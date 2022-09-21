@@ -3123,26 +3123,24 @@ public final class NotificationPanelViewController extends PanelViewController {
         }
         if (mQsExpandImmediate || (mQsExpanded && !mQsTracking && mQsExpansionAnimator == null
                 && !mQsExpansionFromOverscroll)) {
-            float t;
-            if (mKeyguardShowing) {
-
+            float qsExpansionFraction;
+            if (mSplitShadeEnabled) {
+                qsExpansionFraction = 1;
+            } else if (mKeyguardShowing) {
                 // On Keyguard, interpolate the QS expansion linearly to the panel expansion
-                t = expandedHeight / (getMaxPanelHeight());
+                qsExpansionFraction = expandedHeight / (getMaxPanelHeight());
             } else {
                 // In Shade, interpolate linearly such that QS is closed whenever panel height is
                 // minimum QS expansion + minStackHeight
-                float
-                        panelHeightQsCollapsed =
+                float panelHeightQsCollapsed =
                         mNotificationStackScrollLayoutController.getIntrinsicPadding()
                                 + mNotificationStackScrollLayoutController.getLayoutMinHeight();
                 float panelHeightQsExpanded = calculatePanelHeightQsExpanded();
-                t =
-                        (expandedHeight - panelHeightQsCollapsed) / (panelHeightQsExpanded
-                                - panelHeightQsCollapsed);
+                qsExpansionFraction = (expandedHeight - panelHeightQsCollapsed)
+                        / (panelHeightQsExpanded - panelHeightQsCollapsed);
             }
-            float
-                    targetHeight =
-                    mQsMinExpansionHeight + t * (mQsMaxExpansionHeight - mQsMinExpansionHeight);
+            float targetHeight = mQsMinExpansionHeight
+                    + qsExpansionFraction * (mQsMaxExpansionHeight - mQsMinExpansionHeight);
             setQsExpansion(targetHeight);
         }
         updateExpandedHeight(expandedHeight);

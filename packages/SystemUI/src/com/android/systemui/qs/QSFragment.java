@@ -442,20 +442,19 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     }
 
     private void updateQsState() {
-        final boolean expanded = mQsExpanded || mInSplitShade;
-        final boolean expandVisually = expanded || mStackScrollerOverscrolling
+        final boolean expandVisually = mQsExpanded || mStackScrollerOverscrolling
                 || mHeaderAnimating;
-        mQSPanelController.setExpanded(expanded);
+        mQSPanelController.setExpanded(mQsExpanded);
         boolean keyguardShowing = isKeyguardState();
-        mHeader.setVisibility((expanded || !keyguardShowing || mHeaderAnimating
+        mHeader.setVisibility((mQsExpanded || !keyguardShowing || mHeaderAnimating
                 || mShowCollapsedOnKeyguard)
                 ? View.VISIBLE
                 : View.INVISIBLE);
         mHeader.setExpanded((keyguardShowing && !mHeaderAnimating && !mShowCollapsedOnKeyguard)
-                || (expanded && !mStackScrollerOverscrolling), mQuickQSPanelController);
+                || (mQsExpanded && !mStackScrollerOverscrolling), mQuickQSPanelController);
         boolean qsPanelVisible = !mQsDisabled && expandVisually;
-        boolean footerVisible = qsPanelVisible &&  (expanded || !keyguardShowing || mHeaderAnimating
-                || mShowCollapsedOnKeyguard);
+        boolean footerVisible = qsPanelVisible && (mQsExpanded || !keyguardShowing
+                || mHeaderAnimating || mShowCollapsedOnKeyguard);
         mFooter.setVisibility(footerVisible ? View.VISIBLE : View.INVISIBLE);
         if (mQSFooterActionController != null) {
             mQSFooterActionController.setVisible(footerVisible);
@@ -463,7 +462,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
             mQSFooterActionsViewModel.onVisibilityChangeRequested(footerVisible);
         }
         mFooter.setExpanded((keyguardShowing && !mHeaderAnimating && !mShowCollapsedOnKeyguard)
-                || (expanded && !mStackScrollerOverscrolling));
+                || (mQsExpanded && !mStackScrollerOverscrolling));
         mQSPanelController.setVisibility(qsPanelVisible ? View.VISIBLE : View.INVISIBLE);
         if (DEBUG) {
             Log.d(TAG, "Footer: " + footerVisible + ", QS Panel: " + qsPanelVisible);
