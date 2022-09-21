@@ -18,7 +18,6 @@ package com.android.server.am;
 
 import static com.android.server.am.BroadcastQueue.checkState;
 
-import android.annotation.DurationMillisLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UptimeMillisLong;
@@ -28,12 +27,10 @@ import android.util.IndentingPrintWriter;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
-import com.android.server.am.BroadcastRecord.DeliveryState;
 
 import java.util.ArrayDeque;
 import java.util.Iterator;
 import java.util.Objects;
-import java.util.function.BiPredicate;
 
 /**
  * Queue of pending {@link BroadcastRecord} entries intended for delivery to a
@@ -46,7 +43,11 @@ import java.util.function.BiPredicate;
  * Internally each queue consists of a pending broadcasts which are waiting to
  * be dispatched, and a single active broadcast which is currently being
  * dispatched.
+ * <p>
+ * This entire class is marked as {@code NotThreadSafe} since it's the
+ * responsibility of the caller to always interact with a relevant lock held.
  */
+// @NotThreadSafe
 class BroadcastProcessQueue {
     final @NonNull BroadcastConstants constants;
     final @NonNull String processName;
@@ -155,24 +156,42 @@ class BroadcastProcessQueue {
     }
 
     /**
-     * Skip any broadcasts matching the given predicate, marking them as
-     * {@link BroadcastRecord#DELIVERY_SKIPPED}. Typically used when a package
-     * or components have been disabled.
-     * <p>
-     * Note that we carefully preserve the broadcast in our queue to ensure that
-     * we follow our normal flow for "finishing" a broadcast, which is where we
-     * handle things like ordered broadcasts.
+     * Functional interface that tests a {@link BroadcastRecord} that has been
+     * previously enqueued in {@link BroadcastProcessQueue}.
      */
-    public boolean skipMatchingBroadcasts(@NonNull BiPredicate<BroadcastRecord, Object> predicate) {
+    @FunctionalInterface
+    public interface BroadcastPredicate {
+        public boolean test(@NonNull BroadcastRecord r, int index);
+    }
+
+    /**
+     * Functional interface that consumes a {@link BroadcastRecord} that has
+     * been previously enqueued in {@link BroadcastProcessQueue}.
+     */
+    @FunctionalInterface
+    public interface BroadcastConsumer {
+        public void accept(@NonNull BroadcastRecord r, int index);
+    }
+
+    /**
+     * Remove any broadcasts matching the given predicate.
+     * <p>
+     * Predicates that choose to remove a broadcast <em>must</em> finish
+     * delivery of the matched broadcast, to ensure that situations like ordered
+     * broadcasts are handled consistently.
+     */
+    public boolean removeMatchingBroadcasts(@NonNull BroadcastPredicate predicate,
+            @NonNull BroadcastConsumer consumer) {
         boolean didSomething = false;
         final Iterator<SomeArgs> it = mPending.iterator();
         while (it.hasNext()) {
             final SomeArgs args = it.next();
             final BroadcastRecord record = (BroadcastRecord) args.arg1;
             final int index = args.argi1;
-            final Object receiver = record.receivers.get(index);
-            if (predicate.test(record, receiver)) {
-                record.setDeliveryState(index, BroadcastRecord.DELIVERY_SKIPPED);
+            if (predicate.test(record, index)) {
+                consumer.accept(record, index);
+                args.recycle();
+                it.remove();
                 didSomething = true;
             }
         }
@@ -263,78 +282,48 @@ class BroadcastProcessQueue {
         mActiveViaColdStart = false;
     }
 
-    public void traceStartingBegin() {
+    public void traceProcessStartingBegin() {
         Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
                 traceTrackName, toShortString() + " starting", hashCode());
     }
 
-    public void traceRunningBegin() {
+    public void traceProcessRunningBegin() {
         Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
                 traceTrackName, toShortString() + " running", hashCode());
     }
 
-    public void traceEnd() {
+    public void traceProcessEnd() {
         Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER,
                 traceTrackName, hashCode());
     }
 
-    public @DeliveryState int getActiveDeliveryState() {
-        checkState(isActive(), "isActive");
-        return mActive.delivery[mActiveIndex];
-    }
-
-    public void setActiveDeliveryState(@DeliveryState int deliveryState) {
-        checkState(isActive(), "isActive");
-
-        // Emit tracing events for the broadcast we're dispatching; the cookie
-        // here is unique within the track
+    public void traceActiveBegin() {
         final int cookie = mActive.receivers.get(mActiveIndex).hashCode();
-        switch (deliveryState) {
-            case BroadcastRecord.DELIVERY_SCHEDULED:
-                Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
-                        traceTrackName, mActive.toShortString() + " scheduled", cookie);
-                break;
-            case BroadcastRecord.DELIVERY_DELIVERED:
-            case BroadcastRecord.DELIVERY_SKIPPED:
-            case BroadcastRecord.DELIVERY_TIMEOUT:
-            case BroadcastRecord.DELIVERY_FAILURE:
-                // Only end trace events previously started by us
-                if (getActiveDeliveryState() == BroadcastRecord.DELIVERY_SCHEDULED) {
-                    Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER,
-                            traceTrackName, cookie);
-                }
-                break;
-        }
+        Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                traceTrackName, mActive.toShortString() + " scheduled", cookie);
+    }
 
-        mActive.setDeliveryState(mActiveIndex, deliveryState);
+    public void traceActiveEnd() {
+        final int cookie = mActive.receivers.get(mActiveIndex).hashCode();
+        Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                traceTrackName, cookie);
     }
 
     /**
-     * Return the delay between the currently active broadcast being enqueued
-     * and being scheduled to run for this process.
+     * Return the broadcast being actively dispatched in this process.
      */
-    public @DurationMillisLong long getActiveScheduledDelay() {
-        checkState(isActive(), "isActive");
-        return mActive.scheduledTime[mActiveIndex] - mActive.enqueueTime;
-    }
-
-    /**
-     * Return the delay between the currently active broadcast being scheduled
-     * to run and reaching a terminal state for this process.
-     */
-    public @DurationMillisLong long getActiveDeliveredDelay() {
-        checkState(isActive(), "isActive");
-        return mActive.duration[mActiveIndex];
-    }
-
     public @NonNull BroadcastRecord getActive() {
         checkState(isActive(), "isActive");
         return mActive;
     }
 
-    public @NonNull Object getActiveReceiver() {
+    /**
+     * Return the index into {@link BroadcastRecord#receivers} of the receiver
+     * being actively dispatched in this process.
+     */
+    public int getActiveIndex() {
         checkState(isActive(), "isActive");
-        return mActive.receivers.get(mActiveIndex);
+        return mActiveIndex;
     }
 
     public boolean isEmpty() {

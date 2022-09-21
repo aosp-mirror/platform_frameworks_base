@@ -23,7 +23,9 @@ import static com.android.server.am.BroadcastConstants.DEFER_BOOT_COMPLETED_BROA
 import static com.android.server.am.BroadcastConstants.DEFER_BOOT_COMPLETED_BROADCAST_CHANGE_ID;
 import static com.android.server.am.BroadcastConstants.DEFER_BOOT_COMPLETED_BROADCAST_NONE;
 import static com.android.server.am.BroadcastConstants.DEFER_BOOT_COMPLETED_BROADCAST_TARGET_T_ONLY;
+import static com.android.server.am.BroadcastQueue.checkState;
 
+import android.annotation.DurationMillisLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -165,6 +167,22 @@ final class BroadcastRecord extends Binder {
             case DELIVERY_SCHEDULED: return "Scheduled";
             case DELIVERY_FAILURE: return "Failure";
             default: return Integer.toString(deliveryState);
+        }
+    }
+
+    /**
+     * Return if the given delivery state is "terminal", where no additional
+     * delivery state changes will be made.
+     */
+    static boolean isDeliveryStateTerminal(@DeliveryState int deliveryState) {
+        switch (deliveryState) {
+            case DELIVERY_DELIVERED:
+            case DELIVERY_SKIPPED:
+            case DELIVERY_TIMEOUT:
+            case DELIVERY_FAILURE:
+                return true;
+            default:
+                return false;
         }
     }
 
@@ -546,6 +564,10 @@ final class BroadcastRecord extends Binder {
         }
     }
 
+    @DeliveryState int getDeliveryState(int index) {
+        return delivery[index];
+    }
+
     boolean isForeground() {
         return (intent.getFlags() & Intent.FLAG_RECEIVER_FOREGROUND) != 0;
     }
@@ -611,11 +633,19 @@ final class BroadcastRecord extends Binder {
         }
     }
 
-    static String getReceiverProcessName(@NonNull Object receiver) {
+    static @NonNull String getReceiverProcessName(@NonNull Object receiver) {
         if (receiver instanceof BroadcastFilter) {
             return ((BroadcastFilter) receiver).receiverList.app.processName;
         } else /* if (receiver instanceof ResolveInfo) */ {
             return ((ResolveInfo) receiver).activityInfo.processName;
+        }
+    }
+
+    static @NonNull String getReceiverPackageName(@NonNull Object receiver) {
+        if (receiver instanceof BroadcastFilter) {
+            return ((BroadcastFilter) receiver).receiverList.app.info.packageName;
+        } else /* if (receiver instanceof ResolveInfo) */ {
+            return ((ResolveInfo) receiver).activityInfo.packageName;
         }
     }
 

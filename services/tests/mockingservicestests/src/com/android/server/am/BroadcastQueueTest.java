@@ -654,36 +654,27 @@ public class BroadcastQueueTest {
                     receiverApp.mState.getReportedProcState());
             verify(mAms, times(2)).enqueueOomAdjTargetLocked(eq(receiverApp));
 
-            // Confirm that app was thawed
             if ((mImpl == Impl.DEFAULT) && (receiverApp == receiverBlueApp)) {
                 // Nuance: the default implementation doesn't ask for manifest
                 // cold-started apps to be thawed, but the modern stack does
             } else {
+                // Confirm that app was thawed
                 verify(mAms.mOomAdjuster.mCachedAppOptimizer).unfreezeTemporarily(eq(receiverApp),
                         eq(OomAdjuster.OOM_ADJ_REASON_START_RECEIVER));
+
+                // Confirm that we added package to process
+                verify(receiverApp, atLeastOnce()).addPackage(eq(receiverApp.info.packageName),
+                        anyLong(), any());
             }
+
+            // Confirm that we've reported package as being used
+            verify(mAms, atLeastOnce()).notifyPackageUse(eq(receiverApp.info.packageName),
+                    eq(PackageManager.NOTIFY_PACKAGE_USE_BROADCAST_RECEIVER));
+
+            // Confirm that we unstopped manifest receivers
+            verify(mAms.mPackageManagerInt, atLeastOnce()).setPackageStoppedState(
+                    eq(receiverApp.info.packageName), eq(false), eq(UserHandle.USER_SYSTEM));
         }
-
-        // Confirm that we've reported relevant packages as being used, but
-        // only called for manifest receivers
-        verify(mAms, never()).notifyPackageUse(eq(PACKAGE_RED),
-                eq(PackageManager.NOTIFY_PACKAGE_USE_BROADCAST_RECEIVER));
-        verify(mAms, atLeastOnce()).notifyPackageUse(eq(PACKAGE_GREEN),
-                eq(PackageManager.NOTIFY_PACKAGE_USE_BROADCAST_RECEIVER));
-        verify(mAms, atLeastOnce()).notifyPackageUse(eq(PACKAGE_BLUE),
-                eq(PackageManager.NOTIFY_PACKAGE_USE_BROADCAST_RECEIVER));
-        verify(mAms, atLeastOnce()).notifyPackageUse(eq(PACKAGE_YELLOW),
-                eq(PackageManager.NOTIFY_PACKAGE_USE_BROADCAST_RECEIVER));
-
-        // Confirm that we unstopped manifest receivers
-        verify(mAms.mPackageManagerInt, never()).setPackageStoppedState(eq(PACKAGE_RED),
-                eq(false), eq(UserHandle.USER_SYSTEM));
-        verify(mAms.mPackageManagerInt, atLeastOnce()).setPackageStoppedState(eq(PACKAGE_GREEN),
-                eq(false), eq(UserHandle.USER_SYSTEM));
-        verify(mAms.mPackageManagerInt, atLeastOnce()).setPackageStoppedState(eq(PACKAGE_BLUE),
-                eq(false), eq(UserHandle.USER_SYSTEM));
-        verify(mAms.mPackageManagerInt, atLeastOnce()).setPackageStoppedState(eq(PACKAGE_YELLOW),
-                eq(false), eq(UserHandle.USER_SYSTEM));
 
         // Confirm that we've reported expected usage events
         verify(mAms.mUsageStatsService).reportBroadcastDispatched(eq(callerApp.uid),

@@ -37,12 +37,14 @@ import android.app.Activity;
 import android.app.AppOpsManager;
 import android.app.BroadcastOptions;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.HandlerThread;
 import android.os.UserHandle;
 import android.provider.Settings;
 
 import androidx.test.filters.SmallTest;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -86,6 +88,11 @@ public class BroadcastQueueModernImplTest {
         doReturn(2L).when(mQueue2).getRunnableAt();
         doReturn(3L).when(mQueue3).getRunnableAt();
         doReturn(4L).when(mQueue4).getRunnableAt();
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        mHandlerThread.quit();
     }
 
     private static void assertOrphan(BroadcastProcessQueue queue) {
@@ -290,5 +297,36 @@ public class BroadcastQueueModernImplTest {
         queue.setProcessCached(true);
         assertTrue(queue.isRunnable());
         assertEquals(airplaneRecord.enqueueTime, queue.getRunnableAt());
+    }
+
+    /**
+     * Verify that sending a broadcast that removes any matching pending
+     * broadcasts is applied as expected.
+     */
+    @Test
+    public void testRemoveMatchingFilter() {
+        final Intent screenOn = new Intent(Intent.ACTION_SCREEN_ON);
+        final BroadcastOptions optionsOn = BroadcastOptions.makeBasic();
+        optionsOn.setRemoveMatchingFilter(new IntentFilter(Intent.ACTION_SCREEN_OFF));
+
+        final Intent screenOff = new Intent(Intent.ACTION_SCREEN_OFF);
+        final BroadcastOptions optionsOff = BroadcastOptions.makeBasic();
+        optionsOff.setRemoveMatchingFilter(new IntentFilter(Intent.ACTION_SCREEN_ON));
+
+        // Halt all processing so that we get a consistent view
+        mHandlerThread.getLooper().getQueue().postSyncBarrier();
+
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(screenOn, optionsOn));
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(screenOff, optionsOff));
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(screenOn, optionsOn));
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(screenOff, optionsOff));
+
+        // Marching through the queue we should only have one SCREEN_OFF
+        // broadcast, since that's the last state we dispatched
+        final BroadcastProcessQueue queue = mImpl.getProcessQueue(PACKAGE_GREEN,
+                getUidForPackage(PACKAGE_GREEN));
+        queue.makeActiveNextPending();
+        assertEquals(Intent.ACTION_SCREEN_OFF, queue.getActive().intent.getAction());
+        assertTrue(queue.isEmpty());
     }
 }
