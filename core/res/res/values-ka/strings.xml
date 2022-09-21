@@ -586,16 +586,14 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"გამოიყენეთ ეკრანის დაბლოკვა"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"გასაგრძელებლად შედით ეკრანის დაბლოკვაში"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"მაგრად დააჭირეთ სენსორს"</string>
-    <!-- no translation found for fingerprint_acquired_insufficient (623888149088216458) -->
-    <skip />
+    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"თითის ანაბეჭდის ამოცნობა ვერ ხერხდება. ცადეთ ხელახლა."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"გაწმინდეთ თითის ანაბეჭდის სენსორი და ხელახლა ცადეთ"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"გაწმინდეთ სენსორი და ხელახლა ცადეთ"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"მაგრად დააჭირეთ სენსორს"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"თითის აღება მეტისმეტად ნელა მოხდა. გთხოვთ, სცადოთ ხელახლა."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"ცადეთ სხვა თითის ანაბეჭდი"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"ზედმეტად ნათელია"</string>
-    <!-- no translation found for fingerprint_acquired_power_press (3107864151278434961) -->
-    <skip />
+    <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"აღმოჩენილია Ძლიერი დაჭერა"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"ცადეთ დარეგულირება"</string>
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"ოდნავ შეცვალეთ თითის დაჭერის ადგილი ყოველ ჯერზე"</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -607,15 +605,12 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"სახე ავტორიზებულია, დააჭირეთ დადასტურებას"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"თითის ანაბეჭდის აპარატურა არ არის ხელმისაწვდომი."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"თითის ანაბეჭდის დაყენება ვერ ხერხდება"</string>
-    <!-- no translation found for fingerprint_error_timeout (7361192266621252164) -->
-    <skip />
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"თითის ანაბეჭდის დაყენების დრო ამოიწურა. ცადეთ ხელახლა."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"თითის ანაბეჭდის აღების ოპერაცია გაუქმდა."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"თითის ანაბეჭდის ოპერაცია გააუქმა მომხმარებელმა."</string>
-    <!-- no translation found for fingerprint_error_lockout (6626753679019351368) -->
-    <skip />
+    <string name="fingerprint_error_lockout" msgid="6626753679019351368">"მეტისმეტად ბევრი მცდელობა იყო. სანაცვლოდ გამოიყენეთ ეკრანის დაბლოკვა."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"მეტისმეტად ბევრი მცდელობა იყო. სანაცვლოდ გამოიყენეთ ეკრანის დაბლოკვა."</string>
-    <!-- no translation found for fingerprint_error_unable_to_process (2446280592818621224) -->
-    <skip />
+    <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"თითის ანაბეჭდის დამუშავება შეუძლებელია. ცადეთ ხელახლა."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"თითის ანაბეჭდები რეგისტრირებული არ არის."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"ამ მოწყობილობას არ აქვს თითის ანაბეჭდის სენსორი."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"სენსორი დროებით გათიშულია."</string>
@@ -643,8 +638,7 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"ეწვიეთ შეკეთების სერვისის პროვაიდერს."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"თქვენი სახის მოდელი ვერ იქმნება. ცადეთ ხელახლა."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"მეტისმეტად ნათელია. ცადეთ უფრო სუსტი განათება."</string>
-    <!-- no translation found for face_acquired_too_dark (8539853432479385326) -->
-    <skip />
+    <string name="face_acquired_too_dark" msgid="8539853432479385326">"განათება არასაკმარისია"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"გაწიეთ ტელეფონი უფრო შორს"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"მიიტანეთ ტელეფონი უფრო ახლოს"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"აწიეთ ტელეფონი ზემოთ"</string>
@@ -1257,10 +1251,8 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"აპების ჩართვა"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"ჩატვირთვის დასასრული."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"თქვენ დააჭირეთ ჩართვის ღილაკს — ჩვეულებრივ, ის ეკრანს გამორთავს.\n\nთქვენი თითის ანაბეჭდის დაყენებისას ცადეთ მსუბუქად შეხება."</string>
-    <!-- no translation found for fp_power_button_enrollment_title (6976841690455338563) -->
-    <skip />
-    <!-- no translation found for fp_power_button_enrollment_button_text (3199783266386029200) -->
-    <skip />
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"დაყენების დასასრულებლად გამორთეთ ეკრანი"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"გამორთვა"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"გსურთ ანაბეჭდის დადასტურების გაგრძელება?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"თქვენ დააჭირეთ ჩართვის ღილაკს — ჩვეულებრივ, ის ეკრანს გამორთავს.\n\nთქვენი თითის ანაბეჭდის დასადასტურებლად ცადეთ მსუბუქად შეხება."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"ეკრანის გამორთვა"</string>

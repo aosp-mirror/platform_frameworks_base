@@ -19,12 +19,19 @@ package com.android.systemui.statusbar.notification.stack;
 import android.content.res.Resources;
 import android.util.MathUtils;
 
+import androidx.annotation.NonNull;
+
+import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.logging.NotificationRoundnessLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 
+import java.io.PrintWriter;
 import java.util.HashSet;
 
 import javax.inject.Inject;
@@ -33,12 +40,16 @@ import javax.inject.Inject;
  * A class that manages the roundness for notification views
  */
 @SysUISingleton
-public class NotificationRoundnessManager {
+public class NotificationRoundnessManager implements Dumpable {
+
+    private static final String TAG = "NotificationRoundnessManager";
 
     private final ExpandableView[] mFirstInSectionViews;
     private final ExpandableView[] mLastInSectionViews;
     private final ExpandableView[] mTmpFirstInSectionViews;
     private final ExpandableView[] mTmpLastInSectionViews;
+    private final NotificationRoundnessLogger mNotifLogger;
+    private final DumpManager mDumpManager;
     private boolean mExpanded;
     private HashSet<ExpandableView> mAnimatedChildren;
     private Runnable mRoundingChangedCallback;
@@ -53,12 +64,31 @@ public class NotificationRoundnessManager {
 
     @Inject
     NotificationRoundnessManager(
-            NotificationSectionsFeatureManager sectionsFeatureManager) {
+            NotificationSectionsFeatureManager sectionsFeatureManager,
+            NotificationRoundnessLogger notifLogger,
+            DumpManager dumpManager) {
         int numberOfSections = sectionsFeatureManager.getNumberOfBuckets();
         mFirstInSectionViews = new ExpandableView[numberOfSections];
         mLastInSectionViews = new ExpandableView[numberOfSections];
         mTmpFirstInSectionViews = new ExpandableView[numberOfSections];
         mTmpLastInSectionViews = new ExpandableView[numberOfSections];
+        mNotifLogger = notifLogger;
+        mDumpManager = dumpManager;
+
+        mDumpManager.registerDumpable(TAG, this);
+    }
+
+    @Override
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
+        pw.println("mFirstInSectionViews: length=" + mFirstInSectionViews.length);
+        pw.println(dumpViews(mFirstInSectionViews));
+        pw.println("mLastInSectionViews: length=" + mLastInSectionViews.length);
+        pw.println(dumpViews(mFirstInSectionViews));
+        if (mTrackedHeadsUp != null) {
+            pw.println("trackedHeadsUp=" + mTrackedHeadsUp.getEntry());
+        }
+        pw.println("roundForPulsingViews=" + mRoundForPulsingViews);
+        pw.println("isClearAllInProgress=" + mIsClearAllInProgress);
     }
 
     public void updateView(ExpandableView view, boolean animate) {
@@ -94,6 +124,9 @@ public class NotificationRoundnessManager {
 
         view.setFirstInSection(isFirstInSection);
         view.setLastInSection(isLastInSection);
+
+        mNotifLogger.onCornersUpdated(view, isFirstInSection,
+                isLastInSection, topChanged, bottomChanged);
 
         return (isFirstInSection || isLastInSection) && (topChanged || bottomChanged);
     }
@@ -184,6 +217,7 @@ public class NotificationRoundnessManager {
         if (isLastInSection(view) && !top) {
             return 1.0f;
         }
+
         if (view == mTrackedHeadsUp) {
             // If we're pushing up on a headsup the appear fraction is < 0 and it needs to still be
             // rounded.
@@ -220,6 +254,8 @@ public class NotificationRoundnessManager {
         if (anyChanged) {
             mRoundingChangedCallback.run();
         }
+
+        mNotifLogger.onSectionCornersUpdated(sections, anyChanged);
     }
 
     private boolean handleRemovedOldViews(NotificationSection[] sections,
@@ -295,5 +331,37 @@ public class NotificationRoundnessManager {
 
     public void setShouldRoundPulsingViews(boolean shouldRoundPulsingViews) {
         mRoundForPulsingViews = shouldRoundPulsingViews;
+    }
+
+    private String dumpViews(ExpandableView[] views) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < views.length; i++) {
+            if (views[i] == null) continue;
+
+            sb.append("\t")
+                    .append("[").append(i).append("] ")
+                    .append("isPinned=").append(views[i].isPinned()).append(" ")
+                    .append("isFirstInSection=").append(views[i].isFirstInSection()).append(" ")
+                    .append("isLastInSection=").append(views[i].isLastInSection()).append(" ");
+
+            if (views[i] instanceof ExpandableNotificationRow) {
+                sb.append("entry=");
+                dumpEntry(((ExpandableNotificationRow) views[i]).getEntry(), sb);
+            }
+
+            sb.append("\n");
+        }
+        return sb.toString();
+    }
+
+    private void dumpEntry(NotificationEntry entry, StringBuilder sb) {
+        sb.append("NotificationEntry{key=").append(entry.getKey()).append(" ");
+
+        if (entry.getSection() != null) {
+            sb.append(" section=")
+                    .append(entry.getSection().getLabel());
+        }
+
+        sb.append("}");
     }
 }

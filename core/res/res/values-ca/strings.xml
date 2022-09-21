@@ -586,16 +586,14 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Utilitza el bloqueig de pantalla"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Introdueix el teu bloqueig de pantalla per continuar"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Prem el sensor de manera ferma"</string>
-    <!-- no translation found for fingerprint_acquired_insufficient (623888149088216458) -->
-    <skip />
+    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"No es pot reconèixer l\'empremta digital. Torna-ho a provar."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Neteja el sensor d\'empremtes digitals i torna-ho a provar"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Neteja el sensor i torna-ho a provar"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Prem el sensor de manera ferma"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"El dit s\'ha mogut massa lentament. Torna-ho a provar."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Prova una altra empremta digital"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Hi ha massa llum"</string>
-    <!-- no translation found for fingerprint_acquired_power_press (3107864151278434961) -->
-    <skip />
+    <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"S\'ha premut el botó d\'engegada"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Prova d\'ajustar l\'empremta digital"</string>
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Canvia lleugerament la posició del dit en cada intent"</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -607,15 +605,12 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Cara autenticada; prem el botó per confirmar"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"El maquinari d\'empremtes digitals no està disponible."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"No es pot configurar l\'empremta digital"</string>
-    <!-- no translation found for fingerprint_error_timeout (7361192266621252164) -->
-    <skip />
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Temps d\'espera esgotat per configurar l\'empremta digital. Torna-ho a provar."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"S\'ha cancel·lat l\'operació d\'empremta digital."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"L\'usuari ha cancel·lat l\'operació d\'empremta digital."</string>
-    <!-- no translation found for fingerprint_error_lockout (6626753679019351368) -->
-    <skip />
+    <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Massa intents. Utilitza el bloqueig de pantalla."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Massa intents. Utilitza el bloqueig de pantalla."</string>
-    <!-- no translation found for fingerprint_error_unable_to_process (2446280592818621224) -->
-    <skip />
+    <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"No es pot processar l\'empremta digital. Torna-ho a provar."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"No s\'ha registrat cap empremta digital."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Aquest dispositiu no té sensor d\'empremtes digitals."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"El sensor està desactivat temporalment."</string>
@@ -643,8 +638,7 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Visita un proveïdor de reparacions."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"No es pot crear el model facial. Torna-ho a provar."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Massa brillant Prova una il·luminació més suau."</string>
-    <!-- no translation found for face_acquired_too_dark (8539853432479385326) -->
-    <skip />
+    <string name="face_acquired_too_dark" msgid="8539853432479385326">"No hi ha prou llum"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Allunya\'t del telèfon"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Apropa el telèfon"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Mou el telèfon més amunt"</string>
@@ -1257,10 +1251,8 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"S\'estan iniciant les aplicacions."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"S\'està finalitzant l\'actualització."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Has premut el botó d\'engegada, fet que sol apagar la pantalla.\n\nProva de tocar-lo lleugerament en configurar l\'empremta digital."</string>
-    <!-- no translation found for fp_power_button_enrollment_title (6976841690455338563) -->
-    <skip />
-    <!-- no translation found for fp_power_button_enrollment_button_text (3199783266386029200) -->
-    <skip />
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Per finalitzar, apaga la pantalla"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Desactiva"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Vols continuar verificant l\'empremta?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Has premut el botó d\'engegada, fet que sol apagar la pantalla.\n\nProva de tocar-lo lleugerament per verificar l\'empremta digital."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Apaga la pantalla"</string>

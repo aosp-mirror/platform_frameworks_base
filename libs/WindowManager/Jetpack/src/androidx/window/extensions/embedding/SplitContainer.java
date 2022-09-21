@@ -17,8 +17,10 @@
 package androidx.window.extensions.embedding;
 
 import android.app.Activity;
+import android.content.res.Configuration;
 import android.util.Pair;
 import android.util.Size;
+import android.window.WindowContainerTransaction;
 
 import androidx.annotation.NonNull;
 
@@ -32,14 +34,18 @@ class SplitContainer {
     private final TaskFragmentContainer mSecondaryContainer;
     @NonNull
     private final SplitRule mSplitRule;
+    @NonNull
+    private SplitAttributes mSplitAttributes;
 
     SplitContainer(@NonNull TaskFragmentContainer primaryContainer,
             @NonNull Activity primaryActivity,
             @NonNull TaskFragmentContainer secondaryContainer,
-            @NonNull SplitRule splitRule) {
+            @NonNull SplitRule splitRule,
+            @NonNull SplitAttributes splitAttributes) {
         mPrimaryContainer = primaryContainer;
         mSecondaryContainer = secondaryContainer;
         mSplitRule = splitRule;
+        mSplitAttributes = splitAttributes;
 
         if (shouldFinishPrimaryWithSecondary(splitRule)) {
             if (mPrimaryContainer.getRunningActivityCount() == 1
@@ -70,6 +76,26 @@ class SplitContainer {
     @NonNull
     SplitRule getSplitRule() {
         return mSplitRule;
+    }
+
+    @NonNull
+    SplitAttributes getSplitAttributes() {
+        return mSplitAttributes;
+    }
+
+    /**
+     * Updates the {@link SplitAttributes} to this container.
+     * It is usually used when there's a folding state change or
+     * {@link SplitController#onTaskFragmentParentInfoChanged(WindowContainerTransaction, int,
+     * Configuration)}.
+     */
+    void setSplitAttributes(@NonNull SplitAttributes splitAttributes) {
+        mSplitAttributes = splitAttributes;
+    }
+
+    @NonNull
+    TaskContainer getTaskContainer() {
+        return getPrimaryContainer().getTaskContainer();
     }
 
     /** Returns the minimum dimension pair of primary container and secondary container. */
@@ -141,6 +167,7 @@ class SplitContainer {
                 + " primaryContainer=" + mPrimaryContainer
                 + " secondaryContainer=" + mSecondaryContainer
                 + " splitRule=" + mSplitRule
+                + " splitAttributes" + mSplitAttributes
                 + "}";
     }
 }

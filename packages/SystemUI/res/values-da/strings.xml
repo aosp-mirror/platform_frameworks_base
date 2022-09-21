@@ -671,10 +671,8 @@
     <string name="high_temp_notif_message" msgid="1277346543068257549">"Nogle funktioner er begrænsede, mens telefonen køler ned.\nTryk for at få flere oplysninger"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"Din telefon forsøger automatisk at køle ned. Du kan stadig bruge telefonen, men den kører muligvis langsommere.\n\nNår din telefon er kølet ned, fungerer den normalt igen."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Se håndteringsvejledning"</string>
-    <!-- no translation found for high_temp_alarm_title (8654754369605452169) -->
-    <skip />
-    <!-- no translation found for high_temp_alarm_notify_message (3917622943609118956) -->
-    <skip />
+    <string name="high_temp_alarm_title" msgid="8654754369605452169">"Træk stikket ud af din enhed"</string>
+    <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"Din enhed er ved at blive varm i nærheden af opladningsporten. Hvis enheden er tilsluttet en oplader eller USB-enhed, skal du trække stikket ud. Vær opmærksom på, at stikket også kan være varmt."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Se vejledningen i pleje"</string>
     <string name="lockscreen_shortcut_left" msgid="1238765178956067599">"Venstre genvej"</string>
     <string name="lockscreen_shortcut_right" msgid="4138414674531853719">"Højre genvej"</string>
