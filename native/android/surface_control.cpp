@@ -17,6 +17,8 @@
 #include <android/hardware/configstore/1.0/ISurfaceFlingerConfigs.h>
 #include <android/native_window.h>
 #include <android/surface_control.h>
+#include <android/surface_control_jni.h>
+#include <android_runtime/android_view_SurfaceControl.h>
 #include <configstore/Utils.h>
 #include <gui/HdrMetadata.h>
 #include <gui/ISurfaceComposer.h>
@@ -27,6 +29,8 @@
 #include <surface_control_private.h>
 #include <ui/DynamicDisplayInfo.h>
 #include <utils/Timers.h>
+
+#include <utility>
 
 using namespace android::hardware::configstore;
 using namespace android::hardware::configstore::V1_0;
@@ -134,6 +138,11 @@ void ASurfaceControl_release(ASurfaceControl* aSurfaceControl) {
     SurfaceControl_release(surfaceControl);
 }
 
+ASurfaceControl* ASurfaceControl_fromSurfaceControl(JNIEnv* env, jobject surfaceControlObj) {
+    return reinterpret_cast<ASurfaceControl*>(
+            android_view_SurfaceControl_getNativeSurfaceControl(env, surfaceControlObj));
+}
+
 struct ASurfaceControlStats {
     std::variant<int64_t, sp<Fence>> acquireTimeOrFence;
     sp<Fence> previousReleaseFence;
@@ -188,6 +197,11 @@ ASurfaceTransaction* ASurfaceTransaction_create() {
 void ASurfaceTransaction_delete(ASurfaceTransaction* aSurfaceTransaction) {
     Transaction* transaction = ASurfaceTransaction_to_Transaction(aSurfaceTransaction);
     delete transaction;
+}
+
+ASurfaceTransaction* ASurfaceTransaction_fromTransaction(JNIEnv* env, jobject transactionObj) {
+    return reinterpret_cast<ASurfaceTransaction*>(
+            android_view_SurfaceTransaction_getNativeSurfaceTransaction(env, transactionObj));
 }
 
 void ASurfaceTransaction_apply(ASurfaceTransaction* aSurfaceTransaction) {

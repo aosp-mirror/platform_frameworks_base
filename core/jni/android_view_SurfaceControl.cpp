@@ -28,6 +28,7 @@
 #include <android_runtime/android_graphics_GraphicBuffer.h>
 #include <android_runtime/android_hardware_HardwareBuffer.h>
 #include <android_runtime/android_view_Surface.h>
+#include <android_runtime/android_view_SurfaceControl.h>
 #include <android_runtime/android_view_SurfaceSession.h>
 #include <gui/ISurfaceComposer.h>
 #include <gui/Surface.h>
@@ -221,8 +222,14 @@ static struct {
 
 static struct {
     jclass clazz;
+    jfieldID mNativeObject;
+} gTransactionClassInfo;
+
+static struct {
+    jclass clazz;
+    jfieldID mNativeObject;
     jmethodID invokeReleaseCallback;
-} gInvokeReleaseCallback;
+} gSurfaceControlClassInfo;
 
 constexpr ui::Dataspace pickDataspaceFromColorMode(const ui::ColorMode colorMode) {
     switch (colorMode) {
@@ -511,10 +518,11 @@ static ReleaseBufferCallback genReleaseCallback(JNIEnv* env, jobject releaseCall
         if (fenceCopy) {
             fenceCopy->incStrong(0);
         }
-        globalCallbackRef->env()->CallStaticVoidMethod(gInvokeReleaseCallback.clazz,
-                                                       gInvokeReleaseCallback.invokeReleaseCallback,
-                                                       globalCallbackRef->object(),
-                                                       reinterpret_cast<jlong>(fenceCopy));
+        globalCallbackRef->env()
+                ->CallStaticVoidMethod(gSurfaceControlClassInfo.clazz,
+                                       gSurfaceControlClassInfo.invokeReleaseCallback,
+                                       globalCallbackRef->object(),
+                                       reinterpret_cast<jlong>(fenceCopy));
     };
 }
 
@@ -1906,6 +1914,28 @@ static jobject nativeGetDefaultApplyToken(JNIEnv* env, jclass clazz) {
 
 // ----------------------------------------------------------------------------
 
+SurfaceControl* android_view_SurfaceControl_getNativeSurfaceControl(JNIEnv* env,
+                                                                    jobject surfaceControlObj) {
+    if (!!surfaceControlObj &&
+        env->IsInstanceOf(surfaceControlObj, gSurfaceControlClassInfo.clazz)) {
+        return reinterpret_cast<SurfaceControl*>(
+                env->GetLongField(surfaceControlObj, gSurfaceControlClassInfo.mNativeObject));
+    } else {
+        return nullptr;
+    }
+}
+
+SurfaceComposerClient::Transaction* android_view_SurfaceTransaction_getNativeSurfaceTransaction(
+        JNIEnv* env, jobject surfaceTransactionObj) {
+    if (!!surfaceTransactionObj &&
+        env->IsInstanceOf(surfaceTransactionObj, gTransactionClassInfo.clazz)) {
+        return reinterpret_cast<SurfaceComposerClient::Transaction*>(
+                env->GetLongField(surfaceTransactionObj, gTransactionClassInfo.mNativeObject));
+    } else {
+        return nullptr;
+    }
+}
+
 static const JNINativeMethod sSurfaceControlMethods[] = {
         // clang-format off
     {"nativeCreate", "(Landroid/view/SurfaceSession;Ljava/lang/String;IIIIJLandroid/os/Parcel;)J",
@@ -2306,10 +2336,17 @@ int register_android_view_SurfaceControl(JNIEnv* env)
             GetFieldIDOrDie(env, displayDecorationSupportClazz, "alphaInterpretation", "I");
 
     jclass surfaceControlClazz = FindClassOrDie(env, "android/view/SurfaceControl");
-    gInvokeReleaseCallback.clazz = MakeGlobalRefOrDie(env, surfaceControlClazz);
-    gInvokeReleaseCallback.invokeReleaseCallback =
+    gSurfaceControlClassInfo.clazz = MakeGlobalRefOrDie(env, surfaceControlClazz);
+    gSurfaceControlClassInfo.mNativeObject =
+            GetFieldIDOrDie(env, gSurfaceControlClassInfo.clazz, "mNativeObject", "J");
+    gSurfaceControlClassInfo.invokeReleaseCallback =
             GetStaticMethodIDOrDie(env, surfaceControlClazz, "invokeReleaseCallback",
                                    "(Ljava/util/function/Consumer;J)V");
+
+    jclass surfaceTransactionClazz = FindClassOrDie(env, "android/view/SurfaceControl$Transaction");
+    gTransactionClassInfo.clazz = MakeGlobalRefOrDie(env, surfaceTransactionClazz);
+    gTransactionClassInfo.mNativeObject =
+            GetFieldIDOrDie(env, gTransactionClassInfo.clazz, "mNativeObject", "J");
 
     return err;
 }
