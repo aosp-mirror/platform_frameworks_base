@@ -3210,41 +3210,44 @@ public class Vpn {
                 return;
             }
 
-            if (mSession != null && mMobikeEnabled) {
-                Log.d(
-                        TAG,
-                        "IKE Session has mobility. Delay handleSessionLost for losing network "
-                                + network
-                                + " on session with token "
-                                + mCurrentToken);
+            Log.d(TAG, "Schedule a delay handleSessionLost for losing network "
+                            + network
+                            + " on session with token "
+                            + mCurrentToken);
 
-                final int token = mCurrentToken;
-                // Delay the teardown in case a new network will be available soon. For example,
-                // during handover between two WiFi networks, Android will disconnect from the
-                // first WiFi and then connects to the second WiFi.
-                mScheduledHandleNetworkLostFuture =
-                        mExecutor.schedule(
-                                () -> {
-                                    if (isActiveToken(token)) {
-                                        handleSessionLost(null /* exception */, network);
-                                    } else {
-                                        Log.d(
-                                                TAG,
-                                                "Scheduled handleSessionLost fired for "
-                                                        + "obsolete token "
-                                                        + token);
+            final int token = mCurrentToken;
+            // Delay the teardown in case a new network will be available soon. For example,
+            // during handover between two WiFi networks, Android will disconnect from the
+            // first WiFi and then connects to the second WiFi.
+            mScheduledHandleNetworkLostFuture =
+                    mExecutor.schedule(
+                            () -> {
+                                if (isActiveToken(token)) {
+                                    handleSessionLost(new IkeNetworkLostException(network),
+                                            network);
+
+                                    synchronized (Vpn.this) {
+                                        // Ignore stale runner.
+                                        if (mVpnRunner != this) return;
+
+                                        updateState(DetailedState.DISCONNECTED,
+                                                "Network lost");
                                     }
+                                } else {
+                                    Log.d(
+                                            TAG,
+                                            "Scheduled handleSessionLost fired for "
+                                                    + "obsolete token "
+                                                    + token);
+                                }
 
-                                    // Reset mScheduledHandleNetworkLostFuture since it's
-                                    // already run on executor thread.
-                                    mScheduledHandleNetworkLostFuture = null;
-                                },
-                                NETWORK_LOST_TIMEOUT_MS,
-                                TimeUnit.MILLISECONDS);
-            } else {
-                Log.d(TAG, "Call handleSessionLost for losing network " + network);
-                handleSessionLost(null /* exception */, network);
-            }
+                                // Reset mScheduledHandleNetworkLostFuture since it's
+                                // already run on executor thread.
+                                mScheduledHandleNetworkLostFuture = null;
+                            },
+                            NETWORK_LOST_TIMEOUT_MS,
+                            TimeUnit.MILLISECONDS);
+
         }
 
         private void cancelHandleNetworkLostTimeout() {
