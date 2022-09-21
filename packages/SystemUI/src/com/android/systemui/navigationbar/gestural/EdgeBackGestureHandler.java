@@ -955,9 +955,9 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
             updateDisabledForQuickstep(newConfig);
         }
 
-        if (DEBUG_MISSING_GESTURE) {
-            Log.d(DEBUG_MISSING_GESTURE_TAG, "Config changed: config=" + newConfig);
-        }
+        // TODO(b/243765256): Disable this logging once b/243765256 is fixed.
+        Log.d(DEBUG_MISSING_GESTURE_TAG, "Config changed: newConfig=" + newConfig
+                + " lastReportedConfig=" + mLastReportedConfig);
         mLastReportedConfig.updateFrom(newConfig);
         updateDisplaySize();
     }

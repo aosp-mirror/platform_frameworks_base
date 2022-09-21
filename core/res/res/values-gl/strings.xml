@@ -586,16 +586,14 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Usar credencial do dispositivo"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Desbloquea a pantalla para continuar"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Preme o sensor con firmeza"</string>
-    <!-- no translation found for fingerprint_acquired_insufficient (623888149088216458) -->
-    <skip />
+    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Non se puido recoñecer a impresión dixital. Téntao de novo."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Limpa o sensor de impresión dixital e téntao de novo"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Limpa o sensor e téntao de novo"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Preme o sensor con firmeza"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"O dedo moveuse demasiado lento. Téntao de novo."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Proba con outra impresión dixital"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Hai demasiada luz"</string>
-    <!-- no translation found for fingerprint_acquired_power_press (3107864151278434961) -->
-    <skip />
+    <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"Premeuse o botón de acendido"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Proba a axustar a impresión dixital"</string>
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Cambia lixeiramente a posición do dedo en cada intento"</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -607,15 +605,12 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Autenticouse a cara, preme Confirmar"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Hardware de impresión dixital non dispoñible."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Non se puido configurar a impresión dixital"</string>
-    <!-- no translation found for fingerprint_error_timeout (7361192266621252164) -->
-    <skip />
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Esgotouse o tempo para configurar a impresión dixital Téntao de novo."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Cancelouse a operación da impresión dixital."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"O usuario cancelou a operación da impresión dixital."</string>
-    <!-- no translation found for fingerprint_error_lockout (6626753679019351368) -->
-    <skip />
+    <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Houbo demasiados intentos. Mellor usa o bloqueo de pantalla."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Demasiados intentos. Mellor usa o bloqueo de pantalla."</string>
-    <!-- no translation found for fingerprint_error_unable_to_process (2446280592818621224) -->
-    <skip />
+    <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"Non se pode procesar a impresión dixital Téntao de novo."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Non se rexistraron impresións dixitais."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Este dispositivo non ten sensor de impresión dixital."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Desactivouse o sensor temporalmente."</string>
@@ -643,8 +638,7 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Visita un provedor de reparacións."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"Non se puido crear o modelo facial. Téntao de novo."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Hai demasiada iluminación. Proba cunha máis suave."</string>
-    <!-- no translation found for face_acquired_too_dark (8539853432479385326) -->
-    <skip />
+    <string name="face_acquired_too_dark" msgid="8539853432479385326">"Non hai luz suficiente"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Afasta o teléfono"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Achega o teléfono"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Sube o teléfono"</string>
@@ -1257,10 +1251,8 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Iniciando aplicacións."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Está finalizando o arranque"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Premiches o botón de acendido, o que adoita facer que se apague a pantalla.\n\nProba a dar un toque suave namentres configuras a impresión dixital."</string>
-    <!-- no translation found for fp_power_button_enrollment_title (6976841690455338563) -->
-    <skip />
-    <!-- no translation found for fp_power_button_enrollment_button_text (3199783266386029200) -->
-    <skip />
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Apaga a pantalla e acaba a configuración"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Desactivar"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Queres seguir verificando a impresión?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Premiches o botón de acendido, o que adoita facer que se apague a pantalla.\n\nProba a dar un toque suave para verificar a impresión dixital."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Desactivar pantalla"</string>

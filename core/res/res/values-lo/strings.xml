@@ -586,16 +586,14 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"ໃຊ້ການລັອກໜ້າຈໍ"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"ໃສ່ການລັອກໜ້າຈໍຂອງທ່ານເພື່ອສືບຕໍ່"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"ກົດຢູ່ເຊັນເຊີໃຫ້ແໜ້ນ"</string>
-    <!-- no translation found for fingerprint_acquired_insufficient (623888149088216458) -->
-    <skip />
+    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"ບໍ່ສາມາດຈຳແນກລາຍນິ້ວມືໄດ້. ກະລຸນາລອງໃໝ່."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"ໃຫ້ອະນາໄມເຊັນ​ເຊີລາຍນິ້ວ​ມືແລ້ວລອງໃໝ່"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"ໃຫ້ອະນາໄມເຊັນ​ເຊີແລ້ວລອງໃໝ່"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"ກົດຢູ່ເຊັນເຊີໃຫ້ແໜ້ນ"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"ຍ້າຍ​ນີ້ວ​ມື​ໄປຊ້າ​ເກີນ​ໄປ. ກະ​ລຸ​ນາ​ລອງ​ໃໝ່​ອີກ."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"ລອງໃຊ້ລາຍນິ້ວມືອື່ນ"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"ແຈ້ງເກີນໄປ"</string>
-    <!-- no translation found for fingerprint_acquired_power_press (3107864151278434961) -->
-    <skip />
+    <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"ກວດພົບແຮງກົດ"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"ກະລຸນາລອງປັບແກ້"</string>
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"ປ່ຽນຕຳແໜ່ງຂອງນິ້ວມືຂອງທ່ານເລັກນ້ອຍໃນແຕ່ລະເທື່ອ"</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -607,15 +605,12 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"ພິສູດຢືນຢັນໃບໜ້າແລ້ວ, ກະລຸນາກົດຢືນຢັນ"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"ບໍ່​ມີ​ຮາດ​ແວລາຍ​ນີ້ວ​ມື​ໃຫ້​ຢູ່."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"ບໍ່ສາມາດຕັ້ງຄ່າລາຍນິ້ວມືໄດ້"</string>
-    <!-- no translation found for fingerprint_error_timeout (7361192266621252164) -->
-    <skip />
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"ໝົດເວລາຕັ້ງຄ່າລາຍນິ້ວມື. ກະລຸນາລອງໃໝ່."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"ຍົກ​ເລີກ​ການ​ດຳ​ເນີນ​ການ​ລາຍ​ນີ້ວ​ມື​ແລ້ວ."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"ຜູ້ໃຊ້ໄດ້ຍົກເລີກຄຳສັ່ງລາຍນິ້ວມືແລ້ວ."</string>
-    <!-- no translation found for fingerprint_error_lockout (6626753679019351368) -->
-    <skip />
+    <string name="fingerprint_error_lockout" msgid="6626753679019351368">"ພະຍາຍາມຫຼາຍເທື່ອເກີນໄປ. ກະລຸນາໃຊ້ການລອກໜ້າຈໍແທນ."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"ພະຍາຍາມຫຼາຍເທື່ອເກີນໄປ. ກະລຸນາໃຊ້ການລອກໜ້າຈໍແທນ."</string>
-    <!-- no translation found for fingerprint_error_unable_to_process (2446280592818621224) -->
-    <skip />
+    <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"ບໍ່ສາມາດປະມວນຜົນລາຍນິ້ວມືໄດ້. ກະລຸນາລອງໃໝ່."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"ບໍ່ມີການລົງທະບຽນລາຍນິ້ວມື."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"ອຸປະກອນນີ້ບໍ່ມີເຊັນເຊີລາຍນິ້ວມື."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"ປິດການເຮັດວຽກຂອງເຊັນເຊີໄວ້ຊົ່ວຄາວແລ້ວ."</string>
@@ -643,8 +638,7 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"ກະລຸນາໄປຫາຜູ້ໃຫ້ບໍລິການສ້ອມແປງ."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"ບໍ່ສາມາດສ້າງຮູບແບບໃບໜ້າຂອງທ່ານໄດ້. ກະລຸນາລອງໃໝ່."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"ແຈ້ງເກີນໄປ. ລອງຄ່ອຍແສງໄຟລົງ."</string>
-    <!-- no translation found for face_acquired_too_dark (8539853432479385326) -->
-    <skip />
+    <string name="face_acquired_too_dark" msgid="8539853432479385326">"ແສງບໍ່ພໍ"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"ເລື່ອນໂທລະສັບອອກໄປໄກຂຶ້ນ"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"ເລື່ອນໂທລະສັບເຂົ້າໄປໃກ້ຂຶ້ນ"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"ຍົກໂທລະສັບໃຫ້ສູງຂຶ້ນ"</string>
@@ -1257,10 +1251,8 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"ກຳລັງເປີດແອັບຯ."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"ກຳລັງສຳເລັດການເປີດລະບົບ."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"ທ່ານກົດປຸ່ມເປີດປິດ, ປົກກະຕິນີ້ຈະປິດໜ້າຈໍ.\n\nລອງແຕະຄ່ອຍໆໃນລະຫວ່າງຕັ້ງຄ່າລາຍນິ້ວມືຂອງທ່ານ."</string>
-    <!-- no translation found for fp_power_button_enrollment_title (6976841690455338563) -->
-    <skip />
-    <!-- no translation found for fp_power_button_enrollment_button_text (3199783266386029200) -->
-    <skip />
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"ເພື່ອສິ້ນສຸດການຕັ້ງຄ່າ, ໃຫ້ປິດໜ້າຈໍ"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"ປິດໄວ້"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"ສືບຕໍ່ການຢັ້ງຢືນລາຍນິ້ວມືຂອງທ່ານບໍ?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"ທ່ານກົດປຸ່ມເປີດປິດ, ປົກກະຕິນີ້ຈະເປັນການປິດໜ້າຈໍ.\n\nໃຫ້ລອງແຕະຄ່ອຍໆເພື່ອຢັ້ງຢືນລາຍນິ້ວມືຂອງທ່ານ."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"ປິດໜ້າຈໍ"</string>

@@ -78,23 +78,18 @@ class RoundedCornerResDelegate(
         reloadMeasures()
     }
 
-    private fun reloadAll(newReloadToken: Int) {
-        if (reloadToken == newReloadToken) {
-            return
-        }
-        reloadToken = newReloadToken
-        reloadRes()
-        reloadMeasures()
-    }
-
     fun updateDisplayUniqueId(newDisplayUniqueId: String?, newReloadToken: Int?) {
         if (displayUniqueId != newDisplayUniqueId) {
             displayUniqueId = newDisplayUniqueId
             newReloadToken ?.let { reloadToken = it }
             reloadRes()
             reloadMeasures()
-        } else {
-            newReloadToken?.let { reloadAll(it) }
+        } else if (newReloadToken != null) {
+            if (reloadToken == newReloadToken) {
+                return
+            }
+            reloadToken = newReloadToken
+            reloadMeasures()
         }
     }
 

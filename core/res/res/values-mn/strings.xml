@@ -586,16 +586,14 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Дэлгэцийн түгжээг ашиглах"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Үргэлжлүүлэхийн тулд дэлгэцийн түгжээгээ оруулна уу"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Мэдрэгч дээр чанга дарна уу"</string>
-    <!-- no translation found for fingerprint_acquired_insufficient (623888149088216458) -->
-    <skip />
+    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Хурууны хээг таних боломжгүй. Дахин оролдоно уу."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Хурууны хээ мэдрэгчийг цэвэрлээд, дахин оролдоно уу"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Мэдрэгчийг цэвэрлээд, дахин оролдоно уу"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Мэдрэгч дээр чанга дарна уу"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Хуруу хэт удаан хөдөлгөсөн байна. Дахин оролдоно уу."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Өөр хурууны хээ туршина уу"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Хэт гэрэлтэй байна"</string>
-    <!-- no translation found for fingerprint_acquired_power_press (3107864151278434961) -->
-    <skip />
+    <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"Цахилгаан даралтыг илрүүлсэн"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Тохируулж үзнэ үү"</string>
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Хурууныхаа байрлалыг тухай бүрд бага зэрэг өөрчилнө үү"</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -607,15 +605,12 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Царайг баталгаажууллаа. Баталгаажуулах товчлуурыг дарна уу"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Хурууны хээний төхөөрөмж бэлэн бус байна."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Хурууны хээ тохируулах боломжгүй"</string>
-    <!-- no translation found for fingerprint_error_timeout (7361192266621252164) -->
-    <skip />
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Хурууны хээний тохируулга завсарласан. Дахин оролдоно уу."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Хурууны хээний бүртгэл амжилтгүй боллоо."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Хэрэглэгч хурууны хээний баталгаажуулалтыг цуцалсан байна."</string>
-    <!-- no translation found for fingerprint_error_lockout (6626753679019351368) -->
-    <skip />
+    <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Хэт олон удаа оролдлоо. Оронд нь дэлгэцийн түгжээ ашиглана уу."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Хэт олон удаа оролдлоо. Оронд нь дэлгэцийн түгжээ ашиглана уу."</string>
-    <!-- no translation found for fingerprint_error_unable_to_process (2446280592818621224) -->
-    <skip />
+    <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"Хурууны хээг боловсруулах боломжгүй. Дахин оролдоно уу."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Бүртгүүлсэн хурууны хээ алга."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Энэ төхөөрөмжид хурууны хээ мэдрэгч алга."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Мэдрэгчийг түр хугацаанд идэвхгүй болгосон."</string>
@@ -1256,10 +1251,8 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Апп-г эхлүүлж байна."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Эхлэлийг дуусгаж байна."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Та асаах/унтраах товчийг дарсан байна — энэ нь ихэвчлэн дэлгэцийг унтраадаг.\n\nХурууны хээгээ тохируулж байх үедээ зөөлөн товшиж үзнэ үү."</string>
-    <!-- no translation found for fp_power_button_enrollment_title (6976841690455338563) -->
-    <skip />
-    <!-- no translation found for fp_power_button_enrollment_button_text (3199783266386029200) -->
-    <skip />
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Тохиргоог дуусгахын тулд дэлгэцийг унтраана уу"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Унтраах"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Хурууны хээгээ үргэлжлүүлэн баталгаажуулах уу?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Та асаах/унтраах товчийг дарсан байна — энэ нь ихэвчлэн дэлгэцийг унтраадаг.\n\nХурууны хээгээ баталгаажуулахын тулд зөөлөн товшиж үзнэ үү."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Дэлгэцийг унтраах"</string>

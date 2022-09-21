@@ -586,16 +586,14 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"স্ক্রিন লক ব্যবহার করুন"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"চালিয়ে যেতে আপনার স্ক্রিন লক ব্যবহার করুন"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"সেন্সর জোরে প্রেস করুন"</string>
-    <!-- no translation found for fingerprint_acquired_insufficient (623888149088216458) -->
-    <skip />
+    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"ফিঙ্গারপ্রিন্ট শনাক্ত করা যায়নি। আবার চেষ্টা করুন।"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"আঙ্গুলের ছাপের সেন্সর পরিষ্কার করে আবার চেষ্টা করুন"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"সেন্সর পরিষ্কার করে আবার চেষ্টা করুন"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"সেন্সর জোরে প্রেস করুন"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"আঙ্গুল খুব ধীরে সরানো হয়েছে৷ অনুগ্রহ করে আবার চেষ্টা করুন৷"</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"অন্য আঙ্গুলের ছাপ দিয়ে চেষ্টা করুন"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"অত্যন্ত উজ্জ্বল"</string>
-    <!-- no translation found for fingerprint_acquired_power_press (3107864151278434961) -->
-    <skip />
+    <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"পাওয়ার বোতাম প্রেস করার বিষয়টি শনাক্ত করা হয়েছে"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"অ্যাডজাস্ট করার চেষ্টা করুন"</string>
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"প্রতিবার আঙ্গুলের ছাপ সেটআপ করার সময় আপনার আঙ্গুলের অবস্থান সামান্য পরিবর্তন করুন"</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -607,15 +605,12 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"ফেস যাচাই করা হয়েছে, \'কনফার্ম করুন\' বোতাম প্রেস করুন"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"আঙ্গুলের ছাপ নেওয়ার হার্ডওয়্যার অনুপলব্ধ৷"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"আঙ্গুলের ছাপ সেট-আপ করতে পারছি না"</string>
-    <!-- no translation found for fingerprint_error_timeout (7361192266621252164) -->
-    <skip />
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"ফিঙ্গারপ্রিন্ট সেট-আপ করার সময় সীমা পেরিয়ে গেছে। আবার চেষ্টা করুন।"</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"আঙ্গুলের ছাপ অপারেশন বাতিল করা হয়েছে৷"</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"ব্যবহারকারী আঙ্গুলের ছাপের অপারেশনটি বাতিল করেছেন।"</string>
-    <!-- no translation found for fingerprint_error_lockout (6626753679019351368) -->
-    <skip />
+    <string name="fingerprint_error_lockout" msgid="6626753679019351368">"অনেকবার চেষ্টা করেছেন। পরিবর্তে স্ক্রিন লক ব্যবহার করুন।"</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"অনেকবার চেষ্টা করেছেন। পরিবর্তে স্ক্রিন লক ব্যবহার করুন।"</string>
-    <!-- no translation found for fingerprint_error_unable_to_process (2446280592818621224) -->
-    <skip />
+    <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"ফিঙ্গারপ্রিন্ট প্রসেস করা যায়নি। আবার চেষ্টা করুন।"</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"কোনও আঙ্গুলের ছাপ নথিভুক্ত করা হয়নি।"</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"এই ডিভাইসে আঙ্গুলের ছাপ নেওয়ার সেন্সর নেই।"</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"সেন্সর অস্থায়ীভাবে বন্ধ করা আছে।"</string>
@@ -643,8 +638,7 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"একজন মেরামতি মিস্ত্রির কাছে যান।"</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"ফেস মডেল তৈরি করা যাচ্ছে না। আবার চেষ্টা করুন।"</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"খুব উজ্জ্বল। আলো কমিয়ে চেষ্টা করে দেখুন।"</string>
-    <!-- no translation found for face_acquired_too_dark (8539853432479385326) -->
-    <skip />
+    <string name="face_acquired_too_dark" msgid="8539853432479385326">"পর্যাপ্ত আলো নেই"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"ফোন আরও দূরে নিয়ে যান"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"ফোন আরও কাছে নিয়ে আসুন"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"ফোন আরও উঁচুতে তুলুন"</string>
@@ -1257,10 +1251,8 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"অ্যাপ্লিকেশানগুলি শুরু করা হচ্ছে৷"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"চালু করা সম্পূর্ণ হচ্ছে৷"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"আপনি \'পাওয়ার\' বোতাম প্রেস করেছেন — এর ফলে সাধারণত স্ক্রিন বন্ধ হয়ে যায়।\n\nআঙ্গুলের ছাপ সেট-আপ করার সময় হালকাভাবে ট্যাপ করে দেখুন।"</string>
-    <!-- no translation found for fp_power_button_enrollment_title (6976841690455338563) -->
-    <skip />
-    <!-- no translation found for fp_power_button_enrollment_button_text (3199783266386029200) -->
-    <skip />
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"সেট-আপ সম্পূর্ণ করতে, স্ক্রিন বন্ধ করুন"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"বন্ধ করুন"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"আঙ্গুলের ছাপ যাচাই করা চালিয়ে যাবেন?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"আপনি \'পাওয়ার\' বোতাম প্রেস করেছেন — এর ফলে সাধারণত স্ক্রিন বন্ধ হয়ে যায়।\n\nআঙ্গুলের ছাপ যাচাই করতে হালকাভাবে ট্যাপ করে দেখুন।"</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"স্ক্রিন বন্ধ করুন"</string>

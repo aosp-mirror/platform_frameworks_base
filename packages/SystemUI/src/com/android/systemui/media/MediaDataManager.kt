@@ -1322,6 +1322,7 @@ class MediaDataManager(
             println("externalListeners: ${mediaDataFilter.listeners}")
             println("mediaEntries: $mediaEntries")
             println("useMediaResumption: $useMediaResumption")
+            println("allowMediaRecommendations: $allowMediaRecommendations")
         }
     }
 }
