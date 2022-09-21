@@ -8499,7 +8499,10 @@ public class WindowManagerService extends IWindowManager.Stub
         if (mFocusedInputTarget != t && mFocusedInputTarget != null) {
             mFocusedInputTarget.handleTapOutsideFocusOutsideSelf();
         }
+        // Trigger Activity#onUserLeaveHint() if the order change of task pauses any activities.
+        mAtmService.mTaskSupervisor.mUserLeaving = true;
         t.handleTapOutsideFocusInsideSelf();
+        mAtmService.mTaskSupervisor.mUserLeaving = false;
     }
 
     @VisibleForTesting
