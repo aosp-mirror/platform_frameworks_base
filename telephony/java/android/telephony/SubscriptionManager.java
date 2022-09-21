@@ -1071,6 +1071,13 @@ public class SubscriptionManager {
     public static final String ALLOWED_NETWORK_TYPES =
             SimInfo.COLUMN_ALLOWED_NETWORK_TYPES_FOR_REASONS;
 
+    /**
+     * TelephonyProvider column name for user handle associated with a sim.
+     * <P>Type: INTEGER (int)</P>
+     * @hide
+     */
+    public static final String USER_HANDLE = SimInfo.COLUMN_USER_HANDLE;
+
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"USAGE_SETTING_"},
