@@ -19,10 +19,10 @@
     <string name="ringtone_default" msgid="798836092118824500">"Ton de apel prestabilit"</string>
     <string name="notification_sound_default" msgid="8133121186242636840">"Sunet de notificare prestabilit"</string>
     <string name="alarm_sound_default" msgid="4787646764557462649">"Sunet de alarmă prestabilit"</string>
-    <string name="add_ringtone_text" msgid="6642389991738337529">"Adăugați un ton de sonerie"</string>
-    <string name="add_alarm_text" msgid="3545497316166999225">"Adăugați o alarmă"</string>
-    <string name="add_notification_text" msgid="4431129543300614788">"Adăugați o notificare"</string>
-    <string name="delete_ringtone_text" msgid="201443984070732499">"Ștergeți"</string>
+    <string name="add_ringtone_text" msgid="6642389991738337529">"Adaugă un ton de sonerie"</string>
+    <string name="add_alarm_text" msgid="3545497316166999225">"Adaugă o alarmă"</string>
+    <string name="add_notification_text" msgid="4431129543300614788">"Adaugă o notificare"</string>
+    <string name="delete_ringtone_text" msgid="201443984070732499">"Șterge"</string>
     <string name="unable_to_add_ringtone" msgid="4583511263449467326">"Nu se poate adăuga tonul de sonerie personalizat"</string>
     <string name="unable_to_delete_ringtone" msgid="6792301380142859496">"Nu se poate șterge tonul de sonerie personalizat"</string>
     <string name="app_label" msgid="3091611356093417332">"Sunete"</string>
