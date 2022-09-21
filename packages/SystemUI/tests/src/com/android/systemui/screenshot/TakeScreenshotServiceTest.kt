@@ -34,6 +34,7 @@ import android.view.WindowManager.ScreenshotSource.SCREENSHOT_OVERVIEW
 import android.view.WindowManager.TAKE_SCREENSHOT_FULLSCREEN
 import android.view.WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE
 import android.view.WindowManager.TAKE_SCREENSHOT_SELECTED_REGION
+import androidx.test.filters.SmallTest
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.internal.util.ScreenshotHelper
 import com.android.internal.util.ScreenshotHelper.ScreenshotRequest
@@ -65,6 +66,7 @@ private const val USER_ID = 1
 private const val TASK_ID = 1
 
 @RunWith(AndroidTestingRunner::class)
+@SmallTest
 class TakeScreenshotServiceTest : SysuiTestCase() {
 
     private val application = mock<Application>()

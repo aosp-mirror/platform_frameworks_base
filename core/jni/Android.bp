@@ -209,6 +209,7 @@ cc_library_shared {
                 "android_content_res_ApkAssets.cpp",
                 "android_content_res_ObbScanner.cpp",
                 "android_content_res_Configuration.cpp",
+                "android_content_res_ResourceTimer.cpp",
                 "android_security_Scrypt.cpp",
                 "com_android_internal_content_om_OverlayConfig.cpp",
                 "com_android_internal_net_NetworkUtilsInternal.cpp",

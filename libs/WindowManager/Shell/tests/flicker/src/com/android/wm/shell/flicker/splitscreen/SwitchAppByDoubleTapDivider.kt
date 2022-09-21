@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.flicker.splitscreen
 
+import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.IwTest
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
@@ -85,8 +86,9 @@ class SwitchAppByDoubleTapDivider (testSpec: FlickerTestParameter) : SplitScreen
     fun primaryAppBoundsIsVisibleAtEnd() = testSpec.splitAppLayerBoundsIsVisibleAtEnd(
         primaryApp, landscapePosLeft = !tapl.isTablet, portraitPosTop = true)
 
-    @IwTest(focusArea = "sysui")
-    @Presubmit
+    // TODO(b/246490534): Move back to presubmit after withAppTransitionIdle is robust enough to
+    // get the correct end state.
+    @FlakyTest(bugId = 246490534)
     @Test
     fun secondaryAppBoundsIsVisibleAtEnd() = testSpec.splitAppLayerBoundsIsVisibleAtEnd(
         secondaryApp, landscapePosLeft = tapl.isTablet, portraitPosTop = false)

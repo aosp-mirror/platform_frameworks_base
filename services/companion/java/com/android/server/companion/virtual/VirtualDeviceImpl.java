@@ -344,6 +344,33 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         }
     }
 
+    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+    @Override // Binder call
+    public void createVirtualDpad(
+            int displayId,
+            @NonNull String deviceName,
+            int vendorId,
+            int productId,
+            @NonNull IBinder deviceToken) {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.CREATE_VIRTUAL_DEVICE,
+                "Permission required to create a virtual dpad");
+        synchronized (mVirtualDeviceLock) {
+            if (!mVirtualDisplayIds.contains(displayId)) {
+                throw new SecurityException(
+                        "Cannot create a virtual dpad for a display not associated with "
+                                + "this virtual device");
+            }
+        }
+        final long token = Binder.clearCallingIdentity();
+        try {
+            mInputController.createDpad(deviceName, vendorId, productId, deviceToken,
+                    displayId);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
     @Override // Binder call
     public void createVirtualKeyboard(
             int displayId,
@@ -431,6 +458,16 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         final long binderToken = Binder.clearCallingIdentity();
         try {
             mInputController.unregisterInputDevice(token);
+        } finally {
+            Binder.restoreCallingIdentity(binderToken);
+        }
+    }
+
+    @Override // Binder call
+    public boolean sendDpadKeyEvent(IBinder token, VirtualKeyEvent event) {
+        final long binderToken = Binder.clearCallingIdentity();
+        try {
+            return mInputController.sendDpadKeyEvent(token, event);
         } finally {
             Binder.restoreCallingIdentity(binderToken);
         }

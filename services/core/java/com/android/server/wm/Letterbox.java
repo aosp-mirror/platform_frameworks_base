@@ -273,8 +273,8 @@ public class Letterbox {
         @Override
         public boolean onDoubleTapEvent(MotionEvent e) {
             if (e.getAction() == MotionEvent.ACTION_UP) {
-                mDoubleTapCallbackX.accept((int) e.getX());
-                mDoubleTapCallbackY.accept((int) e.getY());
+                mDoubleTapCallbackX.accept((int) e.getRawX());
+                mDoubleTapCallbackY.accept((int) e.getRawY());
                 return true;
             }
             return false;

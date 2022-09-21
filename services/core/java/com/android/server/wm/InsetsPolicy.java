@@ -64,6 +64,7 @@ import android.view.InsetsState.InternalInsetsType;
 import android.view.InternalInsetsAnimationController;
 import android.view.SurfaceControl;
 import android.view.SyncRtSurfaceTransactionApplier;
+import android.view.WindowInsets;
 import android.view.WindowInsets.Type;
 import android.view.WindowInsetsAnimation;
 import android.view.WindowInsetsAnimation.Bounds;
@@ -398,16 +399,13 @@ class InsetsPolicy {
 
         if (WindowConfiguration.isFloating(windowingMode)
                 || (windowingMode == WINDOWING_MODE_MULTI_WINDOW && isAlwaysOnTop)) {
+            // Keep frames, caption, and IME.
+            int types = WindowInsets.Type.captionBar();
+            if (windowingMode != WINDOWING_MODE_PINNED) {
+                types |= WindowInsets.Type.ime();
+            }
             InsetsState newState = new InsetsState();
-
-            // Only caption and IME are needed.
-            if (state.peekSource(ITYPE_CAPTION_BAR) != null) {
-                newState.addSource(state.peekSource(ITYPE_CAPTION_BAR));
-            }
-            if (windowingMode != WINDOWING_MODE_PINNED && state.peekSource(ITYPE_IME) != null) {
-                newState.addSource(state.peekSource(ITYPE_IME));
-            }
-
+            newState.set(state, types);
             state = newState;
             stateCopied = true;
         }

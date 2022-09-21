@@ -16,6 +16,10 @@
 
 package com.android.server.wm;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.WindowInsets.Type.displayCutout;
+import static android.view.WindowInsets.Type.statusBars;
+
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
 import static org.junit.Assert.assertNotNull;
@@ -23,20 +27,31 @@ import static org.junit.Assert.assertTrue;
 
 import android.app.Activity;
 import android.app.Instrumentation;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.ColorSpace;
 import android.graphics.GraphicBuffer;
+import android.graphics.Insets;
 import android.graphics.PixelFormat;
+import android.graphics.Point;
+import android.graphics.Rect;
+import android.hardware.DataSpace;
+import android.hardware.HardwareBuffer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.platform.test.annotations.Presubmit;
+import android.view.IWindowManager;
 import android.view.PointerIcon;
 import android.view.SurfaceControl;
-import android.view.WindowManager;
+import android.view.cts.surfacevalidator.BitmapPixelChecker;
+import android.view.cts.surfacevalidator.PixelColor;
+import android.view.cts.surfacevalidator.SaveBitmapHelper;
 import android.window.ScreenCapture;
+import android.window.ScreenCapture.SyncScreenCaptureListener;
 
 import androidx.annotation.Nullable;
 import androidx.test.filters.SmallTest;
@@ -45,6 +60,7 @@ import androidx.test.rule.ActivityTestRule;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestName;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -60,6 +76,8 @@ public class ScreenshotTests {
     private static final int BUFFER_HEIGHT = 100;
 
     private final Instrumentation mInstrumentation = getInstrumentation();
+    @Rule
+    public TestName mTestName = new TestName();
 
     @Rule
     public ActivityTestRule<ScreenshotActivity> mActivityRule =
@@ -95,8 +113,8 @@ public class ScreenshotTests {
         buffer.unlockCanvasAndPost(canvas);
 
         t.show(secureSC)
-                .setBuffer(secureSC, buffer)
-                .setColorSpace(secureSC, ColorSpace.get(ColorSpace.Named.SRGB))
+                .setBuffer(secureSC, HardwareBuffer.createFromGraphicBuffer(buffer))
+                .setDataSpace(secureSC, DataSpace.DATASPACE_SRGB)
                 .apply(true);
 
         ScreenCapture.LayerCaptureArgs args = new ScreenCapture.LayerCaptureArgs.Builder(secureSC)
@@ -112,13 +130,67 @@ public class ScreenshotTests {
         Bitmap swBitmap = screenshot.copy(Bitmap.Config.ARGB_8888, false);
         screenshot.recycle();
 
-        int numMatchingPixels = PixelChecker.getNumMatchingPixels(swBitmap,
-                new PixelColor(PixelColor.RED));
-        long sizeOfBitmap = swBitmap.getWidth() * swBitmap.getHeight();
+        BitmapPixelChecker bitmapPixelChecker = new BitmapPixelChecker(PixelColor.RED);
+        Rect bounds = new Rect(0, 0, swBitmap.getWidth(), swBitmap.getHeight());
+        int numMatchingPixels = bitmapPixelChecker.getNumMatchingPixels(swBitmap, bounds);
+        int sizeOfBitmap = bounds.width() * bounds.height();
         boolean success = numMatchingPixels == sizeOfBitmap;
         swBitmap.recycle();
 
         assertTrue(success);
+    }
+
+    @Test
+    public void testCaptureDisplay() throws RemoteException {
+        IWindowManager windowManager = IWindowManager.Stub.asInterface(
+                ServiceManager.getService(Context.WINDOW_SERVICE));
+        SurfaceControl sc = new SurfaceControl.Builder()
+                .setName("Layer")
+                .setCallsite("testCaptureDisplay")
+                .build();
+
+        SurfaceControl.Transaction t = mActivity.addChildSc(sc);
+        mInstrumentation.waitForIdleSync();
+
+        GraphicBuffer buffer = GraphicBuffer.create(BUFFER_WIDTH, BUFFER_HEIGHT,
+                PixelFormat.RGBA_8888,
+                GraphicBuffer.USAGE_HW_TEXTURE | GraphicBuffer.USAGE_HW_COMPOSER
+                        | GraphicBuffer.USAGE_SW_WRITE_RARELY);
+
+        Canvas canvas = buffer.lockCanvas();
+        canvas.drawColor(Color.RED);
+        buffer.unlockCanvasAndPost(canvas);
+
+        Point point = mActivity.getPositionBelowStatusBar();
+        t.show(sc)
+                .setBuffer(sc, HardwareBuffer.createFromGraphicBuffer(buffer))
+                .setDataSpace(sc, DataSpace.DATASPACE_SRGB)
+                .setPosition(sc, point.x, point.y)
+                .apply(true);
+
+        SyncScreenCaptureListener listener = new SyncScreenCaptureListener();
+        windowManager.captureDisplay(DEFAULT_DISPLAY, null, listener.getScreenCaptureListener());
+        ScreenCapture.ScreenshotHardwareBuffer hardwareBuffer = listener.waitForScreenshot();
+        assertNotNull(hardwareBuffer);
+
+        Bitmap screenshot = hardwareBuffer.asBitmap();
+        assertNotNull(screenshot);
+
+        Bitmap swBitmap = screenshot.copy(Bitmap.Config.ARGB_8888, false);
+        screenshot.recycle();
+
+        BitmapPixelChecker bitmapPixelChecker = new BitmapPixelChecker(PixelColor.RED);
+        Rect bounds = new Rect(point.x, point.y, BUFFER_WIDTH + point.x, BUFFER_HEIGHT + point.y);
+        int numMatchingPixels = bitmapPixelChecker.getNumMatchingPixels(swBitmap, bounds);
+        int pixelMatchSize = bounds.width() * bounds.height();
+        boolean success = numMatchingPixels == pixelMatchSize;
+
+        if (!success) {
+            SaveBitmapHelper.saveBitmap(swBitmap, getClass(), mTestName, "failedImage");
+        }
+        swBitmap.recycle();
+        assertTrue("numMatchingPixels=" + numMatchingPixels + " pixelMatchSize=" + pixelMatchSize,
+                success);
     }
 
     public static class ScreenshotActivity extends Activity {
@@ -130,7 +202,6 @@ public class ScreenshotTests {
             super.onCreate(savedInstanceState);
             getWindow().getDecorView().setPointerIcon(
                     PointerIcon.getSystemIcon(this, PointerIcon.TYPE_NULL));
-            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         }
 
         SurfaceControl.Transaction addChildSc(SurfaceControl surfaceControl) {
@@ -148,88 +219,14 @@ public class ScreenshotTests {
             }
             return t;
         }
-    }
 
-    public abstract static class PixelChecker {
-        static int getNumMatchingPixels(Bitmap bitmap, PixelColor pixelColor) {
-            int numMatchingPixels = 0;
-            for (int x = 0; x < bitmap.getWidth(); x++) {
-                for (int y = 0; y < bitmap.getHeight(); y++) {
-                    int color = bitmap.getPixel(x, y);
-                    if (matchesColor(pixelColor, color)) {
-                        numMatchingPixels++;
-                    }
-                }
-            }
-            return numMatchingPixels;
-        }
+        public Point getPositionBelowStatusBar() {
+            Insets statusBarInsets = getWindow()
+                    .getDecorView()
+                    .getRootWindowInsets()
+                    .getInsets(statusBars() | displayCutout());
 
-        static boolean matchesColor(PixelColor expectedColor, int color) {
-            final float red = Color.red(color);
-            final float green = Color.green(color);
-            final float blue = Color.blue(color);
-            final float alpha = Color.alpha(color);
-
-            return alpha <= expectedColor.mMaxAlpha
-                    && alpha >= expectedColor.mMinAlpha
-                    && red <= expectedColor.mMaxRed
-                    && red >= expectedColor.mMinRed
-                    && green <= expectedColor.mMaxGreen
-                    && green >= expectedColor.mMinGreen
-                    && blue <= expectedColor.mMaxBlue
-                    && blue >= expectedColor.mMinBlue;
-        }
-    }
-
-    public static class PixelColor {
-        public static final int BLACK = 0xFF000000;
-        public static final int RED = 0xFF0000FF;
-        public static final int GREEN = 0xFF00FF00;
-        public static final int BLUE = 0xFFFF0000;
-        public static final int YELLOW = 0xFF00FFFF;
-        public static final int MAGENTA = 0xFFFF00FF;
-        public static final int WHITE = 0xFFFFFFFF;
-
-        public static final int TRANSPARENT_RED = 0x7F0000FF;
-        public static final int TRANSPARENT_BLUE = 0x7FFF0000;
-        public static final int TRANSPARENT = 0x00000000;
-
-        // Default to black
-        public short mMinAlpha;
-        public short mMaxAlpha;
-        public short mMinRed;
-        public short mMaxRed;
-        public short mMinBlue;
-        public short mMaxBlue;
-        public short mMinGreen;
-        public short mMaxGreen;
-
-        public PixelColor(int color) {
-            short alpha = (short) ((color >> 24) & 0xFF);
-            short blue = (short) ((color >> 16) & 0xFF);
-            short green = (short) ((color >> 8) & 0xFF);
-            short red = (short) (color & 0xFF);
-
-            mMinAlpha = (short) getMinValue(alpha);
-            mMaxAlpha = (short) getMaxValue(alpha);
-            mMinRed = (short) getMinValue(red);
-            mMaxRed = (short) getMaxValue(red);
-            mMinBlue = (short) getMinValue(blue);
-            mMaxBlue = (short) getMaxValue(blue);
-            mMinGreen = (short) getMinValue(green);
-            mMaxGreen = (short) getMaxValue(green);
-        }
-
-        public PixelColor() {
-            this(BLACK);
-        }
-
-        private int getMinValue(short color) {
-            return Math.max(color - 4, 0);
-        }
-
-        private int getMaxValue(short color) {
-            return Math.min(color + 4, 0xFF);
+            return new Point(statusBarInsets.left, statusBarInsets.top);
         }
     }
 }

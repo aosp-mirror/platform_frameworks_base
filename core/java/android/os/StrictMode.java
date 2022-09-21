@@ -441,7 +441,7 @@ public final class StrictMode {
      * different penalties for different detected actions.
      */
     public static final class ThreadPolicy {
-        /** The default, lax policy which doesn't catch anything. */
+        /** The lax policy which doesn't catch anything. */
         public static final ThreadPolicy LAX = new ThreadPolicy(0, null, null);
 
         @UnsupportedAppUsage
@@ -728,7 +728,7 @@ public final class StrictMode {
      * <p>The policy is enabled by {@link #setVmPolicy}.
      */
     public static final class VmPolicy {
-        /** The default, lax policy which doesn't catch anything. */
+        /** The lax policy which doesn't catch anything. */
         public static final VmPolicy LAX = new VmPolicy(0, EMPTY_CLASS_LIMIT_MAP, null, null);
 
         @UnsupportedAppUsage

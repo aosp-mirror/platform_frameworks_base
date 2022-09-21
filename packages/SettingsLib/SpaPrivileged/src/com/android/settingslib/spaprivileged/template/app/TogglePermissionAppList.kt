@@ -20,13 +20,10 @@ import android.content.Context
 import android.content.pm.ApplicationInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
-import androidx.compose.ui.res.stringResource
 import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
 import com.android.settingslib.spa.framework.compose.rememberContext
 import com.android.settingslib.spa.framework.util.asyncMapItem
-import com.android.settingslib.spa.widget.preference.Preference
-import com.android.settingslib.spa.widget.preference.PreferenceModel
 import com.android.settingslib.spaprivileged.model.app.AppRecord
 import kotlinx.coroutines.flow.Flow
 
@@ -85,28 +82,22 @@ interface TogglePermissionAppListProvider {
 
     fun createModel(context: Context): TogglePermissionAppListModel<out AppRecord>
 
-    fun buildInjectEntry(): SettingsEntryBuilder {
-        return TogglePermissionAppListPageProvider.buildInjectEntry(permissionType)
-    }
-
-    @Composable
-    fun EntryItem() {
-        val listModel = rememberContext(::createModel)
-        Preference(
-            object : PreferenceModel {
-                override val title = stringResource(listModel.pageTitleResId)
-                override val onClick = TogglePermissionAppListPageProvider.navigator(permissionType)
-            }
-        )
-    }
+    fun buildAppListInjectEntry(): SettingsEntryBuilder =
+        TogglePermissionAppListPageProvider.buildInjectEntry(permissionType) { createModel(it) }
 
     /**
      * Gets the route to the toggle permission App List page.
      *
      * Expose route to enable enter from non-SPA pages.
      */
-    fun getRoute(): String =
+    fun getAppListRoute(): String =
         TogglePermissionAppListPageProvider.getRoute(permissionType)
+
+    @Composable
+    fun InfoPageEntryItem(app: ApplicationInfo) {
+        val listModel = rememberContext(::createModel)
+        TogglePermissionAppInfoPageProvider.EntryItem(permissionType, app, listModel)
+    }
 }
 
 class TogglePermissionAppListTemplate(

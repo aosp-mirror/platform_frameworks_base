@@ -37,9 +37,8 @@ final class ReconciledPackage {
     public final PackageSetting mPkgSetting;
     public final ScanResult mScanResult;
     // TODO: Remove install-specific details from the reconcile result
-    public final PackageInstalledInfo mInstallResult;
     @Nullable public final PrepareResult mPrepareResult;
-    @Nullable public final InstallArgs mInstallArgs;
+    @Nullable public final InstallRequest mInstallRequest;
     public final DeletePackageAction mDeletePackageAction;
     public final List<SharedLibraryInfo> mAllowedSharedLibraryInfos;
     public final SigningDetails mSigningDetails;
@@ -48,9 +47,8 @@ final class ReconciledPackage {
     public final boolean mRemoveAppKeySetData;
 
     ReconciledPackage(ReconcileRequest request,
-            InstallArgs installArgs,
+            InstallRequest installRequest,
             PackageSetting pkgSetting,
-            PackageInstalledInfo installResult,
             PrepareResult prepareResult,
             ScanResult scanResult,
             DeletePackageAction deletePackageAction,
@@ -59,9 +57,8 @@ final class ReconciledPackage {
             boolean sharedUserSignaturesChanged,
             boolean removeAppKeySetData) {
         mRequest = request;
-        mInstallArgs = installArgs;
+        mInstallRequest = installRequest;
         mPkgSetting = pkgSetting;
-        mInstallResult = installResult;
         mPrepareResult = prepareResult;
         mScanResult = scanResult;
         mDeletePackageAction = deletePackageAction;

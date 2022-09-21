@@ -34,20 +34,17 @@ final class ReconcileRequest {
     public final Map<String, ScanResult> mScannedPackages;
 
     public final Map<String, AndroidPackage> mAllPackages;
-    public final Map<String, InstallArgs> mInstallArgs;
-    public final Map<String, PackageInstalledInfo> mInstallResults;
+    public final Map<String, InstallRequest> mInstallRequests;
     public final Map<String, PrepareResult> mPreparedPackages;
     public final Map<String, Settings.VersionInfo> mVersionInfos;
 
     ReconcileRequest(Map<String, ScanResult> scannedPackages,
-            Map<String, InstallArgs> installArgs,
-            Map<String, PackageInstalledInfo> installResults,
+            Map<String, InstallRequest> installRequests,
             Map<String, PrepareResult> preparedPackages,
             Map<String, AndroidPackage> allPackages,
             Map<String, Settings.VersionInfo> versionInfos) {
         mScannedPackages = scannedPackages;
-        mInstallArgs = installArgs;
-        mInstallResults = installResults;
+        mInstallRequests = installRequests;
         mPreparedPackages = preparedPackages;
         mAllPackages = allPackages;
         mVersionInfos = versionInfos;
@@ -56,7 +53,7 @@ final class ReconcileRequest {
     ReconcileRequest(Map<String, ScanResult> scannedPackages,
             Map<String, AndroidPackage> allPackages,
             Map<String, Settings.VersionInfo> versionInfos) {
-        this(scannedPackages, Collections.emptyMap(), Collections.emptyMap(),
+        this(scannedPackages, Collections.emptyMap(),
                 Collections.emptyMap(), allPackages, versionInfos);
     }
 }

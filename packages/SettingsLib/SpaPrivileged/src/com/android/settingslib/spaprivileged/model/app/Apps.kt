@@ -22,4 +22,7 @@ import android.os.UserHandle
 val ApplicationInfo.userId: Int
     get() = UserHandle.getUserId(uid)
 
+val ApplicationInfo.userHandle: UserHandle
+    get() = UserHandle.getUserHandleForUid(uid)
+
 fun ApplicationInfo.toRoute() = "$packageName/$userId"

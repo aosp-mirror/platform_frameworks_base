@@ -30,7 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.android.settingslib.spa.framework.theme.SettingsDimension
-import com.android.settingslib.spa.framework.theme.SettingsOpacity
+import com.android.settingslib.spa.framework.theme.divider
 
 @Composable
 internal fun TwoTargetPreference(
@@ -67,6 +67,6 @@ private fun PreferenceDivider() {
         Modifier
             .padding(horizontal = SettingsDimension.itemPaddingEnd)
             .size(width = 1.dp, height = SettingsDimension.itemDividerHeight)
-            .background(color = MaterialTheme.colorScheme.onSurface.copy(SettingsOpacity.Divider))
+            .background(color = MaterialTheme.colorScheme.divider)
     )
 }

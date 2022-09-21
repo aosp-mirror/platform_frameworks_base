@@ -3815,13 +3815,6 @@ public final class ViewRootImpl implements ViewParent,
                 if (mAttachInfo.mTooltipHost != null) {
                     mAttachInfo.mTooltipHost.hideTooltip();
                 }
-                if (!hasWindowFocus) {
-                    // Clear focus highlight if its window lost focus.
-                    final View focused = mView.findFocus();
-                    if (focused != null) {
-                        focused.setDefaultFocusHighlight(null);
-                    }
-                }
             }
 
             // Note: must be done after the focus change callbacks,
@@ -5853,13 +5846,7 @@ public final class ViewRootImpl implements ViewParent,
             // be when the window is first being added, and mFocused isn't
             // set yet.
             final View focused = mView.findFocus();
-            if (focused == null) {
-                return false;
-            }
-
-            // Clear default focus highlight if it entered touch mode.
-            focused.setDefaultFocusHighlight(null);
-            if (!focused.isFocusableInTouchMode()) {
+            if (focused != null && !focused.isFocusableInTouchMode()) {
                 final ViewGroup ancestorToTakeFocus = findAncestorToTakeFocusInTouchMode(focused);
                 if (ancestorToTakeFocus != null) {
                     // there is an ancestor that wants focus after its

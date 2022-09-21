@@ -271,7 +271,8 @@ final class DeletePackageHelper {
         // other processes clean up before deleting resources.
         synchronized (mPm.mInstallLock) {
             if (info.mArgs != null) {
-                mRemovePackageHelper.cleanUpResources(info.mArgs);
+                mRemovePackageHelper.cleanUpResources(info.mArgs.mCodeFile,
+                        info.mArgs.mInstructionSets);
             }
 
             boolean reEnableStub = false;
