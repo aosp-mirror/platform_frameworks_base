@@ -53,8 +53,6 @@
     <string name="wifi_disconnected" msgid="7054450256284661757">"未接続"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"無効"</string>
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"IP設定エラー"</string>
-    <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"ネットワークの品質が低いため、接続されていません"</string>
-    <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"WiFi接続エラー"</string>
     <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"認証に問題"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"接続できません"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"「<xliff:g id="AP_NAME">%1$s</xliff:g>」に接続できません"</string>
@@ -63,12 +61,9 @@
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"自動的に接続されません"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"インターネット接続なし"</string>
     <string name="saved_network" msgid="7143698034077223645">"<xliff:g id="NAME">%1$s</xliff:g>により保存"</string>
-    <string name="connected_to_metered_access_point" msgid="9179693207918156341">"従量制ネットワークに接続しました"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"%1$s 経由で自動的に接続しています"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"ネットワーク評価プロバイダ経由で自動的に接続しています"</string>
-    <string name="connected_via_passpoint" msgid="7735442932429075684">"%1$s経由で接続"</string>
     <string name="connected_via_app" msgid="3532267661404276584">"<xliff:g id="NAME">%1$s</xliff:g> で接続しました"</string>
-    <string name="available_via_passpoint" msgid="1716000261192603682">"%1$s経由で使用可能"</string>
     <string name="tap_to_sign_up" msgid="5356397741063740395">"タップして登録してください"</string>
     <string name="wifi_connected_no_internet" msgid="5087420713443350646">"インターネットに接続されていません"</string>
     <string name="private_dns_broken" msgid="1984159464346556931">"プライベート DNS サーバーにアクセスできません"</string>
@@ -76,17 +71,13 @@
     <string name="wifi_status_no_internet" msgid="3799933875988829048">"インターネット未接続"</string>
     <string name="wifi_status_sign_in_required" msgid="2236267500459526855">"ログインが必要"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5885145407184194503">"アクセス ポイントが一時的にいっぱいです"</string>
-    <string name="connected_via_carrier" msgid="1968057009076191514">"%1$s 経由で接続済み"</string>
-    <string name="available_via_carrier" msgid="465598683092718294">"%1$s 経由で使用可能"</string>
     <string name="osu_opening_provider" msgid="4318105381295178285">"「<xliff:g id="PASSPOINTPROVIDER">%1$s</xliff:g>」を開いています"</string>
     <string name="osu_connect_failed" msgid="9107873364807159193">"接続できませんでした"</string>
     <string name="osu_completing_sign_up" msgid="8412636665040390901">"登録を完了しています…"</string>
     <string name="osu_sign_up_failed" msgid="5605453599586001793">"登録を完了できませんでした。タップしてもう一度お試しください。"</string>
     <string name="osu_sign_up_complete" msgid="7640183358878916847">"登録が完了しました。接続しています…"</string>
-    <string name="speed_label_very_slow" msgid="8526005255731597666">"とても遅い"</string>
     <string name="speed_label_slow" msgid="6069917670665664161">"遅い"</string>
     <string name="speed_label_okay" msgid="1253594383880810424">"OK"</string>
-    <string name="speed_label_medium" msgid="9078405312828606976">"普通"</string>
     <string name="speed_label_fast" msgid="2677719134596044051">"速い"</string>
     <string name="speed_label_very_fast" msgid="8215718029533182439">"非常に速い"</string>
     <string name="wifi_passpoint_expired" msgid="6540867261754427561">"期限切れ"</string>
@@ -98,7 +89,6 @@
     <string name="bluetooth_pairing" msgid="4269046942588193600">"ペアとして設定中..."</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"接続済み（電話なし）: <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"接続済み（メディアなし）: <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"接続済み（メッセージ アクセスなし）: <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2893204819854215433">"接続済み（電話、メディアなし）: <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_battery_level" msgid="5410325759372259950">"接続済み、バッテリー残量 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>: <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"接続済み（電話なし）、バッテリー残量 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>: <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>

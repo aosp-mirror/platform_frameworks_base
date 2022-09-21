@@ -53,8 +53,6 @@
     <string name="wifi_disconnected" msgid="7054450256284661757">"ချိတ်ဆက်မထားပါ"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"ပိတ်ထားသည်"</string>
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"IP ပြုပြင်ခြင်း မအောင်မြင်ပါ"</string>
-    <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"ကွန်ရက်ချိတ်ဆက်မှု အားနည်းသည့်အတွက် ချိတ်ဆက်ထားခြင်း မရှိပါ"</string>
-    <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"WiFi ချိတ်ဆက်မှု မအောင်မြင်ပါ"</string>
     <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"အထောက်အထားစိစစ်မှု ပြဿနာ"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"ချိတ်ဆက်၍ မရပါ"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"\'<xliff:g id="AP_NAME">%1$s</xliff:g>\' နှင့် ချိတ်ဆက်၍ မရပါ"</string>
@@ -63,12 +61,9 @@
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"အလိုအလျောက်ချိတ်ဆက်မည်မဟုတ်ပါ"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"အင်တာနက် ချိတ်ဆက်မှု မရှိပါ"</string>
     <string name="saved_network" msgid="7143698034077223645">"<xliff:g id="NAME">%1$s</xliff:g> က သိမ်းဆည်းခဲ့သည်"</string>
-    <string name="connected_to_metered_access_point" msgid="9179693207918156341">"အခမဲ့မဟုတ်သော ကွန်ရက်သို့ ချိတ်ဆက်ထားသည်"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"%1$s မှတစ်ဆင့် အလိုအလျောက် ချိတ်ဆက်ထားပါသည်"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"ကွန်ရက်အဆင့်သတ်မှတ်ပေးသူ မှတစ်ဆင့် အလိုအလျောက် ချိတ်ဆက်ထားပါသည်"</string>
-    <string name="connected_via_passpoint" msgid="7735442932429075684">"%1$s မှတစ်ဆင့် ချိတ်ဆက်ထားသည်"</string>
     <string name="connected_via_app" msgid="3532267661404276584">"<xliff:g id="NAME">%1$s</xliff:g> မှတစ်ဆင့် ချိတ်ဆက်ထားသည်"</string>
-    <string name="available_via_passpoint" msgid="1716000261192603682">"%1$s မှတစ်ဆင့်ရနိုင်သည်"</string>
     <string name="tap_to_sign_up" msgid="5356397741063740395">"အကောင့်ဖွင့်ရန် တို့ပါ"</string>
     <string name="wifi_connected_no_internet" msgid="5087420713443350646">"အင်တာနက် မရှိပါ"</string>
     <string name="private_dns_broken" msgid="1984159464346556931">"သီးသန့် ဒီအန်အက်စ် (DNS) ဆာဗာကို သုံး၍မရပါ။"</string>
@@ -76,17 +71,13 @@
     <string name="wifi_status_no_internet" msgid="3799933875988829048">"အင်တာနက် မရှိပါ"</string>
     <string name="wifi_status_sign_in_required" msgid="2236267500459526855">"လက်မှတ်ထိုးဝင်ရန် လိုအပ်သည်"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5885145407184194503">"ကွန်ရက်ချိတ်ဆက်မှု ယာယီပြည့်နေသည်"</string>
-    <string name="connected_via_carrier" msgid="1968057009076191514">"%1$s မှတစ်ဆင့် ချိတ်ဆက်ထားသည်"</string>
-    <string name="available_via_carrier" msgid="465598683092718294">"%1$s မှတစ်ဆင့် ရနိုင်သည်"</string>
     <string name="osu_opening_provider" msgid="4318105381295178285">"<xliff:g id="PASSPOINTPROVIDER">%1$s</xliff:g> ကို ဖွင့်နေသည်"</string>
     <string name="osu_connect_failed" msgid="9107873364807159193">"ချိတ်ဆက်၍ မရပါ"</string>
     <string name="osu_completing_sign_up" msgid="8412636665040390901">"အကောင့်ဖွင့်ခြင်း အပြီးသတ်နေသည်…"</string>
     <string name="osu_sign_up_failed" msgid="5605453599586001793">"အကောင့်ဖွင့်ခြင်း အပြီးသတ်၍ မရပါ။ ပြန်စမ်းကြည့်ရန် တို့ပါ။"</string>
     <string name="osu_sign_up_complete" msgid="7640183358878916847">"အကောင့်ဖွင့်ခြင်း ပြီးပါပြီ။ ချိတ်ဆက်နေသည်…"</string>
-    <string name="speed_label_very_slow" msgid="8526005255731597666">"အလွန်နှေး"</string>
     <string name="speed_label_slow" msgid="6069917670665664161">"နှေး"</string>
     <string name="speed_label_okay" msgid="1253594383880810424">"OK"</string>
-    <string name="speed_label_medium" msgid="9078405312828606976">"အတော်အသင့်"</string>
     <string name="speed_label_fast" msgid="2677719134596044051">"မြန်"</string>
     <string name="speed_label_very_fast" msgid="8215718029533182439">"အလွန်မြန်"</string>
     <string name="wifi_passpoint_expired" msgid="6540867261754427561">"သက်တမ်းကုန်သွားပါပြီ"</string>
@@ -98,7 +89,6 @@
     <string name="bluetooth_pairing" msgid="4269046942588193600">"တွဲချိတ်နေသည်…"</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> ချိတ်ဆက်ပြီးပြီ (ဖုန်းမရှိပါ)"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> ချိတ်ဆက်ပြီးပြီ (မီဒီယာ မရှိပါ)"</string>
-    <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> ချိတ်ဆက်ပြီးပြီ (မက်ဆေ့ဂျ် သုံး၍မရပါ)"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2893204819854215433">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> ချိတ်ပြီးပြီ (ဖုန်း (သို့) မီဒီယာ မရှိပါ)"</string>
     <string name="bluetooth_connected_battery_level" msgid="5410325759372259950">"ချိတ်ဆက်ပြီးပြီ၊ ဘက်ထရီ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"ချိတ်ဆက်ပြီးပြီ (ဖုန်းမရှိပါ)၊ ဘက်ထရီ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
