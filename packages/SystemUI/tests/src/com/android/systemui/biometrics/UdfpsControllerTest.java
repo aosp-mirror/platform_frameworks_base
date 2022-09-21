@@ -18,6 +18,7 @@ package com.android.systemui.biometrics;
 
 import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_MOVE;
+import static android.view.MotionEvent.ACTION_UP;
 
 import static junit.framework.Assert.assertEquals;
 
@@ -678,6 +679,58 @@ public class UdfpsControllerTest extends SysuiTestCase {
         mFgExecutor.runAllReady();
         // THEN the display is unconfigured
         verify(mUdfpsView).unconfigureDisplay();
+    }
+
+    @Test
+    public void aodInterruptCancelTimeoutActionWhenFingerUp() throws RemoteException {
+        when(mUdfpsView.isWithinSensorArea(anyFloat(), anyFloat())).thenReturn(true);
+        when(mKeyguardUpdateMonitor.isFingerprintDetectionRunning()).thenReturn(true);
+
+        // GIVEN AOD interrupt
+        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, TEST_UDFPS_SENSOR_ID,
+                BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
+        mScreenObserver.onScreenTurnedOn();
+        mFgExecutor.runAllReady();
+        mUdfpsController.onAodInterrupt(0, 0, 0f, 0f);
+        mFgExecutor.runAllReady();
+
+        // Configure UdfpsView to accept the ACTION_UP event
+        when(mUdfpsView.isDisplayConfigured()).thenReturn(true);
+
+        // WHEN ACTION_UP is received
+        verify(mUdfpsView).setOnTouchListener(mTouchListenerCaptor.capture());
+        MotionEvent upEvent = MotionEvent.obtain(0, 0, ACTION_UP, 0, 0, 0);
+        mTouchListenerCaptor.getValue().onTouch(mUdfpsView, upEvent);
+        mBiometricsExecutor.runAllReady();
+        upEvent.recycle();
+
+        // Configure UdfpsView to accept the ACTION_DOWN event
+        when(mUdfpsView.isDisplayConfigured()).thenReturn(false);
+
+        // WHEN ACTION_DOWN is received
+        MotionEvent downEvent = MotionEvent.obtain(0, 0, ACTION_DOWN, 0, 0, 0);
+        mTouchListenerCaptor.getValue().onTouch(mUdfpsView, downEvent);
+        mBiometricsExecutor.runAllReady();
+        downEvent.recycle();
+
+        // WHEN ACTION_MOVE is received
+        MotionEvent moveEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, 0, 0, 0);
+        mTouchListenerCaptor.getValue().onTouch(mUdfpsView, moveEvent);
+        mBiometricsExecutor.runAllReady();
+        moveEvent.recycle();
+        mFgExecutor.runAllReady();
+
+        // Configure UdfpsView to accept the finger up event
+        when(mUdfpsView.isDisplayConfigured()).thenReturn(true);
+
+        // WHEN it times out
+        mFgExecutor.advanceClockToNext();
+        mFgExecutor.runAllReady();
+
+        // THEN the display should be unconfigured once. If the timeout action is not
+        // cancelled, the display would be unconfigured twice which would cause two
+        // FP attempts.
+        verify(mUdfpsView, times(1)).unconfigureDisplay();
     }
 
     @Test
