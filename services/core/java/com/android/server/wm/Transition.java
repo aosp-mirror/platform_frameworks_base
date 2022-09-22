@@ -1860,14 +1860,8 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                     // Whether this is in a Task with embedded activity.
                     flags |= FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY;
                 }
-                final Rect taskBounds = parentTask.getBounds();
-                final Rect startBounds = mAbsoluteBounds;
-                final Rect endBounds = wc.getBounds();
-                if (taskBounds.width() == startBounds.width()
-                        && taskBounds.height() == startBounds.height()
-                        && taskBounds.width() == endBounds.width()
-                        && taskBounds.height() == endBounds.height()) {
-                    // Whether the container fills the Task bounds before and after the transition.
+                if (isWindowFillingTask(wc, parentTask)) {
+                    // Whether the container fills its parent Task bounds.
                     flags |= FLAG_FILLS_TASK;
                 }
             }
@@ -1888,6 +1882,22 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 flags |= FLAG_OCCLUDES_KEYGUARD;
             }
             return flags;
+        }
+
+        /** Whether the container fills its parent Task bounds before and after the transition. */
+        private boolean isWindowFillingTask(@NonNull WindowContainer wc, @NonNull Task parentTask) {
+            final Rect taskBounds = parentTask.getBounds();
+            final int taskWidth = taskBounds.width();
+            final int taskHeight = taskBounds.height();
+            final Rect startBounds = mAbsoluteBounds;
+            final Rect endBounds = wc.getBounds();
+            // Treat it as filling the task if it is not visible.
+            final boolean isInvisibleOrFillingTaskBeforeTransition = !mVisible
+                    || (taskWidth == startBounds.width() && taskHeight == startBounds.height());
+            final boolean isInVisibleOrFillingTaskAfterTransition = !wc.isVisibleRequested()
+                    || (taskWidth == endBounds.width() && taskHeight == endBounds.height());
+            return isInvisibleOrFillingTaskBeforeTransition
+                    && isInVisibleOrFillingTaskAfterTransition;
         }
     }
 
