@@ -18,17 +18,27 @@ package com.android.server.am;
 
 import static com.android.server.am.BroadcastProcessQueue.insertIntoRunnableList;
 import static com.android.server.am.BroadcastProcessQueue.removeFromRunnableList;
+import static com.android.server.am.BroadcastQueueTest.CLASS_GREEN;
 import static com.android.server.am.BroadcastQueueTest.PACKAGE_BLUE;
 import static com.android.server.am.BroadcastQueueTest.PACKAGE_GREEN;
 import static com.android.server.am.BroadcastQueueTest.PACKAGE_RED;
 import static com.android.server.am.BroadcastQueueTest.PACKAGE_YELLOW;
+import static com.android.server.am.BroadcastQueueTest.getUidForPackage;
+import static com.android.server.am.BroadcastQueueTest.makeManifestReceiver;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
 
 import android.annotation.NonNull;
+import android.app.Activity;
+import android.app.AppOpsManager;
+import android.app.BroadcastOptions;
+import android.content.Intent;
 import android.os.HandlerThread;
+import android.os.UserHandle;
 import android.provider.Settings;
 
 import androidx.test.filters.SmallTest;
@@ -100,8 +110,31 @@ public class BroadcastQueueModernImplTest {
         }
     }
 
+    private BroadcastRecord makeBroadcastRecord(Intent intent) {
+        return makeBroadcastRecord(intent, BroadcastOptions.makeBasic(),
+                List.of(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN)), false);
+    }
+
+    private BroadcastRecord makeOrderedBroadcastRecord(Intent intent) {
+        return makeBroadcastRecord(intent, BroadcastOptions.makeBasic(),
+                List.of(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN)), true);
+    }
+
+    private BroadcastRecord makeBroadcastRecord(Intent intent, BroadcastOptions options) {
+        return makeBroadcastRecord(intent, options,
+                List.of(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN)), false);
+    }
+
+    private BroadcastRecord makeBroadcastRecord(Intent intent, BroadcastOptions options,
+            List receivers, boolean ordered) {
+        return new BroadcastRecord(mImpl, intent, null, PACKAGE_RED, null, 21, 42, false, null,
+                null, null, null, AppOpsManager.OP_NONE, options, receivers, null,
+                Activity.RESULT_OK, null, null, ordered, false, false, UserHandle.USER_SYSTEM,
+                false, null, false, null);
+    }
+
     @Test
-    public void testRunnableAt_Simple() {
+    public void testRunnableList_Simple() {
         assertRunnableList(List.of(), mHead);
 
         mHead = insertIntoRunnableList(mHead, mQueue1);
@@ -112,7 +145,7 @@ public class BroadcastQueueModernImplTest {
     }
 
     @Test
-    public void testRunnableAt_InsertLast() {
+    public void testRunnableList_InsertLast() {
         mHead = insertIntoRunnableList(mHead, mQueue1);
         mHead = insertIntoRunnableList(mHead, mQueue2);
         mHead = insertIntoRunnableList(mHead, mQueue3);
@@ -121,7 +154,7 @@ public class BroadcastQueueModernImplTest {
     }
 
     @Test
-    public void testRunnableAt_InsertFirst() {
+    public void testRunnableList_InsertFirst() {
         mHead = insertIntoRunnableList(mHead, mQueue4);
         mHead = insertIntoRunnableList(mHead, mQueue3);
         mHead = insertIntoRunnableList(mHead, mQueue2);
@@ -130,7 +163,7 @@ public class BroadcastQueueModernImplTest {
     }
 
     @Test
-    public void testRunnableAt_InsertMiddle() {
+    public void testRunnableList_InsertMiddle() {
         mHead = insertIntoRunnableList(mHead, mQueue1);
         mHead = insertIntoRunnableList(mHead, mQueue3);
         mHead = insertIntoRunnableList(mHead, mQueue2);
@@ -138,7 +171,7 @@ public class BroadcastQueueModernImplTest {
     }
 
     @Test
-    public void testRunnableAt_Remove() {
+    public void testRunnableList_Remove() {
         mHead = insertIntoRunnableList(mHead, mQueue1);
         mHead = insertIntoRunnableList(mHead, mQueue2);
         mHead = insertIntoRunnableList(mHead, mQueue3);
@@ -200,5 +233,59 @@ public class BroadcastQueueModernImplTest {
         // Verify that we can start all over again safely
         BroadcastProcessQueue yellow = mImpl.getOrCreateProcessQueue(PACKAGE_YELLOW, TEST_UID);
         assertEquals(yellow, mImpl.getProcessQueue(PACKAGE_YELLOW, TEST_UID));
+    }
+
+    /**
+     * Empty queue isn't runnable.
+     */
+    @Test
+    public void testRunnableAt_Empty() {
+        BroadcastProcessQueue queue = new BroadcastProcessQueue(PACKAGE_GREEN,
+                getUidForPackage(PACKAGE_GREEN));
+        assertFalse(queue.isRunnable());
+        assertEquals(Long.MAX_VALUE, queue.getRunnableAt());
+    }
+
+    /**
+     * Queue with a "normal" broadcast is runnable at different times depending
+     * on process cached state; when cached it's delayed by some amount.
+     */
+    @Test
+    public void testRunnableAt_Normal() {
+        BroadcastProcessQueue queue = new BroadcastProcessQueue(PACKAGE_GREEN,
+                getUidForPackage(PACKAGE_GREEN));
+
+        final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        final BroadcastRecord airplaneRecord = makeBroadcastRecord(airplane);
+        queue.enqueueBroadcast(airplaneRecord, 0);
+
+        queue.setProcessCached(false);
+        final long notCachedRunnableAt = queue.getRunnableAt();
+        queue.setProcessCached(true);
+        final long cachedRunnableAt = queue.getRunnableAt();
+        assertTrue(cachedRunnableAt > notCachedRunnableAt);
+    }
+
+    /**
+     * Queue with foreground broadcast is always runnable immediately,
+     * regardless of process cached state.
+     */
+    @Test
+    public void testRunnableAt_Foreground() {
+        BroadcastProcessQueue queue = new BroadcastProcessQueue(PACKAGE_GREEN,
+                getUidForPackage(PACKAGE_GREEN));
+
+        final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        airplane.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        final BroadcastRecord airplaneRecord = makeBroadcastRecord(airplane);
+        queue.enqueueBroadcast(airplaneRecord, 0);
+
+        queue.setProcessCached(false);
+        assertTrue(queue.isRunnable());
+        assertEquals(airplaneRecord.enqueueTime, queue.getRunnableAt());
+
+        queue.setProcessCached(true);
+        assertTrue(queue.isRunnable());
+        assertEquals(airplaneRecord.enqueueTime, queue.getRunnableAt());
     }
 }

@@ -284,7 +284,7 @@ public class BroadcastQueueTest {
                 UnaryOperator.identity());
     }
 
-    private ProcessRecord makeActiveProcessRecordWedged(String packageName) throws Exception {
+    private ProcessRecord makeWedgedActiveProcessRecord(String packageName) throws Exception {
         final ApplicationInfo ai = makeApplicationInfo(packageName);
         return makeActiveProcessRecord(ai, ai.processName, true, false,
                 UnaryOperator.identity());
@@ -698,7 +698,7 @@ public class BroadcastQueueTest {
     @Test
     public void testWedged() throws Exception {
         final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
-        final ProcessRecord receiverApp = makeActiveProcessRecordWedged(PACKAGE_GREEN);
+        final ProcessRecord receiverApp = makeWedgedActiveProcessRecord(PACKAGE_GREEN);
 
         final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         enqueueBroadcast(makeBroadcastRecord(airplane, callerApp,
