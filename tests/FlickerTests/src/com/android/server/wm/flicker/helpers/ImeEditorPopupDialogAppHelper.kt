@@ -26,9 +26,9 @@ import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelpe
 
 class ImeEditorPopupDialogAppHelper @JvmOverloads constructor(
     instr: Instrumentation,
-    launcherName: String = ActivityOptions.Ime.AutoFocusActivity.LABEL,
+    launcherName: String = ActivityOptions.Ime.EditorPopupDialogActivity.LABEL,
     component: ComponentNameMatcher =
-        ActivityOptions.Ime.AutoFocusActivity.COMPONENT.toFlickerComponent()
+        ActivityOptions.Ime.EditorPopupDialogActivity.COMPONENT.toFlickerComponent()
 ) : ImeAppHelper(instr, launcherName, component) {
     override fun openIME(wmHelper: WindowManagerStateHelper) {
         val editText = uiDevice.wait(Until.findObject(By.text("focused editText")), FIND_TIMEOUT)
