@@ -83,6 +83,9 @@ interface IDisplayManager {
     // No permissions required.
     int[] getUserDisabledHdrTypes();
 
+    // Requires ACCESS_SURFACE_FLINGER permission.
+    void overrideHdrTypes(int displayId, in int[] modes);
+
     // Requires CONFIGURE_DISPLAY_COLOR_MODE
     void requestColorMode(int displayId, int colorMode);
 

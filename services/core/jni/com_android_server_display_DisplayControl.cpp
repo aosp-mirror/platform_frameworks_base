@@ -17,6 +17,7 @@
 #include <android_util_Binder.h>
 #include <gui/SurfaceComposerClient.h>
 #include <jni.h>
+#include <nativehelper/ScopedPrimitiveArray.h>
 #include <nativehelper/ScopedUtfChars.h>
 
 namespace android {
@@ -33,6 +34,27 @@ static void nativeDestroyDisplay(JNIEnv* env, jclass clazz, jobject tokenObj) {
     SurfaceComposerClient::destroyDisplay(token);
 }
 
+static void nativeOverrideHdrTypes(JNIEnv* env, jclass clazz, jobject tokenObject,
+                                   jintArray jHdrTypes) {
+    sp<IBinder> token(ibinderForJavaObject(env, tokenObject));
+    if (token == nullptr || jHdrTypes == nullptr) return;
+
+    ScopedIntArrayRO hdrTypes(env, jHdrTypes);
+    size_t numHdrTypes = hdrTypes.size();
+
+    std::vector<ui::Hdr> hdrTypesVector;
+    hdrTypesVector.reserve(numHdrTypes);
+    for (int i = 0; i < numHdrTypes; i++) {
+        hdrTypesVector.push_back(static_cast<ui::Hdr>(hdrTypes[i]));
+    }
+
+    status_t error = SurfaceComposerClient::overrideHdrTypes(token, hdrTypesVector);
+    if (error != NO_ERROR) {
+        jniThrowExceptionFmt(env, "java/lang/SecurityException",
+                             "ACCESS_SURFACE_FLINGER is missing");
+    }
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod sDisplayMethods[] = {
@@ -41,6 +63,8 @@ static const JNINativeMethod sDisplayMethods[] = {
             (void*)nativeCreateDisplay },
     {"nativeDestroyDisplay", "(Landroid/os/IBinder;)V",
             (void*)nativeDestroyDisplay },
+    {"nativeOverrideHdrTypes", "(Landroid/os/IBinder;[I)V",
+                (void*)nativeOverrideHdrTypes },
         // clang-format on
 };
 
