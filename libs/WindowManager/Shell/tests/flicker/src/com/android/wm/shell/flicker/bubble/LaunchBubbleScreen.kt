@@ -16,8 +16,9 @@
 
 package com.android.wm.shell.flicker.bubble
 
-import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresDevice
+import androidx.test.uiautomator.By
+import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.annotation.Group4
@@ -47,10 +48,15 @@ open class LaunchBubbleScreen(testSpec: FlickerTestParameter) : BaseBubbleScreen
             transitions {
                 val addBubbleBtn = waitAndGetAddBubbleBtn()
                 addBubbleBtn?.click() ?: error("Bubble widget not found")
+
+                device.wait(
+                    Until.findObjects(
+                        By.res(SYSTEM_UI_PACKAGE, BUBBLE_RES_NAME)
+                    ), FIND_OBJECT_TIMEOUT
+                ) ?: error("No bubbles found")
             }
         }
 
-    @Presubmit
     @Test
     open fun testAppIsAlwaysVisible() {
         testSpec.assertLayers {
