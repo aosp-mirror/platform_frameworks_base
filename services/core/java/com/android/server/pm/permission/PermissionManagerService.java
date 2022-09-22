@@ -657,8 +657,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             Permission bp = mRegistry.getPermission(info.name);
             added = bp == null;
             int fixedLevel = PermissionInfo.fixProtectionLevel(info.protectionLevel);
+            enforcePermissionCapLocked(info, tree);
             if (added) {
-                enforcePermissionCapLocked(info, tree);
                 bp = new Permission(info.name, tree.getPackageName(), Permission.TYPE_DYNAMIC);
             } else if (!bp.isDynamic()) {
                 throw new SecurityException("Not allowed to modify non-dynamic permission "
