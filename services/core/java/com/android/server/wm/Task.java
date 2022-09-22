@@ -2916,7 +2916,7 @@ class Task extends TaskFragment {
     @Override
     boolean showToCurrentUser() {
         return mForceShowForAllUsers || showForAllUsers()
-                || mWmService.isCurrentProfile(getTopMostTask().mUserId);
+                || mWmService.isUserVisible(getTopMostTask().mUserId);
     }
 
     void setForceShowForAllUsers(boolean forceShowForAllUsers) {

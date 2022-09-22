@@ -158,6 +158,7 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityThread;
@@ -318,6 +319,7 @@ import com.android.server.LocalServices;
 import com.android.server.UiThread;
 import com.android.server.Watchdog;
 import com.android.server.input.InputManagerService;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.policy.WindowManagerPolicy.ScreenOffListener;
 import com.android.server.power.ShutdownThread;
@@ -507,15 +509,9 @@ public class WindowManagerService extends IWindowManager.Stub
     };
 
     /**
-     * Current user when multi-user is enabled. Don't show windows of
-     * non-current user. Also see mCurrentProfileIds.
+     * Current user when multi-user is enabled. Don't show windows of non-current user.
      */
-    int mCurrentUserId;
-    /**
-     * Users that are profiles of the current user. These are also allowed to show windows
-     * on the current user.
-     */
-    int[] mCurrentProfileIds = new int[] {};
+    @UserIdInt int mCurrentUserId;
 
     final Context mContext;
 
@@ -537,6 +533,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     final IActivityManager mActivityManager;
     final ActivityManagerInternal mAmInternal;
+    final UserManagerInternal mUmInternal;
 
     final AppOpsManager mAppOps;
     final PackageManagerInternal mPmInternal;
@@ -1266,6 +1263,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         mActivityManager = ActivityManager.getService();
         mAmInternal = LocalServices.getService(ActivityManagerInternal.class);
+        mUmInternal = LocalServices.getService(UserManagerInternal.class);
         mAppOps = (AppOpsManager)context.getSystemService(Context.APP_OPS_SERVICE);
         AppOpsManager.OnOpChangedInternalListener opListener =
                 new AppOpsManager.OnOpChangedInternalListener() {
@@ -3573,16 +3571,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 confirm);
     }
 
-    public void setCurrentProfileIds(final int[] currentProfileIds) {
-        synchronized (mGlobalLock) {
-            mCurrentProfileIds = currentProfileIds;
-        }
-    }
-
-    public void setCurrentUser(final int newUserId, final int[] currentProfileIds) {
+    public void setCurrentUser(@UserIdInt int newUserId) {
         synchronized (mGlobalLock) {
             mCurrentUserId = newUserId;
-            mCurrentProfileIds = currentProfileIds;
             mPolicy.setCurrentUserLw(newUserId);
             mKeyguardDisableHandler.setCurrentUser(newUserId);
 
@@ -3605,12 +3596,8 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     /* Called by WindowState */
-    boolean isCurrentProfile(int userId) {
-        if (userId == mCurrentUserId) return true;
-        for (int i = 0; i < mCurrentProfileIds.length; i++) {
-            if (mCurrentProfileIds[i] == userId) return true;
-        }
-        return false;
+    boolean isUserVisible(@UserIdInt int userId) {
+        return mUmInternal.isUserVisible(userId);
     }
 
     public void enableScreenAfterBoot() {
