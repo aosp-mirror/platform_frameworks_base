@@ -34,6 +34,7 @@ import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.window.TransitionInfo.FLAG_FILLS_TASK;
 import static android.window.TransitionInfo.FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY;
+import static android.window.TransitionInfo.FLAG_IS_BEHIND_STARTING_WINDOW;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_SHOW_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
@@ -1071,6 +1072,39 @@ public class TransitionTests extends WindowTestsBase {
 
         openTransition.continueTransitionReady();
         assertTrue(openTransition.allReady());
+    }
+
+    @Test
+    public void testIsBehindStartingWindowChange() {
+        final Transition transition = createTestTransition(TRANSIT_OPEN);
+        final ArrayMap<WindowContainer, Transition.ChangeInfo> changes = transition.mChanges;
+        final ArraySet<WindowContainer> participants = transition.mParticipants;
+
+        final Task task = createTask(mDisplayContent);
+        final ActivityRecord activity0 = createActivityRecord(task);
+        final ActivityRecord activity1 = createActivityRecord(task);
+        doReturn(true).when(activity1).hasStartingWindow();
+
+        // Start states.
+        changes.put(activity0, new Transition.ChangeInfo(true /* vis */, false /* exChg */));
+        changes.put(activity1, new Transition.ChangeInfo(false /* vis */, false /* exChg */));
+        // End states.
+        activity0.mVisibleRequested = false;
+        activity1.mVisibleRequested = true;
+
+        participants.add(activity0);
+        participants.add(activity1);
+        final ArrayList<WindowContainer> targets = Transition.calculateTargets(
+                participants, changes);
+        final TransitionInfo info = Transition.calculateTransitionInfo(
+                transition.mType, 0 /* flags */, targets, changes, mMockT);
+
+        // All windows in the Task should have FLAG_IS_BEHIND_STARTING_WINDOW because the starting
+        // window should cover the whole Task.
+        assertEquals(2, info.getChanges().size());
+        assertTrue(info.getChanges().get(0).hasFlags(FLAG_IS_BEHIND_STARTING_WINDOW));
+        assertTrue(info.getChanges().get(1).hasFlags(FLAG_IS_BEHIND_STARTING_WINDOW));
+
     }
 
     @Test
