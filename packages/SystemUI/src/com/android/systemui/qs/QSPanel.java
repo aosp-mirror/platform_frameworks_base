@@ -465,6 +465,8 @@ public class QSPanel extends LinearLayout implements Tunable {
                     ? Math.max(mMediaTotalBottomMargin - getPaddingBottom(), 0) : 0;
             layoutParams.topMargin = mediaNeedsTopMargin() && !horizontal
                     ? mMediaTopMargin : 0;
+            // Call setLayoutParams explicitly to ensure that requestLayout happens
+            hostView.setLayoutParams(layoutParams);
         }
     }
 

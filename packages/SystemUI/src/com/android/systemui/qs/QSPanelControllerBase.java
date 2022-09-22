@@ -90,11 +90,11 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
                             LargeScreenUtils.shouldUseSplitNotificationShade(getResources());
                     mQSLogger.logOnConfigurationChanged(mLastOrientation, newConfig.orientation,
                             mView.getDumpableTag());
-                    onConfigurationChanged();
                     if (newConfig.orientation != mLastOrientation) {
                         mLastOrientation = newConfig.orientation;
                         switchTileLayout(false);
                     }
+                    onConfigurationChanged();
                 }
             };
 
@@ -408,6 +408,8 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         }
         if (mMediaHost != null) {
             pw.println("  media bounds: " + mMediaHost.getCurrentBounds());
+            pw.println("  horizontal layout: " + mUsingHorizontalLayout);
+            pw.println("  last orientation: " + mLastOrientation);
         }
     }
 
