@@ -555,6 +555,8 @@ public class ScreenshotController {
                 mScreenshotView.announceForAccessibility(
                         mContext.getResources().getString(R.string.screenshot_saving_title)));
 
+        mScreenshotView.reset();
+
         if (mScreenshotView.isAttachedToWindow()) {
             // if we didn't already dismiss for another reason
             if (!mScreenshotView.isDismissing()) {
@@ -564,7 +566,6 @@ public class ScreenshotController {
                 Log.d(TAG, "saveScreenshot: screenshotView is already attached, resetting. "
                         + "(dismissing=" + mScreenshotView.isDismissing() + ")");
             }
-            mScreenshotView.reset();
         }
         mPackageName = topComponent == null ? "" : topComponent.getPackageName();
         mScreenshotView.setPackageName(mPackageName);

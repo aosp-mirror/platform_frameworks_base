@@ -34,6 +34,7 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.tracing.ProtoTracer;
 import com.android.wm.shell.common.ShellExecutor;
+import com.android.wm.shell.floating.FloatingTasks;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.onehanded.OneHandedEventCallback;
 import com.android.wm.shell.onehanded.OneHandedTransitionCallback;
@@ -74,16 +75,16 @@ public class WMShellTest extends SysuiTestCase {
     @Mock ProtoTracer mProtoTracer;
     @Mock UserTracker mUserTracker;
     @Mock ShellExecutor mSysUiMainExecutor;
+    @Mock FloatingTasks mFloatingTasks;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-
         mWMShell = new WMShell(mContext, mShellInterface, Optional.of(mPip),
-                Optional.of(mSplitScreen), Optional.of(mOneHanded), mCommandQueue,
-                mConfigurationController, mKeyguardStateController, mKeyguardUpdateMonitor,
-                mScreenLifecycle, mSysUiState, mProtoTracer, mWakefulnessLifecycle,
-                mUserTracker, mSysUiMainExecutor);
+                Optional.of(mSplitScreen), Optional.of(mOneHanded), Optional.of(mFloatingTasks),
+                mCommandQueue, mConfigurationController, mKeyguardStateController,
+                mKeyguardUpdateMonitor, mScreenLifecycle, mSysUiState, mProtoTracer,
+                mWakefulnessLifecycle, mUserTracker, mSysUiMainExecutor);
     }
 
     @Test
