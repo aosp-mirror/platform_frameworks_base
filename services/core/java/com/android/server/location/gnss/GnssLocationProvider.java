@@ -1616,6 +1616,10 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             updateEnabled();
             restartLocationRequest();
         }
+
+        // Re-register network callbacks to get an update of available networks right away.
+        mNetworkConnectivityHandler.unregisterNetworkCallbacks();
+        mNetworkConnectivityHandler.registerNetworkCallbacks();
     }
 
     @Override
