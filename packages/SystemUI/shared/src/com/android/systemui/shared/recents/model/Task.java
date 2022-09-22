@@ -27,6 +27,8 @@ import android.app.ActivityManager.TaskDescription;
 import android.app.TaskInfo;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.graphics.Point;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -233,16 +235,13 @@ public class Task {
     @ViewDebug.ExportedProperty(category="recents")
     public boolean isLocked;
 
+    public Point positionInParent;
+
+    public Rect appBounds;
+
     // Last snapshot data, only used for recent tasks
     public ActivityManager.RecentTaskInfo.PersistedTaskSnapshotData lastSnapshotData =
             new ActivityManager.RecentTaskInfo.PersistedTaskSnapshotData();
-
-    /**
-     * Indicates that this task for the desktop tile in recents.
-     *
-     * Used when desktop mode feature is enabled.
-     */
-    public boolean desktopTile;
 
     public Task() {
         // Do nothing
@@ -274,7 +273,8 @@ public class Task {
         this(other.key, other.colorPrimary, other.colorBackground, other.isDockable,
                 other.isLocked, other.taskDescription, other.topActivity);
         lastSnapshotData.set(other.lastSnapshotData);
-        desktopTile = other.desktopTile;
+        positionInParent = other.positionInParent;
+        appBounds = other.appBounds;
     }
 
     /**
