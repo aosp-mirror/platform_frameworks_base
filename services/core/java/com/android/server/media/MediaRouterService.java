@@ -387,6 +387,9 @@ public final class MediaRouterService extends IMediaRouterService.Stub
                 userRecord.dump(pw, "");
             }
         }
+
+        pw.println();
+        mService2.dump(pw, "");
     }
 
     // Binder call
