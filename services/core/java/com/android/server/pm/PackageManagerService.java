@@ -6539,7 +6539,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                             if (dependentState == null) {
                                 continue;
                             }
-                            if (!Objects.equals(dependentState.getUserStateOrDefault(userId)
+                            if (canSetOverlayPaths(dependentState.getUserStateOrDefault(userId)
                                     .getSharedLibraryOverlayPaths()
                                     .get(libName), newOverlayPaths)) {
                                 String dependentPackageName = dependent.getPackageName();
@@ -6563,7 +6563,10 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     }
                 }
 
-                outUpdatedPackageNames.add(targetPackageName);
+                if (canSetOverlayPaths(packageState.getUserStateOrDefault(userId).getOverlayPaths(),
+                        newOverlayPaths)) {
+                    outUpdatedPackageNames.add(targetPackageName);
+                }
             }
 
             commitPackageStateMutation(null, mutator -> {
@@ -6612,6 +6615,17 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
 
         invalidatePackageInfoCache();
+    }
+
+    private boolean canSetOverlayPaths(OverlayPaths origPaths, OverlayPaths newPaths) {
+        if (Objects.equals(origPaths, newPaths)) {
+            return false;
+        }
+        if ((origPaths == null && newPaths.isEmpty())
+                || (newPaths == null && origPaths.isEmpty())) {
+            return false;
+        }
+        return true;
     }
 
     private void maybeUpdateSystemOverlays(String targetPackageName, OverlayPaths newOverlayPaths) {
