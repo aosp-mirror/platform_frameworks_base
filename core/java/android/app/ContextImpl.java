@@ -1094,7 +1094,7 @@ class ContextImpl extends Context {
                 && (options == null
                         || ActivityOptions.fromBundle(options).getLaunchTaskId() == -1)) {
             throw new AndroidRuntimeException(
-                    "Calling startActivity() from outside of an Activity "
+                    "Calling startActivity() from outside of an Activity"
                             + " context requires the FLAG_ACTIVITY_NEW_TASK flag."
                             + " Is this really what you want?");
         }
@@ -1128,7 +1128,7 @@ class ContextImpl extends Context {
     public int startActivitiesAsUser(Intent[] intents, Bundle options, UserHandle userHandle) {
         if ((intents[0].getFlags()&Intent.FLAG_ACTIVITY_NEW_TASK) == 0) {
             throw new AndroidRuntimeException(
-                    "Calling startActivities() from outside of an Activity "
+                    "Calling startActivities() from outside of an Activity"
                     + " context requires the FLAG_ACTIVITY_NEW_TASK flag on first Intent."
                     + " Is this really what you want?");
         }
@@ -1142,7 +1142,7 @@ class ContextImpl extends Context {
         warnIfCallingFromSystemProcess();
         if ((intents[0].getFlags()&Intent.FLAG_ACTIVITY_NEW_TASK) == 0) {
             throw new AndroidRuntimeException(
-                    "Calling startActivities() from outside of an Activity "
+                    "Calling startActivities() from outside of an Activity"
                     + " context requires the FLAG_ACTIVITY_NEW_TASK flag on first Intent."
                     + " Is this really what you want?");
         }
