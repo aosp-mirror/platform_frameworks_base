@@ -188,14 +188,16 @@ public abstract class WMShellModule {
             @ShellMainThread Choreographer mainChoreographer,
             ShellTaskOrganizer taskOrganizer,
             DisplayController displayController,
-            SyncTransactionQueue syncQueue) {
+            SyncTransactionQueue syncQueue,
+            @DynamicOverride DesktopModeController desktopModeController) {
         return new CaptionWindowDecorViewModel(
                         context,
                         mainHandler,
                         mainChoreographer,
                         taskOrganizer,
                         displayController,
-                        syncQueue);
+                        syncQueue,
+                        desktopModeController);
     }
 
     //
