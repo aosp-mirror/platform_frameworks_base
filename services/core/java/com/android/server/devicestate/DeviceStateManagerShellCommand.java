@@ -16,11 +16,8 @@
 
 package com.android.server.devicestate;
 
-import static android.Manifest.permission.CONTROL_DEVICE_STATE;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.Context;
 import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.devicestate.DeviceStateRequest;
 import android.os.Binder;
@@ -39,6 +36,8 @@ import java.util.stream.Collectors;
 public class DeviceStateManagerShellCommand extends ShellCommand {
     @Nullable
     private static DeviceStateRequest sLastRequest;
+    @Nullable
+    private static DeviceStateRequest sLastBaseStateRequest;
 
     private final DeviceStateManagerService mService;
     private final DeviceStateManager mClient;
@@ -58,6 +57,8 @@ public class DeviceStateManagerShellCommand extends ShellCommand {
         switch (cmd) {
             case "state":
                 return runState(pw);
+            case "base-state":
+                return runBaseState(pw);
             case "print-state":
                 return runPrintState(pw);
             case "print-states":
@@ -89,10 +90,6 @@ public class DeviceStateManagerShellCommand extends ShellCommand {
             return 0;
         }
 
-        final Context context = mService.getContext();
-        context.enforceCallingOrSelfPermission(
-                CONTROL_DEVICE_STATE,
-                "Permission required to request device state.");
         final long callingIdentity = Binder.clearCallingIdentity();
         try {
             if ("reset".equals(nextArg)) {
@@ -107,6 +104,47 @@ public class DeviceStateManagerShellCommand extends ShellCommand {
                 mClient.requestState(request, null /* executor */, null /* callback */);
 
                 sLastRequest = request;
+            }
+        } catch (NumberFormatException e) {
+            getErrPrintWriter().println("Error: requested state should be an integer");
+            return -1;
+        } catch (IllegalArgumentException e) {
+            getErrPrintWriter().println("Error: " + e.getMessage());
+            getErrPrintWriter().println("-------------------");
+            getErrPrintWriter().println("Run:");
+            getErrPrintWriter().println("");
+            getErrPrintWriter().println("    print-states");
+            getErrPrintWriter().println("");
+            getErrPrintWriter().println("to get the list of currently supported device states");
+            return -1;
+        } finally {
+            Binder.restoreCallingIdentity(callingIdentity);
+        }
+
+        return 0;
+    }
+
+    private int runBaseState(PrintWriter pw) {
+        final String nextArg = getNextArg();
+        if (nextArg == null) {
+            printAllStates(pw);
+            return 0;
+        }
+
+        final long callingIdentity = Binder.clearCallingIdentity();
+        try {
+            if ("reset".equals(nextArg)) {
+                if (sLastBaseStateRequest != null) {
+                    mClient.cancelBaseStateOverride();
+                    sLastBaseStateRequest = null;
+                }
+            } else {
+                int requestedState = Integer.parseInt(nextArg);
+                DeviceStateRequest request = DeviceStateRequest.newBuilder(requestedState).build();
+
+                mClient.requestBaseStateOverride(request, null, null);
+
+                sLastBaseStateRequest = request;
             }
         } catch (NumberFormatException e) {
             getErrPrintWriter().println("Error: requested state should be an integer");
