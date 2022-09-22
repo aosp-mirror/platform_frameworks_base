@@ -514,6 +514,8 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
         private boolean mConfigured;
         private boolean mAudioAccessoryConnected;
         private boolean mAudioAccessorySupported;
+        private boolean mConnectedToDataDisabledPort;
+        private int mPowerBrickConnectionStatus;
 
         private UsbAccessory mCurrentAccessory;
         private int mUsbNotificationId;
@@ -952,12 +954,19 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                                 && status.isRoleCombinationSupported(POWER_ROLE_SOURCE,
                                 DATA_ROLE_DEVICE)
                                 && status.isRoleCombinationSupported(POWER_ROLE_SINK, DATA_ROLE_DEVICE);
+
+                        boolean usbDataDisabled =
+                                status.getUsbDataStatus() != UsbPortStatus.DATA_STATUS_ENABLED;
+                        mConnectedToDataDisabledPort = status.isConnected() && usbDataDisabled;
+                        mPowerBrickConnectionStatus = status.getPowerBrickConnectionStatus();
                     } else {
                         mHostConnected = false;
                         mSourcePower = false;
                         mSinkPower = false;
                         mAudioAccessoryConnected = false;
                         mSupportsAllCombinations = false;
+                        mConnectedToDataDisabledPort = false;
+                        mPowerBrickConnectionStatus = UsbPortStatus.POWER_BRICK_STATUS_UNKNOWN;
                     }
 
                     if (mHostConnected) {
@@ -1263,6 +1272,12 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                 titleRes = com.android.internal.R.string.usb_supplying_notification_title;
                 id = SystemMessage.NOTE_USB_SUPPLYING;
             } else if (mHostConnected && mSinkPower && (mUsbCharging || mUsbAccessoryConnected)) {
+                titleRes = com.android.internal.R.string.usb_charging_notification_title;
+                id = SystemMessage.NOTE_USB_CHARGING;
+            } else if (mSinkPower && mConnectedToDataDisabledPort
+                    && mPowerBrickConnectionStatus != UsbPortStatus.POWER_BRICK_STATUS_CONNECTED) {
+                // Show charging notification when USB Data is disabled on the port, and not
+                // connected to a wall charger.
                 titleRes = com.android.internal.R.string.usb_charging_notification_title;
                 id = SystemMessage.NOTE_USB_CHARGING;
             }
