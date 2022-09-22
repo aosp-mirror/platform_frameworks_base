@@ -1,6 +1,7 @@
 package com.android.systemui.statusbar.notification.interruption
 
 import android.app.Notification
+import android.app.Notification.VISIBILITY_SECRET
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -172,6 +173,8 @@ private class KeyguardNotificationVisibilityProviderImpl @Inject constructor(
         !lockscreenUserManager.shouldShowLockscreenNotifications() -> true
         // User settings do not allow this notification on the lockscreen, so hide it.
         userSettingsDisallowNotification(entry) -> true
+        // Entry is explicitly marked SECRET, so hide it.
+        entry.sbn.notification.visibility == VISIBILITY_SECRET -> true
         // if entry is silent, apply custom logic to see if should hide
         shouldHideIfEntrySilent(entry) -> true
         else -> false
