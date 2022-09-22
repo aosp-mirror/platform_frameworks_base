@@ -329,17 +329,15 @@ class ApexPackageInfo {
             ApexInfo ai = parsingApexInfo.get(parseResult.scanFile);
 
             if (throwable == null) {
-                // Calling hideAsFinal to assign derived fields for the app info flags.
-                parseResult.parsedPackage.hideAsFinal();
-
                 // TODO: When ENABLE_FEATURE_SCAN_APEX is finalized, remove this and the entire
                 //  calling path code
                 ScanPackageUtils.applyPolicy(parseResult.parsedPackage,
                         PackageManagerService.SCAN_AS_SYSTEM,
                         mPackageManager == null ? null : mPackageManager.getPlatformPackage(),
                         false);
-                results.add(new ApexManager.ScanResult(
-                        ai, parseResult.parsedPackage, parseResult.parsedPackage.getPackageName()));
+                // Calling hideAsFinal to assign derived fields for the app info flags.
+                AndroidPackage finalPkg = parseResult.parsedPackage.hideAsFinal();
+                results.add(new ApexManager.ScanResult(ai, finalPkg, finalPkg.getPackageName()));
             } else if (throwable instanceof PackageManagerException) {
                 throw new IllegalStateException("Unable to parse: " + ai.modulePath, throwable);
             } else {
