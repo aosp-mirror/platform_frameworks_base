@@ -27,6 +27,7 @@ import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 import static com.android.internal.accessibility.common.ShortcutConstants.CHOOSER_PACKAGE_NAME;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_RECENT_TASKS;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SHELL_BACK_ANIMATION;
+import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SHELL_FLOATING_TASKS;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SHELL_ONE_HANDED;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SHELL_PIP;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SHELL_SHELL_TRANSITIONS;
@@ -109,6 +110,7 @@ import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.StatusBarWindowCallback;
 import com.android.systemui.statusbar.policy.CallbackController;
 import com.android.wm.shell.back.BackAnimation;
+import com.android.wm.shell.floating.FloatingTasks;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipAnimationController;
@@ -150,6 +152,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
     private final Optional<Pip> mPipOptional;
     private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
     private final Optional<SplitScreen> mSplitScreenOptional;
+    private final Optional<FloatingTasks> mFloatingTasksOptional;
     private SysUiState mSysUiState;
     private final Handler mHandler;
     private final Lazy<NavigationBarController> mNavBarControllerLazy;
@@ -382,7 +385,6 @@ public class OverviewProxyService extends CurrentUserTracker implements
                     mCentralSurfacesOptionalLazy.get().ifPresent(CentralSurfaces::togglePanel));
         }
 
-
         private boolean verifyCaller(String reason) {
             final int callerId = Binder.getCallingUserHandle().getIdentifier();
             if (callerId != mCurrentBoundedUserId) {
@@ -466,6 +468,9 @@ public class OverviewProxyService extends CurrentUserTracker implements
             mSplitScreenOptional.ifPresent((splitscreen) -> params.putBinder(
                     KEY_EXTRA_SHELL_SPLIT_SCREEN,
                     splitscreen.createExternalInterface().asBinder()));
+            mFloatingTasksOptional.ifPresent(floatingTasks -> params.putBinder(
+                    KEY_EXTRA_SHELL_FLOATING_TASKS,
+                    floatingTasks.createExternalInterface().asBinder()));
             mOneHandedOptional.ifPresent((onehanded) -> params.putBinder(
                     KEY_EXTRA_SHELL_ONE_HANDED,
                     onehanded.createExternalInterface().asBinder()));
@@ -563,6 +568,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
             NotificationShadeWindowController statusBarWinController, SysUiState sysUiState,
             Optional<Pip> pipOptional,
             Optional<SplitScreen> splitScreenOptional,
+            Optional<FloatingTasks> floatingTasksOptional,
             Optional<OneHanded> oneHandedOptional,
             Optional<RecentTasks> recentTasks,
             Optional<BackAnimation> backAnimation,
@@ -631,6 +637,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
         mCommandQueue = commandQueue;
 
         mSplitScreenOptional = splitScreenOptional;
+        mFloatingTasksOptional = floatingTasksOptional;
 
         // Listen for user setup
         startTracking();
