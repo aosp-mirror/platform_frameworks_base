@@ -1662,7 +1662,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private void toggleNotificationPanel() {
         IStatusBarService statusBarService = getStatusBarService();
-        if (statusBarService != null) {
+        if (isUserSetupComplete() && statusBarService != null) {
             try {
                 statusBarService.togglePanel();
             } catch (RemoteException e) {
