@@ -1120,7 +1120,7 @@ public class TransitionTests extends WindowTestsBase {
     }
 
     @Test
-    public void testFlagFillsTask() {
+    public void testFlagFillsTask_embeddingNotFillingTask() {
         final Transition transition = createTestTransition(TRANSIT_OPEN);
         final ArrayMap<WindowContainer, Transition.ChangeInfo> changes = transition.mChanges;
         final ArraySet<WindowContainer> participants = transition.mParticipants;
@@ -1162,6 +1162,67 @@ public class TransitionTests extends WindowTestsBase {
         assertFalse(info.getChanges().get(0).hasFlags(FLAG_FILLS_TASK));
         assertEquals(embeddedTf.getBounds(), info.getChanges().get(0).getEndAbsBounds());
         assertFalse(info.getChanges().get(1).hasFlags(FLAG_FILLS_TASK));
+    }
+
+    @Test
+    public void testFlagFillsTask_openActivityFillingTask() {
+        final Transition transition = createTestTransition(TRANSIT_OPEN);
+        final ArrayMap<WindowContainer, Transition.ChangeInfo> changes = transition.mChanges;
+        final ArraySet<WindowContainer> participants = transition.mParticipants;
+
+        final Task task = createTask(mDisplayContent);
+        // Set to multi-windowing mode in order to set bounds.
+        task.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        final Rect taskBounds = new Rect(0, 0, 500, 1000);
+        task.setBounds(taskBounds);
+        final ActivityRecord activity = createActivityRecord(task);
+        // Start states: set bounds to make sure the start bounds is ignored if it is not visible.
+        activity.getConfiguration().windowConfiguration.setBounds(new Rect(0, 0, 250, 500));
+        activity.mVisibleRequested = false;
+        changes.put(activity, new Transition.ChangeInfo(activity));
+        // End states: reset bounds to fill Task.
+        activity.getConfiguration().windowConfiguration.setBounds(taskBounds);
+        activity.mVisibleRequested = true;
+
+        participants.add(activity);
+        final ArrayList<WindowContainer> targets = Transition.calculateTargets(
+                participants, changes);
+        final TransitionInfo info = Transition.calculateTransitionInfo(
+                transition.mType, 0 /* flags */, targets, changes, mMockT);
+
+        // Opening activity that is filling Task after transition should have the flag.
+        assertEquals(1, info.getChanges().size());
+        assertTrue(info.getChanges().get(0).hasFlags(FLAG_FILLS_TASK));
+    }
+
+    @Test
+    public void testFlagFillsTask_closeActivityFillingTask() {
+        final Transition transition = createTestTransition(TRANSIT_CLOSE);
+        final ArrayMap<WindowContainer, Transition.ChangeInfo> changes = transition.mChanges;
+        final ArraySet<WindowContainer> participants = transition.mParticipants;
+
+        final Task task = createTask(mDisplayContent);
+        // Set to multi-windowing mode in order to set bounds.
+        task.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        final Rect taskBounds = new Rect(0, 0, 500, 1000);
+        task.setBounds(taskBounds);
+        final ActivityRecord activity = createActivityRecord(task);
+        // Start states: fills Task without override.
+        activity.mVisibleRequested = true;
+        changes.put(activity, new Transition.ChangeInfo(activity));
+        // End states: set bounds to make sure the start bounds is ignored if it is not visible.
+        activity.getConfiguration().windowConfiguration.setBounds(new Rect(0, 0, 250, 500));
+        activity.mVisibleRequested = false;
+
+        participants.add(activity);
+        final ArrayList<WindowContainer> targets = Transition.calculateTargets(
+                participants, changes);
+        final TransitionInfo info = Transition.calculateTransitionInfo(
+                transition.mType, 0 /* flags */, targets, changes, mMockT);
+
+        // Closing activity that is filling Task before transition should have the flag.
+        assertEquals(1, info.getChanges().size());
+        assertTrue(info.getChanges().get(0).hasFlags(FLAG_FILLS_TASK));
     }
 
     @Test
