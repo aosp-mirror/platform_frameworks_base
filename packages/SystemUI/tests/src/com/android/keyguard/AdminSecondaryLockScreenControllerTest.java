@@ -41,6 +41,7 @@ import android.testing.TestableLooper.RunWithLooper;
 import android.testing.ViewUtils;
 import android.view.SurfaceControlViewHost;
 import android.view.SurfaceView;
+import android.view.View;
 
 import androidx.test.filters.SmallTest;
 
@@ -84,6 +85,7 @@ public class AdminSecondaryLockScreenControllerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
 
         mKeyguardSecurityContainer = spy(new KeyguardSecurityContainer(mContext));
+        mKeyguardSecurityContainer.setId(View.generateViewId());
         ViewUtils.attachView(mKeyguardSecurityContainer);
 
         mTestableLooper = TestableLooper.get(this);
