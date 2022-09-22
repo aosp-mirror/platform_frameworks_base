@@ -29,7 +29,6 @@ import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.wm.shell.flicker.SPLIT_SCREEN_DIVIDER_COMPONENT
 import com.android.wm.shell.flicker.appWindowKeepVisible
-import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 import com.android.wm.shell.flicker.layerKeepVisible
 import com.android.wm.shell.flicker.splitAppLayerBoundsChanges
 import org.junit.FixMethodOrder
@@ -54,10 +53,10 @@ class DragDividerToResize (testSpec: FlickerTestParameter) : SplitScreenBase(tes
         get() = {
             super.transition(this)
             setup {
-                SplitScreenHelper.enterSplit(wmHelper, tapl, primaryApp, secondaryApp)
+                SplitScreenUtils.enterSplit(wmHelper, tapl, primaryApp, secondaryApp)
             }
             transitions {
-                SplitScreenHelper.dragDividerToResizeAndWait(device, wmHelper)
+                SplitScreenUtils.dragDividerToResizeAndWait(device, wmHelper)
             }
         }
 

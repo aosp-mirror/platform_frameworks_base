@@ -27,7 +27,6 @@ import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.wm.shell.flicker.appWindowBecomesVisible
-import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 import com.android.wm.shell.flicker.layerBecomesVisible
 import com.android.wm.shell.flicker.splitAppLayerBoundsIsVisibleAtEnd
 import com.android.wm.shell.flicker.splitScreenDividerBecomesVisible
@@ -48,13 +47,13 @@ import org.junit.runners.Parameterized
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group1
 class SwitchBackToSplitFromAnotherApp(testSpec: FlickerTestParameter) : SplitScreenBase(testSpec) {
-    val thirdApp = SplitScreenHelper.getNonResizeable(instrumentation)
+    val thirdApp = SplitScreenUtils.getNonResizeable(instrumentation)
 
     override val transition: FlickerBuilder.() -> Unit
         get() = {
             super.transition(this)
             setup {
-                SplitScreenHelper.enterSplit(wmHelper, tapl, primaryApp, secondaryApp)
+                SplitScreenUtils.enterSplit(wmHelper, tapl, primaryApp, secondaryApp)
 
                 thirdApp.launchViaIntent(wmHelper)
                 wmHelper.StateSyncBuilder()
@@ -63,7 +62,7 @@ class SwitchBackToSplitFromAnotherApp(testSpec: FlickerTestParameter) : SplitScr
             }
             transitions {
                 tapl.launchedAppState.quickSwitchToPreviousApp()
-                SplitScreenHelper.waitForSplitComplete(wmHelper, primaryApp, secondaryApp)
+                SplitScreenUtils.waitForSplitComplete(wmHelper, primaryApp, secondaryApp)
             }
         }
 

@@ -18,9 +18,9 @@ package com.android.wm.shell.flicker.pip
 
 import android.platform.test.annotations.Presubmit
 import com.android.server.wm.flicker.FlickerTestParameter
+import com.android.server.wm.flicker.helpers.FixedOrientationAppHelper
 import com.android.server.wm.flicker.traces.region.RegionSubject
 import com.android.wm.shell.flicker.Direction
-import com.android.wm.shell.flicker.helpers.FixedAppHelper
 import org.junit.Test
 
 /**
@@ -29,7 +29,7 @@ import org.junit.Test
 abstract class MovePipShelfHeightTransition(
     testSpec: FlickerTestParameter
 ) : PipTransition(testSpec) {
-    protected val testApp = FixedAppHelper(instrumentation)
+    protected val testApp = FixedOrientationAppHelper(instrumentation)
 
     /**
      * Checks [pipApp] window remains visible throughout the animation

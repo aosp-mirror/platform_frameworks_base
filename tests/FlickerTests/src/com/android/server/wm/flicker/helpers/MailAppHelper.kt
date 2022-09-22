@@ -28,13 +28,13 @@ import com.android.server.wm.traces.common.ComponentNameMatcher
 import com.android.server.wm.traces.parser.toFlickerComponent
 
 class MailAppHelper @JvmOverloads constructor(
-        instr: Instrumentation,
-        launcherName: String = ActivityOptions.MAIL_ACTIVITY_LAUNCHER_NAME,
-        component: ComponentNameMatcher =
-                ActivityOptions.MAIL_ACTIVITY_COMPONENT_NAME.toFlickerComponent(),
-        launcherStrategy: ILauncherStrategy = LauncherStrategyFactory
-                .getInstance(instr)
-                .launcherStrategy
+    instr: Instrumentation,
+    launcherName: String = ActivityOptions.Mail.LABEL,
+    component: ComponentNameMatcher =
+        ActivityOptions.Mail.COMPONENT.toFlickerComponent(),
+    launcherStrategy: ILauncherStrategy = LauncherStrategyFactory
+        .getInstance(instr)
+        .launcherStrategy
 ) : StandardAppHelper(instr, launcherName, component, launcherStrategy) {
 
     fun openMail(rowIdx: Int) {
@@ -46,7 +46,7 @@ class MailAppHelper @JvmOverloads constructor(
             if (row != null) break
             scrollDown()
         }
-        require(row != null) {""}
+        require(row != null) { "" }
         row.click()
         uiDevice.wait(Until.gone(By.res(getPackage(), MAIL_LIST_RES_ID)), FIND_TIMEOUT)
     }
@@ -57,9 +57,9 @@ class MailAppHelper @JvmOverloads constructor(
     }
 
     fun waitForMailList(): UiObject2 {
-        var sel = By.res(getPackage(), MAIL_LIST_RES_ID).scrollable(true)
+        val sel = By.res(getPackage(), MAIL_LIST_RES_ID).scrollable(true)
         val ret = uiDevice.wait(Until.findObject(sel), FIND_TIMEOUT)
-        require(ret != null) {""}
+        requireNotNull(ret) { "Unable to find $MAIL_LIST_RES_ID object" }
         return ret
     }
 

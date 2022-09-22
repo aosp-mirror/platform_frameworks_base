@@ -29,9 +29,9 @@ import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelpe
 
 class NewTasksAppHelper @JvmOverloads constructor(
     instr: Instrumentation,
-    launcherName: String = ActivityOptions.LAUNCH_NEW_TASK_ACTIVITY_LAUNCHER_NAME,
+    launcherName: String = ActivityOptions.LaunchNewTask.LABEL,
     component: ComponentNameMatcher =
-        ActivityOptions.LAUNCH_NEW_TASK_ACTIVITY_COMPONENT_NAME.toFlickerComponent(),
+        ActivityOptions.LaunchNewTask.COMPONENT.toFlickerComponent(),
     launcherStrategy: ILauncherStrategy = LauncherStrategyFactory
         .getInstance(instr)
         .launcherStrategy
@@ -43,7 +43,7 @@ class NewTasksAppHelper @JvmOverloads constructor(
 
         requireNotNull(button) {
             "Button not found, this usually happens when the device " +
-                    "was left in an unknown state (e.g. in split screen)"
+                "was left in an unknown state (e.g. in split screen)"
         }
         button.click()
         wmHelper.StateSyncBuilder()

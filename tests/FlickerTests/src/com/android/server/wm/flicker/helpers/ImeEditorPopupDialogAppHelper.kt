@@ -26,16 +26,16 @@ import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelpe
 
 class ImeEditorPopupDialogAppHelper @JvmOverloads constructor(
     instr: Instrumentation,
-    launcherName: String = ActivityOptions.EDITOR_POPUP_DIALOG_ACTIVITY_LAUNCHER_NAME,
+    launcherName: String = ActivityOptions.Ime.AutoFocusActivity.LABEL,
     component: ComponentNameMatcher =
-            ActivityOptions.EDITOR_POPUP_DIALOG_ACTIVITY_COMPONENT_NAME.toFlickerComponent()
+        ActivityOptions.Ime.AutoFocusActivity.COMPONENT.toFlickerComponent()
 ) : ImeAppHelper(instr, launcherName, component) {
     override fun openIME(wmHelper: WindowManagerStateHelper) {
         val editText = uiDevice.wait(Until.findObject(By.text("focused editText")), FIND_TIMEOUT)
 
-        require(editText != null) {
+        requireNotNull(editText) {
             "Text field not found, this usually happens when the device " +
-                    "was left in an unknown state (e.g. in split screen)"
+                "was left in an unknown state (e.g. in split screen)"
         }
         editText.click()
         waitIMEShown(wmHelper)
@@ -43,7 +43,7 @@ class ImeEditorPopupDialogAppHelper @JvmOverloads constructor(
 
     fun dismissDialog(wmHelper: WindowManagerStateHelper) {
         val dismissButton = uiDevice.wait(
-                Until.findObject(By.text("Dismiss")), FIND_TIMEOUT)
+            Until.findObject(By.text("Dismiss")), FIND_TIMEOUT)
 
         // Pressing back key to dismiss the dialog
         if (dismissButton != null) {

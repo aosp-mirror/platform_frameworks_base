@@ -25,10 +25,9 @@ import com.android.server.wm.traces.parser.toFlickerComponent
 
 class ShowWhenLockedAppHelper @JvmOverloads constructor(
     instr: Instrumentation,
-    launcherName: String = ActivityOptions.SHOW_WHEN_LOCKED_ACTIVITY_LAUNCHER_NAME,
+    launcherName: String = ActivityOptions.ShowWhenLockedActivity.LABEL,
     component: ComponentNameMatcher =
-            ActivityOptions.SHOW_WHEN_LOCKED_ACTIVITY_COMPONENT_NAME.toFlickerComponent(),
-    launcherStrategy: ILauncherStrategy = LauncherStrategyFactory
-            .getInstance(instr)
-            .launcherStrategy
+        ActivityOptions.ShowWhenLockedActivity.COMPONENT.toFlickerComponent(),
+    launcherStrategy: ILauncherStrategy =
+        LauncherStrategyFactory.getInstance(instr).launcherStrategy
 ) : StandardAppHelper(instr, launcherName, component, launcherStrategy)

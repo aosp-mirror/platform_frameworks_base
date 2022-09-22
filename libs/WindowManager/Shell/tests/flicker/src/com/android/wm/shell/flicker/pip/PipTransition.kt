@@ -21,12 +21,12 @@ import android.content.Intent
 import android.view.Surface
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.helpers.PipAppHelper
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.rules.RemoveAllTasksButHomeRule.Companion.removeAllTasksButHome
+import com.android.server.wm.flicker.testapp.ActivityOptions
 import com.android.wm.shell.flicker.BaseTest
-import com.android.wm.shell.flicker.helpers.PipAppHelper
-import com.android.wm.shell.flicker.testapp.Components
 
 abstract class PipTransition(testSpec: FlickerTestParameter) : BaseTest(testSpec) {
     protected val pipApp = PipAppHelper(instrumentation)
@@ -61,11 +61,11 @@ abstract class PipTransition(testSpec: FlickerTestParameter) : BaseTest(testSpec
      *
      * @param eachRun If the pip app should be launched in each run (otherwise only 1x per test)
      * @param stringExtras Arguments to pass to the PIP launch intent
-     * @param extraSpec Addicional segment of flicker specification
+     * @param extraSpec Additional segment of flicker specification
      */
     @JvmOverloads
     protected open fun buildTransition(
-        stringExtras: Map<String, String> = mapOf(Components.PipActivity.EXTRA_ENTER_PIP to "true"),
+        stringExtras: Map<String, String> = mapOf(ActivityOptions.Pip.EXTRA_ENTER_PIP to "true"),
         extraSpec: FlickerBuilder.() -> Unit = {}
     ): FlickerBuilder.() -> Unit {
         return {

@@ -83,19 +83,17 @@ class ActivitiesTransitionTest(testSpec: FlickerTestParameter) : BaseTest(testSp
     override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
 
     /**
-     * Checks that the [ActivityOptions.BUTTON_ACTIVITY_COMPONENT_NAME] activity is visible at
-     * the start of the transition, that
-     * [ActivityOptions.SIMPLE_ACTIVITY_AUTO_FOCUS_COMPONENT_NAME] becomes visible during the
-     * transition, and that [ActivityOptions.BUTTON_ACTIVITY_COMPONENT_NAME] is again visible
-     * at the end
+     * Checks that the [ActivityOptions.LaunchNewActivity] activity is visible at
+     * the start of the transition, that [ActivityOptions.SimpleActivity] becomes visible during
+     * the transition, and that [ActivityOptions.LaunchNewActivity] is again visible at the end
      */
     @Presubmit
     @Test
     fun finishSubActivity() {
-        val buttonActivityComponent = ActivityOptions
-            .BUTTON_ACTIVITY_COMPONENT_NAME.toFlickerComponent()
-        val imeAutoFocusActivityComponent = ActivityOptions
-            .SIMPLE_ACTIVITY_AUTO_FOCUS_COMPONENT_NAME.toFlickerComponent()
+        val buttonActivityComponent =
+            ActivityOptions.LaunchNewActivity.COMPONENT.toFlickerComponent()
+        val imeAutoFocusActivityComponent =
+            ActivityOptions.SimpleActivity.COMPONENT.toFlickerComponent()
         testSpec.assertWm {
             this.isAppWindowOnTop(buttonActivityComponent)
                 .then()
@@ -106,7 +104,7 @@ class ActivitiesTransitionTest(testSpec: FlickerTestParameter) : BaseTest(testSp
     }
 
     /**
-     * Checks that the [ComponentMatcher.LAUNCHER] window is not on top. The launcher cannot be
+     * Checks that the [ComponentNameMatcher.LAUNCHER] window is not on top. The launcher cannot be
      * asserted with `isAppWindowVisible` because it contains 2 windows with the exact same name,
      * and both are never simultaneously visible
      */
@@ -119,7 +117,7 @@ class ActivitiesTransitionTest(testSpec: FlickerTestParameter) : BaseTest(testSp
     }
 
     /**
-     * Checks that the [ComponentMatcher.LAUNCHER] layer is never visible during the transition
+     * Checks that the [ComponentNameMatcher.LAUNCHER] layer is never visible during the transition
      */
     @Presubmit
     @Test
