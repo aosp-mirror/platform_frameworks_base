@@ -3468,7 +3468,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     "Setting visibility of " + this + ": " + clientVisible);
             mClient.dispatchAppVisibility(clientVisible);
         } catch (RemoteException e) {
+            // The remote client fails to process the visibility message. That means it is in a
+            // wrong state. E.g. the binder buffer is running out or the binder threads are dead.
+            // The window visibility is out-of-sync that may cause blank content or left over, so
+            // just kill it. And if it is a window of foreground activity, the activity can be
+            // restarted automatically if needed.
             Slog.w(TAG, "Exception thrown during dispatchAppVisibility " + this, e);
+            android.os.Process.killProcess(mSession.mPid);
         }
     }
 
