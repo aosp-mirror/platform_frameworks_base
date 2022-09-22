@@ -29,6 +29,7 @@ import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPOR
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_ROTATE_SCREEN_SENSOR;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_SHOW_BACK_ARROW;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_SHOW_SELECTION_TOOLBAR;
+import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_SHOW_VOICE_INTERACTION;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_START_RECENTS_ANIMATION;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_SWITCH_DISPLAY_UNFOLD;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_TOGGLE_RECENTS;
@@ -174,6 +175,12 @@ public class LatencyTracker {
      */
     public static final int ACTION_FOLD_TO_AOD = 18;
 
+    /**
+     * Time it takes to show the {@link android.service.voice.VoiceInteractionSession} system UI
+     * after a {@link android.hardware.soundtrigger3.ISoundTriggerHw} voice trigger.
+     */
+    public static final int ACTION_SHOW_VOICE_INTERACTION = 19;
+
     private static final int[] ACTIONS_ALL = {
         ACTION_EXPAND_PANEL,
         ACTION_TOGGLE_RECENTS,
@@ -194,6 +201,7 @@ public class LatencyTracker {
         ACTION_LOAD_SHARE_SHEET,
         ACTION_SHOW_SELECTION_TOOLBAR,
         ACTION_FOLD_TO_AOD,
+        ACTION_SHOW_VOICE_INTERACTION,
     };
 
     /** @hide */
@@ -217,6 +225,7 @@ public class LatencyTracker {
         ACTION_LOAD_SHARE_SHEET,
         ACTION_SHOW_SELECTION_TOOLBAR,
         ACTION_FOLD_TO_AOD,
+        ACTION_SHOW_VOICE_INTERACTION,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Action {
@@ -243,6 +252,7 @@ public class LatencyTracker {
             UIACTION_LATENCY_REPORTED__ACTION__ACTION_LOAD_SHARE_SHEET,
             UIACTION_LATENCY_REPORTED__ACTION__ACTION_SHOW_SELECTION_TOOLBAR,
             UIACTION_LATENCY_REPORTED__ACTION__ACTION_FOLD_TO_AOD,
+            UIACTION_LATENCY_REPORTED__ACTION__ACTION_SHOW_VOICE_INTERACTION,
     };
 
     private static LatencyTracker sLatencyTracker;
@@ -340,6 +350,8 @@ public class LatencyTracker {
                 return "ACTION_SHOW_SELECTION_TOOLBAR";
             case UIACTION_LATENCY_REPORTED__ACTION__ACTION_FOLD_TO_AOD:
                 return "ACTION_FOLD_TO_AOD";
+            case UIACTION_LATENCY_REPORTED__ACTION__ACTION_SHOW_VOICE_INTERACTION:
+                return "ACTION_SHOW_VOICE_INTERACTION";
             default:
                 throw new IllegalArgumentException("Invalid action");
         }
