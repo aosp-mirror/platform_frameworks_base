@@ -69,12 +69,12 @@ data class SettingsPage(
         return "$displayName ${formatArguments()}"
     }
 
-    fun buildRoute(highlightEntryName: String? = null): String {
+    fun buildRoute(highlightEntryId: String? = null): String {
         val highlightParam =
-            if (highlightEntryName == null)
+            if (highlightEntryId == null)
                 ""
             else
-                "?${BrowseActivity.HIGHLIGHT_ENTRY_PARAM_NAME}=$highlightEntryName"
+                "?${BrowseActivity.HIGHLIGHT_ENTRY_PARAM_NAME}=$highlightEntryId"
         return name + parameter.navLink(arguments) + highlightParam
     }
 

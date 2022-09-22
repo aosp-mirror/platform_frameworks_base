@@ -35,7 +35,7 @@ import com.android.settingslib.spa.widget.ui.CategoryTitle
 private const val TITLE = "Sample Category"
 
 object CategoryPageProvider : SettingsPageProvider {
-    override val name = "Spinner"
+    override val name = "Category"
 
     fun buildInjectEntry(): SettingsEntryBuilder {
         return SettingsEntryBuilder.createInject(owner = SettingsPage.create(name))

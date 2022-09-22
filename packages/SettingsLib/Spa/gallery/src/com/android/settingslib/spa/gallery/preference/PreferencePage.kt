@@ -30,6 +30,7 @@ import com.android.settingslib.spa.framework.common.SettingsEntry
 import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
 import com.android.settingslib.spa.framework.theme.SettingsTheme
+import com.android.settingslib.spa.framework.util.getRuntimeArguments
 import com.android.settingslib.spa.gallery.SettingsPageProviderEnum
 import com.android.settingslib.spa.gallery.createSettingsPage
 import com.android.settingslib.spa.gallery.preference.PreferencePageModel.Companion.ASYNC_PREFERENCE_TITLE
@@ -177,9 +178,10 @@ object PreferencePageProvider : SettingsPageProvider {
 
     @Composable
     override fun Page(arguments: Bundle?) {
+        val globalRuntimeArgs = remember { getRuntimeArguments(arguments) }
         RegularScaffold(title = PAGE_TITLE) {
             for (entry in buildEntry(arguments)) {
-                entry.UiLayout()
+                entry.UiLayout(globalRuntimeArgs)
             }
         }
     }

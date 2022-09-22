@@ -57,10 +57,7 @@ class SettingsEntryRepository(sppRepository: SettingsPageProviderRepository) {
             val pageId = page?.id()
             if (pageId == null || pageWithEntryMap.containsKey(pageId)) continue
             val spp = sppRepository.getProviderOrNull(page.name) ?: continue
-            val newEntries = spp.buildEntry(page.arguments).map {
-                // Set from-page if it is missing.
-                if (it.fromPage == null) it.copy(fromPage = page) else it
-            }
+            val newEntries = spp.buildEntry(page.arguments)
             pageWithEntryMap[pageId] = SettingsPageWithEntry(page, newEntries)
             for (newEntry in newEntries) {
                 val newEntryId = newEntry.id()
