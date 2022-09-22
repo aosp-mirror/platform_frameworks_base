@@ -3043,6 +3043,12 @@
     <permission android:name="android.permission.CREATE_USERS"
         android:protectionLevel="signature" />
 
+    <!-- @SystemApi @hide Allows an application to set user association
+         with a certain subscription. Used by Enterprise to associate a
+         subscription with a work or personal profile. -->
+    <permission android:name="android.permission.MANAGE_SUBSCRIPTION_USER_ASSOCIATION"
+                android:protectionLevel="signature" />
+
     <!-- @SystemApi @hide Allows an application to call APIs that allow it to query users on the
          device. -->
     <permission android:name="android.permission.QUERY_USERS"
