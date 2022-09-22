@@ -554,6 +554,10 @@ final class BroadcastRecord extends Binder {
         return (intent.getFlags() & Intent.FLAG_RECEIVER_REPLACE_PENDING) != 0;
     }
 
+    boolean isNoAbort() {
+        return (intent.getFlags() & Intent.FLAG_RECEIVER_NO_ABORT) != 0;
+    }
+
     @NonNull String getHostingRecordTriggerType() {
         if (alarm) {
             return HostingRecord.TRIGGER_TYPE_ALARM;
@@ -666,13 +670,21 @@ final class BroadcastRecord extends Binder {
 
     @Override
     public String toString() {
+        String label = intent.getAction();
+        if (label == null) {
+            label = intent.toString();
+        }
         return "BroadcastRecord{"
             + Integer.toHexString(System.identityHashCode(this))
-            + " u" + userId + " " + intent.getAction() + "}";
+            + " u" + userId + " " + label + "}";
     }
 
     public String toShortString() {
-        return intent.getAction() + "/u" + userId;
+        String label = intent.getAction();
+        if (label == null) {
+            label = intent.toString();
+        }
+        return label + "/u" + userId;
     }
 
     public void dumpDebug(ProtoOutputStream proto, long fieldId) {

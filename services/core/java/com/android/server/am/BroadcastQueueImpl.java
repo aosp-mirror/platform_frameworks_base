@@ -1446,7 +1446,7 @@ public class BroadcastQueueImpl extends BroadcastQueue {
         return null;
     }
 
-    private void logBootCompletedBroadcastCompletionLatencyIfPossible(BroadcastRecord r) {
+    static void logBootCompletedBroadcastCompletionLatencyIfPossible(BroadcastRecord r) {
         // Only log after last receiver.
         // In case of split BOOT_COMPLETED broadcast, make sure only call this method on the
         // last BroadcastRecord of the split broadcast which has non-null resultTo.

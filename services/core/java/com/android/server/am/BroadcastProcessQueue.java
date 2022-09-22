@@ -18,6 +18,7 @@ package com.android.server.am;
 
 import static com.android.server.am.BroadcastQueue.checkState;
 
+import android.annotation.DurationMillisLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UptimeMillisLong;
@@ -109,6 +110,12 @@ class BroadcastProcessQueue {
      * queue was last idle.
      */
     private int mActiveCountSinceIdle;
+
+    /**
+     * Flag indicating that the currently active broadcast is being dispatched
+     * was scheduled via a cold start.
+     */
+    private boolean mActiveViaColdStart;
 
     /**
      * Count of {@link #mPending} broadcasts of these various flavors.
@@ -223,6 +230,14 @@ class BroadcastProcessQueue {
         return mActiveCountSinceIdle;
     }
 
+    public void setActiveViaColdStart(boolean activeViaColdStart) {
+        mActiveViaColdStart = activeViaColdStart;
+    }
+
+    public boolean getActiveViaColdStart() {
+        return mActiveViaColdStart;
+    }
+
     /**
      * Set the currently active broadcast to the next pending broadcast.
      */
@@ -233,6 +248,7 @@ class BroadcastProcessQueue {
         mActive = (BroadcastRecord) next.arg1;
         mActiveIndex = next.argi1;
         mActiveCountSinceIdle++;
+        mActiveViaColdStart = false;
         next.recycle();
         if (mActive.isForeground()) {
             mCountForeground--;
@@ -253,6 +269,7 @@ class BroadcastProcessQueue {
         mActive = null;
         mActiveIndex = 0;
         mActiveCountSinceIdle = 0;
+        mActiveViaColdStart = false;
     }
 
     public void traceStartingBegin() {
@@ -299,6 +316,24 @@ class BroadcastProcessQueue {
         }
 
         mActive.setDeliveryState(mActiveIndex, deliveryState);
+    }
+
+    /**
+     * Return the delay between the currently active broadcast being enqueued
+     * and being scheduled to run for this process.
+     */
+    public @DurationMillisLong long getActiveScheduledDelay() {
+        checkState(isActive(), "isActive");
+        return mActive.scheduledTime[mActiveIndex] - mActive.enqueueTime;
+    }
+
+    /**
+     * Return the delay between the currently active broadcast being scheduled
+     * to run and reaching a terminal state for this process.
+     */
+    public @DurationMillisLong long getActiveDeliveredDelay() {
+        checkState(isActive(), "isActive");
+        return mActive.duration[mActiveIndex];
     }
 
     public @NonNull BroadcastRecord getActive() {
