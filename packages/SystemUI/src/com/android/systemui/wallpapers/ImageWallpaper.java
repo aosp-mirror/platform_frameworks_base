@@ -16,12 +16,21 @@
 
 package com.android.systemui.wallpapers;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+
+import static com.android.systemui.flags.Flags.USE_CANVAS_RENDERER;
+
 import android.app.WallpaperColors;
+import android.app.WallpaperManager;
+import android.content.ComponentCallbacks2;
+import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.SystemClock;
@@ -31,16 +40,22 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.MathUtils;
 import android.util.Size;
+import android.view.Display;
+import android.view.DisplayInfo;
+import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.wallpapers.canvas.ImageCanvasWallpaperRenderer;
 import com.android.systemui.wallpapers.gl.EglHelper;
 import com.android.systemui.wallpapers.gl.ImageWallpaperRenderer;
 
 import java.io.FileDescriptor;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -59,16 +74,19 @@ public class ImageWallpaper extends WallpaperService {
     private static final @android.annotation.NonNull RectF LOCAL_COLOR_BOUNDS =
             new RectF(0, 0, 1, 1);
     private static final boolean DEBUG = false;
+
     private final ArrayList<RectF> mLocalColorsToAdd = new ArrayList<>();
     private final ArraySet<RectF> mColorAreas = new ArraySet<>();
     private volatile int mPages = 1;
     private HandlerThread mWorker;
     // scaled down version
     private Bitmap mMiniBitmap;
+    private final FeatureFlags mFeatureFlags;
 
     @Inject
-    public ImageWallpaper() {
+    public ImageWallpaper(FeatureFlags featureFlags) {
         super();
+        mFeatureFlags = featureFlags;
     }
 
     @Override
@@ -80,7 +98,7 @@ public class ImageWallpaper extends WallpaperService {
 
     @Override
     public Engine onCreateEngine() {
-        return new GLEngine();
+        return mFeatureFlags.isEnabled(USE_CANVAS_RENDERER) ? new CanvasEngine() : new GLEngine();
     }
 
     @Override
@@ -487,6 +505,272 @@ public class ImageWallpaper extends WallpaperService {
 
             mEglHelper.dump(prefix, fd, out, args);
             mRenderer.dump(prefix, fd, out, args);
+        }
+    }
+
+
+    class CanvasEngine extends WallpaperService.Engine implements DisplayListener {
+
+        // time [ms] before unloading the wallpaper after it is loaded
+        private static final int DELAY_FORGET_WALLPAPER = 5000;
+
+        private final Runnable mUnloadWallpaperCallback = this::unloadWallpaper;
+
+        private WallpaperManager mWallpaperManager;
+        private ImageCanvasWallpaperRenderer mImageCanvasWallpaperRenderer;
+        private Bitmap mBitmap;
+
+        private Display mDisplay;
+        private final DisplayInfo mTmpDisplayInfo = new DisplayInfo();
+
+        private AsyncTask<Void, Void, Bitmap> mLoader;
+        private boolean mNeedsDrawAfterLoadingWallpaper = false;
+
+        CanvasEngine() {
+            super();
+            setFixedSizeAllowed(true);
+            setShowForAllUsers(true);
+        }
+
+        void trimMemory(int level) {
+            if (level >= ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW
+                    && level <= ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL
+                    && isBitmapLoaded()) {
+                if (DEBUG) {
+                    Log.d(TAG, "trimMemory");
+                }
+                unloadWallpaper();
+            }
+        }
+
+        @Override
+        public void onCreate(SurfaceHolder surfaceHolder) {
+            if (DEBUG) {
+                Log.d(TAG, "onCreate");
+            }
+
+            mWallpaperManager = getSystemService(WallpaperManager.class);
+            super.onCreate(surfaceHolder);
+
+            final Context displayContext = getDisplayContext();
+            final int displayId = displayContext == null ? DEFAULT_DISPLAY :
+                    displayContext.getDisplayId();
+            DisplayManager dm = getSystemService(DisplayManager.class);
+            if (dm != null) {
+                mDisplay = dm.getDisplay(displayId);
+                if (mDisplay == null) {
+                    Log.e(TAG, "Cannot find display! Fallback to default.");
+                    mDisplay = dm.getDisplay(DEFAULT_DISPLAY);
+                }
+            }
+            setOffsetNotificationsEnabled(false);
+
+            mImageCanvasWallpaperRenderer = new ImageCanvasWallpaperRenderer(surfaceHolder);
+            loadWallpaper(false);
+        }
+
+        @Override
+        public void onDestroy() {
+            super.onDestroy();
+            unloadWallpaper();
+        }
+
+        @Override
+        public boolean shouldZoomOutWallpaper() {
+            return true;
+        }
+
+        @Override
+        public void onSurfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+            if (DEBUG) {
+                Log.d(TAG, "onSurfaceChanged: width=" + width + ", height=" + height);
+            }
+            super.onSurfaceChanged(holder, format, width, height);
+            mImageCanvasWallpaperRenderer.setSurfaceHolder(holder);
+            drawFrame(false);
+        }
+
+        @Override
+        public void onSurfaceDestroyed(SurfaceHolder holder) {
+            super.onSurfaceDestroyed(holder);
+            if (DEBUG) {
+                Log.i(TAG, "onSurfaceDestroyed");
+            }
+            mImageCanvasWallpaperRenderer.setSurfaceHolder(null);
+        }
+
+        @Override
+        public void onSurfaceCreated(SurfaceHolder holder) {
+            super.onSurfaceCreated(holder);
+            if (DEBUG) {
+                Log.i(TAG, "onSurfaceCreated");
+            }
+            mImageCanvasWallpaperRenderer.setSurfaceHolder(holder);
+        }
+
+        @Override
+        public void onSurfaceRedrawNeeded(SurfaceHolder holder) {
+            if (DEBUG) {
+                Log.d(TAG, "onSurfaceRedrawNeeded");
+            }
+            super.onSurfaceRedrawNeeded(holder);
+            // At the end of this method we should have drawn into the surface.
+            // This means that the bitmap should be loaded synchronously if
+            // it was already unloaded.
+            if (!isBitmapLoaded()) {
+                setBitmap(mWallpaperManager.getBitmap(true /* hardware */));
+            }
+            drawFrame(true);
+        }
+
+        private DisplayInfo getDisplayInfo() {
+            mDisplay.getDisplayInfo(mTmpDisplayInfo);
+            return mTmpDisplayInfo;
+        }
+
+        private void drawFrame(boolean forceRedraw) {
+            if (!mImageCanvasWallpaperRenderer.isSurfaceHolderLoaded()) {
+                Log.e(TAG, "attempt to draw a frame without a valid surface");
+                return;
+            }
+
+            if (!isBitmapLoaded()) {
+                // ensure that we load the wallpaper.
+                // if the wallpaper is currently loading, this call will have no effect.
+                loadWallpaper(true);
+                return;
+            }
+            mImageCanvasWallpaperRenderer.drawFrame(mBitmap, forceRedraw);
+        }
+
+        private void setBitmap(Bitmap bitmap) {
+            if (bitmap == null) {
+                Log.e(TAG, "Attempt to set a null bitmap");
+            } else if (mBitmap == bitmap) {
+                Log.e(TAG, "The value of bitmap is the same");
+            } else if (bitmap.getWidth() < 1 || bitmap.getHeight() < 1) {
+                Log.e(TAG, "Attempt to set an invalid wallpaper of length "
+                        + bitmap.getWidth() + "x" + bitmap.getHeight());
+            } else {
+                if (mBitmap != null) {
+                    mBitmap.recycle();
+                }
+                mBitmap = bitmap;
+            }
+        }
+
+        private boolean isBitmapLoaded() {
+            return mBitmap != null && !mBitmap.isRecycled();
+        }
+
+        /**
+         * Loads the wallpaper on background thread and schedules updating the surface frame,
+         * and if {@code needsDraw} is set also draws a frame.
+         *
+         * If loading is already in-flight, subsequent loads are ignored (but needDraw is or-ed to
+         * the active request).
+         *
+         */
+        private void loadWallpaper(boolean needsDraw) {
+            mNeedsDrawAfterLoadingWallpaper |= needsDraw;
+            if (mLoader != null) {
+                if (DEBUG) {
+                    Log.d(TAG, "Skipping loadWallpaper, already in flight ");
+                }
+                return;
+            }
+            mLoader = new AsyncTask<Void, Void, Bitmap>() {
+                @Override
+                protected Bitmap doInBackground(Void... params) {
+                    Throwable exception;
+                    try {
+                        Bitmap wallpaper = mWallpaperManager.getBitmap(true /* hardware */);
+                        if (wallpaper != null
+                                && wallpaper.getByteCount() > RecordingCanvas.MAX_BITMAP_SIZE) {
+                            throw new RuntimeException("Wallpaper is too large to draw!");
+                        }
+                        return wallpaper;
+                    } catch (RuntimeException | OutOfMemoryError e) {
+                        exception = e;
+                    }
+
+                    if (isCancelled()) {
+                        return null;
+                    }
+
+                    // Note that if we do fail at this, and the default wallpaper can't
+                    // be loaded, we will go into a cycle.  Don't do a build where the
+                    // default wallpaper can't be loaded.
+                    Log.w(TAG, "Unable to load wallpaper!", exception);
+                    try {
+                        mWallpaperManager.clear();
+                    } catch (IOException ex) {
+                        // now we're really screwed.
+                        Log.w(TAG, "Unable reset to default wallpaper!", ex);
+                    }
+
+                    if (isCancelled()) {
+                        return null;
+                    }
+
+                    try {
+                        return mWallpaperManager.getBitmap(true /* hardware */);
+                    } catch (RuntimeException | OutOfMemoryError e) {
+                        Log.w(TAG, "Unable to load default wallpaper!", e);
+                    }
+                    return null;
+                }
+
+                @Override
+                protected void onPostExecute(Bitmap bitmap) {
+                    setBitmap(bitmap);
+
+                    if (mNeedsDrawAfterLoadingWallpaper) {
+                        drawFrame(true);
+                    }
+
+                    mLoader = null;
+                    mNeedsDrawAfterLoadingWallpaper = false;
+                    scheduleUnloadWallpaper();
+                }
+            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        }
+
+        private void unloadWallpaper() {
+            if (mLoader != null) {
+                mLoader.cancel(false);
+                mLoader = null;
+            }
+
+            if (mBitmap != null) {
+                mBitmap.recycle();
+            }
+            mBitmap = null;
+
+            final Surface surface = getSurfaceHolder().getSurface();
+            surface.hwuiDestroy();
+            mWallpaperManager.forgetLoadedWallpaper();
+        }
+
+        private void scheduleUnloadWallpaper() {
+            Handler handler = getMainThreadHandler();
+            handler.removeCallbacks(mUnloadWallpaperCallback);
+            handler.postDelayed(mUnloadWallpaperCallback, DELAY_FORGET_WALLPAPER);
+        }
+
+        @Override
+        public void onDisplayAdded(int displayId) {
+
+        }
+
+        @Override
+        public void onDisplayChanged(int displayId) {
+
+        }
+
+        @Override
+        public void onDisplayRemoved(int displayId) {
+
         }
     }
 }
