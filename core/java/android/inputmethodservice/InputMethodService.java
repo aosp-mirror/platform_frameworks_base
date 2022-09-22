@@ -967,7 +967,7 @@ public class InputMethodService extends AbstractInputMethodService {
                 Log.d(TAG, "Input should have started before starting Stylus handwriting.");
                 return;
             }
-            maybeCreateInkWindow();
+            maybeCreateAndInitInkWindow();
             if (!mOnPreparedStylusHwCalled) {
                 // prepare hasn't been called by Stylus HOVER.
                 onPrepareStylusHandwriting();
@@ -1027,8 +1027,7 @@ public class InputMethodService extends AbstractInputMethodService {
          */
         @Override
         public void initInkWindow() {
-            maybeCreateInkWindow();
-            mInkWindow.initOnly();
+            maybeCreateAndInitInkWindow();
             onPrepareStylusHandwriting();
             mOnPreparedStylusHwCalled = true;
         }
@@ -1036,11 +1035,13 @@ public class InputMethodService extends AbstractInputMethodService {
         /**
          * Create and attach token to Ink window if it wasn't already created.
          */
-        private void maybeCreateInkWindow() {
+        private void maybeCreateAndInitInkWindow() {
             if (mInkWindow == null) {
                 mInkWindow = new InkWindow(mWindow.getContext());
                 mInkWindow.setToken(mToken);
             }
+            mInkWindow.initOnly();
+            setInkViewVisibilityListener();
             // TODO(b/243571274): set an idle-timeout after which InkWindow is removed.
         }
 
@@ -2469,13 +2470,19 @@ public class InputMethodService extends AbstractInputMethodService {
      * @param motionEvent {@link MotionEvent} from stylus.
      */
     public void onStylusHandwritingMotionEvent(@NonNull MotionEvent motionEvent) {
-        if (mInkWindow.isInkViewVisible()) {
+        if (mInkWindow != null && mInkWindow.isInkViewVisible()) {
             mInkWindow.getDecorView().dispatchTouchEvent(motionEvent);
         } else {
             if (mPendingEvents == null) {
                 mPendingEvents = new RingBuffer(MotionEvent.class, MAX_EVENTS_BUFFER);
             }
             mPendingEvents.append(motionEvent);
+            setInkViewVisibilityListener();
+        }
+    }
+
+    private void setInkViewVisibilityListener() {
+        if (mInkWindow != null) {
             mInkWindow.setInkViewVisibilityListener(() -> {
                 if (mPendingEvents != null && !mPendingEvents.isEmpty()) {
                     for (MotionEvent event : mPendingEvents.toArray()) {
@@ -2539,6 +2546,7 @@ public class InputMethodService extends AbstractInputMethodService {
             mHandler.removeCallbacks(mFinishHwRunnable);
         }
         mFinishHwRunnable = null;
+        mPendingEvents.clear();
 
         final int requestId = mHandwritingRequestId.getAsInt();
         mHandwritingRequestId = OptionalInt.empty();
