@@ -428,6 +428,30 @@ namespace PaintGlue {
         env->ReleaseStringChars(text, textArray);
     }
 
+    static void getTextPath___CTypeface(JNIEnv* env, jobject clazz, jlong paintHandle,
+                                        jlong typefaceHandle, jint bidiFlags, jcharArray text,
+                                        jint index, jint count, jfloat x, jfloat y,
+                                        jlong pathHandle) {
+        Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+        const Typeface* typeface = reinterpret_cast<Typeface*>(typefaceHandle);
+        SkPath* path = reinterpret_cast<SkPath*>(pathHandle);
+        const jchar* textArray = env->GetCharArrayElements(text, nullptr);
+        getTextPath(env, paint, typeface, textArray + index, count, bidiFlags, x, y, path);
+        env->ReleaseCharArrayElements(text, const_cast<jchar*>(textArray), JNI_ABORT);
+    }
+
+    static void getTextPath__StringTypeface(JNIEnv* env, jobject clazz, jlong paintHandle,
+                                            jlong typefaceHandle, jint bidiFlags, jstring text,
+                                            jint start, jint end, jfloat x, jfloat y,
+                                            jlong pathHandle) {
+        Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+        const Typeface* typeface = reinterpret_cast<Typeface*>(typefaceHandle);
+        SkPath* path = reinterpret_cast<SkPath*>(pathHandle);
+        const jchar* textArray = env->GetStringChars(text, nullptr);
+        getTextPath(env, paint, typeface, textArray + start, end - start, bidiFlags, x, y, path);
+        env->ReleaseStringChars(text, textArray);
+    }
+
     static void doTextBounds(JNIEnv* env, const jchar* text, int count, jobject bounds,
             const Paint& paint, const Typeface* typeface, jint bidiFlagsInt) {
         SkRect  r;
@@ -675,6 +699,21 @@ namespace PaintGlue {
         return result;
     }
 
+    static jint getOffsetForAdvance___CIIIIZF_ITypeface(JNIEnv* env, jclass, jlong paintHandle,
+                                                        jlong typefaceHandle, jcharArray text,
+                                                        jint start, jint end, jint contextStart,
+                                                        jint contextEnd, jboolean isRtl,
+                                                        jfloat advance) {
+        const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+        const Typeface* typeface = reinterpret_cast<Typeface*>(typefaceHandle);
+        ScopedCharArrayRO textArray(env, text);
+        jint result = doOffsetForAdvance(paint, typeface, textArray.get() + contextStart,
+                                         start - contextStart, end - start,
+                                         contextEnd - contextStart, isRtl, advance);
+        result += contextStart;
+        return result;
+    }
+
     // ------------------ @FastNative ---------------------------
 
     static jint setTextLocales(JNIEnv* env, jobject clazz, jlong objHandle, jstring locales) {
@@ -737,6 +776,15 @@ namespace PaintGlue {
     static jfloat getFontMetrics(JNIEnv* env, jobject, jlong paintHandle, jobject metricsObj) {
         SkFontMetrics metrics;
         SkScalar spacing = getMetricsInternal(paintHandle, &metrics);
+        GraphicsJNI::set_metrics(env, metricsObj, metrics);
+        return SkScalarToFloat(spacing);
+    }
+
+    // Required for API O and O_MR1
+    static jfloat getFontMetricsTypeface(JNIEnv* env, jobject, jlong paintHandle,
+                                         jlong typefaceHandle, jobject metricsObj) {
+        SkFontMetrics metrics;
+        SkScalar spacing = getMetricsInternal(paintHandle, typefaceHandle, &metrics);
         GraphicsJNI::set_metrics(env, metricsObj, metrics);
         return SkScalarToFloat(spacing);
     }
@@ -1202,6 +1250,9 @@ static const JNINativeMethod methods[] = {
          (void*)PaintGlue::getTextRunCursor___String},
         {"nGetTextPath", "(JI[CIIFFJ)V", (void*)PaintGlue::getTextPath___C},
         {"nGetTextPath", "(JILjava/lang/String;IIFFJ)V", (void*)PaintGlue::getTextPath__String},
+        {"nGetTextPath", "(JJI[CIIFFJ)V", (void*)PaintGlue::getTextPath___CTypeface},
+        {"nGetTextPath", "(JJILjava/lang/String;IIFFJ)V",
+         (void*)PaintGlue::getTextPath__StringTypeface},
         {"nGetStringBounds", "(JLjava/lang/String;IIILandroid/graphics/Rect;)V",
          (void*)PaintGlue::getStringBounds},
         {"nGetStringBounds", "(JJLjava/lang/String;IIILandroid/graphics/Rect;)V",
@@ -1215,6 +1266,8 @@ static const JNINativeMethod methods[] = {
         {"nGetRunAdvance", "(J[CIIIIZI)F", (void*)PaintGlue::getRunAdvance___CIIIIZI_F},
         {"nGetRunAdvance", "(JJ[CIIIIZI)F", (void*)PaintGlue::getRunAdvance___JCIIIIZI_F},
         {"nGetOffsetForAdvance", "(J[CIIIIZF)I", (void*)PaintGlue::getOffsetForAdvance___CIIIIZF_I},
+        {"nGetOffsetForAdvance", "(JJ[CIIIIZF)I",
+         (void*)PaintGlue::getOffsetForAdvance___CIIIIZF_ITypeface},
 
         // --------------- @FastNative ----------------------
 
@@ -1223,6 +1276,8 @@ static const JNINativeMethod methods[] = {
          (void*)PaintGlue::setFontFeatureSettings},
         {"nGetFontMetrics", "(JLandroid/graphics/Paint$FontMetrics;)F",
          (void*)PaintGlue::getFontMetrics},
+        {"nGetFontMetrics", "(JJLandroid/graphics/Paint$FontMetrics;)F",
+         (void*)PaintGlue::getFontMetricsTypeface},
         {"nGetFontMetricsInt", "(JLandroid/graphics/Paint$FontMetricsInt;)I",
          (void*)PaintGlue::getFontMetricsInt},
         {"nGetFontMetricsInt", "(JJLandroid/graphics/Paint$FontMetricsInt;)I",
