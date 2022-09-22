@@ -100,24 +100,34 @@ public final class SignalThresholdInfo implements Parcelable {
      */
     public static final int SIGNAL_MEASUREMENT_TYPE_SSSINR = 8;
 
-    /** @hide */
-    @IntDef(prefix = {"SIGNAL_MEASUREMENT_TYPE_"}, value = {
-            SIGNAL_MEASUREMENT_TYPE_UNKNOWN,
-            SIGNAL_MEASUREMENT_TYPE_RSSI,
-            SIGNAL_MEASUREMENT_TYPE_RSCP,
-            SIGNAL_MEASUREMENT_TYPE_RSRP,
-            SIGNAL_MEASUREMENT_TYPE_RSRQ,
-            SIGNAL_MEASUREMENT_TYPE_RSSNR,
-            SIGNAL_MEASUREMENT_TYPE_SSRSRP,
-            SIGNAL_MEASUREMENT_TYPE_SSRSRQ,
-            SIGNAL_MEASUREMENT_TYPE_SSSINR
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface SignalMeasurementType {
-    }
+    /**
+     * The ratio between the received energy from the pilot signal CPICH per chip (Ec) to the
+     * noise density (No).
+     * Range: -24 dBm to 1 dBm.
+     * Used RAN: {@link AccessNetworkConstants.AccessNetworkType#UTRAN}
+     * Reference: 3GPP TS 25.215 5.1.5
+     */
+    public static final int SIGNAL_MEASUREMENT_TYPE_ECNO = 9;
 
-    @SignalMeasurementType
-    private final int mSignalMeasurementType;
+    /** @hide */
+    @IntDef(
+            prefix = {"SIGNAL_MEASUREMENT_TYPE_"},
+            value = {
+                SIGNAL_MEASUREMENT_TYPE_UNKNOWN,
+                SIGNAL_MEASUREMENT_TYPE_RSSI,
+                SIGNAL_MEASUREMENT_TYPE_RSCP,
+                SIGNAL_MEASUREMENT_TYPE_RSRP,
+                SIGNAL_MEASUREMENT_TYPE_RSRQ,
+                SIGNAL_MEASUREMENT_TYPE_RSSNR,
+                SIGNAL_MEASUREMENT_TYPE_SSRSRP,
+                SIGNAL_MEASUREMENT_TYPE_SSRSRQ,
+                SIGNAL_MEASUREMENT_TYPE_SSSINR,
+                SIGNAL_MEASUREMENT_TYPE_ECNO
+            })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SignalMeasurementType {}
+
+    @SignalMeasurementType private final int mSignalMeasurementType;
 
     /**
      * A hysteresis time in milliseconds to prevent flapping.
@@ -149,8 +159,7 @@ public final class SignalThresholdInfo implements Parcelable {
     /**
      * The radio access network type associated with the signal thresholds.
      */
-    @AccessNetworkConstants.RadioAccessNetworkType
-    private final int mRan;
+    @AccessNetworkConstants.RadioAccessNetworkType private final int mRan;
 
     /**
      * Indicates the hysteresisMs is disabled.
@@ -165,7 +174,6 @@ public final class SignalThresholdInfo implements Parcelable {
      * @hide
      */
     public static final int HYSTERESIS_DB_DISABLED = 0;
-
 
     /**
      * Minimum valid value for {@link #SIGNAL_MEASUREMENT_TYPE_RSSI}.
@@ -280,6 +288,20 @@ public final class SignalThresholdInfo implements Parcelable {
     public static final int SIGNAL_SSSINR_MAX_VALUE = 40;
 
     /**
+     * Minimum valid value for {@link #SIGNAL_MEASUREMENT_TYPE_ECNO}.
+     *
+     * @hide
+     */
+    public static final int SIGNAL_ECNO_MIN_VALUE = -24;
+
+    /**
+     * Maximum valid value for {@link #SIGNAL_MEASUREMENT_TYPE_ECNO}.
+     *
+     * @hide
+     */
+    public static final int SIGNAL_ECNO_MAX_VALUE = 1;
+
+    /**
      * The minimum number of thresholds allowed in each SignalThresholdInfo.
      *
      * @hide
@@ -303,9 +325,13 @@ public final class SignalThresholdInfo implements Parcelable {
      * @param thresholds        threshold value
      * @param isEnabled         isEnabled
      */
-    private SignalThresholdInfo(@AccessNetworkConstants.RadioAccessNetworkType int ran,
-            @SignalMeasurementType int signalMeasurementType, int hysteresisMs, int hysteresisDb,
-            @NonNull int[] thresholds, boolean isEnabled) {
+    private SignalThresholdInfo(
+            @AccessNetworkConstants.RadioAccessNetworkType int ran,
+            @SignalMeasurementType int signalMeasurementType,
+            int hysteresisMs,
+            int hysteresisDb,
+            @NonNull int[] thresholds,
+            boolean isEnabled) {
         Objects.requireNonNull(thresholds, "thresholds must not be null");
         validateRanWithMeasurementType(ran, signalMeasurementType);
         validateThresholdRange(signalMeasurementType, thresholds);
@@ -399,6 +425,7 @@ public final class SignalThresholdInfo implements Parcelable {
          * @see #SIGNAL_MEASUREMENT_TYPE_SSRSRP
          * @see #SIGNAL_MEASUREMENT_TYPE_SSRSRQ
          * @see #SIGNAL_MEASUREMENT_TYPE_SSSINR
+         * @see #SIGNAL_MEASUREMENT_TYPE_ECNO
          * @see #getThresholds() for more details on signal strength thresholds
          */
         public @NonNull Builder setThresholds(@NonNull int[] thresholds) {
@@ -417,17 +444,19 @@ public final class SignalThresholdInfo implements Parcelable {
          */
         public @NonNull Builder setThresholds(@NonNull int[] thresholds, boolean isSystem) {
             Objects.requireNonNull(thresholds, "thresholds must not be null");
-            if (!isSystem && (thresholds.length < MINIMUM_NUMBER_OF_THRESHOLDS_ALLOWED
-                    || thresholds.length > MAXIMUM_NUMBER_OF_THRESHOLDS_ALLOWED)) {
+            if (!isSystem
+                    && (thresholds.length < MINIMUM_NUMBER_OF_THRESHOLDS_ALLOWED
+                            || thresholds.length > MAXIMUM_NUMBER_OF_THRESHOLDS_ALLOWED)) {
                 throw new IllegalArgumentException(
-                        "thresholds length must between " + MINIMUM_NUMBER_OF_THRESHOLDS_ALLOWED
-                                + " and " + MAXIMUM_NUMBER_OF_THRESHOLDS_ALLOWED);
+                        "thresholds length must between "
+                                + MINIMUM_NUMBER_OF_THRESHOLDS_ALLOWED
+                                + " and "
+                                + MAXIMUM_NUMBER_OF_THRESHOLDS_ALLOWED);
             }
             mThresholds = thresholds.clone();
             Arrays.sort(mThresholds);
             return this;
         }
-
 
         /**
          * Set if the modem should trigger the report based on the criteria.
@@ -451,8 +480,13 @@ public final class SignalThresholdInfo implements Parcelable {
          * measurement type
          */
         public @NonNull SignalThresholdInfo build() {
-            return new SignalThresholdInfo(mRan, mSignalMeasurementType, mHysteresisMs,
-                    mHysteresisDb, mThresholds, mIsEnabled);
+            return new SignalThresholdInfo(
+                    mRan,
+                    mSignalMeasurementType,
+                    mHysteresisMs,
+                    mHysteresisDb,
+                    mThresholds,
+                    mIsEnabled);
         }
     }
 
@@ -508,6 +542,7 @@ public final class SignalThresholdInfo implements Parcelable {
      * @see #SIGNAL_MEASUREMENT_TYPE_SSRSRP
      * @see #SIGNAL_MEASUREMENT_TYPE_SSRSRQ
      * @see #SIGNAL_MEASUREMENT_TYPE_SSSINR
+     * @see #SIGNAL_MEASUREMENT_TYPE_ECNO
      */
     public @NonNull int[] getThresholds() {
         return mThresholds.clone();
@@ -574,8 +609,13 @@ public final class SignalThresholdInfo implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mRan, mSignalMeasurementType, mHysteresisMs, mHysteresisDb,
-                Arrays.hashCode(mThresholds), mIsEnabled);
+        return Objects.hash(
+                mRan,
+                mSignalMeasurementType,
+                mHysteresisMs,
+                mHysteresisDb,
+                Arrays.hashCode(mThresholds),
+                mIsEnabled);
     }
 
     public static final @NonNull Parcelable.Creator<SignalThresholdInfo> CREATOR =
@@ -594,13 +634,20 @@ public final class SignalThresholdInfo implements Parcelable {
     @Override
     public String toString() {
         return new StringBuilder("SignalThresholdInfo{")
-                .append("mRan=").append(mRan)
-                .append(" mSignalMeasurementType=").append(mSignalMeasurementType)
-                .append(" mHysteresisMs=").append(mHysteresisMs)
-                .append(" mHysteresisDb=").append(mHysteresisDb)
-                .append(" mThresholds=").append(Arrays.toString(mThresholds))
-                .append(" mIsEnabled=").append(mIsEnabled)
-                .append("}").toString();
+                .append("mRan=")
+                .append(mRan)
+                .append(" mSignalMeasurementType=")
+                .append(mSignalMeasurementType)
+                .append(" mHysteresisMs=")
+                .append(mHysteresisMs)
+                .append(" mHysteresisDb=")
+                .append(mHysteresisDb)
+                .append(" mThresholds=")
+                .append(Arrays.toString(mThresholds))
+                .append(" mIsEnabled=")
+                .append(mIsEnabled)
+                .append("}")
+                .toString();
     }
 
     /**
@@ -624,6 +671,8 @@ public final class SignalThresholdInfo implements Parcelable {
                 return threshold >= SIGNAL_SSRSRQ_MIN_VALUE && threshold <= SIGNAL_SSRSRQ_MAX_VALUE;
             case SIGNAL_MEASUREMENT_TYPE_SSSINR:
                 return threshold >= SIGNAL_SSSINR_MIN_VALUE && threshold <= SIGNAL_SSSINR_MAX_VALUE;
+            case SIGNAL_MEASUREMENT_TYPE_ECNO:
+                return threshold >= SIGNAL_ECNO_MIN_VALUE && threshold <= SIGNAL_ECNO_MAX_VALUE;
             default:
                 return false;
         }
@@ -640,6 +689,7 @@ public final class SignalThresholdInfo implements Parcelable {
                 return ran == AccessNetworkConstants.AccessNetworkType.GERAN
                         || ran == AccessNetworkConstants.AccessNetworkType.CDMA2000;
             case SIGNAL_MEASUREMENT_TYPE_RSCP:
+            case SIGNAL_MEASUREMENT_TYPE_ECNO:
                 return ran == AccessNetworkConstants.AccessNetworkType.UTRAN;
             case SIGNAL_MEASUREMENT_TYPE_RSRP:
             case SIGNAL_MEASUREMENT_TYPE_RSRQ:
@@ -663,13 +713,15 @@ public final class SignalThresholdInfo implements Parcelable {
         }
     }
 
-    private void validateThresholdRange(@SignalMeasurementType int signalMeasurement,
-            int[] thresholds) {
+    private void validateThresholdRange(
+            @SignalMeasurementType int signalMeasurement, int[] thresholds) {
         for (int threshold : thresholds) {
             if (!isValidThreshold(signalMeasurement, threshold)) {
                 throw new IllegalArgumentException(
-                        "invalid signal measurement type: " + signalMeasurement
-                                + " with threshold: " + threshold);
+                        "invalid signal measurement type: "
+                                + signalMeasurement
+                                + " with threshold: "
+                                + threshold);
             }
         }
     }

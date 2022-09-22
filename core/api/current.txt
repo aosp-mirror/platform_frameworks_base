@@ -43073,6 +43073,7 @@ package android.telephony {
     method @NonNull public int[] getThresholds();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.SignalThresholdInfo> CREATOR;
+    field public static final int SIGNAL_MEASUREMENT_TYPE_ECNO = 9; // 0x9
     field public static final int SIGNAL_MEASUREMENT_TYPE_RSCP = 2; // 0x2
     field public static final int SIGNAL_MEASUREMENT_TYPE_RSRP = 3; // 0x3
     field public static final int SIGNAL_MEASUREMENT_TYPE_RSRQ = 4; // 0x4
