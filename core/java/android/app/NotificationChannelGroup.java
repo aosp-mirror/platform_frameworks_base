@@ -94,8 +94,11 @@ public final class NotificationChannelGroup implements Parcelable {
         } else {
             mId = null;
         }
-        mName = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
-        mName = getTrimmedString(mName.toString());
+        if (in.readByte() != 0) {
+            mName = getTrimmedString(in.readString());
+        } else {
+            mName = "";
+        }
         if (in.readByte() != 0) {
             mDescription = getTrimmedString(in.readString());
         } else {
@@ -121,7 +124,12 @@ public final class NotificationChannelGroup implements Parcelable {
         } else {
             dest.writeByte((byte) 0);
         }
-        TextUtils.writeToParcel(mName.toString(), dest, flags);
+        if (mName != null) {
+            dest.writeByte((byte) 1);
+            dest.writeString(mName.toString());
+        } else {
+            dest.writeByte((byte) 0);
+        }
         if (mDescription != null) {
             dest.writeByte((byte) 1);
             dest.writeString(mDescription);
