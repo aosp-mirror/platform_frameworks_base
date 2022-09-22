@@ -42,6 +42,7 @@ import static android.view.WindowManager.transitTypeToString;
 import static android.window.TransitionInfo.FLAG_DISPLAY_HAS_ALERT_WINDOWS;
 import static android.window.TransitionInfo.FLAG_FILLS_TASK;
 import static android.window.TransitionInfo.FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY;
+import static android.window.TransitionInfo.FLAG_IS_BEHIND_STARTING_WINDOW;
 import static android.window.TransitionInfo.FLAG_IS_DISPLAY;
 import static android.window.TransitionInfo.FLAG_IS_INPUT_METHOD;
 import static android.window.TransitionInfo.FLAG_IS_VOICE_INTERACTION;
@@ -1859,6 +1860,10 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 if (parentTask.forAllLeafTaskFragments(TaskFragment::isEmbedded)) {
                     // Whether this is in a Task with embedded activity.
                     flags |= FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY;
+                }
+                if (parentTask.forAllActivities(ActivityRecord::hasStartingWindow)) {
+                    // The starting window should cover all windows inside the leaf Task.
+                    flags |= FLAG_IS_BEHIND_STARTING_WINDOW;
                 }
                 if (isWindowFillingTask(wc, parentTask)) {
                     // Whether the container fills its parent Task bounds.
