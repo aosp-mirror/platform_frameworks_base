@@ -192,7 +192,7 @@ public class Flags {
 
     /***************************************/
     // 900 - media
-    public static final ReleasedFlag MEDIA_TAP_TO_TRANSFER = new ReleasedFlag(900);
+    public static final UnreleasedFlag MEDIA_TAP_TO_TRANSFER = new UnreleasedFlag(900);
     public static final UnreleasedFlag MEDIA_SESSION_ACTIONS = new UnreleasedFlag(901);
     public static final ReleasedFlag MEDIA_NEARBY_DEVICES = new ReleasedFlag(903);
     public static final ReleasedFlag MEDIA_MUTE_AWAIT = new ReleasedFlag(904);
@@ -233,6 +233,10 @@ public class Flags {
     @Keep
     public static final SysPropBooleanFlag WM_CAPTION_ON_SHELL =
             new SysPropBooleanFlag(1105, "persist.wm.debug.caption_on_shell", false);
+
+    @Keep
+    public static final SysPropBooleanFlag FLOATING_TASKS_ENABLED =
+            new SysPropBooleanFlag(1106, "persist.wm.debug.floating_tasks", false);
 
     // 1200 - predictive back
     @Keep

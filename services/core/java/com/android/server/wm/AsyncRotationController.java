@@ -202,10 +202,16 @@ class AsyncRotationController extends FadeAnimationController implements Consume
         // target windows. But the windows still need to use sync transaction to keep the appearance
         // in previous rotation, so request a no-op sync to keep the state.
         for (int i = mTargetWindowTokens.size() - 1; i >= 0; i--) {
+            if (TransitionController.SYNC_METHOD != BLASTSyncEngine.METHOD_BLAST
+                    && mTargetWindowTokens.valueAt(i).mAction != Operation.ACTION_SEAMLESS) {
+                // Expect a screenshot layer will cover the non seamless windows.
+                continue;
+            }
             final WindowToken token = mTargetWindowTokens.keyAt(i);
             for (int j = token.getChildCount() - 1; j >= 0; j--) {
                 // TODO(b/234585256): The consumer should be handleFinishDrawing().
                 token.getChildAt(j).applyWithNextDraw(t -> {});
+                if (DEBUG) Slog.d(TAG, "Sync draw for " + token.getChildAt(j));
             }
         }
         mIsSyncDrawRequested = true;
