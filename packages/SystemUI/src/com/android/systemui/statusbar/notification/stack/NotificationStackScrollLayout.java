@@ -1318,7 +1318,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 + mAmbientState.getOverExpansion()
                 - getCurrentOverScrollAmount(false /* top */);
         float fraction = mAmbientState.getExpansionFraction();
-        if (mAmbientState.isBouncerInTransit()) {
+        // If we are on quick settings, we need to quickly hide it to show the bouncer to avoid an
+        // overlap. Otherwise, we maintain the normal fraction for smoothness.
+        if (mAmbientState.isBouncerInTransit() && mQsExpansionFraction > 0f) {
             fraction = BouncerPanelExpansionCalculator.aboutToShowBouncerProgress(fraction);
         }
         final float stackY = MathUtils.lerp(0, endTopPosition, fraction);

@@ -55,6 +55,7 @@ import android.view.ViewGroup;
 import androidx.test.annotation.UiThreadTest;
 import androidx.test.filters.SmallTest;
 
+import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
@@ -176,6 +177,40 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         doNothing().when(mGroupExpansionManager).collapseGroups();
         doNothing().when(mExpandHelper).cancelImmediately();
         doNothing().when(mNotificationShelf).setAnimationsEnabled(anyBoolean());
+    }
+
+    @Test
+    public void testUpdateStackHeight_qsExpansionGreaterThanZero() {
+        final float expansionFraction = 0.2f;
+        final float overExpansion = 50f;
+
+        mStackScroller.setQsExpansionFraction(1f);
+        mAmbientState.setExpansionFraction(expansionFraction);
+        mAmbientState.setOverExpansion(overExpansion);
+        when(mAmbientState.isBouncerInTransit()).thenReturn(true);
+
+
+        mStackScroller.setExpandedHeight(100f);
+
+        float expected = MathUtils.lerp(0, overExpansion,
+                BouncerPanelExpansionCalculator.aboutToShowBouncerProgress(expansionFraction));
+        assertThat(mAmbientState.getStackY()).isEqualTo(expected);
+    }
+
+    @Test
+    public void testUpdateStackHeight_qsExpansionZero() {
+        final float expansionFraction = 0.2f;
+        final float overExpansion = 50f;
+
+        mStackScroller.setQsExpansionFraction(0f);
+        mAmbientState.setExpansionFraction(expansionFraction);
+        mAmbientState.setOverExpansion(overExpansion);
+        when(mAmbientState.isBouncerInTransit()).thenReturn(true);
+
+        mStackScroller.setExpandedHeight(100f);
+
+        float expected = MathUtils.lerp(0, overExpansion, expansionFraction);
+        assertThat(mAmbientState.getStackY()).isEqualTo(expected);
     }
 
     @Test
