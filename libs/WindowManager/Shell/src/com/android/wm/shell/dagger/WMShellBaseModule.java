@@ -24,6 +24,7 @@ import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.SystemProperties;
 import android.view.IWindowManager;
+import android.view.WindowManager;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.launcher3.icons.IconProvider;
@@ -60,6 +61,8 @@ import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.displayareahelper.DisplayAreaHelper;
 import com.android.wm.shell.displayareahelper.DisplayAreaHelperController;
 import com.android.wm.shell.draganddrop.DragAndDropController;
+import com.android.wm.shell.floating.FloatingTasks;
+import com.android.wm.shell.floating.FloatingTasksController;
 import com.android.wm.shell.freeform.FreeformComponents;
 import com.android.wm.shell.fullscreen.FullscreenTaskListener;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutoutController;
@@ -569,6 +572,45 @@ public abstract class WMShellBaseModule {
             return splitscreenController;
         }
         return Optional.empty();
+    }
+
+    //
+    // Floating tasks
+    //
+
+    @WMSingleton
+    @Provides
+    static Optional<FloatingTasks> provideFloatingTasks(
+            Optional<FloatingTasksController> floatingTaskController) {
+        return floatingTaskController.map((controller) -> controller.asFloatingTasks());
+    }
+
+    @WMSingleton
+    @Provides
+    static Optional<FloatingTasksController> provideFloatingTasksController(Context context,
+            ShellInit shellInit,
+            ShellController shellController,
+            ShellCommandHandler shellCommandHandler,
+            WindowManager windowManager,
+            ShellTaskOrganizer organizer,
+            TaskViewTransitions taskViewTransitions,
+            @ShellMainThread ShellExecutor mainExecutor,
+            @ShellBackgroundThread ShellExecutor bgExecutor,
+            SyncTransactionQueue syncQueue) {
+        if (FloatingTasksController.FLOATING_TASKS_ENABLED) {
+            return Optional.of(new FloatingTasksController(context,
+                    shellInit,
+                    shellController,
+                    shellCommandHandler,
+                    windowManager,
+                    organizer,
+                    taskViewTransitions,
+                    mainExecutor,
+                    bgExecutor,
+                    syncQueue));
+        } else {
+            return Optional.empty();
+        }
     }
 
     //

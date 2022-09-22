@@ -96,7 +96,8 @@ public abstract class SystemUIInitializer {
                     .setStartingSurface(mWMComponent.getStartingSurface())
                     .setDisplayAreaHelper(mWMComponent.getDisplayAreaHelper())
                     .setRecentTasks(mWMComponent.getRecentTasks())
-                    .setBackAnimation(mWMComponent.getBackAnimation());
+                    .setBackAnimation(mWMComponent.getBackAnimation())
+                    .setFloatingTasks(mWMComponent.getFloatingTasks());
 
             // Only initialize when not starting from tests since this currently initializes some
             // components that shouldn't be run in the test environment
@@ -115,7 +116,8 @@ public abstract class SystemUIInitializer {
                     .setDisplayAreaHelper(Optional.ofNullable(null))
                     .setStartingSurface(Optional.ofNullable(null))
                     .setRecentTasks(Optional.ofNullable(null))
-                    .setBackAnimation(Optional.ofNullable(null));
+                    .setBackAnimation(Optional.ofNullable(null))
+                    .setFloatingTasks(Optional.ofNullable(null));
         }
         mSysUIComponent = builder.build();
         if (initializeComponents) {
