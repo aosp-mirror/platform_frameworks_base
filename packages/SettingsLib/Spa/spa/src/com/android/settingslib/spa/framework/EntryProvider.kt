@@ -38,8 +38,9 @@ import com.android.settingslib.spa.framework.common.SettingsPage
  * For gallery, AuthorityPath = com.android.spa.gallery.provider
  * For SettingsGoogle, AuthorityPath = com.android.settings.spa.provider
  * Some examples:
- *   $ adb shell content query --uri content://<AuthorityPath>/page_start
+ *   $ adb shell content query --uri content://<AuthorityPath>/page_debug
  *   $ adb shell content query --uri content://<AuthorityPath>/page_info
+ *   $ adb shell content query --uri content://<AuthorityPath>/entry_info
  */
 open class EntryProvider(
     private val entryRepository: SettingsEntryRepository,
@@ -50,6 +51,7 @@ open class EntryProvider(
      * Enum to define all column names in provider.
      */
     enum class ColumnEnum(val id: String) {
+        // Columns related to page
         PAGE_ID("pageId"),
         PAGE_NAME("pageName"),
         PAGE_ROUTE("pageRoute"),
@@ -57,6 +59,13 @@ open class EntryProvider(
         PAGE_ENTRY_COUNT("entryCount"),
         HAS_RUNTIME_PARAM("hasRuntimeParam"),
         PAGE_START_ADB("pageStartAdb"),
+
+        // Columns related to entry
+        ENTRY_ID("entryId"),
+        ENTRY_NAME("entryName"),
+        ENTRY_ROUTE("entryRoute"),
+        ENTRY_TITLE("entryTitle"),
+        ENTRY_SEARCH_KEYWORD("entrySearchKw"),
     }
 
     /**
@@ -67,12 +76,15 @@ open class EntryProvider(
         val queryMatchCode: Int,
         val columnNames: List<ColumnEnum>
     ) {
-        PAGE_START_COMMAND(
-            "page_start", 1,
+        // For debug
+        PAGE_DEBUG_QUERY(
+            "page_debug", 1,
             listOf(ColumnEnum.PAGE_START_ADB)
         ),
+
+        // page related queries.
         PAGE_INFO_QUERY(
-            "page_info", 2,
+            "page_info", 100,
             listOf(
                 ColumnEnum.PAGE_ID,
                 ColumnEnum.PAGE_NAME,
@@ -82,9 +94,24 @@ open class EntryProvider(
                 ColumnEnum.HAS_RUNTIME_PARAM,
             )
         ),
+
+        // entry related queries
+        ENTRY_INFO_QUERY(
+            "entry_info", 200,
+            listOf(
+                ColumnEnum.ENTRY_ID,
+                ColumnEnum.ENTRY_NAME,
+                ColumnEnum.ENTRY_ROUTE,
+                ColumnEnum.ENTRY_TITLE,
+                ColumnEnum.ENTRY_SEARCH_KEYWORD,
+            )
+        )
     }
 
-    private var uriMatcher: UriMatcher? = null
+    private val uriMatcher = UriMatcher(UriMatcher.NO_MATCH)
+    private fun addUri(authority: String, query: QueryEnum) {
+        uriMatcher.addURI(authority, query.queryPath, query.queryMatchCode)
+    }
 
     override fun delete(uri: Uri, selection: String?, selectionArgs: Array<String>?): Int {
         TODO("Implement this to handle requests to delete one or more rows")
@@ -115,18 +142,10 @@ open class EntryProvider(
     }
 
     override fun attachInfo(context: Context?, info: ProviderInfo?) {
-        uriMatcher = UriMatcher(UriMatcher.NO_MATCH)
         if (info != null) {
-            uriMatcher!!.addURI(
-                info.authority,
-                QueryEnum.PAGE_START_COMMAND.queryPath,
-                QueryEnum.PAGE_START_COMMAND.queryMatchCode
-            )
-            uriMatcher!!.addURI(
-                info.authority,
-                QueryEnum.PAGE_INFO_QUERY.queryPath,
-                QueryEnum.PAGE_INFO_QUERY.queryMatchCode
-            )
+            addUri(info.authority, QueryEnum.PAGE_DEBUG_QUERY)
+            addUri(info.authority, QueryEnum.PAGE_INFO_QUERY)
+            addUri(info.authority, QueryEnum.ENTRY_INFO_QUERY)
         }
         super.attachInfo(context, info)
     }
@@ -139,9 +158,10 @@ open class EntryProvider(
         sortOrder: String?
     ): Cursor? {
         return try {
-            when (uriMatcher!!.match(uri)) {
-                QueryEnum.PAGE_START_COMMAND.queryMatchCode -> queryPageStartCommand()
+            when (uriMatcher.match(uri)) {
+                QueryEnum.PAGE_DEBUG_QUERY.queryMatchCode -> queryPageDebug()
                 QueryEnum.PAGE_INFO_QUERY.queryMatchCode -> queryPageInfo()
+                QueryEnum.ENTRY_INFO_QUERY.queryMatchCode -> queryEntryInfo()
                 else -> throw UnsupportedOperationException("Unknown Uri $uri")
             }
         } catch (e: UnsupportedOperationException) {
@@ -152,8 +172,8 @@ open class EntryProvider(
         }
     }
 
-    private fun queryPageStartCommand(): Cursor {
-        val cursor = MatrixCursor(QueryEnum.PAGE_START_COMMAND.getColumns())
+    private fun queryPageDebug(): Cursor {
+        val cursor = MatrixCursor(QueryEnum.PAGE_DEBUG_QUERY.getColumns())
         for (pageWithEntry in entryRepository.getAllPageWithEntry()) {
             val command = createBrowsePageAdbCommand(pageWithEntry.page)
             if (command != null) {
@@ -168,7 +188,7 @@ open class EntryProvider(
         for (pageWithEntry in entryRepository.getAllPageWithEntry()) {
             val page = pageWithEntry.page
             cursor.newRow()
-                .add(ColumnEnum.PAGE_ID.id, page.id())
+                .add(ColumnEnum.PAGE_ID.id, page.id)
                 .add(ColumnEnum.PAGE_NAME.id, page.displayName)
                 .add(ColumnEnum.PAGE_ROUTE.id, page.buildRoute())
                 .add(ColumnEnum.PAGE_ENTRY_COUNT.id, pageWithEntry.entries.size)
@@ -176,6 +196,24 @@ open class EntryProvider(
                 .add(
                     ColumnEnum.PAGE_INTENT_URI.id,
                     createBrowsePageIntent(page).toUri(URI_INTENT_SCHEME)
+                )
+        }
+        return cursor
+    }
+
+    private fun queryEntryInfo(): Cursor {
+        val cursor = MatrixCursor(QueryEnum.ENTRY_INFO_QUERY.getColumns())
+        for (entry in entryRepository.getAllEntries()) {
+            // We can add runtime arguments if necessary
+            val searchData = entry.getSearchData()
+            cursor.newRow()
+                .add(ColumnEnum.ENTRY_ID.id, entry.id)
+                .add(ColumnEnum.ENTRY_NAME.id, entry.displayName)
+                .add(ColumnEnum.ENTRY_ROUTE.id, entry.buildRoute())
+                .add(ColumnEnum.ENTRY_TITLE.id, searchData?.title ?: "")
+                .add(
+                    ColumnEnum.ENTRY_SEARCH_KEYWORD.id,
+                    searchData?.keyword ?: emptyList<String>()
                 )
         }
         return cursor

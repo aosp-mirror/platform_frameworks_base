@@ -153,7 +153,7 @@ open class DebugActivity(
                         "${pageWithEntry.page.displayName} (${pageWithEntry.entries.size})"
                     override val summary = pageWithEntry.page.formatArguments().toState()
                     override val onClick =
-                        navigator(route = ROUTE_PAGE + "/${pageWithEntry.page.id()}")
+                        navigator(route = ROUTE_PAGE + "/${pageWithEntry.page.id}")
                 })
             }
         }
@@ -172,7 +172,7 @@ open class DebugActivity(
         val id = arguments!!.getString(PARAM_NAME_PAGE_ID, "")
         val pageWithEntry = entryRepository.getPageWithEntry(id)!!
         RegularScaffold(title = "Page - ${pageWithEntry.page.displayName}") {
-            Text(text = "id = ${pageWithEntry.page.id()}")
+            Text(text = "id = ${pageWithEntry.page.id}")
             Text(text = pageWithEntry.page.formatArguments())
             Text(text = "Entry size: ${pageWithEntry.entries.size}")
             Preference(model = object : PreferenceModel {
@@ -206,7 +206,7 @@ open class DebugActivity(
                 override val title = entry.displayTitle()
                 override val summary =
                     "${entry.fromPage?.displayName} -> ${entry.toPage?.displayName}".toState()
-                override val onClick = navigator(route = ROUTE_ENTRY + "/${entry.id()}")
+                override val onClick = navigator(route = ROUTE_ENTRY + "/${entry.id}")
             })
         }
     }
