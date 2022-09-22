@@ -25,6 +25,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.SigningInfo;
+import android.processor.immutability.Immutable;
 import android.util.SparseArray;
 
 import com.android.server.pm.PackageSetting;
@@ -55,6 +56,7 @@ import java.util.Set;
  * @hide
  */
 //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+@Immutable
 public interface PackageState {
 
     /**
@@ -109,6 +111,7 @@ public interface PackageState {
      * Keys are indexes into the array represented by {@link PackageManager.NotifyReason}, values
      * are in epoch milliseconds.
      */
+    @Immutable.Ignore
     @Size(PackageManager.NOTIFY_PACKAGE_USE_REASONS_COUNT)
     @NonNull
     long[] getLastPackageUsageTime();
@@ -172,9 +175,11 @@ public interface PackageState {
      */
     int getSharedUserAppId();
 
+    @Immutable.Ignore
     @NonNull
     SigningInfo getSigningInfo();
 
+    @Immutable.Ignore
     @NonNull
     SparseArray<? extends PackageUserState> getUserStates();
 
@@ -199,30 +204,35 @@ public interface PackageState {
     /**
      * @see R.styleable#AndroidManifestUsesLibrary
      */
+    @Immutable.Ignore
     @NonNull
     List<SharedLibraryInfo> getUsesLibraryInfos();
 
     /**
      * @see R.styleable#AndroidManifestUsesSdkLibrary
      */
+    @Immutable.Ignore
     @NonNull
     String[] getUsesSdkLibraries();
 
     /**
      * @see R.styleable#AndroidManifestUsesSdkLibrary_versionMajor
      */
+    @Immutable.Ignore
     @NonNull
     long[] getUsesSdkLibrariesVersionsMajor();
 
     /**
      * @see R.styleable#AndroidManifestUsesStaticLibrary
      */
+    @Immutable.Ignore
     @NonNull
     String[] getUsesStaticLibraries();
 
     /**
      * @see R.styleable#AndroidManifestUsesStaticLibrary_version
      */
+    @Immutable.Ignore
     @NonNull
     long[] getUsesStaticLibrariesVersions();
 

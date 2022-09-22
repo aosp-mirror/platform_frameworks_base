@@ -24,23 +24,38 @@ import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
 import com.android.settingslib.spa.framework.common.SettingsPage
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
 import com.android.settingslib.spa.framework.theme.SettingsTheme
+import com.android.settingslib.spa.gallery.SettingsPageProviderEnum
+import com.android.settingslib.spa.gallery.createSettingsPage
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.scaffold.RegularScaffold
 
 object ArgumentPageProvider : SettingsPageProvider {
-    override val name = ArgumentPageModel.name
+    // Defines all entry name in this page.
+    // Note that entry name would be used in log. DO NOT change it once it is set.
+    // One can still change the display name for better readability if necessary.
+    private enum class EntryEnum(val displayName: String) {
+        STRING_PARAM("string_param"),
+        INT_PARAM("int_param"),
+    }
+
+    private fun createEntry(owner: SettingsPage, entry: EntryEnum): SettingsEntryBuilder {
+        return SettingsEntryBuilder.create(owner, entry.name, entry.displayName)
+    }
+
+    override val name = SettingsPageProviderEnum.ARGUMENT.name
 
     override val parameter = ArgumentPageModel.parameter
 
     override fun buildEntry(arguments: Bundle?): List<SettingsEntry> {
         if (!ArgumentPageModel.isValidArgument(arguments)) return emptyList()
 
-        val owner = SettingsPage.create(name, parameter, arguments)
+        val owner = createSettingsPage(SettingsPageProviderEnum.ARGUMENT, parameter, arguments)
         val entryList = mutableListOf<SettingsEntry>()
         entryList.add(
-            SettingsEntryBuilder.create("string_param", owner)
+            createEntry(owner, EntryEnum.STRING_PARAM)
                 // Set attributes
                 .setIsAllowSearch(true)
+                .setSearchDataFn { ArgumentPageModel.genStringParamSearchData() }
                 .setUiLayoutFn {
                     // Set ui rendering
                     Preference(ArgumentPageModel.create(it).genStringParamPreferenceModel())
@@ -48,9 +63,10 @@ object ArgumentPageProvider : SettingsPageProvider {
         )
 
         entryList.add(
-            SettingsEntryBuilder.create("int_param", owner)
+            createEntry(owner, EntryEnum.INT_PARAM)
                 // Set attributes
                 .setIsAllowSearch(true)
+                .setSearchDataFn { ArgumentPageModel.genIntParamSearchData() }
                 .setUiLayoutFn {
                     // Set ui rendering
                     Preference(ArgumentPageModel.create(it).genIntParamPreferenceModel())
@@ -68,11 +84,12 @@ object ArgumentPageProvider : SettingsPageProvider {
         if (!ArgumentPageModel.isValidArgument(arguments)) return null
 
         return SettingsEntryBuilder.createInject(
-            entryName = "${name}_$stringParam",
-            owner = SettingsPage.create(name, parameter, arguments)
+            owner = createSettingsPage(SettingsPageProviderEnum.ARGUMENT, parameter, arguments),
+            displayName = "${name}_$stringParam",
         )
             // Set attributes
             .setIsAllowSearch(false)
+            .setSearchDataFn { ArgumentPageModel.genInjectSearchData() }
             .setUiLayoutFn {
                 // Set ui rendering
                 Preference(ArgumentPageModel.create(it).genInjectPreferenceModel())
@@ -83,7 +100,7 @@ object ArgumentPageProvider : SettingsPageProvider {
     override fun Page(arguments: Bundle?) {
         RegularScaffold(title = ArgumentPageModel.create(arguments).genPageTitle()) {
             for (entry in buildEntry(arguments)) {
-                if (entry.name.startsWith(name)) {
+                if (entry.owner.isCreateBy(SettingsPageProviderEnum.ARGUMENT.name)) {
                     entry.UiLayout(ArgumentPageModel.buildNextArgument(arguments))
                 } else {
                     entry.UiLayout()

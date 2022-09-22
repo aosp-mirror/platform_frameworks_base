@@ -362,6 +362,7 @@ import com.android.internal.os.SomeArgs;
 import com.android.internal.os.TimeoutRecord;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.os.Zygote;
+import com.android.internal.os.anr.AnrLatencyTracker;
 import com.android.internal.policy.AttributeCache;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.ArrayUtils;
@@ -667,10 +668,17 @@ public class ActivityManagerService extends IActivityManager.Stub
     // we still create this new offload queue, but never ever put anything on it.
     final boolean mEnableOffloadQueue;
 
-    final BroadcastQueue mFgBroadcastQueue;
-    final BroadcastQueue mBgBroadcastQueue;
-    final BroadcastQueue mBgOffloadBroadcastQueue;
-    final BroadcastQueue mFgOffloadBroadcastQueue;
+    /**
+     * Flag indicating if we should use {@link BroadcastQueueModernImpl} instead
+     * of the default {@link BroadcastQueueImpl}.
+     */
+    final boolean mEnableModernQueue;
+
+    static final int BROADCAST_QUEUE_FG = 0;
+    static final int BROADCAST_QUEUE_BG = 1;
+    static final int BROADCAST_QUEUE_BG_OFFLOAD = 2;
+    static final int BROADCAST_QUEUE_FG_OFFLOAD = 3;
+
     // Convenient for easy iteration over the queues. Foreground is first
     // so that dispatch of foreground broadcasts gets precedence.
     final BroadcastQueue[] mBroadcastQueues;
@@ -692,12 +700,16 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     BroadcastQueue broadcastQueueForFlags(int flags, Object cookie) {
+        if (mEnableModernQueue) {
+            return mBroadcastQueues[0];
+        }
+
         if (isOnFgOffloadQueue(flags)) {
             if (DEBUG_BROADCAST_BACKGROUND) {
                 Slog.i(TAG_BROADCAST,
                         "Broadcast intent " + cookie + " on foreground offload queue");
             }
-            return mFgOffloadBroadcastQueue;
+            return mBroadcastQueues[BROADCAST_QUEUE_FG_OFFLOAD];
         }
 
         if (isOnBgOffloadQueue(flags)) {
@@ -705,14 +717,15 @@ public class ActivityManagerService extends IActivityManager.Stub
                 Slog.i(TAG_BROADCAST,
                         "Broadcast intent " + cookie + " on background offload queue");
             }
-            return mBgOffloadBroadcastQueue;
+            return mBroadcastQueues[BROADCAST_QUEUE_BG_OFFLOAD];
         }
 
         final boolean isFg = (flags & Intent.FLAG_RECEIVER_FOREGROUND) != 0;
         if (DEBUG_BROADCAST_BACKGROUND) Slog.i(TAG_BROADCAST,
                 "Broadcast intent " + cookie + " on "
                 + (isFg ? "foreground" : "background") + " queue");
-        return (isFg) ? mFgBroadcastQueue : mBgBroadcastQueue;
+        return (isFg) ? mBroadcastQueues[BROADCAST_QUEUE_FG]
+                : mBroadcastQueues[BROADCAST_QUEUE_BG];
     }
 
     private volatile int mDeviceOwnerUid = INVALID_UID;
@@ -2365,9 +2378,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         mPendingStartActivityUids = new PendingStartActivityUids();
         mUseFifoUiScheduling = false;
         mEnableOffloadQueue = false;
+        mEnableModernQueue = false;
         mBroadcastQueues = new BroadcastQueue[0];
-        mFgBroadcastQueue = mBgBroadcastQueue = mBgOffloadBroadcastQueue =
-                mFgOffloadBroadcastQueue = null;
         mComponentAliasResolver = new ComponentAliasResolver(this);
     }
 
@@ -2423,20 +2435,23 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         mEnableOffloadQueue = SystemProperties.getBoolean(
                 "persist.device_config.activity_manager_native_boot.offload_queue_enabled", true);
+        mEnableModernQueue = SystemProperties.getBoolean(
+                "persist.device_config.activity_manager_native_boot.modern_queue_enabled", false);
 
-        mBroadcastQueues = new BroadcastQueue[4];
-        mFgBroadcastQueue = new BroadcastQueueImpl(this, mHandler,
-                "foreground", foreConstants, false, ProcessList.SCHED_GROUP_DEFAULT);
-        mBgBroadcastQueue = new BroadcastQueueImpl(this, mHandler,
-                "background", backConstants, true, ProcessList.SCHED_GROUP_BACKGROUND);
-        mBgOffloadBroadcastQueue = new BroadcastQueueImpl(this, mHandler,
-                "offload_bg", offloadConstants, true, ProcessList.SCHED_GROUP_BACKGROUND);
-        mFgOffloadBroadcastQueue = new BroadcastQueueImpl(this, mHandler,
-                "offload_fg", foreConstants, true, ProcessList.SCHED_GROUP_BACKGROUND);
-        mBroadcastQueues[0] = mFgBroadcastQueue;
-        mBroadcastQueues[1] = mBgBroadcastQueue;
-        mBroadcastQueues[2] = mBgOffloadBroadcastQueue;
-        mBroadcastQueues[3] = mFgOffloadBroadcastQueue;
+        if (mEnableModernQueue) {
+            mBroadcastQueues = new BroadcastQueue[1];
+            mBroadcastQueues[0] = new BroadcastQueueModernImpl(this, mHandler, foreConstants);
+        } else {
+            mBroadcastQueues = new BroadcastQueue[4];
+            mBroadcastQueues[BROADCAST_QUEUE_FG] = new BroadcastQueueImpl(this, mHandler,
+                    "foreground", foreConstants, false, ProcessList.SCHED_GROUP_DEFAULT);
+            mBroadcastQueues[BROADCAST_QUEUE_BG] = new BroadcastQueueImpl(this, mHandler,
+                    "background", backConstants, true, ProcessList.SCHED_GROUP_BACKGROUND);
+            mBroadcastQueues[BROADCAST_QUEUE_BG_OFFLOAD] = new BroadcastQueueImpl(this, mHandler,
+                    "offload_bg", offloadConstants, true, ProcessList.SCHED_GROUP_BACKGROUND);
+            mBroadcastQueues[BROADCAST_QUEUE_FG_OFFLOAD] = new BroadcastQueueImpl(this, mHandler,
+                    "offload_fg", foreConstants, true, ProcessList.SCHED_GROUP_BACKGROUND);
+        }
 
         mServices = new ActiveServices(this);
         mCpHelper = new ContentProviderHelper(this, true);
@@ -3400,12 +3415,14 @@ public class ActivityManagerService extends IActivityManager.Stub
      * @param lastPids of dalvik VM processes to dump stack traces for last
      * @param nativePids optional list of native pids to dump stack crawls
      * @param logExceptionCreatingFile optional writer to which we log errors creating the file
+     * @param latencyTracker the latency tracker instance of the current ANR.
      */
     public static File dumpStackTraces(ArrayList<Integer> firstPids,
             ProcessCpuTracker processCpuTracker, SparseArray<Boolean> lastPids,
-            ArrayList<Integer> nativePids, StringWriter logExceptionCreatingFile) {
+            ArrayList<Integer> nativePids, StringWriter logExceptionCreatingFile,
+            AnrLatencyTracker latencyTracker) {
         return dumpStackTraces(firstPids, processCpuTracker, lastPids, nativePids,
-                logExceptionCreatingFile, null, null, null);
+                logExceptionCreatingFile, null, null, null, latencyTracker);
     }
 
     /**
@@ -3416,13 +3433,14 @@ public class ActivityManagerService extends IActivityManager.Stub
      * @param logExceptionCreatingFile optional writer to which we log errors creating the file
      * @param subject optional line related to the error
      * @param criticalEventSection optional lines containing recent critical events.
+     * @param latencyTracker the latency tracker instance of the current ANR.
      */
     public static File dumpStackTraces(ArrayList<Integer> firstPids,
             ProcessCpuTracker processCpuTracker, SparseArray<Boolean> lastPids,
             ArrayList<Integer> nativePids, StringWriter logExceptionCreatingFile,
-            String subject, String criticalEventSection) {
+            String subject, String criticalEventSection, AnrLatencyTracker latencyTracker) {
         return dumpStackTraces(firstPids, processCpuTracker, lastPids, nativePids,
-                logExceptionCreatingFile, null, subject, criticalEventSection);
+                logExceptionCreatingFile, null, subject, criticalEventSection, latencyTracker);
     }
 
     /**
@@ -3432,83 +3450,97 @@ public class ActivityManagerService extends IActivityManager.Stub
     /* package */ static File dumpStackTraces(ArrayList<Integer> firstPids,
             ProcessCpuTracker processCpuTracker, SparseArray<Boolean> lastPids,
             ArrayList<Integer> nativePids, StringWriter logExceptionCreatingFile,
-            long[] firstPidOffsets, String subject, String criticalEventSection) {
-        ArrayList<Integer> extraPids = null;
-
-        Slog.i(TAG, "dumpStackTraces pids=" + lastPids + " nativepids=" + nativePids);
-
-        // Measure CPU usage as soon as we're called in order to get a realistic sampling
-        // of the top users at the time of the request.
-        if (processCpuTracker != null) {
-            processCpuTracker.init();
-            try {
-                Thread.sleep(200);
-            } catch (InterruptedException ignored) {
-            }
-
-            processCpuTracker.update();
-
-            // We'll take the stack crawls of just the top apps using CPU.
-            final int N = processCpuTracker.countWorkingStats();
-            extraPids = new ArrayList<>();
-            for (int i = 0; i < N && extraPids.size() < 5; i++) {
-                ProcessCpuTracker.Stats stats = processCpuTracker.getWorkingStats(i);
-                if (lastPids.indexOfKey(stats.pid) >= 0) {
-                    if (DEBUG_ANR) Slog.d(TAG, "Collecting stacks for extra pid " + stats.pid);
-
-                    extraPids.add(stats.pid);
-                } else {
-                    Slog.i(TAG, "Skipping next CPU consuming process, not a java proc: "
-                            + stats.pid);
-                }
-            }
-        }
-
-        final File tracesDir = new File(ANR_TRACE_DIR);
-        // Each set of ANR traces is written to a separate file and dumpstate will process
-        // all such files and add them to a captured bug report if they're recent enough.
-        maybePruneOldTraces(tracesDir);
-
-        // NOTE: We should consider creating the file in native code atomically once we've
-        // gotten rid of the old scheme of dumping and lot of the code that deals with paths
-        // can be removed.
-        File tracesFile;
+            long[] firstPidOffsets, String subject, String criticalEventSection,
+            AnrLatencyTracker latencyTracker) {
         try {
-            tracesFile = createAnrDumpFile(tracesDir);
-        } catch (IOException e) {
-            Slog.w(TAG, "Exception creating ANR dump file:", e);
-            if (logExceptionCreatingFile != null) {
-                logExceptionCreatingFile.append("----- Exception creating ANR dump file -----\n");
-                e.printStackTrace(new PrintWriter(logExceptionCreatingFile));
+            if (latencyTracker != null) {
+                latencyTracker.dumpStackTracesStarted();
             }
-            return null;
-        }
+            ArrayList<Integer> extraPids = null;
 
-        if (subject != null || criticalEventSection != null) {
-            try (FileOutputStream fos = new FileOutputStream(tracesFile, true)) {
-                if (subject != null) {
-                    String header = "Subject: " + subject + "\n\n";
-                    fos.write(header.getBytes(StandardCharsets.UTF_8));
+            Slog.i(TAG, "dumpStackTraces pids=" + lastPids + " nativepids=" + nativePids);
+
+            // Measure CPU usage as soon as we're called in order to get a realistic sampling
+            // of the top users at the time of the request.
+            if (processCpuTracker != null) {
+                if (latencyTracker != null) {
+                    latencyTracker.processCpuTrackerMethodsCalled();
                 }
-                if (criticalEventSection != null) {
-                    fos.write(criticalEventSection.getBytes(StandardCharsets.UTF_8));
+                processCpuTracker.init();
+                try {
+                    Thread.sleep(200);
+                } catch (InterruptedException ignored) {
                 }
+
+                processCpuTracker.update();
+
+                // We'll take the stack crawls of just the top apps using CPU.
+                final int workingStatsNumber = processCpuTracker.countWorkingStats();
+                extraPids = new ArrayList<>();
+                for (int i = 0; i < workingStatsNumber && extraPids.size() < 5; i++) {
+                    ProcessCpuTracker.Stats stats = processCpuTracker.getWorkingStats(i);
+                    if (lastPids.indexOfKey(stats.pid) >= 0) {
+                        if (DEBUG_ANR) Slog.d(TAG, "Collecting stacks for extra pid " + stats.pid);
+
+                        extraPids.add(stats.pid);
+                    } else {
+                        Slog.i(TAG, "Skipping next CPU consuming process, not a java proc: "
+                                + stats.pid);
+                    }
+                }
+                if (latencyTracker != null) {
+                    latencyTracker.processCpuTrackerMethodsReturned();
+                }
+            }
+
+            final File tracesDir = new File(ANR_TRACE_DIR);
+            // Each set of ANR traces is written to a separate file and dumpstate will process
+            // all such files and add them to a captured bug report if they're recent enough.
+            maybePruneOldTraces(tracesDir);
+
+            // NOTE: We should consider creating the file in native code atomically once we've
+            // gotten rid of the old scheme of dumping and lot of the code that deals with paths
+            // can be removed.
+            File tracesFile;
+            try {
+                tracesFile = createAnrDumpFile(tracesDir);
             } catch (IOException e) {
-                Slog.w(TAG, "Exception writing to ANR dump file:", e);
+                Slog.w(TAG, "Exception creating ANR dump file:", e);
+                if (logExceptionCreatingFile != null) {
+                    logExceptionCreatingFile.append(
+                            "----- Exception creating ANR dump file -----\n");
+                    e.printStackTrace(new PrintWriter(logExceptionCreatingFile));
+                }
+                if (latencyTracker != null) {
+                    latencyTracker.anrSkippedDumpStackTraces();
+                }
+                return null;
+            }
+
+            if (subject != null || criticalEventSection != null) {
+                appendtoANRFile(tracesFile.getAbsolutePath(),
+                        (subject != null ? "Subject: " + subject + "\n\n" : "")
+                        + criticalEventSection != null ? criticalEventSection : "");
+            }
+
+            Pair<Long, Long> offsets = dumpStackTraces(
+                    tracesFile.getAbsolutePath(), firstPids, nativePids, extraPids, latencyTracker);
+            if (firstPidOffsets != null) {
+                if (offsets == null) {
+                    firstPidOffsets[0] = firstPidOffsets[1] = -1;
+                } else {
+                    firstPidOffsets[0] = offsets.first; // Start offset to the ANR trace file
+                    firstPidOffsets[1] = offsets.second; // End offset to the ANR trace file
+                }
+            }
+
+            return tracesFile;
+        } finally {
+            if (latencyTracker != null) {
+                latencyTracker.dumpStackTracesEnded();
             }
         }
 
-        Pair<Long, Long> offsets = dumpStackTraces(
-                tracesFile.getAbsolutePath(), firstPids, nativePids, extraPids);
-        if (firstPidOffsets != null) {
-            if (offsets == null) {
-                firstPidOffsets[0] = firstPidOffsets[1] = -1;
-            } else {
-                firstPidOffsets[0] = offsets.first; // Start offset to the ANR trace file
-                firstPidOffsets[1] = offsets.second; // End offset to the ANR trace file
-            }
-        }
-        return tracesFile;
     }
 
     @GuardedBy("ActivityManagerService.class")
@@ -3569,6 +3601,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     private static long dumpJavaTracesTombstoned(int pid, String fileName, long timeoutMs) {
         final long timeStart = SystemClock.elapsedRealtime();
+        int headerSize = writeUptimeStartHeaderForPid(pid, fileName);
         boolean javaSuccess = Debug.dumpJavaBacktraceToFileTimeout(pid, fileName,
                 (int) (timeoutMs / 1000));
         if (javaSuccess) {
@@ -3576,7 +3609,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             // but better safe than sorry.
             try {
                 long size = new File(fileName).length();
-                if (size < JAVA_DUMP_MINIMUM_SIZE) {
+                if ((size - headerSize) < JAVA_DUMP_MINIMUM_SIZE) {
                     Slog.w(TAG, "Successfully created Java ANR file is empty!");
                     javaSuccess = false;
                 }
@@ -3596,11 +3629,32 @@ public class ActivityManagerService extends IActivityManager.Stub
         return SystemClock.elapsedRealtime() - timeStart;
     }
 
+    private static int appendtoANRFile(String fileName, String text) {
+        try (FileOutputStream fos = new FileOutputStream(fileName, true)) {
+            byte[] header = text.getBytes(StandardCharsets.UTF_8);
+            fos.write(header);
+            return header.length;
+        } catch (IOException e) {
+            Slog.w(TAG, "Exception writing to ANR dump file:", e);
+            return 0;
+        }
+    }
+
+    /*
+     * Writes a header containing the process id and the current system uptime.
+     */
+    private static int writeUptimeStartHeaderForPid(int pid, String fileName) {
+        return appendtoANRFile(fileName, "----- dumping pid: " + pid + " at "
+            + SystemClock.uptimeMillis() + "\n");
+    }
+
+
     /**
      * @return The start/end offset of the trace of the very first PID
      */
-    public static Pair<Long, Long> dumpStackTraces(String tracesFile, ArrayList<Integer> firstPids,
-            ArrayList<Integer> nativePids, ArrayList<Integer> extraPids) {
+    public static Pair<Long, Long> dumpStackTraces(String tracesFile,
+            ArrayList<Integer> firstPids, ArrayList<Integer> nativePids,
+            ArrayList<Integer> extraPids, AnrLatencyTracker latencyTracker) {
 
         Slog.i(TAG, "Dumping to " + tracesFile);
 
@@ -3619,6 +3673,9 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         // First collect all of the stacks of the most important pids.
         if (firstPids != null) {
+            if (latencyTracker != null) {
+                latencyTracker.dumpingFirstPidsStarted();
+            }
             int num = firstPids.size();
             for (int i = 0; i < num; i++) {
                 final int pid = firstPids.get(i);
@@ -3629,10 +3686,16 @@ public class ActivityManagerService extends IActivityManager.Stub
                     tf = new File(tracesFile);
                     firstPidStart = tf.exists() ? tf.length() : 0;
                 }
+                if (latencyTracker != null) {
+                    latencyTracker.dumpingPidStarted(pid);
+                }
 
                 Slog.i(TAG, "Collecting stacks for pid " + pid);
                 final long timeTaken = dumpJavaTracesTombstoned(pid, tracesFile,
                                                                 remainingTime);
+                if (latencyTracker != null) {
+                    latencyTracker.dumpingPidEnded();
+                }
 
                 remainingTime -= timeTaken;
                 if (remainingTime <= 0) {
@@ -3643,24 +3706,40 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                 if (firstPid) {
                     firstPidEnd = tf.length();
+                    // Full latency dump
+                    if (latencyTracker != null) {
+                        appendtoANRFile(tracesFile,
+                                latencyTracker.dumpAsCommaSeparatedArrayWithHeader());
+                    }
                 }
                 if (DEBUG_ANR) {
                     Slog.d(TAG, "Done with pid " + firstPids.get(i) + " in " + timeTaken + "ms");
                 }
             }
+            if (latencyTracker != null) {
+                latencyTracker.dumpingFirstPidsEnded();
+            }
         }
 
         // Next collect the stacks of the native pids
         if (nativePids != null) {
+            if (latencyTracker != null) {
+                latencyTracker.dumpingNativePidsStarted();
+            }
             for (int pid : nativePids) {
                 Slog.i(TAG, "Collecting stacks for native pid " + pid);
                 final long nativeDumpTimeoutMs = Math.min(NATIVE_DUMP_TIMEOUT_MS, remainingTime);
 
+                if (latencyTracker != null) {
+                    latencyTracker.dumpingPidStarted(pid);
+                }
                 final long start = SystemClock.elapsedRealtime();
                 Debug.dumpNativeBacktraceToFileTimeout(
                         pid, tracesFile, (int) (nativeDumpTimeoutMs / 1000));
                 final long timeTaken = SystemClock.elapsedRealtime() - start;
-
+                if (latencyTracker != null) {
+                    latencyTracker.dumpingPidEnded();
+                }
                 remainingTime -= timeTaken;
                 if (remainingTime <= 0) {
                     Slog.e(TAG, "Aborting stack trace dump (current native pid=" + pid +
@@ -3672,15 +3751,25 @@ public class ActivityManagerService extends IActivityManager.Stub
                     Slog.d(TAG, "Done with native pid " + pid + " in " + timeTaken + "ms");
                 }
             }
+            if (latencyTracker != null) {
+                latencyTracker.dumpingNativePidsEnded();
+            }
         }
 
         // Lastly, dump stacks for all extra PIDs from the CPU tracker.
         if (extraPids != null) {
+            if (latencyTracker != null) {
+                latencyTracker.dumpingExtraPidsStarted();
+            }
             for (int pid : extraPids) {
                 Slog.i(TAG, "Collecting stacks for extra pid " + pid);
-
+                if (latencyTracker != null) {
+                    latencyTracker.dumpingPidStarted(pid);
+                }
                 final long timeTaken = dumpJavaTracesTombstoned(pid, tracesFile, remainingTime);
-
+                if (latencyTracker != null) {
+                    latencyTracker.dumpingPidEnded();
+                }
                 remainingTime -= timeTaken;
                 if (remainingTime <= 0) {
                     Slog.e(TAG, "Aborting stack trace dump (current extra pid=" + pid +
@@ -3692,8 +3781,14 @@ public class ActivityManagerService extends IActivityManager.Stub
                     Slog.d(TAG, "Done with extra pid " + pid + " in " + timeTaken + "ms");
                 }
             }
+            if (latencyTracker != null) {
+                latencyTracker.dumpingExtraPidsEnded();
+            }
         }
+        // Append the dumping footer with the current uptime
+        appendtoANRFile(tracesFile, "----- dumping ended at " + SystemClock.uptimeMillis() + "\n");
         Slog.i(TAG, "Done dumping");
+
         return firstPidStart >= 0 ? new Pair<>(firstPidStart, firstPidEnd) : null;
     }
 
@@ -4655,7 +4750,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 final String packageName = app.info.packageName;
                 mHandler.post(new Runnable() {
                 @Override
-                    public void run(){
+                    public void run() {
                         try {
                             IBackupManager bm = IBackupManager.Stub.asInterface(
                                     ServiceManager.getService(Context.BACKUP_SERVICE));
@@ -6449,7 +6544,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         TimeoutRecord timeoutRecord = TimeoutRecord.forApp("App requested: " + reason);
         final int callingPid = Binder.getCallingPid();
 
+        timeoutRecord.mLatencyTracker.waitingOnPidLockStarted();
         synchronized (mPidsSelfLocked) {
+            timeoutRecord.mLatencyTracker.waitingOnPidLockEnded();
             final ProcessRecord app = mPidsSelfLocked.get(callingPid);
             if (app == null) {
                 throw new SecurityException("Unknown process: " + callingPid);
@@ -8097,7 +8194,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         synchronized(mPidsSelfLocked) {
             for (int i=mPidsSelfLocked.size()-1; i>=0; i--) {
                 ProcessRecord proc = mPidsSelfLocked.valueAt(i);
-                if (!isAllowedWhileBooting(proc.info)){
+                if (!isAllowedWhileBooting(proc.info)) {
                     if (procsToKill == null) {
                         procsToKill = new ArrayList<ProcessRecord>();
                     }
@@ -12484,7 +12581,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     + backupTarget.appInfo + " died during backup");
             mHandler.post(new Runnable() {
                 @Override
-                public void run(){
+                public void run() {
                     try {
                         IBackupManager bm = IBackupManager.Stub.asInterface(
                                 ServiceManager.getService(Context.BACKUP_SERVICE));
@@ -15021,59 +15118,66 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @GuardedBy("this")
     void finishInstrumentationLocked(ProcessRecord app, int resultCode, Bundle results) {
-        final ActiveInstrumentation instr = app.getActiveInstrumentation();
-        if (instr == null) {
-            Slog.w(TAG, "finishInstrumentation called on non-instrumented: " + app);
-            return;
-        }
+        try {
+            Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "finishInstrumentationLocked()");
+            final ActiveInstrumentation instr = app.getActiveInstrumentation();
+            if (instr == null) {
+                Slog.w(TAG, "finishInstrumentation called on non-instrumented: " + app);
+                return;
+            }
 
-        synchronized (mProcLock) {
-            if (!instr.mFinished) {
-                if (instr.mWatcher != null) {
-                    Bundle finalResults = instr.mCurResults;
-                    if (finalResults != null) {
-                        if (instr.mCurResults != null && results != null) {
-                            finalResults.putAll(results);
+            synchronized (mProcLock) {
+                if (!instr.mFinished) {
+                    if (instr.mWatcher != null) {
+                        Bundle finalResults = instr.mCurResults;
+                        if (finalResults != null) {
+                            if (instr.mCurResults != null && results != null) {
+                                finalResults.putAll(results);
+                            }
+                        } else {
+                            finalResults = results;
                         }
-                    } else {
-                        finalResults = results;
+                        mInstrumentationReporter.reportFinished(instr.mWatcher,
+                                instr.mClass, resultCode, finalResults);
                     }
-                    mInstrumentationReporter.reportFinished(instr.mWatcher,
-                            instr.mClass, resultCode, finalResults);
+
+                    // Can't call out of the system process with a lock held, so post a message.
+                    if (instr.mUiAutomationConnection != null) {
+                        // Go back to the default mode of denying OP_NO_ISOLATED_STORAGE app op.
+                        mAppOpsService.setMode(AppOpsManager.OP_NO_ISOLATED_STORAGE, app.uid,
+                                app.info.packageName, AppOpsManager.MODE_ERRORED);
+                        mAppOpsService.setAppOpsServiceDelegate(null);
+                        getPermissionManagerInternal().stopShellPermissionIdentityDelegation();
+                        mHandler.obtainMessage(SHUTDOWN_UI_AUTOMATION_CONNECTION_MSG,
+                                instr.mUiAutomationConnection).sendToTarget();
+                    }
+                    instr.mFinished = true;
                 }
 
-                // Can't call out of the system process with a lock held, so post a message.
-                if (instr.mUiAutomationConnection != null) {
-                    // Go back to the default mode of denying OP_NO_ISOLATED_STORAGE app op.
-                    mAppOpsService.setMode(AppOpsManager.OP_NO_ISOLATED_STORAGE, app.uid,
-                            app.info.packageName, AppOpsManager.MODE_ERRORED);
-                    mAppOpsService.setAppOpsServiceDelegate(null);
-                    getPermissionManagerInternal().stopShellPermissionIdentityDelegation();
-                    mHandler.obtainMessage(SHUTDOWN_UI_AUTOMATION_CONNECTION_MSG,
-                            instr.mUiAutomationConnection).sendToTarget();
+                instr.removeProcess(app);
+                app.setActiveInstrumentation(null);
+            }
+            app.mProfile.clearHostingComponentType(HOSTING_COMPONENT_TYPE_INSTRUMENTATION);
+
+            if (app.isSdkSandbox) {
+                // For sharedUid apps this will kill all sdk sandbox processes, which is not ideal.
+                // TODO(b/209061624): should we call ProcessList.removeProcessLocked instead?
+                killUid(UserHandle.getAppId(app.uid), UserHandle.getUserId(app.uid),
+                        "finished instr");
+                final SdkSandboxManagerLocal sandboxManagerLocal =
+                        LocalManagerRegistry.getManager(SdkSandboxManagerLocal.class);
+                if (sandboxManagerLocal != null) {
+                    sandboxManagerLocal.notifyInstrumentationFinished(
+                            app.sdkSandboxClientAppPackage,
+                            Process.getAppUidForSdkSandboxUid(app.uid));
                 }
-                instr.mFinished = true;
+            } else if (!instr.mNoRestart) {
+                forceStopPackageLocked(app.info.packageName, -1, false, false, true, true, false,
+                        app.userId,
+                        "finished inst");
             }
-
-            instr.removeProcess(app);
-            app.setActiveInstrumentation(null);
-        }
-        app.mProfile.clearHostingComponentType(HOSTING_COMPONENT_TYPE_INSTRUMENTATION);
-
-        if (app.isSdkSandbox) {
-            // For sharedUid apps this will kill all sdk sandbox processes, which is not ideal.
-            // TODO(b/209061624): should we call ProcessList.removeProcessLocked instead?
-            killUid(UserHandle.getAppId(app.uid), UserHandle.getUserId(app.uid), "finished instr");
-            final SdkSandboxManagerLocal sandboxManagerLocal =
-                    LocalManagerRegistry.getManager(SdkSandboxManagerLocal.class);
-            if (sandboxManagerLocal != null) {
-                sandboxManagerLocal.notifyInstrumentationFinished(
-                        app.sdkSandboxClientAppPackage, Process.getAppUidForSdkSandboxUid(app.uid));
-            }
-        } else if (!instr.mNoRestart) {
-            forceStopPackageLocked(app.info.packageName, -1, false, false, true, true, false,
-                    app.userId,
-                    "finished inst");
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
         }
     }
 
@@ -17767,7 +17871,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             throw new SecurityException("Requires permission " + FILTER_EVENTS);
         }
         ProcessRecord proc;
+        timeoutRecord.mLatencyTracker.waitingOnPidLockStarted();
         synchronized (mPidsSelfLocked) {
+            timeoutRecord.mLatencyTracker.waitingOnPidLockEnded();
             proc = mPidsSelfLocked.get(pid);
         }
         final long timeoutMillis = proc != null ? proc.getInputDispatchingTimeoutMillis() :
@@ -17788,29 +17894,36 @@ public class ActivityManagerService extends IActivityManager.Stub
             ApplicationInfo aInfo, String parentShortComponentName,
             WindowProcessController parentProcess, boolean aboveSystem,
             TimeoutRecord timeoutRecord) {
-        if (checkCallingPermission(FILTER_EVENTS) != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Requires permission " + FILTER_EVENTS);
-        }
-
-        if (proc != null) {
-            synchronized (this) {
-                if (proc.isDebugging()) {
-                    return false;
-                }
-
-                if (proc.getActiveInstrumentation() != null) {
-                    Bundle info = new Bundle();
-                    info.putString("shortMsg", "keyDispatchingTimedOut");
-                    info.putString("longMsg", timeoutRecord.mReason);
-                    finishInstrumentationLocked(proc, Activity.RESULT_CANCELED, info);
-                    return true;
-                }
+        try {
+            Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "inputDispatchingTimedOut()");
+            if (checkCallingPermission(FILTER_EVENTS) != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException("Requires permission " + FILTER_EVENTS);
             }
-            mAnrHelper.appNotResponding(proc, activityShortComponentName, aInfo,
-                    parentShortComponentName, parentProcess, aboveSystem, timeoutRecord);
-        }
 
-        return true;
+            if (proc != null) {
+                timeoutRecord.mLatencyTracker.waitingOnAMSLockStarted();
+                synchronized (this) {
+                    timeoutRecord.mLatencyTracker.waitingOnAMSLockEnded();
+                    if (proc.isDebugging()) {
+                        return false;
+                    }
+
+                    if (proc.getActiveInstrumentation() != null) {
+                        Bundle info = new Bundle();
+                        info.putString("shortMsg", "keyDispatchingTimedOut");
+                        info.putString("longMsg", timeoutRecord.mReason);
+                        finishInstrumentationLocked(proc, Activity.RESULT_CANCELED, info);
+                        return true;
+                    }
+                }
+                mAnrHelper.appNotResponding(proc, activityShortComponentName, aInfo,
+                        parentShortComponentName, parentProcess, aboveSystem, timeoutRecord);
+            }
+
+            return true;
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+        }
     }
 
     /**

@@ -1227,31 +1227,39 @@ public final class ActiveServices {
     }
 
     private void stopServiceLocked(ServiceRecord service, boolean enqueueOomAdj) {
-        if (service.delayed) {
-            // If service isn't actually running, but is being held in the
-            // delayed list, then we need to keep it started but note that it
-            // should be stopped once no longer delayed.
-            if (DEBUG_DELAYED_STARTS) Slog.v(TAG_SERVICE, "Delaying stop of pending: " + service);
-            service.delayedStop = true;
-            return;
-        }
-
-        final int uid = service.appInfo.uid;
-        final String packageName = service.name.getPackageName();
-        final String serviceName = service.name.getClassName();
-        FrameworkStatsLog.write(FrameworkStatsLog.SERVICE_STATE_CHANGED, uid, packageName,
-                serviceName, FrameworkStatsLog.SERVICE_STATE_CHANGED__STATE__STOP);
-        mAm.mBatteryStatsService.noteServiceStopRunning(uid, packageName, serviceName);
-        service.startRequested = false;
-        if (service.tracker != null) {
-            synchronized (mAm.mProcessStats.mLock) {
-                service.tracker.setStarted(false, mAm.mProcessStats.getMemFactorLocked(),
-                        SystemClock.uptimeMillis());
+        try {
+            Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "stopServiceLocked()");
+            if (service.delayed) {
+                // If service isn't actually running, but is being held in the
+                // delayed list, then we need to keep it started but note that it
+                // should be stopped once no longer delayed.
+                if (DEBUG_DELAYED_STARTS) {
+                    Slog.v(TAG_SERVICE, "Delaying stop of pending: " + service);
+                }
+                service.delayedStop = true;
+                return;
             }
-        }
-        service.callStart = false;
 
-        bringDownServiceIfNeededLocked(service, false, false, enqueueOomAdj);
+            final int uid = service.appInfo.uid;
+            final String packageName = service.name.getPackageName();
+            final String serviceName = service.name.getClassName();
+            FrameworkStatsLog.write(FrameworkStatsLog.SERVICE_STATE_CHANGED, uid, packageName,
+                    serviceName, FrameworkStatsLog.SERVICE_STATE_CHANGED__STATE__STOP);
+            mAm.mBatteryStatsService.noteServiceStopRunning(uid, packageName, serviceName);
+            service.startRequested = false;
+            if (service.tracker != null) {
+                synchronized (mAm.mProcessStats.mLock) {
+                    service.tracker.setStarted(false, mAm.mProcessStats.getMemFactorLocked(),
+                            SystemClock.uptimeMillis());
+                }
+            }
+            service.callStart = false;
+
+            bringDownServiceIfNeededLocked(service, false, false, enqueueOomAdj);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+        }
+
     }
 
     int stopServiceLocked(IApplicationThread caller, Intent service,
@@ -3303,7 +3311,7 @@ public final class ActiveServices {
         }
 
         public void run() {
-            synchronized(mAm) {
+            synchronized (mAm) {
                 performServiceRestartLocked(mService);
             }
         }
@@ -5780,92 +5788,108 @@ public final class ActiveServices {
     }
 
     void serviceTimeout(ProcessRecord proc) {
-        TimeoutRecord timeoutRecord = null;
-        synchronized(mAm) {
-            if (proc.isDebugging()) {
-                // The app's being debugged, ignore timeout.
-                return;
-            }
-            final ProcessServiceRecord psr = proc.mServices;
-            if (psr.numberOfExecutingServices() == 0 || proc.getThread() == null) {
-                return;
-            }
-            final long now = SystemClock.uptimeMillis();
-            final long maxTime =  now -
-                    (psr.shouldExecServicesFg() ? SERVICE_TIMEOUT : SERVICE_BACKGROUND_TIMEOUT);
-            ServiceRecord timeout = null;
-            long nextTime = 0;
-            for (int i = psr.numberOfExecutingServices() - 1; i >= 0; i--) {
-                ServiceRecord sr = psr.getExecutingServiceAt(i);
-                if (sr.executingStart < maxTime) {
-                    timeout = sr;
-                    break;
+        try {
+            Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "serviceTimeout()");
+            TimeoutRecord timeoutRecord = null;
+            synchronized (mAm) {
+                if (proc.isDebugging()) {
+                    // The app's being debugged, ignore timeout.
+                    return;
                 }
-                if (sr.executingStart > nextTime) {
-                    nextTime = sr.executingStart;
+                final ProcessServiceRecord psr = proc.mServices;
+                if (psr.numberOfExecutingServices() == 0 || proc.getThread() == null) {
+                    return;
+                }
+                final long now = SystemClock.uptimeMillis();
+                final long maxTime =  now
+                        - (psr.shouldExecServicesFg()
+                        ? SERVICE_TIMEOUT : SERVICE_BACKGROUND_TIMEOUT);
+                ServiceRecord timeout = null;
+                long nextTime = 0;
+                for (int i = psr.numberOfExecutingServices() - 1; i >= 0; i--) {
+                    ServiceRecord sr = psr.getExecutingServiceAt(i);
+                    if (sr.executingStart < maxTime) {
+                        timeout = sr;
+                        break;
+                    }
+                    if (sr.executingStart > nextTime) {
+                        nextTime = sr.executingStart;
+                    }
+                }
+                if (timeout != null && mAm.mProcessList.isInLruListLOSP(proc)) {
+                    Slog.w(TAG, "Timeout executing service: " + timeout);
+                    StringWriter sw = new StringWriter();
+                    PrintWriter pw = new FastPrintWriter(sw, false, 1024);
+                    pw.println(timeout);
+                    timeout.dump(pw, "    ");
+                    pw.close();
+                    mLastAnrDump = sw.toString();
+                    mAm.mHandler.removeCallbacks(mLastAnrDumpClearer);
+                    mAm.mHandler.postDelayed(mLastAnrDumpClearer,
+                            LAST_ANR_LIFETIME_DURATION_MSECS);
+                    String anrMessage = "executing service " + timeout.shortInstanceName;
+                    timeoutRecord = TimeoutRecord.forServiceExec(anrMessage);
+                } else {
+                    Message msg = mAm.mHandler.obtainMessage(
+                            ActivityManagerService.SERVICE_TIMEOUT_MSG);
+                    msg.obj = proc;
+                    mAm.mHandler.sendMessageAtTime(msg, psr.shouldExecServicesFg()
+                            ? (nextTime + SERVICE_TIMEOUT) :
+                            (nextTime + SERVICE_BACKGROUND_TIMEOUT));
                 }
             }
-            if (timeout != null && mAm.mProcessList.isInLruListLOSP(proc)) {
-                Slog.w(TAG, "Timeout executing service: " + timeout);
-                StringWriter sw = new StringWriter();
-                PrintWriter pw = new FastPrintWriter(sw, false, 1024);
-                pw.println(timeout);
-                timeout.dump(pw, "    ");
-                pw.close();
-                mLastAnrDump = sw.toString();
-                mAm.mHandler.removeCallbacks(mLastAnrDumpClearer);
-                mAm.mHandler.postDelayed(mLastAnrDumpClearer, LAST_ANR_LIFETIME_DURATION_MSECS);
-                String anrMessage = "executing service " + timeout.shortInstanceName;
-                timeoutRecord = TimeoutRecord.forServiceExec(anrMessage);
-            } else {
-                Message msg = mAm.mHandler.obtainMessage(
-                        ActivityManagerService.SERVICE_TIMEOUT_MSG);
-                msg.obj = proc;
-                mAm.mHandler.sendMessageAtTime(msg, psr.shouldExecServicesFg()
-                        ? (nextTime+SERVICE_TIMEOUT) : (nextTime + SERVICE_BACKGROUND_TIMEOUT));
-            }
-        }
 
-        if (timeoutRecord != null) {
-            mAm.mAnrHelper.appNotResponding(proc, timeoutRecord);
+            if (timeoutRecord != null) {
+                mAm.mAnrHelper.appNotResponding(proc, timeoutRecord);
+            }
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
         }
     }
 
     void serviceForegroundTimeout(ServiceRecord r) {
-        ProcessRecord app;
-        // Grab a timestamp before lock is taken.
-        long timeoutEndMs = SystemClock.uptimeMillis();
-        synchronized (mAm) {
-            if (!r.fgRequired || !r.fgWaiting || r.destroying) {
-                return;
-            }
-
-            app = r.app;
-            if (app != null && app.isDebugging()) {
-                // The app's being debugged; let it ride
-                return;
-            }
-
-            if (DEBUG_BACKGROUND_CHECK) {
-                Slog.i(TAG, "Service foreground-required timeout for " + r);
-            }
-            r.fgWaiting = false;
-            stopServiceLocked(r, false);
-        }
-
-        if (app != null) {
+        try {
+            Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "serviceForegroundTimeout()");
+            ProcessRecord app;
+            // Create a TimeoutRecord .
             final String annotation = "Context.startForegroundService() did not then call "
                     + "Service.startForeground(): " + r;
-            Message msg = mAm.mHandler.obtainMessage(
-                    ActivityManagerService.SERVICE_FOREGROUND_TIMEOUT_ANR_MSG);
             TimeoutRecord timeoutRecord = TimeoutRecord.forServiceStartWithEndTime(annotation,
-                    timeoutEndMs);
-            SomeArgs args = SomeArgs.obtain();
-            args.arg1 = app;
-            args.arg2 = timeoutRecord;
-            msg.obj = args;
-            mAm.mHandler.sendMessageDelayed(msg,
-                    mAm.mConstants.mServiceStartForegroundAnrDelayMs);
+                    SystemClock.uptimeMillis());
+
+            timeoutRecord.mLatencyTracker.waitingOnAMSLockEnded();
+            synchronized (mAm) {
+                timeoutRecord.mLatencyTracker.waitingOnAMSLockEnded();
+                if (!r.fgRequired || !r.fgWaiting || r.destroying) {
+                    return;
+                }
+
+                app = r.app;
+                if (app != null && app.isDebugging()) {
+                    // The app's being debugged; let it ride
+                    return;
+                }
+
+                if (DEBUG_BACKGROUND_CHECK) {
+                    Slog.i(TAG, "Service foreground-required timeout for " + r);
+                }
+                r.fgWaiting = false;
+                stopServiceLocked(r, false);
+            }
+
+            if (app != null) {
+
+                Message msg = mAm.mHandler.obtainMessage(
+                        ActivityManagerService.SERVICE_FOREGROUND_TIMEOUT_ANR_MSG);
+                SomeArgs args = SomeArgs.obtain();
+                args.arg1 = app;
+                args.arg2 = timeoutRecord;
+                msg.obj = args;
+                mAm.mHandler.sendMessageDelayed(msg,
+                        mAm.mConstants.mServiceStartForegroundAnrDelayMs);
+            }
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
         }
     }
 

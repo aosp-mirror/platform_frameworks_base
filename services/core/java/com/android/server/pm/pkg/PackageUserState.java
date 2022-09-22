@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.content.pm.PackageManager;
 import android.content.pm.overlay.OverlayPaths;
 import android.os.UserHandle;
+import android.processor.immutability.Immutable;
 import android.util.ArraySet;
 
 import java.util.Map;
@@ -35,6 +36,7 @@ import java.util.Map;
  */
 // TODO(b/173807334): Expose API
 //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+@Immutable.Ignore(reason = "Exposed through PackageState pending refactor")
 public interface PackageUserState {
 
     /** @hide */

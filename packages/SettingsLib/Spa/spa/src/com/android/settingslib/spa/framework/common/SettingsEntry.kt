@@ -18,84 +18,20 @@ package com.android.settingslib.spa.framework.common
 
 import android.os.Bundle
 import androidx.compose.runtime.Composable
-import androidx.navigation.NamedNavArgument
-import androidx.navigation.NavType
-import com.android.settingslib.spa.framework.BrowseActivity
-import com.android.settingslib.spa.framework.util.navLink
+import androidx.compose.runtime.remember
 
 const val INJECT_ENTRY_NAME = "INJECT"
 const val ROOT_ENTRY_NAME = "ROOT"
-const val ROOT_PAGE_NAME = "Root"
-
-/**
- * Defines data of one Settings entry for Settings search.
- */
-data class SearchData(val keyword: String = "")
-
-/**
- * Defines data of one Settings entry for UI rendering.
- */
-data class UiData(val title: String = "")
-
-/**
- * Defines data to identify a Settings page.
- */
-data class SettingsPage(
-    // The unique id of this page, which is computed by name + normalized(arguments)
-    val id: Int,
-
-    // The name of the page, which is used to compute the unique id, and need to be stable.
-    val name: String,
-
-    // Defined parameters of this page.
-    val parameter: List<NamedNavArgument> = emptyList(),
-
-    // The arguments of this page.
-    val arguments: Bundle? = null,
-) {
-    companion object {
-        fun create(
-            name: String,
-            parameter: List<NamedNavArgument> = emptyList(),
-            arguments: Bundle? = null
-        ): SettingsPage {
-            return SettingsPageBuilder(name, parameter).setArguments(arguments).build()
-        }
-    }
-
-    fun formatArguments(): String {
-        val normalizedArguments = parameter.normalize(arguments)
-        if (normalizedArguments == null || normalizedArguments.isEmpty) return "[No arguments]"
-        return normalizedArguments.toString().removeRange(0, 6)
-    }
-
-    fun formatAll(): String {
-        return "$name ${formatArguments()}"
-    }
-
-    fun buildRoute(highlightEntryName: String? = null): String {
-        val highlightParam =
-            if (highlightEntryName == null)
-                ""
-            else
-                "?${BrowseActivity.HIGHLIGHT_ENTRY_PARAM_NAME}=$highlightEntryName"
-        return name + parameter.navLink(arguments) + highlightParam
-    }
-
-    fun hasRuntimeParam(): Boolean {
-        return parameter.hasRuntimeParam(arguments)
-    }
-}
 
 /**
  * Defines data of a Settings entry.
  */
 data class SettingsEntry(
-    // The unique id of this entry, which is computed by name + owner + fromPage + toPage.
-    val id: Int,
-
     // The name of the page, which is used to compute the unique id, and need to be stable.
-    val name: String,
+    private val name: String,
+
+    // The display name of the page, for better readability.
+    val displayName: String,
 
     // The owner page of this entry.
     val owner: SettingsPage,
@@ -109,7 +45,7 @@ data class SettingsEntry(
      * Defines entry attributes here.
      * ========================================
      */
-    val isAllowSearch: Boolean,
+    val isAllowSearch: Boolean = false,
 
     /**
      * ========================================
@@ -121,13 +57,7 @@ data class SettingsEntry(
      * API to get Search related data for this entry.
      * Returns null if this entry is not available for the search at the moment.
      */
-    val searchData: () -> SearchData? = { null },
-
-    /**
-     * API to get UI related data for this entry.
-     * Returns null if the entry is not render-able.
-     */
-    val uiData: () -> UiData? = { null },
+    private val searchDataImpl: (arguments: Bundle?) -> EntrySearchData? = { null },
 
     /**
      * API to Render UI of this entry directly. For now, we use it in the internal injection, to
@@ -135,68 +65,56 @@ data class SettingsEntry(
      * injected entry. In the long term, we may deprecate the @Composable Page() API in SPP, and
      * use each entries' UI rendering function in the page instead.
      */
-    val uiLayoutImpl: (@Composable (arguments: Bundle?) -> Unit) = {},
+    private val uiLayoutImpl: (@Composable (arguments: Bundle?) -> Unit) = {},
 ) {
-    fun formatAll(): String {
+    // The unique id of this entry, which is computed by name + owner + fromPage + toPage.
+    fun id(): String {
+        return "$name:${owner.id()}(${fromPage?.id()}-${toPage?.id()})".toHashId()
+    }
+
+    fun formatContent(): String {
         val content = listOf(
-            "owner = ${owner.formatAll()}",
-            "linkFrom = ${fromPage?.formatAll()}",
-            "linkTo = ${toPage?.formatAll()}",
+            "id = ${id()}",
+            "owner = ${owner.formatDisplayTitle()}",
+            "linkFrom = ${fromPage?.formatDisplayTitle()}",
+            "linkTo = ${toPage?.formatDisplayTitle()}",
+            "${getSearchData()?.format()}",
         )
         return content.joinToString("\n")
     }
 
-    // The display name of the entry, for better readability.
-    fun displayName(): String {
-        return "${owner.name}:$name"
+    fun displayTitle(): String {
+        return "${owner.displayName}:$displayName"
     }
 
-    private fun getDisplayPage(): SettingsPage {
-        // Display the entry on its from-page, or on its owner page if the from-page is unset.
+    private fun containerPage(): SettingsPage {
+        // The Container page of the entry, which is the from-page or
+        // the owner-page if from-page is unset.
         return fromPage ?: owner
     }
 
     fun buildRoute(): String {
-        return getDisplayPage().buildRoute(name)
+        return containerPage().buildRoute(id())
     }
 
     fun hasRuntimeParam(): Boolean {
-        return getDisplayPage().hasRuntimeParam()
+        return containerPage().hasRuntimeParam()
+    }
+
+    private fun fullArgument(runtimeArguments: Bundle? = null): Bundle {
+        val arguments = Bundle()
+        if (owner.arguments != null) arguments.putAll(owner.arguments)
+        if (runtimeArguments != null) arguments.putAll(runtimeArguments)
+        return arguments
+    }
+
+    fun getSearchData(runtimeArguments: Bundle? = null): EntrySearchData? {
+        return searchDataImpl(fullArgument(runtimeArguments))
     }
 
     @Composable
     fun UiLayout(runtimeArguments: Bundle? = null) {
-        val arguments = Bundle()
-        if (owner.arguments != null) arguments.putAll(owner.arguments)
-        if (runtimeArguments != null) arguments.putAll(runtimeArguments)
-        uiLayoutImpl(arguments)
-    }
-}
-
-data class SettingsPageWithEntry(
-    val page: SettingsPage,
-    val entries: List<SettingsEntry>,
-)
-
-class SettingsPageBuilder(
-    private val name: String,
-    private val parameter: List<NamedNavArgument> = emptyList()
-) {
-    private var arguments: Bundle? = null
-
-    fun build(): SettingsPage {
-        val normArguments = parameter.normalize(arguments)
-        return SettingsPage(
-            id = "$name:${normArguments?.toString()}".toUniqueId(),
-            name = name,
-            parameter = parameter,
-            arguments = arguments,
-        )
-    }
-
-    fun setArguments(arguments: Bundle?): SettingsPageBuilder {
-        this.arguments = arguments
-        return this
+        uiLayoutImpl(fullArgument(runtimeArguments))
     }
 }
 
@@ -204,30 +122,39 @@ class SettingsPageBuilder(
  * The helper to build a Settings Entry instance.
  */
 class SettingsEntryBuilder(private val name: String, private val owner: SettingsPage) {
+    private var displayName = name
     private var fromPage: SettingsPage? = null
     private var toPage: SettingsPage? = null
-    private var isAllowSearch: Boolean? = null
 
-    private var searchDataFn: () -> SearchData? = { null }
-    private var uiLayoutFn: (@Composable (arguments: Bundle?) -> Unit) = {}
+    // Attributes
+    private var isAllowSearch: Boolean = false
+
+    // Functions
+    private var searchDataFn: (arguments: Bundle?) -> EntrySearchData? = { null }
+    private var uiLayoutFn: (@Composable (arguments: Bundle?) -> Unit) = { }
 
     fun build(): SettingsEntry {
         return SettingsEntry(
-            id = "$name:${owner.id}(${fromPage?.id}-${toPage?.id})".toUniqueId(),
             name = name,
             owner = owner,
+            displayName = displayName,
 
             // linking data
             fromPage = fromPage,
             toPage = toPage,
 
             // attributes
-            isAllowSearch = getIsSearchable(),
+            isAllowSearch = isAllowSearch,
 
             // functions
-            searchData = searchDataFn,
+            searchDataImpl = searchDataFn,
             uiLayoutImpl = uiLayoutFn,
         )
+    }
+
+    fun setDisplayName(displayName: String): SettingsEntryBuilder {
+        this.displayName = displayName
+        return this
     }
 
     fun setLink(
@@ -244,7 +171,16 @@ class SettingsEntryBuilder(private val name: String, private val owner: Settings
         return this
     }
 
-    fun setSearchDataFn(fn: () -> SearchData?): SettingsEntryBuilder {
+    fun setMarco(fn: (arguments: Bundle?) -> EntryMarco): SettingsEntryBuilder {
+        setSearchDataFn { fn(it).getSearchData() }
+        setUiLayoutFn {
+            val marco = remember { fn(it) }
+            marco.UiLayout()
+        }
+        return this
+    }
+
+    fun setSearchDataFn(fn: (arguments: Bundle?) -> EntrySearchData?): SettingsEntryBuilder {
         this.searchDataFn = fn
         return this
     }
@@ -253,8 +189,6 @@ class SettingsEntryBuilder(private val name: String, private val owner: Settings
         this.uiLayoutFn = fn
         return this
     }
-
-    private fun getIsSearchable(): Boolean = isAllowSearch ?: false
 
     companion object {
         fun create(entryName: String, owner: SettingsPage): SettingsEntryBuilder {
@@ -269,48 +203,19 @@ class SettingsEntryBuilder(private val name: String, private val owner: Settings
             return create(entryName, owner).setLink(toPage = owner)
         }
 
-        fun createInject(owner: SettingsPage, entryName: String? = null): SettingsEntryBuilder {
-            val name = entryName ?: "${INJECT_ENTRY_NAME}_${owner.name}"
-            return createLinkTo(name, owner)
+        fun create(owner: SettingsPage, entryName: String, displayName: String? = null):
+            SettingsEntryBuilder {
+            return SettingsEntryBuilder(entryName, owner).setDisplayName(displayName ?: entryName)
         }
 
-        fun createRoot(owner: SettingsPage, entryName: String? = null): SettingsEntryBuilder {
-            val name = entryName ?: "${ROOT_ENTRY_NAME}_${owner.name}"
-            return createLinkTo(name, owner)
+        fun createInject(owner: SettingsPage, displayName: String? = null): SettingsEntryBuilder {
+            val name = displayName ?: "${INJECT_ENTRY_NAME}_${owner.displayName}"
+            return createLinkTo(INJECT_ENTRY_NAME, owner).setDisplayName(name)
+        }
+
+        fun createRoot(owner: SettingsPage, displayName: String? = null): SettingsEntryBuilder {
+            val name = displayName ?: "${ROOT_ENTRY_NAME}_${owner.displayName}"
+            return createLinkTo(ROOT_ENTRY_NAME, owner).setDisplayName(name)
         }
     }
-}
-
-private fun String.toUniqueId(): Int {
-    return this.hashCode()
-}
-
-private fun List<NamedNavArgument>.normalize(arguments: Bundle? = null): Bundle? {
-    if (this.isEmpty()) return null
-    val normArgs = Bundle()
-    for (navArg in this) {
-        when (navArg.argument.type) {
-            NavType.StringType -> {
-                val value = arguments?.getString(navArg.name)
-                if (value != null)
-                    normArgs.putString(navArg.name, value)
-                else
-                    normArgs.putString("unset_" + navArg.name, null)
-            }
-            NavType.IntType -> {
-                if (arguments != null && arguments.containsKey(navArg.name))
-                    normArgs.putInt(navArg.name, arguments.getInt(navArg.name))
-                else
-                    normArgs.putString("unset_" + navArg.name, null)
-            }
-        }
-    }
-    return normArgs
-}
-
-private fun List<NamedNavArgument>.hasRuntimeParam(arguments: Bundle? = null): Boolean {
-    for (navArg in this) {
-        if (arguments == null || !arguments.containsKey(navArg.name)) return true
-    }
-    return false
 }

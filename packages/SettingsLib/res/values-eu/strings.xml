@@ -53,8 +53,6 @@
     <string name="wifi_disconnected" msgid="7054450256284661757">"Deskonektatuta"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"Desgaituta"</string>
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"Ezin izan da konfiguratu IP helbidea"</string>
-    <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"Ez dago konektatuta sarearen kalitate eskasagatik"</string>
-    <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"Ezin izan da konektatu wifi-sarera"</string>
     <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"Autentifikazio-arazoa"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"Ezin da konektatu"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"Ezin da konektatu \"<xliff:g id="AP_NAME">%1$s</xliff:g>\" sarera"</string>
@@ -63,12 +61,9 @@
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"Ez da konektatuko automatikoki"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"Ezin da konektatu Internetera"</string>
     <string name="saved_network" msgid="7143698034077223645">"<xliff:g id="NAME">%1$s</xliff:g> aplikazioak gorde du"</string>
-    <string name="connected_to_metered_access_point" msgid="9179693207918156341">"Sare neurtu batera konektatuta"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"%1$s bidez automatikoki konektatuta"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"Automatikoki konektatuta sare-balorazioen hornitzailearen bidez"</string>
-    <string name="connected_via_passpoint" msgid="7735442932429075684">"%1$s bidez konektatuta"</string>
     <string name="connected_via_app" msgid="3532267661404276584">"<xliff:g id="NAME">%1$s</xliff:g> bidez konektatuta"</string>
-    <string name="available_via_passpoint" msgid="1716000261192603682">"%1$s bidez erabilgarri"</string>
     <string name="tap_to_sign_up" msgid="5356397741063740395">"Sakatu erregistratzeko"</string>
     <string name="wifi_connected_no_internet" msgid="5087420713443350646">"Ez dago Interneteko konexiorik"</string>
     <string name="private_dns_broken" msgid="1984159464346556931">"Ezin da atzitu DNS zerbitzari pribatua"</string>
@@ -76,17 +71,13 @@
     <string name="wifi_status_no_internet" msgid="3799933875988829048">"Ez dago Interneteko konexiorik"</string>
     <string name="wifi_status_sign_in_required" msgid="2236267500459526855">"Saioa hasi behar da"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5885145407184194503">"Sarbide-puntua beteta dago aldi baterako"</string>
-    <string name="connected_via_carrier" msgid="1968057009076191514">"%1$s bidez konektatuta"</string>
-    <string name="available_via_carrier" msgid="465598683092718294">"%1$s bidez erabilgarri"</string>
     <string name="osu_opening_provider" msgid="4318105381295178285">"<xliff:g id="PASSPOINTPROVIDER">%1$s</xliff:g> irekitzen"</string>
     <string name="osu_connect_failed" msgid="9107873364807159193">"Ezin izan da konektatu"</string>
     <string name="osu_completing_sign_up" msgid="8412636665040390901">"Erregistroa osatzen…"</string>
     <string name="osu_sign_up_failed" msgid="5605453599586001793">"Ezin izan da osatu erregistroa. Berriro saiatzeko, ukitu hau."</string>
     <string name="osu_sign_up_complete" msgid="7640183358878916847">"Erregistratu da. Konektatzen…"</string>
-    <string name="speed_label_very_slow" msgid="8526005255731597666">"Oso motela"</string>
     <string name="speed_label_slow" msgid="6069917670665664161">"Motela"</string>
     <string name="speed_label_okay" msgid="1253594383880810424">"Ados"</string>
-    <string name="speed_label_medium" msgid="9078405312828606976">"Tartekoa"</string>
     <string name="speed_label_fast" msgid="2677719134596044051">"Bizkorra"</string>
     <string name="speed_label_very_fast" msgid="8215718029533182439">"Oso bizkorra"</string>
     <string name="wifi_passpoint_expired" msgid="6540867261754427561">"Iraungita"</string>
@@ -98,7 +89,6 @@
     <string name="bluetooth_pairing" msgid="4269046942588193600">"Parekatzen…"</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"Konektatuta (telefonoaren audiorik gabe)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"Konektatuta (gailuaren audiorik gabe)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"Konektatuta (mezuetarako sarbiderik gabe)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2893204819854215433">"Konektatuta (telefonoaren edo gailuaren audiorik gabe)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_battery_level" msgid="5410325759372259950">"Konektatuta. Bateria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>."</string>
     <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"Konektatuta (telefonoaren audiorik gabe). Bateria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>."</string>
