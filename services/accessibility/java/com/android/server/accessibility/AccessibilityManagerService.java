@@ -1695,31 +1695,34 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     private boolean scheduleNotifyMotionEvent(MotionEvent event) {
+        boolean result = false;
+        int displayId = event.getDisplayId();
         synchronized (mLock) {
             AccessibilityUserState state = getCurrentUserStateLocked();
             for (int i = state.mBoundServices.size() - 1; i >= 0; i--) {
                 AccessibilityServiceConnection service = state.mBoundServices.get(i);
-                if (service.mRequestTouchExplorationMode) {
+                if (service.isServiceDetectsGesturesEnabled(displayId)) {
                     service.notifyMotionEvent(event);
-                    return true;
+                    result = true;
                 }
             }
         }
-        return false;
+        return result;
     }
 
     private boolean scheduleNotifyTouchState(int displayId, int touchState) {
+        boolean result = false;
         synchronized (mLock) {
             AccessibilityUserState state = getCurrentUserStateLocked();
             for (int i = state.mBoundServices.size() - 1; i >= 0; i--) {
                 AccessibilityServiceConnection service = state.mBoundServices.get(i);
-                if (service.mRequestTouchExplorationMode) {
+                if (service.isServiceDetectsGesturesEnabled(displayId)) {
                     service.notifyTouchState(displayId, touchState);
-                    return true;
+                    result = true;
                 }
             }
         }
-        return false;
+        return result;
     }
 
     private void notifyClearAccessibilityCacheLocked() {
@@ -2292,8 +2295,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 if (!mHasInputFilter) {
                     mHasInputFilter = true;
                     if (mInputFilter == null) {
-                        mInputFilter = new AccessibilityInputFilter(mContext,
-                                AccessibilityManagerService.this);
+                        mInputFilter =
+                                new AccessibilityInputFilter(
+                                        mContext, AccessibilityManagerService.this);
                     }
                     inputFilter = mInputFilter;
                     setInputFilter = true;
@@ -2303,6 +2307,17 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 if (mHasInputFilter) {
                     mHasInputFilter = false;
                     mInputFilter.setUserAndEnabledFeatures(userState.mUserId, 0);
+                    mInputFilter.resetServiceDetectsGestures();
+                    if (userState.isTouchExplorationEnabledLocked()) {
+                        //  Service gesture detection is turned on and off on a per-display
+                        // basis.
+                        final ArrayList<Display> displays = getValidDisplayList();
+                        for (Display display : displays) {
+                            int displayId = display.getDisplayId();
+                            boolean mode = userState.isServiceDetectsGesturesEnabled(displayId);
+                            mInputFilter.setServiceDetectsGesturesEnabled(displayId, mode);
+                        }
+                    }
                     inputFilter = null;
                     setInputFilter = true;
                 }
@@ -2616,6 +2631,18 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                         userState.mUserId);
             } finally {
                 Binder.restoreCallingIdentity(identity);
+            }
+        }
+        // Service gesture detection is turned on and off on a per-display
+        // basis.
+        userState.resetServiceDetectsGestures();
+        final ArrayList<Display> displays = getValidDisplayList();
+        for (AccessibilityServiceConnection service: userState.mBoundServices) {
+            for (Display display : displays) {
+                int displayId = display.getDisplayId();
+                if (service.isServiceDetectsGesturesEnabled(displayId)) {
+                    userState.setServiceDetectsGesturesEnabled(displayId, true);
+                }
             }
         }
         userState.setServiceHandlesDoubleTapLocked(serviceHandlesDoubleTapEnabled);
@@ -4342,6 +4369,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     private void setServiceDetectsGesturesInternal(int displayId, boolean mode) {
         synchronized (mLock) {
+            getCurrentUserStateLocked().setServiceDetectsGesturesEnabled(displayId, mode);
             if (mHasInputFilter && mInputFilter != null) {
                 mInputFilter.setServiceDetectsGesturesEnabled(displayId, mode);
             }
