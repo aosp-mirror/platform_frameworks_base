@@ -173,6 +173,15 @@ public final class UiAutomation {
     public static final int FLAG_DONT_USE_ACCESSIBILITY = 0x00000002;
 
     /**
+     * UiAutomation sets {@link AccessibilityServiceInfo#isAccessibilityTool()} true by default.
+     * This flag provides the option to set this field false for tests exercising that property.
+     *
+     * @hide
+     */
+    @TestApi
+    public static final int FLAG_NOT_ACCESSIBILITY_TOOL = 0x00000004;
+
+    /**
      * Returned by {@link #getAdoptedShellPermissions} to indicate that all permissions have been
      * adopted using {@link #adoptShellPermissionIdentity}.
      *
