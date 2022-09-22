@@ -5988,7 +5988,11 @@ public class WindowManagerService extends IWindowManager.Stub
         if (mFrozenDisplayId != INVALID_DISPLAY && mFrozenDisplayId == w.getDisplayId()
                 && mWindowsFreezingScreen != WINDOWS_FREEZING_SCREENS_TIMEOUT) {
             ProtoLog.v(WM_DEBUG_ORIENTATION, "Changing surface while display frozen: %s", w);
-            w.setOrientationChanging(true);
+            // WindowsState#reportResized won't tell invisible requested window to redraw,
+            // so do not set it as changing orientation to avoid affecting draw state.
+            if (w.isVisibleRequested()) {
+                w.setOrientationChanging(true);
+            }
             if (mWindowsFreezingScreen == WINDOWS_FREEZING_SCREENS_NONE) {
                 mWindowsFreezingScreen = WINDOWS_FREEZING_SCREENS_ACTIVE;
                 // XXX should probably keep timeout from
