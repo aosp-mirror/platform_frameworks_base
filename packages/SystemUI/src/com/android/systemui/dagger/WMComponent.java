@@ -23,8 +23,6 @@ import androidx.annotation.Nullable;
 
 import com.android.systemui.SystemUIInitializerFactory;
 import com.android.systemui.tv.TvWMComponent;
-import com.android.wm.shell.sysui.ShellCommandHandler;
-import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.TaskViewFactory;
 import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.bubbles.Bubbles;
@@ -33,6 +31,7 @@ import com.android.wm.shell.dagger.TvWMShellModule;
 import com.android.wm.shell.dagger.WMShellModule;
 import com.android.wm.shell.dagger.WMSingleton;
 import com.android.wm.shell.displayareahelper.DisplayAreaHelper;
+import com.android.wm.shell.floating.FloatingTasks;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.recents.RecentTasks;
@@ -110,4 +109,7 @@ public interface WMComponent {
 
     @WMSingleton
     Optional<BackAnimation> getBackAnimation();
+
+    @WMSingleton
+    Optional<FloatingTasks> getFloatingTasks();
 }
