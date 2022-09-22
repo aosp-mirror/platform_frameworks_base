@@ -63,7 +63,7 @@ internal class TogglePermissionAppListPageProvider(
 
     override fun buildEntry(arguments: Bundle?): List<SettingsEntry> {
         val permissionType = parameter.getStringArg(PERMISSION, arguments)!!
-        val appListPage = SettingsPage.create(name, parameter, arguments)
+        val appListPage = SettingsPage.create(name, parameter = parameter, arguments = arguments)
         val appInfoPage = TogglePermissionAppInfoPageProvider.buildPageData(permissionType)
         val entryList = mutableListOf<SettingsEntry>()
         // TODO: add more categories, such as personal, work, cloned, etc.
@@ -117,7 +117,10 @@ internal class TogglePermissionAppListPageProvider(
             listModelSupplier: (Context) -> TogglePermissionAppListModel<out AppRecord>,
         ): SettingsEntryBuilder {
             val appListPage = SettingsPage.create(
-                PAGE_NAME, PAGE_PARAMETER, bundleOf(PERMISSION to permissionType))
+                name = PAGE_NAME,
+                parameter = PAGE_PARAMETER,
+                arguments = bundleOf(PERMISSION to permissionType)
+            )
             return SettingsEntryBuilder.createInject(owner = appListPage).setIsAllowSearch(false)
                 .setUiLayoutFn {
                     val listModel = rememberContext(listModelSupplier)
