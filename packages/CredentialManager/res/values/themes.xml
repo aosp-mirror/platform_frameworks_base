@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+  <style name="Theme.CredentialSelector" parent="@android:style/ThemeOverlay.Material">
+    <item name="android:statusBarColor">@color/purple_700</item>
+    <item name="android:windowContentOverlay">@null</item>
+    <item name="android:windowNoTitle">true</item>
+    <item name="android:windowBackground">@android:color/transparent</item>
+    <item name="android:windowIsTranslucent">true</item>
+    <item name="android:colorBackgroundCacheHint">@null</item>
+  </style>
+</resources>
