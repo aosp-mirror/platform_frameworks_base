@@ -106,6 +106,7 @@ import com.android.server.location.injector.LocationPermissionsHelper.LocationPe
 import com.android.server.location.injector.LocationPowerSaveModeHelper;
 import com.android.server.location.injector.LocationPowerSaveModeHelper.LocationPowerSaveModeChangedListener;
 import com.android.server.location.injector.LocationUsageLogger;
+import com.android.server.location.injector.PackageResetHelper;
 import com.android.server.location.injector.ScreenInteractiveHelper;
 import com.android.server.location.injector.ScreenInteractiveHelper.ScreenInteractiveChangedListener;
 import com.android.server.location.injector.SettingsHelper;
@@ -1373,6 +1374,7 @@ public class LocationProviderManager extends
     protected final ScreenInteractiveHelper mScreenInteractiveHelper;
     protected final LocationUsageLogger mLocationUsageLogger;
     protected final LocationFudger mLocationFudger;
+    private final PackageResetHelper mPackageResetHelper;
 
     private final UserListener mUserChangedListener = this::onUserChanged;
     private final LocationSettings.LocationUserSettingsListener mLocationUserSettingsListener =
@@ -1407,6 +1409,18 @@ public class LocationProviderManager extends
             this::onLocationPowerSaveModeChanged;
     private final ScreenInteractiveChangedListener mScreenInteractiveChangedListener =
             this::onScreenInteractiveChanged;
+    private final PackageResetHelper.Responder mPackageResetResponder =
+            new PackageResetHelper.Responder() {
+                @Override
+                public void onPackageReset(String packageName) {
+                    LocationProviderManager.this.onPackageReset(packageName);
+                }
+
+                @Override
+                public boolean isResetableForPackage(String packageName) {
+                    return LocationProviderManager.this.isResetableForPackage(packageName);
+                }
+            };
 
     // acquiring mMultiplexerLock makes operations on mProvider atomic, but is otherwise unnecessary
     protected final MockableLocationProvider mProvider;
@@ -1442,6 +1456,7 @@ public class LocationProviderManager extends
         mScreenInteractiveHelper = injector.getScreenInteractiveHelper();
         mLocationUsageLogger = injector.getLocationUsageLogger();
         mLocationFudger = new LocationFudger(mSettingsHelper.getCoarseLocationAccuracyM());
+        mPackageResetHelper = injector.getPackageResetHelper();
 
         mProvider = new MockableLocationProvider(mMultiplexerLock);
 
@@ -1970,6 +1985,7 @@ public class LocationProviderManager extends
         mAppForegroundHelper.addListener(mAppForegroundChangedListener);
         mLocationPowerSaveModeHelper.addListener(mLocationPowerSaveModeChangedListener);
         mScreenInteractiveHelper.addListener(mScreenInteractiveChangedListener);
+        mPackageResetHelper.register(mPackageResetResponder);
     }
 
     @GuardedBy("mMultiplexerLock")
@@ -1988,6 +2004,7 @@ public class LocationProviderManager extends
         mAppForegroundHelper.removeListener(mAppForegroundChangedListener);
         mLocationPowerSaveModeHelper.removeListener(mLocationPowerSaveModeChangedListener);
         mScreenInteractiveHelper.removeListener(mScreenInteractiveChangedListener);
+        mPackageResetHelper.unregister(mPackageResetResponder);
     }
 
     @GuardedBy("mMultiplexerLock")
@@ -2389,6 +2406,27 @@ public class LocationProviderManager extends
 
     private void onLocationPermissionsChanged(int uid) {
         updateRegistrations(registration -> registration.onLocationPermissionsChanged(uid));
+    }
+
+    private void onPackageReset(String packageName) {
+        // invoked when a package is "force quit" - move off the main thread
+        FgThread.getExecutor().execute(
+                () ->
+                        updateRegistrations(
+                                registration -> {
+                                    if (registration.getIdentity().getPackageName().equals(
+                                            packageName)) {
+                                        registration.remove();
+                                    }
+
+                                    return false;
+                                }));
+    }
+
+    private boolean isResetableForPackage(String packageName) {
+        // invoked to find out if the given package has any state that can be "force quit"
+        return findRegistration(
+                registration -> registration.getIdentity().getPackageName().equals(packageName));
     }
 
     @GuardedBy("mMultiplexerLock")
