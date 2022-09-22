@@ -18,6 +18,7 @@ package com.android.internal.telephony;
 
 import android.telephony.SubscriptionInfo;
 import android.os.ParcelUuid;
+import android.os.UserHandle;
 import com.android.internal.telephony.ISetOpportunisticDataCallback;
 
 interface ISub {
@@ -324,4 +325,28 @@ interface ISub {
      * @throws SecurityException if doesn't have MODIFY_PHONE_STATE or Carrier Privileges
      */
     int setUsageSetting(int usageSetting, int subId, String callingPackage);
+
+     /**
+      * Set userHandle for this subscription.
+      *
+      * @param userHandle the user handle for this subscription
+      * @param subId the unique SubscriptionInfo index in database
+      * @param callingPackage The package making the IPC.
+      *
+      * @throws SecurityException if doesn't have MANAGE_SUBSCRIPTION_USER_ASSOCIATION
+      * @throws IllegalArgumentException if subId is invalid.
+      */
+    int setUserHandle(in UserHandle userHandle, int subId, String callingPackage);
+
+    /**
+     * Get UserHandle for this subscription
+     *
+     * @param subId the unique SubscriptionInfo index in database
+     * @param callingPackage the package making the IPC
+     * @return userHandle associated with this subscription.
+     *
+     * @throws SecurityException if doesn't have SMANAGE_SUBSCRIPTION_USER_ASSOCIATION
+     * @throws IllegalArgumentException if subId is invalid.
+     */
+     UserHandle getUserHandle(int subId, String callingPackage);
 }
