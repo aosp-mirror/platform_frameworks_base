@@ -87,6 +87,10 @@ public class SplitscreenEventLogger {
         return mLoggerSessionId != null;
     }
 
+    public boolean isEnterRequestedByDrag() {
+        return mEnterReason == ENTER_REASON_DRAG;
+    }
+
     /**
      * May be called before logEnter() to indicate that the session was started from a drag.
      */
