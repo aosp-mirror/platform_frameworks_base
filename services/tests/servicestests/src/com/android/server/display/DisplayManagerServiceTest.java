@@ -58,7 +58,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.MessageQueue;
 import android.os.Process;
-import android.platform.test.annotations.Presubmit;
 import android.view.Display;
 import android.view.DisplayCutout;
 import android.view.DisplayEventReceiver;
@@ -106,7 +105,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.LongStream;
 
 @SmallTest
-@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class DisplayManagerServiceTest {
     private static final int MSG_REGISTER_DEFAULT_DISPLAY_ADAPTERS = 1;
