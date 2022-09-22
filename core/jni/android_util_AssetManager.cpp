@@ -39,6 +39,7 @@
 #include "androidfw/AssetManager2.h"
 #include "androidfw/AttributeResolution.h"
 #include "androidfw/MutexGuard.h"
+#include <androidfw/ResourceTimer.h>
 #include "androidfw/ResourceTypes.h"
 #include "androidfw/ResourceUtils.h"
 
@@ -630,6 +631,7 @@ static jint NativeGetResourceValue(JNIEnv* env, jclass /*clazz*/, jlong ptr, jin
                                    jshort density, jobject typed_value,
                                    jboolean resolve_references) {
   ScopedLock<AssetManager2> assetmanager(AssetManagerFromLong(ptr));
+  ResourceTimer _tag(ResourceTimer::Counter::GetResourceValue);
   auto value = assetmanager->GetResource(static_cast<uint32_t>(resid), false /*may_be_bag*/,
                                          static_cast<uint16_t>(density));
   if (!value.has_value()) {
@@ -1232,6 +1234,7 @@ static jboolean NativeRetrieveAttributes(JNIEnv* env, jclass /*clazz*/, jlong pt
   }
 
   ScopedLock<AssetManager2> assetmanager(AssetManagerFromLong(ptr));
+  ResourceTimer _tag(ResourceTimer::Counter::RetrieveAttributes);
   ResXMLParser* xml_parser = reinterpret_cast<ResXMLParser*>(xml_parser_ptr);
   auto result =
           RetrieveAttributes(assetmanager.get(), xml_parser, reinterpret_cast<uint32_t*>(attrs),

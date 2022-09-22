@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.IResourcesManager;
+import android.content.res.ResourceTimer;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
@@ -55,7 +56,7 @@ public class ResourcesManagerService extends SystemService {
 
     @Override
     public void onStart() {
-        // Intentionally left empty.
+        ResourceTimer.start();
     }
 
     private final IBinder mService = new IResourcesManager.Stub() {
