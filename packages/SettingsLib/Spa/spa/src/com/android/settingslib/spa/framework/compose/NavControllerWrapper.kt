@@ -49,7 +49,8 @@ val LocalNavController = compositionLocalOf<NavControllerWrapper> {
 }
 
 @Composable
-fun navigator(route: String): () -> Unit {
+fun navigator(route: String?): () -> Unit {
+    if (route == null) return {}
     val navController = LocalNavController.current
     return { navController.navigate(route) }
 }

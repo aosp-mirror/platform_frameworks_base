@@ -30,12 +30,8 @@ class SettingsPageProviderRepository(
         logMsg("Initialize Completed: ${pageProviderMap.size} spp")
     }
 
-    fun getDefaultStartPageName(): String {
-        return if (rootPages.isNotEmpty()) {
-            rootPages[0].name
-        } else {
-            ""
-        }
+    fun getDefaultStartPage(): String {
+        return if (rootPages.isEmpty()) "" else rootPages[0].buildRoute()
     }
 
     fun getAllRootPages(): Collection<SettingsPage> {

@@ -16,9 +16,12 @@
 
 package com.android.settingslib.spa.framework
 
+import android.content.ComponentName
 import android.content.ContentProvider
 import android.content.ContentValues
 import android.content.Context
+import android.content.Intent
+import android.content.Intent.URI_INTENT_SCHEME
 import android.content.UriMatcher
 import android.content.pm.ProviderInfo
 import android.database.Cursor
@@ -26,38 +29,62 @@ import android.database.MatrixCursor
 import android.net.Uri
 import android.util.Log
 import com.android.settingslib.spa.framework.common.SettingsEntryRepository
+import com.android.settingslib.spa.framework.common.SettingsPage
 
 /**
- * Enum to define all column names in provider.
+ * The content provider to return entry related data, which can be used for search and hierarchy.
+ * One can query the provider result by:
+ *   $ adb shell content query --uri content://<AuthorityPath>/<QueryPath>
+ * For gallery, AuthorityPath = com.android.spa.gallery.provider
+ * For SettingsGoogle, AuthorityPath = com.android.settings.spa.provider
+ * Some examples:
+ *   $ adb shell content query --uri content://<AuthorityPath>/page_start
+ *   $ adb shell content query --uri content://<AuthorityPath>/page_info
  */
-enum class ColumnName(val id: String) {
-    PAGE_NAME("pageName"),
-    PAGE_ROUTE("pageRoute"),
-    ENTRY_COUNT("entryCount"),
-    HAS_RUNTIME_PARAM("hasRuntimeParam"),
-    PAGE_START_ADB("pageStartAdb"),
-}
-
-data class QueryDefinition(
-    val queryPath: String,
-    val queryMatchCode: Int,
-    val columnNames: List<ColumnName>,
-) {
-    fun getColumns(): Array<String> {
-        return columnNames.map { it.id }.toTypedArray()
-    }
-
-    fun getIndex(name: ColumnName): Int {
-        return columnNames.indexOf(name)
-    }
-}
-
 open class EntryProvider(
     private val entryRepository: SettingsEntryRepository,
-    private val browseActivityComponentName: String? = null,
+    private val browseActivityClass: Class<*>? = null,
 ) : ContentProvider() {
 
-    private var mMatcher: UriMatcher? = null
+    /**
+     * Enum to define all column names in provider.
+     */
+    enum class ColumnEnum(val id: String) {
+        PAGE_ID("pageId"),
+        PAGE_NAME("pageName"),
+        PAGE_ROUTE("pageRoute"),
+        PAGE_INTENT_URI("pageIntent"),
+        PAGE_ENTRY_COUNT("entryCount"),
+        HAS_RUNTIME_PARAM("hasRuntimeParam"),
+        PAGE_START_ADB("pageStartAdb"),
+    }
+
+    /**
+     * Enum to define all queries supported in the provider.
+     */
+    enum class QueryEnum(
+        val queryPath: String,
+        val queryMatchCode: Int,
+        val columnNames: List<ColumnEnum>
+    ) {
+        PAGE_START_COMMAND(
+            "page_start", 1,
+            listOf(ColumnEnum.PAGE_START_ADB)
+        ),
+        PAGE_INFO_QUERY(
+            "page_info", 2,
+            listOf(
+                ColumnEnum.PAGE_ID,
+                ColumnEnum.PAGE_NAME,
+                ColumnEnum.PAGE_ROUTE,
+                ColumnEnum.PAGE_INTENT_URI,
+                ColumnEnum.PAGE_ENTRY_COUNT,
+                ColumnEnum.HAS_RUNTIME_PARAM,
+            )
+        ),
+    }
+
+    private var uriMatcher: UriMatcher? = null
 
     override fun delete(uri: Uri, selection: String?, selectionArgs: Array<String>?): Int {
         TODO("Implement this to handle requests to delete one or more rows")
@@ -88,17 +115,17 @@ open class EntryProvider(
     }
 
     override fun attachInfo(context: Context?, info: ProviderInfo?) {
-        mMatcher = UriMatcher(UriMatcher.NO_MATCH)
+        uriMatcher = UriMatcher(UriMatcher.NO_MATCH)
         if (info != null) {
-            mMatcher!!.addURI(
+            uriMatcher!!.addURI(
                 info.authority,
-                PAGE_START_COMMAND_QUERY.queryPath,
-                PAGE_START_COMMAND_QUERY.queryMatchCode
+                QueryEnum.PAGE_START_COMMAND.queryPath,
+                QueryEnum.PAGE_START_COMMAND.queryMatchCode
             )
-            mMatcher!!.addURI(
+            uriMatcher!!.addURI(
                 info.authority,
-                PAGE_INFO_QUERY.queryPath,
-                PAGE_INFO_QUERY.queryMatchCode
+                QueryEnum.PAGE_INFO_QUERY.queryPath,
+                QueryEnum.PAGE_INFO_QUERY.queryMatchCode
             )
         }
         super.attachInfo(context, info)
@@ -112,9 +139,9 @@ open class EntryProvider(
         sortOrder: String?
     ): Cursor? {
         return try {
-            when (mMatcher!!.match(uri)) {
-                PAGE_START_COMMAND_QUERY.queryMatchCode -> queryPageStartCommand()
-                PAGE_INFO_QUERY.queryMatchCode -> queryPageInfo()
+            when (uriMatcher!!.match(uri)) {
+                QueryEnum.PAGE_START_COMMAND.queryMatchCode -> queryPageStartCommand()
+                QueryEnum.PAGE_INFO_QUERY.queryMatchCode -> queryPageInfo()
                 else -> throw UnsupportedOperationException("Unknown Uri $uri")
             }
         } catch (e: UnsupportedOperationException) {
@@ -126,47 +153,72 @@ open class EntryProvider(
     }
 
     private fun queryPageStartCommand(): Cursor {
-        val componentName = browseActivityComponentName ?: "[component-name]"
-        val cursor = MatrixCursor(PAGE_START_COMMAND_QUERY.getColumns())
+        val cursor = MatrixCursor(QueryEnum.PAGE_START_COMMAND.getColumns())
         for (pageWithEntry in entryRepository.getAllPageWithEntry()) {
-            val page = pageWithEntry.page
-            if (!page.hasRuntimeParam()) {
-                cursor.newRow().add(
-                    ColumnName.PAGE_START_ADB.id,
-                    "adb shell am start -n $componentName" +
-                        " -e ${BrowseActivity.KEY_DESTINATION} ${page.buildRoute()}"
-                )
+            val command = createBrowsePageAdbCommand(pageWithEntry.page)
+            if (command != null) {
+                cursor.newRow().add(ColumnEnum.PAGE_START_ADB.id, command)
             }
         }
         return cursor
     }
 
     private fun queryPageInfo(): Cursor {
-        val cursor = MatrixCursor(PAGE_INFO_QUERY.getColumns())
+        val cursor = MatrixCursor(QueryEnum.PAGE_INFO_QUERY.getColumns())
         for (pageWithEntry in entryRepository.getAllPageWithEntry()) {
             val page = pageWithEntry.page
-            cursor.newRow().add(ColumnName.PAGE_NAME.id, page.name)
-                .add(ColumnName.PAGE_ROUTE.id, page.buildRoute())
-                .add(ColumnName.ENTRY_COUNT.id, pageWithEntry.entries.size)
-                .add(ColumnName.HAS_RUNTIME_PARAM.id, if (page.hasRuntimeParam()) 1 else 0)
+            cursor.newRow()
+                .add(ColumnEnum.PAGE_ID.id, page.id())
+                .add(ColumnEnum.PAGE_NAME.id, page.displayName)
+                .add(ColumnEnum.PAGE_ROUTE.id, page.buildRoute())
+                .add(ColumnEnum.PAGE_ENTRY_COUNT.id, pageWithEntry.entries.size)
+                .add(ColumnEnum.HAS_RUNTIME_PARAM.id, if (page.hasRuntimeParam()) 1 else 0)
+                .add(
+                    ColumnEnum.PAGE_INTENT_URI.id,
+                    createBrowsePageIntent(page).toUri(URI_INTENT_SCHEME)
+                )
         }
         return cursor
     }
 
-    companion object {
-        val PAGE_START_COMMAND_QUERY = QueryDefinition(
-            "page_start", 1,
-            listOf(ColumnName.PAGE_START_ADB)
-        )
+    private fun createBrowsePageIntent(page: SettingsPage): Intent {
+        if (context == null || browseActivityClass == null || page.hasRuntimeParam())
+            return Intent()
 
-        val PAGE_INFO_QUERY = QueryDefinition(
-            "page_info", 2,
-            listOf(
-                ColumnName.PAGE_NAME,
-                ColumnName.PAGE_ROUTE,
-                ColumnName.ENTRY_COUNT,
-                ColumnName.HAS_RUNTIME_PARAM,
-            )
-        )
+        return Intent().setComponent(ComponentName(context!!, browseActivityClass)).apply {
+            putExtra(BrowseActivity.KEY_DESTINATION, page.buildRoute())
+        }
     }
+
+    private fun createBrowsePageAdbCommand(page: SettingsPage): String? {
+        if (context == null || page.hasRuntimeParam()) return null
+        val packageName = context!!.packageName
+        val activityName =
+            browseActivityClass?.name?.replace(packageName, "") ?: "<browse-activity-class>"
+        return "adb shell am start -n $packageName/$activityName" +
+            " -e ${BrowseActivity.KEY_DESTINATION} ${page.buildRoute()}"
+    }
+}
+
+fun EntryProvider.QueryEnum.getColumns(): Array<String> {
+    return columnNames.map { it.id }.toTypedArray()
+}
+
+fun EntryProvider.QueryEnum.getIndex(name: EntryProvider.ColumnEnum): Int {
+    return columnNames.indexOf(name)
+}
+
+fun Cursor.getString(query: EntryProvider.QueryEnum, columnName: EntryProvider.ColumnEnum): String {
+    return this.getString(query.getIndex(columnName))
+}
+
+fun Cursor.getInt(query: EntryProvider.QueryEnum, columnName: EntryProvider.ColumnEnum): Int {
+    return this.getInt(query.getIndex(columnName))
+}
+
+fun Cursor.getBoolean(
+    query: EntryProvider.QueryEnum,
+    columnName: EntryProvider.ColumnEnum
+): Boolean {
+    return this.getInt(query.getIndex(columnName)) == 1
 }

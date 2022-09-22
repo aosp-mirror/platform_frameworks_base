@@ -34,6 +34,7 @@ import android.content.pm.ProviderInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.SigningDetails;
 import android.os.Bundle;
+import android.processor.immutability.Immutable;
 import android.util.ArraySet;
 import android.util.Pair;
 import android.util.SparseArray;
@@ -65,6 +66,7 @@ import java.util.Set;
  * @hide
  */
 //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+@Immutable
 public interface AndroidPackage {
 
     /**
@@ -86,6 +88,7 @@ public interface AndroidPackage {
      * @see ActivityInfo
      * @see PackageInfo#activities
      */
+    @Immutable.Ignore
     @NonNull
     List<ParsedActivity> getActivities();
 
@@ -101,6 +104,7 @@ public interface AndroidPackage {
     /**
      * @see R.styleable#AndroidManifestApexSystemService
      */
+    @Immutable.Ignore
     @NonNull
     List<ParsedApexSystemService> getApexSystemServices();
 
@@ -111,6 +115,7 @@ public interface AndroidPackage {
     @Nullable
     String getAppComponentFactory();
 
+    @Immutable.Ignore
     @NonNull
     List<ParsedAttribution> getAttributions();
 
@@ -189,6 +194,7 @@ public interface AndroidPackage {
      * @see PackageInfo#configPreferences
      * @see R.styleable#AndroidManifestUsesConfiguration
      */
+    @Immutable.Ignore
     @NonNull
     List<ConfigurationInfo> getConfigPreferences();
 
@@ -208,6 +214,7 @@ public interface AndroidPackage {
      * @see PackageInfo#featureGroups
      * @see R.styleable#AndroidManifestUsesFeature
      */
+    @Immutable.Ignore
     @NonNull
     List<FeatureGroupInfo> getFeatureGroups();
 
@@ -247,6 +254,7 @@ public interface AndroidPackage {
      * @see InstrumentationInfo
      * @see PackageInfo#instrumentation
      */
+    @Immutable.Ignore
     @NonNull
     List<ParsedInstrumentation> getInstrumentations();
 
@@ -257,6 +265,7 @@ public interface AndroidPackage {
      * @see R.styleable#AndroidManifestKeySet
      * @see R.styleable#AndroidManifestPublicKey
      */
+    @Immutable.Ignore
     @NonNull
     Map<String, ArraySet<PublicKey>> getKeySetMapping();
 
@@ -341,6 +350,7 @@ public interface AndroidPackage {
     /**
      * TODO(b/135203078): Make all the Bundles immutable (and non-null by shared empty reference?)
      */
+    @Immutable.Ignore
     @Nullable
     Bundle getMetaData();
 
@@ -356,6 +366,7 @@ public interface AndroidPackage {
     /**
      * @see R.styleable#AndroidManifestExtensionSdk
      */
+    @Immutable.Ignore
     @Nullable
     SparseIntArray getMinExtensionVersions();
 
@@ -464,6 +475,7 @@ public interface AndroidPackage {
     /**
      * @see android.content.pm.PermissionGroupInfo
      */
+    @Immutable.Ignore
     @NonNull
     List<ParsedPermissionGroup> getPermissionGroups();
 
@@ -471,6 +483,7 @@ public interface AndroidPackage {
      * @see PermissionInfo
      * @see PackageInfo#permissions
      */
+    @Immutable.Ignore
     @NonNull
     List<ParsedPermission> getPermissions();
 
@@ -480,6 +493,7 @@ public interface AndroidPackage {
      * Map of component className to intent info inside that component. TODO(b/135203078): Is this
      * actually used/working?
      */
+    @Immutable.Ignore
     @NonNull
     List<Pair<String, ParsedIntentInfo>> getPreferredActivityFilters();
 
@@ -493,12 +507,14 @@ public interface AndroidPackage {
     /**
      * @see android.content.pm.ProcessInfo
      */
+    @Immutable.Ignore
     @NonNull
     Map<String, ParsedProcess> getProcesses();
 
     /**
      * Returns the properties set on the application
      */
+    @Immutable.Ignore
     @NonNull
     Map<String, PackageManager.Property> getProperties();
 
@@ -522,6 +538,7 @@ public interface AndroidPackage {
      * @see ProviderInfo
      * @see PackageInfo#providers
      */
+    @Immutable.Ignore
     @NonNull
     List<ParsedProvider> getProviders();
 
@@ -530,6 +547,7 @@ public interface AndroidPackage {
      *
      * @see R.styleable#AndroidManifestQueriesIntent
      */
+    @Immutable.Ignore
     @NonNull
     List<Intent> getQueriesIntents();
 
@@ -566,6 +584,7 @@ public interface AndroidPackage {
      * @see ActivityInfo
      * @see PackageInfo#receivers
      */
+    @Immutable.Ignore
     @NonNull
     List<ParsedActivity> getReceivers();
 
@@ -573,6 +592,7 @@ public interface AndroidPackage {
      * @see PackageInfo#reqFeatures
      * @see R.styleable#AndroidManifestUsesFeature
      */
+    @Immutable.Ignore
     @NonNull
     List<FeatureInfo> getRequestedFeatures();
 
@@ -615,6 +635,7 @@ public interface AndroidPackage {
      *
      * @see R.styleable#AndroidManifestRestrictUpdate
      */
+    @Immutable.Ignore
     @Nullable
     byte[] getRestrictUpdateHash();
 
@@ -662,6 +683,7 @@ public interface AndroidPackage {
      * @see ServiceInfo
      * @see PackageInfo#services
      */
+    @Immutable.Ignore
     @NonNull
     List<ParsedService> getServices();
 
@@ -682,6 +704,7 @@ public interface AndroidPackage {
      * The signature data of all APKs in this package, which must be exactly the same across the
      * base and splits.
      */
+    @Immutable.Ignore
     @NonNull
     SigningDetails getSigningDetails();
 
@@ -689,6 +712,7 @@ public interface AndroidPackage {
      * @see ApplicationInfo#splitClassLoaderNames
      * @see R.styleable#AndroidManifestApplication_classLoader
      */
+    @Immutable.Ignore
     @Nullable
     String[] getSplitClassLoaderNames();
 
@@ -696,18 +720,21 @@ public interface AndroidPackage {
      * @see ApplicationInfo#splitSourceDirs
      * @see ApplicationInfo#getSplitCodePaths
      */
+    @Immutable.Ignore
     @NonNull
     String[] getSplitCodePaths();
 
     /**
      * @see ApplicationInfo#splitDependencies
      */
+    @Immutable.Ignore
     @NonNull
     SparseArray<int[]> getSplitDependencies();
 
     /**
      * Flags of any split APKs; ordered by parsed splitName
      */
+    @Immutable.Ignore
     @Nullable
     int[] getSplitFlags();
 
@@ -717,12 +744,14 @@ public interface AndroidPackage {
      * @see ApplicationInfo#splitNames
      * @see PackageInfo#splitNames
      */
+    @Immutable.Ignore
     @NonNull
     String[] getSplitNames();
 
     /**
      * @see PackageInfo#splitRevisionCodes
      */
+    @Immutable.Ignore
     @NonNull
     int[] getSplitRevisionCodes();
 
@@ -818,6 +847,7 @@ public interface AndroidPackage {
     @NonNull
     List<String> getUsesOptionalNativeLibraries();
 
+    @Immutable.Ignore
     @NonNull
     List<ParsedUsesPermission> getUsesPermissions();
 
@@ -832,12 +862,14 @@ public interface AndroidPackage {
     /**
      * @see R.styleable#AndroidManifestUsesSdkLibrary_certDigest
      */
+    @Immutable.Ignore
     @Nullable
     String[][] getUsesSdkLibrariesCertDigests();
 
     /**
      * @see R.styleable#AndroidManifestUsesSdkLibrary_versionMajor
      */
+    @Immutable.Ignore
     @Nullable
     long[] getUsesSdkLibrariesVersionsMajor();
 
@@ -852,12 +884,14 @@ public interface AndroidPackage {
     /**
      * @see R.styleable#AndroidManifestUsesStaticLibrary_certDigest
      */
+    @Immutable.Ignore
     @Nullable
     String[][] getUsesStaticLibrariesCertDigests();
 
     /**
      * @see R.styleable#AndroidManifestUsesStaticLibrary_version
      */
+    @Immutable.Ignore
     @Nullable
     long[] getUsesStaticLibrariesVersions();
 

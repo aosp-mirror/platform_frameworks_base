@@ -1487,8 +1487,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             } else {
                 final String resolvedType =
                         homeIntent.resolveTypeIfNeeded(mService.mContext.getContentResolver());
-                final ResolveInfo info = AppGlobals.getPackageManager()
-                        .resolveIntent(homeIntent, resolvedType, flags, userId);
+                final ResolveInfo info = mTaskSupervisor.resolveIntent(homeIntent, resolvedType,
+                        userId, flags, Binder.getCallingUid());
                 if (info != null) {
                     aInfo = info.activityInfo;
                 }

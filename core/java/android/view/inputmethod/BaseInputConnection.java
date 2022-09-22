@@ -879,11 +879,8 @@ public class BaseInputConnection implements InputConnection {
             Context context;
             if (mTargetView != null) {
                 context = mTargetView.getContext();
-            } else if (mIMM.mCurRootView != null) {
-                final View servedView = mIMM.mCurRootView.getImeFocusController().getServedView();
-                context = servedView != null ? servedView.getContext() : null;
             } else {
-                context = null;
+                context = mIMM.getFallbackContextFromServedView();
             }
             if (context != null) {
                 TypedArray ta = context.getTheme()

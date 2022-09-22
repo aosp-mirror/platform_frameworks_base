@@ -16,14 +16,18 @@
 
 package com.android.server.display.color;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.hardware.display.DisplayManagerInternal;
 import android.os.Binder;
 import android.os.IBinder;
 import android.view.SurfaceControl;
@@ -50,6 +54,8 @@ public class DisplayWhiteBalanceTintControllerTest {
     private Context mMockedContext;
     @Mock
     private Resources mMockedResources;
+    @Mock
+    private DisplayManagerInternal mDisplayManagerInternal;
 
     private MockitoSession mSession;
     private Resources mResources;
@@ -81,7 +87,6 @@ public class DisplayWhiteBalanceTintControllerTest {
         doReturn(mMockedResources).when(mMockedContext).getResources();
 
         mDisplayToken = new Binder();
-        doReturn(mDisplayToken).when(() -> SurfaceControl.getInternalDisplayToken());
     }
 
     @After
@@ -114,8 +119,8 @@ public class DisplayWhiteBalanceTintControllerTest {
         displayPrimaries.white.X = 0.950456f;
         displayPrimaries.white.Y = 1.000000f;
         displayPrimaries.white.Z = 1.089058f;
-        doReturn(displayPrimaries)
-            .when(() -> SurfaceControl.getDisplayNativePrimaries(mDisplayToken));
+        when(mDisplayManagerInternal.getDisplayNativePrimaries(DEFAULT_DISPLAY))
+                .thenReturn(displayPrimaries);
 
         setUpTintController();
         assertWithMessage("Setup with valid SurfaceControl failed")
@@ -134,8 +139,8 @@ public class DisplayWhiteBalanceTintControllerTest {
         displayPrimaries.green = new CieXyz();
         displayPrimaries.blue = new CieXyz();
         displayPrimaries.white = new CieXyz();
-        doReturn(displayPrimaries)
-            .when(() -> SurfaceControl.getDisplayNativePrimaries(mDisplayToken));
+        when(mDisplayManagerInternal.getDisplayNativePrimaries(DEFAULT_DISPLAY))
+                .thenReturn(displayPrimaries);
 
         setUpTintController();
         assertWithMessage("Setup with invalid SurfaceControl succeeded")
@@ -154,7 +159,7 @@ public class DisplayWhiteBalanceTintControllerTest {
             .when(mMockedResources)
             .getStringArray(R.array.config_displayWhiteBalanceDisplayPrimaries);
         // Make SurfaceControl setup fail
-        doReturn(null).when(() -> SurfaceControl.getDisplayNativePrimaries(mDisplayToken));
+        when(mDisplayManagerInternal.getDisplayNativePrimaries(DEFAULT_DISPLAY)).thenReturn(null);
 
         setUpTintController();
         assertWithMessage("Setup with valid Resources failed")
@@ -178,7 +183,7 @@ public class DisplayWhiteBalanceTintControllerTest {
             .when(mMockedResources)
             .getStringArray(R.array.config_displayWhiteBalanceDisplayPrimaries);
         // Make SurfaceControl setup fail
-        doReturn(null).when(() -> SurfaceControl.getDisplayNativePrimaries(mDisplayToken));
+        when(mDisplayManagerInternal.getDisplayNativePrimaries(DEFAULT_DISPLAY)).thenReturn(null);
 
         setUpTintController();
         assertWithMessage("Setup with invalid Resources succeeded")
@@ -208,8 +213,8 @@ public class DisplayWhiteBalanceTintControllerTest {
         displayPrimaries.white.X = 0.950456f;
         displayPrimaries.white.Y = 1.000000f;
         displayPrimaries.white.Z = 1.089058f;
-        doReturn(displayPrimaries)
-                .when(() -> SurfaceControl.getDisplayNativePrimaries(mDisplayToken));
+        when(mDisplayManagerInternal.getDisplayNativePrimaries(DEFAULT_DISPLAY))
+                .thenReturn(displayPrimaries);
 
         setUpTintController();
         assertWithMessage("Setup with valid SurfaceControl failed")
@@ -234,7 +239,8 @@ public class DisplayWhiteBalanceTintControllerTest {
     }
 
     private void setUpTintController() {
-        mDisplayWhiteBalanceTintController = new DisplayWhiteBalanceTintController();
+        mDisplayWhiteBalanceTintController = new DisplayWhiteBalanceTintController(
+                mDisplayManagerInternal);
         mDisplayWhiteBalanceTintController.setUp(mMockedContext, true);
         mDisplayWhiteBalanceTintController.setActivated(true);
     }

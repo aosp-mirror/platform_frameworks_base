@@ -20,5 +20,5 @@ import com.android.settingslib.spa.framework.EntryProvider
 
 class GalleryEntryProvider : EntryProvider(
     SpaEnvironment.EntryRepository,
-    "com.android.settingslib.spa.gallery/.MainActivity",
+    browseActivityClass = MainActivity::class.java,
 )

@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.ActivityManager.isStartResultSuccessful;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.ActivityTaskManager.RESIZE_MODE_FORCED;
 import static android.app.ActivityTaskManager.RESIZE_MODE_SYSTEM_SCREEN_ROTATION;
@@ -5343,54 +5344,32 @@ class Task extends TaskFragment {
 
         if (parent != null && foundParentInTask) {
             final int callingUid = srec.info.applicationInfo.uid;
-            final int parentLaunchMode = parent.info.launchMode;
-            final int destIntentFlags = destIntent.getFlags();
-            if (parentLaunchMode == ActivityInfo.LAUNCH_SINGLE_INSTANCE ||
-                    parentLaunchMode == ActivityInfo.LAUNCH_SINGLE_TASK ||
-                    parentLaunchMode == ActivityInfo.LAUNCH_SINGLE_TOP ||
-                    (destIntentFlags & Intent.FLAG_ACTIVITY_CLEAR_TOP) != 0) {
-                boolean abort;
-                try {
-                    abort = !mTaskSupervisor.checkStartAnyActivityPermission(destIntent,
-                            parent.info, null /* resultWho */, -1 /* requestCode */, srec.getPid(),
-                            callingUid, srec.info.packageName, null /* callingFeatureId */,
-                            false /* ignoreTargetSecurity */, false /* launchingInTask */, srec.app,
-                            null /* resultRecord */, null /* resultRootTask */);
-                } catch (SecurityException e) {
-                    abort = true;
+            try {
+                ActivityInfo aInfo = AppGlobals.getPackageManager().getActivityInfo(
+                        destIntent.getComponent(), ActivityManagerService.STOCK_PM_FLAGS,
+                        srec.mUserId);
+                // TODO(b/64750076): Check if calling pid should really be -1.
+                final int res = mAtmService.getActivityStartController()
+                        .obtainStarter(destIntent, "navigateUpTo")
+                        .setCaller(srec.app.getThread())
+                        .setActivityInfo(aInfo)
+                        .setResultTo(parent.token)
+                        .setIntentGrants(destGrants)
+                        .setCallingPid(-1)
+                        .setCallingUid(callingUid)
+                        .setCallingPackage(srec.packageName)
+                        .setCallingFeatureId(parent.launchedFromFeatureId)
+                        .setRealCallingPid(-1)
+                        .setRealCallingUid(callingUid)
+                        .setComponentSpecified(true)
+                        .execute();
+                foundParentInTask = isStartResultSuccessful(res);
+                if (res == ActivityManager.START_SUCCESS) {
+                    parent.finishIfPossible(resultCode, resultData, resultGrants,
+                            "navigate-top", true /* oomAdj */);
                 }
-                if (abort) {
-                    android.util.EventLog.writeEvent(0x534e4554, "238605611", callingUid, "");
-                    foundParentInTask = false;
-                } else {
-                    parent.deliverNewIntentLocked(callingUid, destIntent, destGrants,
-                            srec.packageName);
-                }
-            } else {
-                try {
-                    ActivityInfo aInfo = AppGlobals.getPackageManager().getActivityInfo(
-                            destIntent.getComponent(), ActivityManagerService.STOCK_PM_FLAGS,
-                            srec.mUserId);
-                    // TODO(b/64750076): Check if calling pid should really be -1.
-                    final int res = mAtmService.getActivityStartController()
-                            .obtainStarter(destIntent, "navigateUpTo")
-                            .setCaller(srec.app.getThread())
-                            .setActivityInfo(aInfo)
-                            .setResultTo(parent.token)
-                            .setCallingPid(-1)
-                            .setCallingUid(callingUid)
-                            .setCallingPackage(srec.packageName)
-                            .setCallingFeatureId(parent.launchedFromFeatureId)
-                            .setRealCallingPid(-1)
-                            .setRealCallingUid(callingUid)
-                            .setComponentSpecified(true)
-                            .execute();
-                    foundParentInTask = res == ActivityManager.START_SUCCESS;
-                } catch (RemoteException e) {
-                    foundParentInTask = false;
-                }
-                parent.finishIfPossible(resultCode, resultData, resultGrants,
-                        "navigate-top", true /* oomAdj */);
+            } catch (RemoteException e) {
+                foundParentInTask = false;
             }
         }
         Binder.restoreCallingIdentity(origId);

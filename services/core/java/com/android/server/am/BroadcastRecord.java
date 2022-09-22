@@ -84,6 +84,7 @@ final class BroadcastRecord extends Binder {
     final BroadcastOptions options; // BroadcastOptions supplied by caller
     final List receivers;   // contains BroadcastFilter and ResolveInfo
     final int[] delivery;   // delivery state of each receiver
+    final long[] scheduledTime; // uptimeMillis when each receiver was scheduled
     final long[] duration;   // duration a receiver took to process broadcast
     IIntentReceiver resultTo; // who receives final result if non-null
     boolean deferred;
@@ -127,10 +128,18 @@ final class BroadcastRecord extends Binder {
     static final int CALL_DONE_RECEIVE = 3;
     static final int WAITING_SERVICES = 4;
 
+    /** Initial state: waiting to run in future */
     static final int DELIVERY_PENDING = 0;
+    /** Terminal state: finished successfully */
     static final int DELIVERY_DELIVERED = 1;
+    /** Terminal state: skipped due to internal policy */
     static final int DELIVERY_SKIPPED = 2;
+    /** Terminal state: timed out during attempted delivery */
     static final int DELIVERY_TIMEOUT = 3;
+    /** Intermediate state: currently executing */
+    static final int DELIVERY_SCHEDULED = 4;
+    /** Terminal state: failure to dispatch */
+    static final int DELIVERY_FAILURE = 5;
 
     ProcessRecord curApp;       // hosting application of current receiver.
     ComponentName curComponent; // the receiver class that is currently running.
@@ -253,6 +262,8 @@ final class BroadcastRecord extends Binder {
                 case DELIVERY_DELIVERED: pw.print("Deliver"); break;
                 case DELIVERY_SKIPPED:   pw.print("Skipped"); break;
                 case DELIVERY_TIMEOUT:   pw.print("Timeout"); break;
+                case DELIVERY_SCHEDULED: pw.print("Schedul"); break;
+                case DELIVERY_FAILURE:   pw.print("Failure"); break;
                 default:                 pw.print("???????"); break;
             }
             pw.print(" "); TimeUtils.formatDuration(duration[i], pw);
@@ -300,6 +311,7 @@ final class BroadcastRecord extends Binder {
         options = _options;
         receivers = _receivers;
         delivery = new int[_receivers != null ? _receivers.size() : 0];
+        scheduledTime = new long[delivery.length];
         duration = new long[delivery.length];
         resultTo = _resultTo;
         resultCode = _resultCode;
@@ -346,6 +358,7 @@ final class BroadcastRecord extends Binder {
         options = from.options;
         receivers = from.receivers;
         delivery = from.delivery;
+        scheduledTime = from.scheduledTime;
         duration = from.duration;
         resultTo = from.resultTo;
         enqueueTime = from.enqueueTime;
@@ -497,11 +510,89 @@ final class BroadcastRecord extends Binder {
         return ret;
     }
 
-    int getReceiverUid(Object receiver) {
+    /**
+     * Update the delivery state of the given {@link #receivers} index.
+     * Automatically updates any time measurements related to state changes.
+     */
+    void setDeliveryState(int index, int deliveryState) {
+        delivery[index] = deliveryState;
+
+        switch (deliveryState) {
+            case DELIVERY_DELIVERED:
+                duration[index] = SystemClock.uptimeMillis() - scheduledTime[index];
+                break;
+            case DELIVERY_SCHEDULED:
+                scheduledTime[index] = SystemClock.uptimeMillis();
+                break;
+        }
+    }
+
+    boolean isForeground() {
+        return (intent.getFlags() & Intent.FLAG_RECEIVER_FOREGROUND) != 0;
+    }
+
+    boolean isReplacePending() {
+        return (intent.getFlags() & Intent.FLAG_RECEIVER_REPLACE_PENDING) != 0;
+    }
+
+    @NonNull String getHostingRecordTriggerType() {
+        if (alarm) {
+            return HostingRecord.TRIGGER_TYPE_ALARM;
+        } else if (pushMessage) {
+            return HostingRecord.TRIGGER_TYPE_PUSH_MESSAGE;
+        } else if (pushMessageOverQuota) {
+            return HostingRecord.TRIGGER_TYPE_PUSH_MESSAGE_OVER_QUOTA;
+        }
+        return HostingRecord.TRIGGER_TYPE_UNKNOWN;
+    }
+
+    /**
+     * Return an instance of {@link #intent} specialized for the given receiver.
+     * For example, this returns a new specialized instance if the extras need
+     * to be filtered, or a {@link ResolveInfo} needs to be configured.
+     *
+     * @return a specialized intent, otherwise {@code null} to indicate that the
+     *         broadcast should not be delivered to this receiver, typically due
+     *         to it being filtered away by {@link #filterExtrasForReceiver}.
+     */
+    @Nullable Intent getReceiverIntent(@NonNull Object receiver) {
+        Intent newIntent = null;
+        if (filterExtrasForReceiver != null) {
+            final Bundle extras = intent.getExtras();
+            if (extras != null) {
+                final int receiverUid = getReceiverUid(receiver);
+                final Bundle filteredExtras = filterExtrasForReceiver.apply(receiverUid, extras);
+                if (filteredExtras == null) {
+                    // Completely filtered; skip the broadcast!
+                    return null;
+                } else {
+                    newIntent = new Intent(intent);
+                    newIntent.replaceExtras(filteredExtras);
+                }
+            }
+        }
+        if (receiver instanceof ResolveInfo) {
+            if (newIntent == null) {
+                newIntent = new Intent(intent);
+            }
+            newIntent.setComponent(((ResolveInfo) receiver).activityInfo.getComponentName());
+        }
+        return (newIntent != null) ? newIntent : intent;
+    }
+
+    static int getReceiverUid(@NonNull Object receiver) {
         if (receiver instanceof BroadcastFilter) {
             return ((BroadcastFilter) receiver).owningUid;
         } else /* if (receiver instanceof ResolveInfo) */ {
             return ((ResolveInfo) receiver).activityInfo.applicationInfo.uid;
+        }
+    }
+
+    static String getReceiverProcessName(@NonNull Object receiver) {
+        if (receiver instanceof BroadcastFilter) {
+            return ((BroadcastFilter) receiver).receiverList.app.processName;
+        } else /* if (receiver instanceof ResolveInfo) */ {
+            return ((ResolveInfo) receiver).activityInfo.processName;
         }
     }
 
@@ -559,6 +650,10 @@ final class BroadcastRecord extends Binder {
         return "BroadcastRecord{"
             + Integer.toHexString(System.identityHashCode(this))
             + " u" + userId + " " + intent.getAction() + "}";
+    }
+
+    public String toShortString() {
+        return intent.getAction() + "/u" + userId;
     }
 
     public void dumpDebug(ProtoOutputStream proto, long fieldId) {

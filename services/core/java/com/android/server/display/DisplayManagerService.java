@@ -3884,6 +3884,19 @@ public final class DisplayManagerService extends SystemService {
                 return displayIdToMirror;
             }
         }
+
+        @Override
+        public SurfaceControl.DisplayPrimaries getDisplayNativePrimaries(int displayId) {
+            IBinder displayToken;
+            synchronized (mSyncRoot) {
+                displayToken = getDisplayToken(displayId);
+                if (displayToken == null) {
+                    throw new IllegalArgumentException("Invalid displayId=" + displayId);
+                }
+            }
+
+            return SurfaceControl.getDisplayNativePrimaries(displayToken);
+        }
     }
 
     class DesiredDisplayModeSpecsObserver

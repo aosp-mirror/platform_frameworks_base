@@ -677,6 +677,21 @@ public final class InputMethodManager {
         return fallbackImm;
     }
 
+    /**
+     * An internal API that returns the {@link Context} of the current served view connected to
+     * an input method.
+     * @hide
+     */
+    Context getFallbackContextFromServedView() {
+        synchronized (mH) {
+            if (mCurRootView == null) {
+                return null;
+            }
+            final View servedView = mCurRootView.getImeFocusController().getServedViewLocked();
+            return servedView != null ? servedView.getContext() : null;
+        }
+    }
+
     private static boolean canStartInput(View servedView) {
         // We can start input ether the servedView has window focus
         // or the activity is showing autofill ui.
@@ -756,10 +771,10 @@ public final class InputMethodManager {
         }
 
         /**
-         * For {@link ImeFocusController} to start input asynchronously when focus gain.
+         * For {@link ImeFocusController} to start input when gaining the window focus.
          */
         @Override
-        public void startInputAsyncOnWindowFocusGain(View focusedView,
+        public void startInputOnWindowFocusGain(View focusedView,
                 @SoftInputModeFlags int softInputMode, int windowFlags, boolean forceNewFocus) {
             int startInputFlags = getStartInputFlags(focusedView, 0);
             startInputFlags |= StartInputFlags.WINDOW_GAINED_FOCUS;
@@ -772,6 +787,15 @@ public final class InputMethodManager {
             if (controller == null) {
                 return;
             }
+
+            synchronized (mH) {
+                if (mRestartOnNextWindowFocus) {
+                    if (DEBUG) Log.v(TAG, "Restarting due to mRestartOnNextWindowFocus as true");
+                    mRestartOnNextWindowFocus = false;
+                    forceNewFocus = true;
+                }
+            }
+
             if (controller.checkFocus(forceNewFocus, false)) {
                 // We need to restart input on the current focus view.  This
                 // should be done in conjunction with telling the system service
@@ -786,7 +810,7 @@ public final class InputMethodManager {
             synchronized (mH) {
                 // For some reason we didn't do a startInput + windowFocusGain, so
                 // we'll just do a window focus gain and call it a day.
-                View servedView = controller.getServedView();
+                View servedView = controller.getServedViewLocked();
                 boolean nextFocusHasConnection = servedView != null && servedView == focusedView
                         && hasActiveInputConnectionInternal(focusedView);
                 if (DEBUG) {
@@ -845,20 +869,6 @@ public final class InputMethodManager {
         }
 
         /**
-         * For {@link ImeFocusController#checkFocus} if needed to force check new focus.
-         */
-        @Override
-        public boolean isRestartOnNextWindowFocus(boolean reset) {
-            synchronized (mH) {
-                final boolean result = mRestartOnNextWindowFocus;
-                if (reset) {
-                    mRestartOnNextWindowFocus = false;
-                }
-                return result;
-            }
-        }
-
-        /**
          * Checks whether the active input connection (if any) is for the given view.
          *
          * @see #hasActiveInputConnectionInternal(View)}
@@ -866,6 +876,16 @@ public final class InputMethodManager {
         @Override
         public boolean hasActiveConnection(View view) {
             return hasActiveInputConnectionInternal(view);
+        }
+
+        /**
+         * Returns the {@link InputMethodManager#mH} lock object.
+         * Used for {@link ImeFocusController} to guard the served view being accessed by
+         * {@link InputMethodManager} in different threads.
+         */
+        @Override
+        public Object getLockObject() {
+            return mH;
         }
     }
 
@@ -907,27 +927,14 @@ public final class InputMethodManager {
 
     @GuardedBy("mH")
     private View getServedViewLocked() {
-        return mCurRootView != null ? mCurRootView.getImeFocusController().getServedView() : null;
-    }
-
-    @GuardedBy("mH")
-    private View getNextServedViewLocked() {
-        return mCurRootView != null ? mCurRootView.getImeFocusController().getNextServedView()
+        return mCurRootView != null ? mCurRootView.getImeFocusController().getServedViewLocked()
                 : null;
     }
 
     @GuardedBy("mH")
-    private void setServedViewLocked(View view) {
-        if (mCurRootView != null) {
-            mCurRootView.getImeFocusController().setServedView(view);
-        }
-    }
-
-    @GuardedBy("mH")
-    private void setNextServedViewLocked(View view) {
-        if (mCurRootView != null) {
-            mCurRootView.getImeFocusController().setNextServedView(view);
-        }
+    private View getNextServedViewLocked() {
+        return mCurRootView != null ? mCurRootView.getImeFocusController().getNextServedViewLocked()
+                : null;
     }
 
     private ImeFocusController getFocusController() {
@@ -1776,13 +1783,13 @@ public final class InputMethodManager {
     @GuardedBy("mH")
     void finishInputLocked() {
         mVirtualDisplayToScreenMatrix = null;
-        setNextServedViewLocked(null);
-        if (getServedViewLocked() != null) {
+        final ImeFocusController controller = getFocusController();
+        final View clearedView = controller != null ? controller.clearServedViewsLocked() : null;
+        if (clearedView != null) {
             if (DEBUG) {
                 Log.v(TAG, "FINISH INPUT: mServedView="
-                        + InputMethodDebug.dumpViewInfo(getServedViewLocked()));
+                        + InputMethodDebug.dumpViewInfo(clearedView));
             }
-            setServedViewLocked(null);
             mCompletions = null;
             mServedConnecting = false;
             clearConnectionLocked();

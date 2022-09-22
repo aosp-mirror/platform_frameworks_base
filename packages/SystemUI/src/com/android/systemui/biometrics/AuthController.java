@@ -187,7 +187,10 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
         public void onReceive(Context context, Intent intent) {
             if (mCurrentDialog != null
                     && Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(intent.getAction())) {
-                Log.w(TAG, "ACTION_CLOSE_SYSTEM_DIALOGS received");
+                String reason = intent.getStringExtra("reason");
+                reason = (reason != null) ? reason : "unknown";
+                Log.d(TAG, "ACTION_CLOSE_SYSTEM_DIALOGS received, reason: " + reason);
+
                 mCurrentDialog.dismissWithoutCallback(true /* animate */);
                 mCurrentDialog = null;
 

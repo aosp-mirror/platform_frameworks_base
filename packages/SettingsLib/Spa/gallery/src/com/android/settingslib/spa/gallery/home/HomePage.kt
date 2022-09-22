@@ -21,10 +21,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.android.settingslib.spa.framework.common.SettingsEntry
-import com.android.settingslib.spa.framework.common.SettingsPage
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.gallery.R
+import com.android.settingslib.spa.gallery.SettingsPageProviderEnum
 import com.android.settingslib.spa.gallery.button.ActionButtonPageProvider
 import com.android.settingslib.spa.gallery.page.ArgumentPageModel
 import com.android.settingslib.spa.gallery.page.ArgumentPageProvider
@@ -38,20 +38,19 @@ import com.android.settingslib.spa.gallery.ui.SpinnerPageProvider
 import com.android.settingslib.spa.widget.scaffold.HomeScaffold
 
 object HomePageProvider : SettingsPageProvider {
-    override val name = "Home"
+    override val name = SettingsPageProviderEnum.HOME.name
 
     override fun buildEntry(arguments: Bundle?): List<SettingsEntry> {
-        val owner = SettingsPage.create(name)
         return listOf(
-            PreferenceMainPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
-            ArgumentPageProvider.buildInjectEntry("foo")!!.setLink(fromPage = owner).build(),
-            SliderPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
-            SpinnerPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
-            SettingsPagerPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
-            FooterPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
-            IllustrationPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
-            CategoryPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
-            ActionButtonPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
+            PreferenceMainPageProvider.buildInjectEntry().build(),
+            ArgumentPageProvider.buildInjectEntry("foo")!!.build(),
+            SliderPageProvider.buildInjectEntry().build(),
+            SpinnerPageProvider.buildInjectEntry().build(),
+            SettingsPagerPageProvider.buildInjectEntry().build(),
+            FooterPageProvider.buildInjectEntry().build(),
+            IllustrationPageProvider.buildInjectEntry().build(),
+            CategoryPageProvider.buildInjectEntry().build(),
+            ActionButtonPageProvider.buildInjectEntry().build(),
         )
     }
 
@@ -59,7 +58,7 @@ object HomePageProvider : SettingsPageProvider {
     override fun Page(arguments: Bundle?) {
         HomeScaffold(title = stringResource(R.string.app_name)) {
             for (entry in buildEntry(arguments)) {
-                if (entry.name.startsWith(ArgumentPageModel.name)) {
+                if (entry.owner.isCreateBy(SettingsPageProviderEnum.ARGUMENT.name)) {
                     entry.UiLayout(ArgumentPageModel.buildArgument(intParam = 0))
                 } else {
                     entry.UiLayout()

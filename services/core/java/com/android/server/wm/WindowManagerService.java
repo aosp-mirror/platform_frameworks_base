@@ -123,7 +123,10 @@ import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_
 import static com.android.server.wm.RootWindowContainer.MATCH_ATTACHED_TASK_OR_RECENT_TASKS;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_ALL;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION;
 import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
+import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DISPLAY;
@@ -2604,10 +2607,22 @@ public class WindowManagerService extends IWindowManager.Stub
         if (win.isWinVisibleLw() && win.mDisplayContent.okToAnimate()) {
             String reason = null;
             if (winAnimator.applyAnimationLocked(transit, false)) {
+                // This is a WMCore-driven window animation.
                 reason = "applyAnimation";
                 focusMayChange = true;
                 win.mAnimatingExit = true;
-            } else if (win.isExitAnimationRunningSelfOrParent()) {
+            } else if (
+                    // This is already animating via a WMCore-driven window animation
+                    win.isSelfAnimating(0 /* flags */, ANIMATION_TYPE_WINDOW_ANIMATION)
+                    // Or already animating as part of a legacy app-transition
+                    || win.isAnimating(PARENTS | TRANSITION,
+                            ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_RECENTS)
+                    // Or already animating as part of a shell-transition.
+                    || (win.inTransition()
+                            // Filter out non-app windows since transitions don't animate those
+                            // (but may still "wait" on them for readiness)
+                            && (win.mActivityRecord != null || win.mIsWallpaper))) {
+                // TODO(b/247005789): set mAnimatingExit somewhere in shell-transitions setup.
                 reason = "animating";
                 win.mAnimatingExit = true;
             } else if (win.mDisplayContent.mWallpaperController.isWallpaperTarget(win)
@@ -9286,6 +9301,12 @@ public class WindowManagerService extends IWindowManager.Stub
             throw new SecurityException("Requires READ_FRAME_BUFFER permission");
         }
 
+        ScreenCapture.captureLayers(getCaptureArgs(displayId, captureArgs), listener);
+    }
+
+    @VisibleForTesting
+    ScreenCapture.LayerCaptureArgs getCaptureArgs(int displayId,
+            @Nullable ScreenCapture.CaptureArgs captureArgs) {
         final SurfaceControl displaySurfaceControl;
         synchronized (mGlobalLock) {
             DisplayContent displayContent = mRoot.getDisplayContent(displayId);
@@ -9297,18 +9318,20 @@ public class WindowManagerService extends IWindowManager.Stub
             displaySurfaceControl = displayContent.getSurfaceControl();
 
             if (captureArgs == null) {
+                captureArgs = new ScreenCapture.CaptureArgs.Builder<>()
+                        .build();
+            }
+
+            if (captureArgs.mSourceCrop.isEmpty()) {
                 displayContent.getBounds(mTmpRect);
                 mTmpRect.offsetTo(0, 0);
-                captureArgs = new ScreenCapture.CaptureArgs.Builder<>()
-                        .setSourceCrop(mTmpRect)
-                        .build();
+            } else {
+                mTmpRect.set(captureArgs.mSourceCrop);
             }
         }
 
-        ScreenCapture.LayerCaptureArgs args =
-                new ScreenCapture.LayerCaptureArgs.Builder(displaySurfaceControl, captureArgs)
+        return new ScreenCapture.LayerCaptureArgs.Builder(displaySurfaceControl, captureArgs)
+                        .setSourceCrop(mTmpRect)
                         .build();
-
-        ScreenCapture.captureLayers(args, listener);
     }
 }

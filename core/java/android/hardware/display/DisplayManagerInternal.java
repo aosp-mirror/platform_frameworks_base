@@ -28,6 +28,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.DisplayInfo;
+import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.window.DisplayWindowPolicyController;
 import android.window.ScreenCapture;
@@ -396,6 +397,11 @@ public abstract class DisplayManagerInternal {
      * @return The associated {@link DisplayWindowPolicyController}.
      */
     public abstract DisplayWindowPolicyController getDisplayWindowPolicyController(int displayId);
+
+    /**
+     * Get DisplayPrimaries from SF for a particular display.
+     */
+    public abstract SurfaceControl.DisplayPrimaries getDisplayNativePrimaries(int displayId);
 
     /**
      * Describes the requested power state of the display.

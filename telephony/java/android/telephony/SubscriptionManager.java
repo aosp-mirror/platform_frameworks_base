@@ -1071,6 +1071,13 @@ public class SubscriptionManager {
     public static final String ALLOWED_NETWORK_TYPES =
             SimInfo.COLUMN_ALLOWED_NETWORK_TYPES_FOR_REASONS;
 
+    /**
+     * TelephonyProvider column name for user handle associated with a sim.
+     * <P>Type: INTEGER (int)</P>
+     * @hide
+     */
+    public static final String USER_HANDLE = SimInfo.COLUMN_USER_HANDLE;
+
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"USAGE_SETTING_"},
@@ -3099,7 +3106,7 @@ public class SubscriptionManager {
     @SystemApi
     public boolean canManageSubscription(@NonNull SubscriptionInfo info,
             @NonNull String packageName) {
-        if (info == null || info.getAccessRules() == null || packageName == null) {
+        if (info == null || info.getAllAccessRules() == null || packageName == null) {
             return false;
         }
         PackageManager packageManager = mContext.getPackageManager();
@@ -3111,7 +3118,7 @@ public class SubscriptionManager {
             logd("Unknown package: " + packageName);
             return false;
         }
-        for (UiccAccessRule rule : info.getAccessRules()) {
+        for (UiccAccessRule rule : info.getAllAccessRules()) {
             if (rule.getCarrierPrivilegeStatus(packageInfo)
                     == TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS) {
                 return true;

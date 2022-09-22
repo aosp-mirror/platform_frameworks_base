@@ -31,12 +31,23 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.android.settingslib.spa.R
-import com.android.settingslib.spa.framework.common.ROOT_PAGE_NAME
 import com.android.settingslib.spa.framework.common.SettingsPageProviderRepository
 import com.android.settingslib.spa.framework.compose.localNavController
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.framework.util.navRoute
 
+const val NULL_PAGE_NAME = "NULL"
+
+/**
+ * The Activity to render ALL SPA pages, and handles jumps between SPA pages.
+ * One can open any SPA page by:
+ *   $ adb shell am start -n <BrowseActivityComponent> -e spa:SpaActivity:destination <SpaPageRoute>
+ * For gallery, BrowseActivityComponent = com.android.settingslib.spa.gallery/.MainActivity
+ * For SettingsGoogle, BrowseActivityComponent = com.android.settings/.spa.SpaActivity
+ * Some examples:
+ *   $ adb shell am start -n <BrowseActivityComponent> -e spa:SpaActivity:destination HOME
+ *   $ adb shell am start -n <BrowseActivityComponent> -e spa:SpaActivity:destination ARGUMENT/bar/5
+ */
 open class BrowseActivity(
     private val sppRepository: SettingsPageProviderRepository,
 ) : ComponentActivity() {
@@ -55,8 +66,8 @@ open class BrowseActivity(
     private fun MainContent() {
         val navController = rememberNavController()
         CompositionLocalProvider(navController.localNavController()) {
-            NavHost(navController, ROOT_PAGE_NAME) {
-                composable(ROOT_PAGE_NAME) {}
+            NavHost(navController, NULL_PAGE_NAME) {
+                composable(NULL_PAGE_NAME) {}
                 for (page in sppRepository.getAllProviders()) {
                     composable(
                         route = page.name + page.parameter.navRoute() +
@@ -82,7 +93,7 @@ open class BrowseActivity(
         destinationNavigated.value = true
         LaunchedEffect(Unit) {
             val destination =
-                intent?.getStringExtra(KEY_DESTINATION) ?: sppRepository.getDefaultStartPageName()
+                intent?.getStringExtra(KEY_DESTINATION) ?: sppRepository.getDefaultStartPage()
             if (destination.isNotEmpty()) {
                 navController.navigate(destination) {
                     popUpTo(navController.graph.findStartDestination().id) {
@@ -94,7 +105,7 @@ open class BrowseActivity(
     }
 
     companion object {
-        const val KEY_DESTINATION = "spa:SpaActivity:destination"
+        const val KEY_DESTINATION = "spaActivityDestination"
         const val HIGHLIGHT_ENTRY_PARAM_NAME = "highlightEntry"
     }
 }
