@@ -62,10 +62,10 @@ import com.android.server.compat.PlatformCompat
 import com.android.server.extendedtestutils.wheneverStatic
 import com.android.server.pm.dex.DexManager
 import com.android.server.pm.parsing.PackageParser2
-import com.android.server.pm.pkg.AndroidPackage
 import com.android.server.pm.parsing.pkg.PackageImpl
 import com.android.server.pm.parsing.pkg.ParsedPackage
 import com.android.server.pm.permission.PermissionManagerServiceInternal
+import com.android.server.pm.pkg.AndroidPackage
 import com.android.server.pm.pkg.parsing.ParsingPackage
 import com.android.server.pm.pkg.parsing.ParsingPackageUtils
 import com.android.server.pm.resolution.ComponentResolver
@@ -77,14 +77,6 @@ import com.android.server.testutils.mock
 import com.android.server.testutils.nullable
 import com.android.server.testutils.whenever
 import com.android.server.utils.WatchedArrayMap
-import libcore.util.HexEncoding
-import org.junit.Assert
-import org.junit.rules.TestRule
-import org.junit.runner.Description
-import org.junit.runners.model.Statement
-import org.mockito.AdditionalMatchers.or
-import org.mockito.Mockito
-import org.mockito.quality.Strictness
 import java.io.File
 import java.io.IOException
 import java.nio.file.Files
@@ -93,6 +85,14 @@ import java.security.cert.CertificateException
 import java.util.Arrays
 import java.util.Random
 import java.util.concurrent.FutureTask
+import libcore.util.HexEncoding
+import org.junit.Assert
+import org.junit.rules.TestRule
+import org.junit.runner.Description
+import org.junit.runners.model.Statement
+import org.mockito.AdditionalMatchers.or
+import org.mockito.Mockito
+import org.mockito.quality.Strictness
 
 /**
  * A utility for mocking behavior of the system and dependencies when testing PackageManagerService
@@ -522,7 +522,7 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
         whenever(mocks.packageParser.parsePackage(
                 or(eq(path), eq(basePath)), anyInt(), anyBoolean())) { parsedPackage }
         whenever(mocks.packageParser.parsePackage(
-                or(eq(path), eq(basePath)), anyInt(), anyBoolean(), any())) { parsedPackage }
+                or(eq(path), eq(basePath)), anyInt(), anyBoolean())) { parsedPackage }
         return parsedPackage
     }
 
