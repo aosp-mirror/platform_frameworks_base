@@ -74,6 +74,7 @@ public final class AppsFilterSnapshotImpl extends AppsFilterBase {
             // cache is not ready, use an empty cache for the snapshot
             mShouldFilterCache = new WatchedSparseBooleanMatrix();
         }
+        mCacheEnabled = orig.mCacheEnabled;
         mShouldFilterCacheSnapshot = new SnapshotCache.Sealed<>();
 
         mBackgroundHandler = null;
