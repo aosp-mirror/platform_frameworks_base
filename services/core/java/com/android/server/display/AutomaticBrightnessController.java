@@ -593,10 +593,14 @@ class AutomaticBrightnessController {
         }
 
         pw.println();
+        pw.println("  mAmbientBrightnessThresholds=");
         mAmbientBrightnessThresholds.dump(pw);
+        pw.println("  mScreenBrightnessThresholds=");
         mScreenBrightnessThresholds.dump(pw);
+        pw.println("  mScreenBrightnessThresholdsIdle=");
         mScreenBrightnessThresholdsIdle.dump(pw);
-        mScreenBrightnessThresholdsIdle.dump(pw);
+        pw.println("  mAmbientBrightnessThresholdsIdle=");
+        mAmbientBrightnessThresholdsIdle.dump(pw);
     }
 
     private String configStateToString(int state) {
@@ -861,6 +865,7 @@ class AutomaticBrightnessController {
                 Slog.d(TAG, "updateAmbientLux: "
                         + ((mFastAmbientLux > mAmbientLux) ? "Brightened" : "Darkened") + ": "
                         + "mBrighteningLuxThreshold=" + mAmbientBrighteningThreshold + ", "
+                        + "mAmbientDarkeningThreshold=" + mAmbientDarkeningThreshold + ", "
                         + "mAmbientLightRingBuffer=" + mAmbientLightRingBuffer + ", "
                         + "mAmbientLux=" + mAmbientLux);
             }
