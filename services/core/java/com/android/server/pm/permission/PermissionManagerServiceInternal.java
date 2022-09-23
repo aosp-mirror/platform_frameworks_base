@@ -239,16 +239,14 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
     public abstract void resetRuntimePermissions(@NonNull AndroidPackage pkg,
             @UserIdInt int userId);
 
-    /**
-     * We might auto-grant permissions if any permission of the group is already granted. Hence if
-     * the group of a granted permission changes we need to revoke it to avoid having permissions of
-     * the new group auto-granted.
-     *
-     * @param newPackage The new package that was installed
-     * @param oldPackage The old package that was updated
-     * @param allPackageNames All packages
-     */
-    public abstract void revokeRuntimePermissionsIfGroupChanged(
+     /**
+      * If the app is updated, then some checks need to be performed to ensure the package is not 
+      * attempting to expoit permission changes across API boundaries.
+      * @param newPackage The new package that was installed
+      * @param oldPackage The old package that was updated
+      * @param allPackageNames The current packages in the system
+      */
+    public abstract void onPackageUpdated(
             @NonNull AndroidPackage newPackage,
             @NonNull AndroidPackage oldPackage,
             @NonNull ArrayList<String> allPackageNames);
@@ -264,17 +262,6 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
     public abstract void revokeRuntimePermissionsIfPermissionDefinitionChanged(
             @NonNull List<String> permissionsToRevoke,
             @NonNull ArrayList<String> allPackageNames);
-
-    /**
-     * If the app is updated, and has scoped storage permissions, then it is possible that the
-     * app updated in an attempt to get unscoped storage. If so, revoke all storage permissions.
-     * @param newPackage The new package that was installed
-     * @param oldPackage The old package that was updated
-     */
-    public abstract void revokeStoragePermissionsIfScopeExpanded(
-            @NonNull AndroidPackage newPackage,
-            @NonNull AndroidPackage oldPackage
-    );
 
     /**
      * Add all permissions in the given package.
