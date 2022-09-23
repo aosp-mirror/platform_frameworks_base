@@ -22,14 +22,24 @@ public interface StatusIconDisplayable extends DarkReceiver {
     String getSlot();
     void setStaticDrawableColor(int color);
     void setDecorColor(int color);
-    default void setVisibleState(int state) {
+
+    /** Sets the visible state that this displayable should be. */
+    default void setVisibleState(@StatusBarIconView.VisibleState int state) {
         setVisibleState(state, false);
     }
-    void setVisibleState(int state, boolean animate);
+
+    /**
+     * Sets the visible state that this displayable should be, and whether the change should
+     * animate.
+     */
+    void setVisibleState(@StatusBarIconView.VisibleState int state, boolean animate);
+
+    /** Returns the current visible state of this displayable. */
+    @StatusBarIconView.VisibleState
     int getVisibleState();
+
     boolean isIconVisible();
     default boolean isIconBlocked() {
         return false;
     }
 }
-

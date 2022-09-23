@@ -22,6 +22,7 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import com.android.systemui.R
 import com.android.systemui.statusbar.BaseStatusBarWifiView
+import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.StatusBarIconView.STATE_ICON
 import com.android.systemui.statusbar.phone.StatusBarLocation
 import com.android.systemui.statusbar.pipeline.wifi.ui.binder.WifiViewBinder
@@ -52,10 +53,11 @@ class ModernStatusBarWifiView(
         // TODO(b/238425913)
     }
 
-    override fun setVisibleState(state: Int, animate: Boolean) {
+    override fun setVisibleState(@StatusBarIconView.VisibleState state: Int, animate: Boolean) {
         // TODO(b/238425913)
     }
 
+    @StatusBarIconView.VisibleState
     override fun getVisibleState(): Int {
         // TODO(b/238425913)
         return STATE_ICON
