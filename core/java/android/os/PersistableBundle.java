@@ -21,6 +21,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.util.ArrayMap;
+import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.FastXmlSerializer;
@@ -45,6 +46,8 @@ import java.util.ArrayList;
  */
 public final class PersistableBundle extends BaseBundle implements Cloneable, Parcelable,
         XmlUtils.WriteMapCallback {
+    private static final String TAG = "PersistableBundle";
+
     private static final String TAG_PERSISTABLEMAP = "pbundle_as_map";
     public static final PersistableBundle EMPTY;
 
@@ -107,7 +110,11 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
      * @hide
      */
     public PersistableBundle(Bundle b) {
-        this(b.getMap());
+        this(b, true);
+    }
+
+    private PersistableBundle(Bundle b, boolean throwException) {
+        this(b.getMap(), throwException);
     }
 
     /**
@@ -116,7 +123,7 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
      * @param map a Map containing only those items that can be persisted.
      * @throws IllegalArgumentException if any element of #map cannot be persisted.
      */
-    private PersistableBundle(ArrayMap<String, Object> map) {
+    private PersistableBundle(ArrayMap<String, Object> map, boolean throwException) {
         super();
         mFlags = FLAG_DEFUSABLE;
 
@@ -125,16 +132,23 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
 
         // Now verify each item throwing an exception if there is a violation.
         final int N = mMap.size();
-        for (int i=0; i<N; i++) {
+        for (int i = N - 1; i >= 0; --i) {
             Object value = mMap.valueAt(i);
             if (value instanceof ArrayMap) {
                 // Fix up any Maps by replacing them with PersistableBundles.
-                mMap.setValueAt(i, new PersistableBundle((ArrayMap<String, Object>) value));
+                mMap.setValueAt(i,
+                        new PersistableBundle((ArrayMap<String, Object>) value, throwException));
             } else if (value instanceof Bundle) {
-                mMap.setValueAt(i, new PersistableBundle(((Bundle) value)));
+                mMap.setValueAt(i, new PersistableBundle((Bundle) value, throwException));
             } else if (!isValidType(value)) {
-                throw new IllegalArgumentException("Bad value in PersistableBundle key="
-                        + mMap.keyAt(i) + " value=" + value);
+                final String errorMsg = "Bad value in PersistableBundle key="
+                        + mMap.keyAt(i) + " value=" + value;
+                if (throwException) {
+                    throw new IllegalArgumentException(errorMsg);
+                } else {
+                    Slog.wtfStack(TAG, errorMsg);
+                    mMap.removeAt(i);
+                }
             }
         }
     }
@@ -249,6 +263,15 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
     /** @hide */
     public void saveToXml(XmlSerializer out) throws IOException, XmlPullParserException {
         unparcel();
+        // Explicitly drop invalid types an attacker may have added before persisting.
+        for (int i = mMap.size() - 1; i >= 0; --i) {
+            final Object value = mMap.valueAt(i);
+            if (!isValidType(value)) {
+                Slog.e(TAG, "Dropping bad data before persisting: "
+                        + mMap.keyAt(i) + "=" + value);
+                mMap.removeAt(i);
+            }
+        }
         XmlUtils.writeMapXml(mMap, out, this);
     }
 
@@ -297,9 +320,12 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
         while (((event = in.next()) != XmlPullParser.END_DOCUMENT) &&
                 (event != XmlPullParser.END_TAG || in.getDepth() < outerDepth)) {
             if (event == XmlPullParser.START_TAG) {
+                // Don't throw an exception when restoring from XML since an attacker could try to
+                // input invalid data in the persisted file.
                 return new PersistableBundle((ArrayMap<String, Object>)
                         XmlUtils.readThisArrayMapXml(in, startTag, tagName,
-                        new MyReadMapCallback()));
+                        new MyReadMapCallback()),
+                        /* throwException */ false);
             }
         }
         return EMPTY;
