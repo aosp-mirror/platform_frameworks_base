@@ -3684,6 +3684,7 @@ public class InputManagerService extends IInputManager.Stub
         @Override
         public void setInteractive(boolean interactive) {
             mNative.setInteractive(interactive);
+            mBatteryController.onInteractiveChanged(interactive);
         }
 
         @Override
