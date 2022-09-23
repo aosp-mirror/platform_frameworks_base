@@ -24,6 +24,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -101,6 +102,8 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
     DreamOverlayStatusBarItemsProvider.StatusBarItem mStatusBarItem;
     @Mock
     View mStatusBarItemView;
+    @Mock
+    DreamOverlayStateController mDreamOverlayStateController;
 
     private final Executor mMainExecutor = Runnable::run;
 
@@ -126,7 +129,8 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
                 Optional.of(mDreamOverlayNotificationCountProvider),
                 mZenModeController,
                 mStatusBarWindowStateController,
-                mDreamOverlayStatusBarItemsProvider);
+                mDreamOverlayStatusBarItemsProvider,
+                mDreamOverlayStateController);
     }
 
     @Test
@@ -137,6 +141,7 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
         verify(mZenModeController).addCallback(any());
         verify(mDreamOverlayNotificationCountProvider).addCallback(any());
         verify(mDreamOverlayStatusBarItemsProvider).addCallback(any());
+        verify(mDreamOverlayStateController).addCallback(any());
     }
 
     @Test
@@ -266,7 +271,8 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
                 Optional.empty(),
                 mZenModeController,
                 mStatusBarWindowStateController,
-                mDreamOverlayStatusBarItemsProvider);
+                mDreamOverlayStatusBarItemsProvider,
+                mDreamOverlayStateController);
         controller.onViewAttached();
         verify(mView, never()).showIcon(
                 eq(DreamOverlayStatusBarView.STATUS_ICON_NOTIFICATIONS), eq(true), any());
@@ -305,6 +311,7 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
         verify(mZenModeController).removeCallback(any());
         verify(mDreamOverlayNotificationCountProvider).removeCallback(any());
         verify(mDreamOverlayStatusBarItemsProvider).removeCallback(any());
+        verify(mDreamOverlayStateController).removeCallback(any());
     }
 
     @Test
@@ -458,6 +465,7 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
     @Test
     public void testStatusBarShownWhenSystemStatusBarHidden() {
         mController.onViewAttached();
+        reset(mView);
 
         final ArgumentCaptor<StatusBarWindowStateListener>
                 callbackCapture = ArgumentCaptor.forClass(StatusBarWindowStateListener.class);
@@ -471,6 +479,7 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
     public void testUnattachedStatusBarVisibilityUnchangedWhenSystemStatusBarHidden() {
         mController.onViewAttached();
         mController.onViewDetached();
+        reset(mView);
 
         final ArgumentCaptor<StatusBarWindowStateListener>
                 callbackCapture = ArgumentCaptor.forClass(StatusBarWindowStateListener.class);
@@ -492,5 +501,22 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
         callbackCapture.getValue().onStatusBarItemsChanged(List.of(mStatusBarItem));
 
         verify(mView).setExtraStatusBarItemViews(List.of(mStatusBarItemView));
+    }
+
+    @Test
+    public void testLowLightHidesStatusBar() {
+        when(mDreamOverlayStateController.isLowLightActive()).thenReturn(true);
+        mController.onViewAttached();
+
+        verify(mView).setVisibility(View.INVISIBLE);
+        reset(mView);
+
+        when(mDreamOverlayStateController.isLowLightActive()).thenReturn(false);
+        final ArgumentCaptor<DreamOverlayStateController.Callback> callbackCapture =
+                ArgumentCaptor.forClass(DreamOverlayStateController.Callback.class);
+        verify(mDreamOverlayStateController).addCallback(callbackCapture.capture());
+        callbackCapture.getValue().onStateChanged();
+
+        verify(mView).setVisibility(View.VISIBLE);
     }
 }
