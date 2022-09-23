@@ -186,6 +186,7 @@ import android.view.WindowManager.TransitionOldType;
 import android.window.ITaskOrganizer;
 import android.window.PictureInPictureSurfaceTransaction;
 import android.window.StartingWindowInfo;
+import android.window.TaskFragmentParentInfo;
 import android.window.TaskSnapshot;
 import android.window.WindowContainerToken;
 
@@ -2679,6 +2680,7 @@ class Task extends TaskFragment {
         if (isRootTask()) {
             updateSurfaceBounds();
         }
+        sendTaskFragmentParentInfoChangedIfNeeded();
     }
 
     boolean isResizeable() {
@@ -2914,7 +2916,7 @@ class Task extends TaskFragment {
     @Override
     boolean showToCurrentUser() {
         return mForceShowForAllUsers || showForAllUsers()
-                || mWmService.isCurrentProfile(getTopMostTask().mUserId);
+                || mWmService.isUserVisible(getTopMostTask().mUserId);
     }
 
     void setForceShowForAllUsers(boolean forceShowForAllUsers) {
@@ -3511,6 +3513,33 @@ class Task extends TaskFragment {
             }
         }
         return info;
+    }
+
+    /**
+     * Returns the {@link TaskFragmentParentInfo} which will send to the client
+     * {@link android.window.TaskFragmentOrganizer}
+     */
+    TaskFragmentParentInfo getTaskFragmentParentInfo() {
+        return new TaskFragmentParentInfo(getConfiguration(), getDisplayId(), isVisibleRequested());
+    }
+
+    @Override
+    void onActivityVisibleRequestedChanged() {
+        if (mVisibleRequested != isVisibleRequested()) {
+            sendTaskFragmentParentInfoChangedIfNeeded();
+        }
+    }
+
+    void sendTaskFragmentParentInfoChangedIfNeeded() {
+        if (!isLeafTask()) {
+            // Only send parent info changed event for leaf task.
+            return;
+        }
+        final TaskFragment childOrganizedTf =
+                getTaskFragment(TaskFragment::isOrganizedTaskFragment);
+        if (childOrganizedTf != null) {
+            childOrganizedTf.sendTaskFragmentParentInfoChanged();
+        }
     }
 
     boolean isTaskId(int taskId) {

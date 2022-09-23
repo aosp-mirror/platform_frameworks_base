@@ -24,11 +24,11 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group4
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.helpers.ImeAppHelper
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.traces.common.ComponentNameMatcher
-import com.android.wm.shell.flicker.helpers.ImeAppHelper
 import org.junit.Assume.assumeFalse
 import org.junit.Before
 import org.junit.FixMethodOrder

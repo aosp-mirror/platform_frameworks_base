@@ -28,12 +28,11 @@ import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelpe
 
 open class ImeAppHelper @JvmOverloads constructor(
     instr: Instrumentation,
-    launcherName: String = ActivityOptions.IME_ACTIVITY_LAUNCHER_NAME,
+    launcherName: String = ActivityOptions.Ime.Default.LABEL,
     component: ComponentNameMatcher =
-        ActivityOptions.IME_ACTIVITY_COMPONENT_NAME.toFlickerComponent(),
-    launcherStrategy: ILauncherStrategy = LauncherStrategyFactory
-            .getInstance(instr)
-            .launcherStrategy
+        ActivityOptions.Ime.Default.COMPONENT.toFlickerComponent(),
+    launcherStrategy: ILauncherStrategy =
+        LauncherStrategyFactory.getInstance(instr).launcherStrategy
 ) : StandardAppHelper(instr, launcherName, component, launcherStrategy) {
     /**
      * Opens the IME and wait for it to be displayed
@@ -73,8 +72,8 @@ open class ImeAppHelper @JvmOverloads constructor(
 
     open fun finishActivity(wmHelper: WindowManagerStateHelper) {
         val finishButton = uiDevice.wait(
-                Until.findObject(By.res(getPackage(), "finish_activity_btn")),
-                FIND_TIMEOUT)
+            Until.findObject(By.res(getPackage(), "finish_activity_btn")),
+            FIND_TIMEOUT)
         requireNotNull(finishButton) {
             "Finish activity button not found, probably IME activity is not on the screen?"
         }

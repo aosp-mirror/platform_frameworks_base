@@ -67,7 +67,6 @@ import android.view.SurfaceControl;
 import android.view.displayhash.DisplayHash;
 import android.view.displayhash.VerifiedDisplayHash;
 import android.window.ITaskFpsCallback;
-import android.window.ScreenCapture;
 
 /**
  * System private interface to the window manager.
@@ -969,11 +968,4 @@ interface IWindowManager
      * treatment.
      */
     boolean isLetterboxBackgroundMultiColored();
-
-    /**
-     * Captures the entire display specified by the displayId using the args provided. If the args
-     * are null or if the sourceCrop is invalid or null, the entire display bounds will be captured.
-     */
-    oneway void captureDisplay(int displayId, in @nullable ScreenCapture.CaptureArgs captureArgs,
-            in ScreenCapture.ScreenCaptureListener listener);
 }

@@ -28,25 +28,28 @@ import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelpe
 
 class NotificationAppHelper @JvmOverloads constructor(
     instr: Instrumentation,
-    launcherName: String = ActivityOptions.NOTIFICATION_ACTIVITY_LAUNCHER_NAME,
+    launcherName: String = ActivityOptions.Notification.LABEL,
     component: ComponentNameMatcher =
-            ActivityOptions.NOTIFICATION_ACTIVITY_COMPONENT_NAME.toFlickerComponent(),
+        ActivityOptions.Notification.COMPONENT.toFlickerComponent(),
     launcherStrategy: ILauncherStrategy = LauncherStrategyFactory
-            .getInstance(instr)
-            .launcherStrategy
+        .getInstance(instr)
+        .launcherStrategy
 ) : StandardAppHelper(instr, launcherName, component, launcherStrategy) {
     fun postNotification(wmHelper: WindowManagerStateHelper) {
         val button = uiDevice.wait(
-                Until.findObject(By.res(getPackage(), "post_notification")),
-                FIND_TIMEOUT)
+            Until.findObject(By.res(getPackage(), "post_notification")),
+            FIND_TIMEOUT)
 
-        require(button != null) {
+        requireNotNull(button) {
             "Post notification button not found, this usually happens when the device " +
-                    "was left in an unknown state (e.g. in split screen)"
+                "was left in an unknown state (e.g. in split screen)"
         }
         button.click()
 
         uiDevice.wait(Until.findObject(By.text("Flicker Test Notification")), FIND_TIMEOUT)
-                ?: error("Flicker Notification not found")
+            ?: error("Flicker Notification not found")
+        wmHelper.StateSyncBuilder()
+            .withAppTransitionIdle()
+            .waitForAndVerify()
     }
 }

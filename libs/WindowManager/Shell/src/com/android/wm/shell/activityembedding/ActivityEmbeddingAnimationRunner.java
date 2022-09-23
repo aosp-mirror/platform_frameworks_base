@@ -18,6 +18,7 @@ package com.android.wm.shell.activityembedding;
 
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManagerPolicyConstants.TYPE_LAYER_OFFSET;
+import static android.window.TransitionInfo.FLAG_IS_BEHIND_STARTING_WINDOW;
 
 import android.animation.Animator;
 import android.animation.ValueAnimator;
@@ -129,11 +130,19 @@ class ActivityEmbeddingAnimationRunner {
     @NonNull
     private List<ActivityEmbeddingAnimationAdapter> createAnimationAdapters(
             @NonNull TransitionInfo info, @NonNull SurfaceControl.Transaction startTransaction) {
+        boolean isChangeTransition = false;
         for (TransitionInfo.Change change : info.getChanges()) {
-            if (change.getMode() == TRANSIT_CHANGE
-                    && !change.getStartAbsBounds().equals(change.getEndAbsBounds())) {
-                return createChangeAnimationAdapters(info, startTransaction);
+            if (change.hasFlags(FLAG_IS_BEHIND_STARTING_WINDOW)) {
+                // Skip the animation if the windows are behind an app starting window.
+                return new ArrayList<>();
             }
+            if (!isChangeTransition && change.getMode() == TRANSIT_CHANGE
+                    && !change.getStartAbsBounds().equals(change.getEndAbsBounds())) {
+                isChangeTransition = true;
+            }
+        }
+        if (isChangeTransition) {
+            return createChangeAnimationAdapters(info, startTransaction);
         }
         if (Transitions.isClosingType(info.getType())) {
             return createCloseAnimationAdapters(info);

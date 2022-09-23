@@ -18,14 +18,14 @@ package com.android.wm.shell.flicker.pip
 
 import android.platform.test.annotations.Presubmit
 import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.wm.shell.flicker.helpers.FixedAppHelper
+import com.android.server.wm.flicker.helpers.FixedOrientationAppHelper
 import org.junit.Test
 
 /**
  * Base class for pip expand tests
  */
 abstract class ExitPipToAppTransition(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
-    protected val testApp = FixedAppHelper(instrumentation)
+    protected val testApp = FixedOrientationAppHelper(instrumentation)
 
     /**
      * Checks that the pip app window remains inside the display bounds throughout the whole

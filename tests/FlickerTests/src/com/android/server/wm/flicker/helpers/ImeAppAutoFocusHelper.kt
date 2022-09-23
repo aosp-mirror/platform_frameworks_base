@@ -32,9 +32,9 @@ class ImeAppAutoFocusHelper @JvmOverloads constructor(
     instr: Instrumentation,
     private val rotation: Int,
     private val imePackageName: String = IME_PACKAGE,
-    launcherName: String = ActivityOptions.IME_ACTIVITY_AUTO_FOCUS_LAUNCHER_NAME,
+    launcherName: String = ActivityOptions.Ime.AutoFocusActivity.LABEL,
     component: ComponentNameMatcher =
-        ActivityOptions.IME_ACTIVITY_AUTO_FOCUS_COMPONENT_NAME.toFlickerComponent()
+        ActivityOptions.Ime.AutoFocusActivity.COMPONENT.toFlickerComponent()
 ) : ImeAppHelper(instr, launcherName, component) {
     override fun openIME(wmHelper: WindowManagerStateHelper) {
         // do nothing (the app is focused automatically)
@@ -62,21 +62,22 @@ class ImeAppAutoFocusHelper @JvmOverloads constructor(
 
     fun startDialogThemedActivity(wmHelper: WindowManagerStateHelper) {
         val button = uiDevice.wait(Until.findObject(By.res(getPackage(),
-                "start_dialog_themed_activity_btn")), FIND_TIMEOUT)
+            "start_dialog_themed_activity_btn")), FIND_TIMEOUT)
 
         requireNotNull(button) {
             "Button not found, this usually happens when the device " +
-                    "was left in an unknown state (e.g. Screen turned off)"
+                "was left in an unknown state (e.g. Screen turned off)"
         }
         button.click()
         wmHelper.StateSyncBuilder()
             .withFullScreenApp(
-                ActivityOptions.DIALOG_THEMED_ACTIVITY_COMPONENT_NAME.toFlickerComponent())
+                ActivityOptions.DialogThemedActivity.COMPONENT.toFlickerComponent())
             .waitForAndVerify()
     }
+
     fun dismissDialog(wmHelper: WindowManagerStateHelper) {
         val dialog = uiDevice.wait(
-                Until.findObject(By.text("Dialog for test")), FIND_TIMEOUT)
+            Until.findObject(By.text("Dialog for test")), FIND_TIMEOUT)
 
         // Pressing back key to dismiss the dialog
         if (dialog != null) {
@@ -86,9 +87,10 @@ class ImeAppAutoFocusHelper @JvmOverloads constructor(
                 .waitForAndVerify()
         }
     }
+
     fun getInsetsVisibleFromDialog(type: Int): Boolean {
         val insetsVisibilityTextView = uiDevice.wait(
-                Until.findObject(By.res("android:id/text1")), FIND_TIMEOUT)
+            Until.findObject(By.res("android:id/text1")), FIND_TIMEOUT)
         if (insetsVisibilityTextView != null) {
             val visibility = insetsVisibilityTextView.text.toString()
             val matcher = when (type) {

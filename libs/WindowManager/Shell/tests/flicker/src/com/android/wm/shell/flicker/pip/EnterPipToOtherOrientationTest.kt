@@ -28,16 +28,17 @@ import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group3
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.entireScreenCovered
+import com.android.server.wm.flicker.helpers.FixedOrientationAppHelper
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.navBarLayerPositionAtStartAndEnd
 import com.android.server.wm.flicker.rules.RemoveAllTasksButHomeRule
-import com.android.wm.shell.flicker.helpers.FixedAppHelper
+import com.android.server.wm.flicker.testapp.ActivityOptions.Pip.ACTION_ENTER_PIP
+import com.android.server.wm.flicker.testapp.ActivityOptions.PortraitOnlyActivity.EXTRA_FIXED_ORIENTATION
+import com.android.server.wm.traces.common.ComponentNameMatcher
 import com.android.wm.shell.flicker.pip.PipTransition.BroadcastActionTrigger.Companion.ORIENTATION_LANDSCAPE
 import com.android.wm.shell.flicker.pip.PipTransition.BroadcastActionTrigger.Companion.ORIENTATION_PORTRAIT
-import com.android.wm.shell.flicker.testapp.Components.FixedActivity.EXTRA_FIXED_ORIENTATION
-import com.android.wm.shell.flicker.testapp.Components.PipActivity.ACTION_ENTER_PIP
 import org.junit.Assume
 import org.junit.Before
 import org.junit.FixMethodOrder
@@ -72,7 +73,7 @@ import org.junit.runners.Parameterized
 class EnterPipToOtherOrientationTest(
     testSpec: FlickerTestParameter
 ) : PipTransition(testSpec) {
-    private val testApp = FixedAppHelper(instrumentation)
+    private val testApp = FixedOrientationAppHelper(instrumentation)
     private val startingBounds = WindowUtils.getDisplayBounds(Surface.ROTATION_90)
     private val endingBounds = WindowUtils.getDisplayBounds(Surface.ROTATION_0)
 
@@ -127,7 +128,7 @@ class EnterPipToOtherOrientationTest(
     }
 
     /**
-     * Checks that the [ComponentMatcher.NAV_BAR] has the correct position at
+     * Checks that the [ComponentNameMatcher.NAV_BAR] has the correct position at
      * the start and end of the transition
      */
     @FlakyTest

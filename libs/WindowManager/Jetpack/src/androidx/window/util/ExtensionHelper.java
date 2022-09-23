@@ -21,6 +21,7 @@ import static android.view.Surface.ROTATION_180;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 
+import android.app.WindowConfiguration;
 import android.content.Context;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManagerGlobal;
@@ -89,13 +90,21 @@ public final class ExtensionHelper {
     /** Transforms rectangle from absolute coordinate space to the window coordinate space. */
     public static void transformToWindowSpaceRect(@NonNull @UiContext Context context,
             Rect inOutRect) {
-        Rect windowRect = getWindowBounds(context);
-        if (!Rect.intersects(inOutRect, windowRect)) {
+        transformToWindowSpaceRect(getWindowBounds(context), inOutRect);
+    }
+
+    /** @see ExtensionHelper#transformToWindowSpaceRect(Context, Rect) */
+    public static void transformToWindowSpaceRect(@NonNull WindowConfiguration windowConfiguration,
+            Rect inOutRect) {
+        transformToWindowSpaceRect(windowConfiguration.getBounds(), inOutRect);
+    }
+
+    private static void transformToWindowSpaceRect(@NonNull Rect bounds, @NonNull Rect inOutRect) {
+        if (!inOutRect.intersect(bounds)) {
             inOutRect.setEmpty();
             return;
         }
-        inOutRect.intersect(windowRect);
-        inOutRect.offset(-windowRect.left, -windowRect.top);
+        inOutRect.offset(-bounds.left, -bounds.top);
     }
 
     /**

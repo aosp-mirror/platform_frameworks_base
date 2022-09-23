@@ -17,8 +17,13 @@
 package com.android.settingslib.spa.framework.common
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.platform.LocalContext
+import com.android.settingslib.spa.framework.BrowseActivity.Companion.HIGHLIGHT_ENTRY_PARAM_NAME
 
 const val INJECT_ENTRY_NAME = "INJECT"
 const val ROOT_ENTRY_NAME = "ROOT"
@@ -27,6 +32,9 @@ const val ROOT_ENTRY_NAME = "ROOT"
  * Defines data of a Settings entry.
  */
 data class SettingsEntry(
+    // The unique id of this entry, which is computed by name + owner + fromPage + toPage.
+    val id: String,
+
     // The name of the page, which is used to compute the unique id, and need to be stable.
     private val name: String,
 
@@ -67,14 +75,9 @@ data class SettingsEntry(
      */
     private val uiLayoutImpl: (@Composable (arguments: Bundle?) -> Unit) = {},
 ) {
-    // The unique id of this entry, which is computed by name + owner + fromPage + toPage.
-    fun id(): String {
-        return "$name:${owner.id()}(${fromPage?.id()}-${toPage?.id()})".toHashId()
-    }
-
     fun formatContent(): String {
         val content = listOf(
-            "id = ${id()}",
+            "id = $id",
             "owner = ${owner.formatDisplayTitle()}",
             "linkFrom = ${fromPage?.formatDisplayTitle()}",
             "linkTo = ${toPage?.formatDisplayTitle()}",
@@ -94,7 +97,7 @@ data class SettingsEntry(
     }
 
     fun buildRoute(): String {
-        return containerPage().buildRoute(id())
+        return containerPage().buildRoute(id)
     }
 
     fun hasRuntimeParam(): Boolean {
@@ -104,6 +107,7 @@ data class SettingsEntry(
     private fun fullArgument(runtimeArguments: Bundle? = null): Bundle {
         val arguments = Bundle()
         if (owner.arguments != null) arguments.putAll(owner.arguments)
+        // Put runtime args later, which can override page args.
         if (runtimeArguments != null) arguments.putAll(runtimeArguments)
         return arguments
     }
@@ -114,6 +118,15 @@ data class SettingsEntry(
 
     @Composable
     fun UiLayout(runtimeArguments: Bundle? = null) {
+        val context = LocalContext.current
+        val highlight = rememberSaveable {
+            mutableStateOf(runtimeArguments?.getString(HIGHLIGHT_ENTRY_PARAM_NAME) == id)
+        }
+        if (highlight.value) {
+            highlight.value = false
+            // TODO: Add highlight entry logic
+            Toast.makeText(context, "entry $id highlighted", Toast.LENGTH_SHORT).show()
+        }
         uiLayoutImpl(fullArgument(runtimeArguments))
     }
 }
@@ -135,6 +148,7 @@ class SettingsEntryBuilder(private val name: String, private val owner: Settings
 
     fun build(): SettingsEntry {
         return SettingsEntry(
+            id = id(),
             name = name,
             owner = owner,
             displayName = displayName,
@@ -188,6 +202,11 @@ class SettingsEntryBuilder(private val name: String, private val owner: Settings
     fun setUiLayoutFn(fn: @Composable (arguments: Bundle?) -> Unit): SettingsEntryBuilder {
         this.uiLayoutFn = fn
         return this
+    }
+
+    // The unique id of this entry, which is computed by name + owner + fromPage + toPage.
+    private fun id(): String {
+        return "$name:${owner.id}(${fromPage?.id}-${toPage?.id})".toHashId()
     }
 
     companion object {

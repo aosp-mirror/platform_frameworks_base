@@ -373,12 +373,6 @@
       "group": "WM_DEBUG_WINDOW_TRANSITIONS",
       "at": "com\/android\/server\/wm\/TransitionController.java"
     },
-    "-1750384749": {
-      "message": "Launch on display check: allow launch on public display",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_TASKS",
-      "at": "com\/android\/server\/wm\/ActivityTaskSupervisor.java"
-    },
     "-1750206390": {
       "message": "Exception thrown when creating surface for client %s (%s). %s",
       "level": "WARN",
@@ -906,6 +900,12 @@
       "level": "INFO",
       "group": "WM_DEBUG_BOOT",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "-1253056469": {
+      "message": "Launch on display check: %s launch for userId=%d on displayId=%d",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_TASKS",
+      "at": "com\/android\/server\/wm\/ActivityTaskSupervisor.java"
     },
     "-1248645819": {
       "message": "\tAdd container=%s",

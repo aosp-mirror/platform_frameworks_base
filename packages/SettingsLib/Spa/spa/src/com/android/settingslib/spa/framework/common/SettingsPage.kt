@@ -26,6 +26,9 @@ import com.android.settingslib.spa.framework.util.navLink
  * Defines data to identify a Settings page.
  */
 data class SettingsPage(
+    // The unique id of this page, which is computed by name + normalized(arguments)
+    val id: String,
+
     // The name of the page, which is used to compute the unique id, and need to be stable.
     val name: String,
 
@@ -41,17 +44,28 @@ data class SettingsPage(
     companion object {
         fun create(
             name: String,
+            displayName: String? = null,
             parameter: List<NamedNavArgument> = emptyList(),
             arguments: Bundle? = null
         ): SettingsPage {
-            return SettingsPage(name, name, parameter, arguments)
+            return SettingsPage(
+                id = id(name, parameter, arguments),
+                name = name,
+                displayName = displayName ?: name,
+                parameter = parameter,
+                arguments = arguments
+            )
         }
-    }
 
-    // The unique id of this page, which is computed by name + normalized(arguments)
-    fun id(): String {
-        val normArguments = parameter.normalize(arguments)
-        return "$name:${normArguments?.toString()}".toHashId()
+        // The unique id of this page, which is computed by name + normalized(arguments)
+        private fun id(
+            name: String,
+            parameter: List<NamedNavArgument> = emptyList(),
+            arguments: Bundle? = null
+        ): String {
+            val normArguments = parameter.normalize(arguments)
+            return "$name:${normArguments?.toString()}".toHashId()
+        }
     }
 
     // Returns if this Settings Page is created by the given Spp.
@@ -69,12 +83,12 @@ data class SettingsPage(
         return "$displayName ${formatArguments()}"
     }
 
-    fun buildRoute(highlightEntryName: String? = null): String {
+    fun buildRoute(highlightEntryId: String? = null): String {
         val highlightParam =
-            if (highlightEntryName == null)
+            if (highlightEntryId == null)
                 ""
             else
-                "?${BrowseActivity.HIGHLIGHT_ENTRY_PARAM_NAME}=$highlightEntryName"
+                "?${BrowseActivity.HIGHLIGHT_ENTRY_PARAM_NAME}=$highlightEntryId"
         return name + parameter.navLink(arguments) + highlightParam
     }
 
@@ -114,5 +128,5 @@ private fun List<NamedNavArgument>.hasRuntimeParam(arguments: Bundle? = null): B
 }
 
 fun String.toHashId(): String {
-    return this.hashCode().toString(36)
+    return this.hashCode().toUInt().toString(36)
 }

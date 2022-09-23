@@ -29,9 +29,8 @@ import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelpe
 
 class GameAppHelper @JvmOverloads constructor(
     instr: Instrumentation,
-    launcherName: String = ActivityOptions.GAME_ACTIVITY_LAUNCHER_NAME,
-    component: ComponentNameMatcher =
-        ActivityOptions.GAME_ACTIVITY_COMPONENT_NAME.toFlickerComponent(),
+    launcherName: String = ActivityOptions.Game.LABEL,
+    component: ComponentNameMatcher = ActivityOptions.Game.COMPONENT.toFlickerComponent(),
     launcherStrategy: ILauncherStrategy =
         LauncherStrategyFactory.getInstance(instr).launcherStrategy,
 ) : StandardAppHelper(instr, launcherName, component, launcherStrategy) {

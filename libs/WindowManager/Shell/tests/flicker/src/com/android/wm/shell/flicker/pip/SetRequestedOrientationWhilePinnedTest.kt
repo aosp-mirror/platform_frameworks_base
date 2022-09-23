@@ -31,9 +31,9 @@ import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.rules.RemoveAllTasksButHomeRule.Companion.removeAllTasksButHome
+import com.android.server.wm.flicker.testapp.ActivityOptions
+import com.android.server.wm.flicker.testapp.ActivityOptions.PortraitOnlyActivity.EXTRA_FIXED_ORIENTATION
 import com.android.wm.shell.flicker.pip.PipTransition.BroadcastActionTrigger.Companion.ORIENTATION_LANDSCAPE
-import com.android.wm.shell.flicker.testapp.Components
-import com.android.wm.shell.flicker.testapp.Components.FixedActivity.EXTRA_FIXED_ORIENTATION
 import org.junit.Assume
 import org.junit.Before
 import org.junit.FixMethodOrder
@@ -68,7 +68,7 @@ open class SetRequestedOrientationWhilePinnedTest(
                 pipApp.launchViaIntent(wmHelper, stringExtras = mapOf(
                     EXTRA_FIXED_ORIENTATION to ORIENTATION_LANDSCAPE.toString()))
                 // Enter PiP.
-                broadcastActionTrigger.doAction(Components.PipActivity.ACTION_ENTER_PIP)
+                broadcastActionTrigger.doAction(ActivityOptions.Pip.ACTION_ENTER_PIP)
                 // System bar may fade out during fixed rotation.
                 wmHelper.StateSyncBuilder()
                     .withPipShown()

@@ -63,7 +63,7 @@ internal class TogglePermissionAppInfoPageProvider(
     override val parameter = PAGE_PARAMETER
 
     override fun buildEntry(arguments: Bundle?): List<SettingsEntry> {
-        val owner = SettingsPage.create(name, parameter, arguments)
+        val owner = SettingsPage.create(name, parameter = parameter, arguments = arguments)
         val entryList = mutableListOf<SettingsEntry>()
         entryList.add(
             SettingsEntryBuilder.create(ENTRY_NAME, owner).setIsAllowSearch(false).build()
@@ -108,7 +108,10 @@ internal class TogglePermissionAppInfoPageProvider(
 
         fun buildPageData(permissionType: String): SettingsPage {
             return SettingsPage.create(
-                PAGE_NAME, PAGE_PARAMETER, bundleOf(PERMISSION to permissionType))
+                name = PAGE_NAME,
+                parameter = PAGE_PARAMETER,
+                arguments = bundleOf(PERMISSION to permissionType)
+            )
         }
     }
 }

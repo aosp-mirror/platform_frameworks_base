@@ -25,10 +25,9 @@ import com.android.server.wm.traces.parser.toFlickerComponent
 
 class SimpleAppHelper @JvmOverloads constructor(
     instr: Instrumentation,
-    launcherName: String = ActivityOptions.SIMPLE_ACTIVITY_LAUNCHER_NAME,
+    launcherName: String = ActivityOptions.SimpleActivity.LABEL,
     component: ComponentNameMatcher =
-        ActivityOptions.SIMPLE_ACTIVITY_AUTO_FOCUS_COMPONENT_NAME.toFlickerComponent(),
-    launcherStrategy: ILauncherStrategy = LauncherStrategyFactory
-        .getInstance(instr)
-        .launcherStrategy
+        ActivityOptions.SimpleActivity.COMPONENT.toFlickerComponent(),
+    launcherStrategy: ILauncherStrategy =
+        LauncherStrategyFactory.getInstance(instr).launcherStrategy
 ) : StandardAppHelper(instr, launcherName, component, launcherStrategy)

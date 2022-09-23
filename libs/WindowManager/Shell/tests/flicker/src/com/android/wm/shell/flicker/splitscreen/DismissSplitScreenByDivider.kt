@@ -30,7 +30,6 @@ import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.wm.shell.flicker.SPLIT_SCREEN_DIVIDER_COMPONENT
 import com.android.wm.shell.flicker.appWindowBecomesInvisible
 import com.android.wm.shell.flicker.appWindowIsVisibleAtEnd
-import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 import com.android.wm.shell.flicker.layerBecomesInvisible
 import com.android.wm.shell.flicker.layerIsVisibleAtEnd
 import com.android.wm.shell.flicker.splitAppLayerBoundsBecomesInvisible
@@ -57,14 +56,14 @@ class DismissSplitScreenByDivider (testSpec: FlickerTestParameter) : SplitScreen
         get() = {
             super.transition(this)
             setup {
-                SplitScreenHelper.enterSplit(wmHelper, tapl, primaryApp, secondaryApp)
+                SplitScreenUtils.enterSplit(wmHelper, tapl, primaryApp, secondaryApp)
             }
             transitions {
                 if (tapl.isTablet) {
-                    SplitScreenHelper.dragDividerToDismissSplit(device, wmHelper,
+                    SplitScreenUtils.dragDividerToDismissSplit(device, wmHelper,
                         dragToRight = false, dragToBottom = true)
                 } else {
-                    SplitScreenHelper.dragDividerToDismissSplit(device, wmHelper,
+                    SplitScreenUtils.dragDividerToDismissSplit(device, wmHelper,
                         dragToRight = true, dragToBottom = true)
                 }
                 wmHelper.StateSyncBuilder()

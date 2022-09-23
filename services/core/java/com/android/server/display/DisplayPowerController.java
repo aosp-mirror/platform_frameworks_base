@@ -798,8 +798,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
      * Notified when the display is changed. We use this to apply any changes that might be needed
      * when displays get swapped on foldable devices.  For example, different brightness properties
      * of each display need to be properly reflected in AutomaticBrightnessController.
+     *
+     * Make sure DisplayManagerService.mSyncRoot is held when this is called
      */
-    @GuardedBy("DisplayManagerService.mSyncRoot")
     @Override
     public void onDisplayChanged() {
         final DisplayDevice device = mLogicalDisplay.getPrimaryDisplayDeviceLocked();
@@ -988,8 +989,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     com.android.internal.R.array.config_screenBrighteningThresholds);
             int[] screenDarkeningThresholds = resources.getIntArray(
                     com.android.internal.R.array.config_screenDarkeningThresholds);
-            int[] screenThresholdLevels = resources.getIntArray(
-                    com.android.internal.R.array.config_screenThresholdLevels);
+            float[] screenThresholdLevels = BrightnessMappingStrategy.getFloatArray(resources
+                    .obtainTypedArray(com.android.internal.R.array.config_screenThresholdLevels));
             float screenDarkeningMinThreshold =
                     mDisplayDeviceConfig.getScreenDarkeningMinThreshold();
             float screenBrighteningMinThreshold =
@@ -1896,7 +1897,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     }
                 },
                 () -> {
-                    sendUpdatePowerStateLocked();
+                    sendUpdatePowerState();
                     postBrightnessChangeRunnable();
                     // TODO(b/192258832): Switch the HBMChangeCallback to a listener pattern.
                     if (mAutomaticBrightnessController != null) {
@@ -1912,7 +1913,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 ddConfig != null ? ddConfig.getBrightnessThrottlingData() : null;
         return new BrightnessThrottler(mHandler, data,
                 () -> {
-                    sendUpdatePowerStateLocked();
+                    sendUpdatePowerState();
                     postBrightnessChangeRunnable();
                 }, mUniqueDisplayId);
     }

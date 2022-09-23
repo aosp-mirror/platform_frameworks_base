@@ -18,6 +18,8 @@ package com.android.wm.shell.splitscreen;
 
 import static android.app.ActivityOptions.KEY_LAUNCH_ROOT_TASK_TOKEN;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
+import static android.app.ComponentOptions.KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED;
+import static android.app.ComponentOptions.KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED_BY_PERMISSION;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
@@ -502,6 +504,12 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         options = resolveStartStage(STAGE_TYPE_UNDEFINED, position, options, wct);
+
+        // If split still not active, apply windows bounds first to avoid surface reset to
+        // wrong pos by SurfaceAnimator from wms.
+        if (!mMainStage.isActive() && mLogger.isEnterRequestedByDrag()) {
+            updateWindowBounds(mSplitLayout, wct);
+        }
 
         wct.sendPendingIntent(intent, fillInIntent, options);
         mSyncQueue.queue(transition, WindowManager.TRANSIT_OPEN, wct);
@@ -1109,6 +1117,10 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     private void addActivityOptions(Bundle opts, StageTaskListener stage) {
         opts.putParcelable(KEY_LAUNCH_ROOT_TASK_TOKEN, stage.mRootTaskInfo.token);
+        // Put BAL flags to avoid activity start aborted. Otherwise, flows like shortcut to split
+        // will be canceled.
+        opts.putBoolean(KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED, true);
+        opts.putBoolean(KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED_BY_PERMISSION, true);
     }
 
     void updateActivityOptions(Bundle opts, @SplitPosition int position) {
@@ -1455,18 +1467,27 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 }
             }
         } else if (isSideStage && hasChildren && !mMainStage.isActive()) {
-            // TODO (b/238697912) : Add the validation to prevent entering non-recovered status
-            onSplitScreenEnter();
             final WindowContainerTransaction wct = new WindowContainerTransaction();
             mSplitLayout.init();
-            mSplitLayout.setDividerAtBorder(mSideStagePosition == SPLIT_POSITION_TOP_OR_LEFT);
-            mMainStage.activate(wct, true /* includingTopTask */);
-            updateWindowBounds(mSplitLayout, wct);
-            wct.reorder(mRootTaskInfo.token, true);
-            wct.setForceTranslucent(mRootTaskInfo.token, false);
+            if (mLogger.isEnterRequestedByDrag()) {
+                prepareEnterSplitScreen(wct);
+            } else {
+                // TODO (b/238697912) : Add the validation to prevent entering non-recovered status
+                onSplitScreenEnter();
+                mSplitLayout.setDividerAtBorder(mSideStagePosition == SPLIT_POSITION_TOP_OR_LEFT);
+                mMainStage.activate(wct, true /* includingTopTask */);
+                updateWindowBounds(mSplitLayout, wct);
+                wct.reorder(mRootTaskInfo.token, true);
+                wct.setForceTranslucent(mRootTaskInfo.token, false);
+            }
+
             mSyncQueue.queue(wct);
             mSyncQueue.runInSync(t -> {
-                mSplitLayout.flingDividerToCenter();
+                if (mLogger.isEnterRequestedByDrag()) {
+                    updateSurfaceBounds(mSplitLayout, t, false /* applyResizingOffset */);
+                } else {
+                    mSplitLayout.flingDividerToCenter();
+                }
             });
         }
         if (mMainStageListener.mHasChildren && mSideStageListener.mHasChildren) {

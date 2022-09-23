@@ -1,0 +1,13 @@
+<resources>
+  <string name="app_name">CredentialManager</string>
+  <string name="string_cancel">Cancel</string>
+  <string name="string_continue">Continue</string>
+  <string name="string_more_options">More options</string>
+  <string name="string_no_thanks">No thanks</string>
+  <string name="passkey_creation_intro_title">A simple way to sign in safely</string>
+  <string name="passkey_creation_intro_body">Use your fingerprint, face or screen lock to sign in with a unique passkey that can’t be forgotten or stolen. Learn more</string>
+  <string name="choose_provider_title">Choose your default provider</string>
+  <string name="choose_provider_body">This provider will store passkeys and passwords for you and help you easily autofill and sign in. Learn more</string>
+  <string name="choose_create_option_title">Create a passkey at</string>
+  <string name="choose_sign_in_title">Use saved sign in</string>
+</resources>
