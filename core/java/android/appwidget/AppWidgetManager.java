@@ -1109,7 +1109,9 @@ public class AppWidgetManager {
      * @param intent        The intent of the service which will be providing the data to the
      *                      RemoteViewsAdapter.
      * @param connection    The callback interface to be notified when a connection is made or lost.
-     * @param flags         Flags used for binding to the service
+     * @param flags         Flags used for binding to the service. Currently only
+     *                     {@link Context#BIND_AUTO_CREATE} and
+     *                     {@link Context#BIND_FOREGROUND_SERVICE_WHILE_AWAKE} are supported.
      *
      * @see Context#getServiceDispatcher(ServiceConnection, Handler, int)
      * @hide
