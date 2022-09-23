@@ -172,7 +172,7 @@ public final class MediaRouter2Manager {
             try {
                 mMediaRouterService.startScan(client);
             } catch (RemoteException ex) {
-                Log.e(TAG, "Unable to get sessions. Service probably died.", ex);
+                throw ex.rethrowFromSystemServer();
             }
         }
     }
@@ -196,7 +196,7 @@ public final class MediaRouter2Manager {
             try {
                 mMediaRouterService.stopScan(client);
             } catch (RemoteException ex) {
-                Log.e(TAG, "Unable to get sessions. Service probably died.", ex);
+                throw ex.rethrowFromSystemServer();
             }
         }
     }
@@ -361,9 +361,8 @@ public final class MediaRouter2Manager {
             return mMediaRouterService.getSystemSessionInfoForPackage(
                     getOrCreateClient(), packageName);
         } catch (RemoteException ex) {
-            Log.e(TAG, "Unable to get current system session info", ex);
+            throw ex.rethrowFromSystemServer();
         }
-        return null;
     }
 
     /**
@@ -429,7 +428,7 @@ public final class MediaRouter2Manager {
             try {
                 return mMediaRouterService.getRemoteSessions(client);
             } catch (RemoteException ex) {
-                Log.e(TAG, "Unable to get sessions. Service probably died.", ex);
+                throw ex.rethrowFromSystemServer();
             }
         }
         return Collections.emptyList();
@@ -521,7 +520,7 @@ public final class MediaRouter2Manager {
                 int requestId = mNextRequestId.getAndIncrement();
                 mMediaRouterService.setRouteVolumeWithManager(client, requestId, route, volume);
             } catch (RemoteException ex) {
-                Log.e(TAG, "Unable to set route volume.", ex);
+                throw ex.rethrowFromSystemServer();
             }
         }
     }
@@ -551,7 +550,7 @@ public final class MediaRouter2Manager {
                 mMediaRouterService.setSessionVolumeWithManager(
                         client, requestId, sessionInfo.getId(), volume);
             } catch (RemoteException ex) {
-                Log.e(TAG, "Unable to set session volume.", ex);
+                throw ex.rethrowFromSystemServer();
             }
         }
     }
@@ -816,7 +815,7 @@ public final class MediaRouter2Manager {
                 mMediaRouterService.selectRouteWithManager(
                         client, requestId, sessionInfo.getId(), route);
             } catch (RemoteException ex) {
-                Log.e(TAG, "selectRoute: Failed to send a request.", ex);
+                throw ex.rethrowFromSystemServer();
             }
         }
     }
@@ -858,7 +857,7 @@ public final class MediaRouter2Manager {
                 mMediaRouterService.deselectRouteWithManager(
                         client, requestId, sessionInfo.getId(), route);
             } catch (RemoteException ex) {
-                Log.e(TAG, "deselectRoute: Failed to send a request.", ex);
+                throw ex.rethrowFromSystemServer();
             }
         }
     }
@@ -883,7 +882,7 @@ public final class MediaRouter2Manager {
                 mMediaRouterService.releaseSessionWithManager(
                         client, requestId, sessionInfo.getId());
             } catch (RemoteException ex) {
-                Log.e(TAG, "releaseSession: Failed to send a request", ex);
+                throw ex.rethrowFromSystemServer();
             }
         }
     }
@@ -903,7 +902,7 @@ public final class MediaRouter2Manager {
                 mMediaRouterService.transferToRouteWithManager(
                         client, requestId, session.getId(), route);
             } catch (RemoteException ex) {
-                Log.e(TAG, "transferToRoute: Failed to send a request.", ex);
+                throw ex.rethrowFromSystemServer();
             }
         }
     }
@@ -923,7 +922,7 @@ public final class MediaRouter2Manager {
                 mMediaRouterService.requestCreateSessionWithManager(
                         client, requestId, oldSession, route);
             } catch (RemoteException ex) {
-                Log.e(TAG, "requestCreateSession: Failed to send a request", ex);
+                throw ex.rethrowFromSystemServer();
             }
         }
     }
@@ -979,10 +978,9 @@ public final class MediaRouter2Manager {
                 mClient = client;
                 return client;
             } catch (RemoteException ex) {
-                Log.e(TAG, "Unable to register media router manager.", ex);
+                throw ex.rethrowFromSystemServer();
             }
         }
-        return null;
     }
 
     /**
