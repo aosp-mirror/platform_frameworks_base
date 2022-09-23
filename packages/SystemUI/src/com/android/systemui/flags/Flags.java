@@ -192,7 +192,7 @@ public class Flags {
 
     /***************************************/
     // 900 - media
-    public static final ReleasedFlag MEDIA_TAP_TO_TRANSFER = new ReleasedFlag(900);
+    public static final UnreleasedFlag MEDIA_TAP_TO_TRANSFER = new UnreleasedFlag(900);
     public static final UnreleasedFlag MEDIA_SESSION_ACTIONS = new UnreleasedFlag(901);
     public static final ReleasedFlag MEDIA_NEARBY_DEVICES = new ReleasedFlag(903);
     public static final ReleasedFlag MEDIA_MUTE_AWAIT = new ReleasedFlag(904);
