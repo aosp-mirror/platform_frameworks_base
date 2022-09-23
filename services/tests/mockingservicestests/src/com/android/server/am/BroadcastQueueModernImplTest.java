@@ -65,6 +65,8 @@ public class BroadcastQueueModernImplTest {
     @Mock BroadcastProcessQueue mQueue4;
 
     HandlerThread mHandlerThread;
+
+    BroadcastConstants mConstants;
     BroadcastQueueModernImpl mImpl;
 
     BroadcastProcessQueue mHead;
@@ -75,9 +77,10 @@ public class BroadcastQueueModernImplTest {
 
         mHandlerThread = new HandlerThread(getClass().getSimpleName());
         mHandlerThread.start();
+
+        mConstants = new BroadcastConstants(Settings.Global.BROADCAST_FG_CONSTANTS);
         mImpl = new BroadcastQueueModernImpl(mAms, mHandlerThread.getThreadHandler(),
-                new BroadcastConstants(Settings.Global.BROADCAST_FG_CONSTANTS),
-                new BroadcastConstants(Settings.Global.BROADCAST_BG_CONSTANTS));
+                mConstants, mConstants);
 
         doReturn(1L).when(mQueue1).getRunnableAt();
         doReturn(2L).when(mQueue2).getRunnableAt();
@@ -240,8 +243,8 @@ public class BroadcastQueueModernImplTest {
      */
     @Test
     public void testRunnableAt_Empty() {
-        BroadcastProcessQueue queue = new BroadcastProcessQueue(PACKAGE_GREEN,
-                getUidForPackage(PACKAGE_GREEN));
+        BroadcastProcessQueue queue = new BroadcastProcessQueue(mConstants,
+                PACKAGE_GREEN, getUidForPackage(PACKAGE_GREEN));
         assertFalse(queue.isRunnable());
         assertEquals(Long.MAX_VALUE, queue.getRunnableAt());
     }
@@ -252,8 +255,8 @@ public class BroadcastQueueModernImplTest {
      */
     @Test
     public void testRunnableAt_Normal() {
-        BroadcastProcessQueue queue = new BroadcastProcessQueue(PACKAGE_GREEN,
-                getUidForPackage(PACKAGE_GREEN));
+        BroadcastProcessQueue queue = new BroadcastProcessQueue(mConstants,
+                PACKAGE_GREEN, getUidForPackage(PACKAGE_GREEN));
 
         final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         final BroadcastRecord airplaneRecord = makeBroadcastRecord(airplane);
@@ -272,8 +275,8 @@ public class BroadcastQueueModernImplTest {
      */
     @Test
     public void testRunnableAt_Foreground() {
-        BroadcastProcessQueue queue = new BroadcastProcessQueue(PACKAGE_GREEN,
-                getUidForPackage(PACKAGE_GREEN));
+        BroadcastProcessQueue queue = new BroadcastProcessQueue(mConstants,
+                PACKAGE_GREEN, getUidForPackage(PACKAGE_GREEN));
 
         final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         airplane.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);

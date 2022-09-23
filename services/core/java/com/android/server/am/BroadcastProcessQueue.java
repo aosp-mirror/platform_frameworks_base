@@ -32,6 +32,7 @@ import com.android.server.am.BroadcastRecord.DeliveryState;
 
 import java.util.ArrayDeque;
 import java.util.Iterator;
+import java.util.Objects;
 import java.util.function.BiPredicate;
 
 /**
@@ -47,19 +48,7 @@ import java.util.function.BiPredicate;
  * dispatched.
  */
 class BroadcastProcessQueue {
-    /**
-     * Default delay to apply to background broadcasts, giving a chance for
-     * debouncing of rapidly changing events.
-     */
-    // TODO: shift hard-coded defaults to BroadcastConstants
-    private static final long DELAY_DEFAULT_MILLIS = 10_000;
-
-    /**
-     * Default delay to apply to broadcasts targeting cached applications.
-     */
-    // TODO: shift hard-coded defaults to BroadcastConstants
-    private static final long DELAY_CACHED_MILLIS = 30_000;
-
+    final @NonNull BroadcastConstants constants;
     final @NonNull String processName;
     final int uid;
 
@@ -129,8 +118,10 @@ class BroadcastProcessQueue {
 
     private boolean mProcessCached;
 
-    public BroadcastProcessQueue(@NonNull String processName, int uid) {
-        this.processName = processName;
+    public BroadcastProcessQueue(@NonNull BroadcastConstants constants,
+            @NonNull String processName, int uid) {
+        this.constants = Objects.requireNonNull(constants);
+        this.processName = Objects.requireNonNull(processName);
         this.uid = uid;
     }
 
@@ -401,9 +392,9 @@ class BroadcastProcessQueue {
             } else if (mCountAlarm > 0) {
                 mRunnableAt = runnableAt;
             } else if (mProcessCached) {
-                mRunnableAt = runnableAt + DELAY_CACHED_MILLIS;
+                mRunnableAt = runnableAt + constants.DELAY_CACHED_MILLIS;
             } else {
-                mRunnableAt = runnableAt + DELAY_DEFAULT_MILLIS;
+                mRunnableAt = runnableAt + constants.DELAY_NORMAL_MILLIS;
             }
         } else {
             mRunnableAt = Long.MAX_VALUE;

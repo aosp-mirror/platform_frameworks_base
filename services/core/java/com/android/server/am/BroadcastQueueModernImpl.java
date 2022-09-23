@@ -111,9 +111,17 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             BroadcastConstants fgConstants, BroadcastConstants bgConstants,
             BroadcastSkipPolicy skipPolicy, BroadcastHistory history) {
         super(service, handler, "modern", skipPolicy, history);
+
+        // For the moment, read agnostic constants from foreground
+        mConstants = Objects.requireNonNull(fgConstants);
         mFgConstants = Objects.requireNonNull(fgConstants);
         mBgConstants = Objects.requireNonNull(bgConstants);
+
         mLocalHandler = new Handler(handler.getLooper(), mLocalCallback);
+
+        // We configure runnable size only once at boot; it'd be too complex to
+        // try resizing dynamically at runtime
+        mRunning = new BroadcastProcessQueue[mConstants.MAX_RUNNING_PROCESS_QUEUES];
     }
 
     // TODO: add support for replacing pending broadcasts
@@ -123,21 +131,6 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
     // TODO: pause queues when background services are running
     // TODO: pause queues when processes are frozen
-
-    /**
-     * Maximum number of process queues to dispatch broadcasts to
-     * simultaneously.
-     */
-    // TODO: shift hard-coded defaults to BroadcastConstants
-    private static final int MAX_RUNNING_PROCESS_QUEUES = 4;
-
-    /**
-     * Maximum number of active broadcasts to dispatch to a "running" process
-     * queue before we retire them back to being "runnable" to give other
-     * processes a chance to run.
-     */
-    // TODO: shift hard-coded defaults to BroadcastConstants
-    private static final int MAX_RUNNING_ACTIVE_BROADCASTS = 16;
 
     /**
      * Map from UID to per-process broadcast queues. If a UID hosts more than
@@ -168,8 +161,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
      * @see #getRunningIndexOf
      */
     @GuardedBy("mService")
-    private final BroadcastProcessQueue[] mRunning =
-            new BroadcastProcessQueue[MAX_RUNNING_PROCESS_QUEUES];
+    private final BroadcastProcessQueue[] mRunning;
 
     /**
      * Single queue which is "running" but is awaiting a cold start to be
@@ -185,6 +177,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     @GuardedBy("mService")
     private final ArrayList<CountDownLatch> mWaitingForIdle = new ArrayList<>();
 
+    private final BroadcastConstants mConstants;
     private final BroadcastConstants mFgConstants;
     private final BroadcastConstants mBgConstants;
 
@@ -299,12 +292,12 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
      * Consider updating the list of "running" queues.
      * <p>
      * This method can promote "runnable" queues to become "running", subject to
-     * a maximum of {@link #MAX_RUNNING_PROCESS_QUEUES} warm processes and only
-     * one pending cold-start.
+     * a maximum of {@link BroadcastConstants#MAX_RUNNING_PROCESS_QUEUES} warm
+     * processes and only one pending cold-start.
      */
     @GuardedBy("mService")
     private void updateRunningList() {
-        int avail = MAX_RUNNING_PROCESS_QUEUES - getRunningSize();
+        int avail = mRunning.length - getRunningSize();
         if (avail == 0) return;
 
         final int cookie = traceBegin(TAG, "updateRunningList");
@@ -714,7 +707,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         // Even if we have more broadcasts, if we've made reasonable progress
         // and someone else is waiting, retire ourselves to avoid starvation
         final boolean shouldRetire = (mRunnableHead != null)
-                && (queue.getActiveCountSinceIdle() > MAX_RUNNING_ACTIVE_BROADCASTS);
+                && (queue.getActiveCountSinceIdle() > mConstants.MAX_RUNNING_ACTIVE_BROADCASTS);
 
         if (queue.isRunnable() && queue.isProcessWarm() && !shouldRetire) {
             // We're on a roll; move onto the next broadcast for this process
@@ -1034,7 +1027,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             leaf = leaf.processNameNext;
         }
 
-        BroadcastProcessQueue created = new BroadcastProcessQueue(processName, uid);
+        BroadcastProcessQueue created = new BroadcastProcessQueue(mConstants, processName, uid);
         created.app = mService.getProcessRecordLocked(processName, uid);
 
         if (leaf == null) {
