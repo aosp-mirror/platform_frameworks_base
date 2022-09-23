@@ -32,6 +32,7 @@ import android.system.keystore2.ResponseCode;
 import android.util.Log;
 
 import java.util.Calendar;
+import java.util.Objects;
 
 /**
  * @hide This should not be made public in its present form because it
@@ -137,13 +138,13 @@ public class KeyStore2 {
         return new KeyStore2();
     }
 
-    private synchronized IKeystoreService getService(boolean retryLookup) {
+    @NonNull private synchronized IKeystoreService getService(boolean retryLookup) {
         if (mBinder == null || retryLookup) {
             mBinder = IKeystoreService.Stub.asInterface(ServiceManager
                     .getService(KEYSTORE2_SERVICE_NAME));
             Binder.allowBlocking(mBinder.asBinder());
         }
-        return mBinder;
+        return Objects.requireNonNull(mBinder);
     }
 
     void delete(KeyDescriptor descriptor) throws KeyStoreException {
