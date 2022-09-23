@@ -36,13 +36,14 @@
         android:background="@*android:drawable/bottomsheet_background">
 
         <ImageView
-            android:id="@*android:id/icon"
             android:layout_width="@dimen/media_projection_app_selector_icon_size"
             android:layout_height="@dimen/media_projection_app_selector_icon_size"
             android:layout_marginTop="@*android:dimen/chooser_edge_margin_normal"
             android:layout_marginBottom="@*android:dimen/chooser_edge_margin_normal"
             android:importantForAccessibility="no"
-            android:tint="?android:attr/textColorPrimary"/>
+            android:tint="?android:attr/textColorPrimary"
+            android:src="@drawable/ic_present_to_all"
+            />
 
         <TextView android:id="@*android:id/title"
             android:layout_height="wrap_content"

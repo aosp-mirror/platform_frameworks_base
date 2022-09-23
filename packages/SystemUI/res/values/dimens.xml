@@ -1467,6 +1467,8 @@
     <dimen name="fgs_manager_list_top_spacing">12dp</dimen>
 
     <dimen name="media_projection_app_selector_icon_size">32dp</dimen>
+    <dimen name="media_projection_app_selector_recents_padding">16dp</dimen>
+    <dimen name="media_projection_app_selector_loader_size">32dp</dimen>
 
     <!-- Dream overlay related dimensions -->
     <dimen name="dream_overlay_status_bar_height">60dp</dimen>
