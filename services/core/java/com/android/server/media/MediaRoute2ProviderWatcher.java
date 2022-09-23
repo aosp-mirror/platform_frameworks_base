@@ -41,6 +41,8 @@ import java.util.Collections;
 final class MediaRoute2ProviderWatcher {
     private static final String TAG = "MR2ProviderWatcher";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+    private static final PackageManager.ResolveInfoFlags RESOLVE_INFO_FLAGS_NONE =
+            PackageManager.ResolveInfoFlags.of(0);
 
     private final Context mContext;
     private final Callback mCallback;
@@ -110,8 +112,9 @@ final class MediaRoute2ProviderWatcher {
         // Reorder the list so that providers left at the end will be the ones to remove.
         int targetIndex = 0;
         Intent intent = new Intent(MediaRoute2ProviderService.SERVICE_INTERFACE);
-        for (ResolveInfo resolveInfo : mPackageManager.queryIntentServicesAsUser(
-                intent, 0, mUserId)) {
+        for (ResolveInfo resolveInfo :
+                mPackageManager.queryIntentServicesAsUser(
+                        intent, RESOLVE_INFO_FLAGS_NONE, mUserId)) {
             ServiceInfo serviceInfo = resolveInfo.serviceInfo;
             if (serviceInfo != null) {
                 int sourceIndex = findProvider(serviceInfo.packageName, serviceInfo.name);
