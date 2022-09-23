@@ -3327,8 +3327,9 @@ class Task extends TaskFragment {
                 ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS,
                         "applyAnimationUnchecked, control: %s, task: %s, transit: %s",
                         control, asTask(), AppTransition.appTransitionOldToString(transit));
+                final int size = sources != null ? sources.size() : 0;
                 control.addTaskToTargets(this, (type, anim) -> {
-                    for (int i = 0; i < sources.size(); ++i) {
+                    for (int i = 0; i < size; ++i) {
                         sources.get(i).onAnimationFinished(type, anim);
                     }
                 });
