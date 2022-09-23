@@ -2922,7 +2922,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             if (sDebug) {
                 Slog.d(TAG, "Set the response has expired.");
             }
-            mPresentationStatsEventLogger.maybeSetNoPresentationEventReason(
+            mPresentationStatsEventLogger.maybeSetNoPresentationEventReasonIfNoReasonExists(
                         NOT_SHOWN_REASON_VIEW_CHANGED);
             mPresentationStatsEventLogger.logAndEndEvent();
             return;
