@@ -29,7 +29,7 @@ import kotlinx.coroutines.flow.Flow
 class KeyguardInteractor
 @Inject
 constructor(
-    repository: KeyguardRepository,
+    private val repository: KeyguardRepository,
 ) {
     /**
      * The amount of doze the system is in, where `1.0` is fully dozing and `0.0` is not dozing at
@@ -40,4 +40,8 @@ constructor(
     val isDozing: Flow<Boolean> = repository.isDozing
     /** Whether the keyguard is showing ot not. */
     val isKeyguardShowing: Flow<Boolean> = repository.isKeyguardShowing
+
+    fun isKeyguardShowing(): Boolean {
+        return repository.isKeyguardShowing()
+    }
 }

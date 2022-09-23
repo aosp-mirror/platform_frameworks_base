@@ -116,6 +116,7 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
         val job = underTest.isKeyguardShowing.onEach { latest = it }.launchIn(this)
 
         assertThat(latest).isFalse()
+        assertThat(underTest.isKeyguardShowing()).isFalse()
 
         val captor = argumentCaptor<KeyguardStateController.Callback>()
         verify(keyguardStateController).addCallback(captor.capture())
@@ -123,10 +124,12 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
         whenever(keyguardStateController.isShowing).thenReturn(true)
         captor.value.onKeyguardShowingChanged()
         assertThat(latest).isTrue()
+        assertThat(underTest.isKeyguardShowing()).isTrue()
 
         whenever(keyguardStateController.isShowing).thenReturn(false)
         captor.value.onKeyguardShowingChanged()
         assertThat(latest).isFalse()
+        assertThat(underTest.isKeyguardShowing()).isFalse()
 
         job.cancel()
     }
