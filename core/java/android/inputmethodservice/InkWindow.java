@@ -163,6 +163,9 @@ final class InkWindow extends PhoneWindow {
         mGlobalLayoutListener = new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
+                if (mInkView == null) {
+                    return;
+                }
                 if (mInkView.isVisibleToUser()) {
                     if (mInkViewVisibilityListener != null) {
                         mInkViewVisibilityListener.onInkViewVisible();
