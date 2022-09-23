@@ -19,11 +19,10 @@ package com.android.settingslib.spa.framework.common
 import androidx.compose.runtime.Composable
 
 /**
- * Defines interface of a entry marco, which contains all entry functions to support different
+ * Defines interface of a entry macro, which contains entry functions to support different
  * scenarios, such as browsing (UiLayout), search, etc.
- * SPA team will rebuild some entry marcos, in order to make the entry creation easier.
  */
-interface EntryMarco {
+interface EntryMacro {
     @Composable
     fun UiLayout() {}
     fun getSearchData(): EntrySearchData? = null

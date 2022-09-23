@@ -45,7 +45,7 @@ import com.android.settingslib.spa.gallery.preference.PreferencePageModel.Compan
 import com.android.settingslib.spa.gallery.preference.PreferencePageModel.Companion.logMsg
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
-import com.android.settingslib.spa.widget.preference.SimplePreferenceMarco
+import com.android.settingslib.spa.widget.preference.SimplePreferenceMacro
 import com.android.settingslib.spa.widget.scaffold.RegularScaffold
 import com.android.settingslib.spa.widget.ui.SettingsIcon
 
@@ -74,18 +74,18 @@ object PreferencePageProvider : SettingsPageProvider {
         entryList.add(
             createEntry(EntryEnum.SIMPLE_PREFERENCE)
                 .setIsAllowSearch(true)
-                .setMarco {
-                    logMsg("create marco for ${EntryEnum.SIMPLE_PREFERENCE}")
-                    SimplePreferenceMarco(title = SIMPLE_PREFERENCE_TITLE)
+                .setMacro {
+                    logMsg("create macro for ${EntryEnum.SIMPLE_PREFERENCE}")
+                    SimplePreferenceMacro(title = SIMPLE_PREFERENCE_TITLE)
                 }
                 .build()
         )
         entryList.add(
             createEntry(EntryEnum.SUMMARY_PREFERENCE)
                 .setIsAllowSearch(true)
-                .setMarco {
-                    logMsg("create marco for ${EntryEnum.SUMMARY_PREFERENCE}")
-                    SimplePreferenceMarco(
+                .setMacro {
+                    logMsg("create macro for ${EntryEnum.SUMMARY_PREFERENCE}")
+                    SimplePreferenceMacro(
                         title = SIMPLE_PREFERENCE_TITLE,
                         summary = SIMPLE_PREFERENCE_SUMMARY,
                         searchKeywords = SIMPLE_PREFERENCE_KEYWORDS,
@@ -96,9 +96,9 @@ object PreferencePageProvider : SettingsPageProvider {
         entryList.add(
             createEntry(EntryEnum.DISABLED_PREFERENCE)
                 .setIsAllowSearch(true)
-                .setMarco {
-                    logMsg("create marco for ${EntryEnum.DISABLED_PREFERENCE}")
-                    SimplePreferenceMarco(
+                .setMacro {
+                    logMsg("create macro for ${EntryEnum.DISABLED_PREFERENCE}")
+                    SimplePreferenceMacro(
                         title = DISABLE_PREFERENCE_TITLE,
                         summary = DISABLE_PREFERENCE_SUMMARY,
                         disabled = true,
@@ -167,9 +167,9 @@ object PreferencePageProvider : SettingsPageProvider {
     fun buildInjectEntry(): SettingsEntryBuilder {
         return SettingsEntryBuilder.createInject(owner = owner)
             .setIsAllowSearch(true)
-            .setMarco {
-                logMsg("create marco for INJECT entry")
-                SimplePreferenceMarco(
+            .setMacro {
+                logMsg("create macro for INJECT entry")
+                SimplePreferenceMacro(
                     title = PAGE_TITLE,
                     clickRoute = SettingsPageProviderEnum.PREFERENCE.name
                 )
