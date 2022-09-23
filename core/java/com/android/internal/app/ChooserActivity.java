@@ -1069,7 +1069,12 @@ public class ChooserActivity extends ResolverActivity implements
         }
     }
 
-    private ViewGroup createContentPreviewView(ViewGroup parent) {
+    /**
+     * Create a view that will be shown in the content preview area
+     * @param parent reference to the parent container where the view should be attached to
+     * @return content preview view
+     */
+    protected ViewGroup createContentPreviewView(ViewGroup parent) {
         Intent targetIntent = getTargetIntent();
         int previewType = findPreferredContentPreview(targetIntent, getContentResolver());
         return displayContentPreview(previewType, targetIntent, getLayoutInflater(), parent);
@@ -2653,7 +2658,7 @@ public class ChooserActivity extends ResolverActivity implements
 
             boolean isExpandable = getResources().getConfiguration().orientation
                     == Configuration.ORIENTATION_PORTRAIT && !isInMultiWindowMode();
-            if (directShareHeight != 0 && isSendAction(getTargetIntent())
+            if (directShareHeight != 0 && shouldShowContentPreview()
                     && isExpandable) {
                 // make sure to leave room for direct share 4->8 expansion
                 int requiredExpansionHeight =
@@ -2901,7 +2906,14 @@ public class ChooserActivity extends ResolverActivity implements
         return shouldShowTabs()
                 && mMultiProfilePagerAdapter.getListAdapterForUserHandle(
                 UserHandle.of(UserHandle.myUserId())).getCount() > 0
-                && isSendAction(getTargetIntent());
+                && shouldShowContentPreview();
+    }
+
+    /**
+     * @return true if we want to show the content preview area
+     */
+    protected boolean shouldShowContentPreview() {
+        return isSendAction(getTargetIntent());
     }
 
     private void updateStickyContentPreview() {
@@ -3234,7 +3246,7 @@ public class ChooserActivity extends ResolverActivity implements
                 return 0;
             }
 
-            if (!isSendAction(getTargetIntent())) {
+            if (!shouldShowContentPreview()) {
                 return 0;
             }
 
@@ -3265,7 +3277,7 @@ public class ChooserActivity extends ResolverActivity implements
         // There can be at most one row in the listview, that is internally
         // a ViewGroup with 2 rows
         public int getServiceTargetRowCount() {
-            if (isSendAction(getTargetIntent())
+            if (shouldShowContentPreview()
                     && !ActivityManager.isLowRamDeviceStatic()) {
                 return 1;
             }
