@@ -86,8 +86,6 @@
     <dimen name="lockscreen_shade_qs_transition_distance">@dimen/lockscreen_shade_full_transition_distance</dimen>
     <dimen name="lockscreen_shade_qs_transition_delay">@dimen/lockscreen_shade_scrim_transition_distance</dimen>
     <dimen name="lockscreen_shade_qs_squish_transition_distance">@dimen/lockscreen_shade_qs_transition_distance</dimen>
-    <!-- On large screen portrait, the QS squish transition should start from half height.  -->
-    <item name="lockscreen_shade_qs_squish_start_fraction" type="dimen" format="float" >0.5</item>
     <dimen name="lockscreen_shade_depth_controller_transition_distance">@dimen/lockscreen_shade_full_transition_distance</dimen>
     <dimen name="lockscreen_shade_udfps_keyguard_transition_distance">@dimen/lockscreen_shade_full_transition_distance</dimen>
     <dimen name="lockscreen_shade_status_bar_transition_distance">@dimen/lockscreen_shade_full_transition_distance</dimen>
