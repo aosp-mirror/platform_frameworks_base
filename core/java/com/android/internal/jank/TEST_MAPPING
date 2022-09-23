@@ -1,0 +1,22 @@
+{
+  "presubmit": [
+    {
+      "name": "FrameworksCoreTests",
+      "options": [
+        {
+          "include-filter": "com.android.internal.jank"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        },
+        {
+          "exclude-annotation": "org.junit.Ignore"
+        }
+      ],
+      "file_patterns": [
+        "core/java/com/android/internal/jank/.*",
+        "core/tests/coretests/src/com/android/internal/jank/.*"
+      ]
+    }
+  ]
+}
