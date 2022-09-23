@@ -333,7 +333,11 @@ public final class PlaybackState implements Parcelable {
     @Override
     public String toString() {
         StringBuilder bob = new StringBuilder("PlaybackState {");
-        bob.append("state=").append(mState);
+        bob.append("state=")
+                .append(getStringForStateInt(mState))
+                .append("(")
+                .append(mState)
+                .append(")");
         bob.append(", position=").append(mPosition);
         bob.append(", buffered position=").append(mBufferedPosition);
         bob.append(", speed=").append(mSpeed);
@@ -532,6 +536,38 @@ public final class PlaybackState implements Parcelable {
             return new PlaybackState[size];
         }
     };
+
+    /** Returns a human readable string representation of the given int {@code state} */
+    private static String getStringForStateInt(int state) {
+        switch (state) {
+            case STATE_NONE:
+                return "NONE";
+            case STATE_STOPPED:
+                return "STOPPED";
+            case STATE_PAUSED:
+                return "PAUSED";
+            case STATE_PLAYING:
+                return "PLAYING";
+            case STATE_FAST_FORWARDING:
+                return "FAST_FORWARDING";
+            case STATE_REWINDING:
+                return "REWINDING";
+            case STATE_BUFFERING:
+                return "BUFFERING";
+            case STATE_ERROR:
+                return "ERROR";
+            case STATE_CONNECTING:
+                return "CONNECTING";
+            case STATE_SKIPPING_TO_PREVIOUS:
+                return "SKIPPING_TO_PREVIOUS";
+            case STATE_SKIPPING_TO_NEXT:
+                return "SKIPPING_TO_NEXT";
+            case STATE_SKIPPING_TO_QUEUE_ITEM:
+                return "SKIPPING_TO_QUEUE_ITEM";
+            default:
+                return "UNKNOWN";
+        }
+    }
 
     /**
      * {@link PlaybackState.CustomAction CustomActions} can be used to extend the capabilities of
