@@ -1161,6 +1161,22 @@ public class AudioDeviceInventory {
                 .record();
     }
 
+    /**
+     * Returns whether a device of type DEVICE_OUT_HEARING_AID is connected.
+     * Visibility by APM plays no role
+     * @return true if a DEVICE_OUT_HEARING_AID is connected, false otherwise.
+     */
+    boolean isHearingAidConnected() {
+        synchronized (mDevicesLock) {
+            for (DeviceInfo di : mConnectedDevices.values()) {
+                if (di.mDeviceType == AudioSystem.DEVICE_OUT_HEARING_AID) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
     @GuardedBy("mDevicesLock")
     private void makeLeAudioDeviceAvailable(String address, String name, int streamType,
             int volumeIndex, int device, String eventSource) {
