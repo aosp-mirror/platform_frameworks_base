@@ -3666,9 +3666,6 @@ public final class Parcel {
      * previously been written via {@link #writeTypedList} with the same object
      * type.
      *
-     * @return A newly created ArrayList containing objects with the same data
-     *         as those that were previously written.
-     *
      * @see #writeTypedList
      */
     public final <T> void readTypedList(@NonNull List<T> list, @NonNull Parcelable.Creator<T> c) {
