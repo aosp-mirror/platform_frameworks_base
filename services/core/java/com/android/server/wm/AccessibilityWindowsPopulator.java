@@ -153,7 +153,11 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
         for (InputWindowHandle window : windowHandles) {
             final boolean visible = (window.inputConfig & InputConfig.NOT_VISIBLE) == 0;
             final boolean isNotClone = (window.inputConfig & InputConfig.CLONE) == 0;
-            if (visible && window.getWindow() != null && isNotClone) {
+            final boolean hasTouchableRegion = !window.touchableRegion.isEmpty();
+            final boolean hasNonEmptyFrame =
+                    (window.frameBottom != window.frameTop) && (window.frameLeft
+                            != window.frameRight);
+            if (visible && isNotClone && hasTouchableRegion && hasNonEmptyFrame) {
                 tempVisibleWindows.add(window);
             }
         }
@@ -321,10 +325,20 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
         // the old and new windows at the same index should be the
         // same, otherwise something changed.
         for (int i = 0; i < windowsCount; i++) {
-            final InputWindowHandle newWindow = newWindows.get(i);
-            final InputWindowHandle oldWindow = oldWindows.get(i);
+            final IWindow newWindowToken = newWindows.get(i).getWindow();
+            final IWindow oldWindowToken = oldWindows.get(i).getWindow();
+            final boolean hasNewWindowToken = newWindowToken != null;
+            final boolean hasOldWindowToken = oldWindowToken != null;
 
-            if (!newWindow.getWindow().asBinder().equals(oldWindow.getWindow().asBinder())) {
+            // If window token presence has changed then the windows have changed.
+            if (hasNewWindowToken != hasOldWindowToken) {
+                return true;
+            }
+
+            // If both old and new windows had window tokens, but those tokens differ,
+            // then the windows have changed.
+            if (hasNewWindowToken && hasOldWindowToken
+                    && !newWindowToken.asBinder().equals(oldWindowToken.asBinder())) {
                 return true;
             }
         }
@@ -374,7 +388,8 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
         for (int index = inputWindowHandles.size() - 1; index >= 0; index--) {
             final Matrix windowTransformMatrix = mTempMatrix2;
             final InputWindowHandle windowHandle = inputWindowHandles.get(index);
-            final IBinder iBinder = windowHandle.getWindow().asBinder();
+            final IBinder iBinder =
+                    windowHandle.getWindow() != null ? windowHandle.getWindow().asBinder() : null;
 
             if (getWindowTransformMatrix(iBinder, windowTransformMatrix)) {
                 generateMagnificationSpecInverseMatrix(windowHandle, currentMagnificationSpec,
@@ -609,7 +624,6 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
         private boolean mIgnoreDuetoRecentsAnimation;
         private final Region mTouchableRegionInScreen = new Region();
         private final Region mTouchableRegionInWindow = new Region();
-        private final Region mLetterBoxBounds = new Region();
         private WindowInfo mWindowInfo;
 
 
@@ -628,11 +642,11 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
 
             final AccessibilityWindow instance = new AccessibilityWindow();
 
-            instance.mWindow = inputWindowHandle.getWindow();
+            instance.mWindow = window;
             instance.mDisplayId = inputWindowHandle.displayId;
             instance.mInputConfig = inputWindowHandle.inputConfig;
             instance.mType = inputWindowHandle.layoutParamsType;
-            instance.mIsPIPMenu = inputWindowHandle.getWindow().asBinder().equals(pipIBinder);
+            instance.mIsPIPMenu = window != null && window.asBinder().equals(pipIBinder);
 
             // TODO (b/199357848): gets the private flag of the window from other way.
             instance.mPrivateFlags = windowState != null ? windowState.mAttrs.privateFlags : 0;
@@ -643,11 +657,6 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
             final RecentsAnimationController controller = service.getRecentsAnimationController();
             instance.mIgnoreDuetoRecentsAnimation = windowState != null && controller != null
                     && controller.shouldIgnoreForAccessibility(windowState);
-
-            // TODO (b/199358388) : gets the letterbox bounds of the window from other way.
-            if (windowState != null && windowState.areAppWindowBoundsLetterboxed()) {
-                getLetterBoxBounds(windowState, instance.mLetterBoxBounds);
-            }
 
             final Rect windowFrame = new Rect(inputWindowHandle.frameLeft,
                     inputWindowHandle.frameTop, inputWindowHandle.frameRight,
@@ -721,21 +730,6 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
          */
         public WindowInfo getWindowInfo() {
             return mWindowInfo;
-        }
-
-        /**
-         * Gets the letter box bounds if activity bounds are letterboxed
-         * or letterboxed for display cutout.
-         *
-         * @return {@code true} there's a letter box bounds.
-         */
-        public Boolean setLetterBoxBoundsIfNeeded(Region outBounds) {
-            if (mLetterBoxBounds.isEmpty()) {
-                return false;
-            }
-
-            outBounds.set(mLetterBoxBounds);
-            return true;
         }
 
         /**
@@ -841,7 +835,7 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
             WindowInfo windowInfo = WindowInfo.obtain();
             windowInfo.displayId = window.mDisplayId;
             windowInfo.type = window.mType;
-            windowInfo.token = window.mWindow.asBinder();
+            windowInfo.token = window.mWindow != null ? window.mWindow.asBinder() : null;
             windowInfo.hasFlagWatchOutsideTouch = (window.mInputConfig
                     & InputConfig.WATCH_OUTSIDE_TOUCH) != 0;
             // Set it to true to be consistent with the legacy implementation.
@@ -849,18 +843,11 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
             return windowInfo;
         }
 
-        private static void getLetterBoxBounds(WindowState windowState, Region outRegion) {
-            final Rect letterboxInsets = windowState.mActivityRecord.getLetterboxInsets();
-            final Rect nonLetterboxRect = windowState.getBounds();
-
-            nonLetterboxRect.inset(letterboxInsets);
-            outRegion.set(windowState.getBounds());
-            outRegion.op(nonLetterboxRect, Region.Op.DIFFERENCE);
-        }
-
         @Override
         public String toString() {
-            String builder = "A11yWindow=[" + mWindow.asBinder()
+            String windowToken =
+                    mWindow != null ? mWindow.asBinder().toString() : "(no window token)";
+            return "A11yWindow=[" + windowToken
                     + ", displayId=" + mDisplayId
                     + ", inputConfig=0x" + Integer.toHexString(mInputConfig)
                     + ", type=" + mType
@@ -871,12 +858,9 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
                     + ", isTrustedOverlay=" + isTrustedOverlay()
                     + ", regionInScreen=" + mTouchableRegionInScreen
                     + ", touchableRegion=" + mTouchableRegionInWindow
-                    + ", letterBoxBounds=" + mLetterBoxBounds
                     + ", isPIPMenu=" + mIsPIPMenu
                     + ", windowInfo=" + mWindowInfo
                     + "]";
-
-            return builder;
         }
     }
 }

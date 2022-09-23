@@ -965,13 +965,6 @@ final class AccessibilityController {
                         availableBounds.op(navBarInsets, Region.Op.DIFFERENCE);
                     }
 
-                    // Count letterbox into nonMagnifiedBounds
-                    if (windowState.areAppWindowBoundsLetterboxed()) {
-                        Region letterboxBounds = getLetterboxBounds(windowState);
-                        nonMagnifiedBounds.op(letterboxBounds, Region.Op.UNION);
-                        availableBounds.op(letterboxBounds, Region.Op.DIFFERENCE);
-                    }
-
                     // Update accounted bounds
                     Region accountedBounds = mTempRegion2;
                     accountedBounds.set(mMagnificationRegion);
@@ -1411,20 +1404,6 @@ final class AccessibilityController {
         return source != null ? source.getFrame() : EMPTY_RECT;
     }
 
-    static Region getLetterboxBounds(WindowState windowState) {
-        final ActivityRecord appToken = windowState.mActivityRecord;
-        if (appToken == null) {
-            return new Region();
-        }
-        final Rect letterboxInsets = appToken.getLetterboxInsets();
-        final Rect nonLetterboxRect = windowState.getBounds();
-        nonLetterboxRect.inset(letterboxInsets);
-        final Region letterboxBounds = new Region();
-        letterboxBounds.set(windowState.getBounds());
-        letterboxBounds.op(nonLetterboxRect, Region.Op.DIFFERENCE);
-        return letterboxBounds;
-    }
-
     /**
      * This class encapsulates the functionality related to computing the windows
      * reported for accessibility purposes. These windows are all windows a sighted
@@ -1678,18 +1657,17 @@ final class AccessibilityController {
                 a11yWindow.getTouchableRegionInScreen(touchableRegion);
                 unaccountedSpace.op(touchableRegion, unaccountedSpace,
                         Region.Op.REVERSE_DIFFERENCE);
-                // Account for the space of letterbox.
-                final Region letterboxBounds = mTempRegion1;
-                if (a11yWindow.setLetterBoxBoundsIfNeeded(letterboxBounds)) {
-                    unaccountedSpace.op(letterboxBounds,
-                            unaccountedSpace, Region.Op.REVERSE_DIFFERENCE);
-                }
             }
         }
 
         private static void addPopulatedWindowInfo(AccessibilityWindow a11yWindow,
                 Region regionInScreen, List<WindowInfo> out, Set<IBinder> tokenOut) {
             final WindowInfo window = a11yWindow.getWindowInfo();
+            if (window.token == null) {
+                // The window was used in calculating visible windows but does not have an
+                // associated IWindow token, so exclude it from the list returned to accessibility.
+                return;
+            }
             window.regionInScreen.set(regionInScreen);
             window.layer = tokenOut.size();
             out.add(window);
