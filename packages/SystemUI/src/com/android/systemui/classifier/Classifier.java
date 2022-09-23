@@ -42,8 +42,9 @@ public abstract class Classifier {
     public static final int QS_COLLAPSE = 12;
     public static final int UDFPS_AUTHENTICATION = 13;
     public static final int LOCK_ICON = 14;
-    public static final int QS_SWIPE = 15;
+    public static final int QS_SWIPE_SIDE = 15;
     public static final int BACK_GESTURE = 16;
+    public static final int QS_SWIPE_NESTED = 17;
 
     @IntDef({
             QUICK_SETTINGS,
@@ -62,7 +63,8 @@ public abstract class Classifier {
             BRIGHTNESS_SLIDER,
             UDFPS_AUTHENTICATION,
             LOCK_ICON,
-            QS_SWIPE,
+            QS_SWIPE_SIDE,
+            QS_SWIPE_NESTED,
             BACK_GESTURE
     })
     @Retention(RetentionPolicy.SOURCE)
