@@ -23,6 +23,7 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.os.Binder;
 import android.os.IBinder;
@@ -220,46 +221,59 @@ public final class AudioPlaybackConfiguration implements Parcelable {
 
     /**
      * @hide
-     * Mute state used for anonymization.
+     * Mute state used for the initial state and when API is accessed without permission.
      */
-    public static final int PLAYER_MUTE_INVALID = -1;
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public static final int MUTED_BY_UNKNOWN = -1;
     /**
      * @hide
      * Flag used when muted by master volume.
      */
-    public static final int PLAYER_MUTE_MASTER = (1 << 0);
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public static final int MUTED_BY_MASTER = (1 << 0);
     /**
      * @hide
      * Flag used when muted by stream volume.
      */
-    public static final int PLAYER_MUTE_STREAM_VOLUME = (1 << 1);
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public static final int MUTED_BY_STREAM_VOLUME = (1 << 1);
     /**
      * @hide
      * Flag used when muted by stream mute.
      */
-    public static final int PLAYER_MUTE_STREAM_MUTED = (1 << 2);
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public static final int MUTED_BY_STREAM_MUTED = (1 << 2);
     /**
      * @hide
-     * Flag used when playback is restricted by AppOps manager with OP_PLAY_AUDIO.
+     * Flag used when playback is muted by AppOpsManager#OP_PLAY_AUDIO.
      */
-    public static final int PLAYER_MUTE_PLAYBACK_RESTRICTED = (1 << 3);
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public static final int MUTED_BY_APP_OPS = (1 << 3);
     /**
      * @hide
      * Flag used when muted by client volume.
      */
-    public static final int PLAYER_MUTE_CLIENT_VOLUME = (1 << 4);
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public static final int MUTED_BY_CLIENT_VOLUME = (1 << 4);
     /**
      * @hide
      * Flag used when muted by volume shaper.
      */
-    public static final int PLAYER_MUTE_VOLUME_SHAPER = (1 << 5);
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public static final int MUTED_BY_VOLUME_SHAPER = (1 << 5);
 
     /** @hide */
     @IntDef(
             flag = true,
-            value = {PLAYER_MUTE_MASTER, PLAYER_MUTE_STREAM_VOLUME, PLAYER_MUTE_STREAM_MUTED,
-                    PLAYER_MUTE_PLAYBACK_RESTRICTED, PLAYER_MUTE_CLIENT_VOLUME,
-                    PLAYER_MUTE_VOLUME_SHAPER})
+            value = {MUTED_BY_MASTER, MUTED_BY_STREAM_VOLUME, MUTED_BY_STREAM_MUTED,
+                    MUTED_BY_APP_OPS, MUTED_BY_CLIENT_VOLUME, MUTED_BY_VOLUME_SHAPER})
     @Retention(RetentionPolicy.SOURCE)
     public @interface PlayerMuteEvent {
     }
@@ -303,7 +317,7 @@ public final class AudioPlaybackConfiguration implements Parcelable {
         mPlayerType = pic.mPlayerType;
         mClientUid = uid;
         mClientPid = pid;
-        mMutedState = PLAYER_MUTE_INVALID;
+        mMutedState = MUTED_BY_UNKNOWN;
         mDeviceId = PLAYER_DEVICEID_INVALID;
         mPlayerState = PLAYER_STATE_IDLE;
         mPlayerAttr = pic.mAttributes;
@@ -352,7 +366,7 @@ public final class AudioPlaybackConfiguration implements Parcelable {
         anonymCopy.mPlayerAttr = builder.build();
         anonymCopy.mDeviceId = in.mDeviceId;
         // anonymized data
-        anonymCopy.mMutedState = PLAYER_MUTE_INVALID;
+        anonymCopy.mMutedState = MUTED_BY_UNKNOWN;
         anonymCopy.mPlayerType = PLAYER_TYPE_UNKNOWN;
         anonymCopy.mClientUid = PLAYER_UPID_INVALID;
         anonymCopy.mClientPid = PLAYER_UPID_INVALID;
@@ -413,9 +427,27 @@ public final class AudioPlaybackConfiguration implements Parcelable {
 
     /**
      * @hide
-     * @return the mute state as a combination of {@link PlayerMuteEvent} flags
+     * Used for determining if the current player is muted.
+     * <br>Note that if this result is true then {@link #getMutedBy} will be > 0.
+     * @return {@code true} if the player associated with this configuration has been muted (by any
+     * given MUTED_BY_* source event) or {@code false} otherwise.
      */
-    @PlayerMuteEvent public int getMutedState() {
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public boolean isMuted() {
+        return mMutedState != 0 && mMutedState != MUTED_BY_UNKNOWN;
+    }
+
+    /**
+     * @hide
+     * Returns a bitmask expressing the mute state as a combination of MUTED_BY_* flags.
+     * <br>Note that if the mute state is not set the result will be {@link #MUTED_BY_UNKNOWN}. A
+     * value of 0 represents a player which is not muted.
+     * @return the mute state.
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    @PlayerMuteEvent public int getMutedBy() {
         return mMutedState;
     }
 
@@ -570,14 +602,14 @@ public final class AudioPlaybackConfiguration implements Parcelable {
     }
 
     private boolean isMuteAffectingActiveState() {
-        if (mMutedState == PLAYER_MUTE_INVALID) {
+        if (mMutedState == MUTED_BY_UNKNOWN) {
             // mute state is not set, therefore it will not affect the active state
             return false;
         }
 
-        return (mMutedState & PLAYER_MUTE_CLIENT_VOLUME) != 0
-                || (mMutedState & PLAYER_MUTE_VOLUME_SHAPER) != 0
-                || (mMutedState & PLAYER_MUTE_PLAYBACK_RESTRICTED) != 0;
+        return (mMutedState & MUTED_BY_CLIENT_VOLUME) != 0
+                || (mMutedState & MUTED_BY_VOLUME_SHAPER) != 0
+                || (mMutedState & MUTED_BY_APP_OPS) != 0;
     }
 
     /**
@@ -694,27 +726,27 @@ public final class AudioPlaybackConfiguration implements Parcelable {
                 "/").append(mClientPid).append(" state:").append(
                 toLogFriendlyPlayerState(mPlayerState)).append(" attr:").append(mPlayerAttr).append(
                 " sessionId:").append(mSessionId).append(" mutedState:");
-        if (mMutedState == PLAYER_MUTE_INVALID) {
-            apcToString.append("invalid ");
+        if (mMutedState == MUTED_BY_UNKNOWN) {
+            apcToString.append("unknown ");
         } else if (mMutedState == 0) {
             apcToString.append("none ");
         } else {
-            if ((mMutedState & PLAYER_MUTE_MASTER) != 0) {
+            if ((mMutedState & MUTED_BY_MASTER) != 0) {
                 apcToString.append("master ");
             }
-            if ((mMutedState & PLAYER_MUTE_STREAM_VOLUME) != 0) {
+            if ((mMutedState & MUTED_BY_STREAM_VOLUME) != 0) {
                 apcToString.append("streamVolume ");
             }
-            if ((mMutedState & PLAYER_MUTE_STREAM_MUTED) != 0) {
+            if ((mMutedState & MUTED_BY_STREAM_MUTED) != 0) {
                 apcToString.append("streamMute ");
             }
-            if ((mMutedState & PLAYER_MUTE_PLAYBACK_RESTRICTED) != 0) {
-                apcToString.append("playbackRestricted ");
+            if ((mMutedState & MUTED_BY_APP_OPS) != 0) {
+                apcToString.append("appOps ");
             }
-            if ((mMutedState & PLAYER_MUTE_CLIENT_VOLUME) != 0) {
+            if ((mMutedState & MUTED_BY_CLIENT_VOLUME) != 0) {
                 apcToString.append("clientVolume ");
             }
-            if ((mMutedState & PLAYER_MUTE_VOLUME_SHAPER) != 0) {
+            if ((mMutedState & MUTED_BY_VOLUME_SHAPER) != 0) {
                 apcToString.append("volumeShaper ");
             }
         }
