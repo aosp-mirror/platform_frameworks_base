@@ -29,12 +29,20 @@ namespace aapt {
 // preferred.
 constexpr const size_t kSparseEncodingThreshold = 60;
 
+enum class SparseEntriesMode {
+  // Disables sparse encoding for entries.
+  Disabled,
+  // Enables sparse encoding for all entries for APKs with O+ minSdk. For APKs with minSdk less
+  // than O only applies sparse encoding for resource configuration available on O+.
+  Enabled,
+  // Enables sparse encoding for all entries regardless of minSdk.
+  Forced,
+};
+
 struct TableFlattenerOptions {
-  // When true, types for configurations with a sparse set of entries are encoded
+  // When enabled, types for configurations with a sparse set of entries are encoded
   // as a sparse map of entry ID and offset to actual data.
-  // This is only available on platforms O+ and will only be respected when
-  // minSdk is O+.
-  bool use_sparse_entries = false;
+  SparseEntriesMode sparse_entries = SparseEntriesMode::Disabled;
 
   // When true, the key string pool in the final ResTable
   // is collapsed to a single entry. All resource entries

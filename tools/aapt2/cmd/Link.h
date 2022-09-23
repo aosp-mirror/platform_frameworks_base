@@ -69,6 +69,7 @@ struct LinkOptions {
   bool no_resource_removal = false;
   bool no_xml_namespaces = false;
   bool do_not_compress_anything = false;
+  bool use_sparse_encoding = false;
   std::unordered_set<std::string> extensions_to_not_compress;
   std::optional<std::regex> regex_to_not_compress;
 
@@ -156,8 +157,8 @@ class LinkCommand : public Command {
             "defaults. Use this only when building runtime resource overlay packages.",
         &options_.no_resource_removal);
     AddOptionalSwitch("--enable-sparse-encoding",
-        "This decreases APK size at the cost of resource retrieval performance.",
-        &options_.table_flattener_options.use_sparse_entries);
+                      "This decreases APK size at the cost of resource retrieval performance.",
+                      &options_.use_sparse_encoding);
     AddOptionalSwitch("-x", "Legacy flag that specifies to use the package identifier 0x01.",
         &legacy_x_flag_);
     AddOptionalSwitch("-z", "Require localization of strings marked 'suggested'.",

@@ -2419,6 +2419,9 @@ int LinkCommand::Action(const std::vector<std::string>& args) {
                 << "the --merge-only flag can be only used when building a static library");
     return 1;
   }
+  if (options_.use_sparse_encoding) {
+    options_.table_flattener_options.sparse_entries = SparseEntriesMode::Enabled;
+  }
 
   // The default build type.
   context.SetPackageType(PackageType::kApp);
