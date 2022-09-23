@@ -1482,7 +1482,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     // AutoFillUiCallback
     @Override
     public void authenticate(int requestId, int datasetIndex, IntentSender intent, Bundle extras,
-            boolean authenticateInline) {
+            int uiType) {
         if (sDebug) {
             Slog.d(TAG, "authenticate(): requestId=" + requestId + "; datasetIdx=" + datasetIndex
                     + "; intentSender=" + intent);
@@ -1501,12 +1501,13 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
         }
 
-        mService.setAuthenticationSelected(id, mClientState);
+        mService.setAuthenticationSelected(id, mClientState, uiType);
 
         final int authenticationId = AutofillManager.makeAuthenticationId(requestId, datasetIndex);
         mHandler.sendMessage(obtainMessage(
                 Session::startAuthentication,
-                this, authenticationId, intent, fillInIntent, authenticateInline));
+                this, authenticationId, intent, fillInIntent,
+                /* authenticateInline= */ uiType == UI_TYPE_INLINE));
     }
 
     // AutoFillUiCallback
@@ -3591,7 +3592,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     public void authenticate(int requestId, int datasetIndex) {
                         Session.this.authenticate(response.getRequestId(), datasetIndex,
                                 response.getAuthentication(), response.getClientState(),
-                                /* authenticateInline= */ true);
+                                UI_TYPE_INLINE);
                     }
 
                     @Override
@@ -4131,7 +4132,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
 
             // ...or handle authentication.
-            mService.logDatasetAuthenticationSelected(dataset.getId(), id, mClientState);
+            mService.logDatasetAuthenticationSelected(dataset.getId(), id, mClientState, uiType);
             setViewStatesLocked(null, dataset, ViewState.STATE_WAITING_DATASET_AUTH, false);
             final Intent fillInIntent = createAuthFillInIntentLocked(requestId, mClientState);
             if (fillInIntent == null) {

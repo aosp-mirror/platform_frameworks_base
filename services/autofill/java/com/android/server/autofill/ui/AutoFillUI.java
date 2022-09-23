@@ -84,7 +84,7 @@ public final class AutoFillUI {
 
     public interface AutoFillUiCallback {
         void authenticate(int requestId, int datasetIndex, @NonNull IntentSender intent,
-                @Nullable Bundle extras, boolean authenticateInline);
+                @Nullable Bundle extras, int uiType);
         void fill(int requestId, int datasetIndex, @NonNull Dataset dataset,
                 @FillEventHistory.Event.UiType int uiType);
         void save();
@@ -232,7 +232,7 @@ public final class AutoFillUI {
                         mCallback.authenticate(response.getRequestId(),
                                 AutofillManager.AUTHENTICATION_ID_DATASET_ID_UNDEFINED,
                                 response.getAuthentication(), response.getClientState(),
-                                /* authenticateInline= */ false);
+                                UI_TYPE_MENU);
                     }
                 }
 
@@ -419,7 +419,7 @@ public final class AutoFillUI {
                                 mCallback.authenticate(response.getRequestId(),
                                         AutofillManager.AUTHENTICATION_ID_DATASET_ID_UNDEFINED,
                                         response.getAuthentication(), response.getClientState(),
-                                        /* authenticateInline= */ false);
+                                        UI_TYPE_DIALOG);
                             }
                         }
 
