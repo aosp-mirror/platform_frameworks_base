@@ -218,6 +218,12 @@ public class DreamService extends Service implements Window.Callback {
             "android.service.dreams.SHOW_COMPLICATIONS";
 
     /**
+     * Extra containing the component name for the active dream.
+     * @hide
+     */
+    public static final String EXTRA_DREAM_COMPONENT = "android.service.dreams.DREAM_COMPONENT";
+
+    /**
      * The default value for whether to show complications on the overlay.
      * @hide
      */
@@ -271,6 +277,7 @@ public class DreamService extends Service implements Window.Callback {
             overlayIntent.setComponent(overlayService);
             overlayIntent.putExtra(EXTRA_SHOW_COMPLICATIONS,
                     fetchShouldShowComplications(context, serviceInfo));
+            overlayIntent.putExtra(EXTRA_DREAM_COMPONENT, dreamService);
 
             context.bindService(overlayIntent,
                     this, Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE);

@@ -124,6 +124,7 @@ android_library {
         "dagger2",
         "jsr330",
         "lottie",
+        "LowLightDreamLib",
     ],
     manifest: "AndroidManifest.xml",
 
@@ -228,6 +229,7 @@ android_library {
         "dagger2",
         "jsr330",
         "WindowManager-Shell",
+        "LowLightDreamLib",
     ],
     libs: [
         "android.test.runner",
