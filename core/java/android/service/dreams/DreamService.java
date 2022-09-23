@@ -214,19 +214,6 @@ public class DreamService extends Service implements Window.Callback {
     private static final String DREAM_META_DATA_ROOT_TAG = "dream";
 
     /**
-     * Extra containing a boolean for whether to show complications on the overlay.
-     * @hide
-     */
-    public static final String EXTRA_SHOW_COMPLICATIONS =
-            "android.service.dreams.SHOW_COMPLICATIONS";
-
-    /**
-     * Extra containing the component name for the active dream.
-     * @hide
-     */
-    public static final String EXTRA_DREAM_COMPONENT = "android.service.dreams.DREAM_COMPONENT";
-
-    /**
      * The default value for whether to show complications on the overlay.
      *
      * @hide
@@ -251,6 +238,9 @@ public class DreamService extends Service implements Window.Callback {
     private int mDozeScreenBrightness = PowerManager.BRIGHTNESS_DEFAULT;
 
     private boolean mDebug = false;
+
+    private ComponentName mDreamComponent;
+    private boolean mShouldShowComplications;
 
     private DreamServiceWrapper mDreamServiceWrapper;
     private Runnable mDispatchAfterOnAttachedToWindow;
@@ -947,6 +937,11 @@ public class DreamService extends Service implements Window.Callback {
     @Override
     public void onCreate() {
         if (mDebug) Slog.v(mTag, "onCreate()");
+
+        mDreamComponent = new ComponentName(this, getClass());
+        mShouldShowComplications = fetchShouldShowComplications(this /*context*/,
+                fetchServiceInfo(this /*context*/, mDreamComponent));
+
         super.onCreate();
     }
 
@@ -994,14 +989,7 @@ public class DreamService extends Service implements Window.Callback {
         // Connect to the overlay service if present.
         if (!mWindowless && overlayComponent != null) {
             final Resources resources = getResources();
-            final ComponentName dreamService = new ComponentName(this, getClass());
-
-            final ServiceInfo serviceInfo = fetchServiceInfo(this, dreamService);
-            final Intent overlayIntent = new Intent()
-                    .setComponent(overlayComponent)
-                    .putExtra(EXTRA_SHOW_COMPLICATIONS,
-                            fetchShouldShowComplications(this, serviceInfo))
-                    .putExtra(EXTRA_DREAM_COMPONENT, dreamService);
+            final Intent overlayIntent = new Intent().setComponent(overlayComponent);
 
             mOverlayConnection = new OverlayConnection(
                     /* context= */ this,
@@ -1364,7 +1352,9 @@ public class DreamService extends Service implements Window.Callback {
                             // parameters once the window has been attached.
                             mDreamStartOverlayConsumer = overlay -> {
                                 try {
-                                    overlay.startDream(mWindow.getAttributes(), mOverlayCallback);
+                                    overlay.startDream(mWindow.getAttributes(), mOverlayCallback,
+                                            mDreamComponent.flattenToString(),
+                                            mShouldShowComplications);
                                 } catch (RemoteException e) {
                                     Log.e(mTag, "could not send window attributes:" + e);
                                 }
