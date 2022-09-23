@@ -24,6 +24,7 @@ import android.annotation.UptimeMillisLong;
 import android.os.UserHandle;
 import android.util.IndentingPrintWriter;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
 
 import java.util.ArrayDeque;
@@ -40,7 +41,7 @@ import java.util.ArrayDeque;
  * be dispatched, and a single active broadcast which is currently being
  * dispatched.
  */
-class BroadcastProcessQueue implements Comparable<BroadcastProcessQueue> {
+class BroadcastProcessQueue {
     /**
      * Default delay to apply to background broadcasts, giving a chance for
      * debouncing of rapidly changing events.
@@ -61,7 +62,14 @@ class BroadcastProcessQueue implements Comparable<BroadcastProcessQueue> {
      * Linked list connection to another process under this {@link #uid} which
      * has a different {@link #processName}.
      */
-    @Nullable BroadcastProcessQueue next;
+    @Nullable BroadcastProcessQueue processNameNext;
+
+    /**
+     * Linked list connections to runnable process with lower and higher
+     * {@link #getRunnableAt()} times.
+     */
+    @Nullable BroadcastProcessQueue runnableAtNext;
+    @Nullable BroadcastProcessQueue runnableAtPrev;
 
     /**
      * Currently known details about the target process; typically undefined
@@ -87,6 +95,15 @@ class BroadcastProcessQueue implements Comparable<BroadcastProcessQueue> {
      */
     private int mActiveIndex;
 
+    /**
+     * Count of {@link #mActive} broadcasts that have been dispatched since this
+     * queue was last idle.
+     */
+    private int mActiveCountSinceIdle;
+
+    /**
+     * Count of {@link #mPending} broadcasts of these various flavors.
+     */
     private int mCountForeground;
     private int mCountOrdered;
     private int mCountAlarm;
@@ -163,6 +180,14 @@ class BroadcastProcessQueue implements Comparable<BroadcastProcessQueue> {
     }
 
     /**
+     * Count of {@link #mActive} broadcasts that have been dispatched since this
+     * queue was last idle.
+     */
+    public int getActiveCountSinceIdle() {
+        return mActiveCountSinceIdle;
+    }
+
+    /**
      * Set the currently active broadcast to the next pending broadcast.
      */
     public void makeActiveNextPending() {
@@ -171,6 +196,7 @@ class BroadcastProcessQueue implements Comparable<BroadcastProcessQueue> {
         final SomeArgs next = mPending.removeFirst();
         mActive = (BroadcastRecord) next.arg1;
         mActiveIndex = next.argi1;
+        mActiveCountSinceIdle++;
         next.recycle();
         if (mActive.isForeground()) {
             mCountForeground--;
@@ -190,6 +216,7 @@ class BroadcastProcessQueue implements Comparable<BroadcastProcessQueue> {
     public void makeActiveIdle() {
         mActive = null;
         mActiveIndex = 0;
+        mActiveCountSinceIdle = 0;
     }
 
     public void setActiveDeliveryState(int deliveryState) {
@@ -257,11 +284,64 @@ class BroadcastProcessQueue implements Comparable<BroadcastProcessQueue> {
         }
     }
 
-    @Override
-    public int compareTo(BroadcastProcessQueue o) {
-        if (mRunnableAtInvalidated) updateRunnableAt();
-        if (o.mRunnableAtInvalidated) o.updateRunnableAt();
-        return Long.compare(mRunnableAt, o.mRunnableAt);
+    /**
+     * Insert the given queue into a sorted linked list of "runnable" queues.
+     *
+     * @param head the current linked list head
+     * @param item the queue to insert
+     * @return a potentially updated linked list head
+     */
+    @VisibleForTesting
+    static @Nullable BroadcastProcessQueue insertIntoRunnableList(
+            @Nullable BroadcastProcessQueue head, @NonNull BroadcastProcessQueue item) {
+        if (head == null) {
+            return item;
+        }
+        final long itemRunnableAt = item.getRunnableAt();
+        BroadcastProcessQueue test = head;
+        BroadcastProcessQueue tail = null;
+        while (test != null) {
+            if (test.getRunnableAt() >= itemRunnableAt) {
+                item.runnableAtNext = test;
+                item.runnableAtPrev = test.runnableAtPrev;
+                if (item.runnableAtNext != null) {
+                    item.runnableAtNext.runnableAtPrev = item;
+                }
+                if (item.runnableAtPrev != null) {
+                    item.runnableAtPrev.runnableAtNext = item;
+                }
+                return (test == head) ? item : head;
+            }
+            tail = test;
+            test = test.runnableAtNext;
+        }
+        item.runnableAtPrev = tail;
+        item.runnableAtPrev.runnableAtNext = item;
+        return head;
+    }
+
+    /**
+     * Remove the given queue from a sorted linked list of "runnable" queues.
+     *
+     * @param head the current linked list head
+     * @param item the queue to remove
+     * @return a potentially updated linked list head
+     */
+    @VisibleForTesting
+    static @Nullable BroadcastProcessQueue removeFromRunnableList(
+            @Nullable BroadcastProcessQueue head, @NonNull BroadcastProcessQueue item) {
+        if (head == item) {
+            head = item.runnableAtNext;
+        }
+        if (item.runnableAtNext != null) {
+            item.runnableAtNext.runnableAtPrev = item.runnableAtPrev;
+        }
+        if (item.runnableAtPrev != null) {
+            item.runnableAtPrev.runnableAtNext = item.runnableAtNext;
+        }
+        item.runnableAtNext = null;
+        item.runnableAtPrev = null;
+        return head;
     }
 
     @Override

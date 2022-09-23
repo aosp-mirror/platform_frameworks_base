@@ -20,6 +20,8 @@ import static android.os.Process.ZYGOTE_POLICY_FLAG_EMPTY;
 import static android.os.Process.ZYGOTE_POLICY_FLAG_LATENCY_SENSITIVE;
 
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BROADCAST;
+import static com.android.server.am.BroadcastProcessQueue.insertIntoRunnableList;
+import static com.android.server.am.BroadcastProcessQueue.removeFromRunnableList;
 import static com.android.server.am.BroadcastRecord.getReceiverProcessName;
 import static com.android.server.am.BroadcastRecord.getReceiverUid;
 import static com.android.server.am.OomAdjuster.OOM_ADJ_REASON_START_RECEIVER;
@@ -37,6 +39,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.IndentingPrintWriter;
@@ -46,6 +49,8 @@ import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.os.TimeoutRecord;
+import com.android.server.am.BroadcastRecord.DeliveryState;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -66,15 +71,17 @@ import java.util.concurrent.CountDownLatch;
  */
 class BroadcastQueueModernImpl extends BroadcastQueue {
     BroadcastQueueModernImpl(ActivityManagerService service, Handler handler,
-            BroadcastConstants constants) {
-        this(service, handler, constants, new BroadcastSkipPolicy(service),
+            BroadcastConstants fgConstants, BroadcastConstants bgConstants) {
+        this(service, handler, fgConstants, bgConstants, new BroadcastSkipPolicy(service),
                 new BroadcastHistory());
     }
 
     BroadcastQueueModernImpl(ActivityManagerService service, Handler handler,
-            BroadcastConstants constants, BroadcastSkipPolicy skipPolicy,
-            BroadcastHistory history) {
-        super(service, handler, "modern", constants, skipPolicy, history);
+            BroadcastConstants fgConstants, BroadcastConstants bgConstants,
+            BroadcastSkipPolicy skipPolicy, BroadcastHistory history) {
+        super(service, handler, "modern", skipPolicy, history);
+        mFgConstants = Objects.requireNonNull(fgConstants);
+        mBgConstants = Objects.requireNonNull(bgConstants);
         mLocalHandler = new Handler(handler.getLooper(), mLocalCallback);
     }
 
@@ -100,6 +107,14 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     private static final int MAX_RUNNING_PROCESS_QUEUES = 4;
 
     /**
+     * Maximum number of active broadcasts to dispatch to a "running" process
+     * queue before we retire them back to being "runnable" to give other
+     * processes a chance to run.
+     */
+    // TODO: shift hard-coded defaults to BroadcastConstants
+    private static final int MAX_RUNNING_ACTIVE_BROADCASTS = 16;
+
+    /**
      * Map from UID to per-process broadcast queues. If a UID hosts more than
      * one process, each additional process is stored as a linked list using
      * {@link BroadcastProcessQueue#next}.
@@ -111,12 +126,14 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     private final SparseArray<BroadcastProcessQueue> mProcessQueues = new SparseArray<>();
 
     /**
-     * Collection of queues which are "runnable". They're sorted by
-     * {@link BroadcastProcessQueue#getRunnableAt()} so that we prefer
+     * Head of linked list containing queues which are "runnable". They're
+     * sorted by {@link BroadcastProcessQueue#getRunnableAt()} so that we prefer
      * dispatching of longer-waiting broadcasts first.
+     *
+     * @see BroadcastProcessQueue#insertIntoRunnableList
+     * @see BroadcastProcessQueue#removeFromRunnableList
      */
-    @GuardedBy("mService")
-    private final ArrayList<BroadcastProcessQueue> mRunnable = new ArrayList<>();
+    private BroadcastProcessQueue mRunnableHead = null;
 
     /**
      * Collection of queues which are "running". This will never be larger than
@@ -139,7 +156,11 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     @GuardedBy("mService")
     private final ArrayList<CountDownLatch> mWaitingForIdle = new ArrayList<>();
 
+    private final BroadcastConstants mFgConstants;
+    private final BroadcastConstants mBgConstants;
+
     private static final int MSG_UPDATE_RUNNING_LIST = 1;
+    private static final int MSG_DELIVERY_TIMEOUT = 2;
 
     private void enqueueUpdateRunningList() {
         mLocalHandler.removeMessages(MSG_UPDATE_RUNNING_LIST);
@@ -153,6 +174,13 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             case MSG_UPDATE_RUNNING_LIST: {
                 synchronized (mService) {
                     updateRunningList();
+                }
+                return true;
+            }
+            case MSG_DELIVERY_TIMEOUT: {
+                synchronized (mService) {
+                    finishReceiverLocked((BroadcastProcessQueue) msg.obj,
+                            BroadcastRecord.DELIVERY_TIMEOUT);
                 }
                 return true;
             }
@@ -176,12 +204,29 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             return;
         }
 
-        // TODO: better optimize by using insertion sort data structure
-        mRunnable.remove(queue);
-        if (queue.isRunnable()) {
-            mRunnable.add(queue);
+        final boolean wantQueue = queue.isRunnable();
+        final boolean inQueue = (queue == mRunnableHead) || (queue.runnableAtPrev != null)
+                || (queue.runnableAtNext != null);
+        if (wantQueue) {
+            if (inQueue) {
+                // We're in a good state, but our position within the linked
+                // list might need to move based on a runnableAt change
+                final boolean prevLower = (queue.runnableAtPrev != null)
+                        ? queue.runnableAtPrev.getRunnableAt() <= queue.getRunnableAt() : true;
+                final boolean nextHigher = (queue.runnableAtNext != null)
+                        ? queue.runnableAtNext.getRunnableAt() >= queue.getRunnableAt() : true;
+                if (prevLower && nextHigher) {
+                    return;
+                } else {
+                    mRunnableHead = removeFromRunnableList(mRunnableHead, queue);
+                    mRunnableHead = insertIntoRunnableList(mRunnableHead, queue);
+                }
+            } else {
+                mRunnableHead = insertIntoRunnableList(mRunnableHead, queue);
+            }
+        } else if (inQueue) {
+            mRunnableHead = removeFromRunnableList(mRunnableHead, queue);
         }
-        mRunnable.sort(null);
     }
 
     /**
@@ -196,6 +241,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         int avail = MAX_RUNNING_PROCESS_QUEUES - mRunning.size();
         if (avail == 0) return;
 
+        final long now = SystemClock.uptimeMillis();
+
         // If someone is waiting to go idle, everything is runnable now
         final boolean waitingForIdle = !mWaitingForIdle.isEmpty();
 
@@ -204,9 +251,9 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         mLocalHandler.removeMessages(MSG_UPDATE_RUNNING_LIST);
 
         boolean updateOomAdj = false;
-        final long now = SystemClock.uptimeMillis();
-        for (int i = 0; i < mRunnable.size() && avail > 0; i++) {
-            final BroadcastProcessQueue queue = mRunnable.get(i);
+        BroadcastProcessQueue queue = mRunnableHead;
+        while (queue != null && avail > 0) {
+            BroadcastProcessQueue nextQueue = queue.runnableAtNext;
             final long runnableAt = queue.getRunnableAt();
 
             // If queues beyond this point aren't ready to run yet, schedule
@@ -228,6 +275,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 if (mRunningColdStart == null) {
                     mRunningColdStart = queue;
                 } else {
+                    // Move to considering next runnable queue
+                    queue = nextQueue;
                     continue;
                 }
             }
@@ -236,10 +285,11 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                     + " from runnable to running; process is " + queue.app);
 
             // Allocate this available permit and start running!
-            mRunnable.remove(i);
             mRunning.add(queue);
             avail--;
-            i--;
+
+            // Remove ourselves from linked list of runnable things
+            mRunnableHead = removeFromRunnableList(mRunnableHead, queue);
 
             queue.makeActiveNextPending();
 
@@ -253,6 +303,9 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
             mService.enqueueOomAdjTargetLocked(queue.app);
             updateOomAdj = true;
+
+            // Move to considering next runnable queue
+            queue = nextQueue;
         }
 
         if (updateOomAdj) {
@@ -381,7 +434,12 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         final BroadcastRecord r = queue.getActive();
         final Object receiver = queue.getActiveReceiver();
 
-        // TODO: schedule ANR timeout trigger event
+        if (!r.timeoutExempt) {
+            final long timeout = r.isForeground() ? mFgConstants.TIMEOUT : mBgConstants.TIMEOUT;
+            mLocalHandler.sendMessageDelayed(
+                    Message.obtain(mLocalHandler, MSG_DELIVERY_TIMEOUT, queue), timeout);
+        }
+
         // TODO: apply temp allowlist exemptions
         // TODO: apply background activity launch exemptions
 
@@ -436,20 +494,34 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         return finishReceiverLocked(queue, BroadcastRecord.DELIVERY_DELIVERED);
     }
 
-    private boolean finishReceiverLocked(@NonNull BroadcastProcessQueue queue, int deliveryState) {
+    private boolean finishReceiverLocked(@NonNull BroadcastProcessQueue queue,
+            @DeliveryState int deliveryState) {
         checkState(queue.isActive(), "isActive");
-
-        if (deliveryState != BroadcastRecord.DELIVERY_DELIVERED) {
-            Slog.w(TAG, "Failed delivery of " + queue.getActive() + " to " + queue);
-        }
 
         queue.setActiveDeliveryState(deliveryState);
 
-        // TODO: cancel any outstanding ANR timeout
-        // TODO: limit number of broadcasts in a row to avoid starvation
+        if (deliveryState != BroadcastRecord.DELIVERY_DELIVERED) {
+            Slog.w(TAG, "Delivery state of " + queue.getActive() + " to " + queue + " changed to "
+                    + BroadcastRecord.deliveryStateToString(deliveryState));
+        }
+
+        if (deliveryState == BroadcastRecord.DELIVERY_TIMEOUT) {
+            if (queue.app != null && !queue.app.isDebugging()) {
+                mService.appNotResponding(queue.app, TimeoutRecord
+                        .forBroadcastReceiver("Broadcast of " + queue.getActive().toShortString()));
+            }
+        } else {
+            mLocalHandler.removeMessages(MSG_DELIVERY_TIMEOUT, queue);
+        }
+
         // TODO: if we're the last receiver of this broadcast, record to history
 
-        if (queue.isRunnable() && queue.isProcessWarm()) {
+        // Even if we have more broadcasts, if we've made reasonable progress
+        // and someone else is waiting, retire ourselves to avoid starvation
+        final boolean shouldRetire = (mRunnableHead != null)
+                && (queue.getActiveCountSinceIdle() > MAX_RUNNING_ACTIVE_BROADCASTS);
+
+        if (queue.isRunnable() && queue.isProcessWarm() && !shouldRetire) {
             // We're on a roll; move onto the next broadcast for this process
             queue.makeActiveNextPending();
             scheduleReceiverWarmLocked(queue);
@@ -475,8 +547,9 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     }
 
     @Override
-    void start(@NonNull ContentResolver resolver) {
-        super.start(resolver);
+    public void start(@NonNull ContentResolver resolver) {
+        mFgConstants.startObserving(mHandler, resolver);
+        mBgConstants.startObserving(mHandler, resolver);
 
         mService.registerUidObserver(new UidObserver() {
             @Override
@@ -486,7 +559,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                     while (leaf != null) {
                         leaf.setProcessCached(cached);
                         updateRunnableList(leaf);
-                        leaf = leaf.next;
+                        leaf = leaf.processNameNext;
                     }
                     enqueueUpdateRunningList();
                 }
@@ -496,7 +569,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
     @Override
     public boolean isIdleLocked() {
-        return mRunnable.isEmpty() && mRunning.isEmpty();
+        return (mRunnableHead == null) && mRunning.isEmpty();
     }
 
     @Override
@@ -521,7 +594,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
     @Override
     public String describeStateLocked() {
-        return mRunnable.size() + " runnable, " + mRunning.size() + " running";
+        return mRunning.size() + " running";
     }
 
     @Override
@@ -551,10 +624,10 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         while (leaf != null) {
             if (Objects.equals(leaf.processName, processName)) {
                 return leaf;
-            } else if (leaf.next == null) {
+            } else if (leaf.processNameNext == null) {
                 break;
             }
-            leaf = leaf.next;
+            leaf = leaf.processNameNext;
         }
 
         BroadcastProcessQueue created = new BroadcastProcessQueue(processName, uid);
@@ -563,7 +636,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         if (leaf == null) {
             mProcessQueues.put(uid, created);
         } else {
-            leaf.next = created;
+            leaf.processNameNext = created;
         }
         return created;
     }
@@ -578,7 +651,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             if (Objects.equals(leaf.processName, processName)) {
                 return leaf;
             }
-            leaf = leaf.next;
+            leaf = leaf.processNameNext;
         }
         return null;
     }
@@ -606,7 +679,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             BroadcastProcessQueue leaf = mProcessQueues.valueAt(i);
             while (leaf != null) {
                 leaf.dumpLocked(ipw);
-                leaf = leaf.next;
+                leaf = leaf.processNameNext;
             }
         }
         ipw.decreaseIndent();
@@ -614,13 +687,15 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         ipw.println();
         ipw.println("🧍 Runnable:");
         ipw.increaseIndent();
-        if (mRunnable.isEmpty()) {
+        if (mRunnableHead == null) {
             ipw.println("(none)");
         } else {
-            for (BroadcastProcessQueue queue : mRunnable) {
+            BroadcastProcessQueue queue = mRunnableHead;
+            while (queue != null) {
                 TimeUtils.formatDuration(queue.getRunnableAt(), now, ipw);
                 ipw.print(' ');
                 ipw.println(queue.toShortString());
+                queue = queue.runnableAtNext;
             }
         }
         ipw.decreaseIndent();
