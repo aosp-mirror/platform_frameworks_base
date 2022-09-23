@@ -59,6 +59,8 @@ import java.util.concurrent.Executor;
 public class Bubble implements BubbleViewProvider {
     private static final String TAG = "Bubble";
 
+    public static final String KEY_APP_BUBBLE = "key_app_bubble";
+
     private final String mKey;
     @Nullable
     private final String mGroupKey;
@@ -164,6 +166,14 @@ public class Bubble implements BubbleViewProvider {
     private PendingIntent mDeleteIntent;
 
     /**
+     * Used only for a special bubble in the stack that has the key {@link #KEY_APP_BUBBLE}.
+     * There can only be one of these bubbles in the stack and this intent will be populated for
+     * that bubble.
+     */
+    @Nullable
+    private Intent mAppIntent;
+
+    /**
      * Create a bubble with limited information based on given {@link ShortcutInfo}.
      * Note: Currently this is only being used when the bubble is persisted to disk.
      */
@@ -190,6 +200,22 @@ public class Bubble implements BubbleViewProvider {
         mMainExecutor = mainExecutor;
         mTaskId = taskId;
         mBubbleMetadataFlagListener = listener;
+    }
+
+    public Bubble(Intent intent,
+            UserHandle user,
+            Executor mainExecutor) {
+        mKey = KEY_APP_BUBBLE;
+        mGroupKey = null;
+        mLocusId = null;
+        mFlags = 0;
+        mUser = user;
+        mShowBubbleUpdateDot = false;
+        mMainExecutor = mainExecutor;
+        mTaskId = INVALID_TASK_ID;
+        mAppIntent = intent;
+        mDesiredHeight = Integer.MAX_VALUE;
+        mPackageName = intent.getPackage();
     }
 
     @VisibleForTesting(visibility = PRIVATE)
@@ -417,6 +443,9 @@ public class Bubble implements BubbleViewProvider {
 
         mShortcutInfo = info.shortcutInfo;
         mAppName = info.appName;
+        if (mTitle == null) {
+            mTitle = mAppName;
+        }
         mFlyoutMessage = info.flyoutMessage;
 
         mBadgeBitmap = info.badgeBitmap;
@@ -520,7 +549,7 @@ public class Bubble implements BubbleViewProvider {
      * @return the last time this bubble was updated or accessed, whichever is most recent.
      */
     long getLastActivity() {
-        return Math.max(mLastUpdated, mLastAccessed);
+        return isAppBubble() ? Long.MAX_VALUE : Math.max(mLastUpdated, mLastAccessed);
     }
 
     /**
@@ -717,6 +746,15 @@ public class Bubble implements BubbleViewProvider {
     @Nullable
     PendingIntent getDeleteIntent() {
         return mDeleteIntent;
+    }
+
+    @Nullable
+    Intent getAppBubbleIntent() {
+        return mAppIntent;
+    }
+
+    boolean isAppBubble() {
+        return KEY_APP_BUBBLE.equals(mKey);
     }
 
     Intent getSettingsIntent(final Context context) {

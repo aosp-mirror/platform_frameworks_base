@@ -62,6 +62,8 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.Optional;
+
 /**
  * Tests for the floating tasks controller.
  */
@@ -123,6 +125,7 @@ public class FloatingTasksControllerTest extends ShellTestCase {
                 mShellInit,
                 mShellController,
                 mock(ShellCommandHandler.class),
+                Optional.empty(),
                 mWindowManager,
                 mTaskOrganizer,
                 mock(TaskViewTransitions.class),
