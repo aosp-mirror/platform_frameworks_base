@@ -22,14 +22,19 @@ import android.annotation.NonNull;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.UserInfo;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraInjectionSession;
 import android.hardware.camera2.CameraManager;
+import android.os.Process;
+import android.os.UserManager;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -45,6 +50,7 @@ class CameraAccessController extends CameraManager.AvailabilityCallback implemen
     private final CameraAccessBlockedCallback mBlockedCallback;
     private final CameraManager mCameraManager;
     private final PackageManager mPackageManager;
+    private final UserManager mUserManager;
 
     @GuardedBy("mLock")
     private int mObserverCount = 0;
@@ -66,7 +72,7 @@ class CameraAccessController extends CameraManager.AvailabilityCallback implemen
 
     static class OpenCameraInfo {
         public String packageName;
-        public int packageUid;
+        public Set<Integer> packageUids;
     }
 
     interface CameraAccessBlockedCallback {
@@ -85,6 +91,7 @@ class CameraAccessController extends CameraManager.AvailabilityCallback implemen
         mBlockedCallback = blockedCallback;
         mCameraManager = mContext.getSystemService(CameraManager.class);
         mPackageManager = mContext.getPackageManager();
+        mUserManager = mContext.getSystemService(UserManager.class);
     }
 
     /**
@@ -125,16 +132,18 @@ class CameraAccessController extends CameraManager.AvailabilityCallback implemen
             for (int i = 0; i < mAppsToBlockOnVirtualDevice.size(); i++) {
                 final String cameraId = mAppsToBlockOnVirtualDevice.keyAt(i);
                 final OpenCameraInfo openCameraInfo = mAppsToBlockOnVirtualDevice.get(cameraId);
-                int packageUid = openCameraInfo.packageUid;
-                if (runningUids.contains(packageUid)) {
-                    final String packageName = openCameraInfo.packageName;
-                    InjectionSessionData data = mPackageToSessionData.get(packageName);
-                    if (data == null) {
-                        data = new InjectionSessionData();
-                        data.appUid = packageUid;
-                        mPackageToSessionData.put(packageName, data);
+                final String packageName = openCameraInfo.packageName;
+                for (int packageUid : openCameraInfo.packageUids) {
+                    if (runningUids.contains(packageUid)) {
+                        InjectionSessionData data = mPackageToSessionData.get(packageName);
+                        if (data == null) {
+                            data = new InjectionSessionData();
+                            data.appUid = packageUid;
+                            mPackageToSessionData.put(packageName, data);
+                        }
+                        startBlocking(packageName, cameraId);
+                        break;
                     }
-                    startBlocking(packageName, cameraId);
                 }
             }
         }
@@ -155,37 +164,41 @@ class CameraAccessController extends CameraManager.AvailabilityCallback implemen
     @Override
     public void onCameraOpened(@NonNull String cameraId, @NonNull String packageName) {
         synchronized (mLock) {
-            try {
-                final ApplicationInfo ainfo = mPackageManager.getApplicationInfo(packageName, 0);
-                InjectionSessionData data = mPackageToSessionData.get(packageName);
-                if (!mVirtualDeviceManagerInternal.isAppRunningOnAnyVirtualDevice(ainfo.uid)) {
-                    OpenCameraInfo openCameraInfo = new OpenCameraInfo();
-                    openCameraInfo.packageName = packageName;
-                    openCameraInfo.packageUid = ainfo.uid;
-                    mAppsToBlockOnVirtualDevice.put(cameraId, openCameraInfo);
-                    CameraInjectionSession existingSession =
-                            (data != null) ? data.cameraIdToSession.get(cameraId) : null;
-                    if (existingSession != null) {
-                        existingSession.close();
-                        data.cameraIdToSession.remove(cameraId);
-                        if (data.cameraIdToSession.isEmpty()) {
-                            mPackageToSessionData.remove(packageName);
-                        }
+            InjectionSessionData data = mPackageToSessionData.get(packageName);
+            List<UserInfo> aliveUsers = mUserManager.getAliveUsers();
+            ArraySet<Integer> packageUids = new ArraySet<>();
+            for (UserInfo user : aliveUsers) {
+                int userId = user.getUserHandle().getIdentifier();
+                int appUid = queryUidFromPackageName(userId, packageName);
+                if (mVirtualDeviceManagerInternal.isAppRunningOnAnyVirtualDevice(appUid)) {
+                    if (data == null) {
+                        data = new InjectionSessionData();
+                        data.appUid = appUid;
+                        mPackageToSessionData.put(packageName, data);
                     }
+                    if (data.cameraIdToSession.containsKey(cameraId)) {
+                        return;
+                    }
+                    startBlocking(packageName, cameraId);
                     return;
+                } else {
+                    if (appUid != Process.INVALID_UID) {
+                        packageUids.add(appUid);
+                    }
                 }
-                if (data == null) {
-                    data = new InjectionSessionData();
-                    data.appUid = ainfo.uid;
-                    mPackageToSessionData.put(packageName, data);
+            }
+            OpenCameraInfo openCameraInfo = new OpenCameraInfo();
+            openCameraInfo.packageName = packageName;
+            openCameraInfo.packageUids = packageUids;
+            mAppsToBlockOnVirtualDevice.put(cameraId, openCameraInfo);
+            CameraInjectionSession existingSession =
+                    (data != null) ? data.cameraIdToSession.get(cameraId) : null;
+            if (existingSession != null) {
+                existingSession.close();
+                data.cameraIdToSession.remove(cameraId);
+                if (data.cameraIdToSession.isEmpty()) {
+                    mPackageToSessionData.remove(packageName);
                 }
-                if (data.cameraIdToSession.containsKey(cameraId)) {
-                    return;
-                }
-                startBlocking(packageName, cameraId);
-            } catch (PackageManager.NameNotFoundException e) {
-                Slog.e(TAG, "onCameraOpened - unknown package " + packageName, e);
-                return;
             }
         }
     }
@@ -272,6 +285,18 @@ class CameraAccessController extends CameraManager.AvailabilityCallback implemen
             if (data != null) {
                 mBlockedCallback.onCameraAccessBlocked(data.appUid);
             }
+        }
+    }
+
+    private int queryUidFromPackageName(int userId, String packageName) {
+        try {
+            final ApplicationInfo ainfo =
+                    mPackageManager.getApplicationInfoAsUser(packageName,
+                        PackageManager.GET_ACTIVITIES, userId);
+            return ainfo.uid;
+        } catch (PackageManager.NameNotFoundException e) {
+            Slog.w(TAG, "queryUidFromPackageName - unknown package " + packageName, e);
+            return Process.INVALID_UID;
         }
     }
 }
