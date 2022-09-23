@@ -238,6 +238,10 @@ public class Flags {
     public static final SysPropBooleanFlag FLOATING_TASKS_ENABLED =
             new SysPropBooleanFlag(1106, "persist.wm.debug.floating_tasks", false);
 
+    @Keep
+    public static final SysPropBooleanFlag SHOW_FLOATING_TASKS_AS_BUBBLES =
+            new SysPropBooleanFlag(1107, "persist.wm.debug.floating_tasks_as_bubbles", false);
+
     // 1200 - predictive back
     @Keep
     public static final SysPropBooleanFlag WM_ENABLE_PREDICTIVE_BACK = new SysPropBooleanFlag(

@@ -39,6 +39,7 @@ import androidx.annotation.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.TaskViewTransitions;
+import com.android.wm.shell.bubbles.BubbleController;
 import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
@@ -54,6 +55,7 @@ import com.android.wm.shell.sysui.ShellInit;
 
 import java.io.PrintWriter;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Entry point for creating and managing floating tasks.
@@ -70,6 +72,8 @@ public class FloatingTasksController implements RemoteCallable<FloatingTasksCont
 
     public static final boolean FLOATING_TASKS_ENABLED =
             SystemProperties.getBoolean("persist.wm.debug.floating_tasks", false);
+    public static final boolean SHOW_FLOATING_TASKS_AS_BUBBLES =
+            SystemProperties.getBoolean("persist.wm.debug.floating_tasks_as_bubbles", false);
 
     @VisibleForTesting
     static final int SMALLEST_SCREEN_WIDTH_DP_TO_BE_TABLET = 600;
@@ -82,6 +86,7 @@ public class FloatingTasksController implements RemoteCallable<FloatingTasksCont
     private Context mContext;
     private ShellController mShellController;
     private ShellCommandHandler mShellCommandHandler;
+    private @Nullable BubbleController mBubbleController;
     private WindowManager mWindowManager;
     private ShellTaskOrganizer mTaskOrganizer;
     private TaskViewTransitions mTaskViewTransitions;
@@ -111,6 +116,7 @@ public class FloatingTasksController implements RemoteCallable<FloatingTasksCont
             ShellInit shellInit,
             ShellController shellController,
             ShellCommandHandler shellCommandHandler,
+            Optional<BubbleController> bubbleController,
             WindowManager windowManager,
             ShellTaskOrganizer organizer,
             TaskViewTransitions transitions,
@@ -120,6 +126,7 @@ public class FloatingTasksController implements RemoteCallable<FloatingTasksCont
         mContext = context;
         mShellController = shellController;
         mShellCommandHandler = shellCommandHandler;
+        mBubbleController = bubbleController.get();
         mWindowManager = windowManager;
         mTaskOrganizer = organizer;
         mTaskViewTransitions = transitions;
@@ -187,6 +194,22 @@ public class FloatingTasksController implements RemoteCallable<FloatingTasksCont
         return true;
     }
 
+    /** Returns true if the task was or should be shown as a bubble. */
+    private boolean maybeShowTaskAsBubble(Intent intent) {
+        if (SHOW_FLOATING_TASKS_AS_BUBBLES && mBubbleController != null) {
+            removeFloatingLayer();
+            if (intent.getPackage() != null) {
+                mBubbleController.addAppBubble(intent);
+                ProtoLog.d(WM_SHELL_FLOATING_APPS, "showing floating task as bubble: %s", intent);
+            } else {
+                ProtoLog.d(WM_SHELL_FLOATING_APPS,
+                        "failed to show floating task as bubble: %s; unknown package", intent);
+            }
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Shows, stashes, or un-stashes the floating task depending on state:
      * - If there is no floating task for this intent, it shows this the provided task.
@@ -195,6 +218,7 @@ public class FloatingTasksController implements RemoteCallable<FloatingTasksCont
      */
     public void showOrSetStashed(Intent intent) {
         if (!canShowTask(intent)) return;
+        if (maybeShowTaskAsBubble(intent)) return;
 
         addFloatingLayer();
 
@@ -215,6 +239,7 @@ public class FloatingTasksController implements RemoteCallable<FloatingTasksCont
      */
     public void showTask(Intent intent) {
         if (!canShowTask(intent)) return;
+        if (maybeShowTaskAsBubble(intent)) return;
 
         addFloatingLayer();
 
