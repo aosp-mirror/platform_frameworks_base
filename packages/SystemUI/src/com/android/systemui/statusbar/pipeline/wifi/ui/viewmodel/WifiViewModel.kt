@@ -41,6 +41,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOf
@@ -120,7 +121,7 @@ constructor(
             .stateIn(scope, started = SharingStarted.WhileSubscribed(), initialValue = null)
 
     /** The wifi icon that should be displayed. Null if we shouldn't display any icon. */
-    private val wifiIcon: Flow<Icon?> =
+    private val wifiIcon: StateFlow<Icon?> =
         combine(
             interactor.isEnabled,
             interactor.isForceHidden,

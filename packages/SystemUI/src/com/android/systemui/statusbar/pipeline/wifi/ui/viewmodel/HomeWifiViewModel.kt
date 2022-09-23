@@ -20,6 +20,7 @@ import android.graphics.Color
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 
 /**
  * A view model for the wifi icon shown on the "home" page (aka, when the device is unlocked and not
@@ -27,7 +28,7 @@ import kotlinx.coroutines.flow.Flow
  */
 class HomeWifiViewModel(
     statusBarPipelineFlags: StatusBarPipelineFlags,
-    wifiIcon: Flow<Icon?>,
+    wifiIcon: StateFlow<Icon?>,
     isActivityInViewVisible: Flow<Boolean>,
     isActivityOutViewVisible: Flow<Boolean>,
     isActivityContainerVisible: Flow<Boolean>,

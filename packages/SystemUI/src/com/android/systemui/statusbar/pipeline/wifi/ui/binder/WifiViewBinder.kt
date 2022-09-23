@@ -26,10 +26,15 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.R
 import com.android.systemui.common.ui.binder.IconViewBinder
 import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.statusbar.StatusBarIconView
+import com.android.systemui.statusbar.StatusBarIconView.STATE_DOT
+import com.android.systemui.statusbar.StatusBarIconView.STATE_HIDDEN
+import com.android.systemui.statusbar.StatusBarIconView.STATE_ICON
 import com.android.systemui.statusbar.phone.StatusBarLocation
 import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.LocationBasedWifiViewModel
 import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.WifiViewModel
 import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
@@ -45,6 +50,19 @@ import kotlinx.coroutines.launch
 object WifiViewBinder {
 
     /**
+     * Defines interface for an object that acts as the binding between the view and its view-model.
+     *
+     * Users of the [WifiViewBinder] class should use this to control the binder after it is bound.
+     */
+    interface Binding {
+        /** Returns true if the wifi icon should be visible and false otherwise. */
+        fun getShouldIconBeVisible(): Boolean
+
+        /** Notifies that the visibility state has changed. */
+        fun onVisibilityStateChanged(@StatusBarIconView.VisibleState state: Int)
+    }
+
+    /**
      * Binds the view to the appropriate view-model based on the given location. The view will
      * continue to be updated following updates from the view-model.
      */
@@ -53,8 +71,8 @@ object WifiViewBinder {
         view: ViewGroup,
         wifiViewModel: WifiViewModel,
         location: StatusBarLocation,
-    ) {
-        when (location) {
+    ): Binding {
+        return when (location) {
             StatusBarLocation.HOME -> bind(view, wifiViewModel.home)
             StatusBarLocation.KEYGUARD -> bind(view, wifiViewModel.keyguard)
             StatusBarLocation.QS -> bind(view, wifiViewModel.qs)
@@ -66,8 +84,10 @@ object WifiViewBinder {
     private fun bind(
         view: ViewGroup,
         viewModel: LocationBasedWifiViewModel,
-    ) {
+    ): Binding {
+        val groupView = view.requireViewById<ViewGroup>(R.id.wifi_group)
         val iconView = view.requireViewById<ImageView>(R.id.wifi_signal)
+        val dotView = view.requireViewById<StatusBarIconView>(R.id.status_bar_dot)
         val activityInView = view.requireViewById<ImageView>(R.id.wifi_in)
         val activityOutView = view.requireViewById<ImageView>(R.id.wifi_out)
         val activityContainerView = view.requireViewById<View>(R.id.inout_container)
@@ -75,14 +95,21 @@ object WifiViewBinder {
         view.isVisible = true
         iconView.isVisible = true
 
+        // TODO(b/238425913): We should log this visibility state.
+        @StatusBarIconView.VisibleState
+        val visibilityState: MutableStateFlow<Int> = MutableStateFlow(STATE_HIDDEN)
+
         view.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
-                    viewModel.wifiIcon.distinctUntilChanged().collect { wifiIcon ->
-                        // TODO(b/238425913): Right now, if !isVisible, there's just an empty space
-                        //  where the wifi icon would be. We need to pipe isVisible through to
-                        //   [ModernStatusBarWifiView.isIconVisible], which is what actually makes
-                        //   the view GONE.
+                    visibilityState.collect { visibilityState ->
+                        groupView.isVisible = visibilityState == STATE_ICON
+                        dotView.isVisible = visibilityState == STATE_DOT
+                    }
+                }
+
+                launch {
+                    viewModel.wifiIcon.collect { wifiIcon ->
                         view.isVisible = wifiIcon != null
                         wifiIcon?.let { IconViewBinder.bind(wifiIcon, iconView) }
                     }
@@ -94,6 +121,7 @@ object WifiViewBinder {
                         iconView.imageTintList = tintList
                         activityInView.imageTintList = tintList
                         activityOutView.imageTintList = tintList
+                        dotView.setDecorColor(tint)
                     }
                 }
 
@@ -114,6 +142,16 @@ object WifiViewBinder {
                         activityContainerView.isVisible = visible
                     }
                 }
+            }
+        }
+
+        return object : Binding {
+            override fun getShouldIconBeVisible(): Boolean {
+                return viewModel.wifiIcon.value != null
+            }
+
+            override fun onVisibilityStateChanged(@StatusBarIconView.VisibleState state: Int) {
+                visibilityState.value = state
             }
         }
     }
