@@ -238,6 +238,7 @@ LIBANDROID {
     ASurfaceControl_createFromWindow; # introduced=29
     ASurfaceControl_acquire; # introduced=31
     ASurfaceControl_release; # introduced=29
+    ASurfaceControl_fromSurfaceControl; # introduced=34
     ASurfaceTexture_acquireANativeWindow; # introduced=28
     ASurfaceTexture_attachToGLContext; # introduced=28
     ASurfaceTexture_detachFromGLContext; # introduced=28
@@ -255,6 +256,7 @@ LIBANDROID {
     ASurfaceTransaction_apply; # introduced=29
     ASurfaceTransaction_create; # introduced=29
     ASurfaceTransaction_delete; # introduced=29
+    ASurfaceTransaction_fromTransaction; # introduced=34
     ASurfaceTransaction_reparent; # introduced=29
     ASurfaceTransaction_setBuffer; # introduced=29
     ASurfaceTransaction_setBufferAlpha; # introduced=29

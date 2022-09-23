@@ -1662,13 +1662,18 @@
          darkening hysteresis constraint value is the n-th element of
          config_screenDarkeningThresholds.
 
+         Historically, it has been assumed that this will be an integer array with values in the
+         range of [0, 255]. However, it is now assumed to be a float array with values in the
+         range of [0, 1]. To accommodate both the possibilities, we internally check the scale on
+         which the thresholds are defined, and calibrate it accordingly.
+
          The (zero-based) index is calculated as follows: (MAX is the largest index of the array)
          condition                       calculated index
          value < level[0]                0
          level[n] <= value < level[n+1]  n+1
          level[MAX] <= value             MAX+1 -->
-    <integer-array name="config_screenThresholdLevels">
-    </integer-array>
+    <array name="config_screenThresholdLevels">
+    </array>
 
     <!-- Array of hysteresis constraint values for brightening, represented as tenths of a
          percent. The length of this array is assumed to be one greater than

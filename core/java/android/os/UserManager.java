@@ -5265,36 +5265,10 @@ public class UserManager {
     public boolean isUserSwitcherEnabled(boolean showEvenIfNotActionable) {
 
         try {
-            if (!mService.isUserSwitcherEnabled(mUserId)) {
-                return false;
-            }
+            return mService.isUserSwitcherEnabled(showEvenIfNotActionable, mUserId);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
-
-        // The feature is enabled. But is it worth showing?
-        return showEvenIfNotActionable
-                || areThereUsersToWhichToSwitch() // There are switchable users.
-                || !hasUserRestrictionForUser(DISALLOW_ADD_USER, mUserId); // New users can be added
-    }
-
-    /** Returns whether there are any users (other than the current user) to which to switch. */
-    @RequiresPermission(anyOf = {
-            android.Manifest.permission.MANAGE_USERS,
-            android.Manifest.permission.CREATE_USERS
-    })
-    private boolean areThereUsersToWhichToSwitch() {
-        final List<UserInfo> users = getAliveUsers();
-        if (users == null) {
-            return false;
-        }
-        int switchableUserCount = 0;
-        for (UserInfo user : users) {
-            if (user.supportsSwitchToByUser()) {
-                ++switchableUserCount;
-            }
-        }
-        return switchableUserCount > 1;
     }
 
     /**

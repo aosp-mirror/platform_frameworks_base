@@ -1586,11 +1586,19 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         if (oldParent != null) {
             oldParent.cleanUpActivityReferences(this);
+            // Update isVisibleRequested value of parent TaskFragment and send the callback to the
+            // client side if needed.
+            oldParent.onActivityVisibleRequestedChanged();
         }
 
-        if (newParent != null && isState(RESUMED)) {
-            newParent.setResumedActivity(this, "onParentChanged");
-            mImeInsetsFrozenUntilStartInput = false;
+        if (newParent != null) {
+            // Update isVisibleRequested value of parent TaskFragment and send the callback to the
+            // client side if needed.
+            newParent.onActivityVisibleRequestedChanged();
+            if (isState(RESUMED)) {
+                newParent.setResumedActivity(this, "onParentChanged");
+                mImeInsetsFrozenUntilStartInput = false;
+            }
         }
 
         if (rootTask != null && rootTask.topRunningActivity() == this) {
@@ -5094,6 +5102,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
         mVisibleRequested = visible;
+        final TaskFragment taskFragment = getTaskFragment();
+        if (taskFragment != null) {
+            taskFragment.onActivityVisibleRequestedChanged();
+        }
         setInsetsFrozen(!visible);
         if (app != null) {
             mTaskSupervisor.onProcessActivityStateChanged(app, false /* forceBatch */);
@@ -9550,7 +9562,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     @Override
     boolean showToCurrentUser() {
-        return mShowForAllUsers || mWmService.isCurrentProfile(mUserId);
+        return mShowForAllUsers || mWmService.isUserVisible(mUserId);
     }
 
     @Override

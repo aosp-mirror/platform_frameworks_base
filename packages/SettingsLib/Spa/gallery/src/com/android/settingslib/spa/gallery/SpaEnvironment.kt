@@ -54,7 +54,7 @@ fun createSettingsPage(
     parameter: List<NamedNavArgument> = emptyList(),
     arguments: Bundle? = null
 ): SettingsPage {
-    return SettingsPage(
+    return SettingsPage.create(
         name = SppName.name,
         displayName = SppName.displayName,
         parameter = parameter,

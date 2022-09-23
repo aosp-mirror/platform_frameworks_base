@@ -164,6 +164,7 @@ public class LockPatternUtils {
     private static final String LOCK_SCREEN_DEVICE_OWNER_INFO = "lockscreen.device_owner_info";
 
     private static final String ENABLED_TRUST_AGENTS = "lockscreen.enabledtrustagents";
+    private static final String KNOWN_TRUST_AGENTS = "lockscreen.knowntrustagents";
     private static final String IS_TRUST_USUALLY_MANAGED = "lockscreen.istrustusuallymanaged";
 
     public static final String CURRENT_LSKF_BASED_PROTECTOR_ID_KEY = "sp-handle";
@@ -1089,31 +1090,50 @@ public class LockPatternUtils {
         return getString(LOCKSCREEN_POWER_BUTTON_INSTANTLY_LOCKS, userId) != null;
     }
 
+    /** Updates the list of enabled trust agent in LockSettings storage for the given user. */
     public void setEnabledTrustAgents(Collection<ComponentName> activeTrustAgents, int userId) {
+        setString(ENABLED_TRUST_AGENTS, serializeTrustAgents(activeTrustAgents), userId);
+        getTrustManager().reportEnabledTrustAgentsChanged(userId);
+    }
+
+    /** Returns the list of enabled trust agent in LockSettings storage for the given user. */
+    public List<ComponentName> getEnabledTrustAgents(int userId) {
+        return deserializeTrustAgents(getString(ENABLED_TRUST_AGENTS, userId));
+    }
+
+    /** Updates the list of known trust agent in LockSettings storage for the given user. */
+    public void setKnownTrustAgents(Collection<ComponentName> knownTrustAgents, int userId) {
+        setString(KNOWN_TRUST_AGENTS, serializeTrustAgents(knownTrustAgents), userId);
+    }
+
+    /** Returns the list of known trust agent in LockSettings storage for the given user. */
+    public List<ComponentName> getKnownTrustAgents(int userId) {
+        return deserializeTrustAgents(getString(KNOWN_TRUST_AGENTS, userId));
+    }
+
+    private String serializeTrustAgents(Collection<ComponentName> trustAgents) {
         StringBuilder sb = new StringBuilder();
-        for (ComponentName cn : activeTrustAgents) {
+        for (ComponentName cn : trustAgents) {
             if (sb.length() > 0) {
                 sb.append(',');
             }
             sb.append(cn.flattenToShortString());
         }
-        setString(ENABLED_TRUST_AGENTS, sb.toString(), userId);
-        getTrustManager().reportEnabledTrustAgentsChanged(userId);
+        return sb.toString();
     }
 
-    public List<ComponentName> getEnabledTrustAgents(int userId) {
-        String serialized = getString(ENABLED_TRUST_AGENTS, userId);
-        if (TextUtils.isEmpty(serialized)) {
-            return new ArrayList<ComponentName>();
+    private List<ComponentName> deserializeTrustAgents(String serializedTrustAgents) {
+        if (TextUtils.isEmpty(serializedTrustAgents)) {
+            return new ArrayList<>();
         }
-        String[] split = serialized.split(",");
-        ArrayList<ComponentName> activeTrustAgents = new ArrayList<ComponentName>(split.length);
+        String[] split = serializedTrustAgents.split(",");
+        ArrayList<ComponentName> trustAgents = new ArrayList<>(split.length);
         for (String s : split) {
             if (!TextUtils.isEmpty(s)) {
-                activeTrustAgents.add(ComponentName.unflattenFromString(s));
+                trustAgents.add(ComponentName.unflattenFromString(s));
             }
         }
-        return activeTrustAgents;
+        return trustAgents;
     }
 
     /**
@@ -1487,7 +1507,8 @@ public class LockPatternUtils {
                         STRONG_AUTH_REQUIRED_AFTER_LOCKOUT,
                         STRONG_AUTH_REQUIRED_AFTER_TIMEOUT,
                         STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN,
-                        STRONG_AUTH_REQUIRED_AFTER_NON_STRONG_BIOMETRICS_TIMEOUT})
+                        STRONG_AUTH_REQUIRED_AFTER_NON_STRONG_BIOMETRICS_TIMEOUT,
+                        SOME_AUTH_REQUIRED_AFTER_TRUSTAGENT_EXPIRED})
         @Retention(RetentionPolicy.SOURCE)
         public @interface StrongAuthFlags {}
 
@@ -1538,6 +1559,12 @@ public class LockPatternUtils {
          * non-strong biometric (i.e. weak or convenience biometric) is used to unlock device.
          */
         public static final int STRONG_AUTH_REQUIRED_AFTER_NON_STRONG_BIOMETRICS_TIMEOUT = 0x80;
+
+        /**
+         * Some authentication is required because the trustagent either timed out or was disabled
+         * manually.
+         */
+        public static final int SOME_AUTH_REQUIRED_AFTER_TRUSTAGENT_EXPIRED = 0x100;
 
         /**
          * Strong auth flags that do not prevent biometric methods from being accepted as auth.

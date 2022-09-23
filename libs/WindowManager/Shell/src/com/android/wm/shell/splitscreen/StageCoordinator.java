@@ -18,6 +18,8 @@ package com.android.wm.shell.splitscreen;
 
 import static android.app.ActivityOptions.KEY_LAUNCH_ROOT_TASK_TOKEN;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
+import static android.app.ComponentOptions.KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED;
+import static android.app.ComponentOptions.KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED_BY_PERMISSION;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
@@ -44,6 +46,8 @@ import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSIT
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_MAIN;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_SIDE;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_UNDEFINED;
+import static com.android.wm.shell.splitscreen.SplitScreenController.ENTER_REASON_LAUNCHER;
+import static com.android.wm.shell.splitscreen.SplitScreenController.ENTER_REASON_MULTI_INSTANCE;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_APP_DOES_NOT_SUPPORT_MULTIWINDOW;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_APP_FINISHED;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_CHILD_TASK_ENTER_PIP;
@@ -501,6 +505,12 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         options = resolveStartStage(STAGE_TYPE_UNDEFINED, position, options, wct);
 
+        // If split still not active, apply windows bounds first to avoid surface reset to
+        // wrong pos by SurfaceAnimator from wms.
+        if (!mMainStage.isActive() && mLogger.isEnterRequestedByDrag()) {
+            updateWindowBounds(mSplitLayout, wct);
+        }
+
         wct.sendPendingIntent(intent, fillInIntent, options);
         mSyncQueue.queue(transition, WindowManager.TRANSIT_OPEN, wct);
     }
@@ -669,7 +679,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     private void setEnterInstanceId(InstanceId instanceId) {
         if (instanceId != null) {
-            mLogger.enterRequested(instanceId);
+            mLogger.enterRequested(instanceId, ENTER_REASON_LAUNCHER);
         }
     }
 
@@ -1107,6 +1117,10 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     private void addActivityOptions(Bundle opts, StageTaskListener stage) {
         opts.putParcelable(KEY_LAUNCH_ROOT_TASK_TOKEN, stage.mRootTaskInfo.token);
+        // Put BAL flags to avoid activity start aborted. Otherwise, flows like shortcut to split
+        // will be canceled.
+        opts.putBoolean(KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED, true);
+        opts.putBoolean(KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED_BY_PERMISSION, true);
     }
 
     void updateActivityOptions(Bundle opts, @SplitPosition int position) {
@@ -1453,18 +1467,27 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 }
             }
         } else if (isSideStage && hasChildren && !mMainStage.isActive()) {
-            // TODO (b/238697912) : Add the validation to prevent entering non-recovered status
-            onSplitScreenEnter();
             final WindowContainerTransaction wct = new WindowContainerTransaction();
             mSplitLayout.init();
-            mSplitLayout.setDividerAtBorder(mSideStagePosition == SPLIT_POSITION_TOP_OR_LEFT);
-            mMainStage.activate(wct, true /* includingTopTask */);
-            updateWindowBounds(mSplitLayout, wct);
-            wct.reorder(mRootTaskInfo.token, true);
-            wct.setForceTranslucent(mRootTaskInfo.token, false);
+            if (mLogger.isEnterRequestedByDrag()) {
+                prepareEnterSplitScreen(wct);
+            } else {
+                // TODO (b/238697912) : Add the validation to prevent entering non-recovered status
+                onSplitScreenEnter();
+                mSplitLayout.setDividerAtBorder(mSideStagePosition == SPLIT_POSITION_TOP_OR_LEFT);
+                mMainStage.activate(wct, true /* includingTopTask */);
+                updateWindowBounds(mSplitLayout, wct);
+                wct.reorder(mRootTaskInfo.token, true);
+                wct.setForceTranslucent(mRootTaskInfo.token, false);
+            }
+
             mSyncQueue.queue(wct);
             mSyncQueue.runInSync(t -> {
-                mSplitLayout.flingDividerToCenter();
+                if (mLogger.isEnterRequestedByDrag()) {
+                    updateSurfaceBounds(mSplitLayout, t, false /* applyResizingOffset */);
+                } else {
+                    mSplitLayout.flingDividerToCenter();
+                }
             });
         }
         if (mMainStageListener.mHasChildren && mSideStageListener.mHasChildren) {
@@ -1472,6 +1495,9 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             updateRecentTasksSplitPair();
 
             if (!mLogger.hasStartedSession()) {
+                if (!mLogger.hasValidEnterSessionId()) {
+                    mLogger.enterRequested(null /*enterSessionId*/, ENTER_REASON_MULTI_INSTANCE);
+                }
                 mLogger.logEnter(mSplitLayout.getDividerPositionAsFraction(),
                         getMainStagePosition(), mMainStage.getTopChildTaskUid(),
                         getSideStagePosition(), mSideStage.getTopChildTaskUid(),

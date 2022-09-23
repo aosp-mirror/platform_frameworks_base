@@ -30,7 +30,6 @@ import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.wm.shell.flicker.SPLIT_SCREEN_DIVIDER_COMPONENT
 import com.android.wm.shell.flicker.appWindowBecomesVisible
 import com.android.wm.shell.flicker.appWindowIsVisibleAtEnd
-import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 import com.android.wm.shell.flicker.layerBecomesVisible
 import com.android.wm.shell.flicker.layerIsVisibleAtEnd
 import com.android.wm.shell.flicker.splitAppLayerBoundsBecomesVisibleByDrag
@@ -70,7 +69,7 @@ class EnterSplitScreenByDragFromTaskbar(
             super.transition(this)
             setup {
                 tapl.goHome()
-                SplitScreenHelper.createShortcutOnHotseatIfNotExist(
+                SplitScreenUtils.createShortcutOnHotseatIfNotExist(
                     tapl, secondaryApp.appName
                 )
                 primaryApp.launchViaIntent(wmHelper)
@@ -79,7 +78,7 @@ class EnterSplitScreenByDragFromTaskbar(
                 tapl.launchedAppState.taskbar
                     .getAppIcon(secondaryApp.appName)
                     .dragToSplitscreen(secondaryApp.`package`, primaryApp.`package`)
-                SplitScreenHelper.waitForSplitComplete(wmHelper, primaryApp, secondaryApp)
+                SplitScreenUtils.waitForSplitComplete(wmHelper, primaryApp, secondaryApp)
             }
         }
 

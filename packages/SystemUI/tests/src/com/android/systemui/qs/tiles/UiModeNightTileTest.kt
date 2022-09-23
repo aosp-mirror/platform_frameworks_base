@@ -21,9 +21,9 @@ import android.content.Context
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.os.Handler
-import android.test.suitebuilder.annotation.SmallTest
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.systemui.R
@@ -51,28 +51,17 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 class UiModeNightTileTest : SysuiTestCase() {
 
-    @Mock
-    private lateinit var mockContext: Context
-    @Mock
-    private lateinit var uiModeManager: UiModeManager
-    @Mock
-    private lateinit var resources: Resources
-    @Mock
-    private lateinit var qsLogger: QSLogger
-    @Mock
-    private lateinit var qsHost: QSTileHost
-    @Mock
-    private lateinit var metricsLogger: MetricsLogger
-    @Mock
-    private lateinit var statusBarStateController: StatusBarStateController
-    @Mock
-    private lateinit var activityStarter: ActivityStarter
-    @Mock
-    private lateinit var configurationController: ConfigurationController
-    @Mock
-    private lateinit var batteryController: BatteryController
-    @Mock
-    private lateinit var locationController: LocationController
+    @Mock private lateinit var mockContext: Context
+    @Mock private lateinit var uiModeManager: UiModeManager
+    @Mock private lateinit var resources: Resources
+    @Mock private lateinit var qsLogger: QSLogger
+    @Mock private lateinit var qsHost: QSTileHost
+    @Mock private lateinit var metricsLogger: MetricsLogger
+    @Mock private lateinit var statusBarStateController: StatusBarStateController
+    @Mock private lateinit var activityStarter: ActivityStarter
+    @Mock private lateinit var configurationController: ConfigurationController
+    @Mock private lateinit var batteryController: BatteryController
+    @Mock private lateinit var locationController: LocationController
 
     private val uiEventLogger = UiEventLoggerFake()
     private val falsingManager = FalsingManagerFake()
@@ -85,7 +74,7 @@ class UiModeNightTileTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         testableLooper = TestableLooper.get(this)
         configuration = Configuration()
-        mContext.addMockSystemService(Context.UI_MODE_SERVICE, uiModeManager)
+        mContext.addMockSystemService(UiModeManager::class.java, uiModeManager)
 
         `when`(qsHost.context).thenReturn(mockContext)
         `when`(qsHost.userContext).thenReturn(mContext)
@@ -93,7 +82,8 @@ class UiModeNightTileTest : SysuiTestCase() {
         `when`(resources.configuration).thenReturn(configuration)
         `when`(qsHost.uiEventLogger).thenReturn(uiEventLogger)
 
-        tile = UiModeNightTile(
+        tile =
+            UiModeNightTile(
                 qsHost,
                 testableLooper.looper,
                 Handler(testableLooper.looper),
@@ -104,7 +94,8 @@ class UiModeNightTileTest : SysuiTestCase() {
                 qsLogger,
                 configurationController,
                 batteryController,
-                locationController)
+                locationController
+            )
     }
 
     @Test
@@ -115,7 +106,7 @@ class UiModeNightTileTest : SysuiTestCase() {
         tile.handleUpdateState(state, /* arg= */ null)
 
         assertThat(state.icon)
-                .isEqualTo(QSTileImpl.ResourceIcon.get(R.drawable.qs_light_dark_theme_icon_on))
+            .isEqualTo(QSTileImpl.ResourceIcon.get(R.drawable.qs_light_dark_theme_icon_on))
     }
 
     @Test
@@ -126,7 +117,7 @@ class UiModeNightTileTest : SysuiTestCase() {
         tile.handleUpdateState(state, /* arg= */ null)
 
         assertThat(state.icon)
-                .isEqualTo(QSTileImpl.ResourceIcon.get(R.drawable.qs_light_dark_theme_icon_off))
+            .isEqualTo(QSTileImpl.ResourceIcon.get(R.drawable.qs_light_dark_theme_icon_off))
     }
 
     private fun setNightModeOn() {

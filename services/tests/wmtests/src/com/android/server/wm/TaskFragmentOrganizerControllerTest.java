@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.view.Display.DEFAULT_DISPLAY;
 import static android.window.TaskFragmentOrganizer.KEY_ERROR_CALLBACK_OP_TYPE;
 import static android.window.TaskFragmentOrganizer.KEY_ERROR_CALLBACK_THROWABLE;
 import static android.window.TaskFragmentOrganizer.getTransitionType;
@@ -76,6 +77,7 @@ import android.window.TaskFragmentCreationParams;
 import android.window.TaskFragmentInfo;
 import android.window.TaskFragmentOrganizer;
 import android.window.TaskFragmentOrganizerToken;
+import android.window.TaskFragmentParentInfo;
 import android.window.TaskFragmentTransaction;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
@@ -271,7 +273,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     @Test
     public void testOnTaskFragmentParentInfoChanged() {
         setupMockParent(mTaskFragment, mTask);
-        mTask.getConfiguration().smallestScreenWidthDp = 10;
+        mTask.getTaskFragmentParentInfo().getConfiguration().smallestScreenWidthDp = 10;
 
         mController.onTaskFragmentAppeared(
                 mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
@@ -295,7 +297,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
 
         // Trigger callback if the size is changed.
         clearInvocations(mOrganizer);
-        mTask.getConfiguration().smallestScreenWidthDp = 100;
+        mTask.getTaskFragmentParentInfo().getConfiguration().smallestScreenWidthDp = 100;
         mController.onTaskFragmentInfoChanged(
                 mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
         mController.dispatchPendingEvents();
@@ -304,7 +306,8 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
 
         // Trigger callback if the windowing mode is changed.
         clearInvocations(mOrganizer);
-        mTask.getConfiguration().windowConfiguration.setWindowingMode(WINDOWING_MODE_PINNED);
+        mTask.getTaskFragmentParentInfo().getConfiguration().windowConfiguration
+                .setWindowingMode(WINDOWING_MODE_PINNED);
         mController.onTaskFragmentInfoChanged(
                 mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
         mController.dispatchPendingEvents();
@@ -1268,7 +1271,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         final TaskFragmentTransaction.Change change = changes.get(0);
         assertEquals(TYPE_TASK_FRAGMENT_PARENT_INFO_CHANGED, change.getType());
         assertEquals(task.mTaskId, change.getTaskId());
-        assertEquals(task.getConfiguration(), change.getTaskConfiguration());
+        assertEquals(task.getTaskFragmentParentInfo(), change.getTaskFragmentParentInfo());
     }
 
     /** Asserts that there will be a transaction for TaskFragment error. */
@@ -1316,8 +1319,8 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     /** Setups the mock Task as the parent of the given TaskFragment. */
     private static void setupMockParent(TaskFragment taskFragment, Task mockParent) {
         doReturn(mockParent).when(taskFragment).getTask();
-        final Configuration taskConfig = new Configuration();
-        doReturn(taskConfig).when(mockParent).getConfiguration();
+        doReturn(new TaskFragmentParentInfo(new Configuration(), DEFAULT_DISPLAY, true))
+                .when(mockParent).getTaskFragmentParentInfo();
 
         // Task needs to be visible
         mockParent.lastActiveTime = 100;

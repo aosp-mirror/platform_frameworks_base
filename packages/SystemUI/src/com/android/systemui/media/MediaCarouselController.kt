@@ -202,6 +202,7 @@ class MediaCarouselController @Inject constructor(
      * It will be called when the container is out of view.
      */
     lateinit var updateUserVisibility: () -> Unit
+    lateinit var updateHostVisibility: () -> Unit
 
     private val isReorderingAllowed: Boolean
         get() = visualStabilityProvider.isReorderingAllowed
@@ -225,7 +226,13 @@ class MediaCarouselController @Inject constructor(
                 reorderAllPlayers(previousVisiblePlayerKey = null)
             }
 
-            keysNeedRemoval.forEach { removePlayer(it) }
+            keysNeedRemoval.forEach {
+                removePlayer(it)
+            }
+            if (keysNeedRemoval.size > 0) {
+                // Carousel visibility may need to be updated after late removals
+                updateHostVisibility()
+            }
             keysNeedRemoval.clear()
 
             // Update user visibility so that no extra impression will be logged when
@@ -247,6 +254,7 @@ class MediaCarouselController @Inject constructor(
                 receivedSmartspaceCardLatency: Int,
                 isSsReactivated: Boolean
             ) {
+                debugLogger.logMediaLoaded(key)
                 if (addOrUpdatePlayer(key, oldKey, data, isSsReactivated)) {
                     // Log card received if a new resumable media card is added
                     MediaPlayerData.getMediaPlayer(key)?.let {
@@ -315,7 +323,7 @@ class MediaCarouselController @Inject constructor(
                 data: SmartspaceMediaData,
                 shouldPrioritize: Boolean
             ) {
-                if (DEBUG) Log.d(TAG, "Loading Smartspace media update")
+                debugLogger.logRecommendationLoaded(key)
                 // Log the case where the hidden media carousel with the existed inactive resume
                 // media is shown by the Smartspace signal.
                 if (data.isActive) {
@@ -370,13 +378,21 @@ class MediaCarouselController @Inject constructor(
             }
 
             override fun onMediaDataRemoved(key: String) {
+                debugLogger.logMediaRemoved(key)
                 removePlayer(key)
             }
 
             override fun onSmartspaceMediaDataRemoved(key: String, immediately: Boolean) {
-                if (DEBUG) Log.d(TAG, "My Smartspace media removal request is received")
+                debugLogger.logRecommendationRemoved(key, immediately)
                 if (immediately || isReorderingAllowed) {
-                    onMediaDataRemoved(key)
+                    removePlayer(key)
+                    if (!immediately) {
+                        // Although it wasn't requested, we were able to process the removal
+                        // immediately since reordering is allowed. So, notify hosts to update
+                        if (this@MediaCarouselController::updateHostVisibility.isInitialized) {
+                            updateHostVisibility()
+                        }
+                    }
                 } else {
                     keysNeedRemoval.add(key)
                 }

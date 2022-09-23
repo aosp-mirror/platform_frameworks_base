@@ -5725,7 +5725,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         try {
             return setKeyChainGrantInternal(alias, hasGrant, granteeUid, caller.getUserHandle());
         } catch (IllegalArgumentException e) {
-            if (mInjector.isChangeEnabled(THROW_EXCEPTION_WHEN_KEY_MISSING, packageName,
+            if (mInjector.isChangeEnabled(THROW_EXCEPTION_WHEN_KEY_MISSING, callerPackage,
                     caller.getUserId())) {
                 throw e;
             }

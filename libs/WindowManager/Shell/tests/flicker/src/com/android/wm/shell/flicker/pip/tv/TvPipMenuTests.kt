@@ -19,8 +19,8 @@ package com.android.wm.shell.flicker.pip.tv
 import android.graphics.Rect
 import androidx.test.filters.RequiresDevice
 import androidx.test.uiautomator.UiObject2
+import com.android.server.wm.flicker.testapp.ActivityOptions
 import com.android.wm.shell.flicker.SYSTEM_UI_PACKAGE_NAME
-import com.android.wm.shell.flicker.testapp.Components
 import com.android.wm.shell.flicker.wait
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -165,44 +165,44 @@ class TvPipMenuTests : TvPipTestBase() {
         enterPip_openMenu_assertShown()
 
         // PiP menu should contain "No-Op", "Off" and "Clear" buttons...
-        uiDevice.findTvPipMenuElementWithDescription(Components.PipActivity.MENU_ACTION_NO_OP)
+        uiDevice.findTvPipMenuElementWithDescription(ActivityOptions.Pip.MENU_ACTION_NO_OP)
                 ?: fail("\"No-Op\" button should be shown in Pip menu")
-        uiDevice.findTvPipMenuElementWithDescription(Components.PipActivity.MENU_ACTION_OFF)
+        uiDevice.findTvPipMenuElementWithDescription(ActivityOptions.Pip.MENU_ACTION_OFF)
                 ?: fail("\"Off\" button should be shown in Pip menu")
-        uiDevice.findTvPipMenuElementWithDescription(Components.PipActivity.MENU_ACTION_CLEAR)
+        uiDevice.findTvPipMenuElementWithDescription(ActivityOptions.Pip.MENU_ACTION_CLEAR)
                 ?: fail("\"Clear\" button should be shown in Pip menu")
         // ... and should also contain the "Full screen" and "Close" buttons.
         assertFullscreenAndCloseButtonsAreShown()
 
-        uiDevice.clickTvPipMenuElementWithDescription(Components.PipActivity.MENU_ACTION_OFF)
+        uiDevice.clickTvPipMenuElementWithDescription(ActivityOptions.Pip.MENU_ACTION_OFF)
         // Invoking the "Off" action should replace it with the "On" action/button and should
         // remove the "No-Op" action/button. "Clear" action/button should remain in the menu ...
-        uiDevice.waitForTvPipMenuElementWithDescription(Components.PipActivity.MENU_ACTION_ON)
+        uiDevice.waitForTvPipMenuElementWithDescription(ActivityOptions.Pip.MENU_ACTION_ON)
                 ?: fail("\"On\" button should be shown in Pip for a corresponding custom action")
         assertNull("\"No-Op\" button should not be shown in Pip menu",
                 uiDevice.findTvPipMenuElementWithDescription(
-                    Components.PipActivity.MENU_ACTION_NO_OP))
-        uiDevice.findTvPipMenuElementWithDescription(Components.PipActivity.MENU_ACTION_CLEAR)
+                    ActivityOptions.Pip.MENU_ACTION_NO_OP))
+        uiDevice.findTvPipMenuElementWithDescription(ActivityOptions.Pip.MENU_ACTION_CLEAR)
                         ?: fail("\"Clear\" button should be shown in Pip menu")
         // ... as well as the "Full screen" and "Close" buttons.
         assertFullscreenAndCloseButtonsAreShown()
 
-        uiDevice.clickTvPipMenuElementWithDescription(Components.PipActivity.MENU_ACTION_CLEAR)
+        uiDevice.clickTvPipMenuElementWithDescription(ActivityOptions.Pip.MENU_ACTION_CLEAR)
         // Invoking the "Clear" action should remove all the custom actions and their corresponding
         // buttons, ...
         uiDevice.waitUntilTvPipMenuElementWithDescriptionIsGone(
-            Components.PipActivity.MENU_ACTION_ON)?.also {
+            ActivityOptions.Pip.MENU_ACTION_ON)?.also {
             isGone -> if (!isGone) fail("\"On\" button should not be shown in Pip menu")
         }
         assertNull("\"Off\" button should not be shown in Pip menu",
                 uiDevice.findTvPipMenuElementWithDescription(
-                    Components.PipActivity.MENU_ACTION_OFF))
+                    ActivityOptions.Pip.MENU_ACTION_OFF))
         assertNull("\"Clear\" button should not be shown in Pip menu",
                 uiDevice.findTvPipMenuElementWithDescription(
-                    Components.PipActivity.MENU_ACTION_CLEAR))
+                    ActivityOptions.Pip.MENU_ACTION_CLEAR))
         assertNull("\"No-Op\" button should not be shown in Pip menu",
                 uiDevice.findTvPipMenuElementWithDescription(
-                    Components.PipActivity.MENU_ACTION_NO_OP))
+                    ActivityOptions.Pip.MENU_ACTION_NO_OP))
         // ... but the menu should still contain the "Full screen" and "Close" buttons.
         assertFullscreenAndCloseButtonsAreShown()
 
@@ -217,11 +217,11 @@ class TvPipMenuTests : TvPipTestBase() {
         enterPip_openMenu_assertShown()
 
         // PiP menu should contain "No-Op", "Off" and "Clear" buttons for the custom actions...
-        uiDevice.findTvPipMenuElementWithDescription(Components.PipActivity.MENU_ACTION_NO_OP)
+        uiDevice.findTvPipMenuElementWithDescription(ActivityOptions.Pip.MENU_ACTION_NO_OP)
                 ?: fail("\"No-Op\" button should be shown in Pip menu")
-        uiDevice.findTvPipMenuElementWithDescription(Components.PipActivity.MENU_ACTION_OFF)
+        uiDevice.findTvPipMenuElementWithDescription(ActivityOptions.Pip.MENU_ACTION_OFF)
                 ?: fail("\"Off\" button should be shown in Pip menu")
-        uiDevice.findTvPipMenuElementWithDescription(Components.PipActivity.MENU_ACTION_CLEAR)
+        uiDevice.findTvPipMenuElementWithDescription(ActivityOptions.Pip.MENU_ACTION_CLEAR)
                 ?: fail("\"Clear\" button should be shown in Pip menu")
         // ... should also contain the "Full screen" and "Close" buttons, ...
         assertFullscreenAndCloseButtonsAreShown()
@@ -231,7 +231,7 @@ class TvPipMenuTests : TvPipTestBase() {
         assertNull("\"Pause\" button should not be shown in menu when there are custom actions",
                 uiDevice.findTvPipMenuElementWithDescription(pauseButtonDescription))
 
-        uiDevice.clickTvPipMenuElementWithDescription(Components.PipActivity.MENU_ACTION_CLEAR)
+        uiDevice.clickTvPipMenuElementWithDescription(ActivityOptions.Pip.MENU_ACTION_CLEAR)
         // Invoking the "Clear" action should remove all the custom actions, which should bring up
         // media buttons...
         uiDevice.waitForTvPipMenuElementWithDescription(pauseButtonDescription)

@@ -76,6 +76,14 @@ public class LogModule {
         return factory.create("NotifInterruptLog", 100);
     }
 
+    /** Provides a logging buffer for notification rendering events. */
+    @Provides
+    @SysUISingleton
+    @NotificationRenderLog
+    public static LogBuffer provideNotificationRenderLogBuffer(LogBufferFactory factory) {
+        return factory.create("NotifRenderLog", 100);
+    }
+
     /** Provides a logging buffer for all logs for lockscreen to shade transition events. */
     @Provides
     @SysUISingleton

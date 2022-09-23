@@ -16,6 +16,8 @@
 
 package com.android.server.display.color;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+
 import static com.android.server.display.color.DisplayTransformManager.LEVEL_COLOR_MATRIX_DISPLAY_WHITE_BALANCE;
 
 import android.annotation.NonNull;
@@ -24,10 +26,9 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.ColorSpace;
 import android.hardware.display.ColorDisplayManager;
+import android.hardware.display.DisplayManagerInternal;
 import android.opengl.Matrix;
-import android.os.IBinder;
 import android.util.Slog;
-import android.view.SurfaceControl;
 import android.view.SurfaceControl.DisplayPrimaries;
 
 import com.android.internal.R;
@@ -63,6 +64,12 @@ final class DisplayWhiteBalanceTintController extends TintController {
     private Boolean mIsAvailable;
     // This feature becomes disallowed if the device is in an unsupported strong/light state.
     private boolean mIsAllowed = true;
+
+    private final DisplayManagerInternal mDisplayManagerInternal;
+
+    DisplayWhiteBalanceTintController(DisplayManagerInternal dm) {
+        mDisplayManagerInternal = dm;
+    }
 
     @Override
     public void setUp(Context context, boolean needsLinear) {
@@ -287,12 +294,8 @@ final class DisplayWhiteBalanceTintController extends TintController {
     }
 
     private ColorSpace.Rgb getDisplayColorSpaceFromSurfaceControl() {
-        final IBinder displayToken = SurfaceControl.getInternalDisplayToken();
-        if (displayToken == null) {
-            return null;
-        }
-
-        DisplayPrimaries primaries = SurfaceControl.getDisplayNativePrimaries(displayToken);
+        DisplayPrimaries primaries =
+                mDisplayManagerInternal.getDisplayNativePrimaries(DEFAULT_DISPLAY);
         if (primaries == null || primaries.red == null || primaries.green == null
                 || primaries.blue == null || primaries.white == null) {
             return null;

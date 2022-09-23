@@ -25,10 +25,10 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group4
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.helpers.setRotation
-import com.android.wm.shell.flicker.helpers.FixedAppHelper
 import org.junit.Assume
 import org.junit.Before
 import org.junit.FixMethodOrder
@@ -62,7 +62,7 @@ import org.junit.runners.Parameterized
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group4
 open class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
-    private val fixedApp = FixedAppHelper(instrumentation)
+    private val testApp = SimpleAppHelper(instrumentation)
     private val screenBoundsStart = WindowUtils.getDisplayBounds(testSpec.startRotation)
     private val screenBoundsEnd = WindowUtils.getDisplayBounds(testSpec.endRotation)
 
@@ -74,7 +74,7 @@ open class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testS
     override val transition: FlickerBuilder.() -> Unit
         get() = buildTransition {
             setup {
-                fixedApp.launchViaIntent(wmHelper)
+                testApp.launchViaIntent(wmHelper)
                 setRotation(testSpec.startRotation)
             }
             transitions {
@@ -90,48 +90,48 @@ open class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testS
     override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
 
     /**
-     * Checks that [fixedApp] layer is within [screenBoundsStart] at the start of the transition
+     * Checks that [testApp] layer is within [screenBoundsStart] at the start of the transition
      */
     @Presubmit
     @Test
     fun fixedAppLayer_StartingBounds() {
         testSpec.assertLayersStart {
-            visibleRegion(fixedApp).coversAtMost(screenBoundsStart)
+            visibleRegion(testApp).coversAtMost(screenBoundsStart)
         }
     }
 
     /**
-     * Checks that [fixedApp] layer is within [screenBoundsEnd] at the end of the transition
+     * Checks that [testApp] layer is within [screenBoundsEnd] at the end of the transition
      */
     @Presubmit
     @Test
     fun fixedAppLayer_EndingBounds() {
         testSpec.assertLayersEnd {
-            visibleRegion(fixedApp).coversAtMost(screenBoundsEnd)
+            visibleRegion(testApp).coversAtMost(screenBoundsEnd)
         }
     }
 
     /**
-     * Checks that [fixedApp] plus [pipApp] layers are within [screenBoundsEnd] at the start
+     * Checks that [testApp] plus [pipApp] layers are within [screenBoundsEnd] at the start
      * of the transition
      */
     @Presubmit
     @Test
     fun appLayers_StartingBounds() {
         testSpec.assertLayersStart {
-            visibleRegion(fixedApp.or(pipApp)).coversExactly(screenBoundsStart)
+            visibleRegion(testApp.or(pipApp)).coversExactly(screenBoundsStart)
         }
     }
 
     /**
-     * Checks that [fixedApp] plus [pipApp] layers are within [screenBoundsEnd] at the end
+     * Checks that [testApp] plus [pipApp] layers are within [screenBoundsEnd] at the end
      * of the transition
      */
     @Presubmit
     @Test
     fun appLayers_EndingBounds() {
         testSpec.assertLayersEnd {
-            visibleRegion(fixedApp.or(pipApp)).coversExactly(screenBoundsEnd)
+            visibleRegion(testApp.or(pipApp)).coversExactly(screenBoundsEnd)
         }
     }
 
@@ -165,26 +165,26 @@ open class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testS
     }
 
     /**
-     * Ensure that the [pipApp] window does not obscure the [fixedApp] at the start of the
+     * Ensure that the [pipApp] window does not obscure the [testApp] at the start of the
      * transition
      */
     @Presubmit
     @Test
     fun pipIsAboveFixedAppWindow_Start() {
         testSpec.assertWmStart {
-            isAboveWindow(pipApp, fixedApp)
+            isAboveWindow(pipApp, testApp)
         }
     }
 
     /**
-     * Ensure that the [pipApp] window does not obscure the [fixedApp] at the end of the
+     * Ensure that the [pipApp] window does not obscure the [testApp] at the end of the
      * transition
      */
     @Presubmit
     @Test
     fun pipIsAboveFixedAppWindow_End() {
         testSpec.assertWmEnd {
-            isAboveWindow(pipApp, fixedApp)
+            isAboveWindow(pipApp, testApp)
         }
     }
 

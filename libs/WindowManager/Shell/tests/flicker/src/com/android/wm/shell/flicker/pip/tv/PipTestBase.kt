@@ -21,7 +21,6 @@ import android.content.pm.PackageManager
 import android.view.Surface
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
-import com.android.wm.shell.flicker.helpers.PipAppHelper
 import org.junit.Before
 import org.junit.runners.Parameterized
 
@@ -38,7 +37,7 @@ abstract class PipTestBase(
                 hasSystemFeature(PackageManager.FEATURE_LEANBACK_ONLY)
         }
     }
-    protected val testApp = PipAppHelper(instrumentation)
+    protected val testApp = PipAppHelperTv(instrumentation)
 
     @Before
     open fun televisionSetUp() {

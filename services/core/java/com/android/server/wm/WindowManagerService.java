@@ -123,7 +123,10 @@ import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_
 import static com.android.server.wm.RootWindowContainer.MATCH_ATTACHED_TASK_OR_RECENT_TASKS;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_ALL;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION;
 import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
+import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DISPLAY;
@@ -155,6 +158,7 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityThread;
@@ -315,6 +319,7 @@ import com.android.server.LocalServices;
 import com.android.server.UiThread;
 import com.android.server.Watchdog;
 import com.android.server.input.InputManagerService;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.policy.WindowManagerPolicy.ScreenOffListener;
 import com.android.server.power.ShutdownThread;
@@ -504,15 +509,9 @@ public class WindowManagerService extends IWindowManager.Stub
     };
 
     /**
-     * Current user when multi-user is enabled. Don't show windows of
-     * non-current user. Also see mCurrentProfileIds.
+     * Current user when multi-user is enabled. Don't show windows of non-current user.
      */
-    int mCurrentUserId;
-    /**
-     * Users that are profiles of the current user. These are also allowed to show windows
-     * on the current user.
-     */
-    int[] mCurrentProfileIds = new int[] {};
+    @UserIdInt int mCurrentUserId;
 
     final Context mContext;
 
@@ -534,6 +533,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     final IActivityManager mActivityManager;
     final ActivityManagerInternal mAmInternal;
+    final UserManagerInternal mUmInternal;
 
     final AppOpsManager mAppOps;
     final PackageManagerInternal mPmInternal;
@@ -1263,6 +1263,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         mActivityManager = ActivityManager.getService();
         mAmInternal = LocalServices.getService(ActivityManagerInternal.class);
+        mUmInternal = LocalServices.getService(UserManagerInternal.class);
         mAppOps = (AppOpsManager)context.getSystemService(Context.APP_OPS_SERVICE);
         AppOpsManager.OnOpChangedInternalListener opListener =
                 new AppOpsManager.OnOpChangedInternalListener() {
@@ -2604,10 +2605,22 @@ public class WindowManagerService extends IWindowManager.Stub
         if (win.isWinVisibleLw() && win.mDisplayContent.okToAnimate()) {
             String reason = null;
             if (winAnimator.applyAnimationLocked(transit, false)) {
+                // This is a WMCore-driven window animation.
                 reason = "applyAnimation";
                 focusMayChange = true;
                 win.mAnimatingExit = true;
-            } else if (win.isExitAnimationRunningSelfOrParent()) {
+            } else if (
+                    // This is already animating via a WMCore-driven window animation
+                    win.isSelfAnimating(0 /* flags */, ANIMATION_TYPE_WINDOW_ANIMATION)
+                    // Or already animating as part of a legacy app-transition
+                    || win.isAnimating(PARENTS | TRANSITION,
+                            ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_RECENTS)
+                    // Or already animating as part of a shell-transition.
+                    || (win.inTransition()
+                            // Filter out non-app windows since transitions don't animate those
+                            // (but may still "wait" on them for readiness)
+                            && (win.mActivityRecord != null || win.mIsWallpaper))) {
+                // TODO(b/247005789): set mAnimatingExit somewhere in shell-transitions setup.
                 reason = "animating";
                 win.mAnimatingExit = true;
             } else if (win.mDisplayContent.mWallpaperController.isWallpaperTarget(win)
@@ -3558,16 +3571,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 confirm);
     }
 
-    public void setCurrentProfileIds(final int[] currentProfileIds) {
-        synchronized (mGlobalLock) {
-            mCurrentProfileIds = currentProfileIds;
-        }
-    }
-
-    public void setCurrentUser(final int newUserId, final int[] currentProfileIds) {
+    public void setCurrentUser(@UserIdInt int newUserId) {
         synchronized (mGlobalLock) {
             mCurrentUserId = newUserId;
-            mCurrentProfileIds = currentProfileIds;
             mPolicy.setCurrentUserLw(newUserId);
             mKeyguardDisableHandler.setCurrentUser(newUserId);
 
@@ -3590,12 +3596,8 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     /* Called by WindowState */
-    boolean isCurrentProfile(int userId) {
-        if (userId == mCurrentUserId) return true;
-        for (int i = 0; i < mCurrentProfileIds.length; i++) {
-            if (mCurrentProfileIds[i] == userId) return true;
-        }
-        return false;
+    boolean isUserVisible(@UserIdInt int userId) {
+        return mUmInternal.isUserVisible(userId);
     }
 
     public void enableScreenAfterBoot() {
@@ -9276,47 +9278,5 @@ public class WindowManagerService extends IWindowManager.Stub
                 throw new AssertionError(
                         "Unexpected letterbox background type: " + letterboxBackgroundType);
         }
-    }
-
-    @Override
-    public void captureDisplay(int displayId, @Nullable ScreenCapture.CaptureArgs captureArgs,
-            ScreenCapture.ScreenCaptureListener listener) {
-        Slog.d(TAG, "captureDisplay");
-        if (!checkCallingPermission(READ_FRAME_BUFFER, "captureDisplay()")) {
-            throw new SecurityException("Requires READ_FRAME_BUFFER permission");
-        }
-
-        ScreenCapture.captureLayers(getCaptureArgs(displayId, captureArgs), listener);
-    }
-
-    @VisibleForTesting
-    ScreenCapture.LayerCaptureArgs getCaptureArgs(int displayId,
-            @Nullable ScreenCapture.CaptureArgs captureArgs) {
-        final SurfaceControl displaySurfaceControl;
-        synchronized (mGlobalLock) {
-            DisplayContent displayContent = mRoot.getDisplayContent(displayId);
-            if (displayContent == null) {
-                throw new IllegalArgumentException("Trying to screenshot and invalid display: "
-                        + displayId);
-            }
-
-            displaySurfaceControl = displayContent.getSurfaceControl();
-
-            if (captureArgs == null) {
-                captureArgs = new ScreenCapture.CaptureArgs.Builder<>()
-                        .build();
-            }
-
-            if (captureArgs.mSourceCrop.isEmpty()) {
-                displayContent.getBounds(mTmpRect);
-                mTmpRect.offsetTo(0, 0);
-            } else {
-                mTmpRect.set(captureArgs.mSourceCrop);
-            }
-        }
-
-        return new ScreenCapture.LayerCaptureArgs.Builder(displaySurfaceControl, captureArgs)
-                        .setSourceCrop(mTmpRect)
-                        .build();
     }
 }

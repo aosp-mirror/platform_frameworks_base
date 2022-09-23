@@ -216,6 +216,25 @@ public class UserManagerServiceTest {
         assertThat(mUserManagerService.isUserSwitcherEnabled(userId)).isTrue();
     }
 
+    @Test
+    public void assertIsUserSwitcherEnabled()  throws Exception {
+        int userId = ActivityManager.getCurrentUser();
+        setMaxSupportedUsers(8);
+        assertThat(mUserManagerService.isUserSwitcherEnabled(true, userId)).isTrue();
+
+        setUserSwitch(false);
+        assertThat(mUserManagerService.isUserSwitcherEnabled(true, userId)).isFalse();
+
+        setUserSwitch(true);
+        assertThat(mUserManagerService.isUserSwitcherEnabled(false, userId)).isTrue();
+
+        mUserManagerService.setUserRestriction(UserManager.DISALLOW_ADD_USER, true, userId);
+        assertThat(mUserManagerService.isUserSwitcherEnabled(false, userId)).isFalse();
+
+        mUserManagerService.setUserRestriction(UserManager.DISALLOW_ADD_USER, false, userId);
+        setMaxSupportedUsers(1);
+        assertThat(mUserManagerService.isUserSwitcherEnabled(true, userId)).isFalse();
+    }
 
     @Test
     public void assertIsUserSwitcherEnabledOnShowMultiuserUI()  throws Exception {

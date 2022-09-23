@@ -143,15 +143,6 @@ public class PackageParser2 implements AutoCloseable {
     @AnyThread
     public ParsedPackage parsePackage(File packageFile, int flags, boolean useCaches)
             throws PackageManagerException {
-        return parsePackage(packageFile, flags, useCaches, /* frameworkSplits= */ null);
-    }
-
-    /**
-     * TODO(b/135203078): Document new package parsing
-     */
-    @AnyThread
-    public ParsedPackage parsePackage(File packageFile, int flags, boolean useCaches,
-            List<File> frameworkSplits) throws PackageManagerException {
         var files = packageFile.listFiles();
         // Apk directory is directly nested under the current directory
         if (ArrayUtils.size(files) == 1 && files[0].isDirectory()) {
@@ -167,8 +158,7 @@ public class PackageParser2 implements AutoCloseable {
 
         long parseTime = LOG_PARSE_TIMINGS ? SystemClock.uptimeMillis() : 0;
         ParseInput input = mSharedResult.get().reset();
-        ParseResult<ParsingPackage> result = parsingUtils.parsePackage(input, packageFile, flags,
-                frameworkSplits);
+        ParseResult<ParsingPackage> result = parsingUtils.parsePackage(input, packageFile, flags);
         if (result.isError()) {
             throw new PackageManagerException(result.getErrorCode(), result.getErrorMessage(),
                     result.getException());

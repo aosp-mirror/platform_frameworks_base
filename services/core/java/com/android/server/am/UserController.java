@@ -1641,7 +1641,7 @@ class UserController implements Handler.Callback {
                 }
                 mInjector.updateUserConfiguration();
                 updateCurrentProfileIds();
-                mInjector.getWindowManager().setCurrentUser(userId, getCurrentProfileIds());
+                mInjector.getWindowManager().setCurrentUser(userId);
                 mInjector.reportCurWakefulnessUsageEvent();
                 // Once the internal notion of the active user has switched, we lock the device
                 // with the option to show the user switcher on the keyguard.
@@ -1655,7 +1655,6 @@ class UserController implements Handler.Callback {
             } else {
                 final Integer currentUserIdInt = mCurrentUserId;
                 updateCurrentProfileIds();
-                mInjector.getWindowManager().setCurrentProfileIds(getCurrentProfileIds());
                 synchronized (mLock) {
                     mUserLru.remove(currentUserIdInt);
                     mUserLru.add(currentUserIdInt);

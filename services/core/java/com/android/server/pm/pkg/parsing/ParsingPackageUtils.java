@@ -238,7 +238,6 @@ public class ParsingPackageUtils {
      * of required system property within the overlay tag.
      */
     public static final int PARSE_IGNORE_OVERLAY_REQUIRED_SYSTEM_PROPERTY = 1 << 7;
-    public static final int PARSE_FRAMEWORK_RES_SPLITS = 1 << 8;
     public static final int PARSE_APK_IN_APEX = 1 << 9;
 
     public static final int PARSE_CHATTY = 1 << 31;
@@ -257,7 +256,6 @@ public class ParsingPackageUtils {
             PARSE_IS_SYSTEM_DIR,
             PARSE_MUST_BE_APK,
             PARSE_IGNORE_OVERLAY_REQUIRED_SYSTEM_PROPERTY,
-            PARSE_FRAMEWORK_RES_SPLITS
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ParseFlags {}
@@ -307,7 +305,7 @@ public class ParsingPackageUtils {
                         isCoreApp);
             }
         });
-        var parseResult = parser.parsePackage(input, file, parseFlags, /* frameworkSplits= */ null);
+        var parseResult = parser.parsePackage(input, file, parseFlags);
         if (parseResult.isError()) {
             return input.error(parseResult);
         }
@@ -356,14 +354,9 @@ public class ParsingPackageUtils {
      * not check whether {@code packageFile} has changed since the last parse, it's up to callers to
      * do so.
      */
-    public ParseResult<ParsingPackage> parsePackage(ParseInput input, File packageFile, int flags,
-            List<File> frameworkSplits) {
-        if (((flags & PARSE_FRAMEWORK_RES_SPLITS) != 0)
-                && frameworkSplits.size() > 0
-                && packageFile.getAbsolutePath().endsWith("/framework-res.apk")) {
-            return parseClusterPackage(input, packageFile, frameworkSplits, flags);
-        } else if (packageFile.isDirectory()) {
-            return parseClusterPackage(input, packageFile, /* frameworkSplits= */null, flags);
+    public ParseResult<ParsingPackage> parsePackage(ParseInput input, File packageFile, int flags) {
+        if (packageFile.isDirectory()) {
+            return parseClusterPackage(input, packageFile,  flags);
         } else {
             return parseMonolithicPackage(input, packageFile, flags);
         }
@@ -375,28 +368,17 @@ public class ParsingPackageUtils {
      * identical package name and version codes, a single base APK, and unique
      * split names.
      * <p>
-     * Can also be passed the framework-res.apk file and a list of split apks coming from apexes
-     * (via {@code frameworkSplits}) in which case they will be parsed similar to cluster packages
-     * even if they are in different folders. Note that this code path may have other behaviour
-     * differences.
-     * <p>
      * Note that this <em>does not</em> perform signature verification; that must be done separately
      * in {@link #getSigningDetails(ParseInput, ParsedPackage, boolean)}.
      */
     private ParseResult<ParsingPackage> parseClusterPackage(ParseInput input, File packageDir,
-            List<File> frameworkSplits, int flags) {
-        // parseClusterPackageLite should receive no flags (0) for regular splits but we want to
-        // pass the flags for framework splits
+            int flags) {
         int liteParseFlags = 0;
-        if ((flags & PARSE_FRAMEWORK_RES_SPLITS) != 0) {
-            liteParseFlags = flags;
-        }
         if ((flags & PARSE_APK_IN_APEX) != 0) {
             liteParseFlags |= PARSE_APK_IN_APEX;
         }
         final ParseResult<PackageLite> liteResult =
-                ApkLiteParseUtils.parseClusterPackageLite(input, packageDir, frameworkSplits,
-                        liteParseFlags);
+                ApkLiteParseUtils.parseClusterPackageLite(input, packageDir, liteParseFlags);
         if (liteResult.isError()) {
             return input.error(liteResult);
         }
@@ -647,7 +629,7 @@ public class ParsingPackageUtils {
         final TypedArray manifestArray = res.obtainAttributes(parser, R.styleable.AndroidManifest);
         try {
             final boolean isCoreApp = parser.getAttributeBooleanValue(null /*namespace*/,
-                    "coreApp",false);
+                    "coreApp", false);
             final ParsingPackage pkg = mCallback.startParsingPackage(
                     pkgName, apkPath, codePath, manifestArray, isCoreApp);
             final ParseResult<ParsingPackage> result =

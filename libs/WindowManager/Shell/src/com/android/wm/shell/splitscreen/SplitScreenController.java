@@ -133,6 +133,20 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     @Retention(RetentionPolicy.SOURCE)
     @interface ExitReason{}
 
+    public static final int ENTER_REASON_UNKNOWN = 0;
+    public static final int ENTER_REASON_MULTI_INSTANCE = 1;
+    public static final int ENTER_REASON_DRAG = 2;
+    public static final int ENTER_REASON_LAUNCHER = 3;
+    /** Acts as a mapping to the actual EnterReasons as defined in the logging proto */
+    @IntDef(value = {
+            ENTER_REASON_MULTI_INSTANCE,
+            ENTER_REASON_DRAG,
+            ENTER_REASON_LAUNCHER,
+            ENTER_REASON_UNKNOWN
+    })
+    public @interface SplitEnterReason {
+    }
+
     private final ShellCommandHandler mShellCommandHandler;
     private final ShellController mShellController;
     private final ShellTaskOrganizer mTaskOrganizer;
@@ -394,7 +408,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
      */
     public void startShortcut(String packageName, String shortcutId, @SplitPosition int position,
             @Nullable Bundle options, UserHandle user, @NonNull InstanceId instanceId) {
-        mStageCoordinator.getLogger().enterRequested(instanceId);
+        mStageCoordinator.getLogger().enterRequested(instanceId, ENTER_REASON_LAUNCHER);
         startShortcut(packageName, shortcutId, position, options, user);
     }
 
@@ -442,7 +456,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
      */
     public void startIntent(PendingIntent intent, @Nullable Intent fillInIntent,
             @SplitPosition int position, @Nullable Bundle options, @NonNull InstanceId instanceId) {
-        mStageCoordinator.getLogger().enterRequested(instanceId);
+        mStageCoordinator.getLogger().enterRequested(instanceId, ENTER_REASON_LAUNCHER);
         startIntent(intent, fillInIntent, position, options);
     }
 

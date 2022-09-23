@@ -44,29 +44,23 @@ class SettingsEntryRepository(sppRepository: SettingsPageProviderRepository) {
         val entryQueue = LinkedList<SettingsEntry>()
         for (page in sppRepository.getAllRootPages()) {
             val rootEntry = SettingsEntryBuilder.createRoot(owner = page).build()
-            val rootEntryId = rootEntry.id()
-            if (!entryMap.containsKey(rootEntryId)) {
+            if (!entryMap.containsKey(rootEntry.id)) {
                 entryQueue.push(rootEntry)
-                entryMap.put(rootEntryId, rootEntry)
+                entryMap.put(rootEntry.id, rootEntry)
             }
         }
 
         while (entryQueue.isNotEmpty() && entryMap.size < MAX_ENTRY_SIZE) {
             val entry = entryQueue.pop()
             val page = entry.toPage
-            val pageId = page?.id()
-            if (pageId == null || pageWithEntryMap.containsKey(pageId)) continue
+            if (page == null || pageWithEntryMap.containsKey(page.id)) continue
             val spp = sppRepository.getProviderOrNull(page.name) ?: continue
-            val newEntries = spp.buildEntry(page.arguments).map {
-                // Set from-page if it is missing.
-                if (it.fromPage == null) it.copy(fromPage = page) else it
-            }
-            pageWithEntryMap[pageId] = SettingsPageWithEntry(page, newEntries)
+            val newEntries = spp.buildEntry(page.arguments)
+            pageWithEntryMap[page.id] = SettingsPageWithEntry(page, newEntries)
             for (newEntry in newEntries) {
-                val newEntryId = newEntry.id()
-                if (!entryMap.containsKey(newEntryId)) {
+                if (!entryMap.containsKey(newEntry.id)) {
                     entryQueue.push(newEntry)
-                    entryMap.put(newEntryId, newEntry)
+                    entryMap.put(newEntry.id, newEntry)
                 }
             }
         }

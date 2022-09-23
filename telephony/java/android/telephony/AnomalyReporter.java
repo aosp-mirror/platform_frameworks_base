@@ -105,14 +105,20 @@ public final class AnomalyReporter {
      * @param carrierId the carrier of the id associated with this event.
      */
     public static void reportAnomaly(@NonNull UUID eventId, String description, int carrierId) {
-        // Don't report if the server-side flag isn't loaded, as it implies other anomaly report
-        // related config hasn't loaded.
-        boolean isAnomalyReportEnabledFromServer = DeviceConfig.getBoolean(
-                DeviceConfig.NAMESPACE_TELEPHONY, KEY_IS_TELEPHONY_ANOMALY_REPORT_ENABLED, false);
-        if (!isAnomalyReportEnabledFromServer) return;
-
         if (sContext == null) {
             Rlog.w(TAG, "AnomalyReporter not yet initialized, dropping event=" + eventId);
+            return;
+        }
+
+        // Don't report if the server-side flag isn't loaded, as it implies other anomaly report
+        // related config hasn't loaded.
+        try {
+            boolean isAnomalyReportEnabledFromServer = DeviceConfig.getBoolean(
+                    DeviceConfig.NAMESPACE_TELEPHONY, KEY_IS_TELEPHONY_ANOMALY_REPORT_ENABLED,
+                    false);
+            if (!isAnomalyReportEnabledFromServer) return;
+        } catch (Exception e) {
+            Rlog.w(TAG, "Unable to read device config, dropping event=" + eventId);
             return;
         }
 

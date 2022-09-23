@@ -33,12 +33,12 @@ import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelpe
 import org.junit.Assume.assumeNotNull
 
 class ActivityEmbeddingAppHelper @JvmOverloads constructor(
-        instr: Instrumentation,
-        launcherName: String = ActivityOptions.ACTIVITY_EMBEDDING_LAUNCHER_NAME,
-        component: ComponentNameMatcher = MAIN_ACTIVITY_COMPONENT,
-        launcherStrategy: ILauncherStrategy = LauncherStrategyFactory
-                .getInstance(instr)
-                .launcherStrategy
+    instr: Instrumentation,
+    launcherName: String = ActivityOptions.ActivityEmbedding.MainActivity.LABEL,
+    component: ComponentNameMatcher = MAIN_ACTIVITY_COMPONENT,
+    launcherStrategy: ILauncherStrategy = LauncherStrategyFactory
+        .getInstance(instr)
+        .launcherStrategy
 ) : StandardAppHelper(instr, launcherName, component, launcherStrategy) {
 
     /**
@@ -47,8 +47,8 @@ class ActivityEmbeddingAppHelper @JvmOverloads constructor(
      */
     fun launchPlaceholderSplit(wmHelper: WindowManagerStateHelper) {
         val launchButton = uiDevice.wait(
-                Until.findObject(By.res(getPackage(), "launch_placeholder_split_button")),
-                FIND_TIMEOUT)
+            Until.findObject(By.res(getPackage(), "launch_placeholder_split_button")),
+            FIND_TIMEOUT)
         require(launchButton != null) {
             "Can't find launch placeholder split button on screen."
         }
@@ -62,14 +62,15 @@ class ActivityEmbeddingAppHelper @JvmOverloads constructor(
     companion object {
         private const val TAG = "ActivityEmbeddingAppHelper"
 
-        val MAIN_ACTIVITY_COMPONENT = ActivityOptions
-                .ACTIVITY_EMBEDDING_MAIN_ACTIVITY_COMPONENT_NAME.toFlickerComponent()
+        val MAIN_ACTIVITY_COMPONENT =
+            ActivityOptions.ActivityEmbedding.MainActivity.COMPONENT.toFlickerComponent()
 
-        val PLACEHOLDER_PRIMARY_COMPONENT = ActivityOptions
-                .ACTIVITY_EMBEDDING_PLACEHOLDER_PRIMARY_ACTIVITY_COMPONENT_NAME.toFlickerComponent()
+        val PLACEHOLDER_PRIMARY_COMPONENT =
+            ActivityOptions.ActivityEmbedding.PlaceholderPrimaryActivity.COMPONENT
+                .toFlickerComponent()
 
-        val PLACEHOLDER_SECONDARY_COMPONENT = ActivityOptions
-                .ACTIVITY_EMBEDDING_PLACEHOLDER_SECONDARY_ACTIVITY_COMPONENT_NAME
+        val PLACEHOLDER_SECONDARY_COMPONENT =
+            ActivityOptions.ActivityEmbedding.PlaceholderSecondaryActivity.COMPONENT
                 .toFlickerComponent()
 
         @JvmStatic

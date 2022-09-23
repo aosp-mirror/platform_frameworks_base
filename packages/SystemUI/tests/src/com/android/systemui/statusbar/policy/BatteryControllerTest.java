@@ -42,6 +42,7 @@ import com.android.settingslib.fuelgauge.BatterySaverUtils;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.demomode.DemoModeController;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.power.EnhancedEstimates;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
 
@@ -80,6 +81,7 @@ public class BatteryControllerTest extends SysuiTestCase {
                 mPowerManager,
                 mBroadcastDispatcher,
                 mDemoModeController,
+                mock(DumpManager.class),
                 new Handler(),
                 new Handler());
         // Can throw if updateEstimate is called on the main thread

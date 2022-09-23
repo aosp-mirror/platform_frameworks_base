@@ -50,6 +50,7 @@ import android.database.ContentObserver;
 import android.hardware.display.ColorDisplayManager;
 import android.hardware.display.ColorDisplayManager.AutoMode;
 import android.hardware.display.ColorDisplayManager.ColorMode;
+import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.IColorDisplayManager;
 import android.hardware.display.Time;
 import android.net.Uri;
@@ -154,7 +155,8 @@ public final class ColorDisplayService extends SystemService {
 
     @VisibleForTesting
     final DisplayWhiteBalanceTintController mDisplayWhiteBalanceTintController =
-            new DisplayWhiteBalanceTintController();
+            new DisplayWhiteBalanceTintController(
+                    LocalServices.getService(DisplayManagerInternal.class));
     private final NightDisplayTintController mNightDisplayTintController =
             new NightDisplayTintController();
     private final TintController mGlobalSaturationTintController =
