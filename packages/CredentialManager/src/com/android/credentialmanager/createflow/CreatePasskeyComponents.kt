@@ -25,22 +25,15 @@ import androidx.compose.material.Text
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
-import androidx.navigation.NavController
-import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavType
-import androidx.navigation.compose.composable
-import androidx.navigation.navArgument
-import androidx.navigation.navigation
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.credentialmanager.R
 import com.android.credentialmanager.ui.theme.Grey100
 import com.android.credentialmanager.ui.theme.Shapes
@@ -50,53 +43,10 @@ import com.android.credentialmanager.ui.theme.lightColorAccentSecondary
 import com.android.credentialmanager.ui.theme.lightSurface1
 
 @ExperimentalMaterialApi
-fun NavGraphBuilder.createPasskeyGraph(
-  navController: NavController,
-  viewModel: CreatePasskeyViewModel,
-  onCancel: () -> Unit,
-  startDestination: String = "intro", // TODO: get this from view model
-) {
-  navigation(startDestination = startDestination, route = "createPasskey") {
-    composable("intro") {
-      CreatePasskeyIntroDialog(
-        onCancel = onCancel,
-        onConfirm = {viewModel.onConfirm(navController)}
-      )
-    }
-    composable("providerSelection") {
-        ProviderSelectionDialog(
-          providerList = viewModel.uiState.collectAsState().value.providerList,
-          onProviderSelected = {viewModel.onProviderSelected(it, navController)},
-          onCancel = onCancel
-        )
-    }
-    composable(
-      "createCredentialSelection/{providerName}",
-      arguments = listOf(navArgument("providerName") {type = NavType.StringType})
-    ) {
-      val arguments = it.arguments
-      if (arguments == null) {
-        throw java.lang.IllegalStateException("createCredentialSelection without a provider name")
-      }
-      CreationSelectionDialog(
-        providerInfo = viewModel.getProviderInfoByName(arguments.getString("providerName")!!),
-        onOptionSelected = {viewModel.onCreateOptionSelected(it)},
-        onCancel = onCancel,
-        multiProvider = viewModel.uiState.collectAsState().value.providerList.providers.size > 1,
-        onMoreOptionSelected = {viewModel.onMoreOptionSelected(navController)},
-      )
-    }
-  }
-}
-
-/**
- * BEGIN INTRO CONTENT
- */
-@ExperimentalMaterialApi
 @Composable
-fun CreatePasskeyIntroDialog(
-  onCancel: () -> Unit = {},
-  onConfirm: () -> Unit = {},
+fun CreatePasskeyScreen(
+  viewModel: CreatePasskeyViewModel = viewModel(),
+  cancelActivity: () -> Unit,
 ) {
   val state = rememberModalBottomSheetState(
     initialValue = ModalBottomSheetValue.Expanded,
@@ -105,9 +55,25 @@ fun CreatePasskeyIntroDialog(
   ModalBottomSheetLayout(
     sheetState = state,
     sheetContent = {
-      ConfirmationCard(
-        onCancel = onCancel, onConfirm = onConfirm
-      )
+      val uiState = viewModel.uiState
+      when (uiState.currentScreenState) {
+        CreateScreenState.PASSKEY_INTRO -> ConfirmationCard(
+          onConfirm = {viewModel.onConfirmIntro()},
+          onCancel = cancelActivity,
+        )
+        CreateScreenState.PROVIDER_SELECTION -> ProviderSelectionCard(
+          providerList = uiState.providers,
+          onCancel = cancelActivity,
+          onProviderSelected = {viewModel.onProviderSelected(it)}
+        )
+        CreateScreenState.CREATION_OPTION_SELECTION -> CreationSelectionCard(
+          providerInfo = uiState.selectedProvider!!,
+          onOptionSelected = {viewModel.onCreateOptionSelected(it)},
+          onCancel = cancelActivity,
+          multiProvider = uiState.providers.size > 1,
+          onMoreOptionSelected = {viewModel.onMoreOptionSelected()}
+        )
+      }
     },
     scrimColor = Color.Transparent,
     sheetShape = Shapes.medium,
@@ -115,7 +81,7 @@ fun CreatePasskeyIntroDialog(
   LaunchedEffect(state.currentValue) {
     when (state.currentValue) {
       ModalBottomSheetValue.Hidden -> {
-        onCancel()
+        cancelActivity()
       }
     }
   }
@@ -178,49 +144,10 @@ fun ConfirmationCard(
   }
 }
 
-/**
- * END INTRO CONTENT
- */
-
-/**
- * BEGIN PROVIDER SELECTION CONTENT
- */
-@ExperimentalMaterialApi
-@Composable
-fun ProviderSelectionDialog(
-  providerList: ProviderList,
-  onProviderSelected: (String) -> Unit,
-  onCancel: () -> Unit,
-) {
-  val state = rememberModalBottomSheetState(
-    initialValue = ModalBottomSheetValue.Expanded,
-    skipHalfExpanded = true
-  )
-  ModalBottomSheetLayout(
-    sheetState = state,
-    sheetContent = {
-      ProviderSelectionCard(
-        providerList = providerList,
-        onCancel = onCancel,
-        onProviderSelected = onProviderSelected
-      )
-    },
-    scrimColor = Color.Transparent,
-    sheetShape = Shapes.medium,
-  ) {}
-  LaunchedEffect(state.currentValue) {
-    when (state.currentValue) {
-      ModalBottomSheetValue.Hidden -> {
-        onCancel()
-      }
-    }
-  }
-}
-
 @ExperimentalMaterialApi
 @Composable
 fun ProviderSelectionCard(
-  providerList: ProviderList,
+  providerList: List<ProviderInfo>,
   onProviderSelected: (String) -> Unit,
   onCancel: () -> Unit
 ) {
@@ -251,7 +178,7 @@ fun ProviderSelectionCard(
         LazyColumn(
           verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
-          providerList.providers.forEach {
+          providerList.forEach {
             item {
               ProviderRow(providerInfo = it, onProviderSelected = onProviderSelected)
             }
@@ -304,14 +231,6 @@ fun ProviderRow(providerInfo: ProviderInfo, onProviderSelected: (String) -> Unit
   }
 }
 
-/**
- * END PROVIDER SELECTION CONTENT
- */
-
-/**
- * BEGIN COMMON COMPONENTS
- */
-
 @Composable
 fun CancelButton(text: String, onclick: () -> Unit) {
   val colors = ButtonDefaults.buttonColors(
@@ -349,45 +268,6 @@ fun NavigationButton(
     border = border
   ) {
     Text(text = text, style = Typography.button)
-  }
-}
-
-/**
- * BEGIN CREATE OPTION SELECTION CONTENT
- */
-@ExperimentalMaterialApi
-@Composable
-fun CreationSelectionDialog(
-  providerInfo: ProviderInfo,
-  onOptionSelected: (String) -> Unit,
-  onCancel: () -> Unit,
-  multiProvider: Boolean,
-  onMoreOptionSelected: () -> Unit,
-) {
-  val state = rememberModalBottomSheetState(
-    initialValue = ModalBottomSheetValue.Expanded,
-    skipHalfExpanded = true
-  )
-  ModalBottomSheetLayout(
-    sheetState = state,
-    sheetContent = {
-      CreationSelectionCard(
-        providerInfo = providerInfo,
-        onCancel = onCancel,
-        onOptionSelected = onOptionSelected,
-        multiProvider = multiProvider,
-        onMoreOptionSelected = onMoreOptionSelected,
-      )
-    },
-    scrimColor = Color.Transparent,
-    sheetShape = Shapes.medium,
-  ) {}
-  LaunchedEffect(state.currentValue) {
-    when (state.currentValue) {
-      ModalBottomSheetValue.Hidden -> {
-        onCancel()
-      }
-    }
   }
 }
 
@@ -515,27 +395,4 @@ fun MoreOptionRow(onSelect: () -> Unit) {
         style = Typography.h6,
       )
   }
-}
-/**
- * END CREATE OPTION SELECTION CONTENT
- */
-
-/**
- * END COMMON COMPONENTS
- */
-
-@ExperimentalMaterialApi
-@Preview(showBackground = true)
-@Composable
-fun CreatePasskeyEntryScreenPreview() {
-  // val providers = ProviderList(
-  //   listOf(
-  //     ProviderInfo(null),
-  //     ProviderInfo(null, "Dashlane"),
-  //     ProviderInfo(null, "LastPass")
-  //   )
-  // )
-  // TatiAccountSelectorTheme {
-  //   ConfirmationCard({}, {})
-  // }
 }

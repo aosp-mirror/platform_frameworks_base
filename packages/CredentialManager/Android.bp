@@ -26,7 +26,6 @@ android_app {
         "androidx.lifecycle_lifecycle-livedata",
         "androidx.lifecycle_lifecycle-runtime-ktx",
         "androidx.lifecycle_lifecycle-viewmodel-compose",
-        "androidx.navigation_navigation-compose",
         "androidx.recyclerview_recyclerview",
     ],
 
