@@ -995,7 +995,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
                 return;
             }
 
-            if (newState == PlaybackState.STATE_STOPPED || newState == PlaybackState.STATE_PAUSED) {
+            if (newState == PlaybackState.STATE_STOPPED) {
                 mCallback.onMediaStoppedOrPaused();
             }
             mCurrentState = newState;
