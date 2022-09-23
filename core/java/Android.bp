@@ -15,6 +15,14 @@ filegroup {
         "**/*.java",
         "**/*.aidl",
     ],
+    exclude_srcs: [
+        // Remove election toolbar code from build time
+        "android/service/selectiontoolbar/*.aidl",
+        "android/service/selectiontoolbar/*.java",
+        "android/view/selectiontoolbar/*.aidl",
+        "android/view/selectiontoolbar/*.java",
+        "com/android/internal/widget/floatingtoolbar/RemoteFloatingToolbarPopup.java",
+    ],
     visibility: ["//frameworks/base"],
 }
 
