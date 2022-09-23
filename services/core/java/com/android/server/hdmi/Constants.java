@@ -599,6 +599,26 @@ final class Constants {
     })
     @interface RcProfileSource {}
 
+    static final int HDMI_EARC_STATUS_IDLE = 0;             // IDLE1
+    static final int HDMI_EARC_STATUS_EARC_PENDING = 1;     // DISC1 and DISC2
+    static final int HDMI_EARC_STATUS_ARC_PENDING = 2;      // IDLE2 for ARC
+    static final int HDMI_EARC_STATUS_EARC_CONNECTED = 3;   // eARC connected
+    @IntDef({
+            HDMI_EARC_STATUS_IDLE,
+            HDMI_EARC_STATUS_EARC_PENDING,
+            HDMI_EARC_STATUS_ARC_PENDING,
+            HDMI_EARC_STATUS_EARC_CONNECTED
+            })
+    @interface EarcStatus {}
+
+    static final int HDMI_HPD_TYPE_PHYSICAL = 0;   // Default. Physical hotplug signal.
+    static final int HDMI_HPD_TYPE_STATUS_BIT = 1; // HDMI_HPD status bit.
+    @IntDef({
+            HDMI_HPD_TYPE_PHYSICAL,
+            HDMI_HPD_TYPE_STATUS_BIT
+    })
+    @interface HpdSignalType {}
+
     private Constants() {
         /* cannot be instantiated */
     }

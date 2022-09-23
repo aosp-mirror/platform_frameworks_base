@@ -1089,7 +1089,8 @@ public class HdmiControlServiceTest {
     public void disableEarc_clearEarcLocalDevice() {
         mHdmiControlServiceSpy.setEarcSupported(true);
         mHdmiControlServiceSpy.clearEarcLocalDevice();
-        mHdmiControlServiceSpy.addEarcLocalDevice(new HdmiEarcLocalDeviceTx());
+        mHdmiControlServiceSpy.addEarcLocalDevice(
+                new HdmiEarcLocalDeviceTx(mHdmiControlServiceSpy));
         assertThat(mHdmiControlServiceSpy.getEarcLocalDevice()).isNotNull();
 
         mHdmiControlServiceSpy.setEarcEnabled(HdmiControlManager.EARC_FEATURE_DISABLED);
@@ -1101,7 +1102,8 @@ public class HdmiControlServiceTest {
     public void disableCec_doNotClearEarcLocalDevice() {
         mHdmiControlServiceSpy.setEarcSupported(true);
         mHdmiControlServiceSpy.clearEarcLocalDevice();
-        mHdmiControlServiceSpy.addEarcLocalDevice(new HdmiEarcLocalDeviceTx());
+        mHdmiControlServiceSpy.addEarcLocalDevice(
+                new HdmiEarcLocalDeviceTx(mHdmiControlServiceSpy));
         assertThat(mHdmiControlServiceSpy.getEarcLocalDevice()).isNotNull();
 
         mHdmiControlServiceSpy.setCecEnabled(HdmiControlManager.HDMI_CEC_CONTROL_DISABLED);

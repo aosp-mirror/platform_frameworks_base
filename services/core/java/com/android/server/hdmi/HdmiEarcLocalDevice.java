@@ -16,14 +16,39 @@
 
 package com.android.server.hdmi;
 
+import android.hardware.hdmi.HdmiDeviceInfo;
 import android.util.IndentingPrintWriter;
+
+import com.android.internal.annotations.GuardedBy;
 
 /**
  * Class that models a local eARC device hosted in this system.
  * The class contains methods that are common between eARC TX and eARC RX devices.
  */
-public class HdmiEarcLocalDevice extends HdmiLocalDevice {
+abstract class HdmiEarcLocalDevice extends HdmiLocalDevice {
     private static final String TAG = "HdmiEarcLocalDevice";
+
+    // The current status of the eARC connection, as reported by the HAL
+    @GuardedBy("mLock")
+    @Constants.EarcStatus
+    protected int mEarcStatus;
+
+    protected HdmiEarcLocalDevice(HdmiControlService service, int deviceType) {
+        super(service, deviceType);
+    }
+
+    // Factory method that returns HdmiCecLocalDevice of corresponding type.
+    static HdmiEarcLocalDevice create(HdmiControlService service, int deviceType) {
+        switch (deviceType) {
+            case HdmiDeviceInfo.DEVICE_TV:
+                return new HdmiEarcLocalDeviceTx(service);
+            default:
+                return null;
+        }
+    }
+
+    protected abstract void handleEarcStateChange(@Constants.EarcStatus int status);
+
 
     protected void disableDevice() {
     }

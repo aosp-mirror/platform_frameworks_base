@@ -78,5 +78,25 @@ final class HdmiEarcController {
         // TODO: handle error return values here, with logging.
     }
 
+    /**
+     * Getter for the current eARC state.
+     * @param portId the ID of the port on which to get the connection state
+     * @return the current eARC state
+     */
+    @HdmiAnnotations.ServiceThreadOnly
+    @Constants.EarcStatus
+    int getState(int portId) {
+        // Stub.
+        // TODO: bind to native.
+        return Constants.HDMI_EARC_STATUS_IDLE;
+    }
+
+    final class EarcCallback {
+        public void onStateChange(@Constants.EarcStatus int status, int portId) {
+            runOnServiceThread(
+                    () -> mService.handleEarcStateChange(status, portId));
+        }
+    }
+
     // TODO: bind to native.
 }

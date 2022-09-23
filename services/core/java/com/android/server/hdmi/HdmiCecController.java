@@ -417,6 +417,31 @@ final class HdmiCecController {
     }
 
     /**
+     * Configures the type of HDP signal that the driver and HAL use for actions other than eARC,
+     * such as signaling EDID updates.
+     */
+    @ServiceThreadOnly
+    void setHpdSignalType(@Constants.HpdSignalType int signal, int portId) {
+        assertRunOnServiceThread();
+        // Stub.
+        // TODO: bind to native.
+        // TODO: handle error return values here, with logging.
+    }
+
+    /**
+     * Gets the type of the HDP signal that the driver and HAL use for actions other than eARC,
+     * such as signaling EDID updates.
+     */
+    @ServiceThreadOnly
+    @Constants.HpdSignalType
+    int getHpdSignalType(int portId) {
+        assertRunOnServiceThread();
+        // Stub.
+        // TODO: bind to native.
+        return Constants.HDMI_HPD_TYPE_PHYSICAL;
+    }
+
+    /**
      * Informs CEC HAL about the current system language.
      *
      * @param language Three-letter code defined in ISO/FDIS 639-2. Must be lowercase letters.

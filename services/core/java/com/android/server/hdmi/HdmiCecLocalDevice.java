@@ -67,8 +67,6 @@ abstract class HdmiCecLocalDevice extends HdmiLocalDevice {
     // When it expires, we can assume <User Control Release> is received.
     private static final int FOLLOWER_SAFETY_TIMEOUT = 550;
 
-    protected final HdmiControlService mService;
-    protected final int mDeviceType;
     protected int mPreferredAddress;
     @GuardedBy("mLock")
     private HdmiDeviceInfo mDeviceInfo;
@@ -154,8 +152,6 @@ abstract class HdmiCecLocalDevice extends HdmiLocalDevice {
     private int mActiveRoutingPath;
 
     protected final HdmiCecMessageCache mCecMessageCache = new HdmiCecMessageCache();
-    @VisibleForTesting
-    protected final Object mLock;
 
     // A collection of FeatureAction.
     // Note that access to this collection should happen in service thread.
@@ -188,9 +184,7 @@ abstract class HdmiCecLocalDevice extends HdmiLocalDevice {
     protected PendingActionClearedCallback mPendingActionClearedCallback;
 
     protected HdmiCecLocalDevice(HdmiControlService service, int deviceType) {
-        mService = service;
-        mDeviceType = deviceType;
-        mLock = service.getServiceLock();
+        super(service, deviceType);
     }
 
     // Factory method that returns HdmiCecLocalDevice of corresponding type.

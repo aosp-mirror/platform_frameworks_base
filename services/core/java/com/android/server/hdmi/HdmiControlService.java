@@ -398,6 +398,8 @@ public class HdmiControlService extends SystemService {
     @GuardedBy("mLock")
     private boolean mEarcEnabled;
 
+    private int mEarcPortId = -1;
+
     // Set to true while the service is in normal mode. While set to false, no input change is
     // allowed. Used for situations where input change can confuse users such as channel auto-scan,
     // system upgrade, etc., a.k.a. "prohibit mode".
@@ -702,15 +704,21 @@ public class HdmiControlService extends SystemService {
         synchronized (mLock) {
             mEarcSupported = false;
             for (HdmiPortInfo port : ports) {
-                if (mEarcSupported && port.isEarcSupported()) {
-                    // The HDMI specification only allows 1 active eARC connection. Android does not
-                    // support devices with multiple eARC-enabled ports.
+                boolean earcSupportedOnPort = port.isEarcSupported();
+                if (earcSupportedOnPort && mEarcSupported) {
+                    // This means that more than 1 port supports eARC.
+                    // The HDMI specification only allows 1 active eARC connection.
+                    // Android does not support devices with multiple eARC-enabled ports.
+                    // Consider eARC not supported in this case.
                     Slog.e(TAG, "HDMI eARC supported on more than 1 port.");
+                    mEarcSupported = false;
+                    mEarcPortId = -1;
                     break;
+                } else if (earcSupportedOnPort) {
+                    mEarcPortId = port.getId();
+                    mEarcSupported = earcSupportedOnPort;
                 }
-                mEarcSupported |= port.isEarcSupported();
             }
-
             mEarcSupported &= (mEarcController != null);
         }
         if (isEarcSupported()) {
@@ -4416,8 +4424,8 @@ public class HdmiControlService extends SystemService {
     protected void initializeEarcLocalDevice(final int initiatedBy) {
         // TODO remove initiatedBy argument if it stays unused
         assertRunOnServiceThread();
-        if (isTvDevice() && mEarcLocalDevice == null) {
-            mEarcLocalDevice = new HdmiEarcLocalDeviceTx();
+        if (mEarcLocalDevice == null) {
+            mEarcLocalDevice = HdmiEarcLocalDevice.create(this, HdmiDeviceInfo.DEVICE_TV);
         }
         // TODO create HdmiEarcLocalDeviceRx if we're an audio system device.
     }
@@ -4483,10 +4491,11 @@ public class HdmiControlService extends SystemService {
 
     @ServiceThreadOnly
     @VisibleForTesting
-    protected HdmiEarcLocalDevice getEarcLocalDevice() {
+    HdmiEarcLocalDevice getEarcLocalDevice() {
         assertRunOnServiceThread();
         return mEarcLocalDevice;
     }
+
     private void disableEarcLocalDevice() {
         if (mEarcLocalDevice == null) {
             return;
@@ -4499,5 +4508,22 @@ public class HdmiControlService extends SystemService {
     protected void setEarcEnabledInHal(boolean enabled) {
         assertRunOnServiceThread();
         mEarcController.setEarcEnabled(enabled);
+        mCecController.setHpdSignalType(
+                enabled ? Constants.HDMI_HPD_TYPE_STATUS_BIT : Constants.HDMI_HPD_TYPE_PHYSICAL,
+                mEarcPortId);
+    }
+
+    @ServiceThreadOnly
+    void handleEarcStateChange(int status, int portId) {
+        assertRunOnServiceThread();
+        if (!getPortInfo(portId).isEarcSupported()) {
+            Slog.w(TAG, "Tried to update eARC status on a port that doesn't support eARC.");
+            return;
+        }
+        // If eARC is disabled, the local device is null. In this case, the HAL shouldn't have
+        // reported connection state changes, but even if it did, it won't take effect.
+        if (mEarcLocalDevice != null) {
+            mEarcLocalDevice.handleEarcStateChange(status);
+        }
     }
 }
