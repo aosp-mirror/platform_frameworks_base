@@ -528,7 +528,12 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     @Override
     @UiThread
     void flush(@FlushReason int reason) {
-        if (mEvents == null) return;
+        if (mEvents == null || mEvents.size() == 0) {
+            if (sVerbose) {
+                Log.v(TAG, "Don't flush for empty event buffer.");
+            }
+            return;
+        }
 
         if (mDisabled.get()) {
             Log.e(TAG, "handleForceFlush(" + getDebugState(reason) + "): should not be when "
