@@ -64,7 +64,7 @@ public class WindowOnBackInvokedDispatcherTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mDispatcher = new WindowOnBackInvokedDispatcher();
+        mDispatcher = new WindowOnBackInvokedDispatcher(true /* applicationCallbackEnabled */);
         mDispatcher.attachToWindow(mWindowSession, mWindow);
     }
 

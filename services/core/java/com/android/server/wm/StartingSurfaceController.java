@@ -158,14 +158,13 @@ public class StartingSurfaceController {
                         + topFullscreenActivity);
                 return null;
             }
-            if (topFullscreenActivity.getWindowConfiguration().getRotation()
-                    != taskSnapshot.getRotation()) {
+            if (activity.mDisplayContent.getRotation() != taskSnapshot.getRotation()) {
                 // The snapshot should have been checked by ActivityRecord#isSnapshotCompatible
                 // that the activity will be updated to the same rotation as the snapshot. Since
                 // the transition is not started yet, fixed rotation transform needs to be applied
                 // earlier to make the snapshot show in a rotated container.
                 activity.mDisplayContent.handleTopActivityLaunchingInDifferentOrientation(
-                        topFullscreenActivity, false /* checkOpening */);
+                        activity, false /* checkOpening */);
             }
                 mService.mAtmService.mTaskOrganizerController.addStartingWindow(task,
                         activity, 0 /* launchTheme */, taskSnapshot);
@@ -221,6 +220,11 @@ public class StartingSurfaceController {
         // Attempt to add starting window from the top-most activity.
         for (int i = mDeferringAddStartActivities.size() - 1; i >= 0; --i) {
             final DeferringStartingWindowRecord next = mDeferringAddStartActivities.get(i);
+            if (next.mDeferring.getTask() == null) {
+                Slog.e(TAG, "No task exists: " + next.mDeferring.shortComponentName
+                        + " parent: " + next.mDeferring.getParent());
+                continue;
+            }
             next.mDeferring.showStartingWindow(next.mPrev, mInitNewTask, mInitTaskSwitch,
                     mInitProcessRunning, true /* startActivity */, next.mSource, topOptions);
             // If one succeeds, it is done.

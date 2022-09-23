@@ -181,7 +181,8 @@ public class BackNavigationControllerTests extends WindowTestsBase {
 
         Task task = createTopTaskWithActivity();
         WindowState appWindow = task.getTopVisibleAppMainWindow();
-        WindowOnBackInvokedDispatcher dispatcher = new WindowOnBackInvokedDispatcher();
+        WindowOnBackInvokedDispatcher dispatcher =
+                new WindowOnBackInvokedDispatcher(true /* applicationCallbackEnabled */);
         doAnswer(invocation -> {
             appWindow.setOnBackInvokedCallbackInfo(invocation.getArgument(1));
             return null;
