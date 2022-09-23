@@ -716,8 +716,8 @@ public class Transitions implements RemoteCallable<Transitions> {
                         null /* newDisplayAreaInfo */);
             }
         }
-        active.mToken = mOrganizer.startTransition(
-                request.getType(), transitionToken, wct);
+        mOrganizer.startTransition(transitionToken, wct != null && wct.isEmpty() ? null : wct);
+        active.mToken = transitionToken;
         mActiveTransitions.add(active);
     }
 
@@ -726,7 +726,7 @@ public class Transitions implements RemoteCallable<Transitions> {
             @NonNull WindowContainerTransaction wct, @Nullable TransitionHandler handler) {
         final ActiveTransition active = new ActiveTransition();
         active.mHandler = handler;
-        active.mToken = mOrganizer.startTransition(type, null /* token */, wct);
+        active.mToken = mOrganizer.startNewTransition(type, wct);
         mActiveTransitions.add(active);
         return active.mToken;
     }

@@ -84,9 +84,8 @@ public class WindowOrganizer {
     }
 
     /**
-     * Start a transition.
+     * Starts a new transition, don't use this to start an already created one.
      * @param type The type of the transition. This is ignored if a transitionToken is provided.
-     * @param transitionToken An existing transition to start. If null, a new transition is created.
      * @param t The set of window operations that are part of this transition.
      * @return A token identifying the transition. This will be the same as transitionToken if it
      *         was provided.
@@ -94,10 +93,24 @@ public class WindowOrganizer {
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
     @NonNull
-    public IBinder startTransition(int type, @Nullable IBinder transitionToken,
+    public IBinder startNewTransition(int type, @Nullable WindowContainerTransaction t) {
+        try {
+            return getWindowOrganizerController().startNewTransition(type, t);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Starts an already created transition.
+     * @param transitionToken An existing transition to start.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
+    public void startTransition(@NonNull IBinder transitionToken,
             @Nullable WindowContainerTransaction t) {
         try {
-            return getWindowOrganizerController().startTransition(type, transitionToken, t);
+            getWindowOrganizerController().startTransition(transitionToken, t);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
