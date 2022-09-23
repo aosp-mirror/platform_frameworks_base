@@ -45192,6 +45192,7 @@ package android.text {
     method public final int getLineAscent(int);
     method public final int getLineBaseline(int);
     method public final int getLineBottom(int);
+    method public int getLineBottom(int, boolean);
     method public int getLineBounds(int, android.graphics.Rect);
     method public abstract boolean getLineContainsTab(int);
     method public abstract int getLineCount();
