@@ -251,7 +251,7 @@ void RenderThread::initThreadLocals() {
     mEglManager = new EglManager();
     mRenderState = new RenderState(*this);
     mVkManager = VulkanManager::getInstance();
-    mCacheManager = new CacheManager();
+    mCacheManager = new CacheManager(*this);
 }
 
 void RenderThread::setupFrameInterval() {
@@ -453,6 +453,8 @@ bool RenderThread::threadLoop() {
             // next vsync (oops), so none of the callbacks are run.
             requestVsync();
         }
+
+        mCacheManager->onThreadIdle();
     }
 
     return false;
@@ -500,6 +502,11 @@ void RenderThread::preload() {
         requireVkContext();
     }
     HardwareBitmapUploader::initialize();
+}
+
+void RenderThread::trimMemory(TrimLevel level) {
+    ATRACE_CALL();
+    cacheManager().trimMemory(level);
 }
 
 } /* namespace renderthread */

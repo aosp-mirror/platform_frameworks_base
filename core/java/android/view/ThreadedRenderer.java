@@ -196,8 +196,6 @@ public final class ThreadedRenderer extends HardwareRenderer {
      */
     public static boolean sRendererEnabled = true;
 
-    public static boolean sTrimForeground = false;
-
     /**
      * Controls whether or not the renderer should aggressively trim
      * memory. Note that this must not be set for any process that uses
@@ -205,8 +203,9 @@ public final class ThreadedRenderer extends HardwareRenderer {
      * that do not go into the background.
      */
     public static void enableForegroundTrimming() {
-        sTrimForeground = true;
+        // TODO: Remove
     }
+
 
     /**
      * Initialize HWUI for being in a system process like system_server
@@ -218,9 +217,8 @@ public final class ThreadedRenderer extends HardwareRenderer {
         // process.
         if (!ActivityManager.isHighEndGfx()) {
             sRendererEnabled = false;
-        } else {
-            enableForegroundTrimming();
         }
+        setIsSystemOrPersistent();
     }
 
     /**
