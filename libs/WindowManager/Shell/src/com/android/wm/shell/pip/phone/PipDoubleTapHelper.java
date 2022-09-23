@@ -43,16 +43,16 @@ public class PipDoubleTapHelper {
      * <p>MAX - maximum allowed screen size</p>
      */
     @IntDef(value = {
-        SIZE_SPEC_CUSTOM,
         SIZE_SPEC_DEFAULT,
-        SIZE_SPEC_MAX
+        SIZE_SPEC_MAX,
+        SIZE_SPEC_CUSTOM
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface PipSizeSpec {}
 
-    static final int SIZE_SPEC_CUSTOM = 2;
     static final int SIZE_SPEC_DEFAULT = 0;
     static final int SIZE_SPEC_MAX = 1;
+    static final int SIZE_SPEC_CUSTOM = 2;
 
     /**
      * Returns MAX or DEFAULT {@link PipSizeSpec} to toggle to/from.

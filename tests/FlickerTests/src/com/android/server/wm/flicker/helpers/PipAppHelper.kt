@@ -22,6 +22,7 @@ import android.media.session.MediaSessionManager
 import android.util.Log
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Until
+import com.android.server.wm.flicker.helpers.GestureHelper.Tuple
 import com.android.server.wm.flicker.testapp.ActivityOptions
 import com.android.server.wm.traces.common.Rect
 import com.android.server.wm.traces.common.WindowManagerConditionsFactory
@@ -44,11 +45,57 @@ open class PipAppHelper(instrumentation: Instrumentation) :
         get() =
             mediaSessionManager.getActiveSessions(null).firstOrNull { it.packageName == `package` }
 
+    private val gestureHelper: GestureHelper = GestureHelper(mInstrumentation)
+
     open fun clickObject(resId: String) {
         val selector = By.res(`package`, resId)
         val obj = uiDevice.findObject(selector) ?: error("Could not find `$resId` object")
 
         obj.click()
+    }
+
+    /**
+     * Expands the PIP window my using the pinch out gesture.
+     *
+     * @param percent The percentage by which to increase the pip window size.
+     * @throws IllegalArgumentException if percentage isn't between 0.0f and 1.0f
+     */
+    fun pinchOpenPipWindow(wmHelper: WindowManagerStateHelper, percent: Float, steps: Int) {
+        // the percentage must be between 0.0f and 1.0f
+        if (percent <= 0.0f || percent > 1.0f) {
+            throw IllegalArgumentException("Percent must be between 0.0f and 1.0f")
+        }
+
+        val windowRect = getWindowRect(wmHelper)
+
+        // first pointer's initial x coordinate is halfway between the left edge and the center
+        val initLeftX = (windowRect.centerX() - windowRect.width / 4).toFloat()
+        // second pointer's initial x coordinate is halfway between the right edge and the center
+        val initRightX = (windowRect.centerX() + windowRect.width / 4).toFloat()
+
+        // horizontal distance the window should increase by
+        val distIncrease = windowRect.width * percent
+
+        // final x-coordinates
+        val finalLeftX = initLeftX - (distIncrease / 2)
+        val finalRightX = initRightX + (distIncrease / 2)
+
+        // y-coordinate is the same throughout this animation
+        val yCoord = windowRect.centerY().toFloat()
+
+        var adjustedSteps = MIN_STEPS_TO_ANIMATE
+
+        // if distance per step is at least 1, then we can use the number of steps requested
+        if (distIncrease.toInt() / (steps * 2) >= 1) {
+            adjustedSteps = steps
+        }
+
+        // if the distance per step is less than 1, carry out the animation in two steps
+        gestureHelper.pinch(
+                Tuple(initLeftX, yCoord), Tuple(initRightX, yCoord),
+                Tuple(finalLeftX, yCoord), Tuple(finalRightX, yCoord), adjustedSteps)
+
+        waitForPipWindowToExpandFrom(wmHelper, Region.from(windowRect))
     }
 
     /**
@@ -194,5 +241,8 @@ open class PipAppHelper(instrumentation: Instrumentation) :
         private const val MEDIA_SESSION_START_RADIO_BUTTON_ID = "media_session_start"
         private const val ENTER_PIP_ON_USER_LEAVE_HINT = "enter_pip_on_leave_manual"
         private const val ENTER_PIP_AUTOENTER = "enter_pip_on_leave_autoenter"
+        // minimum number of steps to take, when animating gestures, needs to be 2
+        // so that there is at least a single intermediate layer that flicker tests can check
+        private const val MIN_STEPS_TO_ANIMATE = 2
     }
 }
