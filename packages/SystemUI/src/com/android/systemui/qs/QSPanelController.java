@@ -16,7 +16,7 @@
 
 package com.android.systemui.qs;
 
-import static com.android.systemui.classifier.Classifier.QS_SWIPE;
+import static com.android.systemui.classifier.Classifier.QS_SWIPE_SIDE;
 import static com.android.systemui.media.dagger.MediaModule.QS_PANEL;
 import static com.android.systemui.qs.QSPanel.QS_SHOW_BRIGHTNESS;
 import static com.android.systemui.qs.dagger.QSFragmentModule.QS_USING_MEDIA_PLAYER;
@@ -76,7 +76,7 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
         @Override
         public boolean onTouch(View v, MotionEvent event) {
             if (event.getActionMasked() == MotionEvent.ACTION_UP) {
-                mFalsingManager.isFalseTouch(QS_SWIPE);
+                mFalsingManager.isFalseTouch(QS_SWIPE_SIDE);
             }
             return false;
         }
