@@ -263,7 +263,7 @@
     <string name="global_action_settings" msgid="4671878836947494217">"Настройки"</string>
     <string name="global_action_assist" msgid="2517047220311505805">"Помощник"</string>
     <string name="global_action_voice_assist" msgid="6655788068555086695">"Аудиоподсказки"</string>
-    <string name="global_action_lockdown" msgid="2475471405907902963">"Блокировка"</string>
+    <string name="global_action_lockdown" msgid="2475471405907902963">"Блокировка входа"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"&gt;999"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"Новое уведомление"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6465975799223304567">"Виртуальная клавиатура"</string>
@@ -1602,7 +1602,7 @@
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"Телевизор"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Телефон"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Динамики док-станции"</string>
-    <string name="default_audio_route_name_external_device" msgid="5474470558160717850">"HDMI"</string>
+    <string name="default_audio_route_name_external_device" msgid="8124229858618975">"Внешнее устройство"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Наушники"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"Система"</string>

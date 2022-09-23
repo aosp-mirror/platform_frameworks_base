@@ -1471,7 +1471,7 @@
     <string name="sync_binding_label" msgid="469249309424662147">"同步"</string>
     <string name="accessibility_binding_label" msgid="1974602776545801715">"无障碍"</string>
     <string name="wallpaper_binding_label" msgid="1197440498000786738">"壁纸"</string>
-    <string name="chooser_wallpaper" msgid="3082405680079923708">"更改壁纸"</string>
+    <string name="chooser_wallpaper" msgid="3082405680079923708">"更换壁纸"</string>
     <string name="notification_listener_binding_label" msgid="2702165274471499713">"通知侦听器"</string>
     <string name="vr_listener_binding_label" msgid="8013112996671206429">"VR 监听器"</string>
     <string name="condition_provider_service_binding_label" msgid="8490641013951857673">"条件提供程序"</string>
@@ -1600,7 +1600,7 @@
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"电视"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"手机"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"基座扬声器"</string>
-    <string name="default_audio_route_name_external_device" msgid="5474470558160717850">"HDMI"</string>
+    <string name="default_audio_route_name_external_device" msgid="8124229858618975">"外部设备"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"耳机"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"系统"</string>

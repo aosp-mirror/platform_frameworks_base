@@ -1262,7 +1262,7 @@
     <string name="volume_ringtone" msgid="134784084629229029">"ରିଙ୍ଗର୍‌ ଭଲ୍ୟୁମ୍"</string>
     <string name="volume_music" msgid="7727274216734955095">"ମିଡିଆ ଭଲ୍ୟୁମ୍‌"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="2614142915948898228">"ବ୍ଲୁଟୂଥ୍‍ ମାଧ୍ୟମରେ ଚାଲୁଛି"</string>
-    <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"ରିଙ୍ଗଟୋନ୍‍‍କୁ ନିରବ ଭାବେ ସେଟ୍ କରାଯାଇଛି"</string>
+    <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"ସାଇଲେଣ୍ଟ ରିଂଟୋନ ସେଟ ହୋଇଛି"</string>
     <string name="volume_call" msgid="7625321655265747433">"ଇନ୍‍-କଲ୍‍ ଭଲ୍ୟୁମ୍‌"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"ବ୍ଲୁଟୂଥ୍‍ ଇନ୍-କଲ୍ ଭଲ୍ୟୁମ୍‌"</string>
     <string name="volume_alarm" msgid="4486241060751798448">"ଆଲାରାମ୍ ଭଲ୍ୟୁମ୍‌"</string>
@@ -1600,7 +1600,7 @@
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"TV"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"ଫୋନ"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"ଡକ୍‌ ସ୍ପିକର୍‌"</string>
-    <string name="default_audio_route_name_external_device" msgid="5474470558160717850">"HDMI"</string>
+    <string name="default_audio_route_name_external_device" msgid="8124229858618975">"ଏକ୍ସଟର୍ନଲ ଡିଭାଇସ"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"ହେଡଫୋନ୍‍"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"ସିଷ୍ଟମ"</string>
@@ -2029,7 +2029,7 @@
     <string name="shortcut_restore_signature_mismatch" msgid="579345304221605479">"ଶର୍ଟକଟ୍‍ ରିଷ୍ଟୋର୍‍ କରିହେଲା ନାହିଁ, କାରଣ ଏହି ଆପ୍‍ର ସ୍ୱାକ୍ଷର ମେଳ ହେଉନାହିଁ"</string>
     <string name="shortcut_restore_unknown_issue" msgid="2478146134395982154">"ଶର୍ଟକଟ୍‍ ରିଷ୍ଟୋର୍‍ କରିହେଲା ନାହିଁ"</string>
     <string name="shortcut_disabled_reason_unknown" msgid="753074793553599166">"ଶର୍ଟକଟ୍‍ ଅକ୍ଷମ କରାଯାଇଛି"</string>
-    <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"ଅନଇନଷ୍ଟଲ୍‌ କରନ୍ତୁ"</string>
+    <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"ଅନଇନଷ୍ଟଲ କରନ୍ତୁ"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"କୌଣସିମତେ ଖୋଲନ୍ତୁ"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"ହାନିକାରକ ଆପ୍‌ ଚିହ୍ନଟ ହୋଇଛି"</string>
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"ସମସ୍ତ ଡିଭାଇସ ଲଗକୁ ଆକ୍ସେସ କରିବା ପାଇଁ <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>କୁ ଅନୁମତି ଦେବେ?"</string>
