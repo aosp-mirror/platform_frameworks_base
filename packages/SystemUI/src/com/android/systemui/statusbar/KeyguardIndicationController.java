@@ -1199,7 +1199,8 @@ public class KeyguardIndicationController {
             return ((!updateMonitor.isUnlockingWithBiometricAllowed(true /* isStrongBiometric */)
                     && msgId != FingerprintManager.FINGERPRINT_ERROR_LOCKOUT_PERMANENT)
                     || msgId == FingerprintManager.FINGERPRINT_ERROR_CANCELED
-                    || msgId == FingerprintManager.FINGERPRINT_ERROR_USER_CANCELED);
+                    || msgId == FingerprintManager.FINGERPRINT_ERROR_USER_CANCELED
+                    || msgId == FingerprintManager.BIOMETRIC_ERROR_POWER_PRESSED);
         }
 
         private boolean shouldSuppressFaceError(int msgId, KeyguardUpdateMonitor updateMonitor) {
