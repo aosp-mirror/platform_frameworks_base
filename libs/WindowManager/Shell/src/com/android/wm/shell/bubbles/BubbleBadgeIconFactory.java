@@ -52,7 +52,7 @@ public class BubbleBadgeIconFactory extends BaseIconFactory {
             userBadgedAppIcon = new CircularRingDrawable(userBadgedAppIcon);
         }
         Bitmap userBadgedBitmap = createIconBitmap(
-                userBadgedAppIcon, 1, BITMAP_GENERATION_MODE_WITH_SHADOW);
+                userBadgedAppIcon, 1, MODE_WITH_SHADOW);
         return createIconBitmap(userBadgedBitmap);
     }
 
