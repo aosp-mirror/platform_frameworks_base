@@ -5,6 +5,7 @@ import com.android.systemui.Dumpable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.shade.ShadeExpansionStateManager
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.window.StatusBarWindowStateController
 import com.android.systemui.util.concurrency.DelayableExecutor
@@ -24,10 +25,11 @@ import javax.inject.Inject
  */
 @SysUISingleton
 class StatusBarHideIconsForBouncerManager @Inject constructor(
-    private val commandQueue: CommandQueue,
-    @Main private val mainExecutor: DelayableExecutor,
-    statusBarWindowStateController: StatusBarWindowStateController,
-    dumpManager: DumpManager
+        private val commandQueue: CommandQueue,
+        @Main private val mainExecutor: DelayableExecutor,
+        statusBarWindowStateController: StatusBarWindowStateController,
+        shadeExpansionStateManager: ShadeExpansionStateManager,
+        dumpManager: DumpManager
 ) : Dumpable {
     // State variables set by external classes.
     private var panelExpanded: Boolean = false
@@ -47,6 +49,12 @@ class StatusBarHideIconsForBouncerManager @Inject constructor(
         statusBarWindowStateController.addListener {
                 state -> setStatusBarStateAndTriggerUpdate(state)
         }
+        shadeExpansionStateManager.addFullExpansionListener { isExpanded ->
+            if (panelExpanded != isExpanded) {
+                panelExpanded = isExpanded
+                updateHideIconsForBouncer(animate = false)
+            }
+        }
     }
 
     /** Returns true if the status bar icons should be hidden in the bouncer. */
@@ -61,11 +69,6 @@ class StatusBarHideIconsForBouncerManager @Inject constructor(
 
     fun setDisplayId(displayId: Int) {
         this.displayId = displayId
-    }
-
-    fun setPanelExpandedAndTriggerUpdate(panelExpanded: Boolean) {
-        this.panelExpanded = panelExpanded
-        updateHideIconsForBouncer(animate = false)
     }
 
     fun setIsOccludedAndTriggerUpdate(isOccluded: Boolean) {

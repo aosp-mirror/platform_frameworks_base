@@ -3390,11 +3390,7 @@ public final class NotificationPanelViewController {
         boolean isExpanded = !isFullyCollapsed() || mExpectingSynthesizedDown;
         if (mPanelExpanded != isExpanded) {
             mPanelExpanded = isExpanded;
-
-            mHeadsUpManager.setIsPanelExpanded(isExpanded);
-            mStatusBarTouchableRegionManager.setPanelExpanded(isExpanded);
-            mCentralSurfaces.setPanelExpanded(isExpanded);
-
+            mShadeExpansionStateManager.onShadeExpansionFullyChanged(isExpanded);
             if (!isExpanded && mQs != null && mQs.isCustomizing()) {
                 mQs.closeCustomizer();
             }
