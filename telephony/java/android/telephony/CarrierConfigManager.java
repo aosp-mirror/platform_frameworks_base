@@ -52,7 +52,9 @@ import com.android.internal.telephony.ICarrierConfigLoader;
 import com.android.telephony.Rlog;
 
 import java.util.List;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 /**
  * Provides access to telephony configuration values that are carrier-specific.
@@ -8647,6 +8649,73 @@ public class CarrierConfigManager {
             "unthrottle_data_retry_when_tac_changes_bool";
 
     /**
+     * A list of premium capabilities the carrier supports. Applications can prompt users to
+     * purchase these premium capabilities from their carrier for a network boost.
+     * Valid values are any of {@link TelephonyManager.PremiumCapability}.
+     *
+     * This is empty by default, indicating that no premium capabilities are supported.
+     *
+     * @see TelephonyManager#isPremiumCapabilityAvailableForPurchase(int)
+     * @see TelephonyManager#purchasePremiumCapability(int, Executor, Consumer)
+     */
+    public static final String KEY_SUPPORTED_PREMIUM_CAPABILITIES_INT_ARRAY =
+            "supported_premium_capabilities_int_array";
+
+    /**
+     * The amount of time in milliseconds the notification for a network boost via
+     * premium capabilities will be visible to the user after
+     * {@link TelephonyManager#purchasePremiumCapability(int, Executor, Consumer)}
+     * requests user action to purchase the boost from the carrier. Once the timeout expires,
+     * the booster notification will be automatically dismissed and the request will fail with
+     * {@link TelephonyManager#PURCHASE_PREMIUM_CAPABILITY_RESULT_TIMEOUT}.
+     *
+     * The default value is 30 minutes.
+     */
+    public static final String KEY_PREMIUM_CAPABILITY_NOTIFICATION_DISPLAY_TIMEOUT_MILLIS_LONG =
+            "premium_capability_notification_display_timeout_millis_long";
+
+    /**
+     * The amount of time in milliseconds that the notification for a network boost via
+     * premium capabilities should be blocked when
+     * {@link TelephonyManager#purchasePremiumCapability(int, Executor, Consumer)}
+     * returns a failure due to user action or timeout.
+     *
+     * The default value is 30 minutes.
+     *
+     * @see TelephonyManager#PURCHASE_PREMIUM_CAPABILITY_RESULT_USER_CANCELED
+     * @see TelephonyManager#PURCHASE_PREMIUM_CAPABILITY_RESULT_TIMEOUT
+     */
+    public static final String
+            KEY_PREMIUM_CAPABILITY_NOTIFICATION_BACKOFF_HYSTERESIS_TIME_MILLIS_LONG =
+            "premium_capability_notification_backoff_hysteresis_time_millis_long";
+
+    /**
+     * The amount of time in milliseconds that the purchase request should be throttled when
+     * {@link TelephonyManager#purchasePremiumCapability(int, Executor, Consumer)}
+     * returns a failure due to the carrier.
+     *
+     * The default value is 30 minutes.
+     *
+     * @see TelephonyManager#PURCHASE_PREMIUM_CAPABILITY_RESULT_CARRIER_ERROR
+     * @see TelephonyManager#PURCHASE_PREMIUM_CAPABILITY_RESULT_NETWORK_CONGESTED
+     */
+    public static final String
+            KEY_PREMIUM_CAPABILITY_PURCHASE_CONDITION_BACKOFF_HYSTERESIS_TIME_MILLIS_LONG =
+            "premium_capability_purchase_condition_backoff_hysteresis_time_millis_long";
+
+    /**
+     * The URL to redirect to when the user clicks on the notification for a network boost via
+     * premium capabilities after applications call
+     * {@link TelephonyManager#purchasePremiumCapability(int, Executor, Consumer)}.
+     * If the URL is empty or invalid, the purchase request will return
+     * {@link TelephonyManager#PURCHASE_PREMIUM_CAPABILITY_RESULT_FEATURE_NOT_SUPPORTED}.
+     *
+     * This is empty by default.
+     */
+    public static final String KEY_PREMIUM_CAPABILITY_PURCHASE_URL_STRING =
+            "premium_capability_purchase_url_string";
+
+    /**
      * IWLAN handover rules that determine whether handover is allowed or disallowed between
      * cellular and IWLAN.
      *
@@ -9312,6 +9381,15 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_UNTHROTTLE_DATA_RETRY_WHEN_TAC_CHANGES_BOOL, false);
         sDefaults.putBoolean(KEY_VONR_SETTING_VISIBILITY_BOOL, true);
         sDefaults.putBoolean(KEY_VONR_ENABLED_BOOL, false);
+        sDefaults.putIntArray(KEY_SUPPORTED_PREMIUM_CAPABILITIES_INT_ARRAY, new int[]{});
+        sDefaults.putLong(KEY_PREMIUM_CAPABILITY_NOTIFICATION_DISPLAY_TIMEOUT_MILLIS_LONG,
+                TimeUnit.MINUTES.toMillis(30));
+        sDefaults.putLong(KEY_PREMIUM_CAPABILITY_NOTIFICATION_BACKOFF_HYSTERESIS_TIME_MILLIS_LONG,
+                TimeUnit.MINUTES.toMillis(30));
+        sDefaults.putLong(
+                KEY_PREMIUM_CAPABILITY_PURCHASE_CONDITION_BACKOFF_HYSTERESIS_TIME_MILLIS_LONG,
+                TimeUnit.MINUTES.toMillis(30));
+        sDefaults.putString(KEY_PREMIUM_CAPABILITY_PURCHASE_URL_STRING, null);
         sDefaults.putStringArray(KEY_IWLAN_HANDOVER_POLICY_STRING_ARRAY, new String[]{
                 "source=GERAN|UTRAN|EUTRAN|NGRAN|IWLAN, "
                         + "target=GERAN|UTRAN|EUTRAN|NGRAN|IWLAN, type=allowed"});

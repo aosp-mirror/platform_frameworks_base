@@ -17112,6 +17112,266 @@ public class TelephonyManager {
     }
 
     /**
+     * A premium capability boosting the network to allow real-time interactive traffic.
+     * Corresponds to NetworkCapabilities#NET_CAPABILITY_REALTIME_INTERACTIVE_TRAFFIC.
+     */
+    // TODO(b/245748544): add @link once NET_CAPABILITY_REALTIME_INTERACTIVE_TRAFFIC is defined.
+    public static final int PREMIUM_CAPABILITY_REALTIME_INTERACTIVE_TRAFFIC = 1;
+
+    /**
+     * Purchasable premium capabilities.
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "PREMIUM_CAPABILITY_" }, value = {
+            PREMIUM_CAPABILITY_REALTIME_INTERACTIVE_TRAFFIC})
+    public @interface PremiumCapability {}
+
+    /**
+     * Returns the premium capability {@link PremiumCapability} as a String.
+     *
+     * @param capability The premium capability.
+     * @return The premium capability as a String.
+     * @hide
+     */
+    public static String convertPremiumCapabilityToString(@PremiumCapability int capability) {
+        switch (capability) {
+            case PREMIUM_CAPABILITY_REALTIME_INTERACTIVE_TRAFFIC:
+                return "REALTIME_INTERACTIVE_TRAFFIC";
+            default:
+                return "UNKNOWN (" + capability + ")";
+        }
+    }
+
+    /**
+     * Check whether the given premium capability is available for purchase from the carrier.
+     * If this is {@code true}, the capability can be purchased from the carrier using
+     * {@link #purchasePremiumCapability(int, Executor, Consumer)}.
+     *
+     * @param capability The premium capability to check.
+     * @return Whether the given premium capability is available to purchase.
+     * @throws SecurityException if the caller does not hold permission READ_BASIC_PHONE_STATE.
+     */
+    @RequiresPermission(android.Manifest.permission.READ_BASIC_PHONE_STATE)
+    public boolean isPremiumCapabilityAvailableForPurchase(@PremiumCapability int capability) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony == null) {
+                throw new IllegalStateException("telephony service is null.");
+            }
+            return telephony.isPremiumCapabilityAvailableForPurchase(capability, getSubId());
+        } catch (RemoteException ex) {
+            ex.rethrowAsRuntimeException();
+        }
+        return false;
+    }
+
+    /**
+     * Purchase premium capability request was successful. Subsequent attempts will return
+     * {@link #PURCHASE_PREMIUM_CAPABILITY_RESULT_ALREADY_PURCHASED} until the booster expires.
+     * The expiry time is determined by the type or duration of boost purchased from the carrier,
+     * provided at {@link CarrierConfigManager#KEY_PREMIUM_CAPABILITY_PURCHASE_URL_STRING}.
+     */
+    public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_SUCCESS = 1;
+
+    /**
+     * Purchase premium capability failed because the request is throttled for the amount of time
+     * specified by {@link CarrierConfigManager
+     * #KEY_PREMIUM_CAPABILITY_NOTIFICATION_BACKOFF_HYSTERESIS_TIME_MILLIS_LONG}
+     * or {@link CarrierConfigManager
+     * #KEY_PREMIUM_CAPABILITY_PURCHASE_CONDITION_BACKOFF_HYSTERESIS_TIME_MILLIS_LONG}.
+     * Subsequent attempts will return the same error until the request is no longer throttled
+     * or throttling conditions change.
+     */
+    public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_THROTTLED = 2;
+
+    /**
+     * Purchase premium capability failed because it is already purchased and available.
+     * Subsequent attempts will return the same error until the booster expires.
+     */
+    public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_ALREADY_PURCHASED = 3;
+
+    /**
+     * Purchase premium capability failed because a request was already made and is in progress.
+     * This may have been requested by either the same app or another app.
+     * Subsequent attempts will return the same error until the previous request completes.
+     */
+    public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_ALREADY_IN_PROGRESS = 4;
+
+    /**
+     * Purchase premium capability failed because the user disabled the feature.
+     * Subsequent attempts will return the same error until the user re-enables the feature.
+     */
+    public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_USER_DISABLED = 5;
+
+    /**
+     * Purchase premium capability failed because the user canceled the operation.
+     * Subsequent attempts will be throttled for the amount of time specified by
+     * {@link CarrierConfigManager
+     * #KEY_PREMIUM_CAPABILITY_NOTIFICATION_BACKOFF_HYSTERESIS_TIME_MILLIS_LONG}
+     * and return {@link #PURCHASE_PREMIUM_CAPABILITY_RESULT_THROTTLED}.
+     */
+    public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_USER_CANCELED = 6;
+
+    /**
+     * Purchase premium capability failed because the carrier disabled or does not support
+     * the capability, as specified in
+     * {@link CarrierConfigManager#KEY_SUPPORTED_PREMIUM_CAPABILITIES_INT_ARRAY}.
+     * Subsequent attempts will return the same error until the carrier enables the feature.
+     */
+    public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_CARRIER_DISABLED = 7;
+
+    /**
+     * Purchase premium capability failed because the carrier app did not indicate success.
+     * Subsequent attempts will be throttled for the amount of time specified by
+     * {@link CarrierConfigManager
+     * #KEY_PREMIUM_CAPABILITY_PURCHASE_CONDITION_BACKOFF_HYSTERESIS_TIME_MILLIS_LONG}
+     * and return {@link #PURCHASE_PREMIUM_CAPABILITY_RESULT_THROTTLED}.
+     */
+    public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_CARRIER_ERROR = 8;
+
+    /**
+     * Purchase premium capability failed because we did not receive a response from the user
+     * for the booster notification within the time specified by
+     * {@link CarrierConfigManager#KEY_PREMIUM_CAPABILITY_NOTIFICATION_DISPLAY_TIMEOUT_MILLIS_LONG}.
+     * The booster notification will be automatically dismissed and subsequent attempts will be
+     * throttled for the amount of time specified by
+     * {@link CarrierConfigManager
+     * #KEY_PREMIUM_CAPABILITY_NOTIFICATION_BACKOFF_HYSTERESIS_TIME_MILLIS_LONG}
+     * and return {@link #PURCHASE_PREMIUM_CAPABILITY_RESULT_THROTTLED}.
+     */
+    public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_TIMEOUT = 9;
+
+    /**
+     * Purchase premium capability failed because the device does not support the feature.
+     * Subsequent attempts will return the same error.
+     */
+    public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_FEATURE_NOT_SUPPORTED = 10;
+
+    /**
+     * Purchase premium capability failed because the telephony service is down or unavailable.
+     * Subsequent attempts will return the same error until request conditions are satisfied.
+     */
+    public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_REQUEST_FAILED = 11;
+
+    /**
+     * Purchase premium capability failed because the network is not available.
+     * Subsequent attempts will return the same error until network conditions change.
+     */
+    public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_NETWORK_NOT_AVAILABLE = 12;
+
+    /**
+     * Purchase premium capability failed because the network is congested.
+     * Subsequent attempts will be throttled for the amount of time specified by
+     * {@link CarrierConfigManager
+     * #KEY_PREMIUM_CAPABILITY_PURCHASE_CONDITION_BACKOFF_HYSTERESIS_TIME_MILLIS_LONG}
+     * and return {@link #PURCHASE_PREMIUM_CAPABILITY_RESULT_THROTTLED}.
+     * Throttling will be reevaluated when the network is no longer congested.
+     */
+    public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_NETWORK_CONGESTED = 13;
+
+    /**
+     * Results of the purchase premium capability request.
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "PURCHASE_PREMIUM_CAPABILITY_RESULT_" }, value = {
+            PURCHASE_PREMIUM_CAPABILITY_RESULT_SUCCESS,
+            PURCHASE_PREMIUM_CAPABILITY_RESULT_THROTTLED,
+            PURCHASE_PREMIUM_CAPABILITY_RESULT_ALREADY_PURCHASED,
+            PURCHASE_PREMIUM_CAPABILITY_RESULT_ALREADY_IN_PROGRESS,
+            PURCHASE_PREMIUM_CAPABILITY_RESULT_USER_DISABLED,
+            PURCHASE_PREMIUM_CAPABILITY_RESULT_USER_CANCELED,
+            PURCHASE_PREMIUM_CAPABILITY_RESULT_CARRIER_DISABLED,
+            PURCHASE_PREMIUM_CAPABILITY_RESULT_CARRIER_ERROR,
+            PURCHASE_PREMIUM_CAPABILITY_RESULT_TIMEOUT,
+            PURCHASE_PREMIUM_CAPABILITY_RESULT_FEATURE_NOT_SUPPORTED,
+            PURCHASE_PREMIUM_CAPABILITY_RESULT_NETWORK_NOT_AVAILABLE,
+            PURCHASE_PREMIUM_CAPABILITY_RESULT_NETWORK_CONGESTED})
+    public @interface PurchasePremiumCapabilityResult {}
+
+    /**
+     * Returns the purchase result {@link PurchasePremiumCapabilityResult} as a String.
+     *
+     * @param result The purchase premium capability result.
+     * @return The purchase result as a String.
+     * @hide
+     */
+    public static String convertPurchaseResultToString(
+            @PurchasePremiumCapabilityResult int result) {
+        switch (result) {
+            case PURCHASE_PREMIUM_CAPABILITY_RESULT_SUCCESS:
+                return "SUCCESS";
+            case PURCHASE_PREMIUM_CAPABILITY_RESULT_THROTTLED:
+                return "THROTTLED";
+            case PURCHASE_PREMIUM_CAPABILITY_RESULT_ALREADY_PURCHASED:
+                return "ALREADY_PURCHASED";
+            case PURCHASE_PREMIUM_CAPABILITY_RESULT_ALREADY_IN_PROGRESS:
+                return "ALREADY_IN_PROGRESS";
+            case PURCHASE_PREMIUM_CAPABILITY_RESULT_USER_DISABLED:
+                return "USER_DISABLED";
+            case PURCHASE_PREMIUM_CAPABILITY_RESULT_USER_CANCELED:
+                return "USER_CANCELED";
+            case PURCHASE_PREMIUM_CAPABILITY_RESULT_CARRIER_DISABLED:
+                return "CARRIER_DISABLED";
+            case PURCHASE_PREMIUM_CAPABILITY_RESULT_CARRIER_ERROR:
+                return "CARRIER_ERROR";
+            case PURCHASE_PREMIUM_CAPABILITY_RESULT_TIMEOUT:
+                return "TIMEOUT";
+            case PURCHASE_PREMIUM_CAPABILITY_RESULT_FEATURE_NOT_SUPPORTED:
+                return "FEATURE_NOT_SUPPORTED";
+            case PURCHASE_PREMIUM_CAPABILITY_RESULT_REQUEST_FAILED:
+                return "REQUEST_FAILED";
+            case PURCHASE_PREMIUM_CAPABILITY_RESULT_NETWORK_NOT_AVAILABLE:
+                return "NETWORK_NOT_AVAILABLE";
+            case PURCHASE_PREMIUM_CAPABILITY_RESULT_NETWORK_CONGESTED:
+                return "NETWORK_CONGESTED";
+            default:
+                return "UNKNOWN (" + result + ")";
+        }
+    }
+
+    /**
+     * Purchase the given premium capability from the carrier.
+     * This requires user action to purchase the boost from the carrier.
+     * If this returns {@link #PURCHASE_PREMIUM_CAPABILITY_RESULT_SUCCESS} or
+     * {@link #PURCHASE_PREMIUM_CAPABILITY_RESULT_ALREADY_PURCHASED}, applications can request
+     * the premium capability via {@link ConnectivityManager#requestNetwork}.
+     *
+     * @param capability The premium capability to purchase.
+     * @param executor The callback executor for the response.
+     * @param callback The result of the purchase request.
+     *                 One of {@link PurchasePremiumCapabilityResult}.
+     * @throws SecurityException if the caller does not hold permission READ_BASIC_PHONE_STATE.
+     * @see #isPremiumCapabilityAvailableForPurchase(int) to check whether the capability is valid
+     */
+    @RequiresPermission(android.Manifest.permission.READ_BASIC_PHONE_STATE)
+    public void purchasePremiumCapability(@PremiumCapability int capability,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull @PurchasePremiumCapabilityResult Consumer<Integer> callback) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+
+        IIntegerConsumer internalCallback = new IIntegerConsumer.Stub() {
+            @Override
+            public void accept(int result) {
+                executor.execute(() -> callback.accept(result));
+            }
+        };
+
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony == null) {
+                callback.accept(PURCHASE_PREMIUM_CAPABILITY_RESULT_REQUEST_FAILED);
+                return;
+            }
+            telephony.purchasePremiumCapability(capability, internalCallback, getSubId());
+        } catch (RemoteException ex) {
+            callback.accept(PURCHASE_PREMIUM_CAPABILITY_RESULT_REQUEST_FAILED);
+        }
+    }
+
+    /**
      * Get last known cell identity.
      * Require {@link android.Manifest.permission#ACCESS_FINE_LOCATION} and
      * com.android.phone.permission.ACCESS_LAST_KNOWN_CELL_ID, otherwise throws SecurityException.
