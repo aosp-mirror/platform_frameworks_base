@@ -25,7 +25,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.KeyguardManager;
+import android.graphics.Bitmap;
 import android.media.AudioManager;
+import android.media.MediaDescription;
+import android.media.MediaMetadata;
 import android.media.MediaRoute2Info;
 import android.media.session.MediaController;
 import android.media.session.MediaSessionManager;
@@ -43,6 +46,7 @@ import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.bluetooth.LocalBluetoothProfileManager;
 import com.android.settingslib.media.LocalMediaManager;
 import com.android.settingslib.media.MediaDevice;
+import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastSender;
@@ -82,6 +86,8 @@ public class MediaOutputDialogTest extends SysuiTestCase {
     private final CommonNotifCollection mNotifCollection = mock(CommonNotifCollection.class);
     private final UiEventLogger mUiEventLogger = mock(UiEventLogger.class);
     private final DialogLaunchAnimator mDialogLaunchAnimator = mock(DialogLaunchAnimator.class);
+    private final MediaMetadata mMediaMetadata = mock(MediaMetadata.class);
+    private final MediaDescription  mMediaDescription = mock(MediaDescription.class);
     private final NearbyMediaDevicesManager mNearbyMediaDevicesManager = mock(
             NearbyMediaDevicesManager.class);
     private final AudioManager mAudioManager = mock(AudioManager.class);
@@ -100,6 +106,8 @@ public class MediaOutputDialogTest extends SysuiTestCase {
         when(mMediaController.getPlaybackState()).thenReturn(mPlaybackState);
         when(mPlaybackState.getState()).thenReturn(PlaybackState.STATE_NONE);
         when(mMediaController.getPackageName()).thenReturn(TEST_PACKAGE);
+        when(mMediaController.getMetadata()).thenReturn(mMediaMetadata);
+        when(mMediaMetadata.getDescription()).thenReturn(mMediaDescription);
         mMediaControllers.add(mMediaController);
         when(mMediaSessionManager.getActiveSessions(any())).thenReturn(mMediaControllers);
 
@@ -204,6 +212,80 @@ public class MediaOutputDialogTest extends SysuiTestCase {
         when(mMediaDevice.isBLEDevice()).thenReturn(false);
 
         assertThat(mMediaOutputDialog.getBroadcastIconVisibility()).isEqualTo(View.GONE);
+    }
+
+    @Test
+    public void getHeaderIcon_getFromMediaControllerMetaData() {
+        int testWidth = 10;
+        int testHeight = 20;
+        when(mMediaDescription.getIconBitmap())
+                .thenReturn(Bitmap.createBitmap(testWidth, testHeight, Bitmap.Config.ARGB_8888));
+
+        assertThat(mMediaOutputDialog.getHeaderIcon().getBitmap().getHeight()).isEqualTo(
+                testHeight);
+        assertThat(mMediaOutputDialog.getHeaderIcon().getBitmap().getWidth()).isEqualTo(testWidth);
+    }
+
+    @Test
+    public void getHeaderText_getFromMediaControllerMetaData() {
+        String testTitle = "test title";
+        when(mMediaDescription.getTitle())
+                .thenReturn(testTitle);
+        assertThat(mMediaOutputDialog.getHeaderText().toString()).isEqualTo(testTitle);
+    }
+
+    @Test
+    public void getHeaderSubtitle_getFromMediaControllerMetaData() {
+        String testSubtitle = "test title";
+        when(mMediaDescription.getSubtitle())
+                .thenReturn(testSubtitle);
+
+        assertThat(mMediaOutputDialog.getHeaderSubtitle().toString()).isEqualTo(testSubtitle);
+    }
+
+    @Test
+    public void getStopButtonText_notSupportsBroadcast_returnsDefaultText() {
+        String stopText = mContext.getText(R.string.keyboard_key_media_stop).toString();
+        MediaOutputController mockMediaOutputController = mock(MediaOutputController.class);
+        when(mockMediaOutputController.isBroadcastSupported()).thenReturn(false);
+
+        MediaOutputDialog testDialog = new MediaOutputDialog(mContext, false, mBroadcastSender,
+                mockMediaOutputController, mUiEventLogger);
+        testDialog.show();
+
+        assertThat(testDialog.getStopButtonText().toString()).isEqualTo(stopText);
+    }
+
+    @Test
+    public void getStopButtonText_supportsBroadcast_returnsBroadcastText() {
+        String stopText = mContext.getText(R.string.media_output_broadcast).toString();
+        MediaDevice mMediaDevice = mock(MediaDevice.class);
+        MediaOutputController mockMediaOutputController = mock(MediaOutputController.class);
+        when(mockMediaOutputController.isBroadcastSupported()).thenReturn(true);
+        when(mockMediaOutputController.getCurrentConnectedMediaDevice()).thenReturn(mMediaDevice);
+        when(mockMediaOutputController.isBluetoothLeDevice(any())).thenReturn(true);
+        when(mockMediaOutputController.isPlaying()).thenReturn(true);
+        when(mockMediaOutputController.isBluetoothLeBroadcastEnabled()).thenReturn(false);
+        MediaOutputDialog testDialog = new MediaOutputDialog(mContext, false, mBroadcastSender,
+                mockMediaOutputController, mUiEventLogger);
+        testDialog.show();
+
+        assertThat(testDialog.getStopButtonText().toString()).isEqualTo(stopText);
+    }
+
+    @Test
+    public void onStopButtonClick_notPlaying_releaseSession() {
+        MediaOutputController mockMediaOutputController = mock(MediaOutputController.class);
+        when(mockMediaOutputController.isBroadcastSupported()).thenReturn(false);
+        when(mockMediaOutputController.getCurrentConnectedMediaDevice()).thenReturn(null);
+        when(mockMediaOutputController.isPlaying()).thenReturn(false);
+        MediaOutputDialog testDialog = new MediaOutputDialog(mContext, false, mBroadcastSender,
+                mockMediaOutputController, mUiEventLogger);
+        testDialog.show();
+
+        testDialog.onStopButtonClick();
+
+        verify(mockMediaOutputController).releaseSession();
     }
 
     @Test
