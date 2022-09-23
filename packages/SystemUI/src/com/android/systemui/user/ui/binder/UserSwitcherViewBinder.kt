@@ -174,6 +174,7 @@ object UserSwitcherViewBinder {
             setOnItemClickListener { _, _, position, _ ->
                 val itemPositionExcludingHeader = position - 1
                 adapter.getItem(itemPositionExcludingHeader).onClicked()
+                dismiss()
             }
 
             show()
