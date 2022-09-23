@@ -19,6 +19,7 @@ package com.android.systemui.dreams.dagger;
 import android.content.Context;
 import android.content.res.Resources;
 
+import com.android.dream.lowlight.dagger.LowLightDreamModule;
 import com.android.settingslib.dream.DreamBackend;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -37,6 +38,7 @@ import dagger.Provides;
  */
 @Module(includes = {
             RegisteredComplicationsModule.class,
+            LowLightDreamModule.class,
         },
         subcomponents = {
             DreamOverlayComponent.class,
