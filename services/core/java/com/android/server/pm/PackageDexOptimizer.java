@@ -189,6 +189,11 @@ public class PackageDexOptimizer {
             return false;
         }
 
+        // We do not dexopt APEX packages.
+        if (pkg.isApex()) {
+            return false;
+        }
+
         // We do not dexopt unused packages.
         // It's possible for this to be called before app hibernation service is ready due to
         // an OTA dexopt. In this case, we ignore the hibernation check here. This is fine since

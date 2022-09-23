@@ -385,6 +385,11 @@ final class DexOptHelper {
         } else if (snapshot.isInstantApp(options.getPackageName(), UserHandle.getCallingUserId())) {
             return false;
         }
+        var pkg = snapshot.getPackage(options.getPackageName());
+        if (pkg != null && pkg.isApex()) {
+            // skip APEX
+            return true;
+        }
 
         if (options.isDexoptOnlySecondaryDex()) {
             return mPm.getDexManager().dexoptSecondaryDex(options);
@@ -426,6 +431,10 @@ final class DexOptHelper {
             if (p == null || pkgSetting == null) {
                 // Package could not be found. Report failure.
                 return PackageDexOptimizer.DEX_OPT_FAILED;
+            }
+            if (p.isApex()) {
+                // APEX needs no dexopt
+                return PackageDexOptimizer.DEX_OPT_SKIPPED;
             }
             mPm.getPackageUsage().maybeWriteAsync(mPm.mSettings.getPackagesLocked());
             mPm.mCompilerStats.maybeWriteAsync();
@@ -497,6 +506,9 @@ final class DexOptHelper {
         final AndroidPackage pkg = packageState == null ? null : packageState.getPkg();
         if (packageState == null || pkg == null) {
             throw new IllegalArgumentException("Unknown package: " + packageName);
+        }
+        if (pkg.isApex()) {
+            throw new IllegalArgumentException("Can't dexopt APEX package: " + packageName);
         }
 
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
