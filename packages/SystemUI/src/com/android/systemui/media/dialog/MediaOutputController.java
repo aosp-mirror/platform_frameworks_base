@@ -125,13 +125,16 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     private final NearbyMediaDevicesManager mNearbyMediaDevicesManager;
     private final Map<String, Integer> mNearbyDeviceInfoMap = new ConcurrentHashMap<>();
 
-    private boolean mIsRefreshing = false;
-    private boolean mNeedRefresh = false;
+    @VisibleForTesting
+    boolean mIsRefreshing = false;
+    @VisibleForTesting
+    boolean mNeedRefresh = false;
     private MediaController mMediaController;
     @VisibleForTesting
     Callback mCallback;
     @VisibleForTesting
     LocalMediaManager mLocalMediaManager;
+    @VisibleForTesting
     private MediaOutputMetricLogger mMetricLogger;
     private int mCurrentState;
 
