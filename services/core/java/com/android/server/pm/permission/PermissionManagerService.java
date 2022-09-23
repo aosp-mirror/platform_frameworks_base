@@ -2249,6 +2249,46 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     }
 
     /**
+     * If the package was below api 23, got the SYSTEM_ALERT_WINDOW permission automatically, and
+     * then updated past api 23, and the app does not satisfy any of the other SAW permission flags,
+     * the permission should be revoked.
+     *
+     * @param newPackage The new package that was installed
+     * @param oldPackage The old package that was updated
+     */
+    private void revokeSystemAlertWindowIfUpgradedPast23(
+            @NonNull AndroidPackage newPackage,
+            @NonNull AndroidPackage oldPackage) {
+        if (oldPackage.getTargetSdkVersion() >= Build.VERSION_CODES.M
+                || newPackage.getTargetSdkVersion() < Build.VERSION_CODES.M
+                || !newPackage.getRequestedPermissions()
+                .contains(Manifest.permission.SYSTEM_ALERT_WINDOW)) {
+            return;
+        }
+
+        Permission saw;
+        synchronized (mLock) {
+            saw = mRegistry.getPermission(Manifest.permission.SYSTEM_ALERT_WINDOW);
+        }
+        final PackageSetting ps = (PackageSetting)
+                mPackageManagerInt.getPackageSetting(newPackage.getPackageName());
+        if (shouldGrantPermissionByProtectionFlags(newPackage, ps, saw, new ArraySet<>())
+                    || shouldGrantPermissionBySignature(newPackage, saw)) {
+            return;
+        }
+        for (int userId : getAllUserIds()) {
+            try {
+                revokePermissionFromPackageForUser(newPackage.getPackageName(),
+                        Manifest.permission.SYSTEM_ALERT_WINDOW, false, userId,
+                        mDefaultPermissionCallback);
+            } catch (IllegalStateException | SecurityException e) {
+                Log.e(TAG, "unable to revoke SYSTEM_ALERT_WINDOW for "
+                        + newPackage.getPackageName() + " user " + userId, e);
+            }
+        }
+    }
+
+    /**
      * We might auto-grant permissions if any permission of the group is already granted. Hence if
      * the group of a granted permission changes we need to revoke it to avoid having permissions of
      * the new group auto-granted.
@@ -4814,6 +4854,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 if (hasOldPkg) {
                     revokeRuntimePermissionsIfGroupChangedInternal(pkg, oldPkg);
                     revokeStoragePermissionsIfScopeExpandedInternal(pkg, oldPkg);
+                    revokeSystemAlertWindowIfUpgradedPast23(pkg, oldPkg);
                 }
                 if (hasPermissionDefinitionChanges) {
                     revokeRuntimePermissionsIfPermissionDefinitionChangedInternal(
