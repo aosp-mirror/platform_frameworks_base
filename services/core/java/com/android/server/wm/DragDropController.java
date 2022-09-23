@@ -342,6 +342,11 @@ class DragDropController {
     }
 
     void reportDropWindow(IBinder token, float x, float y) {
+        if (mDragState == null) {
+            Slog.w(TAG_WM, "Drag state is closed.");
+            return;
+        }
+
         synchronized (mService.mGlobalLock) {
             mDragState.reportDropWindowLock(token, x, y);
         }

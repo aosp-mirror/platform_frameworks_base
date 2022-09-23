@@ -154,7 +154,7 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
 
         for (InputWindowHandle window : windowHandles) {
             final boolean visible = (window.inputConfig & InputConfig.NOT_VISIBLE) == 0;
-            if (visible && window.getWindow() != null) {
+            if (visible && window.getWindow() != null && !window.isClone) {
                 tempVisibleWindows.add(window);
             }
         }
@@ -853,6 +853,8 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
                 windowInfo.title = "Splitscreen Divider";
             } else if (window.mIsPIPMenu) {
                 windowInfo.title = "Picture-in-Picture menu";
+                // Set it to true to be consistent with the legacy implementation.
+                windowInfo.inPictureInPicture = true;
             }
             return windowInfo;
         }

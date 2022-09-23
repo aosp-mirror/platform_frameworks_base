@@ -1416,7 +1416,7 @@
     <string name="ext_media_unmounting_notification_title" msgid="4147986383917892162">"<xliff:g id="NAME">%s</xliff:g> հիշասարքն անջատվում է"</string>
     <string name="ext_media_unmounting_notification_message" msgid="5717036261538754203">"Չհեռացնեք սարքը"</string>
     <string name="ext_media_init_action" msgid="2312974060585056709">"Կարգավորել"</string>
-    <string name="ext_media_unmount_action" msgid="966992232088442745">"Անջատել"</string>
+    <string name="ext_media_unmount_action" msgid="966992232088442745">"Հանել"</string>
     <string name="ext_media_browse_action" msgid="344865351947079139">"Ուսումնասիրել"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"Աուդիոելքի սարքի փոխարկում"</string>
     <string name="ext_media_missing_title" msgid="3209472091220515046">"<xliff:g id="NAME">%s</xliff:g>-ը տեղադրված չէ"</string>
@@ -1682,7 +1682,7 @@
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Ամբողջական վերահսկումն անհրաժեշտ է միայն այն հավելվածներին, որոնք օգնում են ձեզ հատուկ գործառույթներից օգտվելիս։"</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Դիտել և կառավարել էկրանը"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Կարող է կարդալ էկրանի ողջ բովանդակությունը և ցուցադրել բովանդակություն այլ հավելվածների վրայից։"</string>
-    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Դիտել և համակարգել գործողությունները"</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Դիտել և կատարել գործողությունները"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Կարող է հետագծել ձեր գործողությունները հավելվածներում և սարքակազմի սենսորների վրա, ինչպես նաև հավելվածներում կատարել գործողություններ ձեր անունից։"</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Թույլատրել"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Մերժել"</string>

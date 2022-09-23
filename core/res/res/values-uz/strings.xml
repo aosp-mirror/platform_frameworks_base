@@ -305,10 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"taqvimingizga kirish"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS xabarlarni yuborish va ko‘rish"</string>
-    <!-- no translation found for permgrouplab_storage (17339216290379241) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_storage (5378659041354582769) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="17339216290379241">"Fayllar"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"qurilmangizdagi fayllarga kirish"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Musiqa va audio"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"qurilmadagi musiqa va audioga ruxsat"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Video va suratlar"</string>
@@ -1419,10 +1417,10 @@
     <string name="ext_media_unmounting_notification_message" msgid="5717036261538754203">"Chiqarib olinmasin"</string>
     <string name="ext_media_init_action" msgid="2312974060585056709">"Sozlash"</string>
     <string name="ext_media_unmount_action" msgid="966992232088442745">"Chiqarish"</string>
-    <string name="ext_media_browse_action" msgid="344865351947079139">"O‘rganish"</string>
+    <string name="ext_media_browse_action" msgid="344865351947079139">"Ochish"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"Audio chiqishni almashtirish"</string>
     <string name="ext_media_missing_title" msgid="3209472091220515046">"<xliff:g id="NAME">%s</xliff:g> topilmadi"</string>
-    <string name="ext_media_missing_message" msgid="4408988706227922909">"Qurilmani yana ulang"</string>
+    <string name="ext_media_missing_message" msgid="4408988706227922909">"Qurilmani qayta ulang"</string>
     <string name="ext_media_move_specific_title" msgid="8492118544775964250">"<xliff:g id="NAME">%s</xliff:g> ko‘chirib o‘tkazilmoqda"</string>
     <string name="ext_media_move_title" msgid="2682741525619033637">"Ma’lumotlar ko‘chirilmoqda"</string>
     <string name="ext_media_move_success_title" msgid="4901763082647316767">"Kontent ko‘chirildi"</string>
@@ -2039,7 +2037,7 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"O‘CHIRIB TASHLASH"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"BARIBIR OCHILSIN"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Zararli ilova aniqlandi"</string>
-    <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> ilovasiga qurilmadagi barcha jurnal qaydlariga ruxsat berilsinmi?"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> ilovasining qurilmadagi barcha jurnallarga kirishiga ruxsat berilsinmi?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Bir matalik foydalanishga ruxsat berish"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Rad etish"</string>
     <string name="log_access_confirmation_body" msgid="6581985716241928135">"Qurilma jurnaliga qurilma bilan yuz bergan hodisalar qaydlari yoziladi. Ilovalar bu jurnal qaydlari yordamida muammolarni topishi va bartaraf qilishi mumkin.\n\nAyrim jurnal qaydlarida maxfiy axborotlar yozilishi mumkin, shu sababli qurilmadagi barcha jurnal qaydlariga ruxsatni faqat ishonchli ilovalarga bering. \n\nBu ilovaga qurilmadagi barcha jurnal qaydlariga ruxsat berilmasa ham, u oʻzining jurnalini ocha oladi. Qurilma ishlab chiqaruvchisi ham ayrim jurnallar yoki qurilma haqidagi axborotlarni ocha oladi. Batafsil"</string>

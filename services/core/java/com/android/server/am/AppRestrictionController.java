@@ -55,6 +55,7 @@ import static android.content.Intent.ACTION_SHOW_FOREGROUND_SERVICE_MANAGER;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS;
+import static android.os.PowerExemptionManager.REASON_ACTIVE_DEVICE_ADMIN;
 import static android.os.PowerExemptionManager.REASON_ALLOWLISTED_PACKAGE;
 import static android.os.PowerExemptionManager.REASON_CARRIER_PRIVILEGED_APP;
 import static android.os.PowerExemptionManager.REASON_COMPANION_DEVICE_MANAGER;
@@ -1114,6 +1115,14 @@ public final class AppRestrictionController {
                 DEVICE_CONFIG_SUBNAMESPACE_PREFIX + "prompt_fgs_with_noti_on_long_running";
 
         /**
+         * The behavior for an app with a FGS, when the system detects it's running for
+         * a very long time, should we prompt the user.
+         * {@code true} - we'll show the prompt to user, {@code false} - we'll not show it.
+         */
+        static final String KEY_BG_PROMPT_FGS_ON_LONG_RUNNING =
+                DEVICE_CONFIG_SUBNAMESPACE_PREFIX + "prompt_fgs_on_long_running";
+
+        /**
          * The list of packages to be exempted from all these background restrictions.
          */
         static final String KEY_BG_RESTRICTION_EXEMPTED_PACKAGES =
@@ -1153,6 +1162,11 @@ public final class AppRestrictionController {
         static final boolean DEFAULT_BG_PROMPT_FGS_WITH_NOTIFICATION_ON_LONG_RUNNING = false;
 
         /**
+         * Default value to {@link #mBgPromptFgsOnLongRunning}.
+         */
+        static final boolean DEFAULT_BG_PROMPT_FGS_ON_LONG_RUNNING = true;
+
+        /**
          * Default value to {@link #mBgPromptFgsWithNotiToBgRestricted}.
          */
         final boolean mDefaultBgPromptFgsWithNotiToBgRestricted;
@@ -1188,6 +1202,11 @@ public final class AppRestrictionController {
          * @see #KEY_BG_PROMPT_FGS_WITH_NOTIFICATION_ON_LONG_RUNNING.
          */
         volatile boolean mBgPromptFgsWithNotiOnLongRunning;
+
+        /**
+         * @see #KEY_BG_PROMPT_FGS_ON_LONG_RUNNING.
+         */
+        volatile boolean mBgPromptFgsOnLongRunning;
 
         /**
          * @see #KEY_BG_PROMPT_ABUSIVE_APPS_TO_BG_RESTRICTED.
@@ -1226,6 +1245,9 @@ public final class AppRestrictionController {
                         break;
                     case KEY_BG_PROMPT_FGS_WITH_NOTIFICATION_ON_LONG_RUNNING:
                         updateBgPromptFgsWithNotiOnLongRunning();
+                        break;
+                    case KEY_BG_PROMPT_FGS_ON_LONG_RUNNING:
+                        updateBgPromptFgsOnLongRunning();
                         break;
                     case KEY_BG_PROMPT_ABUSIVE_APPS_TO_BG_RESTRICTED:
                         updateBgPromptAbusiveAppToBgRestricted();
@@ -1268,6 +1290,7 @@ public final class AppRestrictionController {
             updateBgLongFgsNotificationMinimalInterval();
             updateBgPromptFgsWithNotiToBgRestricted();
             updateBgPromptFgsWithNotiOnLongRunning();
+            updateBgPromptFgsOnLongRunning();
             updateBgPromptAbusiveAppToBgRestricted();
             updateBgRestrictionExemptedPackages();
         }
@@ -1318,6 +1341,13 @@ public final class AppRestrictionController {
                     DEFAULT_BG_PROMPT_FGS_WITH_NOTIFICATION_ON_LONG_RUNNING);
         }
 
+        private void updateBgPromptFgsOnLongRunning() {
+            mBgPromptFgsOnLongRunning = DeviceConfig.getBoolean(
+                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    KEY_BG_PROMPT_FGS_ON_LONG_RUNNING,
+                    DEFAULT_BG_PROMPT_FGS_ON_LONG_RUNNING);
+        }
+
         private void updateBgPromptAbusiveAppToBgRestricted() {
             mBgPromptAbusiveAppsToBgRestricted = DeviceConfig.getBoolean(
                     DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
@@ -1363,6 +1393,14 @@ public final class AppRestrictionController {
             pw.print(KEY_BG_LONG_FGS_NOTIFICATION_MINIMAL_INTERVAL);
             pw.print('=');
             pw.println(mBgLongFgsNotificationMinIntervalMs);
+            pw.print(prefix);
+            pw.print(KEY_BG_PROMPT_FGS_ON_LONG_RUNNING);
+            pw.print('=');
+            pw.println(mBgPromptFgsOnLongRunning);
+            pw.print(prefix);
+            pw.print(KEY_BG_PROMPT_FGS_WITH_NOTIFICATION_ON_LONG_RUNNING);
+            pw.print('=');
+            pw.println(mBgPromptFgsWithNotiOnLongRunning);
             pw.print(prefix);
             pw.print(KEY_BG_PROMPT_FGS_WITH_NOTIFICATION_TO_BG_RESTRICTED);
             pw.print('=');
@@ -2499,6 +2537,12 @@ public final class AppRestrictionController {
                     ActivityManager.isLowRamDeviceStatic(),
                     mBgController.getRestrictionLevel(uid));
             PendingIntent pendingIntent;
+            if (!mBgController.mConstantsObserver.mBgPromptFgsOnLongRunning) {
+                if (DEBUG_BG_RESTRICTION_CONTROLLER) {
+                    Slog.i(TAG, "Long-running FGS prompt is disabled.");
+                }
+                return;
+            }
             if (!mBgController.mConstantsObserver.mBgPromptFgsWithNotiOnLongRunning
                     && mBgController.hasForegroundServiceNotifications(packageName, uid)) {
                 if (DEBUG_BG_RESTRICTION_CONTROLLER) {
@@ -2746,13 +2790,6 @@ public final class AppRestrictionController {
         if (isOnSystemDeviceIdleAllowlist(uid)) {
             return REASON_SYSTEM_ALLOW_LISTED;
         }
-        if (isOnDeviceIdleAllowlist(uid)) {
-            return REASON_ALLOWLISTED_PACKAGE;
-        }
-        final ActivityManagerInternal am = mInjector.getActivityManagerInternal();
-        if (am.isAssociatedCompanionApp(UserHandle.getUserId(uid), uid)) {
-            return REASON_COMPANION_DEVICE_MANAGER;
-        }
         if (UserManager.isDeviceInDemoMode(mContext)) {
             return REASON_DEVICE_DEMO_MODE;
         }
@@ -2761,6 +2798,7 @@ public final class AppRestrictionController {
                 .hasUserRestriction(UserManager.DISALLOW_APPS_CONTROL, userId)) {
             return REASON_DISALLOW_APPS_CONTROL;
         }
+        final ActivityManagerInternal am = mInjector.getActivityManagerInternal();
         if (am.isDeviceOwner(uid)) {
             return REASON_DEVICE_OWNER;
         }
@@ -2777,14 +2815,10 @@ public final class AppRestrictionController {
         if (packages != null) {
             final AppOpsManager appOpsManager = mInjector.getAppOpsManager();
             final PackageManagerInternal pm = mInjector.getPackageManagerInternal();
+            final AppStandbyInternal appStandbyInternal = mInjector.getAppStandbyInternal();
+            // Check each packages to see if any of them is in the "fixed" exemption cases.
             for (String pkg : packages) {
-                if (appOpsManager.checkOpNoThrow(AppOpsManager.OP_ACTIVATE_VPN,
-                        uid, pkg) == AppOpsManager.MODE_ALLOWED) {
-                    return REASON_OP_ACTIVATE_VPN;
-                } else if (appOpsManager.checkOpNoThrow(AppOpsManager.OP_ACTIVATE_PLATFORM_VPN,
-                        uid, pkg) == AppOpsManager.MODE_ALLOWED) {
-                    return REASON_OP_ACTIVATE_PLATFORM_VPN;
-                } else if (isSystemModule(pkg)) {
+                if (isSystemModule(pkg)) {
                     return REASON_SYSTEM_MODULE;
                 } else if (isCarrierApp(pkg)) {
                     return REASON_CARRIER_PRIVILEGED_APP;
@@ -2794,6 +2828,18 @@ public final class AppRestrictionController {
                     return REASON_SYSTEM_ALLOW_LISTED;
                 } else if (pm.isPackageStateProtected(pkg, userId)) {
                     return REASON_DPO_PROTECTED_APP;
+                } else if (appStandbyInternal.isActiveDeviceAdmin(pkg, userId)) {
+                    return REASON_ACTIVE_DEVICE_ADMIN;
+                }
+            }
+            // Loop the packages again, and check the user-configurable exemptions.
+            for (String pkg : packages) {
+                if (appOpsManager.checkOpNoThrow(AppOpsManager.OP_ACTIVATE_VPN,
+                        uid, pkg) == AppOpsManager.MODE_ALLOWED) {
+                    return REASON_OP_ACTIVATE_VPN;
+                } else if (appOpsManager.checkOpNoThrow(AppOpsManager.OP_ACTIVATE_PLATFORM_VPN,
+                        uid, pkg) == AppOpsManager.MODE_ALLOWED) {
+                    return REASON_OP_ACTIVATE_PLATFORM_VPN;
                 }
             }
         }
@@ -2802,6 +2848,12 @@ public final class AppRestrictionController {
         }
         if (isRoleHeldByUid(RoleManager.ROLE_EMERGENCY, uid)) {
             return REASON_ROLE_EMERGENCY;
+        }
+        if (isOnDeviceIdleAllowlist(uid)) {
+            return REASON_ALLOWLISTED_PACKAGE;
+        }
+        if (am.isAssociatedCompanionApp(UserHandle.getUserId(uid), uid)) {
+            return REASON_COMPANION_DEVICE_MANAGER;
         }
         return REASON_DENIED;
     }

@@ -305,10 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"takviminize erişme"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS mesajları gönderme ve görüntüleme"</string>
-    <!-- no translation found for permgrouplab_storage (17339216290379241) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_storage (5378659041354582769) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="17339216290379241">"Dosyalar"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"cihazınızdaki dosyalara erişme"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Müzik ve ses"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"cihazınızdaki müziklere ve seslere erişme"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Fotoğraflar ve videolar"</string>
@@ -1590,7 +1588,7 @@
     <string name="validity_period" msgid="1717724283033175968">"Geçerlilik:"</string>
     <string name="issued_on" msgid="5855489688152497307">"Yayınlanma tarihi:"</string>
     <string name="expires_on" msgid="1623640879705103121">"Sona erme tarihi:"</string>
-    <string name="serial_number" msgid="3479576915806623429">"Seri numara:"</string>
+    <string name="serial_number" msgid="3479576915806623429">"Seri numarası:"</string>
     <string name="fingerprints" msgid="148690767172613723">"Parmak izleri:"</string>
     <string name="sha256_fingerprint" msgid="7103976380961964600">"SHA-256 parmak izi:"</string>
     <string name="sha1_fingerprint" msgid="2339915142825390774">"SHA-1 parmak izi:"</string>

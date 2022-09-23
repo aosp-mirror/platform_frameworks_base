@@ -136,7 +136,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Rosto autenticado"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Confirmado"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Toque em Confirmar para concluir."</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Desbloqueado c/ rosto. Prima o ícone de desb. p/ continuar."</string>
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Desbloqueio com a face. Prima o ícone de desb. p/ continuar."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Autenticado"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Utilizar PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Utilizar padrão"</string>
@@ -203,6 +203,7 @@
     <string name="accessibility_clear_all" msgid="970525598287244592">"Limpar todas as notificações."</string>
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="91483442850649192">
+      <item quantity="many"><xliff:g id="NUMBER_1">%s</xliff:g> more notifications inside.</item>
       <item quantity="other">Mais <xliff:g id="NUMBER_1">%s</xliff:g> notificações no grupo.</item>
       <item quantity="one">Mais <xliff:g id="NUMBER_0">%s</xliff:g> notificação no grupo.</item>
     </plurals>
@@ -253,6 +254,7 @@
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"A ativar..."</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Poup. dados ativada"</string>
     <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="3142308865165871976">
+      <item quantity="many">%d devices</item>
       <item quantity="other">%d dispositivos</item>
       <item quantity="one">%d dispositivo</item>
     </plurals>
@@ -286,8 +288,8 @@
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Iniciar"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Parar"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Modo para uma mão"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Pretende desbloquear o microfone do dispositivo?"</string>
-    <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Pretende desbloquear a câmara do dispositivo?"</string>
+    <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Desbloquear o microfone do dispositivo?"</string>
+    <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Desbloquear a câmara do dispositivo?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Pretende desbloquear a câmara e o microfone?"</string>
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Isto desbloqueia o acesso a todas as apps e serviços com autorização para utilizar o seu microfone."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Isto desbloqueia o acesso a todas as apps e serviços com autorização para utilizar a sua câmara."</string>
@@ -312,11 +314,13 @@
     <string name="tap_again" msgid="1315420114387908655">"Toque novamente"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Deslize rapidamente para cima para abrir"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Prima o ícone de desbloqueio para abrir"</string>
-    <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Desbloqueado com o rosto. Prima o ícone de desbl. p/ abrir."</string>
-    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
+    <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Desbloqueio com a face. Prima ícone de desbloqueio p/ abrir."</string>
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1901953991150295169">"Mover para a esquerda"</item>
+    <item msgid="5558598599408514296">"Mover para baixo"</item>
+    <item msgid="4844142668312841831">"Mover para a direita"</item>
+    <item msgid="5640521437931460125">"Mover para cima"</item>
+  </string-array>
     <string name="keyguard_retry" msgid="886802522584053523">"Deslize rapidamente para cima para tentar novamente."</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Desbloquear para utilizar o NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Este dispositivo pertence à sua entidade."</string>
@@ -345,6 +349,7 @@
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Sim, continuar"</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Limite de utilizadores alcançado"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
+      <item quantity="many">You can add up to <xliff:g id="COUNT">%d</xliff:g> users.</item>
       <item quantity="other">Pode adicionar até <xliff:g id="COUNT">%d</xliff:g> utilizadores.</item>
       <item quantity="one">Apenas é possível criar um utilizador.</item>
     </plurals>
@@ -404,7 +409,7 @@
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"As suas apps de trabalho estão ligadas à Internet através da app <xliff:g id="VPN_APP">%1$s</xliff:g>. A sua atividade de rede em apps de trabalho, incluindo dados de navegação e emails, está visível para o seu administrador de TI e fornecedor de VPN."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"As suas apps pessoais estão ligadas à Internet através da app <xliff:g id="VPN_APP">%1$s</xliff:g>. A sua atividade de rede, incluindo dados de navegação e emails, está visível para o seu fornecedor de VPN."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Abrir as definições de VPN"</string>
+    <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Abra as definições de VPN"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Este dispositivo é gerido pelos teus pais, que podem ver e gerir informações como as apps que utilizas, a tua localização e o tempo de utilização."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"Mantido desbloqueado pelo TrustAgent"</string>
@@ -534,10 +539,12 @@
     <string name="snooze_undo" msgid="2738844148845992103">"Anular"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"Suspensa por <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
+      <item quantity="many">%d hours</item>
       <item quantity="other">%d horas</item>
       <item quantity="one">%d hora</item>
     </plurals>
     <plurals name="snoozeMinuteOptions" formatted="false" msgid="8998483159208055980">
+      <item quantity="many">%d minutes</item>
       <item quantity="other">%d minutos</item>
       <item quantity="one">%d minuto</item>
     </plurals>
@@ -550,7 +557,7 @@
     <string name="keyboard_key_dpad_left" msgid="8329738048908755640">"Para a esquerda"</string>
     <string name="keyboard_key_dpad_right" msgid="6282105433822321767">"Para a direita"</string>
     <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"Ao centro"</string>
-    <string name="keyboard_key_tab" msgid="4592772350906496730">"Tabulação"</string>
+    <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Espaço"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Enter"</string>
     <string name="keyboard_key_backspace" msgid="4095278312039628074">"Retrocesso"</string>
@@ -737,6 +744,7 @@
     <string name="privacy_type_camera" msgid="7974051382167078332">"câmara"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"localização"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"microfone"</string>
+    <string name="privacy_type_media_projection" msgid="8136723828804251547">"gravação de ecrã"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Sem título"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Modo de espera"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Janela de ampliação"</string>
@@ -763,6 +771,7 @@
     <string name="quick_controls_title" msgid="6839108006171302273">"Controlos de dispositivos"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Escolha uma app para adicionar controlos"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
+      <item quantity="many"><xliff:g id="NUMBER_1">%s</xliff:g> controls added.</item>
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> controlos adicionados.</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> controlo adicionado.</item>
     </plurals>
@@ -841,8 +850,8 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Para transmitir esta sessão, abra a app."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"App desconhecida"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Parar transmissão"</string>
-    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
-    <skip />
+    <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Dispositivos disponíveis para a saída de áudio."</string>
+    <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Volume"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Como funciona a transmissão"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Transmissão"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"As pessoas próximas de si com dispositivos Bluetooth compatíveis podem ouvir o conteúdo multimédia que está a transmitir"</string>
@@ -923,28 +932,30 @@
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Não adicion. mosaico"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Selecione utilizador"</string>
     <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
+      <item quantity="many"><xliff:g id="COUNT_1">%s</xliff:g> apps estão ativas</item>
       <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> apps estão ativas</item>
       <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> app está ativa</item>
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Novas informações"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Apps ativas"</string>
-    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"Mesmo que não esteja a usar estas apps, continuam ativas e podem afetar a autonomia da bateria"</string>
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"Estas apps estão ativas e a funcionar, mesmo quando não as está a usar. Isto melhora a sua funcionalidade, mas também afeta a autonomia da bateria."</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Parar"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Parada"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Concluir"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"Copiado"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"Da app <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <string name="clipboard_dismiss_description" msgid="7544573092766945657">"Ignorar cópia de IU"</string>
+    <string name="clipboard_dismiss_description" msgid="3335990369850165486">"Ignorar texto copiado"</string>
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"Editar texto copiado"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Editar imagem copiada"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Enviar para dispositivo próximo"</string>
     <string name="clipboard_text_hidden" msgid="7926899867471812305">"Toque para ver"</string>
-    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
-    <skip />
-    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
-    <skip />
-    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
-    <skip />
+    <string name="clipboard_text_copied" msgid="5100836834278976679">"Texto copiado"</string>
+    <string name="clipboard_image_copied" msgid="3793365360174328722">"Imagem copiada"</string>
+    <string name="clipboard_content_copied" msgid="144452398567828145">"Conteúdo copiado"</string>
+    <string name="clipboard_editor" msgid="2971197550401892843">"Editor da área de transferência"</string>
+    <string name="clipboard_overlay_window_name" msgid="6450043652167357664">"Área de transferência"</string>
+    <string name="clipboard_image_preview" msgid="2156475174343538128">"Pré-visualização da imagem"</string>
+    <string name="clipboard_edit" msgid="4500155216174011640">"editar"</string>
     <string name="add" msgid="81036585205287996">"Adicionar"</string>
     <string name="manage_users" msgid="1823875311934643849">"Gerir utilizadores"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"Esta notificação não pode ser arrastada para o ecrã dividido."</string>
@@ -952,5 +963,5 @@
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Modo Prioridade"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"Alarme definido"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"A câmara e o microfone estão desativados"</string>
-    <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# notificação}other{# notificações}}"</string>
+    <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# notificação}many{# notificações}other{# notificações}}"</string>
 </resources>

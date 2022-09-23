@@ -54,7 +54,13 @@ public interface TaskStackListenerCallback {
 
     default void onTaskDescriptionChanged(RunningTaskInfo taskInfo) { }
 
-    default void onTaskSnapshotChanged(int taskId, TaskSnapshot snapshot) { }
+    /**
+     * @return whether the snapshot is consumed and the lifecycle of the snapshot extends beyond
+     *         the lifecycle of this callback.
+     */
+    default boolean onTaskSnapshotChanged(int taskId, TaskSnapshot snapshot) {
+        return false;
+    }
 
     default void onBackPressedOnTaskRoot(RunningTaskInfo taskInfo) { }
 

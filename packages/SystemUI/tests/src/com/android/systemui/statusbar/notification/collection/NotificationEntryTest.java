@@ -29,6 +29,7 @@ import static com.android.systemui.statusbar.NotificationEntryHelper.modifySbn;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 import android.app.ActivityManager;
@@ -57,6 +58,7 @@ import com.android.systemui.util.time.FakeSystemClock;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 
 import java.util.ArrayList;
 
@@ -72,6 +74,7 @@ public class NotificationEntryTest extends SysuiTestCase {
     private int mId;
 
     private NotificationEntry mEntry;
+    private NotificationChannel mChannel = Mockito.mock(NotificationChannel.class);
     private final FakeSystemClock mClock = new FakeSystemClock();
 
     @Before
@@ -85,10 +88,13 @@ public class NotificationEntryTest extends SysuiTestCase {
                 .setPkg(TEST_PACKAGE_NAME)
                 .setOpPkg(TEST_PACKAGE_NAME)
                 .setUid(TEST_UID)
+                .setChannel(mChannel)
                 .setId(mId++)
                 .setNotification(n.build())
                 .setUser(new UserHandle(ActivityManager.getCurrentUser()))
                 .build();
+
+        doReturn(false).when(mChannel).isBlockable();
     }
 
     @Test
@@ -97,6 +103,44 @@ public class NotificationEntryTest extends SysuiTestCase {
 
         assertTrue(mEntry.isExemptFromDndVisualSuppression());
         assertFalse(mEntry.shouldSuppressAmbient());
+    }
+
+    @Test
+    public void testBlockableEntryWhenCritical() {
+        doReturn(true).when(mChannel).isBlockable();
+
+        assertTrue(mEntry.isBlockable());
+    }
+
+
+    @Test
+    public void testBlockableEntryWhenCriticalAndChannelNotBlockable() {
+        doReturn(true).when(mChannel).isBlockable();
+        doReturn(true).when(mChannel).isImportanceLockedByCriticalDeviceFunction();
+
+        assertTrue(mEntry.isBlockable());
+    }
+
+    @Test
+    public void testNonBlockableEntryWhenCriticalAndChannelNotBlockable() {
+        doReturn(false).when(mChannel).isBlockable();
+        doReturn(true).when(mChannel).isImportanceLockedByCriticalDeviceFunction();
+
+        assertFalse(mEntry.isBlockable());
+    }
+
+    @Test
+    public void testBlockableWhenEntryHasNoChannel() {
+        StatusBarNotification sbn = new SbnBuilder().build();
+        Ranking ranking = new RankingBuilder()
+                .setChannel(null)
+                .setKey(sbn.getKey())
+                .build();
+
+        NotificationEntry entry =
+                new NotificationEntry(sbn, ranking, mClock.uptimeMillis());
+
+        assertFalse(entry.isBlockable());
     }
 
     @Test
@@ -117,7 +161,8 @@ public class NotificationEntryTest extends SysuiTestCase {
 
     @Test
     public void testIsExemptFromDndVisualSuppression_system() {
-        mEntry.mIsSystemNotification = true;
+        doReturn(true).when(mChannel).isImportanceLockedByCriticalDeviceFunction();
+        doReturn(false).when(mChannel).isBlockable();
 
         assertTrue(mEntry.isExemptFromDndVisualSuppression());
         assertFalse(mEntry.shouldSuppressAmbient());
@@ -128,7 +173,7 @@ public class NotificationEntryTest extends SysuiTestCase {
         NotificationEntry entry = new NotificationEntryBuilder()
                 .setUid(UID_NORMAL)
                 .build();
-        entry.mIsSystemNotification = true;
+        doReturn(true).when(mChannel).isImportanceLockedByCriticalDeviceFunction();
         modifyRanking(entry).setSuppressedVisualEffects(SUPPRESSED_EFFECT_AMBIENT).build();
 
         modifySbn(entry)

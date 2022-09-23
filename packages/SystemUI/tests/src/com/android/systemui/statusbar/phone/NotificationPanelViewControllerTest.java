@@ -28,6 +28,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeast;
@@ -121,6 +122,8 @@ import com.android.systemui.statusbar.notification.ConversationNotificationManag
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
+import com.android.systemui.statusbar.notification.row.ExpandableView;
+import com.android.systemui.statusbar.notification.row.ExpandableView.OnHeightChangedListener;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.notification.stack.NotificationRoundnessManager;
@@ -568,6 +571,38 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void onNotificationHeightChangeWhileOnKeyguardWillComputeMaxKeyguardNotifications() {
+        mStatusBarStateController.setState(KEYGUARD);
+        ArgumentCaptor<OnHeightChangedListener> captor =
+                ArgumentCaptor.forClass(OnHeightChangedListener.class);
+        verify(mNotificationStackScrollLayoutController)
+                .setOnHeightChangedListener(captor.capture());
+        OnHeightChangedListener listener = captor.getValue();
+
+        clearInvocations(mNotificationStackSizeCalculator);
+        listener.onHeightChanged(mock(ExpandableView.class), false);
+
+        verify(mNotificationStackSizeCalculator)
+                .computeMaxKeyguardNotifications(any(), anyFloat(), anyFloat(), anyFloat());
+    }
+
+    @Test
+    public void onNotificationHeightChangeWhileInShadeWillNotComputeMaxKeyguardNotifications() {
+        mStatusBarStateController.setState(SHADE);
+        ArgumentCaptor<OnHeightChangedListener> captor =
+                ArgumentCaptor.forClass(OnHeightChangedListener.class);
+        verify(mNotificationStackScrollLayoutController)
+                .setOnHeightChangedListener(captor.capture());
+        OnHeightChangedListener listener = captor.getValue();
+
+        clearInvocations(mNotificationStackSizeCalculator);
+        listener.onHeightChanged(mock(ExpandableView.class), false);
+
+        verify(mNotificationStackSizeCalculator, never())
+                .computeMaxKeyguardNotifications(any(), anyFloat(), anyFloat(), anyFloat());
+    }
+
+    @Test
     public void computeMaxKeyguardNotifications_lockscreenToShade_returnsExistingMax() {
         when(mAmbientState.getFractionToShade()).thenReturn(0.5f);
         mNotificationPanelViewController.setMaxDisplayedNotifications(-1);
@@ -578,19 +613,8 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void computeMaxKeyguardNotifications_dozeAmountNotZero_returnsExistingMax() {
-        when(mAmbientState.getDozeAmount()).thenReturn(0.5f);
-        mNotificationPanelViewController.setMaxDisplayedNotifications(-1);
-
-        // computeMaxKeyguardNotifications sets maxAllowed to 0 at minimum if it updates the value
-        assertThat(mNotificationPanelViewController.computeMaxKeyguardNotifications())
-                .isEqualTo(-1);
-    }
-
-    @Test
     public void computeMaxKeyguardNotifications_noTransition_updatesMax() {
         when(mAmbientState.getFractionToShade()).thenReturn(0f);
-        when(mAmbientState.getDozeAmount()).thenReturn(0f);
         mNotificationPanelViewController.setMaxDisplayedNotifications(-1);
 
         // computeMaxKeyguardNotifications sets maxAllowed to 0 at minimum if it updates the value
@@ -598,25 +622,102 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 .isNotEqualTo(-1);
     }
 
-    @Test
-    public void getLockscreenSpaceForNotifications_includesOverlapWithLockIcon() {
-        when(mResources.getDimensionPixelSize(R.dimen.keyguard_indication_bottom_padding))
-                .thenReturn(0);
-        mNotificationPanelViewController.setAmbientIndicationTop(
-                /* ambientIndicationTop= */ 0, /* ambientTextVisible */ false);
+    private void setBottomPadding(int stackBottom, int lockIconPadding, int indicationPadding,
+            int ambientPadding) {
 
-        // Use lock icon padding (100 - 80 - 5 = 15) as bottom padding
-        when(mNotificationStackScrollLayoutController.getBottom()).thenReturn(100);
-        when(mLockIconViewController.getTop()).thenReturn(80f);
-        when(mResources.getDimensionPixelSize(R.dimen.shelf_and_lock_icon_overlap)).thenReturn(5);
-
-        // Available space (100 - 0 - 15 = 85)
-        when(mNotificationStackScrollLayoutController.getHeight()).thenReturn(100);
         when(mNotificationStackScrollLayoutController.getTop()).thenReturn(0);
-        mNotificationPanelViewController.updateResources();
+        when(mNotificationStackScrollLayoutController.getHeight()).thenReturn(stackBottom);
+        when(mNotificationStackScrollLayoutController.getBottom()).thenReturn(stackBottom);
+        when(mLockIconViewController.getTop()).thenReturn((float) (stackBottom - lockIconPadding));
 
-        assertThat(mNotificationPanelViewController.getSpaceForLockscreenNotifications())
-                .isEqualTo(85);
+        when(mResources.getDimensionPixelSize(R.dimen.keyguard_indication_bottom_padding))
+                .thenReturn(indicationPadding);
+        mNotificationPanelViewController.loadDimens();
+
+        mNotificationPanelViewController.setAmbientIndicationTop(
+                /* ambientIndicationTop= */ stackBottom - ambientPadding,
+                /* ambientTextVisible= */ true);
+    }
+
+    @Test
+    public void getVerticalSpaceForLockscreenNotifications_useLockIconBottomPadding_returnsSpaceAvailable() {
+        setBottomPadding(/* stackScrollLayoutBottom= */ 100,
+                /* lockIconPadding= */ 20,
+                /* indicationPadding= */ 0,
+                /* ambientPadding= */ 0);
+
+        assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenNotifications())
+                .isEqualTo(80);
+    }
+
+    @Test
+    public void getVerticalSpaceForLockscreenNotifications_useIndicationBottomPadding_returnsSpaceAvailable() {
+        setBottomPadding(/* stackScrollLayoutBottom= */ 100,
+                /* lockIconPadding= */ 0,
+                /* indicationPadding= */ 30,
+                /* ambientPadding= */ 0);
+
+        assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenNotifications())
+                .isEqualTo(70);
+    }
+
+    @Test
+    public void getVerticalSpaceForLockscreenNotifications_useAmbientBottomPadding_returnsSpaceAvailable() {
+        setBottomPadding(/* stackScrollLayoutBottom= */ 100,
+                /* lockIconPadding= */ 0,
+                /* indicationPadding= */ 0,
+                /* ambientPadding= */ 40);
+
+        assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenNotifications())
+                .isEqualTo(60);
+    }
+
+    @Test
+    public void getVerticalSpaceForLockscreenShelf_useLockIconBottomPadding_returnsShelfHeight() {
+        setBottomPadding(/* stackScrollLayoutBottom= */ 100,
+                /* lockIconPadding= */ 20,
+                /* indicationPadding= */ 0,
+                /* ambientPadding= */ 0);
+
+        when(mNotificationShelfController.getIntrinsicHeight()).thenReturn(5);
+        assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenShelf())
+                .isEqualTo(5);
+    }
+
+    @Test
+    public void getVerticalSpaceForLockscreenShelf_useIndicationBottomPadding_returnsZero() {
+        setBottomPadding(/* stackScrollLayoutBottom= */ 100,
+                /* lockIconPadding= */ 0,
+                /* indicationPadding= */ 30,
+                /* ambientPadding= */ 0);
+
+        when(mNotificationShelfController.getIntrinsicHeight()).thenReturn(5);
+        assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenShelf())
+                .isEqualTo(0);
+    }
+
+    @Test
+    public void getVerticalSpaceForLockscreenShelf_useAmbientBottomPadding_returnsZero() {
+        setBottomPadding(/* stackScrollLayoutBottom= */ 100,
+                /* lockIconPadding= */ 0,
+                /* indicationPadding= */ 0,
+                /* ambientPadding= */ 40);
+
+        when(mNotificationShelfController.getIntrinsicHeight()).thenReturn(5);
+        assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenShelf())
+                .isEqualTo(0);
+    }
+
+    @Test
+    public void getVerticalSpaceForLockscreenShelf_useLockIconPadding_returnsLessThanShelfHeight() {
+        setBottomPadding(/* stackScrollLayoutBottom= */ 100,
+                /* lockIconPadding= */ 10,
+                /* indicationPadding= */ 8,
+                /* ambientPadding= */ 0);
+
+        when(mNotificationShelfController.getIntrinsicHeight()).thenReturn(5);
+        assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenShelf())
+                .isEqualTo(2);
     }
 
     @Test
@@ -788,11 +889,40 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         updateSmallestScreenWidth(300);
         when(mResources.getBoolean(
                 com.android.internal.R.bool.config_keyguardUserSwitcher)).thenReturn(true);
-        when(mUserManager.isUserSwitcherEnabled()).thenReturn(true);
+        when(mResources.getBoolean(R.bool.qs_show_user_switcher_for_single_user)).thenReturn(false);
+        when(mUserManager.isUserSwitcherEnabled(false)).thenReturn(true);
 
         updateSmallestScreenWidth(800);
 
         verify(mUserSwitcherStubView).inflate();
+    }
+
+    @Test
+    public void testFinishInflate_userSwitcherDisabled_doNotInflateUserSwitchView() {
+        givenViewAttached();
+        when(mResources.getBoolean(
+                com.android.internal.R.bool.config_keyguardUserSwitcher)).thenReturn(true);
+        when(mResources.getBoolean(R.bool.qs_show_user_switcher_for_single_user)).thenReturn(false);
+        when(mUserManager.isUserSwitcherEnabled(false /* showEvenIfNotActionable */))
+                .thenReturn(false);
+
+        mNotificationPanelViewController.onFinishInflate();
+
+        verify(mUserSwitcherStubView, never()).inflate();
+    }
+
+    @Test
+    public void testReInflateViews_userSwitcherDisabled_doNotInflateUserSwitchView() {
+        givenViewAttached();
+        when(mResources.getBoolean(
+                com.android.internal.R.bool.config_keyguardUserSwitcher)).thenReturn(true);
+        when(mResources.getBoolean(R.bool.qs_show_user_switcher_for_single_user)).thenReturn(false);
+        when(mUserManager.isUserSwitcherEnabled(false /* showEvenIfNotActionable */))
+                .thenReturn(false);
+
+        mNotificationPanelViewController.reInflateViews();
+
+        verify(mUserSwitcherStubView, never()).inflate();
     }
 
     @Test
@@ -853,6 +983,21 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 0f, true /* expand */, 1000f, 1f, false);
         mNotificationPanelViewController.cancelHeightAnimator();
         verify(mKeyguardStateController).notifyPanelFlingEnd();
+    }
+
+    @Test
+    public void testSwipe_exactlyToTarget_notifiesNssl() {
+        // No over-expansion
+        mNotificationPanelViewController.setOverExpansion(0f);
+        // Fling to a target that is equal to the current position (i.e. a no-op fling).
+        mNotificationPanelViewController.flingToHeight(
+                0f,
+                true,
+                mNotificationPanelViewController.mExpandedHeight,
+                1f,
+                false);
+        // Verify that the NSSL is notified that the panel is *not* flinging.
+        verify(mNotificationStackScrollLayoutController).setPanelFlinging(false);
     }
 
     @Test
@@ -1143,6 +1288,19 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         assertThat(mNotificationPanelViewController.isQsTracking()).isFalse();
     }
 
+    @Test
+    public void testOnAttachRefreshStatusBarState() {
+        mStatusBarStateController.setState(KEYGUARD);
+        when(mKeyguardStateController.isKeyguardFadingAway()).thenReturn(false);
+        for (View.OnAttachStateChangeListener listener : mOnAttachStateChangeListeners) {
+            listener.onViewAttachedToWindow(mView);
+        }
+        verify(mKeyguardStatusViewController).setKeyguardStatusViewVisibility(
+                KEYGUARD/*statusBarState*/,
+                false/*keyguardFadingAway*/,
+                false/*goingToFullShade*/, SHADE/*oldStatusBarState*/);
+    }
+
     private static MotionEvent createMotionEvent(int x, int y, int action) {
         return MotionEvent.obtain(
                 /* downTime= */ 0, /* eventTime= */ 0, action, x, y, /* metaState= */ 0);
@@ -1184,7 +1342,8 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     }
 
     private void updateMultiUserSetting(boolean enabled) {
-        when(mUserManager.isUserSwitcherEnabled()).thenReturn(enabled);
+        when(mResources.getBoolean(R.bool.qs_show_user_switcher_for_single_user)).thenReturn(false);
+        when(mUserManager.isUserSwitcherEnabled(false)).thenReturn(enabled);
         final ArgumentCaptor<ContentObserver> observerCaptor =
                 ArgumentCaptor.forClass(ContentObserver.class);
         verify(mContentResolver)

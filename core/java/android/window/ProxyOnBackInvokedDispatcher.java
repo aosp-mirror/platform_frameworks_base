@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.util.Log;
 import android.util.Pair;
+import android.window.WindowOnBackInvokedDispatcher.Checker;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +51,11 @@ public class ProxyOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
     private final Object mLock = new Object();
     private OnBackInvokedDispatcher mActualDispatcher = null;
     private ImeOnBackInvokedDispatcher mImeDispatcher;
+    private final Checker mChecker;
+
+    public ProxyOnBackInvokedDispatcher(boolean applicationCallBackEnabled) {
+        mChecker = new Checker(applicationCallBackEnabled);
+    }
 
     @Override
     public void registerOnBackInvokedCallback(
@@ -58,11 +64,9 @@ public class ProxyOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
             Log.v(TAG, String.format("Proxy register %s. mActualDispatcher=%s", callback,
                     mActualDispatcher));
         }
-        if (priority < 0) {
-            throw new IllegalArgumentException("Application registered OnBackInvokedCallback "
-                    + "cannot have negative priority. Priority: " + priority);
+        if (mChecker.checkApplicationCallbackRegistration(priority, callback)) {
+            registerOnBackInvokedCallbackUnchecked(callback, priority);
         }
-        registerOnBackInvokedCallbackUnchecked(callback, priority);
     }
 
     @Override
@@ -90,7 +94,11 @@ public class ProxyOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         synchronized (mLock) {
             mCallbacks.add(Pair.create(callback, priority));
             if (mActualDispatcher != null) {
-                mActualDispatcher.registerOnBackInvokedCallback(priority, callback);
+                if (priority <= PRIORITY_SYSTEM) {
+                    mActualDispatcher.registerSystemOnBackInvokedCallback(callback);
+                } else {
+                    mActualDispatcher.registerOnBackInvokedCallback(priority, callback);
+                }
             }
         }
     }
@@ -171,7 +179,16 @@ public class ProxyOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
                 return;
             }
             clearCallbacksOnDispatcher();
-            mActualDispatcher = actualDispatcher;
+            if (actualDispatcher instanceof ProxyOnBackInvokedDispatcher) {
+                // We don't want to nest ProxyDispatchers, so if we are given on, we unwrap its
+                // actual dispatcher.
+                // This can happen when an Activity is recreated but the Window is preserved (e.g.
+                // when going from split-screen back to single screen)
+                mActualDispatcher =
+                        ((ProxyOnBackInvokedDispatcher) actualDispatcher).mActualDispatcher;
+            } else {
+                mActualDispatcher = actualDispatcher;
+            }
             transferCallbacksToDispatcher();
         }
     }

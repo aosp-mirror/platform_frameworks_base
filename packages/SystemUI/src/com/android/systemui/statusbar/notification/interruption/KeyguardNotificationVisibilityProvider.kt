@@ -1,6 +1,7 @@
 package com.android.systemui.statusbar.notification.interruption
 
 import android.app.Notification
+import android.app.Notification.VISIBILITY_SECRET
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -25,12 +26,15 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.ListenerSet
+import com.android.systemui.util.asIndenting
 import com.android.systemui.util.settings.GlobalSettings
 import com.android.systemui.util.settings.SecureSettings
+import com.android.systemui.util.withIncreasedIndent
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.ClassKey
 import dagger.multibindings.IntoMap
+import java.io.PrintWriter
 import java.util.function.Consumer
 import javax.inject.Inject
 
@@ -107,8 +111,7 @@ private class KeyguardNotificationVisibilityProviderImpl @Inject constructor(
                 if (uri == showSilentNotifsUri) {
                     readShowSilentNotificationSetting()
                 }
-                if (statusBarStateController.getCurrentOrUpcomingState()
-                        == StatusBarState.KEYGUARD) {
+                if (isLockedOrLocking) {
                     notifyStateChanged("Settings $uri changed")
                 }
             }
@@ -134,14 +137,16 @@ private class KeyguardNotificationVisibilityProviderImpl @Inject constructor(
 
         // register (maybe) public mode changed callbacks:
         statusBarStateController.addCallback(object : StatusBarStateController.StateListener {
+            override fun onStateChanged(newState: Int) {
+                notifyStateChanged("onStatusBarStateChanged")
+            }
             override fun onUpcomingStateChanged(state: Int) {
                 notifyStateChanged("onStatusBarUpcomingStateChanged")
             }
         })
         broadcastDispatcher.registerReceiver(object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
-                if (statusBarStateController.getCurrentOrUpcomingState()
-                        == StatusBarState.KEYGUARD) {
+                if (isLockedOrLocking) {
                     // maybe public mode changed
                     notifyStateChanged(intent.action!!)
                 }
@@ -163,11 +168,13 @@ private class KeyguardNotificationVisibilityProviderImpl @Inject constructor(
 
     override fun shouldHideNotification(entry: NotificationEntry): Boolean = when {
         // Keyguard state doesn't matter if the keyguard is not showing.
-        statusBarStateController.getCurrentOrUpcomingState() != StatusBarState.KEYGUARD -> false
+        !isLockedOrLocking -> false
         // Notifications not allowed on the lockscreen, always hide.
         !lockscreenUserManager.shouldShowLockscreenNotifications() -> true
         // User settings do not allow this notification on the lockscreen, so hide it.
         userSettingsDisallowNotification(entry) -> true
+        // Entry is explicitly marked SECRET, so hide it.
+        entry.sbn.notification.visibility == VISIBILITY_SECRET -> true
         // if entry is silent, apply custom logic to see if should hide
         shouldHideIfEntrySilent(entry) -> true
         else -> false
@@ -207,6 +214,20 @@ private class KeyguardNotificationVisibilityProviderImpl @Inject constructor(
             else -> disallowForUser(notifUser)
         }
     }
+
+    override fun dump(pw: PrintWriter, args: Array<out String>) = pw.asIndenting().run {
+        println("isLockedOrLocking=$isLockedOrLocking")
+        withIncreasedIndent {
+            println("keyguardStateController.isShowing=${keyguardStateController.isShowing}")
+            println("statusBarStateController.currentOrUpcomingState=" +
+                    "${statusBarStateController.currentOrUpcomingState}")
+        }
+        println("hideSilentNotificationsOnLockscreen=$hideSilentNotificationsOnLockscreen")
+    }
+
+    private val isLockedOrLocking get() =
+        keyguardStateController.isShowing ||
+                statusBarStateController.currentOrUpcomingState == StatusBarState.KEYGUARD
 
     private fun readShowSilentNotificationSetting() {
         val showSilentNotifs =

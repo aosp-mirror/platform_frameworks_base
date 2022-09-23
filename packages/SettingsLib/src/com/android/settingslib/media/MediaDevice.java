@@ -33,6 +33,7 @@ import static android.media.MediaRoute2Info.TYPE_WIRED_HEADSET;
 
 import static com.android.settingslib.media.LocalMediaManager.MediaDeviceState.STATE_SELECTED;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.media.MediaRoute2Info;
@@ -268,6 +269,20 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
     }
 
     /**
+     * Checks if route's volume is fixed, if true, we should disable volume control for the device.
+     *
+     * @return route for this device is fixed.
+     */
+    @SuppressLint("NewApi")
+    public boolean isVolumeFixed() {
+        if (mRouteInfo == null) {
+            Log.w(TAG, "RouteInfo is empty, regarded as volume fixed.");
+            return true;
+        }
+        return mRouteInfo.getVolumeHandling() == MediaRoute2Info.PLAYBACK_VOLUME_FIXED;
+    }
+
+    /**
      * Transfer MediaDevice for media
      *
      * @return result of transfer media
@@ -350,11 +365,6 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
             return 1;
         }
 
-        // Both devices have same connection status, compare the range zone
-        if (NearbyDevice.compareRangeZones(getRangeZone(), another.getRangeZone()) != 0) {
-            return NearbyDevice.compareRangeZones(getRangeZone(), another.getRangeZone());
-        }
-
         if (mType == another.mType) {
             // Check device is muting expected device
             if (isMutingExpectedDevice()) {
@@ -375,6 +385,11 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
                 return -1;
             } else if (another.isCarKitDevice()) {
                 return 1;
+            }
+
+            // Both devices have same connection status and type, compare the range zone
+            if (NearbyDevice.compareRangeZones(getRangeZone(), another.getRangeZone()) != 0) {
+                return NearbyDevice.compareRangeZones(getRangeZone(), another.getRangeZone());
             }
 
             // Set last used device at the first item
@@ -439,7 +454,7 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
      * Check if it is muting expected device
      * @return {@code true} if it is muting expected device, otherwise return {@code false}
      */
-    protected boolean isMutingExpectedDevice() {
+    public boolean isMutingExpectedDevice() {
         return false;
     }
 

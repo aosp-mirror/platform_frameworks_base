@@ -803,6 +803,13 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     private AndroidPackage mPlatformPackage;
     ComponentName mCustomResolverComponentName;
 
+    // Recorded overlay paths configuration for the Android app info.
+    private String[] mPlatformPackageOverlayPaths = null;
+    private String[] mPlatformPackageOverlayResourceDirs = null;
+    // And the same paths for the replaced resolver activity package
+    private String[] mReplacedResolverPackageOverlayPaths = null;
+    private String[] mReplacedResolverPackageOverlayResourceDirs = null;
+
     private boolean mResolverReplaced = false;
 
     @NonNull
@@ -2852,12 +2859,15 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mDexOptHelper.performPackageDexOptUpgradeIfNeeded();
     }
 
-
     private void notifyPackageUseInternal(String packageName, int reason) {
         long time = System.currentTimeMillis();
-        commitPackageStateMutation(null, packageName, packageState -> {
-            packageState.setLastPackageUsageTime(reason, time);
-        });
+        synchronized (mLock) {
+            final PackageSetting pkgSetting = mSettings.getPackageLPr(packageName);
+            if (pkgSetting == null) {
+                return;
+            }
+            pkgSetting.getPkgState().setLastPackageUsageTimeInMills(reason, time);
+        }
     }
 
     /*package*/ DexManager getDexManager() {
@@ -3952,6 +3962,11 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
     void sendPackageChangedBroadcast(@NonNull Computer snapshot, String packageName,
             boolean dontKillApp, ArrayList<String> componentNames, int packageUid, String reason) {
+        PackageStateInternal setting = snapshot.getPackageStateInternal(packageName,
+                Process.SYSTEM_UID);
+        if (setting == null) {
+            return;
+        }
         final int userId = UserHandle.getUserId(packageUid);
         final boolean isInstantApp =
                 snapshot.isInstantAppInternal(packageName, userId, Process.SYSTEM_UID);
@@ -5782,6 +5797,11 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             final Computer snapshot = snapshotComputer();
             enforceOwnerRights(snapshot, packageName, Binder.getCallingUid());
             mimeTypes = CollectionUtils.emptyIfNull(mimeTypes);
+            for (String mimeType : mimeTypes) {
+                if (mimeType.length() > 255) {
+                    throw new IllegalArgumentException("MIME type length exceeds 255 characters");
+                }
+            }
             final PackageStateInternal packageState = snapshot.getPackageStateInternal(packageName);
             Set<String> existingMimeTypes = packageState.getMimeGroups().get(mimeGroup);
             if (existingMimeTypes == null) {
@@ -5791,6 +5811,10 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             if (existingMimeTypes.size() == mimeTypes.size()
                     && existingMimeTypes.containsAll(mimeTypes)) {
                 return;
+            }
+            if (mimeTypes.size() > 500) {
+                throw new IllegalStateException("Max limit on MIME types for MIME group "
+                        + mimeGroup + " exceeded for package " + packageName);
             }
 
             ArraySet<String> mimeTypesSet = new ArraySet<>(mimeTypes);
@@ -6557,9 +6581,59 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             });
         }
 
+        if (userId == UserHandle.USER_SYSTEM) {
+            // Keep the overlays in the system application info (and anything special cased as well)
+            // up to date to make sure system ui is themed correctly.
+            maybeUpdateSystemOverlays(targetPackageName, newOverlayPaths);
+        }
+
         invalidatePackageInfoCache();
 
         return true;
+    }
+
+    private void maybeUpdateSystemOverlays(String targetPackageName, OverlayPaths newOverlayPaths) {
+        if (!mResolverReplaced) {
+            if (targetPackageName.equals("android")) {
+                if (newOverlayPaths == null) {
+                    mPlatformPackageOverlayPaths = null;
+                    mPlatformPackageOverlayResourceDirs = null;
+                } else {
+                    mPlatformPackageOverlayPaths = newOverlayPaths.getOverlayPaths().toArray(
+                            new String[0]);
+                    mPlatformPackageOverlayResourceDirs = newOverlayPaths.getResourceDirs().toArray(
+                            new String[0]);
+                }
+                applyUpdatedSystemOverlayPaths();
+            }
+        } else {
+            if (targetPackageName.equals(mResolveActivity.applicationInfo.packageName)) {
+                if (newOverlayPaths == null) {
+                    mReplacedResolverPackageOverlayPaths = null;
+                    mReplacedResolverPackageOverlayResourceDirs = null;
+                } else {
+                    mReplacedResolverPackageOverlayPaths =
+                            newOverlayPaths.getOverlayPaths().toArray(new String[0]);
+                    mReplacedResolverPackageOverlayResourceDirs =
+                            newOverlayPaths.getResourceDirs().toArray(new String[0]);
+                }
+                applyUpdatedSystemOverlayPaths();
+            }
+        }
+    }
+
+    private void applyUpdatedSystemOverlayPaths() {
+        if (mAndroidApplication == null) {
+            Slog.i(TAG, "Skipped the AndroidApplication overlay paths update - no app yet");
+        } else {
+            mAndroidApplication.overlayPaths = mPlatformPackageOverlayPaths;
+            mAndroidApplication.resourceDirs = mPlatformPackageOverlayResourceDirs;
+        }
+        if (mResolverReplaced) {
+            mResolveActivity.applicationInfo.overlayPaths = mReplacedResolverPackageOverlayPaths;
+            mResolveActivity.applicationInfo.resourceDirs =
+                    mReplacedResolverPackageOverlayResourceDirs;
+        }
     }
 
     private void enforceAdjustRuntimePermissionsPolicyOrUpgradeRuntimePermissions(
@@ -7038,6 +7112,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             }
             PackageManagerService.onChanged();
         }
+        applyUpdatedSystemOverlayPaths();
     }
 
     ApplicationInfo getCoreAndroidApplication() {

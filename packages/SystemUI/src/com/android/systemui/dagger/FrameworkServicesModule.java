@@ -54,11 +54,13 @@ import android.hardware.fingerprint.FingerprintManager;
 import android.media.AudioManager;
 import android.media.IAudioService;
 import android.media.MediaRouter2Manager;
+import android.media.projection.MediaProjectionManager;
 import android.media.session.MediaSessionManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkScoreManager;
 import android.net.wifi.WifiManager;
 import android.os.BatteryStats;
+import android.os.PowerExemptionManager;
 import android.os.PowerManager;
 import android.os.ServiceManager;
 import android.os.UserManager;
@@ -321,6 +323,11 @@ public class FrameworkServicesModule {
     }
 
     @Provides
+    static MediaProjectionManager provideMediaProjectionManager(Context context) {
+        return context.getSystemService(MediaProjectionManager.class);
+    }
+
+    @Provides
     static MediaRouter2Manager provideMediaRouter2Manager(Context context) {
         return MediaRouter2Manager.getInstance(context);
     }
@@ -367,6 +374,13 @@ public class FrameworkServicesModule {
     @Singleton
     static PowerManager providePowerManager(Context context) {
         return context.getSystemService(PowerManager.class);
+    }
+
+    /** */
+    @Provides
+    @Singleton
+    static PowerExemptionManager providePowerExemptionManager(Context context) {
+        return context.getSystemService(PowerExemptionManager.class);
     }
 
     /** */
