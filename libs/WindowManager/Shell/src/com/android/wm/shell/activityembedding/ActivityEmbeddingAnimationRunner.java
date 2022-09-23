@@ -285,7 +285,8 @@ class ActivityEmbeddingAnimationRunner {
             }
 
             final Animation animation;
-            if (!TransitionInfo.isIndependent(change, info)) {
+            if (change.getParent() != null
+                    && handledChanges.contains(info.getChange(change.getParent()))) {
                 // No-op if it will be covered by the changing parent window.
                 animation = ActivityEmbeddingAnimationSpec.createNoopAnimation(change);
             } else if (Transitions.isClosingType(change.getMode())) {
