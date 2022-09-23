@@ -16,6 +16,7 @@
 
 package android.security;
 
+import android.annotation.NonNull;
 import android.app.ActivityThread;
 import android.app.Application;
 import android.app.KeyguardManager;
@@ -56,6 +57,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -157,13 +159,13 @@ public class KeyStore {
 
     private int mError = NO_ERROR;
 
-    private final IKeystoreService mBinder;
+    @NonNull private final IKeystoreService mBinder;
     private final Context mContext;
 
     private IBinder mToken;
 
-    private KeyStore(IKeystoreService binder) {
-        mBinder = binder;
+    private KeyStore(@NonNull IKeystoreService binder) {
+        mBinder = Objects.requireNonNull(binder);
         mContext = getApplicationContext();
     }
 
