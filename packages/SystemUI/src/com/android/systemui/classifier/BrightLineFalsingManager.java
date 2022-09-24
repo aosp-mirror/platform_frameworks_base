@@ -220,7 +220,7 @@ public class BrightLineFalsingManager implements FalsingManager {
             return r;
         }).collect(Collectors.toList());
 
-        logDebug("False Gesture: " + localResult[0]);
+        logDebug("False Gesture (type: " + interactionType + "): " + localResult[0]);
 
         return localResult[0];
     }
@@ -451,6 +451,12 @@ public class BrightLineFalsingManager implements FalsingManager {
     static void logDebug(String msg, Throwable throwable) {
         if (DEBUG) {
             Log.d(TAG, msg, throwable);
+        }
+    }
+
+    static void logVerbose(String msg) {
+        if (DEBUG) {
+            Log.v(TAG, msg);
         }
     }
 

@@ -188,24 +188,28 @@ class MediaDeviceManager @Inject constructor(
 
         @AnyThread
         fun start() = bgExecutor.execute {
-            localMediaManager.registerCallback(this)
-            localMediaManager.startScan()
-            muteAwaitConnectionManager?.startListening()
-            playbackType = controller?.playbackInfo?.playbackType ?: PLAYBACK_TYPE_UNKNOWN
-            controller?.registerCallback(this)
-            updateCurrent()
-            started = true
-            configurationController.addCallback(configListener)
+            if (!started) {
+                localMediaManager.registerCallback(this)
+                localMediaManager.startScan()
+                muteAwaitConnectionManager?.startListening()
+                playbackType = controller?.playbackInfo?.playbackType ?: PLAYBACK_TYPE_UNKNOWN
+                controller?.registerCallback(this)
+                updateCurrent()
+                started = true
+                configurationController.addCallback(configListener)
+            }
         }
 
         @AnyThread
         fun stop() = bgExecutor.execute {
-            started = false
-            controller?.unregisterCallback(this)
-            localMediaManager.stopScan()
-            localMediaManager.unregisterCallback(this)
-            muteAwaitConnectionManager?.stopListening()
-            configurationController.removeCallback(configListener)
+            if (started) {
+                started = false
+                controller?.unregisterCallback(this)
+                localMediaManager.stopScan()
+                localMediaManager.unregisterCallback(this)
+                muteAwaitConnectionManager?.stopListening()
+                configurationController.removeCallback(configListener)
+            }
         }
 
         fun dump(pw: PrintWriter) {
