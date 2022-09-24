@@ -116,9 +116,7 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
         when(mUserSwitcherController.getCurrentUserName()).thenReturn("Test User");
-        when(mUserSwitcherController.getKeyguardStateController())
-                .thenReturn(mKeyguardStateController);
-        when(mKeyguardStateController.isShowing()).thenReturn(true);
+        when(mUserSwitcherController.isKeyguardShowing()).thenReturn(true);
 
         mScreenWidth = getUiDevice().getDisplayWidth();
         mFakeMeasureSpec = View

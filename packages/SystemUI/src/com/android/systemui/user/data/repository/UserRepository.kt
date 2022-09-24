@@ -99,7 +99,7 @@ constructor(
     override val actions: Flow<List<UserActionModel>> =
         userRecords.map { records -> records.filter { it.isNotUser() }.map { it.toActionModel() } }
 
-    override val isActionableWhenLocked: Flow<Boolean> = controller.addUsersFromLockScreen
+    override val isActionableWhenLocked: Flow<Boolean> = controller.isAddUsersFromLockScreenEnabled
 
     override val isGuestUserAutoCreated: Boolean = controller.isGuestUserAutoCreated
 
