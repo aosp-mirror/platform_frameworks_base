@@ -171,15 +171,6 @@ public class MediaOutputControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void start_LocalMediaManagerIsNull_verifyNotStartScan() {
-        mMediaOutputController.mLocalMediaManager = null;
-        mMediaOutputController.start(mCb);
-
-        verify(mLocalMediaManager, never()).registerCallback(mMediaOutputController);
-        verify(mLocalMediaManager, never()).startScan();
-    }
-
-    @Test
     public void stop_verifyLocalMediaManagerDeinit() {
         mMediaOutputController.start(mCb);
         reset(mLocalMediaManager);
