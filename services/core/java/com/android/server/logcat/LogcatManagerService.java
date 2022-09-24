@@ -40,6 +40,8 @@ import android.util.ArrayMap;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.app.ILogAccessDialogCallback;
+import com.android.internal.app.LogAccessDialogActivity;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -101,7 +103,7 @@ public final class LogcatManagerService extends SystemService {
     private final Injector mInjector;
     private final Supplier<Long> mClock;
     private final BinderService mBinderService;
-    private final LogcatManagerServiceInternal mLocalService;
+    private final LogAccessDialogCallback mDialogCallback;
     private final Handler mHandler;
     private ActivityManagerInternal mActivityManagerInternal;
     private ILogd mLogdService;
@@ -206,7 +208,8 @@ public final class LogcatManagerService extends SystemService {
         }
     }
 
-    final class LogcatManagerServiceInternal {
+    final class LogAccessDialogCallback extends ILogAccessDialogCallback.Stub {
+        @Override
         public void approveAccessForClient(int uid, @NonNull String packageName) {
             final LogAccessClient client = new LogAccessClient(uid, packageName);
             if (DEBUG) {
@@ -216,6 +219,7 @@ public final class LogcatManagerService extends SystemService {
             mHandler.sendMessageAtTime(msg, mClock.get());
         }
 
+        @Override
         public void declineAccessForClient(int uid, @NonNull String packageName) {
             final LogAccessClient client = new LogAccessClient(uid, packageName);
             if (DEBUG) {
@@ -302,7 +306,7 @@ public final class LogcatManagerService extends SystemService {
         mInjector = injector;
         mClock = injector.createClock();
         mBinderService = new BinderService();
-        mLocalService = new LogcatManagerServiceInternal();
+        mDialogCallback = new LogAccessDialogCallback();
         mHandler = new LogAccessRequestHandler(injector.getLooper(), this);
     }
 
@@ -311,15 +315,14 @@ public final class LogcatManagerService extends SystemService {
         try {
             mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
             publishBinderService("logcat", mBinderService);
-            publishLocalService(LogcatManagerServiceInternal.class, mLocalService);
         } catch (Throwable t) {
             Slog.e(TAG, "Could not start the LogcatManagerService.", t);
         }
     }
 
     @VisibleForTesting
-    LogcatManagerServiceInternal getLocalService() {
-        return mLocalService;
+    LogAccessDialogCallback getDialogCallback() {
+        return mDialogCallback;
     }
 
     @VisibleForTesting
@@ -438,6 +441,7 @@ public final class LogcatManagerService extends SystemService {
         mHandler.sendMessageAtTime(mHandler.obtainMessage(MSG_PENDING_TIMEOUT, client),
                 mClock.get() + PENDING_CONFIRMATION_TIMEOUT_MILLIS);
         final Intent mIntent = createIntent(client);
+        mIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         mContext.startActivityAsUser(mIntent, UserHandle.SYSTEM);
     }
 
@@ -538,6 +542,7 @@ public final class LogcatManagerService extends SystemService {
 
         intent.putExtra(Intent.EXTRA_PACKAGE_NAME, client.mPackageName);
         intent.putExtra(Intent.EXTRA_UID, client.mUid);
+        intent.putExtra(LogAccessDialogActivity.EXTRA_CALLBACK, mDialogCallback.asBinder());
 
         return intent;
     }
