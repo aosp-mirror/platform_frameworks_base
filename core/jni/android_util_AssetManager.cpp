@@ -39,6 +39,7 @@
 #include "androidfw/AssetManager2.h"
 #include "androidfw/AttributeResolution.h"
 #include "androidfw/MutexGuard.h"
+#include <androidfw/ResourceTimer.h>
 #include "androidfw/ResourceTypes.h"
 #include "androidfw/ResourceUtils.h"
 
@@ -630,6 +631,7 @@ static jint NativeGetResourceValue(JNIEnv* env, jclass /*clazz*/, jlong ptr, jin
                                    jshort density, jobject typed_value,
                                    jboolean resolve_references) {
   ScopedLock<AssetManager2> assetmanager(AssetManagerFromLong(ptr));
+  ResourceTimer _tag(ResourceTimer::Counter::GetResourceValue);
   auto value = assetmanager->GetResource(static_cast<uint32_t>(resid), false /*may_be_bag*/,
                                          static_cast<uint16_t>(density));
   if (!value.has_value()) {
@@ -1232,6 +1234,7 @@ static jboolean NativeRetrieveAttributes(JNIEnv* env, jclass /*clazz*/, jlong pt
   }
 
   ScopedLock<AssetManager2> assetmanager(AssetManagerFromLong(ptr));
+  ResourceTimer _tag(ResourceTimer::Counter::RetrieveAttributes);
   ResXMLParser* xml_parser = reinterpret_cast<ResXMLParser*>(xml_parser_ptr);
   auto result =
           RetrieveAttributes(assetmanager.get(), xml_parser, reinterpret_cast<uint32_t*>(attrs),
@@ -1293,6 +1296,10 @@ static void NativeThemeRebase(JNIEnv* env, jclass /*clazz*/, jlong ptr, jlong th
   } else {
     CHECK(style_count == 0) << "style_ids is null while style_count is non-zero";
   }
+  auto style_id_args_copy = std::vector<uint32_t>{style_id_args, style_id_args + style_count};
+  if (style_ids != nullptr) {
+      env->ReleasePrimitiveArrayCritical(style_ids, style_id_args, JNI_ABORT);
+  }
 
   jboolean* force_args = nullptr;
   if (force != nullptr) {
@@ -1305,15 +1312,14 @@ static void NativeThemeRebase(JNIEnv* env, jclass /*clazz*/, jlong ptr, jlong th
   } else {
     CHECK(style_count == 0) << "force is null while style_count is non-zero";
   }
-
-  auto theme = reinterpret_cast<Theme*>(theme_ptr);
-  theme->Rebase(&(*assetmanager), style_id_args, force_args, static_cast<size_t>(style_count));
-  if (style_ids != nullptr) {
-    env->ReleasePrimitiveArrayCritical(style_ids, style_id_args, JNI_ABORT);
-  }
+  auto force_args_copy = std::vector<jboolean>{force_args, force_args + style_count};
   if (force != nullptr) {
     env->ReleasePrimitiveArrayCritical(force, force_args, JNI_ABORT);
   }
+
+  auto theme = reinterpret_cast<Theme*>(theme_ptr);
+  theme->Rebase(&(*assetmanager), style_id_args_copy.data(), force_args_copy.data(),
+                static_cast<size_t>(style_count));
 }
 
 static void NativeThemeCopy(JNIEnv* env, jclass /*clazz*/, jlong dst_asset_manager_ptr,

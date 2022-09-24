@@ -16,6 +16,9 @@
 
 package com.android.server.display;
 
+import android.Manifest;
+import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
 import android.os.IBinder;
 
 import java.util.Objects;
@@ -26,6 +29,7 @@ import java.util.Objects;
 public class DisplayControl {
     private static native IBinder nativeCreateDisplay(String name, boolean secure);
     private static native void nativeDestroyDisplay(IBinder displayToken);
+    private static native void nativeOverrideHdrTypes(IBinder displayToken, int[] modes);
 
     /**
      * Create a display in SurfaceFlinger.
@@ -52,4 +56,11 @@ public class DisplayControl {
         nativeDestroyDisplay(displayToken);
     }
 
+    /**
+     * Overrides HDR modes for a display device.
+     */
+    @RequiresPermission(Manifest.permission.ACCESS_SURFACE_FLINGER)
+    public static void overrideHdrTypes(@NonNull IBinder displayToken, @NonNull int[] modes) {
+        nativeOverrideHdrTypes(displayToken, modes);
+    }
 }

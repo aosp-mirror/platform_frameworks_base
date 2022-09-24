@@ -224,15 +224,23 @@ public class BubbleExpandedView extends LinearLayout {
                 try {
                     options.setTaskAlwaysOnTop(true);
                     options.setLaunchedFromBubble(true);
-                    if (!mIsOverflow && mBubble.hasMetadataShortcutId()) {
+
+                    Intent fillInIntent = new Intent();
+                    // Apply flags to make behaviour match documentLaunchMode=always.
+                    fillInIntent.addFlags(FLAG_ACTIVITY_NEW_DOCUMENT);
+                    fillInIntent.addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
+
+                    if (mBubble.isAppBubble()) {
+                        PendingIntent pi = PendingIntent.getActivity(mContext, 0,
+                                mBubble.getAppBubbleIntent(),
+                                PendingIntent.FLAG_MUTABLE,
+                                null);
+                        mTaskView.startActivity(pi, fillInIntent, options, launchBounds);
+                    } else if (!mIsOverflow && mBubble.hasMetadataShortcutId()) {
                         options.setApplyActivityFlagsForBubbles(true);
                         mTaskView.startShortcutActivity(mBubble.getShortcutInfo(),
                                 options, launchBounds);
                     } else {
-                        Intent fillInIntent = new Intent();
-                        // Apply flags to make behaviour match documentLaunchMode=always.
-                        fillInIntent.addFlags(FLAG_ACTIVITY_NEW_DOCUMENT);
-                        fillInIntent.addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
                         if (mBubble != null) {
                             mBubble.setIntentActive();
                         }

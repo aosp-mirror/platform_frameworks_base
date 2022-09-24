@@ -855,6 +855,16 @@ public final class DisplayManager {
         return mGlobal.getUserDisabledHdrTypes();
     }
 
+    /**
+     * Overrides HDR modes for a display device.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.ACCESS_SURFACE_FLINGER)
+    @TestApi
+    public void overrideHdrTypes(int displayId, @NonNull int[] modes) {
+        mGlobal.overrideHdrTypes(displayId, modes);
+    }
 
     /**
      * Creates a virtual display.

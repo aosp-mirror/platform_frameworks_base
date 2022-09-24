@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@file:Suppress("JAVA_MODULE_DOES_NOT_EXPORT_PACKAGE")
+
 package android.processor.immutability
 
 import com.sun.tools.javac.code.Symbol
@@ -206,8 +208,8 @@ class ImmutabilityProcessor : AbstractProcessor() {
             }
         }
 
-        if (isRegularClass && !anyError && allowFinalClassesFinalFields
-            && !classType.modifiers.contains(Modifier.FINAL)
+        if (isRegularClass && !anyError && allowFinalClassesFinalFields &&
+            !classType.modifiers.contains(Modifier.FINAL)
         ) {
             printError(parentChain, elementToPrint, MessageUtils.classNotFinalFailure(className))
             return true

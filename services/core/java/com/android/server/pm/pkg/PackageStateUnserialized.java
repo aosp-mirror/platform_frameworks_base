@@ -23,6 +23,7 @@ import android.annotation.Nullable;
 import android.content.pm.PackageManager;
 import android.content.pm.SharedLibraryInfo;
 
+import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.DataClass;
 import com.android.server.pm.PackageSetting;
 
@@ -38,6 +39,7 @@ import java.util.stream.Collectors;
  *
  * These fields are also not copied into any cloned PackageSetting, to preserve the old behavior
  * where they would be lost implicitly by re-generating the package object.
+ * @hide
  */
 @DataClass(genSetters = true, genConstructor = false, genBuilder = false)
 @DataClass.Suppress({"setLastPackageUsageTimeInMills", "setPackageSetting"})
@@ -67,6 +69,18 @@ public class PackageStateUnserialized {
 
     public PackageStateUnserialized(@NonNull PackageSetting packageSetting) {
         mPackageSetting = packageSetting;
+    }
+
+    @NonNull
+    public PackageStateUnserialized addUsesLibraryInfo(@NonNull SharedLibraryInfo value) {
+        usesLibraryInfos = CollectionUtils.add(usesLibraryInfos, value);
+        return this;
+    }
+
+    @NonNull
+    public PackageStateUnserialized addUsesLibraryFile(@NonNull String value) {
+        usesLibraryFiles = CollectionUtils.add(usesLibraryFiles, value);
+        return this;
     }
 
     private long[] lazyInitLastPackageUsageTimeInMills() {

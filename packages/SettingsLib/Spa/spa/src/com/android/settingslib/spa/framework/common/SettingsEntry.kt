@@ -185,11 +185,11 @@ class SettingsEntryBuilder(private val name: String, private val owner: Settings
         return this
     }
 
-    fun setMarco(fn: (arguments: Bundle?) -> EntryMarco): SettingsEntryBuilder {
+    fun setMacro(fn: (arguments: Bundle?) -> EntryMacro): SettingsEntryBuilder {
         setSearchDataFn { fn(it).getSearchData() }
         setUiLayoutFn {
-            val marco = remember { fn(it) }
-            marco.UiLayout()
+            val macro = remember { fn(it) }
+            macro.UiLayout()
         }
         return this
     }

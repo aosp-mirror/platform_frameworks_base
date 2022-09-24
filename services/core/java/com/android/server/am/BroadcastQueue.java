@@ -40,24 +40,18 @@ public abstract class BroadcastQueue {
 
     final @NonNull ActivityManagerService mService;
     final @NonNull Handler mHandler;
-    final @NonNull BroadcastConstants mConstants;
     final @NonNull BroadcastSkipPolicy mSkipPolicy;
     final @NonNull BroadcastHistory mHistory;
     final @NonNull String mQueueName;
 
     BroadcastQueue(@NonNull ActivityManagerService service, @NonNull Handler handler,
-            @NonNull String name, @NonNull BroadcastConstants constants,
-            @NonNull BroadcastSkipPolicy skipPolicy, @NonNull BroadcastHistory history) {
+            @NonNull String name, @NonNull BroadcastSkipPolicy skipPolicy,
+            @NonNull BroadcastHistory history) {
         mService = Objects.requireNonNull(service);
         mHandler = Objects.requireNonNull(handler);
         mQueueName = Objects.requireNonNull(name);
-        mConstants = Objects.requireNonNull(constants);
         mSkipPolicy = Objects.requireNonNull(skipPolicy);
         mHistory = Objects.requireNonNull(history);
-    }
-
-    void start(@NonNull ContentResolver resolver) {
-        mConstants.startObserving(mHandler, resolver);
     }
 
     static void checkState(boolean state, String msg) {
@@ -74,6 +68,8 @@ public abstract class BroadcastQueue {
     public String toString() {
         return mQueueName;
     }
+
+    public abstract void start(@NonNull ContentResolver resolver);
 
     public abstract boolean isDelayBehindServices();
 

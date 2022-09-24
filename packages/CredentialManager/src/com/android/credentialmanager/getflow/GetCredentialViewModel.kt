@@ -1,36 +1,30 @@
 package com.android.credentialmanager.getflow
 
 import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import androidx.navigation.NavController
 import com.android.credentialmanager.CredentialManagerRepo
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 
 data class GetCredentialUiState(
-  val providers: List<ProviderInfo>
+  val providers: List<ProviderInfo>,
+  val currentScreenState: GetScreenState,
+  val selectedProvider: ProviderInfo? = null,
 )
 
 class GetCredentialViewModel(
-  credManRepo: CredentialManagerRepo
+  credManRepo: CredentialManagerRepo = CredentialManagerRepo.getInstance()
 ) : ViewModel() {
 
-  private val _uiState = MutableStateFlow(
-    GetCredentialUiState(credManRepo.getCredentialProviderList())
-  )
-  val uiState: StateFlow<GetCredentialUiState> = _uiState.asStateFlow()
+  var uiState by mutableStateOf(credManRepo.getCredentialInitialUiState())
+      private set
 
-  fun getDefaultProviderInfo(): ProviderInfo {
-    // TODO: correctly get the default provider.
-    return uiState.value.providers.first()
-  }
-
-  fun onCredentailSelected(credentialId: String, navController: NavController) {
+  fun onCredentailSelected(credentialId: String) {
     Log.d("Account Selector", "credential selected: $credentialId")
   }
 
-  fun onMoreOptionSelected(navController: NavController) {
+  fun onMoreOptionSelected() {
     Log.d("Account Selector", "More Option selected")
   }
 }

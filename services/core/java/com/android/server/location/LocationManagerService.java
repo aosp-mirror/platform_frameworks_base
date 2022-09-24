@@ -115,6 +115,7 @@ import com.android.server.location.injector.Injector;
 import com.android.server.location.injector.LocationPermissionsHelper;
 import com.android.server.location.injector.LocationPowerSaveModeHelper;
 import com.android.server.location.injector.LocationUsageLogger;
+import com.android.server.location.injector.PackageResetHelper;
 import com.android.server.location.injector.ScreenInteractiveHelper;
 import com.android.server.location.injector.SettingsHelper;
 import com.android.server.location.injector.SystemAlarmHelper;
@@ -125,6 +126,7 @@ import com.android.server.location.injector.SystemDeviceStationaryHelper;
 import com.android.server.location.injector.SystemEmergencyHelper;
 import com.android.server.location.injector.SystemLocationPermissionsHelper;
 import com.android.server.location.injector.SystemLocationPowerSaveModeHelper;
+import com.android.server.location.injector.SystemPackageResetHelper;
 import com.android.server.location.injector.SystemScreenInteractiveHelper;
 import com.android.server.location.injector.SystemSettingsHelper;
 import com.android.server.location.injector.SystemUserInfoHelper;
@@ -1696,11 +1698,13 @@ public class LocationManagerService extends ILocationManager.Stub implements
         private final SystemDeviceStationaryHelper mDeviceStationaryHelper;
         private final SystemDeviceIdleHelper mDeviceIdleHelper;
         private final LocationUsageLogger mLocationUsageLogger;
+        private final PackageResetHelper mPackageResetHelper;
 
         // lazily instantiated since they may not always be used
 
         @GuardedBy("this")
-        private @Nullable SystemEmergencyHelper mEmergencyCallHelper;
+        @Nullable
+        private SystemEmergencyHelper mEmergencyCallHelper;
 
         @GuardedBy("this")
         private boolean mSystemReady;
@@ -1721,6 +1725,7 @@ public class LocationManagerService extends ILocationManager.Stub implements
             mDeviceStationaryHelper = new SystemDeviceStationaryHelper();
             mDeviceIdleHelper = new SystemDeviceIdleHelper(context);
             mLocationUsageLogger = new LocationUsageLogger();
+            mPackageResetHelper = new SystemPackageResetHelper(context);
         }
 
         synchronized void onSystemReady() {
@@ -1810,6 +1815,11 @@ public class LocationManagerService extends ILocationManager.Stub implements
         @Override
         public LocationUsageLogger getLocationUsageLogger() {
             return mLocationUsageLogger;
+        }
+
+        @Override
+        public PackageResetHelper getPackageResetHelper() {
+            return mPackageResetHelper;
         }
     }
 }

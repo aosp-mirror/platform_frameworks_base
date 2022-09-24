@@ -97,6 +97,8 @@ public class BroadcastQueueImpl extends BroadcastQueue {
     private static final String TAG_MU = TAG + POSTFIX_MU;
     private static final String TAG_BROADCAST = TAG + POSTFIX_BROADCAST;
 
+    final BroadcastConstants mConstants;
+
     /**
      * If true, we can delay broadcasts while waiting services to finish in the previous
      * receiver's process.
@@ -193,14 +195,15 @@ public class BroadcastQueueImpl extends BroadcastQueue {
     BroadcastQueueImpl(ActivityManagerService service, Handler handler,
             String name, BroadcastConstants constants, BroadcastSkipPolicy skipPolicy,
             BroadcastHistory history, boolean allowDelayBehindServices, int schedGroup) {
-        super(service, handler, name, constants, skipPolicy, history);
+        super(service, handler, name, skipPolicy, history);
         mHandler = new BroadcastHandler(handler.getLooper());
+        mConstants = constants;
         mDelayBehindServices = allowDelayBehindServices;
         mSchedGroup = schedGroup;
         mDispatcher = new BroadcastDispatcher(this, mConstants, mHandler, mService);
     }
 
-    void start(ContentResolver resolver) {
+    public void start(ContentResolver resolver) {
         mDispatcher.start();
         mConstants.startObserving(mHandler, resolver);
     }
@@ -1657,7 +1660,7 @@ public class BroadcastQueueImpl extends BroadcastQueue {
 
             // The ANR should only be triggered if we have a process record (app is non-null)
             if (!debugging && app != null) {
-                mService.mAnrHelper.appNotResponding(app, timeoutRecord);
+                mService.appNotResponding(app, timeoutRecord);
             }
 
         } finally {

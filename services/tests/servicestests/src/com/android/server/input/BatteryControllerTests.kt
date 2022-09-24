@@ -233,16 +233,20 @@ class BatteryControllerTests {
         val uEventListener = ArgumentCaptor.forClass(UEventManager.UEventListener::class.java)
         batteryController.registerBatteryListener(DEVICE_ID, listener, PID)
         verify(uEventManager).addListener(uEventListener.capture(), eq("DEVPATH=/test/device1"))
-        verify(listener).onBatteryStateChanged(eq(DEVICE_ID), eq(true /*isPresent*/),
-            eq(STATUS_CHARGING), eq(0.78f), anyLong())
+        verify(listener).onBatteryStateChanged(
+            eq(DEVICE_ID), eq(true /*isPresent*/),
+            eq(STATUS_CHARGING), eq(0.78f), anyLong()
+        )
 
         // If the battery presence for the InputDevice changes, the listener is notified.
         `when`(iInputManager.getInputDevice(DEVICE_ID))
             .thenReturn(createInputDevice(DEVICE_ID, hasBattery = false))
         notifyDeviceChanged(DEVICE_ID)
         testLooper.dispatchNext()
-        verify(listener).onBatteryStateChanged(eq(DEVICE_ID), eq(false /*isPresent*/),
-            eq(STATUS_UNKNOWN), eq(Float.NaN), anyLong())
+        verify(listener).onBatteryStateChanged(
+            eq(DEVICE_ID), eq(false /*isPresent*/),
+            eq(STATUS_UNKNOWN), eq(Float.NaN), anyLong()
+        )
         // Since the battery is no longer present, the UEventListener should be removed.
         verify(uEventManager).removeListener(uEventListener.value)
 
@@ -251,10 +255,67 @@ class BatteryControllerTests {
             .thenReturn(createInputDevice(DEVICE_ID, hasBattery = true))
         notifyDeviceChanged(DEVICE_ID)
         testLooper.dispatchNext()
-        verify(listener, times(2)).onBatteryStateChanged(eq(DEVICE_ID), eq(true /*isPresent*/),
-            eq(STATUS_CHARGING), eq(0.78f), anyLong())
+        verify(listener, times(2)).onBatteryStateChanged(
+            eq(DEVICE_ID), eq(true /*isPresent*/),
+            eq(STATUS_CHARGING), eq(0.78f), anyLong()
+        )
         // Ensure that a new UEventListener was added.
         verify(uEventManager, times(2))
             .addListener(uEventListener.capture(), eq("DEVPATH=/test/device1"))
+    }
+
+    fun testStartPollingWhenListenerIsRegistered() {
+        val listener = createMockListener()
+        `when`(native.getBatteryCapacity(DEVICE_ID)).thenReturn(78)
+        batteryController.registerBatteryListener(DEVICE_ID, listener, PID)
+        verify(listener).onBatteryStateChanged(eq(DEVICE_ID), eq(true /*isPresent*/), anyInt(),
+            eq(0.78f), anyLong())
+
+        // Assume there is a change in the battery state. Ensure the listener is not notified
+        // while the polling period has not elapsed.
+        `when`(native.getBatteryCapacity(DEVICE_ID)).thenReturn(80)
+        testLooper.moveTimeForward(1)
+        testLooper.dispatchAll()
+        verify(listener, never()).onBatteryStateChanged(eq(DEVICE_ID), eq(true /*isPresent*/),
+            anyInt(), eq(0.80f), anyLong())
+
+        // Move the time forward so that the polling period has elapsed.
+        // The listener should be notified.
+        testLooper.moveTimeForward(BatteryController.POLLING_PERIOD_MILLIS - 1)
+        testLooper.dispatchNext()
+        verify(listener).onBatteryStateChanged(eq(DEVICE_ID), eq(true /*isPresent*/), anyInt(),
+            eq(0.80f), anyLong())
+    }
+
+    @Test
+    fun testNoPollingWhenTheDeviceIsNotInteractive() {
+        batteryController.onInteractiveChanged(false /*interactive*/)
+
+        val listener = createMockListener()
+        `when`(native.getBatteryCapacity(DEVICE_ID)).thenReturn(78)
+        batteryController.registerBatteryListener(DEVICE_ID, listener, PID)
+        verify(listener).onBatteryStateChanged(eq(DEVICE_ID), eq(true /*isPresent*/), anyInt(),
+            eq(0.78f), anyLong())
+
+        // The battery state changed, but we should not be polling for battery changes when the
+        // device is not interactive.
+        `when`(native.getBatteryCapacity(DEVICE_ID)).thenReturn(80)
+        testLooper.moveTimeForward(BatteryController.POLLING_PERIOD_MILLIS)
+        testLooper.dispatchAll()
+        verify(listener, never()).onBatteryStateChanged(eq(DEVICE_ID), eq(true /*isPresent*/),
+            anyInt(), eq(0.80f), anyLong())
+
+        // The device is now interactive. Battery state polling begins immediately.
+        batteryController.onInteractiveChanged(true /*interactive*/)
+        testLooper.dispatchNext()
+        verify(listener).onBatteryStateChanged(eq(DEVICE_ID), eq(true /*isPresent*/),
+            anyInt(), eq(0.80f), anyLong())
+
+        // Ensure that we continue to poll for battery changes.
+        `when`(native.getBatteryCapacity(DEVICE_ID)).thenReturn(90)
+        testLooper.moveTimeForward(BatteryController.POLLING_PERIOD_MILLIS)
+        testLooper.dispatchNext()
+        verify(listener).onBatteryStateChanged(eq(DEVICE_ID), eq(true /*isPresent*/),
+            anyInt(), eq(0.90f), anyLong())
     }
 }

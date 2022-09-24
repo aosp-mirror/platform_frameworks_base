@@ -16,12 +16,11 @@
 
 package com.android.systemui.qs;
 
-import static com.android.systemui.classifier.Classifier.QS_SWIPE;
+import static com.android.systemui.classifier.Classifier.QS_SWIPE_SIDE;
 import static com.android.systemui.media.dagger.MediaModule.QS_PANEL;
 import static com.android.systemui.qs.QSPanel.QS_SHOW_BRIGHTNESS;
 import static com.android.systemui.qs.dagger.QSFragmentModule.QS_USING_MEDIA_PLAYER;
 
-import android.content.res.Configuration;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -61,22 +60,11 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
     private final BrightnessMirrorHandler mBrightnessMirrorHandler;
     private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
 
-    private final QSPanel.OnConfigurationChangedListener mOnConfigurationChangedListener =
-            new QSPanel.OnConfigurationChangedListener() {
-        @Override
-        public void onConfigurationChange(Configuration newConfig) {
-            mView.updateResources();
-            if (mView.isListening()) {
-                refreshAllTiles();
-            }
-        }
-    };
-
     private View.OnTouchListener mTileLayoutTouchListener = new View.OnTouchListener() {
         @Override
         public boolean onTouch(View v, MotionEvent event) {
             if (event.getActionMasked() == MotionEvent.ACTION_UP) {
-                mFalsingManager.isFalseTouch(QS_SWIPE);
+                mFalsingManager.isFalseTouch(QS_SWIPE_SIDE);
             }
             return false;
         }
@@ -130,7 +118,6 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
         if (mView.isListening()) {
             refreshAllTiles();
         }
-        mView.addOnConfigurationChangedListener(mOnConfigurationChangedListener);
         switchTileLayout(true);
         mBrightnessMirrorHandler.onQsPanelAttached();
 
@@ -147,9 +134,16 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
     @Override
     protected void onViewDetached() {
         mTunerService.removeTunable(mView);
-        mView.removeOnConfigurationChangedListener(mOnConfigurationChangedListener);
         mBrightnessMirrorHandler.onQsPanelDettached();
         super.onViewDetached();
+    }
+
+    @Override
+    protected void onConfigurationChanged() {
+        mView.updateResources();
+        if (mView.isListening()) {
+            refreshAllTiles();
+        }
     }
 
     /** */

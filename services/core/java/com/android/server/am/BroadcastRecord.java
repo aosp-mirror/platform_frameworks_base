@@ -24,6 +24,7 @@ import static com.android.server.am.BroadcastConstants.DEFER_BOOT_COMPLETED_BROA
 import static com.android.server.am.BroadcastConstants.DEFER_BOOT_COMPLETED_BROADCAST_NONE;
 import static com.android.server.am.BroadcastConstants.DEFER_BOOT_COMPLETED_BROADCAST_TARGET_T_ONLY;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManagerInternal;
@@ -48,6 +49,8 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -83,7 +86,7 @@ final class BroadcastRecord extends Binder {
     final int appOp;        // an app op that is associated with this broadcast
     final BroadcastOptions options; // BroadcastOptions supplied by caller
     final List receivers;   // contains BroadcastFilter and ResolveInfo
-    final int[] delivery;   // delivery state of each receiver
+    final @DeliveryState int[] delivery;   // delivery state of each receiver
     final long[] scheduledTime; // uptimeMillis when each receiver was scheduled
     final long[] duration;   // duration a receiver took to process broadcast
     IIntentReceiver resultTo; // who receives final result if non-null
@@ -140,6 +143,29 @@ final class BroadcastRecord extends Binder {
     static final int DELIVERY_SCHEDULED = 4;
     /** Terminal state: failure to dispatch */
     static final int DELIVERY_FAILURE = 5;
+
+    @IntDef(flag = false, prefix = { "DELIVERY_" }, value = {
+            DELIVERY_PENDING,
+            DELIVERY_DELIVERED,
+            DELIVERY_SKIPPED,
+            DELIVERY_TIMEOUT,
+            DELIVERY_SCHEDULED,
+            DELIVERY_FAILURE,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DeliveryState {}
+
+    static @NonNull String deliveryStateToString(@DeliveryState int deliveryState) {
+        switch (deliveryState) {
+            case DELIVERY_PENDING: return "Pending";
+            case DELIVERY_DELIVERED: return "Delivered";
+            case DELIVERY_SKIPPED: return "Skipped";
+            case DELIVERY_TIMEOUT: return "Timeout";
+            case DELIVERY_SCHEDULED: return "Scheduled";
+            case DELIVERY_FAILURE: return "Failure";
+            default: return Integer.toString(deliveryState);
+        }
+    }
 
     ProcessRecord curApp;       // hosting application of current receiver.
     ComponentName curComponent; // the receiver class that is currently running.
@@ -257,15 +283,7 @@ final class BroadcastRecord extends Binder {
         for (int i = 0; i < N; i++) {
             Object o = receivers.get(i);
             pw.print(prefix);
-            switch (delivery[i]) {
-                case DELIVERY_PENDING:   pw.print("Pending"); break;
-                case DELIVERY_DELIVERED: pw.print("Deliver"); break;
-                case DELIVERY_SKIPPED:   pw.print("Skipped"); break;
-                case DELIVERY_TIMEOUT:   pw.print("Timeout"); break;
-                case DELIVERY_SCHEDULED: pw.print("Schedul"); break;
-                case DELIVERY_FAILURE:   pw.print("Failure"); break;
-                default:                 pw.print("???????"); break;
-            }
+            pw.print(deliveryStateToString(delivery[i]));
             pw.print(" "); TimeUtils.formatDuration(duration[i], pw);
             pw.print(" #"); pw.print(i); pw.print(": ");
             if (o instanceof BroadcastFilter) {
@@ -514,7 +532,7 @@ final class BroadcastRecord extends Binder {
      * Update the delivery state of the given {@link #receivers} index.
      * Automatically updates any time measurements related to state changes.
      */
-    void setDeliveryState(int index, int deliveryState) {
+    void setDeliveryState(int index, @DeliveryState int deliveryState) {
         delivery[index] = deliveryState;
 
         switch (deliveryState) {

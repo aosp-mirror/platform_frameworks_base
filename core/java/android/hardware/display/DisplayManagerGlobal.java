@@ -20,9 +20,11 @@ package android.hardware.display;
 import static android.hardware.display.DisplayManager.EventsMask;
 import static android.view.Display.HdrCapabilities.HdrType;
 
+import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.app.PropertyInvalidatedCache;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -576,6 +578,20 @@ public final class DisplayManagerGlobal {
             throw ex.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * Overrides HDR modes for a display device.
+     *
+     */
+    @RequiresPermission(Manifest.permission.ACCESS_SURFACE_FLINGER)
+    public void overrideHdrTypes(int displayId, int[] modes) {
+        try {
+            mDm.overrideHdrTypes(displayId, modes);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
 
     public void requestColorMode(int displayId, int colorMode) {
         try {

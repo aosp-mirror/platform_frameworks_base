@@ -1,18 +1,14 @@
 package com.android.credentialmanager
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.rememberNavController
-import com.android.credentialmanager.createflow.CreatePasskeyViewModel
-import com.android.credentialmanager.createflow.createPasskeyGraph
-import com.android.credentialmanager.getflow.GetCredentialViewModel
-import com.android.credentialmanager.getflow.getCredentialsGraph
+import com.android.credentialmanager.common.DialogType
+import com.android.credentialmanager.createflow.CreatePasskeyScreen
+import com.android.credentialmanager.getflow.GetCredentialScreen
 import com.android.credentialmanager.ui.theme.CredentialSelectorTheme
 
 @ExperimentalMaterialApi
@@ -22,42 +18,35 @@ class CredentialSelectorActivity : ComponentActivity() {
     CredentialManagerRepo.setup(this)
     val startDestination = intent.extras?.getString(
       "start_destination",
-      "getCredentials"
-    ) ?: "getCredentials"
+      "CREATE_PASSKEY"
+    ) ?: "CREATE_PASSKEY"
 
     setContent {
       CredentialSelectorTheme {
-        AppNavHost(
-          startDestination = startDestination,
-          onCancel = {this.finish()}
-        )
+        CredentialManagerBottomSheet(startDestination)
       }
     }
   }
 
   @ExperimentalMaterialApi
   @Composable
-  fun AppNavHost(
-    modifier: Modifier = Modifier,
-    navController: NavHostController = rememberNavController(),
-    startDestination: String,
-    onCancel: () -> Unit,
-  ) {
-    NavHost(
-      modifier = modifier,
-      navController = navController,
-      startDestination = startDestination
-    ) {
-      createPasskeyGraph(
-        navController = navController,
-        viewModel = CreatePasskeyViewModel(CredentialManagerRepo.repo),
-        onCancel = onCancel
-      )
-      getCredentialsGraph(
-        navController = navController,
-        viewModel = GetCredentialViewModel(CredentialManagerRepo.repo),
-        onCancel = onCancel
-      )
+  fun CredentialManagerBottomSheet(operationType: String) {
+    val dialogType = DialogType.toDialogType(operationType)
+    when (dialogType) {
+      DialogType.CREATE_PASSKEY -> {
+        CreatePasskeyScreen(cancelActivity = onCancel)
+      }
+      DialogType.GET_CREDENTIALS -> {
+        GetCredentialScreen(cancelActivity = onCancel)
+      }
+      else -> {
+        Log.w("AccountSelector", "Unknown type, not rendering any UI")
+        this.finish()
+      }
     }
+  }
+
+  private val onCancel = {
+    this@CredentialSelectorActivity.finish()
   }
 }

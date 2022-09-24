@@ -1848,7 +1848,7 @@ class ActivityStarter {
             ActivityRecord targetTopActivity =
                     targetTask != null ? targetTask.getTopNonFinishingActivity() : null;
             boolean passesAsmChecks = newTask
-                    ? mRootWindowContainer.hasResumedActivity(callerUid)
+                    ? mService.mVisibleActivityProcessTracker.hasResumedActivity(callerUid)
                     : targetTopActivity != null && targetTopActivity.getUid() == callerUid;
 
             if (!passesAsmChecks) {

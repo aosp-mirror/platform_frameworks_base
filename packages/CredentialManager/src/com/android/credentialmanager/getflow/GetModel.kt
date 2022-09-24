@@ -16,3 +16,8 @@ data class CredentialOptionInfo(
   val subtitle: String,
   val id: String,
 )
+
+/** The name of the current screen. */
+enum class GetScreenState {
+  CREDENTIAL_SELECTION,
+}
