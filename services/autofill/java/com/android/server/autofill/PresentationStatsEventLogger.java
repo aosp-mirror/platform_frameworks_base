@@ -118,6 +118,14 @@ public final class PresentationStatsEventLogger {
         });
     }
 
+    public void maybeSetNoPresentationEventReasonIfNoReasonExists(@NotShownReason int reason) {
+        mEventInternal.ifPresent(event -> {
+            if (event.mCountShown == 0 && event.mNoPresentationReason == NOT_SHOWN_REASON_UNKNOWN) {
+                event.mNoPresentationReason = reason;
+            }
+        });
+    }
+
     public void maybeSetAvailableCount(@Nullable List<Dataset> datasetList,
             AutofillId currentViewId) {
         mEventInternal.ifPresent(event -> {
