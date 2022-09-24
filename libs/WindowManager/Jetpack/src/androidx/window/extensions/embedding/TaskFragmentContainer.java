@@ -432,7 +432,7 @@ class TaskFragmentContainer {
                     // In case we have requested to reparent the activity to another container (as
                     // pendingAppeared), we don't want to finish it with this container.
                     && mController.getContainerWithActivity(activity) == this) {
-                activity.finish();
+                wct.finishActivity(activity.getActivityToken());
             }
         }
 
@@ -457,7 +457,7 @@ class TaskFragmentContainer {
                     || controller.shouldRetainAssociatedActivity(this, activity)) {
                 continue;
             }
-            activity.finish();
+            wct.finishActivity(activity.getActivityToken());
         }
         mActivitiesToFinishOnExit.clear();
     }
