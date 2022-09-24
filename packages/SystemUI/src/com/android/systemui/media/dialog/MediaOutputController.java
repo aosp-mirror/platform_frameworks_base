@@ -125,13 +125,16 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     private final NearbyMediaDevicesManager mNearbyMediaDevicesManager;
     private final Map<String, Integer> mNearbyDeviceInfoMap = new ConcurrentHashMap<>();
 
-    private boolean mIsRefreshing = false;
-    private boolean mNeedRefresh = false;
+    @VisibleForTesting
+    boolean mIsRefreshing = false;
+    @VisibleForTesting
+    boolean mNeedRefresh = false;
     private MediaController mMediaController;
     @VisibleForTesting
     Callback mCallback;
     @VisibleForTesting
     LocalMediaManager mLocalMediaManager;
+    @VisibleForTesting
     private MediaOutputMetricLogger mMetricLogger;
     private int mCurrentState;
 
@@ -221,15 +224,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
                 Log.d(TAG, "No media controller for " + mPackageName);
             }
         }
-        if (mLocalMediaManager == null) {
-            if (DEBUG) {
-                Log.d(TAG, "No local media manager " + mPackageName);
-            }
-            return;
-        }
         mCallback = cb;
-        mLocalMediaManager.unregisterCallback(this);
-        mLocalMediaManager.stopScan();
         mLocalMediaManager.registerCallback(this);
         mLocalMediaManager.startScan();
     }
@@ -251,10 +246,8 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         if (mMediaController != null) {
             mMediaController.unregisterCallback(mCb);
         }
-        if (mLocalMediaManager != null) {
-            mLocalMediaManager.unregisterCallback(this);
-            mLocalMediaManager.stopScan();
-        }
+        mLocalMediaManager.unregisterCallback(this);
+        mLocalMediaManager.stopScan();
         synchronized (mMediaDevicesLock) {
             mCachedMediaDevices.clear();
             mMediaDevices.clear();
@@ -658,10 +651,6 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         return mLocalMediaManager.getCurrentConnectedDevice();
     }
 
-    private MediaDevice getMediaDeviceById(String id) {
-        return mLocalMediaManager.getMediaDeviceById(new ArrayList<>(mMediaDevices), id);
-    }
-
     boolean addDeviceToPlayMedia(MediaDevice device) {
         mMetricLogger.logInteractionExpansion(device);
         return mLocalMediaManager.addDeviceToPlayMedia(device);
@@ -681,10 +670,6 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
 
     List<MediaDevice> getDeselectableMediaDevice() {
         return mLocalMediaManager.getDeselectableMediaDevice();
-    }
-
-    void adjustSessionVolume(String sessionId, int volume) {
-        mLocalMediaManager.adjustSessionVolume(sessionId, volume);
     }
 
     void adjustSessionVolume(int volume) {
@@ -1013,7 +998,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
                 return;
             }
 
-            if (newState == PlaybackState.STATE_STOPPED || newState == PlaybackState.STATE_PAUSED) {
+            if (newState == PlaybackState.STATE_STOPPED) {
                 mCallback.onMediaStoppedOrPaused();
             }
             mCurrentState = newState;

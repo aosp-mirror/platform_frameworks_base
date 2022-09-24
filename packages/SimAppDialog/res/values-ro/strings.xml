@@ -22,5 +22,5 @@
     <string name="install_carrier_app_description" msgid="4014303558674923797">"Pentru ca noul card SIM să funcționeze corect, va trebui să instalați aplicația <xliff:g id="ID_1">%1$s</xliff:g>"</string>
     <string name="install_carrier_app_description_default" msgid="7356830245205847840">"Pentru ca noul card SIM să funcționeze corect, va trebui să instalați aplicația operatorului"</string>
     <string name="install_carrier_app_defer_action" msgid="2558576736886876209">"Nu acum"</string>
-    <string name="install_carrier_app_download_action" msgid="7859229305958538064">"Descărcați aplicația"</string>
+    <string name="install_carrier_app_download_action" msgid="7859229305958538064">"Descarcă aplicația"</string>
 </resources>

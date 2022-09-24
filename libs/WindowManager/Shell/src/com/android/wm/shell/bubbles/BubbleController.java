@@ -1017,6 +1017,20 @@ public class BubbleController implements ConfigurationChangeListener {
     }
 
     /**
+     * Adds a bubble for a specific intent. These bubbles are <b>not</b> backed by a notification
+     * and remain until the user dismisses the bubble or bubble stack. Only one intent bubble
+     * is supported at a time.
+     *
+     * @param intent the intent to display in the bubble expanded view.
+     */
+    public void addAppBubble(Intent intent) {
+        if (intent == null || intent.getPackage() == null) return;
+        Bubble b = new Bubble(intent, UserHandle.of(mCurrentUserId), mMainExecutor);
+        b.setShouldAutoExpand(true);
+        inflateAndAdd(b, /* suppressFlyout= */ true, /* showInShade= */ false);
+    }
+
+    /**
      * Fills the overflow bubbles by loading them from disk.
      */
     void loadOverflowBubblesFromDisk() {

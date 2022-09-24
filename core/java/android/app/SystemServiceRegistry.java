@@ -29,8 +29,6 @@ import android.app.ambientcontext.AmbientContextManager;
 import android.app.ambientcontext.IAmbientContextManager;
 import android.app.appsearch.AppSearchManagerFrameworkInitializer;
 import android.app.blob.BlobStoreManagerFrameworkInitializer;
-import android.app.cloudsearch.CloudSearchManager;
-import android.app.cloudsearch.ICloudSearchManager;
 import android.app.contentsuggestions.ContentSuggestionsManager;
 import android.app.contentsuggestions.IContentSuggestionsManager;
 import android.app.job.JobSchedulerFrameworkInitializer;
@@ -230,8 +228,6 @@ import android.view.contentcapture.ContentCaptureManager;
 import android.view.contentcapture.IContentCaptureManager;
 import android.view.displayhash.DisplayHashManager;
 import android.view.inputmethod.InputMethodManager;
-import android.view.selectiontoolbar.ISelectionToolbarManager;
-import android.view.selectiontoolbar.SelectionToolbarManager;
 import android.view.textclassifier.TextClassificationManager;
 import android.view.textservice.TextServicesManager;
 import android.view.translation.ITranslationManager;
@@ -364,15 +360,6 @@ public final class SystemServiceRegistry {
             public TextClassificationManager createService(ContextImpl ctx) {
                 return new TextClassificationManager(ctx);
             }});
-
-        registerService(Context.SELECTION_TOOLBAR_SERVICE, SelectionToolbarManager.class,
-                new CachedServiceFetcher<SelectionToolbarManager>() {
-                    @Override
-                    public SelectionToolbarManager createService(ContextImpl ctx) {
-                        IBinder b = ServiceManager.getService(Context.SELECTION_TOOLBAR_SERVICE);
-                        return new SelectionToolbarManager(ctx.getOuterContext(),
-                                ISelectionToolbarManager.Stub.asInterface(b));
-                    }});
 
         registerService(Context.FONT_SERVICE, FontManager.class,
                 new CachedServiceFetcher<FontManager>() {
@@ -1228,17 +1215,6 @@ public final class SystemServiceRegistry {
                     throws ServiceNotFoundException {
                     IBinder b = ServiceManager.getService(Context.SMARTSPACE_SERVICE);
                     return b == null ? null : new SmartspaceManager(ctx);
-                }
-            });
-
-        registerService(Context.CLOUDSEARCH_SERVICE, CloudSearchManager.class,
-            new CachedServiceFetcher<CloudSearchManager>() {
-                @Override
-                public CloudSearchManager createService(ContextImpl ctx)
-                    throws ServiceNotFoundException {
-                    IBinder b = ServiceManager.getService(Context.CLOUDSEARCH_SERVICE);
-                    return b == null ? null :
-                        new CloudSearchManager(ICloudSearchManager.Stub.asInterface(b));
                 }
             });
 

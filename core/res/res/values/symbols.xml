@@ -3925,8 +3925,10 @@
   <java-symbol type="string" name="log_access_confirmation_deny" />
   <java-symbol type="string" name="log_access_confirmation_title" />
   <java-symbol type="string" name="log_access_confirmation_body" />
+  <java-symbol type="string" name="log_access_confirmation_learn_more" />
   <java-symbol type="layout" name="log_access_user_consent_dialog_permission" />
   <java-symbol type="id" name="log_access_dialog_title" />
+  <java-symbol type="id" name="log_access_dialog_body" />
   <java-symbol type="id" name="log_access_dialog_allow_button" />
   <java-symbol type="id" name="log_access_dialog_deny_button" />
 

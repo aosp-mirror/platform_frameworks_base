@@ -103,7 +103,6 @@ import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 import com.android.systemui.statusbar.policy.AccessibilityController;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
-import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -253,7 +252,6 @@ public class Dependency {
     @Inject Lazy<UserInfoController> mUserInfoController;
     @Inject Lazy<KeyguardStateController> mKeyguardMonitor;
     @Inject Lazy<KeyguardUpdateMonitor> mKeyguardUpdateMonitor;
-    @Inject Lazy<BatteryController> mBatteryController;
     @Inject Lazy<NightDisplayListener> mNightDisplayListener;
     @Inject Lazy<ReduceBrightColorsController> mReduceBrightColorsController;
     @Inject Lazy<ManagedProfileController> mManagedProfileController;
@@ -403,8 +401,6 @@ public class Dependency {
         mProviders.put(UserSwitcherController.class, mUserSwitcherController::get);
 
         mProviders.put(UserInfoController.class, mUserInfoController::get);
-
-        mProviders.put(BatteryController.class, mBatteryController::get);
 
         mProviders.put(NightDisplayListener.class, mNightDisplayListener::get);
 
