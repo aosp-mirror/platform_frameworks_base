@@ -1555,7 +1555,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                 anyBoolean());
         CancellationSignal cancelSignal = mCancellationSignalCaptor.getValue();
 
-        bouncerWillBeVisibleSoon();
+        bouncerFullyVisible();
         mTestableLooper.processAllMessages();
 
         assertThat(cancelSignal.isCanceled()).isTrue();
@@ -1751,11 +1751,6 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
     private void bouncerFullyVisible() {
         setKeyguardBouncerVisibility(true);
-    }
-
-    private void bouncerWillBeVisibleSoon() {
-        mKeyguardUpdateMonitor.sendKeyguardBouncerChanged(true, false);
-        mTestableLooper.processAllMessages();
     }
 
     private void setKeyguardBouncerVisibility(boolean isVisible) {
