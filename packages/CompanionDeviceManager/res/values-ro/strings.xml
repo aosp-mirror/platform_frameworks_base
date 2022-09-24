@@ -39,7 +39,7 @@
     <string name="profile_name_generic" msgid="6851028682723034988">"dispozitiv"</string>
     <string name="summary_generic" msgid="2346762210105903720"></string>
     <string name="consent_yes" msgid="8344487259618762872">"Permite"</string>
-    <string name="consent_no" msgid="2640796915611404382">"Nu permiteți"</string>
+    <string name="consent_no" msgid="2640796915611404382">"Nu permite"</string>
     <string name="consent_back" msgid="2560683030046918882">"Înapoi"</string>
     <string name="permission_sync_confirmation_title" msgid="667074294393493186">"Transferați permisiunile pentru aplicații pe ceas"</string>
     <string name="permission_sync_summary" msgid="8873391306499120778">"Ca să configurați mai ușor ceasul, aplicațiile instalate pe ceas în timpul procesului de configurare vor folosi aceleași permisiuni ca telefonul.\n\n Între acestea se poate număra accesul la microfonul și locația ceasului."</string>

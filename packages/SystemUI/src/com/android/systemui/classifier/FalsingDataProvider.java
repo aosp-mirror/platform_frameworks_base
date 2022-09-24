@@ -78,10 +78,10 @@ public class FalsingDataProvider {
 
     void onMotionEvent(MotionEvent motionEvent) {
         List<MotionEvent> motionEvents = unpackMotionEvent(motionEvent);
-        FalsingClassifier.logDebug("Unpacked into: " + motionEvents.size());
+        FalsingClassifier.logVerbose("Unpacked into: " + motionEvents.size());
         if (BrightLineFalsingManager.DEBUG) {
             for (MotionEvent m : motionEvents) {
-                FalsingClassifier.logDebug(
+                FalsingClassifier.logVerbose(
                         "x,y,t: " + m.getX() + "," + m.getY() + "," + m.getEventTime());
             }
         }
@@ -92,7 +92,7 @@ public class FalsingDataProvider {
         }
         mRecentMotionEvents.addAll(motionEvents);
 
-        FalsingClassifier.logDebug("Size: " + mRecentMotionEvents.size());
+        FalsingClassifier.logVerbose("Size: " + mRecentMotionEvents.size());
 
         mMotionEventListeners.forEach(listener -> listener.onMotionEvent(motionEvent));
 
