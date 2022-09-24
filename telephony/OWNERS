@@ -17,3 +17,6 @@ per-file SubscriptionManager.java=jackyu@google.com,amruthr@google.com
 per-file SubscriptionInfo.java=set noparent
 per-file SubscriptionInfo.java=jackyu@google.com,amruthr@google.com
 
+# Requiring TL ownership for new carrier config keys.
+per-file CarrierConfigManager.java=set noparent
+per-file CarrierConfigManager.java=amruthr@google.com,tgunn@google.com,rgreenwalt@google.com,satk@google.com
