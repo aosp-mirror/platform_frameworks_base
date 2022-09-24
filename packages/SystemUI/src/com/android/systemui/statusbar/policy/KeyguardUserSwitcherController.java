@@ -16,9 +16,6 @@
 
 package com.android.systemui.statusbar.policy;
 
-import static com.android.systemui.statusbar.policy.UserSwitcherController.USER_SWITCH_DISABLED_ALPHA;
-import static com.android.systemui.statusbar.policy.UserSwitcherController.USER_SWITCH_ENABLED_ALPHA;
-
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
@@ -232,14 +229,8 @@ public class KeyguardUserSwitcherController extends ViewController<KeyguardUserS
     }
 
     /**
-     * See:
+     * Returns {@code true} if the user switcher should be open by default on the lock screen.
      *
-     * <ul>
-     *   <li>{@link com.android.internal.R.bool.config_expandLockScreenUserSwitcher}</li>
-     *    <li>{@link UserSwitcherController.SIMPLE_USER_SWITCHER_GLOBAL_SETTING}</li>
-     * </ul>
-     *
-     * @return true if the user switcher should be open by default on the lock screen.
      * @see android.os.UserManager#isUserSwitcherEnabled()
      */
     public boolean isSimpleUserSwitcher() {
@@ -436,7 +427,7 @@ public class KeyguardUserSwitcherController extends ViewController<KeyguardUserS
     }
 
     static class KeyguardUserAdapter extends
-            UserSwitcherController.BaseUserAdapter implements View.OnClickListener {
+            BaseUserSwitcherAdapter implements View.OnClickListener {
 
         private final Context mContext;
         private final Resources mResources;
@@ -514,9 +505,9 @@ public class KeyguardUserSwitcherController extends ViewController<KeyguardUserS
                 v.bind(name, drawable, item.info.id);
             }
             v.setActivated(item.isCurrent);
-            v.setDisabledByAdmin(mController.isDisabledByAdmin(item));
+            v.setDisabledByAdmin(getController().isDisabledByAdmin(item));
             v.setEnabled(item.isSwitchToEnabled);
-            v.setAlpha(v.isEnabled() ? USER_SWITCH_ENABLED_ALPHA : USER_SWITCH_DISABLED_ALPHA);
+            UserSwitcherController.setSelectableAlpha(v);
 
             if (item.isCurrent) {
                 mCurrentUserView = v;

@@ -53,10 +53,8 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.FalsingManager.LOW_PENALTY
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.statusbar.policy.BaseUserSwitcherAdapter
 import com.android.systemui.statusbar.policy.UserSwitcherController
-import com.android.systemui.statusbar.policy.UserSwitcherController.BaseUserAdapter
-import com.android.systemui.statusbar.policy.UserSwitcherController.USER_SWITCH_DISABLED_ALPHA
-import com.android.systemui.statusbar.policy.UserSwitcherController.USER_SWITCH_ENABLED_ALPHA
 import com.android.systemui.user.data.source.UserRecord
 import com.android.systemui.user.ui.binder.UserSwitcherViewBinder
 import com.android.systemui.user.ui.viewmodel.UserSwitcherViewModel
@@ -66,10 +64,10 @@ import kotlin.math.ceil
 
 private const val USER_VIEW = "user_view"
 
-/**
- * Support a fullscreen user switcher
- */
-open class UserSwitcherActivity @Inject constructor(
+/** Support a fullscreen user switcher */
+open class UserSwitcherActivity
+@Inject
+constructor(
     private val userSwitcherController: UserSwitcherController,
     private val broadcastDispatcher: BroadcastDispatcher,
     private val falsingCollector: FalsingCollector,
@@ -86,11 +84,12 @@ open class UserSwitcherActivity @Inject constructor(
     private lateinit var addButton: View
     private var addUserRecords = mutableListOf<UserRecord>()
     private val onBackCallback = OnBackInvokedCallback { finish() }
-    private val userSwitchedCallback: UserTracker.Callback = object : UserTracker.Callback {
-        override fun onUserChanged(newUser: Int, userContext: Context) {
-            finish()
+    private val userSwitchedCallback: UserTracker.Callback =
+        object : UserTracker.Callback {
+            override fun onUserChanged(newUser: Int, userContext: Context) {
+                finish()
+            }
         }
-    }
     // When the add users options become available, insert another option to manage users
     private val manageUserRecord =
         UserRecord(
@@ -114,13 +113,14 @@ open class UserSwitcherActivity @Inject constructor(
     @VisibleForTesting
     fun createActivity() {
         setContentView(R.layout.user_switcher_fullscreen)
-        window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)
+        window.decorView.systemUiVisibility =
+            (View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
+                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
+                View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)
         if (isUsingModernArchitecture()) {
             Log.d(TAG, "Using modern architecture.")
-            val viewModel = ViewModelProvider(
-                this, viewModelFactory.get())[UserSwitcherViewModel::class.java]
+            val viewModel =
+                ViewModelProvider(this, viewModelFactory.get())[UserSwitcherViewModel::class.java]
             UserSwitcherViewBinder.bind(
                 view = requireViewById(R.id.user_switcher_root),
                 viewModel = viewModel,
@@ -136,27 +136,23 @@ open class UserSwitcherActivity @Inject constructor(
 
         parent = requireViewById<UserSwitcherRootView>(R.id.user_switcher_root)
 
-        parent.touchHandler = object : Gefingerpoken {
-            override fun onTouchEvent(ev: MotionEvent?): Boolean {
-                falsingCollector.onTouchEvent(ev)
-                return false
+        parent.touchHandler =
+            object : Gefingerpoken {
+                override fun onTouchEvent(ev: MotionEvent?): Boolean {
+                    falsingCollector.onTouchEvent(ev)
+                    return false
+                }
             }
-        }
 
-        requireViewById<View>(R.id.cancel).apply {
-            setOnClickListener {
-                _ -> finish()
-            }
-        }
+        requireViewById<View>(R.id.cancel).apply { setOnClickListener { _ -> finish() } }
 
-        addButton = requireViewById<View>(R.id.add).apply {
-            setOnClickListener {
-                _ -> showPopupMenu()
-            }
-        }
+        addButton =
+            requireViewById<View>(R.id.add).apply { setOnClickListener { _ -> showPopupMenu() } }
 
         onBackInvokedDispatcher.registerOnBackInvokedCallback(
-                OnBackInvokedDispatcher.PRIORITY_DEFAULT, onBackCallback)
+            OnBackInvokedDispatcher.PRIORITY_DEFAULT,
+            onBackCallback
+        )
 
         userSwitcherController.init(parent)
         initBroadcastReceiver()
@@ -169,25 +165,30 @@ open class UserSwitcherActivity @Inject constructor(
         val items = mutableListOf<UserRecord>()
         addUserRecords.forEach { items.add(it) }
 
-        var popupMenuAdapter = ItemAdapter(
-            this,
-            R.layout.user_switcher_fullscreen_popup_item,
-            layoutInflater,
-            { item: UserRecord -> adapter.getName(this@UserSwitcherActivity, item, true) },
-            { item: UserRecord -> adapter.findUserIcon(item, true).mutate().apply {
-                setTint(resources.getColor(
-                    R.color.user_switcher_fullscreen_popup_item_tint,
-                    getTheme()
-                ))
-            } }
-        )
+        var popupMenuAdapter =
+            ItemAdapter(
+                this,
+                R.layout.user_switcher_fullscreen_popup_item,
+                layoutInflater,
+                { item: UserRecord -> adapter.getName(this@UserSwitcherActivity, item, true) },
+                { item: UserRecord ->
+                    adapter.findUserIcon(item, true).mutate().apply {
+                        setTint(
+                            resources.getColor(
+                                R.color.user_switcher_fullscreen_popup_item_tint,
+                                getTheme()
+                            )
+                        )
+                    }
+                }
+            )
         popupMenuAdapter.addAll(items)
 
-        popupMenu = UserSwitcherPopupMenu(this).apply {
-            setAnchorView(addButton)
-            setAdapter(popupMenuAdapter)
-            setOnItemClickListener {
-                parent: AdapterView<*>, view: View, pos: Int, id: Long ->
+        popupMenu =
+            UserSwitcherPopupMenu(this).apply {
+                setAnchorView(addButton)
+                setAdapter(popupMenuAdapter)
+                setOnItemClickListener { parent: AdapterView<*>, view: View, pos: Int, id: Long ->
                     if (falsingManager.isFalseTap(LOW_PENALTY) || !view.isEnabled()) {
                         return@setOnItemClickListener
                     }
@@ -206,10 +207,10 @@ open class UserSwitcherActivity @Inject constructor(
                     if (!item.isAddUser) {
                         this@UserSwitcherActivity.finish()
                     }
-            }
+                }
 
-            show()
-        }
+                show()
+            }
     }
 
     private fun buildUserViews() {
@@ -227,8 +228,8 @@ open class UserSwitcherActivity @Inject constructor(
         val totalWidth = parent.width
         val userViewCount = adapter.getTotalUserViews()
         val maxColumns = getMaxColumns(userViewCount)
-        val horizontalGap = resources
-            .getDimensionPixelSize(R.dimen.user_switcher_fullscreen_horizontal_gap)
+        val horizontalGap =
+            resources.getDimensionPixelSize(R.dimen.user_switcher_fullscreen_horizontal_gap)
         val totalWidthOfHorizontalGap = (maxColumns - 1) * horizontalGap
         val maxWidgetDiameter = (totalWidth - totalWidthOfHorizontalGap) / maxColumns
 
@@ -299,14 +300,15 @@ open class UserSwitcherActivity @Inject constructor(
     }
 
     private fun initBroadcastReceiver() {
-        broadcastReceiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context, intent: Intent) {
-                val action = intent.getAction()
-                if (Intent.ACTION_SCREEN_OFF.equals(action)) {
-                    finish()
+        broadcastReceiver =
+            object : BroadcastReceiver() {
+                override fun onReceive(context: Context, intent: Intent) {
+                    val action = intent.getAction()
+                    if (Intent.ACTION_SCREEN_OFF.equals(action)) {
+                        finish()
+                    }
                 }
             }
-        }
 
         val filter = IntentFilter()
         filter.addAction(Intent.ACTION_SCREEN_OFF)
@@ -322,9 +324,7 @@ open class UserSwitcherActivity @Inject constructor(
         return flags.isEnabled(Flags.MODERN_USER_SWITCHER_ACTIVITY)
     }
 
-    /**
-     * Provides views to populate the option menu.
-     */
+    /** Provides views to populate the option menu. */
     private class ItemAdapter(
         val parentContext: Context,
         val resource: Int,
@@ -337,43 +337,27 @@ open class UserSwitcherActivity @Inject constructor(
             val item = getItem(position)
             val view = convertView ?: layoutInflater.inflate(resource, parent, false)
 
-            view.requireViewById<ImageView>(R.id.icon).apply {
-                setImageDrawable(iconGetter(item))
-            }
-            view.requireViewById<TextView>(R.id.text).apply {
-                setText(textGetter(item))
-            }
+            view.requireViewById<ImageView>(R.id.icon).apply { setImageDrawable(iconGetter(item)) }
+            view.requireViewById<TextView>(R.id.text).apply { setText(textGetter(item)) }
 
             return view
         }
     }
 
-    private inner class UserAdapter : BaseUserAdapter(userSwitcherController) {
+    private inner class UserAdapter : BaseUserSwitcherAdapter(userSwitcherController) {
         override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
             val item = getItem(position)
             var view = convertView as ViewGroup?
             if (view == null) {
-                view = layoutInflater.inflate(
-                    R.layout.user_switcher_fullscreen_item,
-                    parent,
-                    false
-                ) as ViewGroup
+                view =
+                    layoutInflater.inflate(R.layout.user_switcher_fullscreen_item, parent, false)
+                        as ViewGroup
             }
-            (view.getChildAt(0) as ImageView).apply {
-                setImageDrawable(getDrawable(item))
-            }
-            (view.getChildAt(1) as TextView).apply {
-                setText(getName(getContext(), item))
-            }
+            (view.getChildAt(0) as ImageView).apply { setImageDrawable(getDrawable(item)) }
+            (view.getChildAt(1) as TextView).apply { setText(getName(getContext(), item)) }
 
             view.setEnabled(item.isSwitchToEnabled)
-            view.setAlpha(
-                if (view.isEnabled()) {
-                    USER_SWITCH_ENABLED_ALPHA
-                } else {
-                    USER_SWITCH_DISABLED_ALPHA
-                }
-            )
+            UserSwitcherController.setSelectableAlpha(view)
             view.setTag(USER_VIEW)
             return view
         }
@@ -401,23 +385,20 @@ open class UserSwitcherActivity @Inject constructor(
         }
 
         fun getTotalUserViews(): Int {
-            return users.count { item ->
-                !doNotRenderUserView(item)
-            }
+            return users.count { item -> !doNotRenderUserView(item) }
         }
 
         fun doNotRenderUserView(item: UserRecord): Boolean {
-            return item.isAddUser ||
-                    item.isAddSupervisedUser ||
-                    item.isGuest && item.info == null
+            return item.isAddUser || item.isAddSupervisedUser || item.isGuest && item.info == null
         }
 
         private fun getDrawable(item: UserRecord): Drawable {
-            var drawable = if (item.isGuest) {
-                getDrawable(R.drawable.ic_account_circle)
-            } else {
-                findUserIcon(item)
-            }
+            var drawable =
+                if (item.isGuest) {
+                    getDrawable(R.drawable.ic_account_circle)
+                } else {
+                    findUserIcon(item)
+                }
             drawable.mutate()
 
             if (!item.isCurrent && !item.isSwitchToEnabled) {
@@ -429,16 +410,16 @@ open class UserSwitcherActivity @Inject constructor(
                 )
             }
 
-            val ld = getDrawable(R.drawable.user_switcher_icon_large).mutate()
-                    as LayerDrawable
-            if (item == userSwitcherController.getCurrentUserRecord()) {
+            val ld = getDrawable(R.drawable.user_switcher_icon_large).mutate() as LayerDrawable
+            if (item == userSwitcherController.currentUserRecord) {
                 (ld.findDrawableByLayerId(R.id.ring) as GradientDrawable).apply {
-                    val stroke = resources
-                        .getDimensionPixelSize(R.dimen.user_switcher_icon_selected_width)
-                    val color = Utils.getColorAttrDefaultColor(
-                        this@UserSwitcherActivity,
-                        com.android.internal.R.attr.colorAccentPrimary
-                    )
+                    val stroke =
+                        resources.getDimensionPixelSize(R.dimen.user_switcher_icon_selected_width)
+                    val color =
+                        Utils.getColorAttrDefaultColor(
+                            this@UserSwitcherActivity,
+                            com.android.internal.R.attr.colorAccentPrimary
+                        )
 
                     setStroke(stroke, color)
                 }

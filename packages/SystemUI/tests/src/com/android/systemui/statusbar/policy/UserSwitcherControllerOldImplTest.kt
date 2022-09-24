@@ -86,7 +86,7 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
-class UserSwitcherControllerTest : SysuiTestCase() {
+class UserSwitcherControllerOldImplTest : SysuiTestCase() {
     @Mock private lateinit var keyguardStateController: KeyguardStateController
     @Mock private lateinit var activityManager: IActivityManager
     @Mock private lateinit var deviceProvisionedController: DeviceProvisionedController
@@ -118,7 +118,7 @@ class UserSwitcherControllerTest : SysuiTestCase() {
     private lateinit var longRunningExecutor: FakeExecutor
     private lateinit var uiExecutor: FakeExecutor
     private lateinit var uiEventLogger: UiEventLoggerFake
-    private lateinit var userSwitcherController: UserSwitcherController
+    private lateinit var userSwitcherController: UserSwitcherControllerOldImpl
     private lateinit var picture: Bitmap
     private val ownerId = UserHandle.USER_SYSTEM
     private val ownerInfo = UserInfo(ownerId, "Owner", null,
@@ -205,7 +205,8 @@ class UserSwitcherControllerTest : SysuiTestCase() {
     }
 
     private fun setupController() {
-        userSwitcherController = UserSwitcherController(
+        userSwitcherController =
+            UserSwitcherControllerOldImpl(
                 mContext,
                 activityManager,
                 userManager,
@@ -230,7 +231,8 @@ class UserSwitcherControllerTest : SysuiTestCase() {
                 dumpManager,
                 dialogLaunchAnimator,
                 guestResumeSessionReceiver,
-                guestResetOrExitSessionReceiver)
+                guestResetOrExitSessionReceiver
+            )
         userSwitcherController.init(notificationShadeWindowView)
     }
 
