@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.logcat;
+package com.android.internal.app;
 
 import android.annotation.StyleRes;
 import android.app.Activity;
@@ -27,7 +27,14 @@ import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.RemoteException;
 import android.os.UserHandle;
+import android.text.Html;
+import android.text.Spannable;
+import android.text.TextUtils;
+import android.text.method.LinkMovementMethod;
+import android.text.style.TypefaceSpan;
+import android.text.style.URLSpan;
 import android.util.Slog;
 import android.view.ContextThemeWrapper;
 import android.view.InflateException;
@@ -37,7 +44,6 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.android.internal.R;
-import com.android.server.LocalServices;
 
 /**
  * Dialog responsible for obtaining user consent per-use log access
@@ -45,17 +51,19 @@ import com.android.server.LocalServices;
 public class LogAccessDialogActivity extends Activity implements
         View.OnClickListener {
     private static final String TAG = LogAccessDialogActivity.class.getSimpleName();
+    public static final String EXTRA_CALLBACK = "EXTRA_CALLBACK";
+
 
     private static final int DIALOG_TIME_OUT = Build.IS_DEBUGGABLE ? 60000 : 300000;
     private static final int MSG_DISMISS_DIALOG = 0;
 
-    private final LogcatManagerService.LogcatManagerServiceInternal mLogcatManagerInternal =
-            LocalServices.getService(LogcatManagerService.LogcatManagerServiceInternal.class);
-
     private String mPackageName;
     private int mUid;
+    private ILogAccessDialogCallback mCallback;
 
     private String mAlertTitle;
+    private String mAlertBody;
+    private String mAlertLearnMore;
     private AlertDialog.Builder mAlertDialog;
     private AlertDialog mAlert;
     private View mAlertView;
@@ -80,6 +88,9 @@ public class LogAccessDialogActivity extends Activity implements
             finish();
             return;
         }
+
+        mAlertBody = getResources().getString(R.string.log_access_confirmation_body);
+        mAlertLearnMore = getResources().getString(R.string.log_access_confirmation_learn_more);
 
         // create View
         boolean isDarkTheme = (getResources().getConfiguration().uiMode
@@ -115,6 +126,13 @@ public class LogAccessDialogActivity extends Activity implements
     private boolean readIntentInfo(Intent intent) {
         if (intent == null) {
             Slog.e(TAG, "Intent is null");
+            return false;
+        }
+
+        mCallback = ILogAccessDialogCallback.Stub.asInterface(
+                intent.getExtras().getBinder(EXTRA_CALLBACK));
+        if (mCallback == null) {
+            Slog.e(TAG, "Missing callback");
             return false;
         }
 
@@ -165,13 +183,22 @@ public class LogAccessDialogActivity extends Activity implements
         return titleString;
     }
 
+    private Spannable styleFont(String text) {
+        Spannable s = (Spannable) Html.fromHtml(text);
+        for (URLSpan span : s.getSpans(0, s.length(), URLSpan.class)) {
+            TypefaceSpan typefaceSpan = new TypefaceSpan("google-sans");
+            s.setSpan(typefaceSpan, s.getSpanStart(span), s.getSpanEnd(span), 0);
+        }
+        return s;
+    }
+
     /**
      * Returns the dialog view.
      * If we cannot retrieve the package name, it returns null and we decline the full device log
      * access
      */
     private View createView(@StyleRes int themeId) {
-        Context themedContext = new ContextThemeWrapper(getApplicationContext(), themeId);
+        Context themedContext = new ContextThemeWrapper(this, themeId);
         final View view = LayoutInflater.from(themedContext).inflate(
                 R.layout.log_access_user_consent_dialog_permission, null /*root*/);
 
@@ -181,6 +208,19 @@ public class LogAccessDialogActivity extends Activity implements
 
         ((TextView) view.findViewById(R.id.log_access_dialog_title))
             .setText(mAlertTitle);
+
+        if (!TextUtils.isEmpty(mAlertLearnMore)) {
+            Spannable mSpannableLearnMore = styleFont(mAlertLearnMore);
+
+            ((TextView) view.findViewById(R.id.log_access_dialog_body))
+                    .setText(TextUtils.concat(mAlertBody, "\n\n", mSpannableLearnMore));
+
+            ((TextView) view.findViewById(R.id.log_access_dialog_body))
+                    .setMovementMethod(LinkMovementMethod.getInstance());
+        } else {
+            ((TextView) view.findViewById(R.id.log_access_dialog_body))
+                    .setText(mAlertBody);
+        }
 
         Button button_allow = (Button) view.findViewById(R.id.log_access_dialog_allow_button);
         button_allow.setOnClickListener(this);
@@ -194,19 +234,27 @@ public class LogAccessDialogActivity extends Activity implements
 
     @Override
     public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.log_access_dialog_allow_button:
-                mLogcatManagerInternal.approveAccessForClient(mUid, mPackageName);
-                finish();
-                break;
-            case R.id.log_access_dialog_deny_button:
-                declineLogAccess();
-                finish();
-                break;
+        try {
+            switch (view.getId()) {
+                case R.id.log_access_dialog_allow_button:
+                    mCallback.approveAccessForClient(mUid, mPackageName);
+                    finish();
+                    break;
+                case R.id.log_access_dialog_deny_button:
+                    declineLogAccess();
+                    finish();
+                    break;
+            }
+        } catch (RemoteException e) {
+            finish();
         }
     }
 
     private void declineLogAccess() {
-        mLogcatManagerInternal.declineAccessForClient(mUid, mPackageName);
+        try {
+            mCallback.declineAccessForClient(mUid, mPackageName);
+        } catch (RemoteException e) {
+            finish();
+        }
     }
 }
