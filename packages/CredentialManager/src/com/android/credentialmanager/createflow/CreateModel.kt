@@ -10,13 +10,16 @@ data class ProviderInfo(
   val createOptions: List<CreateOptionInfo>,
 )
 
-data class ProviderList(
-  val providers: List<ProviderInfo>,
-)
-
 data class CreateOptionInfo(
   val icon: Drawable,
   val title: String,
   val subtitle: String,
   val id: String,
 )
+
+/** The name of the current screen. */
+enum class CreateScreenState {
+  PASSKEY_INTRO,
+  PROVIDER_SELECTION,
+  CREATION_OPTION_SELECTION,
+}

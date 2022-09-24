@@ -218,4 +218,20 @@ public class DreamOverlayStateControllerTest extends SysuiTestCase {
         assertThat(stateController.getComplications(true).contains(complication))
                 .isTrue();
     }
+
+    @Test
+    public void testNotifyLowLightChanged() {
+        final DreamOverlayStateController stateController =
+                new DreamOverlayStateController(mExecutor);
+
+        stateController.addCallback(mCallback);
+        mExecutor.runAllReady();
+        assertThat(stateController.isLowLightActive()).isFalse();
+
+        stateController.setLowLightActive(true);
+
+        mExecutor.runAllReady();
+        verify(mCallback, times(1)).onStateChanged();
+        assertThat(stateController.isLowLightActive()).isTrue();
+    }
 }

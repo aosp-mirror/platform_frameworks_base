@@ -225,8 +225,6 @@ public final class SurfaceControl implements Parcelable {
     private static native void nativeSetDimmingEnabled(long transactionObj, long nativeObject,
             boolean dimmingEnabled);
 
-    private static native void nativeOverrideHdrTypes(IBinder displayToken, int[] modes);
-
     private static native void nativeSetInputWindowInfo(long transactionObj, long nativeObject,
             InputWindowHandle handle);
 
@@ -2035,18 +2033,6 @@ public final class SurfaceControl implements Parcelable {
 
         DisplayManagerGlobal.getInstance().releaseVirtualDisplay(
                 IVirtualDisplayCallback.Stub.asInterface(displayToken));
-    }
-
-    /**
-     * Overrides HDR modes for a display device.
-     *
-     * If the caller does not have ACCESS_SURFACE_FLINGER permission, this will throw a Security
-     * Exception.
-     * @hide
-     */
-    @TestApi
-    public static void overrideHdrTypes(@NonNull IBinder displayToken, @NonNull int[] modes) {
-        nativeOverrideHdrTypes(displayToken, modes);
     }
 
     /**

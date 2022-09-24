@@ -21,7 +21,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -29,10 +28,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
-import androidx.navigation.NavController
-import androidx.navigation.NavGraphBuilder
-import androidx.navigation.compose.composable
-import androidx.navigation.navigation
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.credentialmanager.R
 import com.android.credentialmanager.createflow.CancelButton
 import com.android.credentialmanager.ui.theme.Grey100
@@ -41,36 +37,10 @@ import com.android.credentialmanager.ui.theme.Typography
 import com.android.credentialmanager.ui.theme.lightBackgroundColor
 
 @ExperimentalMaterialApi
-fun NavGraphBuilder.getCredentialsGraph(
-  navController: NavController,
-  viewModel: GetCredentialViewModel,
-  onCancel: () -> Unit,
-  startDestination: String = "credentialSelection", // TODO: get this from view model
-) {
-  navigation(startDestination = startDestination, route = "getCredentials") {
-    composable("credentialSelection") {
-      CredentialSelectionDialog(
-        providerInfo = viewModel.getDefaultProviderInfo(),
-        onOptionSelected = {viewModel.onCredentailSelected(it, navController)},
-        onCancel = onCancel,
-        multiProvider = viewModel.uiState.collectAsState().value.providers.size > 1,
-        onMoreOptionSelected = {viewModel.onMoreOptionSelected(navController)}
-      )
-    }
-  }
-}
-
-/**
- * BEGIN CREATE OPTION SELECTION CONTENT
- */
-@ExperimentalMaterialApi
 @Composable
-fun CredentialSelectionDialog(
-  providerInfo: ProviderInfo,
-  onOptionSelected: (String) -> Unit,
-  onCancel: () -> Unit,
-  multiProvider: Boolean,
-  onMoreOptionSelected: () -> Unit,
+fun GetCredentialScreen(
+  viewModel: GetCredentialViewModel = viewModel(),
+  cancelActivity: () -> Unit,
 ) {
   val state = rememberModalBottomSheetState(
     initialValue = ModalBottomSheetValue.Expanded,
@@ -79,13 +49,16 @@ fun CredentialSelectionDialog(
   ModalBottomSheetLayout(
     sheetState = state,
     sheetContent = {
-      CredentialSelectionCard(
-        providerInfo = providerInfo,
-        onCancel = onCancel,
-        onOptionSelected = onOptionSelected,
-        multiProvider = multiProvider,
-        onMoreOptionSelected = onMoreOptionSelected,
-      )
+      val uiState = viewModel.uiState
+      when (uiState.currentScreenState) {
+        GetScreenState.CREDENTIAL_SELECTION -> CredentialSelectionCard(
+          providerInfo = uiState.selectedProvider!!,
+          onCancel = cancelActivity,
+          onOptionSelected = {viewModel.onCredentailSelected(it)},
+          multiProvider = uiState.providers.size > 1,
+          onMoreOptionSelected = {viewModel.onMoreOptionSelected()},
+        )
+      }
     },
     scrimColor = Color.Transparent,
     sheetShape = Shapes.medium,
@@ -93,7 +66,7 @@ fun CredentialSelectionDialog(
   LaunchedEffect(state.currentValue) {
     when (state.currentValue) {
       ModalBottomSheetValue.Hidden -> {
-        onCancel()
+        cancelActivity()
       }
     }
   }
@@ -121,7 +94,9 @@ fun CredentialSelectionCard(
       Text(
         text = stringResource(R.string.choose_sign_in_title),
         style = Typography.subtitle1,
-        modifier = Modifier.padding(all = 24.dp).align(alignment = Alignment.CenterHorizontally)
+        modifier = Modifier
+          .padding(all = 24.dp)
+          .align(alignment = Alignment.CenterHorizontally)
       )
       Text(
         text = providerInfo.appDomainName,
@@ -184,7 +159,6 @@ fun CredentialOptionRow(
     leadingIcon = {
       Image(modifier = Modifier.size(24.dp, 24.dp).padding(start = 10.dp),
             bitmap = credentialOptionInfo.icon.toBitmap().asImageBitmap(),
-        // painter = painterResource(R.drawable.ic_passkey),
         // TODO: add description.
             contentDescription = "")
     },
@@ -227,6 +201,3 @@ fun MoreOptionRow(onSelect: () -> Unit) {
     )
   }
 }
-/**
- * END CREATE OPTION SELECTION CONTENT
- */

@@ -30,6 +30,7 @@ import com.android.server.utils.WatchedArraySet;
 import java.util.Collections;
 import java.util.Map;
 
+/** @hide */
 class PackageUserStateDefault implements PackageUserStateInternal {
 
     @Override

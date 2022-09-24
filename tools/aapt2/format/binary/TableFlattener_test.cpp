@@ -337,7 +337,7 @@ TEST_F(TableFlattenerTest, FlattenSparseEntryWithMinSdkO) {
   auto table_in = BuildTableWithSparseEntries(context.get(), sparse_config, 0.25f);
 
   TableFlattenerOptions options;
-  options.use_sparse_entries = true;
+  options.sparse_entries = SparseEntriesMode::Enabled;
 
   std::string no_sparse_contents;
   ASSERT_TRUE(Flatten(context.get(), {}, table_in.get(), &no_sparse_contents));
@@ -380,7 +380,29 @@ TEST_F(TableFlattenerTest, FlattenSparseEntryWithConfigSdkVersionO) {
   auto table_in = BuildTableWithSparseEntries(context.get(), sparse_config, 0.25f);
 
   TableFlattenerOptions options;
-  options.use_sparse_entries = true;
+  options.sparse_entries = SparseEntriesMode::Enabled;
+
+  std::string no_sparse_contents;
+  ASSERT_TRUE(Flatten(context.get(), {}, table_in.get(), &no_sparse_contents));
+
+  std::string sparse_contents;
+  ASSERT_TRUE(Flatten(context.get(), options, table_in.get(), &sparse_contents));
+
+  EXPECT_GT(no_sparse_contents.size(), sparse_contents.size());
+}
+
+TEST_F(TableFlattenerTest, FlattenSparseEntryRegardlessOfMinSdkWhenForced) {
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder()
+                                              .SetCompilationPackage("android")
+                                              .SetPackageId(0x01)
+                                              .SetMinSdkVersion(SDK_LOLLIPOP)
+                                              .Build();
+
+  const ConfigDescription sparse_config = test::ParseConfigOrDie("en-rGB");
+  auto table_in = BuildTableWithSparseEntries(context.get(), sparse_config, 0.25f);
+
+  TableFlattenerOptions options;
+  options.sparse_entries = SparseEntriesMode::Forced;
 
   std::string no_sparse_contents;
   ASSERT_TRUE(Flatten(context.get(), {}, table_in.get(), &no_sparse_contents));
@@ -399,7 +421,7 @@ TEST_F(TableFlattenerTest, FlattenSparseEntryWithSdkVersionNotSet) {
   auto table_in = BuildTableWithSparseEntries(context.get(), sparse_config, 0.25f);
 
   TableFlattenerOptions options;
-  options.use_sparse_entries = true;
+  options.sparse_entries = SparseEntriesMode::Enabled;
 
   std::string no_sparse_contents;
   ASSERT_TRUE(Flatten(context.get(), {}, table_in.get(), &no_sparse_contents));
@@ -442,7 +464,7 @@ TEST_F(TableFlattenerTest, DoNotUseSparseEntryForDenseConfig) {
   auto table_in = BuildTableWithSparseEntries(context.get(), sparse_config, 0.80f);
 
   TableFlattenerOptions options;
-  options.use_sparse_entries = true;
+  options.sparse_entries = SparseEntriesMode::Enabled;
 
   std::string no_sparse_contents;
   ASSERT_TRUE(Flatten(context.get(), {}, table_in.get(), &no_sparse_contents));

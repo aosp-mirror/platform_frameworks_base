@@ -231,14 +231,14 @@ struct OverlayableChunk {
 class PackageFlattener {
  public:
   PackageFlattener(IAaptContext* context, const ResourceTablePackageView& package,
-                   const std::map<size_t, std::string>* shared_libs, bool use_sparse_entries,
-                   bool collapse_key_stringpool,
+                   const std::map<size_t, std::string>* shared_libs,
+                   SparseEntriesMode sparse_entries, bool collapse_key_stringpool,
                    const std::set<ResourceName>& name_collapse_exemptions)
       : context_(context),
         diag_(context->GetDiagnostics()),
         package_(package),
         shared_libs_(shared_libs),
-        use_sparse_entries_(use_sparse_entries),
+        sparse_entries_(sparse_entries),
         collapse_key_stringpool_(collapse_key_stringpool),
         name_collapse_exemptions_(name_collapse_exemptions) {
   }
@@ -367,10 +367,12 @@ class PackageFlattener {
       }
     }
 
-    bool sparse_encode = use_sparse_entries_;
+    bool sparse_encode = sparse_entries_ == SparseEntriesMode::Enabled ||
+                         sparse_entries_ == SparseEntriesMode::Forced;
 
-    if (context_->GetMinSdkVersion() == 0 && config.sdkVersion == 0) {
-      // Sparse encode if sdk version is not set in context and config.
+    if (sparse_entries_ == SparseEntriesMode::Forced ||
+        (context_->GetMinSdkVersion() == 0 && config.sdkVersion == 0)) {
+      // Sparse encode if forced or sdk version is not set in context and config.
     } else {
       // Otherwise, only sparse encode if the entries will be read on platforms S_V2+.
       sparse_encode = sparse_encode &&
@@ -712,7 +714,7 @@ class PackageFlattener {
   android::IDiagnostics* diag_;
   const ResourceTablePackageView package_;
   const std::map<size_t, std::string>* shared_libs_;
-  bool use_sparse_entries_;
+  SparseEntriesMode sparse_entries_;
   android::StringPool type_pool_;
   android::StringPool key_pool_;
   bool collapse_key_stringpool_;
@@ -768,7 +770,7 @@ bool TableFlattener::Consume(IAaptContext* context, ResourceTable* table) {
     }
 
     PackageFlattener flattener(context, package, &table->included_packages_,
-                               options_.use_sparse_entries, options_.collapse_key_stringpool,
+                               options_.sparse_entries, options_.collapse_key_stringpool,
                                options_.name_collapse_exemptions);
     if (!flattener.FlattenPackage(&package_buffer)) {
       return false;

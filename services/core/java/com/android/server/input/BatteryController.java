@@ -55,6 +55,9 @@ final class BatteryController implements InputManager.InputDeviceListener {
     // 'adb shell setprop log.tag.BatteryController DEBUG' (requires restart)
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
+    @VisibleForTesting
+    static final long POLLING_PERIOD_MILLIS = 10_000; // 10 seconds
+
     private final Object mLock = new Object();
     private final Context mContext;
     private final NativeInputManagerService mNative;
@@ -70,6 +73,11 @@ final class BatteryController implements InputManager.InputDeviceListener {
     // This must be kept in sync with {@link #mListenerRecords}.
     @GuardedBy("mLock")
     private final ArrayMap<Integer, MonitoredDeviceState> mMonitoredDeviceStates = new ArrayMap<>();
+
+    @GuardedBy("mLock")
+    private boolean mIsPolling = false;
+    @GuardedBy("mLock")
+    private boolean mIsInteractive = true;
 
     BatteryController(Context context, NativeInputManagerService nativeService, Looper looper) {
         this(context, nativeService, looper, new UEventManager() {});
@@ -135,6 +143,7 @@ final class BatteryController implements InputManager.InputDeviceListener {
                         + " is monitoring deviceId " + deviceId);
             }
 
+            updatePollingLocked(true /*delayStart*/);
             notifyBatteryListener(listenerRecord, deviceState);
         }
     }
@@ -160,6 +169,23 @@ final class BatteryController implements InputManager.InputDeviceListener {
                 notifyBatteryListener(listenerRecord, deviceState);
             }
         });
+    }
+
+    @GuardedBy("mLock")
+    private void updatePollingLocked(boolean delayStart) {
+        if (mMonitoredDeviceStates.isEmpty() || !mIsInteractive) {
+            // Stop polling.
+            mIsPolling = false;
+            mHandler.removeCallbacks(this::handlePollEvent);
+            return;
+        }
+
+        if (mIsPolling) {
+            return;
+        }
+        // Start polling.
+        mIsPolling = true;
+        mHandler.postDelayed(this::handlePollEvent, delayStart ? POLLING_PERIOD_MILLIS : 0);
     }
 
     private boolean hasBattery(int deviceId) {
@@ -232,6 +258,8 @@ final class BatteryController implements InputManager.InputDeviceListener {
             mListenerRecords.remove(pid);
             if (DEBUG) Slog.d(TAG, "Battery listener removed for pid " + pid);
         }
+
+        updatePollingLocked(false /*delayStart*/);
     }
 
     @GuardedBy("mLock")
@@ -273,10 +301,37 @@ final class BatteryController implements InputManager.InputDeviceListener {
         }
     }
 
+    private void handlePollEvent() {
+        synchronized (mLock) {
+            if (!mIsPolling) {
+                return;
+            }
+            final long eventTime = SystemClock.uptimeMillis();
+            mMonitoredDeviceStates.forEach((deviceId, deviceState) -> {
+                // Re-acquire lock in the lambda to silence error-prone build warnings.
+                synchronized (mLock) {
+                    if (deviceState.updateBatteryState(eventTime)) {
+                        notifyAllListenersForDeviceLocked(deviceState);
+                    }
+                }
+            });
+            mHandler.postDelayed(this::handlePollEvent, POLLING_PERIOD_MILLIS);
+        }
+    }
+
+    void onInteractiveChanged(boolean interactive) {
+        synchronized (mLock) {
+            mIsInteractive = interactive;
+            updatePollingLocked(false /*delayStart*/);
+        }
+    }
+
     void dump(PrintWriter pw, String prefix) {
         synchronized (mLock) {
-            pw.println(prefix + TAG + ": " + mListenerRecords.size()
-                    + " battery listeners");
+            pw.println(prefix + TAG + ": "
+                    + mListenerRecords.size() + " battery listeners"
+                    + ", Polling = " + mIsPolling
+                    + ", Interactive = " + mIsInteractive);
             for (int i = 0; i < mListenerRecords.size(); i++) {
                 pw.println(prefix + "  " + i + ": " + mListenerRecords.valueAt(i));
             }

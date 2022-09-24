@@ -3451,8 +3451,8 @@ final class InstallPackageHelper {
 
             if (throwable == null) {
                 try {
-                    AndroidPackage pkg = addForInitLI(
-                            parseResult.parsedPackage, newParseFlags, newScanFlags, null);
+                    addForInitLI(parseResult.parsedPackage, newParseFlags, newScanFlags, null);
+                    AndroidPackage pkg = parseResult.parsedPackage.hideAsFinal();
                     if (ai.isFactory && !ai.isActive) {
                         disableSystemPackageLPw(pkg);
                     }

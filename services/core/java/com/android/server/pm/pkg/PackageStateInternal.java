@@ -31,6 +31,7 @@ import java.util.UUID;
 
 /**
  * Exposes internal types for internal usage of {@link PackageState}.
+ * @hide
  */
 public interface PackageStateInternal extends PackageState {
 

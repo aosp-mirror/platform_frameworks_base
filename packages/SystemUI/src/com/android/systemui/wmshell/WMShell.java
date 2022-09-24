@@ -55,6 +55,7 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.tracing.ProtoTracer;
 import com.android.systemui.tracing.nano.SystemUiTraceProto;
+import com.android.wm.shell.floating.FloatingTasks;
 import com.android.wm.shell.nano.WmShellTraceProto;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.onehanded.OneHandedEventCallback;
@@ -106,6 +107,7 @@ public final class WMShell extends CoreStartable
     private final Optional<Pip> mPipOptional;
     private final Optional<SplitScreen> mSplitScreenOptional;
     private final Optional<OneHanded> mOneHandedOptional;
+    private final Optional<FloatingTasks> mFloatingTasksOptional;
 
     private final CommandQueue mCommandQueue;
     private final ConfigurationController mConfigurationController;
@@ -166,6 +168,7 @@ public final class WMShell extends CoreStartable
             Optional<Pip> pipOptional,
             Optional<SplitScreen> splitScreenOptional,
             Optional<OneHanded> oneHandedOptional,
+            Optional<FloatingTasks> floatingTasksOptional,
             CommandQueue commandQueue,
             ConfigurationController configurationController,
             KeyguardStateController keyguardStateController,
@@ -190,6 +193,7 @@ public final class WMShell extends CoreStartable
         mWakefulnessLifecycle = wakefulnessLifecycle;
         mProtoTracer = protoTracer;
         mUserTracker = userTracker;
+        mFloatingTasksOptional = floatingTasksOptional;
         mSysUiMainExecutor = sysUiMainExecutor;
     }
 

@@ -143,13 +143,14 @@ public class BroadcastQueueTest {
         realAms.mActivityTaskManager.initialize(null, null, mContext.getMainLooper());
         realAms.mAtmInternal = spy(realAms.mActivityTaskManager.getAtmInternal());
         realAms.mPackageManagerInt = mPackageManagerInt;
+        realAms.mProcessesReady = true;
         mAms = spy(realAms);
         doAnswer((invocation) -> {
             Log.v(TAG, "Intercepting startProcessLocked() for "
                     + Arrays.toString(invocation.getArguments()));
             final String processName = invocation.getArgument(0);
             final ApplicationInfo ai = invocation.getArgument(1);
-            final ProcessRecord res = makeActiveProcessRecord(ai, processName);
+            final ProcessRecord res = makeActiveProcessRecord(ai, processName, false);
             mHandlerThread.getThreadHandler().post(() -> {
                 synchronized (mAms) {
                     mQueue.onApplicationAttachedLocked(res);
@@ -158,9 +159,11 @@ public class BroadcastQueueTest {
             return res;
         }).when(mAms).startProcessLocked(any(), any(), anyBoolean(), anyInt(),
                 any(), anyInt(), anyBoolean(), anyBoolean());
+        doNothing().when(mAms).appNotResponding(any(), any());
 
         final BroadcastConstants constants = new BroadcastConstants(
                 Settings.Global.BROADCAST_FG_CONSTANTS);
+        constants.TIMEOUT = 100;
         final BroadcastSkipPolicy emptySkipPolicy = new BroadcastSkipPolicy(mAms) {
             public boolean shouldSkip(BroadcastRecord r, ResolveInfo info) {
                 return false;
@@ -180,7 +183,7 @@ public class BroadcastQueueTest {
                     ProcessList.SCHED_GROUP_DEFAULT);
         } else if (mImpl == Impl.MODERN) {
             mQueue = new BroadcastQueueModernImpl(mAms, mHandlerThread.getThreadHandler(),
-                    constants, emptySkipPolicy, emptyHistory);
+                    constants, constants, emptySkipPolicy, emptyHistory);
         } else {
             throw new UnsupportedOperationException();
         }
@@ -209,11 +212,16 @@ public class BroadcastQueueTest {
 
     private ProcessRecord makeActiveProcessRecord(String packageName) throws Exception {
         final ApplicationInfo ai = makeApplicationInfo(packageName);
-        return makeActiveProcessRecord(ai, ai.processName);
+        return makeActiveProcessRecord(ai, ai.processName, false);
     }
 
-    private ProcessRecord makeActiveProcessRecord(ApplicationInfo ai, String processName)
-            throws Exception {
+    private ProcessRecord makeActiveProcessRecordWedged(String packageName) throws Exception {
+        final ApplicationInfo ai = makeApplicationInfo(packageName);
+        return makeActiveProcessRecord(ai, ai.processName, true);
+    }
+
+    private ProcessRecord makeActiveProcessRecord(ApplicationInfo ai, String processName,
+            boolean wedged) throws Exception {
         final ProcessRecord r = new ProcessRecord(mAms, ai, processName, ai.uid);
         r.setPid(mNextPid.getAndIncrement());
 
@@ -233,12 +241,14 @@ public class BroadcastQueueTest {
         doAnswer((invocation) -> {
             Log.v(TAG, "Intercepting scheduleReceiver() for "
                     + Arrays.toString(invocation.getArguments()));
-            mHandlerThread.getThreadHandler().post(() -> {
-                synchronized (mAms) {
-                    mQueue.finishReceiverLocked(r, Activity.RESULT_OK,
-                            null, null, false, false);
-                }
-            });
+            if (!wedged) {
+                mHandlerThread.getThreadHandler().post(() -> {
+                    synchronized (mAms) {
+                        mQueue.finishReceiverLocked(r, Activity.RESULT_OK,
+                                null, null, false, false);
+                    }
+                });
+            }
             return null;
         }).when(thread).scheduleReceiver(any(), any(), any(), anyInt(), any(), any(), anyBoolean(),
                 anyInt(), anyInt());
@@ -247,7 +257,7 @@ public class BroadcastQueueTest {
             Log.v(TAG, "Intercepting scheduleRegisteredReceiver() for "
                     + Arrays.toString(invocation.getArguments()));
             final boolean ordered = invocation.getArgument(5);
-            if (ordered) {
+            if (!wedged && ordered) {
                 mHandlerThread.getThreadHandler().post(() -> {
                     synchronized (mAms) {
                         mQueue.finishReceiverLocked(r, Activity.RESULT_OK,
@@ -502,5 +512,21 @@ public class BroadcastQueueTest {
         verifyScheduleReceiver(receiverBlueApp, timezone);
         verifyScheduleRegisteredReceiver(receiverYellowApp, timezone);
         verifyScheduleReceiver(receiverYellowApp, airplane);
+    }
+
+    /**
+     * Verify that we detect and ANR a wedged process.
+     */
+    @Test
+    public void testWedged() throws Exception {
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+        final ProcessRecord receiverApp = makeActiveProcessRecordWedged(PACKAGE_GREEN);
+
+        final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        enqueueBroadcast(makeBroadcastRecord(airplane, callerApp,
+                List.of(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN))));
+
+        waitForIdle();
+        verify(mAms).appNotResponding(eq(receiverApp), any());
     }
 }
