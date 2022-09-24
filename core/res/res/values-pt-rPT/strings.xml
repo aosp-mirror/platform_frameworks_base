@@ -58,7 +58,7 @@
     <string name="imei" msgid="2157082351232630390">"IMEI"</string>
     <string name="meid" msgid="3291227361605924674">"MEID"</string>
     <string name="ClipMmi" msgid="4110549342447630629">"ID do Autor da Chamada"</string>
-    <string name="ClirMmi" msgid="6752346475055446417">"Ocultar identificação do autor da chamada efetuada"</string>
+    <string name="ClirMmi" msgid="6752346475055446417">"Ocultar identificação do autor da chamada feita"</string>
     <string name="ColpMmi" msgid="4736462893284419302">"ID de linha ligada"</string>
     <string name="ColrMmi" msgid="5889782479745764278">"Restrição de ID de linha ligada"</string>
     <string name="CfMmi" msgid="8390012691099787178">"Encaminhamento de chamadas"</string>
@@ -355,7 +355,7 @@
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"desinstalar atalhos"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Permite que a app remova atalhos do Ecrã principal sem a intervenção do utilizador."</string>
     <string name="permlab_processOutgoingCalls" msgid="4075056020714266558">"redirecionar as chamadas efetuadas"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="7833149750590606334">"Permite que a app veja o número que é marcado durante uma chamada efetuada, com a opção de redirecionar a chamada para um número diferente ou terminar a chamada."</string>
+    <string name="permdesc_processOutgoingCalls" msgid="7833149750590606334">"Permite que a app veja o número que é marcado durante uma chamada feita, com a opção de redirecionar a chamada para um número diferente ou terminar a chamada."</string>
     <string name="permlab_answerPhoneCalls" msgid="4131324833663725855">"atender chamadas telefónicas"</string>
     <string name="permdesc_answerPhoneCalls" msgid="894386681983116838">"Permite que a app atenda chamadas recebidas."</string>
     <string name="permlab_receiveSms" msgid="505961632050451881">"receber mensagens de texto (SMS)"</string>

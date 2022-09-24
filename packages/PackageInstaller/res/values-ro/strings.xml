@@ -17,10 +17,10 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="7488448184431507488">"Program de instalare a pachetelor"</string>
-    <string name="install" msgid="711829760615509273">"Instalați"</string>
-    <string name="update" msgid="3932142540719227615">"Actualizați"</string>
+    <string name="install" msgid="711829760615509273">"Instalează"</string>
+    <string name="update" msgid="3932142540719227615">"Actualizează"</string>
     <string name="done" msgid="6632441120016885253">"Gata"</string>
-    <string name="cancel" msgid="1018267193425558088">"Anulați"</string>
+    <string name="cancel" msgid="1018267193425558088">"Anulează"</string>
     <string name="installing" msgid="4921993079741206516">"Se instalează…"</string>
     <string name="installing_app" msgid="1165095864863849422">"Se instalează <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="install_done" msgid="5987363587661783896">"Aplicație instalată."</string>
@@ -36,7 +36,7 @@
     <string name="install_failed_msg" product="tablet" msgid="6298387264270562442">"Aplicația <xliff:g id="APP_NAME">%1$s</xliff:g> nu a putut fi instalată pe tableta dvs."</string>
     <string name="install_failed_msg" product="tv" msgid="1920009940048975221">"Aplicația <xliff:g id="APP_NAME">%1$s</xliff:g> nu a putut fi instalată pe televizorul dvs."</string>
     <string name="install_failed_msg" product="default" msgid="6484461562647915707">"Aplicația <xliff:g id="APP_NAME">%1$s</xliff:g> nu a putut fi instalată pe telefonul dvs."</string>
-    <string name="launch" msgid="3952550563999890101">"Deschideți"</string>
+    <string name="launch" msgid="3952550563999890101">"Deschide"</string>
     <string name="unknown_apps_admin_dlg_text" msgid="4456572224020176095">"Administratorul nu permite instalarea aplicațiilor obținute din surse necunoscute"</string>
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Aplicațiile necunoscute nu pot fi instalate de acest utilizator"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Acest utilizator nu are permisiunea să instaleze aplicații"</string>
