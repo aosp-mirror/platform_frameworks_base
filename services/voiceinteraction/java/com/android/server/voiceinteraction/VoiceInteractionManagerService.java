@@ -95,6 +95,7 @@ import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.LatencyTracker;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -191,6 +192,8 @@ public class VoiceInteractionManagerService extends SystemService {
             mSoundTriggerInternal = LocalServices.getService(SoundTriggerInternal.class);
         } else if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
             mServiceStub.systemRunning(isSafeMode());
+        } else if (phase == PHASE_BOOT_COMPLETED) {
+            mServiceStub.registerVoiceInteractionSessionListener(mLatencyLoggingListener);
         }
     }
 
@@ -2334,4 +2337,36 @@ public class VoiceInteractionManagerService extends SystemService {
             }
         };
     }
+
+    /**
+     * End the latency tracking log for keyphrase hotword invocation.
+     * The measurement covers from when the SoundTrigger HAL emits an event, captured in
+     * {@link com.android.server.soundtrigger_middleware.SoundTriggerMiddlewareLogging}
+     * to when the {@link android.service.voice.VoiceInteractionSession} system UI view is shown.
+     */
+    private final IVoiceInteractionSessionListener mLatencyLoggingListener =
+            new IVoiceInteractionSessionListener.Stub() {
+                @Override
+                public void onVoiceSessionShown() throws RemoteException {}
+
+                @Override
+                public void onVoiceSessionHidden() throws RemoteException {}
+
+                @Override
+                public void onVoiceSessionWindowVisibilityChanged(boolean visible)
+                        throws RemoteException {
+                    if (visible) {
+                        LatencyTracker.getInstance(mContext)
+                                .onActionEnd(LatencyTracker.ACTION_SHOW_VOICE_INTERACTION);
+                    }
+                }
+
+                @Override
+                public void onSetUiHints(Bundle args) throws RemoteException {}
+
+                @Override
+                public IBinder asBinder() {
+                    return mServiceStub;
+                }
+            };
 }
