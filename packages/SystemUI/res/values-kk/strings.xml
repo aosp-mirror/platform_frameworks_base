@@ -194,9 +194,9 @@
     <string name="accessibility_quick_settings_less_time" msgid="9110364286464977870">"Азырақ уақыт."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"Экранды трансляциялау тоқтатылды."</string>
     <string name="accessibility_brightness" msgid="5391187016177823721">"Дисплей жарықтығы"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="2286843518689837719">"Мобильдік деректер кідіртілді"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="2286843518689837719">"Мобильдік интернет кідіртілді"</string>
     <string name="data_usage_disabled_dialog_title" msgid="9131615296036724838">"Деректер кідіртілді"</string>
-    <string name="data_usage_disabled_dialog" msgid="7933201635215099780">"Белгіленген деректер шегіне жеттіңіз. Мобильдік деректер енді пайдаланылмайды.\n\nЕгер жалғастырсаңыз, деректер трафигі үшін ақы алынуы мүмкін."</string>
+    <string name="data_usage_disabled_dialog" msgid="7933201635215099780">"Белгіленген деректер шегіне жеттіңіз. Мобильдік интернет енді пайдаланылмайды.\n\nЕгер жалғастырсаңыз, деректер трафигі үшін ақы алынуы мүмкін."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="2796648546086408937">"Жалғастыру"</string>
     <string name="accessibility_location_active" msgid="2845747916764660369">"Орын өтініштері қосылған"</string>
     <string name="accessibility_sensors_off_active" msgid="2619725434618911551">"Датчиктер өшірулі."</string>
@@ -258,7 +258,7 @@
     </plurals>
     <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"Қалта шам"</string>
     <string name="quick_settings_flashlight_camera_in_use" msgid="4820591564526512571">"Камера қолданылып жатыр"</string>
-    <string name="quick_settings_cellular_detail_title" msgid="792977203299358893">"Мобильдік деректер"</string>
+    <string name="quick_settings_cellular_detail_title" msgid="792977203299358893">"Мобильдік интернет"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="6105969068871138427">"Дерек шығыны"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="1136599216568805644">"Қалған деректер"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="4561921367680636235">"Шектен асу"</string>
@@ -711,7 +711,7 @@
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"Мазаламау режимі автоматты ереже немесе қолданба арқылы қосылды."</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Фонда жұмыс істеп тұрған қолданбалар"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Батарея мен деректер трафигі туралы білу үшін түртіңіз"</string>
-    <string name="mobile_data_disable_title" msgid="5366476131671617790">"Мобильдік деректер өшірілсін бе?"</string>
+    <string name="mobile_data_disable_title" msgid="5366476131671617790">"Мобильдік интернет өшірілсін бе?"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"<xliff:g id="CARRIER">%s</xliff:g> операторы арқылы деректерге немесе интернетке кіре алмайсыз. Интернетке тек Wi-Fi арқылы кіресіз."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"операторыңыз"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Басқа қолданба рұқсат сұрауын жасырып тұрғандықтан, параметрлер жауабыңызды растай алмайды."</string>
