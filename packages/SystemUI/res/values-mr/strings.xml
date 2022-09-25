@@ -327,9 +327,9 @@
     <string name="do_disclosure_generic" msgid="4896482821974707167">"हे डिव्हाइस तुमच्या संस्थेचे आहे"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"हे डिव्हाइस <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> चे आहे"</string>
     <string name="do_financed_disclosure_with_name" msgid="6723004643314467864">"हे डिव्हाइस <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> द्वारे पुरवले गेले आहे"</string>
-    <string name="phone_hint" msgid="6682125338461375925">"फोनसाठी चिन्हावरून स्वाइप करा"</string>
-    <string name="voice_hint" msgid="7476017460191291417">"व्हॉइस सहाय्यासाठी चिन्हावरून स्वाइप करा"</string>
-    <string name="camera_hint" msgid="4519495795000658637">"कॅमेर्‍यासाठी चिन्हावरून स्वाइप करा"</string>
+    <string name="phone_hint" msgid="6682125338461375925">"फोनसाठी आयकनवरून स्वाइप करा"</string>
+    <string name="voice_hint" msgid="7476017460191291417">"व्हॉइस सहाय्यासाठी आयकनवरून स्वाइप करा"</string>
+    <string name="camera_hint" msgid="4519495795000658637">"कॅमेर्‍यासाठी आयकनवरून स्वाइप करा"</string>
     <string name="interruption_level_none_with_warning" msgid="8394434073508145437">"संपूर्ण शांतता. हे स्क्रीन रीडर ना देखील शांत करेल."</string>
     <string name="interruption_level_none" msgid="219484038314193379">"संपूर्ण शांतता"</string>
     <string name="interruption_level_priority" msgid="661294280016622209">"केवळ प्राधान्य"</string>
@@ -598,8 +598,7 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"सुरू"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"बंद"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"उपलब्ध नाही"</string>
-    <!-- no translation found for accessibility_tile_disabled_by_policy_action_description (6958422730461646926) -->
-    <skip />
+    <string name="accessibility_tile_disabled_by_policy_action_description" msgid="6958422730461646926">"अधिक जाणून घ्या"</string>
     <string name="nav_bar" msgid="4642708685386136807">"नॅव्हिगेशन बार"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"लेआउट"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"अतिरिक्त डाव्या बटणाचा प्रकार"</string>
@@ -672,10 +671,8 @@
     <string name="high_temp_notif_message" msgid="1277346543068257549">"फोन थंड होईपर्यंत काही वैशिष्ट्ये मर्यादित केली.\nअधिक माहितीसाठी टॅप करा"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"तुमचा फोन स्वयंचलितपणे थंड होईल. तुम्ही अद्यापही तुमचा फोन वापरू शकता परंतु तो कदाचित धीमेपणे कार्य करेल.\n\nतुमचा फोन एकदा थंड झाला की, तो सामान्यपणे कार्य करेल."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"काय काळजी घ्यावी ते पहा"</string>
-    <!-- no translation found for high_temp_alarm_title (8654754369605452169) -->
-    <skip />
-    <!-- no translation found for high_temp_alarm_notify_message (3917622943609118956) -->
-    <skip />
+    <string name="high_temp_alarm_title" msgid="8654754369605452169">"तुमचे डिव्हाइस अनप्लग करा"</string>
+    <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"तुमचे डिव्हाइस हे चार्जिंग पोर्टच्या जवळ गरम होत आहे. हे चार्जर किंवा USB अ‍ॅक्सेसरी यांच्याशी कनेक्ट केलेले असल्यास, ते अनप्लग करा आणि काळजी घ्या कारण केबलदेखील गरम असू शकते."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"काय काळजी घ्यावी ते पहा"</string>
     <string name="lockscreen_shortcut_left" msgid="1238765178956067599">"डावा शॉर्टकट"</string>
     <string name="lockscreen_shortcut_right" msgid="4138414674531853719">"उजवा शॉर्टकट"</string>
