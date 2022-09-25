@@ -25,7 +25,7 @@
     <string name="permission_apps_summary" msgid="798718816711515431">"Трансліруйце змесціва праграм з вашага тэлефона"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"Дазвольце праграме &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; мець доступ да гэтай інфармацыі з вашага тэлефона"</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"Сэрвісы для некалькіх прылад"</string>
-    <string name="helper_summary_app_streaming" msgid="5977509499890099">"Праграма \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" запытвае дазвол ад імя вашай прылады \"<xliff:g id="DEVICE_TYPE">%2$s</xliff:g>\" на перадачу праграм плынню паміж вашымі прыладамі"</string>
+    <string name="helper_summary_app_streaming" msgid="5977509499890099">"Праграма \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" запытвае дазвол ад імя вашай прылады \"<xliff:g id="DEVICE_TYPE">%2$s</xliff:g>\" на трансляцыю праграм паміж вашымі прыладамі"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
     <string name="title_computer" msgid="4693714143506569253">"Дазвольце праграме &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; мець доступ да гэтай інфармацыі з вашага тэлефона"</string>
