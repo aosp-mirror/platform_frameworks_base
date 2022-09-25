@@ -671,10 +671,8 @@
     <string name="high_temp_notif_message" msgid="1277346543068257549">"Sommige kenmerke is beperk terwyl foon afkoel.\nTik vir meer inligting"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"Jou foon sal outomaties probeer om af te koel. Jy kan steeds jou foon gebruik, maar dit sal dalk stadiger wees.\n\nJou foon sal normaalweg werk nadat dit afgekoel het."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Sien versorgingstappe"</string>
-    <!-- no translation found for high_temp_alarm_title (8654754369605452169) -->
-    <skip />
-    <!-- no translation found for high_temp_alarm_notify_message (3917622943609118956) -->
-    <skip />
+    <string name="high_temp_alarm_title" msgid="8654754369605452169">"Prop jou toestel uit"</string>
+    <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"Jou toestel word tans warm naby die laaipoort. Prop dit uit as dit aan ’n laaier of USB-bykomstigheid gekoppel is. Wees versigtig, aangesien die kabel dalk ook warm is."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Sien versorgingstappe"</string>
     <string name="lockscreen_shortcut_left" msgid="1238765178956067599">"Links-kortpad"</string>
     <string name="lockscreen_shortcut_right" msgid="4138414674531853719">"Regs-kortpad"</string>

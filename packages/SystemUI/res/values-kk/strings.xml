@@ -161,10 +161,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Бет танылмады. Орнына саусақ ізін пайдаланыңыз."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
-    <!-- no translation found for keyguard_face_failed (9044619102286917151) -->
-    <skip />
-    <!-- no translation found for keyguard_suggest_fingerprint (8742015961962702960) -->
-    <skip />
+    <string name="keyguard_face_failed" msgid="9044619102286917151">"Бет танылмады."</string>
+    <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"Орнына саусақ ізін пайдаланыңыз."</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth қосылған."</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Батарея зарядының мөлшері белгісіз."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"<xliff:g id="BLUETOOTH">%s</xliff:g> қосылған."</string>
@@ -198,9 +196,9 @@
     <string name="accessibility_quick_settings_less_time" msgid="9110364286464977870">"Азырақ уақыт."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"Экранды трансляциялау тоқтатылды."</string>
     <string name="accessibility_brightness" msgid="5391187016177823721">"Дисплей жарықтығы"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="2286843518689837719">"Мобильдік деректер кідіртілді"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="2286843518689837719">"Мобильдік интернет кідіртілді"</string>
     <string name="data_usage_disabled_dialog_title" msgid="9131615296036724838">"Деректер кідіртілді"</string>
-    <string name="data_usage_disabled_dialog" msgid="7933201635215099780">"Белгіленген деректер шегіне жеттіңіз. Мобильдік деректер енді пайдаланылмайды.\n\nЕгер жалғастырсаңыз, деректер трафигі үшін ақы алынуы мүмкін."</string>
+    <string name="data_usage_disabled_dialog" msgid="7933201635215099780">"Белгіленген деректер шегіне жеттіңіз. Мобильдік интернет енді пайдаланылмайды.\n\nЕгер жалғастырсаңыз, деректер трафигі үшін ақы алынуы мүмкін."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="2796648546086408937">"Жалғастыру"</string>
     <string name="accessibility_location_active" msgid="2845747916764660369">"Орын өтініштері қосылған"</string>
     <string name="accessibility_sensors_off_active" msgid="2619725434618911551">"Датчиктер өшірулі."</string>
@@ -257,7 +255,7 @@
     <string name="quick_settings_hotspot_secondary_label_num_devices" msgid="7536823087501239457">"{count,plural, =1{# құрылғы}other{# құрылғы}}"</string>
     <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"Қалта шам"</string>
     <string name="quick_settings_flashlight_camera_in_use" msgid="4820591564526512571">"Камера қолданылып жатыр"</string>
-    <string name="quick_settings_cellular_detail_title" msgid="792977203299358893">"Мобильдік деректер"</string>
+    <string name="quick_settings_cellular_detail_title" msgid="792977203299358893">"Мобильдік интернет"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="6105969068871138427">"Дерек шығыны"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="1136599216568805644">"Қалған деректер"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="4561921367680636235">"Шектен асу"</string>
@@ -600,8 +598,7 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"Қосулы"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"Өшірулі"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Қолжетімді емес"</string>
-    <!-- no translation found for accessibility_tile_disabled_by_policy_action_description (6958422730461646926) -->
-    <skip />
+    <string name="accessibility_tile_disabled_by_policy_action_description" msgid="6958422730461646926">"толығырақ"</string>
     <string name="nav_bar" msgid="4642708685386136807">"Шарлау тақтасы"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Формат"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"Қосымша сол жақ түйме түрі"</string>
@@ -674,10 +671,8 @@
     <string name="high_temp_notif_message" msgid="1277346543068257549">"Телефон толық суығанға дейін, кейбір функциялардың жұмысы шектеледі.\nТолығырақ ақпарат үшін түртіңіз."</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"Телефон автоматты түрде суи бастайды. Оны пайдалана бере аласыз, бірақ ол баяуырақ жұмыс істеуі мүмкін.\n\nТелефон суығаннан кейін, оның жұмысы қалпына келеді."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Пайдалану нұсқаулығын қараңыз"</string>
-    <!-- no translation found for high_temp_alarm_title (8654754369605452169) -->
-    <skip />
-    <!-- no translation found for high_temp_alarm_notify_message (3917622943609118956) -->
-    <skip />
+    <string name="high_temp_alarm_title" msgid="8654754369605452169">"Құрылғыны ажыратыңыз"</string>
+    <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"Құрылғының зарядтау ұяшығы тұрған бөлігі қызып келеді. Зарядтағышқа немесе USB құрылғысына жалғанған болса, оны ажыратыңыз. Абайлаңыз, кабель де ыстық болуы мүмкін."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Пайдалану нұсқаулығын қараңыз"</string>
     <string name="lockscreen_shortcut_left" msgid="1238765178956067599">"Сол жақ таңбаша"</string>
     <string name="lockscreen_shortcut_right" msgid="4138414674531853719">"Оң жақ таңбаша"</string>
@@ -717,7 +712,7 @@
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"Мазаламау режимі автоматты ереже немесе қолданба арқылы қосылды."</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Фонда жұмыс істеп тұрған қолданбалар"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Батарея мен деректер трафигі туралы білу үшін түртіңіз"</string>
-    <string name="mobile_data_disable_title" msgid="5366476131671617790">"Мобильдік деректер өшірілсін бе?"</string>
+    <string name="mobile_data_disable_title" msgid="5366476131671617790">"Мобильдік интернет өшірілсін бе?"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"<xliff:g id="CARRIER">%s</xliff:g> операторы арқылы деректерге немесе интернетке кіре алмайсыз. Интернетке тек Wi-Fi арқылы кіресіз."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"операторыңыз"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Басқа қолданба рұқсат сұрауын жасырып тұрғандықтан, параметрлер жауабыңызды растай алмайды."</string>

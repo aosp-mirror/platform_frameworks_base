@@ -31,10 +31,15 @@ import android.view.ViewGroup;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.AuthKeyguardMessageArea;
 import com.android.keyguard.LockIconViewController;
+import com.android.keyguard.dagger.KeyguardBouncerComponent;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dock.DockManager;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
+import com.android.systemui.keyguard.ui.binder.KeyguardBouncerViewBinder;
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardBouncerViewModel;
 import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
@@ -108,7 +113,10 @@ public class NotificationShadeWindowViewController {
             NotificationShadeWindowController controller,
             KeyguardUnlockAnimationController keyguardUnlockAnimationController,
             AmbientState ambientState,
-            PulsingGestureListener pulsingGestureListener
+            PulsingGestureListener pulsingGestureListener,
+            FeatureFlags featureFlags,
+            KeyguardBouncerViewModel keyguardBouncerViewModel,
+            KeyguardBouncerComponent.Factory keyguardBouncerComponentFactory
     ) {
         mLockscreenShadeTransitionController = transitionController;
         mFalsingCollector = falsingCollector;
@@ -130,6 +138,12 @@ public class NotificationShadeWindowViewController {
 
         // This view is not part of the newly inflated expanded status bar.
         mBrightnessMirror = mView.findViewById(R.id.brightness_mirror_container);
+        if (featureFlags.isEnabled(Flags.MODERN_BOUNCER)) {
+            KeyguardBouncerViewBinder.bind(
+                    mView.findViewById(R.id.keyguard_bouncer_container),
+                    keyguardBouncerViewModel,
+                    keyguardBouncerComponentFactory);
+        }
     }
 
     /**
