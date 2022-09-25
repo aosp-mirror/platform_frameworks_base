@@ -33,11 +33,14 @@ import android.view.MotionEvent;
 import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.LockIconViewController;
+import com.android.keyguard.dagger.KeyguardBouncerComponent;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.dock.DockManager;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardBouncerViewModel;
 import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
@@ -86,6 +89,9 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
     @Mock private KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
     @Mock private AmbientState mAmbientState;
     @Mock private PulsingGestureListener mPulsingGestureListener;
+    @Mock private FeatureFlags mFeatureFlags;
+    @Mock private KeyguardBouncerViewModel mKeyguardBouncerViewModel;
+    @Mock private KeyguardBouncerComponent.Factory mKeyguardBouncerComponentFactory;
 
     @Captor private ArgumentCaptor<NotificationShadeWindowView.InteractionEventHandler>
             mInteractionEventHandlerCaptor;
@@ -121,7 +127,10 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
                 mNotificationShadeWindowController,
                 mKeyguardUnlockAnimationController,
                 mAmbientState,
-                mPulsingGestureListener
+                mPulsingGestureListener,
+                mFeatureFlags,
+                mKeyguardBouncerViewModel,
+                mKeyguardBouncerComponentFactory
         );
         mController.setupExpandedStatusBar();
         mController.setDragDownHelper(mDragDownHelper);
