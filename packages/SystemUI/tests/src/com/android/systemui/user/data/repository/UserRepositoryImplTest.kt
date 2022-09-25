@@ -60,7 +60,7 @@ class UserRepositoryImplTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        whenever(controller.addUsersFromLockScreen).thenReturn(MutableStateFlow(false))
+        whenever(controller.isAddUsersFromLockScreenEnabled).thenReturn(MutableStateFlow(false))
         whenever(controller.isGuestUserAutoCreated).thenReturn(false)
         whenever(controller.isGuestUserResetting).thenReturn(false)
 

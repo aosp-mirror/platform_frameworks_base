@@ -21,12 +21,16 @@ import android.testing.TestableLooper.RunWithLooper
 import android.view.MotionEvent
 import android.view.ViewGroup
 import androidx.test.filters.SmallTest
+import com.android.keyguard.KeyguardHostViewController
 import com.android.keyguard.LockIconViewController
+import com.android.keyguard.dagger.KeyguardBouncerComponent
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollectorFake
 import com.android.systemui.dock.DockManager
+import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardBouncerViewModel
 import com.android.systemui.shade.NotificationShadeWindowView.InteractionEventHandler
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
 import com.android.systemui.statusbar.NotificationShadeDepthController
@@ -51,9 +55,9 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 
+@SmallTest
 @RunWith(AndroidTestingRunner::class)
 @RunWithLooper(setAsMainLooper = true)
-@SmallTest
 class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var view: NotificationShadeWindowView
@@ -72,7 +76,11 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var keyguardUnlockAnimationController: KeyguardUnlockAnimationController
     @Mock
+    private lateinit var featureFlags: FeatureFlags
+    @Mock
     private lateinit var ambientState: AmbientState
+    @Mock
+    private lateinit var keyguardBouncerViewModel: KeyguardBouncerViewModel
     @Mock
     private lateinit var stackScrollLayoutController: NotificationStackScrollLayoutController
     @Mock
@@ -87,6 +95,10 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     private lateinit var phoneStatusBarViewController: PhoneStatusBarViewController
     @Mock
     private lateinit var pulsingGestureListener: PulsingGestureListener
+    @Mock lateinit var keyguardBouncerComponentFactory: KeyguardBouncerComponent.Factory
+    @Mock lateinit var keyguardBouncerContainer: ViewGroup
+    @Mock lateinit var keyguardBouncerComponent: KeyguardBouncerComponent
+    @Mock lateinit var keyguardHostViewController: KeyguardHostViewController
 
     private lateinit var interactionEventHandlerCaptor: ArgumentCaptor<InteractionEventHandler>
     private lateinit var interactionEventHandler: InteractionEventHandler
@@ -97,7 +109,6 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         whenever(view.bottom).thenReturn(VIEW_BOTTOM)
-
         underTest = NotificationShadeWindowViewController(
             lockscreenShadeTransitionController,
             FalsingCollectorFake(),
@@ -115,7 +126,10 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
             notificationShadeWindowController,
             keyguardUnlockAnimationController,
             ambientState,
-            pulsingGestureListener
+            pulsingGestureListener,
+            featureFlags,
+            keyguardBouncerViewModel,
+            keyguardBouncerComponentFactory
         )
         underTest.setupExpandedStatusBar()
 
