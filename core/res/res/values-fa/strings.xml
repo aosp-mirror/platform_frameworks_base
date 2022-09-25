@@ -1485,8 +1485,8 @@
     <string name="vpn_title_long" msgid="6834144390504619998">"‏VPN را <xliff:g id="APP">%s</xliff:g> فعال کرده است"</string>
     <string name="vpn_text" msgid="2275388920267251078">"برای مدیریت شبکه ضربه بزنید."</string>
     <string name="vpn_text_long" msgid="278540576806169831">"به <xliff:g id="SESSION">%s</xliff:g> متصل شد. برای مدیریت شبکه ضربه بزنید."</string>
-    <string name="vpn_lockdown_connecting" msgid="6096725311950342607">"‏در حال اتصال VPN همیشه فعال…"</string>
-    <string name="vpn_lockdown_connected" msgid="2853127976590658469">"‏VPN همیشه فعال متصل شد"</string>
+    <string name="vpn_lockdown_connecting" msgid="6096725311950342607">"‏درحال اتصال به VPN همیشه روشن…"</string>
+    <string name="vpn_lockdown_connected" msgid="2853127976590658469">"‏VPN همیشه روشن متصل شد"</string>
     <string name="vpn_lockdown_disconnected" msgid="5573611651300764955">"‏از «VPN همیشه روشن» قطع شد"</string>
     <string name="vpn_lockdown_error" msgid="4453048646854247947">"‏به «VPN همیشه روشن» متصل نشد"</string>
     <string name="vpn_lockdown_config" msgid="8331697329868252169">"‏تغییر شبکه یا تنظیمات VPN"</string>
