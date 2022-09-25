@@ -16,9 +16,6 @@
 
 package com.android.systemui.qs.tiles;
 
-import static com.android.systemui.statusbar.policy.UserSwitcherController.USER_SWITCH_DISABLED_ALPHA;
-import static com.android.systemui.statusbar.policy.UserSwitcherController.USER_SWITCH_ENABLED_ALPHA;
-
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -42,6 +39,7 @@ import com.android.systemui.qs.PseudoGridView;
 import com.android.systemui.qs.QSUserSwitcherEvent;
 import com.android.systemui.qs.user.UserSwitchDialogController;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
+import com.android.systemui.statusbar.policy.BaseUserSwitcherAdapter;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.user.data.source.UserRecord;
 
@@ -73,7 +71,8 @@ public class UserDetailView extends PseudoGridView {
         mAdapter.refresh();
     }
 
-    public static class Adapter extends UserSwitcherController.BaseUserAdapter
+    /** Provides views for user detail items. */
+    public static class Adapter extends BaseUserSwitcherAdapter
             implements OnClickListener {
 
         private final Context mContext;
@@ -137,7 +136,7 @@ public class UserDetailView extends PseudoGridView {
             v.setActivated(item.isCurrent);
             v.setDisabledByAdmin(mController.isDisabledByAdmin(item));
             v.setEnabled(item.isSwitchToEnabled);
-            v.setAlpha(v.isEnabled() ? USER_SWITCH_ENABLED_ALPHA : USER_SWITCH_DISABLED_ALPHA);
+            UserSwitcherController.setSelectableAlpha(v);
 
             if (item.isCurrent) {
                 mCurrentUserView = v;

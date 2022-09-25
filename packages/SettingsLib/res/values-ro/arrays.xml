@@ -113,7 +113,7 @@
     <item msgid="8887519571067543785">"96,0 kHz"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_sample_rate_summaries">
-    <item msgid="2284090879080331090">"Folosiți selectarea sistemului (prestabilit)"</item>
+    <item msgid="2284090879080331090">"Folosește selectarea sistemului (prestabilit)"</item>
     <item msgid="1872276250541651186">"44,1 kHz"</item>
     <item msgid="8736780630001704004">"48,0 kHz"</item>
     <item msgid="7698585706868856888">"88,2 kHz"</item>

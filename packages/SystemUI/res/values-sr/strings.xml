@@ -598,8 +598,7 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"Укључено"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"Искључено"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Недоступно"</string>
-    <!-- no translation found for accessibility_tile_disabled_by_policy_action_description (6958422730461646926) -->
-    <skip />
+    <string name="accessibility_tile_disabled_by_policy_action_description" msgid="6958422730461646926">"сазнајте више"</string>
     <string name="nav_bar" msgid="4642708685386136807">"Трака за навигацију"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Распоред"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"Додатни тип левог дугмета"</string>
@@ -672,10 +671,8 @@
     <string name="high_temp_notif_message" msgid="1277346543068257549">"Неке функције су ограничене док се телефон не охлади.\nДодирните за више информација"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"Телефон ће аутоматски покушати да се охлади. И даље ћете моћи да користите телефон, али ће спорије реаговати.\n\nКада се телефон охлади, нормално ће радити."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Погледајте упозорења"</string>
-    <!-- no translation found for high_temp_alarm_title (8654754369605452169) -->
-    <skip />
-    <!-- no translation found for high_temp_alarm_notify_message (3917622943609118956) -->
-    <skip />
+    <string name="high_temp_alarm_title" msgid="8654754369605452169">"Искључите уређај"</string>
+    <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"Уређај се загрева у близини порта за пуњење. Ако је повезан са пуњачем или USB опремом, искључите је и будите пажљиви јер и кабл може да буде врућ."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Погледајте упозорења"</string>
     <string name="lockscreen_shortcut_left" msgid="1238765178956067599">"Лева пречица"</string>
     <string name="lockscreen_shortcut_right" msgid="4138414674531853719">"Десна пречица"</string>

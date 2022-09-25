@@ -28,7 +28,7 @@
     <string name="helper_summary_app_streaming" msgid="5977509499890099">"<xliff:g id="APP_NAME">%1$s</xliff:g> が <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> に代わってデバイス間でアプリをストリーミングする権限をリクエストしています"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
-    <string name="title_computer" msgid="4693714143506569253">"このスマートフォンからの情報へのアクセスを &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; に許可"</string>
+    <string name="title_computer" msgid="4693714143506569253">"スマートフォンのこの情報へのアクセスを &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; に許可"</string>
     <string name="summary_computer" msgid="3798467601598297062"></string>
     <string name="permission_notification" msgid="693762568127741203">"通知"</string>
     <string name="permission_notification_summary" msgid="884075314530071011">"連絡先、メッセージ、写真に関する情報を含め、すべての通知を読み取ることができます"</string>

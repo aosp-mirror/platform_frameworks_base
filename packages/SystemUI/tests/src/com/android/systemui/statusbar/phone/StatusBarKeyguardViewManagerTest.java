@@ -41,11 +41,17 @@ import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardMessageArea;
 import com.android.keyguard.KeyguardMessageAreaController;
+import com.android.keyguard.KeyguardSecurityModel;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dreams.DreamOverlayStateController;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.keyguard.data.BouncerView;
+import com.android.systemui.keyguard.data.BouncerViewDelegate;
+import com.android.systemui.keyguard.domain.interactor.BouncerCallbackInteractor;
+import com.android.systemui.keyguard.domain.interactor.BouncerInteractor;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.shade.NotificationPanelViewController;
@@ -101,6 +107,13 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     @Mock private SysUIUnfoldComponent mSysUiUnfoldComponent;
     @Mock private DreamOverlayStateController mDreamOverlayStateController;
     @Mock private LatencyTracker mLatencyTracker;
+    @Mock private FeatureFlags mFeatureFlags;
+    @Mock private KeyguardSecurityModel mKeyguardSecurityModel;
+    @Mock private BouncerCallbackInteractor mBouncerCallbackInteractor;
+    @Mock private BouncerInteractor mBouncerInteractor;
+    @Mock private BouncerView mBouncerView;
+//    @Mock private WeakReference<BouncerViewDelegate> mBouncerViewDelegateWeakReference;
+    @Mock private BouncerViewDelegate mBouncerViewDelegate;
 
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private KeyguardBouncer.BouncerExpansionCallback mBouncerExpansionCallback;
@@ -115,6 +128,8 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         when(mContainer.findViewById(anyInt())).thenReturn(mKeyguardMessageArea);
         when(mKeyguardMessageAreaFactory.create(any(KeyguardMessageArea.class)))
                 .thenReturn(mKeyguardMessageAreaController);
+        when(mBouncerView.getDelegate()).thenReturn(mBouncerViewDelegate);
+
         mStatusBarKeyguardViewManager =
                 new StatusBarKeyguardViewManager(
                         getContext(),
@@ -133,7 +148,12 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                         mKeyguardMessageAreaFactory,
                         Optional.of(mSysUiUnfoldComponent),
                         () -> mShadeController,
-                        mLatencyTracker);
+                        mLatencyTracker,
+                        mKeyguardSecurityModel,
+                        mFeatureFlags,
+                        mBouncerCallbackInteractor,
+                        mBouncerInteractor,
+                        mBouncerView);
         mStatusBarKeyguardViewManager.registerCentralSurfaces(
                 mCentralSurfaces,
                 mNotificationPanelView,
