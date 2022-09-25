@@ -56,7 +56,9 @@ import javax.inject.Inject;
 
 /**
  * A class which manages the bouncer on the lockscreen.
+ * @deprecated Use KeyguardBouncerRepository
  */
+@Deprecated
 public class KeyguardBouncer {
 
     private static final String TAG = "KeyguardBouncer";
