@@ -22,8 +22,6 @@ import static android.view.WindowInsets.Type.systemBars;
 import static android.view.WindowInsetsAnimation.Callback.DISPATCH_MODE_STOP;
 
 import static com.android.systemui.plugins.FalsingManager.LOW_PENALTY;
-import static com.android.systemui.statusbar.policy.UserSwitcherController.USER_SWITCH_DISABLED_ALPHA;
-import static com.android.systemui.statusbar.policy.UserSwitcherController.USER_SWITCH_ENABLED_ALPHA;
 
 import static java.lang.Integer.max;
 
@@ -87,8 +85,8 @@ import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.shared.system.SysUiStatsLog;
+import com.android.systemui.statusbar.policy.BaseUserSwitcherAdapter;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
-import com.android.systemui.statusbar.policy.UserSwitcherController.BaseUserAdapter;
 import com.android.systemui.user.data.source.UserRecord;
 import com.android.systemui.util.settings.GlobalSettings;
 
@@ -1137,7 +1135,7 @@ public class KeyguardSecurityContainer extends FrameLayout {
 
             KeyguardUserSwitcherAnchor anchor = mView.findViewById(R.id.user_switcher_anchor);
 
-            BaseUserAdapter adapter = new BaseUserAdapter(mUserSwitcherController) {
+            BaseUserSwitcherAdapter adapter = new BaseUserSwitcherAdapter(mUserSwitcherController) {
                 @Override
                 public View getView(int position, View convertView, ViewGroup parent) {
                     UserRecord item = getItem(position);
@@ -1172,8 +1170,7 @@ public class KeyguardSecurityContainer extends FrameLayout {
                     }
                     textView.setSelected(item == currentUser);
                     view.setEnabled(item.isSwitchToEnabled);
-                    view.setAlpha(view.isEnabled() ? USER_SWITCH_ENABLED_ALPHA :
-                            USER_SWITCH_DISABLED_ALPHA);
+                    UserSwitcherController.setSelectableAlpha(view);
                     return view;
                 }
 
