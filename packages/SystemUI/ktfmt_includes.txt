@@ -813,7 +813,7 @@
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/phone/ongoingcall/OngoingCallControllerTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/phone/ongoingcall/OngoingCallLoggerTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/phone/panelstate/PanelExpansionStateManagerTest.kt
--packages/SystemUI/tests/src/com/android/systemui/statusbar/phone/userswitcher/StatusBarUserSwitcherControllerTest.kt
+-packages/SystemUI/tests/src/com/android/systemui/statusbar/phone/userswitcher/StatusBarUserSwitcherControllerOldImplTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/pipeline/shared/ConnectivityPipelineLoggerTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/pipeline/wifi/data/repository/WifiRepositoryImplTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/pipeline/wifi/domain/interactor/WifiInteractorTest.kt
@@ -828,7 +828,7 @@
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/policy/KeyguardUserSwitcherAdapterTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/policy/RemoteInputQuickSettingsDisablerTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/policy/SafetyControllerTest.kt
--packages/SystemUI/tests/src/com/android/systemui/statusbar/policy/UserSwitcherControllerTest.kt
+-packages/SystemUI/tests/src/com/android/systemui/statusbar/policy/UserSwitcherControllerOldImplTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/policy/VariableDateViewControllerTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/policy/WalletControllerImplTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/window/StatusBarWindowStateControllerTest.kt

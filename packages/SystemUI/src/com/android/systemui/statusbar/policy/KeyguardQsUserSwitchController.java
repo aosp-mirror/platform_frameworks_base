@@ -69,7 +69,7 @@ public class KeyguardQsUserSwitchController extends ViewController<FrameLayout> 
     private final Context mContext;
     private Resources mResources;
     private final UserSwitcherController mUserSwitcherController;
-    private UserSwitcherController.BaseUserAdapter mAdapter;
+    private BaseUserSwitcherAdapter mAdapter;
     private final KeyguardStateController mKeyguardStateController;
     private final FalsingManager mFalsingManager;
     protected final SysuiStatusBarStateController mStatusBarStateController;
@@ -171,7 +171,7 @@ public class KeyguardQsUserSwitchController extends ViewController<FrameLayout> 
         mUserAvatarView = mView.findViewById(R.id.kg_multi_user_avatar);
         mUserAvatarViewWithBackground = mView.findViewById(
                 R.id.kg_multi_user_avatar_with_background);
-        mAdapter = new UserSwitcherController.BaseUserAdapter(mUserSwitcherController) {
+        mAdapter = new BaseUserSwitcherAdapter(mUserSwitcherController) {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
                 return null;
