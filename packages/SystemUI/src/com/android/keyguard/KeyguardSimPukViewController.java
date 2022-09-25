@@ -107,6 +107,14 @@ public class KeyguardSimPukViewController
     }
 
     @Override
+    public void onResume(int reason) {
+        super.onResume(reason);
+        if (mShowDefaultMessage) {
+            showDefaultMessage();
+        }
+    }
+
+    @Override
     void resetState() {
         super.resetState();
         mStateMachine.reset();
