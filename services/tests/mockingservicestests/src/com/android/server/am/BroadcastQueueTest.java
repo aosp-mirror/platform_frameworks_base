@@ -17,6 +17,7 @@
 package com.android.server.am;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -42,6 +43,7 @@ import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.BroadcastOptions;
 import android.app.IApplicationThread;
+import android.app.RemoteServiceException.CannotDeliverBroadcastException;
 import android.app.usage.UsageEvents.Event;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.ComponentName;
@@ -56,6 +58,7 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -136,6 +139,12 @@ public class BroadcastQueueTest {
     private BroadcastQueue mQueue;
 
     /**
+     * When enabled {@link ActivityManagerService#startProcessLocked} will fail
+     * by returning {@code null}; otherwise it will spawn a new mock process.
+     */
+    private boolean mFailStartProcess;
+
+    /**
      * Map from PID to registered registered runtime receivers.
      */
     private SparseArray<ReceiverList> mRegisteredReceivers = new SparseArray<>();
@@ -185,10 +194,13 @@ public class BroadcastQueueTest {
         doAnswer((invocation) -> {
             Log.v(TAG, "Intercepting startProcessLocked() for "
                     + Arrays.toString(invocation.getArguments()));
+            if (mFailStartProcess) {
+                return null;
+            }
             final String processName = invocation.getArgument(0);
             final ApplicationInfo ai = invocation.getArgument(1);
-            final ProcessRecord res = makeActiveProcessRecord(ai, processName, false,
-                    false, UnaryOperator.identity());
+            final ProcessRecord res = makeActiveProcessRecord(ai, processName,
+                    ProcessBehavior.NORMAL, UnaryOperator.identity());
             mHandlerThread.getThreadHandler().post(() -> {
                 synchronized (mAms) {
                     mQueue.onApplicationAttachedLocked(res);
@@ -278,25 +290,48 @@ public class BroadcastQueueTest {
         }
     }
 
+    private enum ProcessBehavior {
+        /** Process broadcasts normally */
+        NORMAL,
+        /** Wedge and never confirm broadcast receipt */
+        WEDGE,
+        /** Process broadcast by requesting abort */
+        ABORT,
+        /** Appear to behave completely dead */
+        DEAD,
+    }
+
     private ProcessRecord makeActiveProcessRecord(String packageName) throws Exception {
         final ApplicationInfo ai = makeApplicationInfo(packageName);
-        return makeActiveProcessRecord(ai, ai.processName, false, false,
+        return makeActiveProcessRecord(ai, ai.processName, ProcessBehavior.NORMAL,
                 UnaryOperator.identity());
     }
 
-    private ProcessRecord makeWedgedActiveProcessRecord(String packageName) throws Exception {
+    private ProcessRecord makeActiveProcessRecord(String packageName,
+            ProcessBehavior behavior) throws Exception {
         final ApplicationInfo ai = makeApplicationInfo(packageName);
-        return makeActiveProcessRecord(ai, ai.processName, true, false,
+        return makeActiveProcessRecord(ai, ai.processName, behavior,
                 UnaryOperator.identity());
     }
 
     private ProcessRecord makeActiveProcessRecord(ApplicationInfo ai, String processName,
-            boolean wedged, boolean abort, UnaryOperator<Bundle> extrasOperator) throws Exception {
+            ProcessBehavior behavior, UnaryOperator<Bundle> extrasOperator) throws Exception {
+        final boolean wedge = (behavior == ProcessBehavior.WEDGE);
+        final boolean abort = (behavior == ProcessBehavior.ABORT);
+        final boolean dead = (behavior == ProcessBehavior.DEAD);
+
         final ProcessRecord r = spy(new ProcessRecord(mAms, ai, processName, ai.uid));
         r.setPid(mNextPid.getAndIncrement());
         mActiveProcesses.add(r);
 
-        final IApplicationThread thread = mock(IApplicationThread.class);
+        final IApplicationThread thread;
+        if (dead) {
+            thread = mock(IApplicationThread.class, (invocation) -> {
+                throw new DeadObjectException();
+            });
+        } else {
+            thread = mock(IApplicationThread.class);
+        }
         final IBinder threadBinder = new Binder();
         doReturn(threadBinder).when(thread).asBinder();
         r.makeActive(thread, mAms.mProcessStats);
@@ -309,18 +344,21 @@ public class BroadcastQueueTest {
                 UserHandle.getUserId(r.info.uid), receiver);
         mRegisteredReceivers.put(r.getPid(), receiverList);
 
+        // If we're entirely dead, rely on default behaviors above
+        if (dead) return r;
+
         doAnswer((invocation) -> {
             Log.v(TAG, "Intercepting scheduleReceiver() for "
                     + Arrays.toString(invocation.getArguments()));
             final Bundle extras = invocation.getArgument(5);
-            if (!wedged) {
+            if (!wedge) {
                 assertTrue(r.mReceivers.numberOfCurReceivers() > 0);
                 assertTrue(mQueue.getPreferredSchedulingGroupLocked(r)
                         != ProcessList.SCHED_GROUP_UNDEFINED);
                 mHandlerThread.getThreadHandler().post(() -> {
                     synchronized (mAms) {
-                        mQueue.finishReceiverLocked(r, Activity.RESULT_OK,
-                                null, extrasOperator.apply(extras), abort, false);
+                        mQueue.finishReceiverLocked(r, Activity.RESULT_OK, null,
+                                extrasOperator.apply(extras), abort, false);
                     }
                 });
             }
@@ -333,7 +371,7 @@ public class BroadcastQueueTest {
                     + Arrays.toString(invocation.getArguments()));
             final Bundle extras = invocation.getArgument(4);
             final boolean ordered = invocation.getArgument(5);
-            if (!wedged && ordered) {
+            if (!wedge && ordered) {
                 assertTrue(r.mReceivers.numberOfCurReceivers() > 0);
                 assertTrue(mQueue.getPreferredSchedulingGroupLocked(r)
                         != ProcessList.SCHED_GROUP_UNDEFINED);
@@ -445,6 +483,13 @@ public class BroadcastQueueTest {
 
     private void verifyScheduleReceiver(ProcessRecord app, Intent intent) throws Exception {
         verify(app.getThread()).scheduleReceiver(
+                argThat(filterEqualsIgnoringComponent(intent)), any(), any(), anyInt(), any(),
+                any(), eq(false), eq(UserHandle.USER_SYSTEM), anyInt());
+    }
+
+    private void verifyScheduleReceiver(VerificationMode mode, ProcessRecord app, Intent intent)
+            throws Exception {
+        verify(app.getThread(), mode).scheduleReceiver(
                 argThat(filterEqualsIgnoringComponent(intent)), any(), any(), anyInt(), any(),
                 any(), eq(false), eq(UserHandle.USER_SYSTEM), anyInt());
     }
@@ -689,7 +734,8 @@ public class BroadcastQueueTest {
     @Test
     public void testWedged() throws Exception {
         final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
-        final ProcessRecord receiverApp = makeWedgedActiveProcessRecord(PACKAGE_GREEN);
+        final ProcessRecord receiverApp = makeActiveProcessRecord(PACKAGE_GREEN,
+                ProcessBehavior.WEDGE);
 
         final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         enqueueBroadcast(makeBroadcastRecord(airplane, callerApp,
@@ -697,6 +743,106 @@ public class BroadcastQueueTest {
 
         waitForIdle();
         verify(mAms).appNotResponding(eq(receiverApp), any());
+    }
+
+    /**
+     * Verify that we handle registered receivers in a process that always
+     * responds with {@link DeadObjectException}, recovering to restart the
+     * process and deliver their next broadcast.
+     */
+    @Test
+    public void testDead_Registered() throws Exception {
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+        final ProcessRecord receiverApp = makeActiveProcessRecord(PACKAGE_GREEN,
+                ProcessBehavior.DEAD);
+
+        final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        enqueueBroadcast(makeBroadcastRecord(airplane, callerApp,
+                List.of(makeRegisteredReceiver(receiverApp))));
+        final Intent timezone = new Intent(Intent.ACTION_TIMEZONE_CHANGED);
+        enqueueBroadcast(makeBroadcastRecord(timezone, callerApp,
+                List.of(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN))));
+        waitForIdle();
+
+        // First broadcast should have already been dead
+        verifyScheduleRegisteredReceiver(receiverApp, airplane);
+        verify(receiverApp).scheduleCrashLocked(any(),
+                eq(CannotDeliverBroadcastException.TYPE_ID), any());
+
+        // Second broadcast in new process should work fine
+        final ProcessRecord restartedReceiverApp = mAms.getProcessRecordLocked(PACKAGE_GREEN,
+                getUidForPackage(PACKAGE_GREEN));
+        assertNotEquals(receiverApp, restartedReceiverApp);
+        verifyScheduleReceiver(restartedReceiverApp, timezone);
+    }
+
+    /**
+     * Verify that we handle manifest receivers in a process that always
+     * responds with {@link DeadObjectException}, recovering to restart the
+     * process and deliver their next broadcast.
+     */
+    @Test
+    public void testDead_Manifest() throws Exception {
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+        final ProcessRecord receiverApp = makeActiveProcessRecord(PACKAGE_GREEN,
+                ProcessBehavior.DEAD);
+
+        final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        enqueueBroadcast(makeBroadcastRecord(airplane, callerApp,
+                List.of(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN))));
+        final Intent timezone = new Intent(Intent.ACTION_TIMEZONE_CHANGED);
+        enqueueBroadcast(makeBroadcastRecord(timezone, callerApp,
+                List.of(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN))));
+        waitForIdle();
+
+        // First broadcast should have already been dead
+        verifyScheduleReceiver(receiverApp, airplane);
+        verify(receiverApp).scheduleCrashLocked(any(),
+                eq(CannotDeliverBroadcastException.TYPE_ID), any());
+
+        // Second broadcast in new process should work fine
+        final ProcessRecord restartedReceiverApp = mAms.getProcessRecordLocked(PACKAGE_GREEN,
+                getUidForPackage(PACKAGE_GREEN));
+        assertNotEquals(receiverApp, restartedReceiverApp);
+        verifyScheduleReceiver(restartedReceiverApp, timezone);
+    }
+
+    /**
+     * Verify that we handle the system failing to start a process.
+     */
+    @Test
+    public void testFailStartProcess() throws Exception {
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+
+        // Send broadcast while process starts are failing
+        mFailStartProcess = true;
+        final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        enqueueBroadcast(makeBroadcastRecord(airplane, callerApp,
+                List.of(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN),
+                        makeManifestReceiver(PACKAGE_YELLOW, CLASS_YELLOW))));
+
+        // Confirm that queue goes idle, with no processes
+        waitForIdle();
+        assertEquals(1, mActiveProcesses.size());
+
+        // Send more broadcasts with working process starts
+        mFailStartProcess = false;
+        final Intent timezone = new Intent(Intent.ACTION_TIMEZONE_CHANGED);
+        enqueueBroadcast(makeBroadcastRecord(timezone, callerApp,
+                List.of(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN),
+                        makeManifestReceiver(PACKAGE_YELLOW, CLASS_YELLOW))));
+
+        // Confirm that we only saw second broadcast
+        waitForIdle();
+        assertEquals(3, mActiveProcesses.size());
+        final ProcessRecord receiverGreenApp = mAms.getProcessRecordLocked(PACKAGE_GREEN,
+                getUidForPackage(PACKAGE_GREEN));
+        final ProcessRecord receiverYellowApp = mAms.getProcessRecordLocked(PACKAGE_YELLOW,
+                getUidForPackage(PACKAGE_YELLOW));
+        verifyScheduleReceiver(never(), receiverGreenApp, airplane);
+        verifyScheduleReceiver(never(), receiverYellowApp, airplane);
+        verifyScheduleReceiver(times(1), receiverGreenApp, timezone);
+        verifyScheduleReceiver(times(1), receiverYellowApp, timezone);
     }
 
     /**
@@ -770,13 +916,13 @@ public class BroadcastQueueTest {
         // Purposefully warm-start the middle apps to make sure we dispatch to
         // both cold and warm apps in expected order
         makeActiveProcessRecord(makeApplicationInfo(PACKAGE_BLUE), PACKAGE_BLUE,
-                false, false, (extras) -> {
+                ProcessBehavior.NORMAL, (extras) -> {
                     extras = clone(extras);
                     extras.putBoolean(PACKAGE_BLUE, true);
                     return extras;
                 });
         makeActiveProcessRecord(makeApplicationInfo(PACKAGE_YELLOW), PACKAGE_YELLOW,
-                false, false, (extras) -> {
+                ProcessBehavior.NORMAL, (extras) -> {
                     extras = clone(extras);
                     extras.putBoolean(PACKAGE_YELLOW, true);
                     return extras;
@@ -858,7 +1004,7 @@ public class BroadcastQueueTest {
 
         // Create a process that aborts any ordered broadcasts
         makeActiveProcessRecord(makeApplicationInfo(PACKAGE_GREEN), PACKAGE_GREEN,
-                false, true, (extras) -> {
+                ProcessBehavior.ABORT, (extras) -> {
                     extras = clone(extras);
                     extras.putBoolean(PACKAGE_GREEN, true);
                     return extras;

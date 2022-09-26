@@ -1381,6 +1381,8 @@ public class BroadcastQueueImpl extends BroadcastQueue {
             } catch (RemoteException e) {
                 Slog.w(TAG, "Exception when sending broadcast to "
                       + r.curComponent, e);
+                app.scheduleCrashLocked("can't deliver broadcast",
+                        CannotDeliverBroadcastException.TYPE_ID, /* extras=*/ null);
             } catch (RuntimeException e) {
                 Slog.wtf(TAG, "Failed sending broadcast to "
                         + r.curComponent + " with " + r.intent, e);

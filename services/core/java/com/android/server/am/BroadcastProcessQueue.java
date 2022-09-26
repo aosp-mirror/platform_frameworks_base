@@ -119,6 +119,9 @@ class BroadcastProcessQueue {
 
     private boolean mProcessCached;
 
+    private String mCachedToString;
+    private String mCachedToShortString;
+
     public BroadcastProcessQueue(@NonNull BroadcastConstants constants,
             @NonNull String processName, int uid) {
         this.constants = Objects.requireNonNull(constants);
@@ -452,13 +455,19 @@ class BroadcastProcessQueue {
 
     @Override
     public String toString() {
-        return "BroadcastProcessQueue{"
-                + Integer.toHexString(System.identityHashCode(this))
-                + " " + processName + "/" + UserHandle.formatUid(uid) + "}";
+        if (mCachedToString == null) {
+            mCachedToString = "BroadcastProcessQueue{"
+                    + Integer.toHexString(System.identityHashCode(this))
+                    + " " + processName + "/" + UserHandle.formatUid(uid) + "}";
+        }
+        return mCachedToString;
     }
 
     public String toShortString() {
-        return processName + "/" + UserHandle.formatUid(uid);
+        if (mCachedToShortString == null) {
+            mCachedToShortString = processName + "/" + UserHandle.formatUid(uid);
+        }
+        return mCachedToShortString;
     }
 
     public void dumpLocked(@NonNull IndentingPrintWriter pw) {

@@ -604,7 +604,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         }
 
         if (DEBUG_BROADCAST) logv("Scheduling " + r + " to warm " + app);
-        setDeliveryState(queue, r, index, receiver, BroadcastRecord.DELIVERY_SCHEDULED);
+        setDeliveryState(queue, app, r, index, receiver, BroadcastRecord.DELIVERY_SCHEDULED);
 
         final IApplicationThread thread = app.getThread();
         if (thread != null) {
@@ -628,8 +628,11 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                             app.mState.getReportedProcState());
                 }
             } catch (RemoteException e) {
-                finishReceiverLocked(queue, BroadcastRecord.DELIVERY_FAILURE);
+                Slog.w(TAG, "Failed to schedule " + r + " to " + receiver
+                        + " via " + app + ": " + e);
                 app.scheduleCrashLocked(TAG, CannotDeliverBroadcastException.TYPE_ID, null);
+                app.setKilled(true);
+                finishReceiverLocked(queue, BroadcastRecord.DELIVERY_FAILURE);
             }
         } else {
             finishReceiverLocked(queue, BroadcastRecord.DELIVERY_FAILURE);
@@ -652,6 +655,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                         r.resultCode, r.resultData, r.resultExtras, false, r.initialSticky,
                         r.userId, app.mState.getReportedProcState());
             } catch (RemoteException e) {
+                Slog.w(TAG, "Failed to schedule result of " + r + " via " + app + ": " + e);
                 app.scheduleCrashLocked(TAG, CannotDeliverBroadcastException.TYPE_ID, null);
             }
         }
@@ -674,7 +678,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         // receivers as skipped
         if (r.ordered && r.resultAbort) {
             for (int i = r.finishedCount + 1; i < r.receivers.size(); i++) {
-                setDeliveryState(null, r, i, r.receivers.get(i), BroadcastRecord.DELIVERY_SKIPPED);
+                setDeliveryState(null, null, r, i, r.receivers.get(i),
+                        BroadcastRecord.DELIVERY_SKIPPED);
             }
         }
 
@@ -690,7 +695,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         final int index = queue.getActiveIndex();
         final Object receiver = r.receivers.get(index);
 
-        setDeliveryState(queue, r, index, receiver, deliveryState);
+        setDeliveryState(queue, app, r, index, receiver, deliveryState);
 
         if (deliveryState == BroadcastRecord.DELIVERY_TIMEOUT) {
             if (app != null && !app.isDebugging()) {
@@ -733,12 +738,13 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
      * bookkeeping related to ordered broadcasts.
      */
     private void setDeliveryState(@Nullable BroadcastProcessQueue queue,
-            @NonNull BroadcastRecord r, int index, @NonNull Object receiver,
-            @DeliveryState int newDeliveryState) {
+            @Nullable ProcessRecord app, @NonNull BroadcastRecord r, int index,
+            @NonNull Object receiver, @DeliveryState int newDeliveryState) {
         final int oldDeliveryState = getDeliveryState(r, index);
 
         if (newDeliveryState != BroadcastRecord.DELIVERY_DELIVERED) {
-            Slog.w(TAG, "Delivery state of " + r + " to " + receiver + " changed from "
+            Slog.w(TAG, "Delivery state of " + r + " to " + receiver
+                    + " via " + app + " changed from "
                     + deliveryStateToString(oldDeliveryState) + " to "
                     + deliveryStateToString(newDeliveryState));
         }
@@ -837,7 +843,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
      * of it matching a predicate.
      */
     private final BroadcastConsumer mBroadcastConsumerSkip = (r, i) -> {
-        setDeliveryState(null, r, i, r.receivers.get(i), BroadcastRecord.DELIVERY_SKIPPED);
+        setDeliveryState(null, null, r, i, r.receivers.get(i), BroadcastRecord.DELIVERY_SKIPPED);
     };
 
     private boolean skipMatchingBroadcasts(
