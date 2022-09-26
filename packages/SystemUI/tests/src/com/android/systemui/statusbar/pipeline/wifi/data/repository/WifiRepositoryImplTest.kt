@@ -28,6 +28,7 @@ import android.net.wifi.WifiManager
 import android.net.wifi.WifiManager.TrafficStateCallback
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepositoryImpl.Companion.ACTIVITY_DEFAULT
@@ -37,6 +38,7 @@ import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.mock
+import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import java.util.concurrent.Executor
@@ -44,23 +46,28 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 
+@Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 class WifiRepositoryImplTest : SysuiTestCase() {
 
     private lateinit var underTest: WifiRepositoryImpl
 
+    @Mock private lateinit var broadcastDispatcher: BroadcastDispatcher
     @Mock private lateinit var logger: ConnectivityPipelineLogger
     @Mock private lateinit var connectivityManager: ConnectivityManager
     @Mock private lateinit var wifiManager: WifiManager
@@ -70,16 +77,17 @@ class WifiRepositoryImplTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+        whenever(
+            broadcastDispatcher.broadcastFlow(
+                any(),
+                nullable(),
+                anyInt(),
+                nullable(),
+            )
+        ).thenReturn(flowOf(Unit))
         executor = FakeExecutor(FakeSystemClock())
         scope = CoroutineScope(IMMEDIATE)
-
-        underTest = WifiRepositoryImpl(
-            connectivityManager,
-            logger,
-            executor,
-            scope,
-            wifiManager,
-        )
+        underTest = createRepo()
     }
 
     @After
@@ -89,13 +97,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun isWifiEnabled_nullWifiManager_getsFalse() = runBlocking(IMMEDIATE) {
-        underTest = WifiRepositoryImpl(
-            connectivityManager,
-            logger,
-            executor,
-            scope,
-            wifiManager = null,
-        )
+        underTest = createRepo(wifiManagerToUse = null)
 
         assertThat(underTest.isWifiEnabled.value).isFalse()
     }
@@ -104,13 +106,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
     fun isWifiEnabled_initiallyGetsWifiManagerValue() = runBlocking(IMMEDIATE) {
         whenever(wifiManager.isWifiEnabled).thenReturn(true)
 
-        underTest = WifiRepositoryImpl(
-            connectivityManager,
-            logger,
-            executor,
-            scope,
-            wifiManager
-        )
+        underTest = createRepo()
 
         assertThat(underTest.isWifiEnabled.value).isTrue()
     }
@@ -154,6 +150,72 @@ class WifiRepositoryImplTest : SysuiTestCase() {
         getNetworkCallback().onLost(NETWORK)
 
         assertThat(underTest.isWifiEnabled.value).isFalse()
+
+        networkJob.cancel()
+        enabledJob.cancel()
+    }
+
+    @Test
+    fun isWifiEnabled_intentsReceived_valueUpdated() = runBlocking(IMMEDIATE) {
+        val intentFlow = MutableSharedFlow<Unit>()
+        whenever(
+            broadcastDispatcher.broadcastFlow(
+                any(),
+                nullable(),
+                anyInt(),
+                nullable(),
+            )
+        ).thenReturn(intentFlow)
+        underTest = createRepo()
+
+        val job = underTest.isWifiEnabled.launchIn(this)
+
+        whenever(wifiManager.isWifiEnabled).thenReturn(true)
+        intentFlow.emit(Unit)
+
+        assertThat(underTest.isWifiEnabled.value).isTrue()
+
+        whenever(wifiManager.isWifiEnabled).thenReturn(false)
+        intentFlow.emit(Unit)
+
+        assertThat(underTest.isWifiEnabled.value).isFalse()
+
+        job.cancel()
+    }
+
+    @Test
+    fun isWifiEnabled_bothIntentAndNetworkUpdates_valueAlwaysUpdated() = runBlocking(IMMEDIATE) {
+        val intentFlow = MutableSharedFlow<Unit>()
+        whenever(
+            broadcastDispatcher.broadcastFlow(
+                any(),
+                nullable(),
+                anyInt(),
+                nullable(),
+            )
+        ).thenReturn(intentFlow)
+        underTest = createRepo()
+
+        val networkJob = underTest.wifiNetwork.launchIn(this)
+        val enabledJob = underTest.isWifiEnabled.launchIn(this)
+
+        whenever(wifiManager.isWifiEnabled).thenReturn(false)
+        intentFlow.emit(Unit)
+        assertThat(underTest.isWifiEnabled.value).isFalse()
+
+        whenever(wifiManager.isWifiEnabled).thenReturn(true)
+        getNetworkCallback().onLost(NETWORK)
+        assertThat(underTest.isWifiEnabled.value).isTrue()
+
+        whenever(wifiManager.isWifiEnabled).thenReturn(false)
+        getNetworkCallback().onCapabilitiesChanged(
+            NETWORK, createWifiNetworkCapabilities(PRIMARY_WIFI_INFO)
+        )
+        assertThat(underTest.isWifiEnabled.value).isFalse()
+
+        whenever(wifiManager.isWifiEnabled).thenReturn(true)
+        intentFlow.emit(Unit)
+        assertThat(underTest.isWifiEnabled.value).isTrue()
 
         networkJob.cancel()
         enabledJob.cancel()
@@ -581,13 +643,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun wifiActivity_nullWifiManager_receivesDefault() = runBlocking(IMMEDIATE) {
-        underTest = WifiRepositoryImpl(
-            connectivityManager,
-            logger,
-            executor,
-            scope,
-            wifiManager = null,
-        )
+        underTest = createRepo(wifiManagerToUse = null)
 
         var latest: WifiActivityModel? = null
         val job = underTest
@@ -664,6 +720,17 @@ class WifiRepositoryImplTest : SysuiTestCase() {
         assertThat(latest).isEqualTo(WifiActivityModel(hasActivityIn = true, hasActivityOut = true))
 
         job.cancel()
+    }
+
+    private fun createRepo(wifiManagerToUse: WifiManager? = wifiManager): WifiRepositoryImpl {
+        return WifiRepositoryImpl(
+            broadcastDispatcher,
+            connectivityManager,
+            logger,
+            executor,
+            scope,
+            wifiManagerToUse,
+        )
     }
 
     private fun getTrafficStateCallback(): TrafficStateCallback {

@@ -23,6 +23,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.log.LogBufferFactory
 import com.android.systemui.log.LogcatEchoTracker
+import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger.Companion.logInputChange
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger.Companion.logOutputChange
 import com.google.common.truth.Truth.assertThat
 import java.io.PrintWriter
@@ -85,6 +86,42 @@ class ConnectivityPipelineLoggerTest : SysuiTestCase() {
         assertThat(actualString).contains("1")
         assertThat(actualString).contains("null")
         assertThat(actualString).contains("3")
+
+        job.cancel()
+    }
+
+    @Test
+    fun logInputChange_unit_printsInputName() = runBlocking(IMMEDIATE) {
+        val flow: Flow<Unit> = flowOf(Unit, Unit)
+
+        val job = flow
+            .logInputChange(logger, "testInputs")
+            .launchIn(this)
+
+        val stringWriter = StringWriter()
+        buffer.dump(PrintWriter(stringWriter), tailLength = 0)
+        val actualString = stringWriter.toString()
+
+        assertThat(actualString).contains("testInputs")
+
+        job.cancel()
+    }
+
+    @Test
+    fun logInputChange_any_printsValuesAndNulls() = runBlocking(IMMEDIATE) {
+        val flow: Flow<Any?> = flowOf(null, 2, "threeString")
+
+        val job = flow
+            .logInputChange(logger, "testInputs")
+            .launchIn(this)
+
+        val stringWriter = StringWriter()
+        buffer.dump(PrintWriter(stringWriter), tailLength = 0)
+        val actualString = stringWriter.toString()
+
+        assertThat(actualString).contains("null")
+        assertThat(actualString).contains("2")
+        assertThat(actualString).contains("threeString")
 
         job.cancel()
     }
