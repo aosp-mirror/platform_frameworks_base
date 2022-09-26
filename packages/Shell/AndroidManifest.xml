@@ -680,6 +680,9 @@
     <!-- Permission required for CTS test - Notification test suite -->
     <uses-permission android:name="android.permission.REVOKE_POST_NOTIFICATIONS_WITHOUT_KILL" />
 
+    <!-- Permission required for test - CellBroadcastComplianceTest -->
+    <uses-permission android:name="com.android.cellbroadcastservice.FULL_ACCESS_CELL_BROADCAST_HISTORY" />
+
     <!-- Permission required for CTS test - CaptioningManagerTest -->
     <uses-permission android:name="android.permission.SET_SYSTEM_AUDIO_CAPTION" />
 
