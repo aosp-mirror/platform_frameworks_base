@@ -330,7 +330,7 @@ class BroadcastProcessQueue {
     }
 
     public boolean isEmpty() {
-        return (mActive != null) && mPending.isEmpty();
+        return mPending.isEmpty();
     }
 
     public boolean isActive() {
@@ -387,6 +387,12 @@ class BroadcastProcessQueue {
                 mRunnableAt = runnableAt + constants.DELAY_CACHED_MILLIS;
             } else {
                 mRunnableAt = runnableAt + constants.DELAY_NORMAL_MILLIS;
+            }
+
+            // If we have too many broadcasts pending, bypass any delays that
+            // might have been applied above to aid draining
+            if (mPending.size() >= constants.MAX_PENDING_BROADCASTS) {
+                mRunnableAt = runnableAt;
             }
         } else {
             mRunnableAt = Long.MAX_VALUE;

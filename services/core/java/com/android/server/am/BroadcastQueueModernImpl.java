@@ -290,7 +290,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         }
 
         // If app isn't running, and there's nothing in the queue, clean up
-        if (queue.isEmpty() && !queue.isProcessWarm()) {
+        if (queue.isEmpty() && !queue.isActive() && !queue.isProcessWarm()) {
             removeProcessQueue(queue.processName, queue.uid);
         }
     }
@@ -578,7 +578,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             return;
         }
 
-        if (!r.timeoutExempt) {
+        if (mService.mProcessesReady && !r.timeoutExempt) {
             final long timeout = r.isForeground() ? mFgConstants.TIMEOUT : mBgConstants.TIMEOUT;
             mLocalHandler.sendMessageDelayed(
                     Message.obtain(mLocalHandler, MSG_DELIVERY_TIMEOUT, queue), timeout);
@@ -698,6 +698,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         setDeliveryState(queue, app, r, index, receiver, deliveryState);
 
         if (deliveryState == BroadcastRecord.DELIVERY_TIMEOUT) {
+            r.anrCount++;
             if (app != null && !app.isDebugging()) {
                 mService.appNotResponding(queue.app, TimeoutRecord
                         .forBroadcastReceiver("Broadcast of " + r.toShortString()));
@@ -709,7 +710,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         // Even if we have more broadcasts, if we've made reasonable progress
         // and someone else is waiting, retire ourselves to avoid starvation
         final boolean shouldRetire = (mRunnableHead != null)
-                && (queue.getActiveCountSinceIdle() > mConstants.MAX_RUNNING_ACTIVE_BROADCASTS);
+                && (queue.getActiveCountSinceIdle() >= mConstants.MAX_RUNNING_ACTIVE_BROADCASTS);
 
         if (queue.isRunnable() && queue.isProcessWarm() && !shouldRetire) {
             // We're on a roll; move onto the next broadcast for this process
@@ -749,7 +750,11 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                     + deliveryStateToString(newDeliveryState));
         }
 
-        r.setDeliveryState(index, newDeliveryState);
+        // Only apply state when we haven't already reached a terminal state;
+        // this is how we ignore racing timeout messages
+        if (!isDeliveryStateTerminal(oldDeliveryState)) {
+            r.setDeliveryState(index, newDeliveryState);
+        }
 
         // Emit any relevant tracing results when we're changing the delivery
         // state as part of running from a queue
