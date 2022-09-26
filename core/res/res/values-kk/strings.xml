@@ -77,7 +77,7 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Қоңырау шалушының жеке анықтағышы бастапқы бойынша шектелмеген. Келесі қоңырау: Шектелмеген"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Қызмет ұсынылмаған."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Қоңырау шалушы идентификаторы параметрін өзгерту мүмкін емес."</string>
-    <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Мобильдік деректер қызметі жоқ"</string>
+    <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Мобильдік интернет қызметі жоқ"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Жедел қызметке қоңырау шалу қолжетімді емес"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Дауыстық қоңыраулар қызметі жоқ"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="3982069078579103087">"Дауыс қызметі немесе жедел қызметке қоңырау шалу мүмкіндігі жоқ"</string>
@@ -90,7 +90,7 @@
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Дабылдар"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Қоңырауды басқа нөмірге бағыттау"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Шұғыл кері қоңырау шалу режимі"</string>
-    <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"Мобильдік деректер күйі"</string>
+    <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"Мобильдік интернет күйі"</string>
     <string name="notification_channel_sms" msgid="1243384981025535724">"SMS хабарлары"</string>
     <string name="notification_channel_voice_mail" msgid="8457433203106654172">"Дауыстық пошта хабарлары"</string>
     <string name="notification_channel_wfc" msgid="9048240466765169038">"Wi-Fi қоңыраулары"</string>
@@ -1305,7 +1305,7 @@
     <string name="network_switch_metered_detail" msgid="1358296010128405906">"Құрылғы <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> желісінде интернетпен байланыс жоғалған жағдайда <xliff:g id="NEW_NETWORK">%1$s</xliff:g> желісін пайдаланады. Деректер ақысы алынуы мүмкін."</string>
     <string name="network_switch_metered_toast" msgid="501662047275723743">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> желісінен <xliff:g id="NEW_NETWORK">%2$s</xliff:g> желісіне ауысты"</string>
   <string-array name="network_switch_type_name">
-    <item msgid="2255670471736226365">"мобильдік деректер"</item>
+    <item msgid="2255670471736226365">"мобильдік интернет"</item>
     <item msgid="5520925862115353992">"Wi-Fi"</item>
     <item msgid="1055487873974272842">"Bluetooth"</item>
     <item msgid="1616528372438698248">"Ethernet"</item>
@@ -1572,7 +1572,7 @@
     <string name="extract_edit_menu_button" msgid="63954536535863040">"Өзгерту"</string>
     <string name="data_usage_warning_title" msgid="9034893717078325845">"Дерек шығыны туралы ескерту"</string>
     <string name="data_usage_warning_body" msgid="1669325367188029454">"Деректің <xliff:g id="APP">%s</xliff:g> пайдаландыңыз"</string>
-    <string name="data_usage_mobile_limit_title" msgid="3911447354393775241">"Мобильдік деректер шегіне жетті"</string>
+    <string name="data_usage_mobile_limit_title" msgid="3911447354393775241">"Мобильдік интернет шегіне жетті"</string>
     <string name="data_usage_wifi_limit_title" msgid="2069698056520812232">"Wi-Fi деректер шегіне жеттіңіз"</string>
     <string name="data_usage_limit_body" msgid="3567699582000085710">"Деректер жіберу қалған цикл үшін тоқтатылды"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="101888478915677895">"Мобильдік дерек шегінен астыңыз"</string>
@@ -1580,7 +1580,7 @@
     <string name="data_usage_limit_snoozed_body" msgid="545146591766765678">"Сіз <xliff:g id="SIZE">%s</xliff:g> шегінен асып кеттіңіз"</string>
     <string name="data_usage_restricted_title" msgid="126711424380051268">"Фондық деректер шектелген"</string>
     <string name="data_usage_restricted_body" msgid="5338694433686077733">"Шектеуді жою үшін түртіңіз."</string>
-    <string name="data_usage_rapid_title" msgid="2950192123248740375">"Мобильдік деректер көп жұмсалды"</string>
+    <string name="data_usage_rapid_title" msgid="2950192123248740375">"Мобильдік интернет көп жұмсалды"</string>
     <string name="data_usage_rapid_body" msgid="3886676853263693432">"Қолданбаларыңыз деректерді әдеттегіден көбірек пайдаланды"</string>
     <string name="data_usage_rapid_app_body" msgid="5425779218506513861">"<xliff:g id="APP">%s</xliff:g> қолданбасы деректерді әдеттегіден көбірек пайдаланды"</string>
     <string name="ssl_certificate" msgid="5690020361307261997">"Қауіпсіздік сертификаты"</string>

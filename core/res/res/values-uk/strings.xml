@@ -1079,7 +1079,7 @@
     <string name="searchview_description_search" msgid="1045552007537359343">"Пошук"</string>
     <string name="searchview_description_query" msgid="7430242366971716338">"Пошуковий запит"</string>
     <string name="searchview_description_clear" msgid="1989371719192982900">"Очистити запит"</string>
-    <string name="searchview_description_submit" msgid="6771060386117334686">"Наіслати запит"</string>
+    <string name="searchview_description_submit" msgid="6771060386117334686">"Надіслати запит"</string>
     <string name="searchview_description_voice" msgid="42360159504884679">"Голосовий пошук"</string>
     <string name="enable_explore_by_touch_warning_title" msgid="5095399706284943314">"Увімкнути дослідження дотиком?"</string>
     <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="1037295476738940824">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> хоче ввімкнути функцію дослідження дотиком. Увімкнувши функцію дослідження дотиком, можна чути або бачити опис елемента, розташованого під вашим пальцем, або виконувати жести для взаємодії з планшетним ПК."</string>
