@@ -86,7 +86,9 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TransactionPool;
+import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.sysui.ShellSharedConstants;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -123,9 +125,22 @@ public class ShellTransitionTests extends ShellTestCase {
     @Test
     public void instantiate_addInitCallback() {
         ShellInit shellInit = mock(ShellInit.class);
-        final Transitions t = new Transitions(mContext, shellInit, mOrganizer, mTransactionPool,
-                createTestDisplayController(), mMainExecutor, mMainHandler, mAnimExecutor);
+        final Transitions t = new Transitions(mContext, shellInit, mock(ShellController.class),
+                mOrganizer, mTransactionPool, createTestDisplayController(), mMainExecutor,
+                mMainHandler, mAnimExecutor);
         verify(shellInit, times(1)).addInitCallback(any(), eq(t));
+    }
+
+    @Test
+    public void instantiateController_addExternalInterface() {
+        ShellInit shellInit = new ShellInit(mMainExecutor);
+        ShellController shellController = mock(ShellController.class);
+        final Transitions t = new Transitions(mContext, shellInit, shellController,
+                mOrganizer, mTransactionPool, createTestDisplayController(), mMainExecutor,
+                mMainHandler, mAnimExecutor);
+        shellInit.init();
+        verify(shellController, times(1)).addExternalInterface(
+                eq(ShellSharedConstants.KEY_EXTRA_SHELL_SHELL_TRANSITIONS), any(), any());
     }
 
     @Test
@@ -1060,8 +1075,9 @@ public class ShellTransitionTests extends ShellTestCase {
 
     private Transitions createTestTransitions() {
         ShellInit shellInit = new ShellInit(mMainExecutor);
-        final Transitions t = new Transitions(mContext, shellInit, mOrganizer, mTransactionPool,
-                createTestDisplayController(), mMainExecutor, mMainHandler, mAnimExecutor);
+        final Transitions t = new Transitions(mContext, shellInit, mock(ShellController.class),
+                mOrganizer, mTransactionPool, createTestDisplayController(), mMainExecutor,
+                mMainHandler, mAnimExecutor);
         shellInit.init();
         return t;
     }

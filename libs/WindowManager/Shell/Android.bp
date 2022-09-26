@@ -44,6 +44,7 @@ filegroup {
     srcs: [
         "src/com/android/wm/shell/util/**/*.java",
         "src/com/android/wm/shell/common/split/SplitScreenConstants.java",
+        "src/com/android/wm/shell/sysui/ShellSharedConstants.java",
     ],
     path: "src",
 }

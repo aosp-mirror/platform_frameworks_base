@@ -18,6 +18,7 @@ package com.android.wm.shell.back;
 
 import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_BACK_PREVIEW;
+import static com.android.wm.shell.sysui.ShellSharedConstants.KEY_EXTRA_SHELL_BACK_ANIMATION;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -53,10 +54,12 @@ import android.window.IOnBackInvokedCallback;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.wm.shell.common.ExternalInterfaceBinder;
 import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.annotations.ShellBackgroundThread;
 import com.android.wm.shell.common.annotations.ShellMainThread;
+import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 
@@ -102,6 +105,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     private final IActivityTaskManager mActivityTaskManager;
     private final Context mContext;
     private final ContentResolver mContentResolver;
+    private final ShellController mShellController;
     private final ShellExecutor mShellExecutor;
     private final Handler mBgHandler;
     private final Runnable mResetTransitionRunnable = () -> {
@@ -188,11 +192,12 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
 
     public BackAnimationController(
             @NonNull ShellInit shellInit,
+            @NonNull ShellController shellController,
             @NonNull @ShellMainThread ShellExecutor shellExecutor,
             @NonNull @ShellBackgroundThread Handler backgroundHandler,
             Context context,
             Transitions transitions) {
-        this(shellInit, shellExecutor, backgroundHandler,
+        this(shellInit, shellController, shellExecutor, backgroundHandler,
                 ActivityTaskManager.getService(), context, context.getContentResolver(),
                 transitions);
     }
@@ -200,11 +205,13 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     @VisibleForTesting
     BackAnimationController(
             @NonNull ShellInit shellInit,
+            @NonNull ShellController shellController,
             @NonNull @ShellMainThread ShellExecutor shellExecutor,
             @NonNull @ShellBackgroundThread Handler bgHandler,
             @NonNull IActivityTaskManager activityTaskManager,
             Context context, ContentResolver contentResolver,
             Transitions transitions) {
+        mShellController = shellController;
         mShellExecutor = shellExecutor;
         mActivityTaskManager = activityTaskManager;
         mContext = context;
@@ -221,6 +228,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             mBackTransitionHandler = new BackTransitionHandler(this);
             mTransitions.addHandler(mBackTransitionHandler);
         }
+        mShellController.addExternalInterface(KEY_EXTRA_SHELL_BACK_ANIMATION,
+                this::createExternalInterface, this);
     }
 
     private void setupAnimationDeveloperSettingsObserver(
@@ -253,7 +262,11 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         return mBackAnimation;
     }
 
-    private final BackAnimation mBackAnimation = new BackAnimationImpl();
+    private ExternalInterfaceBinder createExternalInterface() {
+        return new IBackAnimationImpl(this);
+    }
+
+    private final BackAnimationImpl mBackAnimation = new BackAnimationImpl();
 
     @Override
     public Context getContext() {
@@ -266,17 +279,6 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     }
 
     private class BackAnimationImpl implements BackAnimation {
-        private IBackAnimationImpl mBackAnimation;
-
-        @Override
-        public IBackAnimation createExternalInterface() {
-            if (mBackAnimation != null) {
-                mBackAnimation.invalidate();
-            }
-            mBackAnimation = new IBackAnimationImpl(BackAnimationController.this);
-            return mBackAnimation;
-        }
-
         @Override
         public void onBackMotion(
                 float touchX, float touchY, int keyAction, @BackEvent.SwipeEdge int swipeEdge) {
@@ -295,7 +297,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         }
     }
 
-    private static class IBackAnimationImpl extends IBackAnimation.Stub {
+    private static class IBackAnimationImpl extends IBackAnimation.Stub
+            implements ExternalInterfaceBinder {
         private BackAnimationController mController;
 
         IBackAnimationImpl(BackAnimationController controller) {
@@ -315,7 +318,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                     (controller) -> controller.clearBackToLauncherCallback());
         }
 
-        void invalidate() {
+        @Override
+        public void invalidate() {
             mController = null;
         }
     }

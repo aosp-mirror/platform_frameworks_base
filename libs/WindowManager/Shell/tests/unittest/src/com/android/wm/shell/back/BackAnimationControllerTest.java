@@ -21,6 +21,7 @@ import static android.window.BackNavigationInfo.KEY_TRIGGER_BACK;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -60,7 +61,9 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
+import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.sysui.ShellSharedConstants;
 import com.android.wm.shell.transition.Transitions;
 
 import org.junit.Before;
@@ -102,6 +105,9 @@ public class BackAnimationControllerTest extends ShellTestCase {
     @Mock
     private Transitions mTransitions;
 
+    @Mock
+    private ShellController mShellController;
+
     private BackAnimationController mController;
 
     private int mEventTime = 0;
@@ -118,7 +124,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
                 ANIMATION_ENABLED);
         mTestableLooper = TestableLooper.get(this);
         mShellInit = spy(new ShellInit(mShellExecutor));
-        mController = new BackAnimationController(mShellInit,
+        mController = new BackAnimationController(mShellInit, mShellController,
                 mShellExecutor, new Handler(mTestableLooper.getLooper()),
                 mActivityTaskManager, mContext,
                 mContentResolver, mTransitions);
@@ -167,6 +173,12 @@ public class BackAnimationControllerTest extends ShellTestCase {
     }
 
     @Test
+    public void instantiateController_addExternalInterface() {
+        verify(mShellController, times(1)).addExternalInterface(
+                eq(ShellSharedConstants.KEY_EXTRA_SHELL_BACK_ANIMATION), any(), any());
+    }
+
+    @Test
     public void verifyAnimationFinishes() {
         RemoteAnimationTarget animationTarget = createAnimationTarget();
         boolean[] backNavigationDone = new boolean[]{false};
@@ -210,7 +222,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
         // Toggle the setting off
         Settings.Global.putString(mContentResolver, Settings.Global.ENABLE_BACK_ANIMATION, "0");
         ShellInit shellInit = new ShellInit(mShellExecutor);
-        mController = new BackAnimationController(shellInit,
+        mController = new BackAnimationController(shellInit, mShellController,
                 mShellExecutor, new Handler(mTestableLooper.getLooper()),
                 mActivityTaskManager, mContext,
                 mContentResolver, mTransitions);

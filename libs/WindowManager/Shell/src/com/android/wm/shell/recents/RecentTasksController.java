@@ -20,6 +20,7 @@ import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.content.pm.PackageManager.FEATURE_PC;
 
 import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
+import static com.android.wm.shell.sysui.ShellSharedConstants.KEY_EXTRA_SHELL_RECENT_TASKS;
 
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
@@ -37,6 +38,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.wm.shell.common.ExternalInterfaceBinder;
 import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SingleInstanceRemoteListener;
@@ -48,6 +50,7 @@ import com.android.wm.shell.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.sysui.ShellCommandHandler;
+import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.util.GroupedRecentTaskInfo;
 import com.android.wm.shell.util.SplitBounds;
@@ -69,11 +72,12 @@ public class RecentTasksController implements TaskStackListenerCallback,
     private static final String TAG = RecentTasksController.class.getSimpleName();
 
     private final Context mContext;
+    private final ShellController mShellController;
     private final ShellCommandHandler mShellCommandHandler;
     private final Optional<DesktopModeTaskRepository> mDesktopModeTaskRepository;
     private final ShellExecutor mMainExecutor;
     private final TaskStackListenerImpl mTaskStackListener;
-    private final RecentTasks mImpl = new RecentTasksImpl();
+    private final RecentTasksImpl mImpl = new RecentTasksImpl();
     private final ActivityTaskManager mActivityTaskManager;
     private IRecentTasksListener mListener;
     private final boolean mIsDesktopMode;
@@ -97,6 +101,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
     public static RecentTasksController create(
             Context context,
             ShellInit shellInit,
+            ShellController shellController,
             ShellCommandHandler shellCommandHandler,
             TaskStackListenerImpl taskStackListener,
             ActivityTaskManager activityTaskManager,
@@ -106,18 +111,20 @@ public class RecentTasksController implements TaskStackListenerCallback,
         if (!context.getResources().getBoolean(com.android.internal.R.bool.config_hasRecents)) {
             return null;
         }
-        return new RecentTasksController(context, shellInit, shellCommandHandler, taskStackListener,
-                activityTaskManager, desktopModeTaskRepository, mainExecutor);
+        return new RecentTasksController(context, shellInit, shellController, shellCommandHandler,
+                taskStackListener, activityTaskManager, desktopModeTaskRepository, mainExecutor);
     }
 
     RecentTasksController(Context context,
             ShellInit shellInit,
+            ShellController shellController,
             ShellCommandHandler shellCommandHandler,
             TaskStackListenerImpl taskStackListener,
             ActivityTaskManager activityTaskManager,
             Optional<DesktopModeTaskRepository> desktopModeTaskRepository,
             ShellExecutor mainExecutor) {
         mContext = context;
+        mShellController = shellController;
         mShellCommandHandler = shellCommandHandler;
         mActivityTaskManager = activityTaskManager;
         mIsDesktopMode = mContext.getPackageManager().hasSystemFeature(FEATURE_PC);
@@ -131,7 +138,13 @@ public class RecentTasksController implements TaskStackListenerCallback,
         return mImpl;
     }
 
+    private ExternalInterfaceBinder createExternalInterface() {
+        return new IRecentTasksImpl(this);
+    }
+
     private void onInit() {
+        mShellController.addExternalInterface(KEY_EXTRA_SHELL_RECENT_TASKS,
+                this::createExternalInterface, this);
         mShellCommandHandler.addDumpCallback(this::dump, this);
         mTaskStackListener.addListener(this);
         mDesktopModeTaskRepository.ifPresent(it -> it.addListener(this));
@@ -366,17 +379,6 @@ public class RecentTasksController implements TaskStackListenerCallback,
      */
     @ExternalThread
     private class RecentTasksImpl implements RecentTasks {
-        private IRecentTasksImpl mIRecentTasks;
-
-        @Override
-        public IRecentTasks createExternalInterface() {
-            if (mIRecentTasks != null) {
-                mIRecentTasks.invalidate();
-            }
-            mIRecentTasks = new IRecentTasksImpl(RecentTasksController.this);
-            return mIRecentTasks;
-        }
-
         @Override
         public void getRecentTasks(int maxNum, int flags, int userId, Executor executor,
                 Consumer<List<GroupedRecentTaskInfo>> callback) {
@@ -393,7 +395,8 @@ public class RecentTasksController implements TaskStackListenerCallback,
      * The interface for calls from outside the host process.
      */
     @BinderThread
-    private static class IRecentTasksImpl extends IRecentTasks.Stub {
+    private static class IRecentTasksImpl extends IRecentTasks.Stub
+            implements ExternalInterfaceBinder {
         private RecentTasksController mController;
         private final SingleInstanceRemoteListener<RecentTasksController,
                 IRecentTasksListener> mListener;
@@ -424,7 +427,8 @@ public class RecentTasksController implements TaskStackListenerCallback,
         /**
          * Invalidates this instance, preventing future calls from updating the controller.
          */
-        void invalidate() {
+        @Override
+        public void invalidate() {
             mController = null;
         }
 
