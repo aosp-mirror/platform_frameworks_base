@@ -1457,10 +1457,20 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      */
     public static final int CLASSIFICATION_DEEP_PRESS = 2;
 
+    /**
+     * Classification constant: touchpad scroll.
+     *
+     * The current event stream represents the user scrolling with two fingers on a touchpad.
+     *
+     * @see #getClassification
+     */
+    public static final int CLASSIFICATION_TWO_FINGER_SWIPE = 3;
+
     /** @hide */
     @Retention(SOURCE)
     @IntDef(prefix = { "CLASSIFICATION" }, value = {
-            CLASSIFICATION_NONE, CLASSIFICATION_AMBIGUOUS_GESTURE, CLASSIFICATION_DEEP_PRESS})
+            CLASSIFICATION_NONE, CLASSIFICATION_AMBIGUOUS_GESTURE, CLASSIFICATION_DEEP_PRESS,
+            CLASSIFICATION_TWO_FINGER_SWIPE})
     public @interface Classification {};
 
     /**
@@ -3862,9 +3872,11 @@ public final class MotionEvent extends InputEvent implements Parcelable {
                 return "AMBIGUOUS_GESTURE";
             case CLASSIFICATION_DEEP_PRESS:
                 return "DEEP_PRESS";
+            case CLASSIFICATION_TWO_FINGER_SWIPE:
+                return "TWO_FINGER_SWIPE";
 
         }
-        return "NONE";
+        return "UNKNOWN";
     }
 
     /**

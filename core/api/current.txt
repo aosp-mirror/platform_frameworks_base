@@ -49254,6 +49254,7 @@ package android.view {
     field public static final int CLASSIFICATION_AMBIGUOUS_GESTURE = 1; // 0x1
     field public static final int CLASSIFICATION_DEEP_PRESS = 2; // 0x2
     field public static final int CLASSIFICATION_NONE = 0; // 0x0
+    field public static final int CLASSIFICATION_TWO_FINGER_SWIPE = 3; // 0x3
     field @NonNull public static final android.os.Parcelable.Creator<android.view.MotionEvent> CREATOR;
     field public static final int EDGE_BOTTOM = 2; // 0x2
     field public static final int EDGE_LEFT = 4; // 0x4
