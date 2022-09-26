@@ -29,6 +29,7 @@ import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
 
 import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
+import static com.android.wm.shell.sysui.ShellSharedConstants.KEY_EXTRA_SHELL_SHELL_TRANSITIONS;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -61,11 +62,13 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.ExternalInterfaceBinder;
 import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.annotations.ExternalThread;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 
 import java.util.ArrayList;
@@ -115,6 +118,7 @@ public class Transitions implements RemoteCallable<Transitions> {
     private final DefaultTransitionHandler mDefaultTransitionHandler;
     private final RemoteTransitionHandler mRemoteTransitionHandler;
     private final DisplayController mDisplayController;
+    private final ShellController mShellController;
     private final ShellTransitionImpl mImpl = new ShellTransitionImpl();
 
     /** List of possible handlers. Ordered by specificity (eg. tapped back to front). */
@@ -142,6 +146,7 @@ public class Transitions implements RemoteCallable<Transitions> {
 
     public Transitions(@NonNull Context context,
             @NonNull ShellInit shellInit,
+            @NonNull ShellController shellController,
             @NonNull WindowOrganizer organizer,
             @NonNull TransactionPool pool,
             @NonNull DisplayController displayController,
@@ -156,10 +161,14 @@ public class Transitions implements RemoteCallable<Transitions> {
         mDefaultTransitionHandler = new DefaultTransitionHandler(context, shellInit,
                 displayController, pool, mainExecutor, mainHandler, animExecutor);
         mRemoteTransitionHandler = new RemoteTransitionHandler(mMainExecutor);
+        mShellController = shellController;
         shellInit.addInitCallback(this::onInit, this);
     }
 
     private void onInit() {
+        mShellController.addExternalInterface(KEY_EXTRA_SHELL_SHELL_TRANSITIONS,
+                this::createExternalInterface, this);
+
         // The very last handler (0 in the list) should be the default one.
         mHandlers.add(mDefaultTransitionHandler);
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "addHandler: Default");
@@ -191,6 +200,10 @@ public class Transitions implements RemoteCallable<Transitions> {
 
     public ShellTransitions asRemoteTransitions() {
         return mImpl;
+    }
+
+    private ExternalInterfaceBinder createExternalInterface() {
+        return new IShellTransitionsImpl(this);
     }
 
     @Override
@@ -897,17 +910,6 @@ public class Transitions implements RemoteCallable<Transitions> {
      */
     @ExternalThread
     private class ShellTransitionImpl implements ShellTransitions {
-        private IShellTransitionsImpl mIShellTransitions;
-
-        @Override
-        public IShellTransitions createExternalInterface() {
-            if (mIShellTransitions != null) {
-                mIShellTransitions.invalidate();
-            }
-            mIShellTransitions = new IShellTransitionsImpl(Transitions.this);
-            return mIShellTransitions;
-        }
-
         @Override
         public void registerRemote(@NonNull TransitionFilter filter,
                 @NonNull RemoteTransition remoteTransition) {
@@ -928,7 +930,8 @@ public class Transitions implements RemoteCallable<Transitions> {
      * The interface for calls from outside the host process.
      */
     @BinderThread
-    private static class IShellTransitionsImpl extends IShellTransitions.Stub {
+    private static class IShellTransitionsImpl extends IShellTransitions.Stub
+            implements ExternalInterfaceBinder {
         private Transitions mTransitions;
 
         IShellTransitionsImpl(Transitions transitions) {
@@ -938,7 +941,8 @@ public class Transitions implements RemoteCallable<Transitions> {
         /**
          * Invalidates this instance, preventing future calls from updating the controller.
          */
-        void invalidate() {
+        @Override
+        public void invalidate() {
             mTransitions = null;
         }
 

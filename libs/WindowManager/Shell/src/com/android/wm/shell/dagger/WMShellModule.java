@@ -600,7 +600,9 @@ public abstract class WMShellModule {
     @WMSingleton
     @Provides
     @DynamicOverride
-    static DesktopModeController provideDesktopModeController(Context context, ShellInit shellInit,
+    static DesktopModeController provideDesktopModeController(Context context,
+            ShellInit shellInit,
+            ShellController shellController,
             ShellTaskOrganizer shellTaskOrganizer,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
             Transitions transitions,
@@ -608,7 +610,7 @@ public abstract class WMShellModule {
             @ShellMainThread Handler mainHandler,
             @ShellMainThread ShellExecutor mainExecutor
     ) {
-        return new DesktopModeController(context, shellInit, shellTaskOrganizer,
+        return new DesktopModeController(context, shellInit, shellController, shellTaskOrganizer,
                 rootTaskDisplayAreaOrganizer, transitions, desktopModeTaskRepository, mainHandler,
                 mainExecutor);
     }
