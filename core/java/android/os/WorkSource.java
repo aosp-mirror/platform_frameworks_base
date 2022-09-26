@@ -129,7 +129,7 @@ public class WorkSource implements Parcelable {
         mNames = in.createStringArray();
 
         int numChains = in.readInt();
-        if (numChains > 0) {
+        if (numChains >= 0) {
             mChains = new ArrayList<>(numChains);
             in.readParcelableList(mChains, WorkChain.class.getClassLoader());
         } else {
