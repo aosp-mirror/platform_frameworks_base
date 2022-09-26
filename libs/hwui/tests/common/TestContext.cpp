@@ -28,7 +28,10 @@ const ui::StaticDisplayInfo& getDisplayInfo() {
 #if HWUI_NULL_GPU
         info.density = 2.f;
 #else
-        const sp<IBinder> token = SurfaceComposerClient::getInternalDisplayToken();
+        const std::vector<PhysicalDisplayId> ids = SurfaceComposerClient::getPhysicalDisplayIds();
+        LOG_ALWAYS_FATAL_IF(ids.empty(), "%s: No displays", __FUNCTION__);
+
+        const sp<IBinder> token = SurfaceComposerClient::getPhysicalDisplayToken(ids.front());
         LOG_ALWAYS_FATAL_IF(!token, "%s: No internal display", __FUNCTION__);
 
         const status_t status = SurfaceComposerClient::getStaticDisplayInfo(token, &info);
@@ -48,7 +51,10 @@ const ui::DisplayMode& getActiveDisplayMode() {
         config.xDpi = config.yDpi = 320.f;
         config.refreshRate = 60.f;
 #else
-        const sp<IBinder> token = SurfaceComposerClient::getInternalDisplayToken();
+        const std::vector<PhysicalDisplayId> ids = SurfaceComposerClient::getPhysicalDisplayIds();
+        LOG_ALWAYS_FATAL_IF(ids.empty(), "%s: No displays", __FUNCTION__);
+
+        const sp<IBinder> token = SurfaceComposerClient::getPhysicalDisplayToken(ids.front());
         LOG_ALWAYS_FATAL_IF(!token, "%s: No internal display", __FUNCTION__);
 
         const status_t status = SurfaceComposerClient::getActiveDisplayMode(token, &config);
