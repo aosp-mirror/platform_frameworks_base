@@ -25,6 +25,8 @@ import android.view.WindowInsets;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.compatibility.common.util.ThrowingRunnable;
+
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -33,6 +35,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public final class ImeStressTestUtil {
 
     private static final long TIMEOUT = TimeUnit.SECONDS.toMillis(5);
+    private static final long VERIFY_DURATION = TimeUnit.SECONDS.toMillis(2);
 
     private ImeStressTestUtil() {
     }
@@ -76,5 +79,42 @@ public final class ImeStressTestUtil {
         //eventually(() -> assertThat(callOnMainSync(() -> isImeShown(view))).isFalse(), TIMEOUT);
         eventually(() -> assertWithMessage("IME should be hidden").that(
                 callOnMainSync(() -> isImeShown(view))).isFalse(), TIMEOUT);
+    }
+
+    /** Verify IME is always hidden within the given time duration. */
+    public static void verifyImeIsAlwaysHidden(View view) {
+        always(
+                () ->
+                        assertWithMessage("IME should be hidden")
+                                .that(callOnMainSync(() -> isImeShown(view)))
+                                .isFalse(),
+                VERIFY_DURATION);
+    }
+
+    /**
+     * Make sure that a {@link Runnable} always finishes without throwing a {@link Exception} in the
+     * given duration
+     *
+     * @param r The {@link Runnable} to run.
+     * @param timeoutMillis The number of milliseconds to wait for {@code r} to not throw
+     */
+    public static void always(ThrowingRunnable r, long timeoutMillis) {
+        long start = System.currentTimeMillis();
+
+        while (true) {
+            try {
+                r.run();
+                if (System.currentTimeMillis() - start >= timeoutMillis) {
+                    return;
+                }
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException ignored) {
+                    // Do nothing
+                }
+            } catch (Throwable e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 }
