@@ -24,6 +24,7 @@ import android.icu.text.BreakIterator;
 import android.os.Build;
 import android.text.CharSequenceCharacterIterator;
 import android.text.Selection;
+import android.text.TextUtils;
 
 import java.util.Locale;
 
@@ -275,9 +276,9 @@ public class WordIterator implements Selection.PositionIterator {
     }
 
     /**
-     * If <code>offset</code> is within a group of punctuation as defined
-     * by {@link #isPunctuation(int)}, returns the index of the first character
-     * of that group, otherwise returns BreakIterator.DONE.
+     * If <code>offset</code> is within a group of punctuation as defined by {@link
+     * TextUtils#isPunctuation(int)}, returns the index of the first character of that group,
+     * otherwise returns BreakIterator.DONE.
      *
      * @param offset the offset to search from.
      */
@@ -292,9 +293,9 @@ public class WordIterator implements Selection.PositionIterator {
     }
 
     /**
-     * If <code>offset</code> is within a group of punctuation as defined
-     * by {@link #isPunctuation(int)}, returns the index of the last character
-     * of that group plus one, otherwise returns BreakIterator.DONE.
+     * If <code>offset</code> is within a group of punctuation as defined by {@link
+     * TextUtils#isPunctuation(int)}, returns the index of the last character of that group plus
+     * one, otherwise returns BreakIterator.DONE.
      *
      * @param offset the offset to search from.
      */
@@ -309,8 +310,8 @@ public class WordIterator implements Selection.PositionIterator {
     }
 
     /**
-     * Indicates if the provided offset is after a punctuation character
-     * as defined by {@link #isPunctuation(int)}.
+     * Indicates if the provided offset is after a punctuation character as defined by {@link
+     * TextUtils#isPunctuation(int)}.
      *
      * @param offset the offset to check from.
      * @return Whether the offset is after a punctuation character.
@@ -319,14 +320,14 @@ public class WordIterator implements Selection.PositionIterator {
     public boolean isAfterPunctuation(int offset) {
         if (mStart < offset && offset <= mEnd) {
             final int codePoint = Character.codePointBefore(mCharSeq, offset);
-            return isPunctuation(codePoint);
+            return TextUtils.isPunctuation(codePoint);
         }
         return false;
     }
 
     /**
-     * Indicates if the provided offset is at a punctuation character
-     * as defined by {@link #isPunctuation(int)}.
+     * Indicates if the provided offset is at a punctuation character as defined by {@link
+     * TextUtils#isPunctuation(int)}.
      *
      * @param offset the offset to check from.
      * @return Whether the offset is at a punctuation character.
@@ -335,7 +336,7 @@ public class WordIterator implements Selection.PositionIterator {
     public boolean isOnPunctuation(int offset) {
         if (mStart <= offset && offset < mEnd) {
             final int codePoint = Character.codePointAt(mCharSeq, offset);
-            return isPunctuation(codePoint);
+            return TextUtils.isPunctuation(codePoint);
         }
         return false;
     }
@@ -367,17 +368,6 @@ public class WordIterator implements Selection.PositionIterator {
 
     private boolean isPunctuationEndBoundary(int offset) {
         return !isOnPunctuation(offset) && isAfterPunctuation(offset);
-    }
-
-    private static boolean isPunctuation(int cp) {
-        final int type = Character.getType(cp);
-        return (type == Character.CONNECTOR_PUNCTUATION
-                || type == Character.DASH_PUNCTUATION
-                || type == Character.END_PUNCTUATION
-                || type == Character.FINAL_QUOTE_PUNCTUATION
-                || type == Character.INITIAL_QUOTE_PUNCTUATION
-                || type == Character.OTHER_PUNCTUATION
-                || type == Character.START_PUNCTUATION);
     }
 
     private boolean isAfterLetterOrDigit(int offset) {
