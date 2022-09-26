@@ -31932,6 +31932,7 @@ package android.os {
     method public static final boolean is64Bit();
     method public static boolean isApplicationUid(int);
     method public static final boolean isIsolated();
+    method public static final boolean isIsolatedUid(int);
     method public static final boolean isSdkSandbox();
     method public static final void killProcess(int);
     method public static final int myPid();

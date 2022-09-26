@@ -900,9 +900,21 @@ public class Process {
         return isIsolated(myUid());
     }
 
-    /** {@hide} */
-    @UnsupportedAppUsage
+    /**
+     * @deprecated Use {@link #isIsolatedUid(int)} instead.
+     * {@hide}
+     */
+    @Deprecated
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.TIRAMISU,
+            publicAlternatives = "Use {@link #isIsolatedUid(int)} instead.")
     public static final boolean isIsolated(int uid) {
+        return isIsolatedUid(uid);
+    }
+
+    /**
+     * Returns whether the process with the given {@code uid} is an isolated sandbox.
+     */
+    public static final boolean isIsolatedUid(int uid) {
         uid = UserHandle.getAppId(uid);
         return (uid >= FIRST_ISOLATED_UID && uid <= LAST_ISOLATED_UID)
                 || (uid >= FIRST_APP_ZYGOTE_ISOLATED_UID && uid <= LAST_APP_ZYGOTE_ISOLATED_UID);
