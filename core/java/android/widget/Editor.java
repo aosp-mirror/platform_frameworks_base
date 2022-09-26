@@ -572,8 +572,8 @@ public class Editor {
 
         final Layout layout = mTextView.getLayout();
         final int line = layout.getLineForOffset(mTextView.getSelectionStart());
-        final int sourceHeight =
-            layout.getLineBottomWithoutSpacing(line) - layout.getLineTop(line);
+        final int sourceHeight = layout.getLineBottom(line, /* includeLineSpacing= */ false)
+                - layout.getLineTop(line);
         final int height = (int)(sourceHeight * zoom);
         final int width = (int)(aspectRatio * Math.max(sourceHeight, mMinLineHeightForMagnifier));
 
@@ -2340,7 +2340,7 @@ public class Editor {
         final int offset = mTextView.getSelectionStart();
         final int line = layout.getLineForOffset(offset);
         final int top = layout.getLineTop(line);
-        final int bottom = layout.getLineBottomWithoutSpacing(line);
+        final int bottom = layout.getLineBottom(line, /* includeLineSpacing= */ false);
 
         final boolean clamped = layout.shouldClampCursor(line);
         updateCursorPosition(top, bottom, layout.getPrimaryHorizontal(offset, clamped));
@@ -3443,7 +3443,7 @@ public class Editor {
         @Override
         protected int getVerticalLocalPosition(int line) {
             final Layout layout = mTextView.getLayout();
-            return layout.getLineBottomWithoutSpacing(line);
+            return layout.getLineBottom(line, /* includeLineSpacing= */ false);
         }
 
         @Override
@@ -4109,7 +4109,8 @@ public class Editor {
         @Override
         protected int getVerticalLocalPosition(int line) {
             final Layout layout = mTextView.getLayout();
-            return layout.getLineBottomWithoutSpacing(line) - mContainerMarginTop;
+            return layout.getLineBottom(line, /* includeLineSpacing= */ false)
+                    - mContainerMarginTop;
         }
 
         @Override
@@ -4706,8 +4707,9 @@ public class Editor {
                                 + viewportToContentVerticalOffset;
                         final float insertionMarkerBaseline = layout.getLineBaseline(line)
                                 + viewportToContentVerticalOffset;
-                        final float insertionMarkerBottom = layout.getLineBottomWithoutSpacing(line)
-                                + viewportToContentVerticalOffset;
+                        final float insertionMarkerBottom =
+                                layout.getLineBottom(line, /* includeLineSpacing= */ false)
+                                        + viewportToContentVerticalOffset;
                         final boolean isTopVisible = mTextView
                                 .isPositionVisible(insertionMarkerX, insertionMarkerTop);
                         final boolean isBottomVisible = mTextView
@@ -5137,7 +5139,7 @@ public class Editor {
 
                 mPositionX = getCursorHorizontalPosition(layout, offset) - mHotspotX
                         - getHorizontalOffset() + getCursorOffset();
-                mPositionY = layout.getLineBottomWithoutSpacing(line);
+                mPositionY = layout.getLineBottom(line, /* includeLineSpacing= */ false);
 
                 // Take TextView's padding and scroll into account.
                 mPositionX += mTextView.viewportToContentHorizontalOffset();
@@ -5233,8 +5235,8 @@ public class Editor {
             if (mNewMagnifierEnabled) {
                 Layout layout = mTextView.getLayout();
                 final int line = layout.getLineForOffset(getCurrentCursorOffset());
-                return layout.getLineBottomWithoutSpacing(line) - layout.getLineTop(line)
-                        >= mMaxLineHeightForMagnifier;
+                return layout.getLineBottom(line, /* includeLineSpacing= */ false)
+                        - layout.getLineTop(line) >= mMaxLineHeightForMagnifier;
             }
             final float magnifierContentHeight = Math.round(
                     mMagnifierAnimator.mMagnifier.getHeight()
@@ -5389,7 +5391,8 @@ public class Editor {
 
             // Vertically snap to middle of current line.
             showPosInView.y = ((mTextView.getLayout().getLineTop(lineNumber)
-                    + mTextView.getLayout().getLineBottomWithoutSpacing(lineNumber)) / 2.0f
+                    + mTextView.getLayout()
+                            .getLineBottom(lineNumber, /* includeLineSpacing= */ false)) / 2.0f
                     + mTextView.getTotalPaddingTop() - mTextView.getScrollY()) * mTextViewScaleY;
             return true;
         }
@@ -5473,7 +5476,8 @@ public class Editor {
                         updateCursorPosition();
                     }
                     final int lineHeight =
-                            layout.getLineBottomWithoutSpacing(line) - layout.getLineTop(line);
+                            layout.getLineBottom(line, /* includeLineSpacing= */ false)
+                                    - layout.getLineTop(line);
                     float zoom = mInitialZoom;
                     if (lineHeight < mMinLineHeightForMagnifier) {
                         zoom = zoom * mMinLineHeightForMagnifier / lineHeight;
@@ -5823,8 +5827,8 @@ public class Editor {
         private MotionEvent transformEventForTouchThrough(MotionEvent ev) {
             final Layout layout = mTextView.getLayout();
             final int line = layout.getLineForOffset(getCurrentCursorOffset());
-            final int textHeight =
-                    layout.getLineBottomWithoutSpacing(line) - layout.getLineTop(line);
+            final int textHeight = layout.getLineBottom(line, /* includeLineSpacing= */ false)
+                    - layout.getLineTop(line);
             // Transforms the touch events to screen coordinates.
             // And also shift up to make the hit point is on the text.
             // Note:

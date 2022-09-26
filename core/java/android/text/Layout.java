@@ -1841,7 +1841,7 @@ public abstract class Layout {
         // Find the first line whose vertical center is below the top of the area.
         int startLine = getLineForVertical((int) area.top);
         int startLineTop = getLineTop(startLine);
-        int startLineBottom = getLineBottomWithoutSpacing(startLine);
+        int startLineBottom = getLineBottom(startLine, /* includeLineSpacing= */ false);
         if (area.top > (startLineTop + startLineBottom) / 2f) {
             startLine++;
             if (startLine >= getLineCount()) {
@@ -1854,7 +1854,7 @@ public abstract class Layout {
         // Find the last line whose vertical center is above the bottom of the area.
         int endLine = getLineForVertical((int) area.bottom);
         int endLineTop = getLineTop(endLine);
-        int endLineBottom = getLineBottomWithoutSpacing(endLine);
+        int endLineBottom = getLineBottom(endLine, /* includeLineSpacing= */ false);
         if (area.bottom < (endLineTop + endLineBottom) / 2f) {
             endLine--;
         }
@@ -2229,17 +2229,21 @@ public abstract class Layout {
      * Return the vertical position of the bottom of the specified line.
      */
     public final int getLineBottom(int line) {
-        return getLineTop(line + 1);
+        return getLineBottom(line, /* includeLineSpacing= */ true);
     }
 
     /**
-     * Return the vertical position of the bottom of the specified line without the line spacing
-     * added.
+     * Return the vertical position of the bottom of the specified line.
      *
-     * @hide
+     * @param line index of the line
+     * @param includeLineSpacing whether to include the line spacing
      */
-    public final int getLineBottomWithoutSpacing(int line) {
-        return getLineTop(line + 1) - getLineExtra(line);
+    public int getLineBottom(int line, boolean includeLineSpacing) {
+        if (includeLineSpacing) {
+            return getLineTop(line + 1);
+        } else {
+            return getLineTop(line + 1) - getLineExtra(line);
+        }
     }
 
     /**
@@ -2394,7 +2398,7 @@ public abstract class Layout {
 
         int line = getLineForOffset(point);
         int top = getLineTop(line);
-        int bottom = getLineBottomWithoutSpacing(line);
+        int bottom = getLineBottom(line, /* includeLineSpacing= */ false);
 
         boolean clamped = shouldClampCursor(line);
         float h1 = getPrimaryHorizontal(point, clamped) - 0.5f;
@@ -2530,7 +2534,7 @@ public abstract class Layout {
         final int endline = getLineForOffset(end);
 
         int top = getLineTop(startline);
-        int bottom = getLineBottomWithoutSpacing(endline);
+        int bottom = getLineBottom(endline, /* includeLineSpacing= */ false);
 
         if (startline == endline) {
             addSelection(startline, start, end, top, bottom, consumer);
@@ -2559,7 +2563,7 @@ public abstract class Layout {
             }
 
             top = getLineTop(endline);
-            bottom = getLineBottomWithoutSpacing(endline);
+            bottom = getLineBottom(endline, /* includeLineSpacing= */ false);
 
             addSelection(endline, getLineStart(endline), end, top, bottom, consumer);
 

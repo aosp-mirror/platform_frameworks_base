@@ -9390,7 +9390,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         PointF point = convertFromScreenToContentCoordinates(gesture.getInsertionPoint());
         int line = mLayout.getLineForVertical((int) point.y);
         if (point.y < mLayout.getLineTop(line)
-                || point.y > mLayout.getLineBottomWithoutSpacing(line)) {
+                || point.y > mLayout.getLineBottom(line, /* includeLineSpacing= */ false)) {
             return handleGestureFailure(gesture);
         }
         if (point.x < mLayout.getLineLeft(line) || point.x > mLayout.getLineRight(line)) {
@@ -9418,7 +9418,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             // Both points are above the top of the first line.
             return handleGestureFailure(gesture);
         }
-        if (yMin > mLayout.getLineBottomWithoutSpacing(line)) {
+        if (yMin > mLayout.getLineBottom(line, /* includeLineSpacing= */ false)) {
             if (line == mLayout.getLineCount() - 1 || yMax < mLayout.getLineTop(line + 1)) {
                 // The points are below the last line, or they are between two lines.
                 return handleGestureFailure(gesture);
@@ -9472,7 +9472,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         int line = mLayout.getLineForVertical((int) point.y);
         if (point.y < mLayout.getLineTop(line)
-                || point.y > mLayout.getLineBottomWithoutSpacing(line)) {
+                || point.y > mLayout.getLineBottom(line, /* includeLineSpacing= */ false)) {
             return handleGestureFailure(gesture);
         }
         if (point.x < mLayout.getLineLeft(line) || point.x > mLayout.getLineRight(line)) {
