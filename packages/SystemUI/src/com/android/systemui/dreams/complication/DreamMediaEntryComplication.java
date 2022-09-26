@@ -18,13 +18,21 @@ package com.android.systemui.dreams.complication;
 
 import static com.android.systemui.dreams.complication.dagger.DreamMediaEntryComplicationComponent.DreamMediaEntryModule.DREAM_MEDIA_ENTRY_VIEW;
 import static com.android.systemui.dreams.complication.dagger.RegisteredComplicationsModule.DREAM_MEDIA_ENTRY_LAYOUT_PARAMS;
+import static com.android.systemui.flags.Flags.DREAM_MEDIA_TAP_TO_OPEN;
 
+import android.app.PendingIntent;
 import android.util.Log;
 import android.view.View;
 
+import com.android.systemui.ActivityIntentHelper;
 import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.dreams.complication.dagger.DreamMediaEntryComplicationComponent;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.media.MediaCarouselController;
 import com.android.systemui.media.dream.MediaDreamComplication;
+import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.statusbar.NotificationLockscreenUserManager;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.ViewController;
 
 import javax.inject.Inject;
@@ -87,6 +95,15 @@ public class DreamMediaEntryComplication implements Complication {
 
         private final DreamOverlayStateController mDreamOverlayStateController;
         private final MediaDreamComplication mMediaComplication;
+        private final MediaCarouselController mMediaCarouselController;
+
+        private final ActivityStarter mActivityStarter;
+        private final ActivityIntentHelper mActivityIntentHelper;
+        private final KeyguardStateController mKeyguardStateController;
+        private final NotificationLockscreenUserManager mLockscreenUserManager;
+
+        private final FeatureFlags mFeatureFlags;
+        private boolean mIsTapToOpenEnabled;
 
         private boolean mMediaComplicationAdded;
 
@@ -94,15 +111,28 @@ public class DreamMediaEntryComplication implements Complication {
         DreamMediaEntryViewController(
                 @Named(DREAM_MEDIA_ENTRY_VIEW) View view,
                 DreamOverlayStateController dreamOverlayStateController,
-                MediaDreamComplication mediaComplication) {
+                MediaDreamComplication mediaComplication,
+                MediaCarouselController mediaCarouselController,
+                ActivityStarter activityStarter,
+                ActivityIntentHelper activityIntentHelper,
+                KeyguardStateController keyguardStateController,
+                NotificationLockscreenUserManager lockscreenUserManager,
+                FeatureFlags featureFlags) {
             super(view);
             mDreamOverlayStateController = dreamOverlayStateController;
             mMediaComplication = mediaComplication;
+            mMediaCarouselController = mediaCarouselController;
+            mActivityStarter = activityStarter;
+            mActivityIntentHelper = activityIntentHelper;
+            mKeyguardStateController = keyguardStateController;
+            mLockscreenUserManager = lockscreenUserManager;
+            mFeatureFlags = featureFlags;
             mView.setOnClickListener(this::onClickMediaEntry);
         }
 
         @Override
         protected void onViewAttached() {
+            mIsTapToOpenEnabled = mFeatureFlags.isEnabled(DREAM_MEDIA_TAP_TO_OPEN);
         }
 
         @Override
@@ -112,6 +142,31 @@ public class DreamMediaEntryComplication implements Complication {
 
         private void onClickMediaEntry(View v) {
             if (DEBUG) Log.d(TAG, "media entry complication tapped");
+
+            if (mIsTapToOpenEnabled) {
+                final PendingIntent clickIntent =
+                        mMediaCarouselController.getCurrentVisibleMediaContentIntent();
+
+                if (clickIntent == null) {
+                    return;
+                }
+
+                // See StatusBarNotificationActivityStarter#onNotificationClicked
+                final boolean showOverLockscreen = mKeyguardStateController.isShowing()
+                        && mActivityIntentHelper.wouldShowOverLockscreen(clickIntent.getIntent(),
+                        mLockscreenUserManager.getCurrentUserId());
+
+                if (showOverLockscreen) {
+                    mActivityStarter.startActivity(clickIntent.getIntent(),
+                            /* dismissShade */ true,
+                            /* animationController */ null,
+                            /* showOverLockscreenWhenLocked */ true);
+                } else {
+                    mActivityStarter.postStartActivityDismissingKeyguard(clickIntent, null);
+                }
+
+                return;
+            }
 
             if (!mMediaComplicationAdded) {
                 addMediaComplication();

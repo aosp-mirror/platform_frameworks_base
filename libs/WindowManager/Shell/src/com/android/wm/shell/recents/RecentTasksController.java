@@ -24,6 +24,7 @@ import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTas
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.TaskInfo;
+import android.content.ComponentName;
 import android.content.Context;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -325,6 +326,28 @@ public class RecentTasksController implements TaskStackListenerCallback,
         }
 
         return recentTasks;
+    }
+
+    /**
+     * Find the background task that match the given component.
+     */
+    @Nullable
+    public ActivityManager.RecentTaskInfo findTaskInBackground(ComponentName componentName) {
+        if (componentName == null) {
+            return null;
+        }
+        List<ActivityManager.RecentTaskInfo> tasks = getRawRecentTasks(Integer.MAX_VALUE,
+                ActivityManager.RECENT_IGNORE_UNAVAILABLE, ActivityManager.getCurrentUser());
+        for (int i = 0; i < tasks.size(); i++) {
+            final ActivityManager.RecentTaskInfo task = tasks.get(i);
+            if (task.isVisible) {
+                continue;
+            }
+            if (componentName.equals(task.baseIntent.getComponent())) {
+                return task;
+            }
+        }
+        return null;
     }
 
     public void dump(@NonNull PrintWriter pw, String prefix) {
