@@ -54,6 +54,7 @@ import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.DisplayLayout;
+import com.android.wm.shell.common.DockStateReader;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.transition.Transitions;
 
@@ -103,6 +104,7 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
     @Mock private SurfaceControlViewHost mViewHost;
     @Mock private Transitions mTransitions;
     @Mock private Runnable mOnDismissCallback;
+    @Mock private DockStateReader mDockStateReader;
 
     private SharedPreferences mSharedPreferences;
     @Nullable
@@ -146,6 +148,16 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
     @Test
     public void testCreateLayout_notEligible_doesNotCreateLayout() {
         LetterboxEduWindowManager windowManager = createWindowManager(/* eligible= */ false);
+
+        assertFalse(windowManager.createLayout(/* canShow= */ true));
+
+        assertNull(windowManager.mLayout);
+    }
+
+    @Test
+    public void testCreateLayout_eligibleAndDocked_doesNotCreateLayout() {
+        LetterboxEduWindowManager windowManager = createWindowManager(/* eligible= */
+                true, /* isDocked */ true);
 
         assertFalse(windowManager.createLayout(/* canShow= */ true));
 
@@ -382,17 +394,27 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
         return createWindowManager(eligible, USER_ID_1, /* isTaskbarEduShowing= */ false);
     }
 
+    private LetterboxEduWindowManager createWindowManager(boolean eligible, boolean isDocked) {
+        return createWindowManager(eligible, USER_ID_1, /* isTaskbarEduShowing= */
+                false, isDocked);
+    }
+
     private LetterboxEduWindowManager createWindowManager(boolean eligible,
             int userId, boolean isTaskbarEduShowing) {
+        return createWindowManager(eligible, userId, isTaskbarEduShowing, /* isDocked */false);
+    }
+
+    private LetterboxEduWindowManager createWindowManager(boolean eligible,
+            int userId, boolean isTaskbarEduShowing, boolean isDocked) {
+        doReturn(isDocked).when(mDockStateReader).isDocked();
         LetterboxEduWindowManager windowManager = new LetterboxEduWindowManager(mContext,
                 createTaskInfo(eligible, userId), mSyncTransactionQueue, mTaskListener,
                 createDisplayLayout(), mTransitions, mOnDismissCallback,
-                mAnimationController);
+                mAnimationController, mDockStateReader);
 
         spyOn(windowManager);
         doReturn(mViewHost).when(windowManager).createSurfaceViewHost();
         doReturn(isTaskbarEduShowing).when(windowManager).isTaskbarEduShowing();
-
         return windowManager;
     }
 

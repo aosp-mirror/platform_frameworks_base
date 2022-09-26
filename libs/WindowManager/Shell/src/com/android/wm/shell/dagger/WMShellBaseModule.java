@@ -46,6 +46,7 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.DisplayLayout;
+import com.android.wm.shell.common.DockStateReader;
 import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
@@ -216,9 +217,11 @@ public abstract class WMShellBaseModule {
             ShellController shellController,
             DisplayController displayController, DisplayInsetsController displayInsetsController,
             DisplayImeController imeController, SyncTransactionQueue syncQueue,
-            @ShellMainThread ShellExecutor mainExecutor, Lazy<Transitions> transitionsLazy) {
+            @ShellMainThread ShellExecutor mainExecutor, Lazy<Transitions> transitionsLazy,
+            DockStateReader dockStateReader) {
         return new CompatUIController(context, shellInit, shellController, displayController,
-                displayInsetsController, imeController, syncQueue, mainExecutor, transitionsLazy);
+                displayInsetsController, imeController, syncQueue, mainExecutor, transitionsLazy,
+                dockStateReader);
     }
 
     @WMSingleton
