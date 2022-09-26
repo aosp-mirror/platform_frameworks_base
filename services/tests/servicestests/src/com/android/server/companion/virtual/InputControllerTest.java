@@ -25,7 +25,6 @@ import static org.mockito.Mockito.verify;
 
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.input.IInputManager;
-import android.hardware.input.InputManagerInternal;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -39,6 +38,7 @@ import android.view.WindowManager;
 import androidx.test.InstrumentationRegistry;
 
 import com.android.server.LocalServices;
+import com.android.server.input.InputManagerInternal;
 
 import org.junit.Before;
 import org.junit.Test;

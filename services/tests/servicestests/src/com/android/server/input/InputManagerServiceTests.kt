@@ -19,13 +19,14 @@ package com.android.server.input
 import android.content.Context
 import android.content.ContextWrapper
 import android.hardware.display.DisplayViewport
-import android.hardware.input.InputManagerInternal
 import android.os.IInputConstants
 import android.os.test.TestLooper
 import android.platform.test.annotations.Presubmit
 import android.view.Display
 import android.view.PointerIcon
 import androidx.test.InstrumentationRegistry
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -35,7 +36,6 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.doAnswer
 import org.mockito.Mockito.never
@@ -43,9 +43,8 @@ import org.mockito.Mockito.spy
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
+import org.mockito.Mockito.`when`
 import org.mockito.junit.MockitoJUnit
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 
 /**
  * Tests for {@link InputManagerService}.
