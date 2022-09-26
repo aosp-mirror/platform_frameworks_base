@@ -22,6 +22,7 @@ import static android.service.attention.AttentionService.PROXIMITY_UNKNOWN;
 import static android.service.voice.HotwordDetectedResult.EXTRA_PROXIMITY_METERS;
 import static android.service.voice.HotwordDetectionService.AUDIO_SOURCE_EXTERNAL;
 import static android.service.voice.HotwordDetectionService.AUDIO_SOURCE_MICROPHONE;
+import static android.service.voice.HotwordDetectionService.ENABLE_PROXIMITY_RESULT;
 import static android.service.voice.HotwordDetectionService.INITIALIZATION_STATUS_SUCCESS;
 import static android.service.voice.HotwordDetectionService.INITIALIZATION_STATUS_UNKNOWN;
 import static android.service.voice.HotwordDetectionService.KEY_INITIALIZATION_STATUS;
@@ -185,7 +186,7 @@ final class HotwordDetectionConnection {
     final int mUser;
     final Context mContext;
 
-    @Nullable final AttentionManagerInternal mAttentionManagerInternal;
+    @Nullable AttentionManagerInternal mAttentionManagerInternal = null;
 
     final AttentionManagerInternal.ProximityUpdateCallbackInternal mProximityCallbackInternal =
             this::setProximityMeters;
@@ -240,9 +241,11 @@ final class HotwordDetectionConnection {
         mServiceConnectionFactory = new ServiceConnectionFactory(intent, bindInstantServiceAllowed);
 
         mRemoteHotwordDetectionService = mServiceConnectionFactory.createLocked();
-        mAttentionManagerInternal = LocalServices.getService(AttentionManagerInternal.class);
-        if (mAttentionManagerInternal != null) {
-            mAttentionManagerInternal.onStartProximityUpdates(mProximityCallbackInternal);
+        if (ENABLE_PROXIMITY_RESULT) {
+            mAttentionManagerInternal = LocalServices.getService(AttentionManagerInternal.class);
+            if (mAttentionManagerInternal != null) {
+                mAttentionManagerInternal.onStartProximityUpdates(mProximityCallbackInternal);
+            }
         }
 
         mLastRestartInstant = Instant.now();
