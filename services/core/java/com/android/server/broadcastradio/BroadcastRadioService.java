@@ -21,21 +21,23 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.radio.IRadioService;
-import android.util.Slog;
 
 import com.android.server.SystemService;
 
+import java.util.ArrayList;
+
 public class BroadcastRadioService extends SystemService {
-    private static final String TAG = "BcRadioSrv";
     private final IRadioService mServiceImpl;
+
     public BroadcastRadioService(Context context) {
         super(context);
-        mServiceImpl = new BroadcastRadioServiceHidl(this);
+        ArrayList<String> serviceNameList = IRadioServiceAidlImpl.getServicesNames();
+        mServiceImpl = serviceNameList.isEmpty() ? new IRadioServiceHidlImpl(this)
+                : new IRadioServiceAidlImpl(this, serviceNameList);
     }
 
     @Override
     public void onStart() {
-        Slog.v(TAG, "BroadcastRadioService onStart()");
         publishBinderService(Context.RADIO_SERVICE, mServiceImpl.asBinder());
     }
 
