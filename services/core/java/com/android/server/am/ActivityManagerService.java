@@ -8786,6 +8786,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * @param incrementalMetrics metrics for apps installed on Incremental.
      * @param errorId a unique id to append to the dropbox headers.
      */
+    @SuppressWarnings("DoNotCall") // Ignore warning for synchronous to call to worker.run()
     public void addErrorToDropBox(String eventType,
             ProcessRecord process, String processName, String activityShortComponentName,
             String parentShortComponentName, ProcessRecord parentProcess,
