@@ -27,11 +27,14 @@ import android.compat.annotation.ChangeId;
 import android.compat.annotation.Disabled;
 import android.compat.annotation.EnabledSince;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerExemptionManager;
 import android.os.PowerExemptionManager.ReasonCode;
 import android.os.PowerExemptionManager.TempAllowListType;
+
+import java.util.Objects;
 
 /**
  * Helper class for building an options Bundle that can be used with
@@ -55,6 +58,7 @@ public class BroadcastOptions extends ComponentOptions {
     private boolean mRequireCompatChangeEnabled = true;
     private boolean mIsAlarmBroadcast = false;
     private long mIdForResponseEvent;
+    private @Nullable IntentFilter mRemoveMatchingFilter;
 
     /**
      * Change ID which is invalid.
@@ -180,8 +184,22 @@ public class BroadcastOptions extends ComponentOptions {
     private static final String KEY_ID_FOR_RESPONSE_EVENT =
             "android:broadcast.idForResponseEvent";
 
+    /**
+     * Corresponds to {@link #setRemoveMatchingFilter}.
+     */
+    private static final String KEY_REMOVE_MATCHING_FILTER =
+            "android:broadcast.removeMatchingFilter";
+
     public static BroadcastOptions makeBasic() {
         BroadcastOptions opts = new BroadcastOptions();
+        return opts;
+    }
+
+    /** {@hide} */
+    public static @NonNull BroadcastOptions makeRemovingMatchingFilter(
+            @NonNull IntentFilter removeMatchingFilter) {
+        BroadcastOptions opts = new BroadcastOptions();
+        opts.setRemoveMatchingFilter(removeMatchingFilter);
         return opts;
     }
 
@@ -216,6 +234,8 @@ public class BroadcastOptions extends ComponentOptions {
         mRequireCompatChangeEnabled = opts.getBoolean(KEY_REQUIRE_COMPAT_CHANGE_ENABLED, true);
         mIdForResponseEvent = opts.getLong(KEY_ID_FOR_RESPONSE_EVENT);
         mIsAlarmBroadcast = opts.getBoolean(KEY_ALARM_BROADCAST, false);
+        mRemoveMatchingFilter = opts.getParcelable(KEY_REMOVE_MATCHING_FILTER,
+                IntentFilter.class);
     }
 
     /**
@@ -596,6 +616,29 @@ public class BroadcastOptions extends ComponentOptions {
     }
 
     /**
+     * When enqueuing this broadcast, remove all pending broadcasts previously
+     * sent by this app which match the given filter.
+     * <p>
+     * For example, sending {@link Intent#ACTION_SCREEN_ON} would typically want
+     * to remove any pending {@link Intent#ACTION_SCREEN_OFF} broadcasts.
+     *
+     * @hide
+     */
+    public void setRemoveMatchingFilter(@NonNull IntentFilter removeMatchingFilter) {
+        mRemoveMatchingFilter = Objects.requireNonNull(removeMatchingFilter);
+    }
+
+    /** @hide */
+    public void clearRemoveMatchingFilter() {
+        mRemoveMatchingFilter = null;
+    }
+
+    /** @hide */
+    public @Nullable IntentFilter getRemoveMatchingFilter() {
+        return mRemoveMatchingFilter;
+    }
+
+    /**
      * Returns the created options as a Bundle, which can be passed to
      * {@link android.content.Context#sendBroadcast(android.content.Intent)
      * Context.sendBroadcast(Intent)} and related methods.
@@ -639,6 +682,9 @@ public class BroadcastOptions extends ComponentOptions {
         }
         if (mIdForResponseEvent != 0) {
             b.putLong(KEY_ID_FOR_RESPONSE_EVENT, mIdForResponseEvent);
+        }
+        if (mRemoveMatchingFilter != null) {
+            b.putParcelable(KEY_REMOVE_MATCHING_FILTER, mRemoveMatchingFilter);
         }
         return b.isEmpty() ? null : b;
     }

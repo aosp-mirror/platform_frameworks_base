@@ -22,9 +22,12 @@ import static com.android.server.health.Utils.copyV1Battery;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
+import android.app.AppOpsManager;
+import android.app.BroadcastOptions;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.ContentObserver;
 import android.hardware.health.HealthInfo;
 import android.hardware.health.V2_1.BatteryCapacityLevel;
@@ -184,6 +187,17 @@ public final class BatteryService extends SystemService {
     private BatteryPropertiesRegistrar mBatteryPropertiesRegistrar;
     private ArrayDeque<Bundle> mBatteryLevelsEventQueue;
     private long mLastBatteryLevelChangedSentMs;
+
+    private Bundle mBatteryChangedOptions = BroadcastOptions.makeRemovingMatchingFilter(
+            new IntentFilter(Intent.ACTION_BATTERY_CHANGED)).toBundle();
+    private Bundle mPowerConnectedOptions = BroadcastOptions.makeRemovingMatchingFilter(
+            new IntentFilter(Intent.ACTION_POWER_DISCONNECTED)).toBundle();
+    private Bundle mPowerDisconnectedOptions = BroadcastOptions.makeRemovingMatchingFilter(
+            new IntentFilter(Intent.ACTION_POWER_CONNECTED)).toBundle();
+    private Bundle mBatteryLowOptions = BroadcastOptions.makeRemovingMatchingFilter(
+            new IntentFilter(Intent.ACTION_BATTERY_OKAY)).toBundle();
+    private Bundle mBatteryOkayOptions = BroadcastOptions.makeRemovingMatchingFilter(
+            new IntentFilter(Intent.ACTION_BATTERY_LOW)).toBundle();
 
     private MetricsLogger mMetricsLogger;
 
@@ -606,7 +620,8 @@ public final class BatteryService extends SystemService {
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        mContext.sendBroadcastAsUser(statusIntent, UserHandle.ALL);
+                        mContext.sendBroadcastAsUser(statusIntent, UserHandle.ALL, null,
+                                mPowerConnectedOptions);
                     }
                 });
             }
@@ -617,7 +632,8 @@ public final class BatteryService extends SystemService {
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        mContext.sendBroadcastAsUser(statusIntent, UserHandle.ALL);
+                        mContext.sendBroadcastAsUser(statusIntent, UserHandle.ALL, null,
+                                mPowerDisconnectedOptions);
                     }
                 });
             }
@@ -630,7 +646,8 @@ public final class BatteryService extends SystemService {
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        mContext.sendBroadcastAsUser(statusIntent, UserHandle.ALL);
+                        mContext.sendBroadcastAsUser(statusIntent, UserHandle.ALL, null,
+                                mBatteryLowOptions);
                     }
                 });
             } else if (mSentLowBatteryBroadcast &&
@@ -642,7 +659,8 @@ public final class BatteryService extends SystemService {
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        mContext.sendBroadcastAsUser(statusIntent, UserHandle.ALL);
+                        mContext.sendBroadcastAsUser(statusIntent, UserHandle.ALL, null,
+                                mBatteryOkayOptions);
                     }
                 });
             }
@@ -712,7 +730,8 @@ public final class BatteryService extends SystemService {
                     + ", info:" + mHealthInfo.toString());
         }
 
-        mHandler.post(() -> ActivityManager.broadcastStickyIntent(intent, UserHandle.USER_ALL));
+        mHandler.post(() -> ActivityManager.broadcastStickyIntent(intent, AppOpsManager.OP_NONE,
+                mBatteryChangedOptions, UserHandle.USER_ALL));
     }
 
     private void sendBatteryLevelChangedIntentLocked() {

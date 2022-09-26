@@ -17,6 +17,7 @@
 package com.android.server.am;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.Overridable;
@@ -24,6 +25,8 @@ import android.content.ContentResolver;
 import android.database.ContentObserver;
 import android.os.Build;
 import android.os.Handler;
+import android.os.HandlerExecutor;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.util.KeyValueListParser;
 import android.util.Slog;
@@ -38,6 +41,9 @@ import java.lang.annotation.RetentionPolicy;
  */
 public class BroadcastConstants {
     private static final String TAG = "BroadcastConstants";
+
+    // TODO: migrate remaining constants to be loaded from DeviceConfig
+    // TODO: migrate fg/bg values into single constants instance
 
     // Value element names within the Settings record
     static final String KEY_TIMEOUT = "bcast_timeout";
@@ -115,6 +121,35 @@ public class BroadcastConstants {
     // started its process can start a background activity.
     public long ALLOW_BG_ACTIVITY_START_TIMEOUT = DEFAULT_ALLOW_BG_ACTIVITY_START_TIMEOUT;
 
+    /**
+     * For {@link BroadcastQueueModernImpl}: Maximum number of process queues to
+     * dispatch broadcasts to simultaneously.
+     */
+    public int MAX_RUNNING_PROCESS_QUEUES = DEFAULT_MAX_RUNNING_PROCESS_QUEUES;
+    private static final int DEFAULT_MAX_RUNNING_PROCESS_QUEUES = 4;
+
+    /**
+     * For {@link BroadcastQueueModernImpl}: Maximum number of active broadcasts
+     * to dispatch to a "running" process queue before we retire them back to
+     * being "runnable" to give other processes a chance to run.
+     */
+    public int MAX_RUNNING_ACTIVE_BROADCASTS = DEFAULT_MAX_RUNNING_ACTIVE_BROADCASTS;
+    private static final int DEFAULT_MAX_RUNNING_ACTIVE_BROADCASTS = 16;
+
+    /**
+     * For {@link BroadcastQueueModernImpl}: Default delay to apply to normal
+     * broadcasts, giving a chance for debouncing of rapidly changing events.
+     */
+    public long DELAY_NORMAL_MILLIS = DEFAULT_DELAY_NORMAL_MILLIS;
+    private static final long DEFAULT_DELAY_NORMAL_MILLIS = 10_000 * Build.HW_TIMEOUT_MULTIPLIER;
+
+    /**
+     * For {@link BroadcastQueueModernImpl}: Default delay to apply to
+     * broadcasts targeting cached applications.
+     */
+    public long DELAY_CACHED_MILLIS = DEFAULT_DELAY_CACHED_MILLIS;
+    private static final long DEFAULT_DELAY_CACHED_MILLIS = 30_000 * Build.HW_TIMEOUT_MULTIPLIER;
+
     // Settings override tracking for this instance
     private String mSettingsKey;
     private SettingsObserver mSettingsObserver;
@@ -128,7 +163,7 @@ public class BroadcastConstants {
 
         @Override
         public void onChange(boolean selfChange) {
-            updateConstants();
+            updateSettingsConstants();
         }
     }
 
@@ -148,11 +183,15 @@ public class BroadcastConstants {
         mSettingsObserver = new SettingsObserver(handler);
         mResolver.registerContentObserver(Settings.Global.getUriFor(mSettingsKey),
                 false, mSettingsObserver);
+        updateSettingsConstants();
 
-        updateConstants();
+        DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                new HandlerExecutor(handler), this::updateDeviceConfigConstants);
+        updateDeviceConfigConstants(
+                DeviceConfig.getProperties(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER));
     }
 
-    private void updateConstants() {
+    private void updateSettingsConstants() {
         synchronized (mParser) {
             try {
                 mParser.setString(Settings.Global.getString(mResolver, mSettingsKey));
@@ -171,6 +210,17 @@ public class BroadcastConstants {
             ALLOW_BG_ACTIVITY_START_TIMEOUT = mParser.getLong(KEY_ALLOW_BG_ACTIVITY_START_TIMEOUT,
                     ALLOW_BG_ACTIVITY_START_TIMEOUT);
         }
+    }
+
+    private void updateDeviceConfigConstants(@NonNull DeviceConfig.Properties properties) {
+        MAX_RUNNING_PROCESS_QUEUES = properties.getInt("bcast_max_running_process_queues",
+                DEFAULT_MAX_RUNNING_PROCESS_QUEUES);
+        MAX_RUNNING_ACTIVE_BROADCASTS = properties.getInt("bcast_max_running_active_broadcasts",
+                DEFAULT_MAX_RUNNING_ACTIVE_BROADCASTS);
+        DELAY_NORMAL_MILLIS = properties.getLong("bcast_delay_normal_millis",
+                DEFAULT_DELAY_NORMAL_MILLIS);
+        DELAY_CACHED_MILLIS = properties.getLong("bcast_delay_cached_millis",
+                DEFAULT_DELAY_CACHED_MILLIS);
     }
 
     /**

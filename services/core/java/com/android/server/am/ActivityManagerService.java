@@ -4515,7 +4515,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         // Clean-up disabled broadcast receivers.
         for (int i = mBroadcastQueues.length - 1; i >= 0; i--) {
             mBroadcastQueues[i].cleanupDisabledPackageReceiversLocked(
-                    packageName, disabledClasses, userId, true);
+                    packageName, disabledClasses, userId);
         }
 
     }
@@ -4524,7 +4524,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         boolean didSomething = false;
         for (int i = mBroadcastQueues.length - 1; i >= 0; i--) {
             didSomething |= mBroadcastQueues[i].cleanupDisabledPackageReceiversLocked(
-                    null, null, userId, true);
+                    null, null, userId);
         }
         return didSomething;
     }
@@ -4660,7 +4660,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (doit) {
             for (i = mBroadcastQueues.length - 1; i >= 0; i--) {
                 didSomething |= mBroadcastQueues[i].cleanupDisabledPackageReceiversLocked(
-                        packageName, null, userId, doit);
+                        packageName, null, userId);
             }
         }
 
@@ -17355,6 +17355,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     bOptions.setTemporaryAppAllowlist(mInternal.getBootTimeTempAllowListDuration(),
                             TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
                             PowerExemptionManager.REASON_LOCALE_CHANGED, "");
+                    bOptions.setRemoveMatchingFilter(
+                            new IntentFilter(Intent.ACTION_LOCALE_CHANGED));
                     broadcastIntentLocked(null, null, null, intent, null, null, 0, null, null, null,
                             null, null, OP_NONE, bOptions.toBundle(), false, false, MY_PID,
                             SYSTEM_UID, Binder.getCallingUid(), Binder.getCallingPid(),

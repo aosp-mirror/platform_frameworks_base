@@ -20,10 +20,12 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
+import android.app.BroadcastOptions;
 import android.app.trust.TrustManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.input.InputManagerInternal;
 import android.media.AudioManager;
@@ -32,6 +34,7 @@ import android.media.RingtoneManager;
 import android.metrics.LogMaker;
 import android.net.Uri;
 import android.os.BatteryStats;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IWakeLockCallback;
 import android.os.Looper;
@@ -137,7 +140,9 @@ public class Notifier {
     private final NotifierHandler mHandler;
     private final Executor mBackgroundExecutor;
     private final Intent mScreenOnIntent;
+    private final Bundle mScreenOnOptions;
     private final Intent mScreenOffIntent;
+    private final Bundle mScreenOffOptions;
 
     // True if the device should suspend when the screen is off due to proximity.
     private final boolean mSuspendWhenScreenOffDueToProximityConfig;
@@ -199,10 +204,14 @@ public class Notifier {
         mScreenOnIntent.addFlags(
                 Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND
                 | Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS);
+        mScreenOnOptions = BroadcastOptions.makeRemovingMatchingFilter(
+                new IntentFilter(Intent.ACTION_SCREEN_OFF)).toBundle();
         mScreenOffIntent = new Intent(Intent.ACTION_SCREEN_OFF);
         mScreenOffIntent.addFlags(
                 Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND
                 | Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS);
+        mScreenOffOptions = BroadcastOptions.makeRemovingMatchingFilter(
+                new IntentFilter(Intent.ACTION_SCREEN_ON)).toBundle();
 
         mSuspendWhenScreenOffDueToProximityConfig = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_suspendWhenScreenOffDueToProximity);
@@ -788,7 +797,8 @@ public class Notifier {
 
         if (mActivityManagerInternal.isSystemReady()) {
             mContext.sendOrderedBroadcastAsUser(mScreenOnIntent, UserHandle.ALL, null,
-                    mWakeUpBroadcastDone, mHandler, 0, null, null);
+                    AppOpsManager.OP_NONE, mScreenOnOptions, mWakeUpBroadcastDone, mHandler,
+                    0, null, null);
         } else {
             EventLog.writeEvent(EventLogTags.POWER_SCREEN_BROADCAST_STOP, 2, 1);
             sendNextBroadcast();
@@ -811,7 +821,8 @@ public class Notifier {
 
         if (mActivityManagerInternal.isSystemReady()) {
             mContext.sendOrderedBroadcastAsUser(mScreenOffIntent, UserHandle.ALL, null,
-                    mGoToSleepBroadcastDone, mHandler, 0, null, null);
+                    AppOpsManager.OP_NONE, mScreenOffOptions, mGoToSleepBroadcastDone, mHandler,
+                    0, null, null);
         } else {
             EventLog.writeEvent(EventLogTags.POWER_SCREEN_BROADCAST_STOP, 3, 1);
             sendNextBroadcast();
