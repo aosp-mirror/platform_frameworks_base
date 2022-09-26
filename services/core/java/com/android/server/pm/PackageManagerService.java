@@ -210,7 +210,6 @@ import com.android.server.pm.permission.LegacyPermissionManagerService;
 import com.android.server.pm.permission.PermissionManagerService;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.pm.pkg.AndroidPackage;
-import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.PackageUserState;
 import com.android.server.pm.pkg.PackageUserStateInternal;
@@ -223,7 +222,6 @@ import com.android.server.pm.pkg.mutate.PackageUserStateWrite;
 import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.server.pm.resolution.ComponentResolver;
 import com.android.server.pm.resolution.ComponentResolverApi;
-import com.android.server.pm.snapshot.PackageDataSnapshot;
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
 import com.android.server.pm.verify.domain.DomainVerificationService;
 import com.android.server.pm.verify.domain.proxy.DomainVerificationProxy;
@@ -5491,19 +5489,19 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 AndroidPackage pkg = packageState.getPkg();
                 if (pkg != null) {
                     // Cannot hide SDK libs as they are controlled by SDK manager.
-                    if (pkg.getSdkLibName() != null) {
+                    if (pkg.getSdkLibraryName() != null) {
                         Slog.w(TAG, "Cannot hide package: " + packageName
                                 + " providing SDK library: "
-                                + pkg.getSdkLibName());
+                                + pkg.getSdkLibraryName());
                         return false;
                     }
                     // Cannot hide static shared libs as they are considered
                     // a part of the using app (emulating static linking). Also
                     // static libs are installed always on internal storage.
-                    if (pkg.getStaticSharedLibName() != null) {
+                    if (pkg.getStaticSharedLibraryName() != null) {
                         Slog.w(TAG, "Cannot hide package: " + packageName
                                 + " providing static shared library: "
-                                + pkg.getStaticSharedLibName());
+                                + pkg.getStaticSharedLibraryName());
                         return false;
                     }
                 }
@@ -5546,17 +5544,17 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             if (packageState != null && packageState.getPkg() != null) {
                 AndroidPackage pkg = packageState.getPkg();
                 // Cannot block uninstall SDK libs as they are controlled by SDK manager.
-                if (pkg.getSdkLibName() != null) {
+                if (pkg.getSdkLibraryName() != null) {
                     Slog.w(PackageManagerService.TAG, "Cannot block uninstall of package: " + packageName
-                            + " providing SDK library: " + pkg.getSdkLibName());
+                            + " providing SDK library: " + pkg.getSdkLibraryName());
                     return false;
                 }
                 // Cannot block uninstall of static shared libs as they are
                 // considered a part of the using app (emulating static linking).
                 // Also static libs are installed always on internal storage.
-                if (pkg.getStaticSharedLibName() != null) {
+                if (pkg.getStaticSharedLibraryName() != null) {
                     Slog.w(PackageManagerService.TAG, "Cannot block uninstall of package: " + packageName
-                            + " providing static shared library: " + pkg.getStaticSharedLibName());
+                            + " providing static shared library: " + pkg.getStaticSharedLibraryName());
                     return false;
                 }
             }

@@ -95,8 +95,6 @@ class PackageStateTest {
             ParsedProvider::getUriPermissionPatterns,
             ParsedService::getIntents,
             ParsedService::getProperties,
-            SharedLibraryInfo::getAllCodePaths,
-            SharedLibraryInfo::getDependencies,
             Intent::getCategories,
             PackageUserState::getDisabledComponents,
             PackageUserState::getEnabledComponents,
@@ -149,6 +147,20 @@ class PackageStateTest {
      */
     private fun fillMissingData(pkgSetting: PackageSetting, pkg: PackageImpl) {
         pkgSetting.addUsesLibraryFile("usesLibraryFile")
+
+        val sharedLibraryDependency = listOf(SharedLibraryInfo(
+            "pathDependency",
+            "packageNameDependency",
+            listOf(tempFolder.newFile().path),
+            "nameDependency",
+            1,
+            0,
+            VersionedPackage("versionedPackage0Dependency", 1),
+            listOf(VersionedPackage("versionedPackage1Dependency", 2)),
+            emptyList(),
+            false
+        ))
+
         pkgSetting.addUsesLibraryInfo(SharedLibraryInfo(
             "path",
             "packageName",
@@ -158,7 +170,7 @@ class PackageStateTest {
             0,
             VersionedPackage("versionedPackage0", 1),
             listOf(VersionedPackage("versionedPackage1", 2)),
-            emptyList(),
+            sharedLibraryDependency,
             false
         ))
         pkgSetting.addMimeTypes("mimeGroup", setOf("mimeType"))
@@ -233,7 +245,13 @@ class PackageStateTest {
                     }
 
                     val value = try {
-                        collection.stream().findFirst().get()!!
+                        if (AndroidPackage::getSplits == it) {
+                            // The base split is defined to never have any dependencies,
+                            // so force the visitor to use the split at index 1 instead of 0.
+                            collection.last()
+                        } else {
+                            collection.first()
+                        }
                     } catch (e: Exception) {
                         if (enforceNonEmpty) {
                             expect.withMessage("Method $newChainText ${it.name} returns empty")

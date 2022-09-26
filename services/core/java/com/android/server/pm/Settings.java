@@ -4667,17 +4667,17 @@ public final class Settings implements Watchable, Snappable {
                             pw.println(libraryNames.get(i));
                 }
             }
-            if (pkg.getStaticSharedLibName() != null) {
+            if (pkg.getStaticSharedLibraryName() != null) {
                 pw.print(prefix); pw.println("  static library:");
                 pw.print(prefix); pw.print("    ");
-                pw.print("name:"); pw.print(pkg.getStaticSharedLibName());
+                pw.print("name:"); pw.print(pkg.getStaticSharedLibraryName());
                 pw.print(" version:"); pw.println(pkg.getStaticSharedLibVersion());
             }
 
-            if (pkg.getSdkLibName() != null) {
+            if (pkg.getSdkLibraryName() != null) {
                 pw.print(prefix); pw.println("  SDK library:");
                 pw.print(prefix); pw.print("    ");
-                pw.print("name:"); pw.print(pkg.getSdkLibName());
+                pw.print("name:"); pw.print(pkg.getSdkLibraryName());
                 pw.print(" versionMajor:"); pw.println(pkg.getSdkLibVersionMajor());
             }
 

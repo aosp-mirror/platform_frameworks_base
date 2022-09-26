@@ -386,7 +386,7 @@ class SharedLibrariesImplTest {
             pkg.setTargetSdkVersion(Build.VERSION_CODES.S)
             libraries?.forEach { pkg.addLibraryName(it) }
             staticLibrary?.let {
-                pkg.setStaticSharedLibName(it)
+                pkg.setStaticSharedLibraryName(it)
                 pkg.setStaticSharedLibVersion(staticLibraryVersion)
                 pkg.setStaticSharedLibrary(true)
             }
@@ -430,7 +430,7 @@ class SharedLibrariesImplTest {
             setTargetSdkVersion(Build.VERSION_CODES.S)
             libraries?.forEach { addLibraryName(it) }
             staticLibrary?.let {
-                setStaticSharedLibName(it)
+                setStaticSharedLibraryName(it)
                 setStaticSharedLibVersion(staticLibraryVersion)
                 setStaticSharedLibrary(true)
             }

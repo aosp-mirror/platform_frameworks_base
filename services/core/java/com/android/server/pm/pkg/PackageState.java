@@ -22,8 +22,8 @@ import android.annotation.Size;
 import android.annotation.UserIdInt;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.SharedLibraryInfo;
 import android.content.pm.SigningInfo;
+import android.os.UserHandle;
 import android.processor.immutability.Immutable;
 import android.util.SparseArray;
 
@@ -41,8 +41,6 @@ import java.util.Set;
 //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
 @Immutable
 public interface PackageState {
-
-    // Methods below this comment are not yet exposed as API
 
     /*
      * Until immutability or read-only caching is enabled, {@link PackageSetting} cannot be
@@ -83,11 +81,9 @@ public interface PackageState {
      * Re-attaching the storage device to make the APK available should allow the user to use the
      * app once the device reboots or otherwise re-scans it.
      * <p/>
-     * This can also occur in an device OTA situation where the package is no longer parseable on
-     * an updated SDK version, causing it to be rejectd, but the state associated with it retained,
+     * This can also occur in an device OTA situation where the package is no longer parsable on
+     * an updated SDK version, causing it to be rejected, but the state associated with it retained,
      * similarly to if the package had been uninstalled with the --keep-data option.
-     *
-     * @hide
      */
     @Nullable
     AndroidPackage getAndroidPackage();
@@ -95,10 +91,56 @@ public interface PackageState {
     /**
      * The non-user-specific UID, or the UID if the user ID is
      * {@link android.os.UserHandle#SYSTEM}.
-     *
-     * @hide
      */
     int getAppId();
+
+    /**
+     * @see AndroidPackage#getPackageName()
+     */
+    @NonNull
+    String getPackageName();
+
+    /**
+     * @see ApplicationInfo#primaryCpuAbi
+     */
+    @Nullable
+    String getPrimaryCpuAbi();
+
+    /**
+     * @see ApplicationInfo#secondaryCpuAbi
+     */
+    @Nullable
+    String getSecondaryCpuAbi();
+
+    /**
+     * @see AndroidPackage#isPrivileged()
+     */
+    boolean isPrivileged();
+
+    /**
+     * @see AndroidPackage#isSystem()
+     */
+    boolean isSystem();
+
+    /**
+     * Whether this app is on the /data partition having been upgraded from a preinstalled app on a
+     * system partition.
+     */
+    boolean isUpdatedSystemApp();
+
+    /**
+     * @return State for a user or {@link PackageUserState#DEFAULT} if the state doesn't exist.
+     */
+    @NonNull
+    PackageUserState getStateForUser(@NonNull UserHandle user);
+
+    /**
+     * @see R.styleable#AndroidManifestUsesLibrary
+     */
+    @NonNull
+    List<SharedLibrary> getUsesLibraries();
+
+    // Methods below this comment are not yet exposed as API
 
     /**
      * Value set through {@link PackageManager#setApplicationCategoryHint(String, int)}. Only
@@ -165,32 +207,11 @@ public interface PackageState {
     Map<String, Set<String>> getMimeGroups();
 
     /**
-     * @see AndroidPackage#getPackageName()
-     * @hide
-     */
-    @NonNull
-    String getPackageName();
-
-    /**
      * @see AndroidPackage#getPath()
      * @hide
      */
     @NonNull
     File getPath();
-
-    /**
-     * @see ApplicationInfo#primaryCpuAbi
-     * @hide
-     */
-    @Nullable
-    String getPrimaryCpuAbi();
-
-    /**
-     * @see ApplicationInfo#secondaryCpuAbi
-     * @hide
-     */
-    @Nullable
-    String getSecondaryCpuAbi();
 
     /**
      * Whether the package shares the same user ID as other packages
@@ -237,14 +258,6 @@ public interface PackageState {
      */
     @NonNull
     List<String> getUsesLibraryFiles();
-
-    /**
-     * @see R.styleable#AndroidManifestUsesLibrary
-     * @hide
-     */
-    @Immutable.Ignore
-    @NonNull
-    List<SharedLibraryInfo> getUsesLibraryInfos();
 
     /**
      * @see R.styleable#AndroidManifestUsesSdkLibrary
@@ -327,12 +340,6 @@ public interface PackageState {
     boolean isOem();
 
     /**
-     * @see AndroidPackage#isPrivileged()
-     * @hide
-     */
-    boolean isPrivileged();
-
-    /**
      * @see AndroidPackage#isProduct()
      * @hide
      */
@@ -345,12 +352,6 @@ public interface PackageState {
     boolean isRequiredForSystemUser();
 
     /**
-     * @see AndroidPackage#isSystem()
-     * @hide
-     */
-    boolean isSystem();
-
-    /**
      * @see AndroidPackage#isSystemExt()
      * @hide
      */
@@ -361,14 +362,6 @@ public interface PackageState {
      * @hide
      */
     boolean isUpdateAvailable();
-
-    /**
-     * Whether this app is on the /data partition having been upgraded from a preinstalled app on a
-     * system partition.
-     *
-     * @hide
-     */
-    boolean isUpdatedSystemApp();
 
     /**
      * Whether this app is packaged in an updated apex.

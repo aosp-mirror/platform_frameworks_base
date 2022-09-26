@@ -2161,7 +2161,7 @@ public class ComputerEngine implements Computer {
     }
 
     public final String resolveExternalPackageName(AndroidPackage pkg) {
-        if (pkg.getStaticSharedLibName() != null) {
+        if (pkg.getStaticSharedLibraryName() != null) {
             return pkg.getManifestPackageName();
         }
         return pkg.getPackageName();
@@ -2378,7 +2378,7 @@ public class ComputerEngine implements Computer {
         }
 
         final SharedLibraryInfo libraryInfo = getSharedLibraryInfo(
-                ps.getPkg().getStaticSharedLibName(), ps.getPkg().getStaticSharedLibVersion());
+                ps.getPkg().getStaticSharedLibraryName(), ps.getPkg().getStaticSharedLibVersion());
         if (libraryInfo == null) {
             return false;
         }
@@ -2434,7 +2434,7 @@ public class ComputerEngine implements Computer {
         }
 
         final SharedLibraryInfo libraryInfo = getSharedLibraryInfo(
-                ps.getPkg().getSdkLibName(), ps.getPkg().getSdkLibVersionMajor());
+                ps.getPkg().getSdkLibraryName(), ps.getPkg().getSdkLibVersionMajor());
         if (libraryInfo == null) {
             return false;
         }
