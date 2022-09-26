@@ -34,12 +34,9 @@ import static android.app.AppOpsManager.UID_STATE_TOP;
 import static com.android.server.appop.AppOpsUidStateTracker.processStateToUidState;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
@@ -49,25 +46,22 @@ import static org.mockito.Mockito.verify;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
-import android.os.Handler;
-import android.os.Message;
 import android.util.SparseArray;
 
 import com.android.dx.mockito.inline.extended.ExtendedMockito;
 import com.android.dx.mockito.inline.extended.StaticMockitoSession;
 import com.android.internal.os.Clock;
 import com.android.server.appop.AppOpsUidStateTracker.UidStateChangedCallback;
+import com.android.server.appop.AppOpsUidStateTrackerImpl.DelayableExecutor;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.quality.Strictness;
 
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.PriorityQueue;
 
 public class AppOpsUidStateTrackerTest {
 
@@ -81,12 +75,11 @@ public class AppOpsUidStateTrackerTest {
     ActivityManagerInternal mAmi;
 
     @Mock
-    Handler mHandler;
-
-    @Mock
     AppOpsService.Constants mConstants;
 
-    AppOpsUidStateTrackerTestClock mClock = new AppOpsUidStateTrackerTestClock();
+    AppOpsUidStateTrackerTestExecutor mExecutor = new AppOpsUidStateTrackerTestExecutor();
+
+    AppOpsUidStateTrackerTestClock mClock = new AppOpsUidStateTrackerTestClock(mExecutor);
 
     AppOpsUidStateTracker mIntf;
 
@@ -101,7 +94,8 @@ public class AppOpsUidStateTrackerTest {
         mConstants.TOP_STATE_SETTLE_TIME = 10 * 1000L;
         mConstants.FG_SERVICE_STATE_SETTLE_TIME = 5 * 1000L;
         mConstants.BG_STATE_SETTLE_TIME = 1 * 1000L;
-        mIntf = new AppOpsUidStateTrackerImpl(mAmi, mHandler, mClock, mConstants);
+        mIntf = new AppOpsUidStateTrackerImpl(mAmi, mExecutor, mClock, mConstants,
+                Thread.currentThread());
     }
 
     @After
@@ -263,18 +257,10 @@ public class AppOpsUidStateTrackerTest {
         // Still in foreground due to settle time
         assertForeground(UID);
 
-        AtomicReference<Message> messageAtomicReference = new AtomicReference<>();
-        AtomicLong delayAtomicReference = new AtomicLong();
+        mClock.advanceTime(mConstants.TOP_STATE_SETTLE_TIME - 1);
+        assertForeground(UID);
 
-        getPostDelayedMessageArguments(messageAtomicReference, delayAtomicReference);
-        Message message = messageAtomicReference.get();
-        long delay = delayAtomicReference.get();
-
-        assertNotNull(message);
-        assertEquals(mConstants.TOP_STATE_SETTLE_TIME + 1, delay);
-
-        mClock.advanceTime(mConstants.TOP_STATE_SETTLE_TIME + 1);
-        message.getCallback().run();
+        mClock.advanceTime(1);
         assertBackground(UID);
     }
 
@@ -291,18 +277,10 @@ public class AppOpsUidStateTrackerTest {
         // Still in foreground due to settle time
         assertForeground(UID);
 
-        AtomicReference<Message> messageAtomicReference = new AtomicReference<>();
-        AtomicLong delayAtomicReference = new AtomicLong();
+        mClock.advanceTime(mConstants.FG_SERVICE_STATE_SETTLE_TIME - 1);
+        assertForeground(UID);
 
-        getPostDelayedMessageArguments(messageAtomicReference, delayAtomicReference);
-        Message message = messageAtomicReference.get();
-        long delay = delayAtomicReference.get();
-
-        assertNotNull(message);
-        assertEquals(mConstants.FG_SERVICE_STATE_SETTLE_TIME + 1, delay);
-
-        mClock.advanceTime(mConstants.FG_SERVICE_STATE_SETTLE_TIME + 1);
-        message.getCallback().run();
+        mClock.advanceTime(1);
         assertBackground(UID);
     }
 
@@ -319,14 +297,8 @@ public class AppOpsUidStateTrackerTest {
         // Still in foreground due to settle time
         assertForeground(UID);
 
-        AtomicReference<Message> messageAtomicReference = new AtomicReference<>();
-
-        getPostDelayedMessageArguments(messageAtomicReference, null);
-        Message message = messageAtomicReference.get();
-
         // 1 ms short of settle time
         mClock.advanceTime(mConstants.FG_SERVICE_STATE_SETTLE_TIME - 1);
-        message.getCallback().run();
         assertForeground(UID);
     }
 
@@ -471,8 +443,6 @@ public class AppOpsUidStateTrackerTest {
                 .topState()
                 .update();
 
-        getLatestPostMessageArgument().getCallback().run();
-
         verify(cb).onUidStateChanged(eq(UID), eq(UID_STATE_TOP), eq(true));
     }
 
@@ -483,8 +453,6 @@ public class AppOpsUidStateTrackerTest {
         procStateBuilder(UID)
                 .foregroundServiceState()
                 .update();
-
-        getLatestPostMessageArgument().getCallback().run();
 
         verify(cb).onUidStateChanged(eq(UID), eq(UID_STATE_FOREGROUND_SERVICE), eq(true));
     }
@@ -497,8 +465,6 @@ public class AppOpsUidStateTrackerTest {
                 .foregroundState()
                 .update();
 
-        getLatestPostMessageArgument().getCallback().run();
-
         verify(cb).onUidStateChanged(eq(UID), eq(UID_STATE_FOREGROUND), eq(true));
     }
 
@@ -509,8 +475,6 @@ public class AppOpsUidStateTrackerTest {
         procStateBuilder(UID)
                 .backgroundState()
                 .update();
-
-        getLatestPostMessageArgument().getCallback().run();
 
         verify(cb).onUidStateChanged(eq(UID), eq(UID_STATE_BACKGROUND), eq(false));
     }
@@ -679,7 +643,6 @@ public class AppOpsUidStateTrackerTest {
                 .nonExistentState()
                 .update();
 
-        verify(mHandler, never()).post(any());
         verify(cb, never()).onUidStateChanged(anyInt(), anyInt(), anyBoolean());
     }
 
@@ -695,7 +658,6 @@ public class AppOpsUidStateTrackerTest {
                 .nonExistentState()
                 .update();
 
-        getLatestPostMessageArgument().getCallback().run();
         verify(cb, atLeastOnce()).onUidStateChanged(eq(UID), eq(UID_STATE_CACHED), eq(false));
     }
 
@@ -711,7 +673,6 @@ public class AppOpsUidStateTrackerTest {
                 .nonExistentState()
                 .update();
 
-        getLatestPostMessageArgument().getCallback().run();
         verify(cb, atLeastOnce()).onUidStateChanged(eq(UID), eq(UID_STATE_CACHED), eq(true));
     }
 
@@ -727,7 +688,6 @@ public class AppOpsUidStateTrackerTest {
                 .nonExistentState()
                 .update();
 
-        getLatestPostMessageArgument().getCallback().run();
         verify(cb, atLeastOnce()).onUidStateChanged(eq(UID), eq(UID_STATE_CACHED), eq(true));
     }
 
@@ -743,8 +703,30 @@ public class AppOpsUidStateTrackerTest {
                 .nonExistentState()
                 .update();
 
-        getLatestPostMessageArgument().getCallback().run();
         verify(cb, atLeastOnce()).onUidStateChanged(eq(UID), eq(UID_STATE_CACHED), eq(true));
+    }
+
+    @Test
+    public void testUidStateChangedBackgroundThenForegroundImmediately() {
+        procStateBuilder(UID)
+            .topState()
+            .update();
+
+        UidStateChangedCallback cb = addUidStateChangeCallback();
+
+        procStateBuilder(UID)
+            .backgroundState()
+            .update();
+
+        mClock.advanceTime(mConstants.TOP_STATE_SETTLE_TIME - 1);
+
+        procStateBuilder(UID)
+            .topState()
+            .update();
+
+        mClock.advanceTime(1);
+
+        verify(cb, never()).onUidStateChanged(anyInt(), anyInt(), anyBoolean());
     }
 
     public void testUidStateChangedCallback(int initialState, int finalState) {
@@ -767,13 +749,9 @@ public class AppOpsUidStateTrackerTest {
                 .update();
 
         if (finalUidStateIsBackgroundAndLessImportant) {
-            AtomicReference<Message> delayedMessage = new AtomicReference<>();
-            getPostDelayedMessageArguments(delayedMessage, new AtomicLong());
             mClock.advanceTime(mConstants.TOP_STATE_SETTLE_TIME + 1);
-            delayedMessage.get().getCallback().run();
         }
 
-        getLatestPostMessageArgument().getCallback().run();
         verify(cb, atLeastOnce())
                 .onUidStateChanged(eq(UID), eq(finalUidState), eq(foregroundChange));
     }
@@ -781,7 +759,7 @@ public class AppOpsUidStateTrackerTest {
     private UidStateChangedCallback addUidStateChangeCallback() {
         UidStateChangedCallback cb =
                 Mockito.mock(UidStateChangedCallback.class);
-        mIntf.addUidStateChangedCallback(mHandler, cb);
+        mIntf.addUidStateChangedCallback(r -> r.run(), cb);
         return cb;
     }
 
@@ -793,30 +771,6 @@ public class AppOpsUidStateTrackerTest {
     /* If testBackgroundNotCapabilitiesTracked fails, this assertion is probably incorrect */
     private void assertBackground(int uid) {
         assertEquals(MODE_IGNORED, mIntf.evalMode(uid, OP_NO_CAPABILITIES, MODE_FOREGROUND));
-    }
-
-    private void getPostDelayedMessageArguments(AtomicReference<Message> message,
-            AtomicLong delay) {
-
-        ArgumentCaptor<Message> messageCaptor = ArgumentCaptor.forClass(Message.class);
-        ArgumentCaptor<Long> delayCaptor = ArgumentCaptor.forClass(Long.class);
-
-        verify(mHandler).sendMessageDelayed(messageCaptor.capture(), delayCaptor.capture());
-
-        if (message != null) {
-            message.set(messageCaptor.getValue());
-        }
-        if (delay != null) {
-            delay.set(delayCaptor.getValue());
-        }
-    }
-
-    private Message getLatestPostMessageArgument() {
-        ArgumentCaptor<Message> messageCaptor = ArgumentCaptor.forClass(Message.class);
-
-        verify(mHandler, atLeast(1)).sendMessage(messageCaptor.capture());
-
-        return messageCaptor.getValue();
     }
 
     private UidProcStateUpdateBuilder procStateBuilder(int uid) {
@@ -896,7 +850,13 @@ public class AppOpsUidStateTrackerTest {
 
     private static class AppOpsUidStateTrackerTestClock extends Clock {
 
+        private AppOpsUidStateTrackerTestExecutor mExecutor;
         long mElapsedRealTime = 0x5f3759df;
+
+        AppOpsUidStateTrackerTestClock(AppOpsUidStateTrackerTestExecutor executor) {
+            mExecutor = executor;
+            executor.setUptime(mElapsedRealTime);
+        }
 
         @Override
         public long elapsedRealtime() {
@@ -905,6 +865,53 @@ public class AppOpsUidStateTrackerTest {
 
         void advanceTime(long time) {
             mElapsedRealTime += time;
+            mExecutor.setUptime(mElapsedRealTime); // assume uptime == elapsedtime
+        }
+    }
+
+    private static class AppOpsUidStateTrackerTestExecutor implements DelayableExecutor {
+
+        private static class QueueElement implements Comparable<QueueElement> {
+
+            private long mExecutionTime;
+            private Runnable mRunnable;
+
+            private QueueElement(long executionTime, Runnable runnable) {
+                mExecutionTime = executionTime;
+                mRunnable = runnable;
+            }
+
+            @Override
+            public int compareTo(QueueElement queueElement) {
+                return Long.compare(mExecutionTime, queueElement.mExecutionTime);
+            }
+        }
+
+        private long mUptime = 0;
+
+        private PriorityQueue<QueueElement> mDelayedMessages = new PriorityQueue();
+
+        @Override
+        public void execute(Runnable runnable) {
+            runnable.run();
+        }
+
+        @Override
+        public void executeDelayed(Runnable runnable, long delay) {
+            if (delay <= 0) {
+                execute(runnable);
+            }
+
+            mDelayedMessages.add(new QueueElement(mUptime + delay, runnable));
+        }
+
+        private void setUptime(long uptime) {
+            while (!mDelayedMessages.isEmpty()
+                    && mDelayedMessages.peek().mExecutionTime <= uptime) {
+                mDelayedMessages.poll().mRunnable.run();
+            }
+
+            mUptime = uptime;
         }
     }
 }
