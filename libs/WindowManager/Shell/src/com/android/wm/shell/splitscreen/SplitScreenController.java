@@ -385,6 +385,9 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
             }
             @Override
             public void onAnimationCancelled(boolean isKeyguardOccluded) {
+                final WindowContainerTransaction evictWct = new WindowContainerTransaction();
+                mStageCoordinator.prepareEvictInvisibleChildTasks(evictWct);
+                mSyncQueue.queue(evictWct);
             }
         };
         options = mStageCoordinator.resolveStartStage(STAGE_TYPE_UNDEFINED, position, options,
@@ -472,8 +475,16 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         fillInIntent.addFlags(FLAG_ACTIVITY_NO_USER_ACTION);
 
         // Flag with MULTIPLE_TASK if this is launching the same activity into both sides of the
-        // split.
+        // split and there is no reusable background task.
         if (shouldAddMultipleTaskFlag(intent.getIntent(), position)) {
+            final ActivityManager.RecentTaskInfo taskInfo = mRecentTasksOptional.isPresent()
+                    ? mRecentTasksOptional.get().findTaskInBackground(
+                            intent.getIntent().getComponent())
+                    : null;
+            if (taskInfo != null) {
+                startTask(taskInfo.taskId, position, options);
+                return;
+            }
             fillInIntent.addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN, "Adding MULTIPLE_TASK");
         }
