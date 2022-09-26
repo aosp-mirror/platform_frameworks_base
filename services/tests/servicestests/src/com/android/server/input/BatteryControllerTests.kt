@@ -36,6 +36,7 @@ import androidx.test.InstrumentationRegistry
 import com.android.server.input.BatteryController.POLLING_PERIOD_MILLIS
 import com.android.server.input.BatteryController.UEventManager
 import com.android.server.input.BatteryController.UEventManager.UEventBatteryListener
+import com.android.server.input.BatteryController.USI_BATTERY_VALIDITY_DURATION_MILLIS
 import org.hamcrest.Description
 import org.hamcrest.Matcher
 import org.hamcrest.MatcherAssert.assertThat
@@ -528,10 +529,109 @@ class BatteryControllerTests {
             matchesState(USI_DEVICE_ID, status = STATUS_DISCHARGING, capacity = 0.64f))
 
         // The battery is no longer present after the timeout expires.
-        testLooper.moveTimeForward(BatteryController.USI_BATTERY_VALIDITY_DURATION_MILLIS - 1)
+        testLooper.moveTimeForward(USI_BATTERY_VALIDITY_DURATION_MILLIS - 1)
         testLooper.dispatchNext()
         listener.verifyNotified(isInvalidBatteryState(USI_DEVICE_ID), times(2))
         assertThat("battery state matches", batteryController.getBatteryState(USI_DEVICE_ID),
             isInvalidBatteryState(USI_DEVICE_ID))
+    }
+
+    @Test
+    fun testStylusPresenceExtendsValidUsiBatteryState() {
+        `when`(native.getBatteryDevicePath(USI_DEVICE_ID)).thenReturn("/sys/dev/usi_device")
+        `when`(native.getBatteryStatus(USI_DEVICE_ID)).thenReturn(STATUS_DISCHARGING)
+        `when`(native.getBatteryCapacity(USI_DEVICE_ID)).thenReturn(78)
+
+        addInputDevice(USI_DEVICE_ID, supportsUsi = true)
+        testLooper.dispatchNext()
+        val uEventListener = ArgumentCaptor.forClass(UEventBatteryListener::class.java)
+        verify(uEventManager)
+            .addListener(uEventListener.capture(), eq("DEVPATH=/dev/usi_device"))
+
+        // There is a UEvent signaling a battery change. The battery state is now valid.
+        uEventListener.value!!.onBatteryUEvent(TIMESTAMP)
+        val listener = createMockListener()
+        batteryController.registerBatteryListener(USI_DEVICE_ID, listener, PID)
+        listener.verifyNotified(USI_DEVICE_ID, status = STATUS_DISCHARGING, capacity = 0.78f)
+        assertThat("battery state matches", batteryController.getBatteryState(USI_DEVICE_ID),
+            matchesState(USI_DEVICE_ID, status = STATUS_DISCHARGING, capacity = 0.78f))
+
+        // Stylus presence is detected before the validity timeout expires.
+        testLooper.moveTimeForward(100)
+        testLooper.dispatchAll()
+        batteryController.notifyStylusGestureStarted(USI_DEVICE_ID, TIMESTAMP)
+
+        // Ensure that timeout was extended, and the battery state is now valid for longer.
+        testLooper.moveTimeForward(USI_BATTERY_VALIDITY_DURATION_MILLIS - 100)
+        testLooper.dispatchAll()
+        assertThat("battery state matches", batteryController.getBatteryState(USI_DEVICE_ID),
+            matchesState(USI_DEVICE_ID, status = STATUS_DISCHARGING, capacity = 0.78f))
+
+        // Ensure the validity period expires after the expected amount of time.
+        testLooper.moveTimeForward(100)
+        testLooper.dispatchNext()
+        listener.verifyNotified(isInvalidBatteryState(USI_DEVICE_ID))
+        assertThat("battery state matches", batteryController.getBatteryState(USI_DEVICE_ID),
+            isInvalidBatteryState(USI_DEVICE_ID))
+    }
+
+    @Test
+    fun testStylusPresenceMakesUsiBatteryStateValid() {
+        `when`(native.getBatteryDevicePath(USI_DEVICE_ID)).thenReturn("/sys/dev/usi_device")
+        `when`(native.getBatteryStatus(USI_DEVICE_ID)).thenReturn(STATUS_DISCHARGING)
+        `when`(native.getBatteryCapacity(USI_DEVICE_ID)).thenReturn(78)
+
+        addInputDevice(USI_DEVICE_ID, supportsUsi = true)
+        testLooper.dispatchNext()
+        val uEventListener = ArgumentCaptor.forClass(UEventBatteryListener::class.java)
+        verify(uEventManager)
+            .addListener(uEventListener.capture(), eq("DEVPATH=/dev/usi_device"))
+
+        // The USI battery state is initially invalid.
+        val listener = createMockListener()
+        batteryController.registerBatteryListener(USI_DEVICE_ID, listener, PID)
+        listener.verifyNotified(isInvalidBatteryState(USI_DEVICE_ID))
+        assertThat("battery state matches", batteryController.getBatteryState(USI_DEVICE_ID),
+            isInvalidBatteryState(USI_DEVICE_ID))
+
+        // A stylus presence is detected. This validates the battery state.
+        batteryController.notifyStylusGestureStarted(USI_DEVICE_ID, TIMESTAMP)
+
+        listener.verifyNotified(USI_DEVICE_ID, status = STATUS_DISCHARGING, capacity = 0.78f)
+        assertThat("battery state matches", batteryController.getBatteryState(USI_DEVICE_ID),
+            matchesState(USI_DEVICE_ID, status = STATUS_DISCHARGING, capacity = 0.78f))
+    }
+
+    @Test
+    fun testStylusPresenceDoesNotMakeUsiBatteryStateValidAtBoot() {
+        `when`(native.getBatteryDevicePath(USI_DEVICE_ID)).thenReturn("/sys/dev/usi_device")
+        // At boot, the USI device always reports a capacity value of 0.
+        `when`(native.getBatteryStatus(USI_DEVICE_ID)).thenReturn(STATUS_UNKNOWN)
+        `when`(native.getBatteryCapacity(USI_DEVICE_ID)).thenReturn(0)
+
+        addInputDevice(USI_DEVICE_ID, supportsUsi = true)
+        testLooper.dispatchNext()
+        val uEventListener = ArgumentCaptor.forClass(UEventBatteryListener::class.java)
+        verify(uEventManager)
+            .addListener(uEventListener.capture(), eq("DEVPATH=/dev/usi_device"))
+
+        // The USI battery state is initially invalid.
+        val listener = createMockListener()
+        batteryController.registerBatteryListener(USI_DEVICE_ID, listener, PID)
+        listener.verifyNotified(isInvalidBatteryState(USI_DEVICE_ID))
+        assertThat("battery state matches", batteryController.getBatteryState(USI_DEVICE_ID),
+            isInvalidBatteryState(USI_DEVICE_ID))
+
+        // Since the capacity reported is 0, stylus presence does not validate the battery state.
+        batteryController.notifyStylusGestureStarted(USI_DEVICE_ID, TIMESTAMP)
+
+        assertThat("battery state matches", batteryController.getBatteryState(USI_DEVICE_ID),
+            isInvalidBatteryState(USI_DEVICE_ID))
+
+        // However, if a UEvent reports a battery capacity of 0, the battery state is now valid.
+        uEventListener.value!!.onBatteryUEvent(TIMESTAMP)
+        listener.verifyNotified(USI_DEVICE_ID, status = STATUS_UNKNOWN, capacity = 0f)
+        assertThat("battery state matches", batteryController.getBatteryState(USI_DEVICE_ID),
+            matchesState(USI_DEVICE_ID, status = STATUS_UNKNOWN, capacity = 0f))
     }
 }

@@ -3055,6 +3055,7 @@ public class InputManagerService extends IInputManager.Stub
     // Native callback.
     @SuppressWarnings("unused")
     private void notifyStylusGestureStarted(int deviceId, long eventTime) {
+        mBatteryController.notifyStylusGestureStarted(deviceId, eventTime);
     }
 
     /**
