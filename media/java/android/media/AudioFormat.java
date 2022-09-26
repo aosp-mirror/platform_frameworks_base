@@ -516,6 +516,9 @@ public final class AudioFormat implements Parcelable {
     /** Output channel mask for 5.1 */
     public static final int CHANNEL_OUT_5POINT1 = (CHANNEL_OUT_FRONT_LEFT | CHANNEL_OUT_FRONT_RIGHT |
             CHANNEL_OUT_FRONT_CENTER | CHANNEL_OUT_LOW_FREQUENCY | CHANNEL_OUT_BACK_LEFT | CHANNEL_OUT_BACK_RIGHT);
+    /** Output channel mask for 6.1
+     *  Same as 5.1 with the addition of the back center channel */
+    public static final int CHANNEL_OUT_6POINT1 = (CHANNEL_OUT_5POINT1 | CHANNEL_OUT_BACK_CENTER);
     /** @hide */
     public static final int CHANNEL_OUT_5POINT1_SIDE = (CHANNEL_OUT_FRONT_LEFT | CHANNEL_OUT_FRONT_RIGHT |
             CHANNEL_OUT_FRONT_CENTER | CHANNEL_OUT_LOW_FREQUENCY |
