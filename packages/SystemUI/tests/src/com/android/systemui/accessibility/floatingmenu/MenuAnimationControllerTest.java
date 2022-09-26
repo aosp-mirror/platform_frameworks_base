@@ -18,9 +18,16 @@ package com.android.systemui.accessibility.floatingmenu;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+
 import android.graphics.PointF;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.view.View;
+import android.view.ViewPropertyAnimator;
 import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
@@ -36,6 +43,8 @@ import org.junit.runner.RunWith;
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
 public class MenuAnimationControllerTest extends SysuiTestCase {
+
+    private ViewPropertyAnimator mViewPropertyAnimator;
     private MenuView mMenuView;
     private MenuAnimationController mMenuAnimationController;
 
@@ -45,7 +54,11 @@ public class MenuAnimationControllerTest extends SysuiTestCase {
         final MenuViewAppearance stubMenuViewAppearance = new MenuViewAppearance(mContext,
                 stubWindowManager);
         final MenuViewModel stubMenuViewModel = new MenuViewModel(mContext);
-        mMenuView = new MenuView(mContext, stubMenuViewModel, stubMenuViewAppearance);
+
+        mMenuView = spy(new MenuView(mContext, stubMenuViewModel, stubMenuViewAppearance));
+        mViewPropertyAnimator = spy(mMenuView.animate());
+        doReturn(mViewPropertyAnimator).when(mMenuView).animate();
+
         mMenuAnimationController = new MenuAnimationController(mMenuView);
     }
 
@@ -57,5 +70,12 @@ public class MenuAnimationControllerTest extends SysuiTestCase {
 
         assertThat(mMenuView.getTranslationX()).isEqualTo(50);
         assertThat(mMenuView.getTranslationY()).isEqualTo(60);
+    }
+
+    @Test
+    public void startShrinkAnimation_verifyAnimationEndAction() {
+        mMenuAnimationController.startShrinkAnimation(() -> mMenuView.setVisibility(View.VISIBLE));
+
+        verify(mViewPropertyAnimator).withEndAction(any(Runnable.class));
     }
 }

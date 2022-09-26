@@ -42,7 +42,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * The menu view displays the accessibility features.
+ * The container view displays the accessibility features.
  */
 @SuppressLint("ViewConstructor")
 class MenuView extends FrameLayout implements
@@ -70,7 +70,6 @@ class MenuView extends FrameLayout implements
         mMenuViewModel = menuViewModel;
         mMenuViewAppearance = menuViewAppearance;
         mMenuAnimationController = new MenuAnimationController(this);
-
         mAdapter = new AccessibilityTargetAdapter(mTargetFeatures);
         mTargetFeaturesView = new RecyclerView(context);
         mTargetFeaturesView.setAdapter(mAdapter);
@@ -110,6 +109,10 @@ class MenuView extends FrameLayout implements
 
     void addOnItemTouchListenerToList(RecyclerView.OnItemTouchListener listener) {
         mTargetFeaturesView.addOnItemTouchListener(listener);
+    }
+
+    MenuAnimationController getMenuAnimationController() {
+        return mMenuAnimationController;
     }
 
     @SuppressLint("NotifyDataSetChanged")
