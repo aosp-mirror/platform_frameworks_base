@@ -2940,6 +2940,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     @Override
     public boolean tryUnlockWithCachedUnifiedChallenge(int userId) {
+        checkPasswordReadPermission();
         try (LockscreenCredential cred = mManagedProfilePasswordCache.retrievePassword(userId)) {
             if (cred == null) {
                 return false;
@@ -2951,6 +2952,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     @Override
     public void removeCachedUnifiedChallenge(int userId) {
+        checkWritePermission();
         mManagedProfilePasswordCache.removePassword(userId);
     }
 
