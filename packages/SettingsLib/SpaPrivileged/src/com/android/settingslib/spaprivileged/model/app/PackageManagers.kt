@@ -55,7 +55,7 @@ object PackageManagers {
             iPackageManager.isPackageAvailable(it, userId)
         }.toSet()
 
-    private fun getPackageInfoAsUser(packageName: String, flags: Int, userId: Int): PackageInfo? =
+    fun getPackageInfoAsUser(packageName: String, flags: Int, userId: Int): PackageInfo? =
         try {
             PackageManager.getPackageInfoAsUserCached(packageName, flags.toLong(), userId)
         } catch (e: PackageManager.NameNotFoundException) {
