@@ -323,4 +323,19 @@ public class OverlayManagerServiceImplTests extends OverlayManagerServiceImplTes
         FakeIdmapDaemon.IdmapHeader idmap = idmapd.getIdmap(overlayPath);
         assertEquals(0, CONFIG_SIGNATURE & idmap.policies);
     }
+
+    @Test
+    public void testOnTargetSystemPackageUninstall() throws Exception {
+        installAndAssert(target(TARGET), USER,
+                Set.of(UserPackage.of(USER, TARGET)));
+        installAndAssert(overlay(OVERLAY, TARGET), USER,
+                Set.of(UserPackage.of(USER, OVERLAY), UserPackage.of(USER, TARGET)));
+        upgradeAndAssert(target(TARGET), USER,
+                Set.of(UserPackage.of(USER, TARGET)),
+                Set.of(UserPackage.of(USER, TARGET)));
+
+        downgradeAndAssert(target(TARGET), USER,
+                Set.of(UserPackage.of(USER, TARGET)),
+                Set.of(UserPackage.of(USER, TARGET)));
+    }
 }
