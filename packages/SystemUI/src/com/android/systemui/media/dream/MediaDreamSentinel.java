@@ -16,7 +16,7 @@
 
 package com.android.systemui.media.dream;
 
-import static com.android.systemui.flags.Flags.MEDIA_DREAM_COMPLICATION;
+import static com.android.systemui.flags.Flags.DREAM_MEDIA_COMPLICATION;
 
 import android.content.Context;
 import android.util.Log;
@@ -77,7 +77,7 @@ public class MediaDreamSentinel extends CoreStartable {
         public void onMediaDataLoaded(@NonNull String key, @Nullable String oldKey,
                 @NonNull MediaData data, boolean immediately, int receivedSmartspaceCardLatency,
                 boolean isSsReactivated) {
-            if (!mFeatureFlags.isEnabled(MEDIA_DREAM_COMPLICATION)) {
+            if (!mFeatureFlags.isEnabled(DREAM_MEDIA_COMPLICATION)) {
                 return;
             }
 
