@@ -4158,6 +4158,12 @@ public class ActivityManagerService extends IActivityManager.Stub
             //  Yeah, um, no.
             return;
         }
+        final int callingUid = Binder.getCallingUid();
+        final int callingUserId = UserHandle.getUserId(callingUid);
+        if (getPackageManagerInternal().filterAppAccess(packageName, callingUid, callingUserId)) {
+            Slog.w(TAG, "Failed trying to add dependency on non-existing package: " + packageName);
+            return;
+        }
         ProcessRecord proc;
         synchronized (mPidsSelfLocked) {
             proc = mPidsSelfLocked.get(Binder.getCallingPid());
