@@ -58,6 +58,7 @@ import android.content.pm.PackageManagerInternal;
 import android.graphics.BLASTBufferQueue;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Insets;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
@@ -965,6 +966,13 @@ final class AccessibilityController {
                         availableBounds.op(navBarInsets, Region.Op.DIFFERENCE);
                     }
 
+                    // Count letterbox into nonMagnifiedBounds
+                    if (windowState.areAppWindowBoundsLetterboxed()) {
+                        Region letterboxBounds = getLetterboxBounds(windowState);
+                        nonMagnifiedBounds.op(letterboxBounds, Region.Op.UNION);
+                        availableBounds.op(letterboxBounds, Region.Op.DIFFERENCE);
+                    }
+
                     // Update accounted bounds
                     Region accountedBounds = mTempRegion2;
                     accountedBounds.set(mMagnificationRegion);
@@ -1012,6 +1020,27 @@ final class AccessibilityController {
                             MyHandler.MESSAGE_NOTIFY_MAGNIFICATION_REGION_CHANGED, args)
                             .sendToTarget();
                 }
+            }
+
+            private Region getLetterboxBounds(WindowState windowState) {
+                final ActivityRecord appToken = windowState.mActivityRecord;
+                if (appToken == null) {
+                    return new Region();
+                }
+
+                final Rect boundsWithoutLetterbox = windowState.getBounds();
+                final Rect letterboxInsets = appToken.getLetterboxInsets();
+
+                final Rect boundsIncludingLetterbox = Rect.copyOrNull(boundsWithoutLetterbox);
+                // Letterbox insets from mActivityRecord are positive, so we negate them to grow the
+                // bounds to include the letterbox.
+                boundsIncludingLetterbox.inset(
+                        Insets.subtract(Insets.NONE, Insets.of(letterboxInsets)));
+
+                final Region letterboxBounds = new Region();
+                letterboxBounds.set(boundsIncludingLetterbox);
+                letterboxBounds.op(boundsWithoutLetterbox, Region.Op.DIFFERENCE);
+                return letterboxBounds;
             }
 
             private boolean isExcludedWindowType(int windowType) {
