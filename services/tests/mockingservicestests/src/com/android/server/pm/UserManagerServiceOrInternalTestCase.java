@@ -33,7 +33,6 @@ import android.content.Context;
 import android.content.pm.UserInfo;
 import android.os.UserManager;
 import android.util.Log;
-import android.util.Pair;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 
@@ -612,24 +611,6 @@ abstract class UserManagerServiceOrInternalTestCase extends ExtendedMockitoTestC
     protected final void assertUserAssignedToDisplay(@UserIdInt int userId, int displayId) {
         assertWithMessage("mUsersOnSecondaryDisplays()").that(usersOnSecondaryDisplaysAsMap())
                 .containsExactly(userId, displayId);
-    }
-
-    @SafeVarargs
-    protected final void assertUsersAssignedToDisplays(@UserIdInt int userId, int displayId,
-            @SuppressWarnings("unchecked") Pair<Integer, Integer>... others) {
-        Object[] otherObjects = new Object[others.length * 2];
-        for (int i = 0; i < others.length; i++) {
-            Pair<Integer, Integer> other = others[i];
-            otherObjects[i * 2] = other.first;
-            otherObjects[i * 2 + 1] = other.second;
-
-        }
-        assertWithMessage("mUsersOnSecondaryDisplays()").that(usersOnSecondaryDisplaysAsMap())
-                .containsExactly(userId, displayId, otherObjects);
-    }
-
-    protected static Pair<Integer, Integer> pair(@UserIdInt int userId, int secondaryDisplayId) {
-        return new Pair<>(userId, secondaryDisplayId);
     }
 
     ///////////////////
