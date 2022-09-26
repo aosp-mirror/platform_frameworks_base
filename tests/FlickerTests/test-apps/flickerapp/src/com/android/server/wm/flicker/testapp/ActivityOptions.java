@@ -177,12 +177,6 @@ public class ActivityOptions {
         }
     }
 
-    public static class SendNotificationActivity {
-        public static final String LABEL = "SendNotificationActivity";
-        public static final ComponentName COMPONENT = new ComponentName(FLICKER_APP_PACKAGE,
-                FLICKER_APP_PACKAGE + ".SendNotificationActivity");
-    }
-
     public static class Bubbles {
         public static class LaunchBubble {
             public static final String LABEL = "LaunchBubbleActivity";
