@@ -732,9 +732,10 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                 } catch (RemoteException ex) {
                     // Failed to call into the process. It's either dying or wedged. Kill it gently.
                     synchronized (mService) {
-                        Slog.w(TAG, "Can't deliver broadcast to " + app.processName
-                                + " (pid " + app.getPid() + "). Crashing it.");
-                        app.scheduleCrashLocked("can't deliver broadcast",
+                        final String msg = "Failed to schedule " + intent + " to " + receiver
+                                + " via " + app + ": " + ex;
+                        Slog.w(TAG, msg);
+                        app.scheduleCrashLocked(msg,
                                 CannotDeliverBroadcastException.TYPE_ID, /* extras=*/ null);
                     }
                     throw ex;
@@ -1379,9 +1380,10 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                 processCurBroadcastLocked(r, app);
                 return;
             } catch (RemoteException e) {
-                Slog.w(TAG, "Exception when sending broadcast to "
-                      + r.curComponent, e);
-                app.scheduleCrashLocked("can't deliver broadcast",
+                final String msg = "Failed to schedule " + r.intent + " to " + info
+                        + " via " + app + ": " + e;
+                Slog.w(TAG, msg);
+                app.scheduleCrashLocked(msg,
                         CannotDeliverBroadcastException.TYPE_ID, /* extras=*/ null);
             } catch (RuntimeException e) {
                 Slog.wtf(TAG, "Failed sending broadcast to "

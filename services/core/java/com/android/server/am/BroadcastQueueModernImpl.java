@@ -628,9 +628,10 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                             app.mState.getReportedProcState());
                 }
             } catch (RemoteException e) {
-                Slog.w(TAG, "Failed to schedule " + r + " to " + receiver
-                        + " via " + app + ": " + e);
-                app.scheduleCrashLocked(TAG, CannotDeliverBroadcastException.TYPE_ID, null);
+                final String msg = "Failed to schedule " + r + " to " + receiver
+                        + " via " + app + ": " + e;
+                Slog.w(TAG, msg);
+                app.scheduleCrashLocked(msg, CannotDeliverBroadcastException.TYPE_ID, null);
                 app.setKilled(true);
                 finishReceiverLocked(queue, BroadcastRecord.DELIVERY_FAILURE);
             }
@@ -655,8 +656,9 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                         r.resultCode, r.resultData, r.resultExtras, false, r.initialSticky,
                         r.userId, app.mState.getReportedProcState());
             } catch (RemoteException e) {
-                Slog.w(TAG, "Failed to schedule result of " + r + " via " + app + ": " + e);
-                app.scheduleCrashLocked(TAG, CannotDeliverBroadcastException.TYPE_ID, null);
+                final String msg = "Failed to schedule result of " + r + " via " + app + ": " + e;
+                Slog.w(TAG, msg);
+                app.scheduleCrashLocked(msg, CannotDeliverBroadcastException.TYPE_ID, null);
             }
         }
     }
