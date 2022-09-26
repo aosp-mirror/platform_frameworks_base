@@ -426,16 +426,16 @@ public class BroadcastQueueImpl extends BroadcastQueue {
         }
     }
 
-    public boolean onApplicationTimeoutLocked(ProcessRecord app) {
-        return skipCurrentOrPendingReceiverLocked(app);
+    public void onApplicationTimeoutLocked(ProcessRecord app) {
+        skipCurrentOrPendingReceiverLocked(app);
     }
 
-    public boolean onApplicationProblemLocked(ProcessRecord app) {
-        return skipCurrentOrPendingReceiverLocked(app);
+    public void onApplicationProblemLocked(ProcessRecord app) {
+        skipCurrentOrPendingReceiverLocked(app);
     }
 
-    public boolean onApplicationCleanupLocked(ProcessRecord app) {
-        return skipCurrentOrPendingReceiverLocked(app);
+    public void onApplicationCleanupLocked(ProcessRecord app) {
+        skipCurrentOrPendingReceiverLocked(app);
     }
 
     public boolean sendPendingBroadcastsLocked(ProcessRecord app) {
@@ -815,7 +815,11 @@ public class BroadcastQueueImpl extends BroadcastQueue {
         try {
             if (DEBUG_BROADCAST_LIGHT) Slog.i(TAG_BROADCAST,
                     "Delivering to " + filter + " : " + r);
-            if (filter.receiverList.app != null && filter.receiverList.app.isInFullBackup()) {
+            final boolean isInFullBackup = (filter.receiverList.app != null)
+                    && filter.receiverList.app.isInFullBackup();
+            final boolean isKilled = (filter.receiverList.app != null)
+                    && filter.receiverList.app.isKilled();
+            if (isInFullBackup || isKilled) {
                 // Skip delivery if full backup in progress
                 // If it's an ordered broadcast, we need to continue to the next receiver.
                 if (ordered) {

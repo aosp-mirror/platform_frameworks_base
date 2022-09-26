@@ -209,6 +209,16 @@ public class BroadcastQueueTest {
             return res;
         }).when(mAms).startProcessLocked(any(), any(), anyBoolean(), anyInt(),
                 any(), anyInt(), anyBoolean(), anyBoolean());
+        doAnswer((invocation) -> {
+            final String processName = invocation.getArgument(0);
+            final int uid = invocation.getArgument(1);
+            for (ProcessRecord r : mActiveProcesses) {
+                if (Objects.equals(r.processName, processName) && r.uid == uid) {
+                    return r;
+                }
+            }
+            return null;
+        }).when(mAms).getProcessRecordLocked(any(), anyInt());
         doNothing().when(mAms).appNotResponding(any(), any());
 
         final BroadcastConstants constants = new BroadcastConstants(
@@ -335,7 +345,6 @@ public class BroadcastQueueTest {
         final IBinder threadBinder = new Binder();
         doReturn(threadBinder).when(thread).asBinder();
         r.makeActive(thread, mAms.mProcessStats);
-        doReturn(r).when(mAms).getProcessRecordLocked(eq(r.info.processName), eq(r.info.uid));
 
         final IIntentReceiver receiver = mock(IIntentReceiver.class);
         final IBinder receiverBinder = new Binder();
@@ -343,6 +352,14 @@ public class BroadcastQueueTest {
         final ReceiverList receiverList = new ReceiverList(mAms, r, r.getPid(), r.info.uid,
                 UserHandle.getUserId(r.info.uid), receiver);
         mRegisteredReceivers.put(r.getPid(), receiverList);
+
+        doAnswer((invocation) -> {
+            Log.v(TAG, "Intercepting killLocked() for "
+                    + Arrays.toString(invocation.getArguments()));
+            mActiveProcesses.remove(r);
+            mRegisteredReceivers.remove(r.getPid());
+            return invocation.callRealMethod();
+        }).when(r).killLocked(any(), any(), anyInt(), anyInt(), anyBoolean());
 
         // If we're entirely dead, rely on default behaviors above
         if (dead) return r;
@@ -885,6 +902,45 @@ public class BroadcastQueueTest {
                 new ComponentName(PACKAGE_GREEN, CLASS_GREEN));
         verifyScheduleReceiver(times(1), receiverApp, airplane,
                 new ComponentName(PACKAGE_GREEN, CLASS_BLUE));
+    }
+
+    /**
+     * Verify that killing a running process skips registered receivers.
+     */
+    @Test
+    public void testKill() throws Exception {
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+        final ProcessRecord oldApp = makeActiveProcessRecord(PACKAGE_GREEN);
+
+        final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        try (SyncBarrier b = new SyncBarrier()) {
+            enqueueBroadcast(makeBroadcastRecord(airplane, callerApp, new ArrayList<>(
+                    List.of(makeRegisteredReceiver(oldApp),
+                            makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN)))));
+
+            synchronized (mAms) {
+                oldApp.killLocked(TAG, 42, false);
+                mQueue.onApplicationCleanupLocked(oldApp);
+            }
+        }
+        waitForIdle();
+
+        // Confirm that we cold-started after the kill
+        final ProcessRecord newApp = mAms.getProcessRecordLocked(PACKAGE_GREEN,
+                getUidForPackage(PACKAGE_GREEN));
+        assertNotEquals(oldApp, newApp);
+
+        // Confirm that we saw no registered receiver traffic
+        final IApplicationThread oldThread = oldApp.getThread();
+        verify(oldThread, never()).scheduleRegisteredReceiver(any(),
+                any(), anyInt(), any(), any(), anyBoolean(), anyBoolean(), anyInt(), anyInt());
+        final IApplicationThread newThread = newApp.getThread();
+        verify(newThread, never()).scheduleRegisteredReceiver(any(),
+                any(), anyInt(), any(), any(), anyBoolean(), anyBoolean(), anyInt(), anyInt());
+
+        // Confirm that we saw final manifest broadcast
+        verifyScheduleReceiver(times(1), newApp, airplane,
+                new ComponentName(PACKAGE_GREEN, CLASS_GREEN));
     }
 
     /**
