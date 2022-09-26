@@ -1,5 +1,6 @@
 package com.android.systemui.media
 
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
@@ -943,6 +944,11 @@ class MediaCarouselController @Inject constructor(
         }
         logger.logSwipeDismiss()
         mediaManager.onSwipeToDismiss()
+    }
+
+    fun getCurrentVisibleMediaContentIntent(): PendingIntent? {
+        return MediaPlayerData.playerKeys()
+                .elementAtOrNull(mediaCarouselScrollHandler.visibleMediaIndex)?.data?.clickIntent
     }
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {
