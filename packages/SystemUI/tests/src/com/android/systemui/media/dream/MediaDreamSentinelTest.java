@@ -16,7 +16,7 @@
 
 package com.android.systemui.media.dream;
 
-import static com.android.systemui.flags.Flags.MEDIA_DREAM_COMPLICATION;
+import static com.android.systemui.flags.Flags.DREAM_MEDIA_COMPLICATION;
 
 import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.ArgumentMatchers.any;
@@ -68,7 +68,7 @@ public class MediaDreamSentinelTest extends SysuiTestCase {
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
-        when(mFeatureFlags.isEnabled(MEDIA_DREAM_COMPLICATION)).thenReturn(true);
+        when(mFeatureFlags.isEnabled(DREAM_MEDIA_COMPLICATION)).thenReturn(true);
     }
 
     @Test
@@ -137,7 +137,7 @@ public class MediaDreamSentinelTest extends SysuiTestCase {
 
     @Test
     public void testOnMediaDataLoaded_mediaComplicationDisabled_doesNotAddComplication() {
-        when(mFeatureFlags.isEnabled(MEDIA_DREAM_COMPLICATION)).thenReturn(false);
+        when(mFeatureFlags.isEnabled(DREAM_MEDIA_COMPLICATION)).thenReturn(false);
 
         final MediaDreamSentinel sentinel = new MediaDreamSentinel(mContext, mMediaDataManager,
                 mDreamOverlayStateController, mMediaEntryComplication, mFeatureFlags);
