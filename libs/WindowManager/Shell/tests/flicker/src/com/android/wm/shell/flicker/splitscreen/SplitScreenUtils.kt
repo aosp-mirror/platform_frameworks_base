@@ -41,7 +41,7 @@ import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelpe
 import com.android.wm.shell.flicker.SYSTEM_UI_PACKAGE_NAME
 
 internal object SplitScreenUtils {
-    internal const val TIMEOUT_MS = 3_000L
+    private const val TIMEOUT_MS = 3_000L
     private const val DRAG_DURATION_MS = 1_000L
     private const val NOTIFICATION_SCROLLER = "notification_stack_scroller"
     private const val DIVIDER_BAR = "docked_divider_handle"
@@ -52,7 +52,7 @@ internal object SplitScreenUtils {
     private val notificationScrollerSelector: BySelector
         get() = By.res(SYSTEM_UI_PACKAGE_NAME, NOTIFICATION_SCROLLER)
     private val notificationContentSelector: BySelector
-        get() = By.text("Notification content")
+        get() = By.text("Flicker Test Notification")
     private val dividerBarSelector: BySelector
         get() = By.res(SYSTEM_UI_PACKAGE_NAME, DIVIDER_BAR)
 
@@ -140,14 +140,14 @@ internal object SplitScreenUtils {
         // Pull down the notifications
         device.swipe(
             displayBounds.centerX(), 5,
-            displayBounds.centerX(), displayBounds.bottom, 20 /* steps */
+            displayBounds.centerX(), displayBounds.bottom, 50 /* steps */
         )
         SystemClock.sleep(TIMEOUT_MS)
 
         // Find the target notification
         val notificationScroller = device.wait(
             Until.findObject(notificationScrollerSelector), TIMEOUT_MS
-        )
+        ) ?: error ("Unable to find view $notificationScrollerSelector")
         var notificationContent = notificationScroller.findObject(notificationContentSelector)
 
         while (notificationContent == null) {
