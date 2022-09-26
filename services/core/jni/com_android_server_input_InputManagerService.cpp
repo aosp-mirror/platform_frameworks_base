@@ -107,6 +107,7 @@ static struct {
     jmethodID notifyFocusChanged;
     jmethodID notifySensorEvent;
     jmethodID notifySensorAccuracy;
+    jmethodID notifyStylusGestureStarted;
     jmethodID notifyVibratorState;
     jmethodID filterInputEvent;
     jmethodID interceptKeyBeforeQueueing;
@@ -312,6 +313,7 @@ public:
                                                            int32_t surfaceRotation) override;
 
     TouchAffineTransformation getTouchAffineTransformation(JNIEnv* env, jfloatArray matrixArr);
+    void notifyStylusGestureStarted(int32_t deviceId, nsecs_t eventTime) override;
 
     /* --- InputDispatcherPolicyInterface implementation --- */
 
@@ -1175,6 +1177,13 @@ TouchAffineTransformation NativeInputManager::getTouchAffineTransformation(
     env->DeleteLocalRef(cal);
 
     return transform;
+}
+
+void NativeInputManager::notifyStylusGestureStarted(int32_t deviceId, nsecs_t eventTime) {
+    JNIEnv* env = jniEnv();
+    env->CallVoidMethod(mServiceObj, gServiceClassInfo.notifyStylusGestureStarted, deviceId,
+                        eventTime);
+    checkAndClearExceptionFromCallback(env, "notifyStylusGestureStarted");
 }
 
 bool NativeInputManager::filterInputEvent(const InputEvent* inputEvent, uint32_t policyFlags) {
@@ -2468,6 +2477,9 @@ int register_android_server_InputManager(JNIEnv* env) {
     GET_METHOD_ID(gServiceClassInfo.notifySensorEvent, clazz, "notifySensorEvent", "(IIIJ[F)V");
 
     GET_METHOD_ID(gServiceClassInfo.notifySensorAccuracy, clazz, "notifySensorAccuracy", "(III)V");
+
+    GET_METHOD_ID(gServiceClassInfo.notifyStylusGestureStarted, clazz, "notifyStylusGestureStarted",
+                  "(IJ)V");
 
     GET_METHOD_ID(gServiceClassInfo.notifyVibratorState, clazz, "notifyVibratorState", "(IZ)V");
 

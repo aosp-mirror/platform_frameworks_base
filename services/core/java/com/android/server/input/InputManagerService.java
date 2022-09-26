@@ -3052,6 +3052,11 @@ public class InputManagerService extends IInputManager.Stub
                 com.android.internal.R.bool.config_perDisplayFocusEnabled);
     }
 
+    // Native callback.
+    @SuppressWarnings("unused")
+    private void notifyStylusGestureStarted(int deviceId, long eventTime) {
+    }
+
     /**
      * Flatten a map into a string list, with value positioned directly next to the
      * key.
