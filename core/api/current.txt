@@ -53544,8 +53544,8 @@ package android.view.inputmethod {
 
   public final class InsertGesture extends android.view.inputmethod.HandwritingGesture implements android.os.Parcelable {
     method public int describeContents();
-    method @Nullable public android.graphics.PointF getInsertionPoint();
-    method @Nullable public String getTextToInsert();
+    method @NonNull public android.graphics.PointF getInsertionPoint();
+    method @NonNull public String getTextToInsert();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.inputmethod.InsertGesture> CREATOR;
   }

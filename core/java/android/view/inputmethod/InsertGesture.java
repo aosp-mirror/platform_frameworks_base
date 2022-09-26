@@ -53,7 +53,7 @@ public final class InsertGesture extends HandwritingGesture implements Parcelabl
     }
 
     /** Returns the text that will be inserted at {@link #getInsertionPoint()} **/
-    @Nullable
+    @NonNull
     public String getTextToInsert() {
         return mTextToInsert;
     }
@@ -62,7 +62,7 @@ public final class InsertGesture extends HandwritingGesture implements Parcelabl
      * Returns the insertion point {@link PointF} (in screen coordinates) where
      * {@link #getTextToInsert()} will be inserted.
      */
-    @Nullable
+    @NonNull
     public PointF getInsertionPoint() {
         return mPoint;
     }
