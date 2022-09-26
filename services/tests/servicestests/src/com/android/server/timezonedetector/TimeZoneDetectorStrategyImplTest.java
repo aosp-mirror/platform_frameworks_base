@@ -51,6 +51,7 @@ import com.android.server.timezonedetector.TimeZoneDetectorStrategyImpl.Qualifie
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -1155,7 +1156,7 @@ public class TimeZoneDetectorStrategyImplTest {
 
         @Override
         public void setDeviceTimeZoneAndConfidence(
-                String zoneId, @TimeZoneConfidence int confidence) {
+                String zoneId, @TimeZoneConfidence int confidence, String logInfo) {
             mTimeZoneId.set(zoneId);
             mTimeZoneConfidence = confidence;
         }
@@ -1184,6 +1185,16 @@ public class TimeZoneDetectorStrategyImplTest {
         @ElapsedRealtimeLong
         public long elapsedRealtimeMillis() {
             return mElapsedRealtimeMillis;
+        }
+
+        @Override
+        public void addDebugLogEntry(String logMsg) {
+            // No-op for tests
+        }
+
+        @Override
+        public void dumpDebugLog(PrintWriter printWriter) {
+            // No-op for tests
         }
     }
 
