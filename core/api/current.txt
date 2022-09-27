@@ -51882,10 +51882,11 @@ package android.view.accessibility {
     method public void setSpeechStateChangeTypes(int);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION = 4; // 0x4
+    field public static final int CONTENT_CHANGE_TYPE_CONTENT_INVALID = 1024; // 0x400
     field public static final int CONTENT_CHANGE_TYPE_DRAG_CANCELLED = 512; // 0x200
     field public static final int CONTENT_CHANGE_TYPE_DRAG_DROPPED = 256; // 0x100
     field public static final int CONTENT_CHANGE_TYPE_DRAG_STARTED = 128; // 0x80
-    field public static final int CONTENT_CHANGE_TYPE_INVALID = 1024; // 0x400
+    field public static final int CONTENT_CHANGE_TYPE_ERROR = 2048; // 0x800
     field public static final int CONTENT_CHANGE_TYPE_PANE_APPEARED = 16; // 0x10
     field public static final int CONTENT_CHANGE_TYPE_PANE_DISAPPEARED = 32; // 0x20
     field public static final int CONTENT_CHANGE_TYPE_PANE_TITLE = 8; // 0x8
