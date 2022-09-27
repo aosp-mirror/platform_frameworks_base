@@ -106,7 +106,7 @@ public class LambdaPerfTest {
 
     @Test
     public void test2PrimitiveParamsConsumer() {
-        // Not in Integer#IntegerCache (-128~127) for autoboxing, that will create new object.
+        // Not in Integer#IntegerCache (-128~127) for autoboxing, that may create new object.
         mTaskId = 12345;
         mTime = 54321;
 
@@ -239,6 +239,7 @@ public class LambdaPerfTest {
         SystemClock.sleep(DELAY_AFTER_BENCH_MS);
         final GcStatus endStatus = getGcStatus();
         final GcInfo info = startStatus.calculateGcTime(endStatus, title, mTestResults);
+        mTestResults.putFloat("[" + title + "-execution-time]", elapsed);
         Log.i(TAG, mMethodName + "_" + title + " execution time: "
                 + elapsed + "ms (avg=" + String.format("%.5f", elapsed / TEST_ITERATIONS) + "ms)"
                 + " GC time: " + String.format("%.3f", info.mTotalGcTime) + "ms"
@@ -284,6 +285,9 @@ public class LambdaPerfTest {
             final int pos = log.indexOf(pattern);
             if (pos > 0) {
                 dump = log.substring(pattern.length() + pos);
+                if (!dump.startsWith("/data/anr/")) {
+                    dump = "/data/anr/" + dump;
+                }
                 break;
             }
         }
