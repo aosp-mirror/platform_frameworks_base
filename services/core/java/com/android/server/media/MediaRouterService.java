@@ -17,7 +17,9 @@
 package com.android.server.media;
 
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
 import android.app.ActivityManager;
+import android.app.UserSwitchObserver;
 import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
@@ -146,18 +148,27 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         context.registerReceiverAsUser(mReceiver, UserHandle.ALL, intentFilter, null, null);
     }
 
-    public void systemRunning() {
-        IntentFilter filter = new IntentFilter(Intent.ACTION_USER_SWITCHED);
-        mContext.registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                if (intent.getAction().equals(Intent.ACTION_USER_SWITCHED)) {
-                    switchUser();
-                }
-            }
-        }, filter);
-
-        switchUser();
+    /**
+     * Initializes the MediaRouter service.
+     *
+     * @throws RemoteException If an error occurs while registering the {@link UserSwitchObserver}.
+     */
+    @RequiresPermission(
+            anyOf = {
+                "android.permission.INTERACT_ACROSS_USERS",
+                "android.permission.INTERACT_ACROSS_USERS_FULL"
+            })
+    public void systemRunning() throws RemoteException {
+        ActivityManager.getService()
+                .registerUserSwitchObserver(
+                        new UserSwitchObserver() {
+                            @Override
+                            public void onUserSwitchComplete(int newUserId) {
+                                switchUser(newUserId);
+                            }
+                        },
+                        TAG);
+        switchUser(ActivityManager.getCurrentUser());
     }
 
     @Override
@@ -634,9 +645,8 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         }
     }
 
-    void switchUser() {
+    void switchUser(int userId) {
         synchronized (mLock) {
-            int userId = ActivityManager.getCurrentUser();
             if (mCurrentUserId != userId) {
                 final int oldUserId = mCurrentUserId;
                 mCurrentUserId = userId; // do this first
@@ -653,7 +663,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
                 }
             }
         }
-        mService2.switchUser();
+        mService2.switchUser(userId);
     }
 
     void clientDied(ClientRecord clientRecord) {

@@ -621,10 +621,9 @@ class MediaRouter2ServiceImpl {
         }
     }
 
-    //TODO(b/136703681): Review this is handling multi-user properly.
-    void switchUser() {
+    // TODO(b/136703681): Review this is handling multi-user properly.
+    void switchUser(int userId) {
         synchronized (mLock) {
-            int userId = ActivityManager.getCurrentUser();
             if (mCurrentUserId != userId) {
                 final int oldUserId = mCurrentUserId;
                 mCurrentUserId = userId; // do this first
