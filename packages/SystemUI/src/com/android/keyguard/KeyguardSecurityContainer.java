@@ -538,7 +538,7 @@ public class KeyguardSecurityContainer extends FrameLayout {
     }
 
     /**
-     * Runs after a succsssful authentication only
+     * Runs after a successful authentication only
      */
     public void startDisappearAnimation(SecurityMode securitySelection) {
         mDisappearAnimRunning = true;
@@ -1063,6 +1063,7 @@ public class KeyguardSecurityContainer extends FrameLayout {
                 mPopup.dismiss();
                 mPopup = null;
             }
+            setupUserSwitcher();
         }
 
         @Override
@@ -1096,7 +1097,6 @@ public class KeyguardSecurityContainer extends FrameLayout {
                 return;
             }
 
-            mView.setAlpha(1f);
             mUserSwitcherViewGroup.setAlpha(0f);
             ObjectAnimator alphaAnim = ObjectAnimator.ofFloat(mUserSwitcherViewGroup, View.ALPHA,
                     1f);

@@ -427,6 +427,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
 
     public void startAppearAnimation() {
         if (mCurrentSecurityMode != SecurityMode.None) {
+            mView.setAlpha(1f);
             mView.startAppearAnimation(mCurrentSecurityMode);
             getCurrentSecurityController().startAppearAnimation();
         }
