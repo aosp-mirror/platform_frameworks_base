@@ -30,6 +30,7 @@ import com.android.systemui.statusbar.StatusBarIconView.STATE_HIDDEN
 import com.android.systemui.statusbar.StatusBarIconView.STATE_ICON
 import com.android.systemui.statusbar.phone.StatusBarLocation
 import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
+import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
 import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel
@@ -59,7 +60,9 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
     @Mock
     private lateinit var logger: ConnectivityPipelineLogger
     @Mock
-    private lateinit var constants: WifiConstants
+    private lateinit var connectivityConstants: ConnectivityConstants
+    @Mock
+    private lateinit var wifiConstants: WifiConstants
     private lateinit var connectivityRepository: FakeConnectivityRepository
     private lateinit var wifiRepository: FakeWifiRepository
     private lateinit var interactor: WifiInteractor
@@ -80,7 +83,13 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
         interactor = WifiInteractor(connectivityRepository, wifiRepository)
         scope = CoroutineScope(Dispatchers.Unconfined)
         viewModel = WifiViewModel(
-            constants, context, logger, interactor, scope, statusBarPipelineFlags
+            connectivityConstants,
+            context,
+            logger,
+            interactor,
+            scope,
+            statusBarPipelineFlags,
+            wifiConstants,
         )
     }
 
