@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-#ifndef AAPT_OPTIMIZE_RESOURCEPATHSHORTENER_H
-#define AAPT_OPTIMIZE_RESOURCEPATHSHORTENER_H
+#ifndef TOOLS_AAPT2_OPTIMIZE_OBFUSCATOR_H_
+#define TOOLS_AAPT2_OPTIMIZE_OBFUSCATOR_H_
 
 #include <map>
+#include <string>
 
 #include "android-base/macros.h"
-
 #include "process/IResourceTableConsumer.h"
 
 namespace aapt {
@@ -28,17 +28,17 @@ namespace aapt {
 class ResourceTable;
 
 // Maps resources in the apk to shortened paths.
-class ResourcePathShortener : public IResourceTableConsumer {
+class Obfuscator : public IResourceTableConsumer {
  public:
-  explicit ResourcePathShortener(std::map<std::string, std::string>& path_map_out);
+  explicit Obfuscator(std::map<std::string, std::string>& path_map_out);
 
   bool Consume(IAaptContext* context, ResourceTable* table) override;
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(ResourcePathShortener);
   std::map<std::string, std::string>& path_map_;
+  DISALLOW_COPY_AND_ASSIGN(Obfuscator);
 };
 
-} // namespace aapt
+}  // namespace aapt
 
-#endif  // AAPT_OPTIMIZE_RESOURCEPATHSHORTENER_H
+#endif  // TOOLS_AAPT2_OPTIMIZE_OBFUSCATOR_H_
