@@ -1073,6 +1073,11 @@ public class KeyguardSecurityContainer extends FrameLayout {
                         android.R.attr.textColorPrimary));
                 header.setBackground(mView.getContext().getDrawable(
                         R.drawable.bouncer_user_switcher_header_bg));
+                Drawable keyDownDrawable =
+                        ((LayerDrawable) header.getBackground().mutate()).findDrawableByLayerId(
+                                R.id.user_switcher_key_down);
+                keyDownDrawable.setTintList(Utils.getColorAttr(mView.getContext(),
+                        android.R.attr.textColorPrimary));
             }
         }
 
