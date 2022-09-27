@@ -440,6 +440,42 @@ class HeadsUpCoordinator @Inject constructor(
         override fun onEntryCleanUp(entry: NotificationEntry) {
             mHeadsUpViewBinder.abortBindCallback(entry)
         }
+
+        /**
+         * Identify notifications whose heads-up state changes when the notification rankings are
+         * updated, and have those changed notifications alert if necessary.
+         *
+         * This method will occur after any operations in onEntryAdded or onEntryUpdated, so any
+         * handling of ranking changes needs to take into account that we may have just made a
+         * PostedEntry for some of these notifications.
+         */
+        override fun onRankingApplied() {
+            // Because a ranking update may cause some notifications that are no longer (or were
+            // never) in mPostedEntries to need to alert, we need to check every notification
+            // known to the pipeline.
+            for (entry in mNotifPipeline.allNotifs) {
+                // The only entries we can consider alerting for here are entries that have never
+                // interrupted and that now say they should heads up; if they've alerted in the
+                // past, we don't want to incorrectly alert a second time if there wasn't an
+                // explicit notification update.
+                if (entry.hasInterrupted()) continue
+
+                // The cases where we should consider this notification to be updated:
+                // - if this entry is not present in PostedEntries, and is now in a shouldHeadsUp
+                //   state
+                // - if it is present in PostedEntries and the previous state of shouldHeadsUp
+                //   differs from the updated one
+                val shouldHeadsUpEver = mNotificationInterruptStateProvider.checkHeadsUp(entry,
+                                /* log= */ false)
+                val postedShouldHeadsUpEver = mPostedEntries[entry.key]?.shouldHeadsUpEver ?: false
+                val shouldUpdateEntry = postedShouldHeadsUpEver != shouldHeadsUpEver
+
+                if (shouldUpdateEntry) {
+                    mLogger.logEntryUpdatedByRanking(entry.key, shouldHeadsUpEver)
+                    onEntryUpdated(entry)
+                }
+            }
+        }
     }
 
     /**
