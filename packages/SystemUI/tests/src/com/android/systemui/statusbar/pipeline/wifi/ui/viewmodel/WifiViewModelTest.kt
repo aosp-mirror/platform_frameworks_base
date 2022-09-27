@@ -51,6 +51,7 @@ import org.mockito.Mock
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 
+@Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 class WifiViewModelTest : SysuiTestCase() {
@@ -137,7 +138,9 @@ class WifiViewModelTest : SysuiTestCase() {
             .onEach { latest = it }
             .launchIn(this)
 
-        wifiRepository.setWifiNetwork(WifiNetworkModel.Active(NETWORK_ID, level = 2))
+        wifiRepository.setWifiNetwork(
+            WifiNetworkModel.Active(NETWORK_ID, isValidated = true, level = 2)
+        )
         yield()
 
         assertThat(latest).isInstanceOf(Icon.Resource::class.java)
@@ -146,7 +149,31 @@ class WifiViewModelTest : SysuiTestCase() {
     }
 
     @Test
-    fun wifiIcon_inactiveNetwork_outputsNoNetworkIcon() = runBlocking(IMMEDIATE) {
+    fun wifiIcon_inactiveNetwork_alwaysShowFalse_outputsNull() = runBlocking(IMMEDIATE) {
+        whenever(constants.alwaysShowIconIfEnabled).thenReturn(false)
+        createAndSetViewModel()
+
+        // Start as non-null so we can verify we got the update
+        var latest: Icon? = Icon.Resource(0, null)
+        val job = underTest
+            .home
+            .wifiIcon
+            .onEach { latest = it }
+            .launchIn(this)
+
+        wifiRepository.setWifiNetwork(WifiNetworkModel.Inactive)
+        yield()
+
+        assertThat(latest).isNull()
+
+        job.cancel()
+    }
+
+    @Test
+    fun wifiIcon_inactiveNetwork_alwaysShowTrue_outputsNoNetworkIcon() = runBlocking(IMMEDIATE) {
+        whenever(constants.alwaysShowIconIfEnabled).thenReturn(true)
+        createAndSetViewModel()
+
         var latest: Icon? = null
         val job = underTest
             .home
@@ -170,6 +197,10 @@ class WifiViewModelTest : SysuiTestCase() {
 
     @Test
     fun wifiIcon_carrierMergedNetwork_outputsNull() = runBlocking(IMMEDIATE) {
+        // Even when we should always show the icon
+        whenever(constants.alwaysShowIconIfEnabled).thenReturn(true)
+        createAndSetViewModel()
+
         var latest: Icon? = Icon.Resource(0, null)
         val job = underTest
             .home
@@ -177,9 +208,11 @@ class WifiViewModelTest : SysuiTestCase() {
             .onEach { latest = it }
             .launchIn(this)
 
+        // WHEN we have a carrier merged network
         wifiRepository.setWifiNetwork(WifiNetworkModel.CarrierMerged)
         yield()
 
+        // THEN we override the alwaysShow boolean and still don't show the icon
         assertThat(latest).isNull()
 
         job.cancel()
@@ -187,6 +220,10 @@ class WifiViewModelTest : SysuiTestCase() {
 
     @Test
     fun wifiIcon_isActiveNullLevel_outputsNull() = runBlocking(IMMEDIATE) {
+        // Even when we should always show the icon
+        whenever(constants.alwaysShowIconIfEnabled).thenReturn(true)
+        createAndSetViewModel()
+
         var latest: Icon? = Icon.Resource(0, null)
         val job = underTest
             .home
@@ -194,9 +231,11 @@ class WifiViewModelTest : SysuiTestCase() {
             .onEach { latest = it }
             .launchIn(this)
 
+        // WHEN we have a null level
         wifiRepository.setWifiNetwork(WifiNetworkModel.Active(NETWORK_ID, level = null))
         yield()
 
+        // THEN we override the alwaysShow boolean and still don't show the icon
         assertThat(latest).isNull()
 
         job.cancel()
@@ -233,7 +272,32 @@ class WifiViewModelTest : SysuiTestCase() {
     }
 
     @Test
-    fun wifiIcon_isActiveAndNotValidated_level4_outputsEmpty4Icon() = runBlocking(IMMEDIATE) {
+    fun wifiIcon_isActiveAndNotValidated_alwaysShowFalse_outputsNull() = runBlocking(IMMEDIATE) {
+        whenever(constants.alwaysShowIconIfEnabled).thenReturn(false)
+        createAndSetViewModel()
+
+        var latest: Icon? = Icon.Resource(0, null)
+        val job = underTest
+            .home
+            .wifiIcon
+            .onEach { latest = it }
+            .launchIn(this)
+
+        wifiRepository.setWifiNetwork(
+            WifiNetworkModel.Active(NETWORK_ID, isValidated = false, level = 4,)
+        )
+        yield()
+
+        assertThat(latest).isNull()
+
+        job.cancel()
+    }
+
+    @Test
+    fun wifiIcon_isActiveAndNotValidated_alwaysShowTrue_outputsIcon() = runBlocking(IMMEDIATE) {
+        whenever(constants.alwaysShowIconIfEnabled).thenReturn(true)
+        createAndSetViewModel()
+
         var latest: Icon? = null
         val job = underTest
             .home

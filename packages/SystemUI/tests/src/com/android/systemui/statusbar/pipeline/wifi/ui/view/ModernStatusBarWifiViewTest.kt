@@ -32,6 +32,7 @@ import com.android.systemui.statusbar.phone.StatusBarLocation
 import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
+import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.FakeWifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiInteractor
 import com.android.systemui.statusbar.pipeline.wifi.shared.WifiConstants
@@ -182,6 +183,9 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
     @Test
     fun isIconVisible_notEnabled_outputsFalse() {
         wifiRepository.setIsWifiEnabled(false)
+        wifiRepository.setWifiNetwork(
+            WifiNetworkModel.Active(NETWORK_ID, isValidated = true, level = 2)
+        )
 
         val view = ModernStatusBarWifiView.constructAndBind(
             context, SLOT_NAME, viewModel, StatusBarLocation.HOME
@@ -198,6 +202,9 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
     @Test
     fun isIconVisible_enabled_outputsTrue() {
         wifiRepository.setIsWifiEnabled(true)
+        wifiRepository.setWifiNetwork(
+            WifiNetworkModel.Active(NETWORK_ID, isValidated = true, level = 2)
+        )
 
         val view = ModernStatusBarWifiView.constructAndBind(
             context, SLOT_NAME, viewModel, StatusBarLocation.HOME
@@ -221,3 +228,4 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
 }
 
 private const val SLOT_NAME = "TestSlotName"
+private const val NETWORK_ID = 200
