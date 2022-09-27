@@ -291,7 +291,11 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     public void finishDrawing(IWindow window,
             @Nullable SurfaceControl.Transaction postDrawTransaction, int seqId) {
         if (DEBUG) Slog.v(TAG_WM, "IWindow finishDrawing called for " + window);
+        if (Trace.isTagEnabled(TRACE_TAG_WINDOW_MANAGER)) {
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "finishDrawing: " + mPackageName);
+        }
         mService.finishDrawingWindow(this, window, postDrawTransaction, seqId);
+        Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
 
     @Override
