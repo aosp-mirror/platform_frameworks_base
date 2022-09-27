@@ -53317,6 +53317,7 @@ package android.view.inputmethod {
     method public default void performHandwritingGesture(@NonNull android.view.inputmethod.HandwritingGesture, @Nullable java.util.concurrent.Executor, @Nullable java.util.function.IntConsumer);
     method public boolean performPrivateCommand(String, android.os.Bundle);
     method public default boolean performSpellCheck();
+    method public default boolean replaceText(@IntRange(from=0) int, @IntRange(from=0) int, @NonNull CharSequence, int, @Nullable android.view.inputmethod.TextAttribute);
     method public boolean reportFullscreenMode(boolean);
     method public boolean requestCursorUpdates(int);
     method public default boolean requestCursorUpdates(int, int);

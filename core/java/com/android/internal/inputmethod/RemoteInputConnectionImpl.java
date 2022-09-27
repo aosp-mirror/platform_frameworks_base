@@ -1185,6 +1185,30 @@ public final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub
         });
     }
 
+    @Dispatching(cancellable = true)
+    @Override
+    public void replaceText(
+            InputConnectionCommandHeader header,
+            int start,
+            int end,
+            @NonNull CharSequence text,
+            int newCursorPosition,
+            @Nullable TextAttribute textAttribute) {
+        dispatchWithTracing(
+                "replaceText",
+                () -> {
+                    if (header.mSessionId != mCurrentSessionId.get()) {
+                        return; // cancelled
+                    }
+                    InputConnection ic = getInputConnection();
+                    if (ic == null || !isActive()) {
+                        Log.w(TAG, "replaceText on inactive InputConnection");
+                        return;
+                    }
+                    ic.replaceText(start, end, text, newCursorPosition, textAttribute);
+                });
+    }
+
     private final IRemoteAccessibilityInputConnection mAccessibilityInputConnection =
             new IRemoteAccessibilityInputConnection.Stub() {
         @Dispatching(cancellable = true)
