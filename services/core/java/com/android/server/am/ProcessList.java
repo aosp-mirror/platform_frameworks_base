@@ -27,6 +27,7 @@ import static android.os.MessageQueue.OnFileDescriptorEventListener.EVENT_INPUT;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 import static android.os.Process.ZYGOTE_POLICY_FLAG_EMPTY;
+import static android.os.Process.getAdvertisedMem;
 import static android.os.Process.getFreeMemory;
 import static android.os.Process.getTotalMemory;
 import static android.os.Process.killProcessQuiet;
@@ -1532,6 +1533,7 @@ public final class ProcessList {
     void getMemoryInfo(ActivityManager.MemoryInfo outInfo) {
         final long homeAppMem = getMemLevel(HOME_APP_ADJ);
         final long cachedAppMem = getMemLevel(CACHED_APP_MIN_ADJ);
+        outInfo.advertisedMem = getAdvertisedMem();
         outInfo.availMem = getFreeMemory();
         outInfo.totalMem = getTotalMemory();
         outInfo.threshold = homeAppMem;
