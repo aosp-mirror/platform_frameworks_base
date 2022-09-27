@@ -148,6 +148,14 @@ public interface AppOpsServiceInterface {
     /**
      * Temporary API which will be removed once we can safely untangle the methods that use this.
      * Notify that the app-op's mode is changed by triggering the change listener.
+     * @param op App-op whose mode has changed
+     * @param uid user id associated with the app-op (or, if UID_ANY, notifies all users)
+     */
+    void notifyWatchersOfChange(int op, int uid);
+
+    /**
+     * Temporary API which will be removed once we can safely untangle the methods that use this.
+     * Notify that the app-op's mode is changed by triggering the change listener.
      * @param changedListener the change listener.
      * @param op App-op whose mode has changed
      * @param uid user id associated with the app-op
@@ -198,5 +206,4 @@ public interface AppOpsServiceInterface {
      * @param printWriter writer to dump to.
      */
     boolean dumpListeners(int dumpOp, int dumpUid, String dumpPackage, PrintWriter printWriter);
-
 }
