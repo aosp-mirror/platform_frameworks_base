@@ -399,24 +399,6 @@ public class ScreenshotController {
     }
 
     /**
-     * Displays a screenshot selector
-     */
-    @MainThread
-    void takeScreenshotPartial(ComponentName topComponent,
-            final Consumer<Uri> finisher, RequestCallback requestCallback) {
-        Assert.isMainThread();
-        mScreenshotView.reset();
-        mCurrentRequestCallback = requestCallback;
-
-        attachWindow();
-        mWindow.setContentView(mScreenshotView);
-        mScreenshotView.requestApplyInsets();
-
-        mScreenshotView.takePartialScreenshot(
-                rect -> takeScreenshotInternal(topComponent, finisher, rect));
-    }
-
-    /**
      * Clears current screenshot
      */
     void dismissScreenshot(boolean immediate) {
