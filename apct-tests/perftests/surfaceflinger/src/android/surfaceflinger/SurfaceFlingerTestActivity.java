@@ -22,6 +22,7 @@ import android.os.Bundle;
 import android.view.SurfaceControl;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.Window;
 import android.view.WindowManager;
 
 import java.util.concurrent.CountDownLatch;
@@ -38,12 +39,15 @@ public class SurfaceFlingerTestActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         mTestSurfaceView = new TestSurfaceView(this);
         setContentView(mTestSurfaceView);
     }
 
-    public SurfaceControl createChildSurfaceControl() throws InterruptedException {
+    public SurfaceControl createChildSurfaceControl() {
         return mTestSurfaceView.getChildSurfaceControlHelper();
     }
 
@@ -65,8 +69,11 @@ public class SurfaceFlingerTestActivity extends Activity {
             });
         }
 
-        public SurfaceControl getChildSurfaceControlHelper() throws InterruptedException {
-            mIsReady.await();
+        public SurfaceControl getChildSurfaceControlHelper() {
+            try {
+                mIsReady.await();
+            } catch (InterruptedException ignore) {
+            }
             SurfaceHolder holder = getHolder();
 
             // check to see if surface is valid
