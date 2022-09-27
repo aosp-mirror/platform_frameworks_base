@@ -60,12 +60,12 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 @SuppressLint("LongLogTag")
 public class VirtualDeviceManagerService extends SystemService {
 
-    private static final boolean DEBUG = false;
     private static final String TAG = "VirtualDeviceManagerService";
 
     private final Object mVirtualDeviceManagerLock = new Object();
@@ -73,6 +73,10 @@ public class VirtualDeviceManagerService extends SystemService {
     private final VirtualDeviceManagerInternal mLocalService;
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final PendingTrampolineMap mPendingTrampolines = new PendingTrampolineMap(mHandler);
+
+    private static AtomicInteger sNextUniqueIndex = new AtomicInteger(
+            VirtualDeviceManager.DEFAULT_DEVICE_ID + 1);
+
     /**
      * Mapping from user IDs to CameraAccessControllers.
      */
@@ -260,8 +264,10 @@ public class VirtualDeviceManagerService extends SystemService {
                 final int userId = UserHandle.getUserId(callingUid);
                 final CameraAccessController cameraAccessController =
                         mCameraAccessControllers.get(userId);
+                final int uniqueId = sNextUniqueIndex.getAndIncrement();
+
                 VirtualDeviceImpl virtualDevice = new VirtualDeviceImpl(getContext(),
-                        associationInfo, token, callingUid,
+                        associationInfo, token, callingUid, uniqueId,
                         new VirtualDeviceImpl.OnDeviceCloseListener() {
                             @Override
                             public void onClose(int associationId) {

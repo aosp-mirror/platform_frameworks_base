@@ -95,6 +95,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     private final AssociationInfo mAssociationInfo;
     private final PendingTrampolineCallback mPendingTrampolineCallback;
     private final int mOwnerUid;
+    private final int mDeviceId;
     private final InputController mInputController;
     private VirtualAudioController mVirtualAudioController;
     @VisibleForTesting
@@ -140,19 +141,40 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     private final SparseArray<GenericWindowPolicyController> mWindowPolicyControllers =
             new SparseArray<>();
 
-    VirtualDeviceImpl(Context context, AssociationInfo associationInfo,
-            IBinder token, int ownerUid, OnDeviceCloseListener listener,
+    VirtualDeviceImpl(
+            Context context,
+            AssociationInfo associationInfo,
+            IBinder token,
+            int ownerUid,
+            int deviceId,
+            OnDeviceCloseListener listener,
             PendingTrampolineCallback pendingTrampolineCallback,
             IVirtualDeviceActivityListener activityListener,
             Consumer<ArraySet<Integer>> runningAppsChangedCallback,
             VirtualDeviceParams params) {
-        this(context, associationInfo, token, ownerUid, /* inputController= */ null, listener,
-                pendingTrampolineCallback, activityListener, runningAppsChangedCallback, params);
+        this(
+                context,
+                associationInfo,
+                token,
+                ownerUid,
+                deviceId,
+                /* inputController= */ null,
+                listener,
+                pendingTrampolineCallback,
+                activityListener,
+                runningAppsChangedCallback,
+                params);
     }
 
     @VisibleForTesting
-    VirtualDeviceImpl(Context context, AssociationInfo associationInfo, IBinder token,
-            int ownerUid, InputController inputController, OnDeviceCloseListener listener,
+    VirtualDeviceImpl(
+            Context context,
+            AssociationInfo associationInfo,
+            IBinder token,
+            int ownerUid,
+            int deviceId,
+            InputController inputController,
+            OnDeviceCloseListener listener,
             PendingTrampolineCallback pendingTrampolineCallback,
             IVirtualDeviceActivityListener activityListener,
             Consumer<ArraySet<Integer>> runningAppsChangedCallback,
@@ -164,6 +186,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         mActivityListener = activityListener;
         mRunningAppsChangedCallback = runningAppsChangedCallback;
         mOwnerUid = ownerUid;
+        mDeviceId = deviceId;
         mAppToken = token;
         mParams = params;
         if (inputController == null) {
@@ -197,6 +220,12 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     /** Returns the device display name. */
     CharSequence getDisplayName() {
         return mAssociationInfo.getDisplayName();
+    }
+
+    /** Returns the unique device ID of this device. */
+    @Override // Binder call
+    public int getDeviceId() {
+        return mDeviceId;
     }
 
     @Override // Binder call
