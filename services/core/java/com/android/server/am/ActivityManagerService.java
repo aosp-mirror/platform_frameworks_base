@@ -245,6 +245,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.PermissionInfo;
+import android.content.pm.PermissionMethod;
 import android.content.pm.ProcessInfo;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ProviderInfoList;
@@ -5963,6 +5964,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    /**
+     * Allows if {@code pid} is {@link #MY_PID}, then denies if the {@code pid} has been denied
+     * provided non-{@code null} {@code permission} before. Otherwise calls into
+     * {@link ActivityManager#checkComponentPermission(String, int, int, boolean)}.
+     */
+    @PermissionMethod
     public static int checkComponentPermission(String permission, int pid, int uid,
             int owningUid, boolean exported) {
         if (pid == MY_PID) {
@@ -6009,6 +6016,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * This can be called with or without the global lock held.
      */
     @Override
+    @PermissionMethod
     public int checkPermission(String permission, int pid, int uid) {
         if (permission == null) {
             return PackageManager.PERMISSION_DENIED;
@@ -6020,6 +6028,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * Binder IPC calls go through the public entry point.
      * This can be called with or without the global lock held.
      */
+    @PermissionMethod
     int checkCallingPermission(String permission) {
         return checkPermission(permission,
                 Binder.getCallingPid(),
@@ -6029,6 +6038,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     /**
      * This can be called with or without the global lock held.
      */
+    @PermissionMethod
     void enforceCallingPermission(String permission, String func) {
         if (checkCallingPermission(permission)
                 == PackageManager.PERMISSION_GRANTED) {
@@ -6046,6 +6056,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     /**
      * This can be called with or without the global lock held.
      */
+    @PermissionMethod
     void enforcePermission(String permission, int pid, int uid, String func) {
         if (checkPermission(permission, pid, uid) == PackageManager.PERMISSION_GRANTED) {
             return;
