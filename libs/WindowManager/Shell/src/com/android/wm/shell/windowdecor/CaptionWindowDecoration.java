@@ -34,7 +34,7 @@ import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.SyncTransactionQueue;
-import com.android.wm.shell.desktopmode.DesktopMode;
+import com.android.wm.shell.desktopmode.DesktopModeStatus;
 
 /**
  * Defines visuals and behaviors of a window decoration of a caption bar and shadows. It works with
@@ -164,7 +164,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         View caption = mResult.mRootView.findViewById(R.id.caption);
         caption.setOnTouchListener(mOnCaptionTouchListener);
         View maximize = caption.findViewById(R.id.maximize_window);
-        if (DesktopMode.IS_SUPPORTED) {
+        if (DesktopModeStatus.IS_SUPPORTED) {
             // Hide maximize button when desktop mode is available
             maximize.setVisibility(View.GONE);
         } else {

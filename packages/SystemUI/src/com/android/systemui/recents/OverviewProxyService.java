@@ -27,6 +27,7 @@ import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 import static com.android.internal.accessibility.common.ShortcutConstants.CHOOSER_PACKAGE_NAME;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_RECENT_TASKS;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SHELL_BACK_ANIMATION;
+import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SHELL_DESKTOP_MODE;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SHELL_FLOATING_TASKS;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SHELL_ONE_HANDED;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SHELL_PIP;
@@ -110,6 +111,7 @@ import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.StatusBarWindowCallback;
 import com.android.systemui.statusbar.policy.CallbackController;
 import com.android.wm.shell.back.BackAnimation;
+import com.android.wm.shell.desktopmode.DesktopMode;
 import com.android.wm.shell.floating.FloatingTasks;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.pip.Pip;
@@ -169,6 +171,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
     private final KeyguardUnlockAnimationController mSysuiUnlockAnimationController;
     private final Optional<RecentTasks> mRecentTasks;
     private final Optional<BackAnimation> mBackAnimation;
+    private final Optional<DesktopMode> mDesktopModeOptional;
     private final UiEventLogger mUiEventLogger;
 
     private Region mActiveNavBarRegion;
@@ -488,6 +491,9 @@ public class OverviewProxyService extends CurrentUserTracker implements
             mBackAnimation.ifPresent((backAnimation) -> params.putBinder(
                     KEY_EXTRA_SHELL_BACK_ANIMATION,
                     backAnimation.createExternalInterface().asBinder()));
+            mDesktopModeOptional.ifPresent((desktopMode -> params.putBinder(
+                    KEY_EXTRA_SHELL_DESKTOP_MODE,
+                    desktopMode.createExternalInterface().asBinder())));
 
             try {
                 Log.d(TAG_OPS, "OverviewProxyService connected, initializing overview proxy");
@@ -573,6 +579,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
             Optional<RecentTasks> recentTasks,
             Optional<BackAnimation> backAnimation,
             Optional<StartingSurface> startingSurface,
+            Optional<DesktopMode> desktopModeOptional,
             BroadcastDispatcher broadcastDispatcher,
             ShellTransitions shellTransitions,
             ScreenLifecycle screenLifecycle,
@@ -607,6 +614,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
         mShellTransitions = shellTransitions;
         mRecentTasks = recentTasks;
         mBackAnimation = backAnimation;
+        mDesktopModeOptional = desktopModeOptional;
         mUiEventLogger = uiEventLogger;
 
         dumpManager.registerDumpable(getClass().getSimpleName(), this);
