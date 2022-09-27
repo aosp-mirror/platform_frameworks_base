@@ -19,17 +19,12 @@ import android.content.pm.PackageManager.NameNotFoundException
 import android.content.res.Resources
 import android.test.suitebuilder.annotation.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.dump.DumpManager
 import com.android.systemui.util.DeviceConfigProxyFake
-import com.android.systemui.util.mockito.any
 import com.google.common.truth.Truth.assertThat
-import org.junit.After
 import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
-import org.mockito.Mockito.verify
-import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 
@@ -43,7 +38,6 @@ class FeatureFlagsReleaseTest : SysuiTestCase() {
 
     @Mock private lateinit var mResources: Resources
     @Mock private lateinit var mSystemProperties: SystemPropertiesHelper
-    @Mock private lateinit var mDumpManager: DumpManager
     private val serverFlagReader = ServerFlagReaderFake()
 
     private val deviceConfig = DeviceConfigProxyFake()
@@ -55,15 +49,7 @@ class FeatureFlagsReleaseTest : SysuiTestCase() {
             mResources,
             mSystemProperties,
             deviceConfig,
-            serverFlagReader,
-            mDumpManager)
-    }
-
-    @After
-    fun onFinished() {
-        // The dump manager should be registered with even for the release version, but that's it.
-        verify(mDumpManager).registerDumpable(any(), any())
-        verifyNoMoreInteractions(mDumpManager)
+            serverFlagReader)
     }
 
     @Test

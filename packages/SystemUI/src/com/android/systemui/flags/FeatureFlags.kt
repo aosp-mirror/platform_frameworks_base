@@ -16,12 +16,14 @@
 
 package com.android.systemui.flags
 
+import android.util.Dumpable
+
 /**
  * Class to manage simple DeviceConfig-based feature flags.
  *
  * See [Flags] for instructions on defining new flags.
  */
-interface FeatureFlags : FlagListenable {
+interface FeatureFlags : FlagListenable, Dumpable {
     /** Returns a boolean value for the given flag.  */
     fun isEnabled(flag: UnreleasedFlag): Boolean
 

@@ -21,15 +21,10 @@ import android.content.Intent
 import android.content.pm.PackageManager.NameNotFoundException
 import android.content.res.Resources
 import android.test.suitebuilder.annotation.SmallTest
-import com.android.internal.statusbar.IStatusBarService
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.dump.DumpManager
-import com.android.systemui.statusbar.commandline.Command
 import com.android.systemui.statusbar.commandline.CommandRegistry
 import com.android.systemui.util.DeviceConfigProxyFake
 import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.argumentCaptor
-import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.mockito.withArgCaptor
@@ -46,18 +41,16 @@ import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
 import org.mockito.Mockito.anyBoolean
 import org.mockito.Mockito.anyString
-import org.mockito.Mockito.atLeastOnce
 import org.mockito.Mockito.inOrder
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
-import org.mockito.Mockito.verifyZeroInteractions
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 
 /**
- * NOTE: This test is for the version of FeatureFlagManager in src-release, which should not allow
- * overriding, and should never return any value other than the one provided as the default.
+ * NOTE: This test is for the version of FeatureFlagManager in src-debug, which allows overriding
+ * the default.
  */
 @SmallTest
 class FeatureFlagsDebugTest : SysuiTestCase() {
@@ -68,10 +61,8 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
     @Mock private lateinit var secureSettings: SecureSettings
     @Mock private lateinit var systemProperties: SystemPropertiesHelper
     @Mock private lateinit var resources: Resources
-    @Mock private lateinit var dumpManager: DumpManager
     @Mock private lateinit var commandRegistry: CommandRegistry
-    @Mock private lateinit var barService: IStatusBarService
-    @Mock private lateinit var pw: PrintWriter
+    @Mock private lateinit var restarter: Restarter
     private val flagMap = mutableMapOf<Int, Flag<*>>()
     private lateinit var broadcastReceiver: BroadcastReceiver
     private lateinit var clearCacheAction: Consumer<Int>
@@ -92,12 +83,10 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
             secureSettings,
             systemProperties,
             resources,
-            dumpManager,
             deviceConfig,
             serverFlagReader,
             flagMap,
-            commandRegistry,
-            barService
+            restarter
         )
         verify(flagManager).onSettingsChangedAction = any()
         broadcastReceiver = withArgCaptor {
@@ -366,53 +355,6 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
     }
 
     @Test
-    fun statusBarCommand_IsRegistered() {
-        verify(commandRegistry).registerCommand(anyString(), any())
-    }
-
-    @Test
-    fun noOpCommand() {
-        val cmd = captureCommand()
-
-        cmd.execute(pw, ArrayList())
-        verify(pw, atLeastOnce()).println()
-        verify(flagManager).readFlagValue<Boolean>(eq(1), any())
-        verifyZeroInteractions(secureSettings)
-    }
-
-    @Test
-    fun readFlagCommand() {
-        addFlag(UnreleasedFlag(1))
-        val cmd = captureCommand()
-        cmd.execute(pw, listOf("1"))
-        verify(flagManager).readFlagValue<Boolean>(eq(1), any())
-    }
-
-    @Test
-    fun setFlagCommand() {
-        addFlag(UnreleasedFlag(1))
-        val cmd = captureCommand()
-        cmd.execute(pw, listOf("1", "on"))
-        verifyPutData(1, "{\"type\":\"boolean\",\"value\":true}")
-    }
-
-    @Test
-    fun toggleFlagCommand() {
-        addFlag(ReleasedFlag(1))
-        val cmd = captureCommand()
-        cmd.execute(pw, listOf("1", "toggle"))
-        verifyPutData(1, "{\"type\":\"boolean\",\"value\":false}", 2)
-    }
-
-    @Test
-    fun eraseFlagCommand() {
-        addFlag(ReleasedFlag(1))
-        val cmd = captureCommand()
-        cmd.execute(pw, listOf("1", "erase"))
-        verify(secureSettings).putStringForUser(eq("key-1"), eq(""), anyInt())
-    }
-
-    @Test
     fun dumpFormat() {
         val flag1 = ReleasedFlag(1)
         val flag2 = ResourceBooleanFlag(2, 1002)
@@ -469,13 +411,6 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
         val old = flagMap.put(flag.id, flag)
         check(old == null) { "Flag ${flag.id} already registered" }
         return flag
-    }
-
-    private fun captureCommand(): Command {
-        val captor = argumentCaptor<Function0<Command>>()
-        verify(commandRegistry).registerCommand(anyString(), capture(captor))
-
-        return captor.value.invoke()
     }
 
     private fun dumpToString(): String {

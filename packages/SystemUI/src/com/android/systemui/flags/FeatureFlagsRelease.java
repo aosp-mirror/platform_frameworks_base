@@ -24,10 +24,8 @@ import android.util.SparseBooleanArray;
 
 import androidx.annotation.NonNull;
 
-import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.dump.DumpManager;
 import com.android.systemui.util.DeviceConfigProxy;
 
 import org.jetbrains.annotations.NotNull;
@@ -44,27 +42,26 @@ import javax.inject.Inject;
  * how to set flags.
  */
 @SysUISingleton
-public class FeatureFlagsRelease implements FeatureFlags, Dumpable {
+public class FeatureFlagsRelease implements FeatureFlags {
+    static final String TAG = "SysUIFlags";
+
     private final Resources mResources;
     private final SystemPropertiesHelper mSystemProperties;
     private final DeviceConfigProxy mDeviceConfigProxy;
     private final ServerFlagReader mServerFlagReader;
     SparseBooleanArray mBooleanCache = new SparseBooleanArray();
     SparseArray<String> mStringCache = new SparseArray<>();
-    private boolean mInited;
 
     @Inject
     public FeatureFlagsRelease(
             @Main Resources resources,
             SystemPropertiesHelper systemProperties,
             DeviceConfigProxy deviceConfigProxy,
-            ServerFlagReader serverFlagReader,
-            DumpManager dumpManager) {
+            ServerFlagReader serverFlagReader) {
         mResources = resources;
         mSystemProperties = systemProperties;
         mDeviceConfigProxy = deviceConfigProxy;
         mServerFlagReader = serverFlagReader;
-        dumpManager.registerDumpable("SysUIFlags", this);
     }
 
     @Override

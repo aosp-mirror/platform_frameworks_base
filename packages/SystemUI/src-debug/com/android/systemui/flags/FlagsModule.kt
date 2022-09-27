@@ -18,6 +18,7 @@ package com.android.systemui.flags
 
 import android.content.Context
 import android.os.Handler
+import com.android.internal.statusbar.IStatusBarService
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlagsDebug.ALL_FLAGS
 import com.android.systemui.util.settings.SettingsUtilModule
@@ -27,6 +28,7 @@ import dagger.Provides
 import javax.inject.Named
 
 @Module(includes = [
+    FeatureFlagsDebugStartableModule::class,
     ServerFlagReaderModule::class,
     SettingsUtilModule::class,
 ])
@@ -46,5 +48,15 @@ abstract class FlagsModule {
         @Provides
         @Named(ALL_FLAGS)
         fun providesAllFlags(): Map<Int, Flag<*>> = Flags.collectFlags()
+
+        @JvmStatic
+        @Provides
+        fun providesRestarter(barService: IStatusBarService): Restarter {
+            return object: Restarter {
+                override fun restart() {
+                    barService.restart()
+                }
+            }
+        }
     }
 }
