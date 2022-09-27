@@ -21,7 +21,6 @@ import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
-import android.content.pm.UserInfo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -30,14 +29,25 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 
-class AppsRepository(context: Context) {
+/**
+ * The config used to load the App List.
+ */
+internal data class AppListConfig(
+    val userId: Int,
+    val showInstantApps: Boolean,
+)
+
+/**
+ * The repository to load the App List data.
+ */
+internal class AppListRepository(context: Context) {
     private val packageManager = context.packageManager
 
-    fun loadApps(userInfoFlow: Flow<UserInfo>): Flow<List<ApplicationInfo>> = userInfoFlow
+    fun loadApps(configFlow: Flow<AppListConfig>): Flow<List<ApplicationInfo>> = configFlow
         .map { loadApps(it) }
         .flowOn(Dispatchers.Default)
 
-    private suspend fun loadApps(userInfo: UserInfo): List<ApplicationInfo> {
+    private suspend fun loadApps(config: AppListConfig): List<ApplicationInfo> {
         return coroutineScope {
             val hiddenSystemModulesDeferred = async {
                 packageManager.getInstalledModules(0)
@@ -50,11 +60,11 @@ class AppsRepository(context: Context) {
                     PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS).toLong()
             )
             val installedApplicationsAsUser =
-                packageManager.getInstalledApplicationsAsUser(flags, userInfo.id)
+                packageManager.getInstalledApplicationsAsUser(flags, config.userId)
 
             val hiddenSystemModules = hiddenSystemModulesDeferred.await()
             installedApplicationsAsUser.filter { app ->
-                app.isInAppList(hiddenSystemModules)
+                app.isInAppList(config.showInstantApps, hiddenSystemModules)
             }
         }
     }
@@ -63,9 +73,7 @@ class AppsRepository(context: Context) {
         userIdFlow: Flow<Int>,
         showSystemFlow: Flow<Boolean>,
     ): Flow<(app: ApplicationInfo) -> Boolean> =
-        userIdFlow.combine(showSystemFlow) { userId, showSystem ->
-            showSystemPredicate(userId, showSystem)
-        }
+        userIdFlow.combine(showSystemFlow, ::showSystemPredicate)
 
     private suspend fun showSystemPredicate(
         userId: Int,
@@ -102,12 +110,15 @@ class AppsRepository(context: Context) {
     }
 
     companion object {
-        private fun ApplicationInfo.isInAppList(hiddenSystemModules: Set<String>) =
-            when {
-                packageName in hiddenSystemModules -> false
-                enabled -> true
-                enabledSetting == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER -> true
-                else -> false
-            }
+        private fun ApplicationInfo.isInAppList(
+            showInstantApps: Boolean,
+            hiddenSystemModules: Set<String>,
+        ) = when {
+            !showInstantApps && isInstantApp -> false
+            packageName in hiddenSystemModules -> false
+            enabled -> true
+            isDisabledUntilUsed -> true
+            else -> false
+        }
     }
 }

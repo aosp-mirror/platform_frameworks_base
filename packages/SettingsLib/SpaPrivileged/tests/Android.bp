@@ -18,36 +18,29 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
-android_library {
-    name: "SpaPrivilegedLib",
+android_test {
+    name: "SpaPrivilegedLibTests",
+    certificate: "platform",
+    platform_apis: true,
+    test_suites: ["device-tests"],
 
-    srcs: ["src/**/*.kt"],
+    srcs: [
+        ":SpaPrivilegedLib_srcs",
+        "src/**/*.kt",
+    ],
 
     static_libs: [
-        "SpaLib",
-        "SettingsLib",
+        "SpaPrivilegedLib",
         "androidx.compose.runtime_runtime",
+        "androidx.compose.ui_ui-test-junit4",
+        "androidx.compose.ui_ui-test-manifest",
+        "androidx.test.ext.junit",
+        "androidx.test.runner",
+        "mockito-target-minus-junit4",
+        "truth-prebuilt",
     ],
     kotlincflags: [
         "-Xjvm-default=all",
         "-Xopt-in=kotlin.RequiresOptIn",
     ],
-}
-
-java_defaults {
-    name: "SpaPrivilegedLib-defaults",
-    static_libs: [
-        "androidx.compose.runtime_runtime",
-        "SpaPrivilegedLib",
-    ],
-    kotlincflags: ["-Xjvm-default=all"],
-    javacflags: [
-        "-J-Xmx4G",
-    ],
-}
-
-// Expose the srcs to tests, so the tests can access the internal classes.
-filegroup {
-    name: "SpaPrivilegedLib_srcs",
-    srcs: ["src/**/*.kt"],
 }

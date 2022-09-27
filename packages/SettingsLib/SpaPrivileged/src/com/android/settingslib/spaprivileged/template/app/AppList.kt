@@ -16,7 +16,6 @@
 
 package com.android.settingslib.spaprivileged.template.app
 
-import android.content.pm.UserInfo
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
@@ -33,6 +32,7 @@ import com.android.settingslib.spa.framework.compose.toState
 import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.widget.ui.PlaceholderTitle
 import com.android.settingslib.spaprivileged.R
+import com.android.settingslib.spaprivileged.model.app.AppListConfig
 import com.android.settingslib.spaprivileged.model.app.AppListData
 import com.android.settingslib.spaprivileged.model.app.AppListModel
 import com.android.settingslib.spaprivileged.model.app.AppListViewModel
@@ -41,17 +41,22 @@ import kotlinx.coroutines.Dispatchers
 
 private const val TAG = "AppList"
 
+/**
+ * The template to render an App List.
+ *
+ * This UI element will take the remaining space on the screen to show the App List.
+ */
 @Composable
 internal fun <T : AppRecord> AppList(
-    userInfo: UserInfo,
+    appListConfig: AppListConfig,
     listModel: AppListModel<T>,
     showSystem: State<Boolean>,
     option: State<Int>,
     searchQuery: State<String>,
     appItem: @Composable (itemState: AppListItemModel<T>) -> Unit,
 ) {
-    LogCompositions(TAG, userInfo.id.toString())
-    val appListData = loadAppEntries(userInfo, listModel, showSystem, option, searchQuery)
+    LogCompositions(TAG, appListConfig.userId.toString())
+    val appListData = loadAppEntries(appListConfig, listModel, showSystem, option, searchQuery)
     AppListWidget(appListData, listModel, appItem)
 }
 
@@ -85,14 +90,14 @@ private fun <T : AppRecord> AppListWidget(
 
 @Composable
 private fun <T : AppRecord> loadAppEntries(
-    userInfo: UserInfo,
+    appListConfig: AppListConfig,
     listModel: AppListModel<T>,
     showSystem: State<Boolean>,
     option: State<Int>,
     searchQuery: State<String>,
 ): State<AppListData<T>?> {
-    val viewModel: AppListViewModel<T> = viewModel(key = userInfo.id.toString())
-    viewModel.userInfo.setIfAbsent(userInfo)
+    val viewModel: AppListViewModel<T> = viewModel(key = appListConfig.userId.toString())
+    viewModel.appListConfig.setIfAbsent(appListConfig)
     viewModel.listModel.setIfAbsent(listModel)
     viewModel.showSystem.Sync(showSystem)
     viewModel.option.Sync(option)
