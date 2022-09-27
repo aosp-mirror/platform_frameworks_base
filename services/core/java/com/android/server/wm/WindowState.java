@@ -2042,9 +2042,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * it must be drawn before allDrawn can become true.
      */
     boolean isInteresting() {
+        final RecentsAnimationController recentsAnimationController =
+                mWmService.getRecentsAnimationController();
         return mActivityRecord != null && !mAppDied
                 && (!mActivityRecord.isFreezingScreen() || !mAppFreezing)
-                && mViewVisibility == View.VISIBLE;
+                && mViewVisibility == View.VISIBLE
+                && (recentsAnimationController == null
+                         || recentsAnimationController.isInterestingForAllDrawn(this));
     }
 
     /**
