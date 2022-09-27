@@ -25,7 +25,7 @@ import kotlinx.coroutines.flow.StateFlow
 /** A view model for the wifi icon shown in quick settings (when the shade is pulled down). */
 class QsWifiViewModel(
     statusBarPipelineFlags: StatusBarPipelineFlags,
-    wifiIcon: StateFlow<Icon?>,
+    wifiIcon: StateFlow<Icon.Resource?>,
     isActivityInViewVisible: Flow<Boolean>,
     isActivityOutViewVisible: Flow<Boolean>,
     isActivityContainerVisible: Flow<Boolean>,
