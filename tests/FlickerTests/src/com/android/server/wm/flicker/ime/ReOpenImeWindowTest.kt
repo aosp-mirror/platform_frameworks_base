@@ -26,11 +26,9 @@ import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group2
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper
-import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.helpers.reopenAppFromOverview
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.traces.common.ComponentNameMatcher
-import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -113,30 +111,11 @@ open class ReOpenImeWindowTest(testSpec: FlickerTestParameter) : BaseTest(testSp
 
     @Presubmit
     @Test
-    fun imeWindowIsAlwaysVisible() = testSpec.imeWindowIsAlwaysVisible(!isShellTransitionsEnabled)
+    fun imeWindowIsAlwaysVisible() = testSpec.imeWindowIsAlwaysVisible()
 
     @Presubmit
     @Test
-    fun imeAppWindowVisibilityLegacy() {
-        Assume.assumeFalse(isShellTransitionsEnabled)
-        // the app starts visible in live tile, and stays visible for the duration of entering
-        // and exiting overview. However, legacy transitions seem to have a bug which causes
-        // everything to restart during the test, so expect the app to disappear and come back.
-        // Since we log 1x per frame, sometimes the activity visibility and the app visibility
-        // are updated together, sometimes not, thus ignore activity check at the start
-        testSpec.assertWm {
-            this.isAppWindowVisible(testApp)
-                    .then()
-                    .isAppWindowInvisible(testApp)
-                    .then()
-                    .isAppWindowVisible(testApp)
-        }
-    }
-
-    @Presubmit
-    @Test
-    fun imeAppWindowIsAlwaysVisibleShellTransit() {
-        Assume.assumeTrue(isShellTransitionsEnabled)
+    fun imeAppWindowIsAlwaysVisible() {
         // the app starts visible in live tile, and stays visible for the duration of entering
         // and exiting overview. Since we log 1x per frame, sometimes the activity visibility
         // and the app visibility are updated together, sometimes not, thus ignore activity
@@ -148,21 +127,7 @@ open class ReOpenImeWindowTest(testSpec: FlickerTestParameter) : BaseTest(testSp
 
     @Presubmit
     @Test
-    fun imeLayerIsBecomesVisibleLegacy() {
-        Assume.assumeFalse(isShellTransitionsEnabled)
-        testSpec.assertLayers {
-            this.isVisible(ComponentNameMatcher.IME)
-                    .then()
-                    .isInvisible(ComponentNameMatcher.IME)
-                    .then()
-                    .isVisible(ComponentNameMatcher.IME)
-        }
-    }
-
-    @Presubmit
-    @Test
-    fun imeLayerBecomesVisibleShellTransit() {
-        Assume.assumeTrue(isShellTransitionsEnabled)
+    fun imeLayerBecomesVisible() {
         testSpec.assertLayers {
             this.isVisible(ComponentNameMatcher.IME)
         }

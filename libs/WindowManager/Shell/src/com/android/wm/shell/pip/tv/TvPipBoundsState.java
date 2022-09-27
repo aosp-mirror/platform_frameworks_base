@@ -87,6 +87,7 @@ public class TvPipBoundsState extends PipBoundsState {
     public void resetTvPipState() {
         mTvFixedPipOrientation = ORIENTATION_UNDETERMINED;
         mTvPipGravity = DEFAULT_TV_GRAVITY;
+        mTvPipManuallyCollapsed = false;
     }
 
     /** Set the tv expanded bounds of PiP */
