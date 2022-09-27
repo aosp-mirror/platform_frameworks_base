@@ -3118,6 +3118,34 @@
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_APP_EXEMPTIONS"
                 android:protectionLevel="signature|role" />
 
+    <!-- Allows an application to manage date and time device policy. -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_TIME"
+                android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to set device policies outside the current user
+        that are critical for securing data within the current user.
+        <p>Holding this permission allows the use of other held MANAGE_DEVICE_POLICY_*
+            permissions across all users on the device provided they are required for securing data
+            within the current user.-->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_ACROSS_USERS_SECURITY_CRITICAL"
+                android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to set device policies outside the current user
+        that are required for securing device ownership without accessing user data.
+        <p>Holding this permission allows the use of other held MANAGE_DEVICE_POLICY_*
+            permissions across all users on the device provided they do not grant access to user
+            data. -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_ACROSS_USERS"
+                android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to set device policies outside the current user.
+        <p>Fuller form of {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS}
+             that removes the restriction on accessing user data.
+        <p>Holding this permission allows the use of any other held MANAGE_DEVICE_POLICY_*
+            permissions across all users on the device.-->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL"
+                android:protectionLevel="internal|role" />
+
     <!-- @SystemApi @hide Allows an application to set a device owner on retail demo devices.-->
     <permission android:name="android.permission.PROVISION_DEMO_DEVICE"
                 android:protectionLevel="signature|setup" />
