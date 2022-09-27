@@ -22,11 +22,11 @@ import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_MICROPHO
 import static android.app.ActivityManager.PROCESS_CAPABILITY_NONE;
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.ActivityManager.ProcessCapability;
+import static android.app.AppOpsManager.MIN_PRIORITY_UID_STATE;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.app.AppOpsManager.OP_CAMERA;
 import static android.app.AppOpsManager.OP_RECORD_AUDIO;
-import static android.app.AppOpsManager.UID_STATE_CACHED;
 import static android.app.AppOpsManager.UID_STATE_FOREGROUND_SERVICE;
 import static android.app.AppOpsManager.UID_STATE_MAX_LAST_NON_RESTRICTED;
 import static android.app.AppOpsManager.UID_STATE_TOP;
@@ -89,7 +89,7 @@ class AppOpsUidStateTrackerImpl implements AppOpsUidStateTracker {
 
     private int getUidStateLocked(int uid) {
         updateUidPendingStateIfNeeded(uid);
-        return mUidStates.get(uid, UID_STATE_CACHED);
+        return mUidStates.get(uid, MIN_PRIORITY_UID_STATE);
     }
 
     @Override
@@ -191,8 +191,13 @@ class AppOpsUidStateTrackerImpl implements AppOpsUidStateTracker {
 
         int prevUidState = mUidStates.get(uid, AppOpsManager.MIN_PRIORITY_UID_STATE);
         int prevCapability = mCapability.get(uid, PROCESS_CAPABILITY_NONE);
+        int pendingUidState = mPendingUidStates.get(uid, MIN_PRIORITY_UID_STATE);
+        int pendingCapability = mPendingCapability.get(uid, PROCESS_CAPABILITY_NONE);
         long pendingStateCommitTime = mPendingCommitTime.get(uid, 0);
-        if (uidState != prevUidState || capability != prevCapability) {
+        if ((pendingStateCommitTime == 0
+                && (uidState != prevUidState || capability != prevCapability))
+                || (pendingStateCommitTime != 0
+                && (uidState != pendingUidState || capability != pendingCapability))) {
             mPendingUidStates.put(uid, uidState);
             mPendingCapability.put(uid, capability);
 
@@ -236,7 +241,7 @@ class AppOpsUidStateTrackerImpl implements AppOpsUidStateTracker {
 
     @Override
     public void dumpUidState(PrintWriter pw, int uid, long nowElapsed) {
-        int state = mUidStates.get(uid, UID_STATE_CACHED);
+        int state = mUidStates.get(uid, MIN_PRIORITY_UID_STATE);
         // if no pendingState set to state to suppress output
         int pendingState = mPendingUidStates.get(uid, state);
         pw.print("    state=");
@@ -294,11 +299,11 @@ class AppOpsUidStateTrackerImpl implements AppOpsUidStateTracker {
     }
 
     private void commitUidPendingState(int uid) {
-        int pendingUidState = mPendingUidStates.get(uid, UID_STATE_CACHED);
+        int pendingUidState = mPendingUidStates.get(uid, MIN_PRIORITY_UID_STATE);
         int pendingCapability = mPendingCapability.get(uid, PROCESS_CAPABILITY_NONE);
         boolean pendingVisibleAppWidget = mPendingVisibleAppWidget.get(uid, false);
 
-        int uidState = mUidStates.get(uid, UID_STATE_CACHED);
+        int uidState = mUidStates.get(uid, MIN_PRIORITY_UID_STATE);
         int capability = mCapability.get(uid, PROCESS_CAPABILITY_NONE);
         boolean visibleAppWidget = mVisibleAppWidget.get(uid, false);
 
