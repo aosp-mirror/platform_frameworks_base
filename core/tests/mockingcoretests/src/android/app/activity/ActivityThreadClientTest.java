@@ -207,7 +207,7 @@ public class ActivityThreadClientTest {
 
         assertFalse("Must not report change if no public diff",
                 shouldReportChange(currentConfig, newConfig, null /* sizeBuckets */,
-                        0 /* handledConfigChanges */));
+                        0 /* handledConfigChanges */, false /* alwaysReportChange */));
 
         final int[] verticalThresholds = {100, 400};
         final SizeConfigurationBuckets buckets = new SizeConfigurationBuckets(
@@ -221,24 +221,33 @@ public class ActivityThreadClientTest {
 
         assertFalse("Must not report changes if the diff is small and not handled",
                 shouldReportChange(currentConfig, newConfig, buckets,
-                        CONFIG_FONT_SCALE /* handledConfigChanges */));
+                        CONFIG_FONT_SCALE /* handledConfigChanges */,
+                        false /* alwaysReportChange */));
 
         assertTrue("Must report changes if the small diff is handled",
                 shouldReportChange(currentConfig, newConfig, buckets,
-                        CONFIG_SCREEN_SIZE /* handledConfigChanges */));
+                        CONFIG_SCREEN_SIZE /* handledConfigChanges */,
+                        false /* alwaysReportChange */));
+
+        assertTrue("Must report changes if it should, even it is small and not handled",
+                shouldReportChange(currentConfig, newConfig, buckets,
+                        CONFIG_FONT_SCALE /* handledConfigChanges */,
+                        true /* alwaysReportChange */));
 
         currentConfig.fontScale = 0.8f;
         newConfig.fontScale = 1.2f;
 
         assertTrue("Must report handled changes regardless of small unhandled change",
                 shouldReportChange(currentConfig, newConfig, buckets,
-                        CONFIG_FONT_SCALE /* handledConfigChanges */));
+                        CONFIG_FONT_SCALE /* handledConfigChanges */,
+                        false /* alwaysReportChange */));
 
         newConfig.screenHeightDp = 500;
 
         assertFalse("Must not report changes if there's unhandled big changes",
                 shouldReportChange(currentConfig, newConfig, buckets,
-                        CONFIG_FONT_SCALE /* handledConfigChanges */));
+                        CONFIG_FONT_SCALE /* handledConfigChanges */,
+                        false /* alwaysReportChange */));
     }
 
     private void recreateAndVerifyNoRelaunch(ActivityThread activityThread, TestActivity activity) {
