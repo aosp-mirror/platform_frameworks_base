@@ -32,6 +32,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.server.policy.PhoneWindowManager.LONG_PRESS_POWER_ASSISTANT;
 import static com.android.server.policy.PhoneWindowManager.LONG_PRESS_POWER_GLOBAL_ACTIONS;
@@ -53,6 +54,7 @@ import android.app.AppOpsManager;
 import android.app.NotificationManager;
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerInternal;
@@ -62,6 +64,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.PowerManager;
 import android.os.PowerManagerInternal;
+import android.os.RemoteException;
 import android.os.Vibrator;
 import android.service.dreams.DreamManagerInternal;
 import android.telecom.TelecomManager;
@@ -73,12 +76,16 @@ import com.android.dx.mockito.inline.extended.StaticMockitoSession;
 import com.android.internal.accessibility.AccessibilityShortcutController;
 import com.android.server.GestureLauncherService;
 import com.android.server.LocalServices;
+import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.vr.VrManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.DisplayPolicy;
 import com.android.server.wm.DisplayRotation;
 import com.android.server.wm.WindowManagerInternal;
 
+import junit.framework.Assert;
+
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockSettings;
 import org.mockito.Mockito;
@@ -117,6 +124,8 @@ class TestPhoneWindowManager {
     @Mock private GestureLauncherService mGestureLauncherService;
     @Mock private GlobalActions mGlobalActions;
     @Mock private AccessibilityShortcutController mAccessibilityShortcutController;
+
+    @Mock private StatusBarManagerInternal mStatusBarManagerInternal;
 
     private StaticMockitoSession mMockitoSession;
     private HandlerThread mHandlerThread;
@@ -226,6 +235,8 @@ class TestPhoneWindowManager {
         mPhoneWindowManager.systemBooted();
 
         overrideLaunchAccessibility();
+        doReturn(false).when(mPhoneWindowManager).keyguardOn();
+        doNothing().when(mContext).startActivityAsUser(any(), any());
     }
 
     void tearDown() {
@@ -310,6 +321,22 @@ class TestPhoneWindowManager {
         doReturn(true).when(mTelecomManager).endCall();
     }
 
+    void overrideExpandNotificationsPanel() {
+        // Can't directly mock on IStatusbarService, use spyOn and override the specific api.
+        mPhoneWindowManager.getStatusBarService();
+        spyOn(mPhoneWindowManager.mStatusBarService);
+        try {
+            doNothing().when(mPhoneWindowManager.mStatusBarService).expandNotificationsPanel();
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    void overrideStatusBarManagerInternal() {
+        doReturn(mStatusBarManagerInternal).when(
+                () -> LocalServices.getService(eq(StatusBarManagerInternal.class)));
+    }
+
     /**
      * Below functions will check the policy behavior could be invoked.
      */
@@ -367,5 +394,47 @@ class TestPhoneWindowManager {
     void assertAssistLaunch() {
         waitForIdle();
         verify(mSearchManager, timeout(SHORTCUT_KEY_DELAY_MILLIS)).launchAssist(any());
+    }
+
+    void assertLaunchCategory(String category) {
+        waitForIdle();
+        ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
+        verify(mContext).startActivityAsUser(intentCaptor.capture(), any());
+        Assert.assertTrue(intentCaptor.getValue().getSelector().hasCategory(category));
+        // Reset verifier for next call.
+        Mockito.reset(mContext);
+    }
+
+    void assertShowRecentApps() {
+        waitForIdle();
+        verify(mStatusBarManagerInternal).showRecentApps(anyBoolean());
+    }
+
+    void assertSwitchKeyboardLayout() {
+        waitForIdle();
+        verify(mWindowManagerFuncsImpl).switchKeyboardLayout(anyInt(), anyInt());
+    }
+
+    void assertTakeBugreport() {
+        waitForIdle();
+        ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
+        verify(mContext).sendOrderedBroadcastAsUser(intentCaptor.capture(), any(), any(), any(),
+                any(), anyInt(), any(), any());
+        Assert.assertTrue(intentCaptor.getValue().getAction() == Intent.ACTION_BUG_REPORT);
+    }
+
+    void assertExpandNotification() throws RemoteException {
+        waitForIdle();
+        verify(mPhoneWindowManager.mStatusBarService).expandNotificationsPanel();
+    }
+
+    void assertToggleShortcutsMenu() {
+        waitForIdle();
+        verify(mStatusBarManagerInternal).toggleKeyboardShortcutsMenu(anyInt());
+    }
+
+    void assertToggleCapsLock() {
+        waitForIdle();
+        verify(mInputManagerInternal).toggleCapsLock(anyInt());
     }
 }
