@@ -439,6 +439,22 @@ public class InteractionJankMonitor {
     @VisibleForTesting
     public FrameTracker createFrameTracker(Configuration config, Session session) {
         final View view = config.mView;
+
+        if (!config.hasValidView()) {
+            boolean attached = false;
+            boolean hasViewRoot = false;
+            boolean hasRenderer = false;
+            if (view != null) {
+                attached = view.isAttachedToWindow();
+                hasViewRoot = view.getViewRootImpl() != null;
+                hasRenderer = view.getThreadedRenderer() != null;
+            }
+            Log.d(TAG, "create FrameTracker fails: view=" + view
+                    + ", attached=" + attached + ", hasViewRoot=" + hasViewRoot
+                    + ", hasRenderer=" + hasRenderer, new Throwable());
+            return null;
+        }
+
         final ThreadedRendererWrapper threadedRenderer =
                 view == null ? null : new ThreadedRendererWrapper(view.getThreadedRenderer());
         final ViewRootWrapper viewRoot =
@@ -545,6 +561,7 @@ public class InteractionJankMonitor {
 
         // begin a new trace session.
         tracker = createFrameTracker(conf, new Session(cujType, conf.mTag));
+        if (tracker == null) return false;
         putTracker(cujType, tracker);
         tracker.begin();
 
@@ -1066,14 +1083,30 @@ public class InteractionJankMonitor {
                     msg.append("Must pass in a valid surface control if only instrument surface; ");
                 }
             } else {
-                if (mView == null || !mView.isAttachedToWindow()) {
+                if (!hasValidView()) {
                     shouldThrow = true;
-                    msg.append("Null view or unattached view while instrumenting view; ");
+                    boolean attached = false;
+                    boolean hasViewRoot = false;
+                    boolean hasRenderer = false;
+                    if (mView != null) {
+                        attached = mView.isAttachedToWindow();
+                        hasViewRoot = mView.getViewRootImpl() != null;
+                        hasRenderer = mView.getThreadedRenderer() != null;
+                    }
+                    String err = "invalid view: view=" + mView + ", attached=" + attached
+                            + ", hasViewRoot=" + hasViewRoot + ", hasRenderer=" + hasRenderer;
+                    msg.append(err);
                 }
             }
             if (shouldThrow) {
                 throw new IllegalArgumentException(msg.toString());
             }
+        }
+
+        boolean hasValidView() {
+            return mSurfaceOnly
+                    || (mView != null && mView.isAttachedToWindow()
+                    && mView.getViewRootImpl() != null && mView.getThreadedRenderer() != null);
         }
 
         /**

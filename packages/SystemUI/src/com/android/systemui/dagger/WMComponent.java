@@ -30,6 +30,7 @@ import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.dagger.TvWMShellModule;
 import com.android.wm.shell.dagger.WMShellModule;
 import com.android.wm.shell.dagger.WMSingleton;
+import com.android.wm.shell.desktopmode.DesktopMode;
 import com.android.wm.shell.displayareahelper.DisplayAreaHelper;
 import com.android.wm.shell.floating.FloatingTasks;
 import com.android.wm.shell.onehanded.OneHanded;
@@ -112,4 +113,10 @@ public interface WMComponent {
 
     @WMSingleton
     Optional<FloatingTasks> getFloatingTasks();
+
+    /**
+     * Optional {@link DesktopMode} component for interacting with desktop mode.
+     */
+    @WMSingleton
+    Optional<DesktopMode> getDesktopMode();
 }
