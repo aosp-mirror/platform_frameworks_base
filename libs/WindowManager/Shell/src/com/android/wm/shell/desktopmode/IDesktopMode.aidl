@@ -16,16 +16,11 @@
 
 package com.android.wm.shell.desktopmode;
 
-import com.android.wm.shell.common.annotations.ExternalThread;
-
 /**
- * Interface to interact with desktop mode feature in shell.
+ * Interface that is exposed to remote callers to manipulate desktop mode features.
  */
-@ExternalThread
-public interface DesktopMode {
+interface IDesktopMode {
 
-    /** Returns a binder that can be passed to an external process to manipulate DesktopMode. */
-    default IDesktopMode createExternalInterface() {
-        return null;
-    }
+    /** Show apps on the desktop */
+    void showDesktopApps();
 }

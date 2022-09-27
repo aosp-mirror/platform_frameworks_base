@@ -237,6 +237,13 @@ public class Task {
     public ActivityManager.RecentTaskInfo.PersistedTaskSnapshotData lastSnapshotData =
             new ActivityManager.RecentTaskInfo.PersistedTaskSnapshotData();
 
+    /**
+     * Indicates that this task for the desktop tile in recents.
+     *
+     * Used when desktop mode feature is enabled.
+     */
+    public boolean desktopTile;
+
     public Task() {
         // Do nothing
     }
@@ -267,6 +274,7 @@ public class Task {
         this(other.key, other.colorPrimary, other.colorBackground, other.isDockable,
                 other.isLocked, other.taskDescription, other.topActivity);
         lastSnapshotData.set(other.lastSnapshotData);
+        desktopTile = other.desktopTile;
     }
 
     /**
