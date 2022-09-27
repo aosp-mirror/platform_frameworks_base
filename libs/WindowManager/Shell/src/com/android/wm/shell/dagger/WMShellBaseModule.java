@@ -57,6 +57,8 @@ import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.common.annotations.ShellSplashscreenThread;
 import com.android.wm.shell.compatui.CompatUIController;
 import com.android.wm.shell.desktopmode.DesktopMode;
+import com.android.wm.shell.desktopmode.DesktopModeController;
+import com.android.wm.shell.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.displayareahelper.DisplayAreaHelper;
 import com.android.wm.shell.displayareahelper.DisplayAreaHelperController;
@@ -716,15 +718,36 @@ public abstract class WMShellBaseModule {
     // Desktop mode (optional feature)
     //
 
+    @WMSingleton
+    @Provides
+    static Optional<DesktopMode> provideDesktopMode(
+            Optional<DesktopModeController> desktopModeController) {
+        return desktopModeController.map(DesktopModeController::asDesktopMode);
+    }
+
+    @BindsOptionalOf
+    @DynamicOverride
+    abstract DesktopModeController optionalDesktopModeController();
+
+    @WMSingleton
+    @Provides
+    static Optional<DesktopModeController> providesDesktopModeController(
+            @DynamicOverride Optional<DesktopModeController> desktopModeController) {
+        if (DesktopModeStatus.IS_SUPPORTED) {
+            return desktopModeController;
+        }
+        return Optional.empty();
+    }
+
     @BindsOptionalOf
     @DynamicOverride
     abstract DesktopModeTaskRepository optionalDesktopModeTaskRepository();
 
     @WMSingleton
     @Provides
-    static Optional<DesktopModeTaskRepository> providesDesktopModeTaskRepository(
+    static Optional<DesktopModeTaskRepository> providesDesktopTaskRepository(
             @DynamicOverride Optional<DesktopModeTaskRepository> desktopModeTaskRepository) {
-        if (DesktopMode.IS_SUPPORTED) {
+        if (DesktopModeStatus.IS_SUPPORTED) {
             return desktopModeTaskRepository;
         }
         return Optional.empty();

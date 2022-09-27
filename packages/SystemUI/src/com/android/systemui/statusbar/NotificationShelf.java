@@ -168,6 +168,17 @@ public class NotificationShelf extends ActivatableNotificationView implements
         return new ShelfState();
     }
 
+    @Override
+    public String toString() {
+        return "NotificationShelf("
+                + "hideBackground=" + mHideBackground + " notGoneIndex=" + mNotGoneIndex
+                + " hasItemsInStableShelf=" + mHasItemsInStableShelf
+                + " statusBarState=" + mStatusBarState + " interactive=" + mInteractive
+                + " animationsEnabled=" + mAnimationsEnabled
+                + " showNotificationShelf=" + mShowNotificationShelf
+                + " indexOfFirstViewInShelf=" + mIndexOfFirstViewInShelf + ')';
+    }
+
     /** Update the state of the shelf. */
     public void updateState(StackScrollAlgorithm.StackScrollAlgorithmState algorithmState,
             AmbientState ambientState) {

@@ -53,15 +53,17 @@ public class BufferFlinger {
         }
     }
 
-    public void addBuffer(SurfaceControl.Transaction t, SurfaceControl surfaceControl)
-            throws InterruptedException {
-        GraphicBuffer buffer = mBufferQ.take();
-        t.setBuffer(surfaceControl,
-                HardwareBuffer.createFromGraphicBuffer(buffer),
-                null,
-                (SyncFence fence) -> {
-                    releaseCallback(fence, buffer);
-                });
+    public void addBuffer(SurfaceControl.Transaction t, SurfaceControl surfaceControl) {
+        try {
+            final GraphicBuffer buffer = mBufferQ.take();
+            t.setBuffer(surfaceControl,
+                    HardwareBuffer.createFromGraphicBuffer(buffer),
+                    null,
+                    (SyncFence fence) -> {
+                        releaseCallback(fence, buffer);
+                    });
+        } catch (InterruptedException ignore) {
+        }
     }
 
     public void releaseCallback(SyncFence fence, GraphicBuffer buffer) {

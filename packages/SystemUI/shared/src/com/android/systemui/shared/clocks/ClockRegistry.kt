@@ -105,7 +105,8 @@ open class ClockRegistry(
             )
         }
 
-        pluginManager.addPluginListener(pluginListener, ClockProviderPlugin::class.java)
+        pluginManager.addPluginListener(pluginListener, ClockProviderPlugin::class.java,
+            true /* allowMultiple */)
         context.contentResolver.registerContentObserver(
             Settings.Secure.getUriFor(Settings.Secure.LOCK_SCREEN_CUSTOM_CLOCK_FACE),
             false,
