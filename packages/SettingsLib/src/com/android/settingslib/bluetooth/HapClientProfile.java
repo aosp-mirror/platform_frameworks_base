@@ -19,6 +19,8 @@ package com.android.settingslib.bluetooth;
 import static android.bluetooth.BluetoothProfile.CONNECTION_POLICY_ALLOWED;
 import static android.bluetooth.BluetoothProfile.CONNECTION_POLICY_FORBIDDEN;
 
+import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
@@ -30,12 +32,34 @@ import android.util.Log;
 
 import com.android.settingslib.R;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * HapClientProfile handles the Bluetooth HAP service client role.
  */
 public class HapClientProfile implements LocalBluetoothProfile {
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true, value = {
+            HearingAidType.TYPE_INVALID,
+            HearingAidType.TYPE_BINAURAL,
+            HearingAidType.TYPE_MONAURAL,
+            HearingAidType.TYPE_BANDED,
+            HearingAidType.TYPE_RFU
+    })
+
+    /** Hearing aid type definition for HAP Client. */
+    public @interface HearingAidType {
+        int TYPE_INVALID = -1;
+        int TYPE_BINAURAL = BluetoothHapClient.TYPE_BINAURAL;
+        int TYPE_MONAURAL = BluetoothHapClient.TYPE_MONAURAL;
+        int TYPE_BANDED = BluetoothHapClient.TYPE_BANDED;
+        int TYPE_RFU = BluetoothHapClient.TYPE_RFU;
+    }
+
+    static final String NAME = "HapClient";
     private static final String TAG = "HapClientProfile";
 
     // Order of this profile in device profiles list
@@ -91,6 +115,111 @@ public class HapClientProfile implements LocalBluetoothProfile {
         } else {
             mBluetoothAdapter = null;
         }
+    }
+
+    /**
+     * Get hearing aid devices matching connection states{
+     * {@code BluetoothProfile.STATE_CONNECTED},
+     * {@code BluetoothProfile.STATE_CONNECTING},
+     * {@code BluetoothProfile.STATE_DISCONNECTING}}
+     *
+     * @return Matching device list
+     */
+    public List<BluetoothDevice> getConnectedDevices() {
+        return getDevicesByStates(new int[] {
+                BluetoothProfile.STATE_CONNECTED,
+                BluetoothProfile.STATE_CONNECTING,
+                BluetoothProfile.STATE_DISCONNECTING});
+    }
+
+    /**
+     * Get hearing aid devices matching connection states{
+     * {@code BluetoothProfile.STATE_DISCONNECTED},
+     * {@code BluetoothProfile.STATE_CONNECTED},
+     * {@code BluetoothProfile.STATE_CONNECTING},
+     * {@code BluetoothProfile.STATE_DISCONNECTING}}
+     *
+     * @return Matching device list
+     */
+    public List<BluetoothDevice> getConnectableDevices() {
+        return getDevicesByStates(new int[] {
+                BluetoothProfile.STATE_DISCONNECTED,
+                BluetoothProfile.STATE_CONNECTED,
+                BluetoothProfile.STATE_CONNECTING,
+                BluetoothProfile.STATE_DISCONNECTING});
+    }
+
+    private List<BluetoothDevice> getDevicesByStates(int[] states) {
+        if (mService == null) {
+            return new ArrayList<>(0);
+        }
+        return mService.getDevicesMatchingConnectionStates(states);
+    }
+
+    /**
+     * Gets the hearing aid type of the device.
+     *
+     * @param device is the device for which we want to get the hearing aid type
+     * @return hearing aid type
+     */
+    @HearingAidType
+    public int getHearingAidType(@NonNull BluetoothDevice device) {
+        if (mService == null) {
+            return HearingAidType.TYPE_INVALID;
+        }
+        return mService.getHearingAidType(device);
+    }
+
+    /**
+     * Gets if this device supports synchronized presets or not
+     *
+     * @param device is the device for which we want to know if supports synchronized presets
+     * @return {@code true} if the device supports synchronized presets
+     */
+    public boolean supportSynchronizedPresets(@NonNull BluetoothDevice device) {
+        if (mService == null) {
+            return false;
+        }
+        return mService.supportSynchronizedPresets(device);
+    }
+
+    /**
+     * Gets if this device supports independent presets or not
+     *
+     * @param device is the device for which we want to know if supports independent presets
+     * @return {@code true} if the device supports independent presets
+     */
+    public boolean supportIndependentPresets(@NonNull BluetoothDevice device) {
+        if (mService == null) {
+            return false;
+        }
+        return mService.supportIndependentPresets(device);
+    }
+
+    /**
+     * Gets if this device supports dynamic presets or not
+     *
+     * @param device is the device for which we want to know if supports dynamic presets
+     * @return {@code true} if the device supports dynamic presets
+     */
+    public boolean supportDynamicPresets(@NonNull BluetoothDevice device) {
+        if (mService == null) {
+            return false;
+        }
+        return mService.supportDynamicPresets(device);
+    }
+
+    /**
+     * Gets if this device supports writable presets or not
+     *
+     * @param device is the device for which we want to know if supports writable presets
+     * @return {@code true} if the device supports writable presets
+     */
+    public boolean supportWritablePresets(@NonNull BluetoothDevice device) {
+        if (mService == null) {
+            return false;
+        }
+        return mService.supportWritablePresets(device);
     }
 
     @Override
@@ -182,5 +311,26 @@ public class HapClientProfile implements LocalBluetoothProfile {
     @Override
     public int getDrawableResource(BluetoothClass btClass) {
         return com.android.internal.R.drawable.ic_bt_hearing_aid;
+    }
+
+    /**
+     * Gets the name of this class
+     *
+     * @return the name of this class
+     */
+    public String toString() {
+        return NAME;
+    }
+
+    protected void finalize() {
+        Log.d(TAG, "finalize()");
+        if (mService != null) {
+            try {
+                mBluetoothAdapter.closeProfileProxy(BluetoothProfile.HAP_CLIENT, mService);
+                mService = null;
+            } catch (Throwable t) {
+                Log.w(TAG, "Error cleaning up HAP Client proxy", t);
+            }
+        }
     }
 }

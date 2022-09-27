@@ -45,6 +45,9 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadow.api.Shadow;
 
+import java.util.Arrays;
+import java.util.List;
+
 @RunWith(RobolectricTestRunner.class)
 @Config(shadows = {ShadowBluetoothAdapter.class})
 public class HapClientProfileTest {
@@ -166,5 +169,41 @@ public class HapClientProfileTest {
                 .thenReturn(true);
 
         assertThat(mProfile.setEnabled(mBluetoothDevice, false)).isTrue();
+    }
+
+    @Test
+    public void getConnectedDevices_returnCorrectList() {
+        mServiceListener.onServiceConnected(BluetoothProfile.HAP_CLIENT, mService);
+        int[] connectedStates = new int[] {
+                BluetoothProfile.STATE_CONNECTED,
+                BluetoothProfile.STATE_CONNECTING,
+                BluetoothProfile.STATE_DISCONNECTING};
+        List<BluetoothDevice> connectedList = Arrays.asList(
+                mBluetoothDevice,
+                mBluetoothDevice,
+                mBluetoothDevice);
+        when(mService.getDevicesMatchingConnectionStates(connectedStates))
+                .thenReturn(connectedList);
+
+        assertThat(mProfile.getConnectedDevices().size()).isEqualTo(connectedList.size());
+    }
+
+    @Test
+    public void getConnectableDevices_returnCorrectList() {
+        mServiceListener.onServiceConnected(BluetoothProfile.HAP_CLIENT, mService);
+        int[] connectableStates = new int[] {
+                BluetoothProfile.STATE_DISCONNECTED,
+                BluetoothProfile.STATE_CONNECTED,
+                BluetoothProfile.STATE_CONNECTING,
+                BluetoothProfile.STATE_DISCONNECTING};
+        List<BluetoothDevice> connectableList = Arrays.asList(
+                mBluetoothDevice,
+                mBluetoothDevice,
+                mBluetoothDevice,
+                mBluetoothDevice);
+        when(mService.getDevicesMatchingConnectionStates(connectableStates))
+                .thenReturn(connectableList);
+
+        assertThat(mProfile.getConnectableDevices().size()).isEqualTo(connectableList.size());
     }
 }

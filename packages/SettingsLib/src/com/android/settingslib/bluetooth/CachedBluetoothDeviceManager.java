@@ -188,7 +188,6 @@ public class CachedBluetoothDeviceManager {
     /**
      * Updates the Hearing Aid devices; specifically the HiSyncId's. This routine is called when the
      * Hearing Aid Service is connected and the HiSyncId's are now available.
-     * @param LocalBluetoothProfileManager profileManager
      */
     public synchronized void updateHearingAidsDevices() {
         mHearingAidDeviceManager.updateHearingAidsDevices();
