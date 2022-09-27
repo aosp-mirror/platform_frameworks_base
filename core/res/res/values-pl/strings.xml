@@ -2052,7 +2052,9 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Zezwolić aplikacji <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> na dostęp do wszystkich dzienników urządzenia?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Zezwól na jednorazowy dostęp"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Nie zezwalaj"</string>
-    <string name="log_access_confirmation_body" msgid="1806692062668620735">"Dzienniki urządzenia zapisują, co dzieje się na urządzeniu. Aplikacje mogą ich używać do wykrywania i rozwiązywania problemów.\n\nNiektóre dzienniki mogą zawierać poufne dane, dlatego na dostęp do wszystkich dzienników zezwalaj tylko aplikacjom, którym ufasz. \n\nNawet jeśli nie zezwolisz tej aplikacji na dostęp do wszystkich dzienników na urządzeniu, będzie mogła korzystać z własnych. Producent urządzenia nadal będzie mógł używać niektórych dzienników na urządzeniu."</string>
+    <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"Dzienniki urządzenia zapisują, co dzieje się na urządzeniu. Aplikacje mogą ich używać do wykrywania i rozwiązywania problemów.\n\nNiektóre dzienniki mogą zawierać poufne dane, dlatego na dostęp do wszystkich dzienników zezwalaj tylko aplikacjom, którym ufasz. \n\nNawet jeśli nie zezwolisz tej aplikacji na dostęp do wszystkich dzienników na urządzeniu, będzie mogła korzystać z własnych. Producent urządzenia nadal będzie mógł używać niektórych dzienników na urządzeniu."</string>
+    <!-- no translation found for log_access_confirmation_body (7379536536425265262) -->
+    <skip />
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Nie pokazuj ponownie"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"Aplikacja <xliff:g id="APP_0">%1$s</xliff:g> chce pokazywać wycinki z aplikacji <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Edytuj"</string>

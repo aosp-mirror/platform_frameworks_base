@@ -2051,7 +2051,9 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Želite li dopustiti aplikaciji <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> da pristupa svim zapisnicima uređaja?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Omogući jednokratni pristup"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Nemoj dopustiti"</string>
-    <string name="log_access_confirmation_body" msgid="1806692062668620735">"U zapisnicima uređaja bilježi se što se događa na uređaju. Aplikacije mogu koristiti te zapisnike kako bi pronašle i riješile poteškoće.\n\nNeki zapisnici mogu sadržavati osjetljive podatke, pa pristup svim zapisnicima uređaja odobrite samo pouzdanim aplikacijama. \n\nAko ne dopustite ovoj aplikaciji da pristupa svim zapisnicima uređaja, ona i dalje može pristupati svojim zapisnicima. Proizvođač vašeg uređaja i dalje može pristupati nekim zapisnicima ili podacima na vašem uređaju."</string>
+    <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"U zapisnicima uređaja bilježi se što se događa na uređaju. Aplikacije mogu koristiti te zapisnike kako bi pronašle i riješile poteškoće.\n\nNeki zapisnici mogu sadržavati osjetljive podatke, pa pristup svim zapisnicima uređaja odobrite samo pouzdanim aplikacijama. \n\nAko ne dopustite ovoj aplikaciji da pristupa svim zapisnicima uređaja, ona i dalje može pristupati svojim zapisnicima. Proizvođač vašeg uređaja i dalje može pristupati nekim zapisnicima ili podacima na vašem uređaju."</string>
+    <!-- no translation found for log_access_confirmation_body (7379536536425265262) -->
+    <skip />
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Ne prikazuj ponovo"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> želi prikazivati isječke aplikacije <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Uredi"</string>
