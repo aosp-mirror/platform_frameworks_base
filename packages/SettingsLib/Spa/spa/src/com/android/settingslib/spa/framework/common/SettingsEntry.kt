@@ -54,6 +54,7 @@ data class SettingsEntry(
      * ========================================
      */
     val isAllowSearch: Boolean = false,
+    val isSearchDataDynamic: Boolean = false,
 
     /**
      * ========================================
@@ -134,6 +135,7 @@ class SettingsEntryBuilder(private val name: String, private val owner: Settings
 
     // Attributes
     private var isAllowSearch: Boolean = false
+    private var isSearchDataDynamic: Boolean = false
 
     // Functions
     private var searchDataFn: (arguments: Bundle?) -> EntrySearchData? = { null }
@@ -152,6 +154,7 @@ class SettingsEntryBuilder(private val name: String, private val owner: Settings
 
             // attributes
             isAllowSearch = isAllowSearch,
+            isSearchDataDynamic = isSearchDataDynamic,
 
             // functions
             searchDataImpl = searchDataFn,
@@ -175,6 +178,11 @@ class SettingsEntryBuilder(private val name: String, private val owner: Settings
 
     fun setIsAllowSearch(isAllowSearch: Boolean): SettingsEntryBuilder {
         this.isAllowSearch = isAllowSearch
+        return this
+    }
+
+    fun setIsSearchDataDynamic(isDynamic: Boolean): SettingsEntryBuilder {
+        this.isSearchDataDynamic = isDynamic
         return this
     }
 

@@ -17,6 +17,7 @@
 package com.android.settingslib.spa.framework
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
@@ -36,7 +37,8 @@ import com.android.settingslib.spa.framework.compose.localNavController
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.framework.util.navRoute
 
-const val NULL_PAGE_NAME = "NULL"
+private const val TAG = "BrowseActivity"
+private const val NULL_PAGE_NAME = "NULL"
 
 /**
  * The Activity to render ALL SPA pages, and handles jumps between SPA pages.
@@ -54,6 +56,7 @@ open class BrowseActivity(spaEnvironment: SpaEnvironment) : ComponentActivity() 
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R.style.Theme_SpaLib_DayNight)
         super.onCreate(savedInstanceState)
+        Log.d(TAG, "onCreate")
 
         setContent {
             SettingsTheme {
@@ -72,8 +75,7 @@ open class BrowseActivity(spaEnvironment: SpaEnvironment) : ComponentActivity() 
                     composable(
                         route = page.name + page.parameter.navRoute(),
                         arguments = page.parameter,
-                    ) { navBackStackEntry -> page.Page(navBackStackEntry.arguments)
-                    }
+                    ) { navBackStackEntry -> page.Page(navBackStackEntry.arguments) }
                 }
             }
             InitialDestinationNavigator()
