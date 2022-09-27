@@ -385,14 +385,6 @@ public final class DataSpace {
      */
     public static final int RANGE_EXTENDED = 3 << 27;
 
-    /** @hide */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag = true, value = {
-        DATASPACE_DEPTH,
-        DATASPACE_DYNAMIC_DEPTH,
-    })
-    public @interface DataSpaceDepth {};
-
     /**
      * Depth.
      *
@@ -406,13 +398,6 @@ public final class DataSpace {
      * Embedded depth metadata following the dynamic depth specification.
      */
     public static final int DATASPACE_DYNAMIC_DEPTH = 4098;
-
-    /** @hide */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag = true, value = {
-        DATASPACE_HEIF,
-    })
-    public @interface DataSpaceFileFormat {};
 
     /**
      * High Efficiency Image File Format (HEIF).
@@ -442,7 +427,7 @@ public final class DataSpace {
         DATASPACE_DCI_P3,
         DATASPACE_SRGB_LINEAR
     })
-    public @interface NamedDataSpace {};
+    public @interface ColorDataSpace {};
 
     /**
      * Default-assumption data space, when not explicitly specified.
@@ -635,6 +620,30 @@ public final class DataSpace {
      */
     public static final int DATASPACE_SRGB_LINEAR = 138477568;
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true, value = {
+        DATASPACE_DEPTH,
+        DATASPACE_DYNAMIC_DEPTH,
+        DATASPACE_HEIF,
+        DATASPACE_UNKNOWN,
+        DATASPACE_SCRGB_LINEAR,
+        DATASPACE_SRGB,
+        DATASPACE_SCRGB,
+        DATASPACE_DISPLAY_P3,
+        DATASPACE_BT2020_HLG,
+        DATASPACE_BT2020_PQ,
+        DATASPACE_ADOBE_RGB,
+        DATASPACE_JFIF,
+        DATASPACE_BT601_625,
+        DATASPACE_BT601_525,
+        DATASPACE_BT2020,
+        DATASPACE_BT709,
+        DATASPACE_DCI_P3,
+        DATASPACE_SRGB_LINEAR
+    })
+    public @interface NamedDataSpace {};
+
     private DataSpace() {}
 
     /**
@@ -647,7 +656,7 @@ public final class DataSpace {
      *
      * @return The int dataspace packed by standard, transfer and range value
      */
-    public static @NamedDataSpace int pack(@DataSpaceStandard int standard,
+    public static @ColorDataSpace int pack(@DataSpaceStandard int standard,
                                         @DataSpaceTransfer int transfer,
                                         @DataSpaceRange int range) {
         if ((standard & STANDARD_MASK) != standard) {
@@ -669,7 +678,7 @@ public final class DataSpace {
      *
      * @return The standard aspect
      */
-    public static @DataSpaceStandard int getStandard(@NamedDataSpace int dataSpace) {
+    public static @DataSpaceStandard int getStandard(@ColorDataSpace int dataSpace) {
         @DataSpaceStandard int standard = dataSpace & STANDARD_MASK;
         return standard;
     }
@@ -681,7 +690,7 @@ public final class DataSpace {
      *
      * @return The transfer aspect
      */
-    public static @DataSpaceTransfer int getTransfer(@NamedDataSpace int dataSpace) {
+    public static @DataSpaceTransfer int getTransfer(@ColorDataSpace int dataSpace) {
         @DataSpaceTransfer int transfer = dataSpace & TRANSFER_MASK;
         return transfer;
     }
@@ -693,7 +702,7 @@ public final class DataSpace {
      *
      * @return The range aspect
      */
-    public static @DataSpaceRange int getRange(@NamedDataSpace int dataSpace) {
+    public static @DataSpaceRange int getRange(@ColorDataSpace int dataSpace) {
         @DataSpaceRange int range = dataSpace & RANGE_MASK;
         return range;
     }
