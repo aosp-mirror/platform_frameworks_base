@@ -756,16 +756,23 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     }
 
     public boolean isBusy() {
-        synchronized (mProfileLock) {
-            for (LocalBluetoothProfile profile : mProfiles) {
-                int status = getProfileConnectionState(profile);
-                if (status == BluetoothProfile.STATE_CONNECTING
-                        || status == BluetoothProfile.STATE_DISCONNECTING) {
-                    return true;
-                }
+        for (CachedBluetoothDevice memberDevice : getMemberDevice()) {
+            if (isBusyState(memberDevice)) {
+                return true;
             }
-            return getBondState() == BluetoothDevice.BOND_BONDING;
         }
+        return isBusyState(this);
+    }
+
+    private boolean isBusyState(CachedBluetoothDevice device){
+        for (LocalBluetoothProfile profile : device.getProfiles()) {
+            int status = device.getProfileConnectionState(profile);
+            if (status == BluetoothProfile.STATE_CONNECTING
+                    || status == BluetoothProfile.STATE_DISCONNECTING) {
+                return true;
+            }
+        }
+        return device.getBondState() == BluetoothDevice.BOND_BONDING;
     }
 
     private boolean updateProfiles() {
