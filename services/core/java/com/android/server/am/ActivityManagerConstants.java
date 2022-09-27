@@ -735,6 +735,9 @@ final class ActivityManagerConstants extends ContentObserver {
     // initialized in the constructor.
     public int CUR_MAX_EMPTY_PROCESSES;
 
+    /** @see mEnforceReceiverExportedFlagRequirement */
+    private static final String KEY_ENFORCE_RECEIVER_EXPORTED_FLAG_REQUIREMENT =
+            "enforce_exported_flag_requirement";
 
     /** @see #mNoKillCachedProcessesUntilBootCompleted */
     private static final String KEY_NO_KILL_CACHED_PROCESSES_UNTIL_BOOT_COMPLETED =
@@ -744,12 +747,24 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final String KEY_NO_KILL_CACHED_PROCESSES_POST_BOOT_COMPLETED_DURATION_MILLIS =
             "no_kill_cached_processes_post_boot_completed_duration_millis";
 
+    /** @see mEnforceReceiverExportedFlagRequirement */
+    private static final boolean DEFAULT_ENFORCE_RECEIVER_EXPORTED_FLAG_REQUIREMENT = false;
+
     /** @see #mNoKillCachedProcessesUntilBootCompleted */
     private static final boolean DEFAULT_NO_KILL_CACHED_PROCESSES_UNTIL_BOOT_COMPLETED = true;
 
     /** @see #mNoKillCachedProcessesPostBootCompletedDurationMillis */
     private static final long
             DEFAULT_NO_KILL_CACHED_PROCESSES_POST_BOOT_COMPLETED_DURATION_MILLIS = 600_000;
+
+    /**
+     * If true, enforce the requirement that dynamically registered receivers specify one of
+     * {@link android.content.Context#RECEIVER_EXPORTED} or
+     * {@link android.content.Context#RECEIVER_NOT_EXPORTED} if registering for any non-system
+     * broadcasts.
+     */
+    volatile boolean mEnforceReceiverExportedFlagRequirement =
+            DEFAULT_ENFORCE_RECEIVER_EXPORTED_FLAG_REQUIREMENT;
 
     /**
      * If true, do not kill excessive cached processes proactively, until user-0 is unlocked.
@@ -1009,6 +1024,9 @@ final class ActivityManagerConstants extends ContentObserver {
                                 break;
                             case KEY_NO_KILL_CACHED_PROCESSES_UNTIL_BOOT_COMPLETED:
                                 updateNoKillCachedProcessesUntilBootCompleted();
+                                break;
+                            case KEY_ENFORCE_RECEIVER_EXPORTED_FLAG_REQUIREMENT:
+                                updateEnforceReceiverExportedFlagRequirement();
                                 break;
                             case KEY_NO_KILL_CACHED_PROCESSES_POST_BOOT_COMPLETED_DURATION_MILLIS:
                                 updateNoKillCachedProcessesPostBootCompletedDurationMillis();
@@ -1482,6 +1500,13 @@ final class ActivityManagerConstants extends ContentObserver {
                 DEFAULT_DEFER_BOOT_COMPLETED_BROADCAST);
     }
 
+    private void updateEnforceReceiverExportedFlagRequirement() {
+        mEnforceReceiverExportedFlagRequirement = DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_ENFORCE_RECEIVER_EXPORTED_FLAG_REQUIREMENT,
+                DEFAULT_ENFORCE_RECEIVER_EXPORTED_FLAG_REQUIREMENT);
+    }
+
     private void updateNoKillCachedProcessesUntilBootCompleted() {
         mNoKillCachedProcessesUntilBootCompleted = DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
@@ -1819,6 +1844,8 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.print("="); pw.println(mPrioritizeAlarmBroadcasts);
         pw.print("  "); pw.print(KEY_NO_KILL_CACHED_PROCESSES_UNTIL_BOOT_COMPLETED);
         pw.print("="); pw.println(mNoKillCachedProcessesUntilBootCompleted);
+        pw.print("  "); pw.print(KEY_ENFORCE_RECEIVER_EXPORTED_FLAG_REQUIREMENT);
+        pw.print("="); pw.println(mEnforceReceiverExportedFlagRequirement);
         pw.print("  "); pw.print(KEY_NO_KILL_CACHED_PROCESSES_POST_BOOT_COMPLETED_DURATION_MILLIS);
         pw.print("="); pw.println(mNoKillCachedProcessesPostBootCompletedDurationMillis);
         pw.print("  "); pw.print(KEY_MAX_EMPTY_TIME_MILLIS);

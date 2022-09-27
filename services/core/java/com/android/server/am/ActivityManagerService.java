@@ -214,8 +214,8 @@ import android.app.usage.UsageStatsManagerInternal;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetManagerInternal;
 import android.compat.annotation.ChangeId;
-import android.compat.annotation.Disabled;
 import android.compat.annotation.EnabledAfter;
+import android.compat.annotation.EnabledSince;
 import android.content.AttributionSource;
 import android.content.AutofillOptions;
 import android.content.BroadcastReceiver;
@@ -584,7 +584,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * unprotected broadcast in code.
      */
     @ChangeId
-    @Disabled
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     private static final long DYNAMIC_RECEIVER_EXPLICIT_EXPORT_REQUIRED = 161145287L;
 
     /**
@@ -13400,7 +13400,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             // broadcasts, or the receiver is null (a sticky broadcast). Sticky broadcasts should
             // not be used generally, so we will be marking them as exported by default
             final boolean requireExplicitFlagForDynamicReceivers = CompatChanges.isChangeEnabled(
-                    DYNAMIC_RECEIVER_EXPLICIT_EXPORT_REQUIRED, callingUid);
+                    DYNAMIC_RECEIVER_EXPLICIT_EXPORT_REQUIRED, callingUid)
+                    && mConstants.mEnforceReceiverExportedFlagRequirement;
             if (!onlyProtectedBroadcasts) {
                 if (receiver == null && !explicitExportStateDefined) {
                     // sticky broadcast, no flag specified (flag isn't required)
