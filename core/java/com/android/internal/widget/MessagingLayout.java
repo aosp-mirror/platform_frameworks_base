@@ -470,7 +470,8 @@ public class MessagingLayout extends FrameLayout
                 message = messages.get(i - histSize);
             }
             boolean isNewGroup = currentGroup == null;
-            Person sender = message.getMessage().getSenderPerson();
+            Person sender =
+                    message.getMessage() == null ? null : message.getMessage().getSenderPerson();
             CharSequence key = sender == null ? null
                     : sender.getKey() == null ? sender.getName() : sender.getKey();
             isNewGroup |= !TextUtils.equals(key, currentSenderKey);
