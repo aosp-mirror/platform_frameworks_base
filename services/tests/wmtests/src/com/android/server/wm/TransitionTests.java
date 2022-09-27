@@ -735,6 +735,11 @@ public class TransitionTests extends WindowTestsBase {
         assertTrue(asyncRotationController.isTargetToken(decorToken));
         assertShouldFreezeInsetsPosition(asyncRotationController, statusBar, true);
 
+        if (TransitionController.SYNC_METHOD != BLASTSyncEngine.METHOD_BLAST) {
+            // Only seamless window syncs its draw transaction with transition.
+            assertFalse(asyncRotationController.handleFinishDrawing(statusBar, mMockT));
+            assertTrue(asyncRotationController.handleFinishDrawing(screenDecor, mMockT));
+        }
         screenDecor.setOrientationChanging(false);
         // Status bar finishes drawing before the start transaction. Its fade-in animation will be
         // executed until the transaction is committed, so it is still in target tokens.
