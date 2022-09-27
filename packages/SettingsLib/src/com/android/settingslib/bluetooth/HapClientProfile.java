@@ -26,8 +26,11 @@ import android.bluetooth.BluetoothHapClient;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
+import android.util.Log;
 
 import com.android.settingslib.R;
+
+import java.util.List;
 
 /**
  * HapClientProfile handles the Bluetooth HAP service client role.
@@ -39,6 +42,8 @@ public class HapClientProfile implements LocalBluetoothProfile {
     private static final int ORDINAL = 1;
 
     private final BluetoothAdapter mBluetoothAdapter;
+    private final CachedBluetoothDeviceManager mDeviceManager;
+    private final LocalBluetoothProfileManager mProfileManager;
     private BluetoothHapClient mService;
     private boolean mIsProfileReady;
 
@@ -48,17 +53,36 @@ public class HapClientProfile implements LocalBluetoothProfile {
         @Override
         public void onServiceConnected(int profile, BluetoothProfile proxy) {
             mService = (BluetoothHapClient) proxy;
+            // We just bound to the service, so refresh the UI for any connected HapClient devices.
+            List<BluetoothDevice> deviceList = mService.getConnectedDevices();
+            while (!deviceList.isEmpty()) {
+                BluetoothDevice nextDevice = deviceList.remove(0);
+                CachedBluetoothDevice device = mDeviceManager.findDevice(nextDevice);
+                // Adds a new device into mDeviceManager if it does not exist
+                if (device == null) {
+                    Log.w(TAG, "HapClient profile found new device: " + nextDevice);
+                    device = mDeviceManager.addDevice(nextDevice);
+                }
+                device.onProfileStateChanged(
+                        HapClientProfile.this, BluetoothProfile.STATE_CONNECTED);
+                device.refresh();
+            }
+
             mIsProfileReady = true;
+            mProfileManager.callServiceConnectedListeners();
         }
 
         @Override
         public void onServiceDisconnected(int profile) {
             mIsProfileReady = false;
+            mProfileManager.callServiceDisconnectedListeners();
         }
     }
 
     HapClientProfile(Context context, CachedBluetoothDeviceManager deviceManager,
             LocalBluetoothProfileManager profileManager) {
+        mDeviceManager = deviceManager;
+        mProfileManager = profileManager;
         BluetoothManager bluetoothManager = context.getSystemService(BluetoothManager.class);
         if (bluetoothManager != null) {
             mBluetoothAdapter = bluetoothManager.getAdapter();

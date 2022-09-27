@@ -21,6 +21,7 @@ import static android.bluetooth.BluetoothProfile.CONNECTION_POLICY_FORBIDDEN;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.bluetooth.BluetoothDevice;
@@ -78,6 +79,7 @@ public class HapClientProfileTest {
         mServiceListener.onServiceConnected(BluetoothProfile.HAP_CLIENT, mService);
 
         assertThat(mProfile.isProfileReady()).isTrue();
+        verify(mProfileManager).callServiceConnectedListeners();
     }
 
     @Test
@@ -85,6 +87,7 @@ public class HapClientProfileTest {
         mServiceListener.onServiceDisconnected(BluetoothProfile.HAP_CLIENT);
 
         assertThat(mProfile.isProfileReady()).isFalse();
+        verify(mProfileManager).callServiceDisconnectedListeners();
     }
 
     @Test
