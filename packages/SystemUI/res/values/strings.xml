@@ -2118,6 +2118,8 @@
     <string name="magnification_mode_switch_state_window">Magnify part of screen</string>
     <!-- Click action label for magnification switch. [CHAR LIMIT=NONE] -->
     <string name="magnification_mode_switch_click_label">Switch</string>
+    <!-- Label of the corner of a rectangle that you can tap and drag to resize the magnification area. [CHAR LIMIT=NONE] -->
+    <string name="magnification_drag_corner_to_resize">Drag corner to resize</string>
 
     <!-- Title of the magnification option button allow diagonal scrolling [CHAR LIMIT=NONE]-->
     <string name="accessibility_allow_diagonal_scrolling">Allow diagonal scrolling</string>

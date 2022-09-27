@@ -40,19 +40,22 @@
             android:id="@+id/top_handle"
             android:layout_width="match_parent"
             android:layout_height="@dimen/magnification_border_drag_size"
-            android:layout_alignParentTop="true"/>
+            android:layout_alignParentTop="true"
+            android:accessibilityTraversalAfter="@id/left_handle"/>
 
         <View
             android:id="@+id/right_handle"
             android:layout_width="@dimen/magnification_border_drag_size"
             android:layout_height="match_parent"
-            android:layout_alignParentEnd="true"/>
+            android:layout_alignParentEnd="true"
+            android:accessibilityTraversalAfter="@id/top_handle"/>
 
         <View
             android:id="@+id/bottom_handle"
             android:layout_width="match_parent"
             android:layout_height="@dimen/magnification_border_drag_size"
-            android:layout_alignParentBottom="true"/>
+            android:layout_alignParentBottom="true"
+            android:accessibilityTraversalAfter="@id/right_handle"/>
 
         <SurfaceView
             android:id="@+id/surface_view"
@@ -60,6 +63,58 @@
             android:layout_height="match_parent"
             android:layout_margin="@dimen/magnification_mirror_surface_margin"/>
     </RelativeLayout>
+
+    <ImageView
+        android:id="@+id/top_right_corner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/magnification_outer_border_margin"
+        android:layout_gravity="right|top"
+        android:paddingTop="@dimen/magnifier_drag_handle_padding"
+        android:paddingEnd="@dimen/magnifier_drag_handle_padding"
+        android:scaleType="center"
+        android:contentDescription="@string/magnification_drag_corner_to_resize"
+        android:src="@drawable/ic_magnification_corner_top_right"
+        android:accessibilityTraversalAfter="@id/top_left_corner"/>
+
+    <ImageView
+        android:id="@+id/top_left_corner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/magnification_outer_border_margin"
+        android:layout_gravity="left|top"
+        android:paddingTop="@dimen/magnifier_drag_handle_padding"
+        android:paddingStart="@dimen/magnifier_drag_handle_padding"
+        android:scaleType="center"
+        android:contentDescription="@string/magnification_drag_corner_to_resize"
+        android:src="@drawable/ic_magnification_corner_top_left"
+        android:accessibilityTraversalAfter="@id/bottom_handle"/>
+
+    <ImageView
+        android:id="@+id/bottom_right_corner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/magnification_outer_border_margin"
+        android:layout_gravity="right|bottom"
+        android:paddingEnd="@dimen/magnifier_drag_handle_padding"
+        android:paddingBottom="@dimen/magnifier_drag_handle_padding"
+        android:scaleType="center"
+        android:contentDescription="@string/magnification_drag_corner_to_resize"
+        android:src="@drawable/ic_magnification_corner_bottom_right"
+        android:accessibilityTraversalAfter="@id/top_right_corner"/>
+
+    <ImageView
+        android:id="@+id/bottom_left_corner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/magnification_outer_border_margin"
+        android:layout_gravity="left|bottom"
+        android:paddingStart="@dimen/magnifier_drag_handle_padding"
+        android:paddingBottom="@dimen/magnifier_drag_handle_padding"
+        android:scaleType="center"
+        android:contentDescription="@string/magnification_drag_corner_to_resize"
+        android:src="@drawable/ic_magnification_corner_bottom_left"
+        android:accessibilityTraversalAfter="@id/bottom_right_corner"/>
 
     <ImageView
         android:id="@+id/drag_handle"
