@@ -278,6 +278,15 @@ public class NotificationIconContainer extends ViewGroup {
         }
     }
 
+    @Override
+    public String toString() {
+        return "NotificationIconContainer("
+                + "dozing=" + mDozing + " onLockScreen=" + mOnLockScreen
+                + " inNotificationIconShelf=" + mInNotificationIconShelf
+                + " speedBumpIndex=" + mSpeedBumpIndex
+                + " themedTextColorPrimary=#" + Integer.toHexString(mThemedTextColorPrimary) + ')';
+    }
+
     @VisibleForTesting
     public void setIconSize(int size) {
         mIconSize = size;

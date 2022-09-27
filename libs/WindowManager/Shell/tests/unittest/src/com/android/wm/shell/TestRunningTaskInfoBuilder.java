@@ -44,12 +44,18 @@ public final class TestRunningTaskInfoBuilder {
     private ActivityManager.TaskDescription.Builder mTaskDescriptionBuilder = null;
     private final Point mPositionInParent = new Point();
     private boolean mIsVisible = false;
+    private long mLastActiveTime;
 
     public static WindowContainerToken createMockWCToken() {
         final IWindowContainerToken itoken = mock(IWindowContainerToken.class);
         final IBinder asBinder = mock(IBinder.class);
         doReturn(asBinder).when(itoken).asBinder();
         return new WindowContainerToken(itoken);
+    }
+
+    public TestRunningTaskInfoBuilder setToken(WindowContainerToken token) {
+        mToken = token;
+        return this;
     }
 
     public TestRunningTaskInfoBuilder setBounds(Rect bounds) {
@@ -95,6 +101,11 @@ public final class TestRunningTaskInfoBuilder {
         return this;
     }
 
+    public TestRunningTaskInfoBuilder setLastActiveTime(long lastActiveTime) {
+        mLastActiveTime = lastActiveTime;
+        return this;
+    }
+
     public ActivityManager.RunningTaskInfo build() {
         final ActivityManager.RunningTaskInfo info = new ActivityManager.RunningTaskInfo();
         info.taskId = sNextTaskId++;
@@ -110,6 +121,7 @@ public final class TestRunningTaskInfoBuilder {
                 mTaskDescriptionBuilder != null ? mTaskDescriptionBuilder.build() : null;
         info.positionInParent = mPositionInParent;
         info.isVisible = mIsVisible;
+        info.lastActiveTime = mLastActiveTime;
         return info;
     }
 }

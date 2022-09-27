@@ -28,7 +28,7 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.ShellTaskOrganizer;
-import com.android.wm.shell.desktopmode.DesktopMode;
+import com.android.wm.shell.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.sysui.ShellInit;
@@ -90,7 +90,7 @@ public class FreeformTaskListener<T extends AutoCloseable>
             t.apply();
         }
 
-        if (DesktopMode.IS_SUPPORTED && taskInfo.isVisible) {
+        if (DesktopModeStatus.IS_SUPPORTED && taskInfo.isVisible) {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
                     "Adding active freeform task: #%d", taskInfo.taskId);
             mDesktopModeTaskRepository.ifPresent(it -> it.addActiveTask(taskInfo.taskId));
@@ -123,7 +123,7 @@ public class FreeformTaskListener<T extends AutoCloseable>
                 taskInfo.taskId);
         mTasks.remove(taskInfo.taskId);
 
-        if (DesktopMode.IS_SUPPORTED) {
+        if (DesktopModeStatus.IS_SUPPORTED) {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
                     "Removing active freeform task: #%d", taskInfo.taskId);
             mDesktopModeTaskRepository.ifPresent(it -> it.removeActiveTask(taskInfo.taskId));
@@ -150,7 +150,7 @@ public class FreeformTaskListener<T extends AutoCloseable>
             mWindowDecorationViewModel.onTaskInfoChanged(state.mTaskInfo, state.mWindowDecoration);
         }
 
-        if (DesktopMode.IS_SUPPORTED) {
+        if (DesktopModeStatus.IS_SUPPORTED) {
             if (taskInfo.isVisible) {
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
                         "Adding active freeform task: #%d", taskInfo.taskId);
