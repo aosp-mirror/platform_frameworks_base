@@ -912,6 +912,12 @@ public class UdfpsController implements DozeReceiver {
         if (view.isDisplayConfigured()) {
             view.unconfigureDisplay();
         }
+
+        if (mCancelAodTimeoutAction != null) {
+            mCancelAodTimeoutAction.run();
+            mCancelAodTimeoutAction = null;
+        }
+        mIsAodInterruptActive = false;
     }
 
     /**
