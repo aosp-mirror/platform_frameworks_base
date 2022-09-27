@@ -140,6 +140,8 @@ public class ScribeTest {
         report1.numPositiveRegulations = 10;
         report1.cumulativeNegativeRegulations = 11;
         report1.numNegativeRegulations = 12;
+        report1.screenOffDurationMs = 13;
+        report1.screenOffDischargeMah = 14;
         mReports.add(report1);
         mScribeUnderTest.writeImmediatelyForTesting();
         mScribeUnderTest.loadFromDiskLocked();
@@ -160,6 +162,8 @@ public class ScribeTest {
         report2.numPositiveRegulations = 100;
         report2.cumulativeNegativeRegulations = 110;
         report2.numNegativeRegulations = 120;
+        report2.screenOffDurationMs = 130;
+        report2.screenOffDischargeMah = 140;
         mReports.add(report2);
         mScribeUnderTest.writeImmediatelyForTesting();
         mScribeUnderTest.loadFromDiskLocked();
@@ -385,6 +389,10 @@ public class ScribeTest {
                     eReport.cumulativeNegativeRegulations, aReport.cumulativeNegativeRegulations);
             assertEquals("Reports #" + i + " numNegativeRegulations are not equal",
                     eReport.numNegativeRegulations, aReport.numNegativeRegulations);
+            assertEquals("Reports #" + i + " screenOffDurationMs are not equal",
+                    eReport.screenOffDurationMs, aReport.screenOffDurationMs);
+            assertEquals("Reports #" + i + " screenOffDischargeMah are not equal",
+                    eReport.screenOffDischargeMah, aReport.screenOffDischargeMah);
         }
     }
 
