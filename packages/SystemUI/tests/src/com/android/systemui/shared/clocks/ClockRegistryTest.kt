@@ -113,7 +113,7 @@ class ClockRegistryTest : SysuiTestCase() {
         registry.isEnabled = true
 
         verify(mockPluginManager)
-            .addPluginListener(captor.capture(), eq(ClockProviderPlugin::class.java))
+            .addPluginListener(captor.capture(), eq(ClockProviderPlugin::class.java), eq(true))
         pluginListener = captor.value
     }
 

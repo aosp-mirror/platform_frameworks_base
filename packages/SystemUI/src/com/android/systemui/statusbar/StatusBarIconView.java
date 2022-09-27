@@ -36,7 +36,6 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
-import android.os.Parcelable;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
@@ -551,9 +550,12 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         }
     }
 
+    @Override
     public String toString() {
-        return "StatusBarIconView(slot=" + mSlot + " icon=" + mIcon
-            + " notification=" + mNotification + ")";
+        return "StatusBarIconView("
+                + "slot='" + mSlot + " alpha=" + getAlpha() + " icon=" + mIcon
+                + " iconColor=#" + Integer.toHexString(mIconColor)
+                + " notification=" + mNotification + ')';
     }
 
     public StatusBarNotification getNotification() {
