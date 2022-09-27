@@ -425,18 +425,15 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
     }
 
     private void onPackageReset(String packageName) {
-        // invoked when a package is "force quit" - move off the main thread
-        FgThread.getExecutor().execute(
-                () ->
-                        updateRegistrations(
-                                registration -> {
-                                    if (registration.getIdentity().getPackageName().equals(
-                                            packageName)) {
-                                        registration.remove();
-                                    }
+        updateRegistrations(
+                registration -> {
+                    if (registration.getIdentity().getPackageName().equals(
+                            packageName)) {
+                        registration.remove();
+                    }
 
-                                    return false;
-                                }));
+                    return false;
+                });
     }
 
     private boolean isResetableForPackage(String packageName) {

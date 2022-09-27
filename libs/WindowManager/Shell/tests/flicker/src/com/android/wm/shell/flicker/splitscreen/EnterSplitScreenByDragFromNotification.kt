@@ -21,8 +21,6 @@ import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.WindowManagerPolicyConstants
 import androidx.test.filters.RequiresDevice
-import androidx.test.uiautomator.By
-import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
@@ -73,12 +71,7 @@ class EnterSplitScreenByDragFromNotification(
             setup {
                 // Send a notification
                 sendNotificationApp.launchViaIntent(wmHelper)
-                val sendNotification = device.wait(
-                    Until.findObject(By.text("Send Notification")),
-                    SplitScreenUtils.TIMEOUT_MS
-                )
-                sendNotification?.click() ?: error("Send notification button not found")
-
+                sendNotificationApp.postNotification(wmHelper)
                 tapl.goHome()
                 primaryApp.launchViaIntent(wmHelper)
             }

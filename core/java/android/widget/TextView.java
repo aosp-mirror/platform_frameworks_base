@@ -9330,9 +9330,58 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (range == null) {
             return handleGestureFailure(gesture);
         }
-        getEditableText().delete(range[0], range[1]);
-        Selection.setSelection(getEditableText(), range[0]);
-        // TODO(b/243983058): Delete extra spaces.
+        int start = range[0];
+        int end = range[1];
+
+        // For word granularity, adjust the start and end offsets to remove extra whitespace around
+        // the deleted text.
+        if (gesture.getGranularity() == HandwritingGesture.GRANULARITY_WORD) {
+            // If the deleted text is at the start of the text, the behavior is the same as the case
+            // where the deleted text follows a new line character.
+            int codePointBeforeStart = start > 0
+                    ? Character.codePointBefore(mText, start) : TextUtils.LINE_FEED_CODE_POINT;
+            // If the deleted text is at the end of the text, the behavior is the same as the case
+            // where the deleted text precedes a new line character.
+            int codePointAtEnd = end < mText.length()
+                    ? Character.codePointAt(mText, end) : TextUtils.LINE_FEED_CODE_POINT;
+            if (TextUtils.isWhitespaceExceptNewline(codePointBeforeStart)
+                    && (TextUtils.isWhitespace(codePointAtEnd)
+                            || TextUtils.isPunctuation(codePointAtEnd))) {
+                // Remove whitespace (except new lines) before the deleted text, in these cases:
+                // - There is whitespace following the deleted text
+                //     e.g. "one [deleted] three" -> "one | three" -> "one| three"
+                // - There is punctuation following the deleted text
+                //     e.g. "one [deleted]!" -> "one |!" -> "one|!"
+                // - There is a new line following the deleted text
+                //     e.g. "one [deleted]\n" -> "one |\n" -> "one|\n"
+                // - The deleted text is at the end of the text
+                //     e.g. "one [deleted]" -> "one |" -> "one|"
+                // (The pipe | indicates the cursor position.)
+                while (start > 0 && TextUtils.isWhitespaceExceptNewline(codePointBeforeStart)) {
+                    start -= Character.charCount(codePointBeforeStart);
+                    codePointBeforeStart = Character.codePointBefore(mText, start);
+                }
+            } else if (TextUtils.isWhitespaceExceptNewline(codePointAtEnd)
+                    && (TextUtils.isWhitespace(codePointBeforeStart)
+                            || TextUtils.isPunctuation(codePointBeforeStart))) {
+                // Remove whitespace (except new lines) after the deleted text, in these cases:
+                // - There is punctuation preceding the deleted text
+                //     e.g. "([deleted] two)" -> "(| two)" -> "(|two)"
+                // - There is a new line preceding the deleted text
+                //     e.g. "\n[deleted] two" -> "\n| two" -> "\n|two"
+                // - The deleted text is at the start of the text
+                //     e.g. "[deleted] two" -> "| two" -> "|two"
+                // (The pipe | indicates the cursor position.)
+                while (end < mText.length()
+                        && TextUtils.isWhitespaceExceptNewline(codePointAtEnd)) {
+                    end += Character.charCount(codePointAtEnd);
+                    codePointAtEnd = Character.codePointAt(mText, end);
+                }
+            }
+        }
+
+        getEditableText().delete(start, end);
+        Selection.setSelection(getEditableText(), start);
         return InputConnection.HANDWRITING_GESTURE_RESULT_SUCCESS;
     }
 
@@ -9341,7 +9390,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         PointF point = convertFromScreenToContentCoordinates(gesture.getInsertionPoint());
         int line = mLayout.getLineForVertical((int) point.y);
         if (point.y < mLayout.getLineTop(line)
-                || point.y > mLayout.getLineBottomWithoutSpacing(line)) {
+                || point.y > mLayout.getLineBottom(line, /* includeLineSpacing= */ false)) {
             return handleGestureFailure(gesture);
         }
         if (point.x < mLayout.getLineLeft(line) || point.x > mLayout.getLineRight(line)) {
@@ -9369,7 +9418,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             // Both points are above the top of the first line.
             return handleGestureFailure(gesture);
         }
-        if (yMin > mLayout.getLineBottomWithoutSpacing(line)) {
+        if (yMin > mLayout.getLineBottom(line, /* includeLineSpacing= */ false)) {
             if (line == mLayout.getLineCount() - 1 || yMax < mLayout.getLineTop(line + 1)) {
                 // The points are below the last line, or they are between two lines.
                 return handleGestureFailure(gesture);
@@ -9423,7 +9472,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         int line = mLayout.getLineForVertical((int) point.y);
         if (point.y < mLayout.getLineTop(line)
-                || point.y > mLayout.getLineBottomWithoutSpacing(line)) {
+                || point.y > mLayout.getLineBottom(line, /* includeLineSpacing= */ false)) {
             return handleGestureFailure(gesture);
         }
         if (point.x < mLayout.getLineLeft(line) || point.x > mLayout.getLineRight(line)) {

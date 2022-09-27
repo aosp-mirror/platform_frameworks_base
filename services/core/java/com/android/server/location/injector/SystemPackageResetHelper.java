@@ -27,6 +27,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 
 import com.android.internal.util.Preconditions;
+import com.android.server.FgThread;
 
 /** Listens to appropriate broadcasts for queries and resets. */
 public class SystemPackageResetHelper extends PackageResetHelper {
@@ -120,7 +121,9 @@ public class SystemPackageResetHelper extends PackageResetHelper {
                                     context.getPackageManager().getApplicationInfo(packageName,
                                             PackageManager.ApplicationInfoFlags.of(0));
                             if (!appInfo.enabled) {
-                                notifyPackageReset(packageName);
+                                // move off main thread
+                                FgThread.getExecutor().execute(
+                                        () -> notifyPackageReset(packageName));
                             }
                         } catch (PackageManager.NameNotFoundException e) {
                             return;
@@ -130,7 +133,8 @@ public class SystemPackageResetHelper extends PackageResetHelper {
                 case Intent.ACTION_PACKAGE_REMOVED:
                     // fall through
                 case Intent.ACTION_PACKAGE_RESTARTED:
-                    notifyPackageReset(packageName);
+                    // move off main thread
+                    FgThread.getExecutor().execute(() -> notifyPackageReset(packageName));
                     break;
                 default:
                     break;

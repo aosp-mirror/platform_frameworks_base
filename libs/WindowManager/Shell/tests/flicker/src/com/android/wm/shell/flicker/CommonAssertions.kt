@@ -114,14 +114,14 @@ fun FlickerTestParameter.splitAppLayerBoundsBecomesVisibleByDrag(
 ) {
     assertLayers {
         if (isShellTransitionsEnabled) {
-            this.notContains(SPLIT_SCREEN_DIVIDER_COMPONENT.or(component))
+            this.notContains(SPLIT_SCREEN_DIVIDER_COMPONENT.or(component), isOptional = true)
                 .then()
                 .isInvisible(SPLIT_SCREEN_DIVIDER_COMPONENT.or(component))
                 .then()
                 // TODO(b/245472831): Verify the component should snap to divider.
                 .isVisible(component)
         } else {
-            this.notContains(SPLIT_SCREEN_DIVIDER_COMPONENT.or(component))
+            this.notContains(SPLIT_SCREEN_DIVIDER_COMPONENT.or(component), isOptional = true)
                 .then()
                 .isInvisible(SPLIT_SCREEN_DIVIDER_COMPONENT.or(component))
                 .then()

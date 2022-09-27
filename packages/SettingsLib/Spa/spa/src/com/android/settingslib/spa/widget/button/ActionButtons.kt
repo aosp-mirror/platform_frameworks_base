@@ -17,6 +17,7 @@
 package com.android.settingslib.spa.widget.button
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -39,6 +40,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -54,6 +56,7 @@ import com.android.settingslib.spa.framework.theme.divider
 data class ActionButton(
     val text: String,
     val imageVector: ImageVector,
+    val enabled: Boolean = true,
     val onClick: () -> Unit,
 )
 
@@ -79,10 +82,15 @@ private fun RowScope.ActionButton(actionButton: ActionButton) {
         modifier = Modifier
             .weight(1f)
             .fillMaxHeight(),
+        enabled = actionButton.enabled,
+        // Because buttons could appear, disappear or change positions, reset the interaction source
+        // to prevent highlight the wrong button.
+        interactionSource = remember(actionButton) { MutableInteractionSource() },
         shape = RectangleShape,
         colors = ButtonDefaults.filledTonalButtonColors(
-            containerColor = MaterialTheme.colorScheme.surface,
+            containerColor = SettingsTheme.colorScheme.surface,
             contentColor = SettingsTheme.colorScheme.categoryTitle,
+            disabledContainerColor = SettingsTheme.colorScheme.surface,
         ),
         contentPadding = PaddingValues(horizontal = 4.dp, vertical = 20.dp),
     ) {

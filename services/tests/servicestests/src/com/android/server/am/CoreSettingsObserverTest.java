@@ -24,10 +24,12 @@ import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
@@ -99,6 +101,9 @@ public class CoreSettingsObserverTest {
         // To prevent NullPointerException at the constructor of ActivityManagerConstants.
         when(mResources.getStringArray(anyInt())).thenReturn(new String[0]);
         when(mResources.getIntArray(anyInt())).thenReturn(new int[0]);
+        final TypedArray mockTypedArray = mock(TypedArray.class);
+        when(mockTypedArray.length()).thenReturn(1);
+        when(mResources.obtainTypedArray(anyInt())).thenReturn(mockTypedArray);
 
         mAms = new ActivityManagerService(new TestInjector(mContext),
                 mServiceThreadRule.getThread());

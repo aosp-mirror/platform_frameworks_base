@@ -147,7 +147,7 @@ public abstract class BroadcastQueue {
      */
     @GuardedBy("mService")
     public abstract boolean cleanupDisabledPackageReceiversLocked(@Nullable String packageName,
-            @Nullable Set<String> filterByClasses, int userId, boolean doit);
+            @Nullable Set<String> filterByClasses, int userId);
 
     /**
      * Quickly determine if this queue has broadcasts that are still waiting to

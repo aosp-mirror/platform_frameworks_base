@@ -20063,6 +20063,7 @@ package android.media {
     field public static final int CHANNEL_OUT_5POINT1 = 252; // 0xfc
     field public static final int CHANNEL_OUT_5POINT1POINT2 = 3145980; // 0x3000fc
     field public static final int CHANNEL_OUT_5POINT1POINT4 = 737532; // 0xb40fc
+    field public static final int CHANNEL_OUT_6POINT1 = 1276; // 0x4fc
     field @Deprecated public static final int CHANNEL_OUT_7POINT1 = 1020; // 0x3fc
     field public static final int CHANNEL_OUT_7POINT1POINT2 = 3152124; // 0x3018fc
     field public static final int CHANNEL_OUT_7POINT1POINT4 = 743676; // 0xb58fc
@@ -45193,6 +45194,7 @@ package android.text {
     method public final int getLineAscent(int);
     method public final int getLineBaseline(int);
     method public final int getLineBottom(int);
+    method public int getLineBottom(int, boolean);
     method public int getLineBounds(int, android.graphics.Rect);
     method public abstract boolean getLineContainsTab(int);
     method public abstract int getLineCount();
@@ -49254,6 +49256,7 @@ package android.view {
     field public static final int CLASSIFICATION_AMBIGUOUS_GESTURE = 1; // 0x1
     field public static final int CLASSIFICATION_DEEP_PRESS = 2; // 0x2
     field public static final int CLASSIFICATION_NONE = 0; // 0x0
+    field public static final int CLASSIFICATION_TWO_FINGER_SWIPE = 3; // 0x3
     field @NonNull public static final android.os.Parcelable.Creator<android.view.MotionEvent> CREATOR;
     field public static final int EDGE_BOTTOM = 2; // 0x2
     field public static final int EDGE_LEFT = 4; // 0x4
@@ -53542,8 +53545,8 @@ package android.view.inputmethod {
 
   public final class InsertGesture extends android.view.inputmethod.HandwritingGesture implements android.os.Parcelable {
     method public int describeContents();
-    method @Nullable public android.graphics.PointF getInsertionPoint();
-    method @Nullable public String getTextToInsert();
+    method @NonNull public android.graphics.PointF getInsertionPoint();
+    method @NonNull public String getTextToInsert();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.inputmethod.InsertGesture> CREATOR;
   }

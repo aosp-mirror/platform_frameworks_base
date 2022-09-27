@@ -355,13 +355,7 @@ public class AidlConversion {
                         case AudioChannelLayout.LAYOUT_5POINT1POINT4:
                             return AudioFormat.CHANNEL_OUT_5POINT1POINT4;
                         case AudioChannelLayout.LAYOUT_6POINT1:
-                            return AudioFormat.CHANNEL_OUT_FRONT_LEFT
-                                    | AudioFormat.CHANNEL_OUT_FRONT_RIGHT
-                                    | AudioFormat.CHANNEL_OUT_FRONT_CENTER
-                                    | AudioFormat.CHANNEL_OUT_LOW_FREQUENCY
-                                    | AudioFormat.CHANNEL_OUT_BACK_LEFT
-                                    | AudioFormat.CHANNEL_OUT_BACK_RIGHT
-                                    | AudioFormat.CHANNEL_OUT_BACK_CENTER;
+                            return AudioFormat.CHANNEL_OUT_6POINT1;
                         case AudioChannelLayout.LAYOUT_7POINT1:
                             return AudioFormat.CHANNEL_OUT_7POINT1_SURROUND;
                         case AudioChannelLayout.LAYOUT_7POINT1POINT2:
