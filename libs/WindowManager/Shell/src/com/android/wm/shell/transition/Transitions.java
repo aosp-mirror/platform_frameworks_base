@@ -542,6 +542,22 @@ public class Transitions implements RemoteCallable<Transitions> {
                 "This shouldn't happen, maybe the default handler is broken.");
     }
 
+    /**
+     * Gives every handler (in order) a chance to handle request until one consumes the transition.
+     * @return the WindowContainerTransaction given by the handler which consumed the transition.
+     */
+    public WindowContainerTransaction dispatchRequest(@NonNull IBinder transition,
+            @NonNull TransitionRequestInfo request, @Nullable TransitionHandler skip) {
+        for (int i = mHandlers.size() - 1; i >= 0; --i) {
+            if (mHandlers.get(i) == skip) continue;
+            WindowContainerTransaction wct = mHandlers.get(i).handleRequest(transition, request);
+            if (wct != null) {
+                return wct;
+            }
+        }
+        return null;
+    }
+
     /** Special version of finish just for dealing with no-op/invalid transitions. */
     private void onAbort(IBinder transition) {
         onFinish(transition, null /* wct */, null /* wctCB */, true /* abort */);
