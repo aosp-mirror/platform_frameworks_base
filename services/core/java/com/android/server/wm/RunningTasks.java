@@ -23,18 +23,16 @@ import android.app.ActivityManager.RunningTaskInfo;
 import android.os.UserHandle;
 import android.util.ArraySet;
 
-import com.android.internal.util.function.pooled.PooledConsumer;
-import com.android.internal.util.function.pooled.PooledLambda;
-
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.TreeSet;
+import java.util.function.Consumer;
 
 /**
  * Class for resolving the set of running tasks in the system.
  */
-class RunningTasks {
+class RunningTasks implements Consumer<Task> {
 
     static final int FLAG_FILTER_ONLY_VISIBLE_RECENTS = 1;
     static final int FLAG_ALLOWED = 1 << 1;
@@ -61,7 +59,7 @@ class RunningTasks {
     private boolean mKeepIntentExtra;
 
     void getTasks(int maxNum, List<RunningTaskInfo> list, int flags, RecentTasks recentTasks,
-            WindowContainer root, int callingUid, ArraySet<Integer> profileIds) {
+            WindowContainer<?> root, int callingUid, ArraySet<Integer> profileIds) {
         // Return early if there are no tasks to fetch
         if (maxNum <= 0) {
             return;
@@ -79,10 +77,7 @@ class RunningTasks {
         mRecentTasks = recentTasks;
         mKeepIntentExtra = (flags & FLAG_KEEP_INTENT_EXTRA) == FLAG_KEEP_INTENT_EXTRA;
 
-        final PooledConsumer c = PooledLambda.obtainConsumer(RunningTasks::processTask, this,
-                PooledLambda.__(Task.class));
-        root.forAllLeafTasks(c, false);
-        c.recycle();
+        root.forAllLeafTasks(this, false /* traverseTopToBottom */);
 
         // Take the first {@param maxNum} tasks and create running task infos for them
         final Iterator<Task> iter = mTmpSortedSet.iterator();
@@ -97,7 +92,8 @@ class RunningTasks {
         }
     }
 
-    private void processTask(Task task) {
+    @Override
+    public void accept(Task task) {
         if (task.getTopNonFinishingActivity() == null) {
             // Skip if there are no activities in the task
             return;

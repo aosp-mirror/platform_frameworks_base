@@ -139,7 +139,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.ReferrerIntent;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.ArrayUtils;
-import com.android.internal.util.function.pooled.PooledConsumer;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
 import com.android.server.am.ActivityManagerService;
@@ -1578,15 +1577,10 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         if (rootTask.getWindowingMode() == WINDOWING_MODE_PINNED) {
             removePinnedRootTaskInSurfaceTransaction(rootTask);
         } else {
-            final PooledConsumer c = PooledLambda.obtainConsumer(
-                    ActivityTaskSupervisor::processRemoveTask, this, PooledLambda.__(Task.class));
-            rootTask.forAllLeafTasks(c, true /* traverseTopToBottom */);
-            c.recycle();
+            rootTask.forAllLeafTasks(task -> {
+                removeTask(task, true /* killProcess */, REMOVE_FROM_RECENTS, "remove-root-task");
+            }, true /* traverseTopToBottom */);
         }
-    }
-
-    private void processRemoveTask(Task task) {
-        removeTask(task, true /* killProcess */, REMOVE_FROM_RECENTS, "remove-root-task");
     }
 
     /**
@@ -2268,20 +2262,14 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
     }
 
     void scheduleUpdateMultiWindowMode(Task task) {
-        final PooledConsumer c = PooledLambda.obtainConsumer(
-                ActivityTaskSupervisor::addToMultiWindowModeChangedList, this,
-                PooledLambda.__(ActivityRecord.class));
-        task.forAllActivities(c);
-        c.recycle();
+        task.forAllActivities(r -> {
+            if (r.attachedToProcess()) {
+                mMultiWindowModeChangedActivities.add(r);
+            }
+        });
 
         if (!mHandler.hasMessages(REPORT_MULTI_WINDOW_MODE_CHANGED_MSG)) {
             mHandler.sendEmptyMessage(REPORT_MULTI_WINDOW_MODE_CHANGED_MSG);
-        }
-    }
-
-    private void addToMultiWindowModeChangedList(ActivityRecord r) {
-        if (r.attachedToProcess()) {
-            mMultiWindowModeChangedActivities.add(r);
         }
     }
 
@@ -2296,27 +2284,20 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
     }
 
     void scheduleUpdatePictureInPictureModeIfNeeded(Task task, Rect targetRootTaskBounds) {
-        final PooledConsumer c = PooledLambda.obtainConsumer(
-                ActivityTaskSupervisor::addToPipModeChangedList, this,
-                PooledLambda.__(ActivityRecord.class));
-        task.forAllActivities(c);
-        c.recycle();
+        task.forAllActivities(r -> {
+            if (!r.attachedToProcess()) return;
+            mPipModeChangedActivities.add(r);
+            // If we are scheduling pip change, then remove this activity from multi-window
+            // change list as the processing of pip change will make sure multi-window changed
+            // message is processed in the right order relative to pip changed.
+            mMultiWindowModeChangedActivities.remove(r);
+        });
 
         mPipModeChangedTargetRootTaskBounds = targetRootTaskBounds;
 
         if (!mHandler.hasMessages(REPORT_PIP_MODE_CHANGED_MSG)) {
             mHandler.sendEmptyMessage(REPORT_PIP_MODE_CHANGED_MSG);
         }
-    }
-
-    private void addToPipModeChangedList(ActivityRecord r) {
-        if (!r.attachedToProcess()) return;
-
-        mPipModeChangedActivities.add(r);
-        // If we are scheduling pip change, then remove this activity from multi-window
-        // change list as the processing of pip change will make sure multi-window changed
-        // message is processed in the right order relative to pip changed.
-        mMultiWindowModeChangedActivities.remove(r);
     }
 
     void wakeUp(String reason) {

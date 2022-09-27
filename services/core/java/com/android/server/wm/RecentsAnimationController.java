@@ -62,8 +62,6 @@ import android.window.TaskSnapshot;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
-import com.android.internal.util.function.pooled.PooledConsumer;
-import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.statusbar.StatusBarManagerInternal;
@@ -403,11 +401,11 @@ public class RecentsAnimationController implements DeathRecipient {
         final Task targetRootTask = mDisplayContent.getDefaultTaskDisplayArea()
                 .getRootTask(WINDOWING_MODE_UNDEFINED, targetActivityType);
         if (targetRootTask != null) {
-            final PooledConsumer c = PooledLambda.obtainConsumer((t, outList) ->
-	            { if (!outList.contains(t)) outList.add(t); }, PooledLambda.__(Task.class),
-                    visibleTasks);
-            targetRootTask.forAllLeafTasks(c, true /* traverseTopToBottom */);
-            c.recycle();
+            targetRootTask.forAllLeafTasks(t -> {
+                if (!visibleTasks.contains(t)) {
+                    visibleTasks.add(t);
+                }
+            }, true /* traverseTopToBottom */);
         }
 
         final int taskCount = visibleTasks.size();
