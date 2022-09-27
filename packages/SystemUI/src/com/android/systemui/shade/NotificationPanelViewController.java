@@ -2479,15 +2479,21 @@ public final class NotificationPanelViewController extends PanelViewController {
         mDepthController.setQsPanelExpansion(qsExpansionFraction);
         mStatusBarKeyguardViewManager.setQsExpansion(qsExpansionFraction);
 
-        // updateQsExpansion will get called whenever mTransitionToFullShadeProgress or
-        // mLockscreenShadeTransitionController.getDragProgress change.
-        // When in lockscreen, getDragProgress indicates the true expanded fraction of QS
-        float shadeExpandedFraction = mTransitioningToFullShadeProgress > 0
-                ? mLockscreenShadeTransitionController.getQSDragProgress()
+        float shadeExpandedFraction = isOnKeyguard()
+                ? getLockscreenShadeDragProgress()
                 : getExpandedFraction();
         mLargeScreenShadeHeaderController.setShadeExpandedFraction(shadeExpandedFraction);
         mLargeScreenShadeHeaderController.setQsExpandedFraction(qsExpansionFraction);
         mLargeScreenShadeHeaderController.setQsVisible(mQsVisible);
+    }
+
+    private float getLockscreenShadeDragProgress() {
+        // mTransitioningToFullShadeProgress > 0 means we're doing regular lockscreen to shade
+        // transition. If that's not the case we should follow QS expansion fraction for when
+        // user is pulling from the same top to go directly to expanded QS
+        return mTransitioningToFullShadeProgress > 0
+                ? mLockscreenShadeTransitionController.getQSDragProgress()
+                : computeQsExpansionFraction();
     }
 
     private void onStackYChanged(boolean shouldAnimate) {
@@ -4749,9 +4755,7 @@ public final class NotificationPanelViewController extends PanelViewController {
 
                 @Override
                 public float getLockscreenShadeDragProgress() {
-                    return mTransitioningToFullShadeProgress > 0
-                            ? mLockscreenShadeTransitionController.getQSDragProgress()
-                            : computeQsExpansionFraction();
+                    return NotificationPanelViewController.this.getLockscreenShadeDragProgress();
                 }
             };
 
