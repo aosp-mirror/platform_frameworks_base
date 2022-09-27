@@ -54,6 +54,13 @@ public abstract class DreamManagerInternal {
     public abstract void requestDream();
 
     /**
+     * Whether dreaming can start given user settings and the current dock/charge state.
+     *
+     * @param isScreenOn True if the screen is currently on.
+     */
+    public abstract boolean canStartDreaming(boolean isScreenOn);
+
+    /**
      * Called by the ActivityTaskManagerService to verify that the startDreamActivity
      * request comes from the current active dream component.
      *
