@@ -28,8 +28,8 @@ import android.database.Cursor
 import android.database.MatrixCursor
 import android.net.Uri
 import android.util.Log
-import com.android.settingslib.spa.framework.common.SettingsEntryRepository
 import com.android.settingslib.spa.framework.common.SettingsPage
+import com.android.settingslib.spa.framework.common.SpaEnvironment
 
 /**
  * The content provider to return entry related data, which can be used for search and hierarchy.
@@ -42,10 +42,9 @@ import com.android.settingslib.spa.framework.common.SettingsPage
  *   $ adb shell content query --uri content://<AuthorityPath>/page_info
  *   $ adb shell content query --uri content://<AuthorityPath>/entry_info
  */
-open class EntryProvider(
-    private val entryRepository: SettingsEntryRepository,
-    private val browseActivityClass: Class<*>? = null,
-) : ContentProvider() {
+open class EntryProvider(spaEnvironment: SpaEnvironment) : ContentProvider() {
+    private val entryRepository by spaEnvironment.entryRepository
+    private val browseActivityClass = spaEnvironment.browseActivityClass
 
     /**
      * Enum to define all column names in provider.
@@ -220,7 +219,7 @@ open class EntryProvider(
     }
 
     private fun createBrowsePageIntent(page: SettingsPage): Intent {
-        if (context == null || browseActivityClass == null || page.hasRuntimeParam())
+        if (context == null || page.hasRuntimeParam())
             return Intent()
 
         return Intent().setComponent(ComponentName(context!!, browseActivityClass)).apply {
@@ -231,8 +230,7 @@ open class EntryProvider(
     private fun createBrowsePageAdbCommand(page: SettingsPage): String? {
         if (context == null || page.hasRuntimeParam()) return null
         val packageName = context!!.packageName
-        val activityName =
-            browseActivityClass?.name?.replace(packageName, "") ?: "<browse-activity-class>"
+        val activityName = browseActivityClass.name.replace(packageName, "")
         return "adb shell am start -n $packageName/$activityName" +
             " -e ${BrowseActivity.KEY_DESTINATION} ${page.buildRoute()}"
     }

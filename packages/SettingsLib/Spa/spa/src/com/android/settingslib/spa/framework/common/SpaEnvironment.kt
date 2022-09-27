@@ -14,8 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spa.gallery
+package com.android.settingslib.spa.framework.common
 
-import com.android.settingslib.spa.framework.DebugActivity
+import android.app.Activity
 
-class GalleryDebugActivity : DebugActivity(GallerySpaEnvironment)
+abstract class SpaEnvironment {
+    abstract val pageProviderRepository: Lazy<SettingsPageProviderRepository>
+
+    val entryRepository = lazy { SettingsEntryRepository(pageProviderRepository.value) }
+
+    abstract val browseActivityClass: Class<out Activity>
+
+    open val entryProviderAuthorities: String? = null
+
+    // TODO: add other environment setup here.
+}
