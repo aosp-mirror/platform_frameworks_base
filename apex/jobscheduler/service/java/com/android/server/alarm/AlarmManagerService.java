@@ -59,8 +59,6 @@ import static com.android.server.alarm.AlarmManagerService.RemovedAlarm.REMOVE_R
 
 import android.Manifest;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
-import android.annotation.RequiresPermission;
 import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.ActivityManagerInternal;
@@ -883,9 +881,11 @@ public class AlarmManagerService extends SystemService {
             mInjector.registerDeviceConfigListener(this);
             final EconomyManagerInternal economyManagerInternal =
                     LocalServices.getService(EconomyManagerInternal.class);
-            economyManagerInternal.registerTareStateChangeListener(this);
+            economyManagerInternal.registerTareStateChangeListener(this,
+                    AlarmManagerEconomicPolicy.POLICY_ALARM);
             onPropertiesChanged(DeviceConfig.getProperties(DeviceConfig.NAMESPACE_ALARM_MANAGER));
-            updateTareSettings(economyManagerInternal.isEnabled());
+            updateTareSettings(
+                    economyManagerInternal.isEnabled(AlarmManagerEconomicPolicy.POLICY_ALARM));
         }
 
         public void updateAllowWhileIdleWhitelistDurationLocked() {

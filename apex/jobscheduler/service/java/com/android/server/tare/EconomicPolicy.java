@@ -57,9 +57,10 @@ public abstract class EconomicPolicy {
 
     private static final int SHIFT_POLICY = 28;
     static final int MASK_POLICY = 0b11 << SHIFT_POLICY;
+    static final int ALL_POLICIES = MASK_POLICY;
     // Reserve 0 for the base/common policy.
-    static final int POLICY_AM = 1 << SHIFT_POLICY;
-    static final int POLICY_JS = 2 << SHIFT_POLICY;
+    public static final int POLICY_ALARM = 1 << SHIFT_POLICY;
+    public static final int POLICY_JOB = 2 << SHIFT_POLICY;
 
     static final int MASK_EVENT = -1 ^ (MASK_TYPE | MASK_POLICY);
 
@@ -112,6 +113,15 @@ public abstract class EconomicPolicy {
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface EventType {
+    }
+
+    @IntDef({
+            ALL_POLICIES,
+            POLICY_ALARM,
+            POLICY_JOB,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Policy {
     }
 
     @IntDef({
@@ -342,7 +352,7 @@ public abstract class EconomicPolicy {
     @NonNull
     static String actionToString(int eventId) {
         switch (eventId & MASK_POLICY) {
-            case POLICY_AM:
+            case POLICY_ALARM:
                 switch (eventId) {
                     case AlarmManagerEconomicPolicy.ACTION_ALARM_WAKEUP_EXACT_ALLOW_WHILE_IDLE:
                         return "ALARM_WAKEUP_EXACT_ALLOW_WHILE_IDLE";
@@ -365,7 +375,7 @@ public abstract class EconomicPolicy {
                 }
                 break;
 
-            case POLICY_JS:
+            case POLICY_JOB:
                 switch (eventId) {
                     case JobSchedulerEconomicPolicy.ACTION_JOB_MAX_START:
                         return "JOB_MAX_START";

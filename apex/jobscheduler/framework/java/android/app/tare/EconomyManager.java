@@ -91,6 +91,13 @@ public class EconomyManager {
         }
     }
 
+    public static final String KEY_ENABLE_TARE = "enable_tare";
+    public static final String KEY_ENABLE_POLICY_ALARM = "enable_policy_alarm";
+    public static final String KEY_ENABLE_POLICY_JOB_SCHEDULER = "enable_policy_job";
+    public static final boolean DEFAULT_ENABLE_TARE = true;
+    public static final boolean DEFAULT_ENABLE_POLICY_ALARM = true;
+    public static final boolean DEFAULT_ENABLE_POLICY_JOB_SCHEDULER = true;
+
     // Keys for AlarmManager TARE factors
     /** @hide */
     public static final String KEY_AM_MIN_SATIATED_BALANCE_EXEMPTED =

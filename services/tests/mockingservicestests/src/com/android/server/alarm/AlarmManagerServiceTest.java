@@ -172,6 +172,7 @@ import com.android.server.SystemService;
 import com.android.server.pm.permission.PermissionManagerService;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.pm.pkg.AndroidPackage;
+import com.android.server.tare.AlarmManagerEconomicPolicy;
 import com.android.server.tare.EconomyManagerInternal;
 import com.android.server.usage.AppStandbyInternal;
 
@@ -650,7 +651,8 @@ public class AlarmManagerServiceTest {
     }
 
     private void setTareEnabled(boolean enabled) {
-        when(mEconomyManagerInternal.isEnabled()).thenReturn(enabled);
+        when(mEconomyManagerInternal.isEnabled(eq(AlarmManagerEconomicPolicy.POLICY_ALARM)))
+                .thenReturn(enabled);
         mService.mConstants.onTareEnabledStateChanged(enabled);
     }
 
