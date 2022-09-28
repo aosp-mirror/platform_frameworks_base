@@ -22,26 +22,25 @@ import android.os.RemoteException;
 import android.util.Log;
 
 /**
- * Callback to be invoked as a response to {@link GetCredentialsRequest}.
+ * Callback to be invoked as a response to {@link CreateCredentialRequest}.
  *
  * @hide
  */
-public final class GetCredentialsCallback {
+public final class CreateCredentialCallback {
+    private static final String TAG = "CreateCredentialCallback";
 
-    private static final String TAG = "GetCredentialsCallback";
-
-    private final IGetCredentialsCallback mCallback;
+    private final ICreateCredentialCallback mCallback;
 
     /** @hide */
-    public GetCredentialsCallback(@NonNull IGetCredentialsCallback callback) {
+    public CreateCredentialCallback(@NonNull ICreateCredentialCallback callback) {
         mCallback = callback;
     }
 
     /**
-     * Invoked on a successful response for {@link GetCredentialsRequest}
+     * Invoked on a successful response for {@link CreateCredentialRequest}
      * @param response The response from the credential provider.
      */
-    public void onSuccess(@NonNull GetCredentialsResponse response) {
+    public void onSuccess(@NonNull CreateCredentialResponse response) {
         try {
             mCallback.onSuccess(response);
         } catch (RemoteException e) {
@@ -50,8 +49,8 @@ public final class GetCredentialsCallback {
     }
 
     /**
-     * Invoked on a failure response for {@link GetCredentialsRequest}
-     * @param errorCode The code defining the kind of error.
+     * Invoked on a failure response for {@link CreateCredentialRequest}
+     * @param errorCode The code defining the type of error.
      * @param message The message corresponding to the failure.
      */
     public void onFailure(int errorCode, @Nullable CharSequence message) {
