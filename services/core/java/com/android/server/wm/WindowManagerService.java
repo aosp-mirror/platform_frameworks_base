@@ -9286,4 +9286,46 @@ public class WindowManagerService extends IWindowManager.Stub
                         "Unexpected letterbox background type: " + letterboxBackgroundType);
         }
     }
+
+    @Override
+    public void captureDisplay(int displayId, @Nullable ScreenCapture.CaptureArgs captureArgs,
+            ScreenCapture.ScreenCaptureListener listener) {
+        Slog.d(TAG, "captureDisplay");
+        if (!checkCallingPermission(READ_FRAME_BUFFER, "captureDisplay()")) {
+            throw new SecurityException("Requires READ_FRAME_BUFFER permission");
+        }
+
+        ScreenCapture.captureLayers(getCaptureArgs(displayId, captureArgs), listener);
+    }
+
+    @VisibleForTesting
+    ScreenCapture.LayerCaptureArgs getCaptureArgs(int displayId,
+            @Nullable ScreenCapture.CaptureArgs captureArgs) {
+        final SurfaceControl displaySurfaceControl;
+        synchronized (mGlobalLock) {
+            DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+            if (displayContent == null) {
+                throw new IllegalArgumentException("Trying to screenshot and invalid display: "
+                        + displayId);
+            }
+
+            displaySurfaceControl = displayContent.getSurfaceControl();
+
+            if (captureArgs == null) {
+                captureArgs = new ScreenCapture.CaptureArgs.Builder<>()
+                        .build();
+            }
+
+            if (captureArgs.mSourceCrop.isEmpty()) {
+                displayContent.getBounds(mTmpRect);
+                mTmpRect.offsetTo(0, 0);
+            } else {
+                mTmpRect.set(captureArgs.mSourceCrop);
+            }
+        }
+
+        return new ScreenCapture.LayerCaptureArgs.Builder(displaySurfaceControl, captureArgs)
+                        .setSourceCrop(mTmpRect)
+                        .build();
+    }
 }
