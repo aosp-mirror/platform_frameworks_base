@@ -54,7 +54,7 @@ class MediaProjectionAppSelectorControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun initMultipleRecentTasksWithoutAppSelectorTask_bindsListInReverse() {
+    fun initMultipleRecentTasksWithoutAppSelectorTask_bindsListInTheSameOrder() {
         val tasks = listOf(
             createRecentTask(taskId = 1),
             createRecentTask(taskId = 2),
@@ -66,15 +66,15 @@ class MediaProjectionAppSelectorControllerTest : SysuiTestCase() {
 
         verify(view).bind(
             listOf(
-                createRecentTask(taskId = 3),
-                createRecentTask(taskId = 2),
                 createRecentTask(taskId = 1),
+                createRecentTask(taskId = 2),
+                createRecentTask(taskId = 3),
             )
         )
     }
 
     @Test
-    fun initRecentTasksWithAppSelectorTasks_bindsListInReverseAndAppSelectorTasksAtTheEnd() {
+    fun initRecentTasksWithAppSelectorTasks_bindsAppSelectorTasksAtTheEnd() {
         val tasks = listOf(
             createRecentTask(taskId = 1),
             createRecentTask(taskId = 2, topActivityComponent = appSelectorComponentName),
@@ -88,11 +88,11 @@ class MediaProjectionAppSelectorControllerTest : SysuiTestCase() {
 
         verify(view).bind(
             listOf(
-                createRecentTask(taskId = 5),
-                createRecentTask(taskId = 3),
                 createRecentTask(taskId = 1),
-                createRecentTask(taskId = 4, topActivityComponent = appSelectorComponentName),
+                createRecentTask(taskId = 3),
+                createRecentTask(taskId = 5),
                 createRecentTask(taskId = 2, topActivityComponent = appSelectorComponentName),
+                createRecentTask(taskId = 4, topActivityComponent = appSelectorComponentName),
             )
         )
     }
@@ -105,7 +105,8 @@ class MediaProjectionAppSelectorControllerTest : SysuiTestCase() {
             taskId = taskId,
             topActivityComponent = topActivityComponent,
             baseIntentComponent = ComponentName("com", "Test"),
-            userId = 0
+            userId = 0,
+            colorBackground = 0
         )
     }
 
