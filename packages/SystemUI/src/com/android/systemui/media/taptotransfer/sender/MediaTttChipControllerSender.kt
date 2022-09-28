@@ -29,6 +29,7 @@ import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
 import android.widget.TextView
 import com.android.internal.statusbar.IUndoMediaTransferCallback
+import com.android.internal.widget.CachingIconView
 import com.android.systemui.Gefingerpoken
 import com.android.systemui.R
 import com.android.systemui.animation.Interpolators
@@ -145,11 +146,9 @@ class MediaTttChipControllerSender @Inject constructor(
         val iconInfo = MediaTttUtils.getIconInfoFromPackageName(
             context, newInfo.routeInfo.clientPackageName, logger
         )
-        MediaTttUtils.setIcon(
-            currentView.requireViewById(R.id.app_icon),
-            iconInfo.drawable,
-            iconInfo.contentDescription
-        )
+        val iconView = currentView.requireViewById<CachingIconView>(R.id.app_icon)
+        iconView.setImageDrawable(iconInfo.drawable)
+        iconView.contentDescription = iconInfo.contentDescription
 
         // Text
         val otherDeviceName = newInfo.routeInfo.name.toString()

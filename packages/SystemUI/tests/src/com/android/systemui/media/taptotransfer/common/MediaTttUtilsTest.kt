@@ -19,9 +19,7 @@ package com.android.systemui.media.taptotransfer.common
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
-import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
-import com.android.internal.widget.CachingIconView
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.mockito.any
@@ -89,48 +87,6 @@ class MediaTttUtilsTest : SysuiTestCase() {
         assertThat(iconInfo.isAppIcon).isTrue()
         assertThat(iconInfo.drawable).isEqualTo(appIconFromPackageName)
         assertThat(iconInfo.contentDescription).isEqualTo(APP_NAME)
-    }
-
-    @Test
-    fun setIcon_viewHasIconAndContentDescription() {
-        val view = CachingIconView(context)
-        val icon = context.getDrawable(R.drawable.ic_celebration)!!
-        val contentDescription = "Happy birthday!"
-
-        MediaTttUtils.setIcon(view, icon, contentDescription)
-
-        assertThat(view.drawable).isEqualTo(icon)
-        assertThat(view.contentDescription).isEqualTo(contentDescription)
-    }
-
-    @Test
-    fun setIcon_iconSizeNull_viewSizeDoesNotChange() {
-        val view = CachingIconView(context)
-        val size = 456
-        view.layoutParams = FrameLayout.LayoutParams(size, size)
-
-        MediaTttUtils.setIcon(view, context.getDrawable(R.drawable.ic_cake)!!, "desc")
-
-        assertThat(view.layoutParams.width).isEqualTo(size)
-        assertThat(view.layoutParams.height).isEqualTo(size)
-    }
-
-    @Test
-    fun setIcon_iconSizeProvided_viewSizeUpdates() {
-        val view = CachingIconView(context)
-        val size = 456
-        view.layoutParams = FrameLayout.LayoutParams(size, size)
-
-        val newSize = 40
-        MediaTttUtils.setIcon(
-            view,
-            context.getDrawable(R.drawable.ic_cake)!!,
-            "desc",
-            iconSize = newSize
-        )
-
-        assertThat(view.layoutParams.width).isEqualTo(newSize)
-        assertThat(view.layoutParams.height).isEqualTo(newSize)
     }
 }
 
