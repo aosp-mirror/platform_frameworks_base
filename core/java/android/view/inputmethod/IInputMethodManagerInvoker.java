@@ -202,6 +202,16 @@ final class IInputMethodManagerInvoker {
     }
 
     @AnyThread
+    void setExplicitlyEnabledInputMethodSubtypes(@NonNull String imeId,
+            @NonNull int[] subtypeHashCodes, @UserIdInt int userId) {
+        try {
+            mTarget.setExplicitlyEnabledInputMethodSubtypes(imeId, subtypeHashCodes, userId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @AnyThread
     int getInputMethodWindowVisibleHeight(@NonNull IInputMethodClient client) {
         try {
             return mTarget.getInputMethodWindowVisibleHeight(client);

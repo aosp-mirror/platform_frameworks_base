@@ -3633,6 +3633,56 @@ public final class InputMethodManager {
     }
 
     /**
+     * Updates the list of explicitly enabled {@link InputMethodSubtype} for a given IME owned by
+     * the calling process.
+     *
+     * <p>By default each IME has no explicitly enabled {@link InputMethodSubtype}.  In this state
+     * the system will decide what {@link InputMethodSubtype} should be enabled by using information
+     * available at runtime as per-user language settings.  Users can, however, manually pick up one
+     * or more {@link InputMethodSubtype} to be enabled on an Activity shown by
+     * {@link #showInputMethodAndSubtypeEnabler(String)}. Such a manual change is stored in
+     * {@link Settings.Secure#ENABLED_INPUT_METHODS} so that the change can persist across reboots.
+     * {@link Settings.Secure#ENABLED_INPUT_METHODS} stores {@link InputMethodSubtype#hashCode()} as
+     * the identifier of {@link InputMethodSubtype} for historical reasons.</p>
+     *
+     * <p>This API provides a safe and managed way for IME developers to modify what
+     * {@link InputMethodSubtype} are referenced in {@link Settings.Secure#ENABLED_INPUT_METHODS}
+     * for their own IME.  One use case is when IME developers want to use their own Activity for
+     * users to pick up {@link InputMethodSubtype}. Another use case is for IME developers to fix up
+     * any stale and/or invalid value stored in {@link Settings.Secure#ENABLED_INPUT_METHODS}
+     * without bothering users. Passing an empty {@code subtypeHashCodes} is guaranteed to reset
+     * the state to default.</p>
+     *
+     * <h3>To control the return value of {@link InputMethodSubtype#hashCode()}</h3>
+     * <p>{@link android.R.attr#subtypeId} and {@link
+     * android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder#setSubtypeId(int)} are
+     * available for IME developers to control the return value of
+     * {@link InputMethodSubtype#hashCode()}. Beware that {@code -1} is not a valid value of
+     * {@link InputMethodSubtype#hashCode()} for historical reasons.</p>
+     *
+     * <h3>Note for Direct Boot support</h3>
+     * <p>While IME developers can call this API even before
+     * {@link android.os.UserManager#isUserUnlocked()} becomes {@code true}, such a change is
+     * volatile thus remains effective only until {@link android.os.UserManager#isUserUnlocked()}
+     * becomes {@code true} or the device is rebooted. To make the change persistent IME developers
+     * need to call this API again after receiving {@link Intent#ACTION_USER_UNLOCKED}.</p>
+     *
+     * @param imiId IME ID. The specified IME and the calling process need to belong to the same
+     *              package.  Otherwise {@link SecurityException} will be thrown.
+     * @param subtypeHashCodes An arrays of {@link InputMethodSubtype#hashCode()} to be explicitly
+     *                         enabled. Entries that are found in the specified IME will be silently
+     *                         ignored. Pass an empty array to reset the state to default.
+     * @throws NullPointerException if {@code subtypeHashCodes} is {@code null}.
+     * @throws SecurityException if the specified IME and the calling process do not belong to the
+     *                           same package.
+     */
+    public void setExplicitlyEnabledInputMethodSubtypes(@NonNull String imiId,
+            @NonNull int[] subtypeHashCodes) {
+        mServiceInvoker.setExplicitlyEnabledInputMethodSubtypes(imiId, subtypeHashCodes,
+                UserHandle.myUserId());
+    }
+
+    /**
      * Returns the last used {@link InputMethodSubtype} in system history.
      *
      * @return the last {@link InputMethodSubtype}, {@code null} if last IME have no subtype.
