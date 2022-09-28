@@ -190,6 +190,11 @@
 
                 </LinearLayout>
 
+                <ViewStub android:id="@+id/secondary_mobile_network_stub"
+                  android:inflatedId="@+id/secondary_mobile_network_layout"
+                  android:layout="@layout/qs_dialog_secondary_mobile_network"
+                  style="@style/InternetDialog.Network"/>
+
                 <LinearLayout
                     android:id="@+id/turn_on_wifi_layout"
                     style="@style/InternetDialog.Network"
