@@ -728,7 +728,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         intentFilter.addAction(Intent.ACTION_USER_SWITCHED);
         intentFilter.addAction(Intent.ACTION_USER_UNLOCKED);
         intentFilter.addAction(Intent.ACTION_USER_REMOVED);
-        intentFilter.addAction(Intent.ACTION_USER_PRESENT);
         intentFilter.addAction(Intent.ACTION_SETTING_RESTORED);
 
         mContext.registerReceiverAsUser(new BroadcastReceiver() {
@@ -746,14 +745,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     unlockUser(intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0));
                 } else if (Intent.ACTION_USER_REMOVED.equals(action)) {
                     removeUser(intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0));
-                } else if (Intent.ACTION_USER_PRESENT.equals(action)) {
-                    // We will update when the automation service dies.
-                    synchronized (mLock) {
-                        AccessibilityUserState userState = getCurrentUserStateLocked();
-                        if (readConfigurationForUserStateLocked(userState)) {
-                            onUserStateChangedLocked(userState);
-                        }
-                    }
                 } else if (Intent.ACTION_SETTING_RESTORED.equals(action)) {
                     final String which = intent.getStringExtra(Intent.EXTRA_SETTING_NAME);
                     if (Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES.equals(which)) {
