@@ -105,6 +105,7 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.IBinder;
 import android.os.PackageTagsList;
 import android.os.Process;
@@ -374,10 +375,17 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
     public AppOpsUidStateTracker getUidStateTracker() {
         if (mUidStateTracker == null) {
             mUidStateTracker = new AppOpsUidStateTrackerImpl(
-                    LocalServices.getService(ActivityManagerInternal.class), mHandler,
+                    LocalServices.getService(ActivityManagerInternal.class),
+                    mHandler,
+                    r -> {
+                        synchronized (AppOpsService.this) {
+                            r.run();
+                        }
+                    },
                     Clock.SYSTEM_CLOCK, mConstants);
 
-            mUidStateTracker.addUidStateChangedCallback(mHandler, this::onUidStateChanged);
+            mUidStateTracker.addUidStateChangedCallback(new HandlerExecutor(mHandler),
+                    this::onUidStateChanged);
         }
         return mUidStateTracker;
     }
@@ -4809,6 +4817,8 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
         pw.println("    Only output the watcher sections.");
         pw.println("  --history");
         pw.println("    Only output history.");
+        pw.println("  --uid-state-change-logs");
+        pw.println("    Include logs about uid state changes.");
     }
 
     private void dumpStatesLocked(@NonNull PrintWriter pw, @Nullable String filterAttributionTag,
@@ -4946,6 +4956,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
         // TODO ntmyren: Remove the dumpHistory and dumpFilter
         boolean dumpHistory = false;
         boolean includeDiscreteOps = false;
+        boolean dumpUidStateChangeLogs = false;
         int nDiscreteOps = 10;
         @HistoricalOpsRequestFilter int dumpFilter = 0;
         boolean dumpAll = false;
@@ -5028,6 +5039,8 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
                 } else if (arg.length() > 0 && arg.charAt(0) == '-') {
                     pw.println("Unknown option: " + arg);
                     return;
+                } else if ("--uid-state-change-logs".equals(arg)) {
+                    dumpUidStateChangeLogs = true;
                 } else {
                     pw.println("Unknown command: " + arg);
                     return;
@@ -5363,6 +5376,12 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
                     pw.println("  AppOps policy not set.");
                 }
             }
+
+            if (dumpAll || dumpUidStateChangeLogs) {
+                pw.println();
+                pw.println("Uid State Changes Event Log:");
+                getUidStateTracker().dumpEvents(pw);
+            }
         }
 
         // Must not hold the appops lock
@@ -5374,14 +5393,6 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
             pw.println("Discrete accesses: ");
             mHistoricalRegistry.dumpDiscreteData(pw, dumpUid, dumpPackage, dumpAttributionTag,
                     dumpFilter, dumpOp, sdf, date, "  ", nDiscreteOps);
-        }
-
-        if (dumpAll) {
-            pw.println();
-            pw.println("Uid State Changes Event Log:");
-            if (mUidStateTracker != null) {
-                mUidStateTracker.dumpEvents(pw);
-            }
         }
     }
 
