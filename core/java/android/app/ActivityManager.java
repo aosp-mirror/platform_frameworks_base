@@ -4387,13 +4387,15 @@ public class ActivityManager {
      * a profile, the {@link #getCurrentUser()}, the {@link UserHandle#SYSTEM system user}, or
      * does not exist.
      *
-     * @param displayId id of the display, it must exist.
+     * @param displayId id of the display.
      *
      * @return whether the operation succeeded. Notice that if the user was already started in such
      * display before, it will return {@code false}.
      *
      * @throws UnsupportedOperationException if the device does not support background users on
      * secondary displays.
+     * @throws IllegalArgumentException if the display doesn't exist or is not a valid display to
+     * start secondary users on.
      *
      * @hide
      */
@@ -4408,6 +4410,24 @@ public class ActivityManager {
         }
         try {
             return getService().startUserInBackgroundOnSecondaryDisplay(userId, displayId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets the id of displays that can be used by
+     * {@link #startUserInBackgroundOnSecondaryDisplay(int, int)}.
+     *
+     * @hide
+     */
+    @TestApi
+    @Nullable
+    @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.INTERACT_ACROSS_USERS})
+    public int[] getSecondaryDisplayIdsForStartingBackgroundUsers() {
+        try {
+            return getService().getSecondaryDisplayIdsForStartingBackgroundUsers();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
