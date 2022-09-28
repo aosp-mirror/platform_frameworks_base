@@ -53,12 +53,21 @@ class AppInfoProvider(private val packageInfo: PackageInfo) {
                 ),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
+            val app = packageInfo.applicationInfo
             Box(modifier = Modifier.padding(SettingsDimension.itemPaddingAround)) {
-                AppIcon(app = packageInfo.applicationInfo, size = SettingsDimension.appIconInfoSize)
+                AppIcon(app = app, size = SettingsDimension.appIconInfoSize)
             }
-            AppLabel(packageInfo.applicationInfo)
+            AppLabel(app)
+            InstallType(app)
             if (displayVersion) AppVersion()
         }
+    }
+
+    @Composable
+    private fun InstallType(app: ApplicationInfo) {
+        if (!app.isInstantApp) return
+        Spacer(modifier = Modifier.height(4.dp))
+        SettingsBody(stringResource(R.string.install_type_instant))
     }
 
     @Composable
