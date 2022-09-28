@@ -71,6 +71,7 @@ import android.annotation.AnyThread;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.ActivityTaskManager.RootTaskInfo;
@@ -867,6 +868,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     }
 
     private Runnable mRetryFingerprintAuthentication = new Runnable() {
+        @SuppressLint("MissingPermission")
         @Override
         public void run() {
             mLogger.logRetryAfterFpHwUnavailable(mHardwareFingerprintUnavailableRetryCount);
@@ -1692,7 +1694,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      * {@link com.android.internal.telephony.TelephonyIntents#ACTION_SIM_STATE_CHANGED} broadcast,
      * and then pass a result via our handler to {@link KeyguardUpdateMonitor#handleSimStateChange},
      * we need a single object to pass to the handler.  This class helps decode
-     * the intent and provide a {@link SimCard.State} result.
+     * the intent and provide a {@link SimData} result.
      */
     private static class SimData {
         public int simState;
@@ -2794,6 +2796,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         return isUnlockWithFacePossible(userId) || isUnlockWithFingerprintPossible(userId);
     }
 
+    @SuppressLint("MissingPermission")
     @VisibleForTesting
     boolean isUnlockWithFingerprintPossible(int userId) {
         // TODO (b/242022358), make this rely on onEnrollmentChanged event and update it only once.
@@ -3487,7 +3490,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     /**
      * If any SIM cards are currently secure.
      *
-     * @see #isSimPinSecure(State)
+     * @see #isSimPinSecure(int)
      */
     public boolean isSimPinSecure() {
         // True if any SIM is pin secure
@@ -3716,6 +3719,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         mHandler.removeCallbacksAndMessages(null);
     }
 
+    @SuppressLint("MissingPermission")
     @Override
     public void dump(PrintWriter pw, String[] args) {
         pw.println("KeyguardUpdateMonitor state:");
