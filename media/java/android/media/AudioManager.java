@@ -1212,7 +1212,13 @@ public class AudioManager {
         }
     }
 
-    private static boolean isPublicStreamType(int streamType) {
+    /**
+     * @hide
+     * Checks whether a stream type is part of the public SDK
+     * @param streamType
+     * @return true if the stream type is available in SDK
+     */
+    public static boolean isPublicStreamType(int streamType) {
         switch (streamType) {
             case STREAM_VOICE_CALL:
             case STREAM_SYSTEM:
