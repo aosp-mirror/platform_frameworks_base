@@ -3622,6 +3622,18 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
+    // TODO enforce MODIFY_AUDIO_SYSTEM_SETTINGS when defined
+    private void enforceModifyAudioRoutingOrSystemSettingsPermission() {
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+                != PackageManager.PERMISSION_GRANTED
+                /*&& mContext.checkCallingOrSelfPermission(
+                        android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS)
+                            != PackageManager.PERMISSION_DENIED*/) {
+            throw new SecurityException(
+                    "Missing MODIFY_AUDIO_ROUTING or MODIFY_AUDIO_SYSTEM_SETTINGS permission");
+        }
+    }
+
     private void enforceAccessUltrasoundPermission() {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.ACCESS_ULTRASOUND)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -3734,20 +3746,35 @@ public class AudioService extends IAudioService.Stub
     }
 
     /** @see AudioDeviceVolumeManager#setDeviceVolume(VolumeInfo, AudioDeviceAttributes)
-     * Part of service interface, check permissions and parameters here */
+     * Part of service interface, check permissions and parameters here
+     * Note calling package is for logging purposes only, not to be trusted
+     */
     public void setDeviceVolume(@NonNull VolumeInfo vi, @NonNull AudioDeviceAttributes ada,
-            @NonNull String callingPackage, @Nullable String attributionTag) {
-        enforceModifyAudioRoutingPermission();
+            @NonNull String callingPackage) {
+        enforceModifyAudioRoutingOrSystemSettingsPermission();
         Objects.requireNonNull(vi);
         Objects.requireNonNull(ada);
         Objects.requireNonNull(callingPackage);
+
         if (!vi.hasStreamType()) {
             Log.e(TAG, "Unsupported non-stream type based VolumeInfo", new Exception());
             return;
         }
         int index = vi.getVolumeIndex();
-        if (index == VolumeInfo.INDEX_NOT_SET) {
-            throw new IllegalArgumentException("changing device volume requires a volume index");
+        if (index == VolumeInfo.INDEX_NOT_SET && !vi.hasMuteCommand()) {
+            throw new IllegalArgumentException(
+                    "changing device volume requires a volume index or mute command");
+        }
+
+        // TODO handle unmuting if current audio device
+        // if a stream is not muted but the VolumeInfo is for muting, set the volume index
+        // for the device to min volume
+        if (vi.hasMuteCommand() && vi.isMuted() && !isStreamMute(vi.getStreamType())) {
+            setStreamVolumeWithAttributionInt(vi.getStreamType(),
+                    mStreamStates[vi.getStreamType()].getMinIndex(),
+                    /*flags*/ 0,
+                    ada, callingPackage, null);
+            return;
         }
 
         if (vi.getMinVolumeIndex() == VolumeInfo.INDEX_NOT_SET
@@ -3769,7 +3796,7 @@ public class AudioService extends IAudioService.Stub
             }
         }
         setStreamVolumeWithAttributionInt(vi.getStreamType(), index, /*flags*/ 0,
-                ada, callingPackage, attributionTag);
+                ada, callingPackage, null);
     }
 
     /** Retain API for unsupported app usage */
@@ -4679,6 +4706,36 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
+    /**
+     * @see AudioDeviceVolumeManager#getDeviceVolume(VolumeInfo, AudioDeviceAttributes)
+     */
+    public @NonNull VolumeInfo getDeviceVolume(@NonNull VolumeInfo vi,
+            @NonNull AudioDeviceAttributes ada, @NonNull String callingPackage) {
+        enforceModifyAudioRoutingOrSystemSettingsPermission();
+        Objects.requireNonNull(vi);
+        Objects.requireNonNull(ada);
+        Objects.requireNonNull(callingPackage);
+        if (!vi.hasStreamType()) {
+            Log.e(TAG, "Unsupported non-stream type based VolumeInfo", new Exception());
+            return getDefaultVolumeInfo();
+        }
+
+        int streamType = vi.getStreamType();
+        final VolumeInfo.Builder vib = new VolumeInfo.Builder(vi);
+        vib.setMinVolumeIndex(mStreamStates[streamType].mIndexMin);
+        vib.setMaxVolumeIndex(mStreamStates[streamType].mIndexMax);
+        synchronized (VolumeStreamState.class) {
+            final int index;
+            if (isFixedVolumeDevice(ada.getInternalType())) {
+                index = (mStreamStates[streamType].mIndexMax + 5) / 10;
+            } else {
+                index = (mStreamStates[streamType].getIndex(ada.getInternalType()) + 5) / 10;
+            }
+            vib.setVolumeIndex(index);
+            return vib.setMuted(mStreamStates[streamType].mIsMuted).build();
+        }
+    }
+
     /** @see AudioManager#getStreamMaxVolume(int) */
     public int getStreamMaxVolume(int streamType) {
         ensureValidStreamType(streamType);
@@ -4719,7 +4776,6 @@ public class AudioService extends IAudioService.Stub
             sDefaultVolumeInfo = new VolumeInfo.Builder(AudioSystem.STREAM_MUSIC)
                     .setMinVolumeIndex(getStreamMinVolume(AudioSystem.STREAM_MUSIC))
                     .setMaxVolumeIndex(getStreamMaxVolume(AudioSystem.STREAM_MUSIC))
-                    .setMuted(false)
                     .build();
         }
         return sDefaultVolumeInfo;
@@ -7957,6 +8013,23 @@ public class AudioService extends IAudioService.Stub
                     index = mIndexMap.get(AudioSystem.DEVICE_OUT_DEFAULT);
                 }
                 return index;
+            }
+        }
+
+        public @NonNull VolumeInfo getVolumeInfo(int device) {
+            synchronized (VolumeStreamState.class) {
+                int index = mIndexMap.get(device, -1);
+                if (index == -1) {
+                    // there is always an entry for AudioSystem.DEVICE_OUT_DEFAULT
+                    index = mIndexMap.get(AudioSystem.DEVICE_OUT_DEFAULT);
+                }
+                final VolumeInfo vi = new VolumeInfo.Builder(mStreamType)
+                        .setMinVolumeIndex(mIndexMin)
+                        .setMaxVolumeIndex(mIndexMax)
+                        .setVolumeIndex(index)
+                        .setMuted(isFullyMuted())
+                        .build();
+                return vi;
             }
         }
 
