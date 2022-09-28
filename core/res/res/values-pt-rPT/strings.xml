@@ -2051,7 +2051,9 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Permitir que a app <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> aceda a todos os registos do dispositivo?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Permitir acesso único"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Não permitir"</string>
-    <string name="log_access_confirmation_body" msgid="1806692062668620735">"Os registos do dispositivo documentam o que ocorre no seu dispositivo. As apps podem usar esses registos para detetar e corrigir problemas.\n\nAlguns registos podem conter informações confidenciais e, por isso, o acesso a todos os registos do dispositivo deve apenas ser permitido às apps nas quais confia. \n\nSe não permitir o acesso desta app a todos os registos do dispositivo, esta pode ainda assim aceder aos próprios registos. O fabricante do dispositivo pode continuar a aceder a alguns registos ou informações no seu dispositivo."</string>
+    <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"Os registos do dispositivo documentam o que ocorre no seu dispositivo. As apps podem usar esses registos para detetar e corrigir problemas.\n\nAlguns registos podem conter informações confidenciais e, por isso, o acesso a todos os registos do dispositivo deve apenas ser permitido às apps nas quais confia. \n\nSe não permitir o acesso desta app a todos os registos do dispositivo, esta pode ainda assim aceder aos próprios registos. O fabricante do dispositivo pode continuar a aceder a alguns registos ou informações no seu dispositivo."</string>
+    <!-- no translation found for log_access_confirmation_body (7379536536425265262) -->
+    <skip />
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Não mostrar de novo"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"A app <xliff:g id="APP_0">%1$s</xliff:g> pretende mostrar partes da app <xliff:g id="APP_2">%2$s</xliff:g>."</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Editar"</string>
