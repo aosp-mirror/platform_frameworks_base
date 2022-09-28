@@ -22,32 +22,27 @@ import com.android.server.wm.flicker.replacesLayer
 import com.android.server.wm.traces.common.ComponentNameMatcher
 import org.junit.Test
 
-/**
- * Base class for app launch tests
- */
-abstract class OpenAppFromLauncherTransition(
-    testSpec: FlickerTestParameter
-) : OpenAppTransition(testSpec) {
+/** Base class for app launch tests */
+abstract class OpenAppFromLauncherTransition(testSpec: FlickerTestParameter) :
+    OpenAppTransition(testSpec) {
 
-    /**
-     * Checks that the focus changes from the [ComponentMatcher.LAUNCHER] to [testApp]
-     */
+    /** Checks that the focus changes from the [ComponentMatcher.LAUNCHER] to [testApp] */
     @Presubmit
     @Test
     open fun focusChanges() {
-        testSpec.assertEventLog {
-            this.focusChanges("NexusLauncherActivity", testApp.`package`)
-        }
+        testSpec.assertEventLog { this.focusChanges("NexusLauncherActivity", testApp.`package`) }
     }
 
     /**
-     * Checks that [ComponentMatcher.LAUNCHER] layer is visible at the start of the transition,
-     * and is replaced by [testApp], which remains visible until the end
+     * Checks that [ComponentMatcher.LAUNCHER] layer is visible at the start of the transition, and
+     * is replaced by [testApp], which remains visible until the end
      */
     open fun appLayerReplacesLauncher() {
         testSpec.replacesLayer(
-            ComponentNameMatcher.LAUNCHER, testApp,
-            ignoreEntriesWithRotationLayer = true, ignoreSnapshot = true,
+            ComponentNameMatcher.LAUNCHER,
+            testApp,
+            ignoreEntriesWithRotationLayer = true,
+            ignoreSnapshot = true,
             ignoreSplashscreen = true
         )
     }
@@ -64,21 +59,15 @@ abstract class OpenAppFromLauncherTransition(
             this.isAppWindowOnTop(ComponentNameMatcher.LAUNCHER)
                 .then()
                 .isAppWindowOnTop(
-                    testApp
-                        .or(ComponentNameMatcher.SNAPSHOT)
-                        .or(ComponentNameMatcher.SPLASH_SCREEN)
+                    testApp.or(ComponentNameMatcher.SNAPSHOT).or(ComponentNameMatcher.SPLASH_SCREEN)
                 )
         }
     }
 
-    /**
-     * Checks that [testApp] window is the top window at the en dof the trace
-     */
+    /** Checks that [testApp] window is the top window at the en dof the trace */
     @Presubmit
     @Test
     open fun appWindowAsTopWindowAtEnd() {
-        testSpec.assertWmEnd {
-            this.isAppWindowOnTop(testApp)
-        }
+        testSpec.assertWmEnd { this.isAppWindowOnTop(testApp) }
     }
 }

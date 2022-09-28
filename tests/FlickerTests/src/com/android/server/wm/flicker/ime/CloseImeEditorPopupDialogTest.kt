@@ -50,15 +50,11 @@ class CloseImeEditorPopupDialogTest(testSpec: FlickerTestParameter) : BaseTest(t
         }
         transitions {
             imeTestApp.dismissDialog(wmHelper)
-            wmHelper.StateSyncBuilder()
-                .withImeGone()
-                .waitForAndVerify()
+            wmHelper.StateSyncBuilder().withImeGone().waitForAndVerify()
         }
         teardown {
             tapl.goHome()
-            wmHelper.StateSyncBuilder()
-                .withHomeActivityVisible()
-                .waitForAndVerify()
+            wmHelper.StateSyncBuilder().withHomeActivityVisible().waitForAndVerify()
             imeTestApp.exit(wmHelper)
         }
     }
@@ -71,8 +67,7 @@ class CloseImeEditorPopupDialogTest(testSpec: FlickerTestParameter) : BaseTest(t
     /** {@inheritDoc} */
     @Postsubmit
     @Test
-    override fun taskBarLayerIsVisibleAtStartAndEnd() =
-        super.taskBarLayerIsVisibleAtStartAndEnd()
+    override fun taskBarLayerIsVisibleAtStartAndEnd() = super.taskBarLayerIsVisibleAtStartAndEnd()
 
     /** {@inheritDoc} */
     @Postsubmit
@@ -86,9 +81,7 @@ class CloseImeEditorPopupDialogTest(testSpec: FlickerTestParameter) : BaseTest(t
     override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
         super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
-    @Postsubmit
-    @Test
-    fun imeWindowBecameInvisible() = testSpec.imeWindowBecomesInvisible()
+    @Postsubmit @Test fun imeWindowBecameInvisible() = testSpec.imeWindowBecomesInvisible()
 
     @Postsubmit
     @Test
@@ -108,15 +101,18 @@ class CloseImeEditorPopupDialogTest(testSpec: FlickerTestParameter) : BaseTest(t
     fun imeSnapshotAssociatedOnAppVisibleRegion() {
         testSpec.assertLayers {
             this.invoke("imeSnapshotAssociatedOnAppVisibleRegion") {
-                val imeSnapshotLayers = it.subjects.filter { subject ->
-                    subject.name.contains(
-                        ComponentNameMatcher.IME_SNAPSHOT.toLayerName()
-                    ) && subject.isVisible
-                }
+                val imeSnapshotLayers =
+                    it.subjects.filter { subject ->
+                        subject.name.contains(ComponentNameMatcher.IME_SNAPSHOT.toLayerName()) &&
+                            subject.isVisible
+                    }
                 if (imeSnapshotLayers.isNotEmpty()) {
-                    val visibleAreas = imeSnapshotLayers.mapNotNull { imeSnapshotLayer ->
-                        imeSnapshotLayer.layer?.visibleRegion
-                    }.toTypedArray()
+                    val visibleAreas =
+                        imeSnapshotLayers
+                            .mapNotNull { imeSnapshotLayer ->
+                                imeSnapshotLayer.layer?.visibleRegion
+                            }
+                            .toTypedArray()
                     val imeVisibleRegion = RegionSubject.assertThat(visibleAreas, this, timestamp)
                     val appVisibleRegion = it.visibleRegion(imeTestApp)
                     if (imeVisibleRegion.region.isNotEmpty) {
@@ -133,10 +129,11 @@ class CloseImeEditorPopupDialogTest(testSpec: FlickerTestParameter) : BaseTest(t
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
                 .getConfigNonRotationTests(
-                    supportedNavigationModes = listOf(
-                        WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY,
-                        WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
-                    ),
+                    supportedNavigationModes =
+                        listOf(
+                            WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY,
+                            WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
+                        ),
                     supportedRotations = listOf(Surface.ROTATION_0)
                 )
         }

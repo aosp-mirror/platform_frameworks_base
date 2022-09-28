@@ -32,10 +32,7 @@ import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
-/**
- * Test IME window opening transitions.
- * To run this test: `atest FlickerTests:OpenImeWindowTest`
- */
+/** Test IME window opening transitions. To run this test: `atest FlickerTests:OpenImeWindowTest` */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
@@ -45,40 +42,28 @@ class OpenImeWindowTest(testSpec: FlickerTestParameter) : BaseTest(testSpec) {
 
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit = {
-        setup {
-            testApp.launchViaIntent(wmHelper)
-        }
-        transitions {
-            testApp.openIME(wmHelper)
-        }
+        setup { testApp.launchViaIntent(wmHelper) }
+        transitions { testApp.openIME(wmHelper) }
         teardown {
             testApp.closeIME(wmHelper)
             testApp.exit(wmHelper)
         }
     }
 
-    @Presubmit
-    @Test
-    fun imeWindowBecomesVisible() = testSpec.imeWindowBecomesVisible()
+    @Presubmit @Test fun imeWindowBecomesVisible() = testSpec.imeWindowBecomesVisible()
 
     @Presubmit
     @Test
     fun appWindowAlwaysVisibleOnTop() {
-        testSpec.assertWm {
-            this.isAppWindowOnTop(testApp)
-        }
+        testSpec.assertWm { this.isAppWindowOnTop(testApp) }
     }
 
-    @Presubmit
-    @Test
-    fun imeLayerBecomesVisible() = testSpec.imeLayerBecomesVisible()
+    @Presubmit @Test fun imeLayerBecomesVisible() = testSpec.imeLayerBecomesVisible()
 
     @Presubmit
     @Test
     fun layerAlwaysVisible() {
-        testSpec.assertLayers {
-            this.isVisible(testApp)
-        }
+        testSpec.assertLayers { this.isVisible(testApp) }
     }
 
     companion object {
@@ -87,11 +72,12 @@ class OpenImeWindowTest(testSpec: FlickerTestParameter) : BaseTest(testSpec) {
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
                 .getConfigNonRotationTests(
-                                        supportedRotations = listOf(Surface.ROTATION_0),
-                    supportedNavigationModes = listOf(
-                        WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY,
-                        WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
-                    )
+                    supportedRotations = listOf(Surface.ROTATION_0),
+                    supportedNavigationModes =
+                        listOf(
+                            WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY,
+                            WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
+                        )
                 )
         }
     }

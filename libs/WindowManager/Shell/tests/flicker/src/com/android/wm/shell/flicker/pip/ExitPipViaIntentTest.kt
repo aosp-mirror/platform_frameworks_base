@@ -38,17 +38,20 @@ import org.junit.runners.Parameterized
  * To run this test: `atest WMShellFlickerTests:ExitPipViaIntentTest`
  *
  * Actions:
+ * ```
  *     Launch an app in pip mode [pipApp],
  *     Launch another full screen mode [testApp]
  *     Expand [pipApp] app to full screen via an intent
- *
+ * ```
  * Notes:
+ * ```
  *     1. Some default assertions (e.g., nav bar, status bar and screen covered)
  *        are inherited from [PipTransition]
  *     2. Part of the test setup occurs automatically via
  *        [com.android.server.wm.flicker.TransitionRunnerWithRules],
  *        including configuring navigation mode, initial orientation and ensuring no
  *        apps are running before setup
+ * ```
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
@@ -56,9 +59,7 @@ import org.junit.runners.Parameterized
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class ExitPipViaIntentTest(testSpec: FlickerTestParameter) : ExitPipToAppTransition(testSpec) {
 
-    /**
-     * Defines the transition used to run the test
-     */
+    /** Defines the transition used to run the test */
     override val transition: FlickerBuilder.() -> Unit
         get() = buildTransition {
             setup {
@@ -69,18 +70,14 @@ class ExitPipViaIntentTest(testSpec: FlickerTestParameter) : ExitPipToAppTransit
                 // This will bring PipApp to fullscreen
                 pipApp.exitPipToFullScreenViaIntent(wmHelper)
                 // Wait until the other app is no longer visible
-                wmHelper.StateSyncBuilder()
-                    .withWindowSurfaceDisappeared(testApp)
-                    .waitForAndVerify()
+                wmHelper.StateSyncBuilder().withWindowSurfaceDisappeared(testApp).waitForAndVerify()
             }
         }
 
-    /** {@inheritDoc}  */
-    @FlakyTest
-    @Test
-    override fun entireScreenCovered() = super.entireScreenCovered()
+    /** {@inheritDoc} */
+    @FlakyTest @Test override fun entireScreenCovered() = super.entireScreenCovered()
 
-    /** {@inheritDoc}  */
+    /** {@inheritDoc} */
     @Presubmit
     @Test
     override fun statusBarLayerPositionAtStartAndEnd() {
@@ -95,7 +92,7 @@ class ExitPipViaIntentTest(testSpec: FlickerTestParameter) : ExitPipToAppTransit
         super.statusBarLayerPositionAtStartAndEnd()
     }
 
-    /** {@inheritDoc}  */
+    /** {@inheritDoc} */
     @FlakyTest(bugId = 197726610)
     @Test
     override fun pipLayerExpands() {
@@ -114,14 +111,14 @@ class ExitPipViaIntentTest(testSpec: FlickerTestParameter) : ExitPipToAppTransit
         /**
          * Creates the test configurations.
          *
-         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring
-         * repetitions, screen orientation and navigation modes.
+         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring repetitions,
+         * screen orientation and navigation modes.
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): List<FlickerTestParameter> {
-            return FlickerTestParameterFactory.getInstance().getConfigNonRotationTests(
-                supportedRotations = listOf(Surface.ROTATION_0))
+            return FlickerTestParameterFactory.getInstance()
+                .getConfigNonRotationTests(supportedRotations = listOf(Surface.ROTATION_0))
         }
     }
 }

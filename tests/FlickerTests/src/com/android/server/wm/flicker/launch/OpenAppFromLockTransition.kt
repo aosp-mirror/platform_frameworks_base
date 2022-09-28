@@ -27,40 +27,26 @@ import org.junit.Assume
 import org.junit.Ignore
 import org.junit.Test
 
-/**
- * Base class for app launch tests from lock screen
- */
+/** Base class for app launch tests from lock screen */
 abstract class OpenAppFromLockTransition(testSpec: FlickerTestParameter) :
     OpenAppTransition(testSpec) {
 
-    /**
-     * Defines the transition used to run the test
-     */
+    /** Defines the transition used to run the test */
     override val transition: FlickerBuilder.() -> Unit = {
         super.transition(this)
         setup {
             device.sleep()
-            wmHelper.StateSyncBuilder()
-                .withoutTopVisibleAppWindows()
-                .waitForAndVerify()
+            wmHelper.StateSyncBuilder().withoutTopVisibleAppWindows().waitForAndVerify()
         }
-        teardown {
-            testApp.exit(wmHelper)
-        }
-        transitions {
-            testApp.launchViaIntent(wmHelper)
-        }
+        teardown { testApp.exit(wmHelper) }
+        transitions { testApp.launchViaIntent(wmHelper) }
     }
 
-    /**
-     * Check that we go from no focus to focus on the [testApp]
-     */
+    /** Check that we go from no focus to focus on the [testApp] */
     @Presubmit
     @Test
     open fun focusChanges() {
-        testSpec.assertEventLog {
-            this.focusChanges("", testApp.`package`)
-        }
+        testSpec.assertEventLog { this.focusChanges("", testApp.`package`) }
     }
 
     /**
@@ -72,24 +58,20 @@ abstract class OpenAppFromLockTransition(testSpec: FlickerTestParameter) :
     open fun appWindowBecomesFirstAndOnlyTopWindow() {
         testSpec.assertWm {
             this.hasNoVisibleAppWindow()
-                    .then()
-                    .isAppWindowOnTop(ComponentNameMatcher.SNAPSHOT, isOptional = true)
-                    .then()
-                    .isAppWindowOnTop(ComponentNameMatcher.SPLASH_SCREEN, isOptional = true)
-                    .then()
-                    .isAppWindowOnTop(testApp)
+                .then()
+                .isAppWindowOnTop(ComponentNameMatcher.SNAPSHOT, isOptional = true)
+                .then()
+                .isAppWindowOnTop(ComponentNameMatcher.SPLASH_SCREEN, isOptional = true)
+                .then()
+                .isAppWindowOnTop(testApp)
         }
     }
 
-    /**
-     * Checks that the screen is locked at the start of the transition
-     */
+    /** Checks that the screen is locked at the start of the transition */
     @Presubmit
     @Test
     fun screenLockedStart() {
-        testSpec.assertLayersStart {
-            isEmpty()
-        }
+        testSpec.assertLayersStart { isEmpty() }
     }
 
     /** {@inheritDoc} */
@@ -100,26 +82,24 @@ abstract class OpenAppFromLockTransition(testSpec: FlickerTestParameter) :
     /** {@inheritDoc} */
     @Test
     @Ignore("Not applicable to this CUJ. Display starts off and app is full screen at the end")
-    override fun navBarLayerPositionAtStartAndEnd() { }
+    override fun navBarLayerPositionAtStartAndEnd() {}
 
     /** {@inheritDoc} */
     @Test
     @Ignore("Not applicable to this CUJ. Display starts off and app is full screen at the end")
-    override fun statusBarLayerPositionAtStartAndEnd() { }
+    override fun statusBarLayerPositionAtStartAndEnd() {}
 
     /** {@inheritDoc} */
     @Test
     @Ignore("Not applicable to this CUJ. Display starts off and app is full screen at the end")
-    override fun taskBarLayerIsVisibleAtStartAndEnd() { }
+    override fun taskBarLayerIsVisibleAtStartAndEnd() {}
 
     /** {@inheritDoc} */
     @Test
     @Ignore("Not applicable to this CUJ. Display starts off and app is full screen at the end")
-    override fun taskBarWindowIsAlwaysVisible() { }
+    override fun taskBarWindowIsAlwaysVisible() {}
 
-    /**
-     * Checks the position of the [ComponentMatcher.NAV_BAR] at the end of the transition
-     */
+    /** Checks the position of the [ComponentMatcher.NAV_BAR] at the end of the transition */
     @Presubmit
     @Test
     open fun navBarLayerPositionAtEnd() {
@@ -127,17 +107,13 @@ abstract class OpenAppFromLockTransition(testSpec: FlickerTestParameter) :
         testSpec.navBarLayerPositionAtEnd()
     }
 
-    /**
-     * Checks the position of the [ComponentMatcher.STATUS_BAR] at the end of the transition
-     */
-    @Presubmit
-    @Test
-    fun statusBarLayerPositionAtEnd() = testSpec.statusBarLayerPositionAtEnd()
+    /** Checks the position of the [ComponentMatcher.STATUS_BAR] at the end of the transition */
+    @Presubmit @Test fun statusBarLayerPositionAtEnd() = testSpec.statusBarLayerPositionAtEnd()
 
     /** {@inheritDoc} */
     @Test
     @Ignore("Not applicable to this CUJ. Display starts off and app is full screen at the end")
-    override fun statusBarLayerIsVisibleAtStartAndEnd() { }
+    override fun statusBarLayerIsVisibleAtStartAndEnd() {}
 
     /**
      * Checks that the [ComponentMatcher.STATUS_BAR] layer is visible at the end of the trace
@@ -147,8 +123,6 @@ abstract class OpenAppFromLockTransition(testSpec: FlickerTestParameter) :
     @Presubmit
     @Test
     fun statusBarLayerIsVisibleAtEnd() {
-        testSpec.assertLayersEnd {
-            this.isVisible(ComponentNameMatcher.STATUS_BAR)
-        }
+        testSpec.assertLayersEnd { this.isVisible(ComponentNameMatcher.STATUS_BAR) }
     }
 }

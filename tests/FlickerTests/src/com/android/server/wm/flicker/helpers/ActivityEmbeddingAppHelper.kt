@@ -32,13 +32,14 @@ import com.android.server.wm.traces.parser.toFlickerComponent
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import org.junit.Assume.assumeNotNull
 
-class ActivityEmbeddingAppHelper @JvmOverloads constructor(
+class ActivityEmbeddingAppHelper
+@JvmOverloads
+constructor(
     instr: Instrumentation,
     launcherName: String = ActivityOptions.ActivityEmbedding.MainActivity.LABEL,
     component: ComponentNameMatcher = MAIN_ACTIVITY_COMPONENT,
-    launcherStrategy: ILauncherStrategy = LauncherStrategyFactory
-        .getInstance(instr)
-        .launcherStrategy
+    launcherStrategy: ILauncherStrategy =
+        LauncherStrategyFactory.getInstance(instr).launcherStrategy
 ) : StandardAppHelper(instr, launcherName, component, launcherStrategy) {
 
     /**
@@ -46,14 +47,15 @@ class ActivityEmbeddingAppHelper @JvmOverloads constructor(
      * placeholder secondary activity based on the placeholder rule.
      */
     fun launchPlaceholderSplit(wmHelper: WindowManagerStateHelper) {
-        val launchButton = uiDevice.wait(
-            Until.findObject(By.res(getPackage(), "launch_placeholder_split_button")),
-            FIND_TIMEOUT)
-        require(launchButton != null) {
-            "Can't find launch placeholder split button on screen."
-        }
+        val launchButton =
+            uiDevice.wait(
+                Until.findObject(By.res(getPackage(), "launch_placeholder_split_button")),
+                FIND_TIMEOUT
+            )
+        require(launchButton != null) { "Can't find launch placeholder split button on screen." }
         launchButton.click()
-        wmHelper.StateSyncBuilder()
+        wmHelper
+            .StateSyncBuilder()
             .withActivityState(PLACEHOLDER_PRIMARY_COMPONENT, STATE_RESUMED)
             .withActivityState(PLACEHOLDER_SECONDARY_COMPONENT, STATE_RESUMED)
             .waitForAndVerify()

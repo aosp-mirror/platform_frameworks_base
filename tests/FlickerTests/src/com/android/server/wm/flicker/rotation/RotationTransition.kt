@@ -25,23 +25,15 @@ import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.traces.common.ComponentNameMatcher
 import org.junit.Test
 
-/**
- * Base class for app rotation tests
- */
+/** Base class for app rotation tests */
 abstract class RotationTransition(testSpec: FlickerTestParameter) : BaseTest(testSpec) {
     protected abstract val testApp: StandardAppHelper
 
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit = {
-        setup {
-            this.setRotation(testSpec.startRotation)
-        }
-        teardown {
-            testApp.exit(wmHelper)
-        }
-        transitions {
-            this.setRotation(testSpec.endRotation)
-        }
+        setup { this.setRotation(testSpec.startRotation) }
+        teardown { testApp.exit(wmHelper) }
+        transitions { this.setRotation(testSpec.endRotation) }
     }
 
     /** {@inheritDoc} */
@@ -50,18 +42,17 @@ abstract class RotationTransition(testSpec: FlickerTestParameter) : BaseTest(tes
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
         testSpec.assertLayers {
             this.visibleLayersShownMoreThanOneConsecutiveEntry(
-                ignoreLayers = listOf(
-                    ComponentNameMatcher.SPLASH_SCREEN,
-                    ComponentNameMatcher.SNAPSHOT,
-                    ComponentNameMatcher("", "SecondaryHomeHandle")
-                )
+                ignoreLayers =
+                    listOf(
+                        ComponentNameMatcher.SPLASH_SCREEN,
+                        ComponentNameMatcher.SNAPSHOT,
+                        ComponentNameMatcher("", "SecondaryHomeHandle")
+                    )
             )
         }
     }
 
-    /**
-     * Checks that [testApp] layer covers the entire screen at the start of the transition
-     */
+    /** Checks that [testApp] layer covers the entire screen at the start of the transition */
     @Presubmit
     @Test
     open fun appLayerRotates_StartingPos() {
@@ -72,9 +63,7 @@ abstract class RotationTransition(testSpec: FlickerTestParameter) : BaseTest(tes
         }
     }
 
-    /**
-     * Checks that [testApp] layer covers the entire screen at the end of the transition
-     */
+    /** Checks that [testApp] layer covers the entire screen at the end of the transition */
     @Presubmit
     @Test
     open fun appLayerRotates_EndingPos() {

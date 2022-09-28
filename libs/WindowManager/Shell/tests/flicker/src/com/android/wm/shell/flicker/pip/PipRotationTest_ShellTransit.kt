@@ -35,18 +35,21 @@ import org.junit.runners.Parameterized
  * To run this test: `atest WMShellFlickerTests:PipRotationTest_ShellTransit`
  *
  * Actions:
+ * ```
  *     Launch a [pipApp] in pip mode
  *     Launch another app [fixedApp] (appears below pip)
  *     Rotate the screen from [testSpec.startRotation] to [testSpec.endRotation]
  *     (usually, 0->90 and 90->0)
- *
+ * ```
  * Notes:
+ * ```
  *     1. Some default assertions (e.g., nav bar, status bar and screen covered)
  *        are inherited from [PipTransition]
  *     2. Part of the test setup occurs automatically via
  *        [com.android.server.wm.flicker.TransitionRunnerWithRules],
  *        including configuring navigation mode, initial orientation and ensuring no
  *        apps are running before setup
+ * ```
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
@@ -59,9 +62,8 @@ class PipRotationTest_ShellTransit(testSpec: FlickerTestParameter) : PipRotation
         Assume.assumeTrue(isShellTransitionsEnabled)
     }
 
-    /** {@inheritDoc}  */
+    /** {@inheritDoc} */
     @FlakyTest
     @Test
-    override fun navBarLayerPositionAtStartAndEnd() =
-        super.navBarLayerPositionAtStartAndEnd()
+    override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
 }

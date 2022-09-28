@@ -24,9 +24,7 @@ import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.helpers.PipAppHelper
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 
-/**
- * Helper class for PIP app on AndroidTV
- */
+/** Helper class for PIP app on AndroidTV */
 open class PipAppHelperTv(instrumentation: Instrumentation) : PipAppHelper(instrumentation) {
     private val appSelector = By.pkg(`package`).depth(0)
 
@@ -61,17 +59,12 @@ open class PipAppHelperTv(instrumentation: Instrumentation) : PipAppHelper(instr
         uiDevice.closeTvPipWindow()
     }
 
-    /**
-     * Taps the pip window and dismisses it by clicking on the X button.
-     */
+    /** Taps the pip window and dismisses it by clicking on the X button. */
     override fun closePipWindow(wmHelper: WindowManagerStateHelper) {
         uiDevice.closeTvPipWindow()
 
         // Wait for animation to complete.
-        wmHelper.StateSyncBuilder()
-            .withPipGone()
-            .withHomeActivityVisible()
-            .waitForAndVerify()
+        wmHelper.StateSyncBuilder().withPipGone().withHomeActivityVisible().waitForAndVerify()
     }
 
     fun waitUntilClosed(): Boolean {

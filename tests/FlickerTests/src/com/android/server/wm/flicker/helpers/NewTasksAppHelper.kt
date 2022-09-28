@@ -27,27 +27,24 @@ import com.android.server.wm.traces.common.ComponentNameMatcher
 import com.android.server.wm.traces.parser.toFlickerComponent
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 
-class NewTasksAppHelper @JvmOverloads constructor(
+class NewTasksAppHelper
+@JvmOverloads
+constructor(
     instr: Instrumentation,
     launcherName: String = ActivityOptions.LaunchNewTask.LABEL,
-    component: ComponentNameMatcher =
-        ActivityOptions.LaunchNewTask.COMPONENT.toFlickerComponent(),
-    launcherStrategy: ILauncherStrategy = LauncherStrategyFactory
-        .getInstance(instr)
-        .launcherStrategy
+    component: ComponentNameMatcher = ActivityOptions.LaunchNewTask.COMPONENT.toFlickerComponent(),
+    launcherStrategy: ILauncherStrategy =
+        LauncherStrategyFactory.getInstance(instr).launcherStrategy
 ) : StandardAppHelper(instr, launcherName, component, launcherStrategy) {
     fun openNewTask(device: UiDevice, wmHelper: WindowManagerStateHelper) {
-        val button = device.wait(
-            Until.findObject(By.res(getPackage(), "launch_new_task")),
-            FIND_TIMEOUT)
+        val button =
+            device.wait(Until.findObject(By.res(getPackage(), "launch_new_task")), FIND_TIMEOUT)
 
         requireNotNull(button) {
             "Button not found, this usually happens when the device " +
                 "was left in an unknown state (e.g. in split screen)"
         }
         button.click()
-        wmHelper.StateSyncBuilder()
-            .withAppTransitionIdle()
-            .waitForAndVerify()
+        wmHelper.StateSyncBuilder().withAppTransitionIdle().waitForAndVerify()
     }
 }

@@ -27,9 +27,7 @@ import com.android.server.wm.flicker.replacesLayer
 import com.android.server.wm.traces.common.ComponentNameMatcher.Companion.LAUNCHER
 import org.junit.Test
 
-/**
- * Base test class for transitions that close an app back to the launcher screen
- */
+/** Base test class for transitions that close an app back to the launcher screen */
 abstract class CloseAppTransition(testSpec: FlickerTestParameter) : BaseTest(testSpec) {
     protected open val testApp: StandardAppHelper = SimpleAppHelper(instrumentation)
 
@@ -40,42 +38,30 @@ abstract class CloseAppTransition(testSpec: FlickerTestParameter) : BaseTest(tes
             testApp.launchViaIntent(wmHelper)
             this.setRotation(testSpec.startRotation)
         }
-        teardown {
-            testApp.exit(wmHelper)
-        }
+        teardown { testApp.exit(wmHelper) }
     }
 
     /**
-     * Checks that [testApp] is the top visible app window at the start of the transition and
-     * that it is replaced by [LAUNCHER] during the transition
+     * Checks that [testApp] is the top visible app window at the start of the transition and that
+     * it is replaced by [LAUNCHER] during the transition
      */
     @Presubmit
     @Test
     open fun launcherReplacesAppWindowAsTopWindow() {
-        testSpec.assertWm {
-            this.isAppWindowOnTop(testApp)
-                .then()
-                .isAppWindowOnTop(LAUNCHER)
-        }
+        testSpec.assertWm { this.isAppWindowOnTop(testApp).then().isAppWindowOnTop(LAUNCHER) }
     }
 
     /**
-     * Checks that [LAUNCHER] is invisible at the start of the transition and that
-     * it becomes visible during the transition
+     * Checks that [LAUNCHER] is invisible at the start of the transition and that it becomes
+     * visible during the transition
      */
     @Presubmit
     @Test
     open fun launcherWindowBecomesVisible() {
-        testSpec.assertWm {
-            this.isAppWindowNotOnTop(LAUNCHER)
-                .then()
-                .isAppWindowOnTop(LAUNCHER)
-        }
+        testSpec.assertWm { this.isAppWindowNotOnTop(LAUNCHER).then().isAppWindowOnTop(LAUNCHER) }
     }
 
-    /**
-     * Checks that [LAUNCHER] layer becomes visible when [testApp] becomes invisible
-     */
+    /** Checks that [LAUNCHER] layer becomes visible when [testApp] becomes invisible */
     @Presubmit
     @Test
     open fun launcherLayerReplacesApp() {

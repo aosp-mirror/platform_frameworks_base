@@ -40,15 +40,18 @@ import org.junit.runners.Parameterized
  * To run this test: `atest FlickerTests:ActivitiesTransitionTest`
  *
  * Actions:
+ * ```
  *     Launch an app
  *     Launch a secondary activity within the app
  *     Close the secondary activity back to the initial one
- *
+ * ```
  * Notes:
+ * ```
  *     1. Part of the test setup occurs automatically via
  *        [com.android.server.wm.flicker.TransitionRunnerWithRules],
  *        including configuring navigation mode, initial orientation and ensuring no
  *        apps are running before setup
+ * ```
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
@@ -63,15 +66,11 @@ class ActivitiesTransitionTest(testSpec: FlickerTestParameter) : BaseTest(testSp
             tapl.setExpectedRotation(testSpec.startRotation)
             testApp.launchViaIntent(wmHelper)
         }
-        teardown {
-            testApp.exit(wmHelper)
-        }
+        teardown { testApp.exit(wmHelper) }
         transitions {
             testApp.openSecondActivity(device, wmHelper)
             tapl.pressBack()
-            wmHelper.StateSyncBuilder()
-                .withFullScreenApp(testApp)
-                .waitForAndVerify()
+            wmHelper.StateSyncBuilder().withFullScreenApp(testApp).waitForAndVerify()
         }
     }
 
@@ -81,9 +80,9 @@ class ActivitiesTransitionTest(testSpec: FlickerTestParameter) : BaseTest(testSp
     override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
 
     /**
-     * Checks that the [ActivityOptions.LaunchNewActivity] activity is visible at
-     * the start of the transition, that [ActivityOptions.SimpleActivity] becomes visible during
-     * the transition, and that [ActivityOptions.LaunchNewActivity] is again visible at the end
+     * Checks that the [ActivityOptions.LaunchNewActivity] activity is visible at the start of the
+     * transition, that [ActivityOptions.SimpleActivity] becomes visible during the transition, and
+     * that [ActivityOptions.LaunchNewActivity] is again visible at the end
      */
     @Presubmit
     @Test
@@ -109,9 +108,7 @@ class ActivitiesTransitionTest(testSpec: FlickerTestParameter) : BaseTest(testSp
     @Presubmit
     @Test
     fun launcherWindowNotOnTop() {
-        testSpec.assertWm {
-            this.isAppWindowNotOnTop(ComponentNameMatcher.LAUNCHER)
-        }
+        testSpec.assertWm { this.isAppWindowNotOnTop(ComponentNameMatcher.LAUNCHER) }
     }
 
     /**
@@ -127,14 +124,13 @@ class ActivitiesTransitionTest(testSpec: FlickerTestParameter) : BaseTest(testSp
         /**
          * Creates the test configurations.
          *
-         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring
-         * repetitions, screen orientation and navigation modes.
+         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring repetitions,
+         * screen orientation and navigation modes.
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): Collection<FlickerTestParameter> {
-            return FlickerTestParameterFactory.getInstance()
-                .getConfigNonRotationTests()
+            return FlickerTestParameterFactory.getInstance().getConfigNonRotationTests()
         }
     }
 }

@@ -54,18 +54,14 @@ open class OpenAppFromLockNotificationCold(testSpec: FlickerTestParameter) :
         get() = {
             // Needs to run at start of transition,
             // so before the transition defined in super.transition
-            transitions {
-                device.wakeUp()
-            }
+            transitions { device.wakeUp() }
 
             super.transition(this)
 
             // Needs to run at the end of the setup, so after the setup defined in super.transition
             setup {
                 device.sleep()
-                wmHelper.StateSyncBuilder()
-                    .withoutTopVisibleAppWindows()
-                    .waitForAndVerify()
+                wmHelper.StateSyncBuilder().withoutTopVisibleAppWindows().waitForAndVerify()
             }
         }
 
@@ -86,13 +82,9 @@ open class OpenAppFromLockNotificationCold(testSpec: FlickerTestParameter) :
     override fun appWindowBecomesTopWindow() = super.appWindowBecomesTopWindow()
 
     /** {@inheritDoc} */
-    @Test
-    @Ignore("Display is off at the start")
-    override fun navBarLayerPositionAtStartAndEnd() { }
+    @Test @Ignore("Display is off at the start") override fun navBarLayerPositionAtStartAndEnd() {}
 
-    /**
-     * Checks the position of the [ComponentMatcher.NAV_BAR] at the end of the transition
-     */
+    /** Checks the position of the [ComponentMatcher.NAV_BAR] at the end of the transition */
     @Postsubmit
     @Test
     fun navBarLayerPositionAtEnd() {
@@ -103,15 +95,13 @@ open class OpenAppFromLockNotificationCold(testSpec: FlickerTestParameter) :
     /** {@inheritDoc} */
     @Test
     @Ignore("Display is off at the start")
-    override fun statusBarLayerPositionAtStartAndEnd() { }
+    override fun statusBarLayerPositionAtStartAndEnd() {}
 
     /**
      * Checks the position of the [ComponentMatcher.STATUS_BAR] at the start and end of the
      * transition
      */
-    @Postsubmit
-    @Test
-    fun statusBarLayerPositionEnd() = testSpec.statusBarLayerPositionAtEnd()
+    @Postsubmit @Test fun statusBarLayerPositionEnd() = testSpec.statusBarLayerPositionAtEnd()
 
     /** {@inheritDoc} */
     @Postsubmit
@@ -124,9 +114,7 @@ open class OpenAppFromLockNotificationCold(testSpec: FlickerTestParameter) :
     override fun navBarWindowIsAlwaysVisible() = super.navBarWindowIsAlwaysVisible()
 
     /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun appLayerBecomesVisible() = super.appLayerBecomesVisible()
+    @Postsubmit @Test override fun appLayerBecomesVisible() = super.appLayerBecomesVisible()
 
     /** {@inheritDoc} */
     @Postsubmit
@@ -134,9 +122,7 @@ open class OpenAppFromLockNotificationCold(testSpec: FlickerTestParameter) :
     override fun statusBarWindowIsAlwaysVisible() = super.statusBarWindowIsAlwaysVisible()
 
     /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun appWindowBecomesVisible() = super.appWindowBecomesVisible()
+    @Postsubmit @Test override fun appWindowBecomesVisible() = super.appWindowBecomesVisible()
 
     /** {@inheritDoc} */
     @Postsubmit
@@ -151,23 +137,19 @@ open class OpenAppFromLockNotificationCold(testSpec: FlickerTestParameter) :
         super.visibleLayersShownMoreThanOneConsecutiveEntry()
 
     /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun appWindowIsTopWindowAtEnd() =
-        super.appWindowIsTopWindowAtEnd()
+    @Postsubmit @Test override fun appWindowIsTopWindowAtEnd() = super.appWindowIsTopWindowAtEnd()
 
     companion object {
         /**
          * Creates the test configurations.
          *
-         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring
-         * repetitions, screen orientation and navigation modes.
+         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring repetitions,
+         * screen orientation and navigation modes.
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): Collection<FlickerTestParameter> {
-            return FlickerTestParameterFactory.getInstance()
-                    .getConfigNonRotationTests()
+            return FlickerTestParameterFactory.getInstance().getConfigNonRotationTests()
         }
     }
 }

@@ -36,7 +36,9 @@ import org.junit.runners.Parameterized
  * To run this test: `atest WMShellFlickerTests:LaunchBubbleFromLockScreen`
  *
  * Actions:
+ * ```
  *     Launch an bubble from notification on lock screen
+ * ```
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
@@ -50,36 +52,32 @@ class LaunchBubbleFromLockScreen(testSpec: FlickerTestParameter) : BaseBubbleScr
                 val addBubbleBtn = waitAndGetAddBubbleBtn()
                 addBubbleBtn?.click() ?: error("Bubble widget not found")
                 device.sleep()
-                wmHelper.StateSyncBuilder()
-                    .withoutTopVisibleAppWindows()
-                    .waitForAndVerify()
+                wmHelper.StateSyncBuilder().withoutTopVisibleAppWindows().waitForAndVerify()
                 device.wakeUp()
             }
             transitions {
                 // Swipe & wait for the notification shade to expand so all can be seen
-                val wm = context.getSystemService(WindowManager::class.java)
-                    ?: error("Unable to obtain WM service")
+                val wm =
+                    context.getSystemService(WindowManager::class.java)
+                        ?: error("Unable to obtain WM service")
                 val metricInsets = wm.currentWindowMetrics.windowInsets
-                val insets = metricInsets.getInsetsIgnoringVisibility(
-                    WindowInsets.Type.statusBars()
-                        or WindowInsets.Type.displayCutout()
-                )
+                val insets =
+                    metricInsets.getInsetsIgnoringVisibility(
+                        WindowInsets.Type.statusBars() or WindowInsets.Type.displayCutout()
+                    )
                 device.swipe(100, insets.top + 100, 100, device.displayHeight / 2, 4)
                 device.waitForIdle(2000)
                 instrumentation.uiAutomation.syncInputTransactions()
 
-                val notification = device.wait(
-                    Until.findObject(
-                        By.text("BubbleChat")
-                    ), FIND_OBJECT_TIMEOUT
-                )
+                val notification =
+                    device.wait(Until.findObject(By.text("BubbleChat")), FIND_OBJECT_TIMEOUT)
                 notification?.click() ?: error("Notification not found")
                 instrumentation.uiAutomation.syncInputTransactions()
-                val showBubble = device.wait(
-                    Until.findObject(
-                        By.res("com.android.systemui", "bubble_view")
-                    ), FIND_OBJECT_TIMEOUT
-                )
+                val showBubble =
+                    device.wait(
+                        Until.findObject(By.res("com.android.systemui", "bubble_view")),
+                        FIND_OBJECT_TIMEOUT
+                    )
                 showBubble?.click() ?: error("Bubble notify not found")
                 instrumentation.uiAutomation.syncInputTransactions()
                 val cancelAllBtn = waitAndGetCancelAllBtn()
@@ -90,9 +88,7 @@ class LaunchBubbleFromLockScreen(testSpec: FlickerTestParameter) : BaseBubbleScr
     @FlakyTest(bugId = 242088970)
     @Test
     fun testAppIsVisibleAtEnd() {
-        testSpec.assertLayersEnd {
-            this.isVisible(testApp)
-        }
+        testSpec.assertLayersEnd { this.isVisible(testApp) }
     }
 
     /** {@inheritDoc} */
@@ -104,32 +100,27 @@ class LaunchBubbleFromLockScreen(testSpec: FlickerTestParameter) : BaseBubbleScr
     /** {@inheritDoc} */
     @FlakyTest(bugId = 206753786)
     @Test
-    override fun navBarLayerIsVisibleAtStartAndEnd() =
-        super.navBarLayerIsVisibleAtStartAndEnd()
+    override fun navBarLayerIsVisibleAtStartAndEnd() = super.navBarLayerIsVisibleAtStartAndEnd()
 
     /** {@inheritDoc} */
     @FlakyTest(bugId = 206753786)
     @Test
-    override fun navBarLayerPositionAtStartAndEnd() =
-        super.navBarLayerPositionAtStartAndEnd()
+    override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
 
     /** {@inheritDoc} */
     @FlakyTest(bugId = 206753786)
     @Test
-    override fun navBarWindowIsAlwaysVisible() =
-        super.navBarWindowIsAlwaysVisible()
+    override fun navBarWindowIsAlwaysVisible() = super.navBarWindowIsAlwaysVisible()
 
     /** {@inheritDoc} */
     @FlakyTest(bugId = 242088970)
     @Test
-    override fun taskBarLayerIsVisibleAtStartAndEnd() =
-        super.taskBarLayerIsVisibleAtStartAndEnd()
+    override fun taskBarLayerIsVisibleAtStartAndEnd() = super.taskBarLayerIsVisibleAtStartAndEnd()
 
     /** {@inheritDoc} */
     @Postsubmit
     @Test
-    override fun taskBarWindowIsAlwaysVisible() =
-        super.taskBarWindowIsAlwaysVisible()
+    override fun taskBarWindowIsAlwaysVisible() = super.taskBarWindowIsAlwaysVisible()
 
     /** {@inheritDoc} */
     @FlakyTest(bugId = 242088970)
@@ -140,14 +131,12 @@ class LaunchBubbleFromLockScreen(testSpec: FlickerTestParameter) : BaseBubbleScr
     /** {@inheritDoc} */
     @FlakyTest(bugId = 242088970)
     @Test
-    override fun statusBarLayerPositionAtStartAndEnd() =
-        super.statusBarLayerPositionAtStartAndEnd()
+    override fun statusBarLayerPositionAtStartAndEnd() = super.statusBarLayerPositionAtStartAndEnd()
 
     /** {@inheritDoc} */
     @FlakyTest(bugId = 242088970)
     @Test
-    override fun statusBarWindowIsAlwaysVisible() =
-        super.statusBarWindowIsAlwaysVisible()
+    override fun statusBarWindowIsAlwaysVisible() = super.statusBarWindowIsAlwaysVisible()
 
     /** {@inheritDoc} */
     @FlakyTest(bugId = 242088970)

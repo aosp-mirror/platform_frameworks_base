@@ -41,27 +41,33 @@ import org.junit.runners.Parameterized
  * To run this test: `atest FlickerTests:LaunchAppShowImeOnStartTest`
  *
  * Actions:
+ * ```
  *     Make sure no apps are running on the device
  *     Launch an app [testApp] that automatically displays IME and wait animation to complete
- *
+ * ```
  * To run only the presubmit assertions add: `--
+ * ```
  *      --module-arg FlickerTests:exclude-annotation:androidx.test.filters.FlakyTest
  *      --module-arg FlickerTests:include-annotation:android.platform.test.annotations.Presubmit`
- *
+ * ```
  * To run only the postsubmit assertions add: `--
+ * ```
  *      --module-arg FlickerTests:exclude-annotation:androidx.test.filters.FlakyTest
  *      --module-arg FlickerTests:include-annotation:android.platform.test.annotations.Postsubmit`
- *
+ * ```
  * To run only the flaky assertions add: `--
+ * ```
  *      --module-arg FlickerTests:include-annotation:androidx.test.filters.FlakyTest`
- *
+ * ```
  * Notes:
+ * ```
  *     1. Some default assertions (e.g., nav bar, status bar and screen covered)
  *        are inherited [CloseAppTransition]
  *     2. Part of the test setup occurs automatically via
  *        [com.android.server.wm.flicker.TransitionRunnerWithRules],
  *        including configuring navigation mode, initial orientation and ensuring no
  *        apps are running before setup
+ * ```
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
@@ -83,65 +89,48 @@ class LaunchAppShowImeOnStartTest(testSpec: FlickerTestParameter) : BaseTest(tes
         }
         transitions {
             testApp.launchViaIntent(wmHelper)
-            wmHelper.StateSyncBuilder()
-                .withImeShown()
-                .waitForAndVerify()
+            wmHelper.StateSyncBuilder().withImeShown().waitForAndVerify()
         }
     }
 
-    /**
-     * Checks that [ComponentMatcher.IME] window becomes visible during the transition
-     */
-    @Presubmit
-    @Test
-    fun imeWindowBecomesVisible() = testSpec.imeWindowBecomesVisible()
+    /** Checks that [ComponentMatcher.IME] window becomes visible during the transition */
+    @Presubmit @Test fun imeWindowBecomesVisible() = testSpec.imeWindowBecomesVisible()
 
-    /**
-     * Checks that [ComponentMatcher.IME] layer becomes visible during the transition
-     */
-    @Presubmit
-    @Test
-    fun imeLayerBecomesVisible() = testSpec.imeLayerBecomesVisible()
+    /** Checks that [ComponentMatcher.IME] layer becomes visible during the transition */
+    @Presubmit @Test fun imeLayerBecomesVisible() = testSpec.imeLayerBecomesVisible()
 
-    /**
-     * Checks that [ComponentMatcher.IME] layer is invisible at the start of the transition
-     */
+    /** Checks that [ComponentMatcher.IME] layer is invisible at the start of the transition */
     @Presubmit
     @Test
     fun imeLayerNotExistsStart() {
-        testSpec.assertLayersStart {
-            this.isInvisible(ComponentNameMatcher.IME)
-        }
+        testSpec.assertLayersStart { this.isInvisible(ComponentNameMatcher.IME) }
     }
 
-    /**
-     * Checks that [ComponentMatcher.IME] layer is visible at the end of the transition
-     */
+    /** Checks that [ComponentMatcher.IME] layer is visible at the end of the transition */
     @Presubmit
     @Test
     fun imeLayerExistsEnd() {
-        testSpec.assertLayersEnd {
-            this.isVisible(ComponentNameMatcher.IME)
-        }
+        testSpec.assertLayersEnd { this.isVisible(ComponentNameMatcher.IME) }
     }
 
     companion object {
         /**
          * Creates the test configurations.
          *
-         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring
-         * repetitions, screen orientation and navigation modes.
+         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring repetitions,
+         * screen orientation and navigation modes.
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
                 .getConfigNonRotationTests(
-                                        supportedRotations = listOf(Surface.ROTATION_0),
-                    supportedNavigationModes = listOf(
-                        WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY,
-                        WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
-                    )
+                    supportedRotations = listOf(Surface.ROTATION_0),
+                    supportedNavigationModes =
+                        listOf(
+                            WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY,
+                            WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
+                        )
                 )
         }
     }

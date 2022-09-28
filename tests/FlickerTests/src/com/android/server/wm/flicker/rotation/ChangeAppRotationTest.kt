@@ -35,51 +35,54 @@ import org.junit.runners.Parameterized
  * Test opening an app and cycling through app rotations
  *
  * Currently runs:
+ * ```
  *      0 -> 90 degrees
  *      90 -> 0 degrees
- *
+ * ```
  * Actions:
+ * ```
  *     Launch an app (via intent)
  *     Set initial device orientation
  *     Start tracing
  *     Change device orientation
  *     Stop tracing
- *
+ * ```
  * To run this test: `atest FlickerTests:ChangeAppRotationTest`
  *
  * To run only the presubmit assertions add: `--
+ * ```
  *      --module-arg FlickerTests:exclude-annotation:androidx.test.filters.FlakyTest
  *      --module-arg FlickerTests:include-annotation:android.platform.test.annotations.Presubmit`
- *
+ * ```
  * To run only the postsubmit assertions add: `--
+ * ```
  *      --module-arg FlickerTests:exclude-annotation:androidx.test.filters.FlakyTest
  *      --module-arg FlickerTests:include-annotation:android.platform.test.annotations.Postsubmit`
- *
+ * ```
  * To run only the flaky assertions add: `--
+ * ```
  *      --module-arg FlickerTests:include-annotation:androidx.test.filters.FlakyTest`
- *
+ * ```
  * Notes:
+ * ```
  *     1. Some default assertions (e.g., nav bar, status bar and screen covered)
  *        are inherited [RotationTransition]
  *     2. Part of the test setup occurs automatically via
  *        [com.android.server.wm.flicker.TransitionRunnerWithRules],
  *        including configuring navigation mode, initial orientation and ensuring no
  *        apps are running before setup
+ * ```
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class ChangeAppRotationTest(
-    testSpec: FlickerTestParameter
-) : RotationTransition(testSpec) {
+class ChangeAppRotationTest(testSpec: FlickerTestParameter) : RotationTransition(testSpec) {
     override val testApp = SimpleAppHelper(instrumentation)
     override val transition: FlickerBuilder.() -> Unit
         get() = {
             super.transition(this)
-            setup {
-                testApp.launchViaIntent(wmHelper)
-            }
+            setup { testApp.launchViaIntent(wmHelper) }
         }
 
     /**
@@ -89,14 +92,12 @@ class ChangeAppRotationTest(
     @Presubmit
     @Test
     fun focusChanges() {
-        testSpec.assertEventLog {
-            this.focusChanges(testApp.`package`)
-        }
+        testSpec.assertEventLog { this.focusChanges(testApp.`package`) }
     }
 
     /**
-     * Checks that the [ComponentMatcher.ROTATION] layer appears during the transition,
-     * doesn't flicker, and disappears before the transition is complete
+     * Checks that the [ComponentMatcher.ROTATION] layer appears during the transition, doesn't
+     * flicker, and disappears before the transition is complete
      */
     fun rotationLayerAppearsAndVanishesAssertion() {
         testSpec.assertLayers {
@@ -110,8 +111,8 @@ class ChangeAppRotationTest(
     }
 
     /**
-     * Checks that the [ComponentMatcher.ROTATION] layer appears during the transition,
-     * doesn't flicker, and disappears before the transition is complete
+     * Checks that the [ComponentMatcher.ROTATION] layer appears during the transition, doesn't
+     * flicker, and disappears before the transition is complete
      */
     @Presubmit
     @Test
@@ -122,21 +123,19 @@ class ChangeAppRotationTest(
     /** {@inheritDoc} */
     @FlakyTest(bugId = 206753786)
     @Test
-    override fun navBarLayerPositionAtStartAndEnd() =
-        super.navBarLayerPositionAtStartAndEnd()
+    override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
 
     companion object {
         /**
          * Creates the test configurations.
          *
-         * See [FlickerTestParameterFactory.getConfigRotationTests] for configuring
-         * repetitions, screen orientation and navigation modes.
+         * See [FlickerTestParameterFactory.getConfigRotationTests] for configuring repetitions,
+         * screen orientation and navigation modes.
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): Collection<FlickerTestParameter> {
-            return FlickerTestParameterFactory.getInstance()
-                .getConfigRotationTests()
+            return FlickerTestParameterFactory.getInstance().getConfigRotationTests()
         }
     }
 }
