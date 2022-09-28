@@ -16,13 +16,13 @@
 
 package android.service.credentials;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.app.slice.Slice;
+import android.credentials.Credential;
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import androidx.annotation.NonNull;
 
 import com.android.internal.util.Preconditions;
 
@@ -38,8 +38,9 @@ public final class CredentialEntry implements Parcelable {
     /** The type of the credential entry to be shown on the UI. */
     private final @NonNull String mType;
 
-    /** The info to be displayed along with this credential entry on the UI. */
-    private final @NonNull Slice mInfo;
+    /** The object containing display content to be shown along with this credential entry
+     * on the UI. */
+    private final @NonNull Slice mSlice;
 
     /** The pending intent to be invoked when this credential entry is selected. */
     private final @Nullable PendingIntent mPendingIntent;
@@ -53,11 +54,11 @@ public final class CredentialEntry implements Parcelable {
     /** A flag denoting whether auto-select is enabled for this entry. */
     private final @NonNull boolean mAutoSelectAllowed;
 
-    private CredentialEntry(@NonNull String type, @NonNull Slice entryInfo,
+    private CredentialEntry(@NonNull String type, @NonNull Slice slice,
             @Nullable PendingIntent pendingIntent, @Nullable Credential credential,
             @NonNull boolean autoSeletAllowed) {
         mType = type;
-        mInfo = entryInfo;
+        mSlice = slice;
         mPendingIntent = pendingIntent;
         mCredential = credential;
         mAutoSelectAllowed = autoSeletAllowed;
@@ -65,7 +66,7 @@ public final class CredentialEntry implements Parcelable {
 
     private CredentialEntry(@NonNull Parcel in) {
         mType = in.readString();
-        mInfo = in.readParcelable(Slice.class.getClassLoader(), Slice.class);
+        mSlice = in.readParcelable(Slice.class.getClassLoader(), Slice.class);
         mPendingIntent = in.readParcelable(PendingIntent.class.getClassLoader(),
                 PendingIntent.class);
         mCredential = in.readParcelable(Credential.class.getClassLoader(),
@@ -94,7 +95,7 @@ public final class CredentialEntry implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString8(mType);
-        mInfo.writeToParcel(dest, flags);
+        mSlice.writeToParcel(dest, flags);
         mPendingIntent.writeToParcel(dest, flags);
         mCredential.writeToParcel(dest, flags);
         dest.writeBoolean(mAutoSelectAllowed);
@@ -108,10 +109,10 @@ public final class CredentialEntry implements Parcelable {
     }
 
     /**
-     * Returns the UI info to be displayed for this entry.
+     * Returns the {@link Slice} object containing UI display content to be shown for this entry.
      */
-    public @NonNull Slice getInfo() {
-        return mInfo;
+    public @NonNull Slice getSlice() {
+        return mSlice;
     }
 
     /**
@@ -131,7 +132,7 @@ public final class CredentialEntry implements Parcelable {
     /**
      * Returns whether this entry can be auto selected if it is the only option for the user.
      */
-    public @NonNull boolean isAutoSelectAllowed() {
+    public boolean isAutoSelectAllowed() {
         return mAutoSelectAllowed;
     }
 
@@ -140,27 +141,34 @@ public final class CredentialEntry implements Parcelable {
      */
     public static final class Builder {
         private String mType;
-        private Slice mInfo;
+        private Slice mSlice;
         private PendingIntent mPendingIntent;
         private Credential mCredential;
         private boolean mAutoSelectAllowed = false;
 
         /**
          * Builds the instance.
-         * @param type The type of credential underlying this credential entry.
-         * @param info The info to be displayed with this entry on the UI.
+         * @param type the type of credential underlying this credential entry
+         * @param slice the content to be displayed with this entry on the UI
          *
          * @throws IllegalArgumentException If {@code type} is null or empty.
-         * @throws NullPointerException If {@code info} is null.
+         * @throws NullPointerException If {@code slice} is null.
          */
-        public Builder(@NonNull String type, @NonNull Slice info) {
+        public Builder(@NonNull String type, @NonNull Slice slice) {
             mType = Preconditions.checkStringNotEmpty(type, "type must not be "
                     + "null, or empty");
-            mInfo = Objects.requireNonNull(info, "info must not be null");
+            mSlice = Objects.requireNonNull(slice,
+                    "slice must not be null");
         }
 
         /**
          * Sets the pendingIntent to be invoked if the user selects this entry.
+         *
+         * The pending intent can be used to launch activities that require some user engagement
+         * before getting the credential corresponding to this entry, e.g. authentication,
+         * confirmation etc.
+         * Once the activity fulfills the required user engagement, a {@link Credential} object
+         * must be returned as an extra on activity finish.
          *
          * @throws IllegalStateException If {@code credential} is already set. Must either set the
          * {@code credential}, or the {@code pendingIntent}.
@@ -199,7 +207,7 @@ public final class CredentialEntry implements Parcelable {
         /**
          * Creates a new {@link CredentialEntry} instance.
          *
-         * @throws NullPointerException If {@code info} is null.
+         * @throws NullPointerException If {@code slice} is null.
          * @throws IllegalArgumentException If {@code type} is null, or empty.
          * @throws IllegalStateException If neither {@code pendingIntent} nor {@code credential}
          * is set, or if both are set.
@@ -209,7 +217,7 @@ public final class CredentialEntry implements Parcelable {
                     "Either pendingIntent or credential must be set");
             Preconditions.checkState(mPendingIntent != null && mCredential != null,
                     "Cannot set both the pendingIntent and credential");
-            return new CredentialEntry(mType, mInfo, mPendingIntent,
+            return new CredentialEntry(mType, mSlice, mPendingIntent,
                     mCredential, mAutoSelectAllowed);
         }
     }

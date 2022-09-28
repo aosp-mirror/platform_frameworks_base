@@ -16,11 +16,10 @@
 
 package android.service.credentials;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import androidx.annotation.NonNull;
 
 import java.util.Objects;
 
@@ -43,6 +42,11 @@ public final class GetCredentialsResponse implements Parcelable {
     /**
      * Creates a {@link GetCredentialsRequest} instance with an authentication action set.
      * Providers must use this method when no content can be shown before authentication.
+     *
+     * Once the authentication action activity is launched, and the user is authenticated, providers
+     * should create another response with {@link CredentialsDisplayContent} using
+     * {@code createWithDisplayContent}, and add that response to the result of the authentication
+     * activity.
      *
      * @throws NullPointerException If {@code authenticationAction} is null.
      */
@@ -104,17 +108,10 @@ public final class GetCredentialsResponse implements Parcelable {
     }
 
     /**
-     * Returns whether the response contains a top level authentication action.
-     */
-    public @NonNull boolean isAuthenticationActionSet() {
-        return mAuthenticationAction != null;
-    }
-
-    /**
      * Returns the authentication action to be invoked before any other content
      * can be shown to the user.
      */
-    public @NonNull Action getAuthenticationAction() {
+    public @Nullable Action getAuthenticationAction() {
         return mAuthenticationAction;
     }
 
@@ -122,7 +119,7 @@ public final class GetCredentialsResponse implements Parcelable {
      * Returns the credentialDisplayContent that does not require authentication, and
      * can be shown to the user on the account selector UI.
      */
-    public @NonNull CredentialsDisplayContent getCredentialsDisplayContent() {
+    public @Nullable CredentialsDisplayContent getCredentialsDisplayContent() {
         return mCredentialsDisplayContent;
     }
 }

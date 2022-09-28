@@ -16,11 +16,10 @@
 
 package android.service.credentials;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import androidx.annotation.NonNull;
 
 import com.android.internal.util.Preconditions;
 
