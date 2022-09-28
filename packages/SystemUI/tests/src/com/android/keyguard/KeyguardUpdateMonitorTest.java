@@ -913,7 +913,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
 
         List<SubscriptionInfo> listToVerify = mKeyguardUpdateMonitor
-                .getFilteredSubscriptionInfo(false);
+                .getFilteredSubscriptionInfo();
         assertThat(listToVerify.size()).isEqualTo(1);
         assertThat(listToVerify.get(0)).isEqualTo(TEST_SUBSCRIPTION_2);
     }

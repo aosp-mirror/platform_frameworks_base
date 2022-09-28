@@ -598,7 +598,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      * of them based on carrier config. e.g. In this case we should only show one carrier name
      * on the status bar and quick settings.
      */
-    public List<SubscriptionInfo> getFilteredSubscriptionInfo(boolean forceReload) {
+    public List<SubscriptionInfo> getFilteredSubscriptionInfo() {
         List<SubscriptionInfo> subscriptions = getSubscriptionInfo(false);
         if (subscriptions.size() == 2) {
             SubscriptionInfo info1 = subscriptions.get(0);
