@@ -74,4 +74,8 @@ ndk_library {
     symbol_file: "libamidi.map.txt",
 
     first_version: "29",
+    export_header_libs: [
+        "amidi",
+    ],
+
 }
