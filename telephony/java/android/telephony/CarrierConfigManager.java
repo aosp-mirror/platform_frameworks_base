@@ -3348,18 +3348,33 @@ public class CarrierConfigManager {
     public static final String KEY_CARRIER_QUALIFIED_NETWORKS_SERVICE_CLASS_OVERRIDE_STRING =
             "carrier_qualified_networks_service_class_override_string";
     /**
-     * A list of 4 LTE RSCP thresholds above which a signal level is considered POOR,
+     * A list of 4 WCDMA RSCP thresholds above which a signal level is considered POOR,
      * MODERATE, GOOD, or EXCELLENT, to be used in SignalStrength reporting.
      *
      * Note that the min and max thresholds are fixed at -120 and -24, as set in 3GPP TS 27.007
      * section 8.69.
      * <p>
-     * See SignalStrength#MAX_WCDMA_RSCP and SignalStrength#MIN_WDCMA_RSCP. Any signal level outside
-     * these boundaries is considered invalid.
+     * See CellSignalStrengthWcdma#WCDMA_RSCP_MAX and CellSignalStrengthWcdma#WCDMA_RSCP_MIN.
+     * Any signal level outside these boundaries is considered invalid.
      * @hide
      */
     public static final String KEY_WCDMA_RSCP_THRESHOLDS_INT_ARRAY =
             "wcdma_rscp_thresholds_int_array";
+
+    /**
+     * A list of 4 WCDMA ECNO thresholds above which a signal level is considered POOR,
+     * MODERATE, GOOD, or EXCELLENT, to be used in SignalStrength reporting.
+     *
+     * Note that the min and max thresholds are fixed at -24 and 1, as set in 3GPP TS 25.215
+     * section 5.1.5.
+     * Any signal level outside these boundaries is considered invalid.
+     * <p>
+     *
+     * The default value is {@code {-24, -14, -6, 1}}.
+     * @hide
+     */
+    public static final String KEY_WCDMA_ECNO_THRESHOLDS_INT_ARRAY =
+            "wcdma_ecno_thresholds_int_array";
 
     /**
      * The default measurement to use for signal strength reporting. If this is not specified, the
@@ -3368,7 +3383,7 @@ public class CarrierConfigManager {
      * e.g.) To use RSCP by default, set the value to "rscp". The signal strength level will
      * then be determined by #KEY_WCDMA_RSCP_THRESHOLDS_INT_ARRAY
      * <p>
-     * Currently this supports the value "rscp" and "rssi".
+     * Currently this supports the value "rscp","rssi" and "ecno".
      * @hide
      */
     // FIXME: this key and related keys must not be exposed without a consistent philosophy for
@@ -9142,6 +9157,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_CHECK_PRICING_WITH_CARRIER_FOR_DATA_ROAMING_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_DATA_CONNECTED_ROAMING_NOTIFICATION_BOOL, false);
         sDefaults.putIntArray(KEY_LTE_RSRP_THRESHOLDS_INT_ARRAY,
+                // Boundaries: [-140 dBm, -44 dBm]
                 new int[] {
                         -128, /* SIGNAL_STRENGTH_POOR */
                         -118, /* SIGNAL_STRENGTH_MODERATE */
@@ -9149,6 +9165,7 @@ public class CarrierConfigManager {
                         -98,  /* SIGNAL_STRENGTH_GREAT */
                 });
         sDefaults.putIntArray(KEY_LTE_RSRQ_THRESHOLDS_INT_ARRAY,
+                // Boundaries: [-34 dB, 3 dB]
                 new int[] {
                         -20, /* SIGNAL_STRENGTH_POOR */
                         -17, /* SIGNAL_STRENGTH_MODERATE */
@@ -9156,6 +9173,7 @@ public class CarrierConfigManager {
                         -11  /* SIGNAL_STRENGTH_GREAT */
                 });
         sDefaults.putIntArray(KEY_LTE_RSSNR_THRESHOLDS_INT_ARRAY,
+                // Boundaries: [-20 dBm, 30 dBm]
                 new int[] {
                         -3, /* SIGNAL_STRENGTH_POOR */
                         1,  /* SIGNAL_STRENGTH_MODERATE */
@@ -9163,11 +9181,22 @@ public class CarrierConfigManager {
                         13  /* SIGNAL_STRENGTH_GREAT */
                 });
         sDefaults.putIntArray(KEY_WCDMA_RSCP_THRESHOLDS_INT_ARRAY,
+                // Boundaries: [-120 dBm, -25 dBm]
                 new int[] {
                         -115,  /* SIGNAL_STRENGTH_POOR */
                         -105, /* SIGNAL_STRENGTH_MODERATE */
                         -95, /* SIGNAL_STRENGTH_GOOD */
                         -85  /* SIGNAL_STRENGTH_GREAT */
+                });
+        // TODO(b/249896055): On enabling ECNO measurement part for Signal Bar level indication
+        // system functionality,below values to be rechecked.
+        sDefaults.putIntArray(KEY_WCDMA_ECNO_THRESHOLDS_INT_ARRAY,
+                // Boundaries: [-24 dBm, 1 dBm]
+                new int[] {
+                        -24, /* SIGNAL_STRENGTH_POOR */
+                        -14, /* SIGNAL_STRENGTH_MODERATE */
+                        -6, /* SIGNAL_STRENGTH_GOOD */
+                        1  /* SIGNAL_STRENGTH_GREAT */
                 });
         sDefaults.putIntArray(KEY_5G_NR_SSRSRP_THRESHOLDS_INT_ARRAY,
                 // Boundaries: [-140 dB, -44 dB]
