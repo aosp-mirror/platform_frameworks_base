@@ -27,9 +27,13 @@ import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.wm.shell.flicker.SPLIT_SCREEN_DIVIDER_COMPONENT
+import com.android.wm.shell.flicker.appWindowIsVisibleAtEnd
+import com.android.wm.shell.flicker.appWindowIsVisibleAtStart
 import com.android.wm.shell.flicker.appWindowKeepVisible
 import com.android.wm.shell.flicker.layerKeepVisible
 import com.android.wm.shell.flicker.splitAppLayerBoundsKeepVisible
+import com.android.wm.shell.flicker.splitScreenDividerIsVisibleAtEnd
+import com.android.wm.shell.flicker.splitScreenDividerIsVisibleAtStart
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -64,36 +68,44 @@ class CopyContentInSplit(testSpec: FlickerTestParameter) : SplitScreenBase(testS
     @IwTest(focusArea = "sysui")
     @Presubmit
     @Test
+    fun cujCompleted() {
+        testSpec.appWindowIsVisibleAtStart(primaryApp)
+        testSpec.appWindowIsVisibleAtStart(textEditApp)
+        testSpec.splitScreenDividerIsVisibleAtStart()
+
+        testSpec.appWindowIsVisibleAtEnd(primaryApp)
+        testSpec.appWindowIsVisibleAtEnd(textEditApp)
+        testSpec.splitScreenDividerIsVisibleAtEnd()
+
+        // The validation of copied text is already done in SplitScreenUtils.copyContentInSplit()
+    }
+
+    @Presubmit
+    @Test
     fun splitScreenDividerKeepVisible() = testSpec.layerKeepVisible(SPLIT_SCREEN_DIVIDER_COMPONENT)
 
-    @IwTest(focusArea = "sysui")
     @Presubmit
     @Test
     fun primaryAppLayerKeepVisible() = testSpec.layerKeepVisible(primaryApp)
 
-    @IwTest(focusArea = "sysui")
     @Presubmit
     @Test
     fun textEditAppLayerKeepVisible() = testSpec.layerKeepVisible(textEditApp)
 
-    @IwTest(focusArea = "sysui")
     @Presubmit
     @Test
     fun primaryAppBoundsKeepVisible() = testSpec.splitAppLayerBoundsKeepVisible(
         primaryApp, landscapePosLeft = tapl.isTablet, portraitPosTop = false)
 
-    @IwTest(focusArea = "sysui")
     @Presubmit
     @Test
     fun textEditAppBoundsKeepVisible() = testSpec.splitAppLayerBoundsKeepVisible(
         textEditApp, landscapePosLeft = !tapl.isTablet, portraitPosTop = true)
 
-    @IwTest(focusArea = "sysui")
     @Presubmit
     @Test
     fun primaryAppWindowKeepVisible() = testSpec.appWindowKeepVisible(primaryApp)
 
-    @IwTest(focusArea = "sysui")
     @Presubmit
     @Test
     fun textEditAppWindowKeepVisible() = testSpec.appWindowKeepVisible(textEditApp)
