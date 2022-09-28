@@ -26,7 +26,6 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.media.MediaCarouselController;
 import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.media.MediaHost;
 import com.android.systemui.plugins.qs.QSTile;
@@ -56,10 +55,10 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
             @Named(QS_USING_COLLAPSED_LANDSCAPE_MEDIA)
                     Provider<Boolean> usingCollapsedLandscapeMediaProvider,
             MetricsLogger metricsLogger, UiEventLogger uiEventLogger, QSLogger qsLogger,
-            DumpManager dumpManager, MediaCarouselController mediaCarouselController
+            DumpManager dumpManager
     ) {
         super(view, qsTileHost, qsCustomizerController, usingMediaPlayer, mediaHost, metricsLogger,
-                uiEventLogger, qsLogger, dumpManager, mediaCarouselController);
+                uiEventLogger, qsLogger, dumpManager);
         mUsingCollapsedLandscapeMediaProvider = usingCollapsedLandscapeMediaProvider;
     }
 
