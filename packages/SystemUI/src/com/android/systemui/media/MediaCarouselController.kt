@@ -149,32 +149,6 @@ class MediaCarouselController @Inject constructor(
                 }
             }
         }
-
-    companion object {
-        private const val SQUISHINESS_SCALE_START = 0.5
-        private const val SQUISHINESS_SCALE_FACTOR = 0.5
-        private fun getSquishinessScale(squishinessFraction: Float): Double {
-            return SQUISHINESS_SCALE_START + SQUISHINESS_SCALE_FACTOR * squishinessFraction
-        }
-    }
-
-    var squishinessFraction: Float = 1f
-        set(value) {
-            if (field == value) {
-                return
-            }
-            field = value
-
-            val scale = getSquishinessScale(field)
-            for (mediaPlayer in MediaPlayerData.players()) {
-                mediaPlayer.mediaViewHolder?.let {
-                    it.player.bottom = it.player.top + (scale * it.player.measuredHeight).toInt()
-                } ?: mediaPlayer.recommendationViewHolder?.let {
-                    it.recommendations.bottom = it.recommendations.top +
-                            (scale * it.recommendations.measuredHeight).toInt()
-                }
-            }
-        }
     private val configListener = object : ConfigurationController.ConfigurationListener {
         override fun onDensityOrFontScaleChanged() {
             // System font changes should only happen when UMO is offscreen or a flicker may occur
