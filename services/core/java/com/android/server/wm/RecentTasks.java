@@ -944,7 +944,7 @@ class RecentTasks {
                 continue;
             }
 
-            final ActivityManager.RecentTaskInfo rti = createRecentTaskInfo(tr);
+            final ActivityManager.RecentTaskInfo rti = createRecentTaskInfo(tr, getTasksAllowed);
             if (!getDetailedTasks) {
                 rti.baseIntent.replaceExtras((Bundle) null);
             }
@@ -1715,12 +1715,15 @@ class RecentTasks {
     /**
      * Creates a new RecentTaskInfo from a TaskRecord.
      */
-    ActivityManager.RecentTaskInfo createRecentTaskInfo(TaskRecord tr) {
+    ActivityManager.RecentTaskInfo createRecentTaskInfo(TaskRecord tr, boolean getTasksAllowed) {
         ActivityManager.RecentTaskInfo rti = new ActivityManager.RecentTaskInfo();
         tr.fillTaskInfo(rti);
         // Fill in some deprecated values
         rti.id = rti.isRunning ? rti.taskId : INVALID_TASK_ID;
         rti.persistentId = rti.taskId;
+        if (!getTasksAllowed) {
+            TaskRecord.trimIneffectiveInfo(tr, rti);
+        }
         return rti;
     }
 
