@@ -318,6 +318,7 @@ public abstract class WMShellModule {
             ShellCommandHandler shellCommandHandler,
             ShellController shellController,
             DisplayController displayController,
+            PipAnimationController pipAnimationController,
             PipAppOpsListener pipAppOpsListener,
             PipBoundsAlgorithm pipBoundsAlgorithm,
             PhonePipKeepClearAlgorithm pipKeepClearAlgorithm,
@@ -337,11 +338,12 @@ public abstract class WMShellModule {
             @ShellMainThread ShellExecutor mainExecutor) {
         return Optional.ofNullable(PipController.create(
                 context, shellInit, shellCommandHandler, shellController,
-                displayController, pipAppOpsListener, pipBoundsAlgorithm, pipKeepClearAlgorithm,
-                pipBoundsState, pipMotionHelper, pipMediaController, phonePipMenuController,
-                pipTaskOrganizer, pipTransitionState, pipTouchHandler, pipTransitionController,
-                windowManagerShellWrapper, taskStackListener, pipParamsChangedForwarder,
-                displayInsetsController, oneHandedController, mainExecutor));
+                displayController, pipAnimationController, pipAppOpsListener, pipBoundsAlgorithm,
+                pipKeepClearAlgorithm, pipBoundsState, pipMotionHelper, pipMediaController,
+                phonePipMenuController, pipTaskOrganizer, pipTransitionState, pipTouchHandler,
+                pipTransitionController, windowManagerShellWrapper, taskStackListener,
+                pipParamsChangedForwarder, displayInsetsController, oneHandedController,
+                mainExecutor));
     }
 
     @WMSingleton
