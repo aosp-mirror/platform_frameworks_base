@@ -159,8 +159,9 @@ public final class OutputConfiguration implements Parcelable {
      *
      * <li> For a SurfaceView output surface, the timestamp base is {@link
      * #TIMESTAMP_BASE_CHOREOGRAPHER_SYNCED}. The timestamp is overridden with choreographer
-     * pulses from the display subsystem for smoother display of camera frames. The timestamp
-     * is roughly in the same time base as {@link android.os.SystemClock#uptimeMillis}.</li>
+     * pulses from the display subsystem for smoother display of camera frames when the camera
+     * device runs in fixed frame rate. The timestamp is roughly in the same time base as
+     * {@link android.os.SystemClock#uptimeMillis}.</li>
      * <li> For an output surface of MediaRecorder, MediaCodec, or ImageReader with {@link
      * android.hardware.HardwareBuffer#USAGE_VIDEO_ENCODE} usge flag, the timestamp base is
      * {@link #TIMESTAMP_BASE_MONOTONIC}, which is roughly the same time base as
@@ -231,7 +232,8 @@ public final class OutputConfiguration implements Parcelable {
      *
      * <p>The timestamp of the output images are overridden with choreographer pulses from the
      * display subsystem for smoother display of camera frames. An output target of SurfaceView
-     * uses this time base by default.</p>
+     * uses this time base by default. Note that the timestamp override is done for fixed camera
+     * frame rate only.</p>
      *
      * <p>This timestamp base isn't applicable to SurfaceTexture targets. SurfaceTexture's
      * {@link android.graphics.SurfaceTexture#updateTexImage updateTexImage} function always
