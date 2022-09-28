@@ -1287,8 +1287,8 @@ int IncrementalService::addBindMount(IncFsMount& ifs, StorageId storage,
         bp.set_allocated_dest_path(&target);
         bp.set_allocated_source_subdir(&source);
         const auto metadata = bp.SerializeAsString();
-        bp.release_dest_path();
-        bp.release_source_subdir();
+        static_cast<void>(bp.release_dest_path());
+        static_cast<void>(bp.release_source_subdir());
         mdFileName = makeBindMdName();
         metadataFullPath = path::join(ifs.root, constants().mount, mdFileName);
         auto node = mIncFs->makeFile(ifs.control, metadataFullPath, 0444, idFromMetadata(metadata),

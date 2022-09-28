@@ -595,7 +595,7 @@
     <string name="guest_reset_guest" msgid="6110013010356013758">"கெஸ்ட் அமர்வை மீட்டமை"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"கெஸ்ட்டை மீட்டமைக்கவா?"</string>
     <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"கெஸ்ட் பயனரை அகற்றவா?"</string>
-    <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"மீட்டமை"</string>
+    <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"ரீசெட்"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"அகற்று"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"கெஸ்ட்டை மீட்டமைக்கிறது…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"படமெடுங்கள்"</string>
