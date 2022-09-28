@@ -1147,10 +1147,11 @@ public class RecentTasksTest extends WindowTestsBase {
     @Test
     public void testCreateRecentTaskInfo_detachedTask() {
         final Task task = createTaskBuilder(".Task").build();
+        final ComponentName componentName = new ComponentName("com.foo", ".BarActivity");
         new ActivityBuilder(mSupervisor.mService)
                 .setTask(task)
                 .setUid(NOBODY_UID)
-                .setComponent(new ComponentName("com.foo", ".BarActivity"))
+                .setComponent(componentName)
                 .build();
         final TaskDisplayArea tda = task.getDisplayArea();
 
@@ -1166,9 +1167,9 @@ public class RecentTasksTest extends WindowTestsBase {
         info = mRecentTasks.createRecentTaskInfo(task, true /* stripExtras */,
                 false /* getTasksAllowed */);
 
-        assertTrue(info.topActivity == null);
-        assertTrue(info.topActivityInfo == null);
-        assertTrue(info.baseActivity == null);
+        assertFalse(info.topActivity.equals(componentName));
+        assertFalse(info.topActivityInfo.packageName.equals(componentName.getPackageName()));
+        assertFalse(info.baseActivity.equals(componentName));
 
         // The task can be put in split screen even if it is not attached now.
         task.removeImmediately();
