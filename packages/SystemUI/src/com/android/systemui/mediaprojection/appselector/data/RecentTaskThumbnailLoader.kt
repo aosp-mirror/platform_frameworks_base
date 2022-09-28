@@ -18,6 +18,7 @@ package com.android.systemui.mediaprojection.appselector.data
 
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.shared.recents.model.ThumbnailData
+import com.android.systemui.shared.system.ActivityManagerWrapper
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
@@ -30,12 +31,13 @@ class ActivityTaskManagerThumbnailLoader
 @Inject
 constructor(
     @Background private val coroutineDispatcher: CoroutineDispatcher,
-) :
-    RecentTaskThumbnailLoader {
+    private val activityManager: ActivityManagerWrapper
+) : RecentTaskThumbnailLoader {
 
     override suspend fun loadThumbnail(taskId: Int): ThumbnailData? =
         withContext(coroutineDispatcher) {
-            // TODO(b/240924731): add blocking call to load a thumbnail
-             null
+            val thumbnailData =
+                activityManager.getTaskThumbnail(taskId, /* isLowResolution= */ false)
+            if (thumbnailData.thumbnail == null) null else thumbnailData
         }
 }
