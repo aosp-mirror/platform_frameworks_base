@@ -23,12 +23,13 @@ import static com.android.server.am.BroadcastConstants.DEFER_BOOT_COMPLETED_BROA
 import static com.android.server.am.BroadcastConstants.DEFER_BOOT_COMPLETED_BROADCAST_CHANGE_ID;
 import static com.android.server.am.BroadcastConstants.DEFER_BOOT_COMPLETED_BROADCAST_NONE;
 import static com.android.server.am.BroadcastConstants.DEFER_BOOT_COMPLETED_BROADCAST_TARGET_T_ONLY;
-import static com.android.server.am.BroadcastQueue.checkState;
 
-import android.annotation.DurationMillisLong;
+import android.annotation.CurrentTimeMillisLong;
+import android.annotation.ElapsedRealtimeLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UptimeMillisLong;
 import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
 import android.app.BroadcastOptions;
@@ -89,20 +90,20 @@ final class BroadcastRecord extends Binder {
     final BroadcastOptions options; // BroadcastOptions supplied by caller
     final List receivers;   // contains BroadcastFilter and ResolveInfo
     final @DeliveryState int[] delivery;   // delivery state of each receiver
-    final long[] scheduledTime; // uptimeMillis when each receiver was scheduled
-    final long[] duration;   // duration a receiver took to process broadcast
     IIntentReceiver resultTo; // who receives final result if non-null
     boolean deferred;
     int splitCount;         // refcount for result callback, when split
     int splitToken;         // identifier for cross-BroadcastRecord refcount
-    long enqueueTime;       // uptimeMillis when the broadcast was enqueued
-    long enqueueRealTime;   // elapsedRealtime when the broadcast was enqueued
-    long enqueueClockTime;  // the clock time the broadcast was enqueued
-    long dispatchTime;      // when dispatch started on this set of receivers
-    long dispatchRealTime;  // elapsedRealtime when the broadcast was dispatched
-    long dispatchClockTime; // the clock time the dispatch started
-    long receiverTime;      // when current receiver started for timeouts.
-    long finishTime;        // when we finished the current receiver.
+    @UptimeMillisLong       long enqueueTime;        // when broadcast enqueued
+    @ElapsedRealtimeLong    long enqueueRealTime;    // when broadcast enqueued
+    @CurrentTimeMillisLong  long enqueueClockTime;   // when broadcast enqueued
+    @UptimeMillisLong       long dispatchTime;       // when broadcast dispatch started
+    @ElapsedRealtimeLong    long dispatchRealTime;   // when broadcast dispatch started
+    @CurrentTimeMillisLong  long dispatchClockTime;  // when broadcast dispatch started
+    @UptimeMillisLong       long receiverTime;       // when receiver started for timeouts
+    @UptimeMillisLong       long finishTime;         // when broadcast finished
+    final @UptimeMillisLong long[] scheduledTime;    // when each receiver was scheduled
+    final @UptimeMillisLong long[] terminalTime;     // when each receiver was terminal
     boolean timeoutExempt;  // true if this broadcast is not subject to receiver timeouts
     int resultCode;         // current result code value.
     String resultData;      // current result data value.
@@ -163,12 +164,12 @@ final class BroadcastRecord extends Binder {
 
     static @NonNull String deliveryStateToString(@DeliveryState int deliveryState) {
         switch (deliveryState) {
-            case DELIVERY_PENDING: return "Pending";
-            case DELIVERY_DELIVERED: return "Delivered";
-            case DELIVERY_SKIPPED: return "Skipped";
-            case DELIVERY_TIMEOUT: return "Timeout";
-            case DELIVERY_SCHEDULED: return "Scheduled";
-            case DELIVERY_FAILURE: return "Failure";
+            case DELIVERY_PENDING: return "PENDING";
+            case DELIVERY_DELIVERED: return "DELIVERED";
+            case DELIVERY_SKIPPED: return "SKIPPED";
+            case DELIVERY_TIMEOUT: return "TIMEOUT";
+            case DELIVERY_SCHEDULED: return "SCHEDULED";
+            case DELIVERY_FAILURE: return "FAILURE";
             default: return Integer.toString(deliveryState);
         }
     }
@@ -306,8 +307,18 @@ final class BroadcastRecord extends Binder {
             Object o = receivers.get(i);
             pw.print(prefix);
             pw.print(deliveryStateToString(delivery[i]));
-            pw.print(" "); TimeUtils.formatDuration(duration[i], pw);
-            pw.print(" #"); pw.print(i); pw.print(": ");
+            pw.print(' ');
+            if (scheduledTime[i] != 0) {
+                pw.print("scheduled ");
+                TimeUtils.formatDuration(scheduledTime[i] - enqueueTime, pw);
+                pw.print(' ');
+            }
+            if (terminalTime[i] != 0) {
+                pw.print("terminal ");
+                TimeUtils.formatDuration(terminalTime[i] - scheduledTime[i], pw);
+                pw.print(' ');
+            }
+            pw.print("#"); pw.print(i); pw.print(": ");
             if (o instanceof BroadcastFilter) {
                 pw.println(o);
                 ((BroadcastFilter) o).dumpBrief(pw, p2);
@@ -352,7 +363,7 @@ final class BroadcastRecord extends Binder {
         receivers = _receivers;
         delivery = new int[_receivers != null ? _receivers.size() : 0];
         scheduledTime = new long[delivery.length];
-        duration = new long[delivery.length];
+        terminalTime = new long[delivery.length];
         resultTo = _resultTo;
         resultCode = _resultCode;
         resultData = _resultData;
@@ -399,7 +410,7 @@ final class BroadcastRecord extends Binder {
         receivers = from.receivers;
         delivery = from.delivery;
         scheduledTime = from.scheduledTime;
-        duration = from.duration;
+        terminalTime = from.terminalTime;
         resultTo = from.resultTo;
         enqueueTime = from.enqueueTime;
         enqueueRealTime = from.enqueueRealTime;
@@ -559,7 +570,10 @@ final class BroadcastRecord extends Binder {
 
         switch (deliveryState) {
             case DELIVERY_DELIVERED:
-                duration[index] = SystemClock.uptimeMillis() - scheduledTime[index];
+            case DELIVERY_SKIPPED:
+            case DELIVERY_TIMEOUT:
+            case DELIVERY_FAILURE:
+                terminalTime[index] = SystemClock.uptimeMillis();
                 break;
             case DELIVERY_SCHEDULED:
                 scheduledTime[index] = SystemClock.uptimeMillis();

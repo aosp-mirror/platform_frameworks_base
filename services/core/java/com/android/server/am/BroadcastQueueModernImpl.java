@@ -27,6 +27,7 @@ import static com.android.internal.util.FrameworkStatsLog.BROADCAST_DELIVERY_EVE
 import static com.android.internal.util.FrameworkStatsLog.BROADCAST_DELIVERY_EVENT_REPORTED__RECEIVER_TYPE__RUNTIME;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BROADCAST;
 import static com.android.server.am.BroadcastProcessQueue.insertIntoRunnableList;
+import static com.android.server.am.BroadcastProcessQueue.reasonToString;
 import static com.android.server.am.BroadcastProcessQueue.removeFromRunnableList;
 import static com.android.server.am.BroadcastRecord.deliveryStateToString;
 import static com.android.server.am.BroadcastRecord.getReceiverPackageName;
@@ -60,7 +61,6 @@ import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.util.IndentingPrintWriter;
-import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
@@ -138,6 +138,13 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
     // TODO: pause queues when background services are running
     // TODO: pause queues when processes are frozen
+
+    /**
+     * When enabled, invoke {@link #checkConsistencyLocked()} periodically to
+     * verify that our internal state is consistent. Checking consistency is
+     * relatively expensive, so this should be typically disabled.
+     */
+    private static final boolean CHECK_CONSISTENCY = true;
 
     /**
      * Map from UID to per-process broadcast queues. If a UID hosts more than
@@ -293,6 +300,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         if (queue.isEmpty() && !queue.isActive() && !queue.isProcessWarm()) {
             removeProcessQueue(queue.processName, queue.uid);
         }
+
+        if (CHECK_CONSISTENCY) checkConsistencyLocked();
     }
 
     /**
@@ -396,6 +405,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             mWaitingForIdle.clear();
         }
 
+        if (CHECK_CONSISTENCY) checkConsistencyLocked();
+
         traceEnd(TAG, cookie);
     }
 
@@ -451,13 +462,12 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
             // Skip any pending registered receivers, since the old process
             // would never be around to receive them
-            queue.removeMatchingBroadcasts((r, i) -> {
+            boolean didSomething = queue.removeMatchingBroadcasts((r, i) -> {
                 return (r.receivers.get(i) instanceof BroadcastFilter);
             }, mBroadcastConsumerSkip);
-
-            // If queue has nothing else pending, consider cleaning it
-            if (queue.isEmpty()) {
+            if (didSomething || queue.isEmpty()) {
                 updateRunnableList(queue);
+                enqueueUpdateRunningList();
             }
         }
     }
@@ -565,6 +575,12 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         final int index = queue.getActiveIndex();
         final Object receiver = r.receivers.get(index);
 
+        if (r.finishedCount == 0) {
+            r.dispatchTime = SystemClock.uptimeMillis();
+            r.dispatchRealTime = SystemClock.elapsedRealtime();
+            r.dispatchClockTime = System.currentTimeMillis();
+        }
+
         // If someone already finished this broadcast, finish immediately
         final int oldDeliveryState = getDeliveryState(r, index);
         if (isDeliveryStateTerminal(oldDeliveryState)) {
@@ -646,7 +662,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             } catch (RemoteException e) {
                 final String msg = "Failed to schedule " + r + " to " + receiver
                         + " via " + app + ": " + e;
-                Slog.w(TAG, msg);
+                logw(msg);
                 app.scheduleCrashLocked(msg, CannotDeliverBroadcastException.TYPE_ID, null);
                 app.setKilled(true);
                 finishReceiverLocked(queue, BroadcastRecord.DELIVERY_FAILURE);
@@ -673,7 +689,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                         r.userId, app.mState.getReportedProcState());
             } catch (RemoteException e) {
                 final String msg = "Failed to schedule result of " + r + " via " + app + ": " + e;
-                Slog.w(TAG, msg);
+                logw(msg);
                 app.scheduleCrashLocked(msg, CannotDeliverBroadcastException.TYPE_ID, null);
             }
         }
@@ -761,13 +777,6 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             @NonNull Object receiver, @DeliveryState int newDeliveryState) {
         final int oldDeliveryState = getDeliveryState(r, index);
 
-        if (newDeliveryState != BroadcastRecord.DELIVERY_DELIVERED) {
-            Slog.w(TAG, "Delivery state of " + r + " to " + receiver
-                    + " via " + app + " changed from "
-                    + deliveryStateToString(oldDeliveryState) + " to "
-                    + deliveryStateToString(newDeliveryState));
-        }
-
         // Only apply state when we haven't already reached a terminal state;
         // this is how we ignore racing timeout messages
         if (!isDeliveryStateTerminal(oldDeliveryState)) {
@@ -789,6 +798,13 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         // bookkeeping to update for ordered broadcasts
         if (!isDeliveryStateTerminal(oldDeliveryState)
                 && isDeliveryStateTerminal(newDeliveryState)) {
+            if (newDeliveryState != BroadcastRecord.DELIVERY_DELIVERED) {
+                logw("Delivery state of " + r + " to " + receiver
+                        + " via " + app + " changed from "
+                        + deliveryStateToString(oldDeliveryState) + " to "
+                        + deliveryStateToString(newDeliveryState));
+            }
+
             r.finishedCount++;
             notifyFinishReceiver(queue, r, index, receiver);
 
@@ -801,6 +817,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                             getReceiverProcessName(nextReceiver), getReceiverUid(nextReceiver));
                     nextQueue.invalidateRunnableAt();
                     updateRunnableList(nextQueue);
+                    enqueueUpdateRunningList();
                 } else {
                     // Everything finished, so deliver final result
                     scheduleResultTo(r);
@@ -880,11 +897,17 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             BroadcastProcessQueue leaf = mProcessQueues.valueAt(i);
             while (leaf != null) {
                 if (queuePredicate.test(leaf)) {
-                    didSomething |= leaf.removeMatchingBroadcasts(broadcastPredicate,
-                            mBroadcastConsumerSkip);
+                    if (leaf.removeMatchingBroadcasts(broadcastPredicate,
+                            mBroadcastConsumerSkip)) {
+                        updateRunnableList(leaf);
+                        didSomething = true;
+                    }
                 }
                 leaf = leaf.processNameNext;
             }
+        }
+        if (didSomething) {
+            enqueueUpdateRunningList();
         }
         return didSomething;
     }
@@ -949,6 +972,32 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     @Override
     public void backgroundServicesFinishedLocked(int userId) {
         // TODO: implement
+    }
+
+    /**
+     * Heavy verification of internal consistency.
+     */
+    private void checkConsistencyLocked() {
+        // Verify all runnable queues are sorted
+        BroadcastProcessQueue prev = null;
+        BroadcastProcessQueue next = mRunnableHead;
+        while (next != null) {
+            checkState(next.runnableAtPrev == prev, "runnableAtPrev");
+            checkState(next.isRunnable(), "isRunnable " + next);
+            if (prev != null) {
+                checkState(next.getRunnableAt() >= prev.getRunnableAt(),
+                        "getRunnableAt " + next + " vs " + prev);
+            }
+            prev = next;
+            next = next.runnableAtNext;
+        }
+
+        // Verify all running queues are active
+        for (BroadcastProcessQueue queue : mRunning) {
+            if (queue != null) {
+                checkState(queue.isActive(), "isActive " + queue);
+            }
+        }
     }
 
     private int traceBegin(String trackName, String methodName) {
@@ -1086,7 +1135,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         // "dispatched" and "scheduled", so we report no "receive delay"
         final long dispatchDelay = r.scheduledTime[index] - r.enqueueTime;
         final long receiveDelay = 0;
-        final long finishDelay = r.duration[index];
+        final long finishDelay = r.terminalTime[index] - r.scheduledTime[index];
         FrameworkStatsLog.write(BROADCAST_DELIVERY_EVENT_REPORTED, uid, senderUid, actionName,
                 receiverType, type, dispatchDelay, receiveDelay, finishDelay);
 
@@ -1094,6 +1143,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         if (recordFinished) {
             mHistory.addBroadcastToHistoryLocked(r);
 
+            r.finishTime = SystemClock.uptimeMillis();
             r.nextReceiver = r.receivers.size();
             BroadcastQueueImpl.logBootCompletedBroadcastCompletionLatencyIfPossible(r);
 
@@ -1214,7 +1264,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         for (int i = 0; i < mProcessQueues.size(); i++) {
             BroadcastProcessQueue leaf = mProcessQueues.valueAt(i);
             while (leaf != null) {
-                leaf.dumpLocked(ipw);
+                leaf.dumpLocked(now, ipw);
                 leaf = leaf.processNameNext;
             }
         }
@@ -1230,7 +1280,10 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             while (queue != null) {
                 TimeUtils.formatDuration(queue.getRunnableAt(), now, ipw);
                 ipw.print(' ');
-                ipw.println(queue.toShortString());
+                ipw.print(reasonToString(queue.getRunnableAtReason()));
+                ipw.print(' ');
+                ipw.print(queue.toShortString());
+                ipw.println();
                 queue = queue.runnableAtNext;
             }
         }
