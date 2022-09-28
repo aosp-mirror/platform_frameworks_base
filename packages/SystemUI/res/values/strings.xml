@@ -2022,6 +2022,15 @@
     <!-- Text used to refer to the user's current carrier in mobile_data_disable_message if the users's mobile network carrier name is not available [CHAR LIMIT=NONE] -->
     <string name="mobile_data_disable_message_default_carrier">your carrier</string>
 
+    <!-- Title of the dialog to turn off data usage [CHAR LIMIT=NONE] -->
+    <string name="auto_data_switch_disable_title">Switch back to <xliff:g id="carrier" example="T-Mobile">%s</xliff:g>?</string>
+    <!-- Message body of the dialog to turn off data usage [CHAR LIMIT=NONE] -->
+    <string name="auto_data_switch_disable_message">Mobile data won\’t automatically switch based on availability</string>
+    <!-- Negative button title of the quick settings switch back to DDS dialog [CHAR LIMIT=NONE] -->
+    <string name="auto_data_switch_dialog_negative_button">No thanks</string>
+    <!-- Positive button title of the quick settings switch back to DDS dialog [CHAR LIMIT=NONE] -->
+    <string name="auto_data_switch_dialog_positive_button">Yes, switch</string>
+
     <!-- Warning shown when user input has been blocked due to another app overlaying screen
      content. Since we don't know what the app is showing on top of the input target, we
      can't verify user consent. [CHAR LIMIT=NONE] -->
@@ -2491,6 +2500,12 @@
     <!-- Provider Model:
          Summary indicating that a SIM has an active mobile data connection [CHAR LIMIT=50] -->
     <string name="mobile_data_connection_active">Connected</string>
+    <!-- Provider Model:
+         Summary indicating that a SIM is temporarily connected to mobile data [CHAR LIMIT=50] -->
+    <string name="mobile_data_temp_connection_active">Temporarily connected</string>
+    <!-- Provider Model:
+     Summary indicating that a SIM is temporarily connected to mobile data [CHAR LIMIT=50] -->
+    <string name="mobile_data_poor_connection">Poor connection</string>
     <!-- Provider Model:
      Summary indicating that a SIM has no mobile data connection [CHAR LIMIT=50] -->
     <string name="mobile_data_off_summary">Mobile data won\u0027t auto\u2011connect</string>

@@ -5,6 +5,7 @@ import static android.telephony.SignalStrength.NUM_SIGNAL_STRENGTH_BINS;
 import static android.telephony.SignalStrength.SIGNAL_STRENGTH_GREAT;
 import static android.telephony.SignalStrength.SIGNAL_STRENGTH_POOR;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.systemui.qs.tiles.dialog.InternetDialogController.TOAST_PARAMS_HORIZONTAL_WEIGHT;
 import static com.android.systemui.qs.tiles.dialog.InternetDialogController.TOAST_PARAMS_VERTICAL_WEIGHT;
 import static com.android.wifitrackerlib.WifiEntry.WIFI_LEVEL_MAX;
@@ -13,6 +14,7 @@ import static com.android.wifitrackerlib.WifiEntry.WIFI_LEVEL_UNREACHABLE;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -36,6 +38,7 @@ import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
+import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.testing.AndroidTestingRunner;
@@ -55,6 +58,8 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.UnreleasedFlag;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.connectivity.AccessPointController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -68,12 +73,15 @@ import com.android.systemui.util.time.FakeSystemClock;
 import com.android.wifitrackerlib.MergedCarrierEntry;
 import com.android.wifitrackerlib.WifiEntry;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.MockitoSession;
+import org.mockito.quality.Strictness;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -84,6 +92,9 @@ import java.util.List;
 public class InternetDialogControllerTest extends SysuiTestCase {
 
     private static final int SUB_ID = 1;
+    private static final int SUB_ID2 = 2;
+
+    private MockitoSession mStaticMockSession;
 
     //SystemUIToast
     private static final int GRAVITY_FLAGS = Gravity.FILL_HORIZONTAL | Gravity.FILL_VERTICAL;
@@ -150,6 +161,8 @@ public class InternetDialogControllerTest extends SysuiTestCase {
     private WifiStateWorker mWifiStateWorker;
     @Mock
     private SignalStrength mSignalStrength;
+    @Mock
+    private FeatureFlags mFlags;
 
     private TestableResources mTestableResources;
     private InternetDialogController mInternetDialogController;
@@ -159,6 +172,10 @@ public class InternetDialogControllerTest extends SysuiTestCase {
 
     @Before
     public void setUp() {
+        mStaticMockSession = mockitoSession()
+                .mockStatic(SubscriptionManager.class)
+                .strictness(Strictness.LENIENT)
+                .startMocking();
         MockitoAnnotations.initMocks(this);
         mTestableResources = mContext.getOrCreateTestableResources();
         doReturn(mTelephonyManager).when(mTelephonyManager).createForSubscriptionId(anyInt());
@@ -175,6 +192,7 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         mAccessPoints.add(mWifiEntry1);
         when(mAccessPointController.getMergedCarrierEntry()).thenReturn(mMergedCarrierEntry);
         when(mSubscriptionManager.getActiveSubscriptionIdList()).thenReturn(new int[]{SUB_ID});
+        when(SubscriptionManager.getDefaultDataSubscriptionId()).thenReturn(SUB_ID);
         when(mToastFactory.createToast(any(), anyString(), anyString(), anyInt(), anyInt()))
             .thenReturn(mSystemUIToast);
         when(mSystemUIToast.getView()).thenReturn(mToastView);
@@ -188,13 +206,18 @@ public class InternetDialogControllerTest extends SysuiTestCase {
                 mock(ConnectivityManager.class), mHandler, mExecutor, mBroadcastDispatcher,
                 mock(KeyguardUpdateMonitor.class), mGlobalSettings, mKeyguardStateController,
                 mWindowManager, mToastFactory, mWorkerHandler, mCarrierConfigTracker,
-                mLocationController, mDialogLaunchAnimator, mWifiStateWorker);
+                mLocationController, mDialogLaunchAnimator, mWifiStateWorker, mFlags);
         mSubscriptionManager.addOnSubscriptionsChangedListener(mExecutor,
                 mInternetDialogController.mOnSubscriptionsChangedListener);
         mInternetDialogController.onStart(mInternetDialogCallback, true);
         mInternetDialogController.onAccessPointsChanged(mAccessPoints);
         mInternetDialogController.mActivityStarter = mActivityStarter;
         mInternetDialogController.mWifiIconInjector = mWifiIconInjector;
+    }
+
+    @After
+    public void tearDown() {
+        mStaticMockSession.finishMocking();
     }
 
     @Test
@@ -325,15 +348,45 @@ public class InternetDialogControllerTest extends SysuiTestCase {
 
     @Test
     public void getSubtitleText_withNoService_returnNoNetworksAvailable() {
+        when(mFlags.isEnabled(any(UnreleasedFlag.class))).thenReturn(true);
+        InternetDialogController spyController = spy(mInternetDialogController);
         fakeAirplaneModeEnabled(false);
         when(mWifiStateWorker.isWifiEnabled()).thenReturn(true);
-        mInternetDialogController.onAccessPointsChanged(null /* accessPoints */);
+        spyController.onAccessPointsChanged(null /* accessPoints */);
+
+        doReturn(SUB_ID2).when(spyController).getActiveAutoSwitchNonDdsSubId();
+        doReturn(ServiceState.STATE_OUT_OF_SERVICE).when(mServiceState).getState();
+        doReturn(mServiceState).when(mTelephonyManager).getServiceState();
+        doReturn(TelephonyManager.DATA_DISCONNECTED).when(mTelephonyManager).getDataState();
+
+        assertFalse(TextUtils.equals(spyController.getSubtitleText(false),
+                getResourcesString("all_network_unavailable")));
+
+        doReturn(SubscriptionManager.INVALID_SUBSCRIPTION_ID)
+                .when(spyController).getActiveAutoSwitchNonDdsSubId();
+        spyController.onAccessPointsChanged(null /* accessPoints */);
+        assertTrue(TextUtils.equals(spyController.getSubtitleText(false),
+                getResourcesString("all_network_unavailable")));
+    }
+
+    @Test
+    public void getSubtitleText_withNoService_returnNoNetworksAvailable_flagOff() {
+        InternetDialogController spyController = spy(mInternetDialogController);
+        fakeAirplaneModeEnabled(false);
+        when(mWifiStateWorker.isWifiEnabled()).thenReturn(true);
+        spyController.onAccessPointsChanged(null /* accessPoints */);
 
         doReturn(ServiceState.STATE_OUT_OF_SERVICE).when(mServiceState).getState();
         doReturn(mServiceState).when(mTelephonyManager).getServiceState();
         doReturn(TelephonyManager.DATA_DISCONNECTED).when(mTelephonyManager).getDataState();
 
-        assertTrue(TextUtils.equals(mInternetDialogController.getSubtitleText(false),
+        assertTrue(TextUtils.equals(spyController.getSubtitleText(false),
+                getResourcesString("all_network_unavailable")));
+
+        doReturn(SubscriptionManager.INVALID_SUBSCRIPTION_ID)
+                .when(spyController).getActiveAutoSwitchNonDdsSubId();
+        spyController.onAccessPointsChanged(null /* accessPoints */);
+        assertTrue(TextUtils.equals(spyController.getSubtitleText(false),
                 getResourcesString("all_network_unavailable")));
     }
 
@@ -651,6 +704,108 @@ public class InternetDialogControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void getSignalStrengthIcon_differentSubId() {
+        when(mFlags.isEnabled(any(UnreleasedFlag.class))).thenReturn(true);
+        InternetDialogController spyController = spy(mInternetDialogController);
+        Drawable icons = spyController.getSignalStrengthIcon(SUB_ID, mContext, 1, 1, 0, false);
+        Drawable icons2 = spyController.getSignalStrengthIcon(SUB_ID2, mContext, 1, 1, 0, false);
+
+        assertThat(icons).isNotEqualTo(icons2);
+    }
+
+    @Test
+    public void getActiveAutoSwitchNonDdsSubId() {
+        when(mFlags.isEnabled(any(UnreleasedFlag.class))).thenReturn(true);
+        // active on non-DDS
+        SubscriptionInfo info = mock(SubscriptionInfo.class);
+        doReturn(SUB_ID2).when(info).getSubscriptionId();
+        when(mSubscriptionManager.getActiveSubscriptionInfo(anyInt())).thenReturn(info);
+
+        int subId = mInternetDialogController.getActiveAutoSwitchNonDdsSubId();
+        assertThat(subId).isEqualTo(SUB_ID2);
+
+        // active on CBRS
+        doReturn(true).when(info).isOpportunistic();
+        subId = mInternetDialogController.getActiveAutoSwitchNonDdsSubId();
+        assertThat(subId).isEqualTo(SubscriptionManager.INVALID_SUBSCRIPTION_ID);
+
+        // active on DDS
+        doReturn(false).when(info).isOpportunistic();
+        doReturn(SUB_ID).when(info).getSubscriptionId();
+        when(mSubscriptionManager.getActiveSubscriptionInfo(anyInt())).thenReturn(info);
+
+        subId = mInternetDialogController.getActiveAutoSwitchNonDdsSubId();
+        assertThat(subId).isEqualTo(SubscriptionManager.INVALID_SUBSCRIPTION_ID);
+    }
+
+    @Test
+    public void getActiveAutoSwitchNonDdsSubId_flagOff() {
+        // active on non-DDS
+        SubscriptionInfo info = mock(SubscriptionInfo.class);
+        doReturn(SUB_ID2).when(info).getSubscriptionId();
+        when(mSubscriptionManager.getActiveSubscriptionInfo(anyInt())).thenReturn(info);
+
+        int subId = mInternetDialogController.getActiveAutoSwitchNonDdsSubId();
+        assertThat(subId).isEqualTo(SubscriptionManager.INVALID_SUBSCRIPTION_ID);
+    }
+
+    @Test
+    public void getMobileNetworkSummary() {
+        when(mFlags.isEnabled(any(UnreleasedFlag.class))).thenReturn(true);
+        InternetDialogController spyController = spy(mInternetDialogController);
+        doReturn(SUB_ID2).when(spyController).getActiveAutoSwitchNonDdsSubId();
+        doReturn(true).when(spyController).isMobileDataEnabled();
+        doReturn(true).when(spyController).activeNetworkIsCellular();
+        String dds = spyController.getMobileNetworkSummary(SUB_ID);
+        String nonDds = spyController.getMobileNetworkSummary(SUB_ID2);
+
+        assertThat(dds).contains(mContext.getString(R.string.mobile_data_poor_connection));
+        assertThat(dds).isNotEqualTo(nonDds);
+    }
+
+    @Test
+    public void getMobileNetworkSummary_flagOff() {
+        InternetDialogController spyController = spy(mInternetDialogController);
+        doReturn(true).when(spyController).isMobileDataEnabled();
+        doReturn(true).when(spyController).activeNetworkIsCellular();
+        String dds = spyController.getMobileNetworkSummary(SUB_ID);
+
+        assertThat(dds).contains(mContext.getString(R.string.mobile_data_connection_active));
+    }
+
+    @Test
+    public void launchMobileNetworkSettings_validSubId() {
+        when(mFlags.isEnabled(any(UnreleasedFlag.class))).thenReturn(true);
+        InternetDialogController spyController = spy(mInternetDialogController);
+        doReturn(SUB_ID2).when(spyController).getActiveAutoSwitchNonDdsSubId();
+        spyController.launchMobileNetworkSettings(mDialogLaunchView);
+
+        verify(mActivityStarter).postStartActivityDismissingKeyguard(any(Intent.class), anyInt(),
+                any());
+    }
+
+    @Test
+    public void launchMobileNetworkSettings_invalidSubId() {
+        when(mFlags.isEnabled(any(UnreleasedFlag.class))).thenReturn(true);
+        InternetDialogController spyController = spy(mInternetDialogController);
+        doReturn(SubscriptionManager.INVALID_SUBSCRIPTION_ID)
+                .when(spyController).getActiveAutoSwitchNonDdsSubId();
+        spyController.launchMobileNetworkSettings(mDialogLaunchView);
+
+        verify(mActivityStarter, never())
+                .postStartActivityDismissingKeyguard(any(Intent.class), anyInt());
+    }
+
+    @Test
+    public void setAutoDataSwitchMobileDataPolicy() {
+        when(mFlags.isEnabled(any(UnreleasedFlag.class))).thenReturn(true);
+        mInternetDialogController.setAutoDataSwitchMobileDataPolicy(SUB_ID, true);
+
+        verify(mTelephonyManager).setMobileDataPolicyEnabled(eq(
+                TelephonyManager.MOBILE_DATA_POLICY_AUTO_DATA_SWITCH), eq(true));
+    }
+
+    @Test
     public void getSignalStrengthDrawableWithLevel_carrierNetworkIsNotActive_useMobileDataLevel() {
         // Fake mobile data level as SIGNAL_STRENGTH_POOR(1)
         when(mSignalStrength.getLevel()).thenReturn(SIGNAL_STRENGTH_POOR);
@@ -658,9 +813,9 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         when(mInternetDialogController.getCarrierNetworkLevel()).thenReturn(WIFI_LEVEL_MAX);
 
         InternetDialogController spyController = spy(mInternetDialogController);
-        spyController.getSignalStrengthDrawableWithLevel(false /* isCarrierNetworkActive */);
+        spyController.getSignalStrengthDrawableWithLevel(false /* isCarrierNetworkActive */, 0);
 
-        verify(spyController).getSignalStrengthIcon(any(), eq(SIGNAL_STRENGTH_POOR),
+        verify(spyController).getSignalStrengthIcon(eq(0), any(), eq(SIGNAL_STRENGTH_POOR),
                 eq(NUM_SIGNAL_STRENGTH_BINS), anyInt(), anyBoolean());
     }
 
@@ -672,9 +827,9 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         when(mInternetDialogController.getCarrierNetworkLevel()).thenReturn(WIFI_LEVEL_MAX);
 
         InternetDialogController spyController = spy(mInternetDialogController);
-        spyController.getSignalStrengthDrawableWithLevel(true /* isCarrierNetworkActive */);
+        spyController.getSignalStrengthDrawableWithLevel(true /* isCarrierNetworkActive */, 0);
 
-        verify(spyController).getSignalStrengthIcon(any(), eq(WIFI_LEVEL_MAX),
+        verify(spyController).getSignalStrengthIcon(eq(0), any(), eq(WIFI_LEVEL_MAX),
                 eq(WIFI_LEVEL_MAX + 1), anyInt(), anyBoolean());
     }
 
