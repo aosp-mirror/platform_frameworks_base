@@ -290,7 +290,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         }
 
         // If app isn't running, and there's nothing in the queue, clean up
-        if (queue.isEmpty() && !queue.isProcessWarm()) {
+        if (queue.isEmpty() && !queue.isActive() && !queue.isProcessWarm()) {
             removeProcessQueue(queue.processName, queue.uid);
         }
     }
@@ -420,18 +420,17 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     }
 
     @Override
-    public boolean onApplicationTimeoutLocked(@NonNull ProcessRecord app) {
-        return onApplicationCleanupLocked(app);
+    public void onApplicationTimeoutLocked(@NonNull ProcessRecord app) {
+        onApplicationCleanupLocked(app);
     }
 
     @Override
-    public boolean onApplicationProblemLocked(@NonNull ProcessRecord app) {
-        return onApplicationCleanupLocked(app);
+    public void onApplicationProblemLocked(@NonNull ProcessRecord app) {
+        onApplicationCleanupLocked(app);
     }
 
     @Override
-    public boolean onApplicationCleanupLocked(@NonNull ProcessRecord app) {
-        boolean didSomething = false;
+    public void onApplicationCleanupLocked(@NonNull ProcessRecord app) {
         if ((mRunningColdStart != null) && (mRunningColdStart.app == app)) {
             // We've been waiting for this app to cold start, and it had
             // trouble; clear the slot and fail delivery below
@@ -439,7 +438,6 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
             // We might be willing to kick off another cold start
             enqueueUpdateRunningList();
-            didSomething = true;
         }
 
         final BroadcastProcessQueue queue = getProcessQueue(app);
@@ -449,16 +447,19 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             // If queue was running a broadcast, fail it
             if (queue.isActive()) {
                 finishReceiverLocked(queue, BroadcastRecord.DELIVERY_FAILURE);
-                didSomething = true;
             }
+
+            // Skip any pending registered receivers, since the old process
+            // would never be around to receive them
+            queue.removeMatchingBroadcasts((r, i) -> {
+                return (r.receivers.get(i) instanceof BroadcastFilter);
+            }, mBroadcastConsumerSkip);
 
             // If queue has nothing else pending, consider cleaning it
             if (queue.isEmpty()) {
                 updateRunnableList(queue);
             }
         }
-
-        return didSomething;
     }
 
     @Override
@@ -515,6 +516,13 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         final int index = queue.getActiveIndex();
         final Object receiver = r.receivers.get(index);
 
+        // Ignore registered receivers from a previous PID
+        if (receiver instanceof BroadcastFilter) {
+            mRunningColdStart = null;
+            finishReceiverLocked(queue, BroadcastRecord.DELIVERY_SKIPPED);
+            return;
+        }
+
         final ApplicationInfo info = ((ResolveInfo) receiver).activityInfo.applicationInfo;
         final ComponentName component = ((ResolveInfo) receiver).activityInfo.getComponentName();
 
@@ -536,6 +544,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         } else {
             mRunningColdStart = null;
             finishReceiverLocked(queue, BroadcastRecord.DELIVERY_FAILURE);
+            return;
         }
     }
 
@@ -563,7 +572,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             return;
         }
 
-        // Consider additional cases where we'd want fo finish immediately
+        // Consider additional cases where we'd want to finish immediately
         if (app.isInFullBackup()) {
             finishReceiverLocked(queue, BroadcastRecord.DELIVERY_SKIPPED);
             return;
@@ -578,7 +587,14 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             return;
         }
 
-        if (!r.timeoutExempt) {
+        // Ignore registered receivers from a previous PID
+        if ((receiver instanceof BroadcastFilter)
+                && ((BroadcastFilter) receiver).receiverList.pid != app.getPid()) {
+            finishReceiverLocked(queue, BroadcastRecord.DELIVERY_SKIPPED);
+            return;
+        }
+
+        if (mService.mProcessesReady && !r.timeoutExempt) {
             final long timeout = r.isForeground() ? mFgConstants.TIMEOUT : mBgConstants.TIMEOUT;
             mLocalHandler.sendMessageDelayed(
                     Message.obtain(mLocalHandler, MSG_DELIVERY_TIMEOUT, queue), timeout);
@@ -604,7 +620,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         }
 
         if (DEBUG_BROADCAST) logv("Scheduling " + r + " to warm " + app);
-        setDeliveryState(queue, r, index, receiver, BroadcastRecord.DELIVERY_SCHEDULED);
+        setDeliveryState(queue, app, r, index, receiver, BroadcastRecord.DELIVERY_SCHEDULED);
 
         final IApplicationThread thread = app.getThread();
         if (thread != null) {
@@ -628,8 +644,12 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                             app.mState.getReportedProcState());
                 }
             } catch (RemoteException e) {
+                final String msg = "Failed to schedule " + r + " to " + receiver
+                        + " via " + app + ": " + e;
+                Slog.w(TAG, msg);
+                app.scheduleCrashLocked(msg, CannotDeliverBroadcastException.TYPE_ID, null);
+                app.setKilled(true);
                 finishReceiverLocked(queue, BroadcastRecord.DELIVERY_FAILURE);
-                app.scheduleCrashLocked(TAG, CannotDeliverBroadcastException.TYPE_ID, null);
             }
         } else {
             finishReceiverLocked(queue, BroadcastRecord.DELIVERY_FAILURE);
@@ -652,7 +672,9 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                         r.resultCode, r.resultData, r.resultExtras, false, r.initialSticky,
                         r.userId, app.mState.getReportedProcState());
             } catch (RemoteException e) {
-                app.scheduleCrashLocked(TAG, CannotDeliverBroadcastException.TYPE_ID, null);
+                final String msg = "Failed to schedule result of " + r + " via " + app + ": " + e;
+                Slog.w(TAG, msg);
+                app.scheduleCrashLocked(msg, CannotDeliverBroadcastException.TYPE_ID, null);
             }
         }
     }
@@ -674,7 +696,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         // receivers as skipped
         if (r.ordered && r.resultAbort) {
             for (int i = r.finishedCount + 1; i < r.receivers.size(); i++) {
-                setDeliveryState(null, r, i, r.receivers.get(i), BroadcastRecord.DELIVERY_SKIPPED);
+                setDeliveryState(null, null, r, i, r.receivers.get(i),
+                        BroadcastRecord.DELIVERY_SKIPPED);
             }
         }
 
@@ -690,9 +713,10 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         final int index = queue.getActiveIndex();
         final Object receiver = r.receivers.get(index);
 
-        setDeliveryState(queue, r, index, receiver, deliveryState);
+        setDeliveryState(queue, app, r, index, receiver, deliveryState);
 
         if (deliveryState == BroadcastRecord.DELIVERY_TIMEOUT) {
+            r.anrCount++;
             if (app != null && !app.isDebugging()) {
                 mService.appNotResponding(queue.app, TimeoutRecord
                         .forBroadcastReceiver("Broadcast of " + r.toShortString()));
@@ -704,7 +728,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         // Even if we have more broadcasts, if we've made reasonable progress
         // and someone else is waiting, retire ourselves to avoid starvation
         final boolean shouldRetire = (mRunnableHead != null)
-                && (queue.getActiveCountSinceIdle() > mConstants.MAX_RUNNING_ACTIVE_BROADCASTS);
+                && (queue.getActiveCountSinceIdle() >= mConstants.MAX_RUNNING_ACTIVE_BROADCASTS);
 
         if (queue.isRunnable() && queue.isProcessWarm() && !shouldRetire) {
             // We're on a roll; move onto the next broadcast for this process
@@ -733,17 +757,22 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
      * bookkeeping related to ordered broadcasts.
      */
     private void setDeliveryState(@Nullable BroadcastProcessQueue queue,
-            @NonNull BroadcastRecord r, int index, @NonNull Object receiver,
-            @DeliveryState int newDeliveryState) {
+            @Nullable ProcessRecord app, @NonNull BroadcastRecord r, int index,
+            @NonNull Object receiver, @DeliveryState int newDeliveryState) {
         final int oldDeliveryState = getDeliveryState(r, index);
 
         if (newDeliveryState != BroadcastRecord.DELIVERY_DELIVERED) {
-            Slog.w(TAG, "Delivery state of " + r + " to " + receiver + " changed from "
+            Slog.w(TAG, "Delivery state of " + r + " to " + receiver
+                    + " via " + app + " changed from "
                     + deliveryStateToString(oldDeliveryState) + " to "
                     + deliveryStateToString(newDeliveryState));
         }
 
-        r.setDeliveryState(index, newDeliveryState);
+        // Only apply state when we haven't already reached a terminal state;
+        // this is how we ignore racing timeout messages
+        if (!isDeliveryStateTerminal(oldDeliveryState)) {
+            r.setDeliveryState(index, newDeliveryState);
+        }
 
         // Emit any relevant tracing results when we're changing the delivery
         // state as part of running from a queue
@@ -837,7 +866,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
      * of it matching a predicate.
      */
     private final BroadcastConsumer mBroadcastConsumerSkip = (r, i) -> {
-        setDeliveryState(null, r, i, r.receivers.get(i), BroadcastRecord.DELIVERY_SKIPPED);
+        setDeliveryState(null, null, r, i, r.receivers.get(i), BroadcastRecord.DELIVERY_SKIPPED);
     };
 
     private boolean skipMatchingBroadcasts(

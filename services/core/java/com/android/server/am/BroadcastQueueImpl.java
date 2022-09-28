@@ -426,16 +426,16 @@ public class BroadcastQueueImpl extends BroadcastQueue {
         }
     }
 
-    public boolean onApplicationTimeoutLocked(ProcessRecord app) {
-        return skipCurrentOrPendingReceiverLocked(app);
+    public void onApplicationTimeoutLocked(ProcessRecord app) {
+        skipCurrentOrPendingReceiverLocked(app);
     }
 
-    public boolean onApplicationProblemLocked(ProcessRecord app) {
-        return skipCurrentOrPendingReceiverLocked(app);
+    public void onApplicationProblemLocked(ProcessRecord app) {
+        skipCurrentOrPendingReceiverLocked(app);
     }
 
-    public boolean onApplicationCleanupLocked(ProcessRecord app) {
-        return skipCurrentOrPendingReceiverLocked(app);
+    public void onApplicationCleanupLocked(ProcessRecord app) {
+        skipCurrentOrPendingReceiverLocked(app);
     }
 
     public boolean sendPendingBroadcastsLocked(ProcessRecord app) {
@@ -732,9 +732,10 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                 } catch (RemoteException ex) {
                     // Failed to call into the process. It's either dying or wedged. Kill it gently.
                     synchronized (mService) {
-                        Slog.w(TAG, "Can't deliver broadcast to " + app.processName
-                                + " (pid " + app.getPid() + "). Crashing it.");
-                        app.scheduleCrashLocked("can't deliver broadcast",
+                        final String msg = "Failed to schedule " + intent + " to " + receiver
+                                + " via " + app + ": " + ex;
+                        Slog.w(TAG, msg);
+                        app.scheduleCrashLocked(msg,
                                 CannotDeliverBroadcastException.TYPE_ID, /* extras=*/ null);
                     }
                     throw ex;
@@ -814,7 +815,11 @@ public class BroadcastQueueImpl extends BroadcastQueue {
         try {
             if (DEBUG_BROADCAST_LIGHT) Slog.i(TAG_BROADCAST,
                     "Delivering to " + filter + " : " + r);
-            if (filter.receiverList.app != null && filter.receiverList.app.isInFullBackup()) {
+            final boolean isInFullBackup = (filter.receiverList.app != null)
+                    && filter.receiverList.app.isInFullBackup();
+            final boolean isKilled = (filter.receiverList.app != null)
+                    && filter.receiverList.app.isKilled();
+            if (isInFullBackup || isKilled) {
                 // Skip delivery if full backup in progress
                 // If it's an ordered broadcast, we need to continue to the next receiver.
                 if (ordered) {
@@ -1379,8 +1384,11 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                 processCurBroadcastLocked(r, app);
                 return;
             } catch (RemoteException e) {
-                Slog.w(TAG, "Exception when sending broadcast to "
-                      + r.curComponent, e);
+                final String msg = "Failed to schedule " + r.intent + " to " + info
+                        + " via " + app + ": " + e;
+                Slog.w(TAG, msg);
+                app.scheduleCrashLocked(msg,
+                        CannotDeliverBroadcastException.TYPE_ID, /* extras=*/ null);
             } catch (RuntimeException e) {
                 Slog.wtf(TAG, "Failed sending broadcast to "
                         + r.curComponent + " with " + r.intent, e);

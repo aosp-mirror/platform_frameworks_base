@@ -128,6 +128,9 @@ final class BroadcastRecord extends Binder {
     @Nullable
     final BiFunction<Integer, Bundle, Bundle> filterExtrasForReceiver;
 
+    String cachedToString;
+    String cachedToShortString;
+
     static final int IDLE = 0;
     static final int APP_RECEIVE = 1;
     static final int CALL_IN_RECEIVE = 2;
@@ -700,21 +703,27 @@ final class BroadcastRecord extends Binder {
 
     @Override
     public String toString() {
-        String label = intent.getAction();
-        if (label == null) {
-            label = intent.toString();
+        if (cachedToString == null) {
+            String label = intent.getAction();
+            if (label == null) {
+                label = intent.toString();
+            }
+            cachedToString = "BroadcastRecord{"
+                + Integer.toHexString(System.identityHashCode(this))
+                + " u" + userId + " " + label + "}";
         }
-        return "BroadcastRecord{"
-            + Integer.toHexString(System.identityHashCode(this))
-            + " u" + userId + " " + label + "}";
+        return cachedToString;
     }
 
     public String toShortString() {
-        String label = intent.getAction();
-        if (label == null) {
-            label = intent.toString();
+        if (cachedToShortString == null) {
+            String label = intent.getAction();
+            if (label == null) {
+                label = intent.toString();
+            }
+            cachedToShortString = label + "/u" + userId;
         }
-        return label + "/u" + userId;
+        return cachedToShortString;
     }
 
     public void dumpDebug(ProtoOutputStream proto, long fieldId) {
