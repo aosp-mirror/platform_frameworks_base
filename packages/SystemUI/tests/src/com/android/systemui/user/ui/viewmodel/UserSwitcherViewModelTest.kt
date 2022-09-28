@@ -17,17 +17,28 @@
 
 package com.android.systemui.user.ui.viewmodel
 
+import android.app.ActivityManager
+import android.app.admin.DevicePolicyManager
 import android.graphics.drawable.Drawable
+import android.os.UserManager
 import androidx.test.filters.SmallTest
+import com.android.internal.logging.UiEventLogger
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.Text
+import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.power.data.repository.FakePowerRepository
 import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.statusbar.policy.UserSwitcherController
+import com.android.systemui.telephony.data.repository.FakeTelephonyRepository
+import com.android.systemui.telephony.domain.interactor.TelephonyInteractor
 import com.android.systemui.user.data.repository.FakeUserRepository
+import com.android.systemui.user.domain.interactor.GuestUserInteractor
+import com.android.systemui.user.domain.interactor.RefreshUsersScheduler
 import com.android.systemui.user.domain.interactor.UserInteractor
 import com.android.systemui.user.legacyhelper.ui.LegacyUserUiHelper
 import com.android.systemui.user.shared.model.UserActionModel
@@ -38,6 +49,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.TestCoroutineScope
 import kotlinx.coroutines.yield
 import org.junit.Before
 import org.junit.Test
@@ -52,6 +64,11 @@ class UserSwitcherViewModelTest : SysuiTestCase() {
 
     @Mock private lateinit var controller: UserSwitcherController
     @Mock private lateinit var activityStarter: ActivityStarter
+    @Mock private lateinit var activityManager: ActivityManager
+    @Mock private lateinit var manager: UserManager
+    @Mock private lateinit var deviceProvisionedController: DeviceProvisionedController
+    @Mock private lateinit var devicePolicyManager: DevicePolicyManager
+    @Mock private lateinit var uiEventLogger: UiEventLogger
 
     private lateinit var underTest: UserSwitcherViewModel
 
@@ -66,17 +83,51 @@ class UserSwitcherViewModelTest : SysuiTestCase() {
         userRepository = FakeUserRepository()
         keyguardRepository = FakeKeyguardRepository()
         powerRepository = FakePowerRepository()
+        val featureFlags = FakeFeatureFlags()
+        featureFlags.set(Flags.REFACTORED_USER_SWITCHER_CONTROLLER, false)
+        val scope = TestCoroutineScope()
+        val refreshUsersScheduler =
+            RefreshUsersScheduler(
+                applicationScope = scope,
+                mainDispatcher = IMMEDIATE,
+                repository = userRepository,
+            )
         underTest =
             UserSwitcherViewModel.Factory(
                     userInteractor =
                         UserInteractor(
+                            applicationContext = context,
                             repository = userRepository,
                             controller = controller,
                             activityStarter = activityStarter,
                             keyguardInteractor =
                                 KeyguardInteractor(
                                     repository = keyguardRepository,
-                                )
+                                ),
+                            featureFlags = featureFlags,
+                            manager = manager,
+                            applicationScope = scope,
+                            telephonyInteractor =
+                                TelephonyInteractor(
+                                    repository = FakeTelephonyRepository(),
+                                ),
+                            broadcastDispatcher = fakeBroadcastDispatcher,
+                            backgroundDispatcher = IMMEDIATE,
+                            activityManager = activityManager,
+                            refreshUsersScheduler = refreshUsersScheduler,
+                            guestUserInteractor =
+                                GuestUserInteractor(
+                                    applicationContext = context,
+                                    applicationScope = scope,
+                                    mainDispatcher = IMMEDIATE,
+                                    backgroundDispatcher = IMMEDIATE,
+                                    manager = manager,
+                                    repository = userRepository,
+                                    deviceProvisionedController = deviceProvisionedController,
+                                    devicePolicyManager = devicePolicyManager,
+                                    refreshUsersScheduler = refreshUsersScheduler,
+                                    uiEventLogger = uiEventLogger,
+                                ),
                         ),
                     powerInteractor =
                         PowerInteractor(

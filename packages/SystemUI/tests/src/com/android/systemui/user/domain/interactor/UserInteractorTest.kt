@@ -17,51 +17,60 @@
 
 package com.android.systemui.user.domain.interactor
 
-import androidx.test.filters.SmallTest
+import android.app.ActivityManager
+import android.app.admin.DevicePolicyManager
+import android.os.UserManager
+import com.android.internal.logging.UiEventLogger
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.statusbar.policy.UserSwitcherController
+import com.android.systemui.telephony.data.repository.FakeTelephonyRepository
+import com.android.systemui.telephony.domain.interactor.TelephonyInteractor
 import com.android.systemui.user.data.repository.FakeUserRepository
-import com.android.systemui.user.shared.model.UserActionModel
-import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.eq
-import com.android.systemui.util.mockito.nullable
-import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.runBlocking
-import org.junit.Before
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
+import kotlinx.coroutines.test.TestCoroutineScope
 import org.mockito.Mock
-import org.mockito.Mockito.anyBoolean
-import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
-@SmallTest
-@RunWith(JUnit4::class)
-class UserInteractorTest : SysuiTestCase() {
+abstract class UserInteractorTest : SysuiTestCase() {
 
-    @Mock private lateinit var controller: UserSwitcherController
-    @Mock private lateinit var activityStarter: ActivityStarter
+    @Mock protected lateinit var controller: UserSwitcherController
+    @Mock protected lateinit var activityStarter: ActivityStarter
+    @Mock protected lateinit var manager: UserManager
+    @Mock protected lateinit var activityManager: ActivityManager
+    @Mock protected lateinit var deviceProvisionedController: DeviceProvisionedController
+    @Mock protected lateinit var devicePolicyManager: DevicePolicyManager
+    @Mock protected lateinit var uiEventLogger: UiEventLogger
 
-    private lateinit var underTest: UserInteractor
+    protected lateinit var underTest: UserInteractor
 
-    private lateinit var userRepository: FakeUserRepository
-    private lateinit var keyguardRepository: FakeKeyguardRepository
+    protected lateinit var userRepository: FakeUserRepository
+    protected lateinit var keyguardRepository: FakeKeyguardRepository
+    protected lateinit var telephonyRepository: FakeTelephonyRepository
 
-    @Before
-    fun setUp() {
+    abstract fun isRefactored(): Boolean
+
+    open fun setUp() {
         MockitoAnnotations.initMocks(this)
 
         userRepository = FakeUserRepository()
         keyguardRepository = FakeKeyguardRepository()
+        telephonyRepository = FakeTelephonyRepository()
+        val applicationScope = TestCoroutineScope()
+        val refreshUsersScheduler =
+            RefreshUsersScheduler(
+                applicationScope = applicationScope,
+                mainDispatcher = IMMEDIATE,
+                repository = userRepository,
+            )
         underTest =
             UserInteractor(
+                applicationContext = context,
                 repository = userRepository,
                 controller = controller,
                 activityStarter = activityStarter,
@@ -69,142 +78,34 @@ class UserInteractorTest : SysuiTestCase() {
                     KeyguardInteractor(
                         repository = keyguardRepository,
                     ),
-            )
-    }
-
-    @Test
-    fun `actions - not actionable when locked and locked - no actions`() =
-        runBlocking(IMMEDIATE) {
-            userRepository.setActions(UserActionModel.values().toList())
-            userRepository.setActionableWhenLocked(false)
-            keyguardRepository.setKeyguardShowing(true)
-
-            var actions: List<UserActionModel>? = null
-            val job = underTest.actions.onEach { actions = it }.launchIn(this)
-
-            assertThat(actions).isEmpty()
-            job.cancel()
-        }
-
-    @Test
-    fun `actions - not actionable when locked and not locked`() =
-        runBlocking(IMMEDIATE) {
-            userRepository.setActions(
-                listOf(
-                    UserActionModel.ENTER_GUEST_MODE,
-                    UserActionModel.ADD_USER,
-                    UserActionModel.ADD_SUPERVISED_USER,
-                )
-            )
-            userRepository.setActionableWhenLocked(false)
-            keyguardRepository.setKeyguardShowing(false)
-
-            var actions: List<UserActionModel>? = null
-            val job = underTest.actions.onEach { actions = it }.launchIn(this)
-
-            assertThat(actions)
-                .isEqualTo(
-                    listOf(
-                        UserActionModel.ENTER_GUEST_MODE,
-                        UserActionModel.ADD_USER,
-                        UserActionModel.ADD_SUPERVISED_USER,
-                        UserActionModel.NAVIGATE_TO_USER_MANAGEMENT,
+                featureFlags =
+                    FakeFeatureFlags().apply {
+                        set(Flags.REFACTORED_USER_SWITCHER_CONTROLLER, isRefactored())
+                    },
+                manager = manager,
+                applicationScope = applicationScope,
+                telephonyInteractor =
+                    TelephonyInteractor(
+                        repository = telephonyRepository,
+                    ),
+                broadcastDispatcher = fakeBroadcastDispatcher,
+                backgroundDispatcher = IMMEDIATE,
+                activityManager = activityManager,
+                refreshUsersScheduler = refreshUsersScheduler,
+                guestUserInteractor =
+                    GuestUserInteractor(
+                        applicationContext = context,
+                        applicationScope = applicationScope,
+                        mainDispatcher = IMMEDIATE,
+                        backgroundDispatcher = IMMEDIATE,
+                        manager = manager,
+                        repository = userRepository,
+                        deviceProvisionedController = deviceProvisionedController,
+                        devicePolicyManager = devicePolicyManager,
+                        refreshUsersScheduler = refreshUsersScheduler,
+                        uiEventLogger = uiEventLogger,
                     )
-                )
-            job.cancel()
-        }
-
-    @Test
-    fun `actions - actionable when locked and not locked`() =
-        runBlocking(IMMEDIATE) {
-            userRepository.setActions(
-                listOf(
-                    UserActionModel.ENTER_GUEST_MODE,
-                    UserActionModel.ADD_USER,
-                    UserActionModel.ADD_SUPERVISED_USER,
-                )
             )
-            userRepository.setActionableWhenLocked(true)
-            keyguardRepository.setKeyguardShowing(false)
-
-            var actions: List<UserActionModel>? = null
-            val job = underTest.actions.onEach { actions = it }.launchIn(this)
-
-            assertThat(actions)
-                .isEqualTo(
-                    listOf(
-                        UserActionModel.ENTER_GUEST_MODE,
-                        UserActionModel.ADD_USER,
-                        UserActionModel.ADD_SUPERVISED_USER,
-                        UserActionModel.NAVIGATE_TO_USER_MANAGEMENT,
-                    )
-                )
-            job.cancel()
-        }
-
-    @Test
-    fun `actions - actionable when locked and locked`() =
-        runBlocking(IMMEDIATE) {
-            userRepository.setActions(
-                listOf(
-                    UserActionModel.ENTER_GUEST_MODE,
-                    UserActionModel.ADD_USER,
-                    UserActionModel.ADD_SUPERVISED_USER,
-                )
-            )
-            userRepository.setActionableWhenLocked(true)
-            keyguardRepository.setKeyguardShowing(true)
-
-            var actions: List<UserActionModel>? = null
-            val job = underTest.actions.onEach { actions = it }.launchIn(this)
-
-            assertThat(actions)
-                .isEqualTo(
-                    listOf(
-                        UserActionModel.ENTER_GUEST_MODE,
-                        UserActionModel.ADD_USER,
-                        UserActionModel.ADD_SUPERVISED_USER,
-                        UserActionModel.NAVIGATE_TO_USER_MANAGEMENT,
-                    )
-                )
-            job.cancel()
-        }
-
-    @Test
-    fun selectUser() {
-        val userId = 3
-
-        underTest.selectUser(userId)
-
-        verify(controller).onUserSelected(eq(userId), nullable())
-    }
-
-    @Test
-    fun `executeAction - guest`() {
-        underTest.executeAction(UserActionModel.ENTER_GUEST_MODE)
-
-        verify(controller).createAndSwitchToGuestUser(nullable())
-    }
-
-    @Test
-    fun `executeAction - add user`() {
-        underTest.executeAction(UserActionModel.ADD_USER)
-
-        verify(controller).showAddUserDialog(nullable())
-    }
-
-    @Test
-    fun `executeAction - add supervised user`() {
-        underTest.executeAction(UserActionModel.ADD_SUPERVISED_USER)
-
-        verify(controller).startSupervisedUserActivity()
-    }
-
-    @Test
-    fun `executeAction - manage users`() {
-        underTest.executeAction(UserActionModel.NAVIGATE_TO_USER_MANAGEMENT)
-
-        verify(activityStarter).startActivity(any(), anyBoolean())
     }
 
     companion object {
