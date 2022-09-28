@@ -54,7 +54,7 @@ import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TaskStackListenerImpl;
-import com.android.wm.shell.desktopmode.DesktopMode;
+import com.android.wm.shell.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellInit;
@@ -190,8 +190,8 @@ public class RecentTasksControllerTest extends ShellTestCase {
     @Test
     public void testGetRecentTasks_groupActiveFreeformTasks() {
         StaticMockitoSession mockitoSession = mockitoSession().mockStatic(
-                DesktopMode.class).startMocking();
-        when(DesktopMode.isActive(any())).thenReturn(true);
+                DesktopModeStatus.class).startMocking();
+        when(DesktopModeStatus.isActive(any())).thenReturn(true);
 
         ActivityManager.RecentTaskInfo t1 = makeTaskInfo(1);
         ActivityManager.RecentTaskInfo t2 = makeTaskInfo(2);

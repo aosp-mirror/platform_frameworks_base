@@ -57,6 +57,8 @@ import com.android.internal.util.Parcelling;
 import com.android.internal.util.Parcelling.BuiltIn.ForInternedString;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.pkg.AndroidPackage;
+import com.android.server.pm.pkg.AndroidPackageSplit;
+import com.android.server.pm.pkg.AndroidPackageSplitImpl;
 import com.android.server.pm.pkg.SELinuxUtil;
 import com.android.server.pm.pkg.component.ComponentMutateUtils;
 import com.android.server.pm.pkg.component.ParsedActivity;
@@ -90,6 +92,7 @@ import libcore.util.EmptyArray;
 
 import java.io.File;
 import java.security.PublicKey;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -235,11 +238,11 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     private Map<String, String> overlayables = emptyMap();
     @Nullable
     @DataClass.ParcelWith(ForInternedString.class)
-    private String sdkLibName;
+    private String sdkLibraryName;
     private int sdkLibVersionMajor;
     @Nullable
     @DataClass.ParcelWith(ForInternedString.class)
-    private String staticSharedLibName;
+    private String staticSharedLibraryName;
     private long staticSharedLibVersion;
     @NonNull
     @DataClass.ParcelWith(Parcelling.BuiltIn.ForInternedStringList.class)
@@ -398,6 +401,8 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     // Derived fields
     private long mLongVersionCode;
     private int mLocaleConfigRes;
+
+    private List<AndroidPackageSplit> mSplits;
 
     @NonNull
     public static PackageImpl forParsing(@NonNull String packageName, @NonNull String baseCodePath,
@@ -772,6 +777,51 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
             }
         }
         return ret;
+    }
+
+    @Override
+    public List<AndroidPackageSplit> getSplits() {
+        if (mSplits == null) {
+            var splits = new ArrayList<AndroidPackageSplit>();
+            splits.add(new AndroidPackageSplitImpl(
+                    null,
+                    getBaseApkPath(),
+                    getBaseRevisionCode(),
+                    isHasCode() ? ApplicationInfo.FLAG_HAS_CODE : 0,
+                    getClassLoaderName()
+            ));
+
+            if (splitNames != null) {
+                for (int index = 0; index < splitNames.length; index++) {
+                    splits.add(new AndroidPackageSplitImpl(
+                            splitNames[index],
+                            splitCodePaths[index],
+                            splitRevisionCodes[index],
+                            splitFlags[index],
+                            splitClassLoaderNames[index]
+                    ));
+                }
+            }
+
+            if (splitDependencies != null) {
+                for (int index = 0; index < splitDependencies.size(); index++) {
+                    var splitIndex = splitDependencies.keyAt(index);
+                    var dependenciesByIndex = splitDependencies.valueAt(index);
+                    var dependencies = new ArrayList<AndroidPackageSplit>();
+                    for (int dependencyIndex : dependenciesByIndex) {
+                        // Legacy holdover, base dependencies are an array of -1 rather than empty
+                        if (dependencyIndex >= 0) {
+                            dependencies.add(splits.get(dependencyIndex));
+                        }
+                    }
+                    ((AndroidPackageSplitImpl) splits.get(splitIndex))
+                            .fillDependencies(Collections.unmodifiableList(dependencies));
+                }
+            }
+
+            mSplits = Collections.unmodifiableList(splits);
+        }
+        return mSplits;
     }
 
     @Override
@@ -1209,8 +1259,8 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
 
     @Nullable
     @Override
-    public String getSdkLibName() {
-        return sdkLibName;
+    public String getSdkLibraryName() {
+        return sdkLibraryName;
     }
 
     @Override
@@ -1279,8 +1329,8 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
 
     @Nullable
     @Override
-    public String getStaticSharedLibName() {
-        return staticSharedLibName;
+    public String getStaticSharedLibraryName() {
+        return staticSharedLibraryName;
     }
 
     @Override
@@ -2218,8 +2268,8 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     @Override
-    public PackageImpl setSdkLibName(String sdkLibName) {
-        this.sdkLibName = TextUtils.safeIntern(sdkLibName);
+    public PackageImpl setSdkLibraryName(String sdkLibraryName) {
+        this.sdkLibraryName = TextUtils.safeIntern(sdkLibraryName);
         return this;
     }
 
@@ -2261,8 +2311,8 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     @Override
-    public PackageImpl setStaticSharedLibName(String staticSharedLibName) {
-        this.staticSharedLibName = TextUtils.safeIntern(staticSharedLibName);
+    public PackageImpl setStaticSharedLibraryName(String staticSharedLibraryName) {
+        this.staticSharedLibraryName = TextUtils.safeIntern(staticSharedLibraryName);
         return this;
     }
 
@@ -2977,9 +3027,9 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
         dest.writeString(this.overlayCategory);
         dest.writeInt(this.overlayPriority);
         sForInternedStringValueMap.parcel(this.overlayables, dest, flags);
-        sForInternedString.parcel(this.sdkLibName, dest, flags);
+        sForInternedString.parcel(this.sdkLibraryName, dest, flags);
         dest.writeInt(this.sdkLibVersionMajor);
-        sForInternedString.parcel(this.staticSharedLibName, dest, flags);
+        sForInternedString.parcel(this.staticSharedLibraryName, dest, flags);
         dest.writeLong(this.staticSharedLibVersion);
         sForInternedStringList.parcel(this.libraryNames, dest, flags);
         sForInternedStringList.parcel(this.usesLibraries, dest, flags);
@@ -3127,9 +3177,9 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
         this.overlayCategory = in.readString();
         this.overlayPriority = in.readInt();
         this.overlayables = sForInternedStringValueMap.unparcel(in);
-        this.sdkLibName = sForInternedString.unparcel(in);
+        this.sdkLibraryName = sForInternedString.unparcel(in);
         this.sdkLibVersionMajor = in.readInt();
-        this.staticSharedLibName = sForInternedString.unparcel(in);
+        this.staticSharedLibraryName = sForInternedString.unparcel(in);
         this.staticSharedLibVersion = in.readLong();
         this.libraryNames = sForInternedStringList.unparcel(in);
         this.usesLibraries = sForInternedStringList.unparcel(in);

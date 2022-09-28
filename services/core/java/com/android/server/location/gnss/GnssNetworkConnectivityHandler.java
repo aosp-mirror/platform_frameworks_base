@@ -301,6 +301,10 @@ class GnssNetworkConnectivityHandler {
         mConnMgr.registerNetworkCallback(networkRequest, mNetworkConnectivityCallback, mHandler);
     }
 
+    void unregisterNetworkCallbacks() {
+        mConnMgr.unregisterNetworkCallback(mNetworkConnectivityCallback);
+    }
+
     /**
      * @return {@code true} if there is a data network available for outgoing connections,
      * {@code false} otherwise.

@@ -2869,10 +2869,10 @@ public class UserManager {
      * It includes:
      *
      * <ol>
-     *   <li>The current foreground user in the main display.
-     *   <li>Current background users in secondary displays (for example, passenger users on
-     *   automotive, using the display associated with their seats).
-     *   <li>Profile users (in the running / started state) of other visible users.
+     *   <li>The current foreground user.
+     *   <li>(Running) profiles of the current foreground user.
+     *   <li>Background users assigned to secondary displays (for example, passenger users on
+     *   automotive builds, using the display associated with their seats).
      * </ol>
      *
      * @return whether the user is visible at the moment, as defined above.

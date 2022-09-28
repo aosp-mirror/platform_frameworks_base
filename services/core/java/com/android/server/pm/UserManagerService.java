@@ -6822,13 +6822,25 @@ public class UserManagerService extends IUserManager.Stub {
                 Slogf.d(LOG_TAG, "assignUserToDisplay(%d, %d)", userId, displayId);
             }
 
+            // NOTE: Using Boolean instead of boolean as it will be re-used below
+            Boolean isProfile = null;
             if (displayId == Display.DEFAULT_DISPLAY) {
-                // Don't need to do anything because methods (such as isUserVisible()) already know
-                // that the current user (and their profiles) is assigned to the default display.
-                if (DBG_MUMD) {
-                    Slogf.d(LOG_TAG, "ignoring on default display");
+                if (mUsersOnSecondaryDisplaysEnabled) {
+                    // Profiles are only supported in the default display, but it cannot return yet
+                    // as it needs to check if the parent is also assigned to the DEFAULT_DISPLAY
+                    // (this is done indirectly below when it checks that the profile parent is the
+                    // current user, as the current user is always assigned to the DEFAULT_DISPLAY).
+                    isProfile = isProfileUnchecked(userId);
                 }
-                return;
+                if (isProfile == null || !isProfile) {
+                    // Don't need to do anything because methods (such as isUserVisible()) already
+                    // know that the current user (and their profiles) is assigned to the default
+                    // display.
+                    if (DBG_MUMD) {
+                        Slogf.d(LOG_TAG, "ignoring on default display");
+                    }
+                    return;
+                }
             }
 
             if (!mUsersOnSecondaryDisplaysEnabled) {
@@ -6846,18 +6858,21 @@ public class UserManagerService extends IUserManager.Stub {
             Preconditions.checkArgument(userId != currentUserId,
                     "Cannot assign current user (%d) to other displays", currentUserId);
 
+            if (isProfile == null) {
+                isProfile = isProfileUnchecked(userId);
+            }
             synchronized (mUsersOnSecondaryDisplays) {
-                if (isProfileUnchecked(userId)) {
-                    // Profile can only start in the same display as parent
-                    Preconditions.checkArgument(displayId == UserManagerInternal.PARENT_DISPLAY,
-                            "Profile user can only be started in the same display as parent");
+                if (isProfile) {
+                    // Profile can only start in the same display as parent. And for simplicity,
+                    // that display must be the DEFAULT_DISPLAY.
+                    Preconditions.checkArgument(displayId == Display.DEFAULT_DISPLAY,
+                            "Profile user can only be started in the default display");
                     int parentUserId = getProfileParentId(userId);
-                    int parentDisplayId = mUsersOnSecondaryDisplays.get(parentUserId);
+                    Preconditions.checkArgument(parentUserId == currentUserId,
+                            "Only profile of current user can be assigned to a display");
                     if (DBG_MUMD) {
-                        Slogf.d(LOG_TAG, "Adding profile user %d -> display %d", userId,
-                                parentDisplayId);
+                        Slogf.d(LOG_TAG, "Ignoring profile user %d on default display", userId);
                     }
-                    mUsersOnSecondaryDisplays.put(userId, parentDisplayId);
                     return;
                 }
 

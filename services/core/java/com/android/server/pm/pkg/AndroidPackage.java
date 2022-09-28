@@ -63,6 +63,69 @@ import java.util.Set;
 @Immutable
 public interface AndroidPackage {
 
+    /**
+     * Library names this package is declared as, for use by other packages with "uses-library".
+     *
+     * @see R.styleable#AndroidManifestLibrary
+     */
+    @NonNull
+    List<String> getLibraryNames();
+
+    /**
+     * @see R.styleable#AndroidManifestSdkLibrary_name
+     */
+    @Nullable
+    String getSdkLibraryName();
+
+    /**
+     * @return List of all splits for a package. Note that base.apk is considered a
+     * split and will be provided as index 0 of the list.
+     */
+    @NonNull
+    List<AndroidPackageSplit> getSplits();
+
+    /**
+     * @see R.styleable#AndroidManifestStaticLibrary_name
+     */
+    @Nullable
+    String getStaticSharedLibraryName();
+
+    /**
+     * @see ApplicationInfo#targetSdkVersion
+     * @see R.styleable#AndroidManifestUsesSdk_targetSdkVersion
+     */
+    int getTargetSdkVersion();
+
+    /**
+     * @see ApplicationInfo#FLAG_DEBUGGABLE
+     */
+    boolean isDebuggable();
+
+    /**
+     * @see ApplicationInfo#PRIVATE_FLAG_ISOLATED_SPLIT_LOADING
+     */
+    boolean isIsolatedSplitLoading();
+
+    /**
+     * @see ApplicationInfo#PRIVATE_FLAG_SIGNED_WITH_PLATFORM_KEY
+     */
+    boolean isSignedWithPlatformKey();
+
+    /**
+     * @see ApplicationInfo#PRIVATE_FLAG_USE_EMBEDDED_DEX
+     */
+    boolean isUseEmbeddedDex();
+
+    /**
+     * @see ApplicationInfo#PRIVATE_FLAG_USES_NON_SDK_API
+     */
+    boolean isUsesNonSdkApi();
+
+    /**
+     * @see ApplicationInfo#FLAG_VM_SAFE_MODE
+     */
+    boolean isVmSafeMode();
+
     // Methods below this comment are not yet exposed as API
 
     /**
@@ -315,15 +378,6 @@ public interface AndroidPackage {
      * @hide
      */
     int getLargestWidthLimitDp();
-
-    /**
-     * Library names this package is declared as, for use by other packages with "uses-library".
-     *
-     * @see R.styleable#AndroidManifestLibrary
-     * @hide
-     */
-    @NonNull
-    List<String> getLibraryNames();
 
     /**
      * The resource ID used to provide the application's locales configuration.
@@ -730,13 +784,6 @@ public interface AndroidPackage {
     int getRoundIconRes();
 
     /**
-     * @see R.styleable#AndroidManifestSdkLibrary_name
-     * @hide
-     */
-    @Nullable
-    String getSdkLibName();
-
-    /**
      * @see R.styleable#AndroidManifestSdkLibrary_versionMajor
      * @hide
      */
@@ -844,13 +891,6 @@ public interface AndroidPackage {
     int[] getSplitRevisionCodes();
 
     /**
-     * @see R.styleable#AndroidManifestStaticLibrary_name
-     * @hide
-     */
-    @Nullable
-    String getStaticSharedLibName();
-
-    /**
      * @see R.styleable#AndroidManifestStaticLibrary_version
      * @hide
      */
@@ -862,13 +902,6 @@ public interface AndroidPackage {
      * @hide
      */
     int getTargetSandboxVersion();
-
-    /**
-     * @see ApplicationInfo#targetSdkVersion
-     * @see R.styleable#AndroidManifestUsesSdk_targetSdkVersion
-     * @hide
-     */
-    int getTargetSdkVersion();
 
     /**
      * @see ApplicationInfo#taskAffinity
@@ -1118,12 +1151,6 @@ public interface AndroidPackage {
     boolean isCrossProfile();
 
     /**
-     * @see ApplicationInfo#FLAG_DEBUGGABLE
-     * @hide
-     */
-    boolean isDebuggable();
-
-    /**
      * @see ApplicationInfo#PRIVATE_FLAG_DEFAULT_TO_DEVICE_PROTECTED_STORAGE
      * @hide
      */
@@ -1196,12 +1223,6 @@ public interface AndroidPackage {
      * @hide
      */
     boolean isHasFragileUserData();
-
-    /**
-     * @see ApplicationInfo#PRIVATE_FLAG_ISOLATED_SPLIT_LOADING
-     * @hide
-     */
-    boolean isIsolatedSplitLoading();
 
     /**
      * @see ApplicationInfo#FLAG_KILL_AFTER_RESTORE
@@ -1354,12 +1375,6 @@ public interface AndroidPackage {
     boolean isSdkLibrary();
 
     /**
-     * @see ApplicationInfo#PRIVATE_FLAG_SIGNED_WITH_PLATFORM_KEY
-     * @hide
-     */
-    boolean isSignedWithPlatformKey();
-
-    /**
      * @see ApplicationInfo#PRIVATE_FLAG_STATIC_SHARED_LIBRARY
      * @hide
      */
@@ -1445,22 +1460,10 @@ public interface AndroidPackage {
     boolean isUse32BitAbi();
 
     /**
-     * @see ApplicationInfo#PRIVATE_FLAG_USE_EMBEDDED_DEX
-     * @hide
-     */
-    boolean isUseEmbeddedDex();
-
-    /**
      * @see ApplicationInfo#FLAG_USES_CLEARTEXT_TRAFFIC
      * @hide
      */
     boolean isUsesCleartextTraffic();
-
-    /**
-     * @see ApplicationInfo#PRIVATE_FLAG_USES_NON_SDK_API
-     * @hide
-     */
-    boolean isUsesNonSdkApi();
 
     /**
      * @see ApplicationInfo#PRIVATE_FLAG_VENDOR
@@ -1477,10 +1480,4 @@ public interface AndroidPackage {
      * @hide
      */
     boolean isVisibleToInstantApps();
-
-    /**
-     * @see ApplicationInfo#FLAG_VM_SAFE_MODE
-     * @hide
-     */
-    boolean isVmSafeMode();
 }

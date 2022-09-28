@@ -147,7 +147,7 @@ public interface ParsingPackage {
 
     ParsingPackage setSharedUserId(String sharedUserId);
 
-    ParsingPackage setStaticSharedLibName(String staticSharedLibName);
+    ParsingPackage setStaticSharedLibraryName(String staticSharedLibName);
 
     ParsingPackage setTaskAffinity(String taskAffinity);
 
@@ -221,7 +221,7 @@ public interface ParsingPackage {
 
     ParsingPackage setRestoreAnyVersion(boolean restoreAnyVersion);
 
-    ParsingPackage setSdkLibName(String sdkLibName);
+    ParsingPackage setSdkLibraryName(String sdkLibName);
 
     ParsingPackage setSdkLibVersionMajor(int sdkLibVersionMajor);
 
@@ -458,7 +458,7 @@ public interface ParsingPackage {
     Boolean getResizeableActivity();
 
     @Nullable
-    String getSdkLibName();
+    String getSdkLibraryName();
 
     @NonNull
     List<ParsedService> getServices();
@@ -473,7 +473,7 @@ public interface ParsingPackage {
     String[] getSplitNames();
 
     @Nullable
-    String getStaticSharedLibName();
+    String getStaticSharedLibraryName();
 
     int getTargetSdkVersion();
 

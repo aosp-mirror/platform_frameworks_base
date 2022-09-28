@@ -41,7 +41,7 @@ import java.util.OptionalInt;
 /**
  * Wrapper for HIDL interface for BroadcastRadio HAL
  */
-final class BroadcastRadioServiceHidl extends IRadioService.Stub {
+final class IRadioServiceHidlImpl extends IRadioService.Stub {
     private static final String TAG = "BcRadioSrvHidl";
 
     private final com.android.server.broadcastradio.hal1.BroadcastRadioService mHal1;
@@ -52,7 +52,7 @@ final class BroadcastRadioServiceHidl extends IRadioService.Stub {
     private final BroadcastRadioService mService;
     private final List<RadioManager.ModuleProperties> mV1Modules;
 
-    BroadcastRadioServiceHidl(BroadcastRadioService service) {
+    IRadioServiceHidlImpl(BroadcastRadioService service) {
         mService = Objects.requireNonNull(service);
         mHal1 = new com.android.server.broadcastradio.hal1.BroadcastRadioService(mLock);
         mV1Modules = mHal1.loadModules();

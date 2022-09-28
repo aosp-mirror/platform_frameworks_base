@@ -498,6 +498,17 @@ final class RemoteInputConnection implements InputConnection {
         return mInvoker.setImeConsumesInput(imeConsumesInput);
     }
 
+    /** See {@link InputConnection#replaceText(int, int, CharSequence, int, TextAttribute)}. */
+    @AnyThread
+    public boolean replaceText(
+            int start,
+            int end,
+            @NonNull CharSequence text,
+            int newCursorPosition,
+            @Nullable TextAttribute textAttribute) {
+        return mInvoker.replaceText(start, end, text, newCursorPosition, textAttribute);
+    }
+
     @AnyThread
     @Override
     public String toString() {

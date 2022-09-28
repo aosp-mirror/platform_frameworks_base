@@ -24,6 +24,7 @@ import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.testapp.ActivityOptions
 import com.android.server.wm.traces.common.Rect
 import com.android.server.wm.traces.common.WindowManagerConditionsFactory
+import com.android.server.wm.traces.common.region.Region
 import com.android.server.wm.traces.parser.toFlickerComponent
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 
@@ -178,6 +179,20 @@ open class PipAppHelper(instrumentation: Instrumentation) : StandardAppHelper(
         wmHelper.StateSyncBuilder()
             .withAppTransitionIdle()
             .waitForAndVerify()
+        waitForPipWindowToExpandFrom(wmHelper, Region.from(windowRect))
+    }
+
+    private fun waitForPipWindowToExpandFrom(
+        wmHelper: WindowManagerStateHelper,
+        windowRect: Region
+    ) {
+        wmHelper.StateSyncBuilder().add("pipWindowExpanded") {
+            val pipAppWindow = it.wmState.visibleWindows.firstOrNull { window ->
+                this.windowMatchesAnyOf(window)
+            } ?: return@add false
+            val pipRegion = pipAppWindow.frameRegion
+            return@add pipRegion.coversMoreThan(windowRect)
+        }.waitForAndVerify()
     }
 
     companion object {

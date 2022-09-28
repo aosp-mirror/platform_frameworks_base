@@ -2042,9 +2042,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * it must be drawn before allDrawn can become true.
      */
     boolean isInteresting() {
+        final RecentsAnimationController recentsAnimationController =
+                mWmService.getRecentsAnimationController();
         return mActivityRecord != null && !mAppDied
                 && (!mActivityRecord.isFreezingScreen() || !mAppFreezing)
-                && mViewVisibility == View.VISIBLE;
+                && mViewVisibility == View.VISIBLE
+                && (recentsAnimationController == null
+                         || recentsAnimationController.isInterestingForAllDrawn(this));
     }
 
     /**
@@ -4568,7 +4572,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     float translateToWindowX(float x) {
         float winX = x - mWindowFrames.mFrame.left;
         if (mGlobalScale != 1f) {
-            winX *= mGlobalScale;
+            winX *= mInvGlobalScale;
         }
         return winX;
     }
@@ -4576,7 +4580,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     float translateToWindowY(float y) {
         float winY = y - mWindowFrames.mFrame.top;
         if (mGlobalScale != 1f) {
-            winY *= mGlobalScale;
+            winY *= mInvGlobalScale;
         }
         return winY;
     }

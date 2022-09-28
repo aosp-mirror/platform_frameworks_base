@@ -36,7 +36,7 @@ import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.SyncTransactionQueue;
-import com.android.wm.shell.desktopmode.DesktopMode;
+import com.android.wm.shell.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.freeform.FreeformTaskTransitionStarter;
 import com.android.wm.shell.transition.Transitions;
 
@@ -239,7 +239,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel<Caption
 
     private boolean shouldShowWindowDecor(RunningTaskInfo taskInfo) {
         if (taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM) return true;
-        return DesktopMode.IS_SUPPORTED
+        return DesktopModeStatus.IS_SUPPORTED
                 && mDisplayController.getDisplayContext(taskInfo.displayId)
                 .getResources().getConfiguration().smallestScreenWidthDp >= 600;
     }

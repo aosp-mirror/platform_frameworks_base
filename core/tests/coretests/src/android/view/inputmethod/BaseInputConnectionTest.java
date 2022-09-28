@@ -619,6 +619,74 @@ public class BaseInputConnectionTest {
         verifyTextSnapshotContentEquals(mBaseInputConnection.takeSnapshot(), expectedTextSnapshot);
     }
 
+    @Test
+    public void testReplaceText_toEditorWithoutSelectionAndComposing() {
+        // before replace: "|"
+        // after replace: "text1|"
+        assertThat(mBaseInputConnection.replaceText(0, 0, "text1", 1, null)).isTrue();
+        verifyContent("text1", 5, 5, -1, -1);
+
+        // before replace: "text1|"
+        // after replace: "text2|"
+        assertThat(mBaseInputConnection.replaceText(0, 5, "text2", 1, null)).isTrue();
+        verifyContent("text2", 5, 5, -1, -1);
+
+        // before replace: "text1|"
+        // after replace: "|text3"
+        assertThat(mBaseInputConnection.replaceText(0, 5, "text3", -1, null)).isTrue();
+        verifyContent("text3", 0, 0, -1, -1);
+
+        // before replace: "|text3"
+        // after replace: "ttext4|t3"
+        // BUG(b/21476564): this behavior is inconsistent with API description.
+        assertThat(mBaseInputConnection.replaceText(1, 3, "text4", 1, null)).isTrue();
+        verifyContent("ttext4t3", 6, 6, -1, -1);
+
+        // before replace: "ttext4|t3"
+        // after replace: "|text5t3"
+        assertThat(mBaseInputConnection.replaceText(0, 6, "text5", -1, null)).isTrue();
+        verifyContent("text5t3", 0, 0, -1, -1);
+    }
+
+    @Test
+    public void testReplaceText_toEditorWithSelection() {
+        // before replace: "123|456|789"
+        // before replace: "123text|6789"
+        prepareContent("123456789", 3, 6, -1, -1);
+        assertThat(mBaseInputConnection.replaceText(3, 5, "text", 1, null)).isTrue();
+        verifyContent("123text6789", 7, 7, -1, -1);
+
+        // before replace: "|123|"
+        // before replace: "|text23"
+        prepareContent("123", 0, 3, -1, -1);
+        assertThat(mBaseInputConnection.replaceText(0, 1, "text", 0, null)).isTrue();
+        verifyContent("text23", 0, 0, -1, -1);
+    }
+
+    @Test
+    public void testReplaceText_toEditorWithComposing() {
+        // before replace: "123456|789"
+        //                     ---
+        // before replace: "123456text|"
+        prepareContent("123456789", 6, 6, 3, 6);
+        assertThat(mBaseInputConnection.replaceText(6, 9, "text", 1, null)).isTrue();
+        verifyContent("123456text", 10, 10, -1, -1);
+
+        // before replace: "123456789|"
+        //                     ---
+        // before replace: "text|123456789"
+        prepareContent("123456789", 9, 9, 3, 6);
+        assertThat(mBaseInputConnection.replaceText(0, 0, "text", 1, null)).isTrue();
+        verifyContent("text123456789", 4, 4, -1, -1);
+
+        // before replace: "|123456789|"
+        //                      ---
+        // before replace: "12text|9"
+        prepareContent("123456789", 0, 9, 3, 6);
+        assertThat(mBaseInputConnection.replaceText(2, 8, "text", 1, null)).isTrue();
+        verifyContent("12text9", 6, 6, -1, -1);
+    }
+
     private void prepareContent(
             CharSequence text,
             int selectionStart,

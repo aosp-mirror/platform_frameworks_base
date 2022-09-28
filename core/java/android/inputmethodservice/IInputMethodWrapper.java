@@ -147,119 +147,146 @@ class IInputMethodWrapper extends IInputMethod.Stub
     @MainThread
     @Override
     public void executeMessage(Message msg) {
-        InputMethod inputMethod = mInputMethod.get();
-        // Need a valid reference to the inputMethod for everything except a dump.
-        if (inputMethod == null && msg.what != DO_DUMP) {
-            Log.w(TAG, "Input method reference was null, ignoring message: " + msg.what);
-            return;
-        }
-
+        final InputMethod inputMethod = mInputMethod.get();
+        final InputMethodServiceInternal target = mTarget.get();
         switch (msg.what) {
             case DO_DUMP: {
-                InputMethodServiceInternal target = mTarget.get();
-                if (target == null) {
-                    return;
-                }
                 SomeArgs args = (SomeArgs)msg.obj;
-                try {
-                    target.dump((FileDescriptor) args.arg1,
-                            (PrintWriter) args.arg2, (String[]) args.arg3);
-                } catch (RuntimeException e) {
-                    ((PrintWriter)args.arg2).println("Exception: " + e);
-                }
-                synchronized (args.arg4) {
-                    ((CountDownLatch)args.arg4).countDown();
+                if (isValid(inputMethod, target, "DO_DUMP")) {
+                    final FileDescriptor fd = (FileDescriptor) args.arg1;
+                    final PrintWriter fout = (PrintWriter) args.arg2;
+                    final String[] dumpArgs = (String[]) args.arg3;
+                    final CountDownLatch latch = (CountDownLatch) args.arg4;
+                    try {
+                        target.dump(fd, fout, dumpArgs);
+                    } catch (RuntimeException e) {
+                        fout.println("Exception: " + e);
+                    } finally {
+                        latch.countDown();
+                    }
                 }
                 args.recycle();
                 return;
             }
             case DO_INITIALIZE_INTERNAL:
-                inputMethod.initializeInternal((IInputMethod.InitParams) msg.obj);
+                if (isValid(inputMethod, target, "DO_INITIALIZE_INTERNAL")) {
+                    inputMethod.initializeInternal((IInputMethod.InitParams) msg.obj);
+                }
                 return;
             case DO_SET_INPUT_CONTEXT: {
-                inputMethod.bindInput((InputBinding)msg.obj);
+                if (isValid(inputMethod, target, "DO_SET_INPUT_CONTEXT")) {
+                    inputMethod.bindInput((InputBinding) msg.obj);
+                }
                 return;
             }
             case DO_UNSET_INPUT_CONTEXT:
-                inputMethod.unbindInput();
+                if (isValid(inputMethod, target, "DO_UNSET_INPUT_CONTEXT")) {
+                    inputMethod.unbindInput();
+                }
                 return;
             case DO_START_INPUT: {
                 final SomeArgs args = (SomeArgs) msg.obj;
-                final InputConnection inputConnection = (InputConnection) args.arg1;
-                final IInputMethod.StartInputParams params =
-                        (IInputMethod.StartInputParams) args.arg2;
-                inputMethod.dispatchStartInput(inputConnection, params);
+                if (isValid(inputMethod, target, "DO_START_INPUT")) {
+                    final InputConnection inputConnection = (InputConnection) args.arg1;
+                    final IInputMethod.StartInputParams params =
+                            (IInputMethod.StartInputParams) args.arg2;
+                    inputMethod.dispatchStartInput(inputConnection, params);
+                }
                 args.recycle();
                 return;
             }
             case DO_ON_NAV_BUTTON_FLAGS_CHANGED:
-                inputMethod.onNavButtonFlagsChanged(msg.arg1);
+                if (isValid(inputMethod, target, "DO_ON_NAV_BUTTON_FLAGS_CHANGED")) {
+                    inputMethod.onNavButtonFlagsChanged(msg.arg1);
+                }
                 return;
             case DO_CREATE_SESSION: {
                 SomeArgs args = (SomeArgs)msg.obj;
-                inputMethod.createSession(new InputMethodSessionCallbackWrapper(
-                        mContext, (InputChannel) args.arg1,
-                        (IInputMethodSessionCallback) args.arg2));
+                if (isValid(inputMethod, target, "DO_CREATE_SESSION")) {
+                    inputMethod.createSession(new InputMethodSessionCallbackWrapper(
+                            mContext, (InputChannel) args.arg1,
+                            (IInputMethodSessionCallback) args.arg2));
+                }
                 args.recycle();
                 return;
             }
             case DO_SET_SESSION_ENABLED:
-                inputMethod.setSessionEnabled((InputMethodSession)msg.obj,
-                        msg.arg1 != 0);
+                if (isValid(inputMethod, target, "DO_SET_SESSION_ENABLED")) {
+                    inputMethod.setSessionEnabled((InputMethodSession) msg.obj, msg.arg1 != 0);
+                }
                 return;
             case DO_SHOW_SOFT_INPUT: {
                 final SomeArgs args = (SomeArgs)msg.obj;
-                inputMethod.showSoftInputWithToken(
-                        msg.arg1, (ResultReceiver) args.arg2, (IBinder) args.arg1);
+                if (isValid(inputMethod, target, "DO_SHOW_SOFT_INPUT")) {
+                    inputMethod.showSoftInputWithToken(
+                            msg.arg1, (ResultReceiver) args.arg2, (IBinder) args.arg1);
+                }
                 args.recycle();
                 return;
             }
             case DO_HIDE_SOFT_INPUT: {
                 final SomeArgs args = (SomeArgs) msg.obj;
-                inputMethod.hideSoftInputWithToken(msg.arg1, (ResultReceiver) args.arg2,
-                        (IBinder) args.arg1);
+                if (isValid(inputMethod, target, "DO_HIDE_SOFT_INPUT")) {
+                    inputMethod.hideSoftInputWithToken(msg.arg1, (ResultReceiver) args.arg2,
+                            (IBinder) args.arg1);
+                }
                 args.recycle();
                 return;
             }
             case DO_CHANGE_INPUTMETHOD_SUBTYPE:
-                inputMethod.changeInputMethodSubtype((InputMethodSubtype)msg.obj);
+                if (isValid(inputMethod, target, "DO_CHANGE_INPUTMETHOD_SUBTYPE")) {
+                    inputMethod.changeInputMethodSubtype((InputMethodSubtype) msg.obj);
+                }
                 return;
             case DO_CREATE_INLINE_SUGGESTIONS_REQUEST: {
                 final SomeArgs args = (SomeArgs) msg.obj;
-                inputMethod.onCreateInlineSuggestionsRequest(
-                        (InlineSuggestionsRequestInfo) args.arg1,
-                        (IInlineSuggestionsRequestCallback) args.arg2);
+                if (isValid(inputMethod, target, "DO_CREATE_INLINE_SUGGESTIONS_REQUEST")) {
+                    inputMethod.onCreateInlineSuggestionsRequest(
+                            (InlineSuggestionsRequestInfo) args.arg1,
+                            (IInlineSuggestionsRequestCallback) args.arg2);
+                }
                 args.recycle();
                 return;
             }
             case DO_CAN_START_STYLUS_HANDWRITING: {
-                inputMethod.canStartStylusHandwriting(msg.arg1);
+                if (isValid(inputMethod, target, "DO_CAN_START_STYLUS_HANDWRITING")) {
+                    inputMethod.canStartStylusHandwriting(msg.arg1);
+                }
                 return;
             }
             case DO_UPDATE_TOOL_TYPE: {
-                inputMethod.updateEditorToolType(msg.arg1);
+                if (isValid(inputMethod, target, "DO_UPDATE_TOOL_TYPE")) {
+                    inputMethod.updateEditorToolType(msg.arg1);
+                }
                 return;
             }
             case DO_START_STYLUS_HANDWRITING: {
                 final SomeArgs args = (SomeArgs) msg.obj;
-                inputMethod.startStylusHandwriting(msg.arg1, (InputChannel) args.arg1,
-                        (List<MotionEvent>) args.arg2);
+                if (isValid(inputMethod, target, "DO_START_STYLUS_HANDWRITING")) {
+                    inputMethod.startStylusHandwriting(msg.arg1, (InputChannel) args.arg1,
+                            (List<MotionEvent>) args.arg2);
+                }
                 args.recycle();
                 return;
             }
             case DO_INIT_INK_WINDOW: {
-                inputMethod.initInkWindow();
+                if (isValid(inputMethod, target, "DO_INIT_INK_WINDOW")) {
+                    inputMethod.initInkWindow();
+                }
                 return;
             }
             case DO_FINISH_STYLUS_HANDWRITING: {
-                inputMethod.finishStylusHandwriting();
+                if (isValid(inputMethod, target, "DO_FINISH_STYLUS_HANDWRITING")) {
+                    inputMethod.finishStylusHandwriting();
+                }
                 return;
             }
             case DO_REMOVE_STYLUS_HANDWRITING_WINDOW: {
-                inputMethod.removeStylusHandwritingWindow();
+                if (isValid(inputMethod, target, "DO_REMOVE_STYLUS_HANDWRITING_WINDOW")) {
+                    inputMethod.removeStylusHandwritingWindow();
+                }
                 return;
             }
-
         }
         Log.w(TAG, "Unhandled message code: " + msg.what);
     }
@@ -444,5 +471,16 @@ class IInputMethodWrapper extends IInputMethod.Stub
     @Override
     public void removeStylusHandwritingWindow() {
         mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_REMOVE_STYLUS_HANDWRITING_WINDOW));
+    }
+
+    private static boolean isValid(InputMethod inputMethod, InputMethodServiceInternal target,
+            String msg) {
+        if (inputMethod != null && target != null && !target.isServiceDestroyed()) {
+            return true;
+        } else {
+            Log.w(TAG, "Ignoring " + msg + ", InputMethod:" + inputMethod
+                    + ", InputMethodServiceInternal:" + target);
+            return false;
+        }
     }
 }

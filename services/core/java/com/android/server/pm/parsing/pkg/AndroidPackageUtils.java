@@ -91,7 +91,7 @@ public class AndroidPackageUtils {
     public static SharedLibraryInfo createSharedLibraryForSdk(AndroidPackage pkg) {
         return new SharedLibraryInfo(null, pkg.getPackageName(),
                 AndroidPackageUtils.getAllCodePaths(pkg),
-                pkg.getSdkLibName(),
+                pkg.getSdkLibraryName(),
                 pkg.getSdkLibVersionMajor(),
                 SharedLibraryInfo.TYPE_SDK_PACKAGE,
                 new VersionedPackage(pkg.getManifestPackageName(),
@@ -102,7 +102,7 @@ public class AndroidPackageUtils {
     public static SharedLibraryInfo createSharedLibraryForStatic(AndroidPackage pkg) {
         return new SharedLibraryInfo(null, pkg.getPackageName(),
                 AndroidPackageUtils.getAllCodePaths(pkg),
-                pkg.getStaticSharedLibName(),
+                pkg.getStaticSharedLibraryName(),
                 pkg.getStaticSharedLibVersion(),
                 SharedLibraryInfo.TYPE_STATIC,
                 new VersionedPackage(pkg.getManifestPackageName(),
@@ -230,7 +230,7 @@ public class AndroidPackageUtils {
 
     public static boolean isLibrary(AndroidPackage pkg) {
         // TODO(b/135203078): Can parsing just enforce these always match?
-        return pkg.getSdkLibName() != null || pkg.getStaticSharedLibName() != null
+        return pkg.getSdkLibraryName() != null || pkg.getStaticSharedLibraryName() != null
                 || !pkg.getLibraryNames().isEmpty();
     }
 

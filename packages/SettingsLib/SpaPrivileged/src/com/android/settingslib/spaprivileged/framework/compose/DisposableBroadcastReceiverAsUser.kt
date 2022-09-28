@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spa.framework.compose
+package com.android.settingslib.spaprivileged.framework.compose
 
 import android.content.BroadcastReceiver
 import android.content.Context

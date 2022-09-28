@@ -1616,6 +1616,10 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             updateEnabled();
             restartLocationRequest();
         }
+
+        // Re-register network callbacks to get an update of available networks right away.
+        mNetworkConnectivityHandler.unregisterNetworkCallbacks();
+        mNetworkConnectivityHandler.registerNetworkCallbacks();
     }
 
     @Override
@@ -1722,7 +1726,8 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         String setId = null;
 
         int subId = SubscriptionManager.getDefaultDataSubscriptionId();
-        if (mNIHandler.getInEmergency() && mNetworkConnectivityHandler.getActiveSubId() >= 0) {
+        if (mGnssConfiguration.isActiveSimEmergencySuplEnabled() && mNIHandler.getInEmergency()
+                && mNetworkConnectivityHandler.getActiveSubId() >= 0) {
             subId = mNetworkConnectivityHandler.getActiveSubId();
         }
         if (SubscriptionManager.isValidSubscriptionId(subId)) {

@@ -137,4 +137,7 @@ import com.android.internal.inputmethod.InputConnectionCommandHeader;
             int afterLength, int flags, in AndroidFuture future /* T=SurroundingText */);
 
     void setImeConsumesInput(in InputConnectionCommandHeader header, boolean imeConsumesInput);
+
+    void replaceText(in InputConnectionCommandHeader header, int start, int end, CharSequence text,
+            int newCursorPosition,in TextAttribute textAttribute);
 }

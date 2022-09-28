@@ -1387,7 +1387,7 @@ class UserController implements Handler.Callback {
         int i = 0;
         for (; i < profilesToStartSize && i < (getMaxRunningUsers() - 1); ++i) {
             // NOTE: this method is setting the profiles of the current user - which is always
-            // assigned to the default display - so there's no need to pass PARENT_DISPLAY
+            // assigned to the default display
             startUser(profilesToStart.get(i).id, /* foreground= */ false);
         }
         if (i < profilesToStartSize) {
@@ -1430,10 +1430,7 @@ class UserController implements Handler.Callback {
             return false;
         }
 
-        int displayId = mInjector.isUsersOnSecondaryDisplaysEnabled()
-                ? UserManagerInternal.PARENT_DISPLAY
-                : Display.DEFAULT_DISPLAY;
-        return startUserNoChecks(userId, displayId, /* foreground= */ false,
+        return startUserNoChecks(userId, Display.DEFAULT_DISPLAY, /* foreground= */ false,
                 /* unlockListener= */ null);
     }
 
