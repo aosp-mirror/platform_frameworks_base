@@ -18646,8 +18646,10 @@ package android.hardware.lights {
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.lights.Light> CREATOR;
     field public static final int LIGHT_CAPABILITY_BRIGHTNESS = 1; // 0x1
-    field public static final int LIGHT_CAPABILITY_RGB = 0; // 0x0
+    field public static final int LIGHT_CAPABILITY_COLOR_RGB = 2; // 0x2
+    field @Deprecated public static final int LIGHT_CAPABILITY_RGB = 0; // 0x0
     field public static final int LIGHT_TYPE_INPUT = 10001; // 0x2711
+    field public static final int LIGHT_TYPE_KEYBOARD_BACKLIGHT = 10003; // 0x2713
     field public static final int LIGHT_TYPE_MICROPHONE = 8; // 0x8
     field public static final int LIGHT_TYPE_PLAYER_ID = 10002; // 0x2712
   }
