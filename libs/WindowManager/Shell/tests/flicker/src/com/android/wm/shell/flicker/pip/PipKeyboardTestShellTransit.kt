@@ -20,7 +20,6 @@ import android.platform.test.annotations.Presubmit
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.annotation.Group4
 import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import org.junit.Assume
 import org.junit.Before
@@ -34,7 +33,6 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@Group4
 class PipKeyboardTestShellTransit(testSpec: FlickerTestParameter) : PipKeyboardTest(testSpec) {
 
     @Before

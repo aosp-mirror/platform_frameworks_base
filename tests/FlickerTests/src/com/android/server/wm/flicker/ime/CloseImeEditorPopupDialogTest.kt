@@ -24,7 +24,6 @@ import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.annotation.Group4
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.ImeEditorPopupDialogAppHelper
 import com.android.server.wm.flicker.traces.region.RegionSubject
@@ -39,7 +38,6 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@Group4
 class CloseImeEditorPopupDialogTest(testSpec: FlickerTestParameter) : BaseTest(testSpec) {
     private val imeTestApp = ImeEditorPopupDialogAppHelper(instrumentation)
 
