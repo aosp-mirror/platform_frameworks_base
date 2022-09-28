@@ -32,4 +32,7 @@ data class UserModel(
     val isSelected: Boolean,
     /** Whether this use is selectable. A non-selectable user cannot be switched to. */
     val isSelectable: Boolean,
+    /** Whether this model represents the guest user. */
+    // TODO(b/246631653): remove this default value it was only here to be able to split up CLs
+    val isGuest: Boolean = false,
 )
