@@ -1165,8 +1165,8 @@
     <string name="no" msgid="5122037903299899715">"취소"</string>
     <string name="dialog_alert_title" msgid="651856561974090712">"주의"</string>
     <string name="loading" msgid="3138021523725055037">"로드 중.."</string>
-    <string name="capital_on" msgid="2770685323900821829">"ON"</string>
-    <string name="capital_off" msgid="7443704171014626777">"OFF"</string>
+    <string name="capital_on" msgid="2770685323900821829">"사용 설정"</string>
+    <string name="capital_off" msgid="7443704171014626777">"사용 안함"</string>
     <string name="checked" msgid="9179896827054513119">"선택함"</string>
     <string name="not_checked" msgid="7972320087569023342">"선택 안함"</string>
     <string name="selected" msgid="6614607926197755875">"선택됨"</string>
@@ -2050,7 +2050,9 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>에서 모든 기기 로그에 액세스하도록 허용하시겠습니까?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"일회성 액세스 허용"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"허용 안함"</string>
-    <string name="log_access_confirmation_body" msgid="1806692062668620735">"기기 로그에 기기에서 발생한 상황이 기록됩니다. 앱은 문제를 찾고 해결하는 데 이 로그를 사용할 수 있습니다.\n\n일부 로그는 민감한 정보를 포함할 수 있으므로 신뢰할 수 있는 앱만 모든 기기 로그에 액세스하도록 허용하세요. \n\n앱에 전체 기기 로그에 대한 액세스 권한을 부여하지 않아도 앱이 자체 로그에는 액세스할 수 있습니다. 기기 제조업체에서 일부 로그 또는 기기 내 정보에 액세스할 수도 있습니다."</string>
+    <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"기기 로그에 기기에서 발생한 상황이 기록됩니다. 앱은 문제를 찾고 해결하는 데 이 로그를 사용할 수 있습니다.\n\n일부 로그는 민감한 정보를 포함할 수 있으므로 신뢰할 수 있는 앱만 모든 기기 로그에 액세스하도록 허용하세요. \n\n앱에 전체 기기 로그에 대한 액세스 권한을 부여하지 않아도 앱이 자체 로그에는 액세스할 수 있습니다. 기기 제조업체에서 일부 로그 또는 기기 내 정보에 액세스할 수도 있습니다."</string>
+    <!-- no translation found for log_access_confirmation_body (7379536536425265262) -->
+    <skip />
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"다시 표시 안함"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g>에서 <xliff:g id="APP_2">%2$s</xliff:g>의 슬라이스를 표시하려고 합니다"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"수정"</string>
