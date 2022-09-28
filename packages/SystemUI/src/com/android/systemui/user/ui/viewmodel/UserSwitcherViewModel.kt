@@ -21,7 +21,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.android.systemui.R
 import com.android.systemui.common.ui.drawable.CircularDrawable
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.user.domain.interactor.GuestUserInteractor
 import com.android.systemui.user.domain.interactor.UserInteractor
 import com.android.systemui.user.legacyhelper.ui.LegacyUserUiHelper
 import com.android.systemui.user.shared.model.UserActionModel
@@ -36,8 +39,13 @@ import kotlinx.coroutines.flow.map
 class UserSwitcherViewModel
 private constructor(
     private val userInteractor: UserInteractor,
+    private val guestUserInteractor: GuestUserInteractor,
     private val powerInteractor: PowerInteractor,
+    private val featureFlags: FeatureFlags,
 ) : ViewModel() {
+
+    private val isNewImpl: Boolean
+        get() = featureFlags.isEnabled(Flags.REFACTORED_USER_SWITCHER_CONTROLLER)
 
     /** On-device users. */
     val users: Flow<List<UserViewModel>> =
@@ -47,9 +55,6 @@ private constructor(
     val maximumUserColumns: Flow<Int> =
         users.map { LegacyUserUiHelper.getMaxUserSwitcherItemColumns(it.size) }
 
-    /** Whether the button to open the user action menu is visible. */
-    val isOpenMenuButtonVisible: Flow<Boolean> = userInteractor.actions.map { it.isNotEmpty() }
-
     private val _isMenuVisible = MutableStateFlow(false)
     /**
      * Whether the user action menu should be shown. Once the action menu is dismissed/closed, the
@@ -58,9 +63,23 @@ private constructor(
     val isMenuVisible: Flow<Boolean> = _isMenuVisible
     /** The user action menu. */
     val menu: Flow<List<UserActionViewModel>> =
-        userInteractor.actions.map { actions -> actions.map { action -> toViewModel(action) } }
+        userInteractor.actions.map { actions ->
+            if (isNewImpl && actions.isNotEmpty()) {
+                    // If we have actions, we add NAVIGATE_TO_USER_MANAGEMENT because that's a user
+                    // switcher specific action that is not known to the our data source or other
+                    // features.
+                    actions + listOf(UserActionModel.NAVIGATE_TO_USER_MANAGEMENT)
+                } else {
+                    actions
+                }
+                .map { action -> toViewModel(action) }
+        }
+
+    /** Whether the button to open the user action menu is visible. */
+    val isOpenMenuButtonVisible: Flow<Boolean> = menu.map { it.isNotEmpty() }
 
     private val hasCancelButtonBeenClicked = MutableStateFlow(false)
+    private val isFinishRequiredDueToExecutedAction = MutableStateFlow(false)
 
     /**
      * Whether the observer should finish the experience. Once consumed, [onFinished] must be called
@@ -81,6 +100,7 @@ private constructor(
      */
     fun onFinished() {
         hasCancelButtonBeenClicked.value = false
+        isFinishRequiredDueToExecutedAction.value = false
     }
 
     /** Notifies that the user has clicked the "open menu" button. */
@@ -120,8 +140,10 @@ private constructor(
             },
             // When the cancel button is clicked, we should finish.
             hasCancelButtonBeenClicked,
-        ) { selectedUserChanged, screenTurnedOff, cancelButtonClicked ->
-            selectedUserChanged || screenTurnedOff || cancelButtonClicked
+            // If an executed action told us to finish, we should finish,
+            isFinishRequiredDueToExecutedAction,
+        ) { selectedUserChanged, screenTurnedOff, cancelButtonClicked, executedActionFinish ->
+            selectedUserChanged || screenTurnedOff || cancelButtonClicked || executedActionFinish
         }
     }
 
@@ -164,13 +186,25 @@ private constructor(
                 } else {
                     LegacyUserUiHelper.getUserSwitcherActionTextResourceId(
                         isGuest = model == UserActionModel.ENTER_GUEST_MODE,
-                        isGuestUserAutoCreated = userInteractor.isGuestUserAutoCreated,
-                        isGuestUserResetting = userInteractor.isGuestUserResetting,
+                        isGuestUserAutoCreated = guestUserInteractor.isGuestUserAutoCreated,
+                        isGuestUserResetting = guestUserInteractor.isGuestUserResetting,
                         isAddSupervisedUser = model == UserActionModel.ADD_SUPERVISED_USER,
                         isAddUser = model == UserActionModel.ADD_USER,
                     )
                 },
-            onClicked = { userInteractor.executeAction(action = model) },
+            onClicked = {
+                userInteractor.executeAction(action = model)
+                // We don't finish because we want to show a dialog over the full-screen UI and
+                // that dialog can be dismissed in case the user changes their mind and decides not
+                // to add a user.
+                //
+                // We finish for all other actions because they navigate us away from the
+                // full-screen experience or are destructive (like changing to the guest user).
+                val shouldFinish = model != UserActionModel.ADD_USER
+                if (shouldFinish) {
+                    isFinishRequiredDueToExecutedAction.value = true
+                }
+            },
         )
     }
 
@@ -186,13 +220,17 @@ private constructor(
     @Inject
     constructor(
         private val userInteractor: UserInteractor,
+        private val guestUserInteractor: GuestUserInteractor,
         private val powerInteractor: PowerInteractor,
+        private val featureFlags: FeatureFlags,
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             @Suppress("UNCHECKED_CAST")
             return UserSwitcherViewModel(
                 userInteractor = userInteractor,
+                guestUserInteractor = guestUserInteractor,
                 powerInteractor = powerInteractor,
+                featureFlags = featureFlags,
             )
                 as T
         }

@@ -92,6 +92,20 @@ class UserSwitcherViewModelTest : SysuiTestCase() {
                 mainDispatcher = IMMEDIATE,
                 repository = userRepository,
             )
+        val guestUserInteractor =
+            GuestUserInteractor(
+                applicationContext = context,
+                applicationScope = scope,
+                mainDispatcher = IMMEDIATE,
+                backgroundDispatcher = IMMEDIATE,
+                manager = manager,
+                repository = userRepository,
+                deviceProvisionedController = deviceProvisionedController,
+                devicePolicyManager = devicePolicyManager,
+                refreshUsersScheduler = refreshUsersScheduler,
+                uiEventLogger = uiEventLogger,
+            )
+
         underTest =
             UserSwitcherViewModel.Factory(
                     userInteractor =
@@ -115,24 +129,14 @@ class UserSwitcherViewModelTest : SysuiTestCase() {
                             backgroundDispatcher = IMMEDIATE,
                             activityManager = activityManager,
                             refreshUsersScheduler = refreshUsersScheduler,
-                            guestUserInteractor =
-                                GuestUserInteractor(
-                                    applicationContext = context,
-                                    applicationScope = scope,
-                                    mainDispatcher = IMMEDIATE,
-                                    backgroundDispatcher = IMMEDIATE,
-                                    manager = manager,
-                                    repository = userRepository,
-                                    deviceProvisionedController = deviceProvisionedController,
-                                    devicePolicyManager = devicePolicyManager,
-                                    refreshUsersScheduler = refreshUsersScheduler,
-                                    uiEventLogger = uiEventLogger,
-                                ),
+                            guestUserInteractor = guestUserInteractor,
                         ),
                     powerInteractor =
                         PowerInteractor(
                             repository = powerRepository,
                         ),
+                    featureFlags = featureFlags,
+                    guestUserInteractor = guestUserInteractor,
                 )
                 .create(UserSwitcherViewModel::class.java)
     }
@@ -148,6 +152,7 @@ class UserSwitcherViewModelTest : SysuiTestCase() {
                         image = USER_IMAGE,
                         isSelected = true,
                         isSelectable = true,
+                        isGuest = false,
                     ),
                     UserModel(
                         id = 1,
@@ -155,6 +160,7 @@ class UserSwitcherViewModelTest : SysuiTestCase() {
                         image = USER_IMAGE,
                         isSelected = false,
                         isSelectable = true,
+                        isGuest = false,
                     ),
                     UserModel(
                         id = 2,
@@ -162,6 +168,7 @@ class UserSwitcherViewModelTest : SysuiTestCase() {
                         image = USER_IMAGE,
                         isSelected = false,
                         isSelectable = false,
+                        isGuest = false,
                     ),
                 )
             )
@@ -311,7 +318,7 @@ class UserSwitcherViewModelTest : SysuiTestCase() {
             job.cancel()
         }
 
-    private fun setUsers(count: Int) {
+    private suspend fun setUsers(count: Int) {
         userRepository.setUsers(
             (0 until count).map { index ->
                 UserModel(
@@ -320,6 +327,7 @@ class UserSwitcherViewModelTest : SysuiTestCase() {
                     image = USER_IMAGE,
                     isSelected = index == 0,
                     isSelectable = true,
+                    isGuest = false,
                 )
             }
         )
