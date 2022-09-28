@@ -228,8 +228,8 @@ class DragState {
                 SurfaceControl dragSurface = null;
                 if (!mDragResult && (ws.mSession.mPid == mPid)) {
                     // Report unconsumed drop location back to the app that started the drag.
-                    x = mCurrentX;
-                    y = mCurrentY;
+                    x = ws.translateToWindowX(mCurrentX);
+                    y = ws.translateToWindowY(mCurrentY);
                     if (relinquishDragSurfaceToDragSource()) {
                         // If requested (and allowed), report the drag surface back to the app
                         // starting the drag to handle the return animation

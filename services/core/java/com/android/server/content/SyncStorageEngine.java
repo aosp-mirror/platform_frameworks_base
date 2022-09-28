@@ -2083,7 +2083,7 @@ public class SyncStorageEngine {
             try (FileInputStream in = mStatusFile.openRead()) {
                 readStatusInfoLocked(in);
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             Slog.e(TAG, "Unable to read status info file.", e);
         }
     }
@@ -2483,7 +2483,7 @@ public class SyncStorageEngine {
             try (FileInputStream in = mStatisticsFile.openRead()) {
                 readDayStatsLocked(in);
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             Slog.e(TAG, "Unable to read day stats file.", e);
         }
     }

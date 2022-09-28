@@ -16,17 +16,28 @@
 
 package com.android.systemui.dreams.complication;
 
-import static org.mockito.Mockito.verify;
+import static com.android.systemui.flags.Flags.DREAM_MEDIA_TAP_TO_OPEN;
 
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import android.app.PendingIntent;
+import android.content.Intent;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.View;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.systemui.ActivityIntentHelper;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dreams.DreamOverlayStateController;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.media.MediaCarouselController;
 import com.android.systemui.media.dream.MediaDreamComplication;
+import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.statusbar.NotificationLockscreenUserManager;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -48,21 +59,52 @@ public class DreamMediaEntryComplicationTest extends SysuiTestCase {
     @Mock
     private MediaDreamComplication mMediaComplication;
 
+    @Mock
+    private MediaCarouselController mMediaCarouselController;
+
+    @Mock
+    private ActivityStarter mActivityStarter;
+
+    @Mock
+    private ActivityIntentHelper mActivityIntentHelper;
+
+    @Mock
+    private KeyguardStateController mKeyguardStateController;
+
+    @Mock
+    private NotificationLockscreenUserManager mLockscreenUserManager;
+
+    @Mock
+    private FeatureFlags mFeatureFlags;
+
+    @Mock
+    private PendingIntent mPendingIntent;
+
+    private final Intent mIntent = new Intent("android.test.TEST_ACTION");
+    private final Integer mCurrentUserId = 99;
+
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
+        when(mFeatureFlags.isEnabled(DREAM_MEDIA_TAP_TO_OPEN)).thenReturn(false);
     }
 
     /**
      * Ensures clicking media entry chip adds/removes media complication.
      */
     @Test
-    public void testClick() {
+    public void testClickToOpenUMO() {
         final DreamMediaEntryComplication.DreamMediaEntryViewController viewController =
                 new DreamMediaEntryComplication.DreamMediaEntryViewController(
                         mView,
                         mDreamOverlayStateController,
-                        mMediaComplication);
+                        mMediaComplication,
+                        mMediaCarouselController,
+                        mActivityStarter,
+                        mActivityIntentHelper,
+                        mKeyguardStateController,
+                        mLockscreenUserManager,
+                        mFeatureFlags);
 
         final ArgumentCaptor<View.OnClickListener> clickListenerCaptor =
                 ArgumentCaptor.forClass(View.OnClickListener.class);
@@ -85,10 +127,90 @@ public class DreamMediaEntryComplicationTest extends SysuiTestCase {
                 new DreamMediaEntryComplication.DreamMediaEntryViewController(
                         mView,
                         mDreamOverlayStateController,
-                        mMediaComplication);
+                        mMediaComplication,
+                        mMediaCarouselController,
+                        mActivityStarter,
+                        mActivityIntentHelper,
+                        mKeyguardStateController,
+                        mLockscreenUserManager,
+                        mFeatureFlags);
 
         viewController.onViewDetached();
         verify(mView).setSelected(false);
         verify(mDreamOverlayStateController).removeComplication(mMediaComplication);
+    }
+
+    /**
+     * Ensures clicking media entry chip opens media when flag is set.
+     */
+    @Test
+    public void testClickToOpenMediaOverLockscreen() {
+        when(mFeatureFlags.isEnabled(DREAM_MEDIA_TAP_TO_OPEN)).thenReturn(true);
+
+        when(mMediaCarouselController.getCurrentVisibleMediaContentIntent()).thenReturn(
+                mPendingIntent);
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
+        when(mPendingIntent.getIntent()).thenReturn(mIntent);
+        when(mLockscreenUserManager.getCurrentUserId()).thenReturn(mCurrentUserId);
+
+        final DreamMediaEntryComplication.DreamMediaEntryViewController viewController =
+                new DreamMediaEntryComplication.DreamMediaEntryViewController(
+                        mView,
+                        mDreamOverlayStateController,
+                        mMediaComplication,
+                        mMediaCarouselController,
+                        mActivityStarter,
+                        mActivityIntentHelper,
+                        mKeyguardStateController,
+                        mLockscreenUserManager,
+                        mFeatureFlags);
+        viewController.onViewAttached();
+
+        final ArgumentCaptor<View.OnClickListener> clickListenerCaptor =
+                ArgumentCaptor.forClass(View.OnClickListener.class);
+        verify(mView).setOnClickListener(clickListenerCaptor.capture());
+
+        when(mActivityIntentHelper.wouldShowOverLockscreen(mIntent, mCurrentUserId)).thenReturn(
+                true);
+
+        clickListenerCaptor.getValue().onClick(mView);
+        verify(mActivityStarter).startActivity(mIntent, true, null, true);
+    }
+
+    /**
+     * Ensures clicking media entry chip opens media when flag is set.
+     */
+    @Test
+    public void testClickToOpenMediaDismissingLockscreen() {
+        when(mFeatureFlags.isEnabled(DREAM_MEDIA_TAP_TO_OPEN)).thenReturn(true);
+
+        when(mMediaCarouselController.getCurrentVisibleMediaContentIntent()).thenReturn(
+                mPendingIntent);
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
+        when(mPendingIntent.getIntent()).thenReturn(mIntent);
+        when(mLockscreenUserManager.getCurrentUserId()).thenReturn(mCurrentUserId);
+
+        final DreamMediaEntryComplication.DreamMediaEntryViewController viewController =
+                new DreamMediaEntryComplication.DreamMediaEntryViewController(
+                        mView,
+                        mDreamOverlayStateController,
+                        mMediaComplication,
+                        mMediaCarouselController,
+                        mActivityStarter,
+                        mActivityIntentHelper,
+                        mKeyguardStateController,
+                        mLockscreenUserManager,
+                        mFeatureFlags);
+        viewController.onViewAttached();
+
+        final ArgumentCaptor<View.OnClickListener> clickListenerCaptor =
+                ArgumentCaptor.forClass(View.OnClickListener.class);
+        verify(mView).setOnClickListener(clickListenerCaptor.capture());
+
+        when(mActivityIntentHelper.wouldShowOverLockscreen(mIntent, mCurrentUserId)).thenReturn(
+                false);
+
+        clickListenerCaptor.getValue().onClick(mView);
+        verify(mActivityStarter).postStartActivityDismissingKeyguard(mPendingIntent, null);
     }
 }

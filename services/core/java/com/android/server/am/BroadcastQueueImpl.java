@@ -46,7 +46,6 @@ import android.app.BroadcastOptions;
 import android.app.IApplicationThread;
 import android.app.RemoteServiceException.CannotDeliverBroadcastException;
 import android.app.usage.UsageEvents.Event;
-import android.app.usage.UsageStatsManagerInternal;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.IIntentReceiver;
@@ -1447,7 +1446,7 @@ public class BroadcastQueueImpl extends BroadcastQueue {
         return null;
     }
 
-    private void logBootCompletedBroadcastCompletionLatencyIfPossible(BroadcastRecord r) {
+    static void logBootCompletedBroadcastCompletionLatencyIfPossible(BroadcastRecord r) {
         // Only log after last receiver.
         // In case of split BOOT_COMPLETED broadcast, make sure only call this method on the
         // last BroadcastRecord of the split broadcast which has non-null resultTo.
@@ -1509,17 +1508,10 @@ public class BroadcastQueueImpl extends BroadcastQueue {
         if (targetPackage == null) {
             return;
         }
-        getUsageStatsManagerInternal().reportBroadcastDispatched(
+        mService.mUsageStatsService.reportBroadcastDispatched(
                 r.callingUid, targetPackage, UserHandle.of(r.userId),
                 r.options.getIdForResponseEvent(), SystemClock.elapsedRealtime(),
                 mService.getUidStateLocked(targetUid));
-    }
-
-    @NonNull
-    private UsageStatsManagerInternal getUsageStatsManagerInternal() {
-        final UsageStatsManagerInternal usageStatsManagerInternal =
-                LocalServices.getService(UsageStatsManagerInternal.class);
-        return usageStatsManagerInternal;
     }
 
     private void maybeAddAllowBackgroundActivityStartsToken(ProcessRecord proc, BroadcastRecord r) {
@@ -1693,18 +1685,15 @@ public class BroadcastQueueImpl extends BroadcastQueue {
     }
 
     public boolean cleanupDisabledPackageReceiversLocked(
-            String packageName, Set<String> filterByClasses, int userId, boolean doit) {
+            String packageName, Set<String> filterByClasses, int userId) {
         boolean didSomething = false;
         for (int i = mParallelBroadcasts.size() - 1; i >= 0; i--) {
             didSomething |= mParallelBroadcasts.get(i).cleanupDisabledPackageReceiversLocked(
-                    packageName, filterByClasses, userId, doit);
-            if (!doit && didSomething) {
-                return true;
-            }
+                    packageName, filterByClasses, userId, true);
         }
 
         didSomething |= mDispatcher.cleanupDisabledPackageReceiversLocked(packageName,
-                filterByClasses, userId, doit);
+                filterByClasses, userId, true);
 
         return didSomething;
     }

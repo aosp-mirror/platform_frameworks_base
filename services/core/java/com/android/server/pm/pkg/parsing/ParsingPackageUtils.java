@@ -2164,8 +2164,8 @@ public class ParsingPackageUtils {
             }
         }
 
-        if (TextUtils.isEmpty(pkg.getStaticSharedLibName()) && TextUtils.isEmpty(
-                pkg.getSdkLibName())) {
+        if (TextUtils.isEmpty(pkg.getStaticSharedLibraryName()) && TextUtils.isEmpty(
+                pkg.getSdkLibraryName())) {
             // Add a hidden app detail activity to normal apps which forwards user to App Details
             // page.
             ParseResult<ParsedActivity> a = generateAppDetailsHiddenActivity(input, pkg);
@@ -2355,12 +2355,12 @@ public class ParsingPackageUtils {
                         PackageManager.INSTALL_PARSE_FAILED_BAD_SHARED_USER_ID,
                         "sharedUserId not allowed in SDK library"
                 );
-            } else if (pkg.getSdkLibName() != null) {
+            } else if (pkg.getSdkLibraryName() != null) {
                 return input.error("Multiple SDKs for package "
                         + pkg.getPackageName());
             }
 
-            return input.success(pkg.setSdkLibName(lname.intern())
+            return input.success(pkg.setSdkLibraryName(lname.intern())
                     .setSdkLibVersionMajor(versionMajor)
                     .setSdkLibrary(true));
         } finally {
@@ -2393,12 +2393,12 @@ public class ParsingPackageUtils {
                         PackageManager.INSTALL_PARSE_FAILED_BAD_SHARED_USER_ID,
                         "sharedUserId not allowed in static shared library"
                 );
-            } else if (pkg.getStaticSharedLibName() != null) {
+            } else if (pkg.getStaticSharedLibraryName() != null) {
                 return input.error("Multiple static-shared libs for package "
                         + pkg.getPackageName());
             }
 
-            return input.success(pkg.setStaticSharedLibName(lname.intern())
+            return input.success(pkg.setStaticSharedLibraryName(lname.intern())
                     .setStaticSharedLibVersion(
                             PackageInfo.composeLongVersionCode(versionMajor, version))
                     .setStaticSharedLibrary(true));

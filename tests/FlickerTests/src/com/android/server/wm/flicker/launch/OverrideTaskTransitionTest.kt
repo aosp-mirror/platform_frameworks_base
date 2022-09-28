@@ -31,11 +31,13 @@ import com.android.server.wm.flicker.annotation.Group4
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.server.wm.flicker.helpers.StandardAppHelper
+import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.rules.RemoveAllTasksButHomeRule
 import com.android.server.wm.traces.common.ComponentNameMatcher
 import com.android.server.wm.traces.common.WindowManagerConditionsFactory
+import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -86,6 +88,7 @@ class OverrideTaskTransitionTest(val testSpec: FlickerTestParameter) {
     @Presubmit
     @Test
     fun testSimpleActivityIsShownDirectly() {
+        Assume.assumeFalse(isShellTransitionsEnabled)
         testSpec.assertLayers {
             isVisible(ComponentNameMatcher.LAUNCHER)
                 .isInvisible(ComponentNameMatcher.SPLASH_SCREEN)

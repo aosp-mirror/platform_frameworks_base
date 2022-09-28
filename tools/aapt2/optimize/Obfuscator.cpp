@@ -14,28 +14,25 @@
  * limitations under the License.
  */
 
-#include "optimize/ResourcePathShortener.h"
+#include "optimize/Obfuscator.h"
 
 #include <set>
+#include <string>
 #include <unordered_set>
-
-#include "androidfw/StringPiece.h"
 
 #include "ResourceTable.h"
 #include "ValueVisitor.h"
+#include "androidfw/StringPiece.h"
 #include "util/Util.h"
 
-
-static const std::string base64_chars =
-             "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-             "abcdefghijklmnopqrstuvwxyz"
-             "0123456789-_";
+static const char base64_chars[] =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    "abcdefghijklmnopqrstuvwxyz"
+    "0123456789-_";
 
 namespace aapt {
 
-ResourcePathShortener::ResourcePathShortener(
-    std::map<std::string, std::string>& path_map_out)
-    : path_map_(path_map_out) {
+Obfuscator::Obfuscator(std::map<std::string, std::string>& path_map_out) : path_map_(path_map_out) {
 }
 
 std::string ShortenFileName(const android::StringPiece& file_path, int output_length) {
@@ -50,7 +47,6 @@ std::string ShortenFileName(const android::StringPiece& file_path, int output_le
   return result;
 }
 
-
 // Return the optimal hash length such that at most 10% of resources collide in
 // their shortened path.
 // Reference: http://matt.might.net/articles/counting-hash-collisions/
@@ -63,7 +59,7 @@ int OptimalShortenedLength(int num_resources) {
 }
 
 std::string GetShortenedPath(const android::StringPiece& shortened_filename,
-    const android::StringPiece& extension, int collision_count) {
+                             const android::StringPiece& extension, int collision_count) {
   std::string shortened_path = "res/" + shortened_filename.to_string();
   if (collision_count > 0) {
     shortened_path += std::to_string(collision_count);
@@ -76,12 +72,12 @@ std::string GetShortenedPath(const android::StringPiece& shortened_filename,
 // underlying filepath as key rather than the integer address. This is to ensure
 // determinism of output for colliding files.
 struct PathComparator {
-    bool operator() (const FileReference* lhs, const FileReference* rhs) const {
-        return lhs->path->compare(*rhs->path);
-    }
+  bool operator()(const FileReference* lhs, const FileReference* rhs) const {
+    return lhs->path->compare(*rhs->path);
+  }
 };
 
-bool ResourcePathShortener::Consume(IAaptContext* context, ResourceTable* table) {
+bool Obfuscator::Consume(IAaptContext* context, ResourceTable* table) {
   // used to detect collisions
   std::unordered_set<std::string> shortened_paths;
   std::set<FileReference*, PathComparator> file_refs;
@@ -103,8 +99,7 @@ bool ResourcePathShortener::Consume(IAaptContext* context, ResourceTable* table)
     util::ExtractResFilePathParts(*file_ref->path, &res_subdir, &actual_filename, &extension);
 
     // Android detects ColorStateLists via pathname, skip res/color*
-    if (util::StartsWith(res_subdir, "res/color"))
-      continue;
+    if (util::StartsWith(res_subdir, "res/color")) continue;
 
     std::string shortened_filename = ShortenFileName(*file_ref->path, num_chars);
     int collision_count = 0;

@@ -333,6 +333,18 @@ public class LegacyAppOpsServiceInterfaceImpl implements AppOpsServiceInterface 
     }
 
     @Override
+    public void notifyWatchersOfChange(int code, int uid) {
+        ArraySet<OnOpModeChangedListener> listenerSet = getOpModeChangedListeners(code);
+        if (listenerSet == null) {
+            return;
+        }
+        for (int i = 0; i < listenerSet.size(); i++) {
+            final OnOpModeChangedListener listener = listenerSet.valueAt(i);
+            notifyOpChanged(listener, code, uid, null);
+        }
+    }
+
+    @Override
     public void notifyOpChanged(@NonNull OnOpModeChangedListener onModeChangedListener, int code,
             int uid, @Nullable String packageName) {
         Objects.requireNonNull(onModeChangedListener);

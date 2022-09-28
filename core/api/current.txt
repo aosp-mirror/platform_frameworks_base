@@ -11941,6 +11941,7 @@ package android.content.pm {
     field @Deprecated public static final String FEATURE_CONNECTION_SERVICE = "android.software.connectionservice";
     field public static final String FEATURE_CONSUMER_IR = "android.hardware.consumerir";
     field public static final String FEATURE_CONTROLS = "android.software.controls";
+    field public static final String FEATURE_CREDENTIALS = "android.software.credentials";
     field public static final String FEATURE_DEVICE_ADMIN = "android.software.device_admin";
     field public static final String FEATURE_EMBEDDED = "android.hardware.type.embedded";
     field public static final String FEATURE_ETHERNET = "android.hardware.ethernet";
@@ -45194,6 +45195,7 @@ package android.text {
     method public final int getLineAscent(int);
     method public final int getLineBaseline(int);
     method public final int getLineBottom(int);
+    method public int getLineBottom(int, boolean);
     method public int getLineBounds(int, android.graphics.Rect);
     method public abstract boolean getLineContainsTab(int);
     method public abstract int getLineCount();
@@ -53316,6 +53318,7 @@ package android.view.inputmethod {
     method public default void performHandwritingGesture(@NonNull android.view.inputmethod.HandwritingGesture, @Nullable java.util.concurrent.Executor, @Nullable java.util.function.IntConsumer);
     method public boolean performPrivateCommand(String, android.os.Bundle);
     method public default boolean performSpellCheck();
+    method public default boolean replaceText(@IntRange(from=0) int, @IntRange(from=0) int, @NonNull CharSequence, int, @Nullable android.view.inputmethod.TextAttribute);
     method public boolean reportFullscreenMode(boolean);
     method public boolean requestCursorUpdates(int);
     method public default boolean requestCursorUpdates(int, int);
@@ -53544,8 +53547,8 @@ package android.view.inputmethod {
 
   public final class InsertGesture extends android.view.inputmethod.HandwritingGesture implements android.os.Parcelable {
     method public int describeContents();
-    method @Nullable public android.graphics.PointF getInsertionPoint();
-    method @Nullable public String getTextToInsert();
+    method @NonNull public android.graphics.PointF getInsertionPoint();
+    method @NonNull public String getTextToInsert();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.inputmethod.InsertGesture> CREATOR;
   }

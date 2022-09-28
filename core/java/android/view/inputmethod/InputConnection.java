@@ -1329,4 +1329,44 @@ public interface InputConnection {
         // existing APIs.
         return null;
     }
+
+    /**
+     * Replace the specific range in the editor with suggested text.
+     *
+     * <p>This method finishes whatever composing text is currently active and leaves the text
+     * as-it, replaces the specific range of text with the passed CharSequence, and then moves the
+     * cursor according to {@code newCursorPosition}. This behaves like calling {@link
+     * #finishComposingText()}, {@link #setSelection(int, int) setSelection(start, end)}, and then
+     * {@link #commitText(CharSequence, int, TextAttribute) commitText(text, newCursorPosition,
+     * textAttribute)}.
+     *
+     * <p>Similar to {@link #setSelection(int, int)}, the order of start and end is not important.
+     * In effect, the region from start to end and the region from end to start is the same. Editor
+     * authors, be ready to accept a start that is greater than end.
+     *
+     * @param start the character index where the replacement should start.
+     * @param end the character index where the replacement should end.
+     * @param newCursorPosition the new cursor position around the text. If > 0, this is relative to
+     *     the end of the text - 1; if <= 0, this is relative to the start of the text. So a value
+     *     of 1 will always advance you to the position after the full text being inserted. Note
+     *     that this means you can't position the cursor within the text.
+     * @param text the text to replace. This may include styles.
+     * @param textAttribute The extra information about the text. This value may be null.
+     */
+    default boolean replaceText(
+            @IntRange(from = 0) int start,
+            @IntRange(from = 0) int end,
+            @NonNull CharSequence text,
+            int newCursorPosition,
+            @Nullable TextAttribute textAttribute) {
+        Preconditions.checkArgumentNonnegative(start);
+        Preconditions.checkArgumentNonnegative(end);
+
+        beginBatchEdit();
+        finishComposingText();
+        setSelection(start, end);
+        commitText(text, newCursorPosition, textAttribute);
+        endBatchEdit();
+        return true;
+    }
 }

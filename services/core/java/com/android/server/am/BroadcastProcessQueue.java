@@ -21,6 +21,7 @@ import static com.android.server.am.BroadcastQueue.checkState;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UptimeMillisLong;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.util.IndentingPrintWriter;
 
@@ -28,6 +29,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
 
 import java.util.ArrayDeque;
+import java.util.Iterator;
+import java.util.Objects;
 
 /**
  * Queue of pending {@link BroadcastRecord} entries intended for delivery to a
@@ -40,21 +43,13 @@ import java.util.ArrayDeque;
  * Internally each queue consists of a pending broadcasts which are waiting to
  * be dispatched, and a single active broadcast which is currently being
  * dispatched.
+ * <p>
+ * This entire class is marked as {@code NotThreadSafe} since it's the
+ * responsibility of the caller to always interact with a relevant lock held.
  */
+// @NotThreadSafe
 class BroadcastProcessQueue {
-    /**
-     * Default delay to apply to background broadcasts, giving a chance for
-     * debouncing of rapidly changing events.
-     */
-    // TODO: shift hard-coded defaults to BroadcastConstants
-    private static final long DELAY_DEFAULT_MILLIS = 10_000;
-
-    /**
-     * Default delay to apply to broadcasts targeting cached applications.
-     */
-    // TODO: shift hard-coded defaults to BroadcastConstants
-    private static final long DELAY_CACHED_MILLIS = 30_000;
-
+    final @NonNull BroadcastConstants constants;
     final @NonNull String processName;
     final int uid;
 
@@ -76,6 +71,11 @@ class BroadcastProcessQueue {
      * when the process isn't actively running.
      */
     @Nullable ProcessRecord app;
+
+    /**
+     * Track name to use for {@link Trace} events.
+     */
+    @Nullable String traceTrackName;
 
     /**
      * Ordered collection of broadcasts that are waiting to be dispatched to
@@ -102,6 +102,12 @@ class BroadcastProcessQueue {
     private int mActiveCountSinceIdle;
 
     /**
+     * Flag indicating that the currently active broadcast is being dispatched
+     * was scheduled via a cold start.
+     */
+    private boolean mActiveViaColdStart;
+
+    /**
      * Count of {@link #mPending} broadcasts of these various flavors.
      */
     private int mCountForeground;
@@ -113,8 +119,10 @@ class BroadcastProcessQueue {
 
     private boolean mProcessCached;
 
-    public BroadcastProcessQueue(@NonNull String processName, int uid) {
-        this.processName = processName;
+    public BroadcastProcessQueue(@NonNull BroadcastConstants constants,
+            @NonNull String processName, int uid) {
+        this.constants = Objects.requireNonNull(constants);
+        this.processName = Objects.requireNonNull(processName);
         this.uid = uid;
     }
 
@@ -145,6 +153,51 @@ class BroadcastProcessQueue {
         args.arg1 = record;
         args.argi1 = recordIndex;
         mPending.addLast(args);
+    }
+
+    /**
+     * Functional interface that tests a {@link BroadcastRecord} that has been
+     * previously enqueued in {@link BroadcastProcessQueue}.
+     */
+    @FunctionalInterface
+    public interface BroadcastPredicate {
+        public boolean test(@NonNull BroadcastRecord r, int index);
+    }
+
+    /**
+     * Functional interface that consumes a {@link BroadcastRecord} that has
+     * been previously enqueued in {@link BroadcastProcessQueue}.
+     */
+    @FunctionalInterface
+    public interface BroadcastConsumer {
+        public void accept(@NonNull BroadcastRecord r, int index);
+    }
+
+    /**
+     * Remove any broadcasts matching the given predicate.
+     * <p>
+     * Predicates that choose to remove a broadcast <em>must</em> finish
+     * delivery of the matched broadcast, to ensure that situations like ordered
+     * broadcasts are handled consistently.
+     */
+    public boolean removeMatchingBroadcasts(@NonNull BroadcastPredicate predicate,
+            @NonNull BroadcastConsumer consumer) {
+        boolean didSomething = false;
+        final Iterator<SomeArgs> it = mPending.iterator();
+        while (it.hasNext()) {
+            final SomeArgs args = it.next();
+            final BroadcastRecord record = (BroadcastRecord) args.arg1;
+            final int index = args.argi1;
+            if (predicate.test(record, index)) {
+                consumer.accept(record, index);
+                args.recycle();
+                it.remove();
+                didSomething = true;
+            }
+        }
+        // TODO: also check any active broadcast once we have a better "nonce"
+        // representing each scheduled broadcast to avoid races
+        return didSomething;
     }
 
     /**
@@ -187,6 +240,14 @@ class BroadcastProcessQueue {
         return mActiveCountSinceIdle;
     }
 
+    public void setActiveViaColdStart(boolean activeViaColdStart) {
+        mActiveViaColdStart = activeViaColdStart;
+    }
+
+    public boolean getActiveViaColdStart() {
+        return mActiveViaColdStart;
+    }
+
     /**
      * Set the currently active broadcast to the next pending broadcast.
      */
@@ -197,6 +258,7 @@ class BroadcastProcessQueue {
         mActive = (BroadcastRecord) next.arg1;
         mActiveIndex = next.argi1;
         mActiveCountSinceIdle++;
+        mActiveViaColdStart = false;
         next.recycle();
         if (mActive.isForeground()) {
             mCountForeground--;
@@ -217,21 +279,55 @@ class BroadcastProcessQueue {
         mActive = null;
         mActiveIndex = 0;
         mActiveCountSinceIdle = 0;
+        mActiveViaColdStart = false;
     }
 
-    public void setActiveDeliveryState(int deliveryState) {
-        checkState(isActive(), "isActive");
-        mActive.setDeliveryState(mActiveIndex, deliveryState);
+    public void traceProcessStartingBegin() {
+        Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                traceTrackName, toShortString() + " starting", hashCode());
     }
 
+    public void traceProcessRunningBegin() {
+        Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                traceTrackName, toShortString() + " running", hashCode());
+    }
+
+    public void traceProcessEnd() {
+        Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                traceTrackName, hashCode());
+    }
+
+    public void traceActiveBegin() {
+        final int cookie = mActive.receivers.get(mActiveIndex).hashCode();
+        Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                traceTrackName, mActive.toShortString() + " scheduled", cookie);
+    }
+
+    public void traceActiveEnd() {
+        final int cookie = mActive.receivers.get(mActiveIndex).hashCode();
+        Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                traceTrackName, cookie);
+    }
+
+    /**
+     * Return the broadcast being actively dispatched in this process.
+     */
     public @NonNull BroadcastRecord getActive() {
         checkState(isActive(), "isActive");
         return mActive;
     }
 
-    public @NonNull Object getActiveReceiver() {
+    /**
+     * Return the index into {@link BroadcastRecord#receivers} of the receiver
+     * being actively dispatched in this process.
+     */
+    public int getActiveIndex() {
         checkState(isActive(), "isActive");
-        return mActive.receivers.get(mActiveIndex);
+        return mActiveIndex;
+    }
+
+    public boolean isEmpty() {
+        return (mActive != null) && mPending.isEmpty();
     }
 
     public boolean isActive() {
@@ -257,7 +353,7 @@ class BroadcastProcessQueue {
         return mRunnableAt;
     }
 
-    private void invalidateRunnableAt() {
+    public void invalidateRunnableAt() {
         mRunnableAtInvalidated = true;
     }
 
@@ -267,7 +363,17 @@ class BroadcastProcessQueue {
     private void updateRunnableAt() {
         final SomeArgs next = mPending.peekFirst();
         if (next != null) {
-            final long runnableAt = ((BroadcastRecord) next.arg1).enqueueTime;
+            final BroadcastRecord r = (BroadcastRecord) next.arg1;
+            final int index = next.argi1;
+
+            // If our next broadcast is ordered, and we're not the next receiver
+            // in line, then we're not runnable at all
+            if (r.ordered && r.finishedCount != index) {
+                mRunnableAt = Long.MAX_VALUE;
+                return;
+            }
+
+            final long runnableAt = r.enqueueTime;
             if (mCountForeground > 0) {
                 mRunnableAt = runnableAt;
             } else if (mCountOrdered > 0) {
@@ -275,9 +381,9 @@ class BroadcastProcessQueue {
             } else if (mCountAlarm > 0) {
                 mRunnableAt = runnableAt;
             } else if (mProcessCached) {
-                mRunnableAt = runnableAt + DELAY_CACHED_MILLIS;
+                mRunnableAt = runnableAt + constants.DELAY_CACHED_MILLIS;
             } else {
-                mRunnableAt = runnableAt + DELAY_DEFAULT_MILLIS;
+                mRunnableAt = runnableAt + constants.DELAY_NORMAL_MILLIS;
             }
         } else {
             mRunnableAt = Long.MAX_VALUE;

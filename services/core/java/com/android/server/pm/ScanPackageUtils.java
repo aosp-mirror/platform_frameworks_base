@@ -445,11 +445,11 @@ final class ScanPackageUtils {
         }
 
         SharedLibraryInfo sdkLibraryInfo = null;
-        if (!TextUtils.isEmpty(parsedPackage.getSdkLibName())) {
+        if (!TextUtils.isEmpty(parsedPackage.getSdkLibraryName())) {
             sdkLibraryInfo = AndroidPackageUtils.createSharedLibraryForSdk(parsedPackage);
         }
         SharedLibraryInfo staticSharedLibraryInfo = null;
-        if (!TextUtils.isEmpty(parsedPackage.getStaticSharedLibName())) {
+        if (!TextUtils.isEmpty(parsedPackage.getStaticSharedLibraryName())) {
             staticSharedLibraryInfo =
                     AndroidPackageUtils.createSharedLibraryForStatic(parsedPackage);
         }

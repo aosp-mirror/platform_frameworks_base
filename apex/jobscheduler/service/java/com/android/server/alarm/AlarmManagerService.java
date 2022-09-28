@@ -57,6 +57,8 @@ import static com.android.server.alarm.AlarmManagerService.RemovedAlarm.REMOVE_R
 
 import android.Manifest;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.ActivityManagerInternal;
@@ -289,6 +291,7 @@ public class AlarmManagerService extends SystemService {
     final DeliveryTracker mDeliveryTracker = new DeliveryTracker();
     IBinder.DeathRecipient mListenerDeathRecipient;
     Intent mTimeTickIntent;
+    Bundle mTimeTickOptions;
     IAlarmListener mTimeTickTrigger;
     PendingIntent mDateChangeSender;
     boolean mInteractive = true;
@@ -1909,7 +1912,9 @@ public class AlarmManagerService extends SystemService {
                     Intent.FLAG_RECEIVER_REGISTERED_ONLY
                             | Intent.FLAG_RECEIVER_FOREGROUND
                             | Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS);
-
+            mTimeTickOptions = BroadcastOptions
+                    .makeRemovingMatchingFilter(new IntentFilter(Intent.ACTION_TIME_TICK))
+                    .toBundle();
             mTimeTickTrigger = new IAlarmListener.Stub() {
                 @Override
                 public void doAlarm(final IAlarmCompleteListener callback) throws RemoteException {
@@ -1921,8 +1926,8 @@ public class AlarmManagerService extends SystemService {
                     // takes care of this automatically, but we're using the direct internal
                     // interface here rather than that client-side wrapper infrastructure.
                     mHandler.post(() -> {
-                        getContext().sendBroadcastAsUser(mTimeTickIntent, UserHandle.ALL);
-
+                        getContext().sendBroadcastAsUser(mTimeTickIntent, UserHandle.ALL, null,
+                                mTimeTickOptions);
                         try {
                             callback.alarmComplete(this);
                         } catch (RemoteException e) { /* local method call */ }

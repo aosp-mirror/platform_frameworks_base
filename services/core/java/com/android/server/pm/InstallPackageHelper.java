@@ -168,6 +168,7 @@ import com.android.server.pm.permission.Permission;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
+import com.android.server.pm.pkg.SharedLibraryWrapper;
 import com.android.server.pm.pkg.component.ComponentMutateUtils;
 import com.android.server.pm.pkg.component.ParsedInstrumentation;
 import com.android.server.pm.pkg.component.ParsedPermission;
@@ -351,7 +352,7 @@ final class InstallPackageHelper {
         }
 
         if (reconciledPkg.mCollectedSharedLibraryInfos != null
-                || (oldPkgSetting != null && oldPkgSetting.getUsesLibraryInfos() != null)) {
+                || (oldPkgSetting != null && oldPkgSetting.getUsesLibraries() != null)) {
             // Reconcile if the new package or the old package uses shared libraries.
             // It is possible that the old package uses shared libraries but the new one doesn't.
             mSharedLibraries.executeSharedLibrariesUpdate(pkg, pkgSetting, null, null,
@@ -442,7 +443,7 @@ final class InstallPackageHelper {
         // Also need to kill any apps that are dependent on the library, except the case of
         // installation of new version static shared library.
         if (clientLibPkgs != null) {
-            if (pkg.getStaticSharedLibName() == null || isReplace) {
+            if (pkg.getStaticSharedLibraryName() == null || isReplace) {
                 for (int i = 0; i < clientLibPkgs.size(); i++) {
                     AndroidPackage clientPkg = clientLibPkgs.get(i);
                     mPm.killApplication(clientPkg.getPackageName(),
@@ -1141,7 +1142,7 @@ final class InstallPackageHelper {
             if (signatureCheckPs == null && parsedPackage.isSdkLibrary()) {
                 WatchedLongSparseArray<SharedLibraryInfo> libraryInfos =
                         mSharedLibraries.getSharedLibraryInfos(
-                                parsedPackage.getSdkLibName());
+                                parsedPackage.getSdkLibraryName());
                 if (libraryInfos != null && libraryInfos.size() > 0) {
                     // Any existing version would do.
                     SharedLibraryInfo libraryInfo = libraryInfos.valueAt(0);
@@ -1578,7 +1579,7 @@ final class InstallPackageHelper {
                 removedInfo.mInstallerPackageName =
                         ps.getInstallSource().installerPackageName;
                 removedInfo.mIsStaticSharedLib =
-                        parsedPackage.getStaticSharedLibName() != null;
+                        parsedPackage.getStaticSharedLibraryName() != null;
                 removedInfo.mIsUpdate = true;
                 removedInfo.mOrigUsers = installedUsers;
                 removedInfo.mInstallReasons = new SparseIntArray(installedUsers.length);
@@ -2059,9 +2060,9 @@ final class InstallPackageHelper {
 
                 // Retrieve the overlays for shared libraries of the package.
                 if (!ps.getPkgState().getUsesLibraryInfos().isEmpty()) {
-                    for (SharedLibraryInfo sharedLib : ps.getPkgState().getUsesLibraryInfos()) {
+                    for (SharedLibraryWrapper sharedLib : ps.getPkgState().getUsesLibraryInfos()) {
                         for (int currentUserId : UserManagerService.getInstance().getUserIds()) {
-                            if (!sharedLib.isDynamic()) {
+                            if (sharedLib.getType() != SharedLibraryInfo.TYPE_DYNAMIC) {
                                 // TODO(146804378): Support overlaying static shared libraries
                                 continue;
                             }
@@ -2684,7 +2685,7 @@ final class InstallPackageHelper {
             }
 
             // Send installed broadcasts if the package is not a static shared lib.
-            if (request.getPkg().getStaticSharedLibName() == null) {
+            if (request.getPkg().getStaticSharedLibraryName() == null) {
                 mPm.mProcessLoggingHandler.invalidateBaseApkHash(request.getPkg().getBaseApkPath());
 
                 // Send added for users that see the package for the first time
@@ -2813,7 +2814,7 @@ final class InstallPackageHelper {
                 // No need to kill consumers if it's installation of new version static shared lib.
                 final Computer snapshot = mPm.snapshotComputer();
                 final boolean dontKillApp = !update
-                        && request.getPkg().getStaticSharedLibName() != null;
+                        && request.getPkg().getStaticSharedLibraryName() != null;
                 for (int i = 0; i < request.getLibraryConsumers().size(); i++) {
                     AndroidPackage pkg = request.getLibraryConsumers().get(i);
                     // send broadcast that all consumers of the static shared library have changed
@@ -4297,7 +4298,7 @@ final class InstallPackageHelper {
         long maxVersionCode = Long.MAX_VALUE;
 
         WatchedLongSparseArray<SharedLibraryInfo> versionedLib =
-                mSharedLibraries.getSharedLibraryInfos(pkg.getStaticSharedLibName());
+                mSharedLibraries.getSharedLibraryInfos(pkg.getStaticSharedLibraryName());
         if (versionedLib != null) {
             final int versionCount = versionedLib.size();
             for (int i = 0; i < versionCount; i++) {

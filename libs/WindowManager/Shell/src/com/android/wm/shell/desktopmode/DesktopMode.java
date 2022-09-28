@@ -16,43 +16,16 @@
 
 package com.android.wm.shell.desktopmode;
 
-import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE;
-
-import android.content.Context;
-import android.os.SystemProperties;
-import android.os.UserHandle;
-import android.provider.Settings;
-
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.wm.shell.common.annotations.ExternalThread;
 
 /**
- * Constants for desktop mode feature
+ * Interface to interact with desktop mode feature in shell.
  */
-public class DesktopMode {
+@ExternalThread
+public interface DesktopMode {
 
-    /**
-     * Flag to indicate whether desktop mode is available on the device
-     */
-    public static final boolean IS_SUPPORTED = SystemProperties.getBoolean(
-            "persist.wm.debug.desktop_mode", false);
-
-    /**
-     * Check if desktop mode is active
-     *
-     * @return {@code true} if active
-     */
-    public static boolean isActive(Context context) {
-        if (!IS_SUPPORTED) {
-            return false;
-        }
-        try {
-            int result = Settings.System.getIntForUser(context.getContentResolver(),
-                    Settings.System.DESKTOP_MODE, UserHandle.USER_CURRENT);
-            ProtoLog.d(WM_SHELL_DESKTOP_MODE, "isDesktopModeEnabled=%s", result);
-            return result != 0;
-        } catch (Exception e) {
-            ProtoLog.e(WM_SHELL_DESKTOP_MODE, "Failed to read DESKTOP_MODE setting %s", e);
-            return false;
-        }
+    /** Returns a binder that can be passed to an external process to manipulate DesktopMode. */
+    default IDesktopMode createExternalInterface() {
+        return null;
     }
 }

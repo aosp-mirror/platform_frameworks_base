@@ -679,7 +679,7 @@ public class UserControllerTest {
         setUpAndStartProfileInBackground(TEST_USER_ID1);
 
         startBackgroundUserAssertions();
-        verifyUserAssignedToDisplay(TEST_USER_ID1, UserManagerInternal.PARENT_DISPLAY);
+        verifyUserAssignedToDisplay(TEST_USER_ID1, Display.DEFAULT_DISPLAY);
     }
 
     @Test

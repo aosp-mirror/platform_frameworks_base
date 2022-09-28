@@ -90,7 +90,8 @@ public class LayoutGetRangeForRectTest {
 
         mLineCenters = new float[mLayout.getLineCount()];
         for (int i = 0; i < mLayout.getLineCount(); ++i) {
-            mLineCenters[i] = (mLayout.getLineTop(i) + mLayout.getLineBottomWithoutSpacing(i)) / 2f;
+            mLineCenters[i] = (mLayout.getLineTop(i)
+                    + mLayout.getLineBottom(i, /* includeLineSpacing= */ false)) / 2f;
         }
 
         mGraphemeClusterSegmentIterator =

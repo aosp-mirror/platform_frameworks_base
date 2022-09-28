@@ -16,7 +16,11 @@
 
 #include "Optimize.h"
 
+#include <map>
 #include <memory>
+#include <set>
+#include <string>
+#include <utility>
 #include <vector>
 
 #include "Diagnostics.h"
@@ -38,9 +42,9 @@
 #include "io/BigBufferStream.h"
 #include "io/Util.h"
 #include "optimize/MultiApkGenerator.h"
+#include "optimize/Obfuscator.h"
 #include "optimize/ResourceDeduper.h"
 #include "optimize/ResourceFilter.h"
-#include "optimize/ResourcePathShortener.h"
 #include "optimize/VersionCollapser.h"
 #include "split/TableSplitter.h"
 #include "util/Files.h"
@@ -114,11 +118,11 @@ class OptimizeContext : public IAaptContext {
   }
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(OptimizeContext);
-
   StdErrDiagnostics diagnostics_;
   bool verbose_ = false;
   int sdk_version_ = 0;
+
+  DISALLOW_COPY_AND_ASSIGN(OptimizeContext);
 };
 
 class Optimizer {
@@ -151,8 +155,8 @@ class Optimizer {
     }
 
     if (options_.shorten_resource_paths) {
-      ResourcePathShortener shortener(options_.table_flattener_options.shortened_path_map);
-      if (!shortener.Consume(context_, apk->GetResourceTable())) {
+      Obfuscator obfuscator(options_.table_flattener_options.shortened_path_map);
+      if (!obfuscator.Consume(context_, apk->GetResourceTable())) {
         context_->GetDiagnostics()->Error(android::DiagMessage()
                                           << "failed shortening resource paths");
         return 1;
