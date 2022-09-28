@@ -1696,7 +1696,10 @@ package android.os {
   public class Build {
     method public static boolean is64BitAbi(String);
     method public static boolean isDebuggable();
+    field @Nullable public static final String BRAND_FOR_ATTESTATION;
     field public static final boolean IS_EMULATOR;
+    field @Nullable public static final String MODEL_FOR_ATTESTATION;
+    field @Nullable public static final String PRODUCT_FOR_ATTESTATION;
   }
 
   public static class Build.VERSION {
