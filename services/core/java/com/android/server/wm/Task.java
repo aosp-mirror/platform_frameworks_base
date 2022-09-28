@@ -4156,6 +4156,54 @@ class Task extends WindowContainer<WindowContainer> {
         info.mTopActivityLocusId = topRecord != null ? topRecord.getLocusId() : null;
     }
 
+    /**
+     * Removes the activity info if the activity belongs to a different uid, which is
+     * different from the app that hosts the task.
+     */
+    static void trimIneffectiveInfo(Task task, TaskInfo info) {
+        final ActivityRecord baseActivity = task.getActivity(r -> !r.finishing,
+                false /* traverseTopToBottom */);
+        final int baseActivityUid =
+                baseActivity != null ? baseActivity.getUid() : task.effectiveUid;
+
+        if (info.topActivityInfo != null
+                && task.effectiveUid != info.topActivityInfo.applicationInfo.uid) {
+            // Making a copy to prevent eliminating the info in the original ActivityRecord.
+            info.topActivityInfo = new ActivityInfo(info.topActivityInfo);
+            info.topActivityInfo.applicationInfo =
+                    new ApplicationInfo(info.topActivityInfo.applicationInfo);
+
+            // Strip the sensitive info.
+            info.topActivity = new ComponentName("", "");
+            info.topActivityInfo.packageName = "";
+            info.topActivityInfo.taskAffinity = "";
+            info.topActivityInfo.processName = "";
+            info.topActivityInfo.name = "";
+            info.topActivityInfo.parentActivityName = "";
+            info.topActivityInfo.targetActivity = "";
+            info.topActivityInfo.splitName = "";
+            info.topActivityInfo.applicationInfo.className = "";
+            info.topActivityInfo.applicationInfo.credentialProtectedDataDir = "";
+            info.topActivityInfo.applicationInfo.dataDir = "";
+            info.topActivityInfo.applicationInfo.deviceProtectedDataDir = "";
+            info.topActivityInfo.applicationInfo.manageSpaceActivityName = "";
+            info.topActivityInfo.applicationInfo.nativeLibraryDir = "";
+            info.topActivityInfo.applicationInfo.nativeLibraryRootDir = "";
+            info.topActivityInfo.applicationInfo.processName = "";
+            info.topActivityInfo.applicationInfo.publicSourceDir = "";
+            info.topActivityInfo.applicationInfo.scanPublicSourceDir = "";
+            info.topActivityInfo.applicationInfo.scanSourceDir = "";
+            info.topActivityInfo.applicationInfo.sourceDir = "";
+            info.topActivityInfo.applicationInfo.taskAffinity = "";
+            info.topActivityInfo.applicationInfo.name = "";
+            info.topActivityInfo.applicationInfo.packageName = "";
+        }
+
+        if (task.effectiveUid != baseActivityUid) {
+            info.baseActivity = new ComponentName("", "");
+        }
+    }
+
     @Nullable PictureInPictureParams getPictureInPictureParams() {
         return getPictureInPictureParams(getTopMostTask());
     }
