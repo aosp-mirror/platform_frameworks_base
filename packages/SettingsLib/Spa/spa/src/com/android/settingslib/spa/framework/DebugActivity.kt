@@ -35,8 +35,8 @@ import androidx.navigation.navArgument
 import com.android.settingslib.spa.R
 import com.android.settingslib.spa.framework.BrowseActivity.Companion.KEY_DESTINATION
 import com.android.settingslib.spa.framework.common.SettingsEntry
-import com.android.settingslib.spa.framework.common.SettingsEntryRepository
 import com.android.settingslib.spa.framework.common.SettingsPage
+import com.android.settingslib.spa.framework.common.SpaEnvironment
 import com.android.settingslib.spa.framework.compose.localNavController
 import com.android.settingslib.spa.framework.compose.navigator
 import com.android.settingslib.spa.framework.compose.toState
@@ -61,11 +61,9 @@ private const val PARAM_NAME_ENTRY_ID = "eid"
  * For gallery, Activity = com.android.settingslib.spa.gallery/.GalleryDebugActivity
  * For SettingsGoogle, Activity = com.android.settings/.spa.SpaDebugActivity
  */
-open class DebugActivity(
-    private val entryRepository: SettingsEntryRepository,
-    private val browseActivityClass: Class<*>,
-    private val entryProviderAuthorities: String? = null,
-) : ComponentActivity() {
+open class DebugActivity(private val spaEnvironment: SpaEnvironment) : ComponentActivity() {
+    private val entryRepository by spaEnvironment.entryRepository
+
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R.style.Theme_SpaLib_DayNight)
         super.onCreate(savedInstanceState)
@@ -79,7 +77,7 @@ open class DebugActivity(
     }
 
     private fun displayDebugMessage() {
-        if (entryProviderAuthorities == null) return
+        val entryProviderAuthorities = spaEnvironment.entryProviderAuthorities ?: return
 
         try {
             val query = EntryProvider.QueryEnum.PAGE_INFO_QUERY
@@ -216,7 +214,7 @@ open class DebugActivity(
         if (page.hasRuntimeParam()) return null
         val context = LocalContext.current
         val route = page.buildRoute()
-        val intent = Intent(context, browseActivityClass).apply {
+        val intent = Intent(context, spaEnvironment.browseActivityClass).apply {
             putExtra(KEY_DESTINATION, route)
         }
         return {
@@ -230,7 +228,7 @@ open class DebugActivity(
         if (entry.hasRuntimeParam()) return null
         val context = LocalContext.current
         val route = entry.buildRoute()
-        val intent = Intent(context, browseActivityClass).apply {
+        val intent = Intent(context, spaEnvironment.browseActivityClass).apply {
             putExtra(KEY_DESTINATION, route)
         }
         return {
