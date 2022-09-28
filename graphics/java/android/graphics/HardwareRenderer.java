@@ -47,9 +47,7 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.Optional;
 import java.util.concurrent.Executor;
-import java.util.stream.Stream;
 
 import sun.misc.Cleaner;
 
@@ -1142,6 +1140,16 @@ public class HardwareRenderer {
     }
 
     /**
+     * Sets whether or not the current process is a system or persistent process. Used to influence
+     * the chosen memory usage policy.
+     *
+     * @hide
+     **/
+    public static void setIsSystemOrPersistent() {
+        nSetIsSystemOrPersistent(true);
+    }
+
+    /**
      * Returns true if HardwareRender will produce output.
      *
      * This value is global to the process and affects all uses of HardwareRenderer,
@@ -1203,30 +1211,6 @@ public class HardwareRenderer {
 
     private static class ProcessInitializer {
         static ProcessInitializer sInstance = new ProcessInitializer();
-
-        // Magic values from android/data_space.h
-        private static final int INTERNAL_DATASPACE_SRGB = 142671872;
-        private static final int INTERNAL_DATASPACE_DISPLAY_P3 = 143261696;
-        private static final int INTERNAL_DATASPACE_SCRGB = 411107328;
-
-        private enum Dataspace {
-            DISPLAY_P3(ColorSpace.Named.DISPLAY_P3, INTERNAL_DATASPACE_DISPLAY_P3),
-            SCRGB(ColorSpace.Named.EXTENDED_SRGB, INTERNAL_DATASPACE_SCRGB),
-            SRGB(ColorSpace.Named.SRGB, INTERNAL_DATASPACE_SRGB);
-
-            private final ColorSpace.Named mColorSpace;
-            private final int mNativeDataspace;
-            Dataspace(ColorSpace.Named colorSpace, int nativeDataspace) {
-                this.mColorSpace = colorSpace;
-                this.mNativeDataspace = nativeDataspace;
-            }
-
-            static Optional<Dataspace> find(ColorSpace colorSpace) {
-                return Stream.of(Dataspace.values())
-                        .filter(d -> ColorSpace.get(d.mColorSpace).equals(colorSpace))
-                        .findFirst();
-            }
-        }
 
         private boolean mInitialized = false;
         private boolean mDisplayInitialized = false;
@@ -1296,6 +1280,7 @@ public class HardwareRenderer {
             initDisplayInfo();
 
             nSetIsHighEndGfx(ActivityManager.isHighEndGfx());
+            nSetIsLowRam(ActivityManager.isLowRamDeviceStatic());
             // Defensively clear out the context in case we were passed a context that can leak
             // if we live longer than it, e.g. an activity context.
             mContext = null;
@@ -1314,26 +1299,55 @@ public class HardwareRenderer {
                 return;
             }
 
-            Display display = dm.getDisplay(Display.DEFAULT_DISPLAY);
-            if (display == null) {
+            final Display defaultDisplay = dm.getDisplay(Display.DEFAULT_DISPLAY);
+            if (defaultDisplay == null) {
                 Log.d(LOG_TAG, "Failed to find default display for display-based configuration");
                 return;
             }
 
-            Dataspace wideColorDataspace =
-                    Optional.ofNullable(display.getPreferredWideGamutColorSpace())
-                            .flatMap(Dataspace::find)
-                            // Default to SRGB if the display doesn't support wide color
-                            .orElse(Dataspace.SRGB);
+            final Display[] allDisplays = dm.getDisplays();
+            if (allDisplays.length == 0) {
+                Log.d(LOG_TAG, "Failed to query displays");
+                return;
+            }
 
-            // Grab the physical screen dimensions from the active display mode
-            // Strictly speaking the screen resolution may not always be constant - it is for
-            // sizing the font cache for the underlying rendering thread. Since it's a
-            // heuristic we don't need to be always 100% correct.
-            Mode activeMode = display.getMode();
-            nInitDisplayInfo(activeMode.getPhysicalWidth(), activeMode.getPhysicalHeight(),
-                    display.getRefreshRate(), wideColorDataspace.mNativeDataspace,
-                    display.getAppVsyncOffsetNanos(), display.getPresentationDeadlineNanos());
+            final Mode activeMode = defaultDisplay.getMode();
+            final ColorSpace defaultWideColorSpace =
+                    defaultDisplay.getPreferredWideGamutColorSpace();
+            int wideColorDataspace = defaultWideColorSpace != null
+                    ? defaultWideColorSpace.getDataSpace() : 0;
+            // largest width & height are used to size the default HWUI cache sizes. So find the
+            // largest display resolution we could encounter & use that as the guidance. The actual
+            // memory policy in play will interpret these values differently.
+            int largestWidth = activeMode.getPhysicalWidth();
+            int largestHeight = activeMode.getPhysicalHeight();
+
+            for (int i = 0; i < allDisplays.length; i++) {
+                final Display display = allDisplays[i];
+                // Take the first wide gamut dataspace as the source of truth
+                // Possibly should do per-HardwareRenderer wide gamut dataspace so we can use the
+                // target display's ideal instead
+                if (wideColorDataspace == 0) {
+                    ColorSpace cs = display.getPreferredWideGamutColorSpace();
+                    if (cs != null) {
+                        wideColorDataspace = cs.getDataSpace();
+                    }
+                }
+                Mode[] modes = display.getSupportedModes();
+                for (int j = 0; j < modes.length; j++) {
+                    Mode mode = modes[j];
+                    int width = mode.getPhysicalWidth();
+                    int height = mode.getPhysicalHeight();
+                    if ((width * height) > (largestWidth * largestHeight)) {
+                        largestWidth = width;
+                        largestHeight = height;
+                    }
+                }
+            }
+
+            nInitDisplayInfo(largestWidth, largestHeight, defaultDisplay.getRefreshRate(),
+                    wideColorDataspace, defaultDisplay.getAppVsyncOffsetNanos(),
+                    defaultDisplay.getPresentationDeadlineNanos());
 
             mDisplayInitialized = true;
         }
@@ -1417,6 +1431,10 @@ public class HardwareRenderer {
     private static native void nSetSdrWhitePoint(long nativeProxy, float whitePoint);
 
     private static native void nSetIsHighEndGfx(boolean isHighEndGfx);
+
+    private static native void nSetIsLowRam(boolean isLowRam);
+
+    private static native void nSetIsSystemOrPersistent(boolean isSystemOrPersistent);
 
     private static native int nSyncAndDrawFrame(long nativeProxy, long[] frameInfo, int size);
 

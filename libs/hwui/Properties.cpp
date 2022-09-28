@@ -87,6 +87,10 @@ int Properties::targetCpuTimePercentage = 70;
 
 bool Properties::enableWebViewOverlays = true;
 
+bool Properties::isHighEndGfx = true;
+bool Properties::isLowRam = false;
+bool Properties::isSystemOrPersistent = false;
+
 StretchEffectBehavior Properties::stretchEffectBehavior = StretchEffectBehavior::ShaderHWUI;
 
 DrawingEnabled Properties::drawingEnabled = DrawingEnabled::NotInitialized;

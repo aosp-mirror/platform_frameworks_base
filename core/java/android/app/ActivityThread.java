@@ -6662,6 +6662,9 @@ public final class ActivityThread extends ClientTransactionHandler
 
         // Pass the current context to HardwareRenderer
         HardwareRenderer.setContextForInit(getSystemContext());
+        if (data.persistent) {
+            HardwareRenderer.setIsSystemOrPersistent();
+        }
 
         // Instrumentation info affects the class loader, so load it before
         // setting up the app context.
