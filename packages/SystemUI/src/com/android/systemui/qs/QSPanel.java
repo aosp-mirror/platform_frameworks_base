@@ -79,7 +79,6 @@ public class QSPanel extends LinearLayout implements Tunable {
     protected boolean mExpanded;
     protected boolean mListening;
 
-    @Nullable protected QSTileHost mHost;
     private final List<OnConfigurationChangedListener> mOnConfigurationChangedListeners =
             new ArrayList<>();
 
@@ -357,11 +356,6 @@ public class QSPanel extends LinearLayout implements Tunable {
                 ((PagedTileLayout) mTileLayout).setPageIndicator(mFooterPageIndicator);
             }
         }
-    }
-
-    @Nullable
-    public QSTileHost getHost() {
-        return mHost;
     }
 
     public void updateResources() {
