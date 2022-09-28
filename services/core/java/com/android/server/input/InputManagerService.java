@@ -55,8 +55,6 @@ import android.hardware.input.IInputSensorEventListener;
 import android.hardware.input.ITabletModeChangedListener;
 import android.hardware.input.InputDeviceIdentifier;
 import android.hardware.input.InputManager;
-import android.hardware.input.InputManagerInternal;
-import android.hardware.input.InputManagerInternal.LidSwitchCallback;
 import android.hardware.input.InputSensorInfo;
 import android.hardware.input.KeyboardLayout;
 import android.hardware.input.TouchCalibration;
@@ -123,6 +121,7 @@ import com.android.internal.util.XmlUtils;
 import com.android.server.DisplayThread;
 import com.android.server.LocalServices;
 import com.android.server.Watchdog;
+import com.android.server.input.InputManagerInternal.LidSwitchCallback;
 import com.android.server.policy.WindowManagerPolicy;
 
 import libcore.io.IoUtils;
