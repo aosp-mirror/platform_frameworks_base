@@ -22,14 +22,10 @@ import static android.hardware.display.BrightnessInfo.HIGH_BRIGHTNESS_MODE_HDR;
 import static android.hardware.display.BrightnessInfo.HIGH_BRIGHTNESS_MODE_OFF;
 import static android.hardware.display.BrightnessInfo.HIGH_BRIGHTNESS_MODE_SUNLIGHT;
 
-
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_DISABLED;
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_ENABLED;
-import static com.android.server.display.AutomaticBrightnessController
-                                                      .AUTO_BRIGHTNESS_OFF_DUE_TO_DISPLAY_STATE;
-
+import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_OFF_DUE_TO_DISPLAY_STATE;
 import static com.android.server.display.DisplayDeviceConfig.HDR_PERCENT_OF_SCREEN_REQUIRED_DEFAULT;
-
 import static com.android.server.display.HighBrightnessModeController.HBM_TRANSITION_POINT_INVALID;
 
 import static org.junit.Assert.assertEquals;
@@ -51,7 +47,6 @@ import android.os.PowerManager;
 import android.os.Temperature;
 import android.os.Temperature.ThrottlingStatus;
 import android.os.test.TestLooper;
-import android.platform.test.annotations.Presubmit;
 import android.test.mock.MockContentResolver;
 import android.util.MathUtils;
 
@@ -76,7 +71,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
-@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class HighBrightnessModeControllerTest {
 

@@ -45,7 +45,6 @@ import android.os.IThermalService;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.test.TestLooper;
-import android.platform.test.annotations.Presubmit;
 import android.view.Display;
 import android.view.DisplayAddress;
 import android.view.DisplayInfo;
@@ -67,7 +66,6 @@ import java.util.Arrays;
 import java.util.Set;
 
 @SmallTest
-@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class LogicalDisplayMapperTest {
     private static int sUniqueTestDisplayId = 0;
