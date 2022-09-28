@@ -19,6 +19,7 @@ package com.android.server.devicepolicy;
 import static android.app.admin.DevicePolicyManager.DEPRECATE_USERMANAGERINTERNAL_DEVICEPOLICY_DEFAULT;
 import static android.app.admin.DevicePolicyManager.DEPRECATE_USERMANAGERINTERNAL_DEVICEPOLICY_FLAG;
 import static android.app.admin.DevicePolicyManager.DEVICE_OWNER_TYPE_DEFAULT;
+import static android.app.admin.DevicePolicyManager.DEVICE_OWNER_TYPE_FINANCED;
 
 import static com.android.server.devicepolicy.DeviceStateCacheImpl.NO_DEVICE_OWNER;
 
@@ -452,6 +453,23 @@ class Owners {
     boolean isDeviceOwnerUserId(int userId) {
         synchronized (mData) {
             return mData.mDeviceOwner != null && mData.mDeviceOwnerUserId == userId;
+        }
+    }
+
+    boolean isDefaultDeviceOwnerUserId(int userId) {
+        synchronized (mData) {
+            return mData.mDeviceOwner != null
+                    && mData.mDeviceOwnerUserId == userId
+                    && getDeviceOwnerType(getDeviceOwnerPackageName()) == DEVICE_OWNER_TYPE_DEFAULT;
+        }
+    }
+
+    boolean isFinancedDeviceOwnerUserId(int userId) {
+        synchronized (mData) {
+            return mData.mDeviceOwner != null
+                    && mData.mDeviceOwnerUserId == userId
+                    && getDeviceOwnerType(getDeviceOwnerPackageName())
+                        == DEVICE_OWNER_TYPE_FINANCED;
         }
     }
 
