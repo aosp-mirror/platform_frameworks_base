@@ -541,10 +541,12 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
                 if (!mImeVisible) {
                     // IME not showing, take all touches
                     info.setTouchableInsets(InternalInsetsInfo.TOUCHABLE_INSETS_FRAME);
+                    return;
                 }
                 if (!mView.isImeRenderingNavButtons()) {
                     // IME showing but not drawing any buttons, take all touches
                     info.setTouchableInsets(InternalInsetsInfo.TOUCHABLE_INSETS_FRAME);
+                    return;
                 }
             }
 
