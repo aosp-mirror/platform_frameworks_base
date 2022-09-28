@@ -23,12 +23,17 @@ import android.content.res.Resources
 import android.text.format.DateFormat
 import android.util.TypedValue
 import android.view.View
+import androidx.annotation.VisibleForTesting
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.plugins.ClockController
-import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.flags.Flags.REGION_SAMPLING
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.plugins.Clock
 import com.android.systemui.shared.regionsampling.RegionSamplingInstance
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback
@@ -38,13 +43,19 @@ import java.util.Locale
 import java.util.TimeZone
 import java.util.concurrent.Executor
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.DisposableHandle
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.launch
 
 /**
  * Controller for a Clock provided by the registry and used on the keyguard. Instantiated by
  * [KeyguardClockSwitchController]. Functionality is forked from [AnimatableClockController].
  */
 open class ClockEventController @Inject constructor(
-    private val statusBarStateController: StatusBarStateController,
+    private val keyguardInteractor: KeyguardInteractor,
     private val broadcastDispatcher: BroadcastDispatcher,
     private val batteryController: BatteryController,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
@@ -53,7 +64,7 @@ open class ClockEventController @Inject constructor(
     private val context: Context,
     @Main private val mainExecutor: Executor,
     @Background private val bgExecutor: Executor,
-    private val featureFlags: FeatureFlags,
+    private val featureFlags: FeatureFlags
 ) {
     var clock: ClockController? = null
         set(value) {
@@ -70,9 +81,9 @@ open class ClockEventController @Inject constructor(
     private var isCharging = false
     private var dozeAmount = 0f
     private var isKeyguardVisible = false
-
-    private val regionSamplingEnabled =
-            featureFlags.isEnabled(com.android.systemui.flags.Flags.REGION_SAMPLING)
+    private var isRegistered = false
+    private var disposableHandle: DisposableHandle? = null
+    private val regionSamplingEnabled = featureFlags.isEnabled(REGION_SAMPLING)
 
     private fun updateColors() {
         if (regionSamplingEnabled && smallRegionSampler != null && largeRegionSampler != null) {
@@ -165,15 +176,6 @@ open class ClockEventController @Inject constructor(
         }
     }
 
-    private val statusBarStateListener = object : StatusBarStateController.StateListener {
-        override fun onDozeAmountChanged(linear: Float, eased: Float) {
-            clock?.animations?.doze(linear)
-
-            isDozing = linear > dozeAmount
-            dozeAmount = linear
-        }
-    }
-
     private val keyguardUpdateMonitorCallback = object : KeyguardUpdateMonitorCallback() {
         override fun onKeyguardVisibilityChanged(visible: Boolean) {
             isKeyguardVisible = visible
@@ -195,13 +197,11 @@ open class ClockEventController @Inject constructor(
         }
     }
 
-    init {
-        isDozing = statusBarStateController.isDozing
-    }
-
-    fun registerListeners() {
-        dozeAmount = statusBarStateController.dozeAmount
-        isDozing = statusBarStateController.isDozing || dozeAmount != 0f
+    fun registerListeners(parent: View) {
+        if (isRegistered) {
+            return
+        }
+        isRegistered = true
 
         broadcastDispatcher.registerReceiver(
             localeBroadcastReceiver,
@@ -210,17 +210,27 @@ open class ClockEventController @Inject constructor(
         configurationController.addCallback(configListener)
         batteryController.addCallback(batteryCallback)
         keyguardUpdateMonitor.registerCallback(keyguardUpdateMonitorCallback)
-        statusBarStateController.addCallback(statusBarStateListener)
         smallRegionSampler?.startRegionSampler()
         largeRegionSampler?.startRegionSampler()
+        disposableHandle = parent.repeatWhenAttached {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                listenForDozing(this)
+                listenForDozeAmount(this)
+            }
+        }
     }
 
     fun unregisterListeners() {
+        if (!isRegistered) {
+            return
+        }
+        isRegistered = false
+
+        disposableHandle?.dispose()
         broadcastDispatcher.unregisterReceiver(localeBroadcastReceiver)
         configurationController.removeCallback(configListener)
         batteryController.removeCallback(batteryCallback)
         keyguardUpdateMonitor.removeCallback(keyguardUpdateMonitorCallback)
-        statusBarStateController.removeCallback(statusBarStateListener)
         smallRegionSampler?.stopRegionSampler()
         largeRegionSampler?.stopRegionSampler()
     }
@@ -235,8 +245,28 @@ open class ClockEventController @Inject constructor(
         largeRegionSampler?.dump(pw)
     }
 
-    companion object {
-        private val TAG = ClockEventController::class.simpleName
-        private const val FORMAT_NUMBER = 1234567890
+    @VisibleForTesting
+    internal suspend fun listenForDozeAmount(scope: CoroutineScope): Job {
+        return scope.launch {
+            keyguardInteractor.dozeAmount.collect {
+                dozeAmount = it
+                clock?.animations?.doze(dozeAmount)
+            }
+        }
+    }
+
+    @VisibleForTesting
+    internal suspend fun listenForDozing(scope: CoroutineScope): Job {
+        return scope.launch {
+            combine (
+                keyguardInteractor.dozeAmount,
+                keyguardInteractor.isDozing,
+            ) { localDozeAmount, localIsDozing ->
+                localDozeAmount > dozeAmount || localIsDozing
+            }
+            .collect { localIsDozing ->
+                isDozing = localIsDozing
+            }
+        }
     }
 }
