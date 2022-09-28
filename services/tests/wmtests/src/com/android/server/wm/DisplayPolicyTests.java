@@ -292,12 +292,16 @@ public class DisplayPolicyTests extends WindowTestsBase {
         final DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
         final DisplayInfo di = mDisplayContent.getDisplayInfo();
         final int prevScreenHeightDp = mDisplayContent.getConfiguration().screenHeightDp;
-        assertTrue(displayPolicy.updateDecorInsetsInfoIfNeeded(navbar));
+        assertTrue(navbar.providesNonDecorInsets() && displayPolicy.updateDecorInsetsInfo());
         assertEquals(NAV_BAR_HEIGHT, displayPolicy.getDecorInsetsInfo(di.rotation,
                 di.logicalWidth, di.logicalHeight).mConfigInsets.bottom);
         mDisplayContent.sendNewConfiguration();
         assertNotEquals(prevScreenHeightDp, mDisplayContent.getConfiguration().screenHeightDp);
-        assertFalse(displayPolicy.updateDecorInsetsInfoIfNeeded(navbar));
+        assertFalse(navbar.providesNonDecorInsets() && displayPolicy.updateDecorInsetsInfo());
+
+        navbar.removeIfPossible();
+        assertEquals(0, displayPolicy.getDecorInsetsInfo(di.rotation, di.logicalWidth,
+                di.logicalHeight).mNonDecorInsets.bottom);
     }
 
     @UseTestDisplay(addWindows = { W_NAVIGATION_BAR, W_INPUT_METHOD })
