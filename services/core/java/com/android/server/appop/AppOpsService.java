@@ -4817,7 +4817,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
         pw.println("    Only output the watcher sections.");
         pw.println("  --history");
         pw.println("    Only output history.");
-        pw.println("  --uid-state-change-logs");
+        pw.println("  --uid-state-changes");
         pw.println("    Include logs about uid state changes.");
     }
 
@@ -5039,7 +5039,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
                 } else if (arg.length() > 0 && arg.charAt(0) == '-') {
                     pw.println("Unknown option: " + arg);
                     return;
-                } else if ("--uid-state-change-logs".equals(arg)) {
+                } else if ("--uid-state-changes".equals(arg)) {
                     dumpUidStateChangeLogs = true;
                 } else {
                     pw.println("Unknown command: " + arg);
