@@ -32,7 +32,6 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.media.MediaCarouselController;
 import com.android.systemui.media.MediaHost;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTileView;
@@ -71,7 +70,6 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     private final UiEventLogger mUiEventLogger;
     private final QSLogger mQSLogger;
     private final DumpManager mDumpManager;
-    private final MediaCarouselController mMediaCarouselController;
     protected final ArrayList<TileRecord> mRecords = new ArrayList<>();
     protected boolean mShouldUseSplitNotificationShade;
 
@@ -133,8 +131,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
             MetricsLogger metricsLogger,
             UiEventLogger uiEventLogger,
             QSLogger qsLogger,
-            DumpManager dumpManager,
-            MediaCarouselController mediaCarouselController
+            DumpManager dumpManager
     ) {
         super(view);
         mHost = host;
@@ -147,7 +144,6 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         mDumpManager = dumpManager;
         mShouldUseSplitNotificationShade =
                 LargeScreenUtils.shouldUseSplitNotificationShade(getResources());
-        mMediaCarouselController = mediaCarouselController;
     }
 
     @Override
@@ -165,7 +161,6 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
 
     public void setSquishinessFraction(float squishinessFraction) {
         mView.setSquishinessFraction(squishinessFraction);
-        mMediaCarouselController.setSquishinessFraction(squishinessFraction);
     }
 
     @Override
