@@ -131,7 +131,8 @@ public final class InstallSource {
             @Nullable PackageSignatures initiatingPackageSignatures) {
         if (initiatingPackageName == null && originatingPackageName == null
                 && installerPackageName == null && initiatingPackageSignatures == null
-                && !isInitiatingPackageUninstalled) {
+                && !isInitiatingPackageUninstalled
+                && packageSource == PackageInstaller.PACKAGE_SOURCE_UNSPECIFIED) {
             return isOrphaned ? EMPTY_ORPHANED : EMPTY;
         }
         return new InstallSource(initiatingPackageName, originatingPackageName,
