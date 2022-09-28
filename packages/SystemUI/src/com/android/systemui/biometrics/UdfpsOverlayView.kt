@@ -33,6 +33,8 @@ class UdfpsOverlayView(context: Context, attrs: AttributeSet?) : FrameLayout(con
     var overlayParams = UdfpsOverlayParams()
     private var mUdfpsDisplayMode: UdfpsDisplayMode? = null
 
+    var debugOverlay = false
+
     var overlayPaint = Paint()
     var sensorPaint = Paint()
     var touchPaint = Paint()
@@ -76,9 +78,13 @@ class UdfpsOverlayView(context: Context, attrs: AttributeSet?) : FrameLayout(con
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
-        // Draw overlay and sensor
-        canvas.drawRect(overlayParams.overlayBounds, overlayPaint)
-        canvas.drawRect(overlayParams.sensorBounds, sensorPaint)
+        if (debugOverlay) {
+            // Draw overlay and sensor bounds
+            canvas.drawRect(overlayParams.overlayBounds, overlayPaint)
+            canvas.drawRect(overlayParams.sensorBounds, sensorPaint)
+        }
+
+        // Draw sensor circle
         canvas.drawCircle(
             overlayParams.sensorBounds.exactCenterX(),
             overlayParams.sensorBounds.exactCenterY(),
@@ -86,28 +92,30 @@ class UdfpsOverlayView(context: Context, attrs: AttributeSet?) : FrameLayout(con
             centerPaint
         )
 
-        // Draw Points
-        sensorPoints?.forEach {
-            canvas.drawCircle(it.x.toFloat(), it.y.toFloat(), POINT_SIZE, pointPaint)
+        if (debugOverlay) {
+            // Draw Points
+            sensorPoints?.forEach {
+                canvas.drawCircle(it.x.toFloat(), it.y.toFloat(), POINT_SIZE, pointPaint)
+            }
+
+            // Draw touch oval
+            canvas.save()
+            canvas.rotate(Math.toDegrees(touchOrientation).toFloat(), touchX, touchY)
+
+            oval.setEmpty()
+            oval.set(
+                touchX - touchMinor / 2,
+                touchY + touchMajor / 2,
+                touchX + touchMinor / 2,
+                touchY - touchMajor / 2
+            )
+
+            canvas.drawOval(oval, touchPaint)
+
+            // Draw center point
+            canvas.drawCircle(touchX, touchY, POINT_SIZE, centerPaint)
+            canvas.restore()
         }
-
-        // Draw touch oval
-        canvas.save()
-        canvas.rotate(Math.toDegrees(touchOrientation).toFloat(), touchX, touchY)
-
-        oval.setEmpty()
-        oval.set(
-            touchX - touchMinor / 2,
-            touchY + touchMajor / 2,
-            touchX + touchMinor / 2,
-            touchY - touchMajor / 2
-        )
-
-        canvas.drawOval(oval, touchPaint)
-
-        // Draw center point
-        canvas.drawCircle(touchX, touchY, POINT_SIZE, centerPaint)
-        canvas.restore()
     }
 
     fun setUdfpsDisplayMode(udfpsDisplayMode: UdfpsDisplayMode?) {

@@ -23,6 +23,7 @@ import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricFingerprintConstants;
 import android.hardware.biometrics.BiometricOverlayConstants;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
+import android.hardware.fingerprint.IUdfpsOverlay;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -62,11 +63,13 @@ class FingerprintDetectClient extends AcquisitionClient<IBiometricsFingerprint>
             @NonNull ClientMonitorCallbackConverter listener, int userId, @NonNull String owner,
             int sensorId,
             @NonNull BiometricLogger biometricLogger, @NonNull BiometricContext biometricContext,
-            @Nullable IUdfpsOverlayController udfpsOverlayController, boolean isStrongBiometric) {
+            @Nullable IUdfpsOverlayController udfpsOverlayController,
+            @Nullable IUdfpsOverlay udfpsOverlay, boolean isStrongBiometric) {
         super(context, lazyDaemon, token, listener, userId, owner, 0 /* cookie */, sensorId,
                 true /* shouldVibrate */, biometricLogger, biometricContext);
         setRequestId(requestId);
-        mSensorOverlays = new SensorOverlays(udfpsOverlayController, null /* sideFpsController */);
+        mSensorOverlays = new SensorOverlays(udfpsOverlayController,
+                null /* sideFpsController */, udfpsOverlay);
         mIsStrongBiometric = isStrongBiometric;
     }
 
@@ -92,7 +95,8 @@ class FingerprintDetectClient extends AcquisitionClient<IBiometricsFingerprint>
 
     @Override
     protected void startHalOperation() {
-        mSensorOverlays.show(getSensorId(), BiometricOverlayConstants.REASON_AUTH_KEYGUARD, this);
+        mSensorOverlays.show(getSensorId(), BiometricOverlayConstants.REASON_AUTH_KEYGUARD,
+                this);
 
         try {
             getFreshDaemon().authenticate(0 /* operationId */, getTargetUserId());
@@ -128,8 +132,8 @@ class FingerprintDetectClient extends AcquisitionClient<IBiometricsFingerprint>
     }
 
     @Override
-    public void onAuthenticated(BiometricAuthenticator.Identifier identifier, boolean authenticated,
-            ArrayList<Byte> hardwareAuthToken) {
+    public void onAuthenticated(BiometricAuthenticator.Identifier identifier,
+            boolean authenticated, ArrayList<Byte> hardwareAuthToken) {
         getLogger().logOnAuthenticated(getContext(), getOperationContext(),
                 authenticated, false /* requireConfirmation */,
                 getTargetUserId(), false /* isBiometricPrompt */);

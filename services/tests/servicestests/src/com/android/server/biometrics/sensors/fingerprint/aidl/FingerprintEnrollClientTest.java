@@ -28,7 +28,6 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.same;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -66,7 +65,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
-import java.util.ArrayList;
 import java.util.function.Consumer;
 
 @Presubmit
@@ -292,6 +290,6 @@ public class FingerprintEnrollClientTest {
         mClientMonitorCallbackConverter, 0 /* userId */,
         HAT, "owner", mBiometricUtils, 8 /* sensorId */,
         mBiometricLogger, mBiometricContext, mSensorProps, mUdfpsOverlayController,
-        mSideFpsController, 6 /* maxTemplatesPerUser */, FingerprintManager.ENROLL_ENROLL);
+        mSideFpsController, null, 6 /* maxTemplatesPerUser */, FingerprintManager.ENROLL_ENROLL);
     }
 }

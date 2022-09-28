@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.biometrics.BiometricOverlayConstants;
 import android.hardware.biometrics.common.ICancellationSignal;
+import android.hardware.fingerprint.IUdfpsOverlay;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -54,12 +55,15 @@ class FingerprintDetectClient extends AcquisitionClient<AidlSession> implements 
             @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull String owner, int sensorId,
             @NonNull BiometricLogger biometricLogger, @NonNull BiometricContext biometricContext,
-            @Nullable IUdfpsOverlayController udfpsOverlayController, boolean isStrongBiometric) {
+            @Nullable IUdfpsOverlayController udfpsOverlayController,
+            @Nullable IUdfpsOverlay udfpsOverlay,
+            boolean isStrongBiometric) {
         super(context, lazyDaemon, token, listener, userId, owner, 0 /* cookie */, sensorId,
                 true /* shouldVibrate */, biometricLogger, biometricContext);
         setRequestId(requestId);
         mIsStrongBiometric = isStrongBiometric;
-        mSensorOverlays = new SensorOverlays(udfpsOverlayController, null /* sideFpsController*/);
+        mSensorOverlays = new SensorOverlays(udfpsOverlayController,
+                null /* sideFpsController*/, udfpsOverlay);
     }
 
     @Override
@@ -82,7 +86,8 @@ class FingerprintDetectClient extends AcquisitionClient<AidlSession> implements 
 
     @Override
     protected void startHalOperation() {
-        mSensorOverlays.show(getSensorId(), BiometricOverlayConstants.REASON_AUTH_KEYGUARD, this);
+        mSensorOverlays.show(getSensorId(), BiometricOverlayConstants.REASON_AUTH_KEYGUARD,
+                this);
 
         try {
             mCancellationSignal = doDetectInteraction();
