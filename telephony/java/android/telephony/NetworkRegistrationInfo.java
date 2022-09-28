@@ -856,6 +856,31 @@ public final class NetworkRegistrationInfo implements Parcelable {
         public Builder() {}
 
         /**
+         * Builder from the existing {@link NetworkRegistrationInfo}.
+         *
+         * @param nri The network registration info object.
+         * @hide
+         */
+        public Builder(@NonNull NetworkRegistrationInfo nri) {
+            mDomain = nri.mDomain;
+            mTransportType = nri.mTransportType;
+            mInitialRegistrationState = nri.mInitialRegistrationState;
+            mAccessNetworkTechnology = nri.mAccessNetworkTechnology;
+            mRejectCause = nri.mRejectCause;
+            mEmergencyOnly = nri.mEmergencyOnly;
+            mAvailableServices = new ArrayList<>(nri.mAvailableServices);
+            mCellIdentity = nri.mCellIdentity;
+            if (nri.mDataSpecificInfo != null) {
+                mDataSpecificRegistrationInfo = new DataSpecificRegistrationInfo(
+                        nri.mDataSpecificInfo);
+            }
+            if (nri.mVoiceSpecificInfo != null) {
+                mVoiceSpecificRegistrationInfo = new VoiceSpecificRegistrationInfo(
+                        nri.mVoiceSpecificInfo);
+            }
+        }
+
+        /**
          * Set the network domain.
          *
          * @param domain Network domain.
