@@ -93,8 +93,8 @@ fun View.toBitmap(window: Window? = null): Bitmap {
             Futures.addCallback(
                 captureToBitmap(window),
                 object : FutureCallback<Bitmap> {
-                    override fun onSuccess(result: Bitmap) {
-                        continuation.resumeWith(Result.success(result))
+                    override fun onSuccess(result: Bitmap?) {
+                        continuation.resumeWith(Result.success(result!!))
                     }
 
                     override fun onFailure(t: Throwable) {
