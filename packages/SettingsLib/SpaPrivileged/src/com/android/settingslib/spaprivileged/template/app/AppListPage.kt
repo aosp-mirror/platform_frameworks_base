@@ -36,14 +36,19 @@ import com.android.settingslib.spa.widget.scaffold.MoreOptionsAction
 import com.android.settingslib.spa.widget.scaffold.SettingsScaffold
 import com.android.settingslib.spa.widget.ui.Spinner
 import com.android.settingslib.spaprivileged.R
+import com.android.settingslib.spaprivileged.model.app.AppListConfig
 import com.android.settingslib.spaprivileged.model.app.AppListModel
 import com.android.settingslib.spaprivileged.model.app.AppRecord
 import com.android.settingslib.spaprivileged.template.common.WorkProfilePager
 
+/**
+ * The full screen template for an App List page.
+ */
 @Composable
 fun <T : AppRecord> AppListPage(
     title: String,
     listModel: AppListModel<T>,
+    showInstantApps: Boolean = false,
     primaryUserOnly: Boolean = false,
     appItem: @Composable (itemState: AppListItemModel<T>) -> Unit,
 ) {
@@ -62,7 +67,10 @@ fun <T : AppRecord> AppListPage(
                 val selectedOption = rememberSaveable { mutableStateOf(0) }
                 Spinner(options, selectedOption.value) { selectedOption.value = it }
                 AppList(
-                    userInfo = userInfo,
+                    appListConfig = AppListConfig(
+                        userId = userInfo.id,
+                        showInstantApps = showInstantApps,
+                    ),
                     listModel = listModel,
                     showSystem = showSystem,
                     option = selectedOption,
