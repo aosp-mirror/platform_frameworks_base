@@ -5501,7 +5501,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default">This can’t be accessed on your <xliff:g id="device" example="Chromebook">%1$s</xliff:g>. Try on your phone instead.</string>
 
     <!-- Message displayed in dialog when app is too old to run on this verison of android. [CHAR LIMIT=NONE] -->
-    <string name="deprecated_target_sdk_message">This app was built for an older version of Android and may not work properly. Try checking for updates, or contact the developer.</string>
+    <string name="deprecated_target_sdk_message">This app was built for an older version of Android. It might not work properly and doesn\'t include the latest security and privacy protections. Check for an update, or contact the app\'s developer.</string>
     <!-- Title for button to see application detail in app store which it came from - it may allow user to update to newer version. [CHAR LIMIT=50] -->
     <string name="deprecated_target_sdk_app_store">Check for update</string>
 
