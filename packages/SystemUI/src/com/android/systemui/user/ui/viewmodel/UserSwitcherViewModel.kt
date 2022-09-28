@@ -45,7 +45,7 @@ private constructor(
 ) : ViewModel() {
 
     private val isNewImpl: Boolean
-        get() = featureFlags.isEnabled(Flags.REFACTORED_USER_SWITCHER_CONTROLLER)
+        get() = !featureFlags.isEnabled(Flags.USER_INTERACTOR_AND_REPO_USE_CONTROLLER)
 
     /** On-device users. */
     val users: Flow<List<UserViewModel>> =

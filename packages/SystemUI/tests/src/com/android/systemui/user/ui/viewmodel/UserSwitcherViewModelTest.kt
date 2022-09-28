@@ -84,7 +84,7 @@ class UserSwitcherViewModelTest : SysuiTestCase() {
         keyguardRepository = FakeKeyguardRepository()
         powerRepository = FakePowerRepository()
         val featureFlags = FakeFeatureFlags()
-        featureFlags.set(Flags.REFACTORED_USER_SWITCHER_CONTROLLER, false)
+        featureFlags.set(Flags.USER_INTERACTOR_AND_REPO_USE_CONTROLLER, true)
         val scope = TestCoroutineScope()
         val refreshUsersScheduler =
             RefreshUsersScheduler(

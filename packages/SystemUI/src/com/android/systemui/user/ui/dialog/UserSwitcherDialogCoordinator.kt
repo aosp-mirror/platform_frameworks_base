@@ -53,7 +53,7 @@ constructor(
     private var currentDialog: Dialog? = null
 
     override fun start() {
-        if (!featureFlags.isEnabled(Flags.REFACTORED_USER_SWITCHER_CONTROLLER)) {
+        if (featureFlags.isEnabled(Flags.USER_INTERACTOR_AND_REPO_USE_CONTROLLER)) {
             return
         }
 

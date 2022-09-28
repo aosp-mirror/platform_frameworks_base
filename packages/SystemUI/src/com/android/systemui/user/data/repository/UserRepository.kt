@@ -134,7 +134,7 @@ constructor(
 ) : UserRepository {
 
     private val isNewImpl: Boolean
-        get() = featureFlags.isEnabled(Flags.REFACTORED_USER_SWITCHER_CONTROLLER)
+        get() = !featureFlags.isEnabled(Flags.USER_INTERACTOR_AND_REPO_USE_CONTROLLER)
 
     private val _userSwitcherSettings = MutableStateFlow<UserSwitcherSettingsModel?>(null)
     override val userSwitcherSettings: Flow<UserSwitcherSettingsModel> =

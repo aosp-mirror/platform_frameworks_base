@@ -81,7 +81,7 @@ abstract class UserInteractorTest : SysuiTestCase() {
                     ),
                 featureFlags =
                     FakeFeatureFlags().apply {
-                        set(Flags.REFACTORED_USER_SWITCHER_CONTROLLER, isRefactored())
+                        set(Flags.USER_INTERACTOR_AND_REPO_USE_CONTROLLER, !isRefactored())
                     },
                 manager = manager,
                 applicationScope = testCoroutineScope,

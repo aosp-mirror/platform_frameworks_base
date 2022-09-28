@@ -47,7 +47,7 @@ abstract class UserRepositoryImplTest : SysuiTestCase() {
         globalSettings = FakeSettings()
         tracker = FakeUserTracker()
         featureFlags = FakeFeatureFlags()
-        featureFlags.set(Flags.REFACTORED_USER_SWITCHER_CONTROLLER, isRefactored)
+        featureFlags.set(Flags.USER_INTERACTOR_AND_REPO_USE_CONTROLLER, !isRefactored)
     }
 
     protected fun create(scope: CoroutineScope = TestCoroutineScope()): UserRepositoryImpl {
