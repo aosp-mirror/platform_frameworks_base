@@ -218,6 +218,11 @@ public class ViewConfiguration {
     private static final int WINDOW_TOUCH_SLOP = 16;
 
     /**
+     * Margin in dips around text line bounds where stylus handwriting gestures should be supported.
+     */
+    private static final int HANDWRITING_GESTURE_LINE_MARGIN = 16;
+
+    /**
      * Minimum velocity to initiate a fling, as measured in dips per second
      */
     private static final int MINIMUM_FLING_VELOCITY = 50;
@@ -338,6 +343,7 @@ public class ViewConfiguration {
     private final int mPagingTouchSlop;
     private final int mDoubleTapSlop;
     private final int mWindowTouchSlop;
+    private final int mHandwritingGestureLineMargin;
     private final float mAmbiguousGestureMultiplier;
     private final int mMaximumDrawingCacheSize;
     private final int mOverscrollDistance;
@@ -381,6 +387,7 @@ public class ViewConfiguration {
         mPagingTouchSlop = PAGING_TOUCH_SLOP;
         mDoubleTapSlop = DOUBLE_TAP_SLOP;
         mWindowTouchSlop = WINDOW_TOUCH_SLOP;
+        mHandwritingGestureLineMargin = HANDWRITING_GESTURE_LINE_MARGIN;
         mAmbiguousGestureMultiplier = AMBIGUOUS_GESTURE_MULTIPLIER;
         //noinspection deprecation
         mMaximumDrawingCacheSize = MAXIMUM_DRAWING_CACHE_SIZE;
@@ -489,6 +496,9 @@ public class ViewConfiguration {
         mPagingTouchSlop = mTouchSlop * 2;
 
         mDoubleTapTouchSlop = mTouchSlop;
+
+        mHandwritingGestureLineMargin = res.getDimensionPixelSize(
+                com.android.internal.R.dimen.config_viewConfigurationHandwritingGestureLineMargin);
 
         mMinimumFlingVelocity = res.getDimensionPixelSize(
                 com.android.internal.R.dimen.config_viewMinFlingVelocity);
@@ -793,6 +803,14 @@ public class ViewConfiguration {
      */
     public int getScaledDoubleTapSlop() {
         return mDoubleTapSlop;
+    }
+
+    /**
+     * @return margin in pixels around text line bounds where stylus handwriting gestures should be
+     *     supported.
+     */
+    public int getScaledHandwritingGestureLineMargin() {
+        return mHandwritingGestureLineMargin;
     }
 
     /**

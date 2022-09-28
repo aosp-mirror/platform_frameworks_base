@@ -9391,12 +9391,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     /** @hide */
     public int performHandwritingInsertGesture(@NonNull InsertGesture gesture) {
         PointF point = convertFromScreenToContentCoordinates(gesture.getInsertionPoint());
-        int line = mLayout.getLineForVertical((int) point.y);
-        if (point.y < mLayout.getLineTop(line)
-                || point.y > mLayout.getLineBottom(line, /* includeLineSpacing= */ false)) {
-            return handleGestureFailure(gesture);
-        }
-        if (point.x < mLayout.getLineLeft(line) || point.x > mLayout.getLineRight(line)) {
+        int line = getLineForHandwritingGesture(point);
+        if (line == -1) {
             return handleGestureFailure(gesture);
         }
         int offset = mLayout.getOffsetForHorizontal(line, point.x);
@@ -9412,27 +9408,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         PointF startPoint = convertFromScreenToContentCoordinates(gesture.getStartPoint());
         PointF endPoint = convertFromScreenToContentCoordinates(gesture.getEndPoint());
 
-        // The operation should be applied to the first line of text touched by the line joining
-        // the points.
-        int yMin = (int) Math.min(startPoint.y, endPoint.y);
-        int yMax = (int) Math.max(startPoint.y, endPoint.y);
-        int line = mLayout.getLineForVertical(yMin);
-        if (yMax < mLayout.getLineTop(line)) {
-            // Both points are above the top of the first line.
-            return handleGestureFailure(gesture);
-        }
-        if (yMin > mLayout.getLineBottom(line, /* includeLineSpacing= */ false)) {
-            if (line == mLayout.getLineCount() - 1 || yMax < mLayout.getLineTop(line + 1)) {
-                // The points are below the last line, or they are between two lines.
+        // The operation should be applied to the first line of text containing one of the points.
+        int startPointLine = getLineForHandwritingGesture(startPoint);
+        int endPointLine = getLineForHandwritingGesture(endPoint);
+        int line;
+        if (startPointLine == -1) {
+            if (endPointLine == -1) {
                 return handleGestureFailure(gesture);
-            } else {
-                // Apply the operation to the next line.
-                line++;
             }
-        }
-        if (Math.max(startPoint.x, endPoint.x) < mLayout.getLineLeft(line)
-                || Math.min(startPoint.x, endPoint.x) > mLayout.getLineRight(line)) {
-            return handleGestureFailure(gesture);
+            line = endPointLine;
+        } else {
+            line = (endPointLine == -1) ? startPointLine : Math.min(startPointLine, endPointLine);
         }
 
         // The operation should be applied to all characters touched by the line joining the points.
@@ -9479,12 +9465,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public int performHandwritingJoinOrSplitGesture(@NonNull JoinOrSplitGesture gesture) {
         PointF point = convertFromScreenToContentCoordinates(gesture.getJoinOrSplitPoint());
 
-        int line = mLayout.getLineForVertical((int) point.y);
-        if (point.y < mLayout.getLineTop(line)
-                || point.y > mLayout.getLineBottom(line, /* includeLineSpacing= */ false)) {
-            return handleGestureFailure(gesture);
-        }
-        if (point.x < mLayout.getLineLeft(line) || point.x > mLayout.getLineRight(line)) {
+        int line = getLineForHandwritingGesture(point);
+        if (line == -1) {
             return handleGestureFailure(gesture);
         }
 
@@ -9527,6 +9509,37 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return InputConnection.HANDWRITING_GESTURE_RESULT_FALLBACK;
         }
         return InputConnection.HANDWRITING_GESTURE_RESULT_FAILED;
+    }
+
+    /**
+     * Returns the closest line such that the point is either inside the line bounds or within
+     * {@link ViewConfiguration#getScaledHandwritingGestureLineMargin} of the line bounds. Returns
+     * -1 if the point is not within the margin of any line bounds.
+     */
+    private int getLineForHandwritingGesture(PointF point) {
+        int line = mLayout.getLineForVertical((int) point.y);
+        int lineMargin = ViewConfiguration.get(mContext).getScaledHandwritingGestureLineMargin();
+        if (line < mLayout.getLineCount() - 1
+                && point.y > mLayout.getLineBottom(line) - lineMargin
+                && point.y
+                        > (mLayout.getLineBottom(line, false) + mLayout.getLineBottom(line)) / 2f) {
+            // If a point is in the space between line i and line (i + 1), Layout#getLineForVertical
+            // returns i. If the point is within lineMargin of line (i + 1), and closer to line
+            // (i + 1) than line i, then the gesture operation should be applied to line (i + 1).
+            line++;
+        } else if (point.y < mLayout.getLineTop(line) - lineMargin
+                || point.y
+                        > mLayout.getLineBottom(line, /* includeLineSpacing= */ false)
+                                + lineMargin) {
+            // The point is not within lineMargin of a line.
+            return -1;
+        }
+        if (point.x < mLayout.getLineLeft(line) - lineMargin
+                || point.x > mLayout.getLineRight(line) + lineMargin) {
+            // The point is not within lineMargin of a line.
+            return -1;
+        }
+        return line;
     }
 
     @Nullable
