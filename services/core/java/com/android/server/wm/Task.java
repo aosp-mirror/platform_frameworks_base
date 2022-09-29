@@ -196,7 +196,6 @@ import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.protolog.ProtoLogGroup;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.XmlUtils;
-import com.android.internal.util.function.pooled.PooledConsumer;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.internal.util.function.pooled.PooledPredicate;
 import com.android.server.Watchdog;
@@ -1188,11 +1187,7 @@ class Task extends TaskFragment {
         if (oldParent != null) {
             final Task oldParentTask = oldParent.asTask();
             if (oldParentTask != null) {
-                final PooledConsumer c = PooledLambda.obtainConsumer(
-                        Task::cleanUpActivityReferences, oldParentTask,
-                        PooledLambda.__(ActivityRecord.class));
-                forAllActivities(c);
-                c.recycle();
+                forAllActivities(oldParentTask::cleanUpActivityReferences);
             }
 
             if (oldParent.inPinnedWindowingMode()
@@ -2371,10 +2366,7 @@ class Task extends TaskFragment {
 
     int getDescendantTaskCount() {
         final int[] currentCount = {0};
-        final PooledConsumer c = PooledLambda.obtainConsumer((t, count) -> { count[0]++; },
-                PooledLambda.__(Task.class), currentCount);
-        forAllLeafTasks(c, false /* traverseTopToBottom */);
-        c.recycle();
+        forAllLeafTasks(t -> currentCount[0]++, false /* traverseTopToBottom */);
         return currentCount[0];
     }
 
@@ -2783,10 +2775,7 @@ class Task extends TaskFragment {
                 && displayContent.mDividerControllerLocked.isResizing();
         if (inFreeformWindowingMode()) {
             boolean[] foundTop = { false };
-            final PooledConsumer c = PooledLambda.obtainConsumer(Task::getMaxVisibleBounds,
-                    PooledLambda.__(ActivityRecord.class), out, foundTop);
-            forAllActivities(c);
-            c.recycle();
+            forAllActivities(a -> { getMaxVisibleBounds(a, out, foundTop); });
             if (foundTop[0]) {
                 return;
             }
@@ -4349,14 +4338,6 @@ class Task extends TaskFragment {
         }
     }
 
-
-    void setActivityWindowingMode(int windowingMode) {
-        PooledConsumer c = PooledLambda.obtainConsumer(ActivityRecord::setWindowingMode,
-                PooledLambda.__(ActivityRecord.class), windowingMode);
-        forAllActivities(c);
-        c.recycle();
-    }
-
     /**
      * Sets/unsets the forced-hidden state flag for this task depending on {@param set}.
      * @return Whether the force hidden state changed
@@ -5209,26 +5190,19 @@ class Task extends TaskFragment {
         return finishedTask;
     }
 
-    void finishVoiceTask(IVoiceInteractionSession session) {
-        final PooledConsumer c = PooledLambda.obtainConsumer(Task::finishIfVoiceTask,
-                PooledLambda.__(Task.class), session.asBinder());
-        forAllLeafTasks(c, true /* traverseTopToBottom */);
-        c.recycle();
-    }
-
-    private static void finishIfVoiceTask(Task tr, IBinder binder) {
-        if (tr.voiceSession != null && tr.voiceSession.asBinder() == binder) {
-            tr.forAllActivities((r) -> {
+    void finishIfVoiceTask(IBinder binder) {
+        if (voiceSession != null && voiceSession.asBinder() == binder) {
+            forAllActivities((r) -> {
                 if (r.finishing) return;
                 r.finishIfPossible("finish-voice", false /* oomAdj */);
-                tr.mAtmService.updateOomAdj();
+                mAtmService.updateOomAdj();
             });
         } else {
             // Check if any of the activities are using voice
             final PooledPredicate f = PooledLambda.obtainPredicate(
                     Task::finishIfVoiceActivity, PooledLambda.__(ActivityRecord.class),
                     binder);
-            tr.forAllActivities(f);
+            forAllActivities(f);
             f.recycle();
         }
     }
@@ -5447,10 +5421,7 @@ class Task extends TaskFragment {
 
         if (timeTracker != null) {
             // The caller wants a time tracker associated with this task.
-            final PooledConsumer c = PooledLambda.obtainConsumer(ActivityRecord::setAppTimeTracker,
-                    PooledLambda.__(ActivityRecord.class), timeTracker);
-            tr.forAllActivities(c);
-            c.recycle();
+            tr.forAllActivities(a -> { a.appTimeTracker = timeTracker; });
         }
 
         try {
@@ -5621,11 +5592,11 @@ class Task extends TaskFragment {
         try {
             // TODO: Why not just set this on the root task directly vs. on each tasks?
             // Update override configurations of all tasks in the root task.
-            final PooledConsumer c = PooledLambda.obtainConsumer(
-                    Task::processTaskResizeBounds, PooledLambda.__(Task.class),
-                    displayedBounds);
-            forAllTasks(c, true /* traverseTopToBottom */);
-            c.recycle();
+            forAllTasks(task -> {
+                if (task.isResizeable()) {
+                    task.setBounds(displayedBounds);
+                }
+            }, true /* traverseTopToBottom */);
 
             if (!deferResume) {
                 ensureVisibleActivitiesConfiguration(topRunningActivity(), preserveWindows);
@@ -5634,12 +5605,6 @@ class Task extends TaskFragment {
             mAtmService.continueWindowLayout();
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
-    }
-
-    private static void processTaskResizeBounds(Task task, Rect displayedBounds) {
-        if (!task.isResizeable()) return;
-
-        task.setBounds(displayedBounds);
     }
 
     boolean willActivityBeVisible(IBinder token) {
@@ -5727,22 +5692,15 @@ class Task extends TaskFragment {
 
         // All activities that came from the package must be
         // restarted as if there was a config change.
-        PooledConsumer c = PooledLambda.obtainConsumer(Task::restartPackage,
-                PooledLambda.__(ActivityRecord.class), starting, packageName);
-        forAllActivities(c);
-        c.recycle();
-
-        return starting;
-    }
-
-    private static void restartPackage(
-            ActivityRecord r, ActivityRecord starting, String packageName) {
-        if (r.info.packageName.equals(packageName)) {
+        forAllActivities(r -> {
+            if (!r.info.packageName.equals(packageName)) return;
             r.forceNewConfig = true;
             if (starting != null && r == starting && r.mVisibleRequested) {
                 r.startFreezingScreenLocked(CONFIG_SCREEN_LAYOUT);
             }
-        }
+        });
+
+        return starting;
     }
 
     Task reuseOrCreateTask(ActivityInfo info, Intent intent, boolean toTop) {

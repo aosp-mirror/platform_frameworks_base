@@ -3102,9 +3102,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     void finishVoiceTask(IVoiceInteractionSession session) {
-        forAllRootTasks(rootTask -> {
-            rootTask.finishVoiceTask(session);
-        });
+        final IBinder binder = session.asBinder();
+        forAllLeafTasks(t -> t.finishIfVoiceTask(binder), true /* traverseTopToBottom */);
     }
 
     /**
