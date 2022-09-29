@@ -11613,6 +11613,25 @@ package android.content.pm {
     field public static final int STATUS_SUCCESS = 0; // 0x0
   }
 
+  public static final class PackageInstaller.PreapprovalDetails implements android.os.Parcelable {
+    method public int describeContents();
+    method @Nullable public android.graphics.Bitmap getIcon();
+    method @NonNull public String getLabel();
+    method @NonNull public android.icu.util.ULocale getLocale();
+    method @NonNull public String getPackageName();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.PackageInstaller.PreapprovalDetails> CREATOR;
+  }
+
+  public static final class PackageInstaller.PreapprovalDetails.Builder {
+    ctor public PackageInstaller.PreapprovalDetails.Builder();
+    method @NonNull public android.content.pm.PackageInstaller.PreapprovalDetails build();
+    method @NonNull public android.content.pm.PackageInstaller.PreapprovalDetails.Builder setIcon(@NonNull android.graphics.Bitmap);
+    method @NonNull public android.content.pm.PackageInstaller.PreapprovalDetails.Builder setLabel(@NonNull String);
+    method @NonNull public android.content.pm.PackageInstaller.PreapprovalDetails.Builder setLocale(@NonNull android.icu.util.ULocale);
+    method @NonNull public android.content.pm.PackageInstaller.PreapprovalDetails.Builder setPackageName(@NonNull String);
+  }
+
   public static class PackageInstaller.Session implements java.io.Closeable {
     method public void abandon();
     method public void addChildSessionId(int);
