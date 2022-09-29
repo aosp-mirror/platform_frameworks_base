@@ -18,9 +18,9 @@ package com.android.settingslib.spa.gallery
 
 import android.os.Bundle
 import androidx.navigation.NamedNavArgument
-import com.android.settingslib.spa.framework.common.SettingsEntryRepository
 import com.android.settingslib.spa.framework.common.SettingsPage
 import com.android.settingslib.spa.framework.common.SettingsPageProviderRepository
+import com.android.settingslib.spa.framework.common.SpaEnvironment
 import com.android.settingslib.spa.gallery.button.ActionButtonPageProvider
 import com.android.settingslib.spa.gallery.home.HomePageProvider
 import com.android.settingslib.spa.gallery.page.ArgumentPageProvider
@@ -62,9 +62,8 @@ fun createSettingsPage(
     )
 }
 
-object SpaEnvironment {
-    val PageProviderRepository: SettingsPageProviderRepository by
-    lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+object GallerySpaEnvironment : SpaEnvironment() {
+    override val pageProviderRepository = lazy {
         SettingsPageProviderRepository(
             allPageProviders = listOf(
                 HomePageProvider,
@@ -88,9 +87,7 @@ object SpaEnvironment {
         )
     }
 
-    val EntryRepository: SettingsEntryRepository by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
-        SettingsEntryRepository(PageProviderRepository)
-    }
+    override val browseActivityClass = MainActivity::class.java
 
-    // TODO: add other environment setup here.
+    override val entryProviderAuthorities = "com.android.spa.gallery.provider"
 }

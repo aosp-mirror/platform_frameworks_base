@@ -45,3 +45,9 @@ java_defaults {
         "-J-Xmx4G",
     ],
 }
+
+// Expose the srcs to tests, so the tests can access the internal classes.
+filegroup {
+    name: "SpaPrivilegedLib_srcs",
+    srcs: ["src/**/*.kt"],
+}

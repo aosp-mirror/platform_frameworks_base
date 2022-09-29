@@ -193,6 +193,8 @@ enum DebugLevel {
  */
 #define PROPERTY_DRAWING_ENABLED "debug.hwui.drawing_enabled"
 
+#define PROPERTY_MEMORY_POLICY "debug.hwui.app_memory_policy"
+
 ///////////////////////////////////////////////////////////////////////////////
 // Misc
 ///////////////////////////////////////////////////////////////////////////////
@@ -292,14 +294,25 @@ public:
 
     static bool enableWebViewOverlays;
 
+    static bool isHighEndGfx;
+    static bool isLowRam;
+    static bool isSystemOrPersistent;
+
     static StretchEffectBehavior getStretchEffectBehavior() {
         return stretchEffectBehavior;
     }
 
     static void setIsHighEndGfx(bool isHighEndGfx) {
+        Properties::isHighEndGfx = isHighEndGfx;
         stretchEffectBehavior = isHighEndGfx ?
             StretchEffectBehavior::ShaderHWUI :
             StretchEffectBehavior::UniformScale;
+    }
+
+    static void setIsLowRam(bool isLowRam) { Properties::isLowRam = isLowRam; }
+
+    static void setIsSystemOrPersistent(bool isSystemOrPersistent) {
+        Properties::isSystemOrPersistent = isSystemOrPersistent;
     }
 
     /**

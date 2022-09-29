@@ -296,6 +296,14 @@ public class ContentRecorderTests extends WindowTestsBase {
     }
 
     @Test
+    public void testRemoveTask_stopsRecording_nullSessionShouldNotThrowExceptions() {
+        mContentRecorder.setContentRecordingSession(mTaskSession);
+        mContentRecorder.updateRecording();
+        mContentRecorder.setContentRecordingSession(null);
+        mTask.removeImmediately();
+    }
+
+    @Test
     public void testUpdateMirroredSurface_capturedAreaResized() {
         mContentRecorder.setContentRecordingSession(mDisplaySession);
         mContentRecorder.updateRecording();

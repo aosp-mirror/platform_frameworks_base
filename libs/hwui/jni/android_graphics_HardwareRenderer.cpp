@@ -271,6 +271,16 @@ static void android_view_ThreadedRenderer_setIsHighEndGfx(JNIEnv* env, jobject c
     Properties::setIsHighEndGfx(jIsHighEndGfx);
 }
 
+static void android_view_ThreadedRenderer_setIsLowRam(JNIEnv* env, jobject clazz,
+                                                      jboolean isLowRam) {
+    Properties::setIsLowRam(isLowRam);
+}
+
+static void android_view_ThreadedRenderer_setIsSystemOrPersistent(JNIEnv* env, jobject clazz,
+                                                                  jboolean isSystemOrPersistent) {
+    Properties::setIsSystemOrPersistent(isSystemOrPersistent);
+}
+
 static int android_view_ThreadedRenderer_syncAndDrawFrame(JNIEnv* env, jobject clazz,
                                                           jlong proxyPtr, jlongArray frameInfo,
                                                           jint frameInfoSize) {
@@ -949,6 +959,9 @@ static const JNINativeMethod gMethods[] = {
         {"nSetColorMode", "(JI)V", (void*)android_view_ThreadedRenderer_setColorMode},
         {"nSetSdrWhitePoint", "(JF)V", (void*)android_view_ThreadedRenderer_setSdrWhitePoint},
         {"nSetIsHighEndGfx", "(Z)V", (void*)android_view_ThreadedRenderer_setIsHighEndGfx},
+        {"nSetIsLowRam", "(Z)V", (void*)android_view_ThreadedRenderer_setIsLowRam},
+        {"nSetIsSystemOrPersistent", "(Z)V",
+         (void*)android_view_ThreadedRenderer_setIsSystemOrPersistent},
         {"nSyncAndDrawFrame", "(J[JI)I", (void*)android_view_ThreadedRenderer_syncAndDrawFrame},
         {"nDestroy", "(JJ)V", (void*)android_view_ThreadedRenderer_destroy},
         {"nRegisterAnimatingRenderNode", "(JJ)V",

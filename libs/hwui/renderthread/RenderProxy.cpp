@@ -196,7 +196,8 @@ void RenderProxy::trimMemory(int level) {
     // Avoid creating a RenderThread to do a trimMemory.
     if (RenderThread::hasInstance()) {
         RenderThread& thread = RenderThread::getInstance();
-        thread.queue().post([&thread, level]() { CanvasContext::trimMemory(thread, level); });
+        const auto trimLevel = static_cast<TrimLevel>(level);
+        thread.queue().post([&thread, trimLevel]() { thread.trimMemory(trimLevel); });
     }
 }
 
@@ -205,7 +206,7 @@ void RenderProxy::purgeCaches() {
         RenderThread& thread = RenderThread::getInstance();
         thread.queue().post([&thread]() {
             if (thread.getGrContext()) {
-                thread.cacheManager().trimMemory(CacheManager::TrimMemoryMode::Complete);
+                thread.cacheManager().trimMemory(TrimLevel::COMPLETE);
             }
         });
     }

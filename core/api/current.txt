@@ -4426,6 +4426,7 @@ package android.app {
     method public void readFromParcel(android.os.Parcel);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.ActivityManager.MemoryInfo> CREATOR;
+    field public long advertisedMem;
     field public long availMem;
     field public boolean lowMemory;
     field public long threshold;
@@ -18645,8 +18646,10 @@ package android.hardware.lights {
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.lights.Light> CREATOR;
     field public static final int LIGHT_CAPABILITY_BRIGHTNESS = 1; // 0x1
-    field public static final int LIGHT_CAPABILITY_RGB = 0; // 0x0
+    field public static final int LIGHT_CAPABILITY_COLOR_RGB = 2; // 0x2
+    field @Deprecated public static final int LIGHT_CAPABILITY_RGB = 0; // 0x0
     field public static final int LIGHT_TYPE_INPUT = 10001; // 0x2711
+    field public static final int LIGHT_TYPE_KEYBOARD_BACKLIGHT = 10003; // 0x2713
     field public static final int LIGHT_TYPE_MICROPHONE = 8; // 0x8
     field public static final int LIGHT_TYPE_PLAYER_ID = 10002; // 0x2712
   }
@@ -51882,10 +51885,11 @@ package android.view.accessibility {
     method public void setSpeechStateChangeTypes(int);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION = 4; // 0x4
+    field public static final int CONTENT_CHANGE_TYPE_CONTENT_INVALID = 1024; // 0x400
     field public static final int CONTENT_CHANGE_TYPE_DRAG_CANCELLED = 512; // 0x200
     field public static final int CONTENT_CHANGE_TYPE_DRAG_DROPPED = 256; // 0x100
     field public static final int CONTENT_CHANGE_TYPE_DRAG_STARTED = 128; // 0x80
-    field public static final int CONTENT_CHANGE_TYPE_INVALID = 1024; // 0x400
+    field public static final int CONTENT_CHANGE_TYPE_ERROR = 2048; // 0x800
     field public static final int CONTENT_CHANGE_TYPE_PANE_APPEARED = 16; // 0x10
     field public static final int CONTENT_CHANGE_TYPE_PANE_DISAPPEARED = 32; // 0x20
     field public static final int CONTENT_CHANGE_TYPE_PANE_TITLE = 8; // 0x8

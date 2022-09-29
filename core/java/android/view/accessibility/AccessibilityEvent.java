@@ -24,7 +24,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Log;
-import android.widget.TextView;
 
 import com.android.internal.util.BitUtils;
 
@@ -688,15 +687,27 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
 
     /**
      * Change type for {@link #TYPE_WINDOW_CONTENT_CHANGED} event:
-     * It means the content is invalid or associated with an error.
-     * For example, text that sets an error message, such as when input isn't in a valid format,
-     * should send this event and use {@link AccessibilityNodeInfo#setError} to
-     * provide more context.
+     * The source node changed its content validity returned by
+     * {@link AccessibilityNodeInfo#isContentInvalid}.
+     * The view changing content validity should call
+     * {@link AccessibilityNodeInfo#setContentInvalid} and then send this event.
      *
-     * @see AccessibilityNodeInfo#setError
-     * @see TextView#setError
+     * @see AccessibilityNodeInfo#isContentInvalid
+     * @see AccessibilityNodeInfo#setContentInvalid
      */
-    public static final int CONTENT_CHANGE_TYPE_INVALID = 0x0000400;
+    public static final int CONTENT_CHANGE_TYPE_CONTENT_INVALID = 0x0000400;
+
+    /**
+     * Change type for {@link #TYPE_WINDOW_CONTENT_CHANGED} event:
+     * The source node changed its erroneous content's error message returned by
+     * {@link AccessibilityNodeInfo#getError}.
+     * The view changing erroneous content's error message should call
+     * {@link AccessibilityNodeInfo#setError} and then send this event.
+     *
+     * @see AccessibilityNodeInfo#getError
+     * @see AccessibilityNodeInfo#setError
+     */
+    public static final int CONTENT_CHANGE_TYPE_ERROR = 0x0000800;
 
     /** Change type for {@link #TYPE_SPEECH_STATE_CHANGE} event: another service is speaking. */
     public static final int SPEECH_STATE_SPEAKING_START = 0x00000001;
@@ -823,7 +834,8 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
                 CONTENT_CHANGE_TYPE_DRAG_STARTED,
                 CONTENT_CHANGE_TYPE_DRAG_DROPPED,
                 CONTENT_CHANGE_TYPE_DRAG_CANCELLED,
-                CONTENT_CHANGE_TYPE_INVALID,
+                CONTENT_CHANGE_TYPE_CONTENT_INVALID,
+                CONTENT_CHANGE_TYPE_ERROR,
             })
     public @interface ContentChangeTypes {}
 
@@ -1090,7 +1102,9 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
             case CONTENT_CHANGE_TYPE_DRAG_STARTED: return "CONTENT_CHANGE_TYPE_DRAG_STARTED";
             case CONTENT_CHANGE_TYPE_DRAG_DROPPED: return "CONTENT_CHANGE_TYPE_DRAG_DROPPED";
             case CONTENT_CHANGE_TYPE_DRAG_CANCELLED: return "CONTENT_CHANGE_TYPE_DRAG_CANCELLED";
-            case CONTENT_CHANGE_TYPE_INVALID: return "CONTENT_CHANGE_TYPE_INVALID";
+            case CONTENT_CHANGE_TYPE_CONTENT_INVALID:
+                return "CONTENT_CHANGE_TYPE_CONTENT_INVALID";
+            case CONTENT_CHANGE_TYPE_ERROR: return "CONTENT_CHANGE_TYPE_ERROR";
             default: return Integer.toHexString(type);
         }
     }

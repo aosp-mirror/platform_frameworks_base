@@ -53,12 +53,10 @@ import android.hardware.display.DisplayedContentSamplingAttributes;
 import android.hardware.display.IDisplayManagerCallback;
 import android.hardware.display.IVirtualDisplayCallback;
 import android.hardware.display.VirtualDisplayConfig;
-import android.hardware.input.InputManagerInternal;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.MessageQueue;
 import android.os.Process;
-import android.platform.test.annotations.Presubmit;
 import android.view.Display;
 import android.view.DisplayCutout;
 import android.view.DisplayEventReceiver;
@@ -78,6 +76,7 @@ import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.companion.virtual.VirtualDeviceManagerInternal;
 import com.android.server.display.DisplayManagerService.SyncRoot;
+import com.android.server.input.InputManagerInternal;
 import com.android.server.lights.LightsManager;
 import com.android.server.sensors.SensorManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
@@ -106,7 +105,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.LongStream;
 
 @SmallTest
-@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class DisplayManagerServiceTest {
     private static final int MSG_REGISTER_DEFAULT_DISPLAY_ADAPTERS = 1;

@@ -286,7 +286,7 @@ class Ledger {
             final int idx = (mRewardBucketIndex - b + NUM_REWARD_BUCKET_WINDOWS)
                     % NUM_REWARD_BUCKET_WINDOWS;
             final RewardBucket rewardBucket = mRewardBuckets[idx];
-            if (rewardBucket == null) {
+            if (rewardBucket == null || rewardBucket.startTimeMs == 0) {
                 continue;
             }
 

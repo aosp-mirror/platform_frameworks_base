@@ -31,7 +31,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.android.settingslib.spa.R
-import com.android.settingslib.spa.framework.common.SettingsPageProviderRepository
+import com.android.settingslib.spa.framework.common.SpaEnvironment
 import com.android.settingslib.spa.framework.compose.localNavController
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.framework.util.navRoute
@@ -48,9 +48,9 @@ const val NULL_PAGE_NAME = "NULL"
  *   $ adb shell am start -n <BrowseActivityComponent> -e spa:SpaActivity:destination HOME
  *   $ adb shell am start -n <BrowseActivityComponent> -e spa:SpaActivity:destination ARGUMENT/bar/5
  */
-open class BrowseActivity(
-    private val sppRepository: SettingsPageProviderRepository,
-) : ComponentActivity() {
+open class BrowseActivity(spaEnvironment: SpaEnvironment) : ComponentActivity() {
+    private val sppRepository by spaEnvironment.pageProviderRepository
+
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R.style.Theme_SpaLib_DayNight)
         super.onCreate(savedInstanceState)

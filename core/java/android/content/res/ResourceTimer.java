@@ -19,6 +19,7 @@ package android.content.res;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 
+import android.app.AppProtoEnums;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -30,6 +31,7 @@ import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.FastPrintWriter;
+import com.android.internal.util.FrameworkStatsLog;
 
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
@@ -111,6 +113,14 @@ public final class ResourceTimer {
     private static Config sConfig;
 
     /**
+     * This array contains the statsd enum associated with each timer entry.  A value of NONE (0)
+     * means that the entry should not be logged to statsd.  (This would be the case for timers
+     * that are created for temporary debugging.)
+     */
+    @GuardedBy("sLock")
+    private static int[] sApiMap;
+
+    /**
      * A singleton Summary object that is refilled from the native side.  The length of the array
      * is the number of timers that can be fetched.  nativeGetTimers() will fill the array to the
      * smaller of the length of the array or the actual number of timers in the runtime.  The
@@ -165,6 +175,19 @@ public final class ResourceTimer {
                 sTimers[i].percentile = new int[sConfig.maxBuckets];
                 sTimers[i].largest = new int[sConfig.maxLargest];
             }
+            // Map the values returned from the runtime to statsd enumerals  The runtime may
+            // return timers that are not meant to be logged via statsd.  Such timers are mapped
+            // to RESOURCE_API_NONE.
+            sApiMap = new int[sConfig.maxTimer];
+            for (int i = 0; i < sApiMap.length; i++) {
+                if (sConfig.timers[i].equals("GetResourceValue")) {
+                    sApiMap[i] = AppProtoEnums.RESOURCE_API_GET_VALUE;
+                } else if (sConfig.timers[i].equals("RetrieveAttributes")) {
+                    sApiMap[i] = AppProtoEnums.RESOURCE_API_RETRIEVE_ATTRIBUTES;
+                } else {
+                    sApiMap[i] = AppProtoEnums.RESOURCE_API_NONE;
+                }
+            }
 
             sCurrentPoint = 0;
             startTimer();
@@ -194,7 +217,9 @@ public final class ResourceTimer {
             delay = sPublicationPoints[sCurrentPoint];
         } else {
             // Repeat with the final publication point.
-            delay = sCurrentPoint * sPublicationPoints[sPublicationPoints.length - 1];
+            final long repeated = sPublicationPoints[sPublicationPoints.length - 1];
+            final int prelude = sPublicationPoints.length - 1;
+            delay = (sCurrentPoint - prelude) * repeated;
         }
         // Convert minutes to milliseconds.
         delay *= 60 * 1000;
@@ -223,10 +248,19 @@ public final class ResourceTimer {
         update(true);
         // Log the number of records read.  This happens a few times a day.
         for (int i = 0; i < sTimers.length; i++) {
-            if (sTimers[i].count > 0) {
+            var timer = sTimers[i];
+            if (timer.count > 0) {
                 Log.i(TAG, TextUtils.formatSimple("%s count=%d pvalues=%s",
-                                sConfig.timers[i], sTimers[i].count,
-                                packedString(sTimers[i].percentile)));
+                                sConfig.timers[i], timer.count, packedString(timer.percentile)));
+                if (sApiMap[i] != AppProtoEnums.RESOURCE_API_NONE) {
+                    FrameworkStatsLog.write(FrameworkStatsLog.RESOURCE_API_INFO,
+                            sApiMap[i],
+                            timer.count, timer.total,
+                            timer.percentile[0], timer.percentile[1],
+                            timer.percentile[2], timer.percentile[3],
+                            timer.largest[0], timer.largest[1], timer.largest[2],
+                            timer.largest[3], timer.largest[4]);
+                }
             }
         }
         sCurrentPoint++;

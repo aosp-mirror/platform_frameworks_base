@@ -18,7 +18,6 @@ package com.android.settingslib.spaprivileged.model.app
 
 import android.app.Application
 import android.content.pm.ApplicationInfo
-import android.content.pm.UserInfo
 import android.icu.text.Collator
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -48,28 +47,29 @@ internal data class AppListData<T : AppRecord>(
 internal class AppListViewModel<T : AppRecord>(
     application: Application,
 ) : AndroidViewModel(application) {
-    val userInfo = StateFlowBridge<UserInfo>()
+    val appListConfig = StateFlowBridge<AppListConfig>()
     val listModel = StateFlowBridge<AppListModel<T>>()
     val showSystem = StateFlowBridge<Boolean>()
     val option = StateFlowBridge<Int>()
     val searchQuery = StateFlowBridge<String>()
 
-    private val appsRepository = AppsRepository(application)
+    private val appListRepository = AppListRepository(application)
     private val appRepository = AppRepositoryImpl(application)
     private val collator = Collator.getInstance().freeze()
     private val labelMap = ConcurrentHashMap<String, String>()
     private val scope = viewModelScope + Dispatchers.Default
 
-    private val userIdFlow = userInfo.flow.map { it.id }
+    private val userIdFlow = appListConfig.flow.map { it.userId }
 
     private val recordListFlow = listModel.flow
-        .flatMapLatest { it.transform(userIdFlow, appsRepository.loadApps(userInfo.flow)) }
+        .flatMapLatest { it.transform(userIdFlow, appListRepository.loadApps(appListConfig.flow)) }
         .shareIn(scope = scope, started = SharingStarted.Eagerly, replay = 1)
 
-    private val systemFilteredFlow = appsRepository.showSystemPredicate(userIdFlow, showSystem.flow)
-        .combine(recordListFlow) { showAppPredicate, recordList ->
-            recordList.filter { showAppPredicate(it.app) }
-        }
+    private val systemFilteredFlow =
+        appListRepository.showSystemPredicate(userIdFlow, showSystem.flow)
+            .combine(recordListFlow) { showAppPredicate, recordList ->
+                recordList.filter { showAppPredicate(it.app) }
+            }
 
     val appListDataFlow = option.flow.flatMapLatest(::filterAndSort)
         .combine(searchQuery.flow) { appListData, searchQuery ->

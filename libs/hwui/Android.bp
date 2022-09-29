@@ -521,6 +521,7 @@ cc_defaults {
         "Interpolator.cpp",
         "LightingInfo.cpp",
         "Matrix.cpp",
+        "MemoryPolicy.cpp",
         "PathParser.cpp",
         "Properties.cpp",
         "PropertyValuesAnimatorSet.cpp",

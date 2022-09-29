@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.hardware.input;
+package com.android.server.input;
 
 import android.annotation.NonNull;
 import android.graphics.PointF;

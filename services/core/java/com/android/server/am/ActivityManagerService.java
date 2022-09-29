@@ -22,6 +22,7 @@ import static android.Manifest.permission.FILTER_EVENTS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.Manifest.permission.MANAGE_ACTIVITY_TASKS;
+import static android.Manifest.permission.MANAGE_USERS;
 import static android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND;
 import static android.Manifest.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND;
 import static android.app.ActivityManager.INSTR_FLAG_ALWAYS_CHECK_SIGNATURE;
@@ -258,6 +259,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.Rect;
+import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerInternal;
 import android.media.audiofx.AudioEffect;
 import android.net.ConnectivityManager;
@@ -332,6 +334,7 @@ import android.util.SparseIntArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.util.proto.ProtoUtils;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -2366,6 +2369,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mUiHandler = injector.getUiHandler(null /* service */);
         mUidObserverController = new UidObserverController(mUiHandler);
         mUserController = new UserController(this);
+        mInjector.mUserController = mUserController;
         mPendingIntentController =
                 new PendingIntentController(handlerThread.getLooper(), mUserController, mConstants);
         mAppRestrictionController = new AppRestrictionController(mContext, this);
@@ -2480,6 +2484,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mUgmInternal = LocalServices.getService(UriGrantsManagerInternal.class);
 
         mUserController = new UserController(this);
+        mInjector.mUserController = mUserController;
 
         mPendingIntentController = new PendingIntentController(
                 mHandlerThread.getLooper(), mUserController, mConstants);
@@ -6057,6 +6062,24 @@ public class ActivityManagerService extends IActivityManager.Stub
      * This can be called with or without the global lock held.
      */
     @PermissionMethod
+    private void enforceCallingHasAtLeastOnePermission(String func, String... permissions) {
+        for (String permission : permissions) {
+            if (checkCallingPermission(permission) == PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
+        }
+
+        String msg = "Permission Denial: " + func + " from pid="
+                + Binder.getCallingPid()
+                + ", uid=" + Binder.getCallingUid()
+                + " requires one of " + Arrays.toString(permissions);
+        Slog.w(TAG, msg);
+        throw new SecurityException(msg);
+    }
+
+    /**
+     * This can be called with or without the global lock held.
+     */
     void enforcePermission(String permission, int pid, int uid, String func) {
         if (checkPermission(permission, pid, uid) == PackageManager.PERMISSION_GRANTED) {
             return;
@@ -16333,8 +16356,34 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public boolean startUserInBackgroundOnSecondaryDisplay(int userId, int displayId) {
+        int[] displayIds = getSecondaryDisplayIdsForStartingBackgroundUsers();
+        boolean validDisplay = false;
+        if (displayIds != null) {
+            for (int i = 0; i < displayIds.length; i++) {
+                if (displayId == displayIds[i]) {
+                    validDisplay = true;
+                    break;
+                }
+            }
+        }
+        if (!validDisplay) {
+            throw new IllegalArgumentException("Invalid display (" + displayId + ") to start user. "
+                    + "Valid options are: " + Arrays.toString(displayIds));
+        }
+
+        if (DEBUG_MU) {
+            Slogf.d(TAG_MU, "Calling startUserOnSecondaryDisplay(%d, %d) using injector %s", userId,
+                    displayId, mInjector);
+        }
         // Permission check done inside UserController.
-        return mUserController.startUserOnSecondaryDisplay(userId, displayId);
+        return mInjector.startUserOnSecondaryDisplay(userId, displayId);
+    }
+
+    @Override
+    public int[] getSecondaryDisplayIdsForStartingBackgroundUsers() {
+        enforceCallingHasAtLeastOnePermission("getSecondaryDisplayIdsForStartingBackgroundUsers()",
+                MANAGE_USERS, INTERACT_ACROSS_USERS);
+        return mInjector.getSecondaryDisplayIdsForStartingBackgroundUsers();
     }
 
     /**
@@ -18343,8 +18392,10 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @VisibleForTesting
     public static class Injector {
+        private final Context mContext;
         private NetworkManagementInternal mNmi;
-        private Context mContext;
+
+        private UserController mUserController;
 
         public Injector(Context context) {
             mContext = context;
@@ -18367,6 +18418,103 @@ public class ActivityManagerService extends IActivityManager.Stub
                 return mNmi.isNetworkRestrictedForUid(uid);
             }
             return false;
+        }
+
+        /**
+         * Called by {@code AMS.getSecondaryDisplayIdsForStartingBackgroundUsers()}.
+         */
+        // NOTE: ideally Injector should have no complex logic, but if this logic was moved to AMS,
+        // it could not be tested with the existing ActivityManagerServiceTest (as DisplayManager,
+        // DisplayInfo, etc... are final and UserManager.isUsersOnSecondaryDisplaysEnabled is
+        // static).
+        // So, the logic was added here, and tested on ActivityManagerServiceInjectorTest (which
+        // was added on FrameworksMockingServicesTests and hence uses Extended Mockito to mock
+        // final and static stuff)
+        @Nullable
+        public int[] getSecondaryDisplayIdsForStartingBackgroundUsers() {
+            if (!UserManager.isUsersOnSecondaryDisplaysEnabled()) {
+                Slogf.w(TAG, "getSecondaryDisplayIdsForStartingBackgroundUsers(): not supported");
+                return null;
+            }
+
+            // NOTE: DisplayManagerInternal doesn't have a method to list all displays
+            DisplayManager displayManager = mContext.getSystemService(DisplayManager.class);
+
+            Display[] allDisplays = displayManager.getDisplays();
+
+            // allDisplays should contain at least Display.DEFAULT_DISPLAY, but it's better to
+            // double check, just in case...
+            if (allDisplays == null || allDisplays.length == 0) {
+                Slogf.wtf(TAG, "displayManager (%s) returned no displays", displayManager);
+                return null;
+            }
+            boolean hasDefaultDisplay = false;
+            for (Display display : allDisplays) {
+                if (display.getDisplayId() == Display.DEFAULT_DISPLAY) {
+                    hasDefaultDisplay = true;
+                    break;
+                }
+            }
+            if (!hasDefaultDisplay) {
+                Slogf.wtf(TAG, "displayManager (%s) has %d displays (%s), but none has id "
+                        + "DEFAULT_DISPLAY (%d)", displayManager, allDisplays.length,
+                        Arrays.toString(allDisplays), Display.DEFAULT_DISPLAY);
+                return null;
+            }
+
+            // Starts with all displays but DEFAULT_DISPLAY
+            int[] displayIds = new int[allDisplays.length - 1];
+
+            // TODO(b/247592632): check for other properties like isSecure or proper display type
+            int numberValidDisplays = 0;
+            for (Display display : allDisplays) {
+                int displayId = display.getDisplayId();
+                if (display.isValid() && displayId != Display.DEFAULT_DISPLAY) {
+                    displayIds[numberValidDisplays++] = displayId;
+                }
+            }
+
+            if (numberValidDisplays == 0) {
+                // TODO(b/247580038): remove this workaround once a virtual display on Car's
+                // KitchenSink (or other app) can be used while running CTS tests on devices that
+                // don't have a real display.
+                // STOPSHIP: if not removed, it should at least be unit tested
+                String testingProp = "fw.secondary_display_for_starting_users_for_testing_purposes";
+                int displayId = SystemProperties.getInt(testingProp, Display.DEFAULT_DISPLAY);
+                if (displayId != Display.DEFAULT_DISPLAY && displayId > 0) {
+                    Slogf.w(TAG, "getSecondaryDisplayIdsForStartingBackgroundUsers(): no valid "
+                            + "display found, but returning %d as set by property %s", displayId,
+                            testingProp);
+                    return new int[] { displayId };
+                }
+                Slogf.e(TAG, "getSecondaryDisplayIdsForStartingBackgroundUsers(): no valid display"
+                        + " on %s", Arrays.toString(allDisplays));
+                return null;
+            }
+
+            if (numberValidDisplays != displayIds.length) {
+                int[] validDisplayIds = new int[numberValidDisplays];
+                System.arraycopy(displayIds, 0, validDisplayIds, 0, numberValidDisplays);
+                if (DEBUG_MU) {
+                    Slogf.d(TAG, "getSecondaryDisplayIdsForStartingBackgroundUsers(): returning "
+                            + "only valid displays (%d instead of %d): %s", numberValidDisplays,
+                            displayIds.length, Arrays.toString(validDisplayIds));
+                }
+                return validDisplayIds;
+            }
+
+            if (DEBUG_MU) {
+                Slogf.d(TAG, "getSecondaryDisplayIdsForStartingBackgroundUsers(): returning all "
+                        + "(but DEFAULT_DISPLAY) displays : %s", Arrays.toString(displayIds));
+            }
+            return displayIds;
+        }
+
+        /**
+         * Called by {@code AMS.startUserOnSecondaryDisplay()}.
+         */
+        public boolean startUserOnSecondaryDisplay(int userId, int displayId) {
+            return mUserController.startUserOnSecondaryDisplay(userId, displayId);
         }
 
         /**

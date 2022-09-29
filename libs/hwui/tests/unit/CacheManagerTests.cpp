@@ -58,7 +58,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(CacheManager, trimMemory) {
     ASSERT_TRUE(SkImage_pinAsTexture(image.get(), grContext));
 
     // attempt to trim all memory while we still hold strong refs
-    renderThread.cacheManager().trimMemory(CacheManager::TrimMemoryMode::Complete);
+    renderThread.cacheManager().trimMemory(TrimLevel::COMPLETE);
     ASSERT_TRUE(0 == grContext->getResourceCachePurgeableBytes());
 
     // free the surfaces
@@ -75,11 +75,11 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(CacheManager, trimMemory) {
     ASSERT_TRUE(renderThread.cacheManager().getBackgroundCacheSize() < purgeableBytes);
 
     // UI hidden and make sure only some got purged (unique should remain)
-    renderThread.cacheManager().trimMemory(CacheManager::TrimMemoryMode::UiHidden);
+    renderThread.cacheManager().trimMemory(TrimLevel::UI_HIDDEN);
     ASSERT_TRUE(0 < grContext->getResourceCachePurgeableBytes());
     ASSERT_TRUE(renderThread.cacheManager().getBackgroundCacheSize() > getCacheUsage(grContext));
 
     // complete and make sure all get purged
-    renderThread.cacheManager().trimMemory(CacheManager::TrimMemoryMode::Complete);
+    renderThread.cacheManager().trimMemory(TrimLevel::COMPLETE);
     ASSERT_TRUE(0 == grContext->getResourceCachePurgeableBytes());
 }

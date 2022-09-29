@@ -119,6 +119,9 @@ class BroadcastProcessQueue {
 
     private boolean mProcessCached;
 
+    private String mCachedToString;
+    private String mCachedToShortString;
+
     public BroadcastProcessQueue(@NonNull BroadcastConstants constants,
             @NonNull String processName, int uid) {
         this.constants = Objects.requireNonNull(constants);
@@ -327,7 +330,7 @@ class BroadcastProcessQueue {
     }
 
     public boolean isEmpty() {
-        return (mActive != null) && mPending.isEmpty();
+        return mPending.isEmpty();
     }
 
     public boolean isActive() {
@@ -384,6 +387,12 @@ class BroadcastProcessQueue {
                 mRunnableAt = runnableAt + constants.DELAY_CACHED_MILLIS;
             } else {
                 mRunnableAt = runnableAt + constants.DELAY_NORMAL_MILLIS;
+            }
+
+            // If we have too many broadcasts pending, bypass any delays that
+            // might have been applied above to aid draining
+            if (mPending.size() >= constants.MAX_PENDING_BROADCASTS) {
+                mRunnableAt = runnableAt;
             }
         } else {
             mRunnableAt = Long.MAX_VALUE;
@@ -452,13 +461,19 @@ class BroadcastProcessQueue {
 
     @Override
     public String toString() {
-        return "BroadcastProcessQueue{"
-                + Integer.toHexString(System.identityHashCode(this))
-                + " " + processName + "/" + UserHandle.formatUid(uid) + "}";
+        if (mCachedToString == null) {
+            mCachedToString = "BroadcastProcessQueue{"
+                    + Integer.toHexString(System.identityHashCode(this))
+                    + " " + processName + "/" + UserHandle.formatUid(uid) + "}";
+        }
+        return mCachedToString;
     }
 
     public String toShortString() {
-        return processName + "/" + UserHandle.formatUid(uid);
+        if (mCachedToShortString == null) {
+            mCachedToShortString = processName + "/" + UserHandle.formatUid(uid);
+        }
+        return mCachedToShortString;
     }
 
     public void dumpLocked(@NonNull IndentingPrintWriter pw) {

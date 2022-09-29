@@ -93,12 +93,14 @@ void DeviceInfo::setWideColorDataspace(ADataSpace dataspace) {
         case ADATASPACE_SCRGB:
             get()->mWideColorSpace = SkColorSpace::MakeSRGB();
             break;
+        default:
+            ALOGW("Unknown dataspace %d", dataspace);
+            // Treat unknown dataspaces as sRGB, so fall through
+            [[fallthrough]];
         case ADATASPACE_SRGB:
             // when sRGB is returned, it means wide color gamut is not supported.
             get()->mWideColorSpace = SkColorSpace::MakeSRGB();
             break;
-        default:
-            LOG_ALWAYS_FATAL("Unreachable: unsupported wide color space.");
     }
 }
 

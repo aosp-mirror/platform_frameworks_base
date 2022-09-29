@@ -101,8 +101,8 @@ public class Flags {
     public static final UnreleasedFlag MODERN_BOUNCER = new UnreleasedFlag(208);
 
     /** Whether UserSwitcherActivity should use modern architecture. */
-    public static final UnreleasedFlag MODERN_USER_SWITCHER_ACTIVITY =
-            new UnreleasedFlag(209, true);
+    public static final ReleasedFlag MODERN_USER_SWITCHER_ACTIVITY =
+            new ReleasedFlag(209, true);
 
     /** Whether the new implementation of UserSwitcherController should be used. */
     public static final UnreleasedFlag REFACTORED_USER_SWITCHER_CONTROLLER =

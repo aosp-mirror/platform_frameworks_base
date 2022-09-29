@@ -44,17 +44,18 @@ import android.util.SparseIntArray;
 import android.util.SparseLongArray;
 import android.util.TimeUtils;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.Clock;
 import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.io.PrintWriter;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
 
 class AppOpsUidStateTrackerImpl implements AppOpsUidStateTracker {
 
     private static final String LOG_TAG = AppOpsUidStateTrackerImpl.class.getSimpleName();
 
-    private final Handler mHandler;
+    private final DelayableExecutor mExecutor;
     private final Clock mClock;
     private ActivityManagerInternal mActivityManagerInternal;
     private AppOpsService.Constants mConstants;
@@ -68,18 +69,46 @@ class AppOpsUidStateTrackerImpl implements AppOpsUidStateTracker {
     private SparseLongArray mPendingCommitTime = new SparseLongArray();
     private SparseBooleanArray mPendingGone = new SparseBooleanArray();
 
-    private ArrayMap<UidStateChangedCallback, Handler> mUidStateChangedCallbacks = new ArrayMap<>();
+    private ArrayMap<UidStateChangedCallback, Executor>
+            mUidStateChangedCallbacks = new ArrayMap<>();
 
     private final EventLog mEventLog;
 
+    @VisibleForTesting
+    interface DelayableExecutor extends Executor {
+
+        void execute(Runnable runnable);
+
+        void executeDelayed(Runnable runnable, long delay);
+    }
+
     AppOpsUidStateTrackerImpl(ActivityManagerInternal activityManagerInternal,
-            Handler handler, Clock clock, AppOpsService.Constants constants) {
+            Handler handler, Executor lockingExecutor, Clock clock,
+            AppOpsService.Constants constants) {
+
+        this(activityManagerInternal, new DelayableExecutor() {
+            @Override
+            public void execute(Runnable runnable) {
+                handler.post(() -> lockingExecutor.execute(runnable));
+            }
+
+            @Override
+            public void executeDelayed(Runnable runnable, long delay) {
+                handler.postDelayed(() -> lockingExecutor.execute(runnable), delay);
+            }
+        }, clock, constants, handler.getLooper().getThread());
+    }
+
+    @VisibleForTesting
+    AppOpsUidStateTrackerImpl(ActivityManagerInternal activityManagerInternal,
+            DelayableExecutor executor, Clock clock, AppOpsService.Constants constants,
+            Thread executorThread) {
         mActivityManagerInternal = activityManagerInternal;
-        mHandler = handler;
+        mExecutor = executor;
         mClock = clock;
         mConstants = constants;
 
-        mEventLog = new EventLog(handler);
+        mEventLog = new EventLog(executor, executorThread);
     }
 
     @Override
@@ -157,11 +186,12 @@ class AppOpsUidStateTrackerImpl implements AppOpsUidStateTracker {
     }
 
     @Override
-    public void addUidStateChangedCallback(Handler handler, UidStateChangedCallback callback) {
+    public void addUidStateChangedCallback(Executor executor, UidStateChangedCallback callback) {
         if (mUidStateChangedCallbacks.containsKey(callback)) {
             throw new IllegalStateException("Callback is already registered.");
         }
-        mUidStateChangedCallbacks.put(callback, handler);
+
+        mUidStateChangedCallbacks.put(callback, executor);
     }
 
     @Override
@@ -232,7 +262,7 @@ class AppOpsUidStateTrackerImpl implements AppOpsUidStateTracker {
                 final long commitTime = mClock.elapsedRealtime() + settleTime;
                 mPendingCommitTime.put(uid, commitTime);
 
-                mHandler.sendMessageDelayed(PooledLambda.obtainMessage(
+                mExecutor.executeDelayed(PooledLambda.obtainRunnable(
                                 AppOpsUidStateTrackerImpl::updateUidPendingStateIfNeeded, this,
                                 uid), settleTime + 1);
             }
@@ -323,10 +353,11 @@ class AppOpsUidStateTrackerImpl implements AppOpsUidStateTracker {
 
             for (int i = 0; i < mUidStateChangedCallbacks.size(); i++) {
                 UidStateChangedCallback cb = mUidStateChangedCallbacks.keyAt(i);
-                Handler h = mUidStateChangedCallbacks.valueAt(i);
+                Executor executor = mUidStateChangedCallbacks.valueAt(i);
 
-                h.sendMessage(PooledLambda.obtainMessage(UidStateChangedCallback::onUidStateChanged,
-                        cb, uid, pendingUidState, foregroundChange));
+                executor.execute(PooledLambda.obtainRunnable(
+                        UidStateChangedCallback::onUidStateChanged, cb, uid, pendingUidState,
+                        foregroundChange));
             }
         }
 
@@ -366,7 +397,8 @@ class AppOpsUidStateTrackerImpl implements AppOpsUidStateTracker {
         // Memory usage: 24 * size bytes
         private static final int EVAL_FOREGROUND_MODE_MAX_SIZE = 200;
 
-        private final Handler mHandler;
+        private final DelayableExecutor mExecutor;
+        private final Thread mExecutorThread;
 
         private int[][] mUpdateUidProcStateLog = new int[UPDATE_UID_PROC_STATE_LOG_MAX_SIZE][3];
         private long[] mUpdateUidProcStateLogTimestamps =
@@ -384,15 +416,16 @@ class AppOpsUidStateTrackerImpl implements AppOpsUidStateTracker {
         private int mEvalForegroundModeLogSize = 0;
         private int mEvalForegroundModeLogHead = 0;
 
-        EventLog(Handler handler) {
-            mHandler = handler;
+        EventLog(DelayableExecutor executor, Thread executorThread) {
+            mExecutor = executor;
+            mExecutorThread = executorThread;
         }
 
         void logUpdateUidProcState(int uid, int procState, int capability) {
             if (UPDATE_UID_PROC_STATE_LOG_MAX_SIZE == 0) {
                 return;
             }
-            mHandler.sendMessage(PooledLambda.obtainMessage(EventLog::logUpdateUidProcStateAsync,
+            mExecutor.execute(PooledLambda.obtainRunnable(EventLog::logUpdateUidProcStateAsync,
                     this, System.currentTimeMillis(), uid, procState, capability));
         }
 
@@ -416,7 +449,7 @@ class AppOpsUidStateTrackerImpl implements AppOpsUidStateTracker {
             if (COMMIT_UID_STATE_LOG_MAX_SIZE == 0) {
                 return;
             }
-            mHandler.sendMessage(PooledLambda.obtainMessage(EventLog::logCommitUidStateAsync,
+            mExecutor.execute(PooledLambda.obtainRunnable(EventLog::logCommitUidStateAsync,
                     this, System.currentTimeMillis(), uid, uidState, capability, visible));
         }
 
@@ -442,7 +475,7 @@ class AppOpsUidStateTrackerImpl implements AppOpsUidStateTracker {
             if (EVAL_FOREGROUND_MODE_MAX_SIZE == 0) {
                 return;
             }
-            mHandler.sendMessage(PooledLambda.obtainMessage(EventLog::logEvalForegroundModeAsync,
+            mExecutor.execute(PooledLambda.obtainRunnable(EventLog::logEvalForegroundModeAsync,
                     this, System.currentTimeMillis(), uid, uidState, capability, code, result));
         }
 
@@ -466,22 +499,6 @@ class AppOpsUidStateTrackerImpl implements AppOpsUidStateTracker {
         }
 
         void dumpEvents(PrintWriter pw) {
-            if (Thread.currentThread() != mHandler.getLooper().getThread()) {
-                // All operations are done on the handler's thread
-                CountDownLatch latch = new CountDownLatch(1);
-                mHandler.post(() -> {
-                    dumpEvents(pw);
-                    latch.countDown();
-                });
-
-                try {
-                    latch.await();
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-                return;
-            }
-
             int updateIdx = 0;
             int commitIdx = 0;
             int evalIdx = 0;
@@ -536,13 +553,13 @@ class AppOpsUidStateTrackerImpl implements AppOpsUidStateTracker {
             pw.print(" UPDATE_UID_PROC_STATE");
 
             pw.print(" uid=");
-            pw.print(uid);
+            pw.print(String.format("%-8d", uid));
 
             pw.print(" procState=");
             pw.print(String.format("%-30s", ActivityManager.procStateToString(procState)));
 
             pw.print(" capability=");
-            pw.print(ActivityManager.getCapabilitiesSummary(capability));
+            pw.print(ActivityManager.getCapabilitiesSummary(capability) + " ");
 
             pw.println();
         }
@@ -559,13 +576,13 @@ class AppOpsUidStateTrackerImpl implements AppOpsUidStateTracker {
             pw.print(" COMMIT_UID_STATE     ");
 
             pw.print(" uid=");
-            pw.print(uid);
+            pw.print(String.format("%-8d", uid));
 
             pw.print(" uidState=");
             pw.print(String.format("%-30s", AppOpsManager.uidStateToString(uidState)));
 
             pw.print(" capability=");
-            pw.print(ActivityManager.getCapabilitiesSummary(capability));
+            pw.print(ActivityManager.getCapabilitiesSummary(capability) + " ");
 
             pw.print(" visibleAppWidget=");
             pw.print(visibleAppWidget);
@@ -586,13 +603,13 @@ class AppOpsUidStateTrackerImpl implements AppOpsUidStateTracker {
             pw.print(" EVAL_FOREGROUND_MODE ");
 
             pw.print(" uid=");
-            pw.print(uid);
+            pw.print(String.format("%-8d", uid));
 
             pw.print(" uidState=");
             pw.print(String.format("%-30s", AppOpsManager.uidStateToString(uidState)));
 
             pw.print(" capability=");
-            pw.print(ActivityManager.getCapabilitiesSummary(capability));
+            pw.print(ActivityManager.getCapabilitiesSummary(capability) + " ");
 
             pw.print(" code=");
             pw.print(String.format("%-20s", AppOpsManager.opToName(code)));

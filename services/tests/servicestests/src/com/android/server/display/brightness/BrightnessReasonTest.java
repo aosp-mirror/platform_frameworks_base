@@ -18,7 +18,6 @@ package com.android.server.display.brightness;
 
 import static org.junit.Assert.assertEquals;
 
-import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -28,7 +27,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @SmallTest
-@Presubmit
 @RunWith(AndroidJUnit4.class)
 public final class BrightnessReasonTest {
     private BrightnessReason mBrightnessReason;
