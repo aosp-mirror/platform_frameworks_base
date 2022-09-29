@@ -127,6 +127,7 @@ public:
     void setSurfaceControl(ASurfaceControl* surfaceControl);
     bool pauseSurface();
     void setStopped(bool stopped);
+    bool isStopped() { return mStopped || !hasSurface(); }
     bool hasSurface() const { return mNativeSurface.get(); }
     void allocateBuffers();
 
@@ -148,7 +149,6 @@ public:
     void markLayerInUse(RenderNode* node);
 
     void destroyHardwareResources();
-    static void trimMemory(RenderThread& thread, int level);
 
     DeferredLayerUpdater* createTextureLayer();
 
@@ -330,8 +330,6 @@ private:
 
     std::function<bool(int64_t, int64_t, int64_t)> mASurfaceTransactionCallback;
     std::function<void()> mPrepareSurfaceControlForWebviewCallback;
-
-    void cleanupResources();
 };
 
 } /* namespace renderthread */

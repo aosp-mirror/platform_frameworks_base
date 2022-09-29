@@ -56,7 +56,6 @@ import android.content.pm.ApplicationInfo;
 import android.graphics.Point;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.input.IInputManager;
-import android.hardware.input.InputManagerInternal;
 import android.hardware.input.VirtualKeyEvent;
 import android.hardware.input.VirtualMouseButtonEvent;
 import android.hardware.input.VirtualMouseRelativeEvent;
@@ -84,6 +83,7 @@ import androidx.test.InstrumentationRegistry;
 
 import com.android.internal.app.BlockedAppStreamingActivity;
 import com.android.server.LocalServices;
+import com.android.server.input.InputManagerInternal;
 
 import org.junit.Before;
 import org.junit.Test;

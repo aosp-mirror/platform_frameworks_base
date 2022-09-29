@@ -445,8 +445,8 @@ public final class VirtualDeviceManager {
                 @Nullable Executor executor,
                 @Nullable AudioConfigurationChangeCallback callback) {
             if (mVirtualAudioDevice == null) {
-                mVirtualAudioDevice = new VirtualAudioDevice(
-                        mContext, mVirtualDevice, display, executor, callback);
+                mVirtualAudioDevice = new VirtualAudioDevice(mContext, mVirtualDevice, display,
+                        executor, callback, () -> mVirtualAudioDevice = null);
             }
             return mVirtualAudioDevice;
         }

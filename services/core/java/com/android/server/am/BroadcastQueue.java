@@ -114,6 +114,9 @@ public abstract class BroadcastQueue {
     /**
      * Signal from OS internals that the given process has just been actively
      * attached, and is ready to begin receiving broadcasts.
+     *
+     * @return if the queue performed an action on the given process, such as
+     *         dispatching a pending broadcast
      */
     @GuardedBy("mService")
     public abstract boolean onApplicationAttachedLocked(@NonNull ProcessRecord app);
@@ -123,7 +126,7 @@ public abstract class BroadcastQueue {
      * an attempted start and attachment.
      */
     @GuardedBy("mService")
-    public abstract boolean onApplicationTimeoutLocked(@NonNull ProcessRecord app);
+    public abstract void onApplicationTimeoutLocked(@NonNull ProcessRecord app);
 
     /**
      * Signal from OS internals that the given process, which had already been
@@ -131,14 +134,14 @@ public abstract class BroadcastQueue {
      * not responding.
      */
     @GuardedBy("mService")
-    public abstract boolean onApplicationProblemLocked(@NonNull ProcessRecord app);
+    public abstract void onApplicationProblemLocked(@NonNull ProcessRecord app);
 
     /**
      * Signal from OS internals that the given process has been killed, and is
      * no longer actively running.
      */
     @GuardedBy("mService")
-    public abstract boolean onApplicationCleanupLocked(@NonNull ProcessRecord app);
+    public abstract void onApplicationCleanupLocked(@NonNull ProcessRecord app);
 
     /**
      * Signal from OS internals that the given package (or some subset of that

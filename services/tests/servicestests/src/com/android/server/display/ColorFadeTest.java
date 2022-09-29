@@ -24,7 +24,6 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.hardware.display.DisplayManagerInternal;
-import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -39,7 +38,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
-@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class ColorFadeTest {
     private static final int DISPLAY_ID = 123;

@@ -46,6 +46,66 @@ fun FlickerTestParameter.appPairsDividerBecomesVisible() {
     }
 }
 
+fun FlickerTestParameter.splitScreenEntered(
+    component1: IComponentMatcher,
+    component2: IComponentMatcher,
+    fromOtherApp: Boolean
+) {
+    if (fromOtherApp) {
+        appWindowIsInvisibleAtStart(component1)
+    } else {
+        appWindowIsVisibleAtStart(component1)
+    }
+    appWindowIsInvisibleAtStart(component2)
+    splitScreenDividerIsInvisibleAtStart()
+
+    appWindowIsVisibleAtEnd(component1)
+    appWindowIsVisibleAtEnd(component2)
+    splitScreenDividerIsVisibleAtEnd()
+}
+
+fun FlickerTestParameter.splitScreenDismissed(
+    component1: IComponentMatcher,
+    component2: IComponentMatcher,
+    toHome: Boolean
+) {
+    appWindowIsVisibleAtStart(component1)
+    appWindowIsVisibleAtStart(component2)
+    splitScreenDividerIsVisibleAtStart()
+
+    appWindowIsInvisibleAtEnd(component1)
+    if (toHome) {
+        appWindowIsInvisibleAtEnd(component2)
+    } else {
+        appWindowIsVisibleAtEnd(component2)
+    }
+    splitScreenDividerIsInvisibleAtEnd()
+}
+
+fun FlickerTestParameter.splitScreenDividerIsVisibleAtStart() {
+    assertLayersStart {
+        this.isVisible(SPLIT_SCREEN_DIVIDER_COMPONENT)
+    }
+}
+
+fun FlickerTestParameter.splitScreenDividerIsVisibleAtEnd() {
+    assertLayersEnd {
+        this.isVisible(SPLIT_SCREEN_DIVIDER_COMPONENT)
+    }
+}
+
+fun FlickerTestParameter.splitScreenDividerIsInvisibleAtStart() {
+    assertLayersStart {
+        this.isInvisible(SPLIT_SCREEN_DIVIDER_COMPONENT)
+    }
+}
+
+fun FlickerTestParameter.splitScreenDividerIsInvisibleAtEnd() {
+    assertLayersEnd {
+        this.isInvisible(SPLIT_SCREEN_DIVIDER_COMPONENT)
+    }
+}
+
 fun FlickerTestParameter.splitScreenDividerBecomesVisible() {
     layerBecomesVisible(SPLIT_SCREEN_DIVIDER_COMPONENT)
 }
@@ -271,11 +331,35 @@ fun FlickerTestParameter.appWindowBecomesInvisible(
     }
 }
 
+fun FlickerTestParameter.appWindowIsVisibleAtStart(
+    component: IComponentMatcher
+) {
+    assertWmStart {
+        this.isAppWindowVisible(component)
+    }
+}
+
 fun FlickerTestParameter.appWindowIsVisibleAtEnd(
     component: IComponentMatcher
 ) {
     assertWmEnd {
         this.isAppWindowVisible(component)
+    }
+}
+
+fun FlickerTestParameter.appWindowIsInvisibleAtStart(
+    component: IComponentMatcher
+) {
+    assertWmStart {
+        this.isAppWindowInvisible(component)
+    }
+}
+
+fun FlickerTestParameter.appWindowIsInvisibleAtEnd(
+    component: IComponentMatcher
+) {
+    assertWmEnd {
+        this.isAppWindowInvisible(component)
     }
 }
 

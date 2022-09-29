@@ -29,6 +29,7 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
@@ -2812,6 +2813,15 @@ public class ActivityManager {
      */
     public static class MemoryInfo implements Parcelable {
         /**
+         * The advertised memory of the system, as the end user would encounter in a retail display
+         * environment. This value might be different from {@code totalMem}. This could be due to
+         * many reasons. For example, the ODM could reserve part of the memory for the Trusted
+         * Execution Environment (TEE) which the kernel doesn't have access or knowledge about it.
+         */
+        @SuppressLint("MutableBareField")
+        public long advertisedMem;
+
+        /**
          * The available memory on the system.  This number should not
          * be considered absolute: due to the nature of the kernel, a significant
          * portion of this memory is actually in use and needed for the overall
@@ -2860,6 +2870,7 @@ public class ActivityManager {
         }
 
         public void writeToParcel(Parcel dest, int flags) {
+            dest.writeLong(advertisedMem);
             dest.writeLong(availMem);
             dest.writeLong(totalMem);
             dest.writeLong(threshold);
@@ -2871,6 +2882,7 @@ public class ActivityManager {
         }
 
         public void readFromParcel(Parcel source) {
+            advertisedMem = source.readLong();
             availMem = source.readLong();
             totalMem = source.readLong();
             threshold = source.readLong();
@@ -4375,13 +4387,15 @@ public class ActivityManager {
      * a profile, the {@link #getCurrentUser()}, the {@link UserHandle#SYSTEM system user}, or
      * does not exist.
      *
-     * @param displayId id of the display, it must exist.
+     * @param displayId id of the display.
      *
      * @return whether the operation succeeded. Notice that if the user was already started in such
      * display before, it will return {@code false}.
      *
      * @throws UnsupportedOperationException if the device does not support background users on
      * secondary displays.
+     * @throws IllegalArgumentException if the display doesn't exist or is not a valid display to
+     * start secondary users on.
      *
      * @hide
      */
@@ -4396,6 +4410,24 @@ public class ActivityManager {
         }
         try {
             return getService().startUserInBackgroundOnSecondaryDisplay(userId, displayId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets the id of displays that can be used by
+     * {@link #startUserInBackgroundOnSecondaryDisplay(int, int)}.
+     *
+     * @hide
+     */
+    @TestApi
+    @Nullable
+    @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.INTERACT_ACROSS_USERS})
+    public int[] getSecondaryDisplayIdsForStartingBackgroundUsers() {
+        try {
+            return getService().getSecondaryDisplayIdsForStartingBackgroundUsers();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

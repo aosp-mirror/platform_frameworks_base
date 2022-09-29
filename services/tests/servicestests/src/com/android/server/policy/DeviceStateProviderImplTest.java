@@ -35,13 +35,13 @@ import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorManager;
-import android.hardware.input.InputManagerInternal;
 
 import androidx.annotation.NonNull;
 
 import com.android.server.LocalServices;
 import com.android.server.devicestate.DeviceState;
 import com.android.server.devicestate.DeviceStateProvider;
+import com.android.server.input.InputManagerInternal;
 
 import org.junit.After;
 import org.junit.Before;

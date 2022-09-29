@@ -137,6 +137,14 @@ public class BroadcastConstants {
     private static final int DEFAULT_MAX_RUNNING_ACTIVE_BROADCASTS = 16;
 
     /**
+     * For {@link BroadcastQueueModernImpl}: Maximum number of pending
+     * broadcasts to hold for a process before we ignore any delays that policy
+     * might have applied to that process.
+     */
+    public int MAX_PENDING_BROADCASTS = DEFAULT_MAX_PENDING_BROADCASTS;
+    private static final int DEFAULT_MAX_PENDING_BROADCASTS = 256;
+
+    /**
      * For {@link BroadcastQueueModernImpl}: Default delay to apply to normal
      * broadcasts, giving a chance for debouncing of rapidly changing events.
      */
@@ -217,6 +225,8 @@ public class BroadcastConstants {
                 DEFAULT_MAX_RUNNING_PROCESS_QUEUES);
         MAX_RUNNING_ACTIVE_BROADCASTS = properties.getInt("bcast_max_running_active_broadcasts",
                 DEFAULT_MAX_RUNNING_ACTIVE_BROADCASTS);
+        MAX_PENDING_BROADCASTS = properties.getInt("bcast_max_pending_broadcasts",
+                DEFAULT_MAX_PENDING_BROADCASTS);
         DELAY_NORMAL_MILLIS = properties.getLong("bcast_delay_normal_millis",
                 DEFAULT_DELAY_NORMAL_MILLIS);
         DELAY_CACHED_MILLIS = properties.getLong("bcast_delay_cached_millis",

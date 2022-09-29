@@ -391,8 +391,7 @@ final class ContentRecorder implements WindowContainerListener {
      * </p>
      */
     private void handleStartRecordingFailed() {
-        final boolean shouldExitTaskRecording = mContentRecordingSession != null
-                && mContentRecordingSession.getContentToRecord() == RECORD_CONTENT_TASK;
+        final boolean shouldExitTaskRecording = isRecordingContentTask();
         clearContentRecordingSession();
         if (shouldExitTaskRecording) {
             // Clean up the cached session first to ensure recording doesn't re-start, since
@@ -478,9 +477,10 @@ final class ContentRecorder implements WindowContainerListener {
         ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
                 "Recorded task is removed, so stop recording on display %d",
                 mDisplayContent.getDisplayId());
-        Task recordedTask = mRecordedWindowContainer.asTask();
-        if (recordedTask == null
-                || mContentRecordingSession.getContentToRecord() != RECORD_CONTENT_TASK) {
+
+        Task recordedTask = mRecordedWindowContainer != null
+                ? mRecordedWindowContainer.asTask() : null;
+        if (recordedTask == null || !isRecordingContentTask()) {
             return;
         }
         recordedTask.unregisterWindowContainerListener(this);
@@ -503,5 +503,10 @@ final class ContentRecorder implements WindowContainerListener {
 
     @VisibleForTesting interface MediaProjectionManagerWrapper {
         void stopActiveProjection();
+    }
+
+    private boolean isRecordingContentTask() {
+        return mContentRecordingSession != null
+                && mContentRecordingSession.getContentToRecord() == RECORD_CONTENT_TASK;
     }
 }

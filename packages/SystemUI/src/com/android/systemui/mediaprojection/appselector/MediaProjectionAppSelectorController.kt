@@ -42,7 +42,7 @@ class MediaProjectionAppSelectorController(
     }
 
     private fun List<RecentTask>.sortTasks(): List<RecentTask> =
-        asReversed().sortedBy {
+        sortedBy {
             // Show normal tasks first and only then tasks with opened app selector
             it.topActivityComponent == appSelectorComponentName
         }

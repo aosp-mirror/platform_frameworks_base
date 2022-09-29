@@ -21,7 +21,6 @@ import static android.view.InputDevice.SOURCE_STYLUS;
 import android.annotation.AnyThread;
 import android.annotation.Nullable;
 import android.annotation.UiThread;
-import android.hardware.input.InputManagerInternal;
 import android.os.IBinder;
 import android.os.Looper;
 import android.util.Slog;
@@ -35,6 +34,7 @@ import android.view.MotionEvent;
 import android.view.SurfaceControl;
 
 import com.android.server.LocalServices;
+import com.android.server.input.InputManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
 import java.util.ArrayList;

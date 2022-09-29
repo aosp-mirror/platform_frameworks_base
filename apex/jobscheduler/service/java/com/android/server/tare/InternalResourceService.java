@@ -81,6 +81,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
@@ -163,6 +164,10 @@ public class InternalResourceService extends SystemService {
 
     @GuardedBy("mLock")
     private final SparseArrayMap<String, Boolean> mVipOverrides = new SparseArrayMap<>();
+
+    /** Set of apps each installer is responsible for installing. */
+    @GuardedBy("mLock")
+    private final SparseArrayMap<String, ArraySet<String>> mInstallers = new SparseArrayMap<>();
 
     private volatile boolean mHasBattery = true;
     private volatile boolean mIsEnabled;
@@ -353,6 +358,14 @@ public class InternalResourceService extends SystemService {
         return mCompleteEconomicPolicy;
     }
 
+    /** Returns the number of apps that this app is expected to update at some point. */
+    int getAppUpdateResponsibilityCount(final int userId, @NonNull final String pkgName) {
+        synchronized (mLock) {
+            // TODO(248274798): return 0 if the app has lost the install permission
+            return ArrayUtils.size(mInstallers.get(userId, pkgName));
+        }
+    }
+
     @NonNull
     SparseArrayMap<String, InstalledPackageInfo> getInstalledPackages() {
         synchronized (mLock) {
@@ -525,7 +538,8 @@ public class InternalResourceService extends SystemService {
         }
         synchronized (mLock) {
             final InstalledPackageInfo ipo = new InstalledPackageInfo(packageInfo);
-            mPkgCache.add(userId, pkgName, ipo);
+            final InstalledPackageInfo oldIpo = mPkgCache.add(userId, pkgName, ipo);
+            maybeUpdateInstallerStatusLocked(oldIpo, ipo);
             mUidToPackageCache.add(uid, pkgName);
             // TODO: only do this when the user first launches the app (app leaves stopped state)
             mAgent.grantBirthrightLocked(userId, pkgName);
@@ -552,7 +566,14 @@ public class InternalResourceService extends SystemService {
         synchronized (mLock) {
             mUidToPackageCache.remove(uid, pkgName);
             mVipOverrides.delete(userId, pkgName);
-            mPkgCache.delete(userId, pkgName);
+            final InstalledPackageInfo ipo = mPkgCache.delete(userId, pkgName);
+            mInstallers.delete(userId, pkgName);
+            if (ipo != null && ipo.installerPackageName != null) {
+                final ArraySet<String> list = mInstallers.get(userId, ipo.installerPackageName);
+                if (list != null) {
+                    list.remove(pkgName);
+                }
+            }
             mAgent.onPackageRemovedLocked(userId, pkgName);
         }
     }
@@ -574,7 +595,8 @@ public class InternalResourceService extends SystemService {
                     mPackageManager.getInstalledPackagesAsUser(PACKAGE_QUERY_FLAGS, userId);
             for (int i = pkgs.size() - 1; i >= 0; --i) {
                 final InstalledPackageInfo ipo = new InstalledPackageInfo(pkgs.get(i));
-                mPkgCache.add(userId, ipo.packageName, ipo);
+                final InstalledPackageInfo oldIpo = mPkgCache.add(userId, ipo.packageName, ipo);
+                maybeUpdateInstallerStatusLocked(oldIpo, ipo);
             }
             mAgent.grantBirthrightsLocked(userId);
         }
@@ -590,6 +612,7 @@ public class InternalResourceService extends SystemService {
                     mUidToPackageCache.remove(pkgInfo.uid);
                 }
             }
+            mInstallers.delete(userId);
             mPkgCache.delete(userId);
             mAgent.onUserRemovedLocked(userId);
         }
@@ -746,8 +769,46 @@ public class InternalResourceService extends SystemService {
                     mPackageManager.getInstalledPackagesAsUser(PACKAGE_QUERY_FLAGS, userId);
             for (int i = pkgs.size() - 1; i >= 0; --i) {
                 final InstalledPackageInfo ipo = new InstalledPackageInfo(pkgs.get(i));
-                mPkgCache.add(userId, ipo.packageName, ipo);
+                final InstalledPackageInfo oldIpo = mPkgCache.add(userId, ipo.packageName, ipo);
+                maybeUpdateInstallerStatusLocked(oldIpo, ipo);
             }
+        }
+    }
+
+    /**
+     * Used to update the set of installed apps for each installer. This only has an effect if the
+     * installer package name is different between {@code oldIpo} and {@code newIpo}.
+     */
+    @GuardedBy("mLock")
+    private void maybeUpdateInstallerStatusLocked(@Nullable InstalledPackageInfo oldIpo,
+            @NonNull InstalledPackageInfo newIpo) {
+        final boolean changed;
+        if (oldIpo == null) {
+            changed = newIpo.installerPackageName != null;
+        } else {
+            changed = !Objects.equals(oldIpo.installerPackageName, newIpo.installerPackageName);
+        }
+        if (!changed) {
+            return;
+        }
+        // InstallSourceInfo doesn't track userId, so for now, assume the installer on the package's
+        // user profile did the installation.
+        // TODO(246640162): use the actual installer's user ID
+        final int userId = UserHandle.getUserId(newIpo.uid);
+        final String pkgName = newIpo.packageName;
+        if (oldIpo != null) {
+            final ArraySet<String> oldList = mInstallers.get(userId, oldIpo.installerPackageName);
+            if (oldList != null) {
+                oldList.remove(pkgName);
+            }
+        }
+        if (newIpo.installerPackageName != null) {
+            ArraySet<String> newList = mInstallers.get(userId, newIpo.installerPackageName);
+            if (newList == null) {
+                newList = new ArraySet<>();
+                mInstallers.add(userId, newIpo.installerPackageName, newList);
+            }
+            newList.add(pkgName);
         }
     }
 
@@ -1358,6 +1419,23 @@ public class InternalResourceService extends SystemService {
                 pw.print(" None");
             }
             pw.println();
+
+            pw.println();
+            pw.println("Installers:");
+            pw.increaseIndent();
+            for (int u = 0; u < mInstallers.numMaps(); ++u) {
+                final int userId = mInstallers.keyAt(u);
+
+                for (int p = 0; p < mInstallers.numElementsForKeyAt(u); ++p) {
+                    final String pkgName = mInstallers.keyAt(u, p);
+
+                    pw.print(appToString(userId, pkgName));
+                    pw.print(": ");
+                    pw.print(mInstallers.valueAt(u, p).size());
+                    pw.println(" apps");
+                }
+            }
+            pw.decreaseIndent();
 
             pw.println();
             mCompleteEconomicPolicy.dump(pw);

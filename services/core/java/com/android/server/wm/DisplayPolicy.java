@@ -2167,10 +2167,7 @@ public class DisplayPolicy {
      * If the decor insets changes, the display configuration may be affected. The caller should
      * call {@link DisplayContent#sendNewConfiguration()} if this method returns {@code true}.
      */
-    boolean updateDecorInsetsInfoIfNeeded(WindowState win) {
-        if (!win.providesNonDecorInsets()) {
-            return false;
-        }
+    boolean updateDecorInsetsInfo() {
         final DisplayFrames displayFrames = mDisplayContent.mDisplayFrames;
         final int rotation = displayFrames.mRotation;
         final int dw = displayFrames.mWidth;

@@ -227,6 +227,9 @@ public class EconomyManager {
     public static final String KEY_JS_MIN_SATIATED_BALANCE_OTHER_APP =
             "js_min_satiated_balance_other_app";
     /** @hide */
+    public static final String KEY_JS_MIN_SATIATED_BALANCE_INCREMENT_APP_UPDATER =
+            "js_min_satiated_balance_increment_updater";
+    /** @hide */
     public static final String KEY_JS_MAX_SATIATED_BALANCE =
             "js_max_satiated_balance";
     /** @hide */
@@ -509,6 +512,15 @@ public class EconomyManager {
     public static final long DEFAULT_JS_REWARD_OTHER_USER_INTERACTION_ONGOING_CAKES = arcToCake(0);
     /** @hide */
     public static final long DEFAULT_JS_REWARD_OTHER_USER_INTERACTION_MAX_CAKES = arcToCake(5000);
+    /**
+     * How many credits to increase the updating app's min satiated balance by for each app that it
+     * is responsible for updating.
+     * @hide
+     */
+    public static final long DEFAULT_JS_MIN_SATIATED_BALANCE_INCREMENT_APP_UPDATER_CAKES =
+            // Research indicates that the median time between popular app updates is 13-14 days,
+            // so adjust by 14 to amortize over that time.
+            DEFAULT_JS_REWARD_APP_INSTALL_INSTANT_CAKES / 14;
     /** @hide */
     public static final long DEFAULT_JS_ACTION_JOB_MAX_START_CTP_CAKES = arcToCake(3);
     /** @hide */

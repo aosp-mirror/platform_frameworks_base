@@ -26,7 +26,6 @@ import static org.mockito.Mockito.when;
 
 import android.app.PropertyInvalidatedCache;
 import android.graphics.Point;
-import android.platform.test.annotations.Presubmit;
 import android.view.DisplayInfo;
 import android.view.Surface;
 import android.view.SurfaceControl;
@@ -40,7 +39,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 @SmallTest
-@Presubmit
 public class LogicalDisplayTest {
     private static final int DISPLAY_ID = 0;
     private static final int LAYER_STACK = 0;

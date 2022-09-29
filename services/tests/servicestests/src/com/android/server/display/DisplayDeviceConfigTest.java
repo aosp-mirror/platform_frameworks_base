@@ -27,7 +27,6 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -44,7 +43,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 @SmallTest
-@Presubmit
 @RunWith(AndroidJUnit4.class)
 public final class DisplayDeviceConfigTest {
     private DisplayDeviceConfig mDisplayDeviceConfig;

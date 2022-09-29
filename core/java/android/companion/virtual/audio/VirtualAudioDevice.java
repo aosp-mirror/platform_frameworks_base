@@ -64,11 +64,24 @@ public final class VirtualAudioDevice implements Closeable {
         void onRecordingConfigChanged(@NonNull List<AudioRecordingConfiguration> configs);
     }
 
+    /**
+     * Interface to be notified when {@link #close()} is called.
+     *
+     * @hide
+     */
+    public interface CloseListener {
+        /**
+         * Notifies when {@link #close()} is called.
+         */
+        void onClosed();
+    }
+
     private final Context mContext;
     private final IVirtualDevice mVirtualDevice;
     private final VirtualDisplay mVirtualDisplay;
     private final AudioConfigurationChangeCallback mCallback;
     private final Executor mExecutor;
+    private final CloseListener mListener;
     @Nullable
     private VirtualAudioSession mOngoingSession;
 
@@ -77,12 +90,13 @@ public final class VirtualAudioDevice implements Closeable {
      */
     public VirtualAudioDevice(Context context, IVirtualDevice virtualDevice,
             @NonNull VirtualDisplay virtualDisplay, @Nullable Executor executor,
-            @Nullable AudioConfigurationChangeCallback callback) {
+            @Nullable AudioConfigurationChangeCallback callback, @Nullable CloseListener listener) {
         mContext = context;
         mVirtualDevice = virtualDevice;
         mVirtualDisplay = virtualDisplay;
         mExecutor = executor;
         mCallback = callback;
+        mListener = listener;
     }
 
     /**
@@ -168,6 +182,10 @@ public final class VirtualAudioDevice implements Closeable {
                 mVirtualDevice.onAudioSessionEnded();
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
+            }
+
+            if (mListener != null) {
+                mListener.onClosed();
             }
         }
     }

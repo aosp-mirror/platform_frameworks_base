@@ -35,7 +35,6 @@ import android.os.PowerManager;
 import android.os.Temperature;
 import android.os.Temperature.ThrottlingStatus;
 import android.os.test.TestLooper;
-import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -57,7 +56,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SmallTest
-@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class BrightnessThrottlerTest {
     private static final float EPSILON = 0.000001f;

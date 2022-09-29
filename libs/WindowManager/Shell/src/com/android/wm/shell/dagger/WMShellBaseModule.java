@@ -484,12 +484,14 @@ public abstract class WMShellBaseModule {
             ShellInit shellInit,
             ShellCommandHandler shellCommandHandler,
             TaskStackListenerImpl taskStackListener,
+            ActivityTaskManager activityTaskManager,
             Optional<DesktopModeTaskRepository> desktopModeTaskRepository,
             @ShellMainThread ShellExecutor mainExecutor
     ) {
         return Optional.ofNullable(
                 RecentTasksController.create(context, shellInit, shellCommandHandler,
-                        taskStackListener, desktopModeTaskRepository, mainExecutor));
+                        taskStackListener, activityTaskManager, desktopModeTaskRepository,
+                        mainExecutor));
     }
 
     //

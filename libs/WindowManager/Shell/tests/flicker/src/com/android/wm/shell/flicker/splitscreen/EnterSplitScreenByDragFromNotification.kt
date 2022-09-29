@@ -34,6 +34,7 @@ import com.android.wm.shell.flicker.layerIsVisibleAtEnd
 import com.android.wm.shell.flicker.splitAppLayerBoundsBecomesVisibleByDrag
 import com.android.wm.shell.flicker.splitAppLayerBoundsIsVisibleAtEnd
 import com.android.wm.shell.flicker.splitScreenDividerBecomesVisible
+import com.android.wm.shell.flicker.splitScreenEntered
 import org.junit.Assume
 import org.junit.Before
 import org.junit.FixMethodOrder
@@ -87,13 +88,16 @@ class EnterSplitScreenByDragFromNotification(
     @IwTest(focusArea = "sysui")
     @Presubmit
     @Test
+    fun cujCompleted() = testSpec.splitScreenEntered(primaryApp, secondaryApp, fromOtherApp = false)
+
+    @Presubmit
+    @Test
     fun splitScreenDividerBecomesVisible() {
         Assume.assumeFalse(isShellTransitionsEnabled)
         testSpec.splitScreenDividerBecomesVisible()
     }
 
     // TODO(b/245472831): Back to splitScreenDividerBecomesVisible after shell transition ready.
-    @IwTest(focusArea = "sysui")
     @Presubmit
     @Test
     fun splitScreenDividerIsVisibleAtEnd_ShellTransit() {
@@ -103,12 +107,10 @@ class EnterSplitScreenByDragFromNotification(
         }
     }
 
-    @IwTest(focusArea = "sysui")
     @Presubmit
     @Test
     fun primaryAppLayerIsVisibleAtEnd() = testSpec.layerIsVisibleAtEnd(primaryApp)
 
-    @IwTest(focusArea = "sysui")
     @Presubmit
     @Test
     fun secondaryAppLayerBecomesVisible() {
@@ -132,24 +134,20 @@ class EnterSplitScreenByDragFromNotification(
         testSpec.layerBecomesVisible(sendNotificationApp)
     }
 
-    @IwTest(focusArea = "sysui")
     @Presubmit
     @Test
     fun primaryAppBoundsIsVisibleAtEnd() = testSpec.splitAppLayerBoundsIsVisibleAtEnd(
         primaryApp, landscapePosLeft = false, portraitPosTop = false)
 
-    @IwTest(focusArea = "sysui")
     @Presubmit
     @Test
     fun secondaryAppBoundsBecomesVisible() = testSpec.splitAppLayerBoundsBecomesVisibleByDrag(
         sendNotificationApp)
 
-    @IwTest(focusArea = "sysui")
     @Presubmit
     @Test
     fun primaryAppWindowIsVisibleAtEnd() = testSpec.appWindowIsVisibleAtEnd(primaryApp)
 
-    @IwTest(focusArea = "sysui")
     @Presubmit
     @Test
     fun secondaryAppWindowIsVisibleAtEnd() = testSpec.appWindowIsVisibleAtEnd(sendNotificationApp)

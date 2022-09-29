@@ -1834,8 +1834,12 @@ public class WindowManagerService extends IWindowManager.Stub
             ProtoLog.v(WM_DEBUG_ADD_REMOVE, "addWindow: New client %s"
                     + ": window=%s Callers=%s", client.asBinder(), win, Debug.getCallers(5));
 
-            if ((win.isVisibleRequestedOrAdding() && displayContent.updateOrientation())
-                    || displayPolicy.updateDecorInsetsInfoIfNeeded(win)) {
+            boolean needToSendNewConfiguration =
+                    win.isVisibleRequestedOrAdding() && displayContent.updateOrientation();
+            if (win.providesNonDecorInsets()) {
+                needToSendNewConfiguration |= displayPolicy.updateDecorInsetsInfo();
+            }
+            if (needToSendNewConfiguration) {
                 displayContent.sendNewConfiguration();
             }
 
@@ -2304,8 +2308,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         & WindowManager.LayoutParams.SYSTEM_UI_VISIBILITY_CHANGED) != 0) {
                     win.mLayoutNeeded = true;
                 }
-                if (layoutChanged) {
-                    configChanged = displayPolicy.updateDecorInsetsInfoIfNeeded(win);
+                if (layoutChanged && win.providesNonDecorInsets()) {
+                    configChanged = displayPolicy.updateDecorInsetsInfo();
                 }
                 if (win.mActivityRecord != null && ((flagChanges & FLAG_SHOW_WHEN_LOCKED) != 0
                         || (flagChanges & FLAG_DISMISS_KEYGUARD) != 0)) {

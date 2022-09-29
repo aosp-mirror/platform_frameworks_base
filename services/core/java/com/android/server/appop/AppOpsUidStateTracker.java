@@ -30,10 +30,11 @@ import static android.app.AppOpsManager.UID_STATE_FOREGROUND_SERVICE;
 import static android.app.AppOpsManager.UID_STATE_PERSISTENT;
 import static android.app.AppOpsManager.UID_STATE_TOP;
 
-import android.os.Handler;
+import android.annotation.CallbackExecutor;
 import android.util.SparseArray;
 
 import java.io.PrintWriter;
+import java.util.concurrent.Executor;
 
 interface AppOpsUidStateTracker {
 
@@ -95,7 +96,7 @@ interface AppOpsUidStateTracker {
     /**
      * Listen to changes in {@link android.app.AppOpsManager.UidState}
      */
-    void addUidStateChangedCallback(Handler handler,
+    void addUidStateChangedCallback(@CallbackExecutor Executor executor,
             UidStateChangedCallback callback);
 
     /**

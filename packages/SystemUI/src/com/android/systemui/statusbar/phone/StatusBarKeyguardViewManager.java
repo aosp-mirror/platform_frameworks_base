@@ -204,6 +204,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     protected CentralSurfaces mCentralSurfaces;
     private NotificationPanelViewController mNotificationPanelViewController;
     private BiometricUnlockController mBiometricUnlockController;
+    private boolean mCentralSurfacesRegistered;
 
     private View mNotificationContainer;
 
@@ -338,6 +339,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mNotificationContainer = notificationContainer;
         mKeyguardMessageAreaController = mKeyguardMessageAreaFactory.create(
                 centralSurfaces.getKeyguardMessageArea());
+        mCentralSurfacesRegistered = true;
 
         registerListeners();
     }
@@ -1086,6 +1088,9 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     };
 
     protected void updateStates() {
+        if (!mCentralSurfacesRegistered) {
+            return;
+        }
         boolean showing = mShowing;
         boolean occluded = mOccluded;
         boolean bouncerShowing = bouncerIsShowing();

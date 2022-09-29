@@ -19,9 +19,7 @@ package android.view;
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.ActivityManager;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
@@ -524,9 +522,6 @@ public final class WindowManagerGlobal {
             }
             allViewsRemoved = mRoots.isEmpty();
         }
-        if (ThreadedRenderer.sTrimForeground) {
-            doTrimForeground();
-        }
 
         // If we don't have any views anymore in our process, we no longer need the
         // InsetsAnimationThread to save some resources.
@@ -543,65 +538,9 @@ public final class WindowManagerGlobal {
         return index;
     }
 
-    public static boolean shouldDestroyEglContext(int trimLevel) {
-        // On low-end gfx devices we trim when memory is moderate;
-        // on high-end devices we do this when low.
-        if (trimLevel >= ComponentCallbacks2.TRIM_MEMORY_COMPLETE) {
-            return true;
-        }
-        if (trimLevel >= ComponentCallbacks2.TRIM_MEMORY_MODERATE
-                && !ActivityManager.isHighEndGfx()) {
-            return true;
-        }
-        return false;
-    }
-
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public void trimMemory(int level) {
-
-        if (shouldDestroyEglContext(level)) {
-            // Destroy all hardware surfaces and resources associated to
-            // known windows
-            synchronized (mLock) {
-                for (int i = mRoots.size() - 1; i >= 0; --i) {
-                    mRoots.get(i).destroyHardwareResources();
-                }
-            }
-            // Force a full memory flush
-            level = ComponentCallbacks2.TRIM_MEMORY_COMPLETE;
-        }
-
         ThreadedRenderer.trimMemory(level);
-
-        if (ThreadedRenderer.sTrimForeground) {
-            doTrimForeground();
-        }
-    }
-
-    public static void trimForeground() {
-        if (ThreadedRenderer.sTrimForeground) {
-            WindowManagerGlobal wm = WindowManagerGlobal.getInstance();
-            wm.doTrimForeground();
-        }
-    }
-
-    private void doTrimForeground() {
-        boolean hasVisibleWindows = false;
-        synchronized (mLock) {
-            for (int i = mRoots.size() - 1; i >= 0; --i) {
-                final ViewRootImpl root = mRoots.get(i);
-                if (root.mView != null && root.getHostVisibility() == View.VISIBLE
-                        && root.mAttachInfo.mThreadedRenderer != null) {
-                    hasVisibleWindows = true;
-                } else {
-                    root.destroyHardwareResources();
-                }
-            }
-        }
-        if (!hasVisibleWindows) {
-            ThreadedRenderer.trimMemory(
-                    ComponentCallbacks2.TRIM_MEMORY_COMPLETE);
-        }
     }
 
     public void dumpGfxInfo(FileDescriptor fd, String[] args) {

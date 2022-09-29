@@ -27,6 +27,9 @@ ndk_library {
     symbol_file: "libandroid.map.txt",
     first_version: "9",
     unversioned_until: "current",
+    export_header_libs: [
+        "libandroid_headers",
+    ],
 }
 
 cc_defaults {

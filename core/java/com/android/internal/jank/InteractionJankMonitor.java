@@ -541,6 +541,7 @@ public class InteractionJankMonitor {
     public boolean begin(@NonNull Configuration.Builder builder) {
         try {
             final Configuration config = builder.build();
+            EventLogTags.writeJankCujEventsBeginRequest(config.mCujType);
             final TrackerResult result = new TrackerResult();
             final boolean success = config.getHandler().runWithScissors(
                     () -> result.mResult = beginInternal(config), EXECUTOR_TASK_TIMEOUT);
@@ -614,6 +615,7 @@ public class InteractionJankMonitor {
      * @return boolean true if the tracker is ended successfully, false otherwise.
      */
     public boolean end(@CujType int cujType) {
+        EventLogTags.writeJankCujEventsEndRequest(cujType);
         FrameTracker tracker = getTracker(cujType);
         // Skip this call since we haven't started a trace yet.
         if (tracker == null) return false;
@@ -651,6 +653,7 @@ public class InteractionJankMonitor {
      * @return boolean true if the tracker is cancelled successfully, false otherwise.
      */
     public boolean cancel(@CujType int cujType) {
+        EventLogTags.writeJankCujEventsCancelRequest(cujType);
         return cancel(cujType, REASON_CANCEL_NORMAL);
     }
 

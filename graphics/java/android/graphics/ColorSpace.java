@@ -24,7 +24,7 @@ import android.annotation.Size;
 import android.annotation.SuppressAutoDoc;
 import android.annotation.SuppressLint;
 import android.hardware.DataSpace;
-import android.hardware.DataSpace.NamedDataSpace;
+import android.hardware.DataSpace.ColorDataSpace;
 import android.util.SparseIntArray;
 
 import libcore.util.NativeAllocationRegistry;
@@ -1406,7 +1406,7 @@ public abstract class ColorSpace {
      */
     @SuppressLint("MethodNameUnits")
     @Nullable
-    public static ColorSpace getFromDataSpace(@NamedDataSpace int dataSpace) {
+    public static ColorSpace getFromDataSpace(@ColorDataSpace int dataSpace) {
         int index = sDataToColorSpaces.get(dataSpace, -1);
         if (index != -1) {
             return ColorSpace.get(index);
@@ -1425,7 +1425,7 @@ public abstract class ColorSpace {
      * @return the dataspace value.
      */
     @SuppressLint("MethodNameUnits")
-    public @NamedDataSpace int getDataSpace() {
+    public @ColorDataSpace int getDataSpace() {
         int index = sDataToColorSpaces.indexOfValue(getId());
         if (index != -1) {
             return sDataToColorSpaces.keyAt(index);
