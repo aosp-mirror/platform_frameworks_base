@@ -160,6 +160,7 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
 
     @NonNull private final SparseBooleanArray mUdfpsEnrolledForUser;
     @NonNull private final SparseBooleanArray mFaceEnrolledForUser;
+    @NonNull private final SparseBooleanArray mSfpsEnrolledForUser;
     @NonNull private final SensorPrivacyManager mSensorPrivacyManager;
     private final WakefulnessLifecycle mWakefulnessLifecycle;
     private boolean mAllFingerprintAuthenticatorsRegistered;
@@ -362,6 +363,15 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
             for (FaceSensorPropertiesInternal prop : mFaceProps) {
                 if (prop.sensorId == sensorId) {
                     mFaceEnrolledForUser.put(userId, hasEnrollments);
+                }
+            }
+        }
+        if (mSidefpsProps == null) {
+            Log.d(TAG, "handleEnrollmentsChanged, mSidefpsProps is null");
+        } else {
+            for (FingerprintSensorPropertiesInternal prop : mSidefpsProps) {
+                if (prop.sensorId == sensorId) {
+                    mSfpsEnrolledForUser.put(userId, hasEnrollments);
                 }
             }
         }
@@ -722,6 +732,7 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
         mWindowManager = windowManager;
         mInteractionJankMonitor = jankMonitor;
         mUdfpsEnrolledForUser = new SparseBooleanArray();
+        mSfpsEnrolledForUser = new SparseBooleanArray();
         mFaceEnrolledForUser = new SparseBooleanArray();
         mVibratorHelper = vibrator;
 
@@ -964,6 +975,11 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
         return mUdfpsProps;
     }
 
+    @Nullable
+    public List<FingerprintSensorPropertiesInternal> getSfpsProps() {
+        return mSidefpsProps;
+    }
+
     private String getErrorString(@Modality int modality, int error, int vendorCode) {
         switch (modality) {
             case TYPE_FACE:
@@ -1088,6 +1104,17 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
         }
 
         return mUdfpsEnrolledForUser.get(userId);
+    }
+
+    /**
+     * Whether the passed userId has enrolled SFPS.
+     */
+    public boolean isSfpsEnrolled(int userId) {
+        if (mSidefpsController == null) {
+            return false;
+        }
+
+        return mSfpsEnrolledForUser.get(userId);
     }
 
     /** If BiometricPrompt is currently being shown to the user. */
