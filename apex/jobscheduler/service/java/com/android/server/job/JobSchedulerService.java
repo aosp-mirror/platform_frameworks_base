@@ -967,12 +967,12 @@ public class JobSchedulerService extends com.android.server.SystemService
                 // Has this package scheduled any jobs, such that we will take action
                 // if it were to be force-stopped?
                 if (pkgUid != -1) {
-                    List<JobStatus> jobsForUid;
+                    ArraySet<JobStatus> jobsForUid;
                     synchronized (mLock) {
                         jobsForUid = mJobs.getJobsByUid(pkgUid);
                     }
                     for (int i = jobsForUid.size() - 1; i >= 0; i--) {
-                        if (jobsForUid.get(i).getSourcePackageName().equals(pkgName)) {
+                        if (jobsForUid.valueAt(i).getSourcePackageName().equals(pkgName)) {
                             if (DEBUG) {
                                 Slog.d(TAG, "Restart query: package " + pkgName + " at uid "
                                         + pkgUid + " has jobs");
@@ -1289,10 +1289,11 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     public List<JobInfo> getPendingJobs(int uid) {
         synchronized (mLock) {
-            List<JobStatus> jobs = mJobs.getJobsByUid(uid);
+            ArraySet<JobStatus> jobs = mJobs.getJobsByUid(uid);
             ArrayList<JobInfo> outList = new ArrayList<JobInfo>(jobs.size());
+            // Write out for loop to avoid addAll() creating an Iterator.
             for (int i = jobs.size() - 1; i >= 0; i--) {
-                JobStatus job = jobs.get(i);
+                final JobStatus job = jobs.valueAt(i);
                 outList.add(job.getJob());
             }
             return outList;
@@ -1301,9 +1302,9 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     public JobInfo getPendingJob(int uid, int jobId) {
         synchronized (mLock) {
-            List<JobStatus> jobs = mJobs.getJobsByUid(uid);
+            ArraySet<JobStatus> jobs = mJobs.getJobsByUid(uid);
             for (int i = jobs.size() - 1; i >= 0; i--) {
-                JobStatus job = jobs.get(i);
+                JobStatus job = jobs.valueAt(i);
                 if (job.getJobId() == jobId) {
                     return job.getJob();
                 }
@@ -1345,7 +1346,7 @@ public class JobSchedulerService extends com.android.server.SystemService
             Slog.wtfStack(TAG, "Can't cancel all jobs for system package");
             return;
         }
-        final List<JobStatus> jobsForUid = new ArrayList<>();
+        final ArraySet<JobStatus> jobsForUid = new ArraySet<>();
         if (includeSchedulingApp) {
             mJobs.getJobsByUid(uid, jobsForUid);
         }
@@ -1353,7 +1354,7 @@ public class JobSchedulerService extends com.android.server.SystemService
             mJobs.getJobsBySourceUid(uid, jobsForUid);
         }
         for (int i = jobsForUid.size() - 1; i >= 0; i--) {
-            final JobStatus job = jobsForUid.get(i);
+            final JobStatus job = jobsForUid.valueAt(i);
             final boolean shouldCancel =
                     (includeSchedulingApp
                             && job.getServiceComponent().getPackageName().equals(pkgName))
@@ -1365,14 +1366,16 @@ public class JobSchedulerService extends com.android.server.SystemService
     }
 
     /**
-     * Entry point from client to cancel all jobs originating from their uid.
+     * Entry point from client to cancel all jobs scheduled for or from their uid.
      * This will remove the job from the master list, and cancel the job if it was staged for
      * execution or being executed.
      *
      * @param uid Uid to check against for removal of a job.
+     * @param includeSourceApp Whether to include jobs scheduled for this UID by another UID.
+     *                         If false, only jobs scheduled by this UID will be cancelled.
      */
-    public boolean cancelJobsForUid(int uid, @JobParameters.StopReason int reason,
-            int internalReasonCode, String debugReason) {
+    public boolean cancelJobsForUid(int uid, boolean includeSourceApp,
+            @JobParameters.StopReason int reason, int internalReasonCode, String debugReason) {
         if (uid == Process.SYSTEM_UID) {
             Slog.wtfStack(TAG, "Can't cancel all jobs for system uid");
             return false;
@@ -1380,9 +1383,15 @@ public class JobSchedulerService extends com.android.server.SystemService
 
         boolean jobsCanceled = false;
         synchronized (mLock) {
-            final List<JobStatus> jobsForUid = mJobs.getJobsByUid(uid);
+            final ArraySet<JobStatus> jobsForUid = new ArraySet<>();
+            // Get jobs scheduled by the app.
+            mJobs.getJobsByUid(uid, jobsForUid);
+            if (includeSourceApp) {
+                // Get jobs scheduled for the app by someone else.
+                mJobs.getJobsBySourceUid(uid, jobsForUid);
+            }
             for (int i = 0; i < jobsForUid.size(); i++) {
-                JobStatus toRemove = jobsForUid.get(i);
+                JobStatus toRemove = jobsForUid.valueAt(i);
                 cancelJobImplLocked(toRemove, null, reason, internalReasonCode, debugReason);
                 jobsCanceled = true;
             }
@@ -2217,6 +2226,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                         updateUidState(uid, ActivityManager.PROCESS_STATE_CACHED_EMPTY);
                         if (disabled) {
                             cancelJobsForUid(uid,
+                                    /* includeSourceApp */ true,
                                     JobParameters.STOP_REASON_BACKGROUND_RESTRICTION,
                                     JobParameters.INTERNAL_STOP_REASON_CONSTRAINTS_NOT_SATISFIED,
                                     "uid gone");
@@ -2238,6 +2248,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                         final boolean disabled = message.arg2 != 0;
                         if (disabled) {
                             cancelJobsForUid(uid,
+                                    /* includeSourceApp */ true,
                                     JobParameters.STOP_REASON_BACKGROUND_RESTRICTION,
                                     JobParameters.INTERNAL_STOP_REASON_CONSTRAINTS_NOT_SATISFIED,
                                     "app uid idle");
@@ -2896,9 +2907,10 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
 
         @Override
-        public void cancelJobsForUid(int uid, @JobParameters.StopReason int reason,
-                int internalReasonCode, String debugReason) {
-            JobSchedulerService.this.cancelJobsForUid(uid, reason, internalReasonCode, debugReason);
+        public void cancelJobsForUid(int uid, boolean includeProxiedJobs,
+                @JobParameters.StopReason int reason, int internalReasonCode, String debugReason) {
+            JobSchedulerService.this.cancelJobsForUid(uid,
+                    includeProxiedJobs, reason, internalReasonCode, debugReason);
         }
 
         @Override
@@ -3270,6 +3282,8 @@ public class JobSchedulerService extends com.android.server.SystemService
             final long ident = Binder.clearCallingIdentity();
             try {
                 JobSchedulerService.this.cancelJobsForUid(uid,
+                        // Documentation says only jobs scheduled BY the app will be cancelled
+                        /* includeSourceApp */ false,
                         JobParameters.STOP_REASON_CANCELLED_BY_APP,
                         JobParameters.INTERNAL_STOP_REASON_CANCELED,
                         "cancelAll() called by app, callingUid=" + uid);
@@ -3481,7 +3495,9 @@ public class JobSchedulerService extends com.android.server.SystemService
 
         if (!hasJobId) {
             pw.println("Canceling all jobs for " + pkgName + " in user " + userId);
-            if (!cancelJobsForUid(pkgUid, JobParameters.STOP_REASON_USER,
+            if (!cancelJobsForUid(pkgUid,
+                    /* includeSourceApp */ false,
+                    JobParameters.STOP_REASON_USER,
                     JobParameters.INTERNAL_STOP_REASON_CANCELED,
                     "cancel shell command for package")) {
                 pw.println("No matching jobs found.");

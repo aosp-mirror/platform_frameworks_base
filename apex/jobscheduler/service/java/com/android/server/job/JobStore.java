@@ -291,11 +291,11 @@ public final class JobStore {
      * @return A list of all the jobs scheduled for the source app. Never null.
      */
     @NonNull
-    public List<JobStatus> getJobsBySourceUid(int sourceUid) {
+    public ArraySet<JobStatus> getJobsBySourceUid(int sourceUid) {
         return mJobSet.getJobsBySourceUid(sourceUid);
     }
 
-    public void getJobsBySourceUid(int sourceUid, @NonNull List<JobStatus> insertInto) {
+    public void getJobsBySourceUid(int sourceUid, @NonNull Set<JobStatus> insertInto) {
         mJobSet.getJobsBySourceUid(sourceUid, insertInto);
     }
 
@@ -304,11 +304,11 @@ public final class JobStore {
      * @return All JobStatus objects for a given uid from the master list. Never null.
      */
     @NonNull
-    public List<JobStatus> getJobsByUid(int uid) {
+    public ArraySet<JobStatus> getJobsByUid(int uid) {
         return mJobSet.getJobsByUid(uid);
     }
 
-    public void getJobsByUid(int uid, @NonNull List<JobStatus> insertInto) {
+    public void getJobsByUid(int uid, @NonNull Set<JobStatus> insertInto) {
         mJobSet.getJobsByUid(uid, insertInto);
     }
 
@@ -1229,13 +1229,13 @@ public final class JobStore {
             mJobsPerSourceUid = new SparseArray<>();
         }
 
-        public List<JobStatus> getJobsByUid(int uid) {
-            ArrayList<JobStatus> matchingJobs = new ArrayList<JobStatus>();
+        public ArraySet<JobStatus> getJobsByUid(int uid) {
+            ArraySet<JobStatus> matchingJobs = new ArraySet<>();
             getJobsByUid(uid, matchingJobs);
             return matchingJobs;
         }
 
-        public void getJobsByUid(int uid, List<JobStatus> insertInto) {
+        public void getJobsByUid(int uid, Set<JobStatus> insertInto) {
             ArraySet<JobStatus> jobs = mJobs.get(uid);
             if (jobs != null) {
                 insertInto.addAll(jobs);
@@ -1243,13 +1243,13 @@ public final class JobStore {
         }
 
         @NonNull
-        public List<JobStatus> getJobsBySourceUid(int sourceUid) {
-            final ArrayList<JobStatus> result = new ArrayList<JobStatus>();
+        public ArraySet<JobStatus> getJobsBySourceUid(int sourceUid) {
+            final ArraySet<JobStatus> result = new ArraySet<>();
             getJobsBySourceUid(sourceUid, result);
             return result;
         }
 
-        public void getJobsBySourceUid(int sourceUid, List<JobStatus> insertInto) {
+        public void getJobsBySourceUid(int sourceUid, Set<JobStatus> insertInto) {
             final ArraySet<JobStatus> jobs = mJobsPerSourceUid.get(sourceUid);
             if (jobs != null) {
                 insertInto.addAll(jobs);

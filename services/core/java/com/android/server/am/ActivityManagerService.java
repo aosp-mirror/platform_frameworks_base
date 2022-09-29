@@ -3933,7 +3933,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     // Clear its scheduled jobs
                     JobSchedulerInternal js = LocalServices.getService(JobSchedulerInternal.class);
                     // Clearing data is a user-initiated action.
-                    js.cancelJobsForUid(appInfo.uid, JobParameters.STOP_REASON_USER,
+                    js.cancelJobsForUid(appInfo.uid, /* includeProxiedJobs */ true,
+                            JobParameters.STOP_REASON_USER,
                             JobParameters.INTERNAL_STOP_REASON_DATA_CLEARED, "clear data");
 
                     // Clear its pending alarms
