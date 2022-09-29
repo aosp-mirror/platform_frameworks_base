@@ -49,6 +49,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
 
@@ -148,8 +149,12 @@ public class GlobalActionsImeTest extends SysuiTestCase {
         return false;
     }
 
-    private static void executeShellCommand(String cmd) {
-        InstrumentationRegistry.getInstrumentation().getUiAutomation().executeShellCommand(cmd);
+    private void executeShellCommand(String cmd) {
+        try {
+            runShellCommand(cmd);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
