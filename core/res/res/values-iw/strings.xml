@@ -1951,7 +1951,7 @@
     <string name="app_streaming_blocked_message" product="default" msgid="1245180131667647277">"אי אפשר לגשת לאפליקציה הזו במכשיר <xliff:g id="DEVICE">%1$s</xliff:g>. במקום זאת, יש לנסות בטלפון."</string>
     <string name="app_streaming_blocked_message_for_permission_dialog" product="tv" msgid="6306583663205997979">"‏אי אפשר לגשת לאפליקציה הזו במכשיר <xliff:g id="DEVICE">%1$s</xliff:g> כרגע. במקום זאת, יש לנסות במכשיר Android TV."</string>
     <string name="app_streaming_blocked_message_for_permission_dialog" product="tablet" msgid="6545624942642129664">"אי אפשר לגשת לאפליקציה הזו במכשיר <xliff:g id="DEVICE">%1$s</xliff:g> כרגע. במקום זאת, יש לנסות בטאבלט."</string>
-    <string name="app_streaming_blocked_message_for_permission_dialog" product="default" msgid="8462740631707923000">"אי אפשר לגשת לאפליקציה הזו במכשיר <xliff:g id="DEVICE">%1$s</xliff:g> כרגע. במקום זאת, יש לנסות בטלפון."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="default" msgid="8462740631707923000">"אי אפשר לגשת לאפליקציה הזו במכשיר <xliff:g id="DEVICE">%1$s</xliff:g> כרגע. במקום זאת, אפשר לנסות בטלפון."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"‏האפליקציה הזו מבקשת אמצעי אבטחה נוסף. במקום זאת, יש לנסות במכשיר Android TV."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"האפליקציה הזו מבקשת אמצעי אבטחה נוסף. במקום זאת, יש לנסות בטאבלט."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"האפליקציה הזו מבקשת אמצעי אבטחה נוסף. במקום זאת, יש לנסות בטלפון."</string>
