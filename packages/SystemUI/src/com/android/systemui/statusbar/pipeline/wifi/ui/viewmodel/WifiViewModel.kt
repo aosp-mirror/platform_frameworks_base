@@ -31,6 +31,7 @@ import com.android.systemui.statusbar.connectivity.WifiIcons.WIFI_FULL_ICONS
 import com.android.systemui.statusbar.connectivity.WifiIcons.WIFI_NO_INTERNET_ICONS
 import com.android.systemui.statusbar.connectivity.WifiIcons.WIFI_NO_NETWORK
 import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
+import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger.Companion.logOutputChange
 import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel
@@ -65,12 +66,13 @@ import kotlinx.coroutines.flow.stateIn
 class WifiViewModel
 @Inject
 constructor(
-    constants: WifiConstants,
+    connectivityConstants: ConnectivityConstants,
     private val context: Context,
     logger: ConnectivityPipelineLogger,
     interactor: WifiInteractor,
     @Application private val scope: CoroutineScope,
     statusBarPipelineFlags: StatusBarPipelineFlags,
+    wifiConstants: WifiConstants,
 ) {
     /**
      * Returns the drawable resource ID to use for the wifi icon based on the given network.
@@ -133,7 +135,8 @@ constructor(
             val icon = Icon.Resource(iconResId, wifiNetwork.contentDescription())
 
             return@combine when {
-                constants.alwaysShowIconIfEnabled -> icon
+                wifiConstants.alwaysShowIconIfEnabled -> icon
+                !connectivityConstants.hasDataCapabilities -> icon
                 wifiNetwork is WifiNetworkModel.Active && wifiNetwork.isValidated -> icon
                 else -> null
             }
@@ -142,7 +145,7 @@ constructor(
 
     /** The wifi activity status. Null if we shouldn't display the activity status. */
     private val activity: Flow<WifiActivityModel?> =
-        if (!constants.shouldShowActivityConfig) {
+        if (!wifiConstants.shouldShowActivityConfig) {
             flowOf(null)
         } else {
             combine(interactor.activity, interactor.ssid) { activity, ssid ->
