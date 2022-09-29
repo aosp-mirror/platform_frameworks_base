@@ -247,6 +247,7 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.PermissionInfo;
 import android.content.pm.PermissionMethod;
+import android.content.pm.PermissionName;
 import android.content.pm.ProcessInfo;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ProviderInfoList;
@@ -5974,8 +5975,9 @@ public class ActivityManagerService extends IActivityManager.Stub
      * provided non-{@code null} {@code permission} before. Otherwise calls into
      * {@link ActivityManager#checkComponentPermission(String, int, int, boolean)}.
      */
+    @PackageManager.PermissionResult
     @PermissionMethod
-    public static int checkComponentPermission(String permission, int pid, int uid,
+    public static int checkComponentPermission(@PermissionName String permission, int pid, int uid,
             int owningUid, boolean exported) {
         if (pid == MY_PID) {
             return PackageManager.PERMISSION_GRANTED;
@@ -6022,7 +6024,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     @Override
     @PermissionMethod
-    public int checkPermission(String permission, int pid, int uid) {
+    public int checkPermission(@PermissionName String permission, int pid, int uid) {
         if (permission == null) {
             return PackageManager.PERMISSION_DENIED;
         }
@@ -6034,7 +6036,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * This can be called with or without the global lock held.
      */
     @PermissionMethod
-    int checkCallingPermission(String permission) {
+    int checkCallingPermission(@PermissionName String permission) {
         return checkPermission(permission,
                 Binder.getCallingPid(),
                 Binder.getCallingUid());
@@ -6044,7 +6046,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * This can be called with or without the global lock held.
      */
     @PermissionMethod
-    void enforceCallingPermission(String permission, String func) {
+    void enforceCallingPermission(@PermissionName String permission, String func) {
         if (checkCallingPermission(permission)
                 == PackageManager.PERMISSION_GRANTED) {
             return;
@@ -6061,7 +6063,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     /**
      * This can be called with or without the global lock held.
      */
-    @PermissionMethod
     private void enforceCallingHasAtLeastOnePermission(String func, String... permissions) {
         for (String permission : permissions) {
             if (checkCallingPermission(permission) == PackageManager.PERMISSION_GRANTED) {
@@ -6080,7 +6081,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     /**
      * This can be called with or without the global lock held.
      */
-    void enforcePermission(String permission, int pid, int uid, String func) {
+    @PermissionMethod
+    void enforcePermission(@PermissionName String permission, int pid, int uid, String func) {
         if (checkPermission(permission, pid, uid) == PackageManager.PERMISSION_GRANTED) {
             return;
         }

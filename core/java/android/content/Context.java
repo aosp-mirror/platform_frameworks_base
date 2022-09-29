@@ -52,6 +52,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PermissionMethod;
+import android.content.pm.PermissionName;
 import android.content.res.AssetManager;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
@@ -6077,7 +6078,8 @@ public abstract class Context {
     @CheckResult(suggest="#enforcePermission(String,int,int,String)")
     @PackageManager.PermissionResult
     @PermissionMethod
-    public abstract int checkPermission(@NonNull String permission, int pid, int uid);
+    public abstract int checkPermission(
+            @NonNull @PermissionName String permission, int pid, int uid);
 
     /** @hide */
     @SuppressWarnings("HiddenAbstractMethod")
@@ -6110,7 +6112,7 @@ public abstract class Context {
     @CheckResult(suggest="#enforceCallingPermission(String,String)")
     @PackageManager.PermissionResult
     @PermissionMethod
-    public abstract int checkCallingPermission(@NonNull String permission);
+    public abstract int checkCallingPermission(@NonNull @PermissionName String permission);
 
     /**
      * Determine whether the calling process of an IPC <em>or you</em> have been
@@ -6131,7 +6133,7 @@ public abstract class Context {
     @CheckResult(suggest="#enforceCallingOrSelfPermission(String,String)")
     @PackageManager.PermissionResult
     @PermissionMethod
-    public abstract int checkCallingOrSelfPermission(@NonNull String permission);
+    public abstract int checkCallingOrSelfPermission(@NonNull @PermissionName String permission);
 
     /**
      * Determine whether <em>you</em> have been granted a particular permission.
@@ -6161,7 +6163,7 @@ public abstract class Context {
      */
     @PermissionMethod
     public abstract void enforcePermission(
-            @NonNull String permission, int pid, int uid, @Nullable String message);
+            @NonNull @PermissionName String permission, int pid, int uid, @Nullable String message);
 
     /**
      * If the calling process of an IPC you are handling has not been
@@ -6183,7 +6185,7 @@ public abstract class Context {
      */
     @PermissionMethod
     public abstract void enforceCallingPermission(
-            @NonNull String permission, @Nullable String message);
+            @NonNull @PermissionName String permission, @Nullable String message);
 
     /**
      * If neither you nor the calling process of an IPC you are
@@ -6200,7 +6202,7 @@ public abstract class Context {
      */
     @PermissionMethod
     public abstract void enforceCallingOrSelfPermission(
-            @NonNull String permission, @Nullable String message);
+            @NonNull @PermissionName String permission, @Nullable String message);
 
     /**
      * Grant permission to access a specific Uri to another package, regardless
