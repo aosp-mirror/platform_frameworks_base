@@ -88,8 +88,6 @@ import android.os.UserManager.QuietModeFlag;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageManagerInternal;
 import android.provider.Settings;
-import android.security.GateKeeper;
-import android.service.gatekeeper.IGateKeeperService;
 import android.service.voice.VoiceInteractionManagerInternal;
 import android.stats.devicepolicy.DevicePolicyEnums;
 import android.text.TextUtils;
@@ -4664,6 +4662,10 @@ public class UserManagerService extends IUserManager.Stub {
                     StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE);
             t.traceEnd();
 
+            t.traceBegin("LSS.createNewUser");
+            mLockPatternUtils.createNewUser(userId, userInfo.serialNumber);
+            t.traceEnd();
+
             final Set<String> userTypeInstallablePackages =
                     mSystemPackageInstaller.getInstallablePackagesForUserType(userType);
             t.traceBegin("PM.createNewUser");
@@ -5500,15 +5502,8 @@ public class UserManagerService extends IUserManager.Stub {
             Slog.i(LOG_TAG, "Destroying key for user " + userId + " failed, continuing anyway", e);
         }
 
-        // Cleanup gatekeeper secure user id
-        try {
-            final IGateKeeperService gk = GateKeeper.getService();
-            if (gk != null) {
-                gk.clearSecureUserId(userId);
-            }
-        } catch (Exception ex) {
-            Slog.w(LOG_TAG, "unable to clear GK secure user id");
-        }
+        // Cleanup lock settings
+        mLockPatternUtils.removeUser(userId);
 
         // Cleanup package manager settings
         mPm.cleanUpUser(this, userId);

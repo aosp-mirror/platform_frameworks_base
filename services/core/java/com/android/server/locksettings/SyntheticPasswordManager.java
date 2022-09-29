@@ -49,6 +49,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockscreenCredential;
 import com.android.internal.widget.VerifyCredentialResponse;
 import com.android.server.locksettings.LockSettingsStorage.PersistentData;
+import com.android.server.utils.Slogf;
 
 import libcore.util.HexEncoding;
 
@@ -1026,6 +1027,14 @@ public class SyntheticPasswordManager {
             long protectorId, @NonNull LockscreenCredential credential, int userId,
             ICheckCredentialProgressCallback progressCallback) {
         AuthenticationResult result = new AuthenticationResult();
+
+        if (protectorId == SyntheticPasswordManager.NULL_PROTECTOR_ID) {
+            // This should never happen, due to the migration done in LSS.bootCompleted().
+            Slogf.wtf(TAG, "Synthetic password not found for user %d", userId);
+            result.gkResponse = VerifyCredentialResponse.ERROR;
+            return result;
+        }
+
         PasswordData pwd = PasswordData.fromBytes(loadState(PASSWORD_DATA_NAME, protectorId,
                     userId));
 

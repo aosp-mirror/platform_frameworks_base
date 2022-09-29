@@ -65,6 +65,26 @@ public abstract class LockSettingsInternal {
     public abstract void unlockUserKeyIfUnsecured(@UserIdInt int userId);
 
     /**
+     * Creates the locksettings state for a new user.
+     * <p>
+     * This includes creating a synthetic password and protecting it with an empty LSKF.
+     *
+     * @param userId the ID of the new user
+     * @param userSerialNumber the serial number of the new user
+     */
+    public abstract void createNewUser(@UserIdInt int userId, int userSerialNumber);
+
+    /**
+     * Removes the locksettings state for the given user.
+     * <p>
+     * This includes removing the user's synthetic password and any protectors that are protecting
+     * it.
+     *
+     * @param userId the ID of the user being removed
+     */
+    public abstract void removeUser(@UserIdInt int userId);
+
+    /**
      * Create an escrow token for the current user, which can later be used to unlock FBE
      * or change user password.
      *

@@ -113,6 +113,7 @@ import android.util.EventLog;
 import android.util.LongSparseArray;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseIntArray;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
@@ -244,6 +245,17 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private final RebootEscrowManager mRebootEscrowManager;
 
+    // Locking order is mUserCreationAndRemovalLock -> mSpManager.
+    private final Object mUserCreationAndRemovalLock = new Object();
+    // These two arrays are only used at boot time.  To save memory, they are set to null when
+    // PHASE_BOOT_COMPLETED is reached.
+    @GuardedBy("mUserCreationAndRemovalLock")
+    private SparseIntArray mEarlyCreatedUsers = new SparseIntArray();
+    @GuardedBy("mUserCreationAndRemovalLock")
+    private SparseIntArray mEarlyRemovedUsers = new SparseIntArray();
+    @GuardedBy("mUserCreationAndRemovalLock")
+    private boolean mBootComplete;
+
     // Current password metric for all users on the device. Updated when user unlocks
     // the device or changes password. Removed when user is stopped.
     @GuardedBy("this")
@@ -284,9 +296,16 @@ public class LockSettingsService extends ILockSettings.Stub {
         @Override
         public void onBootPhase(int phase) {
             super.onBootPhase(phase);
-            if (phase == PHASE_ACTIVITY_MANAGER_READY) {
-                mLockSettingsService.migrateOldDataAfterSystemReady();
-                mLockSettingsService.loadEscrowData();
+            switch (phase) {
+                case PHASE_ACTIVITY_MANAGER_READY:
+                    mLockSettingsService.migrateOldDataAfterSystemReady();
+                    mLockSettingsService.loadEscrowData();
+                    break;
+                case PHASE_BOOT_COMPLETED:
+                    mLockSettingsService.bootCompleted();
+                    break;
+                default:
+                    break;
             }
         }
 
@@ -578,7 +597,6 @@ public class LockSettingsService extends ILockSettings.Stub {
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_ADDED);
         filter.addAction(Intent.ACTION_USER_STARTING);
-        filter.addAction(Intent.ACTION_USER_REMOVED);
         injector.getContext().registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL, filter,
                 null, null);
 
@@ -721,28 +739,32 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     /**
-     * Clean up states associated with the given user, in case the userId is reused but LSS didn't
-     * get a chance to do cleanup previously during ACTION_USER_REMOVED.
-     *
-     * Internally, LSS stores serial number for each user and check it against the current user's
-     * serial number to determine if the userId is reused and invoke cleanup code.
+     * Removes the LSS state for the given userId if the userId was reused without its LSS state
+     * being fully removed.
+     * <p>
+     * This is primarily needed for users that were removed by Android 13 or earlier, which didn't
+     * guarantee removal of LSS state as it relied on the {@code ACTION_USER_REMOVED} intent.  It is
+     * also needed because {@link #removeUser()} delays requests to remove LSS state until the
+     * {@code PHASE_BOOT_COMPLETED} boot phase, so they can be lost.
+     * <p>
+     * Stale state is detected by checking whether the user serial number changed.  This works
+     * because user serial numbers are never reused.
      */
-    private void cleanupDataForReusedUserIdIfNecessary(int userId) {
+    private void removeStateForReusedUserIdIfNecessary(@UserIdInt int userId, int serialNumber) {
         if (userId == UserHandle.USER_SYSTEM) {
             // Short circuit as we never clean up user 0.
             return;
         }
-        // Serial number is never reusued, so we can use it as a distinguisher for user Id reuse.
-        int serialNumber = mUserManager.getUserSerialNumber(userId);
-
         int storedSerialNumber = mStorage.getInt(USER_SERIAL_NUMBER_KEY, -1, userId);
         if (storedSerialNumber != serialNumber) {
             // If LockSettingsStorage does not have a copy of the serial number, it could be either
             // this is a user created before the serial number recording logic is introduced, or
             // the user does not exist or was removed and cleaned up properly. In either case, don't
-            // invoke removeUser().
+            // invoke removeUserState().
             if (storedSerialNumber != -1) {
-                removeUser(userId, /* unknownUser */ true);
+                Slogf.i(TAG, "Removing stale state for reused userId %d (serial %d => %d)", userId,
+                        storedSerialNumber, serialNumber);
+                removeUserState(userId);
             }
             mStorage.setInt(USER_SERIAL_NUMBER_KEY, serialNumber, userId);
         }
@@ -772,7 +794,6 @@ public class LockSettingsService extends ILockSettings.Stub {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                cleanupDataForReusedUserIdIfNecessary(userId);
                 ensureProfileKeystoreUnlocked(userId);
                 // Hide notification first, as tie managed profile lock takes time
                 hideEncryptionNotification(new UserHandle(userId));
@@ -822,11 +843,6 @@ public class LockSettingsService extends ILockSettings.Stub {
             } else if (Intent.ACTION_USER_STARTING.equals(intent.getAction())) {
                 final int userHandle = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0);
                 mStorage.prefetchUser(userHandle);
-            } else if (Intent.ACTION_USER_REMOVED.equals(intent.getAction())) {
-                final int userHandle = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0);
-                if (userHandle > 0) {
-                    removeUser(userHandle, /* unknownUser= */ false);
-                }
             }
         }
     };
@@ -936,6 +952,53 @@ public class LockSettingsService extends ILockSettings.Stub {
             }
         }
         return success;
+    }
+
+    private void bootCompleted() {
+        synchronized (mUserCreationAndRemovalLock) {
+            // Handle delayed calls to LSS.removeUser() and LSS.createNewUser().
+            for (int i = 0; i < mEarlyRemovedUsers.size(); i++) {
+                int userId = mEarlyRemovedUsers.keyAt(i);
+                Slogf.i(TAG, "Removing locksettings state for removed user %d now that boot "
+                        + "is complete", userId);
+                removeUserState(userId);
+            }
+            mEarlyRemovedUsers = null; // no longer needed
+            for (int i = 0; i < mEarlyCreatedUsers.size(); i++) {
+                int userId = mEarlyCreatedUsers.keyAt(i);
+                int serialNumber = mEarlyCreatedUsers.valueAt(i);
+
+                removeStateForReusedUserIdIfNecessary(userId, serialNumber);
+                synchronized (mSpManager) {
+                    if (!isSyntheticPasswordBasedCredentialLocked(userId)) {
+                        Slogf.i(TAG, "Creating locksettings state for user %d now that boot "
+                                + "is complete", userId);
+                        initializeSyntheticPasswordLocked(userId);
+                    }
+                }
+            }
+            mEarlyCreatedUsers = null; // no longer needed
+
+            // Also do a one-time migration of all users to SP-based credentials.  This is needed
+            // for the system user on the first boot of a device, as the system user is special and
+            // never goes through the user creation flow that other users do.  It is also needed for
+            // existing users on a device upgraded from Android 13 or earlier, where users with no
+            // LSKF didn't necessarily have an SP.
+            if (getString("migrated_all_users_to_sp", null, 0) == null) {
+                for (UserInfo user : mUserManager.getAliveUsers()) {
+                    removeStateForReusedUserIdIfNecessary(user.id, user.serialNumber);
+                    synchronized (mSpManager) {
+                        if (!isSyntheticPasswordBasedCredentialLocked(user.id)) {
+                            Slogf.i(TAG, "Migrating user %d to SP-based credential", user.id);
+                            initializeSyntheticPasswordLocked(user.id);
+                        }
+                    }
+                }
+                setString("migrated_all_users_to_sp", "true", 0);
+            }
+
+            mBootComplete = true;
+        }
     }
 
     /**
@@ -1587,6 +1650,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                 if (!savedCredential.isNone()) {
                     throw new IllegalStateException("Saved credential given, but user has no SP");
                 }
+                // TODO(b/232452368): this case is only needed by unit tests now; remove it.
                 initializeSyntheticPasswordLocked(userId);
             } else if (savedCredential.isNone() && isProfileWithUnifiedLock(userId)) {
                 // get credential from keystore when profile has unified lock
@@ -2260,8 +2324,50 @@ public class LockSettingsService extends ILockSettings.Stub {
         });
     }
 
-    private void removeUser(int userId, boolean unknownUser) {
-        Slog.i(TAG, "RemoveUser: " + userId);
+    private void createNewUser(@UserIdInt int userId, int userSerialNumber) {
+        synchronized (mUserCreationAndRemovalLock) {
+            // Before PHASE_BOOT_COMPLETED, don't actually create the synthetic password yet, but
+            // rather automatically delay it to later.  We do this because protecting the synthetic
+            // password requires the Weaver HAL if the device supports it, and some devices don't
+            // make Weaver available until fairly late in the boot process.  This logic ensures a
+            // consistent flow across all devices, regardless of their Weaver implementation.
+            if (!mBootComplete) {
+                Slogf.i(TAG, "Delaying locksettings state creation for user %d until boot complete",
+                        userId);
+                mEarlyCreatedUsers.put(userId, userSerialNumber);
+                mEarlyRemovedUsers.delete(userId);
+                return;
+            }
+            removeStateForReusedUserIdIfNecessary(userId, userSerialNumber);
+            synchronized (mSpManager) {
+                initializeSyntheticPasswordLocked(userId);
+            }
+        }
+    }
+
+    private void removeUser(@UserIdInt int userId) {
+        synchronized (mUserCreationAndRemovalLock) {
+            // Before PHASE_BOOT_COMPLETED, don't actually remove the LSS state yet, but rather
+            // automatically delay it to later.  We do this because deleting synthetic password
+            // protectors requires the Weaver HAL if the device supports it, and some devices don't
+            // make Weaver available until fairly late in the boot process.  This logic ensures a
+            // consistent flow across all devices, regardless of their Weaver implementation.
+            if (!mBootComplete) {
+                Slogf.i(TAG, "Delaying locksettings state removal for user %d until boot complete",
+                        userId);
+                if (mEarlyCreatedUsers.indexOfKey(userId) >= 0) {
+                    mEarlyCreatedUsers.delete(userId);
+                } else {
+                    mEarlyRemovedUsers.put(userId, -1 /* unused */);
+                }
+                return;
+            }
+            Slogf.i(TAG, "Removing state for user %d", userId);
+            removeUserState(userId);
+        }
+    }
+
+    private void removeUserState(@UserIdInt int userId) {
         removeBiometricsForUser(userId);
         mSpManager.removeUser(getGateKeeperService(), userId);
         mStrongAuth.removeUser(userId);
@@ -2270,11 +2376,9 @@ public class LockSettingsService extends ILockSettings.Stub {
         mManagedProfilePasswordCache.removePassword(userId);
 
         gateKeeperClearSecureUserId(userId);
-        if (unknownUser || isCredentialSharableWithParent(userId)) {
-            removeKeystoreProfileKey(userId);
-        }
-        // Clean up storage last, this is to ensure that cleanupDataForReusedUserIdIfNecessary()
-        // can make the assumption that no USER_SERIAL_NUMBER_KEY means user is fully removed.
+        removeKeystoreProfileKey(userId);
+        // Clean up storage last, so that removeStateForReusedUserIdIfNecessary() can assume that no
+        // USER_SERIAL_NUMBER_KEY means user is fully removed.
         mStorage.removeUser(userId);
     }
 
@@ -2529,8 +2633,11 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     private void callToAuthSecretIfNeeded(@UserIdInt int userId, SyntheticPassword sp) {
-        // Pass the primary user's auth secret to the HAL
-        if (mAuthSecretService != null && mUserManager.getUserInfo(userId).isPrimary()) {
+        // If the given user is the primary user, pass the auth secret to the HAL.  Only the system
+        // user can be primary.  Check for the system user ID before calling getUserInfo(), as other
+        // users may still be under construction.
+        if (mAuthSecretService != null && userId == UserHandle.USER_SYSTEM &&
+                mUserManager.getUserInfo(userId).isPrimary()) {
             try {
                 final byte[] rawSecret = sp.deriveVendorAuthSecret();
                 final ArrayList<Byte> secret = new ArrayList<>(rawSecret.length);
@@ -2546,8 +2653,11 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     /**
      * Creates the synthetic password (SP) for the given user and protects it with an empty LSKF.
-     * This is called just once in the lifetime of the user: the first time a nonempty LSKF is set,
-     * or when an escrow token is activated on a device with an empty LSKF.
+     * <p>
+     * This is called just once in the lifetime of the user: at user creation time (possibly delayed
+     * until {@code PHASE_BOOT_COMPLETED} to ensure that the Weaver HAL is available if the device
+     * supports it), or when upgrading from Android 13 or earlier where users with no LSKF didn't
+     * necessarily have an SP.
      */
     @GuardedBy("mSpManager")
     @VisibleForTesting
@@ -2835,6 +2945,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             if (!isUserSecure(userId)) {
                 long protectorId = getCurrentLskfBasedProtectorId(userId);
                 if (protectorId == SyntheticPasswordManager.NULL_PROTECTOR_ID) {
+                    // TODO(b/232452368): this case is only needed by unit tests now; remove it.
                     sp = initializeSyntheticPasswordLocked(userId);
                 } else {
                     sp = mSpManager.unlockLskfBasedProtector(getGateKeeperService(), protectorId,
@@ -3072,6 +3183,9 @@ public class LockSettingsService extends ILockSettings.Stub {
         pw.decreaseIndent();
 
         pw.println("PasswordHandleCount: " + mGatekeeperPasswords.size());
+        synchronized (mUserCreationAndRemovalLock) {
+            pw.println("BootComplete: " + mBootComplete);
+        }
     }
 
     private void dumpKeystoreKeys(IndentingPrintWriter pw) {
@@ -3230,6 +3344,16 @@ public class LockSettingsService extends ILockSettings.Stub {
         @Override
         public void unlockUserKeyIfUnsecured(@UserIdInt int userId) {
             LockSettingsService.this.unlockUserKeyIfUnsecured(userId);
+        }
+
+        @Override
+        public void createNewUser(@UserIdInt int userId, int userSerialNumber) {
+            LockSettingsService.this.createNewUser(userId, userSerialNumber);
+        }
+
+        @Override
+        public void removeUser(@UserIdInt int userId) {
+            LockSettingsService.this.removeUser(userId);
         }
 
         @Override

@@ -1789,4 +1789,12 @@ public class LockPatternUtils {
     public void unlockUserKeyIfUnsecured(@UserIdInt int userId) {
         getLockSettingsInternal().unlockUserKeyIfUnsecured(userId);
     }
+
+    public void createNewUser(@UserIdInt int userId, int userSerialNumber) {
+        getLockSettingsInternal().createNewUser(userId, userSerialNumber);
+    }
+
+    public void removeUser(@UserIdInt int userId) {
+        getLockSettingsInternal().removeUser(userId);
+    }
 }
