@@ -151,11 +151,6 @@ interface IWindowSession {
             int seqId);
 
     @UnsupportedAppUsage
-    oneway void setInTouchMode(boolean showFocus);
-    @UnsupportedAppUsage
-    boolean getInTouchMode();
-
-    @UnsupportedAppUsage
     boolean performHapticFeedback(int effectId, boolean always);
 
     /**

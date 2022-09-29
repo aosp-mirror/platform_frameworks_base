@@ -1055,19 +1055,11 @@ public final class ViewRootImpl implements ViewParent,
         mProfile = true;
     }
 
-    /**
-     * Indicates whether we are in touch mode. Calling this method triggers an IPC
-     * call and should be avoided whenever possible.
-     *
-     * @return True, if the device is in touch mode, false otherwise.
-     *
-     * @hide
-     */
-    static boolean isInTouchMode() {
-        IWindowSession windowSession = WindowManagerGlobal.peekWindowSession();
-        if (windowSession != null) {
+    private boolean isInTouchMode() {
+        IWindowManager windowManager = WindowManagerGlobal.getWindowManagerService();
+        if (windowManager != null) {
             try {
-                return windowSession.getInTouchMode();
+                return windowManager.isInTouchMode(getDisplayId());
             } catch (RemoteException e) {
             }
         }
@@ -5810,7 +5802,8 @@ public final class ViewRootImpl implements ViewParent,
 
         // tell the window manager
         try {
-            mWindowSession.setInTouchMode(inTouchMode);
+            IWindowManager windowManager = WindowManagerGlobal.getWindowManagerService();
+            windowManager.setInTouchMode(inTouchMode, getDisplayId());
         } catch (RemoteException e) {
             throw new RuntimeException(e);
         }
