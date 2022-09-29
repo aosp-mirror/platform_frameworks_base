@@ -27,7 +27,6 @@ import android.view.View;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.media.MediaCarouselController;
 import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.media.MediaHost;
 import com.android.systemui.media.MediaHostState;
@@ -76,14 +75,13 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
             @Named(QS_USING_MEDIA_PLAYER) boolean usingMediaPlayer,
             @Named(QS_PANEL) MediaHost mediaHost,
             QSTileRevealController.Factory qsTileRevealControllerFactory,
-            DumpManager dumpManager, MediaCarouselController mediaCarouselController,
-            MetricsLogger metricsLogger, UiEventLogger uiEventLogger,
+            DumpManager dumpManager, MetricsLogger metricsLogger, UiEventLogger uiEventLogger,
             QSLogger qsLogger, BrightnessController.Factory brightnessControllerFactory,
             BrightnessSliderController.Factory brightnessSliderFactory,
             FalsingManager falsingManager,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager) {
         super(view, qstileHost, qsCustomizerController, usingMediaPlayer, mediaHost,
-                metricsLogger, uiEventLogger, qsLogger, dumpManager, mediaCarouselController);
+                metricsLogger, uiEventLogger, qsLogger, dumpManager);
         mTunerService = tunerService;
         mQsCustomizerController = qsCustomizerController;
         mQsTileRevealControllerFactory = qsTileRevealControllerFactory;

@@ -131,6 +131,9 @@
     <!-- For StatusIconContainer to tag its icon views -->
     <item type="id" name="status_bar_view_state_tag" />
 
+    <!-- Status bar -->
+    <item type="id" name="status_bar_dot" />
+
     <!-- Default display cutout on the physical top of screen -->
     <item type="id" name="display_cutout" />
     <item type="id" name="display_cutout_left" />

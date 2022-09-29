@@ -33,6 +33,20 @@ class ConnectivityPipelineLogger @Inject constructor(
 ) {
     /**
      * Logs a change in one of the **raw inputs** to the connectivity pipeline.
+     *
+     * Use this method for inputs that don't have any extra information besides their callback name.
+     */
+    fun logInputChange(callbackName: String) {
+        buffer.log(
+            SB_LOGGING_TAG,
+            LogLevel.INFO,
+            { str1 = callbackName },
+            { "Input: $str1" }
+        )
+    }
+
+    /**
+     * Logs a change in one of the **raw inputs** to the connectivity pipeline.
      */
     fun logInputChange(callbackName: String, changeInfo: String?) {
         buffer.log(
@@ -128,12 +142,36 @@ class ConnectivityPipelineLogger @Inject constructor(
         const val SB_LOGGING_TAG = "SbConnectivity"
 
         /**
+         * Log a change in one of the **inputs** to the connectivity pipeline.
+         */
+        fun Flow<Unit>.logInputChange(
+            logger: ConnectivityPipelineLogger,
+            inputParamName: String,
+        ): Flow<Unit> {
+            return this.onEach { logger.logInputChange(inputParamName) }
+        }
+
+        /**
+         * Log a change in one of the **inputs** to the connectivity pipeline.
+         *
+         * @param prettyPrint an optional function to transform the value into a readable string.
+         *   [toString] is used if no custom function is provided.
+         */
+        fun <T> Flow<T>.logInputChange(
+            logger: ConnectivityPipelineLogger,
+            inputParamName: String,
+            prettyPrint: (T) -> String = { it.toString() }
+        ): Flow<T> {
+            return this.onEach {logger.logInputChange(inputParamName, prettyPrint(it)) }
+        }
+
+        /**
          * Log a change in one of the **outputs** to the connectivity pipeline.
          *
          * @param prettyPrint an optional function to transform the value into a readable string.
          *   [toString] is used if no custom function is provided.
          */
-        fun <T : Any> Flow<T>.logOutputChange(
+        fun <T> Flow<T>.logOutputChange(
                 logger: ConnectivityPipelineLogger,
                 outputParamName: String,
                 prettyPrint: (T) -> String = { it.toString() }

@@ -48,6 +48,7 @@ import android.view.WindowManagerPolicyConstants;
 import android.window.OnBackInvokedCallback;
 import android.window.OnBackInvokedDispatcher;
 
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.colorextraction.ColorExtractor;
@@ -234,6 +235,11 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
         verify(mOnBackInvokedDispatcher).unregisterOnBackInvokedCallback(any());
     }
 
+    /**
+     * This specific test case appears to be flaky.
+     * b/249136797 tracks the task of root-causing and fixing it.
+     */
+    @FlakyTest
     @Test
     public void testPredictiveBackInvocationDismissesDialog() {
         mGlobalActionsDialogLite = spy(mGlobalActionsDialogLite);
