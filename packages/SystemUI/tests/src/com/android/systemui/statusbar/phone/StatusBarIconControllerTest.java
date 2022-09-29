@@ -51,8 +51,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import javax.inject.Provider;
-
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
 @SmallTest
@@ -79,8 +77,9 @@ public class StatusBarIconControllerTest extends LeakCheckedTest {
         LinearLayout layout = new LinearLayout(mContext);
         TestDarkIconManager manager = new TestDarkIconManager(
                 layout,
+                StatusBarLocation.HOME,
                 mock(StatusBarPipelineFlags.class),
-                () -> mock(WifiViewModel.class),
+                mock(WifiViewModel.class),
                 mMobileContextProvider,
                 mock(DarkIconDispatcher.class));
         testCallOnAdd_forManager(manager);
@@ -121,13 +120,15 @@ public class StatusBarIconControllerTest extends LeakCheckedTest {
 
         TestDarkIconManager(
                 LinearLayout group,
+                StatusBarLocation location,
                 StatusBarPipelineFlags statusBarPipelineFlags,
-                Provider<WifiViewModel> wifiViewModelProvider,
+                WifiViewModel wifiViewModel,
                 MobileContextProvider contextProvider,
                 DarkIconDispatcher darkIconDispatcher) {
             super(group,
+                    location,
                     statusBarPipelineFlags,
-                    wifiViewModelProvider,
+                    wifiViewModel,
                     contextProvider,
                     darkIconDispatcher);
         }
@@ -165,8 +166,9 @@ public class StatusBarIconControllerTest extends LeakCheckedTest {
     private static class TestIconManager extends IconManager implements TestableIconManager {
         TestIconManager(ViewGroup group, MobileContextProvider contextProvider) {
             super(group,
+                    StatusBarLocation.HOME,
                     mock(StatusBarPipelineFlags.class),
-                    () -> mock(WifiViewModel.class),
+                    mock(WifiViewModel.class),
                     contextProvider);
         }
 

@@ -177,6 +177,25 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
     }
 
     /**
+     * Turn desktop mode on or off
+     * @param active the desired state for desktop mode setting
+     */
+    public void setDesktopModeActive(boolean active) {
+        int value = active ? 1 : 0;
+        Settings.System.putInt(mContext.getContentResolver(), Settings.System.DESKTOP_MODE, value);
+    }
+
+    /**
+     * Returns the windowing mode of the display area with the specified displayId.
+     * @param displayId
+     * @return
+     */
+    public int getDisplayAreaWindowingMode(int displayId) {
+        return mRootTaskDisplayAreaOrganizer.getDisplayAreaInfo(displayId)
+                .configuration.windowConfiguration.getWindowingMode();
+    }
+
+    /**
      * A {@link ContentObserver} for listening to changes to {@link Settings.System#DESKTOP_MODE}
      */
     private final class SettingsObserver extends ContentObserver {

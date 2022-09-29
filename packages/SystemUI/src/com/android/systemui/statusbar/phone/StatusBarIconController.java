@@ -56,7 +56,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 
 public interface StatusBarIconController {
 
@@ -139,13 +138,15 @@ public interface StatusBarIconController {
 
         public DarkIconManager(
                 LinearLayout linearLayout,
+                StatusBarLocation location,
                 StatusBarPipelineFlags statusBarPipelineFlags,
-                Provider<WifiViewModel> wifiViewModelProvider,
+                WifiViewModel wifiViewModel,
                 MobileContextProvider mobileContextProvider,
                 DarkIconDispatcher darkIconDispatcher) {
             super(linearLayout,
+                    location,
                     statusBarPipelineFlags,
-                    wifiViewModelProvider,
+                    wifiViewModel,
                     mobileContextProvider);
             mIconHPadding = mContext.getResources().getDimensionPixelSize(
                     R.dimen.status_bar_icon_padding);
@@ -204,27 +205,28 @@ public interface StatusBarIconController {
         @SysUISingleton
         public static class Factory {
             private final StatusBarPipelineFlags mStatusBarPipelineFlags;
-            private final Provider<WifiViewModel> mWifiViewModelProvider;
+            private final WifiViewModel mWifiViewModel;
             private final MobileContextProvider mMobileContextProvider;
             private final DarkIconDispatcher mDarkIconDispatcher;
 
             @Inject
             public Factory(
                     StatusBarPipelineFlags statusBarPipelineFlags,
-                    Provider<WifiViewModel> wifiViewModelProvider,
+                    WifiViewModel wifiViewModel,
                     MobileContextProvider mobileContextProvider,
                     DarkIconDispatcher darkIconDispatcher) {
                 mStatusBarPipelineFlags = statusBarPipelineFlags;
-                mWifiViewModelProvider = wifiViewModelProvider;
+                mWifiViewModel = wifiViewModel;
                 mMobileContextProvider = mobileContextProvider;
                 mDarkIconDispatcher = darkIconDispatcher;
             }
 
-            public DarkIconManager create(LinearLayout group) {
+            public DarkIconManager create(LinearLayout group, StatusBarLocation location) {
                 return new DarkIconManager(
                         group,
+                        location,
                         mStatusBarPipelineFlags,
-                        mWifiViewModelProvider,
+                        mWifiViewModel,
                         mMobileContextProvider,
                         mDarkIconDispatcher);
             }
@@ -239,12 +241,14 @@ public interface StatusBarIconController {
 
         public TintedIconManager(
                 ViewGroup group,
+                StatusBarLocation location,
                 StatusBarPipelineFlags statusBarPipelineFlags,
-                Provider<WifiViewModel> wifiViewModelProvider,
+                WifiViewModel wifiViewModel,
                 MobileContextProvider mobileContextProvider) {
             super(group,
+                    location,
                     statusBarPipelineFlags,
-                    wifiViewModelProvider,
+                    wifiViewModel,
                     mobileContextProvider);
         }
 
@@ -278,24 +282,25 @@ public interface StatusBarIconController {
         @SysUISingleton
         public static class Factory {
             private final StatusBarPipelineFlags mStatusBarPipelineFlags;
-            private final Provider<WifiViewModel> mWifiViewModelProvider;
+            private final WifiViewModel mWifiViewModel;
             private final MobileContextProvider mMobileContextProvider;
 
             @Inject
             public Factory(
                     StatusBarPipelineFlags statusBarPipelineFlags,
-                    Provider<WifiViewModel> wifiViewModelProvider,
+                    WifiViewModel wifiViewModel,
                     MobileContextProvider mobileContextProvider) {
                 mStatusBarPipelineFlags = statusBarPipelineFlags;
-                mWifiViewModelProvider = wifiViewModelProvider;
+                mWifiViewModel = wifiViewModel;
                 mMobileContextProvider = mobileContextProvider;
             }
 
-            public TintedIconManager create(ViewGroup group) {
+            public TintedIconManager create(ViewGroup group, StatusBarLocation location) {
                 return new TintedIconManager(
                         group,
+                        location,
                         mStatusBarPipelineFlags,
-                        mWifiViewModelProvider,
+                        mWifiViewModel,
                         mMobileContextProvider);
             }
         }
@@ -306,8 +311,9 @@ public interface StatusBarIconController {
      */
     class IconManager implements DemoModeCommandReceiver {
         protected final ViewGroup mGroup;
+        private final StatusBarLocation mLocation;
         private final StatusBarPipelineFlags mStatusBarPipelineFlags;
-        private final Provider<WifiViewModel> mWifiViewModelProvider;
+        private final WifiViewModel mWifiViewModel;
         private final MobileContextProvider mMobileContextProvider;
         protected final Context mContext;
         protected final int mIconSize;
@@ -324,12 +330,14 @@ public interface StatusBarIconController {
 
         public IconManager(
                 ViewGroup group,
+                StatusBarLocation location,
                 StatusBarPipelineFlags statusBarPipelineFlags,
-                Provider<WifiViewModel> wifiViewModelProvider,
+                WifiViewModel wifiViewModel,
                 MobileContextProvider mobileContextProvider) {
             mGroup = group;
+            mLocation = location;
             mStatusBarPipelineFlags = statusBarPipelineFlags;
-            mWifiViewModelProvider = wifiViewModelProvider;
+            mWifiViewModel = wifiViewModel;
             mMobileContextProvider = mobileContextProvider;
             mContext = group.getContext();
             mIconSize = mContext.getResources().getDimensionPixelSize(
@@ -446,7 +454,7 @@ public interface StatusBarIconController {
 
         private ModernStatusBarWifiView onCreateModernStatusBarWifiView(String slot) {
             return ModernStatusBarWifiView.constructAndBind(
-                    mContext, slot, mWifiViewModelProvider.get());
+                    mContext, slot, mWifiViewModel, mLocation);
         }
 
         private StatusBarMobileView onCreateStatusBarMobileView(int subId, String slot) {
