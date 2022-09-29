@@ -51,6 +51,7 @@ java_test_host {
     data: [
         ":com.android.apex.apkrollback.test_v1",
         ":test.rebootless_apex_v1",
+        ":RollbackTest",
     ],
 }
 
