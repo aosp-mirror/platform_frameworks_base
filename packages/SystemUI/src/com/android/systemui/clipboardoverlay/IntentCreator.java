@@ -47,7 +47,8 @@ class IntentCreator {
             shareIntent.putExtra(Intent.EXTRA_STREAM, clipData.getItemAt(0).getUri());
             shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         } else {
-            shareIntent.putExtra(Intent.EXTRA_TEXT, clipData.getItemAt(0).coerceToText(context));
+            shareIntent.putExtra(
+                    Intent.EXTRA_TEXT, clipData.getItemAt(0).coerceToText(context).toString());
             shareIntent.setType("text/plain");
         }
         Intent chooserIntent = Intent.createChooser(shareIntent, null)
