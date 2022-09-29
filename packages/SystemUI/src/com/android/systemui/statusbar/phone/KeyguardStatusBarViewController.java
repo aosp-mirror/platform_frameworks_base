@@ -352,8 +352,8 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
         mKeyguardUpdateMonitor.registerCallback(mKeyguardUpdateMonitorCallback);
         mDisableStateTracker.startTracking(mCommandQueue, mView.getDisplay().getDisplayId());
         if (mTintedIconManager == null) {
-            mTintedIconManager =
-                    mTintedIconManagerFactory.create(mView.findViewById(R.id.statusIcons));
+            mTintedIconManager = mTintedIconManagerFactory.create(
+                    mView.findViewById(R.id.statusIcons), StatusBarLocation.KEYGUARD);
             mTintedIconManager.setBlockList(getBlockedIcons());
             mStatusBarIconController.addIconGroup(mTintedIconManager);
         }

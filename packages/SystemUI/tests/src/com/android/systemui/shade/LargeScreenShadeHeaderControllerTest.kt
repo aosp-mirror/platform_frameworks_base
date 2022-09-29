@@ -97,7 +97,7 @@ class LargeScreenShadeHeaderControllerTest : SysuiTestCase() {
         whenever(view.visibility).thenAnswer { _ -> viewVisibility }
         whenever(variableDateViewControllerFactory.create(any()))
             .thenReturn(variableDateViewController)
-        whenever(iconManagerFactory.create(any())).thenReturn(iconManager)
+        whenever(iconManagerFactory.create(any(), any())).thenReturn(iconManager)
         whenever(featureFlags.isEnabled(Flags.COMBINED_QS_HEADERS)).thenReturn(false)
         mLargeScreenShadeHeaderController = LargeScreenShadeHeaderController(
                 view,
