@@ -48,7 +48,7 @@ interface IInputMethodManager {
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
             + "android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)")
     List<InputMethodSubtype> getEnabledInputMethodSubtypeList(in @nullable String imiId,
-            boolean allowsImplicitlySelectedSubtypes, int userId);
+            boolean allowsImplicitlyEnabledSubtypes, int userId);
 
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
             + "android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)")

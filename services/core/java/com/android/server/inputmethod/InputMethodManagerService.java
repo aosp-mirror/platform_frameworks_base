@@ -2167,13 +2167,13 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
      * Gets enabled subtypes of the specified {@link InputMethodInfo}.
      *
      * @param imiId if null, returns enabled subtypes for the current {@link InputMethodInfo}.
-     * @param allowsImplicitlySelectedSubtypes {@code true} to return the implicitly selected
+     * @param allowsImplicitlyEnabledSubtypes {@code true} to return the implicitly enabled
      *                                         subtypes.
      * @param userId the user ID to be queried about.
      */
     @Override
     public List<InputMethodSubtype> getEnabledInputMethodSubtypeList(String imiId,
-            boolean allowsImplicitlySelectedSubtypes, @UserIdInt int userId) {
+            boolean allowsImplicitlyEnabledSubtypes, @UserIdInt int userId) {
         if (UserHandle.getCallingUserId() != userId) {
             mContext.enforceCallingPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
         }
@@ -2182,7 +2182,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             final long ident = Binder.clearCallingIdentity();
             try {
                 return getEnabledInputMethodSubtypeListLocked(imiId,
-                        allowsImplicitlySelectedSubtypes, userId);
+                        allowsImplicitlyEnabledSubtypes, userId);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -2191,7 +2191,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
     @GuardedBy("ImfLock.class")
     private List<InputMethodSubtype> getEnabledInputMethodSubtypeListLocked(String imiId,
-            boolean allowsImplicitlySelectedSubtypes, @UserIdInt int userId) {
+            boolean allowsImplicitlyEnabledSubtypes, @UserIdInt int userId) {
         if (userId == mSettings.getCurrentUserId()) {
             final InputMethodInfo imi;
             String selectedMethodId = getSelectedMethodIdLocked();
@@ -2204,7 +2204,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 return Collections.emptyList();
             }
             return mSettings.getEnabledInputMethodSubtypeListLocked(
-                    imi, allowsImplicitlySelectedSubtypes);
+                    imi, allowsImplicitlyEnabledSubtypes);
         }
         final ArrayMap<String, InputMethodInfo> methodMap = queryMethodMapForUser(userId);
         final InputMethodInfo imi = methodMap.get(imiId);
@@ -2214,7 +2214,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         final InputMethodSettings settings = new InputMethodSettings(mContext, methodMap, userId,
                 true);
         return settings.getEnabledInputMethodSubtypeListLocked(
-                imi, allowsImplicitlySelectedSubtypes);
+                imi, allowsImplicitlyEnabledSubtypes);
     }
 
     /**
