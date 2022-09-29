@@ -147,7 +147,6 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.HexDump;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
-import com.android.internal.widget.LockPatternUtils;
 import com.android.server.pm.Installer;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.storage.AppFuseBridge;
@@ -557,7 +556,6 @@ class StorageManagerService extends IStorageManager.Stub
     private IAppOpsService mIAppOpsService;
 
     private final Callbacks mCallbacks;
-    private final LockPatternUtils mLockPatternUtils;
 
     private static final String ANR_DELAY_MILLIS_DEVICE_CONFIG_KEY =
             "anr_delay_millis";
@@ -1808,7 +1806,6 @@ class StorageManagerService extends IStorageManager.Stub
                 ANDROID_VOLD_APP_DATA_ISOLATION_ENABLED_PROPERTY, false);
         mContext = context;
         mCallbacks = new Callbacks(FgThread.get().getLooper());
-        mLockPatternUtils = new LockPatternUtils(mContext);
 
         HandlerThread hthread = new HandlerThread(TAG);
         hthread.start();
@@ -3129,36 +3126,14 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
+    /* Only for use by LockSettingsService */
+    @android.annotation.EnforcePermission(android.Manifest.permission.STORAGE_INTERNAL)
     @Override
-    public void unlockUserKey(int userId, int serialNumber, byte[] secret) {
-        boolean isFileEncrypted = StorageManager.isFileEncrypted();
-        Slog.d(TAG, "unlockUserKey: " + userId
-                + " isFileEncrypted: " + isFileEncrypted
-                + " hasSecret: " + (secret != null));
-        enforcePermission(android.Manifest.permission.STORAGE_INTERNAL);
-
-        if (isUserKeyUnlocked(userId)) {
-            Slog.d(TAG, "User " + userId + "'s CE storage is already unlocked");
-            return;
+    public void unlockUserKey(@UserIdInt int userId, int serialNumber, byte[] secret)
+        throws RemoteException {
+        if (StorageManager.isFileEncrypted()) {
+            mVold.unlockUserKey(userId, serialNumber, encodeBytes(secret));
         }
-
-        if (isFileEncrypted) {
-            // When a user has a secure lock screen, a secret is required to
-            // unlock the key, so don't bother trying to unlock it without one.
-            // This prevents misleading error messages from being logged.
-            if (mLockPatternUtils.isSecure(userId) && ArrayUtils.isEmpty(secret)) {
-                Slog.d(TAG, "Not unlocking user " + userId
-                        + "'s CE storage yet because a secret is needed");
-                return;
-            }
-            try {
-                mVold.unlockUserKey(userId, serialNumber, encodeBytes(secret));
-            } catch (Exception e) {
-                Slog.wtf(TAG, e);
-                return;
-            }
-        }
-
         synchronized (mLock) {
             mLocalUnlockedUsers.append(userId);
         }

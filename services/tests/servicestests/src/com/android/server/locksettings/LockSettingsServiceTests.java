@@ -145,15 +145,9 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
         // Verify that profile which aren't running (e.g. turn off work) don't get unlocked
         assertNull(mGateKeeperService.getAuthToken(TURNED_OFF_PROFILE_USER_ID));
 
-        /* Currently in LockSettingsService.setLockCredential, unlockUser() is called with the new
-         * credential as part of verifyCredential() before the new credential is committed in
-         * StorageManager. So we relax the check in our mock StorageManager to allow that.
-         */
-        mStorageManager.setIgnoreBadUnlock(true);
         // Change primary password and verify that profile SID remains
         assertTrue(mService.setLockCredential(
                 secondUnifiedPassword, firstUnifiedPassword, PRIMARY_USER_ID));
-        mStorageManager.setIgnoreBadUnlock(false);
         assertEquals(profileSid, mGateKeeperService.getSecureUserId(MANAGED_PROFILE_USER_ID));
         assertNull(mGateKeeperService.getAuthToken(TURNED_OFF_PROFILE_USER_ID));
 
@@ -172,15 +166,9 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
         assertTrue(mService.setLockCredential(primaryPassword,
                 nonePassword(),
                 PRIMARY_USER_ID));
-        /* Currently in LockSettingsService.setLockCredential, unlockUser() is called with the new
-         * credential as part of verifyCredential() before the new credential is committed in
-         * StorageManager. So we relax the check in our mock StorageManager to allow that.
-         */
-        mStorageManager.setIgnoreBadUnlock(true);
         assertTrue(mService.setLockCredential(profilePassword,
                 nonePassword(),
                 MANAGED_PROFILE_USER_ID));
-        mStorageManager.setIgnoreBadUnlock(false);
 
         final long primarySid = mGateKeeperService.getSecureUserId(PRIMARY_USER_ID);
         final long profileSid = mGateKeeperService.getSecureUserId(MANAGED_PROFILE_USER_ID);
@@ -203,11 +191,8 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
         assertNotNull(mGateKeeperService.getAuthToken(MANAGED_PROFILE_USER_ID));
         assertEquals(profileSid, mGateKeeperService.getSecureUserId(MANAGED_PROFILE_USER_ID));
 
-        // Change primary credential and make sure we don't affect profile
-        mStorageManager.setIgnoreBadUnlock(true);
         assertTrue(mService.setLockCredential(
                 newPassword("pwd"), primaryPassword, PRIMARY_USER_ID));
-        mStorageManager.setIgnoreBadUnlock(false);
         assertEquals(VerifyCredentialResponse.RESPONSE_OK, mService.verifyCredential(
                 profilePassword, MANAGED_PROFILE_USER_ID, 0 /* flags */)
                 .getResponseCode());

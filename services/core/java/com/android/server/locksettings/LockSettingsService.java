@@ -141,6 +141,7 @@ import com.android.server.locksettings.SyntheticPasswordManager.SyntheticPasswor
 import com.android.server.locksettings.SyntheticPasswordManager.TokenType;
 import com.android.server.locksettings.recoverablekeystore.RecoverableKeyStoreManager;
 import com.android.server.pm.UserManagerInternal;
+import com.android.server.utils.Slogf;
 import com.android.server.wm.WindowManagerInternal;
 
 import libcore.util.HexEncoding;
@@ -1269,9 +1270,8 @@ public class LockSettingsService extends ILockSettings.Stub {
      * can end up calling into other system services to process user unlock request (via
      * {@link com.android.server.SystemServiceManager#unlockUser} </em>
      */
-    private void unlockUser(int userId, byte[] secret) {
-        Slog.i(TAG, "Unlocking user " + userId + " with secret only, length "
-                + (secret != null ? secret.length : 0));
+    private void unlockUser(@UserIdInt int userId) {
+        Slogf.i(TAG, "Unlocking user %d", userId);
         // TODO: make this method fully async so we can update UI with progress strings
         final boolean alreadyUnlocked = mUserManager.isUserUnlockingOrUnlocked(userId);
         final CountDownLatch latch = new CountDownLatch(1);
@@ -1294,7 +1294,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         };
 
         try {
-            mActivityManager.unlockUser(userId, null, secret, listener);
+            mActivityManager.unlockUser2(userId, listener);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
@@ -1924,14 +1924,46 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
     }
 
-    /** Unlock file-based encryption */
-    private void unlockUserKey(int userId, byte[] secret) {
+    /**
+     * Unlocks the user's CE (credential-encrypted) storage if it's not already unlocked.
+     * <p>
+     * If the given {@code SyntheticPassword} is {@code null}, then an empty secret will be used.
+     * Otherwise, a secret derived from the given {@code SyntheticPassword} will be used.
+     * <p>
+     * This method doesn't throw exceptions because it is called opportunistically whenever a user
+     * is started.  Whether it worked or not can be detected by whether the key got unlocked or not.
+     */
+    private void unlockUserKey(@UserIdInt int userId, SyntheticPassword sp) {
+        if (isUserKeyUnlocked(userId)) {
+            Slogf.d(TAG, "CE storage for user %d is already unlocked", userId);
+            return;
+        }
         final UserInfo userInfo = mUserManager.getUserInfo(userId);
+        final String userType = isUserSecure(userId) ? "secured" : "unsecured";
+        byte[] secret = null;
         try {
+            if (sp != null) {
+                secret = sp.deriveFileBasedEncryptionKey();
+            }
             mStorageManager.unlockUserKey(userId, userInfo.serialNumber, secret);
+            Slogf.i(TAG, "Unlocked CE storage for %s user %d", userType, userId);
         } catch (RemoteException e) {
-            throw new IllegalStateException("Failed to unlock user key " + userId, e);
+            Slogf.wtf(TAG, e, "Failed to unlock CE storage for %s user %d", userType, userId);
+        } finally {
+            if (secret != null) {
+                Arrays.fill(secret, (byte) 0);
+            }
+        }
+    }
 
+    private void unlockUserKeyIfUnsecured(@UserIdInt int userId) {
+        synchronized (mSpManager) {
+            if (isUserSecure(userId)) {
+                Slogf.d(TAG, "Not unlocking CE storage for user %d yet because user is secured",
+                        userId);
+                return;
+            }
+            unlockUserKey(userId, null);
         }
     }
 
@@ -2601,11 +2633,10 @@ public class LockSettingsService extends ILockSettings.Stub {
 
         unlockKeystore(sp.deriveKeyStorePassword(), userId);
 
-        {
-            final byte[] secret = sp.deriveFileBasedEncryptionKey();
-            unlockUser(userId, secret);
-            Arrays.fill(secret, (byte) 0);
-        }
+        unlockUserKey(userId, sp);
+
+        unlockUser(userId);
+
         activateEscrowTokens(sp, userId);
 
         if (isProfileWithSeparatedLock(userId)) {
@@ -2659,7 +2690,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
             mSpManager.clearSidForUser(userId);
             gateKeeperClearSecureUserId(userId);
-            unlockUserKey(userId, sp.deriveFileBasedEncryptionKey());
+            unlockUserKey(userId, sp);
             clearUserKeyProtection(userId, sp.deriveFileBasedEncryptionKey());
             fixateNewestUserKeyAuth(userId);
             unlockKeystore(sp.deriveKeyStorePassword(), userId);
@@ -2888,7 +2919,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                 // If clearing credential, unlock the user manually in order to progress user start
                 // Call unlockUser() on a handler thread so no lock is held (either by LSS or by
                 // the caller like DPMS), otherwise it can lead to deadlock.
-                mHandler.post(() -> unlockUser(userId, null));
+                mHandler.post(() -> unlockUser(userId));
             }
             notifyPasswordChanged(credential, userId);
             notifySeparateProfileChallengeChanged(userId);
@@ -3195,6 +3226,11 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     private final class LocalService extends LockSettingsInternal {
+
+        @Override
+        public void unlockUserKeyIfUnsecured(@UserIdInt int userId) {
+            LockSettingsService.this.unlockUserKeyIfUnsecured(userId);
+        }
 
         @Override
         public long addEscrowToken(byte[] token, int userId,

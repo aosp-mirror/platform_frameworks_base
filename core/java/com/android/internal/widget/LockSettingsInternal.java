@@ -18,6 +18,7 @@ package com.android.internal.widget;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.admin.PasswordMetrics;
 
 import java.lang.annotation.Retention;
@@ -51,6 +52,17 @@ public abstract class LockSettingsInternal {
     public static final int ARM_REBOOT_ERROR_KEYSTORE_FAILURE = 6;
     public static final int ARM_REBOOT_ERROR_STORE_ESCROW_KEY = 7;
     // TODO(b/183140900) split store escrow key errors into detailed ones.
+
+    /**
+     * Unlocks the credential-encrypted storage for the given user if the user is not secured, i.e.
+     * doesn't have an LSKF.
+     * <p>
+     * This doesn't throw an exception on failure; whether the storage has been unlocked can be
+     * determined by {@link StorageManager#isUserKeyUnlocked()}.
+     *
+     * @param userId the ID of the user whose storage to unlock
+     */
+    public abstract void unlockUserKeyIfUnsecured(@UserIdInt int userId);
 
     /**
      * Create an escrow token for the current user, which can later be used to unlock FBE

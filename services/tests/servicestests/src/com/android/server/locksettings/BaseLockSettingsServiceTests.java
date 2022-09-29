@@ -168,16 +168,15 @@ public abstract class BaseLockSettingsServiceTests {
         allUsers.add(SECONDARY_USER_INFO);
         when(mUserManager.getUsers()).thenReturn(allUsers);
 
-        when(mActivityManager.unlockUser(anyInt(), any(), any(), any())).thenAnswer(
-                new Answer<Boolean>() {
-            @Override
-            public Boolean answer(InvocationOnMock invocation) throws Throwable {
+        when(mActivityManager.unlockUser2(anyInt(), any())).thenAnswer(
+            invocation -> {
                 Object[] args = invocation.getArguments();
-                mStorageManager.unlockUser((int)args[0], (byte[])args[2],
-                        (IProgressListener) args[3]);
+                int userId = (int) args[0];
+                IProgressListener listener = (IProgressListener) args[1];
+                listener.onStarted(userId, null);
+                listener.onFinished(userId, null);
                 return true;
-            }
-        });
+            });
 
         // Adding a fake Device Owner app which will enable escrow token support in LSS.
         when(mDevicePolicyManager.getDeviceOwnerComponentOnAnyUser()).thenReturn(
@@ -215,36 +214,31 @@ public abstract class BaseLockSettingsServiceTests {
     private IStorageManager setUpStorageManagerMock() throws RemoteException {
         final IStorageManager sm = mock(IStorageManager.class);
 
-        doAnswer(new Answer<Void>() {
-            @Override
-            public Void answer(InvocationOnMock invocation) throws Throwable {
-                Object[] args = invocation.getArguments();
-                mStorageManager.addUserKeyAuth((int) args[0] /* userId */,
-                        (int) args[1] /* serialNumber */,
-                        (byte[]) args[2] /* secret */);
-                return null;
-            }
+        doAnswer(invocation -> {
+            Object[] args = invocation.getArguments();
+            mStorageManager.unlockUserKey(/* userId= */ (int) args[0],
+                    /* secret= */ (byte[]) args[2]);
+            return null;
+        }).when(sm).unlockUserKey(anyInt(), anyInt(), any());
+
+        doAnswer(invocation -> {
+            Object[] args = invocation.getArguments();
+            mStorageManager.addUserKeyAuth(/* userId= */ (int) args[0],
+                    /* serialNumber= */ (int) args[1], /* secret= */ (byte[]) args[2]);
+            return null;
         }).when(sm).addUserKeyAuth(anyInt(), anyInt(), any());
 
-        doAnswer(new Answer<Void>() {
-            @Override
-            public Void answer(InvocationOnMock invocation) throws Throwable {
-                Object[] args = invocation.getArguments();
-                mStorageManager.clearUserKeyAuth((int) args[0] /* userId */,
-                        (int) args[1] /* serialNumber */,
-                        (byte[]) args[2] /* secret */);
-                return null;
-            }
+        doAnswer(invocation -> {
+            Object[] args = invocation.getArguments();
+            mStorageManager.clearUserKeyAuth(/* userId= */ (int) args[0],
+                    /* serialNumber= */ (int) args[1], /* secret= */ (byte[]) args[2]);
+            return null;
         }).when(sm).clearUserKeyAuth(anyInt(), anyInt(), any());
 
-        doAnswer(
-                new Answer<Void>() {
-            @Override
-            public Void answer(InvocationOnMock invocation) throws Throwable {
-                Object[] args = invocation.getArguments();
-                mStorageManager.fixateNewestUserKeyAuth((int) args[0] /* userId */);
-                return null;
-            }
+        doAnswer(invocation -> {
+            Object[] args = invocation.getArguments();
+            mStorageManager.fixateNewestUserKeyAuth(/* userId= */ (int) args[0]);
+            return null;
         }).when(sm).fixateNewestUserKeyAuth(anyInt());
         return sm;
     }

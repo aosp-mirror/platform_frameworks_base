@@ -2119,7 +2119,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             return -1;
         }
 
-        boolean success = mInterface.unlockUser(userId, null, null, null);
+        boolean success = mInterface.unlockUser2(userId, null);
         if (success) {
             pw.println("Success: user unlocked");
         } else {

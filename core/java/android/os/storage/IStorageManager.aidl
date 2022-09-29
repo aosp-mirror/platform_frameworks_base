@@ -137,6 +137,7 @@ interface IStorageManager {
     void createUserKey(int userId, int serialNumber, boolean ephemeral) = 61;
     @EnforcePermission("STORAGE_INTERNAL")
     void destroyUserKey(int userId) = 62;
+    @EnforcePermission("STORAGE_INTERNAL")
     void unlockUserKey(int userId, int serialNumber, in byte[] secret) = 63;
     @EnforcePermission("STORAGE_INTERNAL")
     void lockUserKey(int userId) = 64;

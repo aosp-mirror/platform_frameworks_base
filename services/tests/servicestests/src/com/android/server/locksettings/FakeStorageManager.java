@@ -16,20 +16,15 @@
 
 package com.android.server.locksettings;
 
-import android.os.IProgressListener;
-import android.os.RemoteException;
+import static com.google.common.truth.Truth.assertThat;
+
 import android.util.ArrayMap;
 
-
-import junit.framework.AssertionFailedError;
-
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class FakeStorageManager {
 
-    private ArrayMap<Integer, ArrayList<byte[]>> mAuth = new ArrayMap<>();
-    private boolean mIgnoreBadUnlock;
+    private final ArrayMap<Integer, ArrayList<byte[]>> mAuth = new ArrayMap<>();
 
     public void addUserKeyAuth(int userId, int serialNumber, byte[] secret) {
         getUserAuth(userId).add(secret);
@@ -62,29 +57,14 @@ public class FakeStorageManager {
 
     public byte[] getUserUnlockToken(int userId) {
         ArrayList<byte[]> auths = getUserAuth(userId);
-        if (auths.size() != 1) {
-            throw new AssertionFailedError("More than one secret exists");
-        }
+        assertThat(auths).hasSize(1);
         return auths.get(0);
     }
 
-    public void unlockUser(int userId, byte[] secret, IProgressListener listener)
-            throws RemoteException {
-        listener.onStarted(userId, null);
-        listener.onFinished(userId, null);
+    public void unlockUserKey(int userId, byte[] secret) {
         ArrayList<byte[]> auths = getUserAuth(userId);
-        if (auths.size() > 1) {
-            throw new AssertionFailedError("More than one secret exists");
-        }
+        assertThat(auths).hasSize(1);
         byte[] auth = auths.get(0);
-        if (!Arrays.equals(secret, auth)) {
-            if (!mIgnoreBadUnlock) {
-                throw new AssertionFailedError("Invalid secret to unlock user " + userId);
-            }
-        }
-    }
-
-    public void setIgnoreBadUnlock(boolean ignore) {
-        mIgnoreBadUnlock = ignore;
+        assertThat(auth).isEqualTo(secret);
     }
 }

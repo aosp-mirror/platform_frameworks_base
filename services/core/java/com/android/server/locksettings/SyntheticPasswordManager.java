@@ -83,7 +83,7 @@ import java.util.Set;
  *    storage and auth-bound Keystore keys: the user's CE key is encrypted by an SP-derived secret,
  *    and the user's Keystore and Gatekeeper passwords are other SP-derived secrets.  However, while
  *    the user's LSKF is empty, these protections are cleared; this is needed to invalidate the
- *    auth-bound keys and make UserController.unlockUser() work with an empty secret.
+ *    auth-bound keys and make StorageManagerService.unlockUserKey() work with an empty secret.
  *
  * Files stored on disk for each user:
  *   For the SP itself, stored under NULL_PROTECTOR_ID:
