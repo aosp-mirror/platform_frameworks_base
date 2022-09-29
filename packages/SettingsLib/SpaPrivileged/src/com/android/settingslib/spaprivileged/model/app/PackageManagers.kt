@@ -32,8 +32,13 @@ object PackageManagers {
     fun getPackageInfoAsUser(packageName: String, userId: Int): PackageInfo? =
         getPackageInfoAsUser(packageName, 0, userId)
 
-    fun getApplicationInfoAsUser(packageName: String, userId: Int): ApplicationInfo =
+    fun getApplicationInfoAsUser(packageName: String, userId: Int): ApplicationInfo? =
         PackageManager.getApplicationInfoAsUserCached(packageName, 0, userId)
+
+    /** Checks whether a package is installed for a given user. */
+    fun isPackageInstalledAsUser(packageName: String, userId: Int): Boolean =
+        getApplicationInfoAsUser(packageName, userId)?.hasFlag(ApplicationInfo.FLAG_INSTALLED)
+            ?: false
 
     fun ApplicationInfo.hasRequestPermission(permission: String): Boolean {
         val packageInfo = getPackageInfoAsUser(packageName, PackageManager.GET_PERMISSIONS, userId)

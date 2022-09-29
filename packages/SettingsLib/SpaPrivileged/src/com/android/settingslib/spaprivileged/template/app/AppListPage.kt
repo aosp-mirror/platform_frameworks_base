@@ -20,15 +20,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.android.settingslib.spa.framework.compose.stateOf
@@ -84,17 +81,12 @@ fun <T : AppRecord> AppListPage(
 
 @Composable
 private fun ShowSystemAction(showSystem: Boolean, setShowSystem: (showSystem: Boolean) -> Unit) {
-    var expanded by remember { mutableStateOf(false) }
-    MoreOptionsAction { expanded = true }
-    DropdownMenu(
-        expanded = expanded,
-        onDismissRequest = { expanded = false },
-    ) {
+    MoreOptionsAction { onDismissRequest ->
         val menuText = if (showSystem) R.string.menu_hide_system else R.string.menu_show_system
         DropdownMenuItem(
             text = { Text(stringResource(menuText)) },
             onClick = {
-                expanded = false
+                onDismissRequest()
                 setShowSystem(!showSystem)
             },
         )
