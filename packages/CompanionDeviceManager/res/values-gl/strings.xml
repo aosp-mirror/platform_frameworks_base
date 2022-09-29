@@ -28,7 +28,7 @@
     <string name="helper_summary_app_streaming" msgid="7380294597268573523">"<xliff:g id="APP_NAME">%1$s</xliff:g> está solicitando permiso en nome do teu dispositivo (<xliff:g id="DEVICE_TYPE">%2$s</xliff:g>) para acceder ás fotos, ao contido multimedia e ás notificacións do teléfono"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
-    <string name="title_computer" msgid="4693714143506569253">"Permitir que &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; acceda a esta información desde o teu teléfono"</string>
+    <string name="title_computer" msgid="4693714143506569253">"Permitir que &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; acceda a esta información do teu teléfono"</string>
     <string name="summary_computer" msgid="3798467601598297062"></string>
     <string name="permission_notification" msgid="693762568127741203">"Notificacións"</string>
     <string name="permission_notification_summary" msgid="884075314530071011">"Pode ler todas as notificacións (que poden incluír información como contactos, mensaxes e fotos)"</string>
