@@ -377,6 +377,14 @@ public final class DeviceConfig {
     public static final String NAMESPACE_REBOOT_READINESS = "reboot_readiness";
 
     /**
+     * Namespace for Remote Key Provisioning related features.
+     *
+     * @hide
+     */
+    public static final String NAMESPACE_REMOTE_KEY_PROVISIONING_NATIVE =
+            "remote_key_provisioning_native";
+
+    /**
      * Namespace for Rollback flags that are applied immediately.
      *
      * @hide
