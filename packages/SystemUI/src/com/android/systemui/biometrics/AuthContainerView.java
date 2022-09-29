@@ -875,6 +875,7 @@ public class AuthContainerView extends LinearLayout
     static WindowManager.LayoutParams getLayoutParams(IBinder windowToken, CharSequence title) {
         final int windowFlags = WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
                 | WindowManager.LayoutParams.FLAG_SECURE
+                | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
                 | WindowManager.LayoutParams.FLAG_DIM_BEHIND;
         final WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,

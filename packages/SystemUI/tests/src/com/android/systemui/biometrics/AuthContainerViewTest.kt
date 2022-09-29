@@ -322,6 +322,13 @@ class AuthContainerViewTest : SysuiTestCase() {
     }
 
     @Test
+    fun testLayoutParams_hasShowWhenLockedFlag() {
+        val layoutParams = AuthContainerView.getLayoutParams(windowToken, "")
+        assertThat((layoutParams.flags and WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED) != 0)
+                .isTrue()
+    }
+
+    @Test
     fun testLayoutParams_hasDimbehindWindowFlag() {
         val layoutParams = AuthContainerView.getLayoutParams(windowToken, "")
         val lpFlags = layoutParams.flags
