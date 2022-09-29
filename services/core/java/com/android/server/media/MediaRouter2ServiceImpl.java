@@ -1261,7 +1261,6 @@ class MediaRouter2ServiceImpl {
         public final int mRouterId;
 
         public RouteDiscoveryPreference mDiscoveryPreference;
-        public MediaRoute2Info mSelectedRoute;
 
         RouterRecord(UserRecord userRecord, IMediaRouter2 router, int uid, int pid,
                 String packageName, boolean hasConfigureWifiDisplayPermission,
