@@ -54,7 +54,7 @@ import javax.inject.Inject
  * chip is shown when a user is transferring media to/from this device and a receiver device.
  */
 @SysUISingleton
-class MediaTttChipControllerSender @Inject constructor(
+open class MediaTttChipControllerSender @Inject constructor(
         commandQueue: CommandQueue,
         context: Context,
         @MediaTttSenderLogger logger: MediaTttLogger,
@@ -193,6 +193,18 @@ class MediaTttChipControllerSender @Inject constructor(
             // We can only request focus once the animation finishes.
             onAnimationEnd = { chipInnerView.requestAccessibilityFocus() },
         )
+    }
+
+    override fun animateViewOut(view: ViewGroup, onAnimationEnd: Runnable) {
+        ViewHierarchyAnimator.animateRemoval(
+            view.requireViewById<ViewGroup>(R.id.media_ttt_sender_chip_inner),
+            ViewHierarchyAnimator.Hotspot.TOP,
+            Interpolators.EMPHASIZED_ACCELERATE,
+            ANIMATION_DURATION,
+            onAnimationEnd,
+        )
+        // TODO(b/203800644): Add includeMargins as an option to ViewHierarchyAnimator so that the
+        //   animateChipOut matches the animateChipIn.
     }
 
     override fun shouldIgnoreViewRemoval(removalReason: String): Boolean {

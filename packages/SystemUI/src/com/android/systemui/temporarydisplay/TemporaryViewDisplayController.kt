@@ -171,11 +171,15 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
         if (shouldIgnoreViewRemoval(removalReason)) {
             return
         }
+        val currentView = view ?: return
 
-        if (view == null) { return }
+        animateViewOut(currentView) { windowManager.removeView(currentView) }
+
         logger.logChipRemoval(removalReason)
         configurationController.removeCallback(displayScaleListener)
-        windowManager.removeView(view)
+        // Re-set the view to null immediately (instead as part of the animation end runnable) so
+        // that if a new view event comes in while this view is animating out, we still display the
+        // new view appropriately.
         view = null
         info = null
         // No need to time the view out since it's already gone
@@ -201,7 +205,17 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
      * A method that can be implemented by subclasses to do custom animations for when the view
      * appears.
      */
-    open fun animateViewIn(view: ViewGroup) {}
+    internal open fun animateViewIn(view: ViewGroup) {}
+
+    /**
+     * A method that can be implemented by subclasses to do custom animations for when the view
+     * disappears.
+     *
+     * @param onAnimationEnd an action that *must* be run once the animation finishes successfully.
+     */
+    internal open fun animateViewOut(view: ViewGroup, onAnimationEnd: Runnable) {
+        onAnimationEnd.run()
+    }
 }
 
 object TemporaryDisplayRemovalReason {
