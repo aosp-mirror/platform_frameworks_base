@@ -92,11 +92,11 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Dispozitiv blocat de administrator"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Dispozitivul a fost blocat manual"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Nu este recunoscut"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"Pentru Deblocare facială, activați accesul la cameră"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"Pentru Deblocare facială, activează accesul la cameră"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
       <item quantity="few">Introdu codul PIN pentru cardul SIM. Ți-au mai rămas <xliff:g id="NUMBER_1">%d</xliff:g> încercări.</item>
       <item quantity="other">Introdu codul PIN pentru cardul SIM. Ți-au mai rămas <xliff:g id="NUMBER_1">%d</xliff:g> de încercări.</item>
-      <item quantity="one">Introdu codul PIN pentru cardul SIM. Ți-a mai rămas <xliff:g id="NUMBER_0">%d</xliff:g> încercare, după care va trebui să contactați operatorul pentru a vă debloca dispozitivul.</item>
+      <item quantity="one">Introdu codul PIN pentru cardul SIM. Ți-a mai rămas <xliff:g id="NUMBER_0">%d</xliff:g> încercare, după care va trebui să contactezi operatorul pentru a debloca dispozitivul.</item>
     </plurals>
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="571308542462946935">
       <item quantity="few">Cardul SIM este dezactivat acum. Introdu codul PUK pentru a continua. Ți-au mai rămas <xliff:g id="_NUMBER_1">%d</xliff:g> încercări până când cardul SIM va deveni inutilizabil definitiv. Contactează operatorul pentru detalii.</item>
