@@ -130,6 +130,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     private DisplayController mDisplayController;
     private PipInputConsumer mPipInputConsumer;
     private WindowManagerShellWrapper mWindowManagerShellWrapper;
+    private PipAnimationController mPipAnimationController;
     private PipAppOpsListener mAppOpsListener;
     private PipMediaController mMediaController;
     private PipBoundsAlgorithm mPipBoundsAlgorithm;
@@ -158,7 +159,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             return;
         }
         // if there is another animation ongoing, wait for it to finish and try again
-        if (mPipTaskOrganizer.isAnimating()) {
+        if (mPipAnimationController.isAnimating()) {
             mMainExecutor.removeCallbacks(
                     mMovePipInResponseToKeepClearAreasChangeCallback);
             mMainExecutor.executeDelayed(
@@ -368,6 +369,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             ShellCommandHandler shellCommandHandler,
             ShellController shellController,
             DisplayController displayController,
+            PipAnimationController pipAnimationController,
             PipAppOpsListener pipAppOpsListener,
             PipBoundsAlgorithm pipBoundsAlgorithm,
             PipKeepClearAlgorithm pipKeepClearAlgorithm,
@@ -392,11 +394,12 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         }
 
         return new PipController(context, shellInit, shellCommandHandler, shellController,
-                displayController, pipAppOpsListener, pipBoundsAlgorithm, pipKeepClearAlgorithm,
-                pipBoundsState, pipMotionHelper, pipMediaController, phonePipMenuController,
-                pipTaskOrganizer, pipTransitionState, pipTouchHandler, pipTransitionController,
-                windowManagerShellWrapper, taskStackListener, pipParamsChangedForwarder,
-                displayInsetsController, oneHandedController, mainExecutor)
+                displayController, pipAnimationController, pipAppOpsListener,
+                pipBoundsAlgorithm, pipKeepClearAlgorithm, pipBoundsState, pipMotionHelper,
+                pipMediaController, phonePipMenuController, pipTaskOrganizer, pipTransitionState,
+                pipTouchHandler, pipTransitionController, windowManagerShellWrapper,
+                taskStackListener, pipParamsChangedForwarder, displayInsetsController,
+                oneHandedController, mainExecutor)
                 .mImpl;
     }
 
@@ -405,6 +408,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             ShellCommandHandler shellCommandHandler,
             ShellController shellController,
             DisplayController displayController,
+            PipAnimationController pipAnimationController,
             PipAppOpsListener pipAppOpsListener,
             PipBoundsAlgorithm pipBoundsAlgorithm,
             PipKeepClearAlgorithm pipKeepClearAlgorithm,
@@ -445,6 +449,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         mMediaController = pipMediaController;
         mMenuController = phonePipMenuController;
         mTouchHandler = pipTouchHandler;
+        mPipAnimationController = pipAnimationController;
         mAppOpsListener = pipAppOpsListener;
         mOneHandedController = oneHandedController;
         mPipTransitionController = pipTransitionController;

@@ -195,6 +195,17 @@ public class PipAnimationController {
     }
 
     /**
+     * Returns true if the PiP window is currently being animated.
+     */
+    public boolean isAnimating() {
+        PipAnimationController.PipTransitionAnimator animator = getCurrentAnimator();
+        if (animator != null && animator.isRunning()) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Quietly cancel the animator by removing the listeners first.
      */
     static void quietCancel(@NonNull ValueAnimator animator) {
