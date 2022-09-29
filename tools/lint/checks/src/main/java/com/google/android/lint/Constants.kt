@@ -34,3 +34,7 @@ val ENFORCE_PERMISSION_METHODS = listOf(
         Method(CLASS_ACTIVITY_MANAGER_SERVICE, "checkPermission"),
         Method(CLASS_ACTIVITY_MANAGER_INTERNAL, "enforceCallingPermission")
 )
+
+const val ANNOTATION_PERMISSION_METHOD = "android.content.pm.PermissionMethod"
+const val ANNOTATION_PERMISSION_NAME = "android.content.pm.PermissionName"
+const val ANNOTATION_PERMISSION_RESULT = "android.content.pm.PackageManager.PermissionResult"
