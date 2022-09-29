@@ -775,6 +775,12 @@ public class AuthContainerView extends LinearLayout
         }
         mContainerState = STATE_ANIMATING_OUT;
 
+        // Request hiding soft-keyboard before animating away credential UI, in case IME insets
+        // animation get delayed by dismissing animation.
+        if (isAttachedToWindow() && getRootWindowInsets().isVisible(WindowInsets.Type.ime())) {
+            getWindowInsetsController().hide(WindowInsets.Type.ime());
+        }
+
         if (sendReason) {
             mPendingCallbackReason = reason;
         } else {
