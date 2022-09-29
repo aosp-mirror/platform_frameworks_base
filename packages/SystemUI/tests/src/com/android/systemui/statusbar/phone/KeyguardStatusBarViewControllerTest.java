@@ -135,7 +135,7 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
 
         MockitoAnnotations.initMocks(this);
 
-        when(mIconManagerFactory.create(any())).thenReturn(mIconManager);
+        when(mIconManagerFactory.create(any(), any())).thenReturn(mIconManager);
 
         allowTestableLooperAsMainThread();
         TestableLooper.get(this).runWithLooper(() -> {

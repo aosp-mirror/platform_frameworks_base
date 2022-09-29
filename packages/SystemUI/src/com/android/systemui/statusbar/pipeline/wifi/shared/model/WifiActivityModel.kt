@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.pipeline.wifi.data.model
+package com.android.systemui.statusbar.pipeline.wifi.shared.model
 
-/**
- * Provides information on the current wifi activity.
- */
+/** Provides information on the current wifi activity. */
 data class WifiActivityModel(
     /** True if the wifi has activity in (download). */
     val hasActivityIn: Boolean,

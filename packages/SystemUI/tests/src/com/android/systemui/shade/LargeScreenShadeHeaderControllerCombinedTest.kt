@@ -176,7 +176,7 @@ class LargeScreenShadeHeaderControllerCombinedTest : SysuiTestCase() {
         }
         whenever(view.visibility).thenAnswer { _ -> viewVisibility }
 
-        whenever(iconManagerFactory.create(any())).thenReturn(iconManager)
+        whenever(iconManagerFactory.create(any(), any())).thenReturn(iconManager)
 
         whenever(featureFlags.isEnabled(Flags.COMBINED_QS_HEADERS)).thenReturn(true)
         whenever(featureFlags.isEnabled(Flags.NEW_HEADER)).thenReturn(true)
