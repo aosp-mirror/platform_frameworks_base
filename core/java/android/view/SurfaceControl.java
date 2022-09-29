@@ -57,7 +57,6 @@ import android.hardware.display.IDisplayManager;
 import android.hardware.display.IVirtualDisplayCallback;
 import android.hardware.display.VirtualDisplay;
 import android.hardware.graphics.common.DisplayDecorationSupport;
-import android.media.projection.MediaProjectionGlobal;
 import android.opengl.EGLDisplay;
 import android.opengl.EGLSync;
 import android.os.Build;
@@ -2015,8 +2014,8 @@ public final class SurfaceControl implements Parcelable {
         }
 
         // We don't have a size yet so pass in 1 for width and height since 0 is invalid
-        VirtualDisplay vd = MediaProjectionGlobal.getInstance().createVirtualDisplay(name,
-                1 /* width */, 1 /* height */, INVALID_DISPLAY, null /* Surface */);
+        VirtualDisplay vd = DisplayManager.createVirtualDisplay(name, 1 /* width */, 1 /* height */,
+                INVALID_DISPLAY, null /* Surface */);
         return vd == null ? null : vd.getToken().asBinder();
     }
 

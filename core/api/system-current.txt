@@ -3951,6 +3951,7 @@ package android.hardware.display {
   }
 
   public final class DisplayManager {
+    method @Nullable @RequiresPermission("android.permission.CAPTURE_VIDEO_OUTPUT") public static android.hardware.display.VirtualDisplay createVirtualDisplay(@NonNull String, int, int, int, @Nullable android.view.Surface);
     method @RequiresPermission(android.Manifest.permission.ACCESS_AMBIENT_LIGHT_STATS) public java.util.List<android.hardware.display.AmbientBrightnessDayStats> getAmbientBrightnessStats();
     method @RequiresPermission(android.Manifest.permission.CONFIGURE_DISPLAY_BRIGHTNESS) public android.hardware.display.BrightnessConfiguration getBrightnessConfiguration();
     method @Nullable @RequiresPermission(android.Manifest.permission.CONFIGURE_DISPLAY_BRIGHTNESS) public android.hardware.display.BrightnessConfiguration getBrightnessConfigurationForDisplay(@NonNull String);
@@ -6668,15 +6669,6 @@ package android.media.musicrecognition {
     method @NonNull public android.media.musicrecognition.RecognitionRequest.Builder setCaptureSession(int);
     method @NonNull public android.media.musicrecognition.RecognitionRequest.Builder setIgnoreBeginningFrames(int);
     method @NonNull public android.media.musicrecognition.RecognitionRequest.Builder setMaxAudioLengthSeconds(int);
-  }
-
-}
-
-package android.media.projection {
-
-  public class MediaProjectionGlobal {
-    method @Nullable public android.hardware.display.VirtualDisplay createVirtualDisplay(@NonNull String, int, int, int, @Nullable android.view.Surface);
-    method @NonNull public static android.media.projection.MediaProjectionGlobal getInstance();
   }
 
 }
