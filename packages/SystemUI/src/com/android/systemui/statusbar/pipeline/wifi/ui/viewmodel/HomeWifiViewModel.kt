@@ -28,7 +28,7 @@ import kotlinx.coroutines.flow.StateFlow
  */
 class HomeWifiViewModel(
     statusBarPipelineFlags: StatusBarPipelineFlags,
-    wifiIcon: StateFlow<Icon?>,
+    wifiIcon: StateFlow<Icon.Resource?>,
     isActivityInViewVisible: Flow<Boolean>,
     isActivityOutViewVisible: Flow<Boolean>,
     isActivityContainerVisible: Flow<Boolean>,
