@@ -195,7 +195,7 @@ class MediaTttChipControllerSender @Inject constructor(
         )
     }
 
-    override fun removeView(removalReason: String) {
+    override fun shouldIgnoreViewRemoval(removalReason: String): Boolean {
         // Don't remove the chip if we're in progress or succeeded, since the user should still be
         // able to see the status of the transfer. (But do remove it if it's finally timed out.)
         val transferStatus = info?.state?.transferStatus
@@ -207,9 +207,9 @@ class MediaTttChipControllerSender @Inject constructor(
             logger.logRemovalBypass(
                 removalReason, bypassReason = "transferStatus=${transferStatus.name}"
             )
-            return
+            return true
         }
-        super.removeView(removalReason)
+        return false
     }
 
     private fun Boolean.visibleIfTrue(): Int {

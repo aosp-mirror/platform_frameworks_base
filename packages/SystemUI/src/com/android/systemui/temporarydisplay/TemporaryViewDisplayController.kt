@@ -167,7 +167,11 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
      * @param removalReason a short string describing why the view was removed (timeout, state
      *     change, etc.)
      */
-    open fun removeView(removalReason: String) {
+    fun removeView(removalReason: String) {
+        if (shouldIgnoreViewRemoval(removalReason)) {
+            return
+        }
+
         if (view == null) { return }
         logger.logChipRemoval(removalReason)
         configurationController.removeCallback(displayScaleListener)
@@ -177,6 +181,13 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
         // No need to time the view out since it's already gone
         cancelViewTimeout?.run()
     }
+
+    /**
+     * Returns true if a view removal request should be ignored and false otherwise.
+     *
+     * Allows subclasses to keep the view visible for longer in certain circumstances.
+     */
+    open fun shouldIgnoreViewRemoval(removalReason: String): Boolean = false
 
     /**
      * A method implemented by subclasses to update [currentView] based on [newInfo].
