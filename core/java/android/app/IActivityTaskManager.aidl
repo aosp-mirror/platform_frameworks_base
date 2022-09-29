@@ -173,6 +173,7 @@ interface IActivityTaskManager {
     Rect getTaskBounds(int taskId);
 
     void cancelRecentsAnimation(boolean restoreHomeRootTaskPosition);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.UPDATE_LOCK_TASK_PACKAGES)")
     void updateLockTaskPackages(int userId, in String[] packages);
     boolean isInLockTaskMode();
     int getLockTaskModeState();
