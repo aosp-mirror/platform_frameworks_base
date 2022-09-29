@@ -22438,6 +22438,7 @@ package android.media {
     field public static final String MIMETYPE_AUDIO_SCRAMBLED = "audio/scrambled";
     field public static final String MIMETYPE_AUDIO_VORBIS = "audio/vorbis";
     field public static final String MIMETYPE_IMAGE_ANDROID_HEIC = "image/vnd.android.heic";
+    field public static final String MIMETYPE_IMAGE_AVIF = "image/avif";
     field public static final String MIMETYPE_TEXT_CEA_608 = "text/cea-608";
     field public static final String MIMETYPE_TEXT_CEA_708 = "text/cea-708";
     field public static final String MIMETYPE_TEXT_SUBRIP = "application/x-subrip";
