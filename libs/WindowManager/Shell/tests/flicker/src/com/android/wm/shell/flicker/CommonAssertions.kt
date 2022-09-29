@@ -20,7 +20,6 @@ package com.android.wm.shell.flicker
 import android.view.Surface
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.helpers.WindowUtils
-import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.traces.layers.LayerTraceEntrySubject
 import com.android.server.wm.flicker.traces.layers.LayersTraceSubject
 import com.android.server.wm.traces.common.IComponentMatcher
@@ -173,25 +172,12 @@ fun FlickerTestParameter.splitAppLayerBoundsBecomesVisibleByDrag(
     component: IComponentMatcher
 ) {
     assertLayers {
-        if (isShellTransitionsEnabled) {
-            this.notContains(SPLIT_SCREEN_DIVIDER_COMPONENT.or(component), isOptional = true)
-                .then()
-                .isInvisible(SPLIT_SCREEN_DIVIDER_COMPONENT.or(component))
-                .then()
-                // TODO(b/245472831): Verify the component should snap to divider.
-                .isVisible(component)
-        } else {
-            this.notContains(SPLIT_SCREEN_DIVIDER_COMPONENT.or(component), isOptional = true)
-                .then()
-                .isInvisible(SPLIT_SCREEN_DIVIDER_COMPONENT.or(component))
-                .then()
-                // TODO(b/245472831): Verify the component should snap to divider.
-                .isVisible(component)
-                .then()
-                .isInvisible(component, isOptional = true)
-                .then()
-                .isVisible(component)
-        }
+        this.notContains(SPLIT_SCREEN_DIVIDER_COMPONENT.or(component), isOptional = true)
+            .then()
+            .isInvisible(SPLIT_SCREEN_DIVIDER_COMPONENT.or(component))
+            .then()
+            // TODO(b/245472831): Verify the component should snap to divider.
+            .isVisible(component)
     }
 }
 
