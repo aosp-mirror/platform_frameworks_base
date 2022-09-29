@@ -487,8 +487,10 @@ public class PackageInfoUtils {
         }
 
         info.seInfo = AndroidPackageUtils.getSeInfo(pkg, pkgSetting);
-        info.primaryCpuAbi = AndroidPackageUtils.getPrimaryCpuAbi(pkg, pkgSetting);
-        info.secondaryCpuAbi = AndroidPackageUtils.getSecondaryCpuAbi(pkg, pkgSetting);
+        info.primaryCpuAbi = pkgSetting == null ? AndroidPackageUtils.getRawPrimaryCpuAbi(pkg)
+                : pkgSetting.getPrimaryCpuAbi();
+        info.secondaryCpuAbi = pkgSetting == null ? AndroidPackageUtils.getRawSecondaryCpuAbi(pkg)
+                : pkgSetting.getSecondaryCpuAbi();
 
         info.flags |= appInfoFlags(info.flags, pkgSetting);
         info.privateFlags |= appInfoPrivateFlags(info.privateFlags, pkgSetting);
@@ -715,8 +717,10 @@ public class PackageInfoUtils {
 
         initForUser(info, pkg, userId);
 
-        info.primaryCpuAbi = AndroidPackageUtils.getPrimaryCpuAbi(pkg, pkgSetting);
-        info.secondaryCpuAbi = AndroidPackageUtils.getSecondaryCpuAbi(pkg, pkgSetting);
+        info.primaryCpuAbi = pkgSetting == null ? AndroidPackageUtils.getRawPrimaryCpuAbi(pkg)
+                : pkgSetting.getPrimaryCpuAbi();
+        info.secondaryCpuAbi = pkgSetting == null ? AndroidPackageUtils.getRawSecondaryCpuAbi(pkg)
+                : pkgSetting.getSecondaryCpuAbi();
         info.nativeLibraryDir = pkg.getNativeLibraryDir();
         info.secondaryNativeLibraryDir = pkg.getSecondaryNativeLibraryDir();
 

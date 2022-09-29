@@ -837,8 +837,8 @@ public final class Settings implements Watchable, Snappable {
         }
         p.getPkgState().setUpdatedSystemApp(false);
         PackageSetting ret = addPackageLPw(name, p.getRealName(), p.getPath(),
-                p.getLegacyNativeLibraryPath(), p.getPrimaryCpuAbi(),
-                p.getSecondaryCpuAbi(), p.getCpuAbiOverride(),
+                p.getLegacyNativeLibraryPath(), p.getPrimaryCpuAbiLegacy(),
+                p.getSecondaryCpuAbiLegacy(), p.getCpuAbiOverride(),
                 p.getAppId(), p.getVersionCode(), p.getFlags(), p.getPrivateFlags(),
                 p.getUsesSdkLibraries(), p.getUsesSdkLibrariesVersionsMajor(),
                 p.getUsesStaticLibraries(), p.getUsesStaticLibrariesVersions(), p.getMimeGroups(),
@@ -2796,11 +2796,11 @@ public final class Settings implements Watchable, Snappable {
         if (pkg.getLegacyNativeLibraryPath() != null) {
             serializer.attribute(null, "nativeLibraryPath", pkg.getLegacyNativeLibraryPath());
         }
-        if (pkg.getPrimaryCpuAbi() != null) {
-           serializer.attribute(null, "primaryCpuAbi", pkg.getPrimaryCpuAbi());
+        if (pkg.getPrimaryCpuAbiLegacy() != null) {
+           serializer.attribute(null, "primaryCpuAbi", pkg.getPrimaryCpuAbiLegacy());
         }
-        if (pkg.getSecondaryCpuAbi() != null) {
-            serializer.attribute(null, "secondaryCpuAbi", pkg.getSecondaryCpuAbi());
+        if (pkg.getSecondaryCpuAbiLegacy() != null) {
+            serializer.attribute(null, "secondaryCpuAbi", pkg.getSecondaryCpuAbiLegacy());
         }
         if (pkg.getCpuAbiOverride() != null) {
             serializer.attribute(null, "cpuAbiOverride", pkg.getCpuAbiOverride());
@@ -2834,11 +2834,11 @@ public final class Settings implements Watchable, Snappable {
         if (pkg.getLegacyNativeLibraryPath() != null) {
             serializer.attribute(null, "nativeLibraryPath", pkg.getLegacyNativeLibraryPath());
         }
-        if (pkg.getPrimaryCpuAbi() != null) {
-            serializer.attribute(null, "primaryCpuAbi", pkg.getPrimaryCpuAbi());
+        if (pkg.getPrimaryCpuAbiLegacy() != null) {
+            serializer.attribute(null, "primaryCpuAbi", pkg.getPrimaryCpuAbiLegacy());
         }
-        if (pkg.getSecondaryCpuAbi() != null) {
-            serializer.attribute(null, "secondaryCpuAbi", pkg.getSecondaryCpuAbi());
+        if (pkg.getSecondaryCpuAbiLegacy() != null) {
+            serializer.attribute(null, "secondaryCpuAbi", pkg.getSecondaryCpuAbiLegacy());
         }
         if (pkg.getCpuAbiOverride() != null) {
             serializer.attribute(null, "cpuAbiOverride", pkg.getCpuAbiOverride());
@@ -4561,8 +4561,8 @@ public final class Settings implements Watchable, Snappable {
             pw.print(prefix); pw.print("  extractNativeLibs=");
             pw.println((ps.getFlags() & ApplicationInfo.FLAG_EXTRACT_NATIVE_LIBS) != 0
                     ? "true" : "false");
-            pw.print(prefix); pw.print("  primaryCpuAbi="); pw.println(ps.getPrimaryCpuAbi());
-            pw.print(prefix); pw.print("  secondaryCpuAbi="); pw.println(ps.getSecondaryCpuAbi());
+            pw.print(prefix); pw.print("  primaryCpuAbi="); pw.println(ps.getPrimaryCpuAbiLegacy());
+            pw.print(prefix); pw.print("  secondaryCpuAbi="); pw.println(ps.getSecondaryCpuAbiLegacy());
             pw.print(prefix); pw.print("  cpuAbiOverride="); pw.println(ps.getCpuAbiOverride());
         }
         pw.print(prefix); pw.print("  versionCode="); pw.print(ps.getVersionCode());

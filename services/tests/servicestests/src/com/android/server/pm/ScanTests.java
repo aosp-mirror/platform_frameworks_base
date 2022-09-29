@@ -211,8 +211,8 @@ public class ScanTests {
 
         assertBasicPackageScanResult(scanResult, DUMMY_PACKAGE_NAME, false /*isInstant*/);
 
-        assertThat(scanResult.mPkgSetting.getPrimaryCpuAbi(), is("primaryCpuAbi"));
-        assertThat(scanResult.mPkgSetting.getSecondaryCpuAbi(), is("secondaryCpuAbi"));
+        assertThat(scanResult.mPkgSetting.getPrimaryCpuAbiLegacy(), is("primaryCpuAbi"));
+        assertThat(scanResult.mPkgSetting.getSecondaryCpuAbiLegacy(), is("secondaryCpuAbi"));
         assertThat(scanResult.mPkgSetting.getCpuAbiOverride(), nullValue());
 
         assertPathsNotDerived(scanResult);
