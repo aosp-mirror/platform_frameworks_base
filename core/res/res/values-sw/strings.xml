@@ -2291,7 +2291,7 @@
     <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"<xliff:g id="APP">%1$s</xliff:g> inatumika chinichini. Gusa ili udhibiti matumizi ya betri."</string>
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> inaweza kuathiri muda wa matumizi ya betri. Gusa ili ukague programu zinazotumika."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Angalia programu zinazotumika"</string>
-    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Haiwezi kufikia kamera ya simu kutoka kwenye <xliff:g id="DEVICE">%1$s</xliff:g> yako"</string>
+    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Huwezi kufikia kamera ya simu kutoka kwenye <xliff:g id="DEVICE">%1$s</xliff:g> yako"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Haiwezi kufikia kamera ya kompyuta kibao kutoka kwenye <xliff:g id="DEVICE">%1$s</xliff:g> yako"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Huwezi kufikia maudhui haya unapotiririsha. Badala yake jaribu kwenye simu yako."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Chaguomsingi la mfumo"</string>
