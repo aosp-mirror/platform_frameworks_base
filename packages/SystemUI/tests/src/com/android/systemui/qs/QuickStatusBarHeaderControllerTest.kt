@@ -110,7 +110,7 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
         `when`(qsCarrierGroupControllerBuilder.build()).thenReturn(qsCarrierGroupController)
         `when`(variableDateViewControllerFactory.create(any()))
                 .thenReturn(variableDateViewController)
-        `when`(iconManagerFactory.create(any())).thenReturn(iconManager)
+        `when`(iconManagerFactory.create(any(), any())).thenReturn(iconManager)
         `when`(view.resources).thenReturn(mContext.resources)
         `when`(view.isAttachedToWindow).thenReturn(true)
         `when`(view.context).thenReturn(context)

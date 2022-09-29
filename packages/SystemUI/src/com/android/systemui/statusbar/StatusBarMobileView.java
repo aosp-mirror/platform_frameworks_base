@@ -59,7 +59,8 @@ public class StatusBarMobileView extends FrameLayout implements DarkReceiver,
     private ImageView mOut;
     private ImageView mMobile, mMobileType, mMobileRoaming;
     private View mMobileRoamingSpace;
-    private int mVisibleState = -1;
+    @StatusBarIconView.VisibleState
+    private int mVisibleState = STATE_HIDDEN;
     private DualToneHandler mDualToneHandler;
     private boolean mForceHidden;
 
@@ -271,7 +272,7 @@ public class StatusBarMobileView extends FrameLayout implements DarkReceiver,
     }
 
     @Override
-    public void setVisibleState(int state, boolean animate) {
+    public void setVisibleState(@StatusBarIconView.VisibleState int state, boolean animate) {
         if (state == mVisibleState) {
             return;
         }
@@ -312,6 +313,7 @@ public class StatusBarMobileView extends FrameLayout implements DarkReceiver,
     }
 
     @Override
+    @StatusBarIconView.VisibleState
     public int getVisibleState() {
         return mVisibleState;
     }
