@@ -107,6 +107,32 @@ static bool isHdrDataspace(ui::Dataspace dataspace) {
     return transfer == HAL_DATASPACE_TRANSFER_ST2084 || transfer == HAL_DATASPACE_TRANSFER_HLG;
 }
 
+static void adjustCropForYUV(uint32_t format, int bufferWidth, int bufferHeight, SkRect* cropRect) {
+    // Chroma channels of YUV420 images are subsampled we may need to shrink the crop region by
+    // a whole texel on each side. Since skia still adds its own 0.5 inset, we apply an
+    // additional 0.5 inset. See GLConsumer::computeTransformMatrix for details.
+    float shrinkAmount = 0.0f;
+    switch (format) {
+        // Use HAL formats since some AHB formats are only available in vndk
+        case HAL_PIXEL_FORMAT_YCBCR_420_888:
+        case HAL_PIXEL_FORMAT_YV12:
+        case HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED:
+            shrinkAmount = 0.5f;
+            break;
+        default:
+            break;
+    }
+
+    // Shrink the crop if it has more than 1-px and differs from the buffer size.
+    if (cropRect->width() > 1 && cropRect->width() < bufferWidth) {
+        cropRect->inset(shrinkAmount, 0);
+    }
+
+    if (cropRect->height() > 1 && cropRect->height() < bufferHeight) {
+        cropRect->inset(0, shrinkAmount);
+    }
+}
+
 // TODO: Context arg probably doesn't belong here – do debug check at callsite instead.
 bool LayerDrawable::DrawLayer(GrRecordingContext* context,
                               SkCanvas* canvas,
@@ -142,6 +168,7 @@ bool LayerDrawable::DrawLayer(GrRecordingContext* context,
         SkRect skiaSrcRect;
         if (srcRect && !srcRect->isEmpty()) {
             skiaSrcRect = *srcRect;
+            adjustCropForYUV(layer->getBufferFormat(), imageWidth, imageHeight, &skiaSrcRect);
         } else {
             skiaSrcRect = SkRect::MakeIWH(imageWidth, imageHeight);
         }
