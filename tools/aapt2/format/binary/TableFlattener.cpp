@@ -31,6 +31,7 @@
 #include "androidfw/BigBuffer.h"
 #include "androidfw/ResourceUtils.h"
 #include "format/binary/ChunkWriter.h"
+#include "format/binary/ResEntryWriter.h"
 #include "format/binary/ResourceTypeExtensions.h"
 #include "trace/TraceBuffer.h"
 
@@ -57,170 +58,6 @@ static void strcpy16_htod(uint16_t* dst, size_t len, const StringPiece16& src) {
   }
   dst[i] = 0;
 }
-
-static bool cmp_style_entries(const Style::Entry* a, const Style::Entry* b) {
-  if (a->key.id) {
-    if (b->key.id) {
-      return cmp_ids_dynamic_after_framework(a->key.id.value(), b->key.id.value());
-    }
-    return true;
-  } else if (!b->key.id) {
-    return a->key.name.value() < b->key.name.value();
-  }
-  return false;
-}
-
-struct FlatEntry {
-  const ResourceTableEntryView* entry;
-  const Value* value;
-
-  // The entry string pool index to the entry's name.
-  uint32_t entry_key;
-};
-
-class MapFlattenVisitor : public ConstValueVisitor {
- public:
-  using ConstValueVisitor::Visit;
-
-  MapFlattenVisitor(ResTable_entry_ext* out_entry, BigBuffer* buffer)
-      : out_entry_(out_entry), buffer_(buffer) {
-  }
-
-  void Visit(const Attribute* attr) override {
-    {
-      Reference key = Reference(ResourceId(ResTable_map::ATTR_TYPE));
-      BinaryPrimitive val(Res_value::TYPE_INT_DEC, attr->type_mask);
-      FlattenEntry(&key, &val);
-    }
-
-    if (attr->min_int != std::numeric_limits<int32_t>::min()) {
-      Reference key = Reference(ResourceId(ResTable_map::ATTR_MIN));
-      BinaryPrimitive val(Res_value::TYPE_INT_DEC, static_cast<uint32_t>(attr->min_int));
-      FlattenEntry(&key, &val);
-    }
-
-    if (attr->max_int != std::numeric_limits<int32_t>::max()) {
-      Reference key = Reference(ResourceId(ResTable_map::ATTR_MAX));
-      BinaryPrimitive val(Res_value::TYPE_INT_DEC, static_cast<uint32_t>(attr->max_int));
-      FlattenEntry(&key, &val);
-    }
-
-    for (const Attribute::Symbol& s : attr->symbols) {
-      BinaryPrimitive val(s.type, s.value);
-      FlattenEntry(&s.symbol, &val);
-    }
-  }
-
-  void Visit(const Style* style) override {
-    if (style->parent) {
-      const Reference& parent_ref = style->parent.value();
-      CHECK(bool(parent_ref.id)) << "parent has no ID";
-      out_entry_->parent.ident = android::util::HostToDevice32(parent_ref.id.value().id);
-    }
-
-    // Sort the style.
-    std::vector<const Style::Entry*> sorted_entries;
-    for (const auto& entry : style->entries) {
-      sorted_entries.emplace_back(&entry);
-    }
-
-    std::sort(sorted_entries.begin(), sorted_entries.end(), cmp_style_entries);
-
-    for (const Style::Entry* entry : sorted_entries) {
-      FlattenEntry(&entry->key, entry->value.get());
-    }
-  }
-
-  void Visit(const Styleable* styleable) override {
-    for (auto& attr_ref : styleable->entries) {
-      BinaryPrimitive val(Res_value{});
-      FlattenEntry(&attr_ref, &val);
-    }
-  }
-
-  void Visit(const Array* array) override {
-    const size_t count = array->elements.size();
-    for (size_t i = 0; i < count; i++) {
-      Reference key(android::ResTable_map::ATTR_MIN + i);
-      FlattenEntry(&key, array->elements[i].get());
-    }
-  }
-
-  void Visit(const Plural* plural) override {
-    const size_t count = plural->values.size();
-    for (size_t i = 0; i < count; i++) {
-      if (!plural->values[i]) {
-        continue;
-      }
-
-      ResourceId q;
-      switch (i) {
-        case Plural::Zero:
-          q.id = android::ResTable_map::ATTR_ZERO;
-          break;
-
-        case Plural::One:
-          q.id = android::ResTable_map::ATTR_ONE;
-          break;
-
-        case Plural::Two:
-          q.id = android::ResTable_map::ATTR_TWO;
-          break;
-
-        case Plural::Few:
-          q.id = android::ResTable_map::ATTR_FEW;
-          break;
-
-        case Plural::Many:
-          q.id = android::ResTable_map::ATTR_MANY;
-          break;
-
-        case Plural::Other:
-          q.id = android::ResTable_map::ATTR_OTHER;
-          break;
-
-        default:
-          LOG(FATAL) << "unhandled plural type";
-          break;
-      }
-
-      Reference key(q);
-      FlattenEntry(&key, plural->values[i].get());
-    }
-  }
-
-  /**
-   * Call this after visiting a Value. This will finish any work that
-   * needs to be done to prepare the entry.
-   */
-  void Finish() {
-    out_entry_->count = android::util::HostToDevice32(entry_count_);
-  }
-
- private:
-  DISALLOW_COPY_AND_ASSIGN(MapFlattenVisitor);
-
-  void FlattenKey(const Reference* key, ResTable_map* out_entry) {
-    CHECK(bool(key->id)) << "key has no ID";
-    out_entry->name.ident = android::util::HostToDevice32(key->id.value().id);
-  }
-
-  void FlattenValue(const Item* value, ResTable_map* out_entry) {
-    CHECK(value->Flatten(&out_entry->value)) << "flatten failed";
-  }
-
-  void FlattenEntry(const Reference* key, Item* value) {
-    ResTable_map* out_entry = buffer_->NextBlock<ResTable_map>();
-    FlattenKey(key, out_entry);
-    FlattenValue(value, out_entry);
-    out_entry->value.size = android::util::HostToDevice16(sizeof(out_entry->value));
-    entry_count_++;
-  }
-
-  ResTable_entry_ext* out_entry_;
-  BigBuffer* buffer_;
-  size_t entry_count_ = 0;
-};
 
 struct OverlayableChunk {
   std::string actor;
@@ -298,47 +135,6 @@ class PackageFlattener {
  private:
   DISALLOW_COPY_AND_ASSIGN(PackageFlattener);
 
-  template <typename T, bool IsItem>
-  T* WriteEntry(FlatEntry* entry, BigBuffer* buffer) {
-    static_assert(
-        std::is_same<ResTable_entry, T>::value || std::is_same<ResTable_entry_ext, T>::value,
-        "T must be ResTable_entry or ResTable_entry_ext");
-
-    T* result = buffer->NextBlock<T>();
-    ResTable_entry* out_entry = (ResTable_entry*)result;
-    if (entry->entry->visibility.level == Visibility::Level::kPublic) {
-      out_entry->flags |= ResTable_entry::FLAG_PUBLIC;
-    }
-
-    if (entry->value->IsWeak()) {
-      out_entry->flags |= ResTable_entry::FLAG_WEAK;
-    }
-
-    if (!IsItem) {
-      out_entry->flags |= ResTable_entry::FLAG_COMPLEX;
-    }
-
-    out_entry->flags = android::util::HostToDevice16(out_entry->flags);
-    out_entry->key.index = android::util::HostToDevice32(entry->entry_key);
-    out_entry->size = android::util::HostToDevice16(sizeof(T));
-    return result;
-  }
-
-  bool FlattenValue(FlatEntry* entry, BigBuffer* buffer) {
-    if (const Item* item = ValueCast<Item>(entry->value)) {
-      WriteEntry<ResTable_entry, true>(entry, buffer);
-      Res_value* outValue = buffer->NextBlock<Res_value>();
-      CHECK(item->Flatten(outValue)) << "flatten failed";
-      outValue->size = android::util::HostToDevice16(sizeof(*outValue));
-    } else {
-      ResTable_entry_ext* out_entry = WriteEntry<ResTable_entry_ext, false>(entry, buffer);
-      MapFlattenVisitor visitor(out_entry, buffer);
-      entry->value->Accept(&visitor);
-      visitor.Finish();
-    }
-    return true;
-  }
-
   bool FlattenConfig(const ResourceTableTypeView& type, const ConfigDescription& config,
                      const size_t num_total_entries, std::vector<FlatEntry>* entries,
                      BigBuffer* buffer) {
@@ -355,16 +151,10 @@ class PackageFlattener {
     offsets.resize(num_total_entries, 0xffffffffu);
 
     android::BigBuffer values_buffer(512);
+    SequentialResEntryWriter res_entry_writer(&values_buffer);
     for (FlatEntry& flat_entry : *entries) {
       CHECK(static_cast<size_t>(flat_entry.entry->id.value()) < num_total_entries);
-      offsets[flat_entry.entry->id.value()] = values_buffer.size();
-      if (!FlattenValue(&flat_entry, &values_buffer)) {
-        diag_->Error(android::DiagMessage()
-                     << "failed to flatten resource '"
-                     << ResourceNameRef(package_.name, type.named_type, flat_entry.entry->name)
-                     << "' for configuration '" << config << "'");
-        return false;
-      }
+      offsets[flat_entry.entry->id.value()] = res_entry_writer.Write(&flat_entry);
     }
 
     bool sparse_encode = sparse_entries_ == SparseEntriesMode::Enabled ||
