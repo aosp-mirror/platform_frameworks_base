@@ -29,6 +29,7 @@ import android.app.ActivityTaskManager;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
+import android.content.pm.parsing.FrameworkParsingPackageUtils;
 import android.content.pm.parsing.result.ParseInput;
 import android.content.pm.parsing.result.ParseInput.DeferredError;
 import android.content.pm.parsing.result.ParseResult;
@@ -218,6 +219,18 @@ public class ParsedActivityUtils {
                 activity.setFlags(activity.getFlags() | ActivityInfo.FLAG_VISIBLE_TO_INSTANT_APP);
                 pkg.setVisibleToInstantApps(true);
             }
+
+            String targetDisplayCategory = sa.getNonConfigurationString(
+                    R.styleable.AndroidManifestActivity_targetDisplayCategory, 0);
+
+            if (targetDisplayCategory != null
+                    && FrameworkParsingPackageUtils.validateName(targetDisplayCategory,
+                    false /* requireSeparator */, false /* requireFilename */) != null) {
+                return input.error("targetDisplayCategory attribute can only consists of "
+                        + "alphanumeric characters, '_', and '.'");
+            }
+
+            activity.setTargetDisplayCategory(targetDisplayCategory);
 
             return parseActivityOrAlias(activity, pkg, tag, parser, res, sa, receiver,
                     false /*isAlias*/, visibleToEphemeral, input,
