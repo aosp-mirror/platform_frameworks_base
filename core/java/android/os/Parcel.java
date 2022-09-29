@@ -560,7 +560,9 @@ public final class Parcel {
      */
     public final void recycle() {
         if (mRecycled) {
-            Log.w(TAG, "Recycle called on unowned Parcel. (recycle twice?)", mStack);
+            Log.w(TAG, "Recycle called on unowned Parcel. (recycle twice?) Here: "
+                    + Log.getStackTraceString(new Throwable())
+                    + " Original recycle call (if DEBUG_RECYCLE): ", mStack);
         }
         mRecycled = true;
 
