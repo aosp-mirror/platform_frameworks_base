@@ -210,6 +210,8 @@ public class Flags {
 
     public static final UnreleasedFlag ROUNDED_BOX_RIPPLE = new UnreleasedFlag(1002, false);
 
+    public static final UnreleasedFlag REFACTORED_DOCK_SETUP = new UnreleasedFlag(1003, true);
+
     // 1100 - windowing
     @Keep
     public static final SysPropBooleanFlag WM_ENABLE_SHELL_TRANSITIONS =
