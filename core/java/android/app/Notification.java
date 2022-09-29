@@ -4453,6 +4453,10 @@ public class Notification implements Parcelable
          * <p>Apps targeting {@link Build.VERSION_CODES#Q} and above will have to request
          * a permission ({@link android.Manifest.permission#USE_FULL_SCREEN_INTENT}) in order to
          * use full screen intents.</p>
+         * <p>
+         * To be launched as a full screen intent, the notification must also be posted to a
+         * channel with importance level set to IMPORTANCE_HIGH or higher.
+         * </p>
          *
          * @param intent The pending intent to launch.
          * @param highPriority Passing true will cause this notification to be sent
