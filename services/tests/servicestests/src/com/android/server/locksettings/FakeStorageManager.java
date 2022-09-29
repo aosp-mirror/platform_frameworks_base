@@ -20,51 +20,22 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.util.ArrayMap;
 
-import java.util.ArrayList;
-
 public class FakeStorageManager {
 
-    private final ArrayMap<Integer, ArrayList<byte[]>> mAuth = new ArrayMap<>();
+    private final ArrayMap<Integer, byte[]> mUserSecrets = new ArrayMap<>();
 
-    public void addUserKeyAuth(int userId, int serialNumber, byte[] secret) {
-        getUserAuth(userId).add(secret);
-    }
-
-    public void clearUserKeyAuth(int userId, int serialNumber, byte[] secret) {
-        ArrayList<byte[]> auths = getUserAuth(userId);
-        if (secret == null) {
-            return;
-        }
-        auths.remove(secret);
-        auths.add(null);
-    }
-
-    public void fixateNewestUserKeyAuth(int userId) {
-        ArrayList<byte[]> auths = mAuth.get(userId);
-        byte[] latest = auths.get(auths.size() - 1);
-        auths.clear();
-        auths.add(latest);
-    }
-
-    private ArrayList<byte[]> getUserAuth(int userId) {
-        if (!mAuth.containsKey(userId)) {
-            ArrayList<byte[]> auths = new ArrayList<>();
-            auths.add(null);
-            mAuth.put(userId, auths);
-        }
-        return mAuth.get(userId);
+    public void setUserKeyProtection(int userId, byte[] secret) {
+        assertThat(mUserSecrets).doesNotContainKey(userId);
+        mUserSecrets.put(userId, secret);
     }
 
     public byte[] getUserUnlockToken(int userId) {
-        ArrayList<byte[]> auths = getUserAuth(userId);
-        assertThat(auths).hasSize(1);
-        return auths.get(0);
+        byte[] secret = mUserSecrets.get(userId);
+        assertThat(secret).isNotNull();
+        return secret;
     }
 
     public void unlockUserKey(int userId, byte[] secret) {
-        ArrayList<byte[]> auths = getUserAuth(userId);
-        assertThat(auths).hasSize(1);
-        byte[] auth = auths.get(0);
-        assertThat(auth).isEqualTo(secret);
+        assertThat(mUserSecrets.get(userId)).isEqualTo(secret);
     }
 }

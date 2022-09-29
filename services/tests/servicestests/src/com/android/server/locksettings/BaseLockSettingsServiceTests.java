@@ -223,23 +223,11 @@ public abstract class BaseLockSettingsServiceTests {
 
         doAnswer(invocation -> {
             Object[] args = invocation.getArguments();
-            mStorageManager.addUserKeyAuth(/* userId= */ (int) args[0],
-                    /* serialNumber= */ (int) args[1], /* secret= */ (byte[]) args[2]);
+            mStorageManager.setUserKeyProtection(/* userId= */ (int) args[0],
+                    /* secret= */ (byte[]) args[1]);
             return null;
-        }).when(sm).addUserKeyAuth(anyInt(), anyInt(), any());
+        }).when(sm).setUserKeyProtection(anyInt(), any());
 
-        doAnswer(invocation -> {
-            Object[] args = invocation.getArguments();
-            mStorageManager.clearUserKeyAuth(/* userId= */ (int) args[0],
-                    /* serialNumber= */ (int) args[1], /* secret= */ (byte[]) args[2]);
-            return null;
-        }).when(sm).clearUserKeyAuth(anyInt(), anyInt(), any());
-
-        doAnswer(invocation -> {
-            Object[] args = invocation.getArguments();
-            mStorageManager.fixateNewestUserKeyAuth(/* userId= */ (int) args[0]);
-            return null;
-        }).when(sm).fixateNewestUserKeyAuth(anyInt());
         return sm;
     }
 

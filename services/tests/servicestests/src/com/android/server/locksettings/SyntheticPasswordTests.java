@@ -189,25 +189,13 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
     }
 
     @Test
-    public void testCredentialDoesNotPassAuthSecret() throws RemoteException {
-        LockscreenCredential password = newPassword("password");
-        initializeCredential(password, PRIMARY_USER_ID);
-
-        reset(mAuthSecretService);
-        mService.onUnlockUser(PRIMARY_USER_ID);
-        flushHandlerTasks();
-        verify(mAuthSecretService, never()).primaryUserCredential(any(ArrayList.class));
-    }
-
-    @Test
-    public void testSyntheticPasswordButNoCredentialPassesAuthSecret() throws RemoteException {
+    public void testUnlockUserKeyIfUnsecuredPassesPrimaryUserAuthSecret() throws RemoteException {
         LockscreenCredential password = newPassword("password");
         initializeCredential(password, PRIMARY_USER_ID);
         mService.setLockCredential(nonePassword(), password, PRIMARY_USER_ID);
 
         reset(mAuthSecretService);
-        mService.onUnlockUser(PRIMARY_USER_ID);
-        flushHandlerTasks();
+        mLocalService.unlockUserKeyIfUnsecured(PRIMARY_USER_ID);
         verify(mAuthSecretService).primaryUserCredential(any(ArrayList.class));
     }
 

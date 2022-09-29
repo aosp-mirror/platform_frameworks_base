@@ -801,36 +801,8 @@ public class LockSettingsService extends ILockSettings.Stub {
                 if (isCredentialSharableWithParent(userId)) {
                     tieProfileLockIfNecessary(userId, LockscreenCredential.createNone());
                 }
-
-                // If the user doesn't have a credential, try and derive their secret for the
-                // AuthSecret HAL. The secret will have been enrolled if the user previously set a
-                // credential and still needs to be passed to the HAL once that credential is
-                // removed.
-                if (mUserManager.getUserInfo(userId).isPrimary() && !isUserSecure(userId)) {
-                    tryDeriveVendorAuthSecretForUnsecuredPrimaryUser(userId);
-                }
             }
         });
-    }
-
-    private void tryDeriveVendorAuthSecretForUnsecuredPrimaryUser(@UserIdInt int userId) {
-        synchronized (mSpManager) {
-            // If there is no SP, then there is no vendor auth secret.
-            if (!isSyntheticPasswordBasedCredentialLocked(userId)) {
-                return;
-            }
-
-            final long protectorId = getCurrentLskfBasedProtectorId(userId);
-            AuthenticationResult result =
-                    mSpManager.unlockLskfBasedProtector(getGateKeeperService(), protectorId,
-                            LockscreenCredential.createNone(), userId, null);
-            if (result.syntheticPassword != null) {
-                Slog.i(TAG, "Unwrapped SP for unsecured primary user " + userId);
-                onSyntheticPasswordKnown(userId, result.syntheticPassword);
-            } else {
-                Slog.e(TAG, "Failed to unwrap SP for unsecured primary user " + userId);
-            }
-        }
     }
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
@@ -979,25 +951,51 @@ public class LockSettingsService extends ILockSettings.Stub {
             }
             mEarlyCreatedUsers = null; // no longer needed
 
-            // Also do a one-time migration of all users to SP-based credentials.  This is needed
-            // for the system user on the first boot of a device, as the system user is special and
-            // never goes through the user creation flow that other users do.  It is also needed for
-            // existing users on a device upgraded from Android 13 or earlier, where users with no
-            // LSKF didn't necessarily have an SP.
-            if (getString("migrated_all_users_to_sp", null, 0) == null) {
+            // Also do a one-time migration of all users to SP-based credentials with the CE key
+            // encrypted by the SP.  This is needed for the system user on the first boot of a
+            // device, as the system user is special and never goes through the user creation flow
+            // that other users do.  It is also needed for existing users on a device upgraded from
+            // Android 13 or earlier, where users with no LSKF didn't necessarily have an SP, and if
+            // they did have an SP then their CE key wasn't encrypted by it.
+            //
+            // If this gets interrupted (e.g. by the device powering off), there shouldn't be a
+            // problem since this will run again on the next boot, and setUserKeyProtection() is
+            // okay with the key being already protected by the given secret.
+            if (getString("migrated_all_users_to_sp_and_bound_ce", null, 0) == null) {
                 for (UserInfo user : mUserManager.getAliveUsers()) {
                     removeStateForReusedUserIdIfNecessary(user.id, user.serialNumber);
                     synchronized (mSpManager) {
-                        if (!isSyntheticPasswordBasedCredentialLocked(user.id)) {
-                            Slogf.i(TAG, "Migrating user %d to SP-based credential", user.id);
-                            initializeSyntheticPasswordLocked(user.id);
-                        }
+                        migrateUserToSpWithBoundCeKeyLocked(user.id);
                     }
                 }
-                setString("migrated_all_users_to_sp", "true", 0);
+                setString("migrated_all_users_to_sp_and_bound_ce", "true", 0);
             }
 
             mBootComplete = true;
+        }
+    }
+
+    @GuardedBy("mSpManager")
+    private void migrateUserToSpWithBoundCeKeyLocked(@UserIdInt int userId) {
+        if (isUserSecure(userId)) {
+            Slogf.d(TAG, "User %d is secured; no migration needed", userId);
+            return;
+        }
+        long protectorId = getCurrentLskfBasedProtectorId(userId);
+        if (protectorId == SyntheticPasswordManager.NULL_PROTECTOR_ID) {
+            Slogf.i(TAG, "Migrating unsecured user %d to SP-based credential", userId);
+            initializeSyntheticPasswordLocked(userId);
+        } else {
+            Slogf.i(TAG, "Existing unsecured user %d has a synthetic password; re-encrypting CE " +
+                    "key with it", userId);
+            AuthenticationResult result = mSpManager.unlockLskfBasedProtector(
+                    getGateKeeperService(), protectorId, LockscreenCredential.createNone(), userId,
+                    null);
+            if (result.syntheticPassword == null) {
+                Slogf.wtf(TAG, "Failed to unwrap synthetic password for unsecured user %d", userId);
+                return;
+            }
+            setUserKeyProtection(userId, result.syntheticPassword.deriveFileBasedEncryptionKey());
         }
     }
 
@@ -1961,19 +1959,12 @@ public class LockSettingsService extends ILockSettings.Stub {
         mStorage.writeChildProfileLock(userId, ArrayUtils.concat(iv, ciphertext));
     }
 
-    private void setUserKeyProtection(int userId, byte[] key) {
-        if (DEBUG) Slog.d(TAG, "setUserKeyProtection: user=" + userId);
-        addUserKeyAuth(userId, key);
-    }
-
-    private void clearUserKeyProtection(int userId, byte[] secret) {
-        if (DEBUG) Slog.d(TAG, "clearUserKeyProtection user=" + userId);
-        final UserInfo userInfo = mUserManager.getUserInfo(userId);
+    private void setUserKeyProtection(@UserIdInt int userId, byte[] secret) {
         final long callingId = Binder.clearCallingIdentity();
         try {
-            mStorageManager.clearUserKeyAuth(userId, userInfo.serialNumber, secret);
+            mStorageManager.setUserKeyProtection(userId, secret);
         } catch (RemoteException e) {
-            throw new IllegalStateException("clearUserKeyAuth failed user=" + userId);
+            throw new IllegalStateException("Failed to protect CE key for user " + userId, e);
         } finally {
             Binder.restoreCallingIdentity(callingId);
         }
@@ -1991,9 +1982,6 @@ public class LockSettingsService extends ILockSettings.Stub {
     /**
      * Unlocks the user's CE (credential-encrypted) storage if it's not already unlocked.
      * <p>
-     * If the given {@code SyntheticPassword} is {@code null}, then an empty secret will be used.
-     * Otherwise, a secret derived from the given {@code SyntheticPassword} will be used.
-     * <p>
      * This method doesn't throw exceptions because it is called opportunistically whenever a user
      * is started.  Whether it worked or not can be detected by whether the key got unlocked or not.
      */
@@ -2004,56 +1992,38 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
         final UserInfo userInfo = mUserManager.getUserInfo(userId);
         final String userType = isUserSecure(userId) ? "secured" : "unsecured";
-        byte[] secret = null;
+        final byte[] secret = sp.deriveFileBasedEncryptionKey();
         try {
-            if (sp != null) {
-                secret = sp.deriveFileBasedEncryptionKey();
-            }
             mStorageManager.unlockUserKey(userId, userInfo.serialNumber, secret);
             Slogf.i(TAG, "Unlocked CE storage for %s user %d", userType, userId);
         } catch (RemoteException e) {
             Slogf.wtf(TAG, e, "Failed to unlock CE storage for %s user %d", userType, userId);
         } finally {
-            if (secret != null) {
-                Arrays.fill(secret, (byte) 0);
-            }
+            Arrays.fill(secret, (byte) 0);
         }
     }
 
     private void unlockUserKeyIfUnsecured(@UserIdInt int userId) {
         synchronized (mSpManager) {
+            if (isUserKeyUnlocked(userId)) {
+                Slogf.d(TAG, "CE storage for user %d is already unlocked", userId);
+                return;
+            }
             if (isUserSecure(userId)) {
                 Slogf.d(TAG, "Not unlocking CE storage for user %d yet because user is secured",
                         userId);
                 return;
             }
-            unlockUserKey(userId, null);
-        }
-    }
-
-    private void addUserKeyAuth(int userId, byte[] secret) {
-        final UserInfo userInfo = mUserManager.getUserInfo(userId);
-        final long callingId = Binder.clearCallingIdentity();
-        try {
-            mStorageManager.addUserKeyAuth(userId, userInfo.serialNumber, secret);
-        } catch (RemoteException e) {
-            throw new IllegalStateException("Failed to add new key to vold " + userId, e);
-        } finally {
-            Binder.restoreCallingIdentity(callingId);
-        }
-    }
-
-    private void fixateNewestUserKeyAuth(int userId) {
-        if (DEBUG) Slog.d(TAG, "fixateNewestUserKeyAuth: user=" + userId);
-        final long callingId = Binder.clearCallingIdentity();
-        try {
-            mStorageManager.fixateNewestUserKeyAuth(userId);
-        } catch (RemoteException e) {
-            // OK to ignore the exception as vold would just accept both old and new
-            // keys if this call fails, and will fix itself during the next boot
-            Slog.w(TAG, "fixateNewestUserKeyAuth failed", e);
-        } finally {
-            Binder.restoreCallingIdentity(callingId);
+            Slogf.i(TAG, "Unwrapping synthetic password for unsecured user %d", userId);
+            AuthenticationResult result = mSpManager.unlockLskfBasedProtector(
+                    getGateKeeperService(), getCurrentLskfBasedProtectorId(userId),
+                    LockscreenCredential.createNone(), userId, null);
+            if (result.syntheticPassword == null) {
+                Slogf.wtf(TAG, "Failed to unwrap synthetic password for unsecured user %d", userId);
+                return;
+            }
+            onSyntheticPasswordKnown(userId, result.syntheticPassword);
+            unlockUserKey(userId, result.syntheticPassword);
         }
     }
 
@@ -2652,7 +2622,8 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     /**
-     * Creates the synthetic password (SP) for the given user and protects it with an empty LSKF.
+     * Creates the synthetic password (SP) for the given user, protects it with an empty LSKF, and
+     * protects the user's CE key with a key derived from the SP.
      * <p>
      * This is called just once in the lifetime of the user: at user creation time (possibly delayed
      * until {@code PHASE_BOOT_COMPLETED} to ensure that the Weaver HAL is available if the device
@@ -2671,6 +2642,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         final long protectorId = mSpManager.createLskfBasedProtector(getGateKeeperService(),
                 LockscreenCredential.createNone(), sp, userId);
         setCurrentLskfBasedProtectorId(protectorId, userId);
+        setUserKeyProtection(userId, sp.deriveFileBasedEncryptionKey());
         onSyntheticPasswordKnown(userId, sp);
         return sp;
     }
@@ -2767,9 +2739,9 @@ public class LockSettingsService extends ILockSettings.Stub {
      * be empty) and replacing the old LSKF-based protector with it.  The SP itself is not changed.
      *
      * Also maintains the invariants described in {@link SyntheticPasswordManager} by
-     * setting/clearing the protection (by the SP) on the user's file-based encryption key and
-     * auth-bound Keystore keys when the LSKF is added/removed, respectively.  If the new LSKF is
-     * nonempty, then the Gatekeeper auth token is also refreshed.
+     * setting/clearing the protection (by the SP) on the user's auth-bound Keystore keys when the
+     * LSKF is added/removed, respectively.  If the new LSKF is nonempty, then the Gatekeeper auth
+     * token is also refreshed.
      */
     @GuardedBy("mSpManager")
     private long setLockCredentialWithSpLocked(LockscreenCredential credential,
@@ -2789,8 +2761,6 @@ public class LockSettingsService extends ILockSettings.Stub {
             } else {
                 mSpManager.newSidForUser(getGateKeeperService(), sp, userId);
                 mSpManager.verifyChallenge(getGateKeeperService(), sp, 0L, userId);
-                setUserKeyProtection(userId, sp.deriveFileBasedEncryptionKey());
-                fixateNewestUserKeyAuth(userId);
                 setKeystorePassword(sp.deriveKeyStorePassword(), userId);
             }
         } else {
@@ -2801,8 +2771,6 @@ public class LockSettingsService extends ILockSettings.Stub {
             mSpManager.clearSidForUser(userId);
             gateKeeperClearSecureUserId(userId);
             unlockUserKey(userId, sp);
-            clearUserKeyProtection(userId, sp.deriveFileBasedEncryptionKey());
-            fixateNewestUserKeyAuth(userId);
             unlockKeystore(sp.deriveKeyStorePassword(), userId);
             setKeystorePassword(null, userId);
             removeBiometricsForUser(userId);

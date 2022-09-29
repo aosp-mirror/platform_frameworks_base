@@ -147,9 +147,7 @@ interface IStorageManager {
     @EnforcePermission("STORAGE_INTERNAL")
     void destroyUserStorage(in String volumeUuid, int userId, int flags) = 67;
     @EnforcePermission("STORAGE_INTERNAL")
-    void addUserKeyAuth(int userId, int serialNumber, in byte[] secret) = 70;
-    @EnforcePermission("STORAGE_INTERNAL")
-    void fixateNewestUserKeyAuth(int userId) = 71;
+    void setUserKeyProtection(int userId, in byte[] secret) = 70;
     @EnforcePermission("MOUNT_FORMAT_FILESYSTEMS")
     void fstrim(int flags, IVoldTaskListener listener) = 72;
     AppFuseMount mountProxyFileDescriptorBridge() = 73;
@@ -166,8 +164,6 @@ interface IStorageManager {
     @EnforcePermission("MOUNT_FORMAT_FILESYSTEMS")
     boolean needsCheckpoint() = 86;
     void abortChanges(in String message, boolean retry) = 87;
-    @EnforcePermission("STORAGE_INTERNAL")
-    void clearUserKeyAuth(int userId, int serialNumber, in byte[] secret) = 88;
     void fixupAppDir(in String path) = 89;
     void disableAppDataIsolation(in String pkgName, int pid, int userId) = 90;
     PendingIntent getManageSpaceActivityIntent(in String packageName, int requestCode) = 91;

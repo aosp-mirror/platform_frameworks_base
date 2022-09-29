@@ -3066,64 +3066,11 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
-    private String encodeBytes(byte[] bytes) {
-        if (ArrayUtils.isEmpty(bytes)) {
-            return "!";
-        } else {
-            return HexDump.toHexString(bytes);
-        }
-    }
-
+    /* Only for use by LockSettingsService */
     @android.annotation.EnforcePermission(android.Manifest.permission.STORAGE_INTERNAL)
-    /*
-     * Add this secret to the set of ways we can recover a user's disk
-     * encryption key.  Changing the secret for a disk encryption key is done in
-     * two phases.  First, this method is called to add the new secret binding.
-     * Second, fixateNewestUserKeyAuth is called to delete all other bindings.
-     * This allows other places where a credential is used, such as Gatekeeper,
-     * to be updated between the two calls.
-     */
     @Override
-    public void addUserKeyAuth(int userId, int serialNumber, byte[] secret) {
-
-        try {
-            mVold.addUserKeyAuth(userId, serialNumber, encodeBytes(secret));
-        } catch (Exception e) {
-            Slog.wtf(TAG, e);
-        }
-    }
-
-    @android.annotation.EnforcePermission(android.Manifest.permission.STORAGE_INTERNAL)
-    /*
-     * Store a user's disk encryption key without secret binding.  Removing the
-     * secret for a disk encryption key is done in two phases.  First, this
-     * method is called to retrieve the key using the provided secret and store
-     * it encrypted with a keystore key not bound to the user.  Second,
-     * fixateNewestUserKeyAuth is called to delete the key's other bindings.
-     */
-    @Override
-    public void clearUserKeyAuth(int userId, int serialNumber, byte[] secret) {
-
-        try {
-            mVold.clearUserKeyAuth(userId, serialNumber, encodeBytes(secret));
-        } catch (Exception e) {
-            Slog.wtf(TAG, e);
-        }
-    }
-
-    @android.annotation.EnforcePermission(android.Manifest.permission.STORAGE_INTERNAL)
-    /*
-     * Delete all bindings of a user's disk encryption key except the most
-     * recently added one.
-     */
-    @Override
-    public void fixateNewestUserKeyAuth(int userId) {
-
-        try {
-            mVold.fixateNewestUserKeyAuth(userId);
-        } catch (Exception e) {
-            Slog.wtf(TAG, e);
-        }
+    public void setUserKeyProtection(@UserIdInt int userId, byte[] secret) throws RemoteException {
+        mVold.setUserKeyProtection(userId, HexDump.toHexString(secret));
     }
 
     /* Only for use by LockSettingsService */
@@ -3132,7 +3079,7 @@ class StorageManagerService extends IStorageManager.Stub
     public void unlockUserKey(@UserIdInt int userId, int serialNumber, byte[] secret)
         throws RemoteException {
         if (StorageManager.isFileEncrypted()) {
-            mVold.unlockUserKey(userId, serialNumber, encodeBytes(secret));
+            mVold.unlockUserKey(userId, serialNumber, HexDump.toHexString(secret));
         }
         synchronized (mLock) {
             mLocalUnlockedUsers.append(userId);
