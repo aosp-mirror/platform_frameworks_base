@@ -5289,7 +5289,8 @@ public class UserManagerService extends IUserManager.Stub {
                 Slog.w(LOG_TAG, "Unable to notify AppOpsService of removing user.", e);
             }
 
-            if (userData.info.profileGroupId != UserInfo.NO_PROFILE_GROUP_ID) {
+            if (userData.info.profileGroupId != UserInfo.NO_PROFILE_GROUP_ID
+                    && userData.info.isProfile()) {
                 sendProfileRemovedBroadcast(userData.info.profileGroupId, userData.info.id,
                         userData.info.userType);
             }
