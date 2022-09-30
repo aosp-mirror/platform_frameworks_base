@@ -97,6 +97,7 @@ combined_apis {
         "framework-bluetooth",
         "framework-connectivity",
         "framework-connectivity-t",
+        "framework-federatedcompute",
         "framework-graphics",
         "framework-healthconnect",
         "framework-media",
