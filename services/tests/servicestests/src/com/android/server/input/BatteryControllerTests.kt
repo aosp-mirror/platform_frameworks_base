@@ -33,6 +33,7 @@ import android.platform.test.annotations.Presubmit
 import android.view.InputDevice
 import androidx.test.InstrumentationRegistry
 import com.android.server.input.BatteryController.UEventManager
+import com.android.server.input.BatteryController.UEventManager.UEventBatteryListener
 import org.hamcrest.Description
 import org.hamcrest.Matcher
 import org.hamcrest.MatcherAssert.assertThat
@@ -264,7 +265,7 @@ class BatteryControllerTests {
         `when`(native.getBatteryStatus(DEVICE_ID)).thenReturn(STATUS_CHARGING)
         `when`(native.getBatteryCapacity(DEVICE_ID)).thenReturn(78)
         val listener = createMockListener()
-        val uEventListener = ArgumentCaptor.forClass(UEventManager.UEventListener::class.java)
+        val uEventListener = ArgumentCaptor.forClass(UEventBatteryListener::class.java)
         batteryController.registerBatteryListener(DEVICE_ID, listener, PID)
         // The device paths for UEvent notifications do not include the "/sys" prefix, so verify
         // that the added listener is configured to match the path without that prefix.
@@ -274,14 +275,14 @@ class BatteryControllerTests {
 
         // If the battery state has changed when an UEvent is sent, the listeners are notified.
         `when`(native.getBatteryCapacity(DEVICE_ID)).thenReturn(80)
-        uEventListener.value!!.onUEvent(TIMESTAMP)
+        uEventListener.value!!.onBatteryUEvent(TIMESTAMP)
         listener.verifyNotified(DEVICE_ID, status = STATUS_CHARGING, capacity = 0.80f,
             eventTime = TIMESTAMP)
 
         // If the battery state has not changed when an UEvent is sent, the listeners are not
         // notified.
         clearInvocations(listener)
-        uEventListener.value!!.onUEvent(TIMESTAMP + 1)
+        uEventListener.value!!.onBatteryUEvent(TIMESTAMP + 1)
         verifyNoMoreInteractions(listener)
 
         batteryController.unregisterBatteryListener(DEVICE_ID, listener, PID)
@@ -296,7 +297,7 @@ class BatteryControllerTests {
         `when`(native.getBatteryStatus(DEVICE_ID)).thenReturn(STATUS_CHARGING)
         `when`(native.getBatteryCapacity(DEVICE_ID)).thenReturn(78)
         val listener = createMockListener()
-        val uEventListener = ArgumentCaptor.forClass(UEventManager.UEventListener::class.java)
+        val uEventListener = ArgumentCaptor.forClass(UEventBatteryListener::class.java)
         batteryController.registerBatteryListener(DEVICE_ID, listener, PID)
         verify(uEventManager).addListener(uEventListener.capture(), eq("DEVPATH=/test/device1"))
         listener.verifyNotified(DEVICE_ID, status = STATUS_CHARGING, capacity = 0.78f)

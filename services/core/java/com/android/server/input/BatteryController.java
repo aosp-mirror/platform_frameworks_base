@@ -38,7 +38,7 @@ import android.view.InputDevice;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.input.BatteryController.UEventManager.UEventListener;
+import com.android.server.input.BatteryController.UEventManager.UEventBatteryListener;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -438,7 +438,7 @@ final class BatteryController {
         private State mState;
 
         @Nullable
-        private UEventListener mUEventListener;
+        private UEventBatteryListener mUEventBatteryListener;
 
         DeviceMonitor(int deviceId) {
             mState = new State(deviceId);
@@ -473,13 +473,14 @@ final class BatteryController {
                 return;
             }
             final int deviceId = mState.deviceId;
-            mUEventListener = new UEventListener() {
+            mUEventBatteryListener = new UEventBatteryListener() {
                 @Override
-                public void onUEvent(long eventTime) {
+                public void onBatteryUEvent(long eventTime) {
                     handleUEventNotification(deviceId, eventTime);
                 }
             };
-            mUEventManager.addListener(mUEventListener, "DEVPATH=" + formatDevPath(batteryPath));
+            mUEventManager.addListener(
+                    mUEventBatteryListener, "DEVPATH=" + formatDevPath(batteryPath));
         }
 
         private String formatDevPath(String path) {
@@ -489,9 +490,9 @@ final class BatteryController {
 
         // This must be called when the device is no longer being monitored.
         public void stopMonitoring() {
-            if (mUEventListener != null) {
-                mUEventManager.removeListener(mUEventListener);
-                mUEventListener = null;
+            if (mUEventBatteryListener != null) {
+                mUEventManager.removeListener(mUEventBatteryListener);
+                mUEventBatteryListener = null;
             }
         }
 
@@ -503,7 +504,7 @@ final class BatteryController {
         @Override
         public String toString() {
             return "state=" + mState
-                    + ", uEventListener=" + (mUEventListener != null ? "added" : "none");
+                    + ", uEventListener=" + (mUEventBatteryListener != null ? "added" : "none");
         }
     }
 
@@ -512,7 +513,7 @@ final class BatteryController {
     interface UEventManager {
 
         @VisibleForTesting
-        abstract class UEventListener {
+        abstract class UEventBatteryListener {
             private final UEventObserver mObserver = new UEventObserver() {
                 @Override
                 public void onUEvent(UEvent event) {
@@ -522,18 +523,23 @@ final class BatteryController {
                                 "UEventListener: Received UEvent: "
                                         + event + " eventTime: " + eventTime);
                     }
-                    UEventListener.this.onUEvent(eventTime);
+                    if (!"CHANGE".equalsIgnoreCase(event.get("ACTION"))
+                            || !"POWER_SUPPLY".equalsIgnoreCase(event.get("SUBSYSTEM"))) {
+                        // Disregard any UEvents that do not correspond to battery changes.
+                        return;
+                    }
+                    UEventBatteryListener.this.onBatteryUEvent(eventTime);
                 }
             };
 
-            public abstract void onUEvent(long eventTime);
+            public abstract void onBatteryUEvent(long eventTime);
         }
 
-        default void addListener(UEventListener listener, String match) {
+        default void addListener(UEventBatteryListener listener, String match) {
             listener.mObserver.startObserving(match);
         }
 
-        default void removeListener(UEventListener listener) {
+        default void removeListener(UEventBatteryListener listener) {
             listener.mObserver.stopObserving();
         }
     }
