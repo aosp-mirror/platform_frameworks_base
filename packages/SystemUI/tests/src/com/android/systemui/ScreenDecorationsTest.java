@@ -1005,13 +1005,18 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         assertEquals(new Size(3, 3), resDelegate.getTopRoundedSize());
         assertEquals(new Size(4, 4), resDelegate.getBottomRoundedSize());
 
-        doReturn(2f).when(mScreenDecorations).getPhysicalPixelDisplaySizeRatio();
+        setupResources(20 /* radius */, 0 /* radiusTop */, 0 /* radiusBottom */,
+                getTestsDrawable(com.android.systemui.tests.R.drawable.rounded4px)
+                /* roundedTopDrawable */,
+                getTestsDrawable(com.android.systemui.tests.R.drawable.rounded5px)
+                /* roundedBottomDrawable */,
+                0 /* roundedPadding */, true /* privacyDot */, false /* faceScanning*/);
         mDisplayInfo.rotation = Surface.ROTATION_270;
 
         mScreenDecorations.onConfigurationChanged(null);
 
-        assertEquals(new Size(6, 6), resDelegate.getTopRoundedSize());
-        assertEquals(new Size(8, 8), resDelegate.getBottomRoundedSize());
+        assertEquals(new Size(4, 4), resDelegate.getTopRoundedSize());
+        assertEquals(new Size(5, 5), resDelegate.getBottomRoundedSize());
     }
 
     @Test
@@ -1285,6 +1290,51 @@ public class ScreenDecorationsTest extends SysuiTestCase {
                 mScreenDecorations.mPrivacyDotShowingListener);
 
         verifyFaceScanningViewExists(true);
+    }
+
+    @Test
+    public void testOnDisplayChanged_hwcLayer() {
+        setupResources(0 /* radius */, 0 /* radiusTop */, 0 /* radiusBottom */,
+                null /* roundedTopDrawable */, null /* roundedBottomDrawable */,
+                0 /* roundedPadding */, false /* privacyDot */, false /* faceScanning */);
+        final DisplayDecorationSupport decorationSupport = new DisplayDecorationSupport();
+        decorationSupport.format = PixelFormat.R_8;
+        doReturn(decorationSupport).when(mDisplay).getDisplayDecorationSupport();
+
+        // top cutout
+        mMockCutoutList.add(new CutoutDecorProviderImpl(BOUNDS_POSITION_TOP));
+
+        mScreenDecorations.start();
+
+        final ScreenDecorHwcLayer hwcLayer = mScreenDecorations.mScreenDecorHwcLayer;
+        spyOn(hwcLayer);
+        doReturn(mDisplay).when(hwcLayer).getDisplay();
+
+        mScreenDecorations.mDisplayListener.onDisplayChanged(1);
+
+        verify(hwcLayer, times(1)).onDisplayChanged(any());
+    }
+
+    @Test
+    public void testOnDisplayChanged_nonHwcLayer() {
+        setupResources(0 /* radius */, 0 /* radiusTop */, 0 /* radiusBottom */,
+                null /* roundedTopDrawable */, null /* roundedBottomDrawable */,
+                0 /* roundedPadding */, false /* privacyDot */, false /* faceScanning */);
+
+        // top cutout
+        mMockCutoutList.add(new CutoutDecorProviderImpl(BOUNDS_POSITION_TOP));
+
+        mScreenDecorations.start();
+
+        final ScreenDecorations.DisplayCutoutView cutoutView = (ScreenDecorations.DisplayCutoutView)
+                mScreenDecorations.getOverlayView(R.id.display_cutout);
+        assertNotNull(cutoutView);
+        spyOn(cutoutView);
+        doReturn(mDisplay).when(cutoutView).getDisplay();
+
+        mScreenDecorations.mDisplayListener.onDisplayChanged(1);
+
+        verify(cutoutView, times(1)).onDisplayChanged(any());
     }
 
     @Test
