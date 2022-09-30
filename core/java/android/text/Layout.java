@@ -168,6 +168,37 @@ public abstract class Layout {
     public static final float DEFAULT_LINESPACING_ADDITION = 0.0f;
 
     /**
+     * Strategy which considers a text segment to be inside a rectangle area if the segment bounds
+     * intersect the rectangle.
+     *
+     * @hide
+     */
+    @NonNull
+    public static final TextInclusionStrategy INCLUSION_STRATEGY_ANY_OVERLAP =
+            RectF::intersects;
+
+    /**
+     * Strategy which considers a text segment to be inside a rectangle area if the center of the
+     * segment bounds is inside the rectangle.
+     *
+     * @hide
+     */
+    @NonNull
+    public static final TextInclusionStrategy INCLUSION_STRATEGY_CONTAINS_CENTER =
+            (segmentBounds, area) ->
+                    area.contains(segmentBounds.centerX(), segmentBounds.centerY());
+
+    /**
+     * Strategy which considers a text segment to be inside a rectangle area if the segment bounds
+     * are completely contained within the rectangle.
+     *
+     * @hide
+     */
+    @NonNull
+    public static final TextInclusionStrategy INCLUSION_STRATEGY_CONTAINS_ALL =
+            (segmentBounds, area) -> area.contains(segmentBounds);
+
+    /**
      * Return how wide a layout must be in order to display the specified text with one line per
      * paragraph.
      *
@@ -1818,11 +1849,11 @@ public abstract class Layout {
      * is the start of the first text segment inside the area, and the end of the range is the end
      * of the last text segment inside the area.
      *
-     * <p>A text segment is considered to be inside the area if the center of its bounds is inside
-     * the area. If a text segment spans multiple lines or multiple directional runs (e.g. a
-     * hyphenated word), the text segment is divided into pieces at the line and run breaks, then
-     * the text segment is considered to be inside the area if any of its pieces have their center
-     * inside the area.
+     * <p>A text segment is considered to be inside the area according to the provided {@link
+     * TextInclusionStrategy}. If a text segment spans multiple lines or multiple directional runs
+     * (e.g. a hyphenated word), the text segment is divided into pieces at the line and run breaks,
+     * then the text segment is considered to be inside the area if any of its pieces are inside the
+     * area.
      *
      * <p>The returned range may also include text segments which are not inside the specified area,
      * if those text segments are in between text segments which are inside the area. For example,
@@ -1832,60 +1863,58 @@ public abstract class Layout {
      * @param area area for which the text range will be found
      * @param segmentIterator iterator for determining the ranges of text to be considered as a text
      *     segment
+     * @param inclusionStrategy strategy for determining whether a text segment is inside the
+*          specified area
      * @return int array of size 2 containing the start (inclusive) and end (exclusive) character
      *     offsets of the range, or null if there are no text segments inside the area
      * @hide
      */
     @Nullable
-    public int[] getRangeForRect(@NonNull RectF area, @NonNull SegmentIterator segmentIterator) {
-        // Find the first line whose vertical center is below the top of the area.
+    public int[] getRangeForRect(@NonNull RectF area, @NonNull SegmentIterator segmentIterator,
+            @NonNull TextInclusionStrategy inclusionStrategy) {
+        // Find the first line whose bottom (without line spacing) is below the top of the area.
         int startLine = getLineForVertical((int) area.top);
-        int startLineTop = getLineTop(startLine);
-        int startLineBottom = getLineBottom(startLine, /* includeLineSpacing= */ false);
-        if (area.top > (startLineTop + startLineBottom) / 2f) {
+        if (area.top > getLineBottom(startLine, /* includeLineSpacing= */ false)) {
             startLine++;
             if (startLine >= getLineCount()) {
-                // The top of the area is below the vertical center of the last line, so the area
-                // does not contain any text.
+                // The entire area is below the last line, so it does not contain any text.
                 return null;
             }
         }
 
-        // Find the last line whose vertical center is above the bottom of the area.
+        // Find the last line whose top is above the bottom of the area.
         int endLine = getLineForVertical((int) area.bottom);
-        int endLineTop = getLineTop(endLine);
-        int endLineBottom = getLineBottom(endLine, /* includeLineSpacing= */ false);
-        if (area.bottom < (endLineTop + endLineBottom) / 2f) {
-            endLine--;
+        if (endLine == 0 && area.bottom < getLineTop(0)) {
+            // The entire area is above the first line, so it does not contain any text.
+            return null;
         }
         if (endLine < startLine) {
-            // There are no lines with vertical centers between the top and bottom of the area, so
-            // the area does not contain any text.
+            // The entire area is between two lines, so it does not contain any text.
             return null;
         }
 
-        int start = getStartOrEndOffsetForHorizontalInterval(
-                startLine, area.left, area.right, segmentIterator, /* getStart= */ true);
+        int start = getStartOrEndOffsetForAreaWithinLine(
+                startLine, area, segmentIterator, inclusionStrategy, /* getStart= */ true);
         // If the area does not contain any text on this line, keep trying subsequent lines until
         // the end line is reached.
         while (start == -1 && startLine < endLine) {
             startLine++;
-            start = getStartOrEndOffsetForHorizontalInterval(
-                    startLine, area.left, area.right, segmentIterator, /* getStart= */ true);
+            start = getStartOrEndOffsetForAreaWithinLine(
+                    startLine, area, segmentIterator, inclusionStrategy, /* getStart= */ true);
         }
         if (start == -1) {
             // All lines were checked, the area does not contain any text.
             return null;
         }
 
-        int end = getStartOrEndOffsetForHorizontalInterval(
-                endLine, area.left, area.right, segmentIterator, /* getStart= */ false);
+        int end = getStartOrEndOffsetForAreaWithinLine(
+                endLine, area, segmentIterator, inclusionStrategy, /* getStart= */ false);
         // If the area does not contain any text on this line, keep trying previous lines until
         // the start line is reached.
         while (end == -1 && startLine < endLine) {
             endLine--;
-            end = getStartOrEndOffsetForHorizontalInterval(
-                    endLine, area.left, area.right, segmentIterator, /* getStart= */ false);
+            end = getStartOrEndOffsetForAreaWithinLine(
+                    endLine, area, segmentIterator, inclusionStrategy, /* getStart= */ false);
         }
         if (end == -1) {
             // All lines were checked, the area does not contain any text.
@@ -1893,8 +1922,8 @@ public abstract class Layout {
         }
 
         // If a text segment spans multiple lines or multiple directional runs (e.g. a hyphenated
-        // word), then getStartOrEndOffsetForHorizontalInterval() can return an offset in the middle
-        // of a text segment. Adjust the range to include the rest of any partial text segments. If
+        // word), then getStartOrEndOffsetForAreaWithinLine() can return an offset in the middle of
+        // a text segment. Adjust the range to include the rest of any partial text segments. If
         // start is already the start boundary of a text segment, then this is a no-op.
         start = segmentIterator.previousStartBoundary(start + 1);
         end = segmentIterator.nextEndBoundary(end - 1);
@@ -1903,23 +1932,29 @@ public abstract class Layout {
     }
 
     /**
-     * Finds the start character offset of the first text segment inside a horizontal interval
-     * within a line, or the end character offset of the last text segment inside the horizontal
-     * interval.
+     * Finds the start character offset of the first text segment within a line inside the specified
+     * rectangle area, or the end character offset of the last text segment inside the area.
      *
      * @param line index of the line to search
-     * @param left left bound of the horizontal interval
-     * @param right right bound of the horizontal interval
+     * @param area area inside which text segments will be found
      * @param segmentIterator iterator for determining the ranges of text to be considered as a text
      *     segment
-     * @param getStart true to find the start of the first text segment inside the horizontal
-     *     interval, false to find the end of the last text segment
-     * @return the start character offset of the first text segment inside the horizontal interval,
-     *     or the end character offset of the last text segment inside the horizontal interval.
+     * @param inclusionStrategy strategy for determining whether a text segment is inside the
+     *     specified area
+     * @param getStart true to find the start of the first text segment inside the area, false to
+     *     find the end of the last text segment
+     * @return the start character offset of the first text segment inside the area, or the end
+     *     character offset of the last text segment inside the area.
      */
-    private int getStartOrEndOffsetForHorizontalInterval(
-            @IntRange(from = 0) int line, float left, float right,
-            @NonNull SegmentIterator segmentIterator, boolean getStart) {
+    private int getStartOrEndOffsetForAreaWithinLine(
+            @IntRange(from = 0) int line,
+            @NonNull RectF area,
+            @NonNull SegmentIterator segmentIterator,
+            @NonNull TextInclusionStrategy inclusionStrategy,
+            boolean getStart) {
+        int lineTop = getLineTop(line);
+        int lineBottom = getLineBottom(line, /* includeLineSpacing= */ false);
+
         int lineStartOffset = getLineStart(line);
         int lineEndOffset = getLineEnd(line);
         if (lineStartOffset == lineEndOffset) {
@@ -1952,14 +1987,16 @@ public abstract class Layout {
 
             int result =
                     getStart
-                            ? getStartOffsetForHorizontalIntervalWithinRun(
-                            left, right, lineStartOffset, lineStartPos, horizontalBounds,
-                            runStartOffset, runEndOffset, runLeft, runRight, isRtl,
-                            segmentIterator)
-                            : getEndOffsetForHorizontalIntervalWithinRun(
-                                    left, right, lineStartOffset, lineStartPos, horizontalBounds,
+                            ? getStartOffsetForAreaWithinRun(
+                                    area, lineTop, lineBottom,
+                                    lineStartOffset, lineStartPos, horizontalBounds,
                                     runStartOffset, runEndOffset, runLeft, runRight, isRtl,
-                                    segmentIterator);
+                                    segmentIterator, inclusionStrategy)
+                            : getEndOffsetForAreaWithinRun(
+                                    area, lineTop, lineBottom,
+                                    lineStartOffset, lineStartPos, horizontalBounds,
+                                    runStartOffset, runEndOffset, runLeft, runRight, isRtl,
+                                    segmentIterator, inclusionStrategy);
             if (result >= 0) {
                 return result;
             }
@@ -1970,11 +2007,12 @@ public abstract class Layout {
     }
 
     /**
-     * Finds the start character offset of the first text segment inside a horizontal interval
-     * within a directional run.
+     * Finds the start character offset of the first text segment within a directional run inside
+     * the specified rectangle area.
      *
-     * @param left left bound of the horizontal interval
-     * @param right right bound of the horizontal interval
+     * @param area area inside which text segments will be found
+     * @param lineTop top of the line containing this run
+     * @param lineBottom bottom (not including line spacing) of the line containing this run
      * @param lineStartOffset start character offset of the line containing this run
      * @param lineStartPos start position of the line containing this run
      * @param horizontalBounds array containing the signed horizontal bounds of the characters in
@@ -1987,26 +2025,30 @@ public abstract class Layout {
      * @param isRtl whether the run is right-to-left
      * @param segmentIterator iterator for determining the ranges of text to be considered as a text
      *     segment
-     * @return the start character offset of the first text segment inside the horizontal interval
+     * @param inclusionStrategy strategy for determining whether a text segment is inside the
+     *     specified area
+     * @return the start character offset of the first text segment inside the area
      */
-    private static int getStartOffsetForHorizontalIntervalWithinRun(
-            float left, float right,
+    private static int getStartOffsetForAreaWithinRun(
+            @NonNull RectF area,
+            int lineTop, int lineBottom,
             @IntRange(from = 0) int lineStartOffset,
             @IntRange(from = 0) int lineStartPos,
             @NonNull float[] horizontalBounds,
             @IntRange(from = 0) int runStartOffset, @IntRange(from = 0) int runEndOffset,
             float runLeft, float runRight,
             boolean isRtl,
-            @NonNull SegmentIterator segmentIterator) {
-        if (runRight < left || runLeft > right) {
-            // The run does not overlap the interval.
+            @NonNull SegmentIterator segmentIterator,
+            @NonNull TextInclusionStrategy inclusionStrategy) {
+        if (runRight < area.left || runLeft > area.right) {
+            // The run does not overlap the area.
             return -1;
         }
 
-        // Find the first character in the run whose bounds overlap with the interval.
+        // Find the first character in the run whose bounds overlap with the area.
         // firstCharOffset is an offset index within the line.
         int firstCharOffset;
-        if ((!isRtl && left <= runLeft) || (isRtl && right >= runRight)) {
+        if ((!isRtl && area.left <= runLeft) || (isRtl && area.right >= runRight)) {
             firstCharOffset = runStartOffset;
         } else {
             int low = runStartOffset;
@@ -2016,73 +2058,68 @@ public abstract class Layout {
                 guess = (high + low) / 2;
                 // Left edge of the character at guess
                 float pos = lineStartPos + horizontalBounds[2 * guess];
-                if ((!isRtl && pos > left) || (isRtl && pos < right)) {
+                if ((!isRtl && pos > area.left) || (isRtl && pos < area.right)) {
                     high = guess;
                 } else {
                     low = guess;
                 }
             }
-            // The interval bound is between the left edge of the character at low and the left edge
-            // of the character at high. For LTR text, this is within the character at low. For RTL
+            // The area edge is between the left edge of the character at low and the left edge of
+            // the character at high. For LTR text, this is within the character at low. For RTL
             // text, this is within the character at high.
             firstCharOffset = isRtl ? high : low;
         }
 
         // Find the first text segment containing this character (or, if no text segment contains
         // this character, the first text segment after this character). All previous text segments
-        // in this run are to the left (for LTR) of the interval.
+        // in this run are to the left (for LTR) of the area.
         segmentIterator.setRunLimits(
                 lineStartOffset + runStartOffset, lineStartOffset + runEndOffset);
         int segmentEndOffset =
                 segmentIterator.nextEndBoundaryOrRunEnd(lineStartOffset + firstCharOffset);
         if (segmentEndOffset == SegmentIterator.DONE) {
             // There are no text segments containing or after firstCharOffset, so no text segments
-            // in this run overlap the interval.
+            // in this run overlap the area.
             return -1;
         }
         int segmentStartOffset = segmentIterator.previousStartBoundaryOrRunStart(segmentEndOffset);
-        float segmentCenter = lineStartPos
-                + (horizontalBounds[2 * (segmentStartOffset - lineStartOffset)]
-                        + horizontalBounds[2 * (segmentEndOffset - lineStartOffset) - 1]) / 2;
-        if ((!isRtl && segmentCenter > right) || (isRtl && segmentCenter < left)) {
-            // The entire interval is to the left (for LTR) of the text segment's center. So the
-            // interval does not contain any text segments within this run.
-            return -1;
+        RectF segmentBounds = new RectF(0, lineTop, 0, lineBottom);
+        while (true) {
+            // Start (left for LTR, right for RTL) edge of the character at segmentStartOffset.
+            float segmentStart = lineStartPos + horizontalBounds[
+                    2 * (segmentStartOffset - lineStartOffset) + (isRtl ? 1 : 0)];
+            if ((!isRtl && segmentStart > area.right) || (isRtl && segmentStart < area.left)) {
+                // The entire area is to the left (for LTR) of the text segment. So the area does
+                // not contain any text segments within this run.
+                return -1;
+            }
+            // End (right for LTR, left for RTL) edge of the character at (segmentStartOffset - 1).
+            float segmentEnd = lineStartPos + horizontalBounds[
+                    2 * (segmentEndOffset - lineStartOffset - 1) + (isRtl ? 0 : 1)];
+            segmentBounds.left = isRtl ? segmentEnd : segmentStart;
+            segmentBounds.right = isRtl ? segmentStart : segmentEnd;
+            if (inclusionStrategy.isSegmentInside(segmentBounds, area)) {
+                return segmentStartOffset;
+            }
+            // Try the next text segment.
+            segmentStartOffset =
+                    segmentIterator.nextStartBoundaryWithinRunLimits(segmentStartOffset);
+            if (segmentStartOffset == SegmentIterator.DONE
+                    || segmentStartOffset == lineStartOffset + runEndOffset) {
+                // No more text segments within this run.
+                return -1;
+            }
+            segmentEndOffset = segmentIterator.nextEndBoundaryOrRunEnd(segmentStartOffset);
         }
-        if ((!isRtl && segmentCenter >= left) || (isRtl && segmentCenter <= right)) {
-            // The center is within the interval, so return the start offset of this text segment.
-            return segmentStartOffset;
-        }
-
-        // If first text segment's center is not within the interval, try the next text segment.
-        segmentStartOffset = segmentIterator.nextStartBoundaryWithinRunLimits(segmentStartOffset);
-        if (segmentStartOffset == SegmentIterator.DONE
-                || segmentStartOffset == lineStartOffset + runEndOffset) {
-            // No more text segments within this run.
-            return -1;
-        }
-        segmentEndOffset = segmentIterator.nextEndBoundaryOrRunEnd(segmentStartOffset);
-        segmentCenter = lineStartPos
-                + (horizontalBounds[2 * (segmentStartOffset - lineStartOffset)]
-                        + horizontalBounds[2 * (segmentEndOffset - lineStartOffset) - 1]) / 2;
-        // We already know that segmentCenter >= left (for LTR) since the previous word contains the
-        // left point.
-        if ((!isRtl && segmentCenter <= right) || (isRtl && segmentCenter >= left)) {
-            return segmentStartOffset;
-        }
-
-        // If the second text segment is also not within the interval, then this means that the
-        // interval is between the centers of the first and second text segments, so it does not
-        // contain any text segments on this line.
-        return -1;
     }
 
     /**
-     * Finds the end character offset of the last text segment inside a horizontal interval within a
-     * directional run.
+     * Finds the end character offset of the last text segment within a directional run inside the
+     * specified rectangle area.
      *
-     * @param left left bound of the horizontal interval
-     * @param right right bound of the horizontal interval
+     * @param area area inside which text segments will be found
+     * @param lineTop top of the line containing this run
+     * @param lineBottom bottom (not including line spacing) of the line containing this run
      * @param lineStartOffset start character offset of the line containing this run
      * @param lineStartPos start position of the line containing this run
      * @param horizontalBounds array containing the signed horizontal bounds of the characters in
@@ -2095,26 +2132,30 @@ public abstract class Layout {
      * @param isRtl whether the run is right-to-left
      * @param segmentIterator iterator for determining the ranges of text to be considered as a text
      *     segment
-     * @return the end character offset of the last text segment inside the horizontal interval
+     * @param inclusionStrategy strategy for determining whether a text segment is inside the
+     *     specified area
+     * @return the end character offset of the last text segment inside the area
      */
-    private static int getEndOffsetForHorizontalIntervalWithinRun(
-            float left, float right,
+    private static int getEndOffsetForAreaWithinRun(
+            @NonNull RectF area,
+            int lineTop, int lineBottom,
             @IntRange(from = 0) int lineStartOffset,
             @IntRange(from = 0) int lineStartPos,
             @NonNull float[] horizontalBounds,
             @IntRange(from = 0) int runStartOffset, @IntRange(from = 0) int runEndOffset,
             float runLeft, float runRight,
             boolean isRtl,
-            @NonNull SegmentIterator segmentIterator) {
-        if (runRight < left || runLeft > right) {
-            // The run does not overlap the interval.
+            @NonNull SegmentIterator segmentIterator,
+            @NonNull TextInclusionStrategy inclusionStrategy) {
+        if (runRight < area.left || runLeft > area.right) {
+            // The run does not overlap the area.
             return -1;
         }
 
-        // Find the last character in the run whose bounds overlap with the interval.
+        // Find the last character in the run whose bounds overlap with the area.
         // firstCharOffset is an offset index within the line.
         int lastCharOffset;
-        if ((!isRtl && right >= runRight) || (isRtl && left <= runLeft)) {
+        if ((!isRtl && area.right >= runRight) || (isRtl && area.left <= runLeft)) {
             lastCharOffset = runEndOffset - 1;
         } else {
             int low = runStartOffset;
@@ -2124,21 +2165,21 @@ public abstract class Layout {
                 guess = (high + low) / 2;
                 // Left edge of the character at guess
                 float pos = lineStartPos + horizontalBounds[2 * guess];
-                if ((!isRtl && pos > right) || (isRtl && pos < left)) {
+                if ((!isRtl && pos > area.right) || (isRtl && pos < area.left)) {
                     high = guess;
                 } else {
                     low = guess;
                 }
             }
-            // The interval bound is between the left edge of the character at low and the left edge
-            // of the character at high. For LTR text, this is within the character at low. For RTL
+            // The area edge is between the left edge of the character at low and the left edge of
+            // the character at high. For LTR text, this is within the character at low. For RTL
             // text, this is within the character at high.
             lastCharOffset = isRtl ? high : low;
         }
 
-        // Find the last text segment containing this character (or, if no text segment
-        // contains this character, the first text segment before this character). All
-        // following text segments in this run are to the right (for LTR) of the interval.
+        // Find the last text segment containing this character (or, if no text segment contains
+        // this character, the first text segment before this character). All following text
+        // segments in this run are to the right (for LTR) of the area.
         segmentIterator.setRunLimits(
                 lineStartOffset + runStartOffset, lineStartOffset + runEndOffset);
         // + 1 to allow segmentStartOffset = lineStartOffset + lastCharOffset
@@ -2147,44 +2188,37 @@ public abstract class Layout {
                         lineStartOffset + lastCharOffset + 1);
         if (segmentStartOffset == SegmentIterator.DONE) {
             // There are no text segments containing or before lastCharOffset, so no text segments
-            // in this run overlap the interval.
+            // in this run overlap the area.
             return -1;
         }
         int segmentEndOffset = segmentIterator.nextEndBoundaryOrRunEnd(segmentStartOffset);
-        float segmentCenter = lineStartPos
-                + (horizontalBounds[2 * (segmentStartOffset - lineStartOffset)]
-                        + horizontalBounds[2 * (segmentEndOffset - lineStartOffset) - 1]) / 2;
-        if ((!isRtl && segmentCenter < left) || (isRtl && segmentCenter > right)) {
-            // The entire interval is to the right (for LTR) of the text segment's center. So the
-            // interval does not contain any text segments within this run.
-            return -1;
+        RectF segmentBounds = new RectF(0, lineTop, 0, lineBottom);
+        while (true) {
+            // End (right for LTR, left for RTL) edge of the character at (segmentStartOffset - 1).
+            float segmentEnd = lineStartPos + horizontalBounds[
+                    2 * (segmentEndOffset - lineStartOffset - 1) + (isRtl ? 0 : 1)];
+            if ((!isRtl && segmentEnd < area.left) || (isRtl && segmentEnd > area.right)) {
+                // The entire area is to the right (for LTR) of the text segment. So the
+                // area does not contain any text segments within this run.
+                return -1;
+            }
+            // Start (left for LTR, right for RTL) edge of the character at segmentStartOffset.
+            float segmentStart = lineStartPos + horizontalBounds[
+                    2 * (segmentStartOffset - lineStartOffset) + (isRtl ? 1 : 0)];
+            segmentBounds.left = isRtl ? segmentEnd : segmentStart;
+            segmentBounds.right = isRtl ? segmentStart : segmentEnd;
+            if (inclusionStrategy.isSegmentInside(segmentBounds, area)) {
+                return segmentEndOffset;
+            }
+            // Try the previous text segment.
+            segmentEndOffset = segmentIterator.previousEndBoundaryWithinRunLimits(segmentEndOffset);
+            if (segmentEndOffset == SegmentIterator.DONE
+                    || segmentEndOffset == lineStartOffset + runStartOffset) {
+                // No more text segments within this run.
+                return -1;
+            }
+            segmentStartOffset = segmentIterator.previousStartBoundaryOrRunStart(segmentEndOffset);
         }
-        if ((!isRtl && segmentCenter <= right) || (isRtl && segmentCenter >= left)) {
-            // The center is within the interval, so return the end offset of this text segment.
-            return segmentEndOffset;
-        }
-
-        // If first text segment's center is not within the interval, try the next text segment.
-        segmentEndOffset = segmentIterator.previousEndBoundaryWithinRunLimits(segmentEndOffset);
-        if (segmentEndOffset == SegmentIterator.DONE
-                || segmentEndOffset == lineStartOffset + runStartOffset) {
-            // No more text segments within this run.
-            return -1;
-        }
-        segmentStartOffset = segmentIterator.previousStartBoundaryOrRunStart(segmentEndOffset);
-        segmentCenter = lineStartPos
-                + (horizontalBounds[2 * (segmentStartOffset - lineStartOffset)]
-                        + horizontalBounds[2 * (segmentEndOffset - lineStartOffset) - 1]) / 2;
-        // We already know that segmentCenter <= right (for LTR) since the following word
-        // contains the right point.
-        if ((!isRtl && segmentCenter >= left) || (isRtl && segmentCenter <= right)) {
-            return segmentEndOffset;
-        }
-
-        // If the second text segment is also not within the interval, then this means that the
-        // interval is between the centers of the first and second text segments, so it does not
-        // contain any text segments on this line.
-        return -1;
     }
 
     /**
@@ -3158,4 +3192,23 @@ public abstract class Layout {
                 @TextSelectionLayout int textSelectionLayout);
     }
 
+    /**
+     * Strategy for determining whether a text segment is inside a rectangle area.
+     *
+     * @see #getRangeForRect(RectF, SegmentIterator, TextInclusionStrategy)
+     * @hide
+     */
+    @FunctionalInterface
+    public interface TextInclusionStrategy {
+        /**
+         * Returns true if this {@link TextInclusionStrategy} considers the segment with bounds
+         * {@code segmentBounds} to be inside {@code area}.
+         *
+         * <p>The segment is a range of text which does not cross line boundaries or directional run
+         * boundaries. The horizontal bounds of the segment are the start bound of the first
+         * character to the end bound of the last character. The vertical bounds match the line
+         * bounds ({@code getLineTop(line)} and {@code getLineBottom(line, false)}).
+         */
+        boolean isSegmentInside(@NonNull RectF segmentBounds, @NonNull RectF area);
+    }
 }

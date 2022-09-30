@@ -9524,7 +9524,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             segmentIterator = new GraphemeClusterSegmentIterator(mText, mTextPaint);
         }
 
-        return mLayout.getRangeForRect(area, segmentIterator);
+        return mLayout.getRangeForRect(
+                area, segmentIterator, Layout.INCLUSION_STRATEGY_CONTAINS_CENTER);
     }
 
     private Pattern getWhitespacePattern() {
