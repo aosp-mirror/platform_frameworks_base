@@ -34,6 +34,7 @@ import androidx.test.runner.intercepting.SingleActivityFactory
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.controls.controller.ControlInfo
 import com.android.systemui.controls.controller.ControlsController
+import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
 import org.junit.After
@@ -46,9 +47,10 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
+import java.util.concurrent.Executor
 
 @MediumTest
 @RunWith(AndroidTestingRunner::class)
@@ -67,6 +69,10 @@ class ControlsRequestDialogTest : SysuiTestCase() {
     private lateinit var controller: ControlsController
 
     @Mock
+    private lateinit var mainExecutor: Executor
+    @Mock
+    private lateinit var userTracker: UserTracker
+    @Mock
     private lateinit var listingController: ControlsListingController
     @Mock
     private lateinit var iIntentSender: IIntentSender
@@ -81,8 +87,9 @@ class ControlsRequestDialogTest : SysuiTestCase() {
             ) {
                     override fun create(intent: Intent?): TestControlsRequestDialog {
                         return TestControlsRequestDialog(
+                                mainExecutor,
                                 controller,
-                                fakeBroadcastDispatcher,
+                                userTracker,
                                 listingController
                         )
                     }

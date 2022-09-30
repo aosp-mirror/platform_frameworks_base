@@ -20,6 +20,7 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.app.ActivityOptions
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
@@ -39,7 +40,6 @@ import androidx.activity.ComponentActivity
 import androidx.viewpager2.widget.ViewPager2
 import com.android.systemui.Prefs
 import com.android.systemui.R
-import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.TooltipManager
 import com.android.systemui.controls.controller.ControlsControllerImpl
@@ -47,7 +47,7 @@ import com.android.systemui.controls.controller.StructureInfo
 import com.android.systemui.controls.ui.ControlsActivity
 import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.settings.CurrentUserTracker
+import com.android.systemui.settings.UserTracker
 import java.text.Collator
 import java.util.concurrent.Executor
 import java.util.function.Consumer
@@ -57,7 +57,7 @@ open class ControlsFavoritingActivity @Inject constructor(
     @Main private val executor: Executor,
     private val controller: ControlsControllerImpl,
     private val listingController: ControlsListingController,
-    private val broadcastDispatcher: BroadcastDispatcher,
+    private val userTracker: UserTracker,
     private val uiController: ControlsUiController
 ) : ComponentActivity() {
 
@@ -95,12 +95,12 @@ open class ControlsFavoritingActivity @Inject constructor(
     private var cancelLoadRunnable: Runnable? = null
     private var isPagerLoaded = false
 
-    private val currentUserTracker = object : CurrentUserTracker(broadcastDispatcher) {
+    private val userTrackerCallback: UserTracker.Callback = object : UserTracker.Callback {
         private val startingUser = controller.currentUserId
 
-        override fun onUserSwitched(newUserId: Int) {
-            if (newUserId != startingUser) {
-                stopTracking()
+        override fun onUserChanged(newUser: Int, userContext: Context) {
+            if (newUser != startingUser) {
+                userTracker.removeCallback(this)
                 finish()
             }
         }
@@ -363,7 +363,7 @@ open class ControlsFavoritingActivity @Inject constructor(
         super.onStart()
 
         listingController.addCallback(listingCallback)
-        currentUserTracker.startTracking()
+        userTracker.addCallback(userTrackerCallback, executor)
 
         if (DEBUG) {
             Log.d(TAG, "Registered onBackInvokedCallback")
@@ -388,7 +388,7 @@ open class ControlsFavoritingActivity @Inject constructor(
         super.onStop()
 
         listingController.removeCallback(listingCallback)
-        currentUserTracker.stopTracking()
+        userTracker.removeCallback(userTrackerCallback)
 
         if (DEBUG) {
             Log.d(TAG, "Unregistered onBackInvokedCallback")

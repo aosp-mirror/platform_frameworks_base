@@ -78,8 +78,8 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.internal.util.ScreenshotHelper;
 import com.android.systemui.Dumpable;
-import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.ScreenLifecycle;
@@ -90,12 +90,11 @@ import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.navigationbar.buttons.KeyButtonView;
 import com.android.systemui.recents.OverviewProxyService.OverviewProxyListener;
-import com.android.systemui.settings.CurrentUserTracker;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.shared.recents.ISystemUiProxy;
 import com.android.systemui.shared.recents.model.Task;
-import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
@@ -108,20 +107,19 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 
 import javax.inject.Inject;
 
 import dagger.Lazy;
 
-
 /**
  * Class to send information from overview to launcher with a binder.
  */
 @SysUISingleton
-public class OverviewProxyService extends CurrentUserTracker implements
-        CallbackController<OverviewProxyListener>, NavigationModeController.ModeChangedListener,
-        Dumpable {
+public class OverviewProxyService implements CallbackController<OverviewProxyListener>,
+        NavigationModeController.ModeChangedListener, Dumpable {
 
     private static final String ACTION_QUICKSTEP = "android.intent.action.QUICKSTEP_SERVICE";
 
@@ -133,6 +131,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
     private static final long MAX_BACKOFF_MILLIS = 10 * 60 * 1000;
 
     private final Context mContext;
+    private final Executor mMainExecutor;
     private final ShellInterface mShellInterface;
     private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
     private SysUiState mSysUiState;
@@ -145,6 +144,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
     private final Intent mQuickStepIntent;
     private final ScreenshotHelper mScreenshotHelper;
     private final CommandQueue mCommandQueue;
+    private final UserTracker mUserTracker;
     private final KeyguardUnlockAnimationController mSysuiUnlockAnimationController;
     private final UiEventLogger mUiEventLogger;
 
@@ -417,7 +417,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
                 return;
             }
 
-            mCurrentBoundedUserId = getCurrentUserId();
+            mCurrentBoundedUserId = mUserTracker.getUserId();
             mOverviewProxy = IOverviewProxy.Stub.asInterface(service);
 
             Bundle params = new Bundle();
@@ -498,34 +498,44 @@ public class OverviewProxyService extends CurrentUserTracker implements
         }
     };
 
+    private final UserTracker.Callback mUserChangedCallback =
+            new UserTracker.Callback() {
+                @Override
+                public void onUserChanged(int newUser, @NonNull Context userContext) {
+                    mConnectionBackoffAttempts = 0;
+                    internalConnectToCurrentUser();
+                }
+            };
+
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     @Inject
     public OverviewProxyService(Context context,
+            @Main Executor mainExecutor,
             CommandQueue commandQueue,
             ShellInterface shellInterface,
             Lazy<NavigationBarController> navBarControllerLazy,
             Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             NavigationModeController navModeController,
             NotificationShadeWindowController statusBarWinController, SysUiState sysUiState,
-            BroadcastDispatcher broadcastDispatcher,
+            UserTracker userTracker,
             ScreenLifecycle screenLifecycle,
             UiEventLogger uiEventLogger,
             KeyguardUnlockAnimationController sysuiUnlockAnimationController,
             AssistUtils assistUtils,
             DumpManager dumpManager) {
-        super(broadcastDispatcher);
-
         // b/241601880: This component shouldn't be running for a non-primary user
         if (!Process.myUserHandle().equals(UserHandle.SYSTEM)) {
             Log.e(TAG_OPS, "Unexpected initialization for non-primary user", new Throwable());
         }
 
         mContext = context;
+        mMainExecutor = mainExecutor;
         mShellInterface = shellInterface;
         mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
         mHandler = new Handler();
         mNavBarControllerLazy = navBarControllerLazy;
         mStatusBarWinController = statusBarWinController;
+        mUserTracker = userTracker;
         mConnectionBackoffAttempts = 0;
         mRecentsComponentName = ComponentName.unflattenFromString(context.getString(
                 com.android.internal.R.string.config_recentsComponentName));
@@ -566,7 +576,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
         mCommandQueue = commandQueue;
 
         // Listen for user setup
-        startTracking();
+        mUserTracker.addCallback(mUserChangedCallback, mMainExecutor);
 
         screenLifecycle.addObserver(mLifecycleObserver);
 
@@ -577,12 +587,6 @@ public class OverviewProxyService extends CurrentUserTracker implements
 
         // Listen for assistant changes
         assistUtils.registerVoiceInteractionSessionListener(mVoiceInteractionSessionListener);
-    }
-
-    @Override
-    public void onUserSwitched(int newUserId) {
-        mConnectionBackoffAttempts = 0;
-        internalConnectToCurrentUser();
     }
 
     public void onVoiceSessionWindowVisibilityChanged(boolean visible) {
@@ -712,7 +716,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
             mBound = mContext.bindServiceAsUser(launcherServiceIntent,
                     mOverviewServiceConnection,
                     Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE,
-                    UserHandle.of(getCurrentUserId()));
+                    UserHandle.of(mUserTracker.getUserId()));
         } catch (SecurityException e) {
             Log.e(TAG_OPS, "Unable to bind because of security error", e);
         }
@@ -941,7 +945,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
     }
 
     private void updateEnabledState() {
-        final int currentUser = ActivityManagerWrapper.getInstance().getCurrentUserId();
+        final int currentUser = mUserTracker.getUserId();
         mIsEnabled = mContext.getPackageManager().resolveServiceAsUser(mQuickStepIntent,
                 MATCH_SYSTEM_ONLY, currentUser) != null;
     }

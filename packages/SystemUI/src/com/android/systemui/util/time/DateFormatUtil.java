@@ -16,9 +16,10 @@
 
 package com.android.systemui.util.time;
 
-import android.app.ActivityManager;
 import android.content.Context;
 import android.text.format.DateFormat;
+
+import com.android.systemui.settings.UserTracker;
 
 import javax.inject.Inject;
 
@@ -27,14 +28,16 @@ import javax.inject.Inject;
  */
 public class DateFormatUtil {
     private final Context mContext;
+    private final UserTracker mUserTracker;
 
     @Inject
-    public DateFormatUtil(Context context) {
+    public DateFormatUtil(Context context, UserTracker userTracker) {
         mContext = context;
+        mUserTracker = userTracker;
     }
 
     /** Returns true if the phone is in 24 hour format. */
     public boolean is24HourFormat() {
-        return DateFormat.is24HourFormat(mContext, ActivityManager.getCurrentUser());
+        return DateFormat.is24HourFormat(mContext, mUserTracker.getUserId());
     }
 }
