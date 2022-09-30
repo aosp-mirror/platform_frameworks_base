@@ -334,4 +334,14 @@ public class LogModule {
     public static LogBuffer providerBluetoothLogBuffer(LogBufferFactory factory) {
         return factory.create("BluetoothLog", 50);
     }
+
+    /**
+     * Provides a {@link LogBuffer} for general keyguard-related logs.
+     */
+    @Provides
+    @SysUISingleton
+    @KeyguardLog
+    public static LogBuffer provideKeyguardLogBuffer(LogBufferFactory factory) {
+        return factory.create("KeyguardLog", 250);
+    }
 }
