@@ -28,7 +28,6 @@ import android.content.Context;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
-import android.os.TimestampedValue;
 import android.util.ArrayMap;
 import android.util.Log;
 
@@ -339,10 +338,7 @@ public final class TimeManager {
             Log.d(TAG, "setTime called: " + unixEpochTime);
         }
         try {
-            TimestampedValue<Long> manualTime = new TimestampedValue<>(
-                    unixEpochTime.getElapsedRealtimeMillis(),
-                    unixEpochTime.getUnixEpochTimeMillis());
-            ManualTimeSuggestion manualTimeSuggestion = new ManualTimeSuggestion(manualTime);
+            ManualTimeSuggestion manualTimeSuggestion = new ManualTimeSuggestion(unixEpochTime);
             manualTimeSuggestion.addDebugInfo("TimeManager.setTime()");
             manualTimeSuggestion.addDebugInfo("UID: " + android.os.Process.myUid());
             manualTimeSuggestion.addDebugInfo("UserHandle: " + android.os.Process.myUserHandle());

@@ -216,8 +216,8 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
      *
      * <p>This field is only actually used when telephony time zone fallback is supported, but the
      * value is maintained even when it isn't supported as it can be turned on at any time via
-     * server flags. The reference time is the elapsed realtime when the mode last changed to help
-     * ordering between fallback mode switches and suggestions.
+     * server flags. The elapsed realtime when the mode last changed is used to help ordering
+     * between fallback mode switches and suggestions.
      *
      * <p>See {@link TimeZoneDetectorStrategy} for more information.
      */

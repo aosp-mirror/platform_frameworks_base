@@ -23,7 +23,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.ShellCommand;
 import android.os.SystemClock;
-import android.os.TimestampedValue;
 
 import java.io.PrintWriter;
 import java.util.Objects;
@@ -180,11 +179,5 @@ public final class UnixEpochTime implements Parcelable {
     public static long elapsedRealtimeDifference(
             @NonNull UnixEpochTime one, @NonNull UnixEpochTime two) {
         return one.mElapsedRealtimeMillis - two.mElapsedRealtimeMillis;
-    }
-
-    // TODO(b/246256335) Switch to using UnixEpochTime where possible and remove this method.
-    /** @hide */
-    public TimestampedValue<Long> toTimestampedValue() {
-        return new TimestampedValue<>(mElapsedRealtimeMillis, mUnixEpochTimeMillis);
     }
 }
