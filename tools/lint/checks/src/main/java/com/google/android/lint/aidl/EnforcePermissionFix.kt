@@ -18,37 +18,54 @@ package com.google.android.lint.aidl
 
 import com.android.tools.lint.detector.api.JavaContext
 import com.android.tools.lint.detector.api.Location
-import com.intellij.psi.PsiVariable
+import com.android.tools.lint.detector.api.getUMethod
+import org.jetbrains.kotlin.psi.psiUtil.parameterIndex
 import org.jetbrains.uast.UCallExpression
-import org.jetbrains.uast.ULiteralExpression
-import org.jetbrains.uast.UQualifiedReferenceExpression
-import org.jetbrains.uast.USimpleNameReferenceExpression
-import org.jetbrains.uast.asRecursiveLogString
+import org.jetbrains.uast.evaluateString
+import org.jetbrains.uast.visitor.AbstractUastVisitor
 
 /**
- * Helper ADT class that facilitates the creation of lint auto fixes
+ * Helper class that facilitates the creation of lint auto fixes
  *
  * Handles "Single" permission checks that should be migrated to @EnforcePermission(...), as well as consecutive checks
  * that should be migrated to @EnforcePermission(allOf={...})
  *
  * TODO: handle anyOf style annotations
  */
-sealed class EnforcePermissionFix {
-    abstract fun locations(): List<Location>
-    abstract fun javaAnnotationParameter(): String
-
-    fun javaAnnotation(): String = "@$ANNOTATION_ENFORCE_PERMISSION(${javaAnnotationParameter()})"
+data class EnforcePermissionFix(
+    val locations: List<Location>,
+    val permissionNames: List<String>
+) {
+    val annotation: String
+        get() {
+            val quotedPermissions = permissionNames.joinToString(", ") { """"$it"""" }
+            val annotationParameter =
+                if (permissionNames.size > 1) "allOf={$quotedPermissions}" else quotedPermissions
+            return "@$ANNOTATION_ENFORCE_PERMISSION($annotationParameter)"
+        }
 
     companion object {
-        fun fromCallExpression(callExpression: UCallExpression, context: JavaContext): SingleFix =
-            SingleFix(
-                getPermissionCheckLocation(context, callExpression),
-                getPermissionCheckArgumentValue(callExpression)
-            )
+        /**
+         * conditionally constructs EnforcePermissionFix from a UCallExpression
+         * @return EnforcePermissionFix if the called method is annotated with @PermissionMethod, else null
+         */
+        fun fromCallExpression(
+            context: JavaContext,
+            callExpression: UCallExpression
+        ): EnforcePermissionFix? =
+            if (isPermissionMethodCall(callExpression)) {
+                EnforcePermissionFix(
+                    listOf(getPermissionCheckLocation(context, callExpression)),
+                    getPermissionCheckValues(callExpression)
+                )
+            } else null
 
-        fun maybeAddManifestPrefix(permissionName: String): String =
-            if (permissionName.contains(".")) permissionName
-            else "android.Manifest.permission.$permissionName"
+
+        fun compose(individuals: List<EnforcePermissionFix>): EnforcePermissionFix =
+            EnforcePermissionFix(
+                individuals.flatMap { it.locations },
+                individuals.flatMap { it.permissionNames }
+            )
 
         /**
          * Given a permission check, get its proper location
@@ -70,49 +87,51 @@ sealed class EnforcePermissionFix {
         }
 
         /**
-         * Given a permission check and an argument,
-         * pull out the permission value that is being used
+         * Given a @PermissionMethod, find arguments annotated with @PermissionName
+         * and pull out the permission value(s) being used.  Also evaluates nested calls
+         * to @PermissionMethod(s) in the given method's body.
          */
-        private fun getPermissionCheckArgumentValue(
-            callExpression: UCallExpression,
-            argumentPosition: Int = 0
-        ): String {
+        private fun getPermissionCheckValues(
+            callExpression: UCallExpression
+        ): List<String> {
+            if (!isPermissionMethodCall(callExpression)) return emptyList()
 
-            val identifier = when (
-                val argument = callExpression.valueArguments.getOrNull(argumentPosition)
-            ) {
-                is UQualifiedReferenceExpression -> when (val selector = argument.selector) {
-                    is USimpleNameReferenceExpression ->
-                        ((selector.resolve() as PsiVariable).computeConstantValue() as String)
+            val result = mutableSetOf<String>() // protect against duplicate permission values
+            val visitedCalls = mutableSetOf<UCallExpression>() // don't visit the same call twice
+            val bfsQueue = ArrayDeque(listOf(callExpression))
 
-                    else -> throw RuntimeException(
-                        "Couldn't resolve argument: ${selector.asRecursiveLogString()}"
-                    )
-                }
+            // Breadth First Search - evalutaing nested @PermissionMethod(s) in the available
+            // source code for @PermissionName(s).
+            while (bfsQueue.isNotEmpty()) {
+                val current = bfsQueue.removeFirst()
+                visitedCalls.add(current)
+                result.addAll(findPermissions(current))
 
-                is USimpleNameReferenceExpression -> (
-                        (argument.resolve() as PsiVariable).computeConstantValue() as String)
-
-                is ULiteralExpression -> argument.value as String
-
-                else -> throw RuntimeException(
-                    "Couldn't resolve argument: ${argument?.asRecursiveLogString()}"
-                )
+                current.resolve()?.getUMethod()?.accept(object : AbstractUastVisitor() {
+                    override fun visitCallExpression(node: UCallExpression): Boolean {
+                        if (isPermissionMethodCall(node) && node !in visitedCalls) {
+                            bfsQueue.add(node)
+                        }
+                        return false
+                    }
+                })
             }
 
-            return identifier.substringAfterLast(".")
+            return result.toList()
+        }
+
+        private fun findPermissions(
+            callExpression: UCallExpression,
+        ): List<String> {
+            val indices = callExpression.resolve()?.getUMethod()
+                ?.uastParameters
+                ?.filter(::hasPermissionNameAnnotation)
+                ?.mapNotNull { it.sourcePsi?.parameterIndex() }
+                ?: emptyList()
+
+            return indices.mapNotNull {
+                callExpression.getArgumentForParameter(it)?.evaluateString()
+            }
         }
     }
-}
-
-data class SingleFix(val location: Location, val permissionName: String) : EnforcePermissionFix() {
-    override fun locations(): List<Location> = listOf(this.location)
-    override fun javaAnnotationParameter(): String = maybeAddManifestPrefix(this.permissionName)
-}
-data class AllOfFix(val checks: List<SingleFix>) : EnforcePermissionFix() {
-    override fun locations(): List<Location> = this.checks.map { it.location }
-    override fun javaAnnotationParameter(): String =
-        "allOf={${
-            this.checks.joinToString(", ") { maybeAddManifestPrefix(it.permissionName) }
-        }}"
 }
