@@ -16,15 +16,13 @@
 
 #include "format/binary/TableFlattener.h"
 
-#include <algorithm>
-#include <numeric>
 #include <sstream>
 #include <type_traits>
+#include <variant>
 
 #include "ResourceTable.h"
 #include "ResourceValues.h"
 #include "SdkConstants.h"
-#include "ValueVisitor.h"
 #include "android-base/logging.h"
 #include "android-base/macros.h"
 #include "android-base/stringprintf.h"
@@ -70,14 +68,16 @@ class PackageFlattener {
   PackageFlattener(IAaptContext* context, const ResourceTablePackageView& package,
                    const std::map<size_t, std::string>* shared_libs,
                    SparseEntriesMode sparse_entries, bool collapse_key_stringpool,
-                   const std::set<ResourceName>& name_collapse_exemptions)
+                   const std::set<ResourceName>& name_collapse_exemptions,
+                   bool deduplicate_entry_values)
       : context_(context),
         diag_(context->GetDiagnostics()),
         package_(package),
         shared_libs_(shared_libs),
         sparse_entries_(sparse_entries),
         collapse_key_stringpool_(collapse_key_stringpool),
-        name_collapse_exemptions_(name_collapse_exemptions) {
+        name_collapse_exemptions_(name_collapse_exemptions),
+        deduplicate_entry_values_(deduplicate_entry_values) {
   }
 
   bool FlattenPackage(BigBuffer* buffer) {
@@ -151,10 +151,18 @@ class PackageFlattener {
     offsets.resize(num_total_entries, 0xffffffffu);
 
     android::BigBuffer values_buffer(512);
-    SequentialResEntryWriter res_entry_writer(&values_buffer);
+    std::variant<std::monostate, DeduplicateItemsResEntryWriter, SequentialResEntryWriter>
+        writer_variant;
+    ResEntryWriter* res_entry_writer;
+    if (deduplicate_entry_values_) {
+      res_entry_writer = &writer_variant.emplace<DeduplicateItemsResEntryWriter>(&values_buffer);
+    } else {
+      res_entry_writer = &writer_variant.emplace<SequentialResEntryWriter>(&values_buffer);
+    }
+
     for (FlatEntry& flat_entry : *entries) {
       CHECK(static_cast<size_t>(flat_entry.entry->id.value()) < num_total_entries);
-      offsets[flat_entry.entry->id.value()] = res_entry_writer.Write(&flat_entry);
+      offsets[flat_entry.entry->id.value()] = res_entry_writer->Write(&flat_entry);
     }
 
     bool sparse_encode = sparse_entries_ == SparseEntriesMode::Enabled ||
@@ -510,6 +518,7 @@ class PackageFlattener {
   bool collapse_key_stringpool_;
   const std::set<ResourceName>& name_collapse_exemptions_;
   std::map<uint32_t, uint32_t> aliases_;
+  bool deduplicate_entry_values_;
 };
 
 }  // namespace
@@ -561,7 +570,8 @@ bool TableFlattener::Consume(IAaptContext* context, ResourceTable* table) {
 
     PackageFlattener flattener(context, package, &table->included_packages_,
                                options_.sparse_entries, options_.collapse_key_stringpool,
-                               options_.name_collapse_exemptions);
+                               options_.name_collapse_exemptions,
+                               options_.deduplicate_entry_values);
     if (!flattener.FlattenPackage(&package_buffer)) {
       return false;
     }

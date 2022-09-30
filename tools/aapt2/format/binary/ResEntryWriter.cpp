@@ -222,19 +222,57 @@ int32_t WriteMapToBuffer(const FlatEntry* map_entry, BigBuffer* buffer) {
   return offset;
 }
 
+void WriteItemToPair(const FlatEntry* item_entry, ResEntryValuePair* out_pair) {
+  static_assert(sizeof(ResEntryValuePair) == sizeof(ResTable_entry) + sizeof(Res_value),
+                "ResEntryValuePair must not have padding between entry and value.");
+
+  WriteEntry<ResTable_entry>(item_entry, &out_pair->entry);
+
+  CHECK(ValueCast<Item>(item_entry->value)->Flatten(&out_pair->value)) << "flatten failed";
+  out_pair->value.size = android::util::HostToDevice16(sizeof(out_pair->value));
+}
+
 int32_t SequentialResEntryWriter::WriteMap(const FlatEntry* entry) {
   return WriteMapToBuffer(entry, entries_buffer_);
 }
 
 int32_t SequentialResEntryWriter::WriteItem(const FlatEntry* entry) {
   int32_t offset = entries_buffer_->size();
-  ResTable_entry* out_entry = entries_buffer_->NextBlock<ResTable_entry>();
-  Res_value* out_value = entries_buffer_->NextBlock<Res_value>();
-  out_value->size = android::util::HostToDevice16(sizeof(*out_value));
-
-  WriteEntry<ResTable_entry>(entry, out_entry);
-  CHECK(ValueCast<Item>(entry->value)->Flatten(out_value)) << "flatten failed";
+  auto* out_pair = entries_buffer_->NextBlock<ResEntryValuePair>();
+  WriteItemToPair(entry, out_pair);
   return offset;
+}
+
+std::size_t ResEntryValuePairContentHasher::operator()(const ResEntryValuePairRef& ref) const {
+  return android::JenkinsHashMixBytes(0, ref.ptr, sizeof(ResEntryValuePair));
+}
+
+bool ResEntryValuePairContentEqualTo::operator()(const ResEntryValuePairRef& a,
+                                                 const ResEntryValuePairRef& b) const {
+  return std::memcmp(a.ptr, b.ptr, sizeof(ResEntryValuePair)) == 0;
+}
+
+int32_t DeduplicateItemsResEntryWriter::WriteMap(const FlatEntry* entry) {
+  return WriteMapToBuffer(entry, entries_buffer_);
+}
+
+int32_t DeduplicateItemsResEntryWriter::WriteItem(const FlatEntry* entry) {
+  int32_t initial_offset = entries_buffer_->size();
+
+  auto* out_pair = entries_buffer_->NextBlock<ResEntryValuePair>();
+  WriteItemToPair(entry, out_pair);
+
+  auto ref = ResEntryValuePairRef{*out_pair};
+  auto [it, inserted] = entry_offsets.insert({ref, initial_offset});
+  if (inserted) {
+    // If inserted just return a new offset as this is a first time we store
+    // this entry.
+    return initial_offset;
+  }
+  // If not inserted this means that this is a duplicate, backup allocated block to the buffer
+  // and return offset of previously stored entry.
+  entries_buffer_->BackUp(sizeof(ResEntryValuePair));
+  return it->second;
 }
 
 }  // namespace aapt

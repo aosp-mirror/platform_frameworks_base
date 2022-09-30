@@ -54,6 +54,20 @@ struct TableFlattenerOptions {
 
   // Map from original resource paths to shortened resource paths.
   std::map<std::string, std::string> shortened_path_map;
+
+  // When enabled, only unique pairs of entry and value are stored in type chunks.
+  //
+  // By default, all such pairs are unique because a reference to resource name in the string pool
+  // is a part of the pair. But when resource names are collapsed (using 'collapse_key_stringpool'
+  // flag or manually) the same data might be duplicated multiple times in the same type chunk.
+  //
+  // For example: an application has 3 boolean resources with collapsed names and 3 'true' values
+  // are defined for these resources in 'default' configuration. All pairs of entry and value for
+  // these resources will have the same binary representation and stored only once in type chunk
+  // instead of three times when this flag is disabled.
+  //
+  // This applies only to simple entries (entry->flags & ResTable_entry::FLAG_COMPLEX == 0).
+  bool deduplicate_entry_values = false;
 };
 
 class TableFlattener : public IResourceTableConsumer {

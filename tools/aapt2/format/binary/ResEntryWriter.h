@@ -17,10 +17,13 @@
 #ifndef AAPT_FORMAT_BINARY_RESENTRY_SERIALIZER_H
 #define AAPT_FORMAT_BINARY_RESENTRY_SERIALIZER_H
 
+#include <unordered_map>
+
 #include "ResourceTable.h"
 #include "ValueVisitor.h"
 #include "android-base/macros.h"
 #include "androidfw/BigBuffer.h"
+#include "androidfw/ResourceTypes.h"
 
 namespace aapt {
 
@@ -32,6 +35,35 @@ struct FlatEntry {
   uint32_t entry_key;
 };
 
+// Pair of ResTable_entry and Res_value. These pairs are stored sequentially in values buffer.
+// We introduce this structure for ResEntryWriter to a have single allocation using
+// BigBuffer::NextBlock which allows to return it back with BigBuffer::Backup.
+struct ResEntryValuePair {
+  android::ResTable_entry entry;
+  android::Res_value value;
+};
+
+// References ResEntryValuePair object stored in BigBuffer used as a key in std::unordered_map.
+// Allows access to memory address where ResEntryValuePair is stored.
+union ResEntryValuePairRef {
+  const std::reference_wrapper<const ResEntryValuePair> pair;
+  const u_char* ptr;
+
+  explicit ResEntryValuePairRef(const ResEntryValuePair& ref) : pair(ref) {
+  }
+};
+
+// Hasher which computes hash of ResEntryValuePair using its bytes representation in memory.
+struct ResEntryValuePairContentHasher {
+  std::size_t operator()(const ResEntryValuePairRef& ref) const;
+};
+
+// Equaler which compares ResEntryValuePairs using theirs bytes representation in memory.
+struct ResEntryValuePairContentEqualTo {
+  bool operator()(const ResEntryValuePairRef& a, const ResEntryValuePairRef& b) const;
+};
+
+// Base class that allows to write FlatEntries into entries_buffer.
 class ResEntryWriter {
  public:
   virtual ~ResEntryWriter() = default;
@@ -59,6 +91,8 @@ class ResEntryWriter {
   DISALLOW_COPY_AND_ASSIGN(ResEntryWriter);
 };
 
+// ResEntryWriter which writes FlatEntries sequentially into entries_buffer.
+// Next entry is always written right after previous one in the buffer.
 class SequentialResEntryWriter : public ResEntryWriter {
  public:
   explicit SequentialResEntryWriter(android::BigBuffer* entries_buffer)
@@ -72,6 +106,28 @@ class SequentialResEntryWriter : public ResEntryWriter {
 
  private:
   DISALLOW_COPY_AND_ASSIGN(SequentialResEntryWriter);
+};
+
+// ResEntryWriter that writes only unique entry and value pairs into entries_buffer.
+// Next entry is written into buffer only if there is no entry with the same bytes representation
+// in memory written before. Otherwise returns offset of already written entry.
+class DeduplicateItemsResEntryWriter : public ResEntryWriter {
+ public:
+  explicit DeduplicateItemsResEntryWriter(android::BigBuffer* entries_buffer)
+      : ResEntryWriter(entries_buffer) {
+  }
+  ~DeduplicateItemsResEntryWriter() override = default;
+
+  int32_t WriteItem(const FlatEntry* entry) override;
+
+  int32_t WriteMap(const FlatEntry* entry) override;
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(DeduplicateItemsResEntryWriter);
+
+  std::unordered_map<ResEntryValuePairRef, int32_t, ResEntryValuePairContentHasher,
+                     ResEntryValuePairContentEqualTo>
+      entry_offsets;
 };
 
 }  // namespace aapt
