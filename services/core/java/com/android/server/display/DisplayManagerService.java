@@ -1759,9 +1759,13 @@ public final class DisplayManagerService extends SystemService {
         if (displayDevice == null) {
             return;
         }
-        mPersistentDataStore.setUserPreferredResolution(
-                displayDevice, resolutionWidth, resolutionHeight);
-        mPersistentDataStore.setUserPreferredRefreshRate(displayDevice, refreshRate);
+        try {
+            mPersistentDataStore.setUserPreferredResolution(
+                    displayDevice, resolutionWidth, resolutionHeight);
+            mPersistentDataStore.setUserPreferredRefreshRate(displayDevice, refreshRate);
+        } finally {
+            mPersistentDataStore.saveIfNeeded();
+        }
     }
 
     private void setUserPreferredModeForDisplayLocked(int displayId, Display.Mode mode) {
