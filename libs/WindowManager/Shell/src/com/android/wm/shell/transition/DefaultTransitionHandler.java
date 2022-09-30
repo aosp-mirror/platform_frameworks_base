@@ -18,13 +18,11 @@ package com.android.wm.shell.transition;
 
 import static android.app.ActivityOptions.ANIM_CLIP_REVEAL;
 import static android.app.ActivityOptions.ANIM_CUSTOM;
-import static android.app.ActivityOptions.ANIM_FROM_STYLE;
 import static android.app.ActivityOptions.ANIM_NONE;
 import static android.app.ActivityOptions.ANIM_OPEN_CROSS_PROFILE_APPS;
 import static android.app.ActivityOptions.ANIM_SCALE_UP;
 import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_DOWN;
 import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_UP;
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_RESOURCE_UPDATED;
 import static android.app.admin.DevicePolicyManager.EXTRA_RESOURCE_TYPE;
@@ -43,7 +41,6 @@ import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_RELAUNCH;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
-import static android.view.WindowManager.transitTypeToString;
 import static android.window.TransitionInfo.FLAG_CROSS_PROFILE_OWNER_THUMBNAIL;
 import static android.window.TransitionInfo.FLAG_CROSS_PROFILE_WORK_THUMBNAIL;
 import static android.window.TransitionInfo.FLAG_DISPLAY_HAS_ALERT_WINDOWS;
@@ -59,6 +56,10 @@ import static com.android.internal.policy.TransitionAnimation.WALLPAPER_TRANSITI
 import static com.android.internal.policy.TransitionAnimation.WALLPAPER_TRANSITION_INTRA_OPEN;
 import static com.android.internal.policy.TransitionAnimation.WALLPAPER_TRANSITION_NONE;
 import static com.android.internal.policy.TransitionAnimation.WALLPAPER_TRANSITION_OPEN;
+import static com.android.wm.shell.transition.TransitionAnimationHelper.addBackgroundToTransition;
+import static com.android.wm.shell.transition.TransitionAnimationHelper.getTransitionBackgroundColorIfSet;
+import static com.android.wm.shell.transition.TransitionAnimationHelper.loadAttributeAnimation;
+import static com.android.wm.shell.transition.TransitionAnimationHelper.sDisableCustomTaskAnimationProperty;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -74,7 +75,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Insets;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
@@ -84,7 +84,6 @@ import android.graphics.drawable.Drawable;
 import android.hardware.HardwareBuffer;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.view.Choreographer;
@@ -122,21 +121,6 @@ import java.util.function.Consumer;
 /** The default handler that handles anything not already handled. */
 public class DefaultTransitionHandler implements Transitions.TransitionHandler {
     private static final int MAX_ANIMATION_DURATION = 3000;
-
-    /**
-     * Restrict ability of activities overriding transition animation in a way such that
-     * an activity can do it only when the transition happens within a same task.
-     *
-     * @see android.app.Activity#overridePendingTransition(int, int)
-     */
-    private static final String DISABLE_CUSTOM_TASK_ANIMATION_PROPERTY =
-            "persist.wm.disable_custom_task_animation";
-
-    /**
-     * @see #DISABLE_CUSTOM_TASK_ANIMATION_PROPERTY
-     */
-    static boolean sDisableCustomTaskAnimationProperty =
-            SystemProperties.getBoolean(DISABLE_CUSTOM_TASK_ANIMATION_PROPERTY, true);
 
     private final TransactionPool mTransactionPool;
     private final DisplayController mDisplayController;
@@ -432,22 +416,8 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                     cornerRadius = 0;
                 }
 
-                if (a.getShowBackdrop()) {
-                    if (info.getAnimationOptions().getBackgroundColor() != 0) {
-                        // If available use the background color provided through AnimationOptions
-                        backgroundColorForTransition =
-                                info.getAnimationOptions().getBackgroundColor();
-                    } else if (a.getBackdropColor() != 0) {
-                        // Otherwise fallback on the background color provided through the animation
-                        // definition.
-                        backgroundColorForTransition = a.getBackdropColor();
-                    } else if (change.getBackgroundColor() != 0) {
-                        // Otherwise default to the window's background color if provided through
-                        // the theme as the background color for the animation - the top most window
-                        // with a valid background color and showBackground set takes precedence.
-                        backgroundColorForTransition = change.getBackgroundColor();
-                    }
-                }
+                backgroundColorForTransition = getTransitionBackgroundColorIfSet(info, change, a,
+                        backgroundColorForTransition);
 
                 boolean delayedEdgeExtension = false;
                 if (!isTask && a.hasExtension()) {
@@ -669,29 +639,6 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         return edgeExtensionLayer;
     }
 
-    private void addBackgroundToTransition(
-            @NonNull SurfaceControl rootLeash,
-            @ColorInt int color,
-            @NonNull SurfaceControl.Transaction startTransaction,
-            @NonNull SurfaceControl.Transaction finishTransaction
-    ) {
-        final Color bgColor = Color.valueOf(color);
-        final float[] colorArray = new float[] { bgColor.red(), bgColor.green(), bgColor.blue() };
-
-        final SurfaceControl animationBackgroundSurface = new SurfaceControl.Builder()
-                .setName("Animation Background")
-                .setParent(rootLeash)
-                .setColorLayer()
-                .setOpaque(true)
-                .build();
-
-        startTransaction
-                .setLayer(animationBackgroundSurface, Integer.MIN_VALUE)
-                .setColor(animationBackgroundSurface, colorArray)
-                .show(animationBackgroundSurface);
-        finishTransaction.remove(animationBackgroundSurface);
-    }
-
     @Nullable
     @Override
     public WindowContainerTransaction handleRequest(@NonNull IBinder transition,
@@ -705,9 +652,9 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
     }
 
     @Nullable
-    private Animation loadAnimation(TransitionInfo info, TransitionInfo.Change change,
-            int wallpaperTransit) {
-        Animation a = null;
+    private Animation loadAnimation(@NonNull TransitionInfo info,
+            @NonNull TransitionInfo.Change change, int wallpaperTransit) {
+        Animation a;
 
         final int type = info.getType();
         final int flags = info.getFlags();
@@ -718,12 +665,10 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         final boolean isTask = change.getTaskInfo() != null;
         final TransitionInfo.AnimationOptions options = info.getAnimationOptions();
         final int overrideType = options != null ? options.getType() : ANIM_NONE;
-        final boolean canCustomContainer = isTask ? !sDisableCustomTaskAnimationProperty : true;
+        final boolean canCustomContainer = !isTask || !sDisableCustomTaskAnimationProperty;
         final Rect endBounds = Transitions.isClosingType(changeMode)
                 ? mRotator.getEndBoundsInStartRotation(change)
                 : change.getEndAbsBounds();
-        final boolean isDream =
-                isTask && change.getTaskInfo().topActivityType == ACTIVITY_TYPE_DREAM;
 
         if (info.isKeyguardGoingAway()) {
             a = mTransitionAnimation.loadKeyguardExitAnimation(flags,
@@ -764,87 +709,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             // This received a transferred starting window, so don't animate
             return null;
         } else {
-            int animAttr = 0;
-            boolean translucent = false;
-            if (isDream) {
-                if (type == TRANSIT_OPEN) {
-                    animAttr = enter
-                            ? R.styleable.WindowAnimation_dreamActivityOpenEnterAnimation
-                            : R.styleable.WindowAnimation_dreamActivityOpenExitAnimation;
-                } else if (type == TRANSIT_CLOSE) {
-                    animAttr = enter
-                            ? 0
-                            : R.styleable.WindowAnimation_dreamActivityCloseExitAnimation;
-                }
-            } else if (wallpaperTransit == WALLPAPER_TRANSITION_INTRA_OPEN) {
-                animAttr = enter
-                        ? R.styleable.WindowAnimation_wallpaperIntraOpenEnterAnimation
-                        : R.styleable.WindowAnimation_wallpaperIntraOpenExitAnimation;
-            } else if (wallpaperTransit == WALLPAPER_TRANSITION_INTRA_CLOSE) {
-                animAttr = enter
-                        ? R.styleable.WindowAnimation_wallpaperIntraCloseEnterAnimation
-                        : R.styleable.WindowAnimation_wallpaperIntraCloseExitAnimation;
-            } else if (wallpaperTransit == WALLPAPER_TRANSITION_OPEN) {
-                animAttr = enter
-                        ? R.styleable.WindowAnimation_wallpaperOpenEnterAnimation
-                        : R.styleable.WindowAnimation_wallpaperOpenExitAnimation;
-            } else if (wallpaperTransit == WALLPAPER_TRANSITION_CLOSE) {
-                animAttr = enter
-                        ? R.styleable.WindowAnimation_wallpaperCloseEnterAnimation
-                        : R.styleable.WindowAnimation_wallpaperCloseExitAnimation;
-            } else if (type == TRANSIT_OPEN) {
-                // We will translucent open animation for translucent activities and tasks. Choose
-                // WindowAnimation_activityOpenEnterAnimation and set translucent here, then
-                // TransitionAnimation loads appropriate animation later.
-                if ((changeFlags & FLAG_TRANSLUCENT) != 0 && enter) {
-                    translucent = true;
-                }
-                if (isTask && !translucent) {
-                    animAttr = enter
-                            ? R.styleable.WindowAnimation_taskOpenEnterAnimation
-                            : R.styleable.WindowAnimation_taskOpenExitAnimation;
-                } else {
-                    animAttr = enter
-                            ? R.styleable.WindowAnimation_activityOpenEnterAnimation
-                            : R.styleable.WindowAnimation_activityOpenExitAnimation;
-                }
-            } else if (type == TRANSIT_TO_FRONT) {
-                animAttr = enter
-                        ? R.styleable.WindowAnimation_taskToFrontEnterAnimation
-                        : R.styleable.WindowAnimation_taskToFrontExitAnimation;
-            } else if (type == TRANSIT_CLOSE) {
-                if (isTask) {
-                    animAttr = enter
-                            ? R.styleable.WindowAnimation_taskCloseEnterAnimation
-                            : R.styleable.WindowAnimation_taskCloseExitAnimation;
-                } else {
-                    if ((changeFlags & FLAG_TRANSLUCENT) != 0 && !enter) {
-                        translucent = true;
-                    }
-                    animAttr = enter
-                            ? R.styleable.WindowAnimation_activityCloseEnterAnimation
-                            : R.styleable.WindowAnimation_activityCloseExitAnimation;
-                }
-            } else if (type == TRANSIT_TO_BACK) {
-                animAttr = enter
-                        ? R.styleable.WindowAnimation_taskToBackEnterAnimation
-                        : R.styleable.WindowAnimation_taskToBackExitAnimation;
-            }
-
-            if (animAttr != 0) {
-                if (overrideType == ANIM_FROM_STYLE && canCustomContainer) {
-                    a = mTransitionAnimation
-                            .loadAnimationAttr(options.getPackageName(), options.getAnimations(),
-                                    animAttr, translucent);
-                } else {
-                    a = mTransitionAnimation.loadDefaultAnimationAttr(animAttr, translucent);
-                }
-            }
-
-            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
-                    "loadAnimation: anim=%s animAttr=0x%x type=%s isEntrance=%b", a, animAttr,
-                    transitTypeToString(type),
-                    enter);
+            a = loadAttributeAnimation(info, change, wallpaperTransit, mTransitionAnimation);
         }
 
         if (a != null) {
