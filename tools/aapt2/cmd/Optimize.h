@@ -26,8 +26,6 @@
 namespace aapt {
 
 struct OptimizeOptions {
-  friend class OptimizeCommand;
-
   // Path to the output APK.
   std::optional<std::string> output_path;
   // Path to the output APK directory for splits.
