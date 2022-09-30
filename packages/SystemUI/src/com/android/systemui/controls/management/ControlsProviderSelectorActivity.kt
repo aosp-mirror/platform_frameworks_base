@@ -18,6 +18,7 @@ package com.android.systemui.controls.management
 
 import android.app.ActivityOptions
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -33,13 +34,12 @@ import androidx.activity.ComponentActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.android.systemui.R
-import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.controls.ui.ControlsActivity
 import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.settings.CurrentUserTracker
+import com.android.systemui.settings.UserTracker
 import java.util.concurrent.Executor
 import javax.inject.Inject
 
@@ -51,7 +51,7 @@ open class ControlsProviderSelectorActivity @Inject constructor(
     @Background private val backExecutor: Executor,
     private val listingController: ControlsListingController,
     private val controlsController: ControlsController,
-    private val broadcastDispatcher: BroadcastDispatcher,
+    private val userTracker: UserTracker,
     private val uiController: ControlsUiController
 ) : ComponentActivity() {
 
@@ -62,12 +62,12 @@ open class ControlsProviderSelectorActivity @Inject constructor(
     }
     private var backShouldExit = false
     private lateinit var recyclerView: RecyclerView
-    private val currentUserTracker = object : CurrentUserTracker(broadcastDispatcher) {
+    private val userTrackerCallback: UserTracker.Callback = object : UserTracker.Callback {
         private val startingUser = listingController.currentUserId
 
-        override fun onUserSwitched(newUserId: Int) {
-            if (newUserId != startingUser) {
-                stopTracking()
+        override fun onUserChanged(newUser: Int, userContext: Context) {
+            if (newUser != startingUser) {
+                userTracker.removeCallback(this)
                 finish()
             }
         }
@@ -129,7 +129,7 @@ open class ControlsProviderSelectorActivity @Inject constructor(
 
     override fun onStart() {
         super.onStart()
-        currentUserTracker.startTracking()
+        userTracker.addCallback(userTrackerCallback, executor)
 
         recyclerView.alpha = 0.0f
         recyclerView.adapter = AppAdapter(
@@ -161,7 +161,7 @@ open class ControlsProviderSelectorActivity @Inject constructor(
 
     override fun onStop() {
         super.onStop()
-        currentUserTracker.stopTracking()
+        userTracker.removeCallback(userTrackerCallback)
 
         if (DEBUG) {
             Log.d(TAG, "Unregistered onBackInvokedCallback")
@@ -190,7 +190,7 @@ open class ControlsProviderSelectorActivity @Inject constructor(
     }
 
     override fun onDestroy() {
-        currentUserTracker.stopTracking()
+        userTracker.removeCallback(userTrackerCallback)
         super.onDestroy()
     }
 

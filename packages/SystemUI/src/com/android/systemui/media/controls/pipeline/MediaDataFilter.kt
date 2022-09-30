@@ -20,13 +20,12 @@ import android.content.Context
 import android.os.SystemProperties
 import android.util.Log
 import com.android.internal.annotations.VisibleForTesting
-import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.broadcast.BroadcastSender
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.media.controls.models.player.MediaData
 import com.android.systemui.media.controls.models.recommendation.SmartspaceMediaData
 import com.android.systemui.media.controls.util.MediaUiEventLogger
-import com.android.systemui.settings.CurrentUserTracker
+import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.util.time.SystemClock
 import java.util.SortedMap
@@ -62,14 +61,13 @@ class MediaDataFilter
 @Inject
 constructor(
     private val context: Context,
-    private val broadcastDispatcher: BroadcastDispatcher,
+    private val userTracker: UserTracker,
     private val broadcastSender: BroadcastSender,
     private val lockscreenUserManager: NotificationLockscreenUserManager,
     @Main private val executor: Executor,
     private val systemClock: SystemClock,
     private val logger: MediaUiEventLogger
 ) : MediaDataManager.Listener {
-    private val userTracker: CurrentUserTracker
     private val _listeners: MutableSet<MediaDataManager.Listener> = mutableSetOf()
     internal val listeners: Set<MediaDataManager.Listener>
         get() = _listeners.toSet()
@@ -81,15 +79,15 @@ constructor(
     private var smartspaceMediaData: SmartspaceMediaData = EMPTY_SMARTSPACE_MEDIA_DATA
     private var reactivatedKey: String? = null
 
-    init {
-        userTracker =
-            object : CurrentUserTracker(broadcastDispatcher) {
-                override fun onUserSwitched(newUserId: Int) {
-                    // Post this so we can be sure lockscreenUserManager already got the broadcast
-                    executor.execute { handleUserSwitched(newUserId) }
-                }
+    private val userTrackerCallback =
+        object : UserTracker.Callback {
+            override fun onUserChanged(newUser: Int, userContext: Context) {
+                handleUserSwitched(newUser)
             }
-        userTracker.startTracking()
+        }
+
+    init {
+        userTracker.addCallback(userTrackerCallback, executor)
     }
 
     override fun onMediaDataLoaded(

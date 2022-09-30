@@ -154,6 +154,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
                 mMockSubDefaults,
                 mock(DeviceProvisionedController.class),
                 mMockBd,
+                mUserTracker,
                 mDemoModeController,
                 mock(CarrierConfigTracker.class),
                 mWifiStatusTrackerFactory,

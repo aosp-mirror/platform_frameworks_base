@@ -10,10 +10,12 @@ import androidx.test.filters.SmallTest
 import androidx.test.rule.ActivityTestRule
 import androidx.test.runner.intercepting.SingleActivityFactory
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.controls.CustomIconCache
 import com.android.systemui.controls.controller.ControlsControllerImpl
 import com.android.systemui.controls.ui.ControlsUiController
+import com.android.systemui.settings.UserTracker
+import com.android.systemui.util.concurrency.FakeExecutor
+import com.android.systemui.util.time.FakeSystemClock
 import java.util.concurrent.CountDownLatch
 import org.junit.Before
 import org.junit.Rule
@@ -30,9 +32,11 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper
 class ControlsEditingActivityTest : SysuiTestCase() {
+    private val uiExecutor = FakeExecutor(FakeSystemClock())
+
     @Mock lateinit var controller: ControlsControllerImpl
 
-    @Mock lateinit var broadcastDispatcher: BroadcastDispatcher
+    @Mock lateinit var userTracker: UserTracker
 
     @Mock lateinit var customIconCache: CustomIconCache
 
@@ -54,8 +58,9 @@ class ControlsEditingActivityTest : SysuiTestCase() {
                 ) {
                 override fun create(intent: Intent?): TestableControlsEditingActivity {
                     return TestableControlsEditingActivity(
+                        uiExecutor,
                         controller,
-                        broadcastDispatcher,
+                        userTracker,
                         customIconCache,
                         uiController,
                         mockDispatcher,
@@ -92,13 +97,14 @@ class ControlsEditingActivityTest : SysuiTestCase() {
     }
 
     public class TestableControlsEditingActivity(
+        private val executor: FakeExecutor,
         private val controller: ControlsControllerImpl,
-        private val broadcastDispatcher: BroadcastDispatcher,
+        private val userTracker: UserTracker,
         private val customIconCache: CustomIconCache,
         private val uiController: ControlsUiController,
         private val mockDispatcher: OnBackInvokedDispatcher,
         private val latch: CountDownLatch
-    ) : ControlsEditingActivity(controller, broadcastDispatcher, customIconCache, uiController) {
+    ) : ControlsEditingActivity(executor, controller, userTracker, customIconCache, uiController) {
         override fun getOnBackInvokedDispatcher(): OnBackInvokedDispatcher {
             return mockDispatcher
         }
