@@ -318,6 +318,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runRemoveUser();
                 case "set-user-restriction":
                     return runSetUserRestriction();
+                case "supports-multiple-users":
+                    return runSupportsMultipleUsers();
                 case "get-max-users":
                     return runGetMaxUsers();
                 case "get-max-running-users":
@@ -3050,6 +3052,12 @@ class PackageManagerShellCommand extends ShellCommand {
             getErrPrintWriter().println(e.getMessage());
             return 1;
         }
+        return 0;
+    }
+
+    public int runSupportsMultipleUsers() {
+        getOutPrintWriter().println("Is multiuser supported: "
+                + UserManager.supportsMultipleUsers());
         return 0;
     }
 
