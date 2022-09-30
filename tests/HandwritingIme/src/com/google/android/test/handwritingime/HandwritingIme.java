@@ -96,11 +96,11 @@ public class HandwritingIme extends InputMethodService {
             case MotionEvent.ACTION_UP: {
                 if (areRichGesturesEnabled()) {
                     HandwritingGesture gesture = null;
-                    switch(mRichGestureMode) {
+                    switch (mRichGestureMode) {
                         case OP_SELECT:
                             gesture = new SelectGesture.Builder()
                                     .setGranularity(mRichGestureGranularity)
-                                    .setSelectionArea(new RectF(mRichGestureStartPoint.x,
+                                    .setSelectionArea(getSanitizedRectF(mRichGestureStartPoint.x,
                                             mRichGestureStartPoint.y, event.getX(), event.getY()))
                                     .setFallbackText("fallback text")
                                     .build();
@@ -108,7 +108,7 @@ public class HandwritingIme extends InputMethodService {
                         case OP_DELETE:
                             gesture = new DeleteGesture.Builder()
                                     .setGranularity(mRichGestureGranularity)
-                                    .setDeletionArea(new RectF(mRichGestureStartPoint.x,
+                                    .setDeletionArea(getSanitizedRectF(mRichGestureStartPoint.x,
                                             mRichGestureStartPoint.y, event.getX(), event.getY()))
                                     .setFallbackText("fallback text")
                                     .build();
@@ -143,17 +143,7 @@ public class HandwritingIme extends InputMethodService {
                         Log.e(TAG, "Unrecognized gesture mode: " + mRichGestureMode);
                         return;
                     }
-                    InputConnection ic = getCurrentInputConnection();
-                    if (getCurrentInputStarted() && ic != null) {
-                        ic.performHandwritingGesture(gesture, Runnable::run, mResultConsumer);
-                    } else {
-                        // This shouldn't happen
-                        Log.e(TAG, "No active InputConnection");
-                    }
-
-                    Log.d(TAG, "Sending RichGesture " + mRichGestureMode + " (Screen) Left: "
-                            + mRichGestureStartPoint.x + ", Top: " + mRichGestureStartPoint.y
-                            + ", Right: " + event.getX() + ", Bottom: " + event.getY());
+                    performGesture(gesture);
                 } else {
                     // insert random ASCII char
                     sendKeyChar((char) (56 + new Random().nextInt(66)));
@@ -166,6 +156,44 @@ public class HandwritingIme extends InputMethodService {
                 }
                 return;
             }
+        }
+    }
+
+    /**
+     * sanitize values to support rectangles in all cases.
+     */
+    private RectF getSanitizedRectF(float left, float top, float right, float bottom) {
+        // swap values when left > right OR top > bottom.
+        if (left > right) {
+            float temp = left;
+            left = right;
+            right = temp;
+        }
+        if (top > bottom) {
+            float temp = top;
+            top = bottom;
+            bottom = temp;
+        }
+        // increment by a pixel so that RectF.isEmpty() isn't true.
+        if (left == right) {
+            right++;
+        }
+        if (top == bottom) {
+            bottom++;
+        }
+
+        RectF rectF = new RectF(left, top, right, bottom);
+        Log.d(TAG, "Sending RichGesture " + rectF.toShortString());
+        return rectF;
+    }
+
+    private void performGesture(HandwritingGesture gesture) {
+        InputConnection ic = getCurrentInputConnection();
+        if (getCurrentInputStarted() && ic != null) {
+            ic.performHandwritingGesture(gesture, Runnable::run, mResultConsumer);
+        } else {
+            // This shouldn't happen
+            Log.e(TAG, "No active InputConnection");
         }
     }
 
