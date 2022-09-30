@@ -48,6 +48,9 @@ struct ManifestFixerOptions {
   // <overlay>.
   std::optional<std::string> rename_overlay_target_package;
 
+  // The category to use instead of the one defined in 'android:category' in <overlay>.
+  std::optional<std::string> rename_overlay_category;
+
   // The version name to set if 'android:versionName' is not defined in <manifest> or if
   // replace_version is set.
   std::optional<std::string> version_name_default;
