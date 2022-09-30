@@ -334,4 +334,14 @@ public class LogModule {
     public static LogBuffer providerBluetoothLogBuffer(LogBufferFactory factory) {
         return factory.create("BluetoothLog", 50);
     }
+
+    /**
+     * Provides a {@link LogBuffer} for Udfps logs.
+     */
+    @Provides
+    @SysUISingleton
+    @UdfpsLog
+    public static LogBuffer provideUdfpsLogBuffer(LogBufferFactory factory) {
+        return factory.create("UdfpsLog", 1000);
+    }
 }
