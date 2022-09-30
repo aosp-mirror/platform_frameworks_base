@@ -133,4 +133,6 @@ cc_test {
     static_libs: [
         "libgmock",
     ],
+
+    host_required: ["compatibility-tradefed"],
 }
