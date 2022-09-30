@@ -4993,7 +4993,7 @@ public class UserManager {
     }
 
     /**
-     * Removes a user and all associated data.
+     * Removes a user and its profiles along with their associated data.
      * @param userId the integer handle of the user.
      * @hide
      */
@@ -5009,7 +5009,7 @@ public class UserManager {
     }
 
     /**
-     * Removes a user and all associated data.
+     * Removes a user and its profiles along with their associated data.
      *
      * @param user the user that needs to be removed.
      * @return {@code true} if the user was successfully removed, {@code false} otherwise.
@@ -5046,9 +5046,9 @@ public class UserManager {
     }
 
     /**
-     * Immediately removes the user or, if the user cannot be removed, such as when the user is
-     * the current user, then set the user as ephemeral so that it will be removed when it is
-     * stopped.
+     * Immediately removes the user and its profiles or, if the user cannot be removed, such as
+     * when the user is the current user, then set the user as ephemeral
+     * so that it will be removed when it is stopped.
      *
      * @param overrideDevicePolicy when {@code true}, user is removed even if the caller has
      * the {@link #DISALLOW_REMOVE_USER} or {@link #DISALLOW_REMOVE_MANAGED_PROFILE} restriction
