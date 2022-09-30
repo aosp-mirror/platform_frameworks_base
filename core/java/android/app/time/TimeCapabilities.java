@@ -20,6 +20,7 @@ import static android.app.time.Capabilities.CAPABILITY_NOT_APPLICABLE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.app.time.Capabilities.CapabilityState;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -37,6 +38,7 @@ import java.util.Objects;
  *
  * @hide
  */
+@SystemApi
 public final class TimeCapabilities implements Parcelable {
 
     public static final @NonNull Creator<TimeCapabilities> CREATOR = new Creator<>() {
