@@ -3022,6 +3022,12 @@
          when alpha identifier is not provided by the UICC -->
     <bool name="config_stkNoAlphaUsrCnf">true</bool>
 
+    <!-- Flag indicating whether the current device allows stk sms send service via framework.
+         If true,this means that the device supports sending of stk triggered sms via the telephony.
+         This can be overridden to false for devices which can't send stk sms message via
+         framework, but would be sent via modem. -->
+    <bool name="config_stk_sms_send_support">false</bool>
+
     <!-- Threshold (in ms) under which a screen off / screen on will be considered a reset of the
          immersive mode confirmation prompt.-->
     <integer name="config_immersive_mode_confirmation_panic">5000</integer>
@@ -3325,7 +3331,7 @@
     <!--From SmsMessage-->
     <!--Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
         string that's stored in 8-bit unpacked format) characters.-->
-    <bool translatable="false" name="config_sms_decode_gsm_8bit_data">false</bool>
+    <bool translatable="false" name="config_sms_decode_gsm_8bit_data">true</bool>
 
     <!-- Configures encoding type to parse the User Data of an SMS for reserved TP-DCS value.
          Refer to SmsConstants.java

@@ -2444,6 +2444,7 @@
   <java-symbol type="drawable" name="ic_volume" />
   <java-symbol type="drawable" name="stat_notify_sim_toolkit" />
   <java-symbol type="bool" name="config_stkNoAlphaUsrCnf" />
+  <java-symbol type="bool" name="config_stk_sms_send_support" />
 
   <!-- From maps library -->
   <java-symbol type="array" name="maps_starting_lat_lng" />
