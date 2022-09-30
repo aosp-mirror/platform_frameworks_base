@@ -49,6 +49,7 @@ import android.hardware.SensorPrivacyManagerInternal;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayViewport;
 import android.hardware.input.IInputDeviceBatteryListener;
+import android.hardware.input.IInputDeviceBatteryState;
 import android.hardware.input.IInputDevicesChangedListener;
 import android.hardware.input.IInputManager;
 import android.hardware.input.IInputSensorEventListener;
@@ -2305,14 +2306,8 @@ public class InputManagerService extends IInputManager.Stub
 
     // Binder call
     @Override
-    public int getBatteryStatus(int deviceId) {
-        return mNative.getBatteryStatus(deviceId);
-    }
-
-    // Binder call
-    @Override
-    public int getBatteryCapacity(int deviceId) {
-        return mNative.getBatteryCapacity(deviceId);
+    public IInputDeviceBatteryState getBatteryState(int deviceId) {
+        return mBatteryController.getBatteryState(deviceId);
     }
 
     // Binder call

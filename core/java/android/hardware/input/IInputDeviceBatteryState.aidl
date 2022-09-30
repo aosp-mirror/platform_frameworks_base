@@ -16,14 +16,25 @@
 
 package android.hardware.input;
 
-import android.hardware.input.IInputDeviceBatteryState;
-
 /** @hide */
-oneway interface IInputDeviceBatteryListener {
+@JavaDerive(equals=true)
+parcelable IInputDeviceBatteryState {
+    /** The deviceId of the input device that this battery state is associated with. */
+    int deviceId;
 
     /**
-     * Called when there is a change in battery state for a monitored device. This will be called
-     * immediately after the listener is successfully registered for a new device via IInputManager.
+     * The timestamp of the last time the battery state was updated, in the
+     * {@link SystemClock.uptimeMillis()} time base.
      */
-    void onBatteryStateChanged(in IInputDeviceBatteryState batteryState);
+    long updateTime;
+
+    /** Whether the input device has a battery. */
+    boolean isPresent;
+
+    /** The battery status for this input device. */
+     @JavaPassthrough(annotation="@android.hardware.BatteryState.BatteryStatus")
+    int status;
+
+    /** The battery capacity for this input device, in a range between 0 and 1. */
+    float capacity;
 }
