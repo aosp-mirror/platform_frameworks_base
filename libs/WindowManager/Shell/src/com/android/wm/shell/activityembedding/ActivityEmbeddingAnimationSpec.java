@@ -181,15 +181,15 @@ class ActivityEmbeddingAnimationSpec {
             @NonNull TransitionInfo.Change change, @NonNull Rect wholeAnimationBounds) {
         final boolean isEnter = Transitions.isOpeningType(change.getMode());
         final Animation animation;
-        // TODO(b/207070762): Implement edgeExtension version
         if (shouldShowBackdrop(info, change)) {
             animation = mTransitionAnimation.loadDefaultAnimationRes(isEnter
                     ? com.android.internal.R.anim.task_fragment_clear_top_open_enter
                     : com.android.internal.R.anim.task_fragment_clear_top_open_exit);
         } else {
+            // Use the same edge extension animation as regular activity open.
             animation = mTransitionAnimation.loadDefaultAnimationRes(isEnter
-                    ? com.android.internal.R.anim.task_fragment_open_enter
-                    : com.android.internal.R.anim.task_fragment_open_exit);
+                    ? com.android.internal.R.anim.activity_open_enter
+                    : com.android.internal.R.anim.activity_open_exit);
         }
         // Use the whole animation bounds instead of the change bounds, so that when multiple change
         // targets are opening at the same time, the animation applied to each will be the same.
@@ -205,15 +205,15 @@ class ActivityEmbeddingAnimationSpec {
             @NonNull TransitionInfo.Change change, @NonNull Rect wholeAnimationBounds) {
         final boolean isEnter = Transitions.isOpeningType(change.getMode());
         final Animation animation;
-        // TODO(b/207070762): Implement edgeExtension version
         if (shouldShowBackdrop(info, change)) {
             animation = mTransitionAnimation.loadDefaultAnimationRes(isEnter
                     ? com.android.internal.R.anim.task_fragment_clear_top_close_enter
                     : com.android.internal.R.anim.task_fragment_clear_top_close_exit);
         } else {
+            // Use the same edge extension animation as regular activity close.
             animation = mTransitionAnimation.loadDefaultAnimationRes(isEnter
-                    ? com.android.internal.R.anim.task_fragment_close_enter
-                    : com.android.internal.R.anim.task_fragment_close_exit);
+                    ? com.android.internal.R.anim.activity_close_enter
+                    : com.android.internal.R.anim.activity_close_exit);
         }
         // Use the whole animation bounds instead of the change bounds, so that when multiple change
         // targets are closing at the same time, the animation applied to each will be the same.
