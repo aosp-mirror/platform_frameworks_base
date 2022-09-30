@@ -137,15 +137,6 @@ public class BroadcastSkipPolicy {
             }
         }
 
-        boolean isSingleton = false;
-        try {
-            isSingleton = mService.isSingleton(info.activityInfo.processName,
-                    info.activityInfo.applicationInfo,
-                    info.activityInfo.name, info.activityInfo.flags);
-        } catch (SecurityException e) {
-            Slog.w(TAG, e.getMessage());
-            return true;
-        }
         if ((info.activityInfo.flags&ActivityInfo.FLAG_SINGLE_USER) != 0) {
             if (ActivityManager.checkUidPermission(
                     android.Manifest.permission.INTERACT_ACROSS_USERS,
@@ -214,15 +205,6 @@ public class BroadcastSkipPolicy {
                     "Skipping delivery: permission review required for "
                             + broadcastDescription(r, component));
             return true;
-        }
-
-        // This is safe to do even if we are skipping the broadcast, and we need
-        // this information now to evaluate whether it is going to be allowed to run.
-        final int receiverUid = info.activityInfo.applicationInfo.uid;
-        // If it's a singleton, it needs to be the same app or a special app
-        if (r.callingUid != Process.SYSTEM_UID && isSingleton
-                && mService.isValidSingletonCall(r.callingUid, receiverUid)) {
-            info.activityInfo = mService.getActivityInfoForUser(info.activityInfo, 0);
         }
 
         final int allowed = mService.getAppStartModeLOSP(

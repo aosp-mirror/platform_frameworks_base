@@ -45,6 +45,7 @@ import android.os.IBinder;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.PrintWriterPrinter;
+import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
@@ -713,6 +714,34 @@ final class BroadcastRecord extends Binder {
         nextReceiver = Math.min(nextReceiver, receivers.size());
 
         return didSomething;
+    }
+
+    /**
+     * Apply special treatment to manifest receivers hosted by a singleton
+     * process, by re-targeting them at {@link UserHandle#USER_SYSTEM}.
+     */
+    void applySingletonPolicy(@NonNull ActivityManagerService service) {
+        if (receivers == null) return;
+        for (int i = 0; i < receivers.size(); i++) {
+            final Object receiver = receivers.get(i);
+            if (receiver instanceof ResolveInfo) {
+                final ResolveInfo info = (ResolveInfo) receiver;
+                boolean isSingleton = false;
+                try {
+                    isSingleton = service.isSingleton(info.activityInfo.processName,
+                            info.activityInfo.applicationInfo,
+                            info.activityInfo.name, info.activityInfo.flags);
+                } catch (SecurityException e) {
+                    BroadcastQueue.logw(e.getMessage());
+                }
+                final int receiverUid = info.activityInfo.applicationInfo.uid;
+                if (callingUid != android.os.Process.SYSTEM_UID && isSingleton
+                        && service.isValidSingletonCall(callingUid, receiverUid)) {
+                    info.activityInfo = service.getActivityInfoForUser(info.activityInfo,
+                            UserHandle.USER_SYSTEM);
+                }
+            }
+        }
     }
 
     @Override

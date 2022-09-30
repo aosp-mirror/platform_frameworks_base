@@ -483,6 +483,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
     @Override
     public void enqueueBroadcastLocked(@NonNull BroadcastRecord r) {
+        r.applySingletonPolicy(mService);
+
         // TODO: handle empty receivers to deliver result immediately
         if (r.receivers == null) return;
 

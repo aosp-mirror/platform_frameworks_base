@@ -232,6 +232,8 @@ public class BroadcastQueueImpl extends BroadcastQueue {
     }
 
     public void enqueueBroadcastLocked(BroadcastRecord r) {
+        r.applySingletonPolicy(mService);
+
         final boolean replacePending = (r.intent.getFlags()
                 & Intent.FLAG_RECEIVER_REPLACE_PENDING) != 0;
 

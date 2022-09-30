@@ -288,6 +288,7 @@ class BroadcastProcessQueue {
         mActiveIndex = 0;
         mActiveCountSinceIdle = 0;
         mActiveViaColdStart = false;
+        invalidateRunnableAt();
     }
 
     public void traceProcessStartingBegin() {

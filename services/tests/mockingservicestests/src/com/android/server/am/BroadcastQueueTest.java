@@ -16,6 +16,8 @@
 
 package com.android.server.am;
 
+import static android.os.UserHandle.USER_SYSTEM;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
@@ -312,14 +314,18 @@ public class BroadcastQueueTest {
     }
 
     private ProcessRecord makeActiveProcessRecord(String packageName) throws Exception {
-        final ApplicationInfo ai = makeApplicationInfo(packageName);
-        return makeActiveProcessRecord(ai, ai.processName, ProcessBehavior.NORMAL,
-                UnaryOperator.identity());
+        return makeActiveProcessRecord(packageName, packageName, ProcessBehavior.NORMAL,
+                UserHandle.USER_SYSTEM);
     }
 
     private ProcessRecord makeActiveProcessRecord(String packageName,
             ProcessBehavior behavior) throws Exception {
-        final ApplicationInfo ai = makeApplicationInfo(packageName);
+        return makeActiveProcessRecord(packageName, packageName, behavior, UserHandle.USER_SYSTEM);
+    }
+
+    private ProcessRecord makeActiveProcessRecord(String packageName, String processName,
+            ProcessBehavior behavior, int userId) throws Exception {
+        final ApplicationInfo ai = makeApplicationInfo(packageName, processName, userId);
         return makeActiveProcessRecord(ai, ai.processName, behavior,
                 UnaryOperator.identity());
     }
@@ -406,21 +412,34 @@ public class BroadcastQueueTest {
         return r;
     }
 
+    static ResolveInfo makeManifestReceiver(String packageName, String name) {
+        return makeManifestReceiver(packageName, name, UserHandle.USER_SYSTEM);
+    }
+
     static ApplicationInfo makeApplicationInfo(String packageName) {
+        return makeApplicationInfo(packageName, packageName, UserHandle.USER_SYSTEM);
+    }
+
+    static ApplicationInfo makeApplicationInfo(String packageName, String processName, int userId) {
         final ApplicationInfo ai = new ApplicationInfo();
         ai.packageName = packageName;
-        ai.processName = packageName;
-        ai.uid = getUidForPackage(packageName);
+        ai.processName = processName;
+        ai.uid = getUidForPackage(packageName, userId);
         return ai;
     }
 
-    static ResolveInfo makeManifestReceiver(String packageName, String name) {
+    static ResolveInfo makeManifestReceiver(String packageName, String name, int userId) {
+        return makeManifestReceiver(packageName, packageName, name, userId);
+    }
+
+    static ResolveInfo makeManifestReceiver(String packageName, String processName, String name,
+            int userId) {
         final ResolveInfo ri = new ResolveInfo();
         ri.activityInfo = new ActivityInfo();
         ri.activityInfo.packageName = packageName;
-        ri.activityInfo.processName = packageName;
+        ri.activityInfo.processName = processName;
         ri.activityInfo.name = name;
-        ri.activityInfo.applicationInfo = makeApplicationInfo(packageName);
+        ri.activityInfo.applicationInfo = makeApplicationInfo(packageName, processName, userId);
         return ri;
     }
 
@@ -437,27 +456,34 @@ public class BroadcastQueueTest {
     private BroadcastRecord makeBroadcastRecord(Intent intent, ProcessRecord callerApp,
             List receivers) {
         return makeBroadcastRecord(intent, callerApp, BroadcastOptions.makeBasic(),
-                receivers, false, null, null);
+                receivers, false, null, null, UserHandle.USER_SYSTEM);
+    }
+
+    private BroadcastRecord makeBroadcastRecord(Intent intent, ProcessRecord callerApp,
+            int userId, List receivers) {
+        return makeBroadcastRecord(intent, callerApp, BroadcastOptions.makeBasic(),
+                receivers, false, null, null, userId);
     }
 
     private BroadcastRecord makeOrderedBroadcastRecord(Intent intent, ProcessRecord callerApp,
             List receivers, IIntentReceiver orderedResultTo, Bundle orderedExtras) {
         return makeBroadcastRecord(intent, callerApp, BroadcastOptions.makeBasic(),
-                receivers, true, orderedResultTo, orderedExtras);
+                receivers, true, orderedResultTo, orderedExtras, UserHandle.USER_SYSTEM);
     }
 
     private BroadcastRecord makeBroadcastRecord(Intent intent, ProcessRecord callerApp,
             BroadcastOptions options, List receivers) {
-        return makeBroadcastRecord(intent, callerApp, options, receivers, false, null, null);
+        return makeBroadcastRecord(intent, callerApp, options,
+                receivers, false, null, null, UserHandle.USER_SYSTEM);
     }
 
     private BroadcastRecord makeBroadcastRecord(Intent intent, ProcessRecord callerApp,
             BroadcastOptions options, List receivers, boolean ordered,
-            IIntentReceiver orderedResultTo, Bundle orderedExtras) {
+            IIntentReceiver orderedResultTo, Bundle orderedExtras, int userId) {
         return new BroadcastRecord(mQueue, intent, callerApp, callerApp.info.packageName, null,
                 callerApp.getPid(), callerApp.info.uid, false, null, null, null, null,
                 AppOpsManager.OP_NONE, options, receivers, orderedResultTo, Activity.RESULT_OK,
-                null, orderedExtras, ordered, false, false, UserHandle.USER_SYSTEM, false, null,
+                null, orderedExtras, ordered, false, false, userId, false, null,
                 false, null);
     }
 
@@ -499,16 +525,19 @@ public class BroadcastQueueTest {
     }
 
     private void verifyScheduleReceiver(ProcessRecord app, Intent intent) throws Exception {
-        verify(app.getThread()).scheduleReceiver(
-                argThat(filterEqualsIgnoringComponent(intent)), any(), any(), anyInt(), any(),
-                any(), eq(false), eq(UserHandle.USER_SYSTEM), anyInt());
+        verifyScheduleReceiver(times(1), app, intent, UserHandle.USER_SYSTEM);
     }
 
     private void verifyScheduleReceiver(VerificationMode mode, ProcessRecord app, Intent intent)
             throws Exception {
+        verifyScheduleReceiver(mode, app, intent, UserHandle.USER_SYSTEM);
+    }
+
+    private void verifyScheduleReceiver(VerificationMode mode, ProcessRecord app, Intent intent,
+            int userId) throws Exception {
         verify(app.getThread(), mode).scheduleReceiver(
                 argThat(filterEqualsIgnoringComponent(intent)), any(), any(), anyInt(), any(),
-                any(), eq(false), eq(UserHandle.USER_SYSTEM), anyInt());
+                any(), eq(false), eq(userId), anyInt());
     }
 
     private void verifyScheduleReceiver(VerificationMode mode, ProcessRecord app, Intent intent,
@@ -529,10 +558,14 @@ public class BroadcastQueueTest {
 
     static final int USER_GUEST = 11;
 
+    static final String PACKAGE_ANDROID = "android";
+    static final String PACKAGE_PHONE = "com.android.phone";
     static final String PACKAGE_RED = "com.example.red";
     static final String PACKAGE_GREEN = "com.example.green";
     static final String PACKAGE_BLUE = "com.example.blue";
     static final String PACKAGE_YELLOW = "com.example.yellow";
+
+    static final String PROCESS_SYSTEM = "system";
 
     static final String CLASS_RED = "com.example.red.Red";
     static final String CLASS_GREEN = "com.example.green.Green";
@@ -541,12 +574,18 @@ public class BroadcastQueueTest {
 
     static int getUidForPackage(@NonNull String packageName) {
         switch (packageName) {
+            case PACKAGE_ANDROID: return android.os.Process.SYSTEM_UID;
+            case PACKAGE_PHONE: return android.os.Process.PHONE_UID;
             case PACKAGE_RED: return android.os.Process.FIRST_APPLICATION_UID + 1;
             case PACKAGE_GREEN: return android.os.Process.FIRST_APPLICATION_UID + 2;
             case PACKAGE_BLUE: return android.os.Process.FIRST_APPLICATION_UID + 3;
             case PACKAGE_YELLOW: return android.os.Process.FIRST_APPLICATION_UID + 4;
             default: throw new IllegalArgumentException();
         }
+    }
+
+    static int getUidForPackage(@NonNull String packageName, int userId) {
+        return UserHandle.getUid(userId, getUidForPackage(packageName));
     }
 
     @Test
@@ -1145,5 +1184,29 @@ public class BroadcastQueueTest {
         verify(mAms).tempAllowlistUidLocked(eq(receiverApp.uid), eq(1_000L),
                 eq(options.getTemporaryAppAllowlistReasonCode()), any(),
                 eq(options.getTemporaryAppAllowlistType()), eq(callerApp.uid));
+    }
+
+    /**
+     * Verify that sending broadcasts to the {@code system} process are handled
+     * as a singleton process.
+     */
+    @Test
+    public void testSystemSingleton() throws Exception {
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_PHONE);
+        final ProcessRecord systemApp = makeActiveProcessRecord(PACKAGE_ANDROID, PROCESS_SYSTEM,
+                ProcessBehavior.NORMAL, USER_SYSTEM);
+
+        final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        enqueueBroadcast(makeBroadcastRecord(airplane, callerApp, USER_SYSTEM,
+                List.of(makeManifestReceiver(PACKAGE_ANDROID, PROCESS_SYSTEM,
+                        CLASS_GREEN, USER_SYSTEM))));
+        enqueueBroadcast(makeBroadcastRecord(airplane, callerApp, USER_GUEST,
+                List.of(makeManifestReceiver(PACKAGE_ANDROID, PROCESS_SYSTEM,
+                        CLASS_GREEN, USER_GUEST))));
+        waitForIdle();
+
+        // Confirm we dispatched both users to same singleton instance
+        verifyScheduleReceiver(times(1), systemApp, airplane, USER_SYSTEM);
+        verifyScheduleReceiver(times(1), systemApp, airplane, USER_GUEST);
     }
 }
