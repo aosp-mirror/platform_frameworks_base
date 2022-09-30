@@ -109,7 +109,6 @@ import java.util.function.UnaryOperator;
  */
 @MediumTest
 @RunWith(Parameterized.class)
-@SuppressWarnings("GuardedBy")
 public class BroadcastQueueTest {
     private static final String TAG = "BroadcastQueueTest";
 
@@ -454,31 +453,31 @@ public class BroadcastQueueTest {
     }
 
     private BroadcastRecord makeBroadcastRecord(Intent intent, ProcessRecord callerApp,
-            List receivers) {
+            List<Object> receivers) {
         return makeBroadcastRecord(intent, callerApp, BroadcastOptions.makeBasic(),
                 receivers, false, null, null, UserHandle.USER_SYSTEM);
     }
 
     private BroadcastRecord makeBroadcastRecord(Intent intent, ProcessRecord callerApp,
-            int userId, List receivers) {
+            int userId, List<Object> receivers) {
         return makeBroadcastRecord(intent, callerApp, BroadcastOptions.makeBasic(),
                 receivers, false, null, null, userId);
     }
 
     private BroadcastRecord makeOrderedBroadcastRecord(Intent intent, ProcessRecord callerApp,
-            List receivers, IIntentReceiver orderedResultTo, Bundle orderedExtras) {
+            List<Object> receivers, IIntentReceiver orderedResultTo, Bundle orderedExtras) {
         return makeBroadcastRecord(intent, callerApp, BroadcastOptions.makeBasic(),
                 receivers, true, orderedResultTo, orderedExtras, UserHandle.USER_SYSTEM);
     }
 
     private BroadcastRecord makeBroadcastRecord(Intent intent, ProcessRecord callerApp,
-            BroadcastOptions options, List receivers) {
+            BroadcastOptions options, List<Object> receivers) {
         return makeBroadcastRecord(intent, callerApp, options,
                 receivers, false, null, null, UserHandle.USER_SYSTEM);
     }
 
     private BroadcastRecord makeBroadcastRecord(Intent intent, ProcessRecord callerApp,
-            BroadcastOptions options, List receivers, boolean ordered,
+            BroadcastOptions options, List<Object> receivers, boolean ordered,
             IIntentReceiver orderedResultTo, Bundle orderedExtras, int userId) {
         return new BroadcastRecord(mQueue, intent, callerApp, callerApp.info.packageName, null,
                 callerApp.getPid(), callerApp.info.uid, false, null, null, null, null,
@@ -1144,6 +1143,38 @@ public class BroadcastQueueTest {
         inOrder.verify(redThread).scheduleRegisteredReceiver(any(), argThat(filterEquals(intent)),
                 eq(Activity.RESULT_OK), any(), argThat(bundleEquals(expectedExtras)),
                 eq(false), anyBoolean(), eq(UserHandle.USER_SYSTEM), anyInt());
+    }
+
+    /**
+     * Verify that we immediately dispatch final result for empty lists.
+     */
+    @Test
+    public void testOrdered_Empty() throws Exception {
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+        final IApplicationThread callerThread = callerApp.getThread();
+
+        final IIntentReceiver orderedResultTo = mock(IIntentReceiver.class);
+        final Bundle orderedExtras = new Bundle();
+        orderedExtras.putBoolean(PACKAGE_RED, true);
+
+        final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        enqueueBroadcast(makeOrderedBroadcastRecord(airplane, callerApp, null,
+                orderedResultTo, orderedExtras));
+
+        waitForIdle();
+        verify(callerThread).scheduleRegisteredReceiver(any(), argThat(filterEquals(airplane)),
+                eq(Activity.RESULT_OK), any(), argThat(bundleEquals(orderedExtras)), eq(false),
+                anyBoolean(), eq(UserHandle.USER_SYSTEM), anyInt());
+    }
+
+    /**
+     * Verify that we're not surprised by a process attempting to finishing a
+     * broadcast when none is in progress.
+     */
+    @Test
+    public void testUnexpected() throws Exception {
+        final ProcessRecord app = makeActiveProcessRecord(PACKAGE_RED);
+        mQueue.finishReceiverLocked(app, Activity.RESULT_OK, null, null, false, false);
     }
 
     @Test

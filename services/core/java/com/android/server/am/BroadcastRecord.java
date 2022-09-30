@@ -89,7 +89,7 @@ final class BroadcastRecord extends Binder {
     final String[] excludedPackages; // packages to exclude
     final int appOp;        // an app op that is associated with this broadcast
     final BroadcastOptions options; // BroadcastOptions supplied by caller
-    final List receivers;   // contains BroadcastFilter and ResolveInfo
+    final @NonNull List<Object> receivers;   // contains BroadcastFilter and ResolveInfo
     final @DeliveryState int[] delivery;   // delivery state of each receiver
     IIntentReceiver resultTo; // who receives final result if non-null
     boolean deferred;
@@ -132,6 +132,9 @@ final class BroadcastRecord extends Binder {
 
     String cachedToString;
     String cachedToShortString;
+
+    /** Empty immutable list of receivers */
+    static final List<Object> EMPTY_RECEIVERS = List.of();
 
     static final int IDLE = 0;
     static final int APP_RECEIVE = 1;
@@ -361,7 +364,7 @@ final class BroadcastRecord extends Binder {
         excludedPackages = _excludedPackages;
         appOp = _appOp;
         options = _options;
-        receivers = _receivers;
+        receivers = (_receivers != null) ? _receivers : EMPTY_RECEIVERS;
         delivery = new int[_receivers != null ? _receivers.size() : 0];
         scheduledTime = new long[delivery.length];
         terminalTime = new long[delivery.length];

@@ -485,9 +485,6 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     public void enqueueBroadcastLocked(@NonNull BroadcastRecord r) {
         r.applySingletonPolicy(mService);
 
-        // TODO: handle empty receivers to deliver result immediately
-        if (r.receivers == null) return;
-
         final IntentFilter removeMatchingFilter = (r.options != null)
                 ? r.options.getRemoveMatchingFilter() : null;
         if (removeMatchingFilter != null) {
@@ -510,6 +507,11 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             queue.enqueueBroadcast(r, i);
             updateRunnableList(queue);
             enqueueUpdateRunningList();
+        }
+
+        // If nothing to dispatch, send any pending result immediately
+        if (r.receivers.isEmpty()) {
+            scheduleResultTo(r);
         }
     }
 
@@ -702,6 +704,11 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             @Nullable String resultData, @Nullable Bundle resultExtras, boolean resultAbort,
             boolean waitForServices) {
         final BroadcastProcessQueue queue = getProcessQueue(app);
+        if ((queue == null) || !queue.isActive()) {
+            logw("Ignoring finish; no active broadcast for " + queue);
+            return false;
+        }
+
         final BroadcastRecord r = queue.getActive();
         r.resultCode = resultCode;
         r.resultData = resultData;
