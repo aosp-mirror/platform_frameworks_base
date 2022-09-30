@@ -111,6 +111,7 @@ import android.hardware.location.ContextHubManager;
 import android.hardware.radio.RadioManager;
 import android.hardware.usb.IUsbManager;
 import android.hardware.usb.UsbManager;
+import android.healthconnect.HealthServicesInitializer;
 import android.location.CountryDetector;
 import android.location.ICountryDetector;
 import android.location.ILocationManager;
@@ -1524,6 +1525,7 @@ public final class SystemServiceRegistry {
             BluetoothFrameworkInitializer.registerServiceWrappers();
             TelephonyFrameworkInitializer.registerServiceWrappers();
             AppSearchManagerFrameworkInitializer.initialize();
+            HealthServicesInitializer.registerServiceWrappers();
             WifiFrameworkInitializer.registerServiceWrappers();
             StatsFrameworkInitializer.registerServiceWrappers();
             RollbackManagerFrameworkInitializer.initialize();
