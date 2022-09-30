@@ -19,7 +19,6 @@ package com.android.server.wm.flicker.launch
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.RequiresDevice
-import android.view.Surface
 import android.view.WindowInsets
 import android.view.WindowManager
 import androidx.test.uiautomator.By
@@ -75,14 +74,7 @@ open class OpenAppFromNotificationWarm(
                     .withFullScreenApp(testApp)
                     .waitForAndVerify()
                 testApp.postNotification(wmHelper)
-
-                if (testSpec.isTablet) {
-                    tapl.setExpectedRotation(testSpec.startRotation)
-                } else {
-                    tapl.setExpectedRotation(Surface.ROTATION_0)
-                }
-
-                tapl.goHome()
+                device.pressHome()
                 wmHelper.StateSyncBuilder()
                     .withHomeActivityVisible()
                     .waitForAndVerify()
