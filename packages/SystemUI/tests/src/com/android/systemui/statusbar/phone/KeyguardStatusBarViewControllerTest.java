@@ -47,6 +47,7 @@ import androidx.test.filters.SmallTest;
 import com.android.keyguard.CarrierTextController;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
+import com.android.keyguard.logging.KeyguardLogger;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.battery.BatteryMeterViewController;
@@ -123,6 +124,7 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     private StatusBarUserInfoTracker mStatusBarUserInfoTracker;
     @Mock private SecureSettings mSecureSettings;
     @Mock private CommandQueue mCommandQueue;
+    @Mock private KeyguardLogger mLogger;
 
     private TestNotificationPanelViewStateProvider mNotificationPanelViewStateProvider;
     private KeyguardStatusBarView mKeyguardStatusBarView;
@@ -172,7 +174,8 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
                 mStatusBarUserInfoTracker,
                 mSecureSettings,
                 mCommandQueue,
-                mFakeExecutor
+                mFakeExecutor,
+                mLogger
         );
     }
 

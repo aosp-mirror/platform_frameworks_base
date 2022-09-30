@@ -40,6 +40,7 @@ import androidx.annotation.VisibleForTesting;
 import com.android.keyguard.CarrierTextController;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
+import com.android.keyguard.logging.KeyguardLogger;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.battery.BatteryMeterViewController;
@@ -116,6 +117,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
     private final CommandQueue mCommandQueue;
     private final Executor mMainExecutor;
     private final Object mLock = new Object();
+    private final KeyguardLogger mLogger;
 
     private final ConfigurationController.ConfigurationListener mConfigurationListener =
             new ConfigurationController.ConfigurationListener() {
@@ -279,7 +281,8 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
             StatusBarUserInfoTracker statusBarUserInfoTracker,
             SecureSettings secureSettings,
             CommandQueue commandQueue,
-            @Main Executor mainExecutor
+            @Main Executor mainExecutor,
+            KeyguardLogger logger
     ) {
         super(view);
         mCarrierTextController = carrierTextController;
@@ -304,6 +307,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
         mSecureSettings = secureSettings;
         mCommandQueue = commandQueue;
         mMainExecutor = mainExecutor;
+        mLogger = logger;
 
         mFirstBypassAttempt = mKeyguardBypassController.getBypassEnabled();
         mKeyguardStateController.addCallback(
@@ -430,6 +434,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
 
     /** Animate the keyguard status bar in. */
     public void animateKeyguardStatusBarIn() {
+        mLogger.d("animating status bar in");
         if (mDisableStateTracker.isDisabled()) {
             // If our view is disabled, don't allow us to animate in.
             return;
@@ -445,6 +450,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
 
     /** Animate the keyguard status bar out. */
     public void animateKeyguardStatusBarOut(long startDelay, long duration) {
+        mLogger.d("animating status bar out");
         ValueAnimator anim = ValueAnimator.ofFloat(mView.getAlpha(), 0f);
         anim.addUpdateListener(mAnimatorUpdateListener);
         anim.setStartDelay(startDelay);
@@ -481,6 +487,9 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
             newAlpha = Math.min(getKeyguardContentsAlpha(), alphaQsExpansion)
                     * mKeyguardStatusBarAnimateAlpha
                     * (1.0f - mKeyguardHeadsUpShowingAmount);
+            if (newAlpha != mView.getAlpha() && (newAlpha == 0 || newAlpha == 1)) {
+                mLogger.logStatusBarCalculatedAlpha(newAlpha);
+            }
         }
 
         boolean hideForBypass =
@@ -502,6 +511,10 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
     public void updateViewState(float alpha, int visibility) {
         if (mDisableStateTracker.isDisabled()) {
             visibility = View.INVISIBLE;
+        }
+        if (visibility != mView.getVisibility()) {
+            mLogger.logStatusBarAlphaVisibility(visibility, alpha,
+                    StatusBarState.toString(mStatusBarState));
         }
         mView.setAlpha(alpha);
         mView.setVisibility(visibility);
@@ -596,6 +609,8 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
         pw.println("KeyguardStatusBarView:");
         pw.println("  mBatteryListening: " + mBatteryListening);
         pw.println("  mExplicitAlpha: " + mExplicitAlpha);
+        pw.println("  alpha: " + mView.getAlpha());
+        pw.println("  visibility: " + mView.getVisibility());
         mView.dump(pw, args);
     }
 
@@ -605,6 +620,10 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
      * @param alpha a value between 0 and 1. -1 if the value is to be reset/ignored.
      */
     public void setAlpha(float alpha) {
+        if (mExplicitAlpha != alpha && (mExplicitAlpha == -1 || alpha == -1)) {
+            // logged if value changed to ignored or from ignored
+            mLogger.logStatusBarExplicitAlpha(alpha);
+        }
         mExplicitAlpha = alpha;
         updateViewState();
     }
