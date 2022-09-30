@@ -24,11 +24,12 @@ import androidx.annotation.DrawableRes
 import androidx.test.filters.SmallTest
 import com.android.internal.R as InternalR
 import com.android.systemui.R as SystemUIR
-import com.android.systemui.SysuiTestCase
 import com.android.systemui.tests.R
+import com.android.systemui.SysuiTestCase
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
+
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
@@ -101,11 +102,14 @@ class RoundedCornerResDelegateTest : SysuiTestCase() {
         assertEquals(Size(3, 3), roundedCornerResDelegate.topRoundedSize)
         assertEquals(Size(4, 4), roundedCornerResDelegate.bottomRoundedSize)
 
-        roundedCornerResDelegate.physicalPixelDisplaySizeRatio = 2f
+        setupResources(radius = 100,
+                roundedTopDrawable = getTestsDrawable(R.drawable.rounded4px),
+                roundedBottomDrawable = getTestsDrawable(R.drawable.rounded5px))
+
         roundedCornerResDelegate.updateDisplayUniqueId(null, 1)
 
-        assertEquals(Size(6, 6), roundedCornerResDelegate.topRoundedSize)
-        assertEquals(Size(8, 8), roundedCornerResDelegate.bottomRoundedSize)
+        assertEquals(Size(4, 4), roundedCornerResDelegate.topRoundedSize)
+        assertEquals(Size(5, 5), roundedCornerResDelegate.bottomRoundedSize)
     }
 
     @Test
