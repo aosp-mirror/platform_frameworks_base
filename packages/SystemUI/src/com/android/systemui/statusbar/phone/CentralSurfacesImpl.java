@@ -3312,19 +3312,23 @@ public class CentralSurfacesImpl extends CoreStartable implements
         mNotificationPanelViewController.onAffordanceLaunchEnded();
     }
 
+    /**
+     * Returns whether the keyguard should hide immediately (as opposed to via an animation).
+     * Non-scrimmed bouncers have a special animation tied to the notification panel expansion.
+     * @return whether the keyguard should be immediately hidden.
+     */
     @Override
-    public boolean onBackPressed() {
+    public boolean shouldKeyguardHideImmediately() {
         final boolean isScrimmedBouncer =
                 mScrimController.getState() == ScrimState.BOUNCER_SCRIMMED;
         final boolean isBouncerOverDream = isBouncerShowingOverDream();
+        return (isScrimmedBouncer || isBouncerOverDream);
+    }
 
-        if (mStatusBarKeyguardViewManager.onBackPressed(
-                isScrimmedBouncer || isBouncerOverDream /* hideImmediately */)) {
-            if (isScrimmedBouncer || isBouncerOverDream) {
-                mStatusBarStateController.setLeaveOpenOnKeyguardHide(false);
-            } else {
-                mNotificationPanelViewController.expandWithoutQs();
-            }
+    @Override
+    public boolean onBackPressed() {
+        if (mStatusBarKeyguardViewManager.canHandleBackPressed()) {
+            mStatusBarKeyguardViewManager.onBackPressed(false /* unused */);
             return true;
         }
         if (mNotificationPanelViewController.isQsCustomizing()) {
@@ -3339,7 +3343,7 @@ public class CentralSurfacesImpl extends CoreStartable implements
             return true;
         }
         if (mState != StatusBarState.KEYGUARD && mState != StatusBarState.SHADE_LOCKED
-                && !isBouncerOverDream) {
+                && !isBouncerShowingOverDream()) {
             if (mNotificationPanelViewController.canPanelBeCollapsed()) {
                 mShadeController.animateCollapsePanels();
             }

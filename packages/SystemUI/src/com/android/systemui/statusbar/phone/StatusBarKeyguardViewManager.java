@@ -31,12 +31,15 @@ import android.hardware.biometrics.BiometricSourceType;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.os.Trace;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewRootImpl;
 import android.view.WindowManagerGlobal;
+import android.window.OnBackInvokedCallback;
+import android.window.OnBackInvokedDispatcher;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -119,6 +122,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private static final long KEYGUARD_DISMISS_DURATION_LOCKED = 2000;
 
     private static String TAG = "StatusBarKeyguardViewManager";
+    private static final boolean DEBUG = false;
 
     protected final Context mContext;
     private final ConfigurationController mConfigurationController;
@@ -184,8 +188,25 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             if (mAlternateAuthInterceptor != null) {
                 mAlternateAuthInterceptor.onBouncerVisibilityChanged();
             }
+
+            /* Register predictive back callback when keyguard becomes visible, and unregister
+            when it's hidden. */
+            if (isVisible) {
+                registerBackCallback();
+            } else {
+                unregisterBackCallback();
+            }
         }
     };
+
+    private final OnBackInvokedCallback mOnBackInvokedCallback = () -> {
+        if (DEBUG) {
+            Log.d(TAG, "onBackInvokedCallback() called, invoking onBackPressed()");
+        }
+        onBackPressed(false /* unused */);
+    };
+    private boolean mIsBackCallbackRegistered = false;
+
     private final DockManager.DockEventListener mDockEventListener =
             new DockManager.DockEventListener() {
                 @Override
@@ -375,6 +396,46 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         if (mDockManager != null) {
             mDockManager.addListener(mDockEventListener);
             mIsDocked = mDockManager.isDocked();
+        }
+    }
+
+    /** Register a callback, to be invoked by the Predictive Back system. */
+    private void registerBackCallback() {
+        if (!mIsBackCallbackRegistered) {
+            ViewRootImpl viewRoot = getViewRootImpl();
+            if (viewRoot != null) {
+                viewRoot.getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
+                        OnBackInvokedDispatcher.PRIORITY_OVERLAY, mOnBackInvokedCallback);
+                mIsBackCallbackRegistered = true;
+            } else {
+                if (DEBUG) {
+                    Log.d(TAG, "view root was null, could not register back callback");
+                }
+            }
+        } else {
+            if (DEBUG) {
+                Log.d(TAG, "prevented registering back callback twice");
+            }
+        }
+    }
+
+    /** Unregister the callback formerly registered with the Predictive Back system. */
+    private void unregisterBackCallback() {
+        if (mIsBackCallbackRegistered) {
+            ViewRootImpl viewRoot = getViewRootImpl();
+            if (viewRoot != null) {
+                viewRoot.getOnBackInvokedDispatcher().unregisterOnBackInvokedCallback(
+                        mOnBackInvokedCallback);
+                mIsBackCallbackRegistered = false;
+            } else {
+                if (DEBUG) {
+                    Log.d(TAG, "view root was null, could not unregister back callback");
+                }
+            }
+        } else {
+            if (DEBUG) {
+                Log.d(TAG, "prevented unregistering back callback twice");
+            }
         }
     }
 
@@ -1015,25 +1076,47 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     /**
-     * Notifies this manager that the back button has been pressed.
+     * Returns whether a back invocation can be handled, which depends on whether the keyguard
+     * is currently showing (which itself is derived from multiple states).
      *
-     * @param hideImmediately Hide bouncer when {@code true}, keep it around otherwise.
-     *                        Non-scrimmed bouncers have a special animation tied to the expansion
-     *                        of the notification panel.
-     * @return whether the back press has been handled
+     * @return whether a back press can be handled right now.
      */
-    public boolean onBackPressed(boolean hideImmediately) {
-        if (bouncerIsShowing()) {
-            mCentralSurfaces.endAffordanceLaunch();
-            // The second condition is for SIM card locked bouncer
-            if (bouncerIsScrimmed()
-                    && !needsFullscreenBouncer()) {
-                hideBouncer(false);
-                updateStates();
+    public boolean canHandleBackPressed() {
+        return mBouncer.isShowing();
+    }
+
+    /**
+     * Notifies this manager that the back button has been pressed.
+     */
+    // TODO(b/244635782): This "accept boolean and ignore it, and always return false" was done
+    //                    to make it possible to check this in *and* allow merging to master,
+    //                    where ArcStatusBarKeyguardViewManager inherits this class, and its
+    //                    build will break if we change this interface.
+    //                    So, overall, while this function refactors the behavior of onBackPressed,
+    //                    (it now handles the back press, and no longer returns *whether* it did so)
+    //                    its interface is not changing right now (but will, in a follow-up CL).
+    public boolean onBackPressed(boolean ignored) {
+        if (!canHandleBackPressed()) {
+            return false;
+        }
+
+        mCentralSurfaces.endAffordanceLaunch();
+        // The second condition is for SIM card locked bouncer
+        if (bouncerIsScrimmed() && needsFullscreenBouncer()) {
+            hideBouncer(false);
+            updateStates();
+        } else {
+            /* Non-scrimmed bouncers have a special animation tied to the expansion
+             * of the notification panel. We decide whether to kick this animation off
+             * by computing the hideImmediately boolean.
+             */
+            boolean hideImmediately = mCentralSurfaces.shouldKeyguardHideImmediately();
+            reset(hideImmediately);
+            if (hideImmediately) {
+                mStatusBarStateController.setLeaveOpenOnKeyguardHide(false);
             } else {
-                reset(hideImmediately);
+                mNotificationPanelViewController.expandWithoutQs();
             }
-            return true;
         }
         return false;
     }
@@ -1304,7 +1387,15 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     @Override
     public ViewRootImpl getViewRootImpl() {
-        return mNotificationShadeWindowController.getNotificationShadeView().getViewRootImpl();
+        ViewGroup viewGroup = mNotificationShadeWindowController.getNotificationShadeView();
+        if (viewGroup != null) {
+            return viewGroup.getViewRootImpl();
+        } else {
+            if (DEBUG) {
+                Log.d(TAG, "ViewGroup was null, cannot get ViewRootImpl");
+            }
+            return null;
+        }
     }
 
     public void launchPendingWakeupAction() {
