@@ -300,8 +300,11 @@ final class PersistentDataStore {
     }
 
     public boolean setBrightness(DisplayDevice displayDevice, float brightness) {
+        if (displayDevice == null || !displayDevice.hasStableUniqueId()) {
+            return false;
+        }
         final String displayDeviceUniqueId = displayDevice.getUniqueId();
-        if (!displayDevice.hasStableUniqueId() || displayDeviceUniqueId == null) {
+        if (displayDeviceUniqueId == null) {
             return false;
         }
         final DisplayState state = getDisplayState(displayDeviceUniqueId, true);
