@@ -236,8 +236,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         when(mActivityService.getCurrentUser()).thenReturn(mCurrentUserInfo);
         when(mActivityService.getCurrentUserId()).thenReturn(mCurrentUserId);
         when(mFaceManager.isHardwareDetected()).thenReturn(true);
-        when(mFaceManager.hasEnrolledTemplates()).thenReturn(true);
-        when(mFaceManager.hasEnrolledTemplates(anyInt())).thenReturn(true);
+        when(mAuthController.isFaceAuthEnrolled(anyInt())).thenReturn(true);
         when(mFaceManager.getSensorPropertiesInternal()).thenReturn(mFaceSensorProperties);
         when(mSessionTracker.getSessionId(SESSION_KEYGUARD)).thenReturn(mKeyguardInstanceId);
 
@@ -592,7 +591,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
         verify(mFaceManager).authenticate(any(), any(), any(), any(), anyInt(), anyBoolean());
         verify(mFaceManager).isHardwareDetected();
-        verify(mFaceManager).hasEnrolledTemplates(anyInt());
+        verify(mFaceManager, never()).hasEnrolledTemplates(anyInt());
     }
 
     @Test

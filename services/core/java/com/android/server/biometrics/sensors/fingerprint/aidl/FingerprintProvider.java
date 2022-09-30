@@ -384,28 +384,18 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                     mBiometricContext,
                     mSensors.get(sensorId).getSensorProperties(),
                     mUdfpsOverlayController, mSidefpsController, maxTemplatesPerUser, enrollReason);
-            scheduleForSensor(sensorId, client, new ClientMonitorCallback() {
-
-                @Override
-                public void onClientStarted(@NonNull BaseClientMonitor clientMonitor) {
-                    mBiometricStateCallback.onClientStarted(clientMonitor);
-                }
-
-                @Override
-                public void onBiometricAction(int action) {
-                    mBiometricStateCallback.onBiometricAction(action);
-                }
-
+            scheduleForSensor(sensorId, client, new ClientMonitorCompositeCallback(
+                    mBiometricStateCallback, new ClientMonitorCallback() {
                 @Override
                 public void onClientFinished(@NonNull BaseClientMonitor clientMonitor,
                         boolean success) {
-                    mBiometricStateCallback.onClientFinished(clientMonitor, success);
+                    ClientMonitorCallback.super.onClientFinished(clientMonitor, success);
                     if (success) {
                         scheduleLoadAuthenticatorIdsForUser(sensorId, userId);
                         scheduleInvalidationRequest(sensorId, userId);
                     }
                 }
-            });
+            }));
         });
         return id;
     }

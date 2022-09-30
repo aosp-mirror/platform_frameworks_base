@@ -153,6 +153,7 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
     @Nullable private List<FingerprintSensorPropertiesInternal> mSidefpsProps;
 
     @NonNull private final SparseBooleanArray mUdfpsEnrolledForUser;
+    @NonNull private final SparseBooleanArray mFaceEnrolledForUser;
     @NonNull private final SensorPrivacyManager mSensorPrivacyManager;
     private final WakefulnessLifecycle mWakefulnessLifecycle;
     private boolean mAllFingerprintAuthenticatorsRegistered;
@@ -346,6 +347,15 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
             for (FingerprintSensorPropertiesInternal prop : mUdfpsProps) {
                 if (prop.sensorId == sensorId) {
                     mUdfpsEnrolledForUser.put(userId, hasEnrollments);
+                }
+            }
+        }
+        if (mFaceProps == null) {
+            Log.d(TAG, "handleEnrollmentsChanged, mFaceProps is null");
+        } else {
+            for (FaceSensorPropertiesInternal prop : mFaceProps) {
+                if (prop.sensorId == sensorId) {
+                    mFaceEnrolledForUser.put(userId, hasEnrollments);
                 }
             }
         }
@@ -715,6 +725,7 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
         mWindowManager = windowManager;
         mInteractionJankMonitor = jankMonitor;
         mUdfpsEnrolledForUser = new SparseBooleanArray();
+        mFaceEnrolledForUser = new SparseBooleanArray();
         mVibratorHelper = vibrator;
 
         mOrientationListener = new BiometricDisplayListener(
@@ -1067,7 +1078,7 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
             return false;
         }
 
-        return mFaceManager.hasEnrolledTemplates(userId);
+        return mFaceEnrolledForUser.get(userId);
     }
 
     /**

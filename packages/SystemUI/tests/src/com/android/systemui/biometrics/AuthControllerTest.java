@@ -25,7 +25,9 @@ import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_AWA
 import static com.google.common.truth.Truth.assertThat;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNull;
+import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -236,7 +238,7 @@ public class AuthControllerTest extends SysuiTestCase {
                         2 /* sensorId */,
                         SensorProperties.STRENGTH_STRONG,
                         1 /* maxEnrollmentsPerUser */,
-                        fpComponentInfo,
+                        faceComponentInfo,
                         FaceSensorProperties.TYPE_RGB,
                         true /* supportsFaceDetection */,
                         true /* supportsSelfIllumination */,
@@ -276,8 +278,6 @@ public class AuthControllerTest extends SysuiTestCase {
         reset(mFingerprintManager);
         reset(mFaceManager);
 
-        when(mVibratorHelper.hasVibrator()).thenReturn(true);
-
         // This test requires an uninitialized AuthController.
         AuthController authController = new TestableAuthController(mContextSpy, mExecution,
                 mCommandQueue, mActivityTaskManager, mWindowManager, mFingerprintManager,
@@ -307,8 +307,6 @@ public class AuthControllerTest extends SysuiTestCase {
         // This test is sensitive to prior FingerprintManager interactions.
         reset(mFingerprintManager);
         reset(mFaceManager);
-
-        when(mVibratorHelper.hasVibrator()).thenReturn(true);
 
         // This test requires an uninitialized AuthController.
         AuthController authController = new TestableAuthController(mContextSpy, mExecution,
@@ -341,6 +339,36 @@ public class AuthControllerTest extends SysuiTestCase {
 
         // Nothing should crash.
     }
+
+    @Test
+    public void testFaceAuthEnrollmentStatus() throws RemoteException {
+        final int userId = 0;
+
+        reset(mFaceManager);
+        mAuthController.start();
+
+        verify(mFaceManager).addAuthenticatorsRegisteredCallback(
+                mFaceAuthenticatorsRegisteredCaptor.capture());
+
+        mFaceAuthenticatorsRegisteredCaptor.getValue().onAllAuthenticatorsRegistered(
+                mFaceManager.getSensorPropertiesInternal());
+        mTestableLooper.processAllMessages();
+
+        verify(mFaceManager).registerBiometricStateListener(
+                mBiometricStateCaptor.capture());
+
+        assertFalse(mAuthController.isFaceAuthEnrolled(userId));
+
+        // Enrollments changed for an unknown sensor.
+        for (BiometricStateListener listener : mBiometricStateCaptor.getAllValues()) {
+            listener.onEnrollmentsChanged(userId,
+                    2 /* sensorId */, true /* hasEnrollments */);
+        }
+        mTestableLooper.processAllMessages();
+
+        assertTrue(mAuthController.isFaceAuthEnrolled(userId));
+    }
+
 
     @Test
     public void testSendsReasonUserCanceled_whenDismissedByUserCancel() throws Exception {
