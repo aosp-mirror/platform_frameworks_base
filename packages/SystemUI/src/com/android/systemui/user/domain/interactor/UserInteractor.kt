@@ -46,7 +46,9 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.policy.UserSwitcherController
 import com.android.systemui.telephony.domain.interactor.TelephonyInteractor
 import com.android.systemui.user.data.repository.UserRepository
+import com.android.systemui.user.data.source.UserRecord
 import com.android.systemui.user.domain.model.ShowDialogRequestModel
+import com.android.systemui.user.legacyhelper.data.LegacyUserDataHelper
 import com.android.systemui.user.shared.model.UserActionModel
 import com.android.systemui.user.shared.model.UserModel
 import com.android.systemui.util.kotlin.pairwise
@@ -57,6 +59,8 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -65,6 +69,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.withContext
 
 /** Encapsulates business logic to interact with user data and systems. */
@@ -233,6 +238,54 @@ constructor(
                         }
                     }
             }
+
+    val userRecords: StateFlow<ArrayList<UserRecord>> =
+        if (isNewImpl) {
+            combine(
+                    repository.userInfos,
+                    repository.selectedUserInfo,
+                    actions,
+                    repository.userSwitcherSettings,
+                ) { userInfos, selectedUserInfo, actionModels, settings ->
+                    ArrayList(
+                        userInfos.map {
+                            toRecord(
+                                userInfo = it,
+                                selectedUserId = selectedUserInfo.id,
+                            )
+                        } +
+                            actionModels.map {
+                                toRecord(
+                                    action = it,
+                                    selectedUserId = selectedUserInfo.id,
+                                    isAddFromLockscreenEnabled = settings.isAddUsersFromLockscreen,
+                                )
+                            }
+                    )
+                }
+                .stateIn(
+                    scope = applicationScope,
+                    started = SharingStarted.Eagerly,
+                    initialValue = ArrayList(),
+                )
+        } else {
+            MutableStateFlow(ArrayList())
+        }
+
+    val selectedUserRecord: StateFlow<UserRecord?> =
+        if (isNewImpl) {
+            repository.selectedUserInfo
+                .map { selectedUserInfo ->
+                    toRecord(userInfo = selectedUserInfo, selectedUserId = selectedUserInfo.id)
+                }
+                .stateIn(
+                    scope = applicationScope,
+                    started = SharingStarted.Eagerly,
+                    initialValue = null,
+                )
+        } else {
+            MutableStateFlow(null)
+        }
 
     /** Whether the device is configured to always have a guest user available. */
     val isGuestUserAutoCreated: Boolean = guestUserInteractor.isGuestUserAutoCreated
@@ -405,6 +458,44 @@ constructor(
                     )
             }
         }
+    }
+
+    private suspend fun toRecord(
+        userInfo: UserInfo,
+        selectedUserId: Int,
+    ): UserRecord {
+        return LegacyUserDataHelper.createRecord(
+            context = applicationContext,
+            manager = manager,
+            userInfo = userInfo,
+            picture = null,
+            isCurrent = userInfo.id == selectedUserId,
+            canSwitchUsers = canSwitchUsers(selectedUserId),
+        )
+    }
+
+    private suspend fun toRecord(
+        action: UserActionModel,
+        selectedUserId: Int,
+        isAddFromLockscreenEnabled: Boolean,
+    ): UserRecord {
+        return LegacyUserDataHelper.createRecord(
+            context = applicationContext,
+            selectedUserId = selectedUserId,
+            actionType = action,
+            isRestricted =
+                if (action == UserActionModel.ENTER_GUEST_MODE) {
+                    // Entering guest mode is never restricted, so it's allowed to happen from the
+                    // lockscreen even if the "add from lockscreen" system setting is off.
+                    false
+                } else {
+                    !isAddFromLockscreenEnabled
+                },
+            isSwitchToEnabled =
+                canSwitchUsers(selectedUserId) &&
+                    // If the user is auto-created is must not be currently resetting.
+                    !(isGuestUserAutoCreated && isGuestUserResetting),
+        )
     }
 
     private fun exitGuestUser(

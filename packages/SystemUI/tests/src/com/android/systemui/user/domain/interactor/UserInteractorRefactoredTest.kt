@@ -29,6 +29,7 @@ import com.android.internal.R.drawable.ic_account_circle
 import com.android.systemui.R
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.user.data.model.UserSwitcherSettingsModel
+import com.android.systemui.user.data.source.UserRecord
 import com.android.systemui.user.domain.model.ShowDialogRequestModel
 import com.android.systemui.user.shared.model.UserActionModel
 import com.android.systemui.user.shared.model.UserModel
@@ -62,6 +63,7 @@ class UserInteractorRefactoredTest : UserInteractorTest() {
         super.setUp()
 
         overrideResource(R.drawable.ic_account_circle, GUEST_ICON)
+        overrideResource(R.dimen.max_avatar_size, 10)
         overrideResource(
             com.android.internal.R.string.config_supervisedUserCreationPackage,
             SUPERVISED_USER_CREATION_APP_PACKAGE,
@@ -470,6 +472,49 @@ class UserInteractorRefactoredTest : UserInteractorTest() {
             assertThat(userRepository.refreshUsersCallCount).isEqualTo(refreshUsersCallCount)
         }
 
+    @Test
+    fun userRecords() =
+        runBlocking(IMMEDIATE) {
+            val userInfos = createUserInfos(count = 3, includeGuest = false)
+            userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = true))
+            userRepository.setUserInfos(userInfos)
+            userRepository.setSelectedUserInfo(userInfos[0])
+            keyguardRepository.setKeyguardShowing(false)
+
+            testCoroutineScope.advanceUntilIdle()
+
+            assertRecords(
+                records = underTest.userRecords.value,
+                userIds = listOf(0, 1, 2),
+                selectedUserIndex = 0,
+                includeGuest = false,
+                expectedActions =
+                    listOf(
+                        UserActionModel.ENTER_GUEST_MODE,
+                        UserActionModel.ADD_USER,
+                        UserActionModel.ADD_SUPERVISED_USER,
+                    ),
+            )
+        }
+
+    @Test
+    fun selectedUserRecord() =
+        runBlocking(IMMEDIATE) {
+            val userInfos = createUserInfos(count = 3, includeGuest = true)
+            userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = true))
+            userRepository.setUserInfos(userInfos)
+            userRepository.setSelectedUserInfo(userInfos[0])
+            keyguardRepository.setKeyguardShowing(false)
+
+            assertRecordForUser(
+                record = underTest.selectedUserRecord.value,
+                id = 0,
+                hasPicture = true,
+                isCurrent = true,
+                isSwitchToEnabled = true,
+            )
+        }
+
     private fun assertUsers(
         models: List<UserModel>?,
         count: Int,
@@ -500,6 +545,65 @@ class UserInteractorRefactoredTest : UserInteractorTest() {
         assertThat(model.isSelected).isEqualTo(isSelected)
         assertThat(model.isSelectable).isTrue()
         assertThat(model.isGuest).isEqualTo(isGuest)
+    }
+
+    private fun assertRecords(
+        records: List<UserRecord>,
+        userIds: List<Int>,
+        selectedUserIndex: Int = 0,
+        includeGuest: Boolean = false,
+        expectedActions: List<UserActionModel> = emptyList(),
+    ) {
+        assertThat(records.size >= userIds.size).isTrue()
+        userIds.indices.forEach { userIndex ->
+            val record = records[userIndex]
+            assertThat(record.info).isNotNull()
+            val isGuest = includeGuest && userIndex == userIds.size - 1
+            assertRecordForUser(
+                record = record,
+                id = userIds[userIndex],
+                hasPicture = !isGuest,
+                isCurrent = userIndex == selectedUserIndex,
+                isGuest = isGuest,
+                isSwitchToEnabled = true,
+            )
+        }
+
+        assertThat(records.size - userIds.size).isEqualTo(expectedActions.size)
+        (userIds.size until userIds.size + expectedActions.size).forEach { actionIndex ->
+            val record = records[actionIndex]
+            assertThat(record.info).isNull()
+            assertRecordForAction(
+                record = record,
+                type = expectedActions[actionIndex - userIds.size],
+            )
+        }
+    }
+
+    private fun assertRecordForUser(
+        record: UserRecord?,
+        id: Int? = null,
+        hasPicture: Boolean = false,
+        isCurrent: Boolean = false,
+        isGuest: Boolean = false,
+        isSwitchToEnabled: Boolean = false,
+    ) {
+        checkNotNull(record)
+        assertThat(record.info?.id).isEqualTo(id)
+        assertThat(record.picture != null).isEqualTo(hasPicture)
+        assertThat(record.isCurrent).isEqualTo(isCurrent)
+        assertThat(record.isGuest).isEqualTo(isGuest)
+        assertThat(record.isSwitchToEnabled).isEqualTo(isSwitchToEnabled)
+    }
+
+    private fun assertRecordForAction(
+        record: UserRecord,
+        type: UserActionModel,
+    ) {
+        assertThat(record.isGuest).isEqualTo(type == UserActionModel.ENTER_GUEST_MODE)
+        assertThat(record.isAddUser).isEqualTo(type == UserActionModel.ADD_USER)
+        assertThat(record.isAddSupervisedUser)
+            .isEqualTo(type == UserActionModel.ADD_SUPERVISED_USER)
     }
 
     private fun createUserInfos(
@@ -547,8 +651,8 @@ class UserInteractorRefactoredTest : UserInteractorTest() {
 
     companion object {
         private val IMMEDIATE = Dispatchers.Main.immediate
-        private val ICON: Bitmap = mock()
+        private val ICON = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
         private val GUEST_ICON: Drawable = mock()
-        private val SUPERVISED_USER_CREATION_APP_PACKAGE = "supervisedUserCreation"
+        private const val SUPERVISED_USER_CREATION_APP_PACKAGE = "supervisedUserCreation"
     }
 }

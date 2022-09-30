@@ -49,6 +49,7 @@ abstract class UserInteractorTest : SysuiTestCase() {
 
     protected lateinit var underTest: UserInteractor
 
+    protected lateinit var testCoroutineScope: TestCoroutineScope
     protected lateinit var userRepository: FakeUserRepository
     protected lateinit var keyguardRepository: FakeKeyguardRepository
     protected lateinit var telephonyRepository: FakeTelephonyRepository
@@ -61,10 +62,10 @@ abstract class UserInteractorTest : SysuiTestCase() {
         userRepository = FakeUserRepository()
         keyguardRepository = FakeKeyguardRepository()
         telephonyRepository = FakeTelephonyRepository()
-        val applicationScope = TestCoroutineScope()
+        testCoroutineScope = TestCoroutineScope()
         val refreshUsersScheduler =
             RefreshUsersScheduler(
-                applicationScope = applicationScope,
+                applicationScope = testCoroutineScope,
                 mainDispatcher = IMMEDIATE,
                 repository = userRepository,
             )
@@ -83,7 +84,7 @@ abstract class UserInteractorTest : SysuiTestCase() {
                         set(Flags.REFACTORED_USER_SWITCHER_CONTROLLER, isRefactored())
                     },
                 manager = manager,
-                applicationScope = applicationScope,
+                applicationScope = testCoroutineScope,
                 telephonyInteractor =
                     TelephonyInteractor(
                         repository = telephonyRepository,
@@ -95,7 +96,7 @@ abstract class UserInteractorTest : SysuiTestCase() {
                 guestUserInteractor =
                     GuestUserInteractor(
                         applicationContext = context,
-                        applicationScope = applicationScope,
+                        applicationScope = testCoroutineScope,
                         mainDispatcher = IMMEDIATE,
                         backgroundDispatcher = IMMEDIATE,
                         manager = manager,

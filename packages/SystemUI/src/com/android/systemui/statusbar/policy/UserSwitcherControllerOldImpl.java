@@ -17,8 +17,6 @@ package com.android.systemui.statusbar.policy;
 
 import static android.os.UserManager.SWITCHABILITY_STATUS_OK;
 
-import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
-
 import android.annotation.UserIdInt;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -51,11 +49,9 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.util.LatencyTracker;
-import com.android.settingslib.RestrictedLockUtilsInternal;
 import com.android.settingslib.users.UserCreatingDialog;
 import com.android.systemui.GuestResetOrExitSessionReceiver;
 import com.android.systemui.GuestResumeSessionReceiver;
-import com.android.systemui.R;
 import com.android.systemui.SystemUISecondaryUserService;
 import com.android.systemui.animation.DialogCuj;
 import com.android.systemui.animation.DialogLaunchAnimator;
@@ -73,6 +69,8 @@ import com.android.systemui.qs.user.UserSwitchDialogController.DialogShower;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.telephony.TelephonyListenerManager;
 import com.android.systemui.user.data.source.UserRecord;
+import com.android.systemui.user.legacyhelper.data.LegacyUserDataHelper;
+import com.android.systemui.user.shared.model.UserActionModel;
 import com.android.systemui.user.ui.dialog.AddUserDialog;
 import com.android.systemui.user.ui.dialog.ExitGuestDialog;
 import com.android.systemui.util.settings.GlobalSettings;
@@ -327,7 +325,6 @@ public class UserSwitcherControllerOldImpl implements UserSwitcherController {
 
             for (UserInfo info : infos) {
                 boolean isCurrent = currentId == info.id;
-                boolean switchToEnabled = canSwitchUsers || isCurrent;
                 if (!mUserSwitcherEnabled && !info.isPrimary()) {
                     continue;
                 }
@@ -336,26 +333,22 @@ public class UserSwitcherControllerOldImpl implements UserSwitcherController {
                     if (info.isGuest()) {
                         // Tapping guest icon triggers remove and a user switch therefore
                         // the icon shouldn't be enabled even if the user is current
-                        guestRecord = new UserRecord(info, null /* picture */,
-                                true /* isGuest */, isCurrent, false /* isAddUser */,
-                                false /* isRestricted */, canSwitchUsers,
-                                false /* isAddSupervisedUser */, null /* enforcedAdmin */);
+                        guestRecord = LegacyUserDataHelper.createRecord(
+                                mContext,
+                                mUserManager,
+                                null /* picture */,
+                                info,
+                                isCurrent,
+                                canSwitchUsers);
                     } else if (info.supportsSwitchToByUser()) {
-                        Bitmap picture = bitmaps.get(info.id);
-                        if (picture == null) {
-                            picture = mUserManager.getUserIcon(info.id);
-
-                            if (picture != null) {
-                                int avatarSize = mContext.getResources()
-                                        .getDimensionPixelSize(R.dimen.max_avatar_size);
-                                picture = Bitmap.createScaledBitmap(
-                                        picture, avatarSize, avatarSize, true);
-                            }
-                        }
-                        records.add(new UserRecord(info, picture, false /* isGuest */,
-                                isCurrent, false /* isAddUser */, false /* isRestricted */,
-                                switchToEnabled, false /* isAddSupervisedUser */,
-                                null /* enforcedAdmin */));
+                        records.add(
+                                LegacyUserDataHelper.createRecord(
+                                        mContext,
+                                        mUserManager,
+                                        bitmaps.get(info.id),
+                                        info,
+                                        isCurrent,
+                                        canSwitchUsers));
                     }
                 }
             }
@@ -366,28 +359,20 @@ public class UserSwitcherControllerOldImpl implements UserSwitcherController {
                     // we will just use it as an indicator for "Resetting guest...".
                     // Otherwise, default to canSwitchUsers.
                     boolean isSwitchToGuestEnabled = !mGuestIsResetting.get() && canSwitchUsers;
-                    guestRecord = new UserRecord(
-                            null /* info */,
-                            null /* picture */,
-                            true /* isGuest */,
-                            false /* isCurrent */,
-                            false /* isAddUser */,
+                    guestRecord = LegacyUserDataHelper.createRecord(
+                            mContext,
+                            currentId,
+                            UserActionModel.ENTER_GUEST_MODE,
                             false /* isRestricted */,
-                            isSwitchToGuestEnabled,
-                            false /* isAddSupervisedUser */,
-                            getEnforcedAdmin());
+                            isSwitchToGuestEnabled);
                     records.add(guestRecord);
                 } else if (canCreateGuest(guestRecord != null)) {
-                    guestRecord = new UserRecord(
-                            null /* info */,
-                            null /* picture */,
-                            true /* isGuest */,
-                            false /* isCurrent */,
-                            false /* isAddUser */,
-                            createIsRestricted(),
-                            canSwitchUsers,
-                            false /* isAddSupervisedUser */,
-                            getEnforcedAdmin());
+                    guestRecord = LegacyUserDataHelper.createRecord(
+                            mContext,
+                            currentId,
+                            UserActionModel.ENTER_GUEST_MODE,
+                            false /* isRestricted */,
+                            canSwitchUsers);
                     records.add(guestRecord);
                 }
             } else {
@@ -395,31 +380,23 @@ public class UserSwitcherControllerOldImpl implements UserSwitcherController {
             }
 
             if (canCreateUser()) {
-                UserRecord addUserRecord = new UserRecord(
-                        null /* info */,
-                        null /* picture */,
-                        false /* isGuest */,
-                        false /* isCurrent */,
-                        true /* isAddUser */,
+                final UserRecord userRecord = LegacyUserDataHelper.createRecord(
+                        mContext,
+                        currentId,
+                        UserActionModel.ADD_USER,
                         createIsRestricted(),
-                        canSwitchUsers,
-                        false /* isAddSupervisedUser */,
-                        getEnforcedAdmin());
-                records.add(addUserRecord);
+                        canSwitchUsers);
+                records.add(userRecord);
             }
 
             if (canCreateSupervisedUser()) {
-                UserRecord addUserRecord = new UserRecord(
-                        null /* info */,
-                        null /* picture */,
-                        false /* isGuest */,
-                        false /* isCurrent */,
-                        false /* isAddUser */,
+                final UserRecord userRecord = LegacyUserDataHelper.createRecord(
+                        mContext,
+                        currentId,
+                        UserActionModel.ADD_SUPERVISED_USER,
                         createIsRestricted(),
-                        canSwitchUsers,
-                        true /* isAddSupervisedUser */,
-                        getEnforcedAdmin());
-                records.add(addUserRecord);
+                        canSwitchUsers);
+                records.add(userRecord);
             }
 
             mUiExecutor.execute(() -> {
@@ -996,22 +973,6 @@ public class UserSwitcherControllerOldImpl implements UserSwitcherController {
     @Override
     public boolean isKeyguardShowing() {
         return mKeyguardStateController.isShowing();
-    }
-
-    @Nullable
-    private EnforcedAdmin getEnforcedAdmin() {
-        final EnforcedAdmin admin = RestrictedLockUtilsInternal.checkIfRestrictionEnforced(
-                mContext,
-                UserManager.DISALLOW_ADD_USER,
-                mUserTracker.getUserId());
-        if (admin != null && !RestrictedLockUtilsInternal.hasBaseUserRestriction(
-                mContext,
-                UserManager.DISALLOW_ADD_USER,
-                mUserTracker.getUserId())) {
-            return admin;
-        } else {
-            return null;
-        }
     }
 
     private boolean shouldUseSimpleUserSwitcher() {
