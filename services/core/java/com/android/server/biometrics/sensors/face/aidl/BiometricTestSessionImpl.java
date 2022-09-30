@@ -16,8 +16,6 @@
 
 package com.android.server.biometrics.sensors.face.aidl;
 
-import static android.Manifest.permission.TEST_BIOMETRIC;
-
 import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.ITestSession;
@@ -33,8 +31,8 @@ import android.os.RemoteException;
 import android.util.Slog;
 
 import com.android.server.biometrics.HardwareAuthTokenUtils;
-import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
+import com.android.server.biometrics.sensors.BiometricStateCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.face.FaceUtils;
 
