@@ -237,7 +237,7 @@ public class BaseInputConnection implements InputConnection {
      */
     @Override
     public boolean commitText(CharSequence text, int newCursorPosition) {
-        if (DEBUG) Log.v(TAG, "commitText " + text);
+        if (DEBUG) Log.v(TAG, "commitText(" + text + ", " + newCursorPosition + ")");
         replaceText(text, newCursorPosition, false);
         sendCurrentText();
         return true;
@@ -260,7 +260,7 @@ public class BaseInputConnection implements InputConnection {
      */
     @Override
     public boolean deleteSurroundingText(int beforeLength, int afterLength) {
-        if (DEBUG) Log.v(TAG, "deleteSurroundingText " + beforeLength + " / " + afterLength);
+        if (DEBUG) Log.v(TAG, "deleteSurroundingText(" + beforeLength + ", " + afterLength + ")");
         final Editable content = getEditable();
         if (content == null) return false;
 
@@ -747,13 +747,14 @@ public class BaseInputConnection implements InputConnection {
      */
     @Override
     public boolean setComposingText(CharSequence text, int newCursorPosition) {
-        if (DEBUG) Log.v(TAG, "setComposingText " + text);
+        if (DEBUG) Log.v(TAG, "setComposingText(" + text + ", " + newCursorPosition + ")");
         replaceText(text, newCursorPosition, true);
         return true;
     }
 
     @Override
     public boolean setComposingRegion(int start, int end) {
+        if (DEBUG) Log.v(TAG, "setComposingRegion(" + start + ", " + end + ")");
         final Editable content = getEditable();
         if (content != null) {
             beginBatchEdit();
@@ -797,7 +798,7 @@ public class BaseInputConnection implements InputConnection {
     /** The default implementation changes the selection position in the current editable text. */
     @Override
     public boolean setSelection(int start, int end) {
-        if (DEBUG) Log.v(TAG, "setSelection " + start + ", " + end);
+        if (DEBUG) Log.v(TAG, "setSelection(" + start + ", " + end + ")");
         final Editable content = getEditable();
         if (content == null) return false;
         int len = content.length();
@@ -995,11 +996,22 @@ public class BaseInputConnection implements InputConnection {
             setComposingSpans(sp);
         }
 
-        if (DEBUG) Log.v(TAG, "Replacing from " + a + " to " + b + " with \""
-                + text + "\", composing=" + composing
-                + ", type=" + text.getClass().getCanonicalName());
-
         if (DEBUG) {
+            Log.v(
+                    TAG,
+                    "Replacing from "
+                            + a
+                            + " to "
+                            + b
+                            + " with \""
+                            + text
+                            + "\", composing="
+                            + composing
+                            + ", newCursorPosition="
+                            + newCursorPosition
+                            + ", type="
+                            + text.getClass().getCanonicalName());
+
             LogPrinter lp = new LogPrinter(Log.VERBOSE, TAG);
             lp.println("Current text:");
             TextUtils.dumpSpans(content, lp, "  ");
@@ -1007,10 +1019,10 @@ public class BaseInputConnection implements InputConnection {
             TextUtils.dumpSpans(text, lp, "  ");
         }
 
-        // Position the cursor appropriately, so that after replacing the
-        // desired range of text it will be located in the correct spot.
-        // This allows us to deal with filters performing edits on the text
-        // we are providing here.
+        // Position the cursor appropriately, so that after replacing the desired range of text it
+        // will be located in the correct spot.
+        // This allows us to deal with filters performing edits on the text we are providing here.
+        int requestedNewCursorPosition = newCursorPosition;
         if (newCursorPosition > 0) {
             newCursorPosition += b - 1;
         } else {
@@ -1020,6 +1032,13 @@ public class BaseInputConnection implements InputConnection {
         if (newCursorPosition > content.length()) newCursorPosition = content.length();
         Selection.setSelection(content, newCursorPosition);
         content.replace(a, b, text);
+
+        // Replace (or insert) to the cursor (a==b==newCursorPosition) will position the cursor to
+        // the end of the new replaced/inserted text, we need to re-position the cursor to the start
+        // according the API definition: "if <= 0, this is relative to the start of the text".
+        if (requestedNewCursorPosition == 0 && a == b) {
+            Selection.setSelection(content, newCursorPosition);
+        }
 
         if (DEBUG) {
             LogPrinter lp = new LogPrinter(Log.VERBOSE, TAG);
