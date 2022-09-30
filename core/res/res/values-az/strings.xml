@@ -2051,8 +2051,7 @@
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Birdəfəlik girişə icazə verin"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"İcazə verməyin"</string>
     <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"Cihaz qeydləri cihazınızda baş verənləri qeyd edir. Tətbiqlər problemləri tapmaq və həll etmək üçün bu qeydlərdən istifadə edə bilər.\n\nBəzi qeydlərdə həssas məlumatlar ola bilər, ona görə də yalnız etibar etdiyiniz tətbiqlərin bütün cihaz qeydlərinə giriş etməsinə icazə verin. \n\nBu tətbiqin bütün cihaz qeydlərinə girişinə icazə verməsəniz, o, hələ də öz qeydlərinə giriş edə bilər. Cihaz istehsalçınız hələ də cihazınızda bəzi qeydlərə və ya məlumatlara giriş edə bilər."</string>
-    <!-- no translation found for log_access_confirmation_body (7379536536425265262) -->
-    <skip />
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"Cihaz qeydləri cihazınızda baş verənləri qeyd edir. Tətbiqlər problemləri tapmaq və həll etmək üçün bu qeydlərdən istifadə edə bilər.\n\nBəzi qeydlərdə həssas məlumatlar ola bilər, ona görə də yalnız etibar etdiyiniz tətbiqlərin bütün cihaz qeydlərinə giriş etməsinə icazə verin. \n\nBu tətbiqin bütün cihaz qeydlərinə girişinə icazə verməsəniz, o, hələ də öz qeydlərinə giriş edə bilər. Cihaz istehsalçınız hələ də cihazınızda bəzi qeydlərə və ya məlumatlara giriş edə bilər.\n\nƏtraflı məlumat: g.co/android/devicelogs."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Daha göstərməyin"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> <xliff:g id="APP_2">%2$s</xliff:g> tətbiqindən bölmələr göstərmək istəyir"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Redaktə edin"</string>

@@ -1233,7 +1233,7 @@
     <string name="unsupported_display_size_show" msgid="980129850974919375">"Luôn hiển thị"</string>
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"<xliff:g id="APP_NAME">%1$s</xliff:g> được xây dựng cho phiên bản không tương thích của hệ điều hành Android và có thể hoạt động không như mong đợi. Bạn có thể sử dụng phiên bản cập nhật của ứng dụng."</string>
     <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"Luôn hiển thị"</string>
-    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Kiểm tra bản cập nhật"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Kiểm tra để tìm bản cập nhật"</string>
     <string name="smv_application" msgid="3775183542777792638">"Ứng dụng <xliff:g id="APPLICATION">%1$s</xliff:g> (quá trình <xliff:g id="PROCESS">%2$s</xliff:g>) đã vi phạm chính sách StrictMode tự thi hành của mình."</string>
     <string name="smv_process" msgid="1398801497130695446">"Quá trình <xliff:g id="PROCESS">%1$s</xliff:g> đã vi phạm chính sách StrictMode tự thi hành của mình."</string>
     <string name="android_upgrading_title" product="default" msgid="7279077384220829683">"Điện thoại đang cập nhật…"</string>
@@ -1959,7 +1959,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"Hiện tại, bạn không thể truy cập vào ứng dụng này trên <xliff:g id="DEVICE">%1$s</xliff:g>. Hãy thử trên máy tính bảng."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Hiện tại, bạn không thể truy cập vào ứng dụng này trên <xliff:g id="DEVICE">%1$s</xliff:g>. Hãy thử trên điện thoại."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Ứng dụng này được xây dựng cho một phiên bản Android cũ hơn và có thể hoạt động không bình thường. Hãy thử kiểm tra các bản cập nhật hoặc liên hệ với nhà phát triển."</string>
-    <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Kiểm tra bản cập nhật"</string>
+    <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Kiểm tra để tìm bản cập nhật"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Bạn có tin nhắn mới"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Mở ứng dụng SMS để xem"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Một số chức năng có thể bị hạn chế"</string>
