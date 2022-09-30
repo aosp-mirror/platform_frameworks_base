@@ -16,9 +16,13 @@
 
 package com.android.settingslib.spaprivileged.model.app
 
+import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.os.UserHandle
+import android.os.UserManager
+import com.android.settingslib.spaprivileged.framework.common.devicePolicyManager
+import com.android.settingslib.spaprivileged.framework.common.userManager
 
 /** The user id for a given application. */
 val ApplicationInfo.userId: Int
@@ -34,6 +38,14 @@ fun ApplicationInfo.hasFlag(flag: Int): Boolean = (flags and flag) > 0
 /** Checks whether the application is disabled until used. */
 val ApplicationInfo.isDisabledUntilUsed: Boolean
     get() = enabledSetting == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED
+
+/** Checks whether the application is disallowed control. */
+fun ApplicationInfo.isDisallowControl(context: Context) =
+    context.userManager.hasBaseUserRestriction(UserManager.DISALLOW_APPS_CONTROL, userHandle)
+
+/** Checks whether the application is an active admin. */
+fun ApplicationInfo.isActiveAdmin(context: Context): Boolean =
+    context.devicePolicyManager.packageHasActiveAdmins(packageName, userId)
 
 /** Converts to the route string which used in navigation. */
 fun ApplicationInfo.toRoute() = "$packageName/$userId"

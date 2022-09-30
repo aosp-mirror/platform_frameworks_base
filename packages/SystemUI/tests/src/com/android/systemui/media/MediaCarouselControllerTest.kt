@@ -30,7 +30,6 @@ import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.notification.collection.provider.OnReorderingAllowedListener
 import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider
 import com.android.systemui.statusbar.policy.ConfigurationController
-import com.android.systemui.util.animation.TransitionLayout
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
@@ -46,7 +45,6 @@ import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 
@@ -73,10 +71,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
     @Mock lateinit var dumpManager: DumpManager
     @Mock lateinit var logger: MediaUiEventLogger
     @Mock lateinit var debugLogger: MediaCarouselControllerLogger
-    @Mock lateinit var mediaViewHolder: MediaViewHolder
-    @Mock lateinit var player: TransitionLayout
-    @Mock lateinit var recommendationViewHolder: RecommendationViewHolder
-    @Mock lateinit var recommendations: TransitionLayout
     @Mock lateinit var mediaPlayer: MediaControlPanel
     @Mock lateinit var mediaViewController: MediaViewController
     @Mock lateinit var smartspaceMediaData: SmartspaceMediaData
@@ -280,46 +274,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         mediaCarouselController.removePlayer(SMARTSPACE_KEY)
 
         verify(logger).logRecommendationRemoved(eq(packageName), eq(instanceId!!))
-    }
-
-    @Test
-    fun testSetSquishinessFractionForMedia_setPlayerBottom() {
-        whenever(panel.mediaViewHolder).thenReturn(mediaViewHolder)
-        whenever(mediaViewHolder.player).thenReturn(player)
-        whenever(player.measuredHeight).thenReturn(100)
-
-        val playingLocal = Triple("playing local",
-                DATA.copy(active = true, isPlaying = true,
-                        playbackLocation = MediaData.PLAYBACK_LOCAL, resumption = false),
-                4500L)
-        MediaPlayerData.addMediaPlayer(playingLocal.first, playingLocal.second, panel, clock,
-                false, debugLogger)
-
-        mediaCarouselController.squishinessFraction = 0.0f
-        verify(player).bottom = 50
-        verifyNoMoreInteractions(recommendationViewHolder)
-
-        mediaCarouselController.squishinessFraction = 0.5f
-        verify(player).bottom = 75
-        verifyNoMoreInteractions(recommendationViewHolder)
-    }
-
-    @Test
-    fun testSetSquishinessFractionForRecommendation_setPlayerBottom() {
-        whenever(panel.recommendationViewHolder).thenReturn(recommendationViewHolder)
-        whenever(recommendationViewHolder.recommendations).thenReturn(recommendations)
-        whenever(recommendations.measuredHeight).thenReturn(100)
-
-        MediaPlayerData.addMediaRecommendation(SMARTSPACE_KEY, EMPTY_SMARTSPACE_MEDIA_DATA, panel,
-                false, clock)
-
-        mediaCarouselController.squishinessFraction = 0.0f
-        verifyNoMoreInteractions(mediaViewHolder)
-        verify(recommendationViewHolder.recommendations).bottom = 50
-
-        mediaCarouselController.squishinessFraction = 0.5f
-        verifyNoMoreInteractions(mediaViewHolder)
-        verify(recommendationViewHolder.recommendations).bottom = 75
     }
 
     fun testMediaLoaded_ScrollToActivePlayer() {

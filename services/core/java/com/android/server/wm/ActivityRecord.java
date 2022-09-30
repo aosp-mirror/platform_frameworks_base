@@ -1354,10 +1354,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return true;
     }
 
-    void setAppTimeTracker(AppTimeTracker att) {
-        appTimeTracker = att;
-    }
-
     /** Update the saved state of an activity. */
     void setSavedState(@Nullable Bundle savedState) {
         mIcicle = savedState;

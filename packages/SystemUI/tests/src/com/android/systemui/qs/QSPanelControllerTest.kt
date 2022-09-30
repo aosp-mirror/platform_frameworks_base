@@ -6,7 +6,6 @@ import com.android.internal.logging.MetricsLogger
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.media.MediaCarouselController
 import com.android.systemui.media.MediaHost
 import com.android.systemui.media.MediaHostState
 import com.android.systemui.plugins.FalsingManager
@@ -41,7 +40,6 @@ class QSPanelControllerTest : SysuiTestCase() {
     @Mock private lateinit var qsCustomizerController: QSCustomizerController
     @Mock private lateinit var qsTileRevealControllerFactory: QSTileRevealController.Factory
     @Mock private lateinit var dumpManager: DumpManager
-    @Mock private lateinit var mediaCarouselController: MediaCarouselController
     @Mock private lateinit var metricsLogger: MetricsLogger
     @Mock private lateinit var uiEventLogger: UiEventLogger
     @Mock private lateinit var qsLogger: QSLogger
@@ -78,7 +76,6 @@ class QSPanelControllerTest : SysuiTestCase() {
             mediaHost,
             qsTileRevealControllerFactory,
             dumpManager,
-            mediaCarouselController,
             metricsLogger,
             uiEventLogger,
             qsLogger,

@@ -41,6 +41,7 @@ import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -68,6 +69,7 @@ import android.view.SurfaceControl;
 import android.view.View;
 import android.view.WindowManager;
 import android.window.ClientWindowFrames;
+import android.window.ScreenCapture;
 import android.window.WindowContainerToken;
 
 import androidx.test.filters.SmallTest;
@@ -421,6 +423,45 @@ public class WindowManagerServiceTests extends WindowTestsBase {
                 LETTERBOX_BACKGROUND_WALLPAPER)).isTrue();
         assertThat(setupLetterboxConfigurationWithBackgroundType(
                 LETTERBOX_BACKGROUND_SOLID_COLOR)).isFalse();
+    }
+
+    @Test
+    public void testCaptureDisplay() {
+        Rect displayBounds = new Rect(0, 0, 100, 200);
+        spyOn(mDisplayContent);
+        when(mDisplayContent.getBounds()).thenReturn(displayBounds);
+
+        // Null captureArgs
+        ScreenCapture.LayerCaptureArgs resultingArgs =
+                mWm.getCaptureArgs(DEFAULT_DISPLAY, null /* captureArgs */);
+        assertEquals(displayBounds, resultingArgs.mSourceCrop);
+
+        // Non null captureArgs, didn't set rect
+        ScreenCapture.CaptureArgs captureArgs = new ScreenCapture.CaptureArgs.Builder<>().build();
+        resultingArgs = mWm.getCaptureArgs(DEFAULT_DISPLAY, captureArgs);
+        assertEquals(displayBounds, resultingArgs.mSourceCrop);
+
+        // Non null captureArgs, invalid rect
+        captureArgs = new ScreenCapture.CaptureArgs.Builder<>()
+                .setSourceCrop(new Rect(0, 0, -1, -1))
+                .build();
+        resultingArgs = mWm.getCaptureArgs(DEFAULT_DISPLAY, captureArgs);
+        assertEquals(displayBounds, resultingArgs.mSourceCrop);
+
+        // Non null captureArgs, null rect
+        captureArgs = new ScreenCapture.CaptureArgs.Builder<>()
+                .setSourceCrop(null)
+                .build();
+        resultingArgs = mWm.getCaptureArgs(DEFAULT_DISPLAY, captureArgs);
+        assertEquals(displayBounds, resultingArgs.mSourceCrop);
+
+        // Non null captureArgs, valid rect
+        Rect validRect = new Rect(0, 0, 10, 50);
+        captureArgs = new ScreenCapture.CaptureArgs.Builder<>()
+                .setSourceCrop(validRect)
+                .build();
+        resultingArgs = mWm.getCaptureArgs(DEFAULT_DISPLAY, captureArgs);
+        assertEquals(validRect, resultingArgs.mSourceCrop);
     }
 
     private void setupActivityWithLaunchCookie(IBinder launchCookie, WindowContainerToken wct) {

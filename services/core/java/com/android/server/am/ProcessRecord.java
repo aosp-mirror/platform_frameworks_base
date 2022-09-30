@@ -54,7 +54,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.procstats.ProcessState;
 import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.os.Zygote;
-import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.wm.WindowProcessController;
 import com.android.server.wm.WindowProcessListener;
 
@@ -1212,12 +1211,6 @@ class ProcessRecord implements WindowProcessListener {
                     long now = SystemClock.uptimeMillis();
                     baseProcessTracker.setState(ProcessStats.STATE_NOTHING,
                             tracker.getMemFactorLocked(), now, mPkgList.getPackageListLocked());
-                    mPkgList.forEachPackage((pkgName, holder) ->
-                            FrameworkStatsLog.write(FrameworkStatsLog.PROCESS_STATE_CHANGED,
-                                uid, processName, pkgName,
-                                ActivityManager.processStateAmToProto(ProcessStats.STATE_NOTHING),
-                                holder.appVersion)
-                    );
                     if (numOfPkgs != 1) {
                         mPkgList.forEachPackageProcessStats(holder -> {
                             if (holder.state != null && holder.state != baseProcessTracker) {

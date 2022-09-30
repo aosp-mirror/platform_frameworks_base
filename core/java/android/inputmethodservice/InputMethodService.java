@@ -65,6 +65,7 @@ import android.annotation.TestApi;
 import android.annotation.UiContext;
 import android.app.ActivityManager;
 import android.app.Dialog;
+import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -545,6 +546,20 @@ public class InputMethodService extends AbstractInputMethodService {
     @ChangeId
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.S)
     public static final long FINISH_INPUT_NO_FALLBACK_CONNECTION = 156215187L; // This is a bug id.
+
+    /**
+     * Disallow IMEs to override {@link InputMethodService#onCreateInputMethodSessionInterface()}
+     * method.
+     *
+     * <p>If IMEs targeting on Android U and beyond override the
+     * {@link InputMethodService#onCreateInputMethodSessionInterface()}, an {@link LinkageError}
+     * would be thrown.</p>
+     *
+     * @hide
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    private static final long DISALLOW_INPUT_METHOD_INTERFACE_OVERRIDE = 148086656L;
 
     LayoutInflater mInflater;
     TypedArray mThemeAttrs;
@@ -1527,6 +1542,11 @@ public class InputMethodService extends AbstractInputMethodService {
     }
 
     @Override public void onCreate() {
+        if (methodIsOverridden("onCreateInputMethodSessionInterface")
+                && CompatChanges.isChangeEnabled(DISALLOW_INPUT_METHOD_INTERFACE_OVERRIDE)) {
+            throw new LinkageError("InputMethodService#onCreateInputMethodSessionInterface()"
+                    + " can no longer be overridden!");
+        }
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMS.onCreate");
         mTheme = Resources.selectSystemTheme(mTheme,
                 getApplicationInfo().targetSdkVersion,
@@ -1764,6 +1784,9 @@ public class InputMethodService extends AbstractInputMethodService {
      * {@link InputMethodService#onDisplayCompletions(CompletionInfo[])},
      * {@link InputMethodService#onUpdateExtractedText(int, ExtractedText)},
      * {@link InputMethodService#onUpdateSelection(int, int, int, int, int, int)} instead.
+     *
+     * <p>IMEs targeting on Android U and above cannot override this method, or an
+     * {@link LinkageError} would be thrown.</p>
      */
     @Deprecated
     @Override
@@ -4066,5 +4089,14 @@ public class InputMethodService extends AbstractInputMethodService {
                 (downEvent.getFlags() & KeyEvent.FLAG_START_TRACKING) != 0;
         final KeyEvent upEvent = createBackKeyEvent(KeyEvent.ACTION_UP, hasStartedTracking);
         onKeyUp(KeyEvent.KEYCODE_BACK, upEvent);
+    }
+
+    private boolean methodIsOverridden(String methodName, Class<?>... parameterTypes) {
+        try {
+            return getClass().getMethod(methodName, parameterTypes).getDeclaringClass()
+                    != InputMethodService.class;
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException("Method must exist.", e);
+        }
     }
 }
