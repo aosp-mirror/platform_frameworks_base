@@ -35,6 +35,7 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.IntArray;
 import android.util.Pair;
 import android.util.Printer;
 import android.util.Slog;
@@ -42,6 +43,7 @@ import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
 import android.view.textservice.SpellCheckerInfo;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.inputmethod.StartInputFlags;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.LocalServices;
@@ -899,6 +901,72 @@ final class InputMethodUtils {
             }
             AdditionalSubtypeUtils.save(additionalSubtypeMap, mMethodMap, getCurrentUserId());
             return true;
+        }
+
+        boolean setEnabledInputMethodSubtypes(@NonNull String imeId,
+                @NonNull int[] subtypeHashCodes) {
+            final InputMethodInfo imi = mMethodMap.get(imeId);
+            if (imi == null) {
+                return false;
+            }
+
+            final IntArray validSubtypeHashCodes = new IntArray(subtypeHashCodes.length);
+            for (int subtypeHashCode : subtypeHashCodes) {
+                if (subtypeHashCode == NOT_A_SUBTYPE_ID) {
+                    continue;  // NOT_A_SUBTYPE_ID must not be saved
+                }
+                if (!SubtypeUtils.isValidSubtypeId(imi, subtypeHashCode)) {
+                    continue;  // this subtype does not exist in InputMethodInfo.
+                }
+                if (validSubtypeHashCodes.indexOf(subtypeHashCode) >= 0) {
+                    continue;  // The entry is already added.  No need to add anymore.
+                }
+                validSubtypeHashCodes.add(subtypeHashCode);
+            }
+
+            final String originalEnabledImesString = getEnabledInputMethodsStr();
+            final String updatedEnabledImesString = updateEnabledImeString(
+                    originalEnabledImesString, imi.getId(), validSubtypeHashCodes);
+            if (TextUtils.equals(originalEnabledImesString, updatedEnabledImesString)) {
+                return false;
+            }
+
+            putEnabledInputMethodsStr(updatedEnabledImesString);
+            return true;
+        }
+
+        @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
+        static String updateEnabledImeString(@NonNull String enabledImesString,
+                @NonNull String imeId, @NonNull IntArray enabledSubtypeHashCodes) {
+            final TextUtils.SimpleStringSplitter imeSplitter =
+                    new TextUtils.SimpleStringSplitter(INPUT_METHOD_SEPARATOR);
+            final TextUtils.SimpleStringSplitter imeSubtypeSplitter =
+                    new TextUtils.SimpleStringSplitter(INPUT_METHOD_SUBTYPE_SEPARATOR);
+
+            final StringBuilder sb = new StringBuilder();
+
+            imeSplitter.setString(enabledImesString);
+            boolean needsImeSeparator = false;
+            while (imeSplitter.hasNext()) {
+                final String nextImsStr = imeSplitter.next();
+                imeSubtypeSplitter.setString(nextImsStr);
+                if (imeSubtypeSplitter.hasNext()) {
+                    if (needsImeSeparator) {
+                        sb.append(INPUT_METHOD_SEPARATOR);
+                    }
+                    if (TextUtils.equals(imeId, imeSubtypeSplitter.next())) {
+                        sb.append(imeId);
+                        for (int i = 0; i < enabledSubtypeHashCodes.size(); ++i) {
+                            sb.append(INPUT_METHOD_SUBTYPE_SEPARATOR);
+                            sb.append(enabledSubtypeHashCodes.get(i));
+                        }
+                    } else {
+                        sb.append(nextImsStr);
+                    }
+                    needsImeSeparator = true;
+                }
+            }
+            return sb.toString();
         }
 
         public void dumpLocked(final Printer pw, final String prefix) {
