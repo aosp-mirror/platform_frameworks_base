@@ -60,6 +60,7 @@ import static android.net.NetworkCapabilities.NET_ENTERPRISE_ID_1;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSWORD;
 import static com.android.internal.widget.LockPatternUtils.EscrowTokenStateChangeCallback;
+import static com.android.server.SystemTimeZone.TIME_ZONE_CONFIDENCE_HIGH;
 import static com.android.server.devicepolicy.DevicePolicyManagerService.ACTION_PROFILE_OFF_DEADLINE;
 import static com.android.server.devicepolicy.DevicePolicyManagerService.ACTION_TURN_PROFILE_ON_NOTIFICATION;
 import static com.android.server.devicepolicy.DpmMockContext.CALLER_USER_HANDLE;
@@ -4501,7 +4502,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         setupDeviceOwner();
         dpm.setTimeZone(admin1, "Asia/Shanghai");
-        verify(getServices().alarmManager).setTimeZone("Asia/Shanghai");
+        verify(getServices().alarmManagerInternal)
+                .setTimeZone("Asia/Shanghai", TIME_ZONE_CONFIDENCE_HIGH);
     }
 
     @Test
@@ -4516,7 +4518,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         setupProfileOwner();
         configureProfileOwnerOfOrgOwnedDevice(admin1, CALLER_USER_HANDLE);
         dpm.setTimeZone(admin1, "Asia/Shanghai");
-        verify(getServices().alarmManager).setTimeZone("Asia/Shanghai");
+        verify(getServices().alarmManagerInternal)
+                .setTimeZone("Asia/Shanghai", TIME_ZONE_CONFIDENCE_HIGH);
     }
 
     @Test

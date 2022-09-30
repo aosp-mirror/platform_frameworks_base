@@ -18,6 +18,8 @@ package com.android.server;
 
 import android.app.PendingIntent;
 
+import com.android.server.SystemTimeZone.TimeZoneConfidence;
+
 public interface AlarmManagerInternal {
     // Some other components in the system server need to know about
     // broadcast alarms currently in flight
@@ -48,4 +50,13 @@ public interface AlarmManagerInternal {
      * {@link android.Manifest.permission#USE_EXACT_ALARM}.
      */
     boolean hasExactAlarmPermission(String packageName, int uid);
+
+    /**
+     * Sets the device's current time zone and time zone confidence.
+     *
+     * @param tzId the time zone ID
+     * @param confidence the confidence that {@code tzId} is correct, see {@link TimeZoneConfidence}
+     *     for details
+     */
+    void setTimeZone(String tzId, @TimeZoneConfidence int confidence);
 }

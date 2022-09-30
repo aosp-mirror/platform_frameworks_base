@@ -18,12 +18,15 @@ package com.android.server.timezonedetector;
 
 import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
-import android.app.AlarmManager;
 import android.content.Context;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+
+import com.android.server.AlarmManagerInternal;
+import com.android.server.LocalServices;
+import com.android.server.SystemTimeZone;
+import com.android.server.SystemTimeZone.TimeZoneConfidence;
 
 import java.util.Objects;
 
@@ -59,27 +62,22 @@ final class EnvironmentImpl implements TimeZoneDetectorStrategyImpl.Environment 
     }
 
     @Override
-    public boolean isDeviceTimeZoneInitialized() {
-        // timezone.equals("GMT") will be true and only true if the time zone was
-        // set to a default value by the system server (when starting, system server
-        // sets the persist.sys.timezone to "GMT" if it's not set). "GMT" is not used by
-        // any code that sets it explicitly (in case where something sets GMT explicitly,
-        // "Etc/GMT" Olson ID would be used).
-
-        String timeZoneId = getDeviceTimeZone();
-        return timeZoneId != null && timeZoneId.length() > 0 && !timeZoneId.equals("GMT");
-    }
-
-    @Override
-    @Nullable
+    @NonNull
     public String getDeviceTimeZone() {
         return SystemProperties.get(TIMEZONE_PROPERTY);
     }
 
     @Override
-    public void setDeviceTimeZone(String zoneId) {
-        AlarmManager alarmManager = mContext.getSystemService(AlarmManager.class);
-        alarmManager.setTimeZone(zoneId);
+    public @TimeZoneConfidence int getDeviceTimeZoneConfidence() {
+        return SystemTimeZone.getTimeZoneConfidence();
+    }
+
+    @Override
+    public void setDeviceTimeZoneAndConfidence(
+            @NonNull String zoneId, @TimeZoneConfidence int confidence) {
+        AlarmManagerInternal alarmManagerInternal =
+                LocalServices.getService(AlarmManagerInternal.class);
+        alarmManagerInternal.setTimeZone(zoneId, confidence);
     }
 
     @Override

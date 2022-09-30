@@ -73,6 +73,7 @@ import android.view.IWindowManager;
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockSettingsInternal;
+import com.android.server.AlarmManagerInternal;
 import com.android.server.PersistentDataBlockManagerInternal;
 import com.android.server.net.NetworkPolicyManagerInternal;
 import com.android.server.pm.UserManagerInternal;
@@ -124,6 +125,7 @@ public class MockSystemServices {
     public final ConnectivityManager connectivityManager;
     public final AccountManager accountManager;
     public final AlarmManager alarmManager;
+    public final AlarmManagerInternal alarmManagerInternal;
     public final KeyChain.KeyChainConnection keyChainConnection;
     public final CrossProfileApps crossProfileApps;
     public final PersistentDataBlockManagerInternal persistentDataBlockManagerInternal;
@@ -176,6 +178,7 @@ public class MockSystemServices {
         connectivityManager = mock(ConnectivityManager.class);
         accountManager = mock(AccountManager.class);
         alarmManager = mock(AlarmManager.class);
+        alarmManagerInternal = mock(AlarmManagerInternal.class);
         keyChainConnection = mock(KeyChain.KeyChainConnection.class, RETURNS_DEEP_STUBS);
         crossProfileApps = mock(CrossProfileApps.class);
         persistentDataBlockManagerInternal = mock(PersistentDataBlockManagerInternal.class);
