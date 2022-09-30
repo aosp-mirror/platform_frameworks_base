@@ -1390,17 +1390,17 @@ final class LocalDisplayAdapter extends DisplayAdapter {
     }
 
     @VisibleForTesting
-    static class SurfaceControlProxy {
+    public static class SurfaceControlProxy {
         public SurfaceControl.DynamicDisplayInfo getDynamicDisplayInfo(IBinder token) {
             return SurfaceControl.getDynamicDisplayInfo(token);
         }
 
         public long[] getPhysicalDisplayIds() {
-            return SurfaceControl.getPhysicalDisplayIds();
+            return DisplayControl.getPhysicalDisplayIds();
         }
 
         public IBinder getPhysicalDisplayToken(long physicalDisplayId) {
-            return SurfaceControl.getPhysicalDisplayToken(physicalDisplayId);
+            return DisplayControl.getPhysicalDisplayToken(physicalDisplayId);
         }
 
         public SurfaceControl.StaticDisplayInfo getStaticDisplayInfo(IBinder displayToken) {

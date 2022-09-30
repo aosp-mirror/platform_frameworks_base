@@ -173,8 +173,6 @@ public final class SurfaceControl implements Parcelable {
     private static native boolean nativeClearAnimationFrameStats();
     private static native boolean nativeGetAnimationFrameStats(WindowAnimationFrameStats outStats);
 
-    private static native long[] nativeGetPhysicalDisplayIds();
-    private static native IBinder nativeGetPhysicalDisplayToken(long physicalDisplayId);
     private static native void nativeSetDisplaySurface(long transactionObj,
             IBinder displayToken, long nativeSurfaceObject);
     private static native void nativeSetDisplayLayerStack(long transactionObj,
@@ -2032,35 +2030,6 @@ public final class SurfaceControl implements Parcelable {
 
         DisplayManagerGlobal.getInstance().releaseVirtualDisplay(
                 IVirtualDisplayCallback.Stub.asInterface(displayToken));
-    }
-
-    /**
-     * @hide
-     */
-    public static long[] getPhysicalDisplayIds() {
-        return nativeGetPhysicalDisplayIds();
-    }
-
-    /**
-     * @hide
-     */
-    public static IBinder getPhysicalDisplayToken(long physicalDisplayId) {
-        return nativeGetPhysicalDisplayToken(physicalDisplayId);
-    }
-
-    /**
-     * TODO(b/116025192): Remove this stopgap once framework is display-agnostic.
-     *
-     * @hide
-     */
-    @TestApi
-    @NonNull
-    public static IBinder getInternalDisplayToken() {
-        final long[] physicalDisplayIds = getPhysicalDisplayIds();
-        if (physicalDisplayIds.length == 0) {
-            return null;
-        }
-        return getPhysicalDisplayToken(physicalDisplayIds[0]);
     }
 
     /**

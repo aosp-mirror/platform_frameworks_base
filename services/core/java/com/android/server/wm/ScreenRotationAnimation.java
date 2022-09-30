@@ -56,6 +56,7 @@ import android.window.ScreenCapture;
 
 import com.android.internal.R;
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.server.display.DisplayControl;
 import com.android.server.wm.SurfaceAnimator.AnimationType;
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 import com.android.server.wm.utils.RotationAnimationUtils;
@@ -177,7 +178,7 @@ class ScreenRotationAnimation {
                 }
                 final DisplayAddress.Physical physicalAddress =
                         (DisplayAddress.Physical) address;
-                final IBinder displayToken = SurfaceControl.getPhysicalDisplayToken(
+                final IBinder displayToken = DisplayControl.getPhysicalDisplayToken(
                         physicalAddress.getPhysicalDisplayId());
                 if (displayToken == null) {
                     Slog.e(TAG, "Display token is null.");
