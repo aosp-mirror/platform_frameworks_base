@@ -6807,4 +6807,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     DisplayContent asDisplayContent() {
         return this;
     }
+
+    @Override
+    @Surface.Rotation
+    int getRelativeDisplayRotation() {
+        // Display is the root, so it's not rotated relative to anything.
+        return Surface.ROTATION_0;
+    }
 }
