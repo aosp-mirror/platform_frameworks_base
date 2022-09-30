@@ -16,8 +16,6 @@
 
 package com.android.server.wm.flicker.launch
 
-import android.platform.test.annotations.FlakyTest
-import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -25,8 +23,10 @@ import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.CameraAppHelper
+import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
+import org.junit.Assume
+import org.junit.Before
 import org.junit.FixMethodOrder
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
@@ -47,6 +47,11 @@ import org.junit.runners.Parameterized
 open class OpenAppAfterCameraTest(
     testSpec: FlickerTestParameter
 ) : OpenAppFromLauncherTransition(testSpec) {
+    @Before
+    open fun before() {
+        Assume.assumeFalse(isShellTransitionsEnabled)
+    }
+
     private val cameraApp = CameraAppHelper(instrumentation) /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit
         get() = {
@@ -66,105 +71,6 @@ open class OpenAppAfterCameraTest(
                 testApp.launchViaIntent(wmHelper)
             }
         }
-
-    /** {@inheritDoc} */
-    @FlakyTest(bugId = 206753786)
-    @Test
-    override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
-
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun appLayerReplacesLauncher() = super.appLayerReplacesLauncher()
-
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun focusChanges() = super.focusChanges()
-
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun appWindowReplacesLauncherAsTopWindow() =
-            super.appWindowReplacesLauncherAsTopWindow()
-
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun appWindowAsTopWindowAtEnd() = super.appWindowAsTopWindowAtEnd()
-
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun appLayerBecomesVisible() = super.appLayerBecomesVisible()
-
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun appWindowBecomesVisible() = super.appWindowBecomesVisible()
-
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun appWindowBecomesTopWindow() = super.appWindowBecomesTopWindow()
-
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun appWindowIsTopWindowAtEnd() = super.appWindowIsTopWindowAtEnd()
-
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun entireScreenCovered() = super.entireScreenCovered()
-
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun navBarLayerIsVisibleAtStartAndEnd() = super.navBarLayerIsVisibleAtStartAndEnd()
-
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun navBarWindowIsAlwaysVisible() = super.navBarWindowIsAlwaysVisible()
-
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun taskBarLayerIsVisibleAtStartAndEnd() = super.taskBarLayerIsVisibleAtStartAndEnd()
-
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun taskBarWindowIsAlwaysVisible() = super.taskBarWindowIsAlwaysVisible()
-
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun statusBarLayerIsVisibleAtStartAndEnd() =
-            super.statusBarLayerIsVisibleAtStartAndEnd()
-
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun statusBarLayerPositionAtStartAndEnd() = super.statusBarLayerPositionAtStartAndEnd()
-
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun statusBarWindowIsAlwaysVisible() = super.statusBarWindowIsAlwaysVisible()
-
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
-            super.visibleLayersShownMoreThanOneConsecutiveEntry()
-
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
-            super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
     companion object {
         /**
