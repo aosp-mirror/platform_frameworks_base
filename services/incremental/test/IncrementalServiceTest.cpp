@@ -474,8 +474,8 @@ public:
         m.mutable_loader()->set_package_name("com.test");
         m.mutable_loader()->set_arguments("com.uri");
         const auto metadata = m.SerializeAsString();
-        m.mutable_loader()->release_arguments();
-        m.mutable_loader()->release_package_name();
+        static_cast<void>(m.mutable_loader()->release_arguments());
+        static_cast<void>(m.mutable_loader()->release_package_name());
         return {metadata.begin(), metadata.end()};
     }
     RawMetadata getStorageMetadata(const Control& control, std::string_view path) {
@@ -492,8 +492,8 @@ public:
         bp.set_allocated_dest_path(&destPath);
         bp.set_allocated_source_subdir(&srcPath);
         const auto metadata = bp.SerializeAsString();
-        bp.release_source_subdir();
-        bp.release_dest_path();
+        static_cast<void>(bp.release_source_subdir());
+        static_cast<void>(bp.release_dest_path());
         return std::vector<char>(metadata.begin(), metadata.end());
     }
 };
