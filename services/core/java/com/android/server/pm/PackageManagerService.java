@@ -200,6 +200,7 @@ import com.android.server.pm.dex.ArtManagerService;
 import com.android.server.pm.dex.ArtUtils;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.ViewCompiler;
+import com.android.server.pm.local.PackageManagerLocalImpl;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.PackageParser2;
 import com.android.server.pm.parsing.pkg.AndroidPackageInternal;
@@ -1071,10 +1072,27 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     @VisibleForTesting(visibility = Visibility.PACKAGE)
     @NonNull
     public Computer snapshotComputer() {
-        if (Thread.holdsLock(mLock)) {
-            // If the current thread holds mLock then it may have modified state but not
-            // yet invalidated the snapshot.  Always give the thread the live computer.
-            return mLiveComputer;
+        return snapshotComputer(true /*allowLiveComputer*/);
+    }
+
+    /**
+     * This method should only ever be called from {@link PackageManagerLocal#snapshot()}.
+     *
+     * @param allowLiveComputer Whether to allow a live computer instance based on caller {@link
+     *                          #mLock} hold state. In certain cases, like for {@link
+     *                          PackageManagerLocal} API, it must be enforced that the caller gets
+     *                          a snapshot at time, and never the live variant.
+     * @deprecated Use {@link #snapshotComputer()}
+     */
+    @Deprecated
+    @NonNull
+    public Computer snapshotComputer(boolean allowLiveComputer) {
+        if (allowLiveComputer) {
+            if (Thread.holdsLock(mLock)) {
+                // If the current thread holds mLock then it may have modified state but not
+                // yet invalidated the snapshot.  Always give the thread the live computer.
+                return mLiveComputer;
+            }
         }
 
         var oldSnapshot = sSnapshot.get();
@@ -1531,7 +1549,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         ServiceManager.addService("package", iPackageManager);
         final PackageManagerNative pmn = new PackageManagerNative(m);
         ServiceManager.addService("package_native", pmn);
-        LocalManagerRegistry.addManager(PackageManagerLocal.class, m.new PackageManagerLocalImpl());
+        LocalManagerRegistry.addManager(PackageManagerLocal.class,
+                new PackageManagerLocalImpl(m));
         return Pair.create(m, iPackageManager);
     }
 
@@ -6017,25 +6036,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
     }
 
-    private class PackageManagerLocalImpl implements PackageManagerLocal {
-        @Override
-        public void reconcileSdkData(@Nullable String volumeUuid, @NonNull String packageName,
-                @NonNull List<String> subDirNames, int userId, int appId, int previousAppId,
-                @NonNull String seInfo, int flags) throws IOException {
-            synchronized (mInstallLock) {
-                ReconcileSdkDataArgs args = mInstaller.buildReconcileSdkDataArgs(volumeUuid,
-                        packageName, subDirNames, userId, appId, seInfo,
-                        flags);
-                args.previousAppId = previousAppId;
-                try {
-                    mInstaller.reconcileSdkData(args);
-                } catch (InstallerException e) {
-                    throw new IOException(e.getMessage());
-                }
-            }
-        }
-    }
-
     private class PackageManagerInternalImpl extends PackageManagerInternalBase {
 
         public PackageManagerInternalImpl() {
@@ -7294,6 +7294,22 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     void addInstallerPackageName(InstallSource installSource) {
         synchronized (mLock) {
             mSettings.addInstallerPackageNames(installSource);
+        }
+    }
+
+    public void reconcileSdkData(@Nullable String volumeUuid, @NonNull String packageName,
+            @NonNull List<String> subDirNames, int userId, int appId, int previousAppId,
+            @NonNull String seInfo, int flags) throws IOException {
+        synchronized (mInstallLock) {
+            ReconcileSdkDataArgs args = mInstaller.buildReconcileSdkDataArgs(volumeUuid,
+                    packageName, subDirNames, userId, appId, seInfo,
+                    flags);
+            args.previousAppId = previousAppId;
+            try {
+                mInstaller.reconcileSdkData(args);
+            } catch (InstallerException e) {
+                throw new IOException(e.getMessage());
+            }
         }
     }
 }
