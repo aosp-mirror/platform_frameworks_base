@@ -16,7 +16,7 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.platform.test.annotations.FlakyTest
+import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
@@ -76,12 +76,12 @@ class ExitPipViaExpandButtonClickTest(
         }
 
     /** {@inheritDoc}  */
-    @FlakyTest(bugId = 227313015)
+    @Presubmit
     @Test
     override fun entireScreenCovered() = super.entireScreenCovered()
 
     /** {@inheritDoc}  */
-    @FlakyTest(bugId = 197726610)
+    @Presubmit
     @Test
     override fun pipLayerExpands() = super.pipLayerExpands()
 

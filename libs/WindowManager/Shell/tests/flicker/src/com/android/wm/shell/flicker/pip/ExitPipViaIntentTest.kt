@@ -74,8 +74,10 @@ class ExitPipViaIntentTest(testSpec: FlickerTestParameter) : ExitPipToAppTransit
             }
         }
 
-    /** {@inheritDoc} */
-    @FlakyTest @Test override fun entireScreenCovered() = super.entireScreenCovered()
+    /** {@inheritDoc}  */
+    @Presubmit
+    @Test
+    override fun entireScreenCovered() = super.entireScreenCovered()
 
     /** {@inheritDoc} */
     @Presubmit

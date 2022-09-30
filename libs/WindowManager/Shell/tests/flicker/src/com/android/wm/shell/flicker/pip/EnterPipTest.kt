@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
@@ -83,8 +82,10 @@ open class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec
         testSpec.assertWm { this.isAppWindowVisible(pipApp) }
     }
 
-    /** Checks [pipApp] layer remains visible throughout the animation */
-    @FlakyTest(bugId = 239807171)
+    /**
+     * Checks [pipApp] layer remains visible throughout the animation
+     */
+    @Presubmit
     @Test
     open fun pipAppLayerAlwaysVisible() {
         testSpec.assertLayers { this.isVisible(pipApp) }
@@ -104,7 +105,7 @@ open class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec
      * Checks that the pip app layer remains inside the display bounds throughout the whole
      * animation
      */
-    @FlakyTest(bugId = 239807171)
+    @Presubmit
     @Test
     open fun pipLayerRemainInsideVisibleBounds() {
         testSpec.assertLayersVisibleRegion(pipApp) { coversAtMost(displayBounds) }
