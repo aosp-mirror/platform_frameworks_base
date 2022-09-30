@@ -1578,16 +1578,16 @@ public final class InputMethodManager {
      *
      * @param imi The {@link InputMethodInfo} whose subtypes list will be returned. If {@code null},
      * returns enabled subtypes for the currently selected {@link InputMethodInfo}.
-     * @param allowsImplicitlySelectedSubtypes A boolean flag to allow to return the implicitly
-     * selected subtypes. If an input method info doesn't have enabled subtypes, the framework
+     * @param allowsImplicitlyEnabledSubtypes A boolean flag to allow to return the implicitly
+     * enabled subtypes. If an input method info doesn't have enabled subtypes, the framework
      * will implicitly enable subtypes according to the current system language.
      */
     @NonNull
     public List<InputMethodSubtype> getEnabledInputMethodSubtypeList(@Nullable InputMethodInfo imi,
-            boolean allowsImplicitlySelectedSubtypes) {
+            boolean allowsImplicitlyEnabledSubtypes) {
         return mServiceInvoker.getEnabledInputMethodSubtypeList(
                 imi == null ? null : imi.getId(),
-                allowsImplicitlySelectedSubtypes,
+                allowsImplicitlyEnabledSubtypes,
                 UserHandle.myUserId());
     }
 

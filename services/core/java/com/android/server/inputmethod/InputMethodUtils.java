@@ -415,10 +415,10 @@ final class InputMethodUtils {
         }
 
         List<InputMethodSubtype> getEnabledInputMethodSubtypeListLocked(
-                InputMethodInfo imi, boolean allowsImplicitlySelectedSubtypes) {
+                InputMethodInfo imi, boolean allowsImplicitlyEnabledSubtypes) {
             List<InputMethodSubtype> enabledSubtypes =
                     getEnabledInputMethodSubtypeListLocked(imi);
-            if (allowsImplicitlySelectedSubtypes && enabledSubtypes.isEmpty()) {
+            if (allowsImplicitlyEnabledSubtypes && enabledSubtypes.isEmpty()) {
                 enabledSubtypes = SubtypeUtils.getImplicitlyApplicableSubtypesLocked(mRes, imi);
             }
             return InputMethodSubtype.sort(imi, enabledSubtypes);
@@ -669,12 +669,12 @@ final class InputMethodUtils {
                         // If IME is enabled and no subtypes are enabled, applicable subtypes
                         // are enabled implicitly, so needs to treat them to be enabled.
                         if (imi != null && imi.getSubtypeCount() > 0) {
-                            List<InputMethodSubtype> implicitlySelectedSubtypes =
+                            List<InputMethodSubtype> implicitlyEnabledSubtypes =
                                     SubtypeUtils.getImplicitlyApplicableSubtypesLocked(mRes, imi);
-                            if (implicitlySelectedSubtypes != null) {
-                                final int N = implicitlySelectedSubtypes.size();
+                            if (implicitlyEnabledSubtypes != null) {
+                                final int N = implicitlyEnabledSubtypes.size();
                                 for (int i = 0; i < N; ++i) {
-                                    final InputMethodSubtype st = implicitlySelectedSubtypes.get(i);
+                                    final InputMethodSubtype st = implicitlyEnabledSubtypes.get(i);
                                     if (String.valueOf(st.hashCode()).equals(subtypeHashCode)) {
                                         return subtypeHashCode;
                                     }
