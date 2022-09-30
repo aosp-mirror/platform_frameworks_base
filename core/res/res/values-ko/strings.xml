@@ -1161,8 +1161,8 @@
     <string name="no" msgid="5122037903299899715">"취소"</string>
     <string name="dialog_alert_title" msgid="651856561974090712">"주의"</string>
     <string name="loading" msgid="3138021523725055037">"로드 중.."</string>
-    <string name="capital_on" msgid="2770685323900821829">"ON"</string>
-    <string name="capital_off" msgid="7443704171014626777">"OFF"</string>
+    <string name="capital_on" msgid="2770685323900821829">"사용 설정"</string>
+    <string name="capital_off" msgid="7443704171014626777">"사용 안함"</string>
     <string name="checked" msgid="9179896827054513119">"선택함"</string>
     <string name="not_checked" msgid="7972320087569023342">"선택 안함"</string>
     <string name="selected" msgid="6614607926197755875">"선택됨"</string>

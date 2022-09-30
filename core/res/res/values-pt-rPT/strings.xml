@@ -186,7 +186,7 @@
     <string name="ssl_ca_cert_noti_by_administrator" msgid="4564941950768783879">"Pelo gestor do seu perfil de trabalho"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="217337232273211674">"Por <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
     <string name="work_profile_deleted" msgid="5891181538182009328">"Perfil de trabalho eliminado"</string>
-    <string name="work_profile_deleted_details" msgid="3773706828364418016">"A app de administração do perfil de trabalho está em falta ou danificada. Consequentemente, o seu perfil de trabalho e os dados relacionados foram eliminados. Contacte o gestor para obter assistência."</string>
+    <string name="work_profile_deleted_details" msgid="3773706828364418016">"A app de administração do perfil de trabalho está em falta ou danificada. Por isso, o seu perfil de trabalho e os dados relacionados foram eliminados. Contacte o gestor para obter assistência."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"O seu perfil de trabalho já não está disponível neste dispositivo"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Demasiadas tentativas de introdução da palavra-passe"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"O administrador anulou o dispositivo para utilização pessoal."</string>
