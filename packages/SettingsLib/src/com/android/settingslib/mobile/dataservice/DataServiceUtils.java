@@ -41,12 +41,6 @@ public class DataServiceUtils {
         public static final String COLUMN_ID = "subId";
 
         /**
-         * The name of the WFC provision column,
-         * {@see MobileNetworkUtils#isWfcProvisionedOnDevice(int)}.
-         */
-        public static final String COLUMN_IS_WFC_PROVISIONED_ON_DEVICE = "isWfcProvisionedOnDevice";
-
-        /**
          * The name of the contact discovery enabled state column,
          * {@see MobileNetworkUtils#isContactDiscoveryEnabled(Context, int)}.
          */
