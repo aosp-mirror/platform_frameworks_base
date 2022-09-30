@@ -1172,13 +1172,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     }
 
     private void updatePowerState() {
-        if (DEBUG) {
-            Trace.beginSection("DisplayPowerController#updatePowerState");
-        }
+        Trace.traceBegin(Trace.TRACE_TAG_POWER,
+                "DisplayPowerController#updatePowerState");
         updatePowerStateInternal();
-        if (DEBUG) {
-            Trace.endSection();
-        }
+        Trace.traceEnd(Trace.TRACE_TAG_POWER);
     }
 
     private void updatePowerStateInternal() {
