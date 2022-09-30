@@ -29,6 +29,7 @@ import android.view.WindowManager;
 import com.android.internal.logging.UiEventLogger;
 import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.ProtoLogController;
+import com.android.wm.shell.R;
 import com.android.wm.shell.RootDisplayAreaOrganizer;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
@@ -173,6 +174,7 @@ public abstract class WMShellBaseModule {
     @WMSingleton
     @Provides
     static ShellTaskOrganizer provideShellTaskOrganizer(
+            Context context,
             ShellInit shellInit,
             ShellCommandHandler shellCommandHandler,
             CompatUIController compatUI,
@@ -180,6 +182,10 @@ public abstract class WMShellBaseModule {
             Optional<RecentTasksController> recentTasksOptional,
             @ShellMainThread ShellExecutor mainExecutor
     ) {
+        if (!context.getResources().getBoolean(R.bool.config_registerShellTaskOrganizerOnInit)) {
+            // TODO(b/238217847): Force override shell init if registration is disabled
+            shellInit = new ShellInit(mainExecutor);
+        }
         return new ShellTaskOrganizer(shellInit, shellCommandHandler, compatUI,
                 unfoldAnimationController, recentTasksOptional, mainExecutor);
     }
