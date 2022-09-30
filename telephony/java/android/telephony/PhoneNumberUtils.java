@@ -27,7 +27,6 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Build;
 import android.os.PersistableBundle;
 import android.provider.Contacts;
 import android.provider.ContactsContract;
@@ -2901,7 +2900,7 @@ public class PhoneNumberUtils {
         PhoneNumberUtil util = PhoneNumberUtil.getInstance();
         PhoneNumber n1;
         PhoneNumber n2;
-        defaultCountryIso = defaultCountryIso.toUpperCase();
+        defaultCountryIso = defaultCountryIso.toUpperCase(Locale.ROOT);
         try {
             n1 = util.parseAndKeepRawInput(number1, defaultCountryIso);
             n2 = util.parseAndKeepRawInput(number2, defaultCountryIso);
