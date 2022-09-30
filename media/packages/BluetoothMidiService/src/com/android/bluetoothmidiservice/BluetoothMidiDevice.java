@@ -138,8 +138,6 @@ public final class BluetoothMidiDevice {
                         // switch to receiving notifications
                         mBluetoothGatt.readCharacteristic(characteristic);
                     }
-
-                    openBluetoothDevice(mBluetoothDevice);
                 }
             } else {
                 Log.e(TAG, "onServicesDiscovered received: " + status);

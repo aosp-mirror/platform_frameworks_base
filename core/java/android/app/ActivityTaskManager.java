@@ -496,6 +496,16 @@ public class ActivityTaskManager {
         }
     }
 
+    /** Update the list of packages allowed in lock task mode. */
+    @RequiresPermission(android.Manifest.permission.UPDATE_LOCK_TASK_PACKAGES)
+    public void updateLockTaskPackages(@NonNull Context context, @NonNull String[] packages) {
+        try {
+            getService().updateLockTaskPackages(context.getUserId(), packages);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     /**
      * Information you can retrieve about a root task in the system.
      * @hide

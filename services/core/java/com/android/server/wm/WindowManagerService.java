@@ -309,8 +309,6 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.LatencyTracker;
-import com.android.internal.util.function.pooled.PooledConsumer;
-import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.internal.view.WindowManagerPolicyThread;
 import com.android.server.AnimationThread;
 import com.android.server.DisplayThread;
@@ -475,10 +473,7 @@ public class WindowManagerService extends IWindowManager.Stub
         public void onVrStateChanged(boolean enabled) {
             synchronized (mGlobalLock) {
                 mVrModeEnabled = enabled;
-                final PooledConsumer c = PooledLambda.obtainConsumer(
-                        DisplayPolicy::onVrStateChangedLw, PooledLambda.__(), enabled);
-                mRoot.forAllDisplayPolicies(c);
-                c.recycle();
+                mRoot.forAllDisplayPolicies(p -> p.onVrStateChangedLw(enabled));
             }
         }
     };
@@ -900,11 +895,8 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             mPointerLocationEnabled = enablePointerLocation;
             synchronized (mGlobalLock) {
-                final PooledConsumer c = PooledLambda.obtainConsumer(
-                        DisplayPolicy::setPointerLocationEnabled, PooledLambda.__(),
-                        mPointerLocationEnabled);
-                mRoot.forAllDisplayPolicies(c);
-                c.recycle();
+                mRoot.forAllDisplayPolicies(
+                        p -> p.setPointerLocationEnabled(mPointerLocationEnabled));
             }
         }
 
@@ -3139,10 +3131,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void onPowerKeyDown(boolean isScreenOn) {
-        final PooledConsumer c = PooledLambda.obtainConsumer(
-                DisplayPolicy::onPowerKeyDown, PooledLambda.__(), isScreenOn);
-        mRoot.forAllDisplayPolicies(c);
-        c.recycle();
+        mRoot.forAllDisplayPolicies(p -> p.onPowerKeyDown(isScreenOn));
     }
 
     @Override
@@ -8391,10 +8380,7 @@ public class WindowManagerService extends IWindowManager.Stub
     void onLockTaskStateChanged(int lockTaskState) {
         // TODO: pass in displayId to determine which display the lock task state changed
         synchronized (mGlobalLock) {
-            final PooledConsumer c = PooledLambda.obtainConsumer(
-                    DisplayPolicy::onLockTaskStateChangedLw, PooledLambda.__(), lockTaskState);
-            mRoot.forAllDisplayPolicies(c);
-            c.recycle();
+            mRoot.forAllDisplayPolicies(p -> p.onLockTaskStateChangedLw(lockTaskState));
         }
     }
 
@@ -9285,5 +9271,47 @@ public class WindowManagerService extends IWindowManager.Stub
                 throw new AssertionError(
                         "Unexpected letterbox background type: " + letterboxBackgroundType);
         }
+    }
+
+    @Override
+    public void captureDisplay(int displayId, @Nullable ScreenCapture.CaptureArgs captureArgs,
+            ScreenCapture.ScreenCaptureListener listener) {
+        Slog.d(TAG, "captureDisplay");
+        if (!checkCallingPermission(READ_FRAME_BUFFER, "captureDisplay()")) {
+            throw new SecurityException("Requires READ_FRAME_BUFFER permission");
+        }
+
+        ScreenCapture.captureLayers(getCaptureArgs(displayId, captureArgs), listener);
+    }
+
+    @VisibleForTesting
+    ScreenCapture.LayerCaptureArgs getCaptureArgs(int displayId,
+            @Nullable ScreenCapture.CaptureArgs captureArgs) {
+        final SurfaceControl displaySurfaceControl;
+        synchronized (mGlobalLock) {
+            DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+            if (displayContent == null) {
+                throw new IllegalArgumentException("Trying to screenshot and invalid display: "
+                        + displayId);
+            }
+
+            displaySurfaceControl = displayContent.getSurfaceControl();
+
+            if (captureArgs == null) {
+                captureArgs = new ScreenCapture.CaptureArgs.Builder<>()
+                        .build();
+            }
+
+            if (captureArgs.mSourceCrop.isEmpty()) {
+                displayContent.getBounds(mTmpRect);
+                mTmpRect.offsetTo(0, 0);
+            } else {
+                mTmpRect.set(captureArgs.mSourceCrop);
+            }
+        }
+
+        return new ScreenCapture.LayerCaptureArgs.Builder(displaySurfaceControl, captureArgs)
+                        .setSourceCrop(mTmpRect)
+                        .build();
     }
 }

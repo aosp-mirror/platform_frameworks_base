@@ -19,6 +19,7 @@ package com.android.server.wm.flicker.helpers
 import android.app.Instrumentation
 import android.media.session.MediaController
 import android.media.session.MediaSessionManager
+import android.util.Log
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.testapp.ActivityOptions
@@ -174,8 +175,11 @@ open class PipAppHelper(instrumentation: Instrumentation) : StandardAppHelper(
      */
     fun doubleClickPipWindow(wmHelper: WindowManagerStateHelper) {
         val windowRect = getWindowRect(wmHelper)
+        Log.d(TAG, "First click")
         uiDevice.click(windowRect.centerX(), windowRect.centerY())
+        Log.d(TAG, "Second click")
         uiDevice.click(windowRect.centerX(), windowRect.centerY())
+        Log.d(TAG, "Wait for app transition to end")
         wmHelper.StateSyncBuilder()
             .withAppTransitionIdle()
             .waitForAndVerify()
@@ -196,6 +200,7 @@ open class PipAppHelper(instrumentation: Instrumentation) : StandardAppHelper(
     }
 
     companion object {
+        private const val TAG = "PipAppHelper"
         private const val ENTER_PIP_BUTTON_ID = "enter_pip"
         private const val WITH_CUSTOM_ACTIONS_BUTTON_ID = "with_custom_actions"
         private const val MEDIA_SESSION_START_RADIO_BUTTON_ID = "media_session_start"

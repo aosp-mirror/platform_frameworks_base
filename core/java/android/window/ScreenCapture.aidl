@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.pipeline.wifi.data.model
+package android.window;
 
-/**
- * Provides information on the current wifi activity.
- */
-data class WifiActivityModel(
-    /** True if the wifi has activity in (download). */
-    val hasActivityIn: Boolean,
-    /** True if the wifi has activity out (upload). */
-    val hasActivityOut: Boolean,
-)
+/** @hide */
+parcelable ScreenCapture.CaptureArgs;
+
+/** @hide */
+parcelable ScreenCapture.ScreenshotHardwareBuffer;
+
+/** @hide */
+parcelable ScreenCapture.ScreenCaptureListener;

@@ -128,7 +128,7 @@ private fun TogglePermissionAppInfoPage(
         userId = userId,
         footerText = stringResource(listModel.footerResId),
     ) {
-        val model = createSwitchModel(listModel, packageName, userId)
+        val model = createSwitchModel(listModel, packageName, userId) ?: return@AppInfoPage
         LaunchedEffect(model, Dispatchers.Default) {
             model.initState()
         }
@@ -141,9 +141,9 @@ private fun <T : AppRecord> createSwitchModel(
     listModel: TogglePermissionAppListModel<T>,
     packageName: String,
     userId: Int,
-): TogglePermissionSwitchModel<T> {
+): TogglePermissionSwitchModel<T>? {
     val record = remember {
-        val app = PackageManagers.getApplicationInfoAsUser(packageName, userId)
+        val app = PackageManagers.getApplicationInfoAsUser(packageName, userId) ?: return null
         listModel.transformItem(app)
     }
     val context = LocalContext.current

@@ -29,6 +29,8 @@ import android.view.inputmethod.DeleteGesture;
 import android.view.inputmethod.HandwritingGesture;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InsertGesture;
+import android.view.inputmethod.JoinOrSplitGesture;
+import android.view.inputmethod.RemoveSpaceGesture;
 import android.view.inputmethod.SelectGesture;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -38,6 +40,7 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import java.util.Random;
+import java.util.function.IntConsumer;
 
 public class HandwritingIme extends InputMethodService {
 
@@ -47,8 +50,9 @@ public class HandwritingIme extends InputMethodService {
     private static final int OP_SELECT = 1;
     private static final int OP_DELETE = 2;
     private static final int OP_INSERT = 3;
+    private static final int OP_REMOVE_SPACE = 4;
+    private static final int OP_JOIN_OR_SPLIT = 5;
 
-    private Window mInkWindow;
     private InkView mInk;
 
     static final String TAG = "HandwritingIme";
@@ -58,6 +62,7 @@ public class HandwritingIme extends InputMethodService {
     private Spinner mRichGestureGranularitySpinner;
     private PointF mRichGestureStartPoint;
 
+    private final IntConsumer mResultConsumer = value -> Log.d(TAG, "Gesture result: " + value);
 
     interface HandwritingFinisher {
         void finish();
@@ -93,29 +98,45 @@ public class HandwritingIme extends InputMethodService {
                     HandwritingGesture gesture = null;
                     switch(mRichGestureMode) {
                         case OP_SELECT:
-                            SelectGesture.Builder builder = new SelectGesture.Builder();
-                            builder.setGranularity(mRichGestureGranularity)
+                            gesture = new SelectGesture.Builder()
+                                    .setGranularity(mRichGestureGranularity)
                                     .setSelectionArea(new RectF(mRichGestureStartPoint.x,
                                             mRichGestureStartPoint.y, event.getX(), event.getY()))
-                                    .setFallbackText("fallback text");
-                            gesture = builder.build();
+                                    .setFallbackText("fallback text")
+                                    .build();
                             break;
                         case OP_DELETE:
-                            DeleteGesture.Builder builder1 = new DeleteGesture.Builder();
-                            builder1.setGranularity(mRichGestureGranularity)
+                            gesture = new DeleteGesture.Builder()
+                                    .setGranularity(mRichGestureGranularity)
                                     .setDeletionArea(new RectF(mRichGestureStartPoint.x,
                                             mRichGestureStartPoint.y, event.getX(), event.getY()))
-                                    .setFallbackText("fallback text");
-                            gesture = builder1.build();
+                                    .setFallbackText("fallback text")
+                                    .build();
                             break;
                         case OP_INSERT:
-                            InsertGesture.Builder builder2 = new InsertGesture.Builder();
-                            builder2.setInsertionPoint(
-                                    new PointF(mRichGestureStartPoint.x, mRichGestureStartPoint.y))
+                            gesture = new InsertGesture.Builder()
+                                    .setInsertionPoint(new PointF(
+                                            mRichGestureStartPoint.x, mRichGestureStartPoint.y))
                                     .setTextToInsert(" ")
-                                    .setFallbackText("fallback text");
-                            gesture = builder2.build();
-
+                                    .setFallbackText("fallback text")
+                                    .build();
+                            break;
+                        case OP_REMOVE_SPACE:
+                            gesture = new RemoveSpaceGesture.Builder()
+                                    .setPoints(
+                                            new PointF(mRichGestureStartPoint.x,
+                                                    mRichGestureStartPoint.y),
+                                            new PointF(event.getX(), event.getY()))
+                                    .setFallbackText("fallback text")
+                                    .build();
+                            break;
+                        case OP_JOIN_OR_SPLIT:
+                            gesture = new JoinOrSplitGesture.Builder()
+                                    .setJoinOrSplitPoint(new PointF(
+                                            mRichGestureStartPoint.x, mRichGestureStartPoint.y))
+                                    .setFallbackText("fallback text")
+                                    .build();
+                            break;
                     }
                     if (gesture == null) {
                         // This shouldn't happen
@@ -124,7 +145,7 @@ public class HandwritingIme extends InputMethodService {
                     }
                     InputConnection ic = getCurrentInputConnection();
                     if (getCurrentInputStarted() && ic != null) {
-                        ic.performHandwritingGesture(gesture, null, null);
+                        ic.performHandwritingGesture(gesture, Runnable::run, mResultConsumer);
                     } else {
                         // This shouldn't happen
                         Log.e(TAG, "No active InputConnection");
@@ -179,9 +200,14 @@ public class HandwritingIme extends InputMethodService {
         mRichGestureModeSpinner = new Spinner(this);
         mRichGestureModeSpinner.setPadding(100, 0, 100, 0);
         mRichGestureModeSpinner.setTooltipText("Handwriting IME mode");
-        String[] items =
-                new String[] { "Handwriting IME - Rich gesture disabled", "Rich gesture SELECT",
-                        "Rich gesture DELETE", "Rich gesture INSERT" };
+        String[] items = new String[] {
+                "Handwriting IME - Rich gesture disabled",
+                "Rich gesture SELECT",
+                "Rich gesture DELETE",
+                "Rich gesture INSERT",
+                "Rich gesture REMOVE SPACE",
+                "Rich gesture JOIN OR SPLIT",
+        };
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_dropdown_item, items);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -191,7 +217,7 @@ public class HandwritingIme extends InputMethodService {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 mRichGestureMode = position;
                 mRichGestureGranularitySpinner.setEnabled(
-                        mRichGestureMode != OP_INSERT && mRichGestureMode != OP_NONE);
+                        mRichGestureMode == OP_SELECT || mRichGestureMode == OP_DELETE);
                 Log.d(TAG, "Setting RichGesture Mode " + mRichGestureMode);
             }
 
@@ -247,8 +273,8 @@ public class HandwritingIme extends InputMethodService {
     public boolean onStartStylusHandwriting() {
         Log.d(TAG, "onStartStylusHandwriting ");
         Toast.makeText(this, "START HW", Toast.LENGTH_SHORT).show();
-        mInkWindow = getStylusHandwritingWindow();
-        mInkWindow.setContentView(mInk, mInk.getLayoutParams());
+        Window inkWindow = getStylusHandwritingWindow();
+        inkWindow.setContentView(mInk, mInk.getLayoutParams());
         return true;
     }
 
