@@ -17,12 +17,21 @@
 
 package com.android.systemui.statusbar.policy
 
+import android.content.Context
 import android.content.Intent
 import android.view.View
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.qs.user.UserSwitchDialogController
 import com.android.systemui.user.data.source.UserRecord
+import com.android.systemui.user.domain.interactor.GuestUserInteractor
+import com.android.systemui.user.domain.interactor.UserInteractor
+import com.android.systemui.user.legacyhelper.data.LegacyUserDataHelper
+import com.android.systemui.user.legacyhelper.ui.LegacyUserUiHelper
 import dagger.Lazy
 import java.io.PrintWriter
 import java.lang.ref.WeakReference
@@ -30,11 +39,17 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 
 /** Implementation of [UserSwitcherController]. */
+@SysUISingleton
 class UserSwitcherControllerImpl
 @Inject
 constructor(
-    private val flags: FeatureFlags,
+    @Application private val applicationContext: Context,
+    flags: FeatureFlags,
     @Suppress("DEPRECATION") private val oldImpl: Lazy<UserSwitcherControllerOldImpl>,
+    private val userInteractorLazy: Lazy<UserInteractor>,
+    private val guestUserInteractorLazy: Lazy<GuestUserInteractor>,
+    private val keyguardInteractorLazy: Lazy<KeyguardInteractor>,
+    private val activityStarter: ActivityStarter,
 ) : UserSwitcherController {
 
     private val useInteractor: Boolean =
@@ -42,15 +57,21 @@ constructor(
             !flags.isEnabled(Flags.USER_INTERACTOR_AND_REPO_USE_CONTROLLER)
     private val _oldImpl: UserSwitcherControllerOldImpl
         get() = oldImpl.get()
+    private val userInteractor: UserInteractor by lazy { userInteractorLazy.get() }
+    private val guestUserInteractor: GuestUserInteractor by lazy { guestUserInteractorLazy.get() }
+    private val keyguardInteractor: KeyguardInteractor by lazy { keyguardInteractorLazy.get() }
 
-    private fun notYetImplemented(): Nothing {
-        error("Not yet implemented!")
+    private val callbackCompatMap =
+        mutableMapOf<UserSwitcherController.UserSwitchCallback, UserInteractor.UserCallback>()
+
+    private fun notSupported(): Nothing {
+        error("Not supported in the new implementation!")
     }
 
     override val users: ArrayList<UserRecord>
         get() =
             if (useInteractor) {
-                notYetImplemented()
+                userInteractor.userRecords.value
             } else {
                 _oldImpl.users
             }
@@ -58,15 +79,13 @@ constructor(
     override val isSimpleUserSwitcher: Boolean
         get() =
             if (useInteractor) {
-                notYetImplemented()
+                userInteractor.isSimpleUserSwitcher
             } else {
                 _oldImpl.isSimpleUserSwitcher
             }
 
     override fun init(view: View) {
-        if (useInteractor) {
-            notYetImplemented()
-        } else {
+        if (!useInteractor) {
             _oldImpl.init(view)
         }
     }
@@ -74,7 +93,7 @@ constructor(
     override val currentUserRecord: UserRecord?
         get() =
             if (useInteractor) {
-                notYetImplemented()
+                userInteractor.selectedUserRecord.value
             } else {
                 _oldImpl.currentUserRecord
             }
@@ -82,7 +101,14 @@ constructor(
     override val currentUserName: String?
         get() =
             if (useInteractor) {
-                notYetImplemented()
+                currentUserRecord?.let {
+                    LegacyUserUiHelper.getUserRecordName(
+                        context = applicationContext,
+                        record = it,
+                        isGuestUserAutoCreated = userInteractor.isGuestUserAutoCreated,
+                        isGuestUserResetting = userInteractor.isGuestUserResetting,
+                    )
+                }
             } else {
                 _oldImpl.currentUserName
             }
@@ -92,7 +118,7 @@ constructor(
         dialogShower: UserSwitchDialogController.DialogShower?
     ) {
         if (useInteractor) {
-            notYetImplemented()
+            userInteractor.selectUser(userId)
         } else {
             _oldImpl.onUserSelected(userId, dialogShower)
         }
@@ -101,7 +127,7 @@ constructor(
     override val isAddUsersFromLockScreenEnabled: Flow<Boolean>
         get() =
             if (useInteractor) {
-                notYetImplemented()
+                notSupported()
             } else {
                 _oldImpl.isAddUsersFromLockScreenEnabled
             }
@@ -109,7 +135,7 @@ constructor(
     override val isGuestUserAutoCreated: Boolean
         get() =
             if (useInteractor) {
-                notYetImplemented()
+                userInteractor.isGuestUserAutoCreated
             } else {
                 _oldImpl.isGuestUserAutoCreated
             }
@@ -117,7 +143,7 @@ constructor(
     override val isGuestUserResetting: Boolean
         get() =
             if (useInteractor) {
-                notYetImplemented()
+                userInteractor.isGuestUserResetting
             } else {
                 _oldImpl.isGuestUserResetting
             }
@@ -126,7 +152,7 @@ constructor(
         dialogShower: UserSwitchDialogController.DialogShower?,
     ) {
         if (useInteractor) {
-            notYetImplemented()
+            notSupported()
         } else {
             _oldImpl.createAndSwitchToGuestUser(dialogShower)
         }
@@ -134,7 +160,7 @@ constructor(
 
     override fun showAddUserDialog(dialogShower: UserSwitchDialogController.DialogShower?) {
         if (useInteractor) {
-            notYetImplemented()
+            notSupported()
         } else {
             _oldImpl.showAddUserDialog(dialogShower)
         }
@@ -142,23 +168,31 @@ constructor(
 
     override fun startSupervisedUserActivity() {
         if (useInteractor) {
-            notYetImplemented()
+            notSupported()
         } else {
             _oldImpl.startSupervisedUserActivity()
         }
     }
 
     override fun onDensityOrFontScaleChanged() {
-        if (useInteractor) {
-            notYetImplemented()
-        } else {
+        if (!useInteractor) {
             _oldImpl.onDensityOrFontScaleChanged()
         }
     }
 
     override fun addAdapter(adapter: WeakReference<BaseUserSwitcherAdapter>) {
         if (useInteractor) {
-            notYetImplemented()
+            userInteractor.addCallback(
+                object : UserInteractor.UserCallback {
+                    override fun isEvictable(): Boolean {
+                        return adapter.get() == null
+                    }
+
+                    override fun onUserStateChanged() {
+                        adapter.get()?.notifyDataSetChanged()
+                    }
+                }
+            )
         } else {
             _oldImpl.addAdapter(adapter)
         }
@@ -169,7 +203,11 @@ constructor(
         dialogShower: UserSwitchDialogController.DialogShower?,
     ) {
         if (useInteractor) {
-            notYetImplemented()
+            if (LegacyUserDataHelper.isUser(record)) {
+                userInteractor.selectUser(record.resolveId())
+            } else {
+                userInteractor.executeAction(LegacyUserDataHelper.toUserActionModel(record))
+            }
         } else {
             _oldImpl.onUserListItemClicked(record, dialogShower)
         }
@@ -177,7 +215,10 @@ constructor(
 
     override fun removeGuestUser(guestUserId: Int, targetUserId: Int) {
         if (useInteractor) {
-            notYetImplemented()
+            userInteractor.removeGuestUser(
+                guestUserId = guestUserId,
+                targetUserId = targetUserId,
+            )
         } else {
             _oldImpl.removeGuestUser(guestUserId, targetUserId)
         }
@@ -189,7 +230,7 @@ constructor(
         forceRemoveGuestOnExit: Boolean
     ) {
         if (useInteractor) {
-            notYetImplemented()
+            userInteractor.exitGuestUser(guestUserId, targetUserId, forceRemoveGuestOnExit)
         } else {
             _oldImpl.exitGuestUser(guestUserId, targetUserId, forceRemoveGuestOnExit)
         }
@@ -197,7 +238,7 @@ constructor(
 
     override fun schedulePostBootGuestCreation() {
         if (useInteractor) {
-            notYetImplemented()
+            guestUserInteractor.onDeviceBootCompleted()
         } else {
             _oldImpl.schedulePostBootGuestCreation()
         }
@@ -206,14 +247,14 @@ constructor(
     override val isKeyguardShowing: Boolean
         get() =
             if (useInteractor) {
-                notYetImplemented()
+                keyguardInteractor.isKeyguardShowing()
             } else {
                 _oldImpl.isKeyguardShowing
             }
 
     override fun startActivity(intent: Intent) {
         if (useInteractor) {
-            notYetImplemented()
+            activityStarter.startActivity(intent, /* dismissShade= */ false)
         } else {
             _oldImpl.startActivity(intent)
         }
@@ -221,7 +262,7 @@ constructor(
 
     override fun refreshUsers(forcePictureLoadForId: Int) {
         if (useInteractor) {
-            notYetImplemented()
+            userInteractor.refreshUsers()
         } else {
             _oldImpl.refreshUsers(forcePictureLoadForId)
         }
@@ -229,7 +270,14 @@ constructor(
 
     override fun addUserSwitchCallback(callback: UserSwitcherController.UserSwitchCallback) {
         if (useInteractor) {
-            notYetImplemented()
+            val interactorCallback =
+                object : UserInteractor.UserCallback {
+                    override fun onUserStateChanged() {
+                        callback.onUserSwitched()
+                    }
+                }
+            callbackCompatMap[callback] = interactorCallback
+            userInteractor.addCallback(interactorCallback)
         } else {
             _oldImpl.addUserSwitchCallback(callback)
         }
@@ -237,7 +285,10 @@ constructor(
 
     override fun removeUserSwitchCallback(callback: UserSwitcherController.UserSwitchCallback) {
         if (useInteractor) {
-            notYetImplemented()
+            val interactorCallback = callbackCompatMap.remove(callback)
+            if (interactorCallback != null) {
+                userInteractor.removeCallback(interactorCallback)
+            }
         } else {
             _oldImpl.removeUserSwitchCallback(callback)
         }
@@ -245,7 +296,7 @@ constructor(
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {
         if (useInteractor) {
-            notYetImplemented()
+            userInteractor.dump(pw)
         } else {
             _oldImpl.dump(pw, args)
         }

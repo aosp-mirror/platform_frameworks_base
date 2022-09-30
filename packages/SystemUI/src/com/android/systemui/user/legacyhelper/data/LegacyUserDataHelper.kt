@@ -83,6 +83,21 @@ object LegacyUserDataHelper {
         )
     }
 
+    fun toUserActionModel(record: UserRecord): UserActionModel {
+        check(!isUser(record))
+
+        return when {
+            record.isAddUser -> UserActionModel.ADD_USER
+            record.isAddSupervisedUser -> UserActionModel.ADD_SUPERVISED_USER
+            record.isGuest -> UserActionModel.ENTER_GUEST_MODE
+            else -> error("Not a known action: $record")
+        }
+    }
+
+    fun isUser(record: UserRecord): Boolean {
+        return record.info != null
+    }
+
     private fun getEnforcedAdmin(
         context: Context,
         selectedUserId: Int,

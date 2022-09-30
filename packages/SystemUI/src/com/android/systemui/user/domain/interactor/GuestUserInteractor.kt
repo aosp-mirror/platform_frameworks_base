@@ -173,7 +173,7 @@ constructor(
     }
 
     /** Removes the guest user from the device. */
-    private suspend fun remove(
+    suspend fun remove(
         @UserIdInt guestUserId: Int,
         @UserIdInt targetUserId: Int,
         showDialog: (ShowDialogRequestModel) -> Unit,
