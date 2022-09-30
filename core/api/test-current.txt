@@ -445,6 +445,7 @@ package android.app {
     method public void syncInputTransactions();
     method public void syncInputTransactions(boolean);
     field @NonNull public static final java.util.Set<java.lang.String> ALL_PERMISSIONS;
+    field public static final int FLAG_NOT_ACCESSIBILITY_TOOL = 4; // 0x4
   }
 
   public class UiModeManager {
