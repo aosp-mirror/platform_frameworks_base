@@ -21,7 +21,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * A common IPC header used behind {@link RemoteInputConnectionImpl} and
+ * A common IPC header used behind {@link android.view.inputmethod.RemoteInputConnectionImpl} and
  * {@link android.inputmethodservice.RemoteInputConnection}.
  */
 public final class InputConnectionCommandHeader implements Parcelable {
