@@ -24,8 +24,8 @@
     <string name="installing" msgid="4921993079741206516">"Se instalează…"</string>
     <string name="installing_app" msgid="1165095864863849422">"Se instalează <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="install_done" msgid="5987363587661783896">"Aplicație instalată."</string>
-    <string name="install_confirm_question" msgid="7663733664476363311">"Doriți să instalați această aplicație?"</string>
-    <string name="install_confirm_question_update" msgid="3348888852318388584">"Doriți să actualizați această aplicație?"</string>
+    <string name="install_confirm_question" msgid="7663733664476363311">"Vrei să instalezi această aplicație?"</string>
+    <string name="install_confirm_question_update" msgid="3348888852318388584">"Vrei să actualizezi această aplicație?"</string>
     <string name="install_failed" msgid="5777824004474125469">"Aplicația nu a fost instalată."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Instalarea pachetului a fost blocată."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Aplicația nu a fost instalată deoarece pachetul intră în conflict cu un pachet existent."</string>
@@ -56,7 +56,7 @@
     <string name="uninstall_application_text" msgid="3816830743706143980">"Dezinstalezi această aplicație?"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Dezinstalezi această aplicație pentru "<b>"toți"</b>" utilizatorii? Aplicația și datele acesteia vor fi eliminate de la "<b>"toți"</b>" utilizatorii de pe acest dispozitiv."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Dezinstalezi această aplicație pentru utilizatorul <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
-    <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Doriți să dezinstalați această aplicație din profilul de serviciu?"</string>
+    <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Dezinstalezi această aplicație din profilul de serviciu?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"Înlocuiești această aplicație cu versiunea din fabrică? Toate datele vor fi eliminate."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Înlocuiești această aplicație cu versiunea din fabrică? Toate datele vor fi eliminate. Această acțiune va afecta toți utilizatorii dispozitivului, inclusiv pe cei cu profiluri de serviciu."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Păstrează <xliff:g id="SIZE">%1$s</xliff:g> din datele aplicației."</string>
@@ -81,9 +81,9 @@
     <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Acțiunile de instalare și dezinstalare nu sunt acceptate pe Wear."</string>
     <string name="message_staging" msgid="8032722385658438567">"Se pregătește aplicația…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"Necunoscut"</string>
-    <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"Din motive de securitate, tableta dvs. nu are permisiunea să instaleze aplicații necunoscute din această sursă. Puteți modifica această opțiune în Setări."</string>
-    <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"Din motive de securitate, televizorul dvs. nu are permisiunea să instaleze aplicații necunoscute din această sursă. Puteți modifica această opțiune în Setări."</string>
-    <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"Din motive de securitate, telefonul dvs. nu are permisiunea să instaleze aplicații necunoscute din această sursă. Puteți modifica această opțiune în Setări."</string>
+    <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"Din motive de securitate, tableta nu are permisiunea să instaleze aplicații necunoscute din această sursă. Poți modifica această opțiune în setări."</string>
+    <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"Din motive de securitate, televizorul nu are permisiunea să instaleze aplicații necunoscute din această sursă. Poți modifica această opțiune în setări."</string>
+    <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"Din motive de securitate, telefonul nu are permisiunea să instaleze aplicații necunoscute din această sursă. Poți modifica această opțiune în setări."</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Telefonul și datele tale personale sunt mai vulnerabile la un atac din partea aplicațiilor necunoscute. Dacă instalezi această aplicație, accepți că ești singura persoană responsabilă pentru deteriorarea telefonului sau pentru pierderea datelor, care pot avea loc în urma folosirii acesteia."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Tableta și datele tale personale sunt mai vulnerabile la un atac din partea aplicațiilor necunoscute. Dacă instalezi aplicația, accepți că ești singura persoană responsabilă pentru deteriorarea tabletei sau pentru pierderea datelor, care pot avea loc în urma folosirii acesteia."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Televizorul și datele tale cu caracter personal sunt mai vulnerabile la un atac din partea aplicațiilor necunoscute. Dacă instalezi această aplicație, accepți că ești singura persoană responsabilă pentru deteriorarea televizorului sau pentru pierderea datelor, care pot avea loc în urma folosirii acesteia."</string>
