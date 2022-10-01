@@ -1107,7 +1107,8 @@ public final class SmsApplication {
     }
 
     /**
-     * Returns whether need to write the SMS message to SMS database for this package.
+     * Returns whether need to wrgetIncomingUserIdite the SMS message to SMS database for this
+     * package.
      * <p>
      * Caller must pass in the correct user context if calling from a singleton service.
      */
