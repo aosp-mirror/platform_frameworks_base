@@ -455,6 +455,7 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
                     }
                 }
 
+                boolean needToUpdateProviderViews = false;
                 final String newUniqueId = mDisplayInfo.uniqueId;
                 if (!Objects.equals(newUniqueId, mDisplayUniqueId)) {
                     mDisplayUniqueId = newUniqueId;
@@ -472,6 +473,37 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
                         setupDecorations();
                         return;
                     }
+
+                    if (mScreenDecorHwcLayer != null) {
+                        updateHwLayerRoundedCornerDrawable();
+                        updateHwLayerRoundedCornerExistAndSize();
+                    }
+                    needToUpdateProviderViews = true;
+                }
+
+                final float newRatio = getPhysicalPixelDisplaySizeRatio();
+                if (mRoundedCornerResDelegate.getPhysicalPixelDisplaySizeRatio() != newRatio) {
+                    mRoundedCornerResDelegate.setPhysicalPixelDisplaySizeRatio(newRatio);
+                    if (mScreenDecorHwcLayer != null) {
+                        updateHwLayerRoundedCornerExistAndSize();
+                    }
+                    needToUpdateProviderViews = true;
+                }
+
+                if (needToUpdateProviderViews) {
+                    updateOverlayProviderViews(null);
+                } else {
+                    updateOverlayProviderViews(new Integer[] {
+                            mFaceScanningViewId,
+                            R.id.display_cutout,
+                            R.id.display_cutout_left,
+                            R.id.display_cutout_right,
+                            R.id.display_cutout_bottom,
+                    });
+                }
+
+                if (mScreenDecorHwcLayer != null) {
+                    mScreenDecorHwcLayer.onDisplayChanged(newUniqueId);
                 }
             }
         };
@@ -1037,8 +1069,6 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
                 && (newRotation != mRotation || displayModeChanged(mDisplayMode, newMod))) {
             mRotation = newRotation;
             mDisplayMode = newMod;
-            mRoundedCornerResDelegate.setPhysicalPixelDisplaySizeRatio(
-                    getPhysicalPixelDisplaySizeRatio());
             if (mScreenDecorHwcLayer != null) {
                 mScreenDecorHwcLayer.pendingConfigChange = false;
                 mScreenDecorHwcLayer.updateRotation(mRotation);

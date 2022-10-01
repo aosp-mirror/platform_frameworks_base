@@ -25,7 +25,7 @@ import kotlinx.coroutines.flow.StateFlow
 /** A view model for the wifi icon shown on keyguard (lockscreen). */
 class KeyguardWifiViewModel(
     statusBarPipelineFlags: StatusBarPipelineFlags,
-    wifiIcon: StateFlow<Icon?>,
+    wifiIcon: StateFlow<Icon.Resource?>,
     isActivityInViewVisible: Flow<Boolean>,
     isActivityOutViewVisible: Flow<Boolean>,
     isActivityContainerVisible: Flow<Boolean>,

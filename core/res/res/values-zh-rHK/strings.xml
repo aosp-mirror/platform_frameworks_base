@@ -651,9 +651,9 @@
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"請重新註冊面孔。"</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"無法辨識面孔，請再試一次。"</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"請稍為轉換頭部的位置"</string>
-    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"盡可能直視手機"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"請正面望向手機"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"請正面望向手機"</string>
-    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"盡可能直視手機"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"請正面望向手機"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"移開遮住面孔的任何物件。"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"請清理螢幕頂部，包括黑色列"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
