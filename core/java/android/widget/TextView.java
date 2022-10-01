@@ -99,14 +99,14 @@ import android.text.BoringLayout;
 import android.text.DynamicLayout;
 import android.text.Editable;
 import android.text.GetChars;
-import android.text.GraphemeClusterSegmentIterator;
+import android.text.GraphemeClusterSegmentFinder;
 import android.text.GraphicsOperations;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.text.Layout;
 import android.text.ParcelableSpan;
 import android.text.PrecomputedText;
-import android.text.SegmentIterator;
+import android.text.SegmentFinder;
 import android.text.Selection;
 import android.text.SpanWatcher;
 import android.text.Spannable;
@@ -120,7 +120,7 @@ import android.text.TextPaint;
 import android.text.TextUtils;
 import android.text.TextUtils.TruncateAt;
 import android.text.TextWatcher;
-import android.text.WordSegmentIterator;
+import android.text.WordSegmentFinder;
 import android.text.method.AllCapsTransformationMethod;
 import android.text.method.ArrowKeyMovementMethod;
 import android.text.method.DateKeyListener;
@@ -9515,17 +9515,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     @Nullable
     private int[] getRangeForRect(@NonNull RectF area, int granularity) {
-        SegmentIterator segmentIterator;
+        SegmentFinder segmentFinder;
         if (granularity == HandwritingGesture.GRANULARITY_WORD) {
             WordIterator wordIterator = getWordIterator();
             wordIterator.setCharSequence(mText, 0, mText.length());
-            segmentIterator = new WordSegmentIterator(mText, wordIterator);
+            segmentFinder = new WordSegmentFinder(mText, wordIterator);
         } else {
-            segmentIterator = new GraphemeClusterSegmentIterator(mText, mTextPaint);
+            segmentFinder = new GraphemeClusterSegmentFinder(mText, mTextPaint);
         }
 
         return mLayout.getRangeForRect(
-                area, segmentIterator, Layout.INCLUSION_STRATEGY_CONTAINS_CENTER);
+                area, segmentFinder, Layout.INCLUSION_STRATEGY_CONTAINS_CENTER);
     }
 
     private Pattern getWhitespacePattern() {
