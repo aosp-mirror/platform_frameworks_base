@@ -167,7 +167,8 @@ class DisplayDeviceRepository implements DisplayAdapter.Listener {
                 return;
             }
             if (DEBUG) {
-                Trace.beginSection("handleDisplayDeviceChanged");
+                Trace.traceBegin(Trace.TRACE_TAG_POWER,
+                        "handleDisplayDeviceChanged");
             }
             int diff = device.mDebugLastLoggedDeviceInfo.diff(info);
             if (diff == DisplayDeviceInfo.DIFF_STATE) {
@@ -189,7 +190,7 @@ class DisplayDeviceRepository implements DisplayAdapter.Listener {
             device.applyPendingDisplayDeviceInfoChangesLocked();
             sendEventLocked(device, DISPLAY_DEVICE_EVENT_CHANGED);
             if (DEBUG) {
-                Trace.endSection();
+                Trace.traceEnd(Trace.TRACE_TAG_POWER);
             }
         }
     }

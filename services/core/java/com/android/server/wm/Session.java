@@ -299,16 +299,6 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     }
 
     @Override
-    public void setInTouchMode(boolean mode) {
-        mService.setInTouchMode(mode);
-    }
-
-    @Override
-    public boolean getInTouchMode() {
-        return mService.getInTouchMode();
-    }
-
-    @Override
     public boolean performHapticFeedback(int effectId, boolean always) {
         final long ident = Binder.clearCallingIdentity();
         try {

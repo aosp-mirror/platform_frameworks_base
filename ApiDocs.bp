@@ -84,6 +84,7 @@ stubs_defaults {
         ":framework-connectivity-sources",
         ":framework-bluetooth-sources",
         ":framework-connectivity-tiramisu-updatable-sources",
+        ":framework-federatedcompute-sources",
         ":framework-graphics-srcs",
         ":framework-mediaprovider-sources",
         ":framework-nearby-sources",

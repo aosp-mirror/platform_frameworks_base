@@ -284,22 +284,8 @@ public final class UserManagerTest {
     @Test
     public void testRemoveUserByHandle() {
         UserInfo userInfo = createUser("Guest 1", UserInfo.FLAG_GUEST);
-        final UserHandle user = userInfo.getUserHandle();
-        synchronized (mUserRemoveLock) {
-            mUserManager.removeUser(user);
-            long time = System.currentTimeMillis();
-            while (mUserManager.getUserInfo(user.getIdentifier()) != null) {
-                try {
-                    mUserRemoveLock.wait(REMOVE_CHECK_INTERVAL_MILLIS);
-                } catch (InterruptedException ie) {
-                    Thread.currentThread().interrupt();
-                    return;
-                }
-                if (System.currentTimeMillis() - time > REMOVE_TIMEOUT_MILLIS) {
-                    fail("Timeout waiting for removeUser. userId = " + user.getIdentifier());
-                }
-            }
-        }
+
+        removeUser(userInfo.getUserHandle());
 
         assertThat(hasUser(userInfo.id)).isFalse();
     }
@@ -307,7 +293,7 @@ public final class UserManagerTest {
     @MediumTest
     @Test
     public void testRemoveUserByHandle_ThrowsException() {
-        assertThrows(IllegalArgumentException.class, () -> mUserManager.removeUser(null));
+        assertThrows(IllegalArgumentException.class, () -> removeUser(null));
     }
 
     @MediumTest
@@ -408,6 +394,30 @@ public final class UserManagerTest {
         }
 
         assertThat(hasUser(user1.id)).isFalse();
+    }
+
+    @MediumTest
+    @Test
+    public void testRemoveUserWhenPossible_withProfiles() throws Exception {
+        assumeHeadlessModeEnabled();
+        final UserInfo parentUser = createUser("Human User", /* flags= */ 0);
+        final UserInfo cloneProfileUser = createProfileForUser("Clone Profile user",
+                UserManager.USER_TYPE_PROFILE_CLONE,
+                parentUser.id);
+
+        final UserInfo workProfileUser = createProfileForUser("Work Profile user",
+                UserManager.USER_TYPE_PROFILE_MANAGED,
+                parentUser.id);
+        synchronized (mUserRemoveLock) {
+            assertThat(mUserManager.removeUserWhenPossible(parentUser.getUserHandle(),
+                    /* overrideDevicePolicy= */ false))
+                    .isEqualTo(UserManager.REMOVE_RESULT_REMOVED);
+            waitForUserRemovalLocked(parentUser.id);
+        }
+
+        assertThat(hasUser(parentUser.id)).isFalse();
+        assertThat(hasUser(cloneProfileUser.id)).isFalse();
+        assertThat(hasUser(workProfileUser.id)).isFalse();
     }
 
     /** Tests creating a FULL user via specifying userType. */
@@ -1182,6 +1192,13 @@ public final class UserManagerTest {
         }
     }
 
+    private void removeUser(UserHandle user) {
+        synchronized (mUserRemoveLock) {
+            mUserManager.removeUser(user);
+            waitForUserRemovalLocked(user.getIdentifier());
+        }
+    }
+
     private void removeUser(int userId) {
         synchronized (mUserRemoveLock) {
             mUserManager.removeUser(userId);
@@ -1259,6 +1276,12 @@ public final class UserManagerTest {
         assumeTrue("device doesn't support managed users",
                 mPackageManager.hasSystemFeature(PackageManager.FEATURE_MANAGED_USERS)
                 && (!isAutomotive() || !UserManager.isHeadlessSystemUserMode()));
+    }
+
+    private void assumeHeadlessModeEnabled() {
+        // assume headless mode is enabled
+        assumeTrue("Device doesn't have headless mode enabled",
+                UserManager.isHeadlessSystemUserMode());
     }
 
     private boolean isAutomotive() {

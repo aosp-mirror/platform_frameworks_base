@@ -192,7 +192,7 @@ const unsigned char kIdmapRawData[] = {
     // 0x100 string contents "test"
     0x74, 0x65, 0x73, 0x74};
 
-const unsigned int kIdmapRawDataLen = 0x104;
+constexpr unsigned int kIdmapRawDataLen = std::size(kIdmapRawData);
 const unsigned int kIdmapRawDataOffset = 0x54;
 const unsigned int kIdmapRawDataTargetCrc = 0x1234;
 const unsigned int kIdmapRawOverlayCrc = 0x5678;

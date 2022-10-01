@@ -77,8 +77,7 @@ bool WARN_UNUSED ReadString(std::istream& stream, std::string* out) {
     return false;
   }
   uint32_t padding_size = CalculatePadding(size);
-  std::string padding(padding_size, '\0');
-  if (!stream.read(padding.data(), padding_size)) {
+  if (padding_size != 0 && !stream.seekg(padding_size, std::ios_base::cur)) {
     return false;
   }
   *out = buf;

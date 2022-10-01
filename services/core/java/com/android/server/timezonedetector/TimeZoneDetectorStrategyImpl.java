@@ -22,6 +22,8 @@ import static android.app.timezonedetector.TelephonyTimeZoneSuggestion.QUALITY_M
 import static android.app.timezonedetector.TelephonyTimeZoneSuggestion.QUALITY_MULTIPLE_ZONES_WITH_SAME_OFFSET;
 import static android.app.timezonedetector.TelephonyTimeZoneSuggestion.QUALITY_SINGLE_ZONE;
 
+import static com.android.server.SystemTimeZone.TIME_ZONE_CONFIDENCE_HIGH;
+
 import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -39,6 +41,7 @@ import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.SystemTimeZone.TimeZoneConfidence;
 
 import java.time.Duration;
 import java.util.List;
@@ -73,19 +76,20 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
         @NonNull ConfigurationInternal getCurrentUserConfigurationInternal();
 
         /**
-         * Returns true if the device has had an explicit time zone set.
-         */
-        boolean isDeviceTimeZoneInitialized();
-
-        /**
          * Returns the device's currently configured time zone.
          */
-        String getDeviceTimeZone();
+        @NonNull String getDeviceTimeZone();
 
         /**
-         * Sets the device's time zone.
+         * Returns the confidence of the device's current time zone.
          */
-        void setDeviceTimeZone(@NonNull String zoneId);
+        @TimeZoneConfidence int getDeviceTimeZoneConfidence();
+
+        /**
+         * Sets the device's time zone and associated confidence.
+         */
+        void setDeviceTimeZoneAndConfidence(
+                @NonNull String zoneId, @TimeZoneConfidence int confidence);
 
         /**
          * Returns the time according to the elapsed realtime clock, the same as {@link
@@ -620,25 +624,32 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
     @GuardedBy("this")
     private void setDeviceTimeZoneIfRequired(@NonNull String newZoneId, @NonNull String cause) {
         String currentZoneId = mEnvironment.getDeviceTimeZone();
+        // All manual and automatic suggestions are considered high confidence as low-quality
+        // suggestions are not currently passed on.
+        int newConfidence = TIME_ZONE_CONFIDENCE_HIGH;
+        int currentConfidence = mEnvironment.getDeviceTimeZoneConfidence();
 
-        // Avoid unnecessary changes / intents.
-        if (newZoneId.equals(currentZoneId)) {
-            // No need to set the device time zone - the setting is already what we would be
-            // suggesting.
+        // Avoid unnecessary changes / intents. If the newConfidence is higher than the stored value
+        // then we want to upgrade it.
+        if (newZoneId.equals(currentZoneId) && newConfidence <= currentConfidence) {
+            // No need to modify the device time zone settings.
             if (DBG) {
                 Slog.d(LOG_TAG, "No need to change the time zone;"
                         + " device is already set to newZoneId."
                         + ", newZoneId=" + newZoneId
-                        + ", cause=" + cause);
+                        + ", cause=" + cause
+                        + ", currentScore=" + currentConfidence
+                        + ", newConfidence=" + newConfidence);
             }
             return;
         }
 
-        mEnvironment.setDeviceTimeZone(newZoneId);
-        String logMsg = "Set device time zone."
+        mEnvironment.setDeviceTimeZoneAndConfidence(newZoneId, newConfidence);
+        String logMsg = "Set device time zone or higher confidence."
                 + ", currentZoneId=" + currentZoneId
                 + ", newZoneId=" + newZoneId
-                + ", cause=" + cause;
+                + ", cause=" + cause
+                + ", newConfidence=" + newConfidence;
         logTimeZoneDetectorChange(logMsg);
     }
 
@@ -710,9 +721,9 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
         ipw.println("mCurrentConfigurationInternal=" + mCurrentConfigurationInternal);
         ipw.println("[Capabilities=" + mCurrentConfigurationInternal.createCapabilitiesAndConfig()
                 + "]");
-        ipw.println("mEnvironment.isDeviceTimeZoneInitialized()="
-                + mEnvironment.isDeviceTimeZoneInitialized());
         ipw.println("mEnvironment.getDeviceTimeZone()=" + mEnvironment.getDeviceTimeZone());
+        ipw.println("mEnvironment.getDeviceTimeZoneConfidence()="
+                + mEnvironment.getDeviceTimeZoneConfidence());
 
         ipw.println("Misc state:");
         ipw.increaseIndent(); // level 2

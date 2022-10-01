@@ -17,7 +17,7 @@
 #ifdef _WIN32
 // nothing to see here
 #else
-#include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -29,45 +29,42 @@
 
 #include "androidfw/PosixUtils.h"
 
-namespace {
-
-std::unique_ptr<std::string> ReadFile(int fd) {
-  std::unique_ptr<std::string> str(new std::string());
+static std::optional<std::string> ReadFile(int fd) {
+  std::string str;
   char buf[1024];
   ssize_t r;
   while ((r = read(fd, buf, sizeof(buf))) > 0) {
-    str->append(buf, r);
+    str.append(buf, r);
   }
   if (r != 0) {
-    return nullptr;
+    return std::nullopt;
   }
-  return str;
-}
-
+  return std::move(str);
 }
 
 namespace android {
 namespace util {
 
-std::unique_ptr<ProcResult> ExecuteBinary(const std::vector<std::string>& argv) {
-  int stdout[2];  // stdout[0] read, stdout[1] write
+ProcResult ExecuteBinary(const std::vector<std::string>& argv) {
+  int stdout[2];  // [0] read, [1] write
   if (pipe(stdout) != 0) {
-    PLOG(ERROR) << "pipe";
-    return nullptr;
+    PLOG(ERROR) << "out pipe";
+    return ProcResult{-1};
   }
 
-  int stderr[2];  // stdout[0] read, stdout[1] write
+  int stderr[2];  // [0] read, [1] write
   if (pipe(stderr) != 0) {
-    PLOG(ERROR) << "pipe";
+    PLOG(ERROR) << "err pipe";
     close(stdout[0]);
     close(stdout[1]);
-    return nullptr;
+    return ProcResult{-1};
   }
 
   auto gid = getgid();
   auto uid = getuid();
 
-  char const** argv0 = (char const**)malloc(sizeof(char*) * (argv.size() + 1));
+  // better keep no C++ objects going into the child here
+  auto argv0 = (char const**)malloc(sizeof(char*) * (argv.size() + 1));
   for (size_t i = 0; i < argv.size(); i++) {
     argv0[i] = argv[i].c_str();
   }
@@ -76,8 +73,12 @@ std::unique_ptr<ProcResult> ExecuteBinary(const std::vector<std::string>& argv) 
   switch (pid) {
     case -1: // error
       free(argv0);
+      close(stdout[0]);
+      close(stdout[1]);
+      close(stderr[0]);
+      close(stderr[1]);
       PLOG(ERROR) << "fork";
-      return nullptr;
+      return ProcResult{-1};
     case 0: // child
       if (setgid(gid) != 0) {
         PLOG(ERROR) << "setgid";
@@ -109,17 +110,16 @@ std::unique_ptr<ProcResult> ExecuteBinary(const std::vector<std::string>& argv) 
       if (!WIFEXITED(status)) {
           close(stdout[0]);
           close(stderr[0]);
-          return nullptr;
+          return ProcResult{-1};
       }
-      std::unique_ptr<ProcResult> result(new ProcResult());
-      result->status = status;
-      const auto out = ReadFile(stdout[0]);
-      result->stdout_str = out ? *out : "";
+      ProcResult result(status);
+      auto out = ReadFile(stdout[0]);
+      result.stdout_str = out ? std::move(*out) : "";
       close(stdout[0]);
-      const auto err = ReadFile(stderr[0]);
-      result->stderr_str = err ? *err : "";
+      auto err = ReadFile(stderr[0]);
+      result.stderr_str = err ? std::move(*err) : "";
       close(stderr[0]);
-      return result;
+      return std::move(result);
   }
 }
 

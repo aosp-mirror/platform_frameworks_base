@@ -450,7 +450,8 @@ public final class CompanionDeviceManager {
      * <p>Calling this API requires a uses-feature
      * {@link PackageManager#FEATURE_COMPANION_DEVICE_SETUP} declaration in the manifest</p>
      *
-     * @param deviceMacAddress the MAC address of device to disassociate from this app
+     * @param deviceMacAddress the MAC address of device to disassociate from this app. Device
+     * address is case-sensitive in API level &lt; 33.
      *
      * @deprecated use {@link #disassociate(int)}
      */

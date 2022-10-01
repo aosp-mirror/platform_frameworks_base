@@ -444,7 +444,7 @@ public class QSSecurityFooterUtils implements DialogInterface.OnClickListener {
         mShouldUseSettingsButton.set(false);
         mBgHandler.post(() -> {
             String settingsButtonText = getSettingsButton();
-            final View dialogView = createDialogView();
+            final View dialogView = createDialogView(quickSettingsContext);
             mMainHandler.post(() -> {
                 mDialog = new SystemUIDialog(quickSettingsContext, 0);
                 mDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -469,14 +469,14 @@ public class QSSecurityFooterUtils implements DialogInterface.OnClickListener {
     }
 
     @VisibleForTesting
-    View createDialogView() {
+    View createDialogView(Context quickSettingsContext) {
         if (mSecurityController.isParentalControlsEnabled()) {
             return createParentalControlsDialogView();
         }
-        return createOrganizationDialogView();
+        return createOrganizationDialogView(quickSettingsContext);
     }
 
-    private View createOrganizationDialogView() {
+    private View createOrganizationDialogView(Context quickSettingsContext) {
         final boolean isDeviceManaged = mSecurityController.isDeviceManaged();
         final boolean hasWorkProfile = mSecurityController.hasWorkProfile();
         final CharSequence deviceOwnerOrganization =
@@ -487,7 +487,7 @@ public class QSSecurityFooterUtils implements DialogInterface.OnClickListener {
         final String vpnName = mSecurityController.getPrimaryVpnName();
         final String vpnNameWorkProfile = mSecurityController.getWorkProfileVpnName();
 
-        View dialogView = LayoutInflater.from(mContext)
+        View dialogView = LayoutInflater.from(quickSettingsContext)
                 .inflate(R.layout.quick_settings_footer_dialog, null, false);
 
         // device management section

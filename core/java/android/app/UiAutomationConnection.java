@@ -16,6 +16,8 @@
 
 package android.app;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.annotation.NonNull;
@@ -35,6 +37,7 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.permission.IPermissionManager;
 import android.util.Log;
+import android.util.Pair;
 import android.view.IWindowManager;
 import android.view.InputDevice;
 import android.view.InputEvent;
@@ -46,6 +49,8 @@ import android.view.WindowContentFrameStats;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.IAccessibilityManager;
 import android.window.ScreenCapture;
+import android.window.ScreenCapture.CaptureArgs;
+import android.window.ScreenCapture.ScreenCaptureListener;
 
 import libcore.io.IoUtils;
 
@@ -218,20 +223,22 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
         }
         final long identity = Binder.clearCallingIdentity();
         try {
-            int width = crop.width();
-            int height = crop.height();
-            final IBinder displayToken = SurfaceControl.getInternalDisplayToken();
-            final ScreenCapture.DisplayCaptureArgs captureArgs =
-                    new ScreenCapture.DisplayCaptureArgs.Builder(displayToken)
-                            .setSourceCrop(crop)
-                            .setSize(width, height)
-                            .build();
+            final CaptureArgs captureArgs = new CaptureArgs.Builder<>()
+                    .setSourceCrop(crop)
+                    .build();
+            Pair<ScreenCaptureListener, ScreenCapture.ScreenshotSync> syncScreenCapture =
+                    ScreenCapture.createSyncCaptureListener();
+            mWindowManager.captureDisplay(DEFAULT_DISPLAY, captureArgs,
+                    syncScreenCapture.first);
             final ScreenCapture.ScreenshotHardwareBuffer screenshotBuffer =
-                    ScreenCapture.captureDisplay(captureArgs);
+                    syncScreenCapture.second.get();
             return screenshotBuffer == null ? null : screenshotBuffer.asBitmap();
+        } catch (RemoteException re) {
+            re.rethrowAsRuntimeException();
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
+        return null;
     }
 
     @Nullable
@@ -551,7 +558,9 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
         info.setCapabilities(AccessibilityServiceInfo.CAPABILITY_CAN_RETRIEVE_WINDOW_CONTENT
                 | AccessibilityServiceInfo.CAPABILITY_CAN_REQUEST_TOUCH_EXPLORATION
                 | AccessibilityServiceInfo.CAPABILITY_CAN_REQUEST_FILTER_KEY_EVENTS);
-        info.setAccessibilityTool(true);
+        if ((flags & UiAutomation.FLAG_NOT_ACCESSIBILITY_TOOL) == 0) {
+            info.setAccessibilityTool(true);
+        }
         try {
             // Calling out with a lock held is fine since if the system
             // process is gone the client calling in will be killed.

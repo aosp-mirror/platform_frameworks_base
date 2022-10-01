@@ -213,7 +213,7 @@ java_library {
         "android.hardware.radio.data-V1-java",
         "android.hardware.radio.messaging-V1-java",
         "android.hardware.radio.modem-V1-java",
-        "android.hardware.radio.network-V1-java",
+        "android.hardware.radio.network-V2-java",
         "android.hardware.radio.sim-V1-java",
         "android.hardware.radio.voice-V1-java",
         "android.hardware.thermal-V1.0-java-constants",

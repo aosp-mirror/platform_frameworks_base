@@ -390,7 +390,7 @@ public class Instrumentation {
     public void setInTouchMode(boolean inTouch) {
         try {
             IWindowManager.Stub.asInterface(
-                    ServiceManager.getService("window")).setInTouchMode(inTouch);
+                    ServiceManager.getService("window")).setInTouchModeOnAllDisplays(inTouch);
         } catch (RemoteException e) {
             // Shouldn't happen!
         }

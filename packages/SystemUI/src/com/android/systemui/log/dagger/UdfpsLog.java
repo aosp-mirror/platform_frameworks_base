@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.pipeline.wifi.data.model
+package com.android.systemui.log.dagger;
 
-/**
- * Provides information on the current wifi activity.
- */
-data class WifiActivityModel(
-    /** True if the wifi has activity in (download). */
-    val hasActivityIn: Boolean,
-    /** True if the wifi has activity out (upload). */
-    val hasActivityOut: Boolean,
-)
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+
+import javax.inject.Qualifier;
+
+@Qualifier
+@Documented
+@Retention(RUNTIME)
+public @interface UdfpsLog {
+}

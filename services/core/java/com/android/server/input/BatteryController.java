@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.BatteryState;
 import android.hardware.input.IInputDeviceBatteryListener;
+import android.hardware.input.IInputDeviceBatteryState;
 import android.hardware.input.InputManager;
 import android.os.Handler;
 import android.os.IBinder;
@@ -47,8 +48,13 @@ import java.util.Set;
 /**
  * A thread-safe component of {@link InputManagerService} responsible for managing the battery state
  * of input devices.
+ *
+ * Interactions with BatteryController can happen on several threads, including Binder threads, the
+ * {@link UEventObserver}'s thread, or its own Handler thread, among others. All public methods, and
+ * private methods prefixed with "handle-" (e.g. {@link #handleListeningProcessDied(int)}),
+ * serve as entry points for these threads.
  */
-final class BatteryController implements InputManager.InputDeviceListener {
+final class BatteryController {
     private static final String TAG = BatteryController.class.getSimpleName();
 
     // To enable these logs, run:
@@ -69,10 +75,9 @@ final class BatteryController implements InputManager.InputDeviceListener {
     @GuardedBy("mLock")
     private final ArrayMap<Integer, ListenerRecord> mListenerRecords = new ArrayMap<>();
 
-    // Maps a deviceId that is being monitored to the battery state for the device.
-    // This must be kept in sync with {@link #mListenerRecords}.
+    // Maps a deviceId that is being monitored to the monitor for the battery state of the device.
     @GuardedBy("mLock")
-    private final ArrayMap<Integer, MonitoredDeviceState> mMonitoredDeviceStates = new ArrayMap<>();
+    private final ArrayMap<Integer, DeviceMonitor> mDeviceMonitors = new ArrayMap<>();
 
     @GuardedBy("mLock")
     private boolean mIsPolling = false;
@@ -92,9 +97,9 @@ final class BatteryController implements InputManager.InputDeviceListener {
         mUEventManager = uEventManager;
     }
 
-    void systemRunning() {
+    public void systemRunning() {
         Objects.requireNonNull(mContext.getSystemService(InputManager.class))
-                .registerInputDeviceListener(this, mHandler);
+                .registerInputDeviceListener(mInputDeviceListener, mHandler);
     }
 
     /**
@@ -102,7 +107,7 @@ final class BatteryController implements InputManager.InputDeviceListener {
      * state.
      */
     @BinderThread
-    void registerBatteryListener(int deviceId, @NonNull IInputDeviceBatteryListener listener,
+    public void registerBatteryListener(int deviceId, @NonNull IInputDeviceBatteryListener listener,
             int pid) {
         synchronized (mLock) {
             ListenerRecord listenerRecord = mListenerRecords.get(pid);
@@ -131,11 +136,11 @@ final class BatteryController implements InputManager.InputDeviceListener {
                                 + " is already monitoring deviceId " + deviceId);
             }
 
-            MonitoredDeviceState deviceState = mMonitoredDeviceStates.get(deviceId);
-            if (deviceState == null) {
+            DeviceMonitor monitor = mDeviceMonitors.get(deviceId);
+            if (monitor == null) {
                 // This is the first listener that is monitoring this device.
-                deviceState = new MonitoredDeviceState(deviceId);
-                mMonitoredDeviceStates.put(deviceId, deviceState);
+                monitor = new DeviceMonitor(deviceId);
+                mDeviceMonitors.put(deviceId, monitor);
             }
 
             if (DEBUG) {
@@ -144,36 +149,35 @@ final class BatteryController implements InputManager.InputDeviceListener {
             }
 
             updatePollingLocked(true /*delayStart*/);
-            notifyBatteryListener(listenerRecord, deviceState);
+            notifyBatteryListener(listenerRecord, monitor.getBatteryStateForReporting());
         }
     }
 
-    private static void notifyBatteryListener(ListenerRecord listenerRecord,
-            MonitoredDeviceState deviceState) {
+    private static void notifyBatteryListener(ListenerRecord listenerRecord, State state) {
         try {
-            listenerRecord.mListener.onBatteryStateChanged(
-                    deviceState.mDeviceId,
-                    deviceState.mHasBattery,
-                    deviceState.mBatteryStatus,
-                    deviceState.mBatteryCapacity,
-                    deviceState.mLastUpdateTime);
+            listenerRecord.mListener.onBatteryStateChanged(state);
         } catch (RemoteException e) {
             Slog.e(TAG, "Failed to notify listener", e);
+        }
+        if (DEBUG) {
+            Slog.d(TAG, "Notified battery listener from pid " + listenerRecord.mPid
+                    + " of state of deviceId " + state.deviceId);
         }
     }
 
     @GuardedBy("mLock")
-    private void notifyAllListenersForDeviceLocked(MonitoredDeviceState deviceState) {
+    private void notifyAllListenersForDeviceLocked(State state) {
+        if (DEBUG) Slog.d(TAG, "Notifying all listeners of battery state: " + state);
         mListenerRecords.forEach((pid, listenerRecord) -> {
-            if (listenerRecord.mMonitoredDevices.contains(deviceState.mDeviceId)) {
-                notifyBatteryListener(listenerRecord, deviceState);
+            if (listenerRecord.mMonitoredDevices.contains(state.deviceId)) {
+                notifyBatteryListener(listenerRecord, state);
             }
         });
     }
 
     @GuardedBy("mLock")
     private void updatePollingLocked(boolean delayStart) {
-        if (mMonitoredDeviceStates.isEmpty() || !mIsInteractive) {
+        if (mDeviceMonitors.isEmpty() || !mIsInteractive) {
             // Stop polling.
             mIsPolling = false;
             mHandler.removeCallbacks(this::handlePollEvent);
@@ -196,8 +200,8 @@ final class BatteryController implements InputManager.InputDeviceListener {
     }
 
     @GuardedBy("mLock")
-    private MonitoredDeviceState getDeviceStateOrThrowLocked(int deviceId) {
-        return Objects.requireNonNull(mMonitoredDeviceStates.get(deviceId),
+    private DeviceMonitor getDeviceMonitorOrThrowLocked(int deviceId) {
+        return Objects.requireNonNull(mDeviceMonitors.get(deviceId),
                 "Maps are out of sync: Cannot find device state for deviceId " + deviceId);
     }
 
@@ -207,8 +211,8 @@ final class BatteryController implements InputManager.InputDeviceListener {
      * removed.
      */
     @BinderThread
-    void unregisterBatteryListener(int deviceId, @NonNull IInputDeviceBatteryListener listener,
-            int pid) {
+    public void unregisterBatteryListener(int deviceId,
+            @NonNull IInputDeviceBatteryListener listener, int pid) {
         synchronized (mLock) {
             final ListenerRecord listenerRecord = mListenerRecords.get(pid);
             if (listenerRecord == null) {
@@ -247,9 +251,9 @@ final class BatteryController implements InputManager.InputDeviceListener {
 
         if (!hasRegisteredListenerForDeviceLocked(deviceId)) {
             // There are no more listeners monitoring this device.
-            final MonitoredDeviceState deviceState = getDeviceStateOrThrowLocked(deviceId);
-            deviceState.stopMonitoring();
-            mMonitoredDeviceStates.remove(deviceId);
+            final DeviceMonitor monitor = getDeviceMonitorOrThrowLocked(deviceId);
+            monitor.stopMonitoring();
+            mDeviceMonitors.remove(deviceId);
         }
 
         if (listenerRecord.mMonitoredDevices.isEmpty()) {
@@ -288,15 +292,14 @@ final class BatteryController implements InputManager.InputDeviceListener {
         }
     }
 
-    // Query the battery state for the device and notify all listeners if there is a change.
-    private void handleBatteryChangeNotification(int deviceId, long eventTime) {
+    private void handleUEventNotification(int deviceId, long eventTime) {
         synchronized (mLock) {
-            final MonitoredDeviceState deviceState = mMonitoredDeviceStates.get(deviceId);
-            if (deviceState == null) {
+            final DeviceMonitor monitor = mDeviceMonitors.get(deviceId);
+            if (monitor == null) {
                 return;
             }
-            if (deviceState.updateBatteryState(eventTime)) {
-                notifyAllListenersForDeviceLocked(deviceState);
+            if (monitor.updateBatteryState(eventTime)) {
+                notifyAllListenersForDeviceLocked(monitor.getBatteryStateForReporting());
             }
         }
     }
@@ -307,11 +310,11 @@ final class BatteryController implements InputManager.InputDeviceListener {
                 return;
             }
             final long eventTime = SystemClock.uptimeMillis();
-            mMonitoredDeviceStates.forEach((deviceId, deviceState) -> {
+            mDeviceMonitors.forEach((deviceId, monitor) -> {
                 // Re-acquire lock in the lambda to silence error-prone build warnings.
                 synchronized (mLock) {
-                    if (deviceState.updateBatteryState(eventTime)) {
-                        notifyAllListenersForDeviceLocked(deviceState);
+                    if (monitor.updateBatteryState(eventTime)) {
+                        notifyAllListenersForDeviceLocked(monitor.getBatteryStateForReporting());
                     }
                 }
             });
@@ -319,62 +322,90 @@ final class BatteryController implements InputManager.InputDeviceListener {
         }
     }
 
-    void onInteractiveChanged(boolean interactive) {
+    /** Gets the current battery state of an input device. */
+    public IInputDeviceBatteryState getBatteryState(int deviceId) {
+        synchronized (mLock) {
+            final long updateTime = SystemClock.uptimeMillis();
+            final DeviceMonitor monitor = mDeviceMonitors.get(deviceId);
+            if (monitor == null) {
+                // The input device's battery is not being monitored by any listener.
+                return queryBatteryStateFromNative(deviceId, updateTime);
+            }
+            // Force the battery state to update, and notify listeners if necessary.
+            final boolean stateChanged = monitor.updateBatteryState(updateTime);
+            final State state = monitor.getBatteryStateForReporting();
+            if (stateChanged) {
+                notifyAllListenersForDeviceLocked(state);
+            }
+            return state;
+        }
+    }
+
+    public void onInteractiveChanged(boolean interactive) {
         synchronized (mLock) {
             mIsInteractive = interactive;
             updatePollingLocked(false /*delayStart*/);
         }
     }
 
-    void dump(PrintWriter pw, String prefix) {
+    public void dump(PrintWriter pw, String prefix) {
         synchronized (mLock) {
-            pw.println(prefix + TAG + ": "
-                    + mListenerRecords.size() + " battery listeners"
-                    + ", Polling = " + mIsPolling
+            final String indent = prefix + "  ";
+            final String indent2 = indent + "  ";
+
+            pw.println(prefix + TAG + ":");
+            pw.println(indent + "State: Polling = " + mIsPolling
                     + ", Interactive = " + mIsInteractive);
+
+            pw.println(indent + "Listeners: " + mListenerRecords.size() + " battery listeners");
             for (int i = 0; i < mListenerRecords.size(); i++) {
-                pw.println(prefix + "  " + i + ": " + mListenerRecords.valueAt(i));
+                pw.println(indent2 + i + ": " + mListenerRecords.valueAt(i));
+            }
+
+            pw.println(indent + "Device Monitors: " + mDeviceMonitors.size() + " monitors");
+            for (int i = 0; i < mDeviceMonitors.size(); i++) {
+                pw.println(indent2 + i + ": " + mDeviceMonitors.valueAt(i));
             }
         }
     }
 
     @SuppressWarnings("all")
-    void monitor() {
+    public void monitor() {
         synchronized (mLock) {
             return;
         }
     }
 
-    @VisibleForTesting
-    @Override
-    public void onInputDeviceAdded(int deviceId) {}
+    private final InputManager.InputDeviceListener mInputDeviceListener =
+            new InputManager.InputDeviceListener() {
+        @Override
+        public void onInputDeviceAdded(int deviceId) {}
 
-    @VisibleForTesting
-    @Override
-    public void onInputDeviceRemoved(int deviceId) {}
+        @Override
+        public void onInputDeviceRemoved(int deviceId) {}
 
-    @VisibleForTesting
-    @Override
-    public void onInputDeviceChanged(int deviceId) {
-        synchronized (mLock) {
-            final MonitoredDeviceState deviceState = mMonitoredDeviceStates.get(deviceId);
-            if (deviceState == null) {
-                return;
-            }
-            final long eventTime = SystemClock.uptimeMillis();
-            if (deviceState.updateBatteryState(eventTime)) {
-                notifyAllListenersForDeviceLocked(deviceState);
+        @Override
+        public void onInputDeviceChanged(int deviceId) {
+            synchronized (mLock) {
+                final DeviceMonitor monitor = mDeviceMonitors.get(deviceId);
+                if (monitor == null) {
+                    return;
+                }
+                final long eventTime = SystemClock.uptimeMillis();
+                if (monitor.updateBatteryState(eventTime)) {
+                    notifyAllListenersForDeviceLocked(monitor.getBatteryStateForReporting());
+                }
             }
         }
-    }
+    };
 
     // A record of a registered battery listener from one process.
     private class ListenerRecord {
-        final int mPid;
-        final IInputDeviceBatteryListener mListener;
-        final IBinder.DeathRecipient mDeathRecipient;
+        public final int mPid;
+        public final IInputDeviceBatteryListener mListener;
+        public final IBinder.DeathRecipient mDeathRecipient;
         // The set of deviceIds that are currently being monitored by this listener.
-        final Set<Integer> mMonitoredDevices;
+        public final Set<Integer> mMonitoredDevices;
 
         ListenerRecord(int pid, IInputDeviceBatteryListener listener) {
             mPid = pid;
@@ -390,21 +421,27 @@ final class BatteryController implements InputManager.InputDeviceListener {
         }
     }
 
-    // Holds the state of an InputDevice for which battery changes are currently being monitored.
-    private class MonitoredDeviceState {
-        private final int mDeviceId;
+    // Queries the battery state of an input device from native code.
+    private State queryBatteryStateFromNative(int deviceId, long updateTime) {
+        final boolean isPresent = hasBattery(deviceId);
+        return new State(
+                deviceId,
+                updateTime,
+                isPresent,
+                isPresent ? mNative.getBatteryStatus(deviceId) : BatteryState.STATUS_UNKNOWN,
+                isPresent ? mNative.getBatteryCapacity(deviceId) / 100.f : Float.NaN);
+    }
 
-        private long mLastUpdateTime = 0;
-        private boolean mHasBattery = false;
-        @BatteryState.BatteryStatus
-        private int mBatteryStatus = BatteryState.STATUS_UNKNOWN;
-        private float mBatteryCapacity = Float.NaN;
+    // Holds the state of an InputDevice for which battery changes are currently being monitored.
+    private class DeviceMonitor {
+        @NonNull
+        private State mState;
 
         @Nullable
         private UEventListener mUEventListener;
 
-        MonitoredDeviceState(int deviceId) {
-            mDeviceId = deviceId;
+        DeviceMonitor(int deviceId) {
+            mState = new State(deviceId);
 
             // Load the initial battery state and start monitoring.
             final long eventTime = SystemClock.uptimeMillis();
@@ -412,55 +449,56 @@ final class BatteryController implements InputManager.InputDeviceListener {
         }
 
         // Returns true if the battery state changed since the last time it was updated.
-        boolean updateBatteryState(long eventTime) {
-            mLastUpdateTime = eventTime;
+        public boolean updateBatteryState(long updateTime) {
+            mState.updateTime = updateTime;
 
-            final boolean batteryPresenceChanged = mHasBattery != hasBattery(mDeviceId);
-            if (batteryPresenceChanged) {
-                mHasBattery = !mHasBattery;
-                if (mHasBattery) {
+            final State updatedState = queryBatteryStateFromNative(mState.deviceId, updateTime);
+            if (mState.equals(updatedState)) {
+                return false;
+            }
+            if (mState.isPresent != updatedState.isPresent) {
+                if (updatedState.isPresent) {
                     startMonitoring();
                 } else {
                     stopMonitoring();
                 }
             }
-
-            final int oldStatus = mBatteryStatus;
-            final float oldCapacity = mBatteryCapacity;
-
-            if (mHasBattery) {
-                mBatteryStatus = mNative.getBatteryStatus(mDeviceId);
-                mBatteryCapacity = mNative.getBatteryCapacity(mDeviceId) / 100.f;
-            } else {
-                mBatteryStatus = BatteryState.STATUS_UNKNOWN;
-                mBatteryCapacity = Float.NaN;
-            }
-
-            return batteryPresenceChanged
-                    || mBatteryStatus != oldStatus
-                    || mBatteryCapacity != oldCapacity;
+            mState = updatedState;
+            return true;
         }
 
         private void startMonitoring() {
-            final String batteryPath = mNative.getBatteryDevicePath(mDeviceId);
+            final String batteryPath = mNative.getBatteryDevicePath(mState.deviceId);
             if (batteryPath == null) {
                 return;
             }
+            final int deviceId = mState.deviceId;
             mUEventListener = new UEventListener() {
                 @Override
-                void onUEvent(long eventTime) {
-                    handleBatteryChangeNotification(mDeviceId, eventTime);
+                public void onUEvent(long eventTime) {
+                    handleUEventNotification(deviceId, eventTime);
                 }
             };
             mUEventManager.addListener(mUEventListener, "DEVPATH=" + batteryPath);
         }
 
         // This must be called when the device is no longer being monitored.
-        void stopMonitoring() {
+        public void stopMonitoring() {
             if (mUEventListener != null) {
                 mUEventManager.removeListener(mUEventListener);
                 mUEventListener = null;
             }
+        }
+
+        // Returns the current battery state that can be used to notify listeners BatteryController.
+        public State getBatteryStateForReporting() {
+            return new State(mState);
+        }
+
+        @Override
+        public String toString() {
+            return "state=" + mState
+                    + ", uEventListener=" + (mUEventListener != null ? "added" : "none");
         }
     }
 
@@ -483,7 +521,7 @@ final class BatteryController implements InputManager.InputDeviceListener {
                 }
             };
 
-            abstract void onUEvent(long eventTime);
+            public abstract void onUEvent(long eventTime);
         }
 
         default void addListener(UEventListener listener, String match) {
@@ -492,6 +530,39 @@ final class BatteryController implements InputManager.InputDeviceListener {
 
         default void removeListener(UEventListener listener) {
             listener.mObserver.stopObserving();
+        }
+    }
+
+    // Helper class that adds copying and printing functionality to IInputDeviceBatteryState.
+    private static class State extends IInputDeviceBatteryState {
+
+        State(int deviceId) {
+            initialize(deviceId, 0 /*updateTime*/, false /*isPresent*/, BatteryState.STATUS_UNKNOWN,
+                    Float.NaN /*capacity*/);
+        }
+
+        State(IInputDeviceBatteryState s) {
+            initialize(s.deviceId, s.updateTime, s.isPresent, s.status, s.capacity);
+        }
+
+        State(int deviceId, long updateTime, boolean isPresent, int status, float capacity) {
+            initialize(deviceId, updateTime, isPresent, status, capacity);
+        }
+
+        private void initialize(int deviceId, long updateTime, boolean isPresent, int status,
+                float capacity) {
+            this.deviceId = deviceId;
+            this.updateTime = updateTime;
+            this.isPresent = isPresent;
+            this.status = status;
+            this.capacity = capacity;
+        }
+
+        @Override
+        public String toString() {
+            return "BatteryState{deviceId=" + deviceId + ", updateTime=" + updateTime
+                    + ", isPresent=" + isPresent + ", status=" + status + ", capacity=" + capacity
+                    + " }";
         }
     }
 }

@@ -1253,7 +1253,8 @@ class ActivityMetricsLogger {
                 info.mSourceEventDelayMs,
                 isIncremental,
                 isLoading,
-                info.mLastLaunchedActivity.info.name.hashCode());
+                info.mLastLaunchedActivity.info.name.hashCode(),
+                TimeUnit.NANOSECONDS.toMillis(info.mLaunchingState.mStartRealtimeNs));
 
         // Ends the trace started at the beginning of this function. This is located here to allow
         // the trace slice to have a noticable duration.

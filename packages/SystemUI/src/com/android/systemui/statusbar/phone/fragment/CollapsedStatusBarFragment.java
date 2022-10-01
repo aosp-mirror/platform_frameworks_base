@@ -64,6 +64,7 @@ import com.android.systemui.statusbar.phone.PhoneStatusBarView;
 import com.android.systemui.statusbar.phone.StatusBarHideIconsForBouncerManager;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarIconController.DarkIconManager;
+import com.android.systemui.statusbar.phone.StatusBarLocation;
 import com.android.systemui.statusbar.phone.StatusBarLocationPublisher;
 import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent;
 import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent.Startable;
@@ -235,7 +236,8 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             mStatusBar.restoreHierarchyState(
                     savedInstanceState.getSparseParcelableArray(EXTRA_PANEL_STATE));
         }
-        mDarkIconManager = mDarkIconManagerFactory.create(view.findViewById(R.id.statusIcons));
+        mDarkIconManager = mDarkIconManagerFactory.create(
+                view.findViewById(R.id.statusIcons), StatusBarLocation.HOME);
         mDarkIconManager.setShouldLog(true);
         updateBlockedIcons();
         mStatusBarIconController.addIconGroup(mDarkIconManager);

@@ -187,6 +187,8 @@ public interface Computer extends PackageDataSnapshot {
 
     PackageStateInternal getPackageStateInternal(String packageName);
     PackageStateInternal getPackageStateInternal(String packageName, int callingUid);
+    PackageStateInternal getPackageStateFiltered(@NonNull String packageName, int callingUid,
+            @UserIdInt int userId);
     ParceledListSlice<PackageInfo> getInstalledPackages(long flags, int userId);
     ResolveInfo createForwardingResolveInfoUnchecked(WatchedIntentFilter filter,
             int sourceUserId, int targetUserId);

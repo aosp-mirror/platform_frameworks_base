@@ -196,6 +196,7 @@ import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.DisplayUtils;
 import android.util.IntArray;
+import android.util.Pair;
 import android.util.RotationUtils;
 import android.util.Size;
 import android.util.Slog;
@@ -429,6 +430,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     private final DisplayPolicy mDisplayPolicy;
     private final DisplayRotation mDisplayRotation;
     DisplayFrames mDisplayFrames;
+
+    private boolean mInTouchMode;
 
     private final RemoteCallbackList<ISystemGestureExclusionListener>
             mSystemGestureExclusionListeners = new RemoteCallbackList<>();
@@ -1154,6 +1157,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
         setWindowingMode(WINDOWING_MODE_FULLSCREEN);
         mWmService.mDisplayWindowSettings.applySettingsToDisplayLocked(this);
+
+        // Sets the initial touch mode state.
+        mInTouchMode = mWmService.mContext.getResources().getBoolean(
+                R.bool.config_defaultInTouchMode);
+        mWmService.mInputManager.setInTouchMode(mInTouchMode, mWmService.MY_PID, mWmService.MY_UID,
+                /* hasPermission= */ true, mDisplayId);
     }
 
     private void beginHoldScreenUpdate() {
@@ -1262,6 +1271,18 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     boolean isReady() {
         // The display is ready when the system and the individual display are both ready.
         return mWmService.mDisplayReady && mDisplayReady;
+    }
+
+    boolean setInTouchMode(boolean inTouchMode) {
+        if (mInTouchMode == inTouchMode) {
+            return false;
+        }
+        mInTouchMode = inTouchMode;
+        return true;
+    }
+
+    boolean isInTouchMode() {
+        return mInTouchMode;
     }
 
     int getDisplayId() {
@@ -4537,6 +4558,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             return;
         }
         pw.println("  Display #" + mDisplayId);
+        pw.println("    mInTouchMode=" + mInTouchMode);
         final Iterator<WindowToken> it = mTokenMap.values().iterator();
         while (it.hasNext()) {
             final WindowToken token = it.next();
@@ -4890,20 +4912,19 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             return null;
         }
 
-        final ScreenRotationAnimation screenRotationAnimation =
-                mWmService.mRoot.getDisplayContent(DEFAULT_DISPLAY).getRotationAnimation();
-        final boolean inRotation = screenRotationAnimation != null &&
-                screenRotationAnimation.isAnimating();
-        if (DEBUG_SCREENSHOT && inRotation) Slog.v(TAG_WM, "Taking screenshot while rotating");
+        Pair<ScreenCapture.ScreenCaptureListener, ScreenCapture.ScreenshotSync> syncScreenCapture =
+                ScreenCapture.createSyncCaptureListener();
 
-        // Send invalid rect and no width and height since it will screenshot the entire display.
-        final IBinder displayToken = SurfaceControl.getInternalDisplayToken();
-        final ScreenCapture.DisplayCaptureArgs captureArgs =
-                new ScreenCapture.DisplayCaptureArgs.Builder(displayToken)
-                        .setUseIdentityTransform(inRotation)
-                        .build();
+        getBounds(mTmpRect);
+        mTmpRect.offsetTo(0, 0);
+        ScreenCapture.LayerCaptureArgs args =
+                new ScreenCapture.LayerCaptureArgs.Builder(getSurfaceControl())
+                        .setSourceCrop(mTmpRect).build();
+
+        ScreenCapture.captureLayers(args, syncScreenCapture.first);
+
         final ScreenCapture.ScreenshotHardwareBuffer screenshotBuffer =
-                ScreenCapture.captureDisplay(captureArgs);
+                syncScreenCapture.second.get();
         final Bitmap bitmap = screenshotBuffer == null ? null : screenshotBuffer.asBitmap();
         if (bitmap == null) {
             Slog.w(TAG_WM, "Failed to take screenshot");
@@ -6785,5 +6806,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     @Override
     DisplayContent asDisplayContent() {
         return this;
+    }
+
+    @Override
+    @Surface.Rotation
+    int getRelativeDisplayRotation() {
+        // Display is the root, so it's not rotated relative to anything.
+        return Surface.ROTATION_0;
     }
 }
