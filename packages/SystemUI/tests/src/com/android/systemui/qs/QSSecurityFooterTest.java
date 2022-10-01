@@ -726,7 +726,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
         when(mSecurityController.isParentalControlsEnabled()).thenReturn(true);
         when(mSecurityController.getLabel(any())).thenReturn(PARENTAL_CONTROLS_LABEL);
 
-        View view = mFooterUtils.createDialogView();
+        View view = mFooterUtils.createDialogView(getContext());
         TextView textView = (TextView) view.findViewById(R.id.parental_controls_title);
         assertEquals(PARENTAL_CONTROLS_LABEL, textView.getText());
     }
@@ -749,7 +749,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
         when(mSecurityController.getDeviceOwnerType(DEVICE_OWNER_COMPONENT))
                 .thenReturn(DEVICE_OWNER_TYPE_FINANCED);
 
-        View view = mFooterUtils.createDialogView();
+        View view = mFooterUtils.createDialogView(getContext());
 
         TextView managementSubtitle = view.findViewById(R.id.device_management_subtitle);
         assertEquals(View.VISIBLE, managementSubtitle.getVisibility());

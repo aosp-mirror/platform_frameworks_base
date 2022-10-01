@@ -764,13 +764,11 @@ public class LocalDisplayAdapterTest {
     @Test
     public void testGetSystemPreferredDisplayMode() throws Exception {
         SurfaceControl.DisplayMode displayMode1 = createFakeDisplayMode(0, 1920, 1080, 60f);
-        // system preferred mode
+        // preferred mode
         SurfaceControl.DisplayMode displayMode2 = createFakeDisplayMode(1, 3840, 2160, 60f);
-        // user preferred mode
-        SurfaceControl.DisplayMode displayMode3 = createFakeDisplayMode(2, 1920, 1080, 30f);
 
         SurfaceControl.DisplayMode[] modes =
-                new SurfaceControl.DisplayMode[]{displayMode1, displayMode2, displayMode3};
+                new SurfaceControl.DisplayMode[]{displayMode1, displayMode2};
         FakeDisplay display = new FakeDisplay(PORT_A, modes, 0, 1);
         setUpDisplay(display);
         updateAvailableDisplays();
@@ -782,43 +780,24 @@ public class LocalDisplayAdapterTest {
 
         DisplayDeviceInfo displayDeviceInfo = mListener.addedDisplays.get(
                 0).getDisplayDeviceInfoLocked();
+
         assertThat(displayDeviceInfo.supportedModes.length).isEqualTo(modes.length);
+
         Display.Mode defaultMode = getModeById(displayDeviceInfo, displayDeviceInfo.defaultModeId);
-        assertThat(matches(defaultMode, displayMode1)).isTrue();
-
-        // Set the user preferred display mode
-        mListener.addedDisplays.get(0).setUserPreferredDisplayModeLocked(
-                new Display.Mode(
-                        displayMode3.width, displayMode3.height, displayMode3.refreshRate));
-        updateAvailableDisplays();
-        waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
-        displayDeviceInfo = mListener.addedDisplays.get(
-                0).getDisplayDeviceInfoLocked();
-        defaultMode = getModeById(displayDeviceInfo, displayDeviceInfo.defaultModeId);
-        assertThat(matches(defaultMode, displayMode3)).isTrue();
-
-        // clear the user preferred mode
-        mListener.addedDisplays.get(0).setUserPreferredDisplayModeLocked(null);
-        updateAvailableDisplays();
-        waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
-        displayDeviceInfo = mListener.addedDisplays.get(
-                0).getDisplayDeviceInfoLocked();
-        defaultMode = getModeById(displayDeviceInfo, displayDeviceInfo.defaultModeId);
         assertThat(matches(defaultMode, displayMode2)).isTrue();
 
-        // Change the display and add new system preferred mode
-        SurfaceControl.DisplayMode addedDisplayInfo = createFakeDisplayMode(3, 2340, 1080, 20f);
-        modes = new SurfaceControl.DisplayMode[]{
-                displayMode1, displayMode2, displayMode3, addedDisplayInfo};
+        // Change the display and add new preferred mode
+        SurfaceControl.DisplayMode addedDisplayInfo = createFakeDisplayMode(2, 2340, 1080, 60f);
+        modes = new SurfaceControl.DisplayMode[]{displayMode1, displayMode2, addedDisplayInfo};
         display.dynamicInfo.supportedDisplayModes = modes;
-        display.dynamicInfo.preferredBootDisplayMode = 3;
+        display.dynamicInfo.preferredBootDisplayMode = 2;
         setUpDisplay(display);
         mInjector.getTransmitter().sendHotplug(display, /* connected */ true);
         waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
 
         assertTrue(mListener.traversalRequested);
         assertThat(mListener.addedDisplays.size()).isEqualTo(1);
-        assertThat(mListener.changedDisplays.size()).isEqualTo(3);
+        assertThat(mListener.changedDisplays.size()).isEqualTo(1);
 
         DisplayDevice displayDevice = mListener.changedDisplays.get(0);
         displayDevice.applyPendingDisplayDeviceInfoChangesLocked();
