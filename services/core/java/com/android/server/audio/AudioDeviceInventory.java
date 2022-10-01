@@ -377,7 +377,8 @@ public class AudioDeviceInventory {
                         makeLeAudioDeviceUnavailable(address, btInfo.mAudioSystemDevice);
                     } else if (switchToAvailable) {
                         makeLeAudioDeviceAvailable(address, BtHelper.getName(btInfo.mDevice),
-                                streamType, btInfo.mVolume, btInfo.mAudioSystemDevice,
+                                streamType, btInfo.mVolume == -1 ? -1 : btInfo.mVolume * 10,
+                                btInfo.mAudioSystemDevice,
                                 "onSetBtActiveDevice");
                     }
                     break;
