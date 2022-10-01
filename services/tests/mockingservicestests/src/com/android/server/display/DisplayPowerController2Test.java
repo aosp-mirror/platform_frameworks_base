@@ -98,6 +98,8 @@ public final class DisplayPowerController2Test {
     private DisplayPowerState mDisplayPowerStateMock;
     @Mock
     private DualRampAnimator<DisplayPowerState> mDualRampAnimatorMock;
+    @Mock
+    private WakelockController mWakelockController;
 
     @Captor
     private ArgumentCaptor<SensorEventListener> mSensorEventListenerCaptor;
@@ -126,6 +128,12 @@ public final class DisplayPowerController2Test {
                     FloatProperty<DisplayPowerState> firstProperty,
                     FloatProperty<DisplayPowerState> secondProperty) {
                 return mDualRampAnimatorMock;
+            }
+
+            @Override
+            WakelockController getWakelockController(int displayId,
+                    DisplayPowerCallbacks displayPowerCallbacks) {
+                return mWakelockController;
             }
         };
 
@@ -169,19 +177,15 @@ public final class DisplayPowerController2Test {
         advanceTime(1);
 
         // two times, one for unfinished business and one for proximity
-        verify(mDisplayPowerCallbacksMock).acquireSuspendBlocker(
-                dpc.getSuspendBlockerUnfinishedBusinessId(DISPLAY_ID));
-        verify(mDisplayPowerCallbacksMock).acquireSuspendBlocker(
-                dpc.getSuspendBlockerProxDebounceId(DISPLAY_ID));
+        verify(mWakelockController).acquireUnfinishedBusinessSuspendBlocker();
+        verify(mWakelockController).acquireProxDebounceSuspendBlocker();
+
 
         dpc.stop();
         advanceTime(1);
-
         // two times, one for unfinished business and one for proximity
-        verify(mDisplayPowerCallbacksMock).releaseSuspendBlocker(
-                dpc.getSuspendBlockerUnfinishedBusinessId(DISPLAY_ID));
-        verify(mDisplayPowerCallbacksMock).releaseSuspendBlocker(
-                dpc.getSuspendBlockerProxDebounceId(DISPLAY_ID));
+        verify(mWakelockController).acquireUnfinishedBusinessSuspendBlocker();
+        verify(mWakelockController).acquireProxDebounceSuspendBlocker();
     }
 
     /**

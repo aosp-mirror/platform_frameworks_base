@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.inputmethod;
+package android.view.inputmethod;
 
 import static com.android.internal.inputmethod.InputConnectionProtoDumper.buildGetCursorCapsModeProto;
 import static com.android.internal.inputmethod.InputConnectionProtoDumper.buildGetExtractedTextProto;
@@ -38,26 +38,13 @@ import android.util.proto.ProtoOutputStream;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewRootImpl;
-import android.view.inputmethod.CompletionInfo;
-import android.view.inputmethod.CorrectionInfo;
-import android.view.inputmethod.DeleteGesture;
-import android.view.inputmethod.DeleteRangeGesture;
-import android.view.inputmethod.DumpableInputConnection;
-import android.view.inputmethod.ExtractedTextRequest;
-import android.view.inputmethod.HandwritingGesture;
-import android.view.inputmethod.InputConnection;
-import android.view.inputmethod.InputContentInfo;
-import android.view.inputmethod.InputMethodManager;
-import android.view.inputmethod.InsertGesture;
-import android.view.inputmethod.JoinOrSplitGesture;
-import android.view.inputmethod.RemoveSpaceGesture;
-import android.view.inputmethod.SelectGesture;
-import android.view.inputmethod.SelectRangeGesture;
-import android.view.inputmethod.TextAttribute;
-import android.view.inputmethod.TextSnapshot;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.infra.AndroidFuture;
+import com.android.internal.inputmethod.IRemoteAccessibilityInputConnection;
+import com.android.internal.inputmethod.IRemoteInputConnection;
+import com.android.internal.inputmethod.ImeTracing;
+import com.android.internal.inputmethod.InputConnectionCommandHeader;
 
 import java.lang.annotation.Retention;
 import java.lang.ref.WeakReference;
@@ -82,7 +69,7 @@ import java.util.function.Supplier;
  * (editor app) process, and forwards them to {@link InputConnection} that the IME client provided,
  * on the {@link Looper} associated to the {@link InputConnection}.</p>
  */
-public final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
+final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
     private static final String TAG = "RemoteInputConnectionImpl";
     private static final boolean DEBUG = false;
 
@@ -189,7 +176,7 @@ public final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub
     private final AtomicBoolean mHasPendingImmediateCursorAnchorInfoUpdate =
             new AtomicBoolean(false);
 
-    public RemoteInputConnectionImpl(@NonNull Looper looper,
+    RemoteInputConnectionImpl(@NonNull Looper looper,
             @NonNull InputConnection inputConnection,
             @NonNull InputMethodManager inputMethodManager, @Nullable View servedView) {
         mInputConnection = inputConnection;

@@ -92,9 +92,6 @@ public final class InputDevice implements Parcelable {
     private SensorManager mSensorManager;
 
     @GuardedBy("mMotionRanges")
-    private BatteryState mBatteryState;
-
-    @GuardedBy("mMotionRanges")
     private LightsManager mLightsManager;
 
     /**
@@ -1058,10 +1055,7 @@ public final class InputDevice implements Parcelable {
      */
     @NonNull
     public BatteryState getBatteryState() {
-        if (mBatteryState == null) {
-            mBatteryState = InputManager.getInstance().getInputDeviceBatteryState(mId, mHasBattery);
-        }
-        return mBatteryState;
+        return InputManager.getInstance().getInputDeviceBatteryState(mId, mHasBattery);
     }
 
     /**

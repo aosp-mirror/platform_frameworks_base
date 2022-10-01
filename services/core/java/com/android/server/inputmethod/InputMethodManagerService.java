@@ -75,6 +75,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -2167,13 +2168,13 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
      * Gets enabled subtypes of the specified {@link InputMethodInfo}.
      *
      * @param imiId if null, returns enabled subtypes for the current {@link InputMethodInfo}.
-     * @param allowsImplicitlySelectedSubtypes {@code true} to return the implicitly selected
+     * @param allowsImplicitlyEnabledSubtypes {@code true} to return the implicitly enabled
      *                                         subtypes.
      * @param userId the user ID to be queried about.
      */
     @Override
     public List<InputMethodSubtype> getEnabledInputMethodSubtypeList(String imiId,
-            boolean allowsImplicitlySelectedSubtypes, @UserIdInt int userId) {
+            boolean allowsImplicitlyEnabledSubtypes, @UserIdInt int userId) {
         if (UserHandle.getCallingUserId() != userId) {
             mContext.enforceCallingPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
         }
@@ -2182,7 +2183,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             final long ident = Binder.clearCallingIdentity();
             try {
                 return getEnabledInputMethodSubtypeListLocked(imiId,
-                        allowsImplicitlySelectedSubtypes, userId);
+                        allowsImplicitlyEnabledSubtypes, userId);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -2191,7 +2192,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
     @GuardedBy("ImfLock.class")
     private List<InputMethodSubtype> getEnabledInputMethodSubtypeListLocked(String imiId,
-            boolean allowsImplicitlySelectedSubtypes, @UserIdInt int userId) {
+            boolean allowsImplicitlyEnabledSubtypes, @UserIdInt int userId) {
         if (userId == mSettings.getCurrentUserId()) {
             final InputMethodInfo imi;
             String selectedMethodId = getSelectedMethodIdLocked();
@@ -2204,7 +2205,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 return Collections.emptyList();
             }
             return mSettings.getEnabledInputMethodSubtypeListLocked(
-                    imi, allowsImplicitlySelectedSubtypes);
+                    imi, allowsImplicitlyEnabledSubtypes);
         }
         final ArrayMap<String, InputMethodInfo> methodMap = queryMethodMapForUser(userId);
         final InputMethodInfo imi = methodMap.get(imiId);
@@ -2214,7 +2215,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         final InputMethodSettings settings = new InputMethodSettings(mContext, methodMap, userId,
                 true);
         return settings.getEnabledInputMethodSubtypeListLocked(
-                imi, allowsImplicitlySelectedSubtypes);
+                imi, allowsImplicitlyEnabledSubtypes);
     }
 
     /**
@@ -4211,6 +4212,46 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             AdditionalSubtypeUtils.load(additionalSubtypeMap, userId);
             settings.setAdditionalInputMethodSubtypes(imiId, toBeAdded, additionalSubtypeMap,
                     mIPackageManager);
+        }
+    }
+
+    @Override
+    public void setExplicitlyEnabledInputMethodSubtypes(String imeId,
+            @NonNull int[] subtypeHashCodes, @UserIdInt int userId) {
+        if (UserHandle.getCallingUserId() != userId) {
+            mContext.enforceCallingPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
+        }
+        final int callingUid = Binder.getCallingUid();
+        final ComponentName imeComponentName =
+                imeId != null ? ComponentName.unflattenFromString(imeId) : null;
+        if (imeComponentName == null || !InputMethodUtils.checkIfPackageBelongsToUid(mAppOpsManager,
+                callingUid, imeComponentName.getPackageName())) {
+            throw new SecurityException("Calling UID=" + callingUid + " does not belong to imeId="
+                    + imeId);
+        }
+        Objects.requireNonNull(subtypeHashCodes, "subtypeHashCodes must not be null");
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (ImfLock.class) {
+                final boolean currentUser = (mSettings.getCurrentUserId() == userId);
+                final InputMethodSettings settings = currentUser
+                        ? mSettings
+                        : new InputMethodSettings(mContext, queryMethodMapForUser(userId), userId,
+                                !mUserManagerInternal.isUserUnlocked(userId));
+                if (!settings.setEnabledInputMethodSubtypes(imeId, subtypeHashCodes)) {
+                    return;
+                }
+                if (currentUser) {
+                    // To avoid unnecessary "updateInputMethodsFromSettingsLocked" from happening.
+                    if (mSettingsObserver != null) {
+                        mSettingsObserver.mLastEnabled = settings.getEnabledInputMethodsStr();
+                    }
+                    updateInputMethodsFromSettingsLocked(false /* enabledChanged */);
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
     }
 

@@ -1242,6 +1242,8 @@ class MediaRouter2ServiceImpl {
                 pw.println(indent + "<no manager records>");
             }
 
+            mCompositeDiscoveryPreference.dump(pw, indent);
+
             if (!mHandler.runWithScissors(() -> mHandler.dump(pw, indent), 1000)) {
                 pw.println(indent + "<could not dump handler state>");
             }
@@ -1299,6 +1301,8 @@ class MediaRouter2ServiceImpl {
             pw.println(indent + "mHasModifyAudioRoutingPermission="
                     + mHasModifyAudioRoutingPermission);
             pw.println(indent + "mRouterId=" + mRouterId);
+
+            mDiscoveryPreference.dump(pw, indent);
         }
     }
 

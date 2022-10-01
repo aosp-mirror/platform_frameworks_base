@@ -90,10 +90,10 @@ final class IInputMethodManagerInvoker {
     @AnyThread
     @NonNull
     List<InputMethodSubtype> getEnabledInputMethodSubtypeList(@Nullable String imiId,
-            boolean allowsImplicitlySelectedSubtypes, @UserIdInt int userId) {
+            boolean allowsImplicitlyEnabledSubtypes, @UserIdInt int userId) {
         try {
             return mTarget.getEnabledInputMethodSubtypeList(imiId,
-                    allowsImplicitlySelectedSubtypes, userId);
+                    allowsImplicitlyEnabledSubtypes, userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -196,6 +196,16 @@ final class IInputMethodManagerInvoker {
             @NonNull InputMethodSubtype[] subtypes, @UserIdInt int userId) {
         try {
             mTarget.setAdditionalInputMethodSubtypes(imeId, subtypes, userId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @AnyThread
+    void setExplicitlyEnabledInputMethodSubtypes(@NonNull String imeId,
+            @NonNull int[] subtypeHashCodes, @UserIdInt int userId) {
+        try {
+            mTarget.setExplicitlyEnabledInputMethodSubtypes(imeId, subtypeHashCodes, userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

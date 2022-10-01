@@ -78,25 +78,24 @@ public class BaseInputConnectionTest {
         verifyContent("text1text2text3", 15, 15, -1, -1);
 
         // before commit: "text1text2text3|"
-        // after commit: "text1text2text3text4|"
-        // BUG(b/21476564): this behavior is inconsistent with API description.
+        // after commit: "text1text2text3|text4"
         assertThat(mBaseInputConnection.commitText("text4", 0)).isTrue();
-        verifyContent("text1text2text3text4", 20, 20, -1, -1);
+        verifyContent("text1text2text3text4", 15, 15, -1, -1);
 
-        // before commit: "text1text2text3text4|"
-        // after commit: "text1text2text3text|4text5"
+        // before commit: "text1text2text3|text4"
+        // after commit: "text1text2text|3text5text4"
         assertThat(mBaseInputConnection.commitText("text5", -1)).isTrue();
-        verifyContent("text1text2text3text4text5", 19, 19, -1, -1);
+        verifyContent("text1text2text3text5text4", 14, 14, -1, -1);
 
-        // before commit: "text1text2text3text|4text5"
-        // after commit: "text1text2text3te|xttext64text5"
+        // before commit: "text1text2text|3text5text4"
+        // after commit: "text1text2te|xttext63text5text4"
         assertThat(mBaseInputConnection.commitText("text6", -2)).isTrue();
-        verifyContent("text1text2text3texttext64text5", 17, 17, -1, -1);
+        verifyContent("text1text2texttext63text5text4", 12, 12, -1, -1);
 
-        // before commit: "text1text2text3te|xttext64text5"
-        // after commit: "|text1text2text3tetext7xttext64text5"
+        // before commit: "text1text2te|xttext63text5text4"
+        // after commit: "|text1text2tetext7xttext63text5text4"
         assertThat(mBaseInputConnection.commitText("text7", -100)).isTrue();
-        verifyContent("text1text2text3tetext7xttext64text5", 0, 0, -1, -1);
+        verifyContent("text1text2tetext7xttext63text5text4", 0, 0, -1, -1);
     }
 
     @Test
@@ -296,12 +295,11 @@ public class BaseInputConnectionTest {
         verifyContent("abcdef", 6, 6, 3, 6);
 
         // before set composing text: "abc|"
-        // after set composing text: "abcdef|"
-        //                               ---
-        // BUG(b/21476564): this behavior is inconsistent with API description.
+        // after set composing text: "abc|def"
+        //                                ---
         prepareContent("abc", 3, 3, -1, -1);
         assertThat(mBaseInputConnection.setComposingText("def", 0)).isTrue();
-        verifyContent("abcdef", 6, 6, 3, 6);
+        verifyContent("abcdef", 3, 3, 3, 6);
 
         // before set composing text: "abc|"
         // after set composing text: "ab|cdef"

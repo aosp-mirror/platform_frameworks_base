@@ -1030,8 +1030,12 @@ public class AppTransitionController {
     private void applyAnimations(ArraySet<ActivityRecord> openingApps,
             ArraySet<ActivityRecord> closingApps, @TransitionOldType int transit,
             LayoutParams animLp, boolean voiceInteraction) {
+        final RecentsAnimationController rac = mService.getRecentsAnimationController();
         if (transit == WindowManager.TRANSIT_OLD_UNSET
                 || (openingApps.isEmpty() && closingApps.isEmpty())) {
+            if (rac != null) {
+                rac.sendTasksAppeared();
+            }
             return;
         }
 
@@ -1069,7 +1073,6 @@ public class AppTransitionController {
                 voiceInteraction);
         applyAnimations(closingWcs, closingApps, transit, false /* visible */, animLp,
                 voiceInteraction);
-        final RecentsAnimationController rac = mService.getRecentsAnimationController();
         if (rac != null) {
             rac.sendTasksAppeared();
         }
