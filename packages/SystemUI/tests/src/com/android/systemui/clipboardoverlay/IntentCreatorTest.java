@@ -16,13 +16,14 @@
 
 package com.android.systemui.clipboardoverlay;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import android.content.ClipData;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.net.Uri;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import android.text.SpannableString;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -127,6 +128,18 @@ public class IntentCreatorTest extends SysuiTestCase {
         Intent target = intent.getParcelableExtra(Intent.EXTRA_INTENT, Intent.class);
         assertEquals(uri, target.getData());
         assertEquals("image/png", target.getType());
+    }
+
+    @Test
+    public void test_getShareIntent_spannableText() {
+        ClipData clipData = ClipData.newPlainText("Test", new SpannableString("Test Item"));
+        Intent intent = IntentCreator.getShareIntent(clipData, getContext());
+
+        assertEquals(Intent.ACTION_CHOOSER, intent.getAction());
+        assertFlags(intent, EXTERNAL_INTENT_FLAGS);
+        Intent target = intent.getParcelableExtra(Intent.EXTRA_INTENT, Intent.class);
+        assertEquals("Test Item", target.getStringExtra(Intent.EXTRA_TEXT));
+        assertEquals("text/plain", target.getType());
     }
 
     // Assert that the given flags are set

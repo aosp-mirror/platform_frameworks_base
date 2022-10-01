@@ -34,7 +34,7 @@ abstract class LocationBasedWifiViewModel(
     debugTint: Int,
 
     /** The wifi icon that should be displayed. Null if we shouldn't display any icon. */
-    val wifiIcon: StateFlow<Icon?>,
+    val wifiIcon: StateFlow<Icon.Resource?>,
 
     /** True if the activity in view should be visible. */
     val isActivityInViewVisible: Flow<Boolean>,
