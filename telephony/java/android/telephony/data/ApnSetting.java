@@ -43,6 +43,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
@@ -1442,7 +1443,7 @@ public class ApnSetting implements Parcelable {
      */
     @SystemApi
     public static @ApnType int getApnTypeInt(@NonNull @ApnTypeString String apnType) {
-        return APN_TYPE_STRING_MAP.getOrDefault(apnType.toLowerCase(), 0);
+        return APN_TYPE_STRING_MAP.getOrDefault(apnType.toLowerCase(Locale.ROOT), 0);
     }
 
     /**
@@ -1457,7 +1458,7 @@ public class ApnSetting implements Parcelable {
         } else {
             int result = 0;
             for (String str : types.split(",")) {
-                Integer type = APN_TYPE_STRING_MAP.get(str.toLowerCase());
+                Integer type = APN_TYPE_STRING_MAP.get(str.toLowerCase(Locale.ROOT));
                 if (type != null) {
                     result |= type;
                 }
@@ -1468,7 +1469,8 @@ public class ApnSetting implements Parcelable {
 
     /** @hide */
     public static int getMvnoTypeIntFromString(String mvnoType) {
-        String mvnoTypeString = TextUtils.isEmpty(mvnoType) ? mvnoType : mvnoType.toLowerCase();
+        String mvnoTypeString = TextUtils.isEmpty(mvnoType)
+                ? mvnoType : mvnoType.toLowerCase(Locale.ROOT);
         Integer mvnoTypeInt = MVNO_TYPE_STRING_MAP.get(mvnoTypeString);
         return  mvnoTypeInt == null ? UNSPECIFIED_INT : mvnoTypeInt;
     }

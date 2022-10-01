@@ -48,6 +48,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 /**
@@ -1524,7 +1525,7 @@ public class EuiccManager {
             return false;
         }
         try {
-            return getIEuiccController().isSupportedCountry(countryIso.toUpperCase());
+            return getIEuiccController().isSupportedCountry(countryIso.toUpperCase(Locale.ROOT));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

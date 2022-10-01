@@ -27,6 +27,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 /**
@@ -276,8 +277,8 @@ public final class CarrierRestrictionRules implements Parcelable {
         if (str.length() != pattern.length()) {
             return false;
         }
-        String lowerCaseStr = str.toLowerCase();
-        String lowerCasePattern = pattern.toLowerCase();
+        String lowerCaseStr = str.toLowerCase(Locale.ROOT);
+        String lowerCasePattern = pattern.toLowerCase(Locale.ROOT);
 
         for (int i = 0; i < lowerCasePattern.length(); i++) {
             if (lowerCasePattern.charAt(i) != lowerCaseStr.charAt(i)
