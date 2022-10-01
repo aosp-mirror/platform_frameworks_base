@@ -45192,6 +45192,14 @@ package android.text {
     method public void getChars(int, int, char[], int);
   }
 
+  public class GraphemeClusterSegmentFinder extends android.text.SegmentFinder {
+    ctor public GraphemeClusterSegmentFinder(@NonNull CharSequence, @NonNull android.text.TextPaint);
+    method public int nextEndBoundary(@IntRange(from=0) int);
+    method public int nextStartBoundary(@IntRange(from=0) int);
+    method public int previousEndBoundary(@IntRange(from=0) int);
+    method public int previousStartBoundary(@IntRange(from=0) int);
+  }
+
   public class Html {
     method public static String escapeHtml(CharSequence);
     method @Deprecated public static android.text.Spanned fromHtml(String);
@@ -45321,6 +45329,7 @@ package android.text {
     method public final int getParagraphLeft(int);
     method public final int getParagraphRight(int);
     method public float getPrimaryHorizontal(int);
+    method @Nullable public int[] getRangeForRect(@NonNull android.graphics.RectF, @NonNull android.text.SegmentFinder, @NonNull android.text.Layout.TextInclusionStrategy);
     method public float getSecondaryHorizontal(int);
     method public void getSelectionPath(int, int, android.graphics.Path);
     method public final float getSpacingAdd();
@@ -45344,6 +45353,9 @@ package android.text {
     field public static final int HYPHENATION_FREQUENCY_NONE = 0; // 0x0
     field public static final int HYPHENATION_FREQUENCY_NORMAL = 1; // 0x1
     field public static final int HYPHENATION_FREQUENCY_NORMAL_FAST = 3; // 0x3
+    field @NonNull public static final android.text.Layout.TextInclusionStrategy INCLUSION_STRATEGY_ANY_OVERLAP;
+    field @NonNull public static final android.text.Layout.TextInclusionStrategy INCLUSION_STRATEGY_CONTAINS_ALL;
+    field @NonNull public static final android.text.Layout.TextInclusionStrategy INCLUSION_STRATEGY_CONTAINS_CENTER;
     field public static final int JUSTIFICATION_MODE_INTER_WORD = 1; // 0x1
     field public static final int JUSTIFICATION_MODE_NONE = 0; // 0x0
   }
@@ -45355,6 +45367,10 @@ package android.text {
   }
 
   public static class Layout.Directions {
+  }
+
+  @java.lang.FunctionalInterface public static interface Layout.TextInclusionStrategy {
+    method public boolean isSegmentInside(@NonNull android.graphics.RectF, @NonNull android.graphics.RectF);
   }
 
   @Deprecated public abstract class LoginFilter implements android.text.InputFilter {
@@ -45431,6 +45447,15 @@ package android.text {
     method public android.text.PrecomputedText.Params.Builder setHyphenationFrequency(int);
     method @NonNull public android.text.PrecomputedText.Params.Builder setLineBreakConfig(@NonNull android.graphics.text.LineBreakConfig);
     method public android.text.PrecomputedText.Params.Builder setTextDirection(@NonNull android.text.TextDirectionHeuristic);
+  }
+
+  public abstract class SegmentFinder {
+    ctor public SegmentFinder();
+    method public abstract int nextEndBoundary(@IntRange(from=0) int);
+    method public abstract int nextStartBoundary(@IntRange(from=0) int);
+    method public abstract int previousEndBoundary(@IntRange(from=0) int);
+    method public abstract int previousStartBoundary(@IntRange(from=0) int);
+    field public static final int DONE = -1; // 0xffffffff
   }
 
   public class Selection {
@@ -45716,6 +45741,14 @@ package android.text {
     method public void afterTextChanged(android.text.Editable);
     method public void beforeTextChanged(CharSequence, int, int, int);
     method public void onTextChanged(CharSequence, int, int, int);
+  }
+
+  public class WordSegmentFinder extends android.text.SegmentFinder {
+    ctor public WordSegmentFinder(@NonNull CharSequence, @NonNull java.util.Locale);
+    method public int nextEndBoundary(@IntRange(from=0) int);
+    method public int nextStartBoundary(@IntRange(from=0) int);
+    method public int previousEndBoundary(@IntRange(from=0) int);
+    method public int previousStartBoundary(@IntRange(from=0) int);
   }
 
 }
