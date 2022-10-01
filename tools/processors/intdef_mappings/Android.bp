@@ -7,18 +7,24 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
+java_library_host {
+    name: "libintdef-annotation-processor",
+
+    srcs: [
+        ":framework-annotations",
+        "src/**/*.java",
+        "src/**/*.kt",
+    ],
+
+    use_tools_jar: true,
+}
+
 java_plugin {
     name: "intdef-annotation-processor",
 
     processor_class: "android.processor.IntDefProcessor",
 
-    srcs: [
-        ":framework-annotations",
-        "src/**/*.java",
-        "src/**/*.kt"
-    ],
-
-    use_tools_jar: true,
+    static_libs: ["libintdef-annotation-processor"],
 }
 
 java_test_host {
@@ -26,8 +32,8 @@ java_test_host {
 
     srcs: [
         "test/**/*.java",
-        "test/**/*.kt"
-     ],
+        "test/**/*.kt",
+    ],
     java_resource_dirs: ["test/resources"],
 
     static_libs: [
@@ -35,7 +41,7 @@ java_test_host {
         "truth-prebuilt",
         "junit",
         "guava",
-        "intdef-annotation-processor"
+        "libintdef-annotation-processor",
     ],
 
     test_suites: ["general-tests"],
