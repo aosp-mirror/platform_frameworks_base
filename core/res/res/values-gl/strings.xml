@@ -208,7 +208,7 @@
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Opcións da tableta"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Opcións de Android TV"</string>
     <string name="power_dialog" product="default" msgid="1107775420270203046">"Opcións do teléfono"</string>
-    <string name="silent_mode" msgid="8796112363642579333">"Modo de silencio"</string>
+    <string name="silent_mode" msgid="8796112363642579333">"Modo silencioso"</string>
     <string name="turn_on_radio" msgid="2961717788170634233">"Activar a conexión sen fíos"</string>
     <string name="turn_off_radio" msgid="7222573978109933360">"Desactivar a conexión sen fíos"</string>
     <string name="screen_lock" msgid="2072642720826409809">"Bloqueo de pantalla"</string>
@@ -252,7 +252,7 @@
     <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{Vaise facer unha captura de pantalla para o informe de erro dentro de # segundo.}other{Vaise facer unha captura de pantalla para o informe de erro dentro de # segundos.}}"</string>
     <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"Realizouse a captura de pantalla co informe de erros"</string>
     <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"Produciuse un erro ao realizar a captura de pantalla co informe de erros"</string>
-    <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Modo de silencio"</string>
+    <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Modo silencioso"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"O son está desactivado"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"O son está activado"</string>
     <string name="global_actions_toggle_airplane_mode" msgid="6911684460146916206">"Modo avión"</string>
@@ -2050,7 +2050,9 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Queres permitir que a aplicación <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> acceda a todos os rexistros do dispositivo?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Permitir acceso unha soa vez"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Non permitir"</string>
-    <string name="log_access_confirmation_body" msgid="1806692062668620735">"Os rexistros do dispositivo dan conta do que ocorre neste. As aplicacións poden usalos para buscar problemas e solucionalos.\n\nAlgúns poden conter información confidencial, polo que che recomendamos que só permitas que accedan a todos os rexistros do dispositivo as aplicacións nas que confíes. \n\nEsta aplicación pode acceder aos seus propios rexistros aínda que non lle permitas acceder a todos. É posible que o fabricante do dispositivo teña acceso a algúns rexistros ou á información do teu dispositivo."</string>
+    <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"Os rexistros do dispositivo dan conta do que ocorre neste. As aplicacións poden usalos para buscar problemas e solucionalos.\n\nAlgúns poden conter información confidencial, polo que che recomendamos que só permitas que accedan a todos os rexistros do dispositivo as aplicacións nas que confíes. \n\nEsta aplicación pode acceder aos seus propios rexistros aínda que non lle permitas acceder a todos. É posible que o fabricante do dispositivo teña acceso a algúns rexistros ou á información do teu dispositivo."</string>
+    <!-- no translation found for log_access_confirmation_body (7379536536425265262) -->
+    <skip />
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Non amosar outra vez"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> quere mostrar fragmentos de aplicación de <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Editar"</string>

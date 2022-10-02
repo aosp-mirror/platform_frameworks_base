@@ -2050,7 +2050,9 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Kas anda rakendusele <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> juurdepääs kõigile seadmelogidele?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Luba ühekordne juurdepääs"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Ära luba"</string>
-    <string name="log_access_confirmation_body" msgid="1806692062668620735">"Seadmelogid jäädvustavad, mis teie seadmes toimub. Rakendused saavad neid logisid kasutada probleemide tuvastamiseks ja lahendamiseks.\n\nMõned logid võivad sisaldada tundlikku teavet, seega lubage juurdepääs kõigile seadmelogidele ainult rakendustele, mida usaldate. \n\nKui te ei luba sellel rakendusel kõigile seadmelogidele juurde pääseda, pääseb see siiski juurde oma logidele. Teie seadme tootja võib teie seadmes siiski teatud logidele või teabele juurde pääseda."</string>
+    <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"Seadmelogid jäädvustavad, mis teie seadmes toimub. Rakendused saavad neid logisid kasutada probleemide tuvastamiseks ja lahendamiseks.\n\nMõned logid võivad sisaldada tundlikku teavet, seega lubage juurdepääs kõigile seadmelogidele ainult rakendustele, mida usaldate. \n\nKui te ei luba sellel rakendusel kõigile seadmelogidele juurde pääseda, pääseb see siiski juurde oma logidele. Teie seadme tootja võib teie seadmes siiski teatud logidele või teabele juurde pääseda."</string>
+    <!-- no translation found for log_access_confirmation_body (7379536536425265262) -->
+    <skip />
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Ära kuva uuesti"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"Rakendus <xliff:g id="APP_0">%1$s</xliff:g> soovib näidata rakenduse <xliff:g id="APP_2">%2$s</xliff:g> lõike"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Muuda"</string>
@@ -2289,7 +2291,7 @@
     <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"Rakendus <xliff:g id="APP">%1$s</xliff:g> töötab taustal. Puudutage akukasutuse haldamiseks."</string>
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> võib aku tööiga mõjutada. Puudutage aktiivsete rakenduste ülevaatamiseks."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Vaadake aktiivseid rakendusi"</string>
-    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Teie seadmest <xliff:g id="DEVICE">%1$s</xliff:g> ei pääse telefoni kaamerale juurde"</string>
+    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Teie seadmest <xliff:g id="DEVICE">%1$s</xliff:g> ei pääse telefoni kaamerale juurde."</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Teie seadmest <xliff:g id="DEVICE">%1$s</xliff:g> ei pääse tahvelarvuti kaamerale juurde"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Sellele ei pääse voogesituse ajal juurde. Proovige juurde pääseda oma telefonis."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Süsteemi vaikeseade"</string>

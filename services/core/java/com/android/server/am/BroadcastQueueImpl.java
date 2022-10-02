@@ -232,6 +232,8 @@ public class BroadcastQueueImpl extends BroadcastQueue {
     }
 
     public void enqueueBroadcastLocked(BroadcastRecord r) {
+        r.applySingletonPolicy(mService);
+
         final boolean replacePending = (r.intent.getFlags()
                 & Intent.FLAG_RECEIVER_REPLACE_PENDING) != 0;
 
@@ -601,7 +603,7 @@ public class BroadcastQueueImpl extends BroadcastQueue {
         // If we're abandoning this broadcast before any receivers were actually spun up,
         // nextReceiver is zero; in which case time-to-process bookkeeping doesn't apply.
         if (r.nextReceiver > 0) {
-            r.duration[r.nextReceiver - 1] = elapsed;
+            r.terminalTime[r.nextReceiver - 1] = finishTime;
         }
 
         // if this receiver was slow, impose deferral policy on the app.  This will kick in
@@ -827,6 +829,7 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                 }
             } else {
                 r.receiverTime = SystemClock.uptimeMillis();
+                r.scheduledTime[index] = r.receiverTime;
                 maybeAddAllowBackgroundActivityStartsToken(filter.receiverList.app, r);
                 maybeScheduleTempAllowlistLocked(filter.owningUid, r, r.options);
                 maybeReportBroadcastDispatchedEventLocked(r, filter.owningUid);
@@ -1235,6 +1238,7 @@ public class BroadcastQueueImpl extends BroadcastQueue {
         // Keep track of when this receiver started, and make sure there
         // is a timeout message pending to kill it if need be.
         r.receiverTime = SystemClock.uptimeMillis();
+        r.scheduledTime[recIdx] = r.receiverTime;
         if (recIdx == 0) {
             r.dispatchTime = r.receiverTime;
             r.dispatchRealTime = SystemClock.elapsedRealtime();
