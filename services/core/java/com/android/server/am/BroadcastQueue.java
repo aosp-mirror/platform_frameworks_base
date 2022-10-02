@@ -60,6 +60,10 @@ public abstract class BroadcastQueue {
         }
     }
 
+    static void logw(String msg) {
+        Slog.w(TAG, msg);
+    }
+
     static void logv(String msg) {
         Slog.v(TAG, msg);
     }
