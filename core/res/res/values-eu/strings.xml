@@ -56,7 +56,7 @@
     </plurals>
     <string name="imei" msgid="2157082351232630390">"IMEIa"</string>
     <string name="meid" msgid="3291227361605924674">"MEID"</string>
-    <string name="ClipMmi" msgid="4110549342447630629">"Sarrerako deien identifikazio-zerbitzua"</string>
+    <string name="ClipMmi" msgid="4110549342447630629">"Deitzailearen identitatea (jasotako deiak)"</string>
     <string name="ClirMmi" msgid="6752346475055446417">"Ezkutatu irteerako deitzailearen identitatea"</string>
     <string name="ColpMmi" msgid="4736462893284419302">"Konektatutako linearen IDa"</string>
     <string name="ColrMmi" msgid="5889782479745764278">"Konektatutako linearen ID murriztapena"</string>
@@ -71,12 +71,12 @@
     <string name="RuacMmi" msgid="1876047385848991110">"Nahigabeko dei gogaikarriak ukatzea"</string>
     <string name="CndMmi" msgid="185136449405618437">"Deitzailearen zenbakia ematea"</string>
     <string name="DndMmi" msgid="8797375819689129800">"Ez molestatzeko modua"</string>
-    <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"Deien identifikazio-zerbitzuaren balio lehenetsiak murriztapenak ezartzen ditu. Hurrengo deia: murriztapenekin"</string>
-    <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Deien identifikazio-zerbitzuaren balio lehenetsiak murriztapenak ezartzen ditu. Hurrengo deia: murriztapenik gabe"</string>
-    <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Deien identifikazio-zerbitzuaren balio lehenetsiak ez du murriztapenik ezartzen. Hurrengo deia: murriztapenekin"</string>
-    <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Deien identifikazio-zerbitzuaren balio lehenetsiak ez du murriztapenik ezartzen. Hurrengo deia: murriztapenik gabe"</string>
+    <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"Deitzailearen identitatea zerbitzuaren balio lehenetsiak murriztapenak ezartzen ditu. Hurrengo deia: murriztapenekin"</string>
+    <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Deitzailearen identitatea adierazteko zerbitzuaren balio lehenetsiak murriztapenak ezartzen ditu. Hurrengo deia: murriztapenik gabe."</string>
+    <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Deitzailearen identitatea zerbitzuaren balio lehenetsiak ez du murriztapenik ezartzen. Hurrengo deia: murriztapenekin."</string>
+    <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Deitzailearen identitatea zerbitzuaren balio lehenetsiak ez du murriztapenik ezartzen. Hurrengo deia: murriztapenik gabe."</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Zerbitzua ez da hornitu."</string>
-    <string name="CLIRPermanent" msgid="166443681876381118">"Ezin duzu deien identifikazio-zerbitzuaren ezarpena aldatu."</string>
+    <string name="CLIRPermanent" msgid="166443681876381118">"Ezin duzu aldatu deitzailearen identitatearen ezarpena."</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Ez dago mugikorreko datu-zerbitzurik"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Ezin da egin larrialdi-deirik"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Ez dago ahots-deien zerbitzurik"</string>
