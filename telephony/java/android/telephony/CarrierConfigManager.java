@@ -17,6 +17,7 @@
 package android.telephony;
 
 import android.Manifest;
+import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -10336,5 +10337,86 @@ public class CarrierConfigManager {
         } else if (value instanceof PersistableBundle) {
             configs.putPersistableBundle(key, (PersistableBundle) value);
         }
+    }
+
+    /**
+     * Listener interface to get a notification when the carrier configurations have changed.
+     *
+     * Use this listener to receive timely updates when the carrier configuration changes. System
+     * components should prefer this listener over {@link #ACTION_CARRIER_CONFIG_CHANGED}
+     * whenever possible.
+     *
+     * To register the listener, call
+     * {@link #registerCarrierConfigChangeListener(Executor, CarrierConfigChangeListener)}.
+     * To unregister, call
+     * {@link #unregisterCarrierConfigChangeListener(CarrierConfigChangeListener)}.
+     *
+     * Note that on registration, registrants will NOT receive a notification on last carrier config
+     * change. Only carrier configs change AFTER the registration will be sent to registrants. And
+     * unlike {@link #ACTION_CARRIER_CONFIG_CHANGED}, notification wouldn't send when the device is
+     * unlocked. Registrants only receive the notification when there has been real carrier config
+     * changes.
+     *
+     * @see #registerCarrierConfigChangeListener(Executor, CarrierConfigChangeListener)
+     * @see #unregisterCarrierConfigChangeListener(CarrierConfigChangeListener)
+     * @see #ACTION_CARRIER_CONFIG_CHANGED
+     * @see #getConfig(String...)
+     * @see #getConfigForSubId(int, String...)
+     */
+    public interface CarrierConfigChangeListener {
+        /**
+         * Called when carrier configurations have changed.
+         *
+         * @param logicalSlotIndex  The logical SIM slot index on which to monitor and get
+         *                          notification. It is guaranteed to be valid.
+         * @param subscriptionId    The subscription on the SIM slot. May be
+         *                          {@link SubscriptionManager#INVALID_SUBSCRIPTION_ID}.
+         * @param carrierId         The optional carrier Id, may be
+         *                          {@link TelephonyManager#UNKNOWN_CARRIER_ID}.
+         *                          See {@link TelephonyManager#getSimCarrierId()}.
+         * @param specificCarrierId The optional fine-grained carrierId, may be {@link
+         *                          TelephonyManager#UNKNOWN_CARRIER_ID}. A specific carrierId may
+         *                          be different from the carrierId above in a MVNO scenario. See
+         *                          detail in {@link TelephonyManager#getSimSpecificCarrierId()}.
+         */
+        void onCarrierConfigChanged(int logicalSlotIndex, int subscriptionId, int carrierId,
+                int specificCarrierId);
+    }
+
+    /**
+     * Register a {@link CarrierConfigChangeListener} to get a notification when carrier
+     * configurations have changed.
+     *
+     * @param executor The executor on which the listener will be called.
+     * @param listener The CarrierConfigChangeListener called when carrier configs has changed.
+     */
+    public void registerCarrierConfigChangeListener(@NonNull @CallbackExecutor Executor executor,
+            @NonNull CarrierConfigChangeListener listener) {
+        Objects.requireNonNull(executor, "Executor should be non-null.");
+        Objects.requireNonNull(listener, "Listener should be non-null.");
+
+        TelephonyRegistryManager trm = mContext.getSystemService(TelephonyRegistryManager.class);
+        if (trm == null) {
+            throw new IllegalStateException("Telephony registry service is null");
+        }
+        trm.addCarrierConfigChangedListener(executor, listener);
+    }
+
+    /**
+     * Unregister the {@link CarrierConfigChangeListener} to stop notification on carrier
+     * configurations change.
+     *
+     * @param listener The CarrierConfigChangeListener which was registered with method
+     * {@link #registerCarrierConfigChangeListener(Executor, CarrierConfigChangeListener)}.
+     */
+    public void unregisterCarrierConfigChangeListener(
+            @NonNull CarrierConfigChangeListener listener) {
+        Objects.requireNonNull(listener, "Listener should be non-null.");
+
+        TelephonyRegistryManager trm = mContext.getSystemService(TelephonyRegistryManager.class);
+        if (trm == null) {
+            throw new IllegalStateException("Telephony registry service is null");
+        }
+        trm.removeCarrierConfigChangedListener(listener);
     }
 }

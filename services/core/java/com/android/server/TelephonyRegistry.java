@@ -92,6 +92,7 @@ import android.util.Pair;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
+import com.android.internal.telephony.ICarrierConfigChangeListener;
 import com.android.internal.telephony.ICarrierPrivilegesCallback;
 import com.android.internal.telephony.IOnSubscriptionsChangedListener;
 import com.android.internal.telephony.IPhoneStateListener;
@@ -155,6 +156,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         IOnSubscriptionsChangedListener onSubscriptionsChangedListenerCallback;
         IOnSubscriptionsChangedListener onOpportunisticSubscriptionsChangedListenerCallback;
         ICarrierPrivilegesCallback carrierPrivilegesCallback;
+        ICarrierConfigChangeListener carrierConfigChangeListener;
 
         int callerUid;
         int callerPid;
@@ -183,6 +185,10 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             return carrierPrivilegesCallback != null;
         }
 
+        boolean matchCarrierConfigChangeListener() {
+            return carrierConfigChangeListener != null;
+        }
+
         boolean canReadCallLog() {
             try {
                 return TelephonyPermissions.checkReadCallLog(
@@ -201,6 +207,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     + " onOpportunisticSubscriptionsChangedListenererCallback="
                     + onOpportunisticSubscriptionsChangedListenerCallback
                     + " carrierPrivilegesCallback=" + carrierPrivilegesCallback
+                    + " carrierConfigChangeListener=" + carrierConfigChangeListener
                     + " subId=" + subId + " phoneId=" + phoneId + " events=" + eventList + "}";
         }
     }
@@ -3037,6 +3044,82 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 try {
                     r.carrierPrivilegesCallback.onCarrierServiceChanged(packageName, uid);
                 } catch (RemoteException ex) {
+                    mRemoveList.add(r.binder);
+                }
+            }
+            handleRemoveListLocked();
+        }
+    }
+
+    @Override
+    public void addCarrierConfigChangeListener(ICarrierConfigChangeListener listener,
+            String pkg, String featureId) {
+        final int callerUserId = UserHandle.getCallingUserId();
+        mAppOps.checkPackage(Binder.getCallingUid(), pkg);
+        if (VDBG) {
+            log("addCarrierConfigChangeListener pkg=" + pii(pkg) + " uid=" + Binder.getCallingUid()
+                    + " myUserId=" + UserHandle.myUserId() + " callerUerId" + callerUserId
+                    + " listener=" + listener + " listener.asBinder=" + listener.asBinder());
+        }
+
+        synchronized (mRecords) {
+            IBinder b = listener.asBinder();
+            boolean doesLimitApply = doesLimitApplyForListeners(Binder.getCallingUid(),
+                    Process.myUid());
+            Record r = add(b, Binder.getCallingUid(), Binder.getCallingPid(), doesLimitApply);
+
+            if (r == null) {
+                loge("Can not create Record instance!");
+                return;
+            }
+
+            r.context = mContext;
+            r.carrierConfigChangeListener = listener;
+            r.callingPackage = pkg;
+            r.callingFeatureId = featureId;
+            r.callerUid = Binder.getCallingUid();
+            r.callerPid = Binder.getCallingPid();
+            r.eventList = new ArraySet<>();
+            if (DBG) {
+                log("addCarrierConfigChangeListener:  Register r=" + r);
+            }
+        }
+    }
+
+    @Override
+    public void removeCarrierConfigChangeListener(ICarrierConfigChangeListener listener,
+            String pkg) {
+        if (DBG) log("removeCarrierConfigChangeListener listener=" + listener + ", pkg=" + pkg);
+        mAppOps.checkPackage(Binder.getCallingUid(), pkg);
+        remove(listener.asBinder());
+    }
+
+    @Override
+    public void notifyCarrierConfigChanged(int phoneId, int subId, int carrierId,
+            int specificCarrierId) {
+        if (!validatePhoneId(phoneId)) {
+            throw new IllegalArgumentException("Invalid phoneId: " + phoneId);
+        }
+        if (!checkNotifyPermission("notifyCarrierConfigChanged")) {
+            loge("Caller has no notify permission!");
+            return;
+        }
+        if (VDBG) {
+            log("notifyCarrierConfigChanged: phoneId=" + phoneId + ", subId=" + subId
+                    + ", carrierId=" + carrierId + ", specificCarrierId=" + specificCarrierId);
+        }
+
+        synchronized (mRecords) {
+            mRemoveList.clear();
+            for (Record r : mRecords) {
+                // Listeners are "global", neither per-slot nor per-sub, so no idMatch check here
+                if (!r.matchCarrierConfigChangeListener()) {
+                    continue;
+                }
+                try {
+                    r.carrierConfigChangeListener.onCarrierConfigChanged(phoneId, subId, carrierId,
+                            specificCarrierId);
+                } catch (RemoteException re) {
                     mRemoveList.add(r.binder);
                 }
             }
