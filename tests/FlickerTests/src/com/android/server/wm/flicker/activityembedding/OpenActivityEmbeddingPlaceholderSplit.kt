@@ -16,7 +16,6 @@
 
 package com.android.server.wm.flicker.activityembedding
 
-import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import android.view.WindowManagerPolicyConstants
@@ -87,61 +86,61 @@ class OpenActivityEmbeddingPlaceholderSplit(
     }
 
     /** {@inheritDoc} */
-    @Postsubmit
+    @Presubmit
     @Test
     override fun entireScreenCovered() = super.entireScreenCovered()
 
     /** {@inheritDoc} */
-    @Postsubmit
+    @Presubmit
     @Test
     override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
 
     /** {@inheritDoc} */
-    @Postsubmit
+    @Presubmit
     @Test
     override fun navBarWindowIsAlwaysVisible() = super.navBarWindowIsAlwaysVisible()
 
     /** {@inheritDoc} */
-    @Postsubmit
+    @Presubmit
     @Test
     override fun navBarLayerIsVisibleAtStartAndEnd() = super.navBarLayerIsVisibleAtStartAndEnd()
 
     /** {@inheritDoc} */
-    @Postsubmit
+    @Presubmit
     @Test
     override fun taskBarWindowIsAlwaysVisible() = super.taskBarWindowIsAlwaysVisible()
 
     /** {@inheritDoc} */
-    @Postsubmit
+    @Presubmit
     @Test
     override fun taskBarLayerIsVisibleAtStartAndEnd() = super.taskBarLayerIsVisibleAtStartAndEnd()
 
     /** {@inheritDoc} */
-    @Postsubmit
+    @Presubmit
     @Test
     override fun statusBarLayerIsVisibleAtStartAndEnd() =
         super.statusBarLayerIsVisibleAtStartAndEnd()
 
     /** {@inheritDoc} */
-    @Postsubmit
+    @Presubmit
     @Test
     override fun statusBarLayerPositionAtStartAndEnd() =
         super.statusBarLayerPositionAtStartAndEnd()
 
     /** {@inheritDoc} */
-    @Postsubmit
+    @Presubmit
     @Test
     override fun statusBarWindowIsAlwaysVisible() =
         super.statusBarWindowIsAlwaysVisible()
 
     /** {@inheritDoc} */
-    @Postsubmit
+    @Presubmit
     @Test
     override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
         super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
     /** {@inheritDoc} */
-    @Postsubmit
+    @Presubmit
     @Test
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
         super.visibleLayersShownMoreThanOneConsecutiveEntry()

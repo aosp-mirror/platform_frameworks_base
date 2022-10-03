@@ -16,6 +16,7 @@
 
 package com.android.server.wm.flicker.quickswitch
 
+import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
@@ -71,4 +72,9 @@ open class QuickSwitchBetweenTwoAppsForwardTest_ShellTransit(
         Assume.assumeFalse(testSpec.isTablet)
         testSpec.navBarWindowIsVisibleAtStartAndEnd()
     }
+
+    @FlakyTest(bugId = 246284708)
+    @Test
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
 }

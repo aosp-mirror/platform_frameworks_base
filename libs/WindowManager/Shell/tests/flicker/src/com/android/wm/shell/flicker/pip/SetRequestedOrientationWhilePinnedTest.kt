@@ -28,6 +28,7 @@ import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group4
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.WindowUtils
+import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.rules.RemoveAllTasksButHomeRule.Companion.removeAllTasksButHome
@@ -144,12 +145,24 @@ open class SetRequestedOrientationWhilePinnedTest(
         }
     }
 
-    @Presubmit
-    @Test
-    fun pipLayerInsideDisplay() {
+    private fun pipLayerInsideDisplay_internal() {
         testSpec.assertLayersStart {
             visibleRegion(pipApp).coversAtMost(startingBounds)
         }
+    }
+
+    @Presubmit
+    @Test
+    fun pipLayerInsideDisplay() {
+        Assume.assumeFalse(isShellTransitionsEnabled)
+        pipLayerInsideDisplay_internal()
+    }
+
+    @FlakyTest(bugId = 250527829)
+    @Test
+    fun pipLayerInsideDisplay_shellTransit() {
+        Assume.assumeTrue(isShellTransitionsEnabled)
+        pipLayerInsideDisplay_internal()
     }
 
     @Presubmit

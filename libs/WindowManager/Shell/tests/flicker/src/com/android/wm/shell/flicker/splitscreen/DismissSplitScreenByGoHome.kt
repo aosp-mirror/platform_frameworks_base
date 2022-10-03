@@ -92,7 +92,7 @@ class DismissSplitScreenByGoHome(
         portraitPosTop = false
     )
 
-    @FlakyTest(bugId = 241525302)
+    @FlakyTest(bugId = 250530241)
     @Test
     fun secondaryAppBoundsBecomesInvisible() = testSpec.splitAppLayerBoundsBecomesInvisible(
         secondaryApp,
