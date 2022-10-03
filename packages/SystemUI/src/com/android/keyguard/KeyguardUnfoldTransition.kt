@@ -29,7 +29,7 @@ import javax.inject.Inject
 
 /**
  * Translates items away/towards the hinge when the device is opened/closed. This is controlled by
- * the set of ids, which also dictact which direction to move and when, via a filter function.
+ * the set of ids, which also dictate which direction to move and when, via a filter function.
  */
 @SysUIUnfoldScope
 class KeyguardUnfoldTransition
@@ -50,12 +50,12 @@ constructor(
             viewsIdToTranslate =
                 setOf(
                     ViewIdToTranslate(R.id.keyguard_status_area, LEFT, filterNever),
-                    ViewIdToTranslate(R.id.controls_button, LEFT, filterNever),
                     ViewIdToTranslate(R.id.lockscreen_clock_view_large, LEFT, filterSplitShadeOnly),
                     ViewIdToTranslate(R.id.lockscreen_clock_view, LEFT, filterNever),
                     ViewIdToTranslate(
                         R.id.notification_stack_scroller, RIGHT, filterSplitShadeOnly),
-                    ViewIdToTranslate(R.id.wallet_button, RIGHT, filterNever)),
+                    ViewIdToTranslate(R.id.start_button, LEFT, filterNever),
+                    ViewIdToTranslate(R.id.end_button, RIGHT, filterNever)),
             progressProvider = unfoldProgressProvider)
     }
 

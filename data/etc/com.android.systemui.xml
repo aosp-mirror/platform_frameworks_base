@@ -81,5 +81,6 @@
         <permission name="android.permission.READ_DEVICE_CONFIG" />
         <permission name="android.permission.READ_SAFETY_CENTER_STATUS" />
         <permission name="android.permission.SET_UNRESTRICTED_KEEP_CLEAR_AREAS" />
+        <permission name="android.permission.READ_SEARCH_INDEXABLES" />
     </privapp-permissions>
 </permissions>

@@ -28,8 +28,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.util.Log;
-import android.window.WindowTokenClient;
 import android.view.accessibility.IAccessibilityEmbeddedConnection;
+import android.window.WindowTokenClient;
 
 import java.util.Objects;
 
@@ -271,14 +271,8 @@ public class SurfaceControlViewHost {
     /** @hide */
     public SurfaceControlViewHost(@NonNull Context c, @NonNull Display d,
             @NonNull WindowlessWindowManager wwm) {
-        this(c, d, wwm, false /* useSfChoreographer */);
-    }
-
-    /** @hide */
-    public SurfaceControlViewHost(@NonNull Context c, @NonNull Display d,
-            @NonNull WindowlessWindowManager wwm, boolean useSfChoreographer) {
         mWm = wwm;
-        mViewRoot = new ViewRootImpl(c, d, mWm, new WindowlessWindowLayout(), useSfChoreographer);
+        mViewRoot = new ViewRootImpl(c, d, mWm, new WindowlessWindowLayout());
         addConfigCallback(c, d);
 
         WindowManagerGlobal.getInstance().addWindowlessRoot(mViewRoot);
@@ -422,7 +416,7 @@ public class SurfaceControlViewHost {
     public void relayout(WindowManager.LayoutParams attrs,
             WindowlessWindowManager.ResizeCompleteCallback callback) {
         mViewRoot.setLayoutParams(attrs, false);
-        mViewRoot.setReportNextDraw(true /* syncBuffer */);
+        mViewRoot.setReportNextDraw(true /* syncBuffer */, "scvh_relayout");
         mWm.setCompletionCallback(mViewRoot.mWindow.asBinder(), callback);
     }
 

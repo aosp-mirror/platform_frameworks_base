@@ -59,12 +59,9 @@ public class KeyguardPatternViewController
     private final LatencyTracker mLatencyTracker;
     private final FalsingCollector mFalsingCollector;
     private final EmergencyButtonController mEmergencyButtonController;
-    private final KeyguardMessageAreaController.Factory mMessageAreaControllerFactory;
     private final DevicePostureController mPostureController;
     private final DevicePostureController.Callback mPostureCallback =
             posture -> mView.onDevicePostureChanged(posture);
-
-    private KeyguardMessageAreaController mMessageAreaController;
     private LockPatternView mLockPatternView;
     private CountDownTimer mCountdownTimer;
     private AsyncTask<?, ?, ?> mPendingLockCheck;
@@ -171,7 +168,7 @@ public class KeyguardPatternViewController
                 if (dismissKeyguard) {
                     mLockPatternView.setDisplayMode(LockPatternView.DisplayMode.Correct);
                     mLatencyTracker.onActionStart(LatencyTracker.ACTION_LOCKSCREEN_UNLOCK);
-                    getKeyguardSecurityCallback().dismiss(true, userId);
+                    getKeyguardSecurityCallback().dismiss(true, userId, SecurityMode.Pattern);
                 }
             } else {
                 mLockPatternView.setDisplayMode(LockPatternView.DisplayMode.Wrong);
@@ -201,15 +198,13 @@ public class KeyguardPatternViewController
             EmergencyButtonController emergencyButtonController,
             KeyguardMessageAreaController.Factory messageAreaControllerFactory,
             DevicePostureController postureController) {
-        super(view, securityMode, keyguardSecurityCallback, emergencyButtonController);
+        super(view, securityMode, keyguardSecurityCallback, emergencyButtonController,
+                messageAreaControllerFactory);
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mLockPatternUtils = lockPatternUtils;
         mLatencyTracker = latencyTracker;
         mFalsingCollector = falsingCollector;
         mEmergencyButtonController = emergencyButtonController;
-        mMessageAreaControllerFactory = messageAreaControllerFactory;
-        KeyguardMessageArea kma = KeyguardMessageArea.findSecurityMessageDisplay(mView);
-        mMessageAreaController = mMessageAreaControllerFactory.create(kma);
         mLockPatternView = mView.findViewById(R.id.lockPatternView);
         mPostureController = postureController;
     }
@@ -217,7 +212,6 @@ public class KeyguardPatternViewController
     @Override
     public void onInit() {
         super.onInit();
-        mMessageAreaController.init();
     }
 
     @Override
@@ -336,6 +330,9 @@ public class KeyguardPatternViewController
             case PROMPT_REASON_NON_STRONG_BIOMETRIC_TIMEOUT:
                 mMessageAreaController.setMessage(R.string.kg_prompt_reason_timeout_pattern);
                 break;
+            case PROMPT_REASON_TRUSTAGENT_EXPIRED:
+                mMessageAreaController.setMessage(R.string.kg_prompt_reason_timeout_pattern);
+                break;
             case PROMPT_REASON_NONE:
                 break;
             default:
@@ -346,6 +343,9 @@ public class KeyguardPatternViewController
 
     @Override
     public void showMessage(CharSequence message, ColorStateList colorState) {
+        if (mMessageAreaController == null) {
+            return;
+        }
         if (colorState != null) {
             mMessageAreaController.setNextMessageColor(colorState);
         }

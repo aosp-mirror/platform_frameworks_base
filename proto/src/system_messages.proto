@@ -298,6 +298,10 @@ message SystemMessage {
     // Notify the user to setup their dock
     NOTE_SETUP_DOCK = 72;
 
+    // Inform the user of bluetooth apm state changes.
+    // Package: android
+    NOTE_BT_APM_NOTIFICATION = 74;
+
     // ADD_NEW_IDS_ABOVE_THIS_LINE
     // Legacy IDs with arbitrary values appear below
     // Legacy IDs existed as stable non-conflicting constants prior to the O release

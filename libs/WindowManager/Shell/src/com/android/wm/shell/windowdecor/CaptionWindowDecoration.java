@@ -34,6 +34,7 @@ import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.SyncTransactionQueue;
+import com.android.wm.shell.desktopmode.DesktopModeStatus;
 
 /**
  * Defines visuals and behaviors of a window decoration of a caption bar and shadows. It works with
@@ -141,7 +142,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
             return;
         }
 
-        if (oldDecorationSurface != mDecorationContainerSurface) {
+        if (oldDecorationSurface != mDecorationContainerSurface || mDragResizeListener == null) {
             closeDragResizeListener();
             mDragResizeListener = new DragResizeInputListener(
                     mContext,
@@ -161,12 +162,19 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
      */
     private void setupRootView() {
         View caption = mResult.mRootView.findViewById(R.id.caption);
-
         caption.setOnTouchListener(mOnCaptionTouchListener);
         View maximize = caption.findViewById(R.id.maximize_window);
-        maximize.setOnClickListener(mOnCaptionButtonClickListener);
+        if (DesktopModeStatus.IS_SUPPORTED) {
+            // Hide maximize button when desktop mode is available
+            maximize.setVisibility(View.GONE);
+        } else {
+            maximize.setVisibility(View.VISIBLE);
+            maximize.setOnClickListener(mOnCaptionButtonClickListener);
+        }
         View close = caption.findViewById(R.id.close_window);
         close.setOnClickListener(mOnCaptionButtonClickListener);
+        View minimize = caption.findViewById(R.id.minimize_window);
+        minimize.setOnClickListener(mOnCaptionButtonClickListener);
     }
 
     void setCaptionColor(int captionColor) {

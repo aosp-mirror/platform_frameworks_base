@@ -72,6 +72,7 @@ import android.view.IRemoteAnimationRunner;
 import android.view.IWindowFocusObserver;
 import android.view.RemoteAnimationDefinition;
 import android.view.RemoteAnimationAdapter;
+import android.window.BackAnimationAdaptor;
 import android.window.IWindowOrganizerController;
 import android.window.BackNavigationInfo;
 import android.window.SplashScreenView;
@@ -356,5 +357,5 @@ interface IActivityTaskManager {
      * @param focusObserver a remote callback to nofify shell when the focused window lost focus.
      */
     android.window.BackNavigationInfo startBackNavigation(in boolean requestAnimation,
-            in IWindowFocusObserver focusObserver);
+            in IWindowFocusObserver focusObserver, in BackAnimationAdaptor adaptor);
 }

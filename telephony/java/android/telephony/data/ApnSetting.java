@@ -24,7 +24,6 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.hardware.radio.V1_5.ApnTypes;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.provider.Telephony;
@@ -964,7 +963,7 @@ public class ApnSetting implements Parcelable {
                 ServiceState.convertBearerBitmaskToNetworkTypeBitmask(bearerBitmask);
         }
         int mtuV4 = cursor.getInt(cursor.getColumnIndexOrThrow(Telephony.Carriers.MTU_V4));
-        if (mtuV4 == -1) {
+        if (mtuV4 == UNSET_MTU) {
             mtuV4 = cursor.getInt(cursor.getColumnIndexOrThrow(Telephony.Carriers.MTU));
         }
 

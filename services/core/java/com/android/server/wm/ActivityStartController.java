@@ -94,6 +94,7 @@ public class ActivityStartController {
 
     boolean mCheckedForSetup = false;
 
+    /** Whether an {@link ActivityStarter} is currently executing (starting an Activity). */
     private boolean mInExecution = false;
 
     /**
@@ -129,7 +130,7 @@ public class ActivityStartController {
         return mFactory.obtain().setIntent(intent).setReason(reason);
     }
 
-    void onExecutionStarted(ActivityStarter starter) {
+    void onExecutionStarted() {
         mInExecution = true;
     }
 
@@ -383,6 +384,14 @@ public class ActivityStartController {
                 callingUid, realCallingUid, UserHandle.USER_NULL);
         final SparseArray<String> startingUidPkgs = new SparseArray<>();
         final long origId = Binder.clearCallingIdentity();
+
+        SafeActivityOptions bottomOptions = null;
+        if (options != null) {
+            // To ensure the first N-1 activities (N == total # of activities) are also launched
+            // into the correct display, use a copy of the passed-in options (keeping only
+            // display-related info) for these activities.
+            bottomOptions = options.selectiveCloneDisplayOptions();
+        }
         try {
             intents = ArrayUtils.filterNotNull(intents, Intent[]::new);
             final ActivityStarter[] starters = new ActivityStarter[intents.length];
@@ -431,7 +440,7 @@ public class ActivityStartController {
                 final boolean top = i == intents.length - 1;
                 final SafeActivityOptions checkedOptions = top
                         ? options
-                        : null;
+                        : bottomOptions;
                 starters[i] = obtainStarter(intent, reason)
                         .setIntentGrants(intentGrants)
                         .setCaller(caller)

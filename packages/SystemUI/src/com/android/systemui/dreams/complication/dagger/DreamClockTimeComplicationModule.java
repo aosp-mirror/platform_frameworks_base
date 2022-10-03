@@ -37,7 +37,7 @@ import dagger.Provides;
 public interface DreamClockTimeComplicationModule {
     String DREAM_CLOCK_TIME_COMPLICATION_VIEW = "clock_time_complication_view";
     String TAG_WEIGHT = "'wght' ";
-    int WEIGHT = 200;
+    int WEIGHT = 400;
 
     /**
      * Provides the complication view.

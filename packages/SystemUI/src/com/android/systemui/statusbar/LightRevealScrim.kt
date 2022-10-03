@@ -143,13 +143,13 @@ class LinearLightRevealEffect(private val isVertical: Boolean) : LightRevealEffe
 
 class CircleReveal(
     /** X-value of the circle center of the reveal. */
-    val centerX: Float,
+    val centerX: Int,
     /** Y-value of the circle center of the reveal. */
-    val centerY: Float,
+    val centerY: Int,
     /** Radius of initial state of circle reveal */
-    val startRadius: Float,
+    val startRadius: Int,
     /** Radius of end state of circle reveal */
-    val endRadius: Float
+    val endRadius: Int
 ) : LightRevealEffect {
     override fun setRevealAmountOnScrim(amount: Float, scrim: LightRevealScrim) {
         // reveal amount updates already have an interpolator, so we intentionally use the
@@ -350,7 +350,7 @@ class LightRevealScrim(context: Context?, attrs: AttributeSet?) : View(context, 
      * This method does not call [invalidate] - you should do so once you're done changing
      * properties.
      */
-    public fun setRevealGradientBounds(left: Float, top: Float, right: Float, bottom: Float) {
+    fun setRevealGradientBounds(left: Float, top: Float, right: Float, bottom: Float) {
         revealGradientWidth = right - left
         revealGradientHeight = bottom - top
 

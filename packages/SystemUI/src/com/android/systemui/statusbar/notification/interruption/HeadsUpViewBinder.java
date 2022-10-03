@@ -41,8 +41,7 @@ import javax.inject.Inject;
  * figuring out the right heads up inflation parameters and inflating/freeing the heads up
  * content view.
  *
- * TODO: This should be moved into {@link HeadsUpCoordinator} when the old pipeline is deprecated
- * (i.e. when {@link HeadsUpController} is removed).
+ * TODO: This should be moved into {@link HeadsUpCoordinator} when the old pipeline is deprecated.
  */
 @SysUISingleton
 public class HeadsUpViewBinder {

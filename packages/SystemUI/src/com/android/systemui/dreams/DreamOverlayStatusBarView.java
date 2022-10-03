@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 
@@ -29,6 +30,7 @@ import com.android.systemui.R;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -58,6 +60,8 @@ public class DreamOverlayStatusBarView extends ConstraintLayout {
     public static final int STATUS_ICON_PRIORITY_MODE_ON = 6;
 
     private final Map<Integer, View> mStatusIcons = new HashMap<>();
+    private ViewGroup mSystemStatusViewGroup;
+    private ViewGroup mExtraSystemStatusViewGroup;
 
     public DreamOverlayStatusBarView(Context context) {
         this(context, null);
@@ -94,6 +98,9 @@ public class DreamOverlayStatusBarView extends ConstraintLayout {
                 fetchStatusIconForResId(R.id.dream_overlay_notification_indicator));
         mStatusIcons.put(STATUS_ICON_PRIORITY_MODE_ON,
                 fetchStatusIconForResId(R.id.dream_overlay_priority_mode));
+
+        mSystemStatusViewGroup = findViewById(R.id.dream_overlay_system_status);
+        mExtraSystemStatusViewGroup = findViewById(R.id.dream_overlay_extra_items);
     }
 
     void showIcon(@StatusIconType int iconType, boolean show, @Nullable String contentDescription) {
@@ -105,10 +112,29 @@ public class DreamOverlayStatusBarView extends ConstraintLayout {
             icon.setContentDescription(contentDescription);
         }
         icon.setVisibility(show ? View.VISIBLE : View.GONE);
+        mSystemStatusViewGroup.setVisibility(areAnyStatusIconsVisible() ? View.VISIBLE : View.GONE);
+    }
+
+    void setExtraStatusBarItemViews(List<View> views) {
+        removeAllExtraStatusBarItemViews();
+        views.forEach(view -> mExtraSystemStatusViewGroup.addView(view));
     }
 
     private View fetchStatusIconForResId(int resId) {
         final View statusIcon = findViewById(resId);
         return Objects.requireNonNull(statusIcon);
+    }
+
+    void removeAllExtraStatusBarItemViews() {
+        mExtraSystemStatusViewGroup.removeAllViews();
+    }
+
+    private boolean areAnyStatusIconsVisible() {
+        for (int i = 0; i < mSystemStatusViewGroup.getChildCount(); i++) {
+            if (mSystemStatusViewGroup.getChildAt(i).getVisibility() == View.VISIBLE) {
+                return true;
+            }
+        }
+        return false;
     }
 }

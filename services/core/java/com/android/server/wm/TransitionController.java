@@ -46,6 +46,7 @@ import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.ProtoLogGroup;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.LocalServices;
@@ -63,6 +64,11 @@ class TransitionController {
     /** Whether to use shell-transitions rotation instead of fixed-rotation. */
     private static final boolean SHELL_TRANSITIONS_ROTATION =
             SystemProperties.getBoolean("persist.wm.debug.shell_transit_rotate", false);
+
+    /** Which sync method to use for transition syncs. */
+    static final int SYNC_METHOD =
+            android.os.SystemProperties.getBoolean("persist.wm.debug.shell_transit_blast", false)
+                    ? BLASTSyncEngine.METHOD_BLAST : BLASTSyncEngine.METHOD_NONE;
 
     /** The same as legacy APP_TRANSITION_TIMEOUT_MS. */
     private static final int DEFAULT_TIMEOUT_MS = 5000;
@@ -160,6 +166,12 @@ class TransitionController {
 
     /** Starts Collecting */
     void moveToCollecting(@NonNull Transition transition) {
+        moveToCollecting(transition, SYNC_METHOD);
+    }
+
+    /** Starts Collecting */
+    @VisibleForTesting
+    void moveToCollecting(@NonNull Transition transition, int method) {
         if (mCollectingTransition != null) {
             throw new IllegalStateException("Simultaneous transition collection not supported.");
         }
@@ -167,7 +179,7 @@ class TransitionController {
         // Distinguish change type because the response time is usually expected to be not too long.
         final long timeoutMs =
                 transition.mType == TRANSIT_CHANGE ? CHANGE_TIMEOUT_MS : DEFAULT_TIMEOUT_MS;
-        mCollectingTransition.startCollecting(timeoutMs);
+        mCollectingTransition.startCollecting(timeoutMs, method);
         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Start collecting in Transition: %s",
                 mCollectingTransition);
         dispatchLegacyAppTransitionPending();
@@ -215,6 +227,25 @@ class TransitionController {
     }
 
     /**
+     * @return the collecting transition. {@code null} if there is no collecting transition.
+     */
+    @Nullable
+    Transition getCollectingTransition() {
+        return mCollectingTransition;
+    }
+
+    /**
+     * @return the collecting transition sync Id. This should only be called when there is a
+     * collecting transition.
+     */
+    int getCollectingTransitionId() {
+        if (mCollectingTransition == null) {
+            throw new IllegalStateException("There is no collecting transition");
+        }
+        return mCollectingTransition.getSyncId();
+    }
+
+    /**
      * @return {@code true} if transition is actively collecting changes and `wc` is one of them.
      *                      This is {@code false} once a transition is playing.
      */
@@ -228,10 +259,7 @@ class TransitionController {
      */
     boolean inCollectingTransition(@NonNull WindowContainer wc) {
         if (!isCollecting()) return false;
-        for (WindowContainer p = wc; p != null; p = p.getParent()) {
-            if (mCollectingTransition.mParticipants.contains(p)) return true;
-        }
-        return false;
+        return mCollectingTransition.isInTransition(wc);
     }
 
     /**
@@ -247,9 +275,7 @@ class TransitionController {
      */
     boolean inPlayingTransition(@NonNull WindowContainer wc) {
         for (int i = mPlayingTransitions.size() - 1; i >= 0; --i) {
-            for (WindowContainer p = wc; p != null; p = p.getParent()) {
-                if (mPlayingTransitions.get(i).mParticipants.contains(p)) return true;
-            }
+            if (mPlayingTransitions.get(i).isInTransition(wc)) return true;
         }
         return false;
     }
@@ -463,13 +489,13 @@ class TransitionController {
     }
 
     /**
-     * Collects the window containers which need to be synced with the changing display (e.g.
-     * rotating) to the given transition or the current collecting transition.
+     * Collects the window containers which need to be synced with the changing display area into
+     * the current collecting transition.
      */
-    void collectForDisplayAreaChange(@NonNull DisplayArea<?> wc, @Nullable Transition incoming) {
-        if (incoming == null) incoming = mCollectingTransition;
-        if (incoming == null) return;
-        final Transition transition = incoming;
+    void collectForDisplayAreaChange(@NonNull DisplayArea<?> wc) {
+        final Transition transition = mCollectingTransition;
+        if (transition == null || !transition.mParticipants.contains(wc)) return;
+        transition.collectVisibleChange(wc);
         // Collect all visible tasks.
         wc.forAllLeafTasks(task -> {
             if (task.isVisible()) {
@@ -487,6 +513,16 @@ class TransitionController {
                 }
             }, true /* traverseTopToBottom */);
         }
+    }
+
+    /**
+     * Records that a particular container is changing visibly (ie. something about it is changing
+     * while it remains visible). This only effects windows that are already in the collecting
+     * transition.
+     */
+    void collectVisibleChange(WindowContainer wc) {
+        if (!isCollecting()) return;
+        mCollectingTransition.collectVisibleChange(wc);
     }
 
     /** @see Transition#mStatusBarTransitionDelay */

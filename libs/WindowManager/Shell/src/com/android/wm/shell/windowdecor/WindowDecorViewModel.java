@@ -42,6 +42,7 @@ public interface WindowDecorViewModel<T extends AutoCloseable> {
 
     /**
      * Creates a window decoration for the given task.
+     * Can be {@code null} for Fullscreen tasks but not Freeform ones.
      *
      * @param taskInfo the initial task info of the task
      * @param taskSurface the surface of the task
@@ -49,7 +50,7 @@ public interface WindowDecorViewModel<T extends AutoCloseable> {
      * @param finishT the finish transaction to restore states after the transition
      * @return the window decoration object
      */
-    T createWindowDecoration(
+    @Nullable T createWindowDecoration(
             ActivityManager.RunningTaskInfo taskInfo,
             SurfaceControl taskSurface,
             SurfaceControl.Transaction startT,
@@ -57,11 +58,12 @@ public interface WindowDecorViewModel<T extends AutoCloseable> {
 
     /**
      * Adopts the window decoration if possible.
+     * May be {@code null} if a window decor is not needed or the given one is incompatible.
      *
      * @param windowDecor the potential window decoration to adopt
      * @return the window decoration if it can be adopted, or {@code null} otherwise.
      */
-    T adoptWindowDecoration(@Nullable AutoCloseable windowDecor);
+    @Nullable T adoptWindowDecoration(@Nullable AutoCloseable windowDecor);
 
     /**
      * Notifies a task info update on the given task, with the window decoration created previously

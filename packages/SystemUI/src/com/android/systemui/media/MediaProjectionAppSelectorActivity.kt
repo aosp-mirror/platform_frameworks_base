@@ -23,34 +23,89 @@ import android.os.Binder
 import android.os.Bundle
 import android.os.IBinder
 import android.os.ResultReceiver
+import android.os.UserHandle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.app.ChooserActivity
+import com.android.internal.app.ResolverListController
 import com.android.internal.app.chooser.NotSelectableTargetInfo
 import com.android.internal.app.chooser.TargetInfo
+import com.android.systemui.R
+import com.android.systemui.mediaprojection.appselector.MediaProjectionAppSelectorController
+import com.android.systemui.mediaprojection.appselector.MediaProjectionAppSelectorView
+import com.android.systemui.mediaprojection.appselector.data.RecentTask
+import com.android.systemui.mediaprojection.appselector.view.RecentTasksAdapter
+import com.android.systemui.mediaprojection.appselector.view.RecentTasksAdapter.RecentTaskClickListener
 import com.android.systemui.util.AsyncActivityLauncher
-import com.android.systemui.R;
+import com.android.systemui.util.recycler.HorizontalSpacerItemDecoration
 import javax.inject.Inject
 
-class MediaProjectionAppSelectorActivity @Inject constructor(
-    private val activityLauncher: AsyncActivityLauncher
-) : ChooserActivity() {
+class MediaProjectionAppSelectorActivity(
+    private val activityLauncher: AsyncActivityLauncher,
+    private val controller: MediaProjectionAppSelectorController,
+    private val recentTasksAdapterFactory: RecentTasksAdapter.Factory,
+    /** This is used to override the dependency in a screenshot test */
+    @VisibleForTesting
+    private val listControllerFactory: ((userHandle: UserHandle) -> ResolverListController)?
+) : ChooserActivity(), MediaProjectionAppSelectorView, RecentTaskClickListener {
+
+    @Inject
+    constructor(
+        activityLauncher: AsyncActivityLauncher,
+        controller: MediaProjectionAppSelectorController,
+        recentTasksAdapterFactory: RecentTasksAdapter.Factory,
+    ) : this(activityLauncher, controller, recentTasksAdapterFactory, null)
+
+    private var recentsRoot: ViewGroup? = null
+    private var recentsProgress: View? = null
+    private var recentsRecycler: RecyclerView? = null
+
+    override fun getLayoutResource() =
+        R.layout.media_projection_app_selector
 
     public override fun onCreate(bundle: Bundle?) {
         val queryIntent = Intent(Intent.ACTION_MAIN)
             .addCategory(Intent.CATEGORY_LAUNCHER)
         intent.putExtra(Intent.EXTRA_INTENT, queryIntent)
 
-        // TODO(b/235465652) Use resource lexeme
-        intent.putExtra(Intent.EXTRA_TITLE, "Record or cast an app")
-
+        // TODO(b/240939253): update copies
+        val title = getString(R.string.media_projection_dialog_service_title)
+        intent.putExtra(Intent.EXTRA_TITLE, title)
         super.onCreate(bundle)
+        controller.init(this)
+    }
 
-        // TODO(b/235465652) we should update VisD of the title and add an icon
-        findViewById<View>(R.id.title)?.visibility = View.VISIBLE
+    private fun createRecentsView(parent: ViewGroup): ViewGroup {
+        val recentsRoot = LayoutInflater.from(this)
+            .inflate(R.layout.media_projection_recent_tasks, parent,
+                    /* attachToRoot= */ false) as ViewGroup
+
+        recentsProgress = recentsRoot.requireViewById(R.id.media_projection_recent_tasks_loader)
+        recentsRecycler = recentsRoot.requireViewById(R.id.media_projection_recent_tasks_recycler)
+        recentsRecycler?.layoutManager = LinearLayoutManager(
+            this, LinearLayoutManager.HORIZONTAL,
+            /* reverseLayout= */false
+        )
+
+        val itemDecoration = HorizontalSpacerItemDecoration(
+            resources.getDimensionPixelOffset(
+                R.dimen.media_projection_app_selector_recents_padding
+            )
+        )
+        recentsRecycler?.addItemDecoration(itemDecoration)
+
+        return recentsRoot
     }
 
     override fun appliedThemeResId(): Int =
         R.style.Theme_SystemUI_MediaProjectionAppSelector
+
+    override fun createListController(userHandle: UserHandle): ResolverListController =
+        listControllerFactory?.invoke(userHandle) ?: super.createListController(userHandle)
 
     override fun startSelected(which: Int, always: Boolean, filtered: Boolean) {
         val currentListAdapter = mChooserMultiProfilePagerAdapter.activeListAdapter
@@ -96,11 +151,33 @@ class MediaProjectionAppSelectorActivity @Inject constructor(
 
     override fun onDestroy() {
         activityLauncher.destroy()
+        controller.destroy()
         super.onDestroy()
     }
 
     override fun onActivityStarted(cti: TargetInfo) {
         // do nothing
+    }
+
+    override fun bind(recentTasks: List<RecentTask>) {
+        val recents = recentsRoot ?: return
+        val progress = recentsProgress ?: return
+        val recycler = recentsRecycler ?: return
+
+        if (recentTasks.isEmpty()) {
+            recents.visibility = View.GONE
+            return
+        }
+
+        progress.visibility = View.GONE
+        recycler.visibility = View.VISIBLE
+        recents.visibility = View.VISIBLE
+
+        recycler.adapter = recentTasksAdapterFactory.create(recentTasks, this)
+    }
+
+    override fun onRecentClicked(task: RecentTask, view: View) {
+        // TODO(b/240924732) Handle clicking on a recent task
     }
 
     private fun onTargetActivityLaunched(launchToken: IBinder) {
@@ -132,6 +209,14 @@ class MediaProjectionAppSelectorActivity @Inject constructor(
     }
 
     override fun shouldGetOnlyDefaultActivities() = false
+
+    // TODO(b/240924732) flip the flag when the recents selector is ready
+    override fun shouldShowContentPreview() = false
+
+    override fun createContentPreviewView(parent: ViewGroup): ViewGroup =
+            recentsRoot ?: createRecentsView(parent).also {
+                recentsRoot = it
+            }
 
     companion object {
         /**

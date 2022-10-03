@@ -161,6 +161,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"ບໍ່ສາມາດຈຳແນກໜ້າໄດ້. ກະລຸນາໃຊ້ລາຍນິ້ວມືແທນ."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
+    <string name="keyguard_face_failed" msgid="9044619102286917151">"ບໍ່ສາມາດຈຳແນກໃບໜ້າໄດ້"</string>
+    <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"ກະລຸນາໃຊ້ລາຍນິ້ວມືແທນ"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"ເຊື່ອມຕໍ່ Bluetooth ແລ້ວ."</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"ບໍ່ຮູ້ເປີເຊັນແບັດເຕີຣີ."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"ເຊື່ອມ​ຕໍ່​ຫາ <xliff:g id="BLUETOOTH">%s</xliff:g> ແລ້ວ."</string>
@@ -312,6 +314,8 @@
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"ປົດລັອກດ້ວຍໜ້າແລ້ວ. ກົດເພື່ອເປີດ."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"ຈຳແນກໜ້າໄດ້ແລ້ວ. ກົດເພື່ອເປີດ."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"ຈຳແນກໜ້າໄດ້ແລ້ວ. ກົດໄອຄອນປົດລັອກເພື່ອເປີດ."</string>
+    <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"ປົດລັອກດ້ວຍໃບໜ້າແລ້ວ"</string>
+    <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"ຈຳແນກໜ້າໄດ້ແລ້ວ"</string>
   <string-array name="udfps_accessibility_touch_hints">
     <item msgid="1901953991150295169">"ຍ້າຍໄປຊ້າຍ"</item>
     <item msgid="5558598599408514296">"ຍ້າຍລົງ"</item>
@@ -337,8 +341,9 @@
     <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ກຳລັງສາກໄຟ • ຈະເຕັມໃນອີກ <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ກຳລັງສາກໄຟແບບໄວ • ຈະເຕັມໃນອີກ <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ກຳລັງສາກໄຟແບບຊ້າ • ຈະເຕັມໃນອີກ <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
-    <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ກຳລັງສາກໄຟຜ່ານດັອກ • ຈະເຕັມໃນອີກ <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
+    <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ກຳລັງສາກໄຟ • ຈະເຕັມໃນອີກ <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ສະຫຼັບຜູ້ໃຊ້"</string>
+    <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"ເມນູແບບດຶງລົງ"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ແອັບຯ​ແລະ​ຂໍ້​ມູນ​ທັງ​ໝົດ​ໃນ​ເຊດ​ຊັນ​ນີ້​ຈະ​ຖືກ​ລຶບ​ອອກ."</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"ຍິນ​ດີ​ຕ້ອນ​ຮັບ​ກັບ​ມາ, ຜູ້ຢ້ຽມຢາມ!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"ທ່ານ​ຕ້ອງ​ການ​ສືບ​ຕໍ່​ເຊດ​ຊັນ​ຂອງ​ທ່ານບໍ່?"</string>
@@ -416,6 +421,8 @@
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"ຄຳບັນຍາຍແບບວາງທັບ"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"ເປີດນຳໃຊ້"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"ປິດນຳໃຊ້"</string>
+    <string name="sound_settings" msgid="8874581353127418308">"ສຽງ ແລະ ການສັ່ນເຕືອນ"</string>
+    <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"ການຕັ້ງຄ່າ"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"ແອັບຖືກປັກໝຸດແລ້ວ"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"ນີ້ຈະສະແດງມັນໃນໜ້າຈໍຈົນກວ່າທ່ານຈະເຊົາປັກມຸດ. ໃຫ້ແຕະປຸ່ມກັບຄືນ ແລະ ປຸ່ມພາບຮວມຄ້າງໄວ້ເພື່ອຍົກເລີກການປັກມຸດ."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"ນີ້ຈະສະແດງມັນໃນໜ້າຈໍຈົນກວ່າທ່ານຈະເຊົາປັກໝຸດ. ໃຫ້ແຕະປຸ່ມກັບຄືນ ແລະ ປຸ່ມພາບຮວມຄ້າງໄວ້ເພື່ອຍົກເລີກການປັກໝຸດ."</string>
@@ -591,7 +598,7 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"ເປີດ"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"ປິດ"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"ບໍ່ສາມາດໃຊ້ໄດ້"</string>
-    <string name="tile_disabled" msgid="373212051546573069">"ປິດການນຳໃຊ້ແລ້ວ"</string>
+    <string name="accessibility_tile_disabled_by_policy_action_description" msgid="6958422730461646926">"ສຶກສາເພີ່ມເຕີມ"</string>
     <string name="nav_bar" msgid="4642708685386136807">"ແຖບນຳທາງ"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"ຮູບແບບ"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"ປະເພດປຸ່ມຊ້າຍພິເສດ"</string>
@@ -664,8 +671,8 @@
     <string name="high_temp_notif_message" msgid="1277346543068257549">"ຄຸນສົມບັດບາງຢ່າງຖືກຈຳກັດໄວ້ໃນເວລາຫຼຸດອຸນຫະພູມຂອງໂທລະສັບ.\nແຕະເພື່ອເບິ່ງຂໍ້ມູນເພີ່ມເຕີມ"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"ໂທລະສັບຂອງທ່ານຈະພະຍາຍາມລົດອຸນຫະພູມລົງ. ທ່ານຍັງຄົງສາມາດໃຊ້ໂທລະສັບຂອງທ່ານໄດ້ຢູ່, ແຕ່ມັນຈະເຮັດວຽກຊ້າລົງ.\n\nເມື່ອໂທລະສັບຂອງທ່ານບໍ່ຮ້ອນຫຼາຍແລ້ວ, ມັນຈະກັບມາເຮັດວຽກຕາມປົກກະຕິ."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"ເບິ່ງຂັ້ນຕອນການເບິ່ງແຍງ"</string>
-    <string name="high_temp_alarm_title" msgid="2359958549570161495">"ຖອດສາຍສາກອອກ"</string>
-    <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"ເກີດບັນຫາໃນການສາກໄຟອຸປະກອນນີ້. ກະລຸນາຖອດສາຍສາກອອກ ແລະ ລະວັງເນື່ອງຈາກສາຍອາດຈະຍັງອຸ່ນຢູ່."</string>
+    <string name="high_temp_alarm_title" msgid="8654754369605452169">"ຖອດອຸປະກອນຂອງທ່ານອອກ"</string>
+    <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"ອຸປະກອນຂອງທ່ານຈະອຸ່ນຂຶ້ນເມື່ອຢູ່ໃກ້ຊ່ອງສາກໄຟ. ຫາກມັນເຊື່ອມຕໍ່ຫາສາຍສາກ ຫຼື ອຸປະກອນເສີມ USB ໃດໜຶ່ງຢູ່, ໃຫ້ຖອດມັນອອກ ແລະ ລະວັງເນື່ອງຈາກສາຍກໍອາດຈະອຸ່ນເຊັ່ນກັນ."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"ເບິ່ງຂັ້ນຕອນການເບິ່ງແຍງ"</string>
     <string name="lockscreen_shortcut_left" msgid="1238765178956067599">"ປຸ່ມລັດຊ້າຍ"</string>
     <string name="lockscreen_shortcut_right" msgid="4138414674531853719">"ປຸ່ມລັດຂວາ"</string>
@@ -831,8 +838,7 @@
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"ເລືອກ <xliff:g id="COUNT">%1$d</xliff:g> ອຸປະກອນແລ້ວ"</string>
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(ຕັດການເຊື່ອມຕໍ່ແລ້ວ)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"ບໍ່ສາມາດສະຫຼັບໄດ້. ແຕະເພື່ອລອງໃໝ່."</string>
-    <!-- no translation found for media_output_dialog_pairing_new (5098212763195577270) -->
-    <skip />
+    <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"ເຊື່ອມຕໍ່ຫາອຸປະກອນ"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"ເພື່ອສົ່ງສັນຍານເຊດຊັນນີ້, ກະລຸນາເປີດແອັບ."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"ແອັບທີ່ບໍ່ຮູ້ຈັກ"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"ຢຸດການສົ່ງສັນຍານ"</string>
@@ -944,14 +950,11 @@
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"ບໍ່ສາມາດໃຊ້ Wi‑Fi ໄດ້"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"ໂໝດຄວາມສຳຄັນ"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"ຕັ້ງໂມງປຸກແລ້ວ"</string>
-    <!-- no translation found for dream_overlay_status_bar_camera_off (5273073778969890823) -->
-    <skip />
-    <!-- no translation found for dream_overlay_status_bar_mic_off (8366534415013819396) -->
-    <skip />
+    <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"ກ້ອງປິດຢູ່"</string>
+    <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"ໄມປິດຢູ່"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"ປິດກ້ອງຖ່າຍຮູບ ແລະ ໄມແລ້ວ"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# ການແຈ້ງເຕືອນ}other{# ການແຈ້ງເຕືອນ}}"</string>
-    <!-- no translation found for dream_overlay_weather_complication_desc (824503662089783824) -->
-    <skip />
+    <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"ກຳລັງອອກອາກາດ"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"ຢຸດການອອກອາກາດ <xliff:g id="APP_NAME">%1$s</xliff:g> ບໍ?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"ຫາກທ່ານອອກອາກາດ <xliff:g id="SWITCHAPP">%1$s</xliff:g> ຫຼື ປ່ຽນເອົ້າພຸດ, ການອອກອາກາດປັດຈຸບັນຂອງທ່ານຈະຢຸດ"</string>

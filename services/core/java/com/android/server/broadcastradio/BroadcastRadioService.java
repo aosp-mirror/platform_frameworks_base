@@ -26,11 +26,14 @@ import android.hardware.radio.ITuner;
 import android.hardware.radio.ITunerCallback;
 import android.hardware.radio.RadioManager;
 import android.os.RemoteException;
+import android.util.IndentingPrintWriter;
 import android.util.Slog;
 
 import com.android.server.SystemService;
 import com.android.server.broadcastradio.hal2.AnnouncementAggregator;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -39,7 +42,6 @@ import java.util.OptionalInt;
 
 public class BroadcastRadioService extends SystemService {
     private static final String TAG = "BcRadioSrv";
-    private static final boolean DEBUG = false;
 
     private final ServiceImpl mServiceImpl = new ServiceImpl();
 
@@ -47,7 +49,7 @@ public class BroadcastRadioService extends SystemService {
     private final com.android.server.broadcastradio.hal2.BroadcastRadioService mHal2;
 
     private final Object mLock = new Object();
-    private List<RadioManager.ModuleProperties> mV1Modules = null;
+    private final List<RadioManager.ModuleProperties> mV1Modules;
 
     public BroadcastRadioService(Context context) {
         super(context);
@@ -74,6 +76,7 @@ public class BroadcastRadioService extends SystemService {
 
         @Override
         public List<RadioManager.ModuleProperties> listModules() {
+            Slog.v(TAG, "Listing HIDL modules");
             enforcePolicyAccess();
             List<RadioManager.ModuleProperties> modules = new ArrayList<>();
             modules.addAll(mV1Modules);
@@ -84,7 +87,7 @@ public class BroadcastRadioService extends SystemService {
         @Override
         public ITuner openTuner(int moduleId, RadioManager.BandConfig bandConfig,
                 boolean withAudio, ITunerCallback callback) throws RemoteException {
-            if (DEBUG) Slog.i(TAG, "Opening module " + moduleId);
+            Slog.v(TAG, "Opening module " + moduleId);
             enforcePolicyAccess();
             if (callback == null) {
                 throw new IllegalArgumentException("Callback must not be empty");
@@ -101,21 +104,35 @@ public class BroadcastRadioService extends SystemService {
         @Override
         public ICloseHandle addAnnouncementListener(int[] enabledTypes,
                 IAnnouncementListener listener) {
-            if (DEBUG) {
-                Slog.i(TAG, "Adding announcement listener for " + Arrays.toString(enabledTypes));
-            }
+            Slog.v(TAG, "Adding announcement listener for " + Arrays.toString(enabledTypes));
             Objects.requireNonNull(enabledTypes);
             Objects.requireNonNull(listener);
             enforcePolicyAccess();
 
             synchronized (mLock) {
                 if (!mHal2.hasAnyModules()) {
-                    Slog.i(TAG, "There are no HAL 2.x modules registered");
+                    Slog.i(TAG, "There are no HAL 2.0 modules registered");
                     return new AnnouncementAggregator(listener, mLock);
                 }
 
                 return mHal2.addAnnouncementListener(enabledTypes, listener);
             }
+        }
+
+        @Override
+        protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+            IndentingPrintWriter radioPw = new IndentingPrintWriter(pw);
+            radioPw.printf("BroadcastRadioService\n");
+            radioPw.increaseIndent();
+            radioPw.printf("HAL1: %s\n", mHal1);
+            radioPw.increaseIndent();
+            radioPw.printf("Modules of HAL1: %s\n", mV1Modules);
+            radioPw.decreaseIndent();
+            radioPw.printf("HAL2:\n");
+            radioPw.increaseIndent();
+            mHal2.dumpInfo(radioPw);
+            radioPw.decreaseIndent();
+            radioPw.decreaseIndent();
         }
     }
 }

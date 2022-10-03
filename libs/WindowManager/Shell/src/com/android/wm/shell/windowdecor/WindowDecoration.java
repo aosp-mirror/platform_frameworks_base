@@ -66,6 +66,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
     final DisplayController mDisplayController;
     final ShellTaskOrganizer mTaskOrganizer;
     final Supplier<SurfaceControl.Builder> mSurfaceControlBuilderSupplier;
+    final Supplier<SurfaceControl.Transaction> mSurfaceControlTransactionSupplier;
     final Supplier<WindowContainerTransaction> mWindowContainerTransactionSupplier;
     final SurfaceControlViewHostFactory mSurfaceControlViewHostFactory;
     private final DisplayController.OnDisplaysChangedListener mOnDisplaysChangedListener =
@@ -89,7 +90,8 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
     SurfaceControl mDecorationContainerSurface;
     SurfaceControl mTaskBackgroundSurface;
 
-    private final CaptionWindowManager mCaptionWindowManager;
+    SurfaceControl mCaptionContainerSurface;
+    private CaptionWindowManager mCaptionWindowManager;
     private SurfaceControlViewHost mViewHost;
 
     private final Rect mCaptionInsetsRect = new Rect();
@@ -103,8 +105,8 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             RunningTaskInfo taskInfo,
             SurfaceControl taskSurface) {
         this(context, displayController, taskOrganizer, taskInfo, taskSurface,
-                SurfaceControl.Builder::new, WindowContainerTransaction::new,
-                new SurfaceControlViewHostFactory() {});
+                SurfaceControl.Builder::new, SurfaceControl.Transaction::new,
+                WindowContainerTransaction::new, new SurfaceControlViewHostFactory() {});
     }
 
     WindowDecoration(
@@ -114,6 +116,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             RunningTaskInfo taskInfo,
             SurfaceControl taskSurface,
             Supplier<SurfaceControl.Builder> surfaceControlBuilderSupplier,
+            Supplier<SurfaceControl.Transaction> surfaceControlTransactionSupplier,
             Supplier<WindowContainerTransaction> windowContainerTransactionSupplier,
             SurfaceControlViewHostFactory surfaceControlViewHostFactory) {
         mContext = context;
@@ -122,16 +125,12 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         mTaskInfo = taskInfo;
         mTaskSurface = taskSurface;
         mSurfaceControlBuilderSupplier = surfaceControlBuilderSupplier;
+        mSurfaceControlTransactionSupplier = surfaceControlTransactionSupplier;
         mWindowContainerTransactionSupplier = windowContainerTransactionSupplier;
         mSurfaceControlViewHostFactory = surfaceControlViewHostFactory;
 
         mDisplay = mDisplayController.getDisplay(mTaskInfo.displayId);
         mDecorWindowContext = mContext.createConfigurationContext(mTaskInfo.getConfiguration());
-
-        // Put caption under task surface because ViewRootImpl sets the destination frame of
-        // windowless window layers and BLASTBufferQueue#update() doesn't support offset.
-        mCaptionWindowManager =
-                new CaptionWindowManager(mTaskInfo.getConfiguration(), mTaskSurface);
     }
 
     /**
@@ -213,6 +212,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         startT.setPosition(
                         mDecorationContainerSurface, decorContainerOffsetX, decorContainerOffsetY)
                 .setWindowCrop(mDecorationContainerSurface, outResult.mWidth, outResult.mHeight)
+                // TODO(b/244455401): Change the z-order when it's better organized
                 .setLayer(mDecorationContainerSurface, mTaskInfo.numActivities + 1)
                 .show(mDecorationContainerSurface);
 
@@ -233,11 +233,36 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         mTmpColor[2] = (float) Color.blue(backgroundColorInt) / 255.f;
         startT.setWindowCrop(mTaskBackgroundSurface, taskBounds.width(), taskBounds.height())
                 .setShadowRadius(mTaskBackgroundSurface, shadowRadius)
-                .setColor(mTaskBackgroundSurface, mTmpColor);
+                .setColor(mTaskBackgroundSurface, mTmpColor)
+                // TODO(b/244455401): Change the z-order when it's better organized
+                .setLayer(mTaskBackgroundSurface, -1)
+                .show(mTaskBackgroundSurface);
+
+        // CaptionContainerSurface, CaptionWindowManager
+        if (mCaptionContainerSurface == null) {
+            final SurfaceControl.Builder builder = mSurfaceControlBuilderSupplier.get();
+            mCaptionContainerSurface = builder
+                    .setName("Caption container of Task=" + mTaskInfo.taskId)
+                    .setContainerLayer()
+                    .setParent(mDecorationContainerSurface)
+                    .build();
+        }
+
+        final int captionHeight = (int) Math.ceil(captionHeightDp * outResult.mDensity);
+        startT.setPosition(
+                        mCaptionContainerSurface, -decorContainerOffsetX, -decorContainerOffsetY)
+                .setWindowCrop(mCaptionContainerSurface, taskBounds.width(), captionHeight)
+                .show(mCaptionContainerSurface);
+
+        if (mCaptionWindowManager == null) {
+            // Put caption under a container surface because ViewRootImpl sets the destination frame
+            // of windowless window layers and BLASTBufferQueue#update() doesn't support offset.
+            mCaptionWindowManager = new CaptionWindowManager(
+                    mTaskInfo.getConfiguration(), mCaptionContainerSurface);
+        }
 
         // Caption view
         mCaptionWindowManager.setConfiguration(taskConfig);
-        final int captionHeight = (int) Math.ceil(captionHeightDp * outResult.mDensity);
         final WindowManager.LayoutParams lp =
                 new WindowManager.LayoutParams(taskBounds.width(), captionHeight,
                         WindowManager.LayoutParams.TYPE_APPLICATION,
@@ -246,7 +271,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         lp.setTrustedOverlay();
         if (mViewHost == null) {
             mViewHost = mSurfaceControlViewHostFactory.create(mDecorWindowContext, mDisplay,
-                    mCaptionWindowManager, true);
+                    mCaptionWindowManager);
             mViewHost.setView(outResult.mRootView, lp);
         } else {
             mViewHost.relayout(lp);
@@ -260,7 +285,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             mCaptionInsetsRect.bottom = mCaptionInsetsRect.top + captionHeight;
             wct.addRectInsetsProvider(mTaskInfo.token, mCaptionInsetsRect, CAPTION_INSETS_TYPES);
         } else {
-            outResult.mRootView.setVisibility(View.GONE);
+            startT.hide(mCaptionContainerSurface);
         }
 
         // Task surface itself
@@ -296,14 +321,30 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             mViewHost = null;
         }
 
+        mCaptionWindowManager = null;
+
+        final SurfaceControl.Transaction t = mSurfaceControlTransactionSupplier.get();
+        boolean released = false;
+        if (mCaptionContainerSurface != null) {
+            t.remove(mCaptionContainerSurface);
+            mCaptionContainerSurface = null;
+            released = true;
+        }
+
         if (mDecorationContainerSurface != null) {
-            mDecorationContainerSurface.release();
+            t.remove(mDecorationContainerSurface);
             mDecorationContainerSurface = null;
+            released = true;
         }
 
         if (mTaskBackgroundSurface != null) {
-            mTaskBackgroundSurface.release();
+            t.remove(mTaskBackgroundSurface);
             mTaskBackgroundSurface = null;
+            released = true;
+        }
+
+        if (released) {
+            t.apply();
         }
 
         final WindowContainerTransaction wct = mWindowContainerTransactionSupplier.get();
@@ -343,9 +384,8 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
     }
 
     interface SurfaceControlViewHostFactory {
-        default SurfaceControlViewHost create(
-                Context c, Display d, WindowlessWindowManager wmm, boolean useSfChoreographer) {
-            return new SurfaceControlViewHost(c, d, wmm, useSfChoreographer);
+        default SurfaceControlViewHost create(Context c, Display d, WindowlessWindowManager wmm) {
+            return new SurfaceControlViewHost(c, d, wmm);
         }
     }
 }

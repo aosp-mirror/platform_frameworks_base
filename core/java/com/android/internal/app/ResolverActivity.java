@@ -1283,9 +1283,6 @@ public class ResolverActivity extends Activity implements
         }
 
         if (target != null) {
-            if (intent != null && isLaunchingTargetInOtherProfile()) {
-                prepareIntentForCrossProfileLaunch(intent);
-            }
             safelyStartActivity(target);
 
             // Rely on the ActivityManager to pop up a dialog regarding app suspension
@@ -1296,15 +1293,6 @@ public class ResolverActivity extends Activity implements
         }
 
         return true;
-    }
-
-    private void prepareIntentForCrossProfileLaunch(Intent intent) {
-        intent.fixUris(UserHandle.myUserId());
-    }
-
-    private boolean isLaunchingTargetInOtherProfile() {
-        return mMultiProfilePagerAdapter.getCurrentUserHandle().getIdentifier()
-                != UserHandle.myUserId();
     }
 
     @VisibleForTesting
@@ -1513,9 +1501,6 @@ public class ResolverActivity extends Activity implements
 
         findViewById(R.id.button_open).setOnClickListener(v -> {
             Intent intent = otherProfileResolveInfo.getResolvedIntent();
-            if (intent != null) {
-                prepareIntentForCrossProfileLaunch(intent);
-            }
             safelyStartActivityAsUser(otherProfileResolveInfo,
                     inactiveAdapter.mResolverListController.getUserHandle());
             finish();

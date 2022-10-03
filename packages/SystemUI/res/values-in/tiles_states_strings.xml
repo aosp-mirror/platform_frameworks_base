@@ -58,8 +58,8 @@
   </string-array>
   <string-array name="tile_states_flashlight">
     <item msgid="3465257127433353857">"Tidak tersedia"</item>
-    <item msgid="5044688398303285224">"Nonaktif"</item>
-    <item msgid="8527389108867454098">"Aktif"</item>
+    <item msgid="5044688398303285224">"Mati"</item>
+    <item msgid="8527389108867454098">"Nyala"</item>
   </string-array>
   <string-array name="tile_states_rotation">
     <item msgid="4578491772376121579">"Tidak tersedia"</item>

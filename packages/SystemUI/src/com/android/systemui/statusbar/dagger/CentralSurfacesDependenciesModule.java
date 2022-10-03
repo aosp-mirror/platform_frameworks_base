@@ -18,8 +18,9 @@ package com.android.systemui.statusbar.dagger;
 
 import android.app.IActivityManager;
 import android.content.Context;
-import android.os.Handler;
+import android.os.RemoteException;
 import android.service.dreams.IDreamManager;
+import android.util.Log;
 
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.statusbar.IStatusBarService;
@@ -40,14 +41,12 @@ import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
-import com.android.systemui.statusbar.RemoteInputNotificationRebuilder;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.commandline.CommandRegistry;
 import com.android.systemui.statusbar.gesture.SwipeStatusBarAwayGestureHandler;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
@@ -60,10 +59,12 @@ import com.android.systemui.statusbar.phone.ManagedProfileControllerImpl;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarIconControllerImpl;
 import com.android.systemui.statusbar.phone.StatusBarIconList;
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.StatusBarRemoteInputCallback;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallFlags;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallLogger;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
 import com.android.systemui.tracing.ProtoTracer;
@@ -95,11 +96,8 @@ public interface CentralSurfacesDependenciesModule {
             NotificationLockscreenUserManager lockscreenUserManager,
             SmartReplyController smartReplyController,
             NotificationVisibilityProvider visibilityProvider,
-            NotificationEntryManager notificationEntryManager,
-            RemoteInputNotificationRebuilder rebuilder,
             Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             StatusBarStateController statusBarStateController,
-            Handler mainHandler,
             RemoteInputUriController remoteInputUriController,
             NotificationClickNotifier clickNotifier,
             ActionClickLogger actionClickLogger,
@@ -110,11 +108,8 @@ public interface CentralSurfacesDependenciesModule {
                 lockscreenUserManager,
                 smartReplyController,
                 visibilityProvider,
-                notificationEntryManager,
-                rebuilder,
                 centralSurfacesOptionalLazy,
                 statusBarStateController,
-                mainHandler,
                 remoteInputUriController,
                 clickNotifier,
                 actionClickLogger,
@@ -274,7 +269,30 @@ public interface CentralSurfacesDependenciesModule {
     @Provides
     @SysUISingleton
     static DialogLaunchAnimator provideDialogLaunchAnimator(IDreamManager dreamManager,
+            KeyguardStateController keyguardStateController,
+            Lazy<StatusBarKeyguardViewManager> statusBarKeyguardViewManager,
             InteractionJankMonitor interactionJankMonitor) {
-        return new DialogLaunchAnimator(dreamManager, interactionJankMonitor);
+        DialogLaunchAnimator.Callback callback = new DialogLaunchAnimator.Callback() {
+            @Override
+            public boolean isDreaming() {
+                try {
+                    return dreamManager.isDreaming();
+                } catch (RemoteException e) {
+                    Log.e("DialogLaunchAnimator.Callback", "dreamManager.isDreaming failed", e);
+                    return false;
+                }
+            }
+
+            @Override
+            public boolean isUnlocked() {
+                return keyguardStateController.isUnlocked();
+            }
+
+            @Override
+            public boolean isShowingAlternateAuthOnUnlock() {
+                return statusBarKeyguardViewManager.get().shouldShowAltAuth();
+            }
+        };
+        return new DialogLaunchAnimator(callback, interactionJankMonitor);
     }
 }

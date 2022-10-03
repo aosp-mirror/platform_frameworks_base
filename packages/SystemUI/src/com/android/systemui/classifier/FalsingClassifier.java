@@ -148,6 +148,11 @@ public abstract class FalsingClassifier {
     }
 
     /** */
+    public static void logVerbose(String msg) {
+        BrightLineFalsingManager.logVerbose(msg);
+    }
+
+    /** */
     public static void logInfo(String msg) {
         BrightLineFalsingManager.logInfo(msg);
     }

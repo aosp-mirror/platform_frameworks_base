@@ -25,10 +25,12 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.View
+import androidx.core.graphics.ColorUtils
 import com.android.systemui.ripple.RippleShader.RippleShape
 
 private const val RIPPLE_SPARKLE_STRENGTH: Float = 0.3f
 private const val RIPPLE_DEFAULT_COLOR: Int = 0xffffffff.toInt()
+const val RIPPLE_DEFAULT_ALPHA: Int = 45
 
 /**
  * A generic expanding ripple effect.
@@ -39,7 +41,9 @@ private const val RIPPLE_DEFAULT_COLOR: Int = 0xffffffff.toInt()
 open class RippleView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
 
     private lateinit var rippleShader: RippleShader
-    private lateinit var rippleShape: RippleShape
+    lateinit var rippleShape: RippleShape
+        private set
+
     private val ripplePaint = Paint()
 
     var rippleInProgress: Boolean = false
@@ -79,6 +83,7 @@ open class RippleView(context: Context?, attrs: AttributeSet?) : View(context, a
         rippleShader.color = RIPPLE_DEFAULT_COLOR
         rippleShader.progress = 0f
         rippleShader.sparkleStrength = RIPPLE_SPARKLE_STRENGTH
+        rippleShader.pixelDensity = resources.displayMetrics.density
 
         ripplePaint.shader = rippleShader
     }
@@ -108,9 +113,12 @@ open class RippleView(context: Context?, attrs: AttributeSet?) : View(context, a
         rippleInProgress = true
     }
 
-    /** Set the color to be used for the ripple. */
-    fun setColor(color: Int) {
-        rippleShader.color = color
+    /** Set the color to be used for the ripple.
+     *
+     * The alpha value of the color will be applied to the ripple. The alpha range is [0-100].
+     */
+    fun setColor(color: Int, alpha: Int = RIPPLE_DEFAULT_ALPHA) {
+        rippleShader.color = ColorUtils.setAlphaComponent(color, alpha)
     }
 
     /**
@@ -120,6 +128,13 @@ open class RippleView(context: Context?, attrs: AttributeSet?) : View(context, a
      */
     fun setRippleFill(rippleFill: Boolean) {
         rippleShader.rippleFill = rippleFill
+    }
+
+    /**
+     * Set the intensity of the sparkles.
+     */
+    fun setSparkleStrength(strength: Float) {
+        rippleShader.sparkleStrength = strength
     }
 
     override fun onDraw(canvas: Canvas?) {

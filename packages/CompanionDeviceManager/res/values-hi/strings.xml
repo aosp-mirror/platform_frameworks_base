@@ -31,10 +31,10 @@
     <string name="title_computer" msgid="4693714143506569253">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; को अपने फ़ोन से यह जानकारी ऐक्सेस करने की अनुमति दें"</string>
     <string name="summary_computer" msgid="3798467601598297062"></string>
     <string name="permission_notification" msgid="693762568127741203">"सूचनाएं"</string>
-    <string name="permission_notification_summary" msgid="884075314530071011">"इससे सभी सूचनाएं देखी जा सकती हैं. इसमें संपर्क, मैसेज, और फ़ोटो जैसी जानकारी शामिल होती है"</string>
+    <string name="permission_notification_summary" msgid="884075314530071011">"इससे सभी सूचनाएं देखी जा सकती हैं. इनमें संपर्क, मैसेज, और फ़ोटो जैसी जानकारी शामिल होती है"</string>
     <string name="permission_storage" msgid="6831099350839392343">"फ़ोटो और मीडिया"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
-    <string name="helper_title_computer" msgid="4671071173916176037">"Google Play सेवाएं"</string>
+    <string name="helper_title_computer" msgid="4671071173916176037">"Google Play services"</string>
     <string name="helper_summary_computer" msgid="9050724687678157852">"<xliff:g id="APP_NAME">%1$s</xliff:g> आपके <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> की ओर से, फ़ोन में मौजूद फ़ोटो, मीडिया, और सूचनाओं को ऐक्सेस करने की अनुमति मांग रहा है"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"डिवाइस"</string>
     <string name="summary_generic" msgid="2346762210105903720"></string>

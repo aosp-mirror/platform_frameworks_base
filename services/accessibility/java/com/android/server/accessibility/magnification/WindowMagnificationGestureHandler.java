@@ -28,12 +28,14 @@ import android.annotation.Nullable;
 import android.annotation.UiContext;
 import android.content.Context;
 import android.graphics.Point;
+import android.os.SystemClock;
 import android.provider.Settings;
 import android.util.MathUtils;
 import android.util.Slog;
 import android.view.Display;
 import android.view.MotionEvent;
 
+import com.android.internal.accessibility.util.AccessibilityStatsLogUtils;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.accessibility.AccessibilityTraceManager;
 import com.android.server.accessibility.EventStreamTransformation;
@@ -90,6 +92,8 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
     private MotionEventDispatcherDelegate mMotionEventDispatcherDelegate;
     private final Context mContext;
     private final Point mTempPoint = new Point();
+
+    private long mTripleTapAndHoldStartedTime = 0;
 
     public WindowMagnificationGestureHandler(@UiContext Context context,
             WindowMagnificationManager windowMagnificationMgr,
@@ -213,13 +217,37 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
                 WindowMagnificationManager.WINDOW_POSITION_AT_CENTER);
     }
 
-    private void onTripleTapAndHold(MotionEvent up) {
+    @VisibleForTesting
+    void onTripleTapAndHold(MotionEvent up) {
         if (DEBUG_DETECTING) {
             Slog.i(mLogTag, "onTripleTapAndHold()");
         }
         enableWindowMagnifier(up.getX(), up.getY(),
                 WindowMagnificationManager.WINDOW_POSITION_AT_TOP_LEFT);
+        mTripleTapAndHoldStartedTime = SystemClock.uptimeMillis();
         transitionTo(mViewportDraggingState);
+    }
+
+    @VisibleForTesting
+    void releaseTripleTapAndHold() {
+        mWindowMagnificationMgr.disableWindowMagnification(mDisplayId, true);
+        transitionTo(mDetectingState);
+        if (mTripleTapAndHoldStartedTime != 0) {
+            final long duration = SystemClock.uptimeMillis() - mTripleTapAndHoldStartedTime;
+            logMagnificationTripleTapAndHoldSession(duration);
+            mTripleTapAndHoldStartedTime = 0;
+        }
+    }
+
+    /**
+     * Logs the duration for the magnification session which is activated by the triple tap and
+     * hold gesture.
+     *
+     * @param duration The duration of a triple-tap-and-hold activation session.
+     */
+    @VisibleForTesting
+    void logMagnificationTripleTapAndHoldSession(long duration) {
+        AccessibilityStatsLogUtils.logMagnificationTripleTapAndHoldSession(duration);
     }
 
     void resetToDetectState() {
@@ -310,7 +338,7 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
         @Override
         public String toString() {
             return "PanningScalingState{"
-                    + "mPanningScalingHandler =" + mPanningScalingHandler + '}';
+                    + "mPanningScalingHandler=" + mPanningScalingHandler + '}';
         }
     }
 
@@ -370,8 +398,7 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
 
                 case ACTION_UP:
                 case ACTION_CANCEL: {
-                    mWindowMagnificationMgr.disableWindowMagnification(mDisplayId, true);
-                    transitionTo(mDetectingState);
+                    releaseTripleTapAndHold();
                 }
                     break;
             }
@@ -447,7 +474,7 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
         @Override
         public String toString() {
             return "DetectingState{"
-                    + ", mGestureTimeoutObserver =" + mGesturesObserver
+                    + "mGestureTimeoutObserver=" + mGesturesObserver
                     + '}';
         }
 

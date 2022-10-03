@@ -36,7 +36,6 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.shared.system.ActivityManagerKt.isInForeground
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.phone.CentralSurfaces
-import com.android.systemui.shade.PanelViewController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import java.util.concurrent.Executor
 import javax.inject.Inject
@@ -117,7 +116,7 @@ class CameraGestureHelper @Inject constructor(
                     )
                 } catch (e: RemoteException) {
                     Log.w(
-                        PanelViewController.TAG,
+                        "CameraGestureHelper",
                         "Unable to start camera activity",
                         e
                     )

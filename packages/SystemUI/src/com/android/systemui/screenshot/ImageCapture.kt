@@ -22,5 +22,5 @@ interface ImageCapture {
 
     fun captureDisplay(displayId: Int, crop: Rect? = null): Bitmap?
 
-    fun captureTask(taskId: Int): Bitmap?
+    suspend fun captureTask(taskId: Int): Bitmap?
 }

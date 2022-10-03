@@ -26,6 +26,7 @@ import com.android.systemui.people.widget.PeopleSpaceWidgetProvider;
 import com.android.systemui.screenshot.ActionProxyReceiver;
 import com.android.systemui.screenshot.DeleteScreenshotReceiver;
 import com.android.systemui.screenshot.SmartActionsReceiver;
+import com.android.systemui.volume.VolumePanelDialogReceiver;
 
 import dagger.Binds;
 import dagger.Module;
@@ -72,6 +73,15 @@ public abstract class DefaultBroadcastReceiverBinder {
     @ClassKey(MediaOutputDialogReceiver.class)
     public abstract BroadcastReceiver bindMediaOutputDialogReceiver(
             MediaOutputDialogReceiver broadcastReceiver);
+
+    /**
+     *
+     */
+    @Binds
+    @IntoMap
+    @ClassKey(VolumePanelDialogReceiver.class)
+    public abstract BroadcastReceiver bindVolumePanelDialogReceiver(
+            VolumePanelDialogReceiver broadcastReceiver);
 
     /**
      *

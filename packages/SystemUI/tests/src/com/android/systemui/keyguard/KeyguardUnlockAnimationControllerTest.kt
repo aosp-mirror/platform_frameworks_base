@@ -60,7 +60,18 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var launcherUnlockAnimationController: ILauncherUnlockAnimationController.Stub
 
-    private lateinit var remoteAnimationTarget: RemoteAnimationTarget
+    private var surfaceControl1 = mock(SurfaceControl::class.java)
+    private var remoteTarget1 = RemoteAnimationTarget(
+            0 /* taskId */, 0, surfaceControl1, false, Rect(), Rect(), 0, Point(), Rect(), Rect(),
+            mock(WindowConfiguration::class.java), false, surfaceControl1, Rect(),
+            mock(ActivityManager.RunningTaskInfo::class.java), false)
+
+    private var surfaceControl2 = mock(SurfaceControl::class.java)
+    private var remoteTarget2 = RemoteAnimationTarget(
+            1 /* taskId */, 0, surfaceControl2, false, Rect(), Rect(), 0, Point(), Rect(), Rect(),
+            mock(WindowConfiguration::class.java), false, surfaceControl2, Rect(),
+            mock(ActivityManager.RunningTaskInfo::class.java), false)
+    private lateinit var remoteAnimationTargets: Array<RemoteAnimationTarget>
 
     @Before
     fun setUp() {
@@ -77,10 +88,7 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
 
         // All of these fields are final, so we can't mock them, but are needed so that the surface
         // appear amount setter doesn't short circuit.
-        remoteAnimationTarget = RemoteAnimationTarget(
-            0, 0, null, false, Rect(), Rect(), 0, Point(), Rect(), Rect(),
-            mock(WindowConfiguration::class.java), false, mock(SurfaceControl::class.java), Rect(),
-            mock(ActivityManager.RunningTaskInfo::class.java), false)
+        remoteAnimationTargets = arrayOf(remoteTarget1)
 
         // Set the surface applier to our mock so that we can verify the arguments passed to it.
         // This applier does not have any side effects within the unlock animation controller, so
@@ -99,7 +107,7 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
         `when`(biometricUnlockController.isWakeAndUnlock).thenReturn(true)
 
         keyguardUnlockAnimationController.notifyStartSurfaceBehindRemoteAnimation(
-            remoteAnimationTarget,
+            remoteAnimationTargets,
             0 /* startTime */,
             false /* requestedShowSurfaceBehindKeyguard */
         )
@@ -130,7 +138,7 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
         `when`(biometricUnlockController.isWakeAndUnlock).thenReturn(false)
 
         keyguardUnlockAnimationController.notifyStartSurfaceBehindRemoteAnimation(
-            remoteAnimationTarget,
+            remoteAnimationTargets,
             0 /* startTime */,
             false /* requestedShowSurfaceBehindKeyguard */
         )
@@ -154,7 +162,7 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
         `when`(keyguardStateController.isFlingingToDismissKeyguard).thenReturn(false)
 
         keyguardUnlockAnimationController.notifyStartSurfaceBehindRemoteAnimation(
-            remoteAnimationTarget,
+            remoteAnimationTargets,
             0 /* startTime */,
             true /* requestedShowSurfaceBehindKeyguard */
         )
@@ -176,7 +184,7 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
         `when`(keyguardStateController.isFlingingToDismissKeyguard).thenReturn(true)
 
         keyguardUnlockAnimationController.notifyStartSurfaceBehindRemoteAnimation(
-            remoteAnimationTarget,
+            remoteAnimationTargets,
             0 /* startTime */,
             true /* requestedShowSurfaceBehindKeyguard */
         )
@@ -196,7 +204,7 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
     @Test
     fun playCannedUnlockAnimation_ifDidNotRequestShowSurface() {
         keyguardUnlockAnimationController.notifyStartSurfaceBehindRemoteAnimation(
-            remoteAnimationTarget,
+            remoteAnimationTargets,
             0 /* startTime */,
             false /* requestedShowSurfaceBehindKeyguard */
         )
@@ -210,12 +218,61 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
         `when`(notificationShadeWindowController.isLaunchingActivity).thenReturn(true)
 
         keyguardUnlockAnimationController.notifyStartSurfaceBehindRemoteAnimation(
-            remoteAnimationTarget,
+            remoteAnimationTargets,
             0 /* startTime */,
             true /* requestedShowSurfaceBehindKeyguard */
         )
 
         assertFalse(keyguardUnlockAnimationController.canPerformInWindowLauncherAnimations())
         assertFalse(keyguardUnlockAnimationController.isPlayingCannedUnlockAnimation())
+    }
+
+    @Test
+    fun playCannedUnlockAnimation_nullSmartspaceView_doesNotThrowExecption() {
+        keyguardUnlockAnimationController.lockscreenSmartspace = null
+        keyguardUnlockAnimationController.willUnlockWithInWindowLauncherAnimations = true
+
+        keyguardUnlockAnimationController.notifyStartSurfaceBehindRemoteAnimation(
+                remoteAnimationTargets,
+                0 /* startTime */,
+                false /* requestedShowSurfaceBehindKeyguard */
+        )
+
+        assertTrue(keyguardUnlockAnimationController.isPlayingCannedUnlockAnimation())
+    }
+
+    /**
+     * If we are not wake and unlocking, we expect the unlock animation to play normally.
+     */
+    @Test
+    fun surfaceAnimation_multipleTargets() {
+        keyguardUnlockAnimationController.notifyStartSurfaceBehindRemoteAnimation(
+                arrayOf(remoteTarget1, remoteTarget2),
+                0 /* startTime */,
+                false /* requestedShowSurfaceBehindKeyguard */
+        )
+
+        // Set appear to 50%, we'll just verify that we're not applying the identity matrix which
+        // means an animation is in progress.
+        keyguardUnlockAnimationController.setSurfaceBehindAppearAmount(0.5f)
+
+        val captor = forClass(SyncRtSurfaceTransactionApplier.SurfaceParams::class.java)
+        verify(surfaceTransactionApplier, times(2)).scheduleApply(captor.capture())
+
+        val allParams = captor.allValues
+
+        val remainingTargets = mutableListOf(surfaceControl1, surfaceControl2)
+        allParams.forEach { params ->
+            assertTrue(!params.matrix.isIdentity)
+            remainingTargets.remove(params.surface)
+        }
+
+        // Make sure we called applyParams with each of the surface controls once. The order does
+        // not matter, so don't explicitly check for that.
+        assertTrue(remainingTargets.isEmpty())
+
+        // Since the animation is running, we should not have finished the remote animation.
+        verify(keyguardViewMediator, times(0)).onKeyguardExitRemoteAnimationFinished(
+                false /* cancelled */)
     }
 }

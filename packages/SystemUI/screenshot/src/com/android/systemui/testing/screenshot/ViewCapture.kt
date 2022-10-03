@@ -1,10 +1,12 @@
 package com.android.systemui.testing.screenshot
 
+import android.annotation.WorkerThread
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.HardwareRenderer
 import android.graphics.Rect
 import android.os.Build
 import android.os.Handler
@@ -19,8 +21,13 @@ import androidx.annotation.RequiresApi
 import androidx.concurrent.futures.ResolvableFuture
 import androidx.test.annotation.ExperimentalTestApi
 import androidx.test.core.internal.os.HandlerExecutor
+import androidx.test.espresso.Espresso
 import androidx.test.platform.graphics.HardwareRendererCompat
+import com.google.common.util.concurrent.FutureCallback
+import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
+import kotlin.coroutines.suspendCoroutine
+import kotlinx.coroutines.runBlocking
 
 /*
  * This file was forked from androidx/test/core/view/ViewCapture.kt to add [Window] parameter to
@@ -59,6 +66,47 @@ fun View.captureToBitmap(window: Window? = null): ListenableFuture<Bitmap> {
     }
 
     return bitmapFuture
+}
+
+/**
+ * Synchronously captures an image of the view into a [Bitmap]. Synchronous equivalent of
+ * [captureToBitmap].
+ */
+@WorkerThread
+@ExperimentalTestApi
+@RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+fun View.toBitmap(window: Window? = null): Bitmap {
+    if (Looper.getMainLooper() == Looper.myLooper()) {
+        error("toBitmap() can't be called from the main thread")
+    }
+
+    if (!HardwareRenderer.isDrawingEnabled()) {
+        error("Hardware rendering is not enabled")
+    }
+
+    // Make sure we are idle.
+    Espresso.onIdle()
+
+    val mainExecutor = context.mainExecutor
+    return runBlocking {
+        suspendCoroutine { continuation ->
+            Futures.addCallback(
+                captureToBitmap(window),
+                object : FutureCallback<Bitmap> {
+                    override fun onSuccess(result: Bitmap?) {
+                        continuation.resumeWith(Result.success(result!!))
+                    }
+
+                    override fun onFailure(t: Throwable) {
+                        continuation.resumeWith(Result.failure(t))
+                    }
+                },
+                // We know that we are not on the main thread, so we can block the current
+                // thread and wait for the result in the main thread.
+                mainExecutor,
+            )
+        }
+    }
 }
 
 /**

@@ -24,8 +24,8 @@ import android.util.IntProperty
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
 import android.view.WindowInsets
+import android.view.WindowManager
 import android.widget.FrameLayout
 import androidx.dynamicanimation.animation.DynamicAnimation
 import androidx.dynamicanimation.animation.SpringForce.DAMPING_RATIO_LOW_BOUNCY
@@ -41,6 +41,7 @@ class DismissView(context: Context) : FrameLayout(context) {
 
     var circle = DismissCircleView(context)
     var isShowing = false
+    var targetSizeResId: Int
 
     private val animator = PhysicsAnimator.getInstance(circle)
     private val spring = PhysicsAnimator.SpringConfig(STIFFNESS_LOW, DAMPING_RATIO_LOW_BOUNCY)
@@ -70,7 +71,8 @@ class DismissView(context: Context) : FrameLayout(context) {
         setVisibility(View.INVISIBLE)
         setBackgroundDrawable(gradientDrawable)
 
-        val targetSize: Int = resources.getDimensionPixelSize(R.dimen.dismiss_circle_size)
+        targetSizeResId = R.dimen.dismiss_circle_size
+        val targetSize: Int = resources.getDimensionPixelSize(targetSizeResId)
         addView(circle, LayoutParams(targetSize, targetSize,
                 Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL))
         // start with circle offscreen so it's animated up
@@ -126,7 +128,7 @@ class DismissView(context: Context) : FrameLayout(context) {
         layoutParams.height = resources.getDimensionPixelSize(
                 R.dimen.floating_dismiss_gradient_height)
 
-        val targetSize: Int = resources.getDimensionPixelSize(R.dimen.dismiss_circle_size)
+        val targetSize = resources.getDimensionPixelSize(targetSizeResId)
         circle.layoutParams.width = targetSize
         circle.layoutParams.height = targetSize
         circle.requestLayout()

@@ -245,7 +245,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public void userActivity() {
+    public void userActivity(int displayGroupId, int event) {
     }
 
     @Override

@@ -48,6 +48,8 @@ public interface AuthDialog extends Dumpable {
     String KEY_BIOMETRIC_SENSOR_TYPE = "sensor_type";
     String KEY_BIOMETRIC_SENSOR_PROPS = "sensor_props";
 
+    String KEY_BIOMETRIC_ORIENTATION_CHANGED = "orientation_changed";
+
     int SIZE_UNKNOWN = 0;
     /**
      * Minimal UI, showing only biometric icon.

@@ -40,6 +40,8 @@ import androidx.lifecycle.LifecycleOwner;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.RegisterStatusBarResult;
+import com.android.keyguard.AuthKeyguardMessageArea;
+import com.android.keyguard.FaceAuthApiRequestReason;
 import com.android.systemui.Dumpable;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.RemoteTransitionAdapter;
@@ -219,15 +221,21 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
 
     ViewGroup getBouncerContainer();
 
+    /** Get the Keyguard Message Area that displays auth messages. */
+    AuthKeyguardMessageArea getKeyguardMessageArea();
+
     int getStatusBarHeight();
 
     void updateQsExpansionEnabled();
 
     boolean isShadeDisabled();
 
-    void requestNotificationUpdate(String reason);
-
-    void requestFaceAuth(boolean userInitiatedRequest);
+    /**
+     * Request face auth to initiated
+     * @param userInitiatedRequest Whether this was a user initiated request
+     * @param reason Reason why face auth was triggered.
+     */
+    void requestFaceAuth(boolean userInitiatedRequest, @FaceAuthApiRequestReason String reason);
 
     @Override
     void startActivity(Intent intent, boolean onlyProvisioned, boolean dismissShade,
@@ -385,8 +393,6 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
 
     void fadeKeyguardAfterLaunchTransition(Runnable beforeFading,
             Runnable endRunnable, Runnable cancelRunnable);
-
-    void fadeKeyguardWhilePulsing();
 
     void animateKeyguardUnoccluding();
 

@@ -448,7 +448,7 @@ public class DozeMachineTest extends SysuiTestCase {
 
     @Test
     public void testWakeUp_wakesUp() {
-        mMachine.wakeUp();
+        mMachine.wakeUp(DozeLog.REASON_SENSOR_PICKUP);
 
         assertTrue(mServiceFake.requestedWakeup);
     }

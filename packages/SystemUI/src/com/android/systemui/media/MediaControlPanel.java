@@ -488,8 +488,8 @@ public class MediaControlPanel {
         TextView deviceName = mMediaViewHolder.getSeamlessText();
         final MediaDeviceData device = data.getDevice();
 
-        final boolean enabled;
-        final boolean seamlessDisabled;
+        final boolean isTapEnabled;
+        final boolean useDisabledAlpha;
         final int iconResource;
         CharSequence deviceString;
         if (showBroadcastButton) {
@@ -499,21 +499,25 @@ public class MediaControlPanel {
                     && TextUtils.equals(device.getName(),
                     MediaDataUtils.getAppLabel(mContext, mPackageName, mContext.getString(
                             R.string.bt_le_audio_broadcast_dialog_unknown_name)));
-            seamlessDisabled = !mIsCurrentBroadcastedApp;
+            useDisabledAlpha = !mIsCurrentBroadcastedApp;
             // Always be enabled if the broadcast button is shown
-            enabled = true;
+            isTapEnabled = true;
+
+            // Defaults for broadcasting state
             deviceString = mContext.getString(R.string.bt_le_audio_broadcast_dialog_unknown_name);
             iconResource = R.drawable.settings_input_antenna;
         } else {
             // Disable clicking on output switcher for invalid devices and resumption controls
-            seamlessDisabled = (device != null && !device.getEnabled()) || data.getResumption();
-            enabled = !seamlessDisabled;
+            useDisabledAlpha = (device != null && !device.getEnabled()) || data.getResumption();
+            isTapEnabled = !useDisabledAlpha;
+
+            // Defaults for non-broadcasting state
             deviceString = mContext.getString(R.string.media_seamless_other_device);
             iconResource = R.drawable.ic_media_home_devices;
         }
 
-        mMediaViewHolder.getSeamlessButton().setAlpha(seamlessDisabled ? DISABLED_ALPHA : 1.0f);
-        seamlessView.setEnabled(enabled);
+        mMediaViewHolder.getSeamlessButton().setAlpha(useDisabledAlpha ? DISABLED_ALPHA : 1.0f);
+        seamlessView.setEnabled(isTapEnabled);
 
         if (device != null) {
             Drawable icon = device.getIcon();
@@ -524,7 +528,9 @@ public class MediaControlPanel {
             } else {
                 iconView.setImageDrawable(icon);
             }
-            deviceString = device.getName();
+            if (device.getName() != null) {
+                deviceString = device.getName();
+            }
         } else {
             // Set to default icon
             iconView.setImageResource(iconResource);
@@ -735,10 +741,14 @@ public class MediaControlPanel {
                 }
                 mArtworkBoundId = reqId;
 
+                // Transition Colors to current color scheme
+                boolean colorSchemeChanged = mColorSchemeTransition.updateColorScheme(colorScheme);
+
                 // Bind the album view to the artwork or a transition drawable
                 ImageView albumView = mMediaViewHolder.getAlbumView();
                 albumView.setPadding(0, 0, 0, 0);
-                if (updateBackground || (!mIsArtworkBound && isArtworkBound)) {
+                if (updateBackground || colorSchemeChanged
+                        || (!mIsArtworkBound && isArtworkBound)) {
                     if (mPrevArtwork == null) {
                         albumView.setImageDrawable(artwork);
                     } else {
@@ -760,9 +770,6 @@ public class MediaControlPanel {
                     mPrevArtwork = artwork;
                     mIsArtworkBound = isArtworkBound;
                 }
-
-                // Transition Colors to current color scheme
-                mColorSchemeTransition.updateColorScheme(colorScheme);
 
                 // App icon - use notification icon
                 ImageView appIconView = mMediaViewHolder.getAppIcon();

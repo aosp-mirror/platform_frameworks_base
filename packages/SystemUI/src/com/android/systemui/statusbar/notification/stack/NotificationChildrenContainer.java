@@ -43,7 +43,6 @@ import com.android.systemui.statusbar.NotificationGroupingUtil;
 import com.android.systemui.statusbar.notification.FeedbackIcon;
 import com.android.systemui.statusbar.notification.NotificationFadeAware;
 import com.android.systemui.statusbar.notification.NotificationUtils;
-import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.HybridGroupManager;
@@ -460,39 +459,6 @@ public class NotificationChildrenContainer extends ViewGroup
      */
     public List<ExpandableNotificationRow> getAttachedChildren() {
         return mAttachedChildren;
-    }
-
-    /**
-     * Apply the order given in the list to the children.
-     *
-     * @param childOrder the new list order
-     * @param visualStabilityManager
-     * @param callback
-     * @return whether the list order has changed
-     */
-    public boolean applyChildOrder(List<ExpandableNotificationRow> childOrder,
-            VisualStabilityManager visualStabilityManager,
-            VisualStabilityManager.Callback callback) {
-        if (childOrder == null) {
-            return false;
-        }
-        boolean result = false;
-        for (int i = 0; i < mAttachedChildren.size() && i < childOrder.size(); i++) {
-            ExpandableNotificationRow child = mAttachedChildren.get(i);
-            ExpandableNotificationRow desiredChild = childOrder.get(i);
-            if (child != desiredChild) {
-                if (visualStabilityManager.canReorderNotification(desiredChild)) {
-                    mAttachedChildren.remove(desiredChild);
-                    mAttachedChildren.add(i, desiredChild);
-                    result = true;
-                } else {
-                    visualStabilityManager.addReorderingAllowedCallback(callback,
-                            false /* persistent */);
-                }
-            }
-        }
-        updateExpansionStates();
-        return result;
     }
 
     /** To be called any time the rows have been updated */

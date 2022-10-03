@@ -110,6 +110,10 @@ public final class DreamManagerService extends SystemService {
     private int mCurrentDreamDozeScreenState = Display.STATE_UNKNOWN;
     private int mCurrentDreamDozeScreenBrightness = PowerManager.BRIGHTNESS_DEFAULT;
 
+    // A temporary dream component that, when present, takes precedence over user configured dream
+    // component.
+    private ComponentName mSystemDreamComponent;
+
     private ComponentName mDreamOverlayServiceName;
 
     private AmbientDisplayConfiguration mDozeConfig;
@@ -218,10 +222,18 @@ public final class DreamManagerService extends SystemService {
         }, pw, "", 200);
     }
 
+    /** Whether a real dream is occurring. */
     private boolean isDreamingInternal() {
         synchronized (mLock) {
             return mCurrentDreamToken != null && !mCurrentDreamIsPreview
                     && !mCurrentDreamIsWaking;
+        }
+    }
+
+    /** Whether a real dream, or a dream preview is occurring. */
+    private boolean isDreamingOrInPreviewInternal() {
+        synchronized (mLock) {
+            return mCurrentDreamToken != null && !mCurrentDreamIsWaking;
         }
     }
 
@@ -344,11 +356,21 @@ public final class DreamManagerService extends SystemService {
         return chooseDreamForUser(doze, ActivityManager.getCurrentUser());
     }
 
+    /**
+     * If doze is true, returns the doze component for the user.
+     * Otherwise, returns the system dream component, if present.
+     * Otherwise, returns the first valid user configured dream component.
+     */
     private ComponentName chooseDreamForUser(boolean doze, int userId) {
         if (doze) {
             ComponentName dozeComponent = getDozeComponent(userId);
             return validateDream(dozeComponent) ? dozeComponent : null;
         }
+
+        if (mSystemDreamComponent != null) {
+            return mSystemDreamComponent;
+        }
+
         ComponentName[] dreams = getDreamComponentsForUser(userId);
         return dreams != null && dreams.length != 0 ? dreams[0] : null;
     }
@@ -406,6 +428,21 @@ public final class DreamManagerService extends SystemService {
                 Settings.Secure.SCREENSAVER_COMPONENTS,
                 componentsToString(componentNames),
                 userId);
+    }
+
+    private void setSystemDreamComponentInternal(ComponentName componentName) {
+        synchronized (mLock) {
+            if (Objects.equals(mSystemDreamComponent, componentName)) {
+                return;
+            }
+
+            mSystemDreamComponent = componentName;
+
+            // Switch dream if currently dreaming and not dozing.
+            if (isDreamingInternal() && !mCurrentDreamIsDozing) {
+                startDreamInternal(false);
+            }
+        }
     }
 
     private ComponentName getDefaultDreamComponentForUser(int userId) {
@@ -660,6 +697,18 @@ public final class DreamManagerService extends SystemService {
         }
 
         @Override // Binder call
+        public void setSystemDreamComponent(ComponentName componentName) {
+            checkPermission(android.Manifest.permission.WRITE_DREAM_STATE);
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                DreamManagerService.this.setSystemDreamComponentInternal(componentName);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override // Binder call
         public void registerDreamOverlayService(ComponentName overlayComponent) {
             checkPermission(android.Manifest.permission.WRITE_DREAM_STATE);
 
@@ -693,6 +742,19 @@ public final class DreamManagerService extends SystemService {
                 Binder.restoreCallingIdentity(ident);
             }
         }
+
+        @Override // Binder call
+        public boolean isDreamingOrInPreview() {
+            checkPermission(android.Manifest.permission.READ_DREAM_STATE);
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                return isDreamingOrInPreviewInternal();
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
 
         @Override // Binder call
         public void dream() {
@@ -820,6 +882,11 @@ public final class DreamManagerService extends SystemService {
         @Override
         public ComponentName getActiveDreamComponent(boolean doze) {
             return getActiveDreamComponentInternal(doze);
+        }
+
+        @Override
+        public void requestDream() {
+            requestDreamInternal();
         }
     }
 

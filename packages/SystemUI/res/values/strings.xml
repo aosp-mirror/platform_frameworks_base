@@ -389,6 +389,10 @@
     <string name="fingerprint_dialog_use_fingerprint_instead">Can\u2019t recognize face. Use fingerprint instead.</string>
     <!-- Message shown to inform the user a face cannot be recognized and fingerprint should instead be used.[CHAR LIMIT=50] -->
     <string name="keyguard_face_failed_use_fp">@string/fingerprint_dialog_use_fingerprint_instead</string>
+    <!-- Message shown to inform the user a face cannot be recognized. [CHAR LIMIT=25] -->
+    <string name="keyguard_face_failed">Can\u2019t recognize face</string>
+    <!-- Message shown to suggest using fingerprint sensor to authenticate after another biometric failed. [CHAR LIMIT=25] -->
+    <string name="keyguard_suggest_fingerprint">Use fingerprint instead</string>
 
     <!-- Content description of the bluetooth icon when connected for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_bluetooth_connected">Bluetooth connected.</string>
@@ -799,7 +803,7 @@
     <!-- Message shown when lock screen is tapped or face authentication fails. [CHAR LIMIT=60] -->
     <string name="keyguard_unlock">Swipe up to open</string>
 
-    <!-- Message shown when lock screen is unlocked (ie: by trust agent) and the user taps the empty space on the lock screen and UDFPS is supported. Provides extra instructions for how the user can enter their device [CHAR LIMIT=60] -->
+    <!-- Message shown when lock screen is unlocked (ie: by trust agent or face auth). Provides extra instructions for how the user can enter their device [CHAR LIMIT=60] -->
     <string name="keyguard_unlock_press">Press the unlock icon to open</string>
 
     <!-- Message shown when non-bypass face authentication succeeds. Provides extra instructions for how the user can enter their device [CHAR LIMIT=60] -->
@@ -813,6 +817,10 @@
     <!-- Message shown when non-bypass face authentication succeeds and UDFPS is supported. Provides extra instructions for how the user can enter their device [CHAR LIMIT=60] -->
     <string name="keyguard_face_successful_unlock_press_alt_3">Face recognized. Press the unlock icon to open.</string>
 
+    <!-- Message shown when non-bypass face authentication succeeds. [CHAR LIMIT=60] -->
+    <string name="keyguard_face_successful_unlock">Unlocked by face</string>
+    <!-- Message shown when non-bypass face authentication succeeds. [CHAR LIMIT=60] -->
+    <string name="keyguard_face_successful_unlock_alt1">Face recognized</string>
 
     <!-- Messages shown when users press outside of udfps region during -->
     <string-array name="udfps_accessibility_touch_hints">
@@ -880,14 +888,15 @@
     <string name="keyguard_indication_charging_time_slowly"><xliff:g id="percentage">%2$s</xliff:g> • Charging slowly • Full in <xliff:g id="charging_time_left" example="4 hr, 2 min">%1$s</xliff:g></string>
 
     <!-- Indication on the keyguard that is shown when the device is dock charging. [CHAR LIMIT=80]-->
-    <string name="keyguard_indication_charging_time_dock"><xliff:g id="percentage" example="20%">%2$s</xliff:g> • Charging Dock • Full in <xliff:g id="charging_time_left" example="4 hr, 2 min">%1$s</xliff:g></string>
+    <string name="keyguard_indication_charging_time_dock"><xliff:g id="percentage" example="20%">%2$s</xliff:g> • Charging • Full in <xliff:g id="charging_time_left" example="4 hr, 2 min">%1$s</xliff:g></string>
 
     <!-- Related to user switcher --><skip/>
 
     <!-- Accessibility label for the button that opens the user switcher. -->
     <string name="accessibility_multi_user_switch_switcher">Switch user</string>
 
-    <!-- Accessibility label for the button that opens the user switcher and announces the current user. -->
+    <!-- Accessibility role description for the element that opens the user switcher list. -->
+    <string name="accessibility_multi_user_list_switcher">pulldown menu</string>
 
     <!-- Accessibility label for the user icon on the lock screen. -->
 
@@ -1133,6 +1142,11 @@
     <string name="volume_odi_captions_hint_enable">enable</string>
     <!-- Content description for accessibility: Hint if click will disable. [CHAR LIMIT=NONE] -->
     <string name="volume_odi_captions_hint_disable">disable</string>
+
+    <!-- Sound and vibration settings dialog title. [CHAR LIMIT=30] -->
+    <string name="sound_settings">Sound &amp; vibration</string>
+    <!-- Label for button to go to sound settings screen [CHAR_LIMIT=30] -->
+    <string name="volume_panel_dialog_settings_button">Settings</string>
 
     <!-- content description for audio output chooser [CHAR LIMIT=NONE]-->
 
@@ -1630,8 +1644,9 @@
     <!-- The tile in quick settings is unavailable. [CHAR LIMIT=32] -->
     <string name="tile_unavailable">Unavailable</string>
 
-    <!-- The tile in quick settings is disabled by a device administration policy [CHAR LIMIT=32] -->
-    <string name="tile_disabled">Disabled</string>
+    <!-- Accessibility text for the click action on a tile that is disabled by policy. This will
+         be used following "Double-tap to..." [CHAR LIMIT=NONE] -->
+    <string name="accessibility_tile_disabled_by_policy_action_description">learn more</string>
 
     <!-- SysUI Tuner: Button that leads to the navigation bar customization screen [CHAR LIMIT=60] -->
     <string name="nav_bar">Navigation bar</string>
@@ -1847,10 +1862,10 @@
     <!-- URL for care instructions for overheating devices -->
     <string name="high_temp_dialog_help_url" translatable="false"></string>
 
-    <!-- Title for alarm dialog alerting user the usb adapter has reached a certain temperature that should disconnect charging cable immediately. [CHAR LIMIT=30] -->
-    <string name="high_temp_alarm_title">Unplug charger</string>
-    <!-- Text body for dialog alerting user the usb adapter has reached a certain temperature that should disconnect charging cable immediately. [CHAR LIMIT=300] -->
-    <string name="high_temp_alarm_notify_message">There\u2019s an issue charging this device. Unplug the power adapter, and take care as the cable may be warm.</string>
+    <!-- Title for alarm dialog alerting user the usb charger or accessorry has reached a certain temperature that should unplug the device immediately. [CHAR LIMIT=30] -->
+    <string name="high_temp_alarm_title">Unplug your device</string>
+    <!-- Text body for dialog alerting user the usb charger or accessorry has reached a certain temperature that should unplug the device immediately. [CHAR LIMIT=300] -->
+    <string name="high_temp_alarm_notify_message">Your device is getting warm near the charging port. If it\u2019s connected to a charger or USB accessory, unplug it, and take care as the cable may also be warm.</string>
     <!-- Text for See care steps button [CHAR LIMIT=300] -->
     <string name="high_temp_alarm_help_care_steps">See care steps</string>
     <!-- Text link directs to usb overheat help page. -->

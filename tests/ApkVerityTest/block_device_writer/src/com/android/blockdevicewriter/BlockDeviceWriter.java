@@ -32,11 +32,12 @@ import java.util.ArrayList;
  * <p>To use this class, please push block_device_writer binary to /data/local/tmp.
  * 1. In Android.bp, add:
  * <pre>
- *     target_required: ["block_device_writer_module"],
+ *      data_device_bins_both: ["block_device_writer"],
  * </pre>
  * 2. In AndroidText.xml, add:
  * <pre>
- *     <target_preparer class="com.android.tradefed.targetprep.PushFilePreparer">
+ *     <target_preparer class="com.android.compatibility.common.tradefed.targetprep.FilePusher">
+ *         <option name="append-bitness" value="true" />
  *         <option name="push" value="block_device_writer->/data/local/tmp/block_device_writer" />
  *     </target_preparer>
  * </pre>

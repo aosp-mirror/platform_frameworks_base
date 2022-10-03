@@ -17,8 +17,8 @@
 package com.android.systemui.qs
 
 import android.content.res.Configuration
-import android.test.suitebuilder.annotation.SmallTest
 import android.testing.AndroidTestingRunner
+import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.systemui.SysuiTestCase
@@ -38,38 +38,32 @@ import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.Captor
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.any
+import org.mockito.Mockito.reset
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 class QuickQSPanelControllerTest : SysuiTestCase() {
 
-    @Mock
-    private lateinit var quickQSPanel: QuickQSPanel
-    @Mock
-    private lateinit var qsTileHost: QSTileHost
-    @Mock
-    private lateinit var qsCustomizerController: QSCustomizerController
-    @Mock
-    private lateinit var mediaHost: MediaHost
-    @Mock
-    private lateinit var metricsLogger: MetricsLogger
+    @Mock private lateinit var quickQSPanel: QuickQSPanel
+    @Mock private lateinit var qsTileHost: QSTileHost
+    @Mock private lateinit var qsCustomizerController: QSCustomizerController
+    @Mock private lateinit var mediaHost: MediaHost
+    @Mock private lateinit var metricsLogger: MetricsLogger
+    @Mock private lateinit var qsLogger: QSLogger
+    @Mock private lateinit var tile: QSTile
+    @Mock private lateinit var tileLayout: TileLayout
+    @Mock private lateinit var tileView: QSTileView
+    @Captor private lateinit var captor: ArgumentCaptor<QSPanel.OnConfigurationChangedListener>
+
     private val uiEventLogger = UiEventLoggerFake()
-    @Mock
-    private lateinit var qsLogger: QSLogger
     private val dumpManager = DumpManager()
-    @Mock
-    private lateinit var tile: QSTile
-    @Mock
-    private lateinit var tileLayout: TileLayout
-    @Mock
-    private lateinit var tileView: QSTileView
-    @Captor
-    private lateinit var captor: ArgumentCaptor<QSPanel.OnConfigurationChangedListener>
+
+    private var usingCollapsedLandscapeMedia = true
 
     private lateinit var controller: TestQuickQSPanelController
 
@@ -77,24 +71,24 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        `when`(quickQSPanel.tileLayout).thenReturn(tileLayout)
-        `when`(quickQSPanel.isAttachedToWindow).thenReturn(true)
-        `when`(quickQSPanel.dumpableTag).thenReturn("")
-        `when`(quickQSPanel.resources).thenReturn(mContext.resources)
-        `when`(qsTileHost.createTileView(any(), any(), anyBoolean())).thenReturn(tileView)
+        whenever(quickQSPanel.tileLayout).thenReturn(tileLayout)
+        whenever(quickQSPanel.isAttachedToWindow).thenReturn(true)
+        whenever(quickQSPanel.dumpableTag).thenReturn("")
+        whenever(quickQSPanel.resources).thenReturn(mContext.resources)
+        whenever(qsTileHost.createTileView(any(), any(), anyBoolean())).thenReturn(tileView)
 
-        controller = TestQuickQSPanelController(
+        controller =
+            TestQuickQSPanelController(
                 quickQSPanel,
                 qsTileHost,
                 qsCustomizerController,
-                false,
+                /* usingMediaPlayer = */ false,
                 mediaHost,
-                true,
+                { usingCollapsedLandscapeMedia },
                 metricsLogger,
                 uiEventLogger,
                 qsLogger,
-                dumpManager
-        )
+                dumpManager)
 
         controller.init()
     }
@@ -106,9 +100,9 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
 
     @Test
     fun testTileSublistWithFewerTiles_noCrash() {
-        `when`(quickQSPanel.numQuickTiles).thenReturn(3)
+        whenever(quickQSPanel.numQuickTiles).thenReturn(3)
 
-        `when`(qsTileHost.tiles).thenReturn(listOf(tile, tile))
+        whenever(qsTileHost.tiles).thenReturn(listOf(tile, tile))
 
         controller.setTiles()
     }
@@ -116,8 +110,8 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
     @Test
     fun testTileSublistWithTooManyTiles() {
         val limit = 3
-        `when`(quickQSPanel.numQuickTiles).thenReturn(limit)
-        `when`(qsTileHost.tiles).thenReturn(listOf(tile, tile, tile, tile))
+        whenever(quickQSPanel.numQuickTiles).thenReturn(limit)
+        whenever(qsTileHost.tiles).thenReturn(listOf(tile, tile, tile, tile))
 
         controller.setTiles()
 
@@ -125,18 +119,30 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testMediaExpansionUpdatedWhenConfigurationChanged() {
-        // times(2) because both controller and base controller are registering their listeners
-        verify(quickQSPanel, times(2)).addOnConfigurationChangedListener(captor.capture())
+    fun mediaExpansion_afterConfigChange_inLandscape_collapsedInLandscapeTrue_updatesToCollapsed() {
+        verify(quickQSPanel).addOnConfigurationChangedListener(captor.capture())
 
         // verify that media starts in the expanded state by default
         verify(mediaHost).expansion = MediaHostState.EXPANDED
 
-        // Rotate device, verify media size updated
+        // Rotate device, verify media size updated to collapsed
+        usingCollapsedLandscapeMedia = true
         controller.setRotation(RotationUtils.ROTATION_LANDSCAPE)
         captor.allValues.forEach { it.onConfigurationChange(Configuration.EMPTY) }
 
         verify(mediaHost).expansion = MediaHostState.COLLAPSED
+    }
+
+    @Test
+    fun mediaExpansion_afterConfigChange_landscape_collapsedInLandscapeFalse_remainsExpanded() {
+        verify(quickQSPanel).addOnConfigurationChangedListener(captor.capture())
+        reset(mediaHost)
+
+        usingCollapsedLandscapeMedia = false
+        controller.setRotation(RotationUtils.ROTATION_LANDSCAPE)
+        captor.allValues.forEach { it.onConfigurationChange(Configuration.EMPTY) }
+
+        verify(mediaHost).expansion = MediaHostState.EXPANDED
     }
 
     class TestQuickQSPanelController(
@@ -145,19 +151,27 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
         qsCustomizerController: QSCustomizerController,
         usingMediaPlayer: Boolean,
         mediaHost: MediaHost,
-        usingCollapsedLandscapeMedia: Boolean,
+        usingCollapsedLandscapeMedia: () -> Boolean,
         metricsLogger: MetricsLogger,
         uiEventLogger: UiEventLoggerFake,
         qsLogger: QSLogger,
         dumpManager: DumpManager
-    ) : QuickQSPanelController(view, qsTileHost, qsCustomizerController, usingMediaPlayer,
-        mediaHost, usingCollapsedLandscapeMedia, metricsLogger, uiEventLogger, qsLogger,
-        dumpManager) {
+    ) :
+        QuickQSPanelController(
+            view,
+            qsTileHost,
+            qsCustomizerController,
+            usingMediaPlayer,
+            mediaHost,
+            usingCollapsedLandscapeMedia,
+            metricsLogger,
+            uiEventLogger,
+            qsLogger,
+            dumpManager) {
 
         private var rotation = RotationUtils.ROTATION_NONE
 
-        @Override
-        override fun getRotation(): Int = rotation
+        @Override override fun getRotation(): Int = rotation
 
         fun setRotation(newRotation: Int) {
             rotation = newRotation

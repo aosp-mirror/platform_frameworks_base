@@ -32,6 +32,7 @@ import android.os.Handler;
 import android.os.PowerWhitelistManager;
 import android.os.UserHandle;
 import android.text.TextUtils;
+import android.util.EventLog;
 import android.util.Log;
 import android.view.KeyEvent;
 
@@ -117,6 +118,12 @@ final class MediaButtonReceiverHolder {
         int componentType = getComponentType(pendingIntent);
         ComponentName componentName = getComponentName(pendingIntent, componentType);
         if (componentName != null) {
+            if (!TextUtils.equals(componentName.getPackageName(), sessionPackageName)) {
+                EventLog.writeEvent(0x534e4554, "238177121", -1, ""); // SafetyNet logging
+                throw new IllegalArgumentException("ComponentName does not belong to "
+                        + "sessionPackageName. sessionPackageName = " + sessionPackageName
+                        + ", ComponentName pkg = " + componentName.getPackageName());
+            }
             return new MediaButtonReceiverHolder(userId, pendingIntent, componentName,
                     componentType);
         }

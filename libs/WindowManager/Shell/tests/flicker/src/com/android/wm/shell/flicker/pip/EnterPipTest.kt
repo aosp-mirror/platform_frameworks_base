@@ -132,7 +132,7 @@ open class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec
         testSpec.assertLayers {
             val pipLayerList = this.layers { it.name.contains(layerName) && it.isVisible }
             pipLayerList.zipWithNext { previous, current ->
-                current.visibleRegion.coversAtMost(previous.visibleRegion.region)
+                current.visibleRegion.notBiggerThan(previous.visibleRegion.region)
             }
         }
     }

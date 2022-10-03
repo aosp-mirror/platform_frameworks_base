@@ -107,11 +107,11 @@ class WiredChargingRippleControllerTest : SysuiTestCase() {
 
         reset(rippleView)
         captor.value.onThemeChanged()
-        verify(rippleView).setColor(ArgumentMatchers.anyInt())
+        verify(rippleView).setColor(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt())
 
         reset(rippleView)
         captor.value.onUiModeChanged()
-        verify(rippleView).setColor(ArgumentMatchers.anyInt())
+        verify(rippleView).setColor(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt())
     }
 
     @Test

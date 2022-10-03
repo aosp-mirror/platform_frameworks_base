@@ -137,7 +137,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         final DisplayContent display = suggestedDisplayArea.mDisplayContent;
         if (DEBUG) {
             appendLog("display-id=" + display.getDisplayId()
-                    + " display-windowing-mode=" + display.getWindowingMode()
+                    + " task-display-area-windowing-mode=" + suggestedDisplayArea.getWindowingMode()
                     + " suggested-display-area=" + suggestedDisplayArea);
         }
 
@@ -156,7 +156,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         // source is a freeform window in a fullscreen display launching an activity on the same
         // display.
         if (launchMode == WINDOWING_MODE_UNDEFINED
-                && canInheritWindowingModeFromSource(display, source)) {
+                && canInheritWindowingModeFromSource(display, suggestedDisplayArea, source)) {
             // The source's windowing mode may be different from its task, e.g. activity is set
             // to fullscreen and its task is pinned windowing mode when the activity is entering
             // pip.
@@ -184,7 +184,8 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         // is set with the suggestedDisplayArea. If it is set, but the eventual TaskDisplayArea is
         // different, we should recalculating the bounds.
         boolean hasInitialBoundsForSuggestedDisplayAreaInFreeformWindow = false;
-        final boolean canApplyFreeformPolicy = canApplyFreeformWindowPolicy(display, launchMode);
+        final boolean canApplyFreeformPolicy =
+                canApplyFreeformWindowPolicy(suggestedDisplayArea, launchMode);
         if (mSupervisor.canUseActivityOptionsLaunchBounds(options)
                 && (canApplyFreeformPolicy || canApplyPipWindowPolicy(launchMode))) {
             hasInitialBounds = true;
@@ -239,7 +240,8 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
                         == display.getDisplayId())) {
             // Only set windowing mode if display is in freeform. If the display is in fullscreen
             // mode we should only launch a task in fullscreen mode.
-            if (currentParams.hasWindowingMode() && display.inFreeformWindowingMode()) {
+            if (currentParams.hasWindowingMode()
+                    && suggestedDisplayArea.inFreeformWindowingMode()) {
                 launchMode = currentParams.mWindowingMode;
                 fullyResolvedCurrentParam = launchMode != WINDOWING_MODE_FREEFORM;
                 if (DEBUG) {
@@ -267,11 +269,11 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         // this step is to define the default policy when there is no initial bounds or a fully
         // resolved current params from callers.
 
-        // hasInitialBoundsForSuggestedDisplayAreaInFreeformDisplay is set if the outParams.mBounds
+        // hasInitialBoundsForSuggestedDisplayAreaInFreeformMode is set if the outParams.mBounds
         // is set with the suggestedDisplayArea. If it is set, but the eventual TaskDisplayArea is
         // different, we should recalcuating the bounds.
-        boolean hasInitialBoundsForSuggestedDisplayAreaInFreeformDisplay = false;
-        if (display.inFreeformWindowingMode()) {
+        boolean hasInitialBoundsForSuggestedDisplayAreaInFreeformMode = false;
+        if (suggestedDisplayArea.inFreeformWindowingMode()) {
             if (launchMode == WINDOWING_MODE_PINNED) {
                 if (DEBUG) appendLog("picture-in-picture");
             } else if (!root.isResizeable()) {
@@ -280,7 +282,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
                     if (outParams.mBounds.isEmpty()) {
                         getTaskBounds(root, suggestedDisplayArea, layout, launchMode,
                                 hasInitialBounds, outParams.mBounds);
-                        hasInitialBoundsForSuggestedDisplayAreaInFreeformDisplay = true;
+                        hasInitialBoundsForSuggestedDisplayAreaInFreeformMode = true;
                     }
                     if (DEBUG) appendLog("unresizable-freeform");
                 } else {
@@ -290,10 +292,10 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
                 }
             }
         } else {
-            if (DEBUG) appendLog("non-freeform-display");
+            if (DEBUG) appendLog("non-freeform-task-display-area");
         }
         // If launch mode matches display windowing mode, let it inherit from display.
-        outParams.mWindowingMode = launchMode == display.getWindowingMode()
+        outParams.mWindowingMode = launchMode == suggestedDisplayArea.getWindowingMode()
                 ? WINDOWING_MODE_UNDEFINED : launchMode;
 
         if (phase == PHASE_WINDOWING_MODE) {
@@ -303,7 +305,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         // STEP 3: Finalize the display area. Here we allow WM shell route all launches that match
         // certain criteria to specific task display areas.
         final int resolvedMode = (launchMode != WINDOWING_MODE_UNDEFINED) ? launchMode
-                : display.getWindowingMode();
+                : suggestedDisplayArea.getWindowingMode();
         TaskDisplayArea taskDisplayArea = suggestedDisplayArea;
         // If launch task display area is set in options we should just use it. We assume the
         // suggestedDisplayArea has the right one in this case.
@@ -320,14 +322,17 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
                 mTmpDisplayArea = displayArea;
                 return true;
             });
-            // We may need to recalculate the bounds if the new TaskDisplayArea is different from
-            // the suggested one we used to calculate the bounds.
+            // We may need to recalculate the bounds and the windowing mode if the new
+            // TaskDisplayArea is different from the suggested one we used to calculate the two
+            // configurations.
             if (mTmpDisplayArea != null && mTmpDisplayArea != suggestedDisplayArea) {
+                outParams.mWindowingMode = (launchMode == mTmpDisplayArea.getWindowingMode())
+                        ? WINDOWING_MODE_UNDEFINED : launchMode;
                 if (hasInitialBoundsForSuggestedDisplayAreaInFreeformWindow) {
                     outParams.mBounds.setEmpty();
                     getLayoutBounds(mTmpDisplayArea, root, layout, outParams.mBounds);
                     hasInitialBounds = !outParams.mBounds.isEmpty();
-                } else if (hasInitialBoundsForSuggestedDisplayAreaInFreeformDisplay) {
+                } else if (hasInitialBoundsForSuggestedDisplayAreaInFreeformMode) {
                     outParams.mBounds.setEmpty();
                     getTaskBounds(root, mTmpDisplayArea, layout, launchMode,
                             hasInitialBounds, outParams.mBounds);
@@ -519,7 +524,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
     }
 
     private boolean canInheritWindowingModeFromSource(@NonNull DisplayContent display,
-            @Nullable ActivityRecord source) {
+            TaskDisplayArea suggestedDisplayArea, @Nullable ActivityRecord source) {
         if (source == null) {
             return false;
         }
@@ -527,7 +532,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         // There is not really any strong reason to tie the launching windowing mode and the source
         // on freeform displays. The launching windowing mode is more tied to the content of the new
         // activities.
-        if (display.inFreeformWindowingMode()) {
+        if (suggestedDisplayArea.inFreeformWindowingMode()) {
             return false;
         }
 
@@ -543,9 +548,11 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         return display.getDisplayId() == source.getDisplayId();
     }
 
-    private boolean canApplyFreeformWindowPolicy(@NonNull DisplayContent display, int launchMode) {
+    private boolean canApplyFreeformWindowPolicy(@NonNull TaskDisplayArea suggestedDisplayArea,
+            int launchMode) {
         return mSupervisor.mService.mSupportsFreeformWindowManagement
-                && (display.inFreeformWindowingMode() || launchMode == WINDOWING_MODE_FREEFORM);
+                && (suggestedDisplayArea.inFreeformWindowingMode()
+                || launchMode == WINDOWING_MODE_FREEFORM);
     }
 
     private boolean canApplyPipWindowPolicy(int launchMode) {
@@ -731,7 +738,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         }
 
         // First we get the default size we want.
-        getDefaultFreeformSize(root.info, displayArea, layout, orientation, mTmpBounds);
+        getDefaultFreeformSize(root, displayArea, layout, orientation, mTmpBounds);
         if (hasInitialBounds || sizeMatches(inOutBounds, mTmpBounds)) {
             // We're here because either input parameters specified initial bounds, or the suggested
             // bounds have the same size of the default freeform size. We should use the suggested
@@ -799,7 +806,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         return orientation;
     }
 
-    private void getDefaultFreeformSize(@NonNull ActivityInfo info,
+    private void getDefaultFreeformSize(@NonNull ActivityRecord activityRecord,
             @NonNull TaskDisplayArea displayArea,
             @NonNull ActivityInfo.WindowLayout layout, int orientation, @NonNull Rect bounds) {
         // Default size, which is letterboxing/pillarboxing in displayArea. That's to say the large
@@ -807,6 +814,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         // dimension of default size is calculated to keep the same aspect ratio as the
         // displayArea's. Here we use stable bounds of displayArea because that indicates the area
         // that isn't occupied by system widgets (e.g. sysbar and navbar).
+        final ActivityInfo info = activityRecord.info;
         final Rect stableBounds = mTmpStableBounds;
         displayArea.getStableRect(stableBounds);
         final int portraitHeight = Math.min(stableBounds.width(), stableBounds.height());
@@ -832,7 +840,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         final int layoutMinHeight = (layout == null) ? -1 : layout.minHeight;
 
         // Aspect ratio requirements.
-        final float minAspectRatio = info.getMinAspectRatio(orientation);
+        final float minAspectRatio = activityRecord.getMinAspectRatio();
         final float maxAspectRatio = info.getMaxAspectRatio();
 
         final int width = Math.min(defaultWidth, Math.max(phoneWidth, layoutMinWidth));

@@ -49,6 +49,7 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
+import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellInit;
 
 import org.junit.Before;
@@ -74,6 +75,7 @@ public class KidsModeTaskOrganizerTest extends ShellTestCase {
     @Mock private WindowContainerTransaction mTransaction;
     @Mock private KidsModeSettingsObserver mObserver;
     @Mock private ShellInit mShellInit;
+    @Mock private ShellCommandHandler mShellCommandHandler;
     @Mock private DisplayInsetsController mDisplayInsetsController;
 
     KidsModeTaskOrganizer mOrganizer;
@@ -87,11 +89,17 @@ public class KidsModeTaskOrganizerTest extends ShellTestCase {
         } catch (RemoteException e) {
         }
         // NOTE: KidsModeTaskOrganizer should have a null CompatUIController.
-        mOrganizer = spy(new KidsModeTaskOrganizer(mContext, mTaskOrganizerController,
-                mSyncTransactionQueue, mDisplayController, mDisplayInsetsController,
-                Optional.empty(), Optional.empty(), mObserver, mTestExecutor, mHandler));
+        mOrganizer = spy(new KidsModeTaskOrganizer(mContext, mShellInit, mShellCommandHandler,
+                mTaskOrganizerController, mSyncTransactionQueue, mDisplayController,
+                mDisplayInsetsController, Optional.empty(), Optional.empty(), mObserver,
+                mTestExecutor, mHandler));
         doReturn(mTransaction).when(mOrganizer).getWindowContainerTransaction();
         doReturn(new InsetsState()).when(mDisplayController).getInsetsState(DEFAULT_DISPLAY);
+    }
+
+    @Test
+    public void instantiateController_addInitCallback() {
+        verify(mShellInit, times(1)).addInitCallback(any(), any());
     }
 
     @Test

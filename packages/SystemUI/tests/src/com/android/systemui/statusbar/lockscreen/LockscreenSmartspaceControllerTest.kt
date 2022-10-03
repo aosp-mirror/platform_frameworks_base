@@ -56,6 +56,7 @@ import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.settings.SecureSettings
 import com.android.systemui.util.time.FakeSystemClock
 import java.util.Optional
+import java.util.concurrent.Executor
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentCaptor
@@ -103,6 +104,9 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
 
     @Mock
     private lateinit var deviceProvisionedController: DeviceProvisionedController
+
+    @Mock
+    private lateinit var bgExecutor: Executor
 
     @Mock
     private lateinit var handler: Handler
@@ -203,6 +207,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
                 keyguardBypassController,
                 execution,
                 executor,
+                bgExecutor,
                 handler,
                 Optional.of(plugin)
         )

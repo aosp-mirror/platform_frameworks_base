@@ -131,7 +131,14 @@
     <!-- For StatusIconContainer to tag its icon views -->
     <item type="id" name="status_bar_view_state_tag" />
 
+    <!-- Status bar -->
+    <item type="id" name="status_bar_dot" />
+
+    <!-- Default display cutout on the physical top of screen -->
     <item type="id" name="display_cutout" />
+    <item type="id" name="display_cutout_left" />
+    <item type="id" name="display_cutout_right" />
+    <item type="id" name="display_cutout_bottom" />
 
     <item type="id" name="row_tag_for_content_view" />
 
@@ -179,5 +186,7 @@
 
     <!-- face scanning view id -->
     <item type="id" name="face_scanning_anim"/>
+
+    <item type="id" name="qqs_tile_layout"/>
 </resources>
 

@@ -413,11 +413,6 @@ interface IWindowManager
     boolean hasNavigationBar(int displayId);
 
     /**
-     * Get the position of the nav bar
-     */
-    int getNavBarPosition(int displayId);
-
-    /**
      * Lock the device immediately with the specified options (can be null).
      */
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)

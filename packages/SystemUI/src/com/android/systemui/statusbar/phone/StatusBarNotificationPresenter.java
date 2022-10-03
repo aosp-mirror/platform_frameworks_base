@@ -33,8 +33,6 @@ import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.statusbar.IStatusBarService;
-import com.android.systemui.Dependency;
-import com.android.systemui.ForegroundServiceNotificationListener;
 import com.android.systemui.InitController;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
@@ -184,10 +182,6 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
             mMediaManager.setUpWithPresenter(this);
             mGutsManager.setUpWithPresenter(
                     this, mNotifListContainer, mOnSettingsClickListener);
-            // ForegroundServiceNotificationListener adds its listener in its constructor
-            // but we need to request it here in order for it to be instantiated.
-            // TODO: figure out how to do this correctly once Dependency.get() is gone.
-            Dependency.get(ForegroundServiceNotificationListener.class);
 
             onUserSwitched(mLockscreenUserManager.getCurrentUserId());
         });

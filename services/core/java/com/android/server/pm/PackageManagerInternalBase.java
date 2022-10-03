@@ -308,7 +308,8 @@ abstract class PackageManagerInternalBase extends PackageManagerInternal {
     public final List<ResolveInfo> queryIntentActivities(
             Intent intent, String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags,
             int filterCallingUid, int userId) {
-        return snapshot().queryIntentActivitiesInternal(intent, resolvedType, flags, userId);
+        return snapshot().queryIntentActivitiesInternal(intent, resolvedType, flags,
+                filterCallingUid, userId);
     }
 
     @Override

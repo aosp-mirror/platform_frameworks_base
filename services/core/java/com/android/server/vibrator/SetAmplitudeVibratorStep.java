@@ -148,7 +148,9 @@ final class SetAmplitudeVibratorStep extends AbstractVibratorStep {
                     "Turning on vibrator " + controller.getVibratorInfo().getId() + " for "
                             + duration + "ms");
         }
-        return controller.on(duration, getVibration().id);
+        long vibratorOnResult = controller.on(duration, getVibration().id);
+        getVibration().stats().reportVibratorOn(vibratorOnResult);
+        return vibratorOnResult;
     }
 
     /**

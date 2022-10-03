@@ -131,6 +131,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.am.PendingIntentRecord;
 import com.android.server.pm.InstantAppResolver;
 import com.android.server.power.ShutdownCheckPoints;
@@ -202,6 +203,10 @@ class ActivityStarter {
     private TaskFragment mAddingToTaskFragment;
     @VisibleForTesting
     boolean mAddingToTask;
+    // Activity that was moved to the top of its task in situations where activity-order changes
+    // due to launch flags (eg. REORDER_TO_TOP).
+    @VisibleForTesting
+    ActivityRecord mMovedToTopActivity;
 
     private ActivityInfo mNewTaskInfo;
     private Intent mNewTaskIntent;
@@ -1268,7 +1273,7 @@ class ActivityStarter {
     }
 
     private void onExecutionStarted() {
-        mController.onExecutionStarted(this);
+        mController.onExecutionStarted();
     }
 
     private boolean isHomeApp(int uid, @Nullable String packageName) {
@@ -1762,7 +1767,9 @@ class ActivityStarter {
             // The activity is started new rather than just brought forward, so record it as an
             // existence change.
             transitionController.collectExistenceChange(started);
-        } else if (result == START_DELIVERED_TO_TOP && newTransition != null) {
+        } else if (result == START_DELIVERED_TO_TOP && newTransition != null
+                // An activity has changed order/visibility so this isn't just deliver-to-top
+                && mMovedToTopActivity == null) {
             // We just delivered to top, so there isn't an actual transition here.
             if (!forceTransientTransition) {
                 newTransition.abort();
@@ -2100,6 +2107,49 @@ class ActivityStarter {
             }
         }
 
+        // Log activity starts which violate one of the following rules of the
+        // activity security model (ASM):
+        // 1. Only the top activity on a task can start activities on that task
+        // 2. Only the top activity on the top task can create new (top) tasks
+        // We don't currently block, but these checks may later become blocks
+        // TODO(b/236234252): Shift to BackgroundActivityStartController once
+        // class is ready
+        if (mSourceRecord != null) {
+            int callerUid = mSourceRecord.getUid();
+            ActivityRecord targetTopActivity =
+                    targetTask != null ? targetTask.getTopNonFinishingActivity() : null;
+            boolean passesAsmChecks = newTask
+                    ? mService.mVisibleActivityProcessTracker.hasResumedActivity(callerUid)
+                    : targetTopActivity != null && targetTopActivity.getUid() == callerUid;
+
+            if (!passesAsmChecks) {
+                Slog.i(TAG, "Launching r: " + r
+                        + " from background: " + mSourceRecord
+                        + ". New task: " + newTask);
+                boolean newOrEmptyTask = newTask || (targetTopActivity == null);
+                FrameworkStatsLog.write(FrameworkStatsLog.ACTIVITY_ACTION_BLOCKED,
+                        /* caller_uid */
+                        callerUid,
+                        /* caller_activity_class_name */
+                        mSourceRecord.info.name,
+                        /* target_task_top_activity_uid */
+                        newOrEmptyTask ? -1 : targetTopActivity.getUid(),
+                        /* target_task_top_activity_class_name */
+                        newOrEmptyTask ? null : targetTopActivity.info.name,
+                        /* target_task_is_different */
+                        newTask || !mSourceRecord.getTask().equals(targetTask),
+                        /* target_activity_uid */
+                        r.getUid(),
+                        /* target_activity_class_name */
+                        r.info.name,
+                        /* target_intent_action */
+                        r.intent.getAction(),
+                        /* target_intent_flags */
+                        r.intent.getFlags()
+                );
+            }
+        }
+
         return START_SUCCESS;
     }
 
@@ -2299,10 +2349,15 @@ class ActivityStarter {
             // In this situation we want to remove all activities from the task up to the one
             // being started. In most cases this means we are resetting the task to its initial
             // state.
+            int[] finishCount = new int[1];
             final ActivityRecord clearTop = targetTask.performClearTop(mStartActivity,
-                    mLaunchFlags);
+                    mLaunchFlags, finishCount);
 
             if (clearTop != null && !clearTop.finishing) {
+                if (finishCount[0] > 0) {
+                    // Only record if actually moved to top.
+                    mMovedToTopActivity = clearTop;
+                }
                 if (clearTop.isRootOfTask()) {
                     // Activity aliases may mean we use different intents for the top activity,
                     // so make sure the task now has the identity of the new intent.
@@ -2335,10 +2390,15 @@ class ActivityStarter {
             // already be running somewhere in the history, and we want to shuffle it to
             // the front of the root task if so.
             final ActivityRecord act =
-                    targetTask.findActivityInHistory(mStartActivity.mActivityComponent);
+                    targetTask.findActivityInHistory(mStartActivity.mActivityComponent,
+                            mStartActivity.mUserId);
             if (act != null) {
                 final Task task = act.getTask();
-                task.moveActivityToFrontLocked(act);
+                boolean actuallyMoved = task.moveActivityToFrontLocked(act);
+                if (actuallyMoved) {
+                    // Only record if the activity actually moved.
+                    mMovedToTopActivity = act;
+                }
                 act.updateOptionsLocked(mOptions);
                 deliverNewIntent(act, intentGrants);
                 act.getTaskFragment().clearLastPausedActivity();
@@ -2410,6 +2470,7 @@ class ActivityStarter {
 
         mInTask = null;
         mInTaskFragment = null;
+        mAddingToTaskFragment = null;
         mAddingToTask = false;
 
         mNewTaskInfo = null;
@@ -2972,10 +3033,7 @@ class ActivityStarter {
                 newParent = candidateTf;
             }
         }
-        if (newParent.canHaveEmbeddingActivityTransition(mStartActivity)) {
-            // Make sure the embedded TaskFragment is included in the start activity transition.
-            newParent.collectEmbeddedTaskFragmentIfNeeded();
-        }
+        newParent.mTransitionController.collect(newParent);
         if (mStartActivity.getTaskFragment() == null
                 || mStartActivity.getTaskFragment() == newParent) {
             newParent.addChild(mStartActivity, POSITION_TOP);

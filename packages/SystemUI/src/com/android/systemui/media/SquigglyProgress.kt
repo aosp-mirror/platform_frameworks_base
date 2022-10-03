@@ -60,6 +60,8 @@ class SquigglyProgress : Drawable() {
             linePaint.strokeWidth = value
         }
 
+    // Enables a transition region where the amplitude
+    // of the wave is reduced linearly across it.
     var transitionEnabled = true
         set(value) {
             field = value
@@ -116,44 +118,40 @@ class SquigglyProgress : Drawable() {
         }
 
         val progress = level / 10_000f
-        val totalProgressPx = bounds.width() * progress
-        val waveProgressPx = bounds.width() * (
+        val totalWidth = bounds.width().toFloat()
+        val totalProgressPx = totalWidth * progress
+        val waveProgressPx = totalWidth * (
             if (!transitionEnabled || progress > matchedWaveEndpoint) progress else
             lerp(minWaveEndpoint, matchedWaveEndpoint, lerpInv(0f, matchedWaveEndpoint, progress)))
 
         // Build Wiggly Path
-        val waveStart = -phaseOffset
-        val waveEnd = waveProgressPx
-        val transitionLength = if (transitionEnabled) transitionPeriods * waveLength else 0.01f
+        val waveStart = -phaseOffset - waveLength / 2f
+        val waveEnd = if (transitionEnabled) totalWidth else waveProgressPx
 
         // helper function, computes amplitude for wave segment
         val computeAmplitude: (Float, Float) -> Float = { x, sign ->
-            sign * heightFraction * lineAmplitude *
-                    lerpInvSat(waveEnd, waveEnd - transitionLength, x)
+            if (transitionEnabled) {
+                val length = transitionPeriods * waveLength
+                val coeff = lerpInvSat(
+                    waveProgressPx + length / 2f,
+                    waveProgressPx - length / 2f,
+                    x)
+                sign * heightFraction * lineAmplitude * coeff
+            } else {
+                sign * heightFraction * lineAmplitude
+            }
         }
 
-        var currentX = waveEnd
-        var waveSign = if (phaseOffset < waveLength / 2) 1f else -1f
+        // Reset path object to the start
         path.rewind()
+        path.moveTo(waveStart, 0f)
 
-        // Draw flat line from end to wave endpoint
-        path.moveTo(bounds.width().toFloat(), 0f)
-        path.lineTo(waveEnd, 0f)
-
-        // First wave has shortened wavelength
-        // approx quarter wave gets us to first wave peak
-        // shouldn't be big enough to notice it's not a sin wave
-        currentX -= phaseOffset % (waveLength / 2)
-        val controlRatio = 0.25f
+        // Build the wave, incrementing by half the wavelength each time
+        var currentX = waveStart
+        var waveSign = 1f
         var currentAmp = computeAmplitude(currentX, waveSign)
-        path.cubicTo(
-            waveEnd, currentAmp * controlRatio,
-            lerp(currentX, waveEnd, controlRatio), currentAmp,
-            currentX, currentAmp)
-
-        // Other waves have full wavelength
-        val dist = -1 * waveLength / 2f
-        while (currentX > waveStart) {
+        val dist = waveLength / 2f
+        while (currentX < waveEnd) {
             waveSign = -waveSign
             val nextX = currentX + dist
             val midX = currentX + dist / 2
@@ -166,34 +164,35 @@ class SquigglyProgress : Drawable() {
             currentX = nextX
         }
 
-        // Draw path; clip to progress position
+        // translate to the start position of the progress bar for all draw commands
+        val clipTop = lineAmplitude + strokeWidth
         canvas.save()
         canvas.translate(bounds.left.toFloat(), bounds.centerY().toFloat())
-        canvas.clipRect(
-                0f,
-                -lineAmplitude - strokeWidth,
-                totalProgressPx,
-                lineAmplitude + strokeWidth)
+
+        // Draw path up to progress position
+        canvas.save()
+        canvas.clipRect(0f, -1f * clipTop, totalProgressPx, clipTop)
         canvas.drawPath(path, wavePaint)
         canvas.restore()
 
-        // Draw path; clip between progression position & far edge
-        canvas.save()
-        canvas.translate(bounds.left.toFloat(), bounds.centerY().toFloat())
-        canvas.clipRect(
-                totalProgressPx,
-                -lineAmplitude - strokeWidth,
-                bounds.width().toFloat(),
-                lineAmplitude + strokeWidth)
-        canvas.drawPath(path, linePaint)
-        canvas.restore()
+        if (transitionEnabled) {
+            // If there's a smooth transition, we draw the rest of the
+            // path in a different color (using different clip params)
+            canvas.save()
+            canvas.clipRect(totalProgressPx, -1f * clipTop, totalWidth, clipTop)
+            canvas.drawPath(path, linePaint)
+            canvas.restore()
+        } else {
+            // No transition, just draw a flat line to the end of the region.
+            // The discontinuity is hidden by the progress bar thumb shape.
+            canvas.drawLine(totalProgressPx, 0f, totalWidth, 0f, linePaint)
+        }
 
         // Draw round line cap at the beginning of the wave
-        val startAmp = cos(abs(waveEnd - phaseOffset) / waveLength * TWO_PI)
-        canvas.drawPoint(
-                bounds.left.toFloat(),
-                bounds.centerY() + startAmp * lineAmplitude * heightFraction,
-                wavePaint)
+        val startAmp = cos(abs(waveStart) / waveLength * TWO_PI)
+        canvas.drawPoint(0f, startAmp * lineAmplitude * heightFraction, wavePaint)
+
+        canvas.restore()
     }
 
     override fun getOpacity(): Int {

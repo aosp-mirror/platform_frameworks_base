@@ -1006,7 +1006,7 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      * Called when userActivity is signalled in the power manager.
      * This is safe to call from any thread, with any window manager locks held or not.
      */
-    public void userActivity();
+    void userActivity(int displayGroupId, int event);
 
     /**
      * Called when we have finished booting and can now display the home

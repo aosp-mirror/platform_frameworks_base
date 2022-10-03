@@ -27,7 +27,10 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.Nullable;
+import android.graphics.BitmapShader;
+import android.graphics.Canvas;
 import android.graphics.Insets;
+import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.hardware.power.Boost;
@@ -374,43 +377,45 @@ class SurfaceAnimationRunner {
         final int targetSurfaceWidth = bounds.width();
 
         if (maxExtensionInsets.left < 0) {
-            final Rect edgeBounds = new Rect(0, 0, 1, targetSurfaceHeight);
+            final Rect edgeBounds = new Rect(bounds.left, bounds.top, bounds.left + 1,
+                    bounds.bottom);
             final Rect extensionRect = new Rect(0, 0,
                     -maxExtensionInsets.left, targetSurfaceHeight);
-            final int xPos = maxExtensionInsets.left;
-            final int yPos = 0;
+            final int xPos = bounds.left + maxExtensionInsets.left;
+            final int yPos = bounds.top;
             createExtensionSurface(leash, edgeBounds,
                     extensionRect, xPos, yPos, "Left Edge Extension", transaction);
         }
 
         if (maxExtensionInsets.top < 0) {
-            final Rect edgeBounds = new Rect(0, 0, targetSurfaceWidth, 1);
+            final Rect edgeBounds = new Rect(bounds.left, bounds.top, targetSurfaceWidth,
+                    bounds.top + 1);
             final Rect extensionRect = new Rect(0, 0,
                     targetSurfaceWidth, -maxExtensionInsets.top);
-            final int xPos = 0;
-            final int yPos = maxExtensionInsets.top;
+            final int xPos = bounds.left;
+            final int yPos = bounds.top + maxExtensionInsets.top;
             createExtensionSurface(leash, edgeBounds,
                     extensionRect, xPos, yPos, "Top Edge Extension", transaction);
         }
 
         if (maxExtensionInsets.right < 0) {
-            final Rect edgeBounds = new Rect(targetSurfaceWidth - 1, 0,
-                    targetSurfaceWidth, targetSurfaceHeight);
+            final Rect edgeBounds = new Rect(bounds.right - 1, bounds.top, bounds.right,
+                    bounds.bottom);
             final Rect extensionRect = new Rect(0, 0,
                     -maxExtensionInsets.right, targetSurfaceHeight);
-            final int xPos = targetSurfaceWidth;
-            final int yPos = 0;
+            final int xPos = bounds.right;
+            final int yPos = bounds.top;
             createExtensionSurface(leash, edgeBounds,
                     extensionRect, xPos, yPos, "Right Edge Extension", transaction);
         }
 
         if (maxExtensionInsets.bottom < 0) {
-            final Rect edgeBounds = new Rect(0, targetSurfaceHeight - 1,
-                    targetSurfaceWidth, targetSurfaceHeight);
+            final Rect edgeBounds = new Rect(bounds.left, bounds.bottom - 1,
+                    bounds.right, bounds.bottom);
             final Rect extensionRect = new Rect(0, 0,
                     targetSurfaceWidth, -maxExtensionInsets.bottom);
-            final int xPos = maxExtensionInsets.left;
-            final int yPos = targetSurfaceHeight;
+            final int xPos = bounds.left;
+            final int yPos = bounds.bottom;
             createExtensionSurface(leash, edgeBounds,
                     extensionRect, xPos, yPos, "Bottom Edge Extension", transaction);
         }
@@ -453,16 +458,20 @@ class SurfaceAnimationRunner {
                 .setHidden(true)
                 .setCallsite("DefaultTransitionHandler#startAnimation")
                 .setOpaque(true)
-                .setBufferSize(edgeBounds.width(), edgeBounds.height())
+                .setBufferSize(extensionRect.width(), extensionRect.height())
                 .build();
 
-        final Surface surface = new Surface(edgeExtensionLayer);
-        surface.attachAndQueueBufferWithColorSpace(edgeBuffer.getHardwareBuffer(),
-                edgeBuffer.getColorSpace());
-        surface.release();
+        BitmapShader shader = new BitmapShader(edgeBuffer.asBitmap(),
+                android.graphics.Shader.TileMode.CLAMP,
+                android.graphics.Shader.TileMode.CLAMP);
+        final Paint paint = new Paint();
+        paint.setShader(shader);
 
-        final float scaleX = getScaleXForExtensionSurface(edgeBounds, extensionRect);
-        final float scaleY = getScaleYForExtensionSurface(edgeBounds, extensionRect);
+        final Surface surface = new Surface(edgeExtensionLayer);
+        Canvas c = surface.lockHardwareCanvas();
+        c.drawRect(extensionRect, paint);
+        surface.unlockCanvasAndPost(c);
+        surface.release();
 
         synchronized (mEdgeExtensionLock) {
             if (!mEdgeExtensions.containsKey(leash)) {
@@ -472,7 +481,6 @@ class SurfaceAnimationRunner {
                 return;
             }
 
-            startTransaction.setScale(edgeExtensionLayer, scaleX, scaleY);
             startTransaction.reparent(edgeExtensionLayer, leash);
             startTransaction.setLayer(edgeExtensionLayer, Integer.MIN_VALUE);
             startTransaction.setPosition(edgeExtensionLayer, xPos, yPos);
@@ -507,8 +515,6 @@ class SurfaceAnimationRunner {
 
         throw new RuntimeException("Unexpected edgeBounds and extensionRect heights");
     }
-
-
 
     private static final class RunningAnimation {
         final AnimationSpec mAnimSpec;

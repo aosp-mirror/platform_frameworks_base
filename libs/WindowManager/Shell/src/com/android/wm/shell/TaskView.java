@@ -54,7 +54,10 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
 
     /** Callback for listening task state. */
     public interface Listener {
-        /** Called when the container is ready for launching activities. */
+        /**
+         * Only called once when the surface has been created & the container is ready for
+         * launching activities.
+         */
         default void onInitialized() {}
 
         /** Called when the container can no longer launch activities. */
@@ -80,12 +83,13 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
     private final SyncTransactionQueue mSyncQueue;
     private final TaskViewTransitions mTaskViewTransitions;
 
-    private ActivityManager.RunningTaskInfo mTaskInfo;
+    protected ActivityManager.RunningTaskInfo mTaskInfo;
     private WindowContainerToken mTaskToken;
     private SurfaceControl mTaskLeash;
     private final SurfaceControl.Transaction mTransaction = new SurfaceControl.Transaction();
     private boolean mSurfaceCreated;
     private boolean mIsInitialized;
+    private boolean mNotifiedForInitialized;
     private Listener mListener;
     private Executor mListenerExecutor;
     private Region mObscuredTouchRegion;
@@ -108,6 +112,13 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
         setUseAlpha();
         getHolder().addCallback(this);
         mGuard.open("release");
+    }
+
+    /**
+     * @return {@code True} when the TaskView's surface has been created, {@code False} otherwise.
+     */
+    public boolean isInitialized() {
+        return mIsInitialized;
     }
 
     /** Until all users are converted, we may have mixed-use (eg. Car). */
@@ -269,11 +280,17 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
             resetTaskInfo();
         });
         mGuard.close();
-        if (mListener != null && mIsInitialized) {
+        mIsInitialized = false;
+        notifyReleased();
+    }
+
+    /** Called when the {@link TaskView} has been released. */
+    protected void notifyReleased() {
+        if (mListener != null && mNotifiedForInitialized) {
             mListenerExecutor.execute(() -> {
                 mListener.onReleased();
             });
-            mIsInitialized = false;
+            mNotifiedForInitialized = false;
         }
     }
 
@@ -407,12 +424,8 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         mSurfaceCreated = true;
-        if (mListener != null && !mIsInitialized) {
-            mIsInitialized = true;
-            mListenerExecutor.execute(() -> {
-                mListener.onInitialized();
-            });
-        }
+        mIsInitialized = true;
+        notifyInitialized();
         mShellExecutor.execute(() -> {
             if (mTaskToken == null) {
                 // Nothing to update, task is not yet available
@@ -428,6 +441,16 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
                     .apply();
             updateTaskVisibility();
         });
+    }
+
+    /** Called when the {@link TaskView} is initialized. */
+    protected void notifyInitialized() {
+        if (mListener != null && !mNotifiedForInitialized) {
+            mNotifiedForInitialized = true;
+            mListenerExecutor.execute(() -> {
+                mListener.onInitialized();
+            });
+        }
     }
 
     @Override
@@ -494,7 +517,9 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
         getViewTreeObserver().removeOnComputeInternalInsetsListener(this);
     }
 
-    ActivityManager.RunningTaskInfo getTaskInfo() {
+    /** Returns the task info for the task in the TaskView. */
+    @Nullable
+    public ActivityManager.RunningTaskInfo getTaskInfo() {
         return mTaskInfo;
     }
 

@@ -87,7 +87,7 @@ class DragResizeInputListener implements AutoCloseable {
         try {
             mWindowSession.grantInputChannel(
                     mDisplayId,
-                    new SurfaceControl(mDecorationSurface, TAG),
+                    mDecorationSurface,
                     mFakeWindow,
                     null /* hostInputToken */,
                     FLAG_NOT_FOCUSABLE,
@@ -150,8 +150,7 @@ class DragResizeInputListener implements AutoCloseable {
             mWindowSession.updateInputChannel(
                     mInputChannel.getToken(),
                     mDisplayId,
-                    new SurfaceControl(
-                            mDecorationSurface, "DragResizeInputListener#setTouchRegion"),
+                    mDecorationSurface,
                     FLAG_NOT_FOCUSABLE,
                     PRIVATE_FLAG_TRUSTED_OVERLAY,
                     touchRegion);

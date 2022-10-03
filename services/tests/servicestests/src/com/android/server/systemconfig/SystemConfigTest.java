@@ -336,6 +336,59 @@ public class SystemConfigTest {
         assertThat(mSysConfig.getAllowedVendorApexes()).isEmpty();
     }
 
+    /**
+     * Tests that readPermissions works correctly for the tag: {@code install-constraints-allowed}.
+     */
+    @Test
+    public void readPermissions_installConstraints_successful() throws IOException {
+        final String contents =
+                "<config>\n"
+                        + "    <install-constraints-allowed package=\"com.android.apex1\" />\n"
+                        + "</config>";
+        final File folder = createTempSubfolder("folder");
+        createTempFile(folder, "install-constraints-allowlist.xml", contents);
+
+        readPermissions(folder, /* Grant all permission flags */ ~0);
+
+        assertThat(mSysConfig.getInstallConstraintsAllowlist())
+                .containsExactly("com.android.apex1");
+    }
+
+    /**
+     * Tests that readPermissions works correctly for the tag: {@code install-constraints-allowed}.
+     */
+    @Test
+    public void readPermissions_installConstraints_noPackage() throws IOException {
+        final String contents =
+                "<config>\n"
+                        + "    <install-constraints-allowed/>\n"
+                        + "</config>";
+        final File folder = createTempSubfolder("folder");
+        createTempFile(folder, "install-constraints-allowlist.xml", contents);
+
+        readPermissions(folder, /* Grant all permission flags */ ~0);
+
+        assertThat(mSysConfig.getInstallConstraintsAllowlist()).isEmpty();
+    }
+
+    /**
+     * Tests that readPermissions works correctly for the tag {@code install-constraints-allowed}
+     * without {@link SystemConfig#ALLOW_VENDOR_APEX}.
+     */
+    @Test
+    public void readPermissions_installConstraints_noAppConfigs() throws IOException {
+        final String contents =
+                "<config>\n"
+                        + "    <install-constraints-allowed package=\"com.android.apex1\" />\n"
+                        + "</config>";
+        final File folder = createTempSubfolder("folder");
+        createTempFile(folder, "install-constraints-allowlist.xml", contents);
+
+        readPermissions(folder,  /* Grant all but ALLOW_APP_CONFIGS flag */ ~0x08);
+
+        assertThat(mSysConfig.getInstallConstraintsAllowlist()).isEmpty();
+    }
+
     @Test
     public void readApexPrivAppPermissions_addAllPermissions()
             throws Exception {

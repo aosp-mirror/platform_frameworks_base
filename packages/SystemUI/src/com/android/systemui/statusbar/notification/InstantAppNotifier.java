@@ -50,7 +50,6 @@ import android.util.Pair;
 import com.android.internal.messages.nano.SystemMessageProto;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.CoreStartable;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.UiBackground;
@@ -76,20 +75,22 @@ public class InstantAppNotifier extends CoreStartable
     private final Executor mUiBgExecutor;
     private final ArraySet<Pair<String, Integer>> mCurrentNotifs = new ArraySet<>();
     private final CommandQueue mCommandQueue;
-    private KeyguardStateController mKeyguardStateController;
+    private final KeyguardStateController mKeyguardStateController;
 
     @Inject
-    public InstantAppNotifier(Context context, CommandQueue commandQueue,
-            @UiBackground Executor uiBgExecutor) {
+    public InstantAppNotifier(
+            Context context,
+            CommandQueue commandQueue,
+            @UiBackground Executor uiBgExecutor,
+            KeyguardStateController keyguardStateController) {
         super(context);
         mCommandQueue = commandQueue;
         mUiBgExecutor = uiBgExecutor;
+        mKeyguardStateController = keyguardStateController;
     }
 
     @Override
     public void start() {
-        mKeyguardStateController = Dependency.get(KeyguardStateController.class);
-
         // listen for user / profile change.
         try {
             ActivityManager.getService().registerUserSwitchObserver(mUserSwitchListener, TAG);

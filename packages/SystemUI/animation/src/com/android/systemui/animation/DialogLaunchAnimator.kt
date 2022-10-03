@@ -23,7 +23,6 @@ import android.app.Dialog
 import android.graphics.Color
 import android.graphics.Rect
 import android.os.Looper
-import android.service.dreams.IDreamManager
 import android.util.Log
 import android.util.MathUtils
 import android.view.GhostView
@@ -54,7 +53,7 @@ private const val TAG = "DialogLaunchAnimator"
 class DialogLaunchAnimator
 @JvmOverloads
 constructor(
-    private val dreamManager: IDreamManager,
+    private val callback: Callback,
     private val interactionJankMonitor: InteractionJankMonitor,
     private val launchAnimator: LaunchAnimator = LaunchAnimator(TIMINGS, INTERPOLATORS),
     private val isForTesting: Boolean = false
@@ -114,6 +113,19 @@ constructor(
             }
         val animateFrom = animatedParent?.dialogContentWithBackground ?: view
 
+        if (animatedParent == null && animateFrom !is LaunchableView) {
+            // Make sure the View we launch from implements LaunchableView to avoid visibility
+            // issues. Given that we don't own dialog decorViews so we can't enforce it for launches
+            // from a dialog.
+            // TODO(b/243636422): Throw instead of logging to enforce this.
+            Log.w(
+                TAG,
+                "A dialog was launched from a View that does not implement LaunchableView. This " +
+                    "can lead to subtle bugs where the visibility of the View we are " +
+                    "launching from is not what we expected."
+            )
+        }
+
         // Make sure we don't run the launch animation from the same view twice at the same time.
         if (animateFrom.getTag(TAG_LAUNCH_ANIMATION_RUNNING) != null) {
             Log.e(TAG, "Not running dialog launch animation as there is already one running")
@@ -126,7 +138,7 @@ constructor(
         val animatedDialog =
             AnimatedDialog(
                 launchAnimator,
-                dreamManager,
+                callback,
                 interactionJankMonitor,
                 animateFrom,
                 onDialogDismissed = { openedDialogs.remove(it) },
@@ -157,9 +169,14 @@ constructor(
             openedDialogs.firstOrNull { it.dialog == animateFrom }?.dialogContentWithBackground
                 ?: throw IllegalStateException(
                     "The animateFrom dialog was not animated using " +
-                        "DialogLaunchAnimator.showFrom(View|Dialog)")
+                        "DialogLaunchAnimator.showFrom(View|Dialog)"
+                )
         showFromView(
-            dialog, view, animateBackgroundBoundsChange = animateBackgroundBoundsChange, cuj = cuj)
+            dialog,
+            view,
+            animateBackgroundBoundsChange = animateBackgroundBoundsChange,
+            cuj = cuj
+        )
     }
 
     /**
@@ -194,8 +211,12 @@ constructor(
 
         val dialog = animatedDialog.dialog
 
-        // Don't animate if the dialog is not showing.
-        if (!dialog.isShowing) {
+        // Don't animate if the dialog is not showing or if we are locked and going to show the
+        // bouncer.
+        if (
+            !dialog.isShowing ||
+                (!callback.isUnlocked() && !callback.isShowingAlternateAuthOnUnlock())
+        ) {
             return null
         }
 
@@ -217,7 +238,7 @@ constructor(
                 }
             }
 
-            override fun onLaunchAnimationCancelled() {
+            override fun onLaunchAnimationCancelled(newKeyguardOccludedState: Boolean?) {
                 controller.onLaunchAnimationCancelled()
                 enableDialogDismiss()
                 dialog.dismiss()
@@ -285,6 +306,23 @@ constructor(
             ?.let { it.touchSurface = it.prepareForStackDismiss() }
         dialog.dismiss()
     }
+
+    interface Callback {
+        /** Whether the device is currently in dreaming (screensaver) mode. */
+        fun isDreaming(): Boolean
+
+        /**
+         * Whether the device is currently unlocked, i.e. if it is *not* on the keyguard or if the
+         * keyguard can be dismissed.
+         */
+        fun isUnlocked(): Boolean
+
+        /**
+         * Whether we are going to show alternate authentication (like UDFPS) instead of the
+         * traditional bouncer when unlocking the device.
+         */
+        fun isShowingAlternateAuthOnUnlock(): Boolean
+    }
 }
 
 /**
@@ -296,7 +334,7 @@ data class DialogCuj(@CujType val cujType: Int, val tag: String? = null)
 
 private class AnimatedDialog(
     private val launchAnimator: LaunchAnimator,
-    private val dreamManager: IDreamManager,
+    private val callback: DialogLaunchAnimator.Callback,
     private val interactionJankMonitor: InteractionJankMonitor,
 
     /** The view that triggered the dialog after being tapped. */
@@ -536,11 +574,12 @@ private class AnimatedDialog(
         window.setDecorFitsSystemWindows(false)
         val viewWithInsets = (dialogContentWithBackground.parent as ViewGroup)
         viewWithInsets.setOnApplyWindowInsetsListener { view, windowInsets ->
-            val type = if (wasFittingNavigationBars) {
-                WindowInsets.Type.displayCutout() or WindowInsets.Type.navigationBars()
-            } else {
-                WindowInsets.Type.displayCutout()
-            }
+            val type =
+                if (wasFittingNavigationBars) {
+                    WindowInsets.Type.displayCutout() or WindowInsets.Type.navigationBars()
+                } else {
+                    WindowInsets.Type.displayCutout()
+                }
 
             val insets = windowInsets.getInsets(type)
             view.setPadding(insets.left, insets.top, insets.right, insets.bottom)
@@ -850,7 +889,7 @@ private class AnimatedDialog(
 
         // If we are dreaming, the dialog was probably closed because of that so we don't animate
         // into the touchSurface.
-        if (dreamManager.isDreaming) {
+        if (callback.isDreaming()) {
             return false
         }
 

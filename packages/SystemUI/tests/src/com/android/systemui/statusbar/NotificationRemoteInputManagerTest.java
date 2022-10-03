@@ -23,8 +23,6 @@ import static org.mockito.Mockito.when;
 
 import android.app.Notification;
 import android.content.Context;
-import android.os.Handler;
-import android.os.Looper;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.testing.AndroidTestingRunner;
@@ -36,7 +34,6 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
@@ -70,7 +67,6 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
     @Mock private StatusBarStateController mStateController;
     @Mock private RemoteInputUriController mRemoteInputUriController;
     @Mock private NotificationClickNotifier mClickNotifier;
-    @Mock private NotificationEntryManager mEntryManager;
     @Mock private NotificationLockscreenUserManager mLockscreenUserManager;
 
     private TestableNotificationRemoteInputManager mRemoteInputManager;
@@ -85,11 +81,8 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
                 mLockscreenUserManager,
                 mSmartReplyController,
                 mVisibilityProvider,
-                mEntryManager,
-                mock(RemoteInputNotificationRebuilder.class),
                 () -> Optional.of(mock(CentralSurfaces.class)),
                 mStateController,
-                Handler.createAsync(Looper.myLooper()),
                 mRemoteInputUriController,
                 mClickNotifier,
                 mock(ActionClickLogger.class),
@@ -145,11 +138,8 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
                 NotificationLockscreenUserManager lockscreenUserManager,
                 SmartReplyController smartReplyController,
                 NotificationVisibilityProvider visibilityProvider,
-                NotificationEntryManager notificationEntryManager,
-                RemoteInputNotificationRebuilder rebuilder,
                 Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
                 StatusBarStateController statusBarStateController,
-                Handler mainHandler,
                 RemoteInputUriController remoteInputUriController,
                 NotificationClickNotifier clickNotifier,
                 ActionClickLogger actionClickLogger,
@@ -160,11 +150,8 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
                     lockscreenUserManager,
                     smartReplyController,
                     visibilityProvider,
-                    notificationEntryManager,
-                    rebuilder,
                     centralSurfacesOptionalLazy,
                     statusBarStateController,
-                    mainHandler,
                     remoteInputUriController,
                     clickNotifier,
                     actionClickLogger,

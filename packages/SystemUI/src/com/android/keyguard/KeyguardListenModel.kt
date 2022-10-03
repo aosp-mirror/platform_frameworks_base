@@ -54,6 +54,8 @@ data class KeyguardFaceListenModel(
     val bouncerFullyShown: Boolean,
     val faceAuthenticated: Boolean,
     val faceDisabled: Boolean,
+    val faceLockedOut: Boolean,
+    val fpLockedOut: Boolean,
     val goingToSleep: Boolean,
     val keyguardAwake: Boolean,
     val keyguardGoingAway: Boolean,
@@ -63,7 +65,7 @@ data class KeyguardFaceListenModel(
     val scanningAllowedByStrongAuth: Boolean,
     val secureCameraLaunched: Boolean,
     val switchingUser: Boolean,
-    val udfpsBouncerShowing: Boolean
+    val udfpsBouncerShowing: Boolean,
 ) : KeyguardListenModel()
 /**
  * Verbose debug information associated with [KeyguardUpdateMonitor.shouldTriggerActiveUnlock].

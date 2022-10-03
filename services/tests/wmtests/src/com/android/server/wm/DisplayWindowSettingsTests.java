@@ -110,7 +110,7 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
         mDisplayWindowSettings.applySettingsToDisplayLocked(mPrimaryDisplay);
 
         assertEquals(WindowConfiguration.WINDOWING_MODE_FULLSCREEN,
-                mPrimaryDisplay.getWindowingMode());
+                mPrimaryDisplay.getDefaultTaskDisplayArea().getWindowingMode());
     }
 
     @Test
@@ -120,7 +120,7 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
         mDisplayWindowSettings.applySettingsToDisplayLocked(mPrimaryDisplay);
 
         assertEquals(WindowConfiguration.WINDOWING_MODE_FULLSCREEN,
-                mPrimaryDisplay.getWindowingMode());
+                mPrimaryDisplay.getDefaultTaskDisplayArea().getWindowingMode());
     }
 
     @Test
@@ -131,7 +131,7 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
         mDisplayWindowSettings.applySettingsToDisplayLocked(mPrimaryDisplay);
 
         assertEquals(WindowConfiguration.WINDOWING_MODE_FULLSCREEN,
-                mPrimaryDisplay.getWindowingMode());
+                mPrimaryDisplay.getDefaultTaskDisplayArea().getWindowingMode());
     }
 
     @Test
@@ -141,7 +141,8 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
 
         mDisplayWindowSettings.applySettingsToDisplayLocked(mPrimaryDisplay);
 
-        assertEquals(WINDOWING_MODE_FREEFORM, mPrimaryDisplay.getWindowingMode());
+        assertEquals(WINDOWING_MODE_FREEFORM,
+                mPrimaryDisplay.getDefaultTaskDisplayArea().getWindowingMode());
     }
 
     @Test
@@ -154,7 +155,7 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
         mDisplayWindowSettings.updateSettingsForDisplay(mPrimaryDisplay);
 
         assertEquals(WindowConfiguration.WINDOWING_MODE_FREEFORM,
-                mPrimaryDisplay.getWindowingMode());
+                mPrimaryDisplay.getDefaultTaskDisplayArea().getWindowingMode());
     }
 
     @Test
@@ -162,7 +163,7 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
         mDisplayWindowSettings.applySettingsToDisplayLocked(mSecondaryDisplay);
 
         assertEquals(WindowConfiguration.WINDOWING_MODE_FULLSCREEN,
-                mSecondaryDisplay.getWindowingMode());
+                mSecondaryDisplay.getDefaultTaskDisplayArea().getWindowingMode());
     }
 
     @Test
@@ -172,7 +173,7 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
         mDisplayWindowSettings.applySettingsToDisplayLocked(mSecondaryDisplay);
 
         assertEquals(WindowConfiguration.WINDOWING_MODE_FULLSCREEN,
-                mSecondaryDisplay.getWindowingMode());
+                mSecondaryDisplay.getDefaultTaskDisplayArea().getWindowingMode());
     }
 
     @Test
@@ -183,7 +184,7 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
         mDisplayWindowSettings.applySettingsToDisplayLocked(mSecondaryDisplay);
 
         assertEquals(WINDOWING_MODE_FREEFORM,
-                mSecondaryDisplay.getWindowingMode());
+                mSecondaryDisplay.getDefaultTaskDisplayArea().getWindowingMode());
     }
 
     @Test
@@ -194,7 +195,7 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
         mDisplayWindowSettings.applySettingsToDisplayLocked(mSecondaryDisplay);
 
         assertEquals(WINDOWING_MODE_FREEFORM,
-                mSecondaryDisplay.getWindowingMode());
+                mSecondaryDisplay.getDefaultTaskDisplayArea().getWindowingMode());
     }
 
     @Test

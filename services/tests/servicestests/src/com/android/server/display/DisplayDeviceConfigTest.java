@@ -19,15 +19,18 @@ package com.android.server.display;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.anyFloat;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
-
 
 import org.junit.Before;
 import org.junit.Test;
@@ -52,22 +55,16 @@ public final class DisplayDeviceConfigTest {
     private Resources mResources;
 
     @Before
-    public void setUp() throws IOException {
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
         when(mContext.getResources()).thenReturn(mResources);
         mockDeviceConfigs();
-        try {
-            Path tempFile = Files.createTempFile("display_config", ".tmp");
-            Files.write(tempFile, getContent().getBytes(StandardCharsets.UTF_8));
-            mDisplayDeviceConfig = new DisplayDeviceConfig(mContext);
-            mDisplayDeviceConfig.initFromFile(tempFile.toFile());
-        } catch (IOException e) {
-            throw new IOException("Failed to setup the display device config.", e);
-        }
     }
 
     @Test
-    public void testConfigValues() {
+    public void testConfigValuesFromDisplayConfig() throws IOException {
+        setupDisplayDeviceConfigFromDisplayConfigFile();
+
         assertEquals(mDisplayDeviceConfig.getAmbientHorizonLong(), 5000);
         assertEquals(mDisplayDeviceConfig.getAmbientHorizonShort(), 50);
         assertEquals(mDisplayDeviceConfig.getBrightnessRampDecreaseMaxMillis(), 3000);
@@ -86,10 +83,25 @@ public final class DisplayDeviceConfigTest {
                 0.0f);
         assertEquals(mDisplayDeviceConfig.getScreenBrighteningMinThreshold(), 0.001, 0.000001f);
         assertEquals(mDisplayDeviceConfig.getScreenDarkeningMinThreshold(), 0.002, 0.000001f);
-
+        assertEquals(mDisplayDeviceConfig.getAutoBrightnessBrighteningLightDebounce(), 2000);
+        assertEquals(mDisplayDeviceConfig.getAutoBrightnessDarkeningLightDebounce(), 1000);
+        assertArrayEquals(mDisplayDeviceConfig.getAutoBrightnessBrighteningLevelsLux(), new
+                float[]{0.0f, 50.0f, 80.0f}, 0.0f);
+        assertArrayEquals(mDisplayDeviceConfig.getAutoBrightnessBrighteningLevelsNits(), new
+                float[]{45.32f, 75.43f}, 0.0f);
         // Todo(brup): Add asserts for BrightnessThrottlingData, DensityMapping,
         // HighBrightnessModeData AmbientLightSensor, RefreshRateLimitations and ProximitySensor.
-        // Also add test for the case where optional display configs are null
+    }
+
+    @Test
+    public void testConfigValuesFromConfigResource() {
+        setupDisplayDeviceConfigFromConfigResourceFile();
+        assertArrayEquals(mDisplayDeviceConfig.getAutoBrightnessBrighteningLevelsNits(), new
+                float[]{2.0f, 200.0f, 600.0f}, 0.0f);
+        assertArrayEquals(mDisplayDeviceConfig.getAutoBrightnessBrighteningLevelsLux(), new
+                float[]{0.0f, 0.0f, 110.0f, 500.0f}, 0.0f);
+        // Todo(brup): Add asserts for BrightnessThrottlingData, DensityMapping,
+        // HighBrightnessModeData AmbientLightSensor, RefreshRateLimitations and ProximitySensor.
     }
 
     private String getContent() {
@@ -109,6 +121,20 @@ public final class DisplayDeviceConfigTest {
                 +           "<nits>800.0</nits>\n"
                 +       "</point>\n"
                 +   "</screenBrightnessMap>\n"
+                +   "<autoBrightness>\n"
+                +       "<brighteningLightDebounceMillis>2000</brighteningLightDebounceMillis>\n"
+                +       "<darkeningLightDebounceMillis>1000</darkeningLightDebounceMillis>\n"
+                +       "<displayBrightnessMapping>\n"
+                +            "<displayBrightnessPoint>\n"
+                +                "<lux>50</lux>\n"
+                +                "<nits>45.32</nits>\n"
+                +            "</displayBrightnessPoint>\n"
+                +            "<displayBrightnessPoint>\n"
+                +                "<lux>80</lux>\n"
+                +                "<nits>75.43</nits>\n"
+                +            "</displayBrightnessPoint>\n"
+                +       "</displayBrightnessMapping>\n"
+                +   "</autoBrightness>\n"
                 +   "<highBrightnessMode enabled=\"true\">\n"
                 +       "<transitionPoint>0.62</transitionPoint>\n"
                 +       "<minimumLux>10000</minimumLux>\n"
@@ -178,5 +204,64 @@ public final class DisplayDeviceConfigTest {
                 .config_screenBrightnessSettingDefaultFloat)).thenReturn(0.5f);
         when(mResources.getFloat(com.android.internal.R.dimen
                 .config_screenBrightnessSettingMaximumFloat)).thenReturn(1.0f);
+    }
+
+    private void setupDisplayDeviceConfigFromDisplayConfigFile() throws IOException {
+        Path tempFile = Files.createTempFile("display_config", ".tmp");
+        Files.write(tempFile, getContent().getBytes(StandardCharsets.UTF_8));
+        mDisplayDeviceConfig = new DisplayDeviceConfig(mContext);
+        mDisplayDeviceConfig.initFromFile(tempFile.toFile());
+    }
+
+    private void setupDisplayDeviceConfigFromConfigResourceFile() {
+        TypedArray screenBrightnessNits = createFloatTypedArray(new float[]{2.0f, 250.0f, 650.0f});
+        when(mResources.obtainTypedArray(
+                com.android.internal.R.array.config_screenBrightnessNits))
+                .thenReturn(screenBrightnessNits);
+        TypedArray screenBrightnessBacklight = createFloatTypedArray(new
+                float[]{0.0f, 120.0f, 255.0f});
+        when(mResources.obtainTypedArray(
+                com.android.internal.R.array.config_screenBrightnessBacklight))
+                .thenReturn(screenBrightnessBacklight);
+        when(mResources.getIntArray(com.android.internal.R.array
+                .config_screenBrightnessBacklight)).thenReturn(new int[]{0, 120, 255});
+
+        when(mResources.getIntArray(com.android.internal.R.array
+                .config_autoBrightnessLevels)).thenReturn(new int[]{30, 80});
+        when(mResources.getIntArray(com.android.internal.R.array
+                .config_autoBrightnessDisplayValuesNits)).thenReturn(new int[]{25, 55});
+
+        TypedArray screenBrightnessLevelNits = createFloatTypedArray(new
+                float[]{2.0f, 200.0f, 600.0f});
+        when(mResources.obtainTypedArray(
+                com.android.internal.R.array.config_autoBrightnessDisplayValuesNits))
+                .thenReturn(screenBrightnessLevelNits);
+        int[] screenBrightnessLevelLux = new int[]{0, 110, 500};
+        when(mResources.getIntArray(
+                com.android.internal.R.array.config_autoBrightnessLevels))
+                .thenReturn(screenBrightnessLevelLux);
+
+        mDisplayDeviceConfig = DisplayDeviceConfig.create(mContext, true);
+
+    }
+
+    private TypedArray createFloatTypedArray(float[] vals) {
+        TypedArray mockArray = mock(TypedArray.class);
+        when(mockArray.length()).thenAnswer(invocation -> {
+            return vals.length;
+        });
+        when(mockArray.getFloat(anyInt(), anyFloat())).thenAnswer(invocation -> {
+            final float def = (float) invocation.getArguments()[1];
+            if (vals == null) {
+                return def;
+            }
+            int idx = (int) invocation.getArguments()[0];
+            if (idx >= 0 && idx < vals.length) {
+                return vals[idx];
+            } else {
+                return def;
+            }
+        });
+        return mockArray;
     }
 }

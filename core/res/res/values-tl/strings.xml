@@ -586,13 +586,14 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Gumamit ng lock ng screen"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Ilagay ang iyong lock ng screen para magpatuloy"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Pumindot nang madiin sa sensor"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Hindi maproseso ang fingerprint. Pakisubukan ulit."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Hindi makilala ang fingerprint. Subukan ulit."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Linisin ang sensor para sa fingerprint at subukan ulit"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Linisin ang sensor at subukan ulit"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Pumindot nang madiin sa sensor"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Masyadong mabagal ang paggalaw ng daliri. Pakisubukan ulit."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Sumubok ng ibang fingerprint"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Masyadong maliwanag"</string>
+    <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"May na-detect na pagpindot sa Power"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Subukang isaayos"</string>
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Bahagyang baguhin ang posisyon ng iyong daliri sa bawat pagkakataon"</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -604,16 +605,17 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Na-authenticate ang mukha, pakipindot ang kumpirmahin"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Hindi available ang hardware na ginagamitan ng fingerprint."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Hindi ma-set up ang fingerprint"</string>
-    <string name="fingerprint_error_timeout" msgid="2946635815726054226">"Nag-time out ang fingerprint. Subukang muli."</string>
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Nag-time out ang pag-set up ng fingerprint. Subukan ulit."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Nakansela ang operasyong ginagamitan ng fingerprint."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Kinansela ng user ang operasyon sa fingerprint."</string>
-    <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Napakaraming pagtatangka. Subukan ulit sa ibang pagkakataon."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"Masyadong maraming beses sumubok. Na-disable ang sensor para sa fingerprint."</string>
-    <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Subukang muli."</string>
+    <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Masyadong maraming pagsubok. Gamitin na lang ang lock ng screen."</string>
+    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Masyadong maraming pagsubok. Gamitin na lang ang lock ng screen."</string>
+    <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"Hindi maproseso ang fingerprint. Subukan ulit."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Walang naka-enroll na fingerprint."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Walang sensor ng fingerprint ang device na ito."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Pansamantalang na-disable ang sensor."</string>
     <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Hindi magamit ang sensor para sa fingerprint. Bumisita sa provider ng pag-aayos"</string>
+    <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"Napindot ang power button"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Daliri <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Gumamit ng fingerprint"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Gumamit ng fingerprint o lock ng screen"</string>
@@ -636,7 +638,7 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Bumisita sa provider ng pag-aayos."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"Hindi magawa ang iyong face model. Subukan ulit."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Masyadong maliwanag. Subukang bawasan ang liwanag."</string>
-    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Subukan sa mas maliwanag"</string>
+    <string name="face_acquired_too_dark" msgid="8539853432479385326">"Hindi sapat ang liwanag"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Ilayo pa ang telepono"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Ilapit pa ang telepono"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Itaas pa ang telepono"</string>
@@ -654,8 +656,10 @@
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Tumingin nang mas direkta sa iyong telepono"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Alisin ang anumang humaharang sa iyong mukha."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Linisin ang itaas ng iyong screen, kasama ang itim na bar"</string>
-    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"Dapat ganap na nakikita ang iyong mukha"</string>
-    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"Dapat ganap na nakikita ang iyong mukha"</string>
+    <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
+    <skip />
+    <!-- no translation found for face_acquired_mouth_covering_detected (8219428572168642593) -->
+    <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Hindi magawa ang iyong face model. Subukan ulit."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"May na-detect na madilim na salamin. Dapat ganap na nakikita ang iyong mukha."</string>
     <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"May na-detect na pantakip sa mukha. Dapat ganap na nakikita ang iyong mukha."</string>
@@ -1246,10 +1250,9 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Ihinahanda ang <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Sinisimulan ang apps."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Pagtatapos ng pag-boot."</string>
-    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Ituloy ang pag-set up?"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Pinindot mo ang power button — karaniwan nitong ino-off ang screen.\n\nSubukang i-tap habang sine-set up ang iyong fingerprint."</string>
-    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"I-off ang screen"</string>
-    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Ituloy ang setup"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"I-off ang screen para tapusin ang setup"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"I-off"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Magpatuloy sa pag-verify ng fingerprint?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Pinindot mo ang power button — karaniwan nitong ino-off ang screen.\n\nSubukang i-tap para i-verify ang iyong fingerprint."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"I-off ang screen"</string>
@@ -1402,16 +1405,16 @@
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Mag-tap para i-set up"</string>
     <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"Piliin para i-set up"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Baka kailanganin mong i-reformat ang device. I-tap para i-eject."</string>
-    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Para sa paglilipat ng mga larawan at media"</string>
+    <string name="ext_media_ready_notification_message" msgid="7509496364380197369">"Para sa pag-store ng mga larawan, video, musika, at higit pa"</string>
     <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"Mag-browse ng mga media file"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Isyu sa <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"Hindi gumagana ang <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Mag-tap para ayusin"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"Sira ang <xliff:g id="NAME">%s</xliff:g>. Piliin upang ayusin."</string>
     <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"Baka kailanganin mong i-reformat ang device. I-tap para i-eject."</string>
-    <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"Hindi sinusuportahang <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3487534182861251401">"May na-detect na <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"Hindi gumagana ang <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Hindi sinusuportahan ng device na ito ang <xliff:g id="NAME">%s</xliff:g> na ito. I-tap upang i-set up sa isang sinusuportahang format."</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8463636521459807981">"I-tap para i-set up."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"Piliin para i-set up ang <xliff:g id="NAME">%s</xliff:g> sa isang sinusuportahang format."</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Baka kailanganin mong i-reformat ang device"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"Hindi inaasahang naalis ang <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1425,7 +1428,7 @@
     <string name="ext_media_browse_action" msgid="344865351947079139">"I-explore"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"Ilipat ang output"</string>
     <string name="ext_media_missing_title" msgid="3209472091220515046">"Nawawala ang <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="ext_media_missing_message" msgid="4408988706227922909">"Ikabit muli ang device"</string>
+    <string name="ext_media_missing_message" msgid="4408988706227922909">"Ikabit ulit ang device"</string>
     <string name="ext_media_move_specific_title" msgid="8492118544775964250">"Inililipat ang <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_move_title" msgid="2682741525619033637">"Naglilipat ng data"</string>
     <string name="ext_media_move_success_title" msgid="4901763082647316767">"Tapos na ang paglipat ng content"</string>
@@ -1924,6 +1927,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Kagustuhan sa rehiyon"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"I-type ang wika"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Iminumungkahi"</string>
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"Iminumungkahi"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Lahat ng wika"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"Lahat ng rehiyon"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"Maghanap"</string>
@@ -1941,18 +1945,19 @@
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Hindi available ang camera"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Magpatuloy sa telepono"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Hindi available ang mikropono"</string>
+    <string name="app_streaming_blocked_title_for_playstore_dialog" msgid="8149823099822897538">"Hindi available ang Play Store"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Hindi available ang mga setting ng Android TV"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"Hindi available ang mga setting ng tablet"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"Hindi available ang mga setting ng telepono"</string>
-    <string name="app_streaming_blocked_message" product="tv" msgid="5024599278277957935">"Hindi ito maa-access sa iyong <xliff:g id="DEVICE">%1$s</xliff:g>. Subukan na lang sa iyong Android TV device."</string>
-    <string name="app_streaming_blocked_message" product="tablet" msgid="7491114163056552686">"Hindi ito maa-access sa iyong <xliff:g id="DEVICE">%1$s</xliff:g>. Subukan na lang sa iyong tablet."</string>
-    <string name="app_streaming_blocked_message" product="default" msgid="1245180131667647277">"Hindi ito maa-access sa iyong <xliff:g id="DEVICE">%1$s</xliff:g>. Subukan na lang sa iyong telepono."</string>
-    <string name="app_streaming_blocked_message_for_permission_dialog" product="tv" msgid="6306583663205997979">"Hindi ito maa-access sa iyong <xliff:g id="DEVICE">%1$s</xliff:g> sa ngayon. Subukan na lang sa iyong Android TV device."</string>
-    <string name="app_streaming_blocked_message_for_permission_dialog" product="tablet" msgid="6545624942642129664">"Hindi ito maa-access sa iyong <xliff:g id="DEVICE">%1$s</xliff:g> sa ngayon. Subukan na lang sa iyong tablet."</string>
-    <string name="app_streaming_blocked_message_for_permission_dialog" product="default" msgid="8462740631707923000">"Hindi ito maa-access sa iyong <xliff:g id="DEVICE">%1$s</xliff:g> sa ngayon. Subukan na lang sa iyong telepono."</string>
+    <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Hindi ito maa-access sa iyong <xliff:g id="DEVICE">%1$s</xliff:g> sa ngayon. Subukan na lang sa iyong Android TV device."</string>
+    <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Hindi ito maa-access sa iyong <xliff:g id="DEVICE">%1$s</xliff:g> sa ngayon. Subukan na lang sa iyong tablet."</string>
+    <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Hindi ito maa-access sa iyong <xliff:g id="DEVICE">%1$s</xliff:g> sa ngayon. Subukan na lang sa iyong telepono."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Humihiling ng karagdagang seguridad ang app na ito. Subukan na lang sa iyong Android TV device."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Humihiling ng karagdagang seguridad ang app na ito. Subukan na lang sa iyong tablet."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Humihiling ng karagdagang seguridad ang app na ito. Subukan na lang sa iyong telepono."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"Hindi ito maa-access sa iyong <xliff:g id="DEVICE">%1$s</xliff:g>. Subukan na lang sa iyong Android TV device."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"Hindi ito maa-access sa iyong <xliff:g id="DEVICE">%1$s</xliff:g>. Subukan na lang sa iyong tablet."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Hindi ito maa-access sa iyong <xliff:g id="DEVICE">%1$s</xliff:g>. Subukan na lang sa iyong telepono."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Ang app na ito ay ginawa para sa mas lumang bersyon ng Android at maaaring hindi gumana nang maayos. Subukang tingnan kung may mga update, o makipag-ugnayan sa developer."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Tingnan kung may update"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Mayroon kang mga bagong mensahe"</string>
@@ -2045,7 +2050,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Payagan ang <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> na i-access ang lahat ng log ng device?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Payagan ang isang beses na pag-access"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Huwag payagan"</string>
-    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Nire-record ng mga log ng device kung ano ang nangyayari sa iyong device. Magagamit ng mga app ang mga log na ito para maghanap at mag-ayos ng mga isyu.\n\nPosibleng maglaman ang ilang log ng sensitibong impormasyon, kaya ang mga app lang na pinagkakatiwalaan mo ang payagang maka-access sa lahat ng log ng device. \n\nKung hindi mo papayagan ang app na ito na i-access ang lahat ng log ng device, maa-access pa rin nito ang mga sarili nitong log. Posible pa ring ma-access ng manufacturer ng iyong device ang ilang log o impormasyon sa device mo. Matuto pa"</string>
+    <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"Nire-record ng mga log ng device kung ano ang nangyayari sa iyong device. Magagamit ng mga app ang mga log na ito para maghanap at mag-ayos ng mga isyu.\n\nPosibleng maglaman ang ilang log ng sensitibong impormasyon, kaya ang mga app lang na pinagkakatiwalaan mo ang payagang maka-access sa lahat ng log ng device. \n\nKung hindi mo papayagan ang app na ito na i-access ang lahat ng log ng device, maa-access pa rin nito ang mga sarili nitong log. Posible pa ring ma-access ng manufacturer ng iyong device ang ilang log o impormasyon sa device mo."</string>
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"Nire-record ng mga log ng device kung ano ang nangyayari sa iyong device. Magagamit ng mga app ang mga log na ito para maghanap at mag-ayos ng mga isyu.\n\nPosibleng maglaman ang ilang log ng sensitibong impormasyon, kaya ang mga app lang na pinagkakatiwalaan mo ang payagang maka-access sa lahat ng log ng device. \n\nKung hindi mo papayagan ang app na ito na i-access ang lahat ng log ng device, maa-access pa rin nito ang mga sarili nitong log. Posible pa ring ma-access ng manufacturer ng iyong device ang ilang log o impormasyon sa device mo.\n\nMatuto pa sa g.co/android/devicelogs."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Huwag ipakita ulit"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"Gustong ipakita ng <xliff:g id="APP_0">%1$s</xliff:g> ang mga slice ng <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"I-edit"</string>
@@ -2286,5 +2292,6 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Tingnan ang mga aktibong app"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Hindi ma-access ang camera ng telepono mula sa iyong <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Hindi ma-access ang camera ng tablet mula sa iyong <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
+    <string name="vdm_secure_window" msgid="161700398158812314">"Hindi ito puwedeng i-access habang nagsi-stream. Subukan na lang sa iyong telepono."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Default ng system"</string>
 </resources>

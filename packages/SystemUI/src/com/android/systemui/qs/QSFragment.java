@@ -34,8 +34,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 
+import androidx.annotation.FloatRange;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.LifecycleRegistry;
 
 import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.systemui.Dumpable;
@@ -43,6 +47,8 @@ import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.animation.ShadeInterpolation;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.media.MediaHost;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QS;
@@ -50,6 +56,8 @@ import com.android.systemui.plugins.qs.QSContainerController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.dagger.QSFragmentComponent;
+import com.android.systemui.qs.footer.ui.binder.FooterActionsViewBinder;
+import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
@@ -104,6 +112,10 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     private final QSFragmentComponent.Factory mQsComponentFactory;
     private final QSFragmentDisableFlagsLogger mQsFragmentDisableFlagsLogger;
     private final QSTileHost mHost;
+    private final FeatureFlags mFeatureFlags;
+    private final NewFooterActionsController mNewFooterActionsController;
+    private final FooterActionsViewModel.Factory mFooterActionsViewModelFactory;
+    private final ListeningAndVisibilityLifecycleOwner mListeningAndVisibilityLifecycleOwner;
     private boolean mShowCollapsedOnKeyguard;
     private boolean mLastKeyguardAndExpanded;
     /**
@@ -119,7 +131,10 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     private QSPanelController mQSPanelController;
     private QuickQSPanelController mQuickQSPanelController;
     private QSCustomizerController mQSCustomizerController;
+    @Nullable
     private FooterActionsController mQSFooterActionController;
+    @Nullable
+    private FooterActionsViewModel mQSFooterActionsViewModel;
     @Nullable
     private ScrollListener mScrollListener;
     /**
@@ -152,6 +167,13 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     // visible;
     private boolean mQsVisible;
 
+    /**
+     * Whether the notification panel uses the full width of the screen.
+     *
+     * Usually {@code true} on small screens, and {@code false} on large screens.
+     */
+    private boolean mIsNotificationPanelFullWidth;
+
     @Inject
     public QSFragment(RemoteInputQuickSettingsDisabler remoteInputQsDisabler,
             QSTileHost qsTileHost,
@@ -161,7 +183,9 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
             KeyguardBypassController keyguardBypassController,
             QSFragmentComponent.Factory qsComponentFactory,
             QSFragmentDisableFlagsLogger qsFragmentDisableFlagsLogger,
-            FalsingManager falsingManager, DumpManager dumpManager) {
+            FalsingManager falsingManager, DumpManager dumpManager, FeatureFlags featureFlags,
+            NewFooterActionsController newFooterActionsController,
+            FooterActionsViewModel.Factory footerActionsViewModelFactory) {
         mRemoteInputQuickSettingsDisabler = remoteInputQsDisabler;
         mQsMediaHost = qsMediaHost;
         mQqsMediaHost = qqsMediaHost;
@@ -173,6 +197,10 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         mBypassController = keyguardBypassController;
         mStatusBarStateController = statusBarStateController;
         mDumpManager = dumpManager;
+        mFeatureFlags = featureFlags;
+        mNewFooterActionsController = newFooterActionsController;
+        mFooterActionsViewModelFactory = footerActionsViewModelFactory;
+        mListeningAndVisibilityLifecycleOwner = new ListeningAndVisibilityLifecycleOwner();
     }
 
     @Override
@@ -193,11 +221,22 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         QSFragmentComponent qsFragmentComponent = mQsComponentFactory.create(this);
         mQSPanelController = qsFragmentComponent.getQSPanelController();
         mQuickQSPanelController = qsFragmentComponent.getQuickQSPanelController();
-        mQSFooterActionController = qsFragmentComponent.getQSFooterActionController();
 
         mQSPanelController.init();
         mQuickQSPanelController.init();
-        mQSFooterActionController.init();
+
+        if (mFeatureFlags.isEnabled(Flags.NEW_FOOTER_ACTIONS)) {
+            mQSFooterActionsViewModel = mFooterActionsViewModelFactory.create(/* lifecycleOwner */
+                    this);
+            FooterActionsView footerActionsView = view.findViewById(R.id.qs_footer_actions);
+            FooterActionsViewBinder.bind(footerActionsView, mQSFooterActionsViewModel,
+                    mListeningAndVisibilityLifecycleOwner);
+
+            mNewFooterActionsController.init();
+        } else {
+            mQSFooterActionController = qsFragmentComponent.getQSFooterActionController();
+            mQSFooterActionController.init();
+        }
 
         mQSPanelScrollView = view.findViewById(R.id.expanded_qs_scroll_view);
         mQSPanelScrollView.addOnLayoutChangeListener(
@@ -283,6 +322,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
             mDumpManager.unregisterDumpable(mContainer.getClass().getName());
         }
         mDumpManager.unregisterDumpable(getClass().getName());
+        mListeningAndVisibilityLifecycleOwner.destroy();
     }
 
     @Override
@@ -395,7 +435,9 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         mContainer.disable(state1, state2, animate);
         mHeader.disable(state1, state2, animate);
         mFooter.disable(state1, state2, animate);
-        mQSFooterActionController.disable(state2);
+        if (mQSFooterActionController != null) {
+            mQSFooterActionController.disable(state2);
+        }
         updateQsState();
     }
 
@@ -415,7 +457,11 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         boolean footerVisible = qsPanelVisible &&  (expanded || !keyguardShowing || mHeaderAnimating
                 || mShowCollapsedOnKeyguard);
         mFooter.setVisibility(footerVisible ? View.VISIBLE : View.INVISIBLE);
-        mQSFooterActionController.setVisible(footerVisible);
+        if (mQSFooterActionController != null) {
+            mQSFooterActionController.setVisible(footerVisible);
+        } else {
+            mQSFooterActionsViewModel.onVisibilityChangeRequested(footerVisible);
+        }
         mFooter.setExpanded((keyguardShowing && !mHeaderAnimating && !mShowCollapsedOnKeyguard)
                 || (expanded && !mStackScrollerOverscrolling));
         mQSPanelController.setVisibility(qsPanelVisible ? View.VISIBLE : View.INVISIBLE);
@@ -482,7 +528,9 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         }
 
         mFooter.setKeyguardShowing(keyguardShowing);
-        mQSFooterActionController.setKeyguardShowing(keyguardShowing);
+        if (mQSFooterActionController != null) {
+            mQSFooterActionController.setKeyguardShowing(keyguardShowing);
+        }
         updateQsState();
     }
 
@@ -498,7 +546,10 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         if (DEBUG) Log.d(TAG, "setListening " + listening);
         mListening = listening;
         mQSContainerImplController.setListening(listening && mQsVisible);
-        mQSFooterActionController.setListening(listening && mQsVisible);
+        if (mQSFooterActionController != null) {
+            mQSFooterActionController.setListening(listening && mQsVisible);
+        }
+        mListeningAndVisibilityLifecycleOwner.updateState();
         updateQsPanelControllerListening();
     }
 
@@ -511,6 +562,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         if (DEBUG) Log.d(TAG, "setQsVisible " + visible);
         mQsVisible = visible;
         setListening(mListening);
+        mListeningAndVisibilityLifecycleOwner.updateState();
     }
 
     @Override
@@ -521,21 +573,22 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     @Override
     public void setInSplitShade(boolean inSplitShade) {
         mInSplitShade = inSplitShade;
-        mQSAnimator.setTranslateWhileExpanding(inSplitShade);
         updateShowCollapsedOnKeyguard();
         updateQsState();
     }
 
     @Override
-    public void setTransitionToFullShadeAmount(float pxAmount, float progress) {
-        boolean isTransitioningToFullShade = pxAmount > 0;
+    public void setTransitionToFullShadeProgress(
+            boolean isTransitioningToFullShade,
+            @FloatRange(from = 0.0, to = 1.0) float qsTransitionFraction,
+            @FloatRange(from = 0.0, to = 1.0) float qsSquishinessFraction) {
         if (isTransitioningToFullShade != mTransitioningToFullShade) {
             mTransitioningToFullShade = isTransitioningToFullShade;
             updateShowCollapsedOnKeyguard();
         }
-        mFullShadeProgress = progress;
+        mFullShadeProgress = qsTransitionFraction;
         setQsExpansion(mLastQSExpansion, mLastPanelFraction, mLastHeaderTranslation,
-                isTransitioningToFullShade ? progress : mSquishinessFraction);
+                isTransitioningToFullShade ? qsSquishinessFraction : mSquishinessFraction);
     }
 
     @Override
@@ -554,12 +607,16 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     }
 
     @Override
+    public void setIsNotificationPanelFullWidth(boolean isFullWidth) {
+        mIsNotificationPanelFullWidth = isFullWidth;
+    }
+
+    @Override
     public void setQsExpansion(float expansion, float panelExpansionFraction,
             float proposedTranslation, float squishinessFraction) {
         float headerTranslation = mTransitioningToFullShade ? 0 : proposedTranslation;
-        float progress = mTransitioningToFullShade || mState == StatusBarState.KEYGUARD
-                ? mFullShadeProgress : panelExpansionFraction;
-        setAlphaAnimationProgress(mInSplitShade ? progress : 1);
+        float alphaProgress = calculateAlphaProgress(panelExpansionFraction);
+        setAlphaAnimationProgress(alphaProgress);
         mContainer.setExpansion(expansion);
         final float translationScaleY = (mInSplitShade
                 ? 1 : QSAnimator.SHORT_PARALLAX_AMOUNT) * (expansion - 1);
@@ -600,11 +657,22 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         }
         mQSPanelController.setIsOnKeyguard(onKeyguard);
         mFooter.setExpansion(onKeyguardAndExpanded ? 1 : expansion);
-        mQSFooterActionController.setExpansion(onKeyguardAndExpanded ? 1 : expansion);
+        float footerActionsExpansion =
+                onKeyguardAndExpanded ? 1 : mInSplitShade ? alphaProgress : expansion;
+        if (mQSFooterActionController != null) {
+            mQSFooterActionController.setExpansion(footerActionsExpansion);
+        } else {
+            mQSFooterActionsViewModel.onQuickSettingsExpansionChanged(footerActionsExpansion,
+                    mInSplitShade);
+        }
         mQSPanelController.setRevealExpansion(expansion);
         mQSPanelController.getTileLayout().setExpansion(expansion, proposedTranslation);
         mQuickQSPanelController.getTileLayout().setExpansion(expansion, proposedTranslation);
-        mQSPanelScrollView.setTranslationY(translationScaleY * heightDiff);
+
+        float qsScrollViewTranslation =
+                onKeyguard && !mShowCollapsedOnKeyguard ? panelTranslationY : 0;
+        mQSPanelScrollView.setTranslationY(qsScrollViewTranslation);
+
         if (fullyCollapsed) {
             mQSPanelScrollView.setScrollY(0);
         }
@@ -632,10 +700,43 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         } else if (progress > 0 && view.getVisibility() != View.VISIBLE) {
             view.setVisibility((View.VISIBLE));
         }
-        float alpha = mQSPanelController.isBouncerInTransit()
-                ? BouncerPanelExpansionCalculator.aboutToShowBouncerProgress(progress)
-                : ShadeInterpolation.getContentAlpha(progress);
-        view.setAlpha(alpha);
+        view.setAlpha(interpolateAlphaAnimationProgress(progress));
+    }
+
+    private float calculateAlphaProgress(float panelExpansionFraction) {
+        if (mIsNotificationPanelFullWidth) {
+            // Small screens. QS alpha is not animated.
+            return 1;
+        }
+        if (mInSplitShade) {
+            // Large screens in landscape.
+            if (mTransitioningToFullShade || isKeyguardState()) {
+                // Always use "mFullShadeProgress" on keyguard, because
+                // "panelExpansionFractions" is always 1 on keyguard split shade.
+                return mFullShadeProgress;
+            } else {
+                return panelExpansionFraction;
+            }
+        }
+        // Large screens in portrait.
+        if (mTransitioningToFullShade) {
+            // Only use this value during the standard lock screen shade expansion. During the
+            // "quick" expansion from top, this value is 0.
+            return mFullShadeProgress;
+        } else {
+            return panelExpansionFraction;
+        }
+    }
+
+    private float interpolateAlphaAnimationProgress(float progress) {
+        if (mQSPanelController.isBouncerInTransit()) {
+            return BouncerPanelExpansionCalculator.aboutToShowBouncerProgress(progress);
+        }
+        if (isKeyguardState()) {
+            // Alpha progress should be linear on lockscreen shade expansion.
+            return progress;
+        }
+        return ShadeInterpolation.getContentAlpha(progress);
     }
 
     private void updateQsBounds() {
@@ -712,7 +813,11 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         boolean customizing = isCustomizing();
         mQSPanelScrollView.setVisibility(!customizing ? View.VISIBLE : View.INVISIBLE);
         mFooter.setVisibility(!customizing ? View.VISIBLE : View.INVISIBLE);
-        mQSFooterActionController.setVisible(!customizing);
+        if (mQSFooterActionController != null) {
+            mQSFooterActionController.setVisible(!customizing);
+        } else {
+            mQSFooterActionsViewModel.onVisibilityChangeRequested(!customizing);
+        }
         mHeader.setVisibility(!customizing ? View.VISIBLE : View.INVISIBLE);
         // Let the panel know the position changed and it needs to update where notifications
         // and whatnot are.
@@ -857,5 +962,57 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
             return "INVISIBLE";
         }
         return "GONE";
+    }
+
+    /**
+     * A {@link LifecycleOwner} whose state is driven by the current state of this fragment:
+     *
+     *  - DESTROYED when the fragment is destroyed.
+     *  - CREATED when mListening == mQsVisible == false.
+     *  - STARTED when mListening == true && mQsVisible == false.
+     *  - RESUMED when mListening == true && mQsVisible == true.
+     */
+    private class ListeningAndVisibilityLifecycleOwner implements LifecycleOwner {
+        private final LifecycleRegistry mLifecycleRegistry = new LifecycleRegistry(this);
+        private boolean mDestroyed = false;
+
+        {
+            updateState();
+        }
+
+        @Override
+        public Lifecycle getLifecycle() {
+            return mLifecycleRegistry;
+        }
+
+        /**
+         * Update the state of the associated lifecycle. This should be called whenever
+         * {@code mListening} or {@code mQsVisible} is changed.
+         */
+        public void updateState() {
+            if (mDestroyed) {
+                mLifecycleRegistry.setCurrentState(Lifecycle.State.DESTROYED);
+                return;
+            }
+
+            if (!mListening) {
+                mLifecycleRegistry.setCurrentState(Lifecycle.State.CREATED);
+                return;
+            }
+
+            // mListening && !mQsVisible.
+            if (!mQsVisible) {
+                mLifecycleRegistry.setCurrentState(Lifecycle.State.STARTED);
+                return;
+            }
+
+            // mListening && mQsVisible.
+            mLifecycleRegistry.setCurrentState(Lifecycle.State.RESUMED);
+        }
+
+        public void destroy() {
+            mDestroyed = true;
+            updateState();
+        }
     }
 }

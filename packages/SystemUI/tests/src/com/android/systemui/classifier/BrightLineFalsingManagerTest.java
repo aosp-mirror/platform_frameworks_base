@@ -32,6 +32,7 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.testing.FakeMetricsLogger;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import org.junit.Before;
@@ -111,5 +112,51 @@ public class BrightLineFalsingManagerTest extends SysuiTestCase {
         assertThat(mBrightLineFalsingManager.isFalseDoubleTap()).isFalse();
     }
 
+    @Test
+    public void testIsProxNear_noProxEvents_defaultsToFalse() {
+        assertThat(mBrightLineFalsingManager.isProximityNear()).isFalse();
+    }
 
+    @Test
+    public void testIsProxNear_receivesNearEvent() {
+        mBrightLineFalsingManager.onProximityEvent(new FalsingManager.ProximityEvent() {
+            @Override
+            public boolean getCovered() {
+                return true;
+            }
+
+            @Override
+            public long getTimestampNs() {
+                return 0;
+            }
+        });
+        assertThat(mBrightLineFalsingManager.isProximityNear()).isTrue();
+    }
+
+    @Test
+    public void testIsProxNear_receivesNearAndThenFarEvent() {
+        mBrightLineFalsingManager.onProximityEvent(new FalsingManager.ProximityEvent() {
+            @Override
+            public boolean getCovered() {
+                return true;
+            }
+
+            @Override
+            public long getTimestampNs() {
+                return 0;
+            }
+        });
+        mBrightLineFalsingManager.onProximityEvent(new FalsingManager.ProximityEvent() {
+            @Override
+            public boolean getCovered() {
+                return false;
+            }
+
+            @Override
+            public long getTimestampNs() {
+                return 5;
+            }
+        });
+        assertThat(mBrightLineFalsingManager.isProximityNear()).isFalse();
+    }
 }

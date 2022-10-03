@@ -42,8 +42,10 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
+import static com.android.server.wm.BLASTSyncEngine.METHOD_BLAST;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 import static com.android.server.wm.WindowContainer.SYNC_STATE_READY;
+import static com.android.server.wm.WindowState.BLAST_TIMEOUT_DURATION;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -578,6 +580,22 @@ public class WindowOrganizerTests extends WindowTestsBase {
     }
 
     @Test
+    public void testContainerTranslucentChanges() {
+        removeGlobalMinSizeRestriction();
+        final Task rootTask = new TaskBuilder(mSupervisor).setCreateActivity(true)
+                .setWindowingMode(WINDOWING_MODE_FULLSCREEN).build();
+        final ActivityRecord activity = new ActivityBuilder(mAtm).setTask(rootTask).build();
+        WindowContainerTransaction t = new WindowContainerTransaction();
+        assertFalse(rootTask.isTranslucent(activity));
+        t.setForceTranslucent(rootTask.mRemoteToken.toWindowContainerToken(), true);
+        mWm.mAtmService.mWindowOrganizerController.applyTransaction(t);
+        assertTrue(rootTask.isTranslucent(activity));
+        t.setForceTranslucent(rootTask.mRemoteToken.toWindowContainerToken(), false);
+        mWm.mAtmService.mWindowOrganizerController.applyTransaction(t);
+        assertFalse(rootTask.isTranslucent(activity));
+    }
+
+    @Test
     public void testSetIgnoreOrientationRequest_taskDisplayArea() {
         removeGlobalMinSizeRestriction();
         final TaskDisplayArea taskDisplayArea = mDisplayContent.getDefaultTaskDisplayArea();
@@ -984,7 +1002,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         BLASTSyncEngine.TransactionReadyListener transactionListener =
                 mock(BLASTSyncEngine.TransactionReadyListener.class);
 
-        int id = bse.startSyncSet(transactionListener);
+        int id = bse.startSyncSet(transactionListener, BLAST_TIMEOUT_DURATION, "", METHOD_BLAST);
         bse.addToSyncSet(id, task);
         bse.setReady(id);
         bse.onSurfacePlacement();

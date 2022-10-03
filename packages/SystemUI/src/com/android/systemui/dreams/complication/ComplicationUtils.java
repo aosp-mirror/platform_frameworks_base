@@ -21,6 +21,7 @@ import static com.android.systemui.dreams.complication.Complication.COMPLICATION
 import static com.android.systemui.dreams.complication.Complication.COMPLICATION_TYPE_DATE;
 import static com.android.systemui.dreams.complication.Complication.COMPLICATION_TYPE_HOME_CONTROLS;
 import static com.android.systemui.dreams.complication.Complication.COMPLICATION_TYPE_NONE;
+import static com.android.systemui.dreams.complication.Complication.COMPLICATION_TYPE_SMARTSPACE;
 import static com.android.systemui.dreams.complication.Complication.COMPLICATION_TYPE_TIME;
 import static com.android.systemui.dreams.complication.Complication.COMPLICATION_TYPE_WEATHER;
 
@@ -34,7 +35,7 @@ import java.util.Set;
 public class ComplicationUtils {
     /**
      * Converts a {@link com.android.settingslib.dream.DreamBackend.ComplicationType} to
-     * {@link ComplicationType}.
+     * {@link Complication.ComplicationType}.
      */
     @Complication.ComplicationType
     public static int convertComplicationType(@DreamBackend.ComplicationType int type) {
@@ -51,6 +52,8 @@ public class ComplicationUtils {
                 return COMPLICATION_TYPE_CAST_INFO;
             case DreamBackend.COMPLICATION_TYPE_HOME_CONTROLS:
                 return COMPLICATION_TYPE_HOME_CONTROLS;
+            case DreamBackend.COMPLICATION_TYPE_SMARTSPACE:
+                return COMPLICATION_TYPE_SMARTSPACE;
             default:
                 return COMPLICATION_TYPE_NONE;
         }

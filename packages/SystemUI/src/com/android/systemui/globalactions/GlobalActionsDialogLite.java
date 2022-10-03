@@ -90,6 +90,8 @@ import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.ListPopupWindow;
 import android.widget.TextView;
+import android.window.OnBackInvokedCallback;
+import android.window.OnBackInvokedDispatcher;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.Lifecycle;
@@ -154,6 +156,8 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
     public static final String SYSTEM_DIALOG_REASON_KEY = "reason";
     public static final String SYSTEM_DIALOG_REASON_GLOBAL_ACTIONS = "globalactions";
     public static final String SYSTEM_DIALOG_REASON_DREAM = "dream";
+
+    private static final boolean DEBUG = false;
 
     private static final String TAG = "GlobalActionsDialogLite";
 
@@ -2177,6 +2181,11 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
 
         protected ViewGroup mContainer;
 
+        private final OnBackInvokedCallback mOnBackInvokedCallback = () -> {
+            logOnBackInvocation();
+            dismiss();
+        };
+
         @VisibleForTesting
         protected GestureDetector.SimpleOnGestureListener mGestureListener =
                 new GestureDetector.SimpleOnGestureListener() {
@@ -2221,6 +2230,16 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
                     }
                 };
 
+
+        // this exists so that we can point it to a mock during Unit Testing
+        private OnBackInvokedDispatcher mOverriddenBackDispatcher;
+
+        // the following method exists so that a Unit Test can supply a `OnBackInvokedDispatcher`
+        @VisibleForTesting
+        void setBackDispatcherOverride(OnBackInvokedDispatcher mockDispatcher) {
+            mOverriddenBackDispatcher = mockDispatcher;
+        }
+
         ActionsDialogLite(Context context, int themeRes, MyAdapter adapter,
                 MyOverflowAdapter overflowAdapter,
                 SysuiColorExtractor sysuiColorExtractor, IStatusBarService statusBarService,
@@ -2254,6 +2273,22 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             super.onCreate(savedInstanceState);
             initializeLayout();
             mWindowDimAmount = getWindow().getAttributes().dimAmount;
+            getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
+                    OnBackInvokedDispatcher.PRIORITY_DEFAULT, mOnBackInvokedCallback);
+            if (DEBUG) Log.d(TAG, "OnBackInvokedCallback handler registered");
+        }
+
+        @VisibleForTesting
+        @Override
+        public OnBackInvokedDispatcher getOnBackInvokedDispatcher() {
+            if (mOverriddenBackDispatcher != null) return mOverriddenBackDispatcher;
+            else return super.getOnBackInvokedDispatcher();
+        }
+
+        @Override
+        public void onDetachedFromWindow() {
+            getOnBackInvokedDispatcher().unregisterOnBackInvokedCallback(mOnBackInvokedCallback);
+            if (DEBUG) Log.d(TAG, "OnBackInvokedCallback handler unregistered");
         }
 
         @Override
@@ -2453,7 +2488,12 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         @Override
         public void onBackPressed() {
             super.onBackPressed();
+            logOnBackInvocation();
+        }
+
+        private void logOnBackInvocation() {
             mUiEventLogger.log(GlobalActionsEvent.GA_CLOSE_BACK);
+            if (DEBUG) Log.d(TAG, "onBack invoked");
         }
 
         @Override

@@ -27,6 +27,8 @@ import android.view.SurfaceControl.ScreenshotHardwareBuffer
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -37,7 +39,10 @@ import org.junit.runner.RunWith
 class ImageCaptureImplTest : SysuiTestCase() {
     private val displayManager = mock<DisplayManager>()
     private val atmService = mock<IActivityTaskManager>()
-    private val capture = TestableImageCaptureImpl(displayManager, atmService)
+    private val capture = TestableImageCaptureImpl(
+        displayManager,
+        atmService,
+        Dispatchers.Unconfined)
 
     @Test
     fun captureDisplayWithCrop() {
@@ -59,9 +64,10 @@ class ImageCaptureImplTest : SysuiTestCase() {
 
     class TestableImageCaptureImpl(
         displayManager: DisplayManager,
-        atmService: IActivityTaskManager
+        atmService: IActivityTaskManager,
+        bgDispatcher: CoroutineDispatcher
     ) :
-        ImageCaptureImpl(displayManager, atmService) {
+        ImageCaptureImpl(displayManager, atmService, bgDispatcher) {
 
         var token: IBinder? = null
         var width: Int? = null

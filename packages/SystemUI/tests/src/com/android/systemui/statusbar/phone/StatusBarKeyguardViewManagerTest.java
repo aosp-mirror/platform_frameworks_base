@@ -23,9 +23,11 @@ import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -40,17 +42,24 @@ import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardMessageArea;
 import com.android.keyguard.KeyguardMessageAreaController;
+import com.android.keyguard.KeyguardSecurityModel;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dreams.DreamOverlayStateController;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.keyguard.data.BouncerView;
+import com.android.systemui.keyguard.data.BouncerViewDelegate;
+import com.android.systemui.keyguard.domain.interactor.BouncerCallbackInteractor;
+import com.android.systemui.keyguard.domain.interactor.BouncerInteractor;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
+import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionChangeEvent;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
@@ -99,6 +108,13 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     @Mock private SysUIUnfoldComponent mSysUiUnfoldComponent;
     @Mock private DreamOverlayStateController mDreamOverlayStateController;
     @Mock private LatencyTracker mLatencyTracker;
+    @Mock private FeatureFlags mFeatureFlags;
+    @Mock private KeyguardSecurityModel mKeyguardSecurityModel;
+    @Mock private BouncerCallbackInteractor mBouncerCallbackInteractor;
+    @Mock private BouncerInteractor mBouncerInteractor;
+    @Mock private BouncerView mBouncerView;
+//    @Mock private WeakReference<BouncerViewDelegate> mBouncerViewDelegateWeakReference;
+    @Mock private BouncerViewDelegate mBouncerViewDelegate;
 
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private KeyguardBouncer.BouncerExpansionCallback mBouncerExpansionCallback;
@@ -113,6 +129,8 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         when(mContainer.findViewById(anyInt())).thenReturn(mKeyguardMessageArea);
         when(mKeyguardMessageAreaFactory.create(any(KeyguardMessageArea.class)))
                 .thenReturn(mKeyguardMessageAreaController);
+        when(mBouncerView.getDelegate()).thenReturn(mBouncerViewDelegate);
+
         mStatusBarKeyguardViewManager =
                 new StatusBarKeyguardViewManager(
                         getContext(),
@@ -131,7 +149,12 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                         mKeyguardMessageAreaFactory,
                         Optional.of(mSysUiUnfoldComponent),
                         () -> mShadeController,
-                        mLatencyTracker);
+                        mLatencyTracker,
+                        mKeyguardSecurityModel,
+                        mFeatureFlags,
+                        mBouncerCallbackInteractor,
+                        mBouncerInteractor,
+                        mBouncerView);
         mStatusBarKeyguardViewManager.registerCentralSurfaces(
                 mCentralSurfaces,
                 mNotificationPanelView,
@@ -268,6 +291,17 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     @Test
     public void onPanelExpansionChanged_neverTranslatesBouncerWhenLaunchingApp() {
         when(mCentralSurfaces.isInLaunchTransition()).thenReturn(true);
+        mStatusBarKeyguardViewManager.onPanelExpansionChanged(
+                expansionEvent(
+                        /* fraction= */ KeyguardBouncer.EXPANSION_VISIBLE,
+                        /* expanded= */ true,
+                        /* tracking= */ false));
+        verify(mBouncer, never()).setExpansion(anyFloat());
+    }
+
+    @Test
+    public void onPanelExpansionChanged_neverTranslatesBouncerWhenShadeLocked() {
+        when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE_LOCKED);
         mStatusBarKeyguardViewManager.onPanelExpansionChanged(
                 expansionEvent(
                         /* fraction= */ KeyguardBouncer.EXPANSION_VISIBLE,
@@ -492,5 +526,27 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         when(mDreamOverlayStateController.isOverlayActive()).thenReturn(true);
         mBouncerExpansionCallback.onVisibilityChanged(false);
         verify(mCentralSurfaces).setBouncerShowingOverDream(false);
+    }
+
+
+    @Test
+    public void testSetDozing_bouncerShowing_Dozing() {
+        clearInvocations(mBouncer);
+        when(mBouncer.isShowing()).thenReturn(true);
+        doAnswer(invocation -> {
+            when(mBouncer.isShowing()).thenReturn(false);
+            return null;
+        }).when(mBouncer).hide(false);
+        mStatusBarKeyguardViewManager.onDozingChanged(true);
+        verify(mBouncer, times(1)).hide(false);
+    }
+
+    @Test
+    public void testSetDozing_bouncerShowing_notDozing() {
+        mStatusBarKeyguardViewManager.onDozingChanged(true);
+        when(mBouncer.isShowing()).thenReturn(true);
+        clearInvocations(mBouncer);
+        mStatusBarKeyguardViewManager.onDozingChanged(false);
+        verify(mBouncer, times(1)).hide(false);
     }
 }

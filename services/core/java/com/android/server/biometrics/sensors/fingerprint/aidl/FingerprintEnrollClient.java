@@ -50,12 +50,14 @@ import com.android.server.biometrics.sensors.ClientMonitorCompositeCallback;
 import com.android.server.biometrics.sensors.EnrollClient;
 import com.android.server.biometrics.sensors.SensorOverlays;
 import com.android.server.biometrics.sensors.fingerprint.FingerprintUtils;
+import com.android.server.biometrics.sensors.fingerprint.PowerPressHandler;
 import com.android.server.biometrics.sensors.fingerprint.Udfps;
 import com.android.server.biometrics.sensors.fingerprint.UdfpsHelper;
 
 import java.util.function.Supplier;
 
-class FingerprintEnrollClient extends EnrollClient<AidlSession> implements Udfps {
+class FingerprintEnrollClient extends EnrollClient<AidlSession> implements Udfps,
+        PowerPressHandler {
 
     private static final String TAG = "FingerprintEnrollClient";
 
@@ -94,7 +96,7 @@ class FingerprintEnrollClient extends EnrollClient<AidlSession> implements Udfps
         mSensorOverlays = new SensorOverlays(udfpsOverlayController, sidefpsController);
         mMaxTemplatesPerUser = maxTemplatesPerUser;
 
-        mALSProbeCallback = getLogger().createALSCallback(false /* startWithClient */);
+        mALSProbeCallback = getLogger().getAmbientLightProbe(true /* startWithClient */);
 
         mEnrollReason = enrollReason;
         if (enrollReason == FingerprintManager.ENROLL_FIND_SENSOR) {
@@ -216,7 +218,6 @@ class FingerprintEnrollClient extends EnrollClient<AidlSession> implements Udfps
     public void onPointerDown(int x, int y, float minor, float major) {
         try {
             mIsPointerDown = true;
-            mALSProbeCallback.getProbe().enable();
 
             final AidlSession session = getFreshDaemon();
             if (session.hasContextMethods()) {
@@ -240,7 +241,6 @@ class FingerprintEnrollClient extends EnrollClient<AidlSession> implements Udfps
     public void onPointerUp() {
         try {
             mIsPointerDown = false;
-            mALSProbeCallback.getProbe().disable();
 
             final AidlSession session = getFreshDaemon();
             if (session.hasContextMethods()) {
@@ -267,5 +267,11 @@ class FingerprintEnrollClient extends EnrollClient<AidlSession> implements Udfps
         } catch (RemoteException e) {
             Slog.e(TAG, "Unable to send UI ready", e);
         }
+    }
+
+    @Override
+    public void onPowerPressed() {
+        onAcquired(BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_POWER_PRESSED,
+                0 /* vendorCode */);
     }
 }

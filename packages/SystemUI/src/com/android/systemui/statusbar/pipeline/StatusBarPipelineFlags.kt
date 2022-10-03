@@ -25,13 +25,28 @@ import javax.inject.Inject
 @SysUISingleton
 class StatusBarPipelineFlags @Inject constructor(private val featureFlags: FeatureFlags) {
     /**
-     * Returns true if we should run the new pipeline.
+     * Returns true if we should run the new pipeline backend.
      *
-     * TODO(b/238425913): We may want to split this out into:
-     *   (1) isNewPipelineLoggingEnabled(), where the new pipeline runs and logs its decisions but
-     *       doesn't change the UI at all.
-     *   (2) isNewPipelineEnabled(), where the new pipeline runs and does change the UI (and the old
-     *       pipeline doesn't change the UI).
+     * The new pipeline backend hooks up to all our external callbacks, logs those callback inputs,
+     * and logs the output state.
      */
-    fun isNewPipelineEnabled(): Boolean = featureFlags.isEnabled(Flags.NEW_STATUS_BAR_PIPELINE)
+    fun isNewPipelineBackendEnabled(): Boolean =
+        featureFlags.isEnabled(Flags.NEW_STATUS_BAR_PIPELINE_BACKEND)
+
+    /**
+     * Returns true if we should run the new pipeline frontend *and* backend.
+     *
+     * The new pipeline frontend will use the outputted state from the new backend and will make the
+     * correct changes to the UI.
+     */
+    fun isNewPipelineFrontendEnabled(): Boolean =
+        isNewPipelineBackendEnabled() &&
+            featureFlags.isEnabled(Flags.NEW_STATUS_BAR_PIPELINE_FRONTEND)
+
+    /**
+     * Returns true if we should apply some coloring to icons that were rendered with the new
+     * pipeline to help with debugging.
+     */
+    // For now, just always apply the debug coloring if we've enabled frontend rendering.
+    fun useNewPipelineDebugColoring(): Boolean = isNewPipelineFrontendEnabled()
 }

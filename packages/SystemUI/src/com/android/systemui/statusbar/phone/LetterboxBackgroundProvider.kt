@@ -17,11 +17,14 @@
 package com.android.systemui.statusbar.phone
 
 import android.annotation.ColorInt
+import android.app.WallpaperManager
 import android.graphics.Color
+import android.os.Handler
 import android.os.RemoteException
 import android.view.IWindowManager
 import com.android.systemui.Dumpable
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent.CentralSurfacesScope
@@ -37,6 +40,8 @@ constructor(
     private val windowManager: IWindowManager,
     @Background private val backgroundExecutor: Executor,
     private val dumpManager: DumpManager,
+    private val wallpaperManager: WallpaperManager,
+    @Main private val mainHandler: Handler,
 ) : CentralSurfacesComponent.Startable, Dumpable {
 
     @ColorInt
@@ -46,9 +51,18 @@ constructor(
     var isLetterboxBackgroundMultiColored: Boolean = false
         private set
 
+    private val wallpaperColorsListener =
+        WallpaperManager.OnColorsChangedListener { _, _ ->
+            fetchBackgroundColorInfo()
+        }
+
     override fun start() {
         dumpManager.registerDumpable(javaClass.simpleName, this)
+        fetchBackgroundColorInfo()
+        wallpaperManager.addOnColorsChangedListener(wallpaperColorsListener, mainHandler)
+    }
 
+    private fun fetchBackgroundColorInfo() {
         // Using a background executor, as binder calls to IWindowManager are blocking
         backgroundExecutor.execute {
             try {
@@ -62,6 +76,7 @@ constructor(
 
     override fun stop() {
         dumpManager.unregisterDumpable(javaClass.simpleName)
+        wallpaperManager.removeOnColorsChangedListener(wallpaperColorsListener)
     }
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {

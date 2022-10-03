@@ -303,6 +303,13 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
                     mOverviewProxyService.notifyBackAction(false, (int) mDownPoint.x,
                             (int) mDownPoint.y, false /* isButton */, !mIsOnLeftEdge);
                 }
+
+                @Override
+                public void setTriggerBack(boolean triggerBack) {
+                    if (mBackAnimation != null) {
+                        mBackAnimation.setTriggerBack(triggerBack);
+                    }
+                }
             };
 
     private final SysUiState.SysUiStateCallback mSysUiStateCallback =
@@ -574,10 +581,10 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
     private void resetEdgeBackPlugin() {
         if (mIsNewBackAffordanceEnabled) {
             setEdgeBackPlugin(
-                    mBackPanelControllerFactory.create(mContext, mBackAnimation));
+                    mBackPanelControllerFactory.create(mContext));
         } else {
             setEdgeBackPlugin(
-                    new NavigationBarEdgePanel(mContext, mBackAnimation, mLatencyTracker));
+                    new NavigationBarEdgePanel(mContext, mLatencyTracker));
         }
     }
 
@@ -814,8 +821,10 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
         }
         mLogGesture = false;
         String logPackageName = "";
+        Map<String, Integer> vocab = mVocab;
         // Due to privacy, only top 100 most used apps by all users can be logged.
-        if (mUseMLModel && mVocab.containsKey(mPackageName) && mVocab.get(mPackageName) < 100) {
+        if (mUseMLModel && vocab != null && vocab.containsKey(mPackageName)
+                && vocab.get(mPackageName) < 100) {
             logPackageName = mPackageName;
         }
         SysUiStatsLog.write(SysUiStatsLog.BACK_GESTURE_REPORTED_REPORTED, backType,
@@ -953,9 +962,9 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
             updateDisabledForQuickstep(newConfig);
         }
 
-        if (DEBUG_MISSING_GESTURE) {
-            Log.d(DEBUG_MISSING_GESTURE_TAG, "Config changed: config=" + newConfig);
-        }
+        // TODO(b/243765256): Disable this logging once b/243765256 is fixed.
+        Log.d(DEBUG_MISSING_GESTURE_TAG, "Config changed: newConfig=" + newConfig
+                + " lastReportedConfig=" + mLastReportedConfig);
         mLastReportedConfig.updateFrom(newConfig);
         updateDisplaySize();
     }

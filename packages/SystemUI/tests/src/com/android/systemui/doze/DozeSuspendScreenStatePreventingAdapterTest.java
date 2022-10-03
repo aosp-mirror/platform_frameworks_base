@@ -81,9 +81,9 @@ public class DozeSuspendScreenStatePreventingAdapterTest extends SysuiTestCase {
     }
 
     @Test
-    public void forwards_requestWakeUp() throws Exception {
-        mWrapper.requestWakeUp();
-        verify(mInner).requestWakeUp();
+    public void forwards_requestWakeUp() {
+        mWrapper.requestWakeUp(DozeLog.REASON_SENSOR_PICKUP);
+        verify(mInner).requestWakeUp(DozeLog.REASON_SENSOR_PICKUP);
     }
 
     @Test

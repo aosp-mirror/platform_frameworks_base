@@ -17,32 +17,30 @@
 package com.android.systemui.shade;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
+import android.widget.FrameLayout;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.TapAgainView;
 
-public class NotificationPanelView extends PanelView {
+/** The shade view. */
+public final class NotificationPanelView extends FrameLayout {
+    static final boolean DEBUG = false;
 
-    private static final boolean DEBUG = false;
-
-    /**
-     * Fling expanding QS.
-     */
-    public static final int FLING_EXPAND = 0;
-
-    public static final String COUNTER_PANEL_OPEN = "panel_open";
-    public static final String COUNTER_PANEL_OPEN_QS = "panel_open_qs";
+    private final Paint mAlphaPaint = new Paint();
 
     private int mCurrentPanelAlpha;
-    private final Paint mAlphaPaint = new Paint();
     private boolean mDozing;
     private RtlChangeListener mRtlChangeListener;
+    private NotificationPanelViewController.TouchHandler mTouchHandler;
+    private OnConfigurationChangedListener mOnConfigurationChangedListener;
 
     public NotificationPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -99,7 +97,36 @@ public class NotificationPanelView extends PanelView {
         return findViewById(R.id.shade_falsing_tap_again);
     }
 
+    /** Sets the touch handler for this view. */
+    public void setOnTouchListener(NotificationPanelViewController.TouchHandler touchHandler) {
+        super.setOnTouchListener(touchHandler);
+        mTouchHandler = touchHandler;
+    }
+
+    void setOnConfigurationChangedListener(OnConfigurationChangedListener listener) {
+        mOnConfigurationChangedListener = listener;
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent event) {
+        return mTouchHandler.onInterceptTouchEvent(event);
+    }
+
+    @Override
+    public void dispatchConfigurationChanged(Configuration newConfig) {
+        super.dispatchConfigurationChanged(newConfig);
+        mOnConfigurationChangedListener.onConfigurationChanged(newConfig);
+    }
+
+    /** Callback for right-to-left setting changes. */
     interface RtlChangeListener {
+        /** Called when right-to-left setting changes. */
         void onRtlPropertielsChanged(int layoutDirection);
+    }
+
+    /** Callback for config changes. */
+    interface OnConfigurationChangedListener {
+        /** Called when configuration changes. */
+        void onConfigurationChanged(Configuration newConfig);
     }
 }

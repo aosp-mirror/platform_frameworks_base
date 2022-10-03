@@ -288,8 +288,10 @@ public class PipDismissTargetHandler implements ViewTreeObserver.OnPreDrawListen
 
         if (mTargetViewContainer.getVisibility() != View.VISIBLE) {
             mTargetViewContainer.getViewTreeObserver().addOnPreDrawListener(this);
-            mTargetViewContainer.show();
         }
+        // always invoke show, since the target might still be VISIBLE while playing hide animation,
+        // so we want to ensure it will show back again
+        mTargetViewContainer.show();
     }
 
     /** Animates the magnetic dismiss target out and then sets it to GONE. */

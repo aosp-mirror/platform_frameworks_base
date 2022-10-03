@@ -16,7 +16,7 @@
 
 package com.android.systemui.biometrics
 
-import android.graphics.PointF
+import android.graphics.Point
 import android.graphics.RuntimeShader
 import android.util.MathUtils
 
@@ -94,10 +94,10 @@ class DwellRippleShader internal constructor() : RuntimeShader(SHADER) {
     /**
      * Origin coordinate of the ripple.
      */
-    var origin: PointF = PointF()
+    var origin: Point = Point()
         set(value) {
             field = value
-            setFloatUniform("in_origin", value.x, value.y)
+            setFloatUniform("in_origin", value.x.toFloat(), value.y.toFloat())
         }
 
     /**
@@ -107,7 +107,7 @@ class DwellRippleShader internal constructor() : RuntimeShader(SHADER) {
         set(value) {
             field = value
             setFloatUniform("in_radius",
-                    (1 - (1 - value) * (1 - value) * (1 - value))* maxRadius)
+                    (1 - (1 - value) * (1 - value) * (1 - value)) * maxRadius)
             setFloatUniform("in_blur", MathUtils.lerp(1f, 0.7f, value))
         }
 

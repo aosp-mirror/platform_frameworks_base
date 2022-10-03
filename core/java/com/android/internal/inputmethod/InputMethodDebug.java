@@ -194,12 +194,12 @@ public final class InputMethodDebug {
                 return "SHOW_SOFT_INPUT";
             case SoftInputShowHideReason.ATTACH_NEW_INPUT:
                 return "ATTACH_NEW_INPUT";
-            case SoftInputShowHideReason.SHOW_MY_SOFT_INPUT:
-                return "SHOW_MY_SOFT_INPUT";
+            case SoftInputShowHideReason.SHOW_SOFT_INPUT_FROM_IME:
+                return "SHOW_SOFT_INPUT_FROM_IME";
             case SoftInputShowHideReason.HIDE_SOFT_INPUT:
                 return "HIDE_SOFT_INPUT";
-            case SoftInputShowHideReason.HIDE_MY_SOFT_INPUT:
-                return "HIDE_MY_SOFT_INPUT";
+            case SoftInputShowHideReason.HIDE_SOFT_INPUT_FROM_IME:
+                return "HIDE_SOFT_INPUT_FROM_IME";
             case SoftInputShowHideReason.SHOW_AUTO_EDITOR_FORWARD_NAV:
                 return "SHOW_AUTO_EDITOR_FORWARD_NAV";
             case SoftInputShowHideReason.SHOW_STATE_VISIBLE_FORWARD_NAV:
@@ -242,6 +242,16 @@ public final class InputMethodDebug {
                 return "SHOW_SOFT_INPUT_BY_INSETS_API";
             case SoftInputShowHideReason.HIDE_DISPLAY_IME_POLICY_HIDE:
                 return "HIDE_DISPLAY_IME_POLICY_HIDE";
+            case SoftInputShowHideReason.HIDE_SOFT_INPUT_BY_INSETS_API:
+                return "HIDE_SOFT_INPUT_BY_INSETS_API";
+            case SoftInputShowHideReason.HIDE_SOFT_INPUT_BY_BACK_KEY:
+                return "HIDE_SOFT_INPUT_BY_BACK_KEY";
+            case SoftInputShowHideReason.HIDE_SOFT_INPUT_IME_TOGGLE_SOFT_INPUT:
+                return "HIDE_SOFT_INPUT_IME_TOGGLE_SOFT_INPUT";
+            case SoftInputShowHideReason.HIDE_SOFT_INPUT_EXTRACT_INPUT_CHANGED:
+                return "HIDE_SOFT_INPUT_EXTRACT_INPUT_CHANGED";
+            case SoftInputShowHideReason.HIDE_SOFT_INPUT_IMM_DEPRECATION:
+                return "HIDE_SOFT_INPUT_IMM_DEPRECATION";
             default:
                 return "Unknown=" + reason;
         }

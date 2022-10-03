@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.windowdecor;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
@@ -36,6 +37,8 @@ import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.SyncTransactionQueue;
+import com.android.wm.shell.desktopmode.DesktopModeController;
+import com.android.wm.shell.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.freeform.FreeformTaskTransitionStarter;
 import com.android.wm.shell.transition.Transitions;
 
@@ -51,8 +54,8 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel<Caption
     private final Choreographer mMainChoreographer;
     private final DisplayController mDisplayController;
     private final SyncTransactionQueue mSyncQueue;
-
     private FreeformTaskTransitionStarter mTransitionStarter;
+    private DesktopModeController mDesktopModeController;
 
     public CaptionWindowDecorViewModel(
             Context context,
@@ -60,7 +63,8 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel<Caption
             Choreographer mainChoreographer,
             ShellTaskOrganizer taskOrganizer,
             DisplayController displayController,
-            SyncTransactionQueue syncQueue) {
+            SyncTransactionQueue syncQueue,
+            DesktopModeController desktopModeController) {
         mContext = context;
         mMainHandler = mainHandler;
         mMainChoreographer = mainChoreographer;
@@ -68,6 +72,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel<Caption
         mTaskOrganizer = taskOrganizer;
         mDisplayController = displayController;
         mSyncQueue = syncQueue;
+        mDesktopModeController = desktopModeController;
     }
 
     @Override
@@ -81,6 +86,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel<Caption
             SurfaceControl taskSurface,
             SurfaceControl.Transaction startT,
             SurfaceControl.Transaction finishT) {
+        if (!shouldShowWindowDecor(taskInfo)) return null;
         final CaptionWindowDecoration windowDecoration = new CaptionWindowDecoration(
                 mContext,
                 mDisplayController,
@@ -102,9 +108,12 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel<Caption
 
     @Override
     public CaptionWindowDecoration adoptWindowDecoration(AutoCloseable windowDecor) {
-        return (windowDecor instanceof CaptionWindowDecoration)
-                ? (CaptionWindowDecoration) windowDecor
-                : null;
+        if (!(windowDecor instanceof CaptionWindowDecoration)) return null;
+        final CaptionWindowDecoration captionWindowDecor = (CaptionWindowDecoration) windowDecor;
+        if (!shouldShowWindowDecor(captionWindowDecor.mTaskInfo)) {
+            return null;
+        }
+        return captionWindowDecor;
     }
 
     @Override
@@ -149,7 +158,13 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel<Caption
         public void onClick(View v) {
             final int id = v.getId();
             if (id == R.id.close_window) {
-                mActivityTaskManager.removeTask(mTaskId);
+                WindowContainerTransaction wct = new WindowContainerTransaction();
+                wct.removeTask(mTaskToken);
+                if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+                    mTransitionStarter.startRemoveTransition(wct);
+                } else {
+                    mSyncQueue.queue(wct);
+                }
             } else if (id == R.id.maximize_window) {
                 WindowContainerTransaction wct = new WindowContainerTransaction();
                 RunningTaskInfo taskInfo = mTaskOrganizer.getRunningTaskInfo(mTaskId);
@@ -165,6 +180,14 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel<Caption
                 }
                 if (Transitions.ENABLE_SHELL_TRANSITIONS) {
                     mTransitionStarter.startWindowingModeTransition(targetWindowingMode, wct);
+                } else {
+                    mSyncQueue.queue(wct);
+                }
+            } else if (id == R.id.minimize_window) {
+                WindowContainerTransaction wct = new WindowContainerTransaction();
+                wct.reorder(mTaskToken, false);
+                if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+                    mTransitionStarter.startMinimizedModeTransition(wct);
                 } else {
                     mSyncQueue.queue(wct);
                 }
@@ -192,6 +215,12 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel<Caption
         }
 
         private void handleEventForMove(MotionEvent e) {
+            RunningTaskInfo taskInfo = mTaskOrganizer.getRunningTaskInfo(mTaskId);
+            int windowingMode =  mDesktopModeController
+                    .getDisplayAreaWindowingMode(taskInfo.displayId);
+            if (windowingMode == WINDOWING_MODE_FULLSCREEN) {
+                return;
+            }
             switch (e.getActionMasked()) {
                 case MotionEvent.ACTION_DOWN:
                     mDragPointerId  = e.getPointerId(0);
@@ -207,11 +236,25 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel<Caption
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL: {
                     int dragPointerIdx = e.findPointerIndex(mDragPointerId);
+                    int statusBarHeight = mDisplayController.getDisplayLayout(taskInfo.displayId)
+                            .stableInsets().top;
                     mDragResizeCallback.onDragResizeEnd(
                             e.getRawX(dragPointerIdx), e.getRawY(dragPointerIdx));
+                    if (e.getRawY(dragPointerIdx) <= statusBarHeight
+                            && windowingMode == WINDOWING_MODE_FREEFORM) {
+                        mDesktopModeController.setDesktopModeActive(false);
+                    }
                     break;
                 }
             }
         }
+    }
+
+    private boolean shouldShowWindowDecor(RunningTaskInfo taskInfo) {
+        if (taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM) return true;
+        return DesktopModeStatus.IS_SUPPORTED
+                && taskInfo.getActivityType() == ACTIVITY_TYPE_STANDARD
+                && mDisplayController.getDisplayContext(taskInfo.displayId)
+                .getResources().getConfiguration().smallestScreenWidthDp >= 600;
     }
 }

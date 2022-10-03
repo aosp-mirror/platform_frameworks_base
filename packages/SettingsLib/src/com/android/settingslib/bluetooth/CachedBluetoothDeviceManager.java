@@ -17,6 +17,7 @@
 package com.android.settingslib.bluetooth;
 
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothCsipSetCoordinator;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
@@ -297,6 +298,9 @@ public class CachedBluetoothDeviceManager {
                     mCachedDevices.remove(i);
                 }
             }
+
+            // To clear the SetMemberPair flag when the Bluetooth is turning off.
+            mOngoingSetMemberPair = null;
         }
     }
 
@@ -314,12 +318,14 @@ public class CachedBluetoothDeviceManager {
     }
 
     public synchronized void onDeviceUnpaired(CachedBluetoothDevice device) {
+        device.setGroupId(BluetoothCsipSetCoordinator.GROUP_ID_INVALID);
         CachedBluetoothDevice mainDevice = mCsipDeviceManager.findMainDevice(device);
         final Set<CachedBluetoothDevice> memberDevices = device.getMemberDevice();
         if (!memberDevices.isEmpty()) {
             // Main device is unpaired, to unpair the member device
             for (CachedBluetoothDevice memberDevice : memberDevices) {
                 memberDevice.unpair();
+                memberDevice.setGroupId(BluetoothCsipSetCoordinator.GROUP_ID_INVALID);
                 device.removeMemberDevice(memberDevice);
             }
         } else if (mainDevice != null) {
@@ -351,8 +357,12 @@ public class CachedBluetoothDeviceManager {
      * {@code false}.
      */
     public synchronized boolean shouldPairByCsip(BluetoothDevice device, int groupId) {
-        if (mOngoingSetMemberPair != null || device.getBondState() != BluetoothDevice.BOND_NONE
+        boolean isOngoingSetMemberPair = mOngoingSetMemberPair != null;
+        int bondState = device.getBondState();
+        if (isOngoingSetMemberPair || bondState != BluetoothDevice.BOND_NONE
                 || !mCsipDeviceManager.isExistedGroupId(groupId)) {
+            Log.d(TAG, "isOngoingSetMemberPair: " + isOngoingSetMemberPair
+                    + " , device.getBondState: " + bondState);
             return false;
         }
 

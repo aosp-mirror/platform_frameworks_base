@@ -76,6 +76,6 @@ interface UserTracker : UserContentResolverProvider, UserContextProvider {
          * Notifies that the current user's profiles have changed.
          */
         @JvmDefault
-        fun onProfilesChanged(profiles: List<UserInfo>) {}
+        fun onProfilesChanged(profiles: List<@JvmSuppressWildcards UserInfo>) {}
     }
 }

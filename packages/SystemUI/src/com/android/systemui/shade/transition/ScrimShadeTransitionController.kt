@@ -14,6 +14,7 @@ import com.android.systemui.statusbar.phone.panelstate.PanelExpansionChangeEvent
 import com.android.systemui.statusbar.phone.panelstate.PanelState
 import com.android.systemui.statusbar.phone.panelstate.STATE_OPENING
 import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.util.LargeScreenUtils
 import java.io.PrintWriter
 import javax.inject.Inject
@@ -28,6 +29,7 @@ constructor(
     private val scrimController: ScrimController,
     @Main private val resources: Resources,
     private val statusBarStateController: SysuiStatusBarStateController,
+    private val headsUpManager: HeadsUpManager
 ) {
 
     private var inSplitShade = false
@@ -84,7 +86,11 @@ constructor(
     }
 
     private fun canUseCustomFraction(panelState: Int?) =
-        inSplitShade && isScreenUnlocked() && panelState == STATE_OPENING
+        inSplitShade && isScreenUnlocked() && panelState == STATE_OPENING &&
+                // in case of HUN we can't always use predefined distances to manage scrim
+                // transition because dragDownPxAmount can start from value bigger than
+                // splitShadeScrimTransitionDistance
+                !headsUpManager.isTrackingHeadsUp
 
     private fun isScreenUnlocked() =
         statusBarStateController.currentOrUpcomingState == StatusBarState.SHADE

@@ -46,6 +46,7 @@ import static android.app.AppOpsManager.OP_PLAY_AUDIO;
 import static android.app.AppOpsManager.OP_RECEIVE_AMBIENT_TRIGGER_AUDIO;
 import static android.app.AppOpsManager.OP_RECORD_AUDIO;
 import static android.app.AppOpsManager.OP_RECORD_AUDIO_HOTWORD;
+import static android.app.AppOpsManager.OP_VIBRATE;
 import static android.app.AppOpsManager.OnOpStartedListener.START_TYPE_FAILED;
 import static android.app.AppOpsManager.OnOpStartedListener.START_TYPE_RESUMED;
 import static android.app.AppOpsManager.OnOpStartedListener.START_TYPE_STARTED;
@@ -266,6 +267,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             OP_PLAY_AUDIO,
             OP_RECORD_AUDIO,
             OP_CAMERA,
+            OP_VIBRATE,
     };
 
     private static final int MAX_UNFORWARDED_OPS = 10;
@@ -4593,9 +4595,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                 final PackageManager pm = mContext.getPackageManager();
                 final String supplementalPackageName = pm.getSdkSandboxPackageName();
                 if (Objects.equals(packageName, supplementalPackageName)) {
-                    int supplementalAppId = pm.getPackageUid(supplementalPackageName,
-                            PackageManager.PackageInfoFlags.of(0));
-                    uid = UserHandle.getUid(UserHandle.getUserId(uid), supplementalAppId);
+                    uid = pm.getPackageUidAsUser(supplementalPackageName,
+                            PackageManager.PackageInfoFlags.of(0), UserHandle.getUserId(uid));
                 }
             } catch (PackageManager.NameNotFoundException e) {
                 // Shouldn't happen for the supplemental package

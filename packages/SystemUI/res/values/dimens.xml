@@ -380,6 +380,7 @@
 
     <!-- (48dp - 40dp) / 2 -->
     <dimen name="qs_footer_action_inset">4dp</dimen>
+    <dimen name="qs_footer_actions_top_padding">8dp</dimen>
     <dimen name="qs_footer_actions_bottom_padding">4dp</dimen>
     <dimen name="qs_footer_action_inset_negative">-4dp</dimen>
 
@@ -478,6 +479,10 @@
 
     <dimen name="volume_tool_tip_arrow_corner_radius">2dp</dimen>
 
+    <!-- Volume panel slices dimensions -->
+    <dimen name="volume_panel_slice_vertical_padding">8dp</dimen>
+    <dimen name="volume_panel_slice_horizontal_padding">24dp</dimen>
+
     <!-- Size of each item in the ringer selector drawer. -->
     <dimen name="volume_ringer_drawer_item_size">42dp</dimen>
     <dimen name="volume_ringer_drawer_item_size_half">21dp</dimen>
@@ -515,7 +520,7 @@
     <dimen name="qs_tile_margin_vertical">@dimen/qs_tile_margin_horizontal</dimen>
     <dimen name="qs_tile_margin_top_bottom">4dp</dimen>
     <dimen name="qs_brightness_margin_top">8dp</dimen>
-    <dimen name="qs_brightness_margin_bottom">24dp</dimen>
+    <dimen name="qs_brightness_margin_bottom">16dp</dimen>
     <dimen name="qqs_layout_margin_top">16dp</dimen>
     <dimen name="qqs_layout_padding_bottom">24dp</dimen>
 
@@ -665,12 +670,6 @@
     <dimen name="keyguard_smartspace_top_offset">12dp</dimen>
     <!-- With the large clock, move up slightly from the center -->
     <dimen name="keyguard_large_clock_top_margin">-60dp</dimen>
-
-    <!-- TODO: Remove during migration -->
-    <!-- Default line spacing multiplier between hours and minutes of the keyguard clock -->
-    <item name="keyguard_clock_line_spacing_scale" type="dimen" format="float">.7</item>
-    <!-- Burmese line spacing multiplier between hours and minutes of the keyguard clock -->
-    <item name="keyguard_clock_line_spacing_scale_burmese" type="dimen" format="float">1</item>
 
     <dimen name="notification_scrim_corner_radius">32dp</dimen>
 
@@ -890,11 +889,6 @@
          burn-in on AOD. -->
     <dimen name="burn_in_prevention_offset_y_clock">42dp</dimen>
 
-    <!-- Clock maximum font size (dp is intentional, to prevent any further scaling) -->
-     <!-- TODO: Remove when clock migration complete -->
-    <dimen name="large_clock_text_size">150dp</dimen>
-    <dimen name="clock_text_size">86dp</dimen>
-
     <!-- The maximum offset in either direction that icons move to prevent burn-in on AOD. -->
     <dimen name="default_burn_in_prevention_offset">15dp</dimen>
 
@@ -937,7 +931,8 @@
 
     <!-- Biometric Dialog values -->
     <dimen name="biometric_dialog_face_icon_size">64dp</dimen>
-    <dimen name="biometric_dialog_fingerprint_icon_size">80dp</dimen>
+    <dimen name="biometric_dialog_fingerprint_icon_width">80dp</dimen>
+    <dimen name="biometric_dialog_fingerprint_icon_height">80dp</dimen>
     <dimen name="biometric_dialog_button_negative_max_width">160dp</dimen>
     <dimen name="biometric_dialog_button_positive_max_width">136dp</dimen>
     <dimen name="biometric_dialog_corner_size">4dp</dimen>
@@ -950,6 +945,8 @@
     <dimen name="biometric_dialog_medium_to_large_translation_offset">100dp</dimen>
     <!-- Y translation for credential contents when animating in -->
     <dimen name="biometric_dialog_credential_translation_offset">60dp</dimen>
+    <dimen name="biometric_dialog_width">240dp</dimen>
+    <dimen name="biometric_dialog_height">240dp</dimen>
 
     <!-- Starting text size in sp of batteryLevel for wireless charging animation -->
     <item name="wireless_charging_anim_battery_level_text_size_start" format="float" type="dimen">
@@ -1176,8 +1173,8 @@
     <item name="shutdown_scrim_behind_alpha" format="float" type="dimen">0.95</item>
 
     <!-- Output switcher panel related dimensions -->
-    <dimen name="media_output_dialog_list_margin">12dp</dimen>
     <dimen name="media_output_dialog_list_max_height">355dp</dimen>
+    <dimen name="media_output_dialog_list_item_height">76dp</dimen>
     <dimen name="media_output_dialog_header_album_icon_size">72dp</dimen>
     <dimen name="media_output_dialog_header_back_icon_size">32dp</dimen>
     <dimen name="media_output_dialog_header_icon_padding">16dp</dimen>
@@ -1215,6 +1212,17 @@
     <!-- Distance that the full shade transition takes in order for the Quick Settings to fully
          fade and expand. -->
     <dimen name="lockscreen_shade_qs_transition_distance">@dimen/lockscreen_shade_full_transition_distance</dimen>
+
+    <!-- Distance delay for the QS transition to start during the lockscreen shade expansion. -->
+    <dimen name="lockscreen_shade_qs_transition_delay">0dp</dimen>
+
+    <!-- Distance that it takes to complete the QS "squish" transition during the lockscreen shade
+         expansion. -->
+    <dimen name="lockscreen_shade_qs_squish_transition_distance">@dimen/lockscreen_shade_qs_transition_distance</dimen>
+
+    <!-- The fraction at which the QS "squish" transition should start during the lockscreen shade
+         expansion. 0 is fully collapsed, 1 is fully expanded. -->
+    <item type="dimen" format="float" name="lockscreen_shade_qs_squish_start_fraction">0.5</item>
 
     <!-- Distance that the full shade transition takes in order for depth of the wallpaper to fully
          change.  -->
@@ -1446,6 +1454,10 @@
 
     <dimen name="fgs_manager_list_top_spacing">12dp</dimen>
 
+    <dimen name="media_projection_app_selector_icon_size">32dp</dimen>
+    <dimen name="media_projection_app_selector_recents_padding">16dp</dimen>
+    <dimen name="media_projection_app_selector_loader_size">32dp</dimen>
+
     <!-- Dream overlay related dimensions -->
     <dimen name="dream_overlay_status_bar_height">60dp</dimen>
     <dimen name="dream_overlay_status_bar_margin">40dp</dimen>
@@ -1455,9 +1467,10 @@
     <dimen name="dream_overlay_camera_mic_off_indicator_size">8dp</dimen>
     <dimen name="dream_overlay_notification_indicator_size">6dp</dimen>
     <dimen name="dream_overlay_grey_chip_width">56dp</dimen>
+    <dimen name="dream_overlay_status_bar_extra_margin">8dp</dimen>
 
     <!-- Dream overlay complications related dimensions -->
-    <dimen name="dream_overlay_complication_clock_time_text_size">100sp</dimen>
+    <dimen name="dream_overlay_complication_clock_time_text_size">86sp</dimen>
     <dimen name="dream_overlay_complication_clock_subtitle_text_size">24sp</dimen>
     <dimen name="dream_overlay_complication_preview_text_size">36sp</dimen>
     <dimen name="dream_overlay_complication_preview_icon_padding">28dp</dimen>
@@ -1467,14 +1480,14 @@
          if their end is aligned with the parent end. Represented as the percentage over from the
          start of the parent container. -->
     <item name="dream_overlay_complication_guide_end_percent" format="float" type="dimen">
-        0.75
+        0.5
     </item>
 
     <!-- The position of the start guide, which dream overlay complications can align their end to
          if their start is aligned with the parent start. Represented as the percentage over from
          the start of the parent container. -->
     <item name="dream_overlay_complication_guide_start_percent" format="float" type="dimen">
-        0.25
+        0.5
     </item>
 
     <!-- The position of the bottom guide, which dream overlay complications can align their top to
@@ -1537,4 +1550,20 @@
     <dimen name="broadcast_dialog_btn_text_size">16sp</dimen>
     <dimen name="broadcast_dialog_btn_minHeight">44dp</dimen>
     <dimen name="broadcast_dialog_margin">16dp</dimen>
+
+    <!-- Shadow for dream overlay clock complication -->
+    <dimen name="dream_overlay_clock_key_text_shadow_dx">0dp</dimen>
+    <dimen name="dream_overlay_clock_key_text_shadow_dy">0dp</dimen>
+    <dimen name="dream_overlay_clock_key_text_shadow_radius">3dp</dimen>
+    <dimen name="dream_overlay_clock_ambient_text_shadow_dx">0dp</dimen>
+    <dimen name="dream_overlay_clock_ambient_text_shadow_dy">0dp</dimen>
+    <dimen name="dream_overlay_clock_ambient_text_shadow_radius">1dp</dimen>
+
+    <!-- Shadow for dream overlay status bar complications -->
+    <dimen name="dream_overlay_status_bar_key_text_shadow_dx">0.5dp</dimen>
+    <dimen name="dream_overlay_status_bar_key_text_shadow_dy">0.5dp</dimen>
+    <dimen name="dream_overlay_status_bar_key_text_shadow_radius">1dp</dimen>
+    <dimen name="dream_overlay_status_bar_ambient_text_shadow_dx">0.5dp</dimen>
+    <dimen name="dream_overlay_status_bar_ambient_text_shadow_dy">0.5dp</dimen>
+    <dimen name="dream_overlay_status_bar_ambient_text_shadow_radius">2dp</dimen>
 </resources>

@@ -89,8 +89,8 @@ public class KeyguardMessageAreaControllerTest extends SysuiTestCase {
 
     @Test
     public void testSetBouncerVisible() {
-        mMessageAreaController.setBouncerShowing(true);
-        verify(mKeyguardMessageArea).setBouncerShowing(true);
+        mMessageAreaController.setIsVisible(true);
+        verify(mKeyguardMessageArea).setIsVisible(true);
     }
 
     @Test

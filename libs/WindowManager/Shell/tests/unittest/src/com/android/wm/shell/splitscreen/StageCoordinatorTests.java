@@ -16,7 +16,10 @@
 
 package com.android.wm.shell.splitscreen;
 
+import static android.app.ActivityOptions.KEY_LAUNCH_ROOT_TASK_TOKEN;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
+import static android.app.ComponentOptions.KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED;
+import static android.app.ComponentOptions.KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED_BY_PERMISSION;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
@@ -28,11 +31,10 @@ import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_UNDEFINED;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_RETURN_HOME;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -42,8 +44,10 @@ import static org.mockito.Mockito.when;
 import android.app.ActivityManager;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.os.Bundle;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
+import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -97,8 +101,6 @@ public class StageCoordinatorTests extends ShellTestCase {
     @Mock
     private TransactionPool mTransactionPool;
     @Mock
-    private SplitscreenEventLogger mLogger;
-    @Mock
     private ShellExecutor mMainExecutor;
 
     private final Rect mBounds1 = new Rect(10, 20, 30, 40);
@@ -115,9 +117,8 @@ public class StageCoordinatorTests extends ShellTestCase {
         MockitoAnnotations.initMocks(this);
         mStageCoordinator = spy(new StageCoordinator(mContext, DEFAULT_DISPLAY, mSyncQueue,
                 mTaskOrganizer, mMainStage, mSideStage, mDisplayController, mDisplayImeController,
-                mDisplayInsetsController, mSplitLayout, mTransitions, mTransactionPool, mLogger,
+                mDisplayInsetsController, mSplitLayout, mTransitions, mTransactionPool,
                 mMainExecutor, Optional.empty()));
-        doNothing().when(mStageCoordinator).updateActivityOptions(any(), anyInt());
 
         when(mSplitLayout.getBounds1()).thenReturn(mBounds1);
         when(mSplitLayout.getBounds2()).thenReturn(mBounds2);
@@ -227,7 +228,6 @@ public class StageCoordinatorTests extends ShellTestCase {
         mStageCoordinator.exitSplitScreen(testTaskId, EXIT_REASON_RETURN_HOME);
         verify(mMainStage).reorderChild(eq(testTaskId), eq(true),
                 any(WindowContainerTransaction.class));
-        verify(mSideStage).dismiss(any(WindowContainerTransaction.class), eq(false));
         verify(mMainStage).resetBounds(any(WindowContainerTransaction.class));
     }
 
@@ -241,7 +241,6 @@ public class StageCoordinatorTests extends ShellTestCase {
         verify(mSideStage).reorderChild(eq(testTaskId), eq(true),
                 any(WindowContainerTransaction.class));
         verify(mSideStage).resetBounds(any(WindowContainerTransaction.class));
-        verify(mMainStage).dismiss(any(WindowContainerTransaction.class), eq(false));
     }
 
     @Test
@@ -306,5 +305,17 @@ public class StageCoordinatorTests extends ShellTestCase {
         mStageCoordinator.finishEnterSplitScreen(new SurfaceControl.Transaction());
 
         verify(mSplitLayout).applySurfaceChanges(any(), any(), any(), any(), any(), eq(false));
+    }
+
+    @Test
+    public void testAddActivityOptions_addsBackgroundActivitiesFlags() {
+        Bundle options = mStageCoordinator.resolveStartStage(STAGE_TYPE_MAIN,
+                SPLIT_POSITION_UNDEFINED, null /* options */, null /* wct */);
+
+        assertEquals(options.getParcelable(KEY_LAUNCH_ROOT_TASK_TOKEN, WindowContainerToken.class),
+                mMainStage.mRootTaskInfo.token);
+        assertTrue(options.getBoolean(KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED));
+        assertTrue(options.getBoolean(
+                KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED_BY_PERMISSION));
     }
 }

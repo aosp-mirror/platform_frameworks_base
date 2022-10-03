@@ -88,6 +88,11 @@ public class PipTransitionState {
         return isInPip(mState);
     }
 
+    /** Returns true if activity has fully entered PiP mode. */
+    public boolean hasEnteredPip() {
+        return hasEnteredPip(mState);
+    }
+
     public void setInSwipePipToHomeTransition(boolean inSwipePipToHomeTransition) {
         mInSwipePipToHomeTransition = inSwipePipToHomeTransition;
     }
@@ -118,6 +123,11 @@ public class PipTransitionState {
 
     public static boolean isInPip(@TransitionState int state) {
         return state >= TASK_APPEARED && state != EXITING_PIP;
+    }
+
+    /** Returns true if activity has fully entered PiP mode. */
+    public static boolean hasEnteredPip(@TransitionState int state) {
+        return state == ENTERED_PIP;
     }
 
     public interface OnPipTransitionStateChangedListener {

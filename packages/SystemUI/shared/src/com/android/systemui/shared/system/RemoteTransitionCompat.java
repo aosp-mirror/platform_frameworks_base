@@ -128,9 +128,10 @@ public class RemoteTransitionCompat implements Parcelable {
                     IRemoteTransitionFinishedCallback finishedCallback) {
                 final ArrayMap<SurfaceControl, SurfaceControl> leashMap = new ArrayMap<>();
                 final RemoteAnimationTargetCompat[] apps =
-                        RemoteAnimationTargetCompat.wrap(info, false /* wallpapers */, t, leashMap);
+                        RemoteAnimationTargetCompat.wrapApps(info, t, leashMap);
                 final RemoteAnimationTargetCompat[] wallpapers =
-                        RemoteAnimationTargetCompat.wrap(info, true /* wallpapers */, t, leashMap);
+                        RemoteAnimationTargetCompat.wrapNonApps(
+                                info, true /* wallpapers */, t, leashMap);
                 // TODO(b/177438007): Move this set-up logic into launcher's animation impl.
                 mToken = transition;
                 // This transition is for opening recents, so recents is on-top. We want to draw

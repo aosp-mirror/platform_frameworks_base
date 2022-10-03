@@ -38,6 +38,7 @@ import static android.view.WindowManager.TRANSIT_OLD_DREAM_ACTIVITY_OPEN;
 import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER;
 import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_OCCLUDE;
+import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_OCCLUDE_BY_DREAM;
 import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_UNOCCLUDE;
 import static android.view.WindowManager.TRANSIT_OLD_NONE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE;
@@ -81,9 +82,11 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.graphics.Rect;
 import android.os.Trace;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Pair;
 import android.util.Slog;
 import android.view.Display;
 import android.view.RemoteAnimationAdapter;
@@ -361,8 +364,14 @@ public class AppTransitionController {
                 // When there is a closing app, the keyguard has already been occluded by an
                 // activity, and another activity has started on top of that activity, so normal
                 // app transition animation should be used.
-                return closingApps.isEmpty() ? TRANSIT_OLD_KEYGUARD_OCCLUDE
-                        : TRANSIT_OLD_ACTIVITY_OPEN;
+                if (!closingApps.isEmpty()) {
+                    return TRANSIT_OLD_ACTIVITY_OPEN;
+                }
+                if (!openingApps.isEmpty() && openingApps.valueAt(0).getActivityType()
+                        == ACTIVITY_TYPE_DREAM) {
+                    return TRANSIT_OLD_KEYGUARD_OCCLUDE_BY_DREAM;
+                }
+                return TRANSIT_OLD_KEYGUARD_OCCLUDE;
             case TRANSIT_KEYGUARD_UNOCCLUDE:
                 return TRANSIT_OLD_KEYGUARD_UNOCCLUDE;
         }
@@ -1023,9 +1032,39 @@ public class AppTransitionController {
     private void applyAnimations(ArraySet<ActivityRecord> openingApps,
             ArraySet<ActivityRecord> closingApps, @TransitionOldType int transit,
             LayoutParams animLp, boolean voiceInteraction) {
+        final RecentsAnimationController rac = mService.getRecentsAnimationController();
         if (transit == WindowManager.TRANSIT_OLD_UNSET
                 || (openingApps.isEmpty() && closingApps.isEmpty())) {
+            if (rac != null) {
+                rac.sendTasksAppeared();
+            }
             return;
+        }
+
+        if (AppTransition.isActivityTransitOld(transit)) {
+            final ArrayList<Pair<ActivityRecord, Rect>> closingLetterboxes = new ArrayList();
+            for (int i = 0; i < closingApps.size(); ++i) {
+                ActivityRecord closingApp = closingApps.valueAt(i);
+                if (closingApp.areBoundsLetterboxed()) {
+                    final Rect insets = closingApp.getLetterboxInsets();
+                    closingLetterboxes.add(new Pair(closingApp, insets));
+                }
+            }
+
+            for (int i = 0; i < openingApps.size(); ++i) {
+                ActivityRecord openingApp = openingApps.valueAt(i);
+                if (openingApp.areBoundsLetterboxed()) {
+                    final Rect openingInsets = openingApp.getLetterboxInsets();
+                    for (Pair<ActivityRecord, Rect> closingLetterbox : closingLetterboxes) {
+                        final Rect closingInsets = closingLetterbox.second;
+                        if (openingInsets.equals(closingInsets)) {
+                            ActivityRecord closingApp = closingLetterbox.first;
+                            openingApp.setNeedsLetterboxedAnimation(true);
+                            closingApp.setNeedsLetterboxedAnimation(true);
+                        }
+                    }
+                }
+            }
         }
 
         final ArraySet<WindowContainer> openingWcs = getAnimationTargets(
@@ -1036,7 +1075,6 @@ public class AppTransitionController {
                 voiceInteraction);
         applyAnimations(closingWcs, closingApps, transit, false /* visible */, animLp,
                 voiceInteraction);
-        final RecentsAnimationController rac = mService.getRecentsAnimationController();
         if (rac != null) {
             rac.sendTasksAppeared();
         }

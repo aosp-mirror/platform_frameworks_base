@@ -52,6 +52,11 @@ public class SmartSpaceComplication implements Complication {
         return mViewHolderProvider.get();
     }
 
+    @Override
+    public int getRequiredTypeAvailability() {
+        return COMPLICATION_TYPE_SMARTSPACE;
+    }
+
     /**
      * {@link CoreStartable} responsbile for registering {@link SmartSpaceComplication} with
      * SystemUI.
@@ -65,11 +70,7 @@ public class SmartSpaceComplication implements Complication {
                 new BcSmartspaceDataPlugin.SmartspaceTargetListener() {
             @Override
             public void onSmartspaceTargetsUpdated(List<? extends Parcelable> targets) {
-                if (!targets.isEmpty()) {
-                    mDreamOverlayStateController.addComplication(mComplication);
-                } else {
-                    mDreamOverlayStateController.removeComplication(mComplication);
-                }
+                mDreamOverlayStateController.addComplication(mComplication);
             }
         };
 

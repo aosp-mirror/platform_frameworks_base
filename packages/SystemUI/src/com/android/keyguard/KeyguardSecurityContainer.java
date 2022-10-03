@@ -22,8 +22,6 @@ import static android.view.WindowInsets.Type.systemBars;
 import static android.view.WindowInsetsAnimation.Callback.DISPATCH_MODE_STOP;
 
 import static com.android.systemui.plugins.FalsingManager.LOW_PENALTY;
-import static com.android.systemui.statusbar.policy.UserSwitcherController.USER_SWITCH_DISABLED_ALPHA;
-import static com.android.systemui.statusbar.policy.UserSwitcherController.USER_SWITCH_ENABLED_ALPHA;
 
 import static java.lang.Integer.max;
 
@@ -87,9 +85,9 @@ import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.shared.system.SysUiStatsLog;
+import com.android.systemui.statusbar.policy.BaseUserSwitcherAdapter;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
-import com.android.systemui.statusbar.policy.UserSwitcherController.BaseUserAdapter;
-import com.android.systemui.statusbar.policy.UserSwitcherController.UserRecord;
+import com.android.systemui.user.data.source.UserRecord;
 import com.android.systemui.util.settings.GlobalSettings;
 
 import java.util.ArrayList;
@@ -236,7 +234,12 @@ public class KeyguardSecurityContainer extends FrameLayout {
 
     // Used to notify the container when something interesting happens.
     public interface SecurityCallback {
-        boolean dismiss(boolean authenticated, int targetUserId, boolean bypassSecondaryLockScreen);
+        /**
+         * Potentially dismiss the current security screen, after validating that all device
+         * security has been unlocked. Otherwise show the next screen.
+         */
+        boolean dismiss(boolean authenticated, int targetUserId, boolean bypassSecondaryLockScreen,
+                SecurityMode expectedSecurityMode);
 
         void userActivity();
 
@@ -660,7 +663,8 @@ public class KeyguardSecurityContainer extends FrameLayout {
                 // When using EXACTLY spec, measure will use the layout width if > 0. Set before
                 // measuring the child
                 lp.width = MeasureSpec.getSize(updatedWidthMeasureSpec);
-                measureChildWithMargins(view, updatedWidthMeasureSpec, 0, heightMeasureSpec, 0);
+                measureChildWithMargins(view, updatedWidthMeasureSpec, 0,
+                        heightMeasureSpec, 0);
 
                 maxWidth = Math.max(maxWidth,
                         view.getMeasuredWidth() + lp.leftMargin + lp.rightMargin);
@@ -1092,6 +1096,7 @@ public class KeyguardSecurityContainer extends FrameLayout {
                 return;
             }
 
+            mView.setAlpha(1f);
             mUserSwitcherViewGroup.setAlpha(0f);
             ObjectAnimator alphaAnim = ObjectAnimator.ofFloat(mUserSwitcherViewGroup, View.ALPHA,
                     1f);
@@ -1124,12 +1129,14 @@ public class KeyguardSecurityContainer extends FrameLayout {
                 Log.e(TAG, "Current user in user switcher is null.");
                 return;
             }
+            final String currentUserName = mUserSwitcherController.getCurrentUserName();
             Drawable userIcon = findUserIcon(currentUser.info.id);
             ((ImageView) mView.findViewById(R.id.user_icon)).setImageDrawable(userIcon);
-            mUserSwitcher.setText(mUserSwitcherController.getCurrentUserName());
+            mUserSwitcher.setText(currentUserName);
 
-            ViewGroup anchor = mView.findViewById(R.id.user_switcher_anchor);
-            BaseUserAdapter adapter = new BaseUserAdapter(mUserSwitcherController) {
+            KeyguardUserSwitcherAnchor anchor = mView.findViewById(R.id.user_switcher_anchor);
+
+            BaseUserSwitcherAdapter adapter = new BaseUserSwitcherAdapter(mUserSwitcherController) {
                 @Override
                 public View getView(int position, View convertView, ViewGroup parent) {
                     UserRecord item = getItem(position);
@@ -1164,8 +1171,7 @@ public class KeyguardSecurityContainer extends FrameLayout {
                     }
                     textView.setSelected(item == currentUser);
                     view.setEnabled(item.isSwitchToEnabled);
-                    view.setAlpha(view.isEnabled() ? USER_SWITCH_ENABLED_ALPHA :
-                            USER_SWITCH_DISABLED_ALPHA);
+                    UserSwitcherController.setSelectableAlpha(view);
                     return view;
                 }
 
@@ -1208,7 +1214,6 @@ public class KeyguardSecurityContainer extends FrameLayout {
 
             anchor.setOnClickListener((v) -> {
                 if (mFalsingManager.isFalseTap(LOW_PENALTY)) return;
-
                 mPopup = new KeyguardUserSwitcherPopupMenu(v.getContext(), mFalsingManager);
                 mPopup.setAnchorView(anchor);
                 mPopup.setAdapter(adapter);
@@ -1300,7 +1305,6 @@ public class KeyguardSecurityContainer extends FrameLayout {
             int yTrans = mResources.getDimensionPixelSize(R.dimen.bouncer_user_switcher_y_trans);
             if (mResources.getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
                 mUserSwitcherViewGroup.setTranslationY(yTrans);
-                mViewFlipper.setTranslationY(-yTrans);
             } else {
                 // Attempt to reposition a bit higher to make up for this frame being a bit lower
                 // on the device

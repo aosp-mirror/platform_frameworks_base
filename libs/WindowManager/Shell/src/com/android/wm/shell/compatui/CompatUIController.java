@@ -43,6 +43,7 @@ import com.android.wm.shell.compatui.CompatUIWindowManager.CompatUIHintsState;
 import com.android.wm.shell.compatui.letterboxedu.LetterboxEduWindowManager;
 import com.android.wm.shell.sysui.KeyguardChangeListener;
 import com.android.wm.shell.sysui.ShellController;
+import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 
 import java.lang.ref.WeakReference;
@@ -119,6 +120,7 @@ public class CompatUIController implements OnDisplaysChangedListener,
     private boolean mKeyguardShowing;
 
     public CompatUIController(Context context,
+            ShellInit shellInit,
             ShellController shellController,
             DisplayController displayController,
             DisplayInsetsController displayInsetsController,
@@ -134,10 +136,14 @@ public class CompatUIController implements OnDisplaysChangedListener,
         mSyncQueue = syncQueue;
         mMainExecutor = mainExecutor;
         mTransitionsLazy = transitionsLazy;
+        mCompatUIHintsState = new CompatUIHintsState();
+        shellInit.addInitCallback(this::onInit, this);
+    }
+
+    private void onInit() {
+        mShellController.addKeyguardChangeListener(this);
         mDisplayController.addDisplayWindowListener(this);
         mImeController.addPositionProcessor(this);
-        mCompatUIHintsState = new CompatUIHintsState();
-        shellController.addKeyguardChangeListener(this);
     }
 
     /** Sets the callback for UI interactions. */

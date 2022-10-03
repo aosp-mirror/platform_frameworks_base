@@ -588,13 +588,14 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Używaj blokady ekranu"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Użyj blokady ekranu, aby kontynuować"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Mocno naciśnij czujnik"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Nie udało się przetworzyć odcisku palca. Spróbuj ponownie."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Nie rozpoznaję odcisku palca. Spróbuj ponownie."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Wyczyść czytnik linii papilarnych i spróbuj ponownie"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Wyczyść czujnik i spróbuj ponownie"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Mocno naciśnij czujnik"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Palec został obrócony zbyt wolno. Spróbuj ponownie."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Użyj odcisku innego palca"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Zbyt jasno"</string>
+    <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"Wykryto naciśnięcie przycisku zasilania"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Popraw"</string>
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Za każdym razem lekko zmieniaj ułożenie palca"</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -606,16 +607,17 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Twarz rozpoznana, kliknij Potwierdź"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Czytnik linii papilarnych nie jest dostępny."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Nie można skonfigurować odcisku palca"</string>
-    <string name="fingerprint_error_timeout" msgid="2946635815726054226">"Osiągnięto limit czasu odczytu odcisków palców. Spróbuj ponownie."</string>
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Upłynął limit czasu konfiguracji odcisku palca. Spróbuj ponownie."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Odczyt odcisku palca został anulowany."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Odczyt odcisku palca został anulowany przez użytkownika."</string>
-    <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Zbyt wiele prób. Spróbuj ponownie później."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"Zbyt wiele prób. Czytnik linii papilarnych został wyłączony."</string>
-    <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Spróbuj ponownie."</string>
+    <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Zbyt wiele prób. Użyj blokady ekranu."</string>
+    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Zbyt wiele prób. Użyj blokady ekranu."</string>
+    <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"Nie udało się przetworzyć odcisku palca. Spróbuj ponownie."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Nie zarejestrowano odcisków palców."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"To urządzenie nie jest wyposażone w czytnik linii papilarnych."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Czujnik jest tymczasowo wyłączony."</string>
     <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Nie można użyć czytnika linii papilarnych. Odwiedź serwis."</string>
+    <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"Naciśnięto przycisk zasilania"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Odcisk palca <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Używaj odcisku palca"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Używaj odcisku palca lub blokady ekranu"</string>
@@ -638,7 +640,7 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Odwiedź serwis."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"Nie można utworzyć modelu twarzy. Spróbuj ponownie."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Zbyt jasno. Spróbuj przy słabszym świetle."</string>
-    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Spróbuj w jaśniejszym świetle"</string>
+    <string name="face_acquired_too_dark" msgid="8539853432479385326">"Za mało światła"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Odsuń telefon"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Przybliż telefon"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Przesuń telefon wyżej"</string>
@@ -656,8 +658,10 @@
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Patrz prosto na telefon"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Usuń wszystko, co zasłania Ci twarz."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Wyczyść górną krawędź ekranu, w tym czarny pasek"</string>
-    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"Twarz musi być widoczna w całości"</string>
-    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"Twarz musi być widoczna w całości"</string>
+    <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
+    <skip />
+    <!-- no translation found for face_acquired_mouth_covering_detected (8219428572168642593) -->
+    <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Nie można utworzyć modelu twarzy. Spróbuj ponownie."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Wykryto ciemne okulary. Twarz musi być widoczna w całości."</string>
     <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Wykryto zasłonę twarzy. Twarz musi być widoczna w całości."</string>
@@ -1248,10 +1252,9 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Przygotowuję aplikację <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Uruchamianie aplikacji."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Kończenie uruchamiania."</string>
-    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Kontynuować konfigurowanie?"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Naciśnięto przycisk zasilania — zwykle powoduje to wyłączenie ekranu.\n\nKlikaj delikatnie podczas konfigurowania odcisku palca."</string>
-    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Wyłącz ekran"</string>
-    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Konfiguruj dalej"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Aby zakończyć konfigurację, wyłącz ekran"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Wyłącz"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Kontynuować weryfikację odcisku palca?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Naciśnięto przycisk zasilania — zwykle powoduje to wyłączenie ekranu.\n\nKliknij delikatnie, aby zweryfikować odcisk palca."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Wyłącz ekran"</string>
@@ -1404,16 +1407,16 @@
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Kliknij, by skonfigurować"</string>
     <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"Wybierz, aby skonfigurować"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Może być konieczne ponowne sformatowanie urządzenia. Kliknij, by je odłączyć."</string>
-    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Do przenoszenia zdjęć i multimediów"</string>
+    <string name="ext_media_ready_notification_message" msgid="7509496364380197369">"Przechowywanie zdjęć, filmów, muzyki i innych treści"</string>
     <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"Przeglądaj pliki multimediów"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Wystąpił problem z: <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> nie działa"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Kliknij, by naprawić"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"Nośnik <xliff:g id="NAME">%s</xliff:g> jest uszkodzony. Wybierz, by rozwiązać problem."</string>
     <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"Może być konieczne ponowne sformatowanie urządzenia. Kliknij, by je odłączyć."</string>
-    <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"Nośnik <xliff:g id="NAME">%s</xliff:g> nieobsługiwany"</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3487534182861251401">"Wykryto nośnik <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> nie działa"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"To urządzenie nie obsługuje <xliff:g id="NAME">%s</xliff:g>. Kliknij, by użyć obsługiwanego formatu."</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8463636521459807981">"Kliknij, aby skonfigurować."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"Wybierz, aby skonfigurować nośnik <xliff:g id="NAME">%s</xliff:g> w obsługiwanym formacie."</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Może być konieczne ponowne sformatowanie urządzenia"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g>: nieoczekiwane wyjęcie"</string>
@@ -1926,6 +1929,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Ustawienie regionu"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Wpisz nazwę języka"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Sugerowane"</string>
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"Sugerowane"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Wszystkie języki"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"Wszystkie kraje"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"Szukaj"</string>
@@ -1943,18 +1947,19 @@
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Aparat niedostępny"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Kontynuuj na telefonie"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Mikrofon niedostępny"</string>
+    <string name="app_streaming_blocked_title_for_playstore_dialog" msgid="8149823099822897538">"Sklep Play niedostępny"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Ustawienia Androida TV są niedostępne"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"Ustawienia tabletu są niedostępne"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"Ustawienia telefonu są niedostępne"</string>
-    <string name="app_streaming_blocked_message" product="tv" msgid="5024599278277957935">"Z aplikacji nie można skorzystać na urządzeniu <xliff:g id="DEVICE">%1$s</xliff:g>. Użyj urządzenia z Androidem TV."</string>
-    <string name="app_streaming_blocked_message" product="tablet" msgid="7491114163056552686">"Z aplikacji nie można skorzystać na urządzeniu <xliff:g id="DEVICE">%1$s</xliff:g>. Użyj tabletu."</string>
-    <string name="app_streaming_blocked_message" product="default" msgid="1245180131667647277">"Z aplikacji nie można skorzystać na urządzeniu <xliff:g id="DEVICE">%1$s</xliff:g>. Użyj telefonu."</string>
-    <string name="app_streaming_blocked_message_for_permission_dialog" product="tv" msgid="6306583663205997979">"W tej chwili na urządzeniu <xliff:g id="DEVICE">%1$s</xliff:g> nie można skorzystać z aplikacji. Użyj urządzenia z Androidem TV."</string>
-    <string name="app_streaming_blocked_message_for_permission_dialog" product="tablet" msgid="6545624942642129664">"W tej chwili na urządzeniu <xliff:g id="DEVICE">%1$s</xliff:g> nie można skorzystać z aplikacji. Użyj tabletu."</string>
-    <string name="app_streaming_blocked_message_for_permission_dialog" product="default" msgid="8462740631707923000">"W tej chwili na urządzeniu <xliff:g id="DEVICE">%1$s</xliff:g> nie można skorzystać z aplikacji. Użyj telefonu."</string>
+    <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"W tej chwili nie można z tego skorzystać na urządzeniu <xliff:g id="DEVICE">%1$s</xliff:g>. Użyj urządzenia z Androidem TV."</string>
+    <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"W tej chwili nie można z tego skorzystać na urządzeniu <xliff:g id="DEVICE">%1$s</xliff:g>. Użyj tabletu."</string>
+    <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"W tej chwili nie można z tego skorzystać na urządzeniu <xliff:g id="DEVICE">%1$s</xliff:g>. Użyj telefonu."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Ta aplikacja wymaga dodatkowych zabezpieczeń. Użyj urządzenia z Androidem TV."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Ta aplikacja wymaga dodatkowych zabezpieczeń. Użyj tabletu."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Ta aplikacja wymaga dodatkowych zabezpieczeń. Użyj telefonu."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"Nie można z tego skorzystać na urządzeniu <xliff:g id="DEVICE">%1$s</xliff:g>. Użyj urządzenia z Androidem TV."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"Nie można z tego skorzystać na urządzeniu <xliff:g id="DEVICE">%1$s</xliff:g>. Użyj tabletu."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Nie można z tego skorzystać na urządzeniu <xliff:g id="DEVICE">%1$s</xliff:g>. Użyj telefonu."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Ta aplikacja jest na starszą wersję Androida i może nie działać prawidłowo. Sprawdź dostępność aktualizacji lub skontaktuj się z programistą."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Sprawdź dostępność aktualizacji"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Masz nowe wiadomości"</string>
@@ -2047,7 +2052,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Zezwolić aplikacji <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> na dostęp do wszystkich dzienników urządzenia?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Zezwól na jednorazowy dostęp"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Nie zezwalaj"</string>
-    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Dzienniki urządzenia zapisują, co dzieje się na urządzeniu. Aplikacje mogą ich używać do wykrywania i rozwiązywania problemów.\n\nNiektóre dzienniki mogą zawierać poufne dane, dlatego na dostęp do wszystkich dzienników zezwalaj tylko aplikacjom, którym ufasz. \n\nNawet jeśli nie zezwolisz tej aplikacji na dostęp do wszystkich dzienników na urządzeniu, będzie miała dostęp do własnych. Producent urządzenia nadal będzie mógł korzystać z niektórych dzienników na urządzeniu. Więcej informacji"</string>
+    <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"Dzienniki urządzenia zapisują, co dzieje się na urządzeniu. Aplikacje mogą ich używać do wykrywania i rozwiązywania problemów.\n\nNiektóre dzienniki mogą zawierać poufne dane, dlatego na dostęp do wszystkich dzienników zezwalaj tylko aplikacjom, którym ufasz. \n\nNawet jeśli nie zezwolisz tej aplikacji na dostęp do wszystkich dzienników na urządzeniu, będzie mogła korzystać z własnych. Producent urządzenia nadal będzie mógł używać niektórych dzienników na urządzeniu."</string>
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"Dzienniki urządzenia zapisują, co dzieje się na urządzeniu. Aplikacje mogą ich używać do wykrywania i rozwiązywania problemów.\n\nNiektóre dzienniki mogą zawierać poufne dane, dlatego na dostęp do wszystkich dzienników zezwalaj tylko aplikacjom, którym ufasz. \n\nNawet jeśli nie zezwolisz tej aplikacji na dostęp do wszystkich dzienników na urządzeniu, będzie mogła korzystać z własnych. Producent urządzenia nadal będzie mógł używać niektórych dzienników na urządzeniu.\n\nWięcej informacji znajdziesz na stronie g.co/android/devicelogs."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Nie pokazuj ponownie"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"Aplikacja <xliff:g id="APP_0">%1$s</xliff:g> chce pokazywać wycinki z aplikacji <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Edytuj"</string>
@@ -2288,5 +2294,6 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Sprawdź aktywne aplikacje"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Nie można korzystać z aparatu telefonu na urządzeniu <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Nie można korzystać z aparatu tabletu na urządzeniu <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
+    <string name="vdm_secure_window" msgid="161700398158812314">"Nie można z tego skorzystać podczas strumieniowania. Użyj telefonu."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Ustawienie domyślne systemu"</string>
 </resources>

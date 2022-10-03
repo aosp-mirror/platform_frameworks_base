@@ -32,6 +32,7 @@ import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.ComponentActivity
 import androidx.viewpager2.widget.ViewPager2
 import com.android.systemui.Prefs
 import com.android.systemui.R
@@ -44,7 +45,6 @@ import com.android.systemui.controls.ui.ControlsActivity
 import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.settings.CurrentUserTracker
-import com.android.systemui.util.LifecycleActivity
 import java.text.Collator
 import java.util.concurrent.Executor
 import java.util.function.Consumer
@@ -56,7 +56,7 @@ class ControlsFavoritingActivity @Inject constructor(
     private val listingController: ControlsListingController,
     private val broadcastDispatcher: BroadcastDispatcher,
     private val uiController: ControlsUiController
-) : LifecycleActivity() {
+) : ComponentActivity() {
 
     companion object {
         private const val TAG = "ControlsFavoritingActivity"

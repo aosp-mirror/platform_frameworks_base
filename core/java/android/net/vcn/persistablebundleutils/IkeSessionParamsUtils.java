@@ -37,6 +37,7 @@ import android.net.ipsec.ike.IkeSessionParams.IkeAuthPskConfig;
 import android.net.ipsec.ike.IkeSessionParams.IkeConfigRequest;
 import android.os.PersistableBundle;
 import android.util.ArraySet;
+import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.vcn.util.PersistableBundleUtils;
@@ -58,6 +59,8 @@ import java.util.Set;
  */
 @VisibleForTesting(visibility = Visibility.PRIVATE)
 public final class IkeSessionParamsUtils {
+    private static final String TAG = IkeSessionParamsUtils.class.getSimpleName();
+
     private static final String SERVER_HOST_NAME_KEY = "SERVER_HOST_NAME_KEY";
     private static final String SA_PROPOSALS_KEY = "SA_PROPOSALS_KEY";
     private static final String LOCAL_ID_KEY = "LOCAL_ID_KEY";
@@ -72,6 +75,13 @@ public final class IkeSessionParamsUtils {
     private static final String NATT_KEEPALIVE_DELAY_SEC_KEY = "NATT_KEEPALIVE_DELAY_SEC_KEY";
     private static final String IKE_OPTIONS_KEY = "IKE_OPTIONS_KEY";
 
+    // TODO: b/243181760 Use the IKE API when they are exposed
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    public static final int IKE_OPTION_AUTOMATIC_ADDRESS_FAMILY_SELECTION = 6;
+
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    public static final int IKE_OPTION_AUTOMATIC_NATT_KEEPALIVES = 7;
+
     private static final Set<Integer> IKE_OPTIONS = new ArraySet<>();
 
     static {
@@ -80,6 +90,26 @@ public final class IkeSessionParamsUtils {
         IKE_OPTIONS.add(IkeSessionParams.IKE_OPTION_MOBIKE);
         IKE_OPTIONS.add(IkeSessionParams.IKE_OPTION_FORCE_PORT_4500);
         IKE_OPTIONS.add(IkeSessionParams.IKE_OPTION_INITIAL_CONTACT);
+        IKE_OPTIONS.add(IkeSessionParams.IKE_OPTION_REKEY_MOBILITY);
+        IKE_OPTIONS.add(IKE_OPTION_AUTOMATIC_ADDRESS_FAMILY_SELECTION);
+        IKE_OPTIONS.add(IKE_OPTION_AUTOMATIC_NATT_KEEPALIVES);
+    }
+
+    /**
+     * Check if an IKE option is supported in the IPsec module installed on the device
+     *
+     * <p>This method ensures caller to safely access options that are added between dessert
+     * releases.
+     */
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    public static boolean isIkeOptionValid(int option) {
+        try {
+            new IkeSessionParams.Builder().addIkeOption(option);
+            return true;
+        } catch (IllegalArgumentException e) {
+            Log.d(TAG, "Option not supported; discarding: " + option);
+            return false;
+        }
     }
 
     /** Serializes an IkeSessionParams to a PersistableBundle. */
@@ -130,7 +160,7 @@ public final class IkeSessionParamsUtils {
         // IKE_OPTION is defined in IKE module and added in the IkeSessionParams
         final List<Integer> enabledIkeOptions = new ArrayList<>();
         for (int option : IKE_OPTIONS) {
-            if (params.hasIkeOption(option)) {
+            if (isIkeOptionValid(option) && params.hasIkeOption(option)) {
                 enabledIkeOptions.add(option);
             }
         }
@@ -205,12 +235,16 @@ public final class IkeSessionParamsUtils {
 
         // Clear IKE Options that are by default enabled
         for (int option : IKE_OPTIONS) {
-            builder.removeIkeOption(option);
+            if (isIkeOptionValid(option)) {
+                builder.removeIkeOption(option);
+            }
         }
 
         final int[] optionArray = in.getIntArray(IKE_OPTIONS_KEY);
         for (int option : optionArray) {
-            builder.addIkeOption(option);
+            if (isIkeOptionValid(option)) {
+                builder.addIkeOption(option);
+            }
         }
 
         return builder.build();

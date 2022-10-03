@@ -39,13 +39,14 @@ public class PauseActivityItem extends ActivityLifecycleItem {
     private boolean mUserLeaving;
     private int mConfigChanges;
     private boolean mDontReport;
+    private boolean mAutoEnteringPip;
 
     @Override
     public void execute(ClientTransactionHandler client, ActivityClientRecord r,
             PendingTransactionActions pendingActions) {
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityPause");
-        client.handlePauseActivity(r, mFinished, mUserLeaving, mConfigChanges, pendingActions,
-                "PAUSE_ACTIVITY_ITEM");
+        client.handlePauseActivity(r, mFinished, mUserLeaving, mConfigChanges, mAutoEnteringPip,
+                pendingActions, "PAUSE_ACTIVITY_ITEM");
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
     }
 
@@ -71,7 +72,7 @@ public class PauseActivityItem extends ActivityLifecycleItem {
 
     /** Obtain an instance initialized with provided params. */
     public static PauseActivityItem obtain(boolean finished, boolean userLeaving, int configChanges,
-            boolean dontReport) {
+            boolean dontReport, boolean autoEnteringPip) {
         PauseActivityItem instance = ObjectPool.obtain(PauseActivityItem.class);
         if (instance == null) {
             instance = new PauseActivityItem();
@@ -80,6 +81,7 @@ public class PauseActivityItem extends ActivityLifecycleItem {
         instance.mUserLeaving = userLeaving;
         instance.mConfigChanges = configChanges;
         instance.mDontReport = dontReport;
+        instance.mAutoEnteringPip = autoEnteringPip;
 
         return instance;
     }
@@ -94,6 +96,7 @@ public class PauseActivityItem extends ActivityLifecycleItem {
         instance.mUserLeaving = false;
         instance.mConfigChanges = 0;
         instance.mDontReport = true;
+        instance.mAutoEnteringPip = false;
 
         return instance;
     }
@@ -105,6 +108,7 @@ public class PauseActivityItem extends ActivityLifecycleItem {
         mUserLeaving = false;
         mConfigChanges = 0;
         mDontReport = false;
+        mAutoEnteringPip = false;
         ObjectPool.recycle(this);
     }
 
@@ -117,6 +121,7 @@ public class PauseActivityItem extends ActivityLifecycleItem {
         dest.writeBoolean(mUserLeaving);
         dest.writeInt(mConfigChanges);
         dest.writeBoolean(mDontReport);
+        dest.writeBoolean(mAutoEnteringPip);
     }
 
     /** Read from Parcel. */
@@ -125,6 +130,7 @@ public class PauseActivityItem extends ActivityLifecycleItem {
         mUserLeaving = in.readBoolean();
         mConfigChanges = in.readInt();
         mDontReport = in.readBoolean();
+        mAutoEnteringPip = in.readBoolean();
     }
 
     public static final @NonNull Creator<PauseActivityItem> CREATOR =
@@ -148,7 +154,8 @@ public class PauseActivityItem extends ActivityLifecycleItem {
         }
         final PauseActivityItem other = (PauseActivityItem) o;
         return mFinished == other.mFinished && mUserLeaving == other.mUserLeaving
-                && mConfigChanges == other.mConfigChanges && mDontReport == other.mDontReport;
+                && mConfigChanges == other.mConfigChanges && mDontReport == other.mDontReport
+                && mAutoEnteringPip == other.mAutoEnteringPip;
     }
 
     @Override
@@ -158,12 +165,14 @@ public class PauseActivityItem extends ActivityLifecycleItem {
         result = 31 * result + (mUserLeaving ? 1 : 0);
         result = 31 * result + mConfigChanges;
         result = 31 * result + (mDontReport ? 1 : 0);
+        result = 31 * result + (mAutoEnteringPip ? 1 : 0);
         return result;
     }
 
     @Override
     public String toString() {
         return "PauseActivityItem{finished=" + mFinished + ",userLeaving=" + mUserLeaving
-                + ",configChanges=" + mConfigChanges + ",dontReport=" + mDontReport + "}";
+                + ",configChanges=" + mConfigChanges + ",dontReport=" + mDontReport
+                + ",autoEnteringPip=" + mAutoEnteringPip + "}";
     }
 }

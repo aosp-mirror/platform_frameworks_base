@@ -32,8 +32,8 @@ abstract class DecorProvider {
     abstract val viewId: Int
 
     /** The number of total aligned bounds */
-    val numOfAlignedEdge: Int
-    get() = alignedBounds.size
+    val numOfAlignedBound: Int
+        get() = alignedBounds.size
 
     /** The aligned bounds for the view which is created through inflateView() */
     abstract val alignedBounds: List<Int>
@@ -46,25 +46,19 @@ abstract class DecorProvider {
         view: View,
         reloadToken: Int,
         @Surface.Rotation rotation: Int,
-        displayUniqueId: String? = null
+        tintColor: Int,
+        displayUniqueId: String?
     )
 
     /** Inflate view into parent as current rotation */
     abstract fun inflateView(
         context: Context,
         parent: ViewGroup,
-        @Surface.Rotation rotation: Int
+        @Surface.Rotation rotation: Int,
+        tintColor: Int
     ): View
-}
 
-/**
- * Split list to 2 list, and return it back as Pair<>. The providers on the first list contains this
- * alignedBound element. The providers on the second list do not contain this alignedBound element
- */
-fun List<DecorProvider>.partitionAlignedBound(
-    @DisplayCutout.BoundsPosition alignedBound: Int
-): Pair<List<DecorProvider>, List<DecorProvider>> {
-    return partition { it.alignedBounds.contains(alignedBound) }
+    override fun toString() = "${javaClass.simpleName}{alignedBounds=$alignedBounds}"
 }
 
 /**
@@ -91,4 +85,62 @@ abstract class BoundDecorProvider : DecorProvider() {
     override val alignedBounds: List<Int> by lazy {
         listOf(alignedBound)
     }
+}
+
+/**
+ * Split list to 2 sub-lists, and return it back as Pair<>. The providers on the first list contains
+ * this alignedBound element. The providers on the second list do not contain this alignedBound
+ * element.
+ */
+fun List<DecorProvider>.partitionAlignedBound(
+    @DisplayCutout.BoundsPosition alignedBound: Int
+): Pair<List<DecorProvider>, List<DecorProvider>> {
+    return partition { it.alignedBounds.contains(alignedBound) }
+}
+
+/**
+ * Get the proper bound from DecorProvider list
+ * Time complexity: O(N), N is the number of providers
+ *
+ * Choose order
+ * 1. Return null if list is empty
+ * 2. If list contains BoundDecorProvider, return its alignedBound[0] because it is a must-have
+ *    bound
+ * 3. Return the bound with most DecorProviders
+ */
+fun List<DecorProvider>.getProperBound(): Int? {
+    // Return null if list is empty
+    if (isEmpty()) {
+        return null
+    }
+
+    // Choose alignedBounds[0] of BoundDecorProvider if any
+    val singleBoundProvider = firstOrNull { it.numOfAlignedBound == 1 }
+    if (singleBoundProvider != null) {
+        return singleBoundProvider.alignedBounds[0]
+    }
+
+    // Return the bound with most DecorProviders
+    val boundCount = intArrayOf(0, 0, 0, 0)
+    for (provider in this) {
+        for (bound in provider.alignedBounds) {
+            boundCount[bound]++
+        }
+    }
+    var maxCount = 0
+    var maxCountBound: Int? = null
+    val bounds = arrayOf(
+        // Put top and bottom at first to get the highest priority to be chosen
+        DisplayCutout.BOUNDS_POSITION_TOP,
+        DisplayCutout.BOUNDS_POSITION_BOTTOM,
+        DisplayCutout.BOUNDS_POSITION_LEFT,
+        DisplayCutout.BOUNDS_POSITION_RIGHT
+    )
+    for (bound in bounds) {
+        if (boundCount[bound] > maxCount) {
+            maxCountBound = bound
+            maxCount = boundCount[bound]
+        }
+    }
+    return maxCountBound
 }

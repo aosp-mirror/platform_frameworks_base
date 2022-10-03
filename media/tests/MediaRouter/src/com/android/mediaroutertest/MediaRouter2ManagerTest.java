@@ -39,6 +39,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 import android.Manifest;
@@ -121,7 +122,7 @@ public class MediaRouter2ManagerTest {
         MediaRouter2ManagerTestActivity.startActivity(mContext);
 
         mManager = MediaRouter2Manager.getInstance(mContext);
-        mManager.startScan();
+        mManager.registerScanRequest();
         mRouter2 = MediaRouter2.getInstance(mContext);
 
         // If we need to support thread pool executors, change this to thread pool executor.
@@ -152,7 +153,7 @@ public class MediaRouter2ManagerTest {
 
     @After
     public void tearDown() {
-        mManager.stopScan();
+        mManager.unregisterScanRequest();
 
         // order matters (callbacks should be cleared at the last)
         releaseAllSessions();
@@ -816,6 +817,13 @@ public class MediaRouter2ManagerTest {
         assertTrue(successLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
 
         assertFalse(failureLatch.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS));
+    }
+
+    @Test
+    public void unregisterScanRequest_enforcesANonNegativeCount() {
+        mManager.unregisterScanRequest(); // One request was made in the test setup.
+        assertThrows(IllegalStateException.class, () -> mManager.unregisterScanRequest());
+        mManager.registerScanRequest(); // So that the cleanup doesn't fail.
     }
 
     /**

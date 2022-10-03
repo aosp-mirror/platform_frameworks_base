@@ -92,7 +92,7 @@ public class BackNavigationTest {
         try {
             mInstrumentation.getUiAutomation().waitForIdle(500, 1000);
             BackNavigationInfo info = ActivityTaskManager.getService()
-                    .startBackNavigation(true, null);
+                    .startBackNavigation(true, null, null);
             assertNotNull("BackNavigationInfo is null", info);
             assertNotNull("OnBackInvokedCallback is null", info.getOnBackInvokedCallback());
             info.getOnBackInvokedCallback().onBackInvoked();

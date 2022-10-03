@@ -25,6 +25,7 @@ import static android.hardware.biometrics.BiometricStateListener.STATE_KEYGUARD_
 import android.annotation.NonNull;
 import android.hardware.biometrics.BiometricStateListener;
 import android.hardware.biometrics.IBiometricStateListener;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
@@ -35,7 +36,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 /**
  * A callback for receiving notifications about biometric sensor state changes.
  */
-public class BiometricStateCallback implements ClientMonitorCallback {
+public class BiometricStateCallback implements ClientMonitorCallback, IBinder.DeathRecipient {
 
     private static final String TAG = "BiometricStateCallback";
 
@@ -153,5 +154,25 @@ public class BiometricStateCallback implements ClientMonitorCallback {
      */
     public void registerBiometricStateListener(@NonNull IBiometricStateListener listener) {
         mBiometricStateListeners.add(listener);
+        try {
+            listener.asBinder().linkToDeath(this, 0 /* flags */);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Failed to link to death", e);
+        }
+    }
+
+    @Override
+    public void binderDied() {
+        // Do nothing, handled below
+    }
+
+    @Override
+    public void binderDied(IBinder who) {
+        Slog.w(TAG, "Callback binder died: " + who);
+        if (mBiometricStateListeners.removeIf(listener -> listener.asBinder().equals(who))) {
+            Slog.w(TAG, "Removed dead listener for " + who);
+        } else {
+            Slog.w(TAG, "No dead listeners found");
+        }
     }
 }

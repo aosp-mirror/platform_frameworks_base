@@ -38,15 +38,19 @@ import dagger.Provides;
         },
         subcomponents = {
                 DreamHomeControlsComplicationComponent.class,
+                DreamMediaEntryComplicationComponent.class
         })
 public interface RegisteredComplicationsModule {
     String DREAM_CLOCK_TIME_COMPLICATION_LAYOUT_PARAMS = "time_complication_layout_params";
     String DREAM_SMARTSPACE_LAYOUT_PARAMS = "smartspace_layout_params";
     String DREAM_HOME_CONTROLS_CHIP_LAYOUT_PARAMS = "home_controls_chip_layout_params";
+    String DREAM_MEDIA_ENTRY_LAYOUT_PARAMS = "media_entry_layout_params";
 
     int DREAM_CLOCK_TIME_COMPLICATION_WEIGHT = 1;
     int DREAM_SMARTSPACE_COMPLICATION_WEIGHT = 0;
+    int DREAM_MEDIA_COMPLICATION_WEIGHT = -1;
     int DREAM_HOME_CONTROLS_CHIP_COMPLICATION_WEIGHT = 1;
+    int DREAM_MEDIA_ENTRY_COMPLICATION_WEIGHT = 0;
 
     /**
      * Provides layout parameters for the clock time complication.
@@ -75,6 +79,21 @@ public interface RegisteredComplicationsModule {
                     | ComplicationLayoutParams.POSITION_START,
             ComplicationLayoutParams.DIRECTION_END,
             DREAM_HOME_CONTROLS_CHIP_COMPLICATION_WEIGHT);
+    }
+
+    /**
+     * Provides layout parameters for the media entry complication.
+     */
+    @Provides
+    @Named(DREAM_MEDIA_ENTRY_LAYOUT_PARAMS)
+    static ComplicationLayoutParams provideMediaEntryLayoutParams(@Main Resources res) {
+        return new ComplicationLayoutParams(
+                res.getDimensionPixelSize(R.dimen.keyguard_affordance_fixed_width),
+                res.getDimensionPixelSize(R.dimen.keyguard_affordance_fixed_height),
+                ComplicationLayoutParams.POSITION_BOTTOM
+                        | ComplicationLayoutParams.POSITION_START,
+                ComplicationLayoutParams.DIRECTION_END,
+                DREAM_MEDIA_ENTRY_COMPLICATION_WEIGHT);
     }
 
     /**

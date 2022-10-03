@@ -21,25 +21,6 @@ import dagger.Module
 
 @Module
 abstract class PeopleHubModule {
-
-    @Binds
-    abstract fun peopleHubSectionFooterViewAdapter(
-        impl: PeopleHubViewAdapterImpl
-    ): PeopleHubViewAdapter
-
-    @Binds
-    abstract fun peopleHubDataSource(impl: PeopleHubDataSourceImpl): DataSource<PeopleHubModel>
-
-    @Binds
-    abstract fun peopleHubSettingChangeDataSource(
-        impl: PeopleHubSettingChangeDataSourceImpl
-    ): DataSource<Boolean>
-
-    @Binds
-    abstract fun peopleHubViewModelFactoryDataSource(
-        impl: PeopleHubViewModelFactoryDataSourceImpl
-    ): DataSource<PeopleHubViewModelFactory>
-
     @Binds
     abstract fun peopleNotificationIdentifier(
         impl: PeopleNotificationIdentifierImpl

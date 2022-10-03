@@ -29,17 +29,15 @@
                 app:percentX="0"
                 app:percentY="0"
                 app:framePosition="49"
-                app:percentWidth="1"
-                app:percentHeight="1"
+                app:sizePercent="0"
                 app:curveFit="linear"
                 app:motionTarget="@id/date" />
             <KeyPosition
                 app:keyPositionType="deltaRelative"
                 app:percentX="1"
                 app:percentY="0.51"
+                app:sizePercent="1"
                 app:framePosition="51"
-                app:percentWidth="1"
-                app:percentHeight="1"
                 app:curveFit="linear"
                 app:motionTarget="@id/date" />
             <KeyAttribute
@@ -64,6 +62,7 @@
                 app:percentX="0"
                 app:percentY="0"
                 app:framePosition="50"
+                app:sizePercent="0"
                 app:curveFit="linear"
                 app:motionTarget="@id/statusIcons" />
             <KeyPosition
@@ -71,6 +70,7 @@
                 app:percentX="1"
                 app:percentY="0.51"
                 app:framePosition="51"
+                app:sizePercent="1"
                 app:curveFit="linear"
                 app:motionTarget="@id/statusIcons" />
             <KeyAttribute

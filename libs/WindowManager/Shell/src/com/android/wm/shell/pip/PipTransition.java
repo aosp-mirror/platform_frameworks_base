@@ -66,6 +66,7 @@ import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.splitscreen.SplitScreenController;
+import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.CounterRotatorHelper;
 import com.android.wm.shell.transition.Transitions;
 
@@ -107,17 +108,18 @@ public class PipTransition extends PipTransitionController {
     private boolean mHasFadeOut;
 
     public PipTransition(Context context,
+            @NonNull ShellInit shellInit,
+            @NonNull ShellTaskOrganizer shellTaskOrganizer,
+            @NonNull Transitions transitions,
             PipBoundsState pipBoundsState,
             PipTransitionState pipTransitionState,
             PipMenuController pipMenuController,
             PipBoundsAlgorithm pipBoundsAlgorithm,
             PipAnimationController pipAnimationController,
-            Transitions transitions,
-            @NonNull ShellTaskOrganizer shellTaskOrganizer,
             PipSurfaceTransactionHelper pipSurfaceTransactionHelper,
             Optional<SplitScreenController> splitScreenOptional) {
-        super(pipBoundsState, pipMenuController, pipBoundsAlgorithm,
-                pipAnimationController, transitions, shellTaskOrganizer);
+        super(shellInit, shellTaskOrganizer, transitions, pipBoundsState, pipMenuController,
+                pipBoundsAlgorithm, pipAnimationController);
         mContext = context;
         mPipTransitionState = pipTransitionState;
         mEnterExitAnimationDuration = context.getResources()
@@ -315,7 +317,8 @@ public class PipTransition extends PipTransitionController {
     }
 
     @Override
-    public void onTransitionConsumed(@NonNull IBinder transition, boolean aborted) {
+    public void onTransitionConsumed(@NonNull IBinder transition, boolean aborted,
+            @Nullable SurfaceControl.Transaction finishT) {
         if (transition != mExitTransition) {
             return;
         }

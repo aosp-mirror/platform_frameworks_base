@@ -32,6 +32,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
+import static com.android.server.wm.TaskFragment.EMBEDDING_ALLOWED;
 import static com.android.server.wm.TaskFragment.EMBEDDING_DISALLOWED_MIN_DIMENSION_VIOLATION;
 import static com.android.server.wm.TaskFragment.EMBEDDING_DISALLOWED_NEW_TASK_FRAGMENT;
 import static com.android.server.wm.TaskFragment.EMBEDDING_DISALLOWED_UNTRUSTED_HOST;
@@ -130,6 +131,23 @@ public class TaskFragmentTest extends WindowTestsBase {
         // Update surface after animation.
         verify(mTransaction).setPosition(mLeash, 500, 500);
         verify(mTransaction).setWindowCrop(mLeash, 500, 500);
+    }
+
+    @Test
+    public void testStartChangeTransition_doNotFreezeWhenOnlyMoved() {
+        final Rect startBounds = new Rect(0, 0, 1000, 1000);
+        final Rect endBounds = new Rect(startBounds);
+        endBounds.offset(500, 0);
+        mTaskFragment.setBounds(startBounds);
+        doReturn(true).when(mTaskFragment).isVisible();
+        doReturn(true).when(mTaskFragment).isVisibleRequested();
+
+        clearInvocations(mTransaction);
+        mTaskFragment.setBounds(endBounds);
+
+        // No change transition, but update the organized surface position.
+        verify(mTaskFragment, never()).initializeChangeTransition(any(), any());
+        verify(mTransaction).setPosition(mLeash, endBounds.left, endBounds.top);
     }
 
     @Test
@@ -322,7 +340,7 @@ public class TaskFragmentTest extends WindowTestsBase {
         activity.reparent(task, POSITION_TOP);
 
         // Notify the organizer about the reparent.
-        verify(mAtm.mTaskFragmentOrganizerController).onActivityReparentToTask(activity);
+        verify(mAtm.mTaskFragmentOrganizerController).onActivityReparentedToTask(activity);
         assertNull(activity.mLastTaskFragmentOrganizerBeforePip);
     }
 
@@ -468,6 +486,10 @@ public class TaskFragmentTest extends WindowTestsBase {
         newActivity.resultTo = activity;
         assertEquals(EMBEDDING_DISALLOWED_NEW_TASK_FRAGMENT,
                 newTaskFragment.isAllowedToEmbedActivity(newActivity));
+
+        // Allow embedding if the resultTo activity is finishing.
+        activity.finishing = true;
+        assertEquals(EMBEDDING_ALLOWED, newTaskFragment.isAllowedToEmbedActivity(newActivity));
     }
 
     @Test

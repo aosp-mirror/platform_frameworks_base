@@ -26,6 +26,7 @@ import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.JobSchedulerService.Constants;
 import com.android.server.job.StateChangedListener;
@@ -163,6 +164,15 @@ public abstract class StateController {
         // This is potentially more expensive since JSS may have to query component
         // presence.
         return mService.areComponentsInPlaceLocked(jobStatus);
+    }
+
+    protected void logDeviceWideConstraintStateToStatsd(int constraint, boolean satisfied) {
+        FrameworkStatsLog.write(
+                FrameworkStatsLog.DEVICE_WIDE_JOB_CONSTRAINT_CHANGED,
+                JobStatus.getProtoConstraint(constraint),
+                satisfied
+                        ? FrameworkStatsLog.DEVICE_WIDE_JOB_CONSTRAINT_CHANGED__STATE__SATISFIED
+                        : FrameworkStatsLog.DEVICE_WIDE_JOB_CONSTRAINT_CHANGED__STATE__UNSATISFIED);
     }
 
     public abstract void dumpControllerStateLocked(IndentingPrintWriter pw,

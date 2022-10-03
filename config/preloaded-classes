@@ -220,6 +220,7 @@ android.app.ActivityThread$$ExternalSyntheticLambda1
 android.app.ActivityThread$$ExternalSyntheticLambda2
 android.app.ActivityThread$1$$ExternalSyntheticLambda0
 android.app.ActivityThread$1
+android.app.ActivityThread$2
 android.app.ActivityThread$3
 android.app.ActivityThread$ActivityClientRecord
 android.app.ActivityThread$AndroidOs
@@ -440,6 +441,7 @@ android.app.IBackupAgent$Stub
 android.app.IBackupAgent
 android.app.IForegroundServiceObserver$Stub
 android.app.IForegroundServiceObserver
+android.app.IGameManagerService$Stub$Proxy
 android.app.IGameManagerService$Stub
 android.app.IGameManagerService
 android.app.IInstantAppResolver$Stub$Proxy
@@ -1165,6 +1167,7 @@ android.companion.CompanionDeviceManager
 android.companion.ICompanionDeviceManager$Stub$Proxy
 android.companion.ICompanionDeviceManager$Stub
 android.companion.ICompanionDeviceManager
+android.companion.virtual.IVirtualDevice$Stub
 android.companion.virtual.IVirtualDevice
 android.companion.virtual.VirtualDeviceManager
 android.compat.Compatibility$1
@@ -4668,6 +4671,7 @@ android.media.AudioTrack$2
 android.media.AudioTrack$TunerConfiguration
 android.media.AudioTrack
 android.media.AudioTrackRoutingProxy
+android.media.CallbackUtil$LazyListenerManager
 android.media.CamcorderProfile
 android.media.CameraProfile
 android.media.DecoderCapabilities
@@ -5910,6 +5914,7 @@ android.os.UserHandle$1
 android.os.UserHandle
 android.os.UserManager$1
 android.os.UserManager$2
+android.os.UserManager$3
 android.os.UserManager$EnforcingUser$1
 android.os.UserManager$EnforcingUser
 android.os.UserManager$UserOperationException
@@ -15937,6 +15942,7 @@ sun.util.logging.PlatformLogger
 [Landroid.os.SystemService$State;
 [Landroid.os.UserHandle;
 [Landroid.os.health.HealthKeys$SortedIntArray;
+[Landroid.os.storage.StorageVolume;
 [Landroid.renderscript.Element$DataKind;
 [Landroid.renderscript.Element$DataType;
 [Landroid.renderscript.RenderScript$ContextType;

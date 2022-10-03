@@ -47,6 +47,8 @@ public class QuickStepContract {
     public static final String KEY_EXTRA_SHELL_PIP = "extra_shell_pip";
     // See ISplitScreen.aidl
     public static final String KEY_EXTRA_SHELL_SPLIT_SCREEN = "extra_shell_split_screen";
+    // See IFloatingTasks.aidl
+    public static final String KEY_EXTRA_SHELL_FLOATING_TASKS = "extra_shell_floating_tasks";
     // See IOneHanded.aidl
     public static final String KEY_EXTRA_SHELL_ONE_HANDED = "extra_shell_one_handed";
     // See IShellTransitions.aidl
@@ -60,6 +62,8 @@ public class QuickStepContract {
     // See IRecentTasks.aidl
     public static final String KEY_EXTRA_RECENT_TASKS = "recent_tasks";
     public static final String KEY_EXTRA_SHELL_BACK_ANIMATION = "extra_shell_back_animation";
+    // See IDesktopMode.aidl
+    public static final String KEY_EXTRA_SHELL_DESKTOP_MODE = "extra_shell_desktop_mode";
 
     public static final String NAV_BAR_MODE_3BUTTON_OVERLAY =
             WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY;

@@ -20,9 +20,9 @@ import android.content.Context
 import android.content.res.Resources
 import android.view.DisplayCutout
 import android.view.LayoutInflater
+import android.view.Surface
 import android.view.View
 import android.view.ViewGroup
-import android.view.Surface
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
@@ -85,6 +85,7 @@ class PrivacyDotCornerDecorProviderImpl(
         view: View,
         reloadToken: Int,
         rotation: Int,
+        tintColor: Int,
         displayUniqueId: String?
     ) {
         // Do nothing here because it is handled inside PrivacyDotViewController
@@ -93,7 +94,8 @@ class PrivacyDotCornerDecorProviderImpl(
     override fun inflateView(
         context: Context,
         parent: ViewGroup,
-        @Surface.Rotation rotation: Int
+        @Surface.Rotation rotation: Int,
+        tintColor: Int
     ): View {
         LayoutInflater.from(context).inflate(layoutId, parent, true)
         return parent.getChildAt(parent.childCount - 1 /* latest new added child */)

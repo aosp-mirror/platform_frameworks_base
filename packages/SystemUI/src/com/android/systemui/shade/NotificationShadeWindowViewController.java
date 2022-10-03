@@ -17,12 +17,9 @@
 package com.android.systemui.shade;
 
 import android.app.StatusBarManager;
-import android.hardware.display.AmbientDisplayConfiguration;
 import android.media.AudioManager;
 import android.media.session.MediaSessionLegacyHelper;
 import android.os.SystemClock;
-import android.os.UserHandle;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.InputDevice;
@@ -32,12 +29,17 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.keyguard.AuthKeyguardMessageArea;
 import com.android.keyguard.LockIconViewController;
+import com.android.keyguard.dagger.KeyguardBouncerComponent;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dock.DockManager;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
-import com.android.systemui.lowlightclock.LowLightClockController;
+import com.android.systemui.keyguard.ui.binder.KeyguardBouncerViewBinder;
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardBouncerViewModel;
 import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
@@ -52,10 +54,8 @@ import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.window.StatusBarWindowStateController;
-import com.android.systemui.tuner.TunerService;
 
 import java.io.PrintWriter;
-import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -66,7 +66,6 @@ import javax.inject.Inject;
 public class NotificationShadeWindowViewController {
     private static final String TAG = "NotifShadeWindowVC";
     private final FalsingCollector mFalsingCollector;
-    private final TunerService mTunerService;
     private final SysuiStatusBarStateController mStatusBarStateController;
     private final NotificationShadeWindowView mView;
     private final NotificationShadeDepthController mDepthController;
@@ -77,8 +76,9 @@ public class NotificationShadeWindowViewController {
     private final StatusBarWindowStateController mStatusBarWindowStateController;
     private final KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
     private final AmbientState mAmbientState;
+    private final PulsingGestureListener mPulsingGestureListener;
 
-    private GestureDetector mGestureDetector;
+    private GestureDetector mPulsingWakeupGestureHandler;
     private View mBrightnessMirror;
     private boolean mTouchActive;
     private boolean mTouchCancelled;
@@ -88,13 +88,10 @@ public class NotificationShadeWindowViewController {
     private final CentralSurfaces mService;
     private final NotificationShadeWindowController mNotificationShadeWindowController;
     private DragDownHelper mDragDownHelper;
-    private boolean mDoubleTapEnabled;
-    private boolean mSingleTapEnabled;
     private boolean mExpandingBelowNotch;
     private final DockManager mDockManager;
     private final NotificationPanelViewController mNotificationPanelViewController;
     private final PanelExpansionStateManager mPanelExpansionStateManager;
-    private final Optional<LowLightClockController> mLowLightClockController;
 
     private boolean mIsTrackingBarGesture = false;
 
@@ -102,7 +99,6 @@ public class NotificationShadeWindowViewController {
     public NotificationShadeWindowViewController(
             LockscreenShadeTransitionController transitionController,
             FalsingCollector falsingCollector,
-            TunerService tunerService,
             SysuiStatusBarStateController statusBarStateController,
             DockManager dockManager,
             NotificationShadeDepthController depthController,
@@ -113,14 +109,17 @@ public class NotificationShadeWindowViewController {
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             StatusBarWindowStateController statusBarWindowStateController,
             LockIconViewController lockIconViewController,
-            Optional<LowLightClockController> lowLightClockController,
             CentralSurfaces centralSurfaces,
             NotificationShadeWindowController controller,
             KeyguardUnlockAnimationController keyguardUnlockAnimationController,
-            AmbientState ambientState) {
+            AmbientState ambientState,
+            PulsingGestureListener pulsingGestureListener,
+            FeatureFlags featureFlags,
+            KeyguardBouncerViewModel keyguardBouncerViewModel,
+            KeyguardBouncerComponent.Factory keyguardBouncerComponentFactory
+    ) {
         mLockscreenShadeTransitionController = transitionController;
         mFalsingCollector = falsingCollector;
-        mTunerService = tunerService;
         mStatusBarStateController = statusBarStateController;
         mView = notificationShadeWindowView;
         mDockManager = dockManager;
@@ -131,14 +130,20 @@ public class NotificationShadeWindowViewController {
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mStatusBarWindowStateController = statusBarWindowStateController;
         mLockIconViewController = lockIconViewController;
-        mLowLightClockController = lowLightClockController;
         mService = centralSurfaces;
         mNotificationShadeWindowController = controller;
         mKeyguardUnlockAnimationController = keyguardUnlockAnimationController;
         mAmbientState = ambientState;
+        mPulsingGestureListener = pulsingGestureListener;
 
         // This view is not part of the newly inflated expanded status bar.
         mBrightnessMirror = mView.findViewById(R.id.brightness_mirror_container);
+        if (featureFlags.isEnabled(Flags.MODERN_BOUNCER)) {
+            KeyguardBouncerViewBinder.bind(
+                    mView.findViewById(R.id.keyguard_bouncer_container),
+                    keyguardBouncerViewModel,
+                    keyguardBouncerComponentFactory);
+        }
     }
 
     /**
@@ -148,51 +153,18 @@ public class NotificationShadeWindowViewController {
         return mView.findViewById(R.id.keyguard_bouncer_container);
     }
 
+    /**
+     * @return Location where to place the KeyguardMessageArea
+     */
+    public AuthKeyguardMessageArea getKeyguardMessageArea() {
+        return mView.findViewById(R.id.keyguard_message_area);
+    }
+
     /** Inflates the {@link R.layout#status_bar_expanded} layout and sets it up. */
     public void setupExpandedStatusBar() {
         mStackScrollLayout = mView.findViewById(R.id.notification_stack_scroller);
-
-        TunerService.Tunable tunable = (key, newValue) -> {
-            AmbientDisplayConfiguration configuration =
-                    new AmbientDisplayConfiguration(mView.getContext());
-            switch (key) {
-                case Settings.Secure.DOZE_DOUBLE_TAP_GESTURE:
-                    mDoubleTapEnabled = configuration.doubleTapGestureEnabled(
-                            UserHandle.USER_CURRENT);
-                    break;
-                case Settings.Secure.DOZE_TAP_SCREEN_GESTURE:
-                    mSingleTapEnabled = configuration.tapGestureEnabled(UserHandle.USER_CURRENT);
-            }
-        };
-        mTunerService.addTunable(tunable,
-                Settings.Secure.DOZE_DOUBLE_TAP_GESTURE,
-                Settings.Secure.DOZE_TAP_SCREEN_GESTURE);
-
-        GestureDetector.SimpleOnGestureListener gestureListener =
-                new GestureDetector.SimpleOnGestureListener() {
-                    @Override
-                    public boolean onSingleTapConfirmed(MotionEvent e) {
-                        if (mSingleTapEnabled && !mDockManager.isDocked()) {
-                            mService.wakeUpIfDozing(
-                                    SystemClock.uptimeMillis(), mView, "SINGLE_TAP");
-                            return true;
-                        }
-                        return false;
-                    }
-
-                    @Override
-                    public boolean onDoubleTap(MotionEvent e) {
-                        if (mDoubleTapEnabled || mSingleTapEnabled) {
-                            mService.wakeUpIfDozing(
-                                    SystemClock.uptimeMillis(), mView, "DOUBLE_TAP");
-                            return true;
-                        }
-                        return false;
-                    }
-                };
-        mGestureDetector = new GestureDetector(mView.getContext(), gestureListener);
-
-        mLowLightClockController.ifPresent(controller -> controller.attachLowLightClockView(mView));
+        mPulsingWakeupGestureHandler = new GestureDetector(mView.getContext(),
+                mPulsingGestureListener);
 
         mView.setInteractionEventHandler(new NotificationShadeWindowView.InteractionEventHandler() {
             @Override
@@ -239,7 +211,7 @@ public class NotificationShadeWindowViewController {
                 }
 
                 mFalsingCollector.onTouchEvent(ev);
-                mGestureDetector.onTouchEvent(ev);
+                mPulsingWakeupGestureHandler.onTouchEvent(ev);
                 mStatusBarKeyguardViewManager.onTouch(ev);
                 if (mBrightnessMirror != null
                         && mBrightnessMirror.getVisibility() == View.VISIBLE) {
@@ -476,21 +448,6 @@ public class NotificationShadeWindowViewController {
 
     public void setStatusBarViewController(PhoneStatusBarViewController statusBarViewController) {
         mStatusBarViewController = statusBarViewController;
-    }
-
-    /**
-     * Tell the controller that dozing has begun or ended.
-     * @param dozing True if dozing has begun.
-     */
-    public void setDozing(boolean dozing) {
-        mLowLightClockController.ifPresent(controller -> controller.showLowLightClock(dozing));
-    }
-
-    /**
-     * Tell the controller to perform burn-in prevention.
-     */
-    public void dozeTimeTick() {
-        mLowLightClockController.ifPresent(LowLightClockController::dozeTimeTick);
     }
 
     @VisibleForTesting

@@ -586,13 +586,14 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Képernyőzár használata"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"A folytatáshoz adja meg a képernyőzár hitelesítési adatait"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Nyomja meg határozottan az érzékelőt"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Nem sikerült feldolgozni az ujjlenyomatot. Próbálkozzon újra."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Az ujjlenyomat nem ismerhető fel. Próbálkozzon újra."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Tisztítsa meg az ujjlenyomat-érzékelőt, majd próbálja újra"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Tisztítsa meg az érzékelőt, majd próbálja újra"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Nyomja meg határozottan az érzékelőt"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Túl lassan húzta az ujját. Próbálkozzon újra."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Próbálkozzon másik ujjlenyomattal"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Túl világos"</string>
+    <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"Bekapcsológomb lenyomása észlelve"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Próbálja beállítani"</string>
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Módosítsa minden alkalommal kis mértékben ujja helyzetét."</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -604,16 +605,17 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Arc hitelesítve; nyomja meg a Megerősítés lehetőséget"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Az ujjlenyomathoz szükséges hardver nem érhető el."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Nem sikerült beállítani az ujjlenyomatot"</string>
-    <string name="fingerprint_error_timeout" msgid="2946635815726054226">"Az ujjlenyomat-beolvasási műveletkor időtúllépés történt. Próbálkozzon újra."</string>
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Lejárt az ujjlenyomat-beállítás időkorlátja. Próbálkozzon újra."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Ujjlenyomattal kapcsolatos művelet megszakítva"</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Az ujjlenyomattal kapcsolatos műveletet a felhasználó megszakította."</string>
-    <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Túl sok próbálkozás. Próbálja újra később."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"Túl sok próbálkozás. Ujjlenyomat-érzékelő letiltva."</string>
-    <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Próbálkozzon újra."</string>
+    <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Túl sokszor próbálkozott. Használja inkább a képernyőzárat."</string>
+    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Túl sok próbálkozás. Használja inkább a képernyőzárat."</string>
+    <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"Nem sikerült feldolgozni az ujjlenyomatot. Próbálkozzon újra."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Nincsenek regisztrált ujjlenyomatok."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Ez az eszköz nem rendelkezik ujjlenyomat-érzékelővel."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Az érzékelő átmenetileg le van tiltva."</string>
     <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Nem lehet használni az ujjlenyomat-érzékelőt. Keresse fel a szervizt."</string>
+    <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"Bekapcsológomb megnyomva"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"<xliff:g id="FINGERID">%d</xliff:g>. ujj"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Ujjlenyomat használata"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"A folytatás ujjlenyomattal vagy képernyőzárral lehetséges"</string>
@@ -636,7 +638,7 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Keresse fel a szervizt."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"Nem lehet létrehozni az arcmodellt. Próbálja újra."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Túl világos. Próbálja kevésbé erős világítással."</string>
-    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Próbálja jobb megvilágítás mellett"</string>
+    <string name="face_acquired_too_dark" msgid="8539853432479385326">"Nincs elég fény"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Tartsa távolabb a telefont"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Tartsa közelebb a telefont"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Emelje magasabbra a telefont"</string>
@@ -654,8 +656,10 @@
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Nézzen egyenesen a telefonjára"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Távolítson el mindent, ami takarja az arcát."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Tisztítsa meg a képernyő tetejét, a fekete sávot is beleértve."</string>
-    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"Arcának teljesen láthatónak kell lennie"</string>
-    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"Arcának teljesen láthatónak kell lennie"</string>
+    <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
+    <skip />
+    <!-- no translation found for face_acquired_mouth_covering_detected (8219428572168642593) -->
+    <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Nem lehet létrehozni az arcmodellt. Próbálja újra."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Sötét szemüveget észlelt a rendszer. Arcának teljesen láthatónak kell lennie."</string>
     <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Valami eltakarja az arcát. Arcának teljesen láthatónak kell lennie."</string>
@@ -1246,10 +1250,9 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"A(z) <xliff:g id="APPNAME">%1$s</xliff:g> előkészítése."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Kezdő alkalmazások."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Rendszerindítás befejezése."</string>
-    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Folytatja a beállítást?"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Megnyomta a bekapcsológombot — ezzel általában kikapcsol a képernyő.\n\nPróbáljon finoman rákoppintani az ujjlenyomat beállítása közben."</string>
-    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Kikapcsolom"</string>
-    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Beállítás folytatása"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"A képernyő kikapcsolása befejezi a beállítást"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Kikapcsolás"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Folytatja az ujjlenyomat ellenőrzését?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Megnyomta a bekapcsológombot — ezzel általában kikapcsol a képernyő.\n\nPróbáljon finoman rákoppintani az ujjlenyomat ellenőrzéséhez."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Kikapcsolom"</string>
@@ -1402,16 +1405,16 @@
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Koppintson ide a beállításhoz"</string>
     <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"Válassza ki a beállításhoz"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Előfordulhat, hogy újra kell formáznia az eszközt. Koppintson az eltávolításhoz."</string>
-    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Fotók és más tartalmak átviteléhez"</string>
+    <string name="ext_media_ready_notification_message" msgid="7509496364380197369">"Fotók, videók, zene és egyéb tárolására"</string>
     <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"Médiafájlok böngészése"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Probléma a következővel: <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"A(z) <xliff:g id="NAME">%s</xliff:g> nem működik"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Koppintson a javításhoz"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"A(z) <xliff:g id="NAME">%s</xliff:g> sérült. Válassza ki a javításhoz."</string>
     <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"Előfordulhat, hogy újra kell formáznia az eszközt. Koppintson az eltávolításhoz."</string>
-    <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"Nem támogatott <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3487534182861251401">"<xliff:g id="NAME">%s</xliff:g> felismerve"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"A(z) <xliff:g id="NAME">%s</xliff:g> nem működik"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Ez az eszköz nem támogatja ezt a(z) <xliff:g id="NAME">%s</xliff:g> eszközt. Koppintson rá a támogatott formátumban való beállításhoz."</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8463636521459807981">"Koppintson ide a beállításhoz ."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"Válassza ki a(z) <xliff:g id="NAME">%s</xliff:g> támogatott formátumban történő beállításához."</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Előfordulhat, hogy újra kell formáznia az eszközt"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"A(z) <xliff:g id="NAME">%s</xliff:g> váratlanul eltávolítva"</string>
@@ -1924,6 +1927,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Régió beállítása"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Adja meg a nyelvet"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Javasolt"</string>
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"Javasolt"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Minden nyelv"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"Minden régió"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"Keresés"</string>
@@ -1941,18 +1945,19 @@
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"A kamera nem áll rendelkezésre"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Folytatás a telefonon"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"A mikrofon nem áll rendelkezésre"</string>
+    <string name="app_streaming_blocked_title_for_playstore_dialog" msgid="8149823099822897538">"A Play Áruház nem áll rendelkezésre"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Az Android TV beállításai nem állnak rendelkezésre"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"A táblagép beállításai nem állnak rendelkezésre"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"A telefon beállításai nem állnak rendelkezésre"</string>
-    <string name="app_streaming_blocked_message" product="tv" msgid="5024599278277957935">"Ehhez nem lehet hozzáférni a következő eszközön: <xliff:g id="DEVICE">%1$s</xliff:g>. Próbálja újra Android TV-eszközén."</string>
-    <string name="app_streaming_blocked_message" product="tablet" msgid="7491114163056552686">"Ehhez nem lehet hozzáférni a következő eszközön: <xliff:g id="DEVICE">%1$s</xliff:g>. Próbálja újra a táblagépén."</string>
-    <string name="app_streaming_blocked_message" product="default" msgid="1245180131667647277">"Ehhez nem lehet hozzáférni a következő eszközön: <xliff:g id="DEVICE">%1$s</xliff:g>. Próbálja újra a telefonján."</string>
-    <string name="app_streaming_blocked_message_for_permission_dialog" product="tv" msgid="6306583663205997979">"Ehhez jelenleg nem lehet hozzáférni a következő eszközön: <xliff:g id="DEVICE">%1$s</xliff:g>. Próbálja újra Android TV-eszközén."</string>
-    <string name="app_streaming_blocked_message_for_permission_dialog" product="tablet" msgid="6545624942642129664">"Ehhez jelenleg nem lehet hozzáférni a következő eszközön: <xliff:g id="DEVICE">%1$s</xliff:g>. Próbálja újra a táblagépén."</string>
-    <string name="app_streaming_blocked_message_for_permission_dialog" product="default" msgid="8462740631707923000">"Ehhez jelenleg nem lehet hozzáférni a következő eszközön: <xliff:g id="DEVICE">%1$s</xliff:g>. Próbálja újra a telefonján."</string>
+    <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Ehhez jelenleg nem lehet hozzáférni a következő eszközön: <xliff:g id="DEVICE">%1$s</xliff:g>. Próbálja újra Android TV-eszközén."</string>
+    <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Ehhez jelenleg nem lehet hozzáférni a következő eszközön: <xliff:g id="DEVICE">%1$s</xliff:g>. Próbálja újra a táblagépén."</string>
+    <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Ehhez jelenleg nem lehet hozzáférni a következő eszközön: <xliff:g id="DEVICE">%1$s</xliff:g>. Próbálja újra a telefonján."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Ez az alkalmazás nagyobb biztonságot igényel. Próbálja újra Android TV-eszközén."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Ez az alkalmazás nagyobb biztonságot igényel. Próbálja újra a táblagépén."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Ez az alkalmazás nagyobb biztonságot igényel. Próbálja újra a telefonján."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"Ehhez nem lehet hozzáférni a következő eszközön: <xliff:g id="DEVICE">%1$s</xliff:g>. Próbálja újra az Android TV-eszközön."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"Ehhez nem lehet hozzáférni a következő eszközön: <xliff:g id="DEVICE">%1$s</xliff:g>. Próbálja újra a táblagépen."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Ehhez nem lehet hozzáférni a következő eszközön: <xliff:g id="DEVICE">%1$s</xliff:g>. Próbálja újra a telefonon."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Ez az alkalmazás az Android egyik korábbi verziójához készült, így elképzelhető, hogy nem működik majd megfelelően ezen a rendszeren. Keressen frissítéseket, vagy vegye fel a kapcsolatot a fejlesztővel."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Frissítés keresése"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Új üzenetei érkeztek"</string>
@@ -2045,7 +2050,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Engedélyezi a(z) <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> számára, hogy hozzáférjen az összes eszköznaplóhoz?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Egyszeri hozzáférés engedélyezése"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Tiltás"</string>
-    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Az eszköznaplók rögzítik, hogy mi történik az eszközén. Az alkalmazások ezeket a naplókat használhatják a problémák megkeresésére és kijavítására.\n\nBizonyos naplók érzékeny adatokat is tartalmazhatnak, ezért csak olyan alkalmazások számára engedélyezze az összes eszköznaplóhoz való hozzáférést, amelyekben megbízik. \n\nHa nem engedélyezi ennek az alkalmazásnak, hogy hozzáférjen az összes eszköznaplójához, az app továbbra is hozzáférhet a saját naplóihoz. Előfordulhat, hogy az eszköz gyártója továbbra is hozzáfér az eszközön található bizonyos naplókhoz és adatokhoz. További információ."</string>
+    <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"Az eszköznaplók rögzítik, hogy mi történik az eszközén. Az alkalmazások ezeket a naplókat használhatják a problémák megkeresésére és kijavítására.\n\nBizonyos naplók bizalmas adatokat is tartalmazhatnak, ezért csak olyan alkalmazások számára engedélyezze az összes eszköznaplóhoz való hozzáférést, amelyekben megbízik. \n\nHa nem engedélyezi ennek az alkalmazásnak, hogy hozzáférjen az összes eszköznaplójához, az app továbbra is hozzáférhet a saját naplóihoz. Előfordulhat, hogy az eszköz gyártója továbbra is hozzáfér az eszközön található bizonyos naplókhoz és adatokhoz."</string>
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"Az eszköznaplók rögzítik, hogy mi történik az eszközén. Az alkalmazások ezeket a naplókat használhatják a problémák megkeresésére és kijavítására.\n\nBizonyos naplók bizalmas adatokat is tartalmazhatnak, ezért csak olyan alkalmazások számára engedélyezze az összes eszköznaplóhoz való hozzáférést, amelyekben megbízik. \n\nHa nem engedélyezi ennek az alkalmazásnak, hogy hozzáférjen az összes eszköznaplójához, az app továbbra is hozzáférhet a saját naplóihoz. Előfordulhat, hogy az eszköz gyártója továbbra is hozzáfér az eszközön található bizonyos naplókhoz és adatokhoz.\n\nTovábbi információ: g.co/android/devicelogs."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Ne jelenjen meg újra"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"A(z) <xliff:g id="APP_0">%1$s</xliff:g> alkalmazás részleteket szeretne megjeleníteni a(z) <xliff:g id="APP_2">%2$s</xliff:g> alkalmazásból"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Szerkesztés"</string>
@@ -2286,5 +2292,6 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Aktív alkalmazások ellenőrzése"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Nem lehet hozzáférni a telefon kamerájához a következő eszközön: <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Nem lehet hozzáférni a táblagép kamerájához a következő eszközön: <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
+    <string name="vdm_secure_window" msgid="161700398158812314">"Ehhez a tartalomhoz nem lehet hozzáférni streamelés közben. Próbálja újra a telefonján."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Rendszerbeállítás"</string>
 </resources>

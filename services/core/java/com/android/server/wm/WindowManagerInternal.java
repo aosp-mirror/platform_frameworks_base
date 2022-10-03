@@ -880,6 +880,8 @@ public abstract class WindowManagerInternal {
      * Must be invoked for a valid MediaProjection session.
      *
      * @param incomingSession the nullable incoming content recording session
+     * @return {@code true} if successfully set the session, or {@code false} if the session
+     * could not be prepared and the session needs to be torn down.
      */
-    public abstract void setContentRecordingSession(ContentRecordingSession incomingSession);
+    public abstract boolean setContentRecordingSession(ContentRecordingSession incomingSession);
 }

@@ -235,6 +235,7 @@ public class SystemServicesTestRule implements TestRule {
         doReturn(pm).when(mContext).getSystemService(eq(Context.POWER_SERVICE));
         mStubbedWakeLock = createStubbedWakeLock(false /* needVerification */);
         doReturn(mStubbedWakeLock).when(pm).newWakeLock(anyInt(), anyString());
+        doReturn(mStubbedWakeLock).when(pm).newWakeLock(anyInt(), anyString(), anyInt());
 
         // DisplayManagerInternal
         final DisplayManagerInternal dmi = mock(DisplayManagerInternal.class);
@@ -344,7 +345,7 @@ public class SystemServicesTestRule implements TestRule {
         // Set default display to be in fullscreen mode. Devices with PC feature may start their
         // default display in freeform mode but some of tests in WmTests have implicit assumption on
         // that the default display is in fullscreen mode.
-        display.setDisplayWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        display.getDefaultTaskDisplayArea().setWindowingMode(WINDOWING_MODE_FULLSCREEN);
         spyOn(display);
         final TaskDisplayArea taskDisplayArea = display.getDefaultTaskDisplayArea();
 

@@ -15,8 +15,6 @@
  */
 package android.app.cloudsearch;
 
-import static java.util.Objects.requireNonNull;
-
 import android.annotation.NonNull;
 import android.annotation.StringDef;
 import android.annotation.SuppressLint;
@@ -27,7 +25,6 @@ import android.os.Parcelable;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.Objects;
 
 /**
  * A {@link SearchResult} includes all the information for one result item.
@@ -37,17 +34,6 @@ import java.util.Objects;
 @SystemApi
 public final class SearchResult implements Parcelable {
 
-    /** Short content best describing the result item. */
-    @NonNull
-    private final String mTitle;
-
-    /** Matched contents in the result item. */
-    @NonNull
-    private final String mSnippet;
-
-    /** Ranking Score provided by the search provider. */
-    private final float mScore;
-
     /**
      * List of public static KEYS for Bundles in mExtraInfos.
      * mExtraInfos contains various information specified for different data types.
@@ -56,28 +42,30 @@ public final class SearchResult implements Parcelable {
      */
     @Retention(RetentionPolicy.SOURCE)
     @StringDef(prefix = {"EXTRAINFO_"},
-        value = {EXTRAINFO_APP_DOMAIN_URL,
-            EXTRAINFO_APP_ICON,
-            EXTRAINFO_APP_DEVELOPER_NAME,
-            EXTRAINFO_APP_SIZE_BYTES,
-            EXTRAINFO_APP_STAR_RATING,
-            EXTRAINFO_APP_IARC,
-            EXTRAINFO_APP_REVIEW_COUNT,
-            EXTRAINFO_APP_CONTAINS_ADS_DISCLAIMER,
-            EXTRAINFO_APP_CONTAINS_IAP_DISCLAIMER,
-            EXTRAINFO_SHORT_DESCRIPTION,
-            EXTRAINFO_LONG_DESCRIPTION,
-            EXTRAINFO_SCREENSHOTS,
-            EXTRAINFO_APP_BADGES,
-            EXTRAINFO_ACTION_BUTTON_TEXT_PREREGISTERING,
-            EXTRAINFO_ACTION_BUTTON_IMAGE_PREREGISTERING,
-            EXTRAINFO_ACTION_APP_CARD,
-            EXTRAINFO_ACTION_INSTALL_BUTTON,
-            EXTRAINFO_APP_PACKAGE_NAME,
-            EXTRAINFO_APP_INSTALL_COUNT,
-            EXTRAINFO_WEB_URL,
-            EXTRAINFO_WEB_ICON})
-    public @interface SearchResultExtraInfoKey {}
+            value = {EXTRAINFO_APP_DOMAIN_URL,
+                    EXTRAINFO_APP_ICON,
+                    EXTRAINFO_APP_DEVELOPER_NAME,
+                    EXTRAINFO_APP_SIZE_BYTES,
+                    EXTRAINFO_APP_STAR_RATING,
+                    EXTRAINFO_APP_IARC,
+                    EXTRAINFO_APP_REVIEW_COUNT,
+                    EXTRAINFO_APP_CONTAINS_ADS_DISCLAIMER,
+                    EXTRAINFO_APP_CONTAINS_IAP_DISCLAIMER,
+                    EXTRAINFO_SHORT_DESCRIPTION,
+                    EXTRAINFO_LONG_DESCRIPTION,
+                    EXTRAINFO_SCREENSHOTS,
+                    EXTRAINFO_APP_BADGES,
+                    EXTRAINFO_ACTION_BUTTON_TEXT_PREREGISTERING,
+                    EXTRAINFO_ACTION_BUTTON_IMAGE_PREREGISTERING,
+                    EXTRAINFO_ACTION_APP_CARD,
+                    EXTRAINFO_ACTION_INSTALL_BUTTON,
+                    EXTRAINFO_APP_PACKAGE_NAME,
+                    EXTRAINFO_APP_INSTALL_COUNT,
+                    EXTRAINFO_WEB_URL,
+                    EXTRAINFO_WEB_ICON})
+    public @interface SearchResultExtraInfoKey {
+    }
+
     /** This App developer website's domain URL, String value expected. */
     public static final String EXTRAINFO_APP_DOMAIN_URL = "android.app.cloudsearch.APP_DOMAIN_URL";
     /** This App icon, android.graphics.drawable.Icon expected. */
@@ -90,7 +78,8 @@ public final class SearchResult implements Parcelable {
     /** This App developer's name, Double value expected. */
     public static final String EXTRAINFO_APP_STAR_RATING =
             "android.app.cloudsearch.APP_STAR_RATING";
-    /** This App's IARC rating, String value expected.
+    /**
+     * This App's IARC rating, String value expected.
      * IARC (International Age Rating Coalition) is partnered globally with major
      * content rating organizations to provide a centralized and one-stop-shop for
      * rating content on a global scale.
@@ -142,62 +131,40 @@ public final class SearchResult implements Parcelable {
     /** Web content's domain icon, android.graphics.drawable.Icon expected. */
     public static final String EXTRAINFO_WEB_ICON = "android.app.cloudsearch.WEB_ICON";
 
-    @NonNull
-    private Bundle mExtraInfos;
-
-    private SearchResult(Parcel in) {
-        this.mTitle = in.readString();
-        this.mSnippet = in.readString();
-        this.mScore = in.readFloat();
-        this.mExtraInfos = in.readBundle();
-    }
-
-    private SearchResult(String title, String snippet, float score, Bundle extraInfos) {
-        mTitle = title;
-        mSnippet = snippet;
-        mScore = score;
-        mExtraInfos = extraInfos;
+    private SearchResult() {
     }
 
     /** Gets the search result title. */
     @NonNull
     public String getTitle() {
-        return mTitle;
+        return "";
     }
 
     /** Gets the search result snippet. */
     @NonNull
     public String getSnippet() {
-        return mSnippet;
+        return "";
     }
 
     /** Gets the ranking score provided by the original search provider. */
     public float getScore() {
-        return mScore;
+        return 0;
     }
 
     /** Gets the extra information associated with the search result. */
     @NonNull
     public Bundle getExtraInfos() {
-        return mExtraInfos;
-    }
-
-    private SearchResult(Builder b) {
-        mTitle = requireNonNull(b.mTitle);
-        mSnippet = requireNonNull(b.mSnippet);
-        mScore = b.mScore;
-        mExtraInfos = requireNonNull(b.mExtraInfos);
+        return Bundle.EMPTY;
     }
 
     /**
-     *
      * @see Creator
-     *
      */
-    @NonNull public static final Creator<SearchResult> CREATOR = new Creator<SearchResult>() {
+    @NonNull
+    public static final Creator<SearchResult> CREATOR = new Creator<SearchResult>() {
         @Override
         public SearchResult createFromParcel(Parcel p) {
-            return new SearchResult(p);
+            return new SearchResult();
         }
 
         @Override
@@ -208,10 +175,6 @@ public final class SearchResult implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeString(this.mTitle);
-        dest.writeString(this.mSnippet);
-        dest.writeFloat(this.mScore);
-        dest.writeBundle(this.mExtraInfos);
     }
 
     @Override
@@ -221,24 +184,12 @@ public final class SearchResult implements Parcelable {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-
-        if (obj == null || getClass() != obj.getClass()) {
-            return false;
-        }
-
-        SearchResult that = (SearchResult) obj;
-        return Objects.equals(mTitle, that.mTitle)
-            && Objects.equals(mSnippet, that.mSnippet)
-            && mScore == that.mScore
-            && Objects.equals(mExtraInfos, that.mExtraInfos);
+        return false;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mTitle, mSnippet, mScore, mExtraInfos);
+        return 0;
     }
 
     /**
@@ -248,63 +199,43 @@ public final class SearchResult implements Parcelable {
      */
     @SystemApi
     public static final class Builder {
-        private String mTitle;
-        private String mSnippet;
-        private float mScore;
-        private Bundle mExtraInfos;
-
         /**
-         *
-         * @param title the title to the search result.
+         * @param title      the title to the search result.
          * @param extraInfos the extra infos associated with the search result.
-         *
          * @hide
          */
         @SystemApi
         public Builder(@NonNull String title, @NonNull Bundle extraInfos) {
-            mTitle = title;
-            mExtraInfos = extraInfos;
-
-            mSnippet = "";
-            mScore = 0;
         }
 
         /** Sets the title to the search result. */
         @NonNull
         public Builder setTitle(@NonNull String title) {
-            this.mTitle = title;
             return this;
         }
 
         /** Sets the snippet to the search result. */
         @NonNull
         public Builder setSnippet(@NonNull String snippet) {
-            this.mSnippet = snippet;
             return this;
         }
 
         /** Sets the ranking score to the search result. */
         @NonNull
         public Builder setScore(float score) {
-            this.mScore = score;
             return this;
         }
 
         /** Adds extra information to the search result for rendering in the UI. */
         @NonNull
         public Builder setExtraInfos(@NonNull Bundle extraInfos) {
-            this.mExtraInfos = extraInfos;
             return this;
         }
 
         /** Builds a SearchResult based-on the given parameters. */
         @NonNull
         public SearchResult build() {
-            if (mTitle == null || mExtraInfos == null || mSnippet == null) {
-                throw new IllegalStateException("Please make sure all required args are assigned.");
-            }
-
-            return new SearchResult(mTitle, mSnippet, mScore, mExtraInfos);
+            return new SearchResult();
         }
     }
 }

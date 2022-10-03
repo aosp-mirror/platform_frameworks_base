@@ -311,8 +311,7 @@ class ActivityLaunchAnimator(
             @JvmStatic
             fun fromView(view: View, cujType: Int? = null): Controller? {
                 if (view.parent !is ViewGroup) {
-                    // TODO(b/192194319): Throw instead of just logging.
-                    Log.wtf(
+                    Log.e(
                         TAG,
                         "Skipping animation as view $view is not attached to a ViewGroup",
                         Exception()
@@ -353,8 +352,11 @@ class ActivityLaunchAnimator(
          * The animation was cancelled. Note that [onLaunchAnimationEnd] will still be called after
          * this if the animation was already started, i.e. if [onLaunchAnimationStart] was called
          * before the cancellation.
+         *
+         * If this launch animation affected the occlusion state of the keyguard, WM will provide
+         * us with [newKeyguardOccludedState] so that we can set the occluded state appropriately.
          */
-        fun onLaunchAnimationCancelled() {}
+        fun onLaunchAnimationCancelled(newKeyguardOccludedState: Boolean? = null) {}
     }
 
     @VisibleForTesting
@@ -668,7 +670,7 @@ class ActivityLaunchAnimator(
             removeTimeout()
             context.mainExecutor.execute {
                 animation?.cancel()
-                controller.onLaunchAnimationCancelled()
+                controller.onLaunchAnimationCancelled(newKeyguardOccludedState = isKeyguardOccluded)
             }
         }
 

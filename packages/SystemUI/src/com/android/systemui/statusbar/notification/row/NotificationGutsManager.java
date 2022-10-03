@@ -55,7 +55,6 @@ import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.shade.ShadeController;
-import com.android.systemui.statusbar.NotificationLifetimeExtender;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.StatusBarState;
@@ -81,8 +80,7 @@ import dagger.Lazy;
  * Handles various NotificationGuts related tasks, such as binding guts to a row, opening and
  * closing guts, and keeping track of the currently exposed notification guts.
  */
-public class NotificationGutsManager implements Dumpable, NotificationLifetimeExtender,
-        NotifGutsViewManager {
+public class NotificationGutsManager implements NotifGutsViewManager {
     private static final String TAG = "NotificationGutsManager";
 
     // Must match constant in Settings. Used to highlight preferences when linking to Settings.
@@ -107,13 +105,10 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
     // which notification is currently being longpress-examined by the user
     private NotificationGuts mNotificationGutsExposed;
     private NotificationMenuRowPlugin.MenuItem mGutsMenuItem;
-    private NotificationSafeToRemoveCallback mNotificationLifetimeFinishedCallback;
     private NotificationPresenter mPresenter;
     private NotificationActivityStarter mNotificationActivityStarter;
     private NotificationListContainer mListContainer;
     private OnSettingsClickListener mOnSettingsClickListener;
-    @VisibleForTesting
-    protected String mKeyToRemoveOnGutsClosed;
 
     private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
     private final Handler mMainHandler;
@@ -148,8 +143,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
             Optional<BubblesManager> bubblesManagerOptional,
             UiEventLogger uiEventLogger,
             OnUserInteractionCallback onUserInteractionCallback,
-            ShadeController shadeController,
-            DumpManager dumpManager) {
+            ShadeController shadeController) {
         mContext = context;
         mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
         mMainHandler = mainHandler;
@@ -167,8 +161,6 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
         mUiEventLogger = uiEventLogger;
         mOnUserInteractionCallback = onUserInteractionCallback;
         mShadeController = shadeController;
-
-        dumpManager.registerDumpable(this);
     }
 
     public void setUpWithPresenter(NotificationPresenter presenter,
@@ -266,12 +258,6 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
                 mGutsListener.onGutsClose(entry);
             }
             String key = entry.getKey();
-            if (key.equals(mKeyToRemoveOnGutsClosed)) {
-                mKeyToRemoveOnGutsClosed = null;
-                if (mNotificationLifetimeFinishedCallback != null) {
-                    mNotificationLifetimeFinishedCallback.onSafeToRemove(key);
-                }
-            }
         });
 
         View gutsView = item.getGutsView();
@@ -477,7 +463,6 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
                         R.dimen.notification_guts_conversation_icon_size));
 
         notificationInfoView.bindNotification(
-                notificationInfoView.getSelectedAction(),
                 mShortcutManager,
                 pmUser,
                 mPeopleSpaceWidgetManager,
@@ -656,46 +641,6 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
         };
         guts.post(mOpenRunnable);
         return true;
-    }
-
-    @Override
-    public void setCallback(NotificationSafeToRemoveCallback callback) {
-        mNotificationLifetimeFinishedCallback = callback;
-    }
-
-    @Override
-    public boolean shouldExtendLifetime(NotificationEntry entry) {
-        return entry != null
-                &&(mNotificationGutsExposed != null
-                    && entry.getGuts() != null
-                    && mNotificationGutsExposed == entry.getGuts()
-                    && !mNotificationGutsExposed.isLeavebehind());
-    }
-
-    @Override
-    public void setShouldManageLifetime(NotificationEntry entry, boolean shouldExtend) {
-        if (shouldExtend) {
-            mKeyToRemoveOnGutsClosed = entry.getKey();
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
-                Log.d(TAG, "Keeping notification because it's showing guts. " + entry.getKey());
-            }
-        } else {
-            if (mKeyToRemoveOnGutsClosed != null
-                    && mKeyToRemoveOnGutsClosed.equals(entry.getKey())) {
-                mKeyToRemoveOnGutsClosed = null;
-                if (Log.isLoggable(TAG, Log.DEBUG)) {
-                    Log.d(TAG, "Notification that was kept for guts was updated. "
-                            + entry.getKey());
-                }
-            }
-        }
-    }
-
-    @Override
-    public void dump(PrintWriter pw, String[] args) {
-        pw.println("NotificationGutsManager state:");
-        pw.print("  mKeyToRemoveOnGutsClosed (legacy): ");
-        pw.println(mKeyToRemoveOnGutsClosed);
     }
 
     /**

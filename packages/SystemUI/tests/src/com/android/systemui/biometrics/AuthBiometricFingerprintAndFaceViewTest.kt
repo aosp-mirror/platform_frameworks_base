@@ -41,11 +41,13 @@ import org.mockito.junit.MockitoJUnit
 @SmallTest
 class AuthBiometricFingerprintAndFaceViewTest : SysuiTestCase() {
 
-    @JvmField @Rule
+    @JvmField
+    @Rule
     var mockitoRule = MockitoJUnit.rule()
 
     @Mock
     private lateinit var callback: AuthBiometricView.Callback
+
     @Mock
     private lateinit var panelController: AuthPanelController
 
@@ -67,6 +69,7 @@ class AuthBiometricFingerprintAndFaceViewTest : SysuiTestCase() {
     fun fingerprintSuccessDoesNotRequireExplicitConfirmation() {
         biometricView.onDialogAnimatedIn()
         biometricView.onAuthenticationSucceeded(TYPE_FINGERPRINT)
+        TestableLooper.get(this).moveTimeForward(1000)
         waitForIdleSync()
 
         assertThat(biometricView.isAuthenticated).isTrue()
@@ -86,6 +89,7 @@ class AuthBiometricFingerprintAndFaceViewTest : SysuiTestCase() {
 
         // icon acts as confirm button
         biometricView.mIconView.performClick()
+        TestableLooper.get(this).moveTimeForward(1000)
         waitForIdleSync()
 
         assertThat(biometricView.isAuthenticated).isTrue()
@@ -102,6 +106,7 @@ class AuthBiometricFingerprintAndFaceViewTest : SysuiTestCase() {
         verify(callback, never()).onAction(AuthBiometricView.Callback.ACTION_ERROR)
 
         biometricView.onError(TYPE_FINGERPRINT, "that's a nope")
+        TestableLooper.get(this).moveTimeForward(1000)
         waitForIdleSync()
 
         verify(callback).onAction(AuthBiometricView.Callback.ACTION_ERROR)

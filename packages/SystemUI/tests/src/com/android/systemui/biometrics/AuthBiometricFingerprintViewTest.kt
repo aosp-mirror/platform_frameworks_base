@@ -42,20 +42,23 @@ import org.mockito.junit.MockitoJUnit
 @SmallTest
 class AuthBiometricFingerprintViewTest : SysuiTestCase() {
 
-    @JvmField @Rule
+    @JvmField
+    @Rule
     val mockitoRule = MockitoJUnit.rule()
 
     @Mock
     private lateinit var callback: AuthBiometricView.Callback
+
     @Mock
     private lateinit var panelController: AuthPanelController
 
     private lateinit var biometricView: AuthBiometricView
 
     private fun createView(allowDeviceCredential: Boolean = false): AuthBiometricFingerprintView {
-        val view = R.layout.auth_biometric_fingerprint_view.asTestAuthBiometricView(
+        val view: AuthBiometricFingerprintView =
+                R.layout.auth_biometric_fingerprint_view.asTestAuthBiometricView(
                 mContext, callback, panelController, allowDeviceCredential = allowDeviceCredential
-        ) as AuthBiometricFingerprintView
+        )
         waitForIdleSync()
         return view
     }
@@ -73,6 +76,7 @@ class AuthBiometricFingerprintViewTest : SysuiTestCase() {
     @Test
     fun testOnAuthenticationSucceeded_noConfirmationRequired_sendsActionAuthenticated() {
         biometricView.onAuthenticationSucceeded(BiometricAuthenticator.TYPE_FINGERPRINT)
+        TestableLooper.get(this).moveTimeForward(1000)
         waitForIdleSync()
 
         assertThat(biometricView.isAuthenticated).isTrue()
@@ -83,6 +87,7 @@ class AuthBiometricFingerprintViewTest : SysuiTestCase() {
     fun testOnAuthenticationSucceeded_confirmationRequired_updatesDialogContents() {
         biometricView.setRequireConfirmation(true)
         biometricView.onAuthenticationSucceeded(BiometricAuthenticator.TYPE_FINGERPRINT)
+        TestableLooper.get(this).moveTimeForward(1000)
         waitForIdleSync()
 
         // TODO: this should be tested in the subclasses
@@ -104,6 +109,7 @@ class AuthBiometricFingerprintViewTest : SysuiTestCase() {
     @Test
     fun testPositiveButton_sendsActionAuthenticated() {
         biometricView.mConfirmButton.performClick()
+        TestableLooper.get(this).moveTimeForward(1000)
         waitForIdleSync()
 
         verify(callback).onAction(AuthBiometricView.Callback.ACTION_AUTHENTICATED)
@@ -114,6 +120,7 @@ class AuthBiometricFingerprintViewTest : SysuiTestCase() {
     fun testNegativeButton_beforeAuthentication_sendsActionButtonNegative() {
         biometricView.onDialogAnimatedIn()
         biometricView.mNegativeButton.performClick()
+        TestableLooper.get(this).moveTimeForward(1000)
         waitForIdleSync()
 
         verify(callback).onAction(AuthBiometricView.Callback.ACTION_BUTTON_NEGATIVE)
@@ -126,6 +133,7 @@ class AuthBiometricFingerprintViewTest : SysuiTestCase() {
 
         assertThat(biometricView.mNegativeButton.visibility).isEqualTo(View.GONE)
         biometricView.mCancelButton.performClick()
+        TestableLooper.get(this).moveTimeForward(1000)
         waitForIdleSync()
 
         verify(callback).onAction(AuthBiometricView.Callback.ACTION_USER_CANCELED)
@@ -134,6 +142,7 @@ class AuthBiometricFingerprintViewTest : SysuiTestCase() {
     @Test
     fun testTryAgainButton_sendsActionTryAgain() {
         biometricView.mTryAgainButton.performClick()
+        TestableLooper.get(this).moveTimeForward(1000)
         waitForIdleSync()
 
         verify(callback).onAction(AuthBiometricView.Callback.ACTION_BUTTON_TRY_AGAIN)
@@ -144,6 +153,7 @@ class AuthBiometricFingerprintViewTest : SysuiTestCase() {
     @Test
     fun testOnErrorSendsActionError() {
         biometricView.onError(BiometricAuthenticator.TYPE_FACE, "testError")
+        TestableLooper.get(this).moveTimeForward(1000)
         waitForIdleSync()
 
         verify(callback).onAction(eq(AuthBiometricView.Callback.ACTION_ERROR))
@@ -156,6 +166,7 @@ class AuthBiometricFingerprintViewTest : SysuiTestCase() {
 
         val message = "another error"
         biometricView.onError(BiometricAuthenticator.TYPE_FACE, message)
+        TestableLooper.get(this).moveTimeForward(1000)
         waitForIdleSync()
 
         assertThat(biometricView.isAuthenticating).isFalse()
@@ -178,6 +189,7 @@ class AuthBiometricFingerprintViewTest : SysuiTestCase() {
         val view = View(mContext)
         biometricView.setBackgroundView(view)
         biometricView.onAuthenticationSucceeded(BiometricAuthenticator.TYPE_FINGERPRINT)
+        waitForIdleSync()
         view.performClick()
 
         verify(callback, never())
@@ -225,14 +237,14 @@ class AuthBiometricFingerprintViewTest : SysuiTestCase() {
         biometricView.onSaveState(state)
         assertThat(biometricView.mTryAgainButton.visibility).isEqualTo(View.GONE)
         assertThat(state.getInt(AuthDialog.KEY_BIOMETRIC_TRY_AGAIN_VISIBILITY))
-            .isEqualTo(View.GONE)
+                .isEqualTo(View.GONE)
         assertThat(state.getInt(AuthDialog.KEY_BIOMETRIC_STATE))
-            .isEqualTo(AuthBiometricView.STATE_ERROR)
+                .isEqualTo(AuthBiometricView.STATE_ERROR)
         assertThat(biometricView.mIndicatorView.visibility).isEqualTo(View.VISIBLE)
         assertThat(state.getBoolean(AuthDialog.KEY_BIOMETRIC_INDICATOR_ERROR_SHOWING)).isTrue()
         assertThat(biometricView.mIndicatorView.text).isEqualTo(failureMessage)
         assertThat(state.getString(AuthDialog.KEY_BIOMETRIC_INDICATOR_STRING))
-            .isEqualTo(failureMessage)
+                .isEqualTo(failureMessage)
 
         // TODO: Test dialog size. Should move requireConfirmation to buildBiometricPromptBundle
 

@@ -66,10 +66,11 @@ class KeyguardPatternViewControllerTest : SysuiTestCase() {
     var mKeyguardMessageAreaControllerFactory: KeyguardMessageAreaController.Factory
 
     @Mock
-    private lateinit var mKeyguardMessageArea: KeyguardMessageArea
+    private lateinit var mKeyguardMessageArea: BouncerKeyguardMessageArea
 
     @Mock
-    private lateinit var mKeyguardMessageAreaController: KeyguardMessageAreaController
+    private lateinit var mKeyguardMessageAreaController:
+        KeyguardMessageAreaController<BouncerKeyguardMessageArea>
 
     @Mock
     private lateinit var mLockPatternView: LockPatternView
@@ -83,7 +84,8 @@ class KeyguardPatternViewControllerTest : SysuiTestCase() {
     fun setup() {
         MockitoAnnotations.initMocks(this)
         `when`(mKeyguardPatternView.isAttachedToWindow).thenReturn(true)
-        `when`(mKeyguardPatternView.findViewById<KeyguardMessageArea>(R.id.keyguard_message_area))
+        `when`(mKeyguardPatternView
+            .requireViewById<BouncerKeyguardMessageArea>(R.id.bouncer_message_area))
             .thenReturn(mKeyguardMessageArea)
         `when`(mKeyguardPatternView.findViewById<LockPatternView>(R.id.lockPatternView))
             .thenReturn(mLockPatternView)

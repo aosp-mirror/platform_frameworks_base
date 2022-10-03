@@ -22,7 +22,6 @@
     <dimen name="keyguard_eca_top_margin">4dp</dimen>
     <dimen name="keyguard_eca_bottom_margin">4dp</dimen>
     <dimen name="keyguard_password_height">50dp</dimen>
-    <dimen name="num_pad_entry_row_margin_bottom">4dp</dimen>
 
     <!-- The size of PIN text in the PIN unlock method. -->
     <integer name="scaled_password_text_size">40</integer>

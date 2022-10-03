@@ -48,9 +48,13 @@ interface SysPropFlag<T> : Flag<T> {
     val default: T
 }
 
+/**
+ * Base class for most common boolean flags.
+ *
+ * See [UnreleasedFlag] and [ReleasedFlag] for useful implementations.
+ */
 // Consider using the "parcelize" kotlin library.
-
-data class BooleanFlag @JvmOverloads constructor(
+abstract class BooleanFlag constructor(
     override val id: Int,
     override val default: Boolean = false,
     override val teamfood: Boolean = false,
@@ -60,7 +64,7 @@ data class BooleanFlag @JvmOverloads constructor(
     companion object {
         @JvmField
         val CREATOR = object : Parcelable.Creator<BooleanFlag> {
-            override fun createFromParcel(parcel: Parcel) = BooleanFlag(parcel)
+            override fun createFromParcel(parcel: Parcel) = object : BooleanFlag(parcel) {}
             override fun newArray(size: Int) = arrayOfNulls<BooleanFlag>(size)
         }
     }
@@ -80,12 +84,46 @@ data class BooleanFlag @JvmOverloads constructor(
     }
 }
 
+/**
+ * A Flag that is is false by default.
+ *
+ * It can be changed or overridden in debug builds but not in release builds.
+ */
+data class UnreleasedFlag @JvmOverloads constructor(
+    override val id: Int,
+    override val teamfood: Boolean = false,
+    override val overridden: Boolean = false
+) : BooleanFlag(id, false, teamfood, overridden)
+
+/**
+ * A Flag that is is true by default.
+ *
+ * It can be changed or overridden in any build, meaning it can be turned off if needed.
+ */
+data class ReleasedFlag @JvmOverloads constructor(
+    override val id: Int,
+    override val teamfood: Boolean = false,
+    override val overridden: Boolean = false
+) : BooleanFlag(id, true, teamfood, overridden)
+
+/**
+ * A Flag that reads its default values from a resource overlay instead of code.
+ *
+ * Prefer [UnreleasedFlag] and [ReleasedFlag].
+ */
 data class ResourceBooleanFlag @JvmOverloads constructor(
     override val id: Int,
     @BoolRes override val resourceId: Int,
     override val teamfood: Boolean = false
 ) : ResourceFlag<Boolean>
 
+/**
+ * A Flag that can reads its overrides from DeviceConfig.
+ *
+ * This is generally useful for flags that come from or are used _outside_ of SystemUI.
+ *
+ * Prefer [UnreleasedFlag] and [ReleasedFlag].
+ */
 data class DeviceConfigBooleanFlag @JvmOverloads constructor(
     override val id: Int,
     override val name: String,
@@ -94,6 +132,13 @@ data class DeviceConfigBooleanFlag @JvmOverloads constructor(
     override val teamfood: Boolean = false
 ) : DeviceConfigFlag<Boolean>
 
+/**
+ * A Flag that can reads its overrides from System Properties.
+ *
+ * This is generally useful for flags that come from or are used _outside_ of SystemUI.
+ *
+ * Prefer [UnreleasedFlag] and [ReleasedFlag].
+ */
 data class SysPropBooleanFlag @JvmOverloads constructor(
     override val id: Int,
     override val name: String,

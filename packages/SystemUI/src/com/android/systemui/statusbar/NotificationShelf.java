@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar;
 
+import static com.android.keyguard.BouncerPanelExpansionCalculator.aboutToShowBouncerProgress;
+
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -28,6 +30,8 @@ import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
+
+import androidx.annotation.NonNull;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.SystemBarUtils;
@@ -86,6 +90,12 @@ public class NotificationShelf extends ActivatableNotificationView implements
 
     public NotificationShelf(Context context, AttributeSet attrs) {
         super(context, attrs);
+    }
+
+    @VisibleForTesting
+    public NotificationShelf(Context context, AttributeSet attrs, boolean showNotificationShelf) {
+        super(context, attrs);
+        mShowNotificationShelf = showNotificationShelf;
     }
 
     @Override
@@ -153,8 +163,20 @@ public class NotificationShelf extends ActivatableNotificationView implements
     }
 
     @Override
+    @NonNull
     public ExpandableViewState createExpandableViewState() {
         return new ShelfState();
+    }
+
+    @Override
+    public String toString() {
+        return "NotificationShelf("
+                + "hideBackground=" + mHideBackground + " notGoneIndex=" + mNotGoneIndex
+                + " hasItemsInStableShelf=" + mHasItemsInStableShelf
+                + " statusBarState=" + mStatusBarState + " interactive=" + mInteractive
+                + " animationsEnabled=" + mAnimationsEnabled
+                + " showNotificationShelf=" + mShowNotificationShelf
+                + " indexOfFirstViewInShelf=" + mIndexOfFirstViewInShelf + ')';
     }
 
     /** Update the state of the shelf. */
@@ -172,7 +194,11 @@ public class NotificationShelf extends ActivatableNotificationView implements
 
             if (ambientState.isExpansionChanging() && !ambientState.isOnKeyguard()) {
                 float expansion = ambientState.getExpansionFraction();
-                viewState.alpha = ShadeInterpolation.getContentAlpha(expansion);
+                if (ambientState.isBouncerInTransit()) {
+                    viewState.alpha = aboutToShowBouncerProgress(expansion);
+                } else {
+                    viewState.alpha = ShadeInterpolation.getContentAlpha(expansion);
+                }
             } else {
                 viewState.alpha = 1f - ambientState.getHideAmount();
             }

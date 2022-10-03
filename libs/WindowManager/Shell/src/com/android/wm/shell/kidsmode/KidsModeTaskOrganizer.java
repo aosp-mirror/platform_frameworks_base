@@ -50,6 +50,7 @@ import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.recents.RecentTasksController;
+import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.unfold.UnfoldAnimationController;
 
@@ -73,6 +74,7 @@ public class KidsModeTaskOrganizer extends ShellTaskOrganizer {
 
     private final Handler mMainHandler;
     private final Context mContext;
+    private final ShellCommandHandler mShellCommandHandler;
     private final SyncTransactionQueue mSyncQueue;
     private final DisplayController mDisplayController;
     private final DisplayInsetsController mDisplayInsetsController;
@@ -141,6 +143,8 @@ public class KidsModeTaskOrganizer extends ShellTaskOrganizer {
     @VisibleForTesting
     KidsModeTaskOrganizer(
             Context context,
+            ShellInit shellInit,
+            ShellCommandHandler shellCommandHandler,
             ITaskOrganizerController taskOrganizerController,
             SyncTransactionQueue syncTransactionQueue,
             DisplayController displayController,
@@ -150,19 +154,23 @@ public class KidsModeTaskOrganizer extends ShellTaskOrganizer {
             KidsModeSettingsObserver kidsModeSettingsObserver,
             ShellExecutor mainExecutor,
             Handler mainHandler) {
-        super(/* shellInit= */ null, taskOrganizerController, /* compatUI= */ null,
-                unfoldAnimationController, recentTasks, mainExecutor);
+        // Note: we don't call super with the shell init because we will be initializing manually
+        super(/* shellInit= */ null, /* shellCommandHandler= */ null, taskOrganizerController,
+                /* compatUI= */ null, unfoldAnimationController, recentTasks, mainExecutor);
         mContext = context;
+        mShellCommandHandler = shellCommandHandler;
         mMainHandler = mainHandler;
         mSyncQueue = syncTransactionQueue;
         mDisplayController = displayController;
         mDisplayInsetsController = displayInsetsController;
         mKidsModeSettingsObserver = kidsModeSettingsObserver;
+        shellInit.addInitCallback(this::onInit, this);
     }
 
     public KidsModeTaskOrganizer(
             Context context,
             ShellInit shellInit,
+            ShellCommandHandler shellCommandHandler,
             SyncTransactionQueue syncTransactionQueue,
             DisplayController displayController,
             DisplayInsetsController displayInsetsController,
@@ -171,9 +179,10 @@ public class KidsModeTaskOrganizer extends ShellTaskOrganizer {
             ShellExecutor mainExecutor,
             Handler mainHandler) {
         // Note: we don't call super with the shell init because we will be initializing manually
-        super(/* shellInit= */ null, /* compatUI= */ null, unfoldAnimationController, recentTasks,
-                mainExecutor);
+        super(/* shellInit= */ null, /* taskOrganizerController= */ null, /* compatUI= */ null,
+                unfoldAnimationController, recentTasks, mainExecutor);
         mContext = context;
+        mShellCommandHandler = shellCommandHandler;
         mMainHandler = mainHandler;
         mSyncQueue = syncTransactionQueue;
         mDisplayController = displayController;
@@ -185,6 +194,9 @@ public class KidsModeTaskOrganizer extends ShellTaskOrganizer {
      * Initializes kids mode status.
      */
     public void onInit() {
+        if (mShellCommandHandler != null) {
+            mShellCommandHandler.addDumpCallback(this::dump, this);
+        }
         if (mKidsModeSettingsObserver == null) {
             mKidsModeSettingsObserver = new KidsModeSettingsObserver(mMainHandler, mContext);
         }
@@ -304,11 +316,13 @@ public class KidsModeTaskOrganizer extends ShellTaskOrganizer {
                 true /* onTop */);
         wct.reorder(rootToken, mEnabled /* onTop */);
         mSyncQueue.queue(wct);
-        final SurfaceControl rootLeash = mLaunchRootLeash;
-        mSyncQueue.runInSync(t -> {
-            t.setPosition(rootLeash, taskBounds.left, taskBounds.top);
-            t.setWindowCrop(rootLeash, taskBounds.width(), taskBounds.height());
-        });
+        if (mEnabled) {
+            final SurfaceControl rootLeash = mLaunchRootLeash;
+            mSyncQueue.runInSync(t -> {
+                t.setPosition(rootLeash, taskBounds.left, taskBounds.top);
+                t.setWindowCrop(rootLeash, taskBounds.width(), taskBounds.height());
+            });
+        }
     }
 
     private Rect calculateBounds() {

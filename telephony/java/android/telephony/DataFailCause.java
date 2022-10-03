@@ -987,8 +987,17 @@ public final class DataFailCause {
     /** The ePDG does not support un-authenticated IMSI based emergency PDN bringup **/
     public static final int IWLAN_UNAUTHENTICATED_EMERGENCY_NOT_SUPPORTED = 0x2B2F;
 
-    // Device is unable to establish an IPSec tunnel with the ePDG for any reason
-    // e.g authentication fail or certificate validation or DNS Resolution and timeout failure.
+    // The below error causes are relevant when the device is unable to establish an IPSec tunnel
+    // with the ePDG for any reason, e.g. authentication fail or certificate validation or DNS
+    // Resolution and timeout failure.
+
+    /**
+     * The requested service was rejected because of congestion in the network while accessing the
+     * IWLAN ePDG. Defined in 3GPP TS 24.502, Section 9.2.4.2.
+     *
+     * @hide
+     */
+    public static final int IWLAN_CONGESTION = 0x3C8C;
 
     /** IKE configuration error resulting in failure  */
     public static final int IWLAN_IKEV2_CONFIG_FAILURE = 0x4000;

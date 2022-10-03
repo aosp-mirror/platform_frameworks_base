@@ -399,9 +399,8 @@ public class DisplayRotation {
                 return false;
             }
 
-            final ScreenRotationAnimation screenRotationAnimation =
-                    mDisplayContent.getRotationAnimation();
-            if (screenRotationAnimation != null && screenRotationAnimation.isAnimating()) {
+            if (mDisplayContent.inTransition()
+                    && !mDisplayContent.mTransitionController.useShellTransitionsRotation()) {
                 // Rotation updates cannot be performed while the previous rotation change animation
                 // is still in progress. Skip this update. We will try updating again after the
                 // animation is finished and the display is unfrozen.
@@ -514,19 +513,6 @@ public class DisplayRotation {
         return true;
     }
 
-    /**
-     * Utility to get a rotating displaycontent from a Transition.
-     * @return null if the transition doesn't contain a rotating display.
-     */
-    static DisplayContent getDisplayFromTransition(Transition transition) {
-        for (int i = transition.mParticipants.size() - 1; i >= 0; --i) {
-            final WindowContainer wc = transition.mParticipants.valueAt(i);
-            if (!(wc instanceof DisplayContent)) continue;
-            return (DisplayContent) wc;
-        }
-        return null;
-    }
-
     private void startRemoteRotation(int fromRotation, int toRotation) {
         mDisplayContent.mRemoteDisplayChangeController.performRemoteDisplayChange(
                 fromRotation, toRotation, null /* newDisplayAreaInfo */,
@@ -546,11 +532,6 @@ public class DisplayRotation {
                 throw new IllegalStateException("Trying to rotate outside a transition");
             }
             mDisplayContent.mTransitionController.collect(mDisplayContent);
-            // Go through all tasks and collect them before the rotation
-            // TODO(shell-transitions): move collect() to onConfigurationChange once wallpaper
-            //       handling is synchronized.
-            mDisplayContent.mTransitionController.collectForDisplayAreaChange(mDisplayContent,
-                    null /* use collecting transition */);
         }
         mService.mAtmService.deferWindowLayout();
         try {

@@ -20,14 +20,11 @@ import static android.app.Notification.Action.SEMANTIC_ACTION_MARK_CONVERSATION_
 import static android.service.notification.NotificationListenerService.REASON_CANCEL;
 
 import static com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_HEADSUP;
-import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_PUBLIC;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -69,6 +66,9 @@ import android.widget.Chronometer;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -94,7 +94,6 @@ import com.android.systemui.statusbar.notification.NotificationFadeAware;
 import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorController;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.notification.logging.NotificationCounters;
@@ -237,11 +236,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      */
     private boolean mIsHeadsUp;
 
-    /**
-     * Whether or not the notification should be redacted on the lock screen, i.e has sensitive
-     * content which should be redacted on the lock screen.
-     */
-    private boolean mNeedsRedaction;
     private boolean mLastChronometerRunning = true;
     private ViewStub mChildrenContainerStub;
     private GroupMembershipManager mGroupMembershipManager;
@@ -904,21 +898,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         return mChildrenContainer == null ? null : mChildrenContainer.getAttachedChildren();
     }
 
-    /**
-     * Apply the order given in the list to the children.
-     *
-     * @param childOrder the new list order
-     * @param visualStabilityManager
-     * @param callback the callback to invoked in case it is not allowed
-     * @return whether the list order has changed
-     */
-    public boolean applyChildOrder(List<ExpandableNotificationRow> childOrder,
-            VisualStabilityManager visualStabilityManager,
-            VisualStabilityManager.Callback callback) {
-        return mChildrenContainer != null && mChildrenContainer.applyChildOrder(childOrder,
-                visualStabilityManager, callback);
-    }
-
     /** Updates states of all children. */
     public void updateChildrenStates(AmbientState ambientState) {
         if (mIsSummaryWithChildren) {
@@ -1516,23 +1495,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     public void setUsesIncreasedHeadsUpHeight(boolean use) {
         mUseIncreasedHeadsUpHeight = use;
-    }
-
-    /** @deprecated TODO: Remove this when the old pipeline code is removed. */
-    @Deprecated
-    public void setNeedsRedaction(boolean needsRedaction) {
-        if (mNeedsRedaction != needsRedaction) {
-            mNeedsRedaction = needsRedaction;
-            if (!isRemoved()) {
-                RowContentBindParams params = mRowContentBindStage.getStageParams(mEntry);
-                if (needsRedaction) {
-                    params.requireContentViews(FLAG_CONTENT_VIEW_PUBLIC);
-                } else {
-                    params.markContentViewsFreeable(FLAG_CONTENT_VIEW_PUBLIC);
-                }
-                mRowContentBindStage.requestRebind(mEntry, null /* callback */);
-            }
-        }
     }
 
     public interface ExpansionLogger {
@@ -3286,6 +3248,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     @Override
+    @NonNull
     public ExpandableViewState createExpandableViewState() {
         return new NotificationViewState();
     }
@@ -3492,6 +3455,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             pw.print("visibility: " + getVisibility());
             pw.print(", alpha: " + getAlpha());
             pw.print(", translation: " + getTranslation());
+            pw.print(", Entry isDismissable: " + mEntry.isDismissable());
+            pw.print(", mOnUserInteractionCallback null: " + (mOnUserInteractionCallback == null));
             pw.print(", removed: " + isRemoved());
             pw.print(", expandAnimationRunning: " + mExpandAnimationRunning);
             NotificationContentView showingLayout = getShowingLayout();

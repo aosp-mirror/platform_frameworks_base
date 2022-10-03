@@ -124,6 +124,7 @@ android_library {
         "dagger2",
         "jsr330",
         "lottie",
+        "LowLightDreamLib",
     ],
     manifest: "AndroidManifest.xml",
 
@@ -212,6 +213,7 @@ android_library {
         "kotlinx-coroutines-android",
         "kotlinx-coroutines-core",
         "kotlinx_coroutines_test",
+        "kotlin-reflect",
         "iconloader_base",
         "SystemUI-tags",
         "SystemUI-proto",
@@ -226,10 +228,12 @@ android_library {
         "dagger2",
         "jsr330",
         "WindowManager-Shell",
+        "LowLightDreamLib",
     ],
     libs: [
         "android.test.runner",
         "android.test.base",
+        "android.test.mock",
     ],
     kotlincflags: ["-Xjvm-default=enable"],
     aaptflags: [
@@ -239,11 +243,9 @@ android_library {
     plugins: ["dagger2-compiler"],
 }
 
-// Opt-in config for optimizing the SystemUI target using R8.
-// Enabled via `export SYSTEMUI_OPTIMIZE_JAVA=true`, or explicitly in Make via
-// the `SOONG_CONFIG_ANDROID_SYSTEMUI_OPTIMIZE_JAVA` variable.
-// TODO(b/203472868): Enable optimizations by default after stabilizing and
-// building out retrace infrastructure.
+// Opt-out config for optimizing the SystemUI target using R8.
+// Disabled via `export SYSTEMUI_OPTIMIZE_JAVA=false`, or explicitly in Make via
+// `SYSTEMUI_OPTIMIZE_JAVA := false`.
 soong_config_module_type {
     name: "systemui_optimized_java_defaults",
     module_type: "java_defaults",

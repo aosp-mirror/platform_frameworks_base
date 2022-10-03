@@ -69,7 +69,7 @@ public final class DefaultSelectionToolbarRenderService extends SelectionToolbar
 
         if (mToolbarCache.indexOfKey(callingUid) < 0) {
             RemoteSelectionToolbar toolbar = new RemoteSelectionToolbar(this,
-                    widgetToken, showInfo.getHostInputToken(),
+                    widgetToken, showInfo,
                     callbackWrapper, this::transferTouch);
             mToolbarCache.put(callingUid, new Pair<>(widgetToken, toolbar));
         }

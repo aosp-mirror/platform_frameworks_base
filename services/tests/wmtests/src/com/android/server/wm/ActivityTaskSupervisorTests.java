@@ -228,7 +228,7 @@ public class ActivityTaskSupervisorTests extends WindowTestsBase {
                 mAtm.getTaskChangeNotificationController();
         spyOn(taskChangeNotifier);
 
-        mAtm.setResumedActivityUncheckLocked(fullScreenActivityA, "resumeA");
+        mAtm.setLastResumedActivityUncheckLocked(fullScreenActivityA, "resumeA");
         verify(taskChangeNotifier).notifyTaskFocusChanged(eq(taskA.mTaskId) /* taskId */,
                 eq(true) /* focused */);
         reset(taskChangeNotifier);
@@ -237,7 +237,7 @@ public class ActivityTaskSupervisorTests extends WindowTestsBase {
                 .build();
         final Task taskB = fullScreenActivityB.getTask();
 
-        mAtm.setResumedActivityUncheckLocked(fullScreenActivityB, "resumeB");
+        mAtm.setLastResumedActivityUncheckLocked(fullScreenActivityB, "resumeB");
         verify(taskChangeNotifier).notifyTaskFocusChanged(eq(taskA.mTaskId) /* taskId */,
                 eq(false) /* focused */);
         verify(taskChangeNotifier).notifyTaskFocusChanged(eq(taskB.mTaskId) /* taskId */,
@@ -295,6 +295,7 @@ public class ActivityTaskSupervisorTests extends WindowTestsBase {
         activity1.moveFocusableActivityToTop("test");
         assertEquals(activity1.getUid(), pendingTopUid[0]);
         verify(mAtm).updateOomAdj();
+        verify(mAtm).setLastResumedActivityUncheckLocked(any(), eq("test"));
     }
 
     /**

@@ -16,9 +16,14 @@
 
 package com.android.wm.shell.sysui;
 
+import android.content.Context;
+import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 
+import androidx.annotation.NonNull;
+
 import java.io.PrintWriter;
+import java.util.List;
 
 /**
  * General interface for notifying the Shell of common SysUI events like configuration or keyguard
@@ -59,4 +64,14 @@ public interface ShellInterface {
      * Notifies the Shell when the keyguard dismiss animation has finished.
      */
     default void onKeyguardDismissAnimationFinished() {}
+
+    /**
+     * Notifies the Shell when the user changes.
+     */
+    default void onUserChanged(int newUserId, @NonNull Context userContext) {}
+
+    /**
+     * Notifies the Shell when a profile belonging to the user changes.
+     */
+    default void onUserProfilesChanged(@NonNull List<UserInfo> profiles) {}
 }

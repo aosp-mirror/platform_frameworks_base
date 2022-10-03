@@ -52,7 +52,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
-import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
 import android.view.InsetsState.InternalInsetsType;
@@ -76,7 +75,6 @@ import com.android.systemui.statusbar.policy.CallbackController;
 import com.android.systemui.tracing.ProtoTracer;
 
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
@@ -152,7 +150,6 @@ public class CommandQueue extends IStatusBar.Stub implements
     private static final int MSG_TRACING_STATE_CHANGED             = 54 << MSG_SHIFT;
     private static final int MSG_SUPPRESS_AMBIENT_DISPLAY          = 55 << MSG_SHIFT;
     private static final int MSG_REQUEST_WINDOW_MAGNIFICATION_CONNECTION = 56 << MSG_SHIFT;
-    private static final int MSG_HANDLE_WINDOW_MANAGER_LOGGING_COMMAND = 57 << MSG_SHIFT;
     //TODO(b/169175022) Update name and when feature name is locked.
     private static final int MSG_EMERGENCY_ACTION_LAUNCH_GESTURE      = 58 << MSG_SHIFT;
     private static final int MSG_SET_NAVIGATION_BAR_LUMA_SAMPLING_ENABLED = 59 << MSG_SHIFT;
@@ -423,11 +420,6 @@ public class CommandQueue extends IStatusBar.Stub implements
          * @param connect {@code true} if needs connection, otherwise set the connection to null.
          */
         default void requestWindowMagnificationConnection(boolean connect) { }
-
-        /**
-         * Handles a window manager shell logging command.
-         */
-        default void handleWindowManagerLoggingCommand(String[] args, ParcelFileDescriptor outFd) {}
 
         /**
          * @see IStatusBar#setNavigationBarLumaSamplingEnabled(int, boolean)
@@ -1143,17 +1135,6 @@ public class CommandQueue extends IStatusBar.Stub implements
     }
 
     @Override
-    public void handleWindowManagerLoggingCommand(String[] args, ParcelFileDescriptor outFd) {
-        synchronized (mLock) {
-            SomeArgs internalArgs = SomeArgs.obtain();
-            internalArgs.arg1 = args;
-            internalArgs.arg2 = outFd;
-            mHandler.obtainMessage(MSG_HANDLE_WINDOW_MANAGER_LOGGING_COMMAND, internalArgs)
-                    .sendToTarget();
-        }
-    }
-
-    @Override
     public void suppressAmbientDisplay(boolean suppress) {
         synchronized (mLock) {
             mHandler.obtainMessage(MSG_SUPPRESS_AMBIENT_DISPLAY, suppress).sendToTarget();
@@ -1636,18 +1617,6 @@ public class CommandQueue extends IStatusBar.Stub implements
                     for (int i = 0; i < mCallbacks.size(); i++) {
                         mCallbacks.get(i).requestWindowMagnificationConnection((Boolean) msg.obj);
                     }
-                    break;
-                case MSG_HANDLE_WINDOW_MANAGER_LOGGING_COMMAND:
-                    args = (SomeArgs) msg.obj;
-                    try (ParcelFileDescriptor pfd = (ParcelFileDescriptor) args.arg2) {
-                        for (int i = 0; i < mCallbacks.size(); i++) {
-                            mCallbacks.get(i).handleWindowManagerLoggingCommand(
-                                    (String[]) args.arg1, pfd);
-                        }
-                    } catch (IOException e) {
-                        Log.e(TAG, "Failed to handle logging command", e);
-                    }
-                    args.recycle();
                     break;
                 case MSG_SET_NAVIGATION_BAR_LUMA_SAMPLING_ENABLED:
                     for (int i = 0; i < mCallbacks.size(); i++) {

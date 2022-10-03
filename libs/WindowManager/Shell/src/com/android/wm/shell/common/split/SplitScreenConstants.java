@@ -19,6 +19,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.window.TransitionInfo.FLAG_FIRST_CUSTOM;
 
 import android.annotation.IntDef;
 
@@ -55,4 +56,7 @@ public class SplitScreenConstants {
             {WINDOWING_MODE_FULLSCREEN, WINDOWING_MODE_UNDEFINED};
     public static final int[] CONTROLLED_WINDOWING_MODES_WHEN_ACTIVE =
             {WINDOWING_MODE_FULLSCREEN, WINDOWING_MODE_UNDEFINED, WINDOWING_MODE_MULTI_WINDOW};
+
+    /** Flag applied to a transition change to identify it as a divider bar for animation. */
+    public static final int FLAG_IS_DIVIDER_BAR = FLAG_FIRST_CUSTOM;
 }

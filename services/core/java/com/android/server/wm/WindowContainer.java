@@ -343,6 +343,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     BLASTSyncEngine.SyncGroup mSyncGroup = null;
     final SurfaceControl.Transaction mSyncTransaction;
     @SyncState int mSyncState = SYNC_STATE_NONE;
+    int mSyncMethodOverride = BLASTSyncEngine.METHOD_UNDEFINED;
 
     private final List<WindowContainerListener> mListeners = new ArrayList<>();
 
@@ -476,7 +477,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             }
             mLocalInsetsSourceProviders.remove(insetsTypes[i]);
         }
-        mDisplayContent.getInsetsStateController().updateAboveInsetsState(true);
+        // Update insets if this window is attached.
+        if (mDisplayContent != null) {
+            mDisplayContent.getInsetsStateController().updateAboveInsetsState(true);
+        }
     }
 
     /**
@@ -1833,6 +1837,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return null;
     }
 
+    int getDistanceFromTop(WindowContainer child) {
+        int idx = mChildren.indexOf(child);
+        return idx < 0 ? -1 : mChildren.size() - 1 - idx;
+    }
+
     private ActivityRecord processGetActivityWithBoundary(Predicate<ActivityRecord> callback,
             WindowContainer boundary, boolean includeBoundary, boolean traverseTopToBottom,
             boolean[] boundaryFound, WindowContainer wc) {
@@ -2184,6 +2193,17 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
         return wc.getTask(
                 callback, boundary, includeBoundary, traverseTopToBottom, boundaryFound);
+    }
+
+    @Nullable
+    TaskFragment getTaskFragment(Predicate<TaskFragment> callback) {
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            final TaskFragment tf = mChildren.get(i).getTaskFragment(callback);
+            if (tf != null) {
+                return tf;
+            }
+        }
+        return null;
     }
 
     WindowState getWindow(Predicate<WindowState> callback) {
@@ -2825,7 +2845,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      */
     void initializeChangeTransition(Rect startBounds, @Nullable SurfaceControl freezeTarget) {
         if (mDisplayContent.mTransitionController.isShellTransitionsEnabled()) {
-            // TODO(b/207070762): request shell transition for activityEmbedding change.
+            mDisplayContent.mTransitionController.collectVisibleChange(this);
             return;
         }
         mDisplayContent.prepareAppTransition(TRANSIT_CHANGE);
@@ -3015,6 +3035,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 final float windowCornerRadius = !inMultiWindowMode()
                         ? getDisplayContent().getWindowCornerRadius()
                         : 0;
+                if (asActivityRecord() != null
+                        && asActivityRecord().isNeedsLetterboxedAnimation()) {
+                    asActivityRecord().getLetterboxInnerBounds(mTmpRect);
+                }
                 AnimationAdapter adapter = new LocalAnimationAdapter(
                         new WindowAnimationSpec(a, mTmpPoint, mTmpRect,
                                 getDisplayContent().mAppTransition.canSkipFirstFrame(),
@@ -3662,6 +3686,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     boolean onSyncFinishedDrawing() {
         if (mSyncState == SYNC_STATE_NONE) return false;
         mSyncState = SYNC_STATE_READY;
+        mSyncMethodOverride = BLASTSyncEngine.METHOD_UNDEFINED;
         mWmService.mWindowPlacerLocked.requestTraversal();
         ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "onSyncFinishedDrawing %s", this);
         return true;
@@ -3678,6 +3703,13 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             }
         }
         mSyncGroup = group;
+    }
+
+    @Nullable
+    BLASTSyncEngine.SyncGroup getSyncGroup() {
+        if (mSyncGroup != null) return mSyncGroup;
+        if (mParent != null) return mParent.getSyncGroup();
+        return null;
     }
 
     /**
@@ -3719,6 +3751,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         }
         if (cancel && mSyncGroup != null) mSyncGroup.onCancelSync(this);
         mSyncState = SYNC_STATE_NONE;
+        mSyncMethodOverride = BLASTSyncEngine.METHOD_UNDEFINED;
         mSyncGroup = null;
     }
 
@@ -3821,6 +3854,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         // disable this when shell transitions is disabled.
         if (mTransitionController.isShellTransitionsEnabled()) {
             mSyncState = SYNC_STATE_NONE;
+            mSyncMethodOverride = BLASTSyncEngine.METHOD_UNDEFINED;
         }
         prepareSync();
     }

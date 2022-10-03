@@ -26,11 +26,17 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothLeAudioContentMetadata;
 import android.bluetooth.BluetoothLeBroadcast;
 import android.bluetooth.BluetoothLeBroadcastMetadata;
+import android.bluetooth.BluetoothLeBroadcastSubgroup;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothProfile.ServiceListener;
+import android.content.ContentResolver;
 import android.content.Context;
-import android.content.SharedPreferences;
+import android.database.ContentObserver;
+import android.net.Uri;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -40,6 +46,7 @@ import com.android.settingslib.R;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -54,19 +61,20 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
     private static final String TAG = "LocalBluetoothLeBroadcast";
-    private static final int UNKNOWN_VALUE_PLACEHOLDER = -1;
     private static final boolean DEBUG = BluetoothUtils.D;
 
     static final String NAME = "LE_AUDIO_BROADCAST";
+    private static final String UNDERLINE = "_";
+    private static final int DEFAULT_CODE_MAX = 9999;
+    private static final int DEFAULT_CODE_MIN = 1000;
     // Order of this profile in device profiles list
     private static final int ORDINAL = 1;
-    private static final String PREF_NAME = "LocalBluetoothLeBroadcast";
-    private static final String PREF_PROGRAM_INFO = "PrefProgramInfo";
-    private static final String PREF_BROADCAST_CODE = "PrefBroadcastCode";
-    private static final String PREF_APP_SOURCE_NAME = "PrefAppSourceName";
-    private static final String UNDERLINE = "_";
-    private static final int DEFAULT_CODE_MIN = 1000;
-    private static final int DEFAULT_CODE_MAX = 9999;
+    private static final int UNKNOWN_VALUE_PLACEHOLDER = -1;
+    private static final Uri[] SETTINGS_URIS = new Uri[]{
+            Settings.Secure.getUriFor(Settings.Secure.BLUETOOTH_LE_BROADCAST_PROGRAM_INFO),
+            Settings.Secure.getUriFor(Settings.Secure.BLUETOOTH_LE_BROADCAST_CODE),
+            Settings.Secure.getUriFor(Settings.Secure.BLUETOOTH_LE_BROADCAST_APP_SOURCE_NAME),
+    };
 
     private BluetoothLeBroadcast mService;
     private BluetoothLeAudioContentMetadata mBluetoothLeAudioContentMetadata;
@@ -78,8 +86,9 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
     private boolean mIsProfileReady;
     private String mProgramInfo;
     private byte[] mBroadcastCode;
-    private SharedPreferences mSharedPref;
     private Executor mExecutor;
+    private ContentResolver mContentResolver;
+    private ContentObserver mSettingsObserver;
 
     private final ServiceListener mServiceListener = new ServiceListener() {
         @Override
@@ -91,6 +100,11 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
                 mService = (BluetoothLeBroadcast) proxy;
                 mIsProfileReady = true;
                 registerServiceCallBack(mExecutor, mBroadcastCallback);
+                List<BluetoothLeBroadcastMetadata> metadata = getAllBroadcastMetadata();
+                if (!metadata.isEmpty()) {
+                    updateBroadcastInfoFromBroadcastMetadata(metadata.get(0));
+                }
+                registerContentObserver();
             }
         }
 
@@ -102,6 +116,7 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
             if(mIsProfileReady) {
                 mIsProfileReady = false;
                 unregisterServiceCallBack(mBroadcastCallback);
+                unregisterContentObserver();
             }
         }
     };
@@ -116,7 +131,7 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
                                         + broadcastId);
                     }
                     setLatestBroadcastId(broadcastId);
-                    setAppSourceName(mNewAppSourceName);
+                    setAppSourceName(mNewAppSourceName, /*updateContentResolver=*/ true);
                 }
 
                 @Override
@@ -160,7 +175,7 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
                                         + broadcastId);
                     }
                     setLatestBroadcastId(broadcastId);
-                    setAppSourceName(mNewAppSourceName);
+                    setAppSourceName(mNewAppSourceName, /*updateContentResolver=*/ true);
                 }
 
                 @Override
@@ -181,30 +196,29 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
                 }
             };
 
+    private class BroadcastSettingsObserver extends ContentObserver {
+        BroadcastSettingsObserver(Handler h) {
+            super(h);
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            Log.d(TAG, "BroadcastSettingsObserver: onChange");
+            updateBroadcastInfoFromContentProvider();
+        }
+    }
+
     LocalBluetoothLeBroadcast(Context context) {
         mExecutor = Executors.newSingleThreadExecutor();
-        BluetoothAdapter.getDefaultAdapter().
-                getProfileProxy(context, mServiceListener, BluetoothProfile.LE_AUDIO_BROADCAST);
         mBuilder = new BluetoothLeAudioContentMetadata.Builder();
-        mSharedPref = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-        if (mSharedPref != null) {
-            String programInfo = mSharedPref.getString(PREF_PROGRAM_INFO, "");
-            if (programInfo.isEmpty()) {
-                programInfo = getDefaultValueOfProgramInfo();
-            }
-            setProgramInfo(programInfo);
+        mContentResolver = context.getContentResolver();
+        Handler handler = new Handler(Looper.getMainLooper());
+        mSettingsObserver = new BroadcastSettingsObserver(handler);
+        updateBroadcastInfoFromContentProvider();
 
-            String prefBroadcastCode = mSharedPref.getString(PREF_BROADCAST_CODE, "");
-            byte[] broadcastCode;
-            if (prefBroadcastCode.isEmpty()) {
-                broadcastCode = getDefaultValueOfBroadcastCode();
-            } else {
-                broadcastCode = prefBroadcastCode.getBytes(StandardCharsets.UTF_8);
-            }
-            setBroadcastCode(broadcastCode);
-
-            mAppSourceName = mSharedPref.getString(PREF_APP_SOURCE_NAME, "");
-        }
+        // Before registering callback, the constructor should finish creating the all of variables.
+        BluetoothAdapter.getDefaultAdapter()
+                .getProfileProxy(context, mServiceListener, BluetoothProfile.LE_AUDIO_BROADCAST);
     }
 
     /**
@@ -217,11 +231,12 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
             Log.d(TAG, "The BluetoothLeBroadcast is null when starting the broadcast.");
             return;
         }
+        String programInfo = getProgramInfo();
         if (DEBUG) {
             Log.d(TAG,
-                    "startBroadcast: language = " + language + " ,programInfo = " + mProgramInfo);
+                    "startBroadcast: language = " + language + " ,programInfo = " + programInfo);
         }
-        buildContentMetadata(language, mProgramInfo);
+        buildContentMetadata(language, programInfo);
         mService.startBroadcast(mBluetoothLeAudioContentMetadata, mBroadcastCode);
     }
 
@@ -230,21 +245,28 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
     }
 
     public void setProgramInfo(String programInfo) {
-        if (programInfo == null || programInfo.isEmpty()) {
+        setProgramInfo(programInfo, /*updateContentResolver=*/ true);
+    }
+
+    private void setProgramInfo(String programInfo, boolean updateContentResolver) {
+        if (TextUtils.isEmpty(programInfo)) {
             Log.d(TAG, "setProgramInfo: programInfo is null or empty");
+            return;
+        }
+        if (mProgramInfo != null && TextUtils.equals(mProgramInfo, programInfo)) {
+            Log.d(TAG, "setProgramInfo: programInfo is not changed");
             return;
         }
         Log.d(TAG, "setProgramInfo: " + programInfo);
         mProgramInfo = programInfo;
-
-        if (mSharedPref == null) {
-            Log.d(TAG, "setProgramInfo: sharedPref is null");
-            return;
+        if (updateContentResolver) {
+            if (mContentResolver == null) {
+                Log.d(TAG, "mContentResolver is null");
+                return;
+            }
+            Settings.Secure.putString(mContentResolver,
+                    Settings.Secure.BLUETOOTH_LE_BROADCAST_PROGRAM_INFO, programInfo);
         }
-        SharedPreferences.Editor editor = mSharedPref.edit();
-        editor.putString(PREF_PROGRAM_INFO, mProgramInfo);
-        editor.apply();
-
     }
 
     public byte[] getBroadcastCode() {
@@ -252,22 +274,31 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
     }
 
     public void setBroadcastCode(byte[] broadcastCode) {
-        if (broadcastCode == null || broadcastCode.length == 0) {
-            Log.d(TAG, "setBroadcastCode: broadcastCode is null or empty");
+        setBroadcastCode(broadcastCode, /*updateContentResolver=*/ true);
+    }
+
+    private void setBroadcastCode(byte[] broadcastCode, boolean updateContentResolver) {
+        if (broadcastCode == null) {
+            Log.d(TAG, "setBroadcastCode: broadcastCode is null");
+            return;
+        }
+        if (mBroadcastCode != null && Arrays.equals(broadcastCode, mBroadcastCode)) {
+            Log.d(TAG, "setBroadcastCode: broadcastCode is not changed");
             return;
         }
         mBroadcastCode = broadcastCode;
-
-        if (mSharedPref == null) {
-            Log.d(TAG, "setBroadcastCode: sharedPref is null");
-            return;
+        if (updateContentResolver) {
+            if (mContentResolver == null) {
+                Log.d(TAG, "mContentResolver is null");
+                return;
+            }
+            Settings.Secure.putString(mContentResolver, Settings.Secure.BLUETOOTH_LE_BROADCAST_CODE,
+                    new String(broadcastCode, StandardCharsets.UTF_8));
         }
-        SharedPreferences.Editor editor = mSharedPref.edit();
-        editor.putString(PREF_BROADCAST_CODE, new String(broadcastCode, StandardCharsets.UTF_8));
-        editor.apply();
     }
 
     private void setLatestBroadcastId(int broadcastId) {
+        Log.d(TAG, "setLatestBroadcastId: mBroadcastId is " + broadcastId);
         mBroadcastId = broadcastId;
     }
 
@@ -275,19 +306,24 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
         return mBroadcastId;
     }
 
-    private void setAppSourceName(String appSourceName) {
+    private void setAppSourceName(String appSourceName, boolean updateContentResolver) {
         if (TextUtils.isEmpty(appSourceName)) {
             appSourceName = "";
         }
-        mAppSourceName = appSourceName;
-        mNewAppSourceName = "";
-        if (mSharedPref == null) {
-            Log.d(TAG, "setBroadcastCode: sharedPref is null");
+        if (mAppSourceName != null && TextUtils.equals(mAppSourceName, appSourceName)) {
+            Log.d(TAG, "setAppSourceName: appSourceName is not changed");
             return;
         }
-        SharedPreferences.Editor editor = mSharedPref.edit();
-        editor.putString(PREF_APP_SOURCE_NAME, appSourceName);
-        editor.apply();
+        mAppSourceName = appSourceName;
+        mNewAppSourceName = "";
+        if (updateContentResolver) {
+            if (mContentResolver == null) {
+                Log.d(TAG, "mContentResolver is null");
+                return;
+            }
+            Settings.Secure.putString(mContentResolver,
+                    Settings.Secure.BLUETOOTH_LE_BROADCAST_APP_SOURCE_NAME, mAppSourceName);
+        }
     }
 
     public String getAppSourceName() {
@@ -299,6 +335,7 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
         if (bluetoothLeBroadcastMetadata != null
                 && bluetoothLeBroadcastMetadata.getBroadcastId() == mBroadcastId) {
             mBluetoothLeBroadcastMetadata = bluetoothLeBroadcastMetadata;
+            updateBroadcastInfoFromBroadcastMetadata(bluetoothLeBroadcastMetadata);
         }
     }
 
@@ -316,6 +353,48 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
                     .orElse(null);
         }
         return mBluetoothLeBroadcastMetadata;
+    }
+
+    private void updateBroadcastInfoFromContentProvider() {
+        if (mContentResolver == null) {
+            Log.d(TAG, "updateBroadcastInfoFromContentProvider: mContentResolver is null");
+            return;
+        }
+        String programInfo = Settings.Secure.getString(mContentResolver,
+                Settings.Secure.BLUETOOTH_LE_BROADCAST_PROGRAM_INFO);
+        if (programInfo == null) {
+            programInfo = getDefaultValueOfProgramInfo();
+        }
+        setProgramInfo(programInfo, /*updateContentResolver=*/ false);
+
+        String prefBroadcastCode = Settings.Secure.getString(mContentResolver,
+                Settings.Secure.BLUETOOTH_LE_BROADCAST_CODE);
+        byte[] broadcastCode = (prefBroadcastCode == null) ? getDefaultValueOfBroadcastCode()
+                : prefBroadcastCode.getBytes(StandardCharsets.UTF_8);
+        setBroadcastCode(broadcastCode, /*updateContentResolver=*/ false);
+
+        String appSourceName = Settings.Secure.getString(mContentResolver,
+                Settings.Secure.BLUETOOTH_LE_BROADCAST_APP_SOURCE_NAME);
+        setAppSourceName(appSourceName, /*updateContentResolver=*/ false);
+    }
+
+    private void updateBroadcastInfoFromBroadcastMetadata(
+            BluetoothLeBroadcastMetadata bluetoothLeBroadcastMetadata) {
+        if (bluetoothLeBroadcastMetadata == null) {
+            Log.d(TAG, "The bluetoothLeBroadcastMetadata is null");
+            return;
+        }
+        setBroadcastCode(bluetoothLeBroadcastMetadata.getBroadcastCode());
+        setLatestBroadcastId(bluetoothLeBroadcastMetadata.getBroadcastId());
+
+        List<BluetoothLeBroadcastSubgroup> subgroup = bluetoothLeBroadcastMetadata.getSubgroups();
+        if (subgroup == null || subgroup.size() < 1) {
+            Log.d(TAG, "The subgroup is not valid value");
+            return;
+        }
+        BluetoothLeAudioContentMetadata contentMetadata = subgroup.get(0).getContentMetadata();
+        setProgramInfo(contentMetadata.getProgramInfo());
+        setAppSourceName(getAppSourceName(), /*updateContentResolver=*/ true);
     }
 
     /**
@@ -350,12 +429,13 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
             Log.d(TAG, "The BluetoothLeBroadcast is null when updating the broadcast.");
             return;
         }
+        String programInfo = getProgramInfo();
         if (DEBUG) {
             Log.d(TAG,
-                    "updateBroadcast: language = " + language + " ,programInfo = " + mProgramInfo);
+                    "updateBroadcast: language = " + language + " ,programInfo = " + programInfo);
         }
         mNewAppSourceName = appSourceName;
-        mBluetoothLeAudioContentMetadata = mBuilder.setProgramInfo(mProgramInfo).build();
+        mBluetoothLeAudioContentMetadata = mBuilder.setProgramInfo(programInfo).build();
         mService.updateBroadcast(mBroadcastId, mBluetoothLeAudioContentMetadata);
     }
 
@@ -517,8 +597,7 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
         if (DEBUG) {
             Log.d(TAG, "resetCacheInfo:");
         }
-        mNewAppSourceName = "";
-        mAppSourceName = "";
+        setAppSourceName("", /*updateContentResolver=*/ true);
         mBluetoothLeBroadcastMetadata = null;
         mBroadcastId = UNKNOWN_VALUE_PLACEHOLDER;
     }
@@ -527,5 +606,23 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
         String randomUUID = UUID.randomUUID().toString();
         //first 12 chars from xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx
         return randomUUID.substring(0, 8) + randomUUID.substring(9, 13);
+    }
+
+    private void registerContentObserver() {
+        if (mContentResolver == null) {
+            Log.d(TAG, "mContentResolver is null");
+            return;
+        }
+        for (Uri uri : SETTINGS_URIS) {
+            mContentResolver.registerContentObserver(uri, false, mSettingsObserver);
+        }
+    }
+
+    private void unregisterContentObserver() {
+        if (mContentResolver == null) {
+            Log.d(TAG, "mContentResolver is null");
+            return;
+        }
+        mContentResolver.unregisterContentObserver(mSettingsObserver);
     }
 }

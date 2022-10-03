@@ -26,11 +26,11 @@
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Неважећа картица."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Напуњена је"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Бежично пуњење"</string>
-    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Базна станица за пуњење"</string>
+    <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Пуни се"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Пуни се"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Брзо се пуни"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Споро се пуни"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Пуњење је привремено ограничено"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="1709413803451065875">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Пуњење је паузирано да би се заштитила батерија"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Притисните Мени да бисте откључали."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Мрежа је закључана"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"Нема SIM картице"</string>

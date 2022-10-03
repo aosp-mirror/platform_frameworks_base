@@ -37,7 +37,6 @@ import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.Intent;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -67,7 +66,6 @@ import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorControllerProvider;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -103,8 +101,6 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
     @Mock
     private AssistManager mAssistManager;
     @Mock
-    private NotificationEntryManager mEntryManager;
-    @Mock
     private ActivityStarter mActivityStarter;
     @Mock
     private NotificationClickNotifier mClickNotifier;
@@ -135,8 +131,6 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
     @Mock
     private PendingIntent mContentIntent;
     @Mock
-    private Intent mContentIntentInner;
-    @Mock
     private OnUserInteractionCallback mOnUserInteractionCallback;
     @Mock
     private Runnable mFutureDismissalRunnable;
@@ -159,7 +153,6 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         when(mContentIntent.isActivity()).thenReturn(true);
         when(mContentIntent.getCreatorUserHandle()).thenReturn(UserHandle.of(1));
-        when(mContentIntent.getIntent()).thenReturn(mContentIntentInner);
 
         NotificationTestHelper notificationTestHelper = new NotificationTestHelper(
                 mContext,
@@ -178,10 +171,10 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         bubbleSbn.getNotification().contentIntent = mContentIntent;
         bubbleSbn.getNotification().flags |= Notification.FLAG_AUTO_CANCEL;
 
-        ArrayList<NotificationEntry> activeNotifications = new ArrayList<>();
-        activeNotifications.add(mNotificationRow.getEntry());
-        activeNotifications.add(mBubbleNotificationRow.getEntry());
-        when(mEntryManager.getVisibleNotifications()).thenReturn(activeNotifications);
+//        ArrayList<NotificationEntry> activeNotifications = new ArrayList<>();
+//        activeNotifications.add(mNotificationRow.getEntry());
+//        activeNotifications.add(mBubbleNotificationRow.getEntry());
+//        when(mEntryManager.getVisibleNotifications()).thenReturn(activeNotifications);
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE);
         when(mOnUserInteractionCallback.registerFutureDismissal(eq(mNotificationRow.getEntry()),
                 anyInt())).thenReturn(mFutureDismissalRunnable);
@@ -347,9 +340,6 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
 
         // The content intent should NOT be sent on click.
         verifyZeroInteractions(mContentIntent);
-
-        // Notification should not be cancelled.
-        verify(mEntryManager, never()).performRemoveNotification(eq(sbn), any(), anyInt());
     }
 
     @Test
@@ -377,12 +367,8 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
                 eq(entry.getKey()), any(NotificationVisibility.class));
 
         // The content intent should NOT be sent on click.
-        verify(mContentIntent).getIntent();
         verify(mContentIntent).isActivity();
         verifyNoMoreInteractions(mContentIntent);
-
-        // Notification should not be cancelled.
-        verify(mEntryManager, never()).performRemoveNotification(eq(sbn), any(), anyInt());
     }
 
     @Test

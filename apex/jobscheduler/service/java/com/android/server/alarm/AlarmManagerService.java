@@ -5262,13 +5262,15 @@ public class AlarmManagerService extends SystemService {
                                         + TareBill.getName(bill) + " changed to " + canAfford);
                     }
 
-                    ArrayMap<EconomyManagerInternal.ActionBill, Boolean> actionAffordability =
-                            mAffordabilityCache.get(userId, packageName);
-                    if (actionAffordability == null) {
-                        actionAffordability = new ArrayMap<>();
-                        mAffordabilityCache.add(userId, packageName, actionAffordability);
+                    synchronized (mLock) {
+                        ArrayMap<EconomyManagerInternal.ActionBill, Boolean> actionAffordability =
+                                mAffordabilityCache.get(userId, packageName);
+                        if (actionAffordability == null) {
+                            actionAffordability = new ArrayMap<>();
+                            mAffordabilityCache.add(userId, packageName, actionAffordability);
+                        }
+                        actionAffordability.put(bill, canAfford);
                     }
-                    actionAffordability.put(bill, canAfford);
 
                     mHandler.obtainMessage(AlarmHandler.TARE_AFFORDABILITY_CHANGED, userId,
                             canAfford ? 1 : 0, packageName)

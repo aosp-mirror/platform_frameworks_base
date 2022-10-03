@@ -25,7 +25,9 @@ import static android.content.pm.ActivityInfo.CONFIG_UI_MODE;
 
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_SYSUI_EVENTS;
 
+import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 
 import androidx.annotation.NonNull;
@@ -36,6 +38,7 @@ import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.annotations.ExternalThread;
 
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -45,20 +48,24 @@ public class ShellController {
     private static final String TAG = ShellController.class.getSimpleName();
 
     private final ShellInit mShellInit;
+    private final ShellCommandHandler mShellCommandHandler;
     private final ShellExecutor mMainExecutor;
     private final ShellInterfaceImpl mImpl = new ShellInterfaceImpl();
-
-    private ShellCommandHandler mShellCommandHandler;
 
     private final CopyOnWriteArrayList<ConfigurationChangeListener> mConfigChangeListeners =
             new CopyOnWriteArrayList<>();
     private final CopyOnWriteArrayList<KeyguardChangeListener> mKeyguardChangeListeners =
             new CopyOnWriteArrayList<>();
+    private final CopyOnWriteArrayList<UserChangeListener> mUserChangeListeners =
+            new CopyOnWriteArrayList<>();
+
     private Configuration mLastConfiguration;
 
 
-    public ShellController(ShellInit shellInit, ShellExecutor mainExecutor) {
+    public ShellController(ShellInit shellInit, ShellCommandHandler shellCommandHandler,
+            ShellExecutor mainExecutor) {
         mShellInit = shellInit;
+        mShellCommandHandler = shellCommandHandler;
         mMainExecutor = mainExecutor;
     }
 
@@ -67,15 +74,6 @@ public class ShellController {
      */
     public ShellInterface asShell() {
         return mImpl;
-    }
-
-    /**
-     * Sets the command handler to call back to.
-     * TODO(238217847): This is only exposed this way until we can remove the dependencies from the
-     *                  command handler to other classes.
-     */
-    public void setShellCommandHandler(ShellCommandHandler shellCommandHandler) {
-        mShellCommandHandler = shellCommandHandler;
     }
 
     /**
@@ -108,6 +106,22 @@ public class ShellController {
      */
     public void removeKeyguardChangeListener(KeyguardChangeListener listener) {
         mKeyguardChangeListeners.remove(listener);
+    }
+
+    /**
+     * Adds a new user-change listener. The user change callbacks are not made in any
+     * particular order.
+     */
+    public void addUserChangeListener(UserChangeListener listener) {
+        mUserChangeListeners.remove(listener);
+        mUserChangeListeners.add(listener);
+    }
+
+    /**
+     * Removes an existing user-change listener.
+     */
+    public void removeUserChangeListener(UserChangeListener listener) {
+        mUserChangeListeners.remove(listener);
     }
 
     @VisibleForTesting
@@ -152,6 +166,8 @@ public class ShellController {
 
     @VisibleForTesting
     void onKeyguardVisibilityChanged(boolean visible, boolean occluded, boolean animatingDismiss) {
+        ProtoLog.v(WM_SHELL_SYSUI_EVENTS, "Keyguard visibility changed: visible=%b "
+                + "occluded=%b animatingDismiss=%b", visible, occluded, animatingDismiss);
         for (KeyguardChangeListener listener : mKeyguardChangeListeners) {
             listener.onKeyguardVisibilityChanged(visible, occluded, animatingDismiss);
         }
@@ -159,8 +175,25 @@ public class ShellController {
 
     @VisibleForTesting
     void onKeyguardDismissAnimationFinished() {
+        ProtoLog.v(WM_SHELL_SYSUI_EVENTS, "Keyguard dismiss animation finished");
         for (KeyguardChangeListener listener : mKeyguardChangeListeners) {
             listener.onKeyguardDismissAnimationFinished();
+        }
+    }
+
+    @VisibleForTesting
+    void onUserChanged(int newUserId, @NonNull Context userContext) {
+        ProtoLog.v(WM_SHELL_SYSUI_EVENTS, "User changed: id=%d", newUserId);
+        for (UserChangeListener listener : mUserChangeListeners) {
+            listener.onUserChanged(newUserId, userContext);
+        }
+    }
+
+    @VisibleForTesting
+    void onUserProfilesChanged(@NonNull List<UserInfo> profiles) {
+        ProtoLog.v(WM_SHELL_SYSUI_EVENTS, "User profiles changed");
+        for (UserChangeListener listener : mUserChangeListeners) {
+            listener.onUserProfilesChanged(profiles);
         }
     }
 
@@ -170,6 +203,7 @@ public class ShellController {
         pw.println(innerPrefix + "mConfigChangeListeners=" + mConfigChangeListeners.size());
         pw.println(innerPrefix + "mLastConfiguration=" + mLastConfiguration);
         pw.println(innerPrefix + "mKeyguardChangeListeners=" + mKeyguardChangeListeners.size());
+        pw.println(innerPrefix + "mUserChangeListeners=" + mUserChangeListeners.size());
     }
 
     /**
@@ -227,6 +261,18 @@ public class ShellController {
         public void onKeyguardDismissAnimationFinished() {
             mMainExecutor.execute(() ->
                     ShellController.this.onKeyguardDismissAnimationFinished());
+        }
+
+        @Override
+        public void onUserChanged(int newUserId, @NonNull Context userContext) {
+            mMainExecutor.execute(() ->
+                    ShellController.this.onUserChanged(newUserId, userContext));
+        }
+
+        @Override
+        public void onUserProfilesChanged(@NonNull List<UserInfo> profiles) {
+            mMainExecutor.execute(() ->
+                    ShellController.this.onUserProfilesChanged(profiles));
         }
     }
 }

@@ -33,14 +33,14 @@ import com.android.systemui.animation.Interpolators
 import com.android.systemui.animation.ViewHierarchyAnimator
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.media.taptotransfer.common.ChipInfoCommon
-import com.android.systemui.media.taptotransfer.common.MediaTttChipControllerCommon
 import com.android.systemui.media.taptotransfer.common.MediaTttLogger
-import com.android.systemui.media.taptotransfer.common.MediaTttRemovalReason
+import com.android.systemui.media.taptotransfer.common.MediaTttUtils
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.temporarydisplay.TemporaryDisplayRemovalReason
+import com.android.systemui.temporarydisplay.TemporaryViewDisplayController
+import com.android.systemui.temporarydisplay.TemporaryViewInfo
 import com.android.systemui.util.concurrency.DelayableExecutor
-import com.android.systemui.util.view.ViewUtil
 import javax.inject.Inject
 
 /**
@@ -53,22 +53,22 @@ class MediaTttChipControllerSender @Inject constructor(
         context: Context,
         @MediaTttSenderLogger logger: MediaTttLogger,
         windowManager: WindowManager,
-        viewUtil: ViewUtil,
         @Main mainExecutor: DelayableExecutor,
         accessibilityManager: AccessibilityManager,
         configurationController: ConfigurationController,
         powerManager: PowerManager,
         private val uiEventLogger: MediaTttSenderUiEventLogger
-) : MediaTttChipControllerCommon<ChipSenderInfo>(
+) : TemporaryViewDisplayController<ChipSenderInfo, MediaTttLogger>(
         context,
         logger,
         windowManager,
-        viewUtil,
         mainExecutor,
         accessibilityManager,
         configurationController,
         powerManager,
         R.layout.media_ttt_chip,
+        MediaTttUtils.WINDOW_TITLE,
+        MediaTttUtils.WAKE_REASON,
 ) {
     override val windowLayoutParams = commonWindowLayoutParams.apply {
         gravity = Gravity.TOP.or(Gravity.CENTER_HORIZONTAL)
@@ -97,7 +97,7 @@ class MediaTttChipControllerSender @Inject constructor(
     ) {
         val chipState: ChipStateSender? = ChipStateSender.getSenderStateFromId(displayState)
         val stateName = chipState?.name ?: "Invalid"
-        logger.logStateChange(stateName, routeInfo.id)
+        logger.logStateChange(stateName, routeInfo.id, routeInfo.clientPackageName)
 
         if (chipState == null) {
             Log.e(SENDER_TAG, "Unhandled MediaTransferSenderState $displayState")
@@ -106,66 +106,86 @@ class MediaTttChipControllerSender @Inject constructor(
         uiEventLogger.logSenderStateChange(chipState)
 
         if (chipState == ChipStateSender.FAR_FROM_RECEIVER) {
-            removeChip(removalReason = ChipStateSender.FAR_FROM_RECEIVER::class.simpleName!!)
+            removeView(removalReason = ChipStateSender.FAR_FROM_RECEIVER.name)
         } else {
-            displayChip(ChipSenderInfo(chipState, routeInfo, undoCallback))
+            displayView(ChipSenderInfo(chipState, routeInfo, undoCallback))
         }
     }
 
-    /** Displays the chip view for the given state. */
-    override fun updateChipView(
-            newChipInfo: ChipSenderInfo,
-            currentChipView: ViewGroup
+    override fun updateView(
+        newInfo: ChipSenderInfo,
+        currentView: ViewGroup
     ) {
-        super.updateChipView(newChipInfo, currentChipView)
+        super.updateView(newInfo, currentView)
 
-        val chipState = newChipInfo.state
+        val chipState = newInfo.state
 
         // App icon
-        setIcon(currentChipView, newChipInfo.routeInfo.packageName)
+        val iconInfo = MediaTttUtils.getIconInfoFromPackageName(
+            context, newInfo.routeInfo.clientPackageName, logger
+        )
+        MediaTttUtils.setIcon(
+            currentView.requireViewById(R.id.app_icon),
+            iconInfo.drawable,
+            iconInfo.contentDescription
+        )
 
         // Text
-        val otherDeviceName = newChipInfo.routeInfo.name.toString()
-        currentChipView.requireViewById<TextView>(R.id.text).apply {
-            text = chipState.getChipTextString(context, otherDeviceName)
-        }
+        val otherDeviceName = newInfo.routeInfo.name.toString()
+        val chipText = chipState.getChipTextString(context, otherDeviceName)
+        currentView.requireViewById<TextView>(R.id.text).text = chipText
 
         // Loading
-        currentChipView.requireViewById<View>(R.id.loading).visibility =
-            chipState.isMidTransfer.visibleIfTrue()
+        currentView.requireViewById<View>(R.id.loading).visibility =
+            (chipState.transferStatus == TransferStatus.IN_PROGRESS).visibleIfTrue()
 
         // Undo
-        val undoView = currentChipView.requireViewById<View>(R.id.undo)
+        val undoView = currentView.requireViewById<View>(R.id.undo)
         val undoClickListener = chipState.undoClickListener(
-                this, newChipInfo.routeInfo, newChipInfo.undoCallback, uiEventLogger
+                this, newInfo.routeInfo, newInfo.undoCallback, uiEventLogger
         )
         undoView.setOnClickListener(undoClickListener)
         undoView.visibility = (undoClickListener != null).visibleIfTrue()
 
         // Failure
-        currentChipView.requireViewById<View>(R.id.failure_icon).visibility =
-            chipState.isTransferFailure.visibleIfTrue()
+        currentView.requireViewById<View>(R.id.failure_icon).visibility =
+            (chipState.transferStatus == TransferStatus.FAILED).visibleIfTrue()
+
+        // For accessibility
+        currentView.requireViewById<ViewGroup>(
+                R.id.media_ttt_sender_chip_inner
+        ).contentDescription = "${iconInfo.contentDescription} $chipText"
     }
 
-    override fun animateChipIn(chipView: ViewGroup) {
+    override fun animateViewIn(view: ViewGroup) {
+        val chipInnerView = view.requireViewById<ViewGroup>(R.id.media_ttt_sender_chip_inner)
         ViewHierarchyAnimator.animateAddition(
-            chipView.requireViewById<ViewGroup>(R.id.media_ttt_sender_chip_inner),
+            chipInnerView,
             ViewHierarchyAnimator.Hotspot.TOP,
             Interpolators.EMPHASIZED_DECELERATE,
-            duration = 500L,
+            duration = ANIMATION_DURATION,
             includeMargins = true,
             includeFadeIn = true,
+            // We can only request focus once the animation finishes.
+            onAnimationEnd = { chipInnerView.requestAccessibilityFocus() },
         )
     }
 
-    override fun removeChip(removalReason: String) {
-        // Don't remove the chip if we're mid-transfer since the user should still be able to
-        // see the status of the transfer. (But do remove it if it's finally timed out.)
-        if (chipInfo?.state?.isMidTransfer == true &&
-                removalReason != MediaTttRemovalReason.REASON_TIMEOUT) {
+    override fun removeView(removalReason: String) {
+        // Don't remove the chip if we're in progress or succeeded, since the user should still be
+        // able to see the status of the transfer. (But do remove it if it's finally timed out.)
+        val transferStatus = info?.state?.transferStatus
+        if (
+            (transferStatus == TransferStatus.IN_PROGRESS ||
+                transferStatus == TransferStatus.SUCCEEDED) &&
+            removalReason != TemporaryDisplayRemovalReason.REASON_TIMEOUT
+        ) {
+            logger.logRemovalBypass(
+                removalReason, bypassReason = "transferStatus=${transferStatus.name}"
+            )
             return
         }
-        super.removeChip(removalReason)
+        super.removeView(removalReason)
     }
 
     private fun Boolean.visibleIfTrue(): Int {
@@ -181,8 +201,9 @@ data class ChipSenderInfo(
     val state: ChipStateSender,
     val routeInfo: MediaRoute2Info,
     val undoCallback: IUndoMediaTransferCallback? = null
-) : ChipInfoCommon {
+) : TemporaryViewInfo {
     override fun getTimeoutMs() = state.timeout
 }
 
 const val SENDER_TAG = "MediaTapToTransferSender"
+private const val ANIMATION_DURATION = 500L

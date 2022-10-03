@@ -1,9 +1,9 @@
 package com.android.systemui.statusbar
 
-import android.test.suitebuilder.annotation.SmallTest
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
+import androidx.test.filters.SmallTest
 import com.android.systemui.ExpandHelper
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
@@ -78,6 +78,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     @Mock lateinit var qS: QS
     @Mock lateinit var singleShadeOverScroller: SingleShadeLockScreenOverScroller
     @Mock lateinit var splitShadeOverScroller: SplitShadeLockScreenOverScroller
+    @Mock lateinit var qsTransitionController: LockscreenShadeQsTransitionController
     @JvmField @Rule val mockito = MockitoJUnit.rule()
 
     private val configurationController = FakeConfigurationController()
@@ -120,7 +121,9 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
                         context,
                         configurationController,
                         dumpManager)
-                })
+                },
+                qsTransitionControllerFactory = { qsTransitionController },
+            )
         whenever(nsslController.view).thenReturn(stackscroller)
         whenever(nsslController.expandHelperCallback).thenReturn(expandHelperCallback)
         transitionController.notificationPanelController = notificationPanelController
@@ -249,7 +252,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
         verify(scrimController, never()).setTransitionToFullShadeProgress(anyFloat(), anyFloat())
         verify(notificationPanelController, never()).setTransitionToFullShadeAmount(anyFloat(),
                 anyBoolean(), anyLong())
-        verify(qS, never()).setTransitionToFullShadeAmount(anyFloat(), anyFloat())
+        verify(qsTransitionController, never()).dragDownAmount = anyFloat()
     }
 
     @Test
@@ -260,7 +263,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
         verify(scrimController).setTransitionToFullShadeProgress(anyFloat(), anyFloat())
         verify(notificationPanelController).setTransitionToFullShadeAmount(anyFloat(),
                 anyBoolean(), anyLong())
-        verify(qS).setTransitionToFullShadeAmount(anyFloat(), anyFloat())
+        verify(qsTransitionController).dragDownAmount = 10f
         verify(depthController).transitionToFullShadeProgress = anyFloat()
     }
 

@@ -59,8 +59,8 @@ import org.mockito.Mockito.reset
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
-import org.mockito.junit.MockitoJUnit
 import org.mockito.Mockito.`when` as whenever
+import org.mockito.junit.MockitoJUnit
 
 private const val KEY = "TEST_KEY"
 private const val KEY_OLD = "TEST_KEY_OLD"
@@ -402,9 +402,10 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         manager.onMediaDataLoaded(KEY, null, mediaData)
         fakeBgExecutor.runAllReady()
         fakeFgExecutor.runAllReady()
-        // THEN the device is disabled
+        // THEN the device is disabled and name is set to null
         val data = captureDeviceData(KEY)
         assertThat(data.enabled).isFalse()
+        assertThat(data.name).isNull()
     }
 
     @Test
@@ -421,9 +422,10 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         deviceCallback.onSelectedDeviceStateChanged(device, 1)
         fakeBgExecutor.runAllReady()
         fakeFgExecutor.runAllReady()
-        // THEN the device is disabled
+        // THEN the device is disabled and name is set to null
         val data = captureDeviceData(KEY)
         assertThat(data.enabled).isFalse()
+        assertThat(data.name).isNull()
     }
 
     @Test
@@ -440,9 +442,24 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         deviceCallback.onDeviceListUpdate(mutableListOf(device))
         fakeBgExecutor.runAllReady()
         fakeFgExecutor.runAllReady()
-        // THEN the device is disabled
+        // THEN the device is disabled and name is set to null
         val data = captureDeviceData(KEY)
         assertThat(data.enabled).isFalse()
+        assertThat(data.name).isNull()
+    }
+
+    @Test
+    fun mr2ReturnsRouteWithNullName_useLocalDeviceName() {
+        // GIVEN that MR2Manager returns a routing session that does not have a name
+        whenever(route.name).thenReturn(null)
+        // WHEN a notification is added
+        manager.onMediaDataLoaded(KEY, null, mediaData)
+        fakeBgExecutor.runAllReady()
+        fakeFgExecutor.runAllReady()
+        // THEN the device is enabled and uses the current connected device name
+        val data = captureDeviceData(KEY)
+        assertThat(data.name).isEqualTo(DEVICE_NAME)
+        assertThat(data.enabled).isTrue()
     }
 
     @Test
@@ -647,12 +664,14 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
             override fun onPlaybackStopped(reason: Int, broadcastId: Int) {}
             override fun onBroadcastUpdated(reason: Int, broadcastId: Int) {}
             override fun onBroadcastUpdateFailed(reason: Int, broadcastId: Int) {}
-            override fun onBroadcastMetadataChanged(broadcastId: Int,
-                                                    metadata: BluetoothLeBroadcastMetadata) {}
+            override fun onBroadcastMetadataChanged(
+                broadcastId: Int,
+                metadata: BluetoothLeBroadcastMetadata
+            ) {}
         }
 
         bluetoothLeBroadcast.registerCallback(fakeFgExecutor, callback)
-        return callback;
+        return callback
     }
 
     fun setupLeAudioConfiguration(isLeAudio: Boolean) {

@@ -39,7 +39,7 @@ class RippleShader internal constructor(rippleShape: RippleShape = RippleShape.C
         ROUNDED_BOX,
         ELLIPSE
     }
-
+    //language=AGSL
     companion object {
         private const val SHADER_UNIFORMS = """uniform vec2 in_center;
                 uniform vec2 in_size;
@@ -67,8 +67,8 @@ class RippleShader internal constructor(rippleShape: RippleShape = RippleShape.C
 
                 float rippleInsideAlpha = (1.-inside) * in_fadeFill;
                 float rippleRingAlpha = (1.-sparkleRing) * in_fadeRing;
-                float rippleAlpha = max(rippleInsideAlpha, rippleRingAlpha) * 0.45;
-                vec4 ripple = in_color * rippleAlpha;
+                float rippleAlpha = max(rippleInsideAlpha, rippleRingAlpha) * in_color.a;
+                vec4 ripple = vec4(in_color.rgb, 1.0) * rippleAlpha;
                 return mix(ripple, vec4(sparkle), sparkle * in_sparkle_strength);
             }
         """
@@ -83,8 +83,8 @@ class RippleShader internal constructor(rippleShape: RippleShape = RippleShape.C
 
                 float rippleInsideAlpha = (1.-inside) * in_fadeFill;
                 float rippleRingAlpha = (1.-sparkleRing) * in_fadeRing;
-                float rippleAlpha = max(rippleInsideAlpha, rippleRingAlpha) * 0.45;
-                vec4 ripple = in_color * rippleAlpha;
+                float rippleAlpha = max(rippleInsideAlpha, rippleRingAlpha) * in_color.a;
+                vec4 ripple = vec4(in_color.rgb, 1.0) * rippleAlpha;
                 return mix(ripple, vec4(sparkle), sparkle * in_sparkle_strength);
             }
         """
@@ -99,8 +99,8 @@ class RippleShader internal constructor(rippleShape: RippleShape = RippleShape.C
 
                 float rippleInsideAlpha = (1.-inside) * in_fadeFill;
                 float rippleRingAlpha = (1.-sparkleRing) * in_fadeRing;
-                float rippleAlpha = max(rippleInsideAlpha, rippleRingAlpha) * 0.45;
-                vec4 ripple = in_color * rippleAlpha;
+                float rippleAlpha = max(rippleInsideAlpha, rippleRingAlpha) * in_color.a;
+                vec4 ripple = vec4(in_color.rgb, 1.0) * rippleAlpha;
                 return mix(ripple, vec4(sparkle), sparkle * in_sparkle_strength);
             }
         """

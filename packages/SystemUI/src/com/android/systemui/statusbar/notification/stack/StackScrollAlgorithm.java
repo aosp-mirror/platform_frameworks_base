@@ -120,11 +120,64 @@ public class StackScrollAlgorithm {
         updateClipping(algorithmState, ambientState);
         updateSpeedBumpState(algorithmState, speedBumpIndex);
         updateShelfState(algorithmState, ambientState);
+        updateAlphaState(algorithmState, ambientState);
         getNotificationChildrenStates(algorithmState, ambientState);
+    }
+
+    private void updateAlphaState(StackScrollAlgorithmState algorithmState,
+            AmbientState ambientState) {
+        for (ExpandableView view : algorithmState.visibleChildren) {
+            final ViewState viewState = view.getViewState();
+
+            final boolean isHunGoingToShade = ambientState.isShadeExpanded()
+                    && view == ambientState.getTrackedHeadsUpRow();
+
+            if (isHunGoingToShade) {
+                // Keep 100% opacity for heads up notification going to shade.
+                viewState.alpha = 1f;
+            } else if (ambientState.isOnKeyguard()) {
+                // Adjust alpha for wakeup to lockscreen.
+                viewState.alpha = 1f - ambientState.getHideAmount();
+            } else if (ambientState.isExpansionChanging()) {
+                // Adjust alpha for shade open & close.
+                float expansion = ambientState.getExpansionFraction();
+                viewState.alpha = ambientState.isBouncerInTransit()
+                        ? BouncerPanelExpansionCalculator.aboutToShowBouncerProgress(expansion)
+                        : ShadeInterpolation.getContentAlpha(expansion);
+            }
+
+            // For EmptyShadeView if on keyguard, we need to control the alpha to create
+            // a nice transition when the user is dragging down the notification panel.
+            if (view instanceof EmptyShadeView && ambientState.isOnKeyguard()) {
+                final float fractionToShade = ambientState.getFractionToShade();
+                viewState.alpha = ShadeInterpolation.getContentAlpha(fractionToShade);
+            }
+
+            NotificationShelf shelf = ambientState.getShelf();
+            if (shelf != null) {
+                final ViewState shelfState = shelf.getViewState();
+
+                // After the shelf has updated its yTranslation, explicitly set alpha=0 for view
+                // below shelf to skip rendering them in the hardware layer. We do not set them
+                // invisible because that runs invalidate & onDraw when these views return onscreen,
+                // which is more expensive.
+                if (shelfState.hidden) {
+                    // When the shelf is hidden, it won't clip views, so we don't hide rows
+                    continue;
+                }
+
+                final float shelfTop = shelfState.yTranslation;
+                final float viewTop = viewState.yTranslation;
+                if (viewTop >= shelfTop) {
+                    viewState.alpha = 0;
+                }
+            }
+        }
     }
 
     /**
      * How expanded or collapsed notifications are when pulling down the shade.
+     *
      * @param ambientState Current ambient state.
      * @return 0 when fully collapsed, 1 when expanded.
      */
@@ -208,22 +261,6 @@ public class StackScrollAlgorithm {
         }
 
         shelf.updateState(algorithmState, ambientState);
-
-        // After the shelf has updated its yTranslation, explicitly set alpha=0 for view below shelf
-        // to skip rendering them in the hardware layer. We do not set them invisible because that
-        // runs invalidate & onDraw when these views return onscreen, which is more expensive.
-        if (shelf.getViewState().hidden) {
-            // When the shelf is hidden, it won't clip views, so we don't hide rows
-            return;
-        }
-        final float shelfTop = shelf.getViewState().yTranslation;
-
-        for (ExpandableView view : algorithmState.visibleChildren) {
-            final float viewTop = view.getViewState().yTranslation;
-            if (viewTop >= shelfTop) {
-                view.getViewState().alpha = 0;
-            }
-        }
     }
 
     private void updateClipping(StackScrollAlgorithmState algorithmState,
@@ -472,21 +509,6 @@ public class StackScrollAlgorithm {
         ExpandableView view = algorithmState.visibleChildren.get(i);
         ExpandableViewState viewState = view.getViewState();
         viewState.location = ExpandableViewState.LOCATION_UNKNOWN;
-
-        final boolean isHunGoingToShade = ambientState.isShadeExpanded()
-                && view == ambientState.getTrackedHeadsUpRow();
-        if (isHunGoingToShade) {
-            // Keep 100% opacity for heads up notification going to shade.
-        } else if (ambientState.isOnKeyguard()) {
-            // Adjust alpha for wakeup to lockscreen.
-            viewState.alpha = 1f - ambientState.getHideAmount();
-        } else if (ambientState.isExpansionChanging()) {
-            // Adjust alpha for shade open & close.
-            float expansion = ambientState.getExpansionFraction();
-            viewState.alpha = ambientState.isBouncerInTransit()
-                    ? BouncerPanelExpansionCalculator.aboutToShowBouncerProgress(expansion)
-                    : ShadeInterpolation.getContentAlpha(expansion);
-        }
 
         final float expansionFraction = getExpansionFractionWithoutShelf(
                 algorithmState, ambientState);

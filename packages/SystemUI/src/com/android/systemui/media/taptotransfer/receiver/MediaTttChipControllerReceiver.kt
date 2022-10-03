@@ -30,20 +30,19 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
-import androidx.core.graphics.ColorUtils
 import com.android.settingslib.Utils
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.media.taptotransfer.common.ChipInfoCommon
-import com.android.systemui.media.taptotransfer.common.DEFAULT_TIMEOUT_MILLIS
-import com.android.systemui.media.taptotransfer.common.MediaTttChipControllerCommon
 import com.android.systemui.media.taptotransfer.common.MediaTttLogger
+import com.android.systemui.media.taptotransfer.common.MediaTttUtils
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.temporarydisplay.DEFAULT_TIMEOUT_MILLIS
+import com.android.systemui.temporarydisplay.TemporaryViewDisplayController
+import com.android.systemui.temporarydisplay.TemporaryViewInfo
 import com.android.systemui.util.animation.AnimationUtil.Companion.frames
 import com.android.systemui.util.concurrency.DelayableExecutor
-import com.android.systemui.util.view.ViewUtil
 import javax.inject.Inject
 
 /**
@@ -57,23 +56,23 @@ class MediaTttChipControllerReceiver @Inject constructor(
         context: Context,
         @MediaTttReceiverLogger logger: MediaTttLogger,
         windowManager: WindowManager,
-        viewUtil: ViewUtil,
         mainExecutor: DelayableExecutor,
         accessibilityManager: AccessibilityManager,
         configurationController: ConfigurationController,
         powerManager: PowerManager,
         @Main private val mainHandler: Handler,
         private val uiEventLogger: MediaTttReceiverUiEventLogger,
-) : MediaTttChipControllerCommon<ChipReceiverInfo>(
+) : TemporaryViewDisplayController<ChipReceiverInfo, MediaTttLogger>(
         context,
         logger,
         windowManager,
-        viewUtil,
         mainExecutor,
         accessibilityManager,
         configurationController,
         powerManager,
         R.layout.media_ttt_chip_receiver,
+        MediaTttUtils.WINDOW_TITLE,
+        MediaTttUtils.WAKE_REASON,
 ) {
     @SuppressLint("WrongConstant") // We're allowed to use LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
     override val windowLayoutParams = commonWindowLayoutParams.apply {
@@ -111,7 +110,7 @@ class MediaTttChipControllerReceiver @Inject constructor(
     ) {
         val chipState: ChipStateReceiver? = ChipStateReceiver.getReceiverStateFromId(displayState)
         val stateName = chipState?.name ?: "Invalid"
-        logger.logStateChange(stateName, routeInfo.id)
+        logger.logStateChange(stateName, routeInfo.id, routeInfo.clientPackageName)
 
         if (chipState == null) {
             Log.e(RECEIVER_TAG, "Unhandled MediaTransferReceiverState $displayState")
@@ -120,18 +119,18 @@ class MediaTttChipControllerReceiver @Inject constructor(
         uiEventLogger.logReceiverStateChange(chipState)
 
         if (chipState == ChipStateReceiver.FAR_FROM_SENDER) {
-            removeChip(removalReason = ChipStateReceiver.FAR_FROM_SENDER::class.simpleName!!)
+            removeView(removalReason = ChipStateReceiver.FAR_FROM_SENDER::class.simpleName!!)
             return
         }
         if (appIcon == null) {
-            displayChip(ChipReceiverInfo(routeInfo, appIconDrawableOverride = null, appName))
+            displayView(ChipReceiverInfo(routeInfo, appIconDrawableOverride = null, appName))
             return
         }
 
         appIcon.loadDrawableAsync(
                 context,
                 Icon.OnDrawableLoadedListener { drawable ->
-                    displayChip(ChipReceiverInfo(routeInfo, drawable, appName))
+                    displayView(ChipReceiverInfo(routeInfo, drawable, appName))
                 },
                 // Notify the listener on the main handler since the listener will update
                 // the UI.
@@ -139,18 +138,32 @@ class MediaTttChipControllerReceiver @Inject constructor(
         )
     }
 
-    override fun updateChipView(newChipInfo: ChipReceiverInfo, currentChipView: ViewGroup) {
-        super.updateChipView(newChipInfo, currentChipView)
-        setIcon(
-                currentChipView,
-                newChipInfo.routeInfo.packageName,
-                newChipInfo.appIconDrawableOverride,
-                newChipInfo.appNameOverride
+    override fun updateView(newInfo: ChipReceiverInfo, currentView: ViewGroup) {
+        super.updateView(newInfo, currentView)
+
+        val iconInfo = MediaTttUtils.getIconInfoFromPackageName(
+            context, newInfo.routeInfo.clientPackageName, logger
+        )
+        val iconDrawable = newInfo.appIconDrawableOverride ?: iconInfo.drawable
+        val iconContentDescription = newInfo.appNameOverride ?: iconInfo.contentDescription
+        val iconSize = context.resources.getDimensionPixelSize(
+            if (iconInfo.isAppIcon) {
+                R.dimen.media_ttt_icon_size_receiver
+            } else {
+                R.dimen.media_ttt_generic_icon_size_receiver
+            }
+        )
+
+        MediaTttUtils.setIcon(
+            currentView.requireViewById(R.id.app_icon),
+            iconDrawable,
+            iconContentDescription,
+            iconSize,
         )
     }
 
-    override fun animateChipIn(chipView: ViewGroup) {
-        val appIconView = chipView.requireViewById<View>(R.id.app_icon)
+    override fun animateViewIn(view: ViewGroup) {
+        val appIconView = view.requireViewById<View>(R.id.app_icon)
         appIconView.animate()
                 .translationYBy(-1 * getTranslationAmount().toFloat())
                 .setDuration(30.frames)
@@ -159,17 +172,10 @@ class MediaTttChipControllerReceiver @Inject constructor(
                 .alpha(1f)
                 .setDuration(5.frames)
                 .start()
-        startRipple(chipView.requireViewById(R.id.ripple))
+        // Using withEndAction{} doesn't apply a11y focus when screen is unlocked.
+        appIconView.postOnAnimation { view.requestAccessibilityFocus() }
+        startRipple(view.requireViewById(R.id.ripple))
     }
-
-    override fun getIconSize(isAppIcon: Boolean): Int? =
-        context.resources.getDimensionPixelSize(
-            if (isAppIcon) {
-                R.dimen.media_ttt_icon_size_receiver
-            } else {
-                R.dimen.media_ttt_generic_icon_size_receiver
-            }
-        )
 
     /** Returns the amount that the chip will be translated by in its intro animation. */
     private fun getTranslationAmount(): Int {
@@ -206,8 +212,7 @@ class MediaTttChipControllerReceiver @Inject constructor(
         // Center the ripple on the bottom of the screen in the middle.
         rippleView.setCenter(width * 0.5f, height.toFloat())
         val color = Utils.getColorAttrDefaultColor(context, R.attr.wallpaperTextColorAccent)
-        val colorWithAlpha = ColorUtils.setAlphaComponent(color, 70)
-        rippleView.setColor(colorWithAlpha)
+        rippleView.setColor(color, 70)
     }
 }
 
@@ -215,7 +220,7 @@ data class ChipReceiverInfo(
     val routeInfo: MediaRoute2Info,
     val appIconDrawableOverride: Drawable?,
     val appNameOverride: CharSequence?
-) : ChipInfoCommon {
+) : TemporaryViewInfo {
     override fun getTimeoutMs() = DEFAULT_TIMEOUT_MILLIS
 }
 

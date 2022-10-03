@@ -30,6 +30,7 @@ import androidx.constraintlayout.motion.widget.MotionLayout
 import com.android.settingslib.Utils
 import com.android.systemui.Dumpable
 import com.android.systemui.R
+import com.android.systemui.animation.Interpolators
 import com.android.systemui.animation.ShadeInterpolation
 import com.android.systemui.battery.BatteryMeterView
 import com.android.systemui.battery.BatteryMeterViewController
@@ -47,6 +48,7 @@ import com.android.systemui.shade.LargeScreenShadeHeaderController.Companion.QQS
 import com.android.systemui.shade.LargeScreenShadeHeaderController.Companion.QS_HEADER_CONSTRAINT
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
 import com.android.systemui.statusbar.phone.StatusBarIconController
+import com.android.systemui.statusbar.phone.StatusBarLocation
 import com.android.systemui.statusbar.phone.StatusIconContainer
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent.CentralSurfacesScope
 import com.android.systemui.statusbar.phone.dagger.StatusBarViewModule.LARGE_SCREEN_BATTERY_CONTROLLER
@@ -77,6 +79,7 @@ import javax.inject.Named
 class LargeScreenShadeHeaderController @Inject constructor(
     @Named(LARGE_SCREEN_SHADE_HEADER) private val header: View,
     private val statusBarIconController: StatusBarIconController,
+    private val tintedIconManagerFactory: StatusBarIconController.TintedIconManager.Factory,
     private val privacyIconsController: HeaderPrivacyIconsController,
     private val insetsProvider: StatusBarContentInsetsProvider,
     private val configurationController: ConfigurationController,
@@ -259,7 +262,7 @@ class LargeScreenShadeHeaderController @Inject constructor(
         batteryMeterViewController.ignoreTunerUpdates()
         batteryIcon.setPercentShowMode(BatteryMeterView.MODE_ESTIMATE)
 
-        iconManager = StatusBarIconController.TintedIconManager(iconContainer, featureFlags)
+        iconManager = tintedIconManagerFactory.create(iconContainer, StatusBarLocation.QS)
         iconManager.setTint(
             Utils.getColorAttrDefaultColor(header.context, android.R.attr.textColorPrimary)
         )
@@ -269,6 +272,14 @@ class LargeScreenShadeHeaderController @Inject constructor(
         qsCarrierGroupController = qsCarrierGroupControllerBuilder
             .setQSCarrierGroup(qsCarrierGroup)
             .build()
+
+        if (!combinedHeaders) {
+            // In the new header, we display alarm icon but we ignore it when not using the new
+            // headers.
+            iconContainer.addIgnoredSlot(
+                    context.getString(com.android.internal.R.string.status_bar_alarm_clock)
+            )
+        }
     }
 
     override fun onViewAttached() {
@@ -299,6 +310,14 @@ class LargeScreenShadeHeaderController @Inject constructor(
         if (disabled == qsDisabled) return
         qsDisabled = disabled
         updateVisibility()
+    }
+
+    fun startCustomizingAnimation(show: Boolean, duration: Long) {
+        header.animate()
+                .setDuration(duration)
+                .alpha(if (show) 0f else 1f)
+                .setInterpolator(if (show) Interpolators.ALPHA_OUT else Interpolators.ALPHA_IN)
+                .start()
     }
 
     private fun loadConstraints() {

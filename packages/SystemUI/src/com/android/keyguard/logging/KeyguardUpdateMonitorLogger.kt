@@ -198,6 +198,15 @@ class KeyguardUpdateMonitorLogger @Inject constructor(
                 { "Retrying face after HW unavailable, attempt $int1" })
     }
 
+    fun logRetryAfterFpError(msgId: Int, errString: String?) {
+        logBuffer.log(TAG, DEBUG, {
+            int1 = msgId
+            str1 = "$errString"
+        }, {
+            "Fingerprint retrying auth due to($int1) -> $str1"
+        })
+    }
+
     fun logRetryAfterFpHwUnavailable(retryCount: Int) {
         logBuffer.log(TAG, WARNING,
                 { int1 = retryCount },
@@ -253,10 +262,18 @@ class KeyguardUpdateMonitorLogger @Inject constructor(
         logBuffer.log(TAG, VERBOSE, { int1 = subId }, { "reportSimUnlocked(subId=$int1)" })
     }
 
-    fun logStartedListeningForFace(faceRunningState: Int) {
-        logBuffer.log(TAG, VERBOSE,
-                { int1 = faceRunningState },
-                { "startListeningForFace(): $int1" })
+    fun logStartedListeningForFace(faceRunningState: Int, faceAuthReason: String) {
+        logBuffer.log(TAG, VERBOSE, {
+            int1 = faceRunningState
+            str1 = faceAuthReason
+        }, { "startListeningForFace(): $int1, reason: $str1" })
+    }
+
+    fun logStoppedListeningForFace(faceRunningState: Int, faceAuthReason: String) {
+        logBuffer.log(TAG, VERBOSE, {
+            int1 = faceRunningState
+            str1 = faceAuthReason
+        }, { "stopListeningForFace(): currentFaceRunningState: $int1, reason: $str1" })
     }
 
     fun logSubInfo(subInfo: SubscriptionInfo?) {
@@ -270,12 +287,12 @@ class KeyguardUpdateMonitorLogger @Inject constructor(
                 { str1 = newTimeFormat },
                 { "handleTimeFormatUpdate timeFormat=$str1" })
     }
-
     fun logUdfpsPointerDown(sensorId: Int) {
         logBuffer.log(TAG, DEBUG,
                 { int1 = sensorId },
                 { "onUdfpsPointerDown, sensorId: $int1" })
     }
+
     fun logUdfpsPointerUp(sensorId: Int) {
         logBuffer.log(TAG, DEBUG,
                 { int1 = sensorId },
@@ -322,5 +339,41 @@ class KeyguardUpdateMonitorLogger @Inject constructor(
                     str2 = reason
                     bool1 = dismissKeyguard
                 }, { "reportUserRequestedUnlock origin=$str1 reason=$str2 dismissKeyguard=$bool1" })
+    }
+
+    fun logShowTrustGrantedMessage(
+            message: String
+    ) {
+        logBuffer.log(TAG, DEBUG, {
+            str1 = message
+        }, { "showTrustGrantedMessage message$str1" })
+    }
+
+    fun logTrustChanged(
+            wasTrusted: Boolean,
+            isNowTrusted: Boolean,
+            userId: Int
+    ) {
+        logBuffer.log(TAG, DEBUG, {
+            bool1 = wasTrusted
+            bool2 = isNowTrusted
+            int1 = userId
+        }, { "onTrustChanged[user=$int1] wasTrusted=$bool1 isNowTrusted=$bool2" })
+    }
+
+    fun logKeyguardStateUpdate(
+            secure: Boolean,
+            canDismissLockScreen: Boolean,
+            trusted: Boolean,
+            trustManaged: Boolean
+
+    ) {
+        logBuffer.log("KeyguardState", DEBUG, {
+            bool1 = secure
+            bool2 = canDismissLockScreen
+            bool3 = trusted
+            bool4 = trustManaged
+        }, { "#update secure=$bool1 canDismissKeyguard=$bool2" +
+                " trusted=$bool3 trustManaged=$bool4" })
     }
 }

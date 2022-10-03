@@ -89,6 +89,7 @@ import android.view.InputEventSender;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewRootImpl;
+import android.view.WindowInsets;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 import android.view.autofill.AutofillManager;
 import android.window.ImeOnBackInvokedDispatcher;
@@ -2122,8 +2123,9 @@ public final class InputMethodManager {
                 null /* icProto */);
         synchronized (mH) {
             final View view = getServedViewLocked();
-            if (mImeInsetsConsumer != null && view != null) {
-                if (mImeInsetsConsumer.isRequestedVisible()) {
+            if (view != null) {
+                final WindowInsets rootInsets = view.getRootWindowInsets();
+                if (rootInsets != null && rootInsets.isVisible(WindowInsets.Type.ime())) {
                     hideSoftInputFromWindow(view.getWindowToken(), hideFlags, null,
                             SoftInputShowHideReason.HIDE_TOGGLE_SOFT_INPUT);
                 } else {
@@ -2596,7 +2598,7 @@ public final class InputMethodManager {
                 try {
                     mService.hideSoftInput(mClient, windowToken, 0 /* flags */,
                             null /* resultReceiver */,
-                            SoftInputShowHideReason.HIDE_SOFT_INPUT);
+                            SoftInputShowHideReason.HIDE_SOFT_INPUT_BY_INSETS_API);
                 } catch (RemoteException e) {
                     throw e.rethrowFromSystemServer();
                 }
@@ -2989,7 +2991,8 @@ public final class InputMethodManager {
      */
     @Deprecated
     public void hideSoftInputFromInputMethod(IBinder token, int flags) {
-        InputMethodPrivilegedOperationsRegistry.get(token).hideMySoftInput(flags);
+        InputMethodPrivilegedOperationsRegistry.get(token).hideMySoftInput(
+                flags, SoftInputShowHideReason.HIDE_SOFT_INPUT_IMM_DEPRECATION);
     }
 
     /**

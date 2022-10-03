@@ -205,6 +205,7 @@ public final class ProfcollectForwardingService extends SystemService {
                     .setRequiresDeviceIdle(true)
                     .setRequiresCharging(true)
                     .setPeriodic(BG_PROCESS_PERIOD)
+                    .setPriority(JobInfo.PRIORITY_MIN)
                     .build());
         }
 
@@ -217,6 +218,9 @@ public final class ProfcollectForwardingService extends SystemService {
             BackgroundThread.get().getThreadHandler().post(
                     () -> {
                         try {
+                            if (sSelfService.mIProfcollect == null) {
+                                return;
+                            }
                             sSelfService.mIProfcollect.process();
                         } catch (RemoteException e) {
                             Log.e(LOG_TAG, "Failed to process profiles in background: "

@@ -25,6 +25,7 @@ import android.view.ViewGroup
 import android.view.ViewStub
 import android.widget.Button
 import android.widget.TextView
+import androidx.activity.ComponentActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
@@ -36,7 +37,6 @@ import com.android.systemui.controls.controller.StructureInfo
 import com.android.systemui.controls.ui.ControlsActivity
 import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.settings.CurrentUserTracker
-import com.android.systemui.util.LifecycleActivity
 import javax.inject.Inject
 
 /**
@@ -47,7 +47,7 @@ class ControlsEditingActivity @Inject constructor(
     private val broadcastDispatcher: BroadcastDispatcher,
     private val customIconCache: CustomIconCache,
     private val uiController: ControlsUiController
-) : LifecycleActivity() {
+) : ComponentActivity() {
 
     companion object {
         private const val TAG = "ControlsEditingActivity"

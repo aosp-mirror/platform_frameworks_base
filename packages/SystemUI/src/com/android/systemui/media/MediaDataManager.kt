@@ -17,6 +17,7 @@
 package com.android.systemui.media
 
 import android.app.Notification
+import android.app.Notification.EXTRA_SUBSTITUTE_APP_NAME
 import android.app.PendingIntent
 import android.app.smartspace.SmartspaceConfig
 import android.app.smartspace.SmartspaceManager
@@ -27,6 +28,7 @@ import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
@@ -57,8 +59,8 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.BcSmartspaceDataPlugin
-import com.android.systemui.statusbar.NotificationMediaManager.isPlayingState
 import com.android.systemui.statusbar.NotificationMediaManager.isConnectingState
+import com.android.systemui.statusbar.NotificationMediaManager.isPlayingState
 import com.android.systemui.statusbar.notification.row.HybridGroupManager
 import com.android.systemui.tuner.TunerService
 import com.android.systemui.util.Assert
@@ -516,9 +518,20 @@ class MediaDataManager(
             }
             val actions = createActionsFromState(it.packageName,
                     mediaControllerFactory.create(it.token), UserHandle(it.userId))
-            val data = it.copy(
-                    semanticActions = actions,
-                    isPlaying = isPlayingState(state.state))
+
+            // Control buttons
+            // If flag is enabled and controller has a PlaybackState,
+            // create actions from session info
+            // otherwise, no need to update semantic actions.
+            val data = if (actions != null) {
+                it.copy(
+                        semanticActions = actions,
+                        isPlaying = isPlayingState(state.state))
+            } else {
+                it.copy(
+                        isPlaying = isPlayingState(state.state)
+                )
+            }
             if (DEBUG) Log.d(TAG, "State updated outside of notification")
             onMediaDataLoaded(key, key, data)
         }
@@ -633,9 +646,14 @@ class MediaDataManager(
         }
         val mediaController = mediaControllerFactory.create(token)
         val metadata = mediaController.metadata
+        val notif: Notification = sbn.notification
+
+        val appInfo = notif.extras.getParcelable(
+            Notification.EXTRA_BUILDER_APPLICATION_INFO,
+            ApplicationInfo::class.java
+        ) ?: getAppInfoFromPackage(sbn.packageName)
 
         // Album art
-        val notif: Notification = sbn.notification
         var artworkBitmap = metadata?.let { loadBitmapFromUri(it) }
         if (artworkBitmap == null) {
             artworkBitmap = metadata?.getBitmap(MediaMetadata.METADATA_KEY_ART)
@@ -650,8 +668,7 @@ class MediaDataManager(
         }
 
         // App name
-        val builder = Notification.Builder.recoverBuilder(context, notif)
-        val app = builder.loadHeaderAppName()
+        val appName = getAppName(sbn, appInfo)
 
         // App Icon
         val smallIcon = sbn.notification.smallIcon
@@ -712,12 +729,7 @@ class MediaDataManager(
 
         val currentEntry = mediaEntries.get(key)
         val instanceId = currentEntry?.instanceId ?: logger.getNewInstanceId()
-        val appUid = try {
-            context.packageManager.getApplicationInfo(sbn.packageName, 0)?.uid!!
-        } catch (e: PackageManager.NameNotFoundException) {
-            Log.w(TAG, "Could not get app UID for ${sbn.packageName}", e)
-            Process.INVALID_UID
-        }
+        val appUid = appInfo?.uid ?: Process.INVALID_UID
 
         if (logEvent) {
             logger.logActiveMediaAdded(appUid, sbn.packageName, instanceId, playbackLocation)
@@ -730,13 +742,35 @@ class MediaDataManager(
             val resumeAction: Runnable? = mediaEntries[key]?.resumeAction
             val hasCheckedForResume = mediaEntries[key]?.hasCheckedForResume == true
             val active = mediaEntries[key]?.active ?: true
-            onMediaDataLoaded(key, oldKey, MediaData(sbn.normalizedUserId, true, app,
+            onMediaDataLoaded(key, oldKey, MediaData(sbn.normalizedUserId, true, appName,
                     smallIcon, artist, song, artWorkIcon, actionIcons, actionsToShowCollapsed,
                     semanticActions, sbn.packageName, token, notif.contentIntent, device,
                     active, resumeAction = resumeAction, playbackLocation = playbackLocation,
                     notificationKey = key, hasCheckedForResume = hasCheckedForResume,
                     isPlaying = isPlaying, isClearable = sbn.isClearable(),
                     lastActive = lastActive, instanceId = instanceId, appUid = appUid))
+        }
+    }
+
+    private fun getAppInfoFromPackage(packageName: String): ApplicationInfo? {
+        try {
+            return context.packageManager.getApplicationInfo(packageName, 0)
+        } catch (e: PackageManager.NameNotFoundException) {
+            Log.w(TAG, "Could not get app info for $packageName", e)
+        }
+        return null
+    }
+
+    private fun getAppName(sbn: StatusBarNotification, appInfo: ApplicationInfo?): String {
+        val name = sbn.notification.extras.getString(EXTRA_SUBSTITUTE_APP_NAME)
+        if (name != null) {
+            return name
+        }
+
+        return if (appInfo != null) {
+            context.packageManager.getApplicationLabel(appInfo).toString()
+        } else {
+            sbn.packageName
         }
     }
 
@@ -1288,6 +1322,7 @@ class MediaDataManager(
             println("externalListeners: ${mediaDataFilter.listeners}")
             println("mediaEntries: $mediaEntries")
             println("useMediaResumption: $useMediaResumption")
+            println("allowMediaRecommendations: $allowMediaRecommendations")
         }
     }
 }

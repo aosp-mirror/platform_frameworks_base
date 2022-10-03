@@ -76,12 +76,28 @@ public class LogModule {
         return factory.create("NotifInterruptLog", 100);
     }
 
+    /** Provides a logging buffer for notification rendering events. */
+    @Provides
+    @SysUISingleton
+    @NotificationRenderLog
+    public static LogBuffer provideNotificationRenderLogBuffer(LogBufferFactory factory) {
+        return factory.create("NotifRenderLog", 100);
+    }
+
     /** Provides a logging buffer for all logs for lockscreen to shade transition events. */
     @Provides
     @SysUISingleton
     @LSShadeTransitionLog
     public static LogBuffer provideLSShadeTransitionControllerBuffer(LogBufferFactory factory) {
         return factory.create("LSShadeTransitionLog", 50);
+    }
+
+    /** Provides a logging buffer for Shade messages. */
+    @Provides
+    @SysUISingleton
+    @ShadeLog
+    public static LogBuffer provideShadeLogBuffer(LogBufferFactory factory) {
+        return factory.create("ShadeLog", 500, false);
     }
 
     /** Provides a logging buffer for all logs related to managing notification sections. */
@@ -262,7 +278,7 @@ public class LogModule {
     @SysUISingleton
     @StatusBarConnectivityLog
     public static LogBuffer provideStatusBarConnectivityBuffer(LogBufferFactory factory) {
-        return factory.create("StatusBarConnectivityLog", 64);
+        return factory.create("SbConnectivity", 64);
     }
 
     /** Allows logging buffers to be tweaked via adb on debug builds but not on prod builds. */
@@ -276,6 +292,17 @@ public class LogModule {
         } else {
             return new LogcatEchoTrackerProd();
         }
+    }
+
+    /**
+     * Provides a {@link LogBuffer} for use by
+     * {@link com.android.systemui.biometrics.FaceHelpMessageDeferral}.
+     */
+    @Provides
+    @SysUISingleton
+    @BiometricMessagesLog
+    public static LogBuffer provideBiometricMessagesLogBuffer(LogBufferFactory factory) {
+        return factory.create("BiometricMessagesLog", 150);
     }
 
     /**
@@ -296,5 +323,15 @@ public class LogModule {
     @KeyguardUpdateMonitorLog
     public static LogBuffer provideKeyguardUpdateMonitorLogBuffer(LogBufferFactory factory) {
         return factory.create("KeyguardUpdateMonitorLog", 200);
+    }
+
+    /**
+     * Provides a {@link LogBuffer} for bluetooth-related logs.
+     */
+    @Provides
+    @SysUISingleton
+    @BluetoothLog
+    public static LogBuffer providerBluetoothLogBuffer(LogBufferFactory factory) {
+        return factory.create("BluetoothLog", 50);
     }
 }

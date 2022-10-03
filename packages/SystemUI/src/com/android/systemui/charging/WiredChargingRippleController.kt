@@ -200,8 +200,7 @@ class WiredChargingRippleController @Inject constructor(
     }
 
     private fun updateRippleColor() {
-        rippleView.setColor(
-                Utils.getColorAttr(context, android.R.attr.colorAccent).defaultColor)
+        rippleView.setColor(Utils.getColorAttr(context, android.R.attr.colorAccent).defaultColor)
     }
 
     inner class ChargingRippleCommand : Command {

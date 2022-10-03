@@ -26,6 +26,7 @@ import android.view.ViewGroup
 import android.view.ViewStub
 import android.widget.Button
 import android.widget.TextView
+import androidx.activity.ComponentActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.AdapterDataObserver
@@ -37,7 +38,6 @@ import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.settings.CurrentUserTracker
-import com.android.systemui.util.LifecycleActivity
 import java.util.concurrent.Executor
 import javax.inject.Inject
 
@@ -51,7 +51,7 @@ class ControlsProviderSelectorActivity @Inject constructor(
     private val controlsController: ControlsController,
     private val broadcastDispatcher: BroadcastDispatcher,
     private val uiController: ControlsUiController
-) : LifecycleActivity() {
+) : ComponentActivity() {
 
     companion object {
         private const val TAG = "ControlsProviderSelectorActivity"

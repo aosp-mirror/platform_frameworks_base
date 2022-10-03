@@ -322,6 +322,17 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
         } else {
             mPendingIntentRequest = new PendingIntentRequest(pendingIntent, nanoAppId);
         }
+
+        if (packageName == null) {
+            String[] packages = mContext.getPackageManager().getPackagesForUid(
+                    Binder.getCallingUid());
+            if (packages != null && packages.length > 0) {
+                packageName = packages[0];
+            }
+            Log.e(TAG, "createClient: Provided package name null. Using first package name "
+                    + packageName);
+        }
+
         mPackage = packageName;
         mAttributionTag = attributionTag;
         mTransactionManager = transactionManager;

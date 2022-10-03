@@ -63,6 +63,7 @@ import android.database.DataSetObserver;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Insets;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.drawable.AnimatedVectorDrawable;
@@ -141,11 +142,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.net.URISyntaxException;
 import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 /**
@@ -281,6 +284,7 @@ public class ChooserActivity extends ResolverActivity implements
     private long mQueriedSharingShortcutsTimeMs;
 
     private int mCurrAvailableWidth = 0;
+    private Insets mLastAppliedInsets = null;
     private int mLastNumberOfChildren = -1;
     private int mMaxTargetsPerRow = 1;
 
@@ -1065,7 +1069,12 @@ public class ChooserActivity extends ResolverActivity implements
         }
     }
 
-    private ViewGroup createContentPreviewView(ViewGroup parent) {
+    /**
+     * Create a view that will be shown in the content preview area
+     * @param parent reference to the parent container where the view should be attached to
+     * @return content preview view
+     */
+    protected ViewGroup createContentPreviewView(ViewGroup parent) {
         Intent targetIntent = getTargetIntent();
         int previewType = findPreferredContentPreview(targetIntent, getContentResolver());
         return displayContentPreview(previewType, targetIntent, getLayoutInflater(), parent);
@@ -1619,6 +1628,8 @@ public class ChooserActivity extends ResolverActivity implements
         if (mChooserMultiProfilePagerAdapter.getInactiveListAdapter() != null) {
             mChooserMultiProfilePagerAdapter.getInactiveListAdapter().destroyAppPredictor();
         }
+        mPersonalAppPredictor = null;
+        mWorkAppPredictor = null;
     }
 
     @Override // ResolverListCommunicator
@@ -2531,7 +2542,11 @@ public class ChooserActivity extends ResolverActivity implements
                 || gridAdapter.calculateChooserTargetWidth(availableWidth)
                 || recyclerView.getAdapter() == null
                 || availableWidth != mCurrAvailableWidth;
+
+        boolean insetsChanged = !Objects.equals(mLastAppliedInsets, mSystemWindowInsets);
+
         if (isLayoutUpdated
+                || insetsChanged
                 || mLastNumberOfChildren != recyclerView.getChildCount()) {
             mCurrAvailableWidth = availableWidth;
             if (isLayoutUpdated) {
@@ -2552,7 +2567,7 @@ public class ChooserActivity extends ResolverActivity implements
                 return;
             }
 
-            if (mLastNumberOfChildren == recyclerView.getChildCount()) {
+            if (mLastNumberOfChildren == recyclerView.getChildCount() && !insetsChanged) {
                 return;
             }
 
@@ -2563,6 +2578,7 @@ public class ChooserActivity extends ResolverActivity implements
                 int offset = calculateDrawerOffset(top, bottom, recyclerView, gridAdapter);
                 mResolverDrawerLayout.setCollapsibleHeightReserved(offset);
                 mEnterTransitionAnimationDelegate.markOffsetCalculated();
+                mLastAppliedInsets = mSystemWindowInsets;
             });
         }
     }
@@ -2629,7 +2645,7 @@ public class ChooserActivity extends ResolverActivity implements
 
             boolean isExpandable = getResources().getConfiguration().orientation
                     == Configuration.ORIENTATION_PORTRAIT && !isInMultiWindowMode();
-            if (directShareHeight != 0 && isSendAction(getTargetIntent())
+            if (directShareHeight != 0 && shouldShowContentPreview()
                     && isExpandable) {
                 // make sure to leave room for direct share 4->8 expansion
                 int requiredExpansionHeight =
@@ -2877,7 +2893,14 @@ public class ChooserActivity extends ResolverActivity implements
         return shouldShowTabs()
                 && mMultiProfilePagerAdapter.getListAdapterForUserHandle(
                 UserHandle.of(UserHandle.myUserId())).getCount() > 0
-                && isSendAction(getTargetIntent());
+                && shouldShowContentPreview();
+    }
+
+    /**
+     * @return true if we want to show the content preview area
+     */
+    protected boolean shouldShowContentPreview() {
+        return isSendAction(getTargetIntent());
     }
 
     private void updateStickyContentPreview() {
@@ -2929,12 +2952,14 @@ public class ChooserActivity extends ResolverActivity implements
 
     private void startFinishAnimation() {
         View rootView = findRootView();
-        rootView.startAnimation(new FinishAnimation(this, rootView));
+        if (rootView != null) {
+            rootView.startAnimation(new FinishAnimation(this, rootView));
+        }
     }
 
     private boolean maybeCancelFinishAnimation() {
         View rootView = findRootView();
-        Animation animation = rootView.getAnimation();
+        Animation animation = rootView == null ? null : rootView.getAnimation();
         if (animation instanceof FinishAnimation) {
             boolean hasEnded = animation.hasEnded();
             animation.cancel();
@@ -3055,7 +3080,12 @@ public class ChooserActivity extends ResolverActivity implements
             mChooserMultiProfilePagerAdapter.setupContainerPadding(
                     getActiveEmptyStateView().findViewById(R.id.resolver_empty_state_container));
         }
-        return super.onApplyWindowInsets(v, insets);
+
+        WindowInsets result = super.onApplyWindowInsets(v, insets);
+        if (mResolverDrawerLayout != null) {
+            mResolverDrawerLayout.requestLayout();
+        }
+        return result;
     }
 
     private void setHorizontalScrollingEnabled(boolean enabled) {
@@ -3203,7 +3233,7 @@ public class ChooserActivity extends ResolverActivity implements
                 return 0;
             }
 
-            if (!isSendAction(getTargetIntent())) {
+            if (!shouldShowContentPreview()) {
                 return 0;
             }
 
@@ -3234,7 +3264,7 @@ public class ChooserActivity extends ResolverActivity implements
         // There can be at most one row in the listview, that is internally
         // a ViewGroup with 2 rows
         public int getServiceTargetRowCount() {
-            if (isSendAction(getTargetIntent())
+            if (shouldShowContentPreview()
                     && !ActivityManager.isLowRamDeviceStatic()) {
                 return 1;
             }
@@ -3693,6 +3723,7 @@ public class ChooserActivity extends ResolverActivity implements
             this.mRows = rows;
             this.mCellCountPerRow = cellCountPerRow;
             this.mCellVisibility = new boolean[rows.size() * cellCountPerRow];
+            Arrays.fill(mCellVisibility, true);
             this.mListAdapterSupplier = listAdapterSupplier;
         }
 
@@ -4056,11 +4087,13 @@ public class ChooserActivity extends ResolverActivity implements
      */
     private static class FinishAnimation extends AlphaAnimation implements
             Animation.AnimationListener {
+        @Nullable
         private Activity mActivity;
+        @Nullable
         private View mRootView;
         private final float mFromAlpha;
 
-        FinishAnimation(Activity activity, View rootView) {
+        FinishAnimation(@NonNull Activity activity, @NonNull View rootView) {
             super(rootView.getAlpha(), 0.0f);
             mActivity = activity;
             mRootView = rootView;
@@ -4084,7 +4117,9 @@ public class ChooserActivity extends ResolverActivity implements
 
         @Override
         public void cancel() {
-            mRootView.setAlpha(mFromAlpha);
+            if (mRootView != null) {
+                mRootView.setAlpha(mFromAlpha);
+            }
             cleanup();
             super.cancel();
         }
@@ -4095,9 +4130,10 @@ public class ChooserActivity extends ResolverActivity implements
 
         @Override
         public void onAnimationEnd(Animation animation) {
-            if (mActivity != null) {
-                mActivity.finish();
-                cleanup();
+            Activity activity = mActivity;
+            cleanup();
+            if (activity != null) {
+                activity.finish();
             }
         }
 

@@ -42,7 +42,6 @@ import com.android.systemui.plugins.NavigationEdgeBackPlugin
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.ViewController
-import com.android.wm.shell.back.BackAnimation
 import java.io.PrintWriter
 import javax.inject.Inject
 import kotlin.math.abs
@@ -119,7 +118,7 @@ class BackPanelController private constructor(
         private val latencyTracker: LatencyTracker
     ) {
         /** Construct a [BackPanelController].  */
-        fun create(context: Context, backAnimation: BackAnimation?): BackPanelController {
+        fun create(context: Context): BackPanelController {
             val backPanelController = BackPanelController(
                 context,
                 windowManager,

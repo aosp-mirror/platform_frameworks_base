@@ -236,6 +236,21 @@ public class InsetsControllerTest {
     }
 
     @Test
+    public void testSystemDrivenInsetsAnimationLoggingListener_onReady() {
+        prepareControls();
+        // only the original thread that created view hierarchy can touch its views
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            WindowInsetsAnimationControlListener loggingListener =
+                    mock(WindowInsetsAnimationControlListener.class);
+            mController.setSystemDrivenInsetsAnimationLoggingListener(loggingListener);
+            mController.getSourceConsumer(ITYPE_IME).onWindowFocusGained(true);
+            // since there is no focused view, forcefully make IME visible.
+            mController.show(Type.ime(), true /* fromIme */);
+            verify(loggingListener).onReady(notNull(), anyInt());
+        });
+    }
+
+    @Test
     public void testAnimationEndState() {
         InsetsSourceControl[] controls = prepareControls();
         InsetsSourceControl navBar = controls[0];

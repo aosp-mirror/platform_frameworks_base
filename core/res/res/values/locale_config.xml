@@ -23,7 +23,7 @@
         <item>ak-GH</item> <!-- Akan (Ghana) -->
         <item>am-ET</item> <!-- Amharic (Ethiopia) -->
         <item>ar-AE</item> <!-- Arabic (United Arab Emirates) -->
-        <item>ar-AE-u-nu-latn</item> <!-- Arabic (United Arab Emirates, Western Digits) -->
+        <item>ar-AE-u-nu-arab</item> <!-- Arabic (United Arab Emirates, Arabic Digits) -->
         <item>ar-BH</item> <!-- Arabic (Bahrain) -->
         <item>ar-BH-u-nu-latn</item> <!-- Arabic (Bahrain, Western Digits) -->
         <item>ar-DJ</item> <!-- Arabic (Djibouti) -->
@@ -190,6 +190,7 @@
         <item>en-MS</item> <!-- English (Montserrat) -->
         <item>en-MT</item> <!-- English (Malta) -->
         <item>en-MU</item> <!-- English (Mauritius) -->
+        <item>en-MV</item> <!-- English (Maldives) -->
         <item>en-MW</item> <!-- English (Malawi) -->
         <item>en-MY</item> <!-- English (Malaysia) -->
         <item>en-NA</item> <!-- English (Namibia) -->

@@ -107,7 +107,8 @@ public class MediaOutputMetricLogger {
         SysUiStatsLog.write(
                 SysUiStatsLog.MEDIAOUTPUT_OP_INTERACTION_REPORT,
                 SysUiStatsLog.MEDIA_OUTPUT_OP_INTERACTION_REPORTED__INTERACTION_TYPE__ADJUST_VOLUME,
-                getInteractionDeviceType(source));
+                getInteractionDeviceType(source),
+                getLoggingPackageName());
     }
 
     /**
@@ -121,7 +122,8 @@ public class MediaOutputMetricLogger {
         SysUiStatsLog.write(
                 SysUiStatsLog.MEDIAOUTPUT_OP_INTERACTION_REPORT,
                 SysUiStatsLog.MEDIA_OUTPUT_OP_INTERACTION_REPORTED__INTERACTION_TYPE__STOP_CASTING,
-                SysUiStatsLog.MEDIA_OUTPUT_OP_INTERACTION_REPORTED__TARGET__UNKNOWN_TYPE);
+                SysUiStatsLog.MEDIA_OUTPUT_OP_INTERACTION_REPORTED__TARGET__UNKNOWN_TYPE,
+                getLoggingPackageName());
     }
 
     /**
@@ -135,7 +137,8 @@ public class MediaOutputMetricLogger {
         SysUiStatsLog.write(
                 SysUiStatsLog.MEDIAOUTPUT_OP_INTERACTION_REPORT,
                 SysUiStatsLog.MEDIA_OUTPUT_OP_INTERACTION_REPORTED__INTERACTION_TYPE__EXPANSION,
-                getInteractionDeviceType(source));
+                getInteractionDeviceType(source),
+                getLoggingPackageName());
     }
 
     /**
@@ -194,6 +197,11 @@ public class MediaOutputMetricLogger {
     }
 
     private int getLoggingDeviceType(MediaDevice device, boolean isSourceDevice) {
+        if (device == null) {
+            return isSourceDevice
+                    ? SysUiStatsLog.MEDIA_OUTPUT_OP_SWITCH_REPORTED__SOURCE__UNKNOWN_TYPE
+                    : SysUiStatsLog.MEDIA_OUTPUT_OP_SWITCH_REPORTED__TARGET__UNKNOWN_TYPE;
+        }
         switch (device.getDeviceType()) {
             case MediaDevice.MediaDeviceType.TYPE_PHONE_DEVICE:
                 return isSourceDevice
@@ -229,6 +237,9 @@ public class MediaOutputMetricLogger {
     }
 
     private int getInteractionDeviceType(MediaDevice device) {
+        if (device == null) {
+            return SysUiStatsLog.MEDIA_OUTPUT_OP_INTERACTION_REPORTED__TARGET__UNKNOWN_TYPE;
+        }
         switch (device.getDeviceType()) {
             case MediaDevice.MediaDeviceType.TYPE_PHONE_DEVICE:
                 return SysUiStatsLog.MEDIA_OUTPUT_OP_INTERACTION_REPORTED__TARGET__BUILTIN_SPEAKER;

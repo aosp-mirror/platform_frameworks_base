@@ -32,6 +32,8 @@ import android.graphics.Rect;
 import android.os.RemoteException;
 import android.view.Gravity;
 
+import androidx.annotation.NonNull;
+
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.WindowManagerShellWrapper;
@@ -51,6 +53,8 @@ import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.sysui.ConfigurationChangeListener;
 import com.android.wm.shell.sysui.ShellController;
+import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.sysui.UserChangeListener;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -64,7 +68,7 @@ import java.util.Set;
 public class TvPipController implements PipTransitionController.PipTransitionCallback,
         TvPipBoundsController.PipBoundsListener, TvPipMenuController.Delegate,
         TvPipNotificationController.Delegate, DisplayController.OnDisplaysChangedListener,
-        ConfigurationChangeListener {
+        ConfigurationChangeListener, UserChangeListener {
     private static final String TAG = "TvPipController";
     static final boolean DEBUG = false;
 
@@ -105,6 +109,11 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
     private final PipMediaController mPipMediaController;
     private final TvPipNotificationController mPipNotificationController;
     private final TvPipMenuController mTvPipMenuController;
+    private final PipTransitionController mPipTransitionController;
+    private final TaskStackListenerImpl mTaskStackListener;
+    private final PipParamsChangedForwarder mPipParamsChangedForwarder;
+    private final DisplayController mDisplayController;
+    private final WindowManagerShellWrapper mWmShellWrapper;
     private final ShellExecutor mMainExecutor;
     private final TvPipImpl mImpl = new TvPipImpl();
 
@@ -121,6 +130,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
 
     public static Pip create(
             Context context,
+            ShellInit shellInit,
             ShellController shellController,
             TvPipBoundsState tvPipBoundsState,
             TvPipBoundsAlgorithm tvPipBoundsAlgorithm,
@@ -138,6 +148,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
             ShellExecutor mainExecutor) {
         return new TvPipController(
                 context,
+                shellInit,
                 shellController,
                 tvPipBoundsState,
                 tvPipBoundsAlgorithm,
@@ -157,6 +168,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
 
     private TvPipController(
             Context context,
+            ShellInit shellInit,
             ShellController shellController,
             TvPipBoundsState tvPipBoundsState,
             TvPipBoundsAlgorithm tvPipBoundsAlgorithm,
@@ -170,11 +182,12 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
             TaskStackListenerImpl taskStackListener,
             PipParamsChangedForwarder pipParamsChangedForwarder,
             DisplayController displayController,
-            WindowManagerShellWrapper wmShell,
+            WindowManagerShellWrapper wmShellWrapper,
             ShellExecutor mainExecutor) {
         mContext = context;
         mMainExecutor = mainExecutor;
         mShellController = shellController;
+        mDisplayController = displayController;
 
         mTvPipBoundsState = tvPipBoundsState;
         mTvPipBoundsState.setDisplayId(context.getDisplayId());
@@ -193,16 +206,32 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
 
         mAppOpsListener = pipAppOpsListener;
         mPipTaskOrganizer = pipTaskOrganizer;
-        pipTransitionController.registerPipTransitionCallback(this);
+        mPipTransitionController = pipTransitionController;
+        mPipParamsChangedForwarder = pipParamsChangedForwarder;
+        mTaskStackListener = taskStackListener;
+        mWmShellWrapper = wmShellWrapper;
+        shellInit.addInitCallback(this::onInit, this);
+    }
+
+    private void onInit() {
+        mPipTransitionController.registerPipTransitionCallback(this);
 
         loadConfigurations();
 
-        registerPipParamsChangedListener(pipParamsChangedForwarder);
-        registerTaskStackListenerCallback(taskStackListener);
-        registerWmShellPinnedStackListener(wmShell);
-        displayController.addDisplayWindowListener(this);
+        registerPipParamsChangedListener(mPipParamsChangedForwarder);
+        registerTaskStackListenerCallback(mTaskStackListener);
+        registerWmShellPinnedStackListener(mWmShellWrapper);
+        registerSessionListenerForCurrentUser();
+        mDisplayController.addDisplayWindowListener(this);
 
         mShellController.addConfigurationChangeListener(this);
+        mShellController.addUserChangeListener(this);
+    }
+
+    @Override
+    public void onUserChanged(int newUserId, @NonNull Context userContext) {
+        // Re-register the media session listener when switching users
+        registerSessionListenerForCurrentUser();
     }
 
     @Override
@@ -679,11 +708,6 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
     }
 
     private class TvPipImpl implements Pip {
-        @Override
-        public void registerSessionListenerForCurrentUser() {
-            mMainExecutor.execute(() -> {
-                TvPipController.this.registerSessionListenerForCurrentUser();
-            });
-        }
+        // Not used
     }
 }

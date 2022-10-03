@@ -57,7 +57,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
-import com.android.systemui.statusbar.policy.UserSwitcherController.UserRecord;
+import com.android.systemui.user.data.source.UserRecord;
 import com.android.systemui.util.settings.GlobalSettings;
 
 import org.junit.Before;
@@ -116,9 +116,7 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
         when(mUserSwitcherController.getCurrentUserName()).thenReturn("Test User");
-        when(mUserSwitcherController.getKeyguardStateController())
-                .thenReturn(mKeyguardStateController);
-        when(mKeyguardStateController.isShowing()).thenReturn(true);
+        when(mUserSwitcherController.isKeyguardShowing()).thenReturn(true);
 
         mScreenWidth = getUiDevice().getDisplayWidth();
         mFakeMeasureSpec = View

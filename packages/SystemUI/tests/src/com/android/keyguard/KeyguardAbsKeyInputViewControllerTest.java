@@ -56,7 +56,7 @@ public class KeyguardAbsKeyInputViewControllerTest extends SysuiTestCase {
     @Mock
     private PasswordTextView mPasswordEntry;
     @Mock
-    private KeyguardMessageArea mKeyguardMessageArea;
+    private BouncerKeyguardMessageArea mKeyguardMessageArea;
     @Mock
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock
@@ -85,7 +85,7 @@ public class KeyguardAbsKeyInputViewControllerTest extends SysuiTestCase {
         when(mAbsKeyInputView.getPasswordTextViewId()).thenReturn(1);
         when(mAbsKeyInputView.findViewById(1)).thenReturn(mPasswordEntry);
         when(mAbsKeyInputView.isAttachedToWindow()).thenReturn(true);
-        when(mAbsKeyInputView.findViewById(R.id.keyguard_message_area))
+        when(mAbsKeyInputView.requireViewById(R.id.bouncer_message_area))
                 .thenReturn(mKeyguardMessageArea);
         mKeyguardAbsKeyInputViewController = new KeyguardAbsKeyInputViewController(mAbsKeyInputView,
                 mKeyguardUpdateMonitor, mSecurityMode, mLockPatternUtils, mKeyguardSecurityCallback,

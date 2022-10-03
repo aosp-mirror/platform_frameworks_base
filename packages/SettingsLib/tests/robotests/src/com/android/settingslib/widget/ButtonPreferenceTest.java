@@ -63,6 +63,7 @@ public class ButtonPreferenceTest {
 
         final Button button = mPreference.getButton();
         assertThat(button.getText().toString()).isEqualTo(testTitle);
+        assertThat(mPreference.getTitle().toString()).isEqualTo(testTitle);
     }
 
     @Test

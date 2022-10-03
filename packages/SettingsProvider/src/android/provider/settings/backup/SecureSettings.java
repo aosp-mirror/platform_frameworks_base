@@ -182,6 +182,7 @@ public class SecureSettings {
         Settings.Secure.PEOPLE_STRIP,
         Settings.Secure.MEDIA_CONTROLS_RESUME,
         Settings.Secure.MEDIA_CONTROLS_RECOMMENDATION,
+        Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN,
         Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE,
         Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS,
         Settings.Secure.ACCESSIBILITY_MAGNIFICATION_CAPABILITY,
@@ -209,6 +210,11 @@ public class SecureSettings {
         Settings.Secure.LOCKSCREEN_SHOW_WALLET,
         Settings.Secure.LOCK_SCREEN_SHOW_QR_CODE_SCANNER,
         Settings.Secure.LOCKSCREEN_USE_DOUBLE_LINE_CLOCK,
-        Settings.Secure.STATUS_BAR_SHOW_VIBRATE_ICON
+        Settings.Secure.STATUS_BAR_SHOW_VIBRATE_ICON,
+        Settings.Secure.ASSIST_TOUCH_GESTURE_ENABLED,
+        Settings.Secure.ASSIST_LONG_PRESS_HOME_ENABLED,
+        Settings.Secure.BLUETOOTH_LE_BROADCAST_PROGRAM_INFO,
+        Settings.Secure.BLUETOOTH_LE_BROADCAST_CODE,
+        Settings.Secure.BLUETOOTH_LE_BROADCAST_APP_SOURCE_NAME
     };
 }

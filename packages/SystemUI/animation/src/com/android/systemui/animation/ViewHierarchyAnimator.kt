@@ -165,6 +165,8 @@ class ViewHierarchyAnimator {
          * @param includeFadeIn true if the animator should also fade in the view and child views.
          * @param fadeInInterpolator the interpolator to use when fading in the view. Unused if
          *     [includeFadeIn] is false.
+         * @param onAnimationEnd an optional runnable that will be run once the animation
+         *    finishes successfully. Will not be run if the animation is cancelled.
          */
         @JvmOverloads
         fun animateAddition(
@@ -174,7 +176,8 @@ class ViewHierarchyAnimator {
             duration: Long = DEFAULT_DURATION,
             includeMargins: Boolean = false,
             includeFadeIn: Boolean = false,
-            fadeInInterpolator: Interpolator = DEFAULT_FADE_IN_INTERPOLATOR
+            fadeInInterpolator: Interpolator = DEFAULT_FADE_IN_INTERPOLATOR,
+            onAnimationEnd: Runnable? = null,
         ): Boolean {
             if (
                 occupiesSpace(
@@ -193,7 +196,8 @@ class ViewHierarchyAnimator {
                     origin,
                     interpolator,
                     duration,
-                    ignorePreviousValues = !includeMargins
+                    ignorePreviousValues = !includeMargins,
+                    onAnimationEnd,
                 )
             addListener(rootView, listener, recursive = true)
 
@@ -246,14 +250,16 @@ class ViewHierarchyAnimator {
             origin: Hotspot,
             interpolator: Interpolator,
             duration: Long,
-            ignorePreviousValues: Boolean
+            ignorePreviousValues: Boolean,
+            onAnimationEnd: Runnable? = null,
         ): View.OnLayoutChangeListener {
             return createListener(
                 interpolator,
                 duration,
                 ephemeral = true,
                 origin = origin,
-                ignorePreviousValues = ignorePreviousValues
+                ignorePreviousValues = ignorePreviousValues,
+                onAnimationEnd,
             )
         }
 
@@ -272,7 +278,8 @@ class ViewHierarchyAnimator {
             duration: Long,
             ephemeral: Boolean,
             origin: Hotspot? = null,
-            ignorePreviousValues: Boolean = false
+            ignorePreviousValues: Boolean = false,
+            onAnimationEnd: Runnable? = null,
         ): View.OnLayoutChangeListener {
             return object : View.OnLayoutChangeListener {
                 override fun onLayoutChange(
@@ -340,7 +347,8 @@ class ViewHierarchyAnimator {
                             endValues,
                             interpolator,
                             duration,
-                            ephemeral
+                            ephemeral,
+                            onAnimationEnd,
                         )
                     }
                 }
@@ -903,7 +911,8 @@ class ViewHierarchyAnimator {
             endValues: Map<Bound, Int>,
             interpolator: Interpolator,
             duration: Long,
-            ephemeral: Boolean
+            ephemeral: Boolean,
+            onAnimationEnd: Runnable? = null,
         ) {
             val propertyValuesHolders =
                 buildList {
@@ -940,6 +949,9 @@ class ViewHierarchyAnimator {
                             // views might not change bounds, and therefore not animate and leak the
                             // listener.
                             recursivelyRemoveListener(view)
+                        }
+                        if (!cancelled) {
+                            onAnimationEnd?.run()
                         }
                     }
 

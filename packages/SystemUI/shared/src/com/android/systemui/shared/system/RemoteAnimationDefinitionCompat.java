@@ -34,7 +34,7 @@ public class RemoteAnimationDefinitionCompat {
         mWrapped.addRemoteAnimation(transition, activityTypeFilter, adapter.getWrapped());
     }
 
-    RemoteAnimationDefinition getWrapped() {
+    public RemoteAnimationDefinition getWrapped() {
         return mWrapped;
     }
 }

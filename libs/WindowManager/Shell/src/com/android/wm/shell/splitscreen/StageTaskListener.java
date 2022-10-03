@@ -33,6 +33,7 @@ import android.content.Context;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.IBinder;
+import android.util.Slog;
 import android.util.SparseArray;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
@@ -104,11 +105,6 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         mIconProvider = iconProvider;
         taskOrganizer.createRootTask(displayId, WINDOWING_MODE_MULTI_WINDOW, this);
     }
-
-    /**
-     * General function for dismiss this stage.
-     */
-    void dismiss(WindowContainerTransaction wct, boolean toTop) {}
 
     int getChildCount() {
         return mChildrenTaskInfo.size();
@@ -376,7 +372,13 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
             SurfaceControl leash, boolean firstAppeared) {
         final Point taskPositionInParent = taskInfo.positionInParent;
         mSyncQueue.runInSync(t -> {
-            t.setWindowCrop(leash, null);
+            // The task surface might be released before running in the sync queue for the case like
+            // trampoline launch, so check if the surface is valid before processing it.
+            if (!leash.isValid()) {
+                Slog.w(TAG, "Skip updating invalid child task surface of task#" + taskInfo.taskId);
+                return;
+            }
+            t.setCrop(leash, null);
             t.setPosition(leash, taskPositionInParent.x, taskPositionInParent.y);
             if (firstAppeared && !ENABLE_SHELL_TRANSITIONS) {
                 t.setAlpha(leash, 1f);

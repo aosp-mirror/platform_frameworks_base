@@ -79,9 +79,11 @@ public final class MediaRouter2Manager {
     final String mPackageName;
 
     private final Context mContext;
-    @GuardedBy("sLock")
-    private Client mClient;
+
+    private final Client mClient;
+
     private final IMediaRouterService mMediaRouterService;
+    private final AtomicInteger mScanRequestCount = new AtomicInteger(/* initialValue= */ 0);
     final Handler mHandler;
     final CopyOnWriteArrayList<CallbackRecord> mCallbackRecords = new CopyOnWriteArrayList<>();
 
@@ -119,7 +121,12 @@ public final class MediaRouter2Manager {
                 .getSystemService(Context.MEDIA_SESSION_SERVICE);
         mPackageName = mContext.getPackageName();
         mHandler = new Handler(context.getMainLooper());
-        mHandler.post(this::getOrCreateClient);
+        mClient = new Client();
+        try {
+            mMediaRouterService.registerManager(mClient, mPackageName);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -155,48 +162,47 @@ public final class MediaRouter2Manager {
     }
 
     /**
-     * Starts scanning remote routes.
-     * <p>
-     * Route discovery can happen even when the {@link #startScan()} is not called.
-     * This is because the scanning could be started before by other apps.
-     * Therefore, calling this method after calling {@link #stopScan()} does not necessarily mean
-     * that the routes found before are removed and added again.
-     * <p>
-     * Use {@link Callback} to get the route related events.
-     * <p>
-     * @see #stopScan()
+     * Registers a request to scan for remote routes.
+     *
+     * <p>Increases the count of active scanning requests. When the count transitions from zero to
+     * one, sends a request to the system server to start scanning.
+     *
+     * <p>Clients must {@link #unregisterScanRequest() unregister their scan requests} when scanning
+     * is no longer needed, to avoid unnecessary resource usage.
      */
-    public void startScan() {
-        Client client = getOrCreateClient();
-        if (client != null) {
+    public void registerScanRequest() {
+        if (mScanRequestCount.getAndIncrement() == 0) {
             try {
-                mMediaRouterService.startScan(client);
+                mMediaRouterService.startScan(mClient);
             } catch (RemoteException ex) {
-                Log.e(TAG, "Unable to get sessions. Service probably died.", ex);
+                throw ex.rethrowFromSystemServer();
             }
         }
     }
 
     /**
-     * Stops scanning remote routes to reduce resource consumption.
-     * <p>
-     * Route discovery can be continued even after this method is called.
-     * This is because the scanning is only turned off when all the apps stop scanning.
-     * Therefore, calling this method does not necessarily mean the routes are removed.
-     * Also, for the same reason it does not mean that {@link Callback#onRoutesAdded(List)}
-     * is not called afterwards.
-     * <p>
-     * Use {@link Callback} to get the route related events.
+     * Unregisters a scan request made by {@link #registerScanRequest()}.
      *
-     * @see #startScan()
+     * <p>Decreases the count of active scanning requests. When the count transitions from one to
+     * zero, sends a request to the system server to stop scanning.
+     *
+     * @throws IllegalStateException If called while there are no active scan requests.
      */
-    public void stopScan() {
-        Client client = getOrCreateClient();
-        if (client != null) {
+    public void unregisterScanRequest() {
+        if (mScanRequestCount.updateAndGet(
+                count -> {
+                    if (count == 0) {
+                        throw new IllegalStateException(
+                                "No active scan requests to unregister.");
+                    } else {
+                        return --count;
+                    }
+                })
+                == 0) {
             try {
-                mMediaRouterService.stopScan(client);
+                mMediaRouterService.stopScan(mClient);
             } catch (RemoteException ex) {
-                Log.e(TAG, "Unable to get sessions. Service probably died.", ex);
+                throw ex.rethrowFromSystemServer();
             }
         }
     }
@@ -358,12 +364,10 @@ public final class MediaRouter2Manager {
     @Nullable
     public RoutingSessionInfo getSystemRoutingSession(@Nullable String packageName) {
         try {
-            return mMediaRouterService.getSystemSessionInfoForPackage(
-                    getOrCreateClient(), packageName);
+            return mMediaRouterService.getSystemSessionInfoForPackage(mClient, packageName);
         } catch (RemoteException ex) {
-            Log.e(TAG, "Unable to get current system session info", ex);
+            throw ex.rethrowFromSystemServer();
         }
-        return null;
     }
 
     /**
@@ -424,15 +428,11 @@ public final class MediaRouter2Manager {
      */
     @NonNull
     public List<RoutingSessionInfo> getRemoteSessions() {
-        Client client = getOrCreateClient();
-        if (client != null) {
-            try {
-                return mMediaRouterService.getRemoteSessions(client);
-            } catch (RemoteException ex) {
-                Log.e(TAG, "Unable to get sessions. Service probably died.", ex);
-            }
+        try {
+            return mMediaRouterService.getRemoteSessions(mClient);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
         }
-        return Collections.emptyList();
     }
 
     /**
@@ -515,14 +515,11 @@ public final class MediaRouter2Manager {
             return;
         }
 
-        Client client = getOrCreateClient();
-        if (client != null) {
-            try {
-                int requestId = mNextRequestId.getAndIncrement();
-                mMediaRouterService.setRouteVolumeWithManager(client, requestId, route, volume);
-            } catch (RemoteException ex) {
-                Log.e(TAG, "Unable to set route volume.", ex);
-            }
+        try {
+            int requestId = mNextRequestId.getAndIncrement();
+            mMediaRouterService.setRouteVolumeWithManager(mClient, requestId, route, volume);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -544,15 +541,12 @@ public final class MediaRouter2Manager {
             return;
         }
 
-        Client client = getOrCreateClient();
-        if (client != null) {
-            try {
-                int requestId = mNextRequestId.getAndIncrement();
-                mMediaRouterService.setSessionVolumeWithManager(
-                        client, requestId, sessionInfo.getId(), volume);
-            } catch (RemoteException ex) {
-                Log.e(TAG, "Unable to set session volume.", ex);
-            }
+        try {
+            int requestId = mNextRequestId.getAndIncrement();
+            mMediaRouterService.setSessionVolumeWithManager(
+                    mClient, requestId, sessionInfo.getId(), volume);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -809,15 +803,12 @@ public final class MediaRouter2Manager {
             return;
         }
 
-        Client client = getOrCreateClient();
-        if (client != null) {
-            try {
-                int requestId = mNextRequestId.getAndIncrement();
-                mMediaRouterService.selectRouteWithManager(
-                        client, requestId, sessionInfo.getId(), route);
-            } catch (RemoteException ex) {
-                Log.e(TAG, "selectRoute: Failed to send a request.", ex);
-            }
+        try {
+            int requestId = mNextRequestId.getAndIncrement();
+            mMediaRouterService.selectRouteWithManager(
+                    mClient, requestId, sessionInfo.getId(), route);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -851,15 +842,12 @@ public final class MediaRouter2Manager {
             return;
         }
 
-        Client client = getOrCreateClient();
-        if (client != null) {
-            try {
-                int requestId = mNextRequestId.getAndIncrement();
-                mMediaRouterService.deselectRouteWithManager(
-                        client, requestId, sessionInfo.getId(), route);
-            } catch (RemoteException ex) {
-                Log.e(TAG, "deselectRoute: Failed to send a request.", ex);
-            }
+        try {
+            int requestId = mNextRequestId.getAndIncrement();
+            mMediaRouterService.deselectRouteWithManager(
+                    mClient, requestId, sessionInfo.getId(), route);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -876,15 +864,11 @@ public final class MediaRouter2Manager {
     public void releaseSession(@NonNull RoutingSessionInfo sessionInfo) {
         Objects.requireNonNull(sessionInfo, "sessionInfo must not be null");
 
-        Client client = getOrCreateClient();
-        if (client != null) {
-            try {
-                int requestId = mNextRequestId.getAndIncrement();
-                mMediaRouterService.releaseSessionWithManager(
-                        client, requestId, sessionInfo.getId());
-            } catch (RemoteException ex) {
-                Log.e(TAG, "releaseSession: Failed to send a request", ex);
-            }
+        try {
+            int requestId = mNextRequestId.getAndIncrement();
+            mMediaRouterService.releaseSessionWithManager(mClient, requestId, sessionInfo.getId());
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -897,14 +881,11 @@ public final class MediaRouter2Manager {
             @NonNull MediaRoute2Info route) {
         int requestId = createTransferRequest(session, route);
 
-        Client client = getOrCreateClient();
-        if (client != null) {
-            try {
-                mMediaRouterService.transferToRouteWithManager(
-                        client, requestId, session.getId(), route);
-            } catch (RemoteException ex) {
-                Log.e(TAG, "transferToRoute: Failed to send a request.", ex);
-            }
+        try {
+            mMediaRouterService.transferToRouteWithManager(
+                    mClient, requestId, session.getId(), route);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -917,14 +898,11 @@ public final class MediaRouter2Manager {
 
         int requestId = createTransferRequest(oldSession, route);
 
-        Client client = getOrCreateClient();
-        if (client != null) {
-            try {
-                mMediaRouterService.requestCreateSessionWithManager(
-                        client, requestId, oldSession, route);
-            } catch (RemoteException ex) {
-                Log.e(TAG, "requestCreateSession: Failed to send a request", ex);
-            }
+        try {
+            mMediaRouterService.requestCreateSessionWithManager(
+                    mClient, requestId, oldSession, route);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -966,23 +944,6 @@ public final class MediaRouter2Manager {
         return TextUtils.equals(volumeControlId, sessionInfo.getOriginalId())
                 && TextUtils.equals(mediaController.getPackageName(),
                 sessionInfo.getOwnerPackageName());
-    }
-
-    private Client getOrCreateClient() {
-        synchronized (sLock) {
-            if (mClient != null) {
-                return mClient;
-            }
-            Client client = new Client();
-            try {
-                mMediaRouterService.registerManager(client, mPackageName);
-                mClient = client;
-                return client;
-            } catch (RemoteException ex) {
-                Log.e(TAG, "Unable to register media router manager.", ex);
-            }
-        }
-        return null;
     }
 
     /**

@@ -24,7 +24,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.app.AlertDialog;
 import android.content.pm.PackageManager;
 import android.hardware.biometrics.BiometricStateListener;
 import android.hardware.fingerprint.FingerprintManager;
@@ -36,9 +35,12 @@ import android.os.test.TestLooper;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableContext;
+import android.testing.TestableResources;
 import android.view.Window;
 
 import androidx.test.InstrumentationRegistry;
+
+import com.android.internal.R;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -47,7 +49,6 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
 
 import java.util.List;
 
@@ -68,17 +69,22 @@ public class SideFpsEventHandlerTest {
                     BiometricStateListener.STATE_BP_AUTH,
                     BiometricStateListener.STATE_AUTH_OTHER);
 
+    private static final Integer AUTO_DISMISS_DIALOG = 500;
+
     @Rule
     public TestableContext mContext =
             new TestableContext(InstrumentationRegistry.getContext(), null);
 
-    @Mock private PackageManager mPackageManager;
-    @Mock private FingerprintManager mFingerprintManager;
-    @Spy private AlertDialog.Builder mDialogBuilder = new AlertDialog.Builder(mContext);
-    @Mock private AlertDialog mAlertDialog;
-    @Mock private Window mWindow;
+    @Mock
+    private PackageManager mPackageManager;
+    @Mock
+    private FingerprintManager mFingerprintManager;
+    @Mock
+    private SideFpsToast mDialog;
+    @Mock
+    private Window mWindow;
 
-    private TestLooper mLooper = new TestLooper();
+    private final TestLooper mLooper = new TestLooper();
     private SideFpsEventHandler mEventHandler;
     private BiometricStateListener mBiometricStateListener;
 
@@ -88,16 +94,17 @@ public class SideFpsEventHandlerTest {
 
         mContext.addMockSystemService(PackageManager.class, mPackageManager);
         mContext.addMockSystemService(FingerprintManager.class, mFingerprintManager);
+        TestableResources resources = mContext.getOrCreateTestableResources();
+        resources.addOverride(R.integer.config_sideFpsToastTimeout, AUTO_DISMISS_DIALOG);
 
-        when(mDialogBuilder.create()).thenReturn(mAlertDialog);
-        when(mAlertDialog.getWindow()).thenReturn(mWindow);
+        when(mDialog.getWindow()).thenReturn(mWindow);
 
         mEventHandler =
                 new SideFpsEventHandler(
                         mContext,
                         new Handler(mLooper.getLooper()),
                         mContext.getSystemService(PowerManager.class),
-                        () -> mDialogBuilder);
+                        (ctx) -> mDialog);
     }
 
     @Test
@@ -108,7 +115,7 @@ public class SideFpsEventHandlerTest {
         assertThat(mEventHandler.shouldConsumeSinglePress(60L)).isFalse();
 
         mLooper.dispatchAll();
-        verify(mAlertDialog, never()).show();
+        verify(mDialog, never()).show();
     }
 
     @Test
@@ -120,7 +127,7 @@ public class SideFpsEventHandlerTest {
             assertThat(mEventHandler.shouldConsumeSinglePress(200L)).isFalse();
 
             mLooper.dispatchAll();
-            verify(mAlertDialog, never()).show();
+            verify(mDialog, never()).show();
         }
     }
 
@@ -133,7 +140,7 @@ public class SideFpsEventHandlerTest {
             assertThat(mEventHandler.shouldConsumeSinglePress(400L)).isFalse();
 
             mLooper.dispatchAll();
-            verify(mAlertDialog, never()).show();
+            verify(mDialog, never()).show();
         }
     }
 
@@ -148,7 +155,7 @@ public class SideFpsEventHandlerTest {
         assertThat(mEventHandler.shouldConsumeSinglePress(90000L)).isFalse();
 
         mLooper.dispatchAll();
-        verify(mAlertDialog, never()).show();
+        verify(mDialog, never()).show();
     }
 
     @Test
@@ -159,18 +166,18 @@ public class SideFpsEventHandlerTest {
         assertThat(mEventHandler.shouldConsumeSinglePress(80000L)).isFalse();
 
         mLooper.dispatchAll();
-        verify(mAlertDialog, never()).show();
+        verify(mDialog, never()).show();
     }
 
     @Test
-    public void promptsWhenBPisActive() throws Exception {
+    public void doesNotpromptWhenBPisActive() throws Exception {
         setupWithSensor(true /* hasSideFps */, true /* initialized */);
 
         setBiometricState(BiometricStateListener.STATE_BP_AUTH);
         assertThat(mEventHandler.shouldConsumeSinglePress(80000L)).isTrue();
 
         mLooper.dispatchAll();
-        verify(mAlertDialog, never()).show();
+        verify(mDialog, never()).show();
     }
 
     @Test
@@ -181,57 +188,40 @@ public class SideFpsEventHandlerTest {
         assertThat(mEventHandler.shouldConsumeSinglePress(80000L)).isTrue();
 
         mLooper.dispatchAll();
-        verify(mAlertDialog).show();
-        verify(mAlertDialog, never()).dismiss();
+        verify(mDialog).show();
     }
 
     @Test
-    public void dismissesDialogOnTouchWhenEnrolling() throws Exception {
+    public void dialogDismissesAfterTime() throws Exception {
         setupWithSensor(true /* hasSfps */, true /* initialized */);
 
         setBiometricState(BiometricStateListener.STATE_ENROLLING);
-        when(mAlertDialog.isShowing()).thenReturn(true);
+        when(mDialog.isShowing()).thenReturn(true);
         assertThat(mEventHandler.shouldConsumeSinglePress(80000L)).isTrue();
 
         mLooper.dispatchAll();
-        verify(mAlertDialog).show();
-
-        mBiometricStateListener.onBiometricAction(BiometricStateListener.ACTION_SENSOR_TOUCH);
-        mLooper.moveTimeForward(10000);
+        verify(mDialog).show();
+        mLooper.moveTimeForward(AUTO_DISMISS_DIALOG);
         mLooper.dispatchAll();
-
-        verify(mAlertDialog).dismiss();
+        verify(mDialog).dismiss();
     }
 
     @Test
-    public void dismissesDialogFailsWhenPowerPressedAndDialogShowing() throws Exception {
+    public void dialogDoesNotDismissOnSensorTouch() throws Exception {
         setupWithSensor(true /* hasSfps */, true /* initialized */);
 
         setBiometricState(BiometricStateListener.STATE_ENROLLING);
-        when(mAlertDialog.isShowing()).thenReturn(true);
+        when(mDialog.isShowing()).thenReturn(true);
         assertThat(mEventHandler.shouldConsumeSinglePress(80000L)).isTrue();
 
         mLooper.dispatchAll();
-        verify(mAlertDialog).show();
+        verify(mDialog).show();
 
         mBiometricStateListener.onBiometricAction(BiometricStateListener.ACTION_SENSOR_TOUCH);
-        assertThat(mEventHandler.shouldConsumeSinglePress(60L)).isTrue();
-
+        mLooper.moveTimeForward(AUTO_DISMISS_DIALOG - 1);
         mLooper.dispatchAll();
-        verify(mAlertDialog, never()).dismiss();
-    }
 
-    @Test
-    public void showDialogAfterTap() throws Exception {
-        setupWithSensor(true /* hasSfps */, true /* initialized */);
-
-        setBiometricState(BiometricStateListener.STATE_ENROLLING);
-        when(mAlertDialog.isShowing()).thenReturn(true);
-        mBiometricStateListener.onBiometricAction(BiometricStateListener.ACTION_SENSOR_TOUCH);
-        assertThat(mEventHandler.shouldConsumeSinglePress(60L)).isTrue();
-
-        mLooper.dispatchAll();
-        verify(mAlertDialog).show();
+        verify(mDialog, never()).dismiss();
     }
 
     private void setBiometricState(@BiometricStateListener.State int newState) {

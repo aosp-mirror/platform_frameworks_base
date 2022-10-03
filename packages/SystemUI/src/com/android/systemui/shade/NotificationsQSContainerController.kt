@@ -6,7 +6,11 @@ import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.view.WindowInsets
 import androidx.annotation.VisibleForTesting
 import androidx.constraintlayout.widget.ConstraintSet
-import androidx.constraintlayout.widget.ConstraintSet.*
+import androidx.constraintlayout.widget.ConstraintSet.BOTTOM
+import androidx.constraintlayout.widget.ConstraintSet.END
+import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
+import androidx.constraintlayout.widget.ConstraintSet.START
+import androidx.constraintlayout.widget.ConstraintSet.TOP
 import com.android.systemui.R
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags
@@ -31,6 +35,7 @@ class NotificationsQSContainerController @Inject constructor(
     view: NotificationsQuickSettingsContainer,
     private val navigationModeController: NavigationModeController,
     private val overviewProxyService: OverviewProxyService,
+    private val largeScreenShadeHeaderController: LargeScreenShadeHeaderController,
     private val featureFlags: FeatureFlags,
     @Main private val delayableExecutor: DelayableExecutor
 ) : ViewController<NotificationsQuickSettingsContainer>(view), QSContainerController {
@@ -152,9 +157,12 @@ class NotificationsQSContainerController @Inject constructor(
         }
     }
 
-    override fun setCustomizerShowing(showing: Boolean) {
-        isQSCustomizing = showing
-        updateBottomSpacing()
+    override fun setCustomizerShowing(showing: Boolean, animationDuration: Long) {
+        if (showing != isQSCustomizing) {
+            isQSCustomizing = showing
+            largeScreenShadeHeaderController.startCustomizingAnimation(showing, animationDuration)
+            updateBottomSpacing()
+        }
     }
 
     override fun setDetailShowing(showing: Boolean) {
@@ -171,33 +179,23 @@ class NotificationsQSContainerController @Inject constructor(
 
     private fun calculateBottomSpacing(): Paddings {
         val containerPadding: Int
-        var stackScrollMargin = notificationsBottomMargin
-        if (splitShadeEnabled) {
-            if (isGestureNavigation) {
-                // only default cutout padding, taskbar always hides
-                containerPadding = bottomCutoutInsets
-            } else if (taskbarVisible) {
-                // navigation buttons + visible taskbar means we're NOT on homescreen
-                containerPadding = bottomStableInsets
-            } else {
-                // navigation buttons + hidden taskbar means we're on homescreen
-                containerPadding = 0
-                // we need extra margin for notifications as navigation buttons are below them
-                stackScrollMargin = bottomStableInsets + notificationsBottomMargin
-            }
+        val stackScrollMargin: Int
+        if (!splitShadeEnabled && (isQSCustomizing || isQSDetailShowing)) {
+            // Clear out bottom paddings/margins so the qs customization can be full height.
+            containerPadding = 0
+            stackScrollMargin = 0
+        } else if (isGestureNavigation) {
+            // only default cutout padding, taskbar always hides
+            containerPadding = bottomCutoutInsets
+            stackScrollMargin = notificationsBottomMargin
+        } else if (taskbarVisible) {
+            // navigation buttons + visible taskbar means we're NOT on homescreen
+            containerPadding = bottomStableInsets
+            stackScrollMargin = notificationsBottomMargin
         } else {
-            if (isQSCustomizing || isQSDetailShowing) {
-                // Clear out bottom paddings/margins so the qs customization can be full height.
-                containerPadding = 0
-                stackScrollMargin = 0
-            } else if (isGestureNavigation) {
-                containerPadding = bottomCutoutInsets
-            } else if (taskbarVisible) {
-                containerPadding = bottomStableInsets
-            } else {
-                containerPadding = 0
-                stackScrollMargin = bottomStableInsets + notificationsBottomMargin
-            }
+            // navigation buttons + hidden taskbar means we're on homescreen
+            containerPadding = 0
+            stackScrollMargin = bottomStableInsets + notificationsBottomMargin
         }
         val qsContainerPadding = if (!(isQSCustomizing || isQSDetailShowing)) {
             // We also want this padding in the bottom in these cases

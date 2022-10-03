@@ -32,7 +32,7 @@ import java.util.Map;
  *
  * Flag Ids are integers.
  * Ids must be unique. This is enforced in a unit test.
- * Ids need not be sequential. Flags can "claim" a chunk of ids for flags in related featurs with
+ * Ids need not be sequential. Flags can "claim" a chunk of ids for flags in related features with
  * a comment. This is purely for organizational purposes.
  *
  * On public release builds, flags will always return their default value. There is no way to
@@ -41,30 +41,34 @@ import java.util.Map;
  * See {@link FeatureFlagsDebug} for instructions on flipping the flags via adb.
  */
 public class Flags {
-    public static final BooleanFlag TEAMFOOD = new BooleanFlag(1, false);
+    public static final UnreleasedFlag TEAMFOOD = new UnreleasedFlag(1);
 
     /***************************************/
     // 100 - notification
-    public static final BooleanFlag NOTIFICATION_PIPELINE_DEVELOPER_LOGGING =
-            new BooleanFlag(103, false);
+    public static final UnreleasedFlag NOTIFICATION_PIPELINE_DEVELOPER_LOGGING =
+            new UnreleasedFlag(103);
 
-    public static final BooleanFlag NSSL_DEBUG_LINES =
-            new BooleanFlag(105, false);
+    public static final UnreleasedFlag NSSL_DEBUG_LINES =
+            new UnreleasedFlag(105);
 
-    public static final BooleanFlag NSSL_DEBUG_REMOVE_ANIMATION =
-            new BooleanFlag(106, false);
+    public static final UnreleasedFlag NSSL_DEBUG_REMOVE_ANIMATION =
+            new UnreleasedFlag(106);
 
-    public static final BooleanFlag NEW_PIPELINE_CRASH_ON_CALL_TO_OLD_PIPELINE =
-            new BooleanFlag(107, false);
+    public static final UnreleasedFlag NEW_PIPELINE_CRASH_ON_CALL_TO_OLD_PIPELINE =
+            new UnreleasedFlag(107);
 
     public static final ResourceBooleanFlag NOTIFICATION_DRAG_TO_CONTENTS =
             new ResourceBooleanFlag(108, R.bool.config_notificationToContents);
 
-    public static final BooleanFlag REMOVE_UNRANKED_NOTIFICATIONS =
-            new BooleanFlag(109, false, true);
+    public static final ReleasedFlag REMOVE_UNRANKED_NOTIFICATIONS =
+            new ReleasedFlag(109);
 
-    public static final BooleanFlag FSI_REQUIRES_KEYGUARD =
-            new BooleanFlag(110, false, true);
+    public static final UnreleasedFlag FSI_REQUIRES_KEYGUARD =
+            new UnreleasedFlag(110, true);
+
+    public static final UnreleasedFlag INSTANT_VOICE_REPLY = new UnreleasedFlag(111, true);
+
+    // next id: 112
 
     /***************************************/
     // 200 - keyguard/lockscreen
@@ -73,11 +77,11 @@ public class Flags {
     // public static final BooleanFlag KEYGUARD_LAYOUT =
     //         new BooleanFlag(200, true);
 
-    public static final BooleanFlag LOCKSCREEN_ANIMATIONS =
-            new BooleanFlag(201, true);
+    public static final ReleasedFlag LOCKSCREEN_ANIMATIONS =
+            new ReleasedFlag(201);
 
-    public static final BooleanFlag NEW_UNLOCK_SWIPE_ANIMATION =
-            new BooleanFlag(202, true);
+    public static final ReleasedFlag NEW_UNLOCK_SWIPE_ANIMATION =
+            new ReleasedFlag(202);
 
     public static final ResourceBooleanFlag CHARGING_RIPPLE =
             new ResourceBooleanFlag(203, R.bool.flag_charging_ripple);
@@ -88,29 +92,34 @@ public class Flags {
     public static final ResourceBooleanFlag FACE_SCANNING_ANIM =
             new ResourceBooleanFlag(205, R.bool.config_enableFaceScanningAnimation);
 
-    /**
-     * Whether the KeyguardBottomArea(View|Controller) should use the modern architecture or the old
-     * one.
-     */
-    public static final BooleanFlag MODERN_BOTTOM_AREA = new BooleanFlag(
-            206,
-            /* default= */ false,
-            /* teamfood= */ true);
+    public static final UnreleasedFlag LOCKSCREEN_CUSTOM_CLOCKS = new UnreleasedFlag(207);
 
-    public static final BooleanFlag LOCKSCREEN_CUSTOM_CLOCKS = new BooleanFlag(207, false);
+    /**
+     * Flag to enable the usage of the new bouncer data source. This is a refactor of and
+     * eventual replacement of KeyguardBouncer.java.
+     */
+    public static final UnreleasedFlag MODERN_BOUNCER = new UnreleasedFlag(208);
+
+    /** Whether UserSwitcherActivity should use modern architecture. */
+    public static final ReleasedFlag MODERN_USER_SWITCHER_ACTIVITY =
+            new ReleasedFlag(209, true);
+
+    /** Whether the new implementation of UserSwitcherController should be used. */
+    public static final UnreleasedFlag REFACTORED_USER_SWITCHER_CONTROLLER =
+            new UnreleasedFlag(210, false);
 
     /***************************************/
     // 300 - power menu
-    public static final BooleanFlag POWER_MENU_LITE =
-            new BooleanFlag(300, true);
+    public static final ReleasedFlag POWER_MENU_LITE =
+            new ReleasedFlag(300);
 
     /***************************************/
     // 400 - smartspace
-    public static final BooleanFlag SMARTSPACE_DEDUPING =
-            new BooleanFlag(400, true);
+    public static final ReleasedFlag SMARTSPACE_DEDUPING =
+            new ReleasedFlag(400);
 
-    public static final BooleanFlag SMARTSPACE_SHARED_ELEMENT_TRANSITION_ENABLED =
-            new BooleanFlag(401, true);
+    public static final ReleasedFlag SMARTSPACE_SHARED_ELEMENT_TRANSITION_ENABLED =
+            new ReleasedFlag(401);
 
     public static final ResourceBooleanFlag SMARTSPACE =
             new ResourceBooleanFlag(402, R.bool.flag_smartspace);
@@ -121,11 +130,11 @@ public class Flags {
      * @deprecated Not needed anymore
      */
     @Deprecated
-    public static final BooleanFlag NEW_USER_SWITCHER =
-            new BooleanFlag(500, true);
+    public static final ReleasedFlag NEW_USER_SWITCHER =
+            new ReleasedFlag(500);
 
-    public static final BooleanFlag COMBINED_QS_HEADERS =
-            new BooleanFlag(501, false, true);
+    public static final UnreleasedFlag COMBINED_QS_HEADERS =
+            new UnreleasedFlag(501, true);
 
     public static final ResourceBooleanFlag PEOPLE_TILE =
             new ResourceBooleanFlag(502, R.bool.flag_conversations);
@@ -137,32 +146,38 @@ public class Flags {
      * @deprecated Not needed anymore
      */
     @Deprecated
-    public static final BooleanFlag NEW_FOOTER = new BooleanFlag(504, true);
+    public static final ReleasedFlag NEW_FOOTER = new ReleasedFlag(504);
 
-    public static final BooleanFlag NEW_HEADER = new BooleanFlag(505, false, true);
+    public static final UnreleasedFlag NEW_HEADER = new UnreleasedFlag(505, true);
     public static final ResourceBooleanFlag FULL_SCREEN_USER_SWITCHER =
             new ResourceBooleanFlag(506, R.bool.config_enableFullscreenUserSwitcher);
+
+    public static final UnreleasedFlag NEW_FOOTER_ACTIONS = new UnreleasedFlag(507, true);
 
     /***************************************/
     // 600- status bar
     public static final ResourceBooleanFlag STATUS_BAR_USER_SWITCHER =
             new ResourceBooleanFlag(602, R.bool.flag_user_switcher_chip);
 
-    public static final BooleanFlag STATUS_BAR_LETTERBOX_APPEARANCE =
-            new BooleanFlag(603, false);
+    public static final ReleasedFlag STATUS_BAR_LETTERBOX_APPEARANCE =
+            new ReleasedFlag(603, false);
 
-    public static final BooleanFlag NEW_STATUS_BAR_PIPELINE = new BooleanFlag(604, false);
+    public static final UnreleasedFlag NEW_STATUS_BAR_PIPELINE_BACKEND =
+            new UnreleasedFlag(604, false);
+
+    public static final UnreleasedFlag NEW_STATUS_BAR_PIPELINE_FRONTEND =
+            new UnreleasedFlag(605, false);
 
     /***************************************/
     // 700 - dialer/calls
-    public static final BooleanFlag ONGOING_CALL_STATUS_BAR_CHIP =
-            new BooleanFlag(700, true);
+    public static final ReleasedFlag ONGOING_CALL_STATUS_BAR_CHIP =
+            new ReleasedFlag(700);
 
-    public static final BooleanFlag ONGOING_CALL_IN_IMMERSIVE =
-            new BooleanFlag(701, true);
+    public static final ReleasedFlag ONGOING_CALL_IN_IMMERSIVE =
+            new ReleasedFlag(701);
 
-    public static final BooleanFlag ONGOING_CALL_IN_IMMERSIVE_CHIP_TAP =
-            new BooleanFlag(702, true);
+    public static final ReleasedFlag ONGOING_CALL_IN_IMMERSIVE_CHIP_TAP =
+            new ReleasedFlag(702);
 
     /***************************************/
     // 800 - general visual/theme
@@ -170,17 +185,30 @@ public class Flags {
             new ResourceBooleanFlag(800, R.bool.flag_monet);
 
     /***************************************/
+    // 801 - region sampling
+    public static final UnreleasedFlag REGION_SAMPLING = new UnreleasedFlag(801);
+
+    // 802 - wallpaper rendering
+    public static final UnreleasedFlag USE_CANVAS_RENDERER = new UnreleasedFlag(802);
+
+    // 803 - screen contents translation
+    public static final UnreleasedFlag SCREEN_CONTENTS_TRANSLATION = new UnreleasedFlag(803);
+
+    /***************************************/
     // 900 - media
-    public static final BooleanFlag MEDIA_TAP_TO_TRANSFER = new BooleanFlag(900, true);
-    public static final BooleanFlag MEDIA_SESSION_ACTIONS = new BooleanFlag(901, false);
-    public static final BooleanFlag MEDIA_NEARBY_DEVICES = new BooleanFlag(903, true);
-    public static final BooleanFlag MEDIA_MUTE_AWAIT = new BooleanFlag(904, true);
+    public static final UnreleasedFlag MEDIA_TAP_TO_TRANSFER = new UnreleasedFlag(900);
+    public static final UnreleasedFlag MEDIA_SESSION_ACTIONS = new UnreleasedFlag(901);
+    public static final ReleasedFlag MEDIA_NEARBY_DEVICES = new ReleasedFlag(903);
+    public static final ReleasedFlag MEDIA_MUTE_AWAIT = new ReleasedFlag(904);
+    public static final UnreleasedFlag DREAM_MEDIA_COMPLICATION = new UnreleasedFlag(905);
+    public static final UnreleasedFlag DREAM_MEDIA_TAP_TO_OPEN = new UnreleasedFlag(906);
 
     // 1000 - dock
-    public static final BooleanFlag SIMULATE_DOCK_THROUGH_CHARGING =
-            new BooleanFlag(1000, true);
-    public static final BooleanFlag DOCK_SETUP_ENABLED = new BooleanFlag(1001, true);
+    public static final ReleasedFlag SIMULATE_DOCK_THROUGH_CHARGING =
+            new ReleasedFlag(1000);
+    public static final ReleasedFlag DOCK_SETUP_ENABLED = new ReleasedFlag(1001);
 
+    public static final UnreleasedFlag ROUNDED_BOX_RIPPLE = new UnreleasedFlag(1002, false);
 
     // 1100 - windowing
     @Keep
@@ -203,6 +231,22 @@ public class Flags {
     public static final SysPropBooleanFlag HIDE_NAVBAR_WINDOW =
             new SysPropBooleanFlag(1103, "persist.wm.debug.hide_navbar_window", false);
 
+    @Keep
+    public static final SysPropBooleanFlag WM_DESKTOP_WINDOWING =
+            new SysPropBooleanFlag(1104, "persist.wm.debug.desktop_mode", false);
+
+    @Keep
+    public static final SysPropBooleanFlag WM_CAPTION_ON_SHELL =
+            new SysPropBooleanFlag(1105, "persist.wm.debug.caption_on_shell", false);
+
+    @Keep
+    public static final SysPropBooleanFlag FLOATING_TASKS_ENABLED =
+            new SysPropBooleanFlag(1106, "persist.wm.debug.floating_tasks", false);
+
+    @Keep
+    public static final SysPropBooleanFlag SHOW_FLOATING_TASKS_AS_BUBBLES =
+            new SysPropBooleanFlag(1107, "persist.wm.debug.floating_tasks_as_bubbles", false);
+
     // 1200 - predictive back
     @Keep
     public static final SysPropBooleanFlag WM_ENABLE_PREDICTIVE_BACK = new SysPropBooleanFlag(
@@ -214,12 +258,19 @@ public class Flags {
     public static final SysPropBooleanFlag WM_ALWAYS_ENFORCE_PREDICTIVE_BACK =
             new SysPropBooleanFlag(1202, "persist.wm.debug.predictive_back_always_enforce", false);
 
-    public static final BooleanFlag NEW_BACK_AFFORDANCE =
-            new BooleanFlag(1203, false /* default */, false /* teamfood */);
+    public static final UnreleasedFlag NEW_BACK_AFFORDANCE =
+            new UnreleasedFlag(1203, false /* teamfood */);
 
     // 1300 - screenshots
 
-    public static final BooleanFlag SCREENSHOT_REQUEST_PROCESSOR = new BooleanFlag(1300, false);
+    public static final UnreleasedFlag SCREENSHOT_REQUEST_PROCESSOR = new UnreleasedFlag(1300);
+    public static final UnreleasedFlag SCREENSHOT_WORK_PROFILE_POLICY = new UnreleasedFlag(1301);
+
+    // 1400 - columbus, b/242800729
+    public static final UnreleasedFlag QUICK_TAP_IN_PCC = new UnreleasedFlag(1400);
+
+    // 1500 - chooser
+    public static final UnreleasedFlag CHOOSER_UNBUNDLED = new UnreleasedFlag(1500);
 
     // Pay no attention to the reflection behind the curtain.
     // ========================== Curtain ==========================

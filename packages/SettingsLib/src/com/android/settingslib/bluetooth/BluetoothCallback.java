@@ -16,6 +16,22 @@
 
 package com.android.settingslib.bluetooth;
 
+import static android.bluetooth.BluetoothAdapter.STATE_CONNECTED;
+import static android.bluetooth.BluetoothAdapter.STATE_CONNECTING;
+import static android.bluetooth.BluetoothAdapter.STATE_DISCONNECTED;
+import static android.bluetooth.BluetoothAdapter.STATE_DISCONNECTING;
+import static android.bluetooth.BluetoothAdapter.STATE_OFF;
+import static android.bluetooth.BluetoothAdapter.STATE_ON;
+import static android.bluetooth.BluetoothAdapter.STATE_TURNING_OFF;
+import static android.bluetooth.BluetoothAdapter.STATE_TURNING_ON;
+
+import android.annotation.IntDef;
+import android.annotation.Nullable;
+
+import androidx.annotation.NonNull;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * BluetoothCallback provides a callback interface for the settings
@@ -33,7 +49,7 @@ public interface BluetoothCallback {
      * {@link android.bluetooth.BluetoothAdapter#STATE_ON},
      * {@link android.bluetooth.BluetoothAdapter#STATE_TURNING_OFF}.
      */
-    default void onBluetoothStateChanged(int bluetoothState) {}
+    default void onBluetoothStateChanged(@AdapterState int bluetoothState) {}
 
     /**
      * It will be called when the local Bluetooth adapter has started
@@ -54,14 +70,14 @@ public interface BluetoothCallback {
      *
      * @param cachedDevice the Bluetooth device.
      */
-    default void onDeviceAdded(CachedBluetoothDevice cachedDevice) {}
+    default void onDeviceAdded(@NonNull CachedBluetoothDevice cachedDevice) {}
 
     /**
      * It will be called when requiring to remove a remote device from CachedBluetoothDevice list
      *
      * @param cachedDevice the Bluetooth device.
      */
-    default void onDeviceDeleted(CachedBluetoothDevice cachedDevice) {}
+    default void onDeviceDeleted(@NonNull CachedBluetoothDevice cachedDevice) {}
 
     /**
      * It will be called when bond state of a remote device is changed.
@@ -73,7 +89,8 @@ public interface BluetoothCallback {
      * {@link android.bluetooth.BluetoothDevice#BOND_BONDING},
      * {@link android.bluetooth.BluetoothDevice#BOND_BONDED}.
      */
-    default void onDeviceBondStateChanged(CachedBluetoothDevice cachedDevice, int bondState) {}
+    default void onDeviceBondStateChanged(
+            @NonNull CachedBluetoothDevice cachedDevice, int bondState) {}
 
     /**
      * It will be called in following situations:
@@ -89,7 +106,9 @@ public interface BluetoothCallback {
      * {@link android.bluetooth.BluetoothAdapter#STATE_CONNECTED},
      * {@link android.bluetooth.BluetoothAdapter#STATE_DISCONNECTING}.
      */
-    default void onConnectionStateChanged(CachedBluetoothDevice cachedDevice, int state) {}
+    default void onConnectionStateChanged(
+            @Nullable CachedBluetoothDevice cachedDevice,
+            @ConnectionState int state) {}
 
     /**
      * It will be called when device been set as active for {@code bluetoothProfile}
@@ -101,7 +120,8 @@ public interface BluetoothCallback {
      * @param activeDevice the active Bluetooth device.
      * @param bluetoothProfile the profile of active Bluetooth device.
      */
-    default void onActiveDeviceChanged(CachedBluetoothDevice activeDevice, int bluetoothProfile) {}
+    default void onActiveDeviceChanged(
+            @Nullable CachedBluetoothDevice activeDevice, int bluetoothProfile) {}
 
     /**
      * It will be called in following situations:
@@ -124,8 +144,10 @@ public interface BluetoothCallback {
      * {@link android.bluetooth.BluetoothProfile#STATE_DISCONNECTING}.
      * @param bluetoothProfile the BluetoothProfile id.
      */
-    default void onProfileConnectionStateChanged(CachedBluetoothDevice cachedDevice,
-            int state, int bluetoothProfile) {
+    default void onProfileConnectionStateChanged(
+            @NonNull CachedBluetoothDevice cachedDevice,
+            @ConnectionState int state,
+            int bluetoothProfile) {
     }
 
     /**
@@ -138,6 +160,24 @@ public interface BluetoothCallback {
      *                     {@link android.bluetooth.BluetoothAdapter#STATE_DISCONNECTED},
      *                     {@link android.bluetooth.BluetoothAdapter#STATE_CONNECTED}
      */
-    default void onAclConnectionStateChanged(CachedBluetoothDevice cachedDevice, int state) {
-    }
+    default void onAclConnectionStateChanged(
+            @NonNull CachedBluetoothDevice cachedDevice, int state) {}
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "STATE_" }, value = {
+            STATE_DISCONNECTED,
+            STATE_CONNECTING,
+            STATE_CONNECTED,
+            STATE_DISCONNECTING,
+    })
+    @interface ConnectionState {}
+
+    @IntDef(prefix = { "STATE_" }, value = {
+            STATE_OFF,
+            STATE_TURNING_ON,
+            STATE_ON,
+            STATE_TURNING_OFF,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface AdapterState {}
 }

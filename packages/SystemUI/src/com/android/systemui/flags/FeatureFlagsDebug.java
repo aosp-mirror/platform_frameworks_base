@@ -47,6 +47,8 @@ import com.android.systemui.statusbar.commandline.CommandRegistry;
 import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.settings.SecureSettings;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -83,6 +85,7 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
     private final Resources mResources;
     private final SystemPropertiesHelper mSystemProperties;
     private final DeviceConfigProxy mDeviceConfigProxy;
+    private final ServerFlagReader mServerFlagReader;
     private final Map<Integer, Flag<?>> mAllFlags;
     private final Map<Integer, Boolean> mBooleanFlagCache = new TreeMap<>();
     private final Map<Integer, String> mStringFlagCache = new TreeMap<>();
@@ -97,6 +100,7 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
             @Main Resources resources,
             DumpManager dumpManager,
             DeviceConfigProxy deviceConfigProxy,
+            ServerFlagReader serverFlagReader,
             @Named(ALL_FLAGS) Map<Integer, Flag<?>> allFlags,
             CommandRegistry commandRegistry,
             IStatusBarService barService) {
@@ -105,6 +109,7 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
         mResources = resources;
         mSystemProperties = systemProperties;
         mDeviceConfigProxy = deviceConfigProxy;
+        mServerFlagReader = serverFlagReader;
         mAllFlags = allFlags;
         mBarService = barService;
 
@@ -120,7 +125,16 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
     }
 
     @Override
-    public boolean isEnabled(@NonNull BooleanFlag flag) {
+    public boolean isEnabled(@NotNull UnreleasedFlag flag) {
+        return isEnabledInternal(flag);
+    }
+
+    @Override
+    public boolean isEnabled(@NotNull ReleasedFlag flag) {
+        return isEnabledInternal(flag);
+    }
+
+    private boolean isEnabledInternal(@NotNull BooleanFlag flag) {
         int id = flag.getId();
         if (!mBooleanFlagCache.containsKey(id)) {
             mBooleanFlagCache.put(id,
@@ -197,14 +211,17 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
     /** Specific override for Boolean flags that checks against the teamfood list.*/
     private boolean readFlagValue(int id, boolean defaultValue) {
         Boolean result = readBooleanFlagOverride(id);
-        // Only check for teamfood if the default is false.
-        if (!defaultValue && result == null && id != Flags.TEAMFOOD.getId()) {
+        boolean hasServerOverride = mServerFlagReader.hasOverride(id);
+
+        // Only check for teamfood if the default is false
+        // and there is no server override.
+        if (!hasServerOverride && !defaultValue && result == null && id != Flags.TEAMFOOD.getId()) {
             if (mAllFlags.containsKey(id) && mAllFlags.get(id).getTeamfood()) {
                 return isEnabled(Flags.TEAMFOOD);
             }
         }
 
-        return result == null ? defaultValue : result;
+        return result == null ? mServerFlagReader.readServerOverride(id, defaultValue) : result;
     }
 
     private Boolean readBooleanFlagOverride(int id) {
@@ -409,36 +426,38 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
          */
         @Nullable
         private ParcelableFlag<?> toParcelableFlag(Flag<?> f) {
-            if (f instanceof BooleanFlag) {
-                return new BooleanFlag(
-                        f.getId(),
-                        isEnabled((BooleanFlag) f),
-                        f.getTeamfood(),
-                        readBooleanFlagOverride(f.getId()) != null);
-            }
-            if (f instanceof ResourceBooleanFlag) {
-                return new BooleanFlag(
-                        f.getId(),
-                        isEnabled((ResourceBooleanFlag) f),
-                        f.getTeamfood(),
-                        readBooleanFlagOverride(f.getId()) != null);
-            }
-            if (f instanceof DeviceConfigBooleanFlag) {
-                return new BooleanFlag(
-                        f.getId(), isEnabled((DeviceConfigBooleanFlag) f), f.getTeamfood());
-            }
-            if (f instanceof SysPropBooleanFlag) {
+            boolean enabled;
+            boolean teamfood = f.getTeamfood();
+            boolean overridden;
+
+            if (f instanceof ReleasedFlag) {
+                enabled = isEnabled((ReleasedFlag) f);
+                overridden = readBooleanFlagOverride(f.getId()) != null;
+            } else if (f instanceof UnreleasedFlag) {
+                enabled = isEnabled((UnreleasedFlag) f);
+                overridden = readBooleanFlagOverride(f.getId()) != null;
+            } else if (f instanceof ResourceBooleanFlag) {
+                enabled = isEnabled((ResourceBooleanFlag) f);
+                overridden = readBooleanFlagOverride(f.getId()) != null;
+            } else if (f instanceof DeviceConfigBooleanFlag) {
+                enabled = isEnabled((DeviceConfigBooleanFlag) f);
+                overridden = false;
+            } else if (f instanceof SysPropBooleanFlag) {
                 // TODO(b/223379190): Teamfood not supported for sysprop flags yet.
-                return new BooleanFlag(
-                        f.getId(),
-                        ((SysPropBooleanFlag) f).getDefault(),
-                        false,
-                        !mSystemProperties.get(((SysPropBooleanFlag) f).getName()).isEmpty());
+                enabled = isEnabled((SysPropBooleanFlag) f);
+                teamfood = false;
+                overridden = !mSystemProperties.get(((SysPropBooleanFlag) f).getName()).isEmpty();
+            } else {
+                // TODO: add support for other flag types.
+                Log.w(TAG, "Unsupported Flag Type. Please file a bug.");
+                return null;
             }
 
-            // TODO: add support for other flag types.
-            Log.w(TAG, "Unsupported Flag Type. Please file a bug.");
-            return null;
+            if (enabled) {
+                return new ReleasedFlag(f.getId(), teamfood, overridden);
+            } else {
+                return new UnreleasedFlag(f.getId(), teamfood, overridden);
+            }
         }
     };
 
@@ -539,8 +558,10 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
         }
 
         private boolean isBooleanFlagEnabled(Flag<?> flag) {
-            if (flag instanceof BooleanFlag) {
-                return isEnabled((BooleanFlag) flag);
+            if (flag instanceof ReleasedFlag) {
+                return isEnabled((ReleasedFlag) flag);
+            } else if (flag instanceof UnreleasedFlag) {
+                return isEnabled((UnreleasedFlag) flag);
             } else if (flag instanceof ResourceBooleanFlag) {
                 return isEnabled((ResourceBooleanFlag) flag);
             } else if (flag instanceof SysPropFlag) {

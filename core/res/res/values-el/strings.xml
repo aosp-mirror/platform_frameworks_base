@@ -586,13 +586,14 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Χρήση κλειδώματος οθόνης"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Χρησιμοποιήστε το κλείδωμα οθόνης για να συνεχίσετε"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Πιέστε σταθερά τον αισθητήρα"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Δεν ήταν δυνατή η επεξεργασία του δακτυλικού αποτυπώματος. Δοκιμάστε ξανά."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Δεν είναι δυνατή η αναγνώριση του δακτυλικού αποτυπώματος. Δοκιμάστε ξανά."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Καθαρίστε τον αισθητήρα δακτυλικών αποτυπωμάτων και δοκιμάστε ξανά"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Καθαρίστε τον αισθητήρα και δοκιμάστε ξανά"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Πιέστε σταθερά τον αισθητήρα"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Πολύ αργή κίνηση δαχτύλου. Δοκιμάστε ξανά."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Δοκιμάστε άλλο δακτυλικό αποτύπωμα"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Υπερβολικά έντονος φωτισμός"</string>
+    <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"Εντοπίστηκε πάτημα του κουμπιού λειτουργίας"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Δοκιμάστε να το προσαρμόσετε"</string>
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Αλλάζετε ελαφρώς τη θέση του δακτύλου σας κάθε φορά."</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -604,16 +605,17 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Έγινε έλεγχος ταυτότητας προσώπου, πατήστε \"Επιβεβαίωση\""</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Ο εξοπλισμός δακτυλικού αποτυπώματος δεν είναι διαθέσιμος."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Δεν είναι δυνατή η ρύθμιση του δακτυλικού αποτυπώματος"</string>
-    <string name="fingerprint_error_timeout" msgid="2946635815726054226">"Λήξη χρονικού ορίου δακτυλικού αποτυπώματος. Δοκιμάστε ξανά."</string>
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Λήξη χρονικού ορίου ρύθμισης δακτυλικού αποτυπώματος. Δοκιμάστε ξανά."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Η λειτουργία δακτυλικού αποτυπώματος ακυρώθηκε."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Η λειτουργία δακτυλικού αποτυπώματος ακυρώθηκε από τον χρήστη."</string>
-    <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Πάρα πολλές προσπάθειες. Δοκιμάστε ξανά αργότερα."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"Πάρα πολλές προσπάθειες. Ο αισθητήρας δακτυλικών αποτυπωμάτων απενεργοποιήθηκε."</string>
-    <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Δοκιμάστε ξανά."</string>
+    <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Υπερβολικά πολλές προσπάθειες. Χρησιμοποιήστε εναλλακτικά το κλείδωμα οθόνης."</string>
+    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Υπερβολικά πολλές προσπάθειες. Χρησιμοποιήστε εναλλακτικά το κλείδωμα οθόνης."</string>
+    <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"Δεν είναι δυνατή η επεξεργασία του δακτυλικού αποτυπώματος. Δοκιμάστε ξανά."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Δεν έχουν καταχωριστεί δακτυλικά αποτυπώματα."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Αυτή η συσκευή δεν διαθέτει αισθητήρα δακτυλικού αποτυπώματος."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Ο αισθητήρας απενεργοποιήθηκε προσωρινά."</string>
     <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Δεν είναι δυνατή η χρήση του αισθητήρα δακτυλικών αποτυπωμάτων. Επισκεφτείτε έναν πάροχο υπηρεσιών επισκευής."</string>
+    <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"Το κουμπί λειτουργίας πατήθηκε"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Δάχτυλο <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Χρήση δακτυλικού αποτυπώματος"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Χρήση δακτυλικού αποτυπώματος ή κλειδώματος οθόνης"</string>
@@ -636,7 +638,7 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Επισκεφτείτε έναν πάροχο υπηρεσιών επισκευής."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"Αδύν. η δημιουρ. του μοντ. προσώπ. Δοκιμάστε ξανά."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Υπερβολικά έντονος φωτισμός. Δοκιμάστε πιο ήπιο."</string>
-    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Δοκιμάστε με περισσότερο φως"</string>
+    <string name="face_acquired_too_dark" msgid="8539853432479385326">"Δεν υπάρχει αρκετό φως"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Απομακρύνετε περισσότερο το τηλέφωνο"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Φέρτε πιο κοντά το τηλέφωνό σας"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Μετακινήστε το τηλέφωνο πιο ψηλά"</string>
@@ -654,8 +656,10 @@
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Κοιτάξτε απευθείας το τηλέφωνό σας"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Απομακρύνετε οτιδήποτε κρύβει το πρόσωπό σας."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Καθαρίστε το επάνω μέρος της οθόνης σας, συμπεριλαμβανομένης της μαύρης γραμμής"</string>
-    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"Το πρόσωπό σας πρέπει να φαίνεται πλήρως."</string>
-    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"Το πρόσωπό σας πρέπει να φαίνεται πλήρως."</string>
+    <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
+    <skip />
+    <!-- no translation found for face_acquired_mouth_covering_detected (8219428572168642593) -->
+    <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Αδύνατη η δημιουργία του μοντέλου προσώπου. Δοκιμάστε ξανά."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Ανιχνεύτηκαν σκούρα γυαλιά. Το πρόσωπό σας πρέπει να φαίνεται πλήρως."</string>
     <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Ανιχνεύτηκε κάλυμμα προσώπου. Το πρόσωπό σας πρέπει να φαίνεται πλήρως."</string>
@@ -1246,10 +1250,9 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Προετοιμασία <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Έναρξη εφαρμογών."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Ολοκλήρωση εκκίνησης."</string>
-    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Συνέχιση ρύθμισης;"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Πατήσατε το κουμπί λειτουργίας. Αυτό συνήθως απενεργοποιεί την οθόνη.\n\nΔοκιμάστε να πατήσετε απαλά κατά τη ρύθμιση του δακτυλικού σας αποτυπώματος."</string>
-    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Απενεργοπ. οθόνης"</string>
-    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Συνέχιση ρύθμισης"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Απενεργ. την οθόνη για ολοκλήρ. ρύθμισης"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Απενεργοποίηση"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Συνέχιση επαλήθευσης δακτ. αποτυπώματος;"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Πατήσατε το κουμπί λειτουργίας. Αυτό συνήθως απενεργοποιεί την οθόνη.\n\nΔοκιμάστε να πατήστε απαλά για να επαληθεύσετε το δακτυλικό σας αποτύπωμα."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Απενεργοπ. οθόνης"</string>
@@ -1402,16 +1405,16 @@
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Πατήστε για ρύθμιση"</string>
     <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"Επιλέξτε για ρύθμιση"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Μπορεί να χρειαστεί να διαμορφώσετε ξανά τη συσκευή. Πατήστε για κατάργηση."</string>
-    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Για μεταφορά φωτ./πολυμέσων"</string>
+    <string name="ext_media_ready_notification_message" msgid="7509496364380197369">"Για αποθήκευση φωτογραφιών, βίντεο, μουσικής και άλλου περιεχομένου"</string>
     <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"Περιήγηση στα αρχεία μέσων"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Πρόβλημα με <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"Η συσκευή <xliff:g id="NAME">%s</xliff:g> δεν λειτουργεί."</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Πατήστε για επιδιόρθωση"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"Το μέσο <xliff:g id="NAME">%s</xliff:g> έχει καταστραφεί. Επιλέξτε να γίνει επιδιόρθωση."</string>
     <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"Μπορεί να χρειαστεί να διαμορφώσετε ξανά τη συσκευή. Πατήστε για κατάργηση."</string>
-    <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"Η κάρτα <xliff:g id="NAME">%s</xliff:g> δεν υποστηρίζεται"</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3487534182861251401">"Ανιχνεύθηκε <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"Η συσκευή <xliff:g id="NAME">%s</xliff:g> δεν λειτουργεί."</string>
-    <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Αυτή η συσκευή δεν υποστηρίζει αυτό το μέσο <xliff:g id="NAME">%s</xliff:g>. Πατήστε για ρύθμιση σε μια υποστηριζόμενη μορφή."</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8463636521459807981">"Πατήστε για ρύθμιση ."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"Επιλέξτε για να ρυθμίσετε το μέσο <xliff:g id="NAME">%s</xliff:g> σε μια υποστηριζόμενη μορφή."</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Μπορεί να χρειαστεί να διαμορφώσετε ξανά τη συσκευή."</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"Μη αναμενόμενη αφαίρεση <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1924,6 +1927,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Προτίμηση περιοχής"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Εισαγ. όνομα γλώσσας"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Προτεινόμενες"</string>
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"Προτεινόμενα"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Όλες οι γλώσσες"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"Όλες οι περιοχές"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"Αναζήτηση"</string>
@@ -1941,18 +1945,19 @@
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Η κάμερα δεν είναι διαθέσιμη"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Συνέχεια στο τηλέφωνο"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Το μικρόφωνο δεν είναι διαθέσιμο"</string>
+    <string name="app_streaming_blocked_title_for_playstore_dialog" msgid="8149823099822897538">"Το Play Store δεν είναι διαθέσιμο"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Οι ρυθμίσεις του Android TV δεν είναι διαθέσιμες"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"Οι ρυθμίσεις του tablet δεν είναι διαθέσιμες"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"Οι ρυθμίσεις του τηλεφώνου δεν είναι διαθέσιμες"</string>
-    <string name="app_streaming_blocked_message" product="tv" msgid="5024599278277957935">"Δεν είναι δυνατή η πρόσβαση στη συγκεκριμένη εφαρμογή από τη συσκευή <xliff:g id="DEVICE">%1$s</xliff:g>. Δοκιμάστε στη συσκευή Android TV."</string>
-    <string name="app_streaming_blocked_message" product="tablet" msgid="7491114163056552686">"Δεν είναι δυνατή η πρόσβαση στη συγκεκριμένη εφαρμογή από τη συσκευή <xliff:g id="DEVICE">%1$s</xliff:g>. Δοκιμάστε στο tablet σας."</string>
-    <string name="app_streaming_blocked_message" product="default" msgid="1245180131667647277">"Δεν είναι δυνατή η πρόσβαση στη συγκεκριμένη εφαρμογή από τη συσκευή <xliff:g id="DEVICE">%1$s</xliff:g>. Δοκιμάστε στο τηλέφωνό σας."</string>
-    <string name="app_streaming_blocked_message_for_permission_dialog" product="tv" msgid="6306583663205997979">"Δεν είναι δυνατή η πρόσβαση στη συγκεκριμένη εφαρμογή από τη συσκευή <xliff:g id="DEVICE">%1$s</xliff:g> αυτήν τη στιγμή. Δοκιμάστε στη συσκευή Android TV."</string>
-    <string name="app_streaming_blocked_message_for_permission_dialog" product="tablet" msgid="6545624942642129664">"Δεν είναι δυνατή η πρόσβαση στη συγκεκριμένη εφαρμογή από τη συσκευή <xliff:g id="DEVICE">%1$s</xliff:g> αυτήν τη στιγμή. Δοκιμάστε στο tablet σας."</string>
-    <string name="app_streaming_blocked_message_for_permission_dialog" product="default" msgid="8462740631707923000">"Δεν είναι δυνατή η πρόσβαση στη συγκεκριμένη εφαρμογή από τη συσκευή <xliff:g id="DEVICE">%1$s</xliff:g> αυτήν τη στιγμή. Δοκιμάστε στο τηλέφωνό σας."</string>
+    <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Δεν είναι δυνατή η πρόσβαση στη συγκεκριμένη εφαρμογή από τη συσκευή <xliff:g id="DEVICE">%1$s</xliff:g> αυτήν τη στιγμή. Δοκιμάστε στη συσκευή Android TV."</string>
+    <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Δεν είναι δυνατή η πρόσβαση στη συγκεκριμένη εφαρμογή από τη συσκευή <xliff:g id="DEVICE">%1$s</xliff:g> αυτήν τη στιγμή. Δοκιμάστε στο tablet σας."</string>
+    <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Δεν είναι δυνατή η πρόσβαση στη συγκεκριμένη εφαρμογή από τη συσκευή <xliff:g id="DEVICE">%1$s</xliff:g> αυτήν τη στιγμή. Δοκιμάστε στο τηλέφωνό σας."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Αυτή η εφαρμογή ζητά πρόσθετη ασφάλεια. Δοκιμάστε στη συσκευή Android TV."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Αυτή η εφαρμογή ζητά πρόσθετη ασφάλεια. Δοκιμάστε στο tablet σας."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Αυτή η εφαρμογή ζητά πρόσθετη ασφάλεια. Δοκιμάστε στο τηλέφωνό σας."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"Δεν είναι δυνατή η πρόσβαση σε αυτό το στοιχείο από τη συσκευή <xliff:g id="DEVICE">%1$s</xliff:g>. Δοκιμάστε στη συσκευή Android TV."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"Δεν είναι δυνατή η πρόσβαση σε αυτό το στοιχείο από τη συσκευή <xliff:g id="DEVICE">%1$s</xliff:g>. Δοκιμάστε στο tablet σας."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Δεν είναι δυνατή η πρόσβαση σε αυτό το στοιχείο από τη συσκευή <xliff:g id="DEVICE">%1$s</xliff:g>. Δοκιμάστε στο τηλέφωνό σας."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Αυτή η εφαρμογή δημιουργήθηκε για παλαιότερη έκδοση του Android και μπορεί να μην λειτουργεί σωστά. Δοκιμάστε να ελέγξετε εάν υπάρχουν ενημερώσεις ή επικοινωνήστε με τον προγραμματιστή."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Έλεγχος για ενημέρωση"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Έχετε νέα μηνύματα"</string>
@@ -2045,7 +2050,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Να επιτρέπεται στο <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> η πρόσβαση σε όλα τα αρχεία καταγραφής συσκευής;"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Να επιτρέπεται η πρόσβαση για μία φορά"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Να μην επιτραπεί"</string>
-    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Τα αρχεία καταγραφής συσκευής καταγράφουν ό,τι συμβαίνει στη συσκευή σας. Οι εφαρμογές μπορούν να χρησιμοποιούν αυτά τα αρχεία καταγραφής για να εντοπίζουν και να διορθώνουν ζητήματα.\n\nΟρισμένα αρχεία καταγραφής ενδέχεται να περιέχουν ευαίσθητες πληροφορίες. Ως εκ τούτου, επιτρέψτε την πρόσβαση σε όλα τα αρχεία καταγραφής συσκευής μόνο στις εφαρμογές που εμπιστεύεστε. \n\nΕάν δεν επιτρέψετε σε αυτήν την εφαρμογή την πρόσβαση σε όλα τα αρχεία καταγραφής συσκευής, η εφαρμογή εξακολουθεί να έχει πρόσβαση στα δικά της αρχεία καταγραφής. Ο κατασκευαστής της συσκευής σας ενδέχεται να εξακολουθεί να έχει πρόσβαση σε ορισμένα αρχεία καταγραφής ή ορισμένες πληροφορίες στη συσκευή σας. Μάθετε περισσότερα"</string>
+    <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"Τα αρχεία καταγραφής συσκευής καταγράφουν ό,τι συμβαίνει στη συσκευή σας. Οι εφαρμογές μπορούν να χρησιμοποιούν αυτά τα αρχεία καταγραφής για να εντοπίζουν και να διορθώνουν ζητήματα.\n\nΟρισμένα αρχεία καταγραφής ενδέχεται να περιέχουν ευαίσθητες πληροφορίες. Ως εκ τούτου, επιτρέψτε την πρόσβαση σε όλα τα αρχεία καταγραφής συσκευής μόνο στις εφαρμογές που εμπιστεύεστε. \n\nΕάν δεν επιτρέψετε σε αυτήν την εφαρμογή την πρόσβαση σε όλα τα αρχεία καταγραφής συσκευής, η εφαρμογή εξακολουθεί να έχει πρόσβαση στα δικά της αρχεία καταγραφής. Ο κατασκευαστής της συσκευής σας ενδέχεται να εξακολουθεί να έχει πρόσβαση σε ορισμένα αρχεία καταγραφής ή ορισμένες πληροφορίες στη συσκευή σας."</string>
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"Τα αρχεία καταγραφής συσκευής καταγράφουν ό,τι συμβαίνει στη συσκευή σας. Οι εφαρμογές μπορούν να χρησιμοποιούν αυτά τα αρχεία καταγραφής για να εντοπίζουν και να διορθώνουν ζητήματα.\n\nΟρισμένα αρχεία καταγραφής ενδέχεται να περιέχουν ευαίσθητες πληροφορίες. Ως εκ τούτου, επιτρέψτε την πρόσβαση σε όλα τα αρχεία καταγραφής συσκευής μόνο στις εφαρμογές που εμπιστεύεστε. \n\nΕάν δεν επιτρέψετε σε αυτήν την εφαρμογή την πρόσβαση σε όλα τα αρχεία καταγραφής συσκευής, η εφαρμογή εξακολουθεί να έχει πρόσβαση στα δικά της αρχεία καταγραφής. Ο κατασκευαστής της συσκευής σας ενδέχεται να εξακολουθεί να έχει πρόσβαση σε ορισμένα αρχεία καταγραφής ή σε πληροφορίες στη συσκευή σας.\n\nΜάθετε περισσότερα στη διεύθυνση g.co/android/devicelogs."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Να μην εμφανισ. ξανά"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"Η εφαρμογή <xliff:g id="APP_0">%1$s</xliff:g> θέλει να εμφανίζει τμήματα της εφαρμογής <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Επεξεργασία"</string>
@@ -2286,5 +2292,6 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Έλεγχος ενεργών εφαρμογών"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Δεν είναι δυνατή η πρόσβαση στην κάμερα του τηλεφώνου από τη συσκευή <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Δεν είναι δυνατή η πρόσβαση στην κάμερα του tablet από τη συσκευή <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
+    <string name="vdm_secure_window" msgid="161700398158812314">"Δεν είναι δυνατή η πρόσβαση σε αυτό το στοιχείο κατά τη ροή. Δοκιμάστε στο τηλέφωνό σας."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Προεπιλογή συστήματος"</string>
 </resources>

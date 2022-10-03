@@ -172,6 +172,8 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
      */
     private final boolean mCanHostHomeTask;
 
+    private final Configuration mTempConfiguration = new Configuration();
+
     TaskDisplayArea(DisplayContent displayContent, WindowManagerService service, String name,
                     int displayAreaFeature) {
         this(displayContent, service, name, displayAreaFeature, false /* createdByOrganizer */,
@@ -323,6 +325,10 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
             // Clear preferred top because the adding focusable task has a higher z-order.
             mPreferredTopFocusableRootTask = null;
         }
+
+        // Update the top resumed activity because the preferred top focusable task may be changed.
+        mAtmService.mTaskSupervisor.updateTopResumedActivityIfNeeded("addChildTask");
+
         mAtmService.updateSleepIfNeededLocked();
         onRootTaskOrderChanged(task);
     }
@@ -416,12 +422,7 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         }
 
         // Update the top resumed activity because the preferred top focusable task may be changed.
-        mAtmService.mTaskSupervisor.updateTopResumedActivityIfNeeded();
-
-        final ActivityRecord r = child.getTopResumedActivity();
-        if (r != null && r == mRootWindowContainer.getTopResumedActivity()) {
-            mAtmService.setResumedActivityUncheckLocked(r, "positionChildAt");
-        }
+        mAtmService.mTaskSupervisor.updateTopResumedActivityIfNeeded("positionChildTaskAt");
 
         if (mChildren.indexOf(child) != oldPosition) {
             onRootTaskOrderChanged(child);
@@ -1889,6 +1890,15 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
 
     void clearPreferredTopFocusableRootTask() {
         mPreferredTopFocusableRootTask = null;
+    }
+
+    @Override
+    public void setWindowingMode(int windowingMode) {
+        mTempConfiguration.setTo(getRequestedOverrideConfiguration());
+        WindowConfiguration tempRequestWindowConfiguration = mTempConfiguration.windowConfiguration;
+        tempRequestWindowConfiguration.setWindowingMode(windowingMode);
+        tempRequestWindowConfiguration.setDisplayWindowingMode(windowingMode);
+        onRequestedOverrideConfigurationChanged(mTempConfiguration);
     }
 
     @Override

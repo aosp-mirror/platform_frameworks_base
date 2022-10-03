@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 
@@ -630,12 +629,6 @@ class WindowToken extends WindowContainer<WindowState> {
             // override configuration can update to the same state.
             getResolvedOverrideConfiguration().updateFrom(
                     mFixedRotationTransformState.mRotatedOverrideConfiguration);
-        }
-        if (getTaskDisplayArea() == null) {
-            // We only defined behaviors of system windows in fullscreen mode, i.e. windows not
-            // contained in a task display area.
-            getResolvedOverrideConfiguration().windowConfiguration.setWindowingMode(
-                    WINDOWING_MODE_FULLSCREEN);
         }
     }
 

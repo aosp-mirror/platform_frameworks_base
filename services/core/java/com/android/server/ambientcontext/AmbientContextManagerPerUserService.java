@@ -29,6 +29,7 @@ import android.app.PendingIntent;
 import android.app.ambientcontext.AmbientContextEvent;
 import android.app.ambientcontext.AmbientContextEventRequest;
 import android.app.ambientcontext.AmbientContextManager;
+import android.app.ambientcontext.IAmbientContextObserver;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
@@ -53,6 +54,8 @@ import com.android.server.infra.AbstractPerUserSystemService;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Per-user manager service for {@link AmbientContextEvent}s.
@@ -165,20 +168,17 @@ final class AmbientContextManagerPerUserService extends
      * package. A new registration from the same package will overwrite the previous registration.
      */
     public void onRegisterObserver(AmbientContextEventRequest request,
-            PendingIntent pendingIntent, RemoteCallback clientStatusCallback) {
+            String packageName, IAmbientContextObserver observer) {
         synchronized (mLock) {
             if (!setUpServiceIfNeeded()) {
                 Slog.w(TAG, "Detection service is not available at this moment.");
-                sendStatusCallback(
-                        clientStatusCallback,
-                        AmbientContextManager.STATUS_SERVICE_UNAVAILABLE);
+                completeRegistration(observer, AmbientContextManager.STATUS_SERVICE_UNAVAILABLE);
                 return;
             }
 
             // Register package and add to existing ClientRequests cache
-            startDetection(request, pendingIntent.getCreatorPackage(),
-                    createDetectionResultRemoteCallback(), clientStatusCallback);
-            mMaster.newClientAdded(mUserId, request, pendingIntent, clientStatusCallback);
+            startDetection(request, packageName, observer);
+            mMaster.newClientAdded(mUserId, request, packageName, observer);
         }
     }
 
@@ -186,54 +186,60 @@ final class AmbientContextManagerPerUserService extends
      * Returns a RemoteCallback that handles the status from the detection service, and
      * sends results to the client callback.
      */
-    private RemoteCallback getServerStatusCallback(RemoteCallback clientStatusCallback) {
+    private RemoteCallback getServerStatusCallback(Consumer<Integer> statusConsumer) {
         return new RemoteCallback(result -> {
             AmbientContextDetectionServiceStatus serviceStatus =
                     (AmbientContextDetectionServiceStatus) result.get(
                             AmbientContextDetectionServiceStatus.STATUS_RESPONSE_BUNDLE_KEY);
             final long token = Binder.clearCallingIdentity();
             try {
-                String packageName = serviceStatus.getPackageName();
-                Bundle bundle = new Bundle();
-                bundle.putInt(
-                        AmbientContextManager.STATUS_RESPONSE_BUNDLE_KEY,
-                        serviceStatus.getStatusCode());
-                clientStatusCallback.sendResult(bundle);
                 int statusCode = serviceStatus.getStatusCode();
+                statusConsumer.accept(statusCode);
                 Slog.i(TAG, "Got detection status of " + statusCode
-                        + " for " + packageName);
+                        + " for " + serviceStatus.getPackageName());
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
         });
     }
 
-    @VisibleForTesting
     void startDetection(AmbientContextEventRequest request, String callingPackage,
-            RemoteCallback detectionResultCallback, RemoteCallback clientStatusCallback) {
+            IAmbientContextObserver observer) {
         Slog.d(TAG, "Requested detection of " + request.getEventTypes());
         synchronized (mLock) {
             if (setUpServiceIfNeeded()) {
                 ensureRemoteServiceInitiated();
-                mRemoteService.startDetection(request, callingPackage, detectionResultCallback,
-                        getServerStatusCallback(clientStatusCallback));
+                mRemoteService.startDetection(request, callingPackage,
+                        createDetectionResultRemoteCallback(),
+                        getServerStatusCallback(
+                                statusCode -> completeRegistration(observer, statusCode)));
             } else {
                 Slog.w(TAG, "No valid component found for AmbientContextDetectionService");
-                sendStatusToCallback(clientStatusCallback,
+                completeRegistration(observer,
                         AmbientContextManager.STATUS_NOT_SUPPORTED);
             }
         }
     }
 
     /**
-     * Sends an intent with a status code and empty events.
+     * Sends the result response with the specified status to the callback.
      */
-    void sendStatusCallback(RemoteCallback statusCallback, int statusCode) {
+    static void sendStatusCallback(RemoteCallback statusCallback,
+            @AmbientContextManager.StatusCode int statusCode) {
         Bundle bundle = new Bundle();
         bundle.putInt(
                 AmbientContextManager.STATUS_RESPONSE_BUNDLE_KEY,
                 statusCode);
         statusCallback.sendResult(bundle);
+    }
+
+    static void completeRegistration(IAmbientContextObserver observer, int statusCode) {
+        try {
+            observer.onRegistrationComplete(statusCode);
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Failed to call IAmbientContextObserver.onRegistrationComplete: "
+                    + e.getMessage());
+        }
     }
 
     /**
@@ -255,7 +261,7 @@ final class AmbientContextManagerPerUserService extends
         synchronized (mLock) {
             if (!setUpServiceIfNeeded()) {
                 Slog.w(TAG, "Detection service is not available at this moment.");
-                sendStatusToCallback(statusCallback,
+                sendStatusCallback(statusCallback,
                         AmbientContextManager.STATUS_NOT_SUPPORTED);
                 return;
             }
@@ -263,7 +269,8 @@ final class AmbientContextManagerPerUserService extends
             mRemoteService.queryServiceStatus(
                     eventTypes,
                     callingPackage,
-                    getServerStatusCallback(statusCallback));
+                    getServerStatusCallback(
+                            statusCode -> sendStatusCallback(statusCallback, statusCode)));
         }
     }
 
@@ -350,18 +357,6 @@ final class AmbientContextManagerPerUserService extends
         return ComponentName.unflattenFromString(consentComponent);
     }
 
-    /**
-     * Sends the result response with the specified status to the callback.
-     */
-    void sendStatusToCallback(RemoteCallback callback,
-                    @AmbientContextManager.StatusCode int status) {
-        Bundle bundle = new Bundle();
-        bundle.putInt(
-                AmbientContextManager.STATUS_RESPONSE_BUNDLE_KEY,
-                status);
-        callback.sendResult(bundle);
-    }
-
     @VisibleForTesting
     void stopDetection(String packageName) {
         Slog.d(TAG, "Stop detection for " + packageName);
@@ -377,13 +372,13 @@ final class AmbientContextManagerPerUserService extends
      * Sends out the Intent to the client after the event is detected.
      *
      * @param pendingIntent Client's PendingIntent for callback
-     * @param result result from the detection service
+     * @param events detected events from the detection service
      */
-    private void sendDetectionResultIntent(PendingIntent pendingIntent,
-            AmbientContextDetectionResult result) {
+    void sendDetectionResultIntent(PendingIntent pendingIntent,
+            List<AmbientContextEvent> events) {
         Intent intent = new Intent();
         intent.putExtra(AmbientContextManager.EXTRA_AMBIENT_CONTEXT_EVENTS,
-                new ArrayList(result.getEvents()));
+                new ArrayList(events));
         // Explicitly disallow the receiver from starting activities, to prevent apps from utilizing
         // the PendingIntent as a backdoor to do this.
         BroadcastOptions options = BroadcastOptions.makeBasic();
@@ -392,7 +387,7 @@ final class AmbientContextManagerPerUserService extends
             pendingIntent.send(getContext(), 0, intent, null, null, null,
                     options.toBundle());
             Slog.i(TAG, "Sending PendingIntent to " + pendingIntent.getCreatorPackage() + ": "
-                    + result);
+                    + events);
         } catch (PendingIntent.CanceledException e) {
             Slog.w(TAG, "Couldn't deliver pendingIntent:" + pendingIntent);
         }
@@ -405,16 +400,19 @@ final class AmbientContextManagerPerUserService extends
                     (AmbientContextDetectionResult) result.get(
                             AmbientContextDetectionResult.RESULT_RESPONSE_BUNDLE_KEY);
             String packageName = detectionResult.getPackageName();
-            PendingIntent pendingIntent = mMaster.getPendingIntent(mUserId, packageName);
-            if (pendingIntent == null) {
+            IAmbientContextObserver observer = mMaster.getClientRequestObserver(
+                    mUserId, packageName);
+            if (observer == null) {
                 return;
             }
 
             final long token = Binder.clearCallingIdentity();
             try {
-                sendDetectionResultIntent(pendingIntent, detectionResult);
+                observer.onEvents(detectionResult.getEvents());
                 Slog.i(TAG, "Got detection result of " + detectionResult.getEvents()
                         + " for " + packageName);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Failed to call IAmbientContextObserver.onEvents: " + e.getMessage());
             } finally {
                 Binder.restoreCallingIdentity(token);
             }

@@ -31,11 +31,13 @@ import android.os.UserHandle
 import android.provider.Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS
 import android.provider.Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS
 import android.util.Log
+import android.view.ContextThemeWrapper
 import android.view.View
 import android.view.ViewGroup
 import com.android.settingslib.Utils
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
@@ -46,6 +48,7 @@ import com.android.systemui.plugins.BcSmartspaceDataPlugin.SmartspaceView
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.shared.regionsampling.RegionSamplingInstance
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
@@ -60,22 +63,23 @@ import javax.inject.Inject
  */
 @SysUISingleton
 class LockscreenSmartspaceController @Inject constructor(
-    private val context: Context,
-    private val featureFlags: FeatureFlags,
-    private val smartspaceManager: SmartspaceManager,
-    private val activityStarter: ActivityStarter,
-    private val falsingManager: FalsingManager,
-    private val secureSettings: SecureSettings,
-    private val userTracker: UserTracker,
-    private val contentResolver: ContentResolver,
-    private val configurationController: ConfigurationController,
-    private val statusBarStateController: StatusBarStateController,
-    private val deviceProvisionedController: DeviceProvisionedController,
-    private val bypassController: KeyguardBypassController,
-    private val execution: Execution,
-    @Main private val uiExecutor: Executor,
-    @Main private val handler: Handler,
-    optionalPlugin: Optional<BcSmartspaceDataPlugin>
+        private val context: Context,
+        private val featureFlags: FeatureFlags,
+        private val smartspaceManager: SmartspaceManager,
+        private val activityStarter: ActivityStarter,
+        private val falsingManager: FalsingManager,
+        private val secureSettings: SecureSettings,
+        private val userTracker: UserTracker,
+        private val contentResolver: ContentResolver,
+        private val configurationController: ConfigurationController,
+        private val statusBarStateController: StatusBarStateController,
+        private val deviceProvisionedController: DeviceProvisionedController,
+        private val bypassController: KeyguardBypassController,
+        private val execution: Execution,
+        @Main private val uiExecutor: Executor,
+        @Background private val bgExecutor: Executor,
+        @Main private val handler: Handler,
+        optionalPlugin: Optional<BcSmartspaceDataPlugin>
 ) {
     companion object {
         private const val TAG = "LockscreenSmartspaceController"
@@ -86,15 +90,36 @@ class LockscreenSmartspaceController @Inject constructor(
 
     // Smartspace can be used on multiple displays, such as when the user casts their screen
     private var smartspaceViews = mutableSetOf<SmartspaceView>()
+    private var regionSamplingInstances =
+            mutableMapOf<SmartspaceView, RegionSamplingInstance>()
+
+    private val regionSamplingEnabled =
+            featureFlags.isEnabled(Flags.REGION_SAMPLING)
 
     private var showNotifications = false
     private var showSensitiveContentForCurrentUser = false
     private var showSensitiveContentForManagedUser = false
     private var managedUserHandle: UserHandle? = null
 
+    private val updateFun = object : RegionSamplingInstance.UpdateColorCallback {
+        override fun updateColors() {
+            updateTextColorFromRegionSampler()
+        }
+    }
+
     var stateChangeListener = object : View.OnAttachStateChangeListener {
         override fun onViewAttachedToWindow(v: View) {
             smartspaceViews.add(v as SmartspaceView)
+
+            var regionSamplingInstance = RegionSamplingInstance(
+                    v,
+                    uiExecutor,
+                    bgExecutor,
+                    regionSamplingEnabled,
+                    updateFun
+            )
+            regionSamplingInstance.startRegionSampler()
+            regionSamplingInstances.put(v, regionSamplingInstance)
             connectSession()
 
             updateTextColorFromWallpaper()
@@ -103,6 +128,10 @@ class LockscreenSmartspaceController @Inject constructor(
 
         override fun onViewDetachedFromWindow(v: View) {
             smartspaceViews.remove(v as SmartspaceView)
+
+            var regionSamplingInstance = regionSamplingInstances.getValue(v)
+            regionSamplingInstance.stopRegionSampler()
+            regionSamplingInstances.remove(v)
 
             if (smartspaceViews.isEmpty()) {
                 disconnect()
@@ -332,9 +361,29 @@ class LockscreenSmartspaceController @Inject constructor(
         }
     }
 
+    private fun updateTextColorFromRegionSampler() {
+        smartspaceViews.forEach {
+            val isRegionDark = regionSamplingInstances.getValue(it).currentRegionDarkness()
+            val themeID = if (isRegionDark.isDark) {
+                R.style.Theme_SystemUI
+            } else {
+                R.style.Theme_SystemUI_LightWallpaper
+            }
+            val themedContext = ContextThemeWrapper(context, themeID)
+            val wallpaperTextColor =
+                    Utils.getColorAttrDefaultColor(themedContext, R.attr.wallpaperTextColor)
+            it.setPrimaryTextColor(wallpaperTextColor)
+        }
+    }
+
     private fun updateTextColorFromWallpaper() {
-        val wallpaperTextColor = Utils.getColorAttrDefaultColor(context, R.attr.wallpaperTextColor)
-        smartspaceViews.forEach { it.setPrimaryTextColor(wallpaperTextColor) }
+        if (!regionSamplingEnabled) {
+            val wallpaperTextColor =
+                    Utils.getColorAttrDefaultColor(context, R.attr.wallpaperTextColor)
+            smartspaceViews.forEach { it.setPrimaryTextColor(wallpaperTextColor) }
+        } else {
+            updateTextColorFromRegionSampler()
+        }
     }
 
     private fun reloadSmartspace() {

@@ -56,7 +56,9 @@ import javax.inject.Inject;
 
 /**
  * A class which manages the bouncer on the lockscreen.
+ * @deprecated Use KeyguardBouncerRepository
  */
+@Deprecated
 public class KeyguardBouncer {
 
     private static final String TAG = "KeyguardBouncer";
@@ -220,6 +222,7 @@ public class KeyguardBouncer {
                     && !mKeyguardUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(
                             KeyguardUpdateMonitor.getCurrentUser())
                     && !needsFullscreenBouncer()
+                    && !mKeyguardUpdateMonitor.isFaceLockedOut()
                     && !mKeyguardUpdateMonitor.userNeedsStrongAuth()
                     && !mKeyguardBypassController.getBypassEnabled()) {
                 mHandler.postDelayed(mShowRunnable, BOUNCER_FACE_DELAY);

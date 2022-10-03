@@ -29,6 +29,7 @@ import static android.view.WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
 import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER;
 import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_OCCLUDE;
+import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_OCCLUDE_BY_DREAM;
 import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_UNOCCLUDE;
 import static android.view.WindowManager.TRANSIT_OLD_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
@@ -189,6 +190,9 @@ public class KeyguardService extends Service {
             return apps.length == 0 ? TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER
                     : TRANSIT_OLD_KEYGUARD_GOING_AWAY;
         } else if (type == TRANSIT_KEYGUARD_OCCLUDE) {
+            boolean isOccludeByDream = apps.length > 0 && apps[0].taskInfo.topActivityType
+                    == WindowConfiguration.ACTIVITY_TYPE_DREAM;
+            if (isOccludeByDream) return TRANSIT_OLD_KEYGUARD_OCCLUDE_BY_DREAM;
             return TRANSIT_OLD_KEYGUARD_OCCLUDE;
         } else if (type == TRANSIT_KEYGUARD_UNOCCLUDE) {
             return TRANSIT_OLD_KEYGUARD_UNOCCLUDE;
@@ -198,7 +202,8 @@ public class KeyguardService extends Service {
         }
     }
 
-    // Wrap Keyguard going away animation
+    // Wrap Keyguard going away animation.
+    // Note: Also used for wrapping occlude by Dream animation. It works (with some redundancy).
     private static IRemoteTransition wrap(IRemoteAnimationRunner runner) {
         return new IRemoteTransition.Stub() {
             final ArrayMap<IBinder, IRemoteTransitionFinishedCallback> mFinishCallbacks =
@@ -303,6 +308,12 @@ public class KeyguardService extends Service {
                 definition.addRemoteAnimation(TRANSIT_OLD_KEYGUARD_OCCLUDE,
                         occludeAnimationAdapter);
 
+                final RemoteAnimationAdapter occludeByDreamAnimationAdapter =
+                        new RemoteAnimationAdapter(
+                                mKeyguardViewMediator.getOccludeByDreamAnimationRunner(), 0, 0);
+                definition.addRemoteAnimation(TRANSIT_OLD_KEYGUARD_OCCLUDE_BY_DREAM,
+                        occludeByDreamAnimationAdapter);
+
                 final RemoteAnimationAdapter unoccludeAnimationAdapter =
                         new RemoteAnimationAdapter(
                                 mKeyguardViewMediator.getUnoccludeAnimationRunner(), 0, 0);
@@ -323,6 +334,8 @@ public class KeyguardService extends Service {
         if (sEnableRemoteKeyguardOccludeAnimation) {
             Slog.d(TAG, "KeyguardService registerRemote: TRANSIT_KEYGUARD_(UN)OCCLUDE");
             // Register for occluding
+            final RemoteTransition occludeTransition = new RemoteTransition(
+                    mOccludeAnimation, getIApplicationThread());
             TransitionFilter f = new TransitionFilter();
             f.mFlags = TRANSIT_FLAG_KEYGUARD_LOCKED;
             f.mRequirements = new TransitionFilter.Requirement[]{
@@ -337,10 +350,11 @@ public class KeyguardService extends Service {
             f.mRequirements[1].mMustBeIndependent = false;
             f.mRequirements[1].mFlags = FLAG_OCCLUDES_KEYGUARD;
             f.mRequirements[1].mModes = new int[]{TRANSIT_CLOSE, TRANSIT_TO_BACK};
-            mShellTransitions.registerRemote(f,
-                    new RemoteTransition(mOccludeAnimation, getIApplicationThread()));
+            mShellTransitions.registerRemote(f, occludeTransition);
 
             // Now register for un-occlude.
+            final RemoteTransition unoccludeTransition = new RemoteTransition(
+                    mUnoccludeAnimation, getIApplicationThread());
             f = new TransitionFilter();
             f.mFlags = TRANSIT_FLAG_KEYGUARD_LOCKED;
             f.mRequirements = new TransitionFilter.Requirement[]{
@@ -358,8 +372,44 @@ public class KeyguardService extends Service {
             f.mRequirements[0].mMustBeIndependent = false;
             f.mRequirements[0].mFlags = FLAG_OCCLUDES_KEYGUARD;
             f.mRequirements[0].mModes = new int[]{TRANSIT_OPEN, TRANSIT_TO_FRONT};
-            mShellTransitions.registerRemote(f,
-                    new RemoteTransition(mUnoccludeAnimation, getIApplicationThread()));
+            mShellTransitions.registerRemote(f, unoccludeTransition);
+
+            // Register for specific transition type.
+            // Above filter cannot fulfill all conditions.
+            // E.g. close top activity while screen off but next activity is occluded, this should
+            // an occluded transition, but since the activity is invisible, the condition would
+            // match unoccluded transition.
+            // But on the contrary, if we add above condition in occluded transition, then when user
+            // trying to dismiss occluded activity when unlock keyguard, the condition would match
+            // occluded transition.
+            f = new TransitionFilter();
+            f.mTypeSet = new int[]{TRANSIT_KEYGUARD_OCCLUDE};
+            mShellTransitions.registerRemote(f, occludeTransition);
+
+            f = new TransitionFilter();
+            f.mTypeSet = new int[]{TRANSIT_KEYGUARD_UNOCCLUDE};
+            mShellTransitions.registerRemote(f, unoccludeTransition);
+
+            Slog.d(TAG, "KeyguardService registerRemote: TRANSIT_KEYGUARD_OCCLUDE for DREAM");
+            // Register for occluding by Dream
+            f = new TransitionFilter();
+            f.mFlags = TRANSIT_FLAG_KEYGUARD_LOCKED;
+            f.mRequirements = new TransitionFilter.Requirement[]{
+                    new TransitionFilter.Requirement(), new TransitionFilter.Requirement()};
+            // First require at-least one app of type DREAM showing that occludes.
+            f.mRequirements[0].mActivityType = WindowConfiguration.ACTIVITY_TYPE_DREAM;
+            f.mRequirements[0].mMustBeIndependent = false;
+            f.mRequirements[0].mFlags = FLAG_OCCLUDES_KEYGUARD;
+            f.mRequirements[0].mModes = new int[]{TRANSIT_OPEN, TRANSIT_TO_FRONT};
+            // Then require that we aren't closing any occludes (because this would mean a
+            // regular task->task or activity->activity animation not involving keyguard).
+            f.mRequirements[1].mNot = true;
+            f.mRequirements[1].mMustBeIndependent = false;
+            f.mRequirements[1].mFlags = FLAG_OCCLUDES_KEYGUARD;
+            f.mRequirements[1].mModes = new int[]{TRANSIT_CLOSE, TRANSIT_TO_BACK};
+            mShellTransitions.registerRemote(f, new RemoteTransition(
+                    wrap(mKeyguardViewMediator.getOccludeByDreamAnimationRunner()),
+                    getIApplicationThread()));
         }
     }
 

@@ -550,6 +550,9 @@
     <!-- If this is true, long press on power button will be available from the non-interactive state -->
     <bool name="config_supportLongPressPowerWhenNonInteractive">false</bool>
 
+    <!-- If this is true, then keep dreaming when undocking. -->
+    <bool name="config_keepDreamingWhenUndocking">false</bool>
+
     <!-- Auto-rotation behavior -->
 
     <!-- If true, enables auto-rotation features using the accelerometer.
@@ -932,6 +935,8 @@
         <!-- Nominal White Z --> <item>1.089058</item>
     </string-array>
 
+    <!-- Boolean indicating whether light mode is allowed when DWB is turned on. -->
+    <bool name="config_displayWhiteBalanceLightModeAllowed">true</bool>
 
     <!-- Indicate available ColorDisplayManager.COLOR_MODE_xxx. -->
     <integer-array name="config_availableColorModes">
@@ -1562,8 +1567,7 @@
     <bool name="config_enableIdleScreenBrightnessMode">false</bool>
 
     <!-- Array of desired screen brightness in nits corresponding to the lux values
-         in the config_autoBrightnessLevels array. As with config_screenBrightnessMinimumNits and
-         config_screenBrightnessMaximumNits, the display brightness is defined as the measured
+         in the config_autoBrightnessLevels array. The display brightness is defined as the measured
          brightness of an all-white image.
 
          If this is defined then:
@@ -1584,7 +1588,7 @@
     <array name="config_autoBrightnessDisplayValuesNitsIdle">
     </array>
 
-    <!-- Array of output values for button backlight corresponding to the luX values
+    <!-- Array of output values for button backlight corresponding to the lux values
          in the config_autoBrightnessLevels array.  This array should have size one greater
          than the size of the config_autoBrightnessLevels array.
          The brightness values must be between 0 and 255 and be non-decreasing.
@@ -1658,13 +1662,18 @@
          darkening hysteresis constraint value is the n-th element of
          config_screenDarkeningThresholds.
 
+         Historically, it has been assumed that this will be an integer array with values in the
+         range of [0, 255]. However, it is now assumed to be a float array with values in the
+         range of [0, 1]. To accommodate both the possibilities, we internally check the scale on
+         which the thresholds are defined, and calibrate it accordingly.
+
          The (zero-based) index is calculated as follows: (MAX is the largest index of the array)
          condition                       calculated index
          value < level[0]                0
          level[n] <= value < level[n+1]  n+1
          level[MAX] <= value             MAX+1 -->
-    <integer-array name="config_screenThresholdLevels">
-    </integer-array>
+    <array name="config_screenThresholdLevels">
+    </array>
 
     <!-- Array of hysteresis constraint values for brightening, represented as tenths of a
          percent. The length of this array is assumed to be one greater than
@@ -1729,7 +1738,7 @@
     <item name="default_lock_wallpaper" type="drawable">@null</item>
 
     <!-- Component name of the built in wallpaper used to display bitmap wallpapers. This must not be null. -->
-    <string name="image_wallpaper_component" translatable="false">com.android.systemui/com.android.systemui.ImageWallpaper</string>
+    <string name="image_wallpaper_component" translatable="false">com.android.systemui/com.android.systemui.wallpapers.ImageWallpaper</string>
 
     <!-- True if WallpaperService is enabled -->
     <bool name="config_enableWallpaperService">true</bool>
@@ -2043,9 +2052,28 @@
          are controlled together (aliasing is true) or not. -->
     <bool name="config_alias_ring_notif_stream_types">true</bool>
 
+    <!-- The number of volume steps for the notification stream -->
+    <integer name="config_audio_notif_vol_steps">7</integer>
+
+    <!-- The default volume for the notification stream -->
+    <integer name="config_audio_notif_vol_default">5</integer>
+
+    <!-- The number of volume steps for the ring stream -->
+    <integer name="config_audio_ring_vol_steps">7</integer>
+
+    <!-- The default volume for the ring stream -->
+    <integer name="config_audio_ring_vol_default">5</integer>
+
+    <!-- The default value for whether head tracking for
+         spatial audio is enabled for a newly connected audio device -->
+    <bool name="config_spatial_audio_head_tracking_enabled_default">false</bool>
+
     <!-- Flag indicating whether platform level volume adjustments are enabled for remote sessions
          on grouped devices. -->
     <bool name="config_volumeAdjustmentForRemoteGroupSessions">true</bool>
+
+    <!-- Flag indicating current media Output Switcher version. -->
+    <integer name="config_mediaOutputSwitchDialogVersion">1</integer>
 
     <!-- Flag indicating that an outbound call must have a call capable phone account
          that has declared it can process the call's handle. -->
@@ -2411,9 +2439,6 @@
     </string-array>
     <!-- The list of supported dream complications -->
     <integer-array name="config_supportedDreamComplications">
-    </integer-array>
-    <!-- The list of dream complications which should be enabled by default -->
-    <integer-array name="config_dreamComplicationsEnabledByDefault">
     </integer-array>
 
     <!-- Are we allowed to dream while not plugged in? -->
@@ -3519,9 +3544,19 @@
          (for side fingerprint) -->
     <integer name="config_sidefpsPostAuthDowntime">400</integer>
 
-    <!-- The time (in millis) that a finger tap will wait for a power button
-         before dismissing the power dialog during enrollment(for side fingerprint) -->
-    <integer name="config_sidefpsEnrollPowerPressWindow">300</integer>
+    <!-- The time (in millis) the clickable toast dialog will last until
+         automatically dismissing. This is currently used in SideFpsEventHandler -->
+    <integer name="config_sideFpsToastTimeout">3000</integer>
+
+    <!-- This acquired message will cause the sidefpsKgPowerPress window to be skipped.
+         If this is set to BIOMETRIC_ACQUIRED_VENDOR, then the framework will skip on
+         config_sidefpsSkipWaitForPowerVendorAcquireMessage -->
+    <integer name="config_sidefpsSkipWaitForPowerAcquireMessage">6</integer>
+
+    <!-- This vendor acquired message that will cause the sidefpsKgPowerPress window to be skipped.
+         config_sidefpsSkipWaitForPowerOnFingerUp must be true and
+         config_sidefpsSkipWaitForPowerAcquireMessage must be BIOMETRIC_ACQUIRED_VENDOR == 6. -->
+    <integer name="config_sidefpsSkipWaitForPowerVendorAcquireMessage">2</integer>
 
     <!-- This config is used to force VoiceInteractionService to start on certain low ram devices.
          It declares the package name of VoiceInteractionService that should be started. -->
@@ -4847,9 +4882,6 @@
         -->
     </array>
 
-    <!-- How long it takes for the HW to start illuminating after the illumination is requested. -->
-    <integer name="config_udfps_illumination_transition_ms">50</integer>
-
     <!-- Indicates whether device has a power button fingerprint sensor. -->
     <bool name="config_is_powerbutton_fps" translatable="false" >false</bool>
 
@@ -4860,6 +4892,14 @@
         <item>0.75</item>
         <item>0.875</item>
     </string-array>
+
+    <!-- When each intermediate SFPS enroll stage ends, as a fraction of total progress. -->
+    <string-array name="config_sfps_enroll_stage_thresholds" translatable="false">
+        <item>0</item> <!-- [-1 // <0/25] No animation 1x -->
+        <item>0.36</item> <!-- [0 to 8 // <9/25] Pad center 9x -->
+        <item>0.52</item> <!-- [9 to 12 // <13/25] Tip 4x -->
+        <item>0.76</item> <!-- [13 to 18 // <19/25] Left 6x -->
+    </string-array> <!-- [19 to 24 // <25/25] Right 6x -->
 
     <!-- Messages that should not be shown to the user during face auth enrollment. This should be
          used to hide messages that may be too chatty or messages that the user can't do much about.
@@ -5068,6 +5108,10 @@
     <!-- If true, the wallpaper will scale regardless of the value of shouldZoomOutWallpaper() -->
     <bool name="config_alwaysScaleWallpaper">false</bool>
 
+    <!-- Set to true to offset the wallpaper when using multiple displays so that it's centered
+         at the same position as in the largest display.-->
+    <bool name="config_offsetWallpaperToCenterOfLargestDisplay">false</bool>
+
     <!-- Package name that will receive an explicit manifest broadcast for
          android.os.action.POWER_SAVE_MODE_CHANGED. -->
     <string name="config_powerSaveModeChangedListenerPackage" translatable="false"></string>
@@ -5176,7 +5220,7 @@
     <!-- Vertical position of a center of the letterboxed app window.
         0 corresponds to the upper side of the screen and 1 to the lower side. If given value < 0
         or > 1, it is ignored and central position is used (0.5). -->
-    <item name="config_letterboxVerticalPositionMultiplier" format="float" type="dimen">0.5</item>
+    <item name="config_letterboxVerticalPositionMultiplier" format="float" type="dimen">0.0</item>
 
     <!-- Whether horizontal reachability repositioning is allowed for letterboxed fullscreen apps.
     -->
@@ -5881,4 +5925,13 @@
 
     <!-- Whether the wake screen on notifications feature is available. -->
     <bool name="config_pulseOnNotificationsAvailable">true</bool>
+
+    <!-- The number of tasks to scan to get the visibility of Home -->
+    <integer name="config_maxScanTasksForHomeVisibility">10</integer>
+
+    <!-- Device state that corresponds to rear display mode, feature provided
+         through Jetpack WindowManager
+         TODO(b/236022708) Move rear display state to device state config file
+    -->
+    <integer name="config_deviceStateRearDisplay">-1</integer>
 </resources>

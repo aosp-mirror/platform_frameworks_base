@@ -573,6 +573,7 @@
     </style>
 
     <style name="MediaPlayer.ProgressBar" parent="@android:style/Widget.ProgressBar.Horizontal">
+        <item name="android:thumb">@drawable/media_seekbar_thumb</item>
         <item name="android:thumbTint">?android:attr/textColorPrimary</item>
         <item name="android:progressDrawable">@drawable/media_squiggly_progress</item>
         <item name="android:progressTint">?android:attr/textColorPrimary</item>
@@ -928,6 +929,10 @@
         <item name="rowStyle">@style/SliceRow</item>
     </style>
 
+    <style name="Widget.SliceView.Panel.Slider">
+        <item name="rowStyle">@style/SliceRow.Slider</item>
+    </style>
+
     <style name="SliceRow">
         <!-- 2dp start padding for the start icon -->
         <item name="titleItemStartPadding">2dp</item>
@@ -947,6 +952,28 @@
         <item name="bottomDividerEndPadding">12dp</item>
 
         <item name="actionDividerHeight">32dp</item>
+    </style>
+
+    <style name="SliceRow.Slider">
+        <!-- Padding between content and the start icon is 5dp -->
+        <item name="contentStartPadding">5dp</item>
+        <item name="contentEndPadding">0dp</item>
+
+        <!-- 0dp start padding for the end item -->
+        <item name="endItemStartPadding">0dp</item>
+        <!-- 8dp end padding for the end item -->
+        <item name="endItemEndPadding">8dp</item>
+
+        <item name="titleSize">20sp</item>
+        <!-- Align text with slider -->
+        <item name="titleStartPadding">11dp</item>
+        <item name="subContentStartPadding">11dp</item>
+
+        <!-- Padding for indeterminate progress bar -->
+        <item name="progressBarStartPadding">12dp</item>
+        <item name="progressBarEndPadding">16dp</item>
+
+        <item name="iconSize">25dp</item>
     </style>
 
     <style name="TextAppearance.Dialog.Title" parent="@android:style/TextAppearance.DeviceDefault.Large">

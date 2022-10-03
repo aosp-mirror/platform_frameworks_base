@@ -24,6 +24,7 @@ import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTas
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.TaskInfo;
+import android.content.ComponentName;
 import android.content.Context;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -43,7 +44,10 @@ import com.android.wm.shell.common.TaskStackListenerCallback;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.annotations.ExternalThread;
 import com.android.wm.shell.common.annotations.ShellMainThread;
+import com.android.wm.shell.desktopmode.DesktopModeStatus;
+import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.util.GroupedRecentTaskInfo;
 import com.android.wm.shell.util.SplitBounds;
@@ -53,18 +57,24 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 /**
  * Manages the recent task list from the system, caching it as necessary.
  */
 public class RecentTasksController implements TaskStackListenerCallback,
-        RemoteCallable<RecentTasksController> {
+        RemoteCallable<RecentTasksController>, DesktopModeTaskRepository.Listener {
     private static final String TAG = RecentTasksController.class.getSimpleName();
 
     private final Context mContext;
+    private final ShellCommandHandler mShellCommandHandler;
+    private final Optional<DesktopModeTaskRepository> mDesktopModeTaskRepository;
     private final ShellExecutor mMainExecutor;
     private final TaskStackListenerImpl mTaskStackListener;
     private final RecentTasks mImpl = new RecentTasksImpl();
+    private final ActivityTaskManager mActivityTaskManager;
     private IRecentTasksListener mListener;
     private final boolean mIsDesktopMode;
 
@@ -87,22 +97,32 @@ public class RecentTasksController implements TaskStackListenerCallback,
     public static RecentTasksController create(
             Context context,
             ShellInit shellInit,
+            ShellCommandHandler shellCommandHandler,
             TaskStackListenerImpl taskStackListener,
+            ActivityTaskManager activityTaskManager,
+            Optional<DesktopModeTaskRepository> desktopModeTaskRepository,
             @ShellMainThread ShellExecutor mainExecutor
     ) {
         if (!context.getResources().getBoolean(com.android.internal.R.bool.config_hasRecents)) {
             return null;
         }
-        return new RecentTasksController(context, shellInit, taskStackListener, mainExecutor);
+        return new RecentTasksController(context, shellInit, shellCommandHandler, taskStackListener,
+                activityTaskManager, desktopModeTaskRepository, mainExecutor);
     }
 
     RecentTasksController(Context context,
             ShellInit shellInit,
+            ShellCommandHandler shellCommandHandler,
             TaskStackListenerImpl taskStackListener,
+            ActivityTaskManager activityTaskManager,
+            Optional<DesktopModeTaskRepository> desktopModeTaskRepository,
             ShellExecutor mainExecutor) {
         mContext = context;
+        mShellCommandHandler = shellCommandHandler;
+        mActivityTaskManager = activityTaskManager;
         mIsDesktopMode = mContext.getPackageManager().hasSystemFeature(FEATURE_PC);
         mTaskStackListener = taskStackListener;
+        mDesktopModeTaskRepository = desktopModeTaskRepository;
         mMainExecutor = mainExecutor;
         shellInit.addInitCallback(this::onInit, this);
     }
@@ -112,7 +132,9 @@ public class RecentTasksController implements TaskStackListenerCallback,
     }
 
     private void onInit() {
+        mShellCommandHandler.addDumpCallback(this::dump, this);
         mTaskStackListener.addListener(this);
+        mDesktopModeTaskRepository.ifPresent(it -> it.addListener(this));
     }
 
     /**
@@ -199,6 +221,11 @@ public class RecentTasksController implements TaskStackListenerCallback,
         notifyRecentTasksChanged();
     }
 
+    @Override
+    public void onActiveTasksChanged() {
+        notifyRecentTasksChanged();
+    }
+
     @VisibleForTesting
     void notifyRecentTasksChanged() {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENT_TASKS, "Notify recent tasks changed");
@@ -249,15 +276,10 @@ public class RecentTasksController implements TaskStackListenerCallback,
     }
 
     @VisibleForTesting
-    List<ActivityManager.RecentTaskInfo> getRawRecentTasks(int maxNum, int flags, int userId) {
-        return ActivityTaskManager.getInstance().getRecentTasks(maxNum, flags, userId);
-    }
-
-    @VisibleForTesting
     ArrayList<GroupedRecentTaskInfo> getRecentTasks(int maxNum, int flags, int userId) {
         // Note: the returned task list is from the most-recent to least-recent order
-        final List<ActivityManager.RecentTaskInfo> rawList = getRawRecentTasks(maxNum, flags,
-                userId);
+        final List<ActivityManager.RecentTaskInfo> rawList = mActivityTaskManager.getRecentTasks(
+                maxNum, flags, userId);
 
         // Make a mapping of task id -> task info
         final SparseArray<ActivityManager.RecentTaskInfo> rawMapping = new SparseArray<>();
@@ -265,6 +287,9 @@ public class RecentTasksController implements TaskStackListenerCallback,
             final ActivityManager.RecentTaskInfo taskInfo = rawList.get(i);
             rawMapping.put(taskInfo.taskId, taskInfo);
         }
+
+        boolean desktopModeActive = DesktopModeStatus.isActive(mContext);
+        ArrayList<ActivityManager.RecentTaskInfo> freeformTasks = new ArrayList<>();
 
         // Pull out the pairs as we iterate back in the list
         ArrayList<GroupedRecentTaskInfo> recentTasks = new ArrayList<>();
@@ -275,17 +300,55 @@ public class RecentTasksController implements TaskStackListenerCallback,
                 continue;
             }
 
+            if (desktopModeActive && mDesktopModeTaskRepository.isPresent()
+                    && mDesktopModeTaskRepository.get().isActiveTask(taskInfo.taskId)) {
+                // Freeform tasks will be added as a separate entry
+                freeformTasks.add(taskInfo);
+                continue;
+            }
+
             final int pairedTaskId = mSplitTasks.get(taskInfo.taskId);
-            if (pairedTaskId != INVALID_TASK_ID && rawMapping.contains(pairedTaskId)) {
+            if (!desktopModeActive && pairedTaskId != INVALID_TASK_ID && rawMapping.contains(
+                    pairedTaskId)) {
                 final ActivityManager.RecentTaskInfo pairedTaskInfo = rawMapping.get(pairedTaskId);
                 rawMapping.remove(pairedTaskId);
-                recentTasks.add(new GroupedRecentTaskInfo(taskInfo, pairedTaskInfo,
+                recentTasks.add(GroupedRecentTaskInfo.forSplitTasks(taskInfo, pairedTaskInfo,
                         mTaskSplitBoundsMap.get(pairedTaskId)));
             } else {
-                recentTasks.add(new GroupedRecentTaskInfo(taskInfo));
+                recentTasks.add(GroupedRecentTaskInfo.forSingleTask(taskInfo));
             }
         }
+
+        // Add a special entry for freeform tasks
+        if (!freeformTasks.isEmpty()) {
+            recentTasks.add(0, GroupedRecentTaskInfo.forFreeformTasks(
+                    freeformTasks.toArray(new ActivityManager.RecentTaskInfo[0])));
+        }
+
         return recentTasks;
+    }
+
+    /**
+     * Find the background task that match the given component.
+     */
+    @Nullable
+    public ActivityManager.RecentTaskInfo findTaskInBackground(ComponentName componentName) {
+        if (componentName == null) {
+            return null;
+        }
+        List<ActivityManager.RecentTaskInfo> tasks = mActivityTaskManager.getRecentTasks(
+                Integer.MAX_VALUE, ActivityManager.RECENT_IGNORE_UNAVAILABLE,
+                ActivityManager.getCurrentUser());
+        for (int i = 0; i < tasks.size(); i++) {
+            final ActivityManager.RecentTaskInfo task = tasks.get(i);
+            if (task.isVisible) {
+                continue;
+            }
+            if (componentName.equals(task.baseIntent.getComponent())) {
+                return task;
+            }
+        }
+        return null;
     }
 
     public void dump(@NonNull PrintWriter pw, String prefix) {
@@ -312,6 +375,16 @@ public class RecentTasksController implements TaskStackListenerCallback,
             }
             mIRecentTasks = new IRecentTasksImpl(RecentTasksController.this);
             return mIRecentTasks;
+        }
+
+        @Override
+        public void getRecentTasks(int maxNum, int flags, int userId, Executor executor,
+                Consumer<List<GroupedRecentTaskInfo>> callback) {
+            mMainExecutor.execute(() -> {
+                List<GroupedRecentTaskInfo> tasks =
+                        RecentTasksController.this.getRecentTasks(maxNum, flags, userId);
+                executor.execute(() -> callback.accept(tasks));
+            });
         }
     }
 

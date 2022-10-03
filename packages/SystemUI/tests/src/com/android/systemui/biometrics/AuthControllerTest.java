@@ -20,6 +20,8 @@ import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRIN
 import static android.hardware.biometrics.BiometricManager.Authenticators;
 import static android.hardware.biometrics.BiometricManager.BIOMETRIC_MULTI_SENSOR_FINGERPRINT_AND_FACE;
 
+import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_AWAKE;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static junit.framework.Assert.assertEquals;
@@ -72,6 +74,8 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableContext;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
+import android.view.DisplayInfo;
+import android.view.Surface;
 import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
@@ -154,11 +158,13 @@ public class AuthControllerTest extends SysuiTestCase {
     @Mock
     private InteractionJankMonitor mInteractionJankMonitor;
     @Captor
-    ArgumentCaptor<IFingerprintAuthenticatorsRegisteredCallback> mAuthenticatorsRegisteredCaptor;
+    private ArgumentCaptor<IFingerprintAuthenticatorsRegisteredCallback> mAuthenticatorsRegisteredCaptor;
     @Captor
-    ArgumentCaptor<BiometricStateListener> mBiometricStateCaptor;
+    private ArgumentCaptor<BiometricStateListener> mBiometricStateCaptor;
     @Captor
-    ArgumentCaptor<StatusBarStateController.StateListener> mStatusBarStateListenerCaptor;
+    private ArgumentCaptor<StatusBarStateController.StateListener> mStatusBarStateListenerCaptor;
+    @Captor
+    private ArgumentCaptor<WakefulnessLifecycle.Observer> mWakefullnessObserverCaptor;
 
     private TestableContext mContextSpy;
     private Execution mExecution;
@@ -222,7 +228,9 @@ public class AuthControllerTest extends SysuiTestCase {
                 mAuthenticatorsRegisteredCaptor.capture());
 
         when(mStatusBarStateController.isDozing()).thenReturn(false);
+        when(mWakefulnessLifecycle.getWakefulness()).thenReturn(WAKEFULNESS_AWAKE);
         verify(mStatusBarStateController).addCallback(mStatusBarStateListenerCaptor.capture());
+        verify(mWakefulnessLifecycle).addObserver(mWakefullnessObserverCaptor.capture());
 
         mAuthenticatorsRegisteredCaptor.getValue().onAllAuthenticatorsRegistered(props);
 
@@ -685,13 +693,8 @@ public class AuthControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testSubscribesToOrientationChangesWhenShowingDialog() {
-        showDialog(new int[]{1} /* sensorIds */, false /* credentialAllowed */);
-
+    public void testSubscribesToOrientationChangesOnStart() {
         verify(mDisplayManager).registerDisplayListener(any(), eq(mHandler), anyLong());
-
-        mAuthController.hideAuthenticationDialog(REQUEST_ID);
-        verify(mDisplayManager).unregisterDisplayListener(any());
     }
 
     @Test
@@ -724,19 +727,148 @@ public class AuthControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testForwardsDozeEvent() throws RemoteException {
+    public void testForwardsDozeEvents() throws RemoteException {
+        when(mStatusBarStateController.isDozing()).thenReturn(true);
+        when(mWakefulnessLifecycle.getWakefulness()).thenReturn(WAKEFULNESS_AWAKE);
         mAuthController.setBiometicContextListener(mContextListener);
 
-        mStatusBarStateListenerCaptor.getValue().onDozingChanged(false);
         mStatusBarStateListenerCaptor.getValue().onDozingChanged(true);
+        mStatusBarStateListenerCaptor.getValue().onDozingChanged(false);
 
         InOrder order = inOrder(mContextListener);
-        // invoked twice since the initial state is false
-        order.verify(mContextListener, times(2)).onDozeChanged(eq(false));
-        order.verify(mContextListener).onDozeChanged(eq(true));
+        order.verify(mContextListener, times(2)).onDozeChanged(eq(true), eq(true));
+        order.verify(mContextListener).onDozeChanged(eq(false), eq(true));
+        order.verifyNoMoreInteractions();
     }
 
-    // Helpers
+    @Test
+    public void testForwardsWakeEvents() throws RemoteException {
+        when(mStatusBarStateController.isDozing()).thenReturn(false);
+        when(mWakefulnessLifecycle.getWakefulness()).thenReturn(WAKEFULNESS_AWAKE);
+        mAuthController.setBiometicContextListener(mContextListener);
+
+        mWakefullnessObserverCaptor.getValue().onStartedGoingToSleep();
+        mWakefullnessObserverCaptor.getValue().onFinishedGoingToSleep();
+        mWakefullnessObserverCaptor.getValue().onStartedWakingUp();
+        mWakefullnessObserverCaptor.getValue().onFinishedWakingUp();
+        mWakefullnessObserverCaptor.getValue().onPostFinishedWakingUp();
+
+        InOrder order = inOrder(mContextListener);
+        order.verify(mContextListener).onDozeChanged(eq(false), eq(true));
+        order.verify(mContextListener).onDozeChanged(eq(false), eq(false));
+        order.verify(mContextListener).onDozeChanged(eq(false), eq(true));
+        order.verifyNoMoreInteractions();
+    }
+
+    @Test
+    public void testGetFingerprintSensorLocationChanges_differentRotations() {
+        // GIVEN fp default location and mocked device dimensions
+        // Rotation 0, where "o" is the location of the FP sensor, if x or y = 0, it's the edge of
+        // the screen which is why a 1x1 width and height is represented by a 2x2 grid below:
+        //   [* o]
+        //   [* *]
+        Point fpDefaultLocation = new Point(1, 0);
+        final DisplayInfo displayInfo = new DisplayInfo();
+        displayInfo.logicalWidth = 1;
+        displayInfo.logicalHeight = 1;
+
+        // WHEN the rotation is 0, THEN no rotation applied
+        displayInfo.rotation = Surface.ROTATION_0;
+        assertEquals(
+                fpDefaultLocation,
+                mAuthController.rotateToCurrentOrientation(
+                        new Point(fpDefaultLocation), displayInfo)
+        );
+
+        // WHEN the rotation is 270, THEN rotation is applied
+        //   [* *]
+        //   [* o]
+        displayInfo.rotation = Surface.ROTATION_270;
+        assertEquals(
+                new Point(1, 1),
+                mAuthController.rotateToCurrentOrientation(
+                        new Point(fpDefaultLocation), displayInfo)
+        );
+
+        // WHEN the rotation is 180, THEN rotation is applied
+        //   [* *]
+        //   [o *]
+        displayInfo.rotation = Surface.ROTATION_180;
+        assertEquals(
+                new Point(0, 1),
+                mAuthController.rotateToCurrentOrientation(
+                        new Point(fpDefaultLocation), displayInfo)
+        );
+
+        // WHEN the rotation is 90, THEN rotation is applied
+        //   [o *]
+        //   [* *]
+        displayInfo.rotation = Surface.ROTATION_90;
+        assertEquals(
+                new Point(0, 0),
+                mAuthController.rotateToCurrentOrientation(
+                        new Point(fpDefaultLocation), displayInfo)
+        );
+    }
+
+    @Test
+    public void testGetFingerprintSensorLocationChanges_rotateRectangle() {
+        // GIVEN fp default location and mocked device dimensions
+        // Rotation 0, where "o" is the location of the FP sensor, if x or y = 0, it's the edge of
+        // the screen.
+        //   [* * o *]
+        //   [* * * *]
+        Point fpDefaultLocation = new Point(2, 0);
+        final DisplayInfo displayInfo = new DisplayInfo();
+        displayInfo.logicalWidth = 3;
+        displayInfo.logicalHeight = 1;
+
+        // WHEN the rotation is 0, THEN no rotation applied
+        displayInfo.rotation = Surface.ROTATION_0;
+        assertEquals(
+                fpDefaultLocation,
+                mAuthController.rotateToCurrentOrientation(
+                        new Point(fpDefaultLocation), displayInfo)
+        );
+
+        // WHEN the rotation is 180, THEN rotation is applied
+        //   [* * * *]
+        //   [* o * *]
+        displayInfo.rotation = Surface.ROTATION_180;
+        assertEquals(
+                new Point(1, 1),
+                mAuthController.rotateToCurrentOrientation(
+                        new Point(fpDefaultLocation), displayInfo)
+        );
+
+        // Rotation 270 & 90 have swapped logical width and heights
+        displayInfo.logicalWidth = 1;
+        displayInfo.logicalHeight = 3;
+
+        // WHEN the rotation is 270, THEN rotation is applied
+        //   [* *]
+        //   [* *]
+        //   [* o]
+        //   [* *]
+        displayInfo.rotation = Surface.ROTATION_270;
+        assertEquals(
+                new Point(1, 2),
+                mAuthController.rotateToCurrentOrientation(
+                        new Point(fpDefaultLocation), displayInfo)
+        );
+
+        // WHEN the rotation is 90, THEN rotation is applied
+        //   [* *]
+        //   [o *]
+        //   [* *]
+        //   [* *]
+        displayInfo.rotation = Surface.ROTATION_90;
+        assertEquals(
+                new Point(0, 1),
+                mAuthController.rotateToCurrentOrientation(
+                        new Point(fpDefaultLocation), displayInfo)
+        );
+    }
 
     private void showDialog(int[] sensorIds, boolean credentialAllowed) {
         mAuthController.showAuthenticationDialog(createTestPromptInfo(),

@@ -18,6 +18,7 @@ package com.android.systemui.broadcast
 
 import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
 import android.content.IntentFilter
 import android.os.Handler
 import android.os.Looper
@@ -32,22 +33,27 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.eq
+import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.time.FakeSystemClock
+import com.google.common.truth.Truth.assertThat
+import java.util.concurrent.Executor
 import junit.framework.Assert.assertSame
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.inOrder
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
-import java.util.concurrent.Executor
 
 @RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper
@@ -379,6 +385,39 @@ class BroadcastDispatcherTest : SysuiTestCase() {
         inOrderUser1.verify(mockUBRUser1).unregisterReceiver(broadcastReceiver)
         inOrderUser1.verify(removalPendingStore)
             .clearPendingRemoval(broadcastReceiver, user1.identifier)
+    }
+
+    @Test
+    fun testBroadcastFlow() = runBlockingTest {
+        val flow = broadcastDispatcher.broadcastFlow(intentFilter, user1) { intent, receiver ->
+            intent to receiver
+        }
+
+        // Collect the values into collectedValues.
+        val collectedValues = mutableListOf<Pair<Intent, BroadcastReceiver>>()
+        val job = launch {
+            flow.collect { collectedValues.add(it) }
+        }
+
+        testableLooper.processAllMessages()
+        verify(mockUBRUser1).registerReceiver(capture(argumentCaptor), eq(DEFAULT_FLAG))
+        val receiver = argumentCaptor.value.receiver
+
+        // Simulate fake broadcasted intents.
+        val fakeIntents = listOf<Intent>(mock(), mock(), mock())
+        fakeIntents.forEach { receiver.onReceive(mockContext, it) }
+
+        // The intents should have been collected.
+        advanceUntilIdle()
+
+        val expectedValues = fakeIntents.map { it to receiver }
+        assertThat(collectedValues).containsExactlyElementsIn(expectedValues)
+
+        // Stop the collection.
+        job.cancel()
+
+        testableLooper.processAllMessages()
+        verify(mockUBRUser1).unregisterReceiver(receiver)
     }
 
     private fun setUserMock(mockContext: Context, user: UserHandle) {

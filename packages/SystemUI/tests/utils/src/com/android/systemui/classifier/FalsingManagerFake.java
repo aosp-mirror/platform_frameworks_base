@@ -40,6 +40,7 @@ public class FalsingManagerFake implements FalsingManager {
     private boolean mIsReportingEnabled;
     private boolean mIsFalseRobustTap;
     private boolean mDestroyed;
+    private boolean mIsProximityNear;
 
     private final List<FalsingBeliefListener> mFalsingBeliefListeners = new ArrayList<>();
     private final List<FalsingTapListener> mTapListeners = new ArrayList<>();
@@ -82,6 +83,10 @@ public class FalsingManagerFake implements FalsingManager {
         mIsFalseDoubleTap = falseDoubleTap;
     }
 
+    public void setIsProximityNear(boolean proxNear) {
+        mIsProximityNear = proxNear;
+    }
+
     @Override
     public boolean isSimpleTap() {
         checkDestroyed();
@@ -98,6 +103,11 @@ public class FalsingManagerFake implements FalsingManager {
     public boolean isFalseDoubleTap() {
         checkDestroyed();
         return mIsFalseDoubleTap;
+    }
+
+    @Override
+    public boolean isProximityNear() {
+        return mIsProximityNear;
     }
 
     @VisibleForTesting

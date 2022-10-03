@@ -264,11 +264,6 @@ oneway interface IStatusBar
     void stopTracing();
 
     /**
-     * Handles a logging command from the WM shell command.
-     */
-    void handleWindowManagerLoggingCommand(in String[] args, in ParcelFileDescriptor outFd);
-
-    /**
      * If true, suppresses the ambient display from showing. If false, re-enables the ambient
      * display.
      */

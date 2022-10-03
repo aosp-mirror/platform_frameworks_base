@@ -35,6 +35,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -69,7 +70,11 @@ import android.util.DisplayMetrics;
 import android.util.SparseArray;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.view.ViewRootImpl;
 import android.view.WindowManager;
+import android.window.OnBackInvokedCallback;
+import android.window.OnBackInvokedDispatcher;
+import android.window.WindowOnBackInvokedDispatcher;
 
 import androidx.test.filters.SmallTest;
 
@@ -127,13 +132,11 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.collection.NotifLiveDataStore;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
-import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.notification.interruption.KeyguardNotificationVisibilityProvider;
@@ -170,6 +173,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -209,7 +213,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private DozeScrimController mDozeScrimController;
     @Mock private Lazy<BiometricUnlockController> mBiometricUnlockControllerLazy;
     @Mock private BiometricUnlockController mBiometricUnlockController;
-    @Mock private VisualStabilityManager mVisualStabilityManager;
     @Mock private NotificationListener mNotificationListener;
     @Mock private KeyguardViewMediator mKeyguardViewMediator;
     @Mock private NotificationLockscreenUserManager mLockscreenUserManager;
@@ -225,7 +228,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private NotificationShadeWindowView mNotificationShadeWindowView;
     @Mock private BroadcastDispatcher mBroadcastDispatcher;
     @Mock private AssistManager mAssistManager;
-    @Mock private NotificationEntryManager mNotificationEntryManager;
     @Mock private NotificationGutsManager mNotificationGutsManager;
     @Mock private NotificationMediaManager mNotificationMediaManager;
     @Mock private NavigationBarController mNavigationBarController;
@@ -283,6 +285,15 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private InteractionJankMonitor mJankMonitor;
     @Mock private DeviceStateManager mDeviceStateManager;
     @Mock private WiredChargingRippleController mWiredChargingRippleController;
+    /**
+     * The process of registering/unregistering a predictive back callback requires a
+     * ViewRootImpl, which is present IRL, but may be missing during a Mockito unit test.
+     * To prevent an NPE during test execution, we explicitly craft and provide a fake ViewRootImpl.
+     */
+    @Mock private ViewRootImpl mViewRootImpl;
+    @Mock private WindowOnBackInvokedDispatcher mOnBackInvokedDispatcher;
+    @Captor private ArgumentCaptor<OnBackInvokedCallback> mOnBackInvokedCallback;
+
     private ShadeController mShadeController;
     private final FakeSystemClock mFakeSystemClock = new FakeSystemClock();
     private FakeExecutor mMainExecutor = new FakeExecutor(mFakeSystemClock);
@@ -372,10 +383,10 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
             return null;
         }).when(mNotificationShadeWindowController).batchApplyWindowLayoutParams(any());
 
-        mShadeController = new ShadeControllerImpl(mCommandQueue,
+        mShadeController = spy(new ShadeControllerImpl(mCommandQueue,
                 mStatusBarStateController, mNotificationShadeWindowController,
                 mStatusBarKeyguardViewManager, mContext.getSystemService(WindowManager.class),
-                () -> Optional.of(mCentralSurfaces), () -> mAssistManager);
+                () -> Optional.of(mCentralSurfaces), () -> mAssistManager));
 
         when(mOperatorNameViewControllerFactory.create(any()))
                 .thenReturn(mOperatorNameViewController);
@@ -399,7 +410,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 new FalsingManagerFake(),
                 new FalsingCollectorFake(),
                 mBroadcastDispatcher,
-                mNotificationEntryManager,
                 mNotificationGutsManager,
                 notificationLogger,
                 mNotificationInterruptStateProvider,
@@ -418,7 +428,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 wakefulnessLifecycle,
                 mStatusBarStateController,
                 Optional.of(mBubbles),
-                mVisualStabilityManager,
                 mDeviceProvisionedController,
                 mNavigationBarController,
                 mAccessibilityFloatingMenuController,
@@ -466,7 +475,14 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mActivityLaunchAnimator,
                 mJankMonitor,
                 mDeviceStateManager,
-                mWiredChargingRippleController, mDreamManager);
+                mWiredChargingRippleController, mDreamManager) {
+            @Override
+            protected ViewRootImpl getViewRootImpl() {
+                return mViewRootImpl;
+            }
+        };
+        when(mViewRootImpl.getOnBackInvokedDispatcher())
+                .thenReturn(mOnBackInvokedDispatcher);
         when(mKeyguardViewMediator.registerCentralSurfaces(
                 any(CentralSurfacesImpl.class),
                 any(NotificationPanelViewController.class),
@@ -742,6 +758,43 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         } catch (RemoteException e) {
             fail();
         }
+    }
+
+    /**
+     * Do the following:
+     * 1. verify that a predictive back callback is registered when CSurf becomes visible
+     * 2. verify that the same callback is unregistered when CSurf becomes invisible
+     */
+    @Test
+    public void testPredictiveBackCallback_registration() {
+        mCentralSurfaces.handleVisibleToUserChanged(true);
+        verify(mOnBackInvokedDispatcher).registerOnBackInvokedCallback(
+                eq(OnBackInvokedDispatcher.PRIORITY_DEFAULT),
+                mOnBackInvokedCallback.capture());
+
+        mCentralSurfaces.handleVisibleToUserChanged(false);
+        verify(mOnBackInvokedDispatcher).unregisterOnBackInvokedCallback(
+                eq(mOnBackInvokedCallback.getValue()));
+    }
+
+    /**
+     * Do the following:
+     * 1. capture the predictive back callback during registration
+     * 2. call the callback directly
+     * 3. verify that the ShadeController's panel collapse animation is invoked
+     */
+    @Test
+    public void testPredictiveBackCallback_invocationCollapsesPanel() {
+        mCentralSurfaces.setNotificationShadeWindowViewController(
+                mNotificationShadeWindowViewController);
+        mCentralSurfaces.handleVisibleToUserChanged(true);
+        verify(mOnBackInvokedDispatcher).registerOnBackInvokedCallback(
+                eq(OnBackInvokedDispatcher.PRIORITY_DEFAULT),
+                mOnBackInvokedCallback.capture());
+
+        when(mNotificationPanelViewController.canPanelBeCollapsed()).thenReturn(true);
+        mOnBackInvokedCallback.getValue().onBackInvoked();
+        verify(mShadeController).animateCollapsePanels();
     }
 
     @Test

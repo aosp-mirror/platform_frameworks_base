@@ -1963,7 +1963,6 @@ public class SoundTrigger {
     }
 
     private static Object mServiceLock = new Object();
-    private static ISoundTriggerMiddlewareService mService;
 
     /**
      * Translate an exception thrown from interaction with the underlying service to an error code.
@@ -2217,20 +2216,12 @@ public class SoundTrigger {
                     binder =
                             ServiceManager.getServiceOrThrow(
                                     Context.SOUND_TRIGGER_MIDDLEWARE_SERVICE);
-                    binder.linkToDeath(() -> {
-                        synchronized (mServiceLock) {
-                            mService = null;
-                        }
-                    }, 0);
-                    mService = ISoundTriggerMiddlewareService.Stub.asInterface(binder);
-                    break;
+                    return ISoundTriggerMiddlewareService.Stub.asInterface(binder);
                 } catch (Exception e) {
                     Log.e(TAG, "Failed to bind to soundtrigger service", e);
                 }
             }
-            return  mService;
         }
-
     }
 
     /**

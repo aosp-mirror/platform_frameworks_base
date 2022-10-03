@@ -10,6 +10,7 @@ import android.os.PowerManager
 import android.provider.Settings
 import android.view.Surface
 import android.view.View
+import android.view.WindowManager.fixScale
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.jank.InteractionJankMonitor.CUJ_SCREEN_OFF
 import com.android.internal.jank.InteractionJankMonitor.CUJ_SCREEN_OFF_SHOW_AOD
@@ -138,8 +139,8 @@ class UnlockedScreenOffAnimationController @Inject constructor(
     }
 
     fun updateAnimatorDurationScale() {
-        animatorDurationScale =
-                globalSettings.getFloat(Settings.Global.ANIMATOR_DURATION_SCALE, 1f)
+        animatorDurationScale = fixScale(
+                globalSettings.getFloat(Settings.Global.ANIMATOR_DURATION_SCALE, 1f))
     }
 
     override fun shouldDelayKeyguardShow(): Boolean =

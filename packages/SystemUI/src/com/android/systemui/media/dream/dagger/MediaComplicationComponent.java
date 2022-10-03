@@ -16,6 +16,8 @@
 
 package com.android.systemui.media.dream.dagger;
 
+import static com.android.systemui.dreams.complication.dagger.RegisteredComplicationsModule.DREAM_MEDIA_COMPLICATION_WEIGHT;
+
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import android.content.Context;
@@ -93,7 +95,7 @@ public interface MediaComplicationComponent {
                     ComplicationLayoutParams.POSITION_TOP
                             | ComplicationLayoutParams.POSITION_START,
                     ComplicationLayoutParams.DIRECTION_DOWN,
-                    0,
+                    DREAM_MEDIA_COMPLICATION_WEIGHT,
                     true);
         }
     }

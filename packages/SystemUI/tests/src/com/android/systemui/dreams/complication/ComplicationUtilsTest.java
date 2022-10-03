@@ -20,6 +20,7 @@ import static com.android.systemui.dreams.complication.Complication.COMPLICATION
 import static com.android.systemui.dreams.complication.Complication.COMPLICATION_TYPE_CAST_INFO;
 import static com.android.systemui.dreams.complication.Complication.COMPLICATION_TYPE_DATE;
 import static com.android.systemui.dreams.complication.Complication.COMPLICATION_TYPE_HOME_CONTROLS;
+import static com.android.systemui.dreams.complication.Complication.COMPLICATION_TYPE_SMARTSPACE;
 import static com.android.systemui.dreams.complication.Complication.COMPLICATION_TYPE_TIME;
 import static com.android.systemui.dreams.complication.Complication.COMPLICATION_TYPE_WEATHER;
 import static com.android.systemui.dreams.complication.ComplicationUtils.convertComplicationType;
@@ -60,6 +61,8 @@ public class ComplicationUtilsTest extends SysuiTestCase {
                 .isEqualTo(COMPLICATION_TYPE_CAST_INFO);
         assertThat(convertComplicationType(DreamBackend.COMPLICATION_TYPE_HOME_CONTROLS))
                 .isEqualTo(COMPLICATION_TYPE_HOME_CONTROLS);
+        assertThat(convertComplicationType(DreamBackend.COMPLICATION_TYPE_SMARTSPACE))
+                .isEqualTo(COMPLICATION_TYPE_SMARTSPACE);
     }
 
     @Test

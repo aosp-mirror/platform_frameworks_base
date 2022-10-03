@@ -16,10 +16,14 @@
 
 package com.android.wm.shell.activityembedding;
 
-import static android.window.TransitionInfo.FLAG_IS_EMBEDDED;
+import static android.window.TransitionInfo.FLAG_FILLS_TASK;
+import static android.window.TransitionInfo.FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY;
+
+import static java.util.Objects.requireNonNull;
 
 import android.content.Context;
 import android.os.IBinder;
+import android.util.ArrayMap;
 import android.view.SurfaceControl;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
@@ -28,6 +32,7 @@ import android.window.WindowContainerTransaction;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 
@@ -37,15 +42,37 @@ import com.android.wm.shell.transition.Transitions;
 public class ActivityEmbeddingController implements Transitions.TransitionHandler {
 
     private final Context mContext;
-    private final Transitions mTransitions;
+    @VisibleForTesting
+    final Transitions mTransitions;
+    @VisibleForTesting
+    final ActivityEmbeddingAnimationRunner mAnimationRunner;
 
-    public ActivityEmbeddingController(Context context, ShellInit shellInit,
-            Transitions transitions) {
-        mContext = context;
-        mTransitions = transitions;
-        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            shellInit.addInitCallback(this::onInit, this);
-        }
+    /**
+     * Keeps track of the currently-running transition callback associated with each transition
+     * token.
+     */
+    private final ArrayMap<IBinder, Transitions.TransitionFinishCallback> mTransitionCallbacks =
+            new ArrayMap<>();
+
+    private ActivityEmbeddingController(@NonNull Context context, @NonNull ShellInit shellInit,
+            @NonNull Transitions transitions) {
+        mContext = requireNonNull(context);
+        mTransitions = requireNonNull(transitions);
+        mAnimationRunner = new ActivityEmbeddingAnimationRunner(context, this);
+
+        shellInit.addInitCallback(this::onInit, this);
+    }
+
+    /**
+     * Creates {@link ActivityEmbeddingController}, returns {@code null} if the feature is not
+     * supported.
+     */
+    @Nullable
+    public static ActivityEmbeddingController create(@NonNull Context context,
+            @NonNull ShellInit shellInit, @NonNull Transitions transitions) {
+        return Transitions.ENABLE_SHELL_TRANSITIONS
+                ? new ActivityEmbeddingController(context, shellInit, transitions)
+                : null;
     }
 
     /** Registers to handle transitions. */
@@ -58,17 +85,28 @@ public class ActivityEmbeddingController implements Transitions.TransitionHandle
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
-        // TODO(b/207070762) Handle AE animation as a part of other transitions.
-        // Only handle the transition if all containers are embedded.
+        boolean containsEmbeddingSplit = false;
         for (TransitionInfo.Change change : info.getChanges()) {
-            if (!isEmbedded(change)) {
+            if (!change.hasFlags(FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY)) {
+                // Only animate the transition if all changes are in a Task with ActivityEmbedding.
                 return false;
             }
+            if (!containsEmbeddingSplit && !change.hasFlags(FLAG_FILLS_TASK)) {
+                // Whether the Task contains any ActivityEmbedding split before or after the
+                // transition.
+                containsEmbeddingSplit = true;
+            }
+        }
+        if (!containsEmbeddingSplit) {
+            // Let the system to play the default animation if there is no ActivityEmbedding split
+            // window. This allows to play the app customized animation when there is no embedding,
+            // such as the device is in a folded state.
+            return false;
         }
 
-        // TODO(b/207070762) Implement AE animation.
-        startTransaction.apply();
-        finishCallback.onTransitionFinished(null /* wct */, null /* wctCB */);
+        // Start ActivityEmbedding animation.
+        mTransitionCallbacks.put(transition, finishCallback);
+        mAnimationRunner.startAnimation(transition, info, startTransaction, finishTransaction);
         return true;
     }
 
@@ -79,7 +117,18 @@ public class ActivityEmbeddingController implements Transitions.TransitionHandle
         return null;
     }
 
-    private static boolean isEmbedded(@NonNull TransitionInfo.Change change) {
-        return (change.getFlags() & FLAG_IS_EMBEDDED) != 0;
+    @Override
+    public void setAnimScaleSetting(float scale) {
+        mAnimationRunner.setAnimScaleSetting(scale);
+    }
+
+    /** Called when the animation is finished. */
+    void onAnimationFinished(@NonNull IBinder transition) {
+        final Transitions.TransitionFinishCallback callback =
+                mTransitionCallbacks.remove(transition);
+        if (callback == null) {
+            throw new IllegalStateException("No finish callback found");
+        }
+        callback.onTransitionFinished(null /* wct */, null /* wctCB */);
     }
 }

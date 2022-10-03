@@ -20,7 +20,6 @@ import android.graphics.Rect;
 
 import com.android.wm.shell.common.annotations.ExternalThread;
 
-import java.io.PrintWriter;
 import java.util.function.Consumer;
 
 /**
@@ -49,12 +48,6 @@ public interface Pip {
      * @param flag Current SysUI state.
      */
     default void onSystemUiStateChanged(boolean isSysUiStateValid, int flag) {
-    }
-
-    /**
-     * Registers the session listener for the current user.
-     */
-    default void registerSessionListenerForCurrentUser() {
     }
 
     /**
@@ -99,12 +92,4 @@ public interface Pip {
      * view hierarchy or destroyed.
      */
     default void removePipExclusionBoundsChangeListener(Consumer<Rect> listener) { }
-
-    /**
-     * Dump the current state and information if need.
-     *
-     * @param pw The stream to dump information to.
-     */
-    default void dump(PrintWriter pw) {
-    }
 }

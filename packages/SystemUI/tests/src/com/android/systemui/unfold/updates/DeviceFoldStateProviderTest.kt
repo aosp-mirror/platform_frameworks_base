@@ -30,13 +30,13 @@ import com.android.systemui.unfold.updates.screen.ScreenStatusProvider
 import com.android.systemui.unfold.updates.screen.ScreenStatusProvider.ScreenListener
 import com.android.systemui.util.mockito.any
 import com.google.common.truth.Truth.assertThat
+import java.util.concurrent.Executor
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.MockitoAnnotations
-import java.util.concurrent.Executor
 import org.mockito.Mockito.`when` as whenever
+import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
@@ -331,6 +331,47 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
         assertThat(foldUpdates).containsExactly(FOLD_UPDATE_START_CLOSING)
     }
 
+    @Test
+    fun screenOff_whileFolded_hingeAngleProviderRemainsOff() {
+        setFoldState(folded = true)
+        assertThat(testHingeAngleProvider.isStarted).isFalse()
+
+        screenOnStatusProvider.notifyScreenTurningOff()
+
+        assertThat(testHingeAngleProvider.isStarted).isFalse()
+    }
+
+    @Test
+    fun screenOff_whileUnfolded_hingeAngleProviderStops() {
+        setFoldState(folded = false)
+        assertThat(testHingeAngleProvider.isStarted).isTrue()
+
+        screenOnStatusProvider.notifyScreenTurningOff()
+
+        assertThat(testHingeAngleProvider.isStarted).isFalse()
+    }
+
+    @Test
+    fun screenOn_whileUnfoldedAndScreenOff_hingeAngleProviderStarted() {
+        setFoldState(folded = false)
+        screenOnStatusProvider.notifyScreenTurningOff()
+        assertThat(testHingeAngleProvider.isStarted).isFalse()
+
+        screenOnStatusProvider.notifyScreenTurningOn()
+
+        assertThat(testHingeAngleProvider.isStarted).isTrue()
+    }
+
+    @Test
+    fun screenOn_whileFolded_hingeAngleRemainsOff() {
+        setFoldState(folded = true)
+        assertThat(testHingeAngleProvider.isStarted).isFalse()
+
+        screenOnStatusProvider.notifyScreenTurningOn()
+
+        assertThat(testHingeAngleProvider.isStarted).isFalse()
+    }
+
     private fun setupForegroundActivityType(isHomeActivity: Boolean?) {
         whenever(activityTypeProvider.isHomeActivity).thenReturn(isHomeActivity)
     }
@@ -391,6 +432,14 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
         fun notifyScreenTurnedOn() {
             callbacks.forEach { it.onScreenTurnedOn() }
         }
+
+        fun notifyScreenTurningOn() {
+            callbacks.forEach { it.onScreenTurningOn() }
+        }
+
+        fun notifyScreenTurningOff() {
+            callbacks.forEach { it.onScreenTurningOff() }
+        }
     }
 
     private class TestHingeAngleProvider : HingeAngleProvider {
@@ -398,11 +447,11 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
         var isStarted: Boolean = false
 
         override fun start() {
-            isStarted = true;
+            isStarted = true
         }
 
         override fun stop() {
-            isStarted = false;
+            isStarted = false
         }
 
         override fun addCallback(listener: Consumer<Float>) {

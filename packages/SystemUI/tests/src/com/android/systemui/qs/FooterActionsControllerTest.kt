@@ -22,13 +22,17 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.phone.MultiUserSwitchController
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
+import com.android.systemui.statusbar.policy.FakeConfigurationController
 import com.android.systemui.statusbar.policy.UserInfoController
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.settings.FakeSettings
 import com.android.systemui.utils.leaks.LeakCheckedTest
+import com.google.common.truth.Expect
 import com.google.common.truth.Truth.assertThat
+import javax.inject.Provider
 import org.junit.After
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
@@ -42,47 +46,38 @@ import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
-import org.mockito.MockitoAnnotations
-import javax.inject.Provider
 import org.mockito.Mockito.`when` as whenever
+import org.mockito.MockitoAnnotations
 
 @SmallTest
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @RunWith(AndroidTestingRunner::class)
 class FooterActionsControllerTest : LeakCheckedTest() {
-    @Mock
-    private lateinit var userManager: UserManager
-    @Mock
-    private lateinit var userTracker: UserTracker
-    @Mock
-    private lateinit var activityStarter: ActivityStarter
-    @Mock
-    private lateinit var deviceProvisionedController: DeviceProvisionedController
-    @Mock
-    private lateinit var userInfoController: UserInfoController
-    @Mock
-    private lateinit var multiUserSwitchControllerFactory: MultiUserSwitchController.Factory
-    @Mock
-    private lateinit var multiUserSwitchController: MultiUserSwitchController
-    @Mock
-    private lateinit var globalActionsDialogProvider: Provider<GlobalActionsDialogLite>
-    @Mock
-    private lateinit var globalActionsDialog: GlobalActionsDialogLite
-    @Mock
-    private lateinit var uiEventLogger: UiEventLogger
-    @Mock
-    private lateinit var securityFooterController: QSSecurityFooter
-    @Mock
-    private lateinit var fgsManagerController: QSFgsManagerFooter
+
+    @get:Rule var expect: Expect = Expect.create()
+
+    @Mock private lateinit var userManager: UserManager
+    @Mock private lateinit var userTracker: UserTracker
+    @Mock private lateinit var activityStarter: ActivityStarter
+    @Mock private lateinit var deviceProvisionedController: DeviceProvisionedController
+    @Mock private lateinit var userInfoController: UserInfoController
+    @Mock private lateinit var multiUserSwitchControllerFactory: MultiUserSwitchController.Factory
+    @Mock private lateinit var multiUserSwitchController: MultiUserSwitchController
+    @Mock private lateinit var globalActionsDialogProvider: Provider<GlobalActionsDialogLite>
+    @Mock private lateinit var globalActionsDialog: GlobalActionsDialogLite
+    @Mock private lateinit var uiEventLogger: UiEventLogger
+    @Mock private lateinit var securityFooterController: QSSecurityFooter
+    @Mock private lateinit var fgsManagerController: QSFgsManagerFooter
     @Captor
     private lateinit var visibilityChangedCaptor:
         ArgumentCaptor<VisibilityChangedDispatcher.OnVisibilityChangedListener>
 
     private lateinit var controller: FooterActionsController
 
+    private val configurationController = FakeConfigurationController()
     private val metricsLogger: MetricsLogger = FakeMetricsLogger()
-    private lateinit var view: FooterActionsView
     private val falsingManager: FalsingManagerFake = FalsingManagerFake()
+    private lateinit var view: FooterActionsView
     private lateinit var testableLooper: TestableLooper
     private lateinit var fakeSettings: FakeSettings
     private lateinit var securityFooter: View
@@ -90,12 +85,15 @@ class FooterActionsControllerTest : LeakCheckedTest() {
 
     @Before
     fun setUp() {
+        // We want to make sure testable resources are always used
+        context.ensureTestableResources()
+
         MockitoAnnotations.initMocks(this)
         testableLooper = TestableLooper.get(this)
         fakeSettings = FakeSettings()
 
         whenever(multiUserSwitchControllerFactory.create(any()))
-                .thenReturn(multiUserSwitchController)
+            .thenReturn(multiUserSwitchController)
         whenever(globalActionsDialogProvider.get()).thenReturn(globalActionsDialog)
 
         securityFooter = View(mContext)
@@ -135,7 +133,7 @@ class FooterActionsControllerTest : LeakCheckedTest() {
         view.findViewById<View>(R.id.pm_lite).performClick()
         // Verify clicks are logged
         verify(uiEventLogger, Mockito.times(1))
-                .log(GlobalActionsDialogLite.GlobalActionsEvent.GA_OPEN_QS)
+            .log(GlobalActionsDialogLite.GlobalActionsEvent.GA_OPEN_QS)
     }
 
     @Test
@@ -299,6 +297,86 @@ class FooterActionsControllerTest : LeakCheckedTest() {
         assertThat(booleanCaptor.allValues.last()).isTrue()
     }
 
+    @Test
+    fun setExpansion_inSplitShade_alphaFollowsExpansion() {
+        enableSplitShade()
+
+        controller.setExpansion(0f)
+        expect.that(view.alpha).isEqualTo(0f)
+
+        controller.setExpansion(0.25f)
+        expect.that(view.alpha).isEqualTo(0.25f)
+
+        controller.setExpansion(0.5f)
+        expect.that(view.alpha).isEqualTo(0.5f)
+
+        controller.setExpansion(0.75f)
+        expect.that(view.alpha).isEqualTo(0.75f)
+
+        controller.setExpansion(1f)
+        expect.that(view.alpha).isEqualTo(1f)
+    }
+
+    @Test
+    fun setExpansion_inSplitShade_backgroundAlphaFollowsExpansion_with_0_9_delay() {
+        enableSplitShade()
+
+        controller.setExpansion(0f)
+        expect.that(view.backgroundAlphaFraction).isEqualTo(0f)
+
+        controller.setExpansion(0.5f)
+        expect.that(view.backgroundAlphaFraction).isEqualTo(0f)
+
+        controller.setExpansion(0.9f)
+        expect.that(view.backgroundAlphaFraction).isEqualTo(0f)
+
+        controller.setExpansion(0.91f)
+        expect.that(view.backgroundAlphaFraction).isWithin(FLOAT_TOLERANCE).of(0.1f)
+
+        controller.setExpansion(0.95f)
+        expect.that(view.backgroundAlphaFraction).isWithin(FLOAT_TOLERANCE).of(0.5f)
+
+        controller.setExpansion(1f)
+        expect.that(view.backgroundAlphaFraction).isEqualTo(1f)
+    }
+
+    @Test
+    fun setExpansion_inSingleShade_alphaFollowsExpansion_with_0_9_delay() {
+        disableSplitShade()
+
+        controller.setExpansion(0f)
+        expect.that(view.alpha).isEqualTo(0f)
+
+        controller.setExpansion(0.5f)
+        expect.that(view.alpha).isEqualTo(0f)
+
+        controller.setExpansion(0.9f)
+        expect.that(view.alpha).isEqualTo(0f)
+
+        controller.setExpansion(0.91f)
+        expect.that(view.alpha).isWithin(FLOAT_TOLERANCE).of(0.1f)
+
+        controller.setExpansion(0.95f)
+        expect.that(view.alpha).isWithin(FLOAT_TOLERANCE).of(0.5f)
+
+        controller.setExpansion(1f)
+        expect.that(view.alpha).isEqualTo(1f)
+    }
+
+    @Test
+    fun setExpansion_inSingleShade_backgroundAlphaAlways1() {
+        disableSplitShade()
+
+        controller.setExpansion(0f)
+        expect.that(view.backgroundAlphaFraction).isEqualTo(1f)
+
+        controller.setExpansion(0.5f)
+        expect.that(view.backgroundAlphaFraction).isEqualTo(1f)
+
+        controller.setExpansion(1f)
+        expect.that(view.backgroundAlphaFraction).isEqualTo(1f)
+    }
+
     private fun setVisibilities(
         securityFooterVisible: Boolean,
         fgsFooterVisible: Boolean,
@@ -311,15 +389,52 @@ class FooterActionsControllerTest : LeakCheckedTest() {
     }
 
     private fun inflateView(): FooterActionsView {
-        return LayoutInflater.from(context)
-                .inflate(R.layout.footer_actions, null) as FooterActionsView
+        return LayoutInflater.from(context).inflate(R.layout.footer_actions, null)
+            as FooterActionsView
     }
 
     private fun constructFooterActionsController(view: FooterActionsView): FooterActionsController {
-        return FooterActionsController(view, multiUserSwitchControllerFactory,
-                activityStarter, userManager, userTracker, userInfoController,
-                deviceProvisionedController, securityFooterController, fgsManagerController,
-                falsingManager, metricsLogger, globalActionsDialogProvider, uiEventLogger,
-                showPMLiteButton = true, fakeSettings, Handler(testableLooper.looper))
+        return FooterActionsController(
+            view,
+            multiUserSwitchControllerFactory,
+            activityStarter,
+            userManager,
+            userTracker,
+            userInfoController,
+            deviceProvisionedController,
+            securityFooterController,
+            fgsManagerController,
+            falsingManager,
+            metricsLogger,
+            globalActionsDialogProvider,
+            uiEventLogger,
+            showPMLiteButton = true,
+            fakeSettings,
+            Handler(testableLooper.looper),
+            configurationController)
+    }
+
+    private fun enableSplitShade() {
+        setSplitShadeEnabled(true)
+    }
+
+    private fun disableSplitShade() {
+        setSplitShadeEnabled(false)
+    }
+
+    private fun setSplitShadeEnabled(enabled: Boolean) {
+        overrideResource(R.bool.config_use_split_notification_shade, enabled)
+        configurationController.notifyConfigurationChanged()
     }
 }
+
+private const val FLOAT_TOLERANCE = 0.01f
+
+private val View.backgroundAlphaFraction: Float?
+    get() {
+        return if (background != null) {
+            background.alpha / 255f
+        } else {
+            null
+        }
+    }

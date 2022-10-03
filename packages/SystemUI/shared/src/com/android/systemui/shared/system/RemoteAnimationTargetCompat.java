@@ -16,13 +16,17 @@
 
 package com.android.systemui.shared.system;
 
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
+import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
+
+import static com.android.wm.shell.common.split.SplitScreenConstants.FLAG_IS_DIVIDER_BAR;
 
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
@@ -76,7 +80,7 @@ public class RemoteAnimationTargetCompat {
 
     private final SurfaceControl mStartLeash;
 
-    // Fields used only to unrap into RemoteAnimationTarget
+    // Fields used only to unwrap into RemoteAnimationTarget
     private final Rect startBounds;
 
     public final boolean willShowImeOnTarget;
@@ -203,8 +207,19 @@ public class RemoteAnimationTargetCompat {
 
     public RemoteAnimationTargetCompat(TransitionInfo.Change change, int order,
             TransitionInfo info, SurfaceControl.Transaction t) {
-        taskId = change.getTaskInfo() != null ? change.getTaskInfo().taskId : -1;
         mode = newModeToLegacyMode(change.getMode());
+        taskInfo = change.getTaskInfo();
+        if (taskInfo != null) {
+            taskId = taskInfo.taskId;
+            isNotInRecents = !taskInfo.isRunning;
+            activityType = taskInfo.getActivityType();
+            windowConfiguration = taskInfo.configuration.windowConfiguration;
+        } else {
+            taskId = INVALID_TASK_ID;
+            isNotInRecents = true;
+            activityType = ACTIVITY_TYPE_UNDEFINED;
+            windowConfiguration = new WindowConfiguration();
+        }
 
         // TODO: once we can properly sync transactions across process, then get rid of this leash.
         leash = createLeash(info, change, order, t);
@@ -221,22 +236,12 @@ public class RemoteAnimationTargetCompat {
         prefixOrderIndex = order;
         // TODO(shell-transitions): I guess we need to send content insets? evaluate how its used.
         contentInsets = new Rect(0, 0, 0, 0);
-        if (change.getTaskInfo() != null) {
-            isNotInRecents = !change.getTaskInfo().isRunning;
-            activityType = change.getTaskInfo().getActivityType();
-        } else {
-            isNotInRecents = true;
-            activityType = ACTIVITY_TYPE_UNDEFINED;
-        }
-        taskInfo = change.getTaskInfo();
         allowEnterPip = change.getAllowEnterPip();
         mStartLeash = null;
         rotationChange = change.getEndRotation() - change.getStartRotation();
-        windowType = INVALID_WINDOW_TYPE;
+        windowType = (change.getFlags() & FLAG_IS_DIVIDER_BAR) != 0
+                ? TYPE_DOCK_DIVIDER : INVALID_WINDOW_TYPE;
 
-        windowConfiguration = change.getTaskInfo() != null
-            ? change.getTaskInfo().configuration.windowConfiguration
-            : new WindowConfiguration();
         startBounds = change.getStartAbsBounds();
         willShowImeOnTarget = (change.getFlags() & TransitionInfo.FLAG_WILL_IME_SHOWN) != 0;
     }
@@ -251,36 +256,61 @@ public class RemoteAnimationTargetCompat {
     }
 
     /**
-     * Represents a TransitionInfo object as an array of old-style targets
+     * Represents a TransitionInfo object as an array of old-style app targets
+     *
+     * @param leashMap Temporary map of change leash -> launcher leash. Is an output, so should be
+     *                 populated by this function. If null, it is ignored.
+     */
+    public static RemoteAnimationTargetCompat[] wrapApps(TransitionInfo info,
+            SurfaceControl.Transaction t, ArrayMap<SurfaceControl, SurfaceControl> leashMap) {
+        final ArrayList<RemoteAnimationTargetCompat> out = new ArrayList<>();
+        final SparseArray<TransitionInfo.Change> childTaskTargets = new SparseArray<>();
+        for (int i = 0; i < info.getChanges().size(); i++) {
+            final TransitionInfo.Change change = info.getChanges().get(i);
+            if (change.getTaskInfo() == null) continue;
+
+            final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
+            // Children always come before parent since changes are in top-to-bottom z-order.
+            if (taskInfo != null) {
+                if (childTaskTargets.contains(taskInfo.taskId)) {
+                    // has children, so not a leaf. Skip.
+                    continue;
+                }
+                if (taskInfo.hasParentTask()) {
+                    childTaskTargets.put(taskInfo.parentTaskId, change);
+                }
+            }
+
+            final RemoteAnimationTargetCompat targetCompat =
+                    new RemoteAnimationTargetCompat(change, info.getChanges().size() - i, info, t);
+            if (leashMap != null) {
+                leashMap.put(change.getLeash(), targetCompat.leash);
+            }
+            out.add(targetCompat);
+        }
+
+        return out.toArray(new RemoteAnimationTargetCompat[out.size()]);
+    }
+
+    /**
+     * Represents a TransitionInfo object as an array of old-style non-app targets
      *
      * @param wallpapers If true, this will return wallpaper targets; otherwise it returns
      *                   non-wallpaper targets.
      * @param leashMap Temporary map of change leash -> launcher leash. Is an output, so should be
      *                 populated by this function. If null, it is ignored.
      */
-    public static RemoteAnimationTargetCompat[] wrap(TransitionInfo info, boolean wallpapers,
+    public static RemoteAnimationTargetCompat[] wrapNonApps(TransitionInfo info, boolean wallpapers,
             SurfaceControl.Transaction t, ArrayMap<SurfaceControl, SurfaceControl> leashMap) {
         final ArrayList<RemoteAnimationTargetCompat> out = new ArrayList<>();
-        final SparseArray<TransitionInfo.Change> childTaskTargets = new SparseArray<>();
+
         for (int i = 0; i < info.getChanges().size(); i++) {
             final TransitionInfo.Change change = info.getChanges().get(i);
+            if (change.getTaskInfo() != null) continue;
+
             final boolean changeIsWallpaper =
                     (change.getFlags() & TransitionInfo.FLAG_IS_WALLPAPER) != 0;
             if (wallpapers != changeIsWallpaper) continue;
-
-            if (!wallpapers) {
-                final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
-                // Children always come before parent since changes are in top-to-bottom z-order.
-                if (taskInfo != null) {
-                    if (childTaskTargets.contains(taskInfo.taskId)) {
-                        // has children, so not a leaf. Skip.
-                        continue;
-                    }
-                    if (taskInfo.hasParentTask()) {
-                        childTaskTargets.put(taskInfo.parentTaskId, change);
-                    }
-                }
-            }
 
             final RemoteAnimationTargetCompat targetCompat =
                     new RemoteAnimationTargetCompat(change, info.getChanges().size() - i, info, t);

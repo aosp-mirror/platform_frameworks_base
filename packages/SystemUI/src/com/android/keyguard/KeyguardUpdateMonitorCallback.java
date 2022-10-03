@@ -271,7 +271,7 @@ public class KeyguardUpdateMonitorCallback {
      * like fingerprint authentication errors.
      *
      * @param message Message that indicates an error.
-     * @see KeyguardIndicationController.BaseKeyguardCallback#HIDE_DELAY_MS
+     * @see KeyguardIndicationController#DEFAULT_HIDE_DELAY_MS
      * @see KeyguardIndicationController#showTransientIndication(CharSequence)
      */
     public void onTrustAgentErrorMessage(CharSequence message) { }

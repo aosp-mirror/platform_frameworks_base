@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.content.res.Configuration.ORIENTATION_UNDEFINED;
 import static android.view.ContentRecordingSession.RECORD_CONTENT_DISPLAY;
 import static android.view.ContentRecordingSession.RECORD_CONTENT_TASK;
 
@@ -26,6 +27,7 @@ import android.annotation.Nullable;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.media.projection.MediaProjectionManager;
 import android.os.IBinder;
 import android.provider.DeviceConfig;
 import android.view.ContentRecordingSession;
@@ -38,7 +40,7 @@ import com.android.internal.protolog.common.ProtoLog;
 /**
  * Manages content recording for a particular {@link DisplayContent}.
  */
-final class ContentRecorder {
+final class ContentRecorder implements WindowContainerListener {
 
     /**
      * The key for accessing the device config that controls if task recording is supported.
@@ -50,6 +52,8 @@ final class ContentRecorder {
      */
     @NonNull
     private final DisplayContent mDisplayContent;
+
+    @Nullable private final MediaProjectionManagerWrapper mMediaProjectionManager;
 
     /**
      * The session for content recording, or null if this DisplayContent is not being used for
@@ -73,8 +77,26 @@ final class ContentRecorder {
      */
     @Nullable private Rect mLastRecordedBounds = null;
 
+    /**
+     * The last configuration orientation.
+     */
+    private int mLastOrientation = ORIENTATION_UNDEFINED;
+
     ContentRecorder(@NonNull DisplayContent displayContent) {
+        this(displayContent, () -> {
+            MediaProjectionManager mpm = displayContent.mWmService.mContext.getSystemService(
+                    MediaProjectionManager.class);
+            if (mpm != null) {
+                mpm.stopActiveProjection();
+            }
+        });
+    }
+
+    @VisibleForTesting
+    ContentRecorder(@NonNull DisplayContent displayContent,
+            @NonNull MediaProjectionManagerWrapper mediaProjectionManager) {
         mDisplayContent = displayContent;
+        mMediaProjectionManager = mediaProjectionManager;
     }
 
     /**
@@ -95,7 +117,7 @@ final class ContentRecorder {
     }
 
     /**
-     * Start recording if this DisplayContent no longer has content. Stop recording if it now
+     * Start recording if this DisplayContent no longer has content. Pause recording if it now
      * has content or the display is not on.
      */
     @VisibleForTesting void updateRecording() {
@@ -187,7 +209,7 @@ final class ContentRecorder {
     /**
      * Stops recording on this DisplayContent, and updates the session details.
      */
-    void remove() {
+    void stopRecording() {
         if (mRecordedSurface != null) {
             // Do not wait for the mirrored surface to be garbage collected, but clean up
             // immediately.
@@ -195,7 +217,20 @@ final class ContentRecorder {
             mRecordedSurface = null;
             clearContentRecordingSession();
             // Do not need to force remove the VirtualDisplay; this is handled by the media
-            // projection service.
+            // projection service when the display is removed.
+        }
+    }
+
+
+    /**
+     * Ensure recording does not fall back to the display stack; ensure the recording is stopped
+     * and the client notified by tearing down the virtual display.
+     */
+    void stopMediaProjection() {
+        ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
+                "Stop MediaProjection on virtual display %d", mDisplayContent.getDisplayId());
+        if (mMediaProjectionManager != null) {
+            mMediaProjectionManager.stopActiveProjection();
         }
     }
 
@@ -326,6 +361,8 @@ final class ContentRecorder {
                     ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
                             "Unable to retrieve task to start recording for "
                                     + "display %d", mDisplayContent.getDisplayId());
+                } else {
+                    taskToRecord.registerWindowContainerListener(this);
                 }
                 return taskToRecord;
             default:
@@ -342,34 +379,22 @@ final class ContentRecorder {
     /**
      * Exit this recording session.
      * <p>
-     * If this is a task session, tear down the recording entirely. Do not fall back
-     * to recording the entire display on the display stack; this would surprise the user
-     * given they selected task capture.
+     * If this is a task session, stop the recording entirely, including the MediaProjection.
+     * Do not fall back to recording the entire display on the display stack; this would surprise
+     * the user given they selected task capture.
      * </p><p>
      * If this is a display session, just stop recording by layer mirroring. Fall back to recording
      * from the display stack.
      * </p>
      */
     private void handleStartRecordingFailed() {
-        final boolean shouldExitTaskRecording = mContentRecordingSession != null
-                && mContentRecordingSession.getContentToRecord() == RECORD_CONTENT_TASK;
+        final boolean shouldExitTaskRecording = isRecordingContentTask();
+        clearContentRecordingSession();
         if (shouldExitTaskRecording) {
-            // Clean up the cached session first, since tearing down the display will generate
-            // display
-            // events which will trickle back to here.
-            clearContentRecordingSession();
-            tearDownVirtualDisplay();
-        } else {
-            clearContentRecordingSession();
+            // Clean up the cached session first to ensure recording doesn't re-start, since
+            // tearing down the display will generate display events which will trickle back here.
+            stopMediaProjection();
         }
-    }
-
-    /**
-     * Ensure recording does not fall back to the display stack; ensure the recording is stopped
-     * and the client notified by tearing down the virtual display.
-     */
-    private void tearDownVirtualDisplay() {
-        // TODO(b/219761722) Clean up the VirtualDisplay if task mirroring fails
     }
 
     /**
@@ -441,5 +466,44 @@ final class ContentRecorder {
             return null;
         }
         return surfaceSize;
+    }
+
+    // WindowContainerListener
+    @Override
+    public void onRemoved() {
+        ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
+                "Recorded task is removed, so stop recording on display %d",
+                mDisplayContent.getDisplayId());
+
+        Task recordedTask = mRecordedWindowContainer != null
+                ? mRecordedWindowContainer.asTask() : null;
+        if (recordedTask == null || !isRecordingContentTask()) {
+            return;
+        }
+        recordedTask.unregisterWindowContainerListener(this);
+        // Stop mirroring and teardown.
+        clearContentRecordingSession();
+        // Clean up the cached session first to ensure recording doesn't re-start, since
+        // tearing down the display will generate display events which will trickle back here.
+        stopMediaProjection();
+    }
+
+    // WindowContainerListener
+    @Override
+    public void onMergedOverrideConfigurationChanged(
+            Configuration mergedOverrideConfiguration) {
+        WindowContainerListener.super.onMergedOverrideConfigurationChanged(
+                mergedOverrideConfiguration);
+        onConfigurationChanged(mLastOrientation);
+        mLastOrientation = mergedOverrideConfiguration.orientation;
+    }
+
+    @VisibleForTesting interface MediaProjectionManagerWrapper {
+        void stopActiveProjection();
+    }
+
+    private boolean isRecordingContentTask() {
+        return mContentRecordingSession != null
+                && mContentRecordingSession.getContentToRecord() == RECORD_CONTENT_TASK;
     }
 }

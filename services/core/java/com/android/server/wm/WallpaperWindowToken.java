@@ -128,12 +128,15 @@ class WallpaperWindowToken extends WindowToken {
         if (visible && wallpaperTarget != null) {
             final RecentsAnimationController recentsAnimationController =
                     mWmService.getRecentsAnimationController();
+            final BackNaviAnimationController bac = mWmService.getBackNaviAnimationController();
             if (recentsAnimationController != null
                     && recentsAnimationController.isAnimatingTask(wallpaperTarget.getTask())) {
                 // If the Recents animation is running, and the wallpaper target is the animating
                 // task we want the wallpaper to be rotated in the same orientation as the
                 // RecentsAnimation's target (e.g the launcher)
                 recentsAnimationController.linkFixedRotationTransformIfNeeded(this);
+            } else if (bac != null && bac.isAnimatingTask(wallpaperTarget.getTask())) {
+                bac.linkFixedRotationTransformIfNeeded(this);
             } else if ((wallpaperTarget.mActivityRecord == null
                     // Ignore invisible activity because it may be moving to background.
                     || wallpaperTarget.mActivityRecord.mVisibleRequested)

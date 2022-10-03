@@ -151,8 +151,8 @@ public class DreamHomeControlsComplication implements Complication {
      * Controls behavior of the dream complication.
      */
     static class DreamHomeControlsChipViewController extends ViewController<ImageView> {
-        private static final boolean DEBUG = false;
         private static final String TAG = "DreamHomeControlsCtrl";
+        private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
         private final ActivityStarter mActivityStarter;
         private final Context mContext;

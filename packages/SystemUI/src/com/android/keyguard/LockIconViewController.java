@@ -26,7 +26,7 @@ import static com.android.systemui.doze.util.BurnInHelperKt.getBurnInOffset;
 
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.PointF;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.AnimatedStateListDrawable;
 import android.hardware.biometrics.BiometricSourceType;
@@ -357,8 +357,9 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
                     mAuthController.getUdfpsRadius(), scaledPadding);
         } else {
             mView.setCenterLocation(
-                    new PointF(mWidthPixels / 2,
-                        mHeightPixels - ((mBottomPaddingPx + sLockIconRadiusPx) * scaleFactor)),
+                    new Point((int) mWidthPixels / 2,
+                            (int) (mHeightPixels
+                                    - ((mBottomPaddingPx + sLockIconRadiusPx) * scaleFactor))),
                         sLockIconRadiusPx * scaleFactor, scaledPadding);
         }
     }

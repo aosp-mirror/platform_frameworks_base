@@ -26,11 +26,11 @@
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"A tarxeta non é válida."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Cargado"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Cargando sen fíos"</string>
-    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Base de carga"</string>
+    <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Cargando"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Cargando"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Cargando rapidamente"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Cargando lentamente"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Carga limitada temporalmente"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="1709413803451065875">"<xliff:g id="PERCENTAGE">%s</xliff:g> • A carga púxose en pausa para protexer a batería"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Preme Menú para desbloquear."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Bloqueada pola rede"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"Sen tarxeta SIM"</string>
@@ -84,7 +84,7 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"O administrador bloqueou o dispositivo"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"O dispositivo bloqueouse manualmente"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Non se recoñeceu"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"Desbloqueo facial: acceso á cámara en Configuración"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"O Desbloqueo facial necesita acceso á cámara"</string>
     <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{Mete o PIN da SIM. Quédache # intento antes de que teñas que contactar co operador para desbloquear o dispositivo.}other{Mete o PIN da SIM. Quédanche # intentos.}}"</string>
     <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{A SIM está desactivada. Mete o código PUK para continuar. Quédache # intento antes de que a SIM quede inutilizable para sempre. Contacta co operador para obter información.}other{A SIM está desactivada. Mete o código PUK para continuar. Quédanche # intentos antes de que a SIM quede inutilizable para sempre. Contacta co operador para obter información.}}"</string>
     <string name="clock_title_default" msgid="6342735240617459864">"Predeterminado"</string>

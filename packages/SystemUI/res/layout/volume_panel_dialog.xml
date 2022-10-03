@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (C) 2022 The Android Open Source Project
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+  -->
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/volume_panel_dialog"
+    android:layout_width="@dimen/large_dialog_width"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        style="@style/Widget.SliceView.Panel"
+        android:gravity="center_vertical|center_horizontal"
+        android:layout_marginTop="@dimen/dialog_top_padding"
+        android:layout_marginBottom="@dimen/dialog_bottom_padding"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/volume_panel_dialog_title"
+            android:ellipsize="end"
+            android:gravity="center_vertical|center_horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/sound_settings"
+            android:textAppearance="@style/TextAppearance.Dialog.Title"/>
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/volume_panel_parent_layout"
+        android:scrollbars="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:minHeight="304dp"
+        android:layout_weight="1"
+        android:overScrollMode="never"/>
+
+    <LinearLayout
+        android:id="@+id/button_layout"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dialog_button_vertical_padding"
+        android:layout_marginStart="@dimen/dialog_side_padding"
+        android:layout_marginEnd="@dimen/dialog_side_padding"
+        android:layout_marginBottom="@dimen/dialog_bottom_padding"
+        android:baselineAligned="false"
+        android:clickable="false"
+        android:focusable="false">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_gravity="start|center_vertical"
+            android:orientation="vertical">
+            <Button
+                android:id="@+id/settings_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/volume_panel_dialog_settings_button"
+                android:ellipsize="end"
+                android:maxLines="1"
+                style="@style/Widget.Dialog.Button.BorderButton"
+                android:clickable="true"
+                android:focusable="true"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dialog_button_horizontal_padding"
+            android:layout_gravity="end|center_vertical">
+            <Button
+                android:id="@+id/done_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/inline_done_button"
+                style="@style/Widget.Dialog.Button"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:clickable="true"
+                android:focusable="true"/>
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

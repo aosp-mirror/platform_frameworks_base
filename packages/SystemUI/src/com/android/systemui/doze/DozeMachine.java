@@ -269,9 +269,10 @@ public class DozeMachine {
         return mPulseReason;
     }
 
-    /** Requests the PowerManager to wake up now. */
-    public void wakeUp() {
-        mDozeService.requestWakeUp();
+    /** Requests the PowerManager to wake up now.
+     * @param reason {@link DozeLog.Reason} that woke up the device.*/
+    public void wakeUp(@DozeLog.Reason int reason) {
+        mDozeService.requestWakeUp(reason);
     }
 
     public boolean isExecutingTransition() {
@@ -469,7 +470,7 @@ public class DozeMachine {
         void setDozeScreenState(int state);
 
         /** Request waking up. */
-        void requestWakeUp();
+        void requestWakeUp(@DozeLog.Reason int reason);
 
         /** Set screen brightness */
         void setDozeScreenBrightness(int brightness);
@@ -492,8 +493,8 @@ public class DozeMachine {
             }
 
             @Override
-            public void requestWakeUp() {
-                mDelegate.requestWakeUp();
+            public void requestWakeUp(@DozeLog.Reason int reason) {
+                mDelegate.requestWakeUp(reason);
             }
 
             @Override

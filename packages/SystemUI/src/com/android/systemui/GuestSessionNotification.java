@@ -25,7 +25,6 @@ import android.content.pm.UserInfo;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.util.FeatureFlagUtils;
 
 import com.android.internal.messages.nano.SystemMessageProto;
 import com.android.systemui.util.NotificationChannels;
@@ -59,10 +58,8 @@ public final class GuestSessionNotification {
     }
 
     void createPersistentNotification(UserInfo userInfo, boolean isGuestFirstLogin) {
-        if (!FeatureFlagUtils.isEnabled(mContext,
-                FeatureFlagUtils.SETTINGS_GUEST_MODE_UX_CHANGES)
-                || !userInfo.isGuest()) {
-            // we create a persistent notification only if enabled and only for guests
+        if (!userInfo.isGuest()) {
+            // we create a persistent notification only for guests
             return;
         }
         String contentText;

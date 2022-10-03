@@ -20,8 +20,6 @@ package com.android.systemui.lifecycle
 import android.testing.TestableLooper.RunWithLooper
 import android.view.View
 import android.view.ViewTreeObserver
-import androidx.arch.core.executor.ArchTaskExecutor
-import androidx.arch.core.executor.TaskExecutor
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.test.filters.SmallTest
@@ -35,8 +33,6 @@ import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.junit.rules.TestWatcher
-import org.junit.runner.Description
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
 import org.mockito.Mock
@@ -280,40 +276,6 @@ class RepeatWhenAttachedTest : SysuiTestCase() {
 
         override suspend fun invoke(lifecycleOwner: LifecycleOwner, view: View) {
             _invocations.add(Invocation(lifecycleOwner))
-        }
-    }
-
-    /**
-     * Test rule that makes ArchTaskExecutor main thread assertions pass. There is one such assert
-     * in LifecycleRegistry.
-     */
-    class InstantTaskExecutorRule : TestWatcher() {
-        // TODO(b/240620122): This is a copy of
-        //  androidx/arch/core/executor/testing/InstantTaskExecutorRule which should be replaced
-        //  with a dependency on the real library once b/ is cleared.
-        override fun starting(description: Description) {
-            super.starting(description)
-            ArchTaskExecutor.getInstance()
-                .setDelegate(
-                    object : TaskExecutor() {
-                        override fun executeOnDiskIO(runnable: Runnable) {
-                            runnable.run()
-                        }
-
-                        override fun postToMainThread(runnable: Runnable) {
-                            runnable.run()
-                        }
-
-                        override fun isMainThread(): Boolean {
-                            return true
-                        }
-                    }
-                )
-        }
-
-        override fun finished(description: Description) {
-            super.finished(description)
-            ArchTaskExecutor.getInstance().setDelegate(null)
         }
     }
 }

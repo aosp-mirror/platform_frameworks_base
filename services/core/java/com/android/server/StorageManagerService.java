@@ -19,12 +19,10 @@ package com.android.server;
 import static android.Manifest.permission.ACCESS_MTP;
 import static android.Manifest.permission.INSTALL_PACKAGES;
 import static android.Manifest.permission.MANAGE_EXTERNAL_STORAGE;
-import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.OP_LEGACY_STORAGE;
 import static android.app.AppOpsManager.OP_MANAGE_EXTERNAL_STORAGE;
 import static android.app.AppOpsManager.OP_REQUEST_INSTALL_PACKAGES;
-import static android.app.AppOpsManager.OP_WRITE_EXTERNAL_STORAGE;
 import static android.app.PendingIntent.FLAG_CANCEL_CURRENT;
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
 import static android.app.PendingIntent.FLAG_ONE_SHOT;
@@ -370,6 +368,10 @@ class StorageManagerService extends IStorageManager.Stub
     private static final float DEFAULT_LOW_BATTERY_LEVEL = 20F;
     // Decide whether charging is required to turn on the feature
     private static final boolean DEFAULT_CHARGING_REQUIRED = true;
+    // Minimum GC interval sleep time in ms
+    private static final int DEFAULT_MIN_GC_SLEEPTIME = 10000;
+    // Target dirty segment ratio to aim to
+    private static final int DEFAULT_TARGET_DIRTY_RATIO = 80;
 
     private volatile int mLifetimePercentThreshold;
     private volatile int mMinSegmentsThreshold;
@@ -377,6 +379,8 @@ class StorageManagerService extends IStorageManager.Stub
     private volatile float mSegmentReclaimWeight;
     private volatile float mLowBatteryLevel;
     private volatile boolean mChargingRequired;
+    private volatile int mMinGCSleepTime;
+    private volatile int mTargetDirtyRatio;
     private volatile boolean mNeedGC;
 
     private volatile boolean mPassedLifetimeThresh;
@@ -2712,6 +2716,10 @@ class StorageManagerService extends IStorageManager.Stub
                 "low_battery_level", DEFAULT_LOW_BATTERY_LEVEL);
             mChargingRequired = DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_STORAGE_NATIVE_BOOT,
                 "charging_required", DEFAULT_CHARGING_REQUIRED);
+            mMinGCSleepTime = DeviceConfig.getInt(DeviceConfig.NAMESPACE_STORAGE_NATIVE_BOOT,
+                "min_gc_sleeptime", DEFAULT_MIN_GC_SLEEPTIME);
+            mTargetDirtyRatio = DeviceConfig.getInt(DeviceConfig.NAMESPACE_STORAGE_NATIVE_BOOT,
+                "target_dirty_ratio", DEFAULT_TARGET_DIRTY_RATIO);
 
             // If we use the smart idle maintenance, we need to turn off GC in the traditional idle
             // maintenance to avoid the conflict
@@ -2829,6 +2837,14 @@ class StorageManagerService extends IStorageManager.Stub
         enforcePermission(android.Manifest.permission.MOUNT_FORMAT_FILESYSTEMS);
 
         try {
+            int latestWrite = mVold.getWriteAmount();
+            if (latestWrite == -1) {
+                Slog.w(TAG, "Failed to get storage write record");
+                return;
+            }
+
+            updateStorageWriteRecords(latestWrite);
+
             // Block based checkpoint process runs fstrim. So, if checkpoint is in progress
             // (first boot after OTA), We skip the smart idle maintenance
             if (!needsCheckpoint() || !supportsBlockCheckpoint()) {
@@ -2836,13 +2852,6 @@ class StorageManagerService extends IStorageManager.Stub
                     return;
                 }
 
-                int latestWrite = mVold.getWriteAmount();
-                if (latestWrite == -1) {
-                    Slog.w(TAG, "Failed to get storage write record");
-                    return;
-                }
-
-                updateStorageWriteRecords(latestWrite);
                 int avgWriteAmount = getAverageWriteAmount();
 
                 Slog.i(TAG, "Set smart idle maintenance: " + "latest write amount: " +
@@ -2850,9 +2859,12 @@ class StorageManagerService extends IStorageManager.Stub
                             ", min segment threshold: " + mMinSegmentsThreshold +
                             ", dirty reclaim rate: " + mDirtyReclaimRate +
                             ", segment reclaim weight: " + mSegmentReclaimWeight +
-                            ", period: " + sSmartIdleMaintPeriod);
+                            ", period(min): " + sSmartIdleMaintPeriod +
+                            ", min gc sleep time(ms): " + mMinGCSleepTime +
+                            ", target dirty ratio: " + mTargetDirtyRatio);
                 mVold.setGCUrgentPace(avgWriteAmount, mMinSegmentsThreshold, mDirtyReclaimRate,
-                                      mSegmentReclaimWeight, sSmartIdleMaintPeriod);
+                                      mSegmentReclaimWeight, sSmartIdleMaintPeriod,
+                                      mMinGCSleepTime, mTargetDirtyRatio);
             } else {
                 Slog.i(TAG, "Skipping smart idle maintenance - block based checkpoint in progress");
             }
@@ -4512,11 +4524,7 @@ class StorageManagerService extends IStorageManager.Stub
                 }
             }
 
-            // Determine if caller is holding runtime permission
-            final boolean hasWrite = StorageManager.checkPermissionAndCheckOp(mContext, false, 0,
-                    uid, packageName, WRITE_EXTERNAL_STORAGE, OP_WRITE_EXTERNAL_STORAGE);
-
-            // We're only willing to give out installer access if they also hold
+            // We're only willing to give out installer access if they hold
             // runtime permission; this is a firm CDD requirement
             final boolean hasInstall = mIPackageManager.checkUidPermission(INSTALL_PACKAGES,
                     uid) == PERMISSION_GRANTED;
@@ -4532,7 +4540,7 @@ class StorageManagerService extends IStorageManager.Stub
                     break;
                 }
             }
-            if ((hasInstall || hasInstallOp) && hasWrite) {
+            if (hasInstall || hasInstallOp) {
                 return StorageManager.MOUNT_MODE_EXTERNAL_INSTALLER;
             }
             return StorageManager.MOUNT_MODE_EXTERNAL_DEFAULT;

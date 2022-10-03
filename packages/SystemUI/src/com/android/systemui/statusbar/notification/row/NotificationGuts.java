@@ -76,7 +76,7 @@ public class NotificationGuts extends FrameLayout {
 
                     switch (action) {
                         case AccessibilityNodeInfo.ACTION_LONG_CLICK:
-                            closeControls(host, false);
+                            closeControls(host, /* save= */ false);
                             return true;
                     }
 
@@ -123,7 +123,7 @@ public class NotificationGuts extends FrameLayout {
         /**
          * Return whether something changed and needs to be saved, possibly requiring a bouncer.
          */
-        boolean shouldBeSaved();
+        boolean shouldBeSavedOnClose();
 
         /**
          * Called when the guts view has finished its close animation.
@@ -259,7 +259,7 @@ public class NotificationGuts extends FrameLayout {
         if (mGutsContent != null) {
             if ((mGutsContent.isLeavebehind() && leavebehinds)
                     || (!mGutsContent.isLeavebehind() && controls)) {
-                closeControls(x, y, mGutsContent.shouldBeSaved(), force);
+                closeControls(x, y, mGutsContent.shouldBeSavedOnClose(), force);
             }
         }
     }

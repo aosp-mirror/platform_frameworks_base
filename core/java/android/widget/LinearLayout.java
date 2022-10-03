@@ -732,6 +732,10 @@ public class LinearLayout extends ViewGroup {
      * @hide Pending API consideration. Currently only used internally by the system.
      */
     protected boolean hasDividerBeforeChildAt(int childIndex) {
+        if (mShowDividers == SHOW_DIVIDER_NONE) {
+            // Short-circuit to save iteration over child views.
+            return false;
+        }
         if (childIndex == getVirtualChildCount()) {
             // Check whether the end divider should draw.
             return (mShowDividers & SHOW_DIVIDER_END) != 0;
@@ -746,10 +750,42 @@ public class LinearLayout extends ViewGroup {
     }
 
     /**
+     * Determines whether or not there's a divider after a specified child index.
+     *
+     * @param childIndex Index of child to check for following divider
+     * @return true if there should be a divider after the child at childIndex
+     */
+    private boolean hasDividerAfterChildAt(int childIndex) {
+        if (mShowDividers == SHOW_DIVIDER_NONE) {
+            // Short-circuit to save iteration over child views.
+            return false;
+        }
+        if (allViewsAreGoneAfter(childIndex)) {
+            // This is the last view that's not gone, check if end divider is enabled.
+            return (mShowDividers & SHOW_DIVIDER_END) != 0;
+        }
+        return (mShowDividers & SHOW_DIVIDER_MIDDLE) != 0;
+    }
+
+    /**
      * Checks whether all (virtual) child views before the given index are gone.
      */
     private boolean allViewsAreGoneBefore(int childIndex) {
         for (int i = childIndex - 1; i >= 0; i--) {
+            final View child = getVirtualChildAt(i);
+            if (child != null && child.getVisibility() != GONE) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Checks whether all (virtual) child views after the given index are gone.
+     */
+    private boolean allViewsAreGoneAfter(int childIndex) {
+        final int count = getVirtualChildCount();
+        for (int i = childIndex + 1; i < count; i++) {
             final View child = getVirtualChildAt(i);
             if (child != null && child.getVisibility() != GONE) {
                 return false;
@@ -1295,6 +1331,7 @@ public class LinearLayout extends ViewGroup {
         if (useLargestChild &&
                 (widthMode == MeasureSpec.AT_MOST || widthMode == MeasureSpec.UNSPECIFIED)) {
             mTotalLength = 0;
+            nonSkippedChildCount = 0;
 
             for (int i = 0; i < count; ++i) {
                 final View child = getVirtualChildAt(i);
@@ -1308,6 +1345,11 @@ public class LinearLayout extends ViewGroup {
                     continue;
                 }
 
+                nonSkippedChildCount++;
+                if (hasDividerBeforeChildAt(i)) {
+                    mTotalLength += mDividerWidth;
+                }
+
                 final LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams)
                         child.getLayoutParams();
                 if (isExactly) {
@@ -1318,6 +1360,10 @@ public class LinearLayout extends ViewGroup {
                     mTotalLength = Math.max(totalLength, totalLength + largestChildWidth +
                             lp.leftMargin + lp.rightMargin + getNextLocationOffset(child));
                 }
+            }
+
+            if (nonSkippedChildCount > 0 && hasDividerBeforeChildAt(count)) {
+                mTotalLength += mDividerWidth;
             }
         }
 
@@ -1347,11 +1393,17 @@ public class LinearLayout extends ViewGroup {
             maxHeight = -1;
 
             mTotalLength = 0;
+            nonSkippedChildCount = 0;
 
             for (int i = 0; i < count; ++i) {
                 final View child = getVirtualChildAt(i);
                 if (child == null || child.getVisibility() == View.GONE) {
                     continue;
+                }
+
+                nonSkippedChildCount++;
+                if (hasDividerBeforeChildAt(i)) {
+                    mTotalLength += mDividerWidth;
                 }
 
                 final LayoutParams lp = (LayoutParams) child.getLayoutParams();
@@ -1421,6 +1473,10 @@ public class LinearLayout extends ViewGroup {
                                 childHeight - childBaseline);
                     }
                 }
+            }
+
+            if (nonSkippedChildCount > 0 && hasDividerBeforeChildAt(count)) {
+                mTotalLength += mDividerWidth;
             }
 
             // Add in our padding
@@ -1810,7 +1866,13 @@ public class LinearLayout extends ViewGroup {
                         break;
                 }
 
-                if (hasDividerBeforeChildAt(childIndex)) {
+                if (isLayoutRtl) {
+                    // Because rtl rendering occurs in the reverse direction, we need to check
+                    // after the child rather than before (since after=left in this context)
+                    if (hasDividerAfterChildAt(childIndex)) {
+                        childLeft += mDividerWidth;
+                    }
+                } else if (hasDividerBeforeChildAt(childIndex)) {
                     childLeft += mDividerWidth;
                 }
 

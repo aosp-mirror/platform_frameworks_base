@@ -33,7 +33,6 @@ import static com.android.systemui.statusbar.phone.NotificationIconAreaControlle
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Point;
-import android.graphics.PointF;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -82,13 +81,11 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.LaunchAnimationParameters;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
-import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy.OnGroupChangeListener;
-import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
+import com.android.systemui.statusbar.notification.collection.PipelineDumpable;
+import com.android.systemui.statusbar.notification.collection.PipelineDumper;
 import com.android.systemui.statusbar.notification.collection.notifcollection.DismissedByUserStats;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
@@ -157,10 +154,8 @@ public class NotificationStackScrollLayoutController {
     private final ScrimController mScrimController;
     private final NotifPipeline mNotifPipeline;
     private final NotifCollection mNotifCollection;
-    private final NotificationEntryManager mNotificationEntryManager;
     private final UiEventLogger mUiEventLogger;
     private final NotificationRemoteInputManager mRemoteInputManager;
-    private final VisualStabilityManager mVisualStabilityManager;
     private final ShadeController mShadeController;
     private final KeyguardMediaController mKeyguardMediaController;
     private final SysuiStatusBarStateController mStatusBarStateController;
@@ -180,7 +175,6 @@ public class NotificationStackScrollLayoutController {
     private NotificationStackScrollLayout mView;
     private boolean mFadeNotificationsOnDismiss;
     private NotificationSwipeHelper mSwipeHelper;
-    private boolean mShowEmptyShadeView;
     @Nullable private Boolean mHistoryEnabled;
     private int mBarState;
     private HeadsUpAppearanceController mHeadsUpAppearanceController;
@@ -311,7 +305,6 @@ public class NotificationStackScrollLayoutController {
                     mView.updateSensitiveness(mStatusBarStateController.goingToFullShade(),
                             mLockscreenUserManager.isAnyProfilePublicMode());
                     mView.onStatePostChange(mStatusBarStateController.fromShadeLocked());
-                    mNotificationEntryManager.updateNotifications("CentralSurfaces state changed");
                 }
             };
 
@@ -634,17 +627,14 @@ public class NotificationStackScrollLayoutController {
             NotificationSwipeHelper.Builder notificationSwipeHelperBuilder,
             CentralSurfaces centralSurfaces,
             ScrimController scrimController,
-            NotificationGroupManagerLegacy legacyGroupManager,
             GroupExpansionManager groupManager,
             @SilentHeader SectionHeaderController silentHeaderController,
             NotifPipeline notifPipeline,
             NotifCollection notifCollection,
-            NotificationEntryManager notificationEntryManager,
             LockscreenShadeTransitionController lockscreenShadeTransitionController,
             ShadeTransitionController shadeTransitionController,
             UiEventLogger uiEventLogger,
             NotificationRemoteInputManager remoteInputManager,
-            VisualStabilityManager visualStabilityManager,
             ShadeController shadeController,
             InteractionJankMonitor jankMonitor,
             StackStateLogger stackLogger,
@@ -679,19 +669,11 @@ public class NotificationStackScrollLayoutController {
         mJankMonitor = jankMonitor;
         mNotificationStackSizeCalculator = notificationStackSizeCalculator;
         mGroupExpansionManager = groupManager;
-        legacyGroupManager.registerGroupChangeListener(new OnGroupChangeListener() {
-            @Override
-            public void onGroupsChanged() {
-                mCentralSurfaces.requestNotificationUpdate("onGroupsChanged");
-            }
-        });
         mSilentHeaderController = silentHeaderController;
         mNotifPipeline = notifPipeline;
         mNotifCollection = notifCollection;
-        mNotificationEntryManager = notificationEntryManager;
         mUiEventLogger = uiEventLogger;
         mRemoteInputManager = remoteInputManager;
-        mVisualStabilityManager = visualStabilityManager;
         mShadeController = shadeController;
         updateResources();
     }
@@ -762,8 +744,6 @@ public class NotificationStackScrollLayoutController {
 
         mNotificationRoundnessManager.setOnRoundingChangedCallback(mView::invalidate);
         mView.addOnExpandedHeightChangedListener(mNotificationRoundnessManager::setExpanded);
-
-        mVisualStabilityManager.setVisibilityLocationProvider(this::isInVisibleLocation);
 
         mTunerService.addTunable(
                 (key, newValue) -> {
@@ -1187,8 +1167,21 @@ public class NotificationStackScrollLayoutController {
     }
 
     /**
-     * Update whether we should show the empty shade view (no notifications in the shade).
-     * If so, send the update to our view.
+     * Set the visibility of the view, and propagate it to specific children.
+     *
+     * @param visible either the view is visible or not.
+     */
+    public void updateVisibility(boolean visible) {
+        mView.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
+
+        if (mView.getVisibility() == View.VISIBLE) {
+            // Synchronize EmptyShadeView visibility with the parent container.
+            updateShowEmptyShadeView();
+        }
+    }
+
+    /**
+     * Update whether we should show the empty shade view ("no notifications" in the shade).
      *
      * When in split mode, notifications are always visible regardless of the state of the
      * QuickSettings panel. That being the case, empty view is always shown if the other conditions
@@ -1196,18 +1189,31 @@ public class NotificationStackScrollLayoutController {
      */
     public void updateShowEmptyShadeView() {
         Trace.beginSection("NSSLC.updateShowEmptyShadeView");
-        mShowEmptyShadeView = mStatusBarStateController.getCurrentOrUpcomingState() != KEYGUARD
-                && !mView.isQsFullScreen()
-                && getVisibleNotificationCount() == 0;
 
-        mView.updateEmptyShadeView(
-                mShowEmptyShadeView,
-                mZenModeController.areNotificationsHiddenInShade());
+        final boolean shouldShow = getVisibleNotificationCount() == 0
+                && !mView.isQsFullScreen()
+                // Hide empty shade view when in transition to Keyguard.
+                // That avoids "No Notifications" to blink when transitioning to AOD.
+                // For more details, see: b/228790482
+                && !isInTransitionToKeyguard();
+
+        mView.updateEmptyShadeView(shouldShow, mZenModeController.areNotificationsHiddenInShade());
+
         Trace.endSection();
     }
 
+    /**
+     * @return true if {@link StatusBarStateController} is in transition to the KEYGUARD
+     *         and false otherwise.
+     */
+    private boolean isInTransitionToKeyguard() {
+        final int currentState = mStatusBarStateController.getState();
+        final int upcomingState = mStatusBarStateController.getCurrentOrUpcomingState();
+        return (currentState != upcomingState && upcomingState == KEYGUARD);
+    }
+
     public boolean isShowingEmptyShadeView() {
-        return mShowEmptyShadeView;
+        return mView.isEmptyShadeViewVisible();
     }
 
     public void setHeadsUpAnimatingAway(boolean headsUpAnimatingAway) {
@@ -1239,8 +1245,8 @@ public class NotificationStackScrollLayoutController {
         mView.setAnimationsEnabled(enabled);
     }
 
-    public void setDozing(boolean dozing, boolean animate, PointF wakeUpTouchLocation) {
-        mView.setDozing(dozing, animate, wakeUpTouchLocation);
+    public void setDozing(boolean dozing, boolean animate) {
+        mView.setDozing(dozing, animate);
     }
 
     public void setPulsing(boolean pulsing, boolean animatePulse) {
@@ -1560,7 +1566,8 @@ public class NotificationStackScrollLayoutController {
         }
     }
 
-    private class NotificationListContainerImpl implements NotificationListContainer {
+    private class NotificationListContainerImpl implements NotificationListContainer,
+            PipelineDumpable {
 
         @Override
         public void setChildTransferInProgress(boolean childTransferInProgress) {
@@ -1705,6 +1712,12 @@ public class NotificationStackScrollLayoutController {
         @Override
         public void setWillExpand(boolean willExpand) {
             mView.setWillExpand(willExpand);
+        }
+
+        @Override
+        public void dumpPipeline(@NonNull PipelineDumper d) {
+            d.dump("NotificationStackScrollLayoutController.this",
+                    NotificationStackScrollLayoutController.this);
         }
     }
 

@@ -21,8 +21,10 @@ import static java.util.Objects.requireNonNull;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -41,17 +43,30 @@ import java.util.List;
  */
 public final class TaskFragmentTransaction implements Parcelable {
 
+    /** Unique token to represent this transaction. */
+    private final IBinder mTransactionToken;
+
+    /** Changes in this transaction. */
     private final ArrayList<Change> mChanges = new ArrayList<>();
 
-    public TaskFragmentTransaction() {}
+    public TaskFragmentTransaction() {
+        mTransactionToken = new Binder();
+    }
 
     private TaskFragmentTransaction(Parcel in) {
+        mTransactionToken = in.readStrongBinder();
         in.readTypedList(mChanges, Change.CREATOR);
     }
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
+        dest.writeStrongBinder(mTransactionToken);
         dest.writeTypedList(mChanges);
+    }
+
+    @NonNull
+    public IBinder getTransactionToken() {
+        return mTransactionToken;
     }
 
     /** Adds a {@link Change} to this transaction. */
@@ -74,7 +89,9 @@ public final class TaskFragmentTransaction implements Parcelable {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("TaskFragmentTransaction{changes=[");
+        sb.append("TaskFragmentTransaction{token=");
+        sb.append(mTransactionToken);
+        sb.append(" changes=[");
         for (int i = 0; i < mChanges.size(); ++i) {
             if (i > 0) {
                 sb.append(',');
@@ -90,6 +107,7 @@ public final class TaskFragmentTransaction implements Parcelable {
         return 0;
     }
 
+    @NonNull
     public static final Creator<TaskFragmentTransaction> CREATOR = new Creator<>() {
         @Override
         public TaskFragmentTransaction createFromParcel(Parcel in) {
@@ -122,7 +140,7 @@ public final class TaskFragmentTransaction implements Parcelable {
      * then exits Picture-in-picture, it will be reparented back to its original Task. In this case,
      * we need to notify the organizer so that it can check if the Activity matches any split rule.
      */
-    public static final int TYPE_ACTIVITY_REPARENT_TO_TASK = 6;
+    public static final int TYPE_ACTIVITY_REPARENTED_TO_TASK = 6;
 
     @IntDef(prefix = { "TYPE_" }, value = {
             TYPE_TASK_FRAGMENT_APPEARED,
@@ -130,7 +148,7 @@ public final class TaskFragmentTransaction implements Parcelable {
             TYPE_TASK_FRAGMENT_VANISHED,
             TYPE_TASK_FRAGMENT_PARENT_INFO_CHANGED,
             TYPE_TASK_FRAGMENT_ERROR,
-            TYPE_ACTIVITY_REPARENT_TO_TASK
+            TYPE_ACTIVITY_REPARENTED_TO_TASK
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface ChangeType {}
@@ -153,10 +171,6 @@ public final class TaskFragmentTransaction implements Parcelable {
         /** @see #setTaskId(int) */
         private int mTaskId;
 
-        /** @see #setTaskConfiguration(Configuration) */
-        @Nullable
-        private Configuration mTaskConfiguration;
-
         /** @see #setErrorCallbackToken(IBinder) */
         @Nullable
         private IBinder mErrorCallbackToken;
@@ -173,6 +187,9 @@ public final class TaskFragmentTransaction implements Parcelable {
         @Nullable
         private IBinder mActivityToken;
 
+        @Nullable
+        private TaskFragmentParentInfo mTaskFragmentParentInfo;
+
         public Change(@ChangeType int type) {
             mType = type;
         }
@@ -182,11 +199,11 @@ public final class TaskFragmentTransaction implements Parcelable {
             mTaskFragmentToken = in.readStrongBinder();
             mTaskFragmentInfo = in.readTypedObject(TaskFragmentInfo.CREATOR);
             mTaskId = in.readInt();
-            mTaskConfiguration = in.readTypedObject(Configuration.CREATOR);
             mErrorCallbackToken = in.readStrongBinder();
             mErrorBundle = in.readBundle(TaskFragmentTransaction.class.getClassLoader());
             mActivityIntent = in.readTypedObject(Intent.CREATOR);
             mActivityToken = in.readStrongBinder();
+            mTaskFragmentParentInfo = in.readTypedObject(TaskFragmentParentInfo.CREATOR);
         }
 
         @Override
@@ -195,34 +212,38 @@ public final class TaskFragmentTransaction implements Parcelable {
             dest.writeStrongBinder(mTaskFragmentToken);
             dest.writeTypedObject(mTaskFragmentInfo, flags);
             dest.writeInt(mTaskId);
-            dest.writeTypedObject(mTaskConfiguration, flags);
             dest.writeStrongBinder(mErrorCallbackToken);
             dest.writeBundle(mErrorBundle);
             dest.writeTypedObject(mActivityIntent, flags);
             dest.writeStrongBinder(mActivityToken);
+            dest.writeTypedObject(mTaskFragmentParentInfo, flags);
         }
 
         /** The change is related to the TaskFragment created with this unique token. */
+        @NonNull
         public Change setTaskFragmentToken(@NonNull IBinder taskFragmentToken) {
             mTaskFragmentToken = requireNonNull(taskFragmentToken);
             return this;
         }
 
         /** Info of the embedded TaskFragment. */
+        @NonNull
         public Change setTaskFragmentInfo(@NonNull TaskFragmentInfo info) {
             mTaskFragmentInfo = requireNonNull(info);
             return this;
         }
 
         /** Task id the parent Task. */
+        @NonNull
         public Change setTaskId(int taskId) {
             mTaskId = taskId;
             return this;
         }
 
+        // TODO(b/241043377): Keep this API to prevent @TestApi changes. Remove in the next release.
         /** Configuration of the parent Task. */
+        @NonNull
         public Change setTaskConfiguration(@NonNull Configuration configuration) {
-            mTaskConfiguration = requireNonNull(configuration);
             return this;
         }
 
@@ -231,6 +252,7 @@ public final class TaskFragmentTransaction implements Parcelable {
          * from the {@link TaskFragmentOrganizer}, it may come with an error callback token to
          * report back.
          */
+        @NonNull
         public Change setErrorCallbackToken(@Nullable IBinder errorCallbackToken) {
             mErrorCallbackToken = errorCallbackToken;
             return this;
@@ -240,6 +262,7 @@ public final class TaskFragmentTransaction implements Parcelable {
          * Bundle with necessary info about the failure operation of
          * {@link #TYPE_TASK_FRAGMENT_ERROR}.
          */
+        @NonNull
         public Change setErrorBundle(@NonNull Bundle errorBundle) {
             mErrorBundle = requireNonNull(errorBundle);
             return this;
@@ -247,22 +270,37 @@ public final class TaskFragmentTransaction implements Parcelable {
 
         /**
          * Intent of the activity that is reparented to the Task for
-         * {@link #TYPE_ACTIVITY_REPARENT_TO_TASK}.
+         * {@link #TYPE_ACTIVITY_REPARENTED_TO_TASK}.
          */
+        @NonNull
         public Change setActivityIntent(@NonNull Intent intent) {
             mActivityIntent = requireNonNull(intent);
             return this;
         }
 
         /**
-         * Token of the reparent activity for {@link #TYPE_ACTIVITY_REPARENT_TO_TASK}.
+         * Token of the reparent activity for {@link #TYPE_ACTIVITY_REPARENTED_TO_TASK}.
          * If the activity belongs to the same process as the organizer, this will be the actual
          * activity token; if the activity belongs to a different process, the server will generate
          * a temporary token that the organizer can use to reparent the activity through
          * {@link WindowContainerTransaction} if needed.
          */
+        @NonNull
         public Change setActivityToken(@NonNull IBinder activityToken) {
             mActivityToken = requireNonNull(activityToken);
+            return this;
+        }
+
+        // TODO(b/241043377): Hide this API to prevent @TestApi changes. Remove in the next release.
+        /**
+         * Sets info of the parent Task of the embedded TaskFragment.
+         * @see TaskFragmentParentInfo
+         *
+         * @hide pending unhide
+         */
+        @NonNull
+        public Change setTaskFragmentParentInfo(@NonNull TaskFragmentParentInfo info) {
+            mTaskFragmentParentInfo = requireNonNull(info);
             return this;
         }
 
@@ -285,9 +323,10 @@ public final class TaskFragmentTransaction implements Parcelable {
             return mTaskId;
         }
 
+        // TODO(b/241043377): Keep this API to prevent @TestApi changes. Remove in the next release.
         @Nullable
         public Configuration getTaskConfiguration() {
-            return mTaskConfiguration;
+            return mTaskFragmentParentInfo.getConfiguration();
         }
 
         @Nullable
@@ -295,11 +334,12 @@ public final class TaskFragmentTransaction implements Parcelable {
             return mErrorCallbackToken;
         }
 
-        @Nullable
+        @NonNull
         public Bundle getErrorBundle() {
-            return mErrorBundle;
+            return mErrorBundle != null ? mErrorBundle : Bundle.EMPTY;
         }
 
+        @SuppressLint("IntentBuilderName") // This is not creating new Intent.
         @Nullable
         public Intent getActivityIntent() {
             return mActivityIntent;
@@ -308,6 +348,13 @@ public final class TaskFragmentTransaction implements Parcelable {
         @Nullable
         public IBinder getActivityToken() {
             return mActivityToken;
+        }
+
+        // TODO(b/241043377): Hide this API to prevent @TestApi changes. Remove in the next release.
+        /** @hide pending unhide */
+        @Nullable
+        public TaskFragmentParentInfo getTaskFragmentParentInfo() {
+            return mTaskFragmentParentInfo;
         }
 
         @Override
@@ -320,6 +367,7 @@ public final class TaskFragmentTransaction implements Parcelable {
             return 0;
         }
 
+        @NonNull
         public static final Creator<Change> CREATOR = new Creator<>() {
             @Override
             public Change createFromParcel(Parcel in) {

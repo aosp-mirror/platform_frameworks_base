@@ -2,7 +2,6 @@ package com.android.systemui.statusbar
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
-import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.content.Context
 import android.content.res.Configuration
@@ -12,6 +11,7 @@ import android.util.MathUtils
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
+import androidx.annotation.FloatRange
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.Dumpable
 import com.android.systemui.ExpandHelper
@@ -69,7 +69,8 @@ class LockscreenShadeTransitionController @Inject constructor(
     wakefulnessLifecycle: WakefulnessLifecycle,
     configurationController: ConfigurationController,
     falsingManager: FalsingManager,
-    dumpManager: DumpManager
+    dumpManager: DumpManager,
+    qsTransitionControllerFactory: LockscreenShadeQsTransitionController.Factory,
 ) : Dumpable {
     private var pulseHeight: Float = 0f
     @get:VisibleForTesting
@@ -119,12 +120,6 @@ class LockscreenShadeTransitionController @Inject constructor(
      * expand.
      */
     private var notificationShelfTransitionDistance = 0
-
-    /**
-     * Distance that the full shade transition takes in order for the Quick Settings to fully fade
-     * and expand.
-     */
-    private var qsTransitionDistance = 0
 
     /**
      * Distance that the full shade transition takes in order for depth of the wallpaper to fully
@@ -189,6 +184,18 @@ class LockscreenShadeTransitionController @Inject constructor(
         keyguardTransitionControllerFactory.create(notificationPanelController)
     }
 
+    private val qsTransitionController = qsTransitionControllerFactory.create { qS }
+
+    /** See [LockscreenShadeQsTransitionController.qsTransitionFraction].*/
+    @get:FloatRange(from = 0.0, to = 1.0)
+    val qSDragProgress: Float
+        get() = qsTransitionController.qsTransitionFraction
+
+    /** See [LockscreenShadeQsTransitionController.qsSquishTransitionFraction].*/
+    @get:FloatRange(from = 0.0, to = 1.0)
+    val qsSquishTransitionFraction: Float
+        get() = qsTransitionController.qsSquishTransitionFraction
+
     /**
      * [LockScreenShadeOverScroller] property that delegates to either
      * [SingleShadeLockScreenOverScroller] or [SplitShadeLockScreenOverScroller].
@@ -243,8 +250,6 @@ class LockscreenShadeTransitionController @Inject constructor(
             R.dimen.lockscreen_shade_transition_by_tap_distance)
         notificationShelfTransitionDistance = context.resources.getDimensionPixelSize(
                 R.dimen.lockscreen_shade_notif_shelf_transition_distance)
-        qsTransitionDistance = context.resources.getDimensionPixelSize(
-                R.dimen.lockscreen_shade_qs_transition_distance)
         depthControllerTransitionDistance = context.resources.getDimensionPixelSize(
                 R.dimen.lockscreen_shade_depth_controller_transition_distance)
         udfpsTransitionDistance = context.resources.getDimensionPixelSize(
@@ -412,8 +417,7 @@ class LockscreenShadeTransitionController @Inject constructor(
                         MathUtils.saturate(dragDownAmount / notificationShelfTransitionDistance)
                     nsslController.setTransitionToFullShadeAmount(fractionToShade)
 
-                    qSDragProgress = MathUtils.saturate(dragDownAmount / qsTransitionDistance)
-                    qS.setTransitionToFullShadeAmount(field, qSDragProgress)
+                    qsTransitionController.dragDownAmount = value
 
                     notificationPanelController.setTransitionToFullShadeAmount(field,
                             false /* animate */, 0 /* delay */)
@@ -426,12 +430,6 @@ class LockscreenShadeTransitionController @Inject constructor(
                 }
             }
         }
-
-    /**
-     * The drag progress of the quick settings drag down amount
-     */
-    var qSDragProgress = 0f
-        private set
 
     private fun transitionToShadeAmountCommon(dragDownAmount: Float) {
         if (depthControllerTransitionDistance == 0) { // split shade
@@ -705,7 +703,6 @@ class LockscreenShadeTransitionController @Inject constructor(
             it.println("pulseHeight: $pulseHeight")
             it.println("useSplitShade: $useSplitShade")
             it.println("dragDownAmount: $dragDownAmount")
-            it.println("qSDragProgress: $qSDragProgress")
             it.println("isDragDownAnywhereEnabled: $isDragDownAnywhereEnabled")
             it.println("isFalsingCheckNeeded: $isFalsingCheckNeeded")
             it.println("isWakingToShadeLocked: $isWakingToShadeLocked")
@@ -880,15 +877,22 @@ class DragDownHelper(
         child.actualHeight = (child.collapsedHeight + rubberband).toInt()
     }
 
-    private fun cancelChildExpansion(child: ExpandableView) {
+    @VisibleForTesting
+    fun cancelChildExpansion(
+            child: ExpandableView,
+            animationDuration: Long = SPRING_BACK_ANIMATION_LENGTH_MS
+    ) {
         if (child.actualHeight == child.collapsedHeight) {
             expandCallback.setUserLockedChild(child, false)
             return
         }
-        val anim = ObjectAnimator.ofInt(child, "actualHeight",
-                child.actualHeight, child.collapsedHeight)
+        val anim = ValueAnimator.ofInt(child.actualHeight, child.collapsedHeight)
         anim.interpolator = Interpolators.FAST_OUT_SLOW_IN
-        anim.duration = SPRING_BACK_ANIMATION_LENGTH_MS
+        anim.duration = animationDuration
+        anim.addUpdateListener { animation: ValueAnimator ->
+            // don't use reflection, because the `actualHeight` field may be obfuscated
+            child.actualHeight = animation.animatedValue as Int
+        }
         anim.addListener(object : AnimatorListenerAdapter() {
             override fun onAnimationEnd(animation: Animator) {
                 expandCallback.setUserLockedChild(child, false)

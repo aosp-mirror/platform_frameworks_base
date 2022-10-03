@@ -68,7 +68,7 @@ class MediaTttCommandLineHelper @Inject constructor(
                     .addFeature("feature")
             val useAppIcon = !(args.size >= 3 && args[2] == "useAppIcon=false")
             if (useAppIcon) {
-                routeInfo.setPackageName(TEST_PACKAGE_NAME)
+                routeInfo.setClientPackageName(TEST_PACKAGE_NAME)
             }
 
             statusBarManager.updateMediaTapToTransferSenderDisplay(
@@ -134,7 +134,7 @@ class MediaTttCommandLineHelper @Inject constructor(
                 .addFeature("feature")
             val useAppIcon = !(args.size >= 2 && args[1] == "useAppIcon=false")
             if (useAppIcon) {
-                routeInfo.setPackageName(TEST_PACKAGE_NAME)
+                routeInfo.setClientPackageName(TEST_PACKAGE_NAME)
             }
 
             statusBarManager.updateMediaTapToTransferReceiverDisplay(

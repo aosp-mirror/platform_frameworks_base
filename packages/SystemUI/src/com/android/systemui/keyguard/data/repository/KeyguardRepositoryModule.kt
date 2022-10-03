@@ -16,22 +16,10 @@
 
 package com.android.systemui.keyguard.data.repository
 
-import com.android.systemui.keyguard.data.config.KeyguardQuickAffordanceConfigs
-import com.android.systemui.keyguard.data.config.KeyguardQuickAffordanceConfigsImpl
 import dagger.Binds
 import dagger.Module
 
 @Module
 interface KeyguardRepositoryModule {
     @Binds fun keyguardRepository(impl: KeyguardRepositoryImpl): KeyguardRepository
-
-    @Binds
-    fun keyguardQuickAffordanceRepository(
-        impl: KeyguardQuickAffordanceRepositoryImpl
-    ): KeyguardQuickAffordanceRepository
-
-    @Binds
-    fun keyguardQuickAffordanceConfigs(
-        impl: KeyguardQuickAffordanceConfigsImpl
-    ): KeyguardQuickAffordanceConfigs
 }

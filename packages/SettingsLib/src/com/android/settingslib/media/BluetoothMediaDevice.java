@@ -59,14 +59,14 @@ public class BluetoothMediaDevice extends MediaDevice {
 
     @Override
     public Drawable getIcon() {
-        return BluetoothUtils.isAdvancedDetailsHeader(mCachedDevice.getDevice())
+        return BluetoothUtils.isAdvancedUntetheredDevice(mCachedDevice.getDevice())
                 ? mContext.getDrawable(R.drawable.ic_earbuds_advanced)
                 : BluetoothUtils.getBtClassDrawableWithDescription(mContext, mCachedDevice).first;
     }
 
     @Override
     public Drawable getIconWithoutBackground() {
-        return BluetoothUtils.isAdvancedDetailsHeader(mCachedDevice.getDevice())
+        return BluetoothUtils.isAdvancedUntetheredDevice(mCachedDevice.getDevice())
                 ? mContext.getDrawable(R.drawable.ic_earbuds_advanced)
                 : BluetoothUtils.getBtClassDrawableWithDescription(mContext, mCachedDevice).first;
     }
