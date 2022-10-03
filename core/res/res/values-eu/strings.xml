@@ -524,9 +524,9 @@
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="191079868596433554">"Wi-Fi sarearen bidez gailu guztiei bidalitako paketeak jasotzeko baimena ematen die aplikazioei multidifusio-helbideak erabilita, ez tableta soilik. Multidifusiokoa ez den moduak baino bateria gehiago erabiltzen du."</string>
     <string name="permdesc_changeWifiMulticastState" product="tv" msgid="1336952358450652595">"Multidifusio-helbideak erabiliz wifi-sare bateko gailu guztiei (ez bakarrik Android TV gailuari) bidalitako paketeak jasotzeko baimena ematen die aplikazioei. Multidifusiokoa ez den moduak baino bateria gehiago erabiltzen du."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="8296627590220222740">"Wi-Fi sarearen bidez gailu guztiei bidalitako paketeak jasotzeko baimena ematen die aplikazioei multidifusio-helbideak erabilita, ez telefonoa soilik. Multidifusiokoa ez den moduak baino bateria gehiago erabiltzen du."</string>
-    <string name="permlab_bluetoothAdmin" msgid="6490373569441946064">"atzitu Bluetooth-aren ezarpenak"</string>
+    <string name="permlab_bluetoothAdmin" msgid="6490373569441946064">"atzitu Bluetootharen ezarpenak"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="5370837055438574863">"Tokiko Bluetooth tableta konfiguratzea eta urruneko gailuak detektatzea eta haiekin parekatzea baimentzen die aplikazioei."</string>
-    <string name="permdesc_bluetoothAdmin" product="tv" msgid="1623992984547014588">"Android TV gailuan Bluetooth-a konfiguratzeko eta urruneko gailuak hautemateko eta haiekin parekatzeko baimena ematen die aplikazioei."</string>
+    <string name="permdesc_bluetoothAdmin" product="tv" msgid="1623992984547014588">"Android TV gailuan Bluetootha konfiguratzeko eta urruneko gailuak hautemateko eta haiekin parekatzeko baimena ematen die aplikazioei."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7381341743021234863">"Tokiko Bluetooth telefonoa konfiguratzea eta urruneko gailuak detektatzea eta haiekin parekatzea baimentzen die aplikazioei."</string>
     <string name="permlab_accessWimaxState" msgid="7029563339012437434">"WiMAX sarera konektatzea eta deskonektatzea"</string>
     <string name="permdesc_accessWimaxState" msgid="5372734776802067708">"WiMAX gaituta dagoen zehazteko eta konektatutako WiMAX sareei buruzko informazioa ikusteko baimena ematen die aplikazioei."</string>
@@ -1310,7 +1310,7 @@
   <string-array name="network_switch_type_name">
     <item msgid="2255670471736226365">"datu-konexioa"</item>
     <item msgid="5520925862115353992">"Wifia"</item>
-    <item msgid="1055487873974272842">"Bluetooth-a"</item>
+    <item msgid="1055487873974272842">"Bluetootha"</item>
     <item msgid="1616528372438698248">"Ethernet"</item>
     <item msgid="9177085807664964627">"VPNa"</item>
   </string-array>
@@ -2051,8 +2051,7 @@
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Eman behin erabiltzeko baimena"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Ez eman baimenik"</string>
     <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"Gailuko erregistroetan gailuan gertatzen den guztia gordetzen da. Arazoak bilatu eta konpontzeko erabil ditzakete aplikazioek erregistro horiek.\n\nBaliteke erregistro batzuek kontuzko informazioa edukitzea. Beraz, eman gailuko erregistro guztiak atzitzeko baimena fidagarritzat jotzen dituzun aplikazioei bakarrik. \n\nNahiz eta gailuko erregistro guztiak atzitzeko baimena ez eman aplikazio honi, aplikazioak hari dagozkion erregistroak atzitu ahalko ditu. Gainera, baliteke gailuaren fabrikatzaileak gailuko erregistro edo datu batzuk atzitu ahal izatea."</string>
-    <!-- no translation found for log_access_confirmation_body (7379536536425265262) -->
-    <skip />
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"Gailuko erregistroetan gailuan gertatzen den guztia gordetzen da. Arazoak bilatu eta konpontzeko erabil ditzakete aplikazioek erregistro horiek.\n\nBaliteke erregistro batzuek kontuzko informazioa edukitzea. Beraz, eman gailuko erregistro guztiak atzitzeko baimena fidagarritzat jotzen dituzun aplikazioei bakarrik. \n\nNahiz eta gailuko erregistro guztiak atzitzeko baimena ez eman aplikazio honi, aplikazioak hari dagozkion erregistroak atzitu ahalko ditu. Gainera, baliteke gailuaren fabrikatzaileak gailuko erregistro edo datu batzuk atzitu ahal izatea.\n\nLortu informazio gehiago g.co/android/devicelogs helbidean."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Ez erakutsi berriro"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> aplikazioak <xliff:g id="APP_2">%2$s</xliff:g> aplikazioaren zatiak erakutsi nahi ditu"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Editatu"</string>
@@ -2110,7 +2109,7 @@
     <string name="mime_type_spreadsheet_ext" msgid="8720173181137254414">"<xliff:g id="EXTENSION">%1$s</xliff:g> kalkulu-orria"</string>
     <string name="mime_type_presentation" msgid="1145384236788242075">"Aurkezpena"</string>
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"<xliff:g id="EXTENSION">%1$s</xliff:g> aurkezpena"</string>
-    <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"Bluetooth-ak aktibatuta jarraituko du hegaldi moduan"</string>
+    <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"Bluetoothak aktibatuta jarraituko du hegaldi moduan"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"Kargatzen"</string>
     <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} eta beste # fitxategi}other{{file_name} eta beste # fitxategi}}"</string>
     <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Ez dago edukia partekatzeko pertsona gomendaturik"</string>
