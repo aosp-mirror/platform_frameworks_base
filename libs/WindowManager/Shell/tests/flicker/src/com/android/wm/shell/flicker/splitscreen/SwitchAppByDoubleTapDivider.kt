@@ -99,9 +99,9 @@ class SwitchAppByDoubleTapDivider(testSpec: FlickerTestParameter) : SplitScreenB
             } ?: return@add false
 
             val primaryVisibleRegion = primaryAppLayer.visibleRegion?.bounds
-                    ?: return@add false
+                ?: return@add false
             val secondaryVisibleRegion = secondaryAppLayer.visibleRegion?.bounds
-                    ?: return@add false
+                ?: return@add false
 
             if (testSpec.startRotation.isRotated()) {
                 return@add primaryVisibleRegion.right <= secondaryVisibleRegion.left
@@ -127,35 +127,41 @@ class SwitchAppByDoubleTapDivider(testSpec: FlickerTestParameter) : SplitScreenB
         // robust enough to get the correct end state.
     }
 
-    @Presubmit
+    @FlakyTest(bugId = 241524174)
     @Test
     fun splitScreenDividerKeepVisible() = testSpec.layerKeepVisible(SPLIT_SCREEN_DIVIDER_COMPONENT)
 
-    @Presubmit
+    @FlakyTest(bugId = 241524174)
     @Test
     fun primaryAppLayerIsVisibleAtEnd() = testSpec.layerIsVisibleAtEnd(primaryApp)
 
-    @Presubmit
+    @FlakyTest(bugId = 241524174)
     @Test
     fun secondaryAppLayerIsVisibleAtEnd() = testSpec.layerIsVisibleAtEnd(secondaryApp)
 
-    @Presubmit
+    @FlakyTest(bugId = 241524174)
     @Test
     fun primaryAppBoundsIsVisibleAtEnd() = testSpec.splitAppLayerBoundsIsVisibleAtEnd(
-        primaryApp, landscapePosLeft = !tapl.isTablet, portraitPosTop = true)
+        primaryApp,
+        landscapePosLeft = !tapl.isTablet,
+        portraitPosTop = true
+    )
 
     // TODO(b/246490534): Move back to presubmit after withAppTransitionIdle is robust enough to
     // get the correct end state.
     @FlakyTest(bugId = 246490534)
     @Test
     fun secondaryAppBoundsIsVisibleAtEnd() = testSpec.splitAppLayerBoundsIsVisibleAtEnd(
-        secondaryApp, landscapePosLeft = tapl.isTablet, portraitPosTop = false)
+        secondaryApp,
+        landscapePosLeft = tapl.isTablet,
+        portraitPosTop = false
+    )
 
-    @Presubmit
+    @FlakyTest(bugId = 241524174)
     @Test
     fun primaryAppWindowIsVisibleAtEnd() = testSpec.appWindowIsVisibleAtEnd(primaryApp)
 
-    @Presubmit
+    @FlakyTest(bugId = 241524174)
     @Test
     fun secondaryAppWindowIsVisibleAtEnd() = testSpec.appWindowIsVisibleAtEnd(secondaryApp)
 
@@ -232,7 +238,8 @@ class SwitchAppByDoubleTapDivider(testSpec: FlickerTestParameter) : SplitScreenB
             return FlickerTestParameterFactory.getInstance().getConfigNonRotationTests(
                 // TODO(b/176061063):The 3 buttons of nav bar do not exist in the hierarchy.
                 supportedNavigationModes =
-                    listOf(WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY))
+                listOf(WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY)
+            )
         }
     }
 }

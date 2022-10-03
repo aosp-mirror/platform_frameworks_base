@@ -74,7 +74,7 @@ class DismissSplitScreenByGoHome(
     @Test
     fun splitScreenDividerBecomesInvisible() = testSpec.splitScreenDividerBecomesInvisible()
 
-    @Presubmit
+    @FlakyTest(bugId = 241525302)
     @Test
     fun primaryAppLayerBecomesInvisible() = testSpec.layerBecomesInvisible(primaryApp)
 
@@ -87,12 +87,18 @@ class DismissSplitScreenByGoHome(
     @FlakyTest(bugId = 245472831)
     @Test
     fun primaryAppBoundsBecomesInvisible() = testSpec.splitAppLayerBoundsBecomesInvisible(
-        primaryApp, landscapePosLeft = tapl.isTablet, portraitPosTop = false)
+        primaryApp,
+        landscapePosLeft = tapl.isTablet,
+        portraitPosTop = false
+    )
 
-    @Presubmit
+    @FlakyTest(bugId = 241525302)
     @Test
     fun secondaryAppBoundsBecomesInvisible() = testSpec.splitAppLayerBoundsBecomesInvisible(
-        secondaryApp, landscapePosLeft = !tapl.isTablet, portraitPosTop = true)
+        secondaryApp,
+        landscapePosLeft = !tapl.isTablet,
+        portraitPosTop = true
+    )
 
     @Presubmit
     @Test
@@ -175,7 +181,8 @@ class DismissSplitScreenByGoHome(
             return FlickerTestParameterFactory.getInstance().getConfigNonRotationTests(
                 // TODO(b/176061063):The 3 buttons of nav bar do not exist in the hierarchy.
                 supportedNavigationModes =
-                    listOf(WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY))
+                listOf(WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY)
+            )
         }
     }
 }
