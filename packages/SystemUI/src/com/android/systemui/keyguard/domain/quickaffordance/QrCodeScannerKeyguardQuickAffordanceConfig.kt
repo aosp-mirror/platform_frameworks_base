@@ -21,7 +21,8 @@ import com.android.systemui.R
 import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
-import com.android.systemui.containeddrawable.ContainedDrawable
+import com.android.systemui.common.shared.model.ContentDescription
+import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.qrcodescanner.controller.QRCodeScannerController
 import javax.inject.Inject
@@ -76,8 +77,14 @@ constructor(
     private fun state(): KeyguardQuickAffordanceConfig.State {
         return if (controller.isEnabledForLockScreenButton) {
             KeyguardQuickAffordanceConfig.State.Visible(
-                icon = ContainedDrawable.WithResource(R.drawable.ic_qr_code_scanner),
-                contentDescriptionResourceId = R.string.accessibility_qr_code_scanner_button,
+                icon =
+                    Icon.Resource(
+                        res = R.drawable.ic_qr_code_scanner,
+                        contentDescription =
+                            ContentDescription.Resource(
+                                res = R.string.accessibility_qr_code_scanner_button,
+                            ),
+                    ),
             )
         } else {
             KeyguardQuickAffordanceConfig.State.Hidden

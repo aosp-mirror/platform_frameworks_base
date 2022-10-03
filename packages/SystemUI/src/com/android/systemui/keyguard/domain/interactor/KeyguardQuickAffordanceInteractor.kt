@@ -104,7 +104,6 @@ constructor(
                 KeyguardQuickAffordanceModel.Visible(
                     configKey = configs[index]::class,
                     icon = visibleState.icon,
-                    contentDescriptionResourceId = visibleState.contentDescriptionResourceId,
                 )
             } else {
                 KeyguardQuickAffordanceModel.Hidden

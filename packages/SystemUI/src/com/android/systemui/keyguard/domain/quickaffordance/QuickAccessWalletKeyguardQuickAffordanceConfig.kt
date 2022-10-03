@@ -26,7 +26,8 @@ import com.android.systemui.R
 import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
-import com.android.systemui.containeddrawable.ContainedDrawable
+import com.android.systemui.common.shared.model.ContentDescription
+import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.wallet.controller.QuickAccessWalletController
@@ -100,8 +101,14 @@ constructor(
     ): KeyguardQuickAffordanceConfig.State {
         return if (isFeatureEnabled && hasCard && tileIcon != null) {
             KeyguardQuickAffordanceConfig.State.Visible(
-                icon = ContainedDrawable.WithDrawable(tileIcon),
-                contentDescriptionResourceId = R.string.accessibility_wallet_button,
+                icon =
+                    Icon.Loaded(
+                        drawable = tileIcon,
+                        contentDescription =
+                            ContentDescription.Resource(
+                                res = R.string.accessibility_wallet_button,
+                            ),
+                    ),
             )
         } else {
             KeyguardQuickAffordanceConfig.State.Hidden

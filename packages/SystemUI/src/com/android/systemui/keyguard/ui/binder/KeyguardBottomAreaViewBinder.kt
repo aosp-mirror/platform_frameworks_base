@@ -31,7 +31,7 @@ import com.android.settingslib.Utils
 import com.android.systemui.R
 import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.animation.Interpolators
-import com.android.systemui.containeddrawable.ContainedDrawable
+import com.android.systemui.common.ui.binder.IconViewBinder
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBottomAreaViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardQuickAffordanceViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
@@ -236,10 +236,7 @@ object KeyguardBottomAreaViewBinder {
             }
         }
 
-        when (viewModel.icon) {
-            is ContainedDrawable.WithDrawable -> view.setImageDrawable(viewModel.icon.drawable)
-            is ContainedDrawable.WithResource -> view.setImageResource(viewModel.icon.resourceId)
-        }
+        IconViewBinder.bind(viewModel.icon, view)
 
         view.drawable.setTint(
             Utils.getColorAttrDefaultColor(
@@ -250,7 +247,6 @@ object KeyguardBottomAreaViewBinder {
         view.backgroundTintList =
             Utils.getColorAttr(view.context, com.android.internal.R.attr.colorSurface)
 
-        view.contentDescription = view.context.getString(viewModel.contentDescriptionResourceId)
         view.isClickable = viewModel.isClickable
         if (viewModel.isClickable) {
             view.setOnClickListener(OnClickListener(viewModel, falsingManager))

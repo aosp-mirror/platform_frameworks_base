@@ -19,7 +19,8 @@ package com.android.systemui.keyguard.domain.usecase
 import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.containeddrawable.ContainedDrawable
+import com.android.systemui.common.shared.model.ContentDescription
+import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardQuickAffordanceInteractor
@@ -32,6 +33,7 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.mockito.mock
+import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -101,7 +103,6 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
         homeControls.setState(
             KeyguardQuickAffordanceConfig.State.Visible(
                 icon = ICON,
-                contentDescriptionResourceId = CONTENT_DESCRIPTION_RESOURCE_ID,
             )
         )
 
@@ -120,8 +121,8 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
         val visibleModel = latest as KeyguardQuickAffordanceModel.Visible
         assertThat(visibleModel.configKey).isEqualTo(configKey)
         assertThat(visibleModel.icon).isEqualTo(ICON)
-        assertThat(visibleModel.contentDescriptionResourceId)
-            .isEqualTo(CONTENT_DESCRIPTION_RESOURCE_ID)
+        assertThat(visibleModel.icon.contentDescription)
+            .isEqualTo(ContentDescription.Resource(res = CONTENT_DESCRIPTION_RESOURCE_ID))
         job.cancel()
     }
 
@@ -131,7 +132,6 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
         quickAccessWallet.setState(
             KeyguardQuickAffordanceConfig.State.Visible(
                 icon = ICON,
-                contentDescriptionResourceId = CONTENT_DESCRIPTION_RESOURCE_ID,
             )
         )
 
@@ -150,8 +150,8 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
         val visibleModel = latest as KeyguardQuickAffordanceModel.Visible
         assertThat(visibleModel.configKey).isEqualTo(configKey)
         assertThat(visibleModel.icon).isEqualTo(ICON)
-        assertThat(visibleModel.contentDescriptionResourceId)
-            .isEqualTo(CONTENT_DESCRIPTION_RESOURCE_ID)
+        assertThat(visibleModel.icon.contentDescription)
+            .isEqualTo(ContentDescription.Resource(res = CONTENT_DESCRIPTION_RESOURCE_ID))
         job.cancel()
     }
 
@@ -161,7 +161,6 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
         homeControls.setState(
             KeyguardQuickAffordanceConfig.State.Visible(
                 icon = ICON,
-                contentDescriptionResourceId = CONTENT_DESCRIPTION_RESOURCE_ID,
             )
         )
 
@@ -182,7 +181,6 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
             homeControls.setState(
                 KeyguardQuickAffordanceConfig.State.Visible(
                     icon = ICON,
-                    contentDescriptionResourceId = CONTENT_DESCRIPTION_RESOURCE_ID,
                 )
             )
 
@@ -197,7 +195,14 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
         }
 
     companion object {
-        private val ICON: ContainedDrawable = mock()
+        private val ICON: Icon = mock {
+            whenever(this.contentDescription)
+                .thenReturn(
+                    ContentDescription.Resource(
+                        res = CONTENT_DESCRIPTION_RESOURCE_ID,
+                    )
+                )
+        }
         private const val CONTENT_DESCRIPTION_RESOURCE_ID = 1337
     }
 }

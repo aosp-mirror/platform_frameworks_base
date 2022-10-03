@@ -18,9 +18,8 @@
 package com.android.systemui.keyguard.domain.quickaffordance
 
 import android.content.Intent
-import androidx.annotation.StringRes
 import com.android.systemui.animation.ActivityLaunchAnimator
-import com.android.systemui.containeddrawable.ContainedDrawable
+import com.android.systemui.common.shared.model.Icon
 import kotlinx.coroutines.flow.Flow
 
 /** Defines interface that can act as data source for a single quick affordance model. */
@@ -44,12 +43,7 @@ interface KeyguardQuickAffordanceConfig {
         /** An affordance is visible. */
         data class Visible(
             /** An icon for the affordance. */
-            val icon: ContainedDrawable,
-            /**
-             * Resource ID for a string to use for the accessibility content description text of the
-             * affordance.
-             */
-            @StringRes val contentDescriptionResourceId: Int,
+            val icon: Icon,
         ) : State()
     }
 

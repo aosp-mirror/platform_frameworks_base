@@ -17,8 +17,7 @@
 
 package com.android.systemui.keyguard.domain.model
 
-import androidx.annotation.StringRes
-import com.android.systemui.containeddrawable.ContainedDrawable
+import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.keyguard.domain.quickaffordance.KeyguardQuickAffordanceConfig
 import kotlin.reflect.KClass
 
@@ -35,11 +34,6 @@ sealed class KeyguardQuickAffordanceModel {
         /** Identifier for the affordance this is modeling. */
         val configKey: KClass<out KeyguardQuickAffordanceConfig>,
         /** An icon for the affordance. */
-        val icon: ContainedDrawable,
-        /**
-         * Resource ID for a string to use for the accessibility content description text of the
-         * affordance.
-         */
-        @StringRes val contentDescriptionResourceId: Int,
+        val icon: Icon,
     ) : KeyguardQuickAffordanceModel()
 }

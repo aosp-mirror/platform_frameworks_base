@@ -21,9 +21,11 @@ import android.graphics.drawable.Drawable
 import android.service.quickaccesswallet.GetWalletCardsResponse
 import android.service.quickaccesswallet.QuickAccessWalletClient
 import androidx.test.filters.SmallTest
+import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ActivityLaunchAnimator
-import com.android.systemui.containeddrawable.ContainedDrawable
+import com.android.systemui.common.shared.model.ContentDescription
+import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
@@ -69,8 +71,16 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
         val job = underTest.state.onEach { latest = it }.launchIn(this)
 
         val visibleModel = latest as KeyguardQuickAffordanceConfig.State.Visible
-        assertThat(visibleModel.icon).isEqualTo(ContainedDrawable.WithDrawable(ICON))
-        assertThat(visibleModel.contentDescriptionResourceId).isNotNull()
+        assertThat(visibleModel.icon)
+            .isEqualTo(
+                Icon.Loaded(
+                    drawable = ICON,
+                    contentDescription =
+                        ContentDescription.Resource(
+                            res = R.string.accessibility_wallet_button,
+                        ),
+                )
+            )
         job.cancel()
     }
 

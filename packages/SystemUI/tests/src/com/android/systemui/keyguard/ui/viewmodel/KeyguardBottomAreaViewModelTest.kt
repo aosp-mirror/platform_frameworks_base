@@ -21,7 +21,7 @@ import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ActivityLaunchAnimator
-import com.android.systemui.containeddrawable.ContainedDrawable
+import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.doze.util.BurnInHelperWrapper
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardBottomAreaInteractor
@@ -505,7 +505,6 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
                 }
                 KeyguardQuickAffordanceConfig.State.Visible(
                     icon = testConfig.icon ?: error("Icon is unexpectedly null!"),
-                    contentDescriptionResourceId = CONTENT_DESCRIPTION_RESOURCE_ID,
                 )
             } else {
                 KeyguardQuickAffordanceConfig.State.Hidden
@@ -543,7 +542,7 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
     private data class TestConfig(
         val isVisible: Boolean,
         val isClickable: Boolean = false,
-        val icon: ContainedDrawable? = null,
+        val icon: Icon? = null,
         val canShowWhileLocked: Boolean = false,
         val intent: Intent? = null,
     ) {
@@ -555,6 +554,5 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
     companion object {
         private const val DEFAULT_BURN_IN_OFFSET = 5
         private const val RETURNED_BURN_IN_OFFSET = 3
-        private const val CONTENT_DESCRIPTION_RESOURCE_ID = 1337
     }
 }

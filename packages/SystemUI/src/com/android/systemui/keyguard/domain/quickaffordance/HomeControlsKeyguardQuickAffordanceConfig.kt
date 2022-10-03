@@ -23,7 +23,8 @@ import androidx.annotation.DrawableRes
 import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
-import com.android.systemui.containeddrawable.ContainedDrawable
+import com.android.systemui.common.shared.model.ContentDescription
+import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.controller.StructureInfo
 import com.android.systemui.controls.dagger.ControlsComponent
@@ -122,8 +123,14 @@ constructor(
                 visibility == ControlsComponent.Visibility.AVAILABLE
         ) {
             KeyguardQuickAffordanceConfig.State.Visible(
-                icon = ContainedDrawable.WithResource(iconResourceId),
-                contentDescriptionResourceId = component.getTileTitleId(),
+                icon =
+                    Icon.Resource(
+                        res = iconResourceId,
+                        contentDescription =
+                            ContentDescription.Resource(
+                                res = component.getTileTitleId(),
+                            ),
+                    ),
             )
         } else {
             KeyguardQuickAffordanceConfig.State.Hidden
