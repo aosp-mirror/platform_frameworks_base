@@ -30,14 +30,6 @@ interface ISub {
     List<SubscriptionInfo> getAllSubInfoList(String callingPackage, String callingFeatureId);
 
     /**
-     * @param callingPackage The package maing the call.
-     * @param callingFeatureId The feature in the package
-     * @return the count of all subscriptions in the database, this includes
-     * all subscriptions that have been seen.
-     */
-    int getAllSubInfoCount(String callingPackage, String callingFeatureId);
-
-    /**
      * Get the active SubscriptionInfo with the subId key
      * @param subId The unique SubscriptionInfo key in database
      * @param callingPackage The package maing the call.
