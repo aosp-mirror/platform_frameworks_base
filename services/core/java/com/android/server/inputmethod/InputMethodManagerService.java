@@ -5034,6 +5034,10 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             @UserIdInt int userId, ArrayMap<String, List<InputMethodSubtype>> additionalSubtypeMap,
             ArrayMap<String, InputMethodInfo> methodMap, ArrayList<InputMethodInfo> methodList,
             @DirectBootAwareness int directBootAwareness) {
+        final Context userAwareContext = context.getUserId() == userId
+                ? context
+                : context.createContextAsUser(UserHandle.of(userId), 0 /* flags */);
+
         methodList.clear();
         methodMap.clear();
 
@@ -5055,8 +5059,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         final int flags = PackageManager.GET_META_DATA
                 | PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS
                 | directBootAwarenessFlags;
-        final List<ResolveInfo> services = context.getPackageManager().queryIntentServicesAsUser(
-                new Intent(InputMethod.SERVICE_INTERFACE), flags, userId);
+        final List<ResolveInfo> services = userAwareContext.getPackageManager().queryIntentServices(
+                new Intent(InputMethod.SERVICE_INTERFACE),
+                PackageManager.ResolveInfoFlags.of(flags));
 
         methodList.ensureCapacity(services.size());
         methodMap.ensureCapacity(services.size());
@@ -5075,7 +5080,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             if (DEBUG) Slog.d(TAG, "Checking " + imeId);
 
             try {
-                final InputMethodInfo imi = new InputMethodInfo(context, ri,
+                final InputMethodInfo imi = new InputMethodInfo(userAwareContext, ri,
                         additionalSubtypeMap.get(imeId));
                 if (imi.isVrOnly()) {
                     continue;  // Skip VR-only IME, which isn't supported for now.
