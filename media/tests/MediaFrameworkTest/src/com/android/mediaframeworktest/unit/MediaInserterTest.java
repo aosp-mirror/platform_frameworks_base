@@ -89,7 +89,7 @@ public class MediaInserterTest extends InstrumentationTestCase {
         MockitoAnnotations.initMocks(this);
 
         final Context attributionContext = getInstrumentation().getContext()
-                .createFeatureContext(TEST_FEATURE_ID);
+                .createAttributionContext(TEST_FEATURE_ID);
 
         final ContentProviderClient client = new ContentProviderClient(attributionContext
                         .getContentResolver(), mMockProvider, true);
