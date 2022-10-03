@@ -82,4 +82,6 @@ interface ICompanionDeviceManager {
     void detachSystemDataTransport(String packageName, int userId, int associationId);
 
     boolean isCompanionApplicationBound(String packageName, int userId);
+
+    PendingIntent buildAssociationCancellationIntent(in String callingPackage, int userId);
 }

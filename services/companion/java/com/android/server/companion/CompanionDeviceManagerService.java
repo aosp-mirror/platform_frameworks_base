@@ -549,6 +549,18 @@ public class CompanionDeviceManagerService extends SystemService {
         }
 
         @Override
+        public PendingIntent buildAssociationCancellationIntent(String packageName,
+                int userId) throws RemoteException {
+            Slog.i(TAG, "buildAssociationCancellationIntent() "
+                    + "package=u" + userId + "/" + packageName);
+            enforceCallerCanManageAssociationsForPackage(getContext(), userId, packageName,
+                    "build association cancellation intent");
+
+            return mAssociationRequestsProcessor.buildAssociationCancellationIntent(
+                    packageName, userId);
+        }
+
+        @Override
         public List<AssociationInfo> getAssociations(String packageName, int userId) {
             enforceCallerCanManageAssociationsForPackage(getContext(), userId, packageName,
                     "get associations");
