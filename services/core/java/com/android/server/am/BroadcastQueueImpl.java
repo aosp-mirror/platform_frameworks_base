@@ -163,7 +163,7 @@ public class BroadcastQueueImpl extends BroadcastQueue {
 
     private final class BroadcastHandler extends Handler {
         public BroadcastHandler(Looper looper) {
-            super(looper, null, true);
+            super(looper, null);
         }
 
         @Override

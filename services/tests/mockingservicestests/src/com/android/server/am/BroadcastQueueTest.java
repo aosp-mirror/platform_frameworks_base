@@ -99,7 +99,9 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -504,6 +506,32 @@ public class BroadcastQueueTest {
                 AppOpsManager.OP_NONE, options, receivers, orderedResultTo, Activity.RESULT_OK,
                 null, orderedExtras, ordered, false, false, userId, false, null,
                 false, null);
+    }
+
+    private static Map<String, Object> asMap(Bundle bundle) {
+        final Map<String, Object> map = new HashMap<>();
+        if (bundle != null) {
+            for (String key : bundle.keySet()) {
+                map.put(key, bundle.get(key));
+            }
+        }
+        return map;
+    }
+
+    private ArgumentMatcher<Intent> componentEquals(String packageName, String className) {
+        return (test) -> {
+            final ComponentName cn = test.getComponent();
+            return (cn != null)
+                    && Objects.equals(cn.getPackageName(), packageName)
+                    && Objects.equals(cn.getClassName(), className);
+        };
+    }
+
+    private ArgumentMatcher<Intent> filterAndExtrasEquals(Intent intent) {
+        return (test) -> {
+            return intent.filterEquals(test)
+                    && Objects.equals(asMap(intent.getExtras()), asMap(test.getExtras()));
+        };
     }
 
     private ArgumentMatcher<Intent> filterEquals(Intent intent) {
@@ -1308,5 +1336,66 @@ public class BroadcastQueueTest {
         assertEquals(
                 Set.of(makeScheduledBroadcast(receiverYellowApp, timezone)),
                 Set.of(mScheduledBroadcasts.remove(0)));
+    }
+
+    /**
+     * Verify that we handle replacing a pending broadcast.
+     */
+    @Test
+    public void testReplacePending() throws Exception {
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+        final IApplicationThread callerThread = callerApp.getThread();
+
+        final Intent timezoneFirst = new Intent(Intent.ACTION_TIMEZONE_CHANGED);
+        timezoneFirst.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
+        timezoneFirst.putExtra(Intent.EXTRA_TIMEZONE, "GMT+5");
+        final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        final Intent timezoneSecond = new Intent(Intent.ACTION_TIMEZONE_CHANGED);
+        timezoneSecond.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
+        timezoneSecond.putExtra(Intent.EXTRA_TIMEZONE, "GMT-5");
+
+        final IIntentReceiver resultToFirst = mock(IIntentReceiver.class);
+        final IIntentReceiver resultToSecond = mock(IIntentReceiver.class);
+
+        try (SyncBarrier b = new SyncBarrier()) {
+            enqueueBroadcast(makeOrderedBroadcastRecord(timezoneFirst, callerApp,
+                    List.of(makeManifestReceiver(PACKAGE_BLUE, CLASS_BLUE),
+                            makeManifestReceiver(PACKAGE_BLUE, CLASS_GREEN)),
+                    resultToFirst, null));
+            enqueueBroadcast(makeBroadcastRecord(airplane, callerApp,
+                    List.of(makeManifestReceiver(PACKAGE_BLUE, CLASS_RED))));
+            enqueueBroadcast(makeOrderedBroadcastRecord(timezoneSecond, callerApp,
+                    List.of(makeManifestReceiver(PACKAGE_BLUE, CLASS_GREEN)),
+                    resultToSecond, null));
+        }
+
+        waitForIdle();
+        final IApplicationThread blueThread = mAms.getProcessRecordLocked(PACKAGE_BLUE,
+                getUidForPackage(PACKAGE_BLUE)).getThread();
+        final InOrder inOrder = inOrder(callerThread, blueThread);
+
+        // First broadcast is canceled
+        inOrder.verify(callerThread).scheduleRegisteredReceiver(any(),
+                argThat(filterAndExtrasEquals(timezoneFirst)), eq(Activity.RESULT_CANCELED), any(),
+                any(), eq(false), anyBoolean(), eq(UserHandle.USER_SYSTEM), anyInt());
+
+        // We deliver second broadcast to app
+        timezoneSecond.setClassName(PACKAGE_BLUE, CLASS_GREEN);
+        inOrder.verify(blueThread).scheduleReceiver(
+                argThat(filterAndExtrasEquals(timezoneSecond)),
+                any(), any(), anyInt(), any(), any(), eq(true), anyInt(), anyInt());
+
+        // Second broadcast is finished
+        timezoneSecond.setComponent(null);
+        inOrder.verify(callerThread).scheduleRegisteredReceiver(any(),
+                argThat(filterAndExtrasEquals(timezoneSecond)), eq(Activity.RESULT_OK), any(),
+                any(), eq(false), anyBoolean(), eq(UserHandle.USER_SYSTEM), anyInt());
+
+        // Since we "replaced" the first broadcast in its original position,
+        // only now do we see the airplane broadcast
+        airplane.setClassName(PACKAGE_BLUE, CLASS_RED);
+        inOrder.verify(blueThread).scheduleReceiver(
+                argThat(filterEquals(airplane)),
+                any(), any(), anyInt(), any(), any(), eq(false), anyInt(), anyInt());
     }
 }

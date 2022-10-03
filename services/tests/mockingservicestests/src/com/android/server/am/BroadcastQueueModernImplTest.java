@@ -269,7 +269,7 @@ public class BroadcastQueueModernImplTest {
 
         final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         final BroadcastRecord airplaneRecord = makeBroadcastRecord(airplane);
-        queue.enqueueBroadcast(airplaneRecord, 0, 0);
+        queue.enqueueOrReplaceBroadcast(airplaneRecord, 0, 0);
 
         queue.setProcessCached(false);
         final long notCachedRunnableAt = queue.getRunnableAt();
@@ -291,7 +291,7 @@ public class BroadcastQueueModernImplTest {
         final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         airplane.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         final BroadcastRecord airplaneRecord = makeBroadcastRecord(airplane);
-        queue.enqueueBroadcast(airplaneRecord, 0, 0);
+        queue.enqueueOrReplaceBroadcast(airplaneRecord, 0, 0);
 
         queue.setProcessCached(false);
         assertTrue(queue.isRunnable());
@@ -317,7 +317,7 @@ public class BroadcastQueueModernImplTest {
         final BroadcastRecord airplaneRecord = makeBroadcastRecord(airplane, null,
                 List.of(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN),
                         makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN)), true);
-        queue.enqueueBroadcast(airplaneRecord, 1, 1);
+        queue.enqueueOrReplaceBroadcast(airplaneRecord, 1, 1);
 
         assertFalse(queue.isRunnable());
         assertEquals(BroadcastProcessQueue.REASON_BLOCKED, queue.getRunnableAtReason());

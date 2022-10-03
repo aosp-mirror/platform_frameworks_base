@@ -40,6 +40,7 @@ import static com.android.server.am.OomAdjuster.OOM_ADJ_REASON_START_RECEIVER;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.IApplicationThread;
 import android.app.RemoteServiceException.CannotDeliverBroadcastException;
@@ -463,9 +464,9 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
             // Skip any pending registered receivers, since the old process
             // would never be around to receive them
-            boolean didSomething = queue.removeMatchingBroadcasts((r, i) -> {
+            boolean didSomething = queue.forEachMatchingBroadcast((r, i) -> {
                 return (r.receivers.get(i) instanceof BroadcastFilter);
-            }, mBroadcastConsumerSkip);
+            }, mBroadcastConsumerSkip, true);
             if (didSomething || queue.isEmpty()) {
                 updateRunnableList(queue);
                 enqueueUpdateRunningList();
@@ -490,11 +491,23 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 ? r.options.getRemoveMatchingFilter() : null;
         if (removeMatchingFilter != null) {
             final Predicate<Intent> removeMatching = removeMatchingFilter.asPredicate();
-            skipMatchingBroadcasts(QUEUE_PREDICATE_ANY, (testRecord, testReceiver) -> {
-                // We only allow caller to clear broadcasts they enqueued
-                return (testRecord.callingUid == r.callingUid)
+            forEachMatchingBroadcast(QUEUE_PREDICATE_ANY, (testRecord, testIndex) -> {
+                // We only allow caller to remove broadcasts they enqueued
+                return (r.callingUid == testRecord.callingUid)
+                        && (r.userId == testRecord.userId)
                         && removeMatching.test(testRecord.intent);
-            });
+            }, mBroadcastConsumerSkipAndCanceled, true);
+        }
+
+        if (r.isReplacePending()) {
+            // Leave the skipped broadcasts intact in queue, so that we can
+            // replace them at their current position during enqueue below
+            forEachMatchingBroadcast(QUEUE_PREDICATE_ANY, (testRecord, testIndex) -> {
+                // We only allow caller to replace broadcasts they enqueued
+                return (r.callingUid == testRecord.callingUid)
+                        && (r.userId == testRecord.userId)
+                        && r.intent.filterEquals(testRecord.intent);
+            }, mBroadcastConsumerSkipAndCanceled, false);
         }
 
         r.enqueueTime = SystemClock.uptimeMillis();
@@ -530,7 +543,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 blockedUntilTerminalCount = 0;
             }
 
-            queue.enqueueBroadcast(r, i, blockedUntilTerminalCount);
+            queue.enqueueOrReplaceBroadcast(r, i, blockedUntilTerminalCount);
             updateRunnableList(queue);
             enqueueUpdateRunningList();
         }
@@ -912,7 +925,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             };
             broadcastPredicate = BROADCAST_PREDICATE_ANY;
         }
-        return skipMatchingBroadcasts(queuePredicate, broadcastPredicate);
+        return forEachMatchingBroadcast(queuePredicate, broadcastPredicate,
+                mBroadcastConsumerSkip, true);
     }
 
     private static final Predicate<BroadcastProcessQueue> QUEUE_PREDICATE_ANY =
@@ -928,19 +942,28 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         setDeliveryState(null, null, r, i, r.receivers.get(i), BroadcastRecord.DELIVERY_SKIPPED);
     };
 
-    private boolean skipMatchingBroadcasts(
+    /**
+     * Typical consumer that will both skip the given broadcast and mark it as
+     * cancelled, usually as a result of it matching a predicate.
+     */
+    private final BroadcastConsumer mBroadcastConsumerSkipAndCanceled = (r, i) -> {
+        setDeliveryState(null, null, r, i, r.receivers.get(i), BroadcastRecord.DELIVERY_SKIPPED);
+        r.resultCode = Activity.RESULT_CANCELED;
+        r.resultData = null;
+        r.resultExtras = null;
+    };
+
+    private boolean forEachMatchingBroadcast(
             @NonNull Predicate<BroadcastProcessQueue> queuePredicate,
-            @NonNull BroadcastPredicate broadcastPredicate) {
-        // Note that we carefully preserve any "skipped" broadcasts in their
-        // queues so that we follow our normal flow for "finishing" a broadcast,
-        // which is where we handle things like ordered broadcasts.
+            @NonNull BroadcastPredicate broadcastPredicate,
+            @NonNull BroadcastConsumer broadcastConsumer, boolean andRemove) {
         boolean didSomething = false;
         for (int i = 0; i < mProcessQueues.size(); i++) {
             BroadcastProcessQueue leaf = mProcessQueues.valueAt(i);
             while (leaf != null) {
                 if (queuePredicate.test(leaf)) {
-                    if (leaf.removeMatchingBroadcasts(broadcastPredicate,
-                            mBroadcastConsumerSkip)) {
+                    if (leaf.forEachMatchingBroadcast(broadcastPredicate,
+                            broadcastConsumer, andRemove)) {
                         updateRunnableList(leaf);
                         didSomething = true;
                     }

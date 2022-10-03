@@ -59,6 +59,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
@@ -694,6 +695,19 @@ final class BroadcastRecord extends Binder {
             return ((BroadcastFilter) receiver).getPriority();
         } else /* if (receiver instanceof ResolveInfo) */ {
             return ((ResolveInfo) receiver).priority;
+        }
+    }
+
+    static boolean isReceiverEquals(@NonNull Object a, @NonNull Object b) {
+        if (a == b) {
+            return true;
+        } else if (a instanceof ResolveInfo && b instanceof ResolveInfo) {
+            final ResolveInfo infoA = (ResolveInfo) a;
+            final ResolveInfo infoB = (ResolveInfo) b;
+            return Objects.equals(infoA.activityInfo.packageName, infoB.activityInfo.packageName)
+                    && Objects.equals(infoA.activityInfo.name, infoB.activityInfo.name);
+        } else {
+            return false;
         }
     }
 

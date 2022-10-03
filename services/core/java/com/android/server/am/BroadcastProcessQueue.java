@@ -18,6 +18,7 @@ package com.android.server.am;
 
 import static com.android.server.am.BroadcastRecord.deliveryStateToString;
 import static com.android.server.am.BroadcastRecord.isDeliveryStateTerminal;
+import static com.android.server.am.BroadcastRecord.isReceiverEquals;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -142,38 +143,47 @@ class BroadcastProcessQueue {
      * future point in time. The target receiver is indicated by the given index
      * into {@link BroadcastRecord#receivers}.
      * <p>
+     * If the broadcast is marked as {@link BroadcastRecord#isReplacePending()},
+     * then this call will replace any pending dispatch; otherwise it will
+     * enqueue as a normal broadcast.
+     * <p>
      * When defined, this receiver is considered "blocked" until at least the
      * given count of other receivers have reached a terminal state; typically
      * used for ordered broadcasts and priority traunches.
      */
-    public void enqueueBroadcast(@NonNull BroadcastRecord record, int recordIndex,
+    public void enqueueOrReplaceBroadcast(@NonNull BroadcastRecord record, int recordIndex,
             int blockedUntilTerminalCount) {
-        // Detect situations where the incoming broadcast should cause us to
-        // recalculate when we'll be runnable
-        if (mPending.isEmpty()) {
-            invalidateRunnableAt();
+        // If caller wants to replace, walk backwards looking for any matches
+        if (record.isReplacePending()) {
+            final Iterator<SomeArgs> it = mPending.descendingIterator();
+            final Object receiver = record.receivers.get(recordIndex);
+            while (it.hasNext()) {
+                final SomeArgs args = it.next();
+                final BroadcastRecord testRecord = (BroadcastRecord) args.arg1;
+                final Object testReceiver = testRecord.receivers.get(args.argi1);
+                if ((record.callingUid == testRecord.callingUid)
+                        && (record.userId == testRecord.userId)
+                        && record.intent.filterEquals(testRecord.intent)
+                        && isReceiverEquals(receiver, testReceiver)) {
+                    // Exact match found; perform in-place swap
+                    args.arg1 = record;
+                    args.argi1 = recordIndex;
+                    args.argi2 = blockedUntilTerminalCount;
+                    onBroadcastDequeued(testRecord);
+                    onBroadcastEnqueued(record);
+                    return;
+                }
+            }
         }
-        if (record.isForeground()) {
-            mCountForeground++;
-            invalidateRunnableAt();
-        }
-        if (record.ordered) {
-            mCountOrdered++;
-            invalidateRunnableAt();
-        }
-        if (record.alarm) {
-            mCountAlarm++;
-            invalidateRunnableAt();
-        }
-        if (record.prioritized) {
-            mCountPrioritized++;
-            invalidateRunnableAt();
-        }
+
+        // Caller isn't interested in replacing, or we didn't find any pending
+        // item to replace above, so enqueue as a new broadcast
         SomeArgs args = SomeArgs.obtain();
         args.arg1 = record;
         args.argi1 = recordIndex;
         args.argi2 = blockedUntilTerminalCount;
         mPending.addLast(args);
+        onBroadcastEnqueued(record);
     }
 
     /**
@@ -195,14 +205,15 @@ class BroadcastProcessQueue {
     }
 
     /**
-     * Remove any broadcasts matching the given predicate.
+     * Invoke given consumer for any broadcasts matching given predicate. If
+     * requested, matching broadcasts will also be removed from this queue.
      * <p>
      * Predicates that choose to remove a broadcast <em>must</em> finish
      * delivery of the matched broadcast, to ensure that situations like ordered
      * broadcasts are handled consistently.
      */
-    public boolean removeMatchingBroadcasts(@NonNull BroadcastPredicate predicate,
-            @NonNull BroadcastConsumer consumer) {
+    public boolean forEachMatchingBroadcast(@NonNull BroadcastPredicate predicate,
+            @NonNull BroadcastConsumer consumer, boolean andRemove) {
         boolean didSomething = false;
         final Iterator<SomeArgs> it = mPending.iterator();
         while (it.hasNext()) {
@@ -211,8 +222,11 @@ class BroadcastProcessQueue {
             final int index = args.argi1;
             if (predicate.test(record, index)) {
                 consumer.accept(record, index);
-                args.recycle();
-                it.remove();
+                if (andRemove) {
+                    args.recycle();
+                    it.remove();
+                    onBroadcastDequeued(record);
+                }
                 didSomething = true;
             }
         }
@@ -282,19 +296,7 @@ class BroadcastProcessQueue {
         mActiveCountSinceIdle++;
         mActiveViaColdStart = false;
         next.recycle();
-        if (mActive.isForeground()) {
-            mCountForeground--;
-        }
-        if (mActive.ordered) {
-            mCountOrdered--;
-        }
-        if (mActive.alarm) {
-            mCountAlarm--;
-        }
-        if (mActive.prioritized) {
-            mCountPrioritized--;
-        }
-        invalidateRunnableAt();
+        onBroadcastDequeued(mActive);
     }
 
     /**
@@ -305,6 +307,44 @@ class BroadcastProcessQueue {
         mActiveIndex = 0;
         mActiveCountSinceIdle = 0;
         mActiveViaColdStart = false;
+        invalidateRunnableAt();
+    }
+
+    /**
+     * Update summary statistics when the given record has been enqueued.
+     */
+    private void onBroadcastEnqueued(@NonNull BroadcastRecord record) {
+        if (record.isForeground()) {
+            mCountForeground++;
+        }
+        if (record.ordered) {
+            mCountOrdered++;
+        }
+        if (record.alarm) {
+            mCountAlarm++;
+        }
+        if (record.prioritized) {
+            mCountPrioritized++;
+        }
+        invalidateRunnableAt();
+    }
+
+    /**
+     * Update summary statistics when the given record has been dequeued.
+     */
+    private void onBroadcastDequeued(@NonNull BroadcastRecord record) {
+        if (record.isForeground()) {
+            mCountForeground--;
+        }
+        if (record.ordered) {
+            mCountOrdered--;
+        }
+        if (record.alarm) {
+            mCountAlarm--;
+        }
+        if (record.prioritized) {
+            mCountPrioritized--;
+        }
         invalidateRunnableAt();
     }
 
