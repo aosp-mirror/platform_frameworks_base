@@ -1312,13 +1312,15 @@ public class RootTaskTests extends WindowTestsBase {
         secondActivity.app.setThread(null);
         // This should do nothing from a non-attached caller.
         assertFalse(task.navigateUpTo(secondActivity /* source record */,
-                firstActivity.intent /* destIntent */, null /* destGrants */,
-                0 /* resultCode */, null /* resultData */, null /* resultGrants */));
+                firstActivity.intent /* destIntent */, null /* resolvedType */,
+                null /* destGrants */, 0 /* resultCode */, null /* resultData */,
+                null /* resultGrants */));
 
         secondActivity.app.setThread(thread);
         assertTrue(task.navigateUpTo(secondActivity /* source record */,
-                firstActivity.intent /* destIntent */, null /* destGrants */,
-                0 /* resultCode */, null /* resultData */, null /* resultGrants */));
+                firstActivity.intent /* destIntent */, null /* resolvedType */,
+                null /* destGrants */, 0 /* resultCode */, null /* resultData */,
+                null /* resultGrants */));
         // The firstActivity uses default launch mode, so the activities between it and itself will
         // be finished.
         assertTrue(secondActivity.finishing);
