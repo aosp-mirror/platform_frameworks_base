@@ -16,6 +16,7 @@
 
 package com.android.server.wm.flicker.quickswitch
 
+import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresDevice
 import android.view.Surface
@@ -27,6 +28,7 @@ import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
+import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.navBarWindowIsVisibleAtStartAndEnd
 import com.android.server.wm.traces.common.ComponentNameMatcher
 import com.android.server.wm.traces.common.Rect
@@ -292,6 +294,20 @@ class QuickSwitchFromLauncherTest(testSpec: FlickerTestParameter) : BaseTest(tes
     fun navBarWindowIsVisibleAtStartAndEnd() {
         Assume.assumeFalse(testSpec.isTablet)
         testSpec.navBarWindowIsVisibleAtStartAndEnd()
+    }
+
+    @Presubmit
+    @Test
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
+        Assume.assumeFalse(isShellTransitionsEnabled)
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
+    }
+
+    @FlakyTest(bugId = 246285528)
+    @Test
+    fun visibleLayersShownMoreThanOneConsecutiveEntry_shellTransit() {
+        Assume.assumeTrue(isShellTransitionsEnabled)
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
     }
 
     companion object {

@@ -16,6 +16,7 @@
 
 package com.android.server.wm.flicker.quickswitch
 
+import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresDevice
 import android.view.Surface
@@ -106,7 +107,7 @@ open class QuickSwitchBetweenTwoAppsBackTest(
      * Checks that the transition starts with [testApp2]'s layers filling/covering exactly the
      * entirety of the display.
      */
-    @Presubmit
+    @FlakyTest(bugId = 250520840)
     @Test
     open fun startsWithApp2LayersCoverFullScreen() {
         testSpec.assertLayersStart {
@@ -262,6 +263,10 @@ open class QuickSwitchBetweenTwoAppsBackTest(
     @Presubmit
     @Test
     override fun taskBarLayerIsVisibleAtStartAndEnd() = super.taskBarLayerIsVisibleAtStartAndEnd()
+
+    @FlakyTest(bugId = 250518877)
+    @Test
+    override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
 
     companion object {
         private var startDisplayBounds = Rect.EMPTY

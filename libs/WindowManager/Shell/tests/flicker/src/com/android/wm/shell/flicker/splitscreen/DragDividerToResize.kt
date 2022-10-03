@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.flicker.splitscreen
 
+import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.IwTest
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
@@ -113,7 +114,7 @@ class DragDividerToResize (testSpec: FlickerTestParameter) : SplitScreenBase(tes
     fun primaryAppBoundsChanges() = testSpec.splitAppLayerBoundsChanges(
         primaryApp, landscapePosLeft = true, portraitPosTop = false)
 
-    @Presubmit
+    @FlakyTest(bugId = 250530664)
     @Test
     fun secondaryAppBoundsChanges() = testSpec.splitAppLayerBoundsChanges(
         secondaryApp, landscapePosLeft = false, portraitPosTop = true)
