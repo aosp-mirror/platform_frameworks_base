@@ -13,6 +13,8 @@
         <option name="run-command" value="cmd window tracing level all" />
         <!-- set WM tracing to frame (avoid incomplete states) -->
         <option name="run-command" value="cmd window tracing frame" />
+        <!-- ensure lock screen mode is swipe -->
+        <option name="run-command" value="locksettings set-disabled false" />
         <!-- restart launcher to activate TAPL -->
         <option name="run-command" value="setprop ro.test_harness 1 ; am force-stop com.google.android.apps.nexuslauncher" />
     </target_preparer>
