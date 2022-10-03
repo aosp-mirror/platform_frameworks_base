@@ -22,17 +22,17 @@ import android.icu.text.BreakIterator;
 import android.text.method.WordIterator;
 
 /**
- * Implementation of {@code SegmentIterator} using words as the text segment. Word boundaries are
+ * Implementation of {@code SegmentFinder} using words as the text segment. Word boundaries are
  * found using {@code WordIterator}. Whitespace characters are excluded, so they are not included in
  * any text segments.
  *
  * @hide
  */
-public class WordSegmentIterator extends SegmentIterator {
+public class WordSegmentFinder extends SegmentFinder {
     private final CharSequence mText;
     private final WordIterator mWordIterator;
 
-    public WordSegmentIterator(@NonNull CharSequence text, @NonNull WordIterator wordIterator) {
+    public WordSegmentFinder(@NonNull CharSequence text, @NonNull WordIterator wordIterator) {
         mText = text;
         mWordIterator = wordIterator;
     }
