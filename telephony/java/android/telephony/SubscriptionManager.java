@@ -2327,18 +2327,6 @@ public class SubscriptionManager {
         }
     }
 
-    /**
-     * Return the SubscriptionInfo for default voice subscription.
-     *
-     * Will return null on data only devices, or on error.
-     *
-     * @return the SubscriptionInfo for the default SMS subscription.
-     * @hide
-     */
-    public SubscriptionInfo getDefaultSmsSubscriptionInfo() {
-        return getActiveSubscriptionInfo(getDefaultSmsSubscriptionId());
-    }
-
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public int getDefaultSmsPhoneId() {
@@ -2410,21 +2398,6 @@ public class SubscriptionManager {
         }
 
         return;
-    }
-
-    //FIXME this is vulnerable to race conditions
-    /** @hide */
-    public boolean allDefaultsSelected() {
-        if (!isValidSubscriptionId(getDefaultDataSubscriptionId())) {
-            return false;
-        }
-        if (!isValidSubscriptionId(getDefaultSmsSubscriptionId())) {
-            return false;
-        }
-        if (!isValidSubscriptionId(getDefaultVoiceSubscriptionId())) {
-            return false;
-        }
-        return true;
     }
 
     /**
