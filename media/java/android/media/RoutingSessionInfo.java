@@ -25,6 +25,8 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Log;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -325,6 +327,34 @@ public final class RoutingSessionInfo implements Parcelable {
         dest.writeInt(mVolume);
         dest.writeBundle(mControlHints);
         dest.writeBoolean(mIsSystemSession);
+    }
+
+    /**
+     * Dumps current state of the instance. Use with {@code dumpsys}.
+     *
+     * See {@link android.os.Binder#dump(FileDescriptor, PrintWriter, String[])}.
+     *
+     * @hide
+     */
+    public void dump(@NonNull PrintWriter pw, @NonNull String prefix) {
+        pw.println(prefix + "RoutingSessionInfo");
+
+        String indent = prefix + "  ";
+
+        pw.println(indent + "mId=" + mId);
+        pw.println(indent + "mName=" + mName);
+        pw.println(indent + "mOwnerPackageName=" + mOwnerPackageName);
+        pw.println(indent + "mClientPackageName=" + mClientPackageName);
+        pw.println(indent + "mProviderId=" + mProviderId);
+        pw.println(indent + "mSelectedRoutes=" + mSelectedRoutes);
+        pw.println(indent + "mSelectableRoutes=" + mSelectableRoutes);
+        pw.println(indent + "mDeselectableRoutes=" + mDeselectableRoutes);
+        pw.println(indent + "mTransferableRoutes=" + mTransferableRoutes);
+        pw.println(indent + "mVolumeHandling=" + mVolumeHandling);
+        pw.println(indent + "mVolumeMax=" + mVolumeMax);
+        pw.println(indent + "mVolume=" + mVolume);
+        pw.println(indent + "mControlHints=" + mControlHints);
+        pw.println(indent + "mIsSystemSession=" + mIsSystemSession);
     }
 
     @Override
