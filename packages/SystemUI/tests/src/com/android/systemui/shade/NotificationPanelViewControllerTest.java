@@ -38,6 +38,7 @@ import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -173,6 +174,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.stubbing.Answer;
@@ -1504,6 +1506,33 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 /* proposedTranslation= */ anyFloat(),
                 eq(nsslSquishinessFraction)
         );
+    }
+
+
+    /**
+     * When shade is flinging to close and this fling is not intercepted,
+     * {@link AmbientState#setIsClosing(boolean)} should be called before
+     * {@link NotificationStackScrollLayoutController#onExpansionStopped()}
+     * to ensure scrollY can be correctly set to be 0
+     */
+    @Test
+    public void onShadeFlingClosingEnd_mAmbientStateSetClose_thenOnExpansionStopped() {
+        // Given: Shade is expanded
+        mNotificationPanelViewController.notifyExpandingFinished();
+        mNotificationPanelViewController.setIsClosing(false);
+
+        // When: Shade flings to close not canceled
+        mNotificationPanelViewController.notifyExpandingStarted();
+        mNotificationPanelViewController.setIsClosing(true);
+        mNotificationPanelViewController.onFlingEnd(false);
+
+        // Then: AmbientState's mIsClosing should be set to false
+        // before mNotificationStackScrollLayoutController.onExpansionStopped() is called
+        // to ensure NotificationStackScrollLayout.resetScrollPosition() -> resetScrollPosition
+        // -> setOwnScrollY(0) can set scrollY to 0 when shade is closed
+        InOrder inOrder = inOrder(mAmbientState, mNotificationStackScrollLayoutController);
+        inOrder.verify(mAmbientState).setIsClosing(false);
+        inOrder.verify(mNotificationStackScrollLayoutController).onExpansionStopped();
     }
 
     private static MotionEvent createMotionEvent(int x, int y, int action) {

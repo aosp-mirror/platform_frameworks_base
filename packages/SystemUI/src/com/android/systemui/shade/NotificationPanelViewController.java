@@ -2090,7 +2090,8 @@ public final class NotificationPanelViewController {
         animator.start();
     }
 
-    private void onFlingEnd(boolean cancelled) {
+    @VisibleForTesting
+    void onFlingEnd(boolean cancelled) {
         mIsFlinging = false;
         // No overshoot when the animation ends
         setOverExpansionInternal(0, false /* isFromGesture */);
@@ -3825,12 +3826,14 @@ public final class NotificationPanelViewController {
         }
     }
 
-    private void setIsClosing(boolean isClosing) {
+    @VisibleForTesting
+    void setIsClosing(boolean isClosing) {
         boolean wasClosing = isClosing();
         mClosing = isClosing;
         if (wasClosing != isClosing) {
             mPanelEventsEmitter.notifyPanelCollapsingChanged(isClosing);
         }
+        mAmbientState.setIsClosing(isClosing);
     }
 
     private void updateDozingVisibilities(boolean animate) {
@@ -4621,14 +4624,16 @@ public final class NotificationPanelViewController {
         Log.v(TAG, (mViewName != null ? (mViewName + ": ") : "") + String.format(fmt, args));
     }
 
-    private void notifyExpandingStarted() {
+    @VisibleForTesting
+    void notifyExpandingStarted() {
         if (!mExpanding) {
             mExpanding = true;
             onExpandingStarted();
         }
     }
 
-    private void notifyExpandingFinished() {
+    @VisibleForTesting
+    void notifyExpandingFinished() {
         endClosing();
         if (mExpanding) {
             mExpanding = false;
