@@ -32,6 +32,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.annotation.NonNull;
@@ -40,6 +41,7 @@ import android.hardware.HardwareBuffer;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.view.WindowManager;
+import android.window.BackAnimationAdapter;
 import android.window.BackEvent;
 import android.window.BackNavigationInfo;
 import android.window.IOnBackInvokedCallback;
@@ -54,6 +56,7 @@ import com.android.server.LocalServices;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -61,17 +64,18 @@ import java.util.concurrent.TimeUnit;
 @Presubmit
 @RunWith(WindowTestRunner.class)
 public class BackNavigationControllerTests extends WindowTestsBase {
-
     private BackNavigationController mBackNavigationController;
     private WindowManagerInternal mWindowManagerInternal;
+    private BackAnimationAdapter mBackAnimationAdapter;
 
     @Before
     public void setUp() throws Exception {
-        mBackNavigationController = new BackNavigationController();
+        mBackNavigationController = Mockito.spy(new BackNavigationController());
         LocalServices.removeServiceForTest(WindowManagerInternal.class);
         mWindowManagerInternal = mock(WindowManagerInternal.class);
         LocalServices.addService(WindowManagerInternal.class, mWindowManagerInternal);
         mBackNavigationController.setWindowManager(mWm);
+        mBackAnimationAdapter = mock(BackAnimationAdapter.class);
     }
 
     @Test
@@ -79,14 +83,16 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         Task task = createTopTaskWithActivity();
         IOnBackInvokedCallback callback = withSystemCallback(task);
 
-        BackNavigationInfo backNavigationInfo =
-                mBackNavigationController.startBackNavigation(true, null);
+        BackNavigationInfo backNavigationInfo = startBackNavigation();
         assertWithMessage("BackNavigationInfo").that(backNavigationInfo).isNotNull();
-        assertThat(backNavigationInfo.getDepartingAnimationTarget()).isNotNull();
-        assertThat(backNavigationInfo.getTaskWindowConfiguration()).isNotNull();
         assertThat(backNavigationInfo.getOnBackInvokedCallback()).isEqualTo(callback);
         assertThat(typeToString(backNavigationInfo.getType()))
                 .isEqualTo(typeToString(BackNavigationInfo.TYPE_RETURN_TO_HOME));
+
+        // verify if back animation would start.
+        verify(mBackNavigationController).scheduleAnimationLocked(
+                eq(BackNavigationInfo.TYPE_RETURN_TO_HOME), any(), eq(mBackAnimationAdapter),
+                any());
     }
 
     @Test
@@ -114,10 +120,6 @@ public class BackNavigationControllerTests extends WindowTestsBase {
                 .isEqualTo(typeToString(BackNavigationInfo.TYPE_CROSS_ACTIVITY));
         assertWithMessage("Activity callback").that(
                 backNavigationInfo.getOnBackInvokedCallback()).isEqualTo(callback);
-
-        // Until b/207481538 is implemented, this should be null
-        assertThat(backNavigationInfo.getScreenshotSurface()).isNull();
-        assertThat(backNavigationInfo.getScreenshotHardwareBuffer()).isNull();
     }
 
     @Test
@@ -233,7 +235,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
 
     @Nullable
     private BackNavigationInfo startBackNavigation() {
-        return mBackNavigationController.startBackNavigation(true, null);
+        return mBackNavigationController.startBackNavigation(null, mBackAnimationAdapter);
     }
 
     @NonNull
@@ -287,6 +289,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
                 PRIVATE_FLAG_EXT_ENABLE_ON_BACK_INVOKED_CALLBACK;
         WindowState window = createWindow(null, FIRST_APPLICATION_WINDOW, record, "window");
         when(record.mSurfaceControl.isValid()).thenReturn(true);
+        Mockito.doNothing().when(task).reparentSurfaceControl(any(), any());
         mAtm.setFocusedTask(task.mTaskId, record);
         addToWindowMap(window, true);
         return task;
