@@ -17,7 +17,7 @@
 
 package com.android.server.wm.flicker.close
 
-import android.platform.test.annotations.Presubmit
+import android.platform.test.annotations.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -78,7 +78,7 @@ class CloseAppBackButtonTest(testSpec: FlickerTestParameter) : CloseAppTransitio
         }
 
     /** {@inheritDoc} */
-    @Presubmit
+    @FlakyTest(bugId = 206753786)
     @Test
     override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
 
