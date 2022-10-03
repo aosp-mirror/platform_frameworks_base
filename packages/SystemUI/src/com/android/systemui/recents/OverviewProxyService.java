@@ -342,14 +342,6 @@ public class OverviewProxyService extends CurrentUserTracker implements
         }
 
         @Override
-        public void notifySwipeToHomeFinished() {
-            verifyCallerAndClearCallingIdentity("notifySwipeToHomeFinished", () ->
-                    mPipOptional.ifPresent(
-                            pip -> pip.setPinnedStackAnimationType(
-                                    PipAnimationController.ANIM_TYPE_ALPHA)));
-        }
-
-        @Override
         public void notifySwipeUpGestureStarted() {
             verifyCallerAndClearCallingIdentityPostMain("notifySwipeUpGestureStarted", () ->
                     notifySwipeUpGestureStartedInternal());
