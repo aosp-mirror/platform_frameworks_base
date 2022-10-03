@@ -1398,7 +1398,7 @@ public class ShadeListBuilder implements Dumpable, PipelineDumpable {
             throw exception;
         }
 
-        Log.e(TAG, "Allowing " + mConsecutiveReentrantRebuilds
+        Log.wtf(TAG, "Allowing " + mConsecutiveReentrantRebuilds
                 + " consecutive reentrant notification pipeline rebuild(s).", exception);
         mChoreographer.schedule();
     }
