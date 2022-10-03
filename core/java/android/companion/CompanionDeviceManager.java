@@ -30,6 +30,7 @@ import android.annotation.UserHandleAware;
 import android.app.Activity;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.ComponentName;
 import android.content.Context;
@@ -367,6 +368,10 @@ public final class CompanionDeviceManager {
      * recommended to do when an association is no longer relevant to avoid unnecessary battery
      * and/or data drain resulting from special privileges that the association provides</p>
      *
+     * <p>Note that if you use this api to associate with a Bluetooth device, please make sure
+     * to cancel your own Bluetooth discovery before calling this api, otherwise the callback
+     * may fail to return the desired device.</p>
+     *
      * <p>Calling this API requires a uses-feature
      * {@link PackageManager#FEATURE_COMPANION_DEVICE_SETUP} declaration in the manifest</p>
      **
@@ -377,6 +382,7 @@ public final class CompanionDeviceManager {
      * @see AssociationRequest.Builder
      * @see #getMyAssociations()
      * @see #disassociate(int)
+     * @see BluetoothAdapter#cancelDiscovery()
      */
     @UserHandleAware
     @RequiresPermission(anyOf = {
