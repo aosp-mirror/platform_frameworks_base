@@ -337,6 +337,40 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
     }
 
     @Test
+    fun testOnEntryUpdated_toAlert() {
+        // GIVEN that an entry is posted that should not heads up
+        setShouldHeadsUp(mEntry, false)
+        mCollectionListener.onEntryAdded(mEntry)
+
+        // WHEN it's updated to heads up
+        setShouldHeadsUp(mEntry)
+        mCollectionListener.onEntryUpdated(mEntry)
+        mBeforeTransformGroupsListener.onBeforeTransformGroups(listOf(mEntry))
+        mBeforeFinalizeFilterListener.onBeforeFinalizeFilter(listOf(mEntry))
+
+        // THEN the notification alerts
+        finishBind(mEntry)
+        verify(mHeadsUpManager).showNotification(mEntry)
+    }
+
+    @Test
+    fun testOnEntryUpdated_toNotAlert() {
+        // GIVEN that an entry is posted that should heads up
+        setShouldHeadsUp(mEntry)
+        mCollectionListener.onEntryAdded(mEntry)
+
+        // WHEN it's updated to not heads up
+        setShouldHeadsUp(mEntry, false)
+        mCollectionListener.onEntryUpdated(mEntry)
+        mBeforeTransformGroupsListener.onBeforeTransformGroups(listOf(mEntry))
+        mBeforeFinalizeFilterListener.onBeforeFinalizeFilter(listOf(mEntry))
+
+        // THEN the notification is never bound or shown
+        verify(mHeadsUpViewBinder, never()).bindHeadsUpView(any(), any())
+        verify(mHeadsUpManager, never()).showNotification(any())
+    }
+
+    @Test
     fun testOnEntryRemovedRemovesHeadsUpNotification() {
         // GIVEN the current HUN is mEntry
         addHUN(mEntry)
