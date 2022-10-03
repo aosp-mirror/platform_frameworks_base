@@ -17,26 +17,26 @@
 package com.android.internal.systemui.lint
 
 import com.android.tools.lint.checks.infrastructure.LintDetectorTest
-import com.android.tools.lint.checks.infrastructure.TestFile
 import com.android.tools.lint.checks.infrastructure.TestFiles
 import com.android.tools.lint.checks.infrastructure.TestLintTask
 import com.android.tools.lint.detector.api.Detector
 import com.android.tools.lint.detector.api.Issue
 import org.junit.Test
 
+@Suppress("UnstableApiUsage")
 class BindServiceViaContextDetectorTest : LintDetectorTest() {
 
     override fun getDetector(): Detector = BindServiceViaContextDetector()
     override fun lint(): TestLintTask = super.lint().allowMissingSdk(true)
 
-    override fun getIssues(): List<Issue> = listOf(
-            BindServiceViaContextDetector.ISSUE)
+    override fun getIssues(): List<Issue> = listOf(BindServiceViaContextDetector.ISSUE)
 
     private val explanation = "Binding or unbinding services are synchronous calls"
 
     @Test
     fun testBindService() {
-        lint().files(
+        lint()
+            .files(
                 TestFiles.java(
                         """
                     package test.pkg;
@@ -49,17 +49,20 @@ class BindServiceViaContextDetectorTest : LintDetectorTest() {
                         }
                     }
                 """
-                ).indented(),
-                *stubs)
-                .issues(BindServiceViaContextDetector.ISSUE)
-                .run()
-                .expectWarningCount(1)
-                .expectContains(explanation)
+                    )
+                    .indented(),
+                *stubs
+            )
+            .issues(BindServiceViaContextDetector.ISSUE)
+            .run()
+            .expectWarningCount(1)
+            .expectContains(explanation)
     }
 
     @Test
     fun testBindServiceAsUser() {
-        lint().files(
+        lint()
+            .files(
                 TestFiles.java(
                         """
                     package test.pkg;
@@ -73,17 +76,20 @@ class BindServiceViaContextDetectorTest : LintDetectorTest() {
                         }
                     }
                 """
-                ).indented(),
-                *stubs)
-                .issues(BindServiceViaContextDetector.ISSUE)
-                .run()
-                .expectWarningCount(1)
-                .expectContains(explanation)
+                    )
+                    .indented(),
+                *stubs
+            )
+            .issues(BindServiceViaContextDetector.ISSUE)
+            .run()
+            .expectWarningCount(1)
+            .expectContains(explanation)
     }
 
     @Test
     fun testUnbindService() {
-        lint().files(
+        lint()
+            .files(
                 TestFiles.java(
                         """
                     package test.pkg;
@@ -96,45 +102,15 @@ class BindServiceViaContextDetectorTest : LintDetectorTest() {
                         }
                     }
                 """
-                ).indented(),
-                *stubs)
-                .issues(BindServiceViaContextDetector.ISSUE)
-                .run()
-                .expectWarningCount(1)
-                .expectContains(explanation)
+                    )
+                    .indented(),
+                *stubs
+            )
+            .issues(BindServiceViaContextDetector.ISSUE)
+            .run()
+            .expectWarningCount(1)
+            .expectContains(explanation)
     }
 
-    private val contextStub: TestFile = java(
-            """
-        package android.content;
-        import android.os.UserHandle;
-
-        public class Context {
-            public void bindService(Intent intent) {};
-            public void bindServiceAsUser(Intent intent, ServiceConnection connection, int flags,
-                                          UserHandle userHandle) {};
-            public void unbindService(ServiceConnection connection) {};
-        }
-        """
-    )
-
-    private val serviceConnectionStub: TestFile = java(
-            """
-        package android.content;
-
-        public class ServiceConnection {}
-        """
-    )
-
-    private val userHandleStub: TestFile = java(
-            """
-        package android.os;
-
-        public enum UserHandle {
-            ALL
-        }
-        """
-    )
-
-    private val stubs = arrayOf(contextStub, serviceConnectionStub, userHandleStub)
+    private val stubs = androidStubs
 }
