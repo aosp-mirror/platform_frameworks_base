@@ -5335,7 +5335,14 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     private void showMteOverrideNotificationIfActive() {
-        if (!SystemProperties.getBoolean("ro.arm64.memtag.bootctl_supported", false)
+        String bootctl = SystemProperties.get("arm64.memtag.bootctl");
+        // If MTE is on, there is one in three cases:
+        // * a fullmte build: ro.arm64.memtag.bootctl_supported is not set
+        // * memtag: arm64.memtag.bootctl contains "memtag"
+        // * memtag-once
+        // In the condition below we detect memtag-once by exclusion.
+        if (Arrays.asList(bootctl.split(",")).contains("memtag")
+            || !SystemProperties.getBoolean("ro.arm64.memtag.bootctl_supported", false)
             || !com.android.internal.os.Zygote.nativeSupportsMemoryTagging()) {
             return;
         }
