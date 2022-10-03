@@ -298,7 +298,8 @@ final class AppDataHelper {
             // Create a native library symlink only if we have native libraries
             // and if the native libraries are 32 bit libraries. We do not provide
             // this symlink for 64 bit libraries.
-            String primaryCpuAbi = AndroidPackageUtils.getPrimaryCpuAbi(pkg, pkgSetting);
+            String primaryCpuAbi = pkgSetting == null
+                    ? AndroidPackageUtils.getRawPrimaryCpuAbi(pkg) : pkgSetting.getPrimaryCpuAbi();
             if (primaryCpuAbi != null && !VMRuntime.is64BitAbi(primaryCpuAbi)) {
                 final String nativeLibPath = pkg.getNativeLibraryDir();
                 if (!(new File(nativeLibPath).exists())) {

@@ -83,4 +83,24 @@ public interface PackageStateInternal extends PackageState {
 
     @NonNull
     PackageKeySetData getKeySetData();
+
+    /**
+     * Return the exact value stored inside this object for the primary CPU ABI type. This does
+     * not fallback to the inner {@link #getAndroidPackage()}, unlike {@link #getPrimaryCpuAbi()}.
+     *
+     * @deprecated Use {@link #getPrimaryCpuAbi()} if at all possible.
+     *
+     * TODO(b/249779400): Remove and see if the fallback-only API is a usable replacement
+     */
+    @Deprecated
+    @Nullable
+    String getPrimaryCpuAbiLegacy();
+
+    /**
+     * Same behavior as {@link #getPrimaryCpuAbiLegacy()}, but with the secondary ABI.
+     *
+     * @deprecated Use {@link #getSecondaryCpuAbi()} if at all possible.
+     */
+    @Nullable
+    String getSecondaryCpuAbiLegacy();
 }

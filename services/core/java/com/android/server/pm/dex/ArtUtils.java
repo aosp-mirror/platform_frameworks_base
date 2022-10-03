@@ -42,9 +42,8 @@ public final class ArtUtils {
             AndroidPackage pkg, PackageStateInternal pkgSetting) {
         return new ArtPackageInfo(
                 pkg.getPackageName(),
-                Arrays.asList(getAppDexInstructionSets(
-                        AndroidPackageUtils.getPrimaryCpuAbi(pkg, pkgSetting),
-                        AndroidPackageUtils.getSecondaryCpuAbi(pkg, pkgSetting))),
+                Arrays.asList(getAppDexInstructionSets(pkgSetting.getPrimaryCpuAbi(),
+                        pkgSetting.getSecondaryCpuAbi())),
                 AndroidPackageUtils.getAllCodePaths(pkg),
                 getOatDir(pkg, pkgSetting));
     }

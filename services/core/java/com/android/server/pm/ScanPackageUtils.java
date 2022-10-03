@@ -157,8 +157,8 @@ final class ScanPackageUtils {
                 if (pkgSetting.getPkg() != null && pkgSetting.getPkg().isStub()) {
                     needToDeriveAbi = true;
                 } else {
-                    primaryCpuAbiFromSettings = pkgSetting.getPrimaryCpuAbi();
-                    secondaryCpuAbiFromSettings = pkgSetting.getSecondaryCpuAbi();
+                    primaryCpuAbiFromSettings = pkgSetting.getPrimaryCpuAbiLegacy();
+                    secondaryCpuAbiFromSettings = pkgSetting.getSecondaryCpuAbiLegacy();
                 }
             } else {
                 // Re-scanning a system package after uninstalling updates; need to derive ABI
@@ -229,8 +229,8 @@ final class ScanPackageUtils {
             // to null here, only to reset them at a later point.
             Settings.updatePackageSetting(pkgSetting, disabledPkgSetting, oldSharedUserSetting,
                     sharedUserSetting, destCodeFile, parsedPackage.getNativeLibraryDir(),
-                    AndroidPackageUtils.getPrimaryCpuAbi(parsedPackage, pkgSetting),
-                    AndroidPackageUtils.getSecondaryCpuAbi(parsedPackage, pkgSetting),
+                    pkgSetting.getPrimaryCpuAbi(),
+                    pkgSetting.getSecondaryCpuAbi(),
                     PackageInfoUtils.appInfoFlags(parsedPackage, pkgSetting),
                     PackageInfoUtils.appInfoPrivateFlags(parsedPackage, pkgSetting),
                     UserManagerService.getInstance(),
@@ -327,8 +327,8 @@ final class ScanPackageUtils {
                 // We haven't run dex-opt for this move (since we've moved the compiled output too)
                 // but we already have this packages package info in the PackageSetting. We just
                 // use that and derive the native library path based on the new code path.
-                parsedPackage.setPrimaryCpuAbi(pkgSetting.getPrimaryCpuAbi())
-                        .setSecondaryCpuAbi(pkgSetting.getSecondaryCpuAbi());
+                parsedPackage.setPrimaryCpuAbi(pkgSetting.getPrimaryCpuAbiLegacy())
+                        .setSecondaryCpuAbi(pkgSetting.getSecondaryCpuAbiLegacy());
             }
 
             // Set native library paths again. For moves, the path will be updated based on the
@@ -378,8 +378,8 @@ final class ScanPackageUtils {
 
         if (DEBUG_ABI_SELECTION) {
             Log.d(TAG, "Abis for package[" + parsedPackage.getPackageName() + "] are"
-                    + " primary=" + pkgSetting.getPrimaryCpuAbi()
-                    + " secondary=" + pkgSetting.getSecondaryCpuAbi()
+                    + " primary=" + pkgSetting.getPrimaryCpuAbiLegacy()
+                    + " secondary=" + pkgSetting.getSecondaryCpuAbiLegacy()
                     + " abiOverride=" + pkgSetting.getCpuAbiOverride());
         }
 
@@ -901,7 +901,7 @@ final class ScanPackageUtils {
             PackageSetting ps = sharedUserPackageSettings.valueAt(i);
             if (scannedPackage == null
                     || !scannedPackage.getPackageName().equals(ps.getPackageName())) {
-                if (ps.getPrimaryCpuAbi() != null) {
+                if (ps.getPrimaryCpuAbiLegacy() != null) {
                     continue;
                 }
 

@@ -154,7 +154,7 @@ public interface PackageState {
     /**
      * The install time CPU override, if any. This value is written at install time
      * and doesn't change during the life of an install. If non-null,
-     * {@link #getPrimaryCpuAbi()} will also contain the same value.
+     * {@link #getPrimaryCpuAbiLegacy()} will also contain the same value.
      *
      * @hide
      */
