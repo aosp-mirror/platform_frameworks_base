@@ -410,9 +410,9 @@ public class QuickStatusBarHeader extends FrameLayout {
         // If forceExpanded (we are opening QS from lockscreen), the animators have been set to
         // position = 1f.
         if (forceExpanded) {
-            setTranslationY(panelTranslationY);
+            setAlpha(expansionFraction);
         } else {
-            setTranslationY(0);
+            setAlpha(1);
         }
 
         mKeyguardExpansionFraction = keyguardExpansionFraction;
