@@ -270,4 +270,13 @@ public class LocalImageResolverTest {
         assertThat(bd.getBitmap().getHeight()).isEqualTo(originalHeight);
 
     }
+
+    @Test
+    public void resolveImage_iconWithOtherPackageResource_usesPackageContextDefinition()
+            throws IOException {
+        Icon icon = Icon.createWithResource("this_is_invalid", R.drawable.test32x24);
+        Drawable d = LocalImageResolver.resolveImage(icon, mContext);
+        // This drawable must not be loaded - if it was, the code ignored the package specification.
+        assertThat(d).isNull();
+    }
 }

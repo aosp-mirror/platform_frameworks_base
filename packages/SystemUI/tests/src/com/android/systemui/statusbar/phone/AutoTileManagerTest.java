@@ -490,7 +490,7 @@ public class AutoTileManagerTest extends SysuiTestCase {
         mAutoTileManager.init();
         when(mAutoAddTracker.isAdded(TEST_CUSTOM_SAFETY_SPEC)).thenReturn(true);
         mAutoTileManager.mSafetyCallback.onSafetyCenterEnableChanged(false);
-        verify(mQsTileHost, times(1)).removeTile(safetyComponent);
+        verify(mQsTileHost, times(1)).removeTile(TEST_CUSTOM_SAFETY_SPEC);
     }
 
     @Test

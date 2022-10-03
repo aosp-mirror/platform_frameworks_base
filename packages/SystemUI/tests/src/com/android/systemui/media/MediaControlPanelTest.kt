@@ -547,6 +547,19 @@ public class MediaControlPanelTest : SysuiTestCase() {
     }
 
     @Test
+    fun bindAlbumView_artUsesResource() {
+        val albumArt = Icon.createWithResource(context, R.drawable.ic_android)
+        val state = mediaData.copy(artwork = albumArt)
+
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(state, PACKAGE)
+        bgExecutor.runAllReady()
+        mainExecutor.runAllReady()
+
+        verify(albumView).setImageDrawable(any(Drawable::class.java))
+    }
+
+    @Test
     fun bindAlbumView_setAfterExecutors() {
         val bmp = Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bmp)

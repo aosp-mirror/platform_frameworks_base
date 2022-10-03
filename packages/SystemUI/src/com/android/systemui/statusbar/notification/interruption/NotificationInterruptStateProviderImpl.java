@@ -177,9 +177,69 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
      */
     @Override
     public boolean shouldLaunchFullScreenIntentWhenAdded(NotificationEntry entry) {
-        return entry.getSbn().getNotification().fullScreenIntent != null
-                && (!shouldHeadsUp(entry)
-                || mStatusBarStateController.getState() == StatusBarState.KEYGUARD);
+        if (entry.getSbn().getNotification().fullScreenIntent == null) {
+            return false;
+        }
+
+        // Never show FSI when suppressed by DND
+        if (entry.shouldSuppressFullScreenIntent()) {
+            mLogger.logNoFullscreen(entry, "Suppressed by DND");
+            return false;
+        }
+
+        // Never show FSI if importance is not HIGH
+        if (entry.getImportance() < NotificationManager.IMPORTANCE_HIGH) {
+            mLogger.logNoFullscreen(entry, "Not important enough");
+            return false;
+        }
+
+        // If the notification has suppressive GroupAlertBehavior, block FSI and warn.
+        StatusBarNotification sbn = entry.getSbn();
+        if (sbn.isGroup() && sbn.getNotification().suppressAlertingDueToGrouping()) {
+            // b/231322873: Detect and report an event when a notification has both an FSI and a
+            // suppressive groupAlertBehavior, and now correctly block the FSI from firing.
+            final int uid = entry.getSbn().getUid();
+            android.util.EventLog.writeEvent(0x534e4554, "231322873", uid, "groupAlertBehavior");
+            mLogger.logNoFullscreenWarning(entry, "GroupAlertBehavior will prevent HUN");
+            return false;
+        }
+
+        // If the screen is off, then launch the FullScreenIntent
+        if (!mPowerManager.isInteractive()) {
+            mLogger.logFullscreen(entry, "Device is not interactive");
+            return true;
+        }
+
+        // If the device is currently dreaming, then launch the FullScreenIntent
+        if (isDreaming()) {
+            mLogger.logFullscreen(entry, "Device is dreaming");
+            return true;
+        }
+
+        // If the keyguard is showing, then launch the FullScreenIntent
+        if (mStatusBarStateController.getState() == StatusBarState.KEYGUARD) {
+            mLogger.logFullscreen(entry, "Keyguard is showing");
+            return true;
+        }
+
+        // If the notification should HUN, then we don't need FSI
+        if (shouldHeadsUp(entry)) {
+            mLogger.logNoFullscreen(entry, "Expected to HUN");
+            return false;
+        }
+
+        // If the notification won't HUN for some other reason (DND/snooze/etc), launch FSI.
+        mLogger.logFullscreen(entry, "Expected not to HUN");
+        return true;
+    }
+
+    private boolean isDreaming() {
+        try {
+            return mDreamManager.isDreaming();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to query dream manager.", e);
+            return false;
+        }
     }
 
     private boolean shouldHeadsUpWhenAwake(NotificationEntry entry) {
@@ -219,13 +279,7 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
             return false;
         }
 
-        boolean isDreaming = false;
-        try {
-            isDreaming = mDreamManager.isDreaming();
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to query dream manager.", e);
-        }
-        boolean inUse = mPowerManager.isScreenOn() && !isDreaming;
+        boolean inUse = mPowerManager.isScreenOn() && !isDreaming();
 
         if (!inUse) {
             mLogger.logNoHeadsUpNotInUse(sbn);

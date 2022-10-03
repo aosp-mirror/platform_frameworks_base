@@ -62,6 +62,8 @@ import java.util.Set;
 public class SnoozeHelper {
     public static final int XML_SNOOZED_NOTIFICATION_VERSION = 1;
 
+    static final int CONCURRENT_SNOOZE_LIMIT = 500;
+
     protected static final String XML_TAG_NAME = "snoozed-notifications";
 
     private static final String XML_SNOOZED_NOTIFICATION = "notification";
@@ -133,6 +135,15 @@ public class SnoozeHelper {
             String pkg = mPackages.get(key);
             removeRecordLocked(pkg, key, userId, mPersistedSnoozedNotificationsWithContext);
         }
+    }
+
+    protected boolean canSnooze(int numberToSnooze) {
+        synchronized (mLock) {
+            if ((mPackages.size() + numberToSnooze) > CONCURRENT_SNOOZE_LIMIT) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @NonNull
