@@ -775,18 +775,24 @@ public final class DisplayManagerService extends SystemService {
                 return; // Display no longer exists or no change.
             }
 
-            traceMessage = "requestDisplayStateInternal("
-                    + displayId + ", "
-                    + Display.stateToString(state)
-                    + ", brightness=" + brightnessState
-                    + ", sdrBrightness=" + sdrBrightnessState + ")";
-            Trace.asyncTraceBegin(Trace.TRACE_TAG_POWER, traceMessage, displayId);
+            if (Trace.isTagEnabled(Trace.TRACE_TAG_POWER)) {
+                traceMessage = Display.stateToString(state)
+                           + ", brightness=" + brightnessState
+                           + ", sdrBrightness=" + sdrBrightnessState;
+                Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_POWER,
+                        "requestDisplayStateInternal:" + displayId,
+                        traceMessage, displayId);
+            }
 
             mDisplayStates.setValueAt(index, state);
             brightnessPair.brightness = brightnessState;
             brightnessPair.sdrBrightness = sdrBrightnessState;
             runnable = updateDisplayStateLocked(mLogicalDisplayMapper.getDisplayLocked(displayId)
                     .getPrimaryDisplayDeviceLocked());
+            if (Trace.isTagEnabled(Trace.TRACE_TAG_POWER)) {
+                Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_POWER,
+                        "requestDisplayStateInternal:" + displayId, displayId);
+            }
         }
 
         // Setting the display power state can take hundreds of milliseconds
@@ -796,7 +802,6 @@ public final class DisplayManagerService extends SystemService {
         if (runnable != null) {
             runnable.run();
         }
-        Trace.asyncTraceEnd(Trace.TRACE_TAG_POWER, traceMessage, displayId);
     }
 
     private class SettingsObserver extends ContentObserver {
