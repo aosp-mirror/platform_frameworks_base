@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.collection;
 
 import static com.android.systemui.statusbar.notification.collection.ListDumper.dumpTree;
+import static com.android.systemui.statusbar.notification.collection.ShadeListBuilder.MAX_CONSECUTIVE_REENTRANT_REBUILDS;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -45,6 +46,7 @@ import android.os.SystemClock;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.ArrayMap;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -124,6 +126,10 @@ public class ShadeListBuilderTest extends SysuiTestCase {
 
     private Map<String, Integer> mNextIdMap = new ArrayMap<>();
     private int mNextRank = 0;
+
+    private Log.TerribleFailureHandler mOldWtfHandler = null;
+    private Log.TerribleFailure mLastWtf = null;
+    private int mWtfCount = 0;
 
     @Before
     public void setUp() {
@@ -1748,14 +1754,17 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         mListBuilder.addPreGroupFilter(filter);
         mListBuilder.addOnBeforeTransformGroupsListener(listener);
 
+        interceptWtfs();
+
         // WHEN we try to run the pipeline and the filter is invalidated exactly
         // MAX_CONSECUTIVE_REENTRANT_REBUILDS times,
         addNotif(0, PACKAGE_2);
-        invalidator.setInvalidationCount(ShadeListBuilder.MAX_CONSECUTIVE_REENTRANT_REBUILDS);
+        invalidator.setInvalidationCount(MAX_CONSECUTIVE_REENTRANT_REBUILDS);
         dispatchBuild();
-        runWhileScheduledUpTo(ShadeListBuilder.MAX_CONSECUTIVE_REENTRANT_REBUILDS + 2);
+        runWhileScheduledUpTo(MAX_CONSECUTIVE_REENTRANT_REBUILDS + 2);
 
-        // THEN an exception is NOT thrown.
+        // THEN an exception is NOT thrown directly, but a WTF IS logged.
+        expectWtfs(MAX_CONSECUTIVE_REENTRANT_REBUILDS);
     }
 
     @Test(expected = IllegalStateException.class)
@@ -1767,18 +1776,24 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         mListBuilder.addPreGroupFilter(filter);
         mListBuilder.addOnBeforeTransformGroupsListener(listener);
 
+        interceptWtfs();
+
         // WHEN we try to run the pipeline and the filter is invalidated more than
         // MAX_CONSECUTIVE_REENTRANT_REBUILDS times,
         addNotif(0, PACKAGE_2);
-        invalidator.setInvalidationCount(ShadeListBuilder.MAX_CONSECUTIVE_REENTRANT_REBUILDS + 1);
+        invalidator.setInvalidationCount(MAX_CONSECUTIVE_REENTRANT_REBUILDS + 1);
         dispatchBuild();
-        runWhileScheduledUpTo(ShadeListBuilder.MAX_CONSECUTIVE_REENTRANT_REBUILDS + 2);
+        try {
+            runWhileScheduledUpTo(MAX_CONSECUTIVE_REENTRANT_REBUILDS + 2);
+        } finally {
+            expectWtfs(MAX_CONSECUTIVE_REENTRANT_REBUILDS);
+        }
 
         // THEN an exception IS thrown.
     }
 
     @Test
-    public void testNonConsecutiveOutOfOrderInvalidationDontThrowAfterTooManyRuns() {
+    public void testNonConsecutiveOutOfOrderInvalidationsDontThrowAfterTooManyRuns() {
         // GIVEN a PreGroupNotifFilter that gets invalidated during the grouping stage,
         NotifFilter filter = new PackageFilter(PACKAGE_1);
         CountingInvalidator invalidator = new CountingInvalidator(filter);
@@ -1786,17 +1801,22 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         mListBuilder.addPreGroupFilter(filter);
         mListBuilder.addOnBeforeTransformGroupsListener(listener);
 
-        // WHEN we try to run the pipeline and the filter is invalidated at least
-        // MAX_CONSECUTIVE_REENTRANT_REBUILDS times,
-        addNotif(0, PACKAGE_2);
-        invalidator.setInvalidationCount(ShadeListBuilder.MAX_CONSECUTIVE_REENTRANT_REBUILDS);
-        dispatchBuild();
-        runWhileScheduledUpTo(ShadeListBuilder.MAX_CONSECUTIVE_REENTRANT_REBUILDS + 2);
-        invalidator.setInvalidationCount(ShadeListBuilder.MAX_CONSECUTIVE_REENTRANT_REBUILDS);
-        dispatchBuild();
-        runWhileScheduledUpTo(ShadeListBuilder.MAX_CONSECUTIVE_REENTRANT_REBUILDS + 2);
+        interceptWtfs();
 
-        // THEN an exception is NOT thrown.
+        // WHEN we try to run the pipeline and the filter is invalidated
+        // MAX_CONSECUTIVE_REENTRANT_REBUILDS times, the pipeline runs for a non-reentrant reason,
+        // and then the filter is invalidated MAX_CONSECUTIVE_REENTRANT_REBUILDS times again,
+        addNotif(0, PACKAGE_2);
+        invalidator.setInvalidationCount(MAX_CONSECUTIVE_REENTRANT_REBUILDS);
+        dispatchBuild();
+        runWhileScheduledUpTo(MAX_CONSECUTIVE_REENTRANT_REBUILDS + 2);
+        invalidator.setInvalidationCount(MAX_CONSECUTIVE_REENTRANT_REBUILDS);
+        // Note: dispatchBuild itself triggers a non-reentrant pipeline run.
+        dispatchBuild();
+        runWhileScheduledUpTo(MAX_CONSECUTIVE_REENTRANT_REBUILDS + 2);
+
+        // THEN an exception is NOT thrown, but WTFs ARE logged.
+        expectWtfs(MAX_CONSECUTIVE_REENTRANT_REBUILDS * 2);
     }
 
     @Test
@@ -1808,14 +1828,18 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         mListBuilder.addPromoter(promoter);
         mListBuilder.addOnBeforeSortListener(listener);
 
+        interceptWtfs();
+
         // WHEN we try to run the pipeline and the promoter is invalidated exactly
         // MAX_CONSECUTIVE_REENTRANT_REBUILDS times,
         addNotif(0, PACKAGE_1);
-        invalidator.setInvalidationCount(ShadeListBuilder.MAX_CONSECUTIVE_REENTRANT_REBUILDS);
+        invalidator.setInvalidationCount(MAX_CONSECUTIVE_REENTRANT_REBUILDS);
         dispatchBuild();
-        runWhileScheduledUpTo(ShadeListBuilder.MAX_CONSECUTIVE_REENTRANT_REBUILDS + 2);
+        runWhileScheduledUpTo(MAX_CONSECUTIVE_REENTRANT_REBUILDS + 2);
 
-        // THEN an exception is NOT thrown.
+        // THEN an exception is NOT thrown directly, but a WTF IS logged.
+        expectWtfs(MAX_CONSECUTIVE_REENTRANT_REBUILDS);
+
     }
 
     @Test(expected = IllegalStateException.class)
@@ -1827,12 +1851,18 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         mListBuilder.addPromoter(promoter);
         mListBuilder.addOnBeforeSortListener(listener);
 
+        interceptWtfs();
+
         // WHEN we try to run the pipeline and the promoter is invalidated more than
         // MAX_CONSECUTIVE_REENTRANT_REBUILDS times,
         addNotif(0, PACKAGE_1);
-        invalidator.setInvalidationCount(ShadeListBuilder.MAX_CONSECUTIVE_REENTRANT_REBUILDS + 1);
+        invalidator.setInvalidationCount(MAX_CONSECUTIVE_REENTRANT_REBUILDS + 1);
         dispatchBuild();
-        runWhileScheduledUpTo(ShadeListBuilder.MAX_CONSECUTIVE_REENTRANT_REBUILDS + 2);
+        try {
+            runWhileScheduledUpTo(MAX_CONSECUTIVE_REENTRANT_REBUILDS + 2);
+        } finally {
+            expectWtfs(MAX_CONSECUTIVE_REENTRANT_REBUILDS);
+        }
 
         // THEN an exception IS thrown.
     }
@@ -1846,14 +1876,17 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         mListBuilder.setComparators(singletonList(comparator));
         mListBuilder.addOnBeforeRenderListListener(listener);
 
+        interceptWtfs();
+
         // WHEN we try to run the pipeline and the comparator is invalidated exactly
         // MAX_CONSECUTIVE_REENTRANT_REBUILDS times,
         addNotif(0, PACKAGE_2);
-        invalidator.setInvalidationCount(ShadeListBuilder.MAX_CONSECUTIVE_REENTRANT_REBUILDS);
+        invalidator.setInvalidationCount(MAX_CONSECUTIVE_REENTRANT_REBUILDS);
         dispatchBuild();
-        runWhileScheduledUpTo(ShadeListBuilder.MAX_CONSECUTIVE_REENTRANT_REBUILDS + 2);
+        runWhileScheduledUpTo(MAX_CONSECUTIVE_REENTRANT_REBUILDS + 2);
 
-        // THEN an exception is NOT thrown.
+        // THEN an exception is NOT thrown directly, but a WTF IS logged.
+        expectWtfs(MAX_CONSECUTIVE_REENTRANT_REBUILDS);
     }
 
     @Test(expected = IllegalStateException.class)
@@ -1865,12 +1898,14 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         mListBuilder.setComparators(singletonList(comparator));
         mListBuilder.addOnBeforeRenderListListener(listener);
 
+        interceptWtfs();
+
         // WHEN we try to run the pipeline and the comparator is invalidated more than
         // MAX_CONSECUTIVE_REENTRANT_REBUILDS times,
         addNotif(0, PACKAGE_2);
-        invalidator.setInvalidationCount(ShadeListBuilder.MAX_CONSECUTIVE_REENTRANT_REBUILDS + 1);
+        invalidator.setInvalidationCount(MAX_CONSECUTIVE_REENTRANT_REBUILDS + 1);
         dispatchBuild();
-        runWhileScheduledUpTo(ShadeListBuilder.MAX_CONSECUTIVE_REENTRANT_REBUILDS + 2);
+        runWhileScheduledUpTo(MAX_CONSECUTIVE_REENTRANT_REBUILDS + 2);
 
         // THEN an exception IS thrown.
     }
@@ -1884,14 +1919,17 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         mListBuilder.addFinalizeFilter(filter);
         mListBuilder.addOnBeforeRenderListListener(listener);
 
+        interceptWtfs();
+
         // WHEN we try to run the pipeline and the PreRenderFilter is invalidated exactly
         // MAX_CONSECUTIVE_REENTRANT_REBUILDS times,
         addNotif(0, PACKAGE_2);
-        invalidator.setInvalidationCount(ShadeListBuilder.MAX_CONSECUTIVE_REENTRANT_REBUILDS);
+        invalidator.setInvalidationCount(MAX_CONSECUTIVE_REENTRANT_REBUILDS);
         dispatchBuild();
-        runWhileScheduledUpTo(ShadeListBuilder.MAX_CONSECUTIVE_REENTRANT_REBUILDS + 2);
+        runWhileScheduledUpTo(MAX_CONSECUTIVE_REENTRANT_REBUILDS + 2);
 
-        // THEN an exception is NOT thrown.
+        // THEN an exception is NOT thrown directly, but a WTF IS logged.
+        expectWtfs(MAX_CONSECUTIVE_REENTRANT_REBUILDS);
     }
 
     @Test(expected = IllegalStateException.class)
@@ -1903,14 +1941,57 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         mListBuilder.addFinalizeFilter(filter);
         mListBuilder.addOnBeforeRenderListListener(listener);
 
+        interceptWtfs();
+
         // WHEN we try to run the pipeline and the PreRenderFilter is invalidated more than
         // MAX_CONSECUTIVE_REENTRANT_REBUILDS times,
         addNotif(0, PACKAGE_2);
-        invalidator.setInvalidationCount(ShadeListBuilder.MAX_CONSECUTIVE_REENTRANT_REBUILDS + 1);
+        invalidator.setInvalidationCount(MAX_CONSECUTIVE_REENTRANT_REBUILDS + 1);
         dispatchBuild();
-        runWhileScheduledUpTo(ShadeListBuilder.MAX_CONSECUTIVE_REENTRANT_REBUILDS + 2);
+        try {
+            runWhileScheduledUpTo(MAX_CONSECUTIVE_REENTRANT_REBUILDS + 2);
+        } finally {
+            expectWtfs(MAX_CONSECUTIVE_REENTRANT_REBUILDS);
+        }
 
         // THEN an exception IS thrown.
+    }
+
+    private void interceptWtfs() {
+        assertNull(mOldWtfHandler);
+
+        mLastWtf = null;
+        mWtfCount = 0;
+
+        mOldWtfHandler = Log.setWtfHandler((tag, e, system) -> {
+            Log.e("ShadeListBuilderTest", "Observed WTF: " + e);
+            mLastWtf = e;
+            mWtfCount++;
+        });
+    }
+
+    private void expectNoWtfs() {
+        assertNull(expectWtfs(0));
+    }
+
+    private Log.TerribleFailure expectWtf() {
+        return expectWtfs(1);
+    }
+
+    private Log.TerribleFailure expectWtfs(int expectedWtfCount) {
+        assertNotNull(mOldWtfHandler);
+
+        Log.setWtfHandler(mOldWtfHandler);
+        mOldWtfHandler = null;
+
+        Log.TerribleFailure wtf = mLastWtf;
+        int wtfCount = mWtfCount;
+
+        mLastWtf = null;
+        mWtfCount = 0;
+
+        assertEquals(expectedWtfCount, wtfCount);
+        return wtf;
     }
 
     @Test

@@ -733,6 +733,11 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             if (dozing || mBouncer.needsFullscreenBouncer() || mOccluded) {
                 reset(dozing /* hideBouncerWhenShowing */);
             }
+
+            if (bouncerIsOrWillBeShowing()) {
+                // Ensure bouncer is not shown when dozing state changes.
+                hideBouncer(false);
+            }
             updateStates();
 
             if (!dozing) {
