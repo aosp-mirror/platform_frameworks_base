@@ -74,7 +74,7 @@ public class BiometricContextProviderTest {
     public void setup() throws RemoteException {
         when(mAmbientDisplayConfiguration.alwaysOnEnabled(anyInt())).thenReturn(true);
         mProvider = new BiometricContextProvider(mAmbientDisplayConfiguration, mStatusBarService,
-                null /* handler */);
+                null /* handler */, null /* authSessionCoordinator */);
         ArgumentCaptor<IBiometricContextListener> captor =
                 ArgumentCaptor.forClass(IBiometricContextListener.class);
         verify(mStatusBarService).setBiometicContextListener(captor.capture());

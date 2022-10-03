@@ -58,6 +58,7 @@ import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.log.CallbackWithProbe;
 import com.android.server.biometrics.log.Probe;
+import com.android.server.biometrics.sensors.AuthSessionCoordinator;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.LockoutCache;
@@ -127,6 +128,8 @@ public class FingerprintAuthenticationClientTest {
     private ICancellationSignal mCancellationSignal;
     @Mock
     private Probe mLuxProbe;
+    @Mock
+    private AuthSessionCoordinator mAuthSessionCoordinator;
     @Captor
     private ArgumentCaptor<OperationContext> mOperationContextCaptor;
     @Captor
@@ -138,6 +141,7 @@ public class FingerprintAuthenticationClientTest {
     @Before
     public void setup() {
         mContext.addMockSystemService(BiometricManager.class, mBiometricManager);
+        when(mBiometricContext.getAuthSessionCoordinator()).thenReturn(mAuthSessionCoordinator);
         when(mBiometricLogger.getAmbientLightProbe(anyBoolean())).thenAnswer(i ->
                 new CallbackWithProbe<>(mLuxProbe, i.getArgument(0)));
         when(mBiometricContext.updateContext(any(), anyBoolean())).thenAnswer(
@@ -496,7 +500,7 @@ public class FingerprintAuthenticationClientTest {
                 null /* taskStackListener */, mLockoutCache,
                 mUdfpsOverlayController, mSideFpsController, allowBackgroundAuthentication,
                 mSensorProps,
-                new Handler(mLooper.getLooper())) {
+                new Handler(mLooper.getLooper()), 0 /* biometricStrength */) {
             @Override
             protected ActivityTaskManager getActivityTaskManager() {
                 return mActivityTaskManager;

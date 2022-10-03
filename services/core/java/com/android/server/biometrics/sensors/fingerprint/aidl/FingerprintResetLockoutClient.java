@@ -18,6 +18,7 @@ package com.android.server.biometrics.sensors.fingerprint.aidl;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.hardware.biometrics.BiometricManager.Authenticators;
 import android.hardware.biometrics.fingerprint.IFingerprint;
 import android.hardware.keymaster.HardwareAuthToken;
 import android.os.RemoteException;
@@ -48,17 +49,20 @@ class FingerprintResetLockoutClient extends HalClientMonitor<AidlSession> implem
     private final HardwareAuthToken mHardwareAuthToken;
     private final LockoutCache mLockoutCache;
     private final LockoutResetDispatcher mLockoutResetDispatcher;
+    private final int mBiometricStrength;
 
     FingerprintResetLockoutClient(@NonNull Context context,
             @NonNull Supplier<AidlSession> lazyDaemon, int userId, String owner, int sensorId,
             @NonNull BiometricLogger biometricLogger, @NonNull BiometricContext biometricContext,
             @NonNull byte[] hardwareAuthToken, @NonNull LockoutCache lockoutTracker,
-            @NonNull LockoutResetDispatcher lockoutResetDispatcher) {
+            @NonNull LockoutResetDispatcher lockoutResetDispatcher,
+            @Authenticators.Types int biometricStrength) {
         super(context, lazyDaemon, null /* token */, null /* listener */, userId, owner,
                 0 /* cookie */, sensorId, biometricLogger, biometricContext);
         mHardwareAuthToken = HardwareAuthTokenUtils.toHardwareAuthToken(hardwareAuthToken);
         mLockoutCache = lockoutTracker;
         mLockoutResetDispatcher = lockoutResetDispatcher;
+        mBiometricStrength = biometricStrength;
     }
 
     @Override
@@ -89,6 +93,8 @@ class FingerprintResetLockoutClient extends HalClientMonitor<AidlSession> implem
     void onLockoutCleared() {
         resetLocalLockoutStateToNone(getSensorId(), getTargetUserId(), mLockoutCache,
                 mLockoutResetDispatcher);
+        getBiometricContext().getAuthSessionCoordinator()
+                .resetLockoutFor(getTargetUserId(), mBiometricStrength, getRequestId());
         mCallback.onClientFinished(this, true /* success */);
     }
 
