@@ -2913,6 +2913,7 @@ public final class PowerManager {
         private int mFlags;
         @UnsupportedAppUsage
         private String mTag;
+        private int mTagHash;
         private final String mPackageName;
         private final IBinder mToken;
         private int mInternalCount;
@@ -2921,7 +2922,6 @@ public final class PowerManager {
         private boolean mHeld;
         private WorkSource mWorkSource;
         private String mHistoryTag;
-        private final String mTraceName;
         private final int mDisplayId;
         private WakeLockStateListener mListener;
         private IWakeLockCallback mCallback;
@@ -2931,9 +2931,9 @@ public final class PowerManager {
         WakeLock(int flags, String tag, String packageName, int displayId) {
             mFlags = flags;
             mTag = tag;
+            mTagHash = mTag.hashCode();
             mPackageName = packageName;
             mToken = new Binder();
-            mTraceName = "WakeLock (" + mTag + ")";
             mDisplayId = displayId;
         }
 
@@ -2942,7 +2942,8 @@ public final class PowerManager {
             synchronized (mToken) {
                 if (mHeld) {
                     Log.wtf(TAG, "WakeLock finalized while still held: " + mTag);
-                    Trace.asyncTraceEnd(Trace.TRACE_TAG_POWER, mTraceName, 0);
+                    Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_POWER,
+                            "WakeLocks", mTagHash);
                     try {
                         mService.releaseWakeLock(mToken, 0);
                     } catch (RemoteException e) {
@@ -3012,7 +3013,8 @@ public final class PowerManager {
                 // should immediately acquire the wake lock once again despite never having
                 // been explicitly released by the keyguard.
                 mHandler.removeCallbacks(mReleaser);
-                Trace.asyncTraceBegin(Trace.TRACE_TAG_POWER, mTraceName, 0);
+                Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_POWER,
+                        "WakeLocks", mTag, mTagHash);
                 try {
                     mService.acquireWakeLock(mToken, mFlags, mTag, mPackageName, mWorkSource,
                             mHistoryTag, mDisplayId, mCallback);
@@ -3060,7 +3062,8 @@ public final class PowerManager {
                 if (!mRefCounted || mInternalCount == 0) {
                     mHandler.removeCallbacks(mReleaser);
                     if (mHeld) {
-                        Trace.asyncTraceEnd(Trace.TRACE_TAG_POWER, mTraceName, 0);
+                        Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_POWER,
+                                "WakeLocks", mTagHash);
                         try {
                             mService.releaseWakeLock(mToken, flags);
                         } catch (RemoteException e) {
@@ -3137,6 +3140,7 @@ public final class PowerManager {
         /** @hide */
         public void setTag(String tag) {
             mTag = tag;
+            mTagHash = mTag.hashCode();
         }
 
         /** @hide */
