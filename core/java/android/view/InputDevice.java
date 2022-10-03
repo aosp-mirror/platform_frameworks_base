@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -1007,6 +1008,22 @@ public final class InputDevice implements Parcelable {
     private void addMotionRange(int axis, int source,
             float min, float max, float flat, float fuzz, float resolution) {
         mMotionRanges.add(new MotionRange(axis, source, min, max, flat, fuzz, resolution));
+    }
+
+    /**
+     * Returns the Bluetooth address of this input device, if known.
+     *
+     * The returned string is always null if this input device is not connected
+     * via Bluetooth, or if the Bluetooth address of the device cannot be
+     * determined. The returned address will look like: "11:22:33:44:55:66".
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @Nullable
+    public String getBluetoothAddress() {
+        // We query the address via a separate InputManager API instead of pre-populating it in
+        // this class to avoid leaking it to apps that do not have sufficient permissions.
+        return InputManager.getInstance().getInputDeviceBluetoothAddress(mId);
     }
 
     /**

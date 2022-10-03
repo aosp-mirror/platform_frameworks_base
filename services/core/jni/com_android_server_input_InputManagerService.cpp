@@ -300,6 +300,7 @@ public:
     void requestPointerCapture(const sp<IBinder>& windowToken, bool enabled);
     void setCustomPointerIcon(const SpriteIcon& icon);
     void setMotionClassifierEnabled(bool enabled);
+    std::optional<std::string> getBluetoothAddress(int32_t deviceId);
 
     /* --- InputReaderPolicyInterface implementation --- */
 
@@ -1486,6 +1487,10 @@ void NativeInputManager::setMotionClassifierEnabled(bool enabled) {
     mInputManager->getProcessor().setMotionClassifierEnabled(enabled);
 }
 
+std::optional<std::string> NativeInputManager::getBluetoothAddress(int32_t deviceId) {
+    return mInputManager->getReader().getBluetoothAddress(deviceId);
+}
+
 bool NativeInputManager::isPerDisplayTouchModeEnabled() {
     JNIEnv* env = jniEnv();
     jboolean enabled =
@@ -2325,6 +2330,12 @@ static void nativeSetPointerDisplayId(JNIEnv* env, jobject nativeImplObj, jint d
     im->setPointerDisplayId(displayId);
 }
 
+static jstring nativeGetBluetoothAddress(JNIEnv* env, jobject nativeImplObj, jint deviceId) {
+    NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
+    const auto address = im->getBluetoothAddress(deviceId);
+    return address ? env->NewStringUTF(address->c_str()) : nullptr;
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gInputManagerMethods[] = {
@@ -2407,6 +2418,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"flushSensor", "(II)Z", (void*)nativeFlushSensor},
         {"cancelCurrentTouch", "()V", (void*)nativeCancelCurrentTouch},
         {"setPointerDisplayId", "(I)V", (void*)nativeSetPointerDisplayId},
+        {"getBluetoothAddress", "(I)Ljava/lang/String;", (void*)nativeGetBluetoothAddress},
 };
 
 #define FIND_CLASS(var, className) \

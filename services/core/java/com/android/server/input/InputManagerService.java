@@ -19,6 +19,8 @@ package com.android.server.input;
 import static android.provider.DeviceConfig.NAMESPACE_INPUT_NATIVE_BOOT;
 import static android.view.KeyEvent.KEYCODE_UNKNOWN;
 
+import android.Manifest;
+import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManagerInternal;
@@ -2669,6 +2671,12 @@ public class InputManagerService extends IInputManager.Stub
     public void unregisterBatteryListener(int deviceId, IInputDeviceBatteryListener listener) {
         Objects.requireNonNull(listener);
         mBatteryController.unregisterBatteryListener(deviceId, listener, Binder.getCallingPid());
+    }
+
+    @EnforcePermission(Manifest.permission.BLUETOOTH)
+    @Override
+    public String getInputDeviceBluetoothAddress(int deviceId) {
+        return mNative.getBluetoothAddress(deviceId);
     }
 
     @Override
