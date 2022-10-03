@@ -20,7 +20,9 @@ import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BROADCAST;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BROADCAST_DEFERRAL;
 import static com.android.server.am.BroadcastConstants.DEFER_BOOT_COMPLETED_BROADCAST_NONE;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UptimeMillisLong;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.os.Handler;
@@ -537,6 +539,38 @@ public class BroadcastDispatcher {
                     && mAlarmQueue.isEmpty()
                     && isDeferralsListEmpty(mDeferredBroadcasts)
                     && isDeferralsListEmpty(mAlarmDeferrals);
+        }
+    }
+
+    private static boolean isDeferralsBeyondBarrier(@NonNull ArrayList<Deferrals> list,
+            @UptimeMillisLong long barrierTime) {
+        for (int i = 0; i < list.size(); i++) {
+            if (!isBeyondBarrier(list.get(i).broadcasts, barrierTime)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static boolean isBeyondBarrier(@NonNull ArrayList<BroadcastRecord> list,
+            @UptimeMillisLong long barrierTime) {
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).enqueueTime <= barrierTime) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean isBeyondBarrier(@UptimeMillisLong long barrierTime) {
+        synchronized (mLock) {
+            if ((mCurrentBroadcast != null) && mCurrentBroadcast.enqueueTime <= barrierTime) {
+                return false;
+            }
+            return isBeyondBarrier(mOrderedBroadcasts, barrierTime)
+                    && isBeyondBarrier(mAlarmQueue, barrierTime)
+                    && isDeferralsBeyondBarrier(mDeferredBroadcasts, barrierTime)
+                    && isDeferralsBeyondBarrier(mAlarmDeferrals, barrierTime);
         }
     }
 

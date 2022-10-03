@@ -1753,19 +1753,20 @@ public class BroadcastQueueImpl extends BroadcastQueue {
         // If nothing active, we're beyond barrier
         if (isIdleLocked()) return true;
 
-        // Check if active broadcast is beyond barrier
-        final BroadcastRecord active = getActiveBroadcastLocked();
-        if (active != null && active.enqueueTime > barrierTime) {
-            return true;
+        // Check if parallel broadcasts are beyond barrier
+        for (int i = 0; i < mParallelBroadcasts.size(); i++) {
+            if (mParallelBroadcasts.get(i).enqueueTime <= barrierTime) {
+                return false;
+            }
         }
 
         // Check if pending broadcast is beyond barrier
         final BroadcastRecord pending = getPendingBroadcastLocked();
-        if (pending != null && pending.enqueueTime > barrierTime) {
-            return true;
+        if ((pending != null) && pending.enqueueTime <= barrierTime) {
+            return false;
         }
 
-        return false;
+        return mDispatcher.isBeyondBarrier(barrierTime);
     }
 
     public void waitForIdle(PrintWriter pw) {

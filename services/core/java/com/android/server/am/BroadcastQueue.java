@@ -18,6 +18,7 @@ package com.android.server.am;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UptimeMillisLong;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.os.Bundle;
@@ -60,12 +61,20 @@ public abstract class BroadcastQueue {
         }
     }
 
-    static void logw(String msg) {
+    static void logw(@NonNull String msg) {
         Slog.w(TAG, msg);
     }
 
-    static void logv(String msg) {
+    static void logv(@NonNull String msg) {
         Slog.v(TAG, msg);
+    }
+
+    static void logv(@NonNull String msg, @Nullable PrintWriter pw) {
+        logv(msg);
+        if (pw != null) {
+            pw.println(msg);
+            pw.flush();
+        }
     }
 
     @Override
@@ -165,6 +174,16 @@ public abstract class BroadcastQueue {
      */
     @GuardedBy("mService")
     public abstract boolean isIdleLocked();
+
+    /**
+     * Quickly determine if this queue has broadcasts enqueued before the given
+     * barrier timestamp that are still waiting to be delivered.
+     *
+     * @see #waitForIdle
+     * @see #waitForBarrier
+     */
+    @GuardedBy("mService")
+    public abstract boolean isBeyondBarrierLocked(@UptimeMillisLong long barrierTime);
 
     /**
      * Wait until this queue becomes completely idle.

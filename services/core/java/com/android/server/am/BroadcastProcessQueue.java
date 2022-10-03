@@ -407,6 +407,22 @@ class BroadcastProcessQueue {
         return !isActive() && isEmpty();
     }
 
+    /**
+     * Quickly determine if this queue has broadcasts enqueued before the given
+     * barrier timestamp that are still waiting to be delivered.
+     */
+    public boolean isBeyondBarrierLocked(@UptimeMillisLong long barrierTime) {
+        if (mActive != null) {
+            return mActive.enqueueTime > barrierTime;
+        }
+        final SomeArgs next = mPending.peekFirst();
+        if (next != null) {
+            return ((BroadcastRecord) next.arg1).enqueueTime > barrierTime;
+        }
+        // Nothing running or runnable means we're past the barrier
+        return true;
+    }
+
     public boolean isRunnable() {
         if (mRunnableAtInvalidated) updateRunnableAt();
         return mRunnableAt != Long.MAX_VALUE;

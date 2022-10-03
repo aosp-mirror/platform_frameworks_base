@@ -19,6 +19,7 @@ package com.android.server.am;
 import static android.os.UserHandle.USER_SYSTEM;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -65,6 +66,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.PowerExemptionManager;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
@@ -1397,5 +1399,49 @@ public class BroadcastQueueTest {
         inOrder.verify(blueThread).scheduleReceiver(
                 argThat(filterEquals(airplane)),
                 any(), any(), anyInt(), any(), any(), eq(false), anyInt(), anyInt());
+    }
+
+    @Test
+    public void testIdleAndBarrier() throws Exception {
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+        final ProcessRecord receiverApp = makeActiveProcessRecord(PACKAGE_GREEN);
+
+        final long beforeFirst;
+        final long afterFirst;
+        final long afterSecond;
+
+        beforeFirst = SystemClock.uptimeMillis() - 10;
+        assertTrue(mQueue.isIdleLocked());
+        assertTrue(mQueue.isBeyondBarrierLocked(beforeFirst));
+
+        try (SyncBarrier b = new SyncBarrier()) {
+            final Intent timezone = new Intent(Intent.ACTION_TIMEZONE_CHANGED);
+            enqueueBroadcast(makeBroadcastRecord(timezone, callerApp,
+                    List.of(makeRegisteredReceiver(receiverApp))));
+            afterFirst = SystemClock.uptimeMillis();
+
+            assertFalse(mQueue.isIdleLocked());
+            assertTrue(mQueue.isBeyondBarrierLocked(beforeFirst));
+            assertFalse(mQueue.isBeyondBarrierLocked(afterFirst));
+
+            final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+            enqueueBroadcast(makeBroadcastRecord(airplane, callerApp,
+                    List.of(makeRegisteredReceiver(receiverApp))));
+            afterSecond = SystemClock.uptimeMillis() + 10;
+
+            assertFalse(mQueue.isIdleLocked());
+            assertTrue(mQueue.isBeyondBarrierLocked(beforeFirst));
+            assertFalse(mQueue.isBeyondBarrierLocked(afterFirst));
+            assertFalse(mQueue.isBeyondBarrierLocked(afterSecond));
+        }
+
+        mQueue.waitForBarrier(null);
+        assertTrue(mQueue.isBeyondBarrierLocked(afterFirst));
+
+        mQueue.waitForIdle(null);
+        assertTrue(mQueue.isIdleLocked());
+        assertTrue(mQueue.isBeyondBarrierLocked(beforeFirst));
+        assertTrue(mQueue.isBeyondBarrierLocked(afterFirst));
+        assertTrue(mQueue.isBeyondBarrierLocked(afterSecond));
     }
 }

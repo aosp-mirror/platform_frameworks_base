@@ -40,6 +40,7 @@ import static com.android.server.am.OomAdjuster.OOM_ADJ_REASON_START_RECEIVER;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UptimeMillisLong;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.IApplicationThread;
@@ -63,6 +64,7 @@ import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.util.IndentingPrintWriter;
+import android.util.Pair;
 import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
@@ -83,6 +85,7 @@ import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
+import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
 
 /**
@@ -188,10 +191,20 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     private @Nullable BroadcastProcessQueue mRunningColdStart;
 
     /**
-     * Collection of latches waiting for queue to go idle.
+     * Collection of latches waiting for device to reach specific state. The
+     * first argument is a function to test for the desired state, and the
+     * second argument is the latch to release once that state is reached.
+     * <p>
+     * This is commonly used for callers that are blocked waiting for an
+     * {@link #isIdleLocked} or {@link #isBeyondBarrierLocked} to be reached,
+     * without requiring that they periodically poll for the state change.
+     * <p>
+     * Finally, the presence of any waiting latches will cause all
+     * future-runnable processes to be runnable immediately, to aid in reaching
+     * the desired state as quickly as possible.
      */
     @GuardedBy("mService")
-    private final ArrayList<CountDownLatch> mWaitingForIdle = new ArrayList<>();
+    private final ArrayList<Pair<BooleanSupplier, CountDownLatch>> mWaitingFor = new ArrayList<>();
 
     private final BroadcastConstants mConstants;
     private final BroadcastConstants mFgConstants;
@@ -321,8 +334,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         final int cookie = traceBegin(TAG, "updateRunningList");
         final long now = SystemClock.uptimeMillis();
 
-        // If someone is waiting to go idle, everything is runnable now
-        final boolean waitingForIdle = !mWaitingForIdle.isEmpty();
+        // If someone is waiting for a state, everything is runnable now
+        final boolean waitingFor = !mWaitingFor.isEmpty();
 
         // We're doing an update now, so remove any future update requests;
         // we'll repost below if needed
@@ -336,7 +349,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
             // If queues beyond this point aren't ready to run yet, schedule
             // another pass when they'll be runnable
-            if (runnableAt > now && !waitingForIdle) {
+            if (runnableAt > now && !waitingFor) {
                 mLocalHandler.sendEmptyMessageAtTime(MSG_UPDATE_RUNNING_LIST, runnableAt);
                 break;
             }
@@ -402,9 +415,15 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             mService.updateOomAdjPendingTargetsLocked(OOM_ADJ_REASON_START_RECEIVER);
         }
 
-        if (waitingForIdle && isIdleLocked()) {
-            mWaitingForIdle.forEach((latch) -> latch.countDown());
-            mWaitingForIdle.clear();
+        if (waitingFor) {
+            mWaitingFor.removeIf((pair) -> {
+                if (pair.first.getAsBoolean()) {
+                    pair.second.countDown();
+                    return true;
+                } else {
+                    return false;
+                }
+            });
         }
 
         if (CHECK_CONSISTENCY) checkConsistencyLocked();
@@ -953,6 +972,26 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         r.resultExtras = null;
     };
 
+    /**
+     * Verify that all known {@link #mProcessQueues} are in the state tested by
+     * the given {@link Predicate}.
+     */
+    private boolean testAllProcessQueues(@NonNull Predicate<BroadcastProcessQueue> test,
+            @NonNull String label, @Nullable PrintWriter pw) {
+        for (int i = 0; i < mProcessQueues.size(); i++) {
+            BroadcastProcessQueue leaf = mProcessQueues.valueAt(i);
+            while (leaf != null) {
+                if (!test.test(leaf)) {
+                    logv("Test " + label + " failed due to " + leaf.toShortString(), pw);
+                    return false;
+                }
+                leaf = leaf.processNameNext;
+            }
+        }
+        logv("Test " + label + " passed", pw);
+        return true;
+    }
+
     private boolean forEachMatchingBroadcast(
             @NonNull Predicate<BroadcastProcessQueue> queuePredicate,
             @NonNull BroadcastPredicate broadcastPredicate,
@@ -1000,14 +1039,38 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
     @Override
     public boolean isIdleLocked() {
-        return (mRunnableHead == null) && (getRunningSize() == 0);
+        return isIdleLocked(null);
+    }
+
+    public boolean isIdleLocked(@Nullable PrintWriter pw) {
+        return testAllProcessQueues(q -> q.isIdle(), "idle", pw);
+    }
+
+    @Override
+    public boolean isBeyondBarrierLocked(@UptimeMillisLong long barrierTime) {
+        return isBeyondBarrierLocked(barrierTime, null);
+    }
+
+    public boolean isBeyondBarrierLocked(@UptimeMillisLong long barrierTime,
+            @Nullable PrintWriter pw) {
+        return testAllProcessQueues(q -> q.isBeyondBarrierLocked(barrierTime), "barrier", pw);
     }
 
     @Override
     public void waitForIdle(@Nullable PrintWriter pw) {
+        waitFor(() -> isIdleLocked(pw));
+    }
+
+    @Override
+    public void waitForBarrier(@Nullable PrintWriter pw) {
+        final long now = SystemClock.uptimeMillis();
+        waitFor(() -> isBeyondBarrierLocked(now, pw));
+    }
+
+    public void waitFor(@NonNull BooleanSupplier condition) {
         final CountDownLatch latch = new CountDownLatch(1);
         synchronized (mService) {
-            mWaitingForIdle.add(latch);
+            mWaitingFor.add(Pair.create(condition, latch));
         }
         enqueueUpdateRunningList();
         try {
@@ -1015,12 +1078,6 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    @Override
-    public void waitForBarrier(@Nullable PrintWriter pw) {
-        // TODO: implement
-        throw new UnsupportedOperationException();
     }
 
     @Override
