@@ -103,6 +103,8 @@ public class Context {
     public Looper getMainLooper() { return null; }
     public Executor getMainExecutor() { return null; }
     public Handler getMainThreadHandler() { return null; }
+    public final @Nullable <T> T getSystemService(@NonNull Class<T> serviceClass) { return null; }
+    public abstract @Nullable Object getSystemService(@ServiceName @NonNull String name);
 }
 """
         ),
