@@ -808,6 +808,13 @@ public final class DeviceConfig {
     @SystemApi
     public static final String NAMESPACE_BACKUP_AND_RESTORE = "backup_and_restore";
 
+    /**
+     * Namespace for ARC App Compat related features.
+     *
+     * @hide
+     */
+    public static final String NAMESPACE_ARC_APP_COMPAT = "arc_app_compat";
+
     private static final Object sLock = new Object();
     @GuardedBy("sLock")
     private static ArrayMap<OnPropertiesChangedListener, Pair<String, Executor>> sListeners =
