@@ -20,12 +20,12 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.PowerManager;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Slog;
-
-import com.android.server.LocalServices;
 
 /**
  * Internal helper for launching dreams to ensure consistency between the
@@ -75,28 +75,32 @@ public final class Sandman {
     }
 
     private static void startDream(Context context, boolean docked) {
-        DreamManagerInternal dreamManagerService =
-                LocalServices.getService(DreamManagerInternal.class);
-        if (dreamManagerService != null && !dreamManagerService.isDreaming()) {
-            if (docked) {
-                Slog.i(TAG, "Activating dream while docked.");
+        try {
+            IDreamManager dreamManagerService = IDreamManager.Stub.asInterface(
+                    ServiceManager.getService(DreamService.DREAM_SERVICE));
+            if (dreamManagerService != null && !dreamManagerService.isDreaming()) {
+                if (docked) {
+                    Slog.i(TAG, "Activating dream while docked.");
 
-                // Wake up.
-                // The power manager will wake up the system automatically when it starts
-                // receiving power from a dock but there is a race between that happening
-                // and the UI mode manager starting a dream.  We want the system to already
-                // be awake by the time this happens.  Otherwise the dream may not start.
-                PowerManager powerManager =
-                        context.getSystemService(PowerManager.class);
-                powerManager.wakeUp(SystemClock.uptimeMillis(),
-                        PowerManager.WAKE_REASON_PLUGGED_IN,
-                        "android.service.dreams:DREAM");
-            } else {
-                Slog.i(TAG, "Activating dream by user request.");
+                    // Wake up.
+                    // The power manager will wake up the system automatically when it starts
+                    // receiving power from a dock but there is a race between that happening
+                    // and the UI mode manager starting a dream.  We want the system to already
+                    // be awake by the time this happens.  Otherwise the dream may not start.
+                    PowerManager powerManager =
+                            context.getSystemService(PowerManager.class);
+                    powerManager.wakeUp(SystemClock.uptimeMillis(),
+                            PowerManager.WAKE_REASON_PLUGGED_IN,
+                            "android.service.dreams:DREAM");
+                } else {
+                    Slog.i(TAG, "Activating dream by user request.");
+                }
+
+                // Dream.
+                dreamManagerService.dream();
             }
-
-            // Dream.
-            dreamManagerService.requestDream();
+        } catch (RemoteException ex) {
+            Slog.e(TAG, "Could not start dream when docked.", ex);
         }
     }
 
