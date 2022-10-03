@@ -3960,8 +3960,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                             admins.add(admin);
                         }
                     }
-                } else {
-                    Slogf.w(LOG_TAG, "Unknown user type: " + userInfo);
                 }
             }
         });
