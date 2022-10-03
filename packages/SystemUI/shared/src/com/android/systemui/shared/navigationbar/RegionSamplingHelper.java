@@ -217,12 +217,16 @@ public class RegionSamplingHelper implements View.OnAttachStateChangeListener,
                 unregisterSamplingListener();
                 mSamplingListenerRegistered = true;
                 SurfaceControl wrappedStopLayer = wrap(stopLayerControl);
+
+                // pass this to background thread to avoid empty Rect race condition
+                final Rect boundsCopy = new Rect(mSamplingRequestBounds);
+
                 mBackgroundExecutor.execute(() -> {
                     if (wrappedStopLayer != null && !wrappedStopLayer.isValid()) {
                         return;
                     }
                     mCompositionSamplingListener.register(mSamplingListener, DEFAULT_DISPLAY,
-                            wrappedStopLayer, mSamplingRequestBounds);
+                            wrappedStopLayer, boundsCopy);
                 });
                 mRegisteredSamplingBounds.set(mSamplingRequestBounds);
                 mRegisteredStopLayer = stopLayerControl;
