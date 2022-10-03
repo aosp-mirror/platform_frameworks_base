@@ -25,6 +25,7 @@ import android.os.Handler;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
@@ -76,6 +77,12 @@ public class BrightnessDialog extends Activity {
         FrameLayout frame = findViewById(R.id.brightness_mirror_container);
         // The brightness mirror container is INVISIBLE by default.
         frame.setVisibility(View.VISIBLE);
+        ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) frame.getLayoutParams();
+        int horizontalMargin =
+                getResources().getDimensionPixelSize(R.dimen.notification_side_paddings);
+        lp.leftMargin = horizontalMargin;
+        lp.rightMargin = horizontalMargin;
+        frame.setLayoutParams(lp);
 
         BrightnessSliderController controller = mToggleSliderFactory.create(this, frame);
         controller.init();
