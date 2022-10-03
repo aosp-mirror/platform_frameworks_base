@@ -123,6 +123,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.display.BrightnessSynchronizer;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.AnimationThread;
 import com.android.server.DisplayThread;
@@ -145,6 +146,7 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
+
 
 /**
  * Manages attached displays.
@@ -1866,6 +1868,14 @@ public final class DisplayManagerService extends SystemService {
                 DisplayDevice displayDevice = mDisplayDeviceRepo.getByUniqueIdLocked(uniqueId);
                 if (displayDevice == null) {
                     return;
+                }
+                if (mLogicalDisplayMapper.getDisplayLocked(displayDevice)
+                        .getDisplayInfoLocked().type == Display.TYPE_INTERNAL) {
+                    FrameworkStatsLog.write(FrameworkStatsLog.BRIGHTNESS_CONFIGURATION_UPDATED,
+                                c.getCurve().first,
+                                c.getCurve().second,
+                                // should not be logged for virtual displays
+                                uniqueId);
                 }
                 mPersistentDataStore.setBrightnessConfigurationForDisplayLocked(c, displayDevice,
                         userSerial, packageName);
