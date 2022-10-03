@@ -354,7 +354,7 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         HdmiCecMessage expectedMessage =
                 HdmiCecMessageBuilder.buildSetSystemAudioMode(
                         ADDR_AUDIO_SYSTEM, ADDR_BROADCAST, false);
-        assertThat(mNativeWrapper.getOnlyResultMessage()).isEqualTo(expectedMessage);
+        assertThat(mNativeWrapper.getResultMessages()).contains(expectedMessage);
         assertThat(mMusicMute).isTrue();
     }
 

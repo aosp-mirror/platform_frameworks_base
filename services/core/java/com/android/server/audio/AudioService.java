@@ -7180,6 +7180,24 @@ public class AudioService extends IAudioService.Stub
                         state == CONNECTION_STATE_CONNECTED ? "connected" : "disconnected")
                 .record();
         mDeviceBroker.setWiredDeviceConnectionState(attributes, state, caller);
+        // The Dynamic Soundbar mode feature introduces dynamic presence for an HDMI Audio System
+        // Client. For example, the device can start with the Audio System Client unavailable.
+        // When the feature is activated the client becomes available, therefore Audio Service
+        // requests a new HDMI Audio System Client instance when the ARC status is changed.
+        if (attributes.getInternalType() == AudioSystem.DEVICE_IN_HDMI_ARC) {
+            updateHdmiAudioSystemClient();
+        }
+    }
+
+    /**
+     * Replace the current HDMI Audio System Client.
+     * See {@link #setWiredDeviceConnectionState(AudioDeviceAttributes, int, String)}.
+     */
+    private void updateHdmiAudioSystemClient() {
+        Slog.d(TAG, "Hdmi Audio System Client is updated");
+        synchronized (mHdmiClientLock) {
+            mHdmiAudioSystemClient = mHdmiManager.getAudioSystemClient();
+        }
     }
 
     /** @see AudioManager#setTestDeviceConnectionState(AudioDeviceAttributes, boolean) */

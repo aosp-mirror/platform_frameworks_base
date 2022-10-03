@@ -318,6 +318,16 @@ public class HdmiCecConfig {
                 R.bool.config_cecRoutingControlDisabled_allowed,
                 R.bool.config_cecRoutingControlDisabled_default);
 
+        Setting soundbarMode = registerSetting(
+                HdmiControlManager.CEC_SETTING_NAME_SOUNDBAR_MODE,
+                R.bool.config_cecSoundbarMode_userConfigurable);
+        soundbarMode.registerValue(HdmiControlManager.SOUNDBAR_MODE_ENABLED,
+                R.bool.config_cecSoundbarModeEnabled_allowed,
+                R.bool.config_cecSoundbarModeEnabled_default);
+        soundbarMode.registerValue(HdmiControlManager.SOUNDBAR_MODE_DISABLED,
+                R.bool.config_cecSoundbarModeDisabled_allowed,
+                R.bool.config_cecSoundbarModeDisabled_default);
+
         Setting powerControlMode = registerSetting(
                 HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE,
                 R.bool.config_cecPowerControlMode_userConfigurable);
@@ -714,6 +724,8 @@ public class HdmiCecConfig {
                 return STORAGE_SHARED_PREFS;
             case HdmiControlManager.CEC_SETTING_NAME_ROUTING_CONTROL:
                 return STORAGE_SHARED_PREFS;
+            case HdmiControlManager.CEC_SETTING_NAME_SOUNDBAR_MODE:
+                return STORAGE_SHARED_PREFS;
             case HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE:
                 return STORAGE_SHARED_PREFS;
             case HdmiControlManager.CEC_SETTING_NAME_VOLUME_CONTROL_MODE:
@@ -788,6 +800,8 @@ public class HdmiCecConfig {
             case HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION:
                 return setting.getName();
             case HdmiControlManager.CEC_SETTING_NAME_ROUTING_CONTROL:
+                return setting.getName();
+            case HdmiControlManager.CEC_SETTING_NAME_SOUNDBAR_MODE:
                 return setting.getName();
             case HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE:
                 return setting.getName();

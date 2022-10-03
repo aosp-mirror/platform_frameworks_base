@@ -4556,6 +4556,12 @@
   <java-symbol type="bool" name="config_cecRoutingControlDisabled_allowed" />
   <java-symbol type="bool" name="config_cecRoutingControlDisabled_default" />
 
+  <java-symbol type="bool" name="config_cecSoundbarMode_userConfigurable" />
+  <java-symbol type="bool" name="config_cecSoundbarModeEnabled_allowed" />
+  <java-symbol type="bool" name="config_cecSoundbarModeEnabled_default" />
+  <java-symbol type="bool" name="config_cecSoundbarModeDisabled_allowed" />
+  <java-symbol type="bool" name="config_cecSoundbarModeDisabled_default" />
+
   <java-symbol type="bool" name="config_cecPowerControlMode_userConfigurable" />
   <java-symbol type="bool" name="config_cecPowerControlModeTv_allowed" />
   <java-symbol type="bool" name="config_cecPowerControlModeTv_default" />

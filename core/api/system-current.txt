@@ -4173,6 +4173,7 @@ package android.hardware.hdmi {
     method @NonNull @RequiresPermission(android.Manifest.permission.HDMI_CEC) public String getPowerStateChangeOnActiveSourceLost();
     method @NonNull @RequiresPermission(android.Manifest.permission.HDMI_CEC) public int getRoutingControl();
     method @RequiresPermission(android.Manifest.permission.HDMI_CEC) public int getSadPresenceInQuery(@NonNull String);
+    method @RequiresPermission(android.Manifest.permission.HDMI_CEC) public int getSoundbarMode();
     method @Nullable public android.hardware.hdmi.HdmiSwitchClient getSwitchClient();
     method @NonNull @RequiresPermission(android.Manifest.permission.HDMI_CEC) public int getSystemAudioControl();
     method @NonNull @RequiresPermission(android.Manifest.permission.HDMI_CEC) public int getSystemAudioModeMuting();
@@ -4194,6 +4195,7 @@ package android.hardware.hdmi {
     method @RequiresPermission(android.Manifest.permission.HDMI_CEC) public void setRoutingControl(@NonNull int);
     method @RequiresPermission(android.Manifest.permission.HDMI_CEC) public void setSadPresenceInQuery(@NonNull String, int);
     method @RequiresPermission(android.Manifest.permission.HDMI_CEC) public void setSadsPresenceInQuery(@NonNull java.util.List<java.lang.String>, int);
+    method @RequiresPermission(android.Manifest.permission.HDMI_CEC) public void setSoundbarMode(int);
     method @RequiresPermission(android.Manifest.permission.HDMI_CEC) public void setStandbyMode(boolean);
     method @RequiresPermission(android.Manifest.permission.HDMI_CEC) public void setSystemAudioControl(@NonNull int);
     method @RequiresPermission(android.Manifest.permission.HDMI_CEC) public void setSystemAudioModeMuting(@NonNull int);
@@ -4221,6 +4223,7 @@ package android.hardware.hdmi {
     field public static final String CEC_SETTING_NAME_QUERY_SAD_TRUEHD = "query_sad_truehd";
     field public static final String CEC_SETTING_NAME_QUERY_SAD_WMAPRO = "query_sad_wmapro";
     field public static final String CEC_SETTING_NAME_ROUTING_CONTROL = "routing_control";
+    field public static final String CEC_SETTING_NAME_SOUNDBAR_MODE = "soundbar_mode";
     field public static final String CEC_SETTING_NAME_SYSTEM_AUDIO_CONTROL = "system_audio_control";
     field public static final String CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING = "system_audio_mode_muting";
     field public static final String CEC_SETTING_NAME_TV_SEND_STANDBY_ON_SLEEP = "tv_send_standby_on_sleep";
@@ -4302,6 +4305,8 @@ package android.hardware.hdmi {
     field public static final int ROUTING_CONTROL_DISABLED = 0; // 0x0
     field public static final int ROUTING_CONTROL_ENABLED = 1; // 0x1
     field public static final String SETTING_NAME_EARC_ENABLED = "earc_enabled";
+    field public static final int SOUNDBAR_MODE_DISABLED = 0; // 0x0
+    field public static final int SOUNDBAR_MODE_ENABLED = 1; // 0x1
     field public static final int SYSTEM_AUDIO_CONTROL_DISABLED = 0; // 0x0
     field public static final int SYSTEM_AUDIO_CONTROL_ENABLED = 1; // 0x1
     field public static final int SYSTEM_AUDIO_MODE_MUTING_DISABLED = 0; // 0x0
