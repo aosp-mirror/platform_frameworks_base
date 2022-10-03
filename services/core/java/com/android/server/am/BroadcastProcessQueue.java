@@ -17,6 +17,7 @@
 package com.android.server.am;
 
 import static com.android.server.am.BroadcastRecord.deliveryStateToString;
+import static com.android.server.am.BroadcastRecord.isDeliveryStateTerminal;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -118,6 +119,7 @@ class BroadcastProcessQueue {
     private int mCountForeground;
     private int mCountOrdered;
     private int mCountAlarm;
+    private int mCountPrioritized;
 
     private @UptimeMillisLong long mRunnableAt = Long.MAX_VALUE;
     private @Reason int mRunnableAtReason = REASON_EMPTY;
@@ -139,8 +141,13 @@ class BroadcastProcessQueue {
      * Enqueue the given broadcast to be dispatched to this process at some
      * future point in time. The target receiver is indicated by the given index
      * into {@link BroadcastRecord#receivers}.
+     * <p>
+     * When defined, this receiver is considered "blocked" until at least the
+     * given count of other receivers have reached a terminal state; typically
+     * used for ordered broadcasts and priority traunches.
      */
-    public void enqueueBroadcast(@NonNull BroadcastRecord record, int recordIndex) {
+    public void enqueueBroadcast(@NonNull BroadcastRecord record, int recordIndex,
+            int blockedUntilTerminalCount) {
         // Detect situations where the incoming broadcast should cause us to
         // recalculate when we'll be runnable
         if (mPending.isEmpty()) {
@@ -158,9 +165,14 @@ class BroadcastProcessQueue {
             mCountAlarm++;
             invalidateRunnableAt();
         }
+        if (record.prioritized) {
+            mCountPrioritized++;
+            invalidateRunnableAt();
+        }
         SomeArgs args = SomeArgs.obtain();
         args.arg1 = record;
         args.argi1 = recordIndex;
+        args.argi2 = blockedUntilTerminalCount;
         mPending.addLast(args);
     }
 
@@ -236,8 +248,10 @@ class BroadcastProcessQueue {
                 && (mActive.isForeground() || mActive.ordered || mActive.alarm)) {
             // We have an important broadcast right now, so boost priority
             return ProcessList.SCHED_GROUP_DEFAULT;
-        } else {
+        } else if (!isIdle()) {
             return ProcessList.SCHED_GROUP_BACKGROUND;
+        } else {
+            return ProcessList.SCHED_GROUP_UNDEFINED;
         }
     }
 
@@ -276,6 +290,9 @@ class BroadcastProcessQueue {
         }
         if (mActive.alarm) {
             mCountAlarm--;
+        }
+        if (mActive.prioritized) {
+            mCountPrioritized--;
         }
         invalidateRunnableAt();
     }
@@ -342,6 +359,14 @@ class BroadcastProcessQueue {
         return mActive != null;
     }
 
+    /**
+     * Quickly determine if this queue has broadcasts that are still waiting to
+     * be delivered at some point in the future.
+     */
+    public boolean isIdle() {
+        return !isActive() && isEmpty();
+    }
+
     public boolean isRunnable() {
         if (mRunnableAtInvalidated) updateRunnableAt();
         return mRunnableAt != Long.MAX_VALUE;
@@ -374,24 +399,26 @@ class BroadcastProcessQueue {
         mRunnableAtInvalidated = true;
     }
 
-    private static final int REASON_EMPTY = 0;
-    private static final int REASON_CONTAINS_FOREGROUND = 1;
-    private static final int REASON_CONTAINS_ORDERED = 2;
-    private static final int REASON_CONTAINS_ALARM = 3;
-    private static final int REASON_CACHED = 4;
-    private static final int REASON_NORMAL = 5;
-    private static final int REASON_MAX_PENDING = 6;
-    private static final int REASON_BLOCKED_ORDERED = 7;
+    static final int REASON_EMPTY = 0;
+    static final int REASON_CONTAINS_FOREGROUND = 1;
+    static final int REASON_CONTAINS_ORDERED = 2;
+    static final int REASON_CONTAINS_ALARM = 3;
+    static final int REASON_CONTAINS_PRIORITIZED = 4;
+    static final int REASON_CACHED = 5;
+    static final int REASON_NORMAL = 6;
+    static final int REASON_MAX_PENDING = 7;
+    static final int REASON_BLOCKED = 8;
 
     @IntDef(flag = false, prefix = { "REASON_" }, value = {
             REASON_EMPTY,
             REASON_CONTAINS_FOREGROUND,
             REASON_CONTAINS_ORDERED,
             REASON_CONTAINS_ALARM,
+            REASON_CONTAINS_PRIORITIZED,
             REASON_CACHED,
             REASON_NORMAL,
             REASON_MAX_PENDING,
-            REASON_BLOCKED_ORDERED,
+            REASON_BLOCKED,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Reason {}
@@ -402,10 +429,11 @@ class BroadcastProcessQueue {
             case REASON_CONTAINS_FOREGROUND: return "CONTAINS_FOREGROUND";
             case REASON_CONTAINS_ORDERED: return "CONTAINS_ORDERED";
             case REASON_CONTAINS_ALARM: return "CONTAINS_ALARM";
+            case REASON_CONTAINS_PRIORITIZED: return "CONTAINS_PRIORITIZED";
             case REASON_CACHED: return "CACHED";
             case REASON_NORMAL: return "NORMAL";
             case REASON_MAX_PENDING: return "MAX_PENDING";
-            case REASON_BLOCKED_ORDERED: return "BLOCKED_ORDERED";
+            case REASON_BLOCKED: return "BLOCKED";
             default: return Integer.toString(reason);
         }
     }
@@ -418,13 +446,15 @@ class BroadcastProcessQueue {
         if (next != null) {
             final BroadcastRecord r = (BroadcastRecord) next.arg1;
             final int index = next.argi1;
+            final int blockedUntilTerminalCount = next.argi2;
             final long runnableAt = r.enqueueTime;
 
-            // If our next broadcast is ordered, and we're not the next receiver
-            // in line, then we're not runnable at all
-            if (r.ordered && r.finishedCount != index) {
+            // We might be blocked waiting for other receivers to finish,
+            // typically for an ordered broadcast or priority traunches
+            if (r.terminalCount < blockedUntilTerminalCount
+                    && !isDeliveryStateTerminal(r.getDeliveryState(index))) {
                 mRunnableAt = Long.MAX_VALUE;
-                mRunnableAtReason = REASON_BLOCKED_ORDERED;
+                mRunnableAtReason = REASON_BLOCKED;
                 return;
             }
 
@@ -445,6 +475,9 @@ class BroadcastProcessQueue {
             } else if (mCountAlarm > 0) {
                 mRunnableAt = runnableAt;
                 mRunnableAtReason = REASON_CONTAINS_ALARM;
+            } else if (mCountPrioritized > 0) {
+                mRunnableAt = runnableAt;
+                mRunnableAtReason = REASON_CONTAINS_PRIORITIZED;
             } else if (mProcessCached) {
                 mRunnableAt = runnableAt + constants.DELAY_CACHED_MILLIS;
                 mRunnableAtReason = REASON_CACHED;

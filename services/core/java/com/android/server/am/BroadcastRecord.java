@@ -45,7 +45,6 @@ import android.os.IBinder;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.PrintWriterPrinter;
-import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
@@ -82,6 +81,7 @@ final class BroadcastRecord extends Binder {
     final boolean pushMessage; // originated from a push message?
     final boolean pushMessageOverQuota; // originated from a push message which was over quota?
     final boolean initialSticky; // initial broadcast from register to sticky?
+    final boolean prioritized; // contains more than one priority tranche
     final int userId;       // user id this broadcast was for
     final String resolvedType; // the resolved data type
     final String[] requiredPermissions; // permissions the caller has required
@@ -115,7 +115,7 @@ final class BroadcastRecord extends Binder {
     int anrCount;           // has this broadcast record hit any ANRs?
     int manifestCount;      // number of manifest receivers dispatched.
     int manifestSkipCount;  // number of manifest receivers skipped.
-    int finishedCount;      // number of receivers finished.
+    int terminalCount;      // number of receivers in terminal state.
     BroadcastQueue queue;   // the outbound queue handling this broadcast
 
     // if set to true, app's process will be temporarily allowed to start activities from background
@@ -375,6 +375,7 @@ final class BroadcastRecord extends Binder {
         ordered = _serialized;
         sticky = _sticky;
         initialSticky = _initialSticky;
+        prioritized = isPrioritized(receivers);
         userId = _userId;
         nextReceiver = 0;
         state = IDLE;
@@ -404,6 +405,7 @@ final class BroadcastRecord extends Binder {
         ordered = from.ordered;
         sticky = from.sticky;
         initialSticky = from.initialSticky;
+        prioritized = from.prioritized;
         userId = from.userId;
         resolvedType = from.resolvedType;
         requiredPermissions = from.requiredPermissions;
@@ -646,6 +648,23 @@ final class BroadcastRecord extends Binder {
         return (newIntent != null) ? newIntent : intent;
     }
 
+    /**
+     * Return if given receivers list has more than one traunch of priorities.
+     */
+    private static boolean isPrioritized(@NonNull List<Object> receivers) {
+        int firstPriority = 0;
+        for (int i = 0; i < receivers.size(); i++) {
+            final int thisPriority = getReceiverPriority(receivers.get(i));
+            if (i == 0) {
+                firstPriority = thisPriority;
+            } else if (thisPriority != firstPriority) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
     static int getReceiverUid(@NonNull Object receiver) {
         if (receiver instanceof BroadcastFilter) {
             return ((BroadcastFilter) receiver).owningUid;
@@ -667,6 +686,14 @@ final class BroadcastRecord extends Binder {
             return ((BroadcastFilter) receiver).receiverList.app.info.packageName;
         } else /* if (receiver instanceof ResolveInfo) */ {
             return ((ResolveInfo) receiver).activityInfo.packageName;
+        }
+    }
+
+    static int getReceiverPriority(@NonNull Object receiver) {
+        if (receiver instanceof BroadcastFilter) {
+            return ((BroadcastFilter) receiver).getPriority();
+        } else /* if (receiver instanceof ResolveInfo) */ {
+            return ((ResolveInfo) receiver).priority;
         }
     }
 
