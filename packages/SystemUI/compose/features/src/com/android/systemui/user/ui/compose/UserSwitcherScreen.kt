@@ -17,8 +17,6 @@
 
 package com.android.systemui.user.ui.compose
 
-import android.graphics.Bitmap
-import android.graphics.Canvas
 import android.graphics.drawable.Drawable
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.Image
@@ -50,10 +48,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.ColorPainter
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -62,6 +58,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.drawable.toBitmap
 import com.android.systemui.common.ui.compose.load
 import com.android.systemui.compose.SysUiOutlinedButton
 import com.android.systemui.compose.SysUiTextButton
@@ -356,10 +353,11 @@ private fun MenuItem(
         remember(viewModel.iconResourceId) {
             val drawable =
                 checkNotNull(AppCompatResources.getDrawable(context, viewModel.iconResourceId))
+            val size = with(density) { 20.dp.toPx() }.toInt()
             drawable
                 .toBitmap(
-                    size = with(density) { 20.dp.toPx() }.toInt(),
-                    tintColor = Color.White,
+                    width = size,
+                    height = size,
                 )
                 .asImageBitmap()
         }
@@ -391,33 +389,4 @@ private fun MenuItem(
                     bottom = bottomPadding,
                 ),
     )
-}
-
-/**
- * Converts the [Drawable] to a [Bitmap].
- *
- * Note that this is a relatively memory-heavy operation as it allocates a whole bitmap and draws
- * the `Drawable` onto it. Use sparingly and with care.
- */
-private fun Drawable.toBitmap(
-    size: Int? = null,
-    tintColor: Color? = null,
-): Bitmap {
-    val bitmap =
-        if (intrinsicWidth <= 0 || intrinsicHeight <= 0) {
-            Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
-        } else {
-            Bitmap.createBitmap(
-                size ?: intrinsicWidth,
-                size ?: intrinsicHeight,
-                Bitmap.Config.ARGB_8888
-            )
-        }
-    val canvas = Canvas(bitmap)
-    setBounds(0, 0, canvas.width, canvas.height)
-    if (tintColor != null) {
-        setTint(tintColor.toArgb())
-    }
-    draw(canvas)
-    return bitmap
 }
