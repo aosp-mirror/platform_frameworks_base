@@ -411,6 +411,36 @@ java_library {
     ],
 }
 
+java_library {
+    name: "android_module_stubs_current_with_test_libs",
+    static_libs: [
+        "android_module_lib_stubs_current",
+        "android.test.base.stubs",
+        "android.test.mock.stubs",
+        "android.test.runner.stubs",
+    ],
+    defaults: ["android.jar_defaults"],
+    visibility: [
+        "//visibility:override",
+        "//visibility:private",
+    ],
+}
+
+java_library {
+    name: "android_system_server_stubs_current_with_test_libs",
+    static_libs: [
+        "android_system_server_stubs_current",
+        "android.test.base.stubs.system",
+        "android.test.mock.stubs.system",
+        "android.test.runner.stubs.system",
+    ],
+    defaults: ["android.jar_defaults"],
+    visibility: [
+        "//visibility:override",
+        "//visibility:private",
+    ],
+}
+
 droidstubs {
     name: "api_versions_public",
     srcs: [":android_stubs_current_with_test_libs{.jar}"],
@@ -420,6 +450,7 @@ droidstubs {
         "sdk-dir",
         "api-versions-jars-dir",
     ],
+    api_levels_sdk_type: "public",
     extensions_info_file: ":sdk-extensions-info",
 }
 
@@ -433,6 +464,32 @@ droidstubs {
         "api-versions-jars-dir",
     ],
     api_levels_sdk_type: "system",
+    extensions_info_file: ":sdk-extensions-info",
+}
+
+droidstubs {
+    name: "api_versions_module_lib",
+    srcs: [":android_module_stubs_current_with_test_libs{.jar}"],
+    generate_stubs: false,
+    api_levels_annotations_enabled: true,
+    api_levels_annotations_dirs: [
+        "sdk-dir",
+        "api-versions-jars-dir",
+    ],
+    api_levels_sdk_type: "module-lib",
+    extensions_info_file: ":sdk-extensions-info",
+}
+
+droidstubs {
+    name: "api_versions_system_server",
+    srcs: [":android_system_server_stubs_current_with_test_libs{.jar}"],
+    generate_stubs: false,
+    api_levels_annotations_enabled: true,
+    api_levels_annotations_dirs: [
+        "sdk-dir",
+        "api-versions-jars-dir",
+    ],
+    api_levels_sdk_type: "system-server",
     extensions_info_file: ":sdk-extensions-info",
 }
 
