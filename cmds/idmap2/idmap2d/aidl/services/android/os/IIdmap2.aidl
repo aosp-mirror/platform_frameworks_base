@@ -41,9 +41,9 @@ interface IIdmap2 {
   @nullable FabricatedOverlayInfo createFabricatedOverlay(in FabricatedOverlayInternal overlay);
   boolean deleteFabricatedOverlay(@utf8InCpp String path);
 
-  void acquireFabricatedOverlayIterator();
-  void releaseFabricatedOverlayIterator();
-  List<FabricatedOverlayInfo> nextFabricatedOverlayInfos();
+  int acquireFabricatedOverlayIterator();
+  void releaseFabricatedOverlayIterator(int iteratorId);
+  List<FabricatedOverlayInfo> nextFabricatedOverlayInfos(int iteratorId);
 
   @utf8InCpp String dumpIdmap(@utf8InCpp String overlayApkPath);
 }

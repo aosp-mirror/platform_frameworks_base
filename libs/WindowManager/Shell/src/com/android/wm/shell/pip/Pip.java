@@ -51,29 +51,12 @@ public interface Pip {
     }
 
     /**
-     * Sets both shelf visibility and its height.
-     *
-     * @param visible visibility of shelf.
-     * @param height  to specify the height for shelf.
-     */
-    default void setShelfHeight(boolean visible, int height) {
-    }
-
-    /**
      * Set the callback when {@link PipTaskOrganizer#isInPip()} state is changed.
      *
      * @param callback The callback accepts the result of {@link PipTaskOrganizer#isInPip()}
      *                 when it's changed.
      */
     default void setOnIsInPipStateChangedListener(Consumer<Boolean> callback) {}
-
-    /**
-     * Set the pinned stack with {@link PipAnimationController.AnimationType}
-     *
-     * @param animationType The pre-defined {@link PipAnimationController.AnimationType}
-     */
-    default void setPinnedStackAnimationType(int animationType) {
-    }
 
     /**
      * Called when showing Pip menu.

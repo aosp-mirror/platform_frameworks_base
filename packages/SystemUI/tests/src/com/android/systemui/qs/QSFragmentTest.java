@@ -14,6 +14,9 @@
 
 package com.android.systemui.qs;
 
+import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
+import static com.android.systemui.statusbar.StatusBarState.SHADE;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertTrue;
@@ -49,13 +52,13 @@ import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.media.MediaHost;
 import com.android.systemui.plugins.FalsingManager;
-import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.dagger.QSFragmentComponent;
 import com.android.systemui.qs.external.TileServiceRequestController;
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
@@ -93,7 +96,7 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
     @Mock private QSPanel.QSTileLayout mQsTileLayout;
     @Mock private QSPanel.QSTileLayout mQQsTileLayout;
     @Mock private QSAnimator mQSAnimator;
-    @Mock private StatusBarStateController mStatusBarStateController;
+    @Mock private SysuiStatusBarStateController mStatusBarStateController;
     @Mock private QSSquishinessController mSquishinessController;
     private View mQsFragmentView;
 
@@ -158,7 +161,7 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
     public void
             transitionToFullShade_onKeyguard_noBouncer_setsAlphaUsingLinearInterpolator() {
         QSFragment fragment = resumeAndGetFragment();
-        setStatusBarState(StatusBarState.KEYGUARD);
+        setStatusBarState(KEYGUARD);
         when(mQSPanelController.isBouncerInTransit()).thenReturn(false);
         boolean isTransitioningToFullShade = true;
         float transitionProgress = 0.5f;
@@ -174,7 +177,7 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
     public void
             transitionToFullShade_onKeyguard_bouncerActive_setsAlphaUsingBouncerInterpolator() {
         QSFragment fragment = resumeAndGetFragment();
-        setStatusBarState(StatusBarState.KEYGUARD);
+        setStatusBarState(KEYGUARD);
         when(mQSPanelController.isBouncerInTransit()).thenReturn(true);
         boolean isTransitioningToFullShade = true;
         float transitionProgress = 0.5f;
@@ -259,6 +262,27 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
                 squishinessFraction);
 
         verify(mQSFooterActionController).setExpansion(expansion);
+    }
+
+    @Test
+    public void setQsExpansion_inSplitShade_whenTransitioningToKeyguard_setsAlphaBasedOnShadeTransitionProgress() {
+        QSFragment fragment = resumeAndGetFragment();
+        enableSplitShade();
+        when(mStatusBarStateController.getState()).thenReturn(SHADE);
+        when(mStatusBarStateController.getCurrentOrUpcomingState()).thenReturn(KEYGUARD);
+        boolean isTransitioningToFullShade = false;
+        float transitionProgress = 0;
+        float squishinessFraction = 0f;
+
+        fragment.setTransitionToFullShadeProgress(isTransitioningToFullShade, transitionProgress,
+                squishinessFraction);
+
+        // trigger alpha refresh with non-zero expansion and fraction values
+        fragment.setQsExpansion(/* expansion= */ 1, /* panelExpansionFraction= */1,
+                /* proposedTranslation= */ 0, /* squishinessFraction= */ 1);
+
+        // alpha should follow lockscreen to shade progress, not panel expansion fraction
+        assertThat(mQsFragmentView.getAlpha()).isEqualTo(transitionProgress);
     }
 
     @Test
@@ -400,6 +424,19 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
         verify(mQSContainerImplController).setListening(true);
         verify(mQSFooterActionController).setListening(true);
         verify(mQSPanelController).setListening(eq(true), anyBoolean());
+    }
+
+    @Test
+    public void passCorrectExpansionState_inSplitShade() {
+        QSFragment fragment = resumeAndGetFragment();
+        enableSplitShade();
+        clearInvocations(mQSPanelController);
+
+        fragment.setExpanded(true);
+        verify(mQSPanelController).setExpanded(true);
+
+        fragment.setExpanded(false);
+        verify(mQSPanelController).setExpanded(false);
     }
 
     @Override

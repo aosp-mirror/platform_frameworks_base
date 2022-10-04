@@ -2053,8 +2053,7 @@
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Разрешить разовый доступ"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Запретить"</string>
     <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"В журналы записывается информация о том, что происходит на устройстве. Приложения могут использовать их, чтобы находить и устранять неполадки.\n\nТак как некоторые журналы могут содержать конфиденциальную информацию, доступ ко всем журналам следует предоставлять только тем приложениям, которым вы доверяете. \n\nЕсли вы не предоставите такой доступ этому приложению, оно по-прежнему сможет просматривать свои журналы. Не исключено, что некоторые журналы или сведения на вашем устройстве будут по-прежнему доступны его производителю."</string>
-    <!-- no translation found for log_access_confirmation_body (7379536536425265262) -->
-    <skip />
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"В журналы записывается информация о том, что происходит на устройстве. Приложения могут использовать их, чтобы находить и устранять неполадки.\n\nТак как некоторые журналы могут содержать конфиденциальную информацию, доступ ко всем журналам следует предоставлять только тем приложениям, которым вы доверяете. \n\nЕсли вы не предоставите такой доступ этому приложению, оно по-прежнему сможет просматривать свои журналы. Также некоторые журналы или сведения на вашем устройстве могут быть доступны его производителю.\n\nПодробнее: g.co/android/devicelogs."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Больше не показывать"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"Приложение \"<xliff:g id="APP_0">%1$s</xliff:g>\" запрашивает разрешение на показ фрагментов приложения \"<xliff:g id="APP_2">%2$s</xliff:g>\"."</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Изменить"</string>
@@ -2293,7 +2292,7 @@
     <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"\"<xliff:g id="APP">%1$s</xliff:g>\" работает в фоновом режиме. Нажмите, чтобы изменить настройки, связанные с расходом заряда батареи."</string>
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"Приложение \"<xliff:g id="APP">%1$s</xliff:g>\" может влиять на время работы батареи. Нажмите, чтобы увидеть активные приложения."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Проверить активные приложения"</string>
-    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"У устройства \"<xliff:g id="DEVICE">%1$s</xliff:g>\" нет доступа к камере телефона."</string>
+    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"У устройства <xliff:g id="DEVICE">%1$s</xliff:g> нет доступа к камере телефона."</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"У устройства \"<xliff:g id="DEVICE">%1$s</xliff:g>\" нет доступа к камере планшета."</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Этот контент недоступен во время трансляции. Используйте телефон."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Системные настройки по умолчанию"</string>
