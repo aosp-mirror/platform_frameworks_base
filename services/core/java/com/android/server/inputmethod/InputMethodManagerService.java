@@ -2960,19 +2960,17 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     hideStatusBarIconLocked();
                 } else if (packageName != null) {
                     if (DEBUG) Slog.d(TAG, "show a small icon for the input method");
-                    CharSequence contentDescription = null;
+                    final PackageManager userAwarePackageManager =
+                            getPackageManagerForUser(mContext, mSettings.getCurrentUserId());
+                    ApplicationInfo applicationInfo = null;
                     try {
-                        // Use PackageManager to load label
-                        final PackageManager packageManager = mContext.getPackageManager();
-                        final ApplicationInfo applicationInfo = mIPackageManager
-                                .getApplicationInfo(packageName, 0, mSettings.getCurrentUserId());
-                        if (applicationInfo != null) {
-                            contentDescription = packageManager
-                                    .getApplicationLabel(applicationInfo);
-                        }
-                    } catch (RemoteException e) {
-                        /* ignore */
+                        applicationInfo = userAwarePackageManager.getApplicationInfo(packageName,
+                                PackageManager.ApplicationInfoFlags.of(0));
+                    } catch (PackageManager.NameNotFoundException e) {
                     }
+                    final CharSequence contentDescription = applicationInfo != null
+                            ? userAwarePackageManager.getApplicationLabel(applicationInfo)
+                            : null;
                     if (mStatusBar != null) {
                         mStatusBar.setIcon(mSlotIme, packageName, iconId, 0,
                                 contentDescription  != null
