@@ -23,13 +23,10 @@ import android.annotation.UserIdInt;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.res.Resources;
-import android.os.Binder;
 import android.os.Build;
-import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -45,7 +42,6 @@ import android.view.textservice.SpellCheckerInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.inputmethod.StartInputFlags;
-import com.android.internal.util.ArrayUtils;
 import com.android.server.LocalServices;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.textservices.TextServicesManagerInternal;
@@ -854,20 +850,13 @@ final class InputMethodUtils {
         boolean setAdditionalInputMethodSubtypes(@NonNull String imeId,
                 @NonNull ArrayList<InputMethodSubtype> subtypes,
                 @NonNull ArrayMap<String, List<InputMethodSubtype>> additionalSubtypeMap,
-                @NonNull IPackageManager packageManager) {
+                @NonNull PackageManagerInternal packageManagerInternal, int callingUid) {
             final InputMethodInfo imi = mMethodMap.get(imeId);
             if (imi == null) {
                 return false;
             }
-            final String[] packageInfos;
-            try {
-                packageInfos = packageManager.getPackagesForUid(Binder.getCallingUid());
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to get package infos");
-                return false;
-            }
-            if (ArrayUtils.find(packageInfos,
-                    packageInfo -> TextUtils.equals(packageInfo, imi.getPackageName())) == null) {
+            if (!InputMethodUtils.checkIfPackageBelongsToUid(packageManagerInternal, callingUid,
+                    imi.getPackageName())) {
                 return false;
             }
 
