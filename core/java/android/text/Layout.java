@@ -170,8 +170,6 @@ public abstract class Layout {
     /**
      * Strategy which considers a text segment to be inside a rectangle area if the segment bounds
      * intersect the rectangle.
-     *
-     * @hide
      */
     @NonNull
     public static final TextInclusionStrategy INCLUSION_STRATEGY_ANY_OVERLAP =
@@ -180,8 +178,6 @@ public abstract class Layout {
     /**
      * Strategy which considers a text segment to be inside a rectangle area if the center of the
      * segment bounds is inside the rectangle.
-     *
-     * @hide
      */
     @NonNull
     public static final TextInclusionStrategy INCLUSION_STRATEGY_CONTAINS_CENTER =
@@ -191,8 +187,6 @@ public abstract class Layout {
     /**
      * Strategy which considers a text segment to be inside a rectangle area if the segment bounds
      * are completely contained within the rectangle.
-     *
-     * @hide
      */
     @NonNull
     public static final TextInclusionStrategy INCLUSION_STRATEGY_CONTAINS_ALL =
@@ -1867,7 +1861,6 @@ public abstract class Layout {
      *          specified area
      * @return int array of size 2 containing the start (inclusive) and end (exclusive) character
      *     offsets of the range, or null if there are no text segments inside the area
-     * @hide
      */
     @Nullable
     public int[] getRangeForRect(@NonNull RectF area, @NonNull SegmentFinder segmentFinder,
@@ -3215,8 +3208,7 @@ public abstract class Layout {
     /**
      * Strategy for determining whether a text segment is inside a rectangle area.
      *
-     * @see #getRangeForRect(RectF, SegmentIterator, TextInclusionStrategy)
-     * @hide
+     * @see #getRangeForRect(RectF, SegmentFinder, TextInclusionStrategy)
      */
     @FunctionalInterface
     public interface TextInclusionStrategy {

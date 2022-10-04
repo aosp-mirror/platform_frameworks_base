@@ -18,20 +18,35 @@ package android.text;
 
 import android.annotation.IntRange;
 import android.annotation.NonNull;
+import android.annotation.SuppressLint;
 import android.icu.text.BreakIterator;
 import android.text.method.WordIterator;
 
+import java.util.Locale;
+
 /**
- * Implementation of {@code SegmentFinder} using words as the text segment. Word boundaries are
- * found using {@code WordIterator}. Whitespace characters are excluded, so they are not included in
+ * Implementation of {@link SegmentFinder} using words as the text segment. Word boundaries are
+ * found using {@link WordIterator}. Whitespace characters are excluded, so they are not included in
  * any text segments.
  *
- * @hide
+ * <p>For example, the text "Hello, World!" would be subdivided into four text segments: "Hello",
+ * ",", "World", "!". The space character does not belong to any text segments.
+ *
+ * @see <a href="https://unicode.org/reports/tr29/#Word_Boundaries">Unicode Text Segmentation - Word
+ *     Boundaries</a>
  */
 public class WordSegmentFinder extends SegmentFinder {
     private final CharSequence mText;
     private final WordIterator mWordIterator;
 
+    public WordSegmentFinder(
+            @NonNull CharSequence text, @SuppressLint("UseIcu") @NonNull Locale locale) {
+        mText = text;
+        mWordIterator = new WordIterator(locale);
+        mWordIterator.setCharSequence(text, 0, text.length());
+    }
+
+    /** @hide */
     public WordSegmentFinder(@NonNull CharSequence text, @NonNull WordIterator wordIterator) {
         mText = text;
         mWordIterator = wordIterator;
