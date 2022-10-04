@@ -59,10 +59,15 @@ interface IPip {
     /**
      * Sets listener to get pinned stack animation callbacks.
      */
-    oneway void setPinnedStackAnimationListener(IPipAnimationListener listener) = 3;
+    oneway void setPipAnimationListener(IPipAnimationListener listener) = 3;
 
     /**
      * Sets the shelf height and visibility.
      */
     oneway void setShelfHeight(boolean visible, int shelfHeight) = 4;
+
+    /**
+     * Sets the next pip animation type to be the alpha animation.
+     */
+    oneway void setPipAnimationTypeToAlpha() = 5;
 }
