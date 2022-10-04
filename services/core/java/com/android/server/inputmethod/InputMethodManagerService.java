@@ -298,8 +298,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     final IWindowManager mIWindowManager;
     private final SparseBooleanArray mLoggedDeniedGetInputMethodWindowVisibleHeightForUid =
             new SparseBooleanArray(0);
-    private final SparseBooleanArray mLoggedDeniedIsInputMethodPickerShownForTestForUid =
-            new SparseBooleanArray(0);
     final WindowManagerInternal mWindowManagerInternal;
     final PackageManagerInternal mPackageManagerInternal;
     final InputManagerInternal mInputManagerInternal;
@@ -1479,7 +1477,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         public void onUidRemoved(int uid) {
             synchronized (ImfLock.class) {
                 mLoggedDeniedGetInputMethodWindowVisibleHeightForUid.delete(uid);
-                mLoggedDeniedIsInputMethodPickerShownForTestForUid.delete(uid);
             }
         }
 
@@ -4002,19 +3999,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     /**
      * A test API for CTS to make sure that the input method menu is showing.
      */
+    @EnforcePermission(Manifest.permission.TEST_INPUT_METHOD)
     public boolean isInputMethodPickerShownForTest() {
-        if (mContext.checkCallingPermission(android.Manifest.permission.TEST_INPUT_METHOD)
-                != PackageManager.PERMISSION_GRANTED) {
-            final int callingUid = Binder.getCallingUid();
-            synchronized (ImfLock.class) {
-                if (!mLoggedDeniedIsInputMethodPickerShownForTestForUid.get(callingUid)) {
-                    EventLog.writeEvent(0x534e4554, "237317525", callingUid, "");
-                    mLoggedDeniedIsInputMethodPickerShownForTestForUid.put(callingUid, true);
-                }
-            }
-            throw new SecurityException(
-                    "isInputMethodPickerShownForTest requires TEST_INPUT_METHOD permission");
-        }
         synchronized (ImfLock.class) {
             return mMenuController.isisInputMethodPickerShownForTestLocked();
         }
