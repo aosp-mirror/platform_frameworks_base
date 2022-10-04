@@ -138,7 +138,6 @@ import android.view.WindowManager;
 import android.view.WindowManager.DisplayImePolicy;
 import android.view.WindowManager.LayoutParams;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
-import android.view.accessibility.AccessibilityManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputBinding;
 import android.view.inputmethod.InputConnection;
@@ -315,9 +314,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     private final InputMethodMenuController mMenuController;
     @NonNull private final InputMethodBindingController mBindingController;
     @NonNull private final AutofillSuggestionsController mAutofillController;
-
-    // TODO(b/219056452): Use AccessibilityManagerInternal instead.
-    private final AccessibilityManager mAccessibilityManager;
 
     /**
      * Cache the result of {@code LocalServices.getService(AudioManagerInternal.class)}.
@@ -1740,7 +1736,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         mAppOpsManager = mContext.getSystemService(AppOpsManager.class);
         mUserManager = mContext.getSystemService(UserManager.class);
         mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
-        mAccessibilityManager = AccessibilityManager.getInstance(context);
         mHasFeature = context.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_INPUT_METHODS);
 
@@ -5484,7 +5479,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         public void onCreateInlineSuggestionsRequest(@UserIdInt int userId,
                 InlineSuggestionsRequestInfo requestInfo, IInlineSuggestionsRequestCallback cb) {
             // Get the device global touch exploration state before lock to avoid deadlock.
-            boolean touchExplorationEnabled = mAccessibilityManager.isTouchExplorationEnabled();
+            final boolean touchExplorationEnabled = AccessibilityManagerInternal.get()
+                    .isTouchExplorationEnabled(userId);
 
             synchronized (ImfLock.class) {
                 mAutofillController.onCreateInlineSuggestionsRequest(userId, requestInfo, cb,
