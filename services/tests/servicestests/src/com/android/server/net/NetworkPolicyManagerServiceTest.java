@@ -75,6 +75,7 @@ import static com.android.server.net.NetworkPolicyManagerService.TYPE_LIMIT_SNOO
 import static com.android.server.net.NetworkPolicyManagerService.TYPE_RAPID;
 import static com.android.server.net.NetworkPolicyManagerService.TYPE_WARNING;
 import static com.android.server.net.NetworkPolicyManagerService.UidBlockedState.getEffectiveBlockedReasons;
+import static com.android.server.net.NetworkPolicyManagerService.normalizeTemplate;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -2028,6 +2029,18 @@ public class NetworkPolicyManagerServiceTest {
                 actualPolicy.template.getSubscriberIds().size(), 0);
         assertEquals("Unexpected template meteredness in network policies",
                 METERED_NO, actualPolicy.template.getMeteredness());
+    }
+
+    @Test
+    public void testNormalizeTemplate_duplicatedMergedImsiList() {
+        final NetworkTemplate template = new NetworkTemplate.Builder(MATCH_CARRIER)
+                .setSubscriberIds(Set.of(TEST_IMSI)).build();
+        final String[] mergedImsiGroup = new String[] {TEST_IMSI, TEST_IMSI};
+        final ArrayList<String[]> mergedList = new ArrayList<>();
+        mergedList.add(mergedImsiGroup);
+        // Verify the duplicated items in the merged IMSI list won't crash the system.
+        final NetworkTemplate result = normalizeTemplate(template, mergedList);
+        assertEquals(template, result);
     }
 
     private String formatBlockedStateError(int uid, int rule, boolean metered,
