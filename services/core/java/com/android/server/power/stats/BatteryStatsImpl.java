@@ -6813,20 +6813,31 @@ public class BatteryStatsImpl extends BatteryStats {
         synchronized (mModemNetworkLock) {
             if (displayTransport == TRANSPORT_CELLULAR) {
                 mModemIfaces = includeInStringArray(mModemIfaces, iface);
-                if (DEBUG) Slog.d(TAG, "Note mobile iface " + iface + ": " + mModemIfaces);
+                if (DEBUG) {
+                    Slog.d(TAG, "Note mobile iface " + iface + ": "
+                            + Arrays.toString(mModemIfaces));
+                }
             } else {
                 mModemIfaces = excludeFromStringArray(mModemIfaces, iface);
-                if (DEBUG) Slog.d(TAG, "Note non-mobile iface " + iface + ": " + mModemIfaces);
+                if (DEBUG) {
+                    Slog.d(TAG, "Note non-mobile iface " + iface + ": "
+                            + Arrays.toString(mModemIfaces));
+                }
             }
         }
 
         synchronized (mWifiNetworkLock) {
             if (displayTransport == TRANSPORT_WIFI) {
                 mWifiIfaces = includeInStringArray(mWifiIfaces, iface);
-                if (DEBUG) Slog.d(TAG, "Note wifi iface " + iface + ": " + mWifiIfaces);
+                if (DEBUG) {
+                    Slog.d(TAG, "Note wifi iface " + iface + ": " + Arrays.toString(mWifiIfaces));
+                }
             } else {
                 mWifiIfaces = excludeFromStringArray(mWifiIfaces, iface);
-                if (DEBUG) Slog.d(TAG, "Note non-wifi iface " + iface + ": " + mWifiIfaces);
+                if (DEBUG) {
+                    Slog.d(TAG, "Note non-wifi iface " + iface + ": "
+                            + Arrays.toString(mWifiIfaces));
+                }
             }
         }
     }
@@ -12622,8 +12633,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private void updateCpuMeasuredEnergyStatsLocked(@NonNull long[] clusterChargeUC,
             @NonNull CpuDeltaPowerAccumulator accumulator) {
         if (DEBUG_ENERGY) {
-            Slog.d(TAG,
-                    "Updating cpu cluster stats: " + clusterChargeUC.toString());
+            Slog.d(TAG, "Updating cpu cluster stats: " + Arrays.toString(clusterChargeUC));
         }
         if (mGlobalMeasuredEnergyStats == null) {
             return;
