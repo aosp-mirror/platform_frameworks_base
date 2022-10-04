@@ -1921,7 +1921,8 @@ public final class BroadcastQueue {
                 info.activityInfo.applicationInfo, true,
                 r.intent.getFlags() | Intent.FLAG_FROM_BACKGROUND,
                 new HostingRecord(HostingRecord.HOSTING_TYPE_BROADCAST, r.curComponent,
-                        r.intent.getAction()),
+                        r.intent.getAction(), (r.alarm ? HostingRecord.TRIGGER_TYPE_ALARM
+                        : HostingRecord.TRIGGER_TYPE_UNKNOWN)),
                 isActivityCapable ? ZYGOTE_POLICY_FLAG_LATENCY_SENSITIVE : ZYGOTE_POLICY_FLAG_EMPTY,
                 (r.intent.getFlags() & Intent.FLAG_RECEIVER_BOOT_UPGRADE) != 0, false);
         if (r.curApp == null) {
