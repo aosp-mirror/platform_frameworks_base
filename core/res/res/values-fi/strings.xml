@@ -2051,8 +2051,7 @@
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Salli kertaluonteinen pääsy"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Älä salli"</string>
     <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"Laitteen tapahtumat tallentuvat laitelokeihin. Niiden avulla sovellukset voivat löytää ja korjata ongelmia.\n\nJotkin lokit voivat sisältää arkaluontoista tietoa, joten salli pääsy kaikkiin laitelokeihin vain sovelluksille, joihin luotat. \n\nJos et salli tälle sovellukselle pääsyä kaikkiin laitelokeihin, sillä on kuitenkin pääsy sen omiin lokeihin. Laitteen valmistajalla voi olla pääsy joihinkin lokeihin tai tietoihin laitteella."</string>
-    <!-- no translation found for log_access_confirmation_body (7379536536425265262) -->
-    <skip />
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"Laitteen tapahtumat tallentuvat laitelokeihin. Niiden avulla sovellukset voivat löytää ja korjata ongelmia.\n\nJotkin lokit voivat sisältää arkaluontoista tietoa, joten salli pääsy kaikkiin laitelokeihin vain sovelluksille, joihin luotat. \n\nJos et salli tälle sovellukselle pääsyä kaikkiin laitelokeihin, sillä on kuitenkin pääsy sen omiin lokeihin. Laitteen valmistajalla voi olla pääsy joihinkin lokeihin tai tietoihin laitteella.\n\nLue lisää osoitteessa g.co/android/devicelogs."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Älä näytä uudelleen"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> haluaa näyttää osia sovelluksesta <xliff:g id="APP_2">%2$s</xliff:g>."</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Muokkaa"</string>

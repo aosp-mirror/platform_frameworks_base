@@ -1942,7 +1942,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"L\'app non è disponibile"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"L\'app <xliff:g id="APP_NAME">%1$s</xliff:g> non è al momento disponibile."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> non disponibile"</string>
-    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"È necessaria l\'autorizzazione"</string>
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Autorizzazione necessaria"</string>
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Fotocamera non disponibile"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Continua sul telefono"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Microfono non disponibile"</string>

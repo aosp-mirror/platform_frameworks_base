@@ -437,8 +437,8 @@
     <string name="permdesc_writeCalendar" product="tablet" msgid="8722230940717092850">"এই এপটোৱে আপোনাৰ টেবলেটত কেলেণ্ডাৰ কাৰ্যক্ৰম যোগ কৰিব, আঁতৰাব বা সলনি কৰিব পাৰে। ই এনে বাৰ্তা পঠিয়াব পাৰে যিবোৰ কেলেণ্ডাৰৰ গৰাকীৰ পৰা অহা যেন লাগিব বা ই গৰাকীক নজনোৱাকৈ কাৰ্যক্ৰম সলনি কৰিব পাৰে৷"</string>
     <string name="permdesc_writeCalendar" product="tv" msgid="951246749004952706">"এই এপ্‌টোৱে আপোনাৰ Android TV ডিভাইচত কেলেণ্ডাৰ অনুষ্ঠানবোৰ যোগ দিব, আঁতৰাব অথবা সলনি কৰিব পাৰে। এই এপ্‌টোৱে এনে বাৰ্তা পঠিয়াব পাৰে যিবোৰ কেলেণ্ডাৰৰ গৰাকীৰ পৰা অহা বুলি প্ৰদর্শিত হ’ব পাৰে অথবা এইটোৱে গৰাকীসকলক নজনোৱাকৈ অনুষ্ঠানবোৰ সলনি কৰিব পাৰে।"</string>
     <string name="permdesc_writeCalendar" product="default" msgid="5416380074475634233">"এই এপে আপোনাৰ ফ\'নৰ কেলেণ্ডাৰত কার্যক্ৰম যোগ দিব, আঁতৰাব বা সলনি কৰিব পাৰে। ই এনে বাৰ্তা পঠিয়াব পাৰে যিবোৰ কেলেণ্ডাৰৰ গৰাকীৰ পৰা অহা যেন লাগে বা ই গৰাকীক নজনোৱাকৈ কাৰ্যক্ৰম সলনি কৰিব পাৰে৷"</string>
-    <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"অতিৰিক্ত অৱস্থান দেখুওৱা নির্দেশত প্ৰৱেশ কৰক"</string>
-    <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"অৱস্থানৰ অতিৰিক্ত নির্দেশনাসমূহত প্ৰৱেশ কৰিবলৈ এপক অনুমতি দিয়ে। ইয়ে এপটোক জিপিএছ বা অন্য অৱস্থান উৎসসমূহৰ কাৰ্যকলাপত হস্তক্ষেপ কৰাৰ সুযোগ দিব পাৰে।"</string>
+    <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"অতিৰিক্ত অৱস্থান প্ৰদানকাৰী নির্দেশসমূহ এক্সেছ কৰে"</string>
+    <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"অৱস্থানৰ অতিৰিক্ত নির্দেশনাসমূহ এক্সেছ কৰিবলৈ এপক অনুমতি দিয়ে। ই এপ্‌টোক জিপিএছ বা অন্য অৱস্থান উৎসসমূহৰ কাৰ্যকলাপত হস্তক্ষেপ কৰাৰ সুযোগ দিব পাৰে।"</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"কেৱল অগ্ৰভূমিত অৱস্থানৰ সঠিক তথ্য পাওক"</string>
     <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"এই এপ্‌টো ব্যৱহাৰ হৈ থকা অৱস্থাত ই অৱস্থান সেৱাসমূহৰ পৰা আপোনাৰ সঠিক অৱস্থান লাভ কৰিব পাৰে। এপ্‌টোৱে অৱস্থান লাভ কৰিবলৈ হ’লে আপোনাৰ ডিভাইচৰ অৱস্থান সেৱাসমূহ অন কৰি ৰাখিবই লাগিব। ইয়াৰ ফলত বেটাৰীৰ ব্যৱহাৰ বাঢ়িব পাৰে।"</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"কেৱল অগ্ৰভূমিত আনুমানিক অৱস্থান এক্সেছ কৰক"</string>
@@ -722,7 +722,7 @@
     <string name="permdesc_manageNetworkPolicy" msgid="1865663268764673296">"এপটোক নেটৱৰ্ক সংযোগৰ নীতিসমূহ পৰিচালনা কৰিবলৈ আৰু এপ্-বিশেষ নিয়ম সংজ্ঞাবদ্ধ কৰিবলৈ অনুমতি দিয়ে।"</string>
     <string name="permlab_modifyNetworkAccounting" msgid="7448790834938749041">"নেটৱর্ক ব্যৱহাৰৰ হিচাপ সলনি কৰক"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5076042642247205390">"এপ অনুসুৰি নেটৱর্কৰ ব্যৱহাৰৰ হিচাপ সংশোধন কৰিবলৈ এপক অনুমতি দিয়ে। এয়া সাধাৰণ এপবোৰৰ ব্যৱহাৰৰ বাবে নহয়।"</string>
-    <string name="permlab_accessNotifications" msgid="7130360248191984741">"প্ৰৱেশ জাননীসমূহ"</string>
+    <string name="permlab_accessNotifications" msgid="7130360248191984741">"জাননীসমূহ এক্সেছ কৰে"</string>
     <string name="permdesc_accessNotifications" msgid="761730149268789668">"অন্য এপসমূহৰদ্বাৰা প\'ষ্ট কৰা জাননীসমূহকে ধৰি জাননী বিচাৰি উলিয়াবলৈ, পৰীক্ষা কৰিবলৈ আৰু মচিবলৈ অনুমতি দিয়ে।"</string>
     <string name="permlab_bindNotificationListenerService" msgid="5848096702733262458">"এটা জাননী শুনা সেৱাৰ লগত সংযুক্ত হ\'ব পাৰে"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="4970553694467137126">"এটা জাননী শ্ৰৱণ সেৱা প্ৰদানকাৰীৰ শীৰ্ষ স্তৰৰ ইণ্টাৰফেইচৰ লগত সংযুক্ত হ\'বলৈ ধাৰকক অনুমতি দিয়ে। সাধাৰণ এপসমূহৰ বাবে সাধাৰণতে প্ৰয়োজন নহয়।"</string>
@@ -736,7 +736,7 @@
     <string name="permdesc_accessNetworkConditions" msgid="2959269186741956109">"এটা এপ্লিকেশ্বনক নেটৱৰ্ক অৱস্থাসমূহত নিৰীক্ষণৰ বাবে শুনিবলৈ অনুমতি দিয়ে। সাধাৰণ এপসমূহৰ বাবে সাধাৰণতে প্ৰয়োজন নহয়।"</string>
     <string name="permlab_setInputCalibration" msgid="932069700285223434">"ইনপুট ডিভাইচ কেলিব্ৰেশ্বন সলনি কৰিব পাৰে"</string>
     <string name="permdesc_setInputCalibration" msgid="2937872391426631726">"টাচ্চ স্ক্ৰীনৰ কেলিব্ৰেশ্বন পেৰামিটাৰ সংশোধন কৰিবলৈ এপক অনুমতি দিয়ে। সাধাৰণ এপসমূহৰ বাবে কেতিয়াও প্ৰয়োজন হোৱা উচিত নহয়।"</string>
-    <string name="permlab_accessDrmCertificates" msgid="6473765454472436597">"DRM প্ৰমাণপত্ৰসমূহলৈ প্ৰৱেশ"</string>
+    <string name="permlab_accessDrmCertificates" msgid="6473765454472436597">"DRM প্ৰমাণপত্ৰসমূহ এক্সেছ কৰে"</string>
     <string name="permdesc_accessDrmCertificates" msgid="6983139753493781941">"এটা এপ্লিকেশ্বনক DRM প্ৰমাণপত্ৰ গোটাবলৈ আৰু ব্যৱহাৰ কৰিবলৈ অনুমতি দিয়ে। সাধাৰণ এপসমূহৰ বাবে সাধাৰণতে প্ৰয়োজন নহয়।"</string>
     <string name="permlab_handoverStatus" msgid="7620438488137057281">"Android বীম স্থানান্তৰণৰ স্থিতি লাভ কৰিব পাৰে"</string>
     <string name="permdesc_handoverStatus" msgid="3842269451732571070">"বৰ্তমানৰ Android Beam স্থানান্তৰণসমূহৰ বিষয়ে তথ্য পাবলৈ এই এপ্লিকেশ্বনক অনুমতি দিয়ে"</string>
@@ -1470,7 +1470,7 @@
     <string name="ime_action_default" msgid="8265027027659800121">"কার্য কৰক"</string>
     <string name="dial_number_using" msgid="6060769078933953531">"<xliff:g id="NUMBER">%s</xliff:g> ব্যৱহাৰ কৰি \n নম্বৰটো ডায়েল কৰক"</string>
     <string name="create_contact_using" msgid="6200708808003692594">"<xliff:g id="NUMBER">%s</xliff:g> ব্যৱহাৰ কৰি সম্পৰ্ক \n সৃষ্টি কৰক"</string>
-    <string name="grant_credentials_permission_message_header" msgid="5365733888842570481">"বৰ্তমান আৰু ভৱিষ্যতে আপোনাৰ একাউণ্টত প্ৰৱেশ কৰিবলৈ তলৰ এটা বা অধিক এপে অনুমতি লাভৰ বাবে অনুৰোধ কৰিছে৷"</string>
+    <string name="grant_credentials_permission_message_header" msgid="5365733888842570481">"তলৰ এটা বা একাধিক এপে বৰ্তমান আৰু ভৱিষ্যতে আপোনাৰ একাউণ্ট এক্সেছ কৰিবলৈ অনুমতি বিচাৰি অনুৰোধ কৰিছে৷"</string>
     <string name="grant_credentials_permission_message_footer" msgid="1886710210516246461">"আপুনি এই অনুৰোধক সন্মতি দিব বিচাৰেনে?"</string>
     <string name="grant_permissions_header_text" msgid="3420736827804657201">"ব্যৱহাৰ কৰাৰ অনুমতি বিচাৰি কৰা অনুৰোধ"</string>
     <string name="allow" msgid="6195617008611933762">"অনুমতি দিয়ক"</string>
@@ -2051,8 +2051,7 @@
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"কেৱল এবাৰ এক্সেছ কৰাৰ অনুমতি দিয়ক"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"অনুমতি নিদিব"</string>
     <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"আপোনাৰ ডিভাইচত কি কি ঘটে সেয়া ডিভাইচ লগে ৰেকৰ্ড কৰে। এপ্‌সমূহে সমস্যা বিচাৰিবলৈ আৰু সমাধান কৰিবলৈ এই লগসমূহ ব্যৱহাৰ কৰিব পাৰে।\n\nকিছুমান লগত সংবেদনশীল তথ্য থাকিব পাৰে, গতিকে কেৱল আপুনি বিশ্বাস কৰা এপকহে আটাইবোৰ ডিভাইচ লগ এক্সেছ কৰাৰ অনুমতি দিয়ক। \n\nআপুনি যদি এই এপ্‌টোক আটাইবোৰ ডিভাইচ লগ এক্সেছ কৰাৰ অনুমতি নিদিয়ে, তথাপিও ই নিজৰ লগসমূহ এক্সেছ কৰিব পাৰিব। আপোনাৰ ডিভাইচৰ নিৰ্মাতাই তথাপিও হয়তো আপোনাৰ ডিভাইচটোত থকা কিছু লগ অথবা তথ্য এক্সেছ কৰিব পাৰিব।"</string>
-    <!-- no translation found for log_access_confirmation_body (7379536536425265262) -->
-    <skip />
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"আপোনাৰ ডিভাইচত কি কি ঘটে সেয়া ডিভাইচ লগে ৰেকৰ্ড কৰে। এপ্‌সমূহে সমস্যা বিচাৰিবলৈ আৰু সমাধান কৰিবলৈ এই লগসমূহ ব্যৱহাৰ কৰিব পাৰে।\n\nকিছুমান লগত সংবেদনশীল তথ্য থাকিব পাৰে, গতিকে কেৱল আপুনি বিশ্বাস কৰা এপকহে আটাইবোৰ ডিভাইচ লগ এক্সেছ কৰাৰ অনুমতি দিয়ক। \n\nআপুনি যদি এই এপ্‌টোক আটাইবোৰ ডিভাইচ লগ এক্সেছ কৰাৰ অনুমতি নিদিয়ে, তথাপিও ই নিজৰ লগসমূহ এক্সেছ কৰিব পাৰিব। আপোনাৰ ডিভাইচৰ নিৰ্মাতাই তথাপিও হয়তো আপোনাৰ ডিভাইচটোত থকা কিছু লগ অথবা তথ্য এক্সেছ কৰিব পাৰিব।\n\ng.co/android/devicelogsত অধিক জানক।"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"পুনৰ নেদেখুৱাব"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g>এ <xliff:g id="APP_2">%2$s</xliff:g>ৰ অংশ দেখুওৱাব খুজিছে"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"সম্পাদনা কৰক"</string>
