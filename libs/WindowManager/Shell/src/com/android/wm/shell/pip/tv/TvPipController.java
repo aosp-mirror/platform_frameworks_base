@@ -240,12 +240,6 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                 "%s: onConfigurationChanged(), state=%s", TAG, stateToName(mState));
 
-        if (isPipShown()) {
-            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                    "%s:  > closing Pip.", TAG);
-            closePip();
-        }
-
         loadConfigurations();
         mPipNotificationController.onConfigurationChanged(mContext);
         mTvPipBoundsAlgorithm.onConfigurationChanged(mContext);
