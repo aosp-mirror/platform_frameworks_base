@@ -21,6 +21,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 
 import android.hardware.display.DisplayManagerInternal;
 
@@ -32,6 +33,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.concurrent.Callable;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -64,25 +67,18 @@ public final class WakelockControllerTest {
     }
 
     @Test
-    public void acquireStateChangedSuspendBlockerAcquiresIfNotAcquired() {
-        // Acquire the suspend blocker
-        assertTrue(mWakelockController.acquireStateChangedSuspendBlocker());
-        assertTrue(mWakelockController.isOnStateChangedPending());
-
-        // Try to reacquire
-        assertFalse(mWakelockController.acquireStateChangedSuspendBlocker());
-        assertTrue(mWakelockController.isOnStateChangedPending());
+    public void acquireStateChangedSuspendBlockerAcquiresIfNotAcquired() throws Exception {
+        // Acquire
+        verifyWakelockAcquisitionAndReaquisition(WakelockController.WAKE_LOCK_STATE_CHANGED,
+                () -> mWakelockController.isOnStateChangedPending());
 
         // Verify acquire happened only once
         verify(mDisplayPowerCallbacks, times(1))
                 .acquireSuspendBlocker(mWakelockController.getSuspendBlockerOnStateChangedId());
 
         // Release
-        mWakelockController.releaseStateChangedSuspendBlocker();
-        assertFalse(mWakelockController.isOnStateChangedPending());
-
-        // Try to release again
-        mWakelockController.releaseStateChangedSuspendBlocker();
+        verifyWakelockReleaseAndRerelease(WakelockController.WAKE_LOCK_STATE_CHANGED,
+                () -> mWakelockController.isOnStateChangedPending());
 
         // Verify release happened only once
         verify(mDisplayPowerCallbacks, times(1))
@@ -90,25 +86,18 @@ public final class WakelockControllerTest {
     }
 
     @Test
-    public void acquireUnfinishedBusinessSuspendBlockerAcquiresIfNotAcquired() {
-        // Acquire the suspend blocker
-        mWakelockController.acquireUnfinishedBusinessSuspendBlocker();
-        assertTrue(mWakelockController.hasUnfinishedBusiness());
-
-        // Try to reacquire
-        mWakelockController.acquireUnfinishedBusinessSuspendBlocker();
-        assertTrue(mWakelockController.hasUnfinishedBusiness());
+    public void acquireUnfinishedBusinessSuspendBlockerAcquiresIfNotAcquired() throws Exception {
+        // Acquire
+        verifyWakelockAcquisitionAndReaquisition(WakelockController.WAKE_LOCK_UNFINISHED_BUSINESS,
+                () -> mWakelockController.hasUnfinishedBusiness());
 
         // Verify acquire happened only once
         verify(mDisplayPowerCallbacks, times(1))
                 .acquireSuspendBlocker(mWakelockController.getSuspendBlockerUnfinishedBusinessId());
 
-        // Release the suspend blocker
-        mWakelockController.releaseUnfinishedBusinessSuspendBlocker();
-        assertFalse(mWakelockController.hasUnfinishedBusiness());
-
-        // Try to release again
-        mWakelockController.releaseUnfinishedBusinessSuspendBlocker();
+        // Release
+        verifyWakelockReleaseAndRerelease(WakelockController.WAKE_LOCK_UNFINISHED_BUSINESS,
+                () -> mWakelockController.hasUnfinishedBusiness());
 
         // Verify release happened only once
         verify(mDisplayPowerCallbacks, times(1))
@@ -116,70 +105,56 @@ public final class WakelockControllerTest {
     }
 
     @Test
-    public void acquireProxPositiveSuspendBlockerAcquiresIfNotAcquired() {
-        // Acquire the suspend blocker
-        mWakelockController.acquireProxPositiveSuspendBlocker();
-        assertEquals(mWakelockController.getOnProximityPositiveMessages(), 1);
-
-        // Try to reacquire
-        mWakelockController.acquireProxPositiveSuspendBlocker();
-        assertEquals(mWakelockController.getOnProximityPositiveMessages(), 2);
+    public void acquireProxPositiveSuspendBlockerAcquiresIfNotAcquired() throws Exception {
+        // Acquire
+        verifyWakelockAcquisitionAndReaquisition(WakelockController.WAKE_LOCK_PROXIMITY_POSITIVE,
+                () -> mWakelockController.isProximityPositiveAcquired());
 
         // Verify acquire happened only once
-        verify(mDisplayPowerCallbacks, times(2))
+        verify(mDisplayPowerCallbacks, times(1))
                 .acquireSuspendBlocker(mWakelockController.getSuspendBlockerProxPositiveId());
 
-        // Release the suspend blocker
-        mWakelockController.releaseProxPositiveSuspendBlocker();
-        assertEquals(mWakelockController.getOnProximityPositiveMessages(), 0);
+        // Release
+        verifyWakelockReleaseAndRerelease(WakelockController.WAKE_LOCK_PROXIMITY_POSITIVE,
+                () -> mWakelockController.isProximityPositiveAcquired());
 
-        // Verify all suspend blockers were released
-        verify(mDisplayPowerCallbacks, times(2))
+        // Verify release happened only once
+        verify(mDisplayPowerCallbacks, times(1))
                 .releaseSuspendBlocker(mWakelockController.getSuspendBlockerProxPositiveId());
     }
 
     @Test
-    public void acquireProxNegativeSuspendBlockerAcquiresIfNotAcquired() {
-        // Acquire the suspend blocker
-        mWakelockController.acquireProxNegativeSuspendBlocker();
-        assertEquals(mWakelockController.getOnProximityNegativeMessages(), 1);
-
-        // Try to reacquire
-        mWakelockController.acquireProxNegativeSuspendBlocker();
-        assertEquals(mWakelockController.getOnProximityNegativeMessages(), 2);
+    public void acquireProxNegativeSuspendBlockerAcquiresIfNotAcquired() throws Exception {
+        // Acquire
+        verifyWakelockAcquisitionAndReaquisition(WakelockController.WAKE_LOCK_PROXIMITY_NEGATIVE,
+                () -> mWakelockController.isProximityNegativeAcquired());
 
         // Verify acquire happened only once
-        verify(mDisplayPowerCallbacks, times(2))
+        verify(mDisplayPowerCallbacks, times(1))
                 .acquireSuspendBlocker(mWakelockController.getSuspendBlockerProxNegativeId());
 
-        // Release the suspend blocker
-        mWakelockController.releaseProxNegativeSuspendBlocker();
-        assertEquals(mWakelockController.getOnProximityNegativeMessages(), 0);
+        // Release
+        verifyWakelockReleaseAndRerelease(WakelockController.WAKE_LOCK_PROXIMITY_NEGATIVE,
+                () -> mWakelockController.isProximityNegativeAcquired());
 
-        // Verify all suspend blockers were released
-        verify(mDisplayPowerCallbacks, times(2))
+        // Verify release happened only once
+        verify(mDisplayPowerCallbacks, times(1))
                 .releaseSuspendBlocker(mWakelockController.getSuspendBlockerProxNegativeId());
     }
 
     @Test
-    public void acquireProxDebounceSuspendBlockerAcquiresIfNotAcquired() {
+    public void acquireProxDebounceSuspendBlockerAcquiresIfNotAcquired() throws Exception {
         // Acquire the suspend blocker
-        mWakelockController.acquireProxDebounceSuspendBlocker();
-
-        // Try to reacquire
-        mWakelockController.acquireProxDebounceSuspendBlocker();
-        assertTrue(mWakelockController.hasProximitySensorDebounced());
+        verifyWakelockAcquisitionAndReaquisition(WakelockController.WAKE_LOCK_PROXIMITY_DEBOUNCE,
+                () -> mWakelockController.hasProximitySensorDebounced());
 
         // Verify acquire happened only once
         verify(mDisplayPowerCallbacks, times(1))
                 .acquireSuspendBlocker(mWakelockController.getSuspendBlockerProxDebounceId());
 
         // Release the suspend blocker
-        assertTrue(mWakelockController.releaseProxDebounceSuspendBlocker());
-
-        // Release again
-        assertFalse(mWakelockController.releaseProxDebounceSuspendBlocker());
-        assertFalse(mWakelockController.hasProximitySensorDebounced());
+        verifyWakelockReleaseAndRerelease(WakelockController.WAKE_LOCK_PROXIMITY_DEBOUNCE,
+                () -> mWakelockController.hasProximitySensorDebounced());
 
         // Verify suspend blocker was released only once
         verify(mDisplayPowerCallbacks, times(1))
@@ -189,51 +164,125 @@ public final class WakelockControllerTest {
     @Test
     public void proximityPositiveRunnableWorksAsExpected() {
         // Acquire the suspend blocker twice
-        mWakelockController.acquireProxPositiveSuspendBlocker();
-        mWakelockController.acquireProxPositiveSuspendBlocker();
+        assertTrue(mWakelockController.acquireWakelock(
+                WakelockController.WAKE_LOCK_PROXIMITY_POSITIVE));
 
         // Execute the runnable
         Runnable proximityPositiveRunnable = mWakelockController.getOnProximityPositiveRunnable();
         proximityPositiveRunnable.run();
 
         // Validate one suspend blocker was released
-        assertEquals(mWakelockController.getOnProximityPositiveMessages(), 1);
+        assertFalse(mWakelockController.isProximityPositiveAcquired());
         verify(mDisplayPowerCallbacks).onProximityPositive();
         verify(mDisplayPowerCallbacks).releaseSuspendBlocker(
                 mWakelockController.getSuspendBlockerProxPositiveId());
     }
 
     @Test
+    public void proximityPositiveRunnableDoesNothingIfNotAcquired() {
+        // Execute the runnable
+        Runnable proximityPositiveRunnable = mWakelockController.getOnProximityPositiveRunnable();
+        proximityPositiveRunnable.run();
+
+        // Validate one suspend blocker was released
+        assertFalse(mWakelockController.isProximityPositiveAcquired());
+        verifyZeroInteractions(mDisplayPowerCallbacks);
+    }
+
+    @Test
     public void proximityNegativeRunnableWorksAsExpected() {
         // Acquire the suspend blocker twice
-        mWakelockController.acquireProxNegativeSuspendBlocker();
-        mWakelockController.acquireProxNegativeSuspendBlocker();
+        assertTrue(mWakelockController.acquireWakelock(
+                WakelockController.WAKE_LOCK_PROXIMITY_NEGATIVE));
 
         // Execute the runnable
         Runnable proximityNegativeRunnable = mWakelockController.getOnProximityNegativeRunnable();
         proximityNegativeRunnable.run();
 
         // Validate one suspend blocker was released
-        assertEquals(mWakelockController.getOnProximityNegativeMessages(), 1);
+        assertFalse(mWakelockController.isProximityNegativeAcquired());
         verify(mDisplayPowerCallbacks).onProximityNegative();
         verify(mDisplayPowerCallbacks).releaseSuspendBlocker(
                 mWakelockController.getSuspendBlockerProxNegativeId());
     }
 
     @Test
+    public void proximityNegativeRunnableDoesNothingIfNotAcquired() {
+        // Execute the runnable
+        Runnable proximityNegativeRunnable = mWakelockController.getOnProximityNegativeRunnable();
+        proximityNegativeRunnable.run();
+
+        // Validate one suspend blocker was released
+        assertFalse(mWakelockController.isProximityNegativeAcquired());
+        verifyZeroInteractions(mDisplayPowerCallbacks);
+    }
+
+    @Test
     public void onStateChangeRunnableWorksAsExpected() {
         // Acquire the suspend blocker twice
-        mWakelockController.acquireStateChangedSuspendBlocker();
+        assertTrue(mWakelockController.acquireWakelock(WakelockController.WAKE_LOCK_STATE_CHANGED));
 
         // Execute the runnable
         Runnable stateChangeRunnable = mWakelockController.getOnStateChangedRunnable();
         stateChangeRunnable.run();
 
         // Validate one suspend blocker was released
-        assertEquals(mWakelockController.isOnStateChangedPending(), false);
+        assertFalse(mWakelockController.isOnStateChangedPending());
         verify(mDisplayPowerCallbacks).onStateChanged();
         verify(mDisplayPowerCallbacks).releaseSuspendBlocker(
                 mWakelockController.getSuspendBlockerOnStateChangedId());
+    }
+
+    @Test
+    public void onStateChangeRunnableDoesNothingIfNotAcquired() {
+        // Execute the runnable
+        Runnable stateChangeRunnable = mWakelockController.getOnStateChangedRunnable();
+        stateChangeRunnable.run();
+
+        // Validate one suspend blocker was released
+        assertFalse(mWakelockController.isOnStateChangedPending());
+        verifyZeroInteractions(mDisplayPowerCallbacks);
+    }
+
+    private void verifyWakelockAcquisitionAndReaquisition(int wakelockId,
+            Callable<Boolean> isWakelockAcquiredCallable)
+            throws Exception {
+        verifyWakelockAcquisition(wakelockId, isWakelockAcquiredCallable);
+        verifyWakelockReacquisition(wakelockId, isWakelockAcquiredCallable);
+    }
+
+    private void verifyWakelockReleaseAndRerelease(int wakelockId,
+            Callable<Boolean> isWakelockAcquiredCallable)
+            throws Exception {
+        verifyWakelockRelease(wakelockId, isWakelockAcquiredCallable);
+        verifyWakelockRerelease(wakelockId, isWakelockAcquiredCallable);
+    }
+
+    private void verifyWakelockAcquisition(int wakelockId,
+            Callable<Boolean> isWakelockAcquiredCallable)
+            throws Exception {
+        assertTrue(mWakelockController.acquireWakelock(wakelockId));
+        assertTrue(isWakelockAcquiredCallable.call());
+    }
+
+    private void verifyWakelockReacquisition(int wakelockId,
+            Callable<Boolean> isWakelockAcquiredCallable)
+            throws Exception {
+        assertFalse(mWakelockController.acquireWakelock(wakelockId));
+        assertTrue(isWakelockAcquiredCallable.call());
+    }
+
+    private void verifyWakelockRelease(int wakelockId, Callable<Boolean> isWakelockAcquiredCallable)
+            throws Exception {
+        assertTrue(mWakelockController.releaseWakelock(wakelockId));
+        assertFalse(isWakelockAcquiredCallable.call());
+    }
+
+    private void verifyWakelockRerelease(int wakelockId,
+            Callable<Boolean> isWakelockAcquiredCallable)
+            throws Exception {
+        assertFalse(mWakelockController.releaseWakelock(wakelockId));
+        assertFalse(isWakelockAcquiredCallable.call());
     }
 
 
