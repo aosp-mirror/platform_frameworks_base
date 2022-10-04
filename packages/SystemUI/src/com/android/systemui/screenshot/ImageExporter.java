@@ -19,6 +19,7 @@ package com.android.systemui.screenshot;
 import static android.os.FileUtils.closeQuietly;
 
 import android.annotation.IntRange;
+import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.graphics.Bitmap;
@@ -29,6 +30,7 @@ import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.os.SystemClock;
 import android.os.Trace;
+import android.os.UserHandle;
 import android.provider.MediaStore;
 import android.util.Log;
 
@@ -142,8 +144,9 @@ class ImageExporter {
      *
      * @return a listenable future result
      */
-    ListenableFuture<Result> export(Executor executor, UUID requestId, Bitmap bitmap) {
-        return export(executor, requestId, bitmap, ZonedDateTime.now());
+    ListenableFuture<Result> export(Executor executor, UUID requestId, Bitmap bitmap,
+            UserHandle owner) {
+        return export(executor, requestId, bitmap, ZonedDateTime.now(), owner);
     }
 
     /**
@@ -155,10 +158,10 @@ class ImageExporter {
      * @return a listenable future result
      */
     ListenableFuture<Result> export(Executor executor, UUID requestId, Bitmap bitmap,
-            ZonedDateTime captureTime) {
+            ZonedDateTime captureTime, UserHandle owner) {
 
         final Task task = new Task(mResolver, requestId, bitmap, captureTime, mCompressFormat,
-                mQuality, /* publish */ true);
+                mQuality, /* publish */ true, owner);
 
         return CallbackToFutureAdapter.getFuture(
                 (completer) -> {
@@ -174,28 +177,6 @@ class ImageExporter {
         );
     }
 
-    /**
-     * Delete the entry.
-     *
-     * @param executor the thread for execution
-     * @param uri the uri of the image to publish
-     *
-     * @return a listenable future result
-     */
-    ListenableFuture<Result> delete(Executor executor, Uri uri) {
-        return CallbackToFutureAdapter.getFuture((completer) -> {
-            executor.execute(() -> {
-                mResolver.delete(uri, null);
-
-                Result result = new Result();
-                result.uri = uri;
-                result.deleted = true;
-                completer.set(result);
-            });
-            return "ContentResolver#delete";
-        });
-    }
-
     static class Result {
         Uri uri;
         UUID requestId;
@@ -203,7 +184,6 @@ class ImageExporter {
         long timestamp;
         CompressFormat format;
         boolean published;
-        boolean deleted;
 
         @Override
         public String toString() {
@@ -214,7 +194,6 @@ class ImageExporter {
             sb.append(", timestamp=").append(timestamp);
             sb.append(", format=").append(format);
             sb.append(", published=").append(published);
-            sb.append(", deleted=").append(deleted);
             sb.append('}');
             return sb.toString();
         }
@@ -227,17 +206,19 @@ class ImageExporter {
         private final ZonedDateTime mCaptureTime;
         private final CompressFormat mFormat;
         private final int mQuality;
+        private final UserHandle mOwner;
         private final String mFileName;
         private final boolean mPublish;
 
         Task(ContentResolver resolver, UUID requestId, Bitmap bitmap, ZonedDateTime captureTime,
-                CompressFormat format, int quality, boolean publish) {
+                CompressFormat format, int quality, boolean publish, UserHandle owner) {
             mResolver = resolver;
             mRequestId = requestId;
             mBitmap = bitmap;
             mCaptureTime = captureTime;
             mFormat = format;
             mQuality = quality;
+            mOwner = owner;
             mFileName = createFilename(mCaptureTime, mFormat);
             mPublish = publish;
         }
@@ -253,7 +234,7 @@ class ImageExporter {
                     start = Instant.now();
                 }
 
-                uri = createEntry(mResolver, mFormat, mCaptureTime, mFileName);
+                uri = createEntry(mResolver, mFormat, mCaptureTime, mFileName, mOwner);
                 throwIfInterrupted();
 
                 writeImage(mResolver, mBitmap, mFormat, mQuality, uri);
@@ -297,15 +278,20 @@ class ImageExporter {
     }
 
     private static Uri createEntry(ContentResolver resolver, CompressFormat format,
-            ZonedDateTime time, String fileName) throws ImageExportException {
+            ZonedDateTime time, String fileName, UserHandle owner) throws ImageExportException {
         Trace.beginSection("ImageExporter_createEntry");
         try {
             final ContentValues values = createMetadata(time, format, fileName);
 
-            Uri uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+            Uri baseUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+            if (UserHandle.myUserId() != owner.getIdentifier()) {
+                baseUri = ContentProvider.maybeAddUserId(baseUri, owner.getIdentifier());
+            }
+            Uri uri = resolver.insert(baseUri, values);
             if (uri == null) {
                 throw new ImageExportException(RESOLVER_INSERT_RETURNED_NULL);
             }
+            Log.d(TAG, "Inserted new URI: " + uri);
             return uri;
         } finally {
             Trace.endSection();
