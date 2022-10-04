@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.policy
 
 import android.content.Intent
 import android.view.View
-import com.android.settingslib.RestrictedLockUtils
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.qs.user.UserSwitchDialogController
@@ -38,8 +37,9 @@ constructor(
     @Suppress("DEPRECATION") private val oldImpl: Lazy<UserSwitcherControllerOldImpl>,
 ) : UserSwitcherController {
 
-    private val isNewImpl: Boolean
-        get() = flags.isEnabled(Flags.REFACTORED_USER_SWITCHER_CONTROLLER)
+    private val useInteractor: Boolean =
+        flags.isEnabled(Flags.USER_CONTROLLER_USES_INTERACTOR) &&
+            !flags.isEnabled(Flags.USER_INTERACTOR_AND_REPO_USE_CONTROLLER)
     private val _oldImpl: UserSwitcherControllerOldImpl
         get() = oldImpl.get()
 
@@ -49,7 +49,7 @@ constructor(
 
     override val users: ArrayList<UserRecord>
         get() =
-            if (isNewImpl) {
+            if (useInteractor) {
                 notYetImplemented()
             } else {
                 _oldImpl.users
@@ -57,14 +57,14 @@ constructor(
 
     override val isSimpleUserSwitcher: Boolean
         get() =
-            if (isNewImpl) {
+            if (useInteractor) {
                 notYetImplemented()
             } else {
                 _oldImpl.isSimpleUserSwitcher
             }
 
     override fun init(view: View) {
-        if (isNewImpl) {
+        if (useInteractor) {
             notYetImplemented()
         } else {
             _oldImpl.init(view)
@@ -73,7 +73,7 @@ constructor(
 
     override val currentUserRecord: UserRecord?
         get() =
-            if (isNewImpl) {
+            if (useInteractor) {
                 notYetImplemented()
             } else {
                 _oldImpl.currentUserRecord
@@ -81,7 +81,7 @@ constructor(
 
     override val currentUserName: String?
         get() =
-            if (isNewImpl) {
+            if (useInteractor) {
                 notYetImplemented()
             } else {
                 _oldImpl.currentUserName
@@ -91,7 +91,7 @@ constructor(
         userId: Int,
         dialogShower: UserSwitchDialogController.DialogShower?
     ) {
-        if (isNewImpl) {
+        if (useInteractor) {
             notYetImplemented()
         } else {
             _oldImpl.onUserSelected(userId, dialogShower)
@@ -100,7 +100,7 @@ constructor(
 
     override val isAddUsersFromLockScreenEnabled: Flow<Boolean>
         get() =
-            if (isNewImpl) {
+            if (useInteractor) {
                 notYetImplemented()
             } else {
                 _oldImpl.isAddUsersFromLockScreenEnabled
@@ -108,7 +108,7 @@ constructor(
 
     override val isGuestUserAutoCreated: Boolean
         get() =
-            if (isNewImpl) {
+            if (useInteractor) {
                 notYetImplemented()
             } else {
                 _oldImpl.isGuestUserAutoCreated
@@ -116,7 +116,7 @@ constructor(
 
     override val isGuestUserResetting: Boolean
         get() =
-            if (isNewImpl) {
+            if (useInteractor) {
                 notYetImplemented()
             } else {
                 _oldImpl.isGuestUserResetting
@@ -125,7 +125,7 @@ constructor(
     override fun createAndSwitchToGuestUser(
         dialogShower: UserSwitchDialogController.DialogShower?,
     ) {
-        if (isNewImpl) {
+        if (useInteractor) {
             notYetImplemented()
         } else {
             _oldImpl.createAndSwitchToGuestUser(dialogShower)
@@ -133,7 +133,7 @@ constructor(
     }
 
     override fun showAddUserDialog(dialogShower: UserSwitchDialogController.DialogShower?) {
-        if (isNewImpl) {
+        if (useInteractor) {
             notYetImplemented()
         } else {
             _oldImpl.showAddUserDialog(dialogShower)
@@ -141,7 +141,7 @@ constructor(
     }
 
     override fun startSupervisedUserActivity() {
-        if (isNewImpl) {
+        if (useInteractor) {
             notYetImplemented()
         } else {
             _oldImpl.startSupervisedUserActivity()
@@ -149,7 +149,7 @@ constructor(
     }
 
     override fun onDensityOrFontScaleChanged() {
-        if (isNewImpl) {
+        if (useInteractor) {
             notYetImplemented()
         } else {
             _oldImpl.onDensityOrFontScaleChanged()
@@ -157,7 +157,7 @@ constructor(
     }
 
     override fun addAdapter(adapter: WeakReference<BaseUserSwitcherAdapter>) {
-        if (isNewImpl) {
+        if (useInteractor) {
             notYetImplemented()
         } else {
             _oldImpl.addAdapter(adapter)
@@ -168,7 +168,7 @@ constructor(
         record: UserRecord,
         dialogShower: UserSwitchDialogController.DialogShower?,
     ) {
-        if (isNewImpl) {
+        if (useInteractor) {
             notYetImplemented()
         } else {
             _oldImpl.onUserListItemClicked(record, dialogShower)
@@ -176,7 +176,7 @@ constructor(
     }
 
     override fun removeGuestUser(guestUserId: Int, targetUserId: Int) {
-        if (isNewImpl) {
+        if (useInteractor) {
             notYetImplemented()
         } else {
             _oldImpl.removeGuestUser(guestUserId, targetUserId)
@@ -188,7 +188,7 @@ constructor(
         targetUserId: Int,
         forceRemoveGuestOnExit: Boolean
     ) {
-        if (isNewImpl) {
+        if (useInteractor) {
             notYetImplemented()
         } else {
             _oldImpl.exitGuestUser(guestUserId, targetUserId, forceRemoveGuestOnExit)
@@ -196,7 +196,7 @@ constructor(
     }
 
     override fun schedulePostBootGuestCreation() {
-        if (isNewImpl) {
+        if (useInteractor) {
             notYetImplemented()
         } else {
             _oldImpl.schedulePostBootGuestCreation()
@@ -205,30 +205,14 @@ constructor(
 
     override val isKeyguardShowing: Boolean
         get() =
-            if (isNewImpl) {
+            if (useInteractor) {
                 notYetImplemented()
             } else {
                 _oldImpl.isKeyguardShowing
             }
 
-    override fun getEnforcedAdmin(record: UserRecord): RestrictedLockUtils.EnforcedAdmin? {
-        return if (isNewImpl) {
-            notYetImplemented()
-        } else {
-            _oldImpl.getEnforcedAdmin(record)
-        }
-    }
-
-    override fun isDisabledByAdmin(record: UserRecord): Boolean {
-        return if (isNewImpl) {
-            notYetImplemented()
-        } else {
-            _oldImpl.isDisabledByAdmin(record)
-        }
-    }
-
     override fun startActivity(intent: Intent) {
-        if (isNewImpl) {
+        if (useInteractor) {
             notYetImplemented()
         } else {
             _oldImpl.startActivity(intent)
@@ -236,7 +220,7 @@ constructor(
     }
 
     override fun refreshUsers(forcePictureLoadForId: Int) {
-        if (isNewImpl) {
+        if (useInteractor) {
             notYetImplemented()
         } else {
             _oldImpl.refreshUsers(forcePictureLoadForId)
@@ -244,7 +228,7 @@ constructor(
     }
 
     override fun addUserSwitchCallback(callback: UserSwitcherController.UserSwitchCallback) {
-        if (isNewImpl) {
+        if (useInteractor) {
             notYetImplemented()
         } else {
             _oldImpl.addUserSwitchCallback(callback)
@@ -252,7 +236,7 @@ constructor(
     }
 
     override fun removeUserSwitchCallback(callback: UserSwitcherController.UserSwitchCallback) {
-        if (isNewImpl) {
+        if (useInteractor) {
             notYetImplemented()
         } else {
             _oldImpl.removeUserSwitchCallback(callback)
@@ -260,7 +244,7 @@ constructor(
     }
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {
-        if (isNewImpl) {
+        if (useInteractor) {
             notYetImplemented()
         } else {
             _oldImpl.dump(pw, args)
