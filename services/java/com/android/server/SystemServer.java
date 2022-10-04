@@ -331,6 +331,8 @@ public final class SystemServer implements Dumpable {
             "com.android.server.wallpaper.WallpaperManagerService$Lifecycle";
     private static final String AUTO_FILL_MANAGER_SERVICE_CLASS =
             "com.android.server.autofill.AutofillManagerService";
+    private static final String CREDENTIAL_MANAGER_SERVICE_CLASS =
+            "com.android.server.credentials.CredentialManagerService";
     private static final String CONTENT_CAPTURE_MANAGER_SERVICE_CLASS =
             "com.android.server.contentcapture.ContentCaptureManagerService";
     private static final String TRANSLATION_MANAGER_SERVICE_CLASS =
@@ -2568,6 +2570,12 @@ public final class SystemServer implements Dumpable {
         if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_AUTOFILL)) {
             t.traceBegin("StartAutoFillService");
             mSystemServiceManager.startService(AUTO_FILL_MANAGER_SERVICE_CLASS);
+            t.traceEnd();
+        }
+
+        if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_CREDENTIALS)) {
+            t.traceBegin("StartCredentialManagerService");
+            mSystemServiceManager.startService(CREDENTIAL_MANAGER_SERVICE_CLASS);
             t.traceEnd();
         }
 
