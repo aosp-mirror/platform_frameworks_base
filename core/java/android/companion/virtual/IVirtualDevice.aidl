@@ -43,6 +43,11 @@ interface IVirtualDevice {
     int getAssociationId();
 
     /**
+     * Returns the unique device ID for this virtual device.
+     */
+    int getDeviceId();
+
+    /**
      * Closes the virtual device and frees all associated resources.
      */
     void close();
