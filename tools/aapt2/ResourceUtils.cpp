@@ -43,8 +43,9 @@ namespace ResourceUtils {
 static std::optional<ResourceNamedType> ToResourceNamedType(const char16_t* type16,
                                                             const char* type, size_t type_len) {
   std::optional<ResourceNamedTypeRef> parsed_type;
+  std::string converted;
   if (type16) {
-    auto converted = android::util::Utf16ToUtf8(StringPiece16(type16, type_len));
+    converted = android::util::Utf16ToUtf8(StringPiece16(type16, type_len));
     parsed_type = ParseResourceNamedType(converted);
   } else if (type) {
     parsed_type = ParseResourceNamedType(StringPiece(type, type_len));
