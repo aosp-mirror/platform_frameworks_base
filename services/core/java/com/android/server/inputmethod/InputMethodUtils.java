@@ -80,29 +80,6 @@ final class InputMethodUtils {
     }
 
     // ----------------------------------------------------------------------
-    // Utilities for debug
-    static String getApiCallStack() {
-        String apiCallStack = "";
-        try {
-            throw new RuntimeException();
-        } catch (RuntimeException e) {
-            final StackTraceElement[] frames = e.getStackTrace();
-            for (int j = 1; j < frames.length; ++j) {
-                final String tempCallStack = frames[j].toString();
-                if (TextUtils.isEmpty(apiCallStack)) {
-                    // Overwrite apiCallStack if it's empty
-                    apiCallStack = tempCallStack;
-                } else if (tempCallStack.indexOf("Transact(") < 0) {
-                    // Overwrite apiCallStack if it's not a binder call
-                    apiCallStack = tempCallStack;
-                } else {
-                    break;
-                }
-            }
-        }
-        return apiCallStack;
-    }
-    // ----------------------------------------------------------------------
 
     static boolean canAddToLastInputMethod(InputMethodSubtype subtype) {
         if (subtype == null) return true;
