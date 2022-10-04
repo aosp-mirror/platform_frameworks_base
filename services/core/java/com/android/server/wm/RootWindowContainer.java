@@ -569,8 +569,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     /**
      * Returns {@code true} if the callingUid has any non-toast window currently visible to the
      * user. Also ignores {@link android.view.WindowManager.LayoutParams#TYPE_APPLICATION_STARTING},
-     * since those windows don't belong to apps.
-     * @see WindowState#isNonToastOrStarting()
+     * and{@link android.view.WindowManager.LayoutParams#TYPE_PRIVATE_PRESENTATION}, as they
+     * should not count towards the apps visibility
+     * @see WindowState#isNonToastOrStartingOrPrivatePresentation()
      */
     boolean isAnyNonToastWindowVisibleForUid(int callingUid) {
         final PooledPredicate p = PooledLambda.obtainPredicate(
