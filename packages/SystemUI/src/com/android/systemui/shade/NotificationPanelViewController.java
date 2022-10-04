@@ -430,6 +430,7 @@ public final class NotificationPanelViewController extends PanelViewController {
     /**
      * Determines if QS should be already expanded when expanding shade.
      * Used for split shade, two finger gesture as well as accessibility shortcut to QS.
+     * It needs to be set when movement starts as it resets at the end of expansion/collapse.
      */
     @VisibleForTesting
     boolean mQsExpandImmediate;
@@ -1737,8 +1738,10 @@ public final class NotificationPanelViewController extends PanelViewController {
     }
 
     private void setQsExpandImmediate(boolean expandImmediate) {
-        mQsExpandImmediate = expandImmediate;
-        mPanelEventsEmitter.notifyExpandImmediateChange(expandImmediate);
+        if (expandImmediate != mQsExpandImmediate) {
+            mQsExpandImmediate = expandImmediate;
+            mPanelEventsEmitter.notifyExpandImmediateChange(expandImmediate);
+        }
     }
 
     private void setShowShelfOnly(boolean shelfOnly) {
@@ -3124,26 +3127,24 @@ public final class NotificationPanelViewController extends PanelViewController {
         }
         if (mQsExpandImmediate || (mQsExpanded && !mQsTracking && mQsExpansionAnimator == null
                 && !mQsExpansionFromOverscroll)) {
-            float t;
-            if (mKeyguardShowing) {
-
+            float qsExpansionFraction;
+            if (mSplitShadeEnabled) {
+                qsExpansionFraction = 1;
+            } else if (mKeyguardShowing) {
                 // On Keyguard, interpolate the QS expansion linearly to the panel expansion
-                t = expandedHeight / (getMaxPanelHeight());
+                qsExpansionFraction = expandedHeight / (getMaxPanelHeight());
             } else {
                 // In Shade, interpolate linearly such that QS is closed whenever panel height is
                 // minimum QS expansion + minStackHeight
-                float
-                        panelHeightQsCollapsed =
+                float panelHeightQsCollapsed =
                         mNotificationStackScrollLayoutController.getIntrinsicPadding()
                                 + mNotificationStackScrollLayoutController.getLayoutMinHeight();
                 float panelHeightQsExpanded = calculatePanelHeightQsExpanded();
-                t =
-                        (expandedHeight - panelHeightQsCollapsed) / (panelHeightQsExpanded
-                                - panelHeightQsCollapsed);
+                qsExpansionFraction = (expandedHeight - panelHeightQsCollapsed)
+                        / (panelHeightQsExpanded - panelHeightQsCollapsed);
             }
-            float
-                    targetHeight =
-                    mQsMinExpansionHeight + t * (mQsMaxExpansionHeight - mQsMinExpansionHeight);
+            float targetHeight = mQsMinExpansionHeight
+                    + qsExpansionFraction * (mQsMaxExpansionHeight - mQsMinExpansionHeight);
             setQsExpansion(targetHeight);
         }
         updateExpandedHeight(expandedHeight);
@@ -3329,7 +3330,11 @@ public final class NotificationPanelViewController extends PanelViewController {
         } else {
             setListening(true);
         }
-        setQsExpandImmediate(false);
+        if (mBarState != SHADE) {
+            // updating qsExpandImmediate is done in onPanelStateChanged for unlocked shade but
+            // on keyguard panel state is always OPEN so we need to have that extra update
+            setQsExpandImmediate(false);
+        }
         setShowShelfOnly(false);
         mTwoFingerQsExpandPossible = false;
         updateTrackingHeadsUp(null);
@@ -4993,6 +4998,7 @@ public final class NotificationPanelViewController extends PanelViewController {
         updateQSExpansionEnabledAmbient();
 
         if (state == STATE_OPEN && mCurrentPanelState != state) {
+            setQsExpandImmediate(false);
             mView.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
         }
         if (state == STATE_OPENING) {
@@ -5005,6 +5011,7 @@ public final class NotificationPanelViewController extends PanelViewController {
             mCentralSurfaces.makeExpandedVisible(false);
         }
         if (state == STATE_CLOSED) {
+            setQsExpandImmediate(false);
             // Close the status bar in the next frame so we can show the end of the
             // animation.
             mView.post(mMaybeHideExpandedRunnable);
