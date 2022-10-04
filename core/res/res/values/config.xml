@@ -4072,7 +4072,9 @@
          exists on the device, the accessibility shortcut will be disabled by default. -->
     <string name="config_defaultAccessibilityService" translatable="false"></string>
 
-    <!-- Flag indicates that whether escrow token API is enabled for TrustAgent -->
+    <!-- URI for default Accessibility notification sound when to enable accessibility shortcut. -->
+    <string name="config_defaultAccessibilityNotificationSound" translatable="false"></string>
+
     <!-- Warning: This API can be dangerous when not implemented properly. In particular,
          escrow token must NOT be retrievable from device storage. In other words, either
          escrow token is not stored on device or its ciphertext is stored on device while

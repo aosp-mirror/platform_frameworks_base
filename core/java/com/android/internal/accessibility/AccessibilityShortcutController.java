@@ -438,9 +438,18 @@ public class AccessibilityShortcutController {
                 ? AudioAttributes.USAGE_ASSISTANCE_ACCESSIBILITY
                 : AudioAttributes.USAGE_NOTIFICATION_EVENT;
 
+        // Use the default accessibility notification sound instead to avoid users confusing the new
+        // notification received. Point to the default notification sound if the sound does not
+        // exist.
+        final Uri ringtoneUri = Uri.parse("file://"
+                + mContext.getString(R.string.config_defaultAccessibilityNotificationSound));
+        Ringtone tone = mFrameworkObjectProvider.getRingtone(mContext, ringtoneUri);
+        if (tone == null) {
+            tone = mFrameworkObjectProvider.getRingtone(mContext,
+                    Settings.System.DEFAULT_NOTIFICATION_URI);
+        }
+
         // Play a notification tone
-        final Ringtone tone = mFrameworkObjectProvider.getRingtone(mContext,
-                Settings.System.DEFAULT_NOTIFICATION_URI);
         if (tone != null) {
             tone.setAudioAttributes(new AudioAttributes.Builder()
                     .setUsage(audioAttributesUsage)
