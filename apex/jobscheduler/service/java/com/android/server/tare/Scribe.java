@@ -84,6 +84,8 @@ public class Scribe {
     private static final String XML_ATTR_USER_ID = "userId";
     private static final String XML_ATTR_VERSION = "version";
     private static final String XML_ATTR_LAST_RECLAMATION_TIME = "lastReclamationTime";
+    private static final String XML_ATTR_LAST_STOCK_RECALCULATION_TIME =
+            "lastStockRecalculationTime";
     private static final String XML_ATTR_REMAINING_CONSUMABLE_CAKES = "remainingConsumableCakes";
     private static final String XML_ATTR_CONSUMPTION_LIMIT = "consumptionLimit";
     private static final String XML_ATTR_PR_DISCHARGE = "discharge";
@@ -98,6 +100,8 @@ public class Scribe {
     private static final String XML_ATTR_PR_NUM_POS_REGULATIONS = "numPosRegulations";
     private static final String XML_ATTR_PR_NEG_REGULATIONS = "negRegulations";
     private static final String XML_ATTR_PR_NUM_NEG_REGULATIONS = "numNegRegulations";
+    private static final String XML_ATTR_PR_SCREEN_OFF_DURATION_MS = "screenOffDurationMs";
+    private static final String XML_ATTR_PR_SCREEN_OFF_DISCHARGE_MAH = "screenOffDischargeMah";
 
     /** Version of the file schema. */
     private static final int STATE_FILE_VERSION = 0;
@@ -110,6 +114,8 @@ public class Scribe {
 
     @GuardedBy("mIrs.getLock()")
     private long mLastReclamationTime;
+    @GuardedBy("mIrs.getLock()")
+    private long mLastStockRecalculationTime;
     @GuardedBy("mIrs.getLock()")
     private long mSatiatedConsumptionLimit;
     @GuardedBy("mIrs.getLock()")
@@ -170,6 +176,11 @@ public class Scribe {
     @GuardedBy("mIrs.getLock()")
     long getLastReclamationTimeLocked() {
         return mLastReclamationTime;
+    }
+
+    @GuardedBy("mIrs.getLock()")
+    long getLastStockRecalculationTimeLocked() {
+        return mLastStockRecalculationTime;
     }
 
     @GuardedBy("mIrs.getLock()")
@@ -281,6 +292,8 @@ public class Scribe {
                     case XML_TAG_HIGH_LEVEL_STATE:
                         mLastReclamationTime =
                                 parser.getAttributeLong(null, XML_ATTR_LAST_RECLAMATION_TIME);
+                        mLastStockRecalculationTime = parser.getAttributeLong(null,
+                                XML_ATTR_LAST_STOCK_RECALCULATION_TIME, 0);
                         mSatiatedConsumptionLimit =
                                 parser.getAttributeLong(null, XML_ATTR_CONSUMPTION_LIMIT,
                                         mIrs.getInitialSatiatedConsumptionLimitLocked());
@@ -333,6 +346,12 @@ public class Scribe {
     @GuardedBy("mIrs.getLock()")
     void setLastReclamationTimeLocked(long time) {
         mLastReclamationTime = time;
+        postWrite();
+    }
+
+    @GuardedBy("mIrs.getLock()")
+    void setLastStockRecalculationTimeLocked(long time) {
+        mLastStockRecalculationTime = time;
         postWrite();
     }
 
@@ -504,7 +523,6 @@ public class Scribe {
         return earliestEndTime;
     }
 
-
     /**
      * @param parser Xml parser at the beginning of a {@link #XML_TAG_PERIOD_REPORT} tag. The next
      *               "parser.next()" call will take the parser into the body of the report tag.
@@ -531,6 +549,10 @@ public class Scribe {
                 parser.getAttributeLong(null, XML_ATTR_PR_NEG_REGULATIONS);
         report.numNegativeRegulations =
                 parser.getAttributeInt(null, XML_ATTR_PR_NUM_NEG_REGULATIONS);
+        report.screenOffDurationMs =
+                parser.getAttributeLong(null, XML_ATTR_PR_SCREEN_OFF_DURATION_MS, 0);
+        report.screenOffDischargeMah =
+                parser.getAttributeLong(null, XML_ATTR_PR_SCREEN_OFF_DISCHARGE_MAH, 0);
 
         return report;
     }
@@ -606,6 +628,8 @@ public class Scribe {
 
                 out.startTag(null, XML_TAG_HIGH_LEVEL_STATE);
                 out.attributeLong(null, XML_ATTR_LAST_RECLAMATION_TIME, mLastReclamationTime);
+                out.attributeLong(null,
+                        XML_ATTR_LAST_STOCK_RECALCULATION_TIME, mLastStockRecalculationTime);
                 out.attributeLong(null, XML_ATTR_CONSUMPTION_LIMIT, mSatiatedConsumptionLimit);
                 out.attributeLong(null, XML_ATTR_REMAINING_CONSUMABLE_CAKES,
                         mRemainingConsumableCakes);
@@ -718,6 +742,8 @@ public class Scribe {
         out.attributeInt(null, XML_ATTR_PR_NUM_POS_REGULATIONS, report.numPositiveRegulations);
         out.attributeLong(null, XML_ATTR_PR_NEG_REGULATIONS, report.cumulativeNegativeRegulations);
         out.attributeInt(null, XML_ATTR_PR_NUM_NEG_REGULATIONS, report.numNegativeRegulations);
+        out.attributeLong(null, XML_ATTR_PR_SCREEN_OFF_DURATION_MS, report.screenOffDurationMs);
+        out.attributeLong(null, XML_ATTR_PR_SCREEN_OFF_DISCHARGE_MAH, report.screenOffDischargeMah);
         out.endTag(null, XML_TAG_PERIOD_REPORT);
     }
 
