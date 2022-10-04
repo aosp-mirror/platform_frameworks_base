@@ -20,12 +20,12 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserHandleAware;
 import android.annotation.UserIdInt;
-import android.app.AppOpsManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.res.Resources;
 import android.os.Binder;
 import android.os.Build;
@@ -218,20 +218,20 @@ final class InputMethodUtils {
     /**
      * Returns true if a package name belongs to a UID.
      *
-     * <p>This is a simple wrapper of {@link AppOpsManager#checkPackage(int, String)}.</p>
-     * @param appOpsManager the {@link AppOpsManager} object to be used for the validation.
+     * <p>This is a simple wrapper of
+     * {@link PackageManagerInternal#getPackageUid(String, long, int)}.</p>
+     * @param packageManagerInternal the {@link PackageManagerInternal} object to be used for the
+     *                               validation.
      * @param uid the UID to be validated.
      * @param packageName the package name.
      * @return {@code true} if the package name belongs to the UID.
      */
-    static boolean checkIfPackageBelongsToUid(AppOpsManager appOpsManager,
+    static boolean checkIfPackageBelongsToUid(PackageManagerInternal packageManagerInternal,
             int uid, String packageName) {
-        try {
-            appOpsManager.checkPackage(uid, packageName);
-            return true;
-        } catch (SecurityException e) {
-            return false;
-        }
+        // PackageManagerInternal#getPackageUid() doesn't check MATCH_INSTANT/MATCH_APEX as of
+        // writing. So setting 0 should be fine.
+        return packageManagerInternal.getPackageUid(packageName, 0 /* flags */,
+                UserHandle.getUserId(uid)) == uid;
     }
 
     /**
