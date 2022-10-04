@@ -63,7 +63,8 @@ object Flags {
     @JvmField val NOTIFICATION_DISMISSAL_FADE = UnreleasedFlag(113, teamfood = true)
     val STABILITY_INDEX_FIX = UnreleasedFlag(114, teamfood = true)
     val SEMI_STABLE_SORT = UnreleasedFlag(115, teamfood = true)
-    // next id: 116
+    @JvmField val NOTIFICATION_GROUP_CORNER = UnreleasedFlag(116, true)
+    // next id: 117
 
     // 200 - keyguard/lockscreen
     // ** Flag retired **
