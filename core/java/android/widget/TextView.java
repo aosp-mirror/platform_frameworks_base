@@ -9358,10 +9358,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 // - The deleted text is at the end of the text
                 //     e.g. "one [deleted]" -> "one |" -> "one|"
                 // (The pipe | indicates the cursor position.)
-                while (start > 0 && TextUtils.isWhitespaceExceptNewline(codePointBeforeStart)) {
+                do {
                     start -= Character.charCount(codePointBeforeStart);
+                    if (start == 0) break;
                     codePointBeforeStart = Character.codePointBefore(mText, start);
-                }
+                } while (TextUtils.isWhitespaceExceptNewline(codePointBeforeStart));
             } else if (TextUtils.isWhitespaceExceptNewline(codePointAtEnd)
                     && (TextUtils.isWhitespace(codePointBeforeStart)
                             || TextUtils.isPunctuation(codePointBeforeStart))) {
@@ -9373,11 +9374,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 // - The deleted text is at the start of the text
                 //     e.g. "[deleted] two" -> "| two" -> "|two"
                 // (The pipe | indicates the cursor position.)
-                while (end < mText.length()
-                        && TextUtils.isWhitespaceExceptNewline(codePointAtEnd)) {
+                do {
                     end += Character.charCount(codePointAtEnd);
+                    if (end == mText.length()) break;
                     codePointAtEnd = Character.codePointAt(mText, end);
-                }
+                } while (TextUtils.isWhitespaceExceptNewline(codePointAtEnd));
             }
         }
 
@@ -9487,11 +9488,19 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         int endOffset = startOffset;
-        while (startOffset > 0 && Character.isWhitespace(mText.charAt(startOffset - 1))) {
-            startOffset--;
+        while (startOffset > 0) {
+            int codePointBeforeStart = Character.codePointBefore(mText, startOffset);
+            if (!TextUtils.isWhitespace(codePointBeforeStart)) {
+                break;
+            }
+            startOffset -= Character.charCount(codePointBeforeStart);
         }
-        while (endOffset < mText.length() && Character.isWhitespace(mText.charAt(endOffset))) {
-            endOffset++;
+        while (endOffset < mText.length()) {
+            int codePointAtEnd = Character.codePointAt(mText, endOffset);
+            if (!TextUtils.isWhitespace(codePointAtEnd)) {
+                break;
+            }
+            endOffset += Character.charCount(codePointAtEnd);
         }
         if (startOffset < endOffset) {
             getEditableText().delete(startOffset, endOffset);
