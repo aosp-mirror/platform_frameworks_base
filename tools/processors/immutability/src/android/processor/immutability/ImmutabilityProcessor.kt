@@ -37,10 +37,11 @@ val IMMUTABLE_ANNOTATION_NAME = Immutable::class.qualifiedName
 class ImmutabilityProcessor : AbstractProcessor() {
 
     companion object {
+
         /**
-         * Types that are already immutable.
+         * Types that are already immutable. Will also ignore subclasses.
          */
-        private val IGNORED_TYPES = listOf(
+        private val IGNORED_SUPER_TYPES = listOf(
             "java.io.File",
             "java.lang.Boolean",
             "java.lang.Byte",
@@ -56,6 +57,15 @@ class ImmutabilityProcessor : AbstractProcessor() {
             "android.os.Parcelable.Creator",
         )
 
+        /**
+         * Types that are already immutable. Must be an exact match, does not include any super
+         * or sub classes.
+         */
+        private val IGNORED_EXACT_TYPES = listOf(
+            "java.lang.Class",
+            "java.lang.Object",
+        )
+
         private val IGNORED_METHODS = listOf(
             "writeToParcel",
         )
@@ -64,7 +74,8 @@ class ImmutabilityProcessor : AbstractProcessor() {
     private lateinit var collectionType: TypeMirror
     private lateinit var mapType: TypeMirror
 
-    private lateinit var ignoredTypes: List<TypeMirror>
+    private lateinit var ignoredSuperTypes: List<TypeMirror>
+    private lateinit var ignoredExactTypes: List<TypeMirror>
 
     private val seenTypesByPolicy = mutableMapOf<Set<Immutable.Policy.Exception>, Set<Type>>()
 
@@ -76,7 +87,8 @@ class ImmutabilityProcessor : AbstractProcessor() {
         super.init(processingEnv)
         collectionType = processingEnv.erasedType("java.util.Collection")!!
         mapType = processingEnv.erasedType("java.util.Map")!!
-        ignoredTypes = IGNORED_TYPES.mapNotNull { processingEnv.erasedType(it) }
+        ignoredSuperTypes = IGNORED_SUPER_TYPES.mapNotNull { processingEnv.erasedType(it) }
+        ignoredExactTypes = IGNORED_EXACT_TYPES.mapNotNull { processingEnv.erasedType(it) }
     }
 
     override fun process(
@@ -109,7 +121,7 @@ class ImmutabilityProcessor : AbstractProcessor() {
         classType: Symbol.TypeSymbol,
         parentPolicyExceptions: Set<Immutable.Policy.Exception>,
     ): Boolean {
-        if (classType.getAnnotation(Immutable.Ignore::class.java) != null) return false
+        if (isIgnored(classType)) return false
 
         val policyAnnotation = classType.getAnnotation(Immutable.Policy::class.java)
         val newPolicyExceptions = parentPolicyExceptions + policyAnnotation?.exceptions.orEmpty()
@@ -131,7 +143,7 @@ class ImmutabilityProcessor : AbstractProcessor() {
             .fold(false) { anyError, field ->
                 if (field.isStatic) {
                     if (!field.isPrivate) {
-                        var finalityError = !field.modifiers.contains(Modifier.FINAL)
+                        val finalityError = !field.modifiers.contains(Modifier.FINAL)
                         if (finalityError) {
                             printError(parentChain, field, MessageUtils.staticNonFinalFailure())
                         }
@@ -177,8 +189,10 @@ class ImmutabilityProcessor : AbstractProcessor() {
         val newChain = parentChain + "$classType"
 
         val hasMethodError = filteredElements
+            .asSequence()
             .filter { it.getKind() == ElementKind.METHOD }
             .map { it as Symbol.MethodSymbol }
+            .filterNot { it.isStatic }
             .filterNot { IGNORED_METHODS.contains(it.name.toString()) }
             .fold(false) { anyError, method ->
                 // Must call visitMethod first so it doesn't get short circuited by the ||
@@ -205,6 +219,14 @@ class ImmutabilityProcessor : AbstractProcessor() {
             if (classType.getKind() != ElementKind.INTERFACE) {
                 printError(parentChain, elementToPrint, MessageUtils.nonInterfaceClassFailure())
                 anyError = true
+            }
+        }
+
+        // Check all of the super classes, since methods in those classes are also accessible
+        (classType as? Symbol.ClassSymbol)?.run {
+            (interfaces + superclass).forEach {
+                val element = it.asElement() ?: return@forEach
+                visitClass(parentChain, seenTypesByPolicy, element, element, newPolicyExceptions)
             }
         }
 
@@ -301,14 +323,12 @@ class ImmutabilityProcessor : AbstractProcessor() {
         parentPolicyExceptions: Set<Immutable.Policy.Exception>,
         nonInterfaceClassFailure: () -> String = { MessageUtils.nonInterfaceReturnFailure() },
     ): Boolean {
+        if (isIgnored(symbol)) return false
+        if (isIgnored(type)) return false
         if (type.isPrimitive) return false
         if (type.isPrimitiveOrVoid) {
             printError(parentChain, symbol, MessageUtils.voidReturnFailure())
             return true
-        }
-
-        if (ignoredTypes.any { processingEnv.typeUtils.isAssignable(type, it) }) {
-            return false
         }
 
         val policyAnnotation = symbol.getAnnotation(Immutable.Policy::class.java)
@@ -357,16 +377,38 @@ class ImmutabilityProcessor : AbstractProcessor() {
         message: String,
     ) = processingEnv.messager.printMessage(
         Diagnostic.Kind.ERROR,
-        // Drop one from the parent chain so that the directly enclosing class isn't logged.
-        // It exists in the list at this point in the traversal so that further children can
-        // include the right reference.
-        parentChain.dropLast(1).joinToString() + "\n\t" + message,
+        parentChain.plus(element.simpleName).joinToString() + "\n\t " + message,
         element,
     )
 
     private fun ProcessingEnvironment.erasedType(typeName: String) =
         elementUtils.getTypeElement(typeName)?.asType()?.let(typeUtils::erasure)
 
-    private fun isIgnored(symbol: Symbol) =
-        symbol.getAnnotation(Immutable.Ignore::class.java) != null
+    private fun isIgnored(type: Type) =
+        (type.getAnnotation(Immutable.Ignore::class.java) != null)
+                || (ignoredSuperTypes.any { type.isAssignable(it) })
+                || (ignoredExactTypes.any { type.isSameType(it) })
+
+    private fun isIgnored(symbol: Symbol) = when {
+        // Anything annotated as @Ignore is always ignored
+        symbol.getAnnotation(Immutable.Ignore::class.java) != null -> true
+        // Then ignore exact types, regardless of what kind they are
+        ignoredExactTypes.any { symbol.type.isSameType(it) } -> true
+        // Then only allow methods through, since other types (fields) are usually a failure
+        symbol.getKind() != ElementKind.METHOD -> false
+        // Finally, check for any ignored super types
+        else -> ignoredSuperTypes.any { symbol.type.isAssignable(it) }
+    }
+
+    private fun TypeMirror.isAssignable(type: TypeMirror) = try {
+        processingEnv.typeUtils.isAssignable(this, type)
+    } catch (ignored: Exception) {
+        false
+    }
+
+    private fun TypeMirror.isSameType(type: TypeMirror) = try {
+        processingEnv.typeUtils.isSameType(this, type)
+    } catch (ignored: Exception) {
+        false
+    }
 }
