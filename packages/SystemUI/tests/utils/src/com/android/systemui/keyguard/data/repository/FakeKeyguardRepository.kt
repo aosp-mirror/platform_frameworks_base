@@ -44,6 +44,10 @@ class FakeKeyguardRepository : KeyguardRepository {
     private val _dozeAmount = MutableStateFlow(0f)
     override val dozeAmount: Flow<Float> = _dozeAmount
 
+    override fun isKeyguardShowing(): Boolean {
+        return _isKeyguardShowing.value
+    }
+
     override fun setAnimateDozingTransitions(animate: Boolean) {
         _animateBottomAreaDozingTransitions.tryEmit(animate)
     }
