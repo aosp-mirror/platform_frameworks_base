@@ -94,6 +94,11 @@ static jint convertAudioVolumeGroupsFromNative(
     for (size_t j = 0; j < static_cast<size_t>(numAttributes); j++) {
         auto attributes = group.getAudioAttributes()[j];
 
+        // Native & Java audio attributes default initializers are not aligned for the source.
+        // Given the volume group class concerns only playback, this field must be equal to the
+        // default java initializer.
+        attributes.source = AUDIO_SOURCE_INVALID;
+
         jStatus = JNIAudioAttributeHelper::nativeToJava(env, &jAudioAttribute, attributes);
         if (jStatus != AUDIO_JAVA_SUCCESS) {
             goto exit;
