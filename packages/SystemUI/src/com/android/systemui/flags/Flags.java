@@ -254,6 +254,10 @@ public class Flags {
     public static final SysPropBooleanFlag ENABLE_FLING_TO_DISMISS_PIP =
             new SysPropBooleanFlag(1109, "persist.wm.debug.fling_to_dismiss_pip", true);
 
+    @Keep
+    public static final SysPropBooleanFlag ENABLE_PIP_KEEP_CLEAR_ALGORITHM =
+            new SysPropBooleanFlag(1110, "persist.wm.debug.enable_pip_keep_clear_algorithm", false);
+
     // 1200 - predictive back
     @Keep
     public static final SysPropBooleanFlag WM_ENABLE_PREDICTIVE_BACK = new SysPropBooleanFlag(
