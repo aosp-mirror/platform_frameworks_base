@@ -4678,6 +4678,11 @@ public final class NotificationPanelViewController extends PanelViewController {
                     }
                 }
             } else {
+                // this else branch means we are doing one of:
+                //  - from KEYGUARD and SHADE (but not expanded shade)
+                //  - from SHADE to KEYGUARD
+                //  - from SHADE_LOCKED to SHADE
+                //  - getting notified again about the current SHADE or KEYGUARD state
                 final boolean animatingUnlockedShadeToKeyguard = oldState == SHADE
                         && statusBarState == KEYGUARD
                         && mScreenOffAnimationController.isKeyguardShowDelayed();
