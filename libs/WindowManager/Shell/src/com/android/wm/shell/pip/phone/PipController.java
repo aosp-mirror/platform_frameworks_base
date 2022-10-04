@@ -23,6 +23,7 @@ import static android.view.WindowManager.INPUT_CONSUMER_PIP;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_PIP_TRANSITION;
 import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
+import static com.android.wm.shell.pip.PipAnimationController.ANIM_TYPE_ALPHA;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_EXPAND_OR_UNEXPAND;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_LEAVE_PIP;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_LEAVE_PIP_TO_SPLIT_SCREEN;
@@ -1065,23 +1066,9 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         }
 
         @Override
-        public void setShelfHeight(boolean visible, int height) {
-            mMainExecutor.execute(() -> {
-                PipController.this.setShelfHeight(visible, height);
-            });
-        }
-
-        @Override
         public void setOnIsInPipStateChangedListener(Consumer<Boolean> callback) {
             mMainExecutor.execute(() -> {
                 PipController.this.setOnIsInPipStateChangedListener(callback);
-            });
-        }
-
-        @Override
-        public void setPinnedStackAnimationType(int animationType) {
-            mMainExecutor.execute(() -> {
-                PipController.this.setPinnedStackAnimationType(animationType);
             });
         }
 
@@ -1178,14 +1165,22 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         }
 
         @Override
-        public void setPinnedStackAnimationListener(IPipAnimationListener listener) {
-            executeRemoteCallWithTaskPermission(mController, "setPinnedStackAnimationListener",
+        public void setPipAnimationListener(IPipAnimationListener listener) {
+            executeRemoteCallWithTaskPermission(mController, "setPipAnimationListener",
                     (controller) -> {
                         if (listener != null) {
                             mListener.register(listener);
                         } else {
                             mListener.unregister();
                         }
+                    });
+        }
+
+        @Override
+        public void setPipAnimationTypeToAlpha() {
+            executeRemoteCallWithTaskPermission(mController, "setPipAnimationTypeToAlpha",
+                    (controller) -> {
+                        controller.setPinnedStackAnimationType(ANIM_TYPE_ALPHA);
                     });
         }
     }
