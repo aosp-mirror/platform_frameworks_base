@@ -23,6 +23,7 @@
 #include <cstring>
 #include <filesystem>
 #include <fstream>
+#include <limits>
 #include <memory>
 #include <ostream>
 #include <string>
@@ -295,26 +296,42 @@ Status Idmap2Service::createFabricatedOverlay(
   return ok();
 }
 
-Status Idmap2Service::acquireFabricatedOverlayIterator() {
+Status Idmap2Service::acquireFabricatedOverlayIterator(int32_t* _aidl_return) {
+  std::lock_guard l(frro_iter_mutex_);
   if (frro_iter_.has_value()) {
     LOG(WARNING) << "active ffro iterator was not previously released";
   }
   frro_iter_ = std::filesystem::directory_iterator(kIdmapCacheDir);
+  if (frro_iter_id_ == std::numeric_limits<int32_t>::max()) {
+    frro_iter_id_ = 0;
+  } else {
+    ++frro_iter_id_;
+  }
+  *_aidl_return = frro_iter_id_;
   return ok();
 }
 
-Status Idmap2Service::releaseFabricatedOverlayIterator() {
+Status Idmap2Service::releaseFabricatedOverlayIterator(int32_t iteratorId) {
+  std::lock_guard l(frro_iter_mutex_);
   if (!frro_iter_.has_value()) {
     LOG(WARNING) << "no active ffro iterator to release";
+  } else if (frro_iter_id_ != iteratorId) {
+    LOG(WARNING) << "incorrect iterator id in a call to release";
+  } else {
+    frro_iter_.reset();
   }
   return ok();
 }
 
-Status Idmap2Service::nextFabricatedOverlayInfos(
+Status Idmap2Service::nextFabricatedOverlayInfos(int32_t iteratorId,
     std::vector<os::FabricatedOverlayInfo>* _aidl_return) {
+  std::lock_guard l(frro_iter_mutex_);
+
   constexpr size_t kMaxEntryCount = 100;
   if (!frro_iter_.has_value()) {
     return error("no active frro iterator");
+  } else if (frro_iter_id_ != iteratorId) {
+    return error("incorrect iterator id in a call to next");
   }
 
   size_t count = 0;
@@ -322,22 +339,22 @@ Status Idmap2Service::nextFabricatedOverlayInfos(
   auto entry_iter_end = end(*frro_iter_);
   for (; entry_iter != entry_iter_end && count < kMaxEntryCount; ++entry_iter) {
     auto& entry = *entry_iter;
-    if (!entry.is_regular_file() || !android::IsFabricatedOverlay(entry.path())) {
+    if (!entry.is_regular_file() || !android::IsFabricatedOverlay(entry.path().native())) {
       continue;
     }
 
-    const auto overlay = FabricatedOverlayContainer::FromPath(entry.path());
+    const auto overlay = FabricatedOverlayContainer::FromPath(entry.path().native());
     if (!overlay) {
       LOG(WARNING) << "Failed to open '" << entry.path() << "': " << overlay.GetErrorMessage();
       continue;
     }
 
-    const auto info = (*overlay)->GetManifestInfo();
+    auto info = (*overlay)->GetManifestInfo();
     os::FabricatedOverlayInfo out_info;
-    out_info.packageName = info.package_name;
-    out_info.overlayName = info.name;
-    out_info.targetPackageName = info.target_package;
-    out_info.targetOverlayable = info.target_name;
+    out_info.packageName = std::move(info.package_name);
+    out_info.overlayName = std::move(info.name);
+    out_info.targetPackageName = std::move(info.target_package);
+    out_info.targetOverlayable = std::move(info.target_name);
     out_info.path = entry.path();
     _aidl_return->emplace_back(std::move(out_info));
     count++;
