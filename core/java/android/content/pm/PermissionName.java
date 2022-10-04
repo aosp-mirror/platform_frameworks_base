@@ -16,21 +16,20 @@
 
 package android.content.pm;
 
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.LOCAL_VARIABLE;
 import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.CLASS;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Documents that the subject method's job is to look
- * up whether the provided or calling uid/pid has the requested permission.
- *
- * <p>Methods should either return `void`, but potentially throw {@link SecurityException},
- * or return {@link android.content.pm.PackageManager.PermissionResult} `int`.
+ * Denotes that the annotated {@link String} represents a permission name.
  *
  * @hide
  */
 @Retention(CLASS)
-@Target({METHOD})
-public @interface PermissionMethod {}
+@Target({PARAMETER, METHOD, LOCAL_VARIABLE, FIELD})
+public @interface PermissionName {}
