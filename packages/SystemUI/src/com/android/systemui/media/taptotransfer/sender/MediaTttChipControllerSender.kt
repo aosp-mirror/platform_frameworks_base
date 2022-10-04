@@ -22,25 +22,30 @@ import android.media.MediaRoute2Info
 import android.os.PowerManager
 import android.util.Log
 import android.view.Gravity
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
 import android.widget.TextView
 import com.android.internal.statusbar.IUndoMediaTransferCallback
+import com.android.systemui.Gefingerpoken
 import com.android.systemui.R
 import com.android.systemui.animation.Interpolators
 import com.android.systemui.animation.ViewHierarchyAnimator
+import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.media.taptotransfer.common.MediaTttLogger
 import com.android.systemui.media.taptotransfer.common.MediaTttUtils
+import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.temporarydisplay.TemporaryDisplayRemovalReason
 import com.android.systemui.temporarydisplay.TemporaryViewDisplayController
 import com.android.systemui.temporarydisplay.TemporaryViewInfo
 import com.android.systemui.util.concurrency.DelayableExecutor
+import dagger.Lazy
 import javax.inject.Inject
 
 /**
@@ -57,7 +62,11 @@ class MediaTttChipControllerSender @Inject constructor(
         accessibilityManager: AccessibilityManager,
         configurationController: ConfigurationController,
         powerManager: PowerManager,
-        private val uiEventLogger: MediaTttSenderUiEventLogger
+        private val uiEventLogger: MediaTttSenderUiEventLogger,
+        // Added Lazy<> to delay the time we create Falsing instances.
+        // And overcome performance issue, check [b/247817628] for details.
+        private val falsingManager: Lazy<FalsingManager>,
+        private val falsingCollector: Lazy<FalsingCollector>,
 ) : TemporaryViewDisplayController<ChipSenderInfo, MediaTttLogger>(
         context,
         logger,
@@ -70,6 +79,9 @@ class MediaTttChipControllerSender @Inject constructor(
         MediaTttUtils.WINDOW_TITLE,
         MediaTttUtils.WAKE_REASON,
 ) {
+
+    private lateinit var parent: MediaTttChipRootView
+
     override val windowLayoutParams = commonWindowLayoutParams.apply {
         gravity = Gravity.TOP.or(Gravity.CENTER_HORIZONTAL)
     }
@@ -120,6 +132,15 @@ class MediaTttChipControllerSender @Inject constructor(
 
         val chipState = newInfo.state
 
+        // Detect falsing touches on the chip.
+        parent = currentView.requireViewById(R.id.media_ttt_sender_chip)
+        parent.touchHandler = object : Gefingerpoken {
+            override fun onTouchEvent(ev: MotionEvent?): Boolean {
+                falsingCollector.get().onTouchEvent(ev)
+                return false
+            }
+        }
+
         // App icon
         val iconInfo = MediaTttUtils.getIconInfoFromPackageName(
             context, newInfo.routeInfo.clientPackageName, logger
@@ -142,7 +163,11 @@ class MediaTttChipControllerSender @Inject constructor(
         // Undo
         val undoView = currentView.requireViewById<View>(R.id.undo)
         val undoClickListener = chipState.undoClickListener(
-                this, newInfo.routeInfo, newInfo.undoCallback, uiEventLogger
+                this,
+                newInfo.routeInfo,
+                newInfo.undoCallback,
+                uiEventLogger,
+                falsingManager.get(),
         )
         undoView.setOnClickListener(undoClickListener)
         undoView.visibility = (undoClickListener != null).visibleIfTrue()
