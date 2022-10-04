@@ -138,6 +138,9 @@ public interface EconomyManagerInternal {
     /** Returns true if TARE is enabled. */
     boolean isEnabled();
 
+    /** Returns true if TARE and the specified policy are enabled. */
+    boolean isEnabled(@EconomicPolicy.Policy int policyId);
+
     /**
      * Register an {@link AffordabilityChangeListener} to track when an app's ability to afford the
      * indicated bill changes.
@@ -155,7 +158,8 @@ public interface EconomyManagerInternal {
     /**
      * Register a {@link TareStateChangeListener} to track when TARE's state changes.
      */
-    void registerTareStateChangeListener(@NonNull TareStateChangeListener listener);
+    void registerTareStateChangeListener(@NonNull TareStateChangeListener listener,
+            @EconomicPolicy.Policy int policyId);
 
     /**
      * Unregister a {@link TareStateChangeListener} from being notified when TARE's state changes.

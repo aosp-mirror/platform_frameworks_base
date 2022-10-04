@@ -116,6 +116,7 @@ import com.android.server.job.restrictions.JobRestriction;
 import com.android.server.job.restrictions.ThermalStatusRestriction;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.tare.EconomyManagerInternal;
+import com.android.server.tare.JobSchedulerEconomicPolicy;
 import com.android.server.usage.AppStandbyInternal;
 import com.android.server.usage.AppStandbyInternal.AppIdleStateChangeListener;
 import com.android.server.utils.quota.Categorizer;
@@ -373,10 +374,12 @@ public class JobSchedulerService extends com.android.server.SystemService
                     JobSchedulerBackgroundThread.getExecutor(), this);
             final EconomyManagerInternal economyManagerInternal =
                     LocalServices.getService(EconomyManagerInternal.class);
-            economyManagerInternal.registerTareStateChangeListener(this);
+            economyManagerInternal
+                    .registerTareStateChangeListener(this, JobSchedulerEconomicPolicy.POLICY_JOB);
             // Load all the constants.
             synchronized (mLock) {
-                mConstants.updateTareSettingsLocked(economyManagerInternal.isEnabled());
+                mConstants.updateTareSettingsLocked(
+                        economyManagerInternal.isEnabled(JobSchedulerEconomicPolicy.POLICY_JOB));
             }
             onPropertiesChanged(DeviceConfig.getProperties(DeviceConfig.NAMESPACE_JOB_SCHEDULER));
         }

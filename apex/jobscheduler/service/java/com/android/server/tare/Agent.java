@@ -1196,7 +1196,11 @@ class Agent {
                 final EconomyManagerInternal.AnticipatedAction aa = anticipatedActions.get(i);
                 final EconomicPolicy.Action action = economicPolicy.getAction(aa.actionId);
                 if (action == null) {
-                    throw new IllegalArgumentException("Invalid action id: " + aa.actionId);
+                    if ((aa.actionId & EconomicPolicy.ALL_POLICIES) == 0) {
+                        throw new IllegalArgumentException("Invalid action id: " + aa.actionId);
+                    } else {
+                        Slog.w(TAG, "Tracking disabled policy's action? " + aa.actionId);
+                    }
                 }
             }
             mListener = listener;
