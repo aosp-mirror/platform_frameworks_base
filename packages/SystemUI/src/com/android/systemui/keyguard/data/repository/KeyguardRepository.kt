@@ -148,7 +148,11 @@ constructor(
                         }
                     }
                 dozeHost.addCallback(callback)
-                trySendWithFailureLogging(false, TAG, "initial isDozing: false")
+                trySendWithFailureLogging(
+                    statusBarStateController.isDozing,
+                    TAG,
+                    "initial isDozing",
+                )
 
                 awaitClose { dozeHost.removeCallback(callback) }
             }

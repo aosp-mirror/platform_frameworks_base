@@ -23,6 +23,7 @@ import com.android.systemui.doze.DozeHost
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.mockito.argumentCaptor
+import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -33,7 +34,6 @@ import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
 import org.mockito.Mock
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 
 @SmallTest
@@ -147,6 +147,21 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
 
         job.cancel()
         verify(dozeHost).removeCallback(captor.value)
+    }
+
+    @Test
+    fun `isDozing - starts with correct initial value for isDozing`() = runBlockingTest {
+        var latest: Boolean? = null
+
+        whenever(statusBarStateController.isDozing).thenReturn(true)
+        var job = underTest.isDozing.onEach { latest = it }.launchIn(this)
+        assertThat(latest).isTrue()
+        job.cancel()
+
+        whenever(statusBarStateController.isDozing).thenReturn(false)
+        job = underTest.isDozing.onEach { latest = it }.launchIn(this)
+        assertThat(latest).isFalse()
+        job.cancel()
     }
 
     @Test
