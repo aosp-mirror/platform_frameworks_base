@@ -120,6 +120,7 @@ static struct {
     jmethodID getExcludedDeviceNames;
     jmethodID getInputPortAssociations;
     jmethodID getInputUniqueIdAssociations;
+    jmethodID getDeviceTypeAssociations;
     jmethodID getKeyRepeatTimeout;
     jmethodID getKeyRepeatDelay;
     jmethodID getHoverTapTimeout;
@@ -411,6 +412,8 @@ private:
     void ensureSpriteControllerLocked();
     sp<SurfaceControl> getParentSurfaceForPointers(int displayId);
     static bool checkAndClearExceptionFromCallback(JNIEnv* env, const char* methodName);
+    std::unordered_map<std::string, std::string> readMapFromInterleavedJavaArray(
+            jmethodID method, const char* methodName);
 
     static inline JNIEnv* jniEnv() { return AndroidRuntime::getJNIEnv(); }
 };
@@ -583,21 +586,14 @@ void NativeInputManager::getReaderConfiguration(InputReaderConfiguration* outCon
         }
         env->DeleteLocalRef(portAssociations);
     }
-    outConfig->uniqueIdAssociations.clear();
-    jobjectArray uniqueIdAssociations = jobjectArray(
-            env->CallObjectMethod(mServiceObj, gServiceClassInfo.getInputUniqueIdAssociations));
-    if (!checkAndClearExceptionFromCallback(env, "getInputUniqueIdAssociations") &&
-        uniqueIdAssociations) {
-        jsize length = env->GetArrayLength(uniqueIdAssociations);
-        for (jsize i = 0; i < length / 2; i++) {
-            std::string inputDeviceUniqueId =
-                    getStringElementFromJavaArray(env, uniqueIdAssociations, 2 * i);
-            std::string displayUniqueId =
-                    getStringElementFromJavaArray(env, uniqueIdAssociations, 2 * i + 1);
-            outConfig->uniqueIdAssociations.insert({inputDeviceUniqueId, displayUniqueId});
-        }
-        env->DeleteLocalRef(uniqueIdAssociations);
-    }
+
+    outConfig->uniqueIdAssociations =
+            readMapFromInterleavedJavaArray(gServiceClassInfo.getInputUniqueIdAssociations,
+                                            "getInputUniqueIdAssociations");
+
+    outConfig->deviceTypeAssociations =
+            readMapFromInterleavedJavaArray(gServiceClassInfo.getDeviceTypeAssociations,
+                                            "getDeviceTypeAssociations");
 
     jint hoverTapTimeout = env->CallIntMethod(mServiceObj,
             gServiceClassInfo.getHoverTapTimeout);
@@ -645,6 +641,23 @@ void NativeInputManager::getReaderConfiguration(InputReaderConfiguration* outCon
 
         outConfig->disabledDevices = mLocked.disabledInputDevices;
     } // release lock
+}
+
+std::unordered_map<std::string, std::string> NativeInputManager::readMapFromInterleavedJavaArray(
+        jmethodID method, const char* methodName) {
+    JNIEnv* env = jniEnv();
+    jobjectArray javaArray = jobjectArray(env->CallObjectMethod(mServiceObj, method));
+    std::unordered_map<std::string, std::string> map;
+    if (!checkAndClearExceptionFromCallback(env, methodName) && javaArray) {
+        jsize length = env->GetArrayLength(javaArray);
+        for (jsize i = 0; i < length / 2; i++) {
+            std::string key = getStringElementFromJavaArray(env, javaArray, 2 * i);
+            std::string value = getStringElementFromJavaArray(env, javaArray, 2 * i + 1);
+            map.insert({key, value});
+        }
+    }
+    env->DeleteLocalRef(javaArray);
+    return map;
 }
 
 std::shared_ptr<PointerControllerInterface> NativeInputManager::obtainPointerController(
@@ -2237,6 +2250,12 @@ static void nativeChangeUniqueIdAssociation(JNIEnv* env, jobject nativeImplObj) 
             InputReaderConfiguration::CHANGE_DISPLAY_INFO);
 }
 
+static void nativeChangeTypeAssociation(JNIEnv* env, jobject nativeImplObj) {
+    NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
+    im->getInputManager()->getReader().requestRefreshConfiguration(
+            InputReaderConfiguration::CHANGE_DEVICE_TYPE);
+}
+
 static void nativeSetMotionClassifierEnabled(JNIEnv* env, jobject nativeImplObj, jboolean enabled) {
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
 
@@ -2425,6 +2444,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"canDispatchToDisplay", "(II)Z", (void*)nativeCanDispatchToDisplay},
         {"notifyPortAssociationsChanged", "()V", (void*)nativeNotifyPortAssociationsChanged},
         {"changeUniqueIdAssociation", "()V", (void*)nativeChangeUniqueIdAssociation},
+        {"changeTypeAssociation", "()V", (void*)nativeChangeTypeAssociation},
         {"setDisplayEligibilityForPointerCapture", "(IZ)V",
          (void*)nativeSetDisplayEligibilityForPointerCapture},
         {"setMotionClassifierEnabled", "(Z)V", (void*)nativeSetMotionClassifierEnabled},
@@ -2545,6 +2565,9 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     GET_METHOD_ID(gServiceClassInfo.getInputUniqueIdAssociations, clazz,
                   "getInputUniqueIdAssociations", "()[Ljava/lang/String;");
+
+    GET_METHOD_ID(gServiceClassInfo.getDeviceTypeAssociations, clazz, "getDeviceTypeAssociations",
+                  "()[Ljava/lang/String;");
 
     GET_METHOD_ID(gServiceClassInfo.getKeyRepeatTimeout, clazz,
             "getKeyRepeatTimeout", "()I");

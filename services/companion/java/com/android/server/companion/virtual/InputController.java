@@ -61,15 +61,19 @@ class InputController {
 
     private static final AtomicLong sNextPhysId = new AtomicLong(1);
 
+    static final String NAVIGATION_TOUCHPAD_DEVICE_TYPE = "touchNavigation";
+
     static final String PHYS_TYPE_DPAD = "Dpad";
     static final String PHYS_TYPE_KEYBOARD = "Keyboard";
     static final String PHYS_TYPE_MOUSE = "Mouse";
     static final String PHYS_TYPE_TOUCHSCREEN = "Touchscreen";
+    static final String PHYS_TYPE_NAVIGATION_TOUCHPAD = "NavigationTouchpad";
     @StringDef(prefix = { "PHYS_TYPE_" }, value = {
             PHYS_TYPE_DPAD,
             PHYS_TYPE_KEYBOARD,
             PHYS_TYPE_MOUSE,
             PHYS_TYPE_TOUCHSCREEN,
+            PHYS_TYPE_NAVIGATION_TOUCHPAD,
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface PhysType {
@@ -190,6 +194,28 @@ class InputController {
         }
     }
 
+    void createNavigationTouchpad(
+            @NonNull String deviceName,
+            int vendorId,
+            int productId,
+            @NonNull IBinder deviceToken,
+            int displayId,
+            int touchpadHeight,
+            int touchpadWidth) {
+        final String phys = createPhys(PHYS_TYPE_NAVIGATION_TOUCHPAD);
+        mInputManagerInternal.setTypeAssociation(phys, NAVIGATION_TOUCHPAD_DEVICE_TYPE);
+        try {
+            createDeviceInternal(InputDeviceDescriptor.TYPE_NAVIGATION_TOUCHPAD, deviceName,
+                    vendorId, productId, deviceToken, displayId, phys,
+                    () -> mNativeWrapper.openUinputTouchscreen(deviceName, vendorId, productId,
+                            phys, touchpadHeight, touchpadWidth));
+        } catch (DeviceCreationException e) {
+            mInputManagerInternal.unsetTypeAssociation(phys);
+            throw new RuntimeException(
+                    "Failed to create virtual navigation touchpad device '" + deviceName + "'.", e);
+        }
+    }
+
     void unregisterInputDevice(@NonNull IBinder token) {
         synchronized (mLock) {
             final InputDeviceDescriptor inputDeviceDescriptor = mInputDeviceDescriptors.remove(
@@ -207,7 +233,13 @@ class InputController {
             InputDeviceDescriptor inputDeviceDescriptor) {
         token.unlinkToDeath(inputDeviceDescriptor.getDeathRecipient(), /* flags= */ 0);
         mNativeWrapper.closeUinput(inputDeviceDescriptor.getFileDescriptor());
+
         InputManager.getInstance().removeUniqueIdAssociation(inputDeviceDescriptor.getPhys());
+        // Type associations are added in the case of navigation touchpads. Those should be removed
+        // once the input device gets closed.
+        if (inputDeviceDescriptor.getType() == InputDeviceDescriptor.TYPE_NAVIGATION_TOUCHPAD) {
+            mInputManagerInternal.unsetTypeAssociation(inputDeviceDescriptor.getPhys());
+        }
 
         // Reset values to the default if all virtual mice are unregistered, or set display
         // id if there's another mouse (choose the most recent). The inputDeviceDescriptor must be
@@ -509,11 +541,13 @@ class InputController {
         static final int TYPE_MOUSE = 2;
         static final int TYPE_TOUCHSCREEN = 3;
         static final int TYPE_DPAD = 4;
+        static final int TYPE_NAVIGATION_TOUCHPAD = 5;
         @IntDef(prefix = { "TYPE_" }, value = {
                 TYPE_KEYBOARD,
                 TYPE_MOUSE,
                 TYPE_TOUCHSCREEN,
                 TYPE_DPAD,
+                TYPE_NAVIGATION_TOUCHPAD,
         })
         @Retention(RetentionPolicy.SOURCE)
         @interface Type {

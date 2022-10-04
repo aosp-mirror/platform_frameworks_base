@@ -53,6 +53,7 @@ import android.hardware.input.VirtualMouseButtonEvent;
 import android.hardware.input.VirtualMouseConfig;
 import android.hardware.input.VirtualMouseRelativeEvent;
 import android.hardware.input.VirtualMouseScrollEvent;
+import android.hardware.input.VirtualNavigationTouchpadConfig;
 import android.hardware.input.VirtualTouchEvent;
 import android.hardware.input.VirtualTouchscreenConfig;
 import android.os.Binder;
@@ -485,6 +486,38 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             mInputController.createTouchscreen(config.getInputDeviceName(), config.getVendorId(),
                     config.getProductId(), deviceToken, config.getAssociatedDisplayId(),
                     screenHeightPixels, screenWidthPixels);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override // Binder call
+    public void createVirtualNavigationTouchpad(VirtualNavigationTouchpadConfig config,
+            @NonNull IBinder deviceToken) {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.CREATE_VIRTUAL_DEVICE,
+                "Permission required to create a virtual navigation touchpad");
+        synchronized (mVirtualDeviceLock) {
+            if (!mVirtualDisplayIds.contains(config.getAssociatedDisplayId())) {
+                throw new SecurityException(
+                        "Cannot create a virtual navigation touchpad for a display not associated "
+                                + "with this virtual device");
+            }
+        }
+        int touchpadHeight = config.getHeight();
+        int touchpadWidth = config.getWidth();
+        if (touchpadHeight <= 0 || touchpadWidth <= 0) {
+            throw new IllegalArgumentException(
+                "Cannot create a virtual navigation touchpad, touchpad dimensions must be positive."
+                    + " Got: (" + touchpadHeight + ", " + touchpadWidth + ")");
+        }
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            mInputController.createNavigationTouchpad(
+                    config.getInputDeviceName(), config.getVendorId(),
+                    config.getProductId(), deviceToken, config.getAssociatedDisplayId(),
+                    touchpadHeight, touchpadWidth);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
