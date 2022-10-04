@@ -16,7 +16,6 @@
 
 package com.android.server.wm.flicker.ime
 
-import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresDevice
 import android.view.Surface
@@ -69,7 +68,7 @@ class OpenImeWindowToOverViewTest(testSpec: FlickerTestParameter) : BaseTest(tes
     }
 
     /**
-     * The bars (including [ComponentMatcher.STATUS_BAR] and [ComponentMatcher.NAV_BAR]) are
+     * The bars (including [ComponentNameMatcher.STATUS_BAR] and [ComponentNameMatcher.NAV_BAR]) are
      * expected to be hidden while entering overview in landscape if launcher is set to portrait
      * only. Because "showing portrait overview (launcher) in landscape display" is an intermediate
      * state depending on the touch-up to decide the intention of gesture, the display may keep in
@@ -158,24 +157,28 @@ class OpenImeWindowToOverViewTest(testSpec: FlickerTestParameter) : BaseTest(tes
     /** {@inheritDoc} */
     @Test
     @Ignore("Visibility changes depending on orientation and navigation mode")
-    override fun navBarLayerIsVisibleAtStartAndEnd() {}
+    override fun navBarLayerIsVisibleAtStartAndEnd() {
+    }
 
     /** {@inheritDoc} */
     @Test
     @Ignore("Visibility changes depending on orientation and navigation mode")
-    override fun navBarLayerPositionAtStartAndEnd() {}
+    override fun navBarLayerPositionAtStartAndEnd() {
+    }
 
     /** {@inheritDoc} */
     @Test
     @Ignore("Visibility changes depending on orientation and navigation mode")
-    override fun statusBarLayerPositionAtStartAndEnd() {}
+    override fun statusBarLayerPositionAtStartAndEnd() {
+    }
 
     /** {@inheritDoc} */
     @Test
     @Ignore("Visibility changes depending on orientation and navigation mode")
-    override fun statusBarLayerIsVisibleAtStartAndEnd() {}
+    override fun statusBarLayerIsVisibleAtStartAndEnd() {
+    }
 
-    @Postsubmit
+    @Presubmit
     @Test
     override fun taskBarLayerIsVisibleAtStartAndEnd() = super.taskBarLayerIsVisibleAtStartAndEnd()
 
@@ -239,10 +242,10 @@ class OpenImeWindowToOverViewTest(testSpec: FlickerTestParameter) : BaseTest(tes
                 .getConfigNonRotationTests(
                     supportedRotations = listOf(Surface.ROTATION_0, Surface.ROTATION_90),
                     supportedNavigationModes =
-                        listOf(
-                            WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY,
-                            WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
-                        )
+                    listOf(
+                        WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY,
+                        WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
+                    )
                 )
         }
     }

@@ -27,8 +27,10 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper
+import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.snapshotStartingWindowLayerCoversExactlyOnApp
+import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -78,13 +80,25 @@ class OpenImeWindowFromFixedOrientationAppTest(testSpec: FlickerTestParameter) :
     @Test
     override fun taskBarLayerIsVisibleAtStartAndEnd() = super.taskBarLayerIsVisibleAtStartAndEnd()
 
-    @Presubmit @Test fun imeWindowBecomesVisible() = testSpec.imeWindowBecomesVisible()
+    @Presubmit
+    @Test
+    fun imeWindowBecomesVisible() = testSpec.imeWindowBecomesVisible()
 
-    @Presubmit @Test fun imeLayerBecomesVisible() = testSpec.imeLayerBecomesVisible()
+    @Presubmit
+    @Test
+    fun imeLayerBecomesVisible() = testSpec.imeLayerBecomesVisible()
 
     @Postsubmit
     @Test
     fun snapshotStartingWindowLayerCoversExactlyOnApp() {
+        Assume.assumeFalse(isShellTransitionsEnabled)
+        testSpec.snapshotStartingWindowLayerCoversExactlyOnApp(imeTestApp)
+    }
+
+    @Presubmit
+    @Test
+    fun snapshotStartingWindowLayerCoversExactlyOnApp_ShellTransit() {
+        Assume.assumeTrue(isShellTransitionsEnabled)
         testSpec.snapshotStartingWindowLayerCoversExactlyOnApp(imeTestApp)
     }
 
@@ -102,7 +116,7 @@ class OpenImeWindowFromFixedOrientationAppTest(testSpec: FlickerTestParameter) :
                 .getConfigNonRotationTests(
                     supportedRotations = listOf(Surface.ROTATION_90),
                     supportedNavigationModes =
-                        listOf(WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY)
+                    listOf(WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY)
                 )
         }
     }
