@@ -21,6 +21,8 @@ import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.os.ProcessStartTime;
 
+import com.android.internal.util.FrameworkStatsLog;
+
 /**
  * This class describes various information required to start a process.
  *
@@ -31,6 +33,9 @@ import android.os.ProcessStartTime;
  * process, and is only used for logging and stats.
  *
  * The {@code mHostingZygote} field describes from which Zygote the new process should be spawned.
+ *
+ * The {@code mTriggerType} field describes the trigger that started this processs. This could be
+ * an alarm or a push-message for a broadcast, for example. This is purely for logging and stats.
  *
  * {@code mDefiningPackageName} contains the packageName of the package that defines the
  * component we want to start; this can be different from the packageName and uid in the
@@ -71,7 +76,10 @@ public final class HostingRecord {
     public static final String HOSTING_TYPE_TOP_ACTIVITY = "top-activity";
     public static final String HOSTING_TYPE_EMPTY = "";
 
-    private @NonNull final String mHostingType;
+    public static final String TRIGGER_TYPE_UNKNOWN = "unknown";
+    public static final String TRIGGER_TYPE_ALARM = "alarm";
+
+    @NonNull private final String mHostingType;
     private final String mHostingName;
     private final int mHostingZygote;
     private final String mDefiningPackageName;
@@ -79,11 +87,12 @@ public final class HostingRecord {
     private final boolean mIsTopApp;
     private final String mDefiningProcessName;
     @Nullable private final String mAction;
+    @NonNull private final String mTriggerType;
 
     public HostingRecord(@NonNull String hostingType) {
         this(hostingType, null /* hostingName */, REGULAR_ZYGOTE, null /* definingPackageName */,
                 -1 /* mDefiningUid */, false /* isTopApp */, null /* definingProcessName */,
-                null /* action */);
+                null /* action */, TRIGGER_TYPE_UNKNOWN);
     }
 
     public HostingRecord(@NonNull String hostingType, ComponentName hostingName) {
@@ -91,22 +100,23 @@ public final class HostingRecord {
     }
 
     public HostingRecord(@NonNull String hostingType, ComponentName hostingName,
-            @Nullable String action) {
+            @Nullable String action, @Nullable String triggerType) {
         this(hostingType, hostingName.toShortString(), REGULAR_ZYGOTE,
                 null /* definingPackageName */, -1 /* mDefiningUid */, false /* isTopApp */,
-                null /* definingProcessName */, action);
+                null /* definingProcessName */, action, triggerType);
     }
 
     public HostingRecord(@NonNull String hostingType, ComponentName hostingName,
             String definingPackageName, int definingUid, String definingProcessName) {
         this(hostingType, hostingName.toShortString(), REGULAR_ZYGOTE, definingPackageName,
-                definingUid, false /* isTopApp */, definingProcessName, null /* action */);
+                definingUid, false /* isTopApp */, definingProcessName, null /* action */,
+                TRIGGER_TYPE_UNKNOWN);
     }
 
     public HostingRecord(@NonNull String hostingType, ComponentName hostingName, boolean isTopApp) {
         this(hostingType, hostingName.toShortString(), REGULAR_ZYGOTE,
                 null /* definingPackageName */, -1 /* mDefiningUid */, isTopApp /* isTopApp */,
-                null /* definingProcessName */, null /* action */);
+                null /* definingProcessName */, null /* action */, TRIGGER_TYPE_UNKNOWN);
     }
 
     public HostingRecord(@NonNull String hostingType, String hostingName) {
@@ -121,12 +131,12 @@ public final class HostingRecord {
     private HostingRecord(@NonNull String hostingType, String hostingName, int hostingZygote) {
         this(hostingType, hostingName, hostingZygote, null /* definingPackageName */,
                 -1 /* mDefiningUid */, false /* isTopApp */, null /* definingProcessName */,
-                null /* action */);
+                null /* action */, TRIGGER_TYPE_UNKNOWN);
     }
 
     private HostingRecord(@NonNull String hostingType, String hostingName, int hostingZygote,
             String definingPackageName, int definingUid, boolean isTopApp,
-            String definingProcessName, @Nullable String action) {
+            String definingProcessName, @Nullable String action, String triggerType) {
         mHostingType = hostingType;
         mHostingName = hostingName;
         mHostingZygote = hostingZygote;
@@ -135,6 +145,7 @@ public final class HostingRecord {
         mIsTopApp = isTopApp;
         mDefiningProcessName = definingProcessName;
         mAction = action;
+        mTriggerType = triggerType;
     }
 
     public @NonNull String getType() {
@@ -188,6 +199,11 @@ public final class HostingRecord {
         return mAction;
     }
 
+    /** Returns the type of trigger that led to this process start. */
+    public @NonNull String getTriggerType() {
+        return mTriggerType;
+    }
+
     /**
      * Creates a HostingRecord for a process that must spawn from the webview zygote
      * @param hostingName name of the component to be hosted in this process
@@ -197,7 +213,7 @@ public final class HostingRecord {
             String definingPackageName, int definingUid, String definingProcessName) {
         return new HostingRecord(HostingRecord.HOSTING_TYPE_EMPTY, hostingName.toShortString(),
                 WEBVIEW_ZYGOTE, definingPackageName, definingUid, false /* isTopApp */,
-                definingProcessName, null /* action */);
+                definingProcessName, null /* action */, TRIGGER_TYPE_UNKNOWN);
     }
 
     /**
@@ -211,7 +227,7 @@ public final class HostingRecord {
             int definingUid, String definingProcessName) {
         return new HostingRecord(HostingRecord.HOSTING_TYPE_EMPTY, hostingName.toShortString(),
                 APP_ZYGOTE, definingPackageName, definingUid, false /* isTopApp */,
-                definingProcessName, null /* action */);
+                definingProcessName, null /* action */, TRIGGER_TYPE_UNKNOWN);
     }
 
     /**
@@ -265,6 +281,20 @@ public final class HostingRecord {
                 return ProcessStartTime.HOSTING_TYPE_EMPTY;
             default:
                 return ProcessStartTime.HOSTING_TYPE_UNKNOWN;
+        }
+    }
+
+    /**
+     * Map the string triggerType to enum TriggerType defined in ProcessStartTime proto.
+     * @param triggerType
+     * @return enum TriggerType defined in ProcessStartTime proto
+     */
+    public static int getTriggerTypeForStatsd(@NonNull String triggerType) {
+        switch(triggerType) {
+            case TRIGGER_TYPE_ALARM:
+                return FrameworkStatsLog.PROCESS_START_TIME__TRIGGER_TYPE__TRIGGER_TYPE_ALARM;
+            default:
+                return FrameworkStatsLog.PROCESS_START_TIME__TRIGGER_TYPE__TRIGGER_TYPE_UNKNOWN;
         }
     }
 }
