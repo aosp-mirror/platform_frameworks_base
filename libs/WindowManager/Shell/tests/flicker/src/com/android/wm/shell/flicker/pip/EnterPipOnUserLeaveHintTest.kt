@@ -16,14 +16,12 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.rules.RemoveAllTasksButHomeRule
@@ -108,14 +106,6 @@ class EnterPipOnUserLeaveHintTest(testSpec: FlickerTestParameter) : EnterPipTest
     @Presubmit
     @Test
     override fun entireScreenCovered() {
-        Assume.assumeFalse(isShellTransitionsEnabled)
-        super.entireScreenCovered()
-    }
-
-    @FlakyTest(bugId = 227313015)
-    @Test
-    fun entireScreenCovered_ShellTransit() {
-        Assume.assumeTrue(isShellTransitionsEnabled)
         super.entireScreenCovered()
     }
 

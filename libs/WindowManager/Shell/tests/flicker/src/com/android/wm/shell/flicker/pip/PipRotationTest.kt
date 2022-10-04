@@ -161,7 +161,7 @@ open class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testS
         testSpec.assertWmEnd { isAboveWindow(pipApp, testApp) }
     }
 
-    @FlakyTest(bugId = 240499181)
+    @Presubmit
     @Test
     override fun navBarLayerIsVisibleAtStartAndEnd() {
         super.navBarLayerIsVisibleAtStartAndEnd()
