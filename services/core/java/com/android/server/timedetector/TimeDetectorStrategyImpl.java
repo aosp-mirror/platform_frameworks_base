@@ -16,6 +16,8 @@
 
 package com.android.server.timedetector;
 
+import static android.app.time.Capabilities.CAPABILITY_POSSESSED;
+
 import static com.android.server.SystemClockTime.TIME_CONFIDENCE_HIGH;
 import static com.android.server.SystemClockTime.TIME_CONFIDENCE_LOW;
 import static com.android.server.timedetector.TimeDetectorStrategy.originToString;
@@ -26,6 +28,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.time.ExternalTimeSuggestion;
+import android.app.time.TimeCapabilities;
+import android.app.time.TimeCapabilitiesAndConfig;
 import android.app.time.TimeState;
 import android.app.time.UnixEpochTime;
 import android.app.timedetector.ManualTimeSuggestion;
@@ -244,7 +248,8 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
 
     @Override
     public synchronized boolean suggestManualTime(
-            @UserIdInt int userId, @NonNull ManualTimeSuggestion suggestion) {
+            @UserIdInt int userId, @NonNull ManualTimeSuggestion suggestion,
+            boolean bypassUserPolicyChecks) {
 
         ConfigurationInternal currentUserConfig = mCurrentConfigurationInternal;
         if (currentUserConfig.getUserId() != userId) {
@@ -256,6 +261,18 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         }
 
         Objects.requireNonNull(suggestion);
+        String cause = "Manual time suggestion received: suggestion=" + suggestion;
+
+        TimeCapabilitiesAndConfig capabilitiesAndConfig =
+                currentUserConfig.createCapabilitiesAndConfig(bypassUserPolicyChecks);
+        TimeCapabilities capabilities = capabilitiesAndConfig.getCapabilities();
+        if (capabilities.getSetManualTimeCapability() != CAPABILITY_POSSESSED) {
+            Slog.i(LOG_TAG, "User does not have the capability needed to set the time manually"
+                    + ": capabilities=" + capabilities
+                    + ", suggestion=" + suggestion
+                    + ", cause=" + cause);
+            return false;
+        }
 
         final UnixEpochTime newUnixEpochTime = suggestion.getUnixEpochTime();
 
@@ -263,7 +280,6 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
             return false;
         }
 
-        String cause = "Manual time suggestion received: suggestion=" + suggestion;
         return setSystemClockAndConfidenceIfRequired(ORIGIN_MANUAL, newUnixEpochTime, cause);
     }
 
@@ -428,7 +444,10 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
 
         ipw.println("mLastAutoSystemClockTimeSet=" + mLastAutoSystemClockTimeSet);
         ipw.println("mCurrentConfigurationInternal=" + mCurrentConfigurationInternal);
-        ipw.println("[Capabilities=" + mCurrentConfigurationInternal.capabilitiesAndConfig() + "]");
+        final boolean bypassUserPolicyChecks = false;
+        ipw.println("[Capabilities="
+                + mCurrentConfigurationInternal.createCapabilitiesAndConfig(bypassUserPolicyChecks)
+                + "]");
         long elapsedRealtimeMillis = mEnvironment.elapsedRealtimeMillis();
         ipw.printf("mEnvironment.elapsedRealtimeMillis()=%s (%s)\n",
                 Duration.ofMillis(elapsedRealtimeMillis), elapsedRealtimeMillis);

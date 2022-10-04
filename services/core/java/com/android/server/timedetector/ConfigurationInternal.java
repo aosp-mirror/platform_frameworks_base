@@ -155,21 +155,33 @@ public final class ConfigurationInternal {
         return UserHandle.of(mUserId);
     }
 
-    /** Returns true if the user allowed to modify time zone configuration. */
+    /**
+     * Returns true if the user is allowed to modify time configuration, e.g. can be false due
+     * to device policy (enterprise).
+     *
+     * <p>See also {@link #createCapabilitiesAndConfig(boolean)} for situations where this
+     * value are ignored.
+     */
     public boolean isUserConfigAllowed() {
         return mUserConfigAllowed;
     }
 
-    /** Returns a {@link TimeCapabilitiesAndConfig} objects based on configuration values. */
-    public TimeCapabilitiesAndConfig capabilitiesAndConfig() {
-        return new TimeCapabilitiesAndConfig(timeCapabilities(), timeConfiguration());
+    /**
+     * Returns a {@link TimeCapabilitiesAndConfig} objects based on configuration values.
+     *
+     * @param bypassUserPolicyChecks {@code true} for device policy manager use cases where device
+     *   policy restrictions that should apply to actual users can be ignored
+     */
+    public TimeCapabilitiesAndConfig createCapabilitiesAndConfig(boolean bypassUserPolicyChecks) {
+        return new TimeCapabilitiesAndConfig(
+                timeCapabilities(bypassUserPolicyChecks), timeConfiguration());
     }
 
-    private TimeCapabilities timeCapabilities() {
+    private TimeCapabilities timeCapabilities(boolean bypassUserPolicyChecks) {
         UserHandle userHandle = UserHandle.of(mUserId);
         TimeCapabilities.Builder builder = new TimeCapabilities.Builder(userHandle);
 
-        boolean allowConfigDateTime = isUserConfigAllowed();
+        boolean allowConfigDateTime = isUserConfigAllowed() || bypassUserPolicyChecks;
 
         boolean deviceHasAutoTimeDetection = isAutoDetectionSupported();
         final @CapabilityState int configureAutoDetectionEnabledCapability;
@@ -186,15 +198,15 @@ public final class ConfigurationInternal {
         // current logic above, this could lead to a situation where a device hardware does not
         // support auto detection, the device has been forced into "auto" mode by an admin and the
         // user is unable to disable auto detection.
-        final @CapabilityState int suggestManualTimeZoneCapability;
+        final @CapabilityState int suggestManualTimeCapability;
         if (!allowConfigDateTime) {
-            suggestManualTimeZoneCapability = CAPABILITY_NOT_ALLOWED;
+            suggestManualTimeCapability = CAPABILITY_NOT_ALLOWED;
         } else if (getAutoDetectionEnabledBehavior()) {
-            suggestManualTimeZoneCapability = CAPABILITY_NOT_APPLICABLE;
+            suggestManualTimeCapability = CAPABILITY_NOT_APPLICABLE;
         } else {
-            suggestManualTimeZoneCapability = CAPABILITY_POSSESSED;
+            suggestManualTimeCapability = CAPABILITY_POSSESSED;
         }
-        builder.setSetManualTimeCapability(suggestManualTimeZoneCapability);
+        builder.setSetManualTimeCapability(suggestManualTimeCapability);
 
         return builder.build();
     }

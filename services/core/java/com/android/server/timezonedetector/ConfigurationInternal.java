@@ -147,7 +147,13 @@ public final class ConfigurationInternal {
         return UserHandle.of(mUserId);
     }
 
-    /** Returns true if the user allowed to modify time zone configuration. */
+    /**
+     * Returns true if the user is allowed to modify time zone configuration, e.g. can be false due
+     * to device policy (enterprise).
+     *
+     * <p>See also {@link #createCapabilitiesAndConfig(boolean)} for situations where this value
+     * are ignored.
+     */
     public boolean isUserConfigAllowed() {
         return mUserConfigAllowed;
     }
@@ -190,17 +196,24 @@ public final class ConfigurationInternal {
                 || getGeoDetectionRunInBackgroundEnabled());
     }
 
-    /** Creates a {@link TimeZoneCapabilitiesAndConfig} object using the configuration values. */
-    public TimeZoneCapabilitiesAndConfig createCapabilitiesAndConfig() {
-        return new TimeZoneCapabilitiesAndConfig(asCapabilities(), asConfiguration());
+    /**
+     * Creates a {@link TimeZoneCapabilitiesAndConfig} object using the configuration values.
+     *
+     * @param bypassUserPolicyChecks {@code true} for device policy manager use cases where device
+     *   policy restrictions that should apply to actual users can be ignored
+     */
+    public TimeZoneCapabilitiesAndConfig createCapabilitiesAndConfig(
+            boolean bypassUserPolicyChecks) {
+        return new TimeZoneCapabilitiesAndConfig(
+                asCapabilities(bypassUserPolicyChecks), asConfiguration());
     }
 
     @NonNull
-    private TimeZoneCapabilities asCapabilities() {
+    private TimeZoneCapabilities asCapabilities(boolean bypassUserPolicyChecks) {
         UserHandle userHandle = UserHandle.of(mUserId);
         TimeZoneCapabilities.Builder builder = new TimeZoneCapabilities.Builder(userHandle);
 
-        boolean allowConfigDateTime = isUserConfigAllowed();
+        boolean allowConfigDateTime = isUserConfigAllowed() || bypassUserPolicyChecks;
 
         // Automatic time zone detection is only supported on devices if there is a telephony
         // network available or geolocation time zone detection is possible.

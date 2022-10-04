@@ -53,11 +53,15 @@ public interface ServiceConfigAccessor {
     /**
      * Updates the configuration properties that control a device's time behavior.
      *
-     * <p>This method returns {@code true} if the configuration was changed,
-     * {@code false} otherwise.
+     * <p>This method returns {@code true} if the configuration was changed, {@code false}
+     * otherwise.
+     *
+     * @param bypassUserPolicyChecks {@code true} for device policy manager use cases where device
+     *   policy restrictions that should apply to actual users can be ignored
      */
     boolean updateConfiguration(
-            @UserIdInt int userId, @NonNull TimeConfiguration requestedConfiguration);
+            @UserIdInt int userId, @NonNull TimeConfiguration requestedConfiguration,
+            boolean bypassUserPolicyChecks);
 
     /**
      * Returns a snapshot of the configuration that controls time zone detector behavior for the
