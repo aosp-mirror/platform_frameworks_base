@@ -113,7 +113,7 @@
     <uses-sdk android:minSdkVersion="1"
          android:targetSdkVersion="26"/>
 
-    <application android:testOnly="true">
+    <application android:testOnly="true" android:debuggable="true">
         <uses-library android:name="android.test.runner"/>
 
         <service android:name="com.android.server.accounts.TestAccountType1AuthenticatorService"
