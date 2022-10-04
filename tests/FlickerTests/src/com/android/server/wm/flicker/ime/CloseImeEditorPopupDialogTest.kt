@@ -16,7 +16,7 @@
 
 package com.android.server.wm.flicker.ime
 
-import android.platform.test.annotations.Postsubmit
+import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import android.view.WindowManagerPolicyConstants
 import androidx.test.filters.RequiresDevice
@@ -59,31 +59,11 @@ class CloseImeEditorPopupDialogTest(testSpec: FlickerTestParameter) : BaseTest(t
         }
     }
 
-    /** {@inheritDoc} */
-    @Postsubmit
+    @Presubmit
     @Test
-    override fun taskBarWindowIsAlwaysVisible() = super.taskBarWindowIsAlwaysVisible()
+    fun imeWindowBecameInvisible() = testSpec.imeWindowBecomesInvisible()
 
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun taskBarLayerIsVisibleAtStartAndEnd() = super.taskBarLayerIsVisibleAtStartAndEnd()
-
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
-        super.visibleLayersShownMoreThanOneConsecutiveEntry()
-
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
-        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
-
-    @Postsubmit @Test fun imeWindowBecameInvisible() = testSpec.imeWindowBecomesInvisible()
-
-    @Postsubmit
+    @Presubmit
     @Test
     fun imeLayerAndImeSnapshotVisibleOnScreen() {
         testSpec.assertLayers {
@@ -96,7 +76,7 @@ class CloseImeEditorPopupDialogTest(testSpec: FlickerTestParameter) : BaseTest(t
         }
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun imeSnapshotAssociatedOnAppVisibleRegion() {
         testSpec.assertLayers {
@@ -130,10 +110,10 @@ class CloseImeEditorPopupDialogTest(testSpec: FlickerTestParameter) : BaseTest(t
             return FlickerTestParameterFactory.getInstance()
                 .getConfigNonRotationTests(
                     supportedNavigationModes =
-                        listOf(
-                            WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY,
-                            WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
-                        ),
+                    listOf(
+                        WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY,
+                        WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
+                    ),
                     supportedRotations = listOf(Surface.ROTATION_0)
                 )
         }
