@@ -153,6 +153,20 @@ public class SmsApplicationTest {
     }
 
     @Test
+    public void testGetDefaultMmsApplication() {
+        assertEquals(TEST_COMPONENT_NAME,
+                SmsApplication.getDefaultMmsApplicationAsUser(mContext, false,
+                        UserHandle.USER_SYSTEM));
+    }
+
+    @Test
+    public void testGetDefaultExternalTelephonyProviderChangedApplication() {
+        assertEquals(TEST_COMPONENT_NAME,
+                SmsApplication.getDefaultExternalTelephonyProviderChangedApplicationAsUser(mContext,
+                        false, UserHandle.USER_SYSTEM));
+    }
+
+    @Test
     public void testGetDefaultSmsApplicationWithAppOpsFix() throws Exception {
         when(mAppOpsManager.unsafeCheckOp(AppOpsManager.OPSTR_READ_SMS, SMS_APP_UID,
                 TEST_COMPONENT_NAME.getPackageName()))
