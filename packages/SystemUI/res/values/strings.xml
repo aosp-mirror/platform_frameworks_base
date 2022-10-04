@@ -246,6 +246,16 @@
     <string name="screenrecord_start_label">Start Recording?</string>
     <!-- Message reminding the user that sensitive information may be captured during a screen recording [CHAR_LIMIT=NONE]-->
     <string name="screenrecord_description">While recording, Android System can capture any sensitive information that\u2019s visible on your screen or played on your device. This includes passwords, payment info, photos, messages, and audio.</string>
+    <!-- Dropdown option to record the entire screen [CHAR_LIMIT=30]-->
+    <string name="screenrecord_option_entire_screen">Record entire screen</string>
+    <!-- Dropdown option to record a single app [CHAR_LIMIT=30]-->
+    <string name="screenrecord_option_single_app">Record a single app</string>
+    <!-- Message reminding the user that sensitive information may be captured during a full screen recording for the updated dialog that includes partial screen sharing option [CHAR_LIMIT=350]-->
+    <string name="screenrecord_warning_entire_screen">While you\'re recording, Android has access to anything visible on your screen or played on your device. So be careful with passwords, payment details, messages, or other sensitive information.</string>
+    <!-- Message reminding the user that sensitive information may be captured during a single app screen recording for the updated dialog that includes partial screen sharing option [CHAR_LIMIT=350]-->
+    <string name="screenrecord_warning_single_app">While you\'re recording an app, Android has access to anything shown or played on that app. So be careful with passwords, payment details, messages, or other sensitive information.</string>
+    <!-- Button to start a screen recording in the updated screen record dialog that allows to select an app to record [CHAR LIMIT=50]-->
+    <string name="screenrecord_start_recording">Start recording</string>
     <!-- Label for a switch to enable recording audio [CHAR LIMIT=NONE]-->
     <string name="screenrecord_audio_label">Record audio</string>
     <!-- Label for the option to record audio from the device [CHAR LIMIT=NONE]-->
@@ -958,7 +968,26 @@
     <!-- Media projection permission dialog warning title. [CHAR LIMIT=NONE] -->
     <string name="media_projection_dialog_title">Start recording or casting with <xliff:g id="app_seeking_permission" example="Hangouts">%s</xliff:g>?</string>
 
-    <!-- Media projection permission dialog permanent grant check box. [CHAR LIMIT=NONE] -->
+    <!-- Media projection permission dialog title. [CHAR LIMIT=NONE] -->
+    <string name="media_projection_permission_dialog_title">Allow <xliff:g id="app_seeking_permission" example="Meet">%s</xliff:g> to share or record?</string>
+
+    <!-- Media projection permission dropdown option for capturing the whole screen. [CHAR LIMIT=30] -->
+    <string name="media_projection_permission_dialog_option_entire_screen">Entire screen</string>
+
+    <!-- Media projection permission dropdown option for capturing single app. [CHAR LIMIT=30] -->
+    <string name="media_projection_permission_dialog_option_single_app">A single app</string>
+
+    <!-- Media projection permission warning for capturing the whole screen. [CHAR LIMIT=350] -->
+    <string name="media_projection_permission_dialog_warning_entire_screen">When you\'re sharing, recording, or casting, <xliff:g id="app_seeking_permission" example="Meet">%s</xliff:g> has access to anything visible on your screen or played on your device. So be careful with passwords, payment details, messages, or other sensitive information.</string>
+
+    <!-- Media projection permission warning for capturing an app. [CHAR LIMIT=350] -->
+    <string name="media_projection_permission_dialog_warning_single_app">When you\'re sharing, recording, or casting an app, <xliff:g id="app_seeking_permission" example="Meet">%s</xliff:g> has access to anything shown or played on that app. So be careful with passwords, payment details, messages, or other sensitive information.</string>
+
+    <!-- Media projection permission button to continue with app selection or recording [CHAR LIMIT=60] -->
+    <string name="media_projection_permission_dialog_continue">Continue</string>
+
+    <!-- Title of the dialog that allows to select an app to share or record [CHAR LIMIT=NONE] -->
+    <string name="media_projection_permission_app_selector_title">Share or record an app</string>
 
     <!-- The text to clear all notifications. [CHAR LIMIT=60] -->
     <string name="clear_all_notifications_text">Clear all</string>
