@@ -16,6 +16,7 @@
 
 package com.android.server.timedetector;
 
+import static com.android.server.SystemClockTime.TIME_CONFIDENCE_HIGH;
 import static com.android.server.timedetector.TimeDetectorStrategy.originToString;
 
 import android.annotation.CurrentTimeMillisLong;
@@ -23,7 +24,6 @@ import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
-import android.app.AlarmManager;
 import android.app.time.ExternalTimeSuggestion;
 import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.TelephonyTimeSuggestion;
@@ -31,24 +31,24 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.TimestampedValue;
 import android.util.IndentingPrintWriter;
-import android.util.LocalLog;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.SystemClockTime;
+import com.android.server.SystemClockTime.TimeConfidence;
 import com.android.server.timezonedetector.ArrayMapWithHistory;
 import com.android.server.timezonedetector.ConfigurationChangeListener;
 import com.android.server.timezonedetector.ReferenceWithHistory;
 
+import java.io.PrintWriter;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Objects;
 
 /**
- * An implementation of {@link TimeDetectorStrategy} that passes telephony and manual suggestions to
- * {@link AlarmManager}. When there are multiple telephony sources, the one with the lowest ID is
- * used unless the data becomes too stale.
+ * The real implementation of {@link TimeDetectorStrategy}.
  *
  * <p>Most public methods are marked synchronized to ensure thread safety around internal state.
  */
@@ -83,13 +83,6 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
      * issues with detection.
      */
     private static final int KEEP_SUGGESTION_HISTORY_SIZE = 10;
-
-    /**
-     * A log that records the decisions / decision metadata that affected the device's system clock
-     * time. This is logged in bug reports to assist with debugging issues with detection.
-     */
-    @NonNull
-    private final LocalLog mTimeChangesLog = new LocalLog(30, false /* useLocalTimestamps */);
 
     @NonNull
     private final Environment mEnvironment;
@@ -157,11 +150,30 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         @CurrentTimeMillisLong
         long systemClockMillis();
 
-        /** Sets the device system clock. The WakeLock must be held. */
-        void setSystemClock(@CurrentTimeMillisLong long newTimeMillis);
+        /** Returns the system clock confidence value. */
+        @TimeConfidence int systemClockConfidence();
+
+        /** Sets the device system clock and confidence. The WakeLock must be held. */
+        void setSystemClock(
+                @CurrentTimeMillisLong long newTimeMillis, @TimeConfidence int confidence,
+                @NonNull String logMsg);
+
+        /** Sets the device system clock confidence. The WakeLock must be held. */
+        void setSystemClockConfidence(@TimeConfidence int confidence, @NonNull String logMsg);
 
         /** Release the wake lock acquired by a call to {@link #acquireWakeLock()}. */
         void releaseWakeLock();
+
+
+        /**
+         * Adds a standalone entry to the time debug log.
+         */
+        void addDebugLogEntry(@NonNull String logMsg);
+
+        /**
+         * Dumps the time debug log to the supplied {@link PrintWriter}.
+         */
+        void dumpDebugLog(PrintWriter printWriter);
     }
 
     static TimeDetectorStrategy create(
@@ -250,7 +262,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         }
 
         String cause = "Manual time suggestion received: suggestion=" + suggestion;
-        return setSystemClockIfRequired(ORIGIN_MANUAL, newUnixEpochTime, cause);
+        return setSystemClockAndConfidenceIfRequired(ORIGIN_MANUAL, newUnixEpochTime, cause);
     }
 
     @Override
@@ -318,7 +330,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         String logMsg = "handleConfigurationInternalChanged:"
                 + " oldConfiguration=" + mCurrentConfigurationInternal
                 + ", newConfiguration=" + currentUserConfig;
-        logTimeDetectorChange(logMsg);
+        addDebugLogEntry(logMsg);
         mCurrentConfigurationInternal = currentUserConfig;
 
         boolean autoDetectionEnabled =
@@ -335,11 +347,11 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         }
     }
 
-    private void logTimeDetectorChange(@NonNull String logMsg) {
+    private void addDebugLogEntry(@NonNull String logMsg) {
         if (DBG) {
             Slog.d(LOG_TAG, logMsg);
         }
-        mTimeChangesLog.log(logMsg);
+        mEnvironment.addDebugLogEntry(logMsg);
     }
 
     @Override
@@ -356,10 +368,11 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         long systemClockMillis = mEnvironment.systemClockMillis();
         ipw.printf("mEnvironment.systemClockMillis()=%s (%s)\n",
                 Instant.ofEpochMilli(systemClockMillis), systemClockMillis);
+        ipw.println("mEnvironment.systemClockConfidence()=" + mEnvironment.systemClockConfidence());
 
         ipw.println("Time change log:");
         ipw.increaseIndent(); // level 2
-        mTimeChangesLog.dump(ipw);
+        SystemClockTime.dump(ipw);
         ipw.decreaseIndent(); // level 2
 
         ipw.println("Telephony suggestion history:");
@@ -494,11 +507,6 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
 
     @GuardedBy("this")
     private void doAutoTimeDetection(@NonNull String detectionReason) {
-        if (!mCurrentConfigurationInternal.getAutoDetectionEnabledBehavior()) {
-            // Avoid doing unnecessary work with this (race-prone) check.
-            return;
-        }
-
         // Try the different origins one at a time.
         int[] originPriorities = mCurrentConfigurationInternal.getAutoOriginPriorities();
         for (int origin : originPriorities) {
@@ -544,7 +552,14 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
 
             // Update the system clock if a good suggestion has been found.
             if (newUnixEpochTime != null) {
-                setSystemClockIfRequired(origin, newUnixEpochTime, cause);
+                if (mCurrentConfigurationInternal.getAutoDetectionEnabledBehavior()) {
+                    setSystemClockAndConfidenceIfRequired(origin, newUnixEpochTime, cause);
+                } else {
+                    // An automatically detected time can be used to raise the confidence in the
+                    // current time even if the device is set to only allow user input for the time
+                    // itself.
+                    upgradeSystemClockConfidenceIfRequired(newUnixEpochTime, cause);
+                }
                 return;
             }
         }
@@ -718,14 +733,18 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
     }
 
     @GuardedBy("this")
-    private boolean setSystemClockIfRequired(
+    private boolean setSystemClockAndConfidenceIfRequired(
             @Origin int origin, @NonNull TimestampedValue<Long> time, @NonNull String cause) {
 
+        // Any time set through this class is inherently high confidence. Either it came directly
+        // from a user, or it was detected automatically.
+        @TimeConfidence final int newTimeConfidence = TIME_CONFIDENCE_HIGH;
         boolean isOriginAutomatic = isOriginAutomatic(origin);
         if (isOriginAutomatic) {
             if (!mCurrentConfigurationInternal.getAutoDetectionEnabledBehavior()) {
                 if (DBG) {
-                    Slog.d(LOG_TAG, "Auto time detection is not enabled."
+                    Slog.d(LOG_TAG,
+                            "Auto time detection is not enabled / no confidence update is needed."
                             + " origin=" + originToString(origin)
                             + ", time=" + time
                             + ", cause=" + cause);
@@ -746,7 +765,57 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
 
         mEnvironment.acquireWakeLock();
         try {
-            return setSystemClockUnderWakeLock(origin, time, cause);
+            return setSystemClockAndConfidenceUnderWakeLock(origin, time, newTimeConfidence, cause);
+        } finally {
+            mEnvironment.releaseWakeLock();
+        }
+    }
+
+    /**
+     * Upgrades the system clock confidence if the current time matches the supplied auto-detected
+     * time. The method never changes the system clock and it never lowers the confidence. It only
+     * raises the confidence if the supplied time is within the configured threshold of the current
+     * system clock time.
+     */
+    @GuardedBy("this")
+    private void upgradeSystemClockConfidenceIfRequired(
+            @NonNull TimestampedValue<Long> autoDetectedUnixEpochTime, @NonNull String cause) {
+        @TimeConfidence int newTimeConfidence = TIME_CONFIDENCE_HIGH;
+        @TimeConfidence int currentTimeConfidence = mEnvironment.systemClockConfidence();
+        boolean timeNeedsConfirmation = currentTimeConfidence < newTimeConfidence;
+        if (!timeNeedsConfirmation) {
+            return;
+        }
+
+        // All system clock calculation take place under a wake lock.
+        mEnvironment.acquireWakeLock();
+        try {
+            // Check if the specified time matches the current system clock time (closely
+            // enough) to raise the confidence.
+            long elapsedRealtimeMillis = mEnvironment.elapsedRealtimeMillis();
+            long actualSystemClockMillis = mEnvironment.systemClockMillis();
+            long adjustedAutoDetectedUnixEpochMillis = TimeDetectorStrategy.getTimeAt(
+                    autoDetectedUnixEpochTime, elapsedRealtimeMillis);
+            long absTimeDifferenceMillis =
+                    Math.abs(adjustedAutoDetectedUnixEpochMillis - actualSystemClockMillis);
+            int confidenceUpgradeThresholdMillis =
+                    mCurrentConfigurationInternal.getSystemClockConfidenceUpgradeThresholdMillis();
+            boolean updateConfidenceRequired =
+                    absTimeDifferenceMillis <= confidenceUpgradeThresholdMillis;
+            if (updateConfidenceRequired) {
+                String logMsg = "Upgrade system clock confidence."
+                        + " autoDetectedUnixEpochTime=" + autoDetectedUnixEpochTime
+                        + " newTimeConfidence=" + newTimeConfidence
+                        + " cause=" + cause
+                        + " elapsedRealtimeMillis=" + elapsedRealtimeMillis
+                        + " (old) actualSystemClockMillis=" + actualSystemClockMillis
+                        + " currentTimeConfidence=" + currentTimeConfidence;
+                if (DBG) {
+                    Slog.d(LOG_TAG, logMsg);
+                }
+
+                mEnvironment.setSystemClockConfidence(newTimeConfidence, logMsg);
+            }
         } finally {
             mEnvironment.releaseWakeLock();
         }
@@ -757,8 +826,9 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
     }
 
     @GuardedBy("this")
-    private boolean setSystemClockUnderWakeLock(
-            @Origin int origin, @NonNull TimestampedValue<Long> newTime, @NonNull String cause) {
+    private boolean setSystemClockAndConfidenceUnderWakeLock(
+            @Origin int origin, @NonNull TimestampedValue<Long> newTime,
+            @TimeConfidence int newTimeConfidence, @NonNull String cause) {
 
         long elapsedRealtimeMillis = mEnvironment.elapsedRealtimeMillis();
         boolean isOriginAutomatic = isOriginAutomatic(origin);
@@ -776,6 +846,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
                             "System clock has not tracked elapsed real time clock. A clock may"
                                     + " be inaccurate or something unexpectedly set the system"
                                     + " clock."
+                                    + " origin=" + originToString(origin)
                                     + " elapsedRealtimeMillis=" + elapsedRealtimeMillis
                                     + " expectedTimeMillis=" + expectedTimeMillis
                                     + " actualTimeMillis=" + actualSystemClockMillis
@@ -784,44 +855,72 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
             }
         }
 
+        // If the new signal would make sufficient difference to the system clock or mean a change
+        // in confidence then system state must be updated.
+
         // Adjust for the time that has elapsed since the signal was received.
         long newSystemClockMillis = TimeDetectorStrategy.getTimeAt(newTime, elapsedRealtimeMillis);
-
-        // Check if the new signal would make sufficient difference to the system clock. If it's
-        // below the threshold then ignore it.
         long absTimeDifference = Math.abs(newSystemClockMillis - actualSystemClockMillis);
         long systemClockUpdateThreshold =
                 mCurrentConfigurationInternal.getSystemClockUpdateThresholdMillis();
-        if (absTimeDifference < systemClockUpdateThreshold) {
+        boolean updateSystemClockRequired = absTimeDifference >= systemClockUpdateThreshold;
+
+        @TimeConfidence int currentTimeConfidence = mEnvironment.systemClockConfidence();
+        boolean updateConfidenceRequired = newTimeConfidence > currentTimeConfidence;
+
+        if (updateSystemClockRequired) {
+            String logMsg = "Set system clock & confidence."
+                    + " origin=" + originToString(origin)
+                    + " newTime=" + newTime
+                    + " newTimeConfidence=" + newTimeConfidence
+                    + " cause=" + cause
+                    + " elapsedRealtimeMillis=" + elapsedRealtimeMillis
+                    + " (old) actualSystemClockMillis=" + actualSystemClockMillis
+                    + " newSystemClockMillis=" + newSystemClockMillis
+                    + " currentTimeConfidence=" + currentTimeConfidence;
+            mEnvironment.setSystemClock(newSystemClockMillis, newTimeConfidence, logMsg);
             if (DBG) {
-                Slog.d(LOG_TAG, "Not setting system clock. New time and"
-                        + " system clock are close enough."
-                        + " elapsedRealtimeMillis=" + elapsedRealtimeMillis
-                        + " newTime=" + newTime
-                        + " cause=" + cause
-                        + " systemClockUpdateThreshold=" + systemClockUpdateThreshold
-                        + " absTimeDifference=" + absTimeDifference);
+                Slog.d(LOG_TAG, logMsg);
             }
-            return true;
-        }
 
-        mEnvironment.setSystemClock(newSystemClockMillis);
-        String logMsg = "Set system clock using time=" + newTime
-                + " cause=" + cause
-                + " elapsedRealtimeMillis=" + elapsedRealtimeMillis
-                + " (old) actualSystemClockMillis=" + actualSystemClockMillis
-                + " newSystemClockMillis=" + newSystemClockMillis;
-        if (DBG) {
-            Slog.d(LOG_TAG, logMsg);
-        }
-        mTimeChangesLog.log(logMsg);
-
-        // CLOCK_PARANOIA : Record the last time this class set the system clock due to an auto-time
-        // signal, or clear the record it is being done manually.
-        if (isOriginAutomatic(origin)) {
-            mLastAutoSystemClockTimeSet = newTime;
+            // CLOCK_PARANOIA : Record the last time this class set the system clock due to an
+            // auto-time signal, or clear the record it is being done manually.
+            if (isOriginAutomatic(origin)) {
+                mLastAutoSystemClockTimeSet = newTime;
+            } else {
+                mLastAutoSystemClockTimeSet = null;
+            }
+        } else if (updateConfidenceRequired) {
+            // Only the confidence needs updating. This path is separate from a system clock update
+            // to deliberately avoid touching the system clock's value when it's not needed. Doing
+            // so could introduce inaccuracies or cause unnecessary wear in RTC hardware or
+            // associated storage.
+            String logMsg = "Set system clock confidence."
+                    + " origin=" + originToString(origin)
+                    + " newTime=" + newTime
+                    + " newTimeConfidence=" + newTimeConfidence
+                    + " cause=" + cause
+                    + " elapsedRealtimeMillis=" + elapsedRealtimeMillis
+                    + " (old) actualSystemClockMillis=" + actualSystemClockMillis
+                    + " newSystemClockMillis=" + newSystemClockMillis
+                    + " currentTimeConfidence=" + currentTimeConfidence;
+            if (DBG) {
+                Slog.d(LOG_TAG, logMsg);
+            }
+            mEnvironment.setSystemClockConfidence(newTimeConfidence, logMsg);
         } else {
-            mLastAutoSystemClockTimeSet = null;
+            // Neither clock nor confidence need updating.
+            if (DBG) {
+                Slog.d(LOG_TAG, "Not setting system clock or confidence."
+                        + " origin=" + originToString(origin)
+                        + " newTime=" + newTime
+                        + " newTimeConfidence=" + newTimeConfidence
+                        + " cause=" + cause
+                        + " elapsedRealtimeMillis=" + elapsedRealtimeMillis
+                        + " systemClockUpdateThreshold=" + systemClockUpdateThreshold
+                        + " absTimeDifference=" + absTimeDifference
+                        + " currentTimeConfidence=" + currentTimeConfidence);
+            }
         }
         return true;
     }
