@@ -17,7 +17,7 @@ import androidx.annotation.VisibleForTesting;
 import com.android.keyguard.dagger.KeyguardStatusViewScope;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
-import com.android.systemui.plugins.Clock;
+import com.android.systemui.plugins.ClockController;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -94,7 +94,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
         onDensityOrFontScaleChanged();
     }
 
-    void setClock(Clock clock, int statusBarState) {
+    void setClock(ClockController clock, int statusBarState) {
         // Disconnect from existing plugin.
         mSmallClockFrame.removeAllViews();
         mLargeClockFrame.removeAllViews();
@@ -105,8 +105,8 @@ public class KeyguardClockSwitch extends RelativeLayout {
         }
 
         // Attach small and big clock views to hierarchy.
-        mSmallClockFrame.addView(clock.getSmallClock());
-        mLargeClockFrame.addView(clock.getLargeClock());
+        mSmallClockFrame.addView(clock.getSmallClock().getView());
+        mLargeClockFrame.addView(clock.getLargeClock().getView());
     }
 
     private void updateClockViews(boolean useLargeClock, boolean animate) {

@@ -45,7 +45,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
-import com.android.systemui.plugins.Clock;
+import com.android.systemui.plugins.ClockController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.clocks.AnimatableClockView;
 import com.android.systemui.shared.clocks.ClockRegistry;
@@ -87,7 +87,7 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
     @Mock
     KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
     @Mock
-    private Clock mClock;
+    private ClockController mClock;
     @Mock
     DumpManager mDumpManager;
     @Mock
