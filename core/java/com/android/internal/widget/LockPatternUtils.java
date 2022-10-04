@@ -26,6 +26,7 @@ import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.PropertyInvalidatedCache;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.PasswordMetrics;
@@ -1783,5 +1784,17 @@ public class LockPatternUtils {
         } catch (RemoteException re) {
             re.rethrowFromSystemServer();
         }
+    }
+
+    public void unlockUserKeyIfUnsecured(@UserIdInt int userId) {
+        getLockSettingsInternal().unlockUserKeyIfUnsecured(userId);
+    }
+
+    public void createNewUser(@UserIdInt int userId, int userSerialNumber) {
+        getLockSettingsInternal().createNewUser(userId, userSerialNumber);
+    }
+
+    public void removeUser(@UserIdInt int userId) {
+        getLockSettingsInternal().removeUser(userId);
     }
 }

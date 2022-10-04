@@ -27,6 +27,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
@@ -126,6 +127,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         initializeCredential(password, PRIMARY_USER_ID);
         assertEquals(VerifyCredentialResponse.RESPONSE_OK, mService.verifyCredential(
                 password, PRIMARY_USER_ID, 0 /* flags */).getResponseCode());
+        verify(mActivityManager).unlockUser2(eq(PRIMARY_USER_ID), any());
 
         assertEquals(VerifyCredentialResponse.RESPONSE_ERROR, mService.verifyCredential(
                 badPassword, PRIMARY_USER_ID, 0 /* flags */).getResponseCode());
@@ -187,32 +189,13 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
     }
 
     @Test
-    public void testNoSyntheticPasswordOrCredentialDoesNotPassAuthSecret() throws RemoteException {
-        mService.onUnlockUser(PRIMARY_USER_ID);
-        flushHandlerTasks();
-        verify(mAuthSecretService, never()).primaryUserCredential(any(ArrayList.class));
-    }
-
-    @Test
-    public void testCredentialDoesNotPassAuthSecret() throws RemoteException {
-        LockscreenCredential password = newPassword("password");
-        initializeCredential(password, PRIMARY_USER_ID);
-
-        reset(mAuthSecretService);
-        mService.onUnlockUser(PRIMARY_USER_ID);
-        flushHandlerTasks();
-        verify(mAuthSecretService, never()).primaryUserCredential(any(ArrayList.class));
-    }
-
-    @Test
-    public void testSyntheticPasswordButNoCredentialPassesAuthSecret() throws RemoteException {
+    public void testUnlockUserKeyIfUnsecuredPassesPrimaryUserAuthSecret() throws RemoteException {
         LockscreenCredential password = newPassword("password");
         initializeCredential(password, PRIMARY_USER_ID);
         mService.setLockCredential(nonePassword(), password, PRIMARY_USER_ID);
 
         reset(mAuthSecretService);
-        mService.onUnlockUser(PRIMARY_USER_ID);
-        flushHandlerTasks();
+        mLocalService.unlockUserKeyIfUnsecured(PRIMARY_USER_ID);
         verify(mAuthSecretService).primaryUserCredential(any(ArrayList.class));
     }
 

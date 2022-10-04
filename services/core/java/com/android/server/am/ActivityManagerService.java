@@ -16403,23 +16403,17 @@ public class ActivityManagerService extends IActivityManager.Stub
         return mInjector.getSecondaryDisplayIdsForStartingBackgroundUsers();
     }
 
-    /**
-     * Unlocks the given user.
-     *
-     * @param userId The ID of the user to unlock.
-     * @param token No longer used.  (This parameter cannot be removed because
-     *              this method is marked with UnsupportedAppUsage, so its
-     *              signature might not be safe to change.)
-     * @param secret The secret needed to unlock the user's credential-encrypted
-     *               storage, or null if no secret is needed.
-     * @param listener An optional progress listener.
-     *
-     * @return true if the user was successfully unlocked, otherwise false.
-     */
+    /** @deprecated see the AIDL documentation {@inheritDoc} */
     @Override
-    public boolean unlockUser(int userId, @Nullable byte[] token, @Nullable byte[] secret,
-            @Nullable IProgressListener listener) {
-        return mUserController.unlockUser(userId, secret, listener);
+    @Deprecated
+    public boolean unlockUser(@UserIdInt int userId, @Nullable byte[] token,
+            @Nullable byte[] secret, @Nullable IProgressListener listener) {
+        return mUserController.unlockUser(userId, listener);
+    }
+
+    @Override
+    public boolean unlockUser2(@UserIdInt int userId, @Nullable IProgressListener listener) {
+        return mUserController.unlockUser(userId, listener);
     }
 
     @Override

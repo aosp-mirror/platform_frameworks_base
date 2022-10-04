@@ -49,6 +49,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockscreenCredential;
 import com.android.internal.widget.VerifyCredentialResponse;
 import com.android.server.locksettings.LockSettingsStorage.PersistentData;
+import com.android.server.utils.Slogf;
 
 import libcore.util.HexEncoding;
 
@@ -79,11 +80,12 @@ import java.util.Set;
  *    LockscreenCredential.  The LSKF may be empty (none).  There may be escrow token-based
  *    protectors as well, only for specific use cases such as enterprise-managed users.
  *
- *  - While the user's LSKF is nonempty, the SP protects the user's CE (credential encrypted)
- *    storage and auth-bound Keystore keys: the user's CE key is encrypted by an SP-derived secret,
- *    and the user's Keystore and Gatekeeper passwords are other SP-derived secrets.  However, while
- *    the user's LSKF is empty, these protections are cleared; this is needed to invalidate the
- *    auth-bound keys and make UserController.unlockUser() work with an empty secret.
+ *  - The user's credential-encrypted storage is always protected by the SP.
+ *
+ *  - The user's auth-bound Keystore keys are protected by the SP, but only while an LSKF is set.
+ *    This works by setting the user's Keystore and Gatekeeper passwords to SP-derived secrets, but
+ *    only while an LSKF is set.  When the LSKF is removed, these passwords are cleared,
+ *    invalidating the user's auth-bound keys.
  *
  * Files stored on disk for each user:
  *   For the SP itself, stored under NULL_PROTECTOR_ID:
@@ -1026,6 +1028,14 @@ public class SyntheticPasswordManager {
             long protectorId, @NonNull LockscreenCredential credential, int userId,
             ICheckCredentialProgressCallback progressCallback) {
         AuthenticationResult result = new AuthenticationResult();
+
+        if (protectorId == SyntheticPasswordManager.NULL_PROTECTOR_ID) {
+            // This should never happen, due to the migration done in LSS.bootCompleted().
+            Slogf.wtf(TAG, "Synthetic password not found for user %d", userId);
+            result.gkResponse = VerifyCredentialResponse.ERROR;
+            return result;
+        }
+
         PasswordData pwd = PasswordData.fromBytes(loadState(PASSWORD_DATA_NAME, protectorId,
                     userId));
 

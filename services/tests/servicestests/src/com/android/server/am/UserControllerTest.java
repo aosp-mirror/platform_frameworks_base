@@ -94,6 +94,7 @@ import android.view.Display;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.widget.LockPatternUtils;
 import com.android.server.FgThread;
 import com.android.server.SystemService;
 import com.android.server.am.UserState.KeyEvictedCallback;
@@ -834,8 +835,7 @@ public class UserControllerTest {
     private void setUpAndStartUserInBackground(int userId) throws Exception {
         setUpUser(userId, 0);
         mUserController.startUser(userId, /* foreground= */ false);
-        verify(mInjector.mStorageManagerMock, times(1))
-                .unlockUserKey(userId, /* serialNumber= */ 0, /* secret= */ null);
+        verify(mInjector.mLockPatternUtilsMock, times(1)).unlockUserKeyIfUnsecured(userId);
         mUserStates.put(userId, mUserController.getStartedUserState(userId));
     }
 
@@ -843,8 +843,7 @@ public class UserControllerTest {
         setUpUser(userId, UserInfo.FLAG_PROFILE, false, UserManager.USER_TYPE_PROFILE_MANAGED);
         assertThat(mUserController.startProfile(userId)).isTrue();
 
-        verify(mInjector.mStorageManagerMock, times(1))
-                .unlockUserKey(userId, /* serialNumber= */ 0, /* secret= */ null);
+        verify(mInjector.mLockPatternUtilsMock, times(1)).unlockUserKeyIfUnsecured(userId);
         mUserStates.put(userId, mUserController.getStartedUserState(userId));
     }
 
@@ -966,6 +965,7 @@ public class UserControllerTest {
         private final UserManagerInternal mUserManagerInternalMock;
         private final WindowManagerService mWindowManagerMock;
         private final KeyguardManager mKeyguardManagerMock;
+        private final LockPatternUtils mLockPatternUtilsMock;
 
         private final Context mCtx;
 
@@ -982,6 +982,7 @@ public class UserControllerTest {
             mStorageManagerMock = mock(IStorageManager.class);
             mKeyguardManagerMock = mock(KeyguardManager.class);
             when(mKeyguardManagerMock.isDeviceSecure(anyInt())).thenReturn(true);
+            mLockPatternUtilsMock = mock(LockPatternUtils.class);
         }
 
         @Override
@@ -1080,6 +1081,11 @@ public class UserControllerTest {
         @Override
         protected void dismissKeyguard(Runnable runnable, String reason) {
             runnable.run();
+        }
+
+        @Override
+        protected LockPatternUtils getLockPatternUtils() {
+            return mLockPatternUtilsMock;
         }
     }
 
