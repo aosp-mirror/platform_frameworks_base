@@ -340,9 +340,6 @@ public final class Trace {
      * @hide
      */
     public static void instant(long traceTag, String methodName) {
-        if (methodName == null) {
-            throw new IllegalArgumentException("methodName cannot be null");
-        }
         if (isTagEnabled(traceTag)) {
             nativeInstant(traceTag, methodName);
         }
@@ -357,12 +354,6 @@ public final class Trace {
      * @hide
      */
     public static void instantForTrack(long traceTag, String trackName, String methodName) {
-        if (trackName == null) {
-            throw new IllegalArgumentException("trackName cannot be null");
-        }
-        if (methodName == null) {
-            throw new IllegalArgumentException("methodName cannot be null");
-        }
         if (isTagEnabled(traceTag)) {
             nativeInstantForTrack(traceTag, trackName, methodName);
         }
