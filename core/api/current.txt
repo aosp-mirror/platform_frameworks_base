@@ -9820,6 +9820,7 @@ package android.content {
     field public static final int CONTEXT_IGNORE_SECURITY = 2; // 0x2
     field public static final int CONTEXT_INCLUDE_CODE = 1; // 0x1
     field public static final int CONTEXT_RESTRICTED = 4; // 0x4
+    field public static final String CREDENTIAL_SERVICE = "credential";
     field public static final String CROSS_PROFILE_APPS_SERVICE = "crossprofileapps";
     field public static final String DEVICE_POLICY_SERVICE = "device_policy";
     field public static final String DISPLAY_HASH_SERVICE = "display_hash";
@@ -12875,6 +12876,82 @@ package android.content.res.loader {
     method @NonNull public static android.content.res.loader.ResourcesProvider loadFromDirectory(@NonNull String, @Nullable android.content.res.loader.AssetsProvider) throws java.io.IOException;
     method @NonNull public static android.content.res.loader.ResourcesProvider loadFromSplit(@NonNull android.content.Context, @NonNull String) throws java.io.IOException;
     method @NonNull public static android.content.res.loader.ResourcesProvider loadFromTable(@NonNull android.os.ParcelFileDescriptor, @Nullable android.content.res.loader.AssetsProvider) throws java.io.IOException;
+  }
+
+}
+
+package android.credentials {
+
+  public final class CreateCredentialRequest implements android.os.Parcelable {
+    ctor public CreateCredentialRequest(@NonNull String, @NonNull android.os.Bundle);
+    method public int describeContents();
+    method @NonNull public android.os.Bundle getData();
+    method @NonNull public String getType();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.credentials.CreateCredentialRequest> CREATOR;
+  }
+
+  public final class CreateCredentialResponse implements android.os.Parcelable {
+    ctor public CreateCredentialResponse(@NonNull android.os.Bundle);
+    method public int describeContents();
+    method @NonNull public android.os.Bundle getData();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.credentials.CreateCredentialResponse> CREATOR;
+  }
+
+  public final class Credential implements android.os.Parcelable {
+    ctor public Credential(@NonNull String, @NonNull android.os.Bundle);
+    method public int describeContents();
+    method @NonNull public android.os.Bundle getData();
+    method @NonNull public String getType();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.credentials.Credential> CREATOR;
+  }
+
+  public final class CredentialManager {
+    method public void executeCreateCredential(@NonNull android.credentials.CreateCredentialRequest, @Nullable android.os.CancellationSignal, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.credentials.CreateCredentialResponse,android.credentials.CredentialManagerException>);
+    method public void executeGetCredential(@NonNull android.credentials.GetCredentialRequest, @Nullable android.os.CancellationSignal, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.credentials.GetCredentialResponse,android.credentials.CredentialManagerException>);
+  }
+
+  public class CredentialManagerException extends java.lang.Exception {
+    ctor public CredentialManagerException(int, @Nullable String);
+    ctor public CredentialManagerException(int, @Nullable String, @Nullable Throwable);
+    ctor public CredentialManagerException(int, @Nullable Throwable);
+    ctor public CredentialManagerException(int);
+    field public static final int ERROR_UNKNOWN = 0; // 0x0
+    field public final int errorCode;
+  }
+
+  public final class GetCredentialOption implements android.os.Parcelable {
+    ctor public GetCredentialOption(@NonNull String, @NonNull android.os.Bundle);
+    method public int describeContents();
+    method @NonNull public android.os.Bundle getData();
+    method @NonNull public String getType();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.credentials.GetCredentialOption> CREATOR;
+  }
+
+  public final class GetCredentialRequest implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public java.util.List<android.credentials.GetCredentialOption> getGetCredentialOptions();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.credentials.GetCredentialRequest> CREATOR;
+  }
+
+  public static final class GetCredentialRequest.Builder {
+    ctor public GetCredentialRequest.Builder();
+    method @NonNull public android.credentials.GetCredentialRequest.Builder addGetCredentialOption(@NonNull android.credentials.GetCredentialOption);
+    method @NonNull public android.credentials.GetCredentialRequest build();
+    method @NonNull public android.credentials.GetCredentialRequest.Builder setGetCredentialOptions(@NonNull java.util.List<android.credentials.GetCredentialOption>);
+  }
+
+  public final class GetCredentialResponse implements android.os.Parcelable {
+    ctor public GetCredentialResponse(@NonNull android.credentials.Credential);
+    ctor public GetCredentialResponse();
+    method public int describeContents();
+    method @Nullable public android.credentials.Credential getCredential();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.credentials.GetCredentialResponse> CREATOR;
   }
 
 }

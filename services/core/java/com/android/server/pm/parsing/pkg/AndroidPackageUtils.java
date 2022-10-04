@@ -34,6 +34,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.server.SystemConfig;
 import com.android.server.pm.PackageManagerException;
 import com.android.server.pm.pkg.AndroidPackage;
+import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.component.ParsedActivity;
 import com.android.server.pm.pkg.component.ParsedInstrumentation;
@@ -271,27 +272,9 @@ public class AndroidPackageUtils {
         return true;
     }
 
-    public static String getPrimaryCpuAbi(AndroidPackage pkg,
-            @Nullable PackageStateInternal pkgSetting) {
-        if (pkgSetting == null || TextUtils.isEmpty(pkgSetting.getPrimaryCpuAbi())) {
-            return getRawPrimaryCpuAbi(pkg);
-        }
-
-        return pkgSetting.getPrimaryCpuAbi();
-    }
-
-    public static String getSecondaryCpuAbi(AndroidPackage pkg,
-            @Nullable PackageStateInternal pkgSetting) {
-        if (pkgSetting == null || TextUtils.isEmpty(pkgSetting.getSecondaryCpuAbi())) {
-            return getRawSecondaryCpuAbi(pkg);
-        }
-
-        return pkgSetting.getSecondaryCpuAbi();
-    }
-
     /**
      * Returns the primary ABI as parsed from the package. Used only during parsing and derivation.
-     * Otherwise prefer {@link #getPrimaryCpuAbi(AndroidPackage, PackageStateInternal)}.
+     * Otherwise prefer {@link PackageState#getPrimaryCpuAbi()}.
      */
     public static String getRawPrimaryCpuAbi(AndroidPackage pkg) {
         return ((AndroidPackageHidden) pkg).getPrimaryCpuAbi();
@@ -299,10 +282,9 @@ public class AndroidPackageUtils {
 
     /**
      * Returns the secondary ABI as parsed from the package. Used only during parsing and
-     * derivation. Otherwise prefer
-     * {@link #getSecondaryCpuAbi(AndroidPackage, PackageStateInternal)}.
+     * derivation. Otherwise prefer {@link PackageState#getSecondaryCpuAbi()}.
      */
-    public static String getRawSecondaryCpuAbi(AndroidPackage pkg) {
+    public static String getRawSecondaryCpuAbi(@NonNull AndroidPackage pkg) {
         return ((AndroidPackageHidden) pkg).getSecondaryCpuAbi();
     }
 

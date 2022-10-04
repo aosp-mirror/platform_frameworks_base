@@ -517,12 +517,12 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
                     ps.getPackageName())) {
                 continue;
             }
-            if (ps.getPrimaryCpuAbi() == null) {
+            if (ps.getPrimaryCpuAbiLegacy() == null) {
                 continue;
             }
 
             final String instructionSet =
-                    VMRuntime.getInstructionSet(ps.getPrimaryCpuAbi());
+                    VMRuntime.getInstructionSet(ps.getPrimaryCpuAbiLegacy());
             if (requiredInstructionSet != null && !requiredInstructionSet.equals(instructionSet)) {
                 // We have a mismatch between instruction sets (say arm vs arm64) warn about
                 // this but there's not much we can do.
@@ -548,7 +548,7 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
             // scannedPackage did not require an ABI, in which case we have to adjust
             // scannedPackage to match the ABI of the set (which is the same as
             // requirer's ABI)
-            adjustedAbi = requirer.getPrimaryCpuAbi();
+            adjustedAbi = requirer.getPrimaryCpuAbiLegacy();
         } else {
             // requirer == null implies that we're updating all ABIs in the set to
             // match scannedPackage.

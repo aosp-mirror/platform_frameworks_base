@@ -73,6 +73,7 @@ import android.view.IWindowFocusObserver;
 import android.view.RemoteAnimationDefinition;
 import android.view.RemoteAnimationAdapter;
 import android.window.IWindowOrganizerController;
+import android.window.BackAnimationAdapter;
 import android.window.BackNavigationInfo;
 import android.window.SplashScreenView;
 import com.android.internal.app.IVoiceInteractor;
@@ -353,9 +354,10 @@ interface IActivityTaskManager {
     /**
      * Prepare the back navigation in the server. This setups the leashed for sysui to animate
      * the back gesture and returns the data needed for the animation.
-     * @param requestAnimation true if the caller wishes to animate the back navigation
      * @param focusObserver a remote callback to nofify shell when the focused window lost focus.
+     * @param adaptor a remote animation to be run for the back navigation plays the animation.
+     * @return Returns the back navigation info.
      */
-    android.window.BackNavigationInfo startBackNavigation(in boolean requestAnimation,
-            in IWindowFocusObserver focusObserver);
+    android.window.BackNavigationInfo startBackNavigation(
+            in IWindowFocusObserver focusObserver, in BackAnimationAdapter adaptor);
 }

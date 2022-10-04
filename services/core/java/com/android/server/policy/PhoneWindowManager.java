@@ -2931,9 +2931,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 return key_consumed;
             case KeyEvent.KEYCODE_KEYBOARD_BACKLIGHT_DOWN:
+                if (down) {
+                    mInputManagerInternal.decrementKeyboardBacklight(event.getDeviceId());
+                }
+                return key_consumed;
             case KeyEvent.KEYCODE_KEYBOARD_BACKLIGHT_UP:
+                if (down) {
+                    mInputManagerInternal.incrementKeyboardBacklight(event.getDeviceId());
+                }
+                return key_consumed;
             case KeyEvent.KEYCODE_KEYBOARD_BACKLIGHT_TOGGLE:
-                // TODO: Add logic to handle keyboard backlight controls (go/pk_backlight_control)
+                // TODO: Add logic
                 return key_consumed;
             case KeyEvent.KEYCODE_VOLUME_UP:
             case KeyEvent.KEYCODE_VOLUME_DOWN:

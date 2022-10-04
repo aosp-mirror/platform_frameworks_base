@@ -1377,8 +1377,8 @@ final class InstallPackageHelper {
 
                 // We moved the entire application as-is, so bring over the
                 // previously derived ABI information.
-                parsedPackage.setPrimaryCpuAbi(ps.getPrimaryCpuAbi())
-                        .setSecondaryCpuAbi(ps.getSecondaryCpuAbi());
+                parsedPackage.setPrimaryCpuAbi(ps.getPrimaryCpuAbiLegacy())
+                        .setSecondaryCpuAbi(ps.getSecondaryCpuAbiLegacy());
             }
 
         } else {
@@ -1932,10 +1932,8 @@ final class InstallPackageHelper {
                         installRequest.getRemovedInfo().mArgs = new InstallArgs(
                                 oldPackage.getPath(),
                                 getAppDexInstructionSets(
-                                        AndroidPackageUtils.getPrimaryCpuAbi(oldPackage,
-                                                deletedPkgSetting),
-                                        AndroidPackageUtils.getSecondaryCpuAbi(oldPackage,
-                                                deletedPkgSetting)));
+                                        deletedPkgSetting.getPrimaryCpuAbi(),
+                                        deletedPkgSetting.getSecondaryCpuAbi()));
                     } else {
                         installRequest.getRemovedInfo().mArgs = null;
                     }
@@ -3944,8 +3942,8 @@ final class InstallPackageHelper {
 
             mRemovePackageHelper.cleanUpResources(
                     new File(pkgSetting.getPathString()),
-                    getAppDexInstructionSets(pkgSetting.getPrimaryCpuAbi(),
-                            pkgSetting.getSecondaryCpuAbi()));
+                    getAppDexInstructionSets(pkgSetting.getPrimaryCpuAbiLegacy(),
+                            pkgSetting.getSecondaryCpuAbiLegacy()));
             synchronized (mPm.mLock) {
                 mPm.mSettings.enableSystemPackageLPw(pkgSetting.getPackageName());
             }
@@ -4029,7 +4027,7 @@ final class InstallPackageHelper {
                                 + parsedPackage.getPath());
                 mRemovePackageHelper.cleanUpResources(new File(pkgSetting.getPathString()),
                         getAppDexInstructionSets(
-                                pkgSetting.getPrimaryCpuAbi(), pkgSetting.getSecondaryCpuAbi()));
+                                pkgSetting.getPrimaryCpuAbiLegacy(), pkgSetting.getSecondaryCpuAbiLegacy()));
             } else {
                 // The application on /system is older than the application on /data. Hide
                 // the application on /system and the version on /data will be scanned later

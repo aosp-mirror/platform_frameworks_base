@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.flicker.splitscreen
 
+import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.IwTest
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
@@ -23,8 +24,8 @@ import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.wm.shell.flicker.appWindowBecomesVisible
 import com.android.wm.shell.flicker.layerBecomesVisible
 import com.android.wm.shell.flicker.layerIsVisibleAtEnd
@@ -32,6 +33,7 @@ import com.android.wm.shell.flicker.splitAppLayerBoundsBecomesVisible
 import com.android.wm.shell.flicker.splitAppLayerBoundsIsVisibleAtEnd
 import com.android.wm.shell.flicker.splitScreenDividerBecomesVisible
 import com.android.wm.shell.flicker.splitScreenEntered
+import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -47,7 +49,6 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@Group1
 class EnterSplitScreenFromOverview(testSpec: FlickerTestParameter) : SplitScreenBase(testSpec) {
 
     override val transition: FlickerBuilder.() -> Unit
@@ -93,8 +94,19 @@ class EnterSplitScreenFromOverview(testSpec: FlickerTestParameter) : SplitScreen
 
     @Presubmit
     @Test
-    fun secondaryAppBoundsBecomesVisible() = testSpec.splitAppLayerBoundsBecomesVisible(
-        secondaryApp, landscapePosLeft = !tapl.isTablet, portraitPosTop = true)
+    fun secondaryAppBoundsBecomesVisible() {
+        Assume.assumeFalse(isShellTransitionsEnabled)
+        testSpec.splitAppLayerBoundsBecomesVisible(
+            secondaryApp, landscapePosLeft = !tapl.isTablet, portraitPosTop = true)
+    }
+
+    @FlakyTest(bugId = 244407465)
+    @Test
+    fun secondaryAppBoundsBecomesVisible_shellTransit() {
+        Assume.assumeTrue(isShellTransitionsEnabled)
+        testSpec.splitAppLayerBoundsBecomesVisible(
+            secondaryApp, landscapePosLeft = !tapl.isTablet, portraitPosTop = true)
+    }
 
     @Presubmit
     @Test

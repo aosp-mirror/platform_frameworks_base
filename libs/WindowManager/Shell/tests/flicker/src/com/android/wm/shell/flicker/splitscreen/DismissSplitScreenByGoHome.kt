@@ -25,7 +25,6 @@ import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.wm.shell.flicker.appWindowBecomesInvisible
 import com.android.wm.shell.flicker.layerBecomesInvisible
@@ -47,7 +46,6 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@Group1
 class DismissSplitScreenByGoHome(
     testSpec: FlickerTestParameter
 ) : SplitScreenBase(testSpec) {
@@ -74,7 +72,7 @@ class DismissSplitScreenByGoHome(
     @Test
     fun splitScreenDividerBecomesInvisible() = testSpec.splitScreenDividerBecomesInvisible()
 
-    @Presubmit
+    @FlakyTest(bugId = 241525302)
     @Test
     fun primaryAppLayerBecomesInvisible() = testSpec.layerBecomesInvisible(primaryApp)
 
@@ -87,12 +85,18 @@ class DismissSplitScreenByGoHome(
     @FlakyTest(bugId = 245472831)
     @Test
     fun primaryAppBoundsBecomesInvisible() = testSpec.splitAppLayerBoundsBecomesInvisible(
-        primaryApp, landscapePosLeft = tapl.isTablet, portraitPosTop = false)
+        primaryApp,
+        landscapePosLeft = tapl.isTablet,
+        portraitPosTop = false
+    )
 
-    @Presubmit
+    @FlakyTest(bugId = 250530241)
     @Test
     fun secondaryAppBoundsBecomesInvisible() = testSpec.splitAppLayerBoundsBecomesInvisible(
-        secondaryApp, landscapePosLeft = !tapl.isTablet, portraitPosTop = true)
+        secondaryApp,
+        landscapePosLeft = !tapl.isTablet,
+        portraitPosTop = true
+    )
 
     @Presubmit
     @Test
@@ -175,7 +179,8 @@ class DismissSplitScreenByGoHome(
             return FlickerTestParameterFactory.getInstance().getConfigNonRotationTests(
                 // TODO(b/176061063):The 3 buttons of nav bar do not exist in the hierarchy.
                 supportedNavigationModes =
-                    listOf(WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY))
+                listOf(WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY)
+            )
         }
     }
 }

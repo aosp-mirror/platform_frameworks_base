@@ -749,8 +749,8 @@ public class PackageManagerSettingsTests {
                 null /*usesStaticLibrariesVersions*/,
                 null /*mimeGroups*/,
                 UUID.randomUUID());
-        assertThat(testPkgSetting01.getPrimaryCpuAbi(), is("arm64-v8a"));
-        assertThat(testPkgSetting01.getSecondaryCpuAbi(), is("armeabi"));
+        assertThat(testPkgSetting01.getPrimaryCpuAbiLegacy(), is("arm64-v8a"));
+        assertThat(testPkgSetting01.getSecondaryCpuAbiLegacy(), is("armeabi"));
         assertThat(testPkgSetting01.getFlags(), is(0));
         assertThat(testPkgSetting01.getPrivateFlags(), is(0));
         final PackageUserState userState = testPkgSetting01.readUserState(0);
@@ -785,8 +785,8 @@ public class PackageManagerSettingsTests {
                 null /*usesStaticLibrariesVersions*/,
                 null /*mimeGroups*/,
                 UUID.randomUUID());
-        assertThat(testPkgSetting01.getPrimaryCpuAbi(), is("arm64-v8a"));
-        assertThat(testPkgSetting01.getSecondaryCpuAbi(), is("armeabi"));
+        assertThat(testPkgSetting01.getPrimaryCpuAbiLegacy(), is("arm64-v8a"));
+        assertThat(testPkgSetting01.getSecondaryCpuAbiLegacy(), is("armeabi"));
         assertThat(testPkgSetting01.getFlags(), is(ApplicationInfo.FLAG_SYSTEM));
         assertThat(testPkgSetting01.getPrivateFlags(), is(ApplicationInfo.PRIVATE_FLAG_PRIVILEGED));
         final PackageUserState userState = testPkgSetting01.readUserState(0);
@@ -860,8 +860,8 @@ public class PackageManagerSettingsTests {
         assertThat(testPkgSetting01.getPackageName(), is(PACKAGE_NAME));
         assertThat(testPkgSetting01.getFlags(), is(ApplicationInfo.FLAG_SYSTEM));
         assertThat(testPkgSetting01.getPrivateFlags(), is(ApplicationInfo.PRIVATE_FLAG_PRIVILEGED));
-        assertThat(testPkgSetting01.getPrimaryCpuAbi(), is("arm64-v8a"));
-        assertThat(testPkgSetting01.getSecondaryCpuAbi(), is("armeabi"));
+        assertThat(testPkgSetting01.getPrimaryCpuAbiLegacy(), is("arm64-v8a"));
+        assertThat(testPkgSetting01.getSecondaryCpuAbiLegacy(), is("armeabi"));
         // signatures object must be different
         assertNotSame(testPkgSetting01.getSignatures(), originalSignatures);
         assertThat(testPkgSetting01.getVersionCode(), is(UPDATED_VERSION_CODE));
@@ -901,8 +901,8 @@ public class PackageManagerSettingsTests {
         assertThat(testPkgSetting01.getPackageName(), is(PACKAGE_NAME));
         assertThat(testPkgSetting01.getFlags(), is(0));
         assertThat(testPkgSetting01.getPrivateFlags(), is(0));
-        assertThat(testPkgSetting01.getPrimaryCpuAbi(), is("x86_64"));
-        assertThat(testPkgSetting01.getSecondaryCpuAbi(), is("x86"));
+        assertThat(testPkgSetting01.getPrimaryCpuAbiLegacy(), is("x86_64"));
+        assertThat(testPkgSetting01.getSecondaryCpuAbiLegacy(), is("x86"));
         assertThat(testPkgSetting01.getVersionCode(), is(INITIAL_VERSION_CODE));
         // by default, the package is considered stopped
         final PackageUserState userState = testPkgSetting01.readUserState(0);
@@ -944,8 +944,8 @@ public class PackageManagerSettingsTests {
         assertThat(testPkgSetting01.getPackageName(), is(PACKAGE_NAME));
         assertThat(testPkgSetting01.getFlags(), is(0));
         assertThat(testPkgSetting01.getPrivateFlags(), is(0));
-        assertThat(testPkgSetting01.getPrimaryCpuAbi(), is("x86_64"));
-        assertThat(testPkgSetting01.getSecondaryCpuAbi(), is("x86"));
+        assertThat(testPkgSetting01.getPrimaryCpuAbiLegacy(), is("x86_64"));
+        assertThat(testPkgSetting01.getSecondaryCpuAbiLegacy(), is("x86"));
         assertThat(testPkgSetting01.getVersionCode(), is(INITIAL_VERSION_CODE));
         final PackageUserState userState = testPkgSetting01.readUserState(0);
         verifyUserState(userState, false /*notLaunched*/, false /*stopped*/, true /*installed*/);
@@ -987,8 +987,8 @@ public class PackageManagerSettingsTests {
         assertThat(testPkgSetting01.getPackageName(), is(PACKAGE_NAME));
         assertThat(testPkgSetting01.getFlags(), is(0));
         assertThat(testPkgSetting01.getPrivateFlags(), is(0));
-        assertThat(testPkgSetting01.getPrimaryCpuAbi(), is("arm64-v8a"));
-        assertThat(testPkgSetting01.getSecondaryCpuAbi(), is("armeabi"));
+        assertThat(testPkgSetting01.getPrimaryCpuAbiLegacy(), is("arm64-v8a"));
+        assertThat(testPkgSetting01.getSecondaryCpuAbiLegacy(), is("armeabi"));
         assertNotSame(testPkgSetting01.getSignatures(), disabledSignatures);
         assertThat(testPkgSetting01.getVersionCode(), is(UPDATED_VERSION_CODE));
         final PackageUserState userState = testPkgSetting01.readUserState(0);
@@ -1211,11 +1211,11 @@ public class PackageManagerSettingsTests {
         // assertThat(origPkgSetting.pkg, is(testPkgSetting.pkg));
         assertThat(origPkgSetting.getFlags(), is(testPkgSetting.getFlags()));
         assertThat(origPkgSetting.getPrivateFlags(), is(testPkgSetting.getPrivateFlags()));
-        assertSame(origPkgSetting.getPrimaryCpuAbi(), testPkgSetting.getPrimaryCpuAbi());
-        assertThat(origPkgSetting.getPrimaryCpuAbi(), is(testPkgSetting.getPrimaryCpuAbi()));
+        assertSame(origPkgSetting.getPrimaryCpuAbiLegacy(), testPkgSetting.getPrimaryCpuAbiLegacy());
+        assertThat(origPkgSetting.getPrimaryCpuAbiLegacy(), is(testPkgSetting.getPrimaryCpuAbiLegacy()));
         assertThat(origPkgSetting.getRealName(), is(testPkgSetting.getRealName()));
-        assertSame(origPkgSetting.getSecondaryCpuAbi(), testPkgSetting.getSecondaryCpuAbi());
-        assertThat(origPkgSetting.getSecondaryCpuAbi(), is(testPkgSetting.getSecondaryCpuAbi()));
+        assertSame(origPkgSetting.getSecondaryCpuAbiLegacy(), testPkgSetting.getSecondaryCpuAbiLegacy());
+        assertThat(origPkgSetting.getSecondaryCpuAbiLegacy(), is(testPkgSetting.getSecondaryCpuAbiLegacy()));
         assertSame(origPkgSetting.getSignatures(), testPkgSetting.getSignatures());
         assertThat(origPkgSetting.getSignatures(), is(testPkgSetting.getSignatures()));
         assertThat(origPkgSetting.getLastModifiedTime(), is(testPkgSetting.getLastModifiedTime()));

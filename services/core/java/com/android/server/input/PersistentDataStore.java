@@ -16,39 +16,36 @@
 
 package com.android.server.input;
 
-import com.android.internal.util.ArrayUtils;
-import com.android.internal.util.FastXmlSerializer;
-import com.android.internal.util.XmlUtils;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
-
 import android.annotation.Nullable;
-import android.view.Surface;
 import android.hardware.input.TouchCalibration;
 import android.util.AtomicFile;
 import android.util.Slog;
+import android.util.SparseIntArray;
 import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
 import android.util.Xml;
+import android.view.Surface;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.XmlUtils;
+
+import libcore.io.IoUtils;
+
+import org.xmlpull.v1.XmlPullParserException;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.OptionalInt;
 import java.util.Set;
-
-import libcore.io.IoUtils;
 
 /**
  * Manages persistent state recorded by the input manager service as an XML file.
@@ -69,7 +66,9 @@ final class PersistentDataStore {
     // Input device state by descriptor.
     private final HashMap<String, InputDeviceState> mInputDevices =
             new HashMap<String, InputDeviceState>();
-    private final AtomicFile mAtomicFile;
+
+    // The interface for methods which should be replaced by the test harness.
+    private Injector mInjector;
 
     // True if the data has been loaded.
     private boolean mLoaded;
@@ -78,8 +77,12 @@ final class PersistentDataStore {
     private boolean mDirty;
 
     public PersistentDataStore() {
-        mAtomicFile = new AtomicFile(new File("/data/system/input-manager-state.xml"),
-                "input-state");
+        this(new Injector());
+    }
+
+    @VisibleForTesting
+    PersistentDataStore(Injector injector) {
+        mInjector = injector;
     }
 
     public void saveIfNeeded() {
@@ -90,7 +93,7 @@ final class PersistentDataStore {
     }
 
     public TouchCalibration getTouchCalibration(String inputDeviceDescriptor, int surfaceRotation) {
-        InputDeviceState state = getInputDeviceState(inputDeviceDescriptor, false);
+        InputDeviceState state = getInputDeviceState(inputDeviceDescriptor);
         if (state == null) {
             return TouchCalibration.IDENTITY;
         }
@@ -103,7 +106,7 @@ final class PersistentDataStore {
     }
 
     public boolean setTouchCalibration(String inputDeviceDescriptor, int surfaceRotation, TouchCalibration calibration) {
-        InputDeviceState state = getInputDeviceState(inputDeviceDescriptor, true);
+        InputDeviceState state = getOrCreateInputDeviceState(inputDeviceDescriptor);
 
         if (state.setTouchCalibration(surfaceRotation, calibration)) {
             setDirty();
@@ -114,13 +117,13 @@ final class PersistentDataStore {
     }
 
     public String getCurrentKeyboardLayout(String inputDeviceDescriptor) {
-        InputDeviceState state = getInputDeviceState(inputDeviceDescriptor, false);
+        InputDeviceState state = getInputDeviceState(inputDeviceDescriptor);
         return state != null ? state.getCurrentKeyboardLayout() : null;
     }
 
     public boolean setCurrentKeyboardLayout(String inputDeviceDescriptor,
             String keyboardLayoutDescriptor) {
-        InputDeviceState state = getInputDeviceState(inputDeviceDescriptor, true);
+        InputDeviceState state = getOrCreateInputDeviceState(inputDeviceDescriptor);
         if (state.setCurrentKeyboardLayout(keyboardLayoutDescriptor)) {
             setDirty();
             return true;
@@ -129,7 +132,7 @@ final class PersistentDataStore {
     }
 
     public String[] getKeyboardLayouts(String inputDeviceDescriptor) {
-        InputDeviceState state = getInputDeviceState(inputDeviceDescriptor, false);
+        InputDeviceState state = getInputDeviceState(inputDeviceDescriptor);
         if (state == null) {
             return (String[])ArrayUtils.emptyArray(String.class);
         }
@@ -138,7 +141,7 @@ final class PersistentDataStore {
 
     public boolean addKeyboardLayout(String inputDeviceDescriptor,
             String keyboardLayoutDescriptor) {
-        InputDeviceState state = getInputDeviceState(inputDeviceDescriptor, true);
+        InputDeviceState state = getOrCreateInputDeviceState(inputDeviceDescriptor);
         if (state.addKeyboardLayout(keyboardLayoutDescriptor)) {
             setDirty();
             return true;
@@ -148,7 +151,7 @@ final class PersistentDataStore {
 
     public boolean removeKeyboardLayout(String inputDeviceDescriptor,
             String keyboardLayoutDescriptor) {
-        InputDeviceState state = getInputDeviceState(inputDeviceDescriptor, true);
+        InputDeviceState state = getOrCreateInputDeviceState(inputDeviceDescriptor);
         if (state.removeKeyboardLayout(keyboardLayoutDescriptor)) {
             setDirty();
             return true;
@@ -157,12 +160,30 @@ final class PersistentDataStore {
     }
 
     public boolean switchKeyboardLayout(String inputDeviceDescriptor, int direction) {
-        InputDeviceState state = getInputDeviceState(inputDeviceDescriptor, false);
+        InputDeviceState state = getInputDeviceState(inputDeviceDescriptor);
         if (state != null && state.switchKeyboardLayout(direction)) {
             setDirty();
             return true;
         }
         return false;
+    }
+
+    public boolean setKeyboardBacklightBrightness(String inputDeviceDescriptor, int lightId,
+            int brightness) {
+        InputDeviceState state = getOrCreateInputDeviceState(inputDeviceDescriptor);
+        if (state.setKeyboardBacklightBrightness(lightId, brightness)) {
+            setDirty();
+            return true;
+        }
+        return false;
+    }
+
+    public OptionalInt getKeyboardBacklightBrightness(String inputDeviceDescriptor, int lightId) {
+        InputDeviceState state = getInputDeviceState(inputDeviceDescriptor);
+        if (state == null) {
+            return OptionalInt.empty();
+        }
+        return state.getKeyboardBacklightBrightness(lightId);
     }
 
     public boolean removeUninstalledKeyboardLayouts(Set<String> availableKeyboardLayouts) {
@@ -179,11 +200,15 @@ final class PersistentDataStore {
         return false;
     }
 
-    private InputDeviceState getInputDeviceState(String inputDeviceDescriptor,
-            boolean createIfAbsent) {
+    private InputDeviceState getInputDeviceState(String inputDeviceDescriptor) {
+        loadIfNeeded();
+        return mInputDevices.get(inputDeviceDescriptor);
+    }
+
+    private InputDeviceState getOrCreateInputDeviceState(String inputDeviceDescriptor) {
         loadIfNeeded();
         InputDeviceState state = mInputDevices.get(inputDeviceDescriptor);
-        if (state == null && createIfAbsent) {
+        if (state == null) {
             state = new InputDeviceState();
             mInputDevices.put(inputDeviceDescriptor, state);
             setDirty();
@@ -211,7 +236,7 @@ final class PersistentDataStore {
 
         final InputStream is;
         try {
-            is = mAtomicFile.openRead();
+            is = mInjector.openRead();
         } catch (FileNotFoundException ex) {
             return;
         }
@@ -234,7 +259,7 @@ final class PersistentDataStore {
     private void save() {
         final FileOutputStream os;
         try {
-            os = mAtomicFile.startWrite();
+            os = mInjector.startWrite();
             boolean success = false;
             try {
                 TypedXmlSerializer serializer = Xml.resolveSerializer(os);
@@ -242,11 +267,7 @@ final class PersistentDataStore {
                 serializer.flush();
                 success = true;
             } finally {
-                if (success) {
-                    mAtomicFile.finishWrite(os);
-                } else {
-                    mAtomicFile.failWrite(os);
-                }
+                mInjector.finishWrite(os, success);
             }
         } catch (IOException ex) {
             Slog.w(InputManagerService.TAG, "Failed to save input manager persistent store data.", ex);
@@ -307,10 +328,12 @@ final class PersistentDataStore {
         private static final String[] CALIBRATION_NAME = { "x_scale",
                 "x_ymix", "x_offset", "y_xmix", "y_scale", "y_offset" };
 
-        private TouchCalibration[] mTouchCalibration = new TouchCalibration[4];
+        private static final int INVALID_VALUE = -1;
+        private final TouchCalibration[] mTouchCalibration = new TouchCalibration[4];
         @Nullable
         private String mCurrentKeyboardLayout;
-        private ArrayList<String> mKeyboardLayouts = new ArrayList<String>();
+        private final ArrayList<String> mKeyboardLayouts = new ArrayList<String>();
+        private final SparseIntArray mKeyboardBacklightBrightnessMap = new SparseIntArray();
 
         public TouchCalibration getTouchCalibration(int surfaceRotation) {
             try {
@@ -375,6 +398,19 @@ final class PersistentDataStore {
             mKeyboardLayouts.remove(index);
             updateCurrentKeyboardLayoutIfRemoved(keyboardLayout, index);
             return true;
+        }
+
+        public boolean setKeyboardBacklightBrightness(int lightId, int brightness) {
+            if (mKeyboardBacklightBrightnessMap.get(lightId, INVALID_VALUE) == brightness) {
+                return false;
+            }
+            mKeyboardBacklightBrightnessMap.put(lightId, brightness);
+            return true;
+        }
+
+        public OptionalInt getKeyboardBacklightBrightness(int lightId) {
+            int brightness = mKeyboardBacklightBrightnessMap.get(lightId, INVALID_VALUE);
+            return brightness == INVALID_VALUE ? OptionalInt.empty() : OptionalInt.of(brightness);
         }
 
         private void updateCurrentKeyboardLayoutIfRemoved(
@@ -446,6 +482,10 @@ final class PersistentDataStore {
                         }
                         mCurrentKeyboardLayout = descriptor;
                     }
+                } else if (parser.getName().equals("light-info")) {
+                    int lightId = parser.getAttributeInt(null, "light-id");
+                    int lightBrightness = parser.getAttributeInt(null, "light-brightness");
+                    mKeyboardBacklightBrightnessMap.put(lightId, lightBrightness);
                 } else if (parser.getName().equals("calibration")) {
                     String format = parser.getAttributeValue(null, "format");
                     String rotation = parser.getAttributeValue(null, "rotation");
@@ -515,6 +555,15 @@ final class PersistentDataStore {
                 serializer.endTag(null, "keyboard-layout");
             }
 
+            for (int i = 0; i < mKeyboardBacklightBrightnessMap.size(); i++) {
+                int lightId = mKeyboardBacklightBrightnessMap.valueAt(i);
+                serializer.startTag(null, "light-info");
+                serializer.attributeInt(null, "light-id", lightId);
+                serializer.attributeInt(null, "light-brightness",
+                        mKeyboardBacklightBrightnessMap.get(lightId));
+                serializer.endTag(null, "light-info");
+            }
+
             for (int i = 0; i < mTouchCalibration.length; i++) {
                 if (mTouchCalibration[i] != null) {
                     String rotation = surfaceRotationToString(i);
@@ -557,6 +606,32 @@ final class PersistentDataStore {
                 return Surface.ROTATION_270;
             }
             throw new IllegalArgumentException("Unsupported surface rotation string '" + s + "'");
+        }
+    }
+
+    @VisibleForTesting
+    static class Injector {
+        private final AtomicFile mAtomicFile;
+
+        Injector() {
+            mAtomicFile = new AtomicFile(new File("/data/system/input-manager-state.xml"),
+                    "input-state");
+        }
+
+        InputStream openRead() throws FileNotFoundException {
+            return mAtomicFile.openRead();
+        }
+
+        FileOutputStream startWrite() throws IOException {
+            return mAtomicFile.startWrite();
+        }
+
+        void finishWrite(FileOutputStream fos, boolean success) {
+            if (success) {
+                mAtomicFile.finishWrite(fos);
+            } else {
+                mAtomicFile.failWrite(fos);
+            }
         }
     }
 }

@@ -265,8 +265,8 @@ public class PackageDexOptimizer {
                 .getNonNativeUsesLibraryInfos();
         final String[] instructionSets = targetInstructionSets != null ?
                 targetInstructionSets : getAppDexInstructionSets(
-                AndroidPackageUtils.getPrimaryCpuAbi(pkg, pkgSetting),
-                AndroidPackageUtils.getSecondaryCpuAbi(pkg, pkgSetting));
+                pkgSetting.getPrimaryCpuAbi(),
+                pkgSetting.getSecondaryCpuAbi());
         final String[] dexCodeInstructionSets = getDexCodeInstructionSets(instructionSets);
         final List<String> paths = AndroidPackageUtils.getAllCodePaths(pkg);
 
@@ -736,9 +736,8 @@ public class PackageDexOptimizer {
      */
     void dumpDexoptState(IndentingPrintWriter pw, AndroidPackage pkg,
             PackageStateInternal pkgSetting, PackageDexUsage.PackageUseInfo useInfo) {
-        final String[] instructionSets = getAppDexInstructionSets(
-                AndroidPackageUtils.getPrimaryCpuAbi(pkg, pkgSetting),
-                AndroidPackageUtils.getSecondaryCpuAbi(pkg, pkgSetting));
+        final String[] instructionSets = getAppDexInstructionSets(pkgSetting.getPrimaryCpuAbi(),
+                pkgSetting.getSecondaryCpuAbi());
         final String[] dexCodeInstructionSets = getDexCodeInstructionSets(instructionSets);
 
         final List<String> paths = AndroidPackageUtils.getAllCodePathsExcludingResourceOnly(pkg);

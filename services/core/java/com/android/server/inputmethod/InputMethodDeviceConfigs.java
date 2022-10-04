@@ -25,7 +25,7 @@ import android.provider.DeviceConfig;
  * Class for the device-level configuration related to the input method manager
  * platform features in {@link DeviceConfig}.
  */
-public final class InputMethodDeviceConfigs {
+final class InputMethodDeviceConfigs {
     private boolean mHideImeWhenNoEditorFocus;
     private final DeviceConfig.OnPropertiesChangedListener mDeviceConfigChangedListener;
 

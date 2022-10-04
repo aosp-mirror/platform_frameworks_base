@@ -57,6 +57,7 @@ import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.credentials.CredentialManager;
 import android.database.DatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
@@ -3933,6 +3934,7 @@ public abstract class Context {
             //@hide: ATTESTATION_VERIFICATION_SERVICE,
             //@hide: SAFETY_CENTER_SERVICE,
             DISPLAY_HASH_SERVICE,
+            CREDENTIAL_SERVICE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ServiceName {}
@@ -6057,6 +6059,15 @@ public abstract class Context {
      * @see android.healthconnect.HealthConnectManager
      */
     public static final String HEALTHCONNECT_SERVICE = "healthconnect";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.credentials.CredentialManager} to authenticate a user to your app.
+     *
+     * @see #getSystemService(String)
+     * @see CredentialManager
+     */
+    public static final String CREDENTIAL_SERVICE = "credential";
 
     /**
      * Determine whether the given permission is allowed for a particular
