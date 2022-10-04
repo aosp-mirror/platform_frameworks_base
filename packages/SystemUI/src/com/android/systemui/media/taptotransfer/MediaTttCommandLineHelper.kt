@@ -22,6 +22,7 @@ import android.content.Context
 import android.media.MediaRoute2Info
 import android.util.Log
 import androidx.annotation.VisibleForTesting
+import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.media.taptotransfer.receiver.ChipStateReceiver
@@ -39,14 +40,10 @@ import javax.inject.Inject
  */
 @SysUISingleton
 class MediaTttCommandLineHelper @Inject constructor(
-    commandRegistry: CommandRegistry,
+    private val commandRegistry: CommandRegistry,
     private val context: Context,
     @Main private val mainExecutor: Executor
-) {
-    init {
-        commandRegistry.registerCommand(SENDER_COMMAND) { SenderCommand() }
-        commandRegistry.registerCommand(RECEIVER_COMMAND) { ReceiverCommand() }
-    }
+) : CoreStartable(context) {
 
     /** All commands for the sender device. */
     inner class SenderCommand : Command {
@@ -56,7 +53,7 @@ class MediaTttCommandLineHelper @Inject constructor(
             val displayState: Int?
             try {
                 displayState = ChipStateSender.getSenderStateIdFromName(commandName)
-            }  catch (ex: IllegalArgumentException) {
+            } catch (ex: IllegalArgumentException) {
                 pw.println("Invalid command name $commandName")
                 return
             }
@@ -149,6 +146,11 @@ class MediaTttCommandLineHelper @Inject constructor(
             pw.println("Usage: adb shell cmd statusbar $RECEIVER_COMMAND " +
                     "<chipState> useAppIcon=[true|false]")
         }
+    }
+
+    override fun start() {
+        commandRegistry.registerCommand(SENDER_COMMAND) { SenderCommand() }
+        commandRegistry.registerCommand(RECEIVER_COMMAND) { ReceiverCommand() }
     }
 }
 
