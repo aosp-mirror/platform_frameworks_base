@@ -34,13 +34,26 @@ public class RequestInfo implements Parcelable {
      * The intent extra key for the {@code RequestInfo} object when launching the UX
      * activities.
      */
-    public static final String EXTRA_REQUEST_INFO = "android.credentials.ui.extra.REQUEST_INFO";
+    public static final @NonNull String EXTRA_REQUEST_INFO =
+            "android.credentials.ui.extra.REQUEST_INFO";
+
+    /** Type value for an executeGetCredential request. */
+    public static final @NonNull String TYPE_GET = "android.credentials.ui.TYPE_GET";
+    /** Type value for an executeCreateCredential request. */
+    public static final @NonNull String TYPE_CREATE = "android.credentials.ui.TYPE_CREATE";
 
     @NonNull
     private final IBinder mToken;
 
-    public RequestInfo(@NonNull IBinder token) {
+    @NonNull
+    private final String mType;
+
+    private final boolean mIsFirstUsage;
+
+    public RequestInfo(@NonNull IBinder token, @NonNull String type, boolean isFirstUsage) {
         mToken = token;
+        mType = type;
+        mIsFirstUsage = isFirstUsage;
     }
 
     /** Returns the request token matching the user request. */
@@ -49,15 +62,39 @@ public class RequestInfo implements Parcelable {
         return mToken;
     }
 
+    /** Returns the request type. */
+    @NonNull
+    public String getType() {
+        return mType;
+    }
+
+    /**
+     * Returns whether this is the first Credential Manager usage for this user on the device.
+     *
+     * If true, the user will be prompted for a provider-centric dialog first to confirm their
+     * provider choices.
+     */
+    public boolean isFirstUsage() {
+        return mIsFirstUsage;
+    }
+
     protected RequestInfo(@NonNull Parcel in) {
         IBinder token = in.readStrongBinder();
+        String type = in.readString8();
+        boolean isFirstUsage = in.readBoolean();
+
         mToken = token;
         AnnotationValidations.validate(NonNull.class, null, mToken);
+        mType = type;
+        AnnotationValidations.validate(NonNull.class, null, mType);
+        mIsFirstUsage = isFirstUsage;
     }
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeStrongBinder(mToken);
+        dest.writeString8(mType);
+        dest.writeBoolean(mIsFirstUsage);
     }
 
     @Override
