@@ -68,6 +68,9 @@ public class Flags {
 
     public static final UnreleasedFlag INSTANT_VOICE_REPLY = new UnreleasedFlag(111, true);
 
+    public static final UnreleasedFlag NOTIFICATION_MEMORY_MONITOR_ENABLED = new UnreleasedFlag(112,
+            false);
+
     // next id: 112
 
     /***************************************/
