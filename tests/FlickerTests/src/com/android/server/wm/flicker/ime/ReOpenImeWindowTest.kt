@@ -23,7 +23,6 @@ import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.annotation.Group2
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper
 import com.android.server.wm.flicker.helpers.reopenAppFromOverview
@@ -43,7 +42,6 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@Group2
 open class ReOpenImeWindowTest(testSpec: FlickerTestParameter) : BaseTest(testSpec) {
     private val testApp = ImeAppAutoFocusHelper(instrumentation, testSpec.startRotation)
 

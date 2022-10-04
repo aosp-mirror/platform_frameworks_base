@@ -16,11 +16,11 @@
 
 package com.android.server.wm.flicker.quickswitch
 
+import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.navBarWindowIsVisibleAtStartAndEnd
 import org.junit.Assume
@@ -47,7 +47,6 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@Group1
 open class QuickSwitchBetweenTwoAppsBackTest_ShellTransit(
     testSpec: FlickerTestParameter
 ) : QuickSwitchBetweenTwoAppsBackTest(testSpec) {
@@ -71,4 +70,9 @@ open class QuickSwitchBetweenTwoAppsBackTest_ShellTransit(
         Assume.assumeFalse(testSpec.isTablet)
         testSpec.navBarWindowIsVisibleAtStartAndEnd()
     }
+
+    @FlakyTest(bugId = 246284708)
+    @Test
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
 }

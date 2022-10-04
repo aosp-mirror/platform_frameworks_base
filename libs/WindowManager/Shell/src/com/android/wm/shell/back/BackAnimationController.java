@@ -23,13 +23,9 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityTaskManager;
 import android.app.IActivityTaskManager;
-import android.app.WindowConfiguration;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
-import android.graphics.Point;
-import android.graphics.PointF;
-import android.hardware.HardwareBuffer;
 import android.hardware.input.InputManager;
 import android.net.Uri;
 import android.os.Handler;
@@ -40,15 +36,19 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings.Global;
 import android.util.Log;
+import android.util.SparseArray;
+import android.view.IRemoteAnimationRunner;
 import android.view.IWindowFocusObserver;
 import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.RemoteAnimationTarget;
-import android.view.SurfaceControl;
+import android.window.BackAnimationAdapter;
 import android.window.BackEvent;
 import android.window.BackNavigationInfo;
+import android.window.IBackAnimationFinishedCallback;
+import android.window.IBackAnimationRunner;
 import android.window.IOnBackInvokedCallback;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -58,6 +58,7 @@ import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.annotations.ShellBackgroundThread;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.transition.Transitions;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -75,6 +76,9 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                     SETTING_VALUE_ON) != SETTING_VALUE_OFF;
     private static final int PROGRESS_THRESHOLD = SystemProperties
             .getInt(PREDICTIVE_BACK_PROGRESS_THRESHOLD_PROP, -1);
+
+    // TODO (b/241808055) Find a appropriate time to remove during refactor
+    private static final boolean ENABLE_SHELL_TRANSITIONS = Transitions.ENABLE_SHELL_TRANSITIONS;
     /**
      * Max duration to wait for a transition to finish before accepting another gesture start
      * request.
@@ -82,16 +86,6 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     private static final long MAX_TRANSITION_DURATION = 2000;
 
     private final AtomicBoolean mEnableAnimations = new AtomicBoolean(false);
-
-    /**
-     * Location of the initial touch event of the back gesture.
-     */
-    private final PointF mInitTouchLocation = new PointF();
-
-    /**
-     * Raw delta between {@link #mInitTouchLocation} and the last touch location.
-     */
-    private final Point mTouchEventDelta = new Point();
 
     /** True when a back gesture is ongoing */
     private boolean mBackGestureStarted = false;
@@ -105,22 +99,26 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
 
     @Nullable
     private BackNavigationInfo mBackNavigationInfo;
-    private final SurfaceControl.Transaction mTransaction;
     private final IActivityTaskManager mActivityTaskManager;
     private final Context mContext;
     private final ContentResolver mContentResolver;
     private final ShellExecutor mShellExecutor;
     private final Handler mBgHandler;
-    @Nullable
-    private IOnBackInvokedCallback mBackToLauncherCallback;
-    private float mTriggerThreshold;
-    private float mProgressThreshold;
     private final Runnable mResetTransitionRunnable = () -> {
-        finishAnimation();
-        mTransitionInProgress = false;
         ProtoLog.w(WM_SHELL_BACK_PREVIEW, "Transition didn't finish in %d ms. Resetting...",
                 MAX_TRANSITION_DURATION);
+        onBackAnimationFinished();
     };
+
+    private IBackAnimationFinishedCallback mBackAnimationFinishedCallback;
+    @VisibleForTesting
+    BackAnimationAdapter mBackAnimationAdapter;
+
+    private final TouchTracker mTouchTracker = new TouchTracker();
+
+    private final SparseArray<BackAnimationRunner> mAnimationDefinition = new SparseArray<>();
+    private final Transitions mTransitions;
+    private BackTransitionHandler mBackTransitionHandler;
 
     @VisibleForTesting
     final IWindowFocusObserver mFocusObserver = new IWindowFocusObserver.Stub() {
@@ -134,19 +132,69 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                     // this due to the transition may cause focus lost. (alpha = 0)
                     return;
                 }
+                ProtoLog.i(WM_SHELL_BACK_PREVIEW, "Target window lost focus.");
                 setTriggerBack(false);
                 onGestureFinished(false);
             });
         }
     };
 
+    /**
+     * Helper class to record the touch location for gesture start and latest.
+     */
+    private static class TouchTracker {
+        /**
+         * Location of the latest touch event
+         */
+        private float mLatestTouchX;
+        private float mLatestTouchY;
+        private int mSwipeEdge;
+        private float mProgressThreshold;
+
+        /**
+         * Location of the initial touch event of the back gesture.
+         */
+        private float mInitTouchX;
+        private float mInitTouchY;
+
+        void update(float touchX, float touchY, int swipeEdge) {
+            mLatestTouchX = touchX;
+            mLatestTouchY = touchY;
+            mSwipeEdge = swipeEdge;
+        }
+
+        void setGestureStartLocation(float touchX, float touchY) {
+            mInitTouchX = touchX;
+            mInitTouchY = touchY;
+        }
+
+        void setProgressThreshold(float progressThreshold) {
+            mProgressThreshold = progressThreshold;
+        }
+
+        float getProgress(float touchX) {
+            int deltaX = Math.round(touchX - mInitTouchX);
+            float progressThreshold = PROGRESS_THRESHOLD >= 0
+                    ? PROGRESS_THRESHOLD : mProgressThreshold;
+            return Math.min(Math.max(Math.abs(deltaX) / progressThreshold, 0), 1);
+        }
+
+        void reset() {
+            mInitTouchX = 0;
+            mInitTouchY = 0;
+            mSwipeEdge = -1;
+        }
+    }
+
     public BackAnimationController(
             @NonNull ShellInit shellInit,
             @NonNull @ShellMainThread ShellExecutor shellExecutor,
             @NonNull @ShellBackgroundThread Handler backgroundHandler,
-            Context context) {
-        this(shellInit, shellExecutor, backgroundHandler, new SurfaceControl.Transaction(),
-                ActivityTaskManager.getService(), context, context.getContentResolver());
+            Context context,
+            Transitions transitions) {
+        this(shellInit, shellExecutor, backgroundHandler,
+                ActivityTaskManager.getService(), context, context.getContentResolver(),
+                transitions);
     }
 
     @VisibleForTesting
@@ -154,20 +202,25 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             @NonNull ShellInit shellInit,
             @NonNull @ShellMainThread ShellExecutor shellExecutor,
             @NonNull @ShellBackgroundThread Handler bgHandler,
-            @NonNull SurfaceControl.Transaction transaction,
             @NonNull IActivityTaskManager activityTaskManager,
-            Context context, ContentResolver contentResolver) {
+            Context context, ContentResolver contentResolver,
+            Transitions transitions) {
         mShellExecutor = shellExecutor;
-        mTransaction = transaction;
         mActivityTaskManager = activityTaskManager;
         mContext = context;
         mContentResolver = contentResolver;
         mBgHandler = bgHandler;
         shellInit.addInitCallback(this::onInit, this);
+        mTransitions = transitions;
     }
 
     private void onInit() {
         setupAnimationDeveloperSettingsObserver(mContentResolver, mBgHandler);
+        createAdapter();
+        if (ENABLE_SHELL_TRANSITIONS) {
+            mBackTransitionHandler = new BackTransitionHandler(this);
+            mTransitions.addHandler(mBackTransitionHandler);
+        }
     }
 
     private void setupAnimationDeveloperSettingsObserver(
@@ -250,9 +303,10 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         }
 
         @Override
-        public void setBackToLauncherCallback(IOnBackInvokedCallback callback) {
+        public void setBackToLauncherCallback(IOnBackInvokedCallback callback,
+                IRemoteAnimationRunner runner) {
             executeRemoteCallWithTaskPermission(mController, "setBackToLauncherCallback",
-                    (controller) -> controller.setBackToLauncherCallback(callback));
+                    (controller) -> controller.setBackToLauncherCallback(callback, runner));
         }
 
         @Override
@@ -261,28 +315,30 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                     (controller) -> controller.clearBackToLauncherCallback());
         }
 
-        @Override
-        public void onBackToLauncherAnimationFinished() {
-            executeRemoteCallWithTaskPermission(mController, "onBackToLauncherAnimationFinished",
-                    (controller) -> controller.onBackToLauncherAnimationFinished());
-        }
-
         void invalidate() {
             mController = null;
         }
     }
 
     @VisibleForTesting
-    void setBackToLauncherCallback(IOnBackInvokedCallback callback) {
-        mBackToLauncherCallback = callback;
+    void setBackToLauncherCallback(IOnBackInvokedCallback callback, IRemoteAnimationRunner runner) {
+        mAnimationDefinition.set(BackNavigationInfo.TYPE_RETURN_TO_HOME,
+                new BackAnimationRunner(callback, runner));
     }
 
     private void clearBackToLauncherCallback() {
-        mBackToLauncherCallback = null;
+        mAnimationDefinition.remove(BackNavigationInfo.TYPE_RETURN_TO_HOME);
     }
 
     @VisibleForTesting
-    void onBackToLauncherAnimationFinished() {
+    void onBackAnimationFinished() {
+        if (!mTransitionInProgress) {
+            return;
+        }
+
+        ProtoLog.d(WM_SHELL_BACK_PREVIEW, "BackAnimationController: onBackAnimationFinished()");
+
+        // Trigger real back.
         if (mBackNavigationInfo != null) {
             IOnBackInvokedCallback callback = mBackNavigationInfo.getOnBackInvokedCallback();
             if (mTriggerBack) {
@@ -291,7 +347,18 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                 dispatchOnBackCancelled(callback);
             }
         }
-        finishAnimation();
+
+        // In legacy transition, it would use `Task.mBackGestureStarted` in core to handle the
+        // following transition when back callback is invoked.
+        // If the back callback is not invoked, we should reset the token and finish the whole back
+        // navigation without waiting the transition.
+        if (!ENABLE_SHELL_TRANSITIONS) {
+            finishBackNavigation();
+        } else if (!mTriggerBack) {
+            // reset the token to prevent it consume next transition.
+            mBackTransitionHandler.setDepartingWindowContainerToken(null);
+            finishBackNavigation();
+        }
     }
 
     /**
@@ -303,6 +370,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         if (mTransitionInProgress) {
             return;
         }
+        mTouchTracker.update(touchX, touchY, swipeEdge);
         if (keyAction == MotionEvent.ACTION_DOWN) {
             if (!mBackGestureStarted) {
                 mShouldStartOnNextMoveEvent = true;
@@ -330,20 +398,19 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         ProtoLog.d(WM_SHELL_BACK_PREVIEW, "initAnimation mMotionStarted=%b", mBackGestureStarted);
         if (mBackGestureStarted || mBackNavigationInfo != null) {
             Log.e(TAG, "Animation is being initialized but is already started.");
-            finishAnimation();
+            finishBackNavigation();
         }
 
-        mInitTouchLocation.set(touchX, touchY);
+        mTouchTracker.setGestureStartLocation(touchX, touchY);
         mBackGestureStarted = true;
 
         try {
-            boolean requestAnimation = mEnableAnimations.get();
-            mBackNavigationInfo =
-                    mActivityTaskManager.startBackNavigation(requestAnimation, mFocusObserver);
+            mBackNavigationInfo = mActivityTaskManager.startBackNavigation(
+                    mFocusObserver, mEnableAnimations.get() ? mBackAnimationAdapter : null);
             onBackNavigationInfoReceived(mBackNavigationInfo);
         } catch (RemoteException remoteException) {
             Log.e(TAG, "Failed to initAnimation", remoteException);
-            finishAnimation();
+            finishBackNavigation();
         }
     }
 
@@ -353,74 +420,32 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             Log.e(TAG, "Received BackNavigationInfo is null.");
             return;
         }
-        int backType = backNavigationInfo.getType();
-        IOnBackInvokedCallback targetCallback = null;
-        if (backType == BackNavigationInfo.TYPE_CROSS_ACTIVITY) {
-            HardwareBuffer hardwareBuffer = backNavigationInfo.getScreenshotHardwareBuffer();
-            if (hardwareBuffer != null) {
-                displayTargetScreenshot(hardwareBuffer,
-                        backNavigationInfo.getTaskWindowConfiguration());
-            }
-            mTransaction.apply();
-        } else if (shouldDispatchToLauncher(backType)) {
-            targetCallback = mBackToLauncherCallback;
-        } else if (backType == BackNavigationInfo.TYPE_CALLBACK) {
+        final int backType = backNavigationInfo.getType();
+        final IOnBackInvokedCallback targetCallback;
+        final boolean shouldDispatchToAnimator = shouldDispatchToAnimator(backType);
+        if (shouldDispatchToAnimator) {
+            targetCallback = mAnimationDefinition.get(backType).getGestureStartedCallback();
+        } else {
             targetCallback = mBackNavigationInfo.getOnBackInvokedCallback();
         }
-        dispatchOnBackStarted(targetCallback);
-    }
-
-    /**
-     * Display the screenshot of the activity beneath.
-     *
-     * @param hardwareBuffer The buffer containing the screenshot.
-     */
-    private void displayTargetScreenshot(@NonNull HardwareBuffer hardwareBuffer,
-            WindowConfiguration taskWindowConfiguration) {
-        SurfaceControl screenshotSurface =
-                mBackNavigationInfo == null ? null : mBackNavigationInfo.getScreenshotSurface();
-        if (screenshotSurface == null) {
-            Log.e(TAG, "BackNavigationInfo doesn't contain a surface for the screenshot. ");
-            return;
+        if (shouldDispatchToAnimator) {
+            dispatchOnBackStarted(targetCallback);
         }
-
-        // Scale the buffer to fill the whole Task
-        float sx = 1;
-        float sy = 1;
-        float w = taskWindowConfiguration.getBounds().width();
-        float h = taskWindowConfiguration.getBounds().height();
-
-        if (w != hardwareBuffer.getWidth()) {
-            sx = w / hardwareBuffer.getWidth();
-        }
-
-        if (h != hardwareBuffer.getHeight()) {
-            sy = h / hardwareBuffer.getHeight();
-        }
-        mTransaction.setScale(screenshotSurface, sx, sy);
-        mTransaction.setBuffer(screenshotSurface, hardwareBuffer);
-        mTransaction.setVisibility(screenshotSurface, true);
     }
 
     private void onMove(float touchX, float touchY, @BackEvent.SwipeEdge int swipeEdge) {
-        if (!mBackGestureStarted || mBackNavigationInfo == null) {
+        if (!mBackGestureStarted || mBackNavigationInfo == null || !mEnableAnimations.get()) {
             return;
         }
-        int deltaX = Math.round(touchX - mInitTouchLocation.x);
-        float progressThreshold = PROGRESS_THRESHOLD >= 0 ? PROGRESS_THRESHOLD : mProgressThreshold;
-        float progress = Math.min(Math.max(Math.abs(deltaX) / progressThreshold, 0), 1);
+        mTouchTracker.update(touchX, touchY, swipeEdge);
+        float progress = mTouchTracker.getProgress(touchX);
         int backType = mBackNavigationInfo.getType();
-        RemoteAnimationTarget animationTarget = mBackNavigationInfo.getDepartingAnimationTarget();
 
-        BackEvent backEvent = new BackEvent(
-                touchX, touchY, progress, swipeEdge, animationTarget);
+        BackEvent backEvent = new BackEvent(touchX, touchY, progress, swipeEdge);
         IOnBackInvokedCallback targetCallback = null;
-        if (shouldDispatchToLauncher(backType)) {
-            targetCallback = mBackToLauncherCallback;
-        } else if (backType == BackNavigationInfo.TYPE_CROSS_TASK
-                || backType == BackNavigationInfo.TYPE_CROSS_ACTIVITY) {
-            // TODO(208427216) Run the actual animation
-        } else if (backType == BackNavigationInfo.TYPE_CALLBACK) {
+        if (shouldDispatchToAnimator(backType)) {
+            targetCallback = mAnimationDefinition.get(backType).getCallback();
+        } else {
             targetCallback = mBackNavigationInfo.getOnBackInvokedCallback();
         }
         dispatchOnBackProgressed(targetCallback, backEvent);
@@ -448,7 +473,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     private void onGestureFinished(boolean fromTouch) {
         ProtoLog.d(WM_SHELL_BACK_PREVIEW, "onGestureFinished() mTriggerBack == %s", mTriggerBack);
         if (!mBackGestureStarted) {
-            finishAnimation();
+            finishBackNavigation();
             return;
         }
 
@@ -468,16 +493,21 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             if (mTriggerBack) {
                 injectBackKey();
             }
-            finishAnimation();
+            finishBackNavigation();
             return;
         }
 
         int backType = mBackNavigationInfo.getType();
-        boolean shouldDispatchToLauncher = shouldDispatchToLauncher(backType);
-        IOnBackInvokedCallback targetCallback = shouldDispatchToLauncher
-                ? mBackToLauncherCallback
-                : mBackNavigationInfo.getOnBackInvokedCallback();
-        if (shouldDispatchToLauncher) {
+        boolean shouldDispatchToAnimator = shouldDispatchToAnimator(backType);
+        final BackAnimationRunner runner = mAnimationDefinition.get(backType);
+        IOnBackInvokedCallback targetCallback = shouldDispatchToAnimator
+                ? runner.getCallback() : mBackNavigationInfo.getOnBackInvokedCallback();
+
+        if (shouldDispatchToAnimator) {
+            if (runner.onGestureFinished(mTriggerBack)) {
+                Log.w(TAG, "Gesture released, but animation didn't ready.");
+                return;
+            }
             startTransition();
         }
         if (mTriggerBack) {
@@ -485,18 +515,17 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         } else {
             dispatchOnBackCancelled(targetCallback);
         }
-        if (backType != BackNavigationInfo.TYPE_RETURN_TO_HOME || !shouldDispatchToLauncher) {
-            // Launcher callback missing. Simply finish animation.
-            finishAnimation();
+        if (!shouldDispatchToAnimator) {
+            // Animation callback missing. Simply finish animation.
+            finishBackNavigation();
         }
     }
 
-    private boolean shouldDispatchToLauncher(int backType) {
-        return backType == BackNavigationInfo.TYPE_RETURN_TO_HOME
-                && mBackToLauncherCallback != null
-                && mEnableAnimations.get()
+    private boolean shouldDispatchToAnimator(int backType) {
+        return mEnableAnimations.get()
                 && mBackNavigationInfo != null
-                && mBackNavigationInfo.getDepartingAnimationTarget() != null;
+                && mBackNavigationInfo.isPrepareRemoteAnimation()
+                && mAnimationDefinition.contains(backType);
     }
 
     private static void dispatchOnBackStarted(IOnBackInvokedCallback callback) {
@@ -555,35 +584,30 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     }
 
     private void setSwipeThresholds(float triggerThreshold, float progressThreshold) {
-        mProgressThreshold = progressThreshold;
-        mTriggerThreshold = triggerThreshold;
+        mTouchTracker.setProgressThreshold(progressThreshold);
     }
 
-    private void finishAnimation() {
-        ProtoLog.d(WM_SHELL_BACK_PREVIEW, "BackAnimationController: finishAnimation()");
-        mTouchEventDelta.set(0, 0);
-        mInitTouchLocation.set(0, 0);
+    @VisibleForTesting
+    void finishBackNavigation() {
+        ProtoLog.d(WM_SHELL_BACK_PREVIEW, "BackAnimationController: finishBackNavigation()");
         BackNavigationInfo backNavigationInfo = mBackNavigationInfo;
         boolean triggerBack = mTriggerBack;
         mBackNavigationInfo = null;
         mTriggerBack = false;
         mShouldStartOnNextMoveEvent = false;
+        mTouchTracker.reset();
         if (backNavigationInfo == null) {
             return;
         }
-
-        RemoteAnimationTarget animationTarget = backNavigationInfo.getDepartingAnimationTarget();
-        if (animationTarget != null) {
-            if (animationTarget.leash != null && animationTarget.leash.isValid()) {
-                mTransaction.remove(animationTarget.leash);
-            }
-        }
-        SurfaceControl screenshotSurface = backNavigationInfo.getScreenshotSurface();
-        if (screenshotSurface != null && screenshotSurface.isValid()) {
-            mTransaction.remove(screenshotSurface);
-        }
-        mTransaction.apply();
         stopTransition();
+        if (mBackAnimationFinishedCallback != null) {
+            try {
+                mBackAnimationFinishedCallback.onAnimationFinished(triggerBack);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed call IBackAnimationFinishedCallback", e);
+            }
+            mBackAnimationFinishedCallback = null;
+        }
         backNavigationInfo.onBackNavigationFinished(triggerBack);
     }
 
@@ -592,14 +616,72 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             return;
         }
         mTransitionInProgress = true;
+        if (ENABLE_SHELL_TRANSITIONS) {
+            mBackTransitionHandler.setDepartingWindowContainerToken(
+                    mBackNavigationInfo.getDepartingWindowContainerToken());
+        }
         mShellExecutor.executeDelayed(mResetTransitionRunnable, MAX_TRANSITION_DURATION);
     }
 
-    private void stopTransition() {
-        if (!mTransitionInProgress) {
-            return;
-        }
+    void stopTransition() {
         mShellExecutor.removeCallbacks(mResetTransitionRunnable);
         mTransitionInProgress = false;
+    }
+
+    /**
+     * This should be called from {@link BackTransitionHandler#startAnimation} when the following
+     * transition is triggered by the real back callback in {@link #onBackAnimationFinished}.
+     * Will consume the default transition and finish current back navigation.
+     */
+    void finishTransition(Transitions.TransitionFinishCallback finishCallback) {
+        ProtoLog.d(WM_SHELL_BACK_PREVIEW, "BackAnimationController: finishTransition()");
+        mShellExecutor.execute(() -> {
+            finishBackNavigation();
+            finishCallback.onTransitionFinished(null, null);
+        });
+    }
+
+    private void createAdapter() {
+        IBackAnimationRunner runner = new IBackAnimationRunner.Stub() {
+            @Override
+            public void onAnimationStart(int type, RemoteAnimationTarget[] apps,
+                    RemoteAnimationTarget[] wallpapers, RemoteAnimationTarget[] nonApps,
+                    IBackAnimationFinishedCallback finishedCallback) {
+                mShellExecutor.execute(() -> {
+                    final BackAnimationRunner runner = mAnimationDefinition.get(type);
+                    if (runner == null) {
+                        Log.e(TAG, "Animation didn't be defined for type "
+                                + BackNavigationInfo.typeToString(type));
+                        if (finishedCallback != null) {
+                            try {
+                                finishedCallback.onAnimationFinished(false);
+                            } catch (RemoteException e) {
+                                Log.w(TAG, "Failed call IBackNaviAnimationController", e);
+                            }
+                        }
+                        return;
+                    }
+                    mBackAnimationFinishedCallback = finishedCallback;
+
+                    ProtoLog.d(WM_SHELL_BACK_PREVIEW, "BackAnimationController: startAnimation()");
+                    runner.startAnimation(apps, wallpapers, nonApps,
+                            BackAnimationController.this::onBackAnimationFinished);
+
+                    if (!mBackGestureStarted) {
+                        // if the down -> up gesture happened before animation start, we have to
+                        // trigger the uninterruptible transition to finish the back animation.
+                        final BackEvent backFinish = new BackEvent(
+                                mTouchTracker.mLatestTouchX, mTouchTracker.mLatestTouchY, 1,
+                                mTouchTracker.mSwipeEdge);
+                        startTransition();
+                        runner.consumeIfGestureFinished(backFinish);
+                    }
+                });
+            }
+
+            @Override
+            public void onAnimationCancelled() { }
+        };
+        mBackAnimationAdapter = new BackAnimationAdapter(runner);
     }
 }

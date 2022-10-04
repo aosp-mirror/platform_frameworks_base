@@ -22,7 +22,6 @@ import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.annotation.Group4
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -41,7 +40,6 @@ import org.junit.runners.Parameterized
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
-@Group4
 open class ExpandBubbleScreen(testSpec: FlickerTestParameter) : BaseBubbleScreen(testSpec) {
 
     /** {@inheritDoc} */

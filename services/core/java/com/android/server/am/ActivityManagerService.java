@@ -4164,6 +4164,12 @@ public class ActivityManagerService extends IActivityManager.Stub
             //  Yeah, um, no.
             return;
         }
+        final int callingUid = Binder.getCallingUid();
+        final int callingUserId = UserHandle.getUserId(callingUid);
+        if (getPackageManagerInternal().filterAppAccess(packageName, callingUid, callingUserId)) {
+            Slog.w(TAG, "Failed trying to add dependency on non-existing package: " + packageName);
+            return;
+        }
         ProcessRecord proc;
         synchronized (mPidsSelfLocked) {
             proc = mPidsSelfLocked.get(Binder.getCallingPid());
@@ -5329,7 +5335,14 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     private void showMteOverrideNotificationIfActive() {
-        if (!SystemProperties.getBoolean("ro.arm64.memtag.bootctl_supported", false)
+        String bootctl = SystemProperties.get("arm64.memtag.bootctl");
+        // If MTE is on, there is one in three cases:
+        // * a fullmte build: ro.arm64.memtag.bootctl_supported is not set
+        // * memtag: arm64.memtag.bootctl contains "memtag"
+        // * memtag-once
+        // In the condition below we detect memtag-once by exclusion.
+        if (Arrays.asList(bootctl.split(",")).contains("memtag")
+            || !SystemProperties.getBoolean("ro.arm64.memtag.bootctl_supported", false)
             || !com.android.internal.os.Zygote.nativeSupportsMemoryTagging()) {
             return;
         }

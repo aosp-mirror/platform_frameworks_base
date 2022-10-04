@@ -2437,6 +2437,7 @@ class MediaRouter2ServiceImpl {
 
             pw.println(indent + "mUniqueRequestId=" + mUniqueRequestId);
             pw.println(indent + "mManagerRequestId=" + mManagerRequestId);
+            mOldSession.dump(pw, indent);
         }
     }
 }

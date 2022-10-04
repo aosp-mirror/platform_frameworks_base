@@ -879,22 +879,22 @@ public class InstantAppRegistry implements Watchable, Snappable {
             });
         }
 
-        synchronized (mLock) {
-            if (packagesToDelete != null) {
-                final int packageCount = packagesToDelete.size();
-                for (int i = 0; i < packageCount; i++) {
-                    final String packageToDelete = packagesToDelete.get(i);
-                    if (mDeletePackageHelper.deletePackageX(packageToDelete,
-                            PackageManager.VERSION_CODE_HIGHEST,
-                            UserHandle.USER_SYSTEM, PackageManager.DELETE_ALL_USERS,
-                            true /*removedBySystem*/) == PackageManager.DELETE_SUCCEEDED) {
-                        if (file.getUsableSpace() >= neededSpace) {
-                            return true;
-                        }
+        if (packagesToDelete != null) {
+            final int packageCount = packagesToDelete.size();
+            for (int i = 0; i < packageCount; i++) {
+                final String packageToDelete = packagesToDelete.get(i);
+                if (mDeletePackageHelper.deletePackageX(packageToDelete,
+                        PackageManager.VERSION_CODE_HIGHEST,
+                        UserHandle.USER_SYSTEM, PackageManager.DELETE_ALL_USERS,
+                        true /*removedBySystem*/) == PackageManager.DELETE_SUCCEEDED) {
+                    if (file.getUsableSpace() >= neededSpace) {
+                        return true;
                     }
                 }
             }
+        }
 
+        synchronized (mLock) {
             // Prune uninstalled instant apps
             // TODO: Track last used time for uninstalled instant apps for better pruning
             for (int userId : mUserManager.getUserIds()) {

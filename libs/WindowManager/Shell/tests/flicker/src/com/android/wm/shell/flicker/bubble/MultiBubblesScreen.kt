@@ -24,7 +24,6 @@ import androidx.test.uiautomator.UiObject2
 import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.annotation.Group4
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import org.junit.Assume
@@ -44,7 +43,6 @@ import org.junit.runners.Parameterized
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
-@Group4
 open class MultiBubblesScreen(testSpec: FlickerTestParameter) : BaseBubbleScreen(testSpec) {
 
     @Before

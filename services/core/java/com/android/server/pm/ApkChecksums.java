@@ -650,7 +650,7 @@ public class ApkChecksums {
         // Skip /product folder.
         // TODO(b/231354111): remove this hack once we are allowed to change SELinux rules.
         if (!containsFile(Environment.getProductDirectory(), filePath)) {
-            byte[] verityHash = VerityUtils.getFsverityRootHash(filePath);
+            byte[] verityHash = VerityUtils.getFsverityDigest(filePath);
             if (verityHash != null) {
                 return new ApkChecksum(split, TYPE_WHOLE_MERKLE_ROOT_4K_SHA256, verityHash);
             }

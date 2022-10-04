@@ -17,13 +17,12 @@
 
 package com.android.server.wm.flicker.close
 
-import android.platform.test.annotations.FlakyTest
+import android.platform.test.annotations.Presubmit
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.FlickerServiceCompatible
-import com.android.server.wm.flicker.annotation.Group4
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -65,7 +64,6 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@Group4
 class CloseAppBackButtonTest(testSpec: FlickerTestParameter) : CloseAppTransition(testSpec) {
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit
@@ -80,7 +78,7 @@ class CloseAppBackButtonTest(testSpec: FlickerTestParameter) : CloseAppTransitio
         }
 
     /** {@inheritDoc} */
-    @FlakyTest(bugId = 206753786)
+    @Presubmit
     @Test
     override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
 

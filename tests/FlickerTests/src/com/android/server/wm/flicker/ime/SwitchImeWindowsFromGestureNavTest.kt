@@ -16,6 +16,7 @@
 
 package com.android.server.wm.flicker.ime
 
+import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
@@ -25,7 +26,6 @@ import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.annotation.Group4
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
@@ -48,7 +48,6 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@Group4
 @Presubmit
 open class SwitchImeWindowsFromGestureNavTest(
     testSpec: FlickerTestParameter
@@ -153,6 +152,7 @@ open class SwitchImeWindowsFromGestureNavTest(
     override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
         super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
+    @Presubmit
     @Test
     fun imeAppWindowVisibility() {
         testSpec.assertWm {
@@ -168,6 +168,7 @@ open class SwitchImeWindowsFromGestureNavTest(
         }
     }
 
+    @FlakyTest(bugId = 244414110)
     @Test
     open fun imeLayerIsVisibleWhenSwitchingToImeApp() {
         testSpec.assertLayersStart {
@@ -181,6 +182,7 @@ open class SwitchImeWindowsFromGestureNavTest(
         }
     }
 
+    @Presubmit
     @Test
     fun imeLayerIsInvisibleWhenSwitchingToTestApp() {
         testSpec.assertLayersTag(TAG_IME_INVISIBLE) {

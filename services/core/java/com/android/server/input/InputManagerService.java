@@ -312,6 +312,9 @@ public class InputManagerService extends IInputManager.Stub
     // Manages battery state for input devices.
     private final BatteryController mBatteryController;
 
+    // Manages Keyboard backlight
+    private final KeyboardBacklightController mKeyboardBacklightController;
+
     // Maximum number of milliseconds to wait for input event injection.
     private static final int INJECTION_TIMEOUT_MILLIS = 30 * 1000;
 
@@ -422,6 +425,8 @@ public class InputManagerService extends IInputManager.Stub
         mHandler = new InputManagerHandler(injector.getLooper());
         mNative = injector.getNativeService(this);
         mBatteryController = new BatteryController(mContext, mNative, injector.getLooper());
+        mKeyboardBacklightController = new KeyboardBacklightController(mContext, mNative,
+                mDataStore, injector.getLooper());
 
         mUseDevInputEventForAudioJack =
                 mContext.getResources().getBoolean(R.bool.config_useDevInputEventForAudioJack);
@@ -563,6 +568,7 @@ public class InputManagerService extends IInputManager.Stub
         }
 
         mBatteryController.systemRunning();
+        mKeyboardBacklightController.systemRunning();
     }
 
     private void reloadKeyboardLayouts() {
@@ -2680,6 +2686,7 @@ public class InputManagerService extends IInputManager.Stub
         dumpSpyWindowGestureMonitors(pw, "  " /*prefix*/);
         dumpDisplayInputPropertiesValues(pw, "  " /*prefix*/);
         mBatteryController.dump(pw, "  " /*prefix*/);
+        mKeyboardBacklightController.dump(pw, "  " /*prefix*/);
     }
 
     private void dumpAssociations(PrintWriter pw, String prefix) {
@@ -3756,6 +3763,16 @@ public class InputManagerService extends IInputManager.Stub
         @Override
         public void pilferPointers(IBinder token) {
             mNative.pilferPointers(token);
+        }
+
+        @Override
+        public void incrementKeyboardBacklight(int deviceId) {
+            mKeyboardBacklightController.incrementKeyboardBacklight(deviceId);
+        }
+
+        @Override
+        public void decrementKeyboardBacklight(int deviceId) {
+            mKeyboardBacklightController.decrementKeyboardBacklight(deviceId);
         }
     }
 
