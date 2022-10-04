@@ -17,7 +17,9 @@
 package com.android.systemui.temporarydisplay
 
 import android.content.Context
+import android.graphics.Rect
 import android.os.PowerManager
+import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
@@ -265,6 +267,10 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
 
         override fun shouldIgnoreViewRemoval(removalReason: String): Boolean {
             return shouldIgnoreViewRemoval
+        }
+
+        override fun getTouchableRegion(view: View, outRect: Rect) {
+            outRect.setEmpty()
         }
     }
 

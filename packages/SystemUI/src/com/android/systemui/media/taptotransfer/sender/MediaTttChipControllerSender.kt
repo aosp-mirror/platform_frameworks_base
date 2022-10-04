@@ -18,6 +18,7 @@ package com.android.systemui.media.taptotransfer.sender
 
 import android.app.StatusBarManager
 import android.content.Context
+import android.graphics.Rect
 import android.media.MediaRoute2Info
 import android.os.PowerManager
 import android.util.Log
@@ -46,6 +47,7 @@ import com.android.systemui.temporarydisplay.TemporaryDisplayRemovalReason
 import com.android.systemui.temporarydisplay.TemporaryViewDisplayController
 import com.android.systemui.temporarydisplay.TemporaryViewInfo
 import com.android.systemui.util.concurrency.DelayableExecutor
+import com.android.systemui.util.view.ViewUtil
 import dagger.Lazy
 import javax.inject.Inject
 
@@ -68,6 +70,7 @@ open class MediaTttChipControllerSender @Inject constructor(
         // And overcome performance issue, check [b/247817628] for details.
         private val falsingManager: Lazy<FalsingManager>,
         private val falsingCollector: Lazy<FalsingCollector>,
+        private val viewUtil: ViewUtil,
 ) : TemporaryViewDisplayController<ChipSenderInfo, MediaTttLogger>(
         context,
         logger,
@@ -222,6 +225,10 @@ open class MediaTttChipControllerSender @Inject constructor(
             return true
         }
         return false
+    }
+
+    override fun getTouchableRegion(view: View, outRect: Rect) {
+        viewUtil.setRectToViewWindowLocation(view, outRect)
     }
 
     private fun Boolean.visibleIfTrue(): Int {

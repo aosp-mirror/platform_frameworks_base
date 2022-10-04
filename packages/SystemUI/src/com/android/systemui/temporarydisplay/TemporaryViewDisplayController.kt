@@ -20,10 +20,12 @@ import android.annotation.LayoutRes
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.PixelFormat
+import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.os.PowerManager
 import android.os.SystemClock
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
@@ -70,7 +72,8 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
         width = WindowManager.LayoutParams.WRAP_CONTENT
         height = WindowManager.LayoutParams.WRAP_CONTENT
         type = WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY
-        flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+        flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+            WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
         title = windowTitle
         format = PixelFormat.TRANSLUCENT
         setTrustedOverlay()
@@ -87,8 +90,14 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
     /** The view currently being displayed. Null if the view is not being displayed. */
     private var view: ViewGroup? = null
 
+    /** The view controller for [view]. Null if the view is not being displayed. */
+    private var viewController: TouchableRegionViewController? = null
+
     /** The info currently being displayed. Null if the view is not being displayed. */
     internal var info: T? = null
+
+    // TODO(b/245610654): We should probably group [view], [viewController], and [info] together
+    //   into one object since they're either all null or all non-null.
 
     /** A [Runnable] that, when run, will cancel the pending timeout of the view. */
     private var cancelViewTimeout: Runnable? = null
@@ -141,6 +150,11 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
                 .from(context)
                 .inflate(viewLayoutRes, null) as ViewGroup
         view = newView
+
+        val newViewController = TouchableRegionViewController(newView, this::getTouchableRegion)
+        newViewController.init()
+        viewController = newViewController
+
         updateView(newInfo, newView)
         windowManager.addView(newView, windowLayoutParams)
         animateViewIn(newView)
@@ -181,6 +195,7 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
         // that if a new view event comes in while this view is animating out, we still display the
         // new view appropriately.
         view = null
+        viewController = null
         info = null
         // No need to time the view out since it's already gone
         cancelViewTimeout?.run()
@@ -200,6 +215,12 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
     open fun updateView(newInfo: T, currentView: ViewGroup) {
         info = newInfo
     }
+
+    /**
+     * Fills [outRect] with the touchable region of this view. This will be used by WindowManager
+     * to decide which touch events go to the view.
+     */
+    abstract fun getTouchableRegion(view: View, outRect: Rect)
 
     /**
      * A method that can be implemented by subclasses to do custom animations for when the view
