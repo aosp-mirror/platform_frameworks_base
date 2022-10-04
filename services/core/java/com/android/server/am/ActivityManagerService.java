@@ -6036,6 +6036,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * This can be called with or without the global lock held.
      */
     @Override
+    @PackageManager.PermissionResult
     @PermissionMethod
     public int checkPermission(@PermissionName String permission, int pid, int uid) {
         if (permission == null) {
@@ -6048,6 +6049,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * Binder IPC calls go through the public entry point.
      * This can be called with or without the global lock held.
      */
+    @PackageManager.PermissionResult
     @PermissionMethod
     int checkCallingPermission(@PermissionName String permission) {
         return checkPermission(permission,
