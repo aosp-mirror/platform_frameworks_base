@@ -338,4 +338,9 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     public boolean canDismissBootAnimation() {
         return true;
     }
+
+    @Override
+    public boolean isGlobalKey(int keyCode) {
+        return false;
+    }
 }

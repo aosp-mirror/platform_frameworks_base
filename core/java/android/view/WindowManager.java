@@ -945,6 +945,18 @@ public interface WindowManager extends ViewManager {
     }
 
     /**
+     * Returns {@code true} if the key will be handled globally and not forwarded to all apps.
+     *
+     * @param keyCode the key code to check
+     * @return {@code true} if the key will be handled globally.
+     * @hide
+     */
+    @TestApi
+    default boolean isGlobalKey(int keyCode) {
+        return false;
+    }
+
+    /**
      * <p>
      * Returns whether cross-window blur is currently enabled. This affects both window blur behind
      * (see {@link LayoutParams#setBlurBehindRadius}) and window background blur (see

@@ -283,6 +283,15 @@ public final class WindowManagerImpl implements WindowManager {
     }
 
     @Override
+    public boolean isGlobalKey(int keyCode) {
+        try {
+            return WindowManagerGlobal.getWindowManagerService().isGlobalKey(keyCode);
+        } catch (RemoteException e) {
+        }
+        return false;
+    }
+
+    @Override
     public WindowMetrics getCurrentWindowMetrics() {
         final Context context = mParentWindow != null ? mParentWindow.getContext() : mContext;
         final Rect bounds = getCurrentBounds(context);
