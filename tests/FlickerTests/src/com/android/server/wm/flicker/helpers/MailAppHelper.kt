@@ -27,19 +27,19 @@ import com.android.server.wm.flicker.testapp.ActivityOptions
 import com.android.server.wm.traces.common.ComponentNameMatcher
 import com.android.server.wm.traces.parser.toFlickerComponent
 
-class MailAppHelper @JvmOverloads constructor(
+class MailAppHelper
+@JvmOverloads
+constructor(
     instr: Instrumentation,
     launcherName: String = ActivityOptions.Mail.LABEL,
-    component: ComponentNameMatcher =
-        ActivityOptions.Mail.COMPONENT.toFlickerComponent(),
-    launcherStrategy: ILauncherStrategy = LauncherStrategyFactory
-        .getInstance(instr)
-        .launcherStrategy
+    component: ComponentNameMatcher = ActivityOptions.Mail.COMPONENT.toFlickerComponent(),
+    launcherStrategy: ILauncherStrategy =
+        LauncherStrategyFactory.getInstance(instr).launcherStrategy
 ) : StandardAppHelper(instr, launcherName, component, launcherStrategy) {
 
     fun openMail(rowIdx: Int) {
-        val rowSel = By.res(getPackage(), "mail_row_item_text")
-            .textEndsWith(String.format("%04d", rowIdx))
+        val rowSel =
+            By.res(getPackage(), "mail_row_item_text").textEndsWith(String.format("%04d", rowIdx))
         var row: UiObject2? = null
         for (i in 1..1000) {
             row = uiDevice.wait(Until.findObject(rowSel), SHORT_WAIT_TIME_MS)

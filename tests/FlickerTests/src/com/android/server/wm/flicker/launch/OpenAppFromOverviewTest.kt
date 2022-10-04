@@ -38,31 +38,31 @@ import org.junit.runners.Parameterized
  * To run this test: `atest FlickerTests:OpenAppFromOverviewTest`
  *
  * Actions:
+ * ```
  *     Launch [testApp]
  *     Press recents
  *     Relaunch an app [testApp] by selecting it in the overview screen, and wait animation to
  *     complete (only this action is traced)
- *
+ * ```
  * Notes:
+ * ```
  *     1. Some default assertions (e.g., nav bar, status bar and screen covered)
  *        are inherited [OpenAppTransition]
  *     2. Part of the test setup occurs automatically via
  *        [com.android.server.wm.flicker.TransitionRunnerWithRules],
  *        including configuring navigation mode, initial orientation and ensuring no
  *        apps are running before setup
+ * ```
  */
 @RequiresDevice
 @FlickerServiceCompatible
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class OpenAppFromOverviewTest(
-    testSpec: FlickerTestParameter
-) : OpenAppFromLauncherTransition(testSpec) {
+open class OpenAppFromOverviewTest(testSpec: FlickerTestParameter) :
+    OpenAppFromLauncherTransition(testSpec) {
 
-    /**
-     * Defines the transition used to run the test
-     */
+    /** Defines the transition used to run the test */
     override val transition: FlickerBuilder.() -> Unit
         get() = {
             super.transition(this)
@@ -70,9 +70,7 @@ open class OpenAppFromOverviewTest(
                 tapl.setExpectedRotationCheckEnabled(false)
                 testApp.launchViaIntent(wmHelper)
                 tapl.goHome()
-                wmHelper.StateSyncBuilder()
-                    .withHomeActivityVisible()
-                    .waitForAndVerify()
+                wmHelper.StateSyncBuilder().withHomeActivityVisible().waitForAndVerify()
                 // By default, launcher doesn't rotate on phones, but rotates on tablets
                 if (testSpec.isTablet) {
                     tapl.setExpectedRotation(testSpec.startRotation)
@@ -80,23 +78,17 @@ open class OpenAppFromOverviewTest(
                     tapl.setExpectedRotation(Surface.ROTATION_0)
                 }
                 tapl.workspace.switchToOverview()
-                wmHelper.StateSyncBuilder()
-                    .withRecentsActivityVisible()
-                    .waitForAndVerify()
+                wmHelper.StateSyncBuilder().withRecentsActivityVisible().waitForAndVerify()
                 this.setRotation(testSpec.startRotation)
             }
             transitions {
                 tapl.overview.currentTask.open()
-                wmHelper.StateSyncBuilder()
-                    .withFullScreenApp(testApp)
-                    .waitForAndVerify()
+                wmHelper.StateSyncBuilder().withFullScreenApp(testApp).waitForAndVerify()
             }
         }
 
     /** {@inheritDoc} */
-    @Presubmit
-    @Test
-    override fun appLayerReplacesLauncher() = super.appLayerReplacesLauncher()
+    @Presubmit @Test override fun appLayerReplacesLauncher() = super.appLayerReplacesLauncher()
 
     /** {@inheritDoc} */
     @FlakyTest
@@ -117,14 +109,13 @@ open class OpenAppFromOverviewTest(
         /**
          * Creates the test configurations.
          *
-         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring
-         * repetitions, screen orientation and navigation modes.
+         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring repetitions,
+         * screen orientation and navigation modes.
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): Collection<FlickerTestParameter> {
-            return FlickerTestParameterFactory.getInstance()
-                .getConfigNonRotationTests()
+            return FlickerTestParameterFactory.getInstance().getConfigNonRotationTests()
         }
     }
 }

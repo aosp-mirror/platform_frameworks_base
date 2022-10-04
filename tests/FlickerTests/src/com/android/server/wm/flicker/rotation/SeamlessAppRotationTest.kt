@@ -38,46 +38,51 @@ import org.junit.runners.Parameterized
  * Test opening an app and cycling through app rotations using seamless rotations
  *
  * Currently runs:
+ * ```
  *      0 -> 90 degrees
  *      0 -> 90 degrees (with starved UI thread)
  *      90 -> 0 degrees
  *      90 -> 0 degrees (with starved UI thread)
- *
+ * ```
  * Actions:
+ * ```
  *     Launch an app in fullscreen and supporting seamless rotation (via intent)
  *     Set initial device orientation
  *     Start tracing
  *     Change device orientation
  *     Stop tracing
- *
+ * ```
  * To run this test: `atest FlickerTests:SeamlessAppRotationTest`
  *
  * To run only the presubmit assertions add: `--
+ * ```
  *      --module-arg FlickerTests:exclude-annotation:androidx.test.filters.FlakyTest
  *      --module-arg FlickerTests:include-annotation:android.platform.test.annotations.Presubmit`
- *
+ * ```
  * To run only the postsubmit assertions add: `--
+ * ```
  *      --module-arg FlickerTests:exclude-annotation:androidx.test.filters.FlakyTest
  *      --module-arg FlickerTests:include-annotation:android.platform.test.annotations.Postsubmit`
- *
+ * ```
  * To run only the flaky assertions add: `--
+ * ```
  *      --module-arg FlickerTests:include-annotation:androidx.test.filters.FlakyTest`
- *
+ * ```
  * Notes:
+ * ```
  *     1. Some default assertions (e.g., nav bar, status bar and screen covered)
  *        are inherited [RotationTransition]
  *     2. Part of the test setup occurs automatically via
  *        [com.android.server.wm.flicker.TransitionRunnerWithRules],
  *        including configuring navigation mode, initial orientation and ensuring no
  *        apps are running before setup
+ * ```
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class SeamlessAppRotationTest(
-    testSpec: FlickerTestParameter
-) : RotationTransition(testSpec) {
+open class SeamlessAppRotationTest(testSpec: FlickerTestParameter) : RotationTransition(testSpec) {
     override val testApp = SeamlessRotationAppHelper(instrumentation)
 
     /** {@inheritDoc} */
@@ -87,17 +92,16 @@ open class SeamlessAppRotationTest(
             setup {
                 testApp.launchViaIntent(
                     wmHelper,
-                    stringExtras = mapOf(
-                        ActivityOptions.SeamlessRotation.EXTRA_STARVE_UI_THREAD
-                            to testSpec.starveUiThread.toString()
-                    )
+                    stringExtras =
+                        mapOf(
+                            ActivityOptions.SeamlessRotation.EXTRA_STARVE_UI_THREAD to
+                                testSpec.starveUiThread.toString()
+                        )
                 )
             }
         }
 
-    /**
-     * Checks that [testApp] window is always in full screen
-     */
+    /** Checks that [testApp] window is always in full screen */
     @Presubmit
     @Test
     fun appWindowFullScreen() {
@@ -105,16 +109,15 @@ open class SeamlessAppRotationTest(
             this.invoke("isFullScreen") {
                 val appWindow = it.windowState(testApp.`package`)
                 val flags = appWindow.windowState?.attributes?.flags ?: 0
-                appWindow.verify("isFullScreen")
+                appWindow
+                    .verify("isFullScreen")
                     .that(flags.and(WindowManager.LayoutParams.FLAG_FULLSCREEN))
                     .isGreaterThan(0)
             }
         }
     }
 
-    /**
-     * Checks that [testApp] window is always with seamless rotation
-     */
+    /** Checks that [testApp] window is always with seamless rotation */
     @Presubmit
     @Test
     fun appWindowSeamlessRotation() {
@@ -122,38 +125,33 @@ open class SeamlessAppRotationTest(
             this.invoke("isRotationSeamless") {
                 val appWindow = it.windowState(testApp.`package`)
                 val rotationAnimation = appWindow.windowState?.attributes?.rotationAnimation ?: 0
-                appWindow.verify("isRotationSeamless")
+                appWindow
+                    .verify("isRotationSeamless")
                     .that(
-                        rotationAnimation
-                            .and(WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS)
+                        rotationAnimation.and(
+                            WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS
+                        )
                     )
                     .isGreaterThan(0)
             }
         }
     }
 
-    /**
-     * Checks that [testApp] window is always visible
-     */
+    /** Checks that [testApp] window is always visible */
     @Presubmit
     @Test
     fun appLayerAlwaysVisible() {
-        testSpec.assertLayers {
-            isVisible(testApp)
-        }
+        testSpec.assertLayers { isVisible(testApp) }
     }
 
-    /**
-     * Checks that [testApp] layer covers the entire screen during the whole transition
-     */
+    /** Checks that [testApp] layer covers the entire screen during the whole transition */
     @Presubmit
     @Test
     fun appLayerRotates() {
         testSpec.assertLayers {
             this.invoke("entireScreenCovered") { entry ->
                 entry.entry.displays.map { display ->
-                    entry.visibleRegion(testApp)
-                        .coversExactly(display.layerStackSpace)
+                    entry.visibleRegion(testApp).coversExactly(display.layerStackSpace)
                 }
             }
         }
@@ -162,20 +160,17 @@ open class SeamlessAppRotationTest(
     /** {@inheritDoc} */
     @Test
     @Ignore("Not applicable to this CUJ. App is full screen")
-    override fun statusBarLayerPositionAtStartAndEnd() {
-    }
+    override fun statusBarLayerPositionAtStartAndEnd() {}
 
     /** {@inheritDoc} */
     @Test
     @Ignore("Not applicable to this CUJ. App is full screen")
-    override fun statusBarLayerIsVisibleAtStartAndEnd() {
-    }
+    override fun statusBarLayerIsVisibleAtStartAndEnd() {}
 
     /** {@inheritDoc} */
     @Test
     @Ignore("Not applicable to this CUJ. App is full screen")
-    override fun statusBarWindowIsAlwaysVisible() {
-    }
+    override fun statusBarWindowIsAlwaysVisible() {}
 
     /**
      * Checks that the [ComponentNameMatcher.STATUS_BAR] window is invisible during the whole
@@ -184,9 +179,7 @@ open class SeamlessAppRotationTest(
     @Presubmit
     @Test
     fun statusBarWindowIsAlwaysInvisible() {
-        testSpec.assertWm {
-            this.isAboveAppWindowInvisible(ComponentNameMatcher.STATUS_BAR)
-        }
+        testSpec.assertWm { this.isAboveAppWindowInvisible(ComponentNameMatcher.STATUS_BAR) }
     }
 
     /**
@@ -196,20 +189,14 @@ open class SeamlessAppRotationTest(
     @Presubmit
     @Test
     fun statusBarLayerIsAlwaysInvisible() {
-        testSpec.assertLayers {
-            this.isInvisible(ComponentNameMatcher.STATUS_BAR)
-        }
+        testSpec.assertLayers { this.isInvisible(ComponentNameMatcher.STATUS_BAR) }
     }
 
-    /**
-     * Checks that the focus doesn't change during animation
-     */
+    /** Checks that the focus doesn't change during animation */
     @Presubmit
     @Test
     fun focusDoesNotChange() {
-        testSpec.assertEventLog {
-            this.focusDoesNotChange()
-        }
+        testSpec.assertEventLog { this.focusDoesNotChange() }
     }
 
     /** {@inheritDoc} */
@@ -219,15 +206,16 @@ open class SeamlessAppRotationTest(
 
     companion object {
         private val FlickerTestParameter.starveUiThread
-            get() = config.getOrDefault(
-                ActivityOptions.SeamlessRotation.EXTRA_STARVE_UI_THREAD, false) as Boolean
+            get() =
+                config.getOrDefault(ActivityOptions.SeamlessRotation.EXTRA_STARVE_UI_THREAD, false)
+                    as Boolean
 
         private fun createConfig(
             sourceConfig: FlickerTestParameter,
             starveUiThread: Boolean
         ): FlickerTestParameter {
-            val newConfig = sourceConfig.config.toMutableMap()
-                .also {
+            val newConfig =
+                sourceConfig.config.toMutableMap().also {
                     it[ActivityOptions.SeamlessRotation.EXTRA_STARVE_UI_THREAD] = starveUiThread
                 }
             val nameExt = if (starveUiThread) "_BUSY_UI_THREAD" else ""
@@ -235,27 +223,26 @@ open class SeamlessAppRotationTest(
         }
 
         /**
-         * Creates the test configurations for seamless rotation based on the default rotation
-         * tests from [FlickerTestParameterFactory.getConfigRotationTests], but adding an
-         * additional flag ([ActivityOptions.SeamlessRotation.EXTRA_STARVE_UI_THREAD]) to indicate
-         * if the app should starve the UI thread of not
+         * Creates the test configurations for seamless rotation based on the default rotation tests
+         * from [FlickerTestParameterFactory.getConfigRotationTests], but adding an additional flag
+         * ([ActivityOptions.SeamlessRotation.EXTRA_STARVE_UI_THREAD]) to indicate if the app should
+         * starve the UI thread of not
          */
         @JvmStatic
         private fun getConfigurations(): List<FlickerTestParameter> {
-            return FlickerTestParameterFactory.getInstance()
-                .getConfigRotationTests()
-                .flatMap { sourceConfig ->
-                    val defaultRun = createConfig(sourceConfig, starveUiThread = false)
-                    val busyUiRun = createConfig(sourceConfig, starveUiThread = true)
-                    listOf(defaultRun, busyUiRun)
-                }
+            return FlickerTestParameterFactory.getInstance().getConfigRotationTests().flatMap {
+                sourceConfig ->
+                val defaultRun = createConfig(sourceConfig, starveUiThread = false)
+                val busyUiRun = createConfig(sourceConfig, starveUiThread = true)
+                listOf(defaultRun, busyUiRun)
+            }
         }
 
         /**
          * Creates the test configurations.
          *
-         * See [FlickerTestParameterFactory.getConfigRotationTests] for configuring
-         * repetitions, screen orientation and navigation modes.
+         * See [FlickerTestParameterFactory.getConfigRotationTests] for configuring repetitions,
+         * screen orientation and navigation modes.
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic

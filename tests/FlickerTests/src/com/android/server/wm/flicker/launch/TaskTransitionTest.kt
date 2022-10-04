@@ -45,9 +45,11 @@ import org.junit.runners.Parameterized
  * To run this test: `atest FlickerTests:ActivitiesTransitionTest`
  *
  * Actions:
+ * ```
  *     Launch the NewTaskLauncherApp [mTestApp]
  *     Open a new task (SimpleActivity) from the NewTaskLauncherApp [mTestApp]
  *     Go back to the NewTaskLauncherApp [mTestApp]
+ * ```
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
@@ -61,36 +63,28 @@ class TaskTransitionTest(testSpec: FlickerTestParameter) : BaseTest(testSpec) {
 
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit = {
-        setup {
-            testApp.launchViaIntent(wmHelper)
-        }
-        teardown {
-            testApp.exit(wmHelper)
-        }
+        setup { testApp.launchViaIntent(wmHelper) }
+        teardown { testApp.exit(wmHelper) }
         transitions {
             testApp.openNewTask(device, wmHelper)
             tapl.pressBack()
-            wmHelper.StateSyncBuilder()
-                .withAppTransitionIdle()
-                .waitForAndVerify()
+            wmHelper.StateSyncBuilder().withAppTransitionIdle().waitForAndVerify()
         }
     }
 
     /**
-     * Checks that the [wallpaper] window is never visible when performing task transitions.
-     * A solid color background should be shown instead.
+     * Checks that the [wallpaper] window is never visible when performing task transitions. A solid
+     * color background should be shown instead.
      */
     @Postsubmit
     @Test
     fun wallpaperWindowIsNeverVisible() {
-        testSpec.assertWm {
-            this.isNonAppWindowInvisible(wallpaper)
-        }
+        testSpec.assertWm { this.isNonAppWindowInvisible(wallpaper) }
     }
 
     /**
-     * Checks that the [wallpaper] layer is never visible when performing task transitions.
-     * A solid color background should be shown instead.
+     * Checks that the [wallpaper] layer is never visible when performing task transitions. A solid
+     * color background should be shown instead.
      */
     @Postsubmit
     @Test
@@ -103,33 +97,25 @@ class TaskTransitionTest(testSpec: FlickerTestParameter) : BaseTest(testSpec) {
 
     /**
      * Check that the [ComponentNameMatcher.LAUNCHER] window is never visible when performing task
-     * transitions.
-     * A solid color background should be shown above it.
+     * transitions. A solid color background should be shown above it.
      */
     @Postsubmit
     @Test
     fun launcherWindowIsNeverVisible() {
-        testSpec.assertWm {
-            this.isAppWindowInvisible(ComponentNameMatcher.LAUNCHER)
-        }
+        testSpec.assertWm { this.isAppWindowInvisible(ComponentNameMatcher.LAUNCHER) }
     }
 
     /**
      * Checks that the [ComponentNameMatcher.LAUNCHER] layer is never visible when performing task
-     * transitions.
-     * A solid color background should be shown above it.
+     * transitions. A solid color background should be shown above it.
      */
     @Postsubmit
     @Test
     fun launcherLayerIsNeverVisible() {
-        testSpec.assertLayers {
-            this.isInvisible(ComponentNameMatcher.LAUNCHER)
-        }
+        testSpec.assertLayers { this.isInvisible(ComponentNameMatcher.LAUNCHER) }
     }
 
-    /**
-     * Checks that a color background is visible while the task transition is occurring.
-     */
+    /** Checks that a color background is visible while the task transition is occurring. */
     @Postsubmit
     @Test
     fun colorLayerIsVisibleDuringTransition() {
@@ -138,8 +124,8 @@ class TaskTransitionTest(testSpec: FlickerTestParameter) : BaseTest(testSpec) {
 
         testSpec.assertLayers {
             this.invoke("LAUNCH_NEW_TASK_ACTIVITY coversExactly displayBounds") {
-                it.visibleRegion(LAUNCH_NEW_TASK_ACTIVITY).coversExactly(displayBounds)
-            }
+                    it.visibleRegion(LAUNCH_NEW_TASK_ACTIVITY).coversExactly(displayBounds)
+                }
                 .isInvisible(bgColorLayer)
                 .then()
                 // Transitioning
@@ -163,8 +149,8 @@ class TaskTransitionTest(testSpec: FlickerTestParameter) : BaseTest(testSpec) {
     }
 
     /**
-     * Checks that we start with the LaunchNewTask activity on top and then open up
-     * the SimpleActivity and then go back to the LaunchNewTask activity.
+     * Checks that we start with the LaunchNewTask activity on top and then open up the
+     * SimpleActivity and then go back to the LaunchNewTask activity.
      */
     @Postsubmit
     @Test
@@ -183,9 +169,7 @@ class TaskTransitionTest(testSpec: FlickerTestParameter) : BaseTest(testSpec) {
     }
 
     /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun entireScreenCovered() = super.entireScreenCovered()
+    @Postsubmit @Test override fun entireScreenCovered() = super.entireScreenCovered()
 
     /** {@inheritDoc} */
     @Postsubmit
@@ -206,8 +190,7 @@ class TaskTransitionTest(testSpec: FlickerTestParameter) : BaseTest(testSpec) {
     /** {@inheritDoc} */
     @Postsubmit
     @Test
-    override fun statusBarLayerPositionAtStartAndEnd() =
-        super.statusBarLayerPositionAtStartAndEnd()
+    override fun statusBarLayerPositionAtStartAndEnd() = super.statusBarLayerPositionAtStartAndEnd()
 
     /** {@inheritDoc} */
     @Postsubmit
@@ -255,8 +238,7 @@ class TaskTransitionTest(testSpec: FlickerTestParameter) : BaseTest(testSpec) {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): Collection<FlickerTestParameter> {
-            return FlickerTestParameterFactory.getInstance()
-                .getConfigNonRotationTests()
+            return FlickerTestParameterFactory.getInstance().getConfigNonRotationTests()
         }
     }
 }

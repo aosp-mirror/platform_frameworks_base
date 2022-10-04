@@ -38,50 +38,44 @@ import org.junit.Test
 
 /**
  * Base test class containing common assertions for [ComponentMatcher.NAV_BAR],
- * [ComponentMatcher.TASK_BAR], [ComponentMatcher.STATUS_BAR], and general assertions
- * (layers visible in consecutive states, entire screen covered, etc.)
+ * [ComponentMatcher.TASK_BAR], [ComponentMatcher.STATUS_BAR], and general assertions (layers
+ * visible in consecutive states, entire screen covered, etc.)
  */
-abstract class BaseTest @JvmOverloads constructor(
+abstract class BaseTest
+@JvmOverloads
+constructor(
     protected val testSpec: FlickerTestParameter,
     protected val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation(),
     protected val tapl: LauncherInstrumentation = LauncherInstrumentation()
 ) {
     init {
         testSpec.setIsTablet(
-            WindowManagerStateHelper(
-                instrumentation,
-                clearCacheAfterParsing = false
-            ).currentState.wmState.isTablet
+            WindowManagerStateHelper(instrumentation, clearCacheAfterParsing = false)
+                .currentState
+                .wmState
+                .isTablet
         )
     }
 
-    /**
-     * Specification of the test transition to execute
-     */
+    /** Specification of the test transition to execute */
     abstract val transition: FlickerBuilder.() -> Unit
 
     /**
-     * Entry point for the test runner. It will use this method to initialize and cache
-     * flicker executions
+     * Entry point for the test runner. It will use this method to initialize and cache flicker
+     * executions
      */
     @FlickerBuilderProvider
     fun buildFlicker(): FlickerBuilder {
         return FlickerBuilder(instrumentation).apply {
-            setup {
-                testSpec.setIsTablet(wmHelper.currentState.wmState.isTablet)
-            }
+            setup { testSpec.setIsTablet(wmHelper.currentState.wmState.isTablet) }
             transition()
         }
     }
 
-    /**
-     * Checks that all parts of the screen are covered during the transition
-     */
+    /** Checks that all parts of the screen are covered during the transition */
     open fun entireScreenCovered() = testSpec.entireScreenCovered()
 
-    /**
-     * Checks that the [ComponentMatcher.NAV_BAR] layer is visible during the whole transition
-     */
+    /** Checks that the [ComponentMatcher.NAV_BAR] layer is visible during the whole transition */
     @Presubmit
     @Test
     open fun navBarLayerIsVisibleAtStartAndEnd() {
@@ -111,9 +105,7 @@ abstract class BaseTest @JvmOverloads constructor(
         testSpec.navBarWindowIsAlwaysVisible()
     }
 
-    /**
-     * Checks that the [ComponentMatcher.TASK_BAR] layer is visible during the whole transition
-     */
+    /** Checks that the [ComponentMatcher.TASK_BAR] layer is visible during the whole transition */
     @Presubmit
     @Test
     open fun taskBarLayerIsVisibleAtStartAndEnd() {
@@ -142,7 +134,8 @@ abstract class BaseTest @JvmOverloads constructor(
         testSpec.statusBarLayerIsVisibleAtStartAndEnd()
 
     /**
-     * Checks the position of the [ComponentMatcher.STATUS_BAR] at the start and end of the transition
+     * Checks the position of the [ComponentMatcher.STATUS_BAR] at the start and end of the
+     * transition
      */
     @Presubmit
     @Test
@@ -156,26 +149,22 @@ abstract class BaseTest @JvmOverloads constructor(
     open fun statusBarWindowIsAlwaysVisible() = testSpec.statusBarWindowIsAlwaysVisible()
 
     /**
-     * Checks that all layers that are visible on the trace, are visible for at least 2
-     * consecutive entries.
+     * Checks that all layers that are visible on the trace, are visible for at least 2 consecutive
+     * entries.
      */
     @Presubmit
     @Test
     open fun visibleLayersShownMoreThanOneConsecutiveEntry() {
-        testSpec.assertLayers {
-            this.visibleLayersShownMoreThanOneConsecutiveEntry()
-        }
+        testSpec.assertLayers { this.visibleLayersShownMoreThanOneConsecutiveEntry() }
     }
 
     /**
-     * Checks that all windows that are visible on the trace, are visible for at least 2
-     * consecutive entries.
+     * Checks that all windows that are visible on the trace, are visible for at least 2 consecutive
+     * entries.
      */
     @Presubmit
     @Test
     open fun visibleWindowsShownMoreThanOneConsecutiveEntry() {
-        testSpec.assertWm {
-            this.visibleWindowsShownMoreThanOneConsecutiveEntry()
-        }
+        testSpec.assertWm { this.visibleWindowsShownMoreThanOneConsecutiveEntry() }
     }
 }

@@ -27,7 +27,9 @@ import com.android.server.wm.traces.common.ComponentNameMatcher
 import com.android.server.wm.traces.parser.toFlickerComponent
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 
-class TwoActivitiesAppHelper @JvmOverloads constructor(
+class TwoActivitiesAppHelper
+@JvmOverloads
+constructor(
     instr: Instrumentation,
     launcherName: String = ActivityOptions.LaunchNewActivity.LABEL,
     component: ComponentNameMatcher =
@@ -50,9 +52,7 @@ class TwoActivitiesAppHelper @JvmOverloads constructor(
         button.click()
 
         device.wait(Until.gone(launchActivityButton), FIND_TIMEOUT)
-        wmHelper.StateSyncBuilder()
-            .withFullScreenApp(secondActivityComponent)
-            .waitForAndVerify()
+        wmHelper.StateSyncBuilder().withFullScreenApp(secondActivityComponent).waitForAndVerify()
     }
 
     companion object {

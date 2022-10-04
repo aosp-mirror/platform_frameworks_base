@@ -23,7 +23,9 @@ import com.android.server.wm.flicker.testapp.ActivityOptions
 import com.android.server.wm.traces.common.ComponentNameMatcher
 import com.android.server.wm.traces.parser.toFlickerComponent
 
-class NonResizeableAppHelper @JvmOverloads constructor(
+class NonResizeableAppHelper
+@JvmOverloads
+constructor(
     instr: Instrumentation,
     launcherName: String = ActivityOptions.NonResizeableActivity.LABEL,
     component: ComponentNameMatcher =

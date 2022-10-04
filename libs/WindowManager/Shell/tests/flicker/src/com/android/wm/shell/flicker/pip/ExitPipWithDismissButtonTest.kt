@@ -35,17 +35,20 @@ import org.junit.runners.Parameterized
  * To run this test: `atest WMShellFlickerTests:ExitPipWithDismissButtonTest`
  *
  * Actions:
+ * ```
  *     Launch an app in pip mode [pipApp],
  *     Click on the pip window
  *     Click on dismiss button and wait window disappear
- *
+ * ```
  * Notes:
+ * ```
  *     1. Some default assertions (e.g., nav bar, status bar and screen covered)
  *        are inherited [PipTransition]
  *     2. Part of the test setup occurs automatically via
  *        [com.android.server.wm.flicker.TransitionRunnerWithRules],
  *        including configuring navigation mode, initial orientation and ensuring no
  *        apps are running before setup
+ * ```
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
@@ -56,9 +59,7 @@ class ExitPipWithDismissButtonTest(testSpec: FlickerTestParameter) : ExitPipTran
     override val transition: FlickerBuilder.() -> Unit
         get() = {
             super.transition(this)
-            transitions {
-                pipApp.closePipWindow(wmHelper)
-            }
+            transitions { pipApp.closePipWindow(wmHelper) }
         }
 
     /**
@@ -68,23 +69,21 @@ class ExitPipWithDismissButtonTest(testSpec: FlickerTestParameter) : ExitPipTran
     @Presubmit
     @Test
     fun focusChanges() {
-        testSpec.assertEventLog {
-            this.focusChanges("PipMenuView", "NexusLauncherActivity")
-        }
+        testSpec.assertEventLog { this.focusChanges("PipMenuView", "NexusLauncherActivity") }
     }
 
     companion object {
         /**
          * Creates the test configurations.
          *
-         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring
-         * repetitions, screen orientation and navigation modes.
+         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring repetitions,
+         * screen orientation and navigation modes.
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): List<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
-                    .getConfigNonRotationTests(supportedRotations = listOf(Surface.ROTATION_0))
+                .getConfigNonRotationTests(supportedRotations = listOf(Surface.ROTATION_0))
         }
     }
 }

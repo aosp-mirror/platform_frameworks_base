@@ -30,9 +30,8 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FlakyTest(bugId = 217777115)
-class MultiBubblesScreenShellTransit(
-    testSpec: FlickerTestParameter
-) : MultiBubblesScreen(testSpec) {
+class MultiBubblesScreenShellTransit(testSpec: FlickerTestParameter) :
+    MultiBubblesScreen(testSpec) {
     @Before
     override fun before() {
         Assume.assumeTrue(isShellTransitionsEnabled)

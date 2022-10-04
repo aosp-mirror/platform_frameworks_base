@@ -36,10 +36,7 @@ import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
-/**
- * Test Pip launch.
- * To run this test: `atest WMShellFlickerTests:PipKeyboardTest`
- */
+/** Test Pip launch. To run this test: `atest WMShellFlickerTests:PipKeyboardTest` */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
@@ -52,7 +49,7 @@ open class PipKeyboardTest(testSpec: FlickerTestParameter) : PipTransition(testS
         assumeFalse(isShellTransitionsEnabled)
     }
 
-    /** {@inheritDoc}  */
+    /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit
         get() = buildTransition {
             setup {
@@ -73,9 +70,7 @@ open class PipKeyboardTest(testSpec: FlickerTestParameter) : PipTransition(testS
             }
         }
 
-    /**
-     * Ensure the pip window remains visible throughout any keyboard interactions
-     */
+    /** Ensure the pip window remains visible throughout any keyboard interactions */
     @Presubmit
     @Test
     open fun pipInVisibleBounds() {
@@ -85,15 +80,11 @@ open class PipKeyboardTest(testSpec: FlickerTestParameter) : PipTransition(testS
         }
     }
 
-    /**
-     * Ensure that the pip window does not obscure the keyboard
-     */
+    /** Ensure that the pip window does not obscure the keyboard */
     @Presubmit
     @Test
     open fun pipIsAboveAppWindow() {
-        testSpec.assertWmTag(TAG_IME_VISIBLE) {
-            isAboveWindow(ComponentNameMatcher.IME, pipApp)
-        }
+        testSpec.assertWmTag(TAG_IME_VISIBLE) { isAboveWindow(ComponentNameMatcher.IME, pipApp) }
     }
 
     companion object {

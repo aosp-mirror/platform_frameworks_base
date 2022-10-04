@@ -27,7 +27,9 @@ import com.android.server.wm.traces.common.ComponentNameMatcher
 import com.android.server.wm.traces.parser.toFlickerComponent
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 
-class GameAppHelper @JvmOverloads constructor(
+class GameAppHelper
+@JvmOverloads
+constructor(
     instr: Instrumentation,
     launcherName: String = ActivityOptions.Game.LABEL,
     component: ComponentNameMatcher = ActivityOptions.Game.COMPONENT.toFlickerComponent(),
@@ -41,13 +43,18 @@ class GameAppHelper @JvmOverloads constructor(
      * @return true if the swipe operation is successful.
      */
     fun swipeDown(): Boolean {
-        val gameView = uiDevice.wait(
-            Until.findObject(By.res(getPackage(), GAME_APP_VIEW_RES)), WAIT_TIME_MS)
+        val gameView =
+            uiDevice.wait(Until.findObject(By.res(getPackage(), GAME_APP_VIEW_RES)), WAIT_TIME_MS)
         require(gameView != null) { "Mock game app view not found." }
 
         val bound = gameView.getVisibleBounds()
         return uiDevice.swipe(
-            bound.centerX(), bound.top, bound.centerX(), bound.centerY(), SWIPE_STEPS)
+            bound.centerX(),
+            bound.top,
+            bound.centerX(),
+            bound.centerY(),
+            SWIPE_STEPS
+        )
     }
 
     /**
@@ -69,15 +76,21 @@ class GameAppHelper @JvmOverloads constructor(
 
         val bound = fullView.bounds
         val targetYPos = bound.bottom * ratioForScreenBottom
-        val endX = when (direction) {
-            Direction.LEFT -> bound.left
-            Direction.RIGHT -> bound.right
-            else -> {
-                throw IllegalStateException("Only left or right direction is allowed.")
+        val endX =
+            when (direction) {
+                Direction.LEFT -> bound.left
+                Direction.RIGHT -> bound.right
+                else -> {
+                    throw IllegalStateException("Only left or right direction is allowed.")
+                }
             }
-        }
         return uiDevice.swipe(
-            bound.centerX(), targetYPos.toInt(), endX, targetYPos.toInt(), SWIPE_STEPS)
+            bound.centerX(),
+            targetYPos.toInt(),
+            endX,
+            targetYPos.toInt(),
+            SWIPE_STEPS
+        )
     }
 
     /**

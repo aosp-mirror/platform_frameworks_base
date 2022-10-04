@@ -34,8 +34,8 @@ import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test IME window closing to home transitions.
- * To run this test: `atest FlickerTests:CloseImeWindowToHomeTest`
+ * Test IME window closing to home transitions. To run this test: `atest
+ * FlickerTests:CloseImeWindowToHomeTest`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
@@ -53,14 +53,9 @@ class CloseImeWindowToHomeTest(testSpec: FlickerTestParameter) : BaseTest(testSp
         }
         transitions {
             tapl.goHome()
-            wmHelper.StateSyncBuilder()
-                .withHomeActivityVisible()
-                .withImeGone()
-                .waitForAndVerify()
+            wmHelper.StateSyncBuilder().withHomeActivityVisible().withImeGone().waitForAndVerify()
         }
-        teardown {
-            testApp.exit(wmHelper)
-        }
+        teardown { testApp.exit(wmHelper) }
     }
 
     /** {@inheritDoc} */
@@ -84,40 +79,25 @@ class CloseImeWindowToHomeTest(testSpec: FlickerTestParameter) : BaseTest(testSp
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
         testSpec.assertLayers {
             this.visibleLayersShownMoreThanOneConsecutiveEntry(
-                listOf(
-                    ComponentNameMatcher.IME,
-                    ComponentNameMatcher.SPLASH_SCREEN
-                )
+                listOf(ComponentNameMatcher.IME, ComponentNameMatcher.SPLASH_SCREEN)
             )
         }
     }
 
-    @Presubmit
-    @Test
-    fun imeLayerBecomesInvisible() = testSpec.imeLayerBecomesInvisible()
+    @Presubmit @Test fun imeLayerBecomesInvisible() = testSpec.imeLayerBecomesInvisible()
 
-    @Presubmit
-    @Test
-    fun imeWindowBecomesInvisible() = testSpec.imeWindowBecomesInvisible()
+    @Presubmit @Test fun imeWindowBecomesInvisible() = testSpec.imeWindowBecomesInvisible()
 
     @Presubmit
     @Test
     fun imeAppWindowBecomesInvisible() {
-        testSpec.assertWm {
-            this.isAppWindowVisible(testApp)
-                .then()
-                .isAppWindowInvisible(testApp)
-        }
+        testSpec.assertWm { this.isAppWindowVisible(testApp).then().isAppWindowInvisible(testApp) }
     }
 
     @Presubmit
     @Test
     fun imeAppLayerBecomesInvisible() {
-        testSpec.assertLayers {
-            this.isVisible(testApp)
-                .then()
-                .isInvisible(testApp)
-        }
+        testSpec.assertLayers { this.isVisible(testApp).then().isInvisible(testApp) }
     }
 
     companion object {
@@ -126,11 +106,12 @@ class CloseImeWindowToHomeTest(testSpec: FlickerTestParameter) : BaseTest(testSp
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
                 .getConfigNonRotationTests(
-                                        supportedRotations = listOf(Surface.ROTATION_0),
-                    supportedNavigationModes = listOf(
-                        WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY,
-                        WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
-                    )
+                    supportedRotations = listOf(Surface.ROTATION_0),
+                    supportedNavigationModes =
+                        listOf(
+                            WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY,
+                            WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
+                        )
                 )
         }
     }

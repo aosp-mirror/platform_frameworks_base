@@ -23,7 +23,9 @@ import com.android.server.wm.flicker.testapp.ActivityOptions
 import com.android.server.wm.traces.common.ComponentNameMatcher
 import com.android.server.wm.traces.parser.toFlickerComponent
 
-class SeamlessRotationAppHelper @JvmOverloads constructor(
+class SeamlessRotationAppHelper
+@JvmOverloads
+constructor(
     instr: Instrumentation,
     launcherName: String = ActivityOptions.SeamlessRotation.LABEL,
     component: ComponentNameMatcher =

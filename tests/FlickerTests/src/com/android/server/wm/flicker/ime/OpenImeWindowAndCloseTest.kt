@@ -57,21 +57,13 @@ class OpenImeWindowAndCloseTest(testSpec: FlickerTestParameter) : BaseTest(testS
             testApp.launchViaIntent(wmHelper)
             testApp.openIME(wmHelper)
         }
-        transitions {
-            testApp.finishActivity(wmHelper)
-        }
-        teardown {
-            simpleApp.exit(wmHelper)
-        }
+        transitions { testApp.finishActivity(wmHelper) }
+        teardown { simpleApp.exit(wmHelper) }
     }
 
-    @Presubmit
-    @Test
-    fun imeWindowBecomesInvisible() = testSpec.imeWindowBecomesInvisible()
+    @Presubmit @Test fun imeWindowBecomesInvisible() = testSpec.imeWindowBecomesInvisible()
 
-    @Presubmit
-    @Test
-    fun imeLayerBecomesInvisible() = testSpec.imeLayerBecomesInvisible()
+    @Presubmit @Test fun imeLayerBecomesInvisible() = testSpec.imeLayerBecomesInvisible()
 
     @Presubmit
     @Test
@@ -93,11 +85,12 @@ class OpenImeWindowAndCloseTest(testSpec: FlickerTestParameter) : BaseTest(testS
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
                 .getConfigNonRotationTests(
-                                        supportedRotations = listOf(Surface.ROTATION_0),
-                    supportedNavigationModes = listOf(
-                        WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY,
-                        WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
-                    )
+                    supportedRotations = listOf(Surface.ROTATION_0),
+                    supportedNavigationModes =
+                        listOf(
+                            WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY,
+                            WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
+                        )
                 )
         }
     }

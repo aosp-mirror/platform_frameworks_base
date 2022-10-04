@@ -24,7 +24,9 @@ import com.android.server.wm.traces.common.ComponentNameMatcher
 import com.android.server.wm.traces.parser.toFlickerComponent
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 
-class ImeEditorPopupDialogAppHelper @JvmOverloads constructor(
+class ImeEditorPopupDialogAppHelper
+@JvmOverloads
+constructor(
     instr: Instrumentation,
     launcherName: String = ActivityOptions.Ime.EditorPopupDialogActivity.LABEL,
     component: ComponentNameMatcher =
@@ -42,15 +44,12 @@ class ImeEditorPopupDialogAppHelper @JvmOverloads constructor(
     }
 
     fun dismissDialog(wmHelper: WindowManagerStateHelper) {
-        val dismissButton = uiDevice.wait(
-            Until.findObject(By.text("Dismiss")), FIND_TIMEOUT)
+        val dismissButton = uiDevice.wait(Until.findObject(By.text("Dismiss")), FIND_TIMEOUT)
 
         // Pressing back key to dismiss the dialog
         if (dismissButton != null) {
             dismissButton.click()
-            wmHelper.StateSyncBuilder()
-                .withAppTransitionIdle()
-                .waitForAndVerify()
+            wmHelper.StateSyncBuilder().withAppTransitionIdle().waitForAndVerify()
         }
     }
 }

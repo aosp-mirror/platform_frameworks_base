@@ -21,9 +21,7 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.helpers.FixedOrientationAppHelper
 import org.junit.Test
 
-/**
- * Base class for pip expand tests
- */
+/** Base class for pip expand tests */
 abstract class ExitPipToAppTransition(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
     protected val testApp = FixedOrientationAppHelper(instrumentation)
 
@@ -34,9 +32,7 @@ abstract class ExitPipToAppTransition(testSpec: FlickerTestParameter) : PipTrans
     @Presubmit
     @Test
     open fun pipAppWindowRemainInsideVisibleBounds() {
-        testSpec.assertWmVisibleRegion(pipApp) {
-            coversAtMost(displayBounds)
-        }
+        testSpec.assertWmVisibleRegion(pipApp) { coversAtMost(displayBounds) }
     }
 
     /**
@@ -46,9 +42,7 @@ abstract class ExitPipToAppTransition(testSpec: FlickerTestParameter) : PipTrans
     @Presubmit
     @Test
     open fun pipAppLayerRemainInsideVisibleBounds() {
-        testSpec.assertLayersVisibleRegion(pipApp) {
-            coversAtMost(displayBounds)
-        }
+        testSpec.assertLayersVisibleRegion(pipApp) { coversAtMost(displayBounds) }
     }
 
     /**
@@ -78,44 +72,34 @@ abstract class ExitPipToAppTransition(testSpec: FlickerTestParameter) : PipTrans
     @Test
     open fun showBothAppLayersThenHidePip() {
         testSpec.assertLayers {
-            isVisible(testApp)
-                .isVisible(pipApp)
-                .then()
-                .isInvisible(testApp)
-                .isVisible(pipApp)
+            isVisible(testApp).isVisible(pipApp).then().isInvisible(testApp).isVisible(pipApp)
         }
     }
 
     /**
-     * Checks that the visible region of [testApp] plus the visible region of [pipApp]
-     * cover the full display area at the start of the transition
+     * Checks that the visible region of [testApp] plus the visible region of [pipApp] cover the
+     * full display area at the start of the transition
      */
     @Presubmit
     @Test
     open fun testPlusPipAppsCoverFullScreenAtStart() {
         testSpec.assertLayersStart {
             val pipRegion = visibleRegion(pipApp).region
-            visibleRegion(testApp)
-                .plus(pipRegion)
-                .coversExactly(displayBounds)
+            visibleRegion(testApp).plus(pipRegion).coversExactly(displayBounds)
         }
     }
 
     /**
-     * Checks that the visible region oft [pipApp] covers the full display area at the end of
-     * the transition
+     * Checks that the visible region oft [pipApp] covers the full display area at the end of the
+     * transition
      */
     @Presubmit
     @Test
     open fun pipAppCoversFullScreenAtEnd() {
-        testSpec.assertLayersEnd {
-            visibleRegion(pipApp).coversExactly(displayBounds)
-        }
+        testSpec.assertLayersEnd { visibleRegion(pipApp).coversExactly(displayBounds) }
     }
 
-    /**
-     * Checks that the visible region of [pipApp] always expands during the animation
-     */
+    /** Checks that the visible region of [pipApp] always expands during the animation */
     @Presubmit
     @Test
     open fun pipLayerExpands() {
@@ -127,8 +111,6 @@ abstract class ExitPipToAppTransition(testSpec: FlickerTestParameter) : PipTrans
         }
     }
 
-    /** {@inheritDoc}  */
-    @Presubmit
-    @Test
-    override fun entireScreenCovered() = super.entireScreenCovered()
+    /** {@inheritDoc} */
+    @Presubmit @Test override fun entireScreenCovered() = super.entireScreenCovered()
 }

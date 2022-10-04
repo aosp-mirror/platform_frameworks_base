@@ -35,22 +35,21 @@ import org.junit.runners.Parameterized
  *
  * To run this test: `atest FlickerTests:OpenAppAfterCameraTest`
  *
- * Notes:
- * Some default assertions are inherited [OpenAppTransition]
+ * Notes: Some default assertions are inherited [OpenAppTransition]
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class OpenAppAfterCameraTest(
-    testSpec: FlickerTestParameter
-) : OpenAppFromLauncherTransition(testSpec) {
+open class OpenAppAfterCameraTest(testSpec: FlickerTestParameter) :
+    OpenAppFromLauncherTransition(testSpec) {
     @Before
     open fun before() {
         Assume.assumeFalse(isShellTransitionsEnabled)
     }
 
-    private val cameraApp = CameraAppHelper(instrumentation) /** {@inheritDoc} */
+    private val cameraApp = CameraAppHelper(instrumentation)
+    /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit
         get() = {
             super.transition(this)
@@ -62,26 +61,21 @@ open class OpenAppAfterCameraTest(
                 // 2. Press home button (button nav mode) / swipe up to home (gesture nav mode)
                 tapl.goHome()
             }
-            teardown {
-                testApp.exit(wmHelper)
-            }
-            transitions {
-                testApp.launchViaIntent(wmHelper)
-            }
+            teardown { testApp.exit(wmHelper) }
+            transitions { testApp.launchViaIntent(wmHelper) }
         }
 
     companion object {
         /**
          * Creates the test configurations.
          *
-         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring
-         * repetitions, screen orientation and navigation modes.
+         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring repetitions,
+         * screen orientation and navigation modes.
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): Collection<FlickerTestParameter> {
-            return FlickerTestParameterFactory.getInstance()
-                    .getConfigNonRotationTests()
+            return FlickerTestParameterFactory.getInstance().getConfigNonRotationTests()
         }
     }
 }

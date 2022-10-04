@@ -40,24 +40,21 @@ abstract class PipTransition(testSpec: FlickerTestParameter) : BaseTest(testSpec
         }
 
         fun doAction(broadcastAction: String) {
-            instrumentation.context
-                .sendBroadcast(createIntentWithAction(broadcastAction))
+            instrumentation.context.sendBroadcast(createIntentWithAction(broadcastAction))
         }
 
         companion object {
             // Corresponds to ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-            @JvmStatic
-            val ORIENTATION_LANDSCAPE = 0
+            @JvmStatic val ORIENTATION_LANDSCAPE = 0
 
             // Corresponds to ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-            @JvmStatic
-            val ORIENTATION_PORTRAIT = 1
+            @JvmStatic val ORIENTATION_PORTRAIT = 1
         }
     }
 
     /**
-     * Gets a configuration that handles basic setup and teardown of pip tests and that
-     * launches the Pip app for test
+     * Gets a configuration that handles basic setup and teardown of pip tests and that launches the
+     * Pip app for test
      *
      * @param eachRun If the pip app should be launched in each run (otherwise only 1x per test)
      * @param stringExtras Arguments to pass to the PIP launch intent

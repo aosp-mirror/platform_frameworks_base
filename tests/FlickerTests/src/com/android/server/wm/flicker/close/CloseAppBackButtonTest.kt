@@ -1,4 +1,3 @@
-
 /*
  * Copyright (C) 2020 The Android Open Source Project
  *
@@ -36,28 +35,34 @@ import org.junit.runners.Parameterized
  * To run this test: `atest FlickerTests:CloseAppBackButtonTest`
  *
  * Actions:
+ * ```
  *     Make sure no apps are running on the device
  *     Launch an app [testApp] and wait animation to complete
  *     Press back button
- *
+ * ```
  * To run only the presubmit assertions add: `--
+ * ```
  *      --module-arg FlickerTests:exclude-annotation:androidx.test.filters.FlakyTest
  *      --module-arg FlickerTests:include-annotation:android.platform.test.annotations.Presubmit`
- *
+ * ```
  * To run only the postsubmit assertions add: `--
+ * ```
  *      --module-arg FlickerTests:exclude-annotation:androidx.test.filters.FlakyTest
  *      --module-arg FlickerTests:include-annotation:android.platform.test.annotations.Postsubmit`
- *
+ * ```
  * To run only the flaky assertions add: `--
+ * ```
  *      --module-arg FlickerTests:include-annotation:androidx.test.filters.FlakyTest`
- *
+ * ```
  * Notes:
+ * ```
  *     1. Some default assertions (e.g., nav bar, status bar and screen covered)
  *        are inherited [CloseAppTransition]
  *     2. Part of the test setup occurs automatically via
  *        [com.android.server.wm.flicker.TransitionRunnerWithRules],
  *        including configuring navigation mode, initial orientation and ensuring no
  *        apps are running before setup
+ * ```
  */
 @RequiresDevice
 @FlickerServiceCompatible
@@ -71,9 +76,7 @@ class CloseAppBackButtonTest(testSpec: FlickerTestParameter) : CloseAppTransitio
             super.transition(this)
             transitions {
                 tapl.pressBack()
-                wmHelper.StateSyncBuilder()
-                    .withHomeActivityVisible()
-                    .waitForAndVerify()
+                wmHelper.StateSyncBuilder().withHomeActivityVisible().waitForAndVerify()
             }
         }
 
@@ -86,14 +89,13 @@ class CloseAppBackButtonTest(testSpec: FlickerTestParameter) : CloseAppTransitio
         /**
          * Creates the test configurations.
          *
-         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring
-         * repetitions, screen orientation and navigation modes.
+         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring repetitions,
+         * screen orientation and navigation modes.
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): List<FlickerTestParameter> {
-            return FlickerTestParameterFactory.getInstance()
-                .getConfigNonRotationTests()
+            return FlickerTestParameterFactory.getInstance().getConfigNonRotationTests()
         }
     }
 }

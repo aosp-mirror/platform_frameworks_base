@@ -40,16 +40,19 @@ import org.junit.runners.Parameterized
  * To run this test: `atest WMShellFlickerTests:AutoEnterPipOnGoToHomeTest`
  *
  * Actions:
+ * ```
  *     Launch an app in full screen
  *     Select "Auto-enter PiP" radio button
  *     Press Home button or swipe up to go Home and put [pipApp] in pip mode
- *
+ * ```
  * Notes:
+ * ```
  *     1. All assertions are inherited from [EnterPipTest]
  *     2. Part of the test setup occurs automatically via
  *        [com.android.server.wm.flicker.TransitionRunnerWithRules],
  *        including configuring navigation mode, initial orientation and ensuring no
  *        apps are running before setup
+ * ```
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
@@ -57,9 +60,7 @@ import org.junit.runners.Parameterized
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @FlakyTest(bugId = 238367575)
 class AutoEnterPipOnGoToHomeTest(testSpec: FlickerTestParameter) : EnterPipTest(testSpec) {
-    /**
-     * Defines the transition used to run the test
-     */
+    /** Defines the transition used to run the test */
     override val transition: FlickerBuilder.() -> Unit
         get() = {
             setup {
@@ -76,9 +77,7 @@ class AutoEnterPipOnGoToHomeTest(testSpec: FlickerTestParameter) : EnterPipTest(
                 RemoveAllTasksButHomeRule.removeAllTasksButHome()
                 pipApp.exit(wmHelper)
             }
-            transitions {
-                tapl.goHome()
-            }
+            transitions { tapl.goHome() }
         }
 
     @FlakyTest
@@ -92,9 +91,7 @@ class AutoEnterPipOnGoToHomeTest(testSpec: FlickerTestParameter) : EnterPipTest(
         }
     }
 
-    /**
-     * Checks that [pipApp] window is animated towards default position in right bottom corner
-     */
+    /** Checks that [pipApp] window is animated towards default position in right bottom corner */
     @Presubmit
     @Test
     fun pipLayerMovesTowardsRightBottomCorner() {

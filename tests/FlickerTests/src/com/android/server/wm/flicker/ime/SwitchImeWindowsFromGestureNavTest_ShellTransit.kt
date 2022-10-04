@@ -33,16 +33,15 @@ import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test IME windows switching with 2-Buttons or gestural navigation.
- * To run this test: `atest FlickerTests:SwitchImeWindowsFromGestureNavTest`
+ * Test IME windows switching with 2-Buttons or gestural navigation. To run this test: `atest
+ * FlickerTests:SwitchImeWindowsFromGestureNavTest`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class SwitchImeWindowsFromGestureNavTest_ShellTransit(
-    testSpec: FlickerTestParameter
-) : SwitchImeWindowsFromGestureNavTest(testSpec) {
+class SwitchImeWindowsFromGestureNavTest_ShellTransit(testSpec: FlickerTestParameter) :
+    SwitchImeWindowsFromGestureNavTest(testSpec) {
     @Before
     override fun before() {
         Assume.assumeTrue(isShellTransitionsEnabled)
@@ -73,8 +72,8 @@ class SwitchImeWindowsFromGestureNavTest_ShellTransit(
     override fun navBarWindowIsAlwaysVisible() = super.navBarWindowIsAlwaysVisible()
 
     /**
-     * Checks that [ComponentMatcher.NAV_BAR] window is visible and above the app windows at the start
-     * and end of the WM trace
+     * Checks that [ComponentMatcher.NAV_BAR] window is visible and above the app windows at the
+     * start and end of the WM trace
      */
     @Presubmit
     @Test
