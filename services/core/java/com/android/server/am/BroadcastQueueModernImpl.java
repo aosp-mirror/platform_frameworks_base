@@ -116,7 +116,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     BroadcastQueueModernImpl(ActivityManagerService service, Handler handler,
             BroadcastConstants fgConstants, BroadcastConstants bgConstants) {
         this(service, handler, fgConstants, bgConstants, new BroadcastSkipPolicy(service),
-                new BroadcastHistory());
+                new BroadcastHistory(fgConstants));
     }
 
     BroadcastQueueModernImpl(ActivityManagerService service, Handler handler,
@@ -1379,8 +1379,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         final long now = SystemClock.uptimeMillis();
         final IndentingPrintWriter ipw = new IndentingPrintWriter(pw);
         ipw.increaseIndent();
-
         ipw.println();
+
         ipw.println("📋 Per-process queues:");
         ipw.increaseIndent();
         for (int i = 0; i < mProcessQueues.size(); i++) {
@@ -1391,8 +1391,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             }
         }
         ipw.decreaseIndent();
-
         ipw.println();
+
         ipw.println("🧍 Runnable:");
         ipw.increaseIndent();
         if (mRunnableHead == null) {
@@ -1410,8 +1410,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             }
         }
         ipw.decreaseIndent();
-
         ipw.println();
+
         ipw.println("🏃 Running:");
         ipw.increaseIndent();
         for (BroadcastProcessQueue queue : mRunning) {
@@ -1427,6 +1427,11 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             }
         }
         ipw.decreaseIndent();
+        ipw.println();
+
+        if (dumpPackage == null) {
+            mConstants.dump(ipw);
+        }
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
         needSep = mHistory.dumpLocked(ipw, dumpPackage, mQueueName, sdf, dumpAll, needSep);

@@ -636,6 +636,19 @@ class BroadcastProcessQueue {
         }
         pw.print(" because ");
         pw.print(reasonToString(mRunnableAtReason));
+        if (mRunnableAtReason == REASON_BLOCKED) {
+            final SomeArgs next = mPending.peekFirst();
+            if (next != null) {
+                final BroadcastRecord r = (BroadcastRecord) next.arg1;
+                final int blockedUntilTerminalCount = next.argi2;
+                pw.print(" waiting for ");
+                pw.print(blockedUntilTerminalCount);
+                pw.print(" at ");
+                pw.print(r.terminalCount);
+                pw.print(" of ");
+                pw.print(r.receivers.size());
+            }
+        }
         pw.println();
         pw.increaseIndent();
         if (mActive != null) {

@@ -214,6 +214,7 @@ public abstract class BroadcastQueue {
     @GuardedBy("mService")
     public abstract @NonNull String describeStateLocked();
 
+    @GuardedBy("mService")
     public abstract void dumpDebug(@NonNull ProtoOutputStream proto, long fieldId);
 
     @GuardedBy("mService")

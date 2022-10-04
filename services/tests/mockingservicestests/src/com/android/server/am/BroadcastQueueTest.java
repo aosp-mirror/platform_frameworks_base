@@ -21,6 +21,7 @@ import static android.os.UserHandle.USER_SYSTEM;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -72,6 +73,7 @@ import android.provider.Settings;
 import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
+import android.util.proto.ProtoOutputStream;
 
 import androidx.test.filters.MediumTest;
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -239,14 +241,17 @@ public class BroadcastQueueTest {
         constants.ALLOW_BG_ACTIVITY_START_TIMEOUT = 0;
         final BroadcastSkipPolicy emptySkipPolicy = new BroadcastSkipPolicy(mAms) {
             public boolean shouldSkip(BroadcastRecord r, ResolveInfo info) {
+                // Ignored
                 return false;
             }
             public boolean shouldSkip(BroadcastRecord r, BroadcastFilter filter) {
+                // Ignored
                 return false;
             }
         };
-        final BroadcastHistory emptyHistory = new BroadcastHistory() {
+        final BroadcastHistory emptyHistory = new BroadcastHistory(constants) {
             public void addBroadcastToHistoryLocked(BroadcastRecord original) {
+                // Ignored
             }
         };
 
@@ -638,11 +643,25 @@ public class BroadcastQueueTest {
     }
 
     @Test
-    public void testDump() throws Exception {
+    public void testDebugging() throws Exception {
         // To maximize test coverage, dump current state; we're not worried
         // about the actual output, just that we don't crash
+        mQueue.dumpDebug(new ProtoOutputStream(),
+                ActivityManagerServiceDumpBroadcastsProto.BROADCAST_QUEUE);
         mQueue.dumpLocked(FileDescriptor.err, new PrintWriter(new ByteArrayOutputStream()),
                 null, 0, true, null, false);
+
+        BroadcastQueue.logv(TAG);
+        BroadcastQueue.logv(TAG, null);
+        BroadcastQueue.logv(TAG, new PrintWriter(new ByteArrayOutputStream()));
+
+        BroadcastQueue.logw(TAG);
+
+        BroadcastQueue.checkState(true, TAG);
+        BroadcastQueue.checkState(false, TAG);
+
+        assertNotNull(mQueue.toString());
+        assertNotNull(mQueue.describeStateLocked());
     }
 
     /**
@@ -962,7 +981,8 @@ public class BroadcastQueueTest {
         final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         try (SyncBarrier b = new SyncBarrier()) {
             enqueueBroadcast(makeBroadcastRecord(airplane, callerApp, new ArrayList<>(
-                    List.of(makeManifestReceiver(PACKAGE_GREEN, CLASS_RED),
+                    List.of(makeRegisteredReceiver(receiverApp),
+                            makeManifestReceiver(PACKAGE_GREEN, CLASS_RED),
                             makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN),
                             makeManifestReceiver(PACKAGE_GREEN, CLASS_BLUE)))));
 
@@ -979,11 +999,14 @@ public class BroadcastQueueTest {
 
             // To maximize test coverage, dump current state; we're not worried
             // about the actual output, just that we don't crash
+            mQueue.dumpDebug(new ProtoOutputStream(),
+                    ActivityManagerServiceDumpBroadcastsProto.BROADCAST_QUEUE);
             mQueue.dumpLocked(FileDescriptor.err, new PrintWriter(new ByteArrayOutputStream()),
                     null, 0, true, null, false);
         }
 
         waitForIdle();
+        verifyScheduleRegisteredReceiver(receiverApp, airplane);
         verifyScheduleReceiver(times(1), receiverApp, airplane,
                 new ComponentName(PACKAGE_GREEN, CLASS_RED));
         verifyScheduleReceiver(never(), receiverApp, airplane,

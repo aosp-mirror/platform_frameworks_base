@@ -2440,8 +2440,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         mEnableOffloadQueue = SystemProperties.getBoolean(
                 "persist.device_config.activity_manager_native_boot.offload_queue_enabled", true);
-        mEnableModernQueue = SystemProperties.getBoolean(
-                "persist.device_config.activity_manager_native_boot.modern_queue_enabled", false);
+        mEnableModernQueue = foreConstants.MODERN_QUEUE_ENABLED;
 
         if (mEnableModernQueue) {
             mBroadcastQueues = new BroadcastQueue[1];

@@ -69,6 +69,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.text.TextUtils;
 import android.util.EventLog;
+import android.util.IndentingPrintWriter;
 import android.util.Slog;
 import android.util.SparseIntArray;
 import android.util.proto.ProtoOutputStream;
@@ -188,7 +189,7 @@ public class BroadcastQueueImpl extends BroadcastQueue {
             String name, BroadcastConstants constants, boolean allowDelayBehindServices,
             int schedGroup) {
         this(service, handler, name, constants, new BroadcastSkipPolicy(service),
-                new BroadcastHistory(), allowDelayBehindServices, schedGroup);
+                new BroadcastHistory(constants), allowDelayBehindServices, schedGroup);
     }
 
     BroadcastQueueImpl(ActivityManagerService service, Handler handler,
@@ -1880,7 +1881,7 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                 needSep = true;
             }
         }
-        mConstants.dump(pw);
+        mConstants.dump(new IndentingPrintWriter(pw));
         needSep = mHistory.dumpLocked(pw, dumpPackage, mQueueName, sdf, dumpAll, needSep);
         return needSep;
     }

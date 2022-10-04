@@ -17,6 +17,7 @@
 package com.android.server.am;
 
 import static com.android.server.am.BroadcastProcessQueue.insertIntoRunnableList;
+import static com.android.server.am.BroadcastProcessQueue.reasonToString;
 import static com.android.server.am.BroadcastProcessQueue.removeFromRunnableList;
 import static com.android.server.am.BroadcastQueueTest.CLASS_GREEN;
 import static com.android.server.am.BroadcastQueueTest.PACKAGE_BLUE;
@@ -25,10 +26,12 @@ import static com.android.server.am.BroadcastQueueTest.PACKAGE_RED;
 import static com.android.server.am.BroadcastQueueTest.PACKAGE_YELLOW;
 import static com.android.server.am.BroadcastQueueTest.getUidForPackage;
 import static com.android.server.am.BroadcastQueueTest.makeManifestReceiver;
+import static com.android.server.am.BroadcastRecord.deliveryStateToString;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
@@ -330,6 +333,29 @@ public class BroadcastQueueModernImplTest {
     }
 
     /**
+     * Queue with too many pending broadcasts is runnable.
+     */
+    @Test
+    public void testRunnableAt_Huge() {
+        BroadcastProcessQueue queue = new BroadcastProcessQueue(mConstants,
+                PACKAGE_GREEN, getUidForPackage(PACKAGE_GREEN));
+
+        final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        final BroadcastRecord airplaneRecord = makeBroadcastRecord(airplane);
+        queue.enqueueOrReplaceBroadcast(airplaneRecord, 0, 0);
+
+        mConstants.MAX_PENDING_BROADCASTS = 128;
+        queue.invalidateRunnableAt();
+        assertTrue(queue.getRunnableAt() > airplaneRecord.enqueueTime);
+        assertEquals(BroadcastProcessQueue.REASON_NORMAL, queue.getRunnableAtReason());
+
+        mConstants.MAX_PENDING_BROADCASTS = 1;
+        queue.invalidateRunnableAt();
+        assertTrue(queue.getRunnableAt() == airplaneRecord.enqueueTime);
+        assertEquals(BroadcastProcessQueue.REASON_MAX_PENDING, queue.getRunnableAtReason());
+    }
+
+    /**
      * Verify that sending a broadcast that removes any matching pending
      * broadcasts is applied as expected.
      */
@@ -358,5 +384,16 @@ public class BroadcastQueueModernImplTest {
         queue.makeActiveNextPending();
         assertEquals(Intent.ACTION_SCREEN_OFF, queue.getActive().intent.getAction());
         assertTrue(queue.isEmpty());
+    }
+
+    /**
+     * Verify that we emit something valid for each debug value.
+     */
+    @Test
+    public void testIntDefToString() {
+        for (int i = Byte.MIN_VALUE; i < Byte.MAX_VALUE; i++) {
+            assertNotNull(deliveryStateToString(i));
+            assertNotNull(reasonToString(i));
+        }
     }
 }
