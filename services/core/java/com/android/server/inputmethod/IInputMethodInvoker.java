@@ -221,14 +221,12 @@ final class IInputMethodInvoker {
     }
 
     @AnyThread
-    boolean updateEditorToolType(int toolType) {
+    void updateEditorToolType(@MotionEvent.ToolType int toolType) {
         try {
             mTarget.updateEditorToolType(toolType);
         } catch (RemoteException e) {
             logRemoteException(e);
-            return false;
         }
-        return true;
     }
 
     @AnyThread
