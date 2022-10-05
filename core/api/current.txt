@@ -48386,9 +48386,9 @@ package android.view {
 
   public static interface GestureDetector.OnGestureListener {
     method public boolean onDown(@NonNull android.view.MotionEvent);
-    method public boolean onFling(@NonNull android.view.MotionEvent, @NonNull android.view.MotionEvent, float, float);
+    method public boolean onFling(@Nullable android.view.MotionEvent, @NonNull android.view.MotionEvent, float, float);
     method public void onLongPress(@NonNull android.view.MotionEvent);
-    method public boolean onScroll(@NonNull android.view.MotionEvent, @NonNull android.view.MotionEvent, float, float);
+    method public boolean onScroll(@Nullable android.view.MotionEvent, @NonNull android.view.MotionEvent, float, float);
     method public void onShowPress(@NonNull android.view.MotionEvent);
     method public boolean onSingleTapUp(@NonNull android.view.MotionEvent);
   }
@@ -48399,9 +48399,9 @@ package android.view {
     method public boolean onDoubleTap(@NonNull android.view.MotionEvent);
     method public boolean onDoubleTapEvent(@NonNull android.view.MotionEvent);
     method public boolean onDown(@NonNull android.view.MotionEvent);
-    method public boolean onFling(@NonNull android.view.MotionEvent, @NonNull android.view.MotionEvent, float, float);
+    method public boolean onFling(@Nullable android.view.MotionEvent, @NonNull android.view.MotionEvent, float, float);
     method public void onLongPress(@NonNull android.view.MotionEvent);
-    method public boolean onScroll(@NonNull android.view.MotionEvent, @NonNull android.view.MotionEvent, float, float);
+    method public boolean onScroll(@Nullable android.view.MotionEvent, @NonNull android.view.MotionEvent, float, float);
     method public void onShowPress(@NonNull android.view.MotionEvent);
     method public boolean onSingleTapConfirmed(@NonNull android.view.MotionEvent);
     method public boolean onSingleTapUp(@NonNull android.view.MotionEvent);
