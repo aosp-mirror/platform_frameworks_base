@@ -8540,6 +8540,10 @@ public final class ViewRootImpl implements ViewParent,
         if (mLocalSyncState != LOCAL_SYNC_NONE) {
             writer.println(innerPrefix + "mLocalSyncState=" + mLocalSyncState);
         }
+        writer.println(innerPrefix + "mLastReportedMergedConfiguration="
+                + mLastReportedMergedConfiguration);
+        writer.println(innerPrefix + "mLastConfigurationFromResources="
+                + mLastConfigurationFromResources);
         writer.println(innerPrefix + "mIsAmbientMode="  + mIsAmbientMode);
         writer.println(innerPrefix + "mUnbufferedInputSource="
                 + Integer.toHexString(mUnbufferedInputSource));
