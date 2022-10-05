@@ -81,9 +81,11 @@ import android.telephony.DataConnectionRealTimeInfo;
 import android.telephony.ModemActivityInfo;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
+import android.util.IndentingPrintWriter;
 import android.util.Slog;
 import android.util.StatsEvent;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.os.BackgroundThread;
@@ -104,6 +106,7 @@ import com.android.server.power.stats.BatteryExternalStatsWorker;
 import com.android.server.power.stats.BatteryStatsImpl;
 import com.android.server.power.stats.BatteryUsageStatsProvider;
 import com.android.server.power.stats.BatteryUsageStatsStore;
+import com.android.server.power.stats.CpuWakeupStats;
 import com.android.server.power.stats.SystemServerCpuThreadReader.SystemServiceCpuThreadTimes;
 
 import java.io.File;
@@ -120,6 +123,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -142,6 +146,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
     private final PowerProfile mPowerProfile;
     final BatteryStatsImpl mStats;
+    @GuardedBy("mWakeupStats")
+    final CpuWakeupStats mCpuWakeupStats;
     private final BatteryUsageStatsStore mBatteryUsageStatsStore;
     private final BatteryStatsImpl.UserInfoProvider mUserManagerUserInfoProvider;
     private final Context mContext;
@@ -373,6 +379,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
         mBatteryUsageStatsProvider = new BatteryUsageStatsProvider(context, mStats,
                 mBatteryUsageStatsStore);
+        mCpuWakeupStats = new CpuWakeupStats(context, R.xml.irq_device_map);
     }
 
     public void publish() {
@@ -463,6 +470,12 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             synchronized (BatteryStatsService.this.mLock) {
                 mStats.noteBinderThreadNativeIds(binderThreadNativeTids);
             }
+        }
+
+        @Override
+        public void noteCpuWakingActivity(int subsystem, long elapsedMillis, int... uids) {
+            Objects.requireNonNull(uids);
+            mCpuWakeupStats.noteWakingActivity(subsystem, elapsedMillis, uids);
         }
     }
 
@@ -2251,12 +2264,13 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             try {
                 String reason;
                 while ((reason = waitWakeup()) != null) {
+                    final long nowElapsed = SystemClock.elapsedRealtime();
+                    final long nowUptime = SystemClock.uptimeMillis();
                     // Wait for the completion of pending works if there is any
                     awaitCompletion();
-
+                    mCpuWakeupStats.noteWakeupTimeAndReason(nowElapsed, nowUptime, reason);
                     synchronized (mStats) {
-                        mStats.noteWakeupReasonLocked(reason,
-                                SystemClock.elapsedRealtime(), SystemClock.uptimeMillis());
+                        mStats.noteWakeupReasonLocked(reason, nowElapsed, nowUptime);
                     }
                 }
             } catch (RuntimeException e) {
@@ -2312,6 +2326,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         pw.println("  --read-daily: read-load last written daily stats.");
         pw.println("  --settings: dump the settings key/values related to batterystats");
         pw.println("  --cpu: dump cpu stats for debugging purpose");
+        pw.println("  --wakeups: dump CPU wakeup history and attribution.");
         pw.println("  --power-profile: dump the power profile constants");
         pw.println("  --usage: write battery usage stats. Optional arguments:");
         pw.println("     --proto: output as a binary protobuffer");
@@ -2567,6 +2582,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                     }
                     dumpUsageStatsToProto(fd, pw, model, proto);
                     return;
+                } else if ("--wakeups".equals(arg)) {
+                    mCpuWakeupStats.dump(new IndentingPrintWriter(pw, "  "),
+                            SystemClock.elapsedRealtime());
+                    return;
                 } else if ("-a".equals(arg)) {
                     flags |= BatteryStats.DUMP_VERBOSE;
                 } else if (arg.length() > 0 && arg.charAt(0) == '-'){
@@ -2697,12 +2716,16 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         } else {
             if (DBG) Slog.d(TAG, "begin dumpLocked from UID " + Binder.getCallingUid());
             awaitCompletion();
+
             synchronized (mStats) {
                 mStats.dumpLocked(mContext, pw, flags, reqUid, historyStart);
                 if (writeData) {
                     mStats.writeAsyncLocked();
                 }
             }
+            pw.println();
+            mCpuWakeupStats.dump(new IndentingPrintWriter(pw, "  "), SystemClock.elapsedRealtime());
+
             if (DBG) Slog.d(TAG, "end dumpLocked");
         }
     }
