@@ -289,15 +289,73 @@ class GuestUserInteractorTest : SysuiTestCase() {
             verifyDidNotExit()
         }
 
+    @Test
+    fun `remove - returns to target user`() =
+        runBlocking(IMMEDIATE) {
+            whenever(manager.markGuestForDeletion(anyInt())).thenReturn(true)
+            repository.setSelectedUserInfo(GUEST_USER_INFO)
+
+            val targetUserId = NON_GUEST_USER_INFO.id
+            underTest.remove(
+                guestUserId = GUEST_USER_INFO.id,
+                targetUserId = targetUserId,
+                showDialog = showDialog,
+                dismissDialog = dismissDialog,
+                switchUser = switchUser,
+            )
+
+            verify(manager).markGuestForDeletion(GUEST_USER_INFO.id)
+            verify(manager).removeUser(GUEST_USER_INFO.id)
+            verify(switchUser).invoke(targetUserId)
+        }
+
+    @Test
+    fun `remove - selected different from guest user - do nothing`() =
+        runBlocking(IMMEDIATE) {
+            whenever(manager.markGuestForDeletion(anyInt())).thenReturn(true)
+            repository.setSelectedUserInfo(NON_GUEST_USER_INFO)
+
+            underTest.remove(
+                guestUserId = GUEST_USER_INFO.id,
+                targetUserId = 123,
+                showDialog = showDialog,
+                dismissDialog = dismissDialog,
+                switchUser = switchUser,
+            )
+
+            verifyDidNotRemove()
+        }
+
+    @Test
+    fun `remove - selected is actually not a guest user - do nothing`() =
+        runBlocking(IMMEDIATE) {
+            whenever(manager.markGuestForDeletion(anyInt())).thenReturn(true)
+            repository.setSelectedUserInfo(NON_GUEST_USER_INFO)
+
+            underTest.remove(
+                guestUserId = NON_GUEST_USER_INFO.id,
+                targetUserId = 123,
+                showDialog = showDialog,
+                dismissDialog = dismissDialog,
+                switchUser = switchUser,
+            )
+
+            verifyDidNotRemove()
+        }
+
     private fun setAllowedToAdd(isAllowed: Boolean = true) {
         whenever(deviceProvisionedController.isDeviceProvisioned).thenReturn(isAllowed)
         whenever(devicePolicyManager.isDeviceManaged).thenReturn(!isAllowed)
     }
 
     private fun verifyDidNotExit() {
+        verifyDidNotRemove()
         verify(manager, never()).getUserInfo(anyInt())
-        verify(manager, never()).markGuestForDeletion(anyInt())
         verify(uiEventLogger, never()).log(any())
+    }
+
+    private fun verifyDidNotRemove() {
+        verify(manager, never()).markGuestForDeletion(anyInt())
         verify(showDialog, never()).invoke(any())
         verify(dismissDialog, never()).invoke()
         verify(switchUser, never()).invoke(anyInt())
