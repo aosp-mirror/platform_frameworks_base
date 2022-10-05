@@ -6406,9 +6406,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
      * @return {@code true} if userId has debugging privileges.
      * i.e. {@link UserManager#DISALLOW_DEBUGGING_FEATURES} is {@code false}.
      */
-    private boolean userHasDebugPriv(int userId, final ShellCommand shellCommand) {
-        if (mUserManager.hasUserRestriction(
-                UserManager.DISALLOW_DEBUGGING_FEATURES, UserHandle.of(userId))) {
+    private boolean userHasDebugPriv(@UserIdInt int userId, ShellCommand shellCommand) {
+        if (mUserManagerInternal.hasUserRestriction(
+                UserManager.DISALLOW_DEBUGGING_FEATURES, userId)) {
             shellCommand.getErrPrintWriter().println("User #" + userId
                     + " is restricted with DISALLOW_DEBUGGING_FEATURES.");
             return false;
