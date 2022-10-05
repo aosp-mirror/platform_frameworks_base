@@ -731,6 +731,15 @@ public class WindowStateTests extends WindowTestsBase {
         assertTrue(mWm.mResizingWindows.contains(startingApp));
         assertTrue(startingApp.isDrawn());
         assertFalse(startingApp.getOrientationChanging());
+
+        // Even if the display is frozen, invisible requested window should not be affected.
+        startingApp.mActivityRecord.mVisibleRequested = false;
+        mWm.startFreezingDisplay(0, 0, mDisplayContent);
+        doReturn(true).when(mWm.mPolicy).isScreenOn();
+        startingApp.getWindowFrames().setInsetsChanged(true);
+        startingApp.updateResizingWindowIfNeeded();
+        assertTrue(startingApp.isDrawn());
+        assertFalse(startingApp.getOrientationChanging());
     }
 
     @UseTestDisplay(addWindows = W_ABOVE_ACTIVITY)
