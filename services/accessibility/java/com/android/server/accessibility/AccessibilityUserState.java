@@ -44,6 +44,7 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IAccessibilityManagerClient;
@@ -118,6 +119,7 @@ class AccessibilityUserState {
     private boolean mRequestMultiFingerGestures;
     private boolean mRequestTwoFingerPassthrough;
     private boolean mSendMotionEventsEnabled;
+    private SparseArray<Boolean> mServiceDetectsGestures = new SparseArray<>(0);
     private int mUserInteractiveUiTimeout;
     private int mUserNonInteractiveUiTimeout;
     private int mNonInteractiveUiTimeout = 0;
@@ -986,5 +988,16 @@ class AccessibilityUserState {
     public void setFocusAppearanceLocked(int strokeWidth, int color) {
         mFocusStrokeWidth = strokeWidth;
         mFocusColor = color;
+    }
+
+    public void setServiceDetectsGesturesEnabled(int displayId, boolean mode) {
+        mServiceDetectsGestures.put(displayId, mode);
+    }
+
+    public boolean isServiceDetectsGesturesEnabled(int displayId) {
+        if (mServiceDetectsGestures.contains(displayId)) {
+            return mServiceDetectsGestures.get(displayId);
+        }
+        return false;
     }
 }
