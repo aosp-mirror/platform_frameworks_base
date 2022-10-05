@@ -1273,8 +1273,8 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     public static final int AXIS_GENERIC_16 = 47;
 
     // NOTE: If you add a new axis here you must also add it to:
-    //  native/include/android/input.h
-    //  frameworks/base/include/ui/KeycodeLabels.h
+    //  frameworks/native/include/android/input.h
+    //  frameworks/native/libs/input/InputEventLabels.cpp
 
     // Symbolic names of all axes.
     private static final SparseArray<String> AXIS_SYMBOLIC_NAMES = new SparseArray<String>();
