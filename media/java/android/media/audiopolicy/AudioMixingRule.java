@@ -30,8 +30,10 @@ import android.util.Log;
 
 import java.lang.annotation.Retention;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 
 /**
@@ -50,10 +52,10 @@ import java.util.Objects;
 @SystemApi
 public class AudioMixingRule {
 
-    private AudioMixingRule(int mixType, ArrayList<AudioMixMatchCriterion> criteria,
+    private AudioMixingRule(int mixType, Collection<AudioMixMatchCriterion> criteria,
                             boolean allowPrivilegedMediaPlaybackCapture,
                             boolean voiceCommunicationCaptureAllowed) {
-        mCriteria = criteria;
+        mCriteria = new ArrayList<>(criteria);
         mTargetMixType = mixType;
         mAllowPrivilegedPlaybackCapture = allowPrivilegedMediaPlaybackCapture;
         mVoiceCommunicationCaptureAllowed = voiceCommunicationCaptureAllowed;
@@ -140,6 +142,20 @@ public class AudioMixingRule {
             return Objects.hash(mAttr, mIntProp, mRule);
         }
 
+        @Override
+        public boolean equals(Object object) {
+            if (object == null || this.getClass() != object.getClass()) {
+                return false;
+            }
+            if (object == this) {
+                return true;
+            }
+            AudioMixMatchCriterion other = (AudioMixMatchCriterion) object;
+            return mRule == other.mRule
+                    && mIntProp == other.mIntProp
+                    && Objects.equals(mAttr, other.mAttr);
+        }
+
         void writeToParcel(Parcel dest) {
             dest.writeInt(mRule);
             final int match_rule = mRule & ~RULE_EXCLUSION_MASK;
@@ -190,15 +206,6 @@ public class AudioMixingRule {
             }
         }
         return false;
-    }
-
-    private static boolean areCriteriaEquivalent(ArrayList<AudioMixMatchCriterion> cr1,
-            ArrayList<AudioMixMatchCriterion> cr2) {
-        if (cr1 == null || cr2 == null) return false;
-        if (cr1 == cr2) return true;
-        if (cr1.size() != cr2.size()) return false;
-        //TODO iterate over rules to check they contain the same criterion
-        return (cr1.hashCode() == cr2.hashCode());
     }
 
     private final int mTargetMixType;
@@ -286,9 +293,9 @@ public class AudioMixingRule {
 
         final AudioMixingRule that = (AudioMixingRule) o;
         return (this.mTargetMixType == that.mTargetMixType)
-                && (areCriteriaEquivalent(this.mCriteria, that.mCriteria)
-                && this.mAllowPrivilegedPlaybackCapture == that.mAllowPrivilegedPlaybackCapture
-                && this.mVoiceCommunicationCaptureAllowed
+                && Objects.equals(mCriteria, that.mCriteria)
+                && (this.mAllowPrivilegedPlaybackCapture == that.mAllowPrivilegedPlaybackCapture)
+                && (this.mVoiceCommunicationCaptureAllowed
                     == that.mVoiceCommunicationCaptureAllowed);
     }
 
@@ -372,7 +379,7 @@ public class AudioMixingRule {
      * Builder class for {@link AudioMixingRule} objects
      */
     public static class Builder {
-        private ArrayList<AudioMixMatchCriterion> mCriteria;
+        private final Set<AudioMixMatchCriterion> mCriteria;
         private int mTargetMixType = AudioMix.MIX_TYPE_INVALID;
         private boolean mAllowPrivilegedMediaPlaybackCapture = false;
         // This value should be set internally according to a permission check
@@ -382,7 +389,7 @@ public class AudioMixingRule {
          * Constructs a new Builder with no rules.
          */
         public Builder() {
-            mCriteria = new ArrayList<AudioMixMatchCriterion>();
+            mCriteria = new HashSet<>();
         }
 
         /**
@@ -547,7 +554,12 @@ public class AudioMixingRule {
                 throw new IllegalArgumentException("Illegal argument for mix role");
             }
 
-            Log.i("AudioMixingRule", "Builder setTargetMixRole " + mixRole);
+            if (mCriteria.stream().map(AudioMixMatchCriterion::getRule)
+                    .anyMatch(mixRole == MIX_ROLE_PLAYERS
+                            ? AudioMixingRule::isRecorderRule : AudioMixingRule::isPlayerRule)) {
+                throw new IllegalArgumentException(
+                        "Target mix role is not compatible with mix rules.");
+            }
             mTargetMixType = mixRole == MIX_ROLE_INJECTOR
                     ? AudioMix.MIX_TYPE_RECORDERS : AudioMix.MIX_TYPE_PLAYERS;
             return this;
@@ -604,17 +616,15 @@ public class AudioMixingRule {
          */
         private Builder addRuleInternal(AudioAttributes attrToMatch, Integer intProp, int rule)
                 throws IllegalArgumentException {
-            // as rules are added to the Builder, we verify they are consistent with the type
-            // of mix being built. When adding the first rule, the mix type is MIX_TYPE_INVALID.
+            // If mix type is invalid and added rule is valid only for the players / recorders,
+            // adjust the mix type accordingly.
+            // Otherwise, if the mix type was already deduced or set explicitly, verify the rule
+            // is valid for the mix type.
             if (mTargetMixType == AudioMix.MIX_TYPE_INVALID) {
                 if (isPlayerRule(rule)) {
                     mTargetMixType = AudioMix.MIX_TYPE_PLAYERS;
                 } else if (isRecorderRule(rule)) {
                     mTargetMixType = AudioMix.MIX_TYPE_RECORDERS;
-                } else {
-                    // For rules which are not player or recorder specific (e.g. RULE_MATCH_UID),
-                    // the default mix type is MIX_TYPE_PLAYERS.
-                    mTargetMixType = AudioMix.MIX_TYPE_PLAYERS;
                 }
             } else if ((isPlayerRule(rule) && (mTargetMixType != AudioMix.MIX_TYPE_PLAYERS))
                     || (isRecorderRule(rule)) && (mTargetMixType != AudioMix.MIX_TYPE_RECORDERS))
@@ -622,75 +632,13 @@ public class AudioMixingRule {
                 throw new IllegalArgumentException("Incompatible rule for mix");
             }
             synchronized (mCriteria) {
-                Iterator<AudioMixMatchCriterion> crIterator = mCriteria.iterator();
-                final int match_rule = rule & ~RULE_EXCLUSION_MASK;
-                while (crIterator.hasNext()) {
-                    final AudioMixMatchCriterion criterion = crIterator.next();
-
-                    if ((criterion.mRule & ~RULE_EXCLUSION_MASK) != match_rule) {
-                        continue; // The two rules are not of the same type
-                    }
-                    switch (match_rule) {
-                        case RULE_MATCH_ATTRIBUTE_USAGE:
-                            // "usage"-based rule
-                            if (criterion.mAttr.getSystemUsage() == attrToMatch.getSystemUsage()) {
-                                if (criterion.mRule == rule) {
-                                    // rule already exists, we're done
-                                    return this;
-                                } else {
-                                    // criterion already exists with a another rule,
-                                    // it is incompatible
-                                    throw new IllegalArgumentException("Contradictory rule exists"
-                                            + " for " + attrToMatch);
-                                }
-                            }
-                            break;
-                        case RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET:
-                            // "capture preset"-base rule
-                            if (criterion.mAttr.getCapturePreset() == attrToMatch.getCapturePreset()) {
-                                if (criterion.mRule == rule) {
-                                    // rule already exists, we're done
-                                    return this;
-                                } else {
-                                    // criterion already exists with a another rule,
-                                    // it is incompatible
-                                    throw new IllegalArgumentException("Contradictory rule exists"
-                                            + " for " + attrToMatch);
-                                }
-                            }
-                            break;
-                        case RULE_MATCH_UID:
-                            // "usage"-based rule
-                            if (criterion.mIntProp == intProp.intValue()) {
-                                if (criterion.mRule == rule) {
-                                    // rule already exists, we're done
-                                    return this;
-                                } else {
-                                    // criterion already exists with a another rule,
-                                    // it is incompatible
-                                    throw new IllegalArgumentException("Contradictory rule exists"
-                                            + " for UID " + intProp);
-                                }
-                            }
-                            break;
-                        case RULE_MATCH_USERID:
-                            // "userid"-based rule
-                            if (criterion.mIntProp == intProp.intValue()) {
-                                if (criterion.mRule == rule) {
-                                    // rule already exists, we're done
-                                    return this;
-                                } else {
-                                    // criterion already exists with a another rule,
-                                    // it is incompatible
-                                    throw new IllegalArgumentException("Contradictory rule exists"
-                                            + " for userId " + intProp);
-                                }
-                            }
-                            break;
-                    }
+                int oppositeRule = rule ^ RULE_EXCLUSION_MASK;
+                if (mCriteria.stream().anyMatch(criterion -> criterion.mRule == oppositeRule)) {
+                    throw new IllegalArgumentException("AudioMixingRule cannot contain RULE_MATCH_*"
+                            + " and RULE_EXCLUDE_* for the same dimension.");
                 }
-                // rule didn't exist, add it
-                switch (match_rule) {
+                int ruleWithoutExclusion = rule & ~RULE_EXCLUSION_MASK;
+                switch (ruleWithoutExclusion) {
                     case RULE_MATCH_ATTRIBUTE_USAGE:
                     case RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET:
                         mCriteria.add(new AudioMixMatchCriterion(attrToMatch, rule));
@@ -734,8 +682,11 @@ public class AudioMixingRule {
          * @return a new {@link AudioMixingRule} object
          */
         public AudioMixingRule build() {
-            return new AudioMixingRule(mTargetMixType, mCriteria,
-                mAllowPrivilegedMediaPlaybackCapture, mVoiceCommunicationCaptureAllowed);
+            return new AudioMixingRule(
+                    mTargetMixType == AudioMix.MIX_TYPE_INVALID
+                            ? AudioMix.MIX_TYPE_PLAYERS : mTargetMixType,
+                    mCriteria, mAllowPrivilegedMediaPlaybackCapture,
+                    mVoiceCommunicationCaptureAllowed);
         }
     }
 }
