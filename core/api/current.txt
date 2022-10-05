@@ -9079,6 +9079,12 @@ package android.companion.virtual {
     field @NonNull public static final android.os.Parcelable.Creator<android.companion.virtual.VirtualDevice> CREATOR;
   }
 
+  public final class VirtualDeviceManager {
+    method @NonNull public java.util.List<android.companion.virtual.VirtualDevice> getVirtualDevices();
+    field public static final int DEFAULT_DEVICE_ID = 0; // 0x0
+    field public static final int INVALID_DEVICE_ID = -1; // 0xffffffff
+  }
+
 }
 
 package android.content {
@@ -9903,6 +9909,7 @@ package android.content {
     field public static final String USER_SERVICE = "user";
     field public static final String VIBRATOR_MANAGER_SERVICE = "vibrator_manager";
     field @Deprecated public static final String VIBRATOR_SERVICE = "vibrator";
+    field public static final String VIRTUAL_DEVICE_SERVICE = "virtualdevice";
     field public static final String VPN_MANAGEMENT_SERVICE = "vpn_management";
     field @UiContext public static final String WALLPAPER_SERVICE = "wallpaper";
     field public static final String WIFI_AWARE_SERVICE = "wifiaware";

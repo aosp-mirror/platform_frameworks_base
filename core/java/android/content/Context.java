@@ -3919,7 +3919,7 @@ public abstract class Context {
             //@hide: INCIDENT_COMPANION_SERVICE,
             //@hide: STATS_COMPANION_SERVICE,
             COMPANION_DEVICE_SERVICE,
-            //@hide: VIRTUAL_DEVICE_SERVICE,
+            VIRTUAL_DEVICE_SERVICE,
             CROSS_PROFILE_APPS_SERVICE,
             //@hide: SYSTEM_UPDATE_SERVICE,
             //@hide: TIME_DETECTOR_SERVICE,
@@ -5441,8 +5441,8 @@ public abstract class Context {
      *
      * @see #getSystemService(String)
      * @see android.companion.virtual.VirtualDeviceManager
-     * @hide
      */
+    @SuppressLint("ServiceName")
     public static final String VIRTUAL_DEVICE_SERVICE = "virtualdevice";
 
     /**
