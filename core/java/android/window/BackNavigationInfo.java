@@ -19,6 +19,7 @@ package android.window;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -29,6 +30,7 @@ import android.os.RemoteCallback;
  *
  * @hide
  */
+@TestApi
 public final class BackNavigationInfo implements Parcelable {
 
     /**
@@ -71,6 +73,7 @@ public final class BackNavigationInfo implements Parcelable {
     /**
      * Defines the type of back destinations a back even can lead to. This is used to define the
      * type of animation that need to be run on SystemUI.
+     * @hide
      */
     @IntDef(prefix = "TYPE_", value = {
             TYPE_UNDEFINED,
@@ -97,7 +100,6 @@ public final class BackNavigationInfo implements Parcelable {
      * @param onBackNavigationDone    The callback to be called once the client is done with the
      *                                back preview.
      * @param onBackInvokedCallback   The back callback registered by the current top level window.
-     * @param departingWindowContainerToken The {@link WindowContainerToken} of departing window.
      */
     private BackNavigationInfo(@BackTargetType int type,
             @Nullable RemoteCallback onBackNavigationDone,
@@ -116,6 +118,7 @@ public final class BackNavigationInfo implements Parcelable {
         mPrepareRemoteAnimation = in.readBoolean();
     }
 
+    /** @hide */
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeInt(mType);
@@ -126,7 +129,7 @@ public final class BackNavigationInfo implements Parcelable {
 
     /**
      * Returns the type of back navigation that is about to happen.
-     *
+     * @hide
      * @see BackTargetType
      */
     public @BackTargetType int getType() {
@@ -138,7 +141,7 @@ public final class BackNavigationInfo implements Parcelable {
      * the client didn't register a callback.
      * <p>
      * This is never null when {@link #getType} returns {@link #TYPE_CALLBACK}.
-     *
+     * @hide
      * @see OnBackInvokedCallback
      * @see OnBackInvokedDispatcher
      */
@@ -149,6 +152,7 @@ public final class BackNavigationInfo implements Parcelable {
 
     /**
      * Return true if the core is preparing a back gesture nimation.
+     * @hide
      */
     public boolean isPrepareRemoteAnimation() {
         return mPrepareRemoteAnimation;
@@ -157,7 +161,7 @@ public final class BackNavigationInfo implements Parcelable {
     /**
      * Callback to be called when the back preview is finished in order to notify the server that
      * it can clean up the resources created for the animation.
-     *
+     * @hide
      * @param triggerBack Boolean indicating if back navigation has been triggered.
      */
     public void onBackNavigationFinished(boolean triggerBack) {
@@ -168,11 +172,13 @@ public final class BackNavigationInfo implements Parcelable {
         }
     }
 
+    /** @hide */
     @Override
     public int describeContents() {
         return 0;
     }
 
+    @NonNull
     public static final Creator<BackNavigationInfo> CREATOR = new Creator<BackNavigationInfo>() {
         @Override
         public BackNavigationInfo createFromParcel(Parcel in) {
@@ -197,6 +203,7 @@ public final class BackNavigationInfo implements Parcelable {
     /**
      * Translates the {@link BackNavigationInfo} integer type to its String representation
      */
+    @NonNull
     public static String typeToString(@BackTargetType int type) {
         switch (type) {
             case TYPE_UNDEFINED:

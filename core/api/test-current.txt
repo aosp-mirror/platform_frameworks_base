@@ -3307,6 +3307,18 @@ package android.widget.inline {
 
 package android.window {
 
+  public final class BackNavigationInfo implements android.os.Parcelable {
+    method @NonNull public static String typeToString(int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.window.BackNavigationInfo> CREATOR;
+    field public static final String KEY_TRIGGER_BACK = "TriggerBack";
+    field public static final int TYPE_CALLBACK = 4; // 0x4
+    field public static final int TYPE_CROSS_ACTIVITY = 2; // 0x2
+    field public static final int TYPE_CROSS_TASK = 3; // 0x3
+    field public static final int TYPE_DIALOG_CLOSE = 0; // 0x0
+    field public static final int TYPE_RETURN_TO_HOME = 1; // 0x1
+    field public static final int TYPE_UNDEFINED = -1; // 0xffffffff
+  }
+
   public final class DisplayAreaAppearedInfo implements android.os.Parcelable {
     ctor public DisplayAreaAppearedInfo(@NonNull android.window.DisplayAreaInfo, @NonNull android.view.SurfaceControl);
     method public int describeContents();
