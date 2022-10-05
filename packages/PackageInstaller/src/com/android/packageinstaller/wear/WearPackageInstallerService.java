@@ -211,7 +211,6 @@ public class WearPackageInstallerService extends Service {
         }
         final PackageManager pm = getPackageManager();
         File tempFile = null;
-        int installFlags = 0;
         PowerManager.WakeLock lock = getLock(this.getApplicationContext());
         boolean messageSent = false;
         try {
@@ -220,16 +219,13 @@ public class WearPackageInstallerService extends Service {
                 existingPkgInfo = pm.getPackageInfo(packageName,
                         PackageManager.MATCH_ANY_USER | PackageManager.GET_PERMISSIONS);
                 if (existingPkgInfo != null) {
-                    installFlags |= PackageManager.INSTALL_REPLACE_EXISTING;
+                    if (Log.isLoggable(TAG, Log.DEBUG)) {
+                        Log.d(TAG, "Replacing package:" + packageName);
+                    }
                 }
             } catch (PackageManager.NameNotFoundException e) {
                 // Ignore this exception. We could not find the package, will treat as a new
                 // installation.
-            }
-            if ((installFlags & PackageManager.INSTALL_REPLACE_EXISTING) != 0) {
-                if (Log.isLoggable(TAG, Log.DEBUG)) {
-                    Log.d(TAG, "Replacing package:" + packageName);
-                }
             }
             // TODO(28021618): This was left as a temp file due to the fact that this code is being
             //       deprecated and that we need the bare minimum to continue working moving forward

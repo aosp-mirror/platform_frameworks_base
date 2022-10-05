@@ -17,14 +17,11 @@
 
 package com.android.packageinstaller;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.UserHandle;
@@ -32,6 +29,9 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.io.File;
 
@@ -131,16 +131,15 @@ public class PackageUtil {
     public static AppSnippet getAppSnippet(
             Activity pContext, ApplicationInfo appInfo, File sourceFile) {
         final String archiveFilePath = sourceFile.getAbsolutePath();
-        Resources pRes = pContext.getResources();
-        AssetManager assmgr = new AssetManager();
-        assmgr.addAssetPath(archiveFilePath);
-        Resources res = new Resources(assmgr, pRes.getDisplayMetrics(), pRes.getConfiguration());
+        PackageManager pm = pContext.getPackageManager();
+        appInfo.publicSourceDir = archiveFilePath;
+
         CharSequence label = null;
         // Try to load the label from the package's resources. If an app has not explicitly
         // specified any label, just use the package name.
         if (appInfo.labelRes != 0) {
             try {
-                label = res.getText(appInfo.labelRes);
+                label = appInfo.loadLabel(pm);
             } catch (Resources.NotFoundException e) {
             }
         }
@@ -154,7 +153,7 @@ public class PackageUtil {
         try {
             if (appInfo.icon != 0) {
                 try {
-                    icon = res.getDrawable(appInfo.icon);
+                    icon = appInfo.loadIcon(pm);
                 } catch (Resources.NotFoundException e) {
                 }
             }

@@ -16,9 +16,7 @@
 
 package com.android.packageinstaller;
 
-import android.annotation.Nullable;
 import android.app.Activity;
-import android.app.ActivityThread;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -39,6 +37,8 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Log;
 import android.widget.Toast;
+
+import androidx.annotation.Nullable;
 
 /**
  * Start an uninstallation, show a dialog while uninstalling and return result to the caller.
@@ -119,15 +119,10 @@ public class UninstallUninstalling extends Activity implements
                 int flags = allUsers ? PackageManager.DELETE_ALL_USERS : 0;
                 flags |= keepData ? PackageManager.DELETE_KEEP_DATA : 0;
 
-                try {
-                    ActivityThread.getPackageManager().getPackageInstaller().uninstall(
-                            new VersionedPackage(mAppInfo.packageName,
-                                    PackageManager.VERSION_CODE_HIGHEST),
-                            getPackageName(), flags, pendingIntent.getIntentSender(),
-                            user.getIdentifier());
-                } catch (RemoteException e) {
-                    e.rethrowFromSystemServer();
-                }
+                getPackageManager().getPackageInstaller().uninstall(
+                        new VersionedPackage(mAppInfo.packageName,
+                                PackageManager.VERSION_CODE_HIGHEST),
+                        flags, pendingIntent.getIntentSender());
             } else {
                 mUninstallId = savedInstanceState.getInt(UNINSTALL_ID);
                 UninstallEventReceiver.addObserver(this, mUninstallId, this);

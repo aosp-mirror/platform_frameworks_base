@@ -19,25 +19,24 @@ package com.android.packageinstaller;
 import static com.android.packageinstaller.PackageUtil.getMaxTargetSdkVersionForUid;
 
 import android.Manifest;
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ProviderInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.RemoteException;
+import android.os.Process;
 import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.util.Arrays;
 
@@ -80,12 +79,11 @@ public class InstallStart extends Activity {
         final ApplicationInfo sourceInfo = getSourceInfo(callingPackage);
         final int originatingUid = getOriginatingUid(sourceInfo);
         boolean isTrustedSource = false;
-        if (sourceInfo != null
-                && (sourceInfo.privateFlags & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0) {
+        if (sourceInfo != null && sourceInfo.isPrivilegedApp()) {
             isTrustedSource = intent.getBooleanExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, false);
         }
 
-        if (!isTrustedSource && originatingUid != PackageInstaller.SessionParams.UID_UNKNOWN) {
+        if (!isTrustedSource && originatingUid != Process.INVALID_UID) {
             final int targetSdkVersion = getMaxTargetSdkVersionForUid(this, originatingUid);
             if (targetSdkVersion < 0) {
                 Log.w(LOG_TAG, "Cannot get target sdk version for uid " + originatingUid);
@@ -97,6 +95,10 @@ public class InstallStart extends Activity {
                         + Manifest.permission.REQUEST_INSTALL_PACKAGES);
                 mAbortInstall = true;
             }
+        }
+
+        if (sessionId != -1 && !isCallerSessionOwner(originatingUid, sessionId)) {
+            mAbortInstall = true;
         }
 
         final String installerPackageNameFromIntent = getIntent().getStringExtra(
@@ -208,30 +210,27 @@ public class InstallStart extends Activity {
     }
 
     /**
-     * Get the originating uid if possible, or
-     * {@link android.content.pm.PackageInstaller.SessionParams#UID_UNKNOWN} if not available
+     * Get the originating uid if possible, or {@link Process#INVALID_UID} if not available
      *
      * @param sourceInfo The source of this installation
-     * @return The UID of the installation source or UID_UNKNOWN
+     * @return The UID of the installation source or INVALID_UID
      */
     private int getOriginatingUid(@Nullable ApplicationInfo sourceInfo) {
         // The originating uid from the intent. We only trust/use this if it comes from either
         // the document manager app or the downloads provider
         final int uidFromIntent = getIntent().getIntExtra(Intent.EXTRA_ORIGINATING_UID,
-                PackageInstaller.SessionParams.UID_UNKNOWN);
+                Process.INVALID_UID);
 
         final int callingUid;
         if (sourceInfo != null) {
             callingUid = sourceInfo.uid;
         } else {
-            try {
-                callingUid = ActivityManager.getService()
-                        .getLaunchedFromUid(getActivityToken());
-            } catch (RemoteException ex) {
+            callingUid = getLaunchedFromUid();
+            if (callingUid == Process.INVALID_UID) {
                 // Cannot reach ActivityManager. Aborting install.
                 Log.e(LOG_TAG, "Could not determine the launching uid.");
                 mAbortInstall = true;
-                return PackageInstaller.SessionParams.UID_UNKNOWN;
+                return Process.INVALID_UID;
             }
         }
         if (checkPermission(Manifest.permission.MANAGE_DOCUMENTS, -1, callingUid)
@@ -253,7 +252,8 @@ public class InstallStart extends Activity {
             return false;
         }
         final ApplicationInfo appInfo = downloadProviderPackage.applicationInfo;
-        return (appInfo.isSystemApp() && uid == appInfo.uid);
+        return ((appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0
+                && uid == appInfo.uid);
     }
 
     @NonNull
@@ -268,8 +268,14 @@ public class InstallStart extends Activity {
 
         try {
             return mPackageManager.canPackageQuery(callingPackage, targetPackage);
-        } catch (NameNotFoundException e) {
+        } catch (PackageManager.NameNotFoundException e) {
             return false;
         }
+    }
+
+    private boolean isCallerSessionOwner(int originatingUid, int sessionId) {
+        PackageInstaller packageInstaller = getPackageManager().getPackageInstaller();
+        int installerUid = packageInstaller.getSessionInfo(sessionId).getInstallerUid();
+        return (originatingUid == Process.ROOT_UID) || (originatingUid == installerUid);
     }
 }

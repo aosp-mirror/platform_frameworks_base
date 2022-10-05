@@ -16,8 +16,6 @@
 
 package com.android.packageinstaller;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInstaller;
@@ -26,6 +24,9 @@ import android.util.AtomicFile;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.Xml;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
