@@ -323,8 +323,15 @@ class ImmutabilityProcessor : AbstractProcessor() {
         parentPolicyExceptions: Set<Immutable.Policy.Exception>,
         nonInterfaceClassFailure: () -> String = { MessageUtils.nonInterfaceReturnFailure() },
     ): Boolean {
+        // Skip if the symbol being considered is itself ignored
         if (isIgnored(symbol)) return false
+
+        // Skip if the type being checked, like for a typeArg or return type, is ignored
         if (isIgnored(type)) return false
+
+        // Skip if that typeArg is itself ignored when inspected at the class header level
+        if (isIgnored(type.asElement())) return false
+
         if (type.isPrimitive) return false
         if (type.isPrimitiveOrVoid) {
             printError(parentChain, symbol, MessageUtils.voidReturnFailure())
@@ -355,6 +362,8 @@ class ImmutabilityProcessor : AbstractProcessor() {
         var anyError = false
 
         type.typeArguments.forEachIndexed { index, typeArg ->
+            if (isIgnored(typeArg.asElement())) return@forEachIndexed
+
             val argError =
                 visitType(parentChain, seenTypesByPolicy, symbol, typeArg, newPolicyExceptions) {
                     MessageUtils.nonInterfaceReturnFailure(
