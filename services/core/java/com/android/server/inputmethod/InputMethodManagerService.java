@@ -68,7 +68,6 @@ import android.annotation.UiThread;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
-import android.app.AppGlobals;
 import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -81,7 +80,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
@@ -800,7 +798,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     private LocaleList mLastSystemLocales;
     private boolean mAccessibilityRequestingNoSoftKeyboard;
     private final MyPackageMonitor mMyPackageMonitor = new MyPackageMonitor();
-    private final IPackageManager mIPackageManager;
     private final String mSlotIme;
 
     /**
@@ -1546,11 +1543,13 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     int change = isPackageDisappearing(curIm.getPackageName());
                     if (change == PACKAGE_TEMPORARY_CHANGE
                             || change == PACKAGE_PERMANENT_CHANGE) {
+                        final PackageManager userAwarePackageManager =
+                                getPackageManagerForUser(mContext, mSettings.getCurrentUserId());
                         ServiceInfo si = null;
                         try {
-                            si = mIPackageManager.getServiceInfo(
-                                    curIm.getComponent(), 0, mSettings.getCurrentUserId());
-                        } catch (RemoteException ex) {
+                            si = userAwarePackageManager.getServiceInfo(curIm.getComponent(),
+                                    PackageManager.ComponentInfoFlags.of(0));
+                        } catch (PackageManager.NameNotFoundException ignored) {
                         }
                         if (si == null) {
                             // Uh oh, current input method is no longer around!
@@ -1708,7 +1707,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     public InputMethodManagerService(Context context) {
-        mIPackageManager = AppGlobals.getPackageManager();
         mContext = context;
         mRes = context.getResources();
         // TODO(b/196206770): Disallow I/O on this thread. Currently it's needed for loading
@@ -3211,27 +3209,30 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @GuardedBy("ImfLock.class")
     void updateInputMethodsFromSettingsLocked(boolean enabledMayChange) {
         if (enabledMayChange) {
+            final PackageManager userAwarePackageManager = getPackageManagerForUser(mContext,
+                    mSettings.getCurrentUserId());
+
             List<InputMethodInfo> enabled = mSettings.getEnabledInputMethodListLocked();
             for (int i = 0; i < enabled.size(); i++) {
                 // We allow the user to select "disabled until used" apps, so if they
                 // are enabling one of those here we now need to make it enabled.
                 InputMethodInfo imm = enabled.get(i);
+                ApplicationInfo ai = null;
                 try {
-                    ApplicationInfo ai = mIPackageManager.getApplicationInfo(imm.getPackageName(),
-                            PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS,
-                            mSettings.getCurrentUserId());
-                    if (ai != null && ai.enabledSetting
-                            == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED) {
-                        if (DEBUG) {
-                            Slog.d(TAG, "Update state(" + imm.getId()
-                                    + "): DISABLED_UNTIL_USED -> DEFAULT");
-                        }
-                        mIPackageManager.setApplicationEnabledSetting(imm.getPackageName(),
-                                PackageManager.COMPONENT_ENABLED_STATE_DEFAULT,
-                                PackageManager.DONT_KILL_APP, mSettings.getCurrentUserId(),
-                                mContext.getBasePackageName());
+                    ai = userAwarePackageManager.getApplicationInfo(imm.getPackageName(),
+                            PackageManager.ApplicationInfoFlags.of(
+                                    PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS));
+                } catch (PackageManager.NameNotFoundException ignored) {
+                }
+                if (ai != null && ai.enabledSetting
+                        == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "Update state(" + imm.getId()
+                                + "): DISABLED_UNTIL_USED -> DEFAULT");
                     }
-                } catch (RemoteException e) {
+                    userAwarePackageManager.setApplicationEnabledSetting(imm.getPackageName(),
+                            PackageManager.COMPONENT_ENABLED_STATE_DEFAULT,
+                            PackageManager.DONT_KILL_APP);
                 }
             }
         }
