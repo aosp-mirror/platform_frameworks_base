@@ -946,8 +946,12 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         int inUseLowestPriorityFrHandle = TunerResourceManager.INVALID_RESOURCE_HANDLE;
         // Priority max value is 1000
         int currentLowestPriority = MAX_CLIENT_PRIORITY + 1;
+        // If the desired frontend id was specified, we only need to check the frontend.
+        boolean hasDesiredFrontend = request.desiredId != TunerFrontendRequest.DEFAULT_DESIRED_ID;
         for (FrontendResource fr : getFrontendResources().values()) {
-            if (fr.getType() == request.frontendType) {
+            int frontendId = getResourceIdFromHandle(fr.getHandle());
+            if (fr.getType() == request.frontendType
+                    && (!hasDesiredFrontend || frontendId == request.desiredId)) {
                 if (!fr.isInUse()) {
                     // Unused resource cannot be acquired if the max is already reached, but
                     // TRM still has to look for the reclaim candidate
