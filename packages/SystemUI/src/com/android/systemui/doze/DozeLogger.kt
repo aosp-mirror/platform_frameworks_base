@@ -224,13 +224,12 @@ class DozeLogger @Inject constructor(
         })
     }
 
-    fun logPulseDropped(pulsePending: Boolean, state: DozeMachine.State, blocked: Boolean) {
+    fun logPulseDropped(from: String, state: DozeMachine.State) {
         buffer.log(TAG, INFO, {
-            bool1 = pulsePending
-            str1 = state.name
-            bool2 = blocked
+            str1 = from
+            str2 = state.name
         }, {
-            "Pulse dropped, pulsePending=$bool1 state=$str1 blocked=$bool2"
+            "Pulse dropped, cannot pulse from=$str1 state=$str2"
         })
     }
 
@@ -240,6 +239,16 @@ class DozeLogger @Inject constructor(
             str1 = reason
         }, {
             "SensorEvent [$int1] dropped, reason=$str1"
+        })
+    }
+
+    fun logPulseEvent(pulseEvent: String, dozing: Boolean, pulseReason: String) {
+        buffer.log(TAG, DEBUG, {
+            str1 = pulseEvent
+            bool1 = dozing
+            str2 = pulseReason
+        }, {
+            "Pulse-$str1 dozing=$bool1 pulseReason=$str2"
         })
     }
 
