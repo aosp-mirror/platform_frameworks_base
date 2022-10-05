@@ -87,8 +87,10 @@ public class HdmiEarcLocalDeviceTx extends HdmiEarcLocalDevice {
         mReportCapsHandler.removeCallbacksAndMessages(null);
         if (status == HDMI_EARC_STATUS_IDLE) {
             notifyEarcStatusToAudioService(false, new ArrayList<>());
+            mService.startArcAction(false, null);
         } else if (status == HDMI_EARC_STATUS_ARC_PENDING) {
             notifyEarcStatusToAudioService(false, new ArrayList<>());
+            mService.startArcAction(true, null);
         } else if (status == HDMI_EARC_STATUS_EARC_CONNECTED) {
             mReportCapsHandler.postDelayed(mReportCapsRunnable, REPORT_CAPS_MAX_DELAY_MS);
         }

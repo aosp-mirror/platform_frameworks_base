@@ -30,9 +30,11 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.assertEquals;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
@@ -1291,6 +1293,46 @@ public class HdmiControlServiceTest {
         localDeviceTx.handleEarcStateChange(Constants.HDMI_EARC_STATUS_ARC_PENDING);
         mHdmiControlServiceSpy.addEarcLocalDevice(localDeviceTx);
         assertThat(mHdmiControlServiceSpy.earcBlocksArcConnection()).isFalse();
+    }
+
+    @Test
+    public void earcStatusBecomesIdle_terminateArc() {
+        mHdmiControlServiceSpy.mEarcSupported = true;
+        mHdmiControlServiceSpy.clearEarcLocalDevice();
+        HdmiEarcLocalDeviceTx localDeviceTx = new HdmiEarcLocalDeviceTx(mHdmiControlServiceSpy);
+        mHdmiControlServiceSpy.addEarcLocalDevice(localDeviceTx);
+        localDeviceTx.handleEarcStateChange(Constants.HDMI_EARC_STATUS_IDLE);
+        verify(mHdmiControlServiceSpy, times(1)).startArcAction(eq(false), any());
+    }
+
+    @Test
+    public void earcStatusBecomesEnabled_doNothing() {
+        mHdmiControlServiceSpy.mEarcSupported = true;
+        mHdmiControlServiceSpy.clearEarcLocalDevice();
+        HdmiEarcLocalDeviceTx localDeviceTx = new HdmiEarcLocalDeviceTx(mHdmiControlServiceSpy);
+        mHdmiControlServiceSpy.addEarcLocalDevice(localDeviceTx);
+        localDeviceTx.handleEarcStateChange(Constants.HDMI_EARC_STATUS_EARC_CONNECTED);
+        verify(mHdmiControlServiceSpy, times(0)).startArcAction(anyBoolean(), any());
+    }
+
+    @Test
+    public void earcStatusBecomesPending_doNothing() {
+        mHdmiControlServiceSpy.mEarcSupported = true;
+        mHdmiControlServiceSpy.clearEarcLocalDevice();
+        HdmiEarcLocalDeviceTx localDeviceTx = new HdmiEarcLocalDeviceTx(mHdmiControlServiceSpy);
+        mHdmiControlServiceSpy.addEarcLocalDevice(localDeviceTx);
+        localDeviceTx.handleEarcStateChange(Constants.HDMI_EARC_STATUS_EARC_PENDING);
+        verify(mHdmiControlServiceSpy, times(0)).startArcAction(anyBoolean(), any());
+    }
+
+    @Test
+    public void earcStatusBecomesNotEnabled_initiateArc() {
+        mHdmiControlServiceSpy.mEarcSupported = true;
+        mHdmiControlServiceSpy.clearEarcLocalDevice();
+        HdmiEarcLocalDeviceTx localDeviceTx = new HdmiEarcLocalDeviceTx(mHdmiControlServiceSpy);
+        mHdmiControlServiceSpy.addEarcLocalDevice(localDeviceTx);
+        localDeviceTx.handleEarcStateChange(Constants.HDMI_EARC_STATUS_ARC_PENDING);
+        verify(mHdmiControlServiceSpy, times(1)).startArcAction(eq(true), any());
     }
 
     protected static class MockPlaybackDevice extends HdmiCecLocalDevicePlayback {

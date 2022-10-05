@@ -4468,6 +4468,7 @@ public class HdmiControlService extends SystemService {
 
     @ServiceThreadOnly
     private void onEnableEarc() {
+        // This will terminate ARC as well.
         initializeEarc(INITIATED_BY_ENABLE_EARC);
     }
 
@@ -4551,6 +4552,14 @@ public class HdmiControlService extends SystemService {
         }
         synchronized (mLock) {
             return mEarcLocalDevice.mEarcStatus != HDMI_EARC_STATUS_ARC_PENDING;
+        }
+    }
+
+    protected void startArcAction(boolean enabled, IHdmiControlCallback callback) {
+        if (!isTvDeviceEnabled()) {
+            invokeCallback(callback, HdmiControlManager.RESULT_INCORRECT_MODE);
+        } else {
+            tv().startArcAction(enabled, callback);
         }
     }
 }
