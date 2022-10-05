@@ -300,6 +300,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
     }
 
     @Override
+    @NonNull
     public synchronized TimeState getTimeState() {
         boolean userShouldConfirmTime = mEnvironment.systemClockConfidence() < TIME_CONFIDENCE_HIGH;
         UnixEpochTime unixEpochTime = new UnixEpochTime(
@@ -330,37 +331,32 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
     public synchronized boolean confirmTime(@NonNull UnixEpochTime confirmationTime) {
         Objects.requireNonNull(confirmationTime);
 
-        @TimeConfidence int newTimeConfidence = TIME_CONFIDENCE_HIGH;
-        @TimeConfidence int currentTimeConfidence = mEnvironment.systemClockConfidence();
-        boolean timeNeedsConfirmation = currentTimeConfidence < newTimeConfidence;
-
         // All system clock calculation take place under a wake lock.
         mEnvironment.acquireWakeLock();
         try {
             // Check if the specified time matches the current system clock time (closely
             // enough) to raise the confidence.
-            long elapsedRealtimeMillis = mEnvironment.elapsedRealtimeMillis();
-            long actualSystemClockMillis = mEnvironment.systemClockMillis();
-            long adjustedAutoDetectedUnixEpochMillis =
-                    confirmationTime.at(elapsedRealtimeMillis).getUnixEpochTimeMillis();
-            long absTimeDifferenceMillis =
-                    Math.abs(adjustedAutoDetectedUnixEpochMillis - actualSystemClockMillis);
-            int confidenceUpgradeThresholdMillis =
-                    mCurrentConfigurationInternal.getSystemClockConfidenceThresholdMillis();
-            boolean timeConfirmed = absTimeDifferenceMillis <= confidenceUpgradeThresholdMillis;
-            boolean updateConfidenceRequired = timeNeedsConfirmation && timeConfirmed;
-            if (updateConfidenceRequired) {
-                String logMsg = "Confirm system clock time."
-                        + " confirmationTime=" + confirmationTime
-                        + " newTimeConfidence=" + newTimeConfidence
-                        + " elapsedRealtimeMillis=" + elapsedRealtimeMillis
-                        + " (old) actualSystemClockMillis=" + actualSystemClockMillis
-                        + " currentTimeConfidence=" + currentTimeConfidence;
-                if (DBG) {
-                    Slog.d(LOG_TAG, logMsg);
-                }
+            long currentElapsedRealtimeMillis = mEnvironment.elapsedRealtimeMillis();
+            long currentSystemClockMillis = mEnvironment.systemClockMillis();
+            boolean timeConfirmed = isTimeWithinConfidenceThreshold(
+                    confirmationTime, currentElapsedRealtimeMillis, currentSystemClockMillis);
+            if (timeConfirmed) {
+                @TimeConfidence int newTimeConfidence = TIME_CONFIDENCE_HIGH;
+                @TimeConfidence int currentTimeConfidence = mEnvironment.systemClockConfidence();
+                boolean confidenceUpgradeRequired = currentTimeConfidence < newTimeConfidence;
+                if (confidenceUpgradeRequired) {
+                    String logMsg = "Confirm system clock time."
+                            + " confirmationTime=" + confirmationTime
+                            + " newTimeConfidence=" + newTimeConfidence
+                            + " currentElapsedRealtimeMillis=" + currentElapsedRealtimeMillis
+                            + " currentSystemClockMillis=" + currentSystemClockMillis
+                            + " (old) currentTimeConfidence=" + currentTimeConfidence;
+                    if (DBG) {
+                        Slog.d(LOG_TAG, logMsg);
+                    }
 
-                mEnvironment.setSystemClockConfidence(newTimeConfidence, logMsg);
+                    mEnvironment.setSystemClockConfidence(newTimeConfidence, logMsg);
+                }
             }
             return timeConfirmed;
         } finally {
@@ -470,8 +466,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
     }
 
     @GuardedBy("this")
-    private boolean storeTelephonySuggestion(
-            @NonNull TelephonyTimeSuggestion suggestion) {
+    private boolean storeTelephonySuggestion(@NonNull TelephonyTimeSuggestion suggestion) {
         UnixEpochTime newUnixEpochTime = suggestion.getUnixEpochTime();
 
         int slotIndex = suggestion.getSlotIndex();
@@ -712,7 +707,8 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
     }
 
     private static int scoreTelephonySuggestion(
-            long elapsedRealtimeMillis, @NonNull TelephonyTimeSuggestion timeSuggestion) {
+            @ElapsedRealtimeLong long elapsedRealtimeMillis,
+            @NonNull TelephonyTimeSuggestion timeSuggestion) {
 
         // Validate first.
         UnixEpochTime unixEpochTime = timeSuggestion.getUnixEpochTime();
@@ -845,10 +841,12 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
     @GuardedBy("this")
     private void upgradeSystemClockConfidenceIfRequired(
             @NonNull UnixEpochTime autoDetectedUnixEpochTime, @NonNull String cause) {
+
+        // Fast path: No need to upgrade confidence if confidence is already high.
         @TimeConfidence int newTimeConfidence = TIME_CONFIDENCE_HIGH;
         @TimeConfidence int currentTimeConfidence = mEnvironment.systemClockConfidence();
-        boolean timeNeedsConfirmation = currentTimeConfidence < newTimeConfidence;
-        if (!timeNeedsConfirmation) {
+        boolean confidenceUpgradeRequired = currentTimeConfidence < newTimeConfidence;
+        if (!confidenceUpgradeRequired) {
             return;
         }
 
@@ -857,23 +855,18 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         try {
             // Check if the specified time matches the current system clock time (closely
             // enough) to raise the confidence.
-            long elapsedRealtimeMillis = mEnvironment.elapsedRealtimeMillis();
-            long actualSystemClockMillis = mEnvironment.systemClockMillis();
-            long adjustedAutoDetectedUnixEpochMillis =
-                    autoDetectedUnixEpochTime.at(elapsedRealtimeMillis).getUnixEpochTimeMillis();
-            long absTimeDifferenceMillis =
-                    Math.abs(adjustedAutoDetectedUnixEpochMillis - actualSystemClockMillis);
-            int confidenceUpgradeThresholdMillis =
-                    mCurrentConfigurationInternal.getSystemClockConfidenceThresholdMillis();
-            boolean updateConfidenceRequired =
-                    absTimeDifferenceMillis <= confidenceUpgradeThresholdMillis;
+            long currentElapsedRealtimeMillis = mEnvironment.elapsedRealtimeMillis();
+            long currentSystemClockMillis = mEnvironment.systemClockMillis();
+            boolean updateConfidenceRequired = isTimeWithinConfidenceThreshold(
+                    autoDetectedUnixEpochTime, currentElapsedRealtimeMillis,
+                    currentSystemClockMillis);
             if (updateConfidenceRequired) {
                 String logMsg = "Upgrade system clock confidence."
                         + " autoDetectedUnixEpochTime=" + autoDetectedUnixEpochTime
                         + " newTimeConfidence=" + newTimeConfidence
                         + " cause=" + cause
-                        + " elapsedRealtimeMillis=" + elapsedRealtimeMillis
-                        + " (old) actualSystemClockMillis=" + actualSystemClockMillis
+                        + " currentElapsedRealtimeMillis=" + currentElapsedRealtimeMillis
+                        + " currentSystemClockMillis=" + currentSystemClockMillis
                         + " currentTimeConfidence=" + currentTimeConfidence;
                 if (DBG) {
                     Slog.d(LOG_TAG, logMsg);
@@ -888,6 +881,19 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
 
     private static boolean isOriginAutomatic(@Origin int origin) {
         return origin != ORIGIN_MANUAL;
+    }
+
+    @GuardedBy("this")
+    private boolean isTimeWithinConfidenceThreshold(@NonNull UnixEpochTime timeToCheck,
+            @ElapsedRealtimeLong long currentElapsedRealtimeMillis,
+            @CurrentTimeMillisLong long currentSystemClockMillis) {
+        long adjustedAutoDetectedUnixEpochMillis =
+                timeToCheck.at(currentElapsedRealtimeMillis).getUnixEpochTimeMillis();
+        long absTimeDifferenceMillis =
+                Math.abs(adjustedAutoDetectedUnixEpochMillis - currentSystemClockMillis);
+        int confidenceUpgradeThresholdMillis =
+                mCurrentConfigurationInternal.getSystemClockConfidenceThresholdMillis();
+        return absTimeDifferenceMillis <= confidenceUpgradeThresholdMillis;
     }
 
     @GuardedBy("this")
@@ -1066,7 +1072,8 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
     }
 
     private static boolean validateSuggestionUnixEpochTime(
-            long currentElapsedRealtimeMillis, UnixEpochTime unixEpochTime) {
+            @ElapsedRealtimeLong long currentElapsedRealtimeMillis,
+            @NonNull UnixEpochTime unixEpochTime) {
         long suggestionElapsedRealtimeMillis = unixEpochTime.getElapsedRealtimeMillis();
         if (suggestionElapsedRealtimeMillis > currentElapsedRealtimeMillis) {
             // Future elapsed realtimes are ignored. They imply the elapsed realtime was wrong, or
