@@ -29,7 +29,7 @@ final class InputMethodDeviceConfigs {
     private boolean mHideImeWhenNoEditorFocus;
     private final DeviceConfig.OnPropertiesChangedListener mDeviceConfigChangedListener;
 
-    public InputMethodDeviceConfigs() {
+    InputMethodDeviceConfigs() {
         mDeviceConfigChangedListener = properties -> {
             if (!DeviceConfig.NAMESPACE_INPUT_METHOD_MANAGER.equals(properties.getNamespace())) {
                 return;
