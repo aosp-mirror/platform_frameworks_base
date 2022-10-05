@@ -9069,6 +9069,18 @@ package android.companion {
 
 }
 
+package android.companion.virtual {
+
+  public final class VirtualDevice implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getDeviceId();
+    method @Nullable public String getName();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.companion.virtual.VirtualDevice> CREATOR;
+  }
+
+}
+
 package android.content {
 
   public abstract class AbstractThreadedSyncAdapter {

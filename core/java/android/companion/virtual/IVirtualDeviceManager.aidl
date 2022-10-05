@@ -18,6 +18,7 @@ package android.companion.virtual;
 
 import android.companion.virtual.IVirtualDevice;
 import android.companion.virtual.IVirtualDeviceActivityListener;
+import android.companion.virtual.VirtualDevice;
 import android.companion.virtual.VirtualDeviceParams;
 import android.hardware.display.IVirtualDisplayCallback;
 import android.hardware.display.VirtualDisplayConfig;
@@ -44,6 +45,11 @@ interface IVirtualDeviceManager {
     IVirtualDevice createVirtualDevice(
             in IBinder token, String packageName, int associationId,
             in VirtualDeviceParams params, in IVirtualDeviceActivityListener activityListener);
+
+    /**
+     * Returns the details of all available virtual devices.
+     */
+    List<VirtualDevice> getVirtualDevices();
 
     /**
      * Creates a virtual display owned by a particular virtual device.

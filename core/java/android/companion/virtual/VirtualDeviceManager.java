@@ -49,12 +49,15 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.util.ArrayMap;
+import android.util.Log;
 import android.view.Surface;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.function.IntConsumer;
 
@@ -148,6 +151,22 @@ public final class VirtualDeviceManager {
             @NonNull VirtualDeviceParams params) {
         try {
             return new VirtualDevice(mService, mContext, associationId, params);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the details of all available virtual devices.
+     */
+    @NonNull
+    public List<android.companion.virtual.VirtualDevice> getVirtualDevices() {
+        if (mService == null) {
+            Log.w(TAG, "Failed to retrieve virtual devices; no virtual device manager service.");
+            return new ArrayList<>();
+        }
+        try {
+            return mService.getVirtualDevices();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
