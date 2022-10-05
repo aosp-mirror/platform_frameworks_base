@@ -631,9 +631,22 @@ public class MediaControlPanel {
             Drawable artwork;
             boolean isArtworkBound;
             Icon artworkIcon = data.getArtwork();
+            WallpaperColors wallpaperColors = null;
             if (artworkIcon != null) {
-                WallpaperColors wallpaperColors = WallpaperColors
-                        .fromBitmap(artworkIcon.getBitmap());
+                if (artworkIcon.getType() == Icon.TYPE_BITMAP
+                        || artworkIcon.getType() == Icon.TYPE_ADAPTIVE_BITMAP) {
+                    // Avoids extra processing if this is already a valid bitmap
+                    wallpaperColors = WallpaperColors
+                            .fromBitmap(artworkIcon.getBitmap());
+                } else {
+                    Drawable artworkDrawable = artworkIcon.loadDrawable(mContext);
+                    if (artworkDrawable != null) {
+                        wallpaperColors = WallpaperColors
+                                .fromDrawable(artworkIcon.loadDrawable(mContext));
+                    }
+                }
+            }
+            if (wallpaperColors != null) {
                 mutableColorScheme = new ColorScheme(wallpaperColors, true, Style.CONTENT);
                 artwork = getScaledBackground(artworkIcon, width, height);
                 isArtworkBound = true;
