@@ -1166,7 +1166,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 try {
                     connection.mService.attach(connection, mToken, TYPE_WALLPAPER, false,
                             wpdData.mWidth, wpdData.mHeight,
-                            wpdData.mPadding, mDisplayId);
+                            wpdData.mPadding, mDisplayId, FLAG_SYSTEM | FLAG_LOCK);
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Failed attaching wallpaper on display", e);
                     if (wallpaper != null && !wallpaper.wallpaperUpdating
