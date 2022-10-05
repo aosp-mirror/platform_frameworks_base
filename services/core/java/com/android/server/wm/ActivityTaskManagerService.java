@@ -5041,19 +5041,18 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     private void updateResumedAppTrace(@Nullable ActivityRecord resumed) {
-        if (mTracedResumedActivity != null) {
-            Trace.asyncTraceEnd(TRACE_TAG_WINDOW_MANAGER,
-                    constructResumedTraceName(mTracedResumedActivity.packageName), 0);
-        }
-        if (resumed != null) {
-            Trace.asyncTraceBegin(TRACE_TAG_WINDOW_MANAGER,
-                    constructResumedTraceName(resumed.packageName), 0);
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_WINDOW_MANAGER)) {
+            if (mTracedResumedActivity != null) {
+                Trace.asyncTraceForTrackEnd(TRACE_TAG_WINDOW_MANAGER,
+                        "Focused app", System.identityHashCode(mTracedResumedActivity));
+            }
+            if (resumed != null) {
+                Trace.asyncTraceForTrackBegin(TRACE_TAG_WINDOW_MANAGER,
+                        "Focused app", resumed.mActivityComponent.flattenToShortString(),
+                        System.identityHashCode(resumed));
+            }
         }
         mTracedResumedActivity = resumed;
-    }
-
-    private String constructResumedTraceName(String packageName) {
-        return "focused app: " + packageName;
     }
 
     /** Applies latest configuration and/or visibility updates if needed. */
