@@ -24,10 +24,10 @@ import androidx.annotation.Nullable;
 
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.shade.NotificationPanelViewController;
+import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
-import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 
 /**
  *  Interface to control Keyguard View. It should be implemented by KeyguardViewManagers, which
@@ -185,7 +185,7 @@ public interface KeyguardViewController {
      */
     void registerCentralSurfaces(CentralSurfaces centralSurfaces,
             NotificationPanelViewController notificationPanelViewController,
-            @Nullable PanelExpansionStateManager panelExpansionStateManager,
+            @Nullable ShadeExpansionStateManager shadeExpansionStateManager,
             BiometricUnlockController biometricUnlockController,
             View notificationContainer,
             KeyguardBypassController bypassController);

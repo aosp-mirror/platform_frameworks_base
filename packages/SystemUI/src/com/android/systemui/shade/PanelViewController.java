@@ -67,7 +67,6 @@ import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger.LockscreenUiEvent;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.StatusBarTouchableRegionManager;
-import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.time.SystemClock;
 import com.android.wm.shell.animation.FlingAnimationUtils;
@@ -198,7 +197,7 @@ public abstract class PanelViewController {
     protected final SysuiStatusBarStateController mStatusBarStateController;
     protected final AmbientState mAmbientState;
     protected final LockscreenGestureLogger mLockscreenGestureLogger;
-    private final PanelExpansionStateManager mPanelExpansionStateManager;
+    private final ShadeExpansionStateManager mShadeExpansionStateManager;
     private final InteractionJankMonitor mInteractionJankMonitor;
     protected final SystemClock mSystemClock;
 
@@ -241,7 +240,7 @@ public abstract class PanelViewController {
             FlingAnimationUtils.Builder flingAnimationUtilsBuilder,
             StatusBarTouchableRegionManager statusBarTouchableRegionManager,
             LockscreenGestureLogger lockscreenGestureLogger,
-            PanelExpansionStateManager panelExpansionStateManager,
+            ShadeExpansionStateManager shadeExpansionStateManager,
             AmbientState ambientState,
             InteractionJankMonitor interactionJankMonitor,
             ShadeLogger shadeLogger,
@@ -256,7 +255,7 @@ public abstract class PanelViewController {
         mView = view;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mLockscreenGestureLogger = lockscreenGestureLogger;
-        mPanelExpansionStateManager = panelExpansionStateManager;
+        mShadeExpansionStateManager = shadeExpansionStateManager;
         mShadeLog = shadeLogger;
         TouchHandler touchHandler = createTouchHandler();
         mView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
@@ -1111,7 +1110,7 @@ public abstract class PanelViewController {
      *   {@link #updateVisibility()}? That would allow us to make this method private.
      */
     public void updatePanelExpansionAndVisibility() {
-        mPanelExpansionStateManager.onPanelExpansionChanged(
+        mShadeExpansionStateManager.onPanelExpansionChanged(
                 mExpandedFraction, isExpanded(), mTracking, mExpansionDragDownAmountPx);
         updateVisibility();
     }
@@ -1488,7 +1487,7 @@ public abstract class PanelViewController {
         return mExpandedFraction;
     }
 
-    protected PanelExpansionStateManager getPanelExpansionStateManager() {
-        return mPanelExpansionStateManager;
+    protected ShadeExpansionStateManager getPanelExpansionStateManager() {
+        return mShadeExpansionStateManager;
     }
 }
