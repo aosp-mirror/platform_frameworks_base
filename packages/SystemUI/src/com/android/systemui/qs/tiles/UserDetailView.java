@@ -134,7 +134,7 @@ public class UserDetailView extends PseudoGridView {
                 v.bind(name, drawable, item.info.id);
             }
             v.setActivated(item.isCurrent);
-            v.setDisabledByAdmin(mController.isDisabledByAdmin(item));
+            v.setDisabledByAdmin(item.isDisabledByAdmin());
             v.setEnabled(item.isSwitchToEnabled);
             UserSwitcherController.setSelectableAlpha(v);
 
@@ -173,16 +173,16 @@ public class UserDetailView extends PseudoGridView {
             Trace.beginSection("UserDetailView.Adapter#onClick");
             UserRecord userRecord =
                     (UserRecord) view.getTag();
-            if (mController.isDisabledByAdmin(userRecord)) {
+            if (userRecord.isDisabledByAdmin()) {
                 final Intent intent = RestrictedLockUtils.getShowAdminSupportDetailsIntent(
-                        mContext, mController.getEnforcedAdmin(userRecord));
+                        mContext, userRecord.enforcedAdmin);
                 mController.startActivity(intent);
             } else if (userRecord.isSwitchToEnabled) {
                 MetricsLogger.action(mContext, MetricsEvent.QS_SWITCH_USER);
                 mUiEventLogger.log(QSUserSwitcherEvent.QS_USER_SWITCH);
                 if (!userRecord.isAddUser
                         && !userRecord.isRestricted
-                        && !mController.isDisabledByAdmin(userRecord)) {
+                        && !userRecord.isDisabledByAdmin()) {
                     if (mCurrentUserView != null) {
                         mCurrentUserView.setActivated(false);
                     }

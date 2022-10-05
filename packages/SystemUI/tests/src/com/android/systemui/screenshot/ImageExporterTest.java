@@ -33,6 +33,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
+import android.os.Process;
 import android.provider.MediaStore;
 import android.testing.AndroidTestingRunner;
 
@@ -97,7 +98,8 @@ public class ImageExporterTest extends SysuiTestCase {
         Bitmap original = createCheckerBitmap(10, 10, 10);
 
         ListenableFuture<ImageExporter.Result> direct =
-                exporter.export(DIRECT_EXECUTOR, requestId, original, CAPTURE_TIME);
+                exporter.export(DIRECT_EXECUTOR, requestId, original, CAPTURE_TIME,
+                        Process.myUserHandle());
         assertTrue("future should be done", direct.isDone());
         assertFalse("future should not be canceled", direct.isCancelled());
         ImageExporter.Result result = direct.get();
