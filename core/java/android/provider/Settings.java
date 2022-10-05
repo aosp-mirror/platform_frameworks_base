@@ -438,6 +438,21 @@ public final class Settings {
             "android.settings.COLOR_INVERSION_SETTINGS";
 
     /**
+     * Activity Action: Show settings to allow configuration of text reading.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_TEXT_READING_SETTINGS =
+            "android.settings.TEXT_READING_SETTINGS";
+
+    /**
      * Activity Action: Show settings to control access to usage information.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
