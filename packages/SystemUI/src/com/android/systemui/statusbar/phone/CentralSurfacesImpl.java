@@ -3688,6 +3688,18 @@ public class CentralSurfacesImpl extends CoreStartable implements
         public void onFinishedWakingUp() {
             mWakeUpCoordinator.setFullyAwake(true);
             mWakeUpCoordinator.setWakingUp(false);
+            if (mKeyguardStateController.isOccluded()
+                    && !mDozeParameters.canControlUnlockedScreenOff()) {
+                // When the keyguard is occluded we don't use the KEYGUARD state which would
+                // normally cause these redaction updates.  If AOD is on, the KEYGUARD state is used
+                // to show the doze, AND UnlockedScreenOffAnimationController.onFinishedWakingUp()
+                // would force a KEYGUARD state that would take care of recalculating redaction.
+                // So if AOD is off or unsupported we need to trigger these updates at screen on
+                // when the keyguard is occluded.
+                mLockscreenUserManager.updatePublicMode();
+                mNotificationPanelViewController.getNotificationStackScrollLayoutController()
+                        .updateSensitivenessForOccludedWakeup();
+            }
             if (mLaunchCameraWhenFinishedWaking) {
                 mNotificationPanelViewController.launchCamera(
                         false /* animate */, mLastCameraLaunchSource);
