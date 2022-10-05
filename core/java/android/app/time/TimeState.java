@@ -63,6 +63,12 @@ public final class TimeState implements Parcelable {
         return new TimeState(unixEpochTime, userShouldConfirmId);
     }
 
+    @Override
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        dest.writeParcelable(mUnixEpochTime, 0);
+        dest.writeBoolean(mUserShouldConfirmTime);
+    }
+
     /** @hide */
     @Nullable
     public static TimeState parseCommandLineArgs(@NonNull ShellCommand cmd) {
@@ -117,12 +123,6 @@ public final class TimeState implements Parcelable {
     @Override
     public int describeContents() {
         return 0;
-    }
-
-    @Override
-    public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeParcelable(mUnixEpochTime, 0);
-        dest.writeBoolean(mUserShouldConfirmTime);
     }
 
     @NonNull
