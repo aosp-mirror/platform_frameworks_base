@@ -31,6 +31,15 @@ import java.util.Objects;
  * This class contains extra parameters to pass in a GNSS measurement request.
  */
 public final class GnssMeasurementRequest implements Parcelable {
+    /**
+     * Represents a passive only request. Such a request will not trigger any active GNSS
+     * measurements or power usage itself, but may receive GNSS measurements generated in response
+     * to other requests.
+     *
+     * @see GnssMeasurementRequest#getIntervalMillis()
+     */
+    public static final int PASSIVE_INTERVAL = Integer.MAX_VALUE;
+
     private final boolean mCorrelationVectorOutputsEnabled;
     private final boolean mFullTracking;
     private final int mIntervalMillis;
@@ -76,7 +85,10 @@ public final class GnssMeasurementRequest implements Parcelable {
     }
 
     /**
-     * Represents the requested time interval between the reported measurements in milliseconds.
+     * Returns the requested time interval between the reported measurements in milliseconds, or
+     * {@link #PASSIVE_INTERVAL} if this is a passive, no power request. A passive request will not
+     * actively generate GNSS measurement updates, but may receive GNSS measurement updates
+     * generated as a result of other GNSS measurement requests.
      *
      * <p>If the time interval is not set, the default value is 0, which means the fastest rate the
      * GNSS chipset can report.
@@ -213,7 +225,9 @@ public final class GnssMeasurementRequest implements Parcelable {
 
         /**
          * Set the time interval between the reported measurements in milliseconds, which is 0 by
-         * default.
+         * default. The request interval may be set to {@link #PASSIVE_INTERVAL} which indicates
+         * this request will not actively generate GNSS measurement updates, but may receive
+         * GNSS measurement updates generated as a result of other GNSS measurement requests.
          *
          * <p>An interval of 0 milliseconds means the fastest rate the chipset can report.
          *

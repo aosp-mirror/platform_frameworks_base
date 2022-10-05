@@ -19548,6 +19548,7 @@ package android.location {
     method public boolean isFullTracking();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.location.GnssMeasurementRequest> CREATOR;
+    field public static final int PASSIVE_INTERVAL = 2147483647; // 0x7fffffff
   }
 
   public static final class GnssMeasurementRequest.Builder {
