@@ -26,6 +26,7 @@ import static android.hardware.hdmi.HdmiControlManager.SOUNDBAR_MODE_ENABLED;
 import static com.android.server.hdmi.Constants.ADDR_UNREGISTERED;
 import static com.android.server.hdmi.Constants.DISABLED;
 import static com.android.server.hdmi.Constants.ENABLED;
+import static com.android.server.hdmi.Constants.HDMI_EARC_STATUS_ARC_PENDING;
 import static com.android.server.hdmi.Constants.OPTION_MHL_ENABLE;
 import static com.android.server.hdmi.Constants.OPTION_MHL_INPUT_SWITCHING;
 import static com.android.server.hdmi.Constants.OPTION_MHL_POWER_CHARGE;
@@ -4538,6 +4539,15 @@ public class HdmiControlService extends SystemService {
         // reported eARC capabilities, but even if it did, it won't take effect.
         if (mEarcLocalDevice != null) {
             mEarcLocalDevice.handleEarcCapabilitiesReported(rawCapabilities);
+        }
+    }
+
+    protected boolean earcBlocksArcConnection() {
+        if (mEarcLocalDevice == null) {
+            return false;
+        }
+        synchronized (mLock) {
+            return mEarcLocalDevice.mEarcStatus != HDMI_EARC_STATUS_ARC_PENDING;
         }
     }
 }

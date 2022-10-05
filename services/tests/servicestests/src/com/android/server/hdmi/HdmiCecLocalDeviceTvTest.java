@@ -96,6 +96,7 @@ public class HdmiCecLocalDeviceTvTest {
     private int mTvPhysicalAddress;
     private int mTvLogicalAddress;
     private boolean mWokenUp;
+    private boolean mEarcBlocksArc;
     private List<DeviceEventListener> mDeviceEventListeners = new ArrayList<>();
 
     private class DeviceEventListener {
@@ -156,6 +157,11 @@ public class HdmiCecLocalDeviceTvTest {
                     }
 
                     @Override
+                    boolean isPowerStandbyOrTransient() {
+                        return false;
+                    }
+
+                    @Override
                     AudioManager getAudioManager() {
                         return mAudioManager;
                     }
@@ -163,6 +169,11 @@ public class HdmiCecLocalDeviceTvTest {
                     @Override
                     void invokeDeviceEventListeners(HdmiDeviceInfo device, int status) {
                         mDeviceEventListeners.add(new DeviceEventListener(device, status));
+                    }
+
+                    @Override
+                    protected boolean earcBlocksArcConnection() {
+                        return mEarcBlocksArc;
                     }
                 };
 
@@ -175,16 +186,18 @@ public class HdmiCecLocalDeviceTvTest {
         mHdmiControlService.setHdmiMhlController(HdmiMhlControllerStub.create(mHdmiControlService));
         HdmiPortInfo[] hdmiPortInfos = new HdmiPortInfo[2];
         hdmiPortInfos[0] =
-                new HdmiPortInfo(1, HdmiPortInfo.PORT_INPUT, 0x1000, true, false, false);
+                new HdmiPortInfo(1, HdmiPortInfo.PORT_INPUT, 0x1000, true, false, false, false);
         hdmiPortInfos[1] =
-                new HdmiPortInfo(2, HdmiPortInfo.PORT_INPUT, 0x2000, true, false, true);
+                new HdmiPortInfo(2, HdmiPortInfo.PORT_INPUT, 0x2000, true, false, true, true);
         mNativeWrapper.setPortInfo(hdmiPortInfos);
         mHdmiControlService.initService();
         mHdmiControlService.onBootPhase(PHASE_SYSTEM_SERVICES_READY);
         mPowerManager = new FakePowerManagerWrapper(context);
         mHdmiControlService.setPowerManager(mPowerManager);
         mTvPhysicalAddress = 0x0000;
+        mEarcBlocksArc = false;
         mNativeWrapper.setPhysicalAddress(mTvPhysicalAddress);
+        mHdmiControlService.setEarcEnabled(HdmiControlManager.EARC_FEATURE_DISABLED);
         mTestLooper.dispatchAll();
         mHdmiCecLocalDeviceTv = mHdmiControlService.tv();
         mTvLogicalAddress = mHdmiCecLocalDeviceTv.getDeviceInfo().getLogicalAddress();
@@ -426,9 +439,10 @@ public class HdmiCecLocalDeviceTvTest {
     public void startArcAction_enable_portDoesNotSupportArc() {
         // Emulate Audio device on port 0x1000 (does not support ARC)
         mNativeWrapper.setPortConnectionStatus(1, true);
-        HdmiCecMessage hdmiCecMessage = HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
-                ADDR_AUDIO_SYSTEM, 0x1000, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
-        mNativeWrapper.onCecMessage(hdmiCecMessage);
+        HdmiCecMessage reportPhysicalAddress =
+                HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
+                        ADDR_AUDIO_SYSTEM, 0x1000, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
+        mNativeWrapper.onCecMessage(reportPhysicalAddress);
 
         mHdmiCecLocalDeviceTv.startArcAction(true);
         HdmiCecMessage requestArcInitiation = HdmiCecMessageBuilder.buildRequestArcInitiation(
@@ -445,9 +459,10 @@ public class HdmiCecLocalDeviceTvTest {
     public void startArcAction_disable_portDoesNotSupportArc() {
         // Emulate Audio device on port 0x1000 (does not support ARC)
         mNativeWrapper.setPortConnectionStatus(1, true);
-        HdmiCecMessage hdmiCecMessage = HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
-                ADDR_AUDIO_SYSTEM, 0x1000, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
-        mNativeWrapper.onCecMessage(hdmiCecMessage);
+        HdmiCecMessage reportPhysicalAddress =
+                HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
+                        ADDR_AUDIO_SYSTEM, 0x1000, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
+        mNativeWrapper.onCecMessage(reportPhysicalAddress);
 
         mHdmiCecLocalDeviceTv.startArcAction(false);
         HdmiCecMessage requestArcInitiation = HdmiCecMessageBuilder.buildRequestArcInitiation(
@@ -464,9 +479,10 @@ public class HdmiCecLocalDeviceTvTest {
     public void startArcAction_enable_portSupportsArc() {
         // Emulate Audio device on port 0x2000 (supports ARC)
         mNativeWrapper.setPortConnectionStatus(2, true);
-        HdmiCecMessage hdmiCecMessage = HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
-                ADDR_AUDIO_SYSTEM, 0x2000, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
-        mNativeWrapper.onCecMessage(hdmiCecMessage);
+        HdmiCecMessage reportPhysicalAddress =
+                HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
+                        ADDR_AUDIO_SYSTEM, 0x2000, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
+        mNativeWrapper.onCecMessage(reportPhysicalAddress);
         mTestLooper.dispatchAll();
 
         mHdmiCecLocalDeviceTv.startArcAction(true);
@@ -485,9 +501,10 @@ public class HdmiCecLocalDeviceTvTest {
     public void startArcAction_disable_portSupportsArc() {
         // Emulate Audio device on port 0x2000 (supports ARC)
         mNativeWrapper.setPortConnectionStatus(2, true);
-        HdmiCecMessage hdmiCecMessage = HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
-                ADDR_AUDIO_SYSTEM, 0x2000, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
-        mNativeWrapper.onCecMessage(hdmiCecMessage);
+        HdmiCecMessage reportPhysicalAddress =
+                HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
+                        ADDR_AUDIO_SYSTEM, 0x2000, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
+        mNativeWrapper.onCecMessage(reportPhysicalAddress);
         mTestLooper.dispatchAll();
 
         mHdmiCecLocalDeviceTv.startArcAction(false);
@@ -522,9 +539,10 @@ public class HdmiCecLocalDeviceTvTest {
     public void handleInitiateArc_portDoesNotSupportArc() {
         // Emulate Audio device on port 0x1000 (does not support ARC)
         mNativeWrapper.setPortConnectionStatus(1, true);
-        HdmiCecMessage hdmiCecMessage = HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
-                ADDR_AUDIO_SYSTEM, 0x1000, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
-        mNativeWrapper.onCecMessage(hdmiCecMessage);
+        HdmiCecMessage reportPhysicalAddress =
+                HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
+                        ADDR_AUDIO_SYSTEM, 0x1000, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
+        mNativeWrapper.onCecMessage(reportPhysicalAddress);
 
         HdmiCecMessage requestArcInitiation = HdmiCecMessageBuilder.buildInitiateArc(
                 ADDR_AUDIO_SYSTEM,
@@ -544,9 +562,10 @@ public class HdmiCecLocalDeviceTvTest {
     public void handleInitiateArc_portSupportsArc() {
         // Emulate Audio device on port 0x2000 (supports ARC)
         mNativeWrapper.setPortConnectionStatus(2, true);
-        HdmiCecMessage hdmiCecMessage = HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
-                ADDR_AUDIO_SYSTEM, 0x2000, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
-        mNativeWrapper.onCecMessage(hdmiCecMessage);
+        HdmiCecMessage reportPhysicalAddress =
+                HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
+                        ADDR_AUDIO_SYSTEM, 0x2000, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
+        mNativeWrapper.onCecMessage(reportPhysicalAddress);
         mTestLooper.dispatchAll();
 
         HdmiCecMessage requestArcInitiation = HdmiCecMessageBuilder.buildInitiateArc(
@@ -575,6 +594,66 @@ public class HdmiCecLocalDeviceTvTest {
     }
 
     @Test
+    public void handleTerminateArc_noAudioDevice() {
+        HdmiCecMessage terminateArc = HdmiCecMessageBuilder.buildTerminateArc(
+                ADDR_AUDIO_SYSTEM,
+                ADDR_TV);
+
+        mNativeWrapper.onCecMessage(terminateArc);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage reportArcTerminated = HdmiCecMessageBuilder.buildReportArcTerminated(
+                ADDR_TV,
+                ADDR_AUDIO_SYSTEM);
+        assertThat(mNativeWrapper.getResultMessages()).contains(reportArcTerminated);
+    }
+
+    @Test
+    public void handleTerminateArc_portDoesNotSupportArc() {
+        // Emulate Audio device on port 0x1000 (does not support ARC)
+        mNativeWrapper.setPortConnectionStatus(1, true);
+        HdmiCecMessage reportPhysicalAddress =
+                HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
+                        ADDR_AUDIO_SYSTEM, 0x1000, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
+        mNativeWrapper.onCecMessage(reportPhysicalAddress);
+
+        HdmiCecMessage terminateArc = HdmiCecMessageBuilder.buildTerminateArc(
+                ADDR_AUDIO_SYSTEM,
+                ADDR_TV);
+
+        mNativeWrapper.onCecMessage(terminateArc);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage reportArcTerminated = HdmiCecMessageBuilder.buildReportArcTerminated(
+                ADDR_TV,
+                ADDR_AUDIO_SYSTEM);
+        assertThat(mNativeWrapper.getResultMessages()).contains(reportArcTerminated);
+    }
+
+    @Test
+    public void handleTerminateArc_portSupportsArc() {
+        // Emulate Audio device on port 0x2000 (supports ARC)
+        mNativeWrapper.setPortConnectionStatus(2, true);
+        HdmiCecMessage reportPhysicalAddress =
+                HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
+                        ADDR_AUDIO_SYSTEM, 0x2000, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
+        mNativeWrapper.onCecMessage(reportPhysicalAddress);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage terminateArc = HdmiCecMessageBuilder.buildTerminateArc(
+                ADDR_AUDIO_SYSTEM,
+                ADDR_TV);
+
+        mNativeWrapper.onCecMessage(terminateArc);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage reportArcTerminated = HdmiCecMessageBuilder.buildReportArcTerminated(
+                ADDR_TV,
+                ADDR_AUDIO_SYSTEM);
+        assertThat(mNativeWrapper.getResultMessages()).contains(reportArcTerminated);
+    }
+
+    @Test
     public void supportsRecordTvScreen() {
         HdmiCecMessage recordTvScreen = HdmiCecMessage.build(ADDR_RECORDER_1, mTvLogicalAddress,
                 Constants.MESSAGE_RECORD_TV_SCREEN, HdmiCecMessage.EMPTY_PARAM);
@@ -595,9 +674,10 @@ public class HdmiCecLocalDeviceTvTest {
                 HdmiControlManager.SYSTEM_AUDIO_CONTROL_ENABLED);
         // Emulate Audio device on port 0x1000 (does not support ARC)
         mNativeWrapper.setPortConnectionStatus(1, true);
-        HdmiCecMessage hdmiCecMessage = HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
-                ADDR_AUDIO_SYSTEM, 0x1000, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
-        mNativeWrapper.onCecMessage(hdmiCecMessage);
+        HdmiCecMessage reportPhysicalAddress =
+                HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
+                        ADDR_AUDIO_SYSTEM, 0x1000, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
+        mNativeWrapper.onCecMessage(reportPhysicalAddress);
         mTestLooper.dispatchAll();
 
         HdmiCecFeatureAction systemAudioAutoInitiationAction =
@@ -636,9 +716,9 @@ public class HdmiCecLocalDeviceTvTest {
     public void hotplugDetectionAction_discoversDeviceAfterMessageReceived() {
         // Playback 1 sends a message before ACKing a poll
         mNativeWrapper.setPollAddressResponse(ADDR_PLAYBACK_1, SendMessageResult.NACK);
-        HdmiCecMessage hdmiCecMessage = HdmiCecMessageBuilder.buildActiveSource(
+        HdmiCecMessage activeSource = HdmiCecMessageBuilder.buildActiveSource(
                 ADDR_PLAYBACK_1, ADDR_TV);
-        mNativeWrapper.onCecMessage(hdmiCecMessage);
+        mNativeWrapper.onCecMessage(activeSource);
         mTestLooper.dispatchAll();
 
         // Playback 1 begins ACKing polls, allowing detection by HotplugDetectionAction
@@ -853,11 +933,11 @@ public class HdmiCecLocalDeviceTvTest {
     @Test
     public void tvSendRequestArcTerminationOnSleep() {
         // Emulate Audio device on port 0x2000 (supports ARC)
-
         mNativeWrapper.setPortConnectionStatus(2, true);
-        HdmiCecMessage hdmiCecMessage = HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
-                ADDR_AUDIO_SYSTEM, 0x2000, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
-        mNativeWrapper.onCecMessage(hdmiCecMessage);
+        HdmiCecMessage reportPhysicalAddress =
+                HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
+                        ADDR_AUDIO_SYSTEM, 0x2000, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
+        mNativeWrapper.onCecMessage(reportPhysicalAddress);
         mTestLooper.dispatchAll();
 
         mHdmiCecLocalDeviceTv.startArcAction(true);
@@ -898,4 +978,182 @@ public class HdmiCecLocalDeviceTvTest {
         assertThat(mNativeWrapper.getResultMessages()).contains(requestArcTermination);
     }
 
+    @Test
+    public void startArcAction_enable_earcBlocksArc() {
+        mHdmiControlService.setEarcEnabled(HdmiControlManager.EARC_FEATURE_ENABLED);
+        mTestLooper.dispatchAll();
+
+        mEarcBlocksArc = true;
+
+        // Emulate Audio device on port 0x2000 (supports ARC and eARC)
+        mNativeWrapper.setPortConnectionStatus(2, true);
+        HdmiCecMessage reportPhysicalAddress =
+                HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
+                        ADDR_AUDIO_SYSTEM, 0x2000, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
+        mNativeWrapper.onCecMessage(reportPhysicalAddress);
+        mTestLooper.dispatchAll();
+
+        mHdmiCecLocalDeviceTv.startArcAction(true);
+        mTestLooper.dispatchAll();
+        HdmiCecMessage requestArcInitiation = HdmiCecMessageBuilder.buildRequestArcInitiation(
+                ADDR_TV,
+                ADDR_AUDIO_SYSTEM);
+        HdmiCecMessage requestArcTermination = HdmiCecMessageBuilder.buildRequestArcTermination(
+                ADDR_TV,
+                ADDR_AUDIO_SYSTEM);
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(requestArcInitiation);
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(requestArcTermination);
+    }
+
+    @Test
+    public void startArcAction_enable_earcDoesNotBlockArc() {
+        mHdmiControlService.setEarcEnabled(HdmiControlManager.EARC_FEATURE_ENABLED);
+        mTestLooper.dispatchAll();
+
+        mEarcBlocksArc = false;
+
+        // Emulate Audio device on port 0x2000 (supports ARC and eARC)
+        mNativeWrapper.setPortConnectionStatus(2, true);
+        HdmiCecMessage reportPhysicalAddress =
+                HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
+                        ADDR_AUDIO_SYSTEM, 0x2000, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
+        mNativeWrapper.onCecMessage(reportPhysicalAddress);
+        mTestLooper.dispatchAll();
+
+        mHdmiCecLocalDeviceTv.startArcAction(true);
+        mTestLooper.dispatchAll();
+        HdmiCecMessage requestArcInitiation = HdmiCecMessageBuilder.buildRequestArcInitiation(
+                ADDR_TV,
+                ADDR_AUDIO_SYSTEM);
+        HdmiCecMessage requestArcTermination = HdmiCecMessageBuilder.buildRequestArcTermination(
+                ADDR_TV,
+                ADDR_AUDIO_SYSTEM);
+        assertThat(mNativeWrapper.getResultMessages()).contains(requestArcInitiation);
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(requestArcTermination);
+    }
+
+    @Test
+    public void startArcAction_disable_earcBlocksArc() {
+        mHdmiControlService.setEarcEnabled(HdmiControlManager.EARC_FEATURE_ENABLED);
+        mTestLooper.dispatchAll();
+
+        mEarcBlocksArc = true;
+
+        // Emulate Audio device on port 0x2000 (supports ARC and eARC)
+        mNativeWrapper.setPortConnectionStatus(2, true);
+        HdmiCecMessage reportPhysicalAddress =
+                HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
+                        ADDR_AUDIO_SYSTEM, 0x2000, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
+        mNativeWrapper.onCecMessage(reportPhysicalAddress);
+        mTestLooper.dispatchAll();
+
+        mHdmiCecLocalDeviceTv.startArcAction(false);
+        mTestLooper.dispatchAll();
+        HdmiCecMessage requestArcInitiation = HdmiCecMessageBuilder.buildRequestArcInitiation(
+                ADDR_TV,
+                ADDR_AUDIO_SYSTEM);
+        HdmiCecMessage requestArcTermination = HdmiCecMessageBuilder.buildRequestArcTermination(
+                ADDR_TV,
+                ADDR_AUDIO_SYSTEM);
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(requestArcInitiation);
+        assertThat(mNativeWrapper.getResultMessages()).contains(requestArcTermination);
+    }
+
+    @Test
+    public void handleInitiateArc_earcBlocksArc() {
+        mHdmiControlService.setEarcEnabled(HdmiControlManager.EARC_FEATURE_ENABLED);
+        mTestLooper.dispatchAll();
+
+        mEarcBlocksArc = true;
+
+        // Emulate Audio device on port 0x2000 (supports ARC and eARC)
+        mNativeWrapper.setPortConnectionStatus(2, true);
+        HdmiCecMessage reportPhysicalAddress =
+                HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
+                        ADDR_AUDIO_SYSTEM, 0x2000, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
+        mNativeWrapper.onCecMessage(reportPhysicalAddress);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage requestArcInitiation = HdmiCecMessageBuilder.buildInitiateArc(
+                ADDR_AUDIO_SYSTEM,
+                ADDR_TV);
+
+        mNativeWrapper.onCecMessage(requestArcInitiation);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage featureAbortMessage = HdmiCecMessageBuilder.buildFeatureAbortCommand(
+                ADDR_TV,
+                ADDR_AUDIO_SYSTEM,
+                Constants.MESSAGE_INITIATE_ARC,
+                Constants.ABORT_NOT_IN_CORRECT_MODE);
+        assertThat(mNativeWrapper.getResultMessages()).contains(featureAbortMessage);
+    }
+
+    @Test
+    public void handleInitiateArc_earcDoesNotBlockArc() {
+        mHdmiControlService.setEarcEnabled(HdmiControlManager.EARC_FEATURE_ENABLED);
+        mTestLooper.dispatchAll();
+
+        mEarcBlocksArc = false;
+
+        // Emulate Audio device on port 0x2000 (supports ARC and eARC)
+        mNativeWrapper.setPortConnectionStatus(2, true);
+        HdmiCecMessage reportPhysicalAddress =
+                HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
+                        ADDR_AUDIO_SYSTEM, 0x2000, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
+        mNativeWrapper.onCecMessage(reportPhysicalAddress);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage requestArcInitiation = HdmiCecMessageBuilder.buildInitiateArc(
+                ADDR_AUDIO_SYSTEM,
+                ADDR_TV);
+
+        mNativeWrapper.onCecMessage(requestArcInitiation);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage reportArcInitiated = HdmiCecMessageBuilder.buildReportArcInitiated(
+                ADDR_TV,
+                ADDR_AUDIO_SYSTEM);
+        // <Report ARC Initiated> should only be sent after SAD querying is done
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(reportArcInitiated);
+
+        // Finish querying SADs
+        assertThat(mNativeWrapper.getResultMessages()).contains(SAD_QUERY);
+        mNativeWrapper.clearResultMessages();
+        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
+        mTestLooper.dispatchAll();
+        assertThat(mNativeWrapper.getResultMessages()).contains(SAD_QUERY);
+        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
+        mTestLooper.dispatchAll();
+
+        assertThat(mNativeWrapper.getResultMessages()).contains(reportArcInitiated);
+    }
+
+    @Test
+    public void handleTerminateArc_earcBlocksArc() {
+        mHdmiControlService.setEarcEnabled(HdmiControlManager.EARC_FEATURE_ENABLED);
+        mTestLooper.dispatchAll();
+
+        mEarcBlocksArc = true;
+
+        // Emulate Audio device on port 0x2000 (supports ARC and eARC)
+        mNativeWrapper.setPortConnectionStatus(2, true);
+        HdmiCecMessage reportPhysicalAddress =
+                HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
+                        ADDR_AUDIO_SYSTEM, 0x2000, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
+        mNativeWrapper.onCecMessage(reportPhysicalAddress);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage terminateArc = HdmiCecMessageBuilder.buildTerminateArc(
+                ADDR_AUDIO_SYSTEM,
+                ADDR_TV);
+
+        mNativeWrapper.onCecMessage(terminateArc);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage reportArcTerminated = HdmiCecMessageBuilder.buildReportArcTerminated(
+                ADDR_TV,
+                ADDR_AUDIO_SYSTEM);
+        assertThat(mNativeWrapper.getResultMessages()).contains(reportArcTerminated);
+    }
 }

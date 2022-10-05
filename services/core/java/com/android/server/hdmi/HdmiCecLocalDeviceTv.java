@@ -912,6 +912,12 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             }
             return;
         }
+        if (enabled && mService.earcBlocksArcConnection()) {
+            Slog.i(TAG,
+                    "ARC connection blocked because eARC connection is established or being "
+                            + "established.");
+            return;
+        }
 
         // Terminate opposite action and start action if not exist.
         if (enabled) {
@@ -1009,6 +1015,13 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @Constants.HandleMessageResult
     protected int handleInitiateArc(HdmiCecMessage message) {
         assertRunOnServiceThread();
+
+        if (mService.earcBlocksArcConnection()) {
+            Slog.i(TAG,
+                    "ARC connection blocked because eARC connection is established or being "
+                            + "established.");
+            return Constants.ABORT_NOT_IN_CORRECT_MODE;
+        }
 
         if (!canStartArcUpdateAction(message.getSource(), true)) {
             HdmiDeviceInfo avrDeviceInfo = getAvrDeviceInfo();

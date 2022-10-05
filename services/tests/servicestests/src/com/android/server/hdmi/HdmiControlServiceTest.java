@@ -1253,6 +1253,46 @@ public class HdmiControlServiceTest {
         verify(mHdmiControlServiceSpy, times(0)).setEarcEnabledInHal(true);
     }
 
+    @Test
+    public void earcIdle_blocksArcConnection() {
+        mHdmiControlServiceSpy.mEarcSupported = true;
+        mHdmiControlServiceSpy.clearEarcLocalDevice();
+        HdmiEarcLocalDeviceTx localDeviceTx = new HdmiEarcLocalDeviceTx(mHdmiControlServiceSpy);
+        localDeviceTx.handleEarcStateChange(Constants.HDMI_EARC_STATUS_IDLE);
+        mHdmiControlServiceSpy.addEarcLocalDevice(localDeviceTx);
+        assertThat(mHdmiControlServiceSpy.earcBlocksArcConnection()).isTrue();
+    }
+
+    @Test
+    public void earcPending_blocksArcConnection() {
+        mHdmiControlServiceSpy.mEarcSupported = true;
+        mHdmiControlServiceSpy.clearEarcLocalDevice();
+        HdmiEarcLocalDeviceTx localDeviceTx = new HdmiEarcLocalDeviceTx(mHdmiControlServiceSpy);
+        localDeviceTx.handleEarcStateChange(Constants.HDMI_EARC_STATUS_EARC_PENDING);
+        mHdmiControlServiceSpy.addEarcLocalDevice(localDeviceTx);
+        assertThat(mHdmiControlServiceSpy.earcBlocksArcConnection()).isTrue();
+    }
+
+    @Test
+    public void earcEnabled_blocksArcConnection() {
+        mHdmiControlServiceSpy.mEarcSupported = true;
+        mHdmiControlServiceSpy.clearEarcLocalDevice();
+        HdmiEarcLocalDeviceTx localDeviceTx = new HdmiEarcLocalDeviceTx(mHdmiControlServiceSpy);
+        localDeviceTx.handleEarcStateChange(Constants.HDMI_EARC_STATUS_EARC_CONNECTED);
+        mHdmiControlServiceSpy.addEarcLocalDevice(localDeviceTx);
+        assertThat(mHdmiControlServiceSpy.earcBlocksArcConnection()).isTrue();
+    }
+
+    @Test
+    public void arcPending_doesNotBlockArcConnection() {
+        mHdmiControlServiceSpy.mEarcSupported = true;
+        mHdmiControlServiceSpy.clearEarcLocalDevice();
+        HdmiEarcLocalDeviceTx localDeviceTx = new HdmiEarcLocalDeviceTx(mHdmiControlServiceSpy);
+        localDeviceTx.handleEarcStateChange(Constants.HDMI_EARC_STATUS_ARC_PENDING);
+        mHdmiControlServiceSpy.addEarcLocalDevice(localDeviceTx);
+        assertThat(mHdmiControlServiceSpy.earcBlocksArcConnection()).isFalse();
+    }
+
     protected static class MockPlaybackDevice extends HdmiCecLocalDevicePlayback {
 
         private boolean mCanGoToStandby;
