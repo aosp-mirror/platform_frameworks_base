@@ -52,8 +52,7 @@ import com.android.systemui.user.legacyhelper.data.LegacyUserDataHelper
 import com.android.systemui.user.shared.model.UserActionModel
 import com.android.systemui.user.shared.model.UserModel
 import com.android.systemui.util.kotlin.pairwise
-import java.util.Collections
-import java.util.WeakHashMap
+import java.io.PrintWriter
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -70,6 +69,9 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 /** Encapsulates business logic to interact with user data and systems. */
@@ -96,7 +98,9 @@ constructor(
      * Defines interface for classes that can be notified when the state of users on the device is
      * changed.
      */
-    fun interface UserCallback {
+    interface UserCallback {
+        /** Returns `true` if this callback can be cleaned-up. */
+        fun isEvictable(): Boolean = false
         /** Notifies that the state of users on the device has changed. */
         fun onUserStateChanged()
     }
@@ -110,7 +114,8 @@ constructor(
                 com.android.internal.R.string.config_supervisedUserCreationPackage
             )
 
-    private val callbacks = Collections.newSetFromMap(WeakHashMap<UserCallback, Boolean>())
+    private val callbackMutex = Mutex()
+    private val callbacks = mutableSetOf<UserCallback>()
 
     /** List of current on-device users to select from. */
     val users: Flow<List<UserModel>>
@@ -263,6 +268,7 @@ constructor(
                             }
                     )
                 }
+                .onEach { notifyCallbacks() }
                 .stateIn(
                     scope = applicationScope,
                     started = SharingStarted.Eagerly,
@@ -307,30 +313,6 @@ constructor(
                 error("Not supported in the old implementation!")
             }
 
-    fun addCallback(callback: UserCallback) {
-        callbacks.add(callback)
-    }
-
-    fun removeCallback(callback: UserCallback) {
-        callbacks.remove(callback)
-    }
-
-    fun onDialogShown() {
-        _dialogShowRequests.value = null
-    }
-
-    fun onDialogDismissed() {
-        _dialogDismissRequests.value = null
-    }
-
-    private fun showDialog(request: ShowDialogRequestModel) {
-        _dialogShowRequests.value = request
-    }
-
-    private fun dismissDialog() {
-        _dialogDismissRequests.value = Unit
-    }
-
     init {
         if (isNewImpl) {
             refreshUsersScheduler.refreshIfNotPaused()
@@ -362,6 +344,46 @@ constructor(
                 }
                 .launchIn(applicationScope)
         }
+    }
+
+    fun addCallback(callback: UserCallback) {
+        applicationScope.launch { callbackMutex.withLock { callbacks.add(callback) } }
+    }
+
+    fun removeCallback(callback: UserCallback) {
+        applicationScope.launch { callbackMutex.withLock { callbacks.remove(callback) } }
+    }
+
+    fun refreshUsers() {
+        refreshUsersScheduler.refreshIfNotPaused()
+    }
+
+    fun onDialogShown() {
+        _dialogShowRequests.value = null
+    }
+
+    fun onDialogDismissed() {
+        _dialogDismissRequests.value = null
+    }
+
+    fun dump(pw: PrintWriter) {
+        pw.println("UserInteractor state:")
+        pw.println("  lastSelectedNonGuestUserId=${repository.lastSelectedNonGuestUserId}")
+
+        val users = userRecords.value.filter { it.info != null }
+        pw.println("  userCount=${userRecords.value.count { LegacyUserDataHelper.isUser(it) }}")
+        for (i in users.indices) {
+            pw.println("    ${users[i]}")
+        }
+
+        val actions = userRecords.value.filter { it.info == null }
+        pw.println("  actionCount=${userRecords.value.count { !LegacyUserDataHelper.isUser(it) }}")
+        for (i in actions.indices) {
+            pw.println("    ${actions[i]}")
+        }
+
+        pw.println("isSimpleUserSwitcher=$isSimpleUserSwitcher")
+        pw.println("isGuestUserAutoCreated=$isGuestUserAutoCreated")
     }
 
     fun onDeviceBootCompleted() {
@@ -460,6 +482,60 @@ constructor(
         }
     }
 
+    fun exitGuestUser(
+        @UserIdInt guestUserId: Int,
+        @UserIdInt targetUserId: Int,
+        forceRemoveGuestOnExit: Boolean,
+    ) {
+        guestUserInteractor.exit(
+            guestUserId = guestUserId,
+            targetUserId = targetUserId,
+            forceRemoveGuestOnExit = forceRemoveGuestOnExit,
+            showDialog = this::showDialog,
+            dismissDialog = this::dismissDialog,
+            switchUser = this::switchUser,
+        )
+    }
+
+    fun removeGuestUser(
+        @UserIdInt guestUserId: Int,
+        @UserIdInt targetUserId: Int,
+    ) {
+        applicationScope.launch {
+            guestUserInteractor.remove(
+                guestUserId = guestUserId,
+                targetUserId = targetUserId,
+                ::showDialog,
+                ::dismissDialog,
+                ::selectUser,
+            )
+        }
+    }
+
+    private fun showDialog(request: ShowDialogRequestModel) {
+        _dialogShowRequests.value = request
+    }
+
+    private fun dismissDialog() {
+        _dialogDismissRequests.value = Unit
+    }
+
+    private fun notifyCallbacks() {
+        applicationScope.launch {
+            callbackMutex.withLock {
+                val iterator = callbacks.iterator()
+                while (iterator.hasNext()) {
+                    val callback = iterator.next()
+                    if (!callback.isEvictable()) {
+                        callback.onUserStateChanged()
+                    } else {
+                        iterator.remove()
+                    }
+                }
+            }
+        }
+    }
+
     private suspend fun toRecord(
         userInfo: UserInfo,
         selectedUserId: Int,
@@ -498,21 +574,6 @@ constructor(
         )
     }
 
-    private fun exitGuestUser(
-        @UserIdInt guestUserId: Int,
-        @UserIdInt targetUserId: Int,
-        forceRemoveGuestOnExit: Boolean,
-    ) {
-        guestUserInteractor.exit(
-            guestUserId = guestUserId,
-            targetUserId = targetUserId,
-            forceRemoveGuestOnExit = forceRemoveGuestOnExit,
-            showDialog = this::showDialog,
-            dismissDialog = this::dismissDialog,
-            switchUser = this::switchUser,
-        )
-    }
-
     private fun switchUser(userId: Int) {
         // TODO(b/246631653): track jank and lantecy like in the old impl.
         refreshUsersScheduler.pause()
@@ -533,7 +594,7 @@ constructor(
                     dismissDialog()
                     val selectedUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1)
                     if (previousUserInfo?.id != selectedUserId) {
-                        callbacks.forEach { it.onUserStateChanged() }
+                        notifyCallbacks()
                         restartSecondaryService(selectedUserId)
                     }
                     if (guestUserInteractor.isGuestUserAutoCreated) {
