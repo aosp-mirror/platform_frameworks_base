@@ -183,8 +183,7 @@ final class InputMethodUtils {
         return subtype != null
                 ? TextUtils.concat(subtype.getDisplayName(context,
                         imi.getPackageName(), imi.getServiceInfo().applicationInfo),
-                                (TextUtils.isEmpty(imiLabel) ?
-                                        "" : " - " + imiLabel))
+                                (TextUtils.isEmpty(imiLabel) ? "" : " - " + imiLabel))
                 : imiLabel;
     }
 
@@ -647,8 +646,8 @@ final class InputMethodUtils {
                             List<InputMethodSubtype> implicitlyEnabledSubtypes =
                                     SubtypeUtils.getImplicitlyApplicableSubtypesLocked(mRes, imi);
                             if (implicitlyEnabledSubtypes != null) {
-                                final int N = implicitlyEnabledSubtypes.size();
-                                for (int i = 0; i < N; ++i) {
+                                final int numSubtypes = implicitlyEnabledSubtypes.size();
+                                for (int i = 0; i < numSubtypes; ++i) {
                                     final InputMethodSubtype st = implicitlyEnabledSubtypes.get(i);
                                     if (String.valueOf(st.hashCode()).equals(subtypeHashCode)) {
                                         return subtypeHashCode;
