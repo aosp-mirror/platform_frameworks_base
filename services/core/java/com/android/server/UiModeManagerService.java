@@ -1831,7 +1831,7 @@ final class UiModeManagerService extends SystemService {
         if (category != null && !dockAppStarted && (mStartDreamImmediatelyOnDock
                 || mWindowManager.isKeyguardShowingAndNotOccluded()
                 || !mPowerManager.isInteractive())) {
-            Sandman.startDreamWhenDockedIfAppropriate(getContext());
+            mInjector.startDreamWhenDockedIfAppropriate(getContext());
         }
     }
 
@@ -2144,6 +2144,10 @@ final class UiModeManagerService extends SystemService {
     public static class Injector {
         public int getCallingUid() {
             return Binder.getCallingUid();
+        }
+
+        public void startDreamWhenDockedIfAppropriate(Context context) {
+            Sandman.startDreamWhenDockedIfAppropriate(context);
         }
     }
 }
