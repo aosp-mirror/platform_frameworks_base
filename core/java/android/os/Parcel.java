@@ -4422,6 +4422,9 @@ public final class Parcel {
         int type = readInt();
         if (isLengthPrefixed(type)) {
             int objectLength = readInt();
+            if (objectLength < 0) {
+                return null;
+            }
             int end = MathUtils.addOrThrow(dataPosition(), objectLength);
             int valueLength = end - start;
             setDataPosition(end);
