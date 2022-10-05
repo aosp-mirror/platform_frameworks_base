@@ -481,7 +481,7 @@ final class LetterboxUiController {
     }
 
     private void updateRoundedCorners(WindowState mainWindow) {
-        final SurfaceControl windowSurface = mainWindow.getClientViewRootSurface();
+        final SurfaceControl windowSurface = mainWindow.getSurfaceControl();
         if (windowSurface != null && windowSurface.isValid()) {
             final Transaction transaction = mActivityRecord.getSyncTransaction();
 

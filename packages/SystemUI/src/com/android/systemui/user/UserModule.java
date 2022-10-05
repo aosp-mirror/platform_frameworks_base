@@ -20,6 +20,7 @@ import android.app.Activity;
 
 import com.android.settingslib.users.EditUserInfoController;
 import com.android.systemui.user.data.repository.UserRepositoryModule;
+import com.android.systemui.user.ui.dialog.UserDialogModule;
 
 import dagger.Binds;
 import dagger.Module;
@@ -32,6 +33,7 @@ import dagger.multibindings.IntoMap;
  */
 @Module(
         includes = {
+                UserDialogModule.class,
                 UserRepositoryModule.class,
         }
 )

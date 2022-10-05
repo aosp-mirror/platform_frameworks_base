@@ -46,6 +46,7 @@ import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.hardware.SensorManager;
 import android.hardware.SensorPrivacyManager;
+import android.hardware.biometrics.BiometricManager;
 import android.hardware.camera2.CameraManager;
 import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.display.AmbientDisplayConfiguration;
@@ -237,22 +238,39 @@ public class FrameworkServicesModule {
     @Singleton
     static IDreamManager provideIDreamManager() {
         return IDreamManager.Stub.asInterface(
-                ServiceManager.checkService(DreamService.DREAM_SERVICE));
+                ServiceManager.getService(DreamService.DREAM_SERVICE));
     }
 
     @Provides
     @Singleton
     @Nullable
     static FaceManager provideFaceManager(Context context) {
-        return context.getSystemService(FaceManager.class);
-
+        if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_FACE)) {
+            return context.getSystemService(FaceManager.class);
+        }
+        return null;
     }
 
     @Provides
     @Singleton
     @Nullable
     static FingerprintManager providesFingerprintManager(Context context) {
-        return context.getSystemService(FingerprintManager.class);
+        if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)) {
+            return context.getSystemService(FingerprintManager.class);
+        }
+        return null;
+    }
+
+    /**
+     * @return null if both faceManager and fingerprintManager are null.
+     */
+    @Provides
+    @Singleton
+    @Nullable
+    static BiometricManager providesBiometricManager(Context context,
+            @Nullable FaceManager faceManager, @Nullable FingerprintManager fingerprintManager) {
+        return faceManager == null && fingerprintManager == null ? null :
+                context.getSystemService(BiometricManager.class);
     }
 
     @Provides

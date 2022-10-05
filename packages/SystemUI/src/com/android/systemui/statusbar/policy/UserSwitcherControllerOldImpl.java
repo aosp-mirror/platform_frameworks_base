@@ -17,17 +17,13 @@ package com.android.systemui.statusbar.policy;
 
 import static android.os.UserManager.SWITCHABILITY_STATUS_OK;
 
-import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
-
 import android.annotation.UserIdInt;
-import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.IActivityManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.UserInfo;
@@ -40,7 +36,6 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.telephony.TelephonyCallback;
 import android.text.TextUtils;
-import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -49,17 +44,14 @@ import android.view.WindowManagerGlobal;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
-import androidx.collection.SimpleArrayMap;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.util.LatencyTracker;
-import com.android.settingslib.RestrictedLockUtilsInternal;
 import com.android.settingslib.users.UserCreatingDialog;
 import com.android.systemui.GuestResetOrExitSessionReceiver;
 import com.android.systemui.GuestResumeSessionReceiver;
-import com.android.systemui.R;
 import com.android.systemui.SystemUISecondaryUserService;
 import com.android.systemui.animation.DialogCuj;
 import com.android.systemui.animation.DialogLaunchAnimator;
@@ -75,10 +67,12 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.qs.QSUserSwitcherEvent;
 import com.android.systemui.qs.user.UserSwitchDialogController.DialogShower;
 import com.android.systemui.settings.UserTracker;
-import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.telephony.TelephonyListenerManager;
-import com.android.systemui.user.CreateUserActivity;
 import com.android.systemui.user.data.source.UserRecord;
+import com.android.systemui.user.legacyhelper.data.LegacyUserDataHelper;
+import com.android.systemui.user.shared.model.UserActionModel;
+import com.android.systemui.user.ui.dialog.AddUserDialog;
+import com.android.systemui.user.ui.dialog.ExitGuestDialog;
 import com.android.systemui.util.settings.GlobalSettings;
 import com.android.systemui.util.settings.SecureSettings;
 
@@ -139,9 +133,6 @@ public class UserSwitcherControllerOldImpl implements UserSwitcherController {
     private final InteractionJankMonitor mInteractionJankMonitor;
     private final LatencyTracker mLatencyTracker;
     private final DialogLaunchAnimator mDialogLaunchAnimator;
-    private final SimpleArrayMap<UserRecord, EnforcedAdmin> mEnforcedAdminByUserRecord =
-            new SimpleArrayMap<>();
-    private final ArraySet<UserRecord> mDisabledByAdmin = new ArraySet<>();
 
     private ArrayList<UserRecord> mUsers = new ArrayList<>();
     @VisibleForTesting
@@ -334,7 +325,6 @@ public class UserSwitcherControllerOldImpl implements UserSwitcherController {
 
             for (UserInfo info : infos) {
                 boolean isCurrent = currentId == info.id;
-                boolean switchToEnabled = canSwitchUsers || isCurrent;
                 if (!mUserSwitcherEnabled && !info.isPrimary()) {
                     continue;
                 }
@@ -343,25 +333,22 @@ public class UserSwitcherControllerOldImpl implements UserSwitcherController {
                     if (info.isGuest()) {
                         // Tapping guest icon triggers remove and a user switch therefore
                         // the icon shouldn't be enabled even if the user is current
-                        guestRecord = new UserRecord(info, null /* picture */,
-                                true /* isGuest */, isCurrent, false /* isAddUser */,
-                                false /* isRestricted */, canSwitchUsers,
-                                false /* isAddSupervisedUser */);
+                        guestRecord = LegacyUserDataHelper.createRecord(
+                                mContext,
+                                mUserManager,
+                                null /* picture */,
+                                info,
+                                isCurrent,
+                                canSwitchUsers);
                     } else if (info.supportsSwitchToByUser()) {
-                        Bitmap picture = bitmaps.get(info.id);
-                        if (picture == null) {
-                            picture = mUserManager.getUserIcon(info.id);
-
-                            if (picture != null) {
-                                int avatarSize = mContext.getResources()
-                                        .getDimensionPixelSize(R.dimen.max_avatar_size);
-                                picture = Bitmap.createScaledBitmap(
-                                        picture, avatarSize, avatarSize, true);
-                            }
-                        }
-                        records.add(new UserRecord(info, picture, false /* isGuest */,
-                                isCurrent, false /* isAddUser */, false /* isRestricted */,
-                                switchToEnabled, false /* isAddSupervisedUser */));
+                        records.add(
+                                LegacyUserDataHelper.createRecord(
+                                        mContext,
+                                        mUserManager,
+                                        bitmaps.get(info.id),
+                                        info,
+                                        isCurrent,
+                                        canSwitchUsers));
                     }
                 }
             }
@@ -372,18 +359,20 @@ public class UserSwitcherControllerOldImpl implements UserSwitcherController {
                     // we will just use it as an indicator for "Resetting guest...".
                     // Otherwise, default to canSwitchUsers.
                     boolean isSwitchToGuestEnabled = !mGuestIsResetting.get() && canSwitchUsers;
-                    guestRecord = new UserRecord(null /* info */, null /* picture */,
-                            true /* isGuest */, false /* isCurrent */,
-                            false /* isAddUser */, false /* isRestricted */,
-                            isSwitchToGuestEnabled, false /* isAddSupervisedUser */);
-                    checkIfAddUserDisallowedByAdminOnly(guestRecord);
+                    guestRecord = LegacyUserDataHelper.createRecord(
+                            mContext,
+                            currentId,
+                            UserActionModel.ENTER_GUEST_MODE,
+                            false /* isRestricted */,
+                            isSwitchToGuestEnabled);
                     records.add(guestRecord);
                 } else if (canCreateGuest(guestRecord != null)) {
-                    guestRecord = new UserRecord(null /* info */, null /* picture */,
-                            true /* isGuest */, false /* isCurrent */,
-                            false /* isAddUser */, createIsRestricted(), canSwitchUsers,
-                            false /* isAddSupervisedUser */);
-                    checkIfAddUserDisallowedByAdminOnly(guestRecord);
+                    guestRecord = LegacyUserDataHelper.createRecord(
+                            mContext,
+                            currentId,
+                            UserActionModel.ENTER_GUEST_MODE,
+                            false /* isRestricted */,
+                            canSwitchUsers);
                     records.add(guestRecord);
                 }
             } else {
@@ -391,20 +380,23 @@ public class UserSwitcherControllerOldImpl implements UserSwitcherController {
             }
 
             if (canCreateUser()) {
-                UserRecord addUserRecord = new UserRecord(null /* info */, null /* picture */,
-                        false /* isGuest */, false /* isCurrent */, true /* isAddUser */,
-                        createIsRestricted(), canSwitchUsers,
-                        false /* isAddSupervisedUser */);
-                checkIfAddUserDisallowedByAdminOnly(addUserRecord);
-                records.add(addUserRecord);
+                final UserRecord userRecord = LegacyUserDataHelper.createRecord(
+                        mContext,
+                        currentId,
+                        UserActionModel.ADD_USER,
+                        createIsRestricted(),
+                        canSwitchUsers);
+                records.add(userRecord);
             }
 
             if (canCreateSupervisedUser()) {
-                UserRecord addUserRecord = new UserRecord(null /* info */, null /* picture */,
-                        false /* isGuest */, false /* isCurrent */, false /* isAddUser */,
-                        createIsRestricted(), canSwitchUsers, true /* isAddSupervisedUser */);
-                checkIfAddUserDisallowedByAdminOnly(addUserRecord);
-                records.add(addUserRecord);
+                final UserRecord userRecord = LegacyUserDataHelper.createRecord(
+                        mContext,
+                        currentId,
+                        UserActionModel.ADD_SUPERVISED_USER,
+                        createIsRestricted(),
+                        canSwitchUsers);
+                records.add(userRecord);
             }
 
             mUiExecutor.execute(() -> {
@@ -591,12 +583,23 @@ public class UserSwitcherControllerOldImpl implements UserSwitcherController {
         showExitGuestDialog(id, isGuestEphemeral, newId, dialogShower);
     }
 
-    private void showExitGuestDialog(int id, boolean isGuestEphemeral,
-                        int targetId, DialogShower dialogShower) {
+    private void showExitGuestDialog(
+            int id,
+            boolean isGuestEphemeral,
+            int targetId,
+            DialogShower dialogShower) {
         if (mExitGuestDialog != null && mExitGuestDialog.isShowing()) {
             mExitGuestDialog.cancel();
         }
-        mExitGuestDialog = new ExitGuestDialog(mContext, id, isGuestEphemeral, targetId);
+        mExitGuestDialog = new ExitGuestDialog(
+                mContext,
+                id,
+                isGuestEphemeral,
+                targetId,
+                mKeyguardStateController.isShowing(),
+                mFalsingManager,
+                mDialogLaunchAnimator,
+                this::exitGuestUser);
         if (dialogShower != null) {
             dialogShower.showDialog(mExitGuestDialog, new DialogCuj(
                     InteractionJankMonitor.CUJ_USER_DIALOG_OPEN,
@@ -622,7 +625,15 @@ public class UserSwitcherControllerOldImpl implements UserSwitcherController {
         if (mAddUserDialog != null && mAddUserDialog.isShowing()) {
             mAddUserDialog.cancel();
         }
-        mAddUserDialog = new AddUserDialog(mContext);
+        final UserInfo currentUser = mUserTracker.getUserInfo();
+        mAddUserDialog = new AddUserDialog(
+                mContext,
+                currentUser.getUserHandle(),
+                mKeyguardStateController.isShowing(),
+                /* showEphemeralMessage= */currentUser.isGuest() && currentUser.isEphemeral(),
+                mFalsingManager,
+                mBroadcastSender,
+                mDialogLaunchAnimator);
         if (dialogShower != null) {
             dialogShower.showDialog(mAddUserDialog,
                     new DialogCuj(
@@ -964,30 +975,6 @@ public class UserSwitcherControllerOldImpl implements UserSwitcherController {
         return mKeyguardStateController.isShowing();
     }
 
-    @Override
-    @Nullable
-    public EnforcedAdmin getEnforcedAdmin(UserRecord record) {
-        return mEnforcedAdminByUserRecord.get(record);
-    }
-
-    @Override
-    public boolean isDisabledByAdmin(UserRecord record) {
-        return mDisabledByAdmin.contains(record);
-    }
-
-    private void checkIfAddUserDisallowedByAdminOnly(UserRecord record) {
-        EnforcedAdmin admin = RestrictedLockUtilsInternal.checkIfRestrictionEnforced(mContext,
-                UserManager.DISALLOW_ADD_USER, mUserTracker.getUserId());
-        if (admin != null && !RestrictedLockUtilsInternal.hasBaseUserRestriction(mContext,
-                UserManager.DISALLOW_ADD_USER, mUserTracker.getUserId())) {
-            mDisabledByAdmin.add(record);
-            mEnforcedAdminByUserRecord.put(record, admin);
-        } else {
-            mDisabledByAdmin.remove(record);
-            mEnforcedAdminByUserRecord.put(record, null);
-        }
-    }
-
     private boolean shouldUseSimpleUserSwitcher() {
         int defaultSimpleUserSwitcher = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_expandLockScreenUserSwitcher) ? 1 : 0;
@@ -1052,133 +1039,4 @@ public class UserSwitcherControllerOldImpl implements UserSwitcherController {
                     }
                 }
             };
-
-
-    private final class ExitGuestDialog extends SystemUIDialog implements
-            DialogInterface.OnClickListener {
-
-        private final int mGuestId;
-        private final int mTargetId;
-        private final boolean mIsGuestEphemeral;
-
-        ExitGuestDialog(Context context, int guestId, boolean isGuestEphemeral,
-                    int targetId) {
-            super(context);
-            if (isGuestEphemeral) {
-                setTitle(context.getString(
-                            com.android.settingslib.R.string.guest_exit_dialog_title));
-                setMessage(context.getString(
-                            com.android.settingslib.R.string.guest_exit_dialog_message));
-                setButton(DialogInterface.BUTTON_NEUTRAL,
-                        context.getString(android.R.string.cancel), this);
-                setButton(DialogInterface.BUTTON_POSITIVE,
-                        context.getString(
-                            com.android.settingslib.R.string.guest_exit_dialog_button), this);
-            } else {
-                setTitle(context.getString(
-                            com.android.settingslib
-                                .R.string.guest_exit_dialog_title_non_ephemeral));
-                setMessage(context.getString(
-                            com.android.settingslib
-                                .R.string.guest_exit_dialog_message_non_ephemeral));
-                setButton(DialogInterface.BUTTON_NEUTRAL,
-                        context.getString(android.R.string.cancel), this);
-                setButton(DialogInterface.BUTTON_NEGATIVE,
-                        context.getString(
-                            com.android.settingslib.R.string.guest_exit_clear_data_button),
-                        this);
-                setButton(DialogInterface.BUTTON_POSITIVE,
-                        context.getString(
-                            com.android.settingslib.R.string.guest_exit_save_data_button),
-                        this);
-            }
-            SystemUIDialog.setWindowOnTop(this, mKeyguardStateController.isShowing());
-            setCanceledOnTouchOutside(false);
-            mGuestId = guestId;
-            mTargetId = targetId;
-            mIsGuestEphemeral = isGuestEphemeral;
-        }
-
-        @Override
-        public void onClick(DialogInterface dialog, int which) {
-            int penalty = which == BUTTON_NEGATIVE ? FalsingManager.NO_PENALTY
-                    : FalsingManager.HIGH_PENALTY;
-            if (mFalsingManager.isFalseTap(penalty)) {
-                return;
-            }
-            if (mIsGuestEphemeral) {
-                if (which == DialogInterface.BUTTON_POSITIVE) {
-                    mDialogLaunchAnimator.dismissStack(this);
-                    // Ephemeral guest: exit guest, guest is removed by the system
-                    // on exit, since its marked ephemeral
-                    exitGuestUser(mGuestId, mTargetId, false);
-                } else if (which == DialogInterface.BUTTON_NEGATIVE) {
-                    // Cancel clicked, do nothing
-                    cancel();
-                }
-            } else {
-                if (which == DialogInterface.BUTTON_POSITIVE) {
-                    mDialogLaunchAnimator.dismissStack(this);
-                    // Non-ephemeral guest: exit guest, guest is not removed by the system
-                    // on exit, since its marked non-ephemeral
-                    exitGuestUser(mGuestId, mTargetId, false);
-                } else if (which == DialogInterface.BUTTON_NEGATIVE) {
-                    mDialogLaunchAnimator.dismissStack(this);
-                    // Non-ephemeral guest: remove guest and then exit
-                    exitGuestUser(mGuestId, mTargetId, true);
-                } else if (which == DialogInterface.BUTTON_NEUTRAL) {
-                    // Cancel clicked, do nothing
-                    cancel();
-                }
-            }
-        }
-    }
-
-    @VisibleForTesting
-    final class AddUserDialog extends SystemUIDialog implements
-            DialogInterface.OnClickListener {
-
-        AddUserDialog(Context context) {
-            super(context);
-
-            setTitle(com.android.settingslib.R.string.user_add_user_title);
-            String message = context.getString(
-                                com.android.settingslib.R.string.user_add_user_message_short);
-            UserInfo currentUser = mUserTracker.getUserInfo();
-            if (currentUser != null && currentUser.isGuest() && currentUser.isEphemeral()) {
-                message += context.getString(R.string.user_add_user_message_guest_remove);
-            }
-            setMessage(message);
-            setButton(DialogInterface.BUTTON_NEUTRAL,
-                    context.getString(android.R.string.cancel), this);
-            setButton(DialogInterface.BUTTON_POSITIVE,
-                    context.getString(android.R.string.ok), this);
-            SystemUIDialog.setWindowOnTop(this, mKeyguardStateController.isShowing());
-        }
-
-        @Override
-        public void onClick(DialogInterface dialog, int which) {
-            int penalty = which == BUTTON_NEGATIVE ? FalsingManager.NO_PENALTY
-                    : FalsingManager.MODERATE_PENALTY;
-            if (mFalsingManager.isFalseTap(penalty)) {
-                return;
-            }
-            if (which == BUTTON_NEUTRAL) {
-                cancel();
-            } else {
-                mDialogLaunchAnimator.dismissStack(this);
-                if (ActivityManager.isUserAMonkey()) {
-                    return;
-                }
-                // Use broadcast instead of ShadeController, as this dialog may have started in
-                // another process and normal dagger bindings are not available
-                mBroadcastSender.sendBroadcastAsUser(
-                        new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS), UserHandle.CURRENT);
-                getContext().startActivityAsUser(
-                        CreateUserActivity.createIntentForStart(getContext()),
-                        mUserTracker.getUserHandle());
-            }
-        }
-    }
-
 }

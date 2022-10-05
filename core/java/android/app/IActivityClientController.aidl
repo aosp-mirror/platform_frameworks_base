@@ -60,8 +60,8 @@ interface IActivityClientController {
             in SizeConfigurationBuckets sizeConfigurations);
     boolean moveActivityTaskToBack(in IBinder token, boolean nonRoot);
     boolean shouldUpRecreateTask(in IBinder token, in String destAffinity);
-    boolean navigateUpTo(in IBinder token, in Intent target, int resultCode,
-            in Intent resultData);
+    boolean navigateUpTo(in IBinder token, in Intent target, in String resolvedType,
+            int resultCode, in Intent resultData);
     boolean releaseActivityInstance(in IBinder token);
     boolean finishActivity(in IBinder token, int code, in Intent data, int finishTask);
     boolean finishActivityAffinity(in IBinder token);

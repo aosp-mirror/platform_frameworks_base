@@ -1,13 +1,29 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.android.internal.systemui.lint
 
 import com.android.tools.lint.checks.infrastructure.LintDetectorTest
-import com.android.tools.lint.checks.infrastructure.TestFile
 import com.android.tools.lint.checks.infrastructure.TestFiles
 import com.android.tools.lint.checks.infrastructure.TestLintTask
 import com.android.tools.lint.detector.api.Detector
 import com.android.tools.lint.detector.api.Issue
 import org.junit.Test
 
+@Suppress("UnstableApiUsage")
 class SlowUserQueryDetectorTest : LintDetectorTest() {
 
     override fun getDetector(): Detector = SlowUserQueryDetector()
@@ -134,61 +150,5 @@ class SlowUserQueryDetectorTest : LintDetectorTest() {
             .expectClean()
     }
 
-    private val activityManagerStub: TestFile =
-        java(
-            """
-            package android.app;
-
-            public class ActivityManager {
-                public static int getCurrentUser() {};
-            }
-            """
-        )
-
-    private val userManagerStub: TestFile =
-        java(
-            """
-            package android.os;
-            import android.content.pm.UserInfo;
-            import android.annotation.UserIdInt;
-
-            public class UserManager {
-                public UserInfo getUserInfo(@UserIdInt int userId) {};
-            }
-            """
-        )
-
-    private val userIdIntStub: TestFile =
-        java(
-            """
-            package android.annotation;
-
-            public @interface UserIdInt {}
-            """
-        )
-
-    private val userInfoStub: TestFile =
-        java(
-            """
-            package android.content.pm;
-
-            public class UserInfo {}
-            """
-        )
-
-    private val userTrackerStub: TestFile =
-        java(
-            """
-            package com.android.systemui.settings;
-            import android.content.pm.UserInfo;
-
-            public interface UserTracker {
-                public int getUserId();
-                public UserInfo getUserInfo();
-            }
-            """
-        )
-
-    private val stubs =
-        arrayOf(activityManagerStub, userManagerStub, userIdIntStub, userInfoStub, userTrackerStub)
+    private val stubs = androidStubs
 }

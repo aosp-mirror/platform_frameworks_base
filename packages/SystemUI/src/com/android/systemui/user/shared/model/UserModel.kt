@@ -32,4 +32,6 @@ data class UserModel(
     val isSelected: Boolean,
     /** Whether this use is selectable. A non-selectable user cannot be switched to. */
     val isSelectable: Boolean,
+    /** Whether this model represents the guest user. */
+    val isGuest: Boolean,
 )
