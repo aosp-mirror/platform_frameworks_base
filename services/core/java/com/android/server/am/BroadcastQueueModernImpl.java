@@ -764,6 +764,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 app.scheduleCrashLocked(msg, CannotDeliverBroadcastException.TYPE_ID, null);
             }
         }
+        // Clear so both local and remote references can be GC'ed
+        r.resultTo = null;
     }
 
     private void deliveryTimeoutSoftLocked(@NonNull BroadcastProcessQueue queue) {

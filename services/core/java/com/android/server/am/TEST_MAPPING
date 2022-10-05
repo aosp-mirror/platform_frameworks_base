@@ -65,6 +65,7 @@
       "file_patterns": ["Broadcast"],
       "name": "FrameworksMockingServicesTests",
       "options": [
+        { "include-filter": "com.android.server.am.BroadcastRecordTest" },
         { "include-filter": "com.android.server.am.BroadcastQueueTest" },
         { "include-filter": "com.android.server.am.BroadcastQueueModernImplTest" }
       ]

@@ -68,10 +68,10 @@ import java.util.function.BiFunction;
  * An active intent broadcast.
  */
 final class BroadcastRecord extends Binder {
-    final Intent intent;    // the original intent that generated us
-    final ComponentName targetComp; // original component name set on the intent
-    final ProcessRecord callerApp; // process that sent this
-    final String callerPackage; // who sent this
+    final @NonNull Intent intent;    // the original intent that generated us
+    final @Nullable ComponentName targetComp; // original component name set on the intent
+    final @Nullable ProcessRecord callerApp; // process that sent this
+    final @Nullable String callerPackage; // who sent this
     final @Nullable String callerFeatureId; // which feature in the package sent this
     final int callingPid;   // the pid of who sent this
     final int callingUid;   // the uid of who sent this
@@ -84,15 +84,15 @@ final class BroadcastRecord extends Binder {
     final boolean initialSticky; // initial broadcast from register to sticky?
     final boolean prioritized; // contains more than one priority tranche
     final int userId;       // user id this broadcast was for
-    final String resolvedType; // the resolved data type
-    final String[] requiredPermissions; // permissions the caller has required
-    final String[] excludedPermissions; // permissions to exclude
-    final String[] excludedPackages; // packages to exclude
+    final @Nullable String resolvedType; // the resolved data type
+    final @Nullable String[] requiredPermissions; // permissions the caller has required
+    final @Nullable String[] excludedPermissions; // permissions to exclude
+    final @Nullable String[] excludedPackages; // packages to exclude
     final int appOp;        // an app op that is associated with this broadcast
-    final BroadcastOptions options; // BroadcastOptions supplied by caller
+    final @Nullable BroadcastOptions options; // BroadcastOptions supplied by caller
     final @NonNull List<Object> receivers;   // contains BroadcastFilter and ResolveInfo
     final @DeliveryState int[] delivery;   // delivery state of each receiver
-    IIntentReceiver resultTo; // who receives final result if non-null
+    @Nullable IIntentReceiver resultTo; // who receives final result if non-null
     boolean deferred;
     int splitCount;         // refcount for result callback, when split
     int splitToken;         // identifier for cross-BroadcastRecord refcount
@@ -106,10 +106,10 @@ final class BroadcastRecord extends Binder {
     @UptimeMillisLong       long finishTime;         // when broadcast finished
     final @UptimeMillisLong long[] scheduledTime;    // when each receiver was scheduled
     final @UptimeMillisLong long[] terminalTime;     // when each receiver was terminal
-    boolean timeoutExempt;  // true if this broadcast is not subject to receiver timeouts
+    final boolean timeoutExempt;  // true if this broadcast is not subject to receiver timeouts
     int resultCode;         // current result code value.
-    String resultData;      // current result data value.
-    Bundle resultExtras;    // current result extra data values.
+    @Nullable String resultData;      // current result data value.
+    @Nullable Bundle resultExtras;    // current result extra data values.
     boolean resultAbort;    // current result abortBroadcast value.
     int nextReceiver;       // next receiver to be executed.
     int state;
@@ -117,7 +117,7 @@ final class BroadcastRecord extends Binder {
     int manifestCount;      // number of manifest receivers dispatched.
     int manifestSkipCount;  // number of manifest receivers skipped.
     int terminalCount;      // number of receivers in terminal state.
-    BroadcastQueue queue;   // the outbound queue handling this broadcast
+    @Nullable BroadcastQueue queue;   // the outbound queue handling this broadcast
 
     // if set to true, app's process will be temporarily allowed to start activities from background
     // for the duration of the broadcast dispatch
@@ -131,8 +131,8 @@ final class BroadcastRecord extends Binder {
     @Nullable
     final BiFunction<Integer, Bundle, Bundle> filterExtrasForReceiver;
 
-    String cachedToString;
-    String cachedToShortString;
+    private @Nullable String mCachedToString;
+    private @Nullable String mCachedToShortString;
 
     /** Empty immutable list of receivers */
     static final List<Object> EMPTY_RECEIVERS = List.of();
@@ -351,7 +351,7 @@ final class BroadcastRecord extends Binder {
             throw new NullPointerException("Can't construct with a null intent");
         }
         queue = _queue;
-        intent = _intent;
+        intent = Objects.requireNonNull(_intent);
         targetComp = _intent.getComponent();
         callerApp = _callerApp;
         callerPackage = _callerPackage;
@@ -394,7 +394,7 @@ final class BroadcastRecord extends Binder {
      * Only used by {@link #maybeStripForHistory}.
      */
     private BroadcastRecord(BroadcastRecord from, Intent newIntent) {
-        intent = newIntent;
+        intent = Objects.requireNonNull(newIntent);
         targetComp = newIntent.getComponent();
 
         callerApp = from.callerApp;
@@ -652,7 +652,8 @@ final class BroadcastRecord extends Binder {
     /**
      * Return if given receivers list has more than one traunch of priorities.
      */
-    private static boolean isPrioritized(@NonNull List<Object> receivers) {
+    @VisibleForTesting
+    static boolean isPrioritized(@NonNull List<Object> receivers) {
         int firstPriority = 0;
         for (int i = 0; i < receivers.size(); i++) {
             final int thisPriority = getReceiverPriority(receivers.get(i));
@@ -790,27 +791,27 @@ final class BroadcastRecord extends Binder {
 
     @Override
     public String toString() {
-        if (cachedToString == null) {
+        if (mCachedToString == null) {
             String label = intent.getAction();
             if (label == null) {
                 label = intent.toString();
             }
-            cachedToString = "BroadcastRecord{"
+            mCachedToString = "BroadcastRecord{"
                 + Integer.toHexString(System.identityHashCode(this))
                 + " u" + userId + " " + label + "}";
         }
-        return cachedToString;
+        return mCachedToString;
     }
 
     public String toShortString() {
-        if (cachedToShortString == null) {
+        if (mCachedToShortString == null) {
             String label = intent.getAction();
             if (label == null) {
                 label = intent.toString();
             }
-            cachedToShortString = label + "/u" + userId;
+            mCachedToShortString = label + "/u" + userId;
         }
-        return cachedToShortString;
+        return mCachedToShortString;
     }
 
     public void dumpDebug(ProtoOutputStream proto, long fieldId) {

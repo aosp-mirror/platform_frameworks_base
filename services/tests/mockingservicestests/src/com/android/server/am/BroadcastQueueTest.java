@@ -18,6 +18,9 @@ package com.android.server.am;
 
 import static android.os.UserHandle.USER_SYSTEM;
 
+import static com.android.server.am.BroadcastProcessQueue.reasonToString;
+import static com.android.server.am.BroadcastRecord.deliveryStateToString;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -644,6 +647,10 @@ public class BroadcastQueueTest {
         return UserHandle.getUid(userId, getUidForPackage(packageName));
     }
 
+    /**
+     * Baseline verification of common debugging infrastructure, mostly to make
+     * sure it doesn't crash.
+     */
     @Test
     public void testDebugging() throws Exception {
         // To maximize test coverage, dump current state; we're not worried
@@ -664,6 +671,11 @@ public class BroadcastQueueTest {
 
         assertNotNull(mQueue.toString());
         assertNotNull(mQueue.describeStateLocked());
+
+        for (int i = Byte.MIN_VALUE; i < Byte.MAX_VALUE; i++) {
+            assertNotNull(deliveryStateToString(i));
+            assertNotNull(reasonToString(i));
+        }
     }
 
     /**

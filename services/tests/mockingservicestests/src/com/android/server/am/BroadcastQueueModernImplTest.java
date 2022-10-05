@@ -17,7 +17,6 @@
 package com.android.server.am;
 
 import static com.android.server.am.BroadcastProcessQueue.insertIntoRunnableList;
-import static com.android.server.am.BroadcastProcessQueue.reasonToString;
 import static com.android.server.am.BroadcastProcessQueue.removeFromRunnableList;
 import static com.android.server.am.BroadcastQueueTest.CLASS_GREEN;
 import static com.android.server.am.BroadcastQueueTest.PACKAGE_BLUE;
@@ -26,12 +25,10 @@ import static com.android.server.am.BroadcastQueueTest.PACKAGE_RED;
 import static com.android.server.am.BroadcastQueueTest.PACKAGE_YELLOW;
 import static com.android.server.am.BroadcastQueueTest.getUidForPackage;
 import static com.android.server.am.BroadcastQueueTest.makeManifestReceiver;
-import static com.android.server.am.BroadcastRecord.deliveryStateToString;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
@@ -64,6 +61,7 @@ public class BroadcastQueueModernImplTest {
     private static final int TEST_UID = android.os.Process.FIRST_APPLICATION_UID;
 
     @Mock ActivityManagerService mAms;
+    @Mock ProcessRecord mProcess;
 
     @Mock BroadcastProcessQueue mQueue1;
     @Mock BroadcastProcessQueue mQueue2;
@@ -141,7 +139,7 @@ public class BroadcastQueueModernImplTest {
 
     private BroadcastRecord makeBroadcastRecord(Intent intent, BroadcastOptions options,
             List receivers, boolean ordered) {
-        return new BroadcastRecord(mImpl, intent, null, PACKAGE_RED, null, 21, 42, false, null,
+        return new BroadcastRecord(mImpl, intent, mProcess, PACKAGE_RED, null, 21, 42, false, null,
                 null, null, null, AppOpsManager.OP_NONE, options, receivers, null,
                 Activity.RESULT_OK, null, null, ordered, false, false, UserHandle.USER_SYSTEM,
                 false, null, false, null);
@@ -384,16 +382,5 @@ public class BroadcastQueueModernImplTest {
         queue.makeActiveNextPending();
         assertEquals(Intent.ACTION_SCREEN_OFF, queue.getActive().intent.getAction());
         assertTrue(queue.isEmpty());
-    }
-
-    /**
-     * Verify that we emit something valid for each debug value.
-     */
-    @Test
-    public void testIntDefToString() {
-        for (int i = Byte.MIN_VALUE; i < Byte.MAX_VALUE; i++) {
-            assertNotNull(deliveryStateToString(i));
-            assertNotNull(reasonToString(i));
-        }
     }
 }
