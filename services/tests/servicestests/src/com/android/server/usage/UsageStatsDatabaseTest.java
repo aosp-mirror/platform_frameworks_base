@@ -24,7 +24,6 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
-import android.app.usage.TimeSparseArray;
 import android.app.usage.UsageEvents.Event;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
@@ -32,6 +31,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.AtomicFile;
+import android.util.TimeSparseArray;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
