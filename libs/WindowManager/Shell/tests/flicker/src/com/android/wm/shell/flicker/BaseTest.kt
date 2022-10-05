@@ -32,14 +32,15 @@ import com.android.server.wm.flicker.statusBarLayerPositionAtStartAndEnd
 import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
 import com.android.server.wm.flicker.taskBarLayerIsVisibleAtStartAndEnd
 import com.android.server.wm.flicker.taskBarWindowIsAlwaysVisible
+import com.android.server.wm.traces.common.ComponentNameMatcher
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import org.junit.Assume
 import org.junit.Test
 
 /**
- * Base test class containing common assertions for [ComponentMatcher.NAV_BAR],
- * [ComponentMatcher.TASK_BAR], [ComponentMatcher.STATUS_BAR], and general assertions (layers
- * visible in consecutive states, entire screen covered, etc.)
+ * Base test class containing common assertions for [ComponentNameMatcher.NAV_BAR],
+ * [ComponentNameMatcher.TASK_BAR], [ComponentNameMatcher.STATUS_BAR], and general assertions
+ * (layers visible in consecutive states, entire screen covered, etc.)
  */
 abstract class BaseTest
 @JvmOverloads
@@ -73,9 +74,11 @@ constructor(
     }
 
     /** Checks that all parts of the screen are covered during the transition */
-    open fun entireScreenCovered() = testSpec.entireScreenCovered()
+    @Presubmit @Test open fun entireScreenCovered() = testSpec.entireScreenCovered()
 
-    /** Checks that the [ComponentMatcher.NAV_BAR] layer is visible during the whole transition */
+    /**
+     * Checks that the [ComponentNameMatcher.NAV_BAR] layer is visible during the whole transition
+     */
     @Presubmit
     @Test
     open fun navBarLayerIsVisibleAtStartAndEnd() {
@@ -84,7 +87,8 @@ constructor(
     }
 
     /**
-     * Checks the position of the [ComponentMatcher.NAV_BAR] at the start and end of the transition
+     * Checks the position of the [ComponentNameMatcher.NAV_BAR] at the start and end of the
+     * transition
      */
     @Presubmit
     @Test
@@ -94,7 +98,7 @@ constructor(
     }
 
     /**
-     * Checks that the [ComponentMatcher.NAV_BAR] window is visible during the whole transition
+     * Checks that the [ComponentNameMatcher.NAV_BAR] window is visible during the whole transition
      *
      * Note: Phones only
      */
@@ -105,7 +109,9 @@ constructor(
         testSpec.navBarWindowIsAlwaysVisible()
     }
 
-    /** Checks that the [ComponentMatcher.TASK_BAR] layer is visible during the whole transition */
+    /**
+     * Checks that the [ComponentNameMatcher.TASK_BAR] layer is visible during the whole transition
+     */
     @Presubmit
     @Test
     open fun taskBarLayerIsVisibleAtStartAndEnd() {
@@ -114,7 +120,7 @@ constructor(
     }
 
     /**
-     * Checks that the [ComponentMatcher.TASK_BAR] window is visible during the whole transition
+     * Checks that the [ComponentNameMatcher.TASK_BAR] window is visible during the whole transition
      *
      * Note: Large screen only
      */
@@ -126,7 +132,8 @@ constructor(
     }
 
     /**
-     * Checks that the [ComponentMatcher.STATUS_BAR] layer is visible during the whole transition
+     * Checks that the [ComponentNameMatcher.STATUS_BAR] layer is visible during the whole
+     * transition
      */
     @Presubmit
     @Test
@@ -134,7 +141,7 @@ constructor(
         testSpec.statusBarLayerIsVisibleAtStartAndEnd()
 
     /**
-     * Checks the position of the [ComponentMatcher.STATUS_BAR] at the start and end of the
+     * Checks the position of the [ComponentNameMatcher.STATUS_BAR] at the start and end of the
      * transition
      */
     @Presubmit
@@ -142,7 +149,8 @@ constructor(
     open fun statusBarLayerPositionAtStartAndEnd() = testSpec.statusBarLayerPositionAtStartAndEnd()
 
     /**
-     * Checks that the [ComponentMatcher.STATUS_BAR] window is visible during the whole transition
+     * Checks that the [ComponentNameMatcher.STATUS_BAR] window is visible during the whole
+     * transition
      */
     @Presubmit
     @Test
