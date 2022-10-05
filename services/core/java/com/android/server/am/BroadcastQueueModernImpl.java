@@ -25,6 +25,7 @@ import static com.android.internal.util.FrameworkStatsLog.BROADCAST_DELIVERY_EVE
 import static com.android.internal.util.FrameworkStatsLog.BROADCAST_DELIVERY_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM;
 import static com.android.internal.util.FrameworkStatsLog.BROADCAST_DELIVERY_EVENT_REPORTED__RECEIVER_TYPE__MANIFEST;
 import static com.android.internal.util.FrameworkStatsLog.BROADCAST_DELIVERY_EVENT_REPORTED__RECEIVER_TYPE__RUNTIME;
+import static com.android.internal.util.Preconditions.checkState;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BROADCAST;
 import static com.android.server.am.BroadcastProcessQueue.insertIntoRunnableList;
 import static com.android.server.am.BroadcastProcessQueue.reasonToString;
@@ -63,9 +64,11 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.text.format.DateUtils;
 import android.util.IndentingPrintWriter;
 import android.util.MathUtils;
 import android.util.Pair;
+import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
@@ -148,13 +151,6 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     // TODO: pause queues when processes are frozen
 
     /**
-     * When enabled, invoke {@link #checkConsistencyLocked()} periodically to
-     * verify that our internal state is consistent. Checking consistency is
-     * relatively expensive, so this should be typically disabled.
-     */
-    private static final boolean CHECK_CONSISTENCY = true;
-
-    /**
      * Map from UID to per-process broadcast queues. If a UID hosts more than
      * one process, each additional process is stored as a linked list using
      * {@link BroadcastProcessQueue#next}.
@@ -217,6 +213,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     private static final int MSG_DELIVERY_TIMEOUT_SOFT = 2;
     private static final int MSG_DELIVERY_TIMEOUT_HARD = 3;
     private static final int MSG_BG_ACTIVITY_START_TIMEOUT = 4;
+    private static final int MSG_CHECK_HEALTH = 5;
 
     private void enqueueUpdateRunningList() {
         mLocalHandler.removeMessages(MSG_UPDATE_RUNNING_LIST);
@@ -252,6 +249,12 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                     final BroadcastRecord r = (BroadcastRecord) args.arg2;
                     args.recycle();
                     app.removeAllowBackgroundActivityStartsToken(r);
+                }
+                return true;
+            }
+            case MSG_CHECK_HEALTH: {
+                synchronized (mService) {
+                    checkHealthLocked();
                 }
                 return true;
             }
@@ -324,8 +327,6 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         if (queue.isEmpty() && !queue.isActive() && !queue.isProcessWarm()) {
             removeProcessQueue(queue.processName, queue.uid);
         }
-
-        if (CHECK_CONSISTENCY) checkConsistencyLocked();
     }
 
     /**
@@ -434,8 +435,6 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 }
             });
         }
-
-        if (CHECK_CONSISTENCY) checkConsistencyLocked();
 
         traceEnd(TAG, cookie);
     }
@@ -1067,6 +1066,9 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 }
             }
         }, ActivityManager.UID_OBSERVER_CACHED, 0, "android");
+
+        // Kick off periodic health checks
+        checkHealthLocked();
     }
 
     @Override
@@ -1129,28 +1131,51 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     }
 
     /**
-     * Heavy verification of internal consistency.
+     * Check overall health, confirming things are in a reasonable state and
+     * that we're not wedged. If we determine we're in an unhealthy state, dump
+     * current state once and stop future health checks to avoid spamming.
      */
-    private void checkConsistencyLocked() {
-        // Verify all runnable queues are sorted
-        BroadcastProcessQueue prev = null;
-        BroadcastProcessQueue next = mRunnableHead;
-        while (next != null) {
-            checkState(next.runnableAtPrev == prev, "runnableAtPrev");
-            checkState(next.isRunnable(), "isRunnable " + next);
-            if (prev != null) {
-                checkState(next.getRunnableAt() >= prev.getRunnableAt(),
-                        "getRunnableAt " + next + " vs " + prev);
+    @VisibleForTesting
+    void checkHealthLocked() {
+        try {
+            // Verify all runnable queues are sorted
+            BroadcastProcessQueue prev = null;
+            BroadcastProcessQueue next = mRunnableHead;
+            while (next != null) {
+                checkState(next.runnableAtPrev == prev, "runnableAtPrev");
+                checkState(next.isRunnable(), "isRunnable " + next);
+                if (prev != null) {
+                    checkState(next.getRunnableAt() >= prev.getRunnableAt(),
+                            "getRunnableAt " + next + " vs " + prev);
+                }
+                prev = next;
+                next = next.runnableAtNext;
             }
-            prev = next;
-            next = next.runnableAtNext;
-        }
 
-        // Verify all running queues are active
-        for (BroadcastProcessQueue queue : mRunning) {
-            if (queue != null) {
-                checkState(queue.isActive(), "isActive " + queue);
+            // Verify all running queues are active
+            for (BroadcastProcessQueue queue : mRunning) {
+                if (queue != null) {
+                    checkState(queue.isActive(), "isActive " + queue);
+                }
             }
+
+            // Verify health of all known process queues
+            for (int i = 0; i < mProcessQueues.size(); i++) {
+                BroadcastProcessQueue leaf = mProcessQueues.valueAt(i);
+                while (leaf != null) {
+                    leaf.checkHealthLocked();
+                    leaf = leaf.processNameNext;
+                }
+            }
+
+            // If no health issues found above, check again in the future
+            mLocalHandler.sendEmptyMessageDelayed(MSG_CHECK_HEALTH, DateUtils.MINUTE_IN_MILLIS);
+
+        } catch (Exception e) {
+            // Throw up a message to indicate that something went wrong, and
+            // dump current state for later inspection
+            Slog.wtf(TAG, e);
+            dumpToDropBoxLocked(e.toString());
         }
     }
 
@@ -1408,8 +1433,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     @Override
     @NeverCompile
     public boolean dumpLocked(@NonNull FileDescriptor fd, @NonNull PrintWriter pw,
-            @NonNull String[] args, int opti, boolean dumpAll, @Nullable String dumpPackage,
-            boolean needSep) {
+            @NonNull String[] args, int opti, boolean dumpConstants, boolean dumpHistory,
+            boolean dumpAll, @Nullable String dumpPackage, boolean needSep) {
         final long now = SystemClock.uptimeMillis();
         final IndentingPrintWriter ipw = new IndentingPrintWriter(pw);
         ipw.increaseIndent();
@@ -1463,12 +1488,13 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         ipw.decreaseIndent();
         ipw.println();
 
-        if (dumpPackage == null) {
+        if (dumpConstants) {
             mConstants.dump(ipw);
         }
-
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-        needSep = mHistory.dumpLocked(ipw, dumpPackage, mQueueName, sdf, dumpAll, needSep);
+        if (dumpHistory) {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+            needSep = mHistory.dumpLocked(ipw, dumpPackage, mQueueName, sdf, dumpAll, needSep);
+        }
         return needSep;
     }
 }

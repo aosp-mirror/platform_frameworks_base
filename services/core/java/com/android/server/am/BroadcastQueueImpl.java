@@ -1849,7 +1849,8 @@ public class BroadcastQueueImpl extends BroadcastQueue {
 
     @NeverCompile
     public boolean dumpLocked(FileDescriptor fd, PrintWriter pw, String[] args,
-            int opti, boolean dumpAll, String dumpPackage, boolean needSep) {
+            int opti, boolean dumpConstants, boolean dumpHistory, boolean dumpAll,
+            String dumpPackage, boolean needSep) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
         if (!mParallelBroadcasts.isEmpty() || !mDispatcher.isEmpty()
                 || mPendingBroadcast != null) {
@@ -1885,8 +1886,12 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                 needSep = true;
             }
         }
-        mConstants.dump(new IndentingPrintWriter(pw));
-        needSep = mHistory.dumpLocked(pw, dumpPackage, mQueueName, sdf, dumpAll, needSep);
+        if (dumpConstants) {
+            mConstants.dump(new IndentingPrintWriter(pw));
+        }
+        if (dumpHistory) {
+            needSep = mHistory.dumpLocked(pw, dumpPackage, mQueueName, sdf, dumpAll, needSep);
+        }
         return needSep;
     }
 }

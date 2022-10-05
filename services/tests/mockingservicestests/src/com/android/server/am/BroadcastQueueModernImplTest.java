@@ -375,6 +375,9 @@ public class BroadcastQueueModernImplTest {
         mImpl.enqueueBroadcastLocked(makeBroadcastRecord(screenOn, optionsOn));
         mImpl.enqueueBroadcastLocked(makeBroadcastRecord(screenOff, optionsOff));
 
+        // While we're here, give our health check some test coverage
+        mImpl.checkHealthLocked();
+
         // Marching through the queue we should only have one SCREEN_OFF
         // broadcast, since that's the last state we dispatched
         final BroadcastProcessQueue queue = mImpl.getProcessQueue(PACKAGE_GREEN,

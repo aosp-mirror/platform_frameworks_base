@@ -22,15 +22,17 @@ import android.annotation.UptimeMillisLong;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.DropBoxManager;
 import android.os.Handler;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
-
-import dalvik.annotation.optimization.NeverCompile;
+import com.android.server.DropBoxManagerInternal;
+import com.android.server.LocalServices;
 
 import java.io.FileDescriptor;
+import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.util.Objects;
 import java.util.Set;
@@ -40,6 +42,7 @@ import java.util.Set;
  */
 public abstract class BroadcastQueue {
     public static final String TAG = "BroadcastQueue";
+    public static final String TAG_DUMP = "broadcast_queue_dump";
 
     final @NonNull ActivityManagerService mService;
     final @NonNull Handler mHandler;
@@ -55,12 +58,6 @@ public abstract class BroadcastQueue {
         mQueueName = Objects.requireNonNull(name);
         mSkipPolicy = Objects.requireNonNull(skipPolicy);
         mHistory = Objects.requireNonNull(history);
-    }
-
-    static void checkState(boolean state, String msg) {
-        if (!state) {
-            Slog.wtf(TAG, msg, new Throwable());
-        }
     }
 
     static void logw(@NonNull String msg) {
@@ -221,6 +218,22 @@ public abstract class BroadcastQueue {
 
     @GuardedBy("mService")
     public abstract boolean dumpLocked(@NonNull FileDescriptor fd, @NonNull PrintWriter pw,
-            @NonNull String[] args, int opti, boolean dumpAll, @Nullable String dumpPackage,
-            boolean needSep);
+            @NonNull String[] args, int opti, boolean dumpConstants, boolean dumpHistory,
+            boolean dumpAll, @Nullable String dumpPackage, boolean needSep);
+
+    /**
+     * Execute {@link #dumpLocked} and store the output into
+     * {@link DropBoxManager} for later inspection.
+     */
+    public void dumpToDropBoxLocked(@Nullable String msg) {
+        LocalServices.getService(DropBoxManagerInternal.class).addEntry(TAG_DUMP, (fd) -> {
+            try (FileOutputStream out = new FileOutputStream(fd);
+                    PrintWriter pw = new PrintWriter(out)) {
+                pw.print("Message: ");
+                pw.println(msg);
+                dumpLocked(fd, pw, null, 0, false, false, false, null, false);
+                pw.flush();
+            }
+        }, DropBoxManager.IS_TEXT);
+    }
 }

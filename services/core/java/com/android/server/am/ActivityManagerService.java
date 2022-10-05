@@ -10692,6 +10692,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     @NeverCompile
     void dumpBroadcastsLocked(FileDescriptor fd, PrintWriter pw, String[] args,
             int opti, boolean dumpAll, String dumpPackage) {
+        boolean dumpConstants = true;
+        boolean dumpHistory = true;
         boolean needSep = false;
         boolean onlyHistory = false;
         boolean printedAnything = false;
@@ -10776,7 +10778,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         if (!onlyReceivers) {
             for (BroadcastQueue q : mBroadcastQueues) {
-                needSep = q.dumpLocked(fd, pw, args, opti, dumpAll, dumpPackage, needSep);
+                needSep = q.dumpLocked(fd, pw, args, opti,
+                        dumpConstants, dumpHistory, dumpAll, dumpPackage, needSep);
                 printedAnything |= needSep;
             }
         }

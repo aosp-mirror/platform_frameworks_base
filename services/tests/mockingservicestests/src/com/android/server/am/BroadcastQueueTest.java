@@ -81,6 +81,7 @@ import android.util.proto.ProtoOutputStream;
 import androidx.test.filters.MediumTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.server.DropBoxManagerInternal;
 import com.android.server.LocalServices;
 import com.android.server.am.ActivityManagerService.Injector;
 import com.android.server.appop.AppOpsService;
@@ -143,6 +144,8 @@ public class BroadcastQueueTest {
     @Mock
     private ProcessList mProcessList;
     @Mock
+    private DropBoxManagerInternal mDropBoxManagerInt;
+    @Mock
     private PackageManagerInternal mPackageManagerInt;
     @Mock
     private UsageStatsManagerInternal mUsageStatsManagerInt;
@@ -190,6 +193,8 @@ public class BroadcastQueueTest {
         mHandlerThread.start();
         mNextPid = new AtomicInteger(100);
 
+        LocalServices.removeServiceForTest(DropBoxManagerInternal.class);
+        LocalServices.addService(DropBoxManagerInternal.class, mDropBoxManagerInt);
         LocalServices.removeServiceForTest(PackageManagerInternal.class);
         LocalServices.addService(PackageManagerInternal.class, mPackageManagerInt);
         doReturn(new ComponentName("", "")).when(mPackageManagerInt).getSystemUiServiceComponent();
@@ -658,16 +663,14 @@ public class BroadcastQueueTest {
         mQueue.dumpDebug(new ProtoOutputStream(),
                 ActivityManagerServiceDumpBroadcastsProto.BROADCAST_QUEUE);
         mQueue.dumpLocked(FileDescriptor.err, new PrintWriter(new ByteArrayOutputStream()),
-                null, 0, true, null, false);
+                null, 0, true, true, true, null, false);
+        mQueue.dumpToDropBoxLocked(TAG);
 
         BroadcastQueue.logv(TAG);
         BroadcastQueue.logv(TAG, null);
         BroadcastQueue.logv(TAG, new PrintWriter(new ByteArrayOutputStream()));
 
         BroadcastQueue.logw(TAG);
-
-        BroadcastQueue.checkState(true, TAG);
-        BroadcastQueue.checkState(false, TAG);
 
         assertNotNull(mQueue.toString());
         assertNotNull(mQueue.describeStateLocked());
@@ -1016,7 +1019,7 @@ public class BroadcastQueueTest {
             mQueue.dumpDebug(new ProtoOutputStream(),
                     ActivityManagerServiceDumpBroadcastsProto.BROADCAST_QUEUE);
             mQueue.dumpLocked(FileDescriptor.err, new PrintWriter(new ByteArrayOutputStream()),
-                    null, 0, true, null, false);
+                    null, 0, true, true, true, null, false);
         }
 
         waitForIdle();

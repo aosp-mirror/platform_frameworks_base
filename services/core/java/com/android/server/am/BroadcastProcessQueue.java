@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import static com.android.internal.util.Preconditions.checkState;
 import static com.android.server.am.BroadcastRecord.deliveryStateToString;
 import static com.android.server.am.BroadcastRecord.isDeliveryStateTerminal;
 import static com.android.server.am.BroadcastRecord.isReceiverEquals;
@@ -25,8 +26,10 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UptimeMillisLong;
 import android.content.pm.ResolveInfo;
+import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.text.format.DateUtils;
 import android.util.IndentingPrintWriter;
 import android.util.TimeUtils;
 
@@ -552,6 +555,22 @@ class BroadcastProcessQueue {
         } else {
             mRunnableAt = Long.MAX_VALUE;
             mRunnableAtReason = REASON_EMPTY;
+        }
+    }
+
+    /**
+     * Check overall health, confirming things are in a reasonable state and
+     * that we're not wedged.
+     */
+    public void checkHealthLocked() {
+        if (mRunnableAtReason == REASON_BLOCKED) {
+            final SomeArgs next = mPending.peekFirst();
+            Objects.requireNonNull(next, "peekFirst");
+
+            // If blocked more than 10 minutes, we're likely wedged
+            final BroadcastRecord r = (BroadcastRecord) next.arg1;
+            final long waitingTime = SystemClock.uptimeMillis() - r.enqueueTime;
+            checkState(waitingTime < (10 * DateUtils.MINUTE_IN_MILLIS), "waitingTime");
         }
     }
 
