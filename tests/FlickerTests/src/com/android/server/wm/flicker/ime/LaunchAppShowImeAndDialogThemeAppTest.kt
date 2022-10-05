@@ -47,30 +47,22 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class LaunchAppShowImeAndDialogThemeAppTest(
-    testSpec: FlickerTestParameter
-) : BaseTest(testSpec) {
+class LaunchAppShowImeAndDialogThemeAppTest(testSpec: FlickerTestParameter) : BaseTest(testSpec) {
     private val testApp = ImeAppAutoFocusHelper(instrumentation, testSpec.startRotation)
 
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit = {
         setup {
             testApp.launchViaIntent(wmHelper)
-            wmHelper.StateSyncBuilder()
-                .withImeShown()
-                .waitForAndVerify()
+            wmHelper.StateSyncBuilder().withImeShown().waitForAndVerify()
             testApp.startDialogThemedActivity(wmHelper)
             // Verify IME insets isn't visible on dialog since it's non-IME focusable window
             assertFalse(testApp.getInsetsVisibleFromDialog(ime()))
             assertTrue(testApp.getInsetsVisibleFromDialog(statusBars()))
             assertTrue(testApp.getInsetsVisibleFromDialog(navigationBars()))
         }
-        teardown {
-            testApp.exit(wmHelper)
-        }
-        transitions {
-            testApp.dismissDialog(wmHelper)
-        }
+        teardown { testApp.exit(wmHelper) }
+        transitions { testApp.dismissDialog(wmHelper) }
     }
 
     /** {@inheritDoc} */
@@ -83,41 +75,29 @@ class LaunchAppShowImeAndDialogThemeAppTest(
     @Test
     override fun taskBarLayerIsVisibleAtStartAndEnd() = super.taskBarLayerIsVisibleAtStartAndEnd()
 
-    /**
-     * Checks that [ComponentMatcher.IME] layer becomes visible during the transition
-     */
-    @Presubmit
-    @Test
-    fun imeWindowIsAlwaysVisible() = testSpec.imeWindowIsAlwaysVisible()
+    /** Checks that [ComponentMatcher.IME] layer becomes visible during the transition */
+    @Presubmit @Test fun imeWindowIsAlwaysVisible() = testSpec.imeWindowIsAlwaysVisible()
 
-    /**
-     * Checks that [ComponentMatcher.IME] layer is visible at the end of the transition
-     */
+    /** Checks that [ComponentMatcher.IME] layer is visible at the end of the transition */
     @Presubmit
     @Test
     fun imeLayerExistsEnd() {
-        testSpec.assertLayersEnd {
-            this.isVisible(ComponentNameMatcher.IME)
-        }
+        testSpec.assertLayersEnd { this.isVisible(ComponentNameMatcher.IME) }
     }
 
-    /**
-     * Checks that [ComponentMatcher.IME_SNAPSHOT] layer is invisible always.
-     */
+    /** Checks that [ComponentMatcher.IME_SNAPSHOT] layer is invisible always. */
     @Presubmit
     @Test
     fun imeSnapshotNotVisible() {
-        testSpec.assertLayers {
-            this.isInvisible(ComponentNameMatcher.IME_SNAPSHOT)
-        }
+        testSpec.assertLayers { this.isInvisible(ComponentNameMatcher.IME_SNAPSHOT) }
     }
 
     companion object {
         /**
          * Creates the test configurations.
          *
-         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring
-         * repetitions, screen orientation and navigation modes.
+         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring repetitions,
+         * screen orientation and navigation modes.
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
@@ -125,10 +105,11 @@ class LaunchAppShowImeAndDialogThemeAppTest(
             return FlickerTestParameterFactory.getInstance()
                 .getConfigNonRotationTests(
                     supportedRotations = listOf(Surface.ROTATION_0),
-                    supportedNavigationModes = listOf(
-                        WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY,
-                        WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
-                    )
+                    supportedNavigationModes =
+                        listOf(
+                            WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY,
+                            WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
+                        )
                 )
         }
     }

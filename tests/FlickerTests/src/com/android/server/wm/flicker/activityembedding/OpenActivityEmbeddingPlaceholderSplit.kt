@@ -41,9 +41,8 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class OpenActivityEmbeddingPlaceholderSplit(
-    testSpec: FlickerTestParameter
-) : ActivityEmbeddingTestBase(testSpec) {
+class OpenActivityEmbeddingPlaceholderSplit(testSpec: FlickerTestParameter) :
+    ActivityEmbeddingTestBase(testSpec) {
 
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit = {
@@ -51,9 +50,7 @@ class OpenActivityEmbeddingPlaceholderSplit(
             tapl.setExpectedRotationCheckEnabled(false)
             testApp.launchViaIntent(wmHelper)
         }
-        transitions {
-            testApp.launchPlaceholderSplit(wmHelper)
-        }
+        transitions { testApp.launchPlaceholderSplit(wmHelper) }
         teardown {
             tapl.goHome()
             testApp.exit(wmHelper)
@@ -65,8 +62,8 @@ class OpenActivityEmbeddingPlaceholderSplit(
     fun mainActivityBecomesInvisible() {
         testSpec.assertLayers {
             isVisible(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT)
-                    .then()
-                    .isInvisible(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT)
+                .then()
+                .isInvisible(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT)
         }
     }
 
@@ -75,20 +72,18 @@ class OpenActivityEmbeddingPlaceholderSplit(
     fun placeholderSplitBecomesVisible() {
         testSpec.assertLayers {
             isInvisible(ActivityEmbeddingAppHelper.PLACEHOLDER_PRIMARY_COMPONENT)
-                    .then()
-                    .isVisible(ActivityEmbeddingAppHelper.PLACEHOLDER_PRIMARY_COMPONENT)
+                .then()
+                .isVisible(ActivityEmbeddingAppHelper.PLACEHOLDER_PRIMARY_COMPONENT)
         }
         testSpec.assertLayers {
             isInvisible(ActivityEmbeddingAppHelper.PLACEHOLDER_SECONDARY_COMPONENT)
-                    .then()
-                    .isVisible(ActivityEmbeddingAppHelper.PLACEHOLDER_SECONDARY_COMPONENT)
+                .then()
+                .isVisible(ActivityEmbeddingAppHelper.PLACEHOLDER_SECONDARY_COMPONENT)
         }
     }
 
     /** {@inheritDoc} */
-    @Presubmit
-    @Test
-    override fun entireScreenCovered() = super.entireScreenCovered()
+    @Presubmit @Test override fun entireScreenCovered() = super.entireScreenCovered()
 
     /** {@inheritDoc} */
     @Presubmit
@@ -124,14 +119,12 @@ class OpenActivityEmbeddingPlaceholderSplit(
     /** {@inheritDoc} */
     @Presubmit
     @Test
-    override fun statusBarLayerPositionAtStartAndEnd() =
-        super.statusBarLayerPositionAtStartAndEnd()
+    override fun statusBarLayerPositionAtStartAndEnd() = super.statusBarLayerPositionAtStartAndEnd()
 
     /** {@inheritDoc} */
     @Presubmit
     @Test
-    override fun statusBarWindowIsAlwaysVisible() =
-        super.statusBarWindowIsAlwaysVisible()
+    override fun statusBarWindowIsAlwaysVisible() = super.statusBarWindowIsAlwaysVisible()
 
     /** {@inheritDoc} */
     @Presubmit
@@ -149,20 +142,21 @@ class OpenActivityEmbeddingPlaceholderSplit(
         /**
          * Creates the test configurations.
          *
-         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring
-         * repetitions, screen orientation and navigation modes.
+         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring repetitions,
+         * screen orientation and navigation modes.
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
-                    .getConfigNonRotationTests(
-                            supportedRotations = listOf(Surface.ROTATION_0, Surface.ROTATION_90),
-                            supportedNavigationModes = listOf(
-                                    WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY,
-                                    WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
-                            )
-                    )
+                .getConfigNonRotationTests(
+                    supportedRotations = listOf(Surface.ROTATION_0, Surface.ROTATION_90),
+                    supportedNavigationModes =
+                        listOf(
+                            WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY,
+                            WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
+                        )
+                )
         }
     }
 }

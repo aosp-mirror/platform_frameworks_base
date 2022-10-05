@@ -831,6 +831,26 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     }
 
     @Override
+    @EnforcePermission(BATTERY_STATS)
+    public long computeBatteryScreenOffRealtimeMs() {
+        synchronized (mStats) {
+            final long curTimeUs = SystemClock.elapsedRealtimeNanos() / 1000;
+            long timeUs = mStats.computeBatteryScreenOffRealtime(curTimeUs,
+                    BatteryStats.STATS_SINCE_CHARGED);
+            return timeUs / 1000;
+        }
+    }
+
+    @Override
+    @EnforcePermission(BATTERY_STATS)
+    public long getScreenOffDischargeMah() {
+        synchronized (mStats) {
+            long dischargeUah = mStats.getUahDischargeScreenOff(BatteryStats.STATS_SINCE_CHARGED);
+            return dischargeUah / 1000;
+        }
+    }
+
+    @Override
     @EnforcePermission(UPDATE_DEVICE_STATS)
     public void noteEvent(final int code, final String name, final int uid) {
         if (name == null) {

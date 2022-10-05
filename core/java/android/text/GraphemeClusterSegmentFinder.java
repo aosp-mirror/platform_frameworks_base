@@ -21,16 +21,20 @@ import android.annotation.NonNull;
 import android.graphics.Paint;
 
 /**
- * Implementation of {@code SegmentIterator} using grapheme clusters as the text segment. Whitespace
+ * Implementation of {@code SegmentFinder} using grapheme clusters as the text segment. Whitespace
  * characters are included as segments.
  *
- * @hide
+ * <p>For example, the text "a pot" would be divided into five text segments: "a", " ", "p", "o",
+ * "t".
+ *
+ * @see <a href="https://unicode.org/reports/tr29/#Grapheme_Cluster_Boundaries">Unicode Text
+ *     Segmentation - Grapheme Cluster Boundaries</a>
  */
-public class GraphemeClusterSegmentIterator extends SegmentIterator {
+public class GraphemeClusterSegmentFinder extends SegmentFinder {
     private final CharSequence mText;
     private final TextPaint mTextPaint;
 
-    public GraphemeClusterSegmentIterator(
+    public GraphemeClusterSegmentFinder(
             @NonNull CharSequence text, @NonNull TextPaint textPaint) {
         mText = text;
         mTextPaint = textPaint;

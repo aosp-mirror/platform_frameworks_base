@@ -116,6 +116,7 @@ class AssociationRequestsProcessor {
     private static final String EXTRA_APPLICATION_CALLBACK = "application_callback";
     private static final String EXTRA_ASSOCIATION_REQUEST = "association_request";
     private static final String EXTRA_RESULT_RECEIVER = "result_receiver";
+    private static final String EXTRA_FORCE_CANCEL_CONFIRMATION = "cancel_confirmation";
 
     // AssociationRequestsProcessor -> UI
     private static final int RESULT_CODE_ASSOCIATION_CREATED = 0;
@@ -195,26 +196,33 @@ class AssociationRequestsProcessor {
         intent.putExtras(extras);
 
         // 2b.3. Create a PendingIntent.
-        final PendingIntent pendingIntent;
-        final long token = Binder.clearCallingIdentity();
-        try {
-            // Using uid of the application that will own the association (usually the same
-            // application that sent the request) allows us to have multiple "pending" association
-            // requests at the same time.
-            // If the application already has a pending association request, that PendingIntent
-            // will be cancelled.
-            pendingIntent = PendingIntent.getActivityAsUser(
-                    mContext, /*requestCode */ packageUid, intent,
-                    FLAG_ONE_SHOT | FLAG_CANCEL_CURRENT | FLAG_IMMUTABLE,
-                    /* options= */ null, UserHandle.CURRENT);
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
+        final PendingIntent pendingIntent = createPendingIntent(packageUid, intent);
 
         // 2b.4. Send the PendingIntent back to the app.
         try {
             callback.onAssociationPending(pendingIntent);
         } catch (RemoteException ignore) { }
+    }
+
+    /**
+     * Process another AssociationRequest in CompanionDeviceActivity to cancel current dialog.
+     */
+    PendingIntent buildAssociationCancellationIntent(@NonNull String packageName,
+            @UserIdInt int userId) {
+        requireNonNull(packageName, "Package name MUST NOT be null");
+
+        enforceUsesCompanionDeviceFeature(mContext, userId, packageName);
+
+        final int packageUid = mPackageManager.getPackageUid(packageName, 0, userId);
+
+        final Bundle extras = new Bundle();
+        extras.putBoolean(EXTRA_FORCE_CANCEL_CONFIRMATION, true);
+
+        final Intent intent = new Intent();
+        intent.setComponent(ASSOCIATION_REQUEST_APPROVAL_ACTIVITY);
+        intent.putExtras(extras);
+
+        return createPendingIntent(packageUid, intent);
     }
 
     private void processAssociationRequestApproval(@NonNull AssociationRequest request,
@@ -284,6 +292,27 @@ class AssociationRequestsProcessor {
 
         // Don't need to "grant" the role, if the package already holds the role.
         return !isRoleHolder;
+    }
+
+    private PendingIntent createPendingIntent(int packageUid, Intent intent) {
+        final PendingIntent pendingIntent;
+        final long token = Binder.clearCallingIdentity();
+
+        // Using uid of the application that will own the association (usually the same
+        // application that sent the request) allows us to have multiple "pending" association
+        // requests at the same time.
+        // If the application already has a pending association request, that PendingIntent
+        // will be cancelled except application wants to cancel the request by the system.
+        try {
+            pendingIntent = PendingIntent.getActivityAsUser(
+                    mContext, /*requestCode */ packageUid, intent,
+                    FLAG_ONE_SHOT | FLAG_CANCEL_CURRENT | FLAG_IMMUTABLE,
+                    /* options= */ null, UserHandle.CURRENT);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+
+        return pendingIntent;
     }
 
     private final ResultReceiver mOnRequestConfirmationReceiver =

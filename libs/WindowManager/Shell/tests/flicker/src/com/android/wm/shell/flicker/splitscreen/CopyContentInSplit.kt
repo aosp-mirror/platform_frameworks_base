@@ -17,7 +17,6 @@
 package com.android.wm.shell.flicker.splitscreen
 
 import android.platform.test.annotations.IwTest
-import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.WindowManagerPolicyConstants
 import androidx.test.filters.RequiresDevice
@@ -54,12 +53,14 @@ class CopyContentInSplit(testSpec: FlickerTestParameter) : SplitScreenBase(testS
     override val transition: FlickerBuilder.() -> Unit
         get() = {
             super.transition(this)
-            setup {
-                SplitScreenUtils.enterSplit(wmHelper, tapl, primaryApp, textEditApp)
-            }
+            setup { SplitScreenUtils.enterSplit(wmHelper, tapl, primaryApp, textEditApp) }
             transitions {
                 SplitScreenUtils.copyContentInSplit(
-                    instrumentation, device, primaryApp, textEditApp)
+                    instrumentation,
+                    device,
+                    primaryApp,
+                    textEditApp
+                )
             }
         }
 
@@ -82,94 +83,87 @@ class CopyContentInSplit(testSpec: FlickerTestParameter) : SplitScreenBase(testS
     @Test
     fun splitScreenDividerKeepVisible() = testSpec.layerKeepVisible(SPLIT_SCREEN_DIVIDER_COMPONENT)
 
-    @Presubmit
-    @Test
-    fun primaryAppLayerKeepVisible() = testSpec.layerKeepVisible(primaryApp)
+    @Presubmit @Test fun primaryAppLayerKeepVisible() = testSpec.layerKeepVisible(primaryApp)
+
+    @Presubmit @Test fun textEditAppLayerKeepVisible() = testSpec.layerKeepVisible(textEditApp)
 
     @Presubmit
     @Test
-    fun textEditAppLayerKeepVisible() = testSpec.layerKeepVisible(textEditApp)
+    fun primaryAppBoundsKeepVisible() =
+        testSpec.splitAppLayerBoundsKeepVisible(
+            primaryApp,
+            landscapePosLeft = tapl.isTablet,
+            portraitPosTop = false
+        )
 
     @Presubmit
     @Test
-    fun primaryAppBoundsKeepVisible() = testSpec.splitAppLayerBoundsKeepVisible(
-        primaryApp, landscapePosLeft = tapl.isTablet, portraitPosTop = false)
+    fun textEditAppBoundsKeepVisible() =
+        testSpec.splitAppLayerBoundsKeepVisible(
+            textEditApp,
+            landscapePosLeft = !tapl.isTablet,
+            portraitPosTop = true
+        )
 
-    @Presubmit
-    @Test
-    fun textEditAppBoundsKeepVisible() = testSpec.splitAppLayerBoundsKeepVisible(
-        textEditApp, landscapePosLeft = !tapl.isTablet, portraitPosTop = true)
+    @Presubmit @Test fun primaryAppWindowKeepVisible() = testSpec.appWindowKeepVisible(primaryApp)
 
-    @Presubmit
-    @Test
-    fun primaryAppWindowKeepVisible() = testSpec.appWindowKeepVisible(primaryApp)
-
-    @Presubmit
-    @Test
-    fun textEditAppWindowKeepVisible() = testSpec.appWindowKeepVisible(textEditApp)
+    @Presubmit @Test fun textEditAppWindowKeepVisible() = testSpec.appWindowKeepVisible(textEditApp)
 
     /** {@inheritDoc} */
-    @Postsubmit
+    @Presubmit
     @Test
     override fun entireScreenCovered() =
         super.entireScreenCovered()
 
     /** {@inheritDoc} */
-    @Postsubmit
+    @Presubmit
     @Test
-    override fun navBarLayerIsVisibleAtStartAndEnd() =
-        super.navBarLayerIsVisibleAtStartAndEnd()
+    override fun navBarLayerIsVisibleAtStartAndEnd() = super.navBarLayerIsVisibleAtStartAndEnd()
 
     /** {@inheritDoc} */
-    @Postsubmit
+    @Presubmit
     @Test
-    override fun navBarLayerPositionAtStartAndEnd() =
-        super.navBarLayerPositionAtStartAndEnd()
+    override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
 
     /** {@inheritDoc} */
-    @Postsubmit
+    @Presubmit
     @Test
-    override fun navBarWindowIsAlwaysVisible() =
-        super.navBarWindowIsAlwaysVisible()
+    override fun navBarWindowIsAlwaysVisible() = super.navBarWindowIsAlwaysVisible()
 
     /** {@inheritDoc} */
-    @Postsubmit
+    @Presubmit
     @Test
     override fun statusBarLayerIsVisibleAtStartAndEnd() =
         super.statusBarLayerIsVisibleAtStartAndEnd()
 
     /** {@inheritDoc} */
-    @Postsubmit
+    @Presubmit
     @Test
-    override fun statusBarLayerPositionAtStartAndEnd() =
-        super.statusBarLayerPositionAtStartAndEnd()
+    override fun statusBarLayerPositionAtStartAndEnd() = super.statusBarLayerPositionAtStartAndEnd()
 
     /** {@inheritDoc} */
-    @Postsubmit
+    @Presubmit
     @Test
-    override fun statusBarWindowIsAlwaysVisible() =
-        super.statusBarWindowIsAlwaysVisible()
+    override fun statusBarWindowIsAlwaysVisible() = super.statusBarWindowIsAlwaysVisible()
 
     /** {@inheritDoc} */
-    @Postsubmit
+    @Presubmit
     @Test
-    override fun taskBarLayerIsVisibleAtStartAndEnd() =
-        super.taskBarLayerIsVisibleAtStartAndEnd()
+    override fun taskBarLayerIsVisibleAtStartAndEnd() = super.taskBarLayerIsVisibleAtStartAndEnd()
 
     /** {@inheritDoc} */
-    @Postsubmit
+    @Presubmit
     @Test
-    override fun taskBarWindowIsAlwaysVisible() =
-        super.taskBarWindowIsAlwaysVisible()
+    override fun taskBarWindowIsAlwaysVisible() = super.taskBarWindowIsAlwaysVisible()
 
     /** {@inheritDoc} */
-    @Postsubmit
+    @Presubmit
     @Test
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
         super.visibleLayersShownMoreThanOneConsecutiveEntry()
 
     /** {@inheritDoc} */
-    @Postsubmit
+    @Presubmit
     @Test
     override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
         super.visibleWindowsShownMoreThanOneConsecutiveEntry()
@@ -178,10 +172,12 @@ class CopyContentInSplit(testSpec: FlickerTestParameter) : SplitScreenBase(testS
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): List<FlickerTestParameter> {
-            return FlickerTestParameterFactory.getInstance().getConfigNonRotationTests(
-                // TODO(b/176061063):The 3 buttons of nav bar do not exist in the hierarchy.
-                supportedNavigationModes =
-                    listOf(WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY))
+            return FlickerTestParameterFactory.getInstance()
+                .getConfigNonRotationTests(
+                    // TODO(b/176061063):The 3 buttons of nav bar do not exist in the hierarchy.
+                    supportedNavigationModes =
+                        listOf(WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY)
+                )
         }
     }
 }

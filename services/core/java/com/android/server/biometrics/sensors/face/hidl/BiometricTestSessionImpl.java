@@ -16,8 +16,6 @@
 
 package com.android.server.biometrics.sensors.face.hidl;
 
-import static android.Manifest.permission.TEST_BIOMETRIC;
-
 import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.ITestSession;
@@ -30,8 +28,8 @@ import android.os.Binder;
 import android.os.RemoteException;
 import android.util.Slog;
 
-import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
+import com.android.server.biometrics.sensors.BiometricStateCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.face.FaceUtils;
 
@@ -52,6 +50,7 @@ public class BiometricTestSessionImpl extends ITestSession.Stub {
     @NonNull private final Face10.HalResultController mHalResultController;
     @NonNull private final Set<Integer> mEnrollmentIds;
     @NonNull private final Random mRandom;
+
 
     private final IFaceServiceReceiver mReceiver = new IFaceServiceReceiver.Stub() {
         @Override
@@ -116,7 +115,8 @@ public class BiometricTestSessionImpl extends ITestSession.Stub {
     };
 
     BiometricTestSessionImpl(@NonNull Context context, int sensorId,
-            @NonNull ITestSessionCallback callback, @NonNull Face10 face10,
+            @NonNull ITestSessionCallback callback,
+            @NonNull Face10 face10,
             @NonNull Face10.HalResultController halResultController) {
         mContext = context;
         mSensorId = sensorId;

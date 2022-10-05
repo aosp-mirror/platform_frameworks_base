@@ -84,6 +84,11 @@ interface IBatteryStats {
     @RequiresNoPermission
     long computeChargeTimeRemaining();
 
+    @EnforcePermission("BATTERY_STATS")
+    long computeBatteryScreenOffRealtimeMs();
+    @EnforcePermission("BATTERY_STATS")
+    long getScreenOffDischargeMah();
+
     @EnforcePermission("UPDATE_DEVICE_STATS")
     void noteEvent(int code, String name, int uid);
 

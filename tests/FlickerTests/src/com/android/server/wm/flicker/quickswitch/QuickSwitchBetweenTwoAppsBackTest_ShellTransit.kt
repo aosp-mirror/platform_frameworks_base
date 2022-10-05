@@ -38,18 +38,18 @@ import org.junit.runners.Parameterized
  * To run this test: `atest FlickerTests:QuickSwitchBetweenTwoAppsBackTest`
  *
  * Actions:
+ * ```
  *     Launch an app [testApp1]
  *     Launch another app [testApp2]
  *     Swipe right from the bottom of the screen to quick switch back to the first app [testApp1]
- *
+ * ```
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class QuickSwitchBetweenTwoAppsBackTest_ShellTransit(
-    testSpec: FlickerTestParameter
-) : QuickSwitchBetweenTwoAppsBackTest(testSpec) {
+open class QuickSwitchBetweenTwoAppsBackTest_ShellTransit(testSpec: FlickerTestParameter) :
+    QuickSwitchBetweenTwoAppsBackTest(testSpec) {
     @Before
     override fun before() {
         Assume.assumeTrue(isShellTransitionsEnabled)
@@ -61,8 +61,8 @@ open class QuickSwitchBetweenTwoAppsBackTest_ShellTransit(
     override fun navBarWindowIsAlwaysVisible() = super.navBarWindowIsAlwaysVisible()
 
     /**
-     * Checks that [ComponentMatcher.NAV_BAR] window is visible and above the app windows at the start
-     * and end of the WM trace
+     * Checks that [ComponentMatcher.NAV_BAR] window is visible and above the app windows at the
+     * start and end of the WM trace
      */
     @Presubmit
     @Test

@@ -16,7 +16,6 @@
 
 package com.android.server.wm.flicker.ime
 
-import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresDevice
 import android.view.Surface
@@ -42,8 +41,8 @@ import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test IME window layer will be associated with the app task when going to the overview screen.
- * To run this test: `atest FlickerTests:OpenImeWindowToOverViewTest`
+ * Test IME window layer will be associated with the app task when going to the overview screen. To
+ * run this test: `atest FlickerTests:OpenImeWindowToOverViewTest`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
@@ -54,35 +53,30 @@ class OpenImeWindowToOverViewTest(testSpec: FlickerTestParameter) : BaseTest(tes
 
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit = {
-        setup {
-            imeTestApp.launchViaIntent(wmHelper)
-        }
+        setup { imeTestApp.launchViaIntent(wmHelper) }
         transitions {
             device.pressRecentApps()
-            val builder = wmHelper.StateSyncBuilder()
-                .withRecentsActivityVisible()
+            val builder = wmHelper.StateSyncBuilder().withRecentsActivityVisible()
             waitNavStatusBarVisibility(builder)
             builder.waitForAndVerify()
         }
         teardown {
             device.pressHome()
-            wmHelper.StateSyncBuilder()
-                .withHomeActivityVisible()
-                .waitForAndVerify()
+            wmHelper.StateSyncBuilder().withHomeActivityVisible().waitForAndVerify()
             imeTestApp.exit(wmHelper)
         }
     }
 
     /**
-     * The bars (including [ComponentMatcher.STATUS_BAR] and [ComponentMatcher.NAV_BAR]) are
+     * The bars (including [ComponentNameMatcher.STATUS_BAR] and [ComponentNameMatcher.NAV_BAR]) are
      * expected to be hidden while entering overview in landscape if launcher is set to portrait
      * only. Because "showing portrait overview (launcher) in landscape display" is an intermediate
      * state depending on the touch-up to decide the intention of gesture, the display may keep in
      * landscape if return to app, or change to portrait if the gesture is to swipe-to-home.
      *
-     * So instead of showing landscape bars with portrait launcher at the same time
-     * (especially return-to-home that launcher workspace becomes visible), hide the bars until
-     * leave overview to have cleaner appearance.
+     * So instead of showing landscape bars with portrait launcher at the same time (especially
+     * return-to-home that launcher workspace becomes visible), hide the bars until leave overview
+     * to have cleaner appearance.
      *
      * b/227189877
      */
@@ -90,8 +84,7 @@ class OpenImeWindowToOverViewTest(testSpec: FlickerTestParameter) : BaseTest(tes
         when {
             testSpec.isLandscapeOrSeascapeAtStart && !testSpec.isTablet ->
                 stateSync.add(WindowManagerConditionsFactory.isStatusBarVisible().negate())
-            else ->
-                stateSync.withNavOrTaskBarVisible().withStatusBarVisible()
+            else -> stateSync.withNavOrTaskBarVisible().withStatusBarVisible()
         }
     }
 
@@ -109,9 +102,7 @@ class OpenImeWindowToOverViewTest(testSpec: FlickerTestParameter) : BaseTest(tes
         testSpec.navBarLayerIsVisibleAtStartAndEnd()
     }
 
-    /**
-     * Bars are expected to be hidden while entering overview in landscape (b/227189877)
-     */
+    /** Bars are expected to be hidden while entering overview in landscape (b/227189877) */
     @Presubmit
     @Test
     fun navBarLayerIsVisibleAtStartAndEndGestural() {
@@ -122,8 +113,8 @@ class OpenImeWindowToOverViewTest(testSpec: FlickerTestParameter) : BaseTest(tes
     }
 
     /**
-     * In the legacy transitions, the nav bar is not marked as invisible.
-     * In the new transitions this is fixed and the nav bar shows as invisible
+     * In the legacy transitions, the nav bar is not marked as invisible. In the new transitions
+     * this is fixed and the nav bar shows as invisible
      */
     @Presubmit
     @Test
@@ -132,17 +123,13 @@ class OpenImeWindowToOverViewTest(testSpec: FlickerTestParameter) : BaseTest(tes
         Assume.assumeTrue(testSpec.isLandscapeOrSeascapeAtStart)
         Assume.assumeTrue(testSpec.isGesturalNavigation)
         Assume.assumeTrue(isShellTransitionsEnabled)
-        testSpec.assertLayersStart {
-            this.isVisible(ComponentNameMatcher.NAV_BAR)
-        }
-        testSpec.assertLayersEnd {
-            this.isInvisible(ComponentNameMatcher.NAV_BAR)
-        }
+        testSpec.assertLayersStart { this.isVisible(ComponentNameMatcher.NAV_BAR) }
+        testSpec.assertLayersEnd { this.isInvisible(ComponentNameMatcher.NAV_BAR) }
     }
 
     /**
-     * In the legacy transitions, the nav bar is not marked as invisible.
-     * In the new transitions this is fixed and the nav bar shows as invisible
+     * In the legacy transitions, the nav bar is not marked as invisible. In the new transitions
+     * this is fixed and the nav bar shows as invisible
      */
     @Presubmit
     @Test
@@ -150,17 +137,13 @@ class OpenImeWindowToOverViewTest(testSpec: FlickerTestParameter) : BaseTest(tes
         Assume.assumeTrue(testSpec.isLandscapeOrSeascapeAtStart)
         Assume.assumeTrue(testSpec.isGesturalNavigation)
         Assume.assumeFalse(testSpec.isTablet)
-        testSpec.assertLayersStart {
-            this.isVisible(ComponentNameMatcher.STATUS_BAR)
-        }
-        testSpec.assertLayersEnd {
-            this.isInvisible(ComponentNameMatcher.STATUS_BAR)
-        }
+        testSpec.assertLayersStart { this.isVisible(ComponentNameMatcher.STATUS_BAR) }
+        testSpec.assertLayersEnd { this.isInvisible(ComponentNameMatcher.STATUS_BAR) }
     }
 
     /**
-     * In the legacy transitions, the nav bar is not marked as invisible.
-     * In the new transitions this is fixed and the nav bar shows as invisible
+     * In the legacy transitions, the nav bar is not marked as invisible. In the new transitions
+     * this is fixed and the nav bar shows as invisible
      */
     @Presubmit
     @Test
@@ -174,27 +157,30 @@ class OpenImeWindowToOverViewTest(testSpec: FlickerTestParameter) : BaseTest(tes
     /** {@inheritDoc} */
     @Test
     @Ignore("Visibility changes depending on orientation and navigation mode")
-    override fun navBarLayerIsVisibleAtStartAndEnd() { }
+    override fun navBarLayerIsVisibleAtStartAndEnd() {
+    }
 
     /** {@inheritDoc} */
     @Test
     @Ignore("Visibility changes depending on orientation and navigation mode")
-    override fun navBarLayerPositionAtStartAndEnd() { }
+    override fun navBarLayerPositionAtStartAndEnd() {
+    }
 
     /** {@inheritDoc} */
     @Test
     @Ignore("Visibility changes depending on orientation and navigation mode")
-    override fun statusBarLayerPositionAtStartAndEnd() { }
+    override fun statusBarLayerPositionAtStartAndEnd() {
+    }
 
     /** {@inheritDoc} */
     @Test
     @Ignore("Visibility changes depending on orientation and navigation mode")
-    override fun statusBarLayerIsVisibleAtStartAndEnd() { }
+    override fun statusBarLayerIsVisibleAtStartAndEnd() {
+    }
 
-    @Postsubmit
+    @Presubmit
     @Test
-    override fun taskBarLayerIsVisibleAtStartAndEnd() =
-        super.taskBarLayerIsVisibleAtStartAndEnd()
+    override fun taskBarLayerIsVisibleAtStartAndEnd() = super.taskBarLayerIsVisibleAtStartAndEnd()
 
     @Presubmit
     @Test
@@ -209,12 +195,8 @@ class OpenImeWindowToOverViewTest(testSpec: FlickerTestParameter) : BaseTest(tes
         Assume.assumeTrue(testSpec.isLandscapeOrSeascapeAtStart)
         Assume.assumeFalse(testSpec.isTablet)
         Assume.assumeTrue(isShellTransitionsEnabled)
-        testSpec.assertLayersStart {
-            this.isVisible(ComponentNameMatcher.STATUS_BAR)
-        }
-        testSpec.assertLayersEnd {
-            this.isInvisible(ComponentNameMatcher.STATUS_BAR)
-        }
+        testSpec.assertLayersStart { this.isVisible(ComponentNameMatcher.STATUS_BAR) }
+        testSpec.assertLayersEnd { this.isInvisible(ComponentNameMatcher.STATUS_BAR) }
     }
 
     @Presubmit
@@ -230,11 +212,9 @@ class OpenImeWindowToOverViewTest(testSpec: FlickerTestParameter) : BaseTest(tes
     @Test
     fun imeLayerIsVisibleAndAssociatedWithAppWidow() {
         testSpec.assertLayersStart {
-            isVisible(ComponentNameMatcher.IME).visibleRegion(ComponentNameMatcher.IME)
-                .coversAtMost(
-                    isVisible(imeTestApp)
-                        .visibleRegion(imeTestApp).region
-                )
+            isVisible(ComponentNameMatcher.IME)
+                .visibleRegion(ComponentNameMatcher.IME)
+                .coversAtMost(isVisible(imeTestApp).visibleRegion(imeTestApp).region)
         }
         testSpec.assertLayers {
             this.invoke("imeLayerIsVisibleAndAlignAppWidow") {
@@ -252,8 +232,8 @@ class OpenImeWindowToOverViewTest(testSpec: FlickerTestParameter) : BaseTest(tes
         /**
          * Creates the test configurations.
          *
-         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring
-         * repetitions, screen orientation and navigation modes.
+         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring repetitions,
+         * screen orientation and navigation modes.
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
@@ -261,7 +241,8 @@ class OpenImeWindowToOverViewTest(testSpec: FlickerTestParameter) : BaseTest(tes
             return FlickerTestParameterFactory.getInstance()
                 .getConfigNonRotationTests(
                     supportedRotations = listOf(Surface.ROTATION_0, Surface.ROTATION_90),
-                    supportedNavigationModes = listOf(
+                    supportedNavigationModes =
+                    listOf(
                         WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY,
                         WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
                     )

@@ -1674,8 +1674,8 @@ public class ComputerEngine implements Computer {
             ApplicationInfo ai = new ApplicationInfo();
             ai.packageName = ps.getPackageName();
             ai.uid = UserHandle.getUid(userId, ps.getAppId());
-            ai.primaryCpuAbi = ps.getPrimaryCpuAbi();
-            ai.secondaryCpuAbi = ps.getSecondaryCpuAbi();
+            ai.primaryCpuAbi = ps.getPrimaryCpuAbiLegacy();
+            ai.secondaryCpuAbi = ps.getSecondaryCpuAbiLegacy();
             ai.setVersionCode(ps.getVersionCode());
             ai.flags = ps.getFlags();
             ai.privateFlags = ps.getPrivateFlags();

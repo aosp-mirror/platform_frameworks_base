@@ -225,7 +225,7 @@ final class InputMethodUtils {
      * @return {@code true} if the package name belongs to the UID.
      */
     static boolean checkIfPackageBelongsToUid(AppOpsManager appOpsManager,
-            @UserIdInt int uid, String packageName) {
+            int uid, String packageName) {
         try {
             appOpsManager.checkPackage(uid, packageName);
             return true;

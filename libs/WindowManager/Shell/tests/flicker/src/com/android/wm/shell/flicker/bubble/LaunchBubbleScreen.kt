@@ -32,8 +32,10 @@ import org.junit.runners.Parameterized
  * To run this test: `atest WMShellFlickerTests:LaunchBubbleScreen`
  *
  * Actions:
+ * ```
  *     Launch an app and enable app's bubble notification
  *     Send a bubble notification
+ * ```
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
@@ -48,17 +50,15 @@ open class LaunchBubbleScreen(testSpec: FlickerTestParameter) : BaseBubbleScreen
                 addBubbleBtn?.click() ?: error("Bubble widget not found")
 
                 device.wait(
-                    Until.findObjects(
-                        By.res(SYSTEM_UI_PACKAGE, BUBBLE_RES_NAME)
-                    ), FIND_OBJECT_TIMEOUT
-                ) ?: error("No bubbles found")
+                    Until.findObjects(By.res(SYSTEM_UI_PACKAGE, BUBBLE_RES_NAME)),
+                    FIND_OBJECT_TIMEOUT
+                )
+                    ?: error("No bubbles found")
             }
         }
 
     @Test
     open fun testAppIsAlwaysVisible() {
-        testSpec.assertLayers {
-            this.isVisible(testApp)
-        }
+        testSpec.assertLayers { this.isVisible(testApp) }
     }
 }

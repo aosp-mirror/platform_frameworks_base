@@ -5278,8 +5278,9 @@ class Task extends TaskFragment {
         return false;
     }
 
-    boolean navigateUpTo(ActivityRecord srec, Intent destIntent, NeededUriGrants destGrants,
-            int resultCode, Intent resultData, NeededUriGrants resultGrants) {
+    boolean navigateUpTo(ActivityRecord srec, Intent destIntent, String resolvedType,
+            NeededUriGrants destGrants, int resultCode, Intent resultData,
+            NeededUriGrants resultGrants) {
         if (!srec.attachedToProcess()) {
             // Nothing to do if the caller is not attached, because this method should be called
             // from an alive activity.
@@ -5348,32 +5349,26 @@ class Task extends TaskFragment {
 
         if (parent != null && foundParentInTask) {
             final int callingUid = srec.info.applicationInfo.uid;
-            try {
-                ActivityInfo aInfo = AppGlobals.getPackageManager().getActivityInfo(
-                        destIntent.getComponent(), ActivityManagerService.STOCK_PM_FLAGS,
-                        srec.mUserId);
-                // TODO(b/64750076): Check if calling pid should really be -1.
-                final int res = mAtmService.getActivityStartController()
-                        .obtainStarter(destIntent, "navigateUpTo")
-                        .setCaller(srec.app.getThread())
-                        .setActivityInfo(aInfo)
-                        .setResultTo(parent.token)
-                        .setIntentGrants(destGrants)
-                        .setCallingPid(-1)
-                        .setCallingUid(callingUid)
-                        .setCallingPackage(srec.packageName)
-                        .setCallingFeatureId(parent.launchedFromFeatureId)
-                        .setRealCallingPid(-1)
-                        .setRealCallingUid(callingUid)
-                        .setComponentSpecified(true)
-                        .execute();
-                foundParentInTask = isStartResultSuccessful(res);
-                if (res == ActivityManager.START_SUCCESS) {
-                    parent.finishIfPossible(resultCode, resultData, resultGrants,
-                            "navigate-top", true /* oomAdj */);
-                }
-            } catch (RemoteException e) {
-                foundParentInTask = false;
+            // TODO(b/64750076): Check if calling pid should really be -1.
+            final int res = mAtmService.getActivityStartController()
+                    .obtainStarter(destIntent, "navigateUpTo")
+                    .setResolvedType(resolvedType)
+                    .setUserId(srec.mUserId)
+                    .setCaller(srec.app.getThread())
+                    .setResultTo(parent.token)
+                    .setIntentGrants(destGrants)
+                    .setCallingPid(-1)
+                    .setCallingUid(callingUid)
+                    .setCallingPackage(srec.packageName)
+                    .setCallingFeatureId(parent.launchedFromFeatureId)
+                    .setRealCallingPid(-1)
+                    .setRealCallingUid(callingUid)
+                    .setComponentSpecified(true)
+                    .execute();
+            foundParentInTask = isStartResultSuccessful(res);
+            if (res == ActivityManager.START_SUCCESS) {
+                parent.finishIfPossible(resultCode, resultData, resultGrants,
+                        "navigate-top", true /* oomAdj */);
             }
         }
         Binder.restoreCallingIdentity(origId);

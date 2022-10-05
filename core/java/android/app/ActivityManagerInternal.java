@@ -31,6 +31,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityPresentationInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PermissionMethod;
+import android.content.pm.PermissionName;
 import android.content.pm.UserInfo;
 import android.net.Uri;
 import android.os.Bundle;
@@ -294,7 +295,7 @@ public abstract class ActivityManagerInternal {
 
     /** Checks if the calling binder pid as the permission. */
     @PermissionMethod
-    public abstract void enforceCallingPermission(String permission, String func);
+    public abstract void enforceCallingPermission(@PermissionName String permission, String func);
 
     /** Returns the current user id. */
     public abstract int getCurrentUserId();

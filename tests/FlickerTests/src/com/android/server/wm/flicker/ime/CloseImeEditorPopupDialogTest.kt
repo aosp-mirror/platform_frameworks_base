@@ -16,7 +16,7 @@
 
 package com.android.server.wm.flicker.ime
 
-import android.platform.test.annotations.Postsubmit
+import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import android.view.WindowManagerPolicyConstants
 import androidx.test.filters.RequiresDevice
@@ -50,47 +50,20 @@ class CloseImeEditorPopupDialogTest(testSpec: FlickerTestParameter) : BaseTest(t
         }
         transitions {
             imeTestApp.dismissDialog(wmHelper)
-            wmHelper.StateSyncBuilder()
-                .withImeGone()
-                .waitForAndVerify()
+            wmHelper.StateSyncBuilder().withImeGone().waitForAndVerify()
         }
         teardown {
             tapl.goHome()
-            wmHelper.StateSyncBuilder()
-                .withHomeActivityVisible()
-                .waitForAndVerify()
+            wmHelper.StateSyncBuilder().withHomeActivityVisible().waitForAndVerify()
             imeTestApp.exit(wmHelper)
         }
     }
 
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun taskBarWindowIsAlwaysVisible() = super.taskBarWindowIsAlwaysVisible()
-
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun taskBarLayerIsVisibleAtStartAndEnd() =
-        super.taskBarLayerIsVisibleAtStartAndEnd()
-
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
-        super.visibleLayersShownMoreThanOneConsecutiveEntry()
-
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
-        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
-
-    @Postsubmit
+    @Presubmit
     @Test
     fun imeWindowBecameInvisible() = testSpec.imeWindowBecomesInvisible()
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun imeLayerAndImeSnapshotVisibleOnScreen() {
         testSpec.assertLayers {
@@ -103,20 +76,23 @@ class CloseImeEditorPopupDialogTest(testSpec: FlickerTestParameter) : BaseTest(t
         }
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun imeSnapshotAssociatedOnAppVisibleRegion() {
         testSpec.assertLayers {
             this.invoke("imeSnapshotAssociatedOnAppVisibleRegion") {
-                val imeSnapshotLayers = it.subjects.filter { subject ->
-                    subject.name.contains(
-                        ComponentNameMatcher.IME_SNAPSHOT.toLayerName()
-                    ) && subject.isVisible
-                }
+                val imeSnapshotLayers =
+                    it.subjects.filter { subject ->
+                        subject.name.contains(ComponentNameMatcher.IME_SNAPSHOT.toLayerName()) &&
+                            subject.isVisible
+                    }
                 if (imeSnapshotLayers.isNotEmpty()) {
-                    val visibleAreas = imeSnapshotLayers.mapNotNull { imeSnapshotLayer ->
-                        imeSnapshotLayer.layer?.visibleRegion
-                    }.toTypedArray()
+                    val visibleAreas =
+                        imeSnapshotLayers
+                            .mapNotNull { imeSnapshotLayer ->
+                                imeSnapshotLayer.layer?.visibleRegion
+                            }
+                            .toTypedArray()
                     val imeVisibleRegion = RegionSubject.assertThat(visibleAreas, this, timestamp)
                     val appVisibleRegion = it.visibleRegion(imeTestApp)
                     if (imeVisibleRegion.region.isNotEmpty) {
@@ -133,7 +109,8 @@ class CloseImeEditorPopupDialogTest(testSpec: FlickerTestParameter) : BaseTest(t
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
                 .getConfigNonRotationTests(
-                    supportedNavigationModes = listOf(
+                    supportedNavigationModes =
+                    listOf(
                         WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY,
                         WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
                     ),

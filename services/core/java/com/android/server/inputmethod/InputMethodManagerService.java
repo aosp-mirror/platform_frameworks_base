@@ -298,8 +298,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     final IWindowManager mIWindowManager;
     private final SparseBooleanArray mLoggedDeniedGetInputMethodWindowVisibleHeightForUid =
             new SparseBooleanArray(0);
-    private final SparseBooleanArray mLoggedDeniedIsInputMethodPickerShownForTestForUid =
-            new SparseBooleanArray(0);
     final WindowManagerInternal mWindowManagerInternal;
     final PackageManagerInternal mPackageManagerInternal;
     final InputManagerInternal mInputManagerInternal;
@@ -1479,7 +1477,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         public void onUidRemoved(int uid) {
             synchronized (ImfLock.class) {
                 mLoggedDeniedGetInputMethodWindowVisibleHeightForUid.delete(uid);
-                mLoggedDeniedIsInputMethodPickerShownForTestForUid.delete(uid);
             }
         }
 
@@ -2960,19 +2957,17 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     hideStatusBarIconLocked();
                 } else if (packageName != null) {
                     if (DEBUG) Slog.d(TAG, "show a small icon for the input method");
-                    CharSequence contentDescription = null;
+                    final PackageManager userAwarePackageManager =
+                            getPackageManagerForUser(mContext, mSettings.getCurrentUserId());
+                    ApplicationInfo applicationInfo = null;
                     try {
-                        // Use PackageManager to load label
-                        final PackageManager packageManager = mContext.getPackageManager();
-                        final ApplicationInfo applicationInfo = mIPackageManager
-                                .getApplicationInfo(packageName, 0, mSettings.getCurrentUserId());
-                        if (applicationInfo != null) {
-                            contentDescription = packageManager
-                                    .getApplicationLabel(applicationInfo);
-                        }
-                    } catch (RemoteException e) {
-                        /* ignore */
+                        applicationInfo = userAwarePackageManager.getApplicationInfo(packageName,
+                                PackageManager.ApplicationInfoFlags.of(0));
+                    } catch (PackageManager.NameNotFoundException e) {
                     }
+                    final CharSequence contentDescription = applicationInfo != null
+                            ? userAwarePackageManager.getApplicationLabel(applicationInfo)
+                            : null;
                     if (mStatusBar != null) {
                         mStatusBar.setIcon(mSlotIme, packageName, iconId, 0,
                                 contentDescription  != null
@@ -4002,19 +3997,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     /**
      * A test API for CTS to make sure that the input method menu is showing.
      */
+    @EnforcePermission(Manifest.permission.TEST_INPUT_METHOD)
     public boolean isInputMethodPickerShownForTest() {
-        if (mContext.checkCallingPermission(android.Manifest.permission.TEST_INPUT_METHOD)
-                != PackageManager.PERMISSION_GRANTED) {
-            final int callingUid = Binder.getCallingUid();
-            synchronized (ImfLock.class) {
-                if (!mLoggedDeniedIsInputMethodPickerShownForTestForUid.get(callingUid)) {
-                    EventLog.writeEvent(0x534e4554, "237317525", callingUid, "");
-                    mLoggedDeniedIsInputMethodPickerShownForTestForUid.put(callingUid, true);
-                }
-            }
-            throw new SecurityException(
-                    "isInputMethodPickerShownForTest requires TEST_INPUT_METHOD permission");
-        }
         synchronized (ImfLock.class) {
             return mMenuController.isisInputMethodPickerShownForTestLocked();
         }

@@ -588,8 +588,9 @@ public class FaceService extends SystemService {
                 }
                 try {
                     final SensorProps[] props = face.getSensorProps();
-                    final FaceProvider provider = new FaceProvider(getContext(), props, instance,
-                            mLockoutResetDispatcher, BiometricContext.getInstance(getContext()));
+                    final FaceProvider provider = new FaceProvider(getContext(),
+                            mBiometricStateCallback, props, instance, mLockoutResetDispatcher,
+                            BiometricContext.getInstance(getContext()));
                     providers.add(provider);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Remote exception in getSensorProps: " + fqName);
@@ -600,14 +601,14 @@ public class FaceService extends SystemService {
         }
 
         @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
-        @Override // Binder call
         public void registerAuthenticators(
                 @NonNull List<FaceSensorPropertiesInternal> hidlSensors) {
             mRegistry.registerAll(() -> {
                 final List<ServiceProvider> providers = new ArrayList<>();
                 for (FaceSensorPropertiesInternal hidlSensor : hidlSensors) {
                     providers.add(
-                            Face10.newInstance(getContext(), hidlSensor, mLockoutResetDispatcher));
+                            Face10.newInstance(getContext(), mBiometricStateCallback,
+                                    hidlSensor, mLockoutResetDispatcher));
                 }
                 providers.addAll(getAidlProviders());
                 return providers;

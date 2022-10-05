@@ -36,16 +36,19 @@ import org.junit.runners.Parameterized
  * To run this test: `atest WMShellFlickerTests:ExitPipWithSwipeDownTest`
  *
  * Actions:
+ * ```
  *     Launch an app in pip mode [pipApp],
  *     Swipe the pip window to the bottom-center of the screen and wait it disappear
- *
+ * ```
  * Notes:
+ * ```
  *     1. Some default assertions (e.g., nav bar, status bar and screen covered)
  *        are inherited [PipTransition]
  *     2. Part of the test setup occurs automatically via
  *        [com.android.server.wm.flicker.TransitionRunnerWithRules],
  *        including configuring navigation mode, initial orientation and ensuring no
  *        apps are running before setup
+ * ```
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
@@ -60,20 +63,24 @@ class ExitPipWithSwipeDownTest(testSpec: FlickerTestParameter) : ExitPipTransiti
                 val pipCenterX = pipRegion.centerX()
                 val pipCenterY = pipRegion.centerY()
                 val displayCenterX = device.displayWidth / 2
-                val barComponent = if (testSpec.isTablet) {
-                    ComponentNameMatcher.TASK_BAR
-                } else {
-                    ComponentNameMatcher.NAV_BAR
-                }
-                val barLayerHeight = wmHelper.currentState.layerState
-                    .getLayerWithBuffer(barComponent)
-                    ?.visibleRegion
-                    ?.height ?: error("Couldn't find Nav or Task bar layer")
+                val barComponent =
+                    if (testSpec.isTablet) {
+                        ComponentNameMatcher.TASK_BAR
+                    } else {
+                        ComponentNameMatcher.NAV_BAR
+                    }
+                val barLayerHeight =
+                    wmHelper.currentState.layerState
+                        .getLayerWithBuffer(barComponent)
+                        ?.visibleRegion
+                        ?.height
+                        ?: error("Couldn't find Nav or Task bar layer")
                 // The dismiss button doesn't appear at the complete bottom of the screen,
                 val displayY = device.displayHeight - barLayerHeight
                 device.swipe(pipCenterX, pipCenterY, displayCenterX, displayY, 50)
                 // Wait until the other app is no longer visible
-                wmHelper.StateSyncBuilder()
+                wmHelper
+                    .StateSyncBuilder()
                     .withPipGone()
                     .withWindowSurfaceDisappeared(pipApp)
                     .withAppTransitionIdle()
@@ -81,29 +88,25 @@ class ExitPipWithSwipeDownTest(testSpec: FlickerTestParameter) : ExitPipTransiti
             }
         }
 
-    /**
-     * Checks that the focus doesn't change between windows during the transition
-     */
+    /** Checks that the focus doesn't change between windows during the transition */
     @Presubmit
     @Test
     fun focusDoesNotChange() {
-        testSpec.assertEventLog {
-            this.focusDoesNotChange()
-        }
+        testSpec.assertEventLog { this.focusDoesNotChange() }
     }
 
     companion object {
         /**
          * Creates the test configurations.
          *
-         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring
-         * repetitions, screen orientation and navigation modes.
+         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring repetitions,
+         * screen orientation and navigation modes.
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): List<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
-                    .getConfigNonRotationTests(supportedRotations = listOf(Surface.ROTATION_0))
+                .getConfigNonRotationTests(supportedRotations = listOf(Surface.ROTATION_0))
         }
     }
 }

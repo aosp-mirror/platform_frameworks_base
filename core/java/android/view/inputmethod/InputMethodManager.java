@@ -549,7 +549,10 @@ public final class InputMethodManager {
      */
     @Deprecated
     @GuardedBy("mH")
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(trackingBug = 236937383,
+            maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE,
+            publicAlternatives = "Apps should not change behavior based on the currently connected"
+                    + " IME. If absolutely needed, use {@link InputMethodInfo#getId()} instead.")
     String mCurId;
 
     /**
@@ -560,7 +563,9 @@ public final class InputMethodManager {
     @Deprecated
     @GuardedBy("mH")
     @Nullable
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(trackingBug = 236937383,
+            maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE,
+            publicAlternatives = "Use methods on {@link InputMethodManager} instead.")
     IInputMethodSession mCurMethod;
 
     /**
@@ -718,14 +723,8 @@ public final class InputMethodManager {
             ImeTracing.getInstance().triggerClientDump(
                     "InputMethodManager.DelegateImpl#startInput", InputMethodManager.this,
                     null /* icProto */);
-            synchronized (mH) {
-                mCurrentEditorInfo = null;
-                mCompletions = null;
-                mServedConnecting = true;
-            }
-            return startInputInner(startInputReason,
-                    focusedView != null ? focusedView.getWindowToken() : null, startInputFlags,
-                    softInputMode, windowFlags);
+            return startInputOnWindowFocusGainInternal(startInputReason, focusedView,
+                    startInputFlags, softInputMode, windowFlags);
         }
 
         /**
@@ -800,7 +799,7 @@ public final class InputMethodManager {
                 // should be done in conjunction with telling the system service
                 // about the window gaining focus, to help make the transition
                 // smooth.
-                if (startInput(StartInputReason.WINDOW_FOCUS_GAIN,
+                if (startInputOnWindowFocusGainInternal(StartInputReason.WINDOW_FOCUS_GAIN,
                         focusedView, startInputFlags, softInputMode, windowFlags)) {
                     return;
                 }
@@ -922,6 +921,19 @@ public final class InputMethodManager {
                     && mServedInputConnection.isActive()
                     && mServedInputConnection.getServedView() == view;
         }
+    }
+
+    private boolean startInputOnWindowFocusGainInternal(@StartInputReason int startInputReason,
+            View focusedView, @StartInputFlags int startInputFlags,
+            @SoftInputModeFlags int softInputMode, int windowFlags) {
+        synchronized (mH) {
+            mCurrentEditorInfo = null;
+            mCompletions = null;
+            mServedConnecting = true;
+        }
+        return startInputInner(startInputReason,
+                focusedView != null ? focusedView.getWindowToken() : null, startInputFlags,
+                softInputMode, windowFlags);
     }
 
     @GuardedBy("mH")
@@ -1136,7 +1148,7 @@ public final class InputMethodManager {
                                     .checkFocus(mRestartOnNextWindowFocus, false)) {
                                 final int reason = active ? StartInputReason.ACTIVATED_BY_IMMS
                                         : StartInputReason.DEACTIVATED_BY_IMMS;
-                                mDelegate.startInput(reason, null, 0, 0, 0);
+                                startInputOnWindowFocusGainInternal(reason, null, 0, 0, 0);
                             }
                         }
                     }
@@ -2357,7 +2369,7 @@ public final class InputMethodManager {
             // The view is running on a different thread than our own, so
             // we need to reschedule our work for over there.
             if (DEBUG) Log.v(TAG, "Starting input: reschedule to view thread");
-            vh.post(() -> mDelegate.startInput(startInputReason, null, 0, 0, 0));
+            vh.post(() -> startInputOnWindowFocusGainInternal(startInputReason, null, 0, 0, 0));
             return false;
         }
 

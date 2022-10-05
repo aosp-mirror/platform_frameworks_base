@@ -23,34 +23,23 @@ import com.android.server.wm.flicker.traces.region.RegionSubject
 import com.android.wm.shell.flicker.Direction
 import org.junit.Test
 
-/**
- * Base class for pip tests with Launcher shelf height change
- */
-abstract class MovePipShelfHeightTransition(
-    testSpec: FlickerTestParameter
-) : PipTransition(testSpec) {
+/** Base class for pip tests with Launcher shelf height change */
+abstract class MovePipShelfHeightTransition(testSpec: FlickerTestParameter) :
+    PipTransition(testSpec) {
     protected val testApp = FixedOrientationAppHelper(instrumentation)
 
-    /**
-     * Checks [pipApp] window remains visible throughout the animation
-     */
+    /** Checks [pipApp] window remains visible throughout the animation */
     @Presubmit
     @Test
     open fun pipWindowIsAlwaysVisible() {
-        testSpec.assertWm {
-            isAppWindowVisible(pipApp)
-        }
+        testSpec.assertWm { isAppWindowVisible(pipApp) }
     }
 
-    /**
-     * Checks [pipApp] layer remains visible throughout the animation
-     */
+    /** Checks [pipApp] layer remains visible throughout the animation */
     @Presubmit
     @Test
     open fun pipLayerIsAlwaysVisible() {
-        testSpec.assertLayers {
-            isVisible(pipApp)
-        }
+        testSpec.assertLayers { isVisible(pipApp) }
     }
 
     /**
@@ -60,9 +49,7 @@ abstract class MovePipShelfHeightTransition(
     @Presubmit
     @Test
     open fun pipWindowRemainInsideVisibleBounds() {
-        testSpec.assertWmVisibleRegion(pipApp) {
-            coversAtMost(displayBounds)
-        }
+        testSpec.assertWmVisibleRegion(pipApp) { coversAtMost(displayBounds) }
     }
 
     /**
@@ -72,9 +59,7 @@ abstract class MovePipShelfHeightTransition(
     @Presubmit
     @Test
     open fun pipLayerRemainInsideVisibleBounds() {
-        testSpec.assertLayersVisibleRegion(pipApp) {
-            coversAtMost(displayBounds)
-        }
+        testSpec.assertLayersVisibleRegion(pipApp) { coversAtMost(displayBounds) }
     }
 
     /**
@@ -83,9 +68,8 @@ abstract class MovePipShelfHeightTransition(
      */
     protected fun pipWindowMoves(direction: Direction) {
         testSpec.assertWm {
-            val pipWindowFrameList = this.windowStates {
-                pipApp.windowMatchesAnyOf(it) && it.isVisible
-            }.map { it.frame }
+            val pipWindowFrameList =
+                this.windowStates { pipApp.windowMatchesAnyOf(it) && it.isVisible }.map { it.frame }
             when (direction) {
                 Direction.UP -> assertRegionMovementUp(pipWindowFrameList)
                 Direction.DOWN -> assertRegionMovementDown(pipWindowFrameList)
@@ -100,9 +84,9 @@ abstract class MovePipShelfHeightTransition(
      */
     protected fun pipLayerMoves(direction: Direction) {
         testSpec.assertLayers {
-            val pipLayerRegionList = this.layers {
-                pipApp.layerMatchesAnyOf(it) && it.isVisible
-            }.map { it.visibleRegion }
+            val pipLayerRegionList =
+                this.layers { pipApp.layerMatchesAnyOf(it) && it.isVisible }
+                    .map { it.visibleRegion }
             when (direction) {
                 Direction.UP -> assertRegionMovementUp(pipLayerRegionList)
                 Direction.DOWN -> assertRegionMovementDown(pipLayerRegionList)

@@ -15,6 +15,7 @@
  */
 
 @file:JvmName("CommonAssertions")
+
 package com.android.server.wm.flicker.ime
 
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -22,17 +23,13 @@ import com.android.server.wm.traces.common.ComponentNameMatcher
 
 fun FlickerTestParameter.imeLayerBecomesVisible() {
     assertLayers {
-        this.isInvisible(ComponentNameMatcher.IME)
-            .then()
-            .isVisible(ComponentNameMatcher.IME)
+        this.isInvisible(ComponentNameMatcher.IME).then().isVisible(ComponentNameMatcher.IME)
     }
 }
 
 fun FlickerTestParameter.imeLayerBecomesInvisible() {
     assertLayers {
-        this.isVisible(ComponentNameMatcher.IME)
-            .then()
-            .isInvisible(ComponentNameMatcher.IME)
+        this.isVisible(ComponentNameMatcher.IME).then().isInvisible(ComponentNameMatcher.IME)
     }
 }
 
@@ -46,9 +43,7 @@ fun FlickerTestParameter.imeWindowIsAlwaysVisible(rotatesScreen: Boolean = false
                 .isNonAppWindowVisible(ComponentNameMatcher.IME)
         }
     } else {
-        assertWm {
-            this.isNonAppWindowVisible(ComponentNameMatcher.IME)
-        }
+        assertWm { this.isNonAppWindowVisible(ComponentNameMatcher.IME) }
     }
 }
 

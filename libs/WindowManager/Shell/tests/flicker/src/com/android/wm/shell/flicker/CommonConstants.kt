@@ -15,6 +15,7 @@
  */
 
 @file:JvmName("CommonConstants")
+
 package com.android.wm.shell.flicker
 
 import com.android.server.wm.traces.common.ComponentNameMatcher
@@ -26,5 +27,8 @@ val SPLIT_SCREEN_DIVIDER_COMPONENT = ComponentNameMatcher("", "StageCoordinatorS
 val SPLIT_DECOR_MANAGER = ComponentNameMatcher("", "SplitDecorManager#")
 
 enum class Direction {
-    UP, DOWN, LEFT, RIGHT
+    UP,
+    DOWN,
+    LEFT,
+    RIGHT
 }

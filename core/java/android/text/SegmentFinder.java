@@ -17,25 +17,23 @@
 package android.text;
 
 import android.annotation.IntRange;
+import android.graphics.RectF;
 
 /**
  * Finds text segment boundaries within text. Subclasses can implement different types of text
- * segments. Grapheme clusters and words are examples of possible text segments.
+ * segments. Grapheme clusters and words are examples of possible text segments. These are
+ * implemented by {@link GraphemeClusterSegmentFinder} and {@link WordSegmentFinder}.
  *
- * <p>Granular units may not overlap, so every character belongs to at most one text segment. A
+ * <p>Text segments may not overlap, so every character belongs to at most one text segment. A
  * character may belong to no text segments.
  *
- * <p>For example, a word level text segment iterator may subdivide the text "Hello, World!" into
- * four text segments: "Hello", ",", "World", "!". The space character does not belong to any text
- * segments.
+ * <p>For example, WordSegmentFinder subdivides the text "Hello, World!" into four text segments:
+ * "Hello", ",", "World", "!". The space character does not belong to any text segments.
  *
- * @hide
+ * @see Layout#getRangeForRect(RectF, SegmentFinder, Layout.TextInclusionStrategy)
  */
-public abstract class SegmentIterator {
+public abstract class SegmentFinder {
     public static final int DONE = -1;
-
-    private int mRunStartOffset;
-    private int mRunEndOffset;
 
     /**
      * Returns the character offset of the previous text segment start boundary before the specified
@@ -60,52 +58,4 @@ public abstract class SegmentIterator {
      * character offset, or {@code DONE} if there are none.
      */
     public abstract int nextEndBoundary(@IntRange(from = 0) int offset);
-
-    /**
-     * Sets the start and end of a run which can be used to constrain the scope of the iterator's
-     * search.
-     *
-     * @hide
-     */
-    void setRunLimits(
-            @IntRange(from = 0) int runStartOffset, @IntRange(from = 0) int runEndOffset) {
-        mRunStartOffset = runStartOffset;
-        mRunEndOffset = runEndOffset;
-    }
-
-    /** @hide */
-    int previousStartBoundaryOrRunStart(@IntRange(from = 0) int offset) {
-        int start = previousStartBoundary(offset);
-        if (start == DONE) {
-            return DONE;
-        }
-        return Math.max(start, mRunStartOffset);
-    }
-
-    /** @hide */
-    int previousEndBoundaryWithinRunLimits(@IntRange(from = 0) int offset) {
-        int end = previousEndBoundary(offset);
-        if (end <= mRunStartOffset) {
-            return DONE;
-        }
-        return end;
-    }
-
-    /** @hide */
-    int nextStartBoundaryWithinRunLimits(@IntRange(from = 0) int offset) {
-        int start = nextStartBoundary(offset);
-        if (start >= mRunEndOffset) {
-            return DONE;
-        }
-        return start;
-    }
-
-    /** @hide */
-    int nextEndBoundaryOrRunEnd(@IntRange(from = 0) int offset) {
-        int end = nextEndBoundary(offset);
-        if (end == DONE) {
-            return DONE;
-        }
-        return Math.min(end, mRunEndOffset);
-    }
 }

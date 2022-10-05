@@ -409,8 +409,8 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
             }
 
             final String[] instructionSets = getAppDexInstructionSets(
-                    AndroidPackageUtils.getPrimaryCpuAbi(pkg, packageState),
-                    AndroidPackageUtils.getSecondaryCpuAbi(pkg, packageState));
+                    packageState.getPrimaryCpuAbi(),
+                    packageState.getSecondaryCpuAbi());
             final List<String> paths =
                     AndroidPackageUtils.getAllCodePathsExcludingResourceOnly(pkg);
             final String[] dexCodeInstructionSets = getDexCodeInstructionSets(instructionSets);

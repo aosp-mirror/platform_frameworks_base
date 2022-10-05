@@ -26,7 +26,7 @@ import java.lang.annotation.Target;
  * Documents that the subject method's job is to look
  * up whether the provided or calling uid/pid has the requested permission.
  *
- * Methods should either return `void`, but potentially throw {@link SecurityException},
+ * <p>Methods should either return `void`, but potentially throw {@link SecurityException},
  * or return {@link android.content.pm.PackageManager.PermissionResult} `int`.
  *
  * @hide
