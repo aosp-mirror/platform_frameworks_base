@@ -23,12 +23,18 @@ import android.content.pm.ResolveInfo
 import android.provider.MediaStore
 import com.android.server.wm.traces.common.ComponentNameMatcher
 
-class CameraAppHelper @JvmOverloads constructor(
+class CameraAppHelper
+@JvmOverloads
+constructor(
     instrumentation: Instrumentation,
     pkgManager: PackageManager = instrumentation.context.packageManager
-) : StandardAppHelper(instrumentation, getCameraLauncherName(pkgManager),
-        getCameraComponent(pkgManager)){
-    companion object{
+) :
+    StandardAppHelper(
+        instrumentation,
+        getCameraLauncherName(pkgManager),
+        getCameraComponent(pkgManager)
+    ) {
+    companion object {
         private fun getCameraIntent(): Intent {
             return Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         }
@@ -36,13 +42,15 @@ class CameraAppHelper @JvmOverloads constructor(
         private fun getResolveInfo(pkgManager: PackageManager): ResolveInfo {
             val intent = getCameraIntent()
             return pkgManager.resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY)
-                    ?: error("unable to resolve camera activity")
+                ?: error("unable to resolve camera activity")
         }
 
         private fun getCameraComponent(pkgManager: PackageManager): ComponentNameMatcher {
             val resolveInfo = getResolveInfo(pkgManager)
-            return ComponentNameMatcher(resolveInfo.activityInfo.packageName,
-                    className = resolveInfo.activityInfo.name)
+            return ComponentNameMatcher(
+                resolveInfo.activityInfo.packageName,
+                className = resolveInfo.activityInfo.name
+            )
         }
 
         private fun getCameraLauncherName(pkgManager: PackageManager): String {

@@ -20,16 +20,13 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserHandleAware;
 import android.annotation.UserIdInt;
-import android.app.AppOpsManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.res.Resources;
-import android.os.Binder;
 import android.os.Build;
-import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -45,7 +42,6 @@ import android.view.textservice.SpellCheckerInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.inputmethod.StartInputFlags;
-import com.android.internal.util.ArrayUtils;
 import com.android.server.LocalServices;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.textservices.TextServicesManagerInternal;
@@ -79,29 +75,6 @@ final class InputMethodUtils {
         // This utility class is not publicly instantiable.
     }
 
-    // ----------------------------------------------------------------------
-    // Utilities for debug
-    static String getApiCallStack() {
-        String apiCallStack = "";
-        try {
-            throw new RuntimeException();
-        } catch (RuntimeException e) {
-            final StackTraceElement[] frames = e.getStackTrace();
-            for (int j = 1; j < frames.length; ++j) {
-                final String tempCallStack = frames[j].toString();
-                if (TextUtils.isEmpty(apiCallStack)) {
-                    // Overwrite apiCallStack if it's empty
-                    apiCallStack = tempCallStack;
-                } else if (tempCallStack.indexOf("Transact(") < 0) {
-                    // Overwrite apiCallStack if it's not a binder call
-                    apiCallStack = tempCallStack;
-                } else {
-                    break;
-                }
-            }
-        }
-        return apiCallStack;
-    }
     // ----------------------------------------------------------------------
 
     static boolean canAddToLastInputMethod(InputMethodSubtype subtype) {
@@ -218,20 +191,20 @@ final class InputMethodUtils {
     /**
      * Returns true if a package name belongs to a UID.
      *
-     * <p>This is a simple wrapper of {@link AppOpsManager#checkPackage(int, String)}.</p>
-     * @param appOpsManager the {@link AppOpsManager} object to be used for the validation.
+     * <p>This is a simple wrapper of
+     * {@link PackageManagerInternal#getPackageUid(String, long, int)}.</p>
+     * @param packageManagerInternal the {@link PackageManagerInternal} object to be used for the
+     *                               validation.
      * @param uid the UID to be validated.
      * @param packageName the package name.
      * @return {@code true} if the package name belongs to the UID.
      */
-    static boolean checkIfPackageBelongsToUid(AppOpsManager appOpsManager,
-            @UserIdInt int uid, String packageName) {
-        try {
-            appOpsManager.checkPackage(uid, packageName);
-            return true;
-        } catch (SecurityException e) {
-            return false;
-        }
+    static boolean checkIfPackageBelongsToUid(PackageManagerInternal packageManagerInternal,
+            int uid, String packageName) {
+        // PackageManagerInternal#getPackageUid() doesn't check MATCH_INSTANT/MATCH_APEX as of
+        // writing. So setting 0 should be fine.
+        return packageManagerInternal.getPackageUid(packageName, 0 /* flags */,
+                UserHandle.getUserId(uid)) == uid;
     }
 
     /**
@@ -877,20 +850,13 @@ final class InputMethodUtils {
         boolean setAdditionalInputMethodSubtypes(@NonNull String imeId,
                 @NonNull ArrayList<InputMethodSubtype> subtypes,
                 @NonNull ArrayMap<String, List<InputMethodSubtype>> additionalSubtypeMap,
-                @NonNull IPackageManager packageManager) {
+                @NonNull PackageManagerInternal packageManagerInternal, int callingUid) {
             final InputMethodInfo imi = mMethodMap.get(imeId);
             if (imi == null) {
                 return false;
             }
-            final String[] packageInfos;
-            try {
-                packageInfos = packageManager.getPackagesForUid(Binder.getCallingUid());
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to get package infos");
-                return false;
-            }
-            if (ArrayUtils.find(packageInfos,
-                    packageInfo -> TextUtils.equals(packageInfo, imi.getPackageName())) == null) {
+            if (!InputMethodUtils.checkIfPackageBelongsToUid(packageManagerInternal, callingUid,
+                    imi.getPackageName())) {
                 return false;
             }
 

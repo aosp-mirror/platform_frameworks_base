@@ -68,6 +68,9 @@ public class Flags {
 
     public static final UnreleasedFlag INSTANT_VOICE_REPLY = new UnreleasedFlag(111, true);
 
+    public static final UnreleasedFlag NOTIFICATION_MEMORY_MONITOR_ENABLED = new UnreleasedFlag(112,
+            false);
+
     // next id: 112
 
     /***************************************/
@@ -246,6 +249,13 @@ public class Flags {
     @Keep
     public static final SysPropBooleanFlag SHOW_FLOATING_TASKS_AS_BUBBLES =
             new SysPropBooleanFlag(1107, "persist.wm.debug.floating_tasks_as_bubbles", false);
+
+    @Keep
+    public static final SysPropBooleanFlag ENABLE_FLING_TO_DISMISS_BUBBLE =
+            new SysPropBooleanFlag(1108, "persist.wm.debug.fling_to_dismiss_bubble", true);
+    @Keep
+    public static final SysPropBooleanFlag ENABLE_FLING_TO_DISMISS_PIP =
+            new SysPropBooleanFlag(1109, "persist.wm.debug.fling_to_dismiss_pip", true);
 
     // 1200 - predictive back
     @Keep

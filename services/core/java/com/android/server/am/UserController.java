@@ -654,7 +654,7 @@ class UserController implements Handler.Callback {
         EventLog.writeEvent(EventLogTags.UC_FINISH_USER_UNLOCKING, userId);
         logUserLifecycleEvent(userId, USER_LIFECYCLE_EVENT_UNLOCKING_USER,
                 USER_LIFECYCLE_EVENT_STATE_BEGIN);
-        // Only keep marching forward if user is actually unlocked
+        // If the user key hasn't been unlocked yet, we cannot proceed.
         if (!StorageManager.isUserKeyUnlocked(userId)) return false;
         synchronized (mLock) {
             // Do not proceed if unexpected state or a stale user
@@ -1776,28 +1776,19 @@ class UserController implements Handler.Callback {
         }
     }
 
-    boolean unlockUser(final @UserIdInt int userId, byte[] secret, IProgressListener listener) {
+    boolean unlockUser(@UserIdInt int userId, @Nullable IProgressListener listener) {
         checkCallingPermission(INTERACT_ACROSS_USERS_FULL, "unlockUser");
         EventLog.writeEvent(EventLogTags.UC_UNLOCK_USER, userId);
         final long binderToken = Binder.clearCallingIdentity();
         try {
-            return unlockUserCleared(userId, secret, listener);
+            return maybeUnlockUser(userId, listener);
         } finally {
             Binder.restoreCallingIdentity(binderToken);
         }
     }
 
-    /**
-     * Attempt to unlock user without a secret. This typically succeeds when the
-     * device doesn't have credential-encrypted storage, or when the
-     * credential-encrypted storage isn't tied to a user-provided PIN or
-     * pattern.
-     */
-    private boolean maybeUnlockUser(final @UserIdInt int userId) {
-        return unlockUserCleared(userId, null, null);
-    }
-
-    private static void notifyFinished(@UserIdInt int userId, IProgressListener listener) {
+    private static void notifyFinished(@UserIdInt int userId,
+            @Nullable IProgressListener listener) {
         if (listener == null) return;
         try {
             listener.onFinished(userId, null);
@@ -1805,8 +1796,18 @@ class UserController implements Handler.Callback {
         }
     }
 
-    private boolean unlockUserCleared(final @UserIdInt int userId, byte[] secret,
-            IProgressListener listener) {
+    private boolean maybeUnlockUser(@UserIdInt int userId) {
+        return maybeUnlockUser(userId, null);
+    }
+
+    /**
+     * Tries to unlock the given user.
+     * <p>
+     * This will succeed only if the user's CE storage key is already unlocked or if the user
+     * doesn't have a lockscreen credential set.
+     */
+    private boolean maybeUnlockUser(@UserIdInt int userId, @Nullable IProgressListener listener) {
+
         // Delay user unlocking for headless system user mode until the system boot
         // completes. When the system boot completes, the {@link #onBootCompleted()}
         // method unlocks all started users for headless system user mode. This is done
@@ -1825,14 +1826,8 @@ class UserController implements Handler.Callback {
 
         UserState uss;
         if (!StorageManager.isUserKeyUnlocked(userId)) {
-            final UserInfo userInfo = getUserInfo(userId);
-            final IStorageManager storageManager = mInjector.getStorageManager();
-            try {
-                // We always want to unlock user storage, even user is not started yet
-                storageManager.unlockUserKey(userId, userInfo.serialNumber, secret);
-            } catch (RemoteException | RuntimeException e) {
-                Slogf.w(TAG, "Failed to unlock: " + e.getMessage());
-            }
+            // We always want to try to unlock the user key, even if the user is not started yet.
+            mLockPatternUtils.unlockUserKeyIfUnsecured(userId);
         }
         synchronized (mLock) {
             // Register the given listener to watch for unlock progress

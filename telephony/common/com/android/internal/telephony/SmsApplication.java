@@ -190,12 +190,11 @@ public final class SmsApplication {
     }
 
     /**
-     * Returns the userId of the Context object, if called from a system app,
+     * Returns the userId of the current process, if called from a system app,
      * otherwise it returns the caller's userId
-     * @param context The context object passed in by the caller.
-     * @return
+     * @return userId of the caller.
      */
-    private static int getIncomingUserId(Context context) {
+    private static int getIncomingUserId() {
         int contextUserId = UserHandle.myUserId();
         final int callingUid = Binder.getCallingUid();
         if (DEBUG_MULTIUSER) {
@@ -231,7 +230,7 @@ public final class SmsApplication {
      */
     @UnsupportedAppUsage
     public static Collection<SmsApplicationData> getApplicationCollection(Context context) {
-        return getApplicationCollectionAsUser(context, getIncomingUserId(context));
+        return getApplicationCollectionAsUser(context, getIncomingUserId());
     }
 
     /**
@@ -590,7 +589,7 @@ public final class SmsApplication {
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static void setDefaultApplication(String packageName, Context context) {
-        setDefaultApplicationAsUser(packageName, context, getIncomingUserId(context));
+        setDefaultApplicationAsUser(packageName, context, getIncomingUserId());
     }
 
     /**
@@ -952,7 +951,7 @@ public final class SmsApplication {
      */
     @UnsupportedAppUsage
     public static ComponentName getDefaultSmsApplication(Context context, boolean updateIfNeeded) {
-        return getDefaultSmsApplicationAsUser(context, updateIfNeeded, getIncomingUserId(context));
+        return getDefaultSmsApplicationAsUser(context, updateIfNeeded, getIncomingUserId());
     }
 
     /**
@@ -988,7 +987,18 @@ public final class SmsApplication {
      */
     @UnsupportedAppUsage
     public static ComponentName getDefaultMmsApplication(Context context, boolean updateIfNeeded) {
-        int userId = getIncomingUserId(context);
+        return getDefaultMmsApplicationAsUser(context, updateIfNeeded, getIncomingUserId());
+    }
+
+    /**
+     * Gets the default MMS application on a given user
+     * @param context context from the calling app
+     * @param updateIfNeeded update the default app if there is no valid default app configured.
+     * @param userId target user ID.
+     * @return component name of the app and class to deliver MMS messages to.
+     */
+    public static ComponentName getDefaultMmsApplicationAsUser(Context context,
+            boolean updateIfNeeded, int userId) {
         final long token = Binder.clearCallingIdentity();
         try {
             ComponentName component = null;
@@ -1013,7 +1023,19 @@ public final class SmsApplication {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static ComponentName getDefaultRespondViaMessageApplication(Context context,
             boolean updateIfNeeded) {
-        int userId = getIncomingUserId(context);
+        return getDefaultRespondViaMessageApplicationAsUser(context, updateIfNeeded,
+                getIncomingUserId());
+    }
+
+    /**
+     * Gets the default Respond Via Message application on a given user
+     * @param context context from the calling app
+     * @param updateIfNeeded update the default app if there is no valid default app configured
+     * @param userId target user ID.
+     * @return component name of the app and class to direct Respond Via Message intent to
+     */
+    public static ComponentName getDefaultRespondViaMessageApplicationAsUser(Context context,
+            boolean updateIfNeeded, int userId) {
         final long token = Binder.clearCallingIdentity();
         try {
             ComponentName component = null;
@@ -1039,7 +1061,7 @@ public final class SmsApplication {
      */
     public static ComponentName getDefaultSendToApplication(Context context,
             boolean updateIfNeeded) {
-        int userId = getIncomingUserId(context);
+        int userId = getIncomingUserId();
         final long token = Binder.clearCallingIdentity();
         try {
             ComponentName component = null;
@@ -1064,7 +1086,20 @@ public final class SmsApplication {
      */
     public static ComponentName getDefaultExternalTelephonyProviderChangedApplication(
             Context context, boolean updateIfNeeded) {
-        int userId = getIncomingUserId(context);
+        return getDefaultExternalTelephonyProviderChangedApplicationAsUser(context, updateIfNeeded,
+                getIncomingUserId());
+    }
+
+    /**
+     * Gets the default application that handles external changes to the SmsProvider and
+     * MmsProvider on a given user.
+     * @param context context from the calling app
+     * @param updateIfNeeded update the default app if there is no valid default app configured
+     * @param userId target user ID.
+     * @return component name of the app and class to deliver change intents to.
+     */
+    public static ComponentName getDefaultExternalTelephonyProviderChangedApplicationAsUser(
+            Context context, boolean updateIfNeeded, int userId) {
         final long token = Binder.clearCallingIdentity();
         try {
             ComponentName component = null;
@@ -1089,7 +1124,18 @@ public final class SmsApplication {
      */
     public static ComponentName getDefaultSimFullApplication(
             Context context, boolean updateIfNeeded) {
-        int userId = getIncomingUserId(context);
+        return getDefaultSimFullApplicationAsUser(context, updateIfNeeded, getIncomingUserId());
+    }
+
+    /**
+     * Gets the default application that handles sim full event on a given user.
+     * @param context context from the calling app
+     * @param updateIfNeeded update the default app if there is no valid default app configured
+     * @param userId target user ID.
+     * @return component name of the app and class to deliver change intents to
+     */
+    public static ComponentName getDefaultSimFullApplicationAsUser(Context context,
+            boolean updateIfNeeded, int userId) {
         final long token = Binder.clearCallingIdentity();
         try {
             ComponentName component = null;
@@ -1114,7 +1160,12 @@ public final class SmsApplication {
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static boolean shouldWriteMessageForPackage(String packageName, Context context) {
-        return !isDefaultSmsApplication(context, packageName);
+        return !shouldWriteMessageForPackageAsUser(packageName, context, getIncomingUserId());
+    }
+
+    public static boolean shouldWriteMessageForPackageAsUser(String packageName, Context context,
+            int userId) {
+        return !isDefaultSmsApplicationAsUser(context, packageName, userId);
     }
 
     /**
@@ -1126,26 +1177,40 @@ public final class SmsApplication {
      */
     @UnsupportedAppUsage
     public static boolean isDefaultSmsApplication(Context context, String packageName) {
+        return isDefaultSmsApplicationAsUser(context, packageName, getIncomingUserId());
+    }
+
+    /**
+     * Check if a package is default sms app (or equivalent, like bluetooth) on a given user.
+     *
+     * @param context context from the calling app
+     * @param packageName the name of the package to be checked
+     * @param userId target user ID.
+     * @return true if the package is default sms app or bluetooth
+     */
+    public static boolean isDefaultSmsApplicationAsUser(Context context, String packageName,
+            int userId) {
         if (packageName == null) {
             return false;
         }
-        final String defaultSmsPackage = getDefaultSmsApplicationPackageName(context);
-        final String bluetoothPackageName = context.getResources()
+        ComponentName component = getDefaultSmsApplicationAsUser(context, false,
+                userId);
+        if (component == null) {
+            return false;
+        }
+
+        String defaultSmsPackage = component.getPackageName();
+        if (defaultSmsPackage == null) {
+            return false;
+        }
+
+        String bluetoothPackageName = context.getResources()
                 .getString(com.android.internal.R.string.config_systemBluetoothStack);
 
-        if ((defaultSmsPackage != null && defaultSmsPackage.equals(packageName))
-                || bluetoothPackageName.equals(packageName)) {
+        if (defaultSmsPackage.equals(packageName) || bluetoothPackageName.equals(packageName)) {
             return true;
         }
         return false;
-    }
-
-    private static String getDefaultSmsApplicationPackageName(Context context) {
-        final ComponentName component = getDefaultSmsApplication(context, false);
-        if (component != null) {
-            return component.getPackageName();
-        }
-        return null;
     }
 
     /**
@@ -1157,25 +1222,40 @@ public final class SmsApplication {
      */
     @UnsupportedAppUsage
     public static boolean isDefaultMmsApplication(Context context, String packageName) {
+        return isDefaultMmsApplicationAsUser(context, packageName, getIncomingUserId());
+    }
+
+    /**
+     * Check if a package is default mms app (or equivalent, like bluetooth) on a given user.
+     *
+     * @param context context from the calling app
+     * @param packageName the name of the package to be checked
+     * @param userId target user ID.
+     * @return true if the package is default mms app or bluetooth
+     */
+    public static boolean isDefaultMmsApplicationAsUser(Context context, String packageName,
+            int userId) {
         if (packageName == null) {
             return false;
         }
-        String defaultMmsPackage = getDefaultMmsApplicationPackageName(context);
+
+        ComponentName component = getDefaultMmsApplicationAsUser(context, false,
+                userId);
+        if (component == null) {
+            return false;
+        }
+
+        String defaultMmsPackage = component.getPackageName();
+        if (defaultMmsPackage == null) {
+            return false;
+        }
+
         String bluetoothPackageName = context.getResources()
                 .getString(com.android.internal.R.string.config_systemBluetoothStack);
 
-        if ((defaultMmsPackage != null && defaultMmsPackage.equals(packageName))
-                || bluetoothPackageName.equals(packageName)) {
+        if (defaultMmsPackage.equals(packageName)|| bluetoothPackageName.equals(packageName)) {
             return true;
         }
         return false;
-    }
-
-    private static String getDefaultMmsApplicationPackageName(Context context) {
-        ComponentName component = getDefaultMmsApplication(context, false);
-        if (component != null) {
-            return component.getPackageName();
-        }
-        return null;
     }
 }

@@ -332,8 +332,8 @@ class ActivityClientController extends IActivityClientController.Stub {
     }
 
     @Override
-    public boolean navigateUpTo(IBinder token, Intent destIntent, int resultCode,
-            Intent resultData) {
+    public boolean navigateUpTo(IBinder token, Intent destIntent, String resolvedType,
+            int resultCode, Intent resultData) {
         final ActivityRecord r;
         synchronized (mGlobalLock) {
             r = ActivityRecord.isInRootTaskLocked(token);
@@ -348,7 +348,7 @@ class ActivityClientController extends IActivityClientController.Stub {
 
         synchronized (mGlobalLock) {
             return r.getRootTask().navigateUpTo(
-                    r, destIntent, destGrants, resultCode, resultData, resultGrants);
+                    r, destIntent, resolvedType, destGrants, resultCode, resultData, resultGrants);
         }
     }
 

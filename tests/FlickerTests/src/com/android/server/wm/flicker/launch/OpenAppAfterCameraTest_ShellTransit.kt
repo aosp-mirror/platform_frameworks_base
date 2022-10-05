@@ -33,16 +33,14 @@ import org.junit.runners.Parameterized
  *
  * To run this test: `atest FlickerTests:OpenAppAfterCameraTest_ShellTransit`
  *
- * Notes:
- * Some default assertions are inherited [OpenAppTransition]
+ * Notes: Some default assertions are inherited [OpenAppTransition]
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class OpenAppAfterCameraTest_ShellTransit(
-    testSpec: FlickerTestParameter
-) : OpenAppAfterCameraTest(testSpec) {
+class OpenAppAfterCameraTest_ShellTransit(testSpec: FlickerTestParameter) :
+    OpenAppAfterCameraTest(testSpec) {
     @Before
     override fun before() {
         Assume.assumeFalse(isShellTransitionsEnabled)

@@ -69,7 +69,6 @@ import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
-import android.app.AppOpsManager;
 import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -298,8 +297,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     final IWindowManager mIWindowManager;
     private final SparseBooleanArray mLoggedDeniedGetInputMethodWindowVisibleHeightForUid =
             new SparseBooleanArray(0);
-    private final SparseBooleanArray mLoggedDeniedIsInputMethodPickerShownForTestForUid =
-            new SparseBooleanArray(0);
     final WindowManagerInternal mWindowManagerInternal;
     final PackageManagerInternal mPackageManagerInternal;
     final InputManagerInternal mInputManagerInternal;
@@ -309,7 +306,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     final boolean mHasFeature;
     private final ArrayMap<String, List<InputMethodSubtype>> mAdditionalSubtypeMap =
             new ArrayMap<>();
-    private final AppOpsManager mAppOpsManager;
     private final UserManager mUserManager;
     private final UserManagerInternal mUserManagerInternal;
     private final InputMethodMenuController mMenuController;
@@ -1479,7 +1475,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         public void onUidRemoved(int uid) {
             synchronized (ImfLock.class) {
                 mLoggedDeniedGetInputMethodWindowVisibleHeightForUid.delete(uid);
-                mLoggedDeniedIsInputMethodPickerShownForTestForUid.delete(uid);
             }
         }
 
@@ -1737,7 +1732,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         mInputMethodDeviceConfigs = new InputMethodDeviceConfigs();
         mImeDisplayValidator = mWindowManagerInternal::getDisplayImePolicy;
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
-        mAppOpsManager = mContext.getSystemService(AppOpsManager.class);
         mUserManager = mContext.getSystemService(UserManager.class);
         mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
         mAccessibilityManager = AccessibilityManager.getInstance(context);
@@ -2523,7 +2517,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     null, null, null, selectedMethodId, getSequenceNumberLocked(), null, false);
         }
 
-        if (!InputMethodUtils.checkIfPackageBelongsToUid(mAppOpsManager, cs.mUid,
+        if (!InputMethodUtils.checkIfPackageBelongsToUid(mPackageManagerInternal, cs.mUid,
                 editorInfo.packageName)) {
             Slog.e(TAG, "Rejecting this client as it reported an invalid package name."
                     + " uid=" + cs.mUid + " package=" + editorInfo.packageName);
@@ -2960,19 +2954,17 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     hideStatusBarIconLocked();
                 } else if (packageName != null) {
                     if (DEBUG) Slog.d(TAG, "show a small icon for the input method");
-                    CharSequence contentDescription = null;
+                    final PackageManager userAwarePackageManager =
+                            getPackageManagerForUser(mContext, mSettings.getCurrentUserId());
+                    ApplicationInfo applicationInfo = null;
                     try {
-                        // Use PackageManager to load label
-                        final PackageManager packageManager = mContext.getPackageManager();
-                        final ApplicationInfo applicationInfo = mIPackageManager
-                                .getApplicationInfo(packageName, 0, mSettings.getCurrentUserId());
-                        if (applicationInfo != null) {
-                            contentDescription = packageManager
-                                    .getApplicationLabel(applicationInfo);
-                        }
-                    } catch (RemoteException e) {
-                        /* ignore */
+                        applicationInfo = userAwarePackageManager.getApplicationInfo(packageName,
+                                PackageManager.ApplicationInfoFlags.of(0));
+                    } catch (PackageManager.NameNotFoundException e) {
                     }
+                    final CharSequence contentDescription = applicationInfo != null
+                            ? userAwarePackageManager.getApplicationLabel(applicationInfo)
+                            : null;
                     if (mStatusBar != null) {
                         mStatusBar.setIcon(mSlotIme, packageName, iconId, 0,
                                 contentDescription  != null
@@ -3962,7 +3954,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             return false;
         }
         if (getCurIntentLocked() != null && InputMethodUtils.checkIfPackageBelongsToUid(
-                mAppOpsManager,
+                mPackageManagerInternal,
                 uid,
                 getCurIntentLocked().getComponent().getPackageName())) {
             return true;
@@ -4002,19 +3994,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     /**
      * A test API for CTS to make sure that the input method menu is showing.
      */
+    @EnforcePermission(Manifest.permission.TEST_INPUT_METHOD)
     public boolean isInputMethodPickerShownForTest() {
-        if (mContext.checkCallingPermission(android.Manifest.permission.TEST_INPUT_METHOD)
-                != PackageManager.PERMISSION_GRANTED) {
-            final int callingUid = Binder.getCallingUid();
-            synchronized (ImfLock.class) {
-                if (!mLoggedDeniedIsInputMethodPickerShownForTestForUid.get(callingUid)) {
-                    EventLog.writeEvent(0x534e4554, "237317525", callingUid, "");
-                    mLoggedDeniedIsInputMethodPickerShownForTestForUid.put(callingUid, true);
-                }
-            }
-            throw new SecurityException(
-                    "isInputMethodPickerShownForTest requires TEST_INPUT_METHOD permission");
-        }
         synchronized (ImfLock.class) {
             return mMenuController.isisInputMethodPickerShownForTestLocked();
         }
@@ -4172,6 +4153,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         if (UserHandle.getCallingUserId() != userId) {
             mContext.enforceCallingPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
         }
+        final int callingUid = Binder.getCallingUid();
 
         // By this IPC call, only a process which shares the same uid with the IME can add
         // additional input method subtypes to the IME.
@@ -4192,7 +4174,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
             if (mSettings.getCurrentUserId() == userId) {
                 if (!mSettings.setAdditionalInputMethodSubtypes(imiId, toBeAdded,
-                        mAdditionalSubtypeMap, mIPackageManager)) {
+                        mAdditionalSubtypeMap, mPackageManagerInternal, callingUid)) {
                     return;
                 }
                 final long ident = Binder.clearCallingIdentity();
@@ -4211,7 +4193,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     new ArrayMap<>();
             AdditionalSubtypeUtils.load(additionalSubtypeMap, userId);
             settings.setAdditionalInputMethodSubtypes(imiId, toBeAdded, additionalSubtypeMap,
-                    mIPackageManager);
+                    mPackageManagerInternal, callingUid);
         }
     }
 
@@ -4224,8 +4206,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         final int callingUid = Binder.getCallingUid();
         final ComponentName imeComponentName =
                 imeId != null ? ComponentName.unflattenFromString(imeId) : null;
-        if (imeComponentName == null || !InputMethodUtils.checkIfPackageBelongsToUid(mAppOpsManager,
-                callingUid, imeComponentName.getPackageName())) {
+        if (imeComponentName == null || !InputMethodUtils.checkIfPackageBelongsToUid(
+                mPackageManagerInternal, callingUid, imeComponentName.getPackageName())) {
             throw new SecurityException("Calling UID=" + callingUid + " does not belong to imeId="
                     + imeId);
         }

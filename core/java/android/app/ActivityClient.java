@@ -141,11 +141,11 @@ public class ActivityClient {
         }
     }
 
-    boolean navigateUpTo(IBinder token, Intent destIntent, int resultCode,
+    boolean navigateUpTo(IBinder token, Intent destIntent, String resolvedType, int resultCode,
             Intent resultData) {
         try {
-            return getActivityClientController().navigateUpTo(token, destIntent, resultCode,
-                    resultData);
+            return getActivityClientController().navigateUpTo(token, destIntent, resolvedType,
+                    resultCode, resultData);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

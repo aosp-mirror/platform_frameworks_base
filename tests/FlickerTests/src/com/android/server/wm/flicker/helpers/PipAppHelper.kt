@@ -22,6 +22,7 @@ import android.media.session.MediaSessionManager
 import android.util.Log
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Until
+import com.android.server.wm.flicker.helpers.GestureHelper.Tuple
 import com.android.server.wm.flicker.testapp.ActivityOptions
 import com.android.server.wm.traces.common.Rect
 import com.android.server.wm.traces.common.WindowManagerConditionsFactory
@@ -29,19 +30,22 @@ import com.android.server.wm.traces.common.region.Region
 import com.android.server.wm.traces.parser.toFlickerComponent
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 
-open class PipAppHelper(instrumentation: Instrumentation) : StandardAppHelper(
-    instrumentation,
-    ActivityOptions.Pip.LABEL,
-    ActivityOptions.Pip.COMPONENT.toFlickerComponent()
-) {
+open class PipAppHelper(instrumentation: Instrumentation) :
+    StandardAppHelper(
+        instrumentation,
+        ActivityOptions.Pip.LABEL,
+        ActivityOptions.Pip.COMPONENT.toFlickerComponent()
+    ) {
     private val mediaSessionManager: MediaSessionManager
-        get() = context.getSystemService(MediaSessionManager::class.java)
-            ?: error("Could not get MediaSessionManager")
+        get() =
+            context.getSystemService(MediaSessionManager::class.java)
+                ?: error("Could not get MediaSessionManager")
 
     private val mediaController: MediaController?
-        get() = mediaSessionManager.getActiveSessions(null).firstOrNull {
-            it.packageName == `package`
-        }
+        get() =
+            mediaSessionManager.getActiveSessions(null).firstOrNull { it.packageName == `package` }
+
+    private val gestureHelper: GestureHelper = GestureHelper(mInstrumentation)
 
     open fun clickObject(resId: String) {
         val selector = By.res(`package`, resId)
@@ -51,8 +55,52 @@ open class PipAppHelper(instrumentation: Instrumentation) : StandardAppHelper(
     }
 
     /**
-     * Launches the app through an intent instead of interacting with the launcher and waits
-     * until the app window is in PIP mode
+     * Expands the PIP window my using the pinch out gesture.
+     *
+     * @param percent The percentage by which to increase the pip window size.
+     * @throws IllegalArgumentException if percentage isn't between 0.0f and 1.0f
+     */
+    fun pinchOpenPipWindow(wmHelper: WindowManagerStateHelper, percent: Float, steps: Int) {
+        // the percentage must be between 0.0f and 1.0f
+        if (percent <= 0.0f || percent > 1.0f) {
+            throw IllegalArgumentException("Percent must be between 0.0f and 1.0f")
+        }
+
+        val windowRect = getWindowRect(wmHelper)
+
+        // first pointer's initial x coordinate is halfway between the left edge and the center
+        val initLeftX = (windowRect.centerX() - windowRect.width / 4).toFloat()
+        // second pointer's initial x coordinate is halfway between the right edge and the center
+        val initRightX = (windowRect.centerX() + windowRect.width / 4).toFloat()
+
+        // horizontal distance the window should increase by
+        val distIncrease = windowRect.width * percent
+
+        // final x-coordinates
+        val finalLeftX = initLeftX - (distIncrease / 2)
+        val finalRightX = initRightX + (distIncrease / 2)
+
+        // y-coordinate is the same throughout this animation
+        val yCoord = windowRect.centerY().toFloat()
+
+        var adjustedSteps = MIN_STEPS_TO_ANIMATE
+
+        // if distance per step is at least 1, then we can use the number of steps requested
+        if (distIncrease.toInt() / (steps * 2) >= 1) {
+            adjustedSteps = steps
+        }
+
+        // if the distance per step is less than 1, carry out the animation in two steps
+        gestureHelper.pinch(
+                Tuple(initLeftX, yCoord), Tuple(initRightX, yCoord),
+                Tuple(finalLeftX, yCoord), Tuple(finalRightX, yCoord), adjustedSteps)
+
+        waitForPipWindowToExpandFrom(wmHelper, Region.from(windowRect))
+    }
+
+    /**
+     * Launches the app through an intent instead of interacting with the launcher and waits until
+     * the app window is in PIP mode
      */
     @JvmOverloads
     fun launchViaIntentAndWaitForPip(
@@ -62,18 +110,17 @@ open class PipAppHelper(instrumentation: Instrumentation) : StandardAppHelper(
         stringExtras: Map<String, String>
     ) {
         launchViaIntentAndWaitShown(
-            wmHelper, expectedWindowName, action, stringExtras,
+            wmHelper,
+            expectedWindowName,
+            action,
+            stringExtras,
             waitConditions = arrayOf(WindowManagerConditionsFactory.hasPipWindow())
         )
 
-        wmHelper.StateSyncBuilder()
-            .withPipShown()
-            .waitForAndVerify()
+        wmHelper.StateSyncBuilder().withPipShown().waitForAndVerify()
     }
 
-    /**
-     * Expand the PIP window back to full screen via intent and wait until the app is visible
-     */
+    /** Expand the PIP window back to full screen via intent and wait until the app is visible */
     fun exitPipToFullScreenViaIntent(wmHelper: WindowManagerStateHelper) =
         launchViaIntentAndWaitShown(wmHelper)
 
@@ -81,9 +128,7 @@ open class PipAppHelper(instrumentation: Instrumentation) : StandardAppHelper(
         clickObject(ENTER_PIP_BUTTON_ID)
 
         // Wait on WMHelper or simply wait for 3 seconds
-        wmHelper.StateSyncBuilder()
-            .withPipShown()
-            .waitForAndVerify()
+        wmHelper.StateSyncBuilder().withPipShown().waitForAndVerify()
         // when entering pip, the dismiss button is visible at the start. to ensure the pip
         // animation is complete, wait until the pip dismiss button is no longer visible.
         // b/176822698: dismiss-only state will be removed in the future
@@ -102,17 +147,18 @@ open class PipAppHelper(instrumentation: Instrumentation) : StandardAppHelper(
         clickObject(MEDIA_SESSION_START_RADIO_BUTTON_ID)
     }
 
-    fun checkWithCustomActionsCheckbox() = uiDevice
-        .findObject(By.res(`package`, WITH_CUSTOM_ACTIONS_BUTTON_ID))
-        ?.takeIf { it.isCheckable }
-        ?.apply { if (!isChecked) clickObject(WITH_CUSTOM_ACTIONS_BUTTON_ID) }
-        ?: error("'With custom actions' checkbox not found")
+    fun checkWithCustomActionsCheckbox() =
+        uiDevice
+            .findObject(By.res(`package`, WITH_CUSTOM_ACTIONS_BUTTON_ID))
+            ?.takeIf { it.isCheckable }
+            ?.apply { if (!isChecked) clickObject(WITH_CUSTOM_ACTIONS_BUTTON_ID) }
+            ?: error("'With custom actions' checkbox not found")
 
-    fun pauseMedia() = mediaController?.transportControls?.pause()
-        ?: error("No active media session found")
+    fun pauseMedia() =
+        mediaController?.transportControls?.pause() ?: error("No active media session found")
 
-    fun stopMedia() = mediaController?.transportControls?.stop()
-        ?: error("No active media session found")
+    fun stopMedia() =
+        mediaController?.transportControls?.stop() ?: error("No active media session found")
 
     @Deprecated(
         "Use PipAppHelper.closePipWindow(wmHelper) instead",
@@ -124,55 +170,41 @@ open class PipAppHelper(instrumentation: Instrumentation) : StandardAppHelper(
 
     private fun getWindowRect(wmHelper: WindowManagerStateHelper): Rect {
         val windowRegion = wmHelper.getWindowRegion(this)
-        require(!windowRegion.isEmpty) {
-            "Unable to find a PIP window in the current state"
-        }
+        require(!windowRegion.isEmpty) { "Unable to find a PIP window in the current state" }
         return windowRegion.bounds
     }
 
-    /**
-     * Taps the pip window and dismisses it by clicking on the X button.
-     */
+    /** Taps the pip window and dismisses it by clicking on the X button. */
     open fun closePipWindow(wmHelper: WindowManagerStateHelper) {
         val windowRect = getWindowRect(wmHelper)
         uiDevice.click(windowRect.centerX(), windowRect.centerY())
         // search and interact with the dismiss button
         val dismissSelector = By.res(SYSTEMUI_PACKAGE, "dismiss")
         uiDevice.wait(Until.hasObject(dismissSelector), FIND_TIMEOUT)
-        val dismissPipObject = uiDevice.findObject(dismissSelector)
-            ?: error("PIP window dismiss button not found")
+        val dismissPipObject =
+            uiDevice.findObject(dismissSelector) ?: error("PIP window dismiss button not found")
         val dismissButtonBounds = dismissPipObject.visibleBounds
         uiDevice.click(dismissButtonBounds.centerX(), dismissButtonBounds.centerY())
 
         // Wait for animation to complete.
-        wmHelper.StateSyncBuilder()
-            .withPipGone()
-            .withHomeActivityVisible()
-            .waitForAndVerify()
+        wmHelper.StateSyncBuilder().withPipGone().withHomeActivityVisible().waitForAndVerify()
     }
 
-    /**
-     * Close the pip window by pressing the expand button
-     */
+    /** Close the pip window by pressing the expand button */
     fun expandPipWindowToApp(wmHelper: WindowManagerStateHelper) {
         val windowRect = getWindowRect(wmHelper)
         uiDevice.click(windowRect.centerX(), windowRect.centerY())
         // search and interact with the expand button
         val expandSelector = By.res(SYSTEMUI_PACKAGE, "expand_button")
         uiDevice.wait(Until.hasObject(expandSelector), FIND_TIMEOUT)
-        val expandPipObject = uiDevice.findObject(expandSelector)
-            ?: error("PIP window expand button not found")
+        val expandPipObject =
+            uiDevice.findObject(expandSelector) ?: error("PIP window expand button not found")
         val expandButtonBounds = expandPipObject.visibleBounds
         uiDevice.click(expandButtonBounds.centerX(), expandButtonBounds.centerY())
-        wmHelper.StateSyncBuilder()
-            .withPipGone()
-            .withFullScreenApp(this)
-            .waitForAndVerify()
+        wmHelper.StateSyncBuilder().withPipGone().withFullScreenApp(this).waitForAndVerify()
     }
 
-    /**
-     * Double click on the PIP window to expand it
-     */
+    /** Double click on the PIP window to expand it */
     fun doubleClickPipWindow(wmHelper: WindowManagerStateHelper) {
         val windowRect = getWindowRect(wmHelper)
         Log.d(TAG, "First click")
@@ -180,9 +212,7 @@ open class PipAppHelper(instrumentation: Instrumentation) : StandardAppHelper(
         Log.d(TAG, "Second click")
         uiDevice.click(windowRect.centerX(), windowRect.centerY())
         Log.d(TAG, "Wait for app transition to end")
-        wmHelper.StateSyncBuilder()
-            .withAppTransitionIdle()
-            .waitForAndVerify()
+        wmHelper.StateSyncBuilder().withAppTransitionIdle().waitForAndVerify()
         waitForPipWindowToExpandFrom(wmHelper, Region.from(windowRect))
     }
 
@@ -190,13 +220,18 @@ open class PipAppHelper(instrumentation: Instrumentation) : StandardAppHelper(
         wmHelper: WindowManagerStateHelper,
         windowRect: Region
     ) {
-        wmHelper.StateSyncBuilder().add("pipWindowExpanded") {
-            val pipAppWindow = it.wmState.visibleWindows.firstOrNull { window ->
-                this.windowMatchesAnyOf(window)
-            } ?: return@add false
-            val pipRegion = pipAppWindow.frameRegion
-            return@add pipRegion.coversMoreThan(windowRect)
-        }.waitForAndVerify()
+        wmHelper
+            .StateSyncBuilder()
+            .add("pipWindowExpanded") {
+                val pipAppWindow =
+                    it.wmState.visibleWindows.firstOrNull { window ->
+                        this.windowMatchesAnyOf(window)
+                    }
+                        ?: return@add false
+                val pipRegion = pipAppWindow.frameRegion
+                return@add pipRegion.coversMoreThan(windowRect)
+            }
+            .waitForAndVerify()
     }
 
     companion object {
@@ -206,5 +241,8 @@ open class PipAppHelper(instrumentation: Instrumentation) : StandardAppHelper(
         private const val MEDIA_SESSION_START_RADIO_BUTTON_ID = "media_session_start"
         private const val ENTER_PIP_ON_USER_LEAVE_HINT = "enter_pip_on_leave_manual"
         private const val ENTER_PIP_AUTOENTER = "enter_pip_on_leave_autoenter"
+        // minimum number of steps to take, when animating gestures, needs to be 2
+        // so that there is at least a single intermediate layer that flicker tests can check
+        private const val MIN_STEPS_TO_ANIMATE = 2
     }
 }

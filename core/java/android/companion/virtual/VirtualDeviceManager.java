@@ -78,6 +78,16 @@ public final class VirtualDeviceManager {
                     | DisplayManager.VIRTUAL_DISPLAY_FLAG_SUPPORTS_TOUCH
                     | DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP;
 
+    /**
+     * The default device ID, which is the ID of the primary (non-virtual) device.
+     */
+    public static final int DEFAULT_DEVICE_ID = 0;
+
+    /**
+     * Invalid device ID.
+     */
+    public static final int INVALID_DEVICE_ID = -1;
+
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(
@@ -201,6 +211,17 @@ public final class VirtualDeviceManager {
                     associationId,
                     params,
                     mActivityListenerBinder);
+        }
+
+        /**
+         * Returns the unique ID of this virtual device.
+         */
+        public int getDeviceId() {
+            try {
+                return mVirtualDevice.getDeviceId();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
 
         /**

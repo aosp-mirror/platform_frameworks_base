@@ -33,9 +33,11 @@ import org.junit.runners.Parameterized
  * To run this test: `atest WMShellFlickerTests:ExpandBubbleScreen`
  *
  * Actions:
+ * ```
  *     Launch an app and enable app's bubble notification
  *     Send a bubble notification
  *     The activity for the bubble is launched
+ * ```
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
@@ -50,11 +52,11 @@ open class ExpandBubbleScreen(testSpec: FlickerTestParameter) : BaseBubbleScreen
                 addBubbleBtn?.click() ?: error("Add Bubble not found")
             }
             transitions {
-                val showBubble = device.wait(
-                    Until.findObject(
-                        By.res("com.android.systemui", "bubble_view")
-                    ), FIND_OBJECT_TIMEOUT
-                )
+                val showBubble =
+                    device.wait(
+                        Until.findObject(By.res("com.android.systemui", "bubble_view")),
+                        FIND_OBJECT_TIMEOUT
+                    )
                 showBubble?.run { showBubble.click() } ?: error("Bubble notify not found")
             }
         }
@@ -62,8 +64,6 @@ open class ExpandBubbleScreen(testSpec: FlickerTestParameter) : BaseBubbleScreen
     @Presubmit
     @Test
     open fun testAppIsAlwaysVisible() {
-        testSpec.assertLayers {
-            this.isVisible(testApp)
-        }
+        testSpec.assertLayers { this.isVisible(testApp) }
     }
 }

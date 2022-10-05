@@ -24,10 +24,7 @@ import androidx.test.uiautomator.UiDevice
 import org.junit.Before
 import org.junit.runners.Parameterized
 
-abstract class PipTestBase(
-    protected val rotationName: String,
-    protected val rotation: Int
-) {
+abstract class PipTestBase(protected val rotationName: String, protected val rotation: Int) {
     val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
     val uiDevice = UiDevice.getInstance(instrumentation)
     val packageManager: PackageManager = instrumentation.context.packageManager

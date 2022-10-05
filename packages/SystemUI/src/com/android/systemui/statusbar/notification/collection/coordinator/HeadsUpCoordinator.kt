@@ -393,7 +393,7 @@ class HeadsUpCoordinator @Inject constructor(
             val posted = mPostedEntries.compute(entry.key) { _, value ->
                 value?.also { update ->
                     update.wasUpdated = true
-                    update.shouldHeadsUpEver = update.shouldHeadsUpEver || shouldHeadsUpEver
+                    update.shouldHeadsUpEver = shouldHeadsUpEver
                     update.shouldHeadsUpAgain = update.shouldHeadsUpAgain || shouldHeadsUpAgain
                     update.isAlerting = isAlerting
                     update.isBinding = isBinding

@@ -38,25 +38,27 @@ import org.junit.runners.Parameterized
  * To run this test: `atest FlickerTests:OpenAppColdTest`
  *
  * Actions:
+ * ```
  *     Make sure no apps are running on the device
  *     Launch an app [testApp] and wait animation to complete
- *
+ * ```
  * Notes:
+ * ```
  *     1. Some default assertions (e.g., nav bar, status bar and screen covered)
  *        are inherited [OpenAppTransition]
  *     2. Part of the test setup occurs automatically via
  *        [com.android.server.wm.flicker.TransitionRunnerWithRules],
  *        including configuring navigation mode, initial orientation and ensuring no
  *        apps are running before setup
+ * ```
  */
 @RequiresDevice
 @FlickerServiceCompatible
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class OpenAppColdTest(
-    testSpec: FlickerTestParameter
-) : OpenAppFromLauncherTransition(testSpec) {
+open class OpenAppColdTest(testSpec: FlickerTestParameter) :
+    OpenAppFromLauncherTransition(testSpec) {
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit
         get() = {
@@ -65,24 +67,17 @@ open class OpenAppColdTest(
                 removeAllTasksButHome()
                 this.setRotation(testSpec.startRotation)
             }
-            teardown {
-                testApp.exit(wmHelper)
-            }
-            transitions {
-                testApp.launchViaIntent(wmHelper)
-            }
+            teardown { testApp.exit(wmHelper) }
+            transitions { testApp.launchViaIntent(wmHelper) }
         }
 
     /** {@inheritDoc} */
     @FlakyTest(bugId = 206753786)
     @Test
-    override fun navBarLayerPositionAtStartAndEnd() =
-        super.navBarLayerPositionAtStartAndEnd()
+    override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
 
     /** {@inheritDoc} */
-    @Presubmit
-    @Test
-    override fun appLayerReplacesLauncher() = super.appLayerReplacesLauncher()
+    @Presubmit @Test override fun appLayerReplacesLauncher() = super.appLayerReplacesLauncher()
 
     /** {@inheritDoc} */
     @FlakyTest(bugId = 240238245)
@@ -94,14 +89,13 @@ open class OpenAppColdTest(
         /**
          * Creates the test configurations.
          *
-         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring
-         * repetitions, screen orientation and navigation modes.
+         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring repetitions,
+         * screen orientation and navigation modes.
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): Collection<FlickerTestParameter> {
-            return FlickerTestParameterFactory.getInstance()
-                .getConfigNonRotationTests()
+            return FlickerTestParameterFactory.getInstance().getConfigNonRotationTests()
         }
     }
 }

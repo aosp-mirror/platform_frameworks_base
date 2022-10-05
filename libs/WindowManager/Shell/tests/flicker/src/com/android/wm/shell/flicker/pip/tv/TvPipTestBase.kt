@@ -68,7 +68,8 @@ abstract class TvPipTestBase : PipTestBase(rotationToString(ROTATION_0), ROTATIO
         fun start() {
             hasDied = false
             uiAutomation.adoptShellPermissionIdentity(
-                    android.Manifest.permission.SET_ACTIVITY_WATCHER)
+                android.Manifest.permission.SET_ACTIVITY_WATCHER
+            )
             activityManager.registerProcessObserver(this)
         }
 

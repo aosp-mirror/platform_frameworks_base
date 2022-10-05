@@ -524,9 +524,30 @@ interface IActivityManager {
 
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void suppressResizeConfigChanges(boolean suppress);
+
+    /**
+     * @deprecated Use {@link #unlockUser2(int, IProgressListener)} instead, since the token and
+     * secret arguments no longer do anything.  This method still exists only because it is marked
+     * with {@code @UnsupportedAppUsage}, so it might not be safe to remove it or change its
+     * signature.
+     */
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     boolean unlockUser(int userid, in byte[] token, in byte[] secret,
             in IProgressListener listener);
+
+    /**
+     * Tries to unlock the given user.
+     * <p>
+     * This will succeed only if the user's CE storage key is already unlocked or if the user
+     * doesn't have a lockscreen credential set.
+     *
+     * @param userId The ID of the user to unlock.
+     * @param listener An optional progress listener.
+     *
+     * @return true if the user was successfully unlocked, otherwise false.
+     */
+    boolean unlockUser2(int userId, in IProgressListener listener);
+
     void killPackageDependents(in String packageName, int userId);
     void makePackageIdle(String packageName, int userId);
     int getMemoryTrimLevel();

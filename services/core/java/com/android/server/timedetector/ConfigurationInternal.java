@@ -46,6 +46,7 @@ public final class ConfigurationInternal {
 
     private final boolean mAutoDetectionSupported;
     private final int mSystemClockUpdateThresholdMillis;
+    private final int mSystemClockConfidenceUpgradeThresholdMillis;
     private final Instant mAutoSuggestionLowerBound;
     private final Instant mManualSuggestionLowerBound;
     private final Instant mSuggestionUpperBound;
@@ -57,6 +58,8 @@ public final class ConfigurationInternal {
     private ConfigurationInternal(Builder builder) {
         mAutoDetectionSupported = builder.mAutoDetectionSupported;
         mSystemClockUpdateThresholdMillis = builder.mSystemClockUpdateThresholdMillis;
+        mSystemClockConfidenceUpgradeThresholdMillis =
+                builder.mSystemClockConfidenceUpgradeThresholdMillis;
         mAutoSuggestionLowerBound = Objects.requireNonNull(builder.mAutoSuggestionLowerBound);
         mManualSuggestionLowerBound = Objects.requireNonNull(builder.mManualSuggestionLowerBound);
         mSuggestionUpperBound = Objects.requireNonNull(builder.mSuggestionUpperBound);
@@ -79,6 +82,17 @@ public final class ConfigurationInternal {
      */
     public int getSystemClockUpdateThresholdMillis() {
         return mSystemClockUpdateThresholdMillis;
+    }
+
+    /**
+     * Return the absolute threshold at/below which the system clock confidence can be upgraded.
+     * i.e. if the detector receives a high-confidence time and the current system clock is +/- this
+     * value from that time and the confidence in the time is low, then the device's confidence in
+     * the current system clock time can be upgraded. This needs to be an amount users would
+     * consider "close enough".
+     */
+    public int getSystemClockConfidenceUpgradeThresholdMillis() {
+        return mSystemClockConfidenceUpgradeThresholdMillis;
     }
 
     /**
@@ -242,6 +256,8 @@ public final class ConfigurationInternal {
         return "ConfigurationInternal{"
                 + "mAutoDetectionSupported=" + mAutoDetectionSupported
                 + ", mSystemClockUpdateThresholdMillis=" + mSystemClockUpdateThresholdMillis
+                + ", mSystemClockConfidenceUpgradeThresholdMillis="
+                + mSystemClockConfidenceUpgradeThresholdMillis
                 + ", mAutoSuggestionLowerBound=" + mAutoSuggestionLowerBound
                 + "(" + mAutoSuggestionLowerBound.toEpochMilli() + ")"
                 + ", mManualSuggestionLowerBound=" + mManualSuggestionLowerBound
@@ -258,6 +274,7 @@ public final class ConfigurationInternal {
     static final class Builder {
         private boolean mAutoDetectionSupported;
         private int mSystemClockUpdateThresholdMillis;
+        private int mSystemClockConfidenceUpgradeThresholdMillis;
         @NonNull private Instant mAutoSuggestionLowerBound;
         @NonNull private Instant mManualSuggestionLowerBound;
         @NonNull private Instant mSuggestionUpperBound;
@@ -286,68 +303,55 @@ public final class ConfigurationInternal {
             this.mAutoDetectionEnabledSetting = toCopy.mAutoDetectionEnabledSetting;
         }
 
-        /**
-         * Sets whether the user is allowed to configure time settings on this device.
-         */
+        /** See {@link ConfigurationInternal#isUserConfigAllowed()}. */
         Builder setUserConfigAllowed(boolean userConfigAllowed) {
             mUserConfigAllowed = userConfigAllowed;
             return this;
         }
 
-        /**
-         * Sets whether automatic time detection is supported on this device.
-         */
+        /** See {@link ConfigurationInternal#isAutoDetectionSupported()}. */
         public Builder setAutoDetectionSupported(boolean supported) {
             mAutoDetectionSupported = supported;
             return this;
         }
 
-        /**
-         * Sets the absolute threshold below which the system clock need not be updated. i.e. if
-         * setting the system clock would adjust it by less than this (either backwards or forwards)
-         * then it need not be set.
-         */
+        /** See {@link ConfigurationInternal#getSystemClockUpdateThresholdMillis()}. */
         public Builder setSystemClockUpdateThresholdMillis(int systemClockUpdateThresholdMillis) {
             mSystemClockUpdateThresholdMillis = systemClockUpdateThresholdMillis;
             return this;
         }
 
-        /**
-         * Sets the lower bound for valid automatic time suggestions.
-         */
+        /** See {@link ConfigurationInternal#getSystemClockConfidenceUpgradeThresholdMillis()}. */
+        public Builder setSystemClockConfidenceUpgradeThresholdMillis(int thresholdMillis) {
+            mSystemClockConfidenceUpgradeThresholdMillis = thresholdMillis;
+            return this;
+        }
+
+        /** See {@link ConfigurationInternal#getAutoSuggestionLowerBound()}. */
         public Builder setAutoSuggestionLowerBound(@NonNull Instant autoSuggestionLowerBound) {
             mAutoSuggestionLowerBound = Objects.requireNonNull(autoSuggestionLowerBound);
             return this;
         }
 
-        /**
-         * Sets the lower bound for valid manual time suggestions.
-         */
+        /** See {@link ConfigurationInternal#getManualSuggestionLowerBound()}. */
         public Builder setManualSuggestionLowerBound(@NonNull Instant manualSuggestionLowerBound) {
             mManualSuggestionLowerBound = Objects.requireNonNull(manualSuggestionLowerBound);
             return this;
         }
 
-        /**
-         * Sets the upper bound for valid time suggestions (manual and automatic).
-         */
+        /** See {@link ConfigurationInternal#getSuggestionUpperBound()}. */
         public Builder setSuggestionUpperBound(@NonNull Instant suggestionUpperBound) {
             mSuggestionUpperBound = Objects.requireNonNull(suggestionUpperBound);
             return this;
         }
 
-        /**
-         * Sets the order to look at time suggestions when automatically detecting time.
-         * See {@code #ORIGIN_} constants
-         */
+        /** See {@link ConfigurationInternal#getAutoOriginPriorities()}. */
         public Builder setOriginPriorities(@NonNull @Origin int... originPriorities) {
             mOriginPriorities = Objects.requireNonNull(originPriorities);
             return this;
         }
 
-        /**
-         * Sets the value of the automatic time detection enabled setting for this device.
-         */
+        /** See {@link ConfigurationInternal#getAutoDetectionEnabledSetting()}. */
         Builder setAutoDetectionEnabledSetting(boolean autoDetectionEnabledSetting) {
             mAutoDetectionEnabledSetting = autoDetectionEnabledSetting;
             return this;

@@ -23,7 +23,9 @@ import com.android.server.wm.flicker.testapp.ActivityOptions
 import com.android.server.wm.traces.common.ComponentNameMatcher
 import com.android.server.wm.traces.parser.toFlickerComponent
 
-class ShowWhenLockedAppHelper @JvmOverloads constructor(
+class ShowWhenLockedAppHelper
+@JvmOverloads
+constructor(
     instr: Instrumentation,
     launcherName: String = ActivityOptions.ShowWhenLockedActivity.LABEL,
     component: ComponentNameMatcher =

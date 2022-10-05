@@ -17,7 +17,6 @@
 package com.android.wm.shell.flicker.splitscreen
 
 import android.platform.test.annotations.IwTest
-import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.WindowManagerPolicyConstants
 import androidx.test.filters.RequiresDevice
@@ -54,14 +53,10 @@ class SwitchBackToSplitFromRecent(testSpec: FlickerTestParameter) : SplitScreenB
                 SplitScreenUtils.enterSplit(wmHelper, tapl, primaryApp, secondaryApp)
 
                 tapl.goHome()
-                wmHelper.StateSyncBuilder()
-                    .withHomeActivityVisible()
-                    .waitForAndVerify()
+                wmHelper.StateSyncBuilder().withHomeActivityVisible().waitForAndVerify()
             }
             transitions {
-                tapl.workspace.switchToOverview()
-                    .currentTask
-                    .open()
+                tapl.workspace.switchToOverview().currentTask.open()
                 SplitScreenUtils.waitForSplitComplete(wmHelper, primaryApp, secondaryApp)
             }
         }
@@ -75,9 +70,7 @@ class SwitchBackToSplitFromRecent(testSpec: FlickerTestParameter) : SplitScreenB
     @Test
     fun splitScreenDividerBecomesVisible() = testSpec.splitScreenDividerBecomesVisible()
 
-    @Presubmit
-    @Test
-    fun primaryAppLayerBecomesVisible() = testSpec.layerBecomesVisible(primaryApp)
+    @Presubmit @Test fun primaryAppLayerBecomesVisible() = testSpec.layerBecomesVisible(primaryApp)
 
     @Presubmit
     @Test
@@ -85,13 +78,21 @@ class SwitchBackToSplitFromRecent(testSpec: FlickerTestParameter) : SplitScreenB
 
     @Presubmit
     @Test
-    fun primaryAppBoundsIsVisibleAtEnd() = testSpec.splitAppLayerBoundsIsVisibleAtEnd(
-        primaryApp, landscapePosLeft = tapl.isTablet, portraitPosTop = false)
+    fun primaryAppBoundsIsVisibleAtEnd() =
+        testSpec.splitAppLayerBoundsIsVisibleAtEnd(
+            primaryApp,
+            landscapePosLeft = tapl.isTablet,
+            portraitPosTop = false
+        )
 
     @Presubmit
     @Test
-    fun secondaryAppBoundsIsVisibleAtEnd() = testSpec.splitAppLayerBoundsIsVisibleAtEnd(
-        secondaryApp, landscapePosLeft = !tapl.isTablet, portraitPosTop = true)
+    fun secondaryAppBoundsIsVisibleAtEnd() =
+        testSpec.splitAppLayerBoundsIsVisibleAtEnd(
+            secondaryApp,
+            landscapePosLeft = !tapl.isTablet,
+            portraitPosTop = true
+        )
 
     @Presubmit
     @Test
@@ -102,67 +103,60 @@ class SwitchBackToSplitFromRecent(testSpec: FlickerTestParameter) : SplitScreenB
     fun secondaryAppWindowBecomesVisible() = testSpec.appWindowBecomesVisible(secondaryApp)
 
     /** {@inheritDoc} */
-    @Postsubmit
+    @Presubmit
     @Test
     override fun entireScreenCovered() =
         super.entireScreenCovered()
 
     /** {@inheritDoc} */
-    @Postsubmit
+    @Presubmit
     @Test
-    override fun navBarLayerIsVisibleAtStartAndEnd() =
-        super.navBarLayerIsVisibleAtStartAndEnd()
+    override fun navBarLayerIsVisibleAtStartAndEnd() = super.navBarLayerIsVisibleAtStartAndEnd()
 
     /** {@inheritDoc} */
-    @Postsubmit
+    @Presubmit
     @Test
-    override fun navBarLayerPositionAtStartAndEnd() =
-        super.navBarLayerPositionAtStartAndEnd()
+    override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
 
     /** {@inheritDoc} */
-    @Postsubmit
+    @Presubmit
     @Test
-    override fun navBarWindowIsAlwaysVisible() =
-        super.navBarWindowIsAlwaysVisible()
+    override fun navBarWindowIsAlwaysVisible() = super.navBarWindowIsAlwaysVisible()
 
     /** {@inheritDoc} */
-    @Postsubmit
+    @Presubmit
     @Test
     override fun statusBarLayerIsVisibleAtStartAndEnd() =
         super.statusBarLayerIsVisibleAtStartAndEnd()
 
     /** {@inheritDoc} */
-    @Postsubmit
+    @Presubmit
     @Test
-    override fun statusBarLayerPositionAtStartAndEnd() =
-        super.statusBarLayerPositionAtStartAndEnd()
+    override fun statusBarLayerPositionAtStartAndEnd() = super.statusBarLayerPositionAtStartAndEnd()
 
     /** {@inheritDoc} */
-    @Postsubmit
+    @Presubmit
     @Test
-    override fun statusBarWindowIsAlwaysVisible() =
-        super.statusBarWindowIsAlwaysVisible()
+    override fun statusBarWindowIsAlwaysVisible() = super.statusBarWindowIsAlwaysVisible()
 
     /** {@inheritDoc} */
-    @Postsubmit
+    @Presubmit
     @Test
-    override fun taskBarLayerIsVisibleAtStartAndEnd() =
-        super.taskBarLayerIsVisibleAtStartAndEnd()
+    override fun taskBarLayerIsVisibleAtStartAndEnd() = super.taskBarLayerIsVisibleAtStartAndEnd()
 
     /** {@inheritDoc} */
-    @Postsubmit
+    @Presubmit
     @Test
-    override fun taskBarWindowIsAlwaysVisible() =
-        super.taskBarWindowIsAlwaysVisible()
+    override fun taskBarWindowIsAlwaysVisible() = super.taskBarWindowIsAlwaysVisible()
 
     /** {@inheritDoc} */
-    @Postsubmit
+    @Presubmit
     @Test
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
         super.visibleLayersShownMoreThanOneConsecutiveEntry()
 
     /** {@inheritDoc} */
-    @Postsubmit
+    @Presubmit
     @Test
     override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
         super.visibleWindowsShownMoreThanOneConsecutiveEntry()
@@ -171,10 +165,12 @@ class SwitchBackToSplitFromRecent(testSpec: FlickerTestParameter) : SplitScreenB
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): List<FlickerTestParameter> {
-            return FlickerTestParameterFactory.getInstance().getConfigNonRotationTests(
-                // TODO(b/176061063):The 3 buttons of nav bar do not exist in the hierarchy.
-                supportedNavigationModes =
-                    listOf(WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY))
+            return FlickerTestParameterFactory.getInstance()
+                .getConfigNonRotationTests(
+                    // TODO(b/176061063):The 3 buttons of nav bar do not exist in the hierarchy.
+                    supportedNavigationModes =
+                        listOf(WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY)
+                )
         }
     }
 }

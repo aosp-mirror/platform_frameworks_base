@@ -27,9 +27,7 @@ import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.traces.common.ComponentNameMatcher
 import org.junit.Test
 
-/**
- * Base class for app launch tests
- */
+/** Base class for app launch tests */
 abstract class OpenAppTransition(testSpec: FlickerTestParameter) : BaseTest(testSpec) {
     protected open val testApp: StandardAppHelper = SimpleAppHelper(instrumentation)
 
@@ -40,14 +38,12 @@ abstract class OpenAppTransition(testSpec: FlickerTestParameter) : BaseTest(test
             device.wakeUpAndGoToHomeScreen()
             this.setRotation(testSpec.startRotation)
         }
-        teardown {
-            testApp.exit(wmHelper)
-        }
+        teardown { testApp.exit(wmHelper) }
     }
 
     /**
-     * Checks that the [testApp] layer doesn't exist or is invisible at the start of the
-     * transition, but is created and/or becomes visible during the transition.
+     * Checks that the [testApp] layer doesn't exist or is invisible at the start of the transition,
+     * but is created and/or becomes visible during the transition.
      */
     @Presubmit
     @Test
@@ -85,12 +81,10 @@ abstract class OpenAppTransition(testSpec: FlickerTestParameter) : BaseTest(test
      * Checks that the [testApp] window doesn't exist at the start of the transition, that it is
      * created (invisible - optional) and becomes visible during the transition
      *
-     * The `isAppWindowInvisible` step is optional because we log once per frame, upon logging,
-     * the window may be visible or not depending on what was processed until that moment.
+     * The `isAppWindowInvisible` step is optional because we log once per frame, upon logging, the
+     * window may be visible or not depending on what was processed until that moment.
      */
-    @Presubmit
-    @Test
-    open fun appWindowBecomesVisible() = appWindowBecomesVisible_coldStart()
+    @Presubmit @Test open fun appWindowBecomesVisible() = appWindowBecomesVisible_coldStart()
 
     protected fun appWindowBecomesVisible_coldStart() {
         testSpec.assertWm {
@@ -125,9 +119,7 @@ abstract class OpenAppTransition(testSpec: FlickerTestParameter) : BaseTest(test
             this.isAppWindowNotOnTop(testApp)
                 .then()
                 .isAppWindowOnTop(
-                    testApp
-                        .or(ComponentNameMatcher.SNAPSHOT)
-                        .or(ComponentNameMatcher.SPLASH_SCREEN)
+                    testApp.or(ComponentNameMatcher.SNAPSHOT).or(ComponentNameMatcher.SPLASH_SCREEN)
                 )
         }
     }
@@ -139,8 +131,6 @@ abstract class OpenAppTransition(testSpec: FlickerTestParameter) : BaseTest(test
     @Presubmit
     @Test
     open fun appWindowIsTopWindowAtEnd() {
-        testSpec.assertWmEnd {
-            this.isAppWindowOnTop(testApp)
-        }
+        testSpec.assertWmEnd { this.isAppWindowOnTop(testApp) }
     }
 }

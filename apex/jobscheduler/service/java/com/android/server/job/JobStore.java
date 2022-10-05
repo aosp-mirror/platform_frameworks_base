@@ -1095,6 +1095,8 @@ public final class JobStore {
             }
 
             if ((netCapabilitiesIntArray != null) && (netTransportTypesIntArray != null)) {
+                // S+ format. No capability or transport validation since the values should be in
+                // line with what's defined in the Connectivity mainline module.
                 final NetworkRequest.Builder builder = new NetworkRequest.Builder()
                         .clearCapabilities();
 
@@ -1111,6 +1113,7 @@ public final class JobStore {
                 }
                 jobBuilder.setRequiredNetwork(builder.build());
             } else if (netCapabilitiesLong != null && netTransportTypesLong != null) {
+                // Format used on R- builds. Drop any unexpected capabilities and transports.
                 final NetworkRequest.Builder builder = new NetworkRequest.Builder()
                         .clearCapabilities();
                 final int maxNetCapabilityInR = NET_CAPABILITY_TEMPORARILY_NOT_METERED;

@@ -27,8 +27,10 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper
+import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.snapshotStartingWindowLayerCoversExactlyOnApp
+import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -37,16 +39,15 @@ import org.junit.runners.Parameterized
 
 /**
  * Test IME window layer will become visible when switching from the fixed orientation activity
- * (e.g. Launcher activity).
- * To run this test: `atest FlickerTests:OpenImeWindowFromFixedOrientationAppTest`
+ * (e.g. Launcher activity). To run this test: `atest
+ * FlickerTests:OpenImeWindowFromFixedOrientationAppTest`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class OpenImeWindowFromFixedOrientationAppTest(
-    testSpec: FlickerTestParameter
-) : BaseTest(testSpec) {
+class OpenImeWindowFromFixedOrientationAppTest(testSpec: FlickerTestParameter) :
+    BaseTest(testSpec) {
     private val imeTestApp = ImeAppAutoFocusHelper(instrumentation, testSpec.startRotation)
 
     /** {@inheritDoc} */
@@ -59,18 +60,14 @@ class OpenImeWindowFromFixedOrientationAppTest(
 
             // Swiping out the IME activity to home.
             tapl.goHome()
-            wmHelper.StateSyncBuilder()
-                .withHomeActivityVisible()
-                .waitForAndVerify()
+            wmHelper.StateSyncBuilder().withHomeActivityVisible().waitForAndVerify()
         }
         transitions {
             // Bring the exist IME activity to the front in landscape mode device rotation.
             setRotation(Surface.ROTATION_90)
             imeTestApp.launchViaIntent(wmHelper)
         }
-        teardown {
-            imeTestApp.exit(wmHelper)
-        }
+        teardown { imeTestApp.exit(wmHelper) }
     }
 
     /** {@inheritDoc} */
@@ -94,6 +91,14 @@ class OpenImeWindowFromFixedOrientationAppTest(
     @Postsubmit
     @Test
     fun snapshotStartingWindowLayerCoversExactlyOnApp() {
+        Assume.assumeFalse(isShellTransitionsEnabled)
+        testSpec.snapshotStartingWindowLayerCoversExactlyOnApp(imeTestApp)
+    }
+
+    @Presubmit
+    @Test
+    fun snapshotStartingWindowLayerCoversExactlyOnApp_ShellTransit() {
+        Assume.assumeTrue(isShellTransitionsEnabled)
         testSpec.snapshotStartingWindowLayerCoversExactlyOnApp(imeTestApp)
     }
 
@@ -101,18 +106,17 @@ class OpenImeWindowFromFixedOrientationAppTest(
         /**
          * Creates the test configurations.
          *
-         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring
-         * repetitions, screen orientation and navigation modes.
+         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring repetitions,
+         * screen orientation and navigation modes.
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
                 .getConfigNonRotationTests(
-                                        supportedRotations = listOf(Surface.ROTATION_90),
-                    supportedNavigationModes = listOf(
-                        WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
-                    )
+                    supportedRotations = listOf(Surface.ROTATION_90),
+                    supportedNavigationModes =
+                    listOf(WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY)
                 )
         }
     }

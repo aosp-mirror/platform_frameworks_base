@@ -117,23 +117,23 @@ public class AlarmManagerEconomicPolicy extends EconomicPolicy {
     private static final String TAG = "TARE- " + AlarmManagerEconomicPolicy.class.getSimpleName();
 
     public static final int ACTION_ALARM_WAKEUP_EXACT_ALLOW_WHILE_IDLE =
-            TYPE_ACTION | POLICY_AM | 0;
+            TYPE_ACTION | POLICY_ALARM | 0;
     public static final int ACTION_ALARM_WAKEUP_EXACT =
-            TYPE_ACTION | POLICY_AM | 1;
+            TYPE_ACTION | POLICY_ALARM | 1;
     public static final int ACTION_ALARM_WAKEUP_INEXACT_ALLOW_WHILE_IDLE =
-            TYPE_ACTION | POLICY_AM | 2;
+            TYPE_ACTION | POLICY_ALARM | 2;
     public static final int ACTION_ALARM_WAKEUP_INEXACT =
-            TYPE_ACTION | POLICY_AM | 3;
+            TYPE_ACTION | POLICY_ALARM | 3;
     public static final int ACTION_ALARM_NONWAKEUP_EXACT_ALLOW_WHILE_IDLE =
-            TYPE_ACTION | POLICY_AM | 4;
+            TYPE_ACTION | POLICY_ALARM | 4;
     public static final int ACTION_ALARM_NONWAKEUP_EXACT =
-            TYPE_ACTION | POLICY_AM | 5;
+            TYPE_ACTION | POLICY_ALARM | 5;
     public static final int ACTION_ALARM_NONWAKEUP_INEXACT_ALLOW_WHILE_IDLE =
-            TYPE_ACTION | POLICY_AM | 6;
+            TYPE_ACTION | POLICY_ALARM | 6;
     public static final int ACTION_ALARM_NONWAKEUP_INEXACT =
-            TYPE_ACTION | POLICY_AM | 7;
+            TYPE_ACTION | POLICY_ALARM | 7;
     public static final int ACTION_ALARM_CLOCK =
-            TYPE_ACTION | POLICY_AM | 8;
+            TYPE_ACTION | POLICY_ALARM | 8;
 
     private static final int[] COST_MODIFIERS = new int[]{
             COST_MODIFIER_CHARGING,

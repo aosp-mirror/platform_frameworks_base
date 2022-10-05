@@ -33,8 +33,8 @@ import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test cold launching an app from a notification from the lock screen when there is an app
- * overlaid on the lock screen.
+ * Test cold launching an app from a notification from the lock screen when there is an app overlaid
+ * on the lock screen.
  *
  * To run this test: `atest FlickerTests:OpenAppFromLockNotificationWithLockOverlayApp`
  */
@@ -46,7 +46,7 @@ import org.junit.runners.Parameterized
 class OpenAppFromLockNotificationWithLockOverlayApp(testSpec: FlickerTestParameter) :
     OpenAppFromLockNotificationCold(testSpec) {
     private val showWhenLockedApp: ShowWhenLockedAppHelper =
-            ShowWhenLockedAppHelper(instrumentation)
+        ShowWhenLockedAppHelper(instrumentation)
 
     // Although we are technically still locked here, the overlay app means we should open the
     // notification shade as if we were unlocked.
@@ -61,19 +61,13 @@ class OpenAppFromLockNotificationWithLockOverlayApp(testSpec: FlickerTestParamet
 
                 // Launch an activity that is shown when the device is locked
                 showWhenLockedApp.launchViaIntent(wmHelper)
-                wmHelper.StateSyncBuilder()
-                    .withFullScreenApp(showWhenLockedApp)
-                    .waitForAndVerify()
+                wmHelper.StateSyncBuilder().withFullScreenApp(showWhenLockedApp).waitForAndVerify()
 
                 device.sleep()
-                wmHelper.StateSyncBuilder()
-                    .withoutTopVisibleAppWindows()
-                    .waitForAndVerify()
+                wmHelper.StateSyncBuilder().withoutTopVisibleAppWindows().waitForAndVerify()
             }
 
-            teardown {
-                showWhenLockedApp.exit(wmHelper)
-            }
+            teardown { showWhenLockedApp.exit(wmHelper) }
         }
 
     @Test
@@ -81,10 +75,10 @@ class OpenAppFromLockNotificationWithLockOverlayApp(testSpec: FlickerTestParamet
     fun showWhenLockedAppWindowBecomesVisible() {
         testSpec.assertWm {
             this.hasNoVisibleAppWindow()
-                    .then()
-                    .isAppWindowOnTop(ComponentNameMatcher.SNAPSHOT, isOptional = true)
-                    .then()
-                    .isAppWindowOnTop(showWhenLockedApp)
+                .then()
+                .isAppWindowOnTop(ComponentNameMatcher.SNAPSHOT, isOptional = true)
+                .then()
+                .isAppWindowOnTop(showWhenLockedApp)
         }
     }
 
@@ -93,10 +87,10 @@ class OpenAppFromLockNotificationWithLockOverlayApp(testSpec: FlickerTestParamet
     fun showWhenLockedAppLayerBecomesVisible() {
         testSpec.assertLayers {
             this.isInvisible(showWhenLockedApp)
-                    .then()
-                    .isVisible(ComponentNameMatcher.SNAPSHOT, isOptional = true)
-                    .then()
-                    .isVisible(showWhenLockedApp)
+                .then()
+                .isVisible(ComponentNameMatcher.SNAPSHOT, isOptional = true)
+                .then()
+                .isVisible(showWhenLockedApp)
         }
     }
 
@@ -106,22 +100,19 @@ class OpenAppFromLockNotificationWithLockOverlayApp(testSpec: FlickerTestParamet
     override fun entireScreenCovered() = super.entireScreenCovered()
 
     /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun appWindowBecomesTopWindow() = super.appWindowBecomesTopWindow()
+    @Postsubmit @Test override fun appWindowBecomesTopWindow() = super.appWindowBecomesTopWindow()
 
     companion object {
         /**
          * Creates the test configurations.
          *
-         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring
-         * repetitions, screen orientation and navigation modes.
+         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring repetitions,
+         * screen orientation and navigation modes.
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): Collection<FlickerTestParameter> {
-            return FlickerTestParameterFactory.getInstance()
-                    .getConfigNonRotationTests()
+            return FlickerTestParameterFactory.getInstance().getConfigNonRotationTests()
         }
     }
 }

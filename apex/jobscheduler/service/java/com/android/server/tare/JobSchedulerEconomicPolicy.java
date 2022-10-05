@@ -133,19 +133,19 @@ import android.util.SparseArray;
 public class JobSchedulerEconomicPolicy extends EconomicPolicy {
     private static final String TAG = "TARE- " + JobSchedulerEconomicPolicy.class.getSimpleName();
 
-    public static final int ACTION_JOB_MAX_START = TYPE_ACTION | POLICY_JS | 0;
-    public static final int ACTION_JOB_MAX_RUNNING = TYPE_ACTION | POLICY_JS | 1;
-    public static final int ACTION_JOB_HIGH_START = TYPE_ACTION | POLICY_JS | 2;
-    public static final int ACTION_JOB_HIGH_RUNNING = TYPE_ACTION | POLICY_JS | 3;
-    public static final int ACTION_JOB_DEFAULT_START = TYPE_ACTION | POLICY_JS | 4;
-    public static final int ACTION_JOB_DEFAULT_RUNNING = TYPE_ACTION | POLICY_JS | 5;
-    public static final int ACTION_JOB_LOW_START = TYPE_ACTION | POLICY_JS | 6;
-    public static final int ACTION_JOB_LOW_RUNNING = TYPE_ACTION | POLICY_JS | 7;
-    public static final int ACTION_JOB_MIN_START = TYPE_ACTION | POLICY_JS | 8;
-    public static final int ACTION_JOB_MIN_RUNNING = TYPE_ACTION | POLICY_JS | 9;
-    public static final int ACTION_JOB_TIMEOUT = TYPE_ACTION | POLICY_JS | 10;
+    public static final int ACTION_JOB_MAX_START = TYPE_ACTION | POLICY_JOB | 0;
+    public static final int ACTION_JOB_MAX_RUNNING = TYPE_ACTION | POLICY_JOB | 1;
+    public static final int ACTION_JOB_HIGH_START = TYPE_ACTION | POLICY_JOB | 2;
+    public static final int ACTION_JOB_HIGH_RUNNING = TYPE_ACTION | POLICY_JOB | 3;
+    public static final int ACTION_JOB_DEFAULT_START = TYPE_ACTION | POLICY_JOB | 4;
+    public static final int ACTION_JOB_DEFAULT_RUNNING = TYPE_ACTION | POLICY_JOB | 5;
+    public static final int ACTION_JOB_LOW_START = TYPE_ACTION | POLICY_JOB | 6;
+    public static final int ACTION_JOB_LOW_RUNNING = TYPE_ACTION | POLICY_JOB | 7;
+    public static final int ACTION_JOB_MIN_START = TYPE_ACTION | POLICY_JOB | 8;
+    public static final int ACTION_JOB_MIN_RUNNING = TYPE_ACTION | POLICY_JOB | 9;
+    public static final int ACTION_JOB_TIMEOUT = TYPE_ACTION | POLICY_JOB | 10;
 
-    public static final int REWARD_APP_INSTALL = TYPE_REWARD | POLICY_JS | 0;
+    public static final int REWARD_APP_INSTALL = TYPE_REWARD | POLICY_JOB | 0;
 
     private static final int[] COST_MODIFIERS = new int[]{
             COST_MODIFIER_CHARGING,
