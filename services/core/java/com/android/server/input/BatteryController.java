@@ -45,6 +45,7 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 /**
  * A thread-safe component of {@link InputManagerService} responsible for managing the battery state
@@ -99,8 +100,12 @@ final class BatteryController {
     }
 
     public void systemRunning() {
-        Objects.requireNonNull(mContext.getSystemService(InputManager.class))
-                .registerInputDeviceListener(mInputDeviceListener, mHandler);
+        final InputManager inputManager =
+                Objects.requireNonNull(mContext.getSystemService(InputManager.class));
+        inputManager.registerInputDeviceListener(mInputDeviceListener, mHandler);
+        for (int deviceId : inputManager.getInputDeviceIds()) {
+            mInputDeviceListener.onInputDeviceAdded(deviceId);
+        }
     }
 
     /**
@@ -179,7 +184,7 @@ final class BatteryController {
 
     @GuardedBy("mLock")
     private void updatePollingLocked(boolean delayStart) {
-        if (mDeviceMonitors.isEmpty() || !mIsInteractive) {
+        if (!mIsInteractive || !anyOf(mDeviceMonitors, DeviceMonitor::requiresPolling)) {
             // Stop polling.
             mIsPolling = false;
             mHandler.removeCallbacks(this::handlePollEvent);
@@ -206,6 +211,13 @@ final class BatteryController {
                 Objects.requireNonNull(mContext.getSystemService(InputManager.class))
                         .getInputDevice(deviceId);
         return device != null && device.hasBattery();
+    }
+
+    private boolean isUsiDevice(int deviceId) {
+        final InputDevice device =
+                Objects.requireNonNull(mContext.getSystemService(InputManager.class))
+                        .getInputDevice(deviceId);
+        return device != null && device.supportsUsi();
     }
 
     @GuardedBy("mLock")
@@ -261,8 +273,10 @@ final class BatteryController {
         if (!hasRegisteredListenerForDeviceLocked(deviceId)) {
             // There are no more listeners monitoring this device.
             final DeviceMonitor monitor = getDeviceMonitorOrThrowLocked(deviceId);
-            monitor.onMonitorDestroy();
-            mDeviceMonitors.remove(deviceId);
+            if (!monitor.isPersistent()) {
+                monitor.onMonitorDestroy();
+                mDeviceMonitors.remove(deviceId);
+            }
         }
 
         if (listenerRecord.mMonitoredDevices.isEmpty()) {
@@ -375,7 +389,14 @@ final class BatteryController {
     private final InputManager.InputDeviceListener mInputDeviceListener =
             new InputManager.InputDeviceListener() {
         @Override
-        public void onInputDeviceAdded(int deviceId) {}
+        public void onInputDeviceAdded(int deviceId) {
+            synchronized (mLock) {
+                if (isUsiDevice(deviceId) && !mDeviceMonitors.containsKey(deviceId)) {
+                    // Start monitoring USI device immediately.
+                    mDeviceMonitors.put(deviceId, new UsiDeviceMonitor(deviceId));
+                }
+            }
+        }
 
         @Override
         public void onInputDeviceRemoved(int deviceId) {}
@@ -513,6 +534,14 @@ final class BatteryController {
             processChangesAndNotify(eventTime, this::updateBatteryStateFromNative);
         }
 
+        public boolean requiresPolling() {
+            return true;
+        }
+
+        public boolean isPersistent() {
+            return false;
+        }
+
         // Returns the current battery state that can be used to notify listeners BatteryController.
         public State getBatteryStateForReporting() {
             return new State(mState);
@@ -524,6 +553,27 @@ final class BatteryController {
                     + ", Name='" + getInputDeviceName(mState.deviceId) + "'"
                     + ", NativeBattery=" + mState
                     + ", UEventListener=" + (mUEventBatteryListener != null ? "added" : "none");
+        }
+    }
+
+    // Battery monitoring logic that is specific to stylus devices that support the
+    // Universal Stylus Initiative (USI) protocol.
+    private class UsiDeviceMonitor extends DeviceMonitor {
+
+        UsiDeviceMonitor(int deviceId) {
+            super(deviceId);
+        }
+
+        @Override
+        public boolean requiresPolling() {
+            // Do not poll the battery state for USI devices.
+            return false;
+        }
+
+        @Override
+        public boolean isPersistent() {
+            // Do not remove the battery monitor for USI devices.
+            return true;
         }
     }
 
@@ -622,5 +672,15 @@ final class BatteryController {
                     + ", capacity=" + capacity
                     + "}";
         }
+    }
+
+    // Check if any value in an ArrayMap matches the predicate in an optimized way.
+    private static <K, V> boolean anyOf(ArrayMap<K, V> arrayMap, Predicate<V> test) {
+        for (int i = 0; i < arrayMap.size(); i++) {
+            if (test.test(arrayMap.valueAt(i))) {
+                return true;
+            }
+        }
+        return false;
     }
 }
