@@ -50979,8 +50979,12 @@ package android.view {
     method public android.view.SurfaceControl getSurfaceControl();
     method public void setChildSurfacePackage(@NonNull android.view.SurfaceControlViewHost.SurfacePackage);
     method public void setSecure(boolean);
+    method public void setSurfaceLifecycle(int);
     method public void setZOrderMediaOverlay(boolean);
     method public void setZOrderOnTop(boolean);
+    field public static final int SURFACE_LIFECYCLE_DEFAULT = 0; // 0x0
+    field public static final int SURFACE_LIFECYCLE_FOLLOWS_ATTACHMENT = 2; // 0x2
+    field public static final int SURFACE_LIFECYCLE_FOLLOWS_VISIBILITY = 1; // 0x1
   }
 
   public class TextureView extends android.view.View {
