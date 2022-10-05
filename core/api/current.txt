@@ -9684,6 +9684,7 @@ package android.content {
     method public abstract android.content.Context createConfigurationContext(@NonNull android.content.res.Configuration);
     method @NonNull public android.content.Context createContext(@NonNull android.content.ContextParams);
     method public abstract android.content.Context createContextForSplit(String) throws android.content.pm.PackageManager.NameNotFoundException;
+    method @NonNull public android.content.Context createDeviceContext(int);
     method public abstract android.content.Context createDeviceProtectedStorageContext();
     method @DisplayContext public abstract android.content.Context createDisplayContext(@NonNull android.view.Display);
     method public abstract android.content.Context createPackageContext(String, int) throws android.content.pm.PackageManager.NameNotFoundException;
@@ -9714,6 +9715,7 @@ package android.content {
     method public abstract android.content.ContentResolver getContentResolver();
     method public abstract java.io.File getDataDir();
     method public abstract java.io.File getDatabasePath(String);
+    method public int getDeviceId();
     method public abstract java.io.File getDir(String, int);
     method @Nullable public android.view.Display getDisplay();
     method @Nullable public final android.graphics.drawable.Drawable getDrawable(@DrawableRes int);

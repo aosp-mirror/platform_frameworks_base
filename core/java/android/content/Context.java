@@ -46,6 +46,7 @@ import android.app.VrManager;
 import android.app.ambientcontext.AmbientContextManager;
 import android.app.people.PeopleManager;
 import android.app.time.TimeManager;
+import android.companion.virtual.VirtualDeviceManager;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -6829,6 +6830,30 @@ public abstract class Context {
     public abstract Context createDisplayContext(@NonNull Display display);
 
     /**
+     * Returns a new {@code Context} object from the current context but with device association
+     * given by the {@code deviceId}. Each call to this method returns a new instance of a context
+     * object. Context objects are not shared; however, common state (such as the
+     * {@link ClassLoader} and other resources for the same configuration) can be shared, so the
+     * {@code Context} itself is lightweight.
+     * <p>
+     * Applications that run on virtual devices may use this method to access the default device
+     * capabilities and functionality (by passing
+     * {@link android.companion.virtual.VirtualDeviceManager#DEFAULT_DEVICE_ID}. Similarly,
+     * applications running on the default device may access the functionality of virtual devices.
+     * </p>
+     * @param deviceId The ID of the device to associate with this context.
+     * @return A context associated with the given device ID.
+     *
+     * @see #getDeviceId()
+     * @see VirtualDeviceManager#getVirtualDevices()
+     * @throws IllegalArgumentException if the given device ID is not a valid ID of the default
+     * device or a virtual device.
+     */
+    public @NonNull Context createDeviceContext(int deviceId) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
      * Creates a Context for a non-activity window.
      *
      * <p>
@@ -7149,6 +7174,20 @@ public abstract class Context {
      */
     @SuppressWarnings("HiddenAbstractMethod")
     public abstract void updateDisplay(int displayId);
+
+    /**
+     * Get the device ID this context is associated with. Applications can use this method to
+     * determine whether they are running on a virtual device and identify that device.
+     *
+     * The device ID of the host device is
+     * {@link android.companion.virtual.VirtualDeviceManager#DEFAULT_DEVICE_ID}
+     *
+     * @return the ID of the device this context is associated with.
+     * @see #createDeviceContext(int)
+     */
+    public int getDeviceId() {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
 
     /**
      * Indicates whether this Context is restricted.

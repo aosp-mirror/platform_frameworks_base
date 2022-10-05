@@ -839,6 +839,11 @@ public class MockContext extends Context {
     }
 
     @Override
+    public @NonNull Context createDeviceContext(int deviceId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public @NonNull Context createWindowContext(int type, Bundle options) {
         throw new UnsupportedOperationException();
     }
@@ -879,6 +884,11 @@ public class MockContext extends Context {
     /** @hide */
     @Override
     public void updateDisplay(int displayId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public int getDeviceId() {
         throw new UnsupportedOperationException();
     }
 
