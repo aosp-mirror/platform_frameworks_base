@@ -12454,6 +12454,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (!enabled) {
             cancelPendingInputEvents();
         }
+        notifyViewAccessibilityStateChangedIfNeeded(
+                AccessibilityEvent.CONTENT_CHANGE_TYPE_ENABLED);
     }
 
     /**

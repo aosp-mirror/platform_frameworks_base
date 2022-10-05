@@ -707,6 +707,18 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      */
     public static final int CONTENT_CHANGE_TYPE_ERROR = 0x0000800;
 
+    /**
+     * Change type for {@link #TYPE_WINDOW_CONTENT_CHANGED} event:
+     * The source node changed its ability to interact returned by
+     * {@link AccessibilityNodeInfo#isEnabled}.
+     * The view changing content's ability to interact should call
+     * {@link AccessibilityNodeInfo#setEnabled} and then send this event.
+     *
+     * @see AccessibilityNodeInfo#isEnabled
+     * @see AccessibilityNodeInfo#setEnabled
+     */
+    public static final int CONTENT_CHANGE_TYPE_ENABLED = 1 << 12;
+
     /** Change type for {@link #TYPE_SPEECH_STATE_CHANGE} event: another service is speaking. */
     public static final int SPEECH_STATE_SPEAKING_START = 0x00000001;
 
@@ -834,6 +846,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
                 CONTENT_CHANGE_TYPE_DRAG_CANCELLED,
                 CONTENT_CHANGE_TYPE_CONTENT_INVALID,
                 CONTENT_CHANGE_TYPE_ERROR,
+                CONTENT_CHANGE_TYPE_ENABLED,
             })
     public @interface ContentChangeTypes {}
 
@@ -1103,6 +1116,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
             case CONTENT_CHANGE_TYPE_CONTENT_INVALID:
                 return "CONTENT_CHANGE_TYPE_CONTENT_INVALID";
             case CONTENT_CHANGE_TYPE_ERROR: return "CONTENT_CHANGE_TYPE_ERROR";
+            case CONTENT_CHANGE_TYPE_ENABLED: return "CONTENT_CHANGE_TYPE_ENABLED";
             default: return Integer.toHexString(type);
         }
     }
