@@ -143,4 +143,10 @@ class LaunchBubbleFromLockScreen(testSpec: FlickerTestParameter) : BaseBubbleScr
     @Test
     override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
         super.visibleWindowsShownMoreThanOneConsecutiveEntry()
+
+    @FlakyTest(bugId = 251217773)
+    @Test
+    override fun entireScreenCovered() {
+        super.entireScreenCovered()
+    }
 }
