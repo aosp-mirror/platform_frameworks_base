@@ -49357,6 +49357,8 @@ package android.view {
     field public static final int AXIS_GENERIC_7 = 38; // 0x26
     field public static final int AXIS_GENERIC_8 = 39; // 0x27
     field public static final int AXIS_GENERIC_9 = 40; // 0x28
+    field public static final int AXIS_GESTURE_X_OFFSET = 48; // 0x30
+    field public static final int AXIS_GESTURE_Y_OFFSET = 49; // 0x31
     field public static final int AXIS_HAT_X = 15; // 0xf
     field public static final int AXIS_HAT_Y = 16; // 0x10
     field public static final int AXIS_HSCROLL = 10; // 0xa
