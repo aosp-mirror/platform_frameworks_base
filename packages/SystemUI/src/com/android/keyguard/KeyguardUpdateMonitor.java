@@ -112,7 +112,6 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
-import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
 import android.telephony.CarrierConfigManager;
 import android.telephony.ServiceState;
@@ -270,6 +269,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private final AuthController mAuthController;
     private final UiEventLogger mUiEventLogger;
     private final Set<Integer> mFaceAcquiredInfoIgnoreList;
+    private final PackageManager mPackageManager;
     private int mStatusBarState;
     private final StatusBarStateController.StateListener mStatusBarStateControllerListener =
             new StatusBarStateController.StateListener() {
@@ -343,9 +343,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private final IDreamManager mDreamManager;
     private final TelephonyManager mTelephonyManager;
     @Nullable
-    private FingerprintManager mFpm;
+    private final FingerprintManager mFpm;
     @Nullable
-    private FaceManager mFaceManager;
+    private final FaceManager mFaceManager;
     private final LockPatternUtils mLockPatternUtils;
     private final boolean mWakeOnFingerprintAcquiredStart;
 
@@ -725,7 +725,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      * If the device is dreaming, awakens the device
      */
     public void awakenFromDream() {
-        if (mIsDreaming && mDreamManager != null) {
+        if (mIsDreaming) {
             try {
                 mDreamManager.awaken();
             } catch (RemoteException e) {
@@ -1106,12 +1106,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
         // Error is always the end of authentication lifecycle
         mFaceCancelSignal = null;
-        boolean cameraPrivacyEnabled = false;
-        if (mSensorPrivacyManager != null) {
-            cameraPrivacyEnabled = mSensorPrivacyManager
-                    .isSensorPrivacyEnabled(SensorPrivacyManager.TOGGLE_TYPE_SOFTWARE,
-                    SensorPrivacyManager.Sensors.CAMERA);
-        }
+        boolean cameraPrivacyEnabled = mSensorPrivacyManager.isSensorPrivacyEnabled(
+                SensorPrivacyManager.TOGGLE_TYPE_SOFTWARE, SensorPrivacyManager.Sensors.CAMERA);
 
         if (msgId == FaceManager.FACE_ERROR_CANCELED
                 && mFaceRunningState == BIOMETRIC_STATE_CANCELLING_RESTARTING) {
@@ -1210,19 +1206,16 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     }
 
     private boolean isFingerprintDisabled(int userId) {
-        final DevicePolicyManager dpm =
-                (DevicePolicyManager) mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
-        return dpm != null && (dpm.getKeyguardDisabledFeatures(null, userId)
-                & DevicePolicyManager.KEYGUARD_DISABLE_FINGERPRINT) != 0
+        return (mDevicePolicyManager.getKeyguardDisabledFeatures(null, userId)
+                        & DevicePolicyManager.KEYGUARD_DISABLE_FINGERPRINT) != 0
                 || isSimPinSecure();
     }
 
     private boolean isFaceDisabled(int userId) {
-        final DevicePolicyManager dpm =
-                (DevicePolicyManager) mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
         // TODO(b/140035044)
-        return whitelistIpcs(() -> dpm != null && (dpm.getKeyguardDisabledFeatures(null, userId)
-                & DevicePolicyManager.KEYGUARD_DISABLE_FACE) != 0
+        return whitelistIpcs(() ->
+                (mDevicePolicyManager.getKeyguardDisabledFeatures(null, userId)
+                        & DevicePolicyManager.KEYGUARD_DISABLE_FACE) != 0
                 || isSimPinSecure());
     }
 
@@ -1294,7 +1287,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 Intent intent =
                         new Intent(DevicePolicyManager.ACTION_BIND_SECONDARY_LOCKSCREEN_SERVICE)
                                 .setPackage(supervisorComponent.getPackageName());
-                ResolveInfo resolveInfo = mContext.getPackageManager().resolveService(intent, 0);
+                ResolveInfo resolveInfo = mPackageManager.resolveService(intent, 0);
                 if (resolveInfo != null && resolveInfo.serviceInfo != null) {
                     Intent launchIntent =
                             new Intent().setComponent(resolveInfo.serviceInfo.getComponentName());
@@ -1896,9 +1889,20 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             UiEventLogger uiEventLogger,
             // This has to be a provider because SessionTracker depends on KeyguardUpdateMonitor :(
             Provider<SessionTracker> sessionTrackerProvider,
-            PowerManager powerManager) {
+            PowerManager powerManager,
+            TrustManager trustManager,
+            SubscriptionManager subscriptionManager,
+            UserManager userManager,
+            IDreamManager dreamManager,
+            DevicePolicyManager devicePolicyManager,
+            SensorPrivacyManager sensorPrivacyManager,
+            TelephonyManager telephonyManager,
+            PackageManager packageManager,
+            @Nullable FaceManager faceManager,
+            @Nullable FingerprintManager fingerprintManager,
+            @Nullable BiometricManager biometricManager) {
         mContext = context;
-        mSubscriptionManager = SubscriptionManager.from(context);
+        mSubscriptionManager = subscriptionManager;
         mTelephonyListenerManager = telephonyListenerManager;
         mDeviceProvisioned = isDeviceProvisionedInSettingsDb();
         mStrongAuthTracker = new StrongAuthTracker(context, this::notifyStrongAuthStateChanged);
@@ -1912,12 +1916,20 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         mLockPatternUtils = lockPatternUtils;
         mAuthController = authController;
         dumpManager.registerDumpable(getClass().getName(), this);
-        mSensorPrivacyManager = context.getSystemService(SensorPrivacyManager.class);
+        mSensorPrivacyManager = sensorPrivacyManager;
         mActiveUnlockConfig = activeUnlockConfiguration;
         mLogger = logger;
         mUiEventLogger = uiEventLogger;
         mSessionTrackerProvider = sessionTrackerProvider;
         mPowerManager = powerManager;
+        mTrustManager = trustManager;
+        mUserManager = userManager;
+        mDreamManager = dreamManager;
+        mTelephonyManager = telephonyManager;
+        mDevicePolicyManager = devicePolicyManager;
+        mPackageManager = packageManager;
+        mFpm = fingerprintManager;
+        mFaceManager = faceManager;
         mActiveUnlockConfig.setKeyguardUpdateMonitor(this);
         mWakeOnFingerprintAcquiredStart = context.getResources()
                         .getBoolean(com.android.internal.R.bool.kg_wake_on_acquire_start);
@@ -2062,8 +2074,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         // listener now with the service state from the default sub.
         mBackgroundExecutor.execute(() -> {
             int subId = SubscriptionManager.getDefaultSubscriptionId();
-            ServiceState serviceState = mContext.getSystemService(TelephonyManager.class)
-                    .getServiceStateForSubscriber(subId);
+            ServiceState serviceState = mTelephonyManager.getServiceStateForSubscriber(subId);
             mHandler.sendMessage(
                     mHandler.obtainMessage(MSG_SERVICE_STATE_CHANGE, subId, 0, serviceState));
         });
@@ -2085,25 +2096,20 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             e.rethrowAsRuntimeException();
         }
 
-        mTrustManager = context.getSystemService(TrustManager.class);
         mTrustManager.registerTrustListener(this);
 
         setStrongAuthTracker(mStrongAuthTracker);
 
-        mDreamManager = IDreamManager.Stub.asInterface(
-                ServiceManager.getService(DreamService.DREAM_SERVICE));
-
-        if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)) {
-            mFpm = (FingerprintManager) context.getSystemService(Context.FINGERPRINT_SERVICE);
+        if (mFpm != null) {
             mFingerprintSensorProperties = mFpm.getSensorPropertiesInternal();
+            mFpm.addLockoutResetCallback(mFingerprintLockoutResetCallback);
         }
-        if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_FACE)) {
-            mFaceManager = (FaceManager) context.getSystemService(Context.FACE_SERVICE);
+        if (mFaceManager != null) {
             mFaceSensorProperties = mFaceManager.getSensorPropertiesInternal();
+            mFaceManager.addLockoutResetCallback(mFaceLockoutResetCallback);
         }
 
-        if (mFpm != null || mFaceManager != null) {
-            BiometricManager biometricManager = context.getSystemService(BiometricManager.class);
+        if (biometricManager != null) {
             biometricManager.registerEnabledOnKeyguardCallback(mBiometricEnabledCallback);
         }
 
@@ -2123,19 +2129,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             }
         });
         updateBiometricListeningState(BIOMETRIC_ACTION_UPDATE, FACE_AUTH_UPDATED_ON_KEYGUARD_INIT);
-        if (mFpm != null) {
-            mFpm.addLockoutResetCallback(mFingerprintLockoutResetCallback);
-        }
-        if (mFaceManager != null) {
-            mFaceManager.addLockoutResetCallback(mFaceLockoutResetCallback);
-        }
 
         TaskStackChangeListeners.getInstance().registerTaskStackListener(mTaskStackListener);
-        mUserManager = context.getSystemService(UserManager.class);
         mIsPrimaryUser = mUserManager.isPrimaryUser();
         int user = ActivityManager.getCurrentUser();
         mUserIsUnlocked.put(user, mUserManager.isUserUnlocked(user));
-        mDevicePolicyManager = context.getSystemService(DevicePolicyManager.class);
         mLogoutEnabled = mDevicePolicyManager.isLogoutEnabled();
         updateSecondaryLockscreenRequirement(user);
         List<UserInfo> allUsers = mUserManager.getUsers();
@@ -2145,22 +2143,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         }
         updateAirplaneModeState();
 
-        mTelephonyManager =
-                (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-        if (mTelephonyManager != null) {
-            mTelephonyListenerManager.addActiveDataSubscriptionIdListener(mPhoneStateListener);
-            // Set initial sim states values.
-            for (int slot = 0; slot < mTelephonyManager.getActiveModemCount(); slot++) {
-                int state = mTelephonyManager.getSimState(slot);
-                int[] subIds = mSubscriptionManager.getSubscriptionIds(slot);
-                if (subIds != null) {
-                    for (int subId : subIds) {
-                        mHandler.obtainMessage(MSG_SIM_STATE_CHANGE, subId, slot, state)
-                                .sendToTarget();
-                    }
-                }
-            }
-        }
+        mTelephonyListenerManager.addActiveDataSubscriptionIdListener(mPhoneStateListener);
+        initializeSimState();
 
         mTimeFormatChangeObserver = new ContentObserver(mHandler) {
             @Override
@@ -2175,6 +2159,20 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         mContext.getContentResolver().registerContentObserver(
                 Settings.System.getUriFor(Settings.System.TIME_12_24),
                 false, mTimeFormatChangeObserver, UserHandle.USER_ALL);
+    }
+
+    private void initializeSimState() {
+        // Set initial sim states values.
+        for (int slot = 0; slot < mTelephonyManager.getActiveModemCount(); slot++) {
+            int state = mTelephonyManager.getSimState(slot);
+            int[] subIds = mSubscriptionManager.getSubscriptionIds(slot);
+            if (subIds != null) {
+                for (int subId : subIds) {
+                    mHandler.obtainMessage(MSG_SIM_STATE_CHANGE, subId, slot, state)
+                            .sendToTarget();
+                }
+            }
+        }
     }
 
     private void updateFaceEnrolled(int userId) {
@@ -3176,7 +3174,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             return false;
         }
         Intent homeIntent = new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME);
-        ResolveInfo resolveInfo = mContext.getPackageManager().resolveActivityAsUser(homeIntent,
+        ResolveInfo resolveInfo = mPackageManager.resolveActivityAsUser(homeIntent,
                 0 /* flags */, getCurrentUser());
 
         if (resolveInfo == null) {
@@ -3514,10 +3512,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      * @return true if and only if the state has changed for the specified {@code slotId}
      */
     private boolean refreshSimState(int subId, int slotId) {
-        final TelephonyManager tele =
-                (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
-        int state = (tele != null) ?
-                tele.getSimState(slotId) : TelephonyManager.SIM_STATE_UNKNOWN;
+        int state = mTelephonyManager.getSimState(slotId);
         SimData data = mSimDatas.get(subId);
         final boolean changed;
         if (data == null) {
@@ -3660,13 +3655,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      * Unregister all listeners.
      */
     public void destroy() {
-        // TODO: inject these dependencies:
-        TelephonyManager telephony =
-                (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
-        if (telephony != null) {
-            mTelephonyListenerManager.removeActiveDataSubscriptionIdListener(mPhoneStateListener);
-        }
-
+        mStatusBarStateController.removeCallback(mStatusBarStateControllerListener);
+        mTelephonyListenerManager.removeActiveDataSubscriptionIdListener(mPhoneStateListener);
         mSubscriptionManager.removeOnSubscriptionsChangedListener(mSubscriptionListener);
 
         if (mDeviceProvisionedObserver != null) {
