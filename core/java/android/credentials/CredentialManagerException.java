@@ -23,6 +23,20 @@ public class CredentialManagerException extends Exception {
     /** Indicates that an unknown error was encountered. */
     public static final int ERROR_UNKNOWN = 0;
 
+    /**
+     * The given CredentialManager operation is cancelled by the user.
+     *
+     * @hide
+     */
+    public static final int ERROR_USER_CANCELLED = 1;
+
+    /**
+     * No appropriate provider is found to support the target credential type(s).
+     *
+     * @hide
+     */
+    public static final int ERROR_PROVIDER_NOT_FOUND = 2;
+
     public final int errorCode;
 
     public CredentialManagerException(int errorCode, @Nullable String message) {
