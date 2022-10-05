@@ -105,6 +105,7 @@ cc_library_host_static {
         "format/Container.cpp",
         "format/binary/BinaryResourceParser.cpp",
         "format/binary/ResChunkPullParser.cpp",
+        "format/binary/ResEntryWriter.cpp",
         "format/binary/TableFlattener.cpp",
         "format/binary/XmlFlattener.cpp",
         "format/proto/ProtoDeserialize.cpp",
