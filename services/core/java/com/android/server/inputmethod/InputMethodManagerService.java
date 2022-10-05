@@ -177,6 +177,7 @@ import com.android.internal.inputmethod.UnbindReason;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.TransferPipe;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.view.IInputMethodManager;
@@ -195,8 +196,6 @@ import com.android.server.statusbar.StatusBarManagerService;
 import com.android.server.utils.PriorityDump;
 import com.android.server.wm.WindowManagerInternal;
 
-import com.google.android.collect.Sets;
-
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -211,7 +210,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.OptionalInt;
-import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Future;
@@ -283,7 +281,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
      * {@link #mPreventImeStartupUnlessTextEditor}.
      */
     @NonNull
-    private final Set<String> mNonPreemptibleInputMethods;
+    private final String[] mNonPreemptibleInputMethods;
 
     @UserIdInt
     private int mLastSwitchUserId;
@@ -1777,8 +1775,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         mAutofillController = new AutofillSuggestionsController(this);
         mPreventImeStartupUnlessTextEditor = mRes.getBoolean(
                 com.android.internal.R.bool.config_preventImeStartupUnlessTextEditor);
-        mNonPreemptibleInputMethods = Sets.newHashSet(mRes.getStringArray(
-                com.android.internal.R.array.config_nonPreemptibleInputMethods));
+        mNonPreemptibleInputMethods = mRes.getStringArray(
+                com.android.internal.R.array.config_nonPreemptibleInputMethods);
         mHwController = new HandwritingModeController(thread.getLooper(),
                 new InkWindowInitializer());
         registerDeviceListenerAndCheckStylusSupport();
@@ -2619,7 +2617,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     private boolean isNonPreemptibleImeLocked(@NonNull  String selectedMethodId) {
         final InputMethodInfo imi = mMethodMap.get(selectedMethodId);
         if (imi != null) {
-            return mNonPreemptibleInputMethods.contains(imi.getPackageName());
+            return ArrayUtils.contains(mNonPreemptibleInputMethods, imi.getPackageName());
         }
         return false;
     }
