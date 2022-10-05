@@ -37,6 +37,8 @@ import android.util.KeyValueListParser;
 import android.util.Slog;
 import android.util.TimeUtils;
 
+import dalvik.annotation.optimization.NeverCompile;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -321,6 +323,7 @@ public class BroadcastConstants {
     /**
      * Standard dumpsys support; invoked from BroadcastQueue dump
      */
+    @NeverCompile
     public void dump(@NonNull IndentingPrintWriter pw) {
         synchronized (this) {
             pw.print("Broadcast parameters (key=");

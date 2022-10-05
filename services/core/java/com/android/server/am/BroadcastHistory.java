@@ -22,6 +22,8 @@ import android.os.Bundle;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
+import dalvik.annotation.optimization.NeverCompile;
+
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -90,6 +92,7 @@ public class BroadcastHistory {
         else return x;
     }
 
+    @NeverCompile
     public void dumpDebug(ProtoOutputStream proto) {
         int lastIndex = mHistoryNext;
         int ringIndex = lastIndex;
@@ -123,6 +126,7 @@ public class BroadcastHistory {
         } while (ringIndex != lastIndex);
     }
 
+    @NeverCompile
     public boolean dumpLocked(PrintWriter pw, String dumpPackage, String queueName,
             SimpleDateFormat sdf, boolean dumpAll, boolean needSep) {
         int i;

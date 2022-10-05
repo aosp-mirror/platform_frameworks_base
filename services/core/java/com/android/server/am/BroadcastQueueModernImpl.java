@@ -79,6 +79,8 @@ import com.android.server.am.BroadcastProcessQueue.BroadcastConsumer;
 import com.android.server.am.BroadcastProcessQueue.BroadcastPredicate;
 import com.android.server.am.BroadcastRecord.DeliveryState;
 
+import dalvik.annotation.optimization.NeverCompile;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
@@ -1395,6 +1397,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     }
 
     @Override
+    @NeverCompile
     public void dumpDebug(@NonNull ProtoOutputStream proto, long fieldId) {
         long token = proto.start(fieldId);
         proto.write(BroadcastQueueProto.QUEUE_NAME, mQueueName);
@@ -1403,6 +1406,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     }
 
     @Override
+    @NeverCompile
     public boolean dumpLocked(@NonNull FileDescriptor fd, @NonNull PrintWriter pw,
             @NonNull String[] args, int opti, boolean dumpAll, @Nullable String dumpPackage,
             boolean needSep) {

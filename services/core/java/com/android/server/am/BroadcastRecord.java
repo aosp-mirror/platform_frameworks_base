@@ -51,6 +51,8 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
 
+import dalvik.annotation.optimization.NeverCompile;
+
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -206,6 +208,7 @@ final class BroadcastRecord extends Binder {
     // Private refcount-management bookkeeping; start > 0
     static AtomicInteger sNextToken = new AtomicInteger(1);
 
+    @NeverCompile
     void dump(PrintWriter pw, String prefix, SimpleDateFormat sdf) {
         final long now = SystemClock.uptimeMillis();
 
@@ -814,6 +817,7 @@ final class BroadcastRecord extends Binder {
         return mCachedToShortString;
     }
 
+    @NeverCompile
     public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         long token = proto.start(fieldId);
         proto.write(BroadcastRecordProto.USER_ID, userId);

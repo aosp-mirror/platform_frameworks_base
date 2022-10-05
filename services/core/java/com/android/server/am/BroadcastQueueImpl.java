@@ -79,6 +79,8 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
 import com.android.server.pm.UserManagerInternal;
 
+import dalvik.annotation.optimization.NeverCompile;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
@@ -1828,6 +1830,7 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                 + mDispatcher.describeStateLocked();
     }
 
+    @NeverCompile
     public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         long token = proto.start(fieldId);
         proto.write(BroadcastQueueProto.QUEUE_NAME, mQueueName);
@@ -1844,6 +1847,7 @@ public class BroadcastQueueImpl extends BroadcastQueue {
         proto.end(token);
     }
 
+    @NeverCompile
     public boolean dumpLocked(FileDescriptor fd, PrintWriter pw, String[] args,
             int opti, boolean dumpAll, String dumpPackage, boolean needSep) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");

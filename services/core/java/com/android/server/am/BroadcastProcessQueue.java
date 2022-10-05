@@ -33,6 +33,8 @@ import android.util.TimeUtils;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
 
+import dalvik.annotation.optimization.NeverCompile;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayDeque;
@@ -630,6 +632,7 @@ class BroadcastProcessQueue {
         return mCachedToShortString;
     }
 
+    @NeverCompile
     public void dumpLocked(@UptimeMillisLong long now, @NonNull IndentingPrintWriter pw) {
         if ((mActive == null) && mPending.isEmpty()) return;
 
@@ -668,6 +671,7 @@ class BroadcastProcessQueue {
         pw.println();
     }
 
+    @NeverCompile
     private void dumpRecord(@UptimeMillisLong long now, @NonNull IndentingPrintWriter pw,
             @NonNull BroadcastRecord record, int recordIndex) {
         TimeUtils.formatDuration(record.enqueueTime, now, pw);
