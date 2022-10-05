@@ -1475,6 +1475,27 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     @Test
+    public void testShouldListenForFace_udfpsBouncerIsShowingButDeviceGoingToSleep_returnsFalse()
+            throws RemoteException {
+        // Preconditions for face auth to run
+        keyguardNotGoingAway();
+        currentUserIsPrimary();
+        currentUserDoesNotHaveTrust();
+        biometricsNotDisabledThroughDevicePolicyManager();
+        biometricsEnabledForCurrentUser();
+        userNotCurrentlySwitching();
+        deviceNotGoingToSleep();
+        mKeyguardUpdateMonitor.setUdfpsBouncerShowing(true);
+        mTestableLooper.processAllMessages();
+        assertThat(mKeyguardUpdateMonitor.shouldListenForFace()).isTrue();
+
+        deviceGoingToSleep();
+        mTestableLooper.processAllMessages();
+
+        assertThat(mKeyguardUpdateMonitor.shouldListenForFace()).isFalse();
+    }
+
+    @Test
     public void testShouldListenForFace_whenFaceIsLockedOut_returnsFalse()
             throws RemoteException {
         // Preconditions for face auth to run
@@ -1659,6 +1680,10 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
     private void deviceNotGoingToSleep() {
         mKeyguardUpdateMonitor.dispatchFinishedGoingToSleep(/* value doesn't matter */1);
+    }
+
+    private void deviceGoingToSleep() {
+        mKeyguardUpdateMonitor.dispatchStartedGoingToSleep(/* value doesn't matter */1);
     }
 
     private void deviceIsInteractive() {
