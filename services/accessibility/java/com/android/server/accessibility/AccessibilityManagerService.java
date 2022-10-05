@@ -49,6 +49,7 @@ import android.accessibilityservice.TouchInteractionController;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.UserIdInt;
 import android.app.ActivityOptions;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
@@ -358,6 +359,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 IRemoteAccessibilityInputConnection remoteAccessibilityInputConnection,
                 EditorInfo editorInfo, boolean restarting) {
             mService.scheduleStartInput(remoteAccessibilityInputConnection, editorInfo, restarting);
+        }
+
+        @Override
+        public boolean isTouchExplorationEnabled(@UserIdInt int userId) {
+            synchronized (mService.mLock) {
+                return mService.getUserStateLocked(userId).isTouchExplorationEnabledLocked();
+            }
         }
     }
 
