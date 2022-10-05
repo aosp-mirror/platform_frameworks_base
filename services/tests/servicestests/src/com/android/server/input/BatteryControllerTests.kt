@@ -260,13 +260,16 @@ class BatteryControllerTests {
 
     @Test
     fun testListenersNotifiedOnUEventNotification() {
-        `when`(native.getBatteryDevicePath(DEVICE_ID)).thenReturn("/test/device1")
+        `when`(native.getBatteryDevicePath(DEVICE_ID)).thenReturn("/sys/dev/test/device1")
         `when`(native.getBatteryStatus(DEVICE_ID)).thenReturn(STATUS_CHARGING)
         `when`(native.getBatteryCapacity(DEVICE_ID)).thenReturn(78)
         val listener = createMockListener()
         val uEventListener = ArgumentCaptor.forClass(UEventManager.UEventListener::class.java)
         batteryController.registerBatteryListener(DEVICE_ID, listener, PID)
-        verify(uEventManager).addListener(uEventListener.capture(), eq("DEVPATH=/test/device1"))
+        // The device paths for UEvent notifications do not include the "/sys" prefix, so verify
+        // that the added listener is configured to match the path without that prefix.
+        verify(uEventManager)
+            .addListener(uEventListener.capture(), eq("DEVPATH=/dev/test/device1"))
         listener.verifyNotified(DEVICE_ID, status = STATUS_CHARGING, capacity = 0.78f)
 
         // If the battery state has changed when an UEvent is sent, the listeners are notified.

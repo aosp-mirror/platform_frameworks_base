@@ -479,7 +479,12 @@ final class BatteryController {
                     handleUEventNotification(deviceId, eventTime);
                 }
             };
-            mUEventManager.addListener(mUEventListener, "DEVPATH=" + batteryPath);
+            mUEventManager.addListener(mUEventListener, "DEVPATH=" + formatDevPath(batteryPath));
+        }
+
+        private String formatDevPath(String path) {
+            // Remove the "/sys" prefix if it has one.
+            return path.startsWith("/sys") ? path.substring(4) : path;
         }
 
         // This must be called when the device is no longer being monitored.
