@@ -34,6 +34,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.Closeable;
+import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -447,6 +448,16 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
         final ProtoOutputStream proto = new ProtoOutputStream();
         writeStatsProto(proto, STATSD_PULL_ATOM_MAX_BYTES);
         return proto.getBytes();
+    }
+
+    /**
+     * Writes contents in a binary protobuffer format, using
+     * the android.os.BatteryUsageStatsAtomsProto proto.
+     */
+    public void dumpToProto(FileDescriptor fd) {
+        final ProtoOutputStream proto = new ProtoOutputStream(fd);
+        writeStatsProto(proto, /* max size */ Integer.MAX_VALUE);
+        proto.flush();
     }
 
     @NonNull

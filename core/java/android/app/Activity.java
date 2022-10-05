@@ -8045,8 +8045,9 @@ public class Activity extends ContextThemeWrapper
                 resultData.prepareToLeaveProcess(this);
             }
             upIntent.prepareToLeaveProcess(this);
-            return ActivityClient.getInstance().navigateUpTo(mToken, upIntent, resultCode,
-                    resultData);
+            String resolvedType = upIntent.resolveTypeIfNeeded(getContentResolver());
+            return ActivityClient.getInstance().navigateUpTo(mToken, upIntent, resolvedType,
+                    resultCode, resultData);
         } else {
             return mParent.navigateUpToFromChild(this, upIntent);
         }

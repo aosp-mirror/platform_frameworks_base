@@ -34,6 +34,7 @@ import static java.util.Objects.requireNonNull;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.MainThread;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
@@ -57,7 +58,9 @@ import android.media.AudioSystem;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Process;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -90,6 +93,7 @@ import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.clipboardoverlay.ClipboardOverlayController;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.screenshot.ScreenshotController.SavedImageData.ActionTransition;
 import com.android.systemui.screenshot.TakeScreenshotService.RequestCallback;
 import com.android.systemui.util.Assert;
@@ -151,6 +155,7 @@ public class ScreenshotController {
         public Consumer<Uri> finisher;
         public ScreenshotController.ActionsReadyListener mActionsReadyListener;
         public ScreenshotController.QuickShareActionReadyListener mQuickShareActionsReadyListener;
+        public UserHandle owner;
 
         void clearImage() {
             image = null;
@@ -167,6 +172,8 @@ public class ScreenshotController {
         public Notification.Action deleteAction;
         public List<Notification.Action> smartActions;
         public Notification.Action quickShareAction;
+        public UserHandle owner;
+
 
         /**
          * POD for shared element transition.
@@ -242,6 +249,7 @@ public class ScreenshotController {
     private static final int SCREENSHOT_CORNER_DEFAULT_TIMEOUT_MILLIS = 6000;
 
     private final WindowContext mContext;
+    private final FeatureFlags mFlags;
     private final ScreenshotNotificationsController mNotificationsController;
     private final ScreenshotSmartActions mScreenshotSmartActions;
     private final UiEventLogger mUiEventLogger;
@@ -288,6 +296,7 @@ public class ScreenshotController {
     @Inject
     ScreenshotController(
             Context context,
+            FeatureFlags flags,
             ScreenshotSmartActions screenshotSmartActions,
             ScreenshotNotificationsController screenshotNotificationsController,
             ScrollCaptureClient scrollCaptureClient,
@@ -331,6 +340,7 @@ public class ScreenshotController {
         final Context displayContext = context.createDisplayContext(getDefaultDisplay());
         mContext = (WindowContext) displayContext.createWindowContext(TYPE_SCREENSHOT, null);
         mWindowManager = mContext.getSystemService(WindowManager.class);
+        mFlags = flags;
 
         mAccessibilityManager = AccessibilityManager.getInstance(mContext);
 
@@ -377,7 +387,6 @@ public class ScreenshotController {
     void handleImageAsScreenshot(Bitmap screenshot, Rect screenshotScreenBounds,
             Insets visibleInsets, int taskId, int userId, ComponentName topComponent,
             Consumer<Uri> finisher, RequestCallback requestCallback) {
-        // TODO: use task Id, userId, topComponent for smart handler
         Assert.isMainThread();
         if (screenshot == null) {
             Log.e(TAG, "Got null bitmap from screenshot message");
@@ -395,7 +404,7 @@ public class ScreenshotController {
         }
         mCurrentRequestCallback = requestCallback;
         saveScreenshot(screenshot, finisher, screenshotScreenBounds, visibleInsets, topComponent,
-                showFlash);
+                showFlash, UserHandle.of(userId));
     }
 
     /**
@@ -543,14 +552,15 @@ public class ScreenshotController {
             return;
         }
 
-        saveScreenshot(screenshot, finisher, screenRect, Insets.NONE, topComponent, true);
+        saveScreenshot(screenshot, finisher, screenRect, Insets.NONE, topComponent, true,
+                Process.myUserHandle());
 
         mBroadcastSender.sendBroadcast(new Intent(ClipboardOverlayController.SCREENSHOT_ACTION),
                 ClipboardOverlayController.SELF_PERMISSION);
     }
 
     private void saveScreenshot(Bitmap screenshot, Consumer<Uri> finisher, Rect screenRect,
-            Insets screenInsets, ComponentName topComponent, boolean showFlash) {
+            Insets screenInsets, ComponentName topComponent, boolean showFlash, UserHandle owner) {
         withWindowAttached(() ->
                 mScreenshotView.announceForAccessibility(
                         mContext.getResources().getString(R.string.screenshot_saving_title)));
@@ -575,11 +585,11 @@ public class ScreenshotController {
 
         mScreenBitmap = screenshot;
 
-        if (!isUserSetupComplete()) {
+        if (!isUserSetupComplete(owner)) {
             Log.w(TAG, "User setup not complete, displaying toast only");
             // User setup isn't complete, so we don't want to show any UI beyond a toast, as editing
             // and sharing shouldn't be exposed to the user.
-            saveScreenshotAndToast(finisher);
+            saveScreenshotAndToast(owner, finisher);
             return;
         }
 
@@ -587,7 +597,7 @@ public class ScreenshotController {
         mScreenBitmap.setHasAlpha(false);
         mScreenBitmap.prepareToDraw();
 
-        saveScreenshotInWorkerThread(finisher, this::showUiOnActionsReady,
+        saveScreenshotInWorkerThread(owner, finisher, this::showUiOnActionsReady,
                 this::showUiOnQuickShareActionReady);
 
         // The window is focusable by default
@@ -853,11 +863,12 @@ public class ScreenshotController {
      * Save the bitmap but don't show the normal screenshot UI.. just a toast (or notification on
      * failure).
      */
-    private void saveScreenshotAndToast(Consumer<Uri> finisher) {
+    private void saveScreenshotAndToast(UserHandle owner, Consumer<Uri> finisher) {
         // Play the shutter sound to notify that we've taken a screenshot
         playCameraSound();
 
         saveScreenshotInWorkerThread(
+                owner,
                 /* onComplete */ finisher,
                 /* actionsReadyListener */ imageData -> {
                     if (DEBUG_CALLBACK) {
@@ -925,9 +936,11 @@ public class ScreenshotController {
     /**
      * Creates a new worker thread and saves the screenshot to the media store.
      */
-    private void saveScreenshotInWorkerThread(Consumer<Uri> finisher,
-            @Nullable ScreenshotController.ActionsReadyListener actionsReadyListener,
-            @Nullable ScreenshotController.QuickShareActionReadyListener
+    private void saveScreenshotInWorkerThread(
+            UserHandle owner,
+            @NonNull Consumer<Uri> finisher,
+            @Nullable ActionsReadyListener actionsReadyListener,
+            @Nullable QuickShareActionReadyListener
                     quickShareActionsReadyListener) {
         ScreenshotController.SaveImageInBackgroundData
                 data = new ScreenshotController.SaveImageInBackgroundData();
@@ -935,13 +948,14 @@ public class ScreenshotController {
         data.finisher = finisher;
         data.mActionsReadyListener = actionsReadyListener;
         data.mQuickShareActionsReadyListener = quickShareActionsReadyListener;
+        data.owner = owner;
 
         if (mSaveInBgTask != null) {
             // just log success/failure for the pre-existing screenshot
             mSaveInBgTask.setActionsReadyListener(this::logSuccessOnActionsReady);
         }
 
-        mSaveInBgTask = new SaveImageInBackgroundTask(mContext, mImageExporter,
+        mSaveInBgTask = new SaveImageInBackgroundTask(mContext, mFlags, mImageExporter,
                 mScreenshotSmartActions, data, getActionTransitionSupplier(),
                 mScreenshotNotificationSmartActionsProvider);
         mSaveInBgTask.execute();
@@ -960,6 +974,15 @@ public class ScreenshotController {
         mScreenshotHandler.resetTimeout();
 
         if (imageData.uri != null) {
+            if (!imageData.owner.equals(Process.myUserHandle())) {
+                // TODO: Handle non-primary user ownership (e.g. Work Profile)
+                // This image is owned by another user. Special treatment will be
+                // required in the UI (badging) as well as sending intents which can
+                // correctly forward those URIs on to be read (actions).
+
+                Log.d(TAG, "*** Screenshot saved to a non-primary user ("
+                        + imageData.owner + ") as " + imageData.uri);
+            }
             mScreenshotHandler.post(() -> {
                 if (mScreenshotAnimation != null && mScreenshotAnimation.isRunning()) {
                     mScreenshotAnimation.addListener(new AnimatorListenerAdapter() {
@@ -1033,9 +1056,9 @@ public class ScreenshotController {
         }
     }
 
-    private boolean isUserSetupComplete() {
-        return Settings.Secure.getInt(mContext.getContentResolver(),
-                SETTINGS_SECURE_USER_SETUP_COMPLETE, 0) == 1;
+    private boolean isUserSetupComplete(UserHandle owner) {
+        return Settings.Secure.getInt(mContext.createContextAsUser(owner, 0)
+                        .getContentResolver(), SETTINGS_SECURE_USER_SETUP_COMPLETE, 0) == 1;
     }
 
     /**

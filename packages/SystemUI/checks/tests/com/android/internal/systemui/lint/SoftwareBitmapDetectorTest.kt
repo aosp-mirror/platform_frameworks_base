@@ -17,7 +17,6 @@
 package com.android.internal.systemui.lint
 
 import com.android.tools.lint.checks.infrastructure.LintDetectorTest
-import com.android.tools.lint.checks.infrastructure.TestFile
 import com.android.tools.lint.checks.infrastructure.TestFiles
 import com.android.tools.lint.checks.infrastructure.TestLintTask
 import com.android.tools.lint.detector.api.Detector
@@ -36,7 +35,8 @@ class SoftwareBitmapDetectorTest : LintDetectorTest() {
 
     @Test
     fun testSoftwareBitmap() {
-        lint().files(
+        lint()
+            .files(
                 TestFiles.java(
                         """
                     import android.graphics.Bitmap;
@@ -48,17 +48,20 @@ class SoftwareBitmapDetectorTest : LintDetectorTest() {
                         }
                     }
                 """
-                ).indented(),
-                *stubs)
-                .issues(SoftwareBitmapDetector.ISSUE)
-                .run()
-                .expectWarningCount(2)
-                .expectContains(explanation)
+                    )
+                    .indented(),
+                *stubs
+            )
+            .issues(SoftwareBitmapDetector.ISSUE)
+            .run()
+            .expectWarningCount(2)
+            .expectContains(explanation)
     }
 
     @Test
     fun testHardwareBitmap() {
-        lint().files(
+        lint()
+            .files(
                 TestFiles.java(
                         """
                     import android.graphics.Bitmap;
@@ -69,29 +72,14 @@ class SoftwareBitmapDetectorTest : LintDetectorTest() {
                         }
                     }
                 """
-                ).indented(),
-                *stubs)
-                .issues(SoftwareBitmapDetector.ISSUE)
-                .run()
-                .expectWarningCount(0)
+                    )
+                    .indented(),
+                *stubs
+            )
+            .issues(SoftwareBitmapDetector.ISSUE)
+            .run()
+            .expectWarningCount(0)
     }
 
-    private val bitmapStub: TestFile = java(
-            """
-        package android.graphics;
-
-        public class Bitmap {
-            public enum Config {
-                ARGB_8888,
-                RGB_565,
-                HARDWARE
-            }
-            public static Bitmap createBitmap(int width, int height, Config config) {
-                return null;
-            }
-        }
-        """
-    )
-
-    private val stubs = arrayOf(bitmapStub)
+    private val stubs = androidStubs
 }

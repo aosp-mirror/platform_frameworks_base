@@ -104,9 +104,26 @@ public class Flags {
     public static final ReleasedFlag MODERN_USER_SWITCHER_ACTIVITY =
             new ReleasedFlag(209, true);
 
-    /** Whether the new implementation of UserSwitcherController should be used. */
-    public static final UnreleasedFlag REFACTORED_USER_SWITCHER_CONTROLLER =
-            new UnreleasedFlag(210, false);
+    /**
+     * Whether the user interactor and repository should use `UserSwitcherController`.
+     *
+     * <p>If this is {@code false}, the interactor and repo skip the controller and directly access
+     * the framework APIs.
+     */
+    public static final UnreleasedFlag USER_INTERACTOR_AND_REPO_USE_CONTROLLER =
+            new UnreleasedFlag(210, true);
+
+    /**
+     * Whether `UserSwitcherController` should use the user interactor.
+     *
+     * <p>When this is {@code true}, the controller does not directly access framework APIs.
+     * Instead, it goes through the interactor.
+     *
+     * <p>Note: do not set this to true if {@link #USER_INTERACTOR_AND_REPO_USE_CONTROLLER} is
+     * {@code true} as it would created a cycle between controller -> interactor -> controller.
+     */
+    public static final UnreleasedFlag USER_CONTROLLER_USES_INTERACTOR =
+            new UnreleasedFlag(211, false);
 
     /***************************************/
     // 300 - power menu
@@ -152,7 +169,7 @@ public class Flags {
     public static final ResourceBooleanFlag FULL_SCREEN_USER_SWITCHER =
             new ResourceBooleanFlag(506, R.bool.config_enableFullscreenUserSwitcher);
 
-    public static final UnreleasedFlag NEW_FOOTER_ACTIONS = new UnreleasedFlag(507, true);
+    public static final ReleasedFlag NEW_FOOTER_ACTIONS = new ReleasedFlag(507);
 
     /***************************************/
     // 600- status bar
@@ -253,6 +270,10 @@ public class Flags {
     @Keep
     public static final SysPropBooleanFlag ENABLE_FLING_TO_DISMISS_PIP =
             new SysPropBooleanFlag(1109, "persist.wm.debug.fling_to_dismiss_pip", true);
+
+    @Keep
+    public static final SysPropBooleanFlag ENABLE_PIP_KEEP_CLEAR_ALGORITHM =
+            new SysPropBooleanFlag(1110, "persist.wm.debug.enable_pip_keep_clear_algorithm", false);
 
     // 1200 - predictive back
     @Keep
