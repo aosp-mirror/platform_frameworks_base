@@ -320,7 +320,7 @@ public class TimeDetectorStrategyImplTest {
         Instant suggestionInstant = initialClockTime.getValue()
                 .plusMillis(timeElapsedMillis)
                 .plusMillis(confidenceUpgradeThresholdMillis);
-        TimestampedValue<Long> matchingClockTime = new TimestampedValue<>(
+        UnixEpochTime matchingClockTime = new UnixEpochTime(
                 script.peekElapsedRealtimeMillis(),
                 suggestionInstant.toEpochMilli());
         TelephonyTimeSuggestion timeSuggestion = new TelephonyTimeSuggestion.Builder(slotIndex)
@@ -357,7 +357,7 @@ public class TimeDetectorStrategyImplTest {
         Instant suggestionInstant = initialClockTime.getValue()
                 .plusMillis(timeElapsedMillis)
                 .plusMillis(confidenceUpgradeThresholdMillis + 1);
-        TimestampedValue<Long> mismatchingClockTime = new TimestampedValue<>(
+        UnixEpochTime mismatchingClockTime = new UnixEpochTime(
                 script.peekElapsedRealtimeMillis(),
                 suggestionInstant.toEpochMilli());
         TelephonyTimeSuggestion timeSuggestion = new TelephonyTimeSuggestion.Builder(slotIndex)
@@ -392,7 +392,7 @@ public class TimeDetectorStrategyImplTest {
 
         // Create a suggestion time that doesn't closely match the current system clock.
         Instant initialClockInstant = initialClockTime.getValue();
-        TimestampedValue<Long> mismatchingClockTime = new TimestampedValue<>(
+        UnixEpochTime mismatchingClockTime = new UnixEpochTime(
                 script.peekElapsedRealtimeMillis(),
                 initialClockInstant.plusMillis(timeElapsedMillis + 1_000_000).toEpochMilli());
         TelephonyTimeSuggestion timeSuggestion = new TelephonyTimeSuggestion.Builder(slotIndex)
@@ -418,7 +418,7 @@ public class TimeDetectorStrategyImplTest {
 
         TelephonyTimeSuggestion timeSuggestion1 =
                 script.generateTelephonyTimeSuggestion(slotIndex, testTime);
-        TimestampedValue<Long> unixEpochTime1 = timeSuggestion1.getUnixEpochTime();
+        UnixEpochTime unixEpochTime1 = timeSuggestion1.getUnixEpochTime();
 
         // Initialize the strategy / device with a time set from a telephony suggestion.
         script.simulateTimePassing();
@@ -430,13 +430,13 @@ public class TimeDetectorStrategyImplTest {
 
         // The Unix epoch time increment should be larger than the system clock update threshold so
         // we know it shouldn't be ignored for other reasons.
-        long validUnixEpochTimeMillis = unixEpochTime1.getValue()
+        long validUnixEpochTimeMillis = unixEpochTime1.getUnixEpochTimeMillis()
                 + (2 * systemClockUpdateThresholdMillis);
 
-        // Now supply a new signal that has an obviously bogus reference time : older than the last
-        // one.
-        long referenceTimeBeforeLastSignalMillis = unixEpochTime1.getReferenceTimeMillis() - 1;
-        TimestampedValue<Long> unixEpochTime2 = new TimestampedValue<>(
+        // Now supply a new signal that has an obviously bogus elapsed realtime : older than the
+        // last one.
+        long referenceTimeBeforeLastSignalMillis = unixEpochTime1.getElapsedRealtimeMillis() - 1;
+        UnixEpochTime unixEpochTime2 = new UnixEpochTime(
                 referenceTimeBeforeLastSignalMillis, validUnixEpochTimeMillis);
         TelephonyTimeSuggestion timeSuggestion2 =
                 createTelephonyTimeSuggestion(slotIndex, unixEpochTime2);
@@ -445,11 +445,11 @@ public class TimeDetectorStrategyImplTest {
                 .verifySystemClockWasNotSetAndResetCallTracking()
                 .assertLatestTelephonySuggestion(slotIndex, timeSuggestion1);
 
-        // Now supply a new signal that has an obviously bogus reference time : substantially in the
-        // future.
+        // Now supply a new signal that has an obviously bogus elapsed realtime; one substantially
+        // in the future.
         long referenceTimeInFutureMillis =
-                unixEpochTime1.getReferenceTimeMillis() + Integer.MAX_VALUE + 1;
-        TimestampedValue<Long> unixEpochTime3 = new TimestampedValue<>(
+                unixEpochTime1.getElapsedRealtimeMillis() + Integer.MAX_VALUE + 1;
+        UnixEpochTime unixEpochTime3 = new UnixEpochTime(
                 referenceTimeInFutureMillis, validUnixEpochTimeMillis);
         TelephonyTimeSuggestion timeSuggestion3 =
                 createTelephonyTimeSuggestion(slotIndex, unixEpochTime3);
@@ -459,8 +459,8 @@ public class TimeDetectorStrategyImplTest {
                 .assertLatestTelephonySuggestion(slotIndex, timeSuggestion1);
 
         // Just to prove validUnixEpochTimeMillis is valid.
-        long validReferenceTimeMillis = unixEpochTime1.getReferenceTimeMillis() + 100;
-        TimestampedValue<Long> unixEpochTime4 = new TimestampedValue<>(
+        long validReferenceTimeMillis = unixEpochTime1.getElapsedRealtimeMillis() + 100;
+        UnixEpochTime unixEpochTime4 = new UnixEpochTime(
                 validReferenceTimeMillis, validUnixEpochTimeMillis);
         long expectedSystemClockMillis4 = script.calculateTimeInMillisForNow(unixEpochTime4);
         TelephonyTimeSuggestion timeSuggestion4 =
@@ -486,7 +486,7 @@ public class TimeDetectorStrategyImplTest {
         Instant testTime = ARBITRARY_TEST_TIME;
         TelephonyTimeSuggestion timeSuggestion1 =
                 script.generateTelephonyTimeSuggestion(slotIndex, testTime);
-        TimestampedValue<Long> unixEpochTime1 = timeSuggestion1.getUnixEpochTime();
+        UnixEpochTime unixEpochTime1 = timeSuggestion1.getUnixEpochTime();
 
         // Simulate time passing.
         script.simulateTimePassing(clockIncrementMillis);
@@ -2099,11 +2099,11 @@ public class TimeDetectorStrategyImplTest {
 
         /**
          * Generates a ManualTimeSuggestion using the current elapsed realtime clock for the
-         * reference time.
+         * elapsed realtime.
          */
         ManualTimeSuggestion generateManualTimeSuggestion(Instant suggestedTime) {
-            TimestampedValue<Long> unixEpochTime =
-                    new TimestampedValue<>(
+            UnixEpochTime unixEpochTime =
+                    new UnixEpochTime(
                             mFakeEnvironment.peekElapsedRealtimeMillis(),
                             suggestedTime.toEpochMilli());
             return new ManualTimeSuggestion(unixEpochTime);
@@ -2111,17 +2111,16 @@ public class TimeDetectorStrategyImplTest {
 
         /**
          * Generates a {@link TelephonyTimeSuggestion} using the current elapsed realtime clock for
-         * the reference time.
+         * the elapsed realtime.
          */
         TelephonyTimeSuggestion generateTelephonyTimeSuggestion(int slotIndex, long timeMillis) {
-            TimestampedValue<Long> time =
-                    new TimestampedValue<>(peekElapsedRealtimeMillis(), timeMillis);
+            UnixEpochTime time = new UnixEpochTime(peekElapsedRealtimeMillis(), timeMillis);
             return createTelephonyTimeSuggestion(slotIndex, time);
         }
 
         /**
          * Generates a {@link TelephonyTimeSuggestion} using the current elapsed realtime clock for
-         * the reference time.
+         * the elapsed realtime.
          */
         TelephonyTimeSuggestion generateTelephonyTimeSuggestion(
                 int slotIndex, Instant suggestedTime) {
@@ -2133,11 +2132,11 @@ public class TimeDetectorStrategyImplTest {
 
         /**
          * Generates a NetworkTimeSuggestion using the current elapsed realtime clock for the
-         * reference time.
+         * elapsed realtime.
          */
         NetworkTimeSuggestion generateNetworkTimeSuggestion(Instant suggestedTime) {
-            TimestampedValue<Long> unixEpochTime =
-                    new TimestampedValue<>(
+            UnixEpochTime unixEpochTime =
+                    new UnixEpochTime(
                             mFakeEnvironment.peekElapsedRealtimeMillis(),
                             suggestedTime.toEpochMilli());
             return new NetworkTimeSuggestion(unixEpochTime, 123);
@@ -2145,11 +2144,11 @@ public class TimeDetectorStrategyImplTest {
 
         /**
          * Generates a GnssTimeSuggestion using the current elapsed realtime clock for the
-         * reference time.
+         * elapsed realtime.
          */
         GnssTimeSuggestion generateGnssTimeSuggestion(Instant suggestedTime) {
-            TimestampedValue<Long> unixEpochTime =
-                    new TimestampedValue<>(
+            UnixEpochTime unixEpochTime =
+                    new UnixEpochTime(
                             mFakeEnvironment.peekElapsedRealtimeMillis(),
                             suggestedTime.toEpochMilli());
             return new GnssTimeSuggestion(unixEpochTime);
@@ -2157,7 +2156,7 @@ public class TimeDetectorStrategyImplTest {
 
         /**
          * Generates a ExternalTimeSuggestion using the current elapsed realtime clock for the
-         * reference time.
+         * elapsed realtime.
          */
         ExternalTimeSuggestion generateExternalTimeSuggestion(Instant suggestedTime) {
             return new ExternalTimeSuggestion(mFakeEnvironment.peekElapsedRealtimeMillis(),
@@ -2168,8 +2167,8 @@ public class TimeDetectorStrategyImplTest {
          * Calculates what the supplied time would be when adjusted for the movement of the fake
          * elapsed realtime clock.
          */
-        long calculateTimeInMillisForNow(TimestampedValue<Long> unixEpochTime) {
-            return TimeDetectorStrategy.getTimeAt(unixEpochTime, peekElapsedRealtimeMillis());
+        long calculateTimeInMillisForNow(UnixEpochTime unixEpochTime) {
+            return unixEpochTime.at(peekElapsedRealtimeMillis()).getUnixEpochTimeMillis();
         }
 
         Script simulateConfirmTime(UnixEpochTime confirmationTime, boolean expectedReturnValue) {
@@ -2179,7 +2178,7 @@ public class TimeDetectorStrategyImplTest {
     }
 
     private static TelephonyTimeSuggestion createTelephonyTimeSuggestion(int slotIndex,
-            TimestampedValue<Long> unixEpochTime) {
+            UnixEpochTime unixEpochTime) {
         return new TelephonyTimeSuggestion.Builder(slotIndex)
                 .setUnixEpochTime(unixEpochTime)
                 .build();

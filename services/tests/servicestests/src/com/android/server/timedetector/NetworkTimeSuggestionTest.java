@@ -21,15 +21,15 @@ import static com.android.server.timezonedetector.ShellCommandTestSupport.create
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
+import android.app.time.UnixEpochTime;
 import android.os.ShellCommand;
-import android.os.TimestampedValue;
 
 import org.junit.Test;
 
 public class NetworkTimeSuggestionTest {
 
-    private static final TimestampedValue<Long> ARBITRARY_TIME =
-            new TimestampedValue<>(1111L, 2222L);
+    private static final UnixEpochTime ARBITRARY_TIME =
+            new UnixEpochTime(1111L, 2222L);
     private static final int ARBITRARY_UNCERTAINTY_MILLIS = 3333;
 
     @Test
@@ -43,9 +43,9 @@ public class NetworkTimeSuggestionTest {
         assertEquals(one, two);
         assertEquals(two, one);
 
-        TimestampedValue<Long> differentTime = new TimestampedValue<>(
-                ARBITRARY_TIME.getReferenceTimeMillis() + 1,
-                ARBITRARY_TIME.getValue());
+        UnixEpochTime differentTime = new UnixEpochTime(
+                ARBITRARY_TIME.getElapsedRealtimeMillis() + 1,
+                ARBITRARY_TIME.getUnixEpochTimeMillis());
         NetworkTimeSuggestion three = new NetworkTimeSuggestion(
                 differentTime, ARBITRARY_UNCERTAINTY_MILLIS);
         assertNotEquals(one, three);
@@ -73,22 +73,22 @@ public class NetworkTimeSuggestionTest {
     @Test(expected = IllegalArgumentException.class)
     public void testParseCommandLineArg_noUnixEpochTime() {
         ShellCommand testShellCommand = createShellCommandWithArgsAndOptions(
-                "--reference_time 54321 --uncertainty_millis 111");
+                "--elapsed_realtime 54321 --uncertainty_millis 111");
         NetworkTimeSuggestion.parseCommandLineArg(testShellCommand);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testParseCommandLineArg_noUncertaintyMillis() {
         ShellCommand testShellCommand = createShellCommandWithArgsAndOptions(
-                "--reference_time 54321 --unix_epoch_time 12345");
+                "--elapsed_realtime 54321 --unix_epoch_time 12345");
         NetworkTimeSuggestion.parseCommandLineArg(testShellCommand);
     }
 
     @Test
     public void testParseCommandLineArg_validSuggestion() {
         ShellCommand testShellCommand = createShellCommandWithArgsAndOptions(
-                "--reference_time 54321 --unix_epoch_time 12345 --uncertainty_millis 111");
-        TimestampedValue<Long> timeSignal = new TimestampedValue<>(54321L, 12345L);
+                "--elapsed_realtime 54321 --unix_epoch_time 12345 --uncertainty_millis 111");
+        UnixEpochTime timeSignal = new UnixEpochTime(54321L, 12345L);
         NetworkTimeSuggestion expectedSuggestion = new NetworkTimeSuggestion(timeSignal, 111);
         NetworkTimeSuggestion actualSuggestion =
                 NetworkTimeSuggestion.parseCommandLineArg(testShellCommand);
@@ -98,7 +98,7 @@ public class NetworkTimeSuggestionTest {
     @Test(expected = IllegalArgumentException.class)
     public void testParseCommandLineArg_unknownArgument() {
         ShellCommand testShellCommand = createShellCommandWithArgsAndOptions(
-                "--reference_time 54321 --unix_epoch_time 12345 --bad_arg 0");
+                "--elapsed_realtime 54321 --unix_epoch_time 12345 --bad_arg 0");
         NetworkTimeSuggestion.parseCommandLineArg(testShellCommand);
     }
 }

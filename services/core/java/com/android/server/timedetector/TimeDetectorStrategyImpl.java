@@ -32,7 +32,6 @@ import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.TelephonyTimeSuggestion;
 import android.content.Context;
 import android.os.Handler;
-import android.os.TimestampedValue;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
 
@@ -99,7 +98,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
     // going through this strategy code.
     @GuardedBy("this")
     @Nullable
-    private TimestampedValue<Long> mLastAutoSystemClockTimeSet;
+    private UnixEpochTime mLastAutoSystemClockTimeSet;
 
     /**
      * A mapping from slotIndex to a time suggestion. We typically expect one or two mappings:
@@ -209,7 +208,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         }
         Objects.requireNonNull(suggestion);
 
-        final TimestampedValue<Long> newUnixEpochTime = suggestion.getUnixEpochTime();
+        final UnixEpochTime newUnixEpochTime = suggestion.getUnixEpochTime();
 
         if (!validateAutoSuggestionTime(newUnixEpochTime, suggestion)) {
             return;
@@ -231,7 +230,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         }
         Objects.requireNonNull(suggestion);
 
-        final TimestampedValue<Long> newUnixEpochTime = suggestion.getUnixEpochTime();
+        final UnixEpochTime newUnixEpochTime = suggestion.getUnixEpochTime();
 
         if (!validateAutoSuggestionTime(newUnixEpochTime, suggestion)) {
             return;
@@ -258,7 +257,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
 
         Objects.requireNonNull(suggestion);
 
-        final TimestampedValue<Long> newUnixEpochTime = suggestion.getUnixEpochTime();
+        final UnixEpochTime newUnixEpochTime = suggestion.getUnixEpochTime();
 
         if (!validateManualSuggestionTime(newUnixEpochTime, suggestion)) {
             return false;
@@ -321,7 +320,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
             @Origin int origin = ORIGIN_MANUAL;
             UnixEpochTime unixEpochTime = timeState.getUnixEpochTime();
             setSystemClockAndConfidenceUnderWakeLock(
-                    origin, unixEpochTime.toTimestampedValue(), confidence, "setTimeZoneState()");
+                    origin, unixEpochTime, confidence, "setTimeZoneState()");
         } finally {
             mEnvironment.releaseWakeLock();
         }
@@ -473,14 +472,13 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
     @GuardedBy("this")
     private boolean storeTelephonySuggestion(
             @NonNull TelephonyTimeSuggestion suggestion) {
-        TimestampedValue<Long> newUnixEpochTime = suggestion.getUnixEpochTime();
+        UnixEpochTime newUnixEpochTime = suggestion.getUnixEpochTime();
 
         int slotIndex = suggestion.getSlotIndex();
         TelephonyTimeSuggestion previousSuggestion = mSuggestionBySlotIndex.get(slotIndex);
         if (previousSuggestion != null) {
-            // We can log / discard suggestions with obvious issues with the reference time clock.
-            if (previousSuggestion.getUnixEpochTime() == null
-                    || previousSuggestion.getUnixEpochTime().getValue() == null) {
+            // We can log / discard suggestions with obvious issues with the elapsed realtime clock.
+            if (previousSuggestion.getUnixEpochTime() == null) {
                 // This should be impossible given we only store validated suggestions.
                 Slog.w(LOG_TAG, "Previous suggestion is null or has a null time."
                         + " previousSuggestion=" + previousSuggestion
@@ -488,10 +486,10 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
                 return false;
             }
 
-            long referenceTimeDifference = TimestampedValue.referenceTimeDifference(
+            long referenceTimeDifference = UnixEpochTime.elapsedRealtimeDifference(
                     newUnixEpochTime, previousSuggestion.getUnixEpochTime());
             if (referenceTimeDifference < 0) {
-                // The reference time is before the previously received suggestion. Ignore it.
+                // The elapsed realtime is before the previously received suggestion. Ignore it.
                 Slog.w(LOG_TAG, "Out of order telephony suggestion received."
                         + " referenceTimeDifference=" + referenceTimeDifference
                         + " previousSuggestion=" + previousSuggestion
@@ -507,23 +505,18 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
 
     @GuardedBy("this")
     private boolean validateSuggestionCommon(
-            @NonNull TimestampedValue<Long> newUnixEpochTime, @NonNull Object suggestion) {
-        if (newUnixEpochTime.getValue() == null) {
-            Slog.w(LOG_TAG, "Suggested time value is null. suggestion=" + suggestion);
-            return false;
-        }
-
-        // We can validate the suggestion against the reference time clock.
+            @NonNull UnixEpochTime newUnixEpochTime, @NonNull Object suggestion) {
+        // We can validate the suggestion against the elapsed realtime clock.
         long elapsedRealtimeMillis = mEnvironment.elapsedRealtimeMillis();
-        if (elapsedRealtimeMillis < newUnixEpochTime.getReferenceTimeMillis()) {
+        if (elapsedRealtimeMillis < newUnixEpochTime.getElapsedRealtimeMillis()) {
             // elapsedRealtime clock went backwards?
-            Slog.w(LOG_TAG, "New reference time is in the future? Ignoring."
+            Slog.w(LOG_TAG, "New elapsed realtime is in the future? Ignoring."
                     + " elapsedRealtimeMillis=" + elapsedRealtimeMillis
                     + ", suggestion=" + suggestion);
             return false;
         }
 
-        if (newUnixEpochTime.getValue()
+        if (newUnixEpochTime.getUnixEpochTimeMillis()
                 > mCurrentConfigurationInternal.getSuggestionUpperBound().toEpochMilli()) {
             // This check won't prevent a device's system clock exceeding Integer.MAX_VALUE Unix
             // seconds through the normal passage of time, but it will stop it jumping above 2038
@@ -537,11 +530,11 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
 
     /**
      * Returns {@code true} if an automatic time suggestion time is valid.
-     * See also {@link #validateManualSuggestionTime(TimestampedValue, Object)}.
+     * See also {@link #validateManualSuggestionTime(UnixEpochTime, Object)}.
      */
     @GuardedBy("this")
     private boolean validateAutoSuggestionTime(
-            @NonNull TimestampedValue<Long> newUnixEpochTime, @NonNull Object suggestion)  {
+            @NonNull UnixEpochTime newUnixEpochTime, @NonNull Object suggestion)  {
         Instant lowerBound = mCurrentConfigurationInternal.getAutoSuggestionLowerBound();
         return validateSuggestionCommon(newUnixEpochTime, suggestion)
                 && validateSuggestionAgainstLowerBound(newUnixEpochTime, suggestion,
@@ -550,11 +543,11 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
 
     /**
      * Returns {@code true} if a manual time suggestion time is valid.
-     * See also {@link #validateAutoSuggestionTime(TimestampedValue, Object)}.
+     * See also {@link #validateAutoSuggestionTime(UnixEpochTime, Object)}.
      */
     @GuardedBy("this")
     private boolean validateManualSuggestionTime(
-            @NonNull TimestampedValue<Long> newUnixEpochTime, @NonNull Object suggestion)  {
+            @NonNull UnixEpochTime newUnixEpochTime, @NonNull Object suggestion)  {
         Instant lowerBound = mCurrentConfigurationInternal.getManualSuggestionLowerBound();
 
         // Suggestion is definitely wrong if it comes before lower time bound.
@@ -564,11 +557,11 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
 
     @GuardedBy("this")
     private boolean validateSuggestionAgainstLowerBound(
-            @NonNull TimestampedValue<Long> newUnixEpochTime, @NonNull Object suggestion,
+            @NonNull UnixEpochTime newUnixEpochTime, @NonNull Object suggestion,
             @NonNull Instant lowerBound) {
 
         // Suggestion is definitely wrong if it comes before lower time bound.
-        if (lowerBound.toEpochMilli() > newUnixEpochTime.getValue()) {
+        if (lowerBound.toEpochMilli() > newUnixEpochTime.getUnixEpochTimeMillis()) {
             Slog.w(LOG_TAG, "Suggestion points to time before lower bound, skipping it. "
                     + "suggestion=" + suggestion + ", lower bound=" + lowerBound);
             return false;
@@ -582,7 +575,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         // Try the different origins one at a time.
         int[] originPriorities = mCurrentConfigurationInternal.getAutoOriginPriorities();
         for (int origin : originPriorities) {
-            TimestampedValue<Long> newUnixEpochTime = null;
+            UnixEpochTime newUnixEpochTime = null;
             String cause = null;
             if (origin == ORIGIN_TELEPHONY) {
                 TelephonyTimeSuggestion bestTelephonySuggestion = findBestTelephonySuggestion();
@@ -670,7 +663,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         // The heuristic works as follows:
         // Recency: The most recent suggestion from each slotIndex is scored. The score is based on
         // a discrete age bucket, i.e. so signals received around the same time will be in the same
-        // bucket, thus applying a loose reference time ordering. The suggestion with the highest
+        // bucket, thus applying a loose elapsed realtime ordering. The suggestion with the highest
         // score is used.
         // Consistency: If there a multiple suggestions with the same score, the suggestion with the
         // lowest slotIndex is always taken.
@@ -722,7 +715,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
             long elapsedRealtimeMillis, @NonNull TelephonyTimeSuggestion timeSuggestion) {
 
         // Validate first.
-        TimestampedValue<Long> unixEpochTime = timeSuggestion.getUnixEpochTime();
+        UnixEpochTime unixEpochTime = timeSuggestion.getUnixEpochTime();
         if (!validateSuggestionUnixEpochTime(elapsedRealtimeMillis, unixEpochTime)) {
             Slog.w(LOG_TAG, "Existing suggestion found to be invalid"
                     + " elapsedRealtimeMillis=" + elapsedRealtimeMillis
@@ -732,7 +725,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
 
         // The score is based on the age since receipt. Suggestions are bucketed so two
         // suggestions in the same bucket from different slotIndexs are scored the same.
-        long ageMillis = elapsedRealtimeMillis - unixEpochTime.getReferenceTimeMillis();
+        long ageMillis = elapsedRealtimeMillis - unixEpochTime.getElapsedRealtimeMillis();
 
         // Turn the age into a discrete value: 0 <= bucketIndex < TELEPHONY_BUCKET_COUNT.
         int bucketIndex = (int) (ageMillis / TELEPHONY_BUCKET_SIZE_MILLIS);
@@ -754,7 +747,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
             return null;
         }
 
-        TimestampedValue<Long> unixEpochTime = networkSuggestion.getUnixEpochTime();
+        UnixEpochTime unixEpochTime = networkSuggestion.getUnixEpochTime();
         long elapsedRealTimeMillis = mEnvironment.elapsedRealtimeMillis();
         if (!validateSuggestionUnixEpochTime(elapsedRealTimeMillis, unixEpochTime)) {
             // The latest suggestion is not valid, usually due to its age.
@@ -774,7 +767,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
             return null;
         }
 
-        TimestampedValue<Long> unixEpochTime = gnssTimeSuggestion.getUnixEpochTime();
+        UnixEpochTime unixEpochTime = gnssTimeSuggestion.getUnixEpochTime();
         long elapsedRealTimeMillis = mEnvironment.elapsedRealtimeMillis();
         if (!validateSuggestionUnixEpochTime(elapsedRealTimeMillis, unixEpochTime)) {
             // The latest suggestion is not valid, usually due to its age.
@@ -794,7 +787,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
             return null;
         }
 
-        TimestampedValue<Long> unixEpochTime = externalTimeSuggestion.getUnixEpochTime();
+        UnixEpochTime unixEpochTime = externalTimeSuggestion.getUnixEpochTime();
         long elapsedRealTimeMillis = mEnvironment.elapsedRealtimeMillis();
         if (!validateSuggestionUnixEpochTime(elapsedRealTimeMillis, unixEpochTime)) {
             // The latest suggestion is not valid, usually due to its age.
@@ -806,7 +799,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
 
     @GuardedBy("this")
     private boolean setSystemClockAndConfidenceIfRequired(
-            @Origin int origin, @NonNull TimestampedValue<Long> time, @NonNull String cause) {
+            @Origin int origin, @NonNull UnixEpochTime time, @NonNull String cause) {
 
         // Any time set through this class is inherently high confidence. Either it came directly
         // from a user, or it was detected automatically.
@@ -851,7 +844,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
      */
     @GuardedBy("this")
     private void upgradeSystemClockConfidenceIfRequired(
-            @NonNull TimestampedValue<Long> autoDetectedUnixEpochTime, @NonNull String cause) {
+            @NonNull UnixEpochTime autoDetectedUnixEpochTime, @NonNull String cause) {
         @TimeConfidence int newTimeConfidence = TIME_CONFIDENCE_HIGH;
         @TimeConfidence int currentTimeConfidence = mEnvironment.systemClockConfidence();
         boolean timeNeedsConfirmation = currentTimeConfidence < newTimeConfidence;
@@ -866,8 +859,8 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
             // enough) to raise the confidence.
             long elapsedRealtimeMillis = mEnvironment.elapsedRealtimeMillis();
             long actualSystemClockMillis = mEnvironment.systemClockMillis();
-            long adjustedAutoDetectedUnixEpochMillis = TimeDetectorStrategy.getTimeAt(
-                    autoDetectedUnixEpochTime, elapsedRealtimeMillis);
+            long adjustedAutoDetectedUnixEpochMillis =
+                    autoDetectedUnixEpochTime.at(elapsedRealtimeMillis).getUnixEpochTimeMillis();
             long absTimeDifferenceMillis =
                     Math.abs(adjustedAutoDetectedUnixEpochMillis - actualSystemClockMillis);
             int confidenceUpgradeThresholdMillis =
@@ -899,7 +892,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
 
     @GuardedBy("this")
     private boolean setSystemClockAndConfidenceUnderWakeLock(
-            @Origin int origin, @NonNull TimestampedValue<Long> newTime,
+            @Origin int origin, @NonNull UnixEpochTime newTime,
             @TimeConfidence int newTimeConfidence, @NonNull String cause) {
 
         long elapsedRealtimeMillis = mEnvironment.elapsedRealtimeMillis();
@@ -909,8 +902,8 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
             // CLOCK_PARANOIA : Check to see if this class owns the clock or if something else
             // may be setting the clock.
             if (mLastAutoSystemClockTimeSet != null) {
-                long expectedTimeMillis = TimeDetectorStrategy.getTimeAt(
-                        mLastAutoSystemClockTimeSet, elapsedRealtimeMillis);
+                long expectedTimeMillis = mLastAutoSystemClockTimeSet.at(elapsedRealtimeMillis)
+                        .getUnixEpochTimeMillis();
                 long absSystemClockDifference =
                         Math.abs(expectedTimeMillis - actualSystemClockMillis);
                 if (absSystemClockDifference > SYSTEM_CLOCK_PARANOIA_THRESHOLD_MILLIS) {
@@ -931,7 +924,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         // in confidence then system state must be updated.
 
         // Adjust for the time that has elapsed since the signal was received.
-        long newSystemClockMillis = TimeDetectorStrategy.getTimeAt(newTime, elapsedRealtimeMillis);
+        long newSystemClockMillis = newTime.at(elapsedRealtimeMillis).getUnixEpochTimeMillis();
         long absTimeDifference = Math.abs(newSystemClockMillis - actualSystemClockMillis);
         long systemClockUpdateThreshold =
                 mCurrentConfigurationInternal.getSystemClockUpdateThresholdMillis();
@@ -1073,21 +1066,21 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
     }
 
     private static boolean validateSuggestionUnixEpochTime(
-            long elapsedRealtimeMillis, TimestampedValue<Long> unixEpochTime) {
-        long referenceTimeMillis = unixEpochTime.getReferenceTimeMillis();
-        if (referenceTimeMillis > elapsedRealtimeMillis) {
-            // Future reference times are ignored. They imply the reference time was wrong, or the
-            // elapsed realtime clock used to derive it has gone backwards, neither of which are
+            long currentElapsedRealtimeMillis, UnixEpochTime unixEpochTime) {
+        long suggestionElapsedRealtimeMillis = unixEpochTime.getElapsedRealtimeMillis();
+        if (suggestionElapsedRealtimeMillis > currentElapsedRealtimeMillis) {
+            // Future elapsed realtimes are ignored. They imply the elapsed realtime was wrong, or
+            // the elapsed realtime clock used to derive it has gone backwards, neither of which are
             // supportable situations.
             return false;
         }
 
         // Any suggestion > MAX_AGE_MILLIS is treated as too old. Although time is relentless and
-        // predictable, the accuracy of the reference time clock may be poor over long periods which
-        // would lead to errors creeping in. Also, in edge cases where a bad suggestion has been
-        // made and never replaced, it could also mean that the time detection code remains
+        // predictable, the accuracy of the elapsed realtime clock may be poor over long periods
+        // which would lead to errors creeping in. Also, in edge cases where a bad suggestion has
+        // been made and never replaced, it could also mean that the time detection code remains
         // opinionated using a bad invalid suggestion. This caps that edge case at MAX_AGE_MILLIS.
-        long ageMillis = elapsedRealtimeMillis - referenceTimeMillis;
+        long ageMillis = currentElapsedRealtimeMillis - suggestionElapsedRealtimeMillis;
         return ageMillis <= MAX_SUGGESTION_TIME_AGE_MILLIS;
     }
 }

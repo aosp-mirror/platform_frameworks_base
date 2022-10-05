@@ -41,16 +41,15 @@ import java.util.Objects;
 @SystemApi
 public final class TimeZoneCapabilities implements Parcelable {
 
-    public static final @NonNull Creator<TimeZoneCapabilities> CREATOR =
-            new Creator<TimeZoneCapabilities>() {
-                public TimeZoneCapabilities createFromParcel(Parcel in) {
-                    return TimeZoneCapabilities.createFromParcel(in);
-                }
+    public static final @NonNull Creator<TimeZoneCapabilities> CREATOR = new Creator<>() {
+        public TimeZoneCapabilities createFromParcel(Parcel in) {
+            return TimeZoneCapabilities.createFromParcel(in);
+        }
 
-                public TimeZoneCapabilities[] newArray(int size) {
-                    return new TimeZoneCapabilities[size];
-                }
-            };
+        public TimeZoneCapabilities[] newArray(int size) {
+            return new TimeZoneCapabilities[size];
+        }
+    };
 
     /**
      * The user the capabilities are for. This is used for object equality and debugging but there

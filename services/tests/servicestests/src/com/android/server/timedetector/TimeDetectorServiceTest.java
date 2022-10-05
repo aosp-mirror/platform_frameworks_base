@@ -49,7 +49,6 @@ import android.content.pm.PackageManager;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.ParcelableException;
-import android.os.TimestampedValue;
 import android.util.NtpTrustedTime;
 
 import androidx.test.runner.AndroidJUnit4;
@@ -578,24 +577,24 @@ public class TimeDetectorServiceTest {
 
     private static TelephonyTimeSuggestion createTelephonyTimeSuggestion() {
         int slotIndex = 1234;
-        TimestampedValue<Long> timeValue = new TimestampedValue<>(100L, 1_000_000L);
+        UnixEpochTime timeValue = new UnixEpochTime(100L, 1_000_000L);
         return new TelephonyTimeSuggestion.Builder(slotIndex)
                 .setUnixEpochTime(timeValue)
                 .build();
     }
 
     private static ManualTimeSuggestion createManualTimeSuggestion() {
-        TimestampedValue<Long> timeValue = new TimestampedValue<>(100L, 1_000_000L);
+        UnixEpochTime timeValue = new UnixEpochTime(100L, 1_000_000L);
         return new ManualTimeSuggestion(timeValue);
     }
 
     private static NetworkTimeSuggestion createNetworkTimeSuggestion() {
-        TimestampedValue<Long> timeValue = new TimestampedValue<>(100L, 1_000_000L);
+        UnixEpochTime timeValue = new UnixEpochTime(100L, 1_000_000L);
         return new NetworkTimeSuggestion(timeValue, 123);
     }
 
     private static GnssTimeSuggestion createGnssTimeSuggestion() {
-        TimestampedValue<Long> timeValue = new TimestampedValue<>(100L, 1_000_000L);
+        UnixEpochTime timeValue = new UnixEpochTime(100L, 1_000_000L);
         return new GnssTimeSuggestion(timeValue);
     }
 

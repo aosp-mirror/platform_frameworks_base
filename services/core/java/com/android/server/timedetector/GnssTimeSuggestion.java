@@ -17,9 +17,9 @@
 package com.android.server.timedetector;
 
 import android.annotation.NonNull;
+import android.app.time.UnixEpochTime;
 import android.app.timedetector.TimeSuggestionHelper;
 import android.os.ShellCommand;
-import android.os.TimestampedValue;
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -34,7 +34,7 @@ public final class GnssTimeSuggestion {
 
     @NonNull private final TimeSuggestionHelper mTimeSuggestionHelper;
 
-    public GnssTimeSuggestion(@NonNull TimestampedValue<Long> unixEpochTime) {
+    public GnssTimeSuggestion(@NonNull UnixEpochTime unixEpochTime) {
         mTimeSuggestionHelper = new TimeSuggestionHelper(GnssTimeSuggestion.class, unixEpochTime);
     }
 
@@ -43,7 +43,7 @@ public final class GnssTimeSuggestion {
     }
 
     @NonNull
-    public TimestampedValue<Long> getUnixEpochTime() {
+    public UnixEpochTime getUnixEpochTime() {
         return mTimeSuggestionHelper.getUnixEpochTime();
     }
 
