@@ -23,6 +23,7 @@ import android.app.ActivityManager;
 import android.app.time.ITimeZoneDetectorListener;
 import android.app.time.TimeZoneCapabilitiesAndConfig;
 import android.app.time.TimeZoneConfiguration;
+import android.app.time.TimeZoneState;
 import android.app.timezonedetector.ITimeZoneDetectorService;
 import android.app.timezonedetector.ManualTimeZoneSuggestion;
 import android.app.timezonedetector.TelephonyTimeZoneSuggestion;
@@ -310,6 +311,57 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
 
         mHandler.post(
                 () -> mTimeZoneDetectorStrategy.suggestGeolocationTimeZone(timeZoneSuggestion));
+    }
+
+    @Override
+    @NonNull
+    public TimeZoneState getTimeZoneState() {
+        enforceManageTimeZoneDetectorPermission();
+
+        final long token = mCallerIdentityInjector.clearCallingIdentity();
+        try {
+            return mTimeZoneDetectorStrategy.getTimeZoneState();
+        } finally {
+            mCallerIdentityInjector.restoreCallingIdentity(token);
+        }
+    }
+
+    void setTimeZoneState(@NonNull TimeZoneState timeZoneState) {
+        enforceManageTimeZoneDetectorPermission();
+
+        final long token = mCallerIdentityInjector.clearCallingIdentity();
+        try {
+            mTimeZoneDetectorStrategy.setTimeZoneState(timeZoneState);
+        } finally {
+            mCallerIdentityInjector.restoreCallingIdentity(token);
+        }
+    }
+
+    @Override
+    public boolean confirmTimeZone(@NonNull String timeZoneId) {
+        enforceManageTimeZoneDetectorPermission();
+
+        final long token = mCallerIdentityInjector.clearCallingIdentity();
+        try {
+            return mTimeZoneDetectorStrategy.confirmTimeZone(timeZoneId);
+        } finally {
+            mCallerIdentityInjector.restoreCallingIdentity(token);
+        }
+    }
+
+    @Override
+    public boolean setManualTimeZone(@NonNull ManualTimeZoneSuggestion timeZoneSuggestion) {
+        enforceManageTimeZoneDetectorPermission();
+
+        // This calls suggestManualTimeZone() as the logic is identical, it only differs in the
+        // permission required, which is handled on the line above.
+        int userId = mCallerIdentityInjector.getCallingUserId();
+        final long token = mCallerIdentityInjector.clearCallingIdentity();
+        try {
+            return mTimeZoneDetectorStrategy.suggestManualTimeZone(userId, timeZoneSuggestion);
+        } finally {
+            mCallerIdentityInjector.restoreCallingIdentity(token);
+        }
     }
 
     @Override

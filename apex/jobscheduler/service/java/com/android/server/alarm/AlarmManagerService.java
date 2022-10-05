@@ -2153,7 +2153,7 @@ public class AlarmManagerService extends SystemService {
         }
     }
 
-    void setTimeZoneImpl(String tzId, @TimeZoneConfidence int confidence) {
+    void setTimeZoneImpl(String tzId, @TimeZoneConfidence int confidence, String logInfo) {
         if (TextUtils.isEmpty(tzId)) {
             return;
         }
@@ -2166,7 +2166,7 @@ public class AlarmManagerService extends SystemService {
             // TimeZone.getTimeZone() can return a time zone with a different ID (e.g. it can return
             // "GMT" if the ID is unrecognized). The parameter ID is used here rather than
             // newZone.getId(). It will be rejected if it is invalid.
-            timeZoneWasChanged = SystemTimeZone.setTimeZoneId(tzId, confidence);
+            timeZoneWasChanged = SystemTimeZone.setTimeZoneId(tzId, confidence, logInfo);
 
             if (KERNEL_TIME_ZONE_SYNC_ENABLED) {
                 // Update the kernel timezone information
@@ -2706,8 +2706,9 @@ public class AlarmManagerService extends SystemService {
         }
 
         @Override
-        public void setTimeZone(String tzId, @TimeZoneConfidence int confidence) {
-            setTimeZoneImpl(tzId, confidence);
+        public void setTimeZone(String tzId, @TimeZoneConfidence int confidence,
+                String logInfo) {
+            setTimeZoneImpl(tzId, confidence, logInfo);
         }
 
         @Override
@@ -3010,7 +3011,7 @@ public class AlarmManagerService extends SystemService {
                 // of confidence, but since the time zone ID should come either from apps working on
                 // behalf of the user or a developer, confidence is assumed "high".
                 final int timeZoneConfidence = TIME_ZONE_CONFIDENCE_HIGH;
-                setTimeZoneImpl(tz, timeZoneConfidence);
+                setTimeZoneImpl(tz, timeZoneConfidence, "AlarmManager.setTimeZone() called");
             } finally {
                 Binder.restoreCallingIdentity(oldId);
             }

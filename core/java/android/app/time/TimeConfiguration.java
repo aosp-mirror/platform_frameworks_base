@@ -55,10 +55,16 @@ public final class TimeConfiguration implements Parcelable {
                 }
             };
 
+    /**
+     * All configuration properties
+     *
+     * @hide
+     */
     @StringDef(SETTING_AUTO_DETECTION_ENABLED)
     @Retention(RetentionPolicy.SOURCE)
     @interface Setting {}
 
+    /** See {@link TimeConfiguration#isAutoDetectionEnabled()} for details. */
     @Setting
     private static final String SETTING_AUTO_DETECTION_ENABLED = "autoDetectionEnabled";
 

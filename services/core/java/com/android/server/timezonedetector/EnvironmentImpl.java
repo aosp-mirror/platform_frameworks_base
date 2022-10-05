@@ -28,6 +28,7 @@ import com.android.server.LocalServices;
 import com.android.server.SystemTimeZone;
 import com.android.server.SystemTimeZone.TimeZoneConfidence;
 
+import java.io.PrintWriter;
 import java.util.Objects;
 
 /**
@@ -57,6 +58,7 @@ final class EnvironmentImpl implements TimeZoneDetectorStrategyImpl.Environment 
     }
 
     @Override
+    @NonNull
     public ConfigurationInternal getCurrentUserConfigurationInternal() {
         return mServiceConfigAccessor.getCurrentUserConfigurationInternal();
     }
@@ -74,14 +76,25 @@ final class EnvironmentImpl implements TimeZoneDetectorStrategyImpl.Environment 
 
     @Override
     public void setDeviceTimeZoneAndConfidence(
-            @NonNull String zoneId, @TimeZoneConfidence int confidence) {
+            @NonNull String zoneId, @TimeZoneConfidence int confidence,
+            @NonNull String logInfo) {
         AlarmManagerInternal alarmManagerInternal =
                 LocalServices.getService(AlarmManagerInternal.class);
-        alarmManagerInternal.setTimeZone(zoneId, confidence);
+        alarmManagerInternal.setTimeZone(zoneId, confidence, logInfo);
     }
 
     @Override
     public @ElapsedRealtimeLong long elapsedRealtimeMillis() {
         return SystemClock.elapsedRealtime();
+    }
+
+    @Override
+    public void addDebugLogEntry(@NonNull String logMsg) {
+        SystemTimeZone.addDebugLogEntry(logMsg);
+    }
+
+    @Override
+    public void dumpDebugLog(@NonNull PrintWriter printWriter) {
+        SystemTimeZone.dump(printWriter);
     }
 }

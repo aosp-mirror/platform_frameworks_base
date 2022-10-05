@@ -4503,7 +4503,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         setupDeviceOwner();
         dpm.setTimeZone(admin1, "Asia/Shanghai");
         verify(getServices().alarmManagerInternal)
-                .setTimeZone("Asia/Shanghai", TIME_ZONE_CONFIDENCE_HIGH);
+                .setTimeZone(eq("Asia/Shanghai"), eq(TIME_ZONE_CONFIDENCE_HIGH), anyString());
     }
 
     @Test
@@ -4519,7 +4519,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         configureProfileOwnerOfOrgOwnedDevice(admin1, CALLER_USER_HANDLE);
         dpm.setTimeZone(admin1, "Asia/Shanghai");
         verify(getServices().alarmManagerInternal)
-                .setTimeZone("Asia/Shanghai", TIME_ZONE_CONFIDENCE_HIGH);
+                .setTimeZone(eq("Asia/Shanghai"), eq(TIME_ZONE_CONFIDENCE_HIGH), anyString());
     }
 
     @Test

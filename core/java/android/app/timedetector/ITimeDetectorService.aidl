@@ -20,20 +20,23 @@ import android.app.time.ExternalTimeSuggestion;
 import android.app.time.ITimeDetectorListener;
 import android.app.time.TimeCapabilitiesAndConfig;
 import android.app.time.TimeConfiguration;
+import android.app.time.TimeState;
+import android.app.time.UnixEpochTime;
 import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.TelephonyTimeSuggestion;
 import android.app.timedetector.TimePoint;
 
 /**
- * System private API to communicate with time detector service.
+ * Binder APIs to communicate with the time detector service.
  *
- * <p>Used by parts of the Android system with signals associated with the device's time to provide
- * information to the Time Detector Service.
+ * <p>Used to provide information to the Time Detector Service from other parts of the Android
+ * system that have access to time-related signals, e.g. telephony. Over time, System APIs have
+ * been added to support unbundled parts of the platform, e.g. SetUp Wizard.
  *
- * <p>Use the {@link android.app.timedetector.TimeDetector} class rather than going through
- * this Binder interface directly. See {@link android.app.timedetector.TimeDetectorService} for
- * more complete documentation.
- *
+ * <p>Use the {@link android.app.timedetector.TimeDetector} (internal API) and
+ * {@link android.app.time.TimeManager} (system API) classes rather than going through this Binder
+ * interface directly. See {@link android.app.timedetector.TimeDetectorService} for more complete
+ * documentation.
  *
  * {@hide}
  */
@@ -43,6 +46,10 @@ interface ITimeDetectorService {
   void removeListener(ITimeDetectorListener listener);
 
   boolean updateConfiguration(in TimeConfiguration timeConfiguration);
+
+  TimeState getTimeState();
+  boolean confirmTime(in UnixEpochTime time);
+  boolean setManualTime(in ManualTimeSuggestion timeZoneSuggestion);
 
   void suggestExternalTime(in ExternalTimeSuggestion timeSuggestion);
   boolean suggestManualTime(in ManualTimeSuggestion timeSuggestion);

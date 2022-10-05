@@ -108,6 +108,24 @@ public interface TimeZoneDetector {
     String SHELL_COMMAND_ENABLE_TELEPHONY_FALLBACK = "enable_telephony_fallback";
 
     /**
+     * A shell command that retrieves the current time zone setting state.
+     * @hide
+     */
+    String SHELL_COMMAND_GET_TIME_ZONE_STATE = "get_time_zone_state";
+
+    /**
+     * A shell command that sets the current time zone state for testing.
+     * @hide
+     */
+    String SHELL_COMMAND_SET_TIME_ZONE_STATE = "set_time_zone_state_for_tests";
+
+    /**
+     * A shell command that sets the confidence in the current time zone state for testing.
+     * @hide
+     */
+    String SHELL_COMMAND_CONFIRM_TIME_ZONE = "confirm_time_zone";
+
+    /**
      * A shell command that dumps a {@link
      * com.android.server.timezonedetector.MetricsTimeZoneDetectorState} object to stdout for
      * debugging.

@@ -71,8 +71,6 @@ public final class TimeCapabilitiesAndConfig implements Parcelable {
 
     /**
      * Returns the user's time behaviour capabilities.
-     *
-     * @hide
      */
     @NonNull
     public TimeCapabilities getCapabilities() {
@@ -81,8 +79,6 @@ public final class TimeCapabilitiesAndConfig implements Parcelable {
 
     /**
      * Returns the user's time behaviour configuration.
-     *
-     * @hide
      */
     @NonNull
     public TimeConfiguration getConfiguration() {
