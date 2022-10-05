@@ -16,34 +16,35 @@
 
 package com.android.audiopolicytest;
 
+import static androidx.test.core.app.ApplicationProvider.getApplicationContext;
+
+import static com.android.audiopolicytest.AudioVolumeTestUtil.DEFAULT_ATTRIBUTES;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.audiopolicy.AudioProductStrategy;
 import android.media.audiopolicy.AudioVolumeGroup;
-import android.test.ActivityInstrumentationTestCase2;
+
+import androidx.test.core.app.ActivityScenario;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.rules.ExternalResource;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class AudioVolumesTestBase extends ActivityInstrumentationTestCase2<AudioPolicyTest> {
-    public AudioManager mAudioManager;
-    Context mContext;
+final class AudioVolumesTestRule extends ExternalResource {
+    private AudioManager mAudioManager;
+    private Context mContext;
     private Map<Integer, Integer> mOriginalStreamVolumes = new HashMap<>();
     private Map<Integer, Integer> mOriginalVolumeGroupVolumes = new HashMap<>();
-
-    // Default matches the invalid (empty) attributes from native.
-    // The difference is the input source default which is not aligned between native and java
-    public static final AudioAttributes sDefaultAttributes =
-            AudioProductStrategy.getDefaultAttributes();
-
-    public static final AudioAttributes sInvalidAttributes = new AudioAttributes.Builder().build();
-
-    public AudioVolumesTestBase() {
-        super("com.android.audiopolicytest", AudioPolicyTest.class);
-    }
 
     /**
      * <p>Note: must be called with shell permission (MODIFY_AUDIO_ROUTING)
@@ -56,14 +57,14 @@ public class AudioVolumesTestBase extends ActivityInstrumentationTestCase2<Audio
                 // like rerouting/patch since these groups are internal to audio policy manager
                 continue;
             }
-            AudioAttributes avgAttributes = sDefaultAttributes;
+            AudioAttributes avgAttributes = DEFAULT_ATTRIBUTES;
             for (final AudioAttributes aa : avg.getAudioAttributes()) {
                 if (!aa.equals(AudioProductStrategy.getDefaultAttributes())) {
                     avgAttributes = aa;
                     break;
                 }
             }
-            if (avgAttributes.equals(sDefaultAttributes)) {
+            if (avgAttributes.equals(DEFAULT_ATTRIBUTES)) {
                 // This shall not happen, however, not purpose of this base class.
                 // so bailing out.
                 continue;
@@ -82,14 +83,14 @@ public class AudioVolumesTestBase extends ActivityInstrumentationTestCase2<Audio
             for (final AudioVolumeGroup avg : audioVolumeGroups) {
                 if (avg.getId() == e.getKey()) {
                     assertTrue(!avg.getAudioAttributes().isEmpty());
-                    AudioAttributes avgAttributes = sDefaultAttributes;
+                    AudioAttributes avgAttributes = DEFAULT_ATTRIBUTES;
                     for (final AudioAttributes aa : avg.getAudioAttributes()) {
                         if (!aa.equals(AudioProductStrategy.getDefaultAttributes())) {
                             avgAttributes = aa;
                             break;
                         }
                     }
-                    assertTrue(!avgAttributes.equals(sDefaultAttributes));
+                    assertTrue(!avgAttributes.equals(DEFAULT_ATTRIBUTES));
                     mAudioManager.setVolumeIndexForAttributes(
                             avgAttributes, e.getValue(), AudioManager.FLAG_ALLOW_RINGER_MODES);
                 }
@@ -97,11 +98,11 @@ public class AudioVolumesTestBase extends ActivityInstrumentationTestCase2<Audio
         }
     }
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
+        ActivityScenario.launch(AudioPolicyTestActivity.class);
 
-        mContext = getActivity();
+        mContext = getApplicationContext();
         mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
 
         assertEquals(PackageManager.PERMISSION_GRANTED,
@@ -117,10 +118,8 @@ public class AudioVolumesTestBase extends ActivityInstrumentationTestCase2<Audio
         storeAllVolumes();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-
+    @After
+    public void tearDown() throws Exception {
         // Recover the volume and the ringer mode that the test may have overwritten.
         for (Map.Entry<Integer, Integer> e : mOriginalStreamVolumes.entrySet()) {
             mAudioManager.setStreamVolume(e.getKey(), e.getValue(),
@@ -131,11 +130,5 @@ public class AudioVolumesTestBase extends ActivityInstrumentationTestCase2<Audio
         restoreAllVolumes();
     }
 
-    public static int resetVolumeIndex(int indexMin, int indexMax) {
-        return (indexMax + indexMin) / 2;
-    }
 
-    public static int incrementVolumeIndex(int index, int indexMin, int indexMax) {
-        return (index + 1 > indexMax) ? resetVolumeIndex(indexMin, indexMax) : ++index;
-    }
 }
