@@ -2603,23 +2603,20 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         if (!mPreventImeStartupUnlessTextEditor) {
             return false;
         }
-
-        final boolean imeVisibleAllowed =
-                isSoftInputModeStateVisibleAllowed(unverifiedTargetSdkVersion, startInputFlags);
-
-        return !(imeVisibleAllowed
-                || mShowRequested
-                || isNonPreemptibleImeLocked(selectedMethodId));
-    }
-
-    /** Return {@code true} if the given IME is non-preemptible like the tv remote service. */
-    @GuardedBy("ImfLock.class")
-    private boolean isNonPreemptibleImeLocked(@NonNull  String selectedMethodId) {
-        final InputMethodInfo imi = mMethodMap.get(selectedMethodId);
-        if (imi != null) {
-            return ArrayUtils.contains(mNonPreemptibleInputMethods, imi.getPackageName());
+        if (mShowRequested) {
+            return false;
         }
-        return false;
+        if (isSoftInputModeStateVisibleAllowed(unverifiedTargetSdkVersion, startInputFlags)) {
+            return false;
+        }
+        final InputMethodInfo imi = mMethodMap.get(selectedMethodId);
+        if (imi == null) {
+            return false;
+        }
+        if (ArrayUtils.contains(mNonPreemptibleInputMethods, imi.getPackageName())) {
+            return false;
+        }
+        return true;
     }
 
     @GuardedBy("ImfLock.class")
