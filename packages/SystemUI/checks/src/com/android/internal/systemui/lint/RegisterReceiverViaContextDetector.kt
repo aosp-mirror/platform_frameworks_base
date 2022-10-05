@@ -27,6 +27,7 @@ import com.android.tools.lint.detector.api.SourceCodeScanner
 import com.intellij.psi.PsiMethod
 import org.jetbrains.uast.UCallExpression
 
+@Suppress("UnstableApiUsage")
 class RegisterReceiverViaContextDetector : Detector(), SourceCodeScanner {
 
     override fun getApplicableMethodNames(): List<String> {
