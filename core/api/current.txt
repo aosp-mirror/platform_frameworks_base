@@ -7272,6 +7272,7 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE) public android.os.ParcelFileDescriptor getWallpaperFile(int);
     method public int getWallpaperId(int);
     method public android.app.WallpaperInfo getWallpaperInfo();
+    method @Nullable public android.app.WallpaperInfo getWallpaperInfo(int);
     method public boolean hasResourceWallpaper(@RawRes int);
     method public boolean isSetWallpaperAllowed();
     method public boolean isWallpaperSupported();
@@ -39986,6 +39987,7 @@ package android.service.wallpaper {
     method public int getDesiredMinimumWidth();
     method @Nullable public android.content.Context getDisplayContext();
     method public android.view.SurfaceHolder getSurfaceHolder();
+    method public int getWallpaperFlags();
     method public boolean isPreview();
     method public boolean isVisible();
     method public void notifyColorsChanged();
@@ -40002,6 +40004,7 @@ package android.service.wallpaper {
     method @MainThread public void onSurfaceRedrawNeeded(android.view.SurfaceHolder);
     method @MainThread public void onTouchEvent(android.view.MotionEvent);
     method @MainThread public void onVisibilityChanged(boolean);
+    method @MainThread public void onWallpaperFlagsChanged(int);
     method @MainThread public void onZoomChanged(@FloatRange(from=0.0f, to=1.0f) float);
     method public void setOffsetNotificationsEnabled(boolean);
     method public void setTouchEventsEnabled(boolean);

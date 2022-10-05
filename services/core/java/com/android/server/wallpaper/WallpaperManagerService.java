@@ -270,11 +270,12 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                         + " sys=" + sysWallpaperChanged
                         + " lock=" + lockWallpaperChanged
                         + " imagePending=" + wallpaper.imageWallpaperPending
-                        + " whichPending=0x" + Integer.toHexString(wallpaper.whichPending)
+                        + " mWhich=0x" + Integer.toHexString(wallpaper.mWhich)
                         + " written=" + written);
             }
 
             if (moved && lockWallpaperChanged) {
+                // TODO(b/253507223) Start lock screen WallpaperService
                 // We just migrated sys -> lock to preserve imagery for an impending
                 // new system-only wallpaper.  Tell keyguard about it and make sure it
                 // has the right SELinux label.
@@ -329,8 +330,10 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                                         false, wallpaper, callback);
                                 notifyColorsWhich |= FLAG_SYSTEM;
                             }
+                            // TODO(b/253507223) Start lock screen WallpaperService if only lock
+                            // screen wp changed
                             if (lockWallpaperChanged
-                                    || (wallpaper.whichPending & FLAG_LOCK) != 0) {
+                                    || (wallpaper.mWhich & FLAG_LOCK) != 0) {
                                 if (DEBUG) {
                                     Slog.i(TAG, "Lock-relevant wallpaper changed");
                                 }
@@ -609,7 +612,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
 
         if (DEBUG) {
             Slog.v(TAG, "Generating crop for new wallpaper(s): 0x"
-                    + Integer.toHexString(wallpaper.whichPending)
+                    + Integer.toHexString(wallpaper.mWhich)
                     + " to " + wallpaper.cropFile.getName()
                     + " crop=(" + cropHint.width() + 'x' + cropHint.height()
                     + ") dim=(" + wpData.mWidth + 'x' + wpData.mHeight + ')');
@@ -922,10 +925,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         boolean imageWallpaperPending;
 
         /**
-         * Which new wallpapers are being written; mirrors the 'which'
-         * selector bit field to setWallpaper().
+         * Which wallpaper is set. Flag values are from {@link SetWallpaperFlags}.
          */
-        int whichPending;
+        int mWhich;
 
         /**
          * Callback once the set + crop is finished
@@ -1166,7 +1168,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 try {
                     connection.mService.attach(connection, mToken, TYPE_WALLPAPER, false,
                             wpdData.mWidth, wpdData.mHeight,
-                            wpdData.mPadding, mDisplayId, FLAG_SYSTEM | FLAG_LOCK);
+                            wpdData.mPadding, mDisplayId, mWallpaper.mWhich);
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Failed attaching wallpaper on display", e);
                     if (wallpaper != null && !wallpaper.wallpaperUpdating
@@ -2415,13 +2417,19 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
 
     @Override
     public WallpaperInfo getWallpaperInfo(int userId) {
+        return getWallpaperInfoWithFlags(FLAG_SYSTEM, userId);
+    }
+
+    @Override
+    public WallpaperInfo getWallpaperInfoWithFlags(@SetWallpaperFlags int which, int userId) {
         final boolean allow =
                 hasPermission(READ_WALLPAPER_INTERNAL) || hasPermission(QUERY_ALL_PACKAGES);
         if (allow) {
             userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
                     Binder.getCallingUid(), userId, false, true, "getWallpaperInfo", null);
             synchronized (mLock) {
-                WallpaperData wallpaper = mWallpaperMap.get(userId);
+                WallpaperData wallpaper = (which == FLAG_LOCK) ? mLockWallpaperMap.get(userId)
+                        : mWallpaperMap.get(userId);
                 if (wallpaper != null && wallpaper.connection != null) {
                     return wallpaper.connection.mInfo;
                 }
@@ -2870,7 +2878,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 ParcelFileDescriptor pfd = updateWallpaperBitmapLocked(name, wallpaper, extras);
                 if (pfd != null) {
                     wallpaper.imageWallpaperPending = true;
-                    wallpaper.whichPending = which;
+                    wallpaper.mWhich = which;
                     wallpaper.setComplete = completion;
                     wallpaper.fromForegroundApp = fromForegroundApp;
                     wallpaper.cropHint.set(cropHint);
@@ -2901,6 +2909,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         lockWP.allowBackup = sysWP.allowBackup;
         lockWP.primaryColors = sysWP.primaryColors;
         lockWP.mWallpaperDimAmount = sysWP.mWallpaperDimAmount;
+        lockWP.mWhich = FLAG_LOCK;
 
         // Migrate the bitmap files outright; no need to copy
         try {
@@ -2953,25 +2962,27 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
 
     @Override
     public void setWallpaperComponentChecked(ComponentName name, String callingPackage,
-            int userId) {
+            @SetWallpaperFlags int which, int userId) {
 
         if (isWallpaperSupported(callingPackage) && isSetWallpaperAllowed(callingPackage)) {
-            setWallpaperComponent(name, userId);
+            setWallpaperComponent(name, which, userId);
         }
     }
 
     // ToDo: Remove this version of the function
     @Override
     public void setWallpaperComponent(ComponentName name) {
-        setWallpaperComponent(name, UserHandle.getCallingUserId());
+        setWallpaperComponent(name, UserHandle.getCallingUserId(), FLAG_SYSTEM);
     }
 
-    private void setWallpaperComponent(ComponentName name, int userId) {
+    private void setWallpaperComponent(ComponentName name, @SetWallpaperFlags int which,
+            int userId) {
         userId = ActivityManager.handleIncomingUser(getCallingPid(), getCallingUid(), userId,
                 false /* all */, true /* full */, "changing live wallpaper", null /* pkg */);
         checkPermission(android.Manifest.permission.SET_WALLPAPER_COMPONENT);
 
-        int which = FLAG_SYSTEM;
+        // TODO(b/253507223) Use passed destination and properly start lock screen LWP
+        int legacyWhich = FLAG_SYSTEM;
         boolean shouldNotifyColors = false;
         WallpaperData wallpaper;
 
@@ -2999,11 +3010,12 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
 
             // New live wallpaper is also a lock wallpaper if nothing is set
             if (mLockWallpaperMap.get(userId) == null) {
-                which |= FLAG_LOCK;
+                legacyWhich |= FLAG_LOCK;
             }
 
             try {
                 wallpaper.imageWallpaperPending = false;
+                wallpaper.mWhich = which;
                 boolean same = changingToSame(name, wallpaper);
                 if (bindWallpaperComponentLocked(name, false, true, wallpaper, null)) {
                     if (!same) {
@@ -3032,7 +3044,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         }
 
         if (shouldNotifyColors) {
-            notifyWallpaperColorsChanged(wallpaper, which);
+            notifyWallpaperColorsChanged(wallpaper, legacyWhich);
             notifyWallpaperColorsChanged(mFallbackWallpaper, FLAG_SYSTEM);
         }
     }
