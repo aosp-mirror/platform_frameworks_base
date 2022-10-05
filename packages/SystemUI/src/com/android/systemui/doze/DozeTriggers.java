@@ -102,7 +102,6 @@ public class DozeTriggers implements DozeMachine.Part {
     private final UiEventLogger mUiEventLogger;
 
     private long mNotificationPulseTime;
-    private boolean mPulsePending;
     private Runnable mAodInterruptRunnable;
 
     /** see {@link #onProximityFar} prox for callback */
@@ -303,8 +302,8 @@ public class DozeTriggers implements DozeMachine.Part {
                         null /* onPulseSuppressedListener */);
             }
         } else {
-            proximityCheckThenCall((result) -> {
-                if (result != null && result) {
+            proximityCheckThenCall((isNear) -> {
+                if (isNear != null && isNear) {
                     // In pocket, drop event.
                     mDozeLog.traceSensorEventDropped(pulseReason, "prox reporting near");
                     return;
@@ -410,8 +409,8 @@ public class DozeTriggers implements DozeMachine.Part {
         sWakeDisplaySensorState = wake;
 
         if (wake) {
-            proximityCheckThenCall((result) -> {
-                if (result != null && result) {
+            proximityCheckThenCall((isNear) -> {
+                if (isNear != null && isNear) {
                     // In pocket, drop event.
                     return;
                 }
@@ -537,24 +536,44 @@ public class DozeTriggers implements DozeMachine.Part {
             return;
         }
 
-        if (mPulsePending || !mAllowPulseTriggers || !canPulse()) {
-            if (mAllowPulseTriggers) {
-                mDozeLog.tracePulseDropped(mPulsePending, dozeState, mDozeHost.isPulsingBlocked());
+        if (!mAllowPulseTriggers || mDozeHost.isPulsePending() || !canPulse()) {
+            if (!mAllowPulseTriggers) {
+                mDozeLog.tracePulseDropped("requestPulse - !mAllowPulseTriggers");
+            } else if (mDozeHost.isPulsePending()) {
+                mDozeLog.tracePulseDropped("requestPulse - pulsePending");
+            } else if (!canPulse()) {
+                mDozeLog.tracePulseDropped("requestPulse", dozeState);
             }
             runIfNotNull(onPulseSuppressedListener);
             return;
         }
 
-        mPulsePending = true;
-        proximityCheckThenCall((result) -> {
-            if (result != null && result) {
+        mDozeHost.setPulsePending(true);
+        proximityCheckThenCall((isNear) -> {
+            if (isNear != null && isNear) {
                 // in pocket, abort pulse
-                mDozeLog.tracePulseDropped("inPocket");
-                mPulsePending = false;
+                mDozeLog.tracePulseDropped("requestPulse - inPocket");
+                mDozeHost.setPulsePending(false);
                 runIfNotNull(onPulseSuppressedListener);
             } else {
                 // not in pocket, continue pulsing
-                continuePulseRequest(reason);
+                final boolean isPulsePending = mDozeHost.isPulsePending();
+                mDozeHost.setPulsePending(false);
+                if (!isPulsePending || mDozeHost.isPulsingBlocked() || !canPulse()) {
+                    if (!isPulsePending) {
+                        mDozeLog.tracePulseDropped("continuePulseRequest - pulse no longer"
+                                + " pending, pulse was cancelled before it could start"
+                                + " transitioning to pulsing state.");
+                    } else if (mDozeHost.isPulsingBlocked()) {
+                        mDozeLog.tracePulseDropped("continuePulseRequest - pulsingBlocked");
+                    } else if (!canPulse()) {
+                        mDozeLog.tracePulseDropped("continuePulseRequest", mMachine.getState());
+                    }
+                    runIfNotNull(onPulseSuppressedListener);
+                    return;
+                }
+
+                mMachine.requestPulse(reason);
             }
         }, !mDozeParameters.getProxCheckBeforePulse() || performedProxCheck, reason);
 
@@ -569,16 +588,6 @@ public class DozeTriggers implements DozeMachine.Part {
                 || mMachine.getState() == DozeMachine.State.DOZE_AOD_DOCKED;
     }
 
-    private void continuePulseRequest(int reason) {
-        mPulsePending = false;
-        if (mDozeHost.isPulsingBlocked() || !canPulse()) {
-            mDozeLog.tracePulseDropped(mPulsePending, mMachine.getState(),
-                    mDozeHost.isPulsingBlocked());
-            return;
-        }
-        mMachine.requestPulse(reason);
-    }
-
     @Nullable
     private InstanceId getKeyguardSessionId() {
         return mSessionTracker.getSessionId(SESSION_KEYGUARD);
@@ -591,7 +600,7 @@ public class DozeTriggers implements DozeMachine.Part {
         pw.print(" notificationPulseTime=");
         pw.println(Formatter.formatShortElapsedTime(mContext, mNotificationPulseTime));
 
-        pw.println(" pulsePending=" + mPulsePending);
+        pw.println(" DozeHost#isPulsePending=" + mDozeHost.isPulsePending());
         pw.println("DozeSensors:");
         IndentingPrintWriter idpw = new IndentingPrintWriter(pw);
         idpw.increaseIndent();

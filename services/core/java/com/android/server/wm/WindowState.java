@@ -3869,7 +3869,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // configuration update when the window has requested to be hidden. Doing so can lead to
         // the client erroneously accepting a configuration that would have otherwise caused an
         // activity restart. We instead hand back the last reported {@link MergedConfiguration}.
-        if (useLatestConfig || (relayoutVisible && (shouldCheckTokenVisibleRequested()
+        if (useLatestConfig || (relayoutVisible && (!shouldCheckTokenVisibleRequested()
                 || mToken.isVisibleRequested()))) {
             final Configuration globalConfig = getProcessGlobalConfiguration();
             final Configuration overrideConfig = getMergedOverrideConfiguration();

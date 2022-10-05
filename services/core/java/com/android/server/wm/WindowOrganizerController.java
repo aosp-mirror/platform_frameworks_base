@@ -46,6 +46,7 @@ import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_ORGANIZER;
 import static com.android.server.wm.ActivityTaskManagerService.LAYOUT_REASON_CONFIG_CHANGED;
+import static com.android.server.wm.ActivityTaskManagerService.enforceTaskPermission;
 import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.Task.FLAG_FORCE_HIDDEN_FOR_PINNED_TASK;
 import static com.android.server.wm.Task.FLAG_FORCE_HIDDEN_FOR_TASK_ORG;
@@ -242,8 +243,18 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     }
 
     @Override
-    public IBinder startTransition(int type, @Nullable IBinder transitionToken,
+    public IBinder startNewTransition(int type, @Nullable WindowContainerTransaction t) {
+        return startTransition(type, null /* transitionToken */, t);
+    }
+
+    @Override
+    public void startTransition(@NonNull IBinder transitionToken,
             @Nullable WindowContainerTransaction t) {
+        startTransition(-1 /* unused type */, transitionToken, t);
+    }
+
+    private IBinder startTransition(@WindowManager.TransitionType int type,
+            @Nullable IBinder transitionToken, @Nullable WindowContainerTransaction t) {
         enforceTaskPermission("startTransition()");
         final CallerInfo caller = new CallerInfo();
         final long ident = Binder.clearCallingIdentity();
@@ -1555,10 +1566,6 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             cfgChanges &= ~ActivityInfo.CONFIG_WINDOW_CONFIGURATION;
         }
         return (cfgChanges & CONTROLLABLE_CONFIGS) == 0;
-    }
-
-    private void enforceTaskPermission(String func) {
-        mService.enforceTaskPermission(func);
     }
 
     private boolean isValidTransaction(@NonNull WindowContainerTransaction t) {
