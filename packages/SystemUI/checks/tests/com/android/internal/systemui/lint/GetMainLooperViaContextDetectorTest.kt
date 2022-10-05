@@ -17,13 +17,13 @@
 package com.android.internal.systemui.lint
 
 import com.android.tools.lint.checks.infrastructure.LintDetectorTest
-import com.android.tools.lint.checks.infrastructure.TestFile
 import com.android.tools.lint.checks.infrastructure.TestFiles
 import com.android.tools.lint.checks.infrastructure.TestLintTask
 import com.android.tools.lint.detector.api.Detector
 import com.android.tools.lint.detector.api.Issue
 import org.junit.Test
 
+@Suppress("UnstableApiUsage")
 class GetMainLooperViaContextDetectorTest : LintDetectorTest() {
 
     override fun getDetector(): Detector = GetMainLooperViaContextDetector()
@@ -35,7 +35,8 @@ class GetMainLooperViaContextDetectorTest : LintDetectorTest() {
 
     @Test
     fun testGetMainThreadHandler() {
-        lint().files(
+        lint()
+            .files(
                 TestFiles.java(
                         """
                     package test.pkg;
@@ -48,17 +49,20 @@ class GetMainLooperViaContextDetectorTest : LintDetectorTest() {
                         }
                     }
                 """
-                ).indented(),
-                *stubs)
-                .issues(GetMainLooperViaContextDetector.ISSUE)
-                .run()
-                .expectWarningCount(1)
-                .expectContains(explanation)
+                    )
+                    .indented(),
+                *stubs
+            )
+            .issues(GetMainLooperViaContextDetector.ISSUE)
+            .run()
+            .expectWarningCount(1)
+            .expectContains(explanation)
     }
 
     @Test
     fun testGetMainLooper() {
-        lint().files(
+        lint()
+            .files(
                 TestFiles.java(
                         """
                     package test.pkg;
@@ -71,17 +75,20 @@ class GetMainLooperViaContextDetectorTest : LintDetectorTest() {
                         }
                     }
                 """
-                ).indented(),
-                *stubs)
-                .issues(GetMainLooperViaContextDetector.ISSUE)
-                .run()
-                .expectWarningCount(1)
-                .expectContains(explanation)
+                    )
+                    .indented(),
+                *stubs
+            )
+            .issues(GetMainLooperViaContextDetector.ISSUE)
+            .run()
+            .expectWarningCount(1)
+            .expectContains(explanation)
     }
 
     @Test
     fun testGetMainExecutor() {
-        lint().files(
+        lint()
+            .files(
                 TestFiles.java(
                         """
                     package test.pkg;
@@ -94,42 +101,15 @@ class GetMainLooperViaContextDetectorTest : LintDetectorTest() {
                         }
                     }
                 """
-                ).indented(),
-                *stubs)
-                .issues(GetMainLooperViaContextDetector.ISSUE)
-                .run()
-                .expectWarningCount(1)
-                .expectContains(explanation)
+                    )
+                    .indented(),
+                *stubs
+            )
+            .issues(GetMainLooperViaContextDetector.ISSUE)
+            .run()
+            .expectWarningCount(1)
+            .expectContains(explanation)
     }
 
-    private val contextStub: TestFile = java(
-            """
-        package android.content;
-        import android.os.Handler;import android.os.Looper;import java.util.concurrent.Executor;
-
-        public class Context {
-            public Looper getMainLooper() { return null; };
-            public Executor getMainExecutor() { return null; };
-            public Handler getMainThreadHandler() { return null; };
-        }
-        """
-    )
-
-    private val looperStub: TestFile = java(
-            """
-        package android.os;
-
-        public class Looper {}
-        """
-    )
-
-    private val handlerStub: TestFile = java(
-            """
-        package android.os;
-
-        public class Handler {}
-        """
-    )
-
-    private val stubs = arrayOf(contextStub, looperStub, handlerStub)
+    private val stubs = androidStubs
 }
