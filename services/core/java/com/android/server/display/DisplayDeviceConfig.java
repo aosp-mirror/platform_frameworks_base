@@ -1184,6 +1184,60 @@ public class DisplayDeviceConfig {
         return mBrightnessLevelsNits;
     }
 
+    /**
+     * @return Default peak refresh rate of the associated display
+     */
+    public int getDefaultPeakRefreshRate() {
+        return mContext.getResources().getInteger(R.integer.config_defaultPeakRefreshRate);
+    }
+
+    /**
+     * @return Default refresh rate of the associated display
+     */
+    public int getDefaultRefreshRate() {
+        return mContext.getResources().getInteger(R.integer.config_defaultRefreshRate);
+    }
+
+    /**
+     * @return An array of lower display brightness thresholds. This, in combination with lower
+     * ambient brightness thresholds help define buckets in which the refresh rate switching is not
+     * allowed
+     */
+    public int[] getLowDisplayBrightnessThresholds() {
+        return mContext.getResources().getIntArray(
+                R.array.config_brightnessThresholdsOfPeakRefreshRate);
+    }
+
+    /**
+     * @return An array of lower ambient brightness thresholds. This, in combination with lower
+     * display brightness thresholds help define buckets in which the refresh rate switching is not
+     * allowed
+     */
+    public int[] getLowAmbientBrightnessThresholds() {
+        return mContext.getResources().getIntArray(
+                R.array.config_ambientThresholdsOfPeakRefreshRate);
+    }
+
+    /**
+     * @return An array of high display brightness thresholds. This, in combination with high
+     * ambient brightness thresholds help define buckets in which the refresh rate switching is not
+     * allowed
+     */
+    public int[] getHighDisplayBrightnessThresholds() {
+        return mContext.getResources().getIntArray(
+                R.array.config_highDisplayBrightnessThresholdsOfFixedRefreshRate);
+    }
+
+    /**
+     * @return An array of high ambient brightness thresholds. This, in combination with high
+     * display brightness thresholds help define buckets in which the refresh rate switching is not
+     * allowed
+     */
+    public int[] getHighAmbientBrightnessThresholds() {
+        return mContext.getResources().getIntArray(
+                R.array.config_highAmbientBrightnessThresholdsOfFixedRefreshRate);
+    }
+
     @Override
     public String toString() {
         return "DisplayDeviceConfig{"
