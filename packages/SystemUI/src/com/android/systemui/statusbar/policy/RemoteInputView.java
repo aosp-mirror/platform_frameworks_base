@@ -221,8 +221,10 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
 
         mEditText.setTextColor(textColor);
         mEditText.setHintTextColor(hintColor);
-        mEditText.getTextCursorDrawable().setColorFilter(
-                accentColor.getDefaultColor(), PorterDuff.Mode.SRC_IN);
+        if (mEditText.getTextCursorDrawable() != null) {
+            mEditText.getTextCursorDrawable().setColorFilter(
+                    accentColor.getDefaultColor(), PorterDuff.Mode.SRC_IN);
+        }
         mContentBackground.setColor(editBgColor);
         mContentBackground.setStroke(stroke, accentColor);
         mDelete.setImageTintList(ColorStateList.valueOf(deleteFgColor));
