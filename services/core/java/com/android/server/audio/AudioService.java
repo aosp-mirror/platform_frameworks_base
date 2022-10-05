@@ -3841,7 +3841,7 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
-    private void setLeAudioVolumeOnModeUpdate(int mode) {
+    private void setLeAudioVolumeOnModeUpdate(int mode, int streamType, int device) {
         switch (mode) {
             case AudioSystem.MODE_IN_COMMUNICATION:
             case AudioSystem.MODE_IN_CALL:
@@ -3857,8 +3857,6 @@ public class AudioService extends IAudioService.Stub
                 return;
         }
 
-        int streamType = getBluetoothContextualVolumeStream(mode);
-
         // Currently, DEVICE_OUT_BLE_HEADSET is the only output type for LE_AUDIO profile.
         // (See AudioDeviceBroker#createBtDeviceInfo())
         int index = mStreamStates[streamType].getIndex(AudioSystem.DEVICE_OUT_BLE_HEADSET);
@@ -3869,6 +3867,7 @@ public class AudioService extends IAudioService.Stub
                     + index + " maxIndex=" + maxIndex + " streamType=" + streamType);
         }
         mDeviceBroker.postSetLeAudioVolumeIndex(index, maxIndex, streamType);
+        mDeviceBroker.postApplyVolumeOnDevice(streamType, device, "setLeAudioVolumeOnModeUpdate");
     }
 
     private void setStreamVolume(int streamType, int index, int flags, String callingPackage,
@@ -5053,16 +5052,17 @@ public class AudioService extends IAudioService.Stub
     }
 
     /**
-     * Return the pid of the current audio mode owner
+     * Return information on the current audio mode owner
      * @return 0 if nobody owns the mode
      */
     @GuardedBy("mDeviceBroker.mSetModeLock")
-    /*package*/ int getModeOwnerPid() {
+    /*package*/ AudioDeviceBroker.AudioModeInfo getAudioModeOwner() {
         SetModeDeathHandler hdlr = getAudioModeOwnerHandler();
         if (hdlr != null) {
-            return hdlr.getPid();
+            return new AudioDeviceBroker.AudioModeInfo(
+                    hdlr.getMode(), hdlr.getPid(), hdlr.getUid());
         }
-        return 0;
+        return new AudioDeviceBroker.AudioModeInfo(AudioSystem.MODE_NORMAL, 0 , 0);
     }
 
     /**
@@ -5244,11 +5244,11 @@ public class AudioService extends IAudioService.Stub
 
                 // Forcefully set LE audio volume as a workaround, since the value of 'device'
                 // is not DEVICE_OUT_BLE_* even when BLE is connected.
-                setLeAudioVolumeOnModeUpdate(mode);
+                setLeAudioVolumeOnModeUpdate(mode, streamType, device);
 
                 // when entering RINGTONE, IN_CALL or IN_COMMUNICATION mode, clear all SCO
                 // connections not started by the application changing the mode when pid changes
-                mDeviceBroker.postSetModeOwnerPid(pid, mode);
+                mDeviceBroker.postSetModeOwner(mode, pid, uid);
             } else {
                 Log.w(TAG, "onUpdateAudioMode: failed to set audio mode to: " + mode);
             }
@@ -5575,7 +5575,10 @@ public class AudioService extends IAudioService.Stub
         }
         return deviceIds.stream().mapToInt(Integer::intValue).toArray();
     }
-        /** @see AudioManager#setCommunicationDevice(int) */
+        /**
+         * @see AudioManager#setCommunicationDevice(int)
+         * @see AudioManager#clearCommunicationDevice()
+         */
     public boolean setCommunicationDevice(IBinder cb, int portId) {
         final int uid = Binder.getCallingUid();
         final int pid = Binder.getCallingPid();
@@ -5590,7 +5593,8 @@ public class AudioService extends IAudioService.Stub
                 throw new IllegalArgumentException("invalid device type " + device.getType());
             }
         }
-        final String eventSource = new StringBuilder("setCommunicationDevice(")
+        final String eventSource = new StringBuilder()
+                .append(device == null ? "clearCommunicationDevice(" : "setCommunicationDevice(")
                 .append(") from u/pid:").append(uid).append("/")
                 .append(pid).toString();
 
