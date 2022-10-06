@@ -396,6 +396,70 @@ public class TransitionTests extends WindowTestsBase {
     }
 
     @Test
+    public void testCreateInfo_PromoteSimilarClose() {
+        final Transition transition = createTestTransition(TRANSIT_CLOSE);
+        ArrayMap<WindowContainer, Transition.ChangeInfo> changes = transition.mChanges;
+        ArraySet<WindowContainer> participants = transition.mParticipants;
+
+        final Task topTask = createTask(mDisplayContent);
+        final Task belowTask = createTask(mDisplayContent);
+        final ActivityRecord showing = createActivityRecord(belowTask);
+        final ActivityRecord hiding = createActivityRecord(topTask);
+        final ActivityRecord closing = createActivityRecord(topTask);
+        // Start states.
+        changes.put(topTask, new Transition.ChangeInfo(true /* vis */, false /* exChg */));
+        changes.put(belowTask, new Transition.ChangeInfo(false /* vis */, false /* exChg */));
+        changes.put(showing, new Transition.ChangeInfo(false /* vis */, false /* exChg */));
+        changes.put(hiding, new Transition.ChangeInfo(true /* vis */, false /* exChg */));
+        changes.put(closing, new Transition.ChangeInfo(true /* vis */, true /* exChg */));
+        fillChangeMap(changes, topTask);
+        // End states.
+        showing.mVisibleRequested = true;
+        closing.mVisibleRequested = false;
+        hiding.mVisibleRequested = false;
+
+        participants.add(belowTask);
+        participants.add(hiding);
+        participants.add(closing);
+        ArrayList<WindowContainer> targets = Transition.calculateTargets(participants, changes);
+        assertEquals(2, targets.size());
+        assertTrue(targets.contains(belowTask));
+        assertTrue(targets.contains(topTask));
+    }
+
+    @Test
+    public void testCreateInfo_PromoteSimilarOpen() {
+        final Transition transition = createTestTransition(TRANSIT_OPEN);
+        ArrayMap<WindowContainer, Transition.ChangeInfo> changes = transition.mChanges;
+        ArraySet<WindowContainer> participants = transition.mParticipants;
+
+        final Task topTask = createTask(mDisplayContent);
+        final Task belowTask = createTask(mDisplayContent);
+        final ActivityRecord showing = createActivityRecord(topTask);
+        final ActivityRecord opening = createActivityRecord(topTask);
+        final ActivityRecord closing = createActivityRecord(belowTask);
+        // Start states.
+        changes.put(topTask, new Transition.ChangeInfo(false /* vis */, false /* exChg */));
+        changes.put(belowTask, new Transition.ChangeInfo(true /* vis */, false /* exChg */));
+        changes.put(showing, new Transition.ChangeInfo(false /* vis */, false /* exChg */));
+        changes.put(opening, new Transition.ChangeInfo(false /* vis */, true /* exChg */));
+        changes.put(closing, new Transition.ChangeInfo(true /* vis */, false /* exChg */));
+        fillChangeMap(changes, topTask);
+        // End states.
+        showing.mVisibleRequested = true;
+        opening.mVisibleRequested = true;
+        closing.mVisibleRequested = false;
+
+        participants.add(belowTask);
+        participants.add(showing);
+        participants.add(opening);
+        ArrayList<WindowContainer> targets = Transition.calculateTargets(participants, changes);
+        assertEquals(2, targets.size());
+        assertTrue(targets.contains(belowTask));
+        assertTrue(targets.contains(topTask));
+    }
+
+    @Test
     public void testTargets_noIntermediatesToWallpaper() {
         final Transition transition = createTestTransition(TRANSIT_OPEN);
 
