@@ -1641,11 +1641,10 @@ public class OomAdjuster {
 
         boolean foregroundActivities = false;
         boolean hasVisibleActivities = false;
-        if (app == topApp && (PROCESS_STATE_CUR_TOP == PROCESS_STATE_TOP
-                || PROCESS_STATE_CUR_TOP == PROCESS_STATE_IMPORTANT_FOREGROUND)) {
+        if (app == topApp && PROCESS_STATE_CUR_TOP == PROCESS_STATE_TOP) {
             // The last app on the list is the foreground app.
             adj = ProcessList.FOREGROUND_APP_ADJ;
-            if (PROCESS_STATE_CUR_TOP == PROCESS_STATE_TOP) {
+            if (mService.mAtmInternal.useTopSchedGroupForTopProcess()) {
                 schedGroup = ProcessList.SCHED_GROUP_TOP_APP;
                 state.setAdjType("top-activity");
             } else {
