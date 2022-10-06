@@ -295,6 +295,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     private final SparseBooleanArray mLoggedDeniedGetInputMethodWindowVisibleHeightForUid =
             new SparseBooleanArray(0);
     final WindowManagerInternal mWindowManagerInternal;
+    private final ActivityManagerInternal mActivityManagerInternal;
     final PackageManagerInternal mPackageManagerInternal;
     final InputManagerInternal mInputManagerInternal;
     final ImePlatformCompatUtils mImePlatformCompatUtils;
@@ -1719,6 +1720,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         mIWindowManager = IWindowManager.Stub.asInterface(
                 ServiceManager.getService(Context.WINDOW_SERVICE));
         mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
+        mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
         mImePlatformCompatUtils = new ImePlatformCompatUtils();
@@ -1751,12 +1753,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         mShowOngoingImeSwitcherForPhones = false;
 
         mNotificationShown = false;
-        int userId = 0;
-        try {
-            userId = ActivityManager.getService().getCurrentUser().id;
-        } catch (RemoteException e) {
-            Slog.w(TAG, "Couldn't get current user ID; guessing it's 0", e);
-        }
+        final int userId = mActivityManagerInternal.getCurrentUserId();
 
         mLastSwitchUserId = userId;
 
@@ -3311,7 +3308,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             // setSelectedInputMethodAndSubtypeLocked().
             setSelectedMethodIdLocked(id);
 
-            if (LocalServices.getService(ActivityManagerInternal.class).isSystemReady()) {
+            if (mActivityManagerInternal.isSystemReady()) {
                 Intent intent = new Intent(Intent.ACTION_INPUT_METHOD_CHANGED);
                 intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
                 intent.putExtra("input_method_id", id);
