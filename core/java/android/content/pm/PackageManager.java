@@ -783,6 +783,7 @@ public abstract class PackageManager {
             GET_DISABLED_COMPONENTS,
             GET_DISABLED_UNTIL_USED_COMPONENTS,
             GET_UNINSTALLED_PACKAGES,
+            MATCH_CLONE_PROFILE
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ResolveInfoFlagsBits {}
@@ -1111,6 +1112,19 @@ public abstract class PackageManager {
      * </ul>
      */
     public static final int MATCH_DIRECT_BOOT_AUTO = 0x10000000;
+
+    /**
+     * {@link ResolveInfo} flag: allow matching components across clone profile
+     * <p>
+     * This flag is used only for query and not resolution, the default behaviour would be to
+     * restrict querying across clone profile. This flag would be honored only if caller have
+     * permission {@link Manifest.permission.QUERY_CLONED_APPS}.
+     *
+     *  @hide
+     * <p>
+     */
+    @SystemApi
+    public static final int MATCH_CLONE_PROFILE = 0x20000000;
 
     /**
      * {@link PackageInfo} flag: return all attributions declared in the package manifest
