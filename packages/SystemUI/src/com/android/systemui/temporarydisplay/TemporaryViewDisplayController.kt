@@ -32,7 +32,6 @@ import android.view.accessibility.AccessibilityManager
 import android.view.accessibility.AccessibilityManager.FLAG_CONTENT_CONTROLS
 import android.view.accessibility.AccessibilityManager.FLAG_CONTENT_ICONS
 import android.view.accessibility.AccessibilityManager.FLAG_CONTENT_TEXT
-import androidx.annotation.CallSuper
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.concurrency.DelayableExecutor
@@ -87,17 +86,8 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
      */
     internal abstract val windowLayoutParams: WindowManager.LayoutParams
 
-    /** The view currently being displayed. Null if the view is not being displayed. */
-    private var view: ViewGroup? = null
-
-    /** The view controller for [view]. Null if the view is not being displayed. */
-    private var viewController: TouchableRegionViewController? = null
-
-    /** The info currently being displayed. Null if the view is not being displayed. */
-    internal var info: T? = null
-
-    // TODO(b/245610654): We should probably group [view], [viewController], and [info] together
-    //   into one object since they're either all null or all non-null.
+    /** A container for all the display-related objects. Null if the view is not being displayed. */
+    private var displayInfo: DisplayInfo? = null
 
     /** A [Runnable] that, when run, will cancel the pending timeout of the view. */
     private var cancelViewTimeout: Runnable? = null
@@ -109,10 +99,11 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
      * display the correct information in the view.
      */
     fun displayView(newInfo: T) {
-        val currentView = view
+        val currentDisplayInfo = displayInfo
 
-        if (currentView != null) {
-            updateView(newInfo, currentView)
+        if (currentDisplayInfo != null) {
+            currentDisplayInfo.info = newInfo
+            updateView(currentDisplayInfo.info, currentDisplayInfo.view)
         } else {
             // The view is new, so set up all our callbacks and inflate the view
             configurationController.addCallback(displayScaleListener)
@@ -149,24 +140,24 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
         val newView = LayoutInflater
                 .from(context)
                 .inflate(viewLayoutRes, null) as ViewGroup
-        view = newView
-
         val newViewController = TouchableRegionViewController(newView, this::getTouchableRegion)
         newViewController.init()
-        viewController = newViewController
 
-        updateView(newInfo, newView)
+        // We don't need to hold on to the view controller since we never set anything additional
+        // on it -- it will be automatically cleaned up when the view is detached.
+        val newDisplayInfo = DisplayInfo(newView, newInfo)
+        displayInfo = newDisplayInfo
+        updateView(newDisplayInfo.info, newDisplayInfo.view)
         windowManager.addView(newView, windowLayoutParams)
         animateViewIn(newView)
     }
 
     /** Removes then re-inflates the view. */
     private fun reinflateView() {
-        val currentInfo = info
-        if (view == null || currentInfo == null) { return }
+        val currentViewInfo = displayInfo ?: return
 
-        windowManager.removeView(view)
-        inflateAndUpdateView(currentInfo)
+        windowManager.removeView(currentViewInfo.view)
+        inflateAndUpdateView(currentViewInfo.info)
     }
 
     private val displayScaleListener = object : ConfigurationController.ConfigurationListener {
@@ -182,21 +173,20 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
      *     change, etc.)
      */
     fun removeView(removalReason: String) {
-        if (shouldIgnoreViewRemoval(removalReason)) {
+        val currentDisplayInfo = displayInfo ?: return
+        if (shouldIgnoreViewRemoval(currentDisplayInfo.info, removalReason)) {
             return
         }
-        val currentView = view ?: return
 
+        val currentView = currentDisplayInfo.view
         animateViewOut(currentView) { windowManager.removeView(currentView) }
 
         logger.logChipRemoval(removalReason)
         configurationController.removeCallback(displayScaleListener)
-        // Re-set the view to null immediately (instead as part of the animation end runnable) so
+        // Re-set to null immediately (instead as part of the animation end runnable) so
         // that if a new view event comes in while this view is animating out, we still display the
         // new view appropriately.
-        view = null
-        viewController = null
-        info = null
+        displayInfo = null
         // No need to time the view out since it's already gone
         cancelViewTimeout?.run()
     }
@@ -206,15 +196,12 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
      *
      * Allows subclasses to keep the view visible for longer in certain circumstances.
      */
-    open fun shouldIgnoreViewRemoval(removalReason: String): Boolean = false
+    open fun shouldIgnoreViewRemoval(info: T, removalReason: String): Boolean = false
 
     /**
      * A method implemented by subclasses to update [currentView] based on [newInfo].
      */
-    @CallSuper
-    open fun updateView(newInfo: T, currentView: ViewGroup) {
-        info = newInfo
-    }
+    abstract fun updateView(newInfo: T, currentView: ViewGroup)
 
     /**
      * Fills [outRect] with the touchable region of this view. This will be used by WindowManager
@@ -237,6 +224,15 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
     internal open fun animateViewOut(view: ViewGroup, onAnimationEnd: Runnable) {
         onAnimationEnd.run()
     }
+
+    /** A container for all the display-related state objects. */
+    private inner class DisplayInfo(
+        /** The view currently being displayed. */
+        val view: ViewGroup,
+
+        /** The info currently being displayed. */
+        var info: T,
+    )
 }
 
 object TemporaryDisplayRemovalReason {

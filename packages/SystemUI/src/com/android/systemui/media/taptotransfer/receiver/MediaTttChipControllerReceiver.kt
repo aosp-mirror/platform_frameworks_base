@@ -142,8 +142,6 @@ class MediaTttChipControllerReceiver @Inject constructor(
     }
 
     override fun updateView(newInfo: ChipReceiverInfo, currentView: ViewGroup) {
-        super.updateView(newInfo, currentView)
-
         val iconInfo = MediaTttUtils.getIconInfoFromPackageName(
             context, newInfo.routeInfo.clientPackageName, logger
         )

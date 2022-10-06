@@ -132,8 +132,6 @@ open class MediaTttChipControllerSender @Inject constructor(
         newInfo: ChipSenderInfo,
         currentView: ViewGroup
     ) {
-        super.updateView(newInfo, currentView)
-
         val chipState = newInfo.state
 
         // Detect falsing touches on the chip.
@@ -210,10 +208,10 @@ open class MediaTttChipControllerSender @Inject constructor(
         //   animateChipOut matches the animateChipIn.
     }
 
-    override fun shouldIgnoreViewRemoval(removalReason: String): Boolean {
+    override fun shouldIgnoreViewRemoval(info: ChipSenderInfo, removalReason: String): Boolean {
         // Don't remove the chip if we're in progress or succeeded, since the user should still be
         // able to see the status of the transfer. (But do remove it if it's finally timed out.)
-        val transferStatus = info?.state?.transferStatus
+        val transferStatus = info.state.transferStatus
         if (
             (transferStatus == TransferStatus.IN_PROGRESS ||
                 transferStatus == TransferStatus.SUCCEEDED) &&

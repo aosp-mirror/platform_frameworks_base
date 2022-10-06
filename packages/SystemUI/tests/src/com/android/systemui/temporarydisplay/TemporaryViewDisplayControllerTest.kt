@@ -261,11 +261,10 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
 
         override val windowLayoutParams = commonWindowLayoutParams
         override fun updateView(newInfo: ViewInfo, currentView: ViewGroup) {
-            super.updateView(newInfo, currentView)
             mostRecentViewInfo = newInfo
         }
 
-        override fun shouldIgnoreViewRemoval(removalReason: String): Boolean {
+        override fun shouldIgnoreViewRemoval(info: ViewInfo, removalReason: String): Boolean {
             return shouldIgnoreViewRemoval
         }
 
