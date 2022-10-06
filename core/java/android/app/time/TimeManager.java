@@ -21,11 +21,14 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.app.timedetector.ITimeDetectorService;
+import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timezonedetector.ITimeZoneDetectorService;
+import android.app.timezonedetector.ManualTimeZoneSuggestion;
 import android.content.Context;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
+import android.os.TimestampedValue;
 import android.util.ArrayMap;
 import android.util.Log;
 
@@ -270,6 +273,154 @@ public final class TimeManager {
         }
         try {
             mITimeDetectorService.suggestExternalTime(timeSuggestion);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns a snapshot of the device's current system clock time state. See also {@link
+     * #confirmTime(UnixEpochTime)} for how this information can be used.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION)
+    @NonNull
+    public TimeState getTimeState() {
+        if (DEBUG) {
+            Log.d(TAG, "getTimeState called");
+        }
+        try {
+            return mITimeDetectorService.getTimeState();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Confirms the device's current time during device setup, raising the system's confidence in
+     * the time if needed. Unlike {@link #setManualTime(UnixEpochTime)}, which can only be used when
+     * automatic time detection is currently disabled, this method can be used regardless of the
+     * automatic time detection setting, but only to confirm the current time (which may have been
+     * set via automatic means). Use {@link #getTimeState()} to obtain the time state to confirm.
+     *
+     * <p>Returns {@code false} if the confirmation is invalid, i.e. if the time being
+     * confirmed is no longer the time the device is currently set to. Confirming a time
+     * in which the system already has high confidence will return {@code true}.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION)
+    public boolean confirmTime(@NonNull UnixEpochTime unixEpochTime) {
+        if (DEBUG) {
+            Log.d(TAG, "confirmTime called: " + unixEpochTime);
+        }
+        try {
+            return mITimeDetectorService.confirmTime(unixEpochTime);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Attempts to set the device's time, expected to be determined from the user's manually entered
+     * information.
+     *
+     * <p>Returns {@code false} if the time is invalid, or the device configuration / user
+     * capabilities prevents the time being accepted, e.g. if the device is currently set to
+     * "automatic time detection". This method returns {@code true} if the time was accepted even
+     * if it is the same as the current device time.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION)
+    public boolean setManualTime(@NonNull UnixEpochTime unixEpochTime) {
+        if (DEBUG) {
+            Log.d(TAG, "setTime called: " + unixEpochTime);
+        }
+        try {
+            TimestampedValue<Long> manualTime = new TimestampedValue<>(
+                    unixEpochTime.getElapsedRealtimeMillis(),
+                    unixEpochTime.getUnixEpochTimeMillis());
+            ManualTimeSuggestion manualTimeSuggestion = new ManualTimeSuggestion(manualTime);
+            manualTimeSuggestion.addDebugInfo("TimeManager.setTime()");
+            manualTimeSuggestion.addDebugInfo("UID: " + android.os.Process.myUid());
+            manualTimeSuggestion.addDebugInfo("UserHandle: " + android.os.Process.myUserHandle());
+            manualTimeSuggestion.addDebugInfo("Process: " + android.os.Process.myProcessName());
+            return mITimeDetectorService.setManualTime(manualTimeSuggestion);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns a snapshot of the device's current time zone state. See also {@link
+     * #confirmTimeZone(String)} and {@link #setManualTimeZone(String)} for how this information may
+     * be used.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION)
+    @NonNull
+    public TimeZoneState getTimeZoneState() {
+        if (DEBUG) {
+            Log.d(TAG, "getTimeZoneState called");
+        }
+        try {
+            return mITimeZoneDetectorService.getTimeZoneState();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Confirms the device's current time zone ID, raising the system's confidence in the time zone
+     * if needed. Unlike {@link #setManualTimeZone(String)}, which can only be used when automatic
+     * time zone detection is currently disabled, this method can be used regardless of the
+     * automatic time zone detection setting, but only to confirm the current value (which may have
+     * been set via automatic means).
+     *
+     * <p>Returns {@code false} if the confirmation is invalid, i.e. if the time zone ID being
+     * confirmed is no longer the time zone ID the device is currently set to. Confirming a time
+     * zone ID in which the system already has high confidence returns {@code true}.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION)
+    public boolean confirmTimeZone(@NonNull String timeZoneId) {
+        if (DEBUG) {
+            Log.d(TAG, "confirmTimeZone called: " + timeZoneId);
+        }
+        try {
+            return mITimeZoneDetectorService.confirmTimeZone(timeZoneId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Attempts to set the device's time zone, expected to be determined from a user's manually
+     * entered information.
+     *
+     * <p>Returns {@code false} if the time zone is invalid, or the device configuration / user
+     * capabilities prevents the time zone being accepted, e.g. if the device is currently set to
+     * "automatic time zone detection". {@code true} is returned if the time zone is accepted. A
+     * time zone that is accepted and matches the current device time zone returns {@code true}.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION)
+    public boolean setManualTimeZone(@NonNull String timeZoneId) {
+        if (DEBUG) {
+            Log.d(TAG, "setManualTimeZone called: " + timeZoneId);
+        }
+        try {
+            ManualTimeZoneSuggestion manualTimeZoneSuggestion =
+                    new ManualTimeZoneSuggestion(timeZoneId);
+            manualTimeZoneSuggestion.addDebugInfo("TimeManager.setManualTimeZone()");
+            manualTimeZoneSuggestion.addDebugInfo("UID: " + android.os.Process.myUid());
+            manualTimeZoneSuggestion.addDebugInfo("Process: " + android.os.Process.myProcessName());
+            return mITimeZoneDetectorService.setManualTimeZone(manualTimeZoneSuggestion);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

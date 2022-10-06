@@ -236,10 +236,9 @@ public class VirtualDeviceManagerServiceTest {
                 .setBlockedActivities(getBlockedActivities())
                 .build();
         mDeviceImpl = new VirtualDeviceImpl(mContext,
-                mAssociationInfo, new Binder(), /* uid */ 0, mInputController,
-                (int associationId) -> {
-                }, mPendingTrampolineCallback, mActivityListener, mRunningAppsChangedCallback,
-                params);
+                mAssociationInfo, new Binder(), /* ownerUid */ 0, /* uniqueId */ 1,
+                mInputController, (int associationId) -> {}, mPendingTrampolineCallback,
+                mActivityListener, mRunningAppsChangedCallback, params);
     }
 
     @Test

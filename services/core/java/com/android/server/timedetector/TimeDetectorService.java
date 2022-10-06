@@ -24,6 +24,8 @@ import android.app.time.ExternalTimeSuggestion;
 import android.app.time.ITimeDetectorListener;
 import android.app.time.TimeCapabilitiesAndConfig;
 import android.app.time.TimeConfiguration;
+import android.app.time.TimeState;
+import android.app.time.UnixEpochTime;
 import android.app.timedetector.ITimeDetectorService;
 import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.TelephonyTimeSuggestion;
@@ -268,6 +270,58 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub
                     Slog.w(TAG, "Unable to notify listener=" + listener, e);
                 }
             }
+        }
+    }
+
+    @Override
+    public TimeState getTimeState() {
+        enforceManageTimeDetectorPermission();
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            return mTimeDetectorStrategy.getTimeState();
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    void setTimeState(@NonNull TimeState timeState) {
+        enforceManageTimeDetectorPermission();
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            mTimeDetectorStrategy.setTimeState(timeState);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    @Override
+    public boolean confirmTime(@NonNull UnixEpochTime time) {
+        enforceManageTimeDetectorPermission();
+        Objects.requireNonNull(time);
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            return mTimeDetectorStrategy.confirmTime(time);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    @Override
+    public boolean setManualTime(@NonNull ManualTimeSuggestion timeSignal) {
+        enforceManageTimeDetectorPermission();
+        Objects.requireNonNull(timeSignal);
+
+        // This calls suggestManualTime() as the logic is identical, it only differs in the
+        // permission required, which is handled on the line above.
+        int userId = mCallerIdentityInjector.getCallingUserId();
+        final long token = Binder.clearCallingIdentity();
+        try {
+            return mTimeDetectorStrategy.suggestManualTime(userId, timeSignal);
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
     }
 

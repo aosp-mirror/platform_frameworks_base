@@ -69,7 +69,6 @@ import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
-import android.app.AppOpsManager;
 import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -307,7 +306,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     final boolean mHasFeature;
     private final ArrayMap<String, List<InputMethodSubtype>> mAdditionalSubtypeMap =
             new ArrayMap<>();
-    private final AppOpsManager mAppOpsManager;
     private final UserManager mUserManager;
     private final UserManagerInternal mUserManagerInternal;
     private final InputMethodMenuController mMenuController;
@@ -1734,7 +1732,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         mInputMethodDeviceConfigs = new InputMethodDeviceConfigs();
         mImeDisplayValidator = mWindowManagerInternal::getDisplayImePolicy;
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
-        mAppOpsManager = mContext.getSystemService(AppOpsManager.class);
         mUserManager = mContext.getSystemService(UserManager.class);
         mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
         mAccessibilityManager = AccessibilityManager.getInstance(context);
@@ -2520,7 +2517,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     null, null, null, selectedMethodId, getSequenceNumberLocked(), null, false);
         }
 
-        if (!InputMethodUtils.checkIfPackageBelongsToUid(mAppOpsManager, cs.mUid,
+        if (!InputMethodUtils.checkIfPackageBelongsToUid(mPackageManagerInternal, cs.mUid,
                 editorInfo.packageName)) {
             Slog.e(TAG, "Rejecting this client as it reported an invalid package name."
                     + " uid=" + cs.mUid + " package=" + editorInfo.packageName);
@@ -3957,7 +3954,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             return false;
         }
         if (getCurIntentLocked() != null && InputMethodUtils.checkIfPackageBelongsToUid(
-                mAppOpsManager,
+                mPackageManagerInternal,
                 uid,
                 getCurIntentLocked().getComponent().getPackageName())) {
             return true;
@@ -4156,6 +4153,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         if (UserHandle.getCallingUserId() != userId) {
             mContext.enforceCallingPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
         }
+        final int callingUid = Binder.getCallingUid();
 
         // By this IPC call, only a process which shares the same uid with the IME can add
         // additional input method subtypes to the IME.
@@ -4176,7 +4174,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
             if (mSettings.getCurrentUserId() == userId) {
                 if (!mSettings.setAdditionalInputMethodSubtypes(imiId, toBeAdded,
-                        mAdditionalSubtypeMap, mIPackageManager)) {
+                        mAdditionalSubtypeMap, mPackageManagerInternal, callingUid)) {
                     return;
                 }
                 final long ident = Binder.clearCallingIdentity();
@@ -4188,14 +4186,17 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 return;
             }
 
-            final ArrayMap<String, InputMethodInfo> methodMap = queryMethodMapForUser(userId);
-            final InputMethodSettings settings = new InputMethodSettings(mContext, methodMap,
-                    userId, false);
+            final ArrayMap<String, InputMethodInfo> methodMap = new ArrayMap<>();
+            final ArrayList<InputMethodInfo> methodList = new ArrayList<>();
             final ArrayMap<String, List<InputMethodSubtype>> additionalSubtypeMap =
                     new ArrayMap<>();
             AdditionalSubtypeUtils.load(additionalSubtypeMap, userId);
+            queryInputMethodServicesInternal(mContext, userId, additionalSubtypeMap, methodMap,
+                    methodList, DirectBootAwareness.AUTO);
+            final InputMethodSettings settings = new InputMethodSettings(mContext, methodMap,
+                    userId, false);
             settings.setAdditionalInputMethodSubtypes(imiId, toBeAdded, additionalSubtypeMap,
-                    mIPackageManager);
+                    mPackageManagerInternal, callingUid);
         }
     }
 
@@ -4208,8 +4209,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         final int callingUid = Binder.getCallingUid();
         final ComponentName imeComponentName =
                 imeId != null ? ComponentName.unflattenFromString(imeId) : null;
-        if (imeComponentName == null || !InputMethodUtils.checkIfPackageBelongsToUid(mAppOpsManager,
-                callingUid, imeComponentName.getPackageName())) {
+        if (imeComponentName == null || !InputMethodUtils.checkIfPackageBelongsToUid(
+                mPackageManagerInternal, callingUid, imeComponentName.getPackageName())) {
             throw new SecurityException("Calling UID=" + callingUid + " does not belong to imeId="
                     + imeId);
         }

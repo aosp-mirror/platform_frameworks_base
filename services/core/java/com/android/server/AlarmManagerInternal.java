@@ -16,8 +16,10 @@
 
 package com.android.server;
 
+import android.annotation.CurrentTimeMillisLong;
 import android.app.PendingIntent;
 
+import com.android.server.SystemClockTime.TimeConfidence;
 import com.android.server.SystemTimeZone.TimeZoneConfidence;
 
 public interface AlarmManagerInternal {
@@ -57,6 +59,18 @@ public interface AlarmManagerInternal {
      * @param tzId the time zone ID
      * @param confidence the confidence that {@code tzId} is correct, see {@link TimeZoneConfidence}
      *     for details
+     * @param logInfo the reason the time zone is being changed, for bug report logging
      */
-    void setTimeZone(String tzId, @TimeZoneConfidence int confidence);
+    void setTimeZone(String tzId, @TimeZoneConfidence int confidence, String logInfo);
+
+    /**
+     * Sets the device's current time and time confidence.
+     *
+     * @param unixEpochTimeMillis the time
+     * @param confidence the confidence that {@code unixEpochTimeMillis} is correct, see {@link
+     *     TimeConfidence} for details
+     * @param logMsg the reason the time is being changed, for bug report logging
+     */
+    void setTime(@CurrentTimeMillisLong long unixEpochTimeMillis, @TimeConfidence int confidence,
+            String logMsg);
 }

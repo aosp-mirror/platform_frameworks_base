@@ -46,7 +46,7 @@ final class LocaleUtils {
      * @param desired The locale preferred by user.
      * @return A score based on the locale matching for the default subtype enabling.
      */
-    @IntRange(from=1, to=3)
+    @IntRange(from = 1, to = 3)
     private static byte calculateMatchingSubScore(@NonNull final ULocale supported,
             @NonNull final ULocale desired) {
         // Assuming supported/desired is fully expanded.
@@ -111,7 +111,7 @@ final class LocaleUtils {
          * @return 1 if {@code left} is larger than {@code right}. -1 if {@code left} is less than
          * {@code right}. 0 if {@code left} and {@code right} is equal.
          */
-        @IntRange(from=-1, to=1)
+        @IntRange(from = -1, to = 1)
         private static int compare(@NonNull byte[] left, @NonNull byte[] right) {
             for (int i = 0; i < left.length; ++i) {
                 if (left[i] > right[i]) {

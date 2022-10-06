@@ -90,7 +90,7 @@ class ImmutabilityProcessorTest {
 
     @Test
     fun validInterface() = test(
-        JavaFileObjects.forSourceString(
+        source = JavaFileObjects.forSourceString(
             "$PACKAGE_PREFIX.$DATA_CLASS_NAME",
             /* language=JAVA */ """
                 package $PACKAGE_PREFIX;
@@ -227,49 +227,114 @@ class ImmutabilityProcessorTest {
             nonInterfaceReturnFailure(line = 9),
             nonInterfaceReturnFailure(line = 10, index = 0),
             classNotFinalFailure(line = 13, "NonFinalClassFinalFields"),
-        ), otherErrors = listOf(
-            memberNotMethodFailure(line = 4) to FINAL_CLASSES[1],
-            memberNotMethodFailure(line = 4) to FINAL_CLASSES[3],
+        ), otherErrors = mapOf(
+            FINAL_CLASSES[1] to listOf(
+                memberNotMethodFailure(line = 4),
+            ),
+            FINAL_CLASSES[3] to listOf(
+                memberNotMethodFailure(line = 4),
+            ),
         )
     )
+
+    @Test
+    fun superClass() {
+        val superClass = JavaFileObjects.forSourceString(
+            "$PACKAGE_PREFIX.SuperClass",
+            /* language=JAVA */ """
+            package $PACKAGE_PREFIX;
+
+            import java.util.List;
+
+            public interface SuperClass {
+                InnerClass getInnerClassOne();
+
+                final class InnerClass {
+                    public String innerField;
+                }
+            }
+            """.trimIndent()
+        )
+
+        val dataClass = JavaFileObjects.forSourceString(
+            "$PACKAGE_PREFIX.$DATA_CLASS_NAME",
+            /* language=JAVA */ """
+            package $PACKAGE_PREFIX;
+
+            import java.util.List;
+
+            @Immutable
+            public interface $DATA_CLASS_NAME extends SuperClass {
+                String[] getArray();
+            }
+            """.trimIndent()
+        )
+
+        test(
+            sources = arrayOf(superClass, dataClass),
+            fileToErrors = mapOf(
+                superClass to listOf(
+                    classNotImmutableFailure(line = 5, className = "SuperClass"),
+                    nonInterfaceReturnFailure(line = 6),
+                    nonInterfaceClassFailure(8),
+                    classNotImmutableFailure(line = 8, className = "InnerClass"),
+                    memberNotMethodFailure(line = 9),
+                ),
+                dataClass to listOf(
+                    arrayFailure(line = 7),
+                )
+            )
+        )
+    }
 
     private fun test(
         source: JavaFileObject,
         errors: List<CompilationError>,
-        otherErrors: List<Pair<CompilationError, JavaFileObject>> = emptyList(),
+        otherErrors: Map<JavaFileObject, List<CompilationError>> = emptyMap(),
+    ) = test(
+        sources = arrayOf(source),
+        fileToErrors = otherErrors + (source to errors),
+    )
+
+    private fun test(
+        vararg sources: JavaFileObject,
+        fileToErrors: Map<JavaFileObject, List<CompilationError>> = emptyMap(),
     ) {
         val compilation = javac()
             .withProcessors(ImmutabilityProcessor())
-            .compile(FINAL_CLASSES + ANNOTATION + listOf(source))
-        val allErrors = otherErrors + errors.map { it to source }
-        allErrors.forEach { (error, file) ->
-            try {
-                assertThat(compilation)
-                    .hadErrorContaining(error.message)
-                    .inFile(file)
-                    .onLine(error.line)
-            } catch (e: AssertionError) {
-                // Wrap the exception so that the line number is logged
-                val wrapped = AssertionError("Expected $error, ${e.message}").apply {
-                    stackTrace = e.stackTrace
-                }
+            .compile(FINAL_CLASSES + ANNOTATION + sources)
 
-                // Wrap again with Expect so that all errors are reported. This is very bad code
-                // but can only be fixed by updating compile-testing with a better Truth Subject
-                // implementation.
-                expect.that(wrapped).isNull()
+        fileToErrors.forEach { (file, errors) ->
+            errors.forEach { error ->
+                try {
+                    assertThat(compilation)
+                        .hadErrorContaining(error.message)
+                        .inFile(file)
+                        .onLine(error.line)
+                } catch (e: AssertionError) {
+                    // Wrap the exception so that the line number is logged
+                    val wrapped = AssertionError("Expected $error, ${e.message}").apply {
+                        stackTrace = e.stackTrace
+                    }
+
+                    // Wrap again with Expect so that all errors are reported. This is very bad code
+                    // but can only be fixed by updating compile-testing with a better Truth Subject
+                    // implementation.
+                    expect.that(wrapped).isNull()
+                }
             }
         }
 
-        try {
-            assertThat(compilation).hadErrorCount(allErrors.size)
-        } catch (e: AssertionError) {
+        expect.that(compilation.errors().size).isEqualTo(fileToErrors.values.sumOf { it.size })
+
+        if (expect.hasFailures()) {
             expect.withMessage(
                 compilation.errors()
+                    .sortedBy { it.lineNumber }
                     .joinToString(separator = "\n") {
                         "${it.lineNumber}: ${it.getMessage(Locale.ENGLISH)?.trim()}"
                     }
-            ).that(e).isNull()
+            ).fail()
         }
     }
 

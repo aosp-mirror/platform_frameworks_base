@@ -3051,6 +3051,10 @@
     <permission android:name="android.permission.QUERY_ADMIN_POLICY"
                 android:protectionLevel="signature|role" />
 
+    <!-- @SystemApi @hide Allows an application to exempt apps from platform restrictions.-->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_APP_EXEMPTIONS"
+                android:protectionLevel="signature|role" />
+
     <!-- @SystemApi @hide Allows an application to set a device owner on retail demo devices.-->
     <permission android:name="android.permission.PROVISION_DEMO_DEVICE"
                 android:protectionLevel="signature|setup" />

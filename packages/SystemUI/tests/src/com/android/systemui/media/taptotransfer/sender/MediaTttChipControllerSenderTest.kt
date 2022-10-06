@@ -35,7 +35,9 @@ import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.internal.statusbar.IUndoMediaTransferCallback
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.media.taptotransfer.common.MediaTttLogger
+import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.concurrency.FakeExecutor
@@ -43,10 +45,12 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
+import dagger.Lazy
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
@@ -75,6 +79,14 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
     private lateinit var windowManager: WindowManager
     @Mock
     private lateinit var commandQueue: CommandQueue
+    @Mock
+    private lateinit var lazyFalsingManager: Lazy<FalsingManager>
+    @Mock
+    private lateinit var falsingManager: FalsingManager
+    @Mock
+    private lateinit var lazyFalsingCollector: Lazy<FalsingCollector>
+    @Mock
+    private lateinit var falsingCollector: FalsingCollector
     private lateinit var commandQueueCallback: CommandQueue.Callbacks
     private lateinit var fakeAppIconDrawable: Drawable
     private lateinit var fakeClock: FakeSystemClock
@@ -101,6 +113,8 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         senderUiEventLogger = MediaTttSenderUiEventLogger(uiEventLoggerFake)
 
         whenever(accessibilityManager.getRecommendedTimeoutMillis(any(), any())).thenReturn(TIMEOUT)
+        whenever(lazyFalsingManager.get()).thenReturn(falsingManager)
+        whenever(lazyFalsingCollector.get()).thenReturn(falsingCollector)
 
         controllerSender = MediaTttChipControllerSender(
             commandQueue,
@@ -111,7 +125,9 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
             accessibilityManager,
             configurationController,
             powerManager,
-            senderUiEventLogger
+            senderUiEventLogger,
+            lazyFalsingManager,
+            lazyFalsingCollector
         )
 
         val callbackCaptor = ArgumentCaptor.forClass(CommandQueue.Callbacks::class.java)
@@ -403,6 +419,38 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
 
     @Test
     fun transferToReceiverSucceeded_withUndoRunnable_undoButtonClickRunsRunnable() {
+        var undoCallbackCalled = false
+        val undoCallback = object : IUndoMediaTransferCallback.Stub() {
+            override fun onUndoTriggered() {
+                undoCallbackCalled = true
+            }
+        }
+
+        controllerSender.displayView(transferToReceiverSucceeded(undoCallback))
+        getChipView().getUndoButton().performClick()
+
+        assertThat(undoCallbackCalled).isTrue()
+    }
+
+    @Test
+    fun transferToReceiverSucceeded_withUndoRunnable_falseTap_callbackNotRun() {
+        whenever(lazyFalsingManager.get().isFalseTap(anyInt())).thenReturn(true)
+        var undoCallbackCalled = false
+        val undoCallback = object : IUndoMediaTransferCallback.Stub() {
+            override fun onUndoTriggered() {
+                undoCallbackCalled = true
+            }
+        }
+
+        controllerSender.displayView(transferToReceiverSucceeded(undoCallback))
+        getChipView().getUndoButton().performClick()
+
+        assertThat(undoCallbackCalled).isFalse()
+    }
+
+    @Test
+    fun transferToReceiverSucceeded_withUndoRunnable_realTap_callbackRun() {
+        whenever(lazyFalsingManager.get().isFalseTap(anyInt())).thenReturn(false)
         var undoCallbackCalled = false
         val undoCallback = object : IUndoMediaTransferCallback.Stub() {
             override fun onUndoTriggered() {
