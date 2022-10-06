@@ -32,7 +32,6 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
 public abstract class MobileNetworkDatabase extends RoomDatabase {
 
     public static final String TAG = "MobileNetworkDatabase";
-    public static final String DATABASE_NAME = "mobilenetworksettings_db";
 
     public abstract SubscriptionInfoDao mSubscriptionInfoDao();
 
@@ -47,8 +46,7 @@ public abstract class MobileNetworkDatabase extends RoomDatabase {
      * @return The MobileNetworkDatabase.
      */
     public static MobileNetworkDatabase createDatabase(Context context) {
-        return Room.databaseBuilder(context,
-                        MobileNetworkDatabase.class, DATABASE_NAME)
+        return Room.inMemoryDatabaseBuilder(context, MobileNetworkDatabase.class)
                 .fallbackToDestructiveMigration()
                 .enableMultiInstanceInvalidation()
                 .build();
