@@ -87,11 +87,13 @@ import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.service.voice.VoiceInteractionSession;
 import android.text.Selection;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
@@ -155,6 +157,7 @@ import android.window.WindowOnBackInvokedDispatcher;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.app.IVoiceInteractionManagerService;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.app.ToolbarActionBar;
 import com.android.internal.app.WindowDecorActionBar;
@@ -1602,6 +1605,25 @@ public class Activity extends ContextThemeWrapper
         return callbacks;
     }
 
+    private void notifyVoiceInteractionManagerServiceActivityEvent(
+            @VoiceInteractionSession.VoiceInteractionActivityEventType int type) {
+
+        final IVoiceInteractionManagerService service =
+                IVoiceInteractionManagerService.Stub.asInterface(
+                        ServiceManager.getService(Context.VOICE_INTERACTION_MANAGER_SERVICE));
+        if (service == null) {
+            Log.w(TAG, "notifyVoiceInteractionManagerServiceActivityEvent: Can not get "
+                    + "VoiceInteractionManagerService");
+            return;
+        }
+
+        try {
+            service.notifyActivityEventChanged(mToken, type);
+        } catch (RemoteException e) {
+            // Empty
+        }
+    }
+
     /**
      * Called when the activity is starting.  This is where most initialization
      * should go: calling {@link #setContentView(int)} to inflate the
@@ -1877,6 +1899,9 @@ public class Activity extends ContextThemeWrapper
         mCalled = true;
 
         notifyContentCaptureManagerIfNeeded(CONTENT_CAPTURE_START);
+
+        notifyVoiceInteractionManagerServiceActivityEvent(
+                VoiceInteractionSession.VOICE_INTERACTION_ACTIVITY_EVENT_START);
     }
 
     /**
@@ -2020,6 +2045,12 @@ public class Activity extends ContextThemeWrapper
         final Window win = getWindow();
         if (win != null) win.makeActive();
         if (mActionBar != null) mActionBar.setShowHideAnimationEnabled(true);
+
+        // Because the test case "com.android.launcher3.jank.BinderTests#testPressHome" doesn't
+        // allow any binder call in onResume, we call this method in onPostResume.
+        notifyVoiceInteractionManagerServiceActivityEvent(
+                VoiceInteractionSession.VOICE_INTERACTION_ACTIVITY_EVENT_RESUME);
+
         mCalled = true;
     }
 
@@ -2395,6 +2426,10 @@ public class Activity extends ContextThemeWrapper
         getAutofillClientController().onActivityPaused();
 
         notifyContentCaptureManagerIfNeeded(CONTENT_CAPTURE_PAUSE);
+
+        notifyVoiceInteractionManagerServiceActivityEvent(
+                VoiceInteractionSession.VOICE_INTERACTION_ACTIVITY_EVENT_PAUSE);
+
         mCalled = true;
     }
 
@@ -2624,6 +2659,9 @@ public class Activity extends ContextThemeWrapper
 
         getAutofillClientController().onActivityStopped(mIntent, mChangingConfigurations);
         mEnterAnimationComplete = false;
+
+        notifyVoiceInteractionManagerServiceActivityEvent(
+                VoiceInteractionSession.VOICE_INTERACTION_ACTIVITY_EVENT_STOP);
     }
 
     /**
