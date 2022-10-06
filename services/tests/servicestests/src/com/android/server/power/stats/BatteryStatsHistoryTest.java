@@ -382,4 +382,68 @@ public class BatteryStatsHistoryTest {
         pw.flush();
         return writer.toString();
     }
+
+    @Test
+    public void testVarintParceler() {
+        long[] values = {
+                0,
+                1,
+                42,
+                0x1234,
+                0x10000000,
+                0x12345678,
+                0x7fffffff,
+                0xffffffffL,
+                0x100000000000L,
+                0x123456789012L,
+                0x1000000000000000L,
+                0x1234567890123456L,
+                0x7fffffffffffffffL,
+                0xffffffffffffffffL};
+
+        // Parcel subarrays of different lengths and assert the size of the resulting parcel
+        testVarintParceler(Arrays.copyOfRange(values, 0, 1), 4);   // v. 8
+        testVarintParceler(Arrays.copyOfRange(values, 0, 2), 4);   // v. 16
+        testVarintParceler(Arrays.copyOfRange(values, 0, 3), 4);   // v. 24
+        testVarintParceler(Arrays.copyOfRange(values, 0, 4), 8);   // v. 32
+        testVarintParceler(Arrays.copyOfRange(values, 0, 5), 12);  // v. 40
+        testVarintParceler(Arrays.copyOfRange(values, 0, 6), 16);  // v. 48
+        testVarintParceler(Arrays.copyOfRange(values, 0, 7), 20);  // v. 56
+        testVarintParceler(Arrays.copyOfRange(values, 0, 8), 28);  // v. 64
+        testVarintParceler(Arrays.copyOfRange(values, 0, 9), 32);  // v. 72
+        testVarintParceler(Arrays.copyOfRange(values, 0, 10), 40); // v. 80
+        testVarintParceler(Arrays.copyOfRange(values, 0, 11), 48); // v. 88
+        testVarintParceler(Arrays.copyOfRange(values, 0, 12), 60); // v. 96
+        testVarintParceler(Arrays.copyOfRange(values, 0, 13), 68); // v. 104
+        testVarintParceler(Arrays.copyOfRange(values, 0, 14), 76); // v. 112
+    }
+
+    private void testVarintParceler(long[] values, int expectedLength) {
+        BatteryStatsHistory.VarintParceler parceler = new BatteryStatsHistory.VarintParceler();
+        Parcel parcel = Parcel.obtain();
+        parcel.writeString("begin");
+        int pos = parcel.dataPosition();
+        parceler.writeLongArray(parcel, values);
+        int length = parcel.dataPosition() - pos;
+        parcel.writeString("end");
+
+        byte[] bytes = parcel.marshall();
+        parcel.recycle();
+
+        parcel = Parcel.obtain();
+        parcel.unmarshall(bytes, 0, bytes.length);
+        parcel.setDataPosition(0);
+
+        assertThat(parcel.readString()).isEqualTo("begin");
+
+        long[] result = new long[values.length];
+        parceler.readLongArray(parcel, result);
+
+        assertThat(result).isEqualTo(values);
+        assertThat(length).isEqualTo(expectedLength);
+
+        assertThat(parcel.readString()).isEqualTo("end");
+
+        parcel.recycle();
+    }
 }
