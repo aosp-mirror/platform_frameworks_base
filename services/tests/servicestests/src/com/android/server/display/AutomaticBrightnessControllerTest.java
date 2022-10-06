@@ -422,13 +422,13 @@ public class AutomaticBrightnessControllerTest {
 
     @Test
     public void testHysteresisLevels() {
-        int[] ambientBrighteningThresholds = {100, 200};
-        int[] ambientDarkeningThresholds = {400, 500};
-        int[] ambientThresholdLevels = {500};
+        float[] ambientBrighteningThresholds = {50, 100};
+        float[] ambientDarkeningThresholds = {10, 20};
+        float[] ambientThresholdLevels = {0, 500};
         float ambientDarkeningMinChangeThreshold = 3.0f;
         float ambientBrighteningMinChangeThreshold = 1.5f;
         HysteresisLevels hysteresisLevels = new HysteresisLevels(ambientBrighteningThresholds,
-                ambientDarkeningThresholds, ambientThresholdLevels,
+                ambientDarkeningThresholds, ambientThresholdLevels, ambientThresholdLevels,
                 ambientDarkeningMinChangeThreshold, ambientBrighteningMinChangeThreshold);
 
         // test low, activate minimum change thresholds.
@@ -437,16 +437,17 @@ public class AutomaticBrightnessControllerTest {
         assertEquals(1f, hysteresisLevels.getDarkeningThreshold(4.0f), EPSILON);
 
         // test max
-        assertEquals(12000f, hysteresisLevels.getBrighteningThreshold(10000.0f), EPSILON);
-        assertEquals(5000f, hysteresisLevels.getDarkeningThreshold(10000.0f), EPSILON);
+        // epsilon is x2 here, since the next floating point value about 20,000 is 0.0019531 greater
+        assertEquals(20000f, hysteresisLevels.getBrighteningThreshold(10000.0f), EPSILON * 2);
+        assertEquals(8000f, hysteresisLevels.getDarkeningThreshold(10000.0f), EPSILON);
 
         // test just below threshold
-        assertEquals(548.9f, hysteresisLevels.getBrighteningThreshold(499f), EPSILON);
-        assertEquals(299.4f, hysteresisLevels.getDarkeningThreshold(499f), EPSILON);
+        assertEquals(748.5f, hysteresisLevels.getBrighteningThreshold(499f), EPSILON);
+        assertEquals(449.1f, hysteresisLevels.getDarkeningThreshold(499f), EPSILON);
 
         // test at (considered above) threshold
-        assertEquals(600f, hysteresisLevels.getBrighteningThreshold(500f), EPSILON);
-        assertEquals(250f, hysteresisLevels.getDarkeningThreshold(500f), EPSILON);
+        assertEquals(1000f, hysteresisLevels.getBrighteningThreshold(500f), EPSILON);
+        assertEquals(400f, hysteresisLevels.getDarkeningThreshold(500f), EPSILON);
     }
 
     @Test
