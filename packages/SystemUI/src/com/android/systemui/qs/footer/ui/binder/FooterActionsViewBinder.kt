@@ -222,7 +222,6 @@ object FooterActionsViewBinder {
 
     private fun bindButton(button: IconButtonViewHolder, model: FooterActionsButtonViewModel?) {
         val buttonView = button.view
-        buttonView.id = model?.id ?: View.NO_ID
         buttonView.isVisible = model != null
         if (model == null) {
             return
