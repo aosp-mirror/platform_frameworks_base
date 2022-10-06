@@ -176,6 +176,8 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
 
     private int mEnabledFeatures;
 
+    // Display-specific features
+    private SparseArray<Boolean> mServiceDetectsGestures = new SparseArray<>();
     private final SparseArray<EventStreamState> mMouseStreamStates = new SparseArray<>(0);
 
     private final SparseArray<EventStreamState> mTouchScreenStreamStates = new SparseArray<>(0);
@@ -458,7 +460,9 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
 
         final Context displayContext = mContext.createDisplayContext(display);
         final int displayId = display.getDisplayId();
-
+        if (!mServiceDetectsGestures.contains(displayId)) {
+            mServiceDetectsGestures.put(displayId, false);
+        }
         if ((mEnabledFeatures & FLAG_FEATURE_AUTOCLICK) != 0) {
             if (mAutoclickController == null) {
                 mAutoclickController = new AutoclickController(
@@ -481,6 +485,7 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
             if ((mEnabledFeatures & FLAG_SEND_MOTION_EVENTS) != 0) {
                 explorer.setSendMotionEventsEnabled(true);
             }
+            explorer.setServiceDetectsGestures(mServiceDetectsGestures.get(displayId));
             addFirstEventHandler(displayId, explorer);
             mTouchExplorer.put(displayId, explorer);
         }
@@ -565,7 +570,8 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
             mTouchExplorer.remove(displayId);
         }
 
-        final MagnificationGestureHandler handler = mMagnificationGestureHandler.get(displayId);
+        final MagnificationGestureHandler handler =
+                mMagnificationGestureHandler.get(displayId);
         if (handler != null) {
             handler.onDestroy();
             mMagnificationGestureHandler.remove(displayId);
@@ -897,6 +903,7 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
         if (mTouchExplorer.contains(displayId)) {
             mTouchExplorer.get(displayId).setServiceDetectsGestures(mode);
         }
+        mServiceDetectsGestures.put(displayId, mode);
     }
 
     public void requestTouchExploration(int displayId) {
