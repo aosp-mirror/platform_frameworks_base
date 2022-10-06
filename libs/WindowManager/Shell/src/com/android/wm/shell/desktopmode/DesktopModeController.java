@@ -22,6 +22,7 @@ import static android.view.WindowManager.TRANSIT_CHANGE;
 
 import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE;
+import static com.android.wm.shell.sysui.ShellSharedConstants.KEY_EXTRA_SHELL_DESKTOP_MODE;
 
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.WindowConfiguration;
@@ -42,10 +43,12 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.common.ExternalInterfaceBinder;
 import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.annotations.ExternalThread;
 import com.android.wm.shell.common.annotations.ShellMainThread;
+import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 
@@ -58,15 +61,18 @@ import java.util.Comparator;
 public class DesktopModeController implements RemoteCallable<DesktopModeController> {
 
     private final Context mContext;
+    private final ShellController mShellController;
     private final ShellTaskOrganizer mShellTaskOrganizer;
     private final RootTaskDisplayAreaOrganizer mRootTaskDisplayAreaOrganizer;
     private final Transitions mTransitions;
     private final DesktopModeTaskRepository mDesktopModeTaskRepository;
     private final ShellExecutor mMainExecutor;
-    private final DesktopMode mDesktopModeImpl = new DesktopModeImpl();
+    private final DesktopModeImpl mDesktopModeImpl = new DesktopModeImpl();
     private final SettingsObserver mSettingsObserver;
 
-    public DesktopModeController(Context context, ShellInit shellInit,
+    public DesktopModeController(Context context,
+            ShellInit shellInit,
+            ShellController shellController,
             ShellTaskOrganizer shellTaskOrganizer,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
             Transitions transitions,
@@ -74,6 +80,7 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
             @ShellMainThread Handler mainHandler,
             @ShellMainThread ShellExecutor mainExecutor) {
         mContext = context;
+        mShellController = shellController;
         mShellTaskOrganizer = shellTaskOrganizer;
         mRootTaskDisplayAreaOrganizer = rootTaskDisplayAreaOrganizer;
         mTransitions = transitions;
@@ -85,6 +92,8 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
 
     private void onInit() {
         ProtoLog.d(WM_SHELL_DESKTOP_MODE, "Initialize DesktopModeController");
+        mShellController.addExternalInterface(KEY_EXTRA_SHELL_DESKTOP_MODE,
+                this::createExternalInterface, this);
         mSettingsObserver.observe();
         if (DesktopModeStatus.isActive(mContext)) {
             updateDesktopModeActive(true);
@@ -106,6 +115,13 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
      */
     public DesktopMode asDesktopMode() {
         return mDesktopModeImpl;
+    }
+
+    /**
+     * Creates a new instance of the external interface to pass to another process.
+     */
+    private ExternalInterfaceBinder createExternalInterface() {
+        return new IDesktopModeImpl(this);
     }
 
     @VisibleForTesting
@@ -235,24 +251,15 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
      */
     @ExternalThread
     private final class DesktopModeImpl implements DesktopMode {
-
-        private IDesktopModeImpl mIDesktopMode;
-
-        @Override
-        public IDesktopMode createExternalInterface() {
-            if (mIDesktopMode != null) {
-                mIDesktopMode.invalidate();
-            }
-            mIDesktopMode = new IDesktopModeImpl(DesktopModeController.this);
-            return mIDesktopMode;
-        }
+        // Do nothing
     }
 
     /**
      * The interface for calls from outside the host process.
      */
     @BinderThread
-    private static class IDesktopModeImpl extends IDesktopMode.Stub {
+    private static class IDesktopModeImpl extends IDesktopMode.Stub
+            implements ExternalInterfaceBinder {
 
         private DesktopModeController mController;
 
@@ -263,7 +270,8 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
         /**
          * Invalidates this instance, preventing future calls from updating the controller.
          */
-        void invalidate() {
+        @Override
+        public void invalidate() {
             mController = null;
         }
 
