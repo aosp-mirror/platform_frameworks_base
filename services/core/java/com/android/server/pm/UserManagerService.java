@@ -6700,6 +6700,13 @@ public class UserManagerService extends IUserManager.Stub {
         }
 
         @Override
+        public @NonNull int[] getProfileIds(@UserIdInt int userId, boolean enabledOnly) {
+            synchronized (mUsersLock) {
+                return getProfileIdsLU(userId, null /* userType */, enabledOnly).toArray();
+            }
+        }
+
+        @Override
         public boolean isUserUnlockingOrUnlocked(@UserIdInt int userId) {
             int state;
             synchronized (mUserStates) {

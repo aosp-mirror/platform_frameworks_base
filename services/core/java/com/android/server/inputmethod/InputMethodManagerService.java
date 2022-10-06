@@ -1926,7 +1926,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
     void updateCurrentProfileIds() {
         mSettings.setCurrentProfileIds(
-                mUserManager.getProfileIdsWithDisabled(mSettings.getCurrentUserId()));
+                mUserManagerInternal.getProfileIds(mSettings.getCurrentUserId(),
+                        false /* enabledOnly */));
     }
 
     @Override
@@ -3669,7 +3670,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 scheduleSwitchUserTaskLocked(userId, cs.mClient);
                 return InputBindResult.USER_SWITCHING;
             }
-            for (int profileId : mUserManager.getProfileIdsWithDisabled(nextUserId)) {
+            final int[] profileIdsWithDisabled = mUserManagerInternal.getProfileIds(
+                    mSettings.getCurrentUserId(), false /* enabledOnly */);
+            for (int profileId : profileIdsWithDisabled) {
                 if (profileId == userId) {
                     scheduleSwitchUserTaskLocked(userId, cs.mClient);
                     return InputBindResult.USER_SWITCHING;

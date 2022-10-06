@@ -248,6 +248,18 @@ public abstract class UserManagerInternal {
             boolean excludePreCreated);
 
     /**
+     * Returns an array of ids for profiles associated with the specified user including the user
+     * itself.
+     * <p>Note that this includes all profile types (not including Restricted profiles).
+     *
+     * @param userId      id of the user to return profiles for
+     * @param enabledOnly whether return only {@link UserInfo#isEnabled() enabled} profiles
+     * @return A non-empty array of ids of profiles associated with the specified user if the user
+     *         exists. Otherwise, an empty array.
+     */
+    public abstract @NonNull int[] getProfileIds(@UserIdInt int userId, boolean enabledOnly);
+
+    /**
      * Checks if the {@code callingUserId} and {@code targetUserId} are same or in same group
      * and that the {@code callingUserId} is not a profile and {@code targetUserId} is enabled.
      *
