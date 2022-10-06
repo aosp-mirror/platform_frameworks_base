@@ -16,9 +16,8 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
-import androidx.annotation.StringRes
 import com.android.systemui.animation.ActivityLaunchAnimator
-import com.android.systemui.containeddrawable.ContainedDrawable
+import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.keyguard.domain.quickaffordance.KeyguardQuickAffordanceConfig
 import kotlin.reflect.KClass
 
@@ -28,8 +27,7 @@ data class KeyguardQuickAffordanceViewModel(
     val isVisible: Boolean = false,
     /** Whether to animate the transition of the quick affordance from invisible to visible. */
     val animateReveal: Boolean = false,
-    val icon: ContainedDrawable = ContainedDrawable.WithResource(0),
-    @StringRes val contentDescriptionResourceId: Int = 0,
+    val icon: Icon = Icon.Resource(res = 0, contentDescription = null),
     val onClicked: (OnClickedParameters) -> Unit = {},
     val isClickable: Boolean = false,
 ) {

@@ -116,7 +116,6 @@ constructor(
                     isVisible = true,
                     animateReveal = animateReveal,
                     icon = icon,
-                    contentDescriptionResourceId = contentDescriptionResourceId,
                     onClicked = { parameters ->
                         quickAffordanceInteractor.onQuickAffordanceClicked(
                             configKey = parameters.configKey,

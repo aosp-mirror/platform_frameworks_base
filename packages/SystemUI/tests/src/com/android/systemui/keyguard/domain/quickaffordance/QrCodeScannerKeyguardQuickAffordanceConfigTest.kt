@@ -138,7 +138,7 @@ class QrCodeScannerKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
         assertThat(latest).isInstanceOf(KeyguardQuickAffordanceConfig.State.Visible::class.java)
         val visibleState = latest as KeyguardQuickAffordanceConfig.State.Visible
         assertThat(visibleState.icon).isNotNull()
-        assertThat(visibleState.contentDescriptionResourceId).isNotNull()
+        assertThat(visibleState.icon.contentDescription).isNotNull()
     }
 
     companion object {

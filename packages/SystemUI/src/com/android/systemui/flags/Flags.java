@@ -68,6 +68,9 @@ public class Flags {
 
     public static final UnreleasedFlag INSTANT_VOICE_REPLY = new UnreleasedFlag(111, true);
 
+    public static final UnreleasedFlag NOTIFICATION_MEMORY_MONITOR_ENABLED = new UnreleasedFlag(112,
+            false);
+
     // next id: 112
 
     /***************************************/
@@ -169,7 +172,7 @@ public class Flags {
     public static final ResourceBooleanFlag FULL_SCREEN_USER_SWITCHER =
             new ResourceBooleanFlag(506, R.bool.config_enableFullscreenUserSwitcher);
 
-    public static final ReleasedFlag NEW_FOOTER_ACTIONS = new ReleasedFlag(507);
+    public static final UnreleasedFlag NEW_FOOTER_ACTIONS = new UnreleasedFlag(507, true);
 
     /***************************************/
     // 600- status bar

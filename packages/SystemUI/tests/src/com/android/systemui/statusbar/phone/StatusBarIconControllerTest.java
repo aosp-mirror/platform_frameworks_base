@@ -44,6 +44,7 @@ import com.android.systemui.statusbar.phone.StatusBarIconController.IconManager;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.MobileIconState;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.WifiIconState;
 import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags;
+import com.android.systemui.statusbar.pipeline.mobile.ui.MobileUiAdapter;
 import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.WifiViewModel;
 import com.android.systemui.utils.leaks.LeakCheckedTest;
 
@@ -80,6 +81,7 @@ public class StatusBarIconControllerTest extends LeakCheckedTest {
                 StatusBarLocation.HOME,
                 mock(StatusBarPipelineFlags.class),
                 mock(WifiViewModel.class),
+                mock(MobileUiAdapter.class),
                 mMobileContextProvider,
                 mock(DarkIconDispatcher.class));
         testCallOnAdd_forManager(manager);
@@ -123,12 +125,14 @@ public class StatusBarIconControllerTest extends LeakCheckedTest {
                 StatusBarLocation location,
                 StatusBarPipelineFlags statusBarPipelineFlags,
                 WifiViewModel wifiViewModel,
+                MobileUiAdapter mobileUiAdapter,
                 MobileContextProvider contextProvider,
                 DarkIconDispatcher darkIconDispatcher) {
             super(group,
                     location,
                     statusBarPipelineFlags,
                     wifiViewModel,
+                    mobileUiAdapter,
                     contextProvider,
                     darkIconDispatcher);
         }
@@ -169,6 +173,7 @@ public class StatusBarIconControllerTest extends LeakCheckedTest {
                     StatusBarLocation.HOME,
                     mock(StatusBarPipelineFlags.class),
                     mock(WifiViewModel.class),
+                    mock(MobileUiAdapter.class),
                     contextProvider);
         }
 
