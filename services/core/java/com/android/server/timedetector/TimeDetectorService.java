@@ -88,8 +88,10 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub
                     new TimeDetectorInternalImpl(context, handler, timeDetectorStrategy);
             publishLocalService(TimeDetectorInternal.class, internal);
 
+            CallerIdentityInjector callerIdentityInjector = CallerIdentityInjector.REAL;
             TimeDetectorService service = new TimeDetectorService(
-                    context, handler, serviceConfigAccessor, timeDetectorStrategy);
+                    context, handler, callerIdentityInjector, serviceConfigAccessor,
+                    timeDetectorStrategy, NtpTrustedTime.getInstance(context));
 
             // Publish the binder service so it can be accessed from other (appropriately
             // permissioned) processes.
@@ -114,23 +116,15 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub
 
     @VisibleForTesting
     public TimeDetectorService(@NonNull Context context, @NonNull Handler handler,
-            @NonNull ServiceConfigAccessor serviceConfigAccessor,
-            @NonNull TimeDetectorStrategy timeDetectorStrategy) {
-        this(context, handler, serviceConfigAccessor, timeDetectorStrategy,
-                CallerIdentityInjector.REAL, NtpTrustedTime.getInstance(context));
-    }
-
-    @VisibleForTesting
-    public TimeDetectorService(@NonNull Context context, @NonNull Handler handler,
+            @NonNull CallerIdentityInjector callerIdentityInjector,
             @NonNull ServiceConfigAccessor serviceConfigAccessor,
             @NonNull TimeDetectorStrategy timeDetectorStrategy,
-            @NonNull CallerIdentityInjector callerIdentityInjector,
             @NonNull NtpTrustedTime ntpTrustedTime) {
         mContext = Objects.requireNonNull(context);
         mHandler = Objects.requireNonNull(handler);
+        mCallerIdentityInjector = Objects.requireNonNull(callerIdentityInjector);
         mServiceConfigAccessor = Objects.requireNonNull(serviceConfigAccessor);
         mTimeDetectorStrategy = Objects.requireNonNull(timeDetectorStrategy);
-        mCallerIdentityInjector = Objects.requireNonNull(callerIdentityInjector);
         mNtpTrustedTime = Objects.requireNonNull(ntpTrustedTime);
 
         // Wire up a change listener so that ITimeZoneDetectorListeners can be notified when

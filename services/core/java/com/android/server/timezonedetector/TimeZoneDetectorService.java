@@ -102,8 +102,10 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
 
             // Publish the binder service so it can be accessed from other (appropriately
             // permissioned) processes.
-            TimeZoneDetectorService service = TimeZoneDetectorService.create(
-                    context, handler, serviceConfigAccessor, timeZoneDetectorStrategy);
+            CallerIdentityInjector callerIdentityInjector = CallerIdentityInjector.REAL;
+            TimeZoneDetectorService service = new TimeZoneDetectorService(
+                    context, handler, callerIdentityInjector, serviceConfigAccessor,
+                    timeZoneDetectorStrategy);
 
             // Dump the device activity monitor when the service is dumped.
             service.addDumpable(deviceActivityMonitor);
@@ -141,16 +143,6 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
      */
     @GuardedBy("mDumpables")
     private final List<Dumpable> mDumpables = new ArrayList<>();
-
-    private static TimeZoneDetectorService create(
-            @NonNull Context context, @NonNull Handler handler,
-            @NonNull ServiceConfigAccessor serviceConfigAccessor,
-            @NonNull TimeZoneDetectorStrategy timeZoneDetectorStrategy) {
-
-        CallerIdentityInjector callerIdentityInjector = CallerIdentityInjector.REAL;
-        return new TimeZoneDetectorService(context, handler, callerIdentityInjector,
-                serviceConfigAccessor, timeZoneDetectorStrategy);
-    }
 
     @VisibleForTesting
     public TimeZoneDetectorService(@NonNull Context context, @NonNull Handler handler,
