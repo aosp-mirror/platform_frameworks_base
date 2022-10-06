@@ -26,6 +26,7 @@ import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityTaskManager;
 import android.content.Context;
 import android.os.Handler;
+import android.util.SparseArray;
 import android.view.Choreographer;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
@@ -46,7 +47,7 @@ import com.android.wm.shell.transition.Transitions;
  * View model for the window decoration with a caption and shadows. Works with
  * {@link CaptionWindowDecoration}.
  */
-public class CaptionWindowDecorViewModel implements WindowDecorViewModel<CaptionWindowDecoration> {
+public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
     private final ActivityTaskManager mActivityTaskManager;
     private final ShellTaskOrganizer mTaskOrganizer;
     private final Context mContext;
@@ -56,6 +57,8 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel<Caption
     private final SyncTransactionQueue mSyncQueue;
     private FreeformTaskTransitionStarter mTransitionStarter;
     private DesktopModeController mDesktopModeController;
+
+    private final SparseArray<CaptionWindowDecoration> mWindowDecorByTaskId = new SparseArray<>();
 
     public CaptionWindowDecorViewModel(
             Context context,
@@ -81,12 +84,12 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel<Caption
     }
 
     @Override
-    public CaptionWindowDecoration createWindowDecoration(
+    public boolean createWindowDecoration(
             ActivityManager.RunningTaskInfo taskInfo,
             SurfaceControl taskSurface,
             SurfaceControl.Transaction startT,
             SurfaceControl.Transaction finishT) {
-        if (!shouldShowWindowDecor(taskInfo)) return null;
+        if (!shouldShowWindowDecor(taskInfo)) return false;
         final CaptionWindowDecoration windowDecoration = new CaptionWindowDecoration(
                 mContext,
                 mDisplayController,
@@ -96,30 +99,24 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel<Caption
                 mMainHandler,
                 mMainChoreographer,
                 mSyncQueue);
+        mWindowDecorByTaskId.put(taskInfo.taskId, windowDecoration);
+
         TaskPositioner taskPositioner = new TaskPositioner(mTaskOrganizer, windowDecoration);
         CaptionTouchEventListener touchEventListener =
                 new CaptionTouchEventListener(taskInfo, taskPositioner);
         windowDecoration.setCaptionListeners(touchEventListener, touchEventListener);
         windowDecoration.setDragResizeCallback(taskPositioner);
-        setupWindowDecorationForTransition(taskInfo, startT, finishT, windowDecoration);
+        setupWindowDecorationForTransition(taskInfo, startT, finishT);
         setupCaptionColor(taskInfo, windowDecoration);
-        return windowDecoration;
+        return true;
     }
 
     @Override
-    public CaptionWindowDecoration adoptWindowDecoration(AutoCloseable windowDecor) {
-        if (!(windowDecor instanceof CaptionWindowDecoration)) return null;
-        final CaptionWindowDecoration captionWindowDecor = (CaptionWindowDecoration) windowDecor;
-        if (!shouldShowWindowDecor(captionWindowDecor.mTaskInfo)) {
-            return null;
-        }
-        return captionWindowDecor;
-    }
+    public void onTaskInfoChanged(RunningTaskInfo taskInfo) {
+        final CaptionWindowDecoration decoration = mWindowDecorByTaskId.get(taskInfo.taskId);
+        if (decoration == null) return;
 
-    @Override
-    public void onTaskInfoChanged(RunningTaskInfo taskInfo, CaptionWindowDecoration decoration) {
         decoration.relayout(taskInfo);
-
         setupCaptionColor(taskInfo, decoration);
     }
 
@@ -132,9 +129,20 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel<Caption
     public void setupWindowDecorationForTransition(
             RunningTaskInfo taskInfo,
             SurfaceControl.Transaction startT,
-            SurfaceControl.Transaction finishT,
-            CaptionWindowDecoration decoration) {
+            SurfaceControl.Transaction finishT) {
+        final CaptionWindowDecoration decoration = mWindowDecorByTaskId.get(taskInfo.taskId);
+        if (decoration == null) return;
+
         decoration.relayout(taskInfo, startT, finishT);
+    }
+
+    @Override
+    public void destroyWindowDecoration(RunningTaskInfo taskInfo) {
+        final CaptionWindowDecoration decoration =
+                mWindowDecorByTaskId.removeReturnOld(taskInfo.taskId);
+        if (decoration == null) return;
+
+        decoration.close();
     }
 
     private class CaptionTouchEventListener implements
