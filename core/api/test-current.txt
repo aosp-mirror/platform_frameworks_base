@@ -1352,6 +1352,7 @@ package android.inputmethodservice {
   }
 
   @UiContext public class InputMethodService extends android.inputmethodservice.AbstractInputMethodService {
+    field public static final long DISALLOW_INPUT_METHOD_INTERFACE_OVERRIDE = 148086656L; // 0x8d39f80L
     field public static final long FINISH_INPUT_NO_FALLBACK_CONNECTION = 156215187L; // 0x94fa793L
   }
 
