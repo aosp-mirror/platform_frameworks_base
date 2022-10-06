@@ -42,14 +42,18 @@ class TaskPositioner implements DragResizeCallback {
     private final Rect mResizeTaskBounds = new Rect();
 
     private int mCtrlType;
+    private DragStartListener mDragStartListener;
 
-    TaskPositioner(ShellTaskOrganizer taskOrganizer, WindowDecoration windowDecoration) {
+    TaskPositioner(ShellTaskOrganizer taskOrganizer, WindowDecoration windowDecoration,
+            DragStartListener dragStartListener) {
         mTaskOrganizer = taskOrganizer;
         mWindowDecoration = windowDecoration;
+        mDragStartListener = dragStartListener;
     }
 
     @Override
     public void onDragResizeStart(int ctrlType, float x, float y) {
+        mDragStartListener.onDragStart(mWindowDecoration.mTaskInfo.taskId);
         mCtrlType = ctrlType;
 
         mTaskBoundsAtDragStart.set(
@@ -96,5 +100,13 @@ class TaskPositioner implements DragResizeCallback {
             wct.setBounds(mWindowDecoration.mTaskInfo.token, mResizeTaskBounds);
             mTaskOrganizer.applyTransaction(wct);
         }
+    }
+
+    interface DragStartListener {
+        /**
+         * Inform the implementing class that a drag resize has started
+         * @param taskId id of this positioner's {@link WindowDecoration}
+         */
+        void onDragStart(int taskId);
     }
 }
