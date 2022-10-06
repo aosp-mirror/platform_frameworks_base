@@ -1399,7 +1399,7 @@ final class InstallPackageHelper {
             doRenameLI(request, parsedPackage);
 
             try {
-                setUpFsVerityIfPossible(parsedPackage);
+                setUpFsVerity(parsedPackage);
             } catch (Installer.InstallerException | IOException | DigestException
                     | NoSuchAlgorithmException e) {
                 throw new PrepareFailure(INSTALL_FAILED_INTERNAL_ERROR,
@@ -1796,13 +1796,10 @@ final class InstallPackageHelper {
     }
 
     /**
-     * Set up fs-verity for the given package if possible.  This requires a feature flag of system
-     * property to be enabled only if the kernel supports fs-verity.
-     *
-     * <p>When the feature flag is set to legacy mode, only APK is supported (with some experimental
-     * kernel patches). In normal mode, all file format can be supported.
+     * Set up fs-verity for the given package. For older devices that do not support fs-verity,
+     * this is a no-op.
      */
-    private void setUpFsVerityIfPossible(AndroidPackage pkg) throws Installer.InstallerException,
+    private void setUpFsVerity(AndroidPackage pkg) throws Installer.InstallerException,
             PrepareFailure, IOException, DigestException, NoSuchAlgorithmException {
         if (!PackageManagerServiceUtils.isApkVerityEnabled()) {
             return;
@@ -1837,17 +1834,22 @@ final class InstallPackageHelper {
         }
 
         for (Map.Entry<String, String> entry : fsverityCandidates.entrySet()) {
-            final String filePath = entry.getKey();
-            final String signaturePath = entry.getValue();
-
-            // fs-verity is optional for now.  Only set up if signature is provided.
-            if (new File(signaturePath).exists() && !VerityUtils.hasFsverity(filePath)) {
-                try {
-                    VerityUtils.setUpFsverity(filePath, signaturePath);
-                } catch (IOException e) {
-                    throw new PrepareFailure(PackageManager.INSTALL_FAILED_BAD_SIGNATURE,
-                            "Failed to enable fs-verity: " + e);
+            try {
+                final String filePath = entry.getKey();
+                if (VerityUtils.hasFsverity(filePath)) {
+                    continue;
                 }
+
+                // Set up fs-verity with optional signature.
+                final String signaturePath = entry.getValue();
+                String optionalSignaturePath = null;
+                if (new File(signaturePath).exists()) {
+                    optionalSignaturePath = signaturePath;
+                }
+                VerityUtils.setUpFsverity(filePath, optionalSignaturePath);
+            } catch (IOException e) {
+                throw new PrepareFailure(PackageManager.INSTALL_FAILED_BAD_SIGNATURE,
+                        "Failed to enable fs-verity: " + e);
             }
         }
     }
