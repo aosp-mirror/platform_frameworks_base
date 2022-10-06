@@ -25,7 +25,6 @@ import com.android.systemui.common.shared.model.Icon
  * power buttons.
  */
 data class FooterActionsButtonViewModel(
-    val id: Int?,
     val icon: Icon,
     val iconTint: Int?,
     @DrawableRes val background: Int,
