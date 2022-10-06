@@ -139,7 +139,6 @@ import com.android.internal.util.IntPair;
 import com.android.server.AccessibilityManagerInternal;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
-import com.android.server.accessibility.cursor.SoftwareCursorManager;
 import com.android.server.accessibility.magnification.MagnificationController;
 import com.android.server.accessibility.magnification.MagnificationProcessor;
 import com.android.server.accessibility.magnification.MagnificationScaleProvider;
@@ -243,8 +242,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     private final MagnificationController mMagnificationController;
     private final MagnificationProcessor mMagnificationProcessor;
-
-    private final SoftwareCursorManager mSoftwareCursorManager;
 
     private final MainHandler mMainHandler;
 
@@ -407,7 +404,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         mMagnificationController = magnificationController;
         mMagnificationProcessor = new MagnificationProcessor(mMagnificationController);
         mCaptioningManagerImpl = new CaptioningManagerImpl(mContext);
-        mSoftwareCursorManager = new SoftwareCursorManager();
         if (inputFilter != null) {
             mInputFilter = inputFilter;
             mHasInputFilter = true;
@@ -441,7 +437,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 new MagnificationScaleProvider(mContext));
         mMagnificationProcessor = new MagnificationProcessor(mMagnificationController);
         mCaptioningManagerImpl = new CaptioningManagerImpl(mContext);
-        mSoftwareCursorManager = new SoftwareCursorManager();
         init();
     }
 
@@ -2286,9 +2281,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             if (userState.isPerformGesturesEnabledLocked()) {
                 flags |= AccessibilityInputFilter.FLAG_FEATURE_INJECT_MOTION_EVENTS;
             }
-            if (userState.isSoftwareCursorEnabledLocked()) {
-                flags |= AccessibilityInputFilter.FLAG_FEATURE_SOFTWARE_CURSOR;
-            }
             if (flags != 0) {
                 if (!mHasInputFilter) {
                     mHasInputFilter = true;
@@ -3488,15 +3480,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      */
     MagnificationController getMagnificationController() {
         return mMagnificationController;
-    }
-
-    /**
-     * Getter of {@link SoftwareCursorManager}.
-     *
-     * @return SoftwareCursorManager
-     */
-    SoftwareCursorManager getSoftwareCursorManager() {
-        return mSoftwareCursorManager;
     }
 
     @Override
