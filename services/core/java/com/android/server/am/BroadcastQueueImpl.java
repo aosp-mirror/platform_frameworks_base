@@ -69,6 +69,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.text.TextUtils;
 import android.util.EventLog;
+import android.util.IndentingPrintWriter;
 import android.util.Slog;
 import android.util.SparseIntArray;
 import android.util.proto.ProtoOutputStream;
@@ -77,6 +78,8 @@ import com.android.internal.os.TimeoutRecord;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
 import com.android.server.pm.UserManagerInternal;
+
+import dalvik.annotation.optimization.NeverCompile;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -163,7 +166,7 @@ public class BroadcastQueueImpl extends BroadcastQueue {
 
     private final class BroadcastHandler extends Handler {
         public BroadcastHandler(Looper looper) {
-            super(looper, null, true);
+            super(looper, null);
         }
 
         @Override
@@ -188,7 +191,7 @@ public class BroadcastQueueImpl extends BroadcastQueue {
             String name, BroadcastConstants constants, boolean allowDelayBehindServices,
             int schedGroup) {
         this(service, handler, name, constants, new BroadcastSkipPolicy(service),
-                new BroadcastHistory(), allowDelayBehindServices, schedGroup);
+                new BroadcastHistory(constants), allowDelayBehindServices, schedGroup);
     }
 
     BroadcastQueueImpl(ActivityManagerService service, Handler handler,
@@ -1753,19 +1756,20 @@ public class BroadcastQueueImpl extends BroadcastQueue {
         // If nothing active, we're beyond barrier
         if (isIdleLocked()) return true;
 
-        // Check if active broadcast is beyond barrier
-        final BroadcastRecord active = getActiveBroadcastLocked();
-        if (active != null && active.enqueueTime > barrierTime) {
-            return true;
+        // Check if parallel broadcasts are beyond barrier
+        for (int i = 0; i < mParallelBroadcasts.size(); i++) {
+            if (mParallelBroadcasts.get(i).enqueueTime <= barrierTime) {
+                return false;
+            }
         }
 
         // Check if pending broadcast is beyond barrier
         final BroadcastRecord pending = getPendingBroadcastLocked();
-        if (pending != null && pending.enqueueTime > barrierTime) {
-            return true;
+        if ((pending != null) && pending.enqueueTime <= barrierTime) {
+            return false;
         }
 
-        return false;
+        return mDispatcher.isBeyondBarrier(barrierTime);
     }
 
     public void waitForIdle(PrintWriter pw) {
@@ -1826,6 +1830,7 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                 + mDispatcher.describeStateLocked();
     }
 
+    @NeverCompile
     public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         long token = proto.start(fieldId);
         proto.write(BroadcastQueueProto.QUEUE_NAME, mQueueName);
@@ -1842,8 +1847,10 @@ public class BroadcastQueueImpl extends BroadcastQueue {
         proto.end(token);
     }
 
+    @NeverCompile
     public boolean dumpLocked(FileDescriptor fd, PrintWriter pw, String[] args,
-            int opti, boolean dumpAll, String dumpPackage, boolean needSep) {
+            int opti, boolean dumpConstants, boolean dumpHistory, boolean dumpAll,
+            String dumpPackage, boolean needSep) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
         if (!mParallelBroadcasts.isEmpty() || !mDispatcher.isEmpty()
                 || mPendingBroadcast != null) {
@@ -1879,8 +1886,12 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                 needSep = true;
             }
         }
-        mConstants.dump(pw);
-        needSep = mHistory.dumpLocked(pw, dumpPackage, mQueueName, sdf, dumpAll, needSep);
+        if (dumpConstants) {
+            mConstants.dump(new IndentingPrintWriter(pw));
+        }
+        if (dumpHistory) {
+            needSep = mHistory.dumpLocked(pw, dumpPackage, mQueueName, sdf, dumpAll, needSep);
+        }
         return needSep;
     }
 }

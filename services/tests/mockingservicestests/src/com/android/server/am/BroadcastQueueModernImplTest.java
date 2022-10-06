@@ -28,6 +28,7 @@ import static com.android.server.am.BroadcastQueueTest.makeManifestReceiver;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
@@ -60,6 +61,7 @@ public class BroadcastQueueModernImplTest {
     private static final int TEST_UID = android.os.Process.FIRST_APPLICATION_UID;
 
     @Mock ActivityManagerService mAms;
+    @Mock ProcessRecord mProcess;
 
     @Mock BroadcastProcessQueue mQueue1;
     @Mock BroadcastProcessQueue mQueue2;
@@ -137,7 +139,7 @@ public class BroadcastQueueModernImplTest {
 
     private BroadcastRecord makeBroadcastRecord(Intent intent, BroadcastOptions options,
             List receivers, boolean ordered) {
-        return new BroadcastRecord(mImpl, intent, null, PACKAGE_RED, null, 21, 42, false, null,
+        return new BroadcastRecord(mImpl, intent, mProcess, PACKAGE_RED, null, 21, 42, false, null,
                 null, null, null, AppOpsManager.OP_NONE, options, receivers, null,
                 Activity.RESULT_OK, null, null, ordered, false, false, UserHandle.USER_SYSTEM,
                 false, null, false, null);
@@ -250,10 +252,11 @@ public class BroadcastQueueModernImplTest {
      */
     @Test
     public void testRunnableAt_Empty() {
-        BroadcastProcessQueue queue = new BroadcastProcessQueue(mConstants,
+        final BroadcastProcessQueue queue = new BroadcastProcessQueue(mConstants,
                 PACKAGE_GREEN, getUidForPackage(PACKAGE_GREEN));
         assertFalse(queue.isRunnable());
         assertEquals(Long.MAX_VALUE, queue.getRunnableAt());
+        assertEquals(ProcessList.SCHED_GROUP_UNDEFINED, queue.getPreferredSchedulingGroupLocked());
     }
 
     /**
@@ -262,18 +265,19 @@ public class BroadcastQueueModernImplTest {
      */
     @Test
     public void testRunnableAt_Normal() {
-        BroadcastProcessQueue queue = new BroadcastProcessQueue(mConstants,
+        final BroadcastProcessQueue queue = new BroadcastProcessQueue(mConstants,
                 PACKAGE_GREEN, getUidForPackage(PACKAGE_GREEN));
 
         final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         final BroadcastRecord airplaneRecord = makeBroadcastRecord(airplane);
-        queue.enqueueBroadcast(airplaneRecord, 0);
+        queue.enqueueOrReplaceBroadcast(airplaneRecord, 0, 0);
 
         queue.setProcessCached(false);
         final long notCachedRunnableAt = queue.getRunnableAt();
         queue.setProcessCached(true);
         final long cachedRunnableAt = queue.getRunnableAt();
         assertTrue(cachedRunnableAt > notCachedRunnableAt);
+        assertEquals(ProcessList.SCHED_GROUP_BACKGROUND, queue.getPreferredSchedulingGroupLocked());
     }
 
     /**
@@ -282,21 +286,71 @@ public class BroadcastQueueModernImplTest {
      */
     @Test
     public void testRunnableAt_Foreground() {
-        BroadcastProcessQueue queue = new BroadcastProcessQueue(mConstants,
+        final BroadcastProcessQueue queue = new BroadcastProcessQueue(mConstants,
                 PACKAGE_GREEN, getUidForPackage(PACKAGE_GREEN));
 
         final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         airplane.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         final BroadcastRecord airplaneRecord = makeBroadcastRecord(airplane);
-        queue.enqueueBroadcast(airplaneRecord, 0);
+        queue.enqueueOrReplaceBroadcast(airplaneRecord, 0, 0);
 
         queue.setProcessCached(false);
         assertTrue(queue.isRunnable());
         assertEquals(airplaneRecord.enqueueTime, queue.getRunnableAt());
+        assertEquals(ProcessList.SCHED_GROUP_DEFAULT, queue.getPreferredSchedulingGroupLocked());
 
         queue.setProcessCached(true);
         assertTrue(queue.isRunnable());
         assertEquals(airplaneRecord.enqueueTime, queue.getRunnableAt());
+        assertEquals(ProcessList.SCHED_GROUP_DEFAULT, queue.getPreferredSchedulingGroupLocked());
+    }
+
+    /**
+     * Queue with ordered broadcast is runnable only once we've made enough
+     * progress on earlier blocking items.
+     */
+    @Test
+    public void testRunnableAt_Ordered() {
+        final BroadcastProcessQueue queue = new BroadcastProcessQueue(mConstants,
+                PACKAGE_GREEN, getUidForPackage(PACKAGE_GREEN));
+
+        final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        final BroadcastRecord airplaneRecord = makeBroadcastRecord(airplane, null,
+                List.of(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN),
+                        makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN)), true);
+        queue.enqueueOrReplaceBroadcast(airplaneRecord, 1, 1);
+
+        assertFalse(queue.isRunnable());
+        assertEquals(BroadcastProcessQueue.REASON_BLOCKED, queue.getRunnableAtReason());
+
+        // Bumping past barrier makes us now runnable
+        airplaneRecord.terminalCount++;
+        queue.invalidateRunnableAt();
+        assertTrue(queue.isRunnable());
+        assertNotEquals(BroadcastProcessQueue.REASON_BLOCKED, queue.getRunnableAtReason());
+    }
+
+    /**
+     * Queue with too many pending broadcasts is runnable.
+     */
+    @Test
+    public void testRunnableAt_Huge() {
+        BroadcastProcessQueue queue = new BroadcastProcessQueue(mConstants,
+                PACKAGE_GREEN, getUidForPackage(PACKAGE_GREEN));
+
+        final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        final BroadcastRecord airplaneRecord = makeBroadcastRecord(airplane);
+        queue.enqueueOrReplaceBroadcast(airplaneRecord, 0, 0);
+
+        mConstants.MAX_PENDING_BROADCASTS = 128;
+        queue.invalidateRunnableAt();
+        assertTrue(queue.getRunnableAt() > airplaneRecord.enqueueTime);
+        assertEquals(BroadcastProcessQueue.REASON_NORMAL, queue.getRunnableAtReason());
+
+        mConstants.MAX_PENDING_BROADCASTS = 1;
+        queue.invalidateRunnableAt();
+        assertTrue(queue.getRunnableAt() == airplaneRecord.enqueueTime);
+        assertEquals(BroadcastProcessQueue.REASON_MAX_PENDING, queue.getRunnableAtReason());
     }
 
     /**
@@ -320,6 +374,9 @@ public class BroadcastQueueModernImplTest {
         mImpl.enqueueBroadcastLocked(makeBroadcastRecord(screenOff, optionsOff));
         mImpl.enqueueBroadcastLocked(makeBroadcastRecord(screenOn, optionsOn));
         mImpl.enqueueBroadcastLocked(makeBroadcastRecord(screenOff, optionsOff));
+
+        // While we're here, give our health check some test coverage
+        mImpl.checkHealthLocked();
 
         // Marching through the queue we should only have one SCREEN_OFF
         // broadcast, since that's the last state we dispatched

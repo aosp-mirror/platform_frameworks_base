@@ -24,9 +24,11 @@ import static android.content.Intent.ACTION_TIME_CHANGED;
 import static com.android.server.am.BroadcastConstants.DEFER_BOOT_COMPLETED_BROADCAST_ALL;
 import static com.android.server.am.BroadcastConstants.DEFER_BOOT_COMPLETED_BROADCAST_BACKGROUND_RESTRICTED_ONLY;
 import static com.android.server.am.BroadcastConstants.DEFER_BOOT_COMPLETED_BROADCAST_NONE;
-import static com.android.server.am.BroadcastDispatcher.DeferredBootCompletedBroadcastPerUser;
+import static com.android.server.am.BroadcastRecord.isPrioritized;
+import static com.android.server.am.BroadcastRecord.isReceiverEquals;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
@@ -37,21 +39,26 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ResolveInfo;
+import android.os.Bundle;
 import android.os.Process;
 import android.os.UserHandle;
-import android.platform.test.annotations.Presubmit;
 import android.util.SparseArray;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.server.am.BroadcastDispatcher.DeferredBootCompletedBroadcastPerUser;
+
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.BiFunction;
 
 /**
  * Test class for {@link BroadcastRecord}.
@@ -60,7 +67,7 @@ import java.util.List;
  *  atest FrameworksServicesTests:BroadcastRecordTest
  */
 @SmallTest
-@Presubmit
+@RunWith(MockitoJUnitRunner.class)
 public class BroadcastRecordTest {
 
     private static final int USER0 = UserHandle.USER_SYSTEM;
@@ -73,12 +80,98 @@ public class BroadcastRecordTest {
     private static final String[] PACKAGE_LIST = new String[] {PACKAGE1, PACKAGE2, PACKAGE3,
             PACKAGE4};
 
-    @Mock
-    ActivityManagerInternal mActivityManagerInternal;
+    @Mock ActivityManagerInternal mActivityManagerInternal;
+    @Mock BroadcastQueue mQueue;
+    @Mock ProcessRecord mProcess;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+    }
+
+    @Test
+    public void testIsPrioritized_Empty() {
+        assertFalse(isPrioritized(List.of()));
+    }
+
+    @Test
+    public void testIsPrioritized_Single() {
+        assertFalse(isPrioritized(List.of(createResolveInfo(PACKAGE1, getAppId(1), 0))));
+        assertFalse(isPrioritized(List.of(createResolveInfo(PACKAGE1, getAppId(1), -10))));
+        assertFalse(isPrioritized(List.of(createResolveInfo(PACKAGE1, getAppId(1), 10))));
+    }
+
+    @Test
+    public void testIsPrioritized_No() {
+        assertFalse(isPrioritized(List.of(
+                createResolveInfo(PACKAGE1, getAppId(1), 0),
+                createResolveInfo(PACKAGE2, getAppId(2), 0),
+                createResolveInfo(PACKAGE3, getAppId(3), 0))));
+        assertFalse(isPrioritized(List.of(
+                createResolveInfo(PACKAGE1, getAppId(1), 10),
+                createResolveInfo(PACKAGE2, getAppId(2), 10),
+                createResolveInfo(PACKAGE3, getAppId(3), 10))));
+    }
+
+    @Test
+    public void testIsPrioritized_Yes() {
+        assertTrue(isPrioritized(List.of(
+                createResolveInfo(PACKAGE1, getAppId(1), -10),
+                createResolveInfo(PACKAGE2, getAppId(2), 0),
+                createResolveInfo(PACKAGE3, getAppId(3), 10))));
+        assertTrue(isPrioritized(List.of(
+                createResolveInfo(PACKAGE1, getAppId(1), 0),
+                createResolveInfo(PACKAGE2, getAppId(2), 0),
+                createResolveInfo(PACKAGE3, getAppId(3), 10))));
+    }
+
+    @Test
+    public void testGetReceiverIntent_Simple() {
+        final Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        final BroadcastRecord r = createBroadcastRecord(
+                List.of(createResolveInfo(PACKAGE1, getAppId(1))), UserHandle.USER_ALL, intent);
+        final Intent actual = r.getReceiverIntent(r.receivers.get(0));
+        assertEquals(PACKAGE1, actual.getComponent().getPackageName());
+        assertNull(r.intent.getComponent());
+    }
+
+    @Test
+    public void testGetReceiverIntent_Filtered_Partial() {
+        final Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        intent.putExtra(Intent.EXTRA_INDEX, 42);
+        final BroadcastRecord r = createBroadcastRecord(
+                List.of(createResolveInfo(PACKAGE1, getAppId(1))), UserHandle.USER_ALL, intent,
+                (uid, extras) -> {
+                    return Bundle.EMPTY;
+                });
+        final Intent actual = r.getReceiverIntent(r.receivers.get(0));
+        assertEquals(PACKAGE1, actual.getComponent().getPackageName());
+        assertEquals(-1, actual.getIntExtra(Intent.EXTRA_INDEX, -1));
+        assertNull(r.intent.getComponent());
+        assertEquals(42, r.intent.getIntExtra(Intent.EXTRA_INDEX, -1));
+    }
+
+    @Test
+    public void testGetReceiverIntent_Filtered_Complete() {
+        final Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        intent.putExtra(Intent.EXTRA_INDEX, 42);
+        final BroadcastRecord r = createBroadcastRecord(
+                List.of(createResolveInfo(PACKAGE1, getAppId(1))), UserHandle.USER_ALL, intent,
+                (uid, extras) -> {
+                    return null;
+                });
+        final Intent actual = r.getReceiverIntent(r.receivers.get(0));
+        assertNull(actual);
+        assertNull(r.intent.getComponent());
+        assertEquals(42, r.intent.getIntExtra(Intent.EXTRA_INDEX, -1));
+    }
+
+    @Test
+    public void testIsReceiverEquals() {
+        final ResolveInfo info = createResolveInfo(PACKAGE1, getAppId(1));
+        assertTrue(isReceiverEquals(info, info));
+        assertTrue(isReceiverEquals(info, createResolveInfo(PACKAGE1, getAppId(1))));
+        assertFalse(isReceiverEquals(info, createResolveInfo(PACKAGE2, getAppId(2))));
     }
 
     @Test
@@ -360,13 +453,20 @@ public class BroadcastRecordTest {
     }
 
     private static ResolveInfo createResolveInfo(String packageName, int uid) {
+        return createResolveInfo(packageName, uid, 0);
+    }
+
+    private static ResolveInfo createResolveInfo(String packageName, int uid, int priority) {
         final ResolveInfo resolveInfo = new ResolveInfo();
         final ActivityInfo activityInfo = new ActivityInfo();
         final ApplicationInfo appInfo = new ApplicationInfo();
         appInfo.packageName = packageName;
         appInfo.uid = uid;
         activityInfo.applicationInfo = appInfo;
+        activityInfo.packageName = packageName;
+        activityInfo.name = packageName + ".MyReceiver";
         resolveInfo.activityInfo = activityInfo;
+        resolveInfo.priority = priority;
         return resolveInfo;
     }
 
@@ -402,13 +502,18 @@ public class BroadcastRecordTest {
         return excludedList;
     }
 
-    private static BroadcastRecord createBroadcastRecord(List<ResolveInfo> receivers, int userId,
+    private BroadcastRecord createBroadcastRecord(List<ResolveInfo> receivers, int userId,
             Intent intent) {
+        return createBroadcastRecord(receivers, userId, intent, null);
+    }
+
+    private BroadcastRecord createBroadcastRecord(List<ResolveInfo> receivers, int userId,
+            Intent intent, BiFunction<Integer, Bundle, Bundle> filterExtrasForReceiver) {
         return new BroadcastRecord(
-                null /* queue */,
+                mQueue /* queue */,
                 intent,
-                null /* callerApp */,
-                null  /* callerPackage */,
+                mProcess /* callerApp */,
+                PACKAGE1 /* callerPackage */,
                 null /* callerFeatureId */,
                 0 /* callingPid */,
                 0 /* callingUid */,
@@ -431,7 +536,7 @@ public class BroadcastRecordTest {
                 false /* allowBackgroundActivityStarts */,
                 null /* activityStartsToken */,
                 false /* timeoutExempt */,
-                null /* filterExtrasForReceiver */);
+                filterExtrasForReceiver);
     }
 
     private static int getAppId(int i) {

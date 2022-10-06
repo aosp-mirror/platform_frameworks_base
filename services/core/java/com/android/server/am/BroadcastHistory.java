@@ -16,11 +16,13 @@
 
 package com.android.server.am;
 
-import android.app.ActivityManager;
+import android.annotation.NonNull;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
+
+import dalvik.annotation.optimization.NeverCompile;
 
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
@@ -31,22 +33,32 @@ import java.util.Date;
  * for debugging purposes. Automatically trims itself over time.
  */
 public class BroadcastHistory {
-    static final int MAX_BROADCAST_HISTORY = ActivityManager.isLowRamDeviceStatic() ? 10 : 50;
-    static final int MAX_BROADCAST_SUMMARY_HISTORY
-            = ActivityManager.isLowRamDeviceStatic() ? 25 : 300;
+    private final int MAX_BROADCAST_HISTORY;
+    private final int MAX_BROADCAST_SUMMARY_HISTORY;
+
+    public BroadcastHistory(@NonNull BroadcastConstants constants) {
+        MAX_BROADCAST_HISTORY = constants.MAX_HISTORY_COMPLETE_SIZE;
+        MAX_BROADCAST_SUMMARY_HISTORY = constants.MAX_HISTORY_SUMMARY_SIZE;
+
+        mBroadcastHistory = new BroadcastRecord[MAX_BROADCAST_HISTORY];
+        mBroadcastSummaryHistory = new Intent[MAX_BROADCAST_SUMMARY_HISTORY];
+        mSummaryHistoryEnqueueTime = new long[MAX_BROADCAST_SUMMARY_HISTORY];
+        mSummaryHistoryDispatchTime = new long[MAX_BROADCAST_SUMMARY_HISTORY];
+        mSummaryHistoryFinishTime = new long[MAX_BROADCAST_SUMMARY_HISTORY];
+    }
 
     /**
      * Historical data of past broadcasts, for debugging.  This is a ring buffer
      * whose last element is at mHistoryNext.
      */
-    final BroadcastRecord[] mBroadcastHistory = new BroadcastRecord[MAX_BROADCAST_HISTORY];
+    final BroadcastRecord[] mBroadcastHistory;
     int mHistoryNext = 0;
 
     /**
      * Summary of historical data of past broadcasts, for debugging.  This is a
      * ring buffer whose last element is at mSummaryHistoryNext.
      */
-    final Intent[] mBroadcastSummaryHistory = new Intent[MAX_BROADCAST_SUMMARY_HISTORY];
+    final Intent[] mBroadcastSummaryHistory;
     int mSummaryHistoryNext = 0;
 
     /**
@@ -54,9 +66,9 @@ public class BroadcastHistory {
      * buffer, also tracked via the mSummaryHistoryNext index.  These are all in wall
      * clock time, not elapsed.
      */
-    final long[] mSummaryHistoryEnqueueTime = new long[MAX_BROADCAST_SUMMARY_HISTORY];
-    final long[] mSummaryHistoryDispatchTime = new long[MAX_BROADCAST_SUMMARY_HISTORY];
-    final long[] mSummaryHistoryFinishTime = new long[MAX_BROADCAST_SUMMARY_HISTORY];
+    final long[] mSummaryHistoryEnqueueTime;
+    final long[] mSummaryHistoryDispatchTime;
+    final long[] mSummaryHistoryFinishTime;
 
     public void addBroadcastToHistoryLocked(BroadcastRecord original) {
         // Note sometimes (only for sticky broadcasts?) we reuse BroadcastRecords,
@@ -80,6 +92,7 @@ public class BroadcastHistory {
         else return x;
     }
 
+    @NeverCompile
     public void dumpDebug(ProtoOutputStream proto) {
         int lastIndex = mHistoryNext;
         int ringIndex = lastIndex;
@@ -113,6 +126,7 @@ public class BroadcastHistory {
         } while (ringIndex != lastIndex);
     }
 
+    @NeverCompile
     public boolean dumpLocked(PrintWriter pw, String dumpPackage, String queueName,
             SimpleDateFormat sdf, boolean dumpAll, boolean needSep) {
         int i;

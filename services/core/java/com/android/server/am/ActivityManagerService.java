@@ -2441,8 +2441,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         mEnableOffloadQueue = SystemProperties.getBoolean(
                 "persist.device_config.activity_manager_native_boot.offload_queue_enabled", true);
-        mEnableModernQueue = SystemProperties.getBoolean(
-                "persist.device_config.activity_manager_native_boot.modern_queue_enabled", false);
+        mEnableModernQueue = foreConstants.MODERN_QUEUE_ENABLED;
 
         if (mEnableModernQueue) {
             mBroadcastQueues = new BroadcastQueue[1];
@@ -10697,8 +10696,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    @NeverCompile
     void dumpBroadcastsLocked(FileDescriptor fd, PrintWriter pw, String[] args,
             int opti, boolean dumpAll, String dumpPackage) {
+        boolean dumpConstants = true;
+        boolean dumpHistory = true;
         boolean needSep = false;
         boolean onlyHistory = false;
         boolean printedAnything = false;
@@ -10783,7 +10785,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         if (!onlyReceivers) {
             for (BroadcastQueue q : mBroadcastQueues) {
-                needSep = q.dumpLocked(fd, pw, args, opti, dumpAll, dumpPackage, needSep);
+                needSep = q.dumpLocked(fd, pw, args, opti,
+                        dumpConstants, dumpHistory, dumpAll, dumpPackage, needSep);
                 printedAnything |= needSep;
             }
         }
@@ -10841,6 +10844,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    @NeverCompile
     void dumpBroadcastStatsLocked(FileDescriptor fd, PrintWriter pw, String[] args,
             int opti, boolean dumpAll, String dumpPackage) {
         if (mCurBroadcastStats == null) {
@@ -10874,6 +10878,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    @NeverCompile
     void dumpBroadcastStatsCheckinLocked(FileDescriptor fd, PrintWriter pw, String[] args,
             int opti, boolean fullCheckin, String dumpPackage) {
         if (mCurBroadcastStats == null) {

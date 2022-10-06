@@ -18,16 +18,21 @@ package com.android.server.am;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UptimeMillisLong;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.DropBoxManager;
 import android.os.Handler;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.server.DropBoxManagerInternal;
+import com.android.server.LocalServices;
 
 import java.io.FileDescriptor;
+import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.util.Objects;
 import java.util.Set;
@@ -37,6 +42,7 @@ import java.util.Set;
  */
 public abstract class BroadcastQueue {
     public static final String TAG = "BroadcastQueue";
+    public static final String TAG_DUMP = "broadcast_queue_dump";
 
     final @NonNull ActivityManagerService mService;
     final @NonNull Handler mHandler;
@@ -54,18 +60,20 @@ public abstract class BroadcastQueue {
         mHistory = Objects.requireNonNull(history);
     }
 
-    static void checkState(boolean state, String msg) {
-        if (!state) {
-            Slog.wtf(TAG, msg, new Throwable());
-        }
-    }
-
-    static void logw(String msg) {
+    static void logw(@NonNull String msg) {
         Slog.w(TAG, msg);
     }
 
-    static void logv(String msg) {
+    static void logv(@NonNull String msg) {
         Slog.v(TAG, msg);
+    }
+
+    static void logv(@NonNull String msg, @Nullable PrintWriter pw) {
+        logv(msg);
+        if (pw != null) {
+            pw.println(msg);
+            pw.flush();
+        }
     }
 
     @Override
@@ -167,6 +175,16 @@ public abstract class BroadcastQueue {
     public abstract boolean isIdleLocked();
 
     /**
+     * Quickly determine if this queue has broadcasts enqueued before the given
+     * barrier timestamp that are still waiting to be delivered.
+     *
+     * @see #waitForIdle
+     * @see #waitForBarrier
+     */
+    @GuardedBy("mService")
+    public abstract boolean isBeyondBarrierLocked(@UptimeMillisLong long barrierTime);
+
+    /**
      * Wait until this queue becomes completely idle.
      * <p>
      * Any broadcasts waiting to be delivered at some point in the future will
@@ -195,10 +213,27 @@ public abstract class BroadcastQueue {
     @GuardedBy("mService")
     public abstract @NonNull String describeStateLocked();
 
+    @GuardedBy("mService")
     public abstract void dumpDebug(@NonNull ProtoOutputStream proto, long fieldId);
 
     @GuardedBy("mService")
     public abstract boolean dumpLocked(@NonNull FileDescriptor fd, @NonNull PrintWriter pw,
-            @NonNull String[] args, int opti, boolean dumpAll, @Nullable String dumpPackage,
-            boolean needSep);
+            @NonNull String[] args, int opti, boolean dumpConstants, boolean dumpHistory,
+            boolean dumpAll, @Nullable String dumpPackage, boolean needSep);
+
+    /**
+     * Execute {@link #dumpLocked} and store the output into
+     * {@link DropBoxManager} for later inspection.
+     */
+    public void dumpToDropBoxLocked(@Nullable String msg) {
+        LocalServices.getService(DropBoxManagerInternal.class).addEntry(TAG_DUMP, (fd) -> {
+            try (FileOutputStream out = new FileOutputStream(fd);
+                    PrintWriter pw = new PrintWriter(out)) {
+                pw.print("Message: ");
+                pw.println(msg);
+                dumpLocked(fd, pw, null, 0, false, false, false, null, false);
+                pw.flush();
+            }
+        }, DropBoxManager.IS_TEXT);
+    }
 }
