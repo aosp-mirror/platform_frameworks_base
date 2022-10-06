@@ -922,6 +922,8 @@ public final class ViewRootImpl implements ViewParent,
                 }
             }
         };
+    private final Rect mChildBoundingInsets = new Rect();
+    private boolean mChildBoundingInsetsChanged = false;
 
     private String mTag = TAG;
 
@@ -2227,6 +2229,8 @@ public final class ViewRootImpl implements ViewParent,
         mTempRect.inset(mWindowAttributes.surfaceInsets.left,
                 mWindowAttributes.surfaceInsets.top,
                 mWindowAttributes.surfaceInsets.right, mWindowAttributes.surfaceInsets.bottom);
+        mTempRect.inset(mChildBoundingInsets.left, mChildBoundingInsets.top,
+            mChildBoundingInsets.right, mChildBoundingInsets.bottom);
         t.setWindowCrop(mBoundsLayer, mTempRect);
     }
 
@@ -2248,7 +2252,7 @@ public final class ViewRootImpl implements ViewParent,
         if (!sc.isValid()) return;
 
         if (updateBoundsLayer(t)) {
-              mergeWithNextTransaction(t, mSurface.getNextFrameNumber());
+            applyTransactionOnDraw(t);
         }
     }
 
@@ -3452,7 +3456,8 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
 
-        if (surfaceSizeChanged || surfaceReplaced || surfaceCreated || windowAttributesChanged) {
+        if (surfaceSizeChanged || surfaceReplaced || surfaceCreated ||
+            windowAttributesChanged || mChildBoundingInsetsChanged) {
             // If the surface has been replaced, there's a chance the bounds layer is not parented
             // to the new layer. When updating bounds layer, also reparent to the main VRI
             // SurfaceControl to ensure it's correctly placed in the hierarchy.
@@ -3463,6 +3468,7 @@ public final class ViewRootImpl implements ViewParent,
             // enough. WMS doesn't want to keep around old children since they will leak when the
             // client creates new children.
             prepareSurfaces();
+            mChildBoundingInsetsChanged = false;
         }
 
         final boolean didLayout = layoutRequested && (!mStopped || mReportNextDraw);
@@ -11074,7 +11080,7 @@ public final class ViewRootImpl implements ViewParent,
     @Nullable public SurfaceControl.Transaction buildReparentTransaction(
         @NonNull SurfaceControl child) {
         if (mSurfaceControl.isValid()) {
-            return new SurfaceControl.Transaction().reparent(child, mSurfaceControl);
+          return new SurfaceControl.Transaction().reparent(child, getBoundsLayer());
         }
         return null;
     }
@@ -11329,5 +11335,15 @@ public final class ViewRootImpl implements ViewParent,
             return;
         }
         mActiveSurfaceSyncGroup.addToSync(syncable, false /* parentSyncGroupMerge */);
+    }
+
+    @Override
+    public void setChildBoundingInsets(@NonNull Rect insets) {
+        if (insets.left < 0 || insets.top < 0 || insets.right < 0 || insets.bottom < 0) {
+            throw new IllegalArgumentException("Negative insets passed to setChildBoundingInsets.");
+        }
+        mChildBoundingInsets.set(insets);
+        mChildBoundingInsetsChanged = true;
+        scheduleTraversals();
     }
 }
