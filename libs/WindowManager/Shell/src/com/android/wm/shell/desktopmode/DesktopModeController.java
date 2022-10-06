@@ -19,6 +19,7 @@ package com.android.wm.shell.desktopmode;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.WindowManager.TRANSIT_CHANGE;
+import static android.view.WindowManager.TRANSIT_OPEN;
 
 import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE;
@@ -30,13 +31,18 @@ import android.content.Context;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.ArraySet;
+import android.view.SurfaceControl;
 import android.window.DisplayAreaInfo;
+import android.window.TransitionInfo;
+import android.window.TransitionRequestInfo;
 import android.window.WindowContainerTransaction;
 
 import androidx.annotation.BinderThread;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -58,7 +64,8 @@ import java.util.Comparator;
 /**
  * Handles windowing changes when desktop mode system setting changes
  */
-public class DesktopModeController implements RemoteCallable<DesktopModeController> {
+public class DesktopModeController implements RemoteCallable<DesktopModeController>,
+        Transitions.TransitionHandler {
 
     private final Context mContext;
     private final ShellController mShellController;
@@ -98,6 +105,7 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
         if (DesktopModeStatus.isActive(mContext)) {
             updateDesktopModeActive(true);
         }
+        mTransitions.addHandler(this);
     }
 
     @Override
@@ -173,7 +181,7 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
     /**
      * Show apps on desktop
      */
-    public void showDesktopApps() {
+    WindowContainerTransaction showDesktopApps() {
         ArraySet<Integer> activeTasks = mDesktopModeTaskRepository.getActiveTasks();
         ProtoLog.d(WM_SHELL_DESKTOP_MODE, "bringDesktopAppsToFront: tasks=%s", activeTasks.size());
         ArrayList<RunningTaskInfo> taskInfos = new ArrayList<>();
@@ -189,7 +197,12 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
         for (RunningTaskInfo task : taskInfos) {
             wct.reorder(task.token, true);
         }
-        mShellTaskOrganizer.applyTransaction(wct);
+
+        if (!Transitions.ENABLE_SHELL_TRANSITIONS) {
+            mShellTaskOrganizer.applyTransaction(wct);
+        }
+
+        return wct;
     }
 
     /**
@@ -209,6 +222,35 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
     public int getDisplayAreaWindowingMode(int displayId) {
         return mRootTaskDisplayAreaOrganizer.getDisplayAreaInfo(displayId)
                 .configuration.windowConfiguration.getWindowingMode();
+    }
+
+    @Override
+    public boolean startAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
+            @NonNull SurfaceControl.Transaction startTransaction,
+            @NonNull SurfaceControl.Transaction finishTransaction,
+            @NonNull Transitions.TransitionFinishCallback finishCallback) {
+        // This handler should never be the sole handler, so should not animate anything.
+        return false;
+    }
+
+    @Nullable
+    @Override
+    public WindowContainerTransaction handleRequest(@NonNull IBinder transition,
+            @NonNull TransitionRequestInfo request) {
+
+        // Only do anything if we are in desktop mode and opening a task/app
+        if (!DesktopModeStatus.isActive(mContext) || request.getType() != TRANSIT_OPEN) {
+            return null;
+        }
+
+        WindowContainerTransaction wct = mTransitions.dispatchRequest(transition, request, this);
+        if (wct == null) {
+            wct = new WindowContainerTransaction();
+        }
+        wct.merge(showDesktopApps(), true /* transfer */);
+        wct.reorder(request.getTriggerTask().token, true /* onTop */);
+
+        return wct;
     }
 
     /**
