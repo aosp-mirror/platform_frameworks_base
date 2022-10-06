@@ -160,6 +160,8 @@ public class AuthControllerTest extends SysuiTestCase {
     @Mock
     private StatusBarStateController mStatusBarStateController;
     @Mock
+    private UdfpsLogger mUdfpsLogger;
+    @Mock
     private InteractionJankMonitor mInteractionJankMonitor;
     @Captor
     private ArgumentCaptor<IFingerprintAuthenticatorsRegisteredCallback> mFpAuthenticatorsRegisteredCaptor;
@@ -978,7 +980,7 @@ public class AuthControllerTest extends SysuiTestCase {
             super(context, execution, commandQueue, activityTaskManager, windowManager,
                     fingerprintManager, faceManager, udfpsControllerFactory,
                     sidefpsControllerFactory, mDisplayManager, mWakefulnessLifecycle,
-                    mUserManager, mLockPatternUtils, statusBarStateController,
+                    mUserManager, mLockPatternUtils, mUdfpsLogger, statusBarStateController,
                     mInteractionJankMonitor, mHandler, mBackgroundExecutor, vibratorHelper);
         }
 
