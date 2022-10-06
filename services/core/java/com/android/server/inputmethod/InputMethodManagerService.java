@@ -300,7 +300,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     final ImePlatformCompatUtils mImePlatformCompatUtils;
     final InputMethodDeviceConfigs mInputMethodDeviceConfigs;
     private final DisplayManagerInternal mDisplayManagerInternal;
-    final boolean mHasFeature;
     private final ArrayMap<String, List<InputMethodSubtype>> mAdditionalSubtypeMap =
             new ArrayMap<>();
     private final UserManager mUserManager;
@@ -1728,8 +1727,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
         mUserManager = mContext.getSystemService(UserManager.class);
         mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
-        mHasFeature = context.getPackageManager().hasSystemFeature(
-                PackageManager.FEATURE_INPUT_METHODS);
 
         mSlotIme = mContext.getString(com.android.internal.R.string.status_bar_ime);
 
