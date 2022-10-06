@@ -21,10 +21,12 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileSubscriptionRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeUserSetupRepository
+import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
 import com.android.systemui.util.CarrierConfigTracker
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -40,6 +42,8 @@ class MobileIconsInteractorTest : SysuiTestCase() {
     private lateinit var underTest: MobileIconsInteractor
     private val userSetupRepository = FakeUserSetupRepository()
     private val subscriptionsRepository = FakeMobileSubscriptionRepository()
+    private val mobileMappingsProxy = FakeMobileMappingsProxy()
+    private val scope = CoroutineScope(IMMEDIATE)
 
     @Mock private lateinit var carrierConfigTracker: CarrierConfigTracker
 
@@ -47,10 +51,12 @@ class MobileIconsInteractorTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         underTest =
-            MobileIconsInteractor(
+            MobileIconsInteractorImpl(
                 subscriptionsRepository,
                 carrierConfigTracker,
+                mobileMappingsProxy,
                 userSetupRepository,
+                scope
             )
     }
 

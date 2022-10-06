@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.pipeline.mobile.data.repository
 
 import android.telephony.SubscriptionInfo
 import android.telephony.SubscriptionManager
+import com.android.settingslib.mobile.MobileMappings.Config
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileSubscriptionModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,6 +31,9 @@ class FakeMobileSubscriptionRepository : MobileSubscriptionRepository {
         MutableStateFlow(SubscriptionManager.INVALID_SUBSCRIPTION_ID)
     override val activeMobileDataSubscriptionId = _activeMobileDataSubscriptionId
 
+    private val _defaultDataSubRatConfig = MutableStateFlow(Config())
+    override val defaultDataSubRatConfig = _defaultDataSubRatConfig
+
     private val subIdFlows = mutableMapOf<Int, MutableStateFlow<MobileSubscriptionModel>>()
     override fun getFlowForSubId(subId: Int): Flow<MobileSubscriptionModel> {
         return subIdFlows[subId]
@@ -38,6 +42,10 @@ class FakeMobileSubscriptionRepository : MobileSubscriptionRepository {
 
     fun setSubscriptions(subs: List<SubscriptionInfo>) {
         _subscriptionsFlow.value = subs
+    }
+
+    fun setDefaultDataSubRatConfig(config: Config) {
+        _defaultDataSubRatConfig.value = config
     }
 
     fun setActiveMobileDataSubscriptionId(subId: Int) {

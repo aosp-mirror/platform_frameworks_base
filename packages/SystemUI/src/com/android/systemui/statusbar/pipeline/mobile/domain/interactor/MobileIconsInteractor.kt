@@ -19,29 +19,52 @@ package com.android.systemui.statusbar.pipeline.mobile.domain.interactor
 import android.telephony.CarrierConfigManager
 import android.telephony.SubscriptionInfo
 import android.telephony.SubscriptionManager
+import com.android.settingslib.SignalIcon.MobileIconGroup
+import com.android.settingslib.mobile.TelephonyIcons
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileSubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileSubscriptionRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.UserSetupRepository
+import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxy
 import com.android.systemui.util.CarrierConfigTracker
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 
 /**
- * Business layer logic for mobile subscription icons
+ * Business layer logic for the set of mobile subscription icons.
  *
- * Mobile indicators represent the UI for the (potentially filtered) list of [SubscriptionInfo]s
- * that the system knows about. They obey policy that depends on OEM, carrier, and locale configs
+ * This interactor represents known set of mobile subscriptions (represented by [SubscriptionInfo]).
+ * The list of subscriptions is filtered based on the opportunistic flags on the infos.
+ *
+ * It provides the default mapping between the telephony display info and the icon group that
+ * represents each RAT (LTE, 3G, etc.), as well as can produce an interactor for each individual
+ * icon
  */
+interface MobileIconsInteractor {
+    val filteredSubscriptions: Flow<List<SubscriptionInfo>>
+    val defaultMobileIconMapping: Flow<Map<String, MobileIconGroup>>
+    val defaultMobileIconGroup: Flow<MobileIconGroup>
+    val isUserSetup: Flow<Boolean>
+    fun createMobileConnectionInteractorForSubId(subId: Int): MobileIconInteractor
+}
+
 @SysUISingleton
-class MobileIconsInteractor
+class MobileIconsInteractorImpl
 @Inject
 constructor(
     private val mobileSubscriptionRepo: MobileSubscriptionRepository,
     private val carrierConfigTracker: CarrierConfigTracker,
+    private val mobileMappingsProxy: MobileMappingsProxy,
     userSetupRepo: UserSetupRepository,
-) {
+    @Application private val scope: CoroutineScope,
+) : MobileIconsInteractor {
     private val activeMobileDataSubscriptionId =
         mobileSubscriptionRepo.activeMobileDataSubscriptionId
 
@@ -61,7 +84,7 @@ constructor(
      * [CarrierConfigManager.KEY_ALWAYS_SHOW_PRIMARY_SIGNAL_BAR_IN_OPPORTUNISTIC_NETWORK_BOOLEAN],
      * and by checking which subscription is opportunistic, or which one is active.
      */
-    val filteredSubscriptions: Flow<List<SubscriptionInfo>> =
+    override val filteredSubscriptions: Flow<List<SubscriptionInfo>> =
         combine(unfilteredSubscriptions, activeMobileDataSubscriptionId) { unfilteredSubs, activeId
             ->
             // Based on the old logic,
@@ -92,11 +115,31 @@ constructor(
             }
         }
 
-    val isUserSetup: Flow<Boolean> = userSetupRepo.isUserSetupFlow
+    /**
+     * Mapping from network type to [MobileIconGroup] using the config generated for the default
+     * subscription Id. This mapping is the same for every subscription.
+     */
+    override val defaultMobileIconMapping: StateFlow<Map<String, MobileIconGroup>> =
+        mobileSubscriptionRepo.defaultDataSubRatConfig
+            .map { mobileMappingsProxy.mapIconSets(it) }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), initialValue = mapOf())
+
+    /** If there is no mapping in [defaultMobileIconMapping], then use this default icon group */
+    override val defaultMobileIconGroup: StateFlow<MobileIconGroup> =
+        mobileSubscriptionRepo.defaultDataSubRatConfig
+            .map { mobileMappingsProxy.getDefaultIcons(it) }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), initialValue = TelephonyIcons.G)
+
+    override val isUserSetup: Flow<Boolean> = userSetupRepo.isUserSetupFlow
 
     /** Vends out new [MobileIconInteractor] for a particular subId */
-    fun createMobileConnectionInteractorForSubId(subId: Int): MobileIconInteractor =
-        MobileIconInteractorImpl(mobileSubscriptionFlowForSubId(subId))
+    override fun createMobileConnectionInteractorForSubId(subId: Int): MobileIconInteractor =
+        MobileIconInteractorImpl(
+            defaultMobileIconMapping,
+            defaultMobileIconGroup,
+            mobileMappingsProxy,
+            mobileSubscriptionFlowForSubId(subId),
+        )
 
     /**
      * Create a new flow for a given subscription ID, which usually maps 1:1 with mobile connections

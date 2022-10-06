@@ -22,6 +22,10 @@ import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileSubs
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileSubscriptionRepositoryImpl
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.UserSetupRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.UserSetupRepositoryImpl
+import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconsInteractor
+import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconsInteractorImpl
+import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxy
+import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxyImpl
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepository
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepositoryImpl
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository
@@ -47,4 +51,10 @@ abstract class StatusBarPipelineModule {
 
     @Binds
     abstract fun userSetupRepository(impl: UserSetupRepositoryImpl): UserSetupRepository
+
+    @Binds
+    abstract fun mobileMappingsProxy(impl: MobileMappingsProxyImpl): MobileMappingsProxy
+
+    @Binds
+    abstract fun mobileIconsInteractor(impl: MobileIconsInteractorImpl): MobileIconsInteractor
 }

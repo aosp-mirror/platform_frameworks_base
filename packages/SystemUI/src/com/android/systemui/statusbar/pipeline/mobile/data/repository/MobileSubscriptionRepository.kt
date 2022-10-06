@@ -16,6 +16,9 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.data.repository
 
+import android.content.Context
+import android.content.IntentFilter
+import android.telephony.CarrierConfigManager
 import android.telephony.CellSignalStrength
 import android.telephony.CellSignalStrengthCdma
 import android.telephony.ServiceState
@@ -31,13 +34,21 @@ import android.telephony.TelephonyCallback.DisplayInfoListener
 import android.telephony.TelephonyCallback.ServiceStateListener
 import android.telephony.TelephonyCallback.SignalStrengthsListener
 import android.telephony.TelephonyDisplayInfo
+import android.telephony.TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NONE
 import android.telephony.TelephonyManager
 import androidx.annotation.VisibleForTesting
+import com.android.settingslib.mobile.MobileMappings
+import com.android.settingslib.mobile.MobileMappings.Config
+import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.statusbar.pipeline.mobile.data.model.DefaultNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileSubscriptionModel
+import com.android.systemui.statusbar.pipeline.mobile.data.model.OverrideNetworkType
+import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxy
+import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -47,7 +58,9 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.withContext
 
@@ -62,6 +75,9 @@ interface MobileSubscriptionRepository {
     /** Observable for the subscriptionId of the current mobile data connection */
     val activeMobileDataSubscriptionId: Flow<Int>
 
+    /** Observable for [MobileMappings.Config] tracking the defaults */
+    val defaultDataSubRatConfig: StateFlow<Config>
+
     /** Get or create an observable for the given subscription ID */
     fun getFlowForSubId(subId: Int): Flow<MobileSubscriptionModel>
 }
@@ -74,6 +90,10 @@ class MobileSubscriptionRepositoryImpl
 constructor(
     private val subscriptionManager: SubscriptionManager,
     private val telephonyManager: TelephonyManager,
+    private val logger: ConnectivityPipelineLogger,
+    broadcastDispatcher: BroadcastDispatcher,
+    private val context: Context,
+    private val mobileMappings: MobileMappingsProxy,
     @Background private val bgDispatcher: CoroutineDispatcher,
     @Application private val scope: CoroutineScope,
 ) : MobileSubscriptionRepository {
@@ -122,6 +142,36 @@ constructor(
                 SubscriptionManager.INVALID_SUBSCRIPTION_ID
             )
 
+    private val defaultDataSubChangedEvent =
+        broadcastDispatcher.broadcastFlow(
+            IntentFilter(TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED)
+        )
+
+    private val carrierConfigChangedEvent =
+        broadcastDispatcher.broadcastFlow(
+            IntentFilter(CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED)
+        )
+
+    /**
+     * [Config] is an object that tracks relevant configuration flags for a given subscription ID.
+     * In the case of [MobileMappings], it's hard-coded to check the default data subscription's
+     * config, so this will apply to every icon that we care about.
+     *
+     * Relevant bits in the config are things like
+     * [CarrierConfigManager.KEY_SHOW_4G_FOR_LTE_DATA_ICON_BOOL]
+     *
+     * This flow will produce whenever the default data subscription or the carrier config changes.
+     */
+    override val defaultDataSubRatConfig: StateFlow<Config> =
+        combine(defaultDataSubChangedEvent, carrierConfigChangedEvent) { _, _ ->
+                Config.readConfig(context)
+            }
+            .stateIn(
+                scope,
+                SharingStarted.WhileSubscribed(),
+                initialValue = Config.readConfig(context)
+            )
+
     /**
      * Each mobile subscription needs its own flow, which comes from registering listeners on the
      * system. Use this method to create those flows and cache them for reuse
@@ -151,6 +201,7 @@ constructor(
                             state = state.copy(isEmergencyOnly = serviceState.isEmergencyOnly)
                             trySend(state)
                         }
+
                         override fun onSignalStrengthsChanged(signalStrength: SignalStrength) {
                             val cdmaLevel =
                                 signalStrength
@@ -173,6 +224,7 @@ constructor(
                                 )
                             trySend(state)
                         }
+
                         override fun onDataConnectionStateChanged(
                             dataState: Int,
                             networkType: Int
@@ -180,18 +232,31 @@ constructor(
                             state = state.copy(dataConnectionState = dataState)
                             trySend(state)
                         }
+
                         override fun onDataActivity(direction: Int) {
                             state = state.copy(dataActivityDirection = direction)
                             trySend(state)
                         }
+
                         override fun onCarrierNetworkChange(active: Boolean) {
                             state = state.copy(carrierNetworkChangeActive = active)
                             trySend(state)
                         }
+
                         override fun onDisplayInfoChanged(
                             telephonyDisplayInfo: TelephonyDisplayInfo
                         ) {
-                            state = state.copy(displayInfo = telephonyDisplayInfo)
+                            val networkType =
+                                if (
+                                    telephonyDisplayInfo.overrideNetworkType ==
+                                        OVERRIDE_NETWORK_TYPE_NONE
+                                ) {
+                                    DefaultNetworkType(telephonyDisplayInfo.networkType)
+                                } else {
+                                    OverrideNetworkType(telephonyDisplayInfo.overrideNetworkType)
+                                }
+
+                            state = state.copy(resolvedNetworkType = networkType)
                             trySend(state)
                         }
                     }
@@ -202,6 +267,7 @@ constructor(
                     subIdFlowCache.remove(subId)
                 }
             }
+            .onEach { logger.logOutputChange("mobileSubscriptionModel", it.toString()) }
             .stateIn(scope, SharingStarted.WhileSubscribed(), state)
     }
 

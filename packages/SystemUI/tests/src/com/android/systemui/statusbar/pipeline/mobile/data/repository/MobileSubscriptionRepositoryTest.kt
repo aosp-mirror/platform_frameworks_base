@@ -30,25 +30,36 @@ import android.telephony.TelephonyCallback.DisplayInfoListener
 import android.telephony.TelephonyCallback.ServiceStateListener
 import android.telephony.TelephonyCallback.SignalStrengthsListener
 import android.telephony.TelephonyDisplayInfo
+import android.telephony.TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_LTE_CA
 import android.telephony.TelephonyManager
+import android.telephony.TelephonyManager.NETWORK_TYPE_LTE
+import android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.broadcast.BroadcastDispatcher
+import com.android.systemui.statusbar.pipeline.mobile.data.model.DefaultNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileSubscriptionModel
+import com.android.systemui.statusbar.pipeline.mobile.data.model.OverrideNetworkType
+import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
+import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.mock
+import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import org.mockito.ArgumentMatchers
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
@@ -61,16 +72,33 @@ class MobileSubscriptionRepositoryTest : SysuiTestCase() {
 
     @Mock private lateinit var subscriptionManager: SubscriptionManager
     @Mock private lateinit var telephonyManager: TelephonyManager
+    @Mock private lateinit var logger: ConnectivityPipelineLogger
+    @Mock private lateinit var broadcastDispatcher: BroadcastDispatcher
+
     private val scope = CoroutineScope(IMMEDIATE)
+    private val mobileMappings = FakeMobileMappingsProxy()
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+        whenever(
+                broadcastDispatcher.broadcastFlow(
+                    any(),
+                    nullable(),
+                    ArgumentMatchers.anyInt(),
+                    nullable(),
+                )
+            )
+            .thenReturn(flowOf(Unit))
 
         underTest =
             MobileSubscriptionRepositoryImpl(
                 subscriptionManager,
                 telephonyManager,
+                logger,
+                broadcastDispatcher,
+                context,
+                mobileMappings,
                 IMMEDIATE,
                 scope,
             )
@@ -266,7 +294,23 @@ class MobileSubscriptionRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun testFlowForSubId_displayInfo() =
+    fun testFlowForSubId_defaultNetworkType() =
+        runBlocking(IMMEDIATE) {
+            whenever(telephonyManager.createForSubscriptionId(any())).thenReturn(telephonyManager)
+
+            var latest: MobileSubscriptionModel? = null
+            val job = underTest.getFlowForSubId(SUB_1_ID).onEach { latest = it }.launchIn(this)
+
+            val type = NETWORK_TYPE_UNKNOWN
+            val expected = DefaultNetworkType(type)
+
+            assertThat(latest?.resolvedNetworkType).isEqualTo(expected)
+
+            job.cancel()
+        }
+
+    @Test
+    fun testFlowForSubId_networkTypeUpdates_default() =
         runBlocking(IMMEDIATE) {
             whenever(telephonyManager.createForSubscriptionId(any())).thenReturn(telephonyManager)
 
@@ -274,10 +318,34 @@ class MobileSubscriptionRepositoryTest : SysuiTestCase() {
             val job = underTest.getFlowForSubId(SUB_1_ID).onEach { latest = it }.launchIn(this)
 
             val callback = getTelephonyCallbackForType<DisplayInfoListener>()
-            val ti = mock<TelephonyDisplayInfo>()
+            val type = NETWORK_TYPE_LTE
+            val expected = DefaultNetworkType(type)
+            val ti = mock<TelephonyDisplayInfo>().also { whenever(it.networkType).thenReturn(type) }
             callback.onDisplayInfoChanged(ti)
 
-            assertThat(latest?.displayInfo).isEqualTo(ti)
+            assertThat(latest?.resolvedNetworkType).isEqualTo(expected)
+
+            job.cancel()
+        }
+
+    @Test
+    fun testFlowForSubId_networkTypeUpdates_override() =
+        runBlocking(IMMEDIATE) {
+            whenever(telephonyManager.createForSubscriptionId(any())).thenReturn(telephonyManager)
+
+            var latest: MobileSubscriptionModel? = null
+            val job = underTest.getFlowForSubId(SUB_1_ID).onEach { latest = it }.launchIn(this)
+
+            val callback = getTelephonyCallbackForType<DisplayInfoListener>()
+            val type = OVERRIDE_NETWORK_TYPE_LTE_CA
+            val expected = OverrideNetworkType(type)
+            val ti =
+                mock<TelephonyDisplayInfo>().also {
+                    whenever(it.overrideNetworkType).thenReturn(type)
+                }
+            callback.onDisplayInfoChanged(ti)
+
+            assertThat(latest?.resolvedNetworkType).isEqualTo(expected)
 
             job.cancel()
         }
