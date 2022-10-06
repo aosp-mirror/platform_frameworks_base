@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
 import android.os.BatteryStats.BitDescription;
+import android.os.BatteryStats.CpuUsageDetails;
 import android.os.BatteryStats.HistoryItem;
 import android.os.BatteryStats.HistoryStepDetails;
 import android.os.BatteryStats.HistoryTag;
@@ -122,6 +123,8 @@ public class BatteryStatsHistory {
 
     static final int EXTENSION_MEASURED_ENERGY_HEADER_FLAG = 0x00000001;
     static final int EXTENSION_MEASURED_ENERGY_FLAG = 0x00000002;
+    static final int EXTENSION_CPU_USAGE_HEADER_FLAG = 0x00000004;
+    static final int EXTENSION_CPU_USAGE_FLAG = 0x00000008;
 
     private final Parcel mHistoryBuffer;
     private final File mSystemDir;
@@ -194,6 +197,7 @@ public class BatteryStatsHistory {
     private long mTrackRunningHistoryUptimeMs = 0;
     private long mHistoryBaseTimeMs;
     private boolean mMeasuredEnergyHeaderWritten = false;
+    private boolean mCpuUsageHeaderWritten = false;
 
     private byte mLastHistoryStepLevel = 0;
 
@@ -351,6 +355,7 @@ public class BatteryStatsHistory {
         mTrackRunningHistoryElapsedRealtimeMs = 0;
         mTrackRunningHistoryUptimeMs = 0;
         mMeasuredEnergyHeaderWritten = false;
+        mCpuUsageHeaderWritten = false;
 
         mHistoryBuffer.setDataSize(0);
         mHistoryBuffer.setDataPosition(0);
@@ -1180,7 +1185,7 @@ public class BatteryStatsHistory {
 
         final int idx = code & HistoryItem.EVENT_TYPE_MASK;
         final String prefix = (code & HistoryItem.EVENT_FLAG_START) != 0 ? "+" :
-                  (code & HistoryItem.EVENT_FLAG_FINISH) != 0 ? "-" : "";
+                (code & HistoryItem.EVENT_FLAG_FINISH) != 0 ? "-" : "";
 
         final String[] names = BatteryStats.HISTORY_EVENT_NAMES;
         if (idx < 0 || idx >= names.length) return;
@@ -1188,6 +1193,17 @@ public class BatteryStatsHistory {
         final String track = "battery_stats." + names[idx];
         final String name = prefix + names[idx] + "=" + tag.uid + ":\"" + tag.string + "\"";
         mTracer.traceInstantEvent(track, name);
+    }
+
+    /**
+     * Records CPU usage by a specific UID.  The recorded data is the delta from
+     * the previous record for the same UID.
+     */
+    public void recordCpuUsage(long elapsedRealtimeMs, long uptimeMs,
+            CpuUsageDetails cpuUsageDetails) {
+        mHistoryCur.cpuUsageDetails = cpuUsageDetails;
+        mHistoryCur.states2 |= HistoryItem.STATE2_EXTENSIONS_FLAG;
+        writeHistoryItem(elapsedRealtimeMs, uptimeMs);
     }
 
     /**
@@ -1338,6 +1354,7 @@ public class BatteryStatsHistory {
                 entry.setValue(entry.getValue() | BatteryStatsHistory.TAG_FIRST_OCCURRENCE_FLAG);
             }
             mMeasuredEnergyHeaderWritten = false;
+            mCpuUsageHeaderWritten = false;
 
             // Make a copy of mHistoryCur.
             HistoryItem copy = new HistoryItem();
@@ -1377,6 +1394,7 @@ public class BatteryStatsHistory {
         cur.eventTag = null;
         cur.tagsFirstOccurrence = false;
         cur.measuredEnergyDetails = null;
+        cur.cpuUsageDetails = null;
         if (DEBUG) {
             Slog.i(TAG, "Writing history buffer: was " + mHistoryBufferLastPos
                     + " now " + mHistoryBuffer.dataPosition()
@@ -1502,12 +1520,18 @@ public class BatteryStatsHistory {
                 extensionFlags |= BatteryStatsHistory.EXTENSION_MEASURED_ENERGY_HEADER_FLAG;
             }
         }
+        if (cur.cpuUsageDetails != null) {
+            extensionFlags |= EXTENSION_CPU_USAGE_FLAG;
+            if (!mCpuUsageHeaderWritten) {
+                extensionFlags |= BatteryStatsHistory.EXTENSION_CPU_USAGE_HEADER_FLAG;
+            }
+        }
         if (extensionFlags != 0) {
             cur.states2 |= HistoryItem.STATE2_EXTENSIONS_FLAG;
         } else {
             cur.states2 &= ~HistoryItem.STATE2_EXTENSIONS_FLAG;
         }
-        final boolean state2IntChanged = cur.states2 != last.states2;
+        final boolean state2IntChanged = cur.states2 != last.states2 || extensionFlags != 0;
         if (state2IntChanged) {
             firstToken |= BatteryStatsHistory.DELTA_STATE2_FLAG;
         }
@@ -1643,6 +1667,20 @@ public class BatteryStatsHistory {
                 }
                 for (long chargeUC : cur.measuredEnergyDetails.chargeUC) {
                     dest.writeLong(chargeUC);
+                }
+            }
+
+            if (cur.cpuUsageDetails != null) {
+                if (DEBUG) {
+                    Slog.i(TAG, "WRITE DELTA: cpuUsageDetails=" + cur.cpuUsageDetails);
+                }
+                if (!mCpuUsageHeaderWritten) {
+                    dest.writeStringArray(cur.cpuUsageDetails.cpuBracketDescriptions);
+                    mCpuUsageHeaderWritten = true;
+                }
+                dest.writeInt(cur.cpuUsageDetails.uid);
+                for (long cpuUsageMs: cur.cpuUsageDetails.cpuUsageMs) {
+                    dest.writeLong(cpuUsageMs);
                 }
             }
         }
