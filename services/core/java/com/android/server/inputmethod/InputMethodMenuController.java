@@ -71,7 +71,7 @@ final class InputMethodMenuController {
     @Nullable
     private InputMethodDialogWindowContext mDialogWindowContext;
 
-    public InputMethodMenuController(InputMethodManagerService service) {
+    InputMethodMenuController(InputMethodManagerService service) {
         mService = service;
         mSettings = mService.mSettings;
         mSwitchingController = mService.mSwitchingController;

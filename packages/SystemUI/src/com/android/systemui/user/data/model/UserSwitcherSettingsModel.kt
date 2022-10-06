@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,27 +12,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
-package com.android.audiopolicytest;
+package com.android.systemui.user.data.model
 
-import android.app.Activity;
-import android.os.Bundle;
-
-public class AudioPolicyTest extends Activity  {
-
-    public AudioPolicyTest() {
-    }
-
-    /** Called when the activity is first created. */
-    @Override
-    public void onCreate(Bundle icicle) {
-        super.onCreate(icicle);
-        setContentView(R.layout.audiopolicytest);
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-    }
-}
+/** Encapsulates the state of settings related to user switching. */
+data class UserSwitcherSettingsModel(
+    val isSimpleUserSwitcher: Boolean = false,
+    val isAddUsersFromLockscreen: Boolean = false,
+    val isUserSwitcherEnabled: Boolean = false,
+)

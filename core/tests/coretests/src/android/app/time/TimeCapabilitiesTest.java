@@ -48,10 +48,10 @@ public class TimeCapabilitiesTest {
     public void testEquals() {
         TimeCapabilities.Builder builder1 = new TimeCapabilities.Builder(TEST_USER_HANDLE)
                 .setConfigureAutoDetectionEnabledCapability(CAPABILITY_POSSESSED)
-                .setSuggestManualTimeCapability(CAPABILITY_POSSESSED);
+                .setSetManualTimeCapability(CAPABILITY_POSSESSED);
         TimeCapabilities.Builder builder2 = new TimeCapabilities.Builder(TEST_USER_HANDLE)
                 .setConfigureAutoDetectionEnabledCapability(CAPABILITY_POSSESSED)
-                .setSuggestManualTimeCapability(CAPABILITY_POSSESSED);
+                .setSetManualTimeCapability(CAPABILITY_POSSESSED);
         {
             TimeCapabilities one = builder1.build();
             TimeCapabilities two = builder2.build();
@@ -72,14 +72,14 @@ public class TimeCapabilitiesTest {
             assertEquals(one, two);
         }
 
-        builder2.setSuggestManualTimeCapability(CAPABILITY_NOT_ALLOWED);
+        builder2.setSetManualTimeCapability(CAPABILITY_NOT_ALLOWED);
         {
             TimeCapabilities one = builder1.build();
             TimeCapabilities two = builder2.build();
             assertNotEquals(one, two);
         }
 
-        builder1.setSuggestManualTimeCapability(CAPABILITY_NOT_ALLOWED);
+        builder1.setSetManualTimeCapability(CAPABILITY_NOT_ALLOWED);
         {
             TimeCapabilities one = builder1.build();
             TimeCapabilities two = builder2.build();
@@ -91,12 +91,12 @@ public class TimeCapabilitiesTest {
     public void userHandle_notIgnoredInEquals() {
         TimeCapabilities firstUserCapabilities = new TimeCapabilities.Builder(UserHandle.of(1))
                 .setConfigureAutoDetectionEnabledCapability(CAPABILITY_POSSESSED)
-                .setSuggestManualTimeCapability(CAPABILITY_POSSESSED)
+                .setSetManualTimeCapability(CAPABILITY_POSSESSED)
                 .build();
 
         TimeCapabilities secondUserCapabilities = new TimeCapabilities.Builder(UserHandle.of(2))
                 .setConfigureAutoDetectionEnabledCapability(CAPABILITY_POSSESSED)
-                .setSuggestManualTimeCapability(CAPABILITY_POSSESSED)
+                .setSetManualTimeCapability(CAPABILITY_POSSESSED)
                 .build();
 
         assertThat(firstUserCapabilities).isNotEqualTo(secondUserCapabilities);
@@ -106,12 +106,12 @@ public class TimeCapabilitiesTest {
     public void testBuilder() {
         TimeCapabilities capabilities = new TimeCapabilities.Builder(TEST_USER_HANDLE)
                 .setConfigureAutoDetectionEnabledCapability(CAPABILITY_NOT_APPLICABLE)
-                .setSuggestManualTimeCapability(CAPABILITY_NOT_SUPPORTED)
+                .setSetManualTimeCapability(CAPABILITY_NOT_SUPPORTED)
                 .build();
 
         assertThat(capabilities.getConfigureAutoDetectionEnabledCapability())
                 .isEqualTo(CAPABILITY_NOT_APPLICABLE);
-        assertThat(capabilities.getSuggestManualTimeCapability())
+        assertThat(capabilities.getSetManualTimeCapability())
                 .isEqualTo(CAPABILITY_NOT_SUPPORTED);
 
         try {
@@ -133,7 +133,7 @@ public class TimeCapabilitiesTest {
 
         try {
             new TimeCapabilities.Builder(TEST_USER_HANDLE)
-                    .setSuggestManualTimeCapability(CAPABILITY_NOT_APPLICABLE)
+                    .setSetManualTimeCapability(CAPABILITY_NOT_APPLICABLE)
                     .build();
             fail("Should throw IllegalStateException");
         } catch (IllegalStateException ignored) {
@@ -145,11 +145,11 @@ public class TimeCapabilitiesTest {
     public void testParcelable() {
         TimeCapabilities.Builder builder = new TimeCapabilities.Builder(TEST_USER_HANDLE)
                 .setConfigureAutoDetectionEnabledCapability(CAPABILITY_NOT_SUPPORTED)
-                .setSuggestManualTimeCapability(CAPABILITY_NOT_SUPPORTED);
+                .setSetManualTimeCapability(CAPABILITY_NOT_SUPPORTED);
 
         assertRoundTripParcelable(builder.build());
 
-        builder.setSuggestManualTimeCapability(CAPABILITY_POSSESSED);
+        builder.setSetManualTimeCapability(CAPABILITY_POSSESSED);
         assertRoundTripParcelable(builder.build());
 
         builder.setConfigureAutoDetectionEnabledCapability(CAPABILITY_POSSESSED);
@@ -164,7 +164,7 @@ public class TimeCapabilitiesTest {
                         .build();
         TimeCapabilities capabilities = new TimeCapabilities.Builder(TEST_USER_HANDLE)
                 .setConfigureAutoDetectionEnabledCapability(CAPABILITY_POSSESSED)
-                .setSuggestManualTimeCapability(CAPABILITY_POSSESSED)
+                .setSetManualTimeCapability(CAPABILITY_POSSESSED)
                 .build();
 
         TimeConfiguration configChange = new TimeConfiguration.Builder()
@@ -185,7 +185,7 @@ public class TimeCapabilitiesTest {
                         .build();
         TimeCapabilities capabilities = new TimeCapabilities.Builder(TEST_USER_HANDLE)
                 .setConfigureAutoDetectionEnabledCapability(CAPABILITY_NOT_ALLOWED)
-                .setSuggestManualTimeCapability(CAPABILITY_NOT_ALLOWED)
+                .setSetManualTimeCapability(CAPABILITY_NOT_ALLOWED)
                 .build();
 
         TimeConfiguration configChange = new TimeConfiguration.Builder()
@@ -199,7 +199,7 @@ public class TimeCapabilitiesTest {
     public void copyBuilder_copiesAllFields() {
         TimeCapabilities capabilities = new TimeCapabilities.Builder(TEST_USER_HANDLE)
                 .setConfigureAutoDetectionEnabledCapability(CAPABILITY_NOT_ALLOWED)
-                .setSuggestManualTimeCapability(CAPABILITY_NOT_ALLOWED)
+                .setSetManualTimeCapability(CAPABILITY_NOT_ALLOWED)
                 .build();
 
         {
@@ -210,7 +210,7 @@ public class TimeCapabilitiesTest {
             TimeCapabilities expectedCapabilities =
                     new TimeCapabilities.Builder(TEST_USER_HANDLE)
                             .setConfigureAutoDetectionEnabledCapability(CAPABILITY_POSSESSED)
-                            .setSuggestManualTimeCapability(CAPABILITY_NOT_ALLOWED)
+                            .setSetManualTimeCapability(CAPABILITY_NOT_ALLOWED)
                             .build();
 
             assertThat(updatedCapabilities).isEqualTo(expectedCapabilities);
@@ -219,13 +219,13 @@ public class TimeCapabilitiesTest {
         {
             TimeCapabilities updatedCapabilities =
                     new TimeCapabilities.Builder(capabilities)
-                            .setSuggestManualTimeCapability(CAPABILITY_POSSESSED)
+                            .setSetManualTimeCapability(CAPABILITY_POSSESSED)
                             .build();
 
             TimeCapabilities expectedCapabilities =
                     new TimeCapabilities.Builder(TEST_USER_HANDLE)
                             .setConfigureAutoDetectionEnabledCapability(CAPABILITY_NOT_ALLOWED)
-                            .setSuggestManualTimeCapability(CAPABILITY_POSSESSED)
+                            .setSetManualTimeCapability(CAPABILITY_POSSESSED)
                             .build();
 
             assertThat(updatedCapabilities).isEqualTo(expectedCapabilities);

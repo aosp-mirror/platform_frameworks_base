@@ -23,6 +23,7 @@ import static android.app.timezonedetector.TelephonyTimeZoneSuggestion.QUALITY_M
 import static android.app.timezonedetector.TelephonyTimeZoneSuggestion.QUALITY_SINGLE_ZONE;
 
 import static com.android.server.SystemTimeZone.TIME_ZONE_CONFIDENCE_HIGH;
+import static com.android.server.SystemTimeZone.TIME_ZONE_CONFIDENCE_LOW;
 
 import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
@@ -30,19 +31,20 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.time.TimeZoneCapabilities;
 import android.app.time.TimeZoneCapabilitiesAndConfig;
+import android.app.time.TimeZoneState;
 import android.app.timezonedetector.ManualTimeZoneSuggestion;
 import android.app.timezonedetector.TelephonyTimeZoneSuggestion;
 import android.content.Context;
 import android.os.Handler;
 import android.os.TimestampedValue;
 import android.util.IndentingPrintWriter;
-import android.util.LocalLog;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.SystemTimeZone.TimeZoneConfidence;
 
+import java.io.PrintWriter;
 import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
@@ -76,7 +78,7 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
         @NonNull ConfigurationInternal getCurrentUserConfigurationInternal();
 
         /**
-         * Returns the device's currently configured time zone.
+         * Returns the device's currently configured time zone. May return an empty string.
          */
         @NonNull String getDeviceTimeZone();
 
@@ -86,10 +88,11 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
         @TimeZoneConfidence int getDeviceTimeZoneConfidence();
 
         /**
-         * Sets the device's time zone and associated confidence.
+         * Sets the device's time zone, associated confidence, and records a debug log entry.
          */
         void setDeviceTimeZoneAndConfidence(
-                @NonNull String zoneId, @TimeZoneConfidence int confidence);
+                @NonNull String zoneId, @TimeZoneConfidence int confidence,
+                @NonNull String logInfo);
 
         /**
          * Returns the time according to the elapsed realtime clock, the same as {@link
@@ -97,6 +100,16 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
          */
         @ElapsedRealtimeLong
         long elapsedRealtimeMillis();
+
+        /**
+         * Adds a standalone entry to the time zone debug log.
+         */
+        void addDebugLogEntry(@NonNull String logMsg);
+
+        /**
+         * Dumps the time zone debug log to the supplied {@link PrintWriter}.
+         */
+        void dumpDebugLog(PrintWriter printWriter);
     }
 
     private static final String LOG_TAG = TimeZoneDetectorService.TAG;
@@ -169,13 +182,6 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
     private final Environment mEnvironment;
 
     /**
-     * A log that records the decisions / decision metadata that affected the device's time zone.
-     * This is logged in bug reports to assist with debugging issues with detection.
-     */
-    @NonNull
-    private final LocalLog mTimeZoneChangesLog = new LocalLog(30, false /* useLocalTimestamps */);
-
-    /**
      * A mapping from slotIndex to a telephony time zone suggestion. We typically expect one or two
      * mappings: devices will have a small number of telephony devices and slotIndexes are assumed
      * to be stable.
@@ -246,6 +252,39 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
     }
 
     @Override
+    public synchronized boolean confirmTimeZone(@NonNull String timeZoneId) {
+        Objects.requireNonNull(timeZoneId);
+
+        String currentTimeZoneId = mEnvironment.getDeviceTimeZone();
+        if (!currentTimeZoneId.equals(timeZoneId)) {
+            return false;
+        }
+
+        if (mEnvironment.getDeviceTimeZoneConfidence() < TIME_ZONE_CONFIDENCE_HIGH) {
+            mEnvironment.setDeviceTimeZoneAndConfidence(currentTimeZoneId,
+                    TIME_ZONE_CONFIDENCE_HIGH, "confirmTimeZone: timeZoneId=" + timeZoneId);
+        }
+        return true;
+    }
+
+    @Override
+    public synchronized TimeZoneState getTimeZoneState() {
+        boolean userShouldConfirmId =
+                mEnvironment.getDeviceTimeZoneConfidence() < TIME_ZONE_CONFIDENCE_HIGH;
+        return new TimeZoneState(mEnvironment.getDeviceTimeZone(), userShouldConfirmId);
+    }
+
+    @Override
+    public void setTimeZoneState(@NonNull TimeZoneState timeZoneState) {
+        Objects.requireNonNull(timeZoneState);
+
+        @TimeZoneConfidence int confidence = timeZoneState.getUserShouldConfirmId()
+                ? TIME_ZONE_CONFIDENCE_LOW : TIME_ZONE_CONFIDENCE_HIGH;
+        mEnvironment.setDeviceTimeZoneAndConfidence(
+                timeZoneState.getId(), confidence, "setTimeZoneState()");
+    }
+
+    @Override
     public synchronized void suggestGeolocationTimeZone(
             @NonNull GeolocationTimeZoneSuggestion suggestion) {
 
@@ -297,9 +336,9 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
         TimeZoneCapabilitiesAndConfig capabilitiesAndConfig =
                 currentUserConfig.createCapabilitiesAndConfig();
         TimeZoneCapabilities capabilities = capabilitiesAndConfig.getCapabilities();
-        if (capabilities.getSuggestManualTimeZoneCapability() != CAPABILITY_POSSESSED) {
+        if (capabilities.getSetManualTimeZoneCapability() != CAPABILITY_POSSESSED) {
             Slog.i(LOG_TAG, "User does not have the capability needed to set the time zone manually"
-                    + ", capabilities=" + capabilities
+                    + ": capabilities=" + capabilities
                     + ", timeZoneId=" + timeZoneId
                     + ", cause=" + cause);
             return false;
@@ -349,11 +388,11 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
             mTelephonyTimeZoneFallbackEnabled = new TimestampedValue<>(
                     mEnvironment.elapsedRealtimeMillis(), fallbackEnabled);
 
-            String logMsg = "enableTelephonyTimeZoneFallbackMode"
-                    + ": currentUserConfig=" + currentUserConfig
+            String logMsg = "enableTelephonyTimeZoneFallbackMode: "
+                    + " currentUserConfig=" + currentUserConfig
                     + ", mTelephonyTimeZoneFallbackEnabled="
                     + mTelephonyTimeZoneFallbackEnabled;
-            logTimeZoneDetectorChange(logMsg);
+            logTimeZoneDebugInfo(logMsg);
 
             // mTelephonyTimeZoneFallbackEnabled and mLatestGeoLocationSuggestion interact.
             // If there is currently a certain geolocation suggestion, then the telephony fallback
@@ -558,19 +597,18 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
                 mTelephonyTimeZoneFallbackEnabled = new TimestampedValue<>(
                         mEnvironment.elapsedRealtimeMillis(), fallbackEnabled);
 
-                String logMsg = "disableTelephonyFallbackIfNeeded"
-                        + ": mTelephonyTimeZoneFallbackEnabled="
-                        + mTelephonyTimeZoneFallbackEnabled;
-                logTimeZoneDetectorChange(logMsg);
+                String logMsg = "disableTelephonyFallbackIfNeeded:"
+                        + " mTelephonyTimeZoneFallbackEnabled=" + mTelephonyTimeZoneFallbackEnabled;
+                logTimeZoneDebugInfo(logMsg);
             }
         }
     }
 
-    private void logTimeZoneDetectorChange(@NonNull String logMsg) {
+    private void logTimeZoneDebugInfo(@NonNull String logMsg) {
         if (DBG) {
             Slog.d(LOG_TAG, logMsg);
         }
-        mTimeZoneChangesLog.log(logMsg);
+        mEnvironment.addDebugLogEntry(logMsg);
     }
 
     /**
@@ -598,7 +636,7 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
                 bestTelephonySuggestion.score >= TELEPHONY_SCORE_USAGE_THRESHOLD;
         if (!suggestionGoodEnough) {
             if (DBG) {
-                Slog.d(LOG_TAG, "Best suggestion not good enough."
+                Slog.d(LOG_TAG, "Best suggestion not good enough:"
                         + " bestTelephonySuggestion=" + bestTelephonySuggestion
                         + ", detectionReason=" + detectionReason);
             }
@@ -611,12 +649,12 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
         if (zoneId == null) {
             Slog.w(LOG_TAG, "Empty zone suggestion scored higher than expected. This is an error:"
                     + " bestTelephonySuggestion=" + bestTelephonySuggestion
-                    + " detectionReason=" + detectionReason);
+                    + ", detectionReason=" + detectionReason);
             return;
         }
 
-        String cause = "Found good suggestion."
-                + ", bestTelephonySuggestion=" + bestTelephonySuggestion
+        String cause = "Found good suggestion:"
+                + " bestTelephonySuggestion=" + bestTelephonySuggestion
                 + ", detectionReason=" + detectionReason;
         setDeviceTimeZoneIfRequired(zoneId, cause);
     }
@@ -634,9 +672,8 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
         if (newZoneId.equals(currentZoneId) && newConfidence <= currentConfidence) {
             // No need to modify the device time zone settings.
             if (DBG) {
-                Slog.d(LOG_TAG, "No need to change the time zone;"
-                        + " device is already set to newZoneId."
-                        + ", newZoneId=" + newZoneId
+                Slog.d(LOG_TAG, "No need to change the time zone device is already set to newZoneId"
+                        + ": newZoneId=" + newZoneId
                         + ", cause=" + cause
                         + ", currentScore=" + currentConfidence
                         + ", newConfidence=" + newConfidence);
@@ -644,13 +681,14 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
             return;
         }
 
-        mEnvironment.setDeviceTimeZoneAndConfidence(newZoneId, newConfidence);
-        String logMsg = "Set device time zone or higher confidence."
-                + ", currentZoneId=" + currentZoneId
-                + ", newZoneId=" + newZoneId
+        String logInfo = "Set device time zone or higher confidence:"
+                + " newZoneId=" + newZoneId
                 + ", cause=" + cause
                 + ", newConfidence=" + newConfidence;
-        logTimeZoneDetectorChange(logMsg);
+        if (DBG) {
+            Slog.d(LOG_TAG, logInfo);
+        }
+        mEnvironment.setDeviceTimeZoneAndConfidence(newZoneId, newConfidence, logInfo);
     }
 
     @GuardedBy("this")
@@ -702,7 +740,7 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
         String logMsg = "handleConfigurationInternalChanged:"
                 + " oldConfiguration=" + mCurrentConfigurationInternal
                 + ", newConfiguration=" + currentUserConfig;
-        logTimeZoneDetectorChange(logMsg);
+        logTimeZoneDebugInfo(logMsg);
         mCurrentConfigurationInternal = currentUserConfig;
 
         // The configuration change may have changed available suggestions or the way suggestions
@@ -731,9 +769,9 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
                 + formatDebugString(mTelephonyTimeZoneFallbackEnabled));
         ipw.decreaseIndent(); // level 2
 
-        ipw.println("Time zone change log:");
+        ipw.println("Time zone debug log:");
         ipw.increaseIndent(); // level 2
-        mTimeZoneChangesLog.dump(ipw);
+        mEnvironment.dumpDebugLog(ipw);
         ipw.decreaseIndent(); // level 2
 
         ipw.println("Manual suggestion history:");

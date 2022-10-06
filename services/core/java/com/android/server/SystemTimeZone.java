@@ -19,12 +19,15 @@ import static java.lang.annotation.ElementType.TYPE_USE;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.os.SystemProperties;
 import android.text.TextUtils;
+import android.util.LocalLog;
 import android.util.Slog;
 
 import com.android.i18n.timezone.ZoneInfoDb;
 
+import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
@@ -70,6 +73,14 @@ public final class SystemTimeZone {
      */
     public static final @TimeZoneConfidence int TIME_ZONE_CONFIDENCE_HIGH = 100;
 
+    /**
+     * An in-memory log that records the debug info related to the device's time zone setting.
+     * This is logged in bug reports to assist with debugging time zone detection issues.
+     */
+    @NonNull
+    private static final LocalLog sTimeZoneDebugLog =
+            new LocalLog(30, false /* useLocalTimestamps */);
+
     private SystemTimeZone() {}
 
     /**
@@ -78,27 +89,44 @@ public final class SystemTimeZone {
     public static void initializeTimeZoneSettingsIfRequired() {
         String timezoneProperty = SystemProperties.get(TIME_ZONE_SYSTEM_PROPERTY);
         if (!isValidTimeZoneId(timezoneProperty)) {
-            Slog.w(TAG, TIME_ZONE_SYSTEM_PROPERTY + " is not valid (" + timezoneProperty
-                    + "); setting to " + DEFAULT_TIME_ZONE_ID);
-            setTimeZoneId(DEFAULT_TIME_ZONE_ID, TIME_ZONE_CONFIDENCE_LOW);
+            String logInfo = "initializeTimeZoneSettingsIfRequired():" + TIME_ZONE_SYSTEM_PROPERTY
+                    + " is not valid (" + timezoneProperty + "); setting to "
+                    + DEFAULT_TIME_ZONE_ID;
+            Slog.w(TAG, logInfo);
+            setTimeZoneId(DEFAULT_TIME_ZONE_ID, TIME_ZONE_CONFIDENCE_LOW, logInfo);
         }
     }
 
     /**
-     * Updates the device's time zone system property and associated metadata. Returns {@code true}
-     * if the device's time zone changed, {@code false} if the ID is invalid or the device is
-     * already set to the supplied ID.
+     * Adds an entry to the system time zone debug log that is included in bug reports. This method
+     * is intended to be used to record event that may lead to a time zone change, e.g. config or
+     * mode changes.
+     */
+    public static void addDebugLogEntry(@NonNull String logMsg) {
+        sTimeZoneDebugLog.log(logMsg);
+    }
+
+    /**
+     * Updates the device's time zone system property, associated metadata and adds an entry to the
+     * debug log. Returns {@code true} if the device's time zone changed, {@code false} if the ID is
+     * invalid or the device is already set to the supplied ID.
      *
      * <p>This method ensures the confidence metadata is set to the supplied value if the supplied
      * time zone ID is considered valid.
      *
      * <p>This method is intended only for use by the AlarmManager. When changing the device's time
      * zone other system service components must use {@link
-     * com.android.server.AlarmManagerInternal#setTimeZone(String, int)} to ensure that important
+     * AlarmManagerInternal#setTimeZone(String, int, String)} to ensure that important
      * system-wide side effects occur.
      */
-    public static boolean setTimeZoneId(String timeZoneId, @TimeZoneConfidence int confidence) {
+    public static boolean setTimeZoneId(
+            @NonNull String timeZoneId, @TimeZoneConfidence int confidence,
+            @NonNull String logInfo) {
         if (TextUtils.isEmpty(timeZoneId) || !isValidTimeZoneId(timeZoneId)) {
+            addDebugLogEntry("setTimeZoneId: Invalid time zone ID."
+                    + " timeZoneId=" + timeZoneId
+                    + ", confidence=" + confidence
+                    + ", logInfo=" + logInfo);
             return false;
         }
 
@@ -112,7 +140,14 @@ public final class SystemTimeZone {
                 }
                 timeZoneChanged = true;
             }
-            setTimeZoneConfidence(confidence);
+            boolean timeZoneConfidenceChanged = setTimeZoneConfidence(confidence);
+            if (timeZoneChanged || timeZoneConfidenceChanged) {
+                String logMsg = "Time zone or confidence set: "
+                        + " (new) timeZoneId=" + timeZoneId
+                        + ", (new) confidence=" + confidence
+                        + ", logInfo=" + logInfo;
+                addDebugLogEntry(logMsg);
+            }
         }
 
         return timeZoneChanged;
@@ -121,16 +156,18 @@ public final class SystemTimeZone {
     /**
      * Sets the time zone confidence value if required. See {@link TimeZoneConfidence} for details.
      */
-    private static void setTimeZoneConfidence(@TimeZoneConfidence int confidence) {
+    private static boolean setTimeZoneConfidence(@TimeZoneConfidence int newConfidence) {
         int currentConfidence = getTimeZoneConfidence();
-        if (currentConfidence != confidence) {
+        if (currentConfidence != newConfidence) {
             SystemProperties.set(
-                    TIME_ZONE_CONFIDENCE_SYSTEM_PROPERTY, Integer.toString(confidence));
+                    TIME_ZONE_CONFIDENCE_SYSTEM_PROPERTY, Integer.toString(newConfidence));
             if (DEBUG) {
                 Slog.v(TAG, "Time zone confidence changed: old=" + currentConfidence
-                        + ", new=" + confidence);
+                        + ", newConfidence=" + newConfidence);
             }
+            return true;
         }
+        return false;
     }
 
     /** Returns the time zone confidence value. See {@link TimeZoneConfidence} for details. */
@@ -146,6 +183,13 @@ public final class SystemTimeZone {
     /** Returns the device's time zone ID setting. */
     public static String getTimeZoneId() {
         return SystemProperties.get(TIME_ZONE_SYSTEM_PROPERTY);
+    }
+
+    /**
+     * Dumps information about recent time zone decisions / changes to the supplied writer.
+     */
+    public static void dump(PrintWriter writer) {
+        sTimeZoneDebugLog.dump(writer);
     }
 
     private static boolean isValidTimeZoneConfidence(@TimeZoneConfidence int confidence) {

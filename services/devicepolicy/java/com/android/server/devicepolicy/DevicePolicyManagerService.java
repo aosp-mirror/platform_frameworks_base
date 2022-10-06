@@ -7709,6 +7709,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkCallAuthorization(
                 isProfileOwner(caller) || isDefaultDeviceOwner(caller)
                         || hasCallingOrSelfPermission(permission.READ_NEARBY_STREAMING_POLICY));
+        Preconditions.checkCallAuthorization(hasCrossUsersPermission(caller, userId));
 
         synchronized (getLockObject()) {
             if (mOwners.hasProfileOwner(userId) || mOwners.hasDeviceOwner()) {
@@ -7749,6 +7750,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkCallAuthorization(
                 isProfileOwner(caller) || isDefaultDeviceOwner(caller)
                         || hasCallingOrSelfPermission(permission.READ_NEARBY_STREAMING_POLICY));
+        Preconditions.checkCallAuthorization(hasCrossUsersPermission(caller, userId));
 
         synchronized (getLockObject()) {
             if (mOwners.hasProfileOwner(userId) || mOwners.hasDeviceOwner()) {
@@ -12551,9 +12553,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (mInjector.settingsGlobalGetInt(Global.AUTO_TIME_ZONE, 0) == 1) {
             return false;
         }
+        String logInfo = "DevicePolicyManager.setTimeZone()";
         mInjector.binderWithCleanCallingIdentity(() ->
                 mInjector.getAlarmManagerInternal()
-                        .setTimeZone(timeZone, TIME_ZONE_CONFIDENCE_HIGH));
+                        .setTimeZone(timeZone, TIME_ZONE_CONFIDENCE_HIGH, logInfo));
 
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_TIME_ZONE)

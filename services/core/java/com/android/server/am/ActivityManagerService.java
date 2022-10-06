@@ -3528,7 +3528,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (subject != null || criticalEventSection != null) {
                 appendtoANRFile(tracesFile.getAbsolutePath(),
                         (subject != null ? "Subject: " + subject + "\n\n" : "")
-                        + criticalEventSection != null ? criticalEventSection : "");
+                        + (criticalEventSection != null ? criticalEventSection : ""));
             }
 
             Pair<Long, Long> offsets = dumpStackTraces(

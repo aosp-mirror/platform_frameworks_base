@@ -59,8 +59,9 @@ public interface AlarmManagerInternal {
      * @param tzId the time zone ID
      * @param confidence the confidence that {@code tzId} is correct, see {@link TimeZoneConfidence}
      *     for details
+     * @param logInfo the reason the time zone is being changed, for bug report logging
      */
-    void setTimeZone(String tzId, @TimeZoneConfidence int confidence);
+    void setTimeZone(String tzId, @TimeZoneConfidence int confidence, String logInfo);
 
     /**
      * Sets the device's current time and time confidence.

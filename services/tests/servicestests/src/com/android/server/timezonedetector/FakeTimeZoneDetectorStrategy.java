@@ -20,17 +20,38 @@ import static org.junit.Assert.assertTrue;
 
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
+import android.app.time.TimeZoneState;
 import android.app.timezonedetector.ManualTimeZoneSuggestion;
 import android.app.timezonedetector.TelephonyTimeZoneSuggestion;
 import android.util.IndentingPrintWriter;
 
 class FakeTimeZoneDetectorStrategy implements TimeZoneDetectorStrategy {
 
+    private TimeZoneState mTimeZoneState;
+
     // Call tracking.
     private GeolocationTimeZoneSuggestion mLastGeolocationSuggestion;
     private ManualTimeZoneSuggestion mLastManualSuggestion;
+    private Integer mLastManualSuggestionUserId;
     private TelephonyTimeZoneSuggestion mLastTelephonySuggestion;
+    private String mLastConfirmedTimeZone;
     private boolean mDumpCalled;
+
+    @Override
+    public boolean confirmTimeZone(String timeZoneId) {
+        mLastConfirmedTimeZone = timeZoneId;
+        return false;
+    }
+
+    @Override
+    public TimeZoneState getTimeZoneState() {
+        return mTimeZoneState;
+    }
+
+    @Override
+    public void setTimeZoneState(TimeZoneState timeZoneState) {
+        mTimeZoneState = timeZoneState;
+    }
 
     @Override
     public void suggestGeolocationTimeZone(GeolocationTimeZoneSuggestion timeZoneSuggestion) {
@@ -40,6 +61,7 @@ class FakeTimeZoneDetectorStrategy implements TimeZoneDetectorStrategy {
     @Override
     public boolean suggestManualTimeZone(
             @UserIdInt int userId, @NonNull ManualTimeZoneSuggestion timeZoneSuggestion) {
+        mLastManualSuggestionUserId = userId;
         mLastManualSuggestion = timeZoneSuggestion;
         return true;
     }
@@ -78,8 +100,10 @@ class FakeTimeZoneDetectorStrategy implements TimeZoneDetectorStrategy {
     void resetCallTracking() {
         mLastGeolocationSuggestion = null;
         mLastManualSuggestion = null;
+        mLastManualSuggestionUserId = null;
         mLastTelephonySuggestion = null;
         mDumpCalled = false;
+        mLastConfirmedTimeZone = null;
     }
 
     void verifySuggestGeolocationTimeZoneCalled(
@@ -87,7 +111,9 @@ class FakeTimeZoneDetectorStrategy implements TimeZoneDetectorStrategy {
         assertEquals(expectedSuggestion, mLastGeolocationSuggestion);
     }
 
-    void verifySuggestManualTimeZoneCalled(ManualTimeZoneSuggestion expectedSuggestion) {
+    void verifySuggestManualTimeZoneCalled(
+            @UserIdInt int expectedUserId, ManualTimeZoneSuggestion expectedSuggestion) {
+        assertEquals((Integer) expectedUserId, mLastManualSuggestionUserId);
         assertEquals(expectedSuggestion, mLastManualSuggestion);
     }
 
@@ -97,5 +123,9 @@ class FakeTimeZoneDetectorStrategy implements TimeZoneDetectorStrategy {
 
     void verifyDumpCalled() {
         assertTrue(mDumpCalled);
+    }
+
+    void verifyConfirmTimeZoneCalled(String expectedTimeZoneId) {
+        assertEquals(expectedTimeZoneId, mLastConfirmedTimeZone);
     }
 }

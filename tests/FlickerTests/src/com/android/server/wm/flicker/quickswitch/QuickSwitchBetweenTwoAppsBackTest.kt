@@ -68,6 +68,7 @@ open class QuickSwitchBetweenTwoAppsBackTest(testSpec: FlickerTestParameter) : B
     override val transition: FlickerBuilder.() -> Unit = {
         setup {
             tapl.setExpectedRotation(testSpec.startRotation)
+            tapl.setIgnoreTaskbarVisibility(true)
             testApp1.launchViaIntent(wmHelper)
             testApp2.launchViaIntent(wmHelper)
             startDisplayBounds =

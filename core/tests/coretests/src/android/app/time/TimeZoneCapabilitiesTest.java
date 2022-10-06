@@ -45,11 +45,11 @@ public class TimeZoneCapabilitiesTest {
         TimeZoneCapabilities.Builder builder1 = new TimeZoneCapabilities.Builder(TEST_USER_HANDLE)
                 .setConfigureAutoDetectionEnabledCapability(CAPABILITY_POSSESSED)
                 .setConfigureGeoDetectionEnabledCapability(CAPABILITY_POSSESSED)
-                .setSuggestManualTimeZoneCapability(CAPABILITY_POSSESSED);
+                .setSetManualTimeZoneCapability(CAPABILITY_POSSESSED);
         TimeZoneCapabilities.Builder builder2 = new TimeZoneCapabilities.Builder(TEST_USER_HANDLE)
                 .setConfigureAutoDetectionEnabledCapability(CAPABILITY_POSSESSED)
                 .setConfigureGeoDetectionEnabledCapability(CAPABILITY_POSSESSED)
-                .setSuggestManualTimeZoneCapability(CAPABILITY_POSSESSED);
+                .setSetManualTimeZoneCapability(CAPABILITY_POSSESSED);
         {
             TimeZoneCapabilities one = builder1.build();
             TimeZoneCapabilities two = builder2.build();
@@ -84,14 +84,14 @@ public class TimeZoneCapabilitiesTest {
             assertEquals(one, two);
         }
 
-        builder2.setSuggestManualTimeZoneCapability(CAPABILITY_NOT_ALLOWED);
+        builder2.setSetManualTimeZoneCapability(CAPABILITY_NOT_ALLOWED);
         {
             TimeZoneCapabilities one = builder1.build();
             TimeZoneCapabilities two = builder2.build();
             assertNotEquals(one, two);
         }
 
-        builder1.setSuggestManualTimeZoneCapability(CAPABILITY_NOT_ALLOWED);
+        builder1.setSetManualTimeZoneCapability(CAPABILITY_NOT_ALLOWED);
         {
             TimeZoneCapabilities one = builder1.build();
             TimeZoneCapabilities two = builder2.build();
@@ -104,7 +104,7 @@ public class TimeZoneCapabilitiesTest {
         TimeZoneCapabilities.Builder builder = new TimeZoneCapabilities.Builder(TEST_USER_HANDLE)
                 .setConfigureAutoDetectionEnabledCapability(CAPABILITY_POSSESSED)
                 .setConfigureGeoDetectionEnabledCapability(CAPABILITY_POSSESSED)
-                .setSuggestManualTimeZoneCapability(CAPABILITY_POSSESSED);
+                .setSetManualTimeZoneCapability(CAPABILITY_POSSESSED);
         assertRoundTripParcelable(builder.build());
 
         builder.setConfigureAutoDetectionEnabledCapability(CAPABILITY_NOT_ALLOWED);
@@ -113,7 +113,7 @@ public class TimeZoneCapabilitiesTest {
         builder.setConfigureGeoDetectionEnabledCapability(CAPABILITY_NOT_ALLOWED);
         assertRoundTripParcelable(builder.build());
 
-        builder.setSuggestManualTimeZoneCapability(CAPABILITY_NOT_ALLOWED);
+        builder.setSetManualTimeZoneCapability(CAPABILITY_NOT_ALLOWED);
         assertRoundTripParcelable(builder.build());
     }
 
@@ -127,7 +127,7 @@ public class TimeZoneCapabilitiesTest {
         TimeZoneCapabilities capabilities = new TimeZoneCapabilities.Builder(TEST_USER_HANDLE)
                 .setConfigureAutoDetectionEnabledCapability(CAPABILITY_POSSESSED)
                 .setConfigureGeoDetectionEnabledCapability(CAPABILITY_POSSESSED)
-                .setSuggestManualTimeZoneCapability(CAPABILITY_POSSESSED)
+                .setSetManualTimeZoneCapability(CAPABILITY_POSSESSED)
                 .build();
 
         TimeZoneConfiguration configChange = new TimeZoneConfiguration.Builder()
@@ -150,7 +150,7 @@ public class TimeZoneCapabilitiesTest {
         TimeZoneCapabilities capabilities = new TimeZoneCapabilities.Builder(TEST_USER_HANDLE)
                 .setConfigureAutoDetectionEnabledCapability(CAPABILITY_NOT_ALLOWED)
                 .setConfigureGeoDetectionEnabledCapability(CAPABILITY_NOT_ALLOWED)
-                .setSuggestManualTimeZoneCapability(CAPABILITY_NOT_ALLOWED)
+                .setSetManualTimeZoneCapability(CAPABILITY_NOT_ALLOWED)
                 .build();
 
         TimeZoneConfiguration configChange = new TimeZoneConfiguration.Builder()
@@ -165,7 +165,7 @@ public class TimeZoneCapabilitiesTest {
         TimeZoneCapabilities capabilities = new TimeZoneCapabilities.Builder(TEST_USER_HANDLE)
                 .setConfigureAutoDetectionEnabledCapability(CAPABILITY_NOT_ALLOWED)
                 .setConfigureGeoDetectionEnabledCapability(CAPABILITY_NOT_ALLOWED)
-                .setSuggestManualTimeZoneCapability(CAPABILITY_NOT_ALLOWED)
+                .setSetManualTimeZoneCapability(CAPABILITY_NOT_ALLOWED)
                 .build();
 
         {
@@ -177,7 +177,7 @@ public class TimeZoneCapabilitiesTest {
                     new TimeZoneCapabilities.Builder(TEST_USER_HANDLE)
                             .setConfigureAutoDetectionEnabledCapability(CAPABILITY_POSSESSED)
                             .setConfigureGeoDetectionEnabledCapability(CAPABILITY_NOT_ALLOWED)
-                            .setSuggestManualTimeZoneCapability(CAPABILITY_NOT_ALLOWED)
+                            .setSetManualTimeZoneCapability(CAPABILITY_NOT_ALLOWED)
                             .build();
 
             assertThat(updatedCapabilities).isEqualTo(expectedCapabilities);
@@ -193,7 +193,7 @@ public class TimeZoneCapabilitiesTest {
                     new TimeZoneCapabilities.Builder(TEST_USER_HANDLE)
                             .setConfigureAutoDetectionEnabledCapability(CAPABILITY_NOT_ALLOWED)
                             .setConfigureGeoDetectionEnabledCapability(CAPABILITY_POSSESSED)
-                            .setSuggestManualTimeZoneCapability(CAPABILITY_NOT_ALLOWED)
+                            .setSetManualTimeZoneCapability(CAPABILITY_NOT_ALLOWED)
                             .build();
 
             assertThat(updatedCapabilities).isEqualTo(expectedCapabilities);
@@ -202,14 +202,14 @@ public class TimeZoneCapabilitiesTest {
         {
             TimeZoneCapabilities updatedCapabilities =
                     new TimeZoneCapabilities.Builder(capabilities)
-                            .setSuggestManualTimeZoneCapability(CAPABILITY_POSSESSED)
+                            .setSetManualTimeZoneCapability(CAPABILITY_POSSESSED)
                             .build();
 
             TimeZoneCapabilities expectedCapabilities =
                     new TimeZoneCapabilities.Builder(TEST_USER_HANDLE)
                             .setConfigureAutoDetectionEnabledCapability(CAPABILITY_NOT_ALLOWED)
                             .setConfigureGeoDetectionEnabledCapability(CAPABILITY_NOT_ALLOWED)
-                            .setSuggestManualTimeZoneCapability(CAPABILITY_POSSESSED)
+                            .setSetManualTimeZoneCapability(CAPABILITY_POSSESSED)
                             .build();
 
             assertThat(updatedCapabilities).isEqualTo(expectedCapabilities);

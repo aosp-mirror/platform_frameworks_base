@@ -245,7 +245,7 @@ final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
                 .setAutoDetectionSupported(isAutoDetectionSupported())
                 .setAutoDetectionEnabledSetting(getAutoDetectionEnabledSetting())
                 .setSystemClockUpdateThresholdMillis(getSystemClockUpdateThresholdMillis())
-                .setSystemClockConfidenceUpgradeThresholdMillis(
+                .setSystemClockConfidenceThresholdMillis(
                         getSystemClockConfidenceUpgradeThresholdMillis())
                 .setAutoSuggestionLowerBound(getAutoSuggestionLowerBound())
                 .setManualSuggestionLowerBound(timeDetectorHelper.getManualSuggestionLowerBound())

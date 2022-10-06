@@ -46,7 +46,7 @@ public final class ConfigurationInternal {
 
     private final boolean mAutoDetectionSupported;
     private final int mSystemClockUpdateThresholdMillis;
-    private final int mSystemClockConfidenceUpgradeThresholdMillis;
+    private final int mSystemClockConfidenceThresholdMillis;
     private final Instant mAutoSuggestionLowerBound;
     private final Instant mManualSuggestionLowerBound;
     private final Instant mSuggestionUpperBound;
@@ -58,8 +58,8 @@ public final class ConfigurationInternal {
     private ConfigurationInternal(Builder builder) {
         mAutoDetectionSupported = builder.mAutoDetectionSupported;
         mSystemClockUpdateThresholdMillis = builder.mSystemClockUpdateThresholdMillis;
-        mSystemClockConfidenceUpgradeThresholdMillis =
-                builder.mSystemClockConfidenceUpgradeThresholdMillis;
+        mSystemClockConfidenceThresholdMillis =
+                builder.mSystemClockConfidenceThresholdMillis;
         mAutoSuggestionLowerBound = Objects.requireNonNull(builder.mAutoSuggestionLowerBound);
         mManualSuggestionLowerBound = Objects.requireNonNull(builder.mManualSuggestionLowerBound);
         mSuggestionUpperBound = Objects.requireNonNull(builder.mSuggestionUpperBound);
@@ -85,14 +85,14 @@ public final class ConfigurationInternal {
     }
 
     /**
-     * Return the absolute threshold at/below which the system clock confidence can be upgraded.
-     * i.e. if the detector receives a high-confidence time and the current system clock is +/- this
-     * value from that time and the confidence in the time is low, then the device's confidence in
-     * the current system clock time can be upgraded. This needs to be an amount users would
-     * consider "close enough".
+     * Return the absolute threshold for Unix epoch time comparison at/below which the system clock
+     * confidence can be said to be "close enough", e.g. if the detector receives a high-confidence
+     * time and the current system clock is +/- this value from that time and the current confidence
+     * in the time is low, then the device's confidence in the current system clock time can be
+     * upgraded.
      */
-    public int getSystemClockConfidenceUpgradeThresholdMillis() {
-        return mSystemClockConfidenceUpgradeThresholdMillis;
+    public int getSystemClockConfidenceThresholdMillis() {
+        return mSystemClockConfidenceThresholdMillis;
     }
 
     /**
@@ -194,7 +194,7 @@ public final class ConfigurationInternal {
         } else {
             suggestManualTimeZoneCapability = CAPABILITY_POSSESSED;
         }
-        builder.setSuggestManualTimeCapability(suggestManualTimeZoneCapability);
+        builder.setSetManualTimeCapability(suggestManualTimeZoneCapability);
 
         return builder.build();
     }
@@ -256,8 +256,8 @@ public final class ConfigurationInternal {
         return "ConfigurationInternal{"
                 + "mAutoDetectionSupported=" + mAutoDetectionSupported
                 + ", mSystemClockUpdateThresholdMillis=" + mSystemClockUpdateThresholdMillis
-                + ", mSystemClockConfidenceUpgradeThresholdMillis="
-                + mSystemClockConfidenceUpgradeThresholdMillis
+                + ", mSystemClockConfidenceThresholdMillis="
+                + mSystemClockConfidenceThresholdMillis
                 + ", mAutoSuggestionLowerBound=" + mAutoSuggestionLowerBound
                 + "(" + mAutoSuggestionLowerBound.toEpochMilli() + ")"
                 + ", mManualSuggestionLowerBound=" + mManualSuggestionLowerBound
@@ -274,7 +274,7 @@ public final class ConfigurationInternal {
     static final class Builder {
         private boolean mAutoDetectionSupported;
         private int mSystemClockUpdateThresholdMillis;
-        private int mSystemClockConfidenceUpgradeThresholdMillis;
+        private int mSystemClockConfidenceThresholdMillis;
         @NonNull private Instant mAutoSuggestionLowerBound;
         @NonNull private Instant mManualSuggestionLowerBound;
         @NonNull private Instant mSuggestionUpperBound;
@@ -321,9 +321,9 @@ public final class ConfigurationInternal {
             return this;
         }
 
-        /** See {@link ConfigurationInternal#getSystemClockConfidenceUpgradeThresholdMillis()}. */
-        public Builder setSystemClockConfidenceUpgradeThresholdMillis(int thresholdMillis) {
-            mSystemClockConfidenceUpgradeThresholdMillis = thresholdMillis;
+        /** See {@link ConfigurationInternal#getSystemClockConfidenceThresholdMillis()}. */
+        public Builder setSystemClockConfidenceThresholdMillis(int thresholdMillis) {
+            mSystemClockConfidenceThresholdMillis = thresholdMillis;
             return this;
         }
 

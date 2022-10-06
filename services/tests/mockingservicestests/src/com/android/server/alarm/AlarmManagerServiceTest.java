@@ -3438,7 +3438,7 @@ public class AlarmManagerServiceTest {
     public void setTimeZoneImpl() {
         final long durationMs = 20000L;
         when(mActivityManagerInternal.getBootTimeTempAllowListDuration()).thenReturn(durationMs);
-        mService.setTimeZoneImpl("UTC", TIME_ZONE_CONFIDENCE_HIGH);
+        mService.setTimeZoneImpl("UTC", TIME_ZONE_CONFIDENCE_HIGH, "AlarmManagerServiceTest");
         final ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
         final ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
         verify(mMockContext).sendBroadcastAsUser(intentCaptor.capture(), eq(UserHandle.ALL),

@@ -62,10 +62,8 @@ import com.android.server.biometrics.sensors.AuthenticationConsumer;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.BiometricNotificationUtils;
 import com.android.server.biometrics.sensors.BiometricScheduler;
-import com.android.server.biometrics.sensors.BiometricStateCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
-import com.android.server.biometrics.sensors.ClientMonitorCompositeCallback;
 import com.android.server.biometrics.sensors.EnumerateConsumer;
 import com.android.server.biometrics.sensors.ErrorConsumer;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
@@ -112,7 +110,6 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
     private boolean mTestHalEnabled;
 
     @NonNull private final FaceSensorPropertiesInternal mSensorProperties;
-    @NonNull private final BiometricStateCallback mBiometricStateCallback;
     @NonNull private final Context mContext;
     @NonNull private final BiometricScheduler mScheduler;
     @NonNull private final Handler mHandler;
@@ -339,7 +336,6 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
 
     @VisibleForTesting
     Face10(@NonNull Context context,
-            @NonNull BiometricStateCallback biometricStateCallback,
             @NonNull FaceSensorPropertiesInternal sensorProps,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher,
             @NonNull Handler handler,
@@ -347,7 +343,6 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
             @NonNull BiometricContext biometricContext) {
         mSensorProperties = sensorProps;
         mContext = context;
-        mBiometricStateCallback = biometricStateCallback;
         mSensorId = sensorProps.sensorId;
         mScheduler = scheduler;
         mHandler = handler;
@@ -371,12 +366,11 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
     }
 
     public static Face10 newInstance(@NonNull Context context,
-            @NonNull BiometricStateCallback biometricStateCallback,
             @NonNull FaceSensorPropertiesInternal sensorProps,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher) {
         final Handler handler = new Handler(Looper.getMainLooper());
-        return new Face10(context, biometricStateCallback, sensorProps, lockoutResetDispatcher,
-                handler, new BiometricScheduler(TAG, BiometricScheduler.SENSOR_TYPE_FACE,
+        return new Face10(context, sensorProps, lockoutResetDispatcher, handler,
+                new BiometricScheduler(TAG, BiometricScheduler.SENSOR_TYPE_FACE,
                         null /* gestureAvailabilityTracker */),
                 BiometricContext.getInstance(context));
     }
@@ -621,19 +615,8 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
 
             mScheduler.scheduleClientMonitor(client, new ClientMonitorCallback() {
                 @Override
-                public void onClientStarted(@NonNull BaseClientMonitor clientMonitor) {
-                    mBiometricStateCallback.onClientStarted(clientMonitor);
-                }
-
-                @Override
-                public void onBiometricAction(int action) {
-                    mBiometricStateCallback.onBiometricAction(action);
-                }
-
-                @Override
                 public void onClientFinished(@NonNull BaseClientMonitor clientMonitor,
                         boolean success) {
-                    mBiometricStateCallback.onClientFinished(clientMonitor, success);
                     if (success) {
                         // Update authenticatorIds
                         scheduleUpdateActiveUserWithoutHandler(client.getTargetUserId());
@@ -678,7 +661,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
                     createLogger(BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient),
                     mBiometricContext, isStrongBiometric, mLockoutTracker,
                     mUsageStats, allowBackgroundAuthentication, isKeyguardBypassEnabled);
-            mScheduler.scheduleClientMonitor(client, mBiometricStateCallback);
+            mScheduler.scheduleClientMonitor(client);
         });
     }
 
@@ -713,7 +696,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
                     createLogger(BiometricsProtoEnums.ACTION_REMOVE,
                             BiometricsProtoEnums.CLIENT_UNKNOWN),
                     mBiometricContext, mAuthenticatorIds);
-            mScheduler.scheduleClientMonitor(client, mBiometricStateCallback);
+            mScheduler.scheduleClientMonitor(client);
         });
     }
 
@@ -731,7 +714,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
                     createLogger(BiometricsProtoEnums.ACTION_REMOVE,
                             BiometricsProtoEnums.CLIENT_UNKNOWN),
                     mBiometricContext, mAuthenticatorIds);
-            mScheduler.scheduleClientMonitor(client, mBiometricStateCallback);
+            mScheduler.scheduleClientMonitor(client);
         });
     }
 
@@ -823,15 +806,14 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
                             BiometricsProtoEnums.CLIENT_UNKNOWN),
                     mBiometricContext, enrolledList,
                     FaceUtils.getLegacyInstance(mSensorId), mAuthenticatorIds);
-            mScheduler.scheduleClientMonitor(client, new ClientMonitorCompositeCallback(callback,
-                    mBiometricStateCallback));
+            mScheduler.scheduleClientMonitor(client, callback);
         });
     }
 
     @Override
     public void scheduleInternalCleanup(int sensorId, int userId,
             @Nullable ClientMonitorCallback callback) {
-        scheduleInternalCleanup(userId, mBiometricStateCallback);
+        scheduleInternalCleanup(userId, callback);
     }
 
     @Override
@@ -1029,7 +1011,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
     @Override
     public ITestSession createTestSession(int sensorId, @NonNull ITestSessionCallback callback,
             @NonNull String opPackageName) {
-        return new BiometricTestSessionImpl(mContext, mSensorId, callback,
-                this, mHalResultController);
+        return new BiometricTestSessionImpl(mContext, mSensorId, callback, this,
+                mHalResultController);
     }
 }

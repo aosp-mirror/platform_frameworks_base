@@ -119,7 +119,7 @@
 
     <!-- Temporarily extending the background to show an edu text hint for opening the menu -->
     <FrameLayout
-        android:id="@+id/tv_pip_menu_edu_text_container"
+        android:id="@+id/tv_pip_menu_edu_text_drawer_placeholder"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/tv_pip"
@@ -127,23 +127,8 @@
         android:layout_alignStart="@+id/tv_pip"
         android:layout_alignEnd="@+id/tv_pip"
         android:background="@color/tv_pip_menu_background"
-        android:clipChildren="true">
-
-        <TextView
-            android:id="@+id/tv_pip_menu_edu_text"
-            android:layout_width="wrap_content"
-            android:layout_height="@dimen/pip_menu_edu_text_view_height"
-            android:layout_gravity="bottom|center"
-            android:gravity="center"
-            android:clickable="false"
-            android:paddingBottom="@dimen/pip_menu_border_width"
-            android:text="@string/pip_edu_text"
-            android:singleLine="true"
-            android:ellipsize="marquee"
-            android:marqueeRepeatLimit="1"
-            android:scrollHorizontally="true"
-            android:textAppearance="@style/TvPipEduText"/>
-    </FrameLayout>
+        android:paddingBottom="@dimen/pip_menu_border_width"
+        android:paddingTop="@dimen/pip_menu_border_width"/>
 
     <!-- Frame around the PiP content + edu text hint - used to highlight open menu -->
     <View

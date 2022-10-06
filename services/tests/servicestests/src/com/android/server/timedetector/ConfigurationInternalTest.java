@@ -79,7 +79,7 @@ public class ConfigurationInternalTest {
             TimeCapabilities capabilities = capabilitiesAndConfig.getCapabilities();
             assertEquals(CAPABILITY_POSSESSED,
                     capabilities.getConfigureAutoDetectionEnabledCapability());
-            assertEquals(CAPABILITY_NOT_APPLICABLE, capabilities.getSuggestManualTimeCapability());
+            assertEquals(CAPABILITY_NOT_APPLICABLE, capabilities.getSetManualTimeCapability());
 
             TimeConfiguration configuration = capabilitiesAndConfig.getConfiguration();
             assertTrue(configuration.isAutoDetectionEnabled());
@@ -98,7 +98,7 @@ public class ConfigurationInternalTest {
             assertEquals(CAPABILITY_POSSESSED,
                     capabilities.getConfigureAutoDetectionEnabledCapability());
             assertEquals(CAPABILITY_POSSESSED,
-                    capabilities.getSuggestManualTimeCapability());
+                    capabilities.getSetManualTimeCapability());
 
             TimeConfiguration configuration = capabilitiesAndConfig.getConfiguration();
             assertFalse(configuration.isAutoDetectionEnabled());
@@ -131,7 +131,7 @@ public class ConfigurationInternalTest {
             TimeCapabilities capabilities = capabilitiesAndConfig.getCapabilities();
             assertEquals(CAPABILITY_NOT_ALLOWED,
                     capabilities.getConfigureAutoDetectionEnabledCapability());
-            assertEquals(CAPABILITY_NOT_ALLOWED, capabilities.getSuggestManualTimeCapability());
+            assertEquals(CAPABILITY_NOT_ALLOWED, capabilities.getSetManualTimeCapability());
 
             TimeConfiguration configuration = capabilitiesAndConfig.getConfiguration();
             assertTrue(configuration.isAutoDetectionEnabled());
@@ -149,7 +149,7 @@ public class ConfigurationInternalTest {
             TimeCapabilities capabilities = capabilitiesAndConfig.getCapabilities();
             assertEquals(CAPABILITY_NOT_ALLOWED,
                     capabilities.getConfigureAutoDetectionEnabledCapability());
-            assertEquals(CAPABILITY_NOT_ALLOWED, capabilities.getSuggestManualTimeCapability());
+            assertEquals(CAPABILITY_NOT_ALLOWED, capabilities.getSetManualTimeCapability());
 
             TimeConfiguration configuration = capabilitiesAndConfig.getConfiguration();
             assertFalse(configuration.isAutoDetectionEnabled());
@@ -181,7 +181,7 @@ public class ConfigurationInternalTest {
             TimeCapabilities capabilities = capabilitiesAndConfig.getCapabilities();
             assertEquals(CAPABILITY_NOT_SUPPORTED,
                     capabilities.getConfigureAutoDetectionEnabledCapability());
-            assertEquals(CAPABILITY_POSSESSED, capabilities.getSuggestManualTimeCapability());
+            assertEquals(CAPABILITY_POSSESSED, capabilities.getSetManualTimeCapability());
 
             TimeConfiguration configuration = capabilitiesAndConfig.getConfiguration();
             assertTrue(configuration.isAutoDetectionEnabled());
@@ -199,7 +199,7 @@ public class ConfigurationInternalTest {
             TimeCapabilities capabilities = capabilitiesAndConfig.getCapabilities();
             assertEquals(CAPABILITY_NOT_SUPPORTED,
                     capabilities.getConfigureAutoDetectionEnabledCapability());
-            assertEquals(CAPABILITY_POSSESSED, capabilities.getSuggestManualTimeCapability());
+            assertEquals(CAPABILITY_POSSESSED, capabilities.getSetManualTimeCapability());
 
             TimeConfiguration configuration = capabilitiesAndConfig.getConfiguration();
             assertFalse(configuration.isAutoDetectionEnabled());

@@ -15,9 +15,12 @@
  */
 package com.android.server.timedetector;
 
+import static android.app.timedetector.TimeDetector.SHELL_COMMAND_CONFIRM_TIME;
+import static android.app.timedetector.TimeDetector.SHELL_COMMAND_GET_TIME_STATE;
 import static android.app.timedetector.TimeDetector.SHELL_COMMAND_IS_AUTO_DETECTION_ENABLED;
 import static android.app.timedetector.TimeDetector.SHELL_COMMAND_SERVICE_NAME;
 import static android.app.timedetector.TimeDetector.SHELL_COMMAND_SET_AUTO_DETECTION_ENABLED;
+import static android.app.timedetector.TimeDetector.SHELL_COMMAND_SET_TIME_STATE;
 import static android.app.timedetector.TimeDetector.SHELL_COMMAND_SUGGEST_EXTERNAL_TIME;
 import static android.app.timedetector.TimeDetector.SHELL_COMMAND_SUGGEST_GNSS_TIME;
 import static android.app.timedetector.TimeDetector.SHELL_COMMAND_SUGGEST_MANUAL_TIME;
@@ -30,6 +33,8 @@ import static com.android.server.timedetector.ServerFlags.KEY_TIME_DETECTOR_ORIG
 
 import android.app.time.ExternalTimeSuggestion;
 import android.app.time.TimeConfiguration;
+import android.app.time.TimeState;
+import android.app.time.UnixEpochTime;
 import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.TelephonyTimeSuggestion;
 import android.os.ShellCommand;
@@ -69,6 +74,12 @@ class TimeDetectorShellCommand extends ShellCommand {
                 return runSuggestGnssTime();
             case SHELL_COMMAND_SUGGEST_EXTERNAL_TIME:
                 return runSuggestExternalTime();
+            case SHELL_COMMAND_GET_TIME_STATE:
+                return runGetTimeState();
+            case SHELL_COMMAND_SET_TIME_STATE:
+                return runSetTimeState();
+            case SHELL_COMMAND_CONFIRM_TIME:
+                return runConfirmTime();
             default: {
                 return handleDefaultCommands(cmd);
             }
@@ -140,6 +151,24 @@ class TimeDetectorShellCommand extends ShellCommand {
         }
     }
 
+    private int runGetTimeState() {
+        TimeState timeState = mInterface.getTimeState();
+        getOutPrintWriter().println(timeState);
+        return 0;
+    }
+
+    private int runSetTimeState() {
+        TimeState timeState = TimeState.parseCommandLineArgs(this);
+        mInterface.setTimeState(timeState);
+        return 0;
+    }
+
+    private int runConfirmTime() {
+        UnixEpochTime unixEpochTime = UnixEpochTime.parseCommandLineArgs(this);
+        getOutPrintWriter().println(mInterface.confirmTime(unixEpochTime));
+        return 0;
+    }
+
     @Override
     public void onHelp() {
         final PrintWriter pw = getOutPrintWriter();
@@ -161,6 +190,12 @@ class TimeDetectorShellCommand extends ShellCommand {
         pw.printf("    Suggests a time as if via the \"gnss\" origin.\n");
         pw.printf("  %s <external suggestion opts>\n", SHELL_COMMAND_SUGGEST_EXTERNAL_TIME);
         pw.printf("    Suggests a time as if via the \"external\" origin.\n");
+        pw.printf("  %s\n", SHELL_COMMAND_GET_TIME_STATE);
+        pw.printf("    Returns the current time setting state.\n");
+        pw.printf("  %s <time state options>\n", SHELL_COMMAND_SET_TIME_STATE);
+        pw.printf("    Sets the current time state for tests.\n");
+        pw.printf("  %s <unix epoch time options>\n", SHELL_COMMAND_CONFIRM_TIME);
+        pw.printf("    Tries to confirms the time, raising the confidence.\n");
         pw.println();
         ManualTimeSuggestion.printCommandLineOpts(pw);
         pw.println();
@@ -171,6 +206,10 @@ class TimeDetectorShellCommand extends ShellCommand {
         GnssTimeSuggestion.printCommandLineOpts(pw);
         pw.println();
         ExternalTimeSuggestion.printCommandLineOpts(pw);
+        pw.println();
+        TimeState.printCommandLineOpts(pw);
+        pw.println();
+        UnixEpochTime.printCommandLineOpts(pw);
         pw.println();
         pw.printf("This service is also affected by the following device_config flags in the"
                 + " %s namespace:\n", NAMESPACE_SYSTEM_TIME);

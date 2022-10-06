@@ -18,6 +18,7 @@ package com.android.server.timedetector;
 
 import static com.android.server.SystemClockTime.TIME_CONFIDENCE_HIGH;
 import static com.android.server.SystemClockTime.TIME_CONFIDENCE_LOW;
+import static com.android.server.SystemTimeZone.TIME_ZONE_CONFIDENCE_HIGH;
 import static com.android.server.timedetector.TimeDetectorStrategy.ORIGIN_EXTERNAL;
 import static com.android.server.timedetector.TimeDetectorStrategy.ORIGIN_GNSS;
 import static com.android.server.timedetector.TimeDetectorStrategy.ORIGIN_NETWORK;
@@ -31,6 +32,8 @@ import static org.junit.Assert.fail;
 
 import android.annotation.UserIdInt;
 import android.app.time.ExternalTimeSuggestion;
+import android.app.time.TimeState;
+import android.app.time.UnixEpochTime;
 import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.TelephonyTimeSuggestion;
 import android.os.TimestampedValue;
@@ -300,7 +303,7 @@ public class TimeDetectorStrategyImplTest {
         final int confidenceUpgradeThresholdMillis = 1000;
         ConfigurationInternal configInternal =
                 new ConfigurationInternal.Builder(CONFIG_AUTO_DISABLED)
-                        .setSystemClockConfidenceUpgradeThresholdMillis(
+                        .setSystemClockConfidenceThresholdMillis(
                                 confidenceUpgradeThresholdMillis)
                         .build();
         Script script = new Script()
@@ -338,7 +341,7 @@ public class TimeDetectorStrategyImplTest {
         final int confidenceUpgradeThresholdMillis = 1000;
         ConfigurationInternal configInternal =
                 new ConfigurationInternal.Builder(CONFIG_AUTO_DISABLED)
-                        .setSystemClockConfidenceUpgradeThresholdMillis(
+                        .setSystemClockConfidenceThresholdMillis(
                                 confidenceUpgradeThresholdMillis)
                         .build();
         Script script = new Script().pokeFakeClocks(initialClockTime, TIME_CONFIDENCE_LOW)
@@ -375,7 +378,7 @@ public class TimeDetectorStrategyImplTest {
         final int confidenceUpgradeThresholdMillis = 1000;
         ConfigurationInternal configInternal =
                 new ConfigurationInternal.Builder(CONFIG_AUTO_DISABLED)
-                        .setSystemClockConfidenceUpgradeThresholdMillis(
+                        .setSystemClockConfidenceThresholdMillis(
                                 confidenceUpgradeThresholdMillis)
                         .build();
         Script script = new Script().pokeFakeClocks(initialClockTime, TIME_CONFIDENCE_HIGH)
@@ -1137,6 +1140,126 @@ public class TimeDetectorStrategyImplTest {
     }
 
     @Test
+    public void testGetTimeState() {
+        TimestampedValue<Instant> deviceTime = ARBITRARY_CLOCK_INITIALIZATION_INFO;
+        Script script = new Script().simulateConfigurationInternalChange(CONFIG_AUTO_ENABLED)
+                .pokeFakeClocks(deviceTime, TIME_CONFIDENCE_LOW)
+                .verifySystemClockConfidence(TIME_CONFIDENCE_LOW);
+
+        UnixEpochTime systemClockTime = new UnixEpochTime(deviceTime.getReferenceTimeMillis(),
+                deviceTime.getValue().toEpochMilli());
+
+        // When confidence is low, the user should confirm.
+        script.assertGetTimeStateReturns(new TimeState(systemClockTime, true));
+
+        // When confidence is high, no need for the user to confirm.
+        script.pokeFakeClocks(deviceTime, TIME_ZONE_CONFIDENCE_HIGH)
+                .verifySystemClockConfidence(TIME_CONFIDENCE_HIGH);
+
+        script.assertGetTimeStateReturns(new TimeState(systemClockTime, false));
+    }
+
+    @Test
+    public void testSetTimeState() {
+        TimestampedValue<Instant> deviceTime = ARBITRARY_CLOCK_INITIALIZATION_INFO;
+        Script script = new Script().simulateConfigurationInternalChange(CONFIG_AUTO_ENABLED)
+                .pokeFakeClocks(deviceTime, TIME_CONFIDENCE_LOW)
+                .verifySystemClockConfidence(TIME_CONFIDENCE_LOW);
+
+
+        UnixEpochTime systemClockTime = new UnixEpochTime(11111L, 222222L);
+        boolean userShouldConfirmTime = false;
+        TimeState state = new TimeState(systemClockTime, userShouldConfirmTime);
+        script.simulateSetTimeState(state);
+
+        UnixEpochTime expectedTime = systemClockTime.at(script.peekElapsedRealtimeMillis());
+        long expectedTimeMillis = expectedTime.getUnixEpochTimeMillis();
+        // userShouldConfirmTime == high confidence
+        script.verifySystemClockConfidence(TIME_CONFIDENCE_HIGH)
+                .verifySystemClockWasSetAndResetCallTracking(expectedTimeMillis);
+
+        TimeState expectedTimeState = new TimeState(expectedTime, userShouldConfirmTime);
+        script.assertGetTimeStateReturns(expectedTimeState);
+    }
+
+    @Test
+    public void testConfirmTime_autoDisabled() {
+        testConfirmTime(CONFIG_AUTO_ENABLED);
+    }
+
+    @Test
+    public void testConfirmTime_autoEnabled() {
+        testConfirmTime(CONFIG_AUTO_ENABLED);
+    }
+
+    private void testConfirmTime(ConfigurationInternal config) {
+        TimestampedValue<Instant> deviceTime = ARBITRARY_CLOCK_INITIALIZATION_INFO;
+        Script script = new Script().simulateConfigurationInternalChange(CONFIG_AUTO_ENABLED)
+                .pokeFakeClocks(deviceTime, TIME_CONFIDENCE_LOW)
+                .verifySystemClockConfidence(TIME_CONFIDENCE_LOW);
+
+        long maxConfidenceThreshold = config.getSystemClockConfidenceThresholdMillis();
+        UnixEpochTime incorrectTime1 =
+                new UnixEpochTime(
+                        deviceTime.getReferenceTimeMillis() + maxConfidenceThreshold + 1,
+                        deviceTime.getValue().toEpochMilli());
+        script.simulateConfirmTime(incorrectTime1, false)
+                .verifySystemClockConfidence(TIME_CONFIDENCE_LOW)
+                .verifySystemClockWasNotSetAndResetCallTracking();
+
+        UnixEpochTime incorrectTime2 =
+                new UnixEpochTime(
+                        deviceTime.getReferenceTimeMillis(),
+                        deviceTime.getValue().toEpochMilli() + maxConfidenceThreshold + 1);
+        script.simulateConfirmTime(incorrectTime2, false)
+                .verifySystemClockConfidence(TIME_CONFIDENCE_LOW)
+                .verifySystemClockWasNotSetAndResetCallTracking();
+
+        // Confirm using a time that is at the threshold.
+        UnixEpochTime correctTime1 =
+                new UnixEpochTime(
+                        deviceTime.getReferenceTimeMillis(),
+                        deviceTime.getValue().toEpochMilli() + maxConfidenceThreshold);
+        script.simulateConfirmTime(correctTime1, true)
+                .verifySystemClockConfidence(TIME_CONFIDENCE_HIGH)
+                .verifySystemClockWasNotSetAndResetCallTracking();
+
+        // Reset back to low confidence.
+        script.pokeFakeClocks(deviceTime, TIME_CONFIDENCE_LOW)
+                .verifySystemClockConfidence(TIME_CONFIDENCE_LOW)
+                .verifySystemClockWasNotSetAndResetCallTracking();
+
+        // Confirm using a time that is at the threshold.
+        UnixEpochTime correctTime2 =
+                new UnixEpochTime(
+                        deviceTime.getReferenceTimeMillis() + maxConfidenceThreshold,
+                        deviceTime.getValue().toEpochMilli());
+        script.simulateConfirmTime(correctTime2, true)
+                .verifySystemClockConfidence(TIME_CONFIDENCE_HIGH)
+                .verifySystemClockWasNotSetAndResetCallTracking();
+
+        // Reset back to low confidence.
+        script.pokeFakeClocks(deviceTime, TIME_CONFIDENCE_LOW)
+                .verifySystemClockConfidence(TIME_CONFIDENCE_LOW)
+                .verifySystemClockWasNotSetAndResetCallTracking();
+
+        // Confirm using a time that exactly matches.
+        UnixEpochTime correctTime3 =
+                new UnixEpochTime(
+                        deviceTime.getReferenceTimeMillis(),
+                        deviceTime.getValue().toEpochMilli());
+        script.simulateConfirmTime(correctTime3, true)
+                .verifySystemClockConfidence(TIME_CONFIDENCE_HIGH)
+                .verifySystemClockWasNotSetAndResetCallTracking();
+
+        // Now try to confirm using another incorrect time: Confidence should remain high as the
+        // confirmation is ignored / returns false.
+        script.simulateConfirmTime(incorrectTime1, false)
+                .verifySystemClockConfidence(TIME_CONFIDENCE_HIGH)
+                .verifySystemClockWasNotSetAndResetCallTracking();
+    }
+
+    @Test
     public void highPrioritySuggestionsBeatLowerPrioritySuggestions_telephonyNetworkOrigins() {
         ConfigurationInternal configInternal =
                 new ConfigurationInternal.Builder(CONFIG_AUTO_ENABLED)
@@ -1771,7 +1894,7 @@ public class TimeDetectorStrategyImplTest {
             assertEquals(expectedSystemClockMillis, mSystemClockMillis);
         }
 
-        public void verifySystemClockConfidence(@TimeConfidence int expectedConfidence) {
+        public void verifySystemClockConfidenceLatest(@TimeConfidence int expectedConfidence) {
             assertEquals(expectedConfidence, mSystemClockConfidence);
         }
 
@@ -1879,6 +2002,12 @@ public class TimeDetectorStrategyImplTest {
             return simulateTimePassing(999);
         }
 
+        /** Calls {@link TimeDetectorStrategy#setTimeState(TimeState)}. */
+        Script simulateSetTimeState(TimeState timeState) {
+            mTimeDetectorStrategy.setTimeState(timeState);
+            return this;
+        }
+
         Script verifySystemClockWasNotSetAndResetCallTracking() {
             mFakeEnvironment.verifySystemClockNotSet();
             mFakeEnvironment.resetCallTracking();
@@ -1892,7 +2021,7 @@ public class TimeDetectorStrategyImplTest {
         }
 
         Script verifySystemClockConfidence(@TimeConfidence int expectedConfidence) {
-            mFakeEnvironment.verifySystemClockConfidence(expectedConfidence);
+            mFakeEnvironment.verifySystemClockConfidenceLatest(expectedConfidence);
             return this;
         }
 
@@ -1928,6 +2057,11 @@ public class TimeDetectorStrategyImplTest {
          */
         Script assertLatestExternalSuggestion(ExternalTimeSuggestion expected) {
             assertEquals(expected, mTimeDetectorStrategy.getLatestExternalSuggestion());
+            return this;
+        }
+
+        Script assertGetTimeStateReturns(TimeState expected) {
+            assertEquals(expected, mTimeDetectorStrategy.getTimeState());
             return this;
         }
 
@@ -2036,6 +2170,11 @@ public class TimeDetectorStrategyImplTest {
          */
         long calculateTimeInMillisForNow(TimestampedValue<Long> unixEpochTime) {
             return TimeDetectorStrategy.getTimeAt(unixEpochTime, peekElapsedRealtimeMillis());
+        }
+
+        Script simulateConfirmTime(UnixEpochTime confirmationTime, boolean expectedReturnValue) {
+            assertEquals(expectedReturnValue, mTimeDetectorStrategy.confirmTime(confirmationTime));
+            return this;
         }
     }
 

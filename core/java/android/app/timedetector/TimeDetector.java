@@ -85,6 +85,24 @@ public interface TimeDetector {
     String SHELL_COMMAND_SUGGEST_EXTERNAL_TIME = "suggest_external_time";
 
     /**
+     * A shell command that retrieves the current system clock time state.
+     * @hide
+     */
+    String SHELL_COMMAND_GET_TIME_STATE = "get_time_state";
+
+    /**
+     * A shell command that sets the current time state for testing.
+     * @hide
+     */
+    String SHELL_COMMAND_SET_TIME_STATE = "set_time_state_for_tests";
+
+    /**
+     * A shell command that sets the confidence in the current time state for testing.
+     * @hide
+     */
+    String SHELL_COMMAND_CONFIRM_TIME = "confirm_time";
+
+    /**
      * A shared utility method to create a {@link ManualTimeSuggestion}.
      *
      * @hide

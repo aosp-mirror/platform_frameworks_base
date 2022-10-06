@@ -68,14 +68,14 @@ final class SubtypeUtils {
         if (locale == null) {
             return false;
         }
-        final int N = imi.getSubtypeCount();
-        for (int i = 0; i < N; ++i) {
+        final int numSubtypes = imi.getSubtypeCount();
+        for (int i = 0; i < numSubtypes; ++i) {
             final InputMethodSubtype subtype = imi.getSubtypeAt(i);
             if (checkCountry) {
                 final Locale subtypeLocale = subtype.getLocaleObject();
-                if (subtypeLocale == null ||
-                        !TextUtils.equals(subtypeLocale.getLanguage(), locale.getLanguage()) ||
-                        !TextUtils.equals(subtypeLocale.getCountry(), locale.getCountry())) {
+                if (subtypeLocale == null
+                        || !TextUtils.equals(subtypeLocale.getLanguage(), locale.getLanguage())
+                        || !TextUtils.equals(subtypeLocale.getCountry(), locale.getCountry())) {
                     continue;
                 }
             } else {
@@ -260,8 +260,8 @@ final class SubtypeUtils {
         boolean partialMatchFound = false;
         InputMethodSubtype applicableSubtype = null;
         InputMethodSubtype firstMatchedModeSubtype = null;
-        final int N = subtypes.size();
-        for (int i = 0; i < N; ++i) {
+        final int numSubtypes = subtypes.size();
+        for (int i = 0; i < numSubtypes; ++i) {
             InputMethodSubtype subtype = subtypes.get(i);
             final String subtypeLocale = subtype.getLocale();
             final String subtypeLanguage = LocaleUtils.getLanguageFromLocaleString(subtypeLocale);
