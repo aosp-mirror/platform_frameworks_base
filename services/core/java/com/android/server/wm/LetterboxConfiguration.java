@@ -22,7 +22,6 @@ import android.content.Context;
 import android.graphics.Color;
 
 import com.android.internal.R;
-import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -56,31 +55,57 @@ final class LetterboxConfiguration {
     static final int LETTERBOX_BACKGROUND_WALLPAPER = 3;
 
     /**
-     * Enum for Letterbox reachability position types.
+     * Enum for Letterbox horizontal reachability position types.
      *
      * <p>Order from left to right is important since it's used in {@link
      * #movePositionForReachabilityToNextRightStop} and {@link
      * #movePositionForReachabilityToNextLeftStop}.
      */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({LETTERBOX_REACHABILITY_POSITION_LEFT, LETTERBOX_REACHABILITY_POSITION_CENTER,
-            LETTERBOX_REACHABILITY_POSITION_RIGHT})
-    @interface LetterboxReachabilityPosition {};
+    @IntDef({LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_LEFT,
+            LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_CENTER,
+            LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_RIGHT})
+    @interface LetterboxHorizontalReachabilityPosition {};
 
     /** Letterboxed app window is aligned to the left side. */
-    static final int LETTERBOX_REACHABILITY_POSITION_LEFT = 0;
+    static final int LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_LEFT = 0;
 
     /** Letterboxed app window is positioned in the horizontal center. */
-    static final int LETTERBOX_REACHABILITY_POSITION_CENTER = 1;
+    static final int LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_CENTER = 1;
 
     /** Letterboxed app window is aligned to the right side. */
-    static final int LETTERBOX_REACHABILITY_POSITION_RIGHT = 2;
+    static final int LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_RIGHT = 2;
+
+    /**
+     * Enum for Letterbox vertical reachability position types.
+     *
+     * <p>Order from top to bottom is important since it's used in {@link
+     * #movePositionForReachabilityToNextBottomStop} and {@link
+     * #movePositionForReachabilityToNextTopStop}.
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({LETTERBOX_VERTICAL_REACHABILITY_POSITION_TOP,
+            LETTERBOX_VERTICAL_REACHABILITY_POSITION_CENTER,
+            LETTERBOX_VERTICAL_REACHABILITY_POSITION_BOTTOM})
+    @interface LetterboxVerticalReachabilityPosition {};
+
+    /** Letterboxed app window is aligned to the left side. */
+    static final int LETTERBOX_VERTICAL_REACHABILITY_POSITION_TOP = 0;
+
+    /** Letterboxed app window is positioned in the vertical center. */
+    static final int LETTERBOX_VERTICAL_REACHABILITY_POSITION_CENTER = 1;
+
+    /** Letterboxed app window is aligned to the right side. */
+    static final int LETTERBOX_VERTICAL_REACHABILITY_POSITION_BOTTOM = 2;
 
     final Context mContext;
 
     // Aspect ratio of letterbox for fixed orientation, values <=
     // MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO will be ignored.
     private float mFixedOrientationLetterboxAspectRatio;
+
+    // Default min aspect ratio for unresizable apps that are eligible for the size compat mode.
+    private float mDefaultMinAspectRatioForUnresizableApps;
 
     // Corners radius for activities presented in the letterbox mode, values < 0 will be ignored.
     private int mLetterboxActivityCornersRadius;
@@ -107,28 +132,56 @@ final class LetterboxConfiguration {
     // side of the screen and 1.0 to the right side.
     private float mLetterboxHorizontalPositionMultiplier;
 
-    // Default horizontal position the letterboxed app window when reachability is enabled and
-    // an app is fullscreen in landscape device orientatio.
-    // It is used as a starting point for mLetterboxPositionForReachability.
-    @LetterboxReachabilityPosition
-    private int mDefaultPositionForReachability;
+    // Vertical position of a center of the letterboxed app window. 0 corresponds to the top
+    // side of the screen and 1.0 to the bottom side.
+    private float mLetterboxVerticalPositionMultiplier;
 
-    // Whether reachability repositioning is allowed for letterboxed fullscreen apps in landscape
-    // device orientation.
-    private boolean mIsReachabilityEnabled;
+    // Default horizontal position the letterboxed app window when horizontal reachability is
+    // enabled and an app is fullscreen in landscape device orientation.
+    // It is used as a starting point for mLetterboxPositionForHorizontalReachability.
+    @LetterboxHorizontalReachabilityPosition
+    private int mDefaultPositionForHorizontalReachability;
+
+    // Default vertical position the letterboxed app window when vertical reachability is enabled
+    // and an app is fullscreen in portrait device orientation.
+    // It is used as a starting point for mLetterboxPositionForVerticalReachability.
+    @LetterboxVerticalReachabilityPosition
+    private int mDefaultPositionForVerticalReachability;
+
+    // Whether horizontal reachability repositioning is allowed for letterboxed fullscreen apps in
+    // landscape device orientation.
+    private boolean mIsHorizontalReachabilityEnabled;
+
+    // Whether vertical reachability repositioning is allowed for letterboxed fullscreen apps in
+    // portrait device orientation.
+    private boolean mIsVerticalReachabilityEnabled;
+
 
     // Horizontal position of a center of the letterboxed app window which is global to prevent
     // "jumps" when switching between letterboxed apps. It's updated to reposition the app window
     // in response to a double tap gesture (see LetterboxUiController#handleDoubleTap). Used in
     // LetterboxUiController#getHorizontalPositionMultiplier which is called from
-    // ActivityRecord#updateResolvedBoundsHorizontalPosition.
+    // ActivityRecord#updateResolvedBoundsPosition.
     // TODO(b/199426138): Global reachability setting causes a jump when resuming an app from
     // Overview after changing position in another app.
-    @LetterboxReachabilityPosition
-    private volatile int mLetterboxPositionForReachability;
+    @LetterboxHorizontalReachabilityPosition
+    private volatile int mLetterboxPositionForHorizontalReachability;
+
+    // Vertical position of a center of the letterboxed app window which is global to prevent
+    // "jumps" when switching between letterboxed apps. It's updated to reposition the app window
+    // in response to a double tap gesture (see LetterboxUiController#handleDoubleTap). Used in
+    // LetterboxUiController#getVerticalPositionMultiplier which is called from
+    // ActivityRecord#updateResolvedBoundsPosition.
+    // TODO(b/199426138): Global reachability setting causes a jump when resuming an app from
+    // Overview after changing position in another app.
+    @LetterboxVerticalReachabilityPosition
+    private volatile int mLetterboxPositionForVerticalReachability;
 
     // Whether education is allowed for letterboxed fullscreen apps.
     private boolean mIsEducationEnabled;
+
+    // Whether using split screen aspect ratio as a default aspect ratio for unresizable apps.
+    private boolean mIsSplitScreenAspectRatioForUnresizableAppsEnabled;
 
     LetterboxConfiguration(Context systemUiContext) {
         mContext = systemUiContext;
@@ -143,12 +196,24 @@ final class LetterboxConfiguration {
                 R.dimen.config_letterboxBackgroundWallaperDarkScrimAlpha);
         mLetterboxHorizontalPositionMultiplier = mContext.getResources().getFloat(
                 R.dimen.config_letterboxHorizontalPositionMultiplier);
-        mIsReachabilityEnabled = mContext.getResources().getBoolean(
-                R.bool.config_letterboxIsReachabilityEnabled);
-        mDefaultPositionForReachability = readLetterboxReachabilityPositionFromConfig(mContext);
-        mLetterboxPositionForReachability = mDefaultPositionForReachability;
+        mLetterboxVerticalPositionMultiplier = mContext.getResources().getFloat(
+                R.dimen.config_letterboxVerticalPositionMultiplier);
+        mIsHorizontalReachabilityEnabled = mContext.getResources().getBoolean(
+                R.bool.config_letterboxIsHorizontalReachabilityEnabled);
+        mIsVerticalReachabilityEnabled = mContext.getResources().getBoolean(
+                R.bool.config_letterboxIsVerticalReachabilityEnabled);
+        mDefaultPositionForHorizontalReachability =
+                readLetterboxHorizontalReachabilityPositionFromConfig(mContext);
+        mDefaultPositionForVerticalReachability =
+                readLetterboxVerticalReachabilityPositionFromConfig(mContext);
+        mLetterboxPositionForHorizontalReachability = mDefaultPositionForHorizontalReachability;
+        mLetterboxPositionForVerticalReachability = mDefaultPositionForVerticalReachability;
         mIsEducationEnabled = mContext.getResources().getBoolean(
                 R.bool.config_letterboxIsEducationEnabled);
+        setDefaultMinAspectRatioForUnresizableApps(mContext.getResources().getFloat(
+                R.dimen.config_letterboxDefaultMinAspectRatioForUnresizableApps));
+        mIsSplitScreenAspectRatioForUnresizableAppsEnabled = mContext.getResources().getBoolean(
+                R.bool.config_letterboxIsSplitScreenAspectRatioForUnresizableAppsEnabled);
     }
 
     /**
@@ -157,7 +222,6 @@ final class LetterboxConfiguration {
      * com.android.internal.R.dimen.config_fixedOrientationLetterboxAspectRatio} will be ignored and
      * the framework implementation will be used to determine the aspect ratio.
      */
-    @VisibleForTesting
     void setFixedOrientationLetterboxAspectRatio(float aspectRatio) {
         mFixedOrientationLetterboxAspectRatio = aspectRatio;
     }
@@ -166,7 +230,6 @@ final class LetterboxConfiguration {
      * Resets the aspect ratio of letterbox for fixed orientation to {@link
      * com.android.internal.R.dimen.config_fixedOrientationLetterboxAspectRatio}.
      */
-    @VisibleForTesting
     void resetFixedOrientationLetterboxAspectRatio() {
         mFixedOrientationLetterboxAspectRatio = mContext.getResources().getFloat(
                 com.android.internal.R.dimen.config_fixedOrientationLetterboxAspectRatio);
@@ -180,6 +243,47 @@ final class LetterboxConfiguration {
     }
 
     /**
+     * Resets the min aspect ratio for unresizable apps that are eligible for size compat mode.
+     */
+    void resetDefaultMinAspectRatioForUnresizableApps() {
+        setDefaultMinAspectRatioForUnresizableApps(mContext.getResources().getFloat(
+                R.dimen.config_letterboxDefaultMinAspectRatioForUnresizableApps));
+    }
+
+    /**
+     * Gets the min aspect ratio for unresizable apps that are eligible for size compat mode.
+     */
+    float getDefaultMinAspectRatioForUnresizableApps() {
+        return mDefaultMinAspectRatioForUnresizableApps;
+    }
+
+    /**
+     * Overrides the min aspect ratio for unresizable apps that are eligible for size compat mode.
+     */
+    void setDefaultMinAspectRatioForUnresizableApps(float aspectRatio) {
+        mDefaultMinAspectRatioForUnresizableApps = aspectRatio;
+    }
+
+    /**
+     * Overrides corners radius for activities presented in the letterbox mode. If given value < 0,
+     * both it and a value of {@link
+     * com.android.internal.R.integer.config_letterboxActivityCornersRadius} will be ignored and
+     * corners of the activity won't be rounded.
+     */
+    void setLetterboxActivityCornersRadius(int cornersRadius) {
+        mLetterboxActivityCornersRadius = cornersRadius;
+    }
+
+    /**
+     * Resets corners radius for activities presented in the letterbox mode to {@link
+     * com.android.internal.R.integer.config_letterboxActivityCornersRadius}.
+     */
+    void resetLetterboxActivityCornersRadius() {
+        mLetterboxActivityCornersRadius = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_letterboxActivityCornersRadius);
+    }
+
+    /**
      * Whether corners of letterboxed activities are rounded.
      */
     boolean isLetterboxActivityCornersRounded() {
@@ -187,7 +291,7 @@ final class LetterboxConfiguration {
     }
 
     /**
-     * Gets corners raidus for activities presented in the letterbox mode.
+     * Gets corners radius for activities presented in the letterbox mode.
      */
     int getLetterboxActivityCornersRadius() {
         return mLetterboxActivityCornersRadius;
@@ -196,7 +300,7 @@ final class LetterboxConfiguration {
     /**
      * Gets color of letterbox background which is used when {@link
      * #getLetterboxBackgroundType()} is {@link #LETTERBOX_BACKGROUND_SOLID_COLOR} or as
-     * fallback for other backfround types.
+     * fallback for other background types.
      */
     Color getLetterboxBackgroundColor() {
         if (mLetterboxBackgroundColorOverride != null) {
@@ -210,6 +314,34 @@ final class LetterboxConfiguration {
         return Color.valueOf(mContext.getResources().getColor(colorId));
     }
 
+
+    /**
+     * Sets color of letterbox background which is used when {@link
+     * #getLetterboxBackgroundType()} is {@link #LETTERBOX_BACKGROUND_SOLID_COLOR} or as
+     * fallback for other background types.
+     */
+    void setLetterboxBackgroundColor(Color color) {
+        mLetterboxBackgroundColorOverride = color;
+    }
+
+    /**
+     * Sets color ID of letterbox background which is used when {@link
+     * #getLetterboxBackgroundType()} is {@link #LETTERBOX_BACKGROUND_SOLID_COLOR} or as
+     * fallback for other background types.
+     */
+    void setLetterboxBackgroundColorResourceId(int colorId) {
+        mLetterboxBackgroundColorResourceIdOverride = colorId;
+    }
+
+    /**
+     * Resets color of letterbox background to {@link
+     * com.android.internal.R.color.config_letterboxBackgroundColor}.
+     */
+    void resetLetterboxBackgroundColor() {
+        mLetterboxBackgroundColorOverride = null;
+        mLetterboxBackgroundColorResourceIdOverride = null;
+    }
+
     /**
      * Gets {@link LetterboxBackgroundType} specified in {@link
      * com.android.internal.R.integer.config_letterboxBackgroundType} or over via ADB command.
@@ -217,6 +349,19 @@ final class LetterboxConfiguration {
     @LetterboxBackgroundType
     int getLetterboxBackgroundType() {
         return mLetterboxBackgroundType;
+    }
+
+    /** Sets letterbox background type. */
+    void setLetterboxBackgroundType(@LetterboxBackgroundType int backgroundType) {
+        mLetterboxBackgroundType = backgroundType;
+    }
+
+    /**
+     * Resets cletterbox background type to {@link
+     * com.android.internal.R.integer.config_letterboxBackgroundType}.
+     */
+    void resetLetterboxBackgroundType() {
+        mLetterboxBackgroundType = readLetterboxBackgroundTypeFromConfig(mContext);
     }
 
     /** Returns a string representing the given {@link LetterboxBackgroundType}. */
@@ -248,10 +393,53 @@ final class LetterboxConfiguration {
     }
 
     /**
+     * Overrides alpha of a black scrim shown over wallpaper for {@link
+     * #LETTERBOX_BACKGROUND_WALLPAPER} option in {@link mLetterboxBackgroundType}.
+     *
+     * <p>If given value is < 0 or >= 1, both it and a value of {@link
+     * com.android.internal.R.dimen.config_letterboxBackgroundWallaperDarkScrimAlpha} are ignored
+     * and 0.0 (transparent) is instead.
+     */
+    void setLetterboxBackgroundWallpaperDarkScrimAlpha(float alpha) {
+        mLetterboxBackgroundWallpaperDarkScrimAlpha = alpha;
+    }
+
+    /**
+     * Resets alpha of a black scrim shown over wallpaper letterbox background to {@link
+     * com.android.internal.R.dimen.config_letterboxBackgroundWallaperDarkScrimAlpha}.
+     */
+    void resetLetterboxBackgroundWallpaperDarkScrimAlpha() {
+        mLetterboxBackgroundWallpaperDarkScrimAlpha = mContext.getResources().getFloat(
+                com.android.internal.R.dimen.config_letterboxBackgroundWallaperDarkScrimAlpha);
+    }
+
+    /**
      * Gets alpha of a black scrim shown over wallpaper letterbox background.
      */
     float getLetterboxBackgroundWallpaperDarkScrimAlpha() {
         return mLetterboxBackgroundWallpaperDarkScrimAlpha;
+    }
+
+    /**
+     * Overrides blur radius for {@link #LETTERBOX_BACKGROUND_WALLPAPER} option in
+     * {@link mLetterboxBackgroundType}.
+     *
+     * <p> If given value <= 0, both it and a value of {@link
+     * com.android.internal.R.dimen.config_letterboxBackgroundWallpaperBlurRadius} are ignored
+     * and 0 is used instead.
+     */
+    void setLetterboxBackgroundWallpaperBlurRadius(int radius) {
+        mLetterboxBackgroundWallpaperBlurRadius = radius;
+    }
+
+    /**
+     * Resets blur raidus for {@link #LETTERBOX_BACKGROUND_WALLPAPER} option in {@link
+     * mLetterboxBackgroundType} to {@link
+     * com.android.internal.R.dimen.config_letterboxBackgroundWallpaperBlurRadius}.
+     */
+    void resetLetterboxBackgroundWallpaperBlurRadius() {
+        mLetterboxBackgroundWallpaperBlurRadius = mContext.getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.config_letterboxBackgroundWallpaperBlurRadius);
     }
 
     /**
@@ -275,72 +463,187 @@ final class LetterboxConfiguration {
                         ? 0.5f : mLetterboxHorizontalPositionMultiplier;
     }
 
+    /*
+     * Gets vertical position of a center of the letterboxed app window specified
+     * in {@link com.android.internal.R.dimen.config_letterboxVerticalPositionMultiplier}
+     * or via an ADB command. 0 corresponds to the top side of the screen and 1 to the
+     * bottom side.
+     */
+    float getLetterboxVerticalPositionMultiplier() {
+        return (mLetterboxVerticalPositionMultiplier < 0.0f
+                || mLetterboxVerticalPositionMultiplier > 1.0f)
+                        // Default to central position if invalid value is provided.
+                        ? 0.5f : mLetterboxVerticalPositionMultiplier;
+    }
+
     /**
      * Overrides horizontal position of a center of the letterboxed app window. If given value < 0
      * or > 1, then it and a value of {@link
      * com.android.internal.R.dimen.config_letterboxHorizontalPositionMultiplier} are ignored and
      * central position (0.5) is used.
      */
-    @VisibleForTesting
     void setLetterboxHorizontalPositionMultiplier(float multiplier) {
         mLetterboxHorizontalPositionMultiplier = multiplier;
+    }
+
+    /**
+     * Overrides vertical position of a center of the letterboxed app window. If given value < 0
+     * or > 1, then it and a value of {@link
+     * com.android.internal.R.dimen.config_letterboxVerticalPositionMultiplier} are ignored and
+     * central position (0.5) is used.
+     */
+    void setLetterboxVerticalPositionMultiplier(float multiplier) {
+        mLetterboxVerticalPositionMultiplier = multiplier;
     }
 
     /**
      * Resets horizontal position of a center of the letterboxed app window to {@link
      * com.android.internal.R.dimen.config_letterboxHorizontalPositionMultiplier}.
      */
-    @VisibleForTesting
     void resetLetterboxHorizontalPositionMultiplier() {
         mLetterboxHorizontalPositionMultiplier = mContext.getResources().getFloat(
                 com.android.internal.R.dimen.config_letterboxHorizontalPositionMultiplier);
     }
 
-    /*
-     * Whether reachability repositioning is allowed for letterboxed fullscreen apps in landscape
-     * device orientation.
+    /**
+     * Resets vertical position of a center of the letterboxed app window to {@link
+     * com.android.internal.R.dimen.config_letterboxVerticalPositionMultiplier}.
      */
-    boolean getIsReachabilityEnabled() {
-        return mIsReachabilityEnabled;
+    void resetLetterboxVerticalPositionMultiplier() {
+        mLetterboxVerticalPositionMultiplier = mContext.getResources().getFloat(
+                com.android.internal.R.dimen.config_letterboxVerticalPositionMultiplier);
     }
 
-    /**
-     * Overrides whether reachability repositioning is allowed for letterboxed fullscreen apps in
+    /*
+     * Whether horizontal reachability repositioning is allowed for letterboxed fullscreen apps in
      * landscape device orientation.
      */
-    @VisibleForTesting
-    void setIsReachabilityEnabled(boolean enabled) {
-        mIsReachabilityEnabled = enabled;
-    }
-
-    /**
-     * Resets whether reachability repositioning is allowed for letterboxed fullscreen apps in
-     * landscape device orientation to {@link R.bool.config_letterboxIsReachabilityEnabled}.
-     */
-    @VisibleForTesting
-    void resetIsReachabilityEnabled() {
-        mIsReachabilityEnabled = mContext.getResources().getBoolean(
-                R.bool.config_letterboxIsReachabilityEnabled);
+    boolean getIsHorizontalReachabilityEnabled() {
+        return mIsHorizontalReachabilityEnabled;
     }
 
     /*
-     * Gets default horizontal position of the letterboxed app window when reachability is enabled.
-     * Specified in {@link R.integer.config_letterboxDefaultPositionForReachability} or via an ADB
-     * command.
+     * Whether vertical reachability repositioning is allowed for letterboxed fullscreen apps in
+     * portrait device orientation.
      */
-    @LetterboxReachabilityPosition
-    int getDefaultPositionForReachability() {
-        return mDefaultPositionForReachability;
+    boolean getIsVerticalReachabilityEnabled() {
+        return mIsVerticalReachabilityEnabled;
     }
 
-    @LetterboxReachabilityPosition
-    private static int readLetterboxReachabilityPositionFromConfig(Context context) {
+    /**
+     * Overrides whether horizontal reachability repositioning is allowed for letterboxed fullscreen
+     * apps in landscape device orientation.
+     */
+    void setIsHorizontalReachabilityEnabled(boolean enabled) {
+        mIsHorizontalReachabilityEnabled = enabled;
+    }
+
+    /**
+     * Overrides whether vertical reachability repositioning is allowed for letterboxed fullscreen
+     * apps in portrait device orientation.
+     */
+    void setIsVerticalReachabilityEnabled(boolean enabled) {
+        mIsVerticalReachabilityEnabled = enabled;
+    }
+
+    /**
+     * Resets whether horizontal reachability repositioning is allowed for letterboxed fullscreen
+     * apps in landscape device orientation to
+     * {@link R.bool.config_letterboxIsHorizontalReachabilityEnabled}.
+     */
+    void resetIsHorizontalReachabilityEnabled() {
+        mIsHorizontalReachabilityEnabled = mContext.getResources().getBoolean(
+                R.bool.config_letterboxIsHorizontalReachabilityEnabled);
+    }
+
+    /**
+     * Resets whether vertical reachability repositioning is allowed for letterboxed fullscreen apps
+     * in portrait device orientation to
+     * {@link R.bool.config_letterboxIsVerticalReachabilityEnabled}.
+     */
+    void resetIsVerticalReachabilityEnabled() {
+        mIsVerticalReachabilityEnabled = mContext.getResources().getBoolean(
+                R.bool.config_letterboxIsVerticalReachabilityEnabled);
+    }
+
+    /*
+     * Gets default horizontal position of the letterboxed app window when horizontal reachability
+     * is enabled.
+     *
+     * <p> Specified in {@link R.integer.config_letterboxDefaultPositionForHorizontalReachability}
+     *  or via an ADB command.
+     */
+    @LetterboxHorizontalReachabilityPosition
+    int getDefaultPositionForHorizontalReachability() {
+        return mDefaultPositionForHorizontalReachability;
+    }
+
+    /*
+     * Gets default vertical position of the letterboxed app window when vertical reachability is
+     * enabled.
+     *
+     * <p> Specified in {@link R.integer.config_letterboxDefaultPositionForVerticalReachability} or
+     *  via an ADB command.
+     */
+    @LetterboxVerticalReachabilityPosition
+    int getDefaultPositionForVerticalReachability() {
+        return mDefaultPositionForVerticalReachability;
+    }
+
+    /**
+     * Overrides default horizontal position of the letterboxed app window when horizontal
+     * reachability is enabled.
+     */
+    void setDefaultPositionForHorizontalReachability(
+            @LetterboxHorizontalReachabilityPosition int position) {
+        mDefaultPositionForHorizontalReachability = position;
+    }
+
+    /**
+     * Overrides default vertical position of the letterboxed app window when vertical
+     * reachability is enabled.
+     */
+    void setDefaultPositionForVerticalReachability(
+            @LetterboxVerticalReachabilityPosition int position) {
+        mDefaultPositionForVerticalReachability = position;
+    }
+
+    /**
+     * Resets default horizontal position of the letterboxed app window when horizontal reachability
+     * is enabled to {@link R.integer.config_letterboxDefaultPositionForHorizontalReachability}.
+     */
+    void resetDefaultPositionForHorizontalReachability() {
+        mDefaultPositionForHorizontalReachability =
+                readLetterboxHorizontalReachabilityPositionFromConfig(mContext);
+    }
+
+    /**
+     * Resets default vertical position of the letterboxed app window when vertical reachability
+     * is enabled to {@link R.integer.config_letterboxDefaultPositionForVerticalReachability}.
+     */
+    void resetDefaultPositionForVerticalReachability() {
+        mDefaultPositionForVerticalReachability =
+                readLetterboxVerticalReachabilityPositionFromConfig(mContext);
+    }
+
+    @LetterboxHorizontalReachabilityPosition
+    private static int readLetterboxHorizontalReachabilityPositionFromConfig(Context context) {
         int position = context.getResources().getInteger(
-                R.integer.config_letterboxDefaultPositionForReachability);
-        return position == LETTERBOX_REACHABILITY_POSITION_LEFT
-                    || position == LETTERBOX_REACHABILITY_POSITION_CENTER
-                    || position == LETTERBOX_REACHABILITY_POSITION_RIGHT
-                    ? position : LETTERBOX_REACHABILITY_POSITION_CENTER;
+                R.integer.config_letterboxDefaultPositionForHorizontalReachability);
+        return position == LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_LEFT
+                    || position == LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_CENTER
+                    || position == LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_RIGHT
+                    ? position : LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_CENTER;
+    }
+
+    @LetterboxVerticalReachabilityPosition
+    private static int readLetterboxVerticalReachabilityPositionFromConfig(Context context) {
+        int position = context.getResources().getInteger(
+                R.integer.config_letterboxDefaultPositionForVerticalReachability);
+        return position == LETTERBOX_VERTICAL_REACHABILITY_POSITION_TOP
+                || position == LETTERBOX_VERTICAL_REACHABILITY_POSITION_CENTER
+                || position == LETTERBOX_VERTICAL_REACHABILITY_POSITION_BOTTOM
+                ? position : LETTERBOX_VERTICAL_REACHABILITY_POSITION_CENTER;
     }
 
     /*
@@ -350,48 +653,126 @@ final class LetterboxConfiguration {
      * <p>The position multiplier is changed after each double tap in the letterbox area.
      */
     float getHorizontalMultiplierForReachability() {
-        switch (mLetterboxPositionForReachability) {
-            case LETTERBOX_REACHABILITY_POSITION_LEFT:
+        switch (mLetterboxPositionForHorizontalReachability) {
+            case LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_LEFT:
                 return 0.0f;
-            case LETTERBOX_REACHABILITY_POSITION_CENTER:
+            case LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_CENTER:
                 return 0.5f;
-            case LETTERBOX_REACHABILITY_POSITION_RIGHT:
+            case LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_RIGHT:
                 return 1.0f;
             default:
                 throw new AssertionError(
-                    "Unexpected letterbox position type: " + mLetterboxPositionForReachability);
+                    "Unexpected letterbox position type: "
+                            + mLetterboxPositionForHorizontalReachability);
+        }
+    }
+    /*
+     * Gets vertical position of a center of the letterboxed app window when reachability
+     * is enabled specified. 0 corresponds to the top side of the screen and 1 to the bottom side.
+     *
+     * <p>The position multiplier is changed after each double tap in the letterbox area.
+     */
+    float getVerticalMultiplierForReachability() {
+        switch (mLetterboxPositionForVerticalReachability) {
+            case LETTERBOX_VERTICAL_REACHABILITY_POSITION_TOP:
+                return 0.0f;
+            case LETTERBOX_VERTICAL_REACHABILITY_POSITION_CENTER:
+                return 0.5f;
+            case LETTERBOX_VERTICAL_REACHABILITY_POSITION_BOTTOM:
+                return 1.0f;
+            default:
+                throw new AssertionError(
+                        "Unexpected letterbox position type: "
+                                + mLetterboxPositionForVerticalReachability);
         }
     }
 
-    /** Returns a string representing the given {@link LetterboxReachabilityPosition}. */
-    static String letterboxReachabilityPositionToString(
-            @LetterboxReachabilityPosition int position) {
+    /*
+     * Gets the horizontal position of the letterboxed app window when horizontal reachability is
+     * enabled.
+     */
+    @LetterboxHorizontalReachabilityPosition
+    int getLetterboxPositionForHorizontalReachability() {
+        return mLetterboxPositionForHorizontalReachability;
+    }
+
+    /*
+     * Gets the vertical position of the letterboxed app window when vertical reachability is
+     * enabled.
+     */
+    @LetterboxVerticalReachabilityPosition
+    int getLetterboxPositionForVerticalReachability() {
+        return mLetterboxPositionForVerticalReachability;
+    }
+
+    /** Returns a string representing the given {@link LetterboxHorizontalReachabilityPosition}. */
+    static String letterboxHorizontalReachabilityPositionToString(
+            @LetterboxHorizontalReachabilityPosition int position) {
         switch (position) {
-            case LETTERBOX_REACHABILITY_POSITION_LEFT:
-                return "LETTERBOX_REACHABILITY_POSITION_LEFT";
-            case LETTERBOX_REACHABILITY_POSITION_CENTER:
-                return "LETTERBOX_REACHABILITY_POSITION_CENTER";
-            case LETTERBOX_REACHABILITY_POSITION_RIGHT:
-                return "LETTERBOX_REACHABILITY_POSITION_RIGHT";
+            case LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_LEFT:
+                return "LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_LEFT";
+            case LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_CENTER:
+                return "LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_CENTER";
+            case LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_RIGHT:
+                return "LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_RIGHT";
             default:
                 throw new AssertionError(
                     "Unexpected letterbox position type: " + position);
         }
     }
 
-    /**
-     * Changes letterbox position for reachability to the next available one on the right side.
-     */
-    void movePositionForReachabilityToNextRightStop() {
-        mLetterboxPositionForReachability = Math.min(
-                mLetterboxPositionForReachability + 1, LETTERBOX_REACHABILITY_POSITION_RIGHT);
+    /** Returns a string representing the given {@link LetterboxVerticalReachabilityPosition}. */
+    static String letterboxVerticalReachabilityPositionToString(
+            @LetterboxVerticalReachabilityPosition int position) {
+        switch (position) {
+            case LETTERBOX_VERTICAL_REACHABILITY_POSITION_TOP:
+                return "LETTERBOX_VERTICAL_REACHABILITY_POSITION_TOP";
+            case LETTERBOX_VERTICAL_REACHABILITY_POSITION_CENTER:
+                return "LETTERBOX_VERTICAL_REACHABILITY_POSITION_CENTER";
+            case LETTERBOX_VERTICAL_REACHABILITY_POSITION_BOTTOM:
+                return "LETTERBOX_VERTICAL_REACHABILITY_POSITION_BOTTOM";
+            default:
+                throw new AssertionError(
+                        "Unexpected letterbox position type: " + position);
+        }
     }
 
     /**
-     * Changes letterbox position for reachability to the next available one on the left side.
+     * Changes letterbox position for horizontal reachability to the next available one on the
+     * right side.
      */
-    void movePositionForReachabilityToNextLeftStop() {
-        mLetterboxPositionForReachability = Math.max(mLetterboxPositionForReachability - 1, 0);
+    void movePositionForHorizontalReachabilityToNextRightStop() {
+        mLetterboxPositionForHorizontalReachability = Math.min(
+                mLetterboxPositionForHorizontalReachability + 1,
+                LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_RIGHT);
+    }
+
+    /**
+     * Changes letterbox position for horizontal reachability to the next available one on the left
+     * side.
+     */
+    void movePositionForHorizontalReachabilityToNextLeftStop() {
+        mLetterboxPositionForHorizontalReachability =
+                Math.max(mLetterboxPositionForHorizontalReachability - 1, 0);
+    }
+
+    /**
+     * Changes letterbox position for vertical reachability to the next available one on the bottom
+     * side.
+     */
+    void movePositionForVerticalReachabilityToNextBottomStop() {
+        mLetterboxPositionForVerticalReachability = Math.min(
+                mLetterboxPositionForVerticalReachability + 1,
+                LETTERBOX_VERTICAL_REACHABILITY_POSITION_BOTTOM);
+    }
+
+    /**
+     * Changes letterbox position for vertical reachability to the next available one on the top
+     * side.
+     */
+    void movePositionForVerticalReachabilityToNextTopStop() {
+        mLetterboxPositionForVerticalReachability =
+                Math.max(mLetterboxPositionForVerticalReachability - 1, 0);
     }
 
     /**
@@ -404,8 +785,41 @@ final class LetterboxConfiguration {
     /**
      * Overrides whether education is allowed for letterboxed fullscreen apps.
      */
-    @VisibleForTesting
     void setIsEducationEnabled(boolean enabled) {
         mIsEducationEnabled = enabled;
     }
+
+    /**
+     * Resets whether education is allowed for letterboxed fullscreen apps to
+     * {@link R.bool.config_letterboxIsEducationEnabled}.
+     */
+    void resetIsEducationEnabled() {
+        mIsEducationEnabled = mContext.getResources().getBoolean(
+                R.bool.config_letterboxIsEducationEnabled);
+    }
+
+    /**
+     * Whether using split screen aspect ratio as a default aspect ratio for unresizable apps.
+     */
+    boolean getIsSplitScreenAspectRatioForUnresizableAppsEnabled() {
+        return mIsSplitScreenAspectRatioForUnresizableAppsEnabled;
+    }
+
+    /**
+     * Overrides whether using split screen aspect ratio as a default aspect ratio for unresizable
+     * apps.
+     */
+    void setIsSplitScreenAspectRatioForUnresizableAppsEnabled(boolean enabled) {
+        mIsSplitScreenAspectRatioForUnresizableAppsEnabled = enabled;
+    }
+
+    /**
+     * Resets whether using split screen aspect ratio as a default aspect ratio for unresizable
+     * apps {@link R.bool.config_letterboxIsSplitScreenAspectRatioForUnresizableAppsEnabled}.
+     */
+    void resetIsSplitScreenAspectRatioForUnresizableAppsEnabled() {
+        mIsSplitScreenAspectRatioForUnresizableAppsEnabled = mContext.getResources().getBoolean(
+                R.bool.config_letterboxIsSplitScreenAspectRatioForUnresizableAppsEnabled);
+    }
+
 }

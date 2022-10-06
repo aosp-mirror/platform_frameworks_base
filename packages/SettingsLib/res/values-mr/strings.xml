@@ -125,9 +125,9 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD ऑडिओ: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD ऑडिओ"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"श्रवणयंत्रे"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE ऑडिओ"</string>
+    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"श्रवण यंत्रांशी कनेक्ट केले आहे"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"LE ऑडिओशी कनेक्ट केले आहे"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"LE_AUDIO शी कनेक्ट केले आहे"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"मीडिया ऑडिओवर कनेक्ट केले"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"फोन ऑडिओ वर कनेक्ट केले"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"फाइल स्थानांतर सर्व्हरवर कनेक्ट केले"</string>
@@ -201,9 +201,9 @@
     <string name="tts_engine_network_required" msgid="8722087649733906851">"या भाषेस टेक्‍स्‍ट टू स्‍पीचसाठी एका नेटवर्क कनेक्शनची आवश्यकता आहे."</string>
     <string name="tts_default_sample_string" msgid="6388016028292967973">"हे उच्चार संश्लेषणाचे एक उदाहरण आहे"</string>
     <string name="tts_status_title" msgid="8190784181389278640">"डीफॉल्ट भाषा स्थिती"</string>
-    <string name="tts_status_ok" msgid="8583076006537547379">"<xliff:g id="LOCALE">%1$s</xliff:g> ला पूर्ण सपोर्ट आहे"</string>
+    <string name="tts_status_ok" msgid="8583076006537547379">"<xliff:g id="LOCALE">%1$s</xliff:g> पूर्णपणे समर्थित आहे"</string>
     <string name="tts_status_requires_network" msgid="8327617638884678896">"<xliff:g id="LOCALE">%1$s</xliff:g> ला नेटवर्क कनेक्शनची आवश्यकता आहे"</string>
-    <string name="tts_status_not_supported" msgid="2702997696245523743">"<xliff:g id="LOCALE">%1$s</xliff:g> ला सपोर्ट नाही"</string>
+    <string name="tts_status_not_supported" msgid="2702997696245523743">"<xliff:g id="LOCALE">%1$s</xliff:g> समर्थित नाही"</string>
     <string name="tts_status_checking" msgid="8026559918948285013">"तपासत आहे..."</string>
     <string name="tts_engine_settings_title" msgid="7849477533103566291">"<xliff:g id="TTS_ENGINE_NAME">%s</xliff:g> साठी सेटिंग्ज"</string>
     <string name="tts_engine_settings_button" msgid="477155276199968948">"इंजीन सेटिंग्ज लाँच करा"</string>
@@ -598,6 +598,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"रीसेट करा"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"काढून टाका"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"अतिथीला रीसेट करत आहे…"</string>
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"अतिथी सत्र रीसेट करायचे का?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"हे नवीन अतिथी सत्र सुरू करेल आणि सध्याच्या सत्रातील सर्व अ‍ॅप्स व डेटा हटवेल"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"अतिथी मोडमधून बाहेर पडायचे का?"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"हे सध्याच्या अतिथी सत्रातील अ‍ॅप्स आणि डेटा हटवेल"</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"बाहेर पडा"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"अतिथी अ‍ॅक्टिव्हिटी सेव्ह करायची का?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"सध्याच्या सत्रातील अ‍ॅक्टिव्हिटी सेव्ह करू किंवा सर्व अ‍ॅप्स व डेटा हटवू शकता"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"हटवा"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"सेव्ह करा"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"अतिथी मोडमधून बाहेर पडा"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"अतिथी सत्र रीसेट करा"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"अतिथी मोडमधून बाहेर पडा"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"बाहेर पडल्यावर सर्व अ‍ॅक्टिव्हिटी हटवली जाईल"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"बाहेर पडल्यावर तुमची अ‍ॅक्टिव्हिटी सेव्ह करू किंवा हटवू शकता"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"सत्र अ‍ॅक्टिव्हिटी आता हटवण्यासाठी रीसेट करा किंवा तुम्ही बाहेर पडल्यावर अ‍ॅक्टिव्हिटी सेव्ह करू अथवा हटवू शकता"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"फोटो काढा"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"इमेज निवडा"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"फोटो निवडा"</string>
@@ -652,11 +667,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"स्क्रीन सुरू करा"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"स्क्रीन सुरू करण्यासाठी अनुमती द्या"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"स्क्रीन सुरू करण्यासाठी ॲपला अनुमती द्या. अनुमती दिल्यास, ॲप तुमच्या स्पष्ट हेतूशिवाय कधीही स्क्रीन सुरू करू शकते."</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR कोड स्कॅन करा"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"ऐकणे सुरू करण्यासाठी, खालील QR कोड मध्यभागी ठेवा"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR कोडचा फॉरमॅट चुकीचा आहे"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> चे प्रसारण थांबवायचे आहे का?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"तुम्ही <xliff:g id="SWITCHAPP">%1$s</xliff:g> चे प्रसारण केल्यास किंवा आउटपुट बदलल्यास, तुमचे सध्याचे प्रसारण बंद होईल"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> चे प्रसारण करा"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"आउटपूट बदला"</string>
-    <string name="back_navigation_animation" msgid="8105467568421689484">"पूर्वानुमानित मागे जाण्याचे अ‍ॅनिमेशन"</string>
-    <string name="back_navigation_animation_summary" msgid="741292224121599456">"पूर्वानुमानित मागे जाण्यासाठीचे सिस्टीम अ‍ॅनिमेशन सुरू करा."</string>
-    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"हे सेटिंग पूर्वानुमानित जेश्चर ॲनिमेशनसाठी सिस्टीम ॲनिमेशन सुरू करते. यासाठी मॅनिफेस्ट फाइलमध्ये प्रति ॲप enableOnBackInvokedCallback सत्य वर सेट करणे आवश्यक आहे."</string>
 </resources>

@@ -675,6 +675,11 @@ public class LocationManagerService extends ILocationManager.Stub implements
         return mInjector.getSettingsHelper().getIgnoreSettingsAllowlist();
     }
 
+    @Override
+    public PackageTagsList getAdasAllowlist() {
+        return mInjector.getSettingsHelper().getAdasAllowlist();
+    }
+
     @Nullable
     @Override
     public ICancellationSignal getCurrentLocation(String provider, LocationRequest request,

@@ -18,9 +18,8 @@ package androidx.window.extensions.embedding;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.app.Activity;
+import android.app.ActivityThread;
 import android.app.WindowConfiguration.WindowingMode;
 import android.content.Intent;
 import android.graphics.Rect;
@@ -29,6 +28,10 @@ import android.os.IBinder;
 import android.util.Size;
 import android.window.TaskFragmentInfo;
 import android.window.WindowContainerTransaction;
+
+import androidx.annotation.GuardedBy;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -175,6 +178,7 @@ class TaskFragmentContainer {
                 && mInfo.getActivities().size() == collectNonFinishingActivities().size();
     }
 
+    @NonNull
     ActivityStack toActivityStack() {
         return new ActivityStack(collectNonFinishingActivities(), isEmpty());
     }
@@ -187,15 +191,70 @@ class TaskFragmentContainer {
         // Remove the pending activity from other TaskFragments.
         mTaskContainer.cleanupPendingAppearedActivity(pendingAppearedActivity);
         mPendingAppearedActivities.add(pendingAppearedActivity);
+        updateActivityClientRecordTaskFragmentToken(pendingAppearedActivity);
+    }
+
+    /**
+     * Updates the {@link ActivityThread.ActivityClientRecord#mTaskFragmentToken} for the
+     * activity. This makes sure the token is up-to-date if the activity is relaunched later.
+     */
+    private void updateActivityClientRecordTaskFragmentToken(@NonNull Activity activity) {
+        final ActivityThread.ActivityClientRecord record = ActivityThread
+                .currentActivityThread().getActivityClient(activity.getActivityToken());
+        if (record != null) {
+            record.mTaskFragmentToken = mToken;
+        }
     }
 
     void removePendingAppearedActivity(@NonNull Activity pendingAppearedActivity) {
         mPendingAppearedActivities.remove(pendingAppearedActivity);
     }
 
+    void clearPendingAppearedActivities() {
+        final List<Activity> cleanupActivities = new ArrayList<>(mPendingAppearedActivities);
+        // Clear mPendingAppearedActivities so that #getContainerWithActivity won't return the
+        // current TaskFragment.
+        mPendingAppearedActivities.clear();
+        mPendingAppearedIntent = null;
+
+        // For removed pending activities, we need to update the them to their previous containers.
+        for (Activity activity : cleanupActivities) {
+            final TaskFragmentContainer curContainer = mController.getContainerWithActivity(
+                    activity);
+            if (curContainer != null) {
+                curContainer.updateActivityClientRecordTaskFragmentToken(activity);
+            }
+        }
+    }
+
+    /** Called when the activity is destroyed. */
+    void onActivityDestroyed(@NonNull Activity activity) {
+        removePendingAppearedActivity(activity);
+        if (mInfo != null) {
+            // Remove the activity now because there can be a delay before the server callback.
+            mInfo.getActivities().remove(activity.getActivityToken());
+        }
+    }
+
     @Nullable
     Intent getPendingAppearedIntent() {
         return mPendingAppearedIntent;
+    }
+
+    void setPendingAppearedIntent(@Nullable Intent intent) {
+        mPendingAppearedIntent = intent;
+    }
+
+    /**
+     * Clears the pending appeared Intent if it is the same as given Intent. Otherwise, the
+     * pending appeared Intent is cleared when TaskFragmentInfo is set and is not empty (has
+     * running activities).
+     */
+    void clearPendingAppearedIntentIfNeeded(@NonNull Intent intent) {
+        if (mPendingAppearedIntent == null || mPendingAppearedIntent != intent) {
+            return;
+        }
+        mPendingAppearedIntent = null;
     }
 
     boolean hasActivity(@NonNull IBinder token) {
@@ -228,15 +287,26 @@ class TaskFragmentContainer {
         return mInfo;
     }
 
-    void setInfo(@NonNull TaskFragmentInfo info) {
+    @GuardedBy("mController.mLock")
+    void setInfo(@NonNull WindowContainerTransaction wct, @NonNull TaskFragmentInfo info) {
         if (!mIsFinished && mInfo == null && info.isEmpty()) {
-            // onTaskFragmentAppeared with empty info. We will remove the TaskFragment if it is
-            // still empty after timeout.
-            mAppearEmptyTimeout = () -> {
+            // onTaskFragmentAppeared with empty info. We will remove the TaskFragment if no
+            // pending appeared intent/activities. Otherwise, wait and removing the TaskFragment if
+            // it is still empty after timeout.
+            if (mPendingAppearedIntent != null || !mPendingAppearedActivities.isEmpty()) {
+                mAppearEmptyTimeout = () -> {
+                    synchronized (mController.mLock) {
+                        mAppearEmptyTimeout = null;
+                        // Call without the pass-in wct when timeout. We need to applyWct directly
+                        // in this case.
+                        mController.onTaskFragmentAppearEmptyTimeout(this);
+                    }
+                };
+                mController.getHandler().postDelayed(mAppearEmptyTimeout, APPEAR_EMPTY_TIMEOUT_MS);
+            } else {
                 mAppearEmptyTimeout = null;
-                mController.onTaskFragmentAppearEmptyTimeout(this);
-            };
-            mController.getHandler().postDelayed(mAppearEmptyTimeout, APPEAR_EMPTY_TIMEOUT_MS);
+                mController.onTaskFragmentAppearEmptyTimeout(wct, this);
+            }
         } else if (mAppearEmptyTimeout != null && !info.isEmpty()) {
             mController.getHandler().removeCallbacks(mAppearEmptyTimeout);
             mAppearEmptyTimeout = null;
@@ -362,7 +432,7 @@ class TaskFragmentContainer {
                     // In case we have requested to reparent the activity to another container (as
                     // pendingAppeared), we don't want to finish it with this container.
                     && mController.getContainerWithActivity(activity) == this) {
-                activity.finish();
+                wct.finishActivity(activity.getActivityToken());
             }
         }
 
@@ -387,7 +457,7 @@ class TaskFragmentContainer {
                     || controller.shouldRetainAssociatedActivity(this, activity)) {
                 continue;
             }
-            activity.finish();
+            wct.finishActivity(activity.getActivityToken());
         }
         mActivitiesToFinishOnExit.clear();
     }
@@ -468,6 +538,18 @@ class TaskFragmentContainer {
             }
         }
         return new Size(maxMinWidth, maxMinHeight);
+    }
+
+    /** Whether the current TaskFragment is above the {@code other} TaskFragment. */
+    boolean isAbove(@NonNull TaskFragmentContainer other) {
+        if (mTaskContainer != other.mTaskContainer) {
+            throw new IllegalArgumentException(
+                    "Trying to compare two TaskFragments in different Task.");
+        }
+        if (this == other) {
+            throw new IllegalArgumentException("Trying to compare a TaskFragment with itself.");
+        }
+        return mTaskContainer.indexOf(this) > mTaskContainer.indexOf(other);
     }
 
     @Override

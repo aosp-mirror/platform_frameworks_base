@@ -41,7 +41,12 @@ struct {
 
 static JNIEnv* getenv(JavaVM* vm) {
     JNIEnv* env;
-    if (vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
+    auto result = vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6);
+    if (result == JNI_EDETACHED) {
+        if (vm->AttachCurrentThreadAsDaemon(&env, nullptr) != JNI_OK) {
+            LOG_ALWAYS_FATAL("Failed to AttachCurrentThread!");
+        }
+    } else if (result != JNI_OK) {
         LOG_ALWAYS_FATAL("Failed to get JNIEnv for JavaVM: %p", vm);
     }
     return env;
@@ -60,28 +65,22 @@ public:
     }
 
     ~TransactionHangCallbackWrapper() {
-        if (mTransactionHangObject) {
-            getenv()->DeleteGlobalRef(mTransactionHangObject);
+        if (mTransactionHangObject != nullptr) {
+            getenv(mVm)->DeleteGlobalRef(mTransactionHangObject);
             mTransactionHangObject = nullptr;
         }
     }
 
     void onTransactionHang(bool isGpuHang) {
         if (mTransactionHangObject) {
-            getenv()->CallVoidMethod(mTransactionHangObject,
-                                     gTransactionHangCallback.onTransactionHang, isGpuHang);
+            getenv(mVm)->CallVoidMethod(mTransactionHangObject,
+                                        gTransactionHangCallback.onTransactionHang, isGpuHang);
         }
     }
 
 private:
     JavaVM* mVm;
     jobject mTransactionHangObject;
-
-    JNIEnv* getenv() {
-        JNIEnv* env;
-        mVm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6);
-        return env;
-    }
 };
 
 static jlong nativeCreate(JNIEnv* env, jclass clazz, jstring jName,

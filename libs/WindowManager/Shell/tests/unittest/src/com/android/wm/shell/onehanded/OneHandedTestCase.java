@@ -30,6 +30,8 @@ import android.view.WindowManager;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.wm.shell.ShellTestCase;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.mockito.Answers;
@@ -38,7 +40,7 @@ import org.mockito.Mock;
 /**
  * Base class that does One Handed specific setup.
  */
-public abstract class OneHandedTestCase {
+public abstract class OneHandedTestCase extends ShellTestCase {
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     protected Context mContext;
 

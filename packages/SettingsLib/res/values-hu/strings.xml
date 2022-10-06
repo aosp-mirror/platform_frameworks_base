@@ -125,9 +125,9 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD audio: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD audio"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Hallókészülékek"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"Alacsony energiaszintű hangátvitel"</string>
+    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Hallókészülékhez csatlakoztatva"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Csatlakoztatva az alacsony energiaszintű hangátvitelhez"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"Csatlakoztatva ehhez: LE_AUDIO"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Csatlakoztatva az eszköz hangjához"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Csatlakoztatva a telefon hangjához"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Csatlakozva a fájlküldő szerverhez"</string>
@@ -598,6 +598,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Visszaállítás"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Eltávolítás"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Vendég munkamenet visszaállítása…"</string>
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Visszaállítja a vendégmunkamenetet?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"A művelettel új vendégmunkamenetet indít, valamint az összes alkalmazást és adatot törli az aktuális munkamenetből"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Kilép a vendég módból?"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"A művelettel törlődnek az aktuális vendégmunkamenet alkalmazásai és adatai"</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Kilépés"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Menti a vendégtevékenységeket?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Tevékenységeket menthet az aktuális munkamenetből, vagy minden appot és adatot törölhet"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Törlés"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Mentés"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"Kilépés a vendég módból"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"Vendégmunkamenet visszaállítása"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Vendég kiléptetése"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"A kilépéssel minden tevékenység törlődik"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"A kilépéskor mentheti vagy törölheti a tevékenységeket"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Visszaállítással azonnal törölheti a munkamenethez tartozó tevékenységeket, illetve kilépéskor mentheti vagy törölheti a tevékenységeket"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Fotó készítése"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Kép kiválasztása"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Fotó kiválasztása"</string>
@@ -652,11 +667,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Képernyő bekapcsolása"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"A képernyő bekapcsolásának engedélyezése"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"A képernyő bekapcsolásának engedélyezése az adott alkalmazás számára. Ha megadja az engedélyt, az alkalmazás az Ön kifejezett szándéka nélkül, bármikor bekapcsolhatja a képernyőt."</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR-kód beolvasása"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"A hallgatás megkezdéséhez igazítsa a QR-kódot az alábbi panel közepére"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"A QR-kód formátuma nem érvényes"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Leállítja a(z) <xliff:g id="APP_NAME">%1$s</xliff:g> közvetítését?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"A(z) <xliff:g id="SWITCHAPP">%1$s</xliff:g> közvetítése vagy a kimenet módosítása esetén a jelenlegi közvetítés leáll"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> közvetítése"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Kimenet módosítása"</string>
-    <string name="back_navigation_animation" msgid="8105467568421689484">"Prediktív „vissza” kézmozdulat-animációk"</string>
-    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Rendszeranimációk engedélyezése prediktív „vissza” kézmozdulatok esetén."</string>
-    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"A beállítás engedélyezi a rendszeranimációkat a prediktív kézmozdulat-animációk esetén. A használatukhoz az enableOnBackInvokedCallback beállítást true értékre kell állítani az egyes alkalmazások manifestfájljaiban."</string>
 </resources>

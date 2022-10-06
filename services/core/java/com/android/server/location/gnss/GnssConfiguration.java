@@ -21,6 +21,7 @@ import android.os.PersistableBundle;
 import android.os.SystemProperties;
 import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -73,6 +74,8 @@ public class GnssConfiguration {
     static final String CONFIG_NFW_PROXY_APPS = "NFW_PROXY_APPS";
     private static final String CONFIG_ENABLE_PSDS_PERIODIC_DOWNLOAD =
             "ENABLE_PSDS_PERIODIC_DOWNLOAD";
+    private static final String CONFIG_ENABLE_ACTIVE_SIM_EMERGENCY_SUPL =
+            "ENABLE_ACTIVE_SIM_EMERGENCY_SUPL";
     static final String CONFIG_LONGTERM_PSDS_SERVER_1 = "LONGTERM_PSDS_SERVER_1";
     static final String CONFIG_LONGTERM_PSDS_SERVER_2 = "LONGTERM_PSDS_SERVER_2";
     static final String CONFIG_LONGTERM_PSDS_SERVER_3 = "LONGTERM_PSDS_SERVER_3";
@@ -207,6 +210,14 @@ public class GnssConfiguration {
     }
 
     /**
+     * Returns true if during an emergency call, the GnssConfiguration of the activeSubId will be
+     * injected for the emergency SUPL flow; Returns false otherwise. Default false if not set.
+     */
+    boolean isActiveSimEmergencySuplEnabled() {
+        return getBooleanConfig(CONFIG_ENABLE_ACTIVE_SIM_EMERGENCY_SUPL, false);
+    }
+
+    /**
      * Returns true if a long-term PSDS server is configured.
      */
     boolean isLongTermPsdsServerConfigured() {
@@ -232,16 +243,31 @@ public class GnssConfiguration {
 
     /**
      * Loads the GNSS properties from carrier config file followed by the properties from
-     * gps debug config file.
+     * gps debug config file, and injects the GNSS properties into the HAL.
      */
     void reloadGpsProperties() {
-        if (DEBUG) Log.d(TAG, "Reset GPS properties, previous size = " + mProperties.size());
-        loadPropertiesFromCarrierConfig();
+        reloadGpsProperties(/* inEmergency= */ false, /* activeSubId= */ -1);
+    }
 
-        String lpp_prof = SystemProperties.get(LPP_PROFILE);
-        if (!TextUtils.isEmpty(lpp_prof)) {
-            // override default value of this if lpp_prof is not empty
-            mProperties.setProperty(CONFIG_LPP_PROFILE, lpp_prof);
+    /**
+     * Loads the GNSS properties from carrier config file followed by the properties from
+     * gps debug config file, and injects the GNSS properties into the HAL.
+     */
+    void reloadGpsProperties(boolean inEmergency, int activeSubId) {
+        if (DEBUG) {
+            Log.d(TAG,
+                    "Reset GPS properties, previous size = " + mProperties.size() + ", inEmergency:"
+                            + inEmergency + ", activeSubId=" + activeSubId);
+        }
+        loadPropertiesFromCarrierConfig(inEmergency, activeSubId);
+
+        if (isSimAbsent(mContext)) {
+            // Use the default SIM's LPP profile when SIM is absent.
+            String lpp_prof = SystemProperties.get(LPP_PROFILE);
+            if (!TextUtils.isEmpty(lpp_prof)) {
+                // override default value of this if lpp_prof is not empty
+                mProperties.setProperty(CONFIG_LPP_PROFILE, lpp_prof);
+            }
         }
 
         /*
@@ -322,16 +348,19 @@ public class GnssConfiguration {
     /**
      * Loads GNSS properties from carrier config file.
      */
-    void loadPropertiesFromCarrierConfig() {
+    void loadPropertiesFromCarrierConfig(boolean inEmergency, int activeSubId) {
         CarrierConfigManager configManager = (CarrierConfigManager)
                 mContext.getSystemService(Context.CARRIER_CONFIG_SERVICE);
         if (configManager == null) {
             return;
         }
 
-        int ddSubId = SubscriptionManager.getDefaultDataSubscriptionId();
-        PersistableBundle configs = SubscriptionManager.isValidSubscriptionId(ddSubId)
-                ? configManager.getConfigForSubId(ddSubId) : configManager.getConfig();
+        int subId = SubscriptionManager.getDefaultDataSubscriptionId();
+        if (inEmergency && activeSubId >= 0) {
+            subId = activeSubId;
+        }
+        PersistableBundle configs = SubscriptionManager.isValidSubscriptionId(subId)
+                ? configManager.getConfigForSubId(subId) : configManager.getConfig();
         if (configs == null) {
             if (DEBUG) Log.d(TAG, "SIM not ready, use default carrier config.");
             configs = CarrierConfigManager.getDefaultConfig();
@@ -420,6 +449,12 @@ public class GnssConfiguration {
             HalInterfaceVersion gnssConfiguartionIfaceVersion) {
         // GPS_LOCK is deprecated in @2.0::IGnssConfiguration.hal
         return gnssConfiguartionIfaceVersion.mMajor < 2;
+    }
+
+    private static boolean isSimAbsent(Context context) {
+        TelephonyManager phone = (TelephonyManager) context.getSystemService(
+                Context.TELEPHONY_SERVICE);
+        return phone.getSimState() == TelephonyManager.SIM_STATE_ABSENT;
     }
 
     private static native HalInterfaceVersion native_get_gnss_configuration_version();

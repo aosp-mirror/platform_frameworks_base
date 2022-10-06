@@ -20,6 +20,13 @@ import android.view.MotionEvent;
 
 // ACHTUNG!
 public interface Gefingerpoken {
-    boolean onInterceptTouchEvent(MotionEvent ev);
-    boolean onTouchEvent(MotionEvent ev);
+    /** Called when a touch is being intercepted in a ViewGroup. */
+    default boolean onInterceptTouchEvent(MotionEvent ev) {
+        return false;
+    }
+
+    /** Called when a touch is being handled by a view. */
+    default boolean onTouchEvent(MotionEvent ev) {
+        return false;
+    }
 }

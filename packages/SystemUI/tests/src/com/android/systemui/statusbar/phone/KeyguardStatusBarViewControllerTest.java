@@ -17,6 +17,9 @@
 package com.android.systemui.statusbar.phone;
 
 
+import static android.app.StatusBarManager.DISABLE2_SYSTEM_ICONS;
+import static android.app.StatusBarManager.DISABLE_SYSTEM_INFO;
+
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
 
@@ -47,8 +50,9 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.battery.BatteryMeterViewController;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.shade.NotificationPanelViewController;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserInfoTracker;
@@ -88,7 +92,9 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     @Mock
     private StatusBarIconController mStatusBarIconController;
     @Mock
-    private FeatureFlags mFeatureFlags;
+    private StatusBarIconController.TintedIconManager.Factory mIconManagerFactory;
+    @Mock
+    private StatusBarIconController.TintedIconManager mIconManager;
     @Mock
     private BatteryMeterViewController mBatteryMeterViewController;
     @Mock
@@ -116,6 +122,7 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     @Mock
     private StatusBarUserInfoTracker mStatusBarUserInfoTracker;
     @Mock private SecureSettings mSecureSettings;
+    @Mock private CommandQueue mCommandQueue;
 
     private TestNotificationPanelViewStateProvider mNotificationPanelViewStateProvider;
     private KeyguardStatusBarView mKeyguardStatusBarView;
@@ -128,11 +135,14 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
 
         MockitoAnnotations.initMocks(this);
 
+        when(mIconManagerFactory.create(any(), any())).thenReturn(mIconManager);
+
         allowTestableLooperAsMainThread();
         TestableLooper.get(this).runWithLooper(() -> {
             mKeyguardStatusBarView =
                     spy((KeyguardStatusBarView) LayoutInflater.from(mContext)
                             .inflate(R.layout.keyguard_status_bar, null));
+            when(mKeyguardStatusBarView.getDisplay()).thenReturn(mContext.getDisplay());
         });
 
         mController = createController();
@@ -147,7 +157,7 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
                 mBatteryController,
                 mUserInfoController,
                 mStatusBarIconController,
-                new StatusBarIconController.TintedIconManager.Factory(mFeatureFlags),
+                mIconManagerFactory,
                 mBatteryMeterViewController,
                 mNotificationPanelViewStateProvider,
                 mKeyguardStateController,
@@ -161,6 +171,7 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
                 mStatusBarUserSwitcherController,
                 mStatusBarUserInfoTracker,
                 mSecureSettings,
+                mCommandQueue,
                 mFakeExecutor
         );
     }
@@ -172,6 +183,7 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
         verify(mConfigurationController).addCallback(any());
         verify(mAnimationScheduler).addCallback(any());
         verify(mUserInfoController).addCallback(any());
+        verify(mCommandQueue).addCallback(any());
         verify(mStatusBarIconController).addIconGroup(any());
         verify(mUserManager).isUserSwitcherEnabled(anyBoolean());
     }
@@ -210,6 +222,7 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
         verify(mConfigurationController).removeCallback(any());
         verify(mAnimationScheduler).removeCallback(any());
         verify(mUserInfoController).removeCallback(any());
+        verify(mCommandQueue).removeCallback(any());
         verify(mStatusBarIconController).removeIconGroup(any());
     }
 
@@ -273,6 +286,17 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
 
         assertThat(mKeyguardStatusBarView.getAlpha()).isEqualTo(newAlpha);
         assertThat(mKeyguardStatusBarView.getVisibility()).isEqualTo(newVisibility);
+    }
+
+    @Test
+    public void updateViewState_paramVisibleButIsDisabled_viewIsInvisible() {
+        mController.onViewAttached();
+        setDisableSystemIcons(true);
+
+        mController.updateViewState(1f, View.VISIBLE);
+
+        // Since we're disabled, we stay invisible
+        assertThat(mKeyguardStatusBarView.getVisibility()).isEqualTo(View.INVISIBLE);
     }
 
     @Test
@@ -348,6 +372,50 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
         updateStateToKeyguard();
 
         mNotificationPanelViewStateProvider.setLockscreenShadeDragProgress(1f);
+
+        mController.updateViewState();
+
+        assertThat(mKeyguardStatusBarView.getVisibility()).isEqualTo(View.INVISIBLE);
+    }
+
+    @Test
+    public void updateViewState_disableSystemInfoFalse_viewShown() {
+        mController.onViewAttached();
+        updateStateToKeyguard();
+        setDisableSystemInfo(false);
+
+        mController.updateViewState();
+
+        assertThat(mKeyguardStatusBarView.getVisibility()).isEqualTo(View.VISIBLE);
+    }
+
+    @Test
+    public void updateViewState_disableSystemInfoTrue_viewHidden() {
+        mController.onViewAttached();
+        updateStateToKeyguard();
+        setDisableSystemInfo(true);
+
+        mController.updateViewState();
+
+        assertThat(mKeyguardStatusBarView.getVisibility()).isEqualTo(View.INVISIBLE);
+    }
+
+    @Test
+    public void updateViewState_disableSystemIconsFalse_viewShown() {
+        mController.onViewAttached();
+        updateStateToKeyguard();
+        setDisableSystemIcons(false);
+
+        mController.updateViewState();
+
+        assertThat(mKeyguardStatusBarView.getVisibility()).isEqualTo(View.VISIBLE);
+    }
+
+    @Test
+    public void updateViewState_disableSystemIconsTrue_viewHidden() {
+        mController.onViewAttached();
+        updateStateToKeyguard();
+        setDisableSystemIcons(true);
 
         mController.updateViewState();
 
@@ -481,6 +549,19 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
         callback.onStateChanged(state);
     }
 
+    @Test
+    public void animateKeyguardStatusBarIn_isDisabled_viewStillHidden() {
+        mController.onViewAttached();
+        updateStateToKeyguard();
+        setDisableSystemInfo(true);
+        assertThat(mKeyguardStatusBarView.getVisibility()).isEqualTo(View.INVISIBLE);
+
+        mController.animateKeyguardStatusBarIn();
+
+        // Since we're disabled, we don't actually animate in and stay invisible
+        assertThat(mKeyguardStatusBarView.getVisibility()).isEqualTo(View.INVISIBLE);
+    }
+
     /**
      * Calls {@link com.android.keyguard.KeyguardUpdateMonitorCallback#onFinishedGoingToSleep(int)}
      * to ensure values are updated properly.
@@ -492,6 +573,25 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
         KeyguardUpdateMonitorCallback callback = keyguardUpdateCallbackCaptor.getValue();
 
         callback.onFinishedGoingToSleep(0);
+    }
+
+    private void setDisableSystemInfo(boolean disabled) {
+        CommandQueue.Callbacks callback = getCommandQueueCallback();
+        int disabled1 = disabled ? DISABLE_SYSTEM_INFO : 0;
+        callback.disable(mContext.getDisplayId(), disabled1, 0, false);
+    }
+
+    private void setDisableSystemIcons(boolean disabled) {
+        CommandQueue.Callbacks callback = getCommandQueueCallback();
+        int disabled2 = disabled ? DISABLE2_SYSTEM_ICONS : 0;
+        callback.disable(mContext.getDisplayId(), 0, disabled2, false);
+    }
+
+    private CommandQueue.Callbacks getCommandQueueCallback() {
+        ArgumentCaptor<CommandQueue.Callbacks> captor =
+                ArgumentCaptor.forClass(CommandQueue.Callbacks.class);
+        verify(mCommandQueue).addCallback(captor.capture());
+        return captor.getValue();
     }
 
     private static class TestNotificationPanelViewStateProvider

@@ -125,9 +125,9 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"Audio HD: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"Audio HD"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Aparatet e dëgjimit"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"Audioja LE"</string>
+    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Lidhur me aparatet e dëgjimit"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"U lidh me audion LE"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"Lidhur me LE_AUDIO"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"U lidh me audion e medias"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"U lidh me audion e telefonit"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"U lidh me serverin e transferimit të skedarëve"</string>
@@ -183,8 +183,8 @@
     <string name="running_process_item_user_label" msgid="3988506293099805796">"Përdoruesi: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"Disa caktime me parazgjedhje"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"Nuk janë caktuar parazgjedhje"</string>
-    <string name="tts_settings" msgid="8130616705989351312">"Cilësimet \"Tekst në ligjërim\""</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"Dalja \"Tekst në ligjërim\""</string>
+    <string name="tts_settings" msgid="8130616705989351312">"Cilësimet \"tekst-në-ligjërim\""</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"Dalja \"tekst-në-ligjërim\""</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Shpejtësia e të folurit"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"Shpejtësia me të cilën thuhet teksti"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"Tonaliteti"</string>
@@ -198,7 +198,7 @@
     <string name="tts_install_data_title" msgid="1829942496472751703">"Instalo të dhënat e zërit"</string>
     <string name="tts_install_data_summary" msgid="3608874324992243851">"Instalo të dhënat e zërit që kërkohen për sintezën e të folurit"</string>
     <string name="tts_engine_security_warning" msgid="3372432853837988146">"Ky motor i sintezës së të folurit mund të mbledhë të gjithë tekstin që do të flitet, duke përfshirë të dhëna personale si fjalëkalime dhe numra kartash krediti. Ai vjen nga motori <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g>. Të aktivizohet përdorimi i këtij motori të sintezës së të folurit?"</string>
-    <string name="tts_engine_network_required" msgid="8722087649733906851">"Kjo gjuhë kërkon një lidhje funksionale interneti për daljen \"Tekst në ligjërim\"."</string>
+    <string name="tts_engine_network_required" msgid="8722087649733906851">"Kjo gjuhë kërkon një lidhje funksionale interneti për daljen \"tekst-në-ligjërim\"."</string>
     <string name="tts_default_sample_string" msgid="6388016028292967973">"Ky është një shembull i sintezës së të folurit"</string>
     <string name="tts_status_title" msgid="8190784181389278640">"Statusi i gjuhës së parazgjedhur"</string>
     <string name="tts_status_ok" msgid="8583076006537547379">"<xliff:g id="LOCALE">%1$s</xliff:g> mbështetet plotësisht"</string>
@@ -508,7 +508,7 @@
     <string name="screen_zoom_summary_custom" msgid="3468154096832912210">"I personalizuar (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="content_description_menu_button" msgid="6254844309171779931">"Menyja"</string>
     <string name="retail_demo_reset_message" msgid="5392824901108195463">"Fut fjalëkalimin për të kryer rivendosje në gjendje fabrike në modalitetin e demonstrimit"</string>
-    <string name="retail_demo_reset_next" msgid="3688129033843885362">"Para"</string>
+    <string name="retail_demo_reset_next" msgid="3688129033843885362">"Përpara"</string>
     <string name="retail_demo_reset_title" msgid="1866911701095959800">"Kërkohet fjalëkalimi"</string>
     <string name="active_input_method_subtypes" msgid="4232680535471633046">"Metodat aktive të hyrjeve"</string>
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"Përdor gjuhët e sistemit"</string>
@@ -598,6 +598,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Rivendos"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Hiq"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Vizitori po rivendoset…"</string>
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Të rivendoset sesioni për vizitorë?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Kjo do të fillojë një sesion të ri për vizitorë dhe do të fshijë të gjitha aplikacionet dhe të dhënat nga sesioni aktual"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Të hiqet modaliteti \"vizitor\"?"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Kjo do të fshijë aplikacionet dhe të dhënat nga sesioni aktual për vizitorë"</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Dil"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Të ruhet aktiviteti i vizitorit?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Ruaj aktivitetin nga sesioni aktual ose fshi të gjitha aplikacionet e të dhënat"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Fshi"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Ruaj"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"Dil nga modaliteti \"vizitor\""</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"Rivendos sesionin për vizitorë"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Dil nga modaliteti \"vizitor\""</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Të gjitha aktivitetet do të fshihen kur të dalësh"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Mund ta ruash ose ta fshish aktivitetin tënd kur të dalësh"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Rivendose për të fshirë aktivitetin e sesionit tani ose mund ta ruash ose ta fshish aktivitetin kur të dalësh"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Bëj një fotografi"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Zgjidh një imazh"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Zgjidh një fotografi"</string>
@@ -652,11 +667,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Ndiz ekranin"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Lejo ndezjen e ekranit"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Lejo një aplikacion që të ndezë ekranin. Nëse lejohet, aplikacioni mund ta ndezë ekranin në çdo kohë pa synimin tënd të shprehur."</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Skano kodin QR"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Që të fillosh të dëgjosh, vendos në qendër kodin QR më poshtë"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"Kodi QR nuk është në format të vlefshëm"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Të ndalohet transmetimi i <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Nëse transmeton <xliff:g id="SWITCHAPP">%1$s</xliff:g> ose ndryshon daljen, transmetimi yt aktual do të ndalojë"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Transmeto <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Ndrysho daljen"</string>
-    <string name="back_navigation_animation" msgid="8105467568421689484">"Animacionet për gjestin e parashikuar të kthimit prapa"</string>
-    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Aktivizo animacionet e sistemit për gjestin e parashikuar të kthimit prapa."</string>
-    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Ky cilësim aktivizon animacionet e sistemit për animacionin e gjestit të parashikuar. Ai kërkon që enableOnBackInvokedCallback për aplikacionin të jetë caktuar si i vërtetë në skedarin e manifestit."</string>
 </resources>

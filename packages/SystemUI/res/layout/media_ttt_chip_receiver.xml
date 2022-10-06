@@ -14,20 +14,25 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<!-- TODO(b/203800646): layout_marginTop doesn't seem to work on some large screens. -->
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/media_ttt_receiver_chip"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:background="@drawable/media_ttt_chip_background_receiver"
     >
+
+    <com.android.systemui.media.taptotransfer.receiver.ReceiverChipRippleView
+        android:id="@+id/ripple"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        />
 
     <com.android.internal.widget.CachingIconView
         android:id="@+id/app_icon"
         android:layout_width="@dimen/media_ttt_icon_size_receiver"
         android:layout_height="@dimen/media_ttt_icon_size_receiver"
-        android:layout_gravity="center"
+        android:layout_gravity="center|bottom"
+        android:alpha="0.0"
         />
 
 </FrameLayout>

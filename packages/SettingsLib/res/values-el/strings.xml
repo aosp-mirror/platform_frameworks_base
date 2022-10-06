@@ -125,9 +125,9 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"Ήχος HD: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"Ήχος HD"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Βοηθήματα ακοής"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE Audio"</string>
+    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Έγινε σύνδεση σε βοηθήματα ακοής"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Συνδέθηκε σε LE Audio"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"Συνδέθηκε σε LE_AUDIO"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Συνδέθηκε σε ήχο πολυμέσων"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Συνδεδεμένο στον ήχο τηλεφώνου"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Συνδεδεμένο σε διακομιστή μεταφοράς αρχείων"</string>
@@ -585,9 +585,9 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"Ορισμός κλειδώματος"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Εναλλαγή σε <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Δημιουργία νέου χρήστη…"</string>
-    <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"Δημιουργία νέου επισκέπτη…"</string>
+    <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"Δημιουργία νέου προσκεκλημένου…"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"Η δημιουργία νέου χρήστη απέτυχε"</string>
-    <string name="add_guest_failed" msgid="8074548434469843443">"Αποτυχία δημιουργίας νέου επισκέπτη"</string>
+    <string name="add_guest_failed" msgid="8074548434469843443">"Αποτυχία δημιουργίας νέου προσκεκλημένου"</string>
     <string name="user_nickname" msgid="262624187455825083">"Ψευδώνυμο"</string>
     <string name="user_add_user" msgid="7876449291500212468">"Προσθήκη χρήστη"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Προσθήκη επισκέπτη"</string>
@@ -598,6 +598,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Επαναφορά"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Κατάργηση"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Επαναφορά επισκέπτη…"</string>
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Επαναφορά περιόδου σύνδεσης επισκέπτη;"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Με αυτόν τον τρόπο θα ξεκινήσει μια νέα περίοδος σύνδεσης επισκέπτη και θα διαγραφούν όλες οι εφαρμογές και τα δεδομένα από την τρέχουσα περίοδο σύνδεσης"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Έξοδος από λειτουργία επισκέπτη;"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Θα διαγραφούν εφαρμογές και δεδομένα από την τρέχουσα περίοδο σύνδεσης επισκέπτη"</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Έξοδος"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Αποθήκευση δραστ. επισκέπτη;"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Αποθήκευση δραστ. τρέχουσας περιόδου σύνδεσης ή διαγραφή εφαρμογών και δεδομένων"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Διαγραφή"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Αποθήκευση"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"Έξοδος από λειτουργία επισκέπτη"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"Επαναφορά περ. σύνδεσης επισκέπτη"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Έξοδος επισκέπτη"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Όλη η δραστηριότητα θα διαγραφεί κατά την έξοδο"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Αποθηκεύστε ή διαγράψτε τη δραστηριότητά σας κατά την έξοδο"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Κάντε επαναφορά για να διαγράψετε τη δραστηριότητα της περιόδου σύνδεσης τώρα ή μπορείτε να αποθηκεύσετε ή να διαγράψετε τη δραστηριότητα κατά την έξοδο"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Λήψη φωτογραφίας"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Επιλογή εικόνας"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Επιλογή φωτογραφίας"</string>
@@ -652,11 +667,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Ενεργοποίηση οθόνης"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Να επιτρέπεται η ενεργοποίηση της οθόνης"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Επιτρέψτε σε μια εφαρμογή να ενεργοποιεί την οθόνη. Αν παραχωρήσετε την άδεια, η εφαρμογή ενδέχεται να ενεργοποιεί την οθόνη ανά πάσα στιγμή, χωρίς να εκφράσετε σαφή πρόθεση."</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Σάρωση κωδικού QR"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Για έναρξη της ακρόασης, κεντράρετε τον παρακάτω κωδικό QR"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"Ο κωδικός QR δεν έχει έγκυρη μορφή"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Διακοπή μετάδοσης με την εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g>;"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Εάν κάνετε μετάδοση με την εφαρμογή <xliff:g id="SWITCHAPP">%1$s</xliff:g> ή αλλάξετε την έξοδο, η τρέχουσα μετάδοση θα σταματήσει"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Μετάδοση με την εφαρμογή <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Αλλαγή εξόδου"</string>
-    <string name="back_navigation_animation" msgid="8105467568421689484">"Κινούμ. εικόνες μετάβασης προς τα πίσω με πρόβλεψη"</string>
-    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Ενεργοποίηση κινούμενων εικόνων συστήματος για μετάβαση προς τα πίσω με πρόβλεψη."</string>
-    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Αυτή η ρύθμιση ενεργοποιεί τις κινούμενες εικόνες συστήματος για τις κινούμενες εικόνες κινήσεων με πρόβλεψη. Απαιτεί τη ρύθμιση της παραμέτρου enableOnBackInvokedCallback ως αληθούς σε κάθε εφαρμογή στο αρχείο μανιφέστου."</string>
 </resources>

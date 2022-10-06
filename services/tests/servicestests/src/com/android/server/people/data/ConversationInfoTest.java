@@ -58,6 +58,7 @@ public final class ConversationInfoTest {
                 .setNotificationChannelId(NOTIFICATION_CHANNEL_ID)
                 .setParentNotificationChannelId(PARENT_NOTIFICATION_CHANNEL_ID)
                 .setLastEventTimestamp(100L)
+                .setCreationTimestamp(200L)
                 .setShortcutFlags(ShortcutInfo.FLAG_LONG_LIVED
                         | ShortcutInfo.FLAG_CACHED_NOTIFICATIONS)
                 .setImportant(true)
@@ -79,6 +80,7 @@ public final class ConversationInfoTest {
         assertEquals(PARENT_NOTIFICATION_CHANNEL_ID,
                 conversationInfo.getParentNotificationChannelId());
         assertEquals(100L, conversationInfo.getLastEventTimestamp());
+        assertEquals(200L, conversationInfo.getCreationTimestamp());
         assertTrue(conversationInfo.isShortcutLongLived());
         assertTrue(conversationInfo.isShortcutCachedForNotification());
         assertTrue(conversationInfo.isImportant());
@@ -105,6 +107,7 @@ public final class ConversationInfoTest {
         assertNull(conversationInfo.getNotificationChannelId());
         assertNull(conversationInfo.getParentNotificationChannelId());
         assertEquals(0L, conversationInfo.getLastEventTimestamp());
+        assertEquals(0L, conversationInfo.getCreationTimestamp());
         assertFalse(conversationInfo.isShortcutLongLived());
         assertFalse(conversationInfo.isShortcutCachedForNotification());
         assertFalse(conversationInfo.isImportant());
@@ -131,6 +134,7 @@ public final class ConversationInfoTest {
                 .setNotificationChannelId(NOTIFICATION_CHANNEL_ID)
                 .setParentNotificationChannelId(PARENT_NOTIFICATION_CHANNEL_ID)
                 .setLastEventTimestamp(100L)
+                .setCreationTimestamp(200L)
                 .setShortcutFlags(ShortcutInfo.FLAG_LONG_LIVED)
                 .setImportant(true)
                 .setNotificationSilenced(true)
@@ -154,6 +158,7 @@ public final class ConversationInfoTest {
         assertEquals(NOTIFICATION_CHANNEL_ID, destination.getNotificationChannelId());
         assertEquals(PARENT_NOTIFICATION_CHANNEL_ID, destination.getParentNotificationChannelId());
         assertEquals(100L, destination.getLastEventTimestamp());
+        assertEquals(200L, destination.getCreationTimestamp());
         assertTrue(destination.isShortcutLongLived());
         assertFalse(destination.isImportant());
         assertTrue(destination.isNotificationSilenced());
@@ -163,5 +168,106 @@ public final class ConversationInfoTest {
         assertFalse(destination.isContactStarred());
         assertThat(destination.getStatuses()).contains(cs);
         assertThat(destination.getStatuses()).contains(cs2);
+    }
+
+    @Test
+    public void testBuildFromAnotherConversation_identicalConversation() {
+        ConversationStatus cs = new ConversationStatus.Builder("id", ACTIVITY_ANNIVERSARY).build();
+        ConversationStatus cs2 = new ConversationStatus.Builder("id2", ACTIVITY_GAME).build();
+
+        ConversationInfo source = new ConversationInfo.Builder()
+                .setShortcutId(SHORTCUT_ID)
+                .setLocusId(LOCUS_ID)
+                .setContactUri(CONTACT_URI)
+                .setContactPhoneNumber(PHONE_NUMBER)
+                .setNotificationChannelId(NOTIFICATION_CHANNEL_ID)
+                .setParentNotificationChannelId(PARENT_NOTIFICATION_CHANNEL_ID)
+                .setLastEventTimestamp(100L)
+                .setCreationTimestamp(200L)
+                .setShortcutFlags(ShortcutInfo.FLAG_LONG_LIVED)
+                .setImportant(true)
+                .setNotificationSilenced(true)
+                .setBubbled(true)
+                .setPersonImportant(true)
+                .setPersonBot(true)
+                .setContactStarred(true)
+                .addOrUpdateStatus(cs)
+                .addOrUpdateStatus(cs2)
+                .build();
+
+        ConversationInfo destination = new ConversationInfo.Builder(source).build();
+
+        assertEquals(SHORTCUT_ID, destination.getShortcutId());
+        assertEquals(LOCUS_ID, destination.getLocusId());
+        assertEquals(CONTACT_URI, destination.getContactUri());
+        assertEquals(PHONE_NUMBER, destination.getContactPhoneNumber());
+        assertEquals(NOTIFICATION_CHANNEL_ID, destination.getNotificationChannelId());
+        assertEquals(PARENT_NOTIFICATION_CHANNEL_ID, destination.getParentNotificationChannelId());
+        assertEquals(100L, destination.getLastEventTimestamp());
+        assertEquals(200L, destination.getCreationTimestamp());
+        assertTrue(destination.isShortcutLongLived());
+        assertTrue(destination.isImportant());
+        assertTrue(destination.isNotificationSilenced());
+        assertTrue(destination.isBubbled());
+        assertTrue(destination.isPersonImportant());
+        assertTrue(destination.isPersonBot());
+        assertTrue(destination.isContactStarred());
+        assertThat(destination.getStatuses()).contains(cs);
+        assertThat(destination.getStatuses()).contains(cs2);
+        // Also check equals() implementation
+        assertTrue(source.equals(destination));
+        assertTrue(destination.equals(source));
+    }
+
+    @Test
+    public void testBuildFromBackupPayload() {
+        ConversationStatus cs = new ConversationStatus.Builder("id", ACTIVITY_ANNIVERSARY).build();
+        ConversationStatus cs2 = new ConversationStatus.Builder("id2", ACTIVITY_GAME).build();
+
+        ConversationInfo conversationInfo = new ConversationInfo.Builder()
+                .setShortcutId(SHORTCUT_ID)
+                .setLocusId(LOCUS_ID)
+                .setContactUri(CONTACT_URI)
+                .setContactPhoneNumber(PHONE_NUMBER)
+                .setNotificationChannelId(NOTIFICATION_CHANNEL_ID)
+                .setParentNotificationChannelId(PARENT_NOTIFICATION_CHANNEL_ID)
+                .setLastEventTimestamp(100L)
+                .setCreationTimestamp(200L)
+                .setShortcutFlags(ShortcutInfo.FLAG_LONG_LIVED
+                        | ShortcutInfo.FLAG_CACHED_NOTIFICATIONS)
+                .setImportant(true)
+                .setNotificationSilenced(true)
+                .setBubbled(true)
+                .setDemoted(true)
+                .setPersonImportant(true)
+                .setPersonBot(true)
+                .setContactStarred(true)
+                .addOrUpdateStatus(cs)
+                .addOrUpdateStatus(cs2)
+                .build();
+
+        ConversationInfo conversationInfoFromBackup =
+                ConversationInfo.readFromBackupPayload(conversationInfo.getBackupPayload());
+
+        assertEquals(SHORTCUT_ID, conversationInfoFromBackup.getShortcutId());
+        assertEquals(LOCUS_ID, conversationInfoFromBackup.getLocusId());
+        assertEquals(CONTACT_URI, conversationInfoFromBackup.getContactUri());
+        assertEquals(PHONE_NUMBER, conversationInfoFromBackup.getContactPhoneNumber());
+        assertEquals(
+                NOTIFICATION_CHANNEL_ID, conversationInfoFromBackup.getNotificationChannelId());
+        assertEquals(PARENT_NOTIFICATION_CHANNEL_ID,
+                conversationInfoFromBackup.getParentNotificationChannelId());
+        assertEquals(100L, conversationInfoFromBackup.getLastEventTimestamp());
+        assertEquals(200L, conversationInfoFromBackup.getCreationTimestamp());
+        assertTrue(conversationInfoFromBackup.isShortcutLongLived());
+        assertTrue(conversationInfoFromBackup.isShortcutCachedForNotification());
+        assertTrue(conversationInfoFromBackup.isImportant());
+        assertTrue(conversationInfoFromBackup.isNotificationSilenced());
+        assertTrue(conversationInfoFromBackup.isBubbled());
+        assertTrue(conversationInfoFromBackup.isDemoted());
+        assertTrue(conversationInfoFromBackup.isPersonImportant());
+        assertTrue(conversationInfoFromBackup.isPersonBot());
+        assertTrue(conversationInfoFromBackup.isContactStarred());
+        // ConversationStatus is a transient object and not persisted
     }
 }

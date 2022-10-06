@@ -31,15 +31,14 @@ public final class UsbPortHalInstance {
     public static UsbPortHal getInstance(UsbPortManager portManager, IndentingPrintWriter pw) {
 
         logAndPrint(Log.DEBUG, null, "Querying USB HAL version");
-        if (UsbPortHidl.isServicePresent(null)) {
-            logAndPrint(Log.INFO, null, "USB HAL HIDL present");
-            return new UsbPortHidl(portManager, pw);
-        }
         if (UsbPortAidl.isServicePresent(null)) {
             logAndPrint(Log.INFO, null, "USB HAL AIDL present");
             return new UsbPortAidl(portManager, pw);
         }
-
+        if (UsbPortHidl.isServicePresent(null)) {
+            logAndPrint(Log.INFO, null, "USB HAL HIDL present");
+            return new UsbPortHidl(portManager, pw);
+        }
         return null;
     }
 }

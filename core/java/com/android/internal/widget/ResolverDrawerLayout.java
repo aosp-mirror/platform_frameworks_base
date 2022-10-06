@@ -53,7 +53,7 @@ public class ResolverDrawerLayout extends ViewGroup {
     /**
      * Max width of the whole drawer layout
      */
-    private int mMaxWidth;
+    private final int mMaxWidth;
 
     /**
      * Max total visible height of views not marked always-show when in the closed/initial state
@@ -187,8 +187,10 @@ public class ResolverDrawerLayout extends ViewGroup {
     }
 
     public void setSmallCollapsed(boolean smallCollapsed) {
-        mSmallCollapsed = smallCollapsed;
-        requestLayout();
+        if (mSmallCollapsed != smallCollapsed) {
+            mSmallCollapsed = smallCollapsed;
+            requestLayout();
+        }
     }
 
     public boolean isSmallCollapsed() {
@@ -200,9 +202,10 @@ public class ResolverDrawerLayout extends ViewGroup {
     }
 
     public void setShowAtTop(boolean showOnTop) {
-        mShowAtTop = showOnTop;
-        invalidate();
-        requestLayout();
+        if (mShowAtTop != showOnTop) {
+            mShowAtTop = showOnTop;
+            requestLayout();
+        }
     }
 
     public boolean getShowAtTop() {
@@ -220,6 +223,9 @@ public class ResolverDrawerLayout extends ViewGroup {
     public void setCollapsibleHeightReserved(int heightPixels) {
         final int oldReserved = mCollapsibleHeightReserved;
         mCollapsibleHeightReserved = heightPixels;
+        if (oldReserved != mCollapsibleHeightReserved) {
+            requestLayout();
+        }
 
         final int dReserved = mCollapsibleHeightReserved - oldReserved;
         if (dReserved != 0 && mIsDragging) {
@@ -255,7 +261,7 @@ public class ResolverDrawerLayout extends ViewGroup {
 
         if (getShowAtTop()) {
             // Keep the drawer fully open.
-            mCollapseOffset = 0;
+            setCollapseOffset(0);
             return false;
         }
 
@@ -264,9 +270,9 @@ public class ResolverDrawerLayout extends ViewGroup {
             if (remainClosed && (oldCollapsibleHeight < mCollapsibleHeight
                     && mCollapseOffset == oldCollapsibleHeight)) {
                 // Stay closed even at the new height.
-                mCollapseOffset = mCollapsibleHeight;
+                setCollapseOffset(mCollapsibleHeight);
             } else {
-                mCollapseOffset = Math.min(mCollapseOffset, mCollapsibleHeight);
+                setCollapseOffset(Math.min(mCollapseOffset, mCollapsibleHeight));
             }
             final boolean isCollapsedNew = mCollapseOffset != 0;
             if (isCollapsedOld != isCollapsedNew) {
@@ -274,9 +280,16 @@ public class ResolverDrawerLayout extends ViewGroup {
             }
         } else {
             // Start out collapsed at first unless we restored state for otherwise
-            mCollapseOffset = mOpenOnLayout ? 0 : mCollapsibleHeight;
+            setCollapseOffset(mOpenOnLayout ? 0 : mCollapsibleHeight);
         }
         return true;
+    }
+
+    private void setCollapseOffset(float collapseOffset) {
+        if (mCollapseOffset != collapseOffset) {
+            mCollapseOffset = collapseOffset;
+            requestLayout();
+        }
     }
 
     private int getMaxCollapsedHeight() {
@@ -420,8 +433,7 @@ public class ResolverDrawerLayout extends ViewGroup {
 
             case MotionEvent.ACTION_POINTER_DOWN: {
                 final int pointerIndex = ev.getActionIndex();
-                final int pointerId = ev.getPointerId(pointerIndex);
-                mActivePointerId = pointerId;
+                mActivePointerId = ev.getPointerId(pointerIndex);
                 mInitialTouchX = ev.getX(pointerIndex);
                 mInitialTouchY = mLastTouchY = ev.getY(pointerIndex);
             }
@@ -924,7 +936,7 @@ public class ResolverDrawerLayout extends ViewGroup {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         final int sourceWidth = MeasureSpec.getSize(widthMeasureSpec);
         int widthSize = sourceWidth;
-        int heightSize = MeasureSpec.getSize(heightMeasureSpec);
+        final int heightSize = MeasureSpec.getSize(heightMeasureSpec);
 
         // Single-use layout; just ignore the mode and use available space.
         // Clamp to maxWidth.

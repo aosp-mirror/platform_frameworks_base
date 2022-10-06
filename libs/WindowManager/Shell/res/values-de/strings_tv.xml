@@ -19,16 +19,10 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="notification_channel_tv_pip" msgid="2576686079160402435">"Bild im Bild"</string>
     <string name="pip_notification_unknown_title" msgid="2729870284350772311">"(Kein Sendungsname gefunden)"</string>
-    <string name="pip_close" msgid="2955969519031223530">"Schließen"</string>
+    <string name="pip_close" msgid="9135220303720555525">"PIP schließen"</string>
     <string name="pip_fullscreen" msgid="7278047353591302554">"Vollbild"</string>
-    <string name="pip_move" msgid="158770205886688553">"Bewegen"</string>
-    <string name="pip_expand" msgid="1051966011679297308">"Maximieren"</string>
-    <string name="pip_collapse" msgid="3903295106641385962">"Minimieren"</string>
+    <string name="pip_move" msgid="1544227837964635439">"BiB verschieben"</string>
+    <string name="pip_expand" msgid="7605396312689038178">"BiB maximieren"</string>
+    <string name="pip_collapse" msgid="5732233773786896094">"BiB minimieren"</string>
     <string name="pip_edu_text" msgid="3672999496647508701">" Für Steuerelemente zweimal "<annotation icon="home_icon">"STARTBILDSCHIRMTASTE"</annotation>" drücken"</string>
-    <string name="a11y_pip_menu_entered" msgid="5106343214776801614">"Menü „Bild im Bild“."</string>
-    <string name="a11y_action_pip_move_left" msgid="6612980937817141583">"Nach links bewegen"</string>
-    <string name="a11y_action_pip_move_right" msgid="1119409122645529936">"Nach rechts bewegen"</string>
-    <string name="a11y_action_pip_move_up" msgid="98502616918621959">"Nach oben bewegen"</string>
-    <string name="a11y_action_pip_move_down" msgid="3858802832725159740">"Nach unten bewegen"</string>
-    <string name="a11y_action_pip_move_done" msgid="1486845365134416210">"Fertig"</string>
 </resources>

@@ -46,7 +46,6 @@ import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Slog;
 import android.view.ContentRecordingSession;
-import android.window.WindowContainerToken;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
@@ -336,8 +335,8 @@ public final class MediaProjectionManagerService extends SystemService
 
         @Override // Binder call
         public void stopActiveProjection() {
-            if (mContext.checkCallingPermission(Manifest.permission.MANAGE_MEDIA_PROJECTION)
-                        != PackageManager.PERMISSION_GRANTED) {
+            if (mContext.checkCallingOrSelfPermission(Manifest.permission.MANAGE_MEDIA_PROJECTION)
+                    != PackageManager.PERMISSION_GRANTED) {
                 throw new SecurityException("Requires MANAGE_MEDIA_PROJECTION in order to add "
                         + "projection callbacks");
             }
@@ -394,9 +393,14 @@ public final class MediaProjectionManagerService extends SystemService
                     if (!isValidMediaProjection(projection)) {
                         throw new SecurityException("Invalid media projection");
                     }
-                    LocalServices.getService(
+                    if (!LocalServices.getService(
                             WindowManagerInternal.class).setContentRecordingSession(
-                            incomingSession);
+                            incomingSession)) {
+                        // Unable to start mirroring, so tear down this projection.
+                        if (mProjectionGrant != null) {
+                            mProjectionGrant.stop();
+                        }
+                    }
                 }
             } finally {
                 Binder.restoreCallingIdentity(origId);
@@ -433,7 +437,7 @@ public final class MediaProjectionManagerService extends SystemService
         private IBinder mToken;
         private IBinder.DeathRecipient mDeathEater;
         private boolean mRestoreSystemAlertWindow;
-        private WindowContainerToken mTaskRecordingWindowContainerToken = null;
+        private IBinder mLaunchCookie = null;
 
         MediaProjection(int type, int uid, String packageName, int targetSdkVersion,
                 boolean isPrivileged) {
@@ -609,14 +613,13 @@ public final class MediaProjectionManagerService extends SystemService
         }
 
         @Override // Binder call
-        public void setTaskRecordingWindowContainerToken(WindowContainerToken token) {
-            // TODO(b/221417940) set the task id to record from sysui, for the package chosen.
-            mTaskRecordingWindowContainerToken = token;
+        public void setLaunchCookie(IBinder launchCookie) {
+            mLaunchCookie = launchCookie;
         }
 
         @Override // Binder call
-        public WindowContainerToken getTaskRecordingWindowContainerToken() {
-            return mTaskRecordingWindowContainerToken;
+        public IBinder getLaunchCookie() {
+            return mLaunchCookie;
         }
 
         public MediaProjectionInfo getProjectionInfo() {

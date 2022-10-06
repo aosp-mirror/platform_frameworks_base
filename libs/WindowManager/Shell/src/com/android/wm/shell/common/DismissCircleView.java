@@ -49,6 +49,8 @@ public class DismissCircleView extends FrameLayout {
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
+        final Resources res = getResources();
+        setBackground(res.getDrawable(R.drawable.dismiss_circle_background));
         setViewSizes();
     }
 

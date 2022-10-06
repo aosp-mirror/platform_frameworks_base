@@ -101,11 +101,11 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
     }
 
     @Override
-    void onIlluminationStarting() {
+    void onDisplayConfiguring() {
     }
 
     @Override
-    void onIlluminationStopped() {
+    void onDisplayUnconfigured() {
     }
 
     @Override

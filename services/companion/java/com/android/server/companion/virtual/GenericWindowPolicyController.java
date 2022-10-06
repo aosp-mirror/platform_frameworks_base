@@ -77,6 +77,14 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
             new ComponentName("android", BlockedAppStreamingActivity.class.getName());
 
     /**
+     * For communicating when a secure window shows on the virtual display.
+     */
+    public interface SecureWindowCallback {
+        /** Called when a secure window shows on the virtual display. */
+        void onSecureWindowShown(int displayId, int uid);
+    }
+
+    /**
      * If required, allow the secure activity to display on remote device since
      * {@link android.os.Build.VERSION_CODES#TIRAMISU}.
      */
@@ -108,6 +116,7 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
             new ArraySet<>();
     @Nullable
     private final @AssociationRequest.DeviceProfile String mDeviceProfile;
+    @Nullable private final SecureWindowCallback mSecureWindowCallback;
 
     /**
      * Creates a window policy controller that is generic to the different use cases of virtual
@@ -131,6 +140,8 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
      * @param activityListener Activity listener to listen for activity changes.
      * @param activityBlockedCallback Callback that is called when an activity is blocked from
      *   launching.
+     * @param secureWindowCallback Callback that is called when a secure window shows on the
+     *   virtual display.
      * @param deviceProfile The {@link AssociationRequest.DeviceProfile} of this virtual device.
      */
     public GenericWindowPolicyController(int windowFlags, int systemWindowFlags,
@@ -142,6 +153,7 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
             @ActivityPolicy int defaultActivityPolicy,
             @NonNull ActivityListener activityListener,
             @NonNull ActivityBlockedCallback activityBlockedCallback,
+            @NonNull SecureWindowCallback secureWindowCallback,
             @AssociationRequest.DeviceProfile String deviceProfile) {
         super();
         mAllowedUsers = allowedUsers;
@@ -154,6 +166,7 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
         setInterestedWindowFlags(windowFlags, systemWindowFlags);
         mActivityListener = activityListener;
         mDeviceProfile = deviceProfile;
+        mSecureWindowCallback = secureWindowCallback;
     }
 
     /**
@@ -234,6 +247,14 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
     @Override
     public boolean keepActivityOnWindowFlagsChanged(ActivityInfo activityInfo, int windowFlags,
             int systemWindowFlags) {
+        // The callback is fired only when windowFlags are changed. To let VirtualDevice owner
+        // aware that the virtual display has a secure window on top.
+        if ((windowFlags & FLAG_SECURE) != 0) {
+            // Post callback on the main thread, so it doesn't block activity launching.
+            mHandler.post(() -> mSecureWindowCallback.onSecureWindowShown(mDisplayId,
+                    activityInfo.applicationInfo.uid));
+        }
+
         if (!canContainActivity(activityInfo, windowFlags, systemWindowFlags)) {
             mActivityBlockedCallback.onActivityBlocked(mDisplayId, activityInfo);
             return false;

@@ -17,8 +17,11 @@
 package com.android.systemui.statusbar.notification.stack;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_SCROLL_FLING;
+import static com.android.internal.jank.InteractionJankMonitor.CUJ_SHADE_CLEAR_ALL;
 import static com.android.systemui.statusbar.notification.stack.NotificationPriorityBucketKt.BUCKET_SILENT;
 import static com.android.systemui.statusbar.notification.stack.StackStateAnimator.ANIMATION_DURATION_SWIPE;
+import static com.android.systemui.util.DumpUtilsKt.println;
+import static com.android.systemui.util.DumpUtilsKt.visibilityString;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
@@ -39,7 +42,6 @@ import android.graphics.Color;
 import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -81,6 +83,7 @@ import com.android.systemui.animation.Interpolators;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
+import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.NotificationShelf;
@@ -105,7 +108,6 @@ import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
-import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.policy.HeadsUpUtil;
 import com.android.systemui.statusbar.policy.ScrollAdapter;
 import com.android.systemui.util.Assert;
@@ -746,19 +748,20 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    private void logHunSkippedForUnexpectedState(String key, boolean expected, boolean actual) {
+    private void logHunSkippedForUnexpectedState(ExpandableNotificationRow enr,
+            boolean expected, boolean actual) {
         if (mLogger == null) return;
-        mLogger.hunSkippedForUnexpectedState(key, expected, actual);
+        mLogger.hunSkippedForUnexpectedState(enr.getEntry(), expected, actual);
     }
 
-    private void logHunAnimationSkipped(String key, String reason) {
+    private void logHunAnimationSkipped(ExpandableNotificationRow enr, String reason) {
         if (mLogger == null) return;
-        mLogger.hunAnimationSkipped(key, reason);
+        mLogger.hunAnimationSkipped(enr.getEntry(), reason);
     }
 
-    private void logHunAnimationEventAdded(String key, int type) {
+    private void logHunAnimationEventAdded(ExpandableNotificationRow enr, int type) {
         if (mLogger == null) return;
-        mLogger.hunAnimationEventAdded(key, type);
+        mLogger.hunAnimationEventAdded(enr.getEntry(), type);
     }
 
     private void onDrawDebug(Canvas canvas) {
@@ -1386,12 +1389,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      */
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     public void setExpandedHeight(float height) {
-        final float shadeBottom = getHeight() - getEmptyBottomMargin();
         final boolean skipHeightUpdate = shouldSkipHeightUpdate();
-        if (!skipHeightUpdate) {
-            final float expansionFraction = MathUtils.saturate(height / shadeBottom);
-            mAmbientState.setExpansionFraction(expansionFraction);
-        }
         updateStackPosition();
 
         if (!skipHeightUpdate) {
@@ -2796,10 +2794,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         if (mDebugRemoveAnimation) {
             Log.d(TAG, "generateRemove " + key
                     + "\nmIsExpanded " + mIsExpanded
-                    + "\nmAnimationsEnabled " + mAnimationsEnabled
-                    + "\n!invisible group " + !isChildInInvisibleGroup(child));
+                    + "\nmAnimationsEnabled " + mAnimationsEnabled);
         }
-        if (mIsExpanded && mAnimationsEnabled && !isChildInInvisibleGroup(child)) {
+        if (mIsExpanded && mAnimationsEnabled) {
             if (!mChildrenToAddAnimated.contains(child)) {
                 if (mDebugRemoveAnimation) {
                     Log.d(TAG, "needsAnimation = true " + key);
@@ -2845,26 +2842,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
         mTmpList.clear();
         return hasAddEvent && mAddedHeadsUpChildren.contains(child);
-    }
-
-    // TODO (b/162832756): remove since this won't happen in new pipeline (we prune groups in
-    //  ShadeListBuilder)
-    /**
-     * @param child the child to query
-     * @return whether a view is not a top level child but a child notification and that group is
-     * not expanded
-     */
-    @ShadeViewRefactor(RefactorComponent.ADAPTER)
-    private boolean isChildInInvisibleGroup(View child) {
-        if (child instanceof ExpandableNotificationRow) {
-            ExpandableNotificationRow row = (ExpandableNotificationRow) child;
-            NotificationEntry groupSummary =
-                    mGroupMembershipManager.getGroupSummary(row.getEntry());
-            if (groupSummary != null && groupSummary.getRow() != row) {
-                return row.getVisibility() == View.INVISIBLE;
-            }
-        }
-        return false;
     }
 
     /**
@@ -3177,7 +3154,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             if (isHeadsUp != row.isHeadsUp()) {
                 // For cases where we have a heads up showing and appearing again we shouldn't
                 // do the animations at all.
-                logHunSkippedForUnexpectedState(key, isHeadsUp, row.isHeadsUp());
+                logHunSkippedForUnexpectedState(row, isHeadsUp, row.isHeadsUp());
                 continue;
             }
             int type = AnimationEvent.ANIMATION_TYPE_HEADS_UP_OTHER;
@@ -3195,7 +3172,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 if (row.isChildInGroup()) {
                     // We can otherwise get stuck in there if it was just isolated
                     row.setHeadsUpAnimatingAway(false);
-                    logHunAnimationSkipped(key, "row is child in group");
+                    logHunAnimationSkipped(row, "row is child in group");
                     continue;
                 }
             } else {
@@ -3203,7 +3180,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 if (viewState == null) {
                     // A view state was never generated for this view, so we don't need to animate
                     // this. This may happen with notification children.
-                    logHunAnimationSkipped(key, "row has no viewState");
+                    logHunAnimationSkipped(row, "row has no viewState");
                     continue;
                 }
                 if (isHeadsUp && (mAddedHeadsUpChildren.contains(row) || pinnedAndClosed)) {
@@ -3227,7 +3204,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                         + " onBottom=" + onBottom
                         + " row=" + row.getEntry().getKey());
             }
-            logHunAnimationEventAdded(key, type);
+            logHunAnimationEventAdded(row, type);
         }
         mHeadsUpChangeAnimations.clear();
         mAddedHeadsUpChildren.clear();
@@ -4363,8 +4340,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     /**
      * Update colors of "dismiss" and "empty shade" views.
-     *
-     * @param lightTheme True if light theme should be used.
      */
     @ShadeViewRefactor(RefactorComponent.DECORATOR)
     void updateDecorViews() {
@@ -4408,8 +4383,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * See {@link AmbientState#setDozing}.
      */
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    public void setDozing(boolean dozing, boolean animate,
-            @Nullable PointF touchWakeUpScreenLocation) {
+    public void setDozing(boolean dozing, boolean animate) {
         if (mAmbientState.isDozing() == dozing) {
             return;
         }
@@ -4465,8 +4439,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     private void updateVisibility() {
-        boolean shouldShow = !mAmbientState.isFullyHidden() || !onKeyguard();
-        setVisibility(shouldShow ? View.VISIBLE : View.INVISIBLE);
+        mController.updateVisibility(!mAmbientState.isFullyHidden() || !onKeyguard());
     }
 
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
@@ -4531,15 +4504,19 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    void updateEmptyShadeView(boolean visible, boolean notifVisibleInShade) {
+    void updateEmptyShadeView(boolean visible, boolean areNotificationsHiddenInShade) {
         mEmptyShadeView.setVisible(visible, mIsExpanded && mAnimationsEnabled);
 
         int oldTextRes = mEmptyShadeView.getTextResource();
-        int newTextRes = notifVisibleInShade
+        int newTextRes = areNotificationsHiddenInShade
                 ? R.string.dnd_suppressing_shade_text : R.string.empty_shade_text;
         if (oldTextRes != newTextRes) {
             mEmptyShadeView.setText(newTextRes);
         }
+    }
+
+    public boolean isEmptyShadeViewVisible() {
+        return mEmptyShadeView.isVisible();
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
@@ -4558,29 +4535,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mClearAllInProgress = clearAllInProgress;
         mAmbientState.setClearAllInProgress(clearAllInProgress);
         mController.getNoticationRoundessManager().setClearAllInProgress(clearAllInProgress);
-        handleClearAllClipping();
     }
 
     boolean getClearAllInProgress() {
         return mClearAllInProgress;
-    }
-
-    @ShadeViewRefactor(RefactorComponent.ADAPTER)
-    private void handleClearAllClipping() {
-        final int count = getChildCount();
-        boolean previousChildWillBeDismissed = false;
-        for (int i = 0; i < count; i++) {
-            ExpandableView child = (ExpandableView) getChildAt(i);
-            if (child.getVisibility() == GONE) {
-                continue;
-            }
-            if (mClearAllInProgress && previousChildWillBeDismissed) {
-                child.setMinClipTopAmount(child.getClipTopAmount());
-            } else {
-                child.setMinClipTopAmount(0);
-            }
-            previousChildWillBeDismissed = canChildBeCleared(child);
-        }
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
@@ -4799,8 +4757,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 if (SPEW) {
                     Log.v(TAG, "generateHeadsUpAnimation: previous hun appear animation cancelled");
                 }
-                logHunAnimationSkipped(row.getEntry().getKey(),
-                        "previous hun appear animation cancelled");
+                logHunAnimationSkipped(row, "previous hun appear animation cancelled");
                 return;
             }
             mHeadsUpChangeAnimations.add(new Pair<>(row, isHeadsUp));
@@ -5064,7 +5021,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void setPanelFlinging(boolean flinging) {
-        mAmbientState.setIsFlinging(flinging);
+        mAmbientState.setFlinging(flinging);
         if (!flinging) {
             // re-calculate the stack height which was frozen while flinging
             updateStackPosition();
@@ -5079,30 +5036,31 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void dump(PrintWriter pwOriginal, String[] args) {
         IndentingPrintWriter pw = DumpUtilsKt.asIndenting(pwOriginal);
-        StringBuilder sb = new StringBuilder("[")
-                .append(this.getClass().getSimpleName()).append(":")
-                .append(" pulsing=").append(mPulsing ? "T" : "f")
-                .append(" expanded=").append(mIsExpanded ? "T" : "f")
-                .append(" headsUpPinned=").append(mInHeadsUpPinnedMode ? "T" : "f")
-                .append(" qsClipping=").append(mShouldUseRoundedRectClipping ? "T" : "f")
-                .append(" qsClipDismiss=").append(mDismissUsingRowTranslationX ? "T" : "f")
-                .append(" visibility=").append(DumpUtilsKt.visibilityString(getVisibility()))
-                .append(" alpha=").append(getAlpha())
-                .append(" scrollY=").append(mAmbientState.getScrollY())
-                .append(" maxTopPadding=").append(mMaxTopPadding)
-                .append(" showShelfOnly=").append(mShouldShowShelfOnly ? "T" : "f")
-                .append(" qsExpandFraction=").append(mQsExpansionFraction)
-                .append(" isCurrentUserSetup=").append(mIsCurrentUserSetup)
-                .append(" hideAmount=").append(mAmbientState.getHideAmount())
-                .append(" ambientStateSwipingUp=").append(mAmbientState.isSwipingUp())
-                .append(" maxDisplayedNotifications=").append(mMaxDisplayedNotifications)
-                .append(" intrinsicContentHeight=").append(mIntrinsicContentHeight)
-                .append(" contentHeight=").append(mContentHeight)
-                .append(" intrinsicPadding=").append(mIntrinsicPadding)
-                .append(" topPadding=").append(mTopPadding)
-                .append(" bottomPadding=").append(mBottomPadding)
-                .append("]");
-        pw.println(sb.toString());
+        pw.println("Internal state:");
+        DumpUtilsKt.withIncreasedIndent(pw, () -> {
+            println(pw, "pulsing", mPulsing);
+            println(pw, "expanded", mIsExpanded);
+            println(pw, "headsUpPinned", mInHeadsUpPinnedMode);
+            println(pw, "qsClipping", mShouldUseRoundedRectClipping);
+            println(pw, "qsClipDismiss", mDismissUsingRowTranslationX);
+            println(pw, "visibility", visibilityString(getVisibility()));
+            println(pw, "alpha", getAlpha());
+            println(pw, "scrollY", mAmbientState.getScrollY());
+            println(pw, "maxTopPadding", mMaxTopPadding);
+            println(pw, "showShelfOnly", mShouldShowShelfOnly);
+            println(pw, "qsExpandFraction", mQsExpansionFraction);
+            println(pw, "isCurrentUserSetup", mIsCurrentUserSetup);
+            println(pw, "hideAmount", mAmbientState.getHideAmount());
+            println(pw, "ambientStateSwipingUp", mAmbientState.isSwipingUp());
+            println(pw, "maxDisplayedNotifications", mMaxDisplayedNotifications);
+            println(pw, "intrinsicContentHeight", mIntrinsicContentHeight);
+            println(pw, "contentHeight", mContentHeight);
+            println(pw, "intrinsicPadding", mIntrinsicPadding);
+            println(pw, "topPadding", mTopPadding);
+            println(pw, "bottomPadding", mBottomPadding);
+        });
+        pw.println();
+        pw.println("Contents:");
         DumpUtilsKt.withIncreasedIndent(pw, () -> {
             int childCount = getChildCount();
             pw.println("Number of children: " + childCount);
@@ -5269,6 +5227,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         setClearAllInProgress(true);
         mShadeNeedsToClose = closeShade;
 
+        InteractionJankMonitor.getInstance().begin(this, CUJ_SHADE_CLEAR_ALL);
         // Decrease the delay for every row we animate to give the sense of
         // accelerating the swipes
         final int rowDelayDecrement = 5;
@@ -5843,12 +5802,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mSpeedBumpIndexDirty = true;
     }
 
-    /** Updates the indices of the boundaries between sections. */
-    @ShadeViewRefactor(RefactorComponent.INPUT)
-    public void updateSectionBoundaries(String reason) {
-        mSectionsManager.updateSectionBoundaries(reason);
-    }
-
     void updateContinuousBackgroundDrawing() {
         boolean continuousBackground = !mAmbientState.isFullyAwake()
                 && mSwipeHelper.isSwiping();
@@ -6145,9 +6098,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             }
             return row.canViewBeDismissed();
         }
-        if (v instanceof PeopleHubView) {
-            return ((PeopleHubView) v).getCanSwipe();
-        }
         return false;
     }
 
@@ -6158,9 +6108,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 return false;
             }
             return row.canViewBeCleared();
-        }
-        if (v instanceof PeopleHubView) {
-            return ((PeopleHubView) v).getCanSwipe();
         }
         return false;
     }
@@ -6181,6 +6128,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private void onClearAllAnimationsEnd(
             List<ExpandableNotificationRow> viewsToRemove,
             @SelectedRows int selectedRows) {
+        InteractionJankMonitor.getInstance().end(CUJ_SHADE_CLEAR_ALL);
         if (mClearAllAnimationListener != null) {
             mClearAllAnimationListener.onAnimationEnd(viewsToRemove, selectedRows);
         }

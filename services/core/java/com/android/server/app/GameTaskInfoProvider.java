@@ -16,6 +16,8 @@
 
 package com.android.server.app;
 
+import static android.view.Display.INVALID_DISPLAY;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager.RunningTaskInfo;
@@ -93,7 +95,8 @@ final class GameTaskInfoProvider {
             runningTaskInfos = mActivityTaskManager.getTasks(
                     /* maxNum= */ Integer.MAX_VALUE,
                     /* filterOnlyVisibleRecents= */ false,
-                    /* keepIntentExtra= */ false);
+                    /* keepIntentExtra= */ false,
+                    INVALID_DISPLAY);
         } catch (RemoteException ex) {
             Slog.w(TAG, "Failed to fetch running tasks");
             return null;

@@ -125,9 +125,9 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD zvuk: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD zvuk"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Slušni aparati"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE audio"</string>
+    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Povezano sa slušnim aparatima"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Povezano sa LE audio"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"Povezano sa LE_AUDIO"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Povezano sa zvukom medija"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Povezano sa zvukom telefona"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Povezano sa serverom za prenos datoteka"</string>
@@ -594,10 +594,25 @@
     <string name="guest_exit_guest" msgid="5908239569510734136">"Ukloni gosta"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Resetuj sesiju gosta"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Želite li da resetujete sesiju gosta?"</string>
-    <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Želite da uklonite gosta?"</string>
+    <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Želite li da uklonite gosta?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Resetuj"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Ukloni"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Sesija gosta se resetuje…"</string>
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Želite da resetujete sesiju gosta?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Time ćete pokrenuti novu sesiju gosta i izbrisati sve aplikacije i podatke iz aktuelne sesije"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Izaći ćete iz režima gosta?"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Time ćete izbrisati sve aplikacije i podatke iz aktuelne sesije gosta"</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Izađi"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Sačuvaćete aktivnosti gosta?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Sačuvajte aktivnosti iz aktuelne sesije ili izbrišite sve aplikacije i podatke"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Izbriši"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Sačuvaj"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"Izađi iz režima gosta"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"Resetuj sesiju gosta"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Izađi iz režima gosta"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Sve aktivnosti će biti izbrisane pri izlazu"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Možete da sačuvate ili izbrišete aktivnosti pri izlazu"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Resetujete da biste izbrisali aktivnosti sesije odmah ili možete da sačuvate ili izbrišete aktivnosti pri izlazu"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Slikaj"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Odaberi sliku"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Izaberite sliku"</string>
@@ -652,11 +667,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Uključite ekran"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Dozvoli uključivanje ekrana"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Dozvoljava aplikaciji da uključi ekran. Ako se omogući, aplikacija može da uključi ekran u bilo kom trenutku bez vaše eksplicitne namere."</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Skenirajte QR kôd"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Da biste počeli da slušate, centrirajte QR kôd ispod"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR kôd nije u važećem formatu"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Želite da zaustavite emitovanje aplikacije <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Ako emitujete aplikaciju <xliff:g id="SWITCHAPP">%1$s</xliff:g> ili promenite izlaz, aktuelno emitovanje će se zaustaviti"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Emitujte aplikaciju <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Promenite izlaz"</string>
-    <string name="back_navigation_animation" msgid="8105467568421689484">"Animacije za pokret povratka sa predviđanjem"</string>
-    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Omogućite animacije sistema za pokret povratka sa predviđanjem."</string>
-    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Ovo podešavanje omogućava animacije sistema za pokret povratka sa predviđanjem. Zahteva podešavanje dozvole enableOnBackInvokedCallback po aplikaciji na true u fajlu manifesta."</string>
 </resources>

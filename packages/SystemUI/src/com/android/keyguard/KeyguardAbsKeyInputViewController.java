@@ -50,7 +50,6 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
     private final FalsingCollector mFalsingCollector;
     private final EmergencyButtonController mEmergencyButtonController;
     private CountDownTimer mCountdownTimer;
-    protected KeyguardMessageAreaController mMessageAreaController;
     private boolean mDismissing;
     protected AsyncTask<?, ?, ?> mPendingLockCheck;
     protected boolean mResumed;
@@ -80,14 +79,13 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
             KeyguardMessageAreaController.Factory messageAreaControllerFactory,
             LatencyTracker latencyTracker, FalsingCollector falsingCollector,
             EmergencyButtonController emergencyButtonController) {
-        super(view, securityMode, keyguardSecurityCallback, emergencyButtonController);
+        super(view, securityMode, keyguardSecurityCallback, emergencyButtonController,
+                messageAreaControllerFactory);
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mLockPatternUtils = lockPatternUtils;
         mLatencyTracker = latencyTracker;
         mFalsingCollector = falsingCollector;
         mEmergencyButtonController = emergencyButtonController;
-        KeyguardMessageArea kma = KeyguardMessageArea.findSecurityMessageDisplay(mView);
-        mMessageAreaController = messageAreaControllerFactory.create(kma);
     }
 
     abstract void resetState();
@@ -95,7 +93,6 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
     @Override
     public void onInit() {
         super.onInit();
-        mMessageAreaController.init();
     }
 
     @Override
@@ -134,6 +131,10 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
 
     @Override
     public void showMessage(CharSequence message, ColorStateList colorState) {
+        if (mMessageAreaController == null) {
+            return;
+        }
+
         if (colorState != null) {
             mMessageAreaController.setNextMessageColor(colorState);
         }
@@ -179,7 +180,7 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
             if (dismissKeyguard) {
                 mDismissing = true;
                 mLatencyTracker.onActionStart(LatencyTracker.ACTION_LOCKSCREEN_UNLOCK);
-                getKeyguardSecurityCallback().dismiss(true, userId);
+                getKeyguardSecurityCallback().dismiss(true, userId, getSecurityMode());
             }
         } else {
             if (isValidPassword) {

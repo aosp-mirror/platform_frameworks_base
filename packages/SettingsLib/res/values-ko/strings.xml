@@ -125,9 +125,9 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD 오디오: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD 오디오"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"보청기"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE 오디오"</string>
+    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"보청기에 연결됨"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"LE 오디오에 연결됨"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"LE_AUDIO에 연결됨"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"미디어 오디오에 연결됨"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"휴대전화 오디오에 연결됨"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"파일 전송 서버에 연결됨"</string>
@@ -151,7 +151,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"취소"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"페어링하면 연결 시 연락처 및 통화 기록에 액세스할 수 있습니다."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>와(과) 페어링하지 못했습니다."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"PIN 또는 패스키가 잘못되어 <xliff:g id="DEVICE_NAME">%1$s</xliff:g>와 페어링하지 못했습니다."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"PIN 또는 패스키가 잘못되어 <xliff:g id="DEVICE_NAME">%1$s</xliff:g>와(과) 페어링하지 못했습니다."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>와(과) 통신할 수 없습니다."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>에서 페어링을 거부했습니다."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"컴퓨터"</string>
@@ -184,7 +184,7 @@
     <string name="launch_defaults_some" msgid="3631650616557252926">"일부 기본값이 설정됨"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"기본값이 설정되지 않음"</string>
     <string name="tts_settings" msgid="8130616705989351312">"TTS 설정"</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"텍스트 음성 변환 출력"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"TTS 출력"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"말하는 속도"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"텍스트를 읽어주는 속도"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"음조"</string>
@@ -273,8 +273,8 @@
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"부트로더 잠금 해제 허용"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"OEM 잠금 해제를 허용하시겠습니까?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"경고: 이 설정을 사용하는 동안에는 이 기기에서 기기 보호 기능이 작동하지 않습니다."</string>
-    <string name="mock_location_app" msgid="6269380172542248304">"가상 위치 앱 선택"</string>
-    <string name="mock_location_app_not_set" msgid="6972032787262831155">"가상 위치 앱이 설정되어 있지 않음"</string>
+    <string name="mock_location_app" msgid="6269380172542248304">"모의 위치 앱 선택"</string>
+    <string name="mock_location_app_not_set" msgid="6972032787262831155">"모의 위치 앱이 설정되어 있지 않음"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"모의 위치 앱: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"네트워크"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"무선 디스플레이 인증서"</string>
@@ -385,7 +385,7 @@
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA 강제 사용"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 앱에서 4x MSAA 사용"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"사각형이 아닌 클립 작업 디버그"</string>
-    <string name="track_frame_time" msgid="522674651937771106">"HWUI 렌더링 프로파일"</string>
+    <string name="track_frame_time" msgid="522674651937771106">"프로필 HWUI 렌더링"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"GPU 디버그 레이어 사용 설정"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"디버그 앱에 GPU 디버그 레이어 로드 허용"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"상세 공급업체 로깅 사용 설정"</string>
@@ -598,6 +598,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"재설정"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"삭제"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"게스트 재설정 중…"</string>
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"게스트 세션을 재설정하시겠습니까?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"이렇게 하면 새로운 게스트 세션이 시작되고 기존 세션의 모든 앱과 데이터가 삭제됩니다."</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"게스트 모드를 종료하시겠습니까?"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"기존 게스트 세션의 앱과 데이터가 삭제됩니다."</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"종료"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"게스트 활동을 저장하시겠습니까?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"기존 세션의 활동을 저장하거나 모든 앱과 데이터를 삭제할 수 있습니다."</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"삭제"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"저장"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"게스트 모드 종료"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"게스트 세션 재설정"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"게스트 종료"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"종료하면 모든 활동이 삭제됩니다."</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"종료 시 활동을 저장하거나 삭제할 수 있습니다."</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"지금 재설정하여 활동 세션을 삭제하거나 종료 시 활동을 저장 또는 삭제할 수 있습니다."</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"사진 찍기"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"이미지 선택"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"사진 선택"</string>
@@ -652,11 +667,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"화면 켜기"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"화면 켜기 허용"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"앱에서 화면을 켜도록 허용합니다. 권한이 부여된 경우 앱에서 명시적 인텐트 없이 언제든지 화면을 켤 수 있습니다."</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR 코드 스캔"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"아래의 QR 코드가 스캐너 가운데에 오도록 맞춘 다음 듣기를 시작하세요"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR 코드의 형식이 유효하지 않습니다."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> 방송을 중지하시겠습니까?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> 앱을 방송하거나 출력을 변경하면 기존 방송이 중단됩니다"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> 방송"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"출력 변경"</string>
-    <string name="back_navigation_animation" msgid="8105467568421689484">"예측된 뒤로 동작 애니메이션"</string>
-    <string name="back_navigation_animation_summary" msgid="741292224121599456">"예측된 뒤로 동작에 시스템 애니메이션을 사용하도록 설정합니다."</string>
-    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"이 설정은 예측된 동작 애니메이션에 시스템 애니메이션을 사용하도록 합니다. 매니페스트 파일에서 앱별 enableOnBackInvokedCallback을 True로 설정해야 합니다."</string>
 </resources>

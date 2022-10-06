@@ -90,7 +90,7 @@ public class DeviceProvisionedCoordinator implements Coordinator {
             new DeviceProvisionedController.DeviceProvisionedListener() {
                 @Override
                 public void onDeviceProvisionedChanged() {
-                    mNotifFilter.invalidateList();
+                    mNotifFilter.invalidateList("onDeviceProvisionedChanged");
                 }
             };
 }

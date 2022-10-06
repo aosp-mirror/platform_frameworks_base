@@ -17,7 +17,6 @@
 package com.android.settingslib.dream;
 
 import android.annotation.IntDef;
-import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -32,17 +31,14 @@ import android.os.ServiceManager;
 import android.provider.Settings;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
-import android.text.TextUtils;
 import android.util.Log;
-
-import com.android.settingslib.R;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -64,18 +60,21 @@ public class DreamBackend {
         public String toString() {
             StringBuilder sb = new StringBuilder(DreamInfo.class.getSimpleName());
             sb.append('[').append(caption);
-            if (isActive)
+            if (isActive) {
                 sb.append(",active");
+            }
             sb.append(',').append(componentName);
-            if (settingsComponentName != null)
+            if (settingsComponentName != null) {
                 sb.append("settings=").append(settingsComponentName);
+            }
             return sb.append(']').toString();
         }
     }
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({WHILE_CHARGING, WHILE_DOCKED, EITHER, NEVER})
-    public @interface WhenToDream {}
+    public @interface WhenToDream {
+    }
 
     public static final int WHILE_CHARGING = 0;
     public static final int WHILE_DOCKED = 1;
@@ -91,16 +90,21 @@ public class DreamBackend {
             COMPLICATION_TYPE_DATE,
             COMPLICATION_TYPE_WEATHER,
             COMPLICATION_TYPE_AIR_QUALITY,
-            COMPLICATION_TYPE_CAST_INFO
+            COMPLICATION_TYPE_CAST_INFO,
+            COMPLICATION_TYPE_HOME_CONTROLS,
+            COMPLICATION_TYPE_SMARTSPACE
     })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface ComplicationType {}
+    public @interface ComplicationType {
+    }
 
     public static final int COMPLICATION_TYPE_TIME = 1;
     public static final int COMPLICATION_TYPE_DATE = 2;
     public static final int COMPLICATION_TYPE_WEATHER = 3;
     public static final int COMPLICATION_TYPE_AIR_QUALITY = 4;
     public static final int COMPLICATION_TYPE_CAST_INFO = 5;
+    public static final int COMPLICATION_TYPE_HOME_CONTROLS = 6;
+    public static final int COMPLICATION_TYPE_SMARTSPACE = 7;
 
     private final Context mContext;
     private final IDreamManager mDreamManager;
@@ -110,8 +114,6 @@ public class DreamBackend {
     private final boolean mDreamsActivatedOnDockByDefault;
     private final Set<ComponentName> mDisabledDreams;
     private final Set<Integer> mSupportedComplications;
-    private final Set<Integer> mDefaultEnabledComplications;
-
     private static DreamBackend sInstance;
 
     public static DreamBackend getInstance(Context context) {
@@ -142,13 +144,6 @@ public class DreamBackend {
         mSupportedComplications = Arrays.stream(resources.getIntArray(
                         com.android.internal.R.array.config_supportedDreamComplications))
                 .boxed()
-                .collect(Collectors.toSet());
-
-        mDefaultEnabledComplications = Arrays.stream(resources.getIntArray(
-                        com.android.internal.R.array.config_dreamComplicationsEnabledByDefault))
-                .boxed()
-                // A complication can only be enabled by default if it is also supported.
-                .filter(mSupportedComplications::contains)
                 .collect(Collectors.toSet());
     }
 
@@ -247,11 +242,12 @@ public class DreamBackend {
         return null;
     }
 
-    public @WhenToDream int getWhenToDreamSetting() {
+    @WhenToDream
+    public int getWhenToDreamSetting() {
         return isActivatedOnDock() && isActivatedOnSleep() ? EITHER
                 : isActivatedOnDock() ? WHILE_DOCKED
-                : isActivatedOnSleep() ? WHILE_CHARGING
-                : NEVER;
+                        : isActivatedOnSleep() ? WHILE_CHARGING
+                                : NEVER;
     }
 
     public void setWhenToDream(@WhenToDream int whenToDream) {
@@ -279,92 +275,29 @@ public class DreamBackend {
         }
     }
 
-    /** Returns whether a particular complication is enabled */
-    public boolean isComplicationEnabled(@ComplicationType int complication) {
-        return getEnabledComplications().contains(complication);
-    }
-
     /** Gets all complications which have been enabled by the user. */
     public Set<Integer> getEnabledComplications() {
-        final String enabledComplications = Settings.Secure.getString(
+        return getComplicationsEnabled() ? mSupportedComplications : Collections.emptySet();
+    }
+
+    /** Sets complication enabled state. */
+    public void setComplicationsEnabled(boolean enabled) {
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                Settings.Secure.SCREENSAVER_COMPLICATIONS_ENABLED, enabled ? 1 : 0);
+    }
+
+    /**
+     * Gets whether complications are enabled on this device
+     */
+    public boolean getComplicationsEnabled() {
+        return Settings.Secure.getInt(
                 mContext.getContentResolver(),
-                Settings.Secure.SCREENSAVER_ENABLED_COMPLICATIONS);
-
-        if (enabledComplications == null) {
-            return mDefaultEnabledComplications;
-        }
-
-        return parseFromString(enabledComplications);
+                Settings.Secure.SCREENSAVER_COMPLICATIONS_ENABLED, 1) == 1;
     }
 
     /** Gets all dream complications which are supported on this device. **/
     public Set<Integer> getSupportedComplications() {
         return mSupportedComplications;
-    }
-
-    /**
-     * Enables or disables a particular dream complication.
-     *
-     * @param complicationType The dream complication to be enabled/disabled.
-     * @param value            If true, the complication is enabled. Otherwise it is disabled.
-     */
-    public void setComplicationEnabled(@ComplicationType int complicationType, boolean value) {
-        if (!mSupportedComplications.contains(complicationType)) return;
-
-        Set<Integer> enabledComplications = getEnabledComplications();
-        if (value) {
-            enabledComplications.add(complicationType);
-        } else {
-            enabledComplications.remove(complicationType);
-        }
-
-        Settings.Secure.putString(mContext.getContentResolver(),
-                Settings.Secure.SCREENSAVER_ENABLED_COMPLICATIONS,
-                convertToString(enabledComplications));
-    }
-
-    /**
-     * Gets the title of a particular complication type to be displayed to the user. If there
-     * is no title, null is returned.
-     */
-    @Nullable
-    public CharSequence getComplicationTitle(@ComplicationType int complicationType) {
-        int res = 0;
-        switch (complicationType) {
-            case COMPLICATION_TYPE_TIME:
-                res = R.string.dream_complication_title_time;
-                break;
-            case COMPLICATION_TYPE_DATE:
-                res = R.string.dream_complication_title_date;
-                break;
-            case COMPLICATION_TYPE_WEATHER:
-                res = R.string.dream_complication_title_weather;
-                break;
-            case COMPLICATION_TYPE_AIR_QUALITY:
-                res = R.string.dream_complication_title_aqi;
-                break;
-            case COMPLICATION_TYPE_CAST_INFO:
-                res = R.string.dream_complication_title_cast_info;
-                break;
-            default:
-                return null;
-        }
-        return mContext.getString(res);
-    }
-
-    private static String convertToString(Set<Integer> set) {
-        return set.stream()
-                .map(String::valueOf)
-                .collect(Collectors.joining(","));
-    }
-
-    private static Set<Integer> parseFromString(String string) {
-        if (TextUtils.isEmpty(string)) {
-            return new HashSet<>();
-        }
-        return Arrays.stream(string.split(","))
-                .map(Integer::parseInt)
-                .collect(Collectors.toSet());
     }
 
     public boolean isEnabled() {
@@ -406,10 +339,11 @@ public class DreamBackend {
 
     public void setActiveDream(ComponentName dream) {
         logd("setActiveDream(%s)", dream);
-        if (mDreamManager == null)
+        if (mDreamManager == null) {
             return;
+        }
         try {
-            ComponentName[] dreams = { dream };
+            ComponentName[] dreams = {dream};
             mDreamManager.setDreamComponents(dream == null ? null : dreams);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to set active dream to " + dream, e);
@@ -417,8 +351,9 @@ public class DreamBackend {
     }
 
     public ComponentName getActiveDream() {
-        if (mDreamManager == null)
+        if (mDreamManager == null) {
             return null;
+        }
         try {
             ComponentName[] dreams = mDreamManager.getDreamComponents();
             return dreams != null && dreams.length > 0 ? dreams[0] : null;

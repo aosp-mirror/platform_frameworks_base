@@ -33,10 +33,12 @@ import android.widget.Button;
 import androidx.annotation.Nullable;
 
 import com.android.internal.app.MediaRouteDialogPresenter;
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
 import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.animation.DialogCuj;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -63,6 +65,9 @@ import javax.inject.Inject;
 
 /** Quick settings tile: Cast **/
 public class CastTile extends QSTileImpl<BooleanState> {
+
+    private static final String INTERACTION_JANK_TAG = "cast";
+
     private static final Intent CAST_SETTINGS =
             new Intent(Settings.ACTION_CAST_SETTINGS);
 
@@ -211,7 +216,9 @@ public class CastTile extends QSTileImpl<BooleanState> {
 
             mUiHandler.post(() -> {
                 if (view != null) {
-                    mDialogLaunchAnimator.showFromView(dialog, view);
+                    mDialogLaunchAnimator.showFromView(dialog, view,
+                            new DialogCuj(InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
+                                    INTERACTION_JANK_TAG));
                 } else {
                     dialog.show();
                 }

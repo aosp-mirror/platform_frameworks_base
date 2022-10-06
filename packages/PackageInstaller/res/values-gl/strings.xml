@@ -23,7 +23,7 @@
     <string name="cancel" msgid="1018267193425558088">"Cancelar"</string>
     <string name="installing" msgid="4921993079741206516">"Instalando…"</string>
     <string name="installing_app" msgid="1165095864863849422">"Instalando <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
-    <string name="install_done" msgid="5987363587661783896">"Instalouse a aplicación."</string>
+    <string name="install_done" msgid="5987363587661783896">"Instalouse a aplicación"</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Queres instalar esta aplicación?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Queres actualizar esta aplicación?"</string>
     <string name="install_failed" msgid="5777824004474125469">"Non se instalou a aplicación"</string>

@@ -26,21 +26,22 @@ import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.shade.NotificationPanelViewController
 import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.unfold.SysUIUnfoldComponent
 import com.android.systemui.unfold.config.UnfoldTransitionConfig
 import com.android.systemui.unfold.util.ScopedUnfoldTransitionProgressProvider
-import com.android.systemui.util.view.ViewUtil
 import com.android.systemui.util.mockito.any
+import com.android.systemui.util.view.ViewUtil
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentCaptor
 import org.mockito.Mock
-import org.mockito.Mockito.spy
-import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 import java.util.Optional
@@ -51,7 +52,7 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
     private val touchEventHandler = TestTouchEventHandler()
 
     @Mock
-    private lateinit var panelViewController: PanelViewController
+    private lateinit var notificationPanelViewController: NotificationPanelViewController
     @Mock
     private lateinit var panelView: ViewGroup
     @Mock
@@ -75,7 +76,7 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        `when`(panelViewController.view).thenReturn(panelView)
+        `when`(notificationPanelViewController.view).thenReturn(panelView)
         `when`(sysuiUnfoldComponent.getStatusBarMoveFromCenterAnimationController())
             .thenReturn(moveFromCenterAnimation)
         // create the view on main thread as it requires main looper
@@ -136,6 +137,7 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
     private class UnfoldConfig : UnfoldTransitionConfig {
         override var isEnabled: Boolean = false
         override var isHingeAngleEnabled: Boolean = false
+        override val halfFoldedTimeoutMillis: Int = 0
     }
 
     private class TestTouchEventHandler : PhoneStatusBarView.TouchEventHandler {

@@ -207,8 +207,8 @@ public class ActivityThreadClientTest {
         final Configuration currentConfig = new Configuration();
 
         assertFalse("Must not report change if no public diff",
-                shouldReportChange(0 /* publicDiff */, currentConfig, newConfig,
-                null /* sizeBuckets */, 0 /* handledConfigChanges */));
+                shouldReportChange(currentConfig, newConfig, null /* sizeBuckets */,
+                        0 /* handledConfigChanges */));
 
         final int[] verticalThresholds = {100, 400};
         final SizeConfigurationBuckets buckets = new SizeConfigurationBuckets(
@@ -221,25 +221,25 @@ public class ActivityThreadClientTest {
         newConfig.screenHeightDp = 300;
 
         assertFalse("Must not report changes if the diff is small and not handled",
-                shouldReportChange(CONFIG_SCREEN_SIZE /* publicDiff */, currentConfig,
-                newConfig, buckets, CONFIG_FONT_SCALE /* handledConfigChanges */));
+                shouldReportChange(currentConfig, newConfig, buckets,
+                        CONFIG_FONT_SCALE /* handledConfigChanges */));
 
         assertTrue("Must report changes if the small diff is handled",
-                shouldReportChange(CONFIG_SCREEN_SIZE /* publicDiff */, currentConfig, newConfig,
-                buckets, CONFIG_SCREEN_SIZE /* handledConfigChanges */));
+                shouldReportChange(currentConfig, newConfig, buckets,
+                        CONFIG_SCREEN_SIZE /* handledConfigChanges */));
 
         currentConfig.fontScale = 0.8f;
         newConfig.fontScale = 1.2f;
 
         assertTrue("Must report handled changes regardless of small unhandled change",
-                shouldReportChange(CONFIG_SCREEN_SIZE | CONFIG_FONT_SCALE /* publicDiff */,
-                currentConfig, newConfig, buckets, CONFIG_FONT_SCALE /* handledConfigChanges */));
+                shouldReportChange(currentConfig, newConfig, buckets,
+                        CONFIG_FONT_SCALE /* handledConfigChanges */));
 
         newConfig.screenHeightDp = 500;
 
         assertFalse("Must not report changes if there's unhandled big changes",
-                shouldReportChange(CONFIG_SCREEN_SIZE | CONFIG_FONT_SCALE /* publicDiff */,
-                currentConfig, newConfig, buckets, CONFIG_FONT_SCALE /* handledConfigChanges */));
+                shouldReportChange(currentConfig, newConfig, buckets,
+                        CONFIG_FONT_SCALE /* handledConfigChanges */));
     }
 
     private void recreateAndVerifyNoRelaunch(ActivityThread activityThread, TestActivity activity) {
@@ -299,8 +299,8 @@ public class ActivityThreadClientTest {
 
         private void pauseActivity(ActivityClientRecord r) {
             mThread.handlePauseActivity(r, false /* finished */,
-                    false /* userLeaving */, 0 /* configChanges */, null /* pendingActions */,
-                    "test");
+                    false /* userLeaving */, 0 /* configChanges */, false /* autoEnteringPip */,
+                    null /* pendingActions */, "test");
         }
 
         private void stopActivity(ActivityClientRecord r) {

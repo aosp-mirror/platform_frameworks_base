@@ -21,6 +21,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"o"</string>
+    <string name="kilobyteShort" msgid="2214285521564195803">"ko"</string>
+    <string name="megabyteShort" msgid="6649361267635823443">"Mo"</string>
+    <string name="gigabyteShort" msgid="7515809460261287991">"Go"</string>
+    <string name="terabyteShort" msgid="1822367128583886496">"To"</string>
+    <string name="petabyteShort" msgid="5651571254228534832">"Po"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;Sans_titre&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(Aucun numéro de téléphone)"</string>
@@ -298,14 +303,14 @@
     <string name="permgroupdesc_location" msgid="1995955142118450685">"accéder à la position de cet appareil"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"Agenda"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"accéder à votre agenda"</string>
-    <string name="permgrouplab_sms" msgid="795737735126084874">"Messages texte"</string>
+    <string name="permgrouplab_sms" msgid="795737735126084874">"Messagerie texte"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"envoyer et afficher des messages texte"</string>
-    <string name="permgrouplab_storage" msgid="17339216290379241">"Fichiers"</string>
-    <string name="permgroupdesc_storage" msgid="5378659041354582769">"accéder aux fichiers sur votre appareil"</string>
-    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Musique et audio"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"accédez aux fichiers musicaux et audio sur votre appareil"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Photos et vidéos"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"accédez aux photos et aux vidéos sur votre appareil"</string>
+    <string name="permgrouplab_storage" msgid="9173334109512154196">"Fichiers et documents"</string>
+    <string name="permgroupdesc_storage" msgid="8352226729501080525">"accédez aux fichiers et aux documents sur votre appareil"</string>
+    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Musique et autres fichiers audio"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"accéder aux fichiers audio de votre appareil"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Photos et vidéos"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"accéder aux fichiers d\'image et aux fichiers vidéo de votre appareil"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Microphone"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"enregistrer des fichiers audio"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Activité physique"</string>
@@ -344,7 +349,7 @@
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Permet à l\'application de réduire ou de développer la barre d\'état."</string>
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"afficher les notifications en mode plein écran sur un appareil verrouillé"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Permet à l\'application d\'afficher les notifications en mode plein écran sur un appareil verrouillé."</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"Installer des raccourcis"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"installer des raccourcis"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Permet à une application d\'ajouter des raccourcis sans l\'intervention de l\'utilisateur."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"désinstaller des raccourcis"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Permet à l\'application de supprimer des raccourcis de la page d\'accueil sans intervention de l\'utilisateur."</string>
@@ -422,7 +427,7 @@
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Permet à l\'application de lire le journal d\'appels de votre téléphone, y compris les données relatives aux appels entrants et sortants. Des applications malveillantes peuvent utiliser cette fonctionnalité pour effacer ou modifier votre journal d\'appels."</string>
     <string name="permlab_bodySensors" msgid="662918578601619569">"Accéder aux données des capteurs corporels si en utilisation (fréq. card., etc.)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Permet à l\'application d\'accéder aux données des capteurs corporels telles que la fréquence cardiaque, la température et le pourcentage d\'oxygène dans le sang pendant l\'utilisation de l\'application."</string>
-    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Accéder aux données des capteurs corporels (comme la fréq. card.) en arrière-plan"</string>
+    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Accéder aux données des capteurs corporels si en arrière-plan (fréq. card., etc.)"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Permet à l\'application d\'accéder aux données des capteurs corporels telles que la fréquence cardiaque, la température et le pourcentage d\'oxygène dans le sang pendant que l\'application s\'exécute en arrière-plan."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Lire les événements d\'agenda et leurs détails"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Cette application peut lire tous les événements d\'agenda stockés sur votre tablette et partager ou enregistrer les données de votre agenda."</string>
@@ -1351,7 +1356,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Un accessoire audio analogique a été détecté"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"L\'appareil connecté n\'est pas compatible avec ce téléphone. Touchez ici en savoir plus."</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"Débogage USB activé"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"Touchez pour désactiver le débogage USB"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"Touchez ici pour désactiver le débogage USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Sélectionnez cette option pour désactiver le débogage USB."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Débogage sans fil connecté"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Touchez l\'écran pour désactiver le débogage sans fil"</string>
@@ -1412,7 +1417,7 @@
     <string name="ext_media_unmounting_notification_message" msgid="5717036261538754203">"Ne pas retirer"</string>
     <string name="ext_media_init_action" msgid="2312974060585056709">"Configurer"</string>
     <string name="ext_media_unmount_action" msgid="966992232088442745">"Éjecter"</string>
-    <string name="ext_media_browse_action" msgid="344865351947079139">"Explorer"</string>
+    <string name="ext_media_browse_action" msgid="344865351947079139">"Découvrir"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"Changer de sortie"</string>
     <string name="ext_media_missing_title" msgid="3209472091220515046">"Mémoire de stockage <xliff:g id="NAME">%s</xliff:g> manquante"</string>
     <string name="ext_media_missing_message" msgid="4408988706227922909">"Insérez l\'appareil de nouveau"</string>
@@ -1673,12 +1678,12 @@
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Ne pas activer"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ACTIVÉ"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"DÉSACTIVÉ"</string>
-    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Permettre à <xliff:g id="SERVICE">%1$s</xliff:g> de contrôler complètement votre appareil?"</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Permettre à <xliff:g id="SERVICE">%1$s</xliff:g> de commander complètement votre appareil?"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Le contrôle total convient aux applications qui répondent à vos besoins d\'accessibilité. Il ne convient pas à la plupart des applications."</string>
-    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Afficher et contrôler l\'écran"</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Afficher et commander l\'écran"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Cette fonctionnalité peut lire tout le contenu à l\'écran et afficher du contenu par-dessus d\'autres applications."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Afficher et effectuer des actions"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Cette fonctionnalité peut faire le suivi de vos interactions avec une application ou un capteur matériel et interagir avec des applications en votre nom."</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Cette fonctionnalité peut faire le suivi de vos interactions avec une application ou un capteur matériel, et interagir avec des applications en votre nom."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Autoriser"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Refuser"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Toucher une fonctionnalité pour commencer à l\'utiliser :"</string>
@@ -1692,7 +1697,7 @@
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inversion des couleurs"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Correction des couleurs"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Mode Une main"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Très sombre"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Réduction supplémentaire de la luminosité"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Touches de volume maintenues enfoncées. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> activé."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Touches de volume maintenues enfoncées. Service <xliff:g id="SERVICE_NAME">%1$s</xliff:g> désactivé."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Maintenez les deux touches de volume enfoncées pendant trois secondes pour utiliser <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
@@ -2048,7 +2053,8 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Les paramètres du mode Ne pas déranger ont changé"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Touchez l\'écran pour vérifier ce qui est bloqué."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Examiner les paramètres de notification"</string>
-    <string name="review_notification_settings_text" msgid="5916244866751849279">"À partir d\'Android 13, les applications que vous installez ont besoin de votre autorisation pour envoyer des notifications. Touchez pour modifier cette autorisation pour les applications existantes."</string>
+    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
+    <skip />
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Me rappeler plus tard"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Fermer"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Système"</string>
@@ -2276,5 +2282,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Vérifier les applications actives"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Impossible d\'accéder à l\'appareil photo du téléphone à partir de votre <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Impossible d\'accéder à l\'appareil photo de la tablette à partir de votre <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
-    <string name="system_locale_title" msgid="711882686834677268">"Paramètre système par défaut"</string>
+    <string name="system_locale_title" msgid="3978041860457277638">"Langue du système"</string>
 </resources>

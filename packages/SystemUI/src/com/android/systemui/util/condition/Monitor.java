@@ -16,16 +16,17 @@
 
 package com.android.systemui.util.condition;
 
+import android.util.ArraySet;
 import android.util.Log;
 
-import com.android.systemui.statusbar.policy.CallbackController;
+import com.android.systemui.dagger.qualifiers.Main;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
@@ -36,157 +37,128 @@ import javax.inject.Inject;
  * {@link Monitor} takes in a set of conditions, monitors whether all of them have
  * been fulfilled, and informs any registered listeners.
  */
-public class Monitor implements CallbackController<Monitor.Callback> {
+public class Monitor {
     private final String mTag = getClass().getSimpleName();
-
-    private final ArrayList<Callback> mCallbacks = new ArrayList<>();
-
-    // Set of all conditions that need to be monitored.
-    private final Set<Condition> mConditions;
     private final Executor mExecutor;
 
-    // Whether all conditions have been met.
-    private boolean mAllConditionsMet = false;
+    private final HashMap<Condition, ArraySet<Subscription.Token>> mConditions = new HashMap<>();
+    private final HashMap<Subscription.Token, SubscriptionState> mSubscriptions = new HashMap<>();
 
-    // Whether the monitor has started listening for all the conditions.
-    private boolean mHaveConditionsStarted = false;
+    private static class SubscriptionState {
+        private final Subscription mSubscription;
+        private Boolean mAllConditionsMet;
+
+        SubscriptionState(Subscription subscription) {
+            mSubscription = subscription;
+        }
+
+        public Set<Condition> getConditions() {
+            return mSubscription.mConditions;
+        }
+
+        public void update() {
+            // Overriding conditions do not override each other
+            final Collection<Condition> overridingConditions = mSubscription.mConditions.stream()
+                    .filter(Condition::isOverridingCondition).collect(Collectors.toSet());
+
+            final Collection<Condition> targetCollection = overridingConditions.isEmpty()
+                    ? mSubscription.mConditions : overridingConditions;
+
+            final boolean newAllConditionsMet = targetCollection.isEmpty() ? true : targetCollection
+                    .stream()
+                    .map(Condition::isConditionMet)
+                    .allMatch(conditionMet -> conditionMet);
+
+            if (mAllConditionsMet != null && newAllConditionsMet == mAllConditionsMet) {
+                return;
+            }
+
+            mAllConditionsMet = newAllConditionsMet;
+            mSubscription.mCallback.onConditionsChanged(mAllConditionsMet);
+        }
+    }
 
     // Callback for when each condition has been updated.
     private final Condition.Callback mConditionCallback = new Condition.Callback() {
         @Override
         public void onConditionChanged(Condition condition) {
-            mExecutor.execute(() -> updateConditionMetState());
+            mExecutor.execute(() -> updateConditionMetState(condition));
         }
     };
 
     @Inject
-    public Monitor(Executor executor, Set<Condition> conditions, Set<Callback> callbacks) {
-        mConditions = new HashSet<>();
+    public Monitor(@Main Executor executor) {
         mExecutor = executor;
-
-        if (conditions != null) {
-            mConditions.addAll(conditions);
-        }
-
-        if (callbacks == null) {
-            return;
-        }
-
-        for (Callback callback : callbacks) {
-            addCallbackLocked(callback);
-        }
     }
 
-    private void updateConditionMetState() {
-        // Overriding conditions do not override each other
-        final Collection<Condition> overridingConditions = mConditions.stream()
-                .filter(Condition::isOverridingCondition).collect(Collectors.toSet());
+    private void updateConditionMetState(Condition condition) {
+        final ArraySet<Subscription.Token> subscriptions = mConditions.get(condition);
 
-        final Collection<Condition> targetCollection = overridingConditions.isEmpty()
-                ? mConditions : overridingConditions;
-
-        final boolean newAllConditionsMet = targetCollection.isEmpty() ? true : targetCollection
-                .stream()
-                .map(Condition::isConditionMet)
-                .allMatch(conditionMet -> conditionMet);
-
-        if (newAllConditionsMet == mAllConditionsMet) {
+        // It's possible the condition was removed between the time the callback occurred and
+        // update was executed on the main thread.
+        if (subscriptions == null) {
             return;
         }
 
-        if (shouldLog()) Log.d(mTag, "all conditions met: " + newAllConditionsMet);
-        mAllConditionsMet = newAllConditionsMet;
-
-        // Updates all callbacks.
-        final Iterator<Callback> iterator = mCallbacks.iterator();
-        while (iterator.hasNext()) {
-            final Callback callback = iterator.next();
-            if (callback == null) {
-                iterator.remove();
-            } else {
-                callback.onConditionsChanged(mAllConditionsMet);
-            }
-        }
-    }
-
-    private void addConditionLocked(@NotNull Condition condition) {
-        mConditions.add(condition);
-
-        if (!mHaveConditionsStarted) {
-            return;
-        }
-
-        condition.addCallback(mConditionCallback);
-        updateConditionMetState();
+        subscriptions.stream().forEach(token -> mSubscriptions.get(token).update());
     }
 
     /**
-     * Adds a condition for the monitor to listen to and consider when determining whether the
-     * overall condition state is met.
+     * Registers a callback and the set of conditions to trigger it.
+     * @param subscription A {@link Subscription} detailing the desired conditions and callback.
+     * @return A {@link Subscription.Token} that can be used to remove the subscription.
      */
-    public void addCondition(@NotNull Condition condition) {
-        mExecutor.execute(() -> addConditionLocked(condition));
-    }
+    public Subscription.Token addSubscription(@NotNull Subscription subscription) {
+        final Subscription.Token token = new Subscription.Token();
+        final SubscriptionState state = new SubscriptionState(subscription);
 
-    /**
-     * Removes a condition from further consideration.
-     */
-    public void removeCondition(@NotNull Condition condition) {
         mExecutor.execute(() -> {
-            mConditions.remove(condition);
+            mSubscriptions.put(token, state);
 
-            if (!mHaveConditionsStarted) {
+            // Add and associate conditions.
+            subscription.getConditions().stream().forEach(condition -> {
+                if (!mConditions.containsKey(condition)) {
+                    mConditions.put(condition, new ArraySet<>());
+                    condition.addCallback(mConditionCallback);
+                }
+
+                mConditions.get(condition).add(token);
+            });
+
+            // Update subscription state.
+            state.update();
+
+        });
+        return token;
+    }
+
+    /**
+     * Removes a subscription from participating in future callbacks.
+     * @param token The {@link Subscription.Token} returned when the {@link Subscription} was
+     *              originally added.
+     */
+    public void removeSubscription(@NotNull Subscription.Token token) {
+        mExecutor.execute(() -> {
+            if (shouldLog()) Log.d(mTag, "removing callback");
+            if (!mSubscriptions.containsKey(token)) {
+                Log.e(mTag, "subscription not present:" + token);
                 return;
             }
 
-            condition.removeCallback(mConditionCallback);
-            updateConditionMetState();
-        });
-    }
+            mSubscriptions.remove(token).getConditions().forEach(condition -> {
+                if (!mConditions.containsKey(condition)) {
+                    Log.e(mTag, "condition not present:" + condition);
+                    return;
 
-    private void addCallbackLocked(@NotNull Callback callback) {
-        if (mCallbacks.contains(callback)) {
-            return;
-        }
-
-        if (shouldLog()) Log.d(mTag, "adding callback");
-        mCallbacks.add(callback);
-
-        // Updates the callback immediately.
-        callback.onConditionsChanged(mAllConditionsMet);
-
-        if (!mHaveConditionsStarted) {
-            if (shouldLog()) Log.d(mTag, "starting all conditions");
-            mConditions.forEach(condition -> condition.addCallback(mConditionCallback));
-            updateConditionMetState();
-            mHaveConditionsStarted = true;
-        }
-    }
-
-    @Override
-    public void addCallback(@NotNull Callback callback) {
-        mExecutor.execute(() -> addCallbackLocked(callback));
-    }
-
-    @Override
-    public void removeCallback(@NotNull Callback callback) {
-        mExecutor.execute(() -> {
-            if (shouldLog()) Log.d(mTag, "removing callback");
-            final Iterator<Callback> iterator = mCallbacks.iterator();
-            while (iterator.hasNext()) {
-                final Callback cb = iterator.next();
-                if (cb == null || cb == callback) {
-                    iterator.remove();
                 }
-            }
+                final Set<Subscription.Token> conditionSubscriptions = mConditions.get(condition);
 
-            if (mCallbacks.isEmpty() && mHaveConditionsStarted) {
-                if (shouldLog()) Log.d(mTag, "stopping all conditions");
-                mConditions.forEach(condition -> condition.removeCallback(mConditionCallback));
-
-                mAllConditionsMet = false;
-                mHaveConditionsStarted = false;
-            }
+                conditionSubscriptions.remove(token);
+                if (conditionSubscriptions.isEmpty()) {
+                    condition.removeCallback(mConditionCallback);
+                    mConditions.remove(condition);
+                }
+            });
         });
     }
 
@@ -195,9 +167,91 @@ public class Monitor implements CallbackController<Monitor.Callback> {
     }
 
     /**
+     * A {@link Subscription} represents a set of conditions and a callback that is informed when
+     * these conditions change.
+     */
+    public static class Subscription {
+        private final Set<Condition> mConditions;
+        private final Callback mCallback;
+
+        /** */
+        public Subscription(Set<Condition> conditions, Callback callback) {
+            this.mConditions = Collections.unmodifiableSet(conditions);
+            this.mCallback = callback;
+        }
+
+        public Set<Condition> getConditions() {
+            return mConditions;
+        }
+
+        public Callback getCallback() {
+            return mCallback;
+        }
+
+        /**
+         * A {@link Token} is an identifier that is associated with a {@link Subscription} which is
+         * registered with a {@link Monitor}.
+         */
+        public static class Token {
+        }
+
+        /**
+         * {@link Builder} is a helper class for constructing a {@link Subscription}.
+         */
+        public static class Builder {
+            private final Callback mCallback;
+            private final ArraySet<Condition> mConditions;
+
+            /**
+             * Default constructor specifying the {@link Callback} for the {@link Subscription}.
+             * @param callback
+             */
+            public Builder(Callback callback) {
+                mCallback = callback;
+                mConditions = new ArraySet<>();
+            }
+
+            /**
+             * Adds a {@link Condition} to be associated with the {@link Subscription}.
+             * @param condition
+             * @return The updated {@link Builder}.
+             */
+            public Builder addCondition(Condition condition) {
+                mConditions.add(condition);
+                return this;
+            }
+
+            /**
+             * Adds a set of {@link Condition} to be associated with the {@link Subscription}.
+             * @param condition
+             * @return The updated {@link Builder}.
+             */
+            public Builder addConditions(Set<Condition> condition) {
+                mConditions.addAll(condition);
+                return this;
+            }
+
+            /**
+             * Builds the {@link Subscription}.
+             * @return The resulting {@link Subscription}.
+             */
+            public Subscription build() {
+                return new Subscription(mConditions, mCallback);
+            }
+        }
+    }
+
+    /**
      * Callback that receives updates of whether all conditions have been fulfilled.
      */
     public interface Callback {
+        /**
+         * Returns the conditions associated with this callback.
+         */
+        default ArrayList<Condition> getConditions() {
+            return new ArrayList<>();
+        }
+
         /**
          * Triggered when the fulfillment of all conditions have been met.
          *

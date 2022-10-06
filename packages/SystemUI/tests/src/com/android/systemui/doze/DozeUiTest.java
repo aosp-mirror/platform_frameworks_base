@@ -86,7 +86,7 @@ public class DozeUiTest extends SysuiTestCase {
         mHandler = mHandlerThread.getThreadHandler();
 
         mDozeUi = new DozeUi(mContext, mAlarmManager, mWakeLock, mHost, mHandler,
-                mDozeParameters, mKeyguardUpdateMonitor, mStatusBarStateController, mDozeLog);
+                mDozeParameters, mStatusBarStateController, mDozeLog);
         mDozeUi.setDozeMachine(mMachine);
     }
 

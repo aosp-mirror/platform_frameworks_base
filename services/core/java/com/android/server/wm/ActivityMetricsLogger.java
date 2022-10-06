@@ -1,5 +1,6 @@
 package com.android.server.wm;
 
+import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.ActivityManager.START_SUCCESS;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
 import static android.app.ActivityManager.processStateAmToProto;
@@ -56,6 +57,10 @@ import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_T
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_TRANSITION_REPORTED_DRAWN_NO_BUNDLE;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_TRANSITION_REPORTED_DRAWN_WITH_BUNDLE;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_TRANSITION_WARM_LAUNCH;
+import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__LETTERBOX_POSITION__NOT_LETTERBOXED_POSITION;
+import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__LETTERBOXED_FOR_ASPECT_RATIO;
+import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__LETTERBOXED_FOR_FIXED_ORIENTATION;
+import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__LETTERBOXED_FOR_SIZE_COMPAT_MODE;
 import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__NOT_LETTERBOXED;
 import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__NOT_VISIBLE;
 import static com.android.internal.util.FrameworkStatsLog.CAMERA_COMPAT_CONTROL_EVENT_REPORTED__EVENT__APPEARED_APPLY_TREATMENT;
@@ -65,9 +70,11 @@ import static com.android.internal.util.FrameworkStatsLog.CAMERA_COMPAT_CONTROL_
 import static com.android.internal.util.FrameworkStatsLog.CAMERA_COMPAT_CONTROL_EVENT_REPORTED__EVENT__CLICKED_REVERT_TREATMENT;
 import static com.android.server.am.MemoryStatUtil.MemoryStat;
 import static com.android.server.am.MemoryStatUtil.readMemoryStatFromFilesystem;
+import static com.android.server.am.ProcessList.INVALID_ADJ;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_METRICS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.wm.ActivityTaskManagerInternal.APP_TRANSITION_RECENTS_ANIM;
 import static com.android.server.wm.ActivityTaskManagerInternal.APP_TRANSITION_TIMEOUT;
 import static com.android.server.wm.EventLogTags.WM_ACTIVITY_LAUNCH_TIME;
 
@@ -101,6 +108,7 @@ import android.util.TimeUtils;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.internal.util.LatencyTracker;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
@@ -141,6 +149,12 @@ class ActivityMetricsLogger {
      * keyguard is locked, its transition info will be dropped.
      */
     private static final long UNKNOWN_VISIBILITY_CHECK_DELAY_MS = 3000;
+
+    /**
+     * If the recents animation is finished before the delay since the window drawn, do not log the
+     * action because the duration is too small that may be just an accidentally touch.
+     */
+    private static final long LATENCY_TRACKER_RECENTS_DELAY_MS = 300;
 
     /**
      * The flag for {@link #notifyActivityLaunching} to skip associating a new launch with an active
@@ -262,6 +276,10 @@ class ActivityMetricsLogger {
         final boolean mProcessRunning;
         /** whether the process of the launching activity didn't have any active activity. */
         final boolean mProcessSwitch;
+        /** The process state of the launching activity prior to the launch */
+        final int mProcessState;
+        /** The oom adj score of the launching activity prior to the launch */
+        final int mProcessOomAdj;
         /** Whether the last launched activity has reported drawn. */
         boolean mIsDrawn;
         /** The latest activity to have been launched. */
@@ -297,8 +315,8 @@ class ActivityMetricsLogger {
         @Nullable
         static TransitionInfo create(@NonNull ActivityRecord r,
                 @NonNull LaunchingState launchingState, @Nullable ActivityOptions options,
-                boolean processRunning, boolean processSwitch, boolean newActivityCreated,
-                int startResult) {
+                boolean processRunning, boolean processSwitch, int processState, int processOomAdj,
+                boolean newActivityCreated, int startResult) {
             if (startResult != START_SUCCESS && startResult != START_TASK_TO_FRONT) {
                 return null;
             }
@@ -313,18 +331,20 @@ class ActivityMetricsLogger {
                 transitionType = TYPE_TRANSITION_COLD_LAUNCH;
             }
             return new TransitionInfo(r, launchingState, options, transitionType, processRunning,
-                    processSwitch);
+                    processSwitch, processState, processOomAdj);
         }
 
         /** Use {@link TransitionInfo#create} instead to ensure the transition type is valid. */
         private TransitionInfo(ActivityRecord r, LaunchingState launchingState,
                 ActivityOptions options, int transitionType, boolean processRunning,
-                boolean processSwitch) {
+                boolean processSwitch, int processState, int processOomAdj) {
             mLaunchingState = launchingState;
             mTransitionStartTimeNs = launchingState.mCurrentTransitionStartTimeNs;
             mTransitionType = transitionType;
             mProcessRunning = processRunning;
             mProcessSwitch = processSwitch;
+            mProcessState = processState;
+            mProcessOomAdj = processOomAdj;
             mTransitionDeviceUptimeMs = launchingState.mCurrentUpTimeMs;
             setLatestLaunchedActivity(r);
             // The launching state can be reused by consecutive launch. Its original association
@@ -628,12 +648,23 @@ class ActivityMetricsLogger {
         // interesting.
         final boolean processSwitch = !processRunning
                 || !processRecord.hasStartedActivity(launchedActivity);
+        final int processState;
+        final int processOomAdj;
+        if (processRunning) {
+            processState = processRecord.getCurrentProcState();
+            processOomAdj = processRecord.getCurrentAdj();
+        } else {
+            processState = PROCESS_STATE_NONEXISTENT;
+            processOomAdj = INVALID_ADJ;
+        }
 
         final TransitionInfo info = launchingState.mAssociatedTransitionInfo;
         if (DEBUG_METRICS) {
             Slog.i(TAG, "notifyActivityLaunched" + " resultCode=" + resultCode
                     + " launchedActivity=" + launchedActivity + " processRunning=" + processRunning
                     + " processSwitch=" + processSwitch
+                    + " processState=" + processState
+                    + " processOomAdj=" + processOomAdj
                     + " newActivityCreated=" + newActivityCreated + " info=" + info);
         }
 
@@ -669,7 +700,8 @@ class ActivityMetricsLogger {
         }
 
         final TransitionInfo newInfo = TransitionInfo.create(launchedActivity, launchingState,
-                options, processRunning, processSwitch, newActivityCreated, resultCode);
+                options, processRunning, processSwitch, processState, processOomAdj,
+                newActivityCreated, resultCode);
         if (newInfo == null) {
             abort(launchingState, "unrecognized launch");
             return;
@@ -731,10 +763,6 @@ class ActivityMetricsLogger {
         final TransitionInfoSnapshot infoSnapshot = new TransitionInfoSnapshot(info);
         if (info.mLoggedTransitionStarting) {
             done(false /* abort */, info, "notifyWindowsDrawn", timestampNs);
-        }
-        if (r.mWmService.isRecentsAnimationTarget(r)) {
-            r.mWmService.getRecentsAnimationController().logRecentsAnimationStartTime(
-                    info.mSourceEventDelayMs + info.mWindowsDrawnDelayMs);
         }
         return infoSnapshot;
     }
@@ -947,6 +975,9 @@ class ActivityMetricsLogger {
                 launchObserverNotifyActivityLaunchFinished(info, timestampNs);
             }
             logAppTransitionFinished(info, isHibernating != null ? isHibernating : false);
+            if (info.mReason == APP_TRANSITION_RECENTS_ANIM) {
+                logRecentsAnimationLatency(info);
+            }
         }
         mTransitionInfoList.remove(info);
     }
@@ -984,8 +1015,11 @@ class ActivityMetricsLogger {
             final long timestamp = info.mTransitionStartTimeNs;
             final long uptime = info.mTransitionDeviceUptimeMs;
             final int transitionDelay = info.mCurrentTransitionDelayMs;
+            final int processState = info.mProcessState;
+            final int processOomAdj = info.mProcessOomAdj;
             mLoggerHandler.post(() -> logAppTransition(
-                    timestamp, uptime, transitionDelay, infoSnapshot, isHibernating));
+                    timestamp, uptime, transitionDelay, infoSnapshot, isHibernating,
+                    processState, processOomAdj));
         }
         mLoggerHandler.post(() -> logAppDisplayed(infoSnapshot));
         if (info.mPendingFullyDrawn != null) {
@@ -997,7 +1031,8 @@ class ActivityMetricsLogger {
 
     // This gets called on another thread without holding the activity manager lock.
     private void logAppTransition(long transitionStartTimeNs, long transitionDeviceUptimeMs,
-            int currentTransitionDelayMs, TransitionInfoSnapshot info, boolean isHibernating) {
+            int currentTransitionDelayMs, TransitionInfoSnapshot info, boolean isHibernating,
+            int processState, int processOomAdj) {
         final LogMaker builder = new LogMaker(APP_TRANSITION);
         builder.setPackageName(info.packageName);
         builder.setType(info.type);
@@ -1063,7 +1098,9 @@ class ActivityMetricsLogger {
                 isIncremental,
                 isLoading,
                 info.launchedActivityName.hashCode(),
-                TimeUnit.NANOSECONDS.toMillis(transitionStartTimeNs));
+                TimeUnit.NANOSECONDS.toMillis(transitionStartTimeNs),
+                processState,
+                processOomAdj);
 
         if (DEBUG_METRICS) {
             Slog.i(TAG, String.format("APP_START_OCCURRED(%s, %s, %s, %s, %s)",
@@ -1100,6 +1137,22 @@ class ActivityMetricsLogger {
         sb.append(": ");
         TimeUtils.formatDuration(info.windowsDrawnDelayMs, sb);
         Log.i(TAG, sb.toString());
+    }
+
+    private void logRecentsAnimationLatency(TransitionInfo info) {
+        final int duration = info.mSourceEventDelayMs + info.mWindowsDrawnDelayMs;
+        final ActivityRecord r = info.mLastLaunchedActivity;
+        final long lastTopLossTime = r.topResumedStateLossTime;
+        final WindowManagerService wm = mSupervisor.mService.mWindowManager;
+        final Object controller = wm.getRecentsAnimationController();
+        mLoggerHandler.postDelayed(() -> {
+            if (lastTopLossTime != r.topResumedStateLossTime
+                    || controller != wm.getRecentsAnimationController()) {
+                // Skip if the animation was finished in a short time.
+                return;
+            }
+            wm.mLatencyTracker.logAction(LatencyTracker.ACTION_START_RECENTS_ANIMATION, duration);
+        }, LATENCY_TRACKER_RECENTS_DELAY_MS);
     }
 
     private static int getAppStartTransitionType(int tronType, boolean relaunched) {
@@ -1368,7 +1421,7 @@ class ActivityMetricsLogger {
             return;
         }
 
-        logAppCompatStateInternal(activity, state, packageUid, compatStateInfo);
+        logAppCompatStateInternal(activity, state, compatStateInfo);
     }
 
     /**
@@ -1408,18 +1461,61 @@ class ActivityMetricsLogger {
             }
         }
         if (activityToLog != null && stateToLog != APP_COMPAT_STATE_CHANGED__STATE__NOT_VISIBLE) {
-            logAppCompatStateInternal(activityToLog, stateToLog, packageUid, compatStateInfo);
+            logAppCompatStateInternal(activityToLog, stateToLog, compatStateInfo);
         }
     }
 
+    private static boolean isAppCompateStateChangedToLetterboxed(int state) {
+        return state == APP_COMPAT_STATE_CHANGED__STATE__LETTERBOXED_FOR_ASPECT_RATIO
+                || state == APP_COMPAT_STATE_CHANGED__STATE__LETTERBOXED_FOR_FIXED_ORIENTATION
+                || state == APP_COMPAT_STATE_CHANGED__STATE__LETTERBOXED_FOR_SIZE_COMPAT_MODE;
+    }
+
     private void logAppCompatStateInternal(@NonNull ActivityRecord activity, int state,
-            int packageUid, PackageCompatStateInfo compatStateInfo) {
+             PackageCompatStateInfo compatStateInfo) {
         compatStateInfo.mLastLoggedState = state;
         compatStateInfo.mLastLoggedActivity = activity;
-        FrameworkStatsLog.write(FrameworkStatsLog.APP_COMPAT_STATE_CHANGED, packageUid, state);
+        int packageUid = activity.info.applicationInfo.uid;
+
+        int positionToLog = APP_COMPAT_STATE_CHANGED__LETTERBOX_POSITION__NOT_LETTERBOXED_POSITION;
+        if (isAppCompateStateChangedToLetterboxed(state)) {
+            positionToLog = activity.mLetterboxUiController.getLetterboxPositionForLogging();
+        }
+        FrameworkStatsLog.write(FrameworkStatsLog.APP_COMPAT_STATE_CHANGED,
+                packageUid, state, positionToLog);
 
         if (DEBUG_METRICS) {
-            Slog.i(TAG, String.format("APP_COMPAT_STATE_CHANGED(%s, %s)", packageUid, state));
+            Slog.i(TAG, String.format("APP_COMPAT_STATE_CHANGED(%s, %s, %s)",
+                    packageUid, state, positionToLog));
+        }
+    }
+
+    /**
+     * Logs the changing of the letterbox position along with its package UID
+     */
+    void logLetterboxPositionChange(@NonNull ActivityRecord activity, int position) {
+        int packageUid = activity.info.applicationInfo.uid;
+        FrameworkStatsLog.write(FrameworkStatsLog.LETTERBOX_POSITION_CHANGED, packageUid, position);
+
+        if (!mPackageUidToCompatStateInfo.contains(packageUid)) {
+            // There is no last logged activity for this packageUid so we should not log the
+            // position change as we can only log the position change for the current activity
+            return;
+        }
+        final PackageCompatStateInfo compatStateInfo = mPackageUidToCompatStateInfo.get(packageUid);
+        final ActivityRecord lastLoggedActivity = compatStateInfo.mLastLoggedActivity;
+        if (activity != lastLoggedActivity) {
+            // Only log the position change for the current activity to be consistent with
+            // findAppCompatStateToLog and ensure that metrics for the state changes are computed
+            // correctly
+            return;
+        }
+        int state = activity.getAppCompatState();
+        logAppCompatStateInternal(activity, state, compatStateInfo);
+
+        if (DEBUG_METRICS) {
+            Slog.i(TAG, String.format("LETTERBOX_POSITION_CHANGED(%s, %s)",
+                    packageUid, position));
         }
     }
 

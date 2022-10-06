@@ -27,6 +27,7 @@ import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
@@ -44,11 +45,14 @@ import static org.mockito.Mockito.verify;
 
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
+import android.util.SparseArray;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.InsetsVisibilities;
 
 import androidx.test.filters.SmallTest;
+
+import com.android.internal.util.function.TriConsumer;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -269,15 +273,18 @@ public class InsetsStateControllerTest extends WindowTestsBase {
     @Test
     public void testImeForDispatch() {
         final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
-        final WindowState ime = createWindow(null, TYPE_APPLICATION, "ime");
+        final WindowState ime = createWindow(null, TYPE_INPUT_METHOD, "ime");
 
         // IME cannot be the IME target.
         ime.mAttrs.flags |= FLAG_NOT_FOCUSABLE;
 
         WindowContainerInsetsSourceProvider statusBarProvider =
                 getController().getSourceProvider(ITYPE_STATUS_BAR);
-        statusBarProvider.setWindowContainer(statusBar, null, ((displayFrames, windowState, rect) ->
+        final SparseArray<TriConsumer<DisplayFrames, WindowContainer, Rect>> imeOverrideProviders =
+                new SparseArray<>();
+        imeOverrideProviders.put(TYPE_INPUT_METHOD, ((displayFrames, windowState, rect) ->
                 rect.set(0, 1, 2, 3)));
+        statusBarProvider.setWindowContainer(statusBar, null, imeOverrideProviders);
         getController().getSourceProvider(ITYPE_IME).setWindowContainer(ime, null, null);
         statusBar.setControllableInsetProvider(statusBarProvider);
         statusBar.updateSourceFrame(statusBar.getFrame());

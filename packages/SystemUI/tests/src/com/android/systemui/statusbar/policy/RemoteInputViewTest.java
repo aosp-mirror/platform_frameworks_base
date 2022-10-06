@@ -275,10 +275,9 @@ public class RemoteInputViewTest extends SysuiTestCase {
         EditText editText = view.findViewById(R.id.remote_input_text);
         editText.setText(TEST_REPLY);
         ClipDescription description = new ClipDescription("", new String[] {"image/png"});
-        // We need to use an (arbitrary) real resource here so that an actual image gets attached.
+        // We need to use an (arbitrary) real resource here so that an actual image gets attached
         ClipData clip = new ClipData(description, new ClipData.Item(
-                Uri.parse("android.resource://com.android.systemui/"
-                        + R.drawable.default_thumbnail)));
+                Uri.parse("android.resource://android/" + android.R.drawable.btn_default)));
         ContentInfo payload =
                 new ContentInfo.Builder(clip, SOURCE_CLIPBOARD).build();
         view.setAttachment(payload);

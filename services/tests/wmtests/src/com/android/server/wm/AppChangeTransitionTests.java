@@ -134,9 +134,9 @@ public class AppChangeTransitionTests extends WindowTestsBase {
 
     @Test
     public void testNoChangeOnOldDisplayWhenMoveDisplay() {
-        mDisplayContent.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        mDisplayContent.getDefaultTaskDisplayArea().setWindowingMode(WINDOWING_MODE_FULLSCREEN);
         final DisplayContent dc1 = createNewDisplay(Display.STATE_ON);
-        dc1.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        dc1.getDefaultTaskDisplayArea().setWindowingMode(WINDOWING_MODE_FREEFORM);
         setUpOnDisplay(dc1);
 
         assertEquals(WINDOWING_MODE_FREEFORM, mTask.getWindowingMode());

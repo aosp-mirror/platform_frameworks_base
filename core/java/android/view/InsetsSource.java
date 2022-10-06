@@ -22,6 +22,7 @@ import static android.view.InsetsSourceProto.VISIBLE;
 import static android.view.InsetsSourceProto.VISIBLE_FRAME;
 import static android.view.InsetsState.ITYPE_CAPTION_BAR;
 import static android.view.InsetsState.ITYPE_IME;
+import static android.view.ViewRootImpl.CAPTION_ON_SHELL;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -148,7 +149,7 @@ public class InsetsSource implements Parcelable {
         // During drag-move and drag-resizing, the caption insets position may not get updated
         // before the app frame get updated. To layout the app content correctly during drag events,
         // we always return the insets with the corresponding height covering the top.
-        if (getType() == ITYPE_CAPTION_BAR) {
+        if (!CAPTION_ON_SHELL && getType() == ITYPE_CAPTION_BAR) {
             return Insets.of(0, frame.height(), 0, 0);
         }
         // Checks for whether there is shared edge with insets for 0-width/height window.

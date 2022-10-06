@@ -125,9 +125,9 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD Audio: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD Audio"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Слуховые аппараты"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE Audio"</string>
+    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Слуховой аппарат подключен"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Подключено к LE Audio"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"Подключено к LE_AUDIO"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Подключено к мультимедийному аудиоустройству"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Подключено к аудиоустройству телефона"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Установлено подключение к серверу передачи файлов"</string>
@@ -448,7 +448,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Протаномалия (красный/зеленый)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Тританомалия (синий/желтый)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Коррекция цвета"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Используйте коррекцию цвета, чтобы:&lt;br/&gt; &lt;ol&gt; &lt;li&gt; Добиться нужной цветопередачи.&lt;/li&gt; &lt;li&gt; Убрать цвета, которые мешают сосредоточиться.&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Коррекция цвета поможет вам:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Добиться нужной цветопередачи.&lt;/li&gt; &lt;li&gt;&amp;nbsp;Включить черно-белый режим, чтобы меньше отвлекаться.&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Новая настройка: <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"Уровень заряда – <xliff:g id="PERCENTAGE">%1$s</xliff:g>. <xliff:g id="TIME_STRING">%2$s</xliff:g>."</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Заряда хватит примерно на <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -585,7 +585,7 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"Включить блокировку"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Сменить пользователя на <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Создаем нового пользователя…"</string>
-    <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"Создание профиля…"</string>
+    <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"Создание гостя…"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"Не удалось создать пользователя"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"Не удалось создать гостя."</string>
     <string name="user_nickname" msgid="262624187455825083">"Псевдоним"</string>
@@ -598,6 +598,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Сбросить"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Удалить"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Сброс гостевого сеанса…"</string>
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Сбросить гостевой сеанс?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"При этом начнется новый гостевой сеанс, а все данные и приложения предыдущего сеанса будут удалены."</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Выйти из гостевого режима?"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Все приложения и данные текущего гостевого сеанса будут удалены."</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Выйти"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Сохранить историю сеанса?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Сохраните историю текущего сеанса или удалите данные и приложения."</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Удалить"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Сохранить"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"Выйти из гостевого режима"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"Сбросить гостевой сеанс"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Выйти из гостевого режима"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"История будет удалена сразу после выхода."</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"При выходе вы можете сохранить или удалить историю."</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Сбросьте историю сеанса прямо сейчас и удалите или сохраните ее при выходе."</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Сделать снимок"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Выбрать фото"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Выбрать фотографию"</string>
@@ -652,11 +667,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Включение экрана"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Разрешить приложению включать экран"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Приложение сможет в любое время включать экран без явного согласия с вашей стороны"</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Сканирование QR-кода"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Чтобы прослушать, поместите QR-код в центр"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"Недопустимый формат QR-кода"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Остановить трансляцию \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Если вы начнете транслировать \"<xliff:g id="SWITCHAPP">%1$s</xliff:g>\" или смените целевое устройство, текущая трансляция прервется."</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Транслировать \"<xliff:g id="SWITCHAPP">%1$s</xliff:g>\""</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Транслировать на другое устройство"</string>
-    <string name="back_navigation_animation" msgid="8105467568421689484">"Анимации подсказки для жеста \"Назад\""</string>
-    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Включить системную анимацию подсказки для жеста \"Назад\"."</string>
-    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"С помощью этого параметра можно включить системные анимации подсказок для жестов. Для этого нужно установить значение true для enableOnBackInvokedCallback в файле манифеста приложения."</string>
 </resources>

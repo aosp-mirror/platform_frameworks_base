@@ -19,7 +19,6 @@ package com.android.systemui.media.dialog;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
@@ -74,7 +73,7 @@ public class MediaOutputBroadcastDialog extends MediaOutputBaseDialog {
     MediaOutputBroadcastDialog(Context context, boolean aboveStatusbar,
             BroadcastSender broadcastSender, MediaOutputController mediaOutputController) {
         super(context, broadcastSender, mediaOutputController);
-        mAdapter = new MediaOutputGroupAdapter(mMediaOutputController);
+        mAdapter = new MediaOutputAdapter(mMediaOutputController);
         // TODO(b/226710953): Move the part to MediaOutputBaseDialog for every class
         //  that extends MediaOutputBaseDialog
         if (!aboveStatusbar) {
@@ -116,8 +115,8 @@ public class MediaOutputBroadcastDialog extends MediaOutputBaseDialog {
     }
 
     @Override
-    Drawable getAppSourceIcon() {
-        return mMediaOutputController.getAppSourceIcon();
+    IconCompat getAppSourceIcon() {
+        return mMediaOutputController.getNotificationSmallIcon();
     }
 
     @Override

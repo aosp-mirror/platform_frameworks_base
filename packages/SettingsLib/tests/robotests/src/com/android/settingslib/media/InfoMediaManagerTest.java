@@ -666,12 +666,22 @@ public class InfoMediaManagerTest {
     }
 
     @Test
-    public void onSessionUpdated_shouldDispatchDataChanged() {
+    public void onSessionUpdated_shouldDispatchDeviceListAdded() {
+        final MediaRoute2Info info = mock(MediaRoute2Info.class);
+        when(info.getId()).thenReturn(TEST_ID);
+        when(info.getClientPackageName()).thenReturn(TEST_PACKAGE_NAME);
+        when(info.isSystemRoute()).thenReturn(true);
+
+        final List<MediaRoute2Info> routes = new ArrayList<>();
+        routes.add(info);
+        mShadowRouter2Manager.setAllRoutes(routes);
+
+        mInfoMediaManager.mPackageName = "";
         mInfoMediaManager.registerCallback(mCallback);
 
         mInfoMediaManager.mMediaRouterCallback.onSessionUpdated(mock(RoutingSessionInfo.class));
 
-        verify(mCallback).onDeviceAttributesChanged();
+        verify(mCallback).onDeviceListAdded(any());
     }
 
     @Test

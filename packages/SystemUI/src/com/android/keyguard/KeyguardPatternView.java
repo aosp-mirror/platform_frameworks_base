@@ -71,7 +71,7 @@ public class KeyguardPatternView extends KeyguardInputView
      */
     private long mLastPokeTime = -UNLOCK_PATTERN_WAKE_INTERVAL_MS;
 
-    KeyguardMessageArea mSecurityMessageDisplay;
+    BouncerKeyguardMessageArea mSecurityMessageDisplay;
     private View mEcaView;
     private ConstraintLayout mContainer;
 
@@ -120,7 +120,7 @@ public class KeyguardPatternView extends KeyguardInputView
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        mSecurityMessageDisplay = KeyguardMessageArea.findSecurityMessageDisplay(this);
+        mSecurityMessageDisplay = findViewById(R.id.bouncer_message_area);
     }
 
     @Override

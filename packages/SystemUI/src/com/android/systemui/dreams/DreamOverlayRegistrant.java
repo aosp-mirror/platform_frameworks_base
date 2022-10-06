@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.os.PatternMatcher;
 import android.os.RemoteException;
@@ -31,7 +32,6 @@ import android.service.dreams.IDreamManager;
 import android.util.Log;
 
 import com.android.systemui.CoreStartable;
-import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
 
 import javax.inject.Inject;
@@ -66,23 +66,15 @@ public class DreamOverlayRegistrant extends CoreStartable {
         final int enabledState =
                 packageManager.getComponentEnabledSetting(mOverlayServiceComponent);
 
-
-        // TODO(b/204626521): We should not have to set the component enabled setting if the
-        // enabled config flag is properly applied based on the RRO.
-        if (enabledState != PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER) {
-            final int overlayState = mResources.getBoolean(R.bool.config_dreamOverlayServiceEnabled)
-                    ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED
-                    : PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
-
-            if (overlayState != enabledState) {
-                packageManager
-                        .setComponentEnabledSetting(mOverlayServiceComponent, overlayState, 0);
-            }
-        }
-
         // The overlay service is only registered when its component setting is enabled.
-        boolean register = packageManager.getComponentEnabledSetting(mOverlayServiceComponent)
-                == PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
+        boolean register = false;
+
+        try {
+            register = packageManager.getServiceInfo(mOverlayServiceComponent,
+                PackageManager.GET_META_DATA).enabled;
+        } catch (NameNotFoundException e) {
+            Log.e(TAG, "could not find dream overlay service");
+        }
 
         if (mCurrentRegisteredState == register) {
             return;

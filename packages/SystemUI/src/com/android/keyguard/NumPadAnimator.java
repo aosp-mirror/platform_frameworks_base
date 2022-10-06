@@ -48,6 +48,10 @@ class NumPadAnimator {
     private int mTextColorPrimary;
     private int mTextColorPressed;
     private int mStyle;
+    private float mStartRadius;
+    private float mEndRadius;
+    private int mHeight;
+
     private static final int EXPAND_ANIMATION_MS = 100;
     private static final int EXPAND_COLOR_ANIMATION_MS = 50;
     private static final int CONTRACT_ANIMATION_DELAY_MS = 33;
@@ -80,12 +84,20 @@ class NumPadAnimator {
         mContractAnimatorSet.start();
     }
 
+    public void setProgress(float progress) {
+        mBackground.setCornerRadius(mEndRadius + (mStartRadius - mEndRadius) * progress);
+        int height = (int) (mHeight * 0.7f + mHeight * 0.3 * progress);
+        int difference = mHeight - height;
+        mBackground.setBounds(0, difference / 2, mHeight, mHeight - difference / 2);
+    }
+
     void onLayout(int height) {
-        float startRadius = height / 2f;
-        float endRadius = height / 4f;
-        mBackground.setCornerRadius(startRadius);
-        mExpandAnimator.setFloatValues(startRadius, endRadius);
-        mContractAnimator.setFloatValues(endRadius, startRadius);
+        mHeight = height;
+        mStartRadius = height / 2f;
+        mEndRadius = height / 4f;
+        mBackground.setCornerRadius(mStartRadius);
+        mExpandAnimator.setFloatValues(mStartRadius, mEndRadius);
+        mContractAnimator.setFloatValues(mEndRadius, mStartRadius);
     }
 
     /**
