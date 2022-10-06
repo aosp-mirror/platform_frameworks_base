@@ -306,6 +306,18 @@ public class AbstractAccessibilityServiceConnectionTest {
     }
 
     @Test
+    public void setServiceInfo_ChangeAccessibilityTool_updateFails() {
+        assertFalse(mSpyServiceInfo.isAccessibilityTool());
+
+        final AccessibilityServiceInfo serviceInfo = new AccessibilityServiceInfo();
+        serviceInfo.setAccessibilityTool(true);
+        mServiceConnection.setServiceInfo(serviceInfo);
+
+        // isAccessibilityTool should not be dynamically updatable
+        assertFalse(mSpyServiceInfo.isAccessibilityTool());
+    }
+
+    @Test
     public void canReceiveEvents_hasEventType_returnTrue() {
         final AccessibilityServiceInfo serviceInfo = new AccessibilityServiceInfo();
         updateServiceInfo(serviceInfo,
