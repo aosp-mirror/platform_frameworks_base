@@ -25,6 +25,7 @@ import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.view.WindowManager.fixScale;
 import static android.window.TransitionInfo.FLAG_IS_INPUT_METHOD;
+import static android.window.TransitionInfo.FLAG_IS_OCCLUDED;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
 
@@ -441,31 +442,34 @@ public class Transitions implements RemoteCallable<Transitions> {
             return;
         }
 
-        // apply transfer starting window directly if there is no other task change. Since this
-        // is an activity->activity situation, we can detect it by selecting transitions with only
-        // 2 changes where neither are tasks and one is a starting-window recipient.
         final int changeSize = info.getChanges().size();
-        if (changeSize == 2) {
-            boolean nonTaskChange = true;
-            boolean transferStartingWindow = false;
-            for (int i = changeSize - 1; i >= 0; --i) {
-                final TransitionInfo.Change change = info.getChanges().get(i);
-                if (change.getTaskInfo() != null) {
-                    nonTaskChange = false;
-                    break;
-                }
-                if ((change.getFlags() & FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT) != 0) {
-                    transferStartingWindow = true;
-                }
+        boolean taskChange = false;
+        boolean transferStartingWindow = false;
+        boolean allOccluded = changeSize > 0;
+        for (int i = changeSize - 1; i >= 0; --i) {
+            final TransitionInfo.Change change = info.getChanges().get(i);
+            taskChange |= change.getTaskInfo() != null;
+            transferStartingWindow |= change.hasFlags(FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT);
+            if (!change.hasFlags(FLAG_IS_OCCLUDED)) {
+                allOccluded = false;
             }
-            if (nonTaskChange && transferStartingWindow) {
-                t.apply();
-                finishT.apply();
-                // Treat this as an abort since we are bypassing any merge logic and effectively
-                // finishing immediately.
-                onAbort(transitionToken);
-                return;
-            }
+        }
+        // There does not need animation when:
+        // A. Transfer starting window. Apply transfer starting window directly if there is no other
+        // task change. Since this is an activity->activity situation, we can detect it by selecting
+        // transitions with only 2 changes where neither are tasks and one is a starting-window
+        // recipient.
+        if (!taskChange && transferStartingWindow && changeSize == 2
+                // B. It's visibility change if the TRANSIT_TO_BACK/TO_FRONT happened when all
+                // changes are underneath another change.
+                || ((info.getType() == TRANSIT_TO_BACK || info.getType() == TRANSIT_TO_FRONT)
+                && allOccluded)) {
+            t.apply();
+            finishT.apply();
+            // Treat this as an abort since we are bypassing any merge logic and effectively
+            // finishing immediately.
+            onAbort(transitionToken);
+            return;
         }
 
         final ActiveTransition active = mActiveTransitions.get(activeIdx);
