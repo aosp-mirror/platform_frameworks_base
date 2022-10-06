@@ -92,7 +92,7 @@ class AutoEnterPipOnGoToHomeTest(testSpec: FlickerTestParameter) : EnterPipTest(
     }
 
     /** Checks that [pipApp] window is animated towards default position in right bottom corner */
-    @Presubmit
+    @FlakyTest(bugId = 251135384)
     @Test
     fun pipLayerMovesTowardsRightBottomCorner() {
         // in gestural nav the swipe makes PiP first go upwards

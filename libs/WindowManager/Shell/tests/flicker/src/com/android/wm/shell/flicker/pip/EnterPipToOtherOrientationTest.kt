@@ -141,6 +141,12 @@ class EnterPipToOtherOrientationTest(
     @Test
     fun entireScreenCoveredAtStartAndEnd() = testSpec.entireScreenCovered(allStates = false)
 
+    @FlakyTest(bugId = 251219769)
+    @Test
+    override fun entireScreenCovered() {
+        super.entireScreenCovered()
+    }
+
     /**
      * Checks [pipApp] window remains visible and on top throughout the transition
      */
