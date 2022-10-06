@@ -208,13 +208,12 @@ class MediaTttChipControllerReceiver @Inject constructor(
 
     private fun layoutRipple(rippleView: ReceiverChipRippleView) {
         val windowBounds = windowManager.currentWindowMetrics.bounds
-        val height = windowBounds.height()
-        val width = windowBounds.width()
+        val height = windowBounds.height().toFloat()
+        val width = windowBounds.width().toFloat()
 
-        val maxDiameter = height / 2.5f
-        rippleView.setMaxSize(maxDiameter, maxDiameter)
+        rippleView.setMaxSize(width / 2f, height / 2f)
         // Center the ripple on the bottom of the screen in the middle.
-        rippleView.setCenter(width * 0.5f, height.toFloat())
+        rippleView.setCenter(width * 0.5f, height)
         val color = Utils.getColorAttrDefaultColor(context, R.attr.wallpaperTextColorAccent)
         rippleView.setColor(color, 70)
     }
