@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.flicker.splitscreen
 
+import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.IwTest
 import android.platform.test.annotations.Presubmit
 import android.view.WindowManagerPolicyConstants
@@ -104,7 +105,7 @@ class SwitchBackToSplitFromAnotherApp(testSpec: FlickerTestParameter) : SplitScr
     fun secondaryAppWindowBecomesVisible() = testSpec.appWindowBecomesVisible(secondaryApp)
 
     /** {@inheritDoc} */
-    @Presubmit
+    @FlakyTest
     @Test
     override fun entireScreenCovered() =
         super.entireScreenCovered()
