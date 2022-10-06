@@ -66,7 +66,7 @@ enum {
  *
  * Introduced in API 33.
  */
-enum AMidiDevice_Protocol : int32_t {
+typedef enum AMidiDevice_Protocol : int32_t {
     /**
      * Constant representing a default protocol with Universal MIDI Packets (UMP).
      * UMP is defined in "Universal MIDI Packet (UMP) Format and MIDI 2.0 Protocol" spec.
@@ -131,7 +131,7 @@ enum AMidiDevice_Protocol : int32_t {
      * MIDI-CI is defined in "MIDI Capability Inquiry (MIDI-CI)" spec.
      */
     AMIDI_DEVICE_PROTOCOL_UNKNOWN = -1
-};
+} AMidiDevice_Protocol;
 
 /*
  * Device API
