@@ -292,17 +292,17 @@ public abstract class WMShellBaseModule {
     // Workaround for dynamic overriding with a default implementation, see {@link DynamicOverride}
     @BindsOptionalOf
     @DynamicOverride
-    abstract FullscreenTaskListener<?> optionalFullscreenTaskListener();
+    abstract FullscreenTaskListener optionalFullscreenTaskListener();
 
     @WMSingleton
     @Provides
-    static FullscreenTaskListener<?> provideFullscreenTaskListener(
-            @DynamicOverride Optional<FullscreenTaskListener<?>> fullscreenTaskListener,
+    static FullscreenTaskListener provideFullscreenTaskListener(
+            @DynamicOverride Optional<FullscreenTaskListener> fullscreenTaskListener,
             ShellInit shellInit,
             ShellTaskOrganizer shellTaskOrganizer,
             SyncTransactionQueue syncQueue,
             Optional<RecentTasksController> recentTasksOptional,
-            Optional<WindowDecorViewModel<?>> windowDecorViewModelOptional) {
+            Optional<WindowDecorViewModel> windowDecorViewModelOptional) {
         if (fullscreenTaskListener.isPresent()) {
             return fullscreenTaskListener.get();
         } else {
@@ -316,7 +316,7 @@ public abstract class WMShellBaseModule {
     //
 
     @BindsOptionalOf
-    abstract WindowDecorViewModel<?> optionalWindowDecorViewModel();
+    abstract WindowDecorViewModel optionalWindowDecorViewModel();
 
     //
     // Unfold transition
@@ -768,7 +768,7 @@ public abstract class WMShellBaseModule {
             Optional<SplitScreenController> splitScreenOptional,
             Optional<Pip> pipOptional,
             Optional<PipTouchHandler> pipTouchHandlerOptional,
-            FullscreenTaskListener<?> fullscreenTaskListener,
+            FullscreenTaskListener fullscreenTaskListener,
             Optional<UnfoldAnimationController> unfoldAnimationController,
             Optional<UnfoldTransitionHandler> unfoldTransitionHandler,
             Optional<FreeformComponents> freeformComponents,
