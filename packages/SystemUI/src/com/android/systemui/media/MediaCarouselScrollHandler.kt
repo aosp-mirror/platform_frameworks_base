@@ -289,7 +289,10 @@ class MediaCarouselScrollHandler(
                 return false
             }
         }
-        if (isUp || motionEvent.action == MotionEvent.ACTION_CANCEL) {
+        if (motionEvent.action == MotionEvent.ACTION_MOVE) {
+            // cancel on going animation if there is any.
+            PhysicsAnimator.getInstance(this).cancel()
+        } else if (isUp || motionEvent.action == MotionEvent.ACTION_CANCEL) {
             // It's an up and the fling didn't take it above
             val relativePos = scrollView.relativeScrollX % playerWidthPlusPadding
             val scrollXAmount: Int
