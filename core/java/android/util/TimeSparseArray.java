@@ -14,13 +14,11 @@
  * under the License.
  */
 
-package android.app.usage;
-
-import android.util.LongSparseArray;
-import android.util.Slog;
+package android.util;
 
 /**
  * An array that indexes by a long timestamp, representing milliseconds since the epoch.
+ * @param <E> The type of values this container maps to a timestamp.
  *
  * {@hide}
  */
@@ -29,53 +27,41 @@ public class TimeSparseArray<E> extends LongSparseArray<E> {
 
     private boolean mWtfReported;
 
-    public TimeSparseArray() {
-        super();
-    }
-
     /**
      * Finds the index of the first element whose timestamp is greater or equal to
      * the given time.
      *
      * @param time The timestamp for which to search the array.
-     * @return The index of the matched element, or -1 if no such match exists.
+     * @return The smallest {@code index} for which {@code (keyAt(index) >= timeStamp)} is
+     * {@code true}, or {@link #size() size} if no such {@code index} exists.
      */
     public int closestIndexOnOrAfter(long time) {
-        // This is essentially a binary search, except that if no match is found
-        // the closest index is returned.
         final int size = size();
+        int result = size;
         int lo = 0;
         int hi = size - 1;
-        int mid = -1;
-        long key = -1;
         while (lo <= hi) {
-            mid = lo + ((hi - lo) / 2);
-            key = keyAt(mid);
+            final int mid = lo + ((hi - lo) / 2);
+            final long key = keyAt(mid);
 
             if (time > key) {
                 lo = mid + 1;
             } else if (time < key) {
                 hi = mid - 1;
+                result = mid;
             } else {
                 return mid;
             }
         }
-
-        if (time < key) {
-            return mid;
-        } else if (time > key && lo < size) {
-            return lo;
-        } else {
-            return -1;
-        }
+        return result;
     }
 
     /**
      * {@inheritDoc}
      *
-     * <p> As this container is being used only to keep {@link android.util.AtomicFile files},
-     * there should not be any collisions. Reporting a {@link Slog#wtf(String, String)} in case that
-     * happens, as that will lead to one whole file being dropped.
+     * <p> This container can store only one value for each timestamp. And so ideally, the caller
+     * should ensure that there are no collisions. Reporting a {@link Slog#wtf(String, String)}
+     * if that happens, as that will lead to the previous value being overwritten.
      */
     @Override
     public void put(long key, E value) {
@@ -93,16 +79,13 @@ public class TimeSparseArray<E> extends LongSparseArray<E> {
      * the given time.
      *
      * @param time The timestamp for which to search the array.
-     * @return The index of the matched element, or -1 if no such match exists.
+     * @return The largest {@code index} for which {@code (keyAt(index) <= timeStamp)} is
+     * {@code true}, or -1 if no such {@code index} exists.
      */
     public int closestIndexOnOrBefore(long time) {
         final int index = closestIndexOnOrAfter(time);
-        if (index < 0) {
-            // Everything is larger, so we use the last element, or -1 if the list is empty.
-            return size() - 1;
-        }
 
-        if (keyAt(index) == time) {
+        if (index < size() && keyAt(index) == time) {
             return index;
         }
         return index - 1;
