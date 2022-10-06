@@ -16,12 +16,12 @@
 
 package android.app.time;
 
+import static android.app.timezonedetector.ParcelableTestSupport.assertRoundTripParcelable;
 import static android.app.timezonedetector.ShellCommandTestSupport.createShellCommandWithArgsAndOptions;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
-import android.os.Parcel;
 import android.os.ShellCommand;
 
 import androidx.test.runner.AndroidJUnit4;
@@ -59,19 +59,8 @@ public class TimeZoneStateTest {
 
     @Test
     public void testParceling() {
-        TimeZoneState value = new TimeZoneState("Europe/London", true);
-        Parcel parcel = Parcel.obtain();
-        try {
-            parcel.writeParcelable(value, 0);
-
-            parcel.setDataPosition(0);
-
-            TimeZoneState stringValueCopy =
-                    parcel.readParcelable(null /* classLoader */, TimeZoneState.class);
-            assertEquals(value, stringValueCopy);
-        } finally {
-            parcel.recycle();
-        }
+        assertRoundTripParcelable(new TimeZoneState("Europe/London", true));
+        assertRoundTripParcelable(new TimeZoneState("Europe/London", false));
     }
 
     @Test(expected = IllegalArgumentException.class)
