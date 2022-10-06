@@ -351,6 +351,35 @@
             <xs:annotation name="nonnull"/>
             <xs:annotation name="final"/>
         </xs:element>
+        <xs:sequence>
+            <!--  Thresholds as tenths of percent of current brightness level, at each level of
+                brightness -->
+            <xs:element name="brightnessThresholdPoints" type="thresholdPoints" maxOccurs="1" minOccurs="0">
+                <xs:annotation name="final"/>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="thresholdPoints">
+        <xs:sequence>
+            <xs:element type="thresholdPoint" name="brightnessThresholdPoint" maxOccurs="unbounded" minOccurs="1">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="thresholdPoint">
+        <xs:sequence>
+            <xs:element type="nonNegativeDecimal" name="threshold">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+            <xs:element type="nonNegativeDecimal" name="percentage">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+        </xs:sequence>
     </xs:complexType>
 
     <xs:complexType name="autoBrightness">

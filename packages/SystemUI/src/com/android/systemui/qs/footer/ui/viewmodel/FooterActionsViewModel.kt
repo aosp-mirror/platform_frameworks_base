@@ -138,7 +138,6 @@ class FooterActionsViewModel(
     /** The model for the settings button. */
     val settings: FooterActionsButtonViewModel =
         FooterActionsButtonViewModel(
-            id = R.id.settings_button_container,
             Icon.Resource(
                 R.drawable.ic_settings,
                 ContentDescription.Resource(R.string.accessibility_quick_settings_settings)
@@ -152,7 +151,6 @@ class FooterActionsViewModel(
     val power: FooterActionsButtonViewModel? =
         if (showPowerButton) {
             FooterActionsButtonViewModel(
-                id = R.id.pm_lite,
                 Icon.Resource(
                     android.R.drawable.ic_lock_power_off,
                     ContentDescription.Resource(R.string.accessibility_quick_settings_power_menu)
@@ -258,7 +256,6 @@ class FooterActionsViewModel(
             }
 
         return FooterActionsButtonViewModel(
-            id = null,
             Icon.Loaded(
                 icon,
                 ContentDescription.Loaded(userSwitcherContentDescription(status.currentUserName)),

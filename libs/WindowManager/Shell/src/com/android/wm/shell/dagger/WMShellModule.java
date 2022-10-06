@@ -55,7 +55,6 @@ import com.android.wm.shell.freeform.FreeformComponents;
 import com.android.wm.shell.freeform.FreeformTaskListener;
 import com.android.wm.shell.freeform.FreeformTaskTransitionHandler;
 import com.android.wm.shell.freeform.FreeformTaskTransitionObserver;
-import com.android.wm.shell.fullscreen.FullscreenTaskListener;
 import com.android.wm.shell.kidsmode.KidsModeTaskOrganizer;
 import com.android.wm.shell.onehanded.OneHandedController;
 import com.android.wm.shell.pip.Pip;
@@ -183,7 +182,7 @@ public abstract class WMShellModule {
 
     @WMSingleton
     @Provides
-    static WindowDecorViewModel<?> provideWindowDecorViewModel(
+    static WindowDecorViewModel provideWindowDecorViewModel(
             Context context,
             @ShellMainThread Handler mainHandler,
             @ShellMainThread Choreographer mainChoreographer,
@@ -209,7 +208,7 @@ public abstract class WMShellModule {
     @Provides
     @DynamicOverride
     static FreeformComponents provideFreeformComponents(
-            FreeformTaskListener<?> taskListener,
+            FreeformTaskListener taskListener,
             FreeformTaskTransitionHandler transitionHandler,
             FreeformTaskTransitionObserver transitionObserver) {
         return new FreeformComponents(
@@ -218,18 +217,18 @@ public abstract class WMShellModule {
 
     @WMSingleton
     @Provides
-    static FreeformTaskListener<?> provideFreeformTaskListener(
+    static FreeformTaskListener provideFreeformTaskListener(
             Context context,
             ShellInit shellInit,
             ShellTaskOrganizer shellTaskOrganizer,
             Optional<DesktopModeTaskRepository> desktopModeTaskRepository,
-            WindowDecorViewModel<?> windowDecorViewModel) {
+            WindowDecorViewModel windowDecorViewModel) {
         // TODO(b/238217847): Temporarily add this check here until we can remove the dynamic
         //                    override for this controller from the base module
         ShellInit init = FreeformComponents.isFreeformEnabled(context)
                 ? shellInit
                 : null;
-        return new FreeformTaskListener<>(init, shellTaskOrganizer, desktopModeTaskRepository,
+        return new FreeformTaskListener(init, shellTaskOrganizer, desktopModeTaskRepository,
                 windowDecorViewModel);
     }
 
@@ -238,7 +237,7 @@ public abstract class WMShellModule {
     static FreeformTaskTransitionHandler provideFreeformTaskTransitionHandler(
             ShellInit shellInit,
             Transitions transitions,
-            WindowDecorViewModel<?> windowDecorViewModel) {
+            WindowDecorViewModel windowDecorViewModel) {
         return new FreeformTaskTransitionHandler(shellInit, transitions, windowDecorViewModel);
     }
 
@@ -248,10 +247,9 @@ public abstract class WMShellModule {
             Context context,
             ShellInit shellInit,
             Transitions transitions,
-            FullscreenTaskListener<?> fullscreenTaskListener,
-            FreeformTaskListener<?> freeformTaskListener) {
+            WindowDecorViewModel windowDecorViewModel) {
         return new FreeformTaskTransitionObserver(
-                context, shellInit, transitions, fullscreenTaskListener, freeformTaskListener);
+                context, shellInit, transitions, windowDecorViewModel);
     }
 
     //
