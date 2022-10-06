@@ -40,7 +40,7 @@ import java.util.ArrayList;
 /**
  * Start small: StatusBarWifiView will be able to layout from a WifiIconState
  */
-public class StatusBarWifiView extends BaseStatusBarWifiView implements DarkReceiver {
+public class StatusBarWifiView extends BaseStatusBarFrameLayout implements DarkReceiver {
     private static final String TAG = "StatusBarWifiView";
 
     /// Used to show etc dots
