@@ -69,9 +69,7 @@ class SoftwareHotwordDetector extends AbstractHotwordDetector {
 
     @Override
     void initialize(@Nullable PersistableBundle options, @Nullable SharedMemory sharedMemory) {
-        // TODO: transition to use an API that is not updateState to provide
-        //  onHotwordDetectionServiceInitialized status to external callback
-        updateStateLocked(options, sharedMemory,
+        initAndVerifyDetector(options, sharedMemory,
                 new InitializationStateListener(mHandler, mCallback),
                 DETECTOR_TYPE_TRUSTED_HOTWORD_SOFTWARE);
     }

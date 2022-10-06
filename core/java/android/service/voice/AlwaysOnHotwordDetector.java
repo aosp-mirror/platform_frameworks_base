@@ -817,10 +817,8 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
 
     @Override
     void initialize(@Nullable PersistableBundle options, @Nullable SharedMemory sharedMemory) {
-        // TODO: transition to use an API that is not updateState to provide
-        //  onHotwordDetectionServiceInitialized status to external callback
         if (mSupportHotwordDetectionService) {
-            updateStateLocked(options, sharedMemory, mInternalCallback,
+            initAndVerifyDetector(options, sharedMemory, mInternalCallback,
                     DETECTOR_TYPE_TRUSTED_HOTWORD_DSP);
         }
         try {
