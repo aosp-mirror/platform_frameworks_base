@@ -21,7 +21,8 @@ import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ActivityLaunchAnimator
-import com.android.systemui.containeddrawable.ContainedDrawable
+import com.android.systemui.common.shared.model.ContentDescription
+import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardQuickAffordanceInteractor
@@ -34,6 +35,7 @@ import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
+import com.android.systemui.util.mockito.whenever
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Before
 import org.junit.Test
@@ -46,7 +48,6 @@ import org.mockito.ArgumentMatchers.same
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyZeroInteractions
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 
 @SmallTest
@@ -55,7 +56,15 @@ class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
 
     companion object {
         private val INTENT = Intent("some.intent.action")
-        private val DRAWABLE = mock<ContainedDrawable>()
+        private val DRAWABLE =
+            mock<Icon> {
+                whenever(this.contentDescription)
+                    .thenReturn(
+                        ContentDescription.Resource(
+                            res = CONTENT_DESCRIPTION_RESOURCE_ID,
+                        )
+                    )
+            }
         private const val CONTENT_DESCRIPTION_RESOURCE_ID = 1337
 
         @Parameters(
@@ -236,7 +245,6 @@ class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
             state =
                 KeyguardQuickAffordanceConfig.State.Visible(
                     icon = DRAWABLE,
-                    contentDescriptionResourceId = CONTENT_DESCRIPTION_RESOURCE_ID,
                 )
         )
         homeControls.onClickedResult =
