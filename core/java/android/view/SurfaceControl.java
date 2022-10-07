@@ -110,7 +110,7 @@ public final class SurfaceControl implements Parcelable {
     private static native long nativeReadFromParcel(Parcel in);
     private static native long nativeCopyFromSurfaceControl(long nativeObject);
     private static native void nativeWriteToParcel(long nativeObject, Parcel out);
-    private static native void nativeRelease(long nativeObject);
+    private static native long nativeGetNativeSurfaceControlFinalizer();
     private static native void nativeDisconnect(long nativeObject);
     private static native void nativeUpdateDefaultBufferSize(long nativeObject, int width, int height);
 
@@ -464,6 +464,12 @@ public final class SurfaceControl implements Parcelable {
     static GlobalTransactionWrapper sGlobalTransaction;
     static long sTransactionNestCount = 0;
 
+    private static final NativeAllocationRegistry sRegistry =
+            NativeAllocationRegistry.createMalloced(SurfaceControl.class.getClassLoader(),
+                    nativeGetNativeSurfaceControlFinalizer());
+
+    private Runnable mFreeNativeResources;
+
     /**
      * Adds a reparenting listener.
      *
@@ -722,6 +728,8 @@ public final class SurfaceControl implements Parcelable {
         }
         if (nativeObject != 0) {
             mCloseGuard.openWithCallSite("release", callsite);
+            mFreeNativeResources =
+                    sRegistry.registerNativeAllocation(this, nativeObject);
         }
         mNativeObject = nativeObject;
         mNativeHandle = mNativeObject != 0 ? nativeGetHandle(nativeObject) : 0;
@@ -1150,6 +1158,7 @@ public final class SurfaceControl implements Parcelable {
         mHeight = h;
         mLocalOwnerView = localOwnerView;
         Parcel metaParcel = Parcel.obtain();
+        long nativeObject = 0;
         try {
             if (metadata != null && metadata.size() > 0) {
                 metaParcel.writeInt(metadata.size());
@@ -1161,17 +1170,16 @@ public final class SurfaceControl implements Parcelable {
                 }
                 metaParcel.setDataPosition(0);
             }
-            mNativeObject = nativeCreate(session, name, w, h, format, flags,
+            nativeObject = nativeCreate(session, name, w, h, format, flags,
                     parent != null ? parent.mNativeObject : 0, metaParcel);
         } finally {
             metaParcel.recycle();
         }
-        if (mNativeObject == 0) {
+        if (nativeObject == 0) {
             throw new OutOfResourcesException(
                     "Couldn't allocate SurfaceControl native object");
         }
-        mNativeHandle = nativeGetHandle(mNativeObject);
-        mCloseGuard.openWithCallSite("release", callsite);
+        assignNativeObject(nativeObject, callsite);
     }
 
     /**
@@ -1283,9 +1291,6 @@ public final class SurfaceControl implements Parcelable {
             if (mCloseGuard != null) {
                 mCloseGuard.warnIfOpen();
             }
-            if (mNativeObject != 0) {
-                nativeRelease(mNativeObject);
-            }
         } finally {
             super.finalize();
         }
@@ -1303,7 +1308,7 @@ public final class SurfaceControl implements Parcelable {
      */
     public void release() {
         if (mNativeObject != 0) {
-            nativeRelease(mNativeObject);
+            mFreeNativeResources.run();
             mNativeObject = 0;
             mNativeHandle = 0;
             mCloseGuard.close();
