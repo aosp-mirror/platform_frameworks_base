@@ -32,6 +32,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.R;
+import com.android.internal.widget.NotificationActionListLayout;
 import com.android.internal.widget.NotificationExpandButton;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.media.dialog.MediaOutputDialogFactory;
@@ -141,5 +142,61 @@ public class NotificationContentViewTest extends SysuiTestCase {
         verify(mockContractedEB, times(0)).requestAccessibilityFocus();
         verify(mockExpandedEB, times(1)).requestAccessibilityFocus();
         verify(mockHeadsUpEB, times(0)).requestAccessibilityFocus();
+    }
+
+    @Test
+    @UiThreadTest
+    public void testRemoteInputVisibleSetsActionsUnimportantHideDescendantsForAccessibility() {
+        View mockContracted = mock(NotificationHeaderView.class);
+
+        View mockExpandedActions = mock(NotificationActionListLayout.class);
+        View mockExpanded = mock(NotificationHeaderView.class);
+        when(mockExpanded.findViewById(com.android.internal.R.id.actions)).thenReturn(
+                mockExpandedActions);
+
+        View mockHeadsUpActions = mock(NotificationActionListLayout.class);
+        View mockHeadsUp = mock(NotificationHeaderView.class);
+        when(mockHeadsUp.findViewById(com.android.internal.R.id.actions)).thenReturn(
+                mockHeadsUpActions);
+
+        mView.setContractedChild(mockContracted);
+        mView.setExpandedChild(mockExpanded);
+        mView.setHeadsUpChild(mockHeadsUp);
+
+        mView.setRemoteInputVisible(true);
+
+        verify(mockContracted, times(0)).findViewById(0);
+        verify(mockExpandedActions, times(1)).setImportantForAccessibility(
+                View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
+        verify(mockHeadsUpActions, times(1)).setImportantForAccessibility(
+                View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
+    }
+
+    @Test
+    @UiThreadTest
+    public void testRemoteInputInvisibleSetsActionsAutoImportantForAccessibility() {
+        View mockContracted = mock(NotificationHeaderView.class);
+
+        View mockExpandedActions = mock(NotificationActionListLayout.class);
+        View mockExpanded = mock(NotificationHeaderView.class);
+        when(mockExpanded.findViewById(com.android.internal.R.id.actions)).thenReturn(
+                mockExpandedActions);
+
+        View mockHeadsUpActions = mock(NotificationActionListLayout.class);
+        View mockHeadsUp = mock(NotificationHeaderView.class);
+        when(mockHeadsUp.findViewById(com.android.internal.R.id.actions)).thenReturn(
+                mockHeadsUpActions);
+
+        mView.setContractedChild(mockContracted);
+        mView.setExpandedChild(mockExpanded);
+        mView.setHeadsUpChild(mockHeadsUp);
+
+        mView.setRemoteInputVisible(false);
+
+        verify(mockContracted, times(0)).findViewById(0);
+        verify(mockExpandedActions, times(1)).setImportantForAccessibility(
+                View.IMPORTANT_FOR_ACCESSIBILITY_AUTO);
+        verify(mockHeadsUpActions, times(1)).setImportantForAccessibility(
+                View.IMPORTANT_FOR_ACCESSIBILITY_AUTO);
     }
 }
