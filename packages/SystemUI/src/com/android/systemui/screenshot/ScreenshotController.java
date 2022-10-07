@@ -173,7 +173,7 @@ public class ScreenshotController {
         public List<Notification.Action> smartActions;
         public Notification.Action quickShareAction;
         public UserHandle owner;
-
+        public String subject;  // Title for sharing
 
         /**
          * POD for shared element transition.
@@ -194,6 +194,7 @@ public class ScreenshotController {
             deleteAction = null;
             smartActions = null;
             quickShareAction = null;
+            subject = null;
         }
     }
 
@@ -272,6 +273,7 @@ public class ScreenshotController {
     private final ScreenshotNotificationSmartActionsProvider
             mScreenshotNotificationSmartActionsProvider;
     private final TimeoutHandler mScreenshotHandler;
+    private final ActionIntentExecutor mActionExecutor;
 
     private ScreenshotView mScreenshotView;
     private Bitmap mScreenBitmap;
@@ -309,7 +311,8 @@ public class ScreenshotController {
             ActivityManager activityManager,
             TimeoutHandler timeoutHandler,
             BroadcastSender broadcastSender,
-            ScreenshotNotificationSmartActionsProvider screenshotNotificationSmartActionsProvider
+            ScreenshotNotificationSmartActionsProvider screenshotNotificationSmartActionsProvider,
+            ActionIntentExecutor actionExecutor
     ) {
         mScreenshotSmartActions = screenshotSmartActions;
         mNotificationsController = screenshotNotificationsController;
@@ -341,6 +344,7 @@ public class ScreenshotController {
         mContext = (WindowContext) displayContext.createWindowContext(TYPE_SCREENSHOT, null);
         mWindowManager = mContext.getSystemService(WindowManager.class);
         mFlags = flags;
+        mActionExecutor = actionExecutor;
 
         mAccessibilityManager = AccessibilityManager.getInstance(mContext);
 
@@ -492,7 +496,7 @@ public class ScreenshotController {
                 // TODO(159460485): Remove this when focus is handled properly in the system
                 setWindowFocusable(false);
             }
-        });
+        }, mActionExecutor, mFlags);
         mScreenshotView.setDefaultTimeoutMillis(mScreenshotHandler.getDefaultTimeoutMillis());
 
         mScreenshotView.setOnKeyListener((v, keyCode, event) -> {

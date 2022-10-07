@@ -20,13 +20,16 @@ import android.content.Intent
 import android.os.IBinder
 import android.util.Log
 import com.android.systemui.shade.ShadeExpansionStateManager
+import com.android.systemui.statusbar.phone.CentralSurfaces
+import java.util.Optional
 import javax.inject.Inject
 
 /**
  * Provides state from the main SystemUI process on behalf of the Screenshot process.
  */
 internal class ScreenshotProxyService @Inject constructor(
-    private val mExpansionMgr: ShadeExpansionStateManager
+    private val mExpansionMgr: ShadeExpansionStateManager,
+    private val mCentralSurfacesOptional: Optional<CentralSurfaces>,
 ) : Service() {
 
     private val mBinder: IBinder = object : IScreenshotProxy.Stub() {
@@ -37,6 +40,20 @@ internal class ScreenshotProxyService @Inject constructor(
             val expanded = !mExpansionMgr.isClosed()
             Log.d(TAG, "isNotificationShadeExpanded(): $expanded")
             return expanded
+        }
+
+        override fun dismissKeyguard(callback: IOnDoneCallback) {
+            if (mCentralSurfacesOptional.isPresent) {
+                mCentralSurfacesOptional.get().executeRunnableDismissingKeyguard(
+                    Runnable {
+                        callback.onDone(true)
+                    }, null,
+                    true /* dismissShade */, true /* afterKeyguardGone */,
+                    true /* deferred */
+                )
+            } else {
+                callback.onDone(false)
+            }
         }
     }
 

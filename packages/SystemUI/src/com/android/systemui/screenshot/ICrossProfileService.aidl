@@ -16,14 +16,12 @@
 
 package com.android.systemui.screenshot;
 
-import com.android.systemui.screenshot.IOnDoneCallback;
+import android.app.PendingIntent;
+import android.content.Intent;
+import android.os.Bundle;
 
-/** Interface implemented by ScreenshotProxyService */
-interface IScreenshotProxy {
+/** Interface implemented by ScreenshotCrossProfileService */
+interface ICrossProfileService {
 
-    /** Is the notification shade currently exanded? */
-    boolean isNotificationShadeExpanded();
-
-    /** Attempts to dismiss the keyguard. */
-    void dismissKeyguard(IOnDoneCallback callback);
+    void launchIntent(in Intent intent, in Bundle bundle);
 }
