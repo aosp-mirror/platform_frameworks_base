@@ -983,9 +983,11 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
 
                 @Override
                 public void onAnimationCancelled(boolean isKeyguardOccluded) {
-                    if (mUnoccludeAnimator != null) {
-                        mUnoccludeAnimator.cancel();
-                    }
+                    mContext.getMainExecutor().execute(() -> {
+                        if (mUnoccludeAnimator != null) {
+                            mUnoccludeAnimator.cancel();
+                        }
+                    });
 
                     setOccluded(isKeyguardOccluded /* isOccluded */, false /* animate */);
                     Log.d(TAG, "Unocclude animation cancelled. Occluded state is now: "
