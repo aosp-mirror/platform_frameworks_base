@@ -16,6 +16,7 @@
 
 package com.android.internal.systemui.lint
 
+import com.android.SdkConstants.CLASS_CONTEXT
 import com.android.tools.lint.detector.api.Category
 import com.android.tools.lint.detector.api.Detector
 import com.android.tools.lint.detector.api.Implementation
@@ -28,20 +29,19 @@ import com.intellij.psi.PsiMethod
 import org.jetbrains.uast.UCallExpression
 
 @Suppress("UnstableApiUsage")
-class BindServiceViaContextDetector : Detector(), SourceCodeScanner {
+class NonInjectedMainThreadDetector : Detector(), SourceCodeScanner {
 
     override fun getApplicableMethodNames(): List<String> {
-        return listOf("bindService", "bindServiceAsUser", "unbindService")
+        return listOf("getMainThreadHandler", "getMainLooper", "getMainExecutor")
     }
 
     override fun visitMethodCall(context: JavaContext, node: UCallExpression, method: PsiMethod) {
-        if (context.evaluator.isMemberInSubClassOf(method, "android.content.Context")) {
+        if (context.evaluator.isMemberInSubClassOf(method, CLASS_CONTEXT)) {
             context.report(
-                    ISSUE,
-                    method,
-                    context.getNameLocation(node),
-                    "Binding or unbinding services are synchronous calls, please make " +
-                            "sure you're on a @Background Executor."
+                ISSUE,
+                method,
+                context.getNameLocation(node),
+                "Replace with injected `@Main Executor`."
             )
         }
     }
@@ -50,18 +50,20 @@ class BindServiceViaContextDetector : Detector(), SourceCodeScanner {
         @JvmField
         val ISSUE: Issue =
             Issue.create(
-                id = "BindServiceViaContextDetector",
-                briefDescription = "Service bound/unbound via Context, please make sure " +
-                        "you're on a background thread.",
+                id = "NonInjectedMainThread",
+                briefDescription = "Main thread usage without dependency injection",
                 explanation =
-                "Binding or unbinding services are synchronous calls to ActivityManager, " +
-                        "they usually take multiple milliseconds to complete and will make" +
-                        "the caller drop frames. Make sure you're on a @Background Executor.",
-                category = Category.PERFORMANCE,
+                    """
+                                Main thread should be injected using the `@Main Executor` instead \
+                                of using the accessors in `Context`. This is to make the \
+                                dependencies explicit and increase testability. It's much easier \
+                                to pass a `FakeExecutor` on test constructors than it is to deal \
+                                with loopers in unit tests.""",
+                category = Category.LINT,
                 priority = 8,
                 severity = Severity.WARNING,
                 implementation =
-                Implementation(BindServiceViaContextDetector::class.java, Scope.JAVA_FILE_SCOPE)
+                    Implementation(NonInjectedMainThreadDetector::class.java, Scope.JAVA_FILE_SCOPE)
             )
     }
 }
