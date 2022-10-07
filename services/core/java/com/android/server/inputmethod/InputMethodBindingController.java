@@ -26,7 +26,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManagerInternal;
-import android.content.res.Resources;
 import android.inputmethodservice.InputMethodService;
 import android.os.Binder;
 import android.os.IBinder;
@@ -65,7 +64,6 @@ final class InputMethodBindingController {
     @NonNull private final InputMethodUtils.InputMethodSettings mSettings;
     @NonNull private final PackageManagerInternal mPackageManagerInternal;
     @NonNull private final WindowManagerInternal mWindowManagerInternal;
-    @NonNull private final Resources mRes;
 
     @GuardedBy("ImfLock.class") private long mLastBindTime;
     @GuardedBy("ImfLock.class") private boolean mHasConnection;
@@ -77,7 +75,7 @@ final class InputMethodBindingController {
     @GuardedBy("ImfLock.class") @Nullable private IBinder mCurToken;
     @GuardedBy("ImfLock.class") private int mCurSeq;
     @GuardedBy("ImfLock.class") private boolean mVisibleBound;
-    private boolean mSupportsStylusHw;
+    @GuardedBy("ImfLock.class") private boolean mSupportsStylusHw;
 
     /**
      * Binding flags for establishing connection to the {@link InputMethodService}.
@@ -105,7 +103,6 @@ final class InputMethodBindingController {
         mSettings = mService.mSettings;
         mPackageManagerInternal = mService.mPackageManagerInternal;
         mWindowManagerInternal = mService.mWindowManagerInternal;
-        mRes = mService.mRes;
     }
 
     /**
@@ -460,13 +457,6 @@ final class InputMethodBindingController {
     }
 
     @GuardedBy("ImfLock.class")
-    private boolean bindCurrentInputMethodServiceVisibleConnection() {
-        mVisibleBound = bindCurrentInputMethodService(mVisibleConnection,
-                IME_VISIBLE_BIND_FLAGS);
-        return mVisibleBound;
-    }
-
-    @GuardedBy("ImfLock.class")
     private boolean bindCurrentInputMethodServiceMainConnection() {
         mHasConnection = bindCurrentInputMethodService(mMainConnection, IME_CONNECTION_BIND_FLAGS);
         return mHasConnection;
@@ -483,7 +473,8 @@ final class InputMethodBindingController {
         if (mCurMethod != null) {
             if (DEBUG) Slog.d(TAG, "setCurrentMethodVisible: mCurToken=" + mCurToken);
             if (mHasConnection && !mVisibleBound) {
-                bindCurrentInputMethodServiceVisibleConnection();
+                mVisibleBound = bindCurrentInputMethodService(mVisibleConnection,
+                        IME_VISIBLE_BIND_FLAGS);
             }
             return;
         }
