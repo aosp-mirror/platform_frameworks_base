@@ -32,6 +32,7 @@ import android.util.Log;
 import android.util.Slog;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 /** Utility methods for accessing {@link RoleManager} APIs. */
 @SuppressLint("LongLogTag")
@@ -46,7 +47,8 @@ final class RolesUtils {
     }
 
     static void addRoleHolderForAssociation(
-            @NonNull Context context, @NonNull AssociationInfo associationInfo) {
+            @NonNull Context context, @NonNull AssociationInfo associationInfo,
+            @NonNull Consumer<Boolean> roleGrantResult) {
         if (DEBUG) {
             Log.d(TAG, "addRoleHolderForAssociation() associationInfo=" + associationInfo);
         }
@@ -62,12 +64,7 @@ final class RolesUtils {
 
         roleManager.addRoleHolderAsUser(deviceProfile, packageName,
                 MANAGE_HOLDERS_FLAG_DONT_KILL_APP, userHandle, context.getMainExecutor(),
-                success -> {
-                    if (!success) {
-                        Slog.e(TAG, "Failed to add u" + userId + "\\" + packageName
-                                + " to the list of " + deviceProfile + " holders.");
-                    }
-                });
+                roleGrantResult);
     }
 
     static void removeRoleHolderForAssociation(

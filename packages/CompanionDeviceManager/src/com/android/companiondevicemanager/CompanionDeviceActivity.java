@@ -363,13 +363,6 @@ public class CompanionDeviceActivity extends FragmentActivity implements
         mCdmServiceReceiver.send(RESULT_CODE_ASSOCIATION_APPROVED, data);
     }
 
-    private void onAssociationCreated(@NonNull AssociationInfo association) {
-        if (DEBUG) Log.i(TAG, "onAssociationCreated(), association=" + association);
-
-        // Don't need to notify the app, CdmService has already done that. Just finish.
-        setResultAndFinish(association, RESULT_OK);
-    }
-
     private void cancel(boolean discoveryTimeout, boolean userRejected) {
         if (DEBUG) {
             Log.i(TAG, "cancel(), discoveryTimeout="
@@ -413,7 +406,9 @@ public class CompanionDeviceActivity extends FragmentActivity implements
     }
 
     private void setResultAndFinish(@Nullable AssociationInfo association, int resultCode) {
-        if (DEBUG) Log.i(TAG, "setResultAndFinish(), association=" + association);
+        Log.i(TAG, "setResultAndFinish(), association="
+                + (association == null ? "null" : association)
+                + "resultCode=" + resultCode);
 
         final Intent data = new Intent();
         if (association != null) {
@@ -652,14 +647,14 @@ public class CompanionDeviceActivity extends FragmentActivity implements
             new ResultReceiver(Handler.getMain()) {
                 @Override
                 protected void onReceiveResult(int resultCode, Bundle data) {
-                    if (resultCode != RESULT_CODE_ASSOCIATION_CREATED) {
-                        throw new RuntimeException("Unknown result code: " + resultCode);
+                    if (resultCode == RESULT_CODE_ASSOCIATION_CREATED) {
+                        final AssociationInfo association = data.getParcelable(
+                                EXTRA_ASSOCIATION, AssociationInfo.class);
+                        requireNonNull(association);
+                        setResultAndFinish(association, RESULT_OK);
+                    } else {
+                        setResultAndFinish(null, resultCode);
                     }
-
-                    final AssociationInfo association = data.getParcelable(EXTRA_ASSOCIATION);
-                    requireNonNull(association);
-
-                    onAssociationCreated(association);
                 }
             };
 
