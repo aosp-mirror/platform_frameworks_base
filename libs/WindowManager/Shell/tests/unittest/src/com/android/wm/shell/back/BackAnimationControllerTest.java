@@ -63,7 +63,9 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
+import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.sysui.ShellSharedConstants;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -102,6 +104,9 @@ public class BackAnimationControllerTest extends ShellTestCase {
     @Mock
     private IBackNaviAnimationController mIBackNaviAnimationController;
 
+    @Mock
+    private ShellController mShellController;
+
     private BackAnimationController mController;
 
     private int mEventTime = 0;
@@ -118,7 +123,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
                 ANIMATION_ENABLED);
         mTestableLooper = TestableLooper.get(this);
         mShellInit = spy(new ShellInit(mShellExecutor));
-        mController = new BackAnimationController(mShellInit,
+        mController = new BackAnimationController(mShellInit, mShellController,
                 mShellExecutor, new Handler(mTestableLooper.getLooper()), mTransaction,
                 mActivityTaskManager, mContext,
                 mContentResolver);
@@ -172,6 +177,12 @@ public class BackAnimationControllerTest extends ShellTestCase {
     @Test
     public void instantiateController_addInitCallback() {
         verify(mShellInit, times(1)).addInitCallback(any(), any());
+    }
+
+    @Test
+    public void instantiateController_addExternalInterface() {
+        verify(mShellController, times(1)).addExternalInterface(
+                eq(ShellSharedConstants.KEY_EXTRA_SHELL_BACK_ANIMATION), any(), any());
     }
 
     @Test
@@ -250,7 +261,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
         // Toggle the setting off
         Settings.Global.putString(mContentResolver, Settings.Global.ENABLE_BACK_ANIMATION, "0");
         ShellInit shellInit = new ShellInit(mShellExecutor);
-        mController = new BackAnimationController(shellInit,
+        mController = new BackAnimationController(shellInit, mShellController,
                 mShellExecutor, new Handler(mTestableLooper.getLooper()), mTransaction,
                 mActivityTaskManager, mContext,
                 mContentResolver);

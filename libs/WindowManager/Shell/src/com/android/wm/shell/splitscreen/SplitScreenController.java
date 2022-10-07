@@ -29,6 +29,7 @@ import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSIT
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_SIDE;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_UNDEFINED;
+import static com.android.wm.shell.sysui.ShellSharedConstants.KEY_EXTRA_SHELL_SPLIT_SCREEN;
 import static com.android.wm.shell.transition.Transitions.ENABLE_SHELL_TRANSITIONS;
 
 import android.app.ActivityManager;
@@ -71,6 +72,7 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
+import com.android.wm.shell.common.ExternalInterfaceBinder;
 import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SingleInstanceRemoteListener;
@@ -214,6 +216,10 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         return mImpl;
     }
 
+    private ExternalInterfaceBinder createExternalInterface() {
+        return new ISplitScreenImpl(this);
+    }
+
     /**
      * This will be called after ShellTaskOrganizer has initialized/registered because of the
      * dependency order.
@@ -224,6 +230,8 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         mShellCommandHandler.addCommandCallback("splitscreen", mSplitScreenShellCommandHandler,
                 this);
         mShellController.addKeyguardChangeListener(this);
+        mShellController.addExternalInterface(KEY_EXTRA_SHELL_SPLIT_SCREEN,
+                this::createExternalInterface, this);
         if (mStageCoordinator == null) {
             // TODO: Multi-display
             mStageCoordinator = createStageCoordinator();
@@ -658,7 +666,6 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
      */
     @ExternalThread
     private class SplitScreenImpl implements SplitScreen {
-        private ISplitScreenImpl mISplitScreen;
         private final ArrayMap<SplitScreenListener, Executor> mExecutors = new ArrayMap<>();
         private final SplitScreen.SplitScreenListener mListener = new SplitScreenListener() {
             @Override
@@ -704,15 +711,6 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         };
 
         @Override
-        public ISplitScreen createExternalInterface() {
-            if (mISplitScreen != null) {
-                mISplitScreen.invalidate();
-            }
-            mISplitScreen = new ISplitScreenImpl(SplitScreenController.this);
-            return mISplitScreen;
-        }
-
-        @Override
         public void registerSplitScreenListener(SplitScreenListener listener, Executor executor) {
             if (mExecutors.containsKey(listener)) return;
 
@@ -752,7 +750,8 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
      * The interface for calls from outside the host process.
      */
     @BinderThread
-    private static class ISplitScreenImpl extends ISplitScreen.Stub {
+    private static class ISplitScreenImpl extends ISplitScreen.Stub
+            implements ExternalInterfaceBinder {
         private SplitScreenController mController;
         private final SingleInstanceRemoteListener<SplitScreenController,
                 ISplitScreenListener> mListener;
@@ -779,7 +778,8 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         /**
          * Invalidates this instance, preventing future calls from updating the controller.
          */
-        void invalidate() {
+        @Override
+        public void invalidate() {
             mController = null;
         }
 
