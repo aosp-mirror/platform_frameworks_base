@@ -920,6 +920,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         for (int i = 0, n = pendingEvents.size(); i < n; i++) {
             final PendingTaskFragmentEvent event = pendingEvents.get(i);
             final Task task = event.mTaskFragment != null ? event.mTaskFragment.getTask() : null;
+            // TODO(b/251132298): move visibility check to the client side.
             if (task != null && (task.lastActiveTime <= event.mDeferTime
                     || !(isTaskVisible(task, visibleTasks, invisibleTasks)
                     || shouldSendEventWhenTaskInvisible(event)))) {
