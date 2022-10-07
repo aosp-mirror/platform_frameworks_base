@@ -40,7 +40,6 @@ import static com.android.systemui.statusbar.phone.BarTransitions.TransitionMode
 
 import android.app.StatusBarManager;
 import android.app.StatusBarManager.WindowVisibleState;
-import android.content.ComponentCallbacks;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
@@ -87,7 +86,7 @@ import javax.inject.Inject;
 @SysUISingleton
 public class TaskbarDelegate implements CommandQueue.Callbacks,
         OverviewProxyService.OverviewProxyListener, NavigationModeController.ModeChangedListener,
-        ComponentCallbacks, Dumpable {
+        Dumpable {
     private static final String TAG = TaskbarDelegate.class.getSimpleName();
 
     private final EdgeBackGestureHandler mEdgeBackGestureHandler;
@@ -225,7 +224,6 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         // Initialize component callback
         Display display = mDisplayManager.getDisplay(displayId);
         mWindowContext = mContext.createWindowContext(display, TYPE_APPLICATION, null);
-        mWindowContext.registerComponentCallbacks(this);
         mScreenPinningNotify = new ScreenPinningNotify(mWindowContext);
         // Set initial state for any listeners
         updateSysuiFlags();
@@ -233,6 +231,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         mLightBarController.setNavigationBar(mLightBarTransitionsController);
         mPipOptional.ifPresent(this::addPipExclusionBoundsChangeListener);
         mEdgeBackGestureHandler.setBackAnimation(mBackAnimation);
+        mEdgeBackGestureHandler.onConfigurationChanged(mContext.getResources().getConfiguration());
         mInitialized = true;
     }
 
@@ -247,10 +246,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         mNavBarHelper.destroy();
         mEdgeBackGestureHandler.onNavBarDetached();
         mScreenPinningNotify = null;
-        if (mWindowContext != null) {
-            mWindowContext.unregisterComponentCallbacks(this);
-            mWindowContext = null;
-        }
+        mWindowContext = null;
         mAutoHideController.setNavigationBar(null);
         mLightBarTransitionsController.destroy();
         mLightBarController.setNavigationBar(null);
@@ -267,8 +263,9 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
     }
 
     /**
-     * Returns {@code true} if this taskBar is {@link #init(int)}. Returns {@code false} if this
-     * taskbar has not yet been {@link #init(int)} or has been {@link #destroy()}.
+     * Returns {@code true} if this taskBar is {@link #init(int)}.
+     * Returns {@code false} if this taskbar has not yet been {@link #init(int)}
+     * or has been {@link #destroy()}.
      */
     public boolean isInitialized() {
         return mInitialized;
@@ -460,13 +457,9 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         return mBehavior == BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
     }
 
-    @Override
     public void onConfigurationChanged(Configuration configuration) {
         mEdgeBackGestureHandler.onConfigurationChanged(configuration);
     }
-
-    @Override
-    public void onLowMemory() {}
 
     @Override
     public void showPinningEnterExitToast(boolean entering) {
