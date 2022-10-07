@@ -828,47 +828,46 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         }
 
         @Override
-        public void startTasksWithLegacyTransition(int mainTaskId, @Nullable Bundle mainOptions,
-                int sideTaskId, @Nullable Bundle sideOptions, @SplitPosition int sidePosition,
+        public void startTasksWithLegacyTransition(int taskId1, @Nullable Bundle options1,
+                int taskId2, @Nullable Bundle options2, @SplitPosition int splitPosition,
                 float splitRatio, RemoteAnimationAdapter adapter, InstanceId instanceId) {
             executeRemoteCallWithTaskPermission(mController, "startTasks",
                     (controller) -> controller.mStageCoordinator.startTasksWithLegacyTransition(
-                            mainTaskId, mainOptions, sideTaskId, sideOptions, sidePosition,
+                            taskId1, options1, taskId2, options2, splitPosition,
                             splitRatio, adapter, instanceId));
         }
 
         @Override
         public void startIntentAndTaskWithLegacyTransition(PendingIntent pendingIntent,
-                Intent fillInIntent, int taskId, Bundle mainOptions, Bundle sideOptions,
-                int sidePosition, float splitRatio, RemoteAnimationAdapter adapter,
+                Intent fillInIntent, Bundle options1, int taskId, Bundle options2,
+                int splitPosition, float splitRatio, RemoteAnimationAdapter adapter,
                 InstanceId instanceId) {
             executeRemoteCallWithTaskPermission(mController,
                     "startIntentAndTaskWithLegacyTransition", (controller) ->
                             controller.mStageCoordinator.startIntentAndTaskWithLegacyTransition(
-                                    pendingIntent, fillInIntent, taskId, mainOptions, sideOptions,
-                                    sidePosition, splitRatio, adapter, instanceId));
+                                    pendingIntent, fillInIntent, options1, taskId, options2,
+                                    splitPosition, splitRatio, adapter, instanceId));
         }
 
         @Override
         public void startShortcutAndTaskWithLegacyTransition(ShortcutInfo shortcutInfo,
-                int taskId, @Nullable Bundle mainOptions, @Nullable Bundle sideOptions,
-                @SplitPosition int sidePosition, float splitRatio, RemoteAnimationAdapter adapter,
+                @Nullable Bundle options1, int taskId, @Nullable Bundle options2,
+                @SplitPosition int splitPosition, float splitRatio, RemoteAnimationAdapter adapter,
                 InstanceId instanceId) {
             executeRemoteCallWithTaskPermission(mController,
                     "startShortcutAndTaskWithLegacyTransition", (controller) ->
                             controller.mStageCoordinator.startShortcutAndTaskWithLegacyTransition(
-                                    shortcutInfo, taskId, mainOptions, sideOptions, sidePosition,
+                                    shortcutInfo, options1, taskId, options2, splitPosition,
                                     splitRatio, adapter, instanceId));
         }
 
         @Override
-        public void startTasks(int mainTaskId, @Nullable Bundle mainOptions,
-                int sideTaskId, @Nullable Bundle sideOptions,
-                @SplitPosition int sidePosition, float splitRatio,
+        public void startTasks(int taskId1, @Nullable Bundle options1, int taskId2,
+                @Nullable Bundle options2, @SplitPosition int splitPosition, float splitRatio,
                 @Nullable RemoteTransition remoteTransition, InstanceId instanceId) {
             executeRemoteCallWithTaskPermission(mController, "startTasks",
-                    (controller) -> controller.mStageCoordinator.startTasks(mainTaskId, mainOptions,
-                            sideTaskId, sideOptions, sidePosition, splitRatio, remoteTransition,
+                    (controller) -> controller.mStageCoordinator.startTasks(taskId1, options1,
+                            taskId2, options2, splitPosition, splitRatio, remoteTransition,
                             instanceId));
         }
 
