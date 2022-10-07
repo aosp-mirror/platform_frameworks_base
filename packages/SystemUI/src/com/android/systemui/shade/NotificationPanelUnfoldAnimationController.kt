@@ -20,8 +20,8 @@ import android.content.Context
 import android.view.ViewGroup
 import com.android.systemui.R
 import com.android.systemui.shared.animation.UnfoldConstantTranslateAnimator
-import com.android.systemui.shared.animation.UnfoldConstantTranslateAnimator.Direction.LEFT
-import com.android.systemui.shared.animation.UnfoldConstantTranslateAnimator.Direction.RIGHT
+import com.android.systemui.shared.animation.UnfoldConstantTranslateAnimator.Direction.END
+import com.android.systemui.shared.animation.UnfoldConstantTranslateAnimator.Direction.START
 import com.android.systemui.shared.animation.UnfoldConstantTranslateAnimator.ViewIdToTranslate
 import com.android.systemui.unfold.SysUIUnfoldScope
 import com.android.systemui.unfold.util.NaturalRotationUnfoldProgressProvider
@@ -36,11 +36,11 @@ constructor(private val context: Context, progressProvider: NaturalRotationUnfol
         UnfoldConstantTranslateAnimator(
             viewsIdToTranslate =
                 setOf(
-                    ViewIdToTranslate(R.id.quick_settings_panel, LEFT),
-                    ViewIdToTranslate(R.id.notification_stack_scroller, RIGHT),
-                    ViewIdToTranslate(R.id.rightLayout, RIGHT),
-                    ViewIdToTranslate(R.id.clock, LEFT),
-                    ViewIdToTranslate(R.id.date, LEFT)),
+                    ViewIdToTranslate(R.id.quick_settings_panel, START),
+                    ViewIdToTranslate(R.id.notification_stack_scroller, END),
+                    ViewIdToTranslate(R.id.rightLayout, END),
+                    ViewIdToTranslate(R.id.clock, START),
+                    ViewIdToTranslate(R.id.date, START)),
             progressProvider = progressProvider)
     }
 
