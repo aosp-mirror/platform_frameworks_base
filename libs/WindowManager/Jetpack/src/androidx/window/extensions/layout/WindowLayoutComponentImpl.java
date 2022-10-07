@@ -103,14 +103,23 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
     /**
      * Similar to {@link #addWindowLayoutInfoListener(Activity, Consumer)}, but takes a UI Context
      * as a parameter.
+     *
+     * Jetpack {@link androidx.window.layout.ExtensionWindowLayoutInfoBackend} makes sure all
+     * consumers related to the same {@link Context} gets updated {@link WindowLayoutInfo}
+     * together. However only the first registered consumer of a {@link Context} will actually
+     * invoke {@link #addWindowLayoutInfoListener(Context, Consumer)}.
+     * Here we enforce that {@link #addWindowLayoutInfoListener(Context, Consumer)} can only be
+     * called once for each {@link Context}.
      */
-    // TODO(b/204073440): Add @Override to hook the API in WM extensions library.
+    @Override
     public void addWindowLayoutInfoListener(@NonNull @UiContext Context context,
             @NonNull Consumer<WindowLayoutInfo> consumer) {
         if (mWindowLayoutChangeListeners.containsKey(context)
+                // In theory this method can be called on the same consumer with different context.
                 || mWindowLayoutChangeListeners.containsValue(consumer)) {
-            // Early return if the listener or consumer has been registered.
-            return;
+            throw new IllegalArgumentException(
+                    "Context or Consumer has already been registered for WindowLayoutInfo"
+                            + " callback.");
         }
         if (!context.isUiContext()) {
             throw new IllegalArgumentException("Context must be a UI Context, which should be"
