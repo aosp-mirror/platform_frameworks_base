@@ -10818,6 +10818,8 @@ public class BatteryStatsImpl extends BatteryStats {
     public void setPowerProfileLocked(PowerProfile profile) {
         mPowerProfile = profile;
 
+        int totalSpeedStepCount = 0;
+
         // We need to initialize the KernelCpuSpeedReaders to read from
         // the first cpu of each core. Once we have the PowerProfile, we have access to this
         // information.
@@ -10829,11 +10831,12 @@ public class BatteryStatsImpl extends BatteryStats {
             mKernelCpuSpeedReaders[i] = new KernelCpuSpeedReader(firstCpuOfCluster,
                     numSpeedSteps);
             firstCpuOfCluster += mPowerProfile.getNumCoresInCpuCluster(i);
+            totalSpeedStepCount += numSpeedSteps;
         }
 
         // Initialize CPU power bracket map, which combines CPU states (cluster/freq pairs)
         // into a small number of brackets
-        mCpuPowerBracketMap = new int[getCpuFreqCount()];
+        mCpuPowerBracketMap = new int[totalSpeedStepCount];
         int index = 0;
         int numCpuClusters = mPowerProfile.getNumCpuClusters();
         for (int cluster = 0; cluster < numCpuClusters; cluster++) {
