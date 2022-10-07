@@ -3362,7 +3362,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
         private void handleFixedTranslationZ(ExpandableNotificationRow row) {
             if (row.hasExpandingChild()) {
-                zTranslation = row.getTranslationZ();
+                setZTranslation(row.getTranslationZ());
                 clipTopAmount = row.getClipTopAmount();
             }
         }

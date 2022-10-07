@@ -621,12 +621,12 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
         // initialize with the default values of the view
         mViewState.height = getIntrinsicHeight();
         mViewState.gone = getVisibility() == View.GONE;
-        mViewState.alpha = 1f;
+        mViewState.setAlpha(1f);
         mViewState.notGoneIndex = -1;
-        mViewState.xTranslation = getTranslationX();
+        mViewState.setXTranslation(getTranslationX());
         mViewState.hidden = false;
-        mViewState.scaleX = getScaleX();
-        mViewState.scaleY = getScaleY();
+        mViewState.setScaleX(getScaleX());
+        mViewState.setScaleY(getScaleY());
         mViewState.inShelf = false;
         mViewState.headsUpIsVisible = false;
 

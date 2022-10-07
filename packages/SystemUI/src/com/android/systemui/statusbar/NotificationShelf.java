@@ -189,22 +189,22 @@ public class NotificationShelf extends ActivatableNotificationView implements
             viewState.copyFrom(lastViewState);
 
             viewState.height = getIntrinsicHeight();
-            viewState.zTranslation = ambientState.getBaseZHeight();
+            viewState.setZTranslation(ambientState.getBaseZHeight());
             viewState.clipTopAmount = 0;
 
             if (ambientState.isExpansionChanging() && !ambientState.isOnKeyguard()) {
                 float expansion = ambientState.getExpansionFraction();
                 if (ambientState.isBouncerInTransit()) {
-                    viewState.alpha = aboutToShowBouncerProgress(expansion);
+                    viewState.setAlpha(aboutToShowBouncerProgress(expansion));
                 } else {
-                    viewState.alpha = ShadeInterpolation.getContentAlpha(expansion);
+                    viewState.setAlpha(ShadeInterpolation.getContentAlpha(expansion));
                 }
             } else {
-                viewState.alpha = 1f - ambientState.getHideAmount();
+                viewState.setAlpha(1f - ambientState.getHideAmount());
             }
             viewState.belowSpeedBump = mHostLayoutController.getSpeedBumpIndex() == 0;
             viewState.hideSensitive = false;
-            viewState.xTranslation = getTranslationX();
+            viewState.setXTranslation(getTranslationX());
             viewState.hasItemsInStableShelf = lastViewState.inShelf;
             viewState.firstViewInShelf = algorithmState.firstViewInShelf;
             if (mNotGoneIndex != -1) {
@@ -230,7 +230,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
             }
 
             final float stackEnd = ambientState.getStackY() + ambientState.getStackHeight();
-            viewState.yTranslation = stackEnd - viewState.height;
+            viewState.setYTranslation(stackEnd - viewState.height);
         } else {
             viewState.hidden = true;
             viewState.location = ExpandableViewState.LOCATION_GONE;
@@ -794,7 +794,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
         if (iconState == null) {
             return;
         }
-        iconState.alpha = ICON_ALPHA_INTERPOLATOR.getInterpolation(transitionAmount);
+        iconState.setAlpha(ICON_ALPHA_INTERPOLATOR.getInterpolation(transitionAmount));
         boolean isAppearing = row.isDrawingAppearAnimation() && !row.isInShelf();
         iconState.hidden = isAppearing
                 || (view instanceof ExpandableNotificationRow
@@ -809,12 +809,12 @@ public class NotificationShelf extends ActivatableNotificationView implements
 
         // Fade in icons at shelf start
         // This is important for conversation icons, which are badged and need x reset
-        iconState.xTranslation = mShelfIcons.getActualPaddingStart();
+        iconState.setXTranslation(mShelfIcons.getActualPaddingStart());
 
         final boolean stayingInShelf = row.isInShelf() && !row.isTransformingIntoShelf();
         if (stayingInShelf) {
             iconState.iconAppearAmount = 1.0f;
-            iconState.alpha = 1.0f;
+            iconState.setAlpha(1.0f);
             iconState.hidden = false;
         }
         int backgroundColor = getBackgroundColorWithoutTint();
