@@ -103,6 +103,13 @@ class BroadcastProcessQueue {
     private final ArrayDeque<SomeArgs> mPending = new ArrayDeque<>();
 
     /**
+     * Ordered collection of "urgent" broadcasts that are waiting to be
+     * dispatched to this process, in the same representation as
+     * {@link #mPending}.
+     */
+    private final ArrayDeque<SomeArgs> mPendingUrgent = new ArrayDeque<>();
+
+    /**
      * Broadcast actively being dispatched to this process.
      */
     private @Nullable BroadcastRecord mActive;
@@ -164,37 +171,62 @@ class BroadcastProcessQueue {
      */
     public void enqueueOrReplaceBroadcast(@NonNull BroadcastRecord record, int recordIndex,
             int blockedUntilTerminalCount) {
-        // If caller wants to replace, walk backwards looking for any matches
         if (record.isReplacePending()) {
-            final Iterator<SomeArgs> it = mPending.descendingIterator();
-            final Object receiver = record.receivers.get(recordIndex);
-            while (it.hasNext()) {
-                final SomeArgs args = it.next();
-                final BroadcastRecord testRecord = (BroadcastRecord) args.arg1;
-                final Object testReceiver = testRecord.receivers.get(args.argi1);
-                if ((record.callingUid == testRecord.callingUid)
-                        && (record.userId == testRecord.userId)
-                        && record.intent.filterEquals(testRecord.intent)
-                        && isReceiverEquals(receiver, testReceiver)) {
-                    // Exact match found; perform in-place swap
-                    args.arg1 = record;
-                    args.argi1 = recordIndex;
-                    args.argi2 = blockedUntilTerminalCount;
-                    onBroadcastDequeued(testRecord);
-                    onBroadcastEnqueued(record);
-                    return;
-                }
+            boolean didReplace = replaceBroadcastInQueue(mPending,
+                    record, recordIndex, blockedUntilTerminalCount)
+                    || replaceBroadcastInQueue(mPendingUrgent,
+                    record, recordIndex, blockedUntilTerminalCount);
+            if (didReplace) {
+                return;
             }
         }
 
         // Caller isn't interested in replacing, or we didn't find any pending
         // item to replace above, so enqueue as a new broadcast
-        SomeArgs args = SomeArgs.obtain();
-        args.arg1 = record;
-        args.argi1 = recordIndex;
-        args.argi2 = blockedUntilTerminalCount;
-        mPending.addLast(args);
+        SomeArgs newBroadcastArgs = SomeArgs.obtain();
+        newBroadcastArgs.arg1 = record;
+        newBroadcastArgs.argi1 = recordIndex;
+        newBroadcastArgs.argi2 = blockedUntilTerminalCount;
+
+        // Cross-broadcast prioritization policy:  some broadcasts might warrant being
+        // issued ahead of others that are already pending, for example if this new
+        // broadcast is in a different delivery class or is tied to a direct user interaction
+        // with implicit responsiveness expectations.
+        final ArrayDeque<SomeArgs> queue = record.isUrgent() ? mPendingUrgent : mPending;
+        queue.addLast(newBroadcastArgs);
         onBroadcastEnqueued(record);
+    }
+
+    /**
+     * Searches from newest to oldest, and at the first matching pending broadcast
+     * it finds, replaces it in-place and returns -- does not attempt to handle
+     * "duplicate" broadcasts in the queue.
+     * <p>
+     * @return {@code true} if it found and replaced an existing record in the queue;
+     * {@code false} otherwise.
+     */
+    private boolean replaceBroadcastInQueue(@NonNull ArrayDeque<SomeArgs> queue,
+            @NonNull BroadcastRecord record, int recordIndex,  int blockedUntilTerminalCount) {
+        final Iterator<SomeArgs> it = queue.descendingIterator();
+        final Object receiver = record.receivers.get(recordIndex);
+        while (it.hasNext()) {
+            final SomeArgs args = it.next();
+            final BroadcastRecord testRecord = (BroadcastRecord) args.arg1;
+            final Object testReceiver = testRecord.receivers.get(args.argi1);
+            if ((record.callingUid == testRecord.callingUid)
+                    && (record.userId == testRecord.userId)
+                    && record.intent.filterEquals(testRecord.intent)
+                    && isReceiverEquals(receiver, testReceiver)) {
+                // Exact match found; perform in-place swap
+                args.arg1 = record;
+                args.argi1 = recordIndex;
+                args.argi2 = blockedUntilTerminalCount;
+                onBroadcastDequeued(testRecord);
+                onBroadcastEnqueued(record);
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -225,8 +257,18 @@ class BroadcastProcessQueue {
      */
     public boolean forEachMatchingBroadcast(@NonNull BroadcastPredicate predicate,
             @NonNull BroadcastConsumer consumer, boolean andRemove) {
+        boolean didSomething = forEachMatchingBroadcastInQueue(mPending,
+                predicate, consumer, andRemove);
+        didSomething |= forEachMatchingBroadcastInQueue(mPendingUrgent,
+                predicate, consumer, andRemove);
+        return didSomething;
+    }
+
+    private boolean forEachMatchingBroadcastInQueue(@NonNull ArrayDeque<SomeArgs> queue,
+            @NonNull BroadcastPredicate predicate, @NonNull BroadcastConsumer consumer,
+            boolean andRemove) {
         boolean didSomething = false;
-        final Iterator<SomeArgs> it = mPending.iterator();
+        final Iterator<SomeArgs> it = queue.iterator();
         while (it.hasNext()) {
             final SomeArgs args = it.next();
             final BroadcastRecord record = (BroadcastRecord) args.arg1;
@@ -301,7 +343,7 @@ class BroadcastProcessQueue {
      */
     public void makeActiveNextPending() {
         // TODO: what if the next broadcast isn't runnable yet?
-        final SomeArgs next = mPending.removeFirst();
+        final SomeArgs next = removeNextBroadcast();
         mActive = (BroadcastRecord) next.arg1;
         mActiveIndex = next.argi1;
         mActiveCountSinceIdle++;
@@ -403,11 +445,43 @@ class BroadcastProcessQueue {
     }
 
     public boolean isEmpty() {
-        return mPending.isEmpty();
+        return mPending.isEmpty() && mPendingUrgent.isEmpty();
     }
 
     public boolean isActive() {
         return mActive != null;
+    }
+
+    /**
+     * Will thrown an exception if there are no pending broadcasts; relies on
+     * {@link #isEmpty()} being false.
+     */
+    SomeArgs removeNextBroadcast() {
+        ArrayDeque<SomeArgs> queue = queueForNextBroadcast();
+        return queue.removeFirst();
+    }
+
+    @Nullable ArrayDeque<SomeArgs> queueForNextBroadcast() {
+        if (!mPendingUrgent.isEmpty()) {
+            return mPendingUrgent;
+        } else if (!mPending.isEmpty()) {
+            return mPending;
+        }
+        return null;
+    }
+
+    /**
+     * Returns null if there are no pending broadcasts
+     */
+    @Nullable SomeArgs peekNextBroadcast() {
+        ArrayDeque<SomeArgs> queue = queueForNextBroadcast();
+        return (queue != null) ? queue.peekFirst() : null;
+    }
+
+    @VisibleForTesting
+    @Nullable BroadcastRecord peekNextBroadcastRecord() {
+        ArrayDeque<SomeArgs> queue = queueForNextBroadcast();
+        return (queue != null) ? (BroadcastRecord) queue.peekFirst().arg1 : null;
     }
 
     /**
@@ -427,11 +501,13 @@ class BroadcastProcessQueue {
             return mActive.enqueueTime > barrierTime;
         }
         final SomeArgs next = mPending.peekFirst();
-        if (next != null) {
-            return ((BroadcastRecord) next.arg1).enqueueTime > barrierTime;
-        }
-        // Nothing running or runnable means we're past the barrier
-        return true;
+        final SomeArgs nextUrgent = mPendingUrgent.peekFirst();
+        // Empty queue is past any barrier
+        final boolean nextLater = next == null
+                || ((BroadcastRecord) next.arg1).enqueueTime > barrierTime;
+        final boolean nextUrgentLater = nextUrgent == null
+                || ((BroadcastRecord) nextUrgent.arg1).enqueueTime > barrierTime;
+        return nextLater && nextUrgentLater;
     }
 
     public boolean isRunnable() {
@@ -509,7 +585,7 @@ class BroadcastProcessQueue {
      * Update {@link #getRunnableAt()} if it's currently invalidated.
      */
     private void updateRunnableAt() {
-        final SomeArgs next = mPending.peekFirst();
+        final SomeArgs next = peekNextBroadcast();
         if (next != null) {
             final BroadcastRecord r = (BroadcastRecord) next.arg1;
             final int index = next.argi1;
@@ -527,7 +603,7 @@ class BroadcastProcessQueue {
 
             // If we have too many broadcasts pending, bypass any delays that
             // might have been applied above to aid draining
-            if (mPending.size() >= constants.MAX_PENDING_BROADCASTS) {
+            if (mPending.size() + mPendingUrgent.size() >= constants.MAX_PENDING_BROADCASTS) {
                 mRunnableAt = runnableAt;
                 mRunnableAtReason = REASON_MAX_PENDING;
                 return;
@@ -564,8 +640,8 @@ class BroadcastProcessQueue {
      */
     public void checkHealthLocked() {
         if (mRunnableAtReason == REASON_BLOCKED) {
-            final SomeArgs next = mPending.peekFirst();
-            Objects.requireNonNull(next, "peekFirst");
+            final SomeArgs next = peekNextBroadcast();
+            Objects.requireNonNull(next, "peekNextBroadcast");
 
             // If blocked more than 10 minutes, we're likely wedged
             final BroadcastRecord r = (BroadcastRecord) next.arg1;

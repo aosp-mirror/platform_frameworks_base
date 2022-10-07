@@ -424,13 +424,14 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
         // invocation side effects such as allowlisting.
         if (options != null && callingUid != Process.SYSTEM_UID
                 && key.type == ActivityManager.INTENT_SENDER_BROADCAST) {
-            if (options.containsKey(BroadcastOptions.KEY_ALARM_BROADCAST)) {
+            if (options.containsKey(BroadcastOptions.KEY_ALARM_BROADCAST)
+                    || options.containsKey(BroadcastOptions.KEY_INTERACTIVE_BROADCAST)) {
                 if (DEBUG_BROADCAST_LIGHT) {
                     Slog.w(TAG, "Non-system caller " + callingUid
-                            + " may not flag broadcast as alarm-related");
+                            + " may not flag broadcast as alarm or interactive");
                 }
                 throw new SecurityException(
-                        "Non-system callers may not flag broadcasts as alarm-related");
+                        "Non-system callers may not flag broadcasts as alarm or interactive");
             }
         }
 

@@ -289,20 +289,30 @@ public class BroadcastQueueModernImplTest {
         final BroadcastProcessQueue queue = new BroadcastProcessQueue(mConstants,
                 PACKAGE_GREEN, getUidForPackage(PACKAGE_GREEN));
 
+        // enqueue a bg-priority broadcast then a fg-priority one
+        final Intent timezone = new Intent(Intent.ACTION_TIMEZONE_CHANGED);
+        final BroadcastRecord timezoneRecord = makeBroadcastRecord(timezone);
+        queue.enqueueOrReplaceBroadcast(timezoneRecord, 0, 0);
+
         final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         airplane.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         final BroadcastRecord airplaneRecord = makeBroadcastRecord(airplane);
         queue.enqueueOrReplaceBroadcast(airplaneRecord, 0, 0);
 
+        // verify that:
+        // (a) the queue is immediately runnable by existence of a fg-priority broadcast
+        // (b) the next one up is the fg-priority broadcast despite its later enqueue time
         queue.setProcessCached(false);
         assertTrue(queue.isRunnable());
         assertEquals(airplaneRecord.enqueueTime, queue.getRunnableAt());
         assertEquals(ProcessList.SCHED_GROUP_DEFAULT, queue.getPreferredSchedulingGroupLocked());
+        assertEquals(queue.peekNextBroadcastRecord(), airplaneRecord);
 
         queue.setProcessCached(true);
         assertTrue(queue.isRunnable());
         assertEquals(airplaneRecord.enqueueTime, queue.getRunnableAt());
         assertEquals(ProcessList.SCHED_GROUP_DEFAULT, queue.getPreferredSchedulingGroupLocked());
+        assertEquals(queue.peekNextBroadcastRecord(), airplaneRecord);
     }
 
     /**

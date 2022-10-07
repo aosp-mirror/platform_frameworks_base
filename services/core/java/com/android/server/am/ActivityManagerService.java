@@ -14683,13 +14683,14 @@ public class ActivityManagerService extends IActivityManager.Stub
             // Non-system callers can't declare that a broadcast is alarm-related.
             // The PendingIntent invocation case is handled in PendingIntentRecord.
             if (bOptions != null && callingUid != SYSTEM_UID) {
-                if (bOptions.containsKey(BroadcastOptions.KEY_ALARM_BROADCAST)) {
+                if (bOptions.containsKey(BroadcastOptions.KEY_ALARM_BROADCAST)
+                        || bOptions.containsKey(BroadcastOptions.KEY_INTERACTIVE_BROADCAST)) {
                     if (DEBUG_BROADCAST) {
                         Slog.w(TAG, "Non-system caller " + callingUid
-                                + " may not flag broadcast as alarm-related");
+                                + " may not flag broadcast as alarm or interactive");
                     }
                     throw new SecurityException(
-                            "Non-system callers may not flag broadcasts as alarm-related");
+                            "Non-system callers may not flag broadcasts as alarm or interactive");
                 }
             }
 
