@@ -398,6 +398,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("currentClockSizeLarge=" + (mCurrentClockSize == LARGE));
         pw.println("mCanShowDoubleLineClock=" + mCanShowDoubleLineClock);
+        mView.dump(pw, args);
         ClockController clock = getClock();
         if (clock != null) {
             clock.dump(pw);
