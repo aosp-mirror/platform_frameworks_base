@@ -784,6 +784,8 @@ public class AccessibilityServiceInfo implements Parcelable {
         mNonInteractiveUiTimeout = other.mNonInteractiveUiTimeout;
         mInteractiveUiTimeout = other.mInteractiveUiTimeout;
         flags = other.flags;
+        // NOTE: Ensure that only properties that are safe to be modified by the service itself
+        // are included here (regardless of hidden setters, etc.).
     }
 
     private boolean isRequestAccessibilityButtonChangeEnabled(IPlatformCompat platformCompat) {

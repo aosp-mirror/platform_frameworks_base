@@ -68,7 +68,6 @@ import android.annotation.UiThread;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
-import android.app.AppGlobals;
 import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -81,7 +80,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
@@ -137,7 +135,6 @@ import android.view.WindowManager;
 import android.view.WindowManager.DisplayImePolicy;
 import android.view.WindowManager.LayoutParams;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
-import android.view.accessibility.AccessibilityManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputBinding;
 import android.view.inputmethod.InputConnection;
@@ -178,6 +175,7 @@ import com.android.internal.inputmethod.UnbindReason;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.TransferPipe;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.view.IInputMethodManager;
@@ -196,8 +194,6 @@ import com.android.server.statusbar.StatusBarManagerService;
 import com.android.server.utils.PriorityDump;
 import com.android.server.wm.WindowManagerInternal;
 
-import com.google.android.collect.Sets;
-
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -212,7 +208,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.OptionalInt;
-import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Future;
@@ -284,7 +279,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
      * {@link #mPreventImeStartupUnlessTextEditor}.
      */
     @NonNull
-    private final Set<String> mNonPreemptibleInputMethods;
+    private final String[] mNonPreemptibleInputMethods;
 
     @UserIdInt
     private int mLastSwitchUserId;
@@ -298,12 +293,12 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     private final SparseBooleanArray mLoggedDeniedGetInputMethodWindowVisibleHeightForUid =
             new SparseBooleanArray(0);
     final WindowManagerInternal mWindowManagerInternal;
+    private final ActivityManagerInternal mActivityManagerInternal;
     final PackageManagerInternal mPackageManagerInternal;
     final InputManagerInternal mInputManagerInternal;
     final ImePlatformCompatUtils mImePlatformCompatUtils;
     final InputMethodDeviceConfigs mInputMethodDeviceConfigs;
     private final DisplayManagerInternal mDisplayManagerInternal;
-    final boolean mHasFeature;
     private final ArrayMap<String, List<InputMethodSubtype>> mAdditionalSubtypeMap =
             new ArrayMap<>();
     private final UserManager mUserManager;
@@ -311,9 +306,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     private final InputMethodMenuController mMenuController;
     @NonNull private final InputMethodBindingController mBindingController;
     @NonNull private final AutofillSuggestionsController mAutofillController;
-
-    // TODO(b/219056452): Use AccessibilityManagerInternal instead.
-    private final AccessibilityManager mAccessibilityManager;
 
     /**
      * Cache the result of {@code LocalServices.getService(AudioManagerInternal.class)}.
@@ -804,7 +796,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     private LocaleList mLastSystemLocales;
     private boolean mAccessibilityRequestingNoSoftKeyboard;
     private final MyPackageMonitor mMyPackageMonitor = new MyPackageMonitor();
-    private final IPackageManager mIPackageManager;
     private final String mSlotIme;
 
     /**
@@ -1550,11 +1541,13 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     int change = isPackageDisappearing(curIm.getPackageName());
                     if (change == PACKAGE_TEMPORARY_CHANGE
                             || change == PACKAGE_PERMANENT_CHANGE) {
+                        final PackageManager userAwarePackageManager =
+                                getPackageManagerForUser(mContext, mSettings.getCurrentUserId());
                         ServiceInfo si = null;
                         try {
-                            si = mIPackageManager.getServiceInfo(
-                                    curIm.getComponent(), 0, mSettings.getCurrentUserId());
-                        } catch (RemoteException ex) {
+                            si = userAwarePackageManager.getServiceInfo(curIm.getComponent(),
+                                    PackageManager.ComponentInfoFlags.of(0));
+                        } catch (PackageManager.NameNotFoundException ignored) {
                         }
                         if (si == null) {
                             // Uh oh, current input method is no longer around!
@@ -1712,7 +1705,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     public InputMethodManagerService(Context context) {
-        mIPackageManager = AppGlobals.getPackageManager();
         mContext = context;
         mRes = context.getResources();
         // TODO(b/196206770): Disallow I/O on this thread. Currently it's needed for loading
@@ -1726,6 +1718,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         mIWindowManager = IWindowManager.Stub.asInterface(
                 ServiceManager.getService(Context.WINDOW_SERVICE));
         mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
+        mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
         mImePlatformCompatUtils = new ImePlatformCompatUtils();
@@ -1734,9 +1727,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
         mUserManager = mContext.getSystemService(UserManager.class);
         mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
-        mAccessibilityManager = AccessibilityManager.getInstance(context);
-        mHasFeature = context.getPackageManager().hasSystemFeature(
-                PackageManager.FEATURE_INPUT_METHODS);
 
         mSlotIme = mContext.getString(com.android.internal.R.string.status_bar_ime);
 
@@ -1761,12 +1751,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         mShowOngoingImeSwitcherForPhones = false;
 
         mNotificationShown = false;
-        int userId = 0;
-        try {
-            userId = ActivityManager.getService().getCurrentUser().id;
-        } catch (RemoteException e) {
-            Slog.w(TAG, "Couldn't get current user ID; guessing it's 0", e);
-        }
+        final int userId = mActivityManagerInternal.getCurrentUserId();
 
         mLastSwitchUserId = userId;
 
@@ -1782,8 +1767,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         mAutofillController = new AutofillSuggestionsController(this);
         mPreventImeStartupUnlessTextEditor = mRes.getBoolean(
                 com.android.internal.R.bool.config_preventImeStartupUnlessTextEditor);
-        mNonPreemptibleInputMethods = Sets.newHashSet(mRes.getStringArray(
-                com.android.internal.R.array.config_nonPreemptibleInputMethods));
+        mNonPreemptibleInputMethods = mRes.getStringArray(
+                com.android.internal.R.array.config_nonPreemptibleInputMethods);
         mHwController = new HandwritingModeController(thread.getLooper(),
                 new InkWindowInitializer());
         registerDeviceListenerAndCheckStylusSupport();
@@ -2610,23 +2595,20 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         if (!mPreventImeStartupUnlessTextEditor) {
             return false;
         }
-
-        final boolean imeVisibleAllowed =
-                isSoftInputModeStateVisibleAllowed(unverifiedTargetSdkVersion, startInputFlags);
-
-        return !(imeVisibleAllowed
-                || mShowRequested
-                || isNonPreemptibleImeLocked(selectedMethodId));
-    }
-
-    /** Return {@code true} if the given IME is non-preemptible like the tv remote service. */
-    @GuardedBy("ImfLock.class")
-    private boolean isNonPreemptibleImeLocked(@NonNull  String selectedMethodId) {
-        final InputMethodInfo imi = mMethodMap.get(selectedMethodId);
-        if (imi != null) {
-            return mNonPreemptibleInputMethods.contains(imi.getPackageName());
+        if (mShowRequested) {
+            return false;
         }
-        return false;
+        if (isSoftInputModeStateVisibleAllowed(unverifiedTargetSdkVersion, startInputFlags)) {
+            return false;
+        }
+        final InputMethodInfo imi = mMethodMap.get(selectedMethodId);
+        if (imi == null) {
+            return false;
+        }
+        if (ArrayUtils.contains(mNonPreemptibleInputMethods, imi.getPackageName())) {
+            return false;
+        }
+        return true;
     }
 
     @GuardedBy("ImfLock.class")
@@ -3216,27 +3198,30 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @GuardedBy("ImfLock.class")
     void updateInputMethodsFromSettingsLocked(boolean enabledMayChange) {
         if (enabledMayChange) {
+            final PackageManager userAwarePackageManager = getPackageManagerForUser(mContext,
+                    mSettings.getCurrentUserId());
+
             List<InputMethodInfo> enabled = mSettings.getEnabledInputMethodListLocked();
             for (int i = 0; i < enabled.size(); i++) {
                 // We allow the user to select "disabled until used" apps, so if they
                 // are enabling one of those here we now need to make it enabled.
                 InputMethodInfo imm = enabled.get(i);
+                ApplicationInfo ai = null;
                 try {
-                    ApplicationInfo ai = mIPackageManager.getApplicationInfo(imm.getPackageName(),
-                            PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS,
-                            mSettings.getCurrentUserId());
-                    if (ai != null && ai.enabledSetting
-                            == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED) {
-                        if (DEBUG) {
-                            Slog.d(TAG, "Update state(" + imm.getId()
-                                    + "): DISABLED_UNTIL_USED -> DEFAULT");
-                        }
-                        mIPackageManager.setApplicationEnabledSetting(imm.getPackageName(),
-                                PackageManager.COMPONENT_ENABLED_STATE_DEFAULT,
-                                PackageManager.DONT_KILL_APP, mSettings.getCurrentUserId(),
-                                mContext.getBasePackageName());
+                    ai = userAwarePackageManager.getApplicationInfo(imm.getPackageName(),
+                            PackageManager.ApplicationInfoFlags.of(
+                                    PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS));
+                } catch (PackageManager.NameNotFoundException ignored) {
+                }
+                if (ai != null && ai.enabledSetting
+                        == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "Update state(" + imm.getId()
+                                + "): DISABLED_UNTIL_USED -> DEFAULT");
                     }
-                } catch (RemoteException e) {
+                    userAwarePackageManager.setApplicationEnabledSetting(imm.getPackageName(),
+                            PackageManager.COMPONENT_ENABLED_STATE_DEFAULT,
+                            PackageManager.DONT_KILL_APP);
                 }
             }
         }
@@ -3318,7 +3303,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             // setSelectedInputMethodAndSubtypeLocked().
             setSelectedMethodIdLocked(id);
 
-            if (LocalServices.getService(ActivityManagerInternal.class).isSystemReady()) {
+            if (mActivityManagerInternal.isSystemReady()) {
                 Intent intent = new Intent(Intent.ACTION_INPUT_METHOD_CHANGED);
                 intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
                 intent.putExtra("input_method_id", id);
@@ -5469,7 +5454,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         public void onCreateInlineSuggestionsRequest(@UserIdInt int userId,
                 InlineSuggestionsRequestInfo requestInfo, IInlineSuggestionsRequestCallback cb) {
             // Get the device global touch exploration state before lock to avoid deadlock.
-            boolean touchExplorationEnabled = mAccessibilityManager.isTouchExplorationEnabled();
+            final boolean touchExplorationEnabled = AccessibilityManagerInternal.get()
+                    .isTouchExplorationEnabled(userId);
 
             synchronized (ImfLock.class) {
                 mAutofillController.onCreateInlineSuggestionsRequest(userId, requestInfo, cb,
@@ -6410,9 +6396,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
      * @return {@code true} if userId has debugging privileges.
      * i.e. {@link UserManager#DISALLOW_DEBUGGING_FEATURES} is {@code false}.
      */
-    private boolean userHasDebugPriv(int userId, final ShellCommand shellCommand) {
-        if (mUserManager.hasUserRestriction(
-                UserManager.DISALLOW_DEBUGGING_FEATURES, UserHandle.of(userId))) {
+    private boolean userHasDebugPriv(@UserIdInt int userId, ShellCommand shellCommand) {
+        if (mUserManagerInternal.hasUserRestriction(
+                UserManager.DISALLOW_DEBUGGING_FEATURES, userId)) {
             shellCommand.getErrPrintWriter().println("User #" + userId
                     + " is restricted with DISALLOW_DEBUGGING_FEATURES.");
             return false;

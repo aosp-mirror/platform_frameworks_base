@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.app.time.UnixEpochTime;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -38,7 +39,6 @@ import android.os.PowerManager;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.SystemClock;
-import android.os.TimestampedValue;
 import android.provider.Settings;
 import android.util.LocalLog;
 import android.util.Log;
@@ -278,7 +278,7 @@ public class NetworkTimeUpdateService extends Binder {
     /** Suggests the time to the time detector. It may choose use it to set the system clock. */
     private void makeNetworkTimeSuggestion(
             @NonNull TimeResult ntpResult, @NonNull String debugInfo) {
-        TimestampedValue<Long> timeSignal = new TimestampedValue<>(
+        UnixEpochTime timeSignal = new UnixEpochTime(
                 ntpResult.getElapsedRealtimeMillis(), ntpResult.getTimeMillis());
         NetworkTimeSuggestion timeSuggestion =
                 new NetworkTimeSuggestion(timeSignal, ntpResult.getUncertaintyMillis());

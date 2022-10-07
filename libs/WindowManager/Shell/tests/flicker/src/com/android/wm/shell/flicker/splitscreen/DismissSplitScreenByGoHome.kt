@@ -106,7 +106,7 @@ class DismissSplitScreenByGoHome(
     fun secondaryAppWindowBecomesInvisible() = testSpec.appWindowBecomesInvisible(secondaryApp)
 
     /** {@inheritDoc} */
-    @Presubmit
+    @FlakyTest(bugId = 251268711)
     @Test
     override fun entireScreenCovered() =
         super.entireScreenCovered()

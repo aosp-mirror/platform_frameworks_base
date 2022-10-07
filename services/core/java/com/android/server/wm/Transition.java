@@ -49,7 +49,6 @@ import static android.window.TransitionInfo.FLAG_IS_VOICE_INTERACTION;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_OCCLUDES_KEYGUARD;
 import static android.window.TransitionInfo.FLAG_SHOW_WALLPAPER;
-import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
 import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
 import static android.window.TransitionInfo.FLAG_WILL_IME_SHOWN;
 
@@ -1297,7 +1296,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                     "        sibling is a participant with mode %s",
                     TransitionInfo.modeToString(siblingMode));
-            if (mode != siblingMode) {
+            if (reduceMode(mode) != reduceMode(siblingMode)) {
                 ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                         "          SKIP: common mode mismatch. was %s",
                         TransitionInfo.modeToString(mode));
@@ -1305,6 +1304,16 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             }
         }
         return true;
+    }
+
+    /** "reduces" a mode into a smaller set of modes that uniquely represents visibility change. */
+    @TransitionInfo.TransitionMode
+    private static int reduceMode(@TransitionInfo.TransitionMode int mode) {
+        switch (mode) {
+            case TRANSIT_TO_BACK: return TRANSIT_CLOSE;
+            case TRANSIT_TO_FRONT: return TRANSIT_OPEN;
+            default: return mode;
+        }
     }
 
     /**
@@ -1808,7 +1817,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         @TransitionInfo.TransitionMode
         int getTransitMode(@NonNull WindowContainer wc) {
             if ((mFlags & ChangeInfo.FLAG_ABOVE_TRANSIENT_LAUNCH) != 0) {
-                return TRANSIT_CLOSE;
+                return mExistenceChanged ? TRANSIT_CLOSE : TRANSIT_TO_BACK;
             }
             final boolean nowVisible = wc.isVisibleRequested();
             if (nowVisible == mVisible) {
@@ -1845,12 +1854,10 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             final ActivityRecord record = wc.asActivityRecord();
             if (record != null) {
                 parentTask = record.getTask();
-                if (record.mUseTransferredAnimation) {
-                    flags |= FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
-                }
                 if (record.mVoiceInteraction) {
                     flags |= FLAG_IS_VOICE_INTERACTION;
                 }
+                flags |= record.mTransitionChangeFlags;
             }
             final TaskFragment taskFragment = wc.asTaskFragment();
             if (taskFragment != null && task == null) {

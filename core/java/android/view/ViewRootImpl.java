@@ -1098,6 +1098,10 @@ public final class ViewRootImpl implements ViewParent,
                 mInputQueueCallback.onInputQueueCreated(mInputQueue);
             }
         }
+
+        // Update the last resource config in case the resource configuration was changed while
+        // activity relaunched.
+        mLastConfigurationFromResources.setTo(getConfiguration());
     }
 
     private Configuration getConfiguration() {
@@ -8540,6 +8544,10 @@ public final class ViewRootImpl implements ViewParent,
         if (mLocalSyncState != LOCAL_SYNC_NONE) {
             writer.println(innerPrefix + "mLocalSyncState=" + mLocalSyncState);
         }
+        writer.println(innerPrefix + "mLastReportedMergedConfiguration="
+                + mLastReportedMergedConfiguration);
+        writer.println(innerPrefix + "mLastConfigurationFromResources="
+                + mLastConfigurationFromResources);
         writer.println(innerPrefix + "mIsAmbientMode="  + mIsAmbientMode);
         writer.println(innerPrefix + "mUnbufferedInputSource="
                 + Integer.toHexString(mUnbufferedInputSource));

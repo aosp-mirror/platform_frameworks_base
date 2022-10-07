@@ -197,6 +197,12 @@ open class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) :
     @Test
     override fun appWindowBecomesTopWindow() = super.appWindowBecomesTopWindow()
 
+    @FlakyTest(bugId = 251217585)
+    @Test
+    override fun focusChanges() {
+        super.focusChanges()
+    }
+
     companion object {
         /**
          * Creates the test configurations.

@@ -25,10 +25,12 @@ import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.view.WindowManager.fixScale;
 import static android.window.TransitionInfo.FLAG_IS_INPUT_METHOD;
+import static android.window.TransitionInfo.FLAG_IS_OCCLUDED;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
 
 import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
+import static com.android.wm.shell.sysui.ShellSharedConstants.KEY_EXTRA_SHELL_SHELL_TRANSITIONS;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -61,11 +63,13 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.ExternalInterfaceBinder;
 import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.annotations.ExternalThread;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 
 import java.util.ArrayList;
@@ -115,6 +119,7 @@ public class Transitions implements RemoteCallable<Transitions> {
     private final DefaultTransitionHandler mDefaultTransitionHandler;
     private final RemoteTransitionHandler mRemoteTransitionHandler;
     private final DisplayController mDisplayController;
+    private final ShellController mShellController;
     private final ShellTransitionImpl mImpl = new ShellTransitionImpl();
 
     /** List of possible handlers. Ordered by specificity (eg. tapped back to front). */
@@ -142,6 +147,7 @@ public class Transitions implements RemoteCallable<Transitions> {
 
     public Transitions(@NonNull Context context,
             @NonNull ShellInit shellInit,
+            @NonNull ShellController shellController,
             @NonNull WindowOrganizer organizer,
             @NonNull TransactionPool pool,
             @NonNull DisplayController displayController,
@@ -156,10 +162,14 @@ public class Transitions implements RemoteCallable<Transitions> {
         mDefaultTransitionHandler = new DefaultTransitionHandler(context, shellInit,
                 displayController, pool, mainExecutor, mainHandler, animExecutor);
         mRemoteTransitionHandler = new RemoteTransitionHandler(mMainExecutor);
+        mShellController = shellController;
         shellInit.addInitCallback(this::onInit, this);
     }
 
     private void onInit() {
+        mShellController.addExternalInterface(KEY_EXTRA_SHELL_SHELL_TRANSITIONS,
+                this::createExternalInterface, this);
+
         // The very last handler (0 in the list) should be the default one.
         mHandlers.add(mDefaultTransitionHandler);
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "addHandler: Default");
@@ -191,6 +201,10 @@ public class Transitions implements RemoteCallable<Transitions> {
 
     public ShellTransitions asRemoteTransitions() {
         return mImpl;
+    }
+
+    private ExternalInterfaceBinder createExternalInterface() {
+        return new IShellTransitionsImpl(this);
     }
 
     @Override
@@ -441,31 +455,34 @@ public class Transitions implements RemoteCallable<Transitions> {
             return;
         }
 
-        // apply transfer starting window directly if there is no other task change. Since this
-        // is an activity->activity situation, we can detect it by selecting transitions with only
-        // 2 changes where neither are tasks and one is a starting-window recipient.
         final int changeSize = info.getChanges().size();
-        if (changeSize == 2) {
-            boolean nonTaskChange = true;
-            boolean transferStartingWindow = false;
-            for (int i = changeSize - 1; i >= 0; --i) {
-                final TransitionInfo.Change change = info.getChanges().get(i);
-                if (change.getTaskInfo() != null) {
-                    nonTaskChange = false;
-                    break;
-                }
-                if ((change.getFlags() & FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT) != 0) {
-                    transferStartingWindow = true;
-                }
+        boolean taskChange = false;
+        boolean transferStartingWindow = false;
+        boolean allOccluded = changeSize > 0;
+        for (int i = changeSize - 1; i >= 0; --i) {
+            final TransitionInfo.Change change = info.getChanges().get(i);
+            taskChange |= change.getTaskInfo() != null;
+            transferStartingWindow |= change.hasFlags(FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT);
+            if (!change.hasFlags(FLAG_IS_OCCLUDED)) {
+                allOccluded = false;
             }
-            if (nonTaskChange && transferStartingWindow) {
-                t.apply();
-                finishT.apply();
-                // Treat this as an abort since we are bypassing any merge logic and effectively
-                // finishing immediately.
-                onAbort(transitionToken);
-                return;
-            }
+        }
+        // There does not need animation when:
+        // A. Transfer starting window. Apply transfer starting window directly if there is no other
+        // task change. Since this is an activity->activity situation, we can detect it by selecting
+        // transitions with only 2 changes where neither are tasks and one is a starting-window
+        // recipient.
+        if (!taskChange && transferStartingWindow && changeSize == 2
+                // B. It's visibility change if the TRANSIT_TO_BACK/TO_FRONT happened when all
+                // changes are underneath another change.
+                || ((info.getType() == TRANSIT_TO_BACK || info.getType() == TRANSIT_TO_FRONT)
+                && allOccluded)) {
+            t.apply();
+            finishT.apply();
+            // Treat this as an abort since we are bypassing any merge logic and effectively
+            // finishing immediately.
+            onAbort(transitionToken);
+            return;
         }
 
         final ActiveTransition active = mActiveTransitions.get(activeIdx);
@@ -540,6 +557,22 @@ public class Transitions implements RemoteCallable<Transitions> {
         }
         throw new IllegalStateException(
                 "This shouldn't happen, maybe the default handler is broken.");
+    }
+
+    /**
+     * Gives every handler (in order) a chance to handle request until one consumes the transition.
+     * @return the WindowContainerTransaction given by the handler which consumed the transition.
+     */
+    public WindowContainerTransaction dispatchRequest(@NonNull IBinder transition,
+            @NonNull TransitionRequestInfo request, @Nullable TransitionHandler skip) {
+        for (int i = mHandlers.size() - 1; i >= 0; --i) {
+            if (mHandlers.get(i) == skip) continue;
+            WindowContainerTransaction wct = mHandlers.get(i).handleRequest(transition, request);
+            if (wct != null) {
+                return wct;
+            }
+        }
+        return null;
     }
 
     /** Special version of finish just for dealing with no-op/invalid transitions. */
@@ -716,8 +749,8 @@ public class Transitions implements RemoteCallable<Transitions> {
                         null /* newDisplayAreaInfo */);
             }
         }
-        active.mToken = mOrganizer.startTransition(
-                request.getType(), transitionToken, wct);
+        mOrganizer.startTransition(transitionToken, wct != null && wct.isEmpty() ? null : wct);
+        active.mToken = transitionToken;
         mActiveTransitions.add(active);
     }
 
@@ -726,7 +759,7 @@ public class Transitions implements RemoteCallable<Transitions> {
             @NonNull WindowContainerTransaction wct, @Nullable TransitionHandler handler) {
         final ActiveTransition active = new ActiveTransition();
         active.mHandler = handler;
-        active.mToken = mOrganizer.startTransition(type, null /* token */, wct);
+        active.mToken = mOrganizer.startNewTransition(type, wct);
         mActiveTransitions.add(active);
         return active.mToken;
     }
@@ -897,17 +930,6 @@ public class Transitions implements RemoteCallable<Transitions> {
      */
     @ExternalThread
     private class ShellTransitionImpl implements ShellTransitions {
-        private IShellTransitionsImpl mIShellTransitions;
-
-        @Override
-        public IShellTransitions createExternalInterface() {
-            if (mIShellTransitions != null) {
-                mIShellTransitions.invalidate();
-            }
-            mIShellTransitions = new IShellTransitionsImpl(Transitions.this);
-            return mIShellTransitions;
-        }
-
         @Override
         public void registerRemote(@NonNull TransitionFilter filter,
                 @NonNull RemoteTransition remoteTransition) {
@@ -928,7 +950,8 @@ public class Transitions implements RemoteCallable<Transitions> {
      * The interface for calls from outside the host process.
      */
     @BinderThread
-    private static class IShellTransitionsImpl extends IShellTransitions.Stub {
+    private static class IShellTransitionsImpl extends IShellTransitions.Stub
+            implements ExternalInterfaceBinder {
         private Transitions mTransitions;
 
         IShellTransitionsImpl(Transitions transitions) {
@@ -938,7 +961,8 @@ public class Transitions implements RemoteCallable<Transitions> {
         /**
          * Invalidates this instance, preventing future calls from updating the controller.
          */
-        void invalidate() {
+        @Override
+        public void invalidate() {
             mTransitions = null;
         }
 

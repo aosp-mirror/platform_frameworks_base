@@ -19,9 +19,9 @@ package android.app.timedetector;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
+import android.app.time.UnixEpochTime;
 import android.content.Context;
 import android.os.SystemClock;
-import android.os.TimestampedValue;
 
 /**
  * The interface through which system components can query and send signals to the
@@ -108,9 +108,8 @@ public interface TimeDetector {
      * @hide
      */
     static ManualTimeSuggestion createManualTimeSuggestion(long when, String why) {
-        TimestampedValue<Long> utcTime =
-                new TimestampedValue<>(SystemClock.elapsedRealtime(), when);
-        ManualTimeSuggestion manualTimeSuggestion = new ManualTimeSuggestion(utcTime);
+        UnixEpochTime unixEpochTime = new UnixEpochTime(SystemClock.elapsedRealtime(), when);
+        ManualTimeSuggestion manualTimeSuggestion = new ManualTimeSuggestion(unixEpochTime);
         manualTimeSuggestion.addDebugInfo(why);
         return manualTimeSuggestion;
     }

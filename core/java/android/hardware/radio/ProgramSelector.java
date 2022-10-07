@@ -279,7 +279,6 @@ public final class ProgramSelector implements Parcelable {
         mPrimaryId = Objects.requireNonNull(primaryId);
         mSecondaryIds = secondaryIds;
         mVendorIds = vendorIds;
-        Arrays.sort(mSecondaryIds);
     }
 
     /**
@@ -525,7 +524,9 @@ public final class ProgramSelector implements Parcelable {
         // vendorIds are ignored for equality
         // programType can be inferred from primaryId, thus not checked
         return mPrimaryId.equals(other.getPrimaryId())
-                && Arrays.equals(mSecondaryIds, other.mSecondaryIds);
+                && mSecondaryIds.length == other.mSecondaryIds.length
+                && Arrays.asList(mSecondaryIds).containsAll(
+                        Arrays.asList(other.mSecondaryIds));
     }
 
     private ProgramSelector(Parcel in) {

@@ -290,9 +290,7 @@ class NotificationMemoryMonitorTest : SysuiTestCase() {
             .isEqualTo(NotificationUtils.logKey("0|test_pkg|0|test|0"))
         assertThat(memoryUse.objectUsage.smallIcon).isEqualTo(smallIcon)
         assertThat(memoryUse.objectUsage.largeIcon).isEqualTo(largeIcon)
-        assertThat(memoryUse.objectUsage.extras).isEqualTo(extras)
         assertThat(memoryUse.objectUsage.bigPicture).isEqualTo(bigPicture)
-        assertThat(memoryUse.objectUsage.extender).isEqualTo(extender)
         if (style == null) {
             assertThat(memoryUse.objectUsage.style).isNull()
         } else {

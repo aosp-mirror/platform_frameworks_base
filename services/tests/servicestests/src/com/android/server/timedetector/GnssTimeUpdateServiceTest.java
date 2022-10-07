@@ -28,6 +28,7 @@ import static org.mockito.Mockito.when;
 
 import android.app.AlarmManager;
 import android.app.AlarmManager.OnAlarmListener;
+import android.app.time.UnixEpochTime;
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationListener;
@@ -35,7 +36,6 @@ import android.location.LocationManager;
 import android.location.LocationManagerInternal;
 import android.location.LocationRequest;
 import android.location.LocationTime;
-import android.os.TimestampedValue;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -73,7 +73,7 @@ public final class GnssTimeUpdateServiceTest {
 
     @Test
     public void testLocationListenerOnLocationChanged_validLocationTime_suggestsGnssTime() {
-        TimestampedValue<Long> timeSignal = new TimestampedValue<>(
+        UnixEpochTime timeSignal = new UnixEpochTime(
                 ELAPSED_REALTIME_MS, GNSS_TIME);
         GnssTimeSuggestion timeSuggestion = new GnssTimeSuggestion(timeSignal);
         LocationTime locationTime = new LocationTime(GNSS_TIME, ELAPSED_REALTIME_NS);
@@ -178,7 +178,7 @@ public final class GnssTimeUpdateServiceTest {
     private void advanceServiceToSleepingState(
             ArgumentCaptor<LocationListener> locationListenerCaptor,
             ArgumentCaptor<OnAlarmListener> alarmListenerCaptor) {
-        TimestampedValue<Long> timeSignal = new TimestampedValue<>(
+        UnixEpochTime timeSignal = new UnixEpochTime(
                 ELAPSED_REALTIME_MS, GNSS_TIME);
         GnssTimeSuggestion timeSuggestion = new GnssTimeSuggestion(timeSignal);
         LocationTime locationTime = new LocationTime(GNSS_TIME, ELAPSED_REALTIME_NS);

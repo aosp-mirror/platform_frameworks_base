@@ -261,14 +261,15 @@ public abstract class WMShellBaseModule {
     static Optional<BackAnimationController> provideBackAnimationController(
             Context context,
             ShellInit shellInit,
+            ShellController shellController,
             @ShellMainThread ShellExecutor shellExecutor,
             @ShellBackgroundThread Handler backgroundHandler,
             Transitions transitions
     ) {
         if (BackAnimationController.IS_ENABLED) {
             return Optional.of(
-                    new BackAnimationController(shellInit, shellExecutor, backgroundHandler,
-                            context, transitions));
+                    new BackAnimationController(shellInit, shellController, shellExecutor,
+                            backgroundHandler, context, transitions));
         }
         return Optional.empty();
     }
@@ -293,17 +294,17 @@ public abstract class WMShellBaseModule {
     // Workaround for dynamic overriding with a default implementation, see {@link DynamicOverride}
     @BindsOptionalOf
     @DynamicOverride
-    abstract FullscreenTaskListener<?> optionalFullscreenTaskListener();
+    abstract FullscreenTaskListener optionalFullscreenTaskListener();
 
     @WMSingleton
     @Provides
-    static FullscreenTaskListener<?> provideFullscreenTaskListener(
-            @DynamicOverride Optional<FullscreenTaskListener<?>> fullscreenTaskListener,
+    static FullscreenTaskListener provideFullscreenTaskListener(
+            @DynamicOverride Optional<FullscreenTaskListener> fullscreenTaskListener,
             ShellInit shellInit,
             ShellTaskOrganizer shellTaskOrganizer,
             SyncTransactionQueue syncQueue,
             Optional<RecentTasksController> recentTasksOptional,
-            Optional<WindowDecorViewModel<?>> windowDecorViewModelOptional) {
+            Optional<WindowDecorViewModel> windowDecorViewModelOptional) {
         if (fullscreenTaskListener.isPresent()) {
             return fullscreenTaskListener.get();
         } else {
@@ -317,7 +318,7 @@ public abstract class WMShellBaseModule {
     //
 
     @BindsOptionalOf
-    abstract WindowDecorViewModel<?> optionalWindowDecorViewModel();
+    abstract WindowDecorViewModel optionalWindowDecorViewModel();
 
     //
     // Unfold transition
@@ -472,6 +473,7 @@ public abstract class WMShellBaseModule {
     static Optional<RecentTasksController> provideRecentTasksController(
             Context context,
             ShellInit shellInit,
+            ShellController shellController,
             ShellCommandHandler shellCommandHandler,
             TaskStackListenerImpl taskStackListener,
             ActivityTaskManager activityTaskManager,
@@ -479,9 +481,9 @@ public abstract class WMShellBaseModule {
             @ShellMainThread ShellExecutor mainExecutor
     ) {
         return Optional.ofNullable(
-                RecentTasksController.create(context, shellInit, shellCommandHandler,
-                        taskStackListener, activityTaskManager, desktopModeTaskRepository,
-                        mainExecutor));
+                RecentTasksController.create(context, shellInit, shellController,
+                        shellCommandHandler, taskStackListener, activityTaskManager,
+                        desktopModeTaskRepository, mainExecutor));
     }
 
     //
@@ -498,14 +500,15 @@ public abstract class WMShellBaseModule {
     @Provides
     static Transitions provideTransitions(Context context,
             ShellInit shellInit,
+            ShellController shellController,
             ShellTaskOrganizer organizer,
             TransactionPool pool,
             DisplayController displayController,
             @ShellMainThread ShellExecutor mainExecutor,
             @ShellMainThread Handler mainHandler,
             @ShellAnimationThread ShellExecutor animExecutor) {
-        return new Transitions(context, shellInit, organizer, pool, displayController, mainExecutor,
-                mainHandler, animExecutor);
+        return new Transitions(context, shellInit, shellController, organizer, pool,
+                displayController, mainExecutor, mainHandler, animExecutor);
     }
 
     @WMSingleton
@@ -622,13 +625,15 @@ public abstract class WMShellBaseModule {
 
     @WMSingleton
     @Provides
-    static StartingWindowController provideStartingWindowController(Context context,
+    static StartingWindowController provideStartingWindowController(
+            Context context,
             ShellInit shellInit,
+            ShellController shellController,
             ShellTaskOrganizer shellTaskOrganizer,
             @ShellSplashscreenThread ShellExecutor splashScreenExecutor,
             StartingWindowTypeAlgorithm startingWindowTypeAlgorithm, IconProvider iconProvider,
             TransactionPool pool) {
-        return new StartingWindowController(context, shellInit, shellTaskOrganizer,
+        return new StartingWindowController(context, shellInit, shellController, shellTaskOrganizer,
                 splashScreenExecutor, startingWindowTypeAlgorithm, iconProvider, pool);
     }
 
@@ -769,7 +774,7 @@ public abstract class WMShellBaseModule {
             Optional<SplitScreenController> splitScreenOptional,
             Optional<Pip> pipOptional,
             Optional<PipTouchHandler> pipTouchHandlerOptional,
-            FullscreenTaskListener<?> fullscreenTaskListener,
+            FullscreenTaskListener fullscreenTaskListener,
             Optional<UnfoldAnimationController> unfoldAnimationController,
             Optional<UnfoldTransitionHandler> unfoldTransitionHandler,
             Optional<FreeformComponents> freeformComponents,

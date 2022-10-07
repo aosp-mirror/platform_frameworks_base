@@ -287,6 +287,42 @@ class ImmutabilityProcessorTest {
         )
     }
 
+    @Test
+    fun ignoredClass() = test(
+        JavaFileObjects.forSourceString(
+            "$PACKAGE_PREFIX.$DATA_CLASS_NAME",
+            /* language=JAVA */ """
+            package $PACKAGE_PREFIX;
+
+            import java.util.List;
+            import java.util.Map;
+
+            @Immutable
+            public interface $DATA_CLASS_NAME {
+                IgnoredClass getInnerClassOne();
+                NotIgnoredClass getInnerClassTwo();
+                Map<String, IgnoredClass> getInnerClassThree();
+                Map<String, NotIgnoredClass> getInnerClassFour();
+
+                @Immutable.Ignore
+                final class IgnoredClass {
+                    public String innerField;
+                }
+
+                final class NotIgnoredClass {
+                    public String innerField;
+                }
+            }
+            """.trimIndent()
+        ), errors = listOf(
+            nonInterfaceReturnFailure(line = 9),
+            nonInterfaceReturnFailure(line = 11, prefix = "Value NotIgnoredClass"),
+            classNotImmutableFailure(line = 18, className = "NotIgnoredClass"),
+            nonInterfaceClassFailure(line = 18),
+            memberNotMethodFailure(line = 19),
+        )
+    )
+
     private fun test(
         source: JavaFileObject,
         errors: List<CompilationError>,

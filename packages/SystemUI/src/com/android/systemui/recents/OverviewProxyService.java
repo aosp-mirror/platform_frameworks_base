@@ -25,15 +25,6 @@ import static android.view.WindowManager.ScreenshotSource.SCREENSHOT_OVERVIEW;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 
 import static com.android.internal.accessibility.common.ShortcutConstants.CHOOSER_PACKAGE_NAME;
-import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_RECENT_TASKS;
-import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SHELL_BACK_ANIMATION;
-import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SHELL_DESKTOP_MODE;
-import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SHELL_FLOATING_TASKS;
-import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SHELL_ONE_HANDED;
-import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SHELL_PIP;
-import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SHELL_SHELL_TRANSITIONS;
-import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SHELL_SPLIT_SCREEN;
-import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SHELL_STARTING_WINDOW;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SUPPORTS_WINDOW_CORNERS;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SYSUI_PROXY;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_UNLOCK_ANIMATION_CONTROLLER;
@@ -110,16 +101,7 @@ import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.StatusBarWindowCallback;
 import com.android.systemui.statusbar.policy.CallbackController;
-import com.android.wm.shell.back.BackAnimation;
-import com.android.wm.shell.desktopmode.DesktopMode;
-import com.android.wm.shell.floating.FloatingTasks;
-import com.android.wm.shell.onehanded.OneHanded;
-import com.android.wm.shell.pip.Pip;
-import com.android.wm.shell.pip.PipAnimationController;
-import com.android.wm.shell.recents.RecentTasks;
-import com.android.wm.shell.splitscreen.SplitScreen;
-import com.android.wm.shell.startingsurface.StartingSurface;
-import com.android.wm.shell.transition.ShellTransitions;
+import com.android.wm.shell.sysui.ShellInterface;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -151,10 +133,8 @@ public class OverviewProxyService extends CurrentUserTracker implements
     private static final long MAX_BACKOFF_MILLIS = 10 * 60 * 1000;
 
     private final Context mContext;
-    private final Optional<Pip> mPipOptional;
+    private final ShellInterface mShellInterface;
     private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
-    private final Optional<SplitScreen> mSplitScreenOptional;
-    private final Optional<FloatingTasks> mFloatingTasksOptional;
     private SysUiState mSysUiState;
     private final Handler mHandler;
     private final Lazy<NavigationBarController> mNavBarControllerLazy;
@@ -164,14 +144,8 @@ public class OverviewProxyService extends CurrentUserTracker implements
     private final List<OverviewProxyListener> mConnectionCallbacks = new ArrayList<>();
     private final Intent mQuickStepIntent;
     private final ScreenshotHelper mScreenshotHelper;
-    private final Optional<OneHanded> mOneHandedOptional;
     private final CommandQueue mCommandQueue;
-    private final ShellTransitions mShellTransitions;
-    private final Optional<StartingSurface> mStartingSurface;
     private final KeyguardUnlockAnimationController mSysuiUnlockAnimationController;
-    private final Optional<RecentTasks> mRecentTasks;
-    private final Optional<BackAnimation> mBackAnimation;
-    private final Optional<DesktopMode> mDesktopModeOptional;
     private final UiEventLogger mUiEventLogger;
 
     private Region mActiveNavBarRegion;
@@ -456,36 +430,10 @@ public class OverviewProxyService extends CurrentUserTracker implements
             params.putBinder(KEY_EXTRA_SYSUI_PROXY, mSysUiProxy.asBinder());
             params.putFloat(KEY_EXTRA_WINDOW_CORNER_RADIUS, mWindowCornerRadius);
             params.putBoolean(KEY_EXTRA_SUPPORTS_WINDOW_CORNERS, mSupportsRoundedCornersOnWindows);
-
-            mPipOptional.ifPresent((pip) -> params.putBinder(
-                    KEY_EXTRA_SHELL_PIP,
-                    pip.createExternalInterface().asBinder()));
-            mSplitScreenOptional.ifPresent((splitscreen) -> params.putBinder(
-                    KEY_EXTRA_SHELL_SPLIT_SCREEN,
-                    splitscreen.createExternalInterface().asBinder()));
-            mFloatingTasksOptional.ifPresent(floatingTasks -> params.putBinder(
-                    KEY_EXTRA_SHELL_FLOATING_TASKS,
-                    floatingTasks.createExternalInterface().asBinder()));
-            mOneHandedOptional.ifPresent((onehanded) -> params.putBinder(
-                    KEY_EXTRA_SHELL_ONE_HANDED,
-                    onehanded.createExternalInterface().asBinder()));
-            params.putBinder(KEY_EXTRA_SHELL_SHELL_TRANSITIONS,
-                    mShellTransitions.createExternalInterface().asBinder());
-            mStartingSurface.ifPresent((startingwindow) -> params.putBinder(
-                    KEY_EXTRA_SHELL_STARTING_WINDOW,
-                    startingwindow.createExternalInterface().asBinder()));
-            params.putBinder(
-                    KEY_EXTRA_UNLOCK_ANIMATION_CONTROLLER,
+            params.putBinder(KEY_EXTRA_UNLOCK_ANIMATION_CONTROLLER,
                     mSysuiUnlockAnimationController.asBinder());
-            mRecentTasks.ifPresent(recentTasks -> params.putBinder(
-                    KEY_EXTRA_RECENT_TASKS,
-                    recentTasks.createExternalInterface().asBinder()));
-            mBackAnimation.ifPresent((backAnimation) -> params.putBinder(
-                    KEY_EXTRA_SHELL_BACK_ANIMATION,
-                    backAnimation.createExternalInterface().asBinder()));
-            mDesktopModeOptional.ifPresent((desktopMode -> params.putBinder(
-                    KEY_EXTRA_SHELL_DESKTOP_MODE,
-                    desktopMode.createExternalInterface().asBinder())));
+            // Add all the interfaces exposed by the shell
+            mShellInterface.createExternalInterfaces(params);
 
             try {
                 Log.d(TAG_OPS, "OverviewProxyService connected, initializing overview proxy");
@@ -559,21 +507,14 @@ public class OverviewProxyService extends CurrentUserTracker implements
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     @Inject
-    public OverviewProxyService(Context context, CommandQueue commandQueue,
+    public OverviewProxyService(Context context,
+            CommandQueue commandQueue,
+            ShellInterface shellInterface,
             Lazy<NavigationBarController> navBarControllerLazy,
             Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             NavigationModeController navModeController,
             NotificationShadeWindowController statusBarWinController, SysUiState sysUiState,
-            Optional<Pip> pipOptional,
-            Optional<SplitScreen> splitScreenOptional,
-            Optional<FloatingTasks> floatingTasksOptional,
-            Optional<OneHanded> oneHandedOptional,
-            Optional<RecentTasks> recentTasks,
-            Optional<BackAnimation> backAnimation,
-            Optional<StartingSurface> startingSurface,
-            Optional<DesktopMode> desktopModeOptional,
             BroadcastDispatcher broadcastDispatcher,
-            ShellTransitions shellTransitions,
             ScreenLifecycle screenLifecycle,
             UiEventLogger uiEventLogger,
             KeyguardUnlockAnimationController sysuiUnlockAnimationController,
@@ -587,7 +528,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
         }
 
         mContext = context;
-        mPipOptional = pipOptional;
+        mShellInterface = shellInterface;
         mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
         mHandler = new Handler();
         mNavBarControllerLazy = navBarControllerLazy;
@@ -602,11 +543,6 @@ public class OverviewProxyService extends CurrentUserTracker implements
                 .supportsRoundedCornersOnWindows(mContext.getResources());
         mSysUiState = sysUiState;
         mSysUiState.addCallback(this::notifySystemUiStateFlags);
-        mOneHandedOptional = oneHandedOptional;
-        mShellTransitions = shellTransitions;
-        mRecentTasks = recentTasks;
-        mBackAnimation = backAnimation;
-        mDesktopModeOptional = desktopModeOptional;
         mUiEventLogger = uiEventLogger;
 
         dumpManager.registerDumpable(getClass().getSimpleName(), this);
@@ -636,9 +572,6 @@ public class OverviewProxyService extends CurrentUserTracker implements
         });
         mCommandQueue = commandQueue;
 
-        mSplitScreenOptional = splitScreenOptional;
-        mFloatingTasksOptional = floatingTasksOptional;
-
         // Listen for user setup
         startTracking();
 
@@ -647,7 +580,6 @@ public class OverviewProxyService extends CurrentUserTracker implements
         // Connect to the service
         updateEnabledState();
         startConnectionToCurrentUser();
-        mStartingSurface = startingSurface;
         mSysuiUnlockAnimationController = sysuiUnlockAnimationController;
 
         // Listen for assistant changes

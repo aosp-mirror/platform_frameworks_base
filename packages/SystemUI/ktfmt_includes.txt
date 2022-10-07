@@ -493,7 +493,7 @@
 -packages/SystemUI/src/com/android/systemui/statusbar/phone/ongoingcall/OngoingCallFlags.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/phone/ongoingcall/OngoingCallLogger.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/phone/panelstate/PanelExpansionStateManager.kt
--packages/SystemUI/src/com/android/systemui/statusbar/phone/panelstate/PanelStateListener.kt
+-packages/SystemUI/src/com/android/systemui/statusbar/phone/panelstate/ShadeStateListener.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/phone/userswitcher/StatusBarUserInfoTracker.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/phone/userswitcher/StatusBarUserSwitcherContainer.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/phone/userswitcher/StatusBarUserSwitcherController.kt
@@ -812,7 +812,7 @@
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/phone/ongoingcall/OngoingCallChronometerTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/phone/ongoingcall/OngoingCallControllerTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/phone/ongoingcall/OngoingCallLoggerTest.kt
--packages/SystemUI/tests/src/com/android/systemui/statusbar/phone/panelstate/PanelExpansionStateManagerTest.kt
+-packages/SystemUI/tests/src/com/android/systemui/statusbar/phone/panelstate/ShadeExpansionStateManagerTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/phone/userswitcher/StatusBarUserSwitcherControllerOldImplTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/pipeline/shared/ConnectivityPipelineLoggerTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/pipeline/wifi/data/repository/WifiRepositoryImplTest.kt

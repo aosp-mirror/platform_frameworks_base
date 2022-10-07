@@ -112,6 +112,9 @@ public final class GnssMeasurementsProvider extends
     @Override
     protected boolean registerWithService(GnssMeasurementRequest request,
             Collection<GnssListenerRegistration> registrations) {
+        if (request.getIntervalMillis() == GnssMeasurementRequest.PASSIVE_INTERVAL) {
+            return true;
+        }
         if (mGnssNative.startMeasurementCollection(request.isFullTracking(),
                 request.isCorrelationVectorOutputsEnabled(),
                 request.getIntervalMillis())) {
@@ -157,7 +160,7 @@ public final class GnssMeasurementsProvider extends
             Collection<GnssListenerRegistration> registrations) {
         boolean fullTracking = false;
         boolean enableCorrVecOutputs = false;
-        int intervalMillis = Integer.MAX_VALUE;
+        int intervalMillis = GnssMeasurementRequest.PASSIVE_INTERVAL;
 
         if (mSettingsHelper.isGnssMeasurementsFullTrackingEnabled()) {
             fullTracking = true;
@@ -165,6 +168,10 @@ public final class GnssMeasurementsProvider extends
 
         for (GnssListenerRegistration registration : registrations) {
             GnssMeasurementRequest request = registration.getRequest();
+            // passive requests do not contribute to the merged request
+            if (request.getIntervalMillis() == GnssMeasurementRequest.PASSIVE_INTERVAL) {
+                continue;
+            }
             if (request.isFullTracking()) {
                 fullTracking = true;
             }
@@ -175,10 +182,10 @@ public final class GnssMeasurementsProvider extends
         }
 
         return new GnssMeasurementRequest.Builder()
-                    .setFullTracking(fullTracking)
-                    .setCorrelationVectorOutputsEnabled(enableCorrVecOutputs)
-                    .setIntervalMillis(intervalMillis)
-                    .build();
+                .setFullTracking(fullTracking)
+                .setCorrelationVectorOutputsEnabled(enableCorrVecOutputs)
+                .setIntervalMillis(intervalMillis)
+                .build();
     }
 
     @Override

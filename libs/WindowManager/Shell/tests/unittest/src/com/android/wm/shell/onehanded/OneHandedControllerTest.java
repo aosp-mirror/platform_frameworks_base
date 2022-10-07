@@ -51,6 +51,7 @@ import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.sysui.ShellSharedConstants;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -173,6 +174,12 @@ public class OneHandedControllerTest extends OneHandedTestCase {
     @Test
     public void testControllerRegistersUserChangeListener() {
         verify(mMockShellController, times(1)).addUserChangeListener(any());
+    }
+
+    @Test
+    public void testControllerRegisteresExternalInterface() {
+        verify(mMockShellController, times(1)).addExternalInterface(
+                eq(ShellSharedConstants.KEY_EXTRA_SHELL_ONE_HANDED), any(), any());
     }
 
     @Test

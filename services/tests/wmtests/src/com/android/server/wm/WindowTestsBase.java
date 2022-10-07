@@ -1746,7 +1746,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         }
 
         void startTransition() {
-            mOrganizer.startTransition(mLastRequest.getType(), mLastTransit, null);
+            mOrganizer.startTransition(mLastTransit, null);
         }
 
         void onTransactionReady(SurfaceControl.Transaction t) {

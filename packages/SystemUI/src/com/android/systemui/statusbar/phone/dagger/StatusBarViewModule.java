@@ -41,6 +41,7 @@ import com.android.systemui.shade.NotificationPanelView;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.NotificationsQuickSettingsContainer;
+import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.NotificationShelfController;
@@ -63,7 +64,6 @@ import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment;
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragmentLogger;
 import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
-import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -283,7 +283,7 @@ public abstract class StatusBarViewModule {
             SystemStatusAnimationScheduler animationScheduler,
             StatusBarLocationPublisher locationPublisher,
             NotificationIconAreaController notificationIconAreaController,
-            PanelExpansionStateManager panelExpansionStateManager,
+            ShadeExpansionStateManager shadeExpansionStateManager,
             FeatureFlags featureFlags,
             StatusBarIconController statusBarIconController,
             StatusBarIconController.DarkIconManager.Factory darkIconManagerFactory,
@@ -304,7 +304,7 @@ public abstract class StatusBarViewModule {
                 animationScheduler,
                 locationPublisher,
                 notificationIconAreaController,
-                panelExpansionStateManager,
+                shadeExpansionStateManager,
                 featureFlags,
                 statusBarIconController,
                 darkIconManagerFactory,
