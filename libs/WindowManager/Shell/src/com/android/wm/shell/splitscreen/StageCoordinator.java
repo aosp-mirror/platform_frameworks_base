@@ -516,14 +516,55 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     }
 
     /** Starts 2 tasks in one transition. */
-    void startTasks(int sideTaskId, @Nullable Bundle sideOptions, int mainTaskId,
-            @Nullable Bundle mainOptions, @SplitPosition int sidePosition, float splitRatio,
+    void startTasks(int taskId1, @Nullable Bundle options1, int taskId2,
+            @Nullable Bundle options2, @SplitPosition int splitPosition, float splitRatio,
             @Nullable RemoteTransition remoteTransition, InstanceId instanceId) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
-        mainOptions = mainOptions != null ? mainOptions : new Bundle();
-        sideOptions = sideOptions != null ? sideOptions : new Bundle();
-        setSideStagePosition(sidePosition, wct);
+        setSideStagePosition(splitPosition, wct);
+        options1 = options1 != null ? options1 : new Bundle();
+        addActivityOptions(options1, mSideStage);
+        wct.startTask(taskId1, options1);
 
+        startWithTask(wct, taskId2, options2, splitRatio, remoteTransition, instanceId);
+    }
+
+    /** Start an intent and a task to a split pair in one transition. */
+    void startIntentAndTask(PendingIntent pendingIntent, Intent fillInIntent,
+            @Nullable Bundle options1, int taskId, @Nullable Bundle options2,
+            @SplitPosition int splitPosition, float splitRatio,
+            @Nullable RemoteTransition remoteTransition, InstanceId instanceId) {
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        setSideStagePosition(splitPosition, wct);
+        options1 = options1 != null ? options1 : new Bundle();
+        addActivityOptions(options1, mSideStage);
+        wct.sendPendingIntent(pendingIntent, fillInIntent, options1);
+
+        startWithTask(wct, taskId, options2, splitRatio, remoteTransition, instanceId);
+    }
+
+    /** Starts a shortcut and a task to a split pair in one transition. */
+    void startShortcutAndTask(ShortcutInfo shortcutInfo, @Nullable Bundle options1,
+            int taskId, @Nullable Bundle options2, @SplitPosition int splitPosition,
+            float splitRatio, @Nullable RemoteTransition remoteTransition, InstanceId instanceId) {
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        setSideStagePosition(splitPosition, wct);
+        options1 = options1 != null ? options1 : new Bundle();
+        addActivityOptions(options1, mSideStage);
+        wct.startShortcut(mContext.getPackageName(), shortcutInfo, options1);
+
+        startWithTask(wct, taskId, options2, splitRatio, remoteTransition, instanceId);
+    }
+
+    /**
+     * Starts with the second task to a split pair in one transition.
+     *
+     * @param wct transaction to start the first task
+     * @param instanceId if {@code null}, will not log. Otherwise it will be used in
+     *      {@link SplitscreenEventLogger#logEnter(float, int, int, int, int, boolean)}
+     */
+    private void startWithTask(WindowContainerTransaction wct, int mainTaskId,
+            @Nullable Bundle mainOptions, float splitRatio,
+            @Nullable RemoteTransition remoteTransition, InstanceId instanceId) {
         if (mMainStage.isActive()) {
             mMainStage.evictAllChildren(wct);
             mSideStage.evictAllChildren(wct);
@@ -538,12 +579,11 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         wct.setForceTranslucent(mRootTaskInfo.token, false);
 
         // Make sure the launch options will put tasks in the corresponding split roots
+        mainOptions = mainOptions != null ? mainOptions : new Bundle();
         addActivityOptions(mainOptions, mMainStage);
-        addActivityOptions(sideOptions, mSideStage);
 
         // Add task launch requests
         wct.startTask(mainTaskId, mainOptions);
-        wct.startTask(sideTaskId, sideOptions);
 
         mSplitTransitions.startEnterTransition(
                 TRANSIT_SPLIT_SCREEN_PAIR_OPEN, wct, remoteTransition, this, null);
@@ -593,6 +633,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     }
 
     /**
+     * @param wct transaction to start the first task
      * @param instanceId if {@code null}, will not log. Otherwise it will be used in
      *                   {@link SplitscreenEventLogger#logEnter(float, int, int, int, int, boolean)}
      */
@@ -1728,6 +1769,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     @StageType
     private int getStageType(StageTaskListener stage) {
+        if (stage == null) return STAGE_TYPE_UNDEFINED;
         return stage == mMainStage ? STAGE_TYPE_MAIN : STAGE_TYPE_SIDE;
     }
 
@@ -1982,8 +2024,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             }
         }
 
-        // TODO: fallback logic. Probably start a new transition to exit split before applying
-        //       anything here. Ideally consolidate with transition-merging.
+        // TODO(b/250853925): fallback logic. Probably start a new transition to exit split before
+        //       applying anything here. Ideally consolidate with transition-merging.
         if (info.getType() == TRANSIT_SPLIT_SCREEN_OPEN_TO_SIDE) {
             if (mainChild == null && sideChild == null) {
                 throw new IllegalStateException("Launched a task in split, but didn't receive any"
