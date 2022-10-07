@@ -1454,6 +1454,21 @@ public class TaskTests extends WindowTestsBase {
         verify(tfBehind, never()).resumeTopActivity(any(), any(), anyBoolean());
     }
 
+    @Test
+    public void testGetTaskFragment() {
+        final Task parentTask = createTask(mDisplayContent);
+        final TaskFragment tf0 = createTaskFragmentWithParentTask(parentTask);
+        final TaskFragment tf1 = createTaskFragmentWithParentTask(parentTask);
+
+        assertNull("Could not find it because there's no organized TaskFragment",
+                parentTask.getTaskFragment(TaskFragment::isOrganizedTaskFragment));
+
+        doReturn(true).when(tf0).isOrganizedTaskFragment();
+
+        assertEquals("tf0 must be return because it's the organized TaskFragment.",
+                tf0, parentTask.getTaskFragment(TaskFragment::isOrganizedTaskFragment));
+    }
+
     private Task getTestTask() {
         final Task task = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
         return task.getBottomMostTask();

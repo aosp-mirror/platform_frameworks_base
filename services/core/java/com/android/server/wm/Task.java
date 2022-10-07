@@ -3547,12 +3547,16 @@ class Task extends TaskFragment {
      * {@link android.window.TaskFragmentOrganizer}
      */
     TaskFragmentParentInfo getTaskFragmentParentInfo() {
-        return new TaskFragmentParentInfo(getConfiguration(), getDisplayId(), isVisibleRequested());
+        return new TaskFragmentParentInfo(getConfiguration(), getDisplayId(),
+                shouldBeVisible(null /* starting */));
     }
 
     @Override
     void onActivityVisibleRequestedChanged() {
-        if (mVisibleRequested != isVisibleRequested()) {
+        final boolean prevVisibleRequested = mVisibleRequested;
+        // mVisibleRequested is updated in super method.
+        super.onActivityVisibleRequestedChanged();
+        if (prevVisibleRequested != mVisibleRequested) {
             sendTaskFragmentParentInfoChangedIfNeeded();
         }
     }
