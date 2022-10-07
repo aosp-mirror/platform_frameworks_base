@@ -228,7 +228,8 @@ public class Flags {
             new ReleasedFlag(1000);
     public static final ReleasedFlag DOCK_SETUP_ENABLED = new ReleasedFlag(1001);
 
-    public static final UnreleasedFlag ROUNDED_BOX_RIPPLE = new UnreleasedFlag(1002, false);
+    public static final UnreleasedFlag ROUNDED_BOX_RIPPLE =
+            new UnreleasedFlag(1002, /* teamfood= */ true);
 
     // 1100 - windowing
     @Keep
