@@ -155,11 +155,11 @@ class DozeLogger @Inject constructor(
         })
     }
 
-    fun logKeyguardVisibilityChange(isShowing: Boolean) {
+    fun logKeyguardVisibilityChange(isVisible: Boolean) {
         buffer.log(TAG, INFO, {
-            bool1 = isShowing
+            bool1 = isVisible
         }, {
-            "Keyguard visibility change, isShowing=$bool1"
+            "Keyguard visibility change, isVisible=$bool1"
         })
     }
 
