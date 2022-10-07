@@ -16,6 +16,7 @@
 
 package com.android.server.pm;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.pm.SharedLibraryInfo;
 import android.os.Process;
@@ -28,9 +29,7 @@ import java.util.List;
 @VisibleForTesting
 final class ScanResult {
     /** The request that initiated the scan that produced this result. */
-    public final ScanRequest mRequest;
-    /** Whether or not the package scan was successful */
-    public final boolean mSuccess;
+    @NonNull public final ScanRequest mRequest;
     /**
      * Whether or not the original PackageSetting needs to be updated with this result on
      * commit.
@@ -58,7 +57,7 @@ final class ScanResult {
     public final List<SharedLibraryInfo> mDynamicSharedLibraryInfos;
 
     ScanResult(
-            ScanRequest request, boolean success,
+            @NonNull ScanRequest request,
             @Nullable PackageSetting pkgSetting,
             @Nullable List<String> changedAbiCodePath, boolean existingSettingCopied,
             int previousAppId,
@@ -66,7 +65,6 @@ final class ScanResult {
             SharedLibraryInfo staticSharedLibraryInfo,
             List<SharedLibraryInfo> dynamicSharedLibraryInfos) {
         mRequest = request;
-        mSuccess = success;
         mPkgSetting = pkgSetting;
         mChangedAbiCodePath = changedAbiCodePath;
         mExistingSettingCopied = existingSettingCopied;

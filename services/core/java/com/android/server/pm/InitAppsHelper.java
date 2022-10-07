@@ -352,8 +352,7 @@ final class InitAppsHelper {
     }
 
     @GuardedBy({"mPm.mInstallLock", "mPm.mLock"})
-    private void scanDirTracedLI(File scanDir,
-            int parseFlags, int scanFlags,
+    private void scanDirTracedLI(File scanDir, int parseFlags, int scanFlags,
             PackageParser2 packageParser, ExecutorService executorService) {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "scanDir [" + scanDir.getAbsolutePath() + "]");
         try {
