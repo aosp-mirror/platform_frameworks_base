@@ -25,7 +25,7 @@
     </style>
     <style name="Keyguard.TextView.EmergencyButton" parent="Theme.SystemUI">
         <item name="android:textColor">?androidprv:attr/textColorOnAccent</item>
-        <item name="android:textSize">14dp</item>
+        <item name="android:textSize">14sp</item>
         <item name="android:background">@drawable/kg_emergency_button_background</item>
         <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
         <item name="android:paddingLeft">12dp</item>
