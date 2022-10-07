@@ -516,8 +516,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     }
 
     /** Starts 2 tasks in one transition. */
-    void startTasks(int mainTaskId, @Nullable Bundle mainOptions, int sideTaskId,
-            @Nullable Bundle sideOptions, @SplitPosition int sidePosition, float splitRatio,
+    void startTasks(int sideTaskId, @Nullable Bundle sideOptions, int mainTaskId,
+            @Nullable Bundle mainOptions, @SplitPosition int sidePosition, float splitRatio,
             @Nullable RemoteTransition remoteTransition, InstanceId instanceId) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         mainOptions = mainOptions != null ? mainOptions : new Bundle();
@@ -550,44 +550,45 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         setEnterInstanceId(instanceId);
     }
 
-    /** Starts 2 tasks in one legacy transition. */
-    void startTasksWithLegacyTransition(int mainTaskId, @Nullable Bundle mainOptions,
-            int sideTaskId, @Nullable Bundle sideOptions, @SplitPosition int sidePosition,
+    /** Starts a pair of tasks using legacy transition. */
+    void startTasksWithLegacyTransition(int taskId1, @Nullable Bundle options1,
+            int taskId2, @Nullable Bundle options2, @SplitPosition int splitPosition,
             float splitRatio, RemoteAnimationAdapter adapter,
             InstanceId instanceId) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
-        if (sideOptions == null) sideOptions = new Bundle();
-        addActivityOptions(sideOptions, mSideStage);
-        wct.startTask(sideTaskId, sideOptions);
+        if (options1 == null) options1 = new Bundle();
+        addActivityOptions(options1, mSideStage);
+        wct.startTask(taskId1, options1);
 
-        startWithLegacyTransition(wct, mainTaskId, mainOptions, sidePosition, splitRatio, adapter,
+        startWithLegacyTransition(wct, taskId2, options2, splitPosition, splitRatio, adapter,
                 instanceId);
     }
 
-    /** Start an intent and a task ordered by {@code intentFirst}. */
+    /** Starts a pair of intent and task using legacy transition. */
     void startIntentAndTaskWithLegacyTransition(PendingIntent pendingIntent, Intent fillInIntent,
-            int taskId, @Nullable Bundle mainOptions, @Nullable Bundle sideOptions,
-            @SplitPosition int sidePosition, float splitRatio, RemoteAnimationAdapter adapter,
+            @Nullable Bundle options1, int taskId, @Nullable Bundle options2,
+            @SplitPosition int splitPosition, float splitRatio, RemoteAnimationAdapter adapter,
             InstanceId instanceId) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
-        if (sideOptions == null) sideOptions = new Bundle();
-        addActivityOptions(sideOptions, mSideStage);
-        wct.sendPendingIntent(pendingIntent, fillInIntent, sideOptions);
+        if (options1 == null) options1 = new Bundle();
+        addActivityOptions(options1, mSideStage);
+        wct.sendPendingIntent(pendingIntent, fillInIntent, options1);
 
-        startWithLegacyTransition(wct, taskId, mainOptions, sidePosition, splitRatio, adapter,
+        startWithLegacyTransition(wct, taskId, options2, splitPosition, splitRatio, adapter,
                 instanceId);
     }
 
+    /** Starts a pair of shortcut and task using legacy transition. */
     void startShortcutAndTaskWithLegacyTransition(ShortcutInfo shortcutInfo,
-            int taskId, @Nullable Bundle mainOptions, @Nullable Bundle sideOptions,
-            @SplitPosition int sidePosition, float splitRatio, RemoteAnimationAdapter adapter,
+            @Nullable Bundle options1, int taskId, @Nullable Bundle options2,
+            @SplitPosition int splitPosition, float splitRatio, RemoteAnimationAdapter adapter,
             InstanceId instanceId) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
-        if (sideOptions == null) sideOptions = new Bundle();
-        addActivityOptions(sideOptions, mSideStage);
-        wct.startShortcut(mContext.getPackageName(), shortcutInfo, sideOptions);
+        if (options1 == null) options1 = new Bundle();
+        addActivityOptions(options1, mSideStage);
+        wct.startShortcut(mContext.getPackageName(), shortcutInfo, options1);
 
-        startWithLegacyTransition(wct, taskId, mainOptions, sidePosition, splitRatio, adapter,
+        startWithLegacyTransition(wct, taskId, options2, splitPosition, splitRatio, adapter,
                 instanceId);
     }
 
