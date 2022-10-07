@@ -214,8 +214,6 @@ public class SecureSettings {
         Settings.Secure.WEAR_TALKBACK_ENABLED,
         Settings.Secure.HBM_SETTING_KEY,
         Settings.Secure.ACCESSIBILITY_SOFTWARE_CURSOR_ENABLED,
-        Settings.Secure.ACCESSIBILITY_SOFTWARE_CURSOR_TRIGGER_HINTS_ENABLED,
-        Settings.Secure.ACCESSIBILITY_SOFTWARE_CURSOR_KEYBOARD_SHIFT_ENABLED,
         Settings.Secure.ASSIST_TOUCH_GESTURE_ENABLED,
         Settings.Secure.ASSIST_LONG_PRESS_HOME_ENABLED,
         Settings.Secure.BLUETOOTH_LE_BROADCAST_PROGRAM_INFO,
