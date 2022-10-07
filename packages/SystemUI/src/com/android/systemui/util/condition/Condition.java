@@ -132,8 +132,12 @@ public abstract class Condition implements CallbackController<Condition.Callback
         return mIsConditionMet;
     }
 
-    private boolean shouldLog() {
+    protected final boolean shouldLog() {
         return Log.isLoggable(mTag, Log.DEBUG);
+    }
+
+    protected final String getTag() {
+        return mTag;
     }
 
     /**
