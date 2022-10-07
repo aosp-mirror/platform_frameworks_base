@@ -18346,6 +18346,20 @@ public class PackageManagerService extends IPackageManager.Stub
 
         final String packageName = versionedPackage.getPackageName();
         final long versionCode = versionedPackage.getLongVersionCode();
+
+        if (mProtectedPackages.isPackageStateProtected(userId, packageName)) {
+            mHandler.post(() -> {
+                try {
+                    Slog.w(TAG, "Attempted to delete protected package: " + packageName);
+                    observer.onPackageDeleted(packageName,
+                            PackageManager.DELETE_FAILED_INTERNAL_ERROR, null);
+                } catch (RemoteException re) {
+                }
+            });
+            return;
+        }
+
+
         final String internalPackageName;
         synchronized (mPackages) {
             // Normalize package name to handle renamed packages and static libs
@@ -18685,7 +18699,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 return PackageManager.DELETE_FAILED_INTERNAL_ERROR;
             }
 
-            if (isSystemApp(uninstalledPs)) {
+            if (isSystemApp(uninstalledPs)
+                    && (deleteFlags & PackageManager.DELETE_SYSTEM_APP) == 0) {
                 UserInfo userInfo = sUserManager.getUserInfo(userId);
                 if (userInfo == null || !userInfo.isAdmin()) {
                     Slog.w(TAG, "Not removing package " + packageName
@@ -21468,6 +21483,9 @@ public class PackageManagerService extends IPackageManager.Stub
                     } else {
                         Slog.w(TAG, "Failed setComponentEnabledSetting: component class "
                                 + className + " does not exist in " + packageName);
+                        // Safetynet logging for b/240936919
+                        EventLog.writeEvent(0x534e4554, "240936919", callingUid);
+                        return;
                     }
                 }
                 switch (newState) {
