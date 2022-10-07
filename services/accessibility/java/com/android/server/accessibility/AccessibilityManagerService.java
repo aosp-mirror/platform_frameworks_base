@@ -277,6 +277,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     final SparseArray<AccessibilityUserState> mUserStates = new SparseArray<>();
 
     private final UiAutomationManager mUiAutomationManager = new UiAutomationManager(mLock);
+    private final ProxyManager mProxyManager;
     private final AccessibilityTraceManager mTraceManager;
     private final CaptioningManagerImpl mCaptioningManagerImpl;
 
@@ -396,7 +397,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             AccessibilityWindowManager a11yWindowManager,
             AccessibilityDisplayListener a11yDisplayListener,
             MagnificationController magnificationController,
-            @Nullable AccessibilityInputFilter inputFilter) {
+            @Nullable AccessibilityInputFilter inputFilter,
+            ProxyManager proxyManager) {
         mContext = context;
         mPowerManager =  (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mWindowManagerService = LocalServices.getService(WindowManagerInternal.class);
@@ -412,6 +414,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         mMagnificationController = magnificationController;
         mMagnificationProcessor = new MagnificationProcessor(mMagnificationController);
         mCaptioningManagerImpl = new CaptioningManagerImpl(mContext);
+        mProxyManager = proxyManager;
         if (inputFilter != null) {
             mInputFilter = inputFilter;
             mHasInputFilter = true;
@@ -445,6 +448,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 new MagnificationScaleProvider(mContext));
         mMagnificationProcessor = new MagnificationProcessor(mMagnificationController);
         mCaptioningManagerImpl = new CaptioningManagerImpl(mContext);
+        mProxyManager = new ProxyManager(mLock);
         init();
     }
 
@@ -3602,6 +3606,34 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    public boolean registerProxyForDisplay(IAccessibilityServiceClient client, int displayId)
+            throws RemoteException {
+        mSecurityPolicy.enforceCallingOrSelfPermission(Manifest.permission.MANAGE_ACCESSIBILITY);
+        if (client == null) {
+            return false;
+        }
+        if (displayId < 0) {
+            throw new IllegalArgumentException("The display id " + displayId + " is invalid.");
+        }
+        if (displayId == Display.DEFAULT_DISPLAY) {
+            throw new IllegalArgumentException("The default display cannot be proxy-ed.");
+        }
+        if (!isTrackedDisplay(displayId)) {
+            throw new IllegalArgumentException("The display " + displayId + " does not exist or is"
+                    + " not tracked by accessibility.");
+        }
+
+        mProxyManager.registerProxy(client, displayId);
+        return true;
+    }
+
+    @Override
+    public boolean unregisterProxyForDisplay(int displayId) throws RemoteException {
+        mSecurityPolicy.enforceCallingOrSelfPermission(Manifest.permission.MANAGE_ACCESSIBILITY);
+        return mProxyManager.unregisterProxy(displayId);
+    }
+
+    @Override
     public void dump(FileDescriptor fd, final PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, LOG_TAG, pw)) return;
         synchronized (mLock) {
@@ -3828,6 +3860,21 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      */
     public ArrayList<Display> getValidDisplayList() {
         return mA11yDisplayListener.getValidDisplayList();
+    }
+
+
+    /**
+     *  Returns {@code true} if the display id is in the list of currently valid logical displays
+     *  being tracked by a11y.
+     */
+    private boolean isTrackedDisplay(int displayId) {
+        final ArrayList<Display> displays = getValidDisplayList();
+        for (Display display : displays) {
+            if (display.getDisplayId() == displayId) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
