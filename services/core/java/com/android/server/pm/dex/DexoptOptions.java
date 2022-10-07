@@ -18,6 +18,16 @@ package com.android.server.pm.dex;
 
 import static com.android.server.pm.PackageManagerServiceCompilerMapping.getCompilerFilterForReason;
 
+import android.annotation.Nullable;
+
+import com.android.server.art.ReasonMapping;
+import com.android.server.art.model.ArtFlags;
+import com.android.server.art.model.OptimizeParams;
+import com.android.server.pm.DexOptHelper;
+import com.android.server.pm.PackageManagerService;
+
+import dalvik.system.DexFile;
+
 /**
  * Options used for dexopt invocations.
  */
@@ -188,5 +198,134 @@ public final class DexoptOptions {
                 newCompilerFilter,
                 mSplitName,
                 mFlags);
+    }
+
+    /**
+     * Returns an {@link OptimizeParams} instance corresponding to this object, for use with
+     * {@link com.android.server.art.ArtManagerLocal}.
+     *
+     * @param extraFlags extra {@link ArtFlags#OptimizeFlags} to set in the returned
+     *     {@code OptimizeParams} beyond those converted from this object
+     * @return null if the settings cannot be accurately represented, and hence the old
+     *     PackageManager/installd code paths need to be used.
+     */
+    public @Nullable OptimizeParams convertToOptimizeParams(/*@OptimizeFlags*/ int extraFlags) {
+        if (mSplitName != null) {
+            DexOptHelper.reportArtManagerFallback(
+                    mPackageName, "Request to optimize only split " + mSplitName);
+            return null;
+        }
+
+        /*@OptimizeFlags*/ int flags = extraFlags;
+        if ((mFlags & DEXOPT_CHECK_FOR_PROFILES_UPDATES) == 0
+                && DexFile.isProfileGuidedCompilerFilter(mCompilerFilter)) {
+            // ART Service doesn't support bypassing this, so not setting this flag is not
+            // supported.
+            DexOptHelper.reportArtManagerFallback(mPackageName,
+                    "DEXOPT_CHECK_FOR_PROFILES_UPDATES not set with profile compiler filter");
+            return null;
+        }
+        if ((mFlags & DEXOPT_FORCE) != 0) {
+            flags |= ArtFlags.FLAG_FORCE;
+        }
+        if ((mFlags & DEXOPT_ONLY_SECONDARY_DEX) != 0) {
+            flags |= ArtFlags.FLAG_FOR_SECONDARY_DEX;
+        } else {
+            flags |= ArtFlags.FLAG_FOR_PRIMARY_DEX;
+        }
+        if ((mFlags & DEXOPT_DOWNGRADE) != 0) {
+            flags |= ArtFlags.FLAG_SHOULD_DOWNGRADE;
+        }
+        if ((mFlags & DEXOPT_INSTALL_WITH_DEX_METADATA_FILE) == 0) {
+            // ART Service cannot be instructed to ignore a DM file if present, so not setting this
+            // flag is not supported.
+            DexOptHelper.reportArtManagerFallback(
+                    mPackageName, "DEXOPT_INSTALL_WITH_DEX_METADATA_FILE not set");
+            return null;
+        }
+
+        /*@PriorityClassApi*/ int priority;
+        // Replicates logic in RunDex2Oat::PrepareCompilerRuntimeAndPerfConfigFlags in installd.
+        if ((mFlags & DEXOPT_BOOT_COMPLETE) != 0) {
+            if ((mFlags & DEXOPT_FOR_RESTORE) != 0) {
+                priority = ArtFlags.PRIORITY_INTERACTIVE_FAST;
+            } else {
+                // TODO(b/251903639): Repurpose DEXOPT_IDLE_BACKGROUND_JOB to choose new
+                // dalvik.vm.background-dex2oat-* properties.
+                priority = ArtFlags.PRIORITY_INTERACTIVE;
+            }
+        } else {
+            priority = ArtFlags.PRIORITY_BOOT;
+        }
+
+        // The following flags in mFlags are ignored:
+        //
+        // -  DEXOPT_AS_SHARED_LIBRARY: It's implicit with ART Service since it always looks at
+        //    <uses-library> rather than actual dependencies.
+        //
+        //    We don't require it to be set either. It's safe when switching between old and new
+        //    code paths since the only effect is that some packages may be unnecessarily compiled
+        //    without user profiles.
+        //
+        // -  DEXOPT_IDLE_BACKGROUND_JOB: Its only effect is to allow the debug variant dex2oatd to
+        //    be used, but ART Service never uses that (cf. Artd::GetDex2Oat in artd.cc).
+
+        String reason;
+        switch (mCompilationReason) {
+            case PackageManagerService.REASON_FIRST_BOOT:
+                reason = ReasonMapping.REASON_FIRST_BOOT;
+                break;
+            case PackageManagerService.REASON_BOOT_AFTER_OTA:
+                reason = ReasonMapping.REASON_BOOT_AFTER_OTA;
+                break;
+            case PackageManagerService.REASON_POST_BOOT:
+                // This reason will go away with the legacy dexopt code.
+                DexOptHelper.reportArtManagerFallback(
+                        mPackageName, "Unsupported compilation reason REASON_POST_BOOT");
+                return null;
+            case PackageManagerService.REASON_INSTALL:
+                reason = ReasonMapping.REASON_INSTALL;
+                break;
+            case PackageManagerService.REASON_INSTALL_FAST:
+                reason = ReasonMapping.REASON_INSTALL_FAST;
+                break;
+            case PackageManagerService.REASON_INSTALL_BULK:
+                reason = ReasonMapping.REASON_INSTALL_BULK;
+                break;
+            case PackageManagerService.REASON_INSTALL_BULK_SECONDARY:
+                reason = ReasonMapping.REASON_INSTALL_BULK_SECONDARY;
+                break;
+            case PackageManagerService.REASON_INSTALL_BULK_DOWNGRADED:
+                reason = ReasonMapping.REASON_INSTALL_BULK_DOWNGRADED;
+                break;
+            case PackageManagerService.REASON_INSTALL_BULK_SECONDARY_DOWNGRADED:
+                reason = ReasonMapping.REASON_INSTALL_BULK_SECONDARY_DOWNGRADED;
+                break;
+            case PackageManagerService.REASON_BACKGROUND_DEXOPT:
+                reason = ReasonMapping.REASON_BG_DEXOPT;
+                break;
+            case PackageManagerService.REASON_INACTIVE_PACKAGE_DOWNGRADE:
+                reason = ReasonMapping.REASON_INACTIVE;
+                break;
+            case PackageManagerService.REASON_CMDLINE:
+                reason = ReasonMapping.REASON_CMDLINE;
+                break;
+            case PackageManagerService.REASON_SHARED:
+            case PackageManagerService.REASON_AB_OTA:
+                // REASON_SHARED shouldn't go into this code path - it's only used at lower levels
+                // in PackageDexOptimizer.
+                // TODO(b/251921228): OTA isn't supported, so REASON_AB_OTA shouldn't come this way
+                // either.
+                throw new UnsupportedOperationException(
+                        "ART Service unsupported compilation reason " + mCompilationReason);
+            default:
+                throw new IllegalArgumentException(
+                        "Invalid compilation reason " + mCompilationReason);
+        }
+
+        return new OptimizeParams.Builder(reason, flags)
+                .setCompilerFilter(mCompilerFilter)
+                .setPriorityClass(priority)
+                .build();
     }
 }
