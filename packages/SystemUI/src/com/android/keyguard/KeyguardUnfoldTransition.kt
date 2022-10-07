@@ -20,8 +20,8 @@ import android.content.Context
 import android.view.ViewGroup
 import com.android.systemui.R
 import com.android.systemui.shared.animation.UnfoldConstantTranslateAnimator
-import com.android.systemui.shared.animation.UnfoldConstantTranslateAnimator.Direction.LEFT
-import com.android.systemui.shared.animation.UnfoldConstantTranslateAnimator.Direction.RIGHT
+import com.android.systemui.shared.animation.UnfoldConstantTranslateAnimator.Direction.END
+import com.android.systemui.shared.animation.UnfoldConstantTranslateAnimator.Direction.START
 import com.android.systemui.shared.animation.UnfoldConstantTranslateAnimator.ViewIdToTranslate
 import com.android.systemui.unfold.SysUIUnfoldScope
 import com.android.systemui.unfold.util.NaturalRotationUnfoldProgressProvider
@@ -49,13 +49,14 @@ constructor(
         UnfoldConstantTranslateAnimator(
             viewsIdToTranslate =
                 setOf(
-                    ViewIdToTranslate(R.id.keyguard_status_area, LEFT, filterNever),
-                    ViewIdToTranslate(R.id.lockscreen_clock_view_large, LEFT, filterSplitShadeOnly),
-                    ViewIdToTranslate(R.id.lockscreen_clock_view, LEFT, filterNever),
+                    ViewIdToTranslate(R.id.keyguard_status_area, START, filterNever),
                     ViewIdToTranslate(
-                        R.id.notification_stack_scroller, RIGHT, filterSplitShadeOnly),
-                    ViewIdToTranslate(R.id.start_button, LEFT, filterNever),
-                    ViewIdToTranslate(R.id.end_button, RIGHT, filterNever)),
+                        R.id.lockscreen_clock_view_large, START, filterSplitShadeOnly),
+                    ViewIdToTranslate(R.id.lockscreen_clock_view, START, filterNever),
+                    ViewIdToTranslate(
+                        R.id.notification_stack_scroller, END, filterSplitShadeOnly),
+                    ViewIdToTranslate(R.id.start_button, START, filterNever),
+                    ViewIdToTranslate(R.id.end_button, END, filterNever)),
             progressProvider = unfoldProgressProvider)
     }
 
