@@ -314,6 +314,7 @@
   <java-symbol type="bool" name="config_sms_ask_every_time_support" />
   <java-symbol type="bool" name="config_sms_capable" />
   <java-symbol type="bool" name="config_sms_utf8_support" />
+  <java-symbol type="bool" name="config_smppsim_response_via_ims" />
   <java-symbol type="bool" name="config_mobile_data_capable" />
   <java-symbol type="bool" name="config_suspendWhenScreenOffDueToProximity" />
   <java-symbol type="bool" name="config_swipeDisambiguation" />
