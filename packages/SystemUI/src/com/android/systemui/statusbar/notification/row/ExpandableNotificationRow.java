@@ -1477,6 +1477,20 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
     }
 
+    /**
+     * Sets the alpha on the content, while leaving the background of the row itself as is.
+     *
+     * @param alpha alpha value to apply to the notification content
+     */
+    public void setContentAlpha(float alpha) {
+        for (NotificationContentView l : mLayouts) {
+            l.setAlpha(alpha);
+        }
+        if (mChildrenContainer != null) {
+            mChildrenContainer.setAlpha(alpha);
+        }
+    }
+
     public void setIsLowPriority(boolean isLowPriority) {
         mIsLowPriority = isLowPriority;
         mPrivateLayout.setIsLowPriority(isLowPriority);
