@@ -69,7 +69,7 @@ open class ClockEventController @Inject constructor(
 
     private var isCharging = false
     private var dozeAmount = 0f
-    private var isKeyguardShowing = false
+    private var isKeyguardVisible = false
 
     private val regionSamplingEnabled =
             featureFlags.isEnabled(com.android.systemui.flags.Flags.REGION_SAMPLING)
@@ -145,7 +145,7 @@ open class ClockEventController @Inject constructor(
 
     private val batteryCallback = object : BatteryStateChangeCallback {
         override fun onBatteryLevelChanged(level: Int, pluggedIn: Boolean, charging: Boolean) {
-            if (isKeyguardShowing && !isCharging && charging) {
+            if (isKeyguardVisible && !isCharging && charging) {
                 clock?.animations?.charge()
             }
             isCharging = charging
@@ -168,9 +168,9 @@ open class ClockEventController @Inject constructor(
     }
 
     private val keyguardUpdateMonitorCallback = object : KeyguardUpdateMonitorCallback() {
-        override fun onKeyguardVisibilityChanged(showing: Boolean) {
-            isKeyguardShowing = showing
-            if (!isKeyguardShowing) {
+        override fun onKeyguardVisibilityChanged(visible: Boolean) {
+            isKeyguardVisible = visible
+            if (!isKeyguardVisible) {
                 clock?.animations?.doze(if (isDozing) 1f else 0f)
             }
         }

@@ -91,11 +91,11 @@ public class KeyguardUserSwitcherController extends ViewController<KeyguardUserS
     private final KeyguardUpdateMonitorCallback mInfoCallback =
             new KeyguardUpdateMonitorCallback() {
                 @Override
-                public void onKeyguardVisibilityChanged(boolean showing) {
-                    if (DEBUG) Log.d(TAG, String.format("onKeyguardVisibilityChanged %b", showing));
+                public void onKeyguardVisibilityChanged(boolean visible) {
+                    if (DEBUG) Log.d(TAG, String.format("onKeyguardVisibilityChanged %b", visible));
                     // Any time the keyguard is hidden, try to close the user switcher menu to
                     // restore keyguard to the default state
-                    if (!showing) {
+                    if (!visible) {
                         closeSwitcherIfOpenAndNotSimple(false);
                     }
                 }
