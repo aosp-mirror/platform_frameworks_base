@@ -126,7 +126,6 @@ import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.DisplayInfo;
-import android.view.IWindowManager;
 import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.MotionEvent;
@@ -289,7 +288,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     private final Handler mHandler;
     final InputMethodSettings mSettings;
     final SettingsObserver mSettingsObserver;
-    final IWindowManager mIWindowManager;
     private final SparseBooleanArray mLoggedDeniedGetInputMethodWindowVisibleHeightForUid =
             new SparseBooleanArray(0);
     final WindowManagerInternal mWindowManagerInternal;
@@ -1715,8 +1713,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         mHandler = Handler.createAsync(thread.getLooper(), this);
         // Note: SettingsObserver doesn't register observers in its constructor.
         mSettingsObserver = new SettingsObserver(mHandler);
-        mIWindowManager = IWindowManager.Stub.asInterface(
-                ServiceManager.getService(Context.WINDOW_SERVICE));
         mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
@@ -3160,19 +3156,16 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 mImeSwitcherNotification.setContentTitle(title)
                         .setContentText(summary)
                         .setContentIntent(mImeSwitchPendingIntent);
-                try {
-                    // TODO(b/120076400): Figure out what is the best behavior
-                    if ((mNotificationManager != null)
-                            && !mIWindowManager.hasNavigationBar(DEFAULT_DISPLAY)) {
-                        if (DEBUG) {
-                            Slog.d(TAG, "--- show notification: label =  " + summary);
-                        }
-                        mNotificationManager.notifyAsUser(null,
-                                SystemMessage.NOTE_SELECT_INPUT_METHOD,
-                                mImeSwitcherNotification.build(), UserHandle.ALL);
-                        mNotificationShown = true;
+                // TODO(b/120076400): Figure out what is the best behavior
+                if ((mNotificationManager != null)
+                        && !mWindowManagerInternal.hasNavigationBar(DEFAULT_DISPLAY)) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "--- show notification: label =  " + summary);
                     }
-                } catch (RemoteException e) {
+                    mNotificationManager.notifyAsUser(null,
+                            SystemMessage.NOTE_SELECT_INPUT_METHOD,
+                            mImeSwitcherNotification.build(), UserHandle.ALL);
+                    mNotificationShown = true;
                 }
             } else {
                 if (mNotificationShown && mNotificationManager != null) {
