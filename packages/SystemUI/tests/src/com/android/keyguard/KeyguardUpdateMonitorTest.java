@@ -27,6 +27,7 @@ import static android.telephony.SubscriptionManager.NAME_SOURCE_CARRIER_ID;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_USER_REQUEST;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT;
 import static com.android.keyguard.FaceAuthApiRequestReason.NOTIFICATION_PANEL_CLICKED;
+import static com.android.keyguard.KeyguardUpdateMonitor.BIOMETRIC_STATE_CANCELLING_RESTARTING;
 import static com.android.keyguard.KeyguardUpdateMonitor.DEFAULT_CANCEL_SIGNAL_TIMEOUT;
 import static com.android.keyguard.KeyguardUpdateMonitor.getCurrentUser;
 
@@ -281,7 +282,6 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                 componentInfo, FaceSensorProperties.TYPE_UNKNOWN,
                 false /* supportsFaceDetection */, true /* supportsSelfIllumination */,
                 false /* resetLockoutRequiresChallenge */));
-
         when(mFingerprintManager.isHardwareDetected()).thenReturn(true);
         when(mFingerprintManager.hasEnrolledTemplates(anyInt())).thenReturn(true);
         when(mFingerprintManager.getSensorPropertiesInternal()).thenReturn(List.of(
@@ -594,30 +594,13 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     @Test
-    public void testFingerprintDoesNotAuth_whenEncrypted() {
-        testFingerprintWhenStrongAuth(
-                STRONG_AUTH_REQUIRED_AFTER_BOOT);
-    }
-
-    @Test
-    public void testFingerprintDoesNotAuth_whenDpmLocked() {
-        testFingerprintWhenStrongAuth(
-                KeyguardUpdateMonitor.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW);
-    }
-
-    @Test
-    public void testFingerprintDoesNotAuth_whenUserLockdown() {
-        testFingerprintWhenStrongAuth(
-                KeyguardUpdateMonitor.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN);
-    }
-
-    private void testFingerprintWhenStrongAuth(int strongAuth) {
+    public void testOnlyDetectFingerprint_whenFingerprintUnlockNotAllowed() {
         // Clear invocations, since previous setup (e.g. registering BiometricManager callbacks)
         // will trigger updateBiometricListeningState();
         clearInvocations(mFingerprintManager);
         mKeyguardUpdateMonitor.resetBiometricListeningState();
 
-        when(mStrongAuthTracker.getStrongAuthForUser(anyInt())).thenReturn(strongAuth);
+        when(mStrongAuthTracker.isUnlockingWithBiometricAllowed(anyBoolean())).thenReturn(false);
         mKeyguardUpdateMonitor.dispatchStartedGoingToSleep(0 /* why */);
         mTestableLooper.processAllMessages();
 
@@ -928,10 +911,6 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                 faceLockoutMode != BiometricConstants.BIOMETRIC_LOCKOUT_NONE;
         final boolean fpLocked =
                 fingerprintLockoutMode != BiometricConstants.BIOMETRIC_LOCKOUT_NONE;
-        when(mFingerprintManager.getLockoutModeForUser(eq(FINGERPRINT_SENSOR_ID), eq(newUser)))
-                .thenReturn(fingerprintLockoutMode);
-        when(mFaceManager.getLockoutModeForUser(eq(FACE_SENSOR_ID), eq(newUser)))
-                .thenReturn(faceLockoutMode);
 
         mKeyguardUpdateMonitor.dispatchStartedWakingUp(PowerManager.WAKE_REASON_POWER_BUTTON);
         mTestableLooper.processAllMessages();
@@ -940,7 +919,13 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         verify(mFaceManager).authenticate(any(), any(), any(), any(), anyInt(), anyBoolean());
         verify(mFingerprintManager).authenticate(any(), any(), any(), any(), anyInt(), anyInt(),
                 anyInt());
+//        resetFaceManager();
+//        resetFingerprintManager();
 
+        when(mFingerprintManager.getLockoutModeForUser(eq(FINGERPRINT_SENSOR_ID), eq(newUser)))
+                .thenReturn(fingerprintLockoutMode);
+        when(mFaceManager.getLockoutModeForUser(eq(FACE_SENSOR_ID), eq(newUser)))
+                .thenReturn(faceLockoutMode);
         final CancellationSignal faceCancel = spy(mKeyguardUpdateMonitor.mFaceCancelSignal);
         final CancellationSignal fpCancel = spy(mKeyguardUpdateMonitor.mFingerprintCancelSignal);
         mKeyguardUpdateMonitor.mFaceCancelSignal = faceCancel;
@@ -951,14 +936,22 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mKeyguardUpdateMonitor.handleUserSwitchComplete(newUser);
         mTestableLooper.processAllMessages();
 
-        verify(faceCancel, faceLocked ? times(1) : never()).cancel();
-        verify(fpCancel, fpLocked ? times(1) : never()).cancel();
-        verify(callback, faceLocked ? times(1) : never()).onBiometricRunningStateChanged(
+        // THEN face and fingerprint listening are always cancelled immediately
+        verify(faceCancel).cancel();
+        verify(callback).onBiometricRunningStateChanged(
                 eq(false), eq(BiometricSourceType.FACE));
-        verify(callback, fpLocked ? times(1) : never()).onBiometricRunningStateChanged(
+        verify(fpCancel).cancel();
+        verify(callback).onBiometricRunningStateChanged(
                 eq(false), eq(BiometricSourceType.FINGERPRINT));
+
+        // THEN locked out states are updated
         assertThat(mKeyguardUpdateMonitor.isFingerprintLockedOut()).isEqualTo(fpLocked);
         assertThat(mKeyguardUpdateMonitor.isFaceLockedOut()).isEqualTo(faceLocked);
+
+        // Fingerprint should be restarted once its cancelled bc on lockout, the device
+        // can still detectFingerprint (and if it's not locked out, fingerprint can listen)
+        assertThat(mKeyguardUpdateMonitor.mFingerprintRunningState)
+                .isEqualTo(BIOMETRIC_STATE_CANCELLING_RESTARTING);
     }
 
     @Test
@@ -1144,9 +1137,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         // GIVEN status bar state is on the keyguard
         mStatusBarStateListener.onStateChanged(StatusBarState.KEYGUARD);
 
-        // WHEN user hasn't authenticated since last boot
-        when(mStrongAuthTracker.getStrongAuthForUser(KeyguardUpdateMonitor.getCurrentUser()))
-                .thenReturn(STRONG_AUTH_REQUIRED_AFTER_BOOT);
+        // WHEN user hasn't authenticated since last boot, cannot unlock with FP
+        when(mStrongAuthTracker.isUnlockingWithBiometricAllowed(anyBoolean())).thenReturn(false);
 
         // THEN we shouldn't listen for udfps
         assertThat(mKeyguardUpdateMonitor.shouldListenForFingerprint(true)).isEqualTo(false);
@@ -1259,8 +1251,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         when(mStrongAuthTracker.hasUserAuthenticatedSinceBoot()).thenReturn(true);
 
         // WHEN device in lock down
-        when(mStrongAuthTracker.getStrongAuthForUser(anyInt())).thenReturn(
-                KeyguardUpdateMonitor.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN);
+        when(mStrongAuthTracker.isUnlockingWithBiometricAllowed(anyBoolean())).thenReturn(false);
 
         // THEN we shouldn't listen for udfps
         assertThat(mKeyguardUpdateMonitor.shouldListenForFingerprint(true)).isEqualTo(false);
