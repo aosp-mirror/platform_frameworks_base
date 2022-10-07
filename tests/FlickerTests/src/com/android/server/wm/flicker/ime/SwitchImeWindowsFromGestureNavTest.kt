@@ -62,6 +62,7 @@ open class SwitchImeWindowsFromGestureNavTest(testSpec: FlickerTestParameter) : 
     override val transition: FlickerBuilder.() -> Unit = {
         setup {
             tapl.setExpectedRotationCheckEnabled(false)
+            tapl.setIgnoreTaskbarVisibility(true)
             this.setRotation(testSpec.startRotation)
             testApp.launchViaIntent(wmHelper)
             wmHelper.StateSyncBuilder().withFullScreenApp(testApp).waitForAndVerify()
@@ -78,14 +79,16 @@ open class SwitchImeWindowsFromGestureNavTest(testSpec: FlickerTestParameter) : 
             imeTestApp.exit(wmHelper)
         }
         transitions {
-            // [Step1]: Swipe right from imeTestApp to testApp task
+            // [Step1]: Swipe right from testApp task to imeTestApp
             createTag(TAG_IME_VISIBLE)
+            // Expect taskBar invisible when switching to imeTestApp on the large screen device.
             tapl.launchedAppState.quickSwitchToPreviousApp()
             wmHelper.StateSyncBuilder().withFullScreenApp(testApp).waitForAndVerify()
             createTag(TAG_IME_INVISIBLE)
         }
         transitions {
-            // [Step2]: Swipe left to back to imeTestApp task
+            // [Step2]: Swipe left to back to testApp task
+            // Expect taskBar visible when switching to testApp on the large screen device.
             tapl.launchedAppState.quickSwitchToPreviousAppSwipeLeft()
             wmHelper.StateSyncBuilder().withFullScreenApp(imeTestApp).waitForAndVerify()
         }

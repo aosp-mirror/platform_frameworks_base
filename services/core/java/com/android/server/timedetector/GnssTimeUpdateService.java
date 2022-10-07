@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.app.AlarmManager;
+import android.app.time.UnixEpochTime;
 import android.content.Context;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -31,7 +32,6 @@ import android.os.Handler;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.SystemClock;
-import android.os.TimestampedValue;
 import android.util.LocalLog;
 import android.util.Log;
 
@@ -122,7 +122,7 @@ public final class GnssTimeUpdateService extends Binder {
     @GuardedBy("mLock") @Nullable private AlarmManager.OnAlarmListener mAlarmListener;
     @GuardedBy("mLock") @Nullable private LocationListener mLocationListener;
 
-    @Nullable private volatile TimestampedValue<Long> mLastSuggestedGnssTime;
+    @Nullable private volatile UnixEpochTime mLastSuggestedGnssTime;
 
     @VisibleForTesting
     GnssTimeUpdateService(@NonNull Context context, @NonNull AlarmManager alarmManager,
@@ -263,8 +263,7 @@ public final class GnssTimeUpdateService extends Binder {
         long gnssUnixEpochTimeMillis = locationTime.getUnixEpochTimeMillis();
         long elapsedRealtimeMs = locationTime.getElapsedRealtimeNanos() / 1_000_000L;
 
-        TimestampedValue<Long> timeSignal =
-                new TimestampedValue<>(elapsedRealtimeMs, gnssUnixEpochTimeMillis);
+        UnixEpochTime timeSignal = new UnixEpochTime(elapsedRealtimeMs, gnssUnixEpochTimeMillis);
         mLastSuggestedGnssTime = timeSignal;
 
         GnssTimeSuggestion timeSuggestion = new GnssTimeSuggestion(timeSignal);

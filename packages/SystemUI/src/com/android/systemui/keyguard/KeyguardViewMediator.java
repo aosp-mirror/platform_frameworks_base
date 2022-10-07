@@ -125,6 +125,7 @@ import com.android.systemui.keyguard.dagger.KeyguardModule;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shade.NotificationPanelViewController;
+import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
@@ -135,7 +136,6 @@ import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
-import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.util.DeviceConfigProxy;
@@ -2968,14 +2968,14 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
      */
     public KeyguardViewController registerCentralSurfaces(CentralSurfaces centralSurfaces,
             NotificationPanelViewController panelView,
-            @Nullable PanelExpansionStateManager panelExpansionStateManager,
+            @Nullable ShadeExpansionStateManager shadeExpansionStateManager,
             BiometricUnlockController biometricUnlockController,
             View notificationContainer, KeyguardBypassController bypassController) {
         mCentralSurfaces = centralSurfaces;
         mKeyguardViewControllerLazy.get().registerCentralSurfaces(
                 centralSurfaces,
                 panelView,
-                panelExpansionStateManager,
+                shadeExpansionStateManager,
                 biometricUnlockController,
                 notificationContainer,
                 bypassController);

@@ -18,7 +18,7 @@ package com.android.server.timezonedetector;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -97,19 +97,14 @@ public class TimeZoneDetectorServiceTest {
         mHandlerThread.join();
     }
 
-    @Test(expected = SecurityException.class)
+    @Test
     public void testGetCapabilitiesAndConfig_withoutPermission() {
         doThrow(new SecurityException("Mock"))
                 .when(mMockContext).enforceCallingPermission(anyString(), any());
 
-        try {
-            mTimeZoneDetectorService.getCapabilitiesAndConfig();
-            fail("Expected SecurityException");
-        } finally {
-            verify(mMockContext).enforceCallingPermission(
-                    eq(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION),
-                    anyString());
-        }
+        assertThrows(SecurityException.class, mTimeZoneDetectorService::getCapabilitiesAndConfig);
+        verify(mMockContext).enforceCallingPermission(
+                eq(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION), anyString());
     }
 
     @Test
@@ -124,40 +119,31 @@ public class TimeZoneDetectorServiceTest {
                 mTimeZoneDetectorService.getCapabilitiesAndConfig());
 
         verify(mMockContext).enforceCallingPermission(
-                eq(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION),
-                anyString());
+                eq(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION), anyString());
     }
 
-    @Test(expected = SecurityException.class)
+    @Test
     public void testAddListener_withoutPermission() {
         doThrow(new SecurityException("Mock"))
                 .when(mMockContext).enforceCallingPermission(anyString(), any());
 
         ITimeZoneDetectorListener mockListener = mock(ITimeZoneDetectorListener.class);
-        try {
-            mTimeZoneDetectorService.addListener(mockListener);
-            fail("Expected SecurityException");
-        } finally {
-            verify(mMockContext).enforceCallingPermission(
-                    eq(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION),
-                    anyString());
-        }
+        assertThrows(SecurityException.class,
+                () -> mTimeZoneDetectorService.addListener(mockListener));
+        verify(mMockContext).enforceCallingPermission(
+                eq(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION), anyString());
     }
 
-    @Test(expected = SecurityException.class)
+    @Test
     public void testRemoveListener_withoutPermission() {
         doThrow(new SecurityException("Mock"))
                 .when(mMockContext).enforceCallingPermission(anyString(), any());
 
         ITimeZoneDetectorListener mockListener = mock(ITimeZoneDetectorListener.class);
-        try {
-            mTimeZoneDetectorService.removeListener(mockListener);
-            fail("Expected a SecurityException");
-        } finally {
-            verify(mMockContext).enforceCallingPermission(
-                    eq(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION),
-                    anyString());
-        }
+        assertThrows(SecurityException.class,
+                () -> mTimeZoneDetectorService.removeListener(mockListener));
+        verify(mMockContext).enforceCallingPermission(
+                eq(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION), anyString());
     }
 
     @Test
@@ -176,8 +162,7 @@ public class TimeZoneDetectorServiceTest {
             mTimeZoneDetectorService.addListener(mockListener);
 
             verify(mMockContext).enforceCallingPermission(
-                    eq(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION),
-                    anyString());
+                    eq(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION), anyString());
             verify(mockListener).asBinder();
             verify(mockListenerBinder).linkToDeath(any(), anyInt());
             verifyNoMoreInteractions(mockListenerBinder, mockListener, mMockContext);
@@ -196,8 +181,7 @@ public class TimeZoneDetectorServiceTest {
             mTestHandler.waitForMessagesToBeProcessed();
 
             verify(mMockContext).enforceCallingPermission(
-                    eq(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION),
-                    anyString());
+                    eq(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION), anyString());
             verify(mockListener).onChange();
             verifyNoMoreInteractions(mockListenerBinder, mockListener, mMockContext);
             reset(mockListenerBinder, mockListener, mMockContext);
@@ -213,8 +197,7 @@ public class TimeZoneDetectorServiceTest {
             mTimeZoneDetectorService.removeListener(mockListener);
 
             verify(mMockContext).enforceCallingPermission(
-                    eq(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION),
-                    anyString());
+                    eq(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION), anyString());
             verify(mockListener).asBinder();
             verify(mockListenerBinder).unlinkToDeath(any(), eq(0));
             verifyNoMoreInteractions(mockListenerBinder, mockListener, mMockContext);
@@ -229,28 +212,23 @@ public class TimeZoneDetectorServiceTest {
             mTimeZoneDetectorService.updateConfiguration(autoDetectDisabledConfiguration);
 
             verify(mMockContext).enforceCallingPermission(
-                    eq(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION),
-                    anyString());
+                    eq(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION), anyString());
             verify(mockListener, never()).onChange();
             verifyNoMoreInteractions(mockListenerBinder, mockListener, mMockContext);
             reset(mockListenerBinder, mockListener, mMockContext);
         }
     }
 
-    @Test(expected = SecurityException.class)
+    @Test
     public void testSuggestGeolocationTimeZone_withoutPermission() {
         doThrow(new SecurityException("Mock"))
                 .when(mMockContext).enforceCallingOrSelfPermission(anyString(), any());
         GeolocationTimeZoneSuggestion timeZoneSuggestion = createGeolocationTimeZoneSuggestion();
 
-        try {
-            mTimeZoneDetectorService.suggestGeolocationTimeZone(timeZoneSuggestion);
-            fail("Expected SecurityException");
-        } finally {
-            verify(mMockContext).enforceCallingOrSelfPermission(
-                    eq(android.Manifest.permission.SET_TIME_ZONE),
-                    anyString());
-        }
+        assertThrows(SecurityException.class,
+                () -> mTimeZoneDetectorService.suggestGeolocationTimeZone(timeZoneSuggestion));
+        verify(mMockContext).enforceCallingOrSelfPermission(
+                eq(android.Manifest.permission.SET_TIME_ZONE), anyString());
     }
 
     @Test
@@ -263,27 +241,22 @@ public class TimeZoneDetectorServiceTest {
         mTestHandler.assertTotalMessagesEnqueued(1);
 
         verify(mMockContext).enforceCallingOrSelfPermission(
-                eq(android.Manifest.permission.SET_TIME_ZONE),
-                anyString());
+                eq(android.Manifest.permission.SET_TIME_ZONE), anyString());
 
         mTestHandler.waitForMessagesToBeProcessed();
         mFakeTimeZoneDetectorStrategy.verifySuggestGeolocationTimeZoneCalled(timeZoneSuggestion);
     }
 
-    @Test(expected = SecurityException.class)
+    @Test
     public void testSuggestManualTimeZone_withoutPermission() {
         doThrow(new SecurityException("Mock"))
                 .when(mMockContext).enforceCallingOrSelfPermission(anyString(), any());
         ManualTimeZoneSuggestion timeZoneSuggestion = createManualTimeZoneSuggestion();
 
-        try {
-            mTimeZoneDetectorService.suggestManualTimeZone(timeZoneSuggestion);
-            fail("Expected SecurityException");
-        } finally {
-            verify(mMockContext).enforceCallingOrSelfPermission(
-                    eq(android.Manifest.permission.SUGGEST_MANUAL_TIME_AND_ZONE),
-                    anyString());
-        }
+        assertThrows(SecurityException.class,
+                () -> mTimeZoneDetectorService.suggestManualTimeZone(timeZoneSuggestion));
+        verify(mMockContext).enforceCallingOrSelfPermission(
+                eq(android.Manifest.permission.SUGGEST_MANUAL_TIME_AND_ZONE), anyString());
     }
 
     @Test
@@ -300,40 +273,31 @@ public class TimeZoneDetectorServiceTest {
                 mTestCallerIdentityInjector.getCallingUserId(), timeZoneSuggestion);
 
         verify(mMockContext).enforceCallingOrSelfPermission(
-                eq(android.Manifest.permission.SUGGEST_MANUAL_TIME_AND_ZONE),
-                anyString());
+                eq(android.Manifest.permission.SUGGEST_MANUAL_TIME_AND_ZONE), anyString());
     }
 
-    @Test(expected = SecurityException.class)
+    @Test
     public void testSuggestTelephonyTime_withoutPermission() {
         doThrow(new SecurityException("Mock"))
                 .when(mMockContext).enforceCallingPermission(anyString(), any());
         TelephonyTimeZoneSuggestion timeZoneSuggestion = createTelephonyTimeZoneSuggestion();
 
-        try {
-            mTimeZoneDetectorService.suggestTelephonyTimeZone(timeZoneSuggestion);
-            fail("Expected SecurityException");
-        } finally {
-            verify(mMockContext).enforceCallingPermission(
-                    eq(android.Manifest.permission.SUGGEST_TELEPHONY_TIME_AND_ZONE),
-                    anyString());
-        }
+        assertThrows(SecurityException.class,
+                () -> mTimeZoneDetectorService.suggestTelephonyTimeZone(timeZoneSuggestion));
+        verify(mMockContext).enforceCallingPermission(
+                eq(android.Manifest.permission.SUGGEST_TELEPHONY_TIME_AND_ZONE), anyString());
     }
 
-    @Test(expected = SecurityException.class)
+    @Test
     public void testSuggestTelephonyTimeZone_withoutPermission() {
         doThrow(new SecurityException("Mock"))
                 .when(mMockContext).enforceCallingPermission(anyString(), any());
         TelephonyTimeZoneSuggestion timeZoneSuggestion = createTelephonyTimeZoneSuggestion();
 
-        try {
-            mTimeZoneDetectorService.suggestTelephonyTimeZone(timeZoneSuggestion);
-            fail("Expected SecurityException");
-        } finally {
-            verify(mMockContext).enforceCallingPermission(
-                    eq(android.Manifest.permission.SUGGEST_TELEPHONY_TIME_AND_ZONE),
-                    anyString());
-        }
+        assertThrows(SecurityException.class,
+                () -> mTimeZoneDetectorService.suggestTelephonyTimeZone(timeZoneSuggestion));
+        verify(mMockContext).enforceCallingPermission(
+                eq(android.Manifest.permission.SUGGEST_TELEPHONY_TIME_AND_ZONE), anyString());
     }
 
     @Test
@@ -345,8 +309,7 @@ public class TimeZoneDetectorServiceTest {
         mTestHandler.assertTotalMessagesEnqueued(1);
 
         verify(mMockContext).enforceCallingPermission(
-                eq(android.Manifest.permission.SUGGEST_TELEPHONY_TIME_AND_ZONE),
-                anyString());
+                eq(android.Manifest.permission.SUGGEST_TELEPHONY_TIME_AND_ZONE), anyString());
 
         mTestHandler.waitForMessagesToBeProcessed();
         mFakeTimeZoneDetectorStrategy.verifySuggestTelephonyTimeZoneCalled(timeZoneSuggestion);
@@ -361,23 +324,18 @@ public class TimeZoneDetectorServiceTest {
         TimeZoneState actualState = mTimeZoneDetectorService.getTimeZoneState();
 
         verify(mMockContext).enforceCallingPermission(
-                eq(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION),
-                anyString());
+                eq(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION), anyString());
         assertEquals(actualState, fakeState);
     }
 
-    @Test(expected = SecurityException.class)
+    @Test
     public void testGetTimeZoneState_withoutPermission() {
         doThrow(new SecurityException("Mock"))
                 .when(mMockContext).enforceCallingPermission(anyString(), any());
 
-        try {
-            mTimeZoneDetectorService.getTimeZoneState();
-        } finally {
-            verify(mMockContext).enforceCallingPermission(
-                    eq(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION),
-                    anyString());
-        }
+        assertThrows(SecurityException.class, mTimeZoneDetectorService::getTimeZoneState);
+        verify(mMockContext).enforceCallingPermission(
+                eq(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION), anyString());
     }
 
     @Test
@@ -388,24 +346,20 @@ public class TimeZoneDetectorServiceTest {
         mTimeZoneDetectorService.setTimeZoneState(state);
 
         verify(mMockContext).enforceCallingPermission(
-                eq(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION),
-                anyString());
+                eq(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION), anyString());
         assertEquals(mFakeTimeZoneDetectorStrategy.getTimeZoneState(), state);
     }
 
-    @Test(expected = SecurityException.class)
+    @Test
     public void testSetTimeZoneState_withoutPermission() {
         doThrow(new SecurityException("Mock"))
                 .when(mMockContext).enforceCallingPermission(anyString(), any());
 
         TimeZoneState state = new TimeZoneState("Europe/Narnia", true);
-        try {
-            mTimeZoneDetectorService.setTimeZoneState(state);
-        } finally {
-            verify(mMockContext).enforceCallingPermission(
-                    eq(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION),
-                    anyString());
-        }
+        assertThrows(SecurityException.class,
+                () -> mTimeZoneDetectorService.setTimeZoneState(state));
+        verify(mMockContext).enforceCallingPermission(
+                eq(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION), anyString());
     }
 
     @Test
@@ -416,23 +370,19 @@ public class TimeZoneDetectorServiceTest {
         assertFalse(mTimeZoneDetectorService.confirmTimeZone("Europe/Narnia"));
 
         verify(mMockContext).enforceCallingPermission(
-                eq(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION),
-                anyString());
+                eq(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION), anyString());
         mFakeTimeZoneDetectorStrategy.verifyConfirmTimeZoneCalled("Europe/Narnia");
     }
 
-    @Test(expected = SecurityException.class)
+    @Test
     public void testConfirmTimeZone_withoutPermission() {
         doThrow(new SecurityException("Mock"))
                 .when(mMockContext).enforceCallingPermission(anyString(), any());
 
-        try {
-            mTimeZoneDetectorService.confirmTimeZone("Europe/Narnia");
-        } finally {
-            verify(mMockContext).enforceCallingPermission(
-                    eq(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION),
-                    anyString());
-        }
+        assertThrows(SecurityException.class,
+                () -> mTimeZoneDetectorService.confirmTimeZone("Europe/Narnia"));
+        verify(mMockContext).enforceCallingPermission(
+                eq(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION), anyString());
     }
 
     @Test
@@ -450,24 +400,19 @@ public class TimeZoneDetectorServiceTest {
                 mTestCallerIdentityInjector.getCallingUserId(), timeZoneSuggestion);
 
         verify(mMockContext).enforceCallingPermission(
-                eq(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION),
-                anyString());
+                eq(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION), anyString());
     }
 
-    @Test(expected = SecurityException.class)
+    @Test
     public void testSetManualTimeZone_withoutPermission() {
         doThrow(new SecurityException("Mock"))
                 .when(mMockContext).enforceCallingPermission(anyString(), any());
         ManualTimeZoneSuggestion timeZoneSuggestion = createManualTimeZoneSuggestion();
 
-        try {
-            mTimeZoneDetectorService.setManualTimeZone(timeZoneSuggestion);
-            fail("Expected SecurityException");
-        } finally {
-            verify(mMockContext).enforceCallingPermission(
-                    eq(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION),
-                    anyString());
-        }
+        assertThrows(SecurityException.class,
+                () -> mTimeZoneDetectorService.setManualTimeZone(timeZoneSuggestion));
+        verify(mMockContext).enforceCallingPermission(
+                eq(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION), anyString());
     }
 
     @Test

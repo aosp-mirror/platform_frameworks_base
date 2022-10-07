@@ -18,9 +18,9 @@ package com.android.server.timedetector;
 
 import static org.mockito.Mockito.mock;
 
+import android.app.time.UnixEpochTime;
 import android.content.Context;
 import android.os.HandlerThread;
-import android.os.TimestampedValue;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -74,7 +74,7 @@ public class TimeDetectorInternalImplTest {
     }
 
     private static NetworkTimeSuggestion createNetworkTimeSuggestion() {
-        TimestampedValue<Long> timeValue = new TimestampedValue<>(100L, 1_000_000L);
+        UnixEpochTime timeValue = new UnixEpochTime(100L, 1_000_000L);
         return new NetworkTimeSuggestion(timeValue, 123);
     }
 
@@ -90,7 +90,7 @@ public class TimeDetectorInternalImplTest {
     }
 
     private static GnssTimeSuggestion createGnssTimeSuggestion() {
-        TimestampedValue<Long> timeValue = new TimestampedValue<>(100L, 1_000_000L);
+        UnixEpochTime timeValue = new UnixEpochTime(100L, 1_000_000L);
         return new GnssTimeSuggestion(timeValue);
     }
 }

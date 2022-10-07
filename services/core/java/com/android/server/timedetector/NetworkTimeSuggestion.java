@@ -18,8 +18,8 @@ package com.android.server.timedetector;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.time.UnixEpochTime;
 import android.os.ShellCommand;
-import android.os.TimestampedValue;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -48,7 +48,7 @@ import java.util.Objects;
  */
 public final class NetworkTimeSuggestion {
 
-    @NonNull private final TimestampedValue<Long> mUnixEpochTime;
+    @NonNull private final UnixEpochTime mUnixEpochTime;
     private final int mUncertaintyMillis;
     @Nullable private ArrayList<String> mDebugInfo;
 
@@ -57,8 +57,7 @@ public final class NetworkTimeSuggestion {
      *
      * <p>See {@link NetworkTimeSuggestion} for property details.
      */
-    public NetworkTimeSuggestion(
-            @NonNull TimestampedValue<Long> unixEpochTime, int uncertaintyMillis) {
+    public NetworkTimeSuggestion(@NonNull UnixEpochTime unixEpochTime, int uncertaintyMillis) {
         mUnixEpochTime = Objects.requireNonNull(unixEpochTime);
         if (uncertaintyMillis < 0) {
             throw new IllegalArgumentException("uncertaintyMillis < 0");
@@ -68,7 +67,7 @@ public final class NetworkTimeSuggestion {
 
     /** See {@link NetworkTimeSuggestion} for property details. */
     @NonNull
-    public TimestampedValue<Long> getUnixEpochTime() {
+    public UnixEpochTime getUnixEpochTime() {
         return mUnixEpochTime;
     }
 
@@ -126,14 +125,15 @@ public final class NetworkTimeSuggestion {
     /** Parses command line args to create a {@link NetworkTimeSuggestion}. */
     public static NetworkTimeSuggestion parseCommandLineArg(@NonNull ShellCommand cmd)
             throws IllegalArgumentException {
-        Long referenceTimeMillis = null;
+        Long elapsedRealtimeMillis = null;
         Long unixEpochTimeMillis = null;
         Integer uncertaintyMillis = null;
         String opt;
         while ((opt = cmd.getNextArg()) != null) {
             switch (opt) {
-                case "--reference_time": {
-                    referenceTimeMillis = Long.parseLong(cmd.getNextArgRequired());
+                case "--reference_time":
+                case "--elapsed_realtime": {
+                    elapsedRealtimeMillis = Long.parseLong(cmd.getNextArgRequired());
                     break;
                 }
                 case "--unix_epoch_time": {
@@ -150,8 +150,8 @@ public final class NetworkTimeSuggestion {
             }
         }
 
-        if (referenceTimeMillis == null) {
-            throw new IllegalArgumentException("No referenceTimeMillis specified.");
+        if (elapsedRealtimeMillis == null) {
+            throw new IllegalArgumentException("No elapsedRealtimeMillis specified.");
         }
         if (unixEpochTimeMillis == null) {
             throw new IllegalArgumentException("No unixEpochTimeMillis specified.");
@@ -160,8 +160,7 @@ public final class NetworkTimeSuggestion {
             throw new IllegalArgumentException("No uncertaintyMillis specified.");
         }
 
-        TimestampedValue<Long> timeSignal =
-                new TimestampedValue<>(referenceTimeMillis, unixEpochTimeMillis);
+        UnixEpochTime timeSignal = new UnixEpochTime(elapsedRealtimeMillis, unixEpochTimeMillis);
         NetworkTimeSuggestion networkTimeSuggestion =
                 new NetworkTimeSuggestion(timeSignal, uncertaintyMillis);
         networkTimeSuggestion.addDebugInfo("Command line injection");
@@ -171,8 +170,8 @@ public final class NetworkTimeSuggestion {
     /** Prints the command line args needed to create a {@link NetworkTimeSuggestion}. */
     public static void printCommandLineOpts(PrintWriter pw) {
         pw.printf("%s suggestion options:\n", "Network");
-        pw.println("  --reference_time <elapsed realtime millis> - the elapsed realtime millis when"
-                + " unix epoch time was read");
+        pw.println("  --elapsed_realtime <elapsed realtime millis> - the elapsed realtime millis"
+                + " when unix epoch time was read");
         pw.println("  --unix_epoch_time <Unix epoch time millis>");
         pw.println("  --uncertainty_millis <Uncertainty millis> - a positive error bound (+/-)"
                 + " estimate for unix epoch time");

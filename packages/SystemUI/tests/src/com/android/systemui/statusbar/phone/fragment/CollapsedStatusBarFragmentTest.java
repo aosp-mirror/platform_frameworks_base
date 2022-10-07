@@ -54,6 +54,7 @@ import com.android.systemui.log.LogcatEchoTracker;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shade.NotificationPanelViewController;
+import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.OperatorNameViewController;
 import com.android.systemui.statusbar.disableflags.DisableFlagsLogger;
@@ -65,7 +66,6 @@ import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarLocationPublisher;
 import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
-import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.CarrierConfigTracker;
 import com.android.systemui.util.concurrency.FakeExecutor;
@@ -438,7 +438,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
                 mAnimationScheduler,
                 mLocationPublisher,
                 mMockNotificationAreaController,
-                new PanelExpansionStateManager(),
+                new ShadeExpansionStateManager(),
                 mock(FeatureFlags.class),
                 mStatusBarIconController,
                 mIconManagerFactory,

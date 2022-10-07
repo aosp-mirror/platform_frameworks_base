@@ -364,7 +364,7 @@ public class BroadcastQueueTest {
             mActiveProcesses.remove(r);
             mRegisteredReceivers.remove(r.getPid());
             return invocation.callRealMethod();
-        }).when(r).killLocked(any(), any(), anyInt(), anyInt(), anyBoolean());
+        }).when(r).killLocked(any(), any(), anyInt(), anyInt(), anyBoolean(), anyBoolean());
 
         // If we're entirely dead, rely on default behaviors above
         if (dead) return r;

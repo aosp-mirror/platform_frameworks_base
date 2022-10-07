@@ -24,7 +24,6 @@ import android.app.time.TimeState;
 import android.app.time.UnixEpochTime;
 import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.TelephonyTimeSuggestion;
-import android.os.TimestampedValue;
 import android.util.IndentingPrintWriter;
 
 import com.android.internal.util.Preconditions;
@@ -107,15 +106,6 @@ public interface TimeDetectorStrategy extends Dumpable {
     void suggestExternalTime(@NonNull ExternalTimeSuggestion timeSuggestion);
 
     // Utility methods below are to be moved to a better home when one becomes more obvious.
-
-    /**
-     * Adjusts the supplied time value by applying the difference between the reference time
-     * supplied and the reference time associated with the time.
-     */
-    static long getTimeAt(@NonNull TimestampedValue<Long> timeValue, long referenceClockMillisNow) {
-        return (referenceClockMillisNow - timeValue.getReferenceTimeMillis())
-                + timeValue.getValue();
-    }
 
     /**
      * Converts one of the {@code ORIGIN_} constants to a human readable string suitable for config

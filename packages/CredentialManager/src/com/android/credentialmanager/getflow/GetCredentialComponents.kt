@@ -64,10 +64,8 @@ fun GetCredentialScreen(
     sheetShape = Shapes.medium,
   ) {}
   LaunchedEffect(state.currentValue) {
-    when (state.currentValue) {
-      ModalBottomSheetValue.Hidden -> {
-        cancelActivity()
-      }
+    if (state.currentValue == ModalBottomSheetValue.Hidden) {
+      cancelActivity()
     }
   }
 }

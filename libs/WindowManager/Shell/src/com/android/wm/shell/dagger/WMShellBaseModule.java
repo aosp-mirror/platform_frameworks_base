@@ -46,6 +46,7 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.DisplayLayout;
+import com.android.wm.shell.common.DockStateReader;
 import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
@@ -196,9 +197,11 @@ public abstract class WMShellBaseModule {
             ShellController shellController,
             DisplayController displayController, DisplayInsetsController displayInsetsController,
             DisplayImeController imeController, SyncTransactionQueue syncQueue,
-            @ShellMainThread ShellExecutor mainExecutor, Lazy<Transitions> transitionsLazy) {
+            @ShellMainThread ShellExecutor mainExecutor, Lazy<Transitions> transitionsLazy,
+            DockStateReader dockStateReader) {
         return new CompatUIController(context, shellInit, shellController, displayController,
-                displayInsetsController, imeController, syncQueue, mainExecutor, transitionsLazy);
+                displayInsetsController, imeController, syncQueue, mainExecutor, transitionsLazy,
+                dockStateReader);
     }
 
     @WMSingleton
@@ -290,17 +293,17 @@ public abstract class WMShellBaseModule {
     // Workaround for dynamic overriding with a default implementation, see {@link DynamicOverride}
     @BindsOptionalOf
     @DynamicOverride
-    abstract FullscreenTaskListener<?> optionalFullscreenTaskListener();
+    abstract FullscreenTaskListener optionalFullscreenTaskListener();
 
     @WMSingleton
     @Provides
-    static FullscreenTaskListener<?> provideFullscreenTaskListener(
-            @DynamicOverride Optional<FullscreenTaskListener<?>> fullscreenTaskListener,
+    static FullscreenTaskListener provideFullscreenTaskListener(
+            @DynamicOverride Optional<FullscreenTaskListener> fullscreenTaskListener,
             ShellInit shellInit,
             ShellTaskOrganizer shellTaskOrganizer,
             SyncTransactionQueue syncQueue,
             Optional<RecentTasksController> recentTasksOptional,
-            Optional<WindowDecorViewModel<?>> windowDecorViewModelOptional) {
+            Optional<WindowDecorViewModel> windowDecorViewModelOptional) {
         if (fullscreenTaskListener.isPresent()) {
             return fullscreenTaskListener.get();
         } else {
@@ -314,7 +317,7 @@ public abstract class WMShellBaseModule {
     //
 
     @BindsOptionalOf
-    abstract WindowDecorViewModel<?> optionalWindowDecorViewModel();
+    abstract WindowDecorViewModel optionalWindowDecorViewModel();
 
     //
     // Unfold transition
@@ -766,7 +769,7 @@ public abstract class WMShellBaseModule {
             Optional<SplitScreenController> splitScreenOptional,
             Optional<Pip> pipOptional,
             Optional<PipTouchHandler> pipTouchHandlerOptional,
-            FullscreenTaskListener<?> fullscreenTaskListener,
+            FullscreenTaskListener fullscreenTaskListener,
             Optional<UnfoldAnimationController> unfoldAnimationController,
             Optional<UnfoldTransitionHandler> unfoldTransitionHandler,
             Optional<FreeformComponents> freeformComponents,
