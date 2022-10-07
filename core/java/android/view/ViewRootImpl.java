@@ -10497,6 +10497,8 @@ public final class ViewRootImpl implements ViewParent,
             if (mDirectConnectionId == AccessibilityNodeInfo.UNDEFINED_CONNECTION_ID) {
                 mDirectConnectionId = AccessibilityInteractionClient.addDirectConnection(
                         new AccessibilityInteractionConnection(ViewRootImpl.this));
+                // Notify listeners in the app process.
+                mAccessibilityManager.notifyAccessibilityStateChanged();
             }
             return mDirectConnectionId;
         }
@@ -10505,6 +10507,8 @@ public final class ViewRootImpl implements ViewParent,
             if (mDirectConnectionId != AccessibilityNodeInfo.UNDEFINED_CONNECTION_ID) {
                 AccessibilityInteractionClient.removeConnection(mDirectConnectionId);
                 mDirectConnectionId = AccessibilityNodeInfo.UNDEFINED_CONNECTION_ID;
+                // Notify listeners in the app process.
+                mAccessibilityManager.notifyAccessibilityStateChanged();
             }
         }
     }
