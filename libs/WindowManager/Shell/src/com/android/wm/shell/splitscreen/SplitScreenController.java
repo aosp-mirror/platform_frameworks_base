@@ -872,6 +872,28 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         }
 
         @Override
+        public void startIntentAndTask(PendingIntent pendingIntent, Intent fillInIntent,
+                @Nullable Bundle options1, int taskId, @Nullable Bundle options2,
+                @SplitPosition int splitPosition, float splitRatio,
+                @Nullable RemoteTransition remoteTransition, InstanceId instanceId) {
+            executeRemoteCallWithTaskPermission(mController, "startIntentAndTask",
+                    (controller) -> controller.mStageCoordinator.startIntentAndTask(pendingIntent,
+                            fillInIntent, options1, taskId, options2, splitPosition, splitRatio,
+                            remoteTransition, instanceId));
+        }
+
+        @Override
+        public void startShortcutAndTask(ShortcutInfo shortcutInfo, @Nullable Bundle options1,
+                int taskId, @Nullable Bundle options2, @SplitPosition int splitPosition,
+                float splitRatio, @Nullable RemoteTransition remoteTransition,
+                InstanceId instanceId) {
+            executeRemoteCallWithTaskPermission(mController, "startShortcutAndTask",
+                    (controller) -> controller.mStageCoordinator.startShortcutAndTask(shortcutInfo,
+                            options1, taskId, options2, splitPosition, splitRatio, remoteTransition,
+                            instanceId));
+        }
+
+        @Override
         public void startShortcut(String packageName, String shortcutId, int position,
                 @Nullable Bundle options, UserHandle user, InstanceId instanceId) {
             executeRemoteCallWithTaskPermission(mController, "startShortcut",

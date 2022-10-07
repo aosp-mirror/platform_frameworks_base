@@ -84,6 +84,20 @@ interface ISplitScreen {
             in InstanceId instanceId) = 10;
 
     /**
+     * Starts a pair of intent and task in one transition.
+     */
+    oneway void startIntentAndTask(in PendingIntent pendingIntent, in Intent fillInIntent,
+            in Bundle options1, int taskId, in Bundle options2, int sidePosition, float splitRatio,
+            in RemoteTransition remoteTransition, in InstanceId instanceId) = 16;
+
+    /**
+     * Starts a pair of shortcut and task in one transition.
+     */
+    oneway void startShortcutAndTask(in ShortcutInfo shortcutInfo, in Bundle options1, int taskId,
+            in Bundle options2, int splitPosition, float splitRatio,
+             in RemoteTransition remoteTransition, in InstanceId instanceId) = 17;
+
+    /**
      * Version of startTasks using legacy transition system.
      */
     oneway void startTasksWithLegacyTransition(int taskId1, in Bundle options1, int taskId2,
@@ -99,6 +113,13 @@ interface ISplitScreen {
             in InstanceId instanceId) = 12;
 
     /**
+     * Starts a pair of shortcut and task using legacy transition system.
+     */
+    oneway void startShortcutAndTaskWithLegacyTransition(in ShortcutInfo shortcutInfo,
+            in Bundle options1, int taskId, in Bundle options2, int splitPosition, float splitRatio,
+            in RemoteAnimationAdapter adapter, in InstanceId instanceId) = 15;
+
+    /**
      * Blocking call that notifies and gets additional split-screen targets when entering
      * recents (for example: the dividerBar).
      * @param appTargets apps that will be re-parented to display area
@@ -111,11 +132,5 @@ interface ISplitScreen {
      * does not expect split to currently be running.
      */
     RemoteAnimationTarget[] onStartingSplitLegacy(in RemoteAnimationTarget[] appTargets) = 14;
-
-    /**
-     * Starts a pair of shortcut and task using legacy transition system.
-     */
-    oneway void startShortcutAndTaskWithLegacyTransition(in ShortcutInfo shortcutInfo,
-            in Bundle options1, int taskId, in Bundle options2, int splitPosition, float splitRatio,
-            in RemoteAnimationAdapter adapter, in InstanceId instanceId) = 15;
 }
+// Last id = 17
