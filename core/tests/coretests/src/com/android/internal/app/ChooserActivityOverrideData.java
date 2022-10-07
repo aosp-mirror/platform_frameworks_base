@@ -16,9 +16,11 @@
 
 package com.android.internal.app;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.Cursor;
@@ -26,10 +28,12 @@ import android.graphics.Bitmap;
 import android.os.UserHandle;
 import android.util.Pair;
 
+import com.android.internal.app.AbstractMultiProfilePagerAdapter.CrossProfileIntentsChecker;
+import com.android.internal.app.AbstractMultiProfilePagerAdapter.MyUserIdProvider;
+import com.android.internal.app.AbstractMultiProfilePagerAdapter.QuietModeManager;
 import com.android.internal.app.chooser.TargetInfo;
 import com.android.internal.logging.MetricsLogger;
 
-import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -71,7 +75,10 @@ public class ChooserActivityOverrideData {
     public boolean isQuietModeEnabled;
     public boolean isWorkProfileUserRunning;
     public boolean isWorkProfileUserUnlocked;
-    public AbstractMultiProfilePagerAdapter.Injector multiPagerAdapterInjector;
+    public Integer myUserId;
+    public QuietModeManager mQuietModeManager;
+    public MyUserIdProvider mMyUserIdProvider;
+    public CrossProfileIntentsChecker mCrossProfileIntentsChecker;
     public PackageManager packageManager;
 
     public void reset() {
@@ -95,14 +102,9 @@ public class ChooserActivityOverrideData {
         isQuietModeEnabled = false;
         isWorkProfileUserRunning = true;
         isWorkProfileUserUnlocked = true;
+        myUserId = null;
         packageManager = null;
-        multiPagerAdapterInjector = new AbstractMultiProfilePagerAdapter.Injector() {
-            @Override
-            public boolean hasCrossProfileIntents(List<Intent> intents, int sourceUserId,
-                    int targetUserId) {
-                return hasCrossProfileIntents;
-            }
-
+        mQuietModeManager = new QuietModeManager() {
             @Override
             public boolean isQuietModeEnabled(UserHandle workProfileUserHandle) {
                 return isQuietModeEnabled;
@@ -113,7 +115,27 @@ public class ChooserActivityOverrideData {
                     UserHandle workProfileUserHandle) {
                 isQuietModeEnabled = enabled;
             }
+
+            @Override
+            public void markWorkProfileEnabledBroadcastReceived() {
+            }
+
+            @Override
+            public boolean isWaitingToEnableWorkProfile() {
+                return false;
+            }
         };
+
+        mMyUserIdProvider = new MyUserIdProvider() {
+            @Override
+            public int getMyUserId() {
+                return myUserId != null ? myUserId : UserHandle.myUserId();
+            }
+        };
+
+        mCrossProfileIntentsChecker = mock(CrossProfileIntentsChecker.class);
+        when(mCrossProfileIntentsChecker.hasCrossProfileIntents(any(), anyInt(), anyInt()))
+                .thenAnswer(invocation -> hasCrossProfileIntents);
     }
 
     private ChooserActivityOverrideData() {}

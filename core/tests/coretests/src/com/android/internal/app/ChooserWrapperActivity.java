@@ -16,6 +16,10 @@
 
 package com.android.internal.app;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import android.annotation.Nullable;
@@ -34,6 +38,8 @@ import android.os.UserHandle;
 import android.util.Pair;
 import android.util.Size;
 
+import com.android.internal.app.AbstractMultiProfilePagerAdapter.CrossProfileIntentsChecker;
+import com.android.internal.app.AbstractMultiProfilePagerAdapter.MyUserIdProvider;
 import com.android.internal.app.ResolverListAdapter.ResolveInfoPresentationGetter;
 import com.android.internal.app.chooser.DisplayResolveInfo;
 import com.android.internal.app.chooser.TargetInfo;
@@ -57,15 +63,6 @@ public class ChooserWrapperActivity extends ChooserActivity implements IChooserW
     @Override
     public int getLaunchedFromUid() {
         return 1234;
-    }
-
-    @Override
-    protected AbstractMultiProfilePagerAdapter createMultiProfilePagerAdapter(
-            Intent[] initialIntents, List<ResolveInfo> rList, boolean filterLastUsed) {
-        AbstractMultiProfilePagerAdapter multiProfilePagerAdapter =
-                super.createMultiProfilePagerAdapter(initialIntents, rList, filterLastUsed);
-        multiProfilePagerAdapter.setInjector(sOverrides.multiPagerAdapterInjector);
-        return multiProfilePagerAdapter;
     }
 
     @Override
@@ -132,6 +129,30 @@ public class ChooserWrapperActivity extends ChooserActivity implements IChooserW
             return sOverrides.isVoiceInteraction;
         }
         return super.isVoiceInteraction();
+    }
+
+    @Override
+    protected MyUserIdProvider createMyUserIdProvider() {
+        if (sOverrides.mMyUserIdProvider != null) {
+            return sOverrides.mMyUserIdProvider;
+        }
+        return super.createMyUserIdProvider();
+    }
+
+    @Override
+    protected CrossProfileIntentsChecker createCrossProfileIntentsChecker() {
+        if (sOverrides.mCrossProfileIntentsChecker != null) {
+            return sOverrides.mCrossProfileIntentsChecker;
+        }
+        return super.createCrossProfileIntentsChecker();
+    }
+
+    @Override
+    protected AbstractMultiProfilePagerAdapter.QuietModeManager createQuietModeManager() {
+        if (sOverrides.mQuietModeManager != null) {
+            return sOverrides.mQuietModeManager;
+        }
+        return super.createQuietModeManager();
     }
 
     @Override
