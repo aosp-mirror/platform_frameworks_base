@@ -54539,6 +54539,8 @@ package android.view.inputmethod {
     method @NonNull public android.text.SegmentFinder getGraphemeSegmentFinder();
     method @NonNull public android.text.SegmentFinder getLineSegmentFinder();
     method @NonNull public android.graphics.Matrix getMatrix();
+    method public int getOffsetForPosition(float, float);
+    method @Nullable public int[] getRangeForRect(@NonNull android.graphics.RectF, @NonNull android.text.SegmentFinder, @NonNull android.text.Layout.TextInclusionStrategy);
     method public int getStart();
     method @NonNull public android.text.SegmentFinder getWordSegmentFinder();
     method public void writeToParcel(@NonNull android.os.Parcel, int);

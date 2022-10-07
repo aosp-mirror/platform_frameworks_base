@@ -25,6 +25,7 @@ import android.graphics.RectF;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.Layout;
 import android.text.SegmentFinder;
 
 import com.android.internal.util.ArrayUtils;
@@ -311,6 +312,554 @@ public final class TextBoundsInfo implements Parcelable {
     @NonNull
     public SegmentFinder getLineSegmentFinder() {
         return mLineSegmentFinder;
+    }
+
+    /**
+     * Return the index of the closest character to the given position.
+     * It's similar to the text layout API {@link Layout#getOffsetForHorizontal(int, float)}.
+     * And it's mainly used to find the cursor index (the index of the character before which the
+     * cursor should be placed) for the given position. It's guaranteed that the returned index is
+     * a grapheme break. Check {@link #getGraphemeSegmentFinder()} for more information.
+     *
+     * <p>It's assumed that the editor lays out text in horizontal lines from top to bottom and each
+     * line is laid out according to the display algorithm specified in
+     * <a href="https://unicode.org/reports/tr9/#Basic_Display_Algorithm"> unicode bidirectional
+     * algorithm</a>.
+     * </p>
+     *
+     * <p> This method won't check the text ranges whose line information is missing. For example,
+     * the {@link TextBoundsInfo}'s range is from index 5 to 15. If the associated
+     * {@link SegmentFinder} only identifies one line range from 7 to 12. Then this method
+     * won't check the text in the ranges of [5, 7) and [12, 15).
+     * </p>
+     *
+     * @param x the x coordinates of the interested location, in the editor's coordinates.
+     * @param y the y coordinates of the interested location, in the editor's coordinates.
+     * @return the index of the character whose position is closest to the given location. It will
+     * return -1 if it can't find a character.
+     *
+     * @see Layout#getOffsetForHorizontal(int, float)
+     */
+    public int getOffsetForPosition(float x, float y) {
+        final int[] lineRange = new int[2];
+        final RectF lineBounds = new RectF();
+        getLineInfo(y, lineRange, lineBounds);
+        // No line is found, return -1;
+        if (lineRange[0] == -1 || lineRange[1] == -1) return -1;
+        final int lineStart = lineRange[0];
+        final int lineEnd = lineRange[1];
+
+        final boolean lineEndsWithLinefeed =
+                (getCharacterFlags(lineEnd - 1) & FLAG_CHARACTER_LINEFEED) != 0;
+
+        // Consider the following 2 cases:
+        // Case 1:
+        //   Text: "AB\nCD"
+        //   Layout: AB
+        //           CD
+        // Case 2:
+        //   Text: "ABCD"
+        //   Layout: AB
+        //           CD
+        // If user wants to insert a 'X' character at the end of the first line:
+        //   In case 1, 'X' is inserted before the last character '\n'.
+        //   In case 2, 'X' is inserted after the last character 'B'.
+        // So if a line ends with linefeed, it shouldn't check the cursor position after the last
+        // character.
+        final int lineLimit;
+        if (lineEndsWithLinefeed) {
+            lineLimit = lineEnd;
+        } else {
+            lineLimit = lineEnd + 1;
+        }
+        // Point graphemeStart to the start of the first grapheme segment intersects with the line.
+        int graphemeStart = mGraphemeSegmentFinder.nextEndBoundary(lineStart);
+        // The grapheme information is missing.
+        if (graphemeStart == SegmentFinder.DONE) return -1;
+        graphemeStart = mGraphemeSegmentFinder.previousStartBoundary(graphemeStart);
+
+        int target = -1;
+        float minDistance = Float.MAX_VALUE;
+        while (graphemeStart != SegmentFinder.DONE && graphemeStart < lineLimit) {
+            if (graphemeStart >= lineStart) {
+                float cursorPosition = getCursorHorizontalPosition(graphemeStart, lineStart,
+                        lineEnd, lineBounds.left, lineBounds.right);
+                final float distance = Math.abs(cursorPosition - x);
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    target = graphemeStart;
+                }
+            }
+            graphemeStart = mGraphemeSegmentFinder.nextStartBoundary(graphemeStart);
+        }
+
+        return target;
+    }
+
+    /**
+     * Whether the primary position at the given index is the previous character's trailing
+     * position. <br/>
+     *
+     * For LTR character, trailing position is its right edge. For RTL character, trailing position
+     * is its left edge.
+     *
+     * The primary position is defined as the position of a newly inserted character with the
+     * context direction at the given offset. In contrast, the secondary position is the position
+     * of a newly inserted character with the context's opposite direction at the given offset.
+     *
+     * In Android, the trailing position is used for primary position when the direction run after
+     * the given index has a higher level than the current direction run.
+     *
+     * <p>
+     * For example:
+     * (L represents LTR character, and R represents RTL character. The number is the index)
+     * <pre>
+     * input text:          L0 L1 L2 R3 R4 R5 L6 L7 L8
+     * render result:       L0 L1 L2 R5 R4 R3 L6 L7 L8
+     * BiDi Run:            [ Run 0 ][ Run 1 ][ Run 2 ]
+     * BiDi Level:          0  0  0  1  1  1  0  0  0
+     * </pre>
+     *
+     * The index 3 is a BiDi transition point, the cursor can be placed either after L2 or before
+     * R3. Because the bidi level of run 1 is higher than the run 0, this method returns true. And
+     * the cursor should be placed after L2.
+     * <pre>
+     * render result:       L0 L1 L2 R5 R4 R3 L6 L7 L8
+     * position after L2:           |
+     * position before R3:                   |
+     * result position:             |
+     * </pre>
+     *
+     * The index 6 is also a Bidi transition point, the 2 possible cursor positions are exactly the
+     * same as index 3. However, since the bidi level of run 2 is higher than the run 1, this
+     * method returns false. And the cursor should be placed before L6.
+     * <pre>
+     * render result:       L0 L1 L2 R5 R4 R3 L6 L7 L8
+     * position after R5:           |
+     * position before L6:                   |
+     * result position:                      |
+     * </pre>
+     *
+     * This method helps guarantee that the cursor index and the cursor position forms a one to
+     * one relation.
+     * </p>
+     *
+     * @param offset the offset of the character in front of which the cursor is placed. It must be
+     *              the start index of a grapheme. And it must be in the range from lineStart to
+     *              lineEnd. An offset equal to lineEnd is allowed. It indicates that the cursor is
+     *              placed at the end of current line instead of the start of the following line.
+     * @param lineStart the start index of the line that index belongs to, inclusive.
+     * @param lineEnd the end index of the line that index belongs to, exclusive.
+     * @return true if primary position is the trailing position of the previous character.
+     *
+     * @see #getCursorHorizontalPosition(int, int, int, float, float)
+     */
+    private boolean primaryIsTrailingPrevious(int offset, int lineStart, int lineEnd) {
+        final int bidiLevel;
+        if (offset < lineEnd) {
+            bidiLevel = getCharacterBidiLevel(offset);
+        } else {
+            // index equals to lineEnd, use line's BiDi level for the BiDi run.
+            boolean lineIsRtl =
+                    (getCharacterFlags(offset - 1) & FLAG_LINE_IS_RTL) == FLAG_LINE_IS_RTL;
+            bidiLevel = lineIsRtl ? 1 : 0;
+        }
+        final int bidiLevelBefore;
+        if (offset > lineStart) {
+            // Here it assumes index is always the start of a grapheme. And (index - 1) belongs to
+            // the previous grapheme.
+            bidiLevelBefore = getCharacterBidiLevel(offset - 1);
+        } else {
+            // index equals to lineStart, use line's BiDi level for previous BiDi run.
+            boolean lineIsRtl =
+                    (getCharacterFlags(offset) & FLAG_LINE_IS_RTL) == FLAG_LINE_IS_RTL;
+            bidiLevelBefore = lineIsRtl ? 1 : 0;
+        }
+        return bidiLevelBefore < bidiLevel;
+    }
+
+    /**
+     * Returns the x coordinates of the cursor at the given index. (The index of the character
+     * before which the cursor should be placed.)
+     *
+     * @param index the character index before which the cursor is placed. It must be the start
+     *              index of a grapheme. It must be in the range from lineStart to lineEnd.
+     *              An index equal to lineEnd is allowed. It indicates that the cursor is
+     *              placed at the end of current line instead of the start of the following line.
+     * @param lineStart start index of the line that index belongs to, inclusive.
+     * @param lineEnd end index of the line that index belongs, exclusive.
+     * @return the x coordinates of the cursor at the given index,
+     *
+     * @see #primaryIsTrailingPrevious(int, int, int)
+     */
+    private float getCursorHorizontalPosition(int index, int lineStart, int lineEnd,
+            float lineLeft, float lineRight) {
+        Preconditions.checkArgumentInRange(index, lineStart, lineEnd, "index");
+        final boolean lineIsRtl = (getCharacterFlags(lineStart) & FLAG_LINE_IS_RTL) != 0;
+        final boolean isPrimaryIsTrailingPrevious =
+                primaryIsTrailingPrevious(index, lineStart, lineEnd);
+
+        // The index of the character used to compute the cursor position.
+        final int targetIndex;
+        // Whether to use the start position of the character.
+        // For LTR character start is the left edge. For RTL character, start is the right edge.
+        final boolean isStart;
+        if (isPrimaryIsTrailingPrevious) {
+            // (index - 1) belongs to the previous line(if any), return the line start position.
+            if (index <= lineStart) {
+                return lineIsRtl ? lineRight : lineLeft;
+            }
+            targetIndex = index - 1;
+            isStart = false;
+        } else {
+            // index belongs to the next line(if any), return the line end position.
+            if (index >= lineEnd) {
+                return lineIsRtl ? lineLeft : lineRight;
+            }
+            targetIndex = index;
+            isStart = true;
+        }
+
+        // The BiDi level is odd when the character is RTL.
+        final boolean isRtl = (getCharacterBidiLevel(targetIndex) & 1) != 0;
+        final int offset = targetIndex - mStart;
+        // If the character is RTL, the start is the right edge. Otherwise, the start is the
+        // left edge:
+        //  +-----------------------+
+        //  |       | start | end   |
+        //  |-------+-------+-------|
+        //  | RTL   | right | left  |
+        //  |-------+-------+-------|
+        //  | LTR   | left  | right |
+        //  +-------+-------+-------+
+        return (isRtl != isStart) ? mCharacterBounds[4 * offset] : mCharacterBounds[4 * offset + 2];
+    }
+
+    /**
+     * Return the minimal rectangle that contains all the characters in the given range.
+     *
+     * @param start the start index of the given range, inclusive.
+     * @param end the end index of the given range, exclusive.
+     * @param rectF the {@link RectF} to receive the bounds.
+     */
+    private void getBoundsForRange(int start, int end, @NonNull RectF rectF) {
+        Preconditions.checkArgumentInRange(start, mStart, mEnd - 1, "start");
+        Preconditions.checkArgumentInRange(end, start, mEnd, "end");
+        if (end <= start) {
+            rectF.setEmpty();
+            return;
+        }
+
+        rectF.left = Float.MAX_VALUE;
+        rectF.top = Float.MAX_VALUE;
+        rectF.right = Float.MIN_VALUE;
+        rectF.bottom = Float.MIN_VALUE;
+        for (int index = start; index < end; ++index) {
+            final int offset = index - mStart;
+            rectF.left = Math.min(rectF.left, mCharacterBounds[4 * offset]);
+            rectF.top = Math.min(rectF.top, mCharacterBounds[4 * offset + 1]);
+            rectF.right = Math.max(rectF.right, mCharacterBounds[4 * offset + 2]);
+            rectF.bottom = Math.max(rectF.bottom, mCharacterBounds[4 * offset + 3]);
+        }
+    }
+
+    /**
+     * Return the character range and bounds of the closest line to the given {@code y} coordinate,
+     * in the editor's local coordinates.
+     *
+     * If the given y is above the first line or below the last line -1 will be returned for line
+     * start and end.
+     *
+     * This method assumes that the lines are laid out from the top to bottom.
+     *
+     * @param y the y coordinates used to search for the line.
+     * @param characterRange a two element array used to receive the character range of the line.
+     *                       If no valid line is found -1 will be returned for both start and end.
+     * @param bounds {@link RectF} to receive the line bounds result, nullable. If given, it can
+     *                            still be modified even if no valid line is found.
+     */
+    private void getLineInfo(float y, @NonNull int[] characterRange, @Nullable RectF bounds) {
+        characterRange[0] = -1;
+        characterRange[1] = -1;
+
+        // Starting from the first line.
+        int currentLineEnd = mLineSegmentFinder.nextEndBoundary(mStart);
+        if (currentLineEnd == SegmentFinder.DONE) return;
+        int currentLineStart = mLineSegmentFinder.previousStartBoundary(currentLineEnd);
+
+        float top = Float.MAX_VALUE;
+        float bottom = Float.MIN_VALUE;
+        float minDistance = Float.MAX_VALUE;
+        final RectF currentLineBounds = new RectF();
+        while (currentLineStart != SegmentFinder.DONE && currentLineStart < mEnd) {
+            final int lineStartInRange = Math.max(mStart, currentLineStart);
+            final int lineEndInRange = Math.min(mEnd, currentLineEnd);
+            getBoundsForRange(lineStartInRange, lineEndInRange, currentLineBounds);
+
+            top = Math.min(currentLineBounds.top, top);
+            bottom = Math.max(currentLineBounds.bottom, bottom);
+
+            final float distance = verticalDistance(currentLineBounds, y);
+
+            if (distance == 0f) {
+                characterRange[0] = currentLineStart;
+                characterRange[1] = currentLineEnd;
+                if (bounds != null) {
+                    bounds.set(currentLineBounds);
+                }
+                return;
+            }
+
+            if (distance < minDistance) {
+                minDistance = distance;
+                characterRange[0] = currentLineStart;
+                characterRange[1] = currentLineEnd;
+                if (bounds != null) {
+                    bounds.set(currentLineBounds);
+                }
+            }
+            if (y < bounds.top) break;
+            currentLineStart = mLineSegmentFinder.nextStartBoundary(currentLineStart);
+            currentLineEnd = mLineSegmentFinder.nextEndBoundary(currentLineEnd);
+        }
+
+        // y is above the first line or below the last line. The founded line is still invalid,
+        // clear the result.
+        if (y < top || y > bottom) {
+            characterRange[0] = -1;
+            characterRange[1] = -1;
+            if (bounds != null) {
+                bounds.setEmpty();
+            }
+        }
+    }
+
+    /**
+     * Finds the range of text which is inside the specified rectangle area. This method is a
+     * counterpart of the
+     * {@link Layout#getRangeForRect(RectF, SegmentFinder, Layout.TextInclusionStrategy)}.
+     *
+     * <p>It's assumed that the editor lays out text in horizontal lines from top to bottom
+     * and each line is laid out according to the display algorithm specified in
+     * <a href="https://unicode.org/reports/tr9/#Basic_Display_Algorithm"> unicode bidirectional
+     * algorithm</a>.
+     * </p>
+     *
+     * <p> This method won't check the text ranges whose line information is missing. For example,
+     * the {@link TextBoundsInfo}'s range is from index 5 to 15. If the associated line
+     * {@link SegmentFinder} only identifies one line range from 7 to 12. Then this method
+     * won't check the text in the ranges of [5, 7) and [12, 15).
+     * </p>
+     *
+     * @param area area for which the text range will be found
+     * @param segmentFinder SegmentFinder for determining the ranges of text to be considered as a
+     *     text segment
+     * @param inclusionStrategy strategy for determining whether a text segment is inside the
+     *          specified area
+     * @return the text range stored in a two element int array. The first element is the
+     * start (inclusive) of the text range, and the second element is the end (exclusive) character
+     * offsets of the text range, or null if there are no text segments inside the area.
+     *
+     * @see Layout#getRangeForRect(RectF, SegmentFinder, Layout.TextInclusionStrategy)
+     */
+    @Nullable
+    public int[] getRangeForRect(@NonNull RectF area, @NonNull SegmentFinder segmentFinder,
+            @NonNull Layout.TextInclusionStrategy inclusionStrategy) {
+        int lineEnd = mLineSegmentFinder.nextEndBoundary(mStart);
+        // Line information is missing.
+        if (lineEnd == SegmentFinder.DONE) return null;
+        int lineStart = mLineSegmentFinder.previousStartBoundary(lineEnd);
+
+        int start = -1;
+        while (lineStart != SegmentFinder.DONE && start == -1) {
+            start = getStartForRectWithinLine(lineStart, lineEnd, area, segmentFinder,
+                    inclusionStrategy);
+            lineStart = mLineSegmentFinder.nextStartBoundary(lineStart);
+            lineEnd = mLineSegmentFinder.nextEndBoundary(lineEnd);
+        }
+
+        // Can't find the start index; the specified contains no valid segment.
+        if (start == -1) return null;
+
+        lineStart = mLineSegmentFinder.previousStartBoundary(mEnd);
+        // Line information is missing.
+        if (lineStart == SegmentFinder.DONE) return null;
+        lineEnd = mLineSegmentFinder.nextEndBoundary(lineStart);
+        int end = -1;
+        while (lineEnd > start && end == -1) {
+            end = getEndForRectWithinLine(lineStart, lineEnd, area, segmentFinder,
+                    inclusionStrategy);
+            lineStart = mLineSegmentFinder.previousStartBoundary(lineStart);
+            lineEnd = mLineSegmentFinder.previousEndBoundary(lineEnd);
+        }
+
+        // We've already found start, end is guaranteed to be found at this point.
+        start = segmentFinder.previousStartBoundary(start + 1);
+        end = segmentFinder.nextEndBoundary(end - 1);
+        return new int[] { start, end };
+    }
+
+    /**
+     * Find the start character index of the first text segments within a line inside the specified
+     * {@code area}.
+     *
+     * @param lineStart the start of this line, inclusive .
+     * @param lineEnd the end of this line, exclusive.
+     * @param area the area inside which the text segments will be found.
+     * @param segmentFinder SegmentFinder for determining the ranges of text to be considered a
+     *                      text segment.
+     * @param inclusionStrategy strategy for determining whether a text segment is inside the
+     *                          specified area.
+     * @return the start index of the first segment in the area.
+     */
+    private int getStartForRectWithinLine(int lineStart, int lineEnd, @NonNull RectF area,
+            @NonNull SegmentFinder segmentFinder,
+            @NonNull Layout.TextInclusionStrategy inclusionStrategy) {
+        if (lineStart >= lineEnd) return -1;
+
+        int runStart = lineStart;
+        int runLevel = -1;
+        // Check the BiDi runs and search for the start index.
+        for (int index = lineStart; index < lineEnd; ++index) {
+            final int level = getCharacterBidiLevel(index);
+            if (level != runLevel) {
+                final int start = getStartForRectWithinRun(runStart, index, area, segmentFinder,
+                        inclusionStrategy);
+                if (start != -1) {
+                    return start;
+                }
+
+                runStart = index;
+                runLevel = level;
+            }
+        }
+        return getStartForRectWithinRun(runStart, lineEnd, area, segmentFinder, inclusionStrategy);
+    }
+
+    /**
+     * Find the start character index of the first text segments within the directional run inside
+     * the specified {@code area}.
+     *
+     * @param runStart the start of this directional run, inclusive.
+     * @param runEnd the end of this directional run, exclusive.
+     * @param area the area inside which the text segments will be found.
+     * @param segmentFinder SegmentFinder for determining the ranges of text to be considered a
+     *                      text segment.
+     * @param inclusionStrategy strategy for determining whether a text segment is inside the
+     *                          specified area.
+     * @return the start index of the first segment in the area.
+     */
+    private int getStartForRectWithinRun(int runStart, int runEnd, @NonNull RectF area,
+            @NonNull SegmentFinder segmentFinder,
+            @NonNull Layout.TextInclusionStrategy inclusionStrategy) {
+        if (runStart >= runEnd) return -1;
+
+        int segmentEndOffset = segmentFinder.nextEndBoundary(runStart);
+        // No segment is found in run.
+        if (segmentEndOffset == SegmentFinder.DONE) return -1;
+        int segmentStartOffset = segmentFinder.previousStartBoundary(segmentEndOffset);
+
+        final RectF segmentBounds = new RectF();
+        while (segmentStartOffset != SegmentFinder.DONE && segmentStartOffset < runEnd) {
+            final int start = Math.max(runStart, segmentStartOffset);
+            final int end = Math.min(runEnd, segmentEndOffset);
+            getBoundsForRange(start, end, segmentBounds);
+            // Find the first segment inside the area, return the start.
+            if (inclusionStrategy.isSegmentInside(segmentBounds, area)) return start;
+
+            segmentStartOffset = segmentFinder.nextStartBoundary(segmentStartOffset);
+            segmentEndOffset = segmentFinder.nextEndBoundary(segmentEndOffset);
+        }
+        return -1;
+    }
+
+    /**
+     * Find the end character index of the last text segments within a line inside the specified
+     * {@code area}.
+     *
+     * @param lineStart the start of this line, inclusive .
+     * @param lineEnd the end of this line, exclusive.
+     * @param area the area inside which the text segments will be found.
+     * @param segmentFinder SegmentFinder for determining the ranges of text to be considered a
+     *                      text segment.
+     * @param inclusionStrategy strategy for determining whether a text segment is inside the
+     *                          specified area.
+     * @return the end index of the last segment in the area.
+     */
+    private int getEndForRectWithinLine(int lineStart, int lineEnd, @NonNull RectF area,
+            @NonNull SegmentFinder segmentFinder,
+            @NonNull Layout.TextInclusionStrategy inclusionStrategy) {
+        if (lineStart >= lineEnd) return -1;
+        lineStart = Math.max(lineStart, mStart);
+        lineEnd = Math.min(lineEnd, mEnd);
+
+        // The exclusive run end index.
+        int runEnd = lineEnd;
+        int runLevel = -1;
+        // Check the BiDi runs backwards and search for the end index.
+        for (int index = lineEnd - 1; index >= lineStart; --index) {
+            final int level = getCharacterBidiLevel(index);
+            if (level != runLevel) {
+                final int end = getEndForRectWithinRun(index + 1, runEnd, area, segmentFinder,
+                        inclusionStrategy);
+                if (end != -1) return end;
+
+                runEnd = index + 1;
+                runLevel = level;
+            }
+        }
+        return getEndForRectWithinRun(lineStart, runEnd, area, segmentFinder, inclusionStrategy);
+    }
+
+    /**
+     * Find the end character index of the last text segments within the directional run inside the
+     * specified {@code area}.
+     *
+     * @param runStart the start of this directional run, inclusive.
+     * @param runEnd the end of this directional run, exclusive.
+     * @param area the area inside which the text segments will be found.
+     * @param segmentFinder SegmentFinder for determining the ranges of text to be considered a
+     *                      text segment.
+     * @param inclusionStrategy strategy for determining whether a text segment is inside the
+     *                          specified area.
+     * @return the end index of the last segment in the area.
+     */
+    private int getEndForRectWithinRun(int runStart, int runEnd, @NonNull RectF area,
+            @NonNull SegmentFinder segmentFinder,
+            @NonNull Layout.TextInclusionStrategy inclusionStrategy) {
+        if (runStart >= runEnd) return -1;
+
+        int segmentStart = segmentFinder.previousStartBoundary(runEnd);
+        // No segment is found before the runEnd.
+        if (segmentStart == SegmentFinder.DONE) return -1;
+        int segmentEnd = segmentFinder.nextEndBoundary(segmentStart);
+
+        final RectF segmentBounds = new RectF();
+        while (segmentEnd != SegmentFinder.DONE && segmentEnd > runStart) {
+            final int start = Math.max(runStart, segmentStart);
+            final int end = Math.min(runEnd, segmentEnd);
+            getBoundsForRange(start, end, segmentBounds);
+            // Find the last segment inside the area, return the end.
+            if (inclusionStrategy.isSegmentInside(segmentBounds, area)) return end;
+
+            segmentStart = segmentFinder.previousStartBoundary(segmentStart);
+            segmentEnd = segmentFinder.previousEndBoundary(segmentEnd);
+        }
+        return -1;
+    }
+
+    /**
+     * Get the vertical distance from the {@code pointF} to the {@code rectF}. It's useful to find
+     * the corresponding line for a given point.
+     */
+    private static float verticalDistance(@NonNull RectF rectF, float y) {
+        if (rectF.top <= y && y < rectF.bottom) {
+            return 0f;
+        }
+        if (y < rectF.top) {
+            return rectF.top - y;
+        }
+        return y - rectF.bottom;
     }
 
     /**
