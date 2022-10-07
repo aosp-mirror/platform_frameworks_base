@@ -19,6 +19,7 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_EXCLUDE_FROM_
 
 import static com.android.systemui.classifier.Classifier.BACK_GESTURE;
 
+import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -955,7 +956,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
                 mStartingQuickstepRotation != rotation;
     }
 
-    public void onConfigurationChanged(Configuration newConfig) {
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
         if (mStartingQuickstepRotation > -1) {
             updateDisabledForQuickstep(newConfig);
         }
