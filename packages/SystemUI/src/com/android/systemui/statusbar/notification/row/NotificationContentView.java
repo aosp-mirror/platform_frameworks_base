@@ -1986,6 +1986,25 @@ public class NotificationContentView extends FrameLayout implements Notification
     public void setRemoteInputVisible(boolean remoteInputVisible) {
         mRemoteInputVisible = remoteInputVisible;
         setClipChildren(!remoteInputVisible);
+        setActionsImportanceForAccessibility(
+                remoteInputVisible ? View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
+                        : View.IMPORTANT_FOR_ACCESSIBILITY_AUTO);
+    }
+
+    private void setActionsImportanceForAccessibility(int mode) {
+        if (mExpandedChild != null) {
+            setActionsImportanceForAccessibility(mode, mExpandedChild);
+        }
+        if (mHeadsUpChild != null) {
+            setActionsImportanceForAccessibility(mode, mHeadsUpChild);
+        }
+    }
+
+    private void setActionsImportanceForAccessibility(int mode, View child) {
+        View actionsCandidate = child.findViewById(com.android.internal.R.id.actions);
+        if (actionsCandidate != null) {
+            actionsCandidate.setImportantForAccessibility(mode);
+        }
     }
 
     @Override
