@@ -21,8 +21,8 @@ import android.content.ClipData;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
@@ -266,13 +266,13 @@ public class EditUserPhotoController {
     }
 
     private boolean startSystemActivityForResult(Intent intent, int code) {
-        ActivityInfo info = intent.resolveActivityInfo(mActivity.getPackageManager(),
-                PackageManager.MATCH_SYSTEM_ONLY);
-        if (info == null) {
+        List<ResolveInfo> resolveInfos = mActivity.getPackageManager()
+                .queryIntentActivities(intent, PackageManager.MATCH_SYSTEM_ONLY);
+        if (resolveInfos.isEmpty()) {
             Log.w(TAG, "No system package activity could be found for code " + code);
             return false;
         }
-        intent.setPackage(info.packageName);
+        intent.setPackage(resolveInfos.get(0).activityInfo.packageName);
         mActivityStarter.startActivityForResult(intent, code);
         return true;
     }
