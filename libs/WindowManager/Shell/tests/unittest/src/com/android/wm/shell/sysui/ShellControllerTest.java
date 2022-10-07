@@ -16,12 +16,16 @@
 
 package com.android.wm.shell.sysui;
 
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import android.content.Context;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
+import android.os.Binder;
+import android.os.Bundle;
+import android.os.IBinder;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
@@ -30,6 +34,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.wm.shell.ShellTestCase;
+import com.android.wm.shell.common.ExternalInterfaceBinder;
 import com.android.wm.shell.common.ShellExecutor;
 
 import org.junit.After;
@@ -49,6 +54,7 @@ import java.util.Locale;
 public class ShellControllerTest extends ShellTestCase {
 
     private static final int TEST_USER_ID = 100;
+    private static final String EXTRA_TEST_BINDER = "test_binder";
 
     @Mock
     private ShellInit mShellInit;
@@ -78,6 +84,47 @@ public class ShellControllerTest extends ShellTestCase {
     @After
     public void tearDown() {
         // Do nothing
+    }
+
+    @Test
+    public void testAddExternalInterface_ensureCallback() {
+        Binder callback = new Binder();
+        ExternalInterfaceBinder wrapper = new ExternalInterfaceBinder() {
+            @Override
+            public void invalidate() {
+                // Do nothing
+            }
+
+            @Override
+            public IBinder asBinder() {
+                return callback;
+            }
+        };
+        mController.addExternalInterface(EXTRA_TEST_BINDER, () -> wrapper, this);
+
+        Bundle b = new Bundle();
+        mController.asShell().createExternalInterfaces(b);
+        assertTrue(b.getIBinder(EXTRA_TEST_BINDER) == callback);
+    }
+
+    @Test
+    public void testAddExternalInterface_disallowDuplicateKeys() {
+        Binder callback = new Binder();
+        ExternalInterfaceBinder wrapper = new ExternalInterfaceBinder() {
+            @Override
+            public void invalidate() {
+                // Do nothing
+            }
+
+            @Override
+            public IBinder asBinder() {
+                return callback;
+            }
+        };
+        mController.addExternalInterface(EXTRA_TEST_BINDER, () -> wrapper, this);
+        assertThrows(IllegalArgumentException.class, () -> {
+            mController.addExternalInterface(EXTRA_TEST_BINDER, () -> wrapper, this);
+        });
     }
 
     @Test
