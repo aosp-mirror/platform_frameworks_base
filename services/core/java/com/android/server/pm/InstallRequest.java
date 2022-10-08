@@ -128,7 +128,8 @@ final class InstallRequest {
                 params.mAutoRevokePermissionsMode,
                 params.mTraceMethod, params.mTraceCookie, params.mSigningDetails,
                 params.mInstallReason, params.mInstallScenario, params.mForceQueryableOverride,
-                params.mDataLoaderType, params.mPackageSource);
+                params.mDataLoaderType, params.mPackageSource,
+                params.mKeepApplicationEnabledSetting);
         mPackageMetrics = new PackageMetrics(this);
         mIsInstallInherit = params.mIsInherit;
         mSessionId = params.mSessionId;
@@ -496,6 +497,10 @@ final class InstallRequest {
     public List<String> getChangedAbiCodePath() {
         assertScanResultExists();
         return mScanResult.mChangedAbiCodePath;
+    }
+
+    public boolean isKeepApplicationEnabledSetting() {
+        return mInstallArgs == null ? false : mInstallArgs.mKeepApplicationEnabledSetting;
     }
 
     public boolean isForceQueryableOverride() {
