@@ -566,6 +566,12 @@ public class SubscriptionManager {
     public static final String NAME_SOURCE = SimInfo.COLUMN_NAME_SOURCE;
 
     /**
+     * The name_source is unknown. (for initialization)
+     * @hide
+     */
+    public static final int NAME_SOURCE_UNKNOWN = SimInfo.NAME_SOURCE_UNKNOWN;
+
+    /**
      * The name_source is from the carrier id.
      * @hide
      */
@@ -600,6 +606,7 @@ public class SubscriptionManager {
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"NAME_SOURCE_"},
             value = {
+                    NAME_SOURCE_UNKNOWN,
                     NAME_SOURCE_CARRIER_ID,
                     NAME_SOURCE_SIM_SPN,
                     NAME_SOURCE_USER_INPUT,
