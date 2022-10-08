@@ -151,6 +151,7 @@ import android.util.DisplayMetrics;
 import android.util.FeatureFlagUtils;
 import android.util.IntArray;
 import android.util.Log;
+import android.util.Range;
 import android.util.SparseIntArray;
 import android.util.TypedValue;
 import android.view.AccessibilityIterators.TextSegmentIterator;
@@ -9312,27 +9313,27 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     /** @hide */
     public int performHandwritingSelectGesture(@NonNull SelectGesture gesture) {
-        int[] range = getRangeForRect(
+        Range<Integer> range = getRangeForRect(
                 convertFromScreenToContentCoordinates(gesture.getSelectionArea()),
                 gesture.getGranularity());
         if (range == null) {
             return handleGestureFailure(gesture);
         }
-        Selection.setSelection(getEditableText(), range[0], range[1]);
+        Selection.setSelection(getEditableText(), range.getLower(), range.getUpper());
         mEditor.startSelectionActionModeAsync(/* adjustSelection= */ false);
         return InputConnection.HANDWRITING_GESTURE_RESULT_SUCCESS;
     }
 
     /** @hide */
     public int performHandwritingDeleteGesture(@NonNull DeleteGesture gesture) {
-        int[] range = getRangeForRect(
+        Range<Integer> range = getRangeForRect(
                 convertFromScreenToContentCoordinates(gesture.getDeletionArea()),
                 gesture.getGranularity());
         if (range == null) {
             return handleGestureFailure(gesture);
         }
-        int start = range[0];
-        int end = range[1];
+        int start = range.getLower();
+        int end = range.getUpper();
 
         // For word granularity, adjust the start and end offsets to remove extra whitespace around
         // the deleted text.
@@ -9523,7 +9524,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     @Nullable
-    private int[] getRangeForRect(@NonNull RectF area, int granularity) {
+    private Range<Integer> getRangeForRect(@NonNull RectF area, int granularity) {
         SegmentFinder segmentFinder;
         if (granularity == HandwritingGesture.GRANULARITY_WORD) {
             WordIterator wordIterator = getWordIterator();

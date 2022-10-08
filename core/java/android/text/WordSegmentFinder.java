@@ -18,11 +18,9 @@ package android.text;
 
 import android.annotation.IntRange;
 import android.annotation.NonNull;
-import android.annotation.SuppressLint;
 import android.icu.text.BreakIterator;
+import android.icu.util.ULocale;
 import android.text.method.WordIterator;
-
-import java.util.Locale;
 
 /**
  * Implementation of {@link SegmentFinder} using words as the text segment. Word boundaries are
@@ -39,14 +37,28 @@ public class WordSegmentFinder extends SegmentFinder {
     private final CharSequence mText;
     private final WordIterator mWordIterator;
 
+    /**
+     * Constructs a WordSegmentFinder instance for the specified text which uses the provided locale
+     * to determine word boundaries.
+     *
+     * @param text text to be segmented
+     * @param locale locale used for analyzing the text
+     */
     public WordSegmentFinder(
-            @NonNull CharSequence text, @SuppressLint("UseIcu") @NonNull Locale locale) {
+            @NonNull CharSequence text, @NonNull ULocale locale) {
         mText = text;
         mWordIterator = new WordIterator(locale);
         mWordIterator.setCharSequence(text, 0, text.length());
     }
 
-    /** @hide */
+    /**
+     * Constructs a WordSegmentFinder instance for the specified text which uses the provided
+     * WordIterator to determine word boundaries.
+     *
+     * @param text text to be segmented
+     * @param wordIterator word iterator used to find word boundaries in the text
+     * @hide
+     */
     public WordSegmentFinder(@NonNull CharSequence text, @NonNull WordIterator wordIterator) {
         mText = text;
         mWordIterator = wordIterator;

@@ -33,6 +33,11 @@ import android.graphics.RectF;
  * @see Layout#getRangeForRect(RectF, SegmentFinder, Layout.TextInclusionStrategy)
  */
 public abstract class SegmentFinder {
+    /**
+     * Return value of previousStartBoundary(int), previousEndBoundary(int), nextStartBoundary(int),
+     * and nextEndBoundary(int) when there are no boundaries of the specified type in the specified
+     * direction.
+     */
     public static final int DONE = -1;
 
     /**

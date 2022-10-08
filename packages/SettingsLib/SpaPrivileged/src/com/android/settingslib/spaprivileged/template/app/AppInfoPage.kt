@@ -32,10 +32,11 @@ fun AppInfoPage(
 ) {
     RegularScaffold(title = title) {
         val appInfoProvider = remember {
-            val packageInfo = PackageManagers.getPackageInfoAsUser(packageName, userId)
-                ?: return@RegularScaffold
-            AppInfoProvider(packageInfo)
-        }
+            PackageManagers.getPackageInfoAsUser(packageName, userId)?.let { packageInfo ->
+                AppInfoProvider(packageInfo)
+            }
+        } ?: return@RegularScaffold
+
         appInfoProvider.AppInfo(displayVersion = true)
 
         content()

@@ -576,7 +576,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
      * <p>Calling this overrides any previous call to {@link #setZOrderOnTop}.
      */
     public void setZOrderMediaOverlay(boolean isMediaOverlay) {
-        mSubLayer = isMediaOverlay
+        mRequestedSubLayer = isMediaOverlay
             ? APPLICATION_MEDIA_OVERLAY_SUBLAYER : APPLICATION_MEDIA_SUBLAYER;
     }
 

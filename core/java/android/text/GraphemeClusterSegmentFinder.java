@@ -34,6 +34,13 @@ public class GraphemeClusterSegmentFinder extends SegmentFinder {
     private final CharSequence mText;
     private final TextPaint mTextPaint;
 
+    /**
+     * Constructs a GraphemeClusterSegmentFinder instance for the specified text which uses the
+     * provided TextPaint to determine grapheme cluster boundaries.
+     *
+     * @param text text to be segmented
+     * @param textPaint TextPaint used to draw the text
+     */
     public GraphemeClusterSegmentFinder(
             @NonNull CharSequence text, @NonNull TextPaint textPaint) {
         mText = text;
