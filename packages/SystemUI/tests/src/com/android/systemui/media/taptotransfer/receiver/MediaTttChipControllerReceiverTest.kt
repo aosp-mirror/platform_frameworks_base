@@ -212,35 +212,27 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
     }
 
     @Test
-    fun updateView_isAppIcon_usesAppIconSize() {
+    fun updateView_isAppIcon_usesAppIconPadding() {
         controllerReceiver.displayView(getChipReceiverInfo(packageName = PACKAGE_NAME))
+
         val chipView = getChipView()
-
-        chipView.measure(
-            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
-            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
-        )
-
-        val expectedSize =
-            context.resources.getDimensionPixelSize(R.dimen.media_ttt_icon_size_receiver)
-        assertThat(chipView.getAppIconView().measuredWidth).isEqualTo(expectedSize)
-        assertThat(chipView.getAppIconView().measuredHeight).isEqualTo(expectedSize)
+        assertThat(chipView.getAppIconView().paddingLeft).isEqualTo(0)
+        assertThat(chipView.getAppIconView().paddingRight).isEqualTo(0)
+        assertThat(chipView.getAppIconView().paddingTop).isEqualTo(0)
+        assertThat(chipView.getAppIconView().paddingBottom).isEqualTo(0)
     }
 
     @Test
-    fun updateView_notAppIcon_usesGenericIconSize() {
+    fun updateView_notAppIcon_usesGenericIconPadding() {
         controllerReceiver.displayView(getChipReceiverInfo(packageName = null))
+
         val chipView = getChipView()
-
-        chipView.measure(
-            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
-            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
-        )
-
-        val expectedSize =
-            context.resources.getDimensionPixelSize(R.dimen.media_ttt_generic_icon_size_receiver)
-        assertThat(chipView.getAppIconView().measuredWidth).isEqualTo(expectedSize)
-        assertThat(chipView.getAppIconView().measuredHeight).isEqualTo(expectedSize)
+        val expectedPadding =
+            context.resources.getDimensionPixelSize(R.dimen.media_ttt_generic_icon_padding)
+        assertThat(chipView.getAppIconView().paddingLeft).isEqualTo(expectedPadding)
+        assertThat(chipView.getAppIconView().paddingRight).isEqualTo(expectedPadding)
+        assertThat(chipView.getAppIconView().paddingTop).isEqualTo(expectedPadding)
+        assertThat(chipView.getAppIconView().paddingBottom).isEqualTo(expectedPadding)
     }
 
     @Test

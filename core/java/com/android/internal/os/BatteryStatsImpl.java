@@ -167,7 +167,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    static final int VERSION = 208;
+    static final int VERSION = 210;
 
     // The maximum number of names wakelocks we will keep track of
     // per uid; once the limit is reached, we batch the remaining wakelocks
@@ -6145,12 +6145,13 @@ public class BatteryStatsImpl extends BatteryStats {
 
     @UnsupportedAppUsage
     @GuardedBy("this")
-    public void noteUserActivityLocked(int uid, int event) {
+    public void noteUserActivityLocked(int uid, @PowerManager.UserActivityEvent int event) {
         noteUserActivityLocked(uid, event, mClock.elapsedRealtime(), mClock.uptimeMillis());
     }
 
     @GuardedBy("this")
-    public void noteUserActivityLocked(int uid, int event, long elapsedRealtimeMs, long uptimeMs) {
+    public void noteUserActivityLocked(int uid, @PowerManager.UserActivityEvent int event,
+            long elapsedRealtimeMs, long uptimeMs) {
         if (mOnBatteryInternal) {
             uid = mapUid(uid);
             getUidStatsLocked(uid, elapsedRealtimeMs, uptimeMs).noteUserActivityLocked(event);
@@ -9962,14 +9963,14 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         @Override
-        public void noteUserActivityLocked(int type) {
+        public void noteUserActivityLocked(@PowerManager.UserActivityEvent int event) {
             if (mUserActivityCounters == null) {
                 initUserActivityLocked();
             }
-            if (type >= 0 && type < NUM_USER_ACTIVITY_TYPES) {
-                mUserActivityCounters[type].stepAtomic();
+            if (event >= 0 && event < NUM_USER_ACTIVITY_TYPES) {
+                mUserActivityCounters[event].stepAtomic();
             } else {
-                Slog.w(TAG, "Unknown user activity type " + type + " was specified.",
+                Slog.w(TAG, "Unknown user activity type " + event + " was specified.",
                         new Throwable());
             }
         }

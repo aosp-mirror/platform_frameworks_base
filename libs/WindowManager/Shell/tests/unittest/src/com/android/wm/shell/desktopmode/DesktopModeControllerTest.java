@@ -52,6 +52,7 @@ import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestRunningTaskInfoBuilder;
 import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.ShellExecutor;
+import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 
@@ -67,6 +68,8 @@ import org.mockito.Mockito;
 @RunWith(AndroidTestingRunner.class)
 public class DesktopModeControllerTest extends ShellTestCase {
 
+    @Mock
+    private ShellController mShellController;
     @Mock
     private ShellTaskOrganizer mShellTaskOrganizer;
     @Mock
@@ -94,8 +97,8 @@ public class DesktopModeControllerTest extends ShellTestCase {
 
         mDesktopModeTaskRepository = new DesktopModeTaskRepository();
 
-        mController = new DesktopModeController(mContext, mShellInit, mShellTaskOrganizer,
-                mRootTaskDisplayAreaOrganizer, mMockTransitions,
+        mController = new DesktopModeController(mContext, mShellInit, mShellController,
+                mShellTaskOrganizer, mRootTaskDisplayAreaOrganizer, mMockTransitions,
                 mDesktopModeTaskRepository, mMockHandler, mExecutor);
 
         when(mShellTaskOrganizer.prepareClearFreeformForStandardTasks(anyInt())).thenReturn(

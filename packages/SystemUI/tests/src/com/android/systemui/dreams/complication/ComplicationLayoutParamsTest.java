@@ -97,10 +97,62 @@ public class ComplicationLayoutParamsTest extends SysuiTestCase {
     }
 
     /**
+     * Ensures unspecified margin uses default.
+     */
+    @Test
+    public void testUnspecifiedMarginUsesDefault() {
+        final ComplicationLayoutParams params = new ComplicationLayoutParams(
+                100,
+                100,
+                ComplicationLayoutParams.POSITION_TOP,
+                ComplicationLayoutParams.DIRECTION_DOWN,
+                3);
+        assertThat(params.getMargin(10) == 10).isTrue();
+    }
+
+    /**
+     * Ensures specified margin is used instead of default.
+     */
+    @Test
+    public void testSpecifiedMargin() {
+        final ComplicationLayoutParams params = new ComplicationLayoutParams(
+                100,
+                100,
+                ComplicationLayoutParams.POSITION_TOP,
+                ComplicationLayoutParams.DIRECTION_DOWN,
+                3,
+                10);
+        assertThat(params.getMargin(5) == 10).isTrue();
+    }
+
+    /**
      * Ensures ComplicationLayoutParams is properly duplicated on copy construction.
      */
     @Test
     public void testCopyConstruction() {
+        final ComplicationLayoutParams params = new ComplicationLayoutParams(
+                100,
+                100,
+                ComplicationLayoutParams.POSITION_TOP,
+                ComplicationLayoutParams.DIRECTION_DOWN,
+                3,
+                10);
+        final ComplicationLayoutParams copy = new ComplicationLayoutParams(params);
+
+        assertThat(copy.getDirection() == params.getDirection()).isTrue();
+        assertThat(copy.getPosition() == params.getPosition()).isTrue();
+        assertThat(copy.getWeight() == params.getWeight()).isTrue();
+        assertThat(copy.getMargin(0) == params.getMargin(1)).isTrue();
+        assertThat(copy.height == params.height).isTrue();
+        assertThat(copy.width == params.width).isTrue();
+    }
+
+    /**
+     * Ensures ComplicationLayoutParams is properly duplicated on copy construction with unspecified
+     * margin.
+     */
+    @Test
+    public void testCopyConstructionWithUnspecifiedMargin() {
         final ComplicationLayoutParams params = new ComplicationLayoutParams(
                 100,
                 100,
@@ -112,6 +164,7 @@ public class ComplicationLayoutParamsTest extends SysuiTestCase {
         assertThat(copy.getDirection() == params.getDirection()).isTrue();
         assertThat(copy.getPosition() == params.getPosition()).isTrue();
         assertThat(copy.getWeight() == params.getWeight()).isTrue();
+        assertThat(copy.getMargin(1) == params.getMargin(1)).isTrue();
         assertThat(copy.height == params.height).isTrue();
         assertThat(copy.width == params.width).isTrue();
     }

@@ -61,6 +61,8 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var powerManager: PowerManager
 
+    private var shouldIgnoreViewRemoval: Boolean = false
+
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
@@ -205,6 +207,26 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
         verify(windowManager, never()).removeView(any())
     }
 
+    @Test
+    fun removeView_shouldIgnoreRemovalFalse_viewRemoved() {
+        shouldIgnoreViewRemoval = false
+        underTest.displayView(getState())
+
+        underTest.removeView("reason")
+
+        verify(windowManager).removeView(any())
+    }
+
+    @Test
+    fun removeView_shouldIgnoreRemovalTrue_viewNotRemoved() {
+        shouldIgnoreViewRemoval = true
+        underTest.displayView(getState())
+
+        underTest.removeView("reason")
+
+        verify(windowManager, never()).removeView(any())
+    }
+
     private fun getState(name: String = "name") = ViewInfo(name)
 
     private fun getConfigurationListener(): ConfigurationListener {
@@ -239,6 +261,10 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
         override fun updateView(newInfo: ViewInfo, currentView: ViewGroup) {
             super.updateView(newInfo, currentView)
             mostRecentViewInfo = newInfo
+        }
+
+        override fun shouldIgnoreViewRemoval(removalReason: String): Boolean {
+            return shouldIgnoreViewRemoval
         }
     }
 

@@ -431,8 +431,8 @@ public class DozeLog implements Dumpable {
         }
 
         @Override
-        public void onKeyguardVisibilityChanged(boolean showing) {
-            traceKeyguard(showing);
+        public void onKeyguardVisibilityChanged(boolean visible) {
+            traceKeyguard(visible);
         }
     };
 

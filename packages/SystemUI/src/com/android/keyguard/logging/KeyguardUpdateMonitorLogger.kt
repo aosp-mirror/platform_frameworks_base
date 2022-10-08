@@ -170,8 +170,14 @@ class KeyguardUpdateMonitorLogger @Inject constructor(
         logBuffer.log(TAG, VERBOSE, { str1 = "$model" }, { str1!! })
     }
 
-    fun logKeyguardVisibilityChanged(showing: Boolean) {
-        logBuffer.log(TAG, DEBUG, { bool1 = showing }, { "onKeyguardVisibilityChanged($bool1)" })
+    fun logKeyguardShowingChanged(showing: Boolean, occluded: Boolean, visible: Boolean) {
+        logBuffer.log(TAG, DEBUG, {
+            bool1 = showing
+            bool2 = occluded
+            bool3 = visible
+        }, {
+            "keyguardShowingChanged(showing=$bool1 occluded=$bool2 visible=$bool3)"
+        })
     }
 
     fun logMissingSupervisorAppError(userId: Int) {

@@ -20,6 +20,7 @@ import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
 
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -61,6 +62,7 @@ import com.android.wm.shell.pip.PipTransitionState;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.sysui.ShellSharedConstants;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -149,6 +151,12 @@ public class PipControllerTest extends ShellTestCase {
     @Test
     public void instantiatePipController_registerKeyguardChangeListener() {
         verify(mShellController, times(1)).addKeyguardChangeListener(any());
+    }
+
+    @Test
+    public void instantiatePipController_registerExternalInterface() {
+        verify(mShellController, times(1)).addExternalInterface(
+                eq(ShellSharedConstants.KEY_EXTRA_SHELL_PIP), any(), any());
     }
 
     @Test

@@ -52,6 +52,7 @@ import com.android.wm.shell.floating.views.FloatingTaskLayer;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.sysui.ShellSharedConstants;
 
 import org.junit.After;
 import org.junit.Before;
@@ -165,6 +166,18 @@ public class FloatingTasksControllerTest extends ShellTestCase {
             mController.onInit();
 
             verify(mShellController, times(1)).addConfigurationChangeListener(any());
+        }
+    }
+
+    @Test
+    public void onInit_addExternalInterface() {
+        if (FLOATING_TASKS_ACTUALLY_ENABLED) {
+            createController();
+            setUpTabletConfig();
+            mController.onInit();
+
+            verify(mShellController, times(1)).addExternalInterface(
+                    ShellSharedConstants.KEY_EXTRA_SHELL_FLOATING_TASKS, any(), any());
         }
     }
 

@@ -37,7 +37,7 @@ import dagger.Provides;
 @Module
 public abstract class ComplicationHostViewModule {
     public static final String SCOPED_COMPLICATIONS_LAYOUT = "scoped_complications_layout";
-    public static final String COMPLICATION_MARGIN = "complication_margin";
+    public static final String COMPLICATION_MARGIN_DEFAULT = "complication_margin_default";
     public static final String COMPLICATIONS_FADE_OUT_DURATION = "complications_fade_out_duration";
     public static final String COMPLICATIONS_FADE_IN_DURATION = "complications_fade_in_duration";
     public static final String COMPLICATIONS_RESTORE_TIMEOUT = "complication_restore_timeout";
@@ -58,7 +58,7 @@ public abstract class ComplicationHostViewModule {
     }
 
     @Provides
-    @Named(COMPLICATION_MARGIN)
+    @Named(COMPLICATION_MARGIN_DEFAULT)
     @DreamOverlayComponent.DreamOverlayScope
     static int providesComplicationPadding(@Main Resources resources) {
         return resources.getDimensionPixelSize(R.dimen.dream_overlay_complication_margin);

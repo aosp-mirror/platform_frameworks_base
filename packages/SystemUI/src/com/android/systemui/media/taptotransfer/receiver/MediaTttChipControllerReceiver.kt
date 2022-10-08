@@ -30,6 +30,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
+import com.android.internal.widget.CachingIconView
 import com.android.settingslib.Utils
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
@@ -146,20 +147,17 @@ class MediaTttChipControllerReceiver @Inject constructor(
         )
         val iconDrawable = newInfo.appIconDrawableOverride ?: iconInfo.drawable
         val iconContentDescription = newInfo.appNameOverride ?: iconInfo.contentDescription
-        val iconSize = context.resources.getDimensionPixelSize(
+        val iconPadding =
             if (iconInfo.isAppIcon) {
-                R.dimen.media_ttt_icon_size_receiver
+                0
             } else {
-                R.dimen.media_ttt_generic_icon_size_receiver
+                context.resources.getDimensionPixelSize(R.dimen.media_ttt_generic_icon_padding)
             }
-        )
 
-        MediaTttUtils.setIcon(
-            currentView.requireViewById(R.id.app_icon),
-            iconDrawable,
-            iconContentDescription,
-            iconSize,
-        )
+        val iconView = currentView.requireViewById<CachingIconView>(R.id.app_icon)
+        iconView.setPadding(iconPadding, iconPadding, iconPadding, iconPadding)
+        iconView.setImageDrawable(iconDrawable)
+        iconView.contentDescription = iconContentDescription
     }
 
     override fun animateViewIn(view: ViewGroup) {

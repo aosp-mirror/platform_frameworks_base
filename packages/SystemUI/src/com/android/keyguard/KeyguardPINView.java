@@ -176,6 +176,8 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
 
     @Override
     public void startAppearAnimation() {
+        setAlpha(1f);
+        setTranslationY(0);
         if (mAppearAnimator.isRunning()) {
             mAppearAnimator.cancel();
         }

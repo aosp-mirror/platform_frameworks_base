@@ -14,13 +14,21 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.desktopmode;
+package com.android.wm.shell.common;
 
-import com.android.wm.shell.common.annotations.ExternalThread;
+import android.os.IBinder;
 
 /**
- * Interface to interact with desktop mode feature in shell.
+ * An interface for binders which can be registered to be sent to other processes.
  */
-@ExternalThread
-public interface DesktopMode {
+public interface ExternalInterfaceBinder {
+    /**
+     * Invalidates this binder (detaches it from the controller it would call).
+     */
+    void invalidate();
+
+    /**
+     * Returns the IBinder to send.
+     */
+    IBinder asBinder();
 }

@@ -21,6 +21,7 @@ import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_M
 
 import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_FLOATING_APPS;
+import static com.android.wm.shell.sysui.ShellSharedConstants.KEY_EXTRA_SHELL_FLOATING_TASKS;
 
 import android.annotation.Nullable;
 import android.content.Context;
@@ -40,6 +41,7 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.TaskViewTransitions;
 import com.android.wm.shell.bubbles.BubbleController;
+import com.android.wm.shell.common.ExternalInterfaceBinder;
 import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
@@ -136,11 +138,13 @@ public class FloatingTasksController implements RemoteCallable<FloatingTasksCont
         if (isFloatingTasksEnabled()) {
             shellInit.addInitCallback(this::onInit, this);
         }
-        mShellCommandHandler.addDumpCallback(this::dump, this);
     }
 
     protected void onInit() {
         mShellController.addConfigurationChangeListener(this);
+        mShellController.addExternalInterface(KEY_EXTRA_SHELL_FLOATING_TASKS,
+                this::createExternalInterface, this);
+        mShellCommandHandler.addDumpCallback(this::dump, this);
     }
 
     /** Only used for testing. */
@@ -166,6 +170,10 @@ public class FloatingTasksController implements RemoteCallable<FloatingTasksCont
     /** Whether floating tasks are enabled.  */
     boolean isFloatingTasksEnabled() {
         return FLOATING_TASKS_ENABLED || mFloatingTasksEnabledForTests;
+    }
+
+    private ExternalInterfaceBinder createExternalInterface() {
+        return new IFloatingTasksImpl(this);
     }
 
     @Override
@@ -412,20 +420,9 @@ public class FloatingTasksController implements RemoteCallable<FloatingTasksCont
      */
     @ExternalThread
     private class FloatingTaskImpl implements FloatingTasks {
-        private IFloatingTasksImpl mIFloatingTasks;
-
         @Override
         public void showOrSetStashed(Intent intent) {
             mMainExecutor.execute(() -> FloatingTasksController.this.showOrSetStashed(intent));
-        }
-
-        @Override
-        public IFloatingTasks createExternalInterface() {
-            if (mIFloatingTasks != null) {
-                mIFloatingTasks.invalidate();
-            }
-            mIFloatingTasks = new IFloatingTasksImpl(FloatingTasksController.this);
-            return mIFloatingTasks;
         }
     }
 
@@ -433,7 +430,8 @@ public class FloatingTasksController implements RemoteCallable<FloatingTasksCont
      * The interface for calls from outside the host process.
      */
     @BinderThread
-    private static class IFloatingTasksImpl extends IFloatingTasks.Stub {
+    private static class IFloatingTasksImpl extends IFloatingTasks.Stub
+            implements ExternalInterfaceBinder {
         private FloatingTasksController mController;
 
         IFloatingTasksImpl(FloatingTasksController controller) {
@@ -443,7 +441,8 @@ public class FloatingTasksController implements RemoteCallable<FloatingTasksCont
         /**
          * Invalidates this instance, preventing future calls from updating the controller.
          */
-        void invalidate() {
+        @Override
+        public void invalidate() {
             mController = null;
         }
 
