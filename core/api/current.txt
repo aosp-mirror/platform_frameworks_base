@@ -45331,7 +45331,7 @@ package android.text {
     method public final int getParagraphLeft(int);
     method public final int getParagraphRight(int);
     method public float getPrimaryHorizontal(int);
-    method @Nullable public int[] getRangeForRect(@NonNull android.graphics.RectF, @NonNull android.text.SegmentFinder, @NonNull android.text.Layout.TextInclusionStrategy);
+    method @Nullable public android.util.Range<java.lang.Integer> getRangeForRect(@NonNull android.graphics.RectF, @NonNull android.text.SegmentFinder, @NonNull android.text.Layout.TextInclusionStrategy);
     method public float getSecondaryHorizontal(int);
     method public void getSelectionPath(int, int, android.graphics.Path);
     method public final float getSpacingAdd();
@@ -45746,7 +45746,7 @@ package android.text {
   }
 
   public class WordSegmentFinder extends android.text.SegmentFinder {
-    ctor public WordSegmentFinder(@NonNull CharSequence, @NonNull java.util.Locale);
+    ctor public WordSegmentFinder(@NonNull CharSequence, @NonNull android.icu.util.ULocale);
     method public int nextEndBoundary(@IntRange(from=0) int);
     method public int nextStartBoundary(@IntRange(from=0) int);
     method public int previousEndBoundary(@IntRange(from=0) int);
