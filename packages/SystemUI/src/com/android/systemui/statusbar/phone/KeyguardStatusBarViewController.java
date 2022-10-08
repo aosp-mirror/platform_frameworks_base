@@ -187,8 +187,8 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
                 }
 
                 @Override
-                public void onKeyguardVisibilityChanged(boolean showing) {
-                    if (showing) {
+                public void onKeyguardVisibilityChanged(boolean visible) {
+                    if (visible) {
                         updateUserSwitcher();
                     }
                 }

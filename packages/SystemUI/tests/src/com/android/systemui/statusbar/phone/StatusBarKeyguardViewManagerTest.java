@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static com.android.systemui.flags.Flags.MODERN_BOUNCER;
+
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -23,11 +25,9 @@ import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -528,25 +528,10 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         verify(mCentralSurfaces).setBouncerShowingOverDream(false);
     }
 
-
     @Test
-    public void testSetDozing_bouncerShowing_Dozing() {
-        clearInvocations(mBouncer);
-        when(mBouncer.isShowing()).thenReturn(true);
-        doAnswer(invocation -> {
-            when(mBouncer.isShowing()).thenReturn(false);
-            return null;
-        }).when(mBouncer).hide(false);
-        mStatusBarKeyguardViewManager.onDozingChanged(true);
-        verify(mBouncer, times(1)).hide(false);
-    }
-
-    @Test
-    public void testSetDozing_bouncerShowing_notDozing() {
-        mStatusBarKeyguardViewManager.onDozingChanged(true);
-        when(mBouncer.isShowing()).thenReturn(true);
-        clearInvocations(mBouncer);
-        mStatusBarKeyguardViewManager.onDozingChanged(false);
-        verify(mBouncer, times(1)).hide(false);
+    public void flag_off_DoesNotCallBouncerInteractor() {
+        when(mFeatureFlags.isEnabled(MODERN_BOUNCER)).thenReturn(false);
+        mStatusBarKeyguardViewManager.hideBouncer(false);
+        verify(mBouncerInteractor, never()).hide();
     }
 }

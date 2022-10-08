@@ -58,6 +58,7 @@ import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.sysui.ShellSharedConstants;
 import com.android.wm.shell.transition.Transitions;
 
 import org.junit.Before;
@@ -130,6 +131,15 @@ public class SplitScreenControllerTests extends ShellTestCase {
         when(mDisplayController.getDisplayLayout(anyInt())).thenReturn(new DisplayLayout());
         mSplitScreenController.onInit();
         verify(mShellController, times(1)).addKeyguardChangeListener(any());
+    }
+
+    @Test
+    public void instantiateController_addExternalInterface() {
+        doReturn(mMainExecutor).when(mTaskOrganizer).getExecutor();
+        when(mDisplayController.getDisplayLayout(anyInt())).thenReturn(new DisplayLayout());
+        mSplitScreenController.onInit();
+        verify(mShellController, times(1)).addExternalInterface(
+                eq(ShellSharedConstants.KEY_EXTRA_SHELL_SPLIT_SCREEN), any(), any());
     }
 
     @Test

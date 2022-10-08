@@ -33,9 +33,4 @@ public interface FloatingTasks {
      * - If there is a floating task for this intent, and it's not stashed, this stashes it.
      */
     void showOrSetStashed(Intent intent);
-
-    /** Returns a binder that can be passed to an external process to manipulate FloatingTasks. */
-    default IFloatingTasks createExternalInterface() {
-        return null;
-    }
 }

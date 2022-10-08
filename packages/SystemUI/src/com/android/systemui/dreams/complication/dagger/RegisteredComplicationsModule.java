@@ -59,11 +59,11 @@ public interface RegisteredComplicationsModule {
     @Named(DREAM_CLOCK_TIME_COMPLICATION_LAYOUT_PARAMS)
     static ComplicationLayoutParams provideClockTimeLayoutParams() {
         return new ComplicationLayoutParams(0,
-            ViewGroup.LayoutParams.WRAP_CONTENT,
-            ComplicationLayoutParams.POSITION_TOP
-                    | ComplicationLayoutParams.POSITION_START,
-            ComplicationLayoutParams.DIRECTION_DOWN,
-            DREAM_CLOCK_TIME_COMPLICATION_WEIGHT);
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ComplicationLayoutParams.POSITION_TOP
+                        | ComplicationLayoutParams.POSITION_START,
+                ComplicationLayoutParams.DIRECTION_DOWN,
+                DREAM_CLOCK_TIME_COMPLICATION_WEIGHT);
     }
 
     /**
@@ -73,12 +73,12 @@ public interface RegisteredComplicationsModule {
     @Named(DREAM_HOME_CONTROLS_CHIP_LAYOUT_PARAMS)
     static ComplicationLayoutParams provideHomeControlsChipLayoutParams(@Main Resources res) {
         return new ComplicationLayoutParams(
-            res.getDimensionPixelSize(R.dimen.keyguard_affordance_fixed_width),
-            res.getDimensionPixelSize(R.dimen.keyguard_affordance_fixed_height),
-            ComplicationLayoutParams.POSITION_BOTTOM
-                    | ComplicationLayoutParams.POSITION_START,
-            ComplicationLayoutParams.DIRECTION_END,
-            DREAM_HOME_CONTROLS_CHIP_COMPLICATION_WEIGHT);
+                res.getDimensionPixelSize(R.dimen.keyguard_affordance_fixed_width),
+                res.getDimensionPixelSize(R.dimen.keyguard_affordance_fixed_height),
+                ComplicationLayoutParams.POSITION_BOTTOM
+                        | ComplicationLayoutParams.POSITION_START,
+                ComplicationLayoutParams.DIRECTION_END,
+                DREAM_HOME_CONTROLS_CHIP_COMPLICATION_WEIGHT);
     }
 
     /**
@@ -103,11 +103,12 @@ public interface RegisteredComplicationsModule {
     @Named(DREAM_SMARTSPACE_LAYOUT_PARAMS)
     static ComplicationLayoutParams provideSmartspaceLayoutParams() {
         return new ComplicationLayoutParams(0,
-            ViewGroup.LayoutParams.WRAP_CONTENT,
-            ComplicationLayoutParams.POSITION_TOP
-                    | ComplicationLayoutParams.POSITION_START,
-            ComplicationLayoutParams.DIRECTION_DOWN,
-            DREAM_SMARTSPACE_COMPLICATION_WEIGHT,
-            true /*snapToGuide*/);
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ComplicationLayoutParams.POSITION_TOP
+                        | ComplicationLayoutParams.POSITION_START,
+                ComplicationLayoutParams.DIRECTION_DOWN,
+                DREAM_SMARTSPACE_COMPLICATION_WEIGHT,
+                0,
+                true /*snapToGuide*/);
     }
 }

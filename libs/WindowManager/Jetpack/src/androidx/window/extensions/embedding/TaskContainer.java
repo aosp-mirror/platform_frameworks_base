@@ -140,7 +140,7 @@ class TaskContainer {
     void updateTaskFragmentParentInfo(@NonNull TaskFragmentParentInfo info) {
         mConfiguration.setTo(info.getConfiguration());
         mDisplayId = info.getDisplayId();
-        mIsVisible = info.isVisibleRequested();
+        mIsVisible = info.isVisible();
     }
 
     /**

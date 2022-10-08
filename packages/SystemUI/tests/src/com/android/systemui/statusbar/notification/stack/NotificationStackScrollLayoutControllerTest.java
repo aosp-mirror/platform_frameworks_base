@@ -45,6 +45,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.media.KeyguardMediaController;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.OnMenuEventListener;
@@ -127,6 +128,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     @Mock private NotificationStackScrollLogger mLogger;
     @Mock private NotificationStackSizeCalculator mNotificationStackSizeCalculator;
     @Mock private ShadeTransitionController mShadeTransitionController;
+    @Mock private FeatureFlags mFeatureFlags;
 
     @Captor
     private ArgumentCaptor<StatusBarStateController.StateListener> mStateListenerArgumentCaptor;
@@ -174,7 +176,8 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
                 mJankMonitor,
                 mStackLogger,
                 mLogger,
-                mNotificationStackSizeCalculator
+                mNotificationStackSizeCalculator,
+                mFeatureFlags
         );
 
         when(mNotificationStackScrollLayout.isAttachedToWindow()).thenReturn(true);

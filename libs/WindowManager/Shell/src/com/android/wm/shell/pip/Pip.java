@@ -27,14 +27,6 @@ import java.util.function.Consumer;
  */
 @ExternalThread
 public interface Pip {
-
-    /**
-     * Returns a binder that can be passed to an external process to manipulate PIP.
-     */
-    default IPip createExternalInterface() {
-        return null;
-    }
-
     /**
      * Expand PIP, it's possible that specific request to activate the window via Alt-tab.
      */
