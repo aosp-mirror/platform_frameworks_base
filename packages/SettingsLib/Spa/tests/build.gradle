@@ -53,7 +53,7 @@ android {
         compose true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion jetpack_compose_version
+        kotlinCompilerExtensionVersion jetpack_compose_compiler_version
     }
     packagingOptions {
         resources {

@@ -143,9 +143,11 @@ private fun <T : AppRecord> createSwitchModel(
     userId: Int,
 ): TogglePermissionSwitchModel<T>? {
     val record = remember {
-        val app = PackageManagers.getApplicationInfoAsUser(packageName, userId) ?: return null
-        listModel.transformItem(app)
-    }
+        PackageManagers.getApplicationInfoAsUser(packageName, userId)?.let { app ->
+            listModel.transformItem(app)
+        }
+    } ?: return null
+
     val context = LocalContext.current
     val isAllowed = listModel.isAllowed(record)
     return remember {

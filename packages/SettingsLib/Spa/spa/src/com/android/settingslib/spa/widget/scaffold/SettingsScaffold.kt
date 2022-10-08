@@ -61,6 +61,7 @@ fun SettingsScaffold(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun settingsTopAppBarColors() = TopAppBarDefaults.largeTopAppBarColors(
     containerColor = SettingsTheme.colorScheme.surfaceHeader,

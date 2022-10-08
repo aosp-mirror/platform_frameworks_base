@@ -43,13 +43,13 @@ android {
     }
     kotlinOptions {
         jvmTarget = '1.8'
-        freeCompilerArgs = ["-Xjvm-default=all", "-Xopt-in=kotlin.RequiresOptIn"]
+        freeCompilerArgs = ["-Xjvm-default=all", "-opt-in=kotlin.RequiresOptIn"]
     }
     buildFeatures {
         compose true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion jetpack_compose_version
+        kotlinCompilerExtensionVersion jetpack_compose_compiler_version
     }
     packagingOptions {
         resources {

@@ -36,6 +36,7 @@ import android.text.style.LineBackgroundSpan;
 import android.text.style.ParagraphStyle;
 import android.text.style.ReplacementSpan;
 import android.text.style.TabStopSpan;
+import android.util.Range;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
@@ -1859,11 +1860,12 @@ public abstract class Layout {
      *     text segment
      * @param inclusionStrategy strategy for determining whether a text segment is inside the
      *          specified area
-     * @return int array of size 2 containing the start (inclusive) and end (exclusive) character
-     *     offsets of the range, or null if there are no text segments inside the area
+     * @return an integer range where the endpoints are the start (inclusive) and end (exclusive)
+     *     character offsets of the text range, or null if there are no text segments inside the
+     *     area
      */
     @Nullable
-    public int[] getRangeForRect(@NonNull RectF area, @NonNull SegmentFinder segmentFinder,
+    public Range<Integer> getRangeForRect(@NonNull RectF area, @NonNull SegmentFinder segmentFinder,
             @NonNull TextInclusionStrategy inclusionStrategy) {
         // Find the first line whose bottom (without line spacing) is below the top of the area.
         int startLine = getLineForVertical((int) area.top);
@@ -1921,7 +1923,7 @@ public abstract class Layout {
         start = segmentFinder.previousStartBoundary(start + 1);
         end = segmentFinder.nextEndBoundary(end - 1);
 
-        return new int[] {start, end};
+        return new Range(start, end);
     }
 
     /**

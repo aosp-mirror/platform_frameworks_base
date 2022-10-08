@@ -21,6 +21,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.icu.lang.UCharacter;
 import android.icu.lang.UProperty;
 import android.icu.text.BreakIterator;
+import android.icu.util.ULocale;
 import android.os.Build;
 import android.text.CharSequenceCharacterIterator;
 import android.text.Selection;
@@ -57,6 +58,14 @@ public class WordIterator implements Selection.PositionIterator {
      */
     @UnsupportedAppUsage
     public WordIterator(Locale locale) {
+        mIterator = BreakIterator.getWordInstance(locale);
+    }
+
+    /**
+     * Constructs a new WordIterator for the specified locale.
+     * @param locale The locale to be used for analyzing the text.
+     */
+    public WordIterator(ULocale locale) {
         mIterator = BreakIterator.getWordInstance(locale);
     }
 
