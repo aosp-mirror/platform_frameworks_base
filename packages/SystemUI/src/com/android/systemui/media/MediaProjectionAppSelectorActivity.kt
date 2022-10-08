@@ -16,6 +16,7 @@
 package com.android.systemui.media
 
 import android.app.ActivityOptions
+import android.app.IActivityTaskManager
 import android.content.Intent
 import android.media.projection.IMediaProjection
 import android.media.projection.MediaProjectionManager.EXTRA_MEDIA_PROJECTION
@@ -46,6 +47,7 @@ import javax.inject.Inject
 
 class MediaProjectionAppSelectorActivity(
     private val activityLauncher: AsyncActivityLauncher,
+    private val activityTaskManager: IActivityTaskManager,
     private val controller: MediaProjectionAppSelectorController,
     private val recentTasksAdapterFactory: RecentTasksAdapter.Factory,
     /** This is used to override the dependency in a screenshot test */
@@ -56,9 +58,10 @@ class MediaProjectionAppSelectorActivity(
     @Inject
     constructor(
         activityLauncher: AsyncActivityLauncher,
+        activityTaskManager: IActivityTaskManager,
         controller: MediaProjectionAppSelectorController,
         recentTasksAdapterFactory: RecentTasksAdapter.Factory,
-    ) : this(activityLauncher, controller, recentTasksAdapterFactory, null)
+    ) : this(activityLauncher, activityTaskManager, controller, recentTasksAdapterFactory, null)
 
     private var recentsRoot: ViewGroup? = null
     private var recentsProgress: View? = null
@@ -176,8 +179,14 @@ class MediaProjectionAppSelectorActivity(
         recycler.adapter = recentTasksAdapterFactory.create(recentTasks, this)
     }
 
-    override fun onRecentClicked(task: RecentTask, view: View) {
-        // TODO(b/240924732) Handle clicking on a recent task
+    override fun onRecentAppClicked(task: RecentTask, view: View) {
+        val launchCookie = Binder()
+        val activityOptions = ActivityOptions.makeScaleUpAnimation(view, /* startX= */ 0,
+                /* startY= */ 0, view.width, view.height)
+        activityOptions.launchCookie = launchCookie
+
+        activityTaskManager.startActivityFromRecents(task.taskId, activityOptions.toBundle())
+        onTargetActivityLaunched(launchCookie)
     }
 
     private fun onTargetActivityLaunched(launchToken: IBinder) {
