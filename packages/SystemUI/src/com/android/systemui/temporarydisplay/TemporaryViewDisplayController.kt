@@ -167,16 +167,31 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
      * @param removalReason a short string describing why the view was removed (timeout, state
      *     change, etc.)
      */
-    open fun removeView(removalReason: String) {
-        if (view == null) { return }
+    fun removeView(removalReason: String) {
+        if (shouldIgnoreViewRemoval(removalReason)) {
+            return
+        }
+        val currentView = view ?: return
+
+        animateViewOut(currentView) { windowManager.removeView(currentView) }
+
         logger.logChipRemoval(removalReason)
         configurationController.removeCallback(displayScaleListener)
-        windowManager.removeView(view)
+        // Re-set the view to null immediately (instead as part of the animation end runnable) so
+        // that if a new view event comes in while this view is animating out, we still display the
+        // new view appropriately.
         view = null
         info = null
         // No need to time the view out since it's already gone
         cancelViewTimeout?.run()
     }
+
+    /**
+     * Returns true if a view removal request should be ignored and false otherwise.
+     *
+     * Allows subclasses to keep the view visible for longer in certain circumstances.
+     */
+    open fun shouldIgnoreViewRemoval(removalReason: String): Boolean = false
 
     /**
      * A method implemented by subclasses to update [currentView] based on [newInfo].
@@ -190,7 +205,17 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
      * A method that can be implemented by subclasses to do custom animations for when the view
      * appears.
      */
-    open fun animateViewIn(view: ViewGroup) {}
+    internal open fun animateViewIn(view: ViewGroup) {}
+
+    /**
+     * A method that can be implemented by subclasses to do custom animations for when the view
+     * disappears.
+     *
+     * @param onAnimationEnd an action that *must* be run once the animation finishes successfully.
+     */
+    internal open fun animateViewOut(view: ViewGroup, onAnimationEnd: Runnable) {
+        onAnimationEnd.run()
+    }
 }
 
 object TemporaryDisplayRemovalReason {

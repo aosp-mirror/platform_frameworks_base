@@ -449,14 +449,6 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     private final KeyguardUpdateMonitorCallback mKeyguardUpdateMonitorCallback =
             new KeyguardUpdateMonitorCallback() {
                 @Override
-                public void onKeyguardVisibilityChanged(boolean showing) {
-                    // reset mIsBouncerShowing state in case it was preemptively set
-                    // onLongPress
-                    mIsBouncerShowing = mKeyguardViewController.isBouncerShowing();
-                    updateVisibility();
-                }
-
-                @Override
                 public void onKeyguardBouncerStateChanged(boolean bouncer) {
                     mIsBouncerShowing = bouncer;
                     updateVisibility();
@@ -509,6 +501,11 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
             // If biometrics were removed, local vars mCanDismissLockScreen and
             // mUserUnlockedWithBiometric may not be updated.
             mCanDismissLockScreen = mKeyguardStateController.canDismissLockScreen();
+
+            // reset mIsBouncerShowing state in case it was preemptively set
+            // onLongPress
+            mIsBouncerShowing = mKeyguardViewController.isBouncerShowing();
+
             updateKeyguardShowing();
             if (mIsKeyguardShowing) {
                 mUserUnlockedWithBiometric =

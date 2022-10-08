@@ -361,13 +361,17 @@ class ViewHierarchyAnimator {
          *
          * The end state of the animation is controlled by [destination]. This value can be any of
          * the four corners, any of the four edges, or the center of the view.
+         *
+         * @param onAnimationEnd an optional runnable that will be run once the animation finishes
+         *    successfully. Will not be run if the animation is cancelled.
          */
         @JvmOverloads
         fun animateRemoval(
             rootView: View,
             destination: Hotspot = Hotspot.CENTER,
             interpolator: Interpolator = DEFAULT_REMOVAL_INTERPOLATOR,
-            duration: Long = DEFAULT_DURATION
+            duration: Long = DEFAULT_DURATION,
+            onAnimationEnd: Runnable? = null,
         ): Boolean {
             if (
                 !occupiesSpace(
@@ -391,13 +395,28 @@ class ViewHierarchyAnimator {
                 addListener(child, listener, recursive = false)
             }
 
-            // Remove the view so that a layout update is triggered for the siblings and they
-            // animate to their next position while the view's removal is also animating.
-            parent.removeView(rootView)
-            // By adding the view to the overlay, we can animate it while it isn't part of the view
-            // hierarchy. It is correctly positioned because we have its previous bounds, and we set
-            // them manually during the animation.
-            parent.overlay.add(rootView)
+            val viewHasSiblings = parent.childCount > 1
+            if (viewHasSiblings) {
+                // Remove the view so that a layout update is triggered for the siblings and they
+                // animate to their next position while the view's removal is also animating.
+                parent.removeView(rootView)
+                // By adding the view to the overlay, we can animate it while it isn't part of the
+                // view hierarchy. It is correctly positioned because we have its previous bounds,
+                // and we set them manually during the animation.
+                parent.overlay.add(rootView)
+            }
+            // If this view has no siblings, the parent view may shrink to (0,0) size and mess
+            // up the animation if we immediately remove the view. So instead, we just leave the
+            // view in the real hierarchy until the animation finishes.
+
+            val endRunnable = Runnable {
+                if (viewHasSiblings) {
+                    parent.overlay.remove(rootView)
+                } else {
+                    parent.removeView(rootView)
+                }
+                onAnimationEnd?.run()
+            }
 
             val startValues =
                 mapOf(
@@ -430,7 +449,8 @@ class ViewHierarchyAnimator {
                 endValues,
                 interpolator,
                 duration,
-                ephemeral = true
+                ephemeral = true,
+                endRunnable,
             )
 
             if (rootView is ViewGroup) {
@@ -463,7 +483,6 @@ class ViewHierarchyAnimator {
                                 .alpha(0f)
                                 .setInterpolator(Interpolators.ALPHA_OUT)
                                 .setDuration(duration / 2)
-                                .withEndAction { parent.overlay.remove(rootView) }
                                 .start()
                         }
                     }
@@ -477,7 +496,6 @@ class ViewHierarchyAnimator {
                     .setInterpolator(Interpolators.ALPHA_OUT)
                     .setDuration(duration / 2)
                     .setStartDelay(duration / 2)
-                    .withEndAction { parent.overlay.remove(rootView) }
                     .start()
             }
 

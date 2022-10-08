@@ -464,6 +464,16 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     }
 
     @Override
+    public void setInstalledAndEnabledServices(List<AccessibilityServiceInfo> infos) {
+        return;
+    }
+
+    @Override
+    public List<AccessibilityServiceInfo> getInstalledAndEnabledServices() {
+        return null;
+    }
+
+    @Override
     public void setAttributionTag(String attributionTag) {
         mAttributionTag = attributionTag;
     }

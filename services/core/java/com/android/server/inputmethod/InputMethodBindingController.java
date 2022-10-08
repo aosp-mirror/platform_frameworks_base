@@ -26,12 +26,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManagerInternal;
-import android.content.res.Resources;
 import android.inputmethodservice.InputMethodService;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Process;
-import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
@@ -39,7 +37,6 @@ import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.EventLog;
 import android.util.Slog;
-import android.view.IWindowManager;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodInfo;
@@ -66,9 +63,7 @@ final class InputMethodBindingController {
     @NonNull private final ArrayMap<String, InputMethodInfo> mMethodMap;
     @NonNull private final InputMethodUtils.InputMethodSettings mSettings;
     @NonNull private final PackageManagerInternal mPackageManagerInternal;
-    @NonNull private final IWindowManager mIWindowManager;
     @NonNull private final WindowManagerInternal mWindowManagerInternal;
-    @NonNull private final Resources mRes;
 
     @GuardedBy("ImfLock.class") private long mLastBindTime;
     @GuardedBy("ImfLock.class") private boolean mHasConnection;
@@ -80,7 +75,7 @@ final class InputMethodBindingController {
     @GuardedBy("ImfLock.class") @Nullable private IBinder mCurToken;
     @GuardedBy("ImfLock.class") private int mCurSeq;
     @GuardedBy("ImfLock.class") private boolean mVisibleBound;
-    private boolean mSupportsStylusHw;
+    @GuardedBy("ImfLock.class") private boolean mSupportsStylusHw;
 
     /**
      * Binding flags for establishing connection to the {@link InputMethodService}.
@@ -107,9 +102,7 @@ final class InputMethodBindingController {
         mMethodMap = mService.mMethodMap;
         mSettings = mService.mSettings;
         mPackageManagerInternal = mService.mPackageManagerInternal;
-        mIWindowManager = mService.mIWindowManager;
         mWindowManagerInternal = mService.mWindowManagerInternal;
-        mRes = mService.mRes;
     }
 
     /**
@@ -432,17 +425,13 @@ final class InputMethodBindingController {
 
         mService.setCurTokenDisplayIdLocked(displayIdToShowIme);
 
-        try {
-            if (DEBUG) {
-                Slog.v(TAG, "Adding window token: " + mCurToken + " for display: "
-                        + displayIdToShowIme);
-            }
-            mIWindowManager.addWindowToken(mCurToken, WindowManager.LayoutParams.TYPE_INPUT_METHOD,
-                    displayIdToShowIme, null /* options */);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Could not add window token " + mCurToken + " for display "
-                    + displayIdToShowIme, e);
+        if (DEBUG) {
+            Slog.v(TAG, "Adding window token: " + mCurToken + " for display: "
+                    + displayIdToShowIme);
         }
+        mWindowManagerInternal.addWindowToken(mCurToken,
+                WindowManager.LayoutParams.TYPE_INPUT_METHOD,
+                displayIdToShowIme, null /* options */);
     }
 
     @GuardedBy("ImfLock.class")
@@ -468,13 +457,6 @@ final class InputMethodBindingController {
     }
 
     @GuardedBy("ImfLock.class")
-    private boolean bindCurrentInputMethodServiceVisibleConnection() {
-        mVisibleBound = bindCurrentInputMethodService(mVisibleConnection,
-                IME_VISIBLE_BIND_FLAGS);
-        return mVisibleBound;
-    }
-
-    @GuardedBy("ImfLock.class")
     private boolean bindCurrentInputMethodServiceMainConnection() {
         mHasConnection = bindCurrentInputMethodService(mMainConnection, IME_CONNECTION_BIND_FLAGS);
         return mHasConnection;
@@ -491,7 +473,8 @@ final class InputMethodBindingController {
         if (mCurMethod != null) {
             if (DEBUG) Slog.d(TAG, "setCurrentMethodVisible: mCurToken=" + mCurToken);
             if (mHasConnection && !mVisibleBound) {
-                bindCurrentInputMethodServiceVisibleConnection();
+                mVisibleBound = bindCurrentInputMethodService(mVisibleConnection,
+                        IME_VISIBLE_BIND_FLAGS);
             }
             return;
         }

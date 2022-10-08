@@ -492,28 +492,13 @@ ui::Size BootAnimation::limitSurfaceSize(int width, int height) const {
 status_t BootAnimation::readyToRun() {
     mAssets.addDefaultAssets();
 
-    mDisplayToken = SurfaceComposerClient::getInternalDisplayToken();
-    if (mDisplayToken == nullptr)
+    const std::vector<PhysicalDisplayId> ids = SurfaceComposerClient::getPhysicalDisplayIds();
+    if (ids.empty()) {
+        SLOGE("Failed to get ID for any displays\n");
         return NAME_NOT_FOUND;
+    }
 
-    DisplayMode displayMode;
-    const status_t error =
-            SurfaceComposerClient::getActiveDisplayMode(mDisplayToken, &displayMode);
-    if (error != NO_ERROR)
-        return error;
-
-    mMaxWidth = android::base::GetIntProperty("ro.surface_flinger.max_graphics_width", 0);
-    mMaxHeight = android::base::GetIntProperty("ro.surface_flinger.max_graphics_height", 0);
-    ui::Size resolution = displayMode.resolution;
-    resolution = limitSurfaceSize(resolution.width, resolution.height);
-    // create the native surface
-    sp<SurfaceControl> control = session()->createSurface(String8("BootAnimation"),
-            resolution.getWidth(), resolution.getHeight(), PIXEL_FORMAT_RGB_565,
-            ISurfaceComposerClient::eOpaque);
-
-    SurfaceComposerClient::Transaction t;
-
-    // this guest property specifies multi-display IDs to show the boot animation
+    // this system property specifies multi-display IDs to show the boot animation
     // multiple ids can be set with comma (,) as separator, for example:
     // setprop persist.boot.animation.displays 19260422155234049,19261083906282754
     Vector<PhysicalDisplayId> physicalDisplayIds;
@@ -540,9 +525,44 @@ status_t BootAnimation::readyToRun() {
                 stream.ignore();
         }
 
+        // the first specified display id is used to retrieve mDisplayToken
+        for (const auto id : physicalDisplayIds) {
+            if (std::find(ids.begin(), ids.end(), id) != ids.end()) {
+                if (const auto token = SurfaceComposerClient::getPhysicalDisplayToken(id)) {
+                    mDisplayToken = token;
+                    break;
+                }
+            }
+        }
+    }
+
+    // If the system property is not present or invalid, display 0 is used
+    if (mDisplayToken == nullptr) {
+        mDisplayToken = SurfaceComposerClient::getPhysicalDisplayToken(ids.front());
+        if (mDisplayToken == nullptr) {
+            return NAME_NOT_FOUND;
+        }
+    }
+
+    DisplayMode displayMode;
+    const status_t error =
+            SurfaceComposerClient::getActiveDisplayMode(mDisplayToken, &displayMode);
+    if (error != NO_ERROR) {
+        return error;
+    }
+
+    mMaxWidth = android::base::GetIntProperty("ro.surface_flinger.max_graphics_width", 0);
+    mMaxHeight = android::base::GetIntProperty("ro.surface_flinger.max_graphics_height", 0);
+    ui::Size resolution = displayMode.resolution;
+    resolution = limitSurfaceSize(resolution.width, resolution.height);
+    // create the native surface
+    sp<SurfaceControl> control = session()->createSurface(String8("BootAnimation"),
+            resolution.getWidth(), resolution.getHeight(), PIXEL_FORMAT_RGB_565,
+            ISurfaceComposerClient::eOpaque);
+
+    SurfaceComposerClient::Transaction t;
+    if (isValid) {
         // In the case of multi-display, boot animation shows on the specified displays
-        // in addition to the primary display
-        const auto ids = SurfaceComposerClient::getPhysicalDisplayIds();
         for (const auto id : physicalDisplayIds) {
             if (std::find(ids.begin(), ids.end(), id) != ids.end()) {
                 if (const auto token = SurfaceComposerClient::getPhysicalDisplayToken(id)) {
@@ -570,8 +590,9 @@ status_t BootAnimation::readyToRun() {
     eglQuerySurface(display, surface, EGL_WIDTH, &w);
     eglQuerySurface(display, surface, EGL_HEIGHT, &h);
 
-    if (eglMakeCurrent(display, surface, surface, context) == EGL_FALSE)
+    if (eglMakeCurrent(display, surface, surface, context) == EGL_FALSE) {
         return NO_INIT;
+    }
 
     mDisplay = display;
     mContext = context;

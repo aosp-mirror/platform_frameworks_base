@@ -43,7 +43,7 @@ class RecentTasksAdapter @AssistedInject constructor(
     override fun onBindViewHolder(holder: RecentTaskViewHolder, position: Int) {
         val task = items[position]
         holder.bind(task, onClick = {
-            listener.onRecentClicked(task, holder.itemView)
+            listener.onRecentAppClicked(task, holder.itemView)
         })
     }
 
@@ -54,7 +54,7 @@ class RecentTasksAdapter @AssistedInject constructor(
     }
 
     interface RecentTaskClickListener {
-        fun onRecentClicked(task: RecentTask, view: View)
+        fun onRecentAppClicked(task: RecentTask, view: View)
     }
 
     @AssistedFactory

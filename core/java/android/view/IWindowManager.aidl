@@ -985,4 +985,12 @@ interface IWindowManager
      */
     oneway void captureDisplay(int displayId, in @nullable ScreenCapture.CaptureArgs captureArgs,
             in ScreenCapture.ScreenCaptureListener listener);
+
+    /**
+     * Returns {@code true} if the key will be handled globally and not forwarded to all apps.
+     *
+     * @param keyCode the key code to check
+     * @return {@code true} if the key will be handled globally.
+     */
+    boolean isGlobalKey(int keyCode);
 }

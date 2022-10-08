@@ -16,8 +16,11 @@
 
 package com.android.server.am;
 
+import static android.provider.DeviceConfig.NAMESPACE_ACTIVITY_MANAGER_NATIVE_BOOT;
+
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.app.ActivityManager;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.Overridable;
@@ -26,13 +29,16 @@ import android.database.ContentObserver;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerExecutor;
+import android.os.SystemProperties;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
+import android.util.IndentingPrintWriter;
 import android.util.KeyValueListParser;
 import android.util.Slog;
 import android.util.TimeUtils;
 
-import java.io.PrintWriter;
+import dalvik.annotation.optimization.NeverCompile;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -122,10 +128,19 @@ public class BroadcastConstants {
     public long ALLOW_BG_ACTIVITY_START_TIMEOUT = DEFAULT_ALLOW_BG_ACTIVITY_START_TIMEOUT;
 
     /**
+     * Flag indicating if we should use {@link BroadcastQueueModernImpl} instead
+     * of the default {@link BroadcastQueueImpl}.
+     */
+    public boolean MODERN_QUEUE_ENABLED = DEFAULT_MODERN_QUEUE_ENABLED;
+    private static final String KEY_MODERN_QUEUE_ENABLED = "modern_queue_enabled";
+    private static final boolean DEFAULT_MODERN_QUEUE_ENABLED = false;
+
+    /**
      * For {@link BroadcastQueueModernImpl}: Maximum number of process queues to
      * dispatch broadcasts to simultaneously.
      */
     public int MAX_RUNNING_PROCESS_QUEUES = DEFAULT_MAX_RUNNING_PROCESS_QUEUES;
+    private static final String KEY_MAX_RUNNING_PROCESS_QUEUES = "bcast_max_running_process_queues";
     private static final int DEFAULT_MAX_RUNNING_PROCESS_QUEUES = 4;
 
     /**
@@ -134,6 +149,7 @@ public class BroadcastConstants {
      * being "runnable" to give other processes a chance to run.
      */
     public int MAX_RUNNING_ACTIVE_BROADCASTS = DEFAULT_MAX_RUNNING_ACTIVE_BROADCASTS;
+    private static final String KEY_MAX_RUNNING_ACTIVE_BROADCASTS = "bcast_max_running_active_broadcasts";
     private static final int DEFAULT_MAX_RUNNING_ACTIVE_BROADCASTS = 16;
 
     /**
@@ -142,21 +158,42 @@ public class BroadcastConstants {
      * might have applied to that process.
      */
     public int MAX_PENDING_BROADCASTS = DEFAULT_MAX_PENDING_BROADCASTS;
+    private static final String KEY_MAX_PENDING_BROADCASTS = "bcast_max_pending_broadcasts";
     private static final int DEFAULT_MAX_PENDING_BROADCASTS = 256;
 
     /**
-     * For {@link BroadcastQueueModernImpl}: Default delay to apply to normal
+     * For {@link BroadcastQueueModernImpl}: Delay to apply to normal
      * broadcasts, giving a chance for debouncing of rapidly changing events.
      */
     public long DELAY_NORMAL_MILLIS = DEFAULT_DELAY_NORMAL_MILLIS;
+    private static final String KEY_DELAY_NORMAL_MILLIS = "bcast_delay_normal_millis";
     private static final long DEFAULT_DELAY_NORMAL_MILLIS = 10_000 * Build.HW_TIMEOUT_MULTIPLIER;
 
     /**
-     * For {@link BroadcastQueueModernImpl}: Default delay to apply to
-     * broadcasts targeting cached applications.
+     * For {@link BroadcastQueueModernImpl}: Delay to apply to broadcasts
+     * targeting cached applications.
      */
     public long DELAY_CACHED_MILLIS = DEFAULT_DELAY_CACHED_MILLIS;
+    private static final String KEY_DELAY_CACHED_MILLIS = "bcast_delay_cached_millis";
     private static final long DEFAULT_DELAY_CACHED_MILLIS = 30_000 * Build.HW_TIMEOUT_MULTIPLIER;
+
+    /**
+     * For {@link BroadcastQueueModernImpl}: Maximum number of complete
+     * historical broadcasts to retain for debugging purposes.
+     */
+    public int MAX_HISTORY_COMPLETE_SIZE = DEFAULT_MAX_HISTORY_COMPLETE_SIZE;
+    private static final String KEY_MAX_HISTORY_COMPLETE_SIZE = "bcast_max_history_complete_size";
+    private static final int DEFAULT_MAX_HISTORY_COMPLETE_SIZE =
+            ActivityManager.isLowRamDeviceStatic() ? 10 : 50;
+
+    /**
+     * For {@link BroadcastQueueModernImpl}: Maximum number of summarized
+     * historical broadcasts to retain for debugging purposes.
+     */
+    public int MAX_HISTORY_SUMMARY_SIZE = DEFAULT_MAX_HISTORY_SUMMARY_SIZE;
+    private static final String KEY_MAX_HISTORY_SUMMARY_SIZE = "bcast_max_history_summary_size";
+    private static final int DEFAULT_MAX_HISTORY_SUMMARY_SIZE =
+            ActivityManager.isLowRamDeviceStatic() ? 25 : 300;
 
     // Settings override tracking for this instance
     private String mSettingsKey;
@@ -179,6 +216,9 @@ public class BroadcastConstants {
     // that instance's values are drawn.
     public BroadcastConstants(String settingsKey) {
         mSettingsKey = settingsKey;
+
+        // Load initial values at least once before we start observing below
+        updateDeviceConfigConstants();
     }
 
     /**
@@ -193,14 +233,13 @@ public class BroadcastConstants {
                 false, mSettingsObserver);
         updateSettingsConstants();
 
-        DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+        DeviceConfig.addOnPropertiesChangedListener(NAMESPACE_ACTIVITY_MANAGER_NATIVE_BOOT,
                 new HandlerExecutor(handler), this::updateDeviceConfigConstants);
-        updateDeviceConfigConstants(
-                DeviceConfig.getProperties(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER));
+        updateDeviceConfigConstants();
     }
 
     private void updateSettingsConstants() {
-        synchronized (mParser) {
+        synchronized (this) {
             try {
                 mParser.setString(Settings.Global.getString(mResolver, mSettingsKey));
             } catch (IllegalArgumentException e) {
@@ -220,51 +259,104 @@ public class BroadcastConstants {
         }
     }
 
+    /**
+     * Return the {@link SystemProperty} name for the given key in our
+     * {@link DeviceConfig} namespace.
+     */
+    private @NonNull String propertyFor(@NonNull String key) {
+        return "persist.device_config." + NAMESPACE_ACTIVITY_MANAGER_NATIVE_BOOT + "." + key;
+    }
+
+    /**
+     * Return the {@link SystemProperty} name for the given key in our
+     * {@link DeviceConfig} namespace, but with a different prefix that can be
+     * used to locally override the {@link DeviceConfig} value.
+     */
+    private @NonNull String propertyOverrideFor(@NonNull String key) {
+        return "persist.sys." + NAMESPACE_ACTIVITY_MANAGER_NATIVE_BOOT + "." + key;
+    }
+
+    private boolean getDeviceConfigBoolean(@NonNull String key, boolean def) {
+        return SystemProperties.getBoolean(propertyOverrideFor(key),
+                SystemProperties.getBoolean(propertyFor(key), def));
+    }
+
+    private int getDeviceConfigInt(@NonNull String key, int def) {
+        return SystemProperties.getInt(propertyOverrideFor(key),
+                SystemProperties.getInt(propertyFor(key), def));
+    }
+
+    private long getDeviceConfigLong(@NonNull String key, long def) {
+        return SystemProperties.getLong(propertyOverrideFor(key),
+                SystemProperties.getLong(propertyFor(key), def));
+    }
+
     private void updateDeviceConfigConstants(@NonNull DeviceConfig.Properties properties) {
-        MAX_RUNNING_PROCESS_QUEUES = properties.getInt("bcast_max_running_process_queues",
-                DEFAULT_MAX_RUNNING_PROCESS_QUEUES);
-        MAX_RUNNING_ACTIVE_BROADCASTS = properties.getInt("bcast_max_running_active_broadcasts",
-                DEFAULT_MAX_RUNNING_ACTIVE_BROADCASTS);
-        MAX_PENDING_BROADCASTS = properties.getInt("bcast_max_pending_broadcasts",
-                DEFAULT_MAX_PENDING_BROADCASTS);
-        DELAY_NORMAL_MILLIS = properties.getLong("bcast_delay_normal_millis",
-                DEFAULT_DELAY_NORMAL_MILLIS);
-        DELAY_CACHED_MILLIS = properties.getLong("bcast_delay_cached_millis",
-                DEFAULT_DELAY_CACHED_MILLIS);
+        updateDeviceConfigConstants();
+    }
+
+    /**
+     * Since our values are stored in a "native boot" namespace, we load them
+     * directly from the system properties.
+     */
+    private void updateDeviceConfigConstants() {
+        synchronized (this) {
+            MODERN_QUEUE_ENABLED = getDeviceConfigBoolean(KEY_MODERN_QUEUE_ENABLED,
+                    DEFAULT_MODERN_QUEUE_ENABLED);
+            MAX_RUNNING_PROCESS_QUEUES = getDeviceConfigInt(KEY_MAX_RUNNING_PROCESS_QUEUES,
+                    DEFAULT_MAX_RUNNING_PROCESS_QUEUES);
+            MAX_RUNNING_ACTIVE_BROADCASTS = getDeviceConfigInt(KEY_MAX_RUNNING_ACTIVE_BROADCASTS,
+                    DEFAULT_MAX_RUNNING_ACTIVE_BROADCASTS);
+            MAX_PENDING_BROADCASTS = getDeviceConfigInt(KEY_MAX_PENDING_BROADCASTS,
+                    DEFAULT_MAX_PENDING_BROADCASTS);
+            DELAY_NORMAL_MILLIS = getDeviceConfigLong(KEY_DELAY_NORMAL_MILLIS,
+                    DEFAULT_DELAY_NORMAL_MILLIS);
+            DELAY_CACHED_MILLIS = getDeviceConfigLong(KEY_DELAY_CACHED_MILLIS,
+                    DEFAULT_DELAY_CACHED_MILLIS);
+            MAX_HISTORY_COMPLETE_SIZE = getDeviceConfigInt(KEY_MAX_HISTORY_COMPLETE_SIZE,
+                    DEFAULT_MAX_HISTORY_COMPLETE_SIZE);
+            MAX_HISTORY_SUMMARY_SIZE = getDeviceConfigInt(KEY_MAX_HISTORY_SUMMARY_SIZE,
+                    DEFAULT_MAX_HISTORY_SUMMARY_SIZE);
+        }
     }
 
     /**
      * Standard dumpsys support; invoked from BroadcastQueue dump
      */
-    public void dump(PrintWriter pw) {
-        synchronized (mParser) {
-            pw.println();
-            pw.print("  Broadcast parameters (key=");
+    @NeverCompile
+    public void dump(@NonNull IndentingPrintWriter pw) {
+        synchronized (this) {
+            pw.print("Broadcast parameters (key=");
             pw.print(mSettingsKey);
             pw.print(", observing=");
             pw.print(mSettingsObserver != null);
             pw.println("):");
-
-            pw.print("    "); pw.print(KEY_TIMEOUT); pw.print(" = ");
-            TimeUtils.formatDuration(TIMEOUT, pw);
+            pw.increaseIndent();
+            pw.print(KEY_TIMEOUT, TimeUtils.formatDuration(TIMEOUT)).println();
+            pw.print(KEY_SLOW_TIME, TimeUtils.formatDuration(SLOW_TIME)).println();
+            pw.print(KEY_DEFERRAL, TimeUtils.formatDuration(DEFERRAL)).println();
+            pw.print(KEY_DEFERRAL_DECAY_FACTOR, DEFERRAL_DECAY_FACTOR).println();
+            pw.print(KEY_DEFERRAL_FLOOR, DEFERRAL_FLOOR).println();
+            pw.print(KEY_ALLOW_BG_ACTIVITY_START_TIMEOUT,
+                    TimeUtils.formatDuration(ALLOW_BG_ACTIVITY_START_TIMEOUT)).println();
+            pw.decreaseIndent();
             pw.println();
 
-            pw.print("    "); pw.print(KEY_SLOW_TIME); pw.print(" = ");
-            TimeUtils.formatDuration(SLOW_TIME, pw);
-            pw.println();
-
-            pw.print("    "); pw.print(KEY_DEFERRAL); pw.print(" = ");
-            TimeUtils.formatDuration(DEFERRAL, pw);
-            pw.println();
-
-            pw.print("    "); pw.print(KEY_DEFERRAL_DECAY_FACTOR); pw.print(" = ");
-            pw.println(DEFERRAL_DECAY_FACTOR);
-
-            pw.print("    "); pw.print(KEY_DEFERRAL_FLOOR); pw.print(" = ");
-            TimeUtils.formatDuration(DEFERRAL_FLOOR, pw);
-
-            pw.print("    "); pw.print(KEY_ALLOW_BG_ACTIVITY_START_TIMEOUT); pw.print(" = ");
-            TimeUtils.formatDuration(ALLOW_BG_ACTIVITY_START_TIMEOUT, pw);
+            pw.print("Broadcast parameters (namespace=");
+            pw.print(NAMESPACE_ACTIVITY_MANAGER_NATIVE_BOOT);
+            pw.println("):");
+            pw.increaseIndent();
+            pw.print(KEY_MODERN_QUEUE_ENABLED, MODERN_QUEUE_ENABLED).println();
+            pw.print(KEY_MAX_RUNNING_PROCESS_QUEUES, MAX_RUNNING_PROCESS_QUEUES).println();
+            pw.print(KEY_MAX_RUNNING_ACTIVE_BROADCASTS, MAX_RUNNING_ACTIVE_BROADCASTS).println();
+            pw.print(KEY_MAX_PENDING_BROADCASTS, MAX_PENDING_BROADCASTS).println();
+            pw.print(KEY_DELAY_NORMAL_MILLIS,
+                    TimeUtils.formatDuration(DELAY_NORMAL_MILLIS)).println();
+            pw.print(KEY_DELAY_CACHED_MILLIS,
+                    TimeUtils.formatDuration(DELAY_CACHED_MILLIS)).println();
+            pw.print(KEY_MAX_HISTORY_COMPLETE_SIZE, MAX_HISTORY_COMPLETE_SIZE).println();
+            pw.print(KEY_MAX_HISTORY_SUMMARY_SIZE, MAX_HISTORY_SUMMARY_SIZE).println();
+            pw.decreaseIndent();
             pw.println();
         }
     }

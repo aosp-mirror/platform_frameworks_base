@@ -293,7 +293,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     HashMap<Integer, ServiceState> mServiceStates = new HashMap<>();
 
     private int mPhoneState;
-    private boolean mKeyguardIsVisible;
+    private boolean mKeyguardShowing;
+    private boolean mKeyguardOccluded;
     private boolean mCredentialAttempted;
     private boolean mKeyguardGoingAway;
     private boolean mGoingToSleep;
@@ -303,7 +304,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private boolean mAuthInterruptActive;
     private boolean mNeedsSlowUnlockTransition;
     private boolean mAssistantVisible;
-    private boolean mKeyguardOccluded;
     private boolean mOccludingAppRequestingFp;
     private boolean mOccludingAppRequestingFace;
     private boolean mSecureCameraLaunched;
@@ -605,7 +605,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      * of them based on carrier config. e.g. In this case we should only show one carrier name
      * on the status bar and quick settings.
      */
-    public List<SubscriptionInfo> getFilteredSubscriptionInfo(boolean forceReload) {
+    public List<SubscriptionInfo> getFilteredSubscriptionInfo() {
         List<SubscriptionInfo> subscriptions = getSubscriptionInfo(false);
         if (subscriptions.size() == 2) {
             SubscriptionInfo info1 = subscriptions.get(0);
@@ -666,14 +666,42 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     }
 
     /**
-     * Updates KeyguardUpdateMonitor's internal state to know if keyguard is occluded
+     * Updates KeyguardUpdateMonitor's internal state to know if keyguard is showing and if
+     * its occluded. The keyguard is considered visible if its showing and NOT occluded.
      */
-    public void setKeyguardOccluded(boolean occluded) {
-        mKeyguardOccluded = occluded;
-        updateBiometricListeningState(BIOMETRIC_ACTION_UPDATE,
-                FACE_AUTH_UPDATED_KEYGUARD_OCCLUSION_CHANGED);
-    }
+    public void setKeyguardShowing(boolean showing, boolean occluded) {
+        final boolean occlusionChanged = mKeyguardOccluded != occluded;
+        final boolean showingChanged = mKeyguardShowing != showing;
+        if (!occlusionChanged && !showingChanged) {
+            return;
+        }
 
+        final boolean wasKeyguardVisible = isKeyguardVisible();
+        mKeyguardShowing = showing;
+        mKeyguardOccluded = occluded;
+        final boolean isKeyguardVisible = isKeyguardVisible();
+        mLogger.logKeyguardShowingChanged(showing, occluded, isKeyguardVisible);
+
+        if (isKeyguardVisible != wasKeyguardVisible) {
+            if (isKeyguardVisible) {
+                mSecureCameraLaunched = false;
+            }
+            for (int i = 0; i < mCallbacks.size(); i++) {
+                KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+                if (cb != null) {
+                    cb.onKeyguardVisibilityChanged(isKeyguardVisible);
+                }
+            }
+        }
+
+        if (occlusionChanged) {
+            updateBiometricListeningState(BIOMETRIC_ACTION_UPDATE,
+                    FACE_AUTH_UPDATED_KEYGUARD_OCCLUSION_CHANGED);
+        } else if (showingChanged) {
+            updateBiometricListeningState(BIOMETRIC_ACTION_UPDATE,
+                    FACE_AUTH_UPDATED_KEYGUARD_VISIBILITY_CHANGED);
+        }
+    }
 
     /**
      * Request to listen for face authentication when an app is occluding keyguard.
@@ -2428,7 +2456,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         // Triggers:
         final boolean triggerActiveUnlockForAssistant = shouldTriggerActiveUnlockForAssistant();
         final boolean awakeKeyguard = mBouncerFullyShown || mUdfpsBouncerShowing
-                || (mKeyguardIsVisible && !mGoingToSleep
+                || (isKeyguardVisible() && !mGoingToSleep
                 && mStatusBarState != StatusBarState.SHADE_LOCKED);
 
         // Gates:
@@ -2504,7 +2532,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         final boolean userDoesNotHaveTrust = !getUserHasTrust(user);
         final boolean shouldListenForFingerprintAssistant = shouldListenForFingerprintAssistant();
         final boolean shouldListenKeyguardState =
-                mKeyguardIsVisible
+                isKeyguardVisible()
                         || !mDeviceInteractive
                         || (mBouncerIsOrWillBeShowing && !mKeyguardGoingAway)
                         || mGoingToSleep
@@ -2553,7 +2581,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     mFingerprintLockedOut,
                     mGoingToSleep,
                     mKeyguardGoingAway,
-                    mKeyguardIsVisible,
+                    isKeyguardVisible(),
                     mKeyguardOccluded,
                     mOccludingAppRequestingFp,
                     mIsPrimaryUser,
@@ -2575,7 +2603,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         }
 
         final boolean statusBarShadeLocked = mStatusBarState == StatusBarState.SHADE_LOCKED;
-        final boolean awakeKeyguard = mKeyguardIsVisible && mDeviceInteractive
+        final boolean awakeKeyguard = isKeyguardVisible() && mDeviceInteractive
                 && !statusBarShadeLocked;
         final int user = getCurrentUser();
         final int strongAuth = mStrongAuthTracker.getStrongAuthForUser(user);
@@ -3132,32 +3160,18 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         callbacksRefreshCarrierInfo();
     }
 
+    /**
+     * Whether the keyguard is showing and not occluded.
+     */
     public boolean isKeyguardVisible() {
-        return mKeyguardIsVisible;
+        return isKeyguardShowing() && !mKeyguardOccluded;
     }
 
     /**
-     * Notifies that the visibility state of Keyguard has changed.
-     *
-     * <p>Needs to be called from the main thread.
+     * Whether the keyguard is showing. It may still be occluded and not visible.
      */
-    public void onKeyguardVisibilityChanged(boolean showing) {
-        Assert.isMainThread();
-        mLogger.logKeyguardVisibilityChanged(showing);
-        mKeyguardIsVisible = showing;
-
-        if (showing) {
-            mSecureCameraLaunched = false;
-        }
-
-        for (int i = 0; i < mCallbacks.size(); i++) {
-            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
-            if (cb != null) {
-                cb.onKeyguardVisibilityChangedRaw(showing);
-            }
-        }
-        updateBiometricListeningState(BIOMETRIC_ACTION_UPDATE,
-                FACE_AUTH_UPDATED_KEYGUARD_VISIBILITY_CHANGED);
+    public boolean isKeyguardShowing() {
+        return mKeyguardShowing;
     }
 
     /**
@@ -3366,7 +3380,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         callback.onTimeChanged();
         callback.onPhoneStateChanged(mPhoneState);
         callback.onRefreshCarrierInfo();
-        callback.onKeyguardVisibilityChangedRaw(mKeyguardIsVisible);
+        callback.onKeyguardVisibilityChanged(isKeyguardVisible());
         callback.onTelephonyCapable(mTelephonyCapable);
 
         for (Entry<Integer, SimData> data : mSimDatas.entrySet()) {

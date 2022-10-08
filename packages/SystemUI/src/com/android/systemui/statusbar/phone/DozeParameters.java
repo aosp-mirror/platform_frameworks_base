@@ -93,13 +93,13 @@ public class DozeParameters implements
     private boolean mControlScreenOffAnimation;
     private boolean mIsQuickPickupEnabled;
 
-    private boolean mKeyguardShowing;
+    private boolean mKeyguardVisible;
     @VisibleForTesting
     final KeyguardUpdateMonitorCallback mKeyguardVisibilityCallback =
             new KeyguardUpdateMonitorCallback() {
                 @Override
-                public void onKeyguardVisibilityChanged(boolean showing) {
-                    mKeyguardShowing = showing;
+                public void onKeyguardVisibilityChanged(boolean visible) {
+                    mKeyguardVisible = visible;
                     updateControlScreenOff();
                 }
 
@@ -293,7 +293,7 @@ public class DozeParameters implements
     public void updateControlScreenOff() {
         if (!getDisplayNeedsBlanking()) {
             final boolean controlScreenOff =
-                    getAlwaysOn() && (mKeyguardShowing || shouldControlUnlockedScreenOff());
+                    getAlwaysOn() && (mKeyguardVisible || shouldControlUnlockedScreenOff());
             setControlScreenOffAnimation(controlScreenOff);
         }
     }
@@ -348,7 +348,7 @@ public class DozeParameters implements
     }
 
     private boolean willAnimateFromLockScreenToAod() {
-        return getAlwaysOn() && mKeyguardShowing;
+        return getAlwaysOn() && mKeyguardVisible;
     }
 
     private boolean getBoolean(String propName, int resId) {

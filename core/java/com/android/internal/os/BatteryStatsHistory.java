@@ -79,7 +79,7 @@ public class BatteryStatsHistory {
     private static final String TAG = "BatteryStatsHistory";
 
     // Current on-disk Parcel version. Must be updated when the format of the parcelable changes
-    private static final int VERSION = 208;
+    private static final int VERSION = 209;
 
     private static final String HISTORY_DIR = "battery-history";
     private static final String FILE_SUFFIX = ".bin";
@@ -198,6 +198,7 @@ public class BatteryStatsHistory {
     private long mHistoryBaseTimeMs;
     private boolean mMeasuredEnergyHeaderWritten = false;
     private boolean mCpuUsageHeaderWritten = false;
+    private final VarintParceler mVarintParceler = new VarintParceler();
 
     private byte mLastHistoryStepLevel = 0;
 
@@ -1665,9 +1666,7 @@ public class BatteryStatsHistory {
                     }
                     mMeasuredEnergyHeaderWritten = true;
                 }
-                for (long chargeUC : cur.measuredEnergyDetails.chargeUC) {
-                    dest.writeLong(chargeUC);
-                }
+                mVarintParceler.writeLongArray(dest, cur.measuredEnergyDetails.chargeUC);
             }
 
             if (cur.cpuUsageDetails != null) {
@@ -1679,9 +1678,7 @@ public class BatteryStatsHistory {
                     mCpuUsageHeaderWritten = true;
                 }
                 dest.writeInt(cur.cpuUsageDetails.uid);
-                for (long cpuUsageMs: cur.cpuUsageDetails.cpuUsageMs) {
-                    dest.writeLong(cpuUsageMs);
-                }
+                mVarintParceler.writeLongArray(dest, cur.cpuUsageDetails.cpuUsageMs);
             }
         }
     }
@@ -1928,6 +1925,76 @@ public class BatteryStatsHistory {
         for (Map.Entry<HistoryTag, Integer> entry : mHistoryTagPool.entrySet()) {
             mHistoryTags.put(entry.getValue() & ~BatteryStatsHistory.TAG_FIRST_OCCURRENCE_FLAG,
                     entry.getKey());
+        }
+    }
+
+    /**
+     * Writes/reads an array of longs into Parcel using a compact format, where small integers use
+     * fewer bytes.  It is a bit more expensive than just writing the long into the parcel,
+     * but at scale saves a lot of storage and allows recording of longer battery history.
+     */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public static final class VarintParceler {
+        /**
+         * Writes an array of longs into Parcel using the varint format, see
+         * https://developers.google.com/protocol-buffers/docs/encoding#varints
+         */
+        public void writeLongArray(Parcel parcel, long[] values) {
+            int out = 0;
+            int shift = 0;
+            for (long value : values) {
+                boolean done = false;
+                while (!done) {
+                    final byte b;
+                    if ((value & ~0x7FL) == 0) {
+                        b = (byte) value;
+                        done = true;
+                    } else {
+                        b = (byte) (((int) value & 0x7F) | 0x80);
+                        value >>>= 7;
+                    }
+                    if (shift == 32) {
+                        parcel.writeInt(out);
+                        shift = 0;
+                        out = 0;
+                    }
+                    out |= (b & 0xFF) << shift;
+                    shift += 8;
+                }
+            }
+            if (shift != 0) {
+                parcel.writeInt(out);
+            }
+        }
+
+        /**
+         * Reads a long written with {@link #writeLongArray}
+         */
+        public void readLongArray(Parcel parcel, long[] values) {
+            int in = parcel.readInt();
+            int available = 4;
+            for (int i = 0; i < values.length; i++) {
+                long result = 0;
+                int shift;
+                for (shift = 0; shift < 64; shift += 7) {
+                    if (available == 0) {
+                        in = parcel.readInt();
+                        available = 4;
+                    }
+                    final byte b = (byte) in;
+                    in >>= 8;
+                    available--;
+
+                    result |= (long) (b & 0x7F) << shift;
+                    if ((b & 0x80) == 0) {
+                        values[i] = result;
+                        break;
+                    }
+                }
+                if (shift >= 64) {
+                    throw new ParcelFormatException("Invalid varint format");
+                }
+            }
         }
     }
 }

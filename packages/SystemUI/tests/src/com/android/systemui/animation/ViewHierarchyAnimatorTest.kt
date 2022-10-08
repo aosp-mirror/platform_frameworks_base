@@ -718,7 +718,7 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
     }
 
     @Test
-    fun animatesViewRemovalFromStartToEnd() {
+    fun animatesViewRemovalFromStartToEnd_viewHasSiblings() {
         setUpRootWithChildren()
 
         val child = rootView.getChildAt(0)
@@ -739,6 +739,35 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
         endAnimation(child)
         assertEquals(1, rootView.childCount)
         assertFalse(child in rootView.children)
+    }
+
+    @Test
+    fun animatesViewRemovalFromStartToEnd_viewHasNoSiblings() {
+        rootView = LinearLayout(mContext)
+        (rootView as LinearLayout).orientation = LinearLayout.HORIZONTAL
+        (rootView as LinearLayout).weightSum = 1f
+
+        val onlyChild = View(mContext)
+        rootView.addView(onlyChild)
+        forceLayout()
+
+        val success = ViewHierarchyAnimator.animateRemoval(
+            onlyChild,
+            destination = ViewHierarchyAnimator.Hotspot.LEFT,
+            interpolator = Interpolators.LINEAR
+        )
+
+        assertTrue(success)
+        assertNotNull(onlyChild.getTag(R.id.tag_animator))
+        checkBounds(onlyChild, l = 0, t = 0, r = 200, b = 100)
+        advanceAnimation(onlyChild, 0.5f)
+        checkBounds(onlyChild, l = 0, t = 0, r = 100, b = 100)
+        advanceAnimation(onlyChild, 1.0f)
+        checkBounds(onlyChild, l = 0, t = 0, r = 0, b = 100)
+        endAnimation(rootView)
+        endAnimation(onlyChild)
+        assertEquals(0, rootView.childCount)
+        assertFalse(onlyChild in rootView.children)
     }
 
     @Test
@@ -961,6 +990,60 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
         endAnimation(rootView)
         endAnimation(removedChild)
         assertNull(remainingChild.getTag(R.id.tag_animator))
+    }
+
+    @Test
+    fun animateRemoval_runnableRunsWhenAnimationEnds() {
+        var runnableRun = false
+        val onAnimationEndRunnable = { runnableRun = true }
+
+        setUpRootWithChildren()
+        forceLayout()
+        val removedView = rootView.getChildAt(0)
+
+        ViewHierarchyAnimator.animateRemoval(
+            removedView,
+            onAnimationEnd = onAnimationEndRunnable
+        )
+        endAnimation(removedView)
+
+        assertEquals(true, runnableRun)
+    }
+
+    @Test
+    fun animateRemoval_runnableDoesNotRunWhenAnimationCancelled() {
+        var runnableRun = false
+        val onAnimationEndRunnable = { runnableRun = true }
+
+        setUpRootWithChildren()
+        forceLayout()
+        val removedView = rootView.getChildAt(0)
+
+        ViewHierarchyAnimator.animateRemoval(
+            removedView,
+            onAnimationEnd = onAnimationEndRunnable
+        )
+        cancelAnimation(removedView)
+
+        assertEquals(false, runnableRun)
+    }
+
+    @Test
+    fun animationRemoval_runnableDoesNotRunWhenOnlyPartwayThroughAnimation() {
+        var runnableRun = false
+        val onAnimationEndRunnable = { runnableRun = true }
+
+        setUpRootWithChildren()
+        forceLayout()
+        val removedView = rootView.getChildAt(0)
+
+        ViewHierarchyAnimator.animateRemoval(
+            removedView,
+            onAnimationEnd = onAnimationEndRunnable
+        )
+        advanceAnimation(removedView, 0.5f)
+
+        assertEquals(false, runnableRun)
     }
 
     @Test

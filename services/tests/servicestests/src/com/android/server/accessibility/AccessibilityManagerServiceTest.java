@@ -132,6 +132,7 @@ public class AccessibilityManagerServiceTest {
     @Mock private WindowMagnificationManager mMockWindowMagnificationMgr;
     @Mock private MagnificationController mMockMagnificationController;
     @Mock private FullScreenMagnificationController mMockFullScreenMagnificationController;
+    @Mock private ProxyManager mProxyManager;
 
     @Rule
     public final TestableContext mTestableContext = new TestableContext(
@@ -184,7 +185,8 @@ public class AccessibilityManagerServiceTest {
                 mMockA11yWindowManager,
                 mMockA11yDisplayListener,
                 mMockMagnificationController,
-                mInputFilter);
+                mInputFilter,
+                mProxyManager);
 
         final AccessibilityUserState userState = new AccessibilityUserState(
                 mA11yms.getCurrentUserIdLocked(), mTestableContext, mA11yms);
@@ -274,6 +276,49 @@ public class AccessibilityManagerServiceTest {
         mA11yms.notifySystemActionsChangedLocked(userState);
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
         verify(mMockServiceClient).onSystemActionsChanged();
+    }
+
+    @SmallTest
+    @Test
+    public void testRegisterProxy() throws Exception {
+        mA11yms.registerProxyForDisplay(mMockServiceClient, TEST_DISPLAY);
+        verify(mProxyManager).registerProxy(mMockServiceClient, TEST_DISPLAY);
+    }
+
+
+    @SmallTest
+    @Test
+    public void testRegisterProxyWithoutPermission() throws Exception {
+        doThrow(SecurityException.class).when(mMockSecurityPolicy)
+                .enforceCallingOrSelfPermission(Manifest.permission.MANAGE_ACCESSIBILITY);
+        try {
+            mA11yms.registerProxyForDisplay(mMockServiceClient, TEST_DISPLAY);
+            Assert.fail();
+        } catch (SecurityException expected) {
+        }
+        verify(mProxyManager, never()).registerProxy(mMockServiceClient, TEST_DISPLAY);
+    }
+
+    @SmallTest
+    @Test
+    public void testRegisterProxyForDefaultDisplay() throws Exception {
+        try {
+            mA11yms.registerProxyForDisplay(mMockServiceClient, Display.DEFAULT_DISPLAY);
+            Assert.fail();
+        } catch (IllegalArgumentException expected) {
+        }
+        verify(mProxyManager, never()).registerProxy(mMockServiceClient, Display.DEFAULT_DISPLAY);
+    }
+
+    @SmallTest
+    @Test
+    public void testRegisterProxyForInvalidDisplay() throws Exception {
+        try {
+            mA11yms.registerProxyForDisplay(mMockServiceClient, Display.INVALID_DISPLAY);
+            Assert.fail();
+        } catch (IllegalArgumentException expected) {
+        }
+        verify(mProxyManager, never()).registerProxy(mMockServiceClient, Display.INVALID_DISPLAY);
     }
 
     @SmallTest

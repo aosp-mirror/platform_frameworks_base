@@ -1534,7 +1534,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     private class KeyguardVisibilityCallback extends KeyguardUpdateMonitorCallback {
 
         @Override
-        public void onKeyguardVisibilityChanged(boolean showing) {
+        public void onKeyguardVisibilityChanged(boolean visible) {
             mNeedsDrawableColorUpdate = true;
             scheduleUpdate();
         }

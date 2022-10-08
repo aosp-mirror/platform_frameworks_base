@@ -20,7 +20,9 @@ import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BROADCAST;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BROADCAST_DEFERRAL;
 import static com.android.server.am.BroadcastConstants.DEFER_BOOT_COMPLETED_BROADCAST_NONE;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UptimeMillisLong;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.os.Handler;
@@ -35,6 +37,8 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.AlarmManagerInternal;
 import com.android.server.LocalServices;
+
+import dalvik.annotation.optimization.NeverCompile;
 
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
@@ -80,12 +84,14 @@ public class BroadcastDispatcher {
             return broadcasts.isEmpty();
         }
 
+        @NeverCompile
         void dumpDebug(ProtoOutputStream proto, long fieldId) {
             for (BroadcastRecord br : broadcasts) {
                 br.dumpDebug(proto, fieldId);
             }
         }
 
+        @NeverCompile
         void dumpLocked(Dumper d) {
             for (BroadcastRecord br : broadcasts) {
                 d.dump(br);
@@ -143,6 +149,7 @@ public class BroadcastDispatcher {
             return mPrinted;
         }
 
+        @NeverCompile
         void dump(BroadcastRecord br) {
             if (mDumpPackage == null || mDumpPackage.equals(br.callerPackage)) {
                 if (!mPrinted) {
@@ -422,6 +429,7 @@ public class BroadcastDispatcher {
             return size;
         }
 
+        @NeverCompile
         public void dump(Dumper dumper, String action) {
             SparseArray<BroadcastRecord> brs = getDeferredList(action);
             if (brs == null) {
@@ -432,6 +440,7 @@ public class BroadcastDispatcher {
             }
         }
 
+        @NeverCompile
         public void dumpDebug(ProtoOutputStream proto, long fieldId) {
             for (int i = 0, size = mDeferredLockedBootCompletedBroadcasts.size(); i < size; i++) {
                 mDeferredLockedBootCompletedBroadcasts.valueAt(i).dumpDebug(proto, fieldId);
@@ -441,6 +450,7 @@ public class BroadcastDispatcher {
             }
         }
 
+        @NeverCompile
         private void dumpBootCompletedBroadcastRecord(SparseArray<BroadcastRecord> brs) {
             for (int i = 0, size = brs.size(); i < size; i++) {
                 final Object receiver = brs.valueAt(i).receivers.get(0);
@@ -537,6 +547,38 @@ public class BroadcastDispatcher {
                     && mAlarmQueue.isEmpty()
                     && isDeferralsListEmpty(mDeferredBroadcasts)
                     && isDeferralsListEmpty(mAlarmDeferrals);
+        }
+    }
+
+    private static boolean isDeferralsBeyondBarrier(@NonNull ArrayList<Deferrals> list,
+            @UptimeMillisLong long barrierTime) {
+        for (int i = 0; i < list.size(); i++) {
+            if (!isBeyondBarrier(list.get(i).broadcasts, barrierTime)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static boolean isBeyondBarrier(@NonNull ArrayList<BroadcastRecord> list,
+            @UptimeMillisLong long barrierTime) {
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).enqueueTime <= barrierTime) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean isBeyondBarrier(@UptimeMillisLong long barrierTime) {
+        synchronized (mLock) {
+            if ((mCurrentBroadcast != null) && mCurrentBroadcast.enqueueTime <= barrierTime) {
+                return false;
+            }
+            return isBeyondBarrier(mOrderedBroadcasts, barrierTime)
+                    && isBeyondBarrier(mAlarmQueue, barrierTime)
+                    && isDeferralsBeyondBarrier(mDeferredBroadcasts, barrierTime)
+                    && isDeferralsBeyondBarrier(mAlarmDeferrals, barrierTime);
         }
     }
 
@@ -806,6 +848,7 @@ public class BroadcastDispatcher {
     /**
      * Standard proto dump entry point
      */
+    @NeverCompile
     public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         if (mCurrentBroadcast != null) {
             mCurrentBroadcast.dumpDebug(proto, fieldId);
@@ -1133,6 +1176,7 @@ public class BroadcastDispatcher {
 
     // ----------------------------------
 
+    @NeverCompile
     boolean dumpLocked(PrintWriter pw, String dumpPackage, String queueName,
             SimpleDateFormat sdf) {
         final Dumper dumper = new Dumper(pw, queueName, dumpPackage, sdf);
