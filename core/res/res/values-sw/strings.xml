@@ -1942,9 +1942,9 @@
     <string name="app_streaming_blocked_message" product="tv" msgid="5024599278277957935">"Huwezi kufikia programu hii kwenye <xliff:g id="DEVICE">%1$s</xliff:g> chako. Badala yake jaribu kwenye kifaa chako cha Android TV."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="7491114163056552686">"Huwezi kufikia programu hii kwenye <xliff:g id="DEVICE">%1$s</xliff:g> chako. Badala yake jaribu kwenye kompyuta yako kibao."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="1245180131667647277">"Huwezi kufikia programu hii kwenye <xliff:g id="DEVICE">%1$s</xliff:g> chako. Badala yake jaribu kwenye simu yako."</string>
-    <string name="app_streaming_blocked_message_for_permission_dialog" product="tv" msgid="6306583663205997979">"Huwezi kufikia programu hii kwenye <xliff:g id="DEVICE">%1$s</xliff:g> chako kwa muda huu. Badala yake jaribu kwenye kifaa chako cha Android TV."</string>
-    <string name="app_streaming_blocked_message_for_permission_dialog" product="tablet" msgid="6545624942642129664">"Huwezi kufikia programu hii kwenye <xliff:g id="DEVICE">%1$s</xliff:g> chako kwa muda huu. Badala yake jaribu kwenye kompyuta yako kibao."</string>
-    <string name="app_streaming_blocked_message_for_permission_dialog" product="default" msgid="8462740631707923000">"Huwezi kufikia programu hii kwenye <xliff:g id="DEVICE">%1$s</xliff:g> chako kwa muda huu. Badala yake jaribu kwenye simu yako."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tv" msgid="6306583663205997979">"Huwezi kufikia programu hii kwenye kifaa chako cha <xliff:g id="DEVICE">%1$s</xliff:g> kwa wakati huu. Badala yake jaribu kwenye kifaa chako cha Android TV."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tablet" msgid="6545624942642129664">"Huwezi kufikia programu hii kwenye kifaa chako cha <xliff:g id="DEVICE">%1$s</xliff:g> kwa wakati huu. Badala yake jaribu kwenye kompyuta yako kibao."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="default" msgid="8462740631707923000">"Huwezi kufikia programu hii kwenye kifaa chako cha <xliff:g id="DEVICE">%1$s</xliff:g> kwa wakati huu. Badala yake jaribu kwenye simu yako."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Programu hii inaomba usalama wa ziada. Badala yake jaribu kwenye kifaa chako cha Android TV."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Programu hii inaomba usalama wa ziada. Badala yake jaribu kwenye kompyuta yako kibao."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Programu hii inaomba usalama wa ziada. Badala yake jaribu kwenye simu yako."</string>
@@ -2279,7 +2279,7 @@
     <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"<xliff:g id="APP">%1$s</xliff:g> inatumika chinichini. Gusa ili udhibiti matumizi ya betri."</string>
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> inaweza kuathiri muda wa matumizi ya betri. Gusa ili ukague programu zinazotumika."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Angalia programu zinazotumika"</string>
-    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Haiwezi kufikia kamera ya simu kutoka kwenye <xliff:g id="DEVICE">%1$s</xliff:g> yako"</string>
+    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Huwezi kufikia kamera ya simu kutoka kwenye <xliff:g id="DEVICE">%1$s</xliff:g> yako"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Haiwezi kufikia kamera ya kompyuta kibao kutoka kwenye <xliff:g id="DEVICE">%1$s</xliff:g> yako"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Chaguomsingi la mfumo"</string>
 </resources>
