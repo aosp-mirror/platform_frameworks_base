@@ -17,6 +17,7 @@
 package com.android.systemui.media.taptotransfer.sender
 
 import android.app.StatusBarManager
+import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
@@ -37,9 +38,11 @@ import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.media.taptotransfer.common.MediaTttLogger
+import com.android.systemui.media.taptotransfer.receiver.MediaTttReceiverLogger
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
@@ -61,7 +64,7 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper
 class MediaTttChipControllerSenderTest : SysuiTestCase() {
-    private lateinit var controllerSender: MediaTttChipControllerSender
+    private lateinit var controllerSender: TestMediaTttChipControllerSender
 
     @Mock
     private lateinit var packageManager: PackageManager
@@ -116,7 +119,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         whenever(lazyFalsingManager.get()).thenReturn(falsingManager)
         whenever(lazyFalsingCollector.get()).thenReturn(falsingCollector)
 
-        controllerSender = MediaTttChipControllerSender(
+        controllerSender = TestMediaTttChipControllerSender(
             commandQueue,
             context,
             logger,
@@ -821,6 +824,37 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
     /** Helper method providing default parameters to not clutter up the tests. */
     private fun transferToThisDeviceFailed() =
         ChipSenderInfo(ChipStateSender.TRANSFER_TO_RECEIVER_FAILED, routeInfo)
+
+    private class TestMediaTttChipControllerSender(
+        commandQueue: CommandQueue,
+        context: Context,
+        @MediaTttReceiverLogger logger: MediaTttLogger,
+        windowManager: WindowManager,
+        mainExecutor: DelayableExecutor,
+        accessibilityManager: AccessibilityManager,
+        configurationController: ConfigurationController,
+        powerManager: PowerManager,
+        uiEventLogger: MediaTttSenderUiEventLogger,
+        falsingManager: Lazy<FalsingManager>,
+        falsingCollector: Lazy<FalsingCollector>,
+    ) : MediaTttChipControllerSender(
+        commandQueue,
+        context,
+        logger,
+        windowManager,
+        mainExecutor,
+        accessibilityManager,
+        configurationController,
+        powerManager,
+        uiEventLogger,
+        falsingManager,
+        falsingCollector,
+    ) {
+        override fun animateViewOut(view: ViewGroup, onAnimationEnd: Runnable) {
+            // Just bypass the animation in tests
+            onAnimationEnd.run()
+        }
+    }
 }
 
 private const val APP_NAME = "Fake app name"

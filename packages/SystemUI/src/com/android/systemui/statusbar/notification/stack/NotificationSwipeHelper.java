@@ -185,6 +185,13 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
         return false;
     }
 
+    @Override
+    protected void updateSwipeProgressAlpha(View animView, float alpha) {
+        if (animView instanceof ExpandableNotificationRow) {
+            ((ExpandableNotificationRow) animView).setContentAlpha(alpha);
+        }
+    }
+
     @VisibleForTesting
     protected void handleMenuRowSwipe(MotionEvent ev, View animView, float velocity,
             NotificationMenuRowPlugin menuRow) {
