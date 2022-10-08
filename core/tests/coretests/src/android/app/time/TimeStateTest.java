@@ -16,12 +16,12 @@
 
 package android.app.time;
 
+import static android.app.timezonedetector.ParcelableTestSupport.assertRoundTripParcelable;
 import static android.app.timezonedetector.ShellCommandTestSupport.createShellCommandWithArgsAndOptions;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
-import android.os.Parcel;
 import android.os.ShellCommand;
 
 import androidx.test.runner.AndroidJUnit4;
@@ -60,19 +60,8 @@ public class TimeStateTest {
     @Test
     public void testParceling() {
         UnixEpochTime time = new UnixEpochTime(1, 2);
-        TimeState value = new TimeState(time, true);
-        Parcel parcel = Parcel.obtain();
-        try {
-            parcel.writeParcelable(value, 0);
-
-            parcel.setDataPosition(0);
-
-            TimeState stringValueCopy =
-                    parcel.readParcelable(null /* classLoader */, TimeState.class);
-            assertEquals(value, stringValueCopy);
-        } finally {
-            parcel.recycle();
-        }
+        assertRoundTripParcelable(new TimeState(time, true));
+        assertRoundTripParcelable(new TimeState(time, false));
     }
 
     @Test(expected = IllegalArgumentException.class)

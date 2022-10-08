@@ -9355,4 +9355,9 @@ public class WindowManagerService extends IWindowManager.Stub
                         .setSourceCrop(mTmpRect)
                         .build();
     }
+
+    @Override
+    public boolean isGlobalKey(int keyCode) {
+        return mPolicy.isGlobalKey(keyCode);
+    }
 }

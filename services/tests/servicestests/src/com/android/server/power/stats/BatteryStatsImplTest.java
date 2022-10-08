@@ -28,7 +28,6 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -117,6 +116,7 @@ public class BatteryStatsImplTest {
 
         // Initialize time-in-freq counters
         mMockClock.realtime = 1000;
+        mMockClock.uptime = 1000;
         for (int i = 0; i < testUids.length; ++i) {
             mockKernelSingleUidTimeReader(testUids[i], new long[5]);
             mBatteryStatsImpl.noteUidProcessStateLocked(testUids[i], activityManagerProcStates[i]);
@@ -142,11 +142,12 @@ public class BatteryStatsImplTest {
         };
 
         mMockClock.realtime += 1000;
+        mMockClock.uptime += 1000;
 
         for (int i = 0; i < testUids.length; ++i) {
             mockKernelSingleUidTimeReader(testUids[i], cpuTimes[i]);
             mBatteryStatsImpl.updateProcStateCpuTimesLocked(testUids[i],
-                    mMockClock.realtime);
+                    mMockClock.realtime, mMockClock.uptime);
         }
 
         for (int i = 0; i < testUids.length; ++i) {
@@ -171,6 +172,7 @@ public class BatteryStatsImplTest {
         };
 
         mMockClock.realtime += 1000;
+        mMockClock.uptime += 1000;
 
         for (int i = 0; i < testUids.length; ++i) {
             long[] newCpuTimes = new long[cpuTimes[i].length];
@@ -179,7 +181,7 @@ public class BatteryStatsImplTest {
             }
             mockKernelSingleUidTimeReader(testUids[i], newCpuTimes);
             mBatteryStatsImpl.updateProcStateCpuTimesLocked(testUids[i],
-                    mMockClock.realtime);
+                    mMockClock.realtime, mMockClock.uptime);
         }
 
         for (int i = 0; i < testUids.length; ++i) {
@@ -200,7 +202,7 @@ public class BatteryStatsImplTest {
         }
 
         // Validate the on-battery-screen-off counter
-        mBatteryStatsImpl.updateTimeBasesLocked(true, Display.STATE_OFF, 0,
+        mBatteryStatsImpl.updateTimeBasesLocked(true, Display.STATE_OFF, mMockClock.uptime * 1000,
                 mMockClock.realtime * 1000);
 
         final long[][] delta2 = {
@@ -211,6 +213,7 @@ public class BatteryStatsImplTest {
         };
 
         mMockClock.realtime += 1000;
+        mMockClock.uptime += 1000;
 
         for (int i = 0; i < testUids.length; ++i) {
             long[] newCpuTimes = new long[cpuTimes[i].length];
@@ -219,7 +222,7 @@ public class BatteryStatsImplTest {
             }
             mockKernelSingleUidTimeReader(testUids[i], newCpuTimes);
             mBatteryStatsImpl.updateProcStateCpuTimesLocked(testUids[i],
-                    mMockClock.realtime);
+                    mMockClock.realtime, mMockClock.uptime);
         }
 
         for (int i = 0; i < testUids.length; ++i) {
@@ -253,6 +256,7 @@ public class BatteryStatsImplTest {
         };
 
         mMockClock.realtime += 1000;
+        mMockClock.uptime += 1000;
 
         final int parentUid = testUids[1];
         final int childUid = 99099;
@@ -267,7 +271,7 @@ public class BatteryStatsImplTest {
             }
             mockKernelSingleUidTimeReader(testUids[i], newCpuTimes);
             mBatteryStatsImpl.updateProcStateCpuTimesLocked(testUids[i],
-                    mMockClock.realtime);
+                    mMockClock.realtime, mMockClock.uptime);
         }
 
         for (int i = 0; i < testUids.length; ++i) {
@@ -302,6 +306,7 @@ public class BatteryStatsImplTest {
         mBatteryStatsImpl.updateTimeBasesLocked(true, Display.STATE_ON, 0, 0);
 
         mMockClock.realtime = 1000;
+        mMockClock.uptime = 1000;
 
         final int[] testUids = {10032, 10048, 10145, 10139};
         final int[] testProcStates = {
@@ -316,7 +321,7 @@ public class BatteryStatsImplTest {
             uid.setProcessStateForTest(testProcStates[i], mMockClock.elapsedRealtime());
             mockKernelSingleUidTimeReader(testUids[i], new long[NUM_CPU_FREQS]);
             mBatteryStatsImpl.updateProcStateCpuTimesLocked(testUids[i],
-                    mMockClock.elapsedRealtime());
+                    mMockClock.elapsedRealtime(), mMockClock.uptime);
         }
 
         final SparseArray<long[]> allUidCpuTimes = new SparseArray<>();
@@ -341,6 +346,7 @@ public class BatteryStatsImplTest {
         }
 
         mMockClock.realtime += 1000;
+        mMockClock.uptime += 1000;
 
         mBatteryStatsImpl.updateCpuTimesForAllUids();
 
@@ -391,27 +397,6 @@ public class BatteryStatsImplTest {
         }).when(mKernelSingleUidTimeReader).addDelta(eq(testUid),
                 any(LongArrayMultiStateCounter.class), anyLong(),
                 any(LongArrayMultiStateCounter.LongArrayContainer.class));
-    }
-
-    @Test
-    public void testAddCpuTimes() {
-        long[] timesA = null;
-        long[] timesB = null;
-        assertNull(mBatteryStatsImpl.addCpuTimes(timesA, timesB));
-
-        timesA = new long[] {34, 23, 45, 24};
-        assertArrayEquals(timesA, mBatteryStatsImpl.addCpuTimes(timesA, timesB));
-
-        timesB = timesA;
-        timesA = null;
-        assertArrayEquals(timesB, mBatteryStatsImpl.addCpuTimes(timesA, timesB));
-
-        final long[] expected = {434, 6784, 34987, 9984};
-        timesA = new long[timesB.length];
-        for (int i = 0; i < timesA.length; ++i) {
-            timesA[i] = expected[i] - timesB[i];
-        }
-        assertArrayEquals(expected, mBatteryStatsImpl.addCpuTimes(timesA, timesB));
     }
 
     @Test

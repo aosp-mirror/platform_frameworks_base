@@ -119,6 +119,14 @@ public class ProcessCpuTracker {
     private final String[] mProcessFullStatsStringData = new String[6];
     private final long[] mProcessFullStatsData = new long[6];
 
+    private static final int[] PROCESS_SCHEDSTATS_FORMAT = new int[] {
+            PROC_SPACE_TERM|PROC_OUT_LONG,
+            PROC_SPACE_TERM|PROC_OUT_LONG,
+    };
+
+    static final int PROCESS_SCHEDSTAT_CPU_TIME = 0;
+    static final int PROCESS_SCHEDSTAT_CPU_DELAY_TIME = 1;
+
     private static final int[] SYSTEM_CPU_FORMAT = new int[] {
         PROC_SPACE_TERM|PROC_COMBINE,
         PROC_SPACE_TERM|PROC_OUT_LONG,                  // 1: user time
@@ -617,8 +625,8 @@ public class ProcessCpuTracker {
     }
 
     /**
-     * Returns the total time (in milliseconds) spent executing in
-     * both user and system code.  Safe to call without lock held.
+     * Returns the total time (in milliseconds) the given PID has spent
+     * executing in both user and system code. Safe to call without lock held.
      */
     public long getCpuTimeForPid(int pid) {
         synchronized (mSinglePidStatsData) {
@@ -629,6 +637,22 @@ public class ProcessCpuTracker {
                 long time = statsData[PROCESS_STAT_UTIME]
                         + statsData[PROCESS_STAT_STIME];
                 return time * mJiffyMillis;
+            }
+            return 0;
+        }
+    }
+
+    /**
+     * Returns the total time (in milliseconds) the given PID has spent waiting
+     * in the runqueue. Safe to call without lock held.
+     */
+    public long getCpuDelayTimeForPid(int pid) {
+        synchronized (mSinglePidStatsData) {
+            final String statFile = "/proc/" + pid + "/schedstat";
+            final long[] statsData = mSinglePidStatsData;
+            if (Process.readProcFile(statFile, PROCESS_SCHEDSTATS_FORMAT,
+                    null, statsData, null)) {
+                return statsData[PROCESS_SCHEDSTAT_CPU_DELAY_TIME] / 1_000_000;
             }
             return 0;
         }

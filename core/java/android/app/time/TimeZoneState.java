@@ -58,9 +58,15 @@ public final class TimeZoneState implements Parcelable {
     }
 
     private static TimeZoneState createFromParcel(Parcel in) {
-        String zoneId = in.readString();
+        String zoneId = in.readString8();
         boolean userShouldConfirmId = in.readBoolean();
         return new TimeZoneState(zoneId, userShouldConfirmId);
+    }
+
+    @Override
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        dest.writeString8(mId);
+        dest.writeBoolean(mUserShouldConfirmId);
     }
 
     /** @hide */
@@ -105,12 +111,6 @@ public final class TimeZoneState implements Parcelable {
     @Override
     public int describeContents() {
         return 0;
-    }
-
-    @Override
-    public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeString(mId);
-        dest.writeBoolean(mUserShouldConfirmId);
     }
 
     @NonNull

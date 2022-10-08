@@ -435,7 +435,7 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
         }
 
         @Override
-        public void onKeyguardVisibilityChanged(boolean showing) {
+        public void onKeyguardVisibilityChanged(boolean visible) {
             update(false /* updateAlways */);
         }
 

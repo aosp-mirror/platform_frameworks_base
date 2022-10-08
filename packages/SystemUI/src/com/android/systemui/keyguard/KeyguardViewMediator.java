@@ -25,7 +25,6 @@ import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.NAV_BA
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_OCCLUSION;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_TRANSITION_FROM_AOD;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_UNLOCK_ANIMATION;
-import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_TRUSTAGENT_EXPIRED;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_USER_REQUEST;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT;
@@ -512,9 +511,9 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
     KeyguardUpdateMonitorCallback mUpdateCallback = new KeyguardUpdateMonitorCallback() {
 
         @Override
-        public void onKeyguardVisibilityChanged(boolean showing) {
+        public void onKeyguardVisibilityChanged(boolean visible) {
             synchronized (KeyguardViewMediator.this) {
-                if (!showing && mPendingPinLock) {
+                if (!visible && mPendingPinLock) {
                     Log.i(TAG, "PIN lock requested, starting keyguard");
 
                     // Bring the keyguard back in order to show the PIN lock
@@ -804,9 +803,6 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
             } else if (trustAgentsEnabled
                     && (strongAuth & SOME_AUTH_REQUIRED_AFTER_USER_REQUEST) != 0) {
                 return KeyguardSecurityView.PROMPT_REASON_USER_REQUEST;
-            } else if (trustAgentsEnabled
-                    && (strongAuth & SOME_AUTH_REQUIRED_AFTER_TRUSTAGENT_EXPIRED) != 0) {
-                return KeyguardSecurityView.PROMPT_REASON_TRUSTAGENT_EXPIRED;
             } else if (any && ((strongAuth & STRONG_AUTH_REQUIRED_AFTER_LOCKOUT) != 0
                     || mUpdateMonitor.isFingerprintLockedOut())) {
                 return KeyguardSecurityView.PROMPT_REASON_AFTER_LOCKOUT;
@@ -987,9 +983,11 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
 
                 @Override
                 public void onAnimationCancelled(boolean isKeyguardOccluded) {
-                    if (mUnoccludeAnimator != null) {
-                        mUnoccludeAnimator.cancel();
-                    }
+                    mContext.getMainExecutor().execute(() -> {
+                        if (mUnoccludeAnimator != null) {
+                            mUnoccludeAnimator.cancel();
+                        }
+                    });
 
                     setOccluded(isKeyguardOccluded /* isOccluded */, false /* animate */);
                     Log.d(TAG, "Unocclude animation cancelled. Occluded state is now: "
@@ -1808,7 +1806,6 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
 
             if (mOccluded != isOccluded) {
                 mOccluded = isOccluded;
-                mUpdateMonitor.setKeyguardOccluded(isOccluded);
                 mKeyguardViewControllerLazy.get().setOccluded(isOccluded, animate
                         && mDeviceInteractive);
                 adjustStatusBarLocked();

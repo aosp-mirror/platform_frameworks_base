@@ -296,8 +296,10 @@ public abstract class BatteryStats {
      * New in version 35:
      *   - Fixed bug that was not reporting high cellular tx power correctly
      *   - Added out of service and emergency service modes to data connection types
+     * New in version 36:
+     *   - Added PowerStats and CPU time-in-state data
      */
-    static final int CHECKIN_VERSION = 35;
+    static final int CHECKIN_VERSION = 36;
 
     /**
      * Old version, we hit 9 and ran out of room, need to remove.
@@ -1810,6 +1812,36 @@ public abstract class BatteryStats {
     }
 
     /**
+     * CPU usage for a given UID.
+     */
+    public static final class CpuUsageDetails {
+        /**
+         * Descriptions of CPU power brackets, see PowerProfile.getCpuPowerBracketDescription
+         */
+        public String[] cpuBracketDescriptions;
+        public int uid;
+        /**
+         *  The delta, in milliseconds, per CPU power bracket, from the previous record for the
+         *  same UID.
+         */
+        public long[] cpuUsageMs;
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder();
+            UserHandle.formatUid(sb, uid);
+            sb.append(": ");
+            for (int bracket = 0; bracket < cpuUsageMs.length; bracket++) {
+                if (bracket != 0) {
+                    sb.append(", ");
+                }
+                sb.append(cpuUsageMs[bracket]);
+            }
+            return sb.toString();
+        }
+    }
+
+    /**
      * Battery history record.
      */
     public static final class HistoryItem {
@@ -1951,6 +1983,9 @@ public abstract class BatteryStats {
 
         // Non-null when there is measured energy information
         public MeasuredEnergyDetails measuredEnergyDetails;
+
+        // Non-null when there is CPU usage information
+        public CpuUsageDetails cpuUsageDetails;
 
         public static final int EVENT_FLAG_START = 0x8000;
         public static final int EVENT_FLAG_FINISH = 0x4000;
@@ -2161,6 +2196,7 @@ public abstract class BatteryStats {
             eventTag = null;
             tagsFirstOccurrence = false;
             measuredEnergyDetails = null;
+            cpuUsageDetails = null;
         }
 
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
@@ -2211,6 +2247,7 @@ public abstract class BatteryStats {
             tagsFirstOccurrence = o.tagsFirstOccurrence;
             currentTime = o.currentTime;
             measuredEnergyDetails = o.measuredEnergyDetails;
+            cpuUsageDetails = o.cpuUsageDetails;
         }
 
         public boolean sameNonEvent(HistoryItem o) {
@@ -6808,6 +6845,25 @@ public abstract class BatteryStats {
         private String printNextItem(HistoryItem rec, long baseTime, boolean checkin,
                 boolean verbose) {
             StringBuilder item = new StringBuilder();
+
+            if (rec.cpuUsageDetails != null
+                    && rec.cpuUsageDetails.cpuBracketDescriptions != null
+                    && checkin) {
+                String[] descriptions = rec.cpuUsageDetails.cpuBracketDescriptions;
+                for (int bracket = 0; bracket < descriptions.length; bracket++) {
+                    item.append(BATTERY_STATS_CHECKIN_VERSION);
+                    item.append(',');
+                    item.append(HISTORY_DATA);
+                    item.append(",0,XB,");
+                    item.append(descriptions.length);
+                    item.append(',');
+                    item.append(bracket);
+                    item.append(',');
+                    item.append(descriptions[bracket]);
+                    item.append("\n");
+                }
+            }
+
             if (!checkin) {
                 item.append("  ");
                 TimeUtils.formatDuration(
@@ -7000,14 +7056,6 @@ public abstract class BatteryStats {
                         item.append("\"");
                     }
                 }
-                if ((rec.states2 & HistoryItem.STATE2_EXTENSIONS_FLAG) != 0) {
-                    if (!checkin) {
-                        item.append(" ext=");
-                        if (rec.measuredEnergyDetails != null) {
-                            item.append("E");
-                        }
-                    }
-                }
                 if (rec.eventCode != HistoryItem.EVENT_NONE) {
                     item.append(checkin ? "," : " ");
                     if ((rec.eventCode&HistoryItem.EVENT_FLAG_START) != 0) {
@@ -7035,6 +7083,58 @@ public abstract class BatteryStats {
                         item.append(rec.eventTag.string);
                         item.append("\"");
                     }
+                }
+                boolean firstExtension = true;
+                if (rec.measuredEnergyDetails != null) {
+                    firstExtension = false;
+                    if (!checkin) {
+                        item.append(" ext=energy:");
+                        item.append(rec.measuredEnergyDetails);
+                    } else {
+                        item.append(",XE");
+                        for (int i = 0; i < rec.measuredEnergyDetails.consumers.length; i++) {
+                            if (rec.measuredEnergyDetails.chargeUC[i] != POWER_DATA_UNAVAILABLE) {
+                                item.append(',');
+                                item.append(rec.measuredEnergyDetails.consumers[i].name);
+                                item.append('=');
+                                item.append(rec.measuredEnergyDetails.chargeUC[i]);
+                            }
+                        }
+                    }
+                }
+                if (rec.cpuUsageDetails != null) {
+                    if (!checkin) {
+                        if (!firstExtension) {
+                            item.append("\n                ");
+                        }
+                        String[] descriptions = rec.cpuUsageDetails.cpuBracketDescriptions;
+                        if (descriptions != null) {
+                            for (int bracket = 0; bracket < descriptions.length; bracket++) {
+                                item.append(" ext=cpu-bracket:");
+                                item.append(bracket);
+                                item.append(":");
+                                item.append(descriptions[bracket]);
+                                item.append("\n                ");
+                            }
+                        }
+                        item.append(" ext=cpu:");
+                        item.append(rec.cpuUsageDetails);
+                    } else {
+                        if (!firstExtension) {
+                            item.append('\n');
+                            item.append(BATTERY_STATS_CHECKIN_VERSION);
+                            item.append(',');
+                            item.append(HISTORY_DATA);
+                            item.append(",0");
+                        }
+                        item.append(",XC,");
+                        item.append(rec.cpuUsageDetails.uid);
+                        for (int i = 0; i < rec.cpuUsageDetails.cpuUsageMs.length; i++) {
+                            item.append(',');
+                            item.append(rec.cpuUsageDetails.cpuUsageMs[i]);
+                        }
+                    }
+                    firstExtension = false;
                 }
                 item.append("\n");
                 if (rec.stepDetails != null) {
@@ -7132,25 +7232,6 @@ public abstract class BatteryStats {
                         item.append("\n");
                     }
                 }
-                if (rec.measuredEnergyDetails != null) {
-                    if (!checkin) {
-                        item.append("                 Energy: ");
-                        item.append(rec.measuredEnergyDetails);
-                        item.append("\n");
-                    } else {
-                        item.append(BATTERY_STATS_CHECKIN_VERSION); item.append(',');
-                        item.append(HISTORY_DATA); item.append(",0,XE");
-                        for (int i = 0; i < rec.measuredEnergyDetails.consumers.length; i++) {
-                            if (rec.measuredEnergyDetails.chargeUC[i] != POWER_DATA_UNAVAILABLE) {
-                                item.append(',');
-                                item.append(rec.measuredEnergyDetails.consumers[i].name);
-                                item.append('=');
-                                item.append(rec.measuredEnergyDetails.chargeUC[i]);
-                            }
-                        }
-                        item.append("\n");
-                    }
-                }
                 oldState = rec.states;
                 oldState2 = rec.states2;
                 // Clear High Tx Power Flag for volta positioning
@@ -7158,7 +7239,6 @@ public abstract class BatteryStats {
                     rec.states2 &= ~HistoryItem.STATE2_CELLULAR_HIGH_TX_POWER_FLAG;
                 }
             }
-
             return item.toString();
         }
 

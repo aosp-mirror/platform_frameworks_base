@@ -148,7 +148,7 @@ class NotificationMemoryMonitorTest : SysuiTestCase() {
             smallIcon = notification.smallIcon.bitmap.allocationByteCount,
             largeIcon = notification.getLargeIcon().bitmap.allocationByteCount,
             extras = 4092,
-            bigPicture = 960000,
+            bigPicture = bigPicture.bitmap.allocationByteCount,
             extender = 0,
             style = "BigPictureStyle",
             styleIcon = bigPictureIcon.bitmap.allocationByteCount,

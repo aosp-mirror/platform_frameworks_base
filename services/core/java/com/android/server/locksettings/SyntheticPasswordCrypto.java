@@ -17,7 +17,6 @@
 package com.android.server.locksettings;
 
 import android.security.AndroidKeyStoreMaintenance;
-import android.security.keymaster.KeymasterDefs;
 import android.security.keystore.KeyProperties;
 import android.security.keystore.KeyProtection;
 import android.security.keystore2.AndroidKeyStoreLoadStoreParameter;
@@ -223,13 +222,6 @@ public class SyntheticPasswordCrypto {
                 keyStore.setEntry(protectorKeyAlias, entry, protRollbackResistant);
                 Slog.i(TAG, "Using rollback-resistant key");
             } catch (KeyStoreException e) {
-                if (!(e.getCause() instanceof android.security.KeyStoreException)) {
-                    throw e;
-                }
-                int errorCode = ((android.security.KeyStoreException) e.getCause()).getErrorCode();
-                if (errorCode != KeymasterDefs.KM_ERROR_ROLLBACK_RESISTANCE_UNAVAILABLE) {
-                    throw e;
-                }
                 Slog.w(TAG, "Rollback-resistant keys unavailable.  Falling back to "
                         + "non-rollback-resistant key");
                 keyStore.setEntry(protectorKeyAlias, entry, protNonRollbackResistant);

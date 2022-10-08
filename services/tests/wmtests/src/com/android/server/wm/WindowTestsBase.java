@@ -721,6 +721,10 @@ class WindowTestsBase extends SystemServiceTestsBase {
         activity.mVisibleRequested = true;
     }
 
+    static TaskFragment createTaskFragmentWithParentTask(@NonNull Task parentTask) {
+        return createTaskFragmentWithParentTask(parentTask, false /* createEmbeddedTask */);
+    }
+
     /**
      * Creates a {@link TaskFragment} and attach it to the {@code parentTask}.
      *

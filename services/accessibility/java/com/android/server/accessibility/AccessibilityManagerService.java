@@ -140,7 +140,6 @@ import com.android.internal.util.IntPair;
 import com.android.server.AccessibilityManagerInternal;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
-import com.android.server.accessibility.cursor.SoftwareCursorManager;
 import com.android.server.accessibility.magnification.MagnificationController;
 import com.android.server.accessibility.magnification.MagnificationProcessor;
 import com.android.server.accessibility.magnification.MagnificationScaleProvider;
@@ -245,8 +244,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     private final MagnificationController mMagnificationController;
     private final MagnificationProcessor mMagnificationProcessor;
 
-    private final SoftwareCursorManager mSoftwareCursorManager;
-
     private final MainHandler mMainHandler;
 
     // Lazily initialized - access through getSystemActionPerformer()
@@ -280,6 +277,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     final SparseArray<AccessibilityUserState> mUserStates = new SparseArray<>();
 
     private final UiAutomationManager mUiAutomationManager = new UiAutomationManager(mLock);
+    private final ProxyManager mProxyManager;
     private final AccessibilityTraceManager mTraceManager;
     private final CaptioningManagerImpl mCaptioningManagerImpl;
 
@@ -399,7 +397,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             AccessibilityWindowManager a11yWindowManager,
             AccessibilityDisplayListener a11yDisplayListener,
             MagnificationController magnificationController,
-            @Nullable AccessibilityInputFilter inputFilter) {
+            @Nullable AccessibilityInputFilter inputFilter,
+            ProxyManager proxyManager) {
         mContext = context;
         mPowerManager =  (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mWindowManagerService = LocalServices.getService(WindowManagerInternal.class);
@@ -415,7 +414,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         mMagnificationController = magnificationController;
         mMagnificationProcessor = new MagnificationProcessor(mMagnificationController);
         mCaptioningManagerImpl = new CaptioningManagerImpl(mContext);
-        mSoftwareCursorManager = new SoftwareCursorManager();
+        mProxyManager = proxyManager;
         if (inputFilter != null) {
             mInputFilter = inputFilter;
             mHasInputFilter = true;
@@ -449,7 +448,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 new MagnificationScaleProvider(mContext));
         mMagnificationProcessor = new MagnificationProcessor(mMagnificationController);
         mCaptioningManagerImpl = new CaptioningManagerImpl(mContext);
-        mSoftwareCursorManager = new SoftwareCursorManager();
+        mProxyManager = new ProxyManager(mLock);
         init();
     }
 
@@ -2287,9 +2286,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             if (userState.isPerformGesturesEnabledLocked()) {
                 flags |= AccessibilityInputFilter.FLAG_FEATURE_INJECT_MOTION_EVENTS;
             }
-            if (userState.isSoftwareCursorEnabledLocked()) {
-                flags |= AccessibilityInputFilter.FLAG_FEATURE_SOFTWARE_CURSOR;
-            }
             if (flags != 0) {
                 if (!mHasInputFilter) {
                     mHasInputFilter = true;
@@ -3491,15 +3487,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         return mMagnificationController;
     }
 
-    /**
-     * Getter of {@link SoftwareCursorManager}.
-     *
-     * @return SoftwareCursorManager
-     */
-    SoftwareCursorManager getSoftwareCursorManager() {
-        return mSoftwareCursorManager;
-    }
-
     @Override
     public void associateEmbeddedHierarchy(@NonNull IBinder host, @NonNull IBinder embedded) {
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
@@ -3616,6 +3603,34 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 "setSystemAudioCaptioningUiEnabled");
 
         mCaptioningManagerImpl.setSystemAudioCaptioningUiEnabled(isEnabled, userId);
+    }
+
+    @Override
+    public boolean registerProxyForDisplay(IAccessibilityServiceClient client, int displayId)
+            throws RemoteException {
+        mSecurityPolicy.enforceCallingOrSelfPermission(Manifest.permission.MANAGE_ACCESSIBILITY);
+        if (client == null) {
+            return false;
+        }
+        if (displayId < 0) {
+            throw new IllegalArgumentException("The display id " + displayId + " is invalid.");
+        }
+        if (displayId == Display.DEFAULT_DISPLAY) {
+            throw new IllegalArgumentException("The default display cannot be proxy-ed.");
+        }
+        if (!isTrackedDisplay(displayId)) {
+            throw new IllegalArgumentException("The display " + displayId + " does not exist or is"
+                    + " not tracked by accessibility.");
+        }
+
+        mProxyManager.registerProxy(client, displayId);
+        return true;
+    }
+
+    @Override
+    public boolean unregisterProxyForDisplay(int displayId) throws RemoteException {
+        mSecurityPolicy.enforceCallingOrSelfPermission(Manifest.permission.MANAGE_ACCESSIBILITY);
+        return mProxyManager.unregisterProxy(displayId);
     }
 
     @Override
@@ -3845,6 +3860,21 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      */
     public ArrayList<Display> getValidDisplayList() {
         return mA11yDisplayListener.getValidDisplayList();
+    }
+
+
+    /**
+     *  Returns {@code true} if the display id is in the list of currently valid logical displays
+     *  being tracked by a11y.
+     */
+    private boolean isTrackedDisplay(int displayId) {
+        final ArrayList<Display> displays = getValidDisplayList();
+        for (Display display : displays) {
+            if (display.getDisplayId() == displayId) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

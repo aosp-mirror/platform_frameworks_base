@@ -94,7 +94,6 @@ public final class UnixEpochTime implements Parcelable {
     }
 
     /** Returns the unix epoch time value. See {@link UnixEpochTime} for more information. */
-    @Nullable
     public long getUnixEpochTimeMillis() {
         return mUnixEpochTimeMillis;
     }
@@ -109,7 +108,7 @@ public final class UnixEpochTime implements Parcelable {
         }
         UnixEpochTime that = (UnixEpochTime) o;
         return mElapsedRealtimeMillis == that.mElapsedRealtimeMillis
-                && Objects.equals(mUnixEpochTimeMillis, that.mUnixEpochTimeMillis);
+                && mUnixEpochTimeMillis == that.mUnixEpochTimeMillis;
     }
 
     @Override
@@ -125,37 +124,29 @@ public final class UnixEpochTime implements Parcelable {
                 + '}';
     }
 
-    public static final @NonNull Creator<UnixEpochTime> CREATOR =
-            new ClassLoaderCreator<UnixEpochTime>() {
+    public static final @NonNull Creator<UnixEpochTime> CREATOR = new Creator<>() {
+        @Override
+        public UnixEpochTime createFromParcel(@NonNull Parcel source) {
+            long elapsedRealtimeMillis = source.readLong();
+            long unixEpochTimeMillis = source.readLong();
+            return new UnixEpochTime(elapsedRealtimeMillis, unixEpochTimeMillis);
+        }
 
-                @Override
-                public UnixEpochTime createFromParcel(@NonNull Parcel source) {
-                    return createFromParcel(source, null);
-                }
-
-                @Override
-                public UnixEpochTime createFromParcel(
-                        @NonNull Parcel source, @Nullable ClassLoader classLoader) {
-                    long elapsedRealtimeMillis = source.readLong();
-                    long unixEpochTimeMillis = source.readLong();
-                    return new UnixEpochTime(elapsedRealtimeMillis, unixEpochTimeMillis);
-                }
-
-                @Override
-                public UnixEpochTime[] newArray(int size) {
-                    return new UnixEpochTime[size];
-                }
-            };
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
+        @Override
+        public UnixEpochTime[] newArray(int size) {
+            return new UnixEpochTime[size];
+        }
+    };
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeLong(mElapsedRealtimeMillis);
         dest.writeLong(mUnixEpochTimeMillis);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     /**

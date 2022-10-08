@@ -16,7 +16,6 @@
 package com.android.keyguard;
 
 import android.hardware.biometrics.BiometricSourceType;
-import android.os.SystemClock;
 import android.telephony.TelephonyManager;
 import android.view.WindowManagerPolicyConstants;
 
@@ -31,10 +30,6 @@ import java.util.TimeZone;
  * Callback for general information relevant to lock screen.
  */
 public class KeyguardUpdateMonitorCallback {
-
-    private static final long VISIBILITY_CHANGED_COLLAPSE_MS = 1000;
-    private long mVisibilityChangedCalled;
-    private boolean mShowing;
 
     /**
      * Called when the battery status changes, e.g. when plugged in or unplugged, charge
@@ -75,26 +70,17 @@ public class KeyguardUpdateMonitorCallback {
     public void onPhoneStateChanged(int phoneState) { }
 
     /**
-     * Called when the visibility of the keyguard changes.
-     * @param showing Indicates if the keyguard is now visible.
-     */
-    public void onKeyguardVisibilityChanged(boolean showing) { }
-
-    public void onKeyguardVisibilityChangedRaw(boolean showing) {
-        final long now = SystemClock.elapsedRealtime();
-        if (showing == mShowing
-                && (now - mVisibilityChangedCalled) < VISIBILITY_CHANGED_COLLAPSE_MS) return;
-        onKeyguardVisibilityChanged(showing);
-        mVisibilityChangedCalled = now;
-        mShowing = showing;
-    }
-
-    /**
      * Called when the keyguard enters or leaves bouncer mode.
      * @param bouncerIsOrWillBeShowing if true, keyguard is showing the bouncer or transitioning
      *                                 from/to bouncer mode.
      */
     public void onKeyguardBouncerStateChanged(boolean bouncerIsOrWillBeShowing) { }
+
+    /**
+     * Called when the keyguard visibility changes.
+     * @param visible whether the keyguard is showing and is NOT occluded
+     */
+    public void onKeyguardVisibilityChanged(boolean visible) { }
 
     /**
      * Called when the keyguard fully transitions to the bouncer or is no longer the bouncer

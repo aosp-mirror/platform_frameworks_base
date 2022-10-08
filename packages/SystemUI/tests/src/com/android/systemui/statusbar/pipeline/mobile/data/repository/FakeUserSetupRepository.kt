@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.server.accessibility.cursor;
+package com.android.systemui.statusbar.pipeline.mobile.data.repository
 
-/**
- * Allows the Software Cursor feature to interface with its corresponding code in the SystemUI
- * process.
- */
-public final class SoftwareCursorManager {
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 
-    public SoftwareCursorManager() {
-      // TODO: Add behavior in a future CL.
+/** Defaults to `true` */
+class FakeUserSetupRepository : UserSetupRepository {
+    private val _isUserSetup: MutableStateFlow<Boolean> = MutableStateFlow(true)
+    override val isUserSetupFlow: Flow<Boolean> = _isUserSetup
+
+    fun setUserSetup(setup: Boolean) {
+        _isUserSetup.value = setup
     }
 }

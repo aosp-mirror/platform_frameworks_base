@@ -2483,6 +2483,11 @@ package android.service.voice {
     ctor public VisibleActivityInfo(int, @NonNull android.os.IBinder);
   }
 
+  public static class VoiceInteractionSession.ActivityId {
+    method @NonNull public android.os.IBinder getAssistToken();
+    method public int getTaskId();
+  }
+
 }
 
 package android.service.watchdog {
@@ -2937,6 +2942,7 @@ package android.view {
   public interface WindowManager extends android.view.ViewManager {
     method public default int getDisplayImePolicy(int);
     method public default void holdLock(android.os.IBinder, int);
+    method public default boolean isGlobalKey(int);
     method public default boolean isTaskSnapshotSupported();
     method public default void setDisplayImePolicy(int, int);
     method public default void setShouldShowSystemDecors(int, boolean);
@@ -2964,6 +2970,7 @@ package android.view.accessibility {
 
   public final class AccessibilityManager {
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_ACCESSIBILITY) public java.util.List<java.lang.String> getAccessibilityShortcutTargets(int);
+    method public boolean hasAnyDirectConnection();
   }
 
   public class AccessibilityNodeInfo implements android.os.Parcelable {

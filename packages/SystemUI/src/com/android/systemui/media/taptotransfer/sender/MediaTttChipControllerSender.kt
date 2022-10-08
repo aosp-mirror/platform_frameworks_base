@@ -29,6 +29,7 @@ import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
 import android.widget.TextView
 import com.android.internal.statusbar.IUndoMediaTransferCallback
+import com.android.internal.widget.CachingIconView
 import com.android.systemui.Gefingerpoken
 import com.android.systemui.R
 import com.android.systemui.animation.Interpolators
@@ -53,7 +54,7 @@ import javax.inject.Inject
  * chip is shown when a user is transferring media to/from this device and a receiver device.
  */
 @SysUISingleton
-class MediaTttChipControllerSender @Inject constructor(
+open class MediaTttChipControllerSender @Inject constructor(
         commandQueue: CommandQueue,
         context: Context,
         @MediaTttSenderLogger logger: MediaTttLogger,
@@ -145,11 +146,9 @@ class MediaTttChipControllerSender @Inject constructor(
         val iconInfo = MediaTttUtils.getIconInfoFromPackageName(
             context, newInfo.routeInfo.clientPackageName, logger
         )
-        MediaTttUtils.setIcon(
-            currentView.requireViewById(R.id.app_icon),
-            iconInfo.drawable,
-            iconInfo.contentDescription
-        )
+        val iconView = currentView.requireViewById<CachingIconView>(R.id.app_icon)
+        iconView.setImageDrawable(iconInfo.drawable)
+        iconView.contentDescription = iconInfo.contentDescription
 
         // Text
         val otherDeviceName = newInfo.routeInfo.name.toString()
@@ -196,7 +195,19 @@ class MediaTttChipControllerSender @Inject constructor(
         )
     }
 
-    override fun removeView(removalReason: String) {
+    override fun animateViewOut(view: ViewGroup, onAnimationEnd: Runnable) {
+        ViewHierarchyAnimator.animateRemoval(
+            view.requireViewById<ViewGroup>(R.id.media_ttt_sender_chip_inner),
+            ViewHierarchyAnimator.Hotspot.TOP,
+            Interpolators.EMPHASIZED_ACCELERATE,
+            ANIMATION_DURATION,
+            onAnimationEnd,
+        )
+        // TODO(b/203800644): Add includeMargins as an option to ViewHierarchyAnimator so that the
+        //   animateChipOut matches the animateChipIn.
+    }
+
+    override fun shouldIgnoreViewRemoval(removalReason: String): Boolean {
         // Don't remove the chip if we're in progress or succeeded, since the user should still be
         // able to see the status of the transfer. (But do remove it if it's finally timed out.)
         val transferStatus = info?.state?.transferStatus
@@ -208,9 +219,9 @@ class MediaTttChipControllerSender @Inject constructor(
             logger.logRemovalBypass(
                 removalReason, bypassReason = "transferStatus=${transferStatus.name}"
             )
-            return
+            return true
         }
-        super.removeView(removalReason)
+        return false
     }
 
     private fun Boolean.visibleIfTrue(): Int {

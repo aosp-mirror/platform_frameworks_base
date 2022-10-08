@@ -28,6 +28,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -57,7 +58,9 @@ import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.sysui.ShellCommandHandler;
+import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.sysui.ShellSharedConstants;
 import com.android.wm.shell.util.GroupedRecentTaskInfo;
 import com.android.wm.shell.util.SplitBounds;
 
@@ -84,6 +87,8 @@ public class RecentTasksControllerTest extends ShellTestCase {
     @Mock
     private TaskStackListenerImpl mTaskStackListener;
     @Mock
+    private ShellController mShellController;
+    @Mock
     private ShellCommandHandler mShellCommandHandler;
     @Mock
     private DesktopModeTaskRepository mDesktopModeTaskRepository;
@@ -101,7 +106,7 @@ public class RecentTasksControllerTest extends ShellTestCase {
         when(mContext.getPackageManager()).thenReturn(mock(PackageManager.class));
         mShellInit = spy(new ShellInit(mMainExecutor));
         mRecentTasksController = spy(new RecentTasksController(mContext, mShellInit,
-                mShellCommandHandler, mTaskStackListener, mActivityTaskManager,
+                mShellController, mShellCommandHandler, mTaskStackListener, mActivityTaskManager,
                 Optional.of(mDesktopModeTaskRepository), mMainExecutor));
         mShellTaskOrganizer = new ShellTaskOrganizer(mShellInit, mShellCommandHandler,
                 null /* sizeCompatUI */, Optional.empty(), Optional.of(mRecentTasksController),
@@ -118,6 +123,12 @@ public class RecentTasksControllerTest extends ShellTestCase {
     public void instantiateController_addDumpCallback() {
         verify(mShellCommandHandler, times(1)).addDumpCallback(any(),
                 isA(RecentTasksController.class));
+    }
+
+    @Test
+    public void instantiateController_addExternalInterface() {
+        verify(mShellController, times(1)).addExternalInterface(
+                eq(ShellSharedConstants.KEY_EXTRA_SHELL_RECENT_TASKS), any(), any());
     }
 
     @Test

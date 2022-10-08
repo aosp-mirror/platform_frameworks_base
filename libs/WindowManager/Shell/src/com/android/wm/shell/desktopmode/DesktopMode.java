@@ -23,9 +23,4 @@ import com.android.wm.shell.common.annotations.ExternalThread;
  */
 @ExternalThread
 public interface DesktopMode {
-
-    /** Returns a binder that can be passed to an external process to manipulate DesktopMode. */
-    default IDesktopMode createExternalInterface() {
-        return null;
-    }
 }

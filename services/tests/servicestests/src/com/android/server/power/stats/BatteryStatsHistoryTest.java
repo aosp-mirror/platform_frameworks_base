@@ -26,6 +26,7 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
+import android.os.BatteryStats.CpuUsageDetails;
 import android.os.BatteryStats.HistoryItem;
 import android.os.BatteryStats.MeasuredEnergyDetails;
 import android.os.Parcel;
@@ -315,14 +316,62 @@ public class BatteryStatsHistoryTest {
 
         String dump = toString(item, /* checkin */ false);
         assertThat(dump).contains("+200ms");
-        assertThat(dump).contains("ext=E");
-        assertThat(dump).contains("Energy: A=0 B/0=100 B/1=200");
+        assertThat(dump).contains("ext=energy:A=0 B/0=100 B/1=200");
         assertThat(dump).doesNotContain("C=");
 
         String checkin = toString(item, /* checkin */ true);
         assertThat(checkin).contains("XE");
         assertThat(checkin).contains("A=0,B/0=100,B/1=200");
         assertThat(checkin).doesNotContain("C=");
+    }
+
+    @Test
+    public void cpuUsageDetails() {
+        mHistory.forceRecordAllHistory();
+        mHistory.startRecordingHistory(0, 0, /* reset */ true);
+        mHistory.setBatteryState(true /* charging */, BatteryManager.BATTERY_STATUS_CHARGING, 80,
+                1234);
+
+        CpuUsageDetails details = new CpuUsageDetails();
+        details.cpuBracketDescriptions = new String[] {"low", "Med", "HIGH"};
+        details.uid = 10123;
+        details.cpuUsageMs = new long[] { 100, 200, 300};
+        mHistory.recordCpuUsage(200, 200, details);
+
+        details.uid = 10321;
+        details.cpuUsageMs = new long[] { 400, 500, 600};
+        mHistory.recordCpuUsage(300, 300, details);
+
+        BatteryStatsHistoryIterator iterator = mHistory.iterate();
+        BatteryStats.HistoryItem item = new BatteryStats.HistoryItem();
+        assertThat(iterator.next(item)).isTrue(); // First item contains current time only
+
+        assertThat(iterator.next(item)).isTrue();
+
+        String dump = toString(item, /* checkin */ false);
+        assertThat(dump).contains("+200ms");
+        assertThat(dump).contains("ext=cpu:u0a123: 100, 200, 300");
+        assertThat(dump).contains("ext=cpu-bracket:0:low");
+        assertThat(dump).contains("ext=cpu-bracket:1:Med");
+        assertThat(dump).contains("ext=cpu-bracket:2:HIGH");
+
+        String checkin = toString(item, /* checkin */ true);
+        assertThat(checkin).contains("XB,3,0,low");
+        assertThat(checkin).contains("XB,3,1,Med");
+        assertThat(checkin).contains("XB,3,2,HIGH");
+        assertThat(checkin).contains("XC,10123,100,200,300");
+
+        assertThat(iterator.next(item)).isTrue();
+
+        dump = toString(item, /* checkin */ false);
+        assertThat(dump).contains("+300ms");
+        assertThat(dump).contains("ext=cpu:u0a321: 400, 500, 600");
+        // Power bracket descriptions are written only once
+        assertThat(dump).doesNotContain("ext=cpu-bracket");
+
+        checkin = toString(item, /* checkin */ true);
+        assertThat(checkin).doesNotContain("XB");
+        assertThat(checkin).contains("XC,10321,400,500,600");
     }
 
     private String toString(BatteryStats.HistoryItem item, boolean checkin) {
@@ -332,5 +381,69 @@ public class BatteryStatsHistoryTest {
         printer.printNextItem(pw, item, 0, checkin, /* verbose */ true);
         pw.flush();
         return writer.toString();
+    }
+
+    @Test
+    public void testVarintParceler() {
+        long[] values = {
+                0,
+                1,
+                42,
+                0x1234,
+                0x10000000,
+                0x12345678,
+                0x7fffffff,
+                0xffffffffL,
+                0x100000000000L,
+                0x123456789012L,
+                0x1000000000000000L,
+                0x1234567890123456L,
+                0x7fffffffffffffffL,
+                0xffffffffffffffffL};
+
+        // Parcel subarrays of different lengths and assert the size of the resulting parcel
+        testVarintParceler(Arrays.copyOfRange(values, 0, 1), 4);   // v. 8
+        testVarintParceler(Arrays.copyOfRange(values, 0, 2), 4);   // v. 16
+        testVarintParceler(Arrays.copyOfRange(values, 0, 3), 4);   // v. 24
+        testVarintParceler(Arrays.copyOfRange(values, 0, 4), 8);   // v. 32
+        testVarintParceler(Arrays.copyOfRange(values, 0, 5), 12);  // v. 40
+        testVarintParceler(Arrays.copyOfRange(values, 0, 6), 16);  // v. 48
+        testVarintParceler(Arrays.copyOfRange(values, 0, 7), 20);  // v. 56
+        testVarintParceler(Arrays.copyOfRange(values, 0, 8), 28);  // v. 64
+        testVarintParceler(Arrays.copyOfRange(values, 0, 9), 32);  // v. 72
+        testVarintParceler(Arrays.copyOfRange(values, 0, 10), 40); // v. 80
+        testVarintParceler(Arrays.copyOfRange(values, 0, 11), 48); // v. 88
+        testVarintParceler(Arrays.copyOfRange(values, 0, 12), 60); // v. 96
+        testVarintParceler(Arrays.copyOfRange(values, 0, 13), 68); // v. 104
+        testVarintParceler(Arrays.copyOfRange(values, 0, 14), 76); // v. 112
+    }
+
+    private void testVarintParceler(long[] values, int expectedLength) {
+        BatteryStatsHistory.VarintParceler parceler = new BatteryStatsHistory.VarintParceler();
+        Parcel parcel = Parcel.obtain();
+        parcel.writeString("begin");
+        int pos = parcel.dataPosition();
+        parceler.writeLongArray(parcel, values);
+        int length = parcel.dataPosition() - pos;
+        parcel.writeString("end");
+
+        byte[] bytes = parcel.marshall();
+        parcel.recycle();
+
+        parcel = Parcel.obtain();
+        parcel.unmarshall(bytes, 0, bytes.length);
+        parcel.setDataPosition(0);
+
+        assertThat(parcel.readString()).isEqualTo("begin");
+
+        long[] result = new long[values.length];
+        parceler.readLongArray(parcel, result);
+
+        assertThat(result).isEqualTo(values);
+        assertThat(length).isEqualTo(expectedLength);
+
+        assertThat(parcel.readString()).isEqualTo("end");
+
+        parcel.recycle();
     }
 }

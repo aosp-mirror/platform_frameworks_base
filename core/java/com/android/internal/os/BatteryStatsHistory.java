@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
 import android.os.BatteryStats.BitDescription;
+import android.os.BatteryStats.CpuUsageDetails;
 import android.os.BatteryStats.HistoryItem;
 import android.os.BatteryStats.HistoryStepDetails;
 import android.os.BatteryStats.HistoryTag;
@@ -78,7 +79,7 @@ public class BatteryStatsHistory {
     private static final String TAG = "BatteryStatsHistory";
 
     // Current on-disk Parcel version. Must be updated when the format of the parcelable changes
-    private static final int VERSION = 208;
+    private static final int VERSION = 209;
 
     private static final String HISTORY_DIR = "battery-history";
     private static final String FILE_SUFFIX = ".bin";
@@ -122,6 +123,8 @@ public class BatteryStatsHistory {
 
     static final int EXTENSION_MEASURED_ENERGY_HEADER_FLAG = 0x00000001;
     static final int EXTENSION_MEASURED_ENERGY_FLAG = 0x00000002;
+    static final int EXTENSION_CPU_USAGE_HEADER_FLAG = 0x00000004;
+    static final int EXTENSION_CPU_USAGE_FLAG = 0x00000008;
 
     private final Parcel mHistoryBuffer;
     private final File mSystemDir;
@@ -194,6 +197,8 @@ public class BatteryStatsHistory {
     private long mTrackRunningHistoryUptimeMs = 0;
     private long mHistoryBaseTimeMs;
     private boolean mMeasuredEnergyHeaderWritten = false;
+    private boolean mCpuUsageHeaderWritten = false;
+    private final VarintParceler mVarintParceler = new VarintParceler();
 
     private byte mLastHistoryStepLevel = 0;
 
@@ -351,6 +356,7 @@ public class BatteryStatsHistory {
         mTrackRunningHistoryElapsedRealtimeMs = 0;
         mTrackRunningHistoryUptimeMs = 0;
         mMeasuredEnergyHeaderWritten = false;
+        mCpuUsageHeaderWritten = false;
 
         mHistoryBuffer.setDataSize(0);
         mHistoryBuffer.setDataPosition(0);
@@ -1180,7 +1186,7 @@ public class BatteryStatsHistory {
 
         final int idx = code & HistoryItem.EVENT_TYPE_MASK;
         final String prefix = (code & HistoryItem.EVENT_FLAG_START) != 0 ? "+" :
-                  (code & HistoryItem.EVENT_FLAG_FINISH) != 0 ? "-" : "";
+                (code & HistoryItem.EVENT_FLAG_FINISH) != 0 ? "-" : "";
 
         final String[] names = BatteryStats.HISTORY_EVENT_NAMES;
         if (idx < 0 || idx >= names.length) return;
@@ -1188,6 +1194,17 @@ public class BatteryStatsHistory {
         final String track = "battery_stats." + names[idx];
         final String name = prefix + names[idx] + "=" + tag.uid + ":\"" + tag.string + "\"";
         mTracer.traceInstantEvent(track, name);
+    }
+
+    /**
+     * Records CPU usage by a specific UID.  The recorded data is the delta from
+     * the previous record for the same UID.
+     */
+    public void recordCpuUsage(long elapsedRealtimeMs, long uptimeMs,
+            CpuUsageDetails cpuUsageDetails) {
+        mHistoryCur.cpuUsageDetails = cpuUsageDetails;
+        mHistoryCur.states2 |= HistoryItem.STATE2_EXTENSIONS_FLAG;
+        writeHistoryItem(elapsedRealtimeMs, uptimeMs);
     }
 
     /**
@@ -1338,6 +1355,7 @@ public class BatteryStatsHistory {
                 entry.setValue(entry.getValue() | BatteryStatsHistory.TAG_FIRST_OCCURRENCE_FLAG);
             }
             mMeasuredEnergyHeaderWritten = false;
+            mCpuUsageHeaderWritten = false;
 
             // Make a copy of mHistoryCur.
             HistoryItem copy = new HistoryItem();
@@ -1377,6 +1395,7 @@ public class BatteryStatsHistory {
         cur.eventTag = null;
         cur.tagsFirstOccurrence = false;
         cur.measuredEnergyDetails = null;
+        cur.cpuUsageDetails = null;
         if (DEBUG) {
             Slog.i(TAG, "Writing history buffer: was " + mHistoryBufferLastPos
                     + " now " + mHistoryBuffer.dataPosition()
@@ -1502,12 +1521,18 @@ public class BatteryStatsHistory {
                 extensionFlags |= BatteryStatsHistory.EXTENSION_MEASURED_ENERGY_HEADER_FLAG;
             }
         }
+        if (cur.cpuUsageDetails != null) {
+            extensionFlags |= EXTENSION_CPU_USAGE_FLAG;
+            if (!mCpuUsageHeaderWritten) {
+                extensionFlags |= BatteryStatsHistory.EXTENSION_CPU_USAGE_HEADER_FLAG;
+            }
+        }
         if (extensionFlags != 0) {
             cur.states2 |= HistoryItem.STATE2_EXTENSIONS_FLAG;
         } else {
             cur.states2 &= ~HistoryItem.STATE2_EXTENSIONS_FLAG;
         }
-        final boolean state2IntChanged = cur.states2 != last.states2;
+        final boolean state2IntChanged = cur.states2 != last.states2 || extensionFlags != 0;
         if (state2IntChanged) {
             firstToken |= BatteryStatsHistory.DELTA_STATE2_FLAG;
         }
@@ -1641,9 +1666,19 @@ public class BatteryStatsHistory {
                     }
                     mMeasuredEnergyHeaderWritten = true;
                 }
-                for (long chargeUC : cur.measuredEnergyDetails.chargeUC) {
-                    dest.writeLong(chargeUC);
+                mVarintParceler.writeLongArray(dest, cur.measuredEnergyDetails.chargeUC);
+            }
+
+            if (cur.cpuUsageDetails != null) {
+                if (DEBUG) {
+                    Slog.i(TAG, "WRITE DELTA: cpuUsageDetails=" + cur.cpuUsageDetails);
                 }
+                if (!mCpuUsageHeaderWritten) {
+                    dest.writeStringArray(cur.cpuUsageDetails.cpuBracketDescriptions);
+                    mCpuUsageHeaderWritten = true;
+                }
+                dest.writeInt(cur.cpuUsageDetails.uid);
+                mVarintParceler.writeLongArray(dest, cur.cpuUsageDetails.cpuUsageMs);
             }
         }
     }
@@ -1890,6 +1925,76 @@ public class BatteryStatsHistory {
         for (Map.Entry<HistoryTag, Integer> entry : mHistoryTagPool.entrySet()) {
             mHistoryTags.put(entry.getValue() & ~BatteryStatsHistory.TAG_FIRST_OCCURRENCE_FLAG,
                     entry.getKey());
+        }
+    }
+
+    /**
+     * Writes/reads an array of longs into Parcel using a compact format, where small integers use
+     * fewer bytes.  It is a bit more expensive than just writing the long into the parcel,
+     * but at scale saves a lot of storage and allows recording of longer battery history.
+     */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public static final class VarintParceler {
+        /**
+         * Writes an array of longs into Parcel using the varint format, see
+         * https://developers.google.com/protocol-buffers/docs/encoding#varints
+         */
+        public void writeLongArray(Parcel parcel, long[] values) {
+            int out = 0;
+            int shift = 0;
+            for (long value : values) {
+                boolean done = false;
+                while (!done) {
+                    final byte b;
+                    if ((value & ~0x7FL) == 0) {
+                        b = (byte) value;
+                        done = true;
+                    } else {
+                        b = (byte) (((int) value & 0x7F) | 0x80);
+                        value >>>= 7;
+                    }
+                    if (shift == 32) {
+                        parcel.writeInt(out);
+                        shift = 0;
+                        out = 0;
+                    }
+                    out |= (b & 0xFF) << shift;
+                    shift += 8;
+                }
+            }
+            if (shift != 0) {
+                parcel.writeInt(out);
+            }
+        }
+
+        /**
+         * Reads a long written with {@link #writeLongArray}
+         */
+        public void readLongArray(Parcel parcel, long[] values) {
+            int in = parcel.readInt();
+            int available = 4;
+            for (int i = 0; i < values.length; i++) {
+                long result = 0;
+                int shift;
+                for (shift = 0; shift < 64; shift += 7) {
+                    if (available == 0) {
+                        in = parcel.readInt();
+                        available = 4;
+                    }
+                    final byte b = (byte) in;
+                    in >>= 8;
+                    available--;
+
+                    result |= (long) (b & 0x7F) << shift;
+                    if ((b & 0x80) == 0) {
+                        values[i] = result;
+                        break;
+                    }
+                }
+                if (shift >= 64) {
+                    throw new ParcelFormatException("Invalid varint format");
+                }
+            }
         }
     }
 }

@@ -23,8 +23,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.res.Configuration;
+import android.content.res.Configuration.Orientation;
 import android.metrics.LogMaker;
-import android.util.Log;
 import android.view.View;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -75,6 +75,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
 
     @Nullable
     private Consumer<Boolean> mMediaVisibilityChangedListener;
+    @Orientation
     private int mLastOrientation;
     private String mCachedSpecs = "";
     @Nullable
@@ -88,21 +89,16 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
             new QSPanel.OnConfigurationChangedListener() {
                 @Override
                 public void onConfigurationChange(Configuration newConfig) {
+                    mQSLogger.logOnConfigurationChanged(
+                        /* lastOrientation= */ mLastOrientation,
+                        /* newOrientation= */ newConfig.orientation,
+                        /* containerName= */ mView.getDumpableTag());
+
                     mShouldUseSplitNotificationShade =
-                            LargeScreenUtils.shouldUseSplitNotificationShade(getResources());
-                    // Logging to aid the investigation of b/216244185.
-                    Log.d(TAG,
-                            "onConfigurationChange: "
-                                    + "mShouldUseSplitNotificationShade="
-                                    + mShouldUseSplitNotificationShade + ", "
-                                    + "newConfig.windowConfiguration="
-                                    + newConfig.windowConfiguration);
-                    mQSLogger.logOnConfigurationChanged(mLastOrientation, newConfig.orientation,
-                            mView.getDumpableTag());
-                    if (newConfig.orientation != mLastOrientation) {
-                        mLastOrientation = newConfig.orientation;
-                        switchTileLayout(false);
-                    }
+                        LargeScreenUtils.shouldUseSplitNotificationShade(getResources());
+                    mLastOrientation = newConfig.orientation;
+
+                    switchTileLayoutIfNeeded();
                     onConfigurationChanged();
                 }
             };
@@ -332,6 +328,10 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         if (mView.isListening()) {
             refreshAllTiles();
         }
+    }
+
+    private void switchTileLayoutIfNeeded() {
+        switchTileLayout(/* force= */ false);
     }
 
     boolean switchTileLayout(boolean force) {

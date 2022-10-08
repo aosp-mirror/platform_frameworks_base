@@ -2686,10 +2686,24 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             return;
         }
         mVisibleRequested = isVisibleRequested;
-        final TaskFragment parentTf = getParent().asTaskFragment();
+        final WindowContainer<?> parent = getParent();
+        if (parent == null) {
+            return;
+        }
+        final TaskFragment parentTf = parent.asTaskFragment();
         if (parentTf != null) {
             parentTf.onActivityVisibleRequestedChanged();
         }
+    }
+
+    @Nullable
+    @Override
+    TaskFragment getTaskFragment(Predicate<TaskFragment> callback) {
+        final TaskFragment taskFragment = super.getTaskFragment(callback);
+        if (taskFragment != null) {
+            return taskFragment;
+        }
+        return callback.test(this) ? this : null;
     }
 
     String toFullString() {

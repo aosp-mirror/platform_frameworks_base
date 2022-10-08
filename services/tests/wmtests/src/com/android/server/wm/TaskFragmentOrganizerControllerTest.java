@@ -195,6 +195,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         mController.onTaskFragmentAppeared(mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
         mController.dispatchPendingEvents();
 
+        assertTaskFragmentParentInfoChangedTransaction(mTask);
         assertTaskFragmentAppearedTransaction();
     }
 
@@ -365,6 +366,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         mController.onActivityReparentedToTask(activity);
         mController.dispatchPendingEvents();
 
+        assertTaskFragmentParentInfoChangedTransaction(task);
         assertActivityReparentedToTaskTransaction(task.mTaskId, activity.intent, activity.token);
     }
 
@@ -1205,7 +1207,8 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
 
     /**
      * Creates a {@link TaskFragment} with the {@link WindowContainerTransaction}. Calls
-     * {@link WindowOrganizerController#applyTransaction} to apply the transaction,
+     * {@link WindowOrganizerController#applyTransaction(WindowContainerTransaction)} to apply the
+     * transaction,
      */
     private void createTaskFragmentFromOrganizer(WindowContainerTransaction wct,
             ActivityRecord ownerActivity, IBinder fragmentToken) {
@@ -1239,8 +1242,8 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         final List<TaskFragmentTransaction.Change> changes = transaction.getChanges();
         assertFalse(changes.isEmpty());
 
-        // Appeared will come with parent info changed.
-        final TaskFragmentTransaction.Change change = changes.get(changes.size() - 1);
+        // Use remove to verify multiple transaction changes.
+        final TaskFragmentTransaction.Change change = changes.remove(0);
         assertEquals(TYPE_TASK_FRAGMENT_APPEARED, change.getType());
         assertEquals(mTaskFragmentInfo, change.getTaskFragmentInfo());
         assertEquals(mFragmentToken, change.getTaskFragmentToken());
@@ -1253,8 +1256,8 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         final List<TaskFragmentTransaction.Change> changes = transaction.getChanges();
         assertFalse(changes.isEmpty());
 
-        // InfoChanged may come with parent info changed.
-        final TaskFragmentTransaction.Change change = changes.get(changes.size() - 1);
+        // Use remove to verify multiple transaction changes.
+        final TaskFragmentTransaction.Change change = changes.remove(0);
         assertEquals(TYPE_TASK_FRAGMENT_INFO_CHANGED, change.getType());
         assertEquals(mTaskFragmentInfo, change.getTaskFragmentInfo());
         assertEquals(mFragmentToken, change.getTaskFragmentToken());
@@ -1266,7 +1269,9 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         final TaskFragmentTransaction transaction = mTransactionCaptor.getValue();
         final List<TaskFragmentTransaction.Change> changes = transaction.getChanges();
         assertFalse(changes.isEmpty());
-        final TaskFragmentTransaction.Change change = changes.get(0);
+
+        // Use remove to verify multiple transaction changes.
+        final TaskFragmentTransaction.Change change = changes.remove(0);
         assertEquals(TYPE_TASK_FRAGMENT_VANISHED, change.getType());
         assertEquals(mTaskFragmentInfo, change.getTaskFragmentInfo());
         assertEquals(mFragmentToken, change.getTaskFragmentToken());
@@ -1278,7 +1283,9 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         final TaskFragmentTransaction transaction = mTransactionCaptor.getValue();
         final List<TaskFragmentTransaction.Change> changes = transaction.getChanges();
         assertFalse(changes.isEmpty());
-        final TaskFragmentTransaction.Change change = changes.get(0);
+
+        // Use remove to verify multiple transaction changes.
+        final TaskFragmentTransaction.Change change = changes.remove(0);
         assertEquals(TYPE_TASK_FRAGMENT_PARENT_INFO_CHANGED, change.getType());
         assertEquals(task.mTaskId, change.getTaskId());
         assertEquals(task.getTaskFragmentParentInfo(), change.getTaskFragmentParentInfo());
@@ -1290,7 +1297,9 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         final TaskFragmentTransaction transaction = mTransactionCaptor.getValue();
         final List<TaskFragmentTransaction.Change> changes = transaction.getChanges();
         assertFalse(changes.isEmpty());
-        final TaskFragmentTransaction.Change change = changes.get(0);
+
+        // Use remove to verify multiple transaction changes.
+        final TaskFragmentTransaction.Change change = changes.remove(0);
         assertEquals(TYPE_TASK_FRAGMENT_ERROR, change.getType());
         assertEquals(mErrorToken, change.getErrorCallbackToken());
         final Bundle errorBundle = change.getErrorBundle();
@@ -1306,7 +1315,9 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         final TaskFragmentTransaction transaction = mTransactionCaptor.getValue();
         final List<TaskFragmentTransaction.Change> changes = transaction.getChanges();
         assertFalse(changes.isEmpty());
-        final TaskFragmentTransaction.Change change = changes.get(0);
+
+        // Use remove to verify multiple transaction changes.
+        final TaskFragmentTransaction.Change change = changes.remove(0);
         assertEquals(TYPE_ACTIVITY_REPARENTED_TO_TASK, change.getType());
         assertEquals(taskId, change.getTaskId());
         assertEquals(intent, change.getActivityIntent());

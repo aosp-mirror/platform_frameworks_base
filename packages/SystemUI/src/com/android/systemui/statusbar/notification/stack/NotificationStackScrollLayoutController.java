@@ -56,12 +56,13 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.Gefingerpoken;
-import com.android.systemui.R;
 import com.android.systemui.SwipeHelper;
 import com.android.systemui.classifier.Classifier;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.media.KeyguardMediaController;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
@@ -178,6 +179,7 @@ public class NotificationStackScrollLayoutController {
     @Nullable private Boolean mHistoryEnabled;
     private int mBarState;
     private HeadsUpAppearanceController mHeadsUpAppearanceController;
+    private final FeatureFlags mFeatureFlags;
 
     private View mLongPressedView;
 
@@ -639,7 +641,8 @@ public class NotificationStackScrollLayoutController {
             InteractionJankMonitor jankMonitor,
             StackStateLogger stackLogger,
             NotificationStackScrollLogger logger,
-            NotificationStackSizeCalculator notificationStackSizeCalculator) {
+            NotificationStackSizeCalculator notificationStackSizeCalculator,
+            FeatureFlags featureFlags) {
         mStackStateLogger = stackLogger;
         mLogger = logger;
         mAllowLongPress = allowLongPress;
@@ -675,6 +678,7 @@ public class NotificationStackScrollLayoutController {
         mUiEventLogger = uiEventLogger;
         mRemoteInputManager = remoteInputManager;
         mShadeController = shadeController;
+        mFeatureFlags = featureFlags;
         updateResources();
     }
 
@@ -739,9 +743,7 @@ public class NotificationStackScrollLayoutController {
 
         mLockscreenUserManager.addUserChangedListener(mLockscreenUserChangeListener);
 
-        mFadeNotificationsOnDismiss =  // TODO: this should probably be injected directly
-                mResources.getBoolean(R.bool.config_fadeNotificationsOnDismiss);
-
+        mFadeNotificationsOnDismiss = mFeatureFlags.isEnabled(Flags.NOTIFICATION_DISMISSAL_FADE);
         mNotificationRoundnessManager.setOnRoundingChangedCallback(mView::invalidate);
         mView.addOnExpandedHeightChangedListener(mNotificationRoundnessManager::setExpanded);
 

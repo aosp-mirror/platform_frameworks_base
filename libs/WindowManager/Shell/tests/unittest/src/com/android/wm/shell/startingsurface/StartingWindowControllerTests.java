@@ -21,6 +21,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -36,7 +37,9 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TransactionPool;
+import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.sysui.ShellSharedConstants;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -56,25 +59,34 @@ public class StartingWindowControllerTests extends ShellTestCase {
 
     private @Mock Context mContext;
     private @Mock DisplayManager mDisplayManager;
-    private @Mock ShellInit mShellInit;
+    private @Mock ShellController mShellController;
     private @Mock ShellTaskOrganizer mTaskOrganizer;
     private @Mock ShellExecutor mMainExecutor;
     private @Mock StartingWindowTypeAlgorithm mTypeAlgorithm;
     private @Mock IconProvider mIconProvider;
     private @Mock TransactionPool mTransactionPool;
     private StartingWindowController mController;
+    private ShellInit mShellInit;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         doReturn(mock(Display.class)).when(mDisplayManager).getDisplay(anyInt());
         doReturn(mDisplayManager).when(mContext).getSystemService(eq(DisplayManager.class));
-        mController = new StartingWindowController(mContext, mShellInit, mTaskOrganizer,
-                mMainExecutor, mTypeAlgorithm, mIconProvider, mTransactionPool);
+        mShellInit = spy(new ShellInit(mMainExecutor));
+        mController = new StartingWindowController(mContext, mShellInit, mShellController,
+                mTaskOrganizer, mMainExecutor, mTypeAlgorithm, mIconProvider, mTransactionPool);
+        mShellInit.init();
     }
 
     @Test
-    public void instantiate_addInitCallback() {
+    public void instantiateController_addInitCallback() {
         verify(mShellInit, times(1)).addInitCallback(any(), any());
+    }
+
+    @Test
+    public void instantiateController_addExternalInterface() {
+        verify(mShellController, times(1)).addExternalInterface(
+                eq(ShellSharedConstants.KEY_EXTRA_SHELL_STARTING_WINDOW), any(), any());
     }
 }

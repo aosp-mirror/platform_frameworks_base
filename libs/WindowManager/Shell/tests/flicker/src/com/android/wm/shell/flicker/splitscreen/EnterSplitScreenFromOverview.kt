@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2022 The Android Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import com.android.wm.shell.flicker.splitAppLayerBoundsIsVisibleAtEnd
 import com.android.wm.shell.flicker.splitScreenDividerBecomesVisible
 import com.android.wm.shell.flicker.splitScreenEntered
 import org.junit.Assume
+import org.junit.Before
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -50,7 +51,6 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class EnterSplitScreenFromOverview(testSpec: FlickerTestParameter) : SplitScreenBase(testSpec) {
-
     override val transition: FlickerBuilder.() -> Unit
         get() = {
             super.transition(this)
@@ -117,7 +117,7 @@ class EnterSplitScreenFromOverview(testSpec: FlickerTestParameter) : SplitScreen
     fun secondaryAppWindowBecomesVisible() = testSpec.appWindowBecomesVisible(secondaryApp)
 
     /** {@inheritDoc} */
-    @Presubmit
+    @FlakyTest(bugId = 251269324)
     @Test
     override fun entireScreenCovered() =
         super.entireScreenCovered()

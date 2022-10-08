@@ -36,6 +36,9 @@ public final class GnssMeasurementRequest implements Parcelable {
      * measurements or power usage itself, but may receive GNSS measurements generated in response
      * to other requests.
      *
+     * <p class="note">Note that on Android T, such a request will trigger one GNSS measurement.
+     * Another GNSS measurement will be triggered after {@link #PASSIVE_INTERVAL} and so on.
+     *
      * @see GnssMeasurementRequest#getIntervalMillis()
      */
     public static final int PASSIVE_INTERVAL = Integer.MAX_VALUE;
@@ -94,6 +97,10 @@ public final class GnssMeasurementRequest implements Parcelable {
      * GNSS chipset can report.
      *
      * <p>The GNSS chipset may report measurements with a rate faster than requested.
+     *
+     * <p class="note">Note that on Android T, a request interval of {@link #PASSIVE_INTERVAL}
+     * will first trigger one GNSS measurement. Another GNSS measurement will be triggered after
+     * {@link #PASSIVE_INTERVAL} milliseconds ans so on.
      */
     public @IntRange(from = 0) int getIntervalMillis() {
         return mIntervalMillis;
@@ -232,6 +239,10 @@ public final class GnssMeasurementRequest implements Parcelable {
          * <p>An interval of 0 milliseconds means the fastest rate the chipset can report.
          *
          * <p>The GNSS chipset may report measurements with a rate faster than requested.
+         *
+         * <p class="note">Note that on Android T, a request interval of {@link #PASSIVE_INTERVAL}
+         * will first trigger one GNSS measurement. Another GNSS measurement will be triggered after
+         * {@link #PASSIVE_INTERVAL} milliseconds and so on.
          */
         @NonNull public Builder setIntervalMillis(@IntRange(from = 0) int value) {
             mIntervalMillis = Preconditions.checkArgumentInRange(value, 0, Integer.MAX_VALUE,

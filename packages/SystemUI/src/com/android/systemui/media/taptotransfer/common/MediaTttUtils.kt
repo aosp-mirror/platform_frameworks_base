@@ -19,7 +19,6 @@ package com.android.systemui.media.taptotransfer.common
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
-import com.android.internal.widget.CachingIconView
 import com.android.settingslib.Utils
 import com.android.systemui.R
 
@@ -75,29 +74,6 @@ class MediaTttUtils {
                     },
                 isAppIcon = false
             )
-        }
-
-        /**
-         * Sets an icon to be displayed by the given view.
-         *
-         * @param iconSize the size in pixels that the icon should be. If null, the size of
-         * [appIconView] will not be adjusted.
-         */
-        fun setIcon(
-            appIconView: CachingIconView,
-            icon: Drawable,
-            iconContentDescription: CharSequence,
-            iconSize: Int? = null,
-        ) {
-            iconSize?.let { size ->
-                val lp = appIconView.layoutParams
-                lp.width = size
-                lp.height = size
-                appIconView.layoutParams = lp
-            }
-
-            appIconView.contentDescription = iconContentDescription
-            appIconView.setImageDrawable(icon)
         }
     }
 }

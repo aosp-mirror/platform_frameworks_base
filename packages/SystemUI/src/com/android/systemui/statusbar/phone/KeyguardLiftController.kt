@@ -88,7 +88,7 @@ class KeyguardLiftController @Inject constructor(
             updateListeningState()
         }
 
-        override fun onKeyguardVisibilityChanged(showing: Boolean) {
+        override fun onKeyguardVisibilityChanged(visible: Boolean) {
             updateListeningState()
         }
     }
