@@ -577,7 +577,7 @@
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"Utilisez la biométrie ou le verrouillage de l\'écran pour continuer"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Matériel biométrique indisponible"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Authentification annulée"</string>
-    <string name="biometric_not_recognized" msgid="5106687642694635888">"Non reconnu"</string>
+    <string name="biometric_not_recognized" msgid="5106687642694635888">"Non reconnue"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Authentification annulée"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Aucun code, schéma ni mot de passe n\'est défini"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Erreur d\'authentification"</string>
@@ -1959,7 +1959,8 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"Impossible d\'accéder à ces paramètres sur votre <xliff:g id="DEVICE">%1$s</xliff:g>. Essayez plutôt sur votre appareil Android TV."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"Impossible d\'accéder à ces paramètres sur votre <xliff:g id="DEVICE">%1$s</xliff:g>. Essayez plutôt sur votre tablette."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Impossible d\'accéder à ces paramètres sur votre <xliff:g id="DEVICE">%1$s</xliff:g>. Essayez plutôt sur votre téléphone."</string>
-    <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Cette application a été conçue pour une ancienne version d\'Android et risque de ne pas fonctionner correctement. Recherchez des mises à jour ou contactez le développeur."</string>
+    <!-- no translation found for deprecated_target_sdk_message (5246906284426844596) -->
+    <skip />
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Rechercher une mise à jour"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Vous avez de nouveaux messages"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Ouvrir l\'application de SMS pour afficher le message"</string>
@@ -2052,8 +2053,7 @@
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Autoriser un accès unique"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Ne pas autoriser"</string>
     <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"Les journaux enregistrent ce qui se passe sur votre appareil. Les applis peuvent les utiliser pour rechercher et résoudre les problèmes.\n\nCertains journaux pouvant contenir des infos sensibles, autorisez uniquement les applis de confiance à accéder à tous les journaux de l\'appareil. \n\nSi vous refusez à cette appli l\'accès à tous les journaux de l\'appareil, elle a quand même accès aux siens. Le fabricant de l\'appareil peut accéder à certains journaux ou certaines infos sur votre appareil."</string>
-    <!-- no translation found for log_access_confirmation_body (7379536536425265262) -->
-    <skip />
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"Les journaux enregistrent ce qui se passe sur votre appareil. Les applis peuvent les utiliser pour rechercher et résoudre des problèmes.\n\nCertains journaux pouvant contenir des infos sensibles, autorisez uniquement les applis de confiance à accéder à tous les journaux de l\'appareil. \n\nSi vous refusez à cette appli l\'accès à tous les journaux de l\'appareil, elle a quand même accès aux siens. Le fabricant de l\'appareil peut accéder à certains journaux ou certaines infos sur votre appareil.\n\nEn savoir plus sur g.co/android/devicelogs"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Ne plus afficher"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> souhaite afficher des éléments de <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Modifier"</string>

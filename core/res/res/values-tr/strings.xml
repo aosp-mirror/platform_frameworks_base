@@ -1958,7 +1958,8 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"Bu uygulamaya <xliff:g id="DEVICE">%1$s</xliff:g> cihazınızdan erişilemiyor. Bunun yerine Android TV cihazınızı kullanmayı deneyin."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"Bu uygulamaya <xliff:g id="DEVICE">%1$s</xliff:g> cihazınızdan erişilemiyor. Bunun yerine tabletinizi kullanmayı deneyin."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Bu uygulamaya <xliff:g id="DEVICE">%1$s</xliff:g> cihazınızdan erişilemiyor. Bunun yerine telefonunuzu kullanmayı deneyin."</string>
-    <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Bu uygulama Android\'in daha eski bir sürümü için oluşturuldu ve düzgün çalışmayabilir. Güncellemeleri kontrol etmeyi deneyin veya geliştiriciyle iletişime geçin."</string>
+    <!-- no translation found for deprecated_target_sdk_message (5246906284426844596) -->
+    <skip />
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Güncellemeleri denetle"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Yeni mesajlarınız var"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Görüntülemek için SMS uygulamasını açın"</string>
@@ -2051,8 +2052,7 @@
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Tek seferlik erişim izni ver"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"İzin verme"</string>
     <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"Cihaz günlükleri, cihazınızda olanları kaydeder. Uygulamalar, sorunları bulup düzeltmek için bu günlükleri kullanabilir.\n\nBazı günlükler hassas bilgiler içerebileceği için yalnızca güvendiğiniz uygulamaların tüm cihaz günlüklerine erişmesine izin verin. \n\nBu uygulamanın tüm cihaz günlüklerine erişmesine izin vermeseniz de kendi günlüklerine erişmeye devam edebilir. Ayrıca, cihaz üreticiniz de cihazınızdaki bazı günlüklere veya bilgilere erişmeye devam edebilir."</string>
-    <!-- no translation found for log_access_confirmation_body (7379536536425265262) -->
-    <skip />
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"Cihaz günlükleri, cihazınızda olanları kaydeder. Uygulamalar, sorunları bulup düzeltmek için bu günlükleri kullanabilir.\n\nBazı günlükler hassas bilgiler içerebileceği için yalnızca güvendiğiniz uygulamaların tüm cihaz günlüklerine erişmesine izin verin. \n\nBu uygulamanın tüm cihaz günlüklerine erişmesine izin vermeseniz de kendi günlüklerine erişmeye devam edebilir. Ayrıca, cihaz üreticiniz de cihazınızdaki bazı günlüklere veya bilgilere erişmeye devam edebilir.\n\nDaha fazla bilgiyi g.co/android/devicelogs sayfasında bulabilirsiniz."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Bir daha gösterme"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> uygulaması, <xliff:g id="APP_2">%2$s</xliff:g> dilimlerini göstermek istiyor"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Düzenle"</string>

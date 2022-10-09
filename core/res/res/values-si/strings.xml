@@ -1958,7 +1958,8 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"මෙයට ඔබේ <xliff:g id="DEVICE">%1$s</xliff:g> මත ප්‍රවේශ විය නොහැක. ඒ වෙනුවට ඔබේ Android TV උපාංගයෙහි උත්සාහ කරන්න."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"මෙයට ඔබේ <xliff:g id="DEVICE">%1$s</xliff:g> මත ප්‍රවේශ විය නොහැක. ඒ වෙනුවට ඔබේ ටැබ්ලටයෙහි උත්සාහ කරන්න."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"මෙයට ඔබේ <xliff:g id="DEVICE">%1$s</xliff:g> මත ප්‍රවේශ විය නොහැක. ඒ වෙනුවට ඔබේ දුරකථනයෙහි උත්සාහ කරන්න."</string>
-    <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"මෙම යෙදුම Android හි පැරණි අනුවාදයක් සඳහා තනා ඇති අතර නිසියාකාරව ක්‍රියා නොකරනු ඇත. යාවත්කාලීන සඳහා පරික්ෂා කිරීම උත්සාහ කරන්න, නැතහොත් සංවර්ධක අමතන්න."</string>
+    <!-- no translation found for deprecated_target_sdk_message (5246906284426844596) -->
+    <skip />
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"යාවත්කාලීන සඳහා පරික්ෂා කරන්න"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"ඔබට නව පණිවිඩ තිබේ"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"බැලීමට විවෘත SMS යෙදුම විවෘත කරන්න"</string>
@@ -2051,8 +2052,7 @@
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"එක් වරක් ප්‍රවේශය ඉඩ දෙන්න"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"ඉඩ නොදෙන්න"</string>
     <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"උපාංග ලොග ඔබේ උපාංගයෙහි සිදු වන දේ වාර්තා කරයි. ගැටලු සොයා ගැනීමට සහ නිරාකරණයට යෙදුම්වලට මෙම ලොග භාවිතා කළ හැක.\n\nසමහර ලොගවල සංවේදී තතු අඩංගු විය හැකි බැවින්, ඔබ විශ්වාස කරන යෙදුම්වලට පමණක් සියලු උපාංග ලොග වෙත ප්‍රවේශ වීමට ඉඩ දෙන්න. \n\nඔබ මෙම යෙදුමට සියලු උපාංග ලොග වෙත ප්‍රවේශ වීමට ඉඩ නොදෙන්නේ නම්, එයට තවමත් එහිම ලොග වෙත ප්‍රවේශ විය හැක. ඔබේ උපාංග නිෂ්පාදකයාට තවමත් ඔබේ උපාංගයෙහි සමහර ලොග හෝ තතු වෙත ප්‍රවේශ විය හැක."</string>
-    <!-- no translation found for log_access_confirmation_body (7379536536425265262) -->
-    <skip />
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"උපාංග ලොග ඔබේ උපාංගයෙහි සිදු වන දේ වාර්තා කරයි. ගැටලු සොයා ගැනීමට සහ නිරාකරණයට යෙදුම්වලට මෙම ලොග භාවිතා කළ හැක.\n\nසමහර ලොගවල සංවේදී තතු අඩංගු විය හැකි බැවින්, ඔබ විශ්වාස කරන යෙදුම්වලට පමණක් සියලු උපාංග ලොග වෙත ප්‍රවේශ වීමට ඉඩ දෙන්න. \n\nඔබ මෙම යෙදුමට සියලු උපාංග ලොග වෙත ප්‍රවේශ වීමට ඉඩ නොදෙන්නේ නම්, එයට තවමත් එහිම ලොග වෙත ප්‍රවේශ විය හැක. ඔබේ උපාංග නිෂ්පාදකයාට තවමත් ඔබේ උපාංගයෙහි සමහර ලොග හෝ තතු වෙත ප්‍රවේශ විය හැක.\n\ng.co/android/devicelogs හි දී තව දැන ගන්න."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"නැවත නොපෙන්වන්න"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> හට කොටස් <xliff:g id="APP_2">%2$s</xliff:g>ක් පෙන්වීමට අවශ්‍යයි"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"සංස්කරණය"</string>

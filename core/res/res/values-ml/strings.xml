@@ -1958,7 +1958,8 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"നിങ്ങളുടെ <xliff:g id="DEVICE">%1$s</xliff:g> ഉപകരണത്തിൽ ഇത് ആക്‌സസ് ചെയ്യാനാകില്ല. പകരം നിങ്ങളുടെ Android TV ഉപകരണത്തിൽ ശ്രമിച്ച് നോക്കൂ."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"നിങ്ങളുടെ <xliff:g id="DEVICE">%1$s</xliff:g> ഉപകരണത്തിൽ ഇത് ആക്‌സസ് ചെയ്യാനാകില്ല. പകരം നിങ്ങളുടെ ടാബ്‌ലെറ്റിൽ ശ്രമിച്ച് നോക്കൂ."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"നിങ്ങളുടെ <xliff:g id="DEVICE">%1$s</xliff:g> ഉപകരണത്തിൽ ഇത് ആക്‌സസ് ചെയ്യാനാകില്ല. പകരം നിങ്ങളുടെ ഫോണിൽ ശ്രമിച്ച് നോക്കൂ."</string>
-    <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"ഈ ആപ്പ് Android-ന്റെ പഴയ പതിപ്പിനായി നിർമ്മിച്ചിരിക്കുന്നതിനാൽ ശരിയായി പ്രവർത്തിച്ചേക്കില്ല. അപ്‌ഡേറ്റിനായി പരിശോധിക്കുക, അല്ലെങ്കിൽ ഡെവലപ്പറുമായി ബന്ധപ്പെടുക."</string>
+    <!-- no translation found for deprecated_target_sdk_message (5246906284426844596) -->
+    <skip />
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"അപ്‌ഡേറ്റിനായി പരിശോധിക്കുക"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"നിങ്ങൾക്ക് പുതിയ സന്ദേശങ്ങൾ ഉണ്ട്"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"കാണുന്നതിന് SMS ആപ്പ് തുറക്കുക"</string>

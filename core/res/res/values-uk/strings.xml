@@ -1960,7 +1960,8 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"Немає доступу на вашому пристрої (<xliff:g id="DEVICE">%1$s</xliff:g>). Спробуйте натомість скористатися пристроєм Android TV."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"Немає доступу на вашому пристрої (<xliff:g id="DEVICE">%1$s</xliff:g>). Спробуйте натомість скористатися планшетом."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Немає доступу на вашому пристрої (<xliff:g id="DEVICE">%1$s</xliff:g>). Спробуйте натомість скористатися телефоном."</string>
-    <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Цей додаток створений для старішої версії Android і може працювати неналежним чином. Спробуйте знайти оновлення або зв’яжіться з розробником."</string>
+    <!-- no translation found for deprecated_target_sdk_message (5246906284426844596) -->
+    <skip />
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Шукати оновлення"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"У вас є нові повідомлення"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Щоб переглянути, відкрийте додаток для SMS"</string>
@@ -2053,8 +2054,7 @@
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Надати доступ лише цього разу"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Не дозволяти"</string>
     <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"У журналах пристрою реєструється все, що відбувається на ньому. За допомогою цих журналів додатки можуть виявляти й усувати проблеми.\n\nДеякі журнали можуть містити конфіденційні дані, тому надавати доступ до всіх журналів пристрою слід лише надійним додаткам. \n\nЯкщо додаток не має доступу до всіх журналів пристрою, він усе одно може використовувати власні журнали. Виробник вашого пристрою все одно може використовувати деякі журнали чи інформацію на ньому."</string>
-    <!-- no translation found for log_access_confirmation_body (7379536536425265262) -->
-    <skip />
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"У журналах пристрою реєструється все, що відбувається на ньому. За допомогою цих журналів додатки можуть виявляти й усувати проблеми.\n\nДеякі журнали можуть містити конфіденційні дані, тому надавати доступ до всіх журналів пристрою слід лише надійним додаткам. \n\nЯкщо додаток не має доступу до всіх журналів пристрою, він усе одно може використовувати власні журнали. Виробник вашого пристрою все одно може використовувати деякі журнали чи інформацію на ньому.\n\nДокладніше: g.co/android/devicelogs."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Більше не показувати"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> хоче показати фрагменти додатка <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Редагувати"</string>
