@@ -190,4 +190,12 @@ public class ActivityOptions {
                     FLICKER_APP_PACKAGE + ".BubbleActivity");
         }
     }
+
+    public static final String GAME_ACTIVITY_LAUNCHER_NAME = "GameApp";
+    public static final ComponentName GAME_ACTIVITY_COMPONENT_NAME =
+            new ComponentName(FLICKER_APP_PACKAGE, FLICKER_APP_PACKAGE + ".GameActivity");
+
+    public static final ComponentName ASSISTANT_SERVICE_COMPONENT_NAME =
+            new ComponentName(
+                    FLICKER_APP_PACKAGE, FLICKER_APP_PACKAGE + ".AssistantInteractionService");
 }
