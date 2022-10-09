@@ -19,7 +19,6 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
-import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_NOSENSOR;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS;
@@ -1232,10 +1231,8 @@ public class TransitionTests extends WindowTestsBase {
         final ArraySet<WindowContainer> participants = transition.mParticipants;
 
         final Task task = createTask(mDisplayContent);
-        // Set to multi-windowing mode in order to set bounds.
-        task.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
         final Rect taskBounds = new Rect(0, 0, 500, 1000);
-        task.setBounds(taskBounds);
+        task.getConfiguration().windowConfiguration.setBounds(taskBounds);
         final ActivityRecord nonEmbeddedActivity = createActivityRecord(task);
         final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
         mAtm.mTaskFragmentOrganizerController.registerOrganizer(
@@ -1277,10 +1274,8 @@ public class TransitionTests extends WindowTestsBase {
         final ArraySet<WindowContainer> participants = transition.mParticipants;
 
         final Task task = createTask(mDisplayContent);
-        // Set to multi-windowing mode in order to set bounds.
-        task.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
         final Rect taskBounds = new Rect(0, 0, 500, 1000);
-        task.setBounds(taskBounds);
+        task.getConfiguration().windowConfiguration.setBounds(taskBounds);
         final ActivityRecord activity = createActivityRecord(task);
         // Start states: set bounds to make sure the start bounds is ignored if it is not visible.
         activity.getConfiguration().windowConfiguration.setBounds(new Rect(0, 0, 250, 500));
@@ -1308,10 +1303,8 @@ public class TransitionTests extends WindowTestsBase {
         final ArraySet<WindowContainer> participants = transition.mParticipants;
 
         final Task task = createTask(mDisplayContent);
-        // Set to multi-windowing mode in order to set bounds.
-        task.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
         final Rect taskBounds = new Rect(0, 0, 500, 1000);
-        task.setBounds(taskBounds);
+        task.getConfiguration().windowConfiguration.setBounds(taskBounds);
         final ActivityRecord activity = createActivityRecord(task);
         // Start states: fills Task without override.
         activity.mVisibleRequested = true;
