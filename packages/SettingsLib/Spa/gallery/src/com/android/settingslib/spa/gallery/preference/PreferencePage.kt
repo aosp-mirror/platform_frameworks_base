@@ -24,12 +24,15 @@ import androidx.compose.material.icons.outlined.TouchApp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.android.settingslib.spa.framework.common.EntrySearchData
 import com.android.settingslib.spa.framework.common.SettingsEntry
 import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
+import com.android.settingslib.spa.framework.compose.toState
 import com.android.settingslib.spa.framework.theme.SettingsTheme
+import com.android.settingslib.spa.gallery.R
 import com.android.settingslib.spa.gallery.SettingsPageProviderEnum
 import com.android.settingslib.spa.gallery.createSettingsPage
 import com.android.settingslib.spa.gallery.preference.PreferencePageModel.Companion.ASYNC_PREFERENCE_TITLE
@@ -55,6 +58,7 @@ object PreferencePageProvider : SettingsPageProvider {
     enum class EntryEnum(val displayName: String) {
         SIMPLE_PREFERENCE("preference"),
         SUMMARY_PREFERENCE("preference_with_summary"),
+        SINGLE_LINE_SUMMARY_PREFERENCE("preference_with_single_line_summary"),
         DISABLED_PREFERENCE("preference_disable"),
         ASYNC_SUMMARY_PREFERENCE("preference_with_async_summary"),
         MANUAL_UPDATE_PREFERENCE("preference_actionable"),
@@ -92,6 +96,7 @@ object PreferencePageProvider : SettingsPageProvider {
                 }
                 .build()
         )
+        entryList.add(singleLineSummaryEntry())
         entryList.add(
             createEntry(EntryEnum.DISABLED_PREFERENCE)
                 .setIsAllowSearch(true)
@@ -162,6 +167,21 @@ object PreferencePageProvider : SettingsPageProvider {
 
         return entryList
     }
+
+    private fun singleLineSummaryEntry() = createEntry(EntryEnum.SINGLE_LINE_SUMMARY_PREFERENCE)
+        .setIsAllowSearch(true)
+        .setUiLayoutFn {
+            Preference(
+                model = object : PreferenceModel {
+                    override val title: String =
+                        stringResource(R.string.single_line_summary_preference_title)
+                    override val summary =
+                        stringResource(R.string.single_line_summary_preference_summary).toState()
+                },
+                singleLineSummary = true,
+            )
+        }
+        .build()
 
     fun buildInjectEntry(): SettingsEntryBuilder {
         return SettingsEntryBuilder.createInject(owner = owner)
