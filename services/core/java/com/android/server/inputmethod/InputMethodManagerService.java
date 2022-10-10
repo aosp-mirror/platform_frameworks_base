@@ -144,6 +144,7 @@ import android.view.inputmethod.InputMethodSubtype;
 import android.window.ImeOnBackInvokedDispatcher;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.inputmethod.DirectBootAwareness;
@@ -1592,8 +1593,13 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         private final InputMethodManagerService mService;
 
         public Lifecycle(Context context) {
+            this(context, new InputMethodManagerService(context));
+        }
+
+        public Lifecycle(
+                Context context, @NonNull InputMethodManagerService inputMethodManagerService) {
             super(context);
-            mService = new InputMethodManagerService(context);
+            mService = inputMethodManagerService;
         }
 
         @Override
@@ -1668,12 +1674,25 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     public InputMethodManagerService(Context context) {
+        this(context, null, null);
+    }
+
+    @VisibleForTesting
+    InputMethodManagerService(
+            Context context,
+            @Nullable ServiceThread serviceThreadForTesting,
+            @Nullable InputMethodBindingController bindingControllerForTesting) {
         mContext = context;
         mRes = context.getResources();
         // TODO(b/196206770): Disallow I/O on this thread. Currently it's needed for loading
         // additional subtypes in switchUserOnHandlerLocked().
-        final ServiceThread thread = new ServiceThread(
-                HANDLER_THREAD_NAME, Process.THREAD_PRIORITY_FOREGROUND, true /* allowIo */);
+        final ServiceThread thread =
+                serviceThreadForTesting != null
+                        ? serviceThreadForTesting
+                        : new ServiceThread(
+                                HANDLER_THREAD_NAME,
+                                Process.THREAD_PRIORITY_FOREGROUND,
+                                true /* allowIo */);
         thread.start();
         mHandler = Handler.createAsync(thread.getLooper(), this);
         // Note: SettingsObserver doesn't register observers in its constructor.
@@ -1701,10 +1720,13 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
         updateCurrentProfileIds();
         AdditionalSubtypeUtils.load(mAdditionalSubtypeMap, userId);
-        mSwitchingController = InputMethodSubtypeSwitchingController.createInstanceLocked(
-                mSettings, context);
+        mSwitchingController =
+                InputMethodSubtypeSwitchingController.createInstanceLocked(mSettings, context);
         mMenuController = new InputMethodMenuController(this);
-        mBindingController = new InputMethodBindingController(this);
+        mBindingController =
+                bindingControllerForTesting != null
+                        ? bindingControllerForTesting
+                        : new InputMethodBindingController(this);
         mAutofillController = new AutofillSuggestionsController(this);
         mPreventImeStartupUnlessTextEditor = mRes.getBoolean(
                 com.android.internal.R.bool.config_preventImeStartupUnlessTextEditor);
@@ -3673,6 +3695,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         // UI for input.
         if (isTextEditor && editorInfo != null
                 && shouldRestoreImeVisibility(windowToken, softInputMode)) {
+            if (DEBUG) Slog.v(TAG, "Will show input to restore visibility");
             res = startInputUncheckedLocked(cs, inputContext, remoteAccessibilityInputConnection,
                     editorInfo, startInputFlags, startInputReason, unverifiedTargetSdkVersion,
                     imeDispatcher);
@@ -3719,11 +3742,17 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                                 imeDispatcher);
                         didStart = true;
                     }
-                    showCurrentInputLocked(windowToken, InputMethodManager.SHOW_IMPLICIT, null,
+                    showCurrentInputLocked(
+                            windowToken,
+                            InputMethodManager.SHOW_IMPLICIT,
+                            null,
                             SoftInputShowHideReason.SHOW_AUTO_EDITOR_FORWARD_NAV);
                 }
                 break;
             case LayoutParams.SOFT_INPUT_STATE_UNCHANGED:
+                if (DEBUG) {
+                    Slog.v(TAG, "Window asks to keep the input in whatever state it was last in");
+                }
                 // Do nothing.
                 break;
             case LayoutParams.SOFT_INPUT_STATE_HIDDEN:
@@ -3794,6 +3823,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     // To maintain compatibility, we are now hiding the IME when we don't have
                     // an editor upon refocusing a window.
                     if (startInputByWinGainedFocus) {
+                        if (DEBUG) Slog.v(TAG, "Same window without editor will hide input");
                         hideCurrentInputLocked(mCurFocusedWindow, 0, null,
                                 SoftInputShowHideReason.HIDE_SAME_WINDOW_FOCUSED_WITHOUT_EDITOR);
                     }
@@ -3807,6 +3837,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     // 1) SOFT_INPUT_STATE_UNCHANGED state without an editor
                     // 2) SOFT_INPUT_STATE_VISIBLE state without an editor
                     // 3) SOFT_INPUT_STATE_ALWAYS_VISIBLE state without an editor
+                    if (DEBUG) Slog.v(TAG, "Window without editor will hide input");
                     hideCurrentInputLocked(mCurFocusedWindow, 0, null,
                             SoftInputShowHideReason.HIDE_WINDOW_GAINED_FOCUS_WITHOUT_EDITOR);
                 }
