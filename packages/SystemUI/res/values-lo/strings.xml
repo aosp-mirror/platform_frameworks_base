@@ -94,6 +94,11 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ການແຈ້ງເຕືອນສຳລັບເຊດຊັນການບັນທຶກໜ້າຈໍໃດໜຶ່ງ"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"ເລີ່ມການບັນທຶກບໍ?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"ໃນລະຫວ່າງການບັນທຶກ, ລະບົບ Android ຈະສາມາດບັນທຶກຂໍ້ມູນທີ່ລະອຽດອ່ອນໃດກໍຕາມທີ່ສະແດງຢູ່ໜ້າຈໍຂອງທ່ານ ຫຼື ຫຼິ້ນຢູ່ອຸປະກອນທ່ານ. ນີ້ຮວມເຖິງລະຫັດຜ່ານ, ຂໍ້ມູນການຈ່າຍເງິນ, ຮູບ, ຂໍ້ຄວາມ ແລະ ສຽງນຳ."</string>
+    <string name="screenrecord_option_entire_screen" msgid="1732437834603426934">"ບັນທຶກໝົດໜ້າຈໍ"</string>
+    <string name="screenrecord_option_single_app" msgid="5954863081500035825">"ບັນທຶກແອັບດຽວ"</string>
+    <string name="screenrecord_warning_entire_screen" msgid="8141407178104195610">"ໃນຂະນະທີ່ທ່ານກຳລັງບັນທຶກ, Android ຈະມີສິດເຂົ້າເຖິງສິ່ງທີ່ເບິ່ງໃຫ້ຢູ່ໜ້າຈໍຂອງທ່ານ ຫຼື ຫຼິ້ນຢູ່ອຸປະກອນຂອງທ່ານ. ດັ່ງນັ້ນໃຫ້ລະມັດລະວັງເລື່ອງລະຫັດຜ່ານ, ລາຍລະອຽດການຈ່າຍເງິນ, ຂໍ້ຄວາມ ຫຼື ຂໍ້ມູນທີ່ລະອຽດອ່ອນອື່ນໆ."</string>
+    <string name="screenrecord_warning_single_app" msgid="7760723997065948283">"ໃນຂະນະທີ່ທ່ານກຳລັງບັນທຶກແອັບ, Android ຈະມີສິດເຂົ້າເຖິງສິ່ງທີ່ສະແດງ ຫຼື ຫຼິ້ນຢູ່ໃນແອັບນັ້ນ. ດັ່ງນັ້ນໃຫ້ລະມັດລະວັງກ່ຽວກັບລະຫັດຜ່ານ, ລາຍລະອຽດການຈ່າຍເງິນ, ຂໍ້ຄວາມ ຫຼື ຂໍ້ມູນທີ່ລະອຽດອ່ອນອື່ນໆ."</string>
+    <string name="screenrecord_start_recording" msgid="348286842544768740">"ເລີ່ມການບັນທຶກ"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"ບັນທຶກສຽງ"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"ສຽງອຸປະກອນ"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"ສຽງຈາກອຸປະກອນຂອງທ່ານ ເຊັ່ນ: ສຽງເພງ, ສຽງລົມໂທລະສັບ ແລະ ສຽງຣິງໂທນ"</string>
@@ -361,6 +366,13 @@
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"ບໍລິການທີ່ສະໜອງຄວາມສາມາດນີ້ຈະມີສິດເຂົ້າເຖິງຂໍ້ມູນທັງໝົດທີ່ປາກົດຢູ່ໜ້າຈໍຂອງທ່ານ ຫຼື ຫຼິ້ນຈາກອຸປະກອນຂອງທ່ານໃນເວລາບັນທຶກ ຫຼື ສົ່ງສັນຍານໜ້າຈໍ. ນີ້ຮວມເຖິງຂໍ້ມູນຕ່າງໆ ເຊັ່ນ: ລະຫັດຜ່ານ, ລາຍລະອຽດການຈ່າຍເງິນ, ຮູບ, ຂໍ້ຄວາມ ແລະ ສຽງທີ່ທ່ານຫຼິ້ນ."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"ເລີ່ມການບັນທຶກ ຫຼື ການສົ່ງສັນຍານໜ້າຈໍບໍ?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"ເລີ່ມການບັນທຶກ ຫຼື ການສົ່ງສັນຍານໜ້າຈໍກັບ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ບໍ?"</string>
+    <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"ອະນຸຍາດໃຫ້ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ແບ່ງປັນ ຫຼື ບັນທຶກບໍ?"</string>
+    <string name="media_projection_permission_dialog_option_entire_screen" msgid="392086473225692983">"ທົງໝົດໜ້າຈໍ"</string>
+    <string name="media_projection_permission_dialog_option_single_app" msgid="1591110238124910521">"ແອັບດຽວ"</string>
+    <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"ເມື່ອທ່ານກຳລັງແບ່ງປັນ, ບັນທຶກ ຫຼື ສົ່ງສັນຍານ, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ມີສິດເຂົ້າເຖິງສິ່ງທີ່ເຫັນໄດ້ໃນໜ້າຈໍຂອງທ່ານ ຫຼື ຫຼິ້ນຢູ່ອຸປະກອນຂອງທ່ານ. ດັ່ງນັ້ນໃຫ້ລະມັດລະວັງເລື່ອງລະຫັດຜ່ານ, ລາຍລະອຽດການຈ່າຍເງິນ, ຂໍ້ຄວາມ ຫຼື ຂໍ້ມູນທີ່ລະອຽດອ່ອນອື່ນໆ."</string>
+    <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"ໃນຕອນທີ່ທ່ານກຳລັງແບ່ງປັນ, ບັນທຶກ ຫຼື ສົ່ງສັນຍານແອັບ, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ມີສິດເຂົ້າເຖິງສິ່ງທີ່ສະແດງ ຫຼື ຫຼິ້ນຢູ່ໃນແອັບນັ້ນ. ດັ່ງນັ້ນໃຫ້ລະມັດລະວັງກ່ຽວກັບລະຫັດຜ່ານ, ລາຍລະອຽດການຈ່າຍເງິນ, ຂໍ້ຄວາມ ຫຼື ຂໍ້ມູນທີ່ລະອຽດອ່ອນອື່ນໆ."</string>
+    <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"ສືບຕໍ່"</string>
+    <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"ແບ່ງປັນ ຫຼື ບັນທຶກແອັບ"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"ລຶບລ້າງທັງໝົດ"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"ຈັດການ"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"ປະຫວັດ"</string>
