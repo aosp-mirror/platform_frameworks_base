@@ -390,6 +390,17 @@ constructor(
         guestUserInteractor.onDeviceBootCompleted()
     }
 
+    /** Switches to the user or executes the action represented by the given record. */
+    fun onRecordSelected(record: UserRecord) {
+        if (LegacyUserDataHelper.isUser(record)) {
+            // It's safe to use checkNotNull around record.info because isUser only returns true
+            // if record.info is not null.
+            selectUser(checkNotNull(record.info).id)
+        } else {
+            executeAction(LegacyUserDataHelper.toUserActionModel(record))
+        }
+    }
+
     /** Switches to the user with the given user ID. */
     fun selectUser(
         newlySelectedUserId: Int,

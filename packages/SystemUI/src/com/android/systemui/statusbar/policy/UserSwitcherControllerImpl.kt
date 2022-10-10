@@ -30,7 +30,6 @@ import com.android.systemui.qs.user.UserSwitchDialogController
 import com.android.systemui.user.data.source.UserRecord
 import com.android.systemui.user.domain.interactor.GuestUserInteractor
 import com.android.systemui.user.domain.interactor.UserInteractor
-import com.android.systemui.user.legacyhelper.data.LegacyUserDataHelper
 import com.android.systemui.user.legacyhelper.ui.LegacyUserUiHelper
 import dagger.Lazy
 import java.io.PrintWriter
@@ -203,11 +202,7 @@ constructor(
         dialogShower: UserSwitchDialogController.DialogShower?,
     ) {
         if (useInteractor) {
-            if (LegacyUserDataHelper.isUser(record)) {
-                userInteractor.selectUser(record.resolveId())
-            } else {
-                userInteractor.executeAction(LegacyUserDataHelper.toUserActionModel(record))
-            }
+            userInteractor.onRecordSelected(record)
         } else {
             _oldImpl.onUserListItemClicked(record, dialogShower)
         }

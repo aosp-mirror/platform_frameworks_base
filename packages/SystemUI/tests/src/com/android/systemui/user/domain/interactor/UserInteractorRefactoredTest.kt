@@ -47,6 +47,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
+import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mockito.verify
 
@@ -71,6 +72,61 @@ class UserInteractorRefactoredTest : UserInteractorTest() {
         whenever(manager.getUserIcon(anyInt())).thenReturn(ICON)
         whenever(manager.canAddMoreUsers(any())).thenReturn(true)
     }
+
+    @Test
+    fun `onRecordSelected - user`() =
+        runBlocking(IMMEDIATE) {
+            val userInfos = createUserInfos(count = 3, includeGuest = false)
+            userRepository.setUserInfos(userInfos)
+            userRepository.setSelectedUserInfo(userInfos[0])
+            userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = true))
+
+            underTest.onRecordSelected(UserRecord(info = userInfos[1]))
+
+            verify(activityManager).switchUser(userInfos[1].id)
+            Unit
+        }
+
+    @Test
+    fun `onRecordSelected - switch to guest user`() =
+        runBlocking(IMMEDIATE) {
+            val userInfos = createUserInfos(count = 3, includeGuest = true)
+            userRepository.setUserInfos(userInfos)
+            userRepository.setSelectedUserInfo(userInfos[0])
+            userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = true))
+
+            underTest.onRecordSelected(UserRecord(info = userInfos.last()))
+
+            verify(activityManager).switchUser(userInfos.last().id)
+            Unit
+        }
+
+    @Test
+    fun `onRecordSelected - enter guest mode`() =
+        runBlocking(IMMEDIATE) {
+            val userInfos = createUserInfos(count = 3, includeGuest = false)
+            userRepository.setUserInfos(userInfos)
+            userRepository.setSelectedUserInfo(userInfos[0])
+            userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = true))
+
+            underTest.onRecordSelected(UserRecord(isGuest = true))
+
+            verify(manager).createGuest(any())
+            Unit
+        }
+
+    @Test
+    fun `onRecordSelected - action`() =
+        runBlocking(IMMEDIATE) {
+            val userInfos = createUserInfos(count = 3, includeGuest = true)
+            userRepository.setUserInfos(userInfos)
+            userRepository.setSelectedUserInfo(userInfos[0])
+            userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = true))
+
+            underTest.onRecordSelected(UserRecord(isAddSupervisedUser = true))
+
+            verify(activityStarter).startActivity(any(), anyBoolean())
+        }
 
     @Test
     fun `users - switcher enabled`() =
