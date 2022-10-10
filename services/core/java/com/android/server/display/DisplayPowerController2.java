@@ -26,8 +26,6 @@ import android.content.pm.ParceledListSlice;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.hardware.display.AmbientBrightnessDayStats;
 import android.hardware.display.BrightnessChangeEvent;
@@ -54,7 +52,6 @@ import android.util.MathUtils;
 import android.util.MutableFloat;
 import android.util.MutableInt;
 import android.util.Slog;
-import android.util.TimeUtils;
 import android.view.Display;
 
 import com.android.internal.R;
@@ -109,7 +106,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
     private static final String SCREEN_OFF_BLOCKED_TRACE_NAME = "Screen off blocked";
 
     private static final boolean DEBUG = false;
-    private static final boolean DEBUG_PRETEND_PROXIMITY_SENSOR_ABSENT = false;
+
 
     // If true, uses the color fade on animation.
     // We might want to turn this off if we cannot get a guarantee that the screen
@@ -123,31 +120,19 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
     private static final int COLOR_FADE_OFF_ANIMATION_DURATION_MILLIS = 400;
 
     private static final int MSG_UPDATE_POWER_STATE = 1;
-    private static final int MSG_PROXIMITY_SENSOR_DEBOUNCED = 2;
-    private static final int MSG_SCREEN_ON_UNBLOCKED = 3;
-    private static final int MSG_SCREEN_OFF_UNBLOCKED = 4;
-    private static final int MSG_CONFIGURE_BRIGHTNESS = 5;
-    private static final int MSG_SET_TEMPORARY_BRIGHTNESS = 6;
-    private static final int MSG_SET_TEMPORARY_AUTO_BRIGHTNESS_ADJUSTMENT = 7;
-    private static final int MSG_IGNORE_PROXIMITY = 8;
-    private static final int MSG_STOP = 9;
-    private static final int MSG_UPDATE_BRIGHTNESS = 10;
-    private static final int MSG_UPDATE_RBC = 11;
-    private static final int MSG_BRIGHTNESS_RAMP_DONE = 12;
-    private static final int MSG_STATSD_HBM_BRIGHTNESS = 13;
-
-    private static final int PROXIMITY_UNKNOWN = -1;
-    private static final int PROXIMITY_NEGATIVE = 0;
-    private static final int PROXIMITY_POSITIVE = 1;
-
-    // Proximity sensor debounce delay in milliseconds for positive or negative transitions.
-    private static final int PROXIMITY_SENSOR_POSITIVE_DEBOUNCE_DELAY = 0;
-    private static final int PROXIMITY_SENSOR_NEGATIVE_DEBOUNCE_DELAY = 250;
+    private static final int MSG_SCREEN_ON_UNBLOCKED = 2;
+    private static final int MSG_SCREEN_OFF_UNBLOCKED = 3;
+    private static final int MSG_CONFIGURE_BRIGHTNESS = 4;
+    private static final int MSG_SET_TEMPORARY_BRIGHTNESS = 5;
+    private static final int MSG_SET_TEMPORARY_AUTO_BRIGHTNESS_ADJUSTMENT = 6;
+    private static final int MSG_STOP = 7;
+    private static final int MSG_UPDATE_BRIGHTNESS = 8;
+    private static final int MSG_UPDATE_RBC = 9;
+    private static final int MSG_BRIGHTNESS_RAMP_DONE = 10;
+    private static final int MSG_STATSD_HBM_BRIGHTNESS = 11;
 
     private static final int BRIGHTNESS_CHANGE_STATSD_REPORT_INTERVAL_MS = 500;
 
-    // Trigger proximity if distance is less than 5 cm.
-    private static final float TYPICAL_PROXIMITY_THRESHOLD = 5.0f;
 
     // State machine constants for tracking initial brightness ramp skipping when enabled.
     private static final int RAMP_STATE_SKIP_NONE = 0;
@@ -199,9 +184,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
 
     // Tracker for brightness settings changes.
     private final SettingsObserver mSettingsObserver;
-
-    // The proximity sensor, or null if not available or needed.
-    private Sensor mProximitySensor;
 
     // The doze screen brightness.
     private final float mScreenBrightnessDozeConfig;
@@ -266,10 +248,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
     @GuardedBy("mLock")
     private DisplayPowerRequest mPendingRequestLocked;
 
-    // True if a request has been made to wait for the proximity sensor to go negative.
-    @GuardedBy("mLock")
-    private boolean mPendingWaitForNegativeProximityLocked;
-
     // True if the pending power request or wait for negative proximity flag
     // has been changed since the last update occurred.
     @GuardedBy("mLock")
@@ -296,37 +274,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
     // Must only be accessed on the handler thread.
     private DisplayPowerState mPowerState;
 
-    // True if the device should wait for negative proximity sensor before
-    // waking up the screen.  This is set to false as soon as a negative
-    // proximity sensor measurement is observed or when the device is forced to
-    // go to sleep by the user.  While true, the screen remains off.
-    private boolean mWaitingForNegativeProximity;
 
-    // True if the device should not take into account the proximity sensor
-    // until either the proximity sensor state changes, or there is no longer a
-    // request to listen to proximity sensor.
-    private boolean mIgnoreProximityUntilChanged;
-
-    // The actual proximity sensor threshold value.
-    private float mProximityThreshold;
-
-    // Set to true if the proximity sensor listener has been registered
-    // with the sensor manager.
-    private boolean mProximitySensorEnabled;
-
-    // The debounced proximity sensor state.
-    private int mProximity = PROXIMITY_UNKNOWN;
-
-    // The raw non-debounced proximity sensor state.
-    private int mPendingProximity = PROXIMITY_UNKNOWN;
-
-    // -1 if fully debounced. Else, represents the time in ms when the debounce suspend blocker will
-    // be removed. Applies for both positive and negative proximity flips.
-    private long mPendingProximityDebounceTime = -1;
-
-    // True if the screen was turned off because of the proximity sensor.
-    // When the screen turns on again, we report user activity to the power manager.
-    private boolean mScreenOffBecauseOfProximity;
 
     // The currently active screen on unblocker.  This field is non-null whenever
     // we are waiting for a callback to release it and unblock the screen.
@@ -406,6 +354,9 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
     // Controls and tracks all the wakelocks that are acquired/released by the system. Also acts as
     // a medium of communication between this class and the PowerManagerService.
     private final WakelockController mWakelockController;
+
+    // Tracks and manages the proximity state of the associated display.
+    private final DisplayPowerProximityStateController mDisplayPowerProximityStateController;
 
     // A record of state for skipping brightness ramps.
     private int mSkipRampState = RAMP_STATE_SKIP_NONE;
@@ -491,13 +442,20 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         mClock = mInjector.getClock();
         mLogicalDisplay = logicalDisplay;
         mDisplayId = mLogicalDisplay.getDisplayIdLocked();
+        mSensorManager = sensorManager;
+        mHandler = new DisplayControllerHandler(handler.getLooper());
+        mDisplayDeviceConfig = logicalDisplay.getPrimaryDisplayDeviceLocked()
+                .getDisplayDeviceConfig();
         mWakelockController = mInjector.getWakelockController(mDisplayId, callbacks);
+        mDisplayPowerProximityStateController = mInjector.getDisplayPowerProximityStateController(
+                mWakelockController, mDisplayDeviceConfig, mHandler.getLooper(),
+                () -> updatePowerState(), mDisplayId, mSensorManager);
         mTag = "DisplayPowerController2[" + mDisplayId + "]";
 
         mDisplayDevice = mLogicalDisplay.getPrimaryDisplayDeviceLocked();
         mUniqueDisplayId = logicalDisplay.getPrimaryDisplayDeviceLocked().getUniqueId();
         mDisplayStatsId = mUniqueDisplayId.hashCode();
-        mHandler = new DisplayControllerHandler(handler.getLooper());
+
         mLastBrightnessEvent = new BrightnessEvent(mDisplayId);
         mTempBrightnessEvent = new BrightnessEvent(mDisplayId);
 
@@ -508,7 +466,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         }
 
         mSettingsObserver = new SettingsObserver(mHandler);
-        mSensorManager = sensorManager;
         mWindowManagerPolicy = LocalServices.getService(WindowManagerPolicy.class);
         mBlanker = blanker;
         mContext = context;
@@ -544,9 +501,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
 
         mAllowAutoBrightnessWhileDozingConfig = resources.getBoolean(
                 R.bool.config_allowAutoBrightnessWhileDozing);
-
-        mDisplayDeviceConfig = logicalDisplay.getPrimaryDisplayDeviceLocked()
-                .getDisplayDeviceConfig();
 
         loadBrightnessRampRates();
         mSkipScreenOnBrightnessRamp = resources.getBoolean(
@@ -611,8 +565,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         mBrightnessBucketsInDozeConfig = resources.getBoolean(
                 R.bool.config_displayBrightnessBucketsInDoze);
 
-        loadProximitySensor();
-
         mCurrentScreenBrightnessSetting = getScreenBrightnessSetting();
         mScreenBrightnessForVr = getScreenBrightnessForVrSetting();
         mAutoBrightnessAdjustment = getAutoBrightnessAdjustmentSetting();
@@ -653,7 +605,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
      */
     @Override
     public boolean isProximitySensorAvailable() {
-        return mProximitySensor != null;
+        return mDisplayPowerProximityStateController.isProximitySensorAvailable();
     }
 
     /**
@@ -727,13 +679,8 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                 return true;
             }
 
-            boolean changed = false;
-
-            if (waitForNegativeProximity
-                    && !mPendingWaitForNegativeProximityLocked) {
-                mPendingWaitForNegativeProximityLocked = true;
-                changed = true;
-            }
+            boolean changed = mDisplayPowerProximityStateController
+                    .setPendingWaitForNegativeProximityLocked(waitForNegativeProximity);
 
             if (mPendingRequestLocked == null) {
                 mPendingRequestLocked = new DisplayPowerRequest(request);
@@ -790,6 +737,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                 mDisplayStatsId = mUniqueDisplayId.hashCode();
                 mDisplayDeviceConfig = config;
                 loadFromDisplayDeviceConfig(token, info);
+                mDisplayPowerProximityStateController.notifyDisplayDeviceChanged(config);
                 updatePowerState();
             }
         });
@@ -838,7 +786,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         // All properties that depend on the associated DisplayDevice and the DDC must be
         // updated here.
         loadBrightnessRampRates();
-        loadProximitySensor();
         loadNitsRange(mContext.getResources());
         setUpAutoBrightness(mContext.getResources(), mHandler);
         reloadReduceBrightColours();
@@ -1134,7 +1081,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
 
     /** Clean up all resources that are accessed via the {@link #mHandler} thread. */
     private void cleanupHandlerThreadAfterStop() {
-        setProximitySensorEnabled(false);
+        mDisplayPowerProximityStateController.cleanup();
         mHbmController.stop();
         mBrightnessThrottler.stop();
         mHandler.removeCallbacksAndMessages(null);
@@ -1179,7 +1126,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
 
             if (mPowerRequest == null) {
                 mPowerRequest = new DisplayPowerRequest(mPendingRequestLocked);
-                updatePendingProximityRequestsLocked();
+                mDisplayPowerProximityStateController.updatePendingProximityRequestsLocked();
                 mPendingRequestChangedLocked = false;
                 mustInitialize = true;
                 // Assume we're on and bright until told otherwise, since that's the state we turn
@@ -1188,7 +1135,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
             } else if (mPendingRequestChangedLocked) {
                 previousPolicy = mPowerRequest.policy;
                 mPowerRequest.copyFrom(mPendingRequestLocked);
-                updatePendingProximityRequestsLocked();
+                mDisplayPowerProximityStateController.updatePendingProximityRequestsLocked();
                 mPendingRequestChangedLocked = false;
                 mDisplayReadyLocked = false;
             } else {
@@ -1231,55 +1178,11 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         }
         assert (state != Display.STATE_UNKNOWN);
 
-        boolean skipRampBecauseOfProximityChangeToNegative = false;
-        // Apply the proximity sensor.
-        if (mProximitySensor != null) {
-            if (mPowerRequest.useProximitySensor && state != Display.STATE_OFF) {
-                // At this point the policy says that the screen should be on, but we've been
-                // asked to listen to the prox sensor to adjust the display state, so lets make
-                // sure the sensor is on.
-                setProximitySensorEnabled(true);
-                if (!mScreenOffBecauseOfProximity
-                        && mProximity == PROXIMITY_POSITIVE
-                        && !mIgnoreProximityUntilChanged) {
-                    // Prox sensor already reporting "near" so we should turn off the screen.
-                    // Also checked that we aren't currently set to ignore the proximity sensor
-                    // temporarily.
-                    mScreenOffBecauseOfProximity = true;
-                    sendOnProximityPositiveWithWakelock();
-                }
-            } else if (mWaitingForNegativeProximity
-                    && mScreenOffBecauseOfProximity
-                    && mProximity == PROXIMITY_POSITIVE
-                    && state != Display.STATE_OFF) {
-                // The policy says that we should have the screen on, but it's off due to the prox
-                // and we've been asked to wait until the screen is far from the user to turn it
-                // back on. Let keep the prox sensor on so we can tell when it's far again.
-                setProximitySensorEnabled(true);
-            } else {
-                // We haven't been asked to use the prox sensor and we're not waiting on the screen
-                // to turn back on...so lets shut down the prox sensor.
-                setProximitySensorEnabled(false);
-                mWaitingForNegativeProximity = false;
-            }
-
-            if (mScreenOffBecauseOfProximity
-                    && (mProximity != PROXIMITY_POSITIVE || mIgnoreProximityUntilChanged)) {
-                // The screen *was* off due to prox being near, but now it's "far" so lets turn
-                // the screen back on.  Also turn it back on if we've been asked to ignore the
-                // prox sensor temporarily.
-                mScreenOffBecauseOfProximity = false;
-                skipRampBecauseOfProximityChangeToNegative = true;
-                sendOnProximityNegativeWithWakelock();
-            }
-        } else {
-            mWaitingForNegativeProximity = false;
-            mIgnoreProximityUntilChanged = false;
-        }
+        mDisplayPowerProximityStateController.updateProximityState(mPowerRequest, state);
 
         if (!mLogicalDisplay.isEnabled()
                 || mLogicalDisplay.getPhase() == LogicalDisplay.DISPLAY_PHASE_LAYOUT_TRANSITION
-                || mScreenOffBecauseOfProximity) {
+                || mDisplayPowerProximityStateController.isScreenOffBecauseOfProximity()) {
             state = Display.STATE_OFF;
         }
 
@@ -1550,7 +1453,8 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
             final boolean wasOrWillBeInVr =
                     (state == Display.STATE_VR || oldState == Display.STATE_VR);
             final boolean initialRampSkip = (state == Display.STATE_ON && mSkipRampState
-                    != RAMP_STATE_SKIP_NONE) || skipRampBecauseOfProximityChangeToNegative;
+                    != RAMP_STATE_SKIP_NONE) || mDisplayPowerProximityStateController
+                    .shouldSkipRampBecauseOfProximityChangeToNegative();
             // While dozing, sometimes the brightness is split into buckets. Rather than animating
             // through the buckets, which is unlikely to be smooth in the first place, just jump
             // right to the suggested brightness.
@@ -1770,7 +1674,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
      */
     @Override
     public void ignoreProximitySensorUntilChanged() {
-        mHandler.sendEmptyMessage(MSG_IGNORE_PROXIMITY);
+        mDisplayPowerProximityStateController.ignoreProximitySensorUntilChanged();
     }
 
     @Override
@@ -1936,7 +1840,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                 || mReportedScreenStateToPolicy == REPORTED_TO_POLICY_UNREPORTED) {
             // If we are trying to turn screen off, give policy a chance to do something before we
             // actually turn the screen off.
-            if (isOff && !mScreenOffBecauseOfProximity) {
+            if (isOff && !mDisplayPowerProximityStateController.isScreenOffBecauseOfProximity()) {
                 if (mReportedScreenStateToPolicy == REPORTED_TO_POLICY_SCREEN_ON
                         || mReportedScreenStateToPolicy == REPORTED_TO_POLICY_UNREPORTED) {
                     setReportedScreenState(REPORTED_TO_POLICY_SCREEN_TURNING_OFF);
@@ -1966,7 +1870,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         // it is only removed once the window manager tells us that the activity has
         // finished drawing underneath.
         if (isOff && mReportedScreenStateToPolicy != REPORTED_TO_POLICY_SCREEN_OFF
-                && !mScreenOffBecauseOfProximity) {
+                && !mDisplayPowerProximityStateController.isScreenOffBecauseOfProximity()) {
             setReportedScreenState(REPORTED_TO_POLICY_SCREEN_OFF);
             unblockScreenOn();
             mWindowManagerPolicy.screenTurnedOff(mDisplayId);
@@ -2006,22 +1910,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                 ? Sensor.TYPE_LIGHT : SensorUtils.NO_FALLBACK;
         mLightSensor = SensorUtils.findSensor(mSensorManager, lightSensor.type, lightSensor.name,
                 fallbackType);
-    }
-
-    private void loadProximitySensor() {
-        if (DEBUG_PRETEND_PROXIMITY_SENSOR_ABSENT) {
-            return;
-        }
-        final DisplayDeviceConfig.SensorData proxSensor =
-                mDisplayDeviceConfig.getProximitySensor();
-        final int fallbackType = mDisplayId == Display.DEFAULT_DISPLAY
-                ? Sensor.TYPE_PROXIMITY : SensorUtils.NO_FALLBACK;
-        mProximitySensor = SensorUtils.findSensor(mSensorManager, proxSensor.type, proxSensor.name,
-                fallbackType);
-        if (mProximitySensor != null) {
-            mProximityThreshold = Math.min(mProximitySensor.getMaximumRange(),
-                    TYPICAL_PROXIMITY_THRESHOLD);
-        }
     }
 
     private float clampScreenBrightnessForVr(float value) {
@@ -2225,98 +2113,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
 
     private final Runnable mCleanListener = this::sendUpdatePowerState;
 
-    private void setProximitySensorEnabled(boolean enable) {
-        if (enable) {
-            if (!mProximitySensorEnabled) {
-                // Register the listener.
-                // Proximity sensor state already cleared initially.
-                mProximitySensorEnabled = true;
-                mIgnoreProximityUntilChanged = false;
-                mSensorManager.registerListener(mProximitySensorListener, mProximitySensor,
-                        SensorManager.SENSOR_DELAY_NORMAL, mHandler);
-            }
-        } else {
-            if (mProximitySensorEnabled) {
-                // Unregister the listener.
-                // Clear the proximity sensor state for next time.
-                mProximitySensorEnabled = false;
-                mProximity = PROXIMITY_UNKNOWN;
-                mIgnoreProximityUntilChanged = false;
-                mPendingProximity = PROXIMITY_UNKNOWN;
-                mHandler.removeMessages(MSG_PROXIMITY_SENSOR_DEBOUNCED);
-                mSensorManager.unregisterListener(mProximitySensorListener);
-                // release wake lock(must be last)
-                boolean proxDebounceSuspendBlockerReleased =
-                        mWakelockController.releaseWakelock(
-                                WakelockController.WAKE_LOCK_PROXIMITY_DEBOUNCE);
-                if (proxDebounceSuspendBlockerReleased) {
-                    mPendingProximityDebounceTime = -1;
-                }
-            }
-        }
-    }
-
-    private void handleProximitySensorEvent(long time, boolean positive) {
-        if (mProximitySensorEnabled) {
-            if (mPendingProximity == PROXIMITY_NEGATIVE && !positive) {
-                return; // no change
-            }
-            if (mPendingProximity == PROXIMITY_POSITIVE && positive) {
-                return; // no change
-            }
-
-            // Only accept a proximity sensor reading if it remains
-            // stable for the entire debounce delay.  We hold a wake lock while
-            // debouncing the sensor.
-            mHandler.removeMessages(MSG_PROXIMITY_SENSOR_DEBOUNCED);
-            if (positive) {
-                mPendingProximity = PROXIMITY_POSITIVE;
-                mPendingProximityDebounceTime = time + PROXIMITY_SENSOR_POSITIVE_DEBOUNCE_DELAY;
-                mWakelockController.acquireWakelock(
-                        WakelockController.WAKE_LOCK_PROXIMITY_DEBOUNCE); // acquire wake lock
-            } else {
-                mPendingProximity = PROXIMITY_NEGATIVE;
-                mPendingProximityDebounceTime = time + PROXIMITY_SENSOR_NEGATIVE_DEBOUNCE_DELAY;
-                mWakelockController.acquireWakelock(
-                        WakelockController.WAKE_LOCK_PROXIMITY_DEBOUNCE); // acquire wake lock
-            }
-
-            // Debounce the new sensor reading.
-            debounceProximitySensor();
-        }
-    }
-
-    private void debounceProximitySensor() {
-        if (mProximitySensorEnabled
-                && mPendingProximity != PROXIMITY_UNKNOWN
-                && mPendingProximityDebounceTime >= 0) {
-            final long now = mClock.uptimeMillis();
-            if (mPendingProximityDebounceTime <= now) {
-                if (mProximity != mPendingProximity) {
-                    // if the status of the sensor changed, stop ignoring.
-                    mIgnoreProximityUntilChanged = false;
-                    Slog.i(mTag, "No longer ignoring proximity [" + mPendingProximity + "]");
-                }
-                // Sensor reading accepted.  Apply the change then release the wake lock.
-                mProximity = mPendingProximity;
-                updatePowerState();
-                // (must be last)
-                boolean proxDebounceSuspendBlockerReleased =
-                        mWakelockController.releaseWakelock(
-                                WakelockController.WAKE_LOCK_PROXIMITY_DEBOUNCE);
-                if (proxDebounceSuspendBlockerReleased) {
-                    mPendingProximityDebounceTime = -1;
-                }
-
-            } else {
-                // Need to wait a little longer.
-                // Debounce again later.  We continue holding a wake lock while waiting.
-                Message msg = mHandler.obtainMessage(MSG_PROXIMITY_SENSOR_DEBOUNCED);
-                mHandler.sendMessageAtTime(msg, mPendingProximityDebounceTime);
-            }
-        }
-    }
-
     private void sendOnStateChangedWithWakelock() {
         boolean wakeLockAcquired = mWakelockController.acquireWakelock(
                 WakelockController.WAKE_LOCK_STATE_CHANGED);
@@ -2461,39 +2257,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         return mAutomaticBrightnessController.convertToNits(brightness);
     }
 
-    @GuardedBy("mLock")
-    private void updatePendingProximityRequestsLocked() {
-        mWaitingForNegativeProximity |= mPendingWaitForNegativeProximityLocked;
-        mPendingWaitForNegativeProximityLocked = false;
-
-        if (mIgnoreProximityUntilChanged) {
-            // Also, lets stop waiting for negative proximity if we're ignoring it.
-            mWaitingForNegativeProximity = false;
-        }
-    }
-
-    private void ignoreProximitySensorUntilChangedInternal() {
-        if (!mIgnoreProximityUntilChanged
-                && mProximity == PROXIMITY_POSITIVE) {
-            // Only ignore if it is still reporting positive (near)
-            mIgnoreProximityUntilChanged = true;
-            Slog.i(mTag, "Ignoring proximity");
-            updatePowerState();
-        }
-    }
-
-    private void sendOnProximityPositiveWithWakelock() {
-        mWakelockController.acquireWakelock(WakelockController.WAKE_LOCK_PROXIMITY_POSITIVE);
-        mHandler.post(mWakelockController.getOnProximityPositiveRunnable());
-    }
-
-
-    private void sendOnProximityNegativeWithWakelock() {
-        mWakelockController.acquireWakelock(WakelockController.WAKE_LOCK_PROXIMITY_NEGATIVE);
-        mHandler.post(mWakelockController.getOnProximityNegativeRunnable());
-    }
-
-
     @Override
     public void dump(final PrintWriter pw) {
         synchronized (mLock) {
@@ -2507,8 +2270,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
             pw.println("  mDisplayReadyLocked=" + mDisplayReadyLocked);
             pw.println("  mPendingRequestLocked=" + mPendingRequestLocked);
             pw.println("  mPendingRequestChangedLocked=" + mPendingRequestChangedLocked);
-            pw.println("  mPendingWaitForNegativeProximityLocked="
-                    + mPendingWaitForNegativeProximityLocked);
             pw.println("  mPendingUpdatePowerStateLocked=" + mPendingUpdatePowerStateLocked);
         }
 
@@ -2543,7 +2304,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         }
         pw.println("  mDisplayBlanksAfterDozeConfig=" + mDisplayBlanksAfterDozeConfig);
         pw.println("  mBrightnessBucketsInDozeConfig=" + mBrightnessBucketsInDozeConfig);
-
         mHandler.runWithScissors(() -> dumpLocal(pw), 1000);
     }
 
@@ -2551,15 +2311,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         pw.println();
         pw.println("Display Power Controller Thread State:");
         pw.println("  mPowerRequest=" + mPowerRequest);
-        pw.println("  mWaitingForNegativeProximity=" + mWaitingForNegativeProximity);
-        pw.println("  mProximitySensor=" + mProximitySensor);
-        pw.println("  mProximitySensorEnabled=" + mProximitySensorEnabled);
-        pw.println("  mProximityThreshold=" + mProximityThreshold);
-        pw.println("  mProximity=" + proximityToString(mProximity));
-        pw.println("  mPendingProximity=" + proximityToString(mPendingProximity));
-        pw.println("  mPendingProximityDebounceTime="
-                + TimeUtils.formatUptime(mPendingProximityDebounceTime));
-        pw.println("  mScreenOffBecauseOfProximity=" + mScreenOffBecauseOfProximity);
         pw.println("  mLastUserSetScreenBrightness=" + mLastUserSetScreenBrightness);
         pw.println("  mPendingScreenBrightnessSetting="
                 + mPendingScreenBrightnessSetting);
@@ -2631,20 +2382,12 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         if (mWakelockController != null) {
             mWakelockController.dumpLocal(pw);
         }
-    }
 
-    private static String proximityToString(int state) {
-        switch (state) {
-            case PROXIMITY_UNKNOWN:
-                return "Unknown";
-            case PROXIMITY_NEGATIVE:
-                return "Negative";
-            case PROXIMITY_POSITIVE:
-                return "Positive";
-            default:
-                return Integer.toString(state);
+        if (mDisplayPowerProximityStateController != null) {
+            mDisplayPowerProximityStateController.dumpLocal(pw);
         }
     }
+
 
     private static String reportedToPolicyToString(int state) {
         switch (state) {
@@ -2795,10 +2538,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                     updatePowerState();
                     break;
 
-                case MSG_PROXIMITY_SENSOR_DEBOUNCED:
-                    debounceProximitySensor();
-                    break;
-
                 case MSG_SCREEN_ON_UNBLOCKED:
                     if (mPendingScreenOnUnblocker == msg.obj) {
                         unblockScreenOn();
@@ -2825,10 +2564,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                 case MSG_SET_TEMPORARY_AUTO_BRIGHTNESS_ADJUSTMENT:
                     mTemporaryAutoBrightnessAdjustment = Float.intBitsToFloat(msg.arg1);
                     updatePowerState();
-                    break;
-
-                case MSG_IGNORE_PROXIMITY:
-                    ignoreProximitySensorUntilChangedInternal();
                     break;
 
                 case MSG_STOP:
@@ -2859,23 +2594,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
             }
         }
     }
-
-    private final SensorEventListener mProximitySensorListener = new SensorEventListener() {
-        @Override
-        public void onSensorChanged(SensorEvent event) {
-            if (mProximitySensorEnabled) {
-                final long time = mClock.uptimeMillis();
-                final float distance = event.values[0];
-                boolean positive = distance >= 0.0f && distance < mProximityThreshold;
-                handleProximitySensorEvent(time, positive);
-            }
-        }
-
-        @Override
-        public void onAccuracyChanged(Sensor sensor, int accuracy) {
-            // Not used.
-        }
-    };
 
 
     private final class SettingsObserver extends ContentObserver {
@@ -2965,6 +2683,15 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         WakelockController getWakelockController(int displayId,
                 DisplayPowerCallbacks displayPowerCallbacks) {
             return new WakelockController(displayId, displayPowerCallbacks);
+        }
+
+        DisplayPowerProximityStateController getDisplayPowerProximityStateController(
+                WakelockController wakelockController, DisplayDeviceConfig displayDeviceConfig,
+                Looper looper, Runnable nudgeUpdatePowerState,
+                int displayId, SensorManager sensorManager) {
+            return new DisplayPowerProximityStateController(wakelockController, displayDeviceConfig,
+                    looper, nudgeUpdatePowerState,
+                    displayId, sensorManager);
         }
     }
 
