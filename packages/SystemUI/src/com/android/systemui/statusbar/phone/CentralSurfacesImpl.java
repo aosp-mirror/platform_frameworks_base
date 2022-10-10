@@ -3308,7 +3308,7 @@ public class CentralSurfacesImpl extends CoreStartable implements
     @Override
     public boolean onBackPressed() {
         if (mStatusBarKeyguardViewManager.canHandleBackPressed()) {
-            mStatusBarKeyguardViewManager.onBackPressed(false /* unused */);
+            mStatusBarKeyguardViewManager.onBackPressed();
             return true;
         }
         if (mNotificationPanelViewController.isQsCustomizing()) {
