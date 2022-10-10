@@ -161,6 +161,10 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             // early bail out if the keep clear areas feature is disabled
             return;
         }
+        if (mPipBoundsState.isStashed()) {
+            // don't move when stashed
+            return;
+        }
         // if there is another animation ongoing, wait for it to finish and try again
         if (mPipAnimationController.isAnimating()) {
             mMainExecutor.removeCallbacks(

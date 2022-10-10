@@ -25,9 +25,10 @@ import com.android.wm.shell.ShellTaskOrganizer;
 
 class TaskPositioner implements DragResizeCallback {
 
-    @IntDef({CTRL_TYPE_LEFT, CTRL_TYPE_RIGHT, CTRL_TYPE_TOP, CTRL_TYPE_BOTTOM})
+    @IntDef({CTRL_TYPE_UNDEFINED, CTRL_TYPE_LEFT, CTRL_TYPE_RIGHT, CTRL_TYPE_TOP, CTRL_TYPE_BOTTOM})
     @interface CtrlType {}
 
+    static final int CTRL_TYPE_UNDEFINED = 0;
     static final int CTRL_TYPE_LEFT = 1;
     static final int CTRL_TYPE_RIGHT = 2;
     static final int CTRL_TYPE_TOP = 4;
