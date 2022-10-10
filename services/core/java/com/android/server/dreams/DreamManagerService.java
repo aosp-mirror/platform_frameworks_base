@@ -856,13 +856,13 @@ public final class DreamManagerService extends SystemService {
 
     private final class LocalService extends DreamManagerInternal {
         @Override
-        public void startDream(boolean doze) {
-            startDreamInternal(doze, "dream manager request" /*reason*/);
+        public void startDream(boolean doze, String reason) {
+            startDreamInternal(doze, reason);
         }
 
         @Override
-        public void stopDream(boolean immediate) {
-            stopDreamInternal(immediate, "dream manager request" /*reason*/);
+        public void stopDream(boolean immediate, String reason) {
+            stopDreamInternal(immediate, reason);
         }
 
         @Override
