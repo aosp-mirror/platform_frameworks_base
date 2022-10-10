@@ -424,7 +424,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
         AudioDeviceAttributes device = crc != null ? crc.getDevice() : null;
         if (AudioService.DEBUG_COMM_RTE) {
             Log.v(TAG, "requestedCommunicationDevice, device: "
-                    + device + "mAudioModeOwner: " + mAudioModeOwner.toString());
+                    + device + " mAudioModeOwner: " + mAudioModeOwner.toString());
         }
         return device;
     }
