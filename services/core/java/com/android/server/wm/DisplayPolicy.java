@@ -73,6 +73,7 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_BA
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_SCREEN_DECOR;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
@@ -95,7 +96,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
-import static android.view.WindowManager.LayoutParams.TYPE_TRUSTED_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
 import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
@@ -138,6 +138,7 @@ import android.graphics.Insets;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.gui.DropInputMode;
 import android.hardware.input.InputManager;
 import android.hardware.power.V1_0.PowerHint;
 import android.os.Handler;
@@ -919,6 +920,20 @@ public class DisplayPolicy {
     }
 
     /**
+     * Add additional policy if needed to ensure the window or its children should not receive any
+     * input.
+     */
+    public void setDropInputModePolicy(WindowState win, LayoutParams attrs) {
+        if (attrs.type == TYPE_TOAST
+                && (attrs.privateFlags & PRIVATE_FLAG_TRUSTED_OVERLAY) == 0) {
+            // Toasts should not receive input. These windows should not have any children, so
+            // force this hierarchy of windows to drop all input.
+            mService.mTransactionFactory.get()
+                    .setDropInputMode(win.getSurfaceControl(), DropInputMode.ALL).apply();
+        }
+    }
+
+    /**
      * @return {@code true} if the calling activity initiate toast and is visible with
      * {@link WindowManager.LayoutParams#FLAG_SHOW_WHEN_LOCKED} flag.
      */
@@ -947,6 +962,11 @@ public class DisplayPolicy {
         if ((attrs.privateFlags & PRIVATE_FLAG_IS_SCREEN_DECOR) != 0) {
             mContext.enforcePermission(
                     android.Manifest.permission.STATUS_BAR_SERVICE, callingPid, callingUid,
+                    "DisplayPolicy");
+        }
+        if ((attrs.privateFlags & PRIVATE_FLAG_TRUSTED_OVERLAY) != 0) {
+            mContext.enforcePermission(
+                    android.Manifest.permission.INTERNAL_SYSTEM_WINDOW, callingPid, callingUid,
                     "DisplayPolicy");
         }
 
@@ -994,11 +1014,6 @@ public class DisplayPolicy {
             case TYPE_VOICE_INTERACTION_STARTING:
                 mContext.enforcePermission(
                         android.Manifest.permission.STATUS_BAR_SERVICE, callingPid, callingUid,
-                        "DisplayPolicy");
-                break;
-            case TYPE_TRUSTED_APPLICATION_OVERLAY:
-                mContext.enforcePermission(
-                        android.Manifest.permission.INTERNAL_SYSTEM_WINDOW, callingPid, callingUid,
                         "DisplayPolicy");
                 break;
             case TYPE_STATUS_BAR_PANEL:

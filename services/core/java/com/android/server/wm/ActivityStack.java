@@ -716,7 +716,7 @@ class ActivityStack extends Task {
                     : WINDOWING_MODE_FULLSCREEN;
         }
         if (currentMode == WINDOWING_MODE_PINNED) {
-            mAtmService.getTaskChangeNotificationController().notifyActivityUnpinned();
+            mRootWindowContainer.notifyActivityPipModeChanged(this, null);
         }
         if (likelyResolvedMode == WINDOWING_MODE_PINNED
                 && taskDisplayArea.getRootPinnedTask() != null) {
