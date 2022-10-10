@@ -884,6 +884,9 @@ public class StackScrollAlgorithm {
                 childViewState.zTranslation = baseZ;
             } else {
                 float factor = (notificationEnd - shelfStart) / shelfHeight;
+                if (Float.isNaN(factor)) { // Avoid problems when the above is 0/0.
+                    factor = 1.0f;
+                }
                 factor = Math.min(factor, 1.0f);
                 childViewState.zTranslation = baseZ + factor * zDistanceBetweenElements;
             }
