@@ -60,7 +60,8 @@ public class ImageFormat {
              RAW_DEPTH,
              RAW_DEPTH10,
              PRIVATE,
-             HEIC
+             HEIC,
+             JPEG_R
      })
      public @interface Format {
      }
@@ -256,6 +257,14 @@ public class ImageFormat {
      * following ISO 16684-1:2011(E).</p>
      */
     public static final int DEPTH_JPEG = 0x69656963;
+
+    /**
+     * Compressed JPEG format that includes an embedded recovery map.
+     *
+     * <p>JPEG compressed main image along with XMP embedded recovery map
+     * following ISO TBD.</p>
+     */
+    public static final int JPEG_R = 0x1005;
 
     /**
      * <p>Multi-plane Android YUV 420 format</p>
@@ -886,6 +895,7 @@ public class ImageFormat {
             case Y8:
             case DEPTH_JPEG:
             case HEIC:
+            case JPEG_R:
                 return true;
         }
 
