@@ -16,10 +16,10 @@
 
 package android.service.credentials;
 
+import android.annotation.NonNull;
+import android.credentials.GetCredentialOption;
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import androidx.annotation.NonNull;
 
 import com.android.internal.util.Preconditions;
 
@@ -100,7 +100,7 @@ public final class GetCredentialsRequest implements Parcelable {
 
         /**
          * Creates a new builder.
-         * @param callingPackage The calling package of the app requesting credentials.
+         * @param callingPackage the calling package of the app requesting credentials
          *
          * @throws IllegalArgumentException If {@code callingPackag}e is null or empty.
          */
