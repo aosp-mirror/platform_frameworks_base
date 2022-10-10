@@ -211,7 +211,7 @@ public class Flags {
     public static final UnreleasedFlag REGION_SAMPLING = new UnreleasedFlag(801);
 
     // 802 - wallpaper rendering
-    public static final UnreleasedFlag USE_CANVAS_RENDERER = new UnreleasedFlag(802);
+    public static final UnreleasedFlag USE_CANVAS_RENDERER = new UnreleasedFlag(802, true);
 
     // 803 - screen contents translation
     public static final UnreleasedFlag SCREEN_CONTENTS_TRANSLATION = new UnreleasedFlag(803);
