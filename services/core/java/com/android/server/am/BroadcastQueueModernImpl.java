@@ -1298,7 +1298,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         // Report statistics for each individual receiver
         final int uid = getReceiverUid(receiver);
         final int senderUid = (r.callingUid == -1) ? Process.SYSTEM_UID : r.callingUid;
-        final String actionName = ActivityManagerService.getShortAction(r.intent.getAction());
+        final String actionName = r.intent.getAction();
         final int receiverType = (receiver instanceof BroadcastFilter)
                 ? BROADCAST_DELIVERY_EVENT_REPORTED__RECEIVER_TYPE__RUNTIME
                 : BROADCAST_DELIVERY_EVENT_REPORTED__RECEIVER_TYPE__MANIFEST;
