@@ -35,6 +35,10 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewRootImpl;
+import android.window.OnBackInvokedCallback;
+import android.window.OnBackInvokedDispatcher;
+import android.window.WindowOnBackInvokedDispatcher;
 
 import androidx.test.filters.SmallTest;
 
@@ -73,6 +77,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -119,6 +124,12 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private KeyguardBouncer.BouncerExpansionCallback mBouncerExpansionCallback;
 
+    @Mock private ViewRootImpl mViewRootImpl;
+    @Mock private WindowOnBackInvokedDispatcher mOnBackInvokedDispatcher;
+    @Captor
+    private ArgumentCaptor<OnBackInvokedCallback> mOnBackInvokedCallback;
+
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -154,7 +165,14 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                         mFeatureFlags,
                         mBouncerCallbackInteractor,
                         mBouncerInteractor,
-                        mBouncerView);
+                        mBouncerView) {
+                    @Override
+                    public ViewRootImpl getViewRootImpl() {
+                        return mViewRootImpl;
+                    }
+                };
+        when(mViewRootImpl.getOnBackInvokedDispatcher())
+                .thenReturn(mOnBackInvokedDispatcher);
         mStatusBarKeyguardViewManager.registerCentralSurfaces(
                 mCentralSurfaces,
                 mNotificationPanelView,
@@ -506,6 +524,37 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
             float fraction, boolean expanded, boolean tracking) {
         return new ShadeExpansionChangeEvent(
                 fraction, expanded, tracking, /* dragDownPxAmount= */ 0f);
+    }
+
+    @Test
+    public void testPredictiveBackCallback_registration() {
+        /* verify that a predictive back callback is registered when the bouncer becomes visible */
+        mBouncerExpansionCallback.onVisibilityChanged(true);
+        verify(mOnBackInvokedDispatcher).registerOnBackInvokedCallback(
+                eq(OnBackInvokedDispatcher.PRIORITY_OVERLAY),
+                mOnBackInvokedCallback.capture());
+
+        /* verify that the same callback is unregistered when the bouncer becomes invisible */
+        mBouncerExpansionCallback.onVisibilityChanged(false);
+        verify(mOnBackInvokedDispatcher).unregisterOnBackInvokedCallback(
+                eq(mOnBackInvokedCallback.getValue()));
+    }
+
+    @Test
+    public void testPredictiveBackCallback_invocationHidesBouncer() {
+        mBouncerExpansionCallback.onVisibilityChanged(true);
+        /* capture the predictive back callback during registration */
+        verify(mOnBackInvokedDispatcher).registerOnBackInvokedCallback(
+                eq(OnBackInvokedDispatcher.PRIORITY_OVERLAY),
+                mOnBackInvokedCallback.capture());
+
+        when(mBouncer.isShowing()).thenReturn(true);
+        when(mCentralSurfaces.shouldKeyguardHideImmediately()).thenReturn(true);
+        /* invoke the back callback directly */
+        mOnBackInvokedCallback.getValue().onBackInvoked();
+
+        /* verify that the bouncer will be hidden as a result of the invocation */
+        verify(mCentralSurfaces).setBouncerShowing(eq(false));
     }
 
     @Test
