@@ -38,6 +38,7 @@ package android {
     field public static final String READ_CELL_BROADCASTS = "android.permission.READ_CELL_BROADCASTS";
     field public static final String READ_PRIVILEGED_PHONE_STATE = "android.permission.READ_PRIVILEGED_PHONE_STATE";
     field public static final String RECORD_BACKGROUND_AUDIO = "android.permission.RECORD_BACKGROUND_AUDIO";
+    field public static final String REMAP_MODIFIER_KEYS = "android.permission.REMAP_MODIFIER_KEYS";
     field public static final String REMOVE_TASKS = "android.permission.REMOVE_TASKS";
     field public static final String REQUEST_UNIQUE_ID_ATTESTATION = "android.permission.REQUEST_UNIQUE_ID_ATTESTATION";
     field public static final String RESET_APP_ERRORS = "android.permission.RESET_APP_ERRORS";
@@ -1294,8 +1295,11 @@ package android.hardware.input {
 
   public final class InputManager {
     method public void addUniqueIdAssociation(@NonNull String, @NonNull String);
+    method @RequiresPermission(android.Manifest.permission.REMAP_MODIFIER_KEYS) public void clearAllModifierKeyRemappings();
     method @Nullable public String getCurrentKeyboardLayoutForInputDevice(@NonNull android.hardware.input.InputDeviceIdentifier);
     method @NonNull public java.util.List<java.lang.String> getKeyboardLayoutDescriptorsForInputDevice(@NonNull android.view.InputDevice);
+    method @NonNull @RequiresPermission(android.Manifest.permission.REMAP_MODIFIER_KEYS) public java.util.Map<java.lang.Integer,java.lang.Integer> getModifierKeyRemapping();
+    method @RequiresPermission(android.Manifest.permission.REMAP_MODIFIER_KEYS) public void remapModifierKey(int, int);
     method @RequiresPermission(android.Manifest.permission.SET_KEYBOARD_LAYOUT) public void removeKeyboardLayoutForInputDevice(@NonNull android.hardware.input.InputDeviceIdentifier, @NonNull String);
     method public void removeUniqueIdAssociation(@NonNull String);
     method @RequiresPermission(android.Manifest.permission.SET_KEYBOARD_LAYOUT) public void setCurrentKeyboardLayoutForInputDevice(@NonNull android.hardware.input.InputDeviceIdentifier, @NonNull String);

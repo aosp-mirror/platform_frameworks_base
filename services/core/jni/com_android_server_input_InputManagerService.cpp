@@ -1578,6 +1578,12 @@ static std::vector<int32_t> getIntArray(JNIEnv* env, jintArray arr) {
     return vec;
 }
 
+static void nativeAddKeyRemapping(JNIEnv* env, jobject nativeImplObj, jint deviceId,
+                                  jint fromKeyCode, jint toKeyCode) {
+    NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
+    im->getInputManager()->getReader().addKeyRemapping(deviceId, fromKeyCode, toKeyCode);
+}
+
 static jboolean nativeHasKeys(JNIEnv* env, jobject nativeImplObj, jint deviceId, jint sourceMask,
                               jintArray keyCodes, jbooleanArray outFlags) {
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
@@ -2360,6 +2366,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"getScanCodeState", "(III)I", (void*)nativeGetScanCodeState},
         {"getKeyCodeState", "(III)I", (void*)nativeGetKeyCodeState},
         {"getSwitchState", "(III)I", (void*)nativeGetSwitchState},
+        {"addKeyRemapping", "(III)V", (void*)nativeAddKeyRemapping},
         {"hasKeys", "(II[I[Z)Z", (void*)nativeHasKeys},
         {"getKeyCodeForKeyLocation", "(II)I", (void*)nativeGetKeyCodeForKeyLocation},
         {"createInputChannel", "(Ljava/lang/String;)Landroid/view/InputChannel;",
