@@ -117,7 +117,7 @@ constructor(
         dialogShower: UserSwitchDialogController.DialogShower?
     ) {
         if (useInteractor) {
-            userInteractor.selectUser(userId)
+            userInteractor.selectUser(userId, dialogShower)
         } else {
             _oldImpl.onUserSelected(userId, dialogShower)
         }
@@ -202,7 +202,7 @@ constructor(
         dialogShower: UserSwitchDialogController.DialogShower?,
     ) {
         if (useInteractor) {
-            userInteractor.onRecordSelected(record)
+            userInteractor.onRecordSelected(record, dialogShower)
         } else {
             _oldImpl.onUserListItemClicked(record, dialogShower)
         }

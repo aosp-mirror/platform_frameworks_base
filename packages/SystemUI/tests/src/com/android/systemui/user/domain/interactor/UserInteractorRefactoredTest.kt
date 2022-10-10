@@ -49,6 +49,7 @@ import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyInt
+import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 
 @SmallTest
@@ -81,8 +82,9 @@ class UserInteractorRefactoredTest : UserInteractorTest() {
             userRepository.setSelectedUserInfo(userInfos[0])
             userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = true))
 
-            underTest.onRecordSelected(UserRecord(info = userInfos[1]))
+            underTest.onRecordSelected(UserRecord(info = userInfos[1]), dialogShower)
 
+            verify(dialogShower).dismiss()
             verify(activityManager).switchUser(userInfos[1].id)
             Unit
         }
@@ -108,9 +110,12 @@ class UserInteractorRefactoredTest : UserInteractorTest() {
             userRepository.setUserInfos(userInfos)
             userRepository.setSelectedUserInfo(userInfos[0])
             userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = true))
+            val guestUserInfo = createUserInfo(id = 1337, name = "guest", isGuest = true)
+            whenever(manager.createGuest(any())).thenReturn(guestUserInfo)
 
-            underTest.onRecordSelected(UserRecord(isGuest = true))
+            underTest.onRecordSelected(UserRecord(isGuest = true), dialogShower)
 
+            verify(dialogShower).dismiss()
             verify(manager).createGuest(any())
             Unit
         }
@@ -123,8 +128,9 @@ class UserInteractorRefactoredTest : UserInteractorTest() {
             userRepository.setSelectedUserInfo(userInfos[0])
             userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = true))
 
-            underTest.onRecordSelected(UserRecord(isAddSupervisedUser = true))
+            underTest.onRecordSelected(UserRecord(isAddSupervisedUser = true), dialogShower)
 
+            verify(dialogShower, never()).dismiss()
             verify(activityStarter).startActivity(any(), anyBoolean())
         }
 
@@ -392,10 +398,14 @@ class UserInteractorRefactoredTest : UserInteractorTest() {
             var dialogRequest: ShowDialogRequestModel? = null
             val job = underTest.dialogShowRequests.onEach { dialogRequest = it }.launchIn(this)
 
-            underTest.selectUser(newlySelectedUserId = guestUserInfo.id)
+            underTest.selectUser(
+                newlySelectedUserId = guestUserInfo.id,
+                dialogShower = dialogShower,
+            )
 
             assertThat(dialogRequest)
                 .isInstanceOf(ShowDialogRequestModel.ShowExitGuestDialog::class.java)
+            verify(dialogShower, never()).dismiss()
             job.cancel()
         }
 
@@ -411,10 +421,11 @@ class UserInteractorRefactoredTest : UserInteractorTest() {
             var dialogRequest: ShowDialogRequestModel? = null
             val job = underTest.dialogShowRequests.onEach { dialogRequest = it }.launchIn(this)
 
-            underTest.selectUser(newlySelectedUserId = userInfos[0].id)
+            underTest.selectUser(newlySelectedUserId = userInfos[0].id, dialogShower = dialogShower)
 
             assertThat(dialogRequest)
                 .isInstanceOf(ShowDialogRequestModel.ShowExitGuestDialog::class.java)
+            verify(dialogShower, never()).dismiss()
             job.cancel()
         }
 
@@ -428,10 +439,11 @@ class UserInteractorRefactoredTest : UserInteractorTest() {
             var dialogRequest: ShowDialogRequestModel? = null
             val job = underTest.dialogShowRequests.onEach { dialogRequest = it }.launchIn(this)
 
-            underTest.selectUser(newlySelectedUserId = userInfos[1].id)
+            underTest.selectUser(newlySelectedUserId = userInfos[1].id, dialogShower = dialogShower)
 
             assertThat(dialogRequest).isNull()
             verify(activityManager).switchUser(userInfos[1].id)
+            verify(dialogShower).dismiss()
             job.cancel()
         }
 

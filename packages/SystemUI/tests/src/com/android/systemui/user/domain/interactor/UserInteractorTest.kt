@@ -27,6 +27,7 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.qs.user.UserSwitchDialogController
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.statusbar.policy.UserSwitcherController
 import com.android.systemui.telephony.data.repository.FakeTelephonyRepository
@@ -46,6 +47,7 @@ abstract class UserInteractorTest : SysuiTestCase() {
     @Mock protected lateinit var deviceProvisionedController: DeviceProvisionedController
     @Mock protected lateinit var devicePolicyManager: DevicePolicyManager
     @Mock protected lateinit var uiEventLogger: UiEventLogger
+    @Mock protected lateinit var dialogShower: UserSwitchDialogController.DialogShower
 
     protected lateinit var underTest: UserInteractor
 
