@@ -60,13 +60,13 @@
     <string name="usb_debugging_title" msgid="8274884945238642726">"USB аркылуу жөндөөгө уруксат берилсинби?"</string>
     <string name="usb_debugging_message" msgid="5794616114463921773">"Компүтердин RSA ачкычынын контролдук суммасы:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="4003121804294739548">"Бул компүтерден дайыма уруксат берилсин"</string>
-    <string name="usb_debugging_allow" msgid="1722643858015321328">"Уруксат берүү"</string>
+    <string name="usb_debugging_allow" msgid="1722643858015321328">"Ооба"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"USB мүчүлүштүктөрүн оңдоого уруксат жок"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"Учурда бул аккаунтта USB аркылуу мүчүлүштүктөрдү аныктоо функциясын иштетүүгө болбойт. Негизги колдонуучунун аккаунтуна кириңиз."</string>
     <string name="wifi_debugging_title" msgid="7300007687492186076">"Ушул тармакта мүчүлүштүктөрдү Wi-Fi аркылуу аныктоого уруксат бересизби?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"Тармактын аталышы (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nWi‑Fi дареги (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Бул тармакта ар дайым уруксат берилсин"</string>
-    <string name="wifi_debugging_allow" msgid="4573224609684957886">"Уруксат берүү"</string>
+    <string name="wifi_debugging_allow" msgid="4573224609684957886">"Ооба"</string>
     <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"Мүчүлүштүктөрдү Wi-Fi аркылуу оңдоого уруксат берилген жок"</string>
     <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"Учурда бул түзмөккө кирген колдонуучу мүчүлүштүктөрдү Wi-Fi аркылуу оңдоо функциясын күйгүзө албайт. Бул функцияны колдонуу үчүн негизги колдонуучунун аккаунтуна которулуңуз."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"USB порту өчүрүлдү"</string>
@@ -232,7 +232,7 @@
     <string name="accessibility_battery_level" msgid="5143715405241138822">"Батарея <xliff:g id="NUMBER">%d</xliff:g> пайыз."</string>
     <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"Батареянын деңгээли <xliff:g id="PERCENTAGE">%1$s</xliff:g> пайыз, колдонгонуңузга караганда болжол менен <xliff:g id="TIME">%2$s</xliff:g> калды"</string>
     <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"Батарея кубатталууда, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%."</string>
-    <string name="accessibility_settings_button" msgid="2197034218538913880">"Система тууралоолору."</string>
+    <string name="accessibility_settings_button" msgid="2197034218538913880">"Параметрлер."</string>
     <string name="accessibility_notifications_button" msgid="3960913924189228831">"Билдирмелер"</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"Бардык билдирмелерди көрүү"</string>
     <string name="accessibility_remove_notification" msgid="1641455251495815527">"Эскертмелерди тазалоо."</string>
@@ -530,11 +530,11 @@
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"Бул түзмөк <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> уюмуна таандык. Уюм тармактын трафигин көзөмөлдөй алат"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Бул түзмөктү <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> камсыздады."</string>
     <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Бул түзмөк уюмуңузга таандык жана <xliff:g id="VPN_APP">%1$s</xliff:g> колдонмосуна туташтырылган"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Бул түзмөк <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> уюмуна таандык жана <xliff:g id="VPN_APP">%2$s</xliff:g> колдонмосуна туташтырылган"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Бул түзмөк <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> уюмуна таандык жана <xliff:g id="VPN_APP">%2$s</xliff:g> колдонмосуна туташып турат"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Бул түзмөк уюмуңузга таандык"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Бул түзмөк төмөнкүгө таандык: <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"Бул түзмөк уюмуңузга таандык жана VPN\'дерге туташтырылган"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Бул түзмөк <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> уюмуна таандык жана VPN\'дерге туташтырылган"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Бул түзмөк <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> уюмуна таандык жана VPN\'дерге туташып турат"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Ишканаңыз жумуш профилиңиздин тармак трафигин көзөмөлдөй алат"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> жумуш профилиңиздеги тармак трафигин көзөмөлдөй алат"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"Жумуш профилинин тармактагы аракеттери IT администраторуна көрүнөт"</string>
@@ -661,7 +661,7 @@
     <string name="quick_settings" msgid="6211774484997470203">"Ыкчам жөндөөлөр"</string>
     <string name="status_bar" msgid="4357390266055077437">"Абал тилкеси"</string>
     <string name="overview" msgid="3522318590458536816">"Назар"</string>
-    <string name="demo_mode" msgid="263484519766901593">"Тутум интерфейсинин демо режими"</string>
+    <string name="demo_mode" msgid="263484519766901593">"Системанын интерфейсинин демо режими"</string>
     <string name="enable_demo_mode" msgid="3180345364745966431">"Демо режимин иштетүү"</string>
     <string name="show_demo_mode" msgid="3677956462273059726">"Демо режимин көрсөтүү"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
@@ -674,7 +674,7 @@
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Жаңырууда"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Колдонуу үчүн кулпусун ачыңыз"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Кыйытмаларды алууда ката кетти. Бир аздан кийин кайталап көрүңүз."</string>
-    <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Кулпуланган экран жөндөөлөрү"</string>
+    <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Экранды кулпулоо параметрлери"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Жумуш профили"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Учак режими"</string>
     <string name="add_tile" msgid="6239678623873086686">"Тайл кошуу"</string>

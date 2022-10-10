@@ -38,7 +38,7 @@
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Slå på"</string>
     <string name="battery_saver_start_action" msgid="4553256017945469937">"Slå på batterisparing"</string>
     <string name="status_bar_settings_settings_button" msgid="534331565185171556">"Innstillinger"</string>
-    <string name="status_bar_settings_wifi_button" msgid="7243072479837270946">"Trådløse nettverk"</string>
+    <string name="status_bar_settings_wifi_button" msgid="7243072479837270946">"Wifi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Rotér skjermen automatisk"</string>
     <string name="status_bar_settings_mute_label" msgid="914392730086057522">"DEMPET"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="2151934479226017725">"AUTO"</string>
@@ -219,7 +219,7 @@
     <string name="accessibility_desc_connecting" msgid="8011433412112903614">"Kobler til."</string>
     <string name="data_connection_hspa" msgid="6096234094857660873">"HSPA"</string>
     <string name="data_connection_roaming" msgid="375650836665414797">"Roaming"</string>
-    <string name="accessibility_data_connection_wifi" msgid="4422160347472742434">"Wi-Fi"</string>
+    <string name="accessibility_data_connection_wifi" msgid="4422160347472742434">"Wifi"</string>
     <string name="accessibility_no_sim" msgid="1140839832913084973">"Uten SIM."</string>
     <string name="accessibility_cell_data" msgid="172950885786007392">"Mobildata"</string>
     <string name="accessibility_cell_data_on" msgid="691666434519443162">"Mobildata er slått på"</string>
@@ -289,8 +289,8 @@
     <string name="accessibility_quick_settings_flashlight_changed_on" msgid="4747870681508334200">"Lommelykten er slått på."</string>
     <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="7548045840282925393">"Inverterte farger er slått av."</string>
     <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="4711141858364404084">"Inverterte farger er slått på."</string>
-    <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"Mobil Wi-Fi-sone er slått av."</string>
-    <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"Mobil Wi-Fi-sone er slått på."</string>
+    <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"Mobil wifi-sone er slått av."</string>
+    <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"Mobil wifi-sone er slått på."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"Skjermcastingen er stoppet."</string>
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6422896967647049692">"Arbeidsmodus er satt på pause."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"Arbeidsmodusen er slått på."</string>
@@ -365,7 +365,7 @@
     <string name="quick_settings_user_label" msgid="1253515509432672496">"Meg"</string>
     <string name="quick_settings_user_title" msgid="8673045967216204537">"Bruker"</string>
     <string name="quick_settings_user_new_user" msgid="3347905871336069666">"Ny bruker"</string>
-    <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
+    <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wifi"</string>
     <string name="quick_settings_internet_label" msgid="6603068555872455463">"Internett"</string>
     <string name="quick_settings_networks_available" msgid="1875138606855420438">"Tilgjengelige nettverk"</string>
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"Nettverk er utilgjengelige"</string>
@@ -393,7 +393,7 @@
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"Tilkoblet, batterinivå <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="2381969772953268809">"Kobler til …"</string>
     <string name="quick_settings_tethering_label" msgid="5257299852322475780">"Internettdeling"</string>
-    <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"Wi-Fi-sone"</string>
+    <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"Wifi-sone"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"Slår på …"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Datasparing er på"</string>
     <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="3142308865165871976">
@@ -653,7 +653,7 @@
     <string name="output_none_found" msgid="5488087293120982770">"Fant ingen enheter"</string>
     <string name="output_none_found_service_off" msgid="935667567681386368">"Fant ingen enheter. Prøv å slå på <xliff:g id="SERVICE">%1$s</xliff:g>"</string>
     <string name="output_service_bt" msgid="4315362133973911687">"Bluetooth"</string>
-    <string name="output_service_wifi" msgid="9003667810868222134">"Wi-Fi"</string>
+    <string name="output_service_wifi" msgid="9003667810868222134">"Wifi"</string>
     <string name="output_service_bt_wifi" msgid="7186882540475524124">"Bluetooth og Wi-Fi"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"System UI Tuner"</string>
     <string name="show_battery_percentage" msgid="6235377891802910455">"Vis prosent for det innebygde batteriet"</string>
@@ -684,7 +684,7 @@
     <string name="alarm_template" msgid="2234991538018805736">"kl. <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_detail" msgid="544463655956179791">"Hurtiginnstillinger, <xliff:g id="TITLE">%s</xliff:g>."</string>
-    <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"Wi-Fi-sone"</string>
+    <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"Wifi-sone"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Work-profil"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Gøy for noen – ikke for alle"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Med System UI Tuner har du flere måter å justere og tilpasse Android-brukergrensesnittet på. Disse eksperimentelle funksjonene kan endres, avbrytes eller fjernes i fremtidige utgivelser. Fortsett med forbehold."</string>

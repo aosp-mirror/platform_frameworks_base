@@ -136,7 +136,7 @@
     <string name="accessibility_camera_button" msgid="2938898391716647247">"ক্যামেরা"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"ফোন"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"ভয়েস সহায়তা"</string>
-    <string name="accessibility_wallet_button" msgid="1458258783460555507">"ওয়ালেট"</string>
+    <string name="accessibility_wallet_button" msgid="1458258783460555507">"Wallet"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"আনলক করুন"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"ডিভাইস লক করা আছে"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="5209142744692162598">"আঙ্গুলের ছাপের জন্য অপেক্ষা করা হচ্ছে"</string>
@@ -814,7 +814,7 @@
     <string name="keyboard_key_dpad_right" msgid="6282105433822321767">"ডান"</string>
     <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"কেন্দ্র"</string>
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
-    <string name="keyboard_key_space" msgid="6980847564173394012">"স্পেস"</string>
+    <string name="keyboard_key_space" msgid="6980847564173394012">"Space"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"এন্টার"</string>
     <string name="keyboard_key_backspace" msgid="4095278312039628074">"ব্যাকস্পেস"</string>
     <string name="keyboard_key_media_play_pause" msgid="8389984232732277478">"প্লে/বিরতি"</string>

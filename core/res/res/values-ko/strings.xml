@@ -579,7 +579,7 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"지문의 일부만 감지됨"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"지문을 인식할 수 없습니다. 다시 시도해 주세요."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"센서 닦기"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"조금 더 길게 터치하세요."</string>
+    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"조금 더 오래 터치하세요."</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"손가락을 너무 느리게 움직였습니다. 다시 시도해 주세요."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"다른 지문으로 시도"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"너무 밝음"</string>

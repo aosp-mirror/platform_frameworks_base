@@ -15,6 +15,7 @@
  */
 package com.android.server.notification;
 
+import static com.android.server.notification.SnoozeHelper.CONCURRENT_SNOOZE_LIMIT;
 import static com.android.server.notification.SnoozeHelper.EXTRA_KEY;
 
 import static junit.framework.Assert.assertEquals;
@@ -278,6 +279,22 @@ public class SnoozeHelperTest extends UiServiceTestCase {
                 anyInt(), anyLong(), any(PendingIntent.class));
         assertTrue(mSnoozeHelper.isSnoozed(
                 UserHandle.USER_SYSTEM, r.getSbn().getPackageName(), r.getKey()));
+    }
+
+    @Test
+    public void testSnoozeLimit() {
+        for (int i = 0; i < CONCURRENT_SNOOZE_LIMIT; i++ ) {
+            NotificationRecord r = getNotificationRecord("pkg", i, i+"", UserHandle.SYSTEM);
+
+            assertTrue("cannot snooze record " + i, mSnoozeHelper.canSnooze(1));
+
+            if (i % 2 == 0) {
+                mSnoozeHelper.snooze(r, null);
+            } else {
+                mSnoozeHelper.snooze(r, 9000);
+            }
+        }
+        assertFalse(mSnoozeHelper.canSnooze(1));
     }
 
     @Test

@@ -840,7 +840,7 @@
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"कीबोर्ड शॉर्टकट"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"कीबोर्ड लेआउट स्विच करा"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"ॲप्लिकेशन"</string>
-    <string name="keyboard_shortcut_group_applications_assist" msgid="771606231466098742">"सहाय्य"</string>
+    <string name="keyboard_shortcut_group_applications_assist" msgid="771606231466098742">"Assist"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"ब्राउझर"</string>
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"संपर्क"</string>
     <string name="keyboard_shortcut_group_applications_email" msgid="7852376788894975192">"ईमेल"</string>

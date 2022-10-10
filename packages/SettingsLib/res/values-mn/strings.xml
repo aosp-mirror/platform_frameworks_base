@@ -73,13 +73,13 @@
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"Холбогдсон (медиа байхгүй)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"Холбогдсон (мессежийн хандалт байхгүй)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2893204819854215433">"Холбогдсон (утас эсвэл медиа байхгүй)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_battery_level" msgid="5410325759372259950">"Холбогдсон, батерей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"Холбогдсон (утас байхгүй), батерей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_a2dp_battery_level" msgid="6499078454894324287">"Холбогдсон (медиа байхгүй), батерей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="8477440576953067242">"Холбогдсон (утас эсвэл медиа байхгүй), батерей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
-    <string name="bluetooth_active_battery_level" msgid="3450745316700494425">"Идэвхтэй, батерей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_battery_level" msgid="5410325759372259950">"Холбогдсон, батарей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"Холбогдсон (утас байхгүй), батарей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_a2dp_battery_level" msgid="6499078454894324287">"Холбогдсон (медиа байхгүй), батарей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="8477440576953067242">"Холбогдсон (утас эсвэл медиа байхгүй), батарей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <string name="bluetooth_active_battery_level" msgid="3450745316700494425">"Идэвхтэй, батарей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_battery_level_untethered" msgid="2706188607604205362">"Идэвхтэй, Зүүн: Батарей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, Баруун: Батарей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
-    <string name="bluetooth_battery_level" msgid="2893696778200201555">"Батерей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level" msgid="2893696778200201555">"Батарей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"Зүүн: Батарей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, Баруун: Батарей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Идэвхтэй"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Медиа аудио"</string>
@@ -130,8 +130,8 @@
     <string name="bluetooth_talkback_bluetooth" msgid="1143241359781999989">"Bluetooth"</string>
     <string name="bluetooth_hearingaid_left_pairing_message" msgid="8561855779703533591">"Зүүн талын сонсголын төхөөрөмжийг холбож байна…"</string>
     <string name="bluetooth_hearingaid_right_pairing_message" msgid="2655347721696331048">"Баруун талын сонсголын төхөөрөмжийг холбож байна…"</string>
-    <string name="bluetooth_hearingaid_left_battery_level" msgid="7375621694748104876">"Зүүн - батерей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_hearingaid_right_battery_level" msgid="1850094448499089312">"Баруун - батерей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_hearingaid_left_battery_level" msgid="7375621694748104876">"Зүүн - батарей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_hearingaid_right_battery_level" msgid="1850094448499089312">"Баруун - батарей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="accessibility_wifi_off" msgid="1195445715254137155">"Wifi унтраалттай байна."</string>
     <string name="accessibility_no_wifi" msgid="5297119459491085771">"Wifi холбогдоогүй байна."</string>
     <string name="accessibility_wifi_one_bar" msgid="6025652717281815212">"Wifi сүлжээний дохио нэг баганатай байна."</string>
@@ -425,7 +425,7 @@
     <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"Дьютераномаль (улаан-ногоон)"</string>
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Протаномаль (улаан-ногоон)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Тританомаль (цэнхэр-шар)"</string>
-    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Өнгө тохируулах"</string>
+    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Өнгө тохируулга"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="2333641630205214702">"Таны төхөөрөмж дээр өнгийг хэрхэн үзүүлэхийг тохируулна уу. Энэ нь танд дараахыг хийхийг хүссэн үед хэрэг болж магадгүй:&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Өнгийг илүү оновчтой харах&lt;/li&gt; &lt;li&gt;&amp;nbsp;Танд төвлөрөхөд туслахын тулд өнгийг хасах&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Давхарласан <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
