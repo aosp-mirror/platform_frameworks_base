@@ -34,6 +34,7 @@ import androidx.test.filters.SmallTest
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.media.taptotransfer.MediaTttFlags
 import com.android.systemui.media.taptotransfer.common.MediaTttLogger
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.policy.ConfigurationController
@@ -49,6 +50,7 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Mock
 import org.mockito.Mockito.never
+import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
@@ -70,6 +72,8 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
     @Mock
     private lateinit var configurationController: ConfigurationController
     @Mock
+    private lateinit var mediaTttFlags: MediaTttFlags
+    @Mock
     private lateinit var powerManager: PowerManager
     @Mock
     private lateinit var viewUtil: ViewUtil
@@ -85,6 +89,7 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+        whenever(mediaTttFlags.isMediaTttEnabled()).thenReturn(true)
 
         fakeAppIconDrawable = context.getDrawable(R.drawable.ic_cake)!!
         whenever(packageManager.getApplicationIcon(PACKAGE_NAME)).thenReturn(fakeAppIconDrawable)
@@ -107,6 +112,7 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
             configurationController,
             powerManager,
             Handler.getMain(),
+            mediaTttFlags,
             receiverUiEventLogger,
             viewUtil,
         )
@@ -115,6 +121,30 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
         val callbackCaptor = ArgumentCaptor.forClass(CommandQueue.Callbacks::class.java)
         verify(commandQueue).addCallback(callbackCaptor.capture())
         commandQueueCallback = callbackCaptor.value!!
+    }
+
+    @Test
+    fun commandQueueCallback_flagOff_noCallbackAdded() {
+        reset(commandQueue)
+        whenever(mediaTttFlags.isMediaTttEnabled()).thenReturn(false)
+
+        controllerReceiver = MediaTttChipControllerReceiver(
+            commandQueue,
+            context,
+            logger,
+            windowManager,
+            FakeExecutor(FakeSystemClock()),
+            accessibilityManager,
+            configurationController,
+            powerManager,
+            Handler.getMain(),
+            mediaTttFlags,
+            receiverUiEventLogger,
+            viewUtil,
+        )
+        controllerReceiver.start()
+
+        verify(commandQueue, never()).addCallback(any())
     }
 
     @Test

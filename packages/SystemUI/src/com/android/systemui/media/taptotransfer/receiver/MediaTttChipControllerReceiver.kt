@@ -36,6 +36,7 @@ import com.android.settingslib.Utils
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.media.taptotransfer.MediaTttFlags
 import com.android.systemui.media.taptotransfer.common.MediaTttLogger
 import com.android.systemui.media.taptotransfer.common.MediaTttUtils
 import com.android.systemui.statusbar.CommandQueue
@@ -64,6 +65,7 @@ class MediaTttChipControllerReceiver @Inject constructor(
         configurationController: ConfigurationController,
         powerManager: PowerManager,
         @Main private val mainHandler: Handler,
+        private val mediaTttFlags: MediaTttFlags,
         private val uiEventLogger: MediaTttReceiverUiEventLogger,
         private val viewUtil: ViewUtil,
 ) : TemporaryViewDisplayController<ChipReceiverInfo, MediaTttLogger>(
@@ -138,7 +140,9 @@ class MediaTttChipControllerReceiver @Inject constructor(
     }
 
     override fun start() {
-        commandQueue.addCallback(commandQueueCallbacks)
+        if (mediaTttFlags.isMediaTttEnabled()) {
+            commandQueue.addCallback(commandQueueCallbacks)
+        }
     }
 
     override fun updateView(newInfo: ChipReceiverInfo, currentView: ViewGroup) {
