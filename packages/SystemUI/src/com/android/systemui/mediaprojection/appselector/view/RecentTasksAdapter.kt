@@ -26,7 +26,9 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 
-class RecentTasksAdapter @AssistedInject constructor(
+class RecentTasksAdapter
+@AssistedInject
+constructor(
     @Assisted private val items: List<RecentTask>,
     @Assisted private val listener: RecentTaskClickListener,
     private val viewHolderFactory: RecentTaskViewHolder.Factory
@@ -34,8 +36,8 @@ class RecentTasksAdapter @AssistedInject constructor(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecentTaskViewHolder {
         val taskItem =
-            LayoutInflater.from(parent.context)
-                .inflate(R.layout.media_projection_task_item, null) as ViewGroup
+                LayoutInflater.from(parent.context)
+                        .inflate(R.layout.media_projection_task_item, parent, false) as ViewGroup
 
         return viewHolderFactory.create(taskItem)
     }
