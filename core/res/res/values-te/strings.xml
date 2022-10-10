@@ -499,7 +499,7 @@
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"వాల్‌పేపర్‌ను సెట్ చేయడం"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"సిస్టమ్ వాల్‌పేపర్‌ను సెట్ చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"మీ వాల్‌పేపర్ పరిమాణాన్ని సర్దుబాటు చేయడం"</string>
-    <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"సిస్టమ్ వాల్‌పేపర్ పరిమాణం సూచనలను సెట్ చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
+    <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"సిస్టమ్ వాల్‌పేపర్ సైజ్‌ సూచనలను సెట్ చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"సమయ మండలిని సెట్ చేయడం"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1788868809638682503">"టాబ్లెట్ యొక్క సమయ మండలిని మార్చడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permdesc_setTimeZone" product="tv" msgid="9069045914174455938">"మీ Android TV పరికరం సమయ మండలిని మార్చడానికి యాప్‌ని అనుమతిస్తుంది."</string>
@@ -1438,7 +1438,7 @@
     <string name="ext_media_status_ejecting" msgid="7532403368044013797">"తొలగిస్తోంది…"</string>
     <string name="ext_media_status_formatting" msgid="774148701503179906">"ఫార్మాట్ చేస్తోంది..."</string>
     <string name="ext_media_status_missing" msgid="6520746443048867314">"చొప్పించబడలేదు"</string>
-    <string name="activity_list_empty" msgid="4219430010716034252">"సరిపోలే కార్యాచరణలు కనుగొనబడలేదు."</string>
+    <string name="activity_list_empty" msgid="4219430010716034252">"మ్యాచ్ అయ్యే కార్యాచరణలు కనుగొనబడలేదు."</string>
     <string name="permlab_route_media_output" msgid="8048124531439513118">"మీడియా అవుట్‌పుట్‌ను మళ్లించడం"</string>
     <string name="permdesc_route_media_output" msgid="1759683269387729675">"మీడియా అవుట్‌పుట్‌ను ఇతర బాహ్య పరికరాలకు మళ్లించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_readInstallSessions" msgid="7279049337895583621">"ఇన్‌స్టాల్ సెషన్‌లను చదవడం"</string>
