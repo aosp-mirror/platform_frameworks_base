@@ -38,7 +38,7 @@ private const val PAGE_TITLE = "Sample page with arguments"
 private const val STRING_PARAM_TITLE = "String param value"
 private const val INT_PARAM_TITLE = "Int param value"
 private const val STRING_PARAM_NAME = "stringParam"
-private const val INT_PARAM_NAME = "intParam"
+private const val INT_PARAM_NAME = "rt_intParam"
 private val ARGUMENT_PAGE_KEYWORDS = listOf("argument keyword1", "argument keyword2")
 
 class ArgumentPageModel : PageModel() {

@@ -208,7 +208,7 @@ open class EntryProvider(spaEnvironment: SpaEnvironment) : ContentProvider() {
             cursor.newRow()
                 .add(ColumnEnum.ENTRY_ID.id, entry.id)
                 .add(ColumnEnum.ENTRY_NAME.id, entry.displayName)
-                .add(ColumnEnum.ENTRY_ROUTE.id, entry.buildRoute())
+                .add(ColumnEnum.ENTRY_ROUTE.id, entry.containerPage().buildRoute())
                 .add(ColumnEnum.ENTRY_TITLE.id, searchData?.title ?: "")
                 .add(
                     ColumnEnum.ENTRY_SEARCH_KEYWORD.id,

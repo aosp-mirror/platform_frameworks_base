@@ -34,6 +34,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.android.settingslib.spa.R
 import com.android.settingslib.spa.framework.BrowseActivity.Companion.KEY_DESTINATION
+import com.android.settingslib.spa.framework.BrowseActivity.Companion.KEY_HIGHLIGHT_ENTRY
 import com.android.settingslib.spa.framework.common.SettingsEntry
 import com.android.settingslib.spa.framework.common.SettingsPage
 import com.android.settingslib.spa.framework.common.SpaEnvironment
@@ -190,7 +191,7 @@ open class DebugActivity(private val spaEnvironment: SpaEnvironment) : Component
         RegularScaffold(title = "Entry - ${entry.displayTitle()}") {
             Preference(model = object : PreferenceModel {
                 override val title = "open entry"
-                override val enabled = (!entry.hasRuntimeParam()).toState()
+                override val enabled = (!entry.containerPage().hasRuntimeParam()).toState()
                 override val onClick = openEntry(entry)
             })
             Text(text = entryContent)
@@ -225,11 +226,12 @@ open class DebugActivity(private val spaEnvironment: SpaEnvironment) : Component
 
     @Composable
     private fun openEntry(entry: SettingsEntry): (() -> Unit)? {
-        if (entry.hasRuntimeParam()) return null
+        if (entry.containerPage().hasRuntimeParam()) return null
         val context = LocalContext.current
-        val route = entry.buildRoute()
+        val route = entry.containerPage().buildRoute()
         val intent = Intent(context, spaEnvironment.browseActivityClass).apply {
             putExtra(KEY_DESTINATION, route)
+            putExtra(KEY_HIGHLIGHT_ENTRY, entry.id)
         }
         return {
             Log.d("DEBUG ACTIVITY", "Open entry: $route")
