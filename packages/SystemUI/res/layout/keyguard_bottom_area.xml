@@ -59,7 +59,7 @@
 
     </LinearLayout>
 
-    <ImageView
+    <com.android.systemui.common.ui.view.LaunchableImageView
         android:id="@+id/start_button"
         android:layout_height="@dimen/keyguard_affordance_fixed_height"
         android:layout_width="@dimen/keyguard_affordance_fixed_width"
@@ -71,7 +71,7 @@
         android:layout_marginBottom="@dimen/keyguard_affordance_vertical_offset"
         android:visibility="gone" />
 
-    <ImageView
+    <com.android.systemui.common.ui.view.LaunchableImageView
         android:id="@+id/end_button"
         android:layout_height="@dimen/keyguard_affordance_fixed_height"
         android:layout_width="@dimen/keyguard_affordance_fixed_width"
