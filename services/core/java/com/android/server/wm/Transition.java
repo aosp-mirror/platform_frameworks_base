@@ -1561,6 +1561,10 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             if (info.mEndParent != null) {
                 change.setParent(info.mEndParent.mRemoteToken.toWindowContainerToken());
             }
+            if (info.mStartParent != null && info.mStartParent.mRemoteToken != null
+                    && target.getParent() != info.mStartParent) {
+                change.setLastParent(info.mStartParent.mRemoteToken.toWindowContainerToken());
+            }
             change.setMode(info.getTransitMode(target));
             change.setStartAbsBounds(info.mAbsoluteBounds);
             change.setFlags(info.getChangeFlags(target));
