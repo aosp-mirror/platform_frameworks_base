@@ -324,9 +324,9 @@
     <string name="do_disclosure_generic" msgid="4896482821974707167">"हे डिव्हाइस तुमच्या संस्थेचे आहे"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"हे डिव्हाइस <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> चे आहे"</string>
     <string name="do_financed_disclosure_with_name" msgid="6723004643314467864">"हे डिव्हाइस <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> द्वारे पुरवले गेले आहे"</string>
-    <string name="phone_hint" msgid="6682125338461375925">"फोनसाठी चिन्हावरून स्वाइप करा"</string>
-    <string name="voice_hint" msgid="7476017460191291417">"व्हॉइस सहाय्यासाठी चिन्हावरून स्वाइप करा"</string>
-    <string name="camera_hint" msgid="4519495795000658637">"कॅमेर्‍यासाठी चिन्हावरून स्वाइप करा"</string>
+    <string name="phone_hint" msgid="6682125338461375925">"फोनसाठी आयकनवरून स्वाइप करा"</string>
+    <string name="voice_hint" msgid="7476017460191291417">"व्हॉइस सहाय्यासाठी आयकनवरून स्वाइप करा"</string>
+    <string name="camera_hint" msgid="4519495795000658637">"कॅमेर्‍यासाठी आयकनवरून स्वाइप करा"</string>
     <string name="interruption_level_none_with_warning" msgid="8394434073508145437">"संपूर्ण शांतता. हे स्क्रीन रीडर ना देखील शांत करेल."</string>
     <string name="interruption_level_none" msgid="219484038314193379">"संपूर्ण शांतता"</string>
     <string name="interruption_level_priority" msgid="661294280016622209">"केवळ प्राधान्य"</string>
@@ -579,7 +579,7 @@
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"कीबोर्ड शॉर्टकट"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"कीबोर्ड लेआउट स्विच करा"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"ॲप्लिकेशन"</string>
-    <string name="keyboard_shortcut_group_applications_assist" msgid="771606231466098742">"सहाय्य"</string>
+    <string name="keyboard_shortcut_group_applications_assist" msgid="771606231466098742">"Assist"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"ब्राउझर"</string>
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"संपर्क"</string>
     <string name="keyboard_shortcut_group_applications_email" msgid="7852376788894975192">"ईमेल"</string>

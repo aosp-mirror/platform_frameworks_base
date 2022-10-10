@@ -1156,8 +1156,8 @@
     <string name="no" msgid="5122037903299899715">"취소"</string>
     <string name="dialog_alert_title" msgid="651856561974090712">"주의"</string>
     <string name="loading" msgid="3138021523725055037">"로드 중.."</string>
-    <string name="capital_on" msgid="2770685323900821829">"ON"</string>
-    <string name="capital_off" msgid="7443704171014626777">"OFF"</string>
+    <string name="capital_on" msgid="2770685323900821829">"사용 설정"</string>
+    <string name="capital_off" msgid="7443704171014626777">"사용 안함"</string>
     <string name="checked" msgid="9179896827054513119">"선택함"</string>
     <string name="not_checked" msgid="7972320087569023342">"선택 안함"</string>
     <string name="selected" msgid="6614607926197755875">"선택됨"</string>
@@ -1416,7 +1416,7 @@
     <string name="ext_media_unmounting_notification_title" msgid="4147986383917892162">"<xliff:g id="NAME">%s</xliff:g> 마운트 해제 중"</string>
     <string name="ext_media_unmounting_notification_message" msgid="5717036261538754203">"외부 미디어를 제거하지 마세요."</string>
     <string name="ext_media_init_action" msgid="2312974060585056709">"설정"</string>
-    <string name="ext_media_unmount_action" msgid="966992232088442745">"마운트 해제"</string>
+    <string name="ext_media_unmount_action" msgid="966992232088442745">"꺼내기"</string>
     <string name="ext_media_browse_action" msgid="344865351947079139">"둘러보기"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"출력 전환"</string>
     <string name="ext_media_missing_title" msgid="3209472091220515046">"<xliff:g id="NAME">%s</xliff:g> 없음"</string>

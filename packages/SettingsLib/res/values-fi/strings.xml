@@ -574,7 +574,7 @@
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Lisätäänkö käyttäjä nyt?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Varmista, että käyttäjä voi ottaa laitteen nyt ja määrittää oman tilansa."</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Määritetäänkö profiilin asetukset nyt?"</string>
-    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"Määritä nyt"</string>
+    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"Ota käyttöön nyt"</string>
     <string name="user_setup_button_setup_later" msgid="8712980133555493516">"Ei nyt"</string>
     <string name="user_add_user_type_title" msgid="551279664052914497">"Lisää"</string>
     <string name="user_new_user_name" msgid="60979820612818840">"Uusi käyttäjä"</string>

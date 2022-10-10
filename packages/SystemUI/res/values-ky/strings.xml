@@ -457,7 +457,7 @@
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Чалуулар менен эскертмелердин үнү чыгарылат (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"System UI Tuner"</string>
     <string name="status_bar" msgid="4357390266055077437">"Абал тилкеси"</string>
-    <string name="demo_mode" msgid="263484519766901593">"Тутум интерфейсинин демо режими"</string>
+    <string name="demo_mode" msgid="263484519766901593">"Системанын интерфейсинин демо режими"</string>
     <string name="enable_demo_mode" msgid="3180345364745966431">"Демо режимин иштетүү"</string>
     <string name="show_demo_mode" msgid="3677956462273059726">"Демо режимин көрсөтүү"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
@@ -919,7 +919,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Wi-Fi азырынча автоматтык түрдө туташпайт"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Баарын көрүү"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Башка тармактарга которулуу үчүн Ethernet кабелин ажыратыңыз"</string>
-    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Түзмөктүн колдонулушун жакшыртуу үчүн колдонмолор менен кызматтар Wi‑Fi өчүп турса да зымсыз тармактарды издей беришет. Аны Wi-Fi тармактарын издөө жөндөөлөрүнөн өзгөртө аласыз. "<annotation id="link">"Өзгөртүү"</annotation></string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Түзмөктүн иштешин жакшыртуу үчүн колдонмолор менен кызматтар Wi‑Fi өчүп турса да зымсыз тармактарды издей беришет. Издебесин десеңиз, Wi-Fi тармактарын издөө дегенди өчүрүп коюңуз. "<annotation id="link">"Өзгөртүү"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Учак режимин өчүрүү"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> төмөнкү ыкчам баскычты Ыкчам жөндөөлөргө кошкону жатат"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Ыкчам баскыч кошуу"</string>
@@ -931,7 +931,7 @@
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Жаңы маалымат"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Жигердүү колдонмолор"</string>
-    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"Бул колдонмолор жабылып турса да, активдүү болуп, иштеп турушат. Алардын функционалдуулугу жакшырат, бирок батареянын кубатынын мөөнөтүнө кедергиси тийиши мүмкүн."</string>
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"Бул колдонмолор жабылып турса да иштей беришет. Ушуну менен көбүрөөк мүмкүнчүлүктөргө ээ болгонуңуз менен, батареяңыз тез отуруп калышы мүмкүн."</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Токтотуу"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Токтотулду"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Бүттү"</string>

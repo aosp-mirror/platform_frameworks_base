@@ -234,7 +234,7 @@
     <string name="apn_settings_not_available" msgid="1147111671403342300">"Los ajustes del nombre del punto de acceso no están disponibles para este usuario"</string>
     <string name="enable_adb" msgid="8072776357237289039">"Depuración por USB"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"Activa el modo de depuración cuando el dispositivo esté conectado por USB"</string>
-    <string name="clear_adb_keys" msgid="3010148733140369917">"Revocar autorizaciones de depuración USB"</string>
+    <string name="clear_adb_keys" msgid="3010148733140369917">"Revocar autorizaciones de depuración por USB"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"Depuración inalámbrica"</string>
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Activa el modo de depuración cuando haya conexión Wi‑Fi"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"Error"</string>

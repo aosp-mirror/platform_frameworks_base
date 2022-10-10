@@ -305,7 +305,7 @@
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"অৱলোকন ট’গল কৰক"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"আপুনি নিৰ্দিষ্ট কৰা এলাৰ্ম, ৰিমাইণ্ডাৰ, ইভেন্ট আৰু কল কৰোঁতাৰ বাহিৰে আন কোনো শব্দৰ পৰা আপুনি অসুবিধা নাপাব। কিন্তু, সংগীত, ভিডিঅ\' আৰু খেলসমূহকে ধৰি আপুনি প্লে কৰিব খোজা যিকোনো বস্তু তথাপি শুনিব পাৰিব।"</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"আপুনি নিৰ্দিষ্ট কৰা এলাৰ্মৰ বাহিৰে আন কোনো ধ্বনি আৰু কম্পনৰ পৰা আপুনি অসুবিধা নাপাব। কিন্তু, সংগীত, ভিডিঅ\' আৰু খেলসমূহকে ধৰি আপুনি প্লে কৰিব খোজা যিকোনো বস্তু তথাপি শুনিব পাৰিব।"</string>
-    <string name="zen_priority_customize_button" msgid="4119213187257195047">"নিজৰ উপযোগিতা অনুসৰি"</string>
+    <string name="zen_priority_customize_button" msgid="4119213187257195047">"কাষ্টমাইজ কৰক"</string>
     <string name="zen_silence_introduction_voice" msgid="853573681302712348">"এই কার্যই এলার্ম, সংগীত, ভিডিঅ\' আৰু খেলসমূহকে ধৰি আটাইবোৰৰ বাবে ধ্বনি আৰু কম্পন অৱৰোধ কৰিব। আপুনি ফ\'ন কল তথাপি কৰিবলৈ সক্ষম হ\'ব।"</string>
     <string name="zen_silence_introduction" msgid="6117517737057344014">"এই কার্যই এলার্ম, মিউজিক, ভিডিঅ\' আৰু গেইমকে ধৰি আটাইবোৰৰ ধ্বনি আৰু কম্পন অৱৰোধ কৰে।"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"খুলিবলৈ পুনৰাই টিপক"</string>
@@ -526,7 +526,7 @@
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ জাননী নিয়ন্ত্ৰণসমূহ খোলা অৱস্থাত আছে"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="1561909368876911701">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ জাননী নিয়ন্ত্ৰণসমূহ বন্ধ অৱস্থাত আছে"</string>
     <string name="notification_more_settings" msgid="4936228656989201793">"অধিক ছেটিং"</string>
-    <string name="notification_app_settings" msgid="8963648463858039377">"নিজৰ উপযোগিতা অনুসৰি"</string>
+    <string name="notification_app_settings" msgid="8963648463858039377">"কাষ্টমাইজ কৰক"</string>
     <string name="notification_conversation_bubble" msgid="2242180995373949022">"বাবল হিচাপে দেখুৱাওক"</string>
     <string name="notification_conversation_unbubble" msgid="6908427185031099868">"Bubbles আঁতৰাওক"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
@@ -672,7 +672,7 @@
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"আপোনাৰ ফ\'নটোৱে নিজে নিজে ঠাণ্ডা হ\'বলৈ স্বয়ংক্ৰিয়ভাৱে চেষ্টা কৰিব। আপুনি ফ\'নটো ব্যৱহাৰ কৰি থাকিব পাৰে কিন্তু ই লাহে লাহে চলিব পাৰে।\n\nফ\'নটো সম্পূৰ্ণভাৱে ঠাণ্ডা হোৱাৰ পিছত ই আগৰ নিচিনাকৈয়েই চলিব।"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"যত্ন লোৱাৰ পদক্ষেপসমূহ চাওক"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"চ্চার্জাৰ আনপ্লাগ কৰক"</string>
-    <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"এই ডিভাইচটো চ্চার্জ কৰোঁতে কিবা সমস্যা হৈছে। পাৱাৰ এডাপ্টাৰটো আনপ্লাগ কৰক, কেব’লডাল গৰম হ’ব পাৰে গতিকে সাবধান হ’ব।"</string>
+    <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"এই ডিভাইচটো চাৰ্জ কৰোঁতে কিবা সমস্যা হৈছে। পাৱাৰ এডাপ্টাৰটো আনপ্লাগ কৰক আৰু কে’বলডাল গৰম হ’ব পাৰে; গতিকে সাবধান হ’ব।"</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"যত্ন লোৱাৰ পদক্ষেপসমূহ চাওক"</string>
     <string name="lockscreen_shortcut_left" msgid="1238765178956067599">"বাওঁ শ্বৰ্টকাট"</string>
     <string name="lockscreen_shortcut_right" msgid="4138414674531853719">"সোঁ শ্বৰ্টকাট"</string>

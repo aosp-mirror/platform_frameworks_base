@@ -5797,6 +5797,11 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             final Computer snapshot = snapshotComputer();
             enforceOwnerRights(snapshot, packageName, Binder.getCallingUid());
             mimeTypes = CollectionUtils.emptyIfNull(mimeTypes);
+            for (String mimeType : mimeTypes) {
+                if (mimeType.length() > 255) {
+                    throw new IllegalArgumentException("MIME type length exceeds 255 characters");
+                }
+            }
             final PackageStateInternal packageState = snapshot.getPackageStateInternal(packageName);
             Set<String> existingMimeTypes = packageState.getMimeGroups().get(mimeGroup);
             if (existingMimeTypes == null) {
@@ -5806,6 +5811,10 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             if (existingMimeTypes.size() == mimeTypes.size()
                     && existingMimeTypes.containsAll(mimeTypes)) {
                 return;
+            }
+            if (mimeTypes.size() > 500) {
+                throw new IllegalStateException("Max limit on MIME types for MIME group "
+                        + mimeGroup + " exceeded for package " + packageName);
             }
 
             ArraySet<String> mimeTypesSet = new ArraySet<>(mimeTypes);
