@@ -32,16 +32,18 @@ import java.util.concurrent.Executor
 
 class FakeBroadcastDispatcher(
     context: SysuiTestableContext,
-    looper: Looper,
-    executor: Executor,
+    mainExecutor: Executor,
+    broadcastRunningLooper: Looper,
+    broadcastRunningExecutor: Executor,
     dumpManager: DumpManager,
     logger: BroadcastDispatcherLogger,
     userTracker: UserTracker
 ) :
     BroadcastDispatcher(
         context,
-        looper,
-        executor,
+        mainExecutor,
+        broadcastRunningLooper,
+        broadcastRunningExecutor,
         dumpManager,
         logger,
         userTracker,
