@@ -128,7 +128,8 @@ public final class UserTypeFactory {
                 .setIsCredentialSharableWithParent(true)
                 .setDefaultUserProperties(new UserProperties.Builder()
                         .setStartWithParent(true)
-                        .setShowInLauncher(UserProperties.SHOW_IN_LAUNCHER_WITH_PARENT));
+                        .setShowInLauncher(UserProperties.SHOW_IN_LAUNCHER_WITH_PARENT)
+                        .setShowInSettings(UserProperties.SHOW_IN_SETTINGS_WITH_PARENT));
     }
 
     /**
@@ -163,7 +164,8 @@ public final class UserTypeFactory {
                 .setIsCredentialSharableWithParent(true)
                 .setDefaultUserProperties(new UserProperties.Builder()
                         .setStartWithParent(true)
-                        .setShowInLauncher(UserProperties.SHOW_IN_LAUNCHER_SEPARATE));
+                        .setShowInLauncher(UserProperties.SHOW_IN_LAUNCHER_SEPARATE)
+                        .setShowInSettings(UserProperties.SHOW_IN_SETTINGS_SEPARATE));
     }
 
     /**
