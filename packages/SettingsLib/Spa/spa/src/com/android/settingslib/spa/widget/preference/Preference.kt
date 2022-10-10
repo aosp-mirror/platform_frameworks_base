@@ -101,7 +101,10 @@ interface PreferenceModel {
  * Data is provided through [PreferenceModel].
  */
 @Composable
-fun Preference(model: PreferenceModel) {
+fun Preference(
+    model: PreferenceModel,
+    singleLineSummary: Boolean = false,
+) {
     val modifier = remember(model.enabled.value, model.onClick) {
         model.onClick?.let { onClick ->
             Modifier.clickable(enabled = model.enabled.value, onClick = onClick)
@@ -110,6 +113,7 @@ fun Preference(model: PreferenceModel) {
     BasePreference(
         title = model.title,
         summary = model.summary,
+        singleLineSummary = singleLineSummary,
         modifier = modifier,
         icon = model.icon,
         enabled = model.enabled,
