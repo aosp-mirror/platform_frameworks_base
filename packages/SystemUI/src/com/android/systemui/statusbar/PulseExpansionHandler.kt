@@ -39,6 +39,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.shade.ShadeExpansionStateManager
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
@@ -68,6 +69,7 @@ constructor(
     configurationController: ConfigurationController,
     private val statusBarStateController: StatusBarStateController,
     private val falsingManager: FalsingManager,
+    shadeExpansionStateManager: ShadeExpansionStateManager,
     private val lockscreenShadeTransitionController: LockscreenShadeTransitionController,
     private val falsingCollector: FalsingCollector,
     dumpManager: DumpManager
@@ -126,6 +128,13 @@ constructor(
                 initResources(context)
             }
         })
+
+        shadeExpansionStateManager.addQsExpansionListener { isQsExpanded ->
+            if (qsExpanded != isQsExpanded) {
+                qsExpanded = isQsExpanded
+            }
+        }
+
         mPowerManager = context.getSystemService(PowerManager::class.java)
         dumpManager.registerDumpable(this)
     }

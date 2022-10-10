@@ -92,9 +92,6 @@ public interface NotificationShadeWindowController extends RemoteInputController
     /** Sets the state of whether the keyguard is fading away or not. */
     default void setKeyguardFadingAway(boolean keyguardFadingAway) {}
 
-    /** Sets the state of whether the quick settings is expanded or not. */
-    default void setQsExpanded(boolean expanded) {}
-
     /** Sets the state of whether the user activities are forced or not. */
     default void setForceUserActivity(boolean forceUserActivity) {}
 
