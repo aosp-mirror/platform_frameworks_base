@@ -203,7 +203,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         if (DEBUG) {
             Log.d(TAG, "onBackInvokedCallback() called, invoking onBackPressed()");
         }
-        onBackPressed(false /* unused */);
+        onBackPressed();
     };
     private boolean mIsBackCallbackRegistered = false;
 
@@ -1098,16 +1098,9 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     /**
      * Notifies this manager that the back button has been pressed.
      */
-    // TODO(b/244635782): This "accept boolean and ignore it, and always return false" was done
-    //                    to make it possible to check this in *and* allow merging to master,
-    //                    where ArcStatusBarKeyguardViewManager inherits this class, and its
-    //                    build will break if we change this interface.
-    //                    So, overall, while this function refactors the behavior of onBackPressed,
-    //                    (it now handles the back press, and no longer returns *whether* it did so)
-    //                    its interface is not changing right now (but will, in a follow-up CL).
-    public boolean onBackPressed(boolean ignored) {
+    public void onBackPressed() {
         if (!canHandleBackPressed()) {
-            return false;
+            return;
         }
 
         mCentralSurfaces.endAffordanceLaunch();
@@ -1128,7 +1121,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                 mNotificationPanelViewController.expandWithoutQs();
             }
         }
-        return false;
+        return;
     }
 
     @Override
