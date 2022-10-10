@@ -48,7 +48,6 @@ android_test {
         "ShortcutManagerTestUtils",
         "truth-prebuilt",
         "testables",
-        "testng",
         "ub-uiautomator",
         "platformprotosnano",
         "framework-protos",
@@ -60,6 +59,7 @@ android_test {
         // which provides assertThrows
         "testng",
         "junit",
+        "junit-params",
         "platform-compat-test-rules",
         "ActivityContext",
         "coretests-aidl",
