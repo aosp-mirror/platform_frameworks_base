@@ -28,6 +28,7 @@ import android.os.Handler;
 import android.view.Choreographer;
 import android.view.SurfaceControl;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.window.WindowContainerTransaction;
 
 import com.android.wm.shell.R;
@@ -55,6 +56,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
     // Height of button (32dp)  + 2 * margin (5dp each)
     private static final int DECOR_CAPTION_HEIGHT_IN_DIP = 42;
     private static final int RESIZE_HANDLE_IN_DIP = 30;
+    private static final int RESIZE_CORNER_IN_DIP = 44;
 
     private static final Rect EMPTY_OUTSET = new Rect();
     private static final Rect RESIZE_HANDLE_OUTSET = new Rect(
@@ -145,16 +147,19 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         if (oldDecorationSurface != mDecorationContainerSurface || mDragResizeListener == null) {
             closeDragResizeListener();
             mDragResizeListener = new DragResizeInputListener(
-                    mContext,
-                    mHandler,
-                    mChoreographer,
-                    mDisplay.getDisplayId(),
-                    mDecorationContainerSurface,
-                    mDragResizeCallback);
+                        mContext,
+                        mHandler,
+                        mChoreographer,
+                        mDisplay.getDisplayId(),
+                        mDecorationContainerSurface,
+                        mDragResizeCallback);
         }
 
+        int touchSlop = ViewConfiguration.get(mResult.mRootView.getContext()).getScaledTouchSlop();
+
         mDragResizeListener.setGeometry(
-                mResult.mWidth, mResult.mHeight, (int) (mResult.mDensity * RESIZE_HANDLE_IN_DIP));
+                mResult.mWidth, mResult.mHeight, (int) (mResult.mDensity * RESIZE_HANDLE_IN_DIP),
+                (int) (mResult.mDensity * RESIZE_CORNER_IN_DIP), touchSlop);
     }
 
     /**

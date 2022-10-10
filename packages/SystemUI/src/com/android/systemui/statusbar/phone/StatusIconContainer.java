@@ -337,7 +337,7 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
             // without cutting off the child view.
             translationX -= getViewTotalWidth(child);
             childState.visibleState = STATE_ICON;
-            childState.xTranslation = translationX;
+            childState.setXTranslation(translationX);
             mLayoutStates.add(0, childState);
 
             // Shift translationX over by mIconSpacing for the next view.
@@ -354,13 +354,13 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
         for (int i = totalVisible - 1; i >= 0; i--) {
             StatusIconState state = mLayoutStates.get(i);
             // Allow room for underflow if we found we need it in onMeasure
-            if (mNeedsUnderflow && (state.xTranslation < (contentStart + mUnderflowWidth))||
-                    (mShouldRestrictIcons && visible >= maxVisible)) {
+            if (mNeedsUnderflow && (state.getXTranslation() < (contentStart + mUnderflowWidth))
+                    || (mShouldRestrictIcons && (visible >= maxVisible))) {
                 firstUnderflowIndex = i;
                 break;
             }
             mUnderflowStart = (int) Math.max(
-                    contentStart, state.xTranslation - mUnderflowWidth - mIconSpacing);
+                    contentStart, state.getXTranslation() - mUnderflowWidth - mIconSpacing);
             visible++;
         }
 
@@ -371,7 +371,7 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
             for (int i = firstUnderflowIndex; i >= 0; i--) {
                 StatusIconState state = mLayoutStates.get(i);
                 if (totalDots < MAX_DOTS) {
-                    state.xTranslation = dotOffset;
+                    state.setXTranslation(dotOffset);
                     state.visibleState = STATE_DOT;
                     dotOffset -= dotWidth;
                     totalDots++;
@@ -386,7 +386,7 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
             for (int i = 0; i < childCount; i++) {
                 View child = getChildAt(i);
                 StatusIconState state = getViewStateFromChild(child);
-                state.xTranslation = width - state.xTranslation - child.getWidth();
+                state.setXTranslation(width - state.getXTranslation() - child.getWidth());
             }
         }
     }
@@ -410,7 +410,7 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
             }
 
             vs.initFrom(child);
-            vs.alpha = 1.0f;
+            vs.setAlpha(1.0f);
             vs.hidden = false;
         }
     }
@@ -442,7 +442,7 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
                 parentWidth = ((View) view.getParent()).getWidth();
             }
 
-            float currentDistanceToEnd = parentWidth - xTranslation;
+            float currentDistanceToEnd = parentWidth - getXTranslation();
 
             if (!(view instanceof StatusIconDisplayable)) {
                 return;

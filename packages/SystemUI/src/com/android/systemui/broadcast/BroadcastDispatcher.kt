@@ -34,7 +34,8 @@ import com.android.systemui.broadcast.logging.BroadcastDispatcherLogger
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dagger.qualifiers.BroadcastRunning
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.settings.UserTracker
 import java.io.PrintWriter
@@ -55,7 +56,6 @@ private const val MSG_ADD_RECEIVER = 0
 private const val MSG_REMOVE_RECEIVER = 1
 private const val MSG_REMOVE_RECEIVER_FOR_USER = 2
 private const val TAG = "BroadcastDispatcher"
-private const val DEBUG = true
 
 /**
  * SystemUI master Broadcast Dispatcher.
@@ -73,15 +73,16 @@ private const val DEBUG = true
 @SysUISingleton
 open class BroadcastDispatcher @Inject constructor(
     private val context: Context,
-    @Background private val bgLooper: Looper,
-    @Background private val bgExecutor: Executor,
+    @Main private val mainExecutor: Executor,
+    @BroadcastRunning private val broadcastLooper: Looper,
+    @BroadcastRunning private val broadcastExecutor: Executor,
     private val dumpManager: DumpManager,
     private val logger: BroadcastDispatcherLogger,
     private val userTracker: UserTracker,
     private val removalPendingStore: PendingRemovalStore
 ) : Dumpable {
 
-    // Only modify in BG thread
+    // Only modify in BroadcastRunning thread
     private val receiversByUser = SparseArray<UserBroadcastDispatcher>(20)
 
     fun initialize() {
@@ -148,7 +149,7 @@ open class BroadcastDispatcher @Inject constructor(
         val data = ReceiverData(
                 receiver,
                 filter,
-                executor ?: context.mainExecutor,
+                executor ?: mainExecutor,
                 user ?: context.user,
                 permission
             )
@@ -181,7 +182,7 @@ open class BroadcastDispatcher @Inject constructor(
         registerReceiver(
             receiver,
             filter,
-            bgExecutor,
+            broadcastExecutor,
             user,
             flags,
             permission,
@@ -246,8 +247,8 @@ open class BroadcastDispatcher @Inject constructor(
             UserBroadcastDispatcher(
                 context,
                 userId,
-                bgLooper,
-                bgExecutor,
+                broadcastLooper,
+                broadcastExecutor,
                 logger,
                 removalPendingStore
             )
@@ -265,7 +266,7 @@ open class BroadcastDispatcher @Inject constructor(
         ipw.decreaseIndent()
     }
 
-    private val handler = object : Handler(bgLooper) {
+    private val handler = object : Handler(broadcastLooper) {
 
         override fun handleMessage(msg: Message) {
             when (msg.what) {
