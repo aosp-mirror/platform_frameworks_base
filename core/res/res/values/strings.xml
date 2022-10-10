@@ -1300,6 +1300,11 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE] -->
     <string name="permdesc_recordBackgroundAudio">This app can record audio using the microphone at any time.</string>
 
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=NONE] -->
+    <string name="permlab_detectScreenCapture">detect screen captures of app windows</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this.[CHAR_LIMIT=NONE] -->
+    <string name="permdesc_detectScreenCapture">This app will get notified when a screenshot is taken while the app is in use.</string>
+
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_sim_communication">send commands to the SIM</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->

@@ -83,6 +83,7 @@ package android {
     field public static final String DELETE_CACHE_FILES = "android.permission.DELETE_CACHE_FILES";
     field public static final String DELETE_PACKAGES = "android.permission.DELETE_PACKAGES";
     field public static final String DELIVER_COMPANION_MESSAGES = "android.permission.DELIVER_COMPANION_MESSAGES";
+    field public static final String DETECT_SCREEN_CAPTURE = "android.permission.DETECT_SCREEN_CAPTURE";
     field public static final String DIAGNOSTIC = "android.permission.DIAGNOSTIC";
     field public static final String DISABLE_KEYGUARD = "android.permission.DISABLE_KEYGUARD";
     field public static final String DUMP = "android.permission.DUMP";
