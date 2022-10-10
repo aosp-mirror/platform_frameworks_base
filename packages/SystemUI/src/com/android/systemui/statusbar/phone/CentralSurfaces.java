@@ -416,6 +416,9 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
 
     void endAffordanceLaunch();
 
+    /** Should the keyguard be hidden immediately in response to a back press/gesture. */
+    boolean shouldKeyguardHideImmediately();
+
     boolean onBackPressed();
 
     boolean onSpacePressed();
