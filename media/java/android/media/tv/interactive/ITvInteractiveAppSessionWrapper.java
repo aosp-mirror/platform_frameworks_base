@@ -81,6 +81,7 @@ public class ITvInteractiveAppSessionWrapper
     private static final int DO_CREATE_MEDIA_VIEW = 27;
     private static final int DO_RELAYOUT_MEDIA_VIEW = 28;
     private static final int DO_REMOVE_MEDIA_VIEW = 29;
+    private static final int DO_NOTIFY_RECORDING_STARTED = 30;
 
     private final HandlerCaller mCaller;
     private Session mSessionImpl;
@@ -162,6 +163,10 @@ public class ITvInteractiveAppSessionWrapper
             }
             case DO_SEND_CURRENT_TV_INPUT_ID: {
                 mSessionImpl.sendCurrentTvInputId((String) msg.obj);
+                break;
+            }
+            case DO_NOTIFY_RECORDING_STARTED: {
+                mSessionImpl.notifyRecordingStarted((String) msg.obj);
                 break;
             }
             case DO_SEND_SIGNING_RESULT: {
@@ -378,6 +383,12 @@ public class ITvInteractiveAppSessionWrapper
     @Override
     public void notifySignalStrength(int strength) {
         mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_NOTIFY_SIGNAL_STRENGTH, strength));
+    }
+
+    @Override
+    public void notifyRecordingStarted(String recordingId) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageO(
+                DO_NOTIFY_RECORDING_STARTED, recordingId));
     }
 
     @Override
