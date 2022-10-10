@@ -16,15 +16,17 @@
 
 package com.android.systemui.mediaprojection.appselector.view
 
+import android.graphics.Rect
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.android.systemui.R
-import com.android.systemui.media.dagger.MediaProjectionAppSelector
+import com.android.systemui.mediaprojection.appselector.MediaProjectionAppSelector
 import com.android.systemui.mediaprojection.appselector.data.AppIconLoader
 import com.android.systemui.mediaprojection.appselector.data.RecentTask
 import com.android.systemui.mediaprojection.appselector.data.RecentTaskThumbnailLoader
+import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -32,19 +34,27 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
-class RecentTaskViewHolder @AssistedInject constructor(
-    @Assisted root: ViewGroup,
+class RecentTaskViewHolder
+@AssistedInject
+constructor(
+    @Assisted private val root: ViewGroup,
     private val iconLoader: AppIconLoader,
     private val thumbnailLoader: RecentTaskThumbnailLoader,
+    private val taskViewSizeProvider: TaskPreviewSizeProvider,
     @MediaProjectionAppSelector private val scope: CoroutineScope
-) : RecyclerView.ViewHolder(root) {
+) : RecyclerView.ViewHolder(root), ConfigurationListener, TaskPreviewSizeProvider.TaskPreviewSizeListener {
 
+    val thumbnailView: MediaProjectionTaskView = root.requireViewById(R.id.task_thumbnail)
     private val iconView: ImageView = root.requireViewById(R.id.task_icon)
-    private val thumbnailView: ImageView = root.requireViewById(R.id.task_thumbnail)
 
     private var job: Job? = null
 
+    init {
+        updateThumbnailSize()
+    }
+
     fun bind(task: RecentTask, onClick: (View) -> Unit) {
+        taskViewSizeProvider.addCallback(this)
         job?.cancel()
 
         job =
@@ -57,18 +67,31 @@ class RecentTaskViewHolder @AssistedInject constructor(
                 }
                 launch {
                     val thumbnail = thumbnailLoader.loadThumbnail(task.taskId)
-                    thumbnailView.setImageBitmap(thumbnail?.thumbnail)
+                    thumbnailView.bindTask(task, thumbnail)
                 }
             }
 
-        thumbnailView.setOnClickListener(onClick)
+        root.setOnClickListener(onClick)
     }
 
     fun onRecycled() {
+        taskViewSizeProvider.removeCallback(this)
         iconView.setImageDrawable(null)
-        thumbnailView.setImageBitmap(null)
+        thumbnailView.bindTask(null, null)
         job?.cancel()
         job = null
+    }
+
+    override fun onTaskSizeChanged(size: Rect) {
+        updateThumbnailSize()
+    }
+
+    private fun updateThumbnailSize() {
+        thumbnailView.layoutParams =
+                thumbnailView.layoutParams.apply {
+                    width = taskViewSizeProvider.size.width()
+                    height = taskViewSizeProvider.size.height()
+                }
     }
 
     @AssistedFactory

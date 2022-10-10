@@ -3188,7 +3188,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     private boolean shouldHunAppearFromBottom(ExpandableViewState viewState) {
-        return viewState.yTranslation + viewState.height
+        return viewState.getYTranslation() + viewState.height
                 >= mAmbientState.getMaxHeadsUpTranslation();
     }
 

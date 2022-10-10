@@ -84,9 +84,14 @@ public abstract class SysuiTestCase {
         initializer.init(true);
         mDependency = new TestableDependency(initializer.getSysUIComponent().createDependency());
         Dependency.setInstance(mDependency);
-        mFakeBroadcastDispatcher = new FakeBroadcastDispatcher(mContext, mock(Looper.class),
-                mock(Executor.class), mock(DumpManager.class),
-                mock(BroadcastDispatcherLogger.class), mock(UserTracker.class));
+        mFakeBroadcastDispatcher = new FakeBroadcastDispatcher(
+                mContext,
+                mContext.getMainExecutor(),
+                mock(Looper.class),
+                mock(Executor.class),
+                mock(DumpManager.class),
+                mock(BroadcastDispatcherLogger.class),
+                mock(UserTracker.class));
 
         mRealInstrumentation = InstrumentationRegistry.getInstrumentation();
         Instrumentation inst = spy(mRealInstrumentation);
