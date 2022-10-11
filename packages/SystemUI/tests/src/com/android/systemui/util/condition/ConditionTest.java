@@ -133,4 +133,12 @@ public class ConditionTest extends SysuiTestCase {
         mCondition.fakeUpdateCondition(false);
         verify(callback, never()).onConditionChanged(eq(mCondition));
     }
+
+    @Test
+    public void clearCondition_reportsNotSet() {
+        mCondition.fakeUpdateCondition(false);
+        assertThat(mCondition.isConditionSet()).isTrue();
+        mCondition.clearCondition();
+        assertThat(mCondition.isConditionSet()).isFalse();
+    }
 }

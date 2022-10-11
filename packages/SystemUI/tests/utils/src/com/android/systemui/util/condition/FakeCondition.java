@@ -21,6 +21,14 @@ package com.android.systemui.util.condition;
  * condition fulfillment.
  */
 public class FakeCondition extends Condition {
+    FakeCondition() {
+        super();
+    }
+
+    FakeCondition(Boolean initialValue, Boolean overriding) {
+        super(initialValue, overriding);
+    }
+
     @Override
     public void start() {}
 
