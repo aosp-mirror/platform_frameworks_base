@@ -105,11 +105,14 @@ public class KeyguardClockSwitch extends RelativeLayout {
         }
 
         // Attach small and big clock views to hierarchy.
+        Log.i(TAG, "Attached new clock views to switch");
         mSmallClockFrame.addView(clock.getSmallClock().getView());
         mLargeClockFrame.addView(clock.getLargeClock().getView());
     }
 
     private void updateClockViews(boolean useLargeClock, boolean animate) {
+        Log.i(TAG, "updateClockViews; useLargeClock=" + useLargeClock + "; animate=" + animate
+                + "; mChildrenAreLaidOut=" + mChildrenAreLaidOut);
         if (mClockInAnim != null) mClockInAnim.cancel();
         if (mClockOutAnim != null) mClockOutAnim.cancel();
         if (mStatusAreaAnim != null) mStatusAreaAnim.cancel();

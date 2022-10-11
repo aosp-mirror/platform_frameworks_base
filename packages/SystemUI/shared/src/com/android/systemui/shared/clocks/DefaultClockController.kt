@@ -225,7 +225,13 @@ class DefaultClockController(
         }
     }
 
-    override fun dump(pw: PrintWriter) = clocks.forEach { it.dump(pw) }
+    override fun dump(pw: PrintWriter) {
+        pw.print("smallClock=")
+        smallClock.view.dump(pw)
+
+        pw.print("largeClock=")
+        largeClock.view.dump(pw)
+    }
 
     companion object {
         @VisibleForTesting const val DOZE_COLOR = Color.WHITE
