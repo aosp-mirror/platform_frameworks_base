@@ -27,6 +27,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -129,19 +130,43 @@ public class DisplayManagerServiceTest {
                 }
 
                 @Override
+                LocalDisplayAdapter getLocalDisplayAdapter(SyncRoot syncRoot, Context context,
+                        Handler handler, DisplayAdapter.Listener displayAdapterListener) {
+                    return new LocalDisplayAdapter(syncRoot, context, handler,
+                            displayAdapterListener, new LocalDisplayAdapter.Injector() {
+                        @Override
+                        public LocalDisplayAdapter.SurfaceControlProxy getSurfaceControlProxy() {
+                            return mSurfaceControlProxy;
+                        }
+                    });
+                }
+
+                @Override
                 long getDefaultDisplayDelayTimeout() {
                     return SHORT_DEFAULT_DISPLAY_TIMEOUT_MILLIS;
                 }
             };
 
-    class BasicInjector extends DisplayManagerService.Injector {
-        @Override
-        VirtualDisplayAdapter getVirtualDisplayAdapter(SyncRoot syncRoot, Context context,
-                Handler handler, DisplayAdapter.Listener displayAdapterListener) {
-            return new VirtualDisplayAdapter(syncRoot, context, handler, displayAdapterListener,
-                    (String name, boolean secure) -> mMockDisplayToken);
-        }
-    }
+   class BasicInjector extends DisplayManagerService.Injector {
+       @Override
+       VirtualDisplayAdapter getVirtualDisplayAdapter(SyncRoot syncRoot, Context context,
+               Handler handler, DisplayAdapter.Listener displayAdapterListener) {
+           return new VirtualDisplayAdapter(syncRoot, context, handler, displayAdapterListener,
+                   (String name, boolean secure) -> mMockDisplayToken);
+       }
+
+       @Override
+       LocalDisplayAdapter getLocalDisplayAdapter(SyncRoot syncRoot, Context context,
+               Handler handler, DisplayAdapter.Listener displayAdapterListener) {
+           return new LocalDisplayAdapter(syncRoot, context, handler,
+                   displayAdapterListener, new LocalDisplayAdapter.Injector() {
+               @Override
+               public LocalDisplayAdapter.SurfaceControlProxy getSurfaceControlProxy() {
+                   return mSurfaceControlProxy;
+               }
+           });
+       }
+   }
 
     private final DisplayManagerService.Injector mBasicInjector = new BasicInjector();
 
@@ -168,6 +193,7 @@ public class DisplayManagerServiceTest {
     @Mock WindowManagerInternal mMockWindowManagerInternal;
     @Mock LightsManager mMockLightsManager;
     @Mock VirtualDisplayAdapter mMockVirtualDisplayAdapter;
+    @Mock LocalDisplayAdapter.SurfaceControlProxy mSurfaceControlProxy;
     @Mock IBinder mMockDisplayToken;
     @Mock SensorManagerInternal mMockSensorManagerInternal;
 
@@ -191,6 +217,28 @@ public class DisplayManagerServiceTest {
 
         // Disable binder caches in this process.
         PropertyInvalidatedCache.disableForTestMode();
+        setUpDisplay();
+    }
+
+    private void setUpDisplay() {
+        long[] ids = new long[] {100};
+        when(mSurfaceControlProxy.getPhysicalDisplayIds()).thenReturn(ids);
+        when(mSurfaceControlProxy.getPhysicalDisplayToken(anyLong()))
+                .thenReturn(mMockDisplayToken);
+        SurfaceControl.StaticDisplayInfo staticDisplayInfo = new SurfaceControl.StaticDisplayInfo();
+        staticDisplayInfo.isInternal = true;
+        when(mSurfaceControlProxy.getStaticDisplayInfo(mMockDisplayToken))
+                .thenReturn(staticDisplayInfo);
+        SurfaceControl.DynamicDisplayInfo dynamicDisplayMode =
+                new SurfaceControl.DynamicDisplayInfo();
+        SurfaceControl.DisplayMode displayMode = new SurfaceControl.DisplayMode();
+        displayMode.width = 100;
+        displayMode.height = 200;
+        dynamicDisplayMode.supportedDisplayModes = new SurfaceControl.DisplayMode[] {displayMode};
+        when(mSurfaceControlProxy.getDynamicDisplayInfo(mMockDisplayToken))
+                .thenReturn(dynamicDisplayMode);
+        when(mSurfaceControlProxy.getDesiredDisplayModeSpecs(mMockDisplayToken))
+                .thenReturn(new SurfaceControl.DesiredDisplayModeSpecs());
     }
 
     @Test

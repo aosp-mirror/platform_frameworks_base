@@ -886,34 +886,6 @@ static void nativeSetDestinationFrame(JNIEnv* env, jclass clazz, jlong transacti
     transaction->setDestinationFrame(ctrl, crop);
 }
 
-static jlongArray nativeGetPhysicalDisplayIds(JNIEnv* env, jclass clazz) {
-    const auto displayIds = SurfaceComposerClient::getPhysicalDisplayIds();
-    jlongArray array = env->NewLongArray(displayIds.size());
-    if (array == nullptr) {
-        jniThrowException(env, "java/lang/OutOfMemoryError", nullptr);
-        return nullptr;
-    }
-
-    if (displayIds.empty()) {
-        return array;
-    }
-
-    jlong* values = env->GetLongArrayElements(array, 0);
-    for (size_t i = 0; i < displayIds.size(); ++i) {
-        values[i] = static_cast<jlong>(displayIds[i].value);
-    }
-
-    env->ReleaseLongArrayElements(array, values, 0);
-    return array;
-}
-
-static jobject nativeGetPhysicalDisplayToken(JNIEnv* env, jclass clazz, jlong physicalDisplayId) {
-    const auto id = DisplayId::fromValue<PhysicalDisplayId>(physicalDisplayId);
-    if (!id) return nullptr;
-    sp<IBinder> token = SurfaceComposerClient::getPhysicalDisplayToken(*id);
-    return javaObjectForIBinder(env, token);
-}
-
 static jobject nativeGetDisplayedContentSamplingAttributes(JNIEnv* env, jclass clazz,
         jobject tokenObj) {
     sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
@@ -1992,10 +1964,6 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetFrameRate },
     {"nativeSetDefaultFrameRateCompatibility", "(JJI)V",
             (void*)nativeSetDefaultFrameRateCompatibility},
-    {"nativeGetPhysicalDisplayIds", "()[J",
-            (void*)nativeGetPhysicalDisplayIds },
-    {"nativeGetPhysicalDisplayToken", "(J)Landroid/os/IBinder;",
-            (void*)nativeGetPhysicalDisplayToken },
     {"nativeSetDisplaySurface", "(JLandroid/os/IBinder;J)V",
             (void*)nativeSetDisplaySurface },
     {"nativeSetDisplayLayerStack", "(JLandroid/os/IBinder;I)V",

@@ -55,6 +55,28 @@ static void nativeOverrideHdrTypes(JNIEnv* env, jclass clazz, jobject tokenObjec
     }
 }
 
+static jlongArray nativeGetPhysicalDisplayIds(JNIEnv* env, jclass clazz) {
+    const auto displayIds = SurfaceComposerClient::getPhysicalDisplayIds();
+    ScopedLongArrayRW values(env, env->NewLongArray(displayIds.size()));
+    if (values.get() == nullptr) {
+        jniThrowException(env, "java/lang/OutOfMemoryError", nullptr);
+        return nullptr;
+    }
+
+    for (size_t i = 0; i < displayIds.size(); ++i) {
+        values[i] = static_cast<jlong>(displayIds[i].value);
+    }
+
+    return values.getJavaArray();
+}
+
+static jobject nativeGetPhysicalDisplayToken(JNIEnv* env, jclass clazz, jlong physicalDisplayId) {
+    const auto id = DisplayId::fromValue<PhysicalDisplayId>(physicalDisplayId);
+    if (!id) return nullptr;
+    sp<IBinder> token = SurfaceComposerClient::getPhysicalDisplayToken(*id);
+    return javaObjectForIBinder(env, token);
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod sDisplayMethods[] = {
@@ -65,6 +87,10 @@ static const JNINativeMethod sDisplayMethods[] = {
             (void*)nativeDestroyDisplay },
     {"nativeOverrideHdrTypes", "(Landroid/os/IBinder;[I)V",
                 (void*)nativeOverrideHdrTypes },
+    {"nativeGetPhysicalDisplayIds", "()[J",
+            (void*)nativeGetPhysicalDisplayIds },
+    {"nativeGetPhysicalDisplayToken", "(J)Landroid/os/IBinder;",
+            (void*)nativeGetPhysicalDisplayToken },
         // clang-format on
 };
 
