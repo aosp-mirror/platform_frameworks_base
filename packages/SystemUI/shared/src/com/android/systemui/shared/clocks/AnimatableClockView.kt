@@ -58,6 +58,7 @@ class AnimatableClockView @JvmOverloads constructor(
     private var lastOnTextChanged: CharSequence? = null
     private var lastInvalidate: CharSequence? = null
     private var lastTimeZoneChange: CharSequence? = null
+    private var lastAnimationCall: CharSequence? = null
 
     private val time = Calendar.getInstance()
 
@@ -222,6 +223,7 @@ class AnimatableClockView @JvmOverloads constructor(
     }
 
     fun animateAppearOnLockscreen() {
+        lastAnimationCall = "${getTimestamp()} call=animateAppearOnLockscreen"
         setTextStyle(
             weight = dozingWeight,
             textSize = -1f,
@@ -246,6 +248,7 @@ class AnimatableClockView @JvmOverloads constructor(
         if (isAnimationEnabled && textAnimator == null) {
             return
         }
+        lastAnimationCall = "${getTimestamp()} call=animateFoldAppear"
         setTextStyle(
             weight = lockScreenWeightInternal,
             textSize = -1f,
@@ -272,6 +275,7 @@ class AnimatableClockView @JvmOverloads constructor(
             // Skip charge animation if dozing animation is already playing.
             return
         }
+        lastAnimationCall = "${getTimestamp()} call=animateCharge"
         val startAnimPhase2 = Runnable {
             setTextStyle(
                 weight = if (isDozing()) dozingWeight else lockScreenWeight,
@@ -295,6 +299,7 @@ class AnimatableClockView @JvmOverloads constructor(
     }
 
     fun animateDoze(isDozing: Boolean, animate: Boolean) {
+        lastAnimationCall = "${getTimestamp()} call=animateDoze"
         setTextStyle(
             weight = if (isDozing) dozingWeight else lockScreenWeight,
             textSize = -1f,
@@ -408,6 +413,11 @@ class AnimatableClockView @JvmOverloads constructor(
         pw.println("    lastTimeZoneChange=$lastTimeZoneChange")
         pw.println("    currText=$text")
         pw.println("    currTimeContextDesc=$contentDescription")
+        pw.println("    lastAnimationCall=$lastAnimationCall")
+        pw.println("    dozingWeightInternal=$dozingWeightInternal")
+        pw.println("    lockScreenWeightInternal=$lockScreenWeightInternal")
+        pw.println("    dozingColor=$dozingColor")
+        pw.println("    lockScreenColor=$lockScreenColor")
         pw.println("    time=$time")
     }
 

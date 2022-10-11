@@ -191,13 +191,13 @@ public abstract class WMShellModule {
             SyncTransactionQueue syncQueue,
             @DynamicOverride DesktopModeController desktopModeController) {
         return new CaptionWindowDecorViewModel(
-                        context,
-                        mainHandler,
-                        mainChoreographer,
-                        taskOrganizer,
-                        displayController,
-                        syncQueue,
-                        desktopModeController);
+                    context,
+                    mainHandler,
+                    mainChoreographer,
+                    taskOrganizer,
+                    displayController,
+                    syncQueue,
+                    desktopModeController);
     }
 
     //

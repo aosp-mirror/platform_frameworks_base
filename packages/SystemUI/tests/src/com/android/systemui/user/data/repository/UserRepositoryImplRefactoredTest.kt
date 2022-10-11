@@ -120,6 +120,27 @@ class UserRepositoryImplRefactoredTest : UserRepositoryImplTest() {
         assertThat(underTest.lastSelectedNonGuestUserId).isEqualTo(selectedNonGuestUserId)
     }
 
+    @Test
+    fun `refreshUsers - sorts by creation time`() = runSelfCancelingTest {
+        underTest = create(this)
+        val unsortedUsers =
+            setUpUsers(
+                count = 3,
+                selectedIndex = 0,
+            )
+        unsortedUsers[0].creationTime = 900
+        unsortedUsers[1].creationTime = 700
+        unsortedUsers[2].creationTime = 999
+        val expectedUsers = listOf(unsortedUsers[1], unsortedUsers[0], unsortedUsers[2])
+        var userInfos: List<UserInfo>? = null
+        var selectedUserInfo: UserInfo? = null
+        underTest.userInfos.onEach { userInfos = it }.launchIn(this)
+        underTest.selectedUserInfo.onEach { selectedUserInfo = it }.launchIn(this)
+
+        underTest.refreshUsers()
+        assertThat(userInfos).isEqualTo(expectedUsers)
+    }
+
     private fun setUpUsers(
         count: Int,
         hasGuest: Boolean = false,

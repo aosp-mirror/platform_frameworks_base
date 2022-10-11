@@ -22,7 +22,7 @@ import android.os.UserHandle
 import android.provider.Settings
 import android.util.Log
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.plugins.Clock
+import com.android.systemui.plugins.ClockController
 import com.android.systemui.plugins.ClockId
 import com.android.systemui.plugins.ClockMetadata
 import com.android.systemui.plugins.ClockProvider
@@ -33,7 +33,7 @@ import com.google.gson.Gson
 import javax.inject.Inject
 
 private val TAG = ClockRegistry::class.simpleName
-private val DEBUG = true
+private const val DEBUG = true
 
 /** ClockRegistry aggregates providers and plugins */
 open class ClockRegistry(
@@ -130,6 +130,10 @@ open class ClockRegistry(
             }
 
             availableClocks[id] = ClockInfo(clock, provider)
+            if (DEBUG) {
+                Log.i(TAG, "Added ${clock.clockId}")
+            }
+
             if (currentId == id) {
                 if (DEBUG) {
                     Log.i(TAG, "Current clock ($currentId) was connected")
@@ -143,6 +147,9 @@ open class ClockRegistry(
         val currentId = currentClockId
         for (clock in provider.getClocks()) {
             availableClocks.remove(clock.clockId)
+            if (DEBUG) {
+                Log.i(TAG, "Removed ${clock.clockId}")
+            }
 
             if (currentId == clock.clockId) {
                 Log.w(TAG, "Current clock ($currentId) was disconnected")
@@ -161,7 +168,7 @@ open class ClockRegistry(
     fun getClockThumbnail(clockId: ClockId): Drawable? =
         availableClocks[clockId]?.provider?.getClockThumbnail(clockId)
 
-    fun createExampleClock(clockId: ClockId): Clock? = createClock(clockId)
+    fun createExampleClock(clockId: ClockId): ClockController? = createClock(clockId)
 
     fun registerClockChangeListener(listener: ClockChangeListener) =
         clockChangeListeners.add(listener)
@@ -169,11 +176,14 @@ open class ClockRegistry(
     fun unregisterClockChangeListener(listener: ClockChangeListener) =
         clockChangeListeners.remove(listener)
 
-    fun createCurrentClock(): Clock {
+    fun createCurrentClock(): ClockController {
         val clockId = currentClockId
         if (isEnabled && clockId.isNotEmpty()) {
             val clock = createClock(clockId)
             if (clock != null) {
+                if (DEBUG) {
+                    Log.i(TAG, "Rendering clock $clockId")
+                }
                 return clock
             } else {
                 Log.e(TAG, "Clock $clockId not found; using default")
@@ -183,7 +193,7 @@ open class ClockRegistry(
         return createClock(DEFAULT_CLOCK_ID)!!
     }
 
-    private fun createClock(clockId: ClockId): Clock? =
+    private fun createClock(clockId: ClockId): ClockController? =
         availableClocks[clockId]?.provider?.createClock(clockId)
 
     private data class ClockInfo(
