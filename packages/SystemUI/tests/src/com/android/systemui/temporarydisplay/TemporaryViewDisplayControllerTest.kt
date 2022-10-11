@@ -17,7 +17,9 @@
 package com.android.systemui.temporarydisplay
 
 import android.content.Context
+import android.graphics.Rect
 import android.os.PowerManager
+import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
@@ -259,12 +261,15 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
 
         override val windowLayoutParams = commonWindowLayoutParams
         override fun updateView(newInfo: ViewInfo, currentView: ViewGroup) {
-            super.updateView(newInfo, currentView)
             mostRecentViewInfo = newInfo
         }
 
-        override fun shouldIgnoreViewRemoval(removalReason: String): Boolean {
+        override fun shouldIgnoreViewRemoval(info: ViewInfo, removalReason: String): Boolean {
             return shouldIgnoreViewRemoval
+        }
+
+        override fun getTouchableRegion(view: View, outRect: Rect) {
+            outRect.setEmpty()
         }
     }
 

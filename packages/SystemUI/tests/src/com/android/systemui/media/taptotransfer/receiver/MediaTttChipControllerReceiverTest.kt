@@ -41,6 +41,7 @@ import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
+import com.android.systemui.util.view.ViewUtil
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -70,6 +71,8 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
     private lateinit var configurationController: ConfigurationController
     @Mock
     private lateinit var powerManager: PowerManager
+    @Mock
+    private lateinit var viewUtil: ViewUtil
     @Mock
     private lateinit var windowManager: WindowManager
     @Mock
@@ -104,7 +107,8 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
             configurationController,
             powerManager,
             Handler.getMain(),
-            receiverUiEventLogger
+            receiverUiEventLogger,
+            viewUtil,
         )
 
         val callbackCaptor = ArgumentCaptor.forClass(CommandQueue.Callbacks::class.java)
