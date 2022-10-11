@@ -73,10 +73,16 @@ public class ConditionMonitorTest extends SysuiTestCase {
                 .addConditions(mConditions);
     }
 
+    private Condition createMockCondition() {
+        final Condition condition = Mockito.mock(Condition.class);
+        when(condition.isConditionSet()).thenReturn(true);
+        return condition;
+    }
+
     @Test
     public void testOverridingCondition() {
-        final Condition overridingCondition = Mockito.mock(Condition.class);
-        final Condition regularCondition = Mockito.mock(Condition.class);
+        final Condition overridingCondition = createMockCondition();
+        final Condition regularCondition = createMockCondition();
         final Monitor.Callback callback = Mockito.mock(Monitor.Callback.class);
 
         final Monitor.Callback referenceCallback = Mockito.mock(Monitor.Callback.class);
@@ -127,9 +133,9 @@ public class ConditionMonitorTest extends SysuiTestCase {
      */
     @Test
     public void testMultipleOverridingConditions() {
-        final Condition overridingCondition = Mockito.mock(Condition.class);
-        final Condition overridingCondition2 = Mockito.mock(Condition.class);
-        final Condition regularCondition = Mockito.mock(Condition.class);
+        final Condition overridingCondition = createMockCondition();
+        final Condition overridingCondition2 = createMockCondition();
+        final Condition regularCondition = createMockCondition();
         final Monitor.Callback callback = Mockito.mock(Monitor.Callback.class);
 
         final Monitor monitor = new Monitor(mExecutor);
@@ -337,6 +343,116 @@ public class ConditionMonitorTest extends SysuiTestCase {
         verify(callback, never()).onConditionsChanged(anyBoolean());
 
         mCondition3.fakeUpdateCondition(true);
+        mExecutor.runAllReady();
+        verify(callback).onConditionsChanged(true);
+    }
+
+    @Test
+    public void clearCondition_shouldUpdateValue() {
+        mCondition1.fakeUpdateCondition(false);
+        mCondition2.fakeUpdateCondition(true);
+        mCondition3.fakeUpdateCondition(true);
+
+        final Monitor.Callback callback =
+                mock(Monitor.Callback.class);
+        mConditionMonitor.addSubscription(getDefaultBuilder(callback).build());
+        mExecutor.runAllReady();
+        verify(callback).onConditionsChanged(false);
+
+        mCondition1.clearCondition();
+        mExecutor.runAllReady();
+        verify(callback).onConditionsChanged(true);
+    }
+
+    @Test
+    public void unsetCondition_shouldNotAffectValue() {
+        final FakeCondition settableCondition = new FakeCondition(null, false);
+        mCondition1.fakeUpdateCondition(true);
+        mCondition2.fakeUpdateCondition(true);
+        mCondition3.fakeUpdateCondition(true);
+
+        final Monitor.Callback callback =
+                mock(Monitor.Callback.class);
+
+        mConditionMonitor.addSubscription(getDefaultBuilder(callback)
+                .addCondition(settableCondition)
+                .build());
+
+        mExecutor.runAllReady();
+        verify(callback).onConditionsChanged(true);
+    }
+
+    @Test
+    public void setUnsetCondition_shouldAffectValue() {
+        final FakeCondition settableCondition = new FakeCondition(null, false);
+        mCondition1.fakeUpdateCondition(true);
+        mCondition2.fakeUpdateCondition(true);
+        mCondition3.fakeUpdateCondition(true);
+
+        final Monitor.Callback callback =
+                mock(Monitor.Callback.class);
+
+        mConditionMonitor.addSubscription(getDefaultBuilder(callback)
+                .addCondition(settableCondition)
+                .build());
+
+        mExecutor.runAllReady();
+        verify(callback).onConditionsChanged(true);
+        clearInvocations(callback);
+
+        settableCondition.fakeUpdateCondition(false);
+        mExecutor.runAllReady();
+        verify(callback).onConditionsChanged(false);
+        clearInvocations(callback);
+
+
+        settableCondition.clearCondition();
+        mExecutor.runAllReady();
+        verify(callback).onConditionsChanged(true);
+    }
+
+    @Test
+    public void clearingOverridingCondition_shouldBeExcluded() {
+        final FakeCondition overridingCondition = new FakeCondition(true, true);
+        mCondition1.fakeUpdateCondition(false);
+        mCondition2.fakeUpdateCondition(false);
+        mCondition3.fakeUpdateCondition(false);
+
+        final Monitor.Callback callback =
+                mock(Monitor.Callback.class);
+
+        mConditionMonitor.addSubscription(getDefaultBuilder(callback)
+                .addCondition(overridingCondition)
+                .build());
+
+        mExecutor.runAllReady();
+        verify(callback).onConditionsChanged(true);
+        clearInvocations(callback);
+
+        overridingCondition.clearCondition();
+        mExecutor.runAllReady();
+        verify(callback).onConditionsChanged(false);
+    }
+
+    @Test
+    public void settingUnsetOverridingCondition_shouldBeIncluded() {
+        final FakeCondition overridingCondition = new FakeCondition(null, true);
+        mCondition1.fakeUpdateCondition(false);
+        mCondition2.fakeUpdateCondition(false);
+        mCondition3.fakeUpdateCondition(false);
+
+        final Monitor.Callback callback =
+                mock(Monitor.Callback.class);
+
+        mConditionMonitor.addSubscription(getDefaultBuilder(callback)
+                .addCondition(overridingCondition)
+                .build());
+
+        mExecutor.runAllReady();
+        verify(callback).onConditionsChanged(false);
+        clearInvocations(callback);
+
+        overridingCondition.fakeUpdateCondition(true);
         mExecutor.runAllReady();
         verify(callback).onConditionsChanged(true);
     }

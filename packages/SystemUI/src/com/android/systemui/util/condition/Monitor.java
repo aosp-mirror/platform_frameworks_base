@@ -57,12 +57,16 @@ public class Monitor {
         }
 
         public void update() {
+            // Only consider set conditions.
+            final Collection<Condition> setConditions = mSubscription.mConditions.stream()
+                    .filter(Condition::isConditionSet).collect(Collectors.toSet());
+
             // Overriding conditions do not override each other
-            final Collection<Condition> overridingConditions = mSubscription.mConditions.stream()
+            final Collection<Condition> overridingConditions = setConditions.stream()
                     .filter(Condition::isOverridingCondition).collect(Collectors.toSet());
 
             final Collection<Condition> targetCollection = overridingConditions.isEmpty()
-                    ? mSubscription.mConditions : overridingConditions;
+                    ? setConditions : overridingConditions;
 
             final boolean newAllConditionsMet = targetCollection.isEmpty() ? true : targetCollection
                     .stream()
