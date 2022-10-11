@@ -6051,6 +6051,10 @@ public final class NotificationPanelViewController {
                 mShadeLog.logMotionEvent(event, "onTouch: PulseExpansionHandler handled event");
                 return true;
             }
+            if (mPulsing) {
+                mShadeLog.logMotionEvent(event, "onTouch: eat touch, device pulsing");
+                return true;
+            }
             if (mListenForHeadsUp && !mHeadsUpTouchHelper.isTrackingHeadsUp()
                     && !mNotificationStackScrollLayoutController.isLongPressInProgress()
                     && mHeadsUpTouchHelper.onInterceptTouchEvent(event)) {
@@ -6073,7 +6077,7 @@ public final class NotificationPanelViewController {
             }
 
             handled |= handleTouch(event);
-            return !mDozing || mPulsing || handled;
+            return !mDozing || handled;
         }
 
         private boolean handleTouch(MotionEvent event) {

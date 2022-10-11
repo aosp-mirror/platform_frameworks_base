@@ -52,7 +52,10 @@ import javax.inject.Inject
 import kotlin.math.max
 
 /**
- * A utility class to enable the downward swipe on when pulsing.
+ * A utility class that handles notification panel expansion when a user swipes downward on a
+ * notification from the pulsing state.
+ * If face-bypass is enabled, the user can swipe down anywhere on the screen (not just from a
+ * notification) to trigger the notification panel expansion.
  */
 @SysUISingleton
 class PulseExpansionHandler @Inject
@@ -62,7 +65,7 @@ constructor(
     private val bypassController: KeyguardBypassController,
     private val headsUpManager: HeadsUpManagerPhone,
     private val roundnessManager: NotificationRoundnessManager,
-    private val configurationController: ConfigurationController,
+    configurationController: ConfigurationController,
     private val statusBarStateController: StatusBarStateController,
     private val falsingManager: FalsingManager,
     private val lockscreenShadeTransitionController: LockscreenShadeTransitionController,

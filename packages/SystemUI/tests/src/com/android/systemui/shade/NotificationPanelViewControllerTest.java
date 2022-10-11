@@ -716,6 +716,40 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void test_pulsing_onTouchEvent_noTracking() {
+        // GIVEN device is pulsing
+        mNotificationPanelViewController.setPulsing(true);
+
+        // WHEN touch DOWN & MOVE events received
+        onTouchEvent(MotionEvent.obtain(0L /* downTime */,
+                0L /* eventTime */, MotionEvent.ACTION_DOWN, 0f /* x */, 0f /* y */,
+                0 /* metaState */));
+        onTouchEvent(MotionEvent.obtain(0L /* downTime */,
+                0L /* eventTime */, MotionEvent.ACTION_MOVE, 0f /* x */, 200f /* y */,
+                0 /* metaState */));
+
+        // THEN touch is NOT tracked (since the device is pulsing)
+        assertThat(mNotificationPanelViewController.isTracking()).isFalse();
+    }
+
+    @Test
+    public void test_onTouchEvent_startTracking() {
+        // GIVEN device is NOT pulsing
+        mNotificationPanelViewController.setPulsing(false);
+
+        // WHEN touch DOWN & MOVE events received
+        onTouchEvent(MotionEvent.obtain(0L /* downTime */,
+                0L /* eventTime */, MotionEvent.ACTION_DOWN, 0f /* x */, 0f /* y */,
+                0 /* metaState */));
+        onTouchEvent(MotionEvent.obtain(0L /* downTime */,
+                0L /* eventTime */, MotionEvent.ACTION_MOVE, 0f /* x */, 200f /* y */,
+                0 /* metaState */));
+
+        // THEN touch is tracked
+        assertThat(mNotificationPanelViewController.isTracking()).isTrue();
+    }
+
+    @Test
     public void handleTouchEventFromStatusBar_panelsNotEnabled_returnsFalseAndNoViewEvent() {
         when(mCommandQueue.panelsEnabled()).thenReturn(false);
 
