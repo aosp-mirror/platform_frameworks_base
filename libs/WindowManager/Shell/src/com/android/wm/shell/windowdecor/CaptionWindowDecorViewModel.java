@@ -19,15 +19,20 @@ package com.android.wm.shell.windowdecor;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
-import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityTaskManager;
 import android.content.Context;
+import android.hardware.input.InputManager;
 import android.os.Handler;
+import android.os.SystemClock;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.Choreographer;
+import android.view.InputDevice;
+import android.view.KeyCharacterMap;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
 import android.view.View;
@@ -47,7 +52,9 @@ import com.android.wm.shell.transition.Transitions;
  * View model for the window decoration with a caption and shadows. Works with
  * {@link CaptionWindowDecoration}.
  */
+
 public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
+    private static final String TAG = "CaptionViewModel";
     private final ActivityTaskManager mActivityTaskManager;
     private final ShellTaskOrganizer mTaskOrganizer;
     private final Context mContext;
@@ -107,7 +114,6 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
         windowDecoration.setCaptionListeners(touchEventListener, touchEventListener);
         windowDecoration.setDragResizeCallback(taskPositioner);
         setupWindowDecorationForTransition(taskInfo, startT, finishT);
-        setupCaptionColor(taskInfo, windowDecoration);
         return true;
     }
 
@@ -117,12 +123,6 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
         if (decoration == null) return;
 
         decoration.relayout(taskInfo);
-        setupCaptionColor(taskInfo, decoration);
-    }
-
-    private void setupCaptionColor(RunningTaskInfo taskInfo, CaptionWindowDecoration decoration) {
-        int statusBarColor = taskInfo.taskDescription.getStatusBarColor();
-        decoration.setCaptionColor(statusBarColor);
     }
 
     @Override
@@ -153,6 +153,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
         private final DragResizeCallback mDragResizeCallback;
 
         private int mDragPointerId = -1;
+        private boolean mDragActive = false;
 
         private CaptionTouchEventListener(
                 RunningTaskInfo taskInfo,
@@ -173,42 +174,38 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
                 } else {
                     mSyncQueue.queue(wct);
                 }
-            } else if (id == R.id.maximize_window) {
-                WindowContainerTransaction wct = new WindowContainerTransaction();
-                RunningTaskInfo taskInfo = mTaskOrganizer.getRunningTaskInfo(mTaskId);
-                int targetWindowingMode = taskInfo.getWindowingMode() != WINDOWING_MODE_FULLSCREEN
-                        ? WINDOWING_MODE_FULLSCREEN : WINDOWING_MODE_FREEFORM;
-                int displayWindowingMode =
-                        taskInfo.configuration.windowConfiguration.getDisplayWindowingMode();
-                wct.setWindowingMode(mTaskToken,
-                        targetWindowingMode == displayWindowingMode
-                            ? WINDOWING_MODE_UNDEFINED : targetWindowingMode);
-                if (targetWindowingMode == WINDOWING_MODE_FULLSCREEN) {
-                    wct.setBounds(mTaskToken, null);
-                }
-                if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-                    mTransitionStarter.startWindowingModeTransition(targetWindowingMode, wct);
-                } else {
-                    mSyncQueue.queue(wct);
-                }
-            } else if (id == R.id.minimize_window) {
-                WindowContainerTransaction wct = new WindowContainerTransaction();
-                wct.reorder(mTaskToken, false);
-                if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-                    mTransitionStarter.startMinimizedModeTransition(wct);
-                } else {
-                    mSyncQueue.queue(wct);
-                }
+            } else if (id == R.id.back_button) {
+                injectBackKey();
+            }
+        }
+        private void injectBackKey() {
+            sendBackEvent(KeyEvent.ACTION_DOWN);
+            sendBackEvent(KeyEvent.ACTION_UP);
+        }
+
+        private void sendBackEvent(int action) {
+            final long when = SystemClock.uptimeMillis();
+            final KeyEvent ev = new KeyEvent(when, when, action, KeyEvent.KEYCODE_BACK,
+                    0 /* repeat */, 0 /* metaState */, KeyCharacterMap.VIRTUAL_KEYBOARD,
+                    0 /* scancode */, KeyEvent.FLAG_FROM_SYSTEM | KeyEvent.FLAG_VIRTUAL_HARD_KEY,
+                    InputDevice.SOURCE_KEYBOARD);
+
+            ev.setDisplayId(mContext.getDisplay().getDisplayId());
+            if (!InputManager.getInstance()
+                    .injectInputEvent(ev, InputManager.INJECT_INPUT_EVENT_MODE_ASYNC)) {
+                Log.e(TAG, "Inject input event fail");
             }
         }
 
         @Override
         public boolean onTouch(View v, MotionEvent e) {
-            if (v.getId() != R.id.caption) {
+            int id = v.getId();
+            if (id != R.id.caption_handle && id != R.id.caption) {
                 return false;
             }
-            handleEventForMove(e);
-
+            if (id == R.id.caption_handle || mDragActive) {
+                handleEventForMove(e);
+            }
             if (e.getAction() != MotionEvent.ACTION_DOWN) {
                 return false;
             }
@@ -231,6 +228,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
             }
             switch (e.getActionMasked()) {
                 case MotionEvent.ACTION_DOWN:
+                    mDragActive = true;
                     mDragPointerId  = e.getPointerId(0);
                     mDragResizeCallback.onDragResizeStart(
                             0 /* ctrlType */, e.getRawX(0), e.getRawY(0));
@@ -243,6 +241,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
                 }
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL: {
+                    mDragActive = false;
                     int dragPointerIdx = e.findPointerIndex(mDragPointerId);
                     int statusBarHeight = mDisplayController.getDisplayLayout(taskInfo.displayId)
                             .stableInsets().top;

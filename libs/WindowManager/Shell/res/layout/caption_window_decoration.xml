@@ -17,39 +17,33 @@
 <com.android.wm.shell.windowdecor.WindowDecorLinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/caption"
-    android:layout_width="match_parent"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:gravity="end"
+    android:gravity="center_horizontal"
     android:background="@drawable/decor_caption_title">
     <Button
-        android:id="@+id/minimize_window"
-        android:visibility="gone"
+        android:id="@+id/back_button"
         android:layout_width="32dp"
         android:layout_height="32dp"
         android:layout_margin="5dp"
         android:padding="4dp"
-        android:layout_gravity="top|end"
-        android:contentDescription="@string/maximize_button_text"
-        android:background="@drawable/decor_minimize_button_dark"
-        android:duplicateParentState="true"/>
+        android:contentDescription="@string/back_button_text"
+        android:background="@drawable/decor_back_button_dark"
+    />
     <Button
-        android:id="@+id/maximize_window"
-        android:layout_width="32dp"
+        android:id="@+id/caption_handle"
+        android:layout_width="128dp"
         android:layout_height="32dp"
         android:layout_margin="5dp"
         android:padding="4dp"
-        android:layout_gravity="center_vertical|end"
-        android:contentDescription="@string/maximize_button_text"
-        android:background="@drawable/decor_maximize_button_dark"
-        android:duplicateParentState="true"/>
+        android:contentDescription="@string/handle_text"
+        android:background="@drawable/decor_handle_dark"/>
     <Button
         android:id="@+id/close_window"
         android:layout_width="32dp"
         android:layout_height="32dp"
         android:layout_margin="5dp"
         android:padding="4dp"
-        android:layout_gravity="center_vertical|end"
         android:contentDescription="@string/close_button_text"
-        android:background="@drawable/decor_close_button_dark"
-        android:duplicateParentState="true"/>
+        android:background="@drawable/decor_close_button_dark"/>
 </com.android.wm.shell.windowdecor.WindowDecorLinearLayout>
