@@ -211,6 +211,9 @@ public class Flags {
     // 803 - screen contents translation
     public static final UnreleasedFlag SCREEN_CONTENTS_TRANSLATION = new UnreleasedFlag(803);
 
+    // 804 - monochromatic themes
+    public static final UnreleasedFlag MONOCHROMATIC_THEMES = new UnreleasedFlag(804);
+
     /***************************************/
     // 900 - media
     public static final ReleasedFlag MEDIA_TAP_TO_TRANSFER = new ReleasedFlag(900);
