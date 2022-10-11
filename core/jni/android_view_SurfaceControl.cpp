@@ -368,9 +368,12 @@ static jlong nativeCreate(JNIEnv* env, jclass clazz, jobject sessionObj,
     return reinterpret_cast<jlong>(surface.get());
 }
 
-static void nativeRelease(JNIEnv* env, jclass clazz, jlong nativeObject) {
-    sp<SurfaceControl> ctrl(reinterpret_cast<SurfaceControl *>(nativeObject));
+static void release(SurfaceControl* ctrl) {
     ctrl->decStrong((void *)nativeCreate);
+}
+
+static jlong nativeGetNativeSurfaceControlFinalizer(JNIEnv* env, jclass clazz) {
+    return static_cast<jlong>(reinterpret_cast<uintptr_t>(&release));
 }
 
 static void nativeDisconnect(JNIEnv* env, jclass clazz, jlong nativeObject) {
@@ -1897,8 +1900,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeCopyFromSurfaceControl },
     {"nativeWriteToParcel", "(JLandroid/os/Parcel;)V",
             (void*)nativeWriteToParcel },
-    {"nativeRelease", "(J)V",
-            (void*)nativeRelease },
+    {"nativeGetNativeSurfaceControlFinalizer", "()J",
+            (void*) nativeGetNativeSurfaceControlFinalizer },
     {"nativeDisconnect", "(J)V",
             (void*)nativeDisconnect },
     {"nativeUpdateDefaultBufferSize", "(JII)V",
