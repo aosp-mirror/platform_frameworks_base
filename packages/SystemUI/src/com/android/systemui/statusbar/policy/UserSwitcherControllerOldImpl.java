@@ -49,6 +49,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.util.LatencyTracker;
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.settingslib.users.UserCreatingDialog;
 import com.android.systemui.GuestResetOrExitSessionReceiver;
 import com.android.systemui.GuestResumeSessionReceiver;
@@ -399,6 +400,16 @@ public class UserSwitcherControllerOldImpl implements UserSwitcherController {
                 records.add(userRecord);
             }
 
+            if (canManageUsers()) {
+                records.add(LegacyUserDataHelper.createRecord(
+                        mContext,
+                        KeyguardUpdateMonitor.getCurrentUser(),
+                        UserActionModel.NAVIGATE_TO_USER_MANAGEMENT,
+                        /* isRestricted= */ false,
+                        /* isSwitchToEnabled= */ true
+                ));
+            }
+
             mUiExecutor.execute(() -> {
                 if (records != null) {
                     mUsers = records;
@@ -436,6 +447,14 @@ public class UserSwitcherControllerOldImpl implements UserSwitcherController {
         return mUserSwitcherEnabled
                 && (currentUserCanCreateUsers() || anyoneCanCreateUsers())
                 && mUserManager.canAddMoreUsers(UserManager.USER_TYPE_FULL_SECONDARY);
+    }
+
+    @VisibleForTesting
+    boolean canManageUsers() {
+        UserInfo currentUser = mUserTracker.getUserInfo();
+        return mUserSwitcherEnabled
+                && ((currentUser != null && currentUser.isAdmin())
+                || mAddUsersFromLockScreen.getValue());
     }
 
     private boolean createIsRestricted() {
@@ -525,6 +544,8 @@ public class UserSwitcherControllerOldImpl implements UserSwitcherController {
             showAddUserDialog(dialogShower);
         } else if (record.isAddSupervisedUser) {
             startSupervisedUserActivity();
+        } else if (record.isManageUsers) {
+            startActivity(new Intent(Settings.ACTION_USER_SETTINGS));
         } else {
             onUserListItemClicked(record.info.id, record, dialogShower);
         }
@@ -984,7 +1005,7 @@ public class UserSwitcherControllerOldImpl implements UserSwitcherController {
 
     @Override
     public void startActivity(Intent intent) {
-        mActivityStarter.startActivity(intent, true);
+        mActivityStarter.startActivity(intent, /* dismissShade= */ true);
     }
 
     @Override

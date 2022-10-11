@@ -19,8 +19,6 @@ package com.android.systemui.user.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.android.systemui.R
-import com.android.systemui.common.shared.model.Text
 import com.android.systemui.common.ui.drawable.CircularDrawable
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
@@ -162,12 +160,7 @@ private constructor(
     ): UserViewModel {
         return UserViewModel(
             viewKey = model.id,
-            name =
-                if (model.isGuest) {
-                    Text.Resource(com.android.settingslib.R.string.guest_exit_quick_settings_button)
-                } else {
-                    model.name
-                },
+            name = model.name,
             image = CircularDrawable(model.image),
             isSelectionMarkerVisible = model.isSelected,
             alpha =
@@ -186,29 +179,23 @@ private constructor(
         return UserActionViewModel(
             viewKey = model.ordinal.toLong(),
             iconResourceId =
-                if (model == UserActionModel.NAVIGATE_TO_USER_MANAGEMENT) {
-                    R.drawable.ic_manage_users
-                } else {
-                    LegacyUserUiHelper.getUserSwitcherActionIconResourceId(
-                        isAddSupervisedUser = model == UserActionModel.ADD_SUPERVISED_USER,
-                        isAddUser = model == UserActionModel.ADD_USER,
-                        isGuest = model == UserActionModel.ENTER_GUEST_MODE,
-                        isTablet = true,
-                    )
-                },
+                LegacyUserUiHelper.getUserSwitcherActionIconResourceId(
+                    isAddSupervisedUser = model == UserActionModel.ADD_SUPERVISED_USER,
+                    isAddUser = model == UserActionModel.ADD_USER,
+                    isGuest = model == UserActionModel.ENTER_GUEST_MODE,
+                    isManageUsers = model == UserActionModel.NAVIGATE_TO_USER_MANAGEMENT,
+                    isTablet = true,
+                ),
             textResourceId =
-                if (model == UserActionModel.NAVIGATE_TO_USER_MANAGEMENT) {
-                    R.string.manage_users
-                } else {
-                    LegacyUserUiHelper.getUserSwitcherActionTextResourceId(
-                        isGuest = model == UserActionModel.ENTER_GUEST_MODE,
-                        isGuestUserAutoCreated = guestUserInteractor.isGuestUserAutoCreated,
-                        isGuestUserResetting = guestUserInteractor.isGuestUserResetting,
-                        isAddSupervisedUser = model == UserActionModel.ADD_SUPERVISED_USER,
-                        isAddUser = model == UserActionModel.ADD_USER,
-                        isTablet = true,
-                    )
-                },
+                LegacyUserUiHelper.getUserSwitcherActionTextResourceId(
+                    isGuest = model == UserActionModel.ENTER_GUEST_MODE,
+                    isGuestUserAutoCreated = guestUserInteractor.isGuestUserAutoCreated,
+                    isGuestUserResetting = guestUserInteractor.isGuestUserResetting,
+                    isAddSupervisedUser = model == UserActionModel.ADD_SUPERVISED_USER,
+                    isAddUser = model == UserActionModel.ADD_USER,
+                    isManageUsers = model == UserActionModel.NAVIGATE_TO_USER_MANAGEMENT,
+                    isTablet = true,
+                ),
             onClicked = {
                 userInteractor.executeAction(action = model)
                 // We don't finish because we want to show a dialog over the full-screen UI and
