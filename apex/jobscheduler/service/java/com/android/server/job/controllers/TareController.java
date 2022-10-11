@@ -337,7 +337,6 @@ public class TareController extends StateController {
                 removeJobFromBillList(jobStatus, billToJobMap.keyAt(i));
             }
         }
-        addJobToBillList(jobStatus, getRunningBill(jobStatus));
 
         final int uid = jobStatus.getSourceUid();
         if (mService.getUidBias(uid) == JobInfo.BIAS_TOP_APP) {
@@ -347,6 +346,7 @@ public class TareController extends StateController {
             mTopStartedJobs.add(jobStatus);
             // Top jobs won't count towards quota so there's no need to involve the EconomyManager.
         } else {
+            addJobToBillList(jobStatus, getRunningBill(jobStatus));
             mEconomyManagerInternal.noteOngoingEventStarted(userId, pkgName,
                     getRunningActionId(jobStatus), String.valueOf(jobStatus.getJobId()));
         }
@@ -357,9 +357,14 @@ public class TareController extends StateController {
     public void unprepareFromExecutionLocked(JobStatus jobStatus) {
         final int userId = jobStatus.getSourceUserId();
         final String pkgName = jobStatus.getSourcePackageName();
-        mEconomyManagerInternal.noteOngoingEventStopped(userId, pkgName,
-                getRunningActionId(jobStatus), String.valueOf(jobStatus.getJobId()));
-        mTopStartedJobs.remove(jobStatus);
+        // If this method is called, then jobStatus.madeActive was never updated, so don't use it
+        // to determine if the EconomyManager was notified.
+        if (!mTopStartedJobs.remove(jobStatus)) {
+            // If the job was started while the app was top, then the EconomyManager wasn't notified
+            // of the job start.
+            mEconomyManagerInternal.noteOngoingEventStopped(userId, pkgName,
+                    getRunningActionId(jobStatus), String.valueOf(jobStatus.getJobId()));
+        }
 
         final ArraySet<ActionBill> bills = getPossibleStartBills(jobStatus);
         ArrayMap<ActionBill, ArraySet<JobStatus>> billToJobMap =
@@ -382,9 +387,13 @@ public class TareController extends StateController {
             boolean forUpdate) {
         final int userId = jobStatus.getSourceUserId();
         final String pkgName = jobStatus.getSourcePackageName();
-        mEconomyManagerInternal.noteOngoingEventStopped(userId, pkgName,
-                getRunningActionId(jobStatus), String.valueOf(jobStatus.getJobId()));
-        mTopStartedJobs.remove(jobStatus);
+        if (!mTopStartedJobs.remove(jobStatus) && jobStatus.madeActive > 0) {
+            // Only note the job stop if we previously told the EconomyManager that the job started.
+            // If the job was started while the app was top, then the EconomyManager wasn't notified
+            // of the job start.
+            mEconomyManagerInternal.noteOngoingEventStopped(userId, pkgName,
+                    getRunningActionId(jobStatus), String.valueOf(jobStatus.getJobId()));
+        }
         ArrayMap<ActionBill, ArraySet<JobStatus>> billToJobMap =
                 mRegisteredBillsAndJobs.get(userId, pkgName);
         if (billToJobMap != null) {
