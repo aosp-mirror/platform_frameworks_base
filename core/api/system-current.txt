@@ -393,6 +393,8 @@ package android {
   }
 
   public static final class R.bool {
+    field public static final int config_enableDefaultNotes;
+    field public static final int config_enableDefaultNotesForWorkProfile;
     field public static final int config_enableQrCodeScannerOnLockScreen = 17891336; // 0x1110008
     field public static final int config_safetyProtectionEnabled;
     field public static final int config_sendPackageName = 17891328; // 0x1110000
@@ -429,6 +431,7 @@ package android {
     field public static final int config_defaultCallRedirection = 17039397; // 0x1040025
     field public static final int config_defaultCallScreening = 17039398; // 0x1040026
     field public static final int config_defaultDialer = 17039395; // 0x1040023
+    field public static final int config_defaultNotes;
     field public static final int config_defaultSms = 17039396; // 0x1040024
     field public static final int config_devicePolicyManagement = 17039421; // 0x104003d
     field public static final int config_feedbackIntentExtraKey = 17039391; // 0x104001f
