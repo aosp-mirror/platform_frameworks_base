@@ -246,8 +246,8 @@ public final class DreamManagerService extends SystemService {
         // Because napping could cause the screen to turn off immediately if the dream
         // cannot be started, we keep one eye open and gently poke user activity.
         long time = SystemClock.uptimeMillis();
-        mPowerManager.userActivity(time, true /*noChangeLights*/);
-        mPowerManager.nap(time);
+        mPowerManager.userActivity(time, /* noChangeLights= */ true);
+        mPowerManagerInternal.nap(time, /* allowWake= */ true);
     }
 
     private void requestAwakenInternal(String reason) {
@@ -637,7 +637,7 @@ public final class DreamManagerService extends SystemService {
                 @Nullable FileDescriptor err,
                 @NonNull String[] args, @Nullable ShellCallback callback,
                 @NonNull ResultReceiver resultReceiver) throws RemoteException {
-            new DreamShellCommand(DreamManagerService.this, mPowerManager)
+            new DreamShellCommand(DreamManagerService.this)
                     .exec(this, in, out, err, args, callback, resultReceiver);
         }
 
