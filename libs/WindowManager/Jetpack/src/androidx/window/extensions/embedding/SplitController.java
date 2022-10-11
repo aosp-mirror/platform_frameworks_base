@@ -240,6 +240,16 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     }
 
     /**
+     * Clears the listener set in {@link SplitController#setSplitInfoListener}.
+     */
+    @Override
+    public void clearSplitInfoCallback() {
+        synchronized (mLock) {
+            mEmbeddingCallback = null;
+        }
+    }
+
+    /**
      * Called when the transaction is ready so that the organizer can update the TaskFragments based
      * on the changes in transaction.
      */
