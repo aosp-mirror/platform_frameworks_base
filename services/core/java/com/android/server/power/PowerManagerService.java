@@ -3278,8 +3278,10 @@ public final class PowerManagerService extends SystemService
         if (mDreamManager != null) {
             // Restart the dream whenever the sandman is summoned.
             if (startDreaming) {
-                mDreamManager.stopDream(/* immediate= */ false);
-                mDreamManager.startDream(wakefulness == WAKEFULNESS_DOZING);
+                mDreamManager.stopDream(/* immediate= */ false,
+                        "power manager request before starting dream" /*reason*/);
+                mDreamManager.startDream(wakefulness == WAKEFULNESS_DOZING,
+                        "power manager request" /*reason*/);
             }
             isDreaming = mDreamManager.isDreaming();
         } else {
@@ -3364,7 +3366,7 @@ public final class PowerManagerService extends SystemService
 
         // Stop dream.
         if (isDreaming) {
-            mDreamManager.stopDream(/* immediate= */ false);
+            mDreamManager.stopDream(/* immediate= */ false, "power manager request" /*reason*/);
         }
     }
 
