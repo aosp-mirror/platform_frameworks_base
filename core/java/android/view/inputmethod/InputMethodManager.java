@@ -903,8 +903,6 @@ public final class InputMethodManager {
     /**
      * Checks whether the active input connection (if any) is for the given view.
      *
-     * TODO(b/182259171): Clean-up hasActiveConnection to simplify the logic.
-     *
      * Note that this method is only intended for restarting input after focus gain
      * (e.g. b/160391516), DO NOT leverage this method to do another check.
      */
@@ -915,7 +913,6 @@ public final class InputMethodManager {
             }
 
             return mServedInputConnection != null
-                    && mServedInputConnection.isActive()
                     && mServedInputConnection.isAssociatedWith(view);
         }
     }
