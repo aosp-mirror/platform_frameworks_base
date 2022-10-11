@@ -40,6 +40,7 @@ import android.hardware.biometrics.common.OperationContext;
 import android.hardware.biometrics.fingerprint.ISession;
 import android.hardware.biometrics.fingerprint.PointerContext;
 import android.hardware.fingerprint.Fingerprint;
+import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.ISidefpsController;
 import android.hardware.fingerprint.IUdfpsOverlayController;
@@ -420,6 +421,52 @@ public class FingerprintAuthenticationClientTest {
         mLooper.dispatchAll();
 
         verify(mCallback).onClientFinished(any(), eq(true));
+    }
+
+    @Test
+    public void sideFingerprintSkipsWindowIfVendorMessageMatch() throws Exception {
+        when(mSensorProps.isAnySidefpsType()).thenReturn(true);
+        final int vendorAcquireMessage = 1234;
+
+        mContext.getOrCreateTestableResources().addOverride(
+                R.integer.config_sidefpsSkipWaitForPowerAcquireMessage,
+                FingerprintManager.FINGERPRINT_ACQUIRED_VENDOR);
+        mContext.getOrCreateTestableResources().addOverride(
+                R.integer.config_sidefpsSkipWaitForPowerVendorAcquireMessage,
+                vendorAcquireMessage);
+
+        final FingerprintAuthenticationClient client = createClient(1);
+        client.start(mCallback);
+        mLooper.dispatchAll();
+        client.onAuthenticated(new Fingerprint("friendly", 4 /* fingerId */, 5 /* deviceId */),
+                true /* authenticated */, new ArrayList<>());
+        client.onAcquired(FingerprintManager.FINGERPRINT_ACQUIRED_VENDOR, vendorAcquireMessage);
+        mLooper.dispatchAll();
+
+        verify(mCallback).onClientFinished(any(), eq(true));
+    }
+
+    @Test
+    public void sideFingerprintDoesNotSkipWindowOnVendorErrorMismatch() throws Exception {
+        when(mSensorProps.isAnySidefpsType()).thenReturn(true);
+        final int vendorAcquireMessage = 1234;
+
+        mContext.getOrCreateTestableResources().addOverride(
+                R.integer.config_sidefpsSkipWaitForPowerAcquireMessage,
+                FingerprintManager.FINGERPRINT_ACQUIRED_VENDOR);
+        mContext.getOrCreateTestableResources().addOverride(
+                R.integer.config_sidefpsSkipWaitForPowerVendorAcquireMessage,
+                vendorAcquireMessage);
+
+        final FingerprintAuthenticationClient client = createClient(1);
+        client.start(mCallback);
+        mLooper.dispatchAll();
+        client.onAuthenticated(new Fingerprint("friendly", 4 /* fingerId */, 5 /* deviceId */),
+                true /* authenticated */, new ArrayList<>());
+        client.onAcquired(FingerprintManager.FINGERPRINT_ACQUIRED_VENDOR, 1);
+        mLooper.dispatchAll();
+
+        verify(mCallback, never()).onClientFinished(any(), anyBoolean());
     }
 
     @Test
