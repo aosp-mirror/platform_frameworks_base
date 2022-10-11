@@ -234,11 +234,11 @@ public final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
 
     @Override
     public synchronized boolean updateConfiguration(@UserIdInt int userId,
-            @NonNull TimeZoneConfiguration requestedConfiguration) {
+            @NonNull TimeZoneConfiguration requestedConfiguration, boolean bypassUserPolicyChecks) {
         Objects.requireNonNull(requestedConfiguration);
 
-        TimeZoneCapabilitiesAndConfig capabilitiesAndConfig =
-                getConfigurationInternal(userId).createCapabilitiesAndConfig();
+        TimeZoneCapabilitiesAndConfig capabilitiesAndConfig = getConfigurationInternal(userId)
+                .createCapabilitiesAndConfig(bypassUserPolicyChecks);
         TimeZoneCapabilities capabilities = capabilitiesAndConfig.getCapabilities();
         TimeZoneConfiguration oldConfiguration = capabilitiesAndConfig.getConfiguration();
 

@@ -96,8 +96,11 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
             });
 
             // Create and publish the local service for use by internal callers.
-            TimeZoneDetectorInternal internal =
-                    new TimeZoneDetectorInternalImpl(context, handler, timeZoneDetectorStrategy);
+            CurrentUserIdentityInjector currentUserIdentityInjector =
+                    CurrentUserIdentityInjector.REAL;
+            TimeZoneDetectorInternal internal = new TimeZoneDetectorInternalImpl(
+                    context, handler, currentUserIdentityInjector, serviceConfigAccessor,
+                    timeZoneDetectorStrategy);
             publishLocalService(TimeZoneDetectorInternal.class, internal);
 
             // Publish the binder service so it can be accessed from other (appropriately
@@ -175,7 +178,8 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
         try {
             ConfigurationInternal configurationInternal =
                     mServiceConfigAccessor.getConfigurationInternal(userId);
-            return configurationInternal.createCapabilitiesAndConfig();
+            final boolean bypassUserPolicyChecks = false;
+            return configurationInternal.createCapabilitiesAndConfig(bypassUserPolicyChecks);
         } finally {
             mCallerIdentityInjector.restoreCallingIdentity(token);
         }
@@ -199,7 +203,9 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
 
         final long token = mCallerIdentityInjector.clearCallingIdentity();
         try {
-            return mServiceConfigAccessor.updateConfiguration(resolvedUserId, configuration);
+            final boolean bypassUserPolicyChecks = false;
+            return mServiceConfigAccessor.updateConfiguration(
+                    resolvedUserId, configuration, bypassUserPolicyChecks);
         } finally {
             mCallerIdentityInjector.restoreCallingIdentity(token);
         }
@@ -350,7 +356,9 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
         int userId = mCallerIdentityInjector.getCallingUserId();
         final long token = mCallerIdentityInjector.clearCallingIdentity();
         try {
-            return mTimeZoneDetectorStrategy.suggestManualTimeZone(userId, timeZoneSuggestion);
+            final boolean bypassUserPolicyChecks = false;
+            return mTimeZoneDetectorStrategy.suggestManualTimeZone(
+                    userId, timeZoneSuggestion, bypassUserPolicyChecks);
         } finally {
             mCallerIdentityInjector.restoreCallingIdentity(token);
         }
@@ -364,7 +372,9 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
         int userId = mCallerIdentityInjector.getCallingUserId();
         final long token = mCallerIdentityInjector.clearCallingIdentity();
         try {
-            return mTimeZoneDetectorStrategy.suggestManualTimeZone(userId, timeZoneSuggestion);
+            final boolean bypassUserPolicyChecks = false;
+            return mTimeZoneDetectorStrategy.suggestManualTimeZone(
+                    userId, timeZoneSuggestion, bypassUserPolicyChecks);
         } finally {
             mCallerIdentityInjector.restoreCallingIdentity(token);
         }
@@ -449,7 +459,7 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
     private void enforceSuggestGeolocationTimeZonePermission() {
         // The associated method is only used for the shell command interface, it's not possible to
         // call it via Binder, and Shell currently can set the time zone directly anyway.
-        mContext.enforceCallingOrSelfPermission(
+        mContext.enforceCallingPermission(
                 android.Manifest.permission.SET_TIME_ZONE,
                 "suggest geolocation time zone");
     }
@@ -461,7 +471,7 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
     }
 
     private void enforceSuggestManualTimeZonePermission() {
-        mContext.enforceCallingOrSelfPermission(
+        mContext.enforceCallingPermission(
                 android.Manifest.permission.SUGGEST_MANUAL_TIME_AND_ZONE,
                 "suggest manual time and time zone");
     }

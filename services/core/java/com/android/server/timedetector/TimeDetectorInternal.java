@@ -17,15 +17,46 @@
 package com.android.server.timedetector;
 
 import android.annotation.NonNull;
+import android.app.time.TimeCapabilitiesAndConfig;
+import android.app.time.TimeConfiguration;
+import android.app.timedetector.ManualTimeSuggestion;
 
 /**
- * The internal (in-process) system server API for the {@link
- * com.android.server.timedetector.TimeDetectorService}.
+ * The internal (in-process) system server API for the time detector service.
  *
  * <p>The methods on this class can be called from any thread.
+ *
+ * <p>Methods marked with "[For device policy manager only]" are for use by the device policy
+ * manager to set device state and must not enforce device policy restrictions.
+ *
  * @hide
  */
 public interface TimeDetectorInternal {
+
+    /**
+     * [For device policy manager only] Returns a snapshot of the configuration that controls time
+     * detector behavior for the current user.
+     */
+    @NonNull
+    TimeCapabilitiesAndConfig getCapabilitiesAndConfigForDpm();
+
+    /**
+     * [For device policy manager only] Updates the configuration properties that control a device's
+     * time behavior for the current user.
+     *
+     * <p>This method returns {@code true} if the configuration was changed, {@code false}
+     * otherwise.
+     */
+    boolean updateConfigurationForDpm(@NonNull TimeConfiguration configuration);
+
+    /**
+     * [For device policy manager only] Attempts to set the device to a manually entered time.
+     * Returns {@code false} if the suggestion is invalid, or the device configuration prevents the
+     * suggestion being used, {@code true} if the suggestion has been accepted. A suggestion that is
+     * valid but does not change the time because it matches the current device time is considered
+     * accepted.
+     */
+    boolean setManualTimeForDpm(@NonNull ManualTimeSuggestion manualTimeSuggestion);
 
     /** Used to pass new network time suggestions to the time detector. */
     void suggestNetworkTime(@NonNull NetworkTimeSuggestion timeSignal);

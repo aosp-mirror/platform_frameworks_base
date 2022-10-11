@@ -38,8 +38,6 @@ import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.TelephonyTimeSuggestion;
 import android.os.TimestampedValue;
 
-import androidx.test.runner.AndroidJUnit4;
-
 import com.android.server.SystemClockTime.TimeConfidence;
 import com.android.server.timedetector.TimeDetectorStrategy.Origin;
 import com.android.server.timezonedetector.ConfigurationChangeListener;
@@ -55,7 +53,10 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Objects;
 
-@RunWith(AndroidJUnit4.class)
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
+
+@RunWith(JUnitParamsRunner.class)
 public class TimeDetectorStrategyImplTest {
 
     private static final @UserIdInt int ARBITRARY_USER_ID = 9876;
@@ -656,10 +657,43 @@ public class TimeDetectorStrategyImplTest {
 
         long expectedSystemClockMillis =
                 script.calculateTimeInMillisForNow(timeSuggestion.getUnixEpochTime());
+        boolean bypassUserPolicyChecks = false;
+        boolean expectedResult = true;
         script.simulateManualTimeSuggestion(
-                ARBITRARY_USER_ID, timeSuggestion, true /* expectedResult */)
+                ARBITRARY_USER_ID, timeSuggestion, bypassUserPolicyChecks, expectedResult)
                 .verifySystemClockConfidence(TIME_CONFIDENCE_HIGH)
                 .verifySystemClockWasSetAndResetCallTracking(expectedSystemClockMillis);
+    }
+
+    /** Confirms the effect of user policy restrictions on being able to set the time. */
+    @Test
+    @Parameters({ "true,true", "true,false", "false,true", "false,false" })
+    public void testSuggestManualTime_autoTimeDisabled_userRestrictions(
+            boolean userConfigAllowed, boolean bypassUserPolicyChecks) {
+        ConfigurationInternal configAutoDisabled =
+                new ConfigurationInternal.Builder(CONFIG_AUTO_DISABLED)
+                        .setUserConfigAllowed(userConfigAllowed)
+                        .build();
+        Script script = new Script().simulateConfigurationInternalChange(configAutoDisabled)
+                .verifySystemClockConfidence(TIME_CONFIDENCE_LOW);
+
+        ManualTimeSuggestion timeSuggestion =
+                script.generateManualTimeSuggestion(ARBITRARY_TEST_TIME);
+
+        script.simulateTimePassing();
+
+        long expectedSystemClockMillis =
+                script.calculateTimeInMillisForNow(timeSuggestion.getUnixEpochTime());
+        boolean expectedResult = userConfigAllowed || bypassUserPolicyChecks;
+        script.simulateManualTimeSuggestion(
+                ARBITRARY_USER_ID, timeSuggestion, bypassUserPolicyChecks, expectedResult);
+        if (expectedResult) {
+            script.verifySystemClockConfidence(TIME_CONFIDENCE_HIGH)
+                    .verifySystemClockWasSetAndResetCallTracking(expectedSystemClockMillis);
+        } else {
+            script.verifySystemClockConfidence(TIME_CONFIDENCE_LOW)
+                    .verifySystemClockWasNotSetAndResetCallTracking();
+        }
     }
 
     @Test
@@ -704,8 +738,10 @@ public class TimeDetectorStrategyImplTest {
 
         long expectedManualClockMillis =
                 script.calculateTimeInMillisForNow(manualTimeSuggestion.getUnixEpochTime());
+        boolean bypassUserPolicyChecks = false;
+        boolean expectedResult = true;
         script.simulateManualTimeSuggestion(
-                        ARBITRARY_USER_ID, manualTimeSuggestion, true /* expectedResult */)
+                ARBITRARY_USER_ID, manualTimeSuggestion, bypassUserPolicyChecks, expectedResult)
                 .verifySystemClockConfidence(TIME_CONFIDENCE_HIGH)
                 .verifySystemClockWasSetAndResetCallTracking(expectedManualClockMillis)
                 .assertLatestTelephonySuggestion(slotIndex, telephonyTimeSuggestion);
@@ -737,9 +773,10 @@ public class TimeDetectorStrategyImplTest {
         ManualTimeSuggestion timeSuggestion =
                 script.generateManualTimeSuggestion(ARBITRARY_TEST_TIME);
 
-        script.simulateTimePassing()
-                .simulateManualTimeSuggestion(
-                        ARBITRARY_USER_ID, timeSuggestion, false /* expectedResult */)
+        boolean bypassUserPolicyChecks = false;
+        boolean expectedResult = false;
+        script.simulateTimePassing().simulateManualTimeSuggestion(
+                ARBITRARY_USER_ID, timeSuggestion, bypassUserPolicyChecks, expectedResult)
                 .verifySystemClockConfidence(TIME_CONFIDENCE_LOW)
                 .verifySystemClockWasNotSetAndResetCallTracking();
     }
@@ -755,8 +792,10 @@ public class TimeDetectorStrategyImplTest {
 
         Instant aboveUpperBound = TEST_SUGGESTION_UPPER_BOUND.plusSeconds(1);
         ManualTimeSuggestion timeSuggestion = script.generateManualTimeSuggestion(aboveUpperBound);
+        boolean bypassUserPolicyChecks = false;
+        boolean expectedResult = false;
         script.simulateManualTimeSuggestion(
-                        ARBITRARY_USER_ID, timeSuggestion, false /* expectedResult */)
+                ARBITRARY_USER_ID, timeSuggestion, bypassUserPolicyChecks, expectedResult)
                 .verifySystemClockConfidence(TIME_CONFIDENCE_LOW)
                 .verifySystemClockWasNotSetAndResetCallTracking();
     }
@@ -772,8 +811,10 @@ public class TimeDetectorStrategyImplTest {
 
         Instant belowUpperBound = TEST_SUGGESTION_UPPER_BOUND.minusSeconds(1);
         ManualTimeSuggestion timeSuggestion = script.generateManualTimeSuggestion(belowUpperBound);
+        boolean bypassUserPolicyChecks = false;
+        boolean expectedResult = true;
         script.simulateManualTimeSuggestion(
-                        ARBITRARY_USER_ID, timeSuggestion, true /* expectedResult */)
+                ARBITRARY_USER_ID, timeSuggestion, bypassUserPolicyChecks, expectedResult)
                 .verifySystemClockConfidence(TIME_CONFIDENCE_HIGH)
                 .verifySystemClockWasSetAndResetCallTracking(belowUpperBound.toEpochMilli());
     }
@@ -789,8 +830,10 @@ public class TimeDetectorStrategyImplTest {
 
         Instant belowLowerBound = TEST_SUGGESTION_LOWER_BOUND.minusSeconds(1);
         ManualTimeSuggestion timeSuggestion = script.generateManualTimeSuggestion(belowLowerBound);
+        boolean bypassUserPolicyChecks = false;
+        boolean expectedResult = false;
         script.simulateManualTimeSuggestion(
-                        ARBITRARY_USER_ID, timeSuggestion, false /* expectedResult */)
+                ARBITRARY_USER_ID, timeSuggestion, bypassUserPolicyChecks, expectedResult)
                 .verifySystemClockConfidence(TIME_CONFIDENCE_LOW)
                 .verifySystemClockWasNotSetAndResetCallTracking();
     }
@@ -806,8 +849,10 @@ public class TimeDetectorStrategyImplTest {
 
         Instant aboveLowerBound = TEST_SUGGESTION_LOWER_BOUND.plusSeconds(1);
         ManualTimeSuggestion timeSuggestion = script.generateManualTimeSuggestion(aboveLowerBound);
+        boolean bypassUserPolicyChecks = false;
+        boolean expectedResult = true;
         script.simulateManualTimeSuggestion(
-                        ARBITRARY_USER_ID, timeSuggestion, true /* expectedResult */)
+                ARBITRARY_USER_ID, timeSuggestion, bypassUserPolicyChecks, expectedResult)
                 .verifySystemClockConfidence(TIME_CONFIDENCE_HIGH)
                 .verifySystemClockWasSetAndResetCallTracking(aboveLowerBound.toEpochMilli());
     }
@@ -1758,8 +1803,10 @@ public class TimeDetectorStrategyImplTest {
         ManualTimeSuggestion timeSuggestion =
                 script.generateManualTimeSuggestion(ARBITRARY_TEST_TIME);
 
+        boolean bypassUserPolicyChecks = false;
+        boolean expectedResult = true;
         script.simulateManualTimeSuggestion(
-                ARBITRARY_USER_ID, timeSuggestion, true /* expectedResult */)
+                ARBITRARY_USER_ID, timeSuggestion, bypassUserPolicyChecks, expectedResult)
                 .verifySystemClockWasSetAndResetCallTracking(ARBITRARY_TEST_TIME.toEpochMilli());
     }
 
@@ -1951,14 +1998,15 @@ public class TimeDetectorStrategyImplTest {
 
         Script simulateManualTimeSuggestion(
                 @UserIdInt int userId, ManualTimeSuggestion timeSuggestion,
-                boolean expectedResult) {
+                boolean bypassUserPolicyChecks, boolean expectedResult) {
             String errorMessage = expectedResult
                     ? "Manual time suggestion was ignored, but expected to be accepted."
                     : "Manual time suggestion was accepted, but expected to be ignored.";
             assertEquals(
                     errorMessage,
                     expectedResult,
-                    mTimeDetectorStrategy.suggestManualTime(userId, timeSuggestion));
+                    mTimeDetectorStrategy.suggestManualTime(
+                            userId, timeSuggestion, bypassUserPolicyChecks));
             return this;
         }
 
