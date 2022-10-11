@@ -20,7 +20,6 @@ import android.content.Context
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroupOverlay
-import android.view.ViewRootImpl
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
@@ -35,20 +34,15 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCompositionContext
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawOutline
 import androidx.compose.ui.graphics.drawscope.scale
@@ -56,29 +50,13 @@ import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.Density
 import androidx.lifecycle.ViewTreeLifecycleOwner
 import androidx.lifecycle.ViewTreeViewModelStoreOwner
 import androidx.savedstate.findViewTreeSavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
-import com.android.internal.jank.InteractionJankMonitor
-import com.android.systemui.animation.ActivityLaunchAnimator
-import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.animation.LaunchAnimator
 import kotlin.math.min
-import kotlin.math.roundToInt
-
-/** A controller that can control animated launches. */
-interface ExpandableController {
-    /** Create an [ActivityLaunchAnimator.Controller] to animate into an Activity. */
-    fun forActivity(): ActivityLaunchAnimator.Controller
-
-    /** Create a [DialogLaunchAnimator.Controller] to animate into a Dialog. */
-    fun forDialog(): DialogLaunchAnimator.Controller
-}
 
 /**
  * Create an expandable shape that can launch into an Activity or a Dialog.
@@ -111,6 +89,48 @@ fun Expandable(
     contentColor: Color = contentColorFor(color),
     content: @Composable (ExpandableController) -> Unit,
 ) {
+    Expandable(
+        rememberExpandableController(color, shape, contentColor),
+        modifier,
+        content,
+    )
+}
+
+/**
+ * Create an expandable shape that can launch into an Activity or a Dialog.
+ *
+ * This overload can be used in cases where you need to create the [ExpandableController] before
+ * composing this [Expandable], for instance if something outside of this Expandable can trigger a
+ * launch animation
+ *
+ * Example:
+ * ```
+ *    // The controller that you can use to trigger the animations from anywhere.
+ *    val controller =
+ *        rememberExpandableController(
+ *          color = MaterialTheme.colorScheme.primary,
+ *          shape = RoundedCornerShape(16.dp),
+ *        )
+ *
+ *    Expandable(controller) {
+ *       ...
+ *    }
+ * ```
+ *
+ * @sample com.android.systemui.compose.gallery.ActivityLaunchScreen
+ * @sample com.android.systemui.compose.gallery.DialogLaunchScreen
+ */
+@Composable
+fun Expandable(
+    controller: ExpandableController,
+    modifier: Modifier = Modifier,
+    content: @Composable (ExpandableController) -> Unit,
+) {
+    val controller = controller as ExpandableControllerImpl
+    val color = controller.color
+    val contentColor = controller.contentColor
+    val shape = controller.shape
+
     // TODO(b/230830644): Use movableContentOf to preserve the content state instead once the
     // Compose libraries have been updated and include aosp/2163631.
     val wrappedContent =
@@ -122,207 +142,16 @@ fun Expandable(
             }
         }
 
-    val density = LocalDensity.current
-    val layoutDirection = LocalLayoutDirection.current
-    val composeViewRoot = LocalView.current
-
-    val animatorState = remember { mutableStateOf<LaunchAnimator.State?>(null) }
-    var overlay by remember { mutableStateOf<ViewGroupOverlay?>(null) }
-    var isDialogShowing by remember { mutableStateOf(false) }
-    var currentComposeViewInOverlay by remember { mutableStateOf<View?>(null) }
-    var boundsInComposeViewRoot by remember { mutableStateOf(Rect.Zero) }
-    val thisExpandableSize by remember { derivedStateOf { boundsInComposeViewRoot.size } }
-
-    // Create a [LaunchAnimator.Controller] that is going to be used to drive an activity or dialog
-    // animation. This controller will:
-    //   1. Compute the start/end animation state using [boundsInComposeViewRoot] and the location
-    //      of composeViewRoot on the screen.
-    //   2. Update [animatorState] with the current animation state if we are animating, or null
-    //      otherwise.
-    fun launchController(): LaunchAnimator.Controller {
-        return object : LaunchAnimator.Controller {
-            private val rootLocationOnScreen = intArrayOf(0, 0)
-
-            override var launchContainer: ViewGroup = composeViewRoot.rootView as ViewGroup
-
-            override fun onLaunchAnimationEnd(isExpandingFullyAbove: Boolean) {
-                animatorState.value = null
-            }
-
-            override fun onLaunchAnimationProgress(
-                state: LaunchAnimator.State,
-                progress: Float,
-                linearProgress: Float
-            ) {
-                // We copy state given that it's always the same object that is mutated by
-                // ActivityLaunchAnimator.
-                animatorState.value =
-                    LaunchAnimator.State(
-                            state.top,
-                            state.bottom,
-                            state.left,
-                            state.right,
-                            state.topCornerRadius,
-                            state.bottomCornerRadius,
-                        )
-                        .apply { visible = state.visible }
-
-                // Force measure and layout the ComposeView in the overlay whenever the animation
-                // state changes.
-                currentComposeViewInOverlay?.let { measureAndLayoutComposeViewInOverlay(it, state) }
-            }
-
-            override fun createAnimatorState(): LaunchAnimator.State {
-                val boundsInRoot = boundsInComposeViewRoot
-                val outline =
-                    shape.createOutline(
-                        Size(boundsInRoot.width, boundsInRoot.height),
-                        layoutDirection,
-                        density,
-                    )
-
-                val (topCornerRadius, bottomCornerRadius) =
-                    when (outline) {
-                        is Outline.Rectangle -> 0f to 0f
-                        is Outline.Rounded -> {
-                            val roundRect = outline.roundRect
-
-                            // TODO(b/230830644): Add better support different corner radii.
-                            val topCornerRadius =
-                                maxOf(
-                                    roundRect.topLeftCornerRadius.x,
-                                    roundRect.topLeftCornerRadius.y,
-                                    roundRect.topRightCornerRadius.x,
-                                    roundRect.topRightCornerRadius.y,
-                                )
-                            val bottomCornerRadius =
-                                maxOf(
-                                    roundRect.bottomLeftCornerRadius.x,
-                                    roundRect.bottomLeftCornerRadius.y,
-                                    roundRect.bottomRightCornerRadius.x,
-                                    roundRect.bottomRightCornerRadius.y,
-                                )
-
-                            topCornerRadius to bottomCornerRadius
-                        }
-                        else ->
-                            error(
-                                "ExpandableState only supports (rounded) rectangles at the " +
-                                    "moment."
-                            )
-                    }
-
-                val rootLocation = rootLocationOnScreen()
-                return LaunchAnimator.State(
-                    top = rootLocation.y.roundToInt(),
-                    bottom = (rootLocation.y + boundsInRoot.height).roundToInt(),
-                    left = rootLocation.x.roundToInt(),
-                    right = (rootLocation.x + boundsInRoot.width).roundToInt(),
-                    topCornerRadius = topCornerRadius,
-                    bottomCornerRadius = bottomCornerRadius,
-                )
-            }
-
-            private fun rootLocationOnScreen(): Offset {
-                composeViewRoot.getLocationOnScreen(rootLocationOnScreen)
-                val boundsInRoot = boundsInComposeViewRoot
-                val x = rootLocationOnScreen[0] + boundsInRoot.left
-                val y = rootLocationOnScreen[1] + boundsInRoot.top
-                return Offset(x, y)
-            }
-        }
+    val thisExpandableSize by remember {
+        derivedStateOf { controller.boundsInComposeViewRoot.value.size }
     }
-
-    /** Create an [ActivityLaunchAnimator.Controller] that can be used to animate activities. */
-    fun activityController(): ActivityLaunchAnimator.Controller {
-        val delegate = launchController()
-        return object : ActivityLaunchAnimator.Controller, LaunchAnimator.Controller by delegate {
-            override fun onLaunchAnimationStart(isExpandingFullyAbove: Boolean) {
-                delegate.onLaunchAnimationStart(isExpandingFullyAbove)
-                overlay = composeViewRoot.rootView.overlay as ViewGroupOverlay
-            }
-
-            override fun onLaunchAnimationEnd(isExpandingFullyAbove: Boolean) {
-                delegate.onLaunchAnimationEnd(isExpandingFullyAbove)
-                overlay = null
-            }
-        }
-    }
-
-    // Whether this composable is still composed. We only do the dialog exit animation if this is
-    // true.
-    var isComposed by remember { mutableStateOf(true) }
-    DisposableEffect(Unit) { onDispose { isComposed = false } }
-
-    /** Create a [DialogLaunchAnimator.Controller] that can be used to animate dialogs. */
-    val identity = remember { Object() }
-    fun dialogController(): DialogLaunchAnimator.Controller {
-        return object : DialogLaunchAnimator.Controller {
-            override val viewRoot: ViewRootImpl = composeViewRoot.viewRootImpl
-            override val sourceIdentity: Any = identity
-
-            override fun startDrawingInOverlayOf(viewGroup: ViewGroup) {
-                val newOverlay = viewGroup.overlay as ViewGroupOverlay
-                if (newOverlay != overlay) {
-                    overlay = newOverlay
-                }
-            }
-
-            override fun stopDrawingInOverlay() {
-                if (overlay != null) {
-                    overlay = null
-                }
-            }
-
-            override fun createLaunchController(): LaunchAnimator.Controller {
-                val delegate = launchController()
-                return object : LaunchAnimator.Controller by delegate {
-                    override fun onLaunchAnimationEnd(isExpandingFullyAbove: Boolean) {
-                        delegate.onLaunchAnimationEnd(isExpandingFullyAbove)
-
-                        // Make sure we don't draw this expandable when the dialog is showing.
-                        isDialogShowing = true
-                    }
-                }
-            }
-
-            override fun createExitController(): LaunchAnimator.Controller {
-                val delegate = launchController()
-                return object : LaunchAnimator.Controller by delegate {
-                    override fun onLaunchAnimationEnd(isExpandingFullyAbove: Boolean) {
-                        delegate.onLaunchAnimationEnd(isExpandingFullyAbove)
-                        isDialogShowing = false
-                    }
-                }
-            }
-
-            override fun shouldAnimateExit(): Boolean = isComposed
-
-            override fun onExitAnimationCancelled() {
-                isDialogShowing = false
-            }
-
-            override fun jankConfigurationBuilder(
-                cuj: Int
-            ): InteractionJankMonitor.Configuration.Builder? {
-                // TODO(b/252723237): Add support for jank monitoring when animating from a
-                // Composable.
-                return null
-            }
-        }
-    }
-
-    val controller =
-        object : ExpandableController {
-            override fun forActivity(): ActivityLaunchAnimator.Controller = activityController()
-
-            override fun forDialog(): DialogLaunchAnimator.Controller = dialogController()
-        }
 
     // Make sure we don't read animatorState directly here to avoid recomposition every time the
     // state changes (i.e. every frame of the animation).
     val isAnimating by remember {
-        derivedStateOf { animatorState.value != null && overlay != null }
+        derivedStateOf {
+            controller.animatorState.value != null && controller.overlay.value != null
+        }
     }
 
     when {
@@ -333,7 +162,7 @@ fun Expandable(
             Spacer(
                 modifier
                     .clip(shape)
-                    .requiredSize(with(density) { boundsInComposeViewRoot.size.toDpSize() })
+                    .requiredSize(with(controller.density) { thisExpandableSize.toDpSize() })
             )
 
             // The content and its animated background in the overlay. We draw it only when we are
@@ -341,27 +170,29 @@ fun Expandable(
             AnimatedContentInOverlay(
                 color,
                 thisExpandableSize,
-                animatorState,
-                overlay
+                controller.animatorState,
+                controller.overlay.value
                     ?: error("AnimatedContentInOverlay shouldn't be composed with null overlay."),
                 controller,
                 wrappedContent,
-                composeViewRoot,
-                { currentComposeViewInOverlay = it },
-                density,
+                controller.composeViewRoot,
+                { controller.currentComposeViewInOverlay.value = it },
+                controller.density,
             )
         }
-        isDialogShowing -> {
+        controller.isDialogShowing.value -> {
             Box(
                 modifier
                     .drawWithContent { /* Don't draw anything when the dialog is shown. */}
-                    .onGloballyPositioned { boundsInComposeViewRoot = it.boundsInRoot() }
+                    .onGloballyPositioned {
+                        controller.boundsInComposeViewRoot.value = it.boundsInRoot()
+                    }
             ) { wrappedContent(controller) }
         }
         else -> {
             Box(
                 modifier.clip(shape).background(color, shape).onGloballyPositioned {
-                    boundsInComposeViewRoot = it.boundsInRoot()
+                    controller.boundsInComposeViewRoot.value = it.boundsInRoot()
                 }
             ) { wrappedContent(controller) }
         }
@@ -496,7 +327,7 @@ private fun AnimatedContentInOverlay(
     }
 }
 
-private fun measureAndLayoutComposeViewInOverlay(
+internal fun measureAndLayoutComposeViewInOverlay(
     view: View,
     state: LaunchAnimator.State,
 ) {
