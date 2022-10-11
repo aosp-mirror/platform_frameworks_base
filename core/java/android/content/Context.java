@@ -3817,6 +3817,7 @@ public abstract class Context {
             CAPTIONING_SERVICE,
             KEYGUARD_SERVICE,
             LOCATION_SERVICE,
+            HEALTHCONNECT_SERVICE,
             //@hide: COUNTRY_DETECTOR,
             SEARCH_SERVICE,
             SENSOR_SERVICE,
