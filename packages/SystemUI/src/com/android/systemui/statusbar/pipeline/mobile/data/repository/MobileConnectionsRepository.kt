@@ -19,22 +19,10 @@ package com.android.systemui.statusbar.pipeline.mobile.data.repository
 import android.content.Context
 import android.content.IntentFilter
 import android.telephony.CarrierConfigManager
-import android.telephony.CellSignalStrength
-import android.telephony.CellSignalStrengthCdma
-import android.telephony.ServiceState
-import android.telephony.SignalStrength
 import android.telephony.SubscriptionInfo
 import android.telephony.SubscriptionManager
 import android.telephony.TelephonyCallback
 import android.telephony.TelephonyCallback.ActiveDataSubscriptionIdListener
-import android.telephony.TelephonyCallback.CarrierNetworkListener
-import android.telephony.TelephonyCallback.DataActivityListener
-import android.telephony.TelephonyCallback.DataConnectionStateListener
-import android.telephony.TelephonyCallback.DisplayInfoListener
-import android.telephony.TelephonyCallback.ServiceStateListener
-import android.telephony.TelephonyCallback.SignalStrengthsListener
-import android.telephony.TelephonyDisplayInfo
-import android.telephony.TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NONE
 import android.telephony.TelephonyManager
 import androidx.annotation.VisibleForTesting
 import com.android.settingslib.mobile.MobileMappings
@@ -44,10 +32,6 @@ import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCall
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
-import com.android.systemui.statusbar.pipeline.mobile.data.model.DefaultNetworkType
-import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileSubscriptionModel
-import com.android.systemui.statusbar.pipeline.mobile.data.model.OverrideNetworkType
-import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxy
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -68,7 +52,7 @@ import kotlinx.coroutines.withContext
  * Repo for monitoring the complete active subscription info list, to be consumed and filtered based
  * on various policy
  */
-interface MobileSubscriptionRepository {
+interface MobileConnectionsRepository {
     /** Observable list of current mobile subscriptions */
     val subscriptionsFlow: Flow<List<SubscriptionInfo>>
 
@@ -78,14 +62,14 @@ interface MobileSubscriptionRepository {
     /** Observable for [MobileMappings.Config] tracking the defaults */
     val defaultDataSubRatConfig: StateFlow<Config>
 
-    /** Get or create an observable for the given subscription ID */
-    fun getFlowForSubId(subId: Int): Flow<MobileSubscriptionModel>
+    /** Get or create a repository for the line of service for the given subscription ID */
+    fun getRepoForSubId(subId: Int): MobileConnectionRepository
 }
 
 @Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
 @OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
-class MobileSubscriptionRepositoryImpl
+class MobileConnectionsRepositoryImpl
 @Inject
 constructor(
     private val subscriptionManager: SubscriptionManager,
@@ -93,11 +77,11 @@ constructor(
     private val logger: ConnectivityPipelineLogger,
     broadcastDispatcher: BroadcastDispatcher,
     private val context: Context,
-    private val mobileMappings: MobileMappingsProxy,
     @Background private val bgDispatcher: CoroutineDispatcher,
     @Application private val scope: CoroutineScope,
-) : MobileSubscriptionRepository {
-    private val subIdFlowCache: MutableMap<Int, StateFlow<MobileSubscriptionModel>> = mutableMapOf()
+    private val mobileConnectionRepositoryFactory: MobileConnectionRepositoryImpl.Factory
+) : MobileConnectionsRepository {
+    private val subIdRepositoryCache: MutableMap<Int, MobileConnectionRepository> = mutableMapOf()
 
     /**
      * State flow that emits the set of mobile data subscriptions, each represented by its own
@@ -121,6 +105,7 @@ constructor(
                 awaitClose { subscriptionManager.removeOnSubscriptionsChangedListener(callback) }
             }
             .mapLatest { fetchSubscriptionsList() }
+            .onEach { infos -> dropUnusedReposFromCache(infos) }
             .stateIn(scope, started = SharingStarted.WhileSubscribed(), listOf())
 
     /** StateFlow that keeps track of the current active mobile data subscription */
@@ -172,103 +157,43 @@ constructor(
                 initialValue = Config.readConfig(context)
             )
 
-    /**
-     * Each mobile subscription needs its own flow, which comes from registering listeners on the
-     * system. Use this method to create those flows and cache them for reuse
-     */
-    override fun getFlowForSubId(subId: Int): StateFlow<MobileSubscriptionModel> {
-        return subIdFlowCache[subId]
-            ?: createFlowForSubId(subId).also { subIdFlowCache[subId] = it }
+    override fun getRepoForSubId(subId: Int): MobileConnectionRepository {
+        if (!isValidSubId(subId)) {
+            throw IllegalArgumentException(
+                "subscriptionId $subId is not in the list of valid subscriptions"
+            )
+        }
+
+        return subIdRepositoryCache[subId]
+            ?: createRepositoryForSubId(subId).also { subIdRepositoryCache[subId] = it }
     }
 
-    @VisibleForTesting fun getSubIdFlowCache() = subIdFlowCache
-
-    private fun createFlowForSubId(subId: Int): StateFlow<MobileSubscriptionModel> = run {
-        var state = MobileSubscriptionModel()
-        conflatedCallbackFlow {
-                val phony = telephonyManager.createForSubscriptionId(subId)
-                // TODO (b/240569788): log all of these into the connectivity logger
-                val callback =
-                    object :
-                        TelephonyCallback(),
-                        ServiceStateListener,
-                        SignalStrengthsListener,
-                        DataConnectionStateListener,
-                        DataActivityListener,
-                        CarrierNetworkListener,
-                        DisplayInfoListener {
-                        override fun onServiceStateChanged(serviceState: ServiceState) {
-                            state = state.copy(isEmergencyOnly = serviceState.isEmergencyOnly)
-                            trySend(state)
-                        }
-
-                        override fun onSignalStrengthsChanged(signalStrength: SignalStrength) {
-                            val cdmaLevel =
-                                signalStrength
-                                    .getCellSignalStrengths(CellSignalStrengthCdma::class.java)
-                                    .let { strengths ->
-                                        if (!strengths.isEmpty()) {
-                                            strengths[0].level
-                                        } else {
-                                            CellSignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN
-                                        }
-                                    }
-
-                            val primaryLevel = signalStrength.level
-
-                            state =
-                                state.copy(
-                                    cdmaLevel = cdmaLevel,
-                                    primaryLevel = primaryLevel,
-                                    isGsm = signalStrength.isGsm,
-                                )
-                            trySend(state)
-                        }
-
-                        override fun onDataConnectionStateChanged(
-                            dataState: Int,
-                            networkType: Int
-                        ) {
-                            state = state.copy(dataConnectionState = dataState)
-                            trySend(state)
-                        }
-
-                        override fun onDataActivity(direction: Int) {
-                            state = state.copy(dataActivityDirection = direction)
-                            trySend(state)
-                        }
-
-                        override fun onCarrierNetworkChange(active: Boolean) {
-                            state = state.copy(carrierNetworkChangeActive = active)
-                            trySend(state)
-                        }
-
-                        override fun onDisplayInfoChanged(
-                            telephonyDisplayInfo: TelephonyDisplayInfo
-                        ) {
-                            val networkType =
-                                if (
-                                    telephonyDisplayInfo.overrideNetworkType ==
-                                        OVERRIDE_NETWORK_TYPE_NONE
-                                ) {
-                                    DefaultNetworkType(telephonyDisplayInfo.networkType)
-                                } else {
-                                    OverrideNetworkType(telephonyDisplayInfo.overrideNetworkType)
-                                }
-
-                            state = state.copy(resolvedNetworkType = networkType)
-                            trySend(state)
-                        }
-                    }
-                phony.registerTelephonyCallback(bgDispatcher.asExecutor(), callback)
-                awaitClose {
-                    phony.unregisterTelephonyCallback(callback)
-                    // Release the cached flow
-                    subIdFlowCache.remove(subId)
-                }
+    private fun isValidSubId(subId: Int): Boolean {
+        subscriptionsFlow.value.forEach {
+            if (it.subscriptionId == subId) {
+                return true
             }
-            .onEach { logger.logOutputChange("mobileSubscriptionModel", it.toString()) }
-            .stateIn(scope, SharingStarted.WhileSubscribed(), state)
+        }
+
+        return false
+    }
+
+    @VisibleForTesting fun getSubIdRepoCache() = subIdRepositoryCache
+
+    private fun createRepositoryForSubId(subId: Int): MobileConnectionRepository {
+        return mobileConnectionRepositoryFactory.build(subId)
+    }
+
+    private fun dropUnusedReposFromCache(newInfos: List<SubscriptionInfo>) {
+        // Remove any connection repository from the cache that isn't in the new set of IDs. They
+        // will get garbage collected once their subscribers go away
+        val currentValidSubscriptionIds = newInfos.map { it.subscriptionId }
+
+        subIdRepositoryCache.keys.forEach {
+            if (!currentValidSubscriptionIds.contains(it)) {
+                subIdRepositoryCache.remove(it)
+            }
+        }
     }
 
     private suspend fun fetchSubscriptionsList(): List<SubscriptionInfo> =

@@ -23,8 +23,7 @@ import com.android.settingslib.SignalIcon.MobileIconGroup
 import com.android.settingslib.mobile.TelephonyIcons
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileSubscriptionModel
-import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileSubscriptionRepository
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.UserSetupRepository
 import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxy
 import com.android.systemui.util.CarrierConfigTracker
@@ -59,7 +58,7 @@ interface MobileIconsInteractor {
 class MobileIconsInteractorImpl
 @Inject
 constructor(
-    private val mobileSubscriptionRepo: MobileSubscriptionRepository,
+    private val mobileSubscriptionRepo: MobileConnectionsRepository,
     private val carrierConfigTracker: CarrierConfigTracker,
     private val mobileMappingsProxy: MobileMappingsProxy,
     userSetupRepo: UserSetupRepository,
@@ -138,12 +137,6 @@ constructor(
             defaultMobileIconMapping,
             defaultMobileIconGroup,
             mobileMappingsProxy,
-            mobileSubscriptionFlowForSubId(subId),
+            mobileSubscriptionRepo.getRepoForSubId(subId),
         )
-
-    /**
-     * Create a new flow for a given subscription ID, which usually maps 1:1 with mobile connections
-     */
-    private fun mobileSubscriptionFlowForSubId(subId: Int): Flow<MobileSubscriptionModel> =
-        mobileSubscriptionRepo.getFlowForSubId(subId)
 }

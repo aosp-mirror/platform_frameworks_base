@@ -19,7 +19,7 @@ package com.android.systemui.statusbar.pipeline.mobile.domain.interactor
 import android.telephony.SubscriptionInfo
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileSubscriptionRepository
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeUserSetupRepository
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
 import com.android.systemui.util.CarrierConfigTracker
@@ -41,7 +41,7 @@ import org.mockito.MockitoAnnotations
 class MobileIconsInteractorTest : SysuiTestCase() {
     private lateinit var underTest: MobileIconsInteractor
     private val userSetupRepository = FakeUserSetupRepository()
-    private val subscriptionsRepository = FakeMobileSubscriptionRepository()
+    private val subscriptionsRepository = FakeMobileConnectionsRepository()
     private val mobileMappingsProxy = FakeMobileMappingsProxy()
     private val scope = CoroutineScope(IMMEDIATE)
 

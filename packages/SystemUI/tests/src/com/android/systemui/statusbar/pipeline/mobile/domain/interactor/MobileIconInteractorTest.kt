@@ -26,7 +26,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DefaultNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileSubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.OverrideNetworkType
-import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileSubscriptionRepository
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionRepository
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobileIconsInteractor.Companion.FIVE_G_OVERRIDE
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobileIconsInteractor.Companion.FOUR_G
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobileIconsInteractor.Companion.THREE_G
@@ -45,10 +45,9 @@ import org.junit.Test
 @SmallTest
 class MobileIconInteractorTest : SysuiTestCase() {
     private lateinit var underTest: MobileIconInteractor
-    private val mobileSubscriptionRepository = FakeMobileSubscriptionRepository()
     private val mobileMappingsProxy = FakeMobileMappingsProxy()
     private val mobileIconsInteractor = FakeMobileIconsInteractor(mobileMappingsProxy)
-    private val sub1Flow = mobileSubscriptionRepository.getFlowForSubId(SUB_1_ID)
+    private val connectionRepository = FakeMobileConnectionRepository()
 
     @Before
     fun setUp() {
@@ -57,16 +56,15 @@ class MobileIconInteractorTest : SysuiTestCase() {
                 mobileIconsInteractor.defaultMobileIconMapping,
                 mobileIconsInteractor.defaultMobileIconGroup,
                 mobileMappingsProxy,
-                sub1Flow,
+                connectionRepository,
             )
     }
 
     @Test
     fun gsm_level_default_unknown() =
         runBlocking(IMMEDIATE) {
-            mobileSubscriptionRepository.setMobileSubscriptionModel(
+            connectionRepository.setMobileSubscriptionModel(
                 MobileSubscriptionModel(isGsm = true),
-                SUB_1_ID
             )
 
             var latest: Int? = null
@@ -80,13 +78,12 @@ class MobileIconInteractorTest : SysuiTestCase() {
     @Test
     fun gsm_usesGsmLevel() =
         runBlocking(IMMEDIATE) {
-            mobileSubscriptionRepository.setMobileSubscriptionModel(
+            connectionRepository.setMobileSubscriptionModel(
                 MobileSubscriptionModel(
                     isGsm = true,
                     primaryLevel = GSM_LEVEL,
                     cdmaLevel = CDMA_LEVEL
                 ),
-                SUB_1_ID
             )
 
             var latest: Int? = null
@@ -100,9 +97,8 @@ class MobileIconInteractorTest : SysuiTestCase() {
     @Test
     fun cdma_level_default_unknown() =
         runBlocking(IMMEDIATE) {
-            mobileSubscriptionRepository.setMobileSubscriptionModel(
+            connectionRepository.setMobileSubscriptionModel(
                 MobileSubscriptionModel(isGsm = false),
-                SUB_1_ID
             )
 
             var latest: Int? = null
@@ -115,13 +111,12 @@ class MobileIconInteractorTest : SysuiTestCase() {
     @Test
     fun cdma_usesCdmaLevel() =
         runBlocking(IMMEDIATE) {
-            mobileSubscriptionRepository.setMobileSubscriptionModel(
+            connectionRepository.setMobileSubscriptionModel(
                 MobileSubscriptionModel(
                     isGsm = false,
                     primaryLevel = GSM_LEVEL,
                     cdmaLevel = CDMA_LEVEL
                 ),
-                SUB_1_ID
             )
 
             var latest: Int? = null
@@ -135,9 +130,8 @@ class MobileIconInteractorTest : SysuiTestCase() {
     @Test
     fun iconGroup_three_g() =
         runBlocking(IMMEDIATE) {
-            mobileSubscriptionRepository.setMobileSubscriptionModel(
+            connectionRepository.setMobileSubscriptionModel(
                 MobileSubscriptionModel(resolvedNetworkType = DefaultNetworkType(THREE_G)),
-                SUB_1_ID
             )
 
             var latest: MobileIconGroup? = null
@@ -151,19 +145,17 @@ class MobileIconInteractorTest : SysuiTestCase() {
     @Test
     fun iconGroup_updates_on_change() =
         runBlocking(IMMEDIATE) {
-            mobileSubscriptionRepository.setMobileSubscriptionModel(
+            connectionRepository.setMobileSubscriptionModel(
                 MobileSubscriptionModel(resolvedNetworkType = DefaultNetworkType(THREE_G)),
-                SUB_1_ID
             )
 
             var latest: MobileIconGroup? = null
             val job = underTest.networkTypeIconGroup.onEach { latest = it }.launchIn(this)
 
-            mobileSubscriptionRepository.setMobileSubscriptionModel(
+            connectionRepository.setMobileSubscriptionModel(
                 MobileSubscriptionModel(
                     resolvedNetworkType = DefaultNetworkType(FOUR_G),
                 ),
-                SUB_1_ID
             )
             yield()
 
@@ -175,9 +167,8 @@ class MobileIconInteractorTest : SysuiTestCase() {
     @Test
     fun iconGroup_5g_override_type() =
         runBlocking(IMMEDIATE) {
-            mobileSubscriptionRepository.setMobileSubscriptionModel(
+            connectionRepository.setMobileSubscriptionModel(
                 MobileSubscriptionModel(resolvedNetworkType = OverrideNetworkType(FIVE_G_OVERRIDE)),
-                SUB_1_ID
             )
 
             var latest: MobileIconGroup? = null
@@ -191,11 +182,10 @@ class MobileIconInteractorTest : SysuiTestCase() {
     @Test
     fun iconGroup_default_if_no_lookup() =
         runBlocking(IMMEDIATE) {
-            mobileSubscriptionRepository.setMobileSubscriptionModel(
+            connectionRepository.setMobileSubscriptionModel(
                 MobileSubscriptionModel(
                     resolvedNetworkType = DefaultNetworkType(NETWORK_TYPE_UNKNOWN),
                 ),
-                SUB_1_ID
             )
 
             var latest: MobileIconGroup? = null
@@ -215,9 +205,5 @@ class MobileIconInteractorTest : SysuiTestCase() {
         private const val SUB_1_ID = 1
         private val SUB_1 =
             mock<SubscriptionInfo>().also { whenever(it.subscriptionId).thenReturn(SUB_1_ID) }
-
-        private const val SUB_2_ID = 2
-        private val SUB_2 =
-            mock<SubscriptionInfo>().also { whenever(it.subscriptionId).thenReturn(SUB_2_ID) }
     }
 }

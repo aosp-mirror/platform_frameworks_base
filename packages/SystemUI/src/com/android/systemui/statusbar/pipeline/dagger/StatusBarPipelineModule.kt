@@ -18,8 +18,8 @@ package com.android.systemui.statusbar.pipeline.dagger
 
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.AirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.AirplaneModeRepositoryImpl
-import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileSubscriptionRepository
-import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileSubscriptionRepositoryImpl
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepositoryImpl
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.UserSetupRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.UserSetupRepositoryImpl
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconsInteractor
@@ -45,9 +45,9 @@ abstract class StatusBarPipelineModule {
     abstract fun wifiRepository(impl: WifiRepositoryImpl): WifiRepository
 
     @Binds
-    abstract fun mobileSubscriptionRepository(
-        impl: MobileSubscriptionRepositoryImpl
-    ): MobileSubscriptionRepository
+    abstract fun mobileConnectionsRepository(
+        impl: MobileConnectionsRepositoryImpl
+    ): MobileConnectionsRepository
 
     @Binds
     abstract fun userSetupRepository(impl: UserSetupRepositoryImpl): UserSetupRepository

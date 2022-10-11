@@ -19,8 +19,8 @@ package com.android.systemui.statusbar.pipeline.mobile.domain.interactor
 import android.telephony.CarrierConfigManager
 import com.android.settingslib.SignalIcon.MobileIconGroup
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DefaultNetworkType
-import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileSubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.OverrideNetworkType
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
 import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxy
 import com.android.systemui.util.CarrierConfigTracker
 import kotlinx.coroutines.flow.Flow
@@ -50,8 +50,10 @@ class MobileIconInteractorImpl(
     defaultMobileIconMapping: Flow<Map<String, MobileIconGroup>>,
     defaultMobileIconGroup: Flow<MobileIconGroup>,
     mobileMappingsProxy: MobileMappingsProxy,
-    mobileStatusInfo: Flow<MobileSubscriptionModel>,
+    connectionRepository: MobileConnectionRepository,
 ) : MobileIconInteractor {
+    private val mobileStatusInfo = connectionRepository.subscriptionModelFlow
+
     /** Observable for the current RAT indicator icon ([MobileIconGroup]) */
     override val networkTypeIconGroup: Flow<MobileIconGroup> =
         combine(
