@@ -19,6 +19,7 @@ package com.android.server.pm;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
 import static org.testng.Assert.assertThrows;
@@ -164,6 +165,14 @@ public final class UserManagerTest {
 
     @Test
     public void testCloneUser() throws Exception {
+
+        // Get the default properties for clone user type.
+        final UserTypeDetails userTypeDetails =
+                UserTypeFactory.getUserTypes().get(UserManager.USER_TYPE_PROFILE_CLONE);
+        assertWithMessage("No %s type on device", UserManager.USER_TYPE_PROFILE_CLONE)
+                .that(userTypeDetails).isNotNull();
+        final UserProperties typeProps = userTypeDetails.getDefaultUserPropertiesReference();
+
         // Test that only one clone user can be created
         final int primaryUserId = mUserManager.getPrimaryUser().id;
         UserInfo userInfo = createProfileForUser("Clone user1",
@@ -186,6 +195,16 @@ public final class UserManagerTest {
                         && user.isCloneProfile()))
                 .collect(Collectors.toList());
         assertThat(cloneUsers.size()).isEqualTo(1);
+
+        // Check that the new clone user has the expected properties (relative to the defaults)
+        // provided that the test caller has the necessary permissions.
+        UserProperties cloneUserProperties =
+                mUserManager.getUserProperties(UserHandle.of(userInfo.id));
+        assertThat(typeProps.getUseParentsContacts())
+                .isEqualTo(cloneUserProperties.getUseParentsContacts());
+        assertThat(typeProps.getShowInLauncher())
+                .isEqualTo(cloneUserProperties.getShowInLauncher());
+        assertThrows(SecurityException.class, cloneUserProperties::getStartWithParent);
 
         // Verify clone user parent
         assertThat(mUserManager.getProfileParent(primaryUserId)).isNull();
@@ -600,6 +619,7 @@ public final class UserManagerTest {
         // provided that the test caller has the necessary permissions.
         assertThat(userProps.getShowInLauncher()).isEqualTo(typeProps.getShowInLauncher());
         assertThat(userProps.getShowInSettings()).isEqualTo(typeProps.getShowInSettings());
+        assertFalse(userProps.getUseParentsContacts());
         assertThrows(SecurityException.class, userProps::getStartWithParent);
         assertThrows(SecurityException.class, userProps::getInheritDevicePolicy);
     }
