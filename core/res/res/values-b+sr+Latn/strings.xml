@@ -1959,7 +1959,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"Ovoj aplikaciji ne može da se pristupi sa uređaja <xliff:g id="DEVICE">%1$s</xliff:g>. Probajte na Android TV uređaju."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"Ovoj aplikaciji ne može da se pristupi sa uređaja <xliff:g id="DEVICE">%1$s</xliff:g>. Probajte na tabletu."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Ovoj aplikaciji ne može da se pristupi sa uređaja <xliff:g id="DEVICE">%1$s</xliff:g>. Probajte na telefonu."</string>
-    <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Ova aplikacija je napravljena za stariju verziju Android-a, pa možda neće raditi ispravno. Potražite ažuriranja ili kontaktirajte programera."</string>
+    <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Ova aplikacija je napravljena za stariju verziju Android-a. Možda neće raditi ispravno i ne obuhvata najnovije bezbednosne funkcije i zaštite privatnosti. Proverite da li ima ažuriranja ili se obratite programeru aplikacije."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Potraži ažuriranje"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Imate nove poruke"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Otvorite aplikaciju za SMS da biste pregledali"</string>

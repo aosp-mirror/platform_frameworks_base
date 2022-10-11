@@ -1958,7 +1958,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"無法在 <xliff:g id="DEVICE">%1$s</xliff:g> 上存取此應用程式，請改用 Android TV 裝置。"</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"無法在 <xliff:g id="DEVICE">%1$s</xliff:g> 上存取此應用程式，請改用平板電腦。"</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"無法在 <xliff:g id="DEVICE">%1$s</xliff:g> 上存取此應用程式，請改用手機。"</string>
-    <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"此應用程式專為舊版 Android 打造，因此可能無法正常運作。請嘗試檢查更新，或與開發人員聯絡。"</string>
+    <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"這個應用程式是專為舊版 Android 所打造，因此可能無法正常運作，且不提供最新的安全性和隱私保護服務。請檢查是否有更新版本，或與應用程式的開發人員聯絡。"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"檢查更新"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"您有新的訊息"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"開啟短訊應用程式查看內容"</string>
@@ -2051,8 +2051,7 @@
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"允許存取一次"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"不允許"</string>
     <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"裝置記錄會記下裝置上的活動。應用程式可透過這些記錄找出並修正問題。\n\n部分記錄可能包含敏感資料，因此請只允許信任的應用程式存取所有裝置記錄。\n\n如果不允許此應用程式存取所有裝置記錄，此應用程式仍能存取自己的記錄，且裝置製造商可能仍可存取裝置上的部分記錄或資料。"</string>
-    <!-- no translation found for log_access_confirmation_body (7379536536425265262) -->
-    <skip />
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"裝置記錄會記下裝置上的活動。應用程式可使用這些記錄找出並修正問題。\n\n有些記錄可能包含敏感資料，因此建議只允許信任的應用程式存取所有裝置記錄。\n\n如果不允許此應用程式存取所有裝置記錄，此應用程式仍能存取自己的記錄。您的裝置製造商可能仍可存取裝置上的一些記錄或資料。\n\n詳情請瀏覽 g.co/android/devicelogs。"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"不要再顯示"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"「<xliff:g id="APP_0">%1$s</xliff:g>」想顯示「<xliff:g id="APP_2">%2$s</xliff:g>」的快訊"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"編輯"</string>

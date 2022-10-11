@@ -1958,7 +1958,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"Ова не може да се отвори на <xliff:g id="DEVICE">%1$s</xliff:g>. Пробајте на вашиот Android TV како алтернатива."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"Ова не може да се отвори на <xliff:g id="DEVICE">%1$s</xliff:g>. Пробајте на вашиот таблет како алтернатива."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Ова не може да се отвори на <xliff:g id="DEVICE">%1$s</xliff:g>. Пробајте на вашиот телефон како алтернатива."</string>
-    <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Апликацијава е создадена за постара верзија на Android и може да не функционира правилно. Проверете за ажурирања или контактирајте со програмерот."</string>
+    <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Оваа апликација е создадена за постара верзија на Android. Можеби нема да работи правилно и не ги вклучува најновите мерки за заштита на безбедноста и приватноста. Проверете дали има ажурирање или контактирајте со програмерот на апликацијата."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Проверка за ажурирање"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Имате нови пораки"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Отворете ја апликацијата за SMS за приказ"</string>

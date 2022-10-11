@@ -1960,7 +1960,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"‏אי אפשר לגשת להגדרה הזו במכשיר <xliff:g id="DEVICE">%1$s</xliff:g>. במקום זאת, יש לנסות במכשיר Android TV."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"אי אפשר לגשת להגדרה הזו במכשיר <xliff:g id="DEVICE">%1$s</xliff:g>. במקום זאת, יש לנסות בטאבלט."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"אי אפשר לגשת להגדרה הזו במכשיר <xliff:g id="DEVICE">%1$s</xliff:g>. במקום זאת, אפשר לנסות בטלפון."</string>
-    <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"‏האפליקציה הזו עוצבה לגרסה ישנה יותר של Android וייתכן שלא תפעל כראוי. ניתן לבדוק אם יש עדכונים או ליצור קשר עם המפתח."</string>
+    <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"‏האפליקציה הזו תוכננה לגרסה ישנה יותר של Android. האפליקציה לא כוללת את אמצעי ההגנה האחרונים לאבטחה ופרטיות, ועלולה לא לעבוד כראוי. כדאי לבדוק אם יש עדכון או ליצור קשר עם מפתח האפליקציה."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"יש עדכון חדש?"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"יש לך הודעות חדשות"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"‏יש לפתוח את אפליקציית ה-SMS כדי להציג"</string>
@@ -2053,8 +2053,7 @@
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"הרשאת גישה חד-פעמית"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"אין אישור"</string>
     <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"ביומני המכשיר מתועדת הפעילות במכשיר. האפליקציות יכולות להשתמש ביומנים האלה כדי למצוא בעיות ולפתור אותן.\n\nהמידע בחלק מהיומנים יכול להיות רגיש, לכן יש לתת הרשאת גישה לכל יומני המכשיר רק לאפליקציות מהימנות. \n\nגם אם האפליקציה הזו לא תקבל הרשאת גישה לכל יומני המכשיר, היא תוכל לגשת ליומנים שלה. יכול להיות שליצרן המכשיר עדיין תהיה גישה לחלק מהיומנים או למידע במכשיר שלך."</string>
-    <!-- no translation found for log_access_confirmation_body (7379536536425265262) -->
-    <skip />
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"‏ביומני המכשיר מתועדת הפעילות במכשיר. האפליקציות יכולות להשתמש ביומנים האלה כדי למצוא בעיות ולפתור אותן.\n\nהמידע בחלק מהיומנים יכול להיות רגיש, לכן יש לתת הרשאת גישה לכל היומנים של המכשיר רק לאפליקציות שסומכים עליהן. \n\nגם אם האפליקציה הזו לא תקבל הרשאת גישה לכל יומני המכשיר, היא תוכל לגשת ליומנים שלה. יכול להיות שליצרן המכשיר עדיין תהיה גישה לחלק מהיומנים או למידע במכשיר שלך.\n\nמידע נוסף זמין בכתובת g.co/android/devicelogs."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"אין להציג שוב"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> רוצה להציג חלקים מ-<xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"עריכה"</string>
