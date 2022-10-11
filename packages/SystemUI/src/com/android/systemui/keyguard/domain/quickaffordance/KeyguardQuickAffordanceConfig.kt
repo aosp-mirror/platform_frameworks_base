@@ -20,6 +20,7 @@ package com.android.systemui.keyguard.domain.quickaffordance
 import android.content.Intent
 import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.common.shared.model.Icon
+import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordanceToggleState
 import kotlinx.coroutines.flow.Flow
 
 /** Defines interface that can act as data source for a single quick affordance model. */
@@ -44,6 +45,9 @@ interface KeyguardQuickAffordanceConfig {
         data class Visible(
             /** An icon for the affordance. */
             val icon: Icon,
+            /** The toggle state for the affordance. */
+            val toggle: KeyguardQuickAffordanceToggleState =
+                KeyguardQuickAffordanceToggleState.NotSupported,
         ) : State()
     }
 

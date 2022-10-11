@@ -31,6 +31,7 @@ import com.android.systemui.keyguard.domain.model.KeyguardQuickAffordancePositio
 import com.android.systemui.keyguard.domain.quickaffordance.FakeKeyguardQuickAffordanceConfig
 import com.android.systemui.keyguard.domain.quickaffordance.FakeKeyguardQuickAffordanceRegistry
 import com.android.systemui.keyguard.domain.quickaffordance.KeyguardQuickAffordanceConfig
+import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordanceToggleState
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.KeyguardStateController
@@ -130,6 +131,7 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
             TestConfig(
                 isVisible = true,
                 isClickable = true,
+                isActivated = true,
                 icon = mock(),
                 canShowWhileLocked = false,
                 intent = Intent("action"),
@@ -505,6 +507,12 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
                 }
                 KeyguardQuickAffordanceConfig.State.Visible(
                     icon = testConfig.icon ?: error("Icon is unexpectedly null!"),
+                    toggle =
+                        when (testConfig.isActivated) {
+                            true -> KeyguardQuickAffordanceToggleState.On
+                            false -> KeyguardQuickAffordanceToggleState.Off
+                            null -> KeyguardQuickAffordanceToggleState.NotSupported
+                        }
                 )
             } else {
                 KeyguardQuickAffordanceConfig.State.Hidden
@@ -521,6 +529,7 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
         checkNotNull(viewModel)
         assertThat(viewModel.isVisible).isEqualTo(testConfig.isVisible)
         assertThat(viewModel.isClickable).isEqualTo(testConfig.isClickable)
+        assertThat(viewModel.isActivated).isEqualTo(testConfig.isActivated)
         if (testConfig.isVisible) {
             assertThat(viewModel.icon).isEqualTo(testConfig.icon)
             viewModel.onClicked.invoke(
@@ -542,6 +551,7 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
     private data class TestConfig(
         val isVisible: Boolean,
         val isClickable: Boolean = false,
+        val isActivated: Boolean = false,
         val icon: Icon? = null,
         val canShowWhileLocked: Boolean = false,
         val intent: Intent? = null,

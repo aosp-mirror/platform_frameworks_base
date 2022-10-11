@@ -104,6 +104,7 @@ constructor(
                 KeyguardQuickAffordanceModel.Visible(
                     configKey = configs[index]::class,
                     icon = visibleState.icon,
+                    toggle = visibleState.toggle,
                 )
             } else {
                 KeyguardQuickAffordanceModel.Hidden

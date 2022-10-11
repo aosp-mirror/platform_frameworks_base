@@ -23,6 +23,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardQuickAffordanceInteractor
 import com.android.systemui.keyguard.domain.model.KeyguardQuickAffordanceModel
 import com.android.systemui.keyguard.domain.model.KeyguardQuickAffordancePosition
+import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordanceToggleState
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -123,6 +124,7 @@ constructor(
                         )
                     },
                     isClickable = isClickable,
+                    isActivated = toggle is KeyguardQuickAffordanceToggleState.On,
                 )
             is KeyguardQuickAffordanceModel.Hidden -> KeyguardQuickAffordanceViewModel()
         }

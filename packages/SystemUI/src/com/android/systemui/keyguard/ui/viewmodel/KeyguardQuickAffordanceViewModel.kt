@@ -30,6 +30,7 @@ data class KeyguardQuickAffordanceViewModel(
     val icon: Icon = Icon.Resource(res = 0, contentDescription = null),
     val onClicked: (OnClickedParameters) -> Unit = {},
     val isClickable: Boolean = false,
+    val isActivated: Boolean = false,
 ) {
     data class OnClickedParameters(
         val configKey: KClass<out KeyguardQuickAffordanceConfig>,

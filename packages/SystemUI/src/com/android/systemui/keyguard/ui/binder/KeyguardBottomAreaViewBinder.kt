@@ -238,14 +238,26 @@ object KeyguardBottomAreaViewBinder {
 
         IconViewBinder.bind(viewModel.icon, view)
 
+        view.isActivated = viewModel.isActivated
         view.drawable.setTint(
             Utils.getColorAttrDefaultColor(
                 view.context,
-                com.android.internal.R.attr.textColorPrimary
+                if (viewModel.isActivated) {
+                    com.android.internal.R.attr.textColorPrimaryInverse
+                } else {
+                    com.android.internal.R.attr.textColorPrimary
+                },
             )
         )
         view.backgroundTintList =
-            Utils.getColorAttr(view.context, com.android.internal.R.attr.colorSurface)
+            Utils.getColorAttr(
+                view.context,
+                if (viewModel.isActivated) {
+                    com.android.internal.R.attr.colorAccentPrimary
+                } else {
+                    com.android.internal.R.attr.colorSurface
+                }
+            )
 
         view.isClickable = viewModel.isClickable
         if (viewModel.isClickable) {

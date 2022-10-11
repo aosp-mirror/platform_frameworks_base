@@ -29,6 +29,7 @@ import com.android.systemui.keyguard.domain.model.KeyguardQuickAffordancePositio
 import com.android.systemui.keyguard.domain.quickaffordance.FakeKeyguardQuickAffordanceConfig
 import com.android.systemui.keyguard.domain.quickaffordance.FakeKeyguardQuickAffordanceRegistry
 import com.android.systemui.keyguard.domain.quickaffordance.KeyguardQuickAffordanceConfig
+import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordanceToggleState
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.KeyguardStateController
@@ -103,6 +104,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
         homeControls.setState(
             KeyguardQuickAffordanceConfig.State.Visible(
                 icon = ICON,
+                toggle = KeyguardQuickAffordanceToggleState.On,
             )
         )
 
@@ -123,6 +125,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
         assertThat(visibleModel.icon).isEqualTo(ICON)
         assertThat(visibleModel.icon.contentDescription)
             .isEqualTo(ContentDescription.Resource(res = CONTENT_DESCRIPTION_RESOURCE_ID))
+        assertThat(visibleModel.toggle).isEqualTo(KeyguardQuickAffordanceToggleState.On)
         job.cancel()
     }
 
@@ -152,6 +155,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
         assertThat(visibleModel.icon).isEqualTo(ICON)
         assertThat(visibleModel.icon.contentDescription)
             .isEqualTo(ContentDescription.Resource(res = CONTENT_DESCRIPTION_RESOURCE_ID))
+        assertThat(visibleModel.toggle).isEqualTo(KeyguardQuickAffordanceToggleState.NotSupported)
         job.cancel()
     }
 
