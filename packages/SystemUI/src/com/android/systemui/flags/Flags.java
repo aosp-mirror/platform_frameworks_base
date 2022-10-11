@@ -116,7 +116,7 @@ public class Flags {
      * the framework APIs.
      */
     public static final UnreleasedFlag USER_INTERACTOR_AND_REPO_USE_CONTROLLER =
-            new UnreleasedFlag(210, true);
+            new UnreleasedFlag(210);
 
     /**
      * Whether `UserSwitcherController` should use the user interactor.
@@ -127,8 +127,7 @@ public class Flags {
      * <p>Note: do not set this to true if {@link #USER_INTERACTOR_AND_REPO_USE_CONTROLLER} is
      * {@code true} as it would created a cycle between controller -> interactor -> controller.
      */
-    public static final UnreleasedFlag USER_CONTROLLER_USES_INTERACTOR =
-            new UnreleasedFlag(211, false);
+    public static final ReleasedFlag USER_CONTROLLER_USES_INTERACTOR = new ReleasedFlag(211);
 
     /***************************************/
     // 300 - power menu
