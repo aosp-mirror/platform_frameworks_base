@@ -21,7 +21,6 @@ import android.app.WindowConfiguration;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
-import android.graphics.Rect;
 import android.graphics.drawable.VectorDrawable;
 import android.os.Handler;
 import android.view.Choreographer;
@@ -43,22 +42,6 @@ import com.android.wm.shell.desktopmode.DesktopModeStatus;
  * The shadow's thickness is 20dp when the window is in focus and 5dp when the window isn't.
  */
 public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearLayout> {
-    // The thickness of shadows of a window that has focus in DIP.
-    private static final int DECOR_SHADOW_FOCUSED_THICKNESS_IN_DIP = 20;
-    // The thickness of shadows of a window that doesn't have focus in DIP.
-    private static final int DECOR_SHADOW_UNFOCUSED_THICKNESS_IN_DIP = 5;
-
-    // Height of button (32dp)  + 2 * margin (5dp each)
-    private static final int DECOR_CAPTION_HEIGHT_IN_DIP = 42;
-    // Width of buttons (64dp) + handle (128dp) + padding (24dp total)
-    private static final int DECOR_CAPTION_WIDTH_IN_DIP = 216;
-    private static final int RESIZE_HANDLE_IN_DIP = 30;
-    private static final int RESIZE_CORNER_IN_DIP = 44;
-
-    private static final Rect EMPTY_OUTSET = new Rect();
-    private static final Rect RESIZE_HANDLE_OUTSET = new Rect(
-            RESIZE_HANDLE_IN_DIP, RESIZE_HANDLE_IN_DIP, RESIZE_HANDLE_IN_DIP, RESIZE_HANDLE_IN_DIP);
-
     private final Handler mHandler;
     private final Choreographer mChoreographer;
     private final SyncTransactionQueue mSyncQueue;
@@ -69,6 +52,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
 
     private DragResizeInputListener mDragResizeListener;
 
+    private RelayoutParams mRelayoutParams = new RelayoutParams();
     private final WindowDecoration.RelayoutResult<WindowDecorLinearLayout> mResult =
             new WindowDecoration.RelayoutResult<>();
 
@@ -114,19 +98,31 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
 
     void relayout(ActivityManager.RunningTaskInfo taskInfo,
             SurfaceControl.Transaction startT, SurfaceControl.Transaction finishT) {
-        final int shadowRadiusDp = taskInfo.isFocused
-                ? DECOR_SHADOW_FOCUSED_THICKNESS_IN_DIP : DECOR_SHADOW_UNFOCUSED_THICKNESS_IN_DIP;
+        final int shadowRadiusID = taskInfo.isFocused
+                ? R.dimen.freeform_decor_shadow_focused_thickness
+                : R.dimen.freeform_decor_shadow_unfocused_thickness;
         final boolean isFreeform = mTaskInfo.configuration.windowConfiguration.getWindowingMode()
                 == WindowConfiguration.WINDOWING_MODE_FREEFORM;
         final boolean isDragResizeable = isFreeform && mTaskInfo.isResizeable;
-        final Rect outset = isDragResizeable ? RESIZE_HANDLE_OUTSET : EMPTY_OUTSET;
 
         WindowDecorLinearLayout oldRootView = mResult.mRootView;
         final SurfaceControl oldDecorationSurface = mDecorationContainerSurface;
         final WindowContainerTransaction wct = new WindowContainerTransaction();
-        relayout(taskInfo, R.layout.caption_window_decoration, oldRootView,
-                DECOR_CAPTION_HEIGHT_IN_DIP, DECOR_CAPTION_WIDTH_IN_DIP, outset, shadowRadiusDp,
-                startT, finishT, wct, mResult);
+
+        int outsetLeftId = R.dimen.freeform_resize_handle;
+        int outsetTopId = R.dimen.freeform_resize_handle;
+        int outsetRightId = R.dimen.freeform_resize_handle;
+        int outsetBottomId = R.dimen.freeform_resize_handle;
+
+        mRelayoutParams.mRunningTaskInfo = taskInfo;
+        mRelayoutParams.mLayoutResId = R.layout.caption_window_decoration;
+        mRelayoutParams.mCaptionHeightId = R.dimen.freeform_decor_caption_height;
+        mRelayoutParams.mCaptionWidthId = R.dimen.freeform_decor_caption_width;
+        mRelayoutParams.mShadowRadiusId = shadowRadiusID;
+        if (isDragResizeable) {
+            mRelayoutParams.setOutsets(outsetLeftId, outsetTopId, outsetRightId, outsetBottomId);
+        }
+        relayout(mRelayoutParams, startT, finishT, wct, oldRootView, mResult);
 
         mTaskOrganizer.applyTransaction(wct);
 
@@ -167,10 +163,12 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         }
 
         int touchSlop = ViewConfiguration.get(mResult.mRootView.getContext()).getScaledTouchSlop();
-
+        int resize_handle = mResult.mRootView.getResources()
+                .getDimensionPixelSize(R.dimen.freeform_resize_handle);
+        int resize_corner = mResult.mRootView.getResources()
+                .getDimensionPixelSize(R.dimen.freeform_resize_corner);
         mDragResizeListener.setGeometry(
-                mResult.mWidth, mResult.mHeight, (int) (mResult.mDensity * RESIZE_HANDLE_IN_DIP),
-                (int) (mResult.mDensity * RESIZE_CORNER_IN_DIP), touchSlop);
+                mResult.mWidth, mResult.mHeight, resize_handle, resize_corner, touchSlop);
     }
 
     /**
