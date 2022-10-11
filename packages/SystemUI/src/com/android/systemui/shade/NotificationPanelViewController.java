@@ -3872,17 +3872,17 @@ public final class NotificationPanelViewController {
         switch (mBarState) {
             case KEYGUARD:
                 if (!mDozingOnDown) {
-                    if (mUpdateMonitor.isFaceEnrolled()
-                            && !mUpdateMonitor.isFaceDetectionRunning()
-                            && !mUpdateMonitor.getUserCanSkipBouncer(
-                            KeyguardUpdateMonitor.getCurrentUser())) {
-                        mUpdateMonitor.requestFaceAuth(true,
-                                FaceAuthApiRequestReason.NOTIFICATION_PANEL_CLICKED);
-                    } else {
-                        mLockscreenGestureLogger.write(MetricsEvent.ACTION_LS_HINT,
-                                0 /* lengthDp - N/A */, 0 /* velocityDp - N/A */);
-                        mLockscreenGestureLogger
-                                .log(LockscreenUiEvent.LOCKSCREEN_LOCK_SHOW_HINT);
+                    mShadeLog.v("onMiddleClicked on Keyguard, mDozingOnDown: false");
+                    // Try triggering face auth, this "might" run. Check
+                    // KeyguardUpdateMonitor#shouldListenForFace to see when face auth won't run.
+                    mUpdateMonitor.requestFaceAuth(true,
+                            FaceAuthApiRequestReason.NOTIFICATION_PANEL_CLICKED);
+
+                    mLockscreenGestureLogger.write(MetricsEvent.ACTION_LS_HINT,
+                            0 /* lengthDp - N/A */, 0 /* velocityDp - N/A */);
+                    mLockscreenGestureLogger
+                            .log(LockscreenUiEvent.LOCKSCREEN_LOCK_SHOW_HINT);
+                    if (!mUpdateMonitor.isFaceDetectionRunning()) {
                         startUnlockHintAnimation();
                     }
                     if (mUpdateMonitor.isFaceEnrolled()) {
