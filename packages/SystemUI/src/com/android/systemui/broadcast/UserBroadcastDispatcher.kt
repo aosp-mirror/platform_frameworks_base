@@ -16,6 +16,7 @@
 
 package com.android.systemui.broadcast
 
+import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.os.Handler
@@ -46,8 +47,8 @@ private const val DEBUG = false
 open class UserBroadcastDispatcher(
     private val context: Context,
     private val userId: Int,
-    private val bgLooper: Looper,
-    private val bgExecutor: Executor,
+    private val workerLooper: Looper,
+    private val workerExecutor: Executor,
     private val logger: BroadcastDispatcherLogger,
     private val removalPendingStore: PendingRemovalStore
 ) : Dumpable {
@@ -66,9 +67,11 @@ open class UserBroadcastDispatcher(
         val permission: String?
     )
 
-    private val bgHandler = Handler(bgLooper)
+    private val wrongThreadErrorMsg = "This method should only be called from the worker thread " +
+            "(which is expected to be the BroadcastRunning thread)"
+    private val workerHandler = Handler(workerLooper)
 
-    // Only modify in BG thread
+    // Only modify in BroadcastRunning thread
     @VisibleForTesting
     internal val actionsToActionsReceivers = ArrayMap<ReceiverProperties, ActionReceiver>()
     private val receiverToActions = ArrayMap<BroadcastReceiver, MutableSet<String>>()
@@ -97,8 +100,7 @@ open class UserBroadcastDispatcher(
     }
 
     private fun handleRegisterReceiver(receiverData: ReceiverData, flags: Int) {
-        Preconditions.checkState(bgLooper.isCurrentThread,
-                "This method should only be called from BG thread")
+        Preconditions.checkState(workerLooper.isCurrentThread, wrongThreadErrorMsg)
         if (DEBUG) Log.w(TAG, "Register receiver: ${receiverData.receiver}")
         receiverToActions
                 .getOrPut(receiverData.receiver, { ArraySet() })
@@ -113,6 +115,7 @@ open class UserBroadcastDispatcher(
         logger.logReceiverRegistered(userId, receiverData.receiver, flags)
     }
 
+    @SuppressLint("RegisterReceiverViaContextDetector")
     @VisibleForTesting
     internal open fun createActionReceiver(
         action: String,
@@ -128,7 +131,7 @@ open class UserBroadcastDispatcher(
                             UserHandle.of(userId),
                             it,
                             permission,
-                            bgHandler,
+                            workerHandler,
                             flags
                     )
                     logger.logContextReceiverRegistered(userId, flags, it)
@@ -143,15 +146,14 @@ open class UserBroadcastDispatcher(
                                 IllegalStateException(e))
                     }
                 },
-                bgExecutor,
+                workerExecutor,
                 logger,
                 removalPendingStore::isPendingRemoval
         )
     }
 
     private fun handleUnregisterReceiver(receiver: BroadcastReceiver) {
-        Preconditions.checkState(bgLooper.isCurrentThread,
-                "This method should only be called from BG thread")
+        Preconditions.checkState(workerLooper.isCurrentThread, wrongThreadErrorMsg)
         if (DEBUG) Log.w(TAG, "Unregister receiver: $receiver")
         receiverToActions.getOrDefault(receiver, mutableSetOf()).forEach {
             actionsToActionsReceivers.forEach { (key, value) ->

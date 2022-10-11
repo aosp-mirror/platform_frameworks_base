@@ -18,15 +18,12 @@ package com.android.settingslib.spa.gallery.page
 
 import android.os.Bundle
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.tooling.preview.Preview
 import com.android.settingslib.spa.framework.common.SettingsEntry
 import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
 import com.android.settingslib.spa.framework.common.SettingsPage
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
 import com.android.settingslib.spa.framework.theme.SettingsTheme
-import com.android.settingslib.spa.framework.util.getRuntimeArguments
-import com.android.settingslib.spa.framework.util.mergeArguments
 import com.android.settingslib.spa.gallery.SettingsPageProviderEnum
 import com.android.settingslib.spa.gallery.createSettingsPage
 import com.android.settingslib.spa.widget.preference.Preference
@@ -58,6 +55,7 @@ object ArgumentPageProvider : SettingsPageProvider {
             createEntry(owner, EntryEnum.STRING_PARAM)
                 // Set attributes
                 .setIsAllowSearch(true)
+                .setIsSearchDataDynamic(true)
                 .setSearchDataFn { ArgumentPageModel.genStringParamSearchData() }
                 .setUiLayoutFn {
                     // Set ui rendering
@@ -69,6 +67,7 @@ object ArgumentPageProvider : SettingsPageProvider {
             createEntry(owner, EntryEnum.INT_PARAM)
                 // Set attributes
                 .setIsAllowSearch(true)
+                .setIsSearchDataDynamic(true)
                 .setSearchDataFn { ArgumentPageModel.genIntParamSearchData() }
                 .setUiLayoutFn {
                     // Set ui rendering
@@ -101,20 +100,12 @@ object ArgumentPageProvider : SettingsPageProvider {
 
     @Composable
     override fun Page(arguments: Bundle?) {
-        val globalRuntimeArgs = remember { getRuntimeArguments(arguments) }
         RegularScaffold(title = ArgumentPageModel.create(arguments).genPageTitle()) {
             for (entry in buildEntry(arguments)) {
                 if (entry.toPage != null) {
-                    entry.UiLayout(
-                        mergeArguments(
-                            listOf(
-                                globalRuntimeArgs,
-                                ArgumentPageModel.buildNextArgument(arguments)
-                            )
-                        )
-                    )
+                    entry.UiLayout(ArgumentPageModel.buildNextArgument(arguments))
                 } else {
-                    entry.UiLayout(globalRuntimeArgs)
+                    entry.UiLayout()
                 }
             }
         }

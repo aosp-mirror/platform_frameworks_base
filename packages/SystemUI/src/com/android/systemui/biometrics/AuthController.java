@@ -143,6 +143,7 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
     @Nullable private IUdfpsHbmListener mUdfpsHbmListener;
     @Nullable private SidefpsController mSidefpsController;
     @Nullable private IBiometricContextListener mBiometricContextListener;
+    @Nullable private UdfpsLogger mUdfpsLogger;
     @VisibleForTesting IBiometricSysuiReceiver mReceiver;
     @VisibleForTesting @NonNull final BiometricDisplayListener mOrientationListener;
     @Nullable private final List<FaceSensorPropertiesInternal> mFaceProps;
@@ -289,6 +290,8 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
                 }
             });
             mUdfpsController.setAuthControllerUpdateUdfpsLocation(this::updateUdfpsLocation);
+            mUdfpsController.setUdfpsDisplayMode(new UdfpsDisplayMode(mContext, mExecution,
+                    this, mUdfpsLogger));
             mUdfpsBounds = mUdfpsProps.get(0).getLocation().getRect();
         }
 
@@ -688,6 +691,7 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
             @NonNull WakefulnessLifecycle wakefulnessLifecycle,
             @NonNull UserManager userManager,
             @NonNull LockPatternUtils lockPatternUtils,
+            @NonNull UdfpsLogger udfpsLogger,
             @NonNull StatusBarStateController statusBarStateController,
             @NonNull InteractionJankMonitor jankMonitor,
             @Main Handler handler,
@@ -705,6 +709,7 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
         mFaceManager = faceManager;
         mUdfpsControllerFactory = udfpsControllerFactory;
         mSidefpsControllerFactory = sidefpsControllerFactory;
+        mUdfpsLogger = udfpsLogger;
         mDisplayManager = displayManager;
         mWindowManager = windowManager;
         mInteractionJankMonitor = jankMonitor;

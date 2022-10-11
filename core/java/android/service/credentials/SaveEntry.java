@@ -16,13 +16,13 @@
 
 package android.service.credentials;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.app.slice.Slice;
+import android.credentials.Credential;
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import androidx.annotation.NonNull;
 
 import com.android.internal.util.Preconditions;
 
@@ -35,12 +35,12 @@ import java.util.Objects;
  * @hide
  */
 public final class SaveEntry implements Parcelable {
-    private final @NonNull Slice mInfo;
+    private final @NonNull Slice mSlice;
     private final @Nullable PendingIntent mPendingIntent;
     private final @Nullable Credential mCredential;
 
     private SaveEntry(@NonNull Parcel in) {
-        mInfo = in.readParcelable(Slice.class.getClassLoader(), Slice.class);
+        mSlice = in.readParcelable(Slice.class.getClassLoader(), Slice.class);
         mPendingIntent = in.readParcelable(PendingIntent.class.getClassLoader(),
                 PendingIntent.class);
         mCredential = in.readParcelable(Credential.class.getClassLoader(), Credential.class);
@@ -65,25 +65,25 @@ public final class SaveEntry implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        mInfo.writeToParcel(dest, flags);
+        mSlice.writeToParcel(dest, flags);
         mPendingIntent.writeToParcel(dest, flags);
         mCredential.writeToParcel(dest, flags);
     }
 
     /* package-private */ SaveEntry(
-            @NonNull Slice info,
+            @NonNull Slice slice,
             @Nullable PendingIntent pendingIntent,
             @Nullable Credential credential) {
-        this.mInfo = info;
+        this.mSlice = slice;
         com.android.internal.util.AnnotationValidations.validate(
-                NonNull.class, null, mInfo);
+                NonNull.class, null, mSlice);
         this.mPendingIntent = pendingIntent;
         this.mCredential = credential;
     }
 
-    /** Returns the info to be displayed with this save entry on the UI. */
-    public @NonNull Slice getInfo() {
-        return mInfo;
+    /** Returns the content to be displayed with this save entry on the UI. */
+    public @NonNull Slice getSlice() {
+        return mSlice;
     }
 
     /** Returns the pendingIntent to be invoked when this save entry on the UI is selectcd. */
@@ -101,18 +101,18 @@ public final class SaveEntry implements Parcelable {
      */
     public static final class Builder {
 
-        private @NonNull Slice mInfo;
+        private @NonNull Slice mSlice;
         private @Nullable PendingIntent mPendingIntent;
         private @Nullable Credential mCredential;
 
         /**
          * Builds the instance.
-         * @param info The info to be displayed with this save entry.
+         * @param slice the content to be displayed with this save entry
          *
-         * @throws NullPointerException If {@code info} is null.
+         * @throws NullPointerException If {@code slice} is null.
          */
-        public Builder(@NonNull Slice info) {
-            mInfo = Objects.requireNonNull(info, "info must not be null");
+        public Builder(@NonNull Slice slice) {
+            mSlice = Objects.requireNonNull(slice, "slice must not be null");
         }
 
         /**
@@ -154,7 +154,7 @@ public final class SaveEntry implements Parcelable {
                     "pendingIntent and credential both must not be null. Must set "
                             + "either the pendingIntnet or the credential");
             return new SaveEntry(
-                    mInfo,
+                    mSlice,
                     mPendingIntent,
                     mCredential);
         }

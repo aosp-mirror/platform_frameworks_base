@@ -34,6 +34,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.android.settingslib.spa.R
 import com.android.settingslib.spa.framework.BrowseActivity.Companion.KEY_DESTINATION
+import com.android.settingslib.spa.framework.BrowseActivity.Companion.KEY_HIGHLIGHT_ENTRY
 import com.android.settingslib.spa.framework.common.SettingsEntry
 import com.android.settingslib.spa.framework.common.SettingsPage
 import com.android.settingslib.spa.framework.common.SpaEnvironment
@@ -46,6 +47,7 @@ import com.android.settingslib.spa.widget.preference.PreferenceModel
 import com.android.settingslib.spa.widget.scaffold.HomeScaffold
 import com.android.settingslib.spa.widget.scaffold.RegularScaffold
 
+private const val TAG = "DebugActivity"
 private const val ROUTE_ROOT = "root"
 private const val ROUTE_All_PAGES = "pages"
 private const val ROUTE_All_ENTRIES = "entries"
@@ -67,7 +69,7 @@ open class DebugActivity(private val spaEnvironment: SpaEnvironment) : Component
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R.style.Theme_SpaLib_DayNight)
         super.onCreate(savedInstanceState)
-        displayDebugMessage()
+        Log.d(TAG, "onCreate")
 
         setContent {
             SettingsTheme {
@@ -90,14 +92,13 @@ open class DebugActivity(private val spaEnvironment: SpaEnvironment) : Component
                     val entryCount = cursor.getInt(query, EntryProvider.ColumnEnum.PAGE_ENTRY_COUNT)
                     val hasRuntimeParam =
                         cursor.getBoolean(query, EntryProvider.ColumnEnum.HAS_RUNTIME_PARAM)
-                    Log.d(
-                        "DEBUG ACTIVITY", "Page Info: $route ($entryCount) " +
-                            (if (hasRuntimeParam) "with" else "no") + "-runtime-params"
-                    )
+                    val message = "Page Info: $route ($entryCount) " +
+                        (if (hasRuntimeParam) "with" else "no") + "-runtime-params"
+                    Log.d(TAG, message)
                 }
             }
         } catch (e: Exception) {
-            Log.e("DEBUG ACTIVITY", "Provider querying exception:", e)
+            Log.e(TAG, "Provider querying exception:", e)
         }
     }
 
@@ -137,6 +138,10 @@ open class DebugActivity(private val spaEnvironment: SpaEnvironment) : Component
             Preference(object : PreferenceModel {
                 override val title = "List All Entries (${allEntry.size})"
                 override val onClick = navigator(route = ROUTE_All_ENTRIES)
+            })
+            Preference(object : PreferenceModel {
+                override val title = "Query EntryProvider"
+                override val onClick = { displayDebugMessage() }
             })
         }
     }
@@ -190,7 +195,7 @@ open class DebugActivity(private val spaEnvironment: SpaEnvironment) : Component
         RegularScaffold(title = "Entry - ${entry.displayTitle()}") {
             Preference(model = object : PreferenceModel {
                 override val title = "open entry"
-                override val enabled = (!entry.hasRuntimeParam()).toState()
+                override val enabled = (!entry.containerPage().hasRuntimeParam()).toState()
                 override val onClick = openEntry(entry)
             })
             Text(text = entryContent)
@@ -218,21 +223,22 @@ open class DebugActivity(private val spaEnvironment: SpaEnvironment) : Component
             putExtra(KEY_DESTINATION, route)
         }
         return {
-            Log.d("DEBUG ACTIVITY", "Open page: $route")
+            Log.d(TAG, "OpenPage: $route")
             context.startActivity(intent)
         }
     }
 
     @Composable
     private fun openEntry(entry: SettingsEntry): (() -> Unit)? {
-        if (entry.hasRuntimeParam()) return null
+        if (entry.containerPage().hasRuntimeParam()) return null
         val context = LocalContext.current
-        val route = entry.buildRoute()
+        val route = entry.containerPage().buildRoute()
         val intent = Intent(context, spaEnvironment.browseActivityClass).apply {
             putExtra(KEY_DESTINATION, route)
+            putExtra(KEY_HIGHLIGHT_ENTRY, entry.id)
         }
         return {
-            Log.d("DEBUG ACTIVITY", "Open entry: $route")
+            Log.d(TAG, "OpenEntry: $route")
             context.startActivity(intent)
         }
     }

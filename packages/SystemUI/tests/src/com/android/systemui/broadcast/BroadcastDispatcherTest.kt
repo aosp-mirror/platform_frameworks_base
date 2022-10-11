@@ -96,7 +96,7 @@ class BroadcastDispatcherTest : SysuiTestCase() {
     @Mock
     private lateinit var removalPendingStore: PendingRemovalStore
 
-    private lateinit var executor: Executor
+    private lateinit var mainExecutor: Executor
 
     @Captor
     private lateinit var argumentCaptor: ArgumentCaptor<ReceiverData>
@@ -108,11 +108,12 @@ class BroadcastDispatcherTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         testableLooper = TestableLooper.get(this)
-        executor = FakeExecutor(FakeSystemClock())
-        `when`(mockContext.mainExecutor).thenReturn(executor)
+        mainExecutor = FakeExecutor(FakeSystemClock())
+        `when`(mockContext.mainExecutor).thenReturn(mainExecutor)
 
         broadcastDispatcher = TestBroadcastDispatcher(
                 mockContext,
+                mainExecutor,
                 testableLooper.looper,
                 mock(Executor::class.java),
                 mock(DumpManager::class.java),
@@ -148,9 +149,9 @@ class BroadcastDispatcherTest : SysuiTestCase() {
 
     @Test
     fun testAddingReceiverToCorrectUBR_executor() {
-        broadcastDispatcher.registerReceiver(broadcastReceiver, intentFilter, executor, user0)
+        broadcastDispatcher.registerReceiver(broadcastReceiver, intentFilter, mainExecutor, user0)
         broadcastDispatcher.registerReceiver(
-                broadcastReceiverOther, intentFilterOther, executor, user1)
+                broadcastReceiverOther, intentFilterOther, mainExecutor, user1)
 
         testableLooper.processAllMessages()
 
@@ -427,8 +428,9 @@ class BroadcastDispatcherTest : SysuiTestCase() {
 
     private class TestBroadcastDispatcher(
         context: Context,
-        bgLooper: Looper,
-        executor: Executor,
+        mainExecutor: Executor,
+        backgroundRunningLooper: Looper,
+        backgroundRunningExecutor: Executor,
         dumpManager: DumpManager,
         logger: BroadcastDispatcherLogger,
         userTracker: UserTracker,
@@ -436,8 +438,9 @@ class BroadcastDispatcherTest : SysuiTestCase() {
         var mockUBRMap: Map<Int, UserBroadcastDispatcher>
     ) : BroadcastDispatcher(
         context,
-        bgLooper,
-        executor,
+        mainExecutor,
+        backgroundRunningLooper,
+        backgroundRunningExecutor,
         dumpManager,
         logger,
         userTracker,

@@ -94,6 +94,11 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Folyamatban lévő értesítés képernyőrögzítési munkamenethez"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Elindítja a felvételt?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"A felvétel készítése során az Android rendszer rögzítheti az eszközön lejátszott, illetve a képernyőjén megjelenő bizalmas információkat. Ide tartoznak például a jelszavak, a fizetési információk, a fotók, az üzenetek és az audiotartalmak is."</string>
+    <string name="screenrecord_option_entire_screen" msgid="1732437834603426934">"Teljes képernyő rögzítése"</string>
+    <string name="screenrecord_option_single_app" msgid="5954863081500035825">"Egyetlen alkalmazás rögzítése"</string>
+    <string name="screenrecord_warning_entire_screen" msgid="8141407178104195610">"Rögzítés közben az Android a képernyőn látható vagy az eszközön lejátszott minden tartalomhoz hozzáfér. Ezért legyen elővigyázatos a jelszavakkal, a fizetési adatokkal, az üzenetekkel és más bizalmas információkkal."</string>
+    <string name="screenrecord_warning_single_app" msgid="7760723997065948283">"Alkalmazás rögzítése közben az Android az adott appban látható vagy lejátszott minden tartalomhoz hozzáfér. Ezért legyen elővigyázatos a jelszavakkal, a fizetési adatokkal, az üzenetekkel és más bizalmas információkkal."</string>
+    <string name="screenrecord_start_recording" msgid="348286842544768740">"Rögzítés indítása"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Hang rögzítése"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Eszköz hangja"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Az eszköz által lejátszott hangok, például zeneszámok, hívások és csengőhangok"</string>
@@ -361,6 +366,13 @@
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"A funkciót biztosító szolgáltatás hozzáfér majd minden olyan információhoz, amely látható az Ön képernyőjén, illetve amelyet az Ön eszközéről játszanak le rögzítés vagy átküldés közben. Ez olyan információkat is tartalmaz, mint a jelszavak, a fizetési részletek, fotók, üzenetek és lejátszott audiotartalmak."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Biztosan elkezdi a rögzítést vagy az átküldést?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Elkezdi a rögzítést vagy átküldést a következővel: <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
+    <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"Engedélyezi a(z) <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> számára a megosztást és rögzítést?"</string>
+    <string name="media_projection_permission_dialog_option_entire_screen" msgid="392086473225692983">"Teljes képernyő"</string>
+    <string name="media_projection_permission_dialog_option_single_app" msgid="1591110238124910521">"Egyetlen alkalmazás"</string>
+    <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"Amikor Ön megosztást, rögzítést vagy átküldést végez, a(z) <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> a képernyőn látható vagy az eszközön lejátszott minden tartalomhoz hozzáfér. Ezért legyen elővigyázatos a jelszavakkal, a fizetési adatokkal, az üzenetekkel és más bizalmas információkkal."</string>
+    <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"Amikor Ön megoszt, rögzít vagy átküld egy alkalmazást, a(z) <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> az adott appban látható vagy lejátszott minden tartalomhoz hozzáfér. Ezért legyen elővigyázatos a jelszavakkal, a fizetési adatokkal, az üzenetekkel és más bizalmas információkkal."</string>
+    <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"Folytatás"</string>
+    <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"Alkalmazás megosztása és rögzítése"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Az összes törlése"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Kezelés"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Előzmények"</string>

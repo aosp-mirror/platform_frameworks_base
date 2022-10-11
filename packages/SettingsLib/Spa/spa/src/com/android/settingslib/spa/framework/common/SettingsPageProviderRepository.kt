@@ -18,6 +18,8 @@ package com.android.settingslib.spa.framework.common
 
 import android.util.Log
 
+private const val TAG = "SppRepository"
+
 class SettingsPageProviderRepository(
     allPageProviders: List<SettingsPageProvider>,
     private val rootPages: List<SettingsPage> = emptyList(),
@@ -27,7 +29,7 @@ class SettingsPageProviderRepository(
 
     init {
         pageProviderMap = allPageProviders.associateBy { it.name }
-        logMsg("Initialize Completed: ${pageProviderMap.size} spp")
+        Log.d(TAG, "Initialize Completed: ${pageProviderMap.size} spp")
     }
 
     fun getDefaultStartPage(): String {
@@ -45,8 +47,4 @@ class SettingsPageProviderRepository(
     fun getProviderOrNull(name: String): SettingsPageProvider? {
         return pageProviderMap[name]
     }
-}
-
-private fun logMsg(message: String) {
-    Log.d("SppRepo", message)
 }

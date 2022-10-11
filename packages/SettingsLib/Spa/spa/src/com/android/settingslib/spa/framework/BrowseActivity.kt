@@ -17,6 +17,7 @@
 package com.android.settingslib.spa.framework
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
@@ -25,18 +26,19 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import com.android.settingslib.spa.R
 import com.android.settingslib.spa.framework.common.SpaEnvironment
+import com.android.settingslib.spa.framework.compose.LocalNavController
+import com.android.settingslib.spa.framework.compose.NavControllerWrapperImpl
 import com.android.settingslib.spa.framework.compose.localNavController
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.framework.util.navRoute
 
-const val NULL_PAGE_NAME = "NULL"
+private const val TAG = "BrowseActivity"
+private const val NULL_PAGE_NAME = "NULL"
 
 /**
  * The Activity to render ALL SPA pages, and handles jumps between SPA pages.
@@ -54,6 +56,7 @@ open class BrowseActivity(spaEnvironment: SpaEnvironment) : ComponentActivity() 
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R.style.Theme_SpaLib_DayNight)
         super.onCreate(savedInstanceState)
+        Log.d(TAG, "onCreate")
 
         setContent {
             SettingsTheme {
@@ -70,31 +73,28 @@ open class BrowseActivity(spaEnvironment: SpaEnvironment) : ComponentActivity() 
                 composable(NULL_PAGE_NAME) {}
                 for (page in sppRepository.getAllProviders()) {
                     composable(
-                        route = page.name + page.parameter.navRoute() +
-                            "?$HIGHLIGHT_ENTRY_PARAM_NAME={$HIGHLIGHT_ENTRY_PARAM_NAME}",
-                        arguments = page.parameter + listOf(
-                            // add optional parameters
-                            navArgument(HIGHLIGHT_ENTRY_PARAM_NAME) { defaultValue = "null" }
-                        ),
-                    ) { navBackStackEntry ->
-                        page.Page(navBackStackEntry.arguments)
-                    }
+                        route = page.name + page.parameter.navRoute(),
+                        arguments = page.parameter,
+                    ) { navBackStackEntry -> page.Page(navBackStackEntry.arguments) }
                 }
             }
+            InitialDestinationNavigator()
         }
-
-        InitialDestinationNavigator(navController)
     }
 
     @Composable
-    private fun InitialDestinationNavigator(navController: NavHostController) {
+    private fun InitialDestinationNavigator() {
         val destinationNavigated = rememberSaveable { mutableStateOf(false) }
         if (destinationNavigated.value) return
         destinationNavigated.value = true
+        val controller = LocalNavController.current as NavControllerWrapperImpl
         LaunchedEffect(Unit) {
             val destination =
                 intent?.getStringExtra(KEY_DESTINATION) ?: sppRepository.getDefaultStartPage()
+            val highlightEntryId = intent?.getStringExtra(KEY_HIGHLIGHT_ENTRY)
             if (destination.isNotEmpty()) {
+                controller.highlightId = highlightEntryId
+                val navController = controller.navController
                 navController.navigate(destination) {
                     popUpTo(navController.graph.findStartDestination().id) {
                         inclusive = true
@@ -106,6 +106,6 @@ open class BrowseActivity(spaEnvironment: SpaEnvironment) : ComponentActivity() 
 
     companion object {
         const val KEY_DESTINATION = "spaActivityDestination"
-        const val HIGHLIGHT_ENTRY_PARAM_NAME = "highlightEntry"
+        const val KEY_HIGHLIGHT_ENTRY = "highlightEntry"
     }
 }

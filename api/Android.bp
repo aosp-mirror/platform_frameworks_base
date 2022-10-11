@@ -95,6 +95,7 @@ combined_apis {
         "framework-adservices",
         "framework-appsearch",
         "framework-bluetooth",
+        "framework-configinfrastructure",
         "framework-connectivity",
         "framework-connectivity-t",
         "framework-federatedcompute",

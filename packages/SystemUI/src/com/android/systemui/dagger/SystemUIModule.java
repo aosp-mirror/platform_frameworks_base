@@ -43,7 +43,7 @@ import com.android.systemui.flags.FlagsModule;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyguard.data.BouncerViewModule;
 import com.android.systemui.log.dagger.LogModule;
-import com.android.systemui.media.dagger.MediaProjectionModule;
+import com.android.systemui.mediaprojection.appselector.MediaProjectionModule;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.NavigationBarComponent;
 import com.android.systemui.people.PeopleModule;

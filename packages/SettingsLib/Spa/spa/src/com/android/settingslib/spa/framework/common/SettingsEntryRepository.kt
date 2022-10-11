@@ -19,6 +19,7 @@ package com.android.settingslib.spa.framework.common
 import android.util.Log
 import java.util.LinkedList
 
+private const val TAG = "EntryRepository"
 private const val MAX_ENTRY_SIZE = 5000
 
 data class SettingsPageWithEntry(
@@ -37,7 +38,7 @@ class SettingsEntryRepository(sppRepository: SettingsPageProviderRepository) {
     private val pageWithEntryMap: Map<String, SettingsPageWithEntry>
 
     init {
-        logMsg("Initialize")
+        Log.d(TAG, "Initialize")
         entryMap = mutableMapOf()
         pageWithEntryMap = mutableMapOf()
 
@@ -65,7 +66,10 @@ class SettingsEntryRepository(sppRepository: SettingsPageProviderRepository) {
             }
         }
 
-        logMsg("Initialize Completed: ${entryMap.size} entries in ${pageWithEntryMap.size} pages")
+        Log.d(
+            TAG,
+            "Initialize Completed: ${entryMap.size} entries in ${pageWithEntryMap.size} pages"
+        )
     }
 
     fun getAllPageWithEntry(): Collection<SettingsPageWithEntry> {
@@ -83,8 +87,8 @@ class SettingsEntryRepository(sppRepository: SettingsPageProviderRepository) {
     fun getEntry(entryId: String): SettingsEntry? {
         return entryMap[entryId]
     }
-}
 
-private fun logMsg(message: String) {
-    Log.d("EntryRepo", message)
+    fun getEntryPath(entryId: String): String {
+        return "TODO(path_of_$entryId)"
+    }
 }

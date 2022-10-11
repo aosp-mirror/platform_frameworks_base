@@ -16,12 +16,11 @@
 
 package android.service.credentials;
 
+import android.annotation.NonNull;
 import android.app.PendingIntent;
 import android.app.slice.Slice;
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import androidx.annotation.NonNull;
 
 import java.util.Objects;
 
@@ -32,29 +31,26 @@ import java.util.Objects;
  * @hide
  */
 public final class Action implements Parcelable {
-    /** Info to be displayed with this action on the UI. */
-    private final @NonNull Slice mInfo;
-    /**
-     * The pending intent to be invoked when the user selects this action.
-     */
+    /** Slice object containing display content to be displayed with this action on the UI. */
+    private final @NonNull Slice mSlice;
+    /** The pending intent to be invoked when the user selects this action. */
     private final @NonNull PendingIntent mPendingIntent;
 
     /**
      * Constructs an action to be displayed on the UI.
      *
-     * @param actionInfo The info to be displayed along with this action.
-     * @param pendingIntent The intent to be invoked when the user selects this action.
-     * @throws NullPointerException If {@code actionInfo}, or {@code pendingIntent} is null.
+     * @param slice the display content to be displayed on the UI, along with this action
+     * @param pendingIntent the intent to be invoked when the user selects this action
      */
-    public Action(@NonNull Slice actionInfo, @NonNull PendingIntent pendingIntent) {
-        Objects.requireNonNull(actionInfo, "actionInfo must not be null");
+    public Action(@NonNull Slice slice, @NonNull PendingIntent pendingIntent) {
+        Objects.requireNonNull(slice, "slice must not be null");
         Objects.requireNonNull(pendingIntent, "pendingIntent must not be null");
-        mInfo = actionInfo;
+        mSlice = slice;
         mPendingIntent = pendingIntent;
     }
 
     private Action(@NonNull Parcel in) {
-        mInfo = in.readParcelable(Slice.class.getClassLoader(), Slice.class);
+        mSlice = in.readParcelable(Slice.class.getClassLoader(), Slice.class);
         mPendingIntent = in.readParcelable(PendingIntent.class.getClassLoader(),
                 PendingIntent.class);
     }
@@ -78,15 +74,15 @@ public final class Action implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        mInfo.writeToParcel(dest, flags);
+        mSlice.writeToParcel(dest, flags);
         mPendingIntent.writeToParcel(dest, flags);
     }
 
     /**
-     * Returns the action info as a {@link Slice} object, to be displayed on the UI.
+     * Returns a {@code Slice} object containing the display content to be displayed on the UI.
      */
-    public @NonNull Slice getActionInfo() {
-        return mInfo;
+    public @NonNull Slice getSlice() {
+        return mSlice;
     }
 
     /**

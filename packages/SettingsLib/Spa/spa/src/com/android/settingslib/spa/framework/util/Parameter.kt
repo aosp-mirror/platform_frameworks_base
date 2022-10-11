@@ -19,7 +19,10 @@ package com.android.settingslib.spa.framework.util
 import android.os.Bundle
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavType
-import com.android.settingslib.spa.framework.BrowseActivity
+
+const val RUNTIME_PARAM_PREFIX = "rt_"
+const val UNSET_PARAM_PREFIX = "unset_"
+const val UNSET_PARAM_VALUE = "[unset]"
 
 fun List<NamedNavArgument>.navRoute(): String {
     return this.joinToString("") { argument -> "/{${argument.name}}" }
@@ -29,7 +32,7 @@ fun List<NamedNavArgument>.navLink(arguments: Bundle? = null): String {
     val argsArray = mutableListOf<String>()
     for (navArg in this) {
         if (arguments == null || !arguments.containsKey(navArg.name)) {
-            argsArray.add("[rt]")
+            argsArray.add(UNSET_PARAM_VALUE)
             continue
         }
         when (navArg.argument.type) {
@@ -42,6 +45,35 @@ fun List<NamedNavArgument>.navLink(arguments: Bundle? = null): String {
         }
     }
     return argsArray.joinToString("") { arg -> "/$arg" }
+}
+
+fun List<NamedNavArgument>.normalize(arguments: Bundle? = null): Bundle? {
+    if (this.isEmpty()) return null
+    val normArgs = Bundle()
+    for (navArg in this) {
+        // Erase value of runtime parameters.
+        if (navArg.isRuntimeParam()) {
+            normArgs.putString(navArg.name, null)
+            continue
+        }
+
+        when (navArg.argument.type) {
+            NavType.StringType -> {
+                val value = arguments?.getString(navArg.name)
+                if (value != null)
+                    normArgs.putString(navArg.name, value)
+                else
+                    normArgs.putString(UNSET_PARAM_PREFIX + navArg.name, null)
+            }
+            NavType.IntType -> {
+                if (arguments != null && arguments.containsKey(navArg.name))
+                    normArgs.putInt(navArg.name, arguments.getInt(navArg.name))
+                else
+                    normArgs.putString(UNSET_PARAM_PREFIX + navArg.name, null)
+            }
+        }
+    }
+    return normArgs
 }
 
 fun List<NamedNavArgument>.getStringArg(name: String, arguments: Bundle? = null): String? {
@@ -72,20 +104,6 @@ fun List<NamedNavArgument>.containsIntArg(name: String): Boolean {
     return false
 }
 
-fun getRuntimeArguments(arguments: Bundle? = null): Bundle {
-    val res = Bundle()
-    val highlightEntry = arguments?.getString(BrowseActivity.HIGHLIGHT_ENTRY_PARAM_NAME)
-    if (highlightEntry != null) {
-        res.putString(BrowseActivity.HIGHLIGHT_ENTRY_PARAM_NAME, highlightEntry)
-    }
-    // Append more general runtime arguments here
-    return res
-}
-
-fun mergeArguments(argsList: List<Bundle?>): Bundle {
-    val res = Bundle()
-    for (args in argsList) {
-        if (args != null) res.putAll(args)
-    }
-    return res
+fun NamedNavArgument.isRuntimeParam(): Boolean {
+    return this.name.startsWith(RUNTIME_PARAM_PREFIX)
 }

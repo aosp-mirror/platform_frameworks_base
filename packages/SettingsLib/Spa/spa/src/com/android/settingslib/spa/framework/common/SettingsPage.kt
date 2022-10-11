@@ -18,9 +18,9 @@ package com.android.settingslib.spa.framework.common
 
 import android.os.Bundle
 import androidx.navigation.NamedNavArgument
-import androidx.navigation.NavType
-import com.android.settingslib.spa.framework.BrowseActivity
+import com.android.settingslib.spa.framework.util.isRuntimeParam
 import com.android.settingslib.spa.framework.util.navLink
+import com.android.settingslib.spa.framework.util.normalize
 
 /**
  * Defines data to identify a Settings page.
@@ -74,57 +74,25 @@ data class SettingsPage(
     }
 
     fun formatArguments(): String {
-        val normalizedArguments = parameter.normalize(arguments)
-        if (normalizedArguments == null || normalizedArguments.isEmpty) return "[No arguments]"
-        return normalizedArguments.toString().removeRange(0, 6)
+        val normArguments = parameter.normalize(arguments)
+        if (normArguments == null || normArguments.isEmpty) return "[No arguments]"
+        return normArguments.toString().removeRange(0, 6)
     }
 
     fun formatDisplayTitle(): String {
         return "$displayName ${formatArguments()}"
     }
 
-    fun buildRoute(highlightEntryId: String? = null): String {
-        val highlightParam =
-            if (highlightEntryId == null)
-                ""
-            else
-                "?${BrowseActivity.HIGHLIGHT_ENTRY_PARAM_NAME}=$highlightEntryId"
-        return name + parameter.navLink(arguments) + highlightParam
+    fun buildRoute(): String {
+        return name + parameter.navLink(arguments)
     }
 
     fun hasRuntimeParam(): Boolean {
-        return parameter.hasRuntimeParam(arguments)
-    }
-}
-
-private fun List<NamedNavArgument>.normalize(arguments: Bundle? = null): Bundle? {
-    if (this.isEmpty()) return null
-    val normArgs = Bundle()
-    for (navArg in this) {
-        when (navArg.argument.type) {
-            NavType.StringType -> {
-                val value = arguments?.getString(navArg.name)
-                if (value != null)
-                    normArgs.putString(navArg.name, value)
-                else
-                    normArgs.putString("unset_" + navArg.name, null)
-            }
-            NavType.IntType -> {
-                if (arguments != null && arguments.containsKey(navArg.name))
-                    normArgs.putInt(navArg.name, arguments.getInt(navArg.name))
-                else
-                    normArgs.putString("unset_" + navArg.name, null)
-            }
+        for (navArg in parameter) {
+            if (navArg.isRuntimeParam()) return true
         }
+        return false
     }
-    return normArgs
-}
-
-private fun List<NamedNavArgument>.hasRuntimeParam(arguments: Bundle? = null): Boolean {
-    for (navArg in this) {
-        if (arguments == null || !arguments.containsKey(navArg.name)) return true
-    }
-    return false
 }
 
 fun String.toHashId(): String {

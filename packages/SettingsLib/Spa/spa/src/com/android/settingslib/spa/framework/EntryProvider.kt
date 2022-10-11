@@ -28,8 +28,11 @@ import android.database.Cursor
 import android.database.MatrixCursor
 import android.net.Uri
 import android.util.Log
+import com.android.settingslib.spa.framework.common.SettingsEntry
 import com.android.settingslib.spa.framework.common.SettingsPage
 import com.android.settingslib.spa.framework.common.SpaEnvironment
+
+private const val TAG = "EntryProvider"
 
 /**
  * The content provider to return entry related data, which can be used for search and hierarchy.
@@ -39,8 +42,12 @@ import com.android.settingslib.spa.framework.common.SpaEnvironment
  * For SettingsGoogle, AuthorityPath = com.android.settings.spa.provider
  * Some examples:
  *   $ adb shell content query --uri content://<AuthorityPath>/page_debug
+ *   $ adb shell content query --uri content://<AuthorityPath>/entry_debug
  *   $ adb shell content query --uri content://<AuthorityPath>/page_info
  *   $ adb shell content query --uri content://<AuthorityPath>/entry_info
+ *   $ adb shell content query --uri content://<AuthorityPath>/search_sitemap
+ *   $ adb shell content query --uri content://<AuthorityPath>/search_static
+ *   $ adb shell content query --uri content://<AuthorityPath>/search_dynamic
  */
 open class EntryProvider(spaEnvironment: SpaEnvironment) : ContentProvider() {
     private val entryRepository by spaEnvironment.entryRepository
@@ -63,6 +70,11 @@ open class EntryProvider(spaEnvironment: SpaEnvironment) : ContentProvider() {
         ENTRY_ID("entryId"),
         ENTRY_NAME("entryName"),
         ENTRY_ROUTE("entryRoute"),
+        ENTRY_INTENT_URI("entryIntent"),
+        ENTRY_HIERARCHY_PATH("entryPath"),
+        ENTRY_START_ADB("entryStartAdb"),
+
+        // Columns related to search
         ENTRY_TITLE("entryTitle"),
         ENTRY_SEARCH_KEYWORD("entrySearchKw"),
     }
@@ -79,6 +91,10 @@ open class EntryProvider(spaEnvironment: SpaEnvironment) : ContentProvider() {
         PAGE_DEBUG_QUERY(
             "page_debug", 1,
             listOf(ColumnEnum.PAGE_START_ADB)
+        ),
+        ENTRY_DEBUG_QUERY(
+            "entry_debug", 2,
+            listOf(ColumnEnum.ENTRY_START_ADB)
         ),
 
         // page related queries.
@@ -101,10 +117,34 @@ open class EntryProvider(spaEnvironment: SpaEnvironment) : ContentProvider() {
                 ColumnEnum.ENTRY_ID,
                 ColumnEnum.ENTRY_NAME,
                 ColumnEnum.ENTRY_ROUTE,
+                ColumnEnum.ENTRY_INTENT_URI,
+            )
+        ),
+
+        // Search related queries
+        SEARCH_SITEMAP_QUERY(
+            "search_sitemap", 300,
+            listOf(
+                ColumnEnum.ENTRY_ID,
+                ColumnEnum.ENTRY_HIERARCHY_PATH,
+            )
+        ),
+        SEARCH_STATIC_DATA_QUERY(
+            "search_static", 301,
+            listOf(
+                ColumnEnum.ENTRY_ID,
                 ColumnEnum.ENTRY_TITLE,
                 ColumnEnum.ENTRY_SEARCH_KEYWORD,
             )
-        )
+        ),
+        SEARCH_DYNAMIC_DATA_QUERY(
+            "search_dynamic", 302,
+            listOf(
+                ColumnEnum.ENTRY_ID,
+                ColumnEnum.ENTRY_TITLE,
+                ColumnEnum.ENTRY_SEARCH_KEYWORD,
+            )
+        ),
     }
 
     private val uriMatcher = UriMatcher(UriMatcher.NO_MATCH)
@@ -137,14 +177,19 @@ open class EntryProvider(spaEnvironment: SpaEnvironment) : ContentProvider() {
     }
 
     override fun onCreate(): Boolean {
+        Log.d(TAG, "onCreate")
         return true
     }
 
     override fun attachInfo(context: Context?, info: ProviderInfo?) {
         if (info != null) {
             addUri(info.authority, QueryEnum.PAGE_DEBUG_QUERY)
+            addUri(info.authority, QueryEnum.ENTRY_DEBUG_QUERY)
             addUri(info.authority, QueryEnum.PAGE_INFO_QUERY)
             addUri(info.authority, QueryEnum.ENTRY_INFO_QUERY)
+            addUri(info.authority, QueryEnum.SEARCH_SITEMAP_QUERY)
+            addUri(info.authority, QueryEnum.SEARCH_STATIC_DATA_QUERY)
+            addUri(info.authority, QueryEnum.SEARCH_DYNAMIC_DATA_QUERY)
         }
         super.attachInfo(context, info)
     }
@@ -159,14 +204,18 @@ open class EntryProvider(spaEnvironment: SpaEnvironment) : ContentProvider() {
         return try {
             when (uriMatcher.match(uri)) {
                 QueryEnum.PAGE_DEBUG_QUERY.queryMatchCode -> queryPageDebug()
+                QueryEnum.ENTRY_DEBUG_QUERY.queryMatchCode -> queryEntryDebug()
                 QueryEnum.PAGE_INFO_QUERY.queryMatchCode -> queryPageInfo()
                 QueryEnum.ENTRY_INFO_QUERY.queryMatchCode -> queryEntryInfo()
+                QueryEnum.SEARCH_SITEMAP_QUERY.queryMatchCode -> querySearchSitemap()
+                QueryEnum.SEARCH_STATIC_DATA_QUERY.queryMatchCode -> querySearchStaticData()
+                QueryEnum.SEARCH_DYNAMIC_DATA_QUERY.queryMatchCode -> querySearchDynamicData()
                 else -> throw UnsupportedOperationException("Unknown Uri $uri")
             }
         } catch (e: UnsupportedOperationException) {
             throw e
         } catch (e: Exception) {
-            Log.e("EntryProvider", "Provider querying exception:", e)
+            Log.e(TAG, "Provider querying exception:", e)
             null
         }
     }
@@ -177,6 +226,17 @@ open class EntryProvider(spaEnvironment: SpaEnvironment) : ContentProvider() {
             val command = createBrowsePageAdbCommand(pageWithEntry.page)
             if (command != null) {
                 cursor.newRow().add(ColumnEnum.PAGE_START_ADB.id, command)
+            }
+        }
+        return cursor
+    }
+
+    private fun queryEntryDebug(): Cursor {
+        val cursor = MatrixCursor(QueryEnum.ENTRY_DEBUG_QUERY.getColumns())
+        for (entry in entryRepository.getAllEntries()) {
+            val command = createBrowsePageAdbCommand(entry.containerPage(), entry.id)
+            if (command != null) {
+                cursor.newRow().add(ColumnEnum.ENTRY_START_ADB.id, command)
             }
         }
         return cursor
@@ -203,36 +263,79 @@ open class EntryProvider(spaEnvironment: SpaEnvironment) : ContentProvider() {
     private fun queryEntryInfo(): Cursor {
         val cursor = MatrixCursor(QueryEnum.ENTRY_INFO_QUERY.getColumns())
         for (entry in entryRepository.getAllEntries()) {
-            // We can add runtime arguments if necessary
-            val searchData = entry.getSearchData()
             cursor.newRow()
                 .add(ColumnEnum.ENTRY_ID.id, entry.id)
                 .add(ColumnEnum.ENTRY_NAME.id, entry.displayName)
-                .add(ColumnEnum.ENTRY_ROUTE.id, entry.buildRoute())
-                .add(ColumnEnum.ENTRY_TITLE.id, searchData?.title ?: "")
+                .add(ColumnEnum.ENTRY_ROUTE.id, entry.containerPage().buildRoute())
                 .add(
-                    ColumnEnum.ENTRY_SEARCH_KEYWORD.id,
-                    searchData?.keyword ?: emptyList<String>()
+                    ColumnEnum.ENTRY_INTENT_URI.id,
+                    createBrowsePageIntent(entry.containerPage(), entry.id).toUri(URI_INTENT_SCHEME)
                 )
         }
         return cursor
     }
 
-    private fun createBrowsePageIntent(page: SettingsPage): Intent {
+    private fun querySearchSitemap(): Cursor {
+        val cursor = MatrixCursor(QueryEnum.SEARCH_SITEMAP_QUERY.getColumns())
+        for (entry in entryRepository.getAllEntries()) {
+            if (!entry.isAllowSearch) continue
+            cursor.newRow()
+                .add(ColumnEnum.ENTRY_ID.id, entry.id)
+                .add(ColumnEnum.ENTRY_HIERARCHY_PATH.id, entryRepository.getEntryPath(entry.id))
+        }
+        return cursor
+    }
+
+    private fun querySearchStaticData(): Cursor {
+        val cursor = MatrixCursor(QueryEnum.SEARCH_STATIC_DATA_QUERY.getColumns())
+        for (entry in entryRepository.getAllEntries()) {
+            if (!entry.isAllowSearch || entry.isSearchDataDynamic) continue
+            fetchSearchData(entry, cursor)
+        }
+        return cursor
+    }
+
+    private fun querySearchDynamicData(): Cursor {
+        val cursor = MatrixCursor(QueryEnum.SEARCH_DYNAMIC_DATA_QUERY.getColumns())
+        for (entry in entryRepository.getAllEntries()) {
+            if (!entry.isAllowSearch || !entry.isSearchDataDynamic) continue
+            fetchSearchData(entry, cursor)
+        }
+        return cursor
+    }
+
+    private fun fetchSearchData(entry: SettingsEntry, cursor: MatrixCursor) {
+        // Fetch search data. We can add runtime arguments later if necessary
+        val searchData = entry.getSearchData()
+        cursor.newRow()
+            .add(ColumnEnum.ENTRY_ID.id, entry.id)
+            .add(ColumnEnum.ENTRY_TITLE.id, searchData?.title ?: "")
+            .add(
+                ColumnEnum.ENTRY_SEARCH_KEYWORD.id,
+                searchData?.keyword ?: emptyList<String>()
+            )
+    }
+
+    private fun createBrowsePageIntent(page: SettingsPage, entryId: String? = null): Intent {
         if (context == null || page.hasRuntimeParam())
             return Intent()
 
         return Intent().setComponent(ComponentName(context!!, browseActivityClass)).apply {
             putExtra(BrowseActivity.KEY_DESTINATION, page.buildRoute())
+            if (entryId != null) {
+                putExtra(BrowseActivity.KEY_HIGHLIGHT_ENTRY, entryId)
+            }
         }
     }
 
-    private fun createBrowsePageAdbCommand(page: SettingsPage): String? {
+    private fun createBrowsePageAdbCommand(page: SettingsPage, entryId: String? = null): String? {
         if (context == null || page.hasRuntimeParam()) return null
         val packageName = context!!.packageName
         val activityName = browseActivityClass.name.replace(packageName, "")
-        return "adb shell am start -n $packageName/$activityName" +
-            " -e ${BrowseActivity.KEY_DESTINATION} ${page.buildRoute()}"
+        val destinationParam = " -e ${BrowseActivity.KEY_DESTINATION} ${page.buildRoute()}"
+        val highlightParam =
+            if (entryId != null) " -e ${BrowseActivity.KEY_HIGHLIGHT_ENTRY} $entryId" else ""
+        return "adb shell am start -n $packageName/$activityName$destinationParam$highlightParam"
     }
 }
 

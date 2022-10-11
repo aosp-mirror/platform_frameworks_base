@@ -64,6 +64,10 @@ platform_bootclasspath {
             module: "com.android.btservices-bootclasspath-fragment",
         },
         {
+            apex: "com.android.configinfrastructure",
+            module: "com.android.configinfrastructure-bootclasspath-fragment",
+        },
+        {
             apex: "com.android.conscrypt",
             module: "com.android.conscrypt-bootclasspath-fragment",
         },
