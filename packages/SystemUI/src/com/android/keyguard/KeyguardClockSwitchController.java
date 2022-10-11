@@ -40,7 +40,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
-import com.android.systemui.plugins.Clock;
+import com.android.systemui.plugins.ClockController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.clocks.ClockRegistry;
 import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController;
@@ -262,7 +262,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
 
         mCurrentClockSize = clockSize;
 
-        Clock clock = getClock();
+        ClockController clock = getClock();
         boolean appeared = mView.switchToClock(clockSize, animate);
         if (clock != null && animate && appeared && clockSize == LARGE) {
             clock.getAnimations().enter();
@@ -273,7 +273,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
      * Animates the clock view between folded and unfolded states
      */
     public void animateFoldToAod(float foldFraction) {
-        Clock clock = getClock();
+        ClockController clock = getClock();
         if (clock != null) {
             clock.getAnimations().fold(foldFraction);
         }
@@ -286,7 +286,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         if (mSmartspaceController != null) {
             mSmartspaceController.requestSmartspaceUpdate();
         }
-        Clock clock = getClock();
+        ClockController clock = getClock();
         if (clock != null) {
             clock.getEvents().onTimeTick();
         }
@@ -319,17 +319,17 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
      * We can't directly getBottom() because clock changes positions in AOD for burn-in
      */
     int getClockBottom(int statusBarHeaderHeight) {
-        Clock clock = getClock();
+        ClockController clock = getClock();
         if (clock == null) {
             return 0;
         }
 
         if (mLargeClockFrame.getVisibility() == View.VISIBLE) {
             int frameHeight = mLargeClockFrame.getHeight();
-            int clockHeight = clock.getLargeClock().getHeight();
+            int clockHeight = clock.getLargeClock().getView().getHeight();
             return frameHeight / 2 + clockHeight / 2;
         } else {
-            int clockHeight = clock.getSmallClock().getHeight();
+            int clockHeight = clock.getSmallClock().getView().getHeight();
             return clockHeight + statusBarHeaderHeight + mKeyguardClockTopMargin;
         }
     }
@@ -338,15 +338,15 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
      * Get the height of the currently visible clock on the keyguard.
      */
     int getClockHeight() {
-        Clock clock = getClock();
+        ClockController clock = getClock();
         if (clock == null) {
             return 0;
         }
 
         if (mLargeClockFrame.getVisibility() == View.VISIBLE) {
-            return clock.getLargeClock().getHeight();
+            return clock.getLargeClock().getView().getHeight();
         } else {
-            return clock.getSmallClock().getHeight();
+            return clock.getSmallClock().getView().getHeight();
         }
     }
 
@@ -361,12 +361,12 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mNotificationIconAreaController.setupAodIcons(nic);
     }
 
-    private void setClock(Clock clock) {
+    private void setClock(ClockController clock) {
         mClockEventController.setClock(clock);
         mView.setClock(clock, mStatusBarStateController.getState());
     }
 
-    private Clock getClock() {
+    private ClockController getClock() {
         return mClockEventController.getClock();
     }
 
@@ -398,7 +398,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("currentClockSizeLarge=" + (mCurrentClockSize == LARGE));
         pw.println("mCanShowDoubleLineClock=" + mCanShowDoubleLineClock);
-        Clock clock = getClock();
+        ClockController clock = getClock();
         if (clock != null) {
             clock.dump(pw);
         }
