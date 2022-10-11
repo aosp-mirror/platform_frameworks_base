@@ -189,6 +189,7 @@ import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CorrectionInfo;
 import android.view.inputmethod.CursorAnchorInfo;
 import android.view.inputmethod.DeleteGesture;
+import android.view.inputmethod.DeleteRangeGesture;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
@@ -199,6 +200,7 @@ import android.view.inputmethod.InsertGesture;
 import android.view.inputmethod.JoinOrSplitGesture;
 import android.view.inputmethod.RemoveSpaceGesture;
 import android.view.inputmethod.SelectGesture;
+import android.view.inputmethod.SelectRangeGesture;
 import android.view.inspector.InspectableProperty;
 import android.view.inspector.InspectableProperty.EnumEntry;
 import android.view.inspector.InspectableProperty.FlagEntry;
@@ -9096,7 +9098,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                 ArrayList<Class<? extends HandwritingGesture>> gestures = new ArrayList<>();
                 gestures.add(SelectGesture.class);
+                gestures.add(SelectRangeGesture.class);
                 gestures.add(DeleteGesture.class);
+                gestures.add(DeleteRangeGesture.class);
                 gestures.add(InsertGesture.class);
                 gestures.add(RemoveSpaceGesture.class);
                 gestures.add(JoinOrSplitGesture.class);
@@ -9325,6 +9329,26 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /** @hide */
+    public int performHandwritingSelectRangeGesture(@NonNull SelectRangeGesture gesture) {
+        Range<Integer> startRange = getRangeForRect(
+                convertFromScreenToContentCoordinates(gesture.getSelectionStartArea()),
+                gesture.getGranularity());
+        if (startRange == null) {
+            return handleGestureFailure(gesture);
+        }
+        Range<Integer> endRange = getRangeForRect(
+                convertFromScreenToContentCoordinates(gesture.getSelectionEndArea()),
+                gesture.getGranularity());
+        if (endRange == null || endRange.getUpper() <= startRange.getLower()) {
+            return handleGestureFailure(gesture);
+        }
+        Range<Integer> range = startRange.extend(endRange);
+        Selection.setSelection(getEditableText(), range.getLower(), range.getUpper());
+        mEditor.startSelectionActionModeAsync(/* adjustSelection= */ false);
+        return InputConnection.HANDWRITING_GESTURE_RESULT_SUCCESS;
+    }
+
+    /** @hide */
     public int performHandwritingDeleteGesture(@NonNull DeleteGesture gesture) {
         Range<Integer> range = getRangeForRect(
                 convertFromScreenToContentCoordinates(gesture.getDeletionArea()),
@@ -9332,60 +9356,99 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (range == null) {
             return handleGestureFailure(gesture);
         }
+
+        if (gesture.getGranularity() == HandwritingGesture.GRANULARITY_WORD) {
+            range = adjustHandwritingDeleteGestureRange(range);
+        }
+
+        getEditableText().delete(range.getLower(), range.getUpper());
+        Selection.setSelection(getEditableText(), range.getLower());
+        return InputConnection.HANDWRITING_GESTURE_RESULT_SUCCESS;
+    }
+
+    /** @hide */
+    public int performHandwritingDeleteRangeGesture(@NonNull DeleteRangeGesture gesture) {
+        Range<Integer> startRange = getRangeForRect(
+                convertFromScreenToContentCoordinates(gesture.getDeletionStartArea()),
+                gesture.getGranularity());
+        if (startRange == null) {
+            return handleGestureFailure(gesture);
+        }
+        Range<Integer> endRange = getRangeForRect(
+                convertFromScreenToContentCoordinates(gesture.getDeletionEndArea()),
+                gesture.getGranularity());
+        if (endRange == null) {
+            return handleGestureFailure(gesture);
+        }
+        Range<Integer> range = startRange.extend(endRange);
+
+        if (gesture.getGranularity() == HandwritingGesture.GRANULARITY_WORD) {
+            range = adjustHandwritingDeleteGestureRange(range);
+        }
+
+        getEditableText().delete(range.getLower(), range.getUpper());
+        Selection.setSelection(getEditableText(), range.getLower());
+        return InputConnection.HANDWRITING_GESTURE_RESULT_SUCCESS;
+    }
+
+    private Range<Integer> adjustHandwritingDeleteGestureRange(Range<Integer> range) {
+        // For handwriting delete gestures with word granularity, adjust the start and end offsets
+        // to remove extra whitespace around the deleted text.
+
         int start = range.getLower();
         int end = range.getUpper();
 
-        // For word granularity, adjust the start and end offsets to remove extra whitespace around
-        // the deleted text.
-        if (gesture.getGranularity() == HandwritingGesture.GRANULARITY_WORD) {
-            // If the deleted text is at the start of the text, the behavior is the same as the case
-            // where the deleted text follows a new line character.
-            int codePointBeforeStart = start > 0
-                    ? Character.codePointBefore(mText, start) : TextUtils.LINE_FEED_CODE_POINT;
-            // If the deleted text is at the end of the text, the behavior is the same as the case
-            // where the deleted text precedes a new line character.
-            int codePointAtEnd = end < mText.length()
-                    ? Character.codePointAt(mText, end) : TextUtils.LINE_FEED_CODE_POINT;
-            if (TextUtils.isWhitespaceExceptNewline(codePointBeforeStart)
-                    && (TextUtils.isWhitespace(codePointAtEnd)
-                            || TextUtils.isPunctuation(codePointAtEnd))) {
-                // Remove whitespace (except new lines) before the deleted text, in these cases:
-                // - There is whitespace following the deleted text
-                //     e.g. "one [deleted] three" -> "one | three" -> "one| three"
-                // - There is punctuation following the deleted text
-                //     e.g. "one [deleted]!" -> "one |!" -> "one|!"
-                // - There is a new line following the deleted text
-                //     e.g. "one [deleted]\n" -> "one |\n" -> "one|\n"
-                // - The deleted text is at the end of the text
-                //     e.g. "one [deleted]" -> "one |" -> "one|"
-                // (The pipe | indicates the cursor position.)
-                do {
-                    start -= Character.charCount(codePointBeforeStart);
-                    if (start == 0) break;
-                    codePointBeforeStart = Character.codePointBefore(mText, start);
-                } while (TextUtils.isWhitespaceExceptNewline(codePointBeforeStart));
-            } else if (TextUtils.isWhitespaceExceptNewline(codePointAtEnd)
-                    && (TextUtils.isWhitespace(codePointBeforeStart)
-                            || TextUtils.isPunctuation(codePointBeforeStart))) {
-                // Remove whitespace (except new lines) after the deleted text, in these cases:
-                // - There is punctuation preceding the deleted text
-                //     e.g. "([deleted] two)" -> "(| two)" -> "(|two)"
-                // - There is a new line preceding the deleted text
-                //     e.g. "\n[deleted] two" -> "\n| two" -> "\n|two"
-                // - The deleted text is at the start of the text
-                //     e.g. "[deleted] two" -> "| two" -> "|two"
-                // (The pipe | indicates the cursor position.)
-                do {
-                    end += Character.charCount(codePointAtEnd);
-                    if (end == mText.length()) break;
-                    codePointAtEnd = Character.codePointAt(mText, end);
-                } while (TextUtils.isWhitespaceExceptNewline(codePointAtEnd));
-            }
+        // If the deleted text is at the start of the text, the behavior is the same as the case
+        // where the deleted text follows a new line character.
+        int codePointBeforeStart = start > 0
+                ? Character.codePointBefore(mText, start) : TextUtils.LINE_FEED_CODE_POINT;
+        // If the deleted text is at the end of the text, the behavior is the same as the case where
+        // the deleted text precedes a new line character.
+        int codePointAtEnd = end < mText.length()
+                ? Character.codePointAt(mText, end) : TextUtils.LINE_FEED_CODE_POINT;
+
+        if (TextUtils.isWhitespaceExceptNewline(codePointBeforeStart)
+                && (TextUtils.isWhitespace(codePointAtEnd)
+                        || TextUtils.isPunctuation(codePointAtEnd))) {
+            // Remove whitespace (except new lines) before the deleted text, in these cases:
+            // - There is whitespace following the deleted text
+            //     e.g. "one [deleted] three" -> "one | three" -> "one| three"
+            // - There is punctuation following the deleted text
+            //     e.g. "one [deleted]!" -> "one |!" -> "one|!"
+            // - There is a new line following the deleted text
+            //     e.g. "one [deleted]\n" -> "one |\n" -> "one|\n"
+            // - The deleted text is at the end of the text
+            //     e.g. "one [deleted]" -> "one |" -> "one|"
+            // (The pipe | indicates the cursor position.)
+            do {
+                start -= Character.charCount(codePointBeforeStart);
+                if (start == 0) break;
+                codePointBeforeStart = Character.codePointBefore(mText, start);
+            } while (TextUtils.isWhitespaceExceptNewline(codePointBeforeStart));
+            return new Range(start, end);
         }
 
-        getEditableText().delete(start, end);
-        Selection.setSelection(getEditableText(), start);
-        return InputConnection.HANDWRITING_GESTURE_RESULT_SUCCESS;
+        if (TextUtils.isWhitespaceExceptNewline(codePointAtEnd)
+                && (TextUtils.isWhitespace(codePointBeforeStart)
+                        || TextUtils.isPunctuation(codePointBeforeStart))) {
+            // Remove whitespace (except new lines) after the deleted text, in these cases:
+            // - There is punctuation preceding the deleted text
+            //     e.g. "([deleted] two)" -> "(| two)" -> "(|two)"
+            // - There is a new line preceding the deleted text
+            //     e.g. "\n[deleted] two" -> "\n| two" -> "\n|two"
+            // - The deleted text is at the start of the text
+            //     e.g. "[deleted] two" -> "| two" -> "|two"
+            // (The pipe | indicates the cursor position.)
+            do {
+                end += Character.charCount(codePointAtEnd);
+                if (end == mText.length()) break;
+                codePointAtEnd = Character.codePointAt(mText, end);
+            } while (TextUtils.isWhitespaceExceptNewline(codePointAtEnd));
+            return new Range(start, end);
+        }
+
+        // Return the original range.
+        return range;
     }
 
     /** @hide */
