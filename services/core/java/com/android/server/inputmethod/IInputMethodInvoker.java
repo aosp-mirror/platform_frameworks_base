@@ -284,4 +284,13 @@ final class IInputMethodInvoker {
             logRemoteException(e);
         }
     }
+
+    @AnyThread
+    void setStylusWindowIdleTimeoutForTest(long timeout) {
+        try {
+            mTarget.setStylusWindowIdleTimeoutForTest(timeout);
+        } catch (RemoteException e) {
+            logRemoteException(e);
+        }
+    }
 }
