@@ -47,7 +47,9 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
+import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyInt
+import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 
 @SmallTest
@@ -71,6 +73,66 @@ class UserInteractorRefactoredTest : UserInteractorTest() {
         whenever(manager.getUserIcon(anyInt())).thenReturn(ICON)
         whenever(manager.canAddMoreUsers(any())).thenReturn(true)
     }
+
+    @Test
+    fun `onRecordSelected - user`() =
+        runBlocking(IMMEDIATE) {
+            val userInfos = createUserInfos(count = 3, includeGuest = false)
+            userRepository.setUserInfos(userInfos)
+            userRepository.setSelectedUserInfo(userInfos[0])
+            userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = true))
+
+            underTest.onRecordSelected(UserRecord(info = userInfos[1]), dialogShower)
+
+            verify(dialogShower).dismiss()
+            verify(activityManager).switchUser(userInfos[1].id)
+            Unit
+        }
+
+    @Test
+    fun `onRecordSelected - switch to guest user`() =
+        runBlocking(IMMEDIATE) {
+            val userInfos = createUserInfos(count = 3, includeGuest = true)
+            userRepository.setUserInfos(userInfos)
+            userRepository.setSelectedUserInfo(userInfos[0])
+            userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = true))
+
+            underTest.onRecordSelected(UserRecord(info = userInfos.last()))
+
+            verify(activityManager).switchUser(userInfos.last().id)
+            Unit
+        }
+
+    @Test
+    fun `onRecordSelected - enter guest mode`() =
+        runBlocking(IMMEDIATE) {
+            val userInfos = createUserInfos(count = 3, includeGuest = false)
+            userRepository.setUserInfos(userInfos)
+            userRepository.setSelectedUserInfo(userInfos[0])
+            userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = true))
+            val guestUserInfo = createUserInfo(id = 1337, name = "guest", isGuest = true)
+            whenever(manager.createGuest(any())).thenReturn(guestUserInfo)
+
+            underTest.onRecordSelected(UserRecord(isGuest = true), dialogShower)
+
+            verify(dialogShower).dismiss()
+            verify(manager).createGuest(any())
+            Unit
+        }
+
+    @Test
+    fun `onRecordSelected - action`() =
+        runBlocking(IMMEDIATE) {
+            val userInfos = createUserInfos(count = 3, includeGuest = true)
+            userRepository.setUserInfos(userInfos)
+            userRepository.setSelectedUserInfo(userInfos[0])
+            userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = true))
+
+            underTest.onRecordSelected(UserRecord(isAddSupervisedUser = true), dialogShower)
+
+            verify(dialogShower, never()).dismiss()
+            verify(activityStarter).startActivity(any(), anyBoolean())
+        }
 
     @Test
     fun `users - switcher enabled`() =
@@ -336,10 +398,14 @@ class UserInteractorRefactoredTest : UserInteractorTest() {
             var dialogRequest: ShowDialogRequestModel? = null
             val job = underTest.dialogShowRequests.onEach { dialogRequest = it }.launchIn(this)
 
-            underTest.selectUser(newlySelectedUserId = guestUserInfo.id)
+            underTest.selectUser(
+                newlySelectedUserId = guestUserInfo.id,
+                dialogShower = dialogShower,
+            )
 
             assertThat(dialogRequest)
                 .isInstanceOf(ShowDialogRequestModel.ShowExitGuestDialog::class.java)
+            verify(dialogShower, never()).dismiss()
             job.cancel()
         }
 
@@ -355,10 +421,11 @@ class UserInteractorRefactoredTest : UserInteractorTest() {
             var dialogRequest: ShowDialogRequestModel? = null
             val job = underTest.dialogShowRequests.onEach { dialogRequest = it }.launchIn(this)
 
-            underTest.selectUser(newlySelectedUserId = userInfos[0].id)
+            underTest.selectUser(newlySelectedUserId = userInfos[0].id, dialogShower = dialogShower)
 
             assertThat(dialogRequest)
                 .isInstanceOf(ShowDialogRequestModel.ShowExitGuestDialog::class.java)
+            verify(dialogShower, never()).dismiss()
             job.cancel()
         }
 
@@ -372,10 +439,11 @@ class UserInteractorRefactoredTest : UserInteractorTest() {
             var dialogRequest: ShowDialogRequestModel? = null
             val job = underTest.dialogShowRequests.onEach { dialogRequest = it }.launchIn(this)
 
-            underTest.selectUser(newlySelectedUserId = userInfos[1].id)
+            underTest.selectUser(newlySelectedUserId = userInfos[1].id, dialogShower = dialogShower)
 
             assertThat(dialogRequest).isNull()
             verify(activityManager).switchUser(userInfos[1].id)
+            verify(dialogShower).dismiss()
             job.cancel()
         }
 

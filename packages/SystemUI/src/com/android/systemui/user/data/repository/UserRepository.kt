@@ -220,7 +220,7 @@ constructor(
             val result = withContext(backgroundDispatcher) { manager.aliveUsers }
 
             if (result != null) {
-                _userInfos.value = result
+                _userInfos.value = result.sortedBy { it.creationTime }
             }
         }
     }

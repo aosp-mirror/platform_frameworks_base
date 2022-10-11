@@ -17,6 +17,7 @@
 package com.android.systemui.shared.clocks
 
 import android.content.res.Resources
+import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.testing.AndroidTestingRunner
 import android.util.TypedValue
@@ -25,7 +26,7 @@ import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.shared.clocks.DefaultClock.Companion.DOZE_COLOR
+import com.android.systemui.shared.clocks.DefaultClockController.Companion.DOZE_COLOR
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
@@ -88,17 +89,20 @@ class DefaultClockProviderTest : SysuiTestCase() {
         // Default clock provider must always provide the default clock
         val clock = provider.createClock(DEFAULT_CLOCK_ID)
         assertNotNull(clock)
-        assertEquals(clock.smallClock, mockSmallClockView)
-        assertEquals(clock.largeClock, mockLargeClockView)
+        assertEquals(mockSmallClockView, clock.smallClock.view)
+        assertEquals(mockLargeClockView, clock.largeClock.view)
     }
 
     @Test
     fun defaultClock_initialize() {
         val clock = provider.createClock(DEFAULT_CLOCK_ID)
+        verify(mockSmallClockView).setColors(Color.MAGENTA, Color.MAGENTA)
+        verify(mockLargeClockView).setColors(Color.MAGENTA, Color.MAGENTA)
+
         clock.initialize(resources, 0f, 0f)
 
-        verify(mockSmallClockView, times(2)).setColors(eq(DOZE_COLOR), anyInt())
-        verify(mockLargeClockView, times(2)).setColors(eq(DOZE_COLOR), anyInt())
+        verify(mockSmallClockView).setColors(eq(DOZE_COLOR), anyInt())
+        verify(mockLargeClockView).setColors(eq(DOZE_COLOR), anyInt())
         verify(mockSmallClockView).onTimeZoneChanged(notNull())
         verify(mockLargeClockView).onTimeZoneChanged(notNull())
         verify(mockSmallClockView).refreshTime()
@@ -147,10 +151,14 @@ class DefaultClockProviderTest : SysuiTestCase() {
     @Test
     fun defaultClock_events_onColorPaletteChanged() {
         val clock = provider.createClock(DEFAULT_CLOCK_ID)
-        clock.events.onColorPaletteChanged(resources, true, true)
 
-        verify(mockSmallClockView, times(2)).setColors(eq(DOZE_COLOR), anyInt())
-        verify(mockLargeClockView, times(2)).setColors(eq(DOZE_COLOR), anyInt())
+        verify(mockSmallClockView).setColors(Color.MAGENTA, Color.MAGENTA)
+        verify(mockLargeClockView).setColors(Color.MAGENTA, Color.MAGENTA)
+
+        clock.events.onColorPaletteChanged(resources)
+
+        verify(mockSmallClockView).setColors(eq(DOZE_COLOR), anyInt())
+        verify(mockLargeClockView).setColors(eq(DOZE_COLOR), anyInt())
     }
 
     @Test
