@@ -19424,9 +19424,30 @@ package android.location {
   public final class GnssCapabilities implements android.os.Parcelable {
     method public int describeContents();
     method public boolean hasAntennaInfo();
+    method public boolean hasGeofencing();
     method @Deprecated public boolean hasGnssAntennaInfo();
+    method public boolean hasLowPowerMode();
+    method public boolean hasMeasurementCorrections();
+    method public boolean hasMeasurementCorrectionsExcessPathLength();
+    method public boolean hasMeasurementCorrectionsForDriving();
+    method public boolean hasMeasurementCorrectionsLosSats();
+    method public boolean hasMeasurementCorrectionsReflectingPlane();
+    method public boolean hasMeasurementCorrelationVectors();
     method public boolean hasMeasurements();
+    method public boolean hasMsa();
+    method public boolean hasMsb();
     method public boolean hasNavigationMessages();
+    method public boolean hasOnDemandTime();
+    method public boolean hasPowerMultibandAcquisition();
+    method public boolean hasPowerMultibandTracking();
+    method public boolean hasPowerOtherModes();
+    method public boolean hasPowerSinglebandAcquisition();
+    method public boolean hasPowerSinglebandTracking();
+    method public boolean hasPowerTotal();
+    method public boolean hasSatelliteBlocklist();
+    method public boolean hasSatellitePvt();
+    method public boolean hasScheduling();
+    method public boolean hasSingleShot();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.location.GnssCapabilities> CREATOR;
   }
@@ -19436,8 +19457,29 @@ package android.location {
     ctor public GnssCapabilities.Builder(@NonNull android.location.GnssCapabilities);
     method @NonNull public android.location.GnssCapabilities build();
     method @NonNull public android.location.GnssCapabilities.Builder setHasAntennaInfo(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasGeofencing(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasLowPowerMode(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasMeasurementCorrections(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasMeasurementCorrectionsExcessPathLength(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasMeasurementCorrectionsForDriving(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasMeasurementCorrectionsLosSats(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasMeasurementCorrectionsReflectingPlane(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasMeasurementCorrelationVectors(boolean);
     method @NonNull public android.location.GnssCapabilities.Builder setHasMeasurements(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasMsa(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasMsb(boolean);
     method @NonNull public android.location.GnssCapabilities.Builder setHasNavigationMessages(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasOnDemandTime(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasPowerMultibandAcquisition(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasPowerMultibandTracking(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasPowerOtherModes(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasPowerSinglebandAcquisition(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasPowerSinglebandTracking(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasPowerTotal(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasSatelliteBlocklist(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasSatellitePvt(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasScheduling(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasSingleShot(boolean);
   }
 
   public final class GnssClock implements android.os.Parcelable {

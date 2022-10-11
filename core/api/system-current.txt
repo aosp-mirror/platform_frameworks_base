@@ -5471,32 +5471,9 @@ package android.location {
   }
 
   public final class GnssCapabilities implements android.os.Parcelable {
-    method public boolean hasGeofencing();
-    method public boolean hasLowPowerMode();
-    method public boolean hasMeasurementCorrections();
-    method public boolean hasMeasurementCorrectionsExcessPathLength();
-    method public boolean hasMeasurementCorrectionsForDriving();
-    method public boolean hasMeasurementCorrectionsLosSats();
     method @Deprecated public boolean hasMeasurementCorrectionsReflectingPane();
-    method public boolean hasMeasurementCorrectionsReflectingPlane();
-    method public boolean hasMeasurementCorrelationVectors();
     method @Deprecated public boolean hasNavMessages();
     method @Deprecated public boolean hasSatelliteBlacklist();
-    method public boolean hasSatelliteBlocklist();
-    method public boolean hasSatellitePvt();
-  }
-
-  public static final class GnssCapabilities.Builder {
-    method @NonNull public android.location.GnssCapabilities.Builder setHasGeofencing(boolean);
-    method @NonNull public android.location.GnssCapabilities.Builder setHasLowPowerMode(boolean);
-    method @NonNull public android.location.GnssCapabilities.Builder setHasMeasurementCorrections(boolean);
-    method @NonNull public android.location.GnssCapabilities.Builder setHasMeasurementCorrectionsExcessPathLength(boolean);
-    method @NonNull public android.location.GnssCapabilities.Builder setHasMeasurementCorrectionsForDriving(boolean);
-    method @NonNull public android.location.GnssCapabilities.Builder setHasMeasurementCorrectionsLosSats(boolean);
-    method @NonNull public android.location.GnssCapabilities.Builder setHasMeasurementCorrectionsReflectingPlane(boolean);
-    method @NonNull public android.location.GnssCapabilities.Builder setHasMeasurementCorrelationVectors(boolean);
-    method @NonNull public android.location.GnssCapabilities.Builder setHasSatelliteBlocklist(boolean);
-    method @NonNull public android.location.GnssCapabilities.Builder setHasSatellitePvt(boolean);
   }
 
   public final class GnssExcessPathInfo implements android.os.Parcelable {
