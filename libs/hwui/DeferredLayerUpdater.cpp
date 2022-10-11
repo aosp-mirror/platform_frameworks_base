@@ -169,6 +169,8 @@ void DeferredLayerUpdater::apply() {
                 sk_sp<SkImage> layerImage = mImageSlots[slot].createIfNeeded(
                         hardwareBuffer, dataspace, newContent,
                         mRenderState.getRenderThread().getGrContext());
+                AHardwareBuffer_Desc bufferDesc;
+                AHardwareBuffer_describe(hardwareBuffer, &bufferDesc);
                 // unref to match the ref added by ASurfaceTexture_dequeueBuffer. eglCreateImageKHR
                 // (invoked by createIfNeeded) will add a ref to the AHardwareBuffer.
                 AHardwareBuffer_release(hardwareBuffer);
@@ -189,6 +191,7 @@ void DeferredLayerUpdater::apply() {
                         maxLuminanceNits =
                                 std::max(cta861_3.maxContentLightLevel, maxLuminanceNits);
                     }
+                    mLayer->setBufferFormat(bufferDesc.format);
                     updateLayer(forceFilter, layerImage, outTransform, currentCropRect,
                                 maxLuminanceNits);
                 }
