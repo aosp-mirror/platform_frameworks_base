@@ -15,7 +15,7 @@ import com.android.credentialmanager.ui.theme.CredentialSelectorTheme
 class CredentialSelectorActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    CredentialManagerRepo.setup(this)
+    CredentialManagerRepo.setup(this, intent)
     val startDestination = intent.extras?.getString(
       "start_destination",
       "CREATE_PASSKEY"
