@@ -18,6 +18,7 @@ package com.android.server.pm.pkg;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -58,8 +59,27 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/** @hide */
-//@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+/**
+ * The representation of an application on disk, as parsed from its split APKs' manifests.
+ *
+ * Metadata available here is mostly device-state independent and indicates what the application
+ * author declared for their app.
+ *
+ * This is the system server in-process API equivalent of the public API {@link ApplicationInfo}.
+ * Note that because {@link ApplicationInfo} is stateful, several methods that exist on it may not
+ * be available here and need to be read through {@link PackageState} or {@link PackageUserState}.
+ *
+ * All instances of {@link AndroidPackage} are associated with a {@link PackageState}, and the
+ * only way to retrieve one is through {@link PackageState}. Note that the inverse does not apply
+ * and {@link AndroidPackage} may be null in several cases. See
+ * {@link PackageState#getAndroidPackage()}.
+ *
+ * The data available here is immutable and will throw {@link UnsupportedOperationException} if any
+ * collection type is mutated.
+ *
+ * @hide
+ */
+@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
 @Immutable
 public interface AndroidPackage {
 
@@ -98,11 +118,13 @@ public interface AndroidPackage {
 
     /**
      * @see ApplicationInfo#FLAG_DEBUGGABLE
+     * @see R.styleable#AndroidManifestApplication_debuggable
      */
     boolean isDebuggable();
 
     /**
      * @see ApplicationInfo#PRIVATE_FLAG_ISOLATED_SPLIT_LOADING
+     * @see R.styleable#AndroidManifest_isolatedSplits
      */
     boolean isIsolatedSplitLoading();
 
@@ -113,16 +135,19 @@ public interface AndroidPackage {
 
     /**
      * @see ApplicationInfo#PRIVATE_FLAG_USE_EMBEDDED_DEX
+     * @see R.styleable#AndroidManifestApplication_useEmbeddedDex
      */
     boolean isUseEmbeddedDex();
 
     /**
      * @see ApplicationInfo#PRIVATE_FLAG_USES_NON_SDK_API
+     * @see R.styleable#AndroidManifestApplication_usesNonSdkApi
      */
     boolean isUsesNonSdkApi();
 
     /**
      * @see ApplicationInfo#FLAG_VM_SAFE_MODE
+     * @see R.styleable#AndroidManifestApplication_vmSafeMode
      */
     boolean isVmSafeMode();
 
@@ -147,6 +172,7 @@ public interface AndroidPackage {
      *
      * @see ActivityInfo
      * @see PackageInfo#activities
+     * @see R.styleable#AndroidManifestActivity
      * @hide
      */
     @Immutable.Ignore
@@ -179,7 +205,10 @@ public interface AndroidPackage {
     @Nullable
     String getAppComponentFactory();
 
-    /** @hide */
+    /**
+     * @see R.styleable#AndroidManifestAttribution
+     * @hide
+     */
     @Immutable.Ignore
     @NonNull
     List<ParsedAttribution> getAttributions();
@@ -188,6 +217,7 @@ public interface AndroidPackage {
      * @see ApplicationInfo#AUTO_REVOKE_ALLOWED
      * @see ApplicationInfo#AUTO_REVOKE_DISCOURAGED
      * @see ApplicationInfo#AUTO_REVOKE_DISALLOWED
+     * @see R.styleable#AndroidManifestApplication_autoRevokePermissions
      * @hide
      */
     int getAutoRevokePermissions();
@@ -217,6 +247,7 @@ public interface AndroidPackage {
 
     /**
      * @see PackageInfo#baseRevisionCode
+     * @see R.styleable#AndroidManifest_revisionCode
      * @hide
      */
     int getBaseRevisionCode();
@@ -338,6 +369,7 @@ public interface AndroidPackage {
     /**
      * @see InstrumentationInfo
      * @see PackageInfo#instrumentation
+     * @see R.styleable#AndroidManifestInstrumentation
      * @hide
      */
     @Immutable.Ignore
@@ -396,6 +428,8 @@ public interface AndroidPackage {
 
     /**
      * @see PackageInfo#getLongVersionCode()
+     * @see R.styleable#AndroidManifest_versionCode
+     * @see R.styleable#AndroidManifest_versionCodeMajor
      * @hide
      */
     long getLongVersionCode();
@@ -439,13 +473,17 @@ public interface AndroidPackage {
 
     /**
      * TODO(b/135203078): Make all the Bundles immutable (and non-null by shared empty reference?)
+     * @see R.styleable#AndroidManifestMetaData
      * @hide
      */
     @Immutable.Ignore
     @Nullable
     Bundle getMetaData();
 
-    /** @hide */
+    /**
+     * @see R.attr#mimeGroup
+     * @hide
+     */
     @Nullable
     Set<String> getMimeGroups();
 
@@ -583,6 +621,7 @@ public interface AndroidPackage {
 
     /**
      * @see android.content.pm.PermissionGroupInfo
+     * @see R.styleable#AndroidManifestPermissionGroup
      * @hide
      */
     @Immutable.Ignore
@@ -619,6 +658,7 @@ public interface AndroidPackage {
 
     /**
      * @see android.content.pm.ProcessInfo
+     * @see R.styleable#AndroidManifestProcess
      * @hide
      */
     @Immutable.Ignore
@@ -627,6 +667,7 @@ public interface AndroidPackage {
 
     /**
      * Returns the properties set on the application
+     * @see R.styleable#AndroidManifestProperty
      * @hide
      */
     @Immutable.Ignore
@@ -653,6 +694,7 @@ public interface AndroidPackage {
      *
      * @see ProviderInfo
      * @see PackageInfo#providers
+     * @see R.styleable#AndroidManifestProvider
      * @hide
      */
     @Immutable.Ignore
@@ -703,6 +745,7 @@ public interface AndroidPackage {
      *
      * @see ActivityInfo
      * @see PackageInfo#receivers
+     * @see R.styleable#AndroidManifestReceiver
      * @hide
      */
     @Immutable.Ignore
@@ -751,6 +794,7 @@ public interface AndroidPackage {
      *
      * @see ApplicationInfo#PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE
      * @see ApplicationInfo#PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_UNRESIZEABLE
+     * @see R.styleable#AndroidManifestApplication_resizeableActivity
      * @hide
      */
     @Nullable
@@ -807,6 +851,7 @@ public interface AndroidPackage {
      *
      * @see ServiceInfo
      * @see PackageInfo#services
+     * @see R.styleable#AndroidManifestService
      * @hide
      */
     @Immutable.Ignore
@@ -1050,7 +1095,11 @@ public interface AndroidPackage {
     @Nullable
     String getVolumeUuid();
 
-    /** @hide */
+    /**
+     * @see ApplicationInfo#zygotePreloadName
+     * @see R.styleable#AndroidManifestApplication_zygotePreloadName
+     * @hide
+     */
     @Nullable
     String getZygotePreloadName();
 
@@ -1073,36 +1122,42 @@ public interface AndroidPackage {
 
     /**
      * @see ApplicationInfo#PRIVATE_FLAG_ALLOW_AUDIO_PLAYBACK_CAPTURE
+     * @see R.styleable#AndroidManifestApplication_allowAudioPlaybackCapture
      * @hide
      */
     boolean isAllowAudioPlaybackCapture();
 
     /**
      * @see ApplicationInfo#FLAG_ALLOW_BACKUP
+     * @see R.styleable#AndroidManifestApplication_allowBackup
      * @hide
      */
     boolean isAllowBackup();
 
     /**
      * @see ApplicationInfo#FLAG_ALLOW_CLEAR_USER_DATA
+     * @see R.styleable#AndroidManifestApplication_allowClearUserData
      * @hide
      */
     boolean isAllowClearUserData();
 
     /**
      * @see ApplicationInfo#PRIVATE_FLAG_ALLOW_CLEAR_USER_DATA_ON_FAILED_RESTORE
+     * @see R.styleable#AndroidManifestApplication_allowClearUserDataOnFailedRestore
      * @hide
      */
     boolean isAllowClearUserDataOnFailedRestore();
 
     /**
      * @see ApplicationInfo#PRIVATE_FLAG_ALLOW_NATIVE_HEAP_POINTER_TAGGING
+     * @see R.styleable#AndroidManifestApplication_allowNativeHeapPointerTagging
      * @hide
      */
     boolean isAllowNativeHeapPointerTagging();
 
     /**
      * @see ApplicationInfo#FLAG_ALLOW_TASK_REPARENTING
+     * @see R.styleable#AndroidManifestApplication_allowTaskReparenting
      * @hide
      */
     boolean isAllowTaskReparenting();
@@ -1122,18 +1177,21 @@ public interface AndroidPackage {
 
     /**
      * @see ApplicationInfo#PRIVATE_FLAG_BACKUP_IN_FOREGROUND
+     * @see R.styleable#AndroidManifestApplication_backupInForeground
      * @hide
      */
     boolean isBackupInForeground();
 
     /**
      * @see ApplicationInfo#FLAG_HARDWARE_ACCELERATED
+     * @see R.styleable#AndroidManifestApplication_hardwareAccelerated
      * @hide
      */
     boolean isBaseHardwareAccelerated();
 
     /**
      * @see ApplicationInfo#PRIVATE_FLAG_CANT_SAVE_STATE
+     * @see R.styleable#AndroidManifestApplication_cantSaveState
      * @hide
      */
     boolean isCantSaveState();
@@ -1146,18 +1204,21 @@ public interface AndroidPackage {
 
     /**
      * @see ApplicationInfo#crossProfile
+     * @see R.styleable#AndroidManifestApplication_crossProfile
      * @hide
      */
     boolean isCrossProfile();
 
     /**
      * @see ApplicationInfo#PRIVATE_FLAG_DEFAULT_TO_DEVICE_PROTECTED_STORAGE
+     * @see R.styleable#AndroidManifestApplication_defaultToDeviceProtectedStorage
      * @hide
      */
     boolean isDefaultToDeviceProtectedStorage();
 
     /**
      * @see ApplicationInfo#PRIVATE_FLAG_DIRECT_BOOT_AWARE
+     * @see R.styleable#AndroidManifestApplication_directBootAware
      * @hide
      */
     boolean isDirectBootAware();
@@ -1177,6 +1238,7 @@ public interface AndroidPackage {
 
     /**
      * @see ApplicationInfo#FLAG_EXTRACT_NATIVE_LIBS
+     * @see R.styleable#AndroidManifestApplication_extractNativeLibs
      * @hide
      */
     boolean isExtractNativeLibs();
@@ -1195,12 +1257,14 @@ public interface AndroidPackage {
 
     /**
      * @see ApplicationInfo#FLAG_FULL_BACKUP_ONLY
+     * @see R.styleable#AndroidManifestApplication_fullBackupOnly
      * @hide
      */
     boolean isFullBackupOnly();
 
     /**
      * @see ApplicationInfo#FLAG_IS_GAME
+     * @see R.styleable#AndroidManifestApplication_isGame
      * @hide
      */
     @Deprecated
@@ -1208,30 +1272,35 @@ public interface AndroidPackage {
 
     /**
      * @see ApplicationInfo#FLAG_HAS_CODE
+     * @see R.styleable#AndroidManifestApplication_hasCode
      * @hide
      */
     boolean isHasCode();
 
     /**
      * @see ApplicationInfo#PRIVATE_FLAG_HAS_DOMAIN_URLS
+     * @see R.styleable#AndroidManifestIntentFilter
      * @hide
      */
     boolean isHasDomainUrls();
 
     /**
      * @see ApplicationInfo#PRIVATE_FLAG_HAS_FRAGILE_USER_DATA
+     * @see R.styleable#AndroidManifestApplication_hasFragileUserData
      * @hide
      */
     boolean isHasFragileUserData();
 
     /**
      * @see ApplicationInfo#FLAG_KILL_AFTER_RESTORE
+     * @see R.styleable#AndroidManifestApplication_killAfterRestore
      * @hide
      */
     boolean isKillAfterRestore();
 
     /**
      * @see ApplicationInfo#FLAG_LARGE_HEAP
+     * @see R.styleable#AndroidManifestApplication_largeHeap
      * @hide
      */
     boolean isLargeHeap();
@@ -1247,6 +1316,7 @@ public interface AndroidPackage {
 
     /**
      * @see ApplicationInfo#FLAG_MULTIARCH
+     * @see R.styleable#AndroidManifestApplication_multiArch
      * @hide
      */
     boolean isMultiArch();
@@ -1278,6 +1348,7 @@ public interface AndroidPackage {
     /**
      * @see ApplicationInfo#PRIVATE_FLAG_IS_RESOURCE_OVERLAY
      * @see ApplicationInfo#isResourceOverlay()
+     * @see R.styleable#AndroidManifestResourceOverlay
      * @hide
      */
     boolean isOverlay();
@@ -1290,12 +1361,17 @@ public interface AndroidPackage {
 
     /**
      * @see ApplicationInfo#PRIVATE_FLAG_PARTIALLY_DIRECT_BOOT_AWARE
+     * @see R.styleable#AndroidManifestActivity_directBootAware
+     * @see R.styleable#AndroidManifestProvider_directBootAware
+     * @see R.styleable#AndroidManifestReceiver_directBootAware
+     * @see R.styleable#AndroidManifestService_directBootAware
      * @hide
      */
     boolean isPartiallyDirectBootAware();
 
     /**
      * @see ApplicationInfo#FLAG_PERSISTENT
+     * @see R.styleable#AndroidManifestApplication_persistent
      * @hide
      */
     boolean isPersistent();
@@ -1314,18 +1390,21 @@ public interface AndroidPackage {
 
     /**
      * @see ApplicationInfo#PRIVATE_FLAG_EXT_PROFILEABLE
+     * @see R.styleable#AndroidManifestProfileable
      * @hide
      */
     boolean isProfileable();
 
     /**
      * @see ApplicationInfo#PRIVATE_FLAG_PROFILEABLE_BY_SHELL
+     * @see R.styleable#AndroidManifestProfileable_shell
      * @hide
      */
     boolean isProfileableByShell();
 
     /**
      * @see ApplicationInfo#PRIVATE_FLAG_REQUEST_LEGACY_EXTERNAL_STORAGE
+     * @see R.styleable#AndroidManifestApplication_requestLegacyExternalStorage
      * @hide
      */
     boolean isRequestLegacyExternalStorage();
@@ -1358,24 +1437,28 @@ public interface AndroidPackage {
 
     /**
      * @see ApplicationInfo#PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION
+     * @see R.styleable#AppWidgetProviderInfo_resizeMode
      * @hide
      */
     boolean isResizeableActivityViaSdkVersion();
 
     /**
      * @see ApplicationInfo#FLAG_RESTORE_ANY_VERSION
+     * @see R.styleable#AndroidManifestApplication_restoreAnyVersion
      * @hide
      */
     boolean isRestoreAnyVersion();
 
     /**
      * True means that this package/app contains an SDK library.
+     * @see R.styleable#AndroidManifestSdkLibrary
      * @hide
      */
     boolean isSdkLibrary();
 
     /**
      * @see ApplicationInfo#PRIVATE_FLAG_STATIC_SHARED_LIBRARY
+     * @see R.styleable#AndroidManifestStaticLibrary
      * @hide
      */
     boolean isStaticSharedLibrary();
@@ -1417,6 +1500,7 @@ public interface AndroidPackage {
 
     /**
      * @see ApplicationInfo#FLAG_SUPPORTS_RTL
+     * @see R.styleable#AndroidManifestApplication_supportsRtl
      * @hide
      */
     boolean isSupportsRtl();
@@ -1445,6 +1529,7 @@ public interface AndroidPackage {
 
     /**
      * @see ApplicationInfo#FLAG_TEST_ONLY
+     * @see R.styleable#AndroidManifestApplication_testOnly
      * @hide
      */
     boolean isTestOnly();
@@ -1461,6 +1546,7 @@ public interface AndroidPackage {
 
     /**
      * @see ApplicationInfo#FLAG_USES_CLEARTEXT_TRAFFIC
+     * @see R.styleable#AndroidManifestApplication_usesCleartextTraffic
      * @hide
      */
     boolean isUsesCleartextTraffic();

@@ -48,8 +48,80 @@ package com.android.server.pm {
 
   public interface PackageManagerLocal {
     method public void reconcileSdkData(@Nullable String, @NonNull String, @NonNull java.util.List<java.lang.String>, int, int, int, @NonNull String, int) throws java.io.IOException;
+    method @NonNull public com.android.server.pm.PackageManagerLocal.FilteredSnapshot withFilteredSnapshot();
+    method @NonNull public com.android.server.pm.PackageManagerLocal.FilteredSnapshot withFilteredSnapshot(int, @NonNull android.os.UserHandle);
+    method @NonNull public com.android.server.pm.PackageManagerLocal.UnfilteredSnapshot withUnfilteredSnapshot();
     field public static final int FLAG_STORAGE_CE = 2; // 0x2
     field public static final int FLAG_STORAGE_DE = 1; // 0x1
+  }
+
+  public static interface PackageManagerLocal.FilteredSnapshot extends java.lang.AutoCloseable {
+    method public void close();
+    method public void forAllPackageStates(@NonNull java.util.function.Consumer<com.android.server.pm.pkg.PackageState>);
+    method @Nullable public com.android.server.pm.pkg.PackageState getPackageState(@NonNull String);
+  }
+
+  public static interface PackageManagerLocal.UnfilteredSnapshot extends java.lang.AutoCloseable {
+    method public void close();
+    method @NonNull public com.android.server.pm.PackageManagerLocal.FilteredSnapshot filtered(int, @NonNull android.os.UserHandle);
+    method @NonNull public java.util.Map<java.lang.String,com.android.server.pm.pkg.PackageState> getPackageStates();
+  }
+
+}
+
+package com.android.server.pm.pkg {
+
+  public interface AndroidPackage {
+    method @NonNull public java.util.List<java.lang.String> getLibraryNames();
+    method @Nullable public String getSdkLibraryName();
+    method @NonNull public java.util.List<com.android.server.pm.pkg.AndroidPackageSplit> getSplits();
+    method @Nullable public String getStaticSharedLibraryName();
+    method public int getTargetSdkVersion();
+    method public boolean isDebuggable();
+    method public boolean isIsolatedSplitLoading();
+    method public boolean isSignedWithPlatformKey();
+    method public boolean isUseEmbeddedDex();
+    method public boolean isUsesNonSdkApi();
+    method public boolean isVmSafeMode();
+  }
+
+  public interface AndroidPackageSplit {
+    method @Nullable public String getClassLoaderName();
+    method @NonNull public java.util.List<com.android.server.pm.pkg.AndroidPackageSplit> getDependencies();
+    method @Nullable public String getName();
+    method @NonNull public String getPath();
+    method public int getRevisionCode();
+    method public boolean isHasCode();
+  }
+
+  public interface PackageState {
+    method @Nullable public com.android.server.pm.pkg.AndroidPackage getAndroidPackage();
+    method public int getAppId();
+    method @NonNull public String getPackageName();
+    method @Nullable public String getPrimaryCpuAbi();
+    method @Nullable public String getSecondaryCpuAbi();
+    method @NonNull public com.android.server.pm.pkg.PackageUserState getStateForUser(@NonNull android.os.UserHandle);
+    method @NonNull public java.util.List<com.android.server.pm.pkg.SharedLibrary> getUsesLibraries();
+    method public boolean isPrivileged();
+    method public boolean isSystem();
+    method public boolean isUpdatedSystemApp();
+  }
+
+  public interface PackageUserState {
+    method public boolean isInstalled();
+  }
+
+  public interface SharedLibrary {
+    method @NonNull public java.util.List<java.lang.String> getAllCodePaths();
+    method @NonNull public android.content.pm.VersionedPackage getDeclaringPackage();
+    method @NonNull public java.util.List<com.android.server.pm.pkg.SharedLibrary> getDependencies();
+    method @NonNull public java.util.List<android.content.pm.VersionedPackage> getDependentPackages();
+    method @Nullable public String getName();
+    method @Nullable public String getPackageName();
+    method @Nullable public String getPath();
+    method public int getType();
+    method public long getVersion();
+    method public boolean isNative();
   }
 
 }

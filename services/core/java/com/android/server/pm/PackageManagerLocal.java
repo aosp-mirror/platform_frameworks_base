@@ -95,8 +95,6 @@ public interface PackageManagerLocal {
      * <p/>
      * The snapshot assumes the caller is acting on behalf of the system and will not filter any
      * results.
-     *
-     * @hide
      */
     @NonNull
     UnfilteredSnapshot withUnfilteredSnapshot();
@@ -106,7 +104,6 @@ public interface PackageManagerLocal {
      * caller through {@link Binder#getCallingUid()} and {@link Binder#getCallingUserHandle()}.
      *
      * @see #withFilteredSnapshot(int, UserHandle)
-     * @hide
      */
     @NonNull
     FilteredSnapshot withFilteredSnapshot();
@@ -121,7 +118,6 @@ public interface PackageManagerLocal {
      *                   and permissions, including cross-user enforcement.
      * @param user       The user to query as, should usually be the user that the caller was
      *                   invoked from.
-     * @hide
      */
     @SuppressWarnings("UserHandleName") // Ignore naming convention, not invoking action as user
     @NonNull
@@ -130,6 +126,7 @@ public interface PackageManagerLocal {
     /**
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
     interface UnfilteredSnapshot extends AutoCloseable {
 
         /**
@@ -160,6 +157,7 @@ public interface PackageManagerLocal {
     /**
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
     interface FilteredSnapshot extends AutoCloseable {
 
         /**
