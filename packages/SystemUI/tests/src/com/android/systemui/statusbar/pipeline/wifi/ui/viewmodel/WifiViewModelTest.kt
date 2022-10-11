@@ -76,6 +76,8 @@ class WifiViewModelTest : SysuiTestCase() {
         scope.cancel()
     }
 
+    // See [WifiViewModelIconParameterizedTest] for additional view model tests.
+
     // Note on testing: [WifiViewModel] exposes 3 different instances of
     // [LocationBasedWifiViewModel]. In practice, these 3 different instances will get the exact
     // same data for icon, activity, etc. flows. So, most of these tests will test just one of the
