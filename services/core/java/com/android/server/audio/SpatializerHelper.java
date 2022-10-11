@@ -47,6 +47,7 @@ import android.util.Pair;
 import android.util.SparseIntArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.server.utils.EventLogger;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -1711,7 +1712,7 @@ public class SpatializerHelper {
     }
 
     private static String logloge(String msg) {
-        AudioService.sSpatialLogger.loglog(msg, AudioEventLogger.Event.ALOGE, TAG);
+        AudioService.sSpatialLogger.loglog(msg, EventLogger.Event.ALOGE, TAG);
         return msg;
     }
 

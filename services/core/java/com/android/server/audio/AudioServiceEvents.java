@@ -24,11 +24,12 @@ import android.media.AudioSystem;
 import android.media.MediaMetrics;
 
 import com.android.server.audio.AudioDeviceInventory.WiredDeviceConnectionState;
+import com.android.server.utils.EventLogger;
 
 
 public class AudioServiceEvents {
 
-    final static class PhoneStateEvent extends AudioEventLogger.Event {
+    final static class PhoneStateEvent extends EventLogger.Event {
         static final int MODE_SET = 0;
         static final int MODE_IN_COMMUNICATION_TIMEOUT = 1;
 
@@ -108,7 +109,7 @@ public class AudioServiceEvents {
         }
     }
 
-    final static class WiredDevConnectEvent extends AudioEventLogger.Event {
+    final static class WiredDevConnectEvent extends EventLogger.Event {
         final WiredDeviceConnectionState mState;
 
         WiredDevConnectEvent(WiredDeviceConnectionState state) {
@@ -127,7 +128,7 @@ public class AudioServiceEvents {
         }
     }
 
-    final static class ForceUseEvent extends AudioEventLogger.Event {
+    final static class ForceUseEvent extends EventLogger.Event {
         final int mUsage;
         final int mConfig;
         final String mReason;
@@ -147,7 +148,7 @@ public class AudioServiceEvents {
         }
     }
 
-    static final class DeviceVolumeEvent extends AudioEventLogger.Event {
+    static final class DeviceVolumeEvent extends EventLogger.Event {
         final int mStream;
         final int mVolIndex;
         final String mDeviceNativeType;
@@ -184,7 +185,7 @@ public class AudioServiceEvents {
         }
     }
 
-    final static class VolumeEvent extends AudioEventLogger.Event {
+    final static class VolumeEvent extends EventLogger.Event {
         static final int VOL_ADJUST_SUGG_VOL = 0;
         static final int VOL_ADJUST_STREAM_VOL = 1;
         static final int VOL_SET_STREAM_VOL = 2;

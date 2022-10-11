@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.audio;
+package com.android.server.utils;
 
 import android.annotation.IntDef;
 import android.util.Log;
@@ -26,7 +26,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
 
-public class AudioEventLogger {
+public class EventLogger {
 
     // ring buffer of events to log.
     private final LinkedList<Event> mEvents;
@@ -42,7 +42,7 @@ public class AudioEventLogger {
 
         private final long mTimestamp;
 
-        Event() {
+        public Event() {
             mTimestamp = System.currentTimeMillis();
         }
 
@@ -135,7 +135,7 @@ public class AudioEventLogger {
      * @param size the maximum number of events to keep in log
      * @param title the string displayed before the recorded log
      */
-    public AudioEventLogger(int size, String title) {
+    public EventLogger(int size, String title) {
         mEvents = new LinkedList<Event>();
         mMemSize = size;
         mTitle = title;
