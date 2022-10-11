@@ -22,7 +22,6 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Rect;
-import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.VectorDrawable;
 import android.os.Handler;
 import android.view.Choreographer;
@@ -39,11 +38,7 @@ import com.android.wm.shell.desktopmode.DesktopModeStatus;
 
 /**
  * Defines visuals and behaviors of a window decoration of a caption bar and shadows. It works with
- * {@link CaptionWindowDecorViewModel}. The caption bar contains maximize and close buttons.
- *
- * {@link CaptionWindowDecorViewModel} can change the color of the caption bar based on the foremost
- * app's request through {@link #setCaptionColor(int)}, in which it changes the foreground color of
- * caption buttons according to the luminance of the background.
+ * {@link CaptionWindowDecorViewModel}. The caption bar contains a handle, back button, and close button.
  *
  * The shadow's thickness is 20dp when the window is in focus and 5dp when the window isn't.
  */
@@ -55,6 +50,8 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
 
     // Height of button (32dp)  + 2 * margin (5dp each)
     private static final int DECOR_CAPTION_HEIGHT_IN_DIP = 42;
+    // Width of buttons (64dp) + handle (128dp) + padding (24dp total)
+    private static final int DECOR_CAPTION_WIDTH_IN_DIP = 216;
     private static final int RESIZE_HANDLE_IN_DIP = 30;
     private static final int RESIZE_CORNER_IN_DIP = 44;
 
@@ -75,6 +72,8 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
     private final WindowDecoration.RelayoutResult<WindowDecorLinearLayout> mResult =
             new WindowDecoration.RelayoutResult<>();
 
+    private boolean mDesktopActive;
+
     CaptionWindowDecoration(
             Context context,
             DisplayController displayController,
@@ -89,6 +88,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         mHandler = handler;
         mChoreographer = choreographer;
         mSyncQueue = syncQueue;
+        mDesktopActive = DesktopModeStatus.isActive(mContext);
     }
 
     void setCaptionListeners(
@@ -125,8 +125,8 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         final SurfaceControl oldDecorationSurface = mDecorationContainerSurface;
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         relayout(taskInfo, R.layout.caption_window_decoration, oldRootView,
-                DECOR_CAPTION_HEIGHT_IN_DIP, outset, shadowRadiusDp, startT, finishT, wct, mResult);
-        taskInfo = null; // Clear it just in case we use it accidentally
+                DECOR_CAPTION_HEIGHT_IN_DIP, DECOR_CAPTION_WIDTH_IN_DIP, outset, shadowRadiusDp,
+                startT, finishT, wct, mResult);
 
         mTaskOrganizer.applyTransaction(wct);
 
@@ -138,6 +138,17 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         if (oldRootView != mResult.mRootView) {
             setupRootView();
         }
+
+        // If this task is not focused, do not show caption.
+        setCaptionVisibility(taskInfo.isFocused);
+
+        // Only handle should show if Desktop Mode is inactive.
+        boolean desktopCurrentStatus = DesktopModeStatus.isActive(mContext);
+        if (mDesktopActive != desktopCurrentStatus && taskInfo.isFocused) {
+            mDesktopActive = desktopCurrentStatus;
+            setButtonVisibility();
+        }
+        taskInfo = null; // Clear it just in case we use it accidentally
 
         if (!isDragResizeable) {
             closeDragResizeListener();
@@ -168,42 +179,46 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
     private void setupRootView() {
         View caption = mResult.mRootView.findViewById(R.id.caption);
         caption.setOnTouchListener(mOnCaptionTouchListener);
-        View maximize = caption.findViewById(R.id.maximize_window);
-        if (DesktopModeStatus.IS_SUPPORTED) {
-            // Hide maximize button when desktop mode is available
-            maximize.setVisibility(View.GONE);
-        } else {
-            maximize.setVisibility(View.VISIBLE);
-            maximize.setOnClickListener(mOnCaptionButtonClickListener);
-        }
         View close = caption.findViewById(R.id.close_window);
         close.setOnClickListener(mOnCaptionButtonClickListener);
-        View minimize = caption.findViewById(R.id.minimize_window);
-        minimize.setOnClickListener(mOnCaptionButtonClickListener);
+        View back = caption.findViewById(R.id.back_button);
+        back.setOnClickListener(mOnCaptionButtonClickListener);
+        View handle = caption.findViewById(R.id.caption_handle);
+        handle.setOnTouchListener(mOnCaptionTouchListener);
+        setButtonVisibility();
     }
 
-    void setCaptionColor(int captionColor) {
-        if (mResult.mRootView == null) {
-            return;
-        }
-
+    /**
+     * Sets caption visibility based on task focus.
+     *
+     * @param visible whether or not the caption should be visible
+     */
+    private void setCaptionVisibility(boolean visible) {
+        int v = visible ? View.VISIBLE : View.GONE;
         View caption = mResult.mRootView.findViewById(R.id.caption);
-        GradientDrawable captionDrawable = (GradientDrawable) caption.getBackground();
-        captionDrawable.setColor(captionColor);
+        caption.setVisibility(v);
+    }
 
+    /**
+     * Sets the visibility of buttons and color of caption based on desktop mode status
+     *
+     */
+    public void setButtonVisibility() {
+        int v = mDesktopActive ? View.VISIBLE : View.GONE;
+        View caption = mResult.mRootView.findViewById(R.id.caption);
+        View back = caption.findViewById(R.id.back_button);
+        View close = caption.findViewById(R.id.close_window);
+        back.setVisibility(v);
+        close.setVisibility(v);
         int buttonTintColorRes =
-                Color.valueOf(captionColor).luminance() < 0.5
-                        ? R.color.decor_button_light_color
-                        : R.color.decor_button_dark_color;
+                mDesktopActive ? R.color.decor_button_dark_color
+                        : R.color.decor_button_light_color;
         ColorStateList buttonTintColor =
                 caption.getResources().getColorStateList(buttonTintColorRes, null /* theme */);
-        View maximize = caption.findViewById(R.id.maximize_window);
-        VectorDrawable maximizeBackground = (VectorDrawable) maximize.getBackground();
-        maximizeBackground.setTintList(buttonTintColor);
-
-        View close = caption.findViewById(R.id.close_window);
-        VectorDrawable closeBackground = (VectorDrawable) close.getBackground();
-        closeBackground.setTintList(buttonTintColor);
+        View handle = caption.findViewById(R.id.caption_handle);
+        VectorDrawable handleBackground = (VectorDrawable) handle.getBackground();
+        handleBackground.setTintList(buttonTintColor);
+        caption.setBackgroundColor(v == View.VISIBLE ? Color.WHITE : Color.TRANSPARENT);
     }
 
     private void closeDragResizeListener() {

@@ -16,6 +16,8 @@
 
 package com.android.systemui.flags
 
+import java.io.PrintWriter
+
 class FakeFeatureFlags : FeatureFlags {
     private val booleanFlags = mutableMapOf<Int, Boolean>()
     private val stringFlags = mutableMapOf<Int, String>()
@@ -104,6 +106,10 @@ class FakeFeatureFlags : FeatureFlags {
                         id -> flagListeners[id]?.remove(listener)
                 }
         }
+    }
+
+    override fun dump(writer: PrintWriter, args: Array<out String>?) {
+        // no-op
     }
 
     private fun flagName(flagId: Int): String {

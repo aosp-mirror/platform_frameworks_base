@@ -22,9 +22,11 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.plugins.Clock
 import com.android.systemui.plugins.ClockAnimations
+import com.android.systemui.plugins.ClockController
 import com.android.systemui.plugins.ClockEvents
+import com.android.systemui.plugins.ClockFaceController
+import com.android.systemui.plugins.ClockFaceEvents
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.ConfigurationController
@@ -40,6 +42,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyFloat
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
@@ -61,17 +64,25 @@ class ClockEventControllerTest : SysuiTestCase() {
     @Mock private lateinit var configurationController: ConfigurationController
     @Mock private lateinit var animations: ClockAnimations
     @Mock private lateinit var events: ClockEvents
-    @Mock private lateinit var clock: Clock
+    @Mock private lateinit var clock: ClockController
     @Mock private lateinit var mainExecutor: Executor
     @Mock private lateinit var bgExecutor: Executor
     @Mock private lateinit var featureFlags: FeatureFlags
+    @Mock private lateinit var smallClockController: ClockFaceController
+    @Mock private lateinit var largeClockController: ClockFaceController
+    @Mock private lateinit var smallClockEvents: ClockFaceEvents
+    @Mock private lateinit var largeClockEvents: ClockFaceEvents
 
     private lateinit var clockEventController: ClockEventController
 
     @Before
     fun setUp() {
-        whenever(clock.smallClock).thenReturn(TextView(context))
-        whenever(clock.largeClock).thenReturn(TextView(context))
+        whenever(clock.smallClock).thenReturn(smallClockController)
+        whenever(clock.largeClock).thenReturn(largeClockController)
+        whenever(smallClockController.view).thenReturn(TextView(context))
+        whenever(largeClockController.view).thenReturn(TextView(context))
+        whenever(smallClockController.events).thenReturn(smallClockEvents)
+        whenever(largeClockController.events).thenReturn(largeClockEvents)
         whenever(clock.events).thenReturn(events)
         whenever(clock.animations).thenReturn(animations)
 
@@ -107,7 +118,8 @@ class ClockEventControllerTest : SysuiTestCase() {
     @Test
     fun themeChanged_verifyClockPaletteUpdated() {
         clockEventController.clock = clock
-        verify(events).onColorPaletteChanged(any(), any(), any())
+        verify(smallClockEvents).onRegionDarknessChanged(anyBoolean())
+        verify(largeClockEvents).onRegionDarknessChanged(anyBoolean())
 
         clockEventController.registerListeners()
 
@@ -115,13 +127,14 @@ class ClockEventControllerTest : SysuiTestCase() {
         verify(configurationController).addCallback(capture(captor))
         captor.value.onThemeChanged()
 
-        verify(events, times(2)).onColorPaletteChanged(any(), any(), any())
+        verify(events).onColorPaletteChanged(any())
     }
 
     @Test
     fun fontChanged_verifyFontSizeUpdated() {
         clockEventController.clock = clock
-        verify(events).onColorPaletteChanged(any(), any(), any())
+        verify(smallClockEvents).onRegionDarknessChanged(anyBoolean())
+        verify(largeClockEvents).onRegionDarknessChanged(anyBoolean())
 
         clockEventController.registerListeners()
 

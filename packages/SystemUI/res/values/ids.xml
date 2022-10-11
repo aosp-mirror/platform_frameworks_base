@@ -188,5 +188,11 @@
     <item type="id" name="face_scanning_anim"/>
 
     <item type="id" name="qqs_tile_layout"/>
+
+    <!-- The buttons in the Quick Settings footer actions.-->
+    <item type="id" name="multi_user_switch"/>
+    <item type="id" name="pm_lite"/>
+    <item type="id" name="settings_button_container"/>
+
 </resources>
 

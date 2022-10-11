@@ -143,9 +143,9 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
     abstract void relayout(RunningTaskInfo taskInfo);
 
     void relayout(RunningTaskInfo taskInfo, int layoutResId, T rootView, float captionHeightDp,
-            Rect outsetsDp, float shadowRadiusDp, SurfaceControl.Transaction startT,
-            SurfaceControl.Transaction finishT, WindowContainerTransaction wct,
-            RelayoutResult<T> outResult) {
+            float captionWidthDp, Rect outsetsDp, float shadowRadiusDp,
+            SurfaceControl.Transaction startT, SurfaceControl.Transaction finishT,
+            WindowContainerTransaction wct, RelayoutResult<T> outResult) {
         outResult.reset();
 
         final Configuration oldTaskConfig = mTaskInfo.getConfiguration();
@@ -249,8 +249,15 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         }
 
         final int captionHeight = (int) Math.ceil(captionHeightDp * outResult.mDensity);
+        final int captionWidth = (int) Math.ceil(captionWidthDp * outResult.mDensity);
+
+        //Prevent caption from going offscreen if task is too high up
+        final int captionYPos = taskBounds.top <= captionHeight / 2 ? 0 : captionHeight / 2;
+
         startT.setPosition(
-                        mCaptionContainerSurface, -decorContainerOffsetX, -decorContainerOffsetY)
+                        mCaptionContainerSurface, -decorContainerOffsetX
+                                + taskBounds.width() / 2 - captionWidth / 2,
+                        -decorContainerOffsetY - captionYPos)
                 .setWindowCrop(mCaptionContainerSurface, taskBounds.width(), captionHeight)
                 .show(mCaptionContainerSurface);
 
@@ -264,7 +271,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         // Caption view
         mCaptionWindowManager.setConfiguration(taskConfig);
         final WindowManager.LayoutParams lp =
-                new WindowManager.LayoutParams(taskBounds.width(), captionHeight,
+                new WindowManager.LayoutParams(captionWidth, captionHeight,
                         WindowManager.LayoutParams.TYPE_APPLICATION,
                         WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, PixelFormat.TRANSPARENT);
         lp.setTitle("Caption of Task=" + mTaskInfo.taskId);
@@ -282,7 +289,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
 
             // Caption insets
             mCaptionInsetsRect.set(taskBounds);
-            mCaptionInsetsRect.bottom = mCaptionInsetsRect.top + captionHeight;
+            mCaptionInsetsRect.bottom = mCaptionInsetsRect.top + captionHeight - captionYPos;
             wct.addRectInsetsProvider(mTaskInfo.token, mCaptionInsetsRect, CAPTION_INSETS_TYPES);
         } else {
             startT.hide(mCaptionContainerSurface);

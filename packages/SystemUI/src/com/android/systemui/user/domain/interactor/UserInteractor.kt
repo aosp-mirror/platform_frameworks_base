@@ -43,6 +43,7 @@ import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.qs.user.UserSwitchDialogController
 import com.android.systemui.statusbar.policy.UserSwitcherController
 import com.android.systemui.telephony.domain.interactor.TelephonyInteractor
 import com.android.systemui.user.data.repository.UserRepository
@@ -390,9 +391,24 @@ constructor(
         guestUserInteractor.onDeviceBootCompleted()
     }
 
+    /** Switches to the user or executes the action represented by the given record. */
+    fun onRecordSelected(
+        record: UserRecord,
+        dialogShower: UserSwitchDialogController.DialogShower? = null,
+    ) {
+        if (LegacyUserDataHelper.isUser(record)) {
+            // It's safe to use checkNotNull around record.info because isUser only returns true
+            // if record.info is not null.
+            selectUser(checkNotNull(record.info).id, dialogShower)
+        } else {
+            executeAction(LegacyUserDataHelper.toUserActionModel(record), dialogShower)
+        }
+    }
+
     /** Switches to the user with the given user ID. */
     fun selectUser(
         newlySelectedUserId: Int,
+        dialogShower: UserSwitchDialogController.DialogShower? = null,
     ) {
         if (isNewImpl) {
             val currentlySelectedUserInfo = repository.getSelectedUserInfo()
@@ -428,22 +444,28 @@ constructor(
                 return
             }
 
+            dialogShower?.dismiss()
+
             switchUser(newlySelectedUserId)
         } else {
-            controller.onUserSelected(newlySelectedUserId, /* dialogShower= */ null)
+            controller.onUserSelected(newlySelectedUserId, dialogShower)
         }
     }
 
     /** Executes the given action. */
-    fun executeAction(action: UserActionModel) {
+    fun executeAction(
+        action: UserActionModel,
+        dialogShower: UserSwitchDialogController.DialogShower? = null,
+    ) {
         if (isNewImpl) {
             when (action) {
                 UserActionModel.ENTER_GUEST_MODE ->
                     guestUserInteractor.createAndSwitchTo(
                         this::showDialog,
                         this::dismissDialog,
-                        this::selectUser,
-                    )
+                    ) { userId ->
+                        selectUser(userId, dialogShower)
+                    }
                 UserActionModel.ADD_USER -> {
                     val currentUser = repository.getSelectedUserInfo()
                     showDialog(
@@ -575,7 +597,7 @@ constructor(
     }
 
     private fun switchUser(userId: Int) {
-        // TODO(b/246631653): track jank and lantecy like in the old impl.
+        // TODO(b/246631653): track jank and latency like in the old impl.
         refreshUsersScheduler.pause()
         try {
             activityManager.switchUser(userId)
