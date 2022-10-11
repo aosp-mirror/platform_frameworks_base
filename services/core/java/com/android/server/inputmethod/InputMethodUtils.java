@@ -645,13 +645,11 @@ final class InputMethodUtils {
                         if (imi != null && imi.getSubtypeCount() > 0) {
                             List<InputMethodSubtype> implicitlyEnabledSubtypes =
                                     SubtypeUtils.getImplicitlyApplicableSubtypesLocked(mRes, imi);
-                            if (implicitlyEnabledSubtypes != null) {
-                                final int numSubtypes = implicitlyEnabledSubtypes.size();
-                                for (int i = 0; i < numSubtypes; ++i) {
-                                    final InputMethodSubtype st = implicitlyEnabledSubtypes.get(i);
-                                    if (String.valueOf(st.hashCode()).equals(subtypeHashCode)) {
-                                        return subtypeHashCode;
-                                    }
+                            final int numSubtypes = implicitlyEnabledSubtypes.size();
+                            for (int i = 0; i < numSubtypes; ++i) {
+                                final InputMethodSubtype st = implicitlyEnabledSubtypes.get(i);
+                                if (String.valueOf(st.hashCode()).equals(subtypeHashCode)) {
+                                    return subtypeHashCode;
                                 }
                             }
                         }
