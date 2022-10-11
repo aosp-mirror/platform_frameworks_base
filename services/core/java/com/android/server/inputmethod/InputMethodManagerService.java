@@ -299,7 +299,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     private final DisplayManagerInternal mDisplayManagerInternal;
     private final ArrayMap<String, List<InputMethodSubtype>> mAdditionalSubtypeMap =
             new ArrayMap<>();
-    private final UserManager mUserManager;
     private final UserManagerInternal mUserManagerInternal;
     private final InputMethodMenuController mMenuController;
     @NonNull private final InputMethodBindingController mBindingController;
@@ -1721,7 +1720,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         mInputMethodDeviceConfigs = new InputMethodDeviceConfigs();
         mImeDisplayValidator = mWindowManagerInternal::getDisplayImePolicy;
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
-        mUserManager = mContext.getSystemService(UserManager.class);
         mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
 
         mSlotIme = mContext.getString(com.android.internal.R.string.status_bar_ime);
