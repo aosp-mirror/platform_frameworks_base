@@ -583,24 +583,26 @@ public class NotificationChildrenContainer extends ViewGroup
             ExpandableViewState childState = child.getViewState();
             int intrinsicHeight = child.getIntrinsicHeight();
             childState.height = intrinsicHeight;
-            childState.yTranslation = yPosition + launchTransitionCompensation;
+            childState.setYTranslation(yPosition + launchTransitionCompensation);
             childState.hidden = false;
             // When the group is expanded, the children cast the shadows rather than the parent
             // so use the parent's elevation here.
-            childState.zTranslation =
-                    (childrenExpandedAndNotAnimating && mEnableShadowOnChildNotifications)
-                    ? parentState.zTranslation
-                    : 0;
+            if (childrenExpandedAndNotAnimating && mEnableShadowOnChildNotifications) {
+                childState.setZTranslation(parentState.getZTranslation());
+            } else {
+                childState.setZTranslation(0);
+            }
             childState.dimmed = parentState.dimmed;
             childState.hideSensitive = parentState.hideSensitive;
             childState.belowSpeedBump = parentState.belowSpeedBump;
             childState.clipTopAmount = 0;
-            childState.alpha = 0;
+            childState.setAlpha(0);
             if (i < firstOverflowIndex) {
-                childState.alpha = showingAsLowPriority() ? expandFactor : 1.0f;
+                childState.setAlpha(showingAsLowPriority() ? expandFactor : 1.0f);
             } else if (expandFactor == 1.0f && i <= lastVisibleIndex) {
-                childState.alpha = (mActualHeight - childState.yTranslation) / childState.height;
-                childState.alpha = Math.max(0.0f, Math.min(1.0f, childState.alpha));
+                childState.setAlpha(
+                        (mActualHeight - childState.getYTranslation()) / childState.height);
+                childState.setAlpha(Math.max(0.0f, Math.min(1.0f, childState.getAlpha())));
             }
             childState.location = parentState.location;
             childState.inShelf = parentState.inShelf;
@@ -621,13 +623,16 @@ public class NotificationChildrenContainer extends ViewGroup
                     if (mirrorView.getVisibility() == GONE) {
                         mirrorView = alignView;
                     }
-                    mGroupOverFlowState.alpha = mirrorView.getAlpha();
-                    mGroupOverFlowState.yTranslation += NotificationUtils.getRelativeYOffset(
+                    mGroupOverFlowState.setAlpha(mirrorView.getAlpha());
+                    float yTranslation = mGroupOverFlowState.getYTranslation()
+                            + NotificationUtils.getRelativeYOffset(
                             mirrorView, overflowView);
+                    mGroupOverFlowState.setYTranslation(yTranslation);
                 }
             } else {
-                mGroupOverFlowState.yTranslation += mNotificationHeaderMargin;
-                mGroupOverFlowState.alpha = 0.0f;
+                mGroupOverFlowState.setYTranslation(
+                        mGroupOverFlowState.getYTranslation() + mNotificationHeaderMargin);
+                mGroupOverFlowState.setAlpha(0.0f);
             }
         }
         if (mNotificationHeader != null) {
@@ -635,11 +640,11 @@ public class NotificationChildrenContainer extends ViewGroup
                 mHeaderViewState = new ViewState();
             }
             mHeaderViewState.initFrom(mNotificationHeader);
-            mHeaderViewState.zTranslation = childrenExpandedAndNotAnimating
-                    ? parentState.zTranslation
-                    : 0;
-            mHeaderViewState.yTranslation = mCurrentHeaderTranslation;
-            mHeaderViewState.alpha = mHeaderVisibleAmount;
+            mHeaderViewState.setZTranslation(childrenExpandedAndNotAnimating
+                    ? parentState.getZTranslation()
+                    : 0);
+            mHeaderViewState.setYTranslation(mCurrentHeaderTranslation);
+            mHeaderViewState.setAlpha(mHeaderVisibleAmount);
             // The hiding is done automatically by the alpha, otherwise we'll pick it up again
             // in the next frame with the initFrom call above and have an invisible header
             mHeaderViewState.hidden = false;
@@ -711,14 +716,14 @@ public class NotificationChildrenContainer extends ViewGroup
             // layout the divider
             View divider = mDividers.get(i);
             tmpState.initFrom(divider);
-            tmpState.yTranslation = viewState.yTranslation - mDividerHeight;
-            float alpha = mChildrenExpanded && viewState.alpha != 0 ? mDividerAlpha : 0;
-            if (mUserLocked && !showingAsLowPriority() && viewState.alpha != 0) {
+            tmpState.setYTranslation(viewState.getYTranslation() - mDividerHeight);
+            float alpha = mChildrenExpanded && viewState.getAlpha() != 0 ? mDividerAlpha : 0;
+            if (mUserLocked && !showingAsLowPriority() && viewState.getAlpha() != 0) {
                 alpha = NotificationUtils.interpolate(0, mDividerAlpha,
-                        Math.min(viewState.alpha, expandFraction));
+                        Math.min(viewState.getAlpha(), expandFraction));
             }
             tmpState.hidden = !dividersVisible;
-            tmpState.alpha = alpha;
+            tmpState.setAlpha(alpha);
             tmpState.applyToView(divider);
             // There is no fake shadow to be drawn on the children
             child.setFakeShadowIntensity(0.0f, 0.0f, 0, 0);
@@ -790,24 +795,24 @@ public class NotificationChildrenContainer extends ViewGroup
             // layout the divider
             View divider = mDividers.get(i);
             tmpState.initFrom(divider);
-            tmpState.yTranslation = viewState.yTranslation - mDividerHeight;
-            float alpha = mChildrenExpanded && viewState.alpha != 0 ? mDividerAlpha : 0;
-            if (mUserLocked && !showingAsLowPriority() && viewState.alpha != 0) {
+            tmpState.setYTranslation(viewState.getYTranslation() - mDividerHeight);
+            float alpha = mChildrenExpanded && viewState.getAlpha() != 0 ? mDividerAlpha : 0;
+            if (mUserLocked && !showingAsLowPriority() && viewState.getAlpha() != 0) {
                 alpha = NotificationUtils.interpolate(0, mDividerAlpha,
-                        Math.min(viewState.alpha, expandFraction));
+                        Math.min(viewState.getAlpha(), expandFraction));
             }
             tmpState.hidden = !dividersVisible;
-            tmpState.alpha = alpha;
+            tmpState.setAlpha(alpha);
             tmpState.animateTo(divider, properties);
             // There is no fake shadow to be drawn on the children
             child.setFakeShadowIntensity(0.0f, 0.0f, 0, 0);
         }
         if (mOverflowNumber != null) {
             if (mNeverAppliedGroupState) {
-                float alpha = mGroupOverFlowState.alpha;
-                mGroupOverFlowState.alpha = 0;
+                float alpha = mGroupOverFlowState.getAlpha();
+                mGroupOverFlowState.setAlpha(0);
                 mGroupOverFlowState.applyToView(mOverflowNumber);
-                mGroupOverFlowState.alpha = alpha;
+                mGroupOverFlowState.setAlpha(alpha);
                 mNeverAppliedGroupState = false;
             }
             mGroupOverFlowState.animateTo(mOverflowNumber, properties);
@@ -949,7 +954,7 @@ public class NotificationChildrenContainer extends ViewGroup
             child.setAlpha(start);
             ViewState viewState = new ViewState();
             viewState.initFrom(child);
-            viewState.alpha = target;
+            viewState.setAlpha(target);
             ALPHA_FADE_IN.setDelay(i * 50);
             viewState.animateTo(child, ALPHA_FADE_IN);
         }

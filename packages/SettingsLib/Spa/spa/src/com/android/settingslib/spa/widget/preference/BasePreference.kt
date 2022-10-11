@@ -34,7 +34,8 @@ internal fun BasePreference(
     title: String,
     summary: State<String>,
     modifier: Modifier = Modifier,
-    icon: (@Composable () -> Unit)? = null,
+    singleLineSummary: Boolean = false,
+    icon: @Composable (() -> Unit)? = null,
     enabled: State<Boolean> = true.toState(),
     paddingStart: Dp = SettingsDimension.itemPaddingStart,
     paddingEnd: Dp = SettingsDimension.itemPaddingEnd,
@@ -43,7 +44,13 @@ internal fun BasePreference(
 ) {
     BaseLayout(
         title = title,
-        subTitle = { SettingsBody(summary) },
+        subTitle = {
+            if (singleLineSummary) {
+                SettingsBody(body = summary, maxLines = 1)
+            } else {
+                SettingsBody(body = summary)
+            }
+        },
         modifier = modifier,
         icon = icon,
         enabled = enabled,

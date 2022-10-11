@@ -528,6 +528,7 @@ public class ImageWallpaper extends WallpaperService {
         @VisibleForTesting
         static final int MIN_SURFACE_HEIGHT = 128;
         private Bitmap mBitmap;
+        private boolean mWideColorGamut = false;
 
         /*
          * Counter to unload the bitmap as soon as possible.
@@ -674,14 +675,16 @@ public class ImageWallpaper extends WallpaperService {
         @VisibleForTesting
         void drawFrameOnCanvas(Bitmap bitmap) {
             Trace.beginSection("ImageWallpaper.CanvasEngine#drawFrame");
-            // TODO change SurfaceHolder API to add wcg support
-            Canvas c = mSurfaceHolder.lockHardwareCanvas();
-            if (c != null) {
+            Surface surface = mSurfaceHolder.getSurface();
+            Canvas canvas = mWideColorGamut
+                    ? surface.lockHardwareWideColorGamutCanvas()
+                    : surface.lockHardwareCanvas();
+            if (canvas != null) {
                 Rect dest = mSurfaceHolder.getSurfaceFrame();
                 try {
-                    c.drawBitmap(bitmap, null, dest, null);
+                    canvas.drawBitmap(bitmap, null, dest, null);
                 } finally {
-                    mSurfaceHolder.unlockCanvasAndPost(c);
+                    surface.unlockCanvasAndPost(canvas);
                 }
             }
             Trace.endSection();
@@ -778,6 +781,8 @@ public class ImageWallpaper extends WallpaperService {
                     mBitmap.recycle();
                 }
                 mBitmap = bitmap;
+                mWideColorGamut = mWallpaperManager.wallpaperSupportsWcg(
+                        WallpaperManager.FLAG_SYSTEM);
 
                 // +2 usages for the color extraction and the delayed unload.
                 mBitmapUsages += 2;
@@ -839,10 +844,6 @@ public class ImageWallpaper extends WallpaperService {
         public void onOffsetsChanged(float xOffset, float yOffset,
                 float xOffsetStep, float yOffsetStep,
                 int xPixelOffset, int yPixelOffset) {
-            /*
-             * TODO check this formula. mPages is always >= 4, even when launcher is single-paged
-             * this formula is also used in the GL engine
-             */
             final int pages;
             if (xOffsetStep > 0 && xOffsetStep <= 1) {
                 pages = Math.round(1 / xOffsetStep) + 1;

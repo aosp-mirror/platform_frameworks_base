@@ -211,11 +211,11 @@ public class NotificationIconContainer extends ViewGroup {
             canvas.drawLine(end, 0, end, height, paint);
 
             paint.setColor(Color.GREEN);
-            int lastIcon = (int) mLastVisibleIconState.xTranslation;
+            int lastIcon = (int) mLastVisibleIconState.getXTranslation();
             canvas.drawLine(lastIcon, 0, lastIcon, height, paint);
 
             if (mFirstVisibleIconState != null) {
-                int firstIcon = (int) mFirstVisibleIconState.xTranslation;
+                int firstIcon = (int) mFirstVisibleIconState.getXTranslation();
                 canvas.drawLine(firstIcon, 0, firstIcon, height, paint);
             }
 
@@ -413,7 +413,7 @@ public class NotificationIconContainer extends ViewGroup {
             View view = getChildAt(i);
             ViewState iconState = mIconStates.get(view);
             iconState.initFrom(view);
-            iconState.alpha = mIsolatedIcon == null || view == mIsolatedIcon ? 1.0f : 0.0f;
+            iconState.setAlpha(mIsolatedIcon == null || view == mIsolatedIcon ? 1.0f : 0.0f);
             iconState.hidden = false;
         }
     }
@@ -467,7 +467,7 @@ public class NotificationIconContainer extends ViewGroup {
                 // We only modify the xTranslation if it's fully inside of the container
                 // since during the transition to the shelf, the translations are controlled
                 // from the outside
-                iconState.xTranslation = translationX;
+                iconState.setXTranslation(translationX);
             }
             if (mFirstVisibleIconState == null) {
                 mFirstVisibleIconState = iconState;
@@ -501,7 +501,7 @@ public class NotificationIconContainer extends ViewGroup {
                 View view = getChildAt(i);
                 IconState iconState = mIconStates.get(view);
                 int dotWidth = mStaticDotDiameter + mDotPadding;
-                iconState.xTranslation = translationX;
+                iconState.setXTranslation(translationX);
                 if (mNumDots < MAX_DOTS) {
                     if (mNumDots == 0 && iconState.iconAppearAmount < 0.8f) {
                         iconState.visibleState = StatusBarIconView.STATE_ICON;
@@ -525,7 +525,8 @@ public class NotificationIconContainer extends ViewGroup {
             for (int i = 0; i < childCount; i++) {
                 View view = getChildAt(i);
                 IconState iconState = mIconStates.get(view);
-                iconState.xTranslation = getWidth() - iconState.xTranslation - view.getWidth();
+                iconState.setXTranslation(
+                        getWidth() - iconState.getXTranslation() - view.getWidth());
             }
         }
         if (mIsolatedIcon != null) {
@@ -533,8 +534,8 @@ public class NotificationIconContainer extends ViewGroup {
             if (iconState != null) {
                 // Most of the time the icon isn't yet added when this is called but only happening
                 // later
-                iconState.xTranslation = mIsolatedIconLocation.left - mAbsolutePosition[0]
-                        - (1 - mIsolatedIcon.getIconScale()) * mIsolatedIcon.getWidth() / 2.0f;
+                iconState.setXTranslation(mIsolatedIconLocation.left - mAbsolutePosition[0]
+                        - (1 - mIsolatedIcon.getIconScale()) * mIsolatedIcon.getWidth() / 2.0f);
                 iconState.visibleState = StatusBarIconView.STATE_ICON;
             }
         }
@@ -609,8 +610,10 @@ public class NotificationIconContainer extends ViewGroup {
             return 0;
         }
 
-        int translation = (int) (isLayoutRtl() ? getWidth() - mLastVisibleIconState.xTranslation
-                : mLastVisibleIconState.xTranslation + mIconSize);
+        int translation = (int) (isLayoutRtl()
+                ? getWidth() - mLastVisibleIconState.getXTranslation()
+                : mLastVisibleIconState.getXTranslation() + mIconSize);
+
         // There's a chance that last translation goes beyond the edge maybe
         return Math.min(getWidth(), translation);
     }

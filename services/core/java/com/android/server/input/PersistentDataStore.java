@@ -556,11 +556,10 @@ final class PersistentDataStore {
             }
 
             for (int i = 0; i < mKeyboardBacklightBrightnessMap.size(); i++) {
-                int lightId = mKeyboardBacklightBrightnessMap.valueAt(i);
                 serializer.startTag(null, "light-info");
-                serializer.attributeInt(null, "light-id", lightId);
+                serializer.attributeInt(null, "light-id", mKeyboardBacklightBrightnessMap.keyAt(i));
                 serializer.attributeInt(null, "light-brightness",
-                        mKeyboardBacklightBrightnessMap.get(lightId));
+                        mKeyboardBacklightBrightnessMap.valueAt(i));
                 serializer.endTag(null, "light-info");
             }
 

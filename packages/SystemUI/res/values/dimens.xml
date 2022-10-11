@@ -1470,6 +1470,9 @@
     <dimen name="media_projection_app_selector_icon_size">32dp</dimen>
     <dimen name="media_projection_app_selector_recents_padding">16dp</dimen>
     <dimen name="media_projection_app_selector_loader_size">32dp</dimen>
+    <dimen name="media_projection_app_selector_task_rounded_corners">10dp</dimen>
+    <dimen name="media_projection_app_selector_task_icon_size">24dp</dimen>
+    <dimen name="media_projection_app_selector_task_icon_margin">8dp</dimen>
 
     <!-- Dream overlay related dimensions -->
     <dimen name="dream_overlay_status_bar_height">60dp</dimen>

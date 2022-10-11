@@ -23,7 +23,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.LocalContext
-import com.android.settingslib.spa.framework.BrowseActivity.Companion.HIGHLIGHT_ENTRY_PARAM_NAME
+import com.android.settingslib.spa.framework.compose.LocalNavController
 
 const val INJECT_ENTRY_NAME = "INJECT"
 const val ROOT_ENTRY_NAME = "ROOT"
@@ -54,6 +54,7 @@ data class SettingsEntry(
      * ========================================
      */
     val isAllowSearch: Boolean = false,
+    val isSearchDataDynamic: Boolean = false,
 
     /**
      * ========================================
@@ -90,18 +91,10 @@ data class SettingsEntry(
         return "${owner.displayName}:$displayName"
     }
 
-    private fun containerPage(): SettingsPage {
+    fun containerPage(): SettingsPage {
         // The Container page of the entry, which is the from-page or
         // the owner-page if from-page is unset.
         return fromPage ?: owner
-    }
-
-    fun buildRoute(): String {
-        return containerPage().buildRoute(id)
-    }
-
-    fun hasRuntimeParam(): Boolean {
-        return containerPage().hasRuntimeParam()
     }
 
     private fun fullArgument(runtimeArguments: Bundle? = null): Bundle {
@@ -119,8 +112,9 @@ data class SettingsEntry(
     @Composable
     fun UiLayout(runtimeArguments: Bundle? = null) {
         val context = LocalContext.current
+        val controller = LocalNavController.current
         val highlight = rememberSaveable {
-            mutableStateOf(runtimeArguments?.getString(HIGHLIGHT_ENTRY_PARAM_NAME) == id)
+            mutableStateOf(controller.highlightEntryId == id)
         }
         if (highlight.value) {
             highlight.value = false
@@ -141,6 +135,7 @@ class SettingsEntryBuilder(private val name: String, private val owner: Settings
 
     // Attributes
     private var isAllowSearch: Boolean = false
+    private var isSearchDataDynamic: Boolean = false
 
     // Functions
     private var searchDataFn: (arguments: Bundle?) -> EntrySearchData? = { null }
@@ -159,6 +154,7 @@ class SettingsEntryBuilder(private val name: String, private val owner: Settings
 
             // attributes
             isAllowSearch = isAllowSearch,
+            isSearchDataDynamic = isSearchDataDynamic,
 
             // functions
             searchDataImpl = searchDataFn,
@@ -182,6 +178,11 @@ class SettingsEntryBuilder(private val name: String, private val owner: Settings
 
     fun setIsAllowSearch(isAllowSearch: Boolean): SettingsEntryBuilder {
         this.isAllowSearch = isAllowSearch
+        return this
+    }
+
+    fun setIsSearchDataDynamic(isDynamic: Boolean): SettingsEntryBuilder {
+        this.isSearchDataDynamic = isDynamic
         return this
     }
 

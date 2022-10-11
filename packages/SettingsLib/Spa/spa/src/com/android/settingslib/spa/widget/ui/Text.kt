@@ -17,13 +17,19 @@
 package com.android.settingslib.spa.widget.ui
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.android.settingslib.spa.framework.theme.SettingsTheme
 
 @Composable
 fun SettingsTitle(title: State<String>) {
@@ -40,17 +46,25 @@ fun SettingsTitle(title: String) {
 }
 
 @Composable
-fun SettingsBody(body: State<String>) {
-    SettingsBody(body.value)
+fun SettingsBody(
+    body: State<String>,
+    maxLines: Int = Int.MAX_VALUE,
+) {
+    SettingsBody(body = body.value, maxLines = maxLines)
 }
 
 @Composable
-fun SettingsBody(body: String) {
+fun SettingsBody(
+    body: String,
+    maxLines: Int = Int.MAX_VALUE,
+) {
     if (body.isNotEmpty()) {
         Text(
             text = body,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             style = MaterialTheme.typography.bodyMedium,
+            overflow = TextOverflow.Ellipsis,
+            maxLines = maxLines,
         )
     }
 }
@@ -66,5 +80,21 @@ fun PlaceholderTitle(title: String) {
             color = MaterialTheme.colorScheme.onSurface,
             style = MaterialTheme.typography.titleLarge,
         )
+    }
+}
+
+@Preview
+@Composable
+private fun BasePreferencePreview() {
+    SettingsTheme {
+        Column(Modifier.width(100.dp)) {
+            SettingsBody(
+                body = "Long long long long long long text",
+            )
+            SettingsBody(
+                body = "Long long long long long long text",
+                maxLines = 1,
+            )
+        }
     }
 }

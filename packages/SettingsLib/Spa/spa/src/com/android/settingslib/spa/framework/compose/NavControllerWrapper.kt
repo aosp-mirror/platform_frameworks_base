@@ -27,6 +27,9 @@ import androidx.navigation.NavHostController
 interface NavControllerWrapper {
     fun navigate(route: String)
     fun navigateBack()
+
+    val highlightEntryId: String?
+      get() = null
 }
 
 @Composable
@@ -56,9 +59,11 @@ fun navigator(route: String?): () -> Unit {
 }
 
 internal class NavControllerWrapperImpl(
-    private val navController: NavHostController,
+    val navController: NavHostController,
     private val onBackPressedDispatcher: OnBackPressedDispatcher?,
 ) : NavControllerWrapper {
+    var highlightId: String? = null
+
     override fun navigate(route: String) {
         navController.navigate(route)
     }
@@ -66,4 +71,7 @@ internal class NavControllerWrapperImpl(
     override fun navigateBack() {
         onBackPressedDispatcher?.onBackPressed()
     }
+
+    override val highlightEntryId: String?
+      get() = highlightId
 }

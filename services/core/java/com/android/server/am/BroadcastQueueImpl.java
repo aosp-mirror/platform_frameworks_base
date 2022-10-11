@@ -579,7 +579,7 @@ public class BroadcastQueueImpl extends BroadcastQueue {
             final Object curReceiver = r.receivers.get(curIndex);
             FrameworkStatsLog.write(BROADCAST_DELIVERY_EVENT_REPORTED, r.curApp.uid,
                     r.callingUid == -1 ? Process.SYSTEM_UID : r.callingUid,
-                    ActivityManagerService.getShortAction(r.intent.getAction()),
+                    r.intent.getAction(),
                     curReceiver instanceof BroadcastFilter
                     ? BROADCAST_DELIVERY_EVENT_REPORTED__RECEIVER_TYPE__RUNTIME
                     : BROADCAST_DELIVERY_EVENT_REPORTED__RECEIVER_TYPE__MANIFEST,
@@ -757,7 +757,7 @@ public class BroadcastQueueImpl extends BroadcastQueue {
             FrameworkStatsLog.write(BROADCAST_DELIVERY_EVENT_REPORTED,
                     receiverUid == -1 ? Process.SYSTEM_UID : receiverUid,
                     callingUid == -1 ? Process.SYSTEM_UID : callingUid,
-                    ActivityManagerService.getShortAction(intent.getAction()),
+                    intent.getAction(),
                     BROADCAST_DELIVERY_EVENT_REPORTED__RECEIVER_TYPE__RUNTIME,
                     BROADCAST_DELIVERY_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM,
                     dispatchDelay, receiveDelay, 0 /* finish_delay */);

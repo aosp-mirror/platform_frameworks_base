@@ -32,11 +32,14 @@ import android.graphics.Bitmap;
 import android.hardware.broadcastradio.IBroadcastRadio;
 import android.hardware.broadcastradio.ITunerCallback;
 import android.hardware.broadcastradio.ProgramInfo;
+import android.hardware.broadcastradio.Result;
 import android.hardware.radio.ProgramList;
 import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
 import android.hardware.radio.RadioTuner;
 import android.os.RemoteException;
+import android.os.ServiceSpecificException;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 
 import org.junit.Before;
@@ -46,8 +49,12 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.verification.VerificationWithTimeout;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 /**
- * Tests for AIDL HAL RadioModule.
+ * Tests for AIDL HAL TunerSession.
  */
 @RunWith(MockitoJUnitRunner.class)
 public final class TunerSessionTest {
@@ -57,6 +64,13 @@ public final class TunerSessionTest {
     private final int mSignalQuality = 1;
     private final long mAmfmFrequencySpacing = 500;
     private final long[] mAmfmFrequencyList = {97500, 98100, 99100};
+    private final RadioManager.FmBandDescriptor mFmBandDescriptor =
+            new RadioManager.FmBandDescriptor(RadioManager.REGION_ITU_1, RadioManager.BAND_FM,
+                    /* lowerLimit= */ 87500, /* upperLimit= */ 108000, /* spacing= */ 100,
+                    /* stereo= */ false, /* rds= */ false, /* ta= */ false, /* af= */ false,
+                    /* ea= */ false);
+    private final RadioManager.BandConfig mFmBandConfig =
+            new RadioManager.FmBandConfig(mFmBandDescriptor);
 
     // Mocks
     @Mock private IBroadcastRadio mBroadcastRadioMock;
@@ -69,6 +83,9 @@ public final class TunerSessionTest {
     // Objects created by mRadioModule
     private ITunerCallback mHalTunerCallback;
     private ProgramInfo mHalCurrentInfo;
+    private final int mUnsupportedConfigFlag = 0;
+    private final ArrayMap<Integer, Boolean> mHalConfigMap = new ArrayMap<>();
+
     private TunerSession[] mTunerSessions;
 
     @Before
@@ -118,6 +135,23 @@ public final class TunerSessionTest {
         }).when(mBroadcastRadioMock).seek(anyBoolean(), anyBoolean());
 
         when(mBroadcastRadioMock.getImage(anyInt())).thenReturn(null);
+
+        mHalConfigMap.clear();
+        doAnswer(invocation -> {
+            int configFlag = (int) invocation.getArguments()[0];
+            if (configFlag == mUnsupportedConfigFlag) {
+                throw new ServiceSpecificException(Result.NOT_SUPPORTED);
+            }
+            return mHalConfigMap.getOrDefault(configFlag, false);
+        }).when(mBroadcastRadioMock).isConfigFlagSet(anyInt());
+        doAnswer(invocation -> {
+            int configFlag = (int) invocation.getArguments()[0];
+            if (configFlag == mUnsupportedConfigFlag) {
+                throw new ServiceSpecificException(Result.NOT_SUPPORTED);
+            }
+            mHalConfigMap.put(configFlag, (boolean) invocation.getArguments()[1]);
+            return null;
+        }).when(mBroadcastRadioMock).setConfigFlag(anyInt(), anyBoolean());
     }
 
     @Test
@@ -130,6 +164,46 @@ public final class TunerSessionTest {
             assertWithMessage("Session of index %s close state", index)
                     .that(mTunerSessions[index].isClosed()).isFalse();
         }
+    }
+
+    @Test
+    public void setConfiguration() throws RemoteException {
+        openAidlClients(/* numClients= */ 1);
+
+        mTunerSessions[0].setConfiguration(mFmBandConfig);
+
+        verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT).onConfigurationChanged(mFmBandConfig);
+    }
+
+    @Test
+    public void getConfiguration() throws RemoteException {
+        openAidlClients(/* numClients= */ 1);
+        mTunerSessions[0].setConfiguration(mFmBandConfig);
+
+        RadioManager.BandConfig config = mTunerSessions[0].getConfiguration();
+
+        assertWithMessage("Session configuration").that(config)
+                .isEqualTo(mFmBandConfig);
+    }
+
+    @Test
+    public void setMuted_withUnmuted() throws RemoteException {
+        openAidlClients(/* numClients= */ 1);
+
+        mTunerSessions[0].setMuted(/* mute= */ false);
+
+        assertWithMessage("Session mute state after setting muted %s", false)
+                .that(mTunerSessions[0].isMuted()).isFalse();
+    }
+
+    @Test
+    public void setMuted_withMuted() throws RemoteException {
+        openAidlClients(/* numClients= */ 1);
+
+        mTunerSessions[0].setMuted(/* mute= */ true);
+
+        assertWithMessage("Session mute state after setting muted %s", true)
+                .that(mTunerSessions[0].isMuted()).isTrue();
     }
 
     @Test
@@ -338,6 +412,114 @@ public final class TunerSessionTest {
         mTunerSessions[0].stopProgramListUpdates();
 
         verify(mBroadcastRadioMock).stopProgramListUpdates();
+    }
+
+    @Test
+    public void isConfigFlagSupported_withUnsupportedFlag_returnsFalse() throws RemoteException {
+        openAidlClients(/* numClients= */ 1);
+        int flag = mUnsupportedConfigFlag;
+
+        boolean isSupported = mTunerSessions[0].isConfigFlagSupported(flag);
+
+        verify(mBroadcastRadioMock).isConfigFlagSet(flag);
+        assertWithMessage("Config  flag %s is supported", flag).that(isSupported).isFalse();
+    }
+
+    @Test
+    public void isConfigFlagSupported_withSupportedFlag_returnsTrue() throws RemoteException {
+        openAidlClients(/* numClients= */ 1);
+        int flag = mUnsupportedConfigFlag + 1;
+
+        boolean isSupported = mTunerSessions[0].isConfigFlagSupported(flag);
+
+        verify(mBroadcastRadioMock).isConfigFlagSet(flag);
+        assertWithMessage("Config flag %s is supported", flag).that(isSupported).isTrue();
+    }
+
+    @Test
+    public void setConfigFlag_withUnsupportedFlag_throwsRuntimeException() throws RemoteException {
+        openAidlClients(/* numClients= */ 1);
+        int flag = mUnsupportedConfigFlag;
+
+        RuntimeException thrown = assertThrows(RuntimeException.class, () -> {
+            mTunerSessions[0].setConfigFlag(flag, /* value= */ true);
+        });
+
+        assertWithMessage("Exception for setting unsupported flag %s", flag)
+                .that(thrown).hasMessageThat().contains("setConfigFlag: NOT_SUPPORTED");
+    }
+
+    @Test
+    public void setConfigFlag_withFlagSetToTrue() throws RemoteException {
+        openAidlClients(/* numClients= */ 1);
+        int flag = mUnsupportedConfigFlag + 1;
+
+        mTunerSessions[0].setConfigFlag(flag, /* value= */ true);
+
+        verify(mBroadcastRadioMock).setConfigFlag(flag, /* value= */ true);
+    }
+
+    @Test
+    public void setConfigFlag_withFlagSetToFalse() throws RemoteException {
+        openAidlClients(/* numClients= */ 1);
+        int flag = mUnsupportedConfigFlag + 1;
+
+        mTunerSessions[0].setConfigFlag(flag, /* value= */ false);
+
+        verify(mBroadcastRadioMock).setConfigFlag(flag, /* value= */ false);
+    }
+
+    @Test
+    public void isConfigFlagSet_withUnsupportedFlag_throwsRuntimeException()
+            throws RemoteException {
+        openAidlClients(/* numClients= */ 1);
+        int flag = mUnsupportedConfigFlag;
+
+        RuntimeException thrown = assertThrows(RuntimeException.class, () -> {
+            mTunerSessions[0].isConfigFlagSet(flag);
+        });
+
+        assertWithMessage("Exception for check if unsupported flag %s is set", flag)
+                .that(thrown).hasMessageThat().contains("isConfigFlagSet: NOT_SUPPORTED");
+    }
+
+    @Test
+    public void isConfigFlagSet_withSupportedFlag() throws RemoteException {
+        openAidlClients(/* numClients= */ 1);
+        int flag = mUnsupportedConfigFlag + 1;
+        boolean expectedConfigFlagValue = true;
+        mTunerSessions[0].setConfigFlag(flag, /* value= */ expectedConfigFlagValue);
+
+        boolean isSet = mTunerSessions[0].isConfigFlagSet(flag);
+
+        assertWithMessage("Config flag %s is set", flag)
+                .that(isSet).isEqualTo(expectedConfigFlagValue);
+    }
+
+    @Test
+    public void setParameters_withMockParameters() throws RemoteException {
+        openAidlClients(/* numClients= */ 1);
+        Map<String, String> parametersSet = new ArrayMap<>();
+        parametersSet.put("mockParam1", "mockValue1");
+        parametersSet.put("mockParam2", "mockValue2");
+
+        mTunerSessions[0].setParameters(parametersSet);
+
+        verify(mBroadcastRadioMock).setParameters(
+                ConversionUtils.vendorInfoToHalVendorKeyValues(parametersSet));
+    }
+
+    @Test
+    public void getParameters_withMockKeys() throws RemoteException {
+        openAidlClients(/* numClients= */ 1);
+        List<String> parameterKeys = new ArrayList<>(2);
+        parameterKeys.add("mockKey1");
+        parameterKeys.add("mockKey2");
+
+        mTunerSessions[0].getParameters(parameterKeys);
+
+        verify(mBroadcastRadioMock).getParameters(
+                parameterKeys.toArray(new String[0]));
     }
 
     private void openAidlClients(int numClients) throws RemoteException {
