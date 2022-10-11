@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.content.ComponentName;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.InsetsVisibilities;
@@ -30,10 +31,11 @@ oneway interface IDisplayWindowInsetsController {
     /**
      * Called when top focused window changes to determine whether or not to take over insets
      * control. Won't be called if config_remoteInsetsControllerControlsSystemBars is false.
-     * @param packageName: Passes the top package name
+     * @param component: Passes the top application component in the focused window.
      * @param requestedVisibilities The insets visibilities requested by the focussed window.
      */
-    void topFocusedWindowChanged(String packageName, in InsetsVisibilities insetsVisibilities);
+    void topFocusedWindowChanged(in ComponentName component,
+            in InsetsVisibilities insetsVisibilities);
 
     /**
      * @see IWindow#insetsChanged

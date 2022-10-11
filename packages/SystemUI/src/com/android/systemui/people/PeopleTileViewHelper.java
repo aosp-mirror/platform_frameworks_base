@@ -75,6 +75,7 @@ import androidx.core.math.MathUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
+import com.android.systemui.people.data.model.PeopleTileModel;
 import com.android.systemui.people.widget.LaunchConversationActivity;
 import com.android.systemui.people.widget.PeopleSpaceWidgetProvider;
 import com.android.systemui.people.widget.PeopleTileKey;
@@ -299,7 +300,8 @@ public class PeopleTileViewHelper {
         return createLastInteractionRemoteViews();
     }
 
-    private static boolean isDndBlockingTileData(@Nullable PeopleSpaceTile tile) {
+    /** Whether the conversation associated with {@code tile} can bypass DND. */
+    public static boolean isDndBlockingTileData(@Nullable PeopleSpaceTile tile) {
         if (tile == null) return false;
 
         int notificationPolicyState = tile.getNotificationPolicyState();
@@ -536,7 +538,8 @@ public class PeopleTileViewHelper {
         return views;
     }
 
-    private static boolean getHasNewStory(PeopleSpaceTile tile) {
+    /** Whether {@code tile} has a new story. */
+    public static boolean getHasNewStory(PeopleSpaceTile tile) {
         return tile.getStatuses() != null && tile.getStatuses().stream().anyMatch(
                 c -> c.getActivity() == ACTIVITY_NEW_STORY);
     }
@@ -1250,16 +1253,24 @@ public class PeopleTileViewHelper {
     }
 
     /** Returns a bitmap with the user icon and package icon. */
-    public static Bitmap getPersonIconBitmap(Context context, PeopleSpaceTile tile,
+    public static Bitmap getPersonIconBitmap(Context context, PeopleTileModel tile,
             int maxAvatarSize) {
-        boolean hasNewStory = getHasNewStory(tile);
-        return getPersonIconBitmap(context, tile, maxAvatarSize, hasNewStory);
+        return getPersonIconBitmap(context, maxAvatarSize, tile.getHasNewStory(),
+                tile.getUserIcon(), tile.getKey().getPackageName(), tile.getKey().getUserId(),
+                tile.isImportant(),  tile.isDndBlocking());
     }
 
     /** Returns a bitmap with the user icon and package icon. */
     private static Bitmap getPersonIconBitmap(
             Context context, PeopleSpaceTile tile, int maxAvatarSize, boolean hasNewStory) {
-        Icon icon = tile.getUserIcon();
+        return getPersonIconBitmap(context, maxAvatarSize, hasNewStory, tile.getUserIcon(),
+                tile.getPackageName(), getUserId(tile),
+                tile.isImportantConversation(), isDndBlockingTileData(tile));
+    }
+
+    private static Bitmap getPersonIconBitmap(
+            Context context, int maxAvatarSize, boolean hasNewStory, Icon icon, String packageName,
+            int userId, boolean importantConversation, boolean dndBlockingTileData) {
         if (icon == null) {
             Drawable placeholder = context.getDrawable(R.drawable.ic_avatar_with_badge).mutate();
             placeholder.setColorFilter(getDisabledColorFilter());
@@ -1272,10 +1283,10 @@ public class PeopleTileViewHelper {
         RoundedBitmapDrawable roundedDrawable = RoundedBitmapDrawableFactory.create(
                 context.getResources(), icon.getBitmap());
         Drawable personDrawable = storyIcon.getPeopleTileDrawable(roundedDrawable,
-                tile.getPackageName(), getUserId(tile), tile.isImportantConversation(),
+                packageName, userId, importantConversation,
                 hasNewStory);
 
-        if (isDndBlockingTileData(tile)) {
+        if (dndBlockingTileData) {
             personDrawable.setColorFilter(getDisabledColorFilter());
         }
 

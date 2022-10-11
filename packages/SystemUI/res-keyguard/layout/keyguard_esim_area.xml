@@ -17,15 +17,17 @@
 */
 -->
 
-<!-- This contains disable esim buttonas shared by sim_pin/sim_puk screens -->
-<com.android.keyguard.KeyguardEsimArea
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- This contains disable eSim buttons shared by sim_pin/sim_puk screens -->
+<com.android.keyguard.KeyguardEsimArea xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/keyguard_disable_esim"
+    style="@style/Keyguard.TextView"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:id="@+id/keyguard_disable_esim"
-    android:visibility="gone"
+    android:background="@drawable/kg_bouncer_secondary_button"
+    android:drawablePadding="10dp"
+    android:drawableStart="@drawable/ic_no_sim"
+    android:drawableTint="?android:attr/textColorPrimary"
     android:text="@string/disable_carrier_button_text"
-    style="@style/Keyguard.TextView"
-    android:textAppearance="?android:attr/textAppearanceMedium"
+    android:textColor="?android:attr/textColorPrimary"
     android:textSize="@dimen/kg_status_line_font_size"
-    android:textAllCaps="@bool/kg_use_all_caps" />
+    android:visibility="gone" />

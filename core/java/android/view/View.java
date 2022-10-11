@@ -8207,7 +8207,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     // We have not been laid out yet, hence cannot evaluate
                     // whether this view is visible to the user, we will do
                     // the evaluation once layout is complete.
-                    if (!isLaidOut()) {
+                    // Sometimes, views are already laid out, but it's still
+                    // not visible to the user, we also do the evaluation once
+                    // the view is visible. ex: There is a fade-in animation
+                    // for the activity, the view will be laid out when the
+                    // animation beginning. On the time, the view is not visible
+                    // to the user. And then as the animation progresses, the view
+                    // becomes visible to the user.
+                    if (!isLaidOut() || !isVisibleToUser()) {
                         mPrivateFlags3 |= PFLAG3_NOTIFY_AUTOFILL_ENTER_ON_LAYOUT;
                     } else if (isVisibleToUser()) {
                         if (isFocused()) {
@@ -12709,7 +12716,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (mViewTranslationCallback != null) {
             mViewTranslationCallback.onClearTranslation(this);
         }
-        clearViewTranslationCallback();
         clearViewTranslationResponse();
         if (hasTranslationTransientState()) {
             setHasTransientState(false);

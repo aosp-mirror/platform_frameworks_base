@@ -125,9 +125,9 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD-lyd: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD-lyd"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Høreapparater"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE-lyd"</string>
+    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Koblet til høreapparater"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Koblet til LE-lyd"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"Koblet til LE_AUDIO"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Koblet til medielyd"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Koblet til telefonlyd"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Koblet til tjener for filoverføring"</string>
@@ -554,7 +554,7 @@
     <string name="shared_data_title" msgid="1017034836800864953">"Delte data"</string>
     <string name="shared_data_summary" msgid="5516326713822885652">"Se og endre delte data"</string>
     <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"Det finnes ingen delte data for denne brukeren."</string>
-    <string name="shared_data_query_failure_text" msgid="3489828881998773687">"Det har oppstått en feil ved henting av delte data. Prøv på nytt."</string>
+    <string name="shared_data_query_failure_text" msgid="3489828881998773687">"Det har oppstått en feil ved henting av delte data. Prøv igjen."</string>
     <string name="blob_id_text" msgid="8680078988996308061">"Delt data-ID: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
     <string name="blob_expires_text" msgid="7882727111491739331">"Utløper <xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="shared_data_delete_failure_text" msgid="3842701391009628947">"Det har oppstått en feil ved sletting av de delte dataene."</string>
@@ -598,6 +598,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Tilbakestill"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Fjern"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Tilbakestiller gjesten …"</string>
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Vil du tilbakestille gjesteøkten?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Dette starter en ny gjesteøkt og sletter alle apper og data fra den gjeldende økten"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Vil du avslutte gjestemodus?"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Dette sletter apper og data fra den gjeldende gjesteøkten"</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Avslutt"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Vil du lagre gjesteaktivitet?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Du kan lagre aktivitet fra den gjeldende økten eller slette alle apper og data"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Slett"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Lagre"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"Avslutt gjestemodus"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"Tilbakestill gjesteøkten"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Avslutt gjesteøkten"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"All aktivitet slettes når du avslutter"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Du kan lagre eller slette aktiviteten når du avslutter"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Tilbakestill for å slette øktaktivitet nå, eller du kan lagre eller slette aktivitet når du avslutter"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Ta et bilde"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Velg et bilde"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Velg et bilde"</string>
@@ -652,11 +667,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Slå på skjermen"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Tillat å slå på skjermen"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Tillat at en app slår på skjermen. Hvis tillatelsen gis, kan appen slå på skjermen når som helst uten din eksplisitte intensjon."</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Skann QR-koden"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"For å begynne å lytte, midtstill QR-koden nedenfor"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR-koden er ikke i et gyldig format"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Vil du stoppe kringkastingen av <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Hvis du kringkaster <xliff:g id="SWITCHAPP">%1$s</xliff:g> eller endrer utgangen, stopper den nåværende kringkastingen din"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Kringkast <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Endre utgang"</string>
-    <string name="back_navigation_animation" msgid="8105467568421689484">"Tilbake-animasjoner med forslag"</string>
-    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Slå på systemanimasjoner for tilbakebevegelser med forslag."</string>
-    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Denne innstillingen slår på systemanimasjoner for bevegelsesanimasjoner med forslag. Den krever at enableOnBackInvokedCallback settes til sann i manifestfilen for hver app."</string>
 </resources>

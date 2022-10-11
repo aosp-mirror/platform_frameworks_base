@@ -365,6 +365,9 @@ public class InternetTile extends QSTileImpl<SignalState> {
             mWifiInfo.mNoDefaultNetwork = noDefaultNetwork;
             mWifiInfo.mNoValidatedNetwork = noValidatedNetwork;
             mWifiInfo.mNoNetworksAvailable = noNetworksAvailable;
+            if (!noDefaultNetwork) {
+                return;
+            }
             refreshState(mWifiInfo);
         }
 
@@ -380,6 +383,7 @@ public class InternetTile extends QSTileImpl<SignalState> {
 
     @Override
     protected void handleUpdateState(SignalState state, Object arg) {
+        mQSLogger.logInternetTileUpdate(mLastTileState, arg == null ? "null" : arg.toString());
         if (arg instanceof CellularCallbackInfo) {
             mLastTileState = 0;
             handleUpdateCellularState(state, arg);
@@ -596,5 +600,10 @@ public class InternetTile extends QSTileImpl<SignalState> {
         pw.print("    "); pw.println(getState().toString());
         pw.print("    "); pw.println("mLastTileState=" + mLastTileState);
         pw.print("    "); pw.println("mSignalCallback=" + mSignalCallback.toString());
+    }
+
+    // For testing usage only.
+    protected int getLastTileState() {
+        return mLastTileState;
     }
 }

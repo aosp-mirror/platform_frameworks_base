@@ -22,11 +22,11 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.ArrayMap;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -42,7 +42,7 @@ public final class ProgramList implements AutoCloseable {
 
     private final Object mLock = new Object();
     private final Map<ProgramSelector.Identifier, RadioManager.ProgramInfo> mPrograms =
-            new HashMap<>();
+            new ArrayMap<>();
 
     private final List<ListCallback> mListCallbacks = new ArrayList<>();
     private final List<OnCompleteListener> mOnCompleteListeners = new ArrayList<>();
@@ -173,38 +173,69 @@ public final class ProgramList implements AutoCloseable {
         }
     }
 
-    void apply(@NonNull Chunk chunk) {
+    void apply(Chunk chunk) {
+        List<ProgramSelector.Identifier> removedList = new ArrayList<>();
+        List<ProgramSelector.Identifier> changedList = new ArrayList<>();
+        List<ProgramList.ListCallback> listCallbacksCopied;
+        List<OnCompleteListener> onCompleteListenersCopied = new ArrayList<>();
         synchronized (mLock) {
             if (mIsClosed) return;
 
             mIsComplete = false;
+            listCallbacksCopied = new ArrayList<>(mListCallbacks);
 
             if (chunk.isPurge()) {
-                new HashSet<>(mPrograms.keySet()).stream().forEach(id -> removeLocked(id));
+                Iterator<Map.Entry<ProgramSelector.Identifier, RadioManager.ProgramInfo>>
+                        programsIterator = mPrograms.entrySet().iterator();
+                while (programsIterator.hasNext()) {
+                    RadioManager.ProgramInfo removed = programsIterator.next().getValue();
+                    if (removed != null) {
+                        removedList.add(removed.getSelector().getPrimaryId());
+                    }
+                    programsIterator.remove();
+                }
             }
 
-            chunk.getRemoved().stream().forEach(id -> removeLocked(id));
-            chunk.getModified().stream().forEach(info -> putLocked(info));
+            chunk.getRemoved().stream().forEach(id -> removeLocked(id, removedList));
+            chunk.getModified().stream().forEach(info -> putLocked(info, changedList));
 
             if (chunk.isComplete()) {
                 mIsComplete = true;
-                mOnCompleteListeners.forEach(cb -> cb.onComplete());
+                onCompleteListenersCopied = new ArrayList<>(mOnCompleteListeners);
+            }
+        }
+
+        for (int i = 0; i < removedList.size(); i++) {
+            for (int cbIndex = 0; cbIndex < listCallbacksCopied.size(); cbIndex++) {
+                listCallbacksCopied.get(cbIndex).onItemRemoved(removedList.get(i));
+            }
+        }
+        for (int i = 0; i < changedList.size(); i++) {
+            for (int cbIndex = 0; cbIndex < listCallbacksCopied.size(); cbIndex++) {
+                listCallbacksCopied.get(cbIndex).onItemChanged(changedList.get(i));
+            }
+        }
+        if (chunk.isComplete()) {
+            for (int cbIndex = 0; cbIndex < onCompleteListenersCopied.size(); cbIndex++) {
+                onCompleteListenersCopied.get(cbIndex).onComplete();
             }
         }
     }
 
-    private void putLocked(@NonNull RadioManager.ProgramInfo value) {
+    private void putLocked(RadioManager.ProgramInfo value,
+            List<ProgramSelector.Identifier> changedIdentifierList) {
         ProgramSelector.Identifier key = value.getSelector().getPrimaryId();
         mPrograms.put(Objects.requireNonNull(key), value);
         ProgramSelector.Identifier sel = value.getSelector().getPrimaryId();
-        mListCallbacks.forEach(cb -> cb.onItemChanged(sel));
+        changedIdentifierList.add(sel);
     }
 
-    private void removeLocked(@NonNull ProgramSelector.Identifier key) {
+    private void removeLocked(ProgramSelector.Identifier key,
+            List<ProgramSelector.Identifier> removedIdentifierList) {
         RadioManager.ProgramInfo removed = mPrograms.remove(Objects.requireNonNull(key));
         if (removed == null) return;
         ProgramSelector.Identifier sel = removed.getSelector().getPrimaryId();
-        mListCallbacks.forEach(cb -> cb.onItemRemoved(sel));
+        removedIdentifierList.add(sel);
     }
 
     /**

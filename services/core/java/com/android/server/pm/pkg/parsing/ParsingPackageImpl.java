@@ -1856,6 +1856,9 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
         for (int i = component.getIntents().size() - 1; i >= 0; i--) {
             IntentFilter filter = component.getIntents().get(i).getIntentFilter();
             for (int groupIndex = filter.countMimeGroups() - 1; groupIndex >= 0; groupIndex--) {
+                if (mimeGroups != null && mimeGroups.size() > 500) {
+                    throw new IllegalStateException("Max limit on number of MIME Groups reached");
+                }
                 mimeGroups = ArrayUtils.add(mimeGroups, filter.getMimeGroup(groupIndex));
             }
         }

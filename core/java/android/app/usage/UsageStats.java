@@ -293,6 +293,17 @@ public final class UsageStats implements Parcelable {
     }
 
     /**
+     * Returns the last time the package was used - defined by the latest of
+     * mLastTimeUsed, mLastTimeVisible, mLastTimeForegroundServiceUsed, or mLastTimeComponentUsed.
+     * @hide
+     */
+    public long getLastTimePackageUsed() {
+        return Math.max(mLastTimeUsed,
+                        Math.max(mLastTimeVisible,
+                                 Math.max(mLastTimeForegroundServiceUsed, mLastTimeComponentUsed)));
+    }
+
+    /**
      * Returns the number of times the app was launched as an activity from outside of the app.
      * Excludes intra-app activity transitions.
      * @hide

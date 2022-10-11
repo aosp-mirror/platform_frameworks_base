@@ -1,10 +1,9 @@
 package com.android.systemui.statusbar
 
-import org.mockito.Mockito.`when` as whenever
-import android.test.suitebuilder.annotation.SmallTest
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
+import androidx.test.filters.SmallTest
 import com.android.systemui.ExpandHelper
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
@@ -14,6 +13,7 @@ import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.media.MediaHierarchyManager
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.qs.QS
+import com.android.systemui.shade.NotificationPanelViewController
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper
 import com.android.systemui.statusbar.notification.stack.AmbientState
@@ -22,7 +22,6 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.phone.LSShadeTransitionLogger
-import com.android.systemui.statusbar.phone.NotificationPanelViewController
 import com.android.systemui.statusbar.phone.ScrimController
 import com.android.systemui.statusbar.policy.FakeConfigurationController
 import org.junit.After
@@ -45,6 +44,7 @@ import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyZeroInteractions
+import org.mockito.Mockito.`when` as whenever
 import org.mockito.junit.MockitoJUnit
 
 private fun <T> anyObject(): T {
@@ -78,6 +78,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     @Mock lateinit var qS: QS
     @Mock lateinit var singleShadeOverScroller: SingleShadeLockScreenOverScroller
     @Mock lateinit var splitShadeOverScroller: SplitShadeLockScreenOverScroller
+    @Mock lateinit var qsTransitionController: LockscreenShadeQsTransitionController
     @JvmField @Rule val mockito = MockitoJUnit.rule()
 
     private val configurationController = FakeConfigurationController()
@@ -120,7 +121,9 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
                         context,
                         configurationController,
                         dumpManager)
-                })
+                },
+                qsTransitionControllerFactory = { qsTransitionController },
+            )
         whenever(nsslController.view).thenReturn(stackscroller)
         whenever(nsslController.expandHelperCallback).thenReturn(expandHelperCallback)
         transitionController.notificationPanelController = notificationPanelController
@@ -249,7 +252,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
         verify(scrimController, never()).setTransitionToFullShadeProgress(anyFloat(), anyFloat())
         verify(notificationPanelController, never()).setTransitionToFullShadeAmount(anyFloat(),
                 anyBoolean(), anyLong())
-        verify(qS, never()).setTransitionToFullShadeAmount(anyFloat(), anyFloat())
+        verify(qsTransitionController, never()).dragDownAmount = anyFloat()
     }
 
     @Test
@@ -260,7 +263,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
         verify(scrimController).setTransitionToFullShadeProgress(anyFloat(), anyFloat())
         verify(notificationPanelController).setTransitionToFullShadeAmount(anyFloat(),
                 anyBoolean(), anyLong())
-        verify(qS).setTransitionToFullShadeAmount(anyFloat(), anyFloat())
+        verify(qsTransitionController).dragDownAmount = 10f
         verify(depthController).transitionToFullShadeProgress = anyFloat()
     }
 

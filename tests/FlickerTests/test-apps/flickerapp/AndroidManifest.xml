@@ -45,6 +45,7 @@
              android:theme="@style/CutoutShortEdges"
              android:taskAffinity="com.android.server.wm.flicker.testapp.ImeActivityAutoFocus"
              android:windowSoftInputMode="stateVisible"
+             android:configChanges="orientation|screenSize"
              android:label="ImeAppAutoFocus"
              android:exported="true">
             <intent-filter>
@@ -162,5 +163,56 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <activity android:name=".MailActivity"
+            android:exported="true"
+            android:label="MailApp"
+            android:taskAffinity="com.android.server.wm.flicker.testapp.MailActivity"
+            android:theme="@style/Theme.AppCompat.Light">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <activity android:name=".GameActivity"
+            android:taskAffinity="com.android.server.wm.flicker.testapp.GameActivity"
+            android:immersive="true"
+            android:theme="@android:style/Theme.NoTitleBar"
+            android:configChanges="screenSize"
+            android:label="GameApp"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <service
+            android:name=".AssistantInteractionSessionService"
+            android:exported="true"
+            android:permission="android.permission.BIND_VOICE_INTERACTION" />
+        <service
+            android:name=".AssistantRecognitionService"
+            android:exported="true"
+            android:label="Test Voice Interaction Service">
+            <intent-filter>
+                <action android:name="android.speech.RecognitionService" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <meta-data
+                android:name="android.speech"
+                android:resource="@xml/recognition_service" />
+        </service>
+        <service
+            android:name=".AssistantInteractionService"
+            android:exported="true"
+            android:label="Test Voice Interaction Service"
+            android:permission="android.permission.BIND_VOICE_INTERACTION">
+            <intent-filter>
+                <action android:name="android.service.voice.VoiceInteractionService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.voice_interaction"
+                android:resource="@xml/interaction_service" />
+        </service>
     </application>
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
 </manifest>

@@ -46,6 +46,12 @@ public abstract class DreamManagerInternal {
     public abstract boolean isDreaming();
 
     /**
+     * Ask the power manager to nap.  It will eventually call back into startDream() if/when it is
+     * appropriate to start dreaming.
+     */
+    public abstract void requestDream();
+
+    /**
      * Called by the ActivityTaskManagerService to verify that the startDreamActivity
      * request comes from the current active dream component.
      *

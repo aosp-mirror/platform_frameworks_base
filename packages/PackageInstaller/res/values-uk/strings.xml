@@ -20,7 +20,7 @@
     <string name="install" msgid="711829760615509273">"Установити"</string>
     <string name="update" msgid="3932142540719227615">"Оновити"</string>
     <string name="done" msgid="6632441120016885253">"Готово"</string>
-    <string name="cancel" msgid="1018267193425558088">"Скасувати"</string>
+    <string name="cancel" msgid="1018267193425558088">"Скасув."</string>
     <string name="installing" msgid="4921993079741206516">"Встановлення…"</string>
     <string name="installing_app" msgid="1165095864863849422">"Установлюється <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="install_done" msgid="5987363587661783896">"Програму встановлено."</string>

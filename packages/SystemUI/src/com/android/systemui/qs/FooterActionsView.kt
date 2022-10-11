@@ -27,6 +27,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
+import androidx.annotation.Keep
 import com.android.settingslib.Utils
 import com.android.settingslib.drawable.UserIconDrawable
 import com.android.systemui.R
@@ -37,6 +38,7 @@ import com.android.systemui.statusbar.phone.MultiUserSwitch
  * in split shade mode visible also in collapsed state. May contain up to 5 buttons: settings,
  * edit tiles, power off and conditionally: user switch and tuner
  */
+// TODO(b/242040009): Remove this file.
 class FooterActionsView(context: Context?, attrs: AttributeSet?) : LinearLayout(context, attrs) {
     private lateinit var settingsContainer: View
     private lateinit var multiUserSwitch: MultiUserSwitch
@@ -44,6 +46,19 @@ class FooterActionsView(context: Context?, attrs: AttributeSet?) : LinearLayout(
 
     private var qsDisabled = false
     private var expansionAmount = 0f
+
+    /**
+     * Sets the alpha of the background of this view.
+     *
+     * Used from a [TouchAnimator] in the controller.
+     */
+    var backgroundAlpha: Float = 1f
+        @Keep
+        set(value) {
+            field = value
+            background?.alpha = (value * 255).toInt()
+        }
+        @Keep get
 
     override fun onFinishInflate() {
         super.onFinishInflate()

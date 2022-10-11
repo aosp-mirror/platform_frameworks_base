@@ -153,6 +153,8 @@ public final class DeviceIdleJobsController extends StateController {
                 changed = true;
             }
             mDeviceIdleMode = enabled;
+            logDeviceWideConstraintStateToStatsd(JobStatus.CONSTRAINT_DEVICE_NOT_DOZING,
+                    !mDeviceIdleMode);
             if (DEBUG) Slog.d(TAG, "mDeviceIdleMode=" + mDeviceIdleMode);
             mDeviceIdleUpdateFunctor.prepare();
             if (enabled) {

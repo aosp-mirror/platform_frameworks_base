@@ -16,6 +16,8 @@
 
 package com.android.server.logcat;
 
+import static android.os.Process.INVALID_UID;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -28,6 +30,7 @@ import static org.mockito.Mockito.when;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.content.ContextWrapper;
+import android.content.pm.PackageManager;
 import android.os.ILogd;
 import android.os.Looper;
 import android.os.UserHandle;
@@ -69,10 +72,12 @@ public class LogcatManagerServiceTest {
     @Mock
     private ActivityManagerInternal mActivityManagerInternalMock;
     @Mock
+    private PackageManager mPackageManagerMock;
+    @Mock
     private ILogd mLogdMock;
 
     private LogcatManagerService mService;
-    private LogcatManagerService.LogcatManagerServiceInternal mLocalService;
+    private LogcatManagerService.LogAccessDialogCallback mDialogCallback;
     private ContextWrapper mContextSpy;
     private OffsettableClock mClock;
     private TestLooper mTestLooper;
@@ -81,10 +86,17 @@ public class LogcatManagerServiceTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         addLocalServiceMock(ActivityManagerInternal.class, mActivityManagerInternalMock);
+        when(mActivityManagerInternalMock.getInstrumentationSourceUid(anyInt()))
+                .thenReturn(INVALID_UID);
+
         mContextSpy = spy(new ContextWrapper(ApplicationProvider.getApplicationContext()));
         mClock = new OffsettableClock.Stopped();
         mTestLooper = new TestLooper(mClock::now);
-
+        when(mContextSpy.getPackageManager()).thenReturn(mPackageManagerMock);
+        when(mPackageManagerMock.getPackagesForUid(APP1_UID)).thenReturn(
+                new String[]{APP1_PACKAGE_NAME});
+        when(mPackageManagerMock.getPackagesForUid(APP2_UID)).thenReturn(
+                new String[]{APP2_PACKAGE_NAME});
         when(mActivityManagerInternalMock.getPackageNameByPid(APP1_PID)).thenReturn(
                 APP1_PACKAGE_NAME);
         when(mActivityManagerInternalMock.getPackageNameByPid(APP2_PID)).thenReturn(
@@ -106,7 +118,7 @@ public class LogcatManagerServiceTest {
                 return mLogdMock;
             }
         });
-        mLocalService = mService.getLocalService();
+        mDialogCallback = mService.getDialogCallback();
         mService.onStart();
     }
 
@@ -132,6 +144,20 @@ public class LogcatManagerServiceTest {
 
         verify(mLogdMock).decline(APP1_UID, APP1_GID, APP1_PID, FD1);
         verify(mLogdMock, never()).approve(APP1_UID, APP1_GID, APP1_PID, FD1);
+        verify(mContextSpy, never()).startActivityAsUser(any(), any());
+    }
+
+    @Test
+    public void test_RequestFromBackground_ApprovedIfInstrumented() throws Exception {
+        when(mActivityManagerInternalMock.getInstrumentationSourceUid(APP1_UID))
+                .thenReturn(APP1_UID);
+        when(mActivityManagerInternalMock.getUidProcessState(APP1_UID)).thenReturn(
+                ActivityManager.PROCESS_STATE_RECEIVER);
+        mService.getBinderService().startThread(APP1_UID, APP1_GID, APP1_PID, FD1);
+        mTestLooper.dispatchAll();
+
+        verify(mLogdMock).approve(APP1_UID, APP1_GID, APP1_PID, FD1);
+        verify(mLogdMock, never()).decline(APP1_UID, APP1_GID, APP1_PID, FD1);
         verify(mContextSpy, never()).startActivityAsUser(any(), any());
     }
 
@@ -181,7 +207,7 @@ public class LogcatManagerServiceTest {
         mTestLooper.dispatchAll();
         verify(mContextSpy, times(1)).startActivityAsUser(any(), eq(UserHandle.SYSTEM));
 
-        mLocalService.approveAccessForClient(APP1_UID, APP1_PACKAGE_NAME);
+        mDialogCallback.approveAccessForClient(APP1_UID, APP1_PACKAGE_NAME);
         mTestLooper.dispatchAll();
 
         verify(mLogdMock, times(1)).approve(APP1_UID, APP1_GID, APP1_PID, FD1);
@@ -196,7 +222,7 @@ public class LogcatManagerServiceTest {
         mTestLooper.dispatchAll();
         verify(mContextSpy, times(1)).startActivityAsUser(any(), eq(UserHandle.SYSTEM));
 
-        mLocalService.declineAccessForClient(APP1_UID, APP1_PACKAGE_NAME);
+        mDialogCallback.declineAccessForClient(APP1_UID, APP1_PACKAGE_NAME);
         mTestLooper.dispatchAll();
 
         verify(mLogdMock, never()).approve(APP1_UID, APP1_GID, APP1_PID, FD1);
@@ -214,7 +240,7 @@ public class LogcatManagerServiceTest {
         verify(mLogdMock, never()).approve(eq(APP1_UID), eq(APP1_GID), eq(APP1_PID), anyInt());
         verify(mLogdMock, never()).decline(eq(APP1_UID), eq(APP1_GID), eq(APP1_PID), anyInt());
 
-        mLocalService.approveAccessForClient(APP1_UID, APP1_PACKAGE_NAME);
+        mDialogCallback.approveAccessForClient(APP1_UID, APP1_PACKAGE_NAME);
         mTestLooper.dispatchAll();
 
         verify(mLogdMock, times(1)).approve(APP1_UID, APP1_GID, APP1_PID, FD1);
@@ -234,7 +260,7 @@ public class LogcatManagerServiceTest {
         verify(mLogdMock, never()).approve(eq(APP1_UID), eq(APP1_GID), eq(APP1_PID), anyInt());
         verify(mLogdMock, never()).decline(eq(APP1_UID), eq(APP1_GID), eq(APP1_PID), anyInt());
 
-        mLocalService.declineAccessForClient(APP1_UID, APP1_PACKAGE_NAME);
+        mDialogCallback.declineAccessForClient(APP1_UID, APP1_PACKAGE_NAME);
         mTestLooper.dispatchAll();
 
         verify(mLogdMock, times(1)).decline(APP1_UID, APP1_GID, APP1_PID, FD1);
@@ -249,7 +275,7 @@ public class LogcatManagerServiceTest {
                 ActivityManager.PROCESS_STATE_TOP);
         mService.getBinderService().startThread(APP1_UID, APP1_GID, APP1_PID, FD1);
         mTestLooper.dispatchAll();
-        mLocalService.approveAccessForClient(APP1_UID, APP1_PACKAGE_NAME);
+        mDialogCallback.approveAccessForClient(APP1_UID, APP1_PACKAGE_NAME);
         mTestLooper.dispatchAll();
 
         mService.getBinderService().startThread(APP1_UID, APP1_GID, APP1_PID, FD2);
@@ -267,7 +293,7 @@ public class LogcatManagerServiceTest {
                 ActivityManager.PROCESS_STATE_TOP);
         mService.getBinderService().startThread(APP1_UID, APP1_GID, APP1_PID, FD1);
         mTestLooper.dispatchAll();
-        mLocalService.declineAccessForClient(APP1_UID, APP1_PACKAGE_NAME);
+        mDialogCallback.declineAccessForClient(APP1_UID, APP1_PACKAGE_NAME);
         mTestLooper.dispatchAll();
 
         mService.getBinderService().startThread(APP1_UID, APP1_GID, APP1_PID, FD2);
@@ -287,7 +313,7 @@ public class LogcatManagerServiceTest {
                 ActivityManager.PROCESS_STATE_TOP);
         mService.getBinderService().startThread(APP1_UID, APP1_GID, APP1_PID, FD1);
         mTestLooper.dispatchAll();
-        mLocalService.approveAccessForClient(APP1_UID, APP1_PACKAGE_NAME);
+        mDialogCallback.approveAccessForClient(APP1_UID, APP1_PACKAGE_NAME);
         mTestLooper.dispatchAll();
 
         mService.getBinderService().startThread(APP2_UID, APP2_GID, APP2_PID, FD2);
@@ -304,7 +330,7 @@ public class LogcatManagerServiceTest {
                 ActivityManager.PROCESS_STATE_TOP);
         mService.getBinderService().startThread(APP1_UID, APP1_GID, APP1_PID, FD1);
         mTestLooper.dispatchAll();
-        mLocalService.declineAccessForClient(APP1_UID, APP1_PACKAGE_NAME);
+        mDialogCallback.declineAccessForClient(APP1_UID, APP1_PACKAGE_NAME);
         mTestLooper.dispatchAll();
 
         advanceTime(LogcatManagerService.STATUS_EXPIRATION_TIMEOUT_MILLIS);

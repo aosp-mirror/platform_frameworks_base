@@ -239,6 +239,8 @@ public class Utils {
                             statusString = res.getString(R.string.battery_info_status_charging);
                             break;
                     }
+                } else if (batteryStatus.isPluggedInDock()) {
+                    statusString = res.getString(R.string.battery_info_status_charging_dock);
                 } else {
                     statusString = res.getString(R.string.battery_info_status_charging_wireless);
                 }
@@ -597,6 +599,9 @@ public class Utils {
     /**
      * Returns the WifiInfo for the underlying WiFi network of the VCN network, returns null if the
      * input NetworkCapabilities is not for a VCN network with underlying WiFi network.
+     *
+     * TODO(b/238425913): Move this method to be inside systemui not settingslib once we've migrated
+     *   off of {@link WifiStatusTracker} and {@link NetworkControllerImpl}.
      *
      * @param networkCapabilities NetworkCapabilities of the network.
      */

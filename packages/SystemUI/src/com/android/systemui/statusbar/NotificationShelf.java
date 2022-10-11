@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar;
 
+import static com.android.keyguard.BouncerPanelExpansionCalculator.aboutToShowBouncerProgress;
+
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -28,6 +30,8 @@ import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
+
+import androidx.annotation.NonNull;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.SystemBarUtils;
@@ -86,6 +90,12 @@ public class NotificationShelf extends ActivatableNotificationView implements
 
     public NotificationShelf(Context context, AttributeSet attrs) {
         super(context, attrs);
+    }
+
+    @VisibleForTesting
+    public NotificationShelf(Context context, AttributeSet attrs, boolean showNotificationShelf) {
+        super(context, attrs);
+        mShowNotificationShelf = showNotificationShelf;
     }
 
     @Override
@@ -153,8 +163,20 @@ public class NotificationShelf extends ActivatableNotificationView implements
     }
 
     @Override
+    @NonNull
     public ExpandableViewState createExpandableViewState() {
         return new ShelfState();
+    }
+
+    @Override
+    public String toString() {
+        return "NotificationShelf("
+                + "hideBackground=" + mHideBackground + " notGoneIndex=" + mNotGoneIndex
+                + " hasItemsInStableShelf=" + mHasItemsInStableShelf
+                + " statusBarState=" + mStatusBarState + " interactive=" + mInteractive
+                + " animationsEnabled=" + mAnimationsEnabled
+                + " showNotificationShelf=" + mShowNotificationShelf
+                + " indexOfFirstViewInShelf=" + mIndexOfFirstViewInShelf + ')';
     }
 
     /** Update the state of the shelf. */
@@ -172,7 +194,11 @@ public class NotificationShelf extends ActivatableNotificationView implements
 
             if (ambientState.isExpansionChanging() && !ambientState.isOnKeyguard()) {
                 float expansion = ambientState.getExpansionFraction();
-                viewState.alpha = ShadeInterpolation.getContentAlpha(expansion);
+                if (ambientState.isBouncerInTransit()) {
+                    viewState.alpha = aboutToShowBouncerProgress(expansion);
+                } else {
+                    viewState.alpha = ShadeInterpolation.getContentAlpha(expansion);
+                }
             } else {
                 viewState.alpha = 1f - ambientState.getHideAmount();
             }
@@ -227,6 +253,17 @@ public class NotificationShelf extends ActivatableNotificationView implements
             mShelfIcons.setActualLayoutWidth((int) actualWidth);
         }
         mActualWidth = actualWidth;
+    }
+
+    @Override
+    public void getBoundsOnScreen(Rect outRect, boolean clipToParent) {
+        super.getBoundsOnScreen(outRect, clipToParent);
+        final int actualWidth = getActualWidth();
+        if (isLayoutRtl()) {
+            outRect.left = outRect.right - actualWidth;
+        } else {
+            outRect.right = outRect.left + actualWidth;
+        }
     }
 
     /**
@@ -387,7 +424,14 @@ public class NotificationShelf extends ActivatableNotificationView implements
             if (child instanceof ActivatableNotificationView) {
                 ActivatableNotificationView anv =
                         (ActivatableNotificationView) child;
-                updateCornerRoundnessOnScroll(anv, viewStart, shelfStart);
+                // Because we show whole notifications on the lockscreen, the bottom notification is
+                // always "just about to enter the shelf" by normal scrolling rules.  This is fine
+                // if the shelf is visible, but if the shelf is hidden, it causes incorrect curling.
+                // notificationClipEnd handles the discrepancy between a visible and hidden shelf,
+                // so we use that when on the keyguard (and while animating away) to reduce curling.
+                final float keyguardSafeShelfStart =
+                        mAmbientState.isOnKeyguard() ? notificationClipEnd : shelfStart;
+                updateCornerRoundnessOnScroll(anv, viewStart, keyguardSafeShelfStart);
             }
         }
 

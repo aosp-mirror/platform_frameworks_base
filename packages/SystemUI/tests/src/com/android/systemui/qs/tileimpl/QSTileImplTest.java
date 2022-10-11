@@ -37,6 +37,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Matchers.argThat;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -78,6 +79,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Captor;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -144,7 +146,25 @@ public class QSTileImplTest extends SysuiTestCase {
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE);
 
         mTile.click(null /* view */);
-        verify(mQsLogger).logTileClick(SPEC, StatusBarState.SHADE, Tile.STATE_ACTIVE);
+        verify(mQsLogger).logTileClick(eq(SPEC), eq(StatusBarState.SHADE), eq(Tile.STATE_ACTIVE),
+                anyInt());
+    }
+
+    @Test
+    public void testHandleClick_log() {
+        mTile.click(null);
+        mTile.click(null);
+        mTestableLooper.processAllMessages();
+        mTile.click(null);
+        mTestableLooper.processAllMessages();
+
+        InOrder inOrder = inOrder(mQsLogger);
+        inOrder.verify(mQsLogger).logTileClick(eq(SPEC), anyInt(), anyInt(), eq(0));
+        inOrder.verify(mQsLogger).logTileClick(eq(SPEC), anyInt(), anyInt(), eq(1));
+        inOrder.verify(mQsLogger).logHandleClick(SPEC, 0);
+        inOrder.verify(mQsLogger).logHandleClick(SPEC, 1);
+        inOrder.verify(mQsLogger).logTileClick(eq(SPEC), anyInt(), anyInt(), eq(2));
+        inOrder.verify(mQsLogger).logHandleClick(SPEC, 2);
     }
 
     @Test
@@ -183,7 +203,25 @@ public class QSTileImplTest extends SysuiTestCase {
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE);
 
         mTile.secondaryClick(null /* view */);
-        verify(mQsLogger).logTileSecondaryClick(SPEC, StatusBarState.SHADE, Tile.STATE_ACTIVE);
+        verify(mQsLogger).logTileSecondaryClick(eq(SPEC), eq(StatusBarState.SHADE),
+                eq(Tile.STATE_ACTIVE), anyInt());
+    }
+
+    @Test
+    public void testHandleSecondaryClick_log() {
+        mTile.secondaryClick(null);
+        mTile.secondaryClick(null);
+        mTestableLooper.processAllMessages();
+        mTile.secondaryClick(null);
+        mTestableLooper.processAllMessages();
+
+        InOrder inOrder = inOrder(mQsLogger);
+        inOrder.verify(mQsLogger).logTileSecondaryClick(eq(SPEC), anyInt(), anyInt(), eq(0));
+        inOrder.verify(mQsLogger).logTileSecondaryClick(eq(SPEC), anyInt(), anyInt(), eq(1));
+        inOrder.verify(mQsLogger).logHandleSecondaryClick(SPEC, 0);
+        inOrder.verify(mQsLogger).logHandleSecondaryClick(SPEC, 1);
+        inOrder.verify(mQsLogger).logTileSecondaryClick(eq(SPEC), anyInt(), anyInt(), eq(2));
+        inOrder.verify(mQsLogger).logHandleSecondaryClick(SPEC, 2);
     }
 
     @Test
@@ -210,7 +248,25 @@ public class QSTileImplTest extends SysuiTestCase {
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE);
 
         mTile.longClick(null /* view */);
-        verify(mQsLogger).logTileLongClick(SPEC, StatusBarState.SHADE, Tile.STATE_ACTIVE);
+        verify(mQsLogger).logTileLongClick(eq(SPEC), eq(StatusBarState.SHADE),
+                eq(Tile.STATE_ACTIVE), anyInt());
+    }
+
+    @Test
+    public void testHandleLongClick_log() {
+        mTile.longClick(null);
+        mTile.longClick(null);
+        mTestableLooper.processAllMessages();
+        mTile.longClick(null);
+        mTestableLooper.processAllMessages();
+
+        InOrder inOrder = inOrder(mQsLogger);
+        inOrder.verify(mQsLogger).logTileLongClick(eq(SPEC), anyInt(), anyInt(), eq(0));
+        inOrder.verify(mQsLogger).logTileLongClick(eq(SPEC), anyInt(), anyInt(), eq(1));
+        inOrder.verify(mQsLogger).logHandleLongClick(SPEC, 0);
+        inOrder.verify(mQsLogger).logHandleLongClick(SPEC, 1);
+        inOrder.verify(mQsLogger).logTileLongClick(eq(SPEC), anyInt(), anyInt(), eq(2));
+        inOrder.verify(mQsLogger).logHandleLongClick(SPEC, 2);
     }
 
     @Test

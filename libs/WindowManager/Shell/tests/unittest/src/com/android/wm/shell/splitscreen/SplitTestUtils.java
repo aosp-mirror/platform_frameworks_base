@@ -40,8 +40,6 @@ import com.android.wm.shell.transition.Transitions;
 
 import java.util.Optional;
 
-import javax.inject.Provider;
-
 public class SplitTestUtils {
 
     static SplitLayout createMockSplitLayout() {
@@ -73,13 +71,11 @@ public class SplitTestUtils {
                 DisplayController displayController, DisplayImeController imeController,
                 DisplayInsetsController insetsController, SplitLayout splitLayout,
                 Transitions transitions, TransactionPool transactionPool,
-                SplitscreenEventLogger logger, ShellExecutor mainExecutor,
-                Optional<RecentTasksController> recentTasks,
-                Provider<Optional<StageTaskUnfoldController>> unfoldController) {
+                ShellExecutor mainExecutor,
+                Optional<RecentTasksController> recentTasks) {
             super(context, displayId, syncQueue, taskOrganizer, mainStage,
                     sideStage, displayController, imeController, insetsController, splitLayout,
-                    transitions, transactionPool, logger, mainExecutor, recentTasks,
-                    unfoldController);
+                    transitions, transactionPool, mainExecutor, recentTasks);
 
             // Prepare root task for testing.
             mRootTask = new TestRunningTaskInfoBuilder().build();

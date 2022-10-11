@@ -37,7 +37,7 @@
     <string name="install_failed_msg" product="tv" msgid="1920009940048975221">"Impossibile installare <xliff:g id="APP_NAME">%1$s</xliff:g> sulla TV."</string>
     <string name="install_failed_msg" product="default" msgid="6484461562647915707">"Impossibile installare <xliff:g id="APP_NAME">%1$s</xliff:g> sul telefono."</string>
     <string name="launch" msgid="3952550563999890101">"Apri"</string>
-    <string name="unknown_apps_admin_dlg_text" msgid="4456572224020176095">"L\'amministratore non consente l\'installazione di app ottenute da origini sconosciute"</string>
+    <string name="unknown_apps_admin_dlg_text" msgid="4456572224020176095">"L\'amministratore non consente l\'installazione di app ottenute da fonti sconosciute"</string>
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Questo utente non può installare app sconosciute"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"L\'utente non è autorizzato a installare app"</string>
     <string name="ok" msgid="7871959885003339302">"OK"</string>
@@ -46,7 +46,7 @@
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"Impossibile installare <xliff:g id="APP_NAME">%1$s</xliff:g>. Libera dello spazio e riprova."</string>
     <string name="app_not_found_dlg_title" msgid="5107924008597470285">"App non trovata"</string>
     <string name="app_not_found_dlg_text" msgid="5219983779377811611">"Impossibile trovare l\'applicazione nell\'elenco di applicazioni installate."</string>
-    <string name="user_is_not_allowed_dlg_title" msgid="6915293433252210232">"Non autorizzate"</string>
+    <string name="user_is_not_allowed_dlg_title" msgid="6915293433252210232">"Autorizzazione non concessa"</string>
     <string name="user_is_not_allowed_dlg_text" msgid="3468447791330611681">"L\'utente corrente non è autorizzato a eseguire questa disinstallazione."</string>
     <string name="generic_error_dlg_title" msgid="5863195085927067752">"Errore"</string>
     <string name="generic_error_dlg_text" msgid="5287861443265795232">"Impossibile disinstallare l\'app."</string>

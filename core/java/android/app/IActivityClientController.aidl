@@ -67,11 +67,18 @@ interface IActivityClientController {
     boolean finishActivityAffinity(in IBinder token);
     /** Finish all activities that were started for result from the specified activity. */
     void finishSubActivity(in IBinder token, in String resultWho, int requestCode);
+    /**
+     * Indicates that when the activity finsihes, the result should be immediately sent to the
+     * originating activity. Must only be invoked during MediaProjection setup.
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_MEDIA_PROJECTION)")
+    void setForceSendResultForMediaProjection(in IBinder token);
 
     boolean isTopOfTask(in IBinder token);
     boolean willActivityBeVisible(in IBinder token);
     int getDisplayId(in IBinder activityToken);
     int getTaskForActivity(in IBinder token, in boolean onlyRoot);
+    int getTaskWindowingMode(in IBinder activityToken);
     IBinder getActivityTokenBelow(IBinder token);
     ComponentName getCallingActivity(in IBinder token);
     String getCallingPackage(in IBinder token);

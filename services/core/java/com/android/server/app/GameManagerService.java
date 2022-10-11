@@ -60,6 +60,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
@@ -68,6 +69,7 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.FileUtils;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -77,9 +79,12 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.ShellCallback;
+import android.os.UserManager;
 import android.provider.DeviceConfig;
 import android.provider.DeviceConfig.Properties;
+import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.util.AtomicFile;
 import android.util.AttributeSet;
 import android.util.KeyValueListParser;
 import android.util.Slog;
@@ -90,6 +95,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.compat.CompatibilityOverrideConfig;
 import com.android.internal.compat.IPlatformCompat;
 import com.android.internal.os.BackgroundThread;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
@@ -99,9 +105,17 @@ import com.android.server.SystemService.TargetUser;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileDescriptor;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -122,6 +136,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
     static final int POPULATE_GAME_MODE_SETTINGS = 3;
     static final int SET_GAME_STATE = 4;
     static final int CANCEL_GAME_LOADING_MODE = 5;
+    static final int WRITE_GAME_MODE_INTERVENTION_LIST_FILE = 6;
     static final int WRITE_SETTINGS_DELAY = 10 * 1000;  // 10 seconds
     static final int LOADING_BOOST_MAX_DURATION = 5 * 1000;  // 5 seconds
 
@@ -131,6 +146,8 @@ public final class GameManagerService extends IGameManagerService.Stub {
             .build();
     private static final String PACKAGE_NAME_MSG_KEY = "packageName";
     private static final String USER_ID_MSG_KEY = "userId";
+    private static final String GAME_MODE_INTERVENTION_LIST_FILE_NAME =
+            "game_mode_intervention.list";
 
     private final Context mContext;
     private final Object mLock = new Object();
@@ -138,8 +155,12 @@ public final class GameManagerService extends IGameManagerService.Stub {
     private final Object mOverrideConfigLock = new Object();
     private final Handler mHandler;
     private final PackageManager mPackageManager;
+    private final UserManager mUserManager;
     private final IPlatformCompat mPlatformCompat;
     private final PowerManagerInternal mPowerManagerInternal;
+    private final File mSystemDir;
+    @VisibleForTesting
+    final AtomicFile mGameModeInterventionListFile;
     private DeviceConfigListener mDeviceConfigListener;
     @GuardedBy("mLock")
     private final ArrayMap<Integer, GameManagerSettings> mSettings = new ArrayMap<>();
@@ -158,9 +179,53 @@ public final class GameManagerService extends IGameManagerService.Stub {
         mContext = context;
         mHandler = new SettingsHandler(looper);
         mPackageManager = mContext.getPackageManager();
+        mUserManager = mContext.getSystemService(UserManager.class);
         mPlatformCompat = IPlatformCompat.Stub.asInterface(
                 ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE));
         mPowerManagerInternal = LocalServices.getService(PowerManagerInternal.class);
+        mSystemDir = new File(Environment.getDataDirectory(), "system");
+        mSystemDir.mkdirs();
+        FileUtils.setPermissions(mSystemDir.toString(),
+                FileUtils.S_IRWXU | FileUtils.S_IRWXG | FileUtils.S_IROTH | FileUtils.S_IXOTH,
+                -1, -1);
+        mGameModeInterventionListFile = new AtomicFile(new File(mSystemDir,
+                                                     GAME_MODE_INTERVENTION_LIST_FILE_NAME));
+        FileUtils.setPermissions(mGameModeInterventionListFile.getBaseFile().getAbsolutePath(),
+                FileUtils.S_IRUSR | FileUtils.S_IWUSR
+                        | FileUtils.S_IRGRP | FileUtils.S_IWGRP,
+                -1, -1);
+        if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_GAME_SERVICE)) {
+            mGameServiceController = new GameServiceController(
+                    context, BackgroundThread.getExecutor(),
+                    new GameServiceProviderSelectorImpl(
+                            context.getResources(),
+                            context.getPackageManager()),
+                    new GameServiceProviderInstanceFactoryImpl(context));
+        } else {
+            mGameServiceController = null;
+        }
+    }
+
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
+    GameManagerService(Context context, Looper looper, File dataDir) {
+        mContext = context;
+        mHandler = new SettingsHandler(looper);
+        mPackageManager = mContext.getPackageManager();
+        mUserManager = mContext.getSystemService(UserManager.class);
+        mPlatformCompat = IPlatformCompat.Stub.asInterface(
+                ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE));
+        mPowerManagerInternal = LocalServices.getService(PowerManagerInternal.class);
+        mSystemDir = new File(dataDir, "system");
+        mSystemDir.mkdirs();
+        FileUtils.setPermissions(mSystemDir.toString(),
+                FileUtils.S_IRWXU | FileUtils.S_IRWXG | FileUtils.S_IROTH | FileUtils.S_IXOTH,
+                -1, -1);
+        mGameModeInterventionListFile = new AtomicFile(new File(mSystemDir,
+                GAME_MODE_INTERVENTION_LIST_FILE_NAME));
+        FileUtils.setPermissions(mGameModeInterventionListFile.getBaseFile().getAbsolutePath(),
+                FileUtils.S_IRUSR | FileUtils.S_IWUSR
+                        | FileUtils.S_IRGRP | FileUtils.S_IWGRP,
+                -1, -1);
         if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_GAME_SERVICE)) {
             mGameServiceController = new GameServiceController(
                     context, BackgroundThread.getExecutor(),
@@ -304,6 +369,22 @@ public final class GameManagerService extends IGameManagerService.Stub {
                 }
                 case CANCEL_GAME_LOADING_MODE: {
                     mPowerManagerInternal.setPowerMode(Mode.GAME_LOADING, false);
+                    break;
+                }
+                case WRITE_GAME_MODE_INTERVENTION_LIST_FILE: {
+                    final int userId = (int) msg.obj;
+                    if (userId < 0) {
+                        Slog.wtf(TAG, "Attempt to write setting for invalid user: " + userId);
+                        synchronized (mLock) {
+                            removeMessages(WRITE_GAME_MODE_INTERVENTION_LIST_FILE, null);
+                        }
+                        break;
+                    }
+
+                    Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
+                    removeMessages(WRITE_GAME_MODE_INTERVENTION_LIST_FILE, null);
+                    writeGameModeInterventionsToFile(userId);
+                    Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
                     break;
                 }
             }
@@ -473,31 +554,24 @@ public final class GameManagerService extends IGameManagerService.Stub {
         private static final String GAME_MODE_CONFIG_NODE_NAME = "game-mode-config";
         private final String mPackageName;
         private final ArrayMap<Integer, GameModeConfiguration> mModeConfigs;
-        private boolean mPerfModeOptedIn;
-        private boolean mBatteryModeOptedIn;
-        private boolean mAllowDownscale;
-        private boolean mAllowAngle;
-        private boolean mAllowFpsOverride;
+        private boolean mPerfModeOptedIn = false;
+        private boolean mBatteryModeOptedIn = false;
+        private boolean mAllowDownscale = true;
+        private boolean mAllowAngle = true;
+        private boolean mAllowFpsOverride = true;
 
         GamePackageConfiguration(String packageName, int userId) {
             mPackageName = packageName;
             mModeConfigs = new ArrayMap<>();
+
             try {
                 final ApplicationInfo ai = mPackageManager.getApplicationInfoAsUser(packageName,
                         PackageManager.GET_META_DATA, userId);
-                if (!parseInterventionFromXml(ai, packageName)) {
-                    if (ai.metaData != null) {
-                        mPerfModeOptedIn = ai.metaData.getBoolean(METADATA_PERFORMANCE_MODE_ENABLE);
-                        mBatteryModeOptedIn = ai.metaData.getBoolean(METADATA_BATTERY_MODE_ENABLE);
-                        mAllowDownscale = ai.metaData.getBoolean(METADATA_WM_ALLOW_DOWNSCALE, true);
-                        mAllowAngle = ai.metaData.getBoolean(METADATA_ANGLE_ALLOW_ANGLE, true);
-                    } else {
-                        mPerfModeOptedIn = false;
-                        mBatteryModeOptedIn = false;
-                        mAllowDownscale = true;
-                        mAllowAngle = true;
-                        mAllowFpsOverride = true;
-                    }
+                if (!parseInterventionFromXml(ai, packageName) && ai.metaData != null) {
+                    mPerfModeOptedIn = ai.metaData.getBoolean(METADATA_PERFORMANCE_MODE_ENABLE);
+                    mBatteryModeOptedIn = ai.metaData.getBoolean(METADATA_BATTERY_MODE_ENABLE);
+                    mAllowDownscale = ai.metaData.getBoolean(METADATA_WM_ALLOW_DOWNSCALE, true);
+                    mAllowAngle = ai.metaData.getBoolean(METADATA_ANGLE_ALLOW_ANGLE, true);
                 }
             } catch (NameNotFoundException e) {
                 // Not all packages are installed, hence ignore those that are not installed yet.
@@ -560,6 +634,12 @@ public final class GameManagerService extends IGameManagerService.Stub {
                     }
                 }
             } catch (NameNotFoundException | XmlPullParserException | IOException ex) {
+                // set flag back to default values when parsing fails
+                mPerfModeOptedIn = false;
+                mBatteryModeOptedIn = false;
+                mAllowDownscale = true;
+                mAllowAngle = true;
+                mAllowFpsOverride = true;
                 Slog.e(TAG, "Error while parsing XML meta-data for "
                         + METADATA_GAME_MODE_CONFIG);
             }
@@ -955,6 +1035,11 @@ public final class GameManagerService extends IGameManagerService.Stub {
             }
         }
         updateInterventions(packageName, gameMode, userId);
+        final Message msg = mHandler.obtainMessage(WRITE_GAME_MODE_INTERVENTION_LIST_FILE);
+        msg.obj = userId;
+        if (!mHandler.hasEqualMessages(WRITE_GAME_MODE_INTERVENTION_LIST_FILE, userId)) {
+            mHandler.sendMessage(msg);
+        }
     }
 
     /**
@@ -1520,21 +1605,115 @@ public final class GameManagerService extends IGameManagerService.Stub {
                 final int newGameMode = getNewGameMode(gameMode, config);
                 if (newGameMode != gameMode) {
                     setGameMode(packageName, newGameMode, userId);
+                } else {
+                    // Make sure we handle the case when the interventions are changed while
+                    // the game mode remains the same. We call only updateInterventions() here.
+                    updateInterventions(packageName, gameMode, userId);
                 }
-                updateInterventions(packageName, gameMode, userId);
             }
         } catch (Exception e) {
             Slog.e(TAG, "Failed to update compat modes for user " + userId + ": " + e);
         }
+
+        final Message msg = mHandler.obtainMessage(WRITE_GAME_MODE_INTERVENTION_LIST_FILE);
+        msg.obj = userId;
+        if (!mHandler.hasEqualMessages(WRITE_GAME_MODE_INTERVENTION_LIST_FILE, userId)) {
+            mHandler.sendMessage(msg);
+        }
     }
 
-    private String[] getInstalledGamePackageNames(int userId) {
+    /*
+     Write the interventions and mode of each game to file /system/data/game_mode_intervention.list
+     Each line will contain the information of each game, separated by tab.
+     The format of the output is:
+     <package name> <UID> <current mode> <game mode 1> <interventions> <game mode 2> <interventions>
+     For example:
+     com.android.app1   1425    1   2   angle=0,scaling=1.0,fps=60  3   angle=1,scaling=0.5,fps=30
+     */
+    private void writeGameModeInterventionsToFile(@UserIdInt int userId) {
+        FileOutputStream fileOutputStream = null;
+        BufferedWriter bufferedWriter;
+        try {
+            fileOutputStream = mGameModeInterventionListFile.startWrite();
+            bufferedWriter = new BufferedWriter(new OutputStreamWriter(fileOutputStream,
+                    Charset.defaultCharset()));
+
+            final StringBuilder sb = new StringBuilder();
+            final List<String> installedGamesList = getInstalledGamePackageNamesByAllUsers(userId);
+            for (final String packageName : installedGamesList) {
+                GamePackageConfiguration packageConfig = getConfig(packageName);
+                if (packageConfig == null) {
+                    continue;
+                }
+                sb.append(packageName);
+                sb.append("\t");
+                sb.append(mPackageManager.getPackageUidAsUser(packageName, userId));
+                sb.append("\t");
+                sb.append(getGameMode(packageName, userId));
+                sb.append("\t");
+                final int[] modes = packageConfig.getAvailableGameModes();
+                for (int mode : modes) {
+                    final GamePackageConfiguration.GameModeConfiguration gameModeConfiguration =
+                            packageConfig.getGameModeConfiguration(mode);
+                    if (gameModeConfiguration == null) {
+                        continue;
+                    }
+                    sb.append(mode);
+                    sb.append("\t");
+                    final int useAngle = gameModeConfiguration.getUseAngle() ? 1 : 0;
+                    sb.append(TextUtils.formatSimple("angle=%d", useAngle));
+                    sb.append(",");
+                    final String scaling = gameModeConfiguration.getScaling();
+                    sb.append("scaling=");
+                    sb.append(scaling);
+                    sb.append(",");
+                    final int fps = gameModeConfiguration.getFps();
+                    sb.append(TextUtils.formatSimple("fps=%d", fps));
+                    sb.append("\t");
+                }
+                sb.append("\n");
+            }
+            bufferedWriter.append(sb);
+            bufferedWriter.flush();
+            FileUtils.sync(fileOutputStream);
+            mGameModeInterventionListFile.finishWrite(fileOutputStream);
+        } catch (Exception e) {
+            mGameModeInterventionListFile.failWrite(fileOutputStream);
+            Slog.wtf(TAG, "Failed to write game_mode_intervention.list, exception " + e);
+        }
+        return;
+    }
+
+    private int[] getAllUserIds(@UserIdInt int currentUserId) {
+        final List<UserInfo> users = mUserManager.getUsers();
+        int[] userIds = new int[users.size()];
+        for (int i = 0; i < userIds.length; ++i) {
+            userIds[i] = users.get(i).id;
+        }
+        if (currentUserId != -1) {
+            userIds = ArrayUtils.appendInt(userIds, currentUserId);
+        }
+        return userIds;
+    }
+
+    private String[] getInstalledGamePackageNames(@UserIdInt int userId) {
         final List<PackageInfo> packages =
                 mPackageManager.getInstalledPackagesAsUser(0, userId);
         return packages.stream().filter(e -> e.applicationInfo != null && e.applicationInfo.category
                         == ApplicationInfo.CATEGORY_GAME)
                 .map(e -> e.packageName)
                 .toArray(String[]::new);
+    }
+
+    private List<String> getInstalledGamePackageNamesByAllUsers(@UserIdInt int currentUserId) {
+        HashSet<String> packageSet = new HashSet<>();
+
+        final int[] userIds = getAllUserIds(currentUserId);
+        for (int userId : userIds) {
+            packageSet.addAll(Arrays.asList(getInstalledGamePackageNames(userId)));
+        }
+
+        return new ArrayList<>(packageSet);
     }
 
     /**

@@ -84,6 +84,11 @@ public class NotificationHistoryManager {
     }
 
     void onBootPhaseAppsCanStart() {
+        try {
+            NotificationHistoryJobService.scheduleJob(mContext);
+        } catch (Throwable e) {
+            Slog.e(TAG, "Failed to schedule cleanup job", e);
+        }
         mSettingsObserver.observe();
     }
 
@@ -148,6 +153,24 @@ public class NotificationHistoryManager {
             }
 
             userHistory.onPackageRemoved(packageName);
+        }
+    }
+
+    public void cleanupHistoryFiles() {
+        synchronized (mLock) {
+            int n = mUserUnlockedStates.size();
+            for (int i = 0;  i < n; i++) {
+                // cleanup old files for currently unlocked users. User are additionally cleaned
+                // on unlock in NotificationHistoryDatabase.init().
+                if (mUserUnlockedStates.valueAt(i)) {
+                    final NotificationHistoryDatabase userHistory =
+                            mUserState.get(mUserUnlockedStates.keyAt(i));
+                    if (userHistory == null) {
+                        continue;
+                    }
+                    userHistory.prune();
+                }
+            }
         }
     }
 
@@ -288,7 +311,6 @@ public class NotificationHistoryManager {
 
     private void disableHistory(NotificationHistoryDatabase userHistory, @UserIdInt int userId) {
         userHistory.disableHistory();
-        userHistory.unregisterFileCleanupReceiver();
 
         mUserPendingHistoryDisables.put(userId, false);
         mHistoryEnabled.put(userId, false);

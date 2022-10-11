@@ -21,6 +21,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"Б"</string>
+    <string name="kilobyteShort" msgid="2214285521564195803">"КБ"</string>
+    <string name="megabyteShort" msgid="6649361267635823443">"МБ"</string>
+    <string name="gigabyteShort" msgid="7515809460261287991">"ГБ"</string>
+    <string name="terabyteShort" msgid="1822367128583886496">"ТБ"</string>
+    <string name="petabyteShort" msgid="5651571254228534832">"Пб"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;Без назви&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(Немає номера тел.)"</string>
@@ -302,12 +307,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"отримувати доступ до календаря"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"надсилати та переглядати SMS-повідомлення"</string>
-    <string name="permgrouplab_storage" msgid="17339216290379241">"Файли"</string>
-    <string name="permgroupdesc_storage" msgid="5378659041354582769">"отримувати доступ до файлів на пристрої"</string>
-    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Музика й аудіо"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"отримувати доступ до музики й аудіо на пристрої"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Фото й відео"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"отримувати доступ до фото й відео на пристрої"</string>
+    <string name="permgrouplab_storage" msgid="9173334109512154196">"Файли та документи"</string>
+    <string name="permgroupdesc_storage" msgid="8352226729501080525">"отримувати доступ до файлів і документів на вашому пристрої"</string>
+    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Музика й інше аудіо"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"отримувати доступ до аудіофайлів на вашому пристрої"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Фото й відео"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"отримувати доступ до відеофайлів на вашому пристрої"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Мікрофон"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"записувати аудіо"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Фізична активність"</string>
@@ -346,7 +351,7 @@
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Дозволяє програмі розгортати чи згортати рядок стану."</string>
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"Показувати сповіщення як активності на весь екран заблокованого пристрою"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Додаток зможе показувати сповіщення як активності на весь екран заблокованого пристрою"</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"Створювати ярлики"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"створення ярликів"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Дозволяє програмі самостійно додавати ярлики на головний екран."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"видаляти ярлики"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Дозволяє програмі самостійно вилучати ярлики з головного екрана."</string>
@@ -638,8 +643,8 @@
     <string name="face_acquired_too_far" msgid="5098567726427173896">"Тримайте телефон ближче до обличчя."</string>
     <string name="face_acquired_too_high" msgid="4868033653626081839">"Тримайте телефон вище."</string>
     <string name="face_acquired_too_low" msgid="1512237819632165945">"Тримайте телефон нижче."</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"Посуньте телефон лівіше."</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"Посуньте телефон правіше."</string>
+    <string name="face_acquired_too_right" msgid="2513391513020932655">"Тримайте телефон лівіше."</string>
+    <string name="face_acquired_too_left" msgid="8882499346502714350">"Тримайте телефон правіше."</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Дивіться просто на пристрій."</string>
     <string name="face_acquired_not_detected" msgid="2945945257956443257">"Тримайте телефон просто перед обличчям."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Забагато рухів. Тримайте телефон нерухомо."</string>
@@ -1474,7 +1479,7 @@
     <string name="accessibility_binding_label" msgid="1974602776545801715">"Спеціальні можливості"</string>
     <string name="wallpaper_binding_label" msgid="1197440498000786738">"Фоновий мал."</string>
     <string name="chooser_wallpaper" msgid="3082405680079923708">"Змінити фоновий малюнок"</string>
-    <string name="notification_listener_binding_label" msgid="2702165274471499713">"Сервіс читання сповіщень"</string>
+    <string name="notification_listener_binding_label" msgid="2702165274471499713">"Служба читання сповіщень"</string>
     <string name="vr_listener_binding_label" msgid="8013112996671206429">"VR-режим"</string>
     <string name="condition_provider_service_binding_label" msgid="8490641013951857673">"Постачальник умов"</string>
     <string name="notification_ranker_binding_label" msgid="432708245635563763">"Служба встановлення пріоритетності сповіщень"</string>
@@ -1678,7 +1683,7 @@
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Надати сервісу <xliff:g id="SERVICE">%1$s</xliff:g> повний доступ до вашого пристрою?"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Повний доступ доречний для додатків, які надають спеціальні можливості, але його не варто відкривати для більшості інших додатків."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Перегляд і контроль екрана"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Цей сервіс може переглядати всі дані на екрані й показувати контент поверх інших додатків."</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Цей сервіс може переглядати всі дані на екрані й показувати вміст над іншими додатками."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Перегляд і виконання дій"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Цей сервіс може відстежувати вашу взаємодію з додатком чи апаратним датчиком, а також взаємодіяти з додатками від вашого імені."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Дозволити"</string>
@@ -2050,7 +2055,8 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Налаштування режиму \"Не турбувати\" змінено"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Торкніться, щоб перевірити, що заблоковано."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Перегляньте налаштування сповіщень"</string>
-    <string name="review_notification_settings_text" msgid="5916244866751849279">"Починаючи з ОС Android 13, установленим додаткам потрібно надати дозвіл, щоб вони могли надсилати сповіщення. Натисніть, щоб змінити цей дозвіл для наявних додатків."</string>
+    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
+    <skip />
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Нагадати пізніше"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Закрити"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Система"</string>
@@ -2069,7 +2075,7 @@
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Вимкнути"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Докладніше"</string>
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"В Android 12 адаптивні сповіщення замінено на покращені. Ця функція допомагає впорядковувати сповіщення й показує в них пропоновані дії та відповіді.\n\nПокращені сповіщення надають доступ до вмісту сповіщень, зокрема до такої особистої інформації, як повідомлення й імена контактів. Ця функція може автоматично закривати сповіщення чи реагувати на них, наприклад відповідати на телефонні дзвінки або керувати режимом \"Не турбувати\"."</string>
-    <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Сповіщення про програму"</string>
+    <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Сповіщення про послідовнсть дій"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Акумулятор може розрядитися раніше ніж зазвичай"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Режим енергозбереження активовано для збільшення часу роботи акумулятора"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Режим енергозбереження"</string>
@@ -2098,7 +2104,7 @@
     <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"У режимі польоту Bluetooth залишатиметься ввімкненим"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"Завантаження"</string>
     <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} і ще # файл}one{{file_name} і ще # файл}few{{file_name} і ще # файли}many{{file_name} і ще # файлів}other{{file_name} і ще # файлу}}"</string>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Немає рекомендацій про те, з ким поділитися"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Немає рекомендацій щодо людей, з якими можна поділитися"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Список додатків"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Цей додаток не має дозволу на запис, але він може фіксувати звук через цей USB-пристрій."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"На головний екран"</string>
@@ -2278,5 +2284,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Перевірте активні додатки"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Не вдається отримати доступ до камери телефона з пристрою <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Не вдається отримати доступ до камери планшета з пристрою <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
-    <string name="system_locale_title" msgid="711882686834677268">"Налаштування системи за умовчанням"</string>
+    <string name="system_locale_title" msgid="3978041860457277638">"Мова системи"</string>
 </resources>

@@ -22,24 +22,29 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import android.app.StatusBarManager;
 import android.os.PowerManager;
 import android.os.Vibrator;
 import android.testing.AndroidTestingRunner;
+import android.view.InsetsVisibilities;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.testing.FakeMetricsLogger;
+import com.android.internal.statusbar.LetterboxDetails;
+import com.android.internal.view.AppearanceRegion;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.shade.NotificationPanelViewController;
+import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.DisableFlagsLogger;
-import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
@@ -58,6 +63,7 @@ import java.util.Optional;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
+
     @Mock private CentralSurfaces mCentralSurfaces;
     @Mock private ShadeController mShadeController;
     @Mock private CommandQueue mCommandQueue;
@@ -72,14 +78,12 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
     @Mock private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     @Mock private AssistManager mAssistManager;
     @Mock private DozeServiceHost mDozeServiceHost;
-    @Mock private StatusBarStateControllerImpl mStatusBarStateController;
-    @Mock private NotificationShadeWindowView mNotificationShadeWindowView;
     @Mock private NotificationStackScrollLayoutController mNotificationStackScrollLayoutController;
     @Mock private PowerManager mPowerManager;
     @Mock private VibratorHelper mVibratorHelper;
     @Mock private Vibrator mVibrator;
-    @Mock private LightBarController mLightBarController;
     @Mock private StatusBarHideIconsForBouncerManager mStatusBarHideIconsForBouncerManager;
+    @Mock private SystemBarAttributesListener mSystemBarAttributesListener;
 
     CentralSurfacesCommandQueueCallbacks mSbcqCallbacks;
 
@@ -104,16 +108,14 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
                 mStatusBarKeyguardViewManager,
                 mAssistManager,
                 mDozeServiceHost,
-                mStatusBarStateController,
-                mNotificationShadeWindowView,
                 mNotificationStackScrollLayoutController,
                 mStatusBarHideIconsForBouncerManager,
                 mPowerManager,
                 mVibratorHelper,
                 Optional.of(mVibrator),
-                mLightBarController,
                 new DisableFlagsLogger(),
-                DEFAULT_DISPLAY);
+                DEFAULT_DISPLAY,
+                mSystemBarAttributesListener);
 
         when(mDeviceProvisionedController.isCurrentUserSetup()).thenReturn(true);
         when(mRemoteInputQuickSettingsDisabler.adjustDisableFlags(anyInt()))
@@ -168,5 +170,59 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
         verify(mDozeServiceHost).setAlwaysOnSuppressed(false);
     }
 
+    @Test
+    public void onSystemBarAttributesChanged_forwardsToSysBarAttrsListener() {
+        int displayId = DEFAULT_DISPLAY;
+        int appearance = 123;
+        AppearanceRegion[] appearanceRegions = new AppearanceRegion[]{};
+        boolean navbarColorManagedByIme = true;
+        int behavior = 456;
+        InsetsVisibilities requestedVisibilities = new InsetsVisibilities();
+        String packageName = "test package name";
+        LetterboxDetails[] letterboxDetails = new LetterboxDetails[]{};
 
+        mSbcqCallbacks.onSystemBarAttributesChanged(
+                displayId,
+                appearance,
+                appearanceRegions,
+                navbarColorManagedByIme,
+                behavior,
+                requestedVisibilities,
+                packageName,
+                letterboxDetails);
+
+        verify(mSystemBarAttributesListener).onSystemBarAttributesChanged(
+                displayId,
+                appearance,
+                appearanceRegions,
+                navbarColorManagedByIme,
+                behavior,
+                requestedVisibilities,
+                packageName,
+                letterboxDetails
+        );
+    }
+
+    @Test
+    public void onSystemBarAttributesChanged_differentDisplayId_doesNotForwardToAttrsListener() {
+        int appearance = 123;
+        AppearanceRegion[] appearanceRegions = new AppearanceRegion[]{};
+        boolean navbarColorManagedByIme = true;
+        int behavior = 456;
+        InsetsVisibilities requestedVisibilities = new InsetsVisibilities();
+        String packageName = "test package name";
+        LetterboxDetails[] letterboxDetails = new LetterboxDetails[]{};
+
+        mSbcqCallbacks.onSystemBarAttributesChanged(
+                DEFAULT_DISPLAY + 1,
+                appearance,
+                appearanceRegions,
+                navbarColorManagedByIme,
+                behavior,
+                requestedVisibilities,
+                packageName,
+                letterboxDetails);
+
+        verifyZeroInteractions(mSystemBarAttributesListener);
+    }
 }

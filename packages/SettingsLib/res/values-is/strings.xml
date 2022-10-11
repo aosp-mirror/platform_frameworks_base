@@ -125,9 +125,9 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD-hljóð: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD-hljóð"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Heyrnartæki"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE-hljóð"</string>
+    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Tengt við heyrnartæki"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Tengt við LE-hljóð"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"Tengt við LE_AUDIO"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Tengt við hljóðspilun efnis"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Tengt við hljóð símans"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Tengt við skráaflutningsþjón"</string>
@@ -598,6 +598,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Endurstilla"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Fjarlægja"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Endurstillir gest…"</string>
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Endurstilla gestalotu?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Þetta opnar nýja gestalotu og eyðir öllum forritum og gögnum úr núverandi lotu"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Loka gestastillingu?"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Þetta eyðir forritum og gögnum úr núverandi gestalotu"</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Hætta"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Vista aðgerðir úr gestalotu?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Þú getur vistað aðgerðir úr núverandi lotu eða eytt öllum forritum og gögnum"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Eyða"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Vista"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"Loka gestastillingu"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"Endurstilla gestalotu"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Loka gestastillingu"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Öllum aðgerðum verður eytt þegar lotu er lokað"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Þú getur vistað eða eytt aðgerðum þegar þú lokar"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Endurstilltu til að eyða aðgerðum lotu núna, eða þú getur vistað eða eytt aðgerðum þegar þú lokar"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Taka mynd"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Velja mynd"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Velja mynd"</string>
@@ -652,11 +667,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Kveikja á skjánum"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Leyfa að kveikt sé á skjánum"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Leyfa forriti að kveikja á skjánum. Ef þetta er leyft getur forritið kveikt á skjánum hvenær sem er án þess að þú samþykkir það sérstaklega."</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Skanna QR-kóða"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Byrjaðu að hlusta með því að skanna QR-kóðann hér að neðan"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR-kóði er ekki gilt snið"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Hætta að senda út <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Ef þú sendir út <xliff:g id="SWITCHAPP">%1$s</xliff:g> eða skiptir um úttak lýkur yfirstandandi útsendingu"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Senda út <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Skipta um úttak"</string>
-    <string name="back_navigation_animation" msgid="8105467568421689484">"Hreyfimyndir flýtiritunar við bendinguna „til baka“"</string>
-    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Kveikja á hreyfimyndum í kerfinu til að sýna hreyfimyndir þegar bendingin „til baka“ er gerð."</string>
-    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Þessi stilling kveikir á hreyfimyndum í kerfinu til að sýna hreyfimyndir flýtiritunar með bendingum. Stillingin krefst þess að kveikt sé á enableOnBackInvokedCallback í upplýsingaskránni fyrir hvert forrit."</string>
 </resources>

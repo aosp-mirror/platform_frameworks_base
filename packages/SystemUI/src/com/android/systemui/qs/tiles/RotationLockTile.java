@@ -57,6 +57,7 @@ import javax.inject.Inject;
 /** Quick settings tile: Rotation **/
 public class RotationLockTile extends QSTileImpl<BooleanState> implements
         BatteryController.BatteryStateChangeCallback {
+    private static final String EMPTY_SECONDARY_STRING = "";
 
     private final Icon mIcon = ResourceIcon.get(com.android.internal.R.drawable.ic_qs_auto_rotate);
     private final RotationLockController mController;
@@ -144,13 +145,15 @@ public class RotationLockTile extends QSTileImpl<BooleanState> implements
                         && mController.isCameraRotationEnabled();
         state.value = !rotationLocked;
         state.label = mContext.getString(R.string.quick_settings_rotation_unlocked_label);
-        state.icon = mIcon;
+        state.icon = ResourceIcon.get(R.drawable.qs_auto_rotate_icon_off);
         state.contentDescription = getAccessibilityString(rotationLocked);
-        if (!rotationLocked && cameraRotation) {
-            state.secondaryLabel = mContext.getResources().getString(
-                    R.string.rotation_lock_camera_rotation_on);
+        if (!rotationLocked) {
+            state.secondaryLabel = cameraRotation ? mContext.getResources().getString(
+                    R.string.rotation_lock_camera_rotation_on)
+                    : EMPTY_SECONDARY_STRING;
+            state.icon = ResourceIcon.get(R.drawable.qs_auto_rotate_icon_on);
         } else {
-            state.secondaryLabel = "";
+            state.secondaryLabel = EMPTY_SECONDARY_STRING;
         }
         state.stateDescription = state.secondaryLabel;
 

@@ -108,6 +108,7 @@ public class NotificationEntryTest extends SysuiTestCase {
     @Test
     public void testBlockableEntryWhenCritical() {
         doReturn(true).when(mChannel).isBlockable();
+        mEntry.setRanking(mEntry.getRanking());
 
         assertTrue(mEntry.isBlockable());
     }
@@ -117,6 +118,7 @@ public class NotificationEntryTest extends SysuiTestCase {
     public void testBlockableEntryWhenCriticalAndChannelNotBlockable() {
         doReturn(true).when(mChannel).isBlockable();
         doReturn(true).when(mChannel).isImportanceLockedByCriticalDeviceFunction();
+        mEntry.setRanking(mEntry.getRanking());
 
         assertTrue(mEntry.isBlockable());
     }
@@ -125,6 +127,7 @@ public class NotificationEntryTest extends SysuiTestCase {
     public void testNonBlockableEntryWhenCriticalAndChannelNotBlockable() {
         doReturn(false).when(mChannel).isBlockable();
         doReturn(true).when(mChannel).isImportanceLockedByCriticalDeviceFunction();
+        mEntry.setRanking(mEntry.getRanking());
 
         assertFalse(mEntry.isBlockable());
     }
@@ -164,6 +167,9 @@ public class NotificationEntryTest extends SysuiTestCase {
         doReturn(true).when(mChannel).isImportanceLockedByCriticalDeviceFunction();
         doReturn(false).when(mChannel).isBlockable();
 
+        mEntry.setRanking(mEntry.getRanking());
+
+        assertFalse(mEntry.isBlockable());
         assertTrue(mEntry.isExemptFromDndVisualSuppression());
         assertFalse(mEntry.shouldSuppressAmbient());
     }

@@ -43,6 +43,4 @@
     <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"နောက်ထပ် ထိန်းချုပ်မှုများအတွက် သင့်ဖုန်းကို လော့ခ်ဖွင့်ပါ"</string>
     <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"နောက်ထပ် ထိန်းချုပ်မှုများအတွက် သင့်တက်ဘလက်ကို လော့ခ်ဖွင့်ပါ"</string>
     <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"နောက်ထပ် ထိန်းချုပ်မှုများအတွက် သင့်စက်ကို လော့ခ်ဖွင့်ပါ"</string>
-    <string name="media_transfer_playing_this_device" product="default" msgid="5795784619523545556">"ဤဖုန်းတွင် ဖွင့်နေသည်"</string>
-    <string name="media_transfer_playing_this_device" product="tablet" msgid="222514408550408633">"ဤတက်ဘလက်တွင် ဖွင့်နေသည်"</string>
 </resources>

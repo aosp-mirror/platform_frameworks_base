@@ -163,4 +163,20 @@ class TileRequestDialogTest : SysuiTestCase() {
         assertThat(tile.isClickable).isFalse()
         assertThat(tile.isLongClickable).isFalse()
     }
+
+    @Test
+    fun setTileData_tileHasCorrectContentDescription() {
+        val icon = Icon.createWithResource(mContext, R.drawable.cloud)
+        val tileData = TileRequestDialog.TileData(APP_NAME, LABEL, icon)
+
+        dialog.setTileData(tileData)
+        dialog.show()
+
+        TestableLooper.get(this).processAllMessages()
+
+        val content = dialog.requireViewById<ViewGroup>(TileRequestDialog.CONTENT_ID)
+        val tile = content.getChildAt(1) as QSTileView
+
+        assertThat(tile.contentDescription).isEqualTo(LABEL)
+    }
 }

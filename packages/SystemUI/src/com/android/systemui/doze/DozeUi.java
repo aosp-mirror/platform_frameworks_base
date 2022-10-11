@@ -26,8 +26,6 @@ import android.os.SystemClock;
 import android.text.format.Formatter;
 import android.util.Log;
 
-import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.dagger.DozeScope;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -44,8 +42,6 @@ import javax.inject.Inject;
  */
 @DozeScope
 public class DozeUi implements DozeMachine.Part {
-    // if enabled, calls dozeTimeTick() whenever the time changes:
-    private static final boolean BURN_IN_TESTING_ENABLED = false;
     private static final long TIME_TICK_DEADLINE_MILLIS = 90 * 1000; // 1.5min
     private final Context mContext;
     private final DozeHost mHost;
@@ -57,26 +53,13 @@ public class DozeUi implements DozeMachine.Part {
     private final DozeParameters mDozeParameters;
     private final DozeLog mDozeLog;
     private final StatusBarStateController mStatusBarStateController;
-    private final KeyguardUpdateMonitorCallback mKeyguardVisibilityCallback =
-            new KeyguardUpdateMonitorCallback() {
-                @Override
-                public void onTimeChanged() {
-                    if (BURN_IN_TESTING_ENABLED && mStatusBarStateController.isDozing()) {
-                        // update whenever the time changes for manual burn in testing
-                        mHost.dozeTimeTick();
-
-                        // Keep wakelock until a frame has been pushed.
-                        mHandler.post(mWakeLock.wrap(() -> {}));
-                    }
-                }
-            };
 
     private long mLastTimeTickElapsed = 0;
 
     @Inject
     public DozeUi(Context context, AlarmManager alarmManager,
             WakeLock wakeLock, DozeHost host, @Main Handler handler,
-            DozeParameters params, KeyguardUpdateMonitor keyguardUpdateMonitor,
+            DozeParameters params,
             StatusBarStateController statusBarStateController,
             DozeLog dozeLog) {
         mContext = context;
@@ -86,7 +69,6 @@ public class DozeUi implements DozeMachine.Part {
         mCanAnimateTransition = !params.getDisplayNeedsBlanking();
         mDozeParameters = params;
         mTimeTicker = new AlarmTimeout(alarmManager, this::onTimeTick, "doze_time_tick", handler);
-        keyguardUpdateMonitor.registerCallback(mKeyguardVisibilityCallback);
         mDozeLog = dozeLog;
         mStatusBarStateController = statusBarStateController;
     }
@@ -139,6 +121,7 @@ public class DozeUi implements DozeMachine.Part {
                 break;
             case DOZE:
             case DOZE_AOD_PAUSED:
+            case DOZE_SUSPEND_TRIGGERS:
                 unscheduleTimeTick();
                 break;
             case DOZE_REQUEST_PULSE:

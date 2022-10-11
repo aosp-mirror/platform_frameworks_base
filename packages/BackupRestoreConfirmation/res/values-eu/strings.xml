@@ -18,10 +18,10 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="backup_confirm_title" msgid="827563724209303345">"Babeskopia osoa"</string>
     <string name="restore_confirm_title" msgid="5469365809567486602">"Leheneratze osoa"</string>
-    <string name="backup_confirm_text" msgid="1878021282758896593">"Datu guztien babeskopia egitea eta konektatutako ordenagailu batean gordetzea eskatu da. Horretarako baimena eman nahi duzu?\n\nBabeskopia egitea zeuk eskatu ez baduzu, ez eman eragiketarekin jarraitzeko baimena."</string>
+    <string name="backup_confirm_text" msgid="1878021282758896593">"Datu guztien babeskopia egitea eta konektatutako ordenagailu batean gordetzea eskatu da. Horretarako baimena eman nahi duzu?\n\nEz baduzu babeskopia egitea zuk eskatu, ez eman eragiketarekin jarraitzeko baimena."</string>
     <string name="allow_backup_button_label" msgid="4217228747769644068">"Egin datuen babeskopia"</string>
     <string name="deny_backup_button_label" msgid="6009119115581097708">"Ez egin babeskopia"</string>
-    <string name="restore_confirm_text" msgid="7499866728030461776">"Konektatutako ordenagailu bateko datu guztiak leheneratzeko eskatu da. Horretarako baimena eman nahi duzu?\n\nLeheneratzea zeuk eskatu ez baduzu, ez eman eragiketarekin jarraitzeko baimena. Eragiketa gauzatzen bada, gailuan dituzun datu guztiak ordeztuko dira!"</string>
+    <string name="restore_confirm_text" msgid="7499866728030461776">"Konektatutako ordenagailu bateko datu guztiak leheneratzeko eskatu da. Horretarako baimena eman nahi duzu?\n\nEz baduzu leheneratzea zuk eskatu, ez eman eragiketarekin jarraitzeko baimena. Eragiketa gauzatzen bada, gailuan dituzun datu guztiak ordeztuko dira!"</string>
     <string name="allow_restore_button_label" msgid="3081286752277127827">"Leheneratu datuak"</string>
     <string name="deny_restore_button_label" msgid="1724367334453104378">"Ez leheneratu"</string>
     <string name="current_password_text" msgid="8268189555578298067">"Idatzi babeskopien oraingo pasahitza behean:"</string>

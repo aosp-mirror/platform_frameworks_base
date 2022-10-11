@@ -23,8 +23,10 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.ComponentName;
 import android.content.Intent;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamOverlay;
 import android.service.dreams.IDreamOverlayCallback;
@@ -57,6 +59,8 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 public class DreamOverlayServiceTest extends SysuiTestCase {
+    private static final ComponentName LOW_LIGHT_COMPONENT = new ComponentName("package",
+            "lowlight");
     private final FakeSystemClock mFakeSystemClock = new FakeSystemClock();
     private final FakeExecutor mMainExecutor = new FakeExecutor(mFakeSystemClock);
 
@@ -129,7 +133,8 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
                 mDreamOverlayComponentFactory,
                 mStateController,
                 mKeyguardUpdateMonitor,
-                mUiEventLogger);
+                mUiEventLogger,
+                LOW_LIGHT_COMPONENT);
     }
 
     @Test
@@ -204,6 +209,22 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
     }
 
     @Test
+    public void testLowLightSetByIntentExtra() throws RemoteException {
+        final Intent intent = new Intent();
+        intent.putExtra(DreamService.EXTRA_DREAM_COMPONENT, LOW_LIGHT_COMPONENT);
+
+        final IBinder proxy = mService.onBind(intent);
+        final IDreamOverlay overlay = IDreamOverlay.Stub.asInterface(proxy);
+        assertThat(mService.getDreamComponent()).isEqualTo(LOW_LIGHT_COMPONENT);
+
+        // Inform the overlay service of dream starting.
+        overlay.startDream(mWindowParams, mDreamOverlayCallback);
+        mMainExecutor.runAllReady();
+
+        verify(mStateController).setLowLightActive(true);
+    }
+
+    @Test
     public void testDestroy() {
         mService.onDestroy();
         mMainExecutor.runAllReady();
@@ -211,6 +232,7 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
         verify(mKeyguardUpdateMonitor).removeCallback(any());
         verify(mLifecycleRegistry).setCurrentState(Lifecycle.State.DESTROYED);
         verify(mStateController).setOverlayActive(false);
+        verify(mStateController).setLowLightActive(false);
     }
 
     @Test

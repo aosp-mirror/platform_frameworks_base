@@ -43,6 +43,4 @@
     <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"Чтобы посмотреть дополнительные параметры, разблокируйте телефон."</string>
     <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"Чтобы посмотреть дополнительные параметры, разблокируйте планшет."</string>
     <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"Чтобы посмотреть дополнительные параметры, разблокируйте устройство."</string>
-    <string name="media_transfer_playing_this_device" product="default" msgid="5795784619523545556">"Воспроизводится на этом телефоне."</string>
-    <string name="media_transfer_playing_this_device" product="tablet" msgid="222514408550408633">"Воспроизводится на этом планшете."</string>
 </resources>

@@ -19,16 +19,10 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="notification_channel_tv_pip" msgid="2576686079160402435">"Integreret billede"</string>
     <string name="pip_notification_unknown_title" msgid="2729870284350772311">"(Program uden titel)"</string>
-    <string name="pip_close" msgid="2955969519031223530">"Luk"</string>
+    <string name="pip_close" msgid="9135220303720555525">"Luk integreret billede"</string>
     <string name="pip_fullscreen" msgid="7278047353591302554">"Fuld skærm"</string>
-    <string name="pip_move" msgid="158770205886688553">"Flyt"</string>
-    <string name="pip_expand" msgid="1051966011679297308">"Udvid"</string>
-    <string name="pip_collapse" msgid="3903295106641385962">"Skjul"</string>
+    <string name="pip_move" msgid="1544227837964635439">"Flyt PIP"</string>
+    <string name="pip_expand" msgid="7605396312689038178">"Udvid PIP"</string>
+    <string name="pip_collapse" msgid="5732233773786896094">"Skjul PIP"</string>
     <string name="pip_edu_text" msgid="3672999496647508701">" Tryk to gange på "<annotation icon="home_icon">" HJEM "</annotation>" for at se indstillinger"</string>
-    <string name="a11y_pip_menu_entered" msgid="5106343214776801614">"Menu for integreret billede."</string>
-    <string name="a11y_action_pip_move_left" msgid="6612980937817141583">"Flyt til venstre"</string>
-    <string name="a11y_action_pip_move_right" msgid="1119409122645529936">"Flyt til højre"</string>
-    <string name="a11y_action_pip_move_up" msgid="98502616918621959">"Flyt op"</string>
-    <string name="a11y_action_pip_move_down" msgid="3858802832725159740">"Flyt ned"</string>
-    <string name="a11y_action_pip_move_done" msgid="1486845365134416210">"Udfør"</string>
 </resources>

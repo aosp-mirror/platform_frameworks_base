@@ -121,6 +121,7 @@ public final class SurfaceControl implements Parcelable {
     private static native void nativeSetAnimationTransaction(long transactionObj);
     private static native void nativeSetEarlyWakeupStart(long transactionObj);
     private static native void nativeSetEarlyWakeupEnd(long transactionObj);
+    private static native long nativeGetTransactionId(long transactionObj);
 
     private static native void nativeSetLayer(long transactionObj, long nativeObject, int zorder);
     private static native void nativeSetRelativeLayer(long transactionObj, long nativeObject,
@@ -3534,6 +3535,15 @@ public final class SurfaceControl implements Parcelable {
         public Transaction setEarlyWakeupEnd() {
             nativeSetEarlyWakeupEnd(mNativeObject);
             return this;
+        }
+
+        /**
+         * @hide
+         * @return The transaction's current id.
+         *         The id changed every time the transaction is applied.
+         */
+        public long getId() {
+            return nativeGetTransactionId(mNativeObject);
         }
 
         /**

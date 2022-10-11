@@ -16,13 +16,18 @@
 
 package com.android.server.wm;
 
+import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
+
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+import static com.android.server.wm.BLASTSyncEngine.METHOD_BLAST;
+import static com.android.server.wm.BLASTSyncEngine.METHOD_NONE;
 import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 import static com.android.server.wm.WindowContainer.SYNC_STATE_NONE;
+import static com.android.server.wm.WindowState.BLAST_TIMEOUT_DURATION;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -67,7 +72,7 @@ public class SyncEngineTests extends WindowTestsBase {
         BLASTSyncEngine.TransactionReadyListener listener = mock(
                 BLASTSyncEngine.TransactionReadyListener.class);
 
-        int id = bse.startSyncSet(listener);
+        int id = startSyncSet(bse, listener);
         bse.addToSyncSet(id, mockWC);
         // Make sure a traversal is requested
         verify(mWm.mWindowPlacerLocked, times(1)).requestTraversal();
@@ -95,7 +100,7 @@ public class SyncEngineTests extends WindowTestsBase {
         BLASTSyncEngine.TransactionReadyListener listener = mock(
                 BLASTSyncEngine.TransactionReadyListener.class);
 
-        int id = bse.startSyncSet(listener);
+        int id = startSyncSet(bse, listener);
         bse.addToSyncSet(id, mockWC);
         bse.setReady(id);
         // Make sure traversals requested (one for add and another for setReady)
@@ -119,7 +124,7 @@ public class SyncEngineTests extends WindowTestsBase {
         BLASTSyncEngine.TransactionReadyListener listener = mock(
                 BLASTSyncEngine.TransactionReadyListener.class);
 
-        int id = bse.startSyncSet(listener);
+        int id = startSyncSet(bse, listener);
         bse.addToSyncSet(id, mockWC);
         bse.setReady(id);
         // Make sure traversals requested (one for add and another for setReady)
@@ -147,7 +152,7 @@ public class SyncEngineTests extends WindowTestsBase {
         BLASTSyncEngine.TransactionReadyListener listener = mock(
                 BLASTSyncEngine.TransactionReadyListener.class);
 
-        int id = bse.startSyncSet(listener);
+        int id = startSyncSet(bse, listener);
         bse.addToSyncSet(id, parentWC);
         bse.setReady(id);
         bse.onSurfacePlacement();
@@ -180,7 +185,7 @@ public class SyncEngineTests extends WindowTestsBase {
         BLASTSyncEngine.TransactionReadyListener listener = mock(
                 BLASTSyncEngine.TransactionReadyListener.class);
 
-        int id = bse.startSyncSet(listener);
+        int id = startSyncSet(bse, listener);
         bse.addToSyncSet(id, parentWC);
         bse.setReady(id);
         bse.onSurfacePlacement();
@@ -211,7 +216,7 @@ public class SyncEngineTests extends WindowTestsBase {
         BLASTSyncEngine.TransactionReadyListener listener = mock(
                 BLASTSyncEngine.TransactionReadyListener.class);
 
-        int id = bse.startSyncSet(listener);
+        int id = startSyncSet(bse, listener);
         bse.addToSyncSet(id, parentWC);
         bse.setReady(id);
         bse.onSurfacePlacement();
@@ -243,7 +248,7 @@ public class SyncEngineTests extends WindowTestsBase {
         BLASTSyncEngine.TransactionReadyListener listener = mock(
                 BLASTSyncEngine.TransactionReadyListener.class);
 
-        int id = bse.startSyncSet(listener);
+        int id = startSyncSet(bse, listener);
         bse.addToSyncSet(id, parentWC);
         bse.setReady(id);
         bse.onSurfacePlacement();
@@ -278,7 +283,7 @@ public class SyncEngineTests extends WindowTestsBase {
         BLASTSyncEngine.TransactionReadyListener listener = mock(
                 BLASTSyncEngine.TransactionReadyListener.class);
 
-        int id = bse.startSyncSet(listener);
+        int id = startSyncSet(bse, listener);
         bse.addToSyncSet(id, parentWC);
         bse.setReady(id);
         bse.onSurfacePlacement();
@@ -317,7 +322,7 @@ public class SyncEngineTests extends WindowTestsBase {
         BLASTSyncEngine.TransactionReadyListener listener = mock(
                 BLASTSyncEngine.TransactionReadyListener.class);
 
-        int id = bse.startSyncSet(listener);
+        int id = startSyncSet(bse, listener);
         bse.addToSyncSet(id, parentWC);
         final BLASTSyncEngine.SyncGroup syncGroup = parentWC.mSyncGroup;
         bse.setReady(id);
@@ -348,6 +353,33 @@ public class SyncEngineTests extends WindowTestsBase {
 
         assertEquals(SYNC_STATE_NONE, parentWC.mSyncState);
         assertEquals(SYNC_STATE_NONE, botChildWC.mSyncState);
+    }
+
+    @Test
+    public void testNonBlastMethod() {
+        mAppWindow = createWindow(null, TYPE_BASE_APPLICATION, "mAppWindow");
+
+        final BLASTSyncEngine bse = createTestBLASTSyncEngine();
+
+        BLASTSyncEngine.TransactionReadyListener listener = mock(
+                BLASTSyncEngine.TransactionReadyListener.class);
+
+        int id = startSyncSet(bse, listener, METHOD_NONE);
+        bse.addToSyncSet(id, mAppWindow.mToken);
+        mAppWindow.prepareSync();
+        assertFalse(mAppWindow.shouldSyncWithBuffers());
+
+        mAppWindow.removeImmediately();
+    }
+
+    static int startSyncSet(BLASTSyncEngine engine,
+            BLASTSyncEngine.TransactionReadyListener listener) {
+        return startSyncSet(engine, listener, METHOD_BLAST);
+    }
+
+    static int startSyncSet(BLASTSyncEngine engine,
+            BLASTSyncEngine.TransactionReadyListener listener, int method) {
+        return engine.startSyncSet(listener, BLAST_TIMEOUT_DURATION, "", method);
     }
 
     static class TestWindowContainer extends WindowContainer {

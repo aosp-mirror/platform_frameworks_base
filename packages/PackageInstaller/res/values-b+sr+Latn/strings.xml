@@ -53,7 +53,7 @@
     <string name="uninstall_application_title" msgid="4045420072401428123">"Deinstaliraj aplikaciju"</string>
     <string name="uninstall_update_title" msgid="824411791011583031">"Deinstaliraj ažuriranje"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> je deo sledeće aplikacije:"</string>
-    <string name="uninstall_application_text" msgid="3816830743706143980">"Želite da deinstalirate ovu aplikaciju?"</string>
+    <string name="uninstall_application_text" msgid="3816830743706143980">"Želite li da deinstalirate ovu aplikaciju?"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Da li želite da deinstalirate ovu aplikaciju za "<b>"sve"</b>" korisnike? Aplikacija i podaci uz nje biće uklonjeni za "<b>"sve"</b>" korisnike ovog uređaja."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Želite li da deinstalirate ovu aplikaciju za korisnika <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Da li želite da deinstalirate ovu aplikaciju sa poslovnog profila?"</string>

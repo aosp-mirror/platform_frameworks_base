@@ -8065,7 +8065,7 @@ public abstract class PackageManager {
             }
 
             PackageParser.Package pkg = parser.parsePackage(apkFile, 0, false);
-            if ((flagsBits & GET_SIGNATURES) != 0) {
+            if ((flagsBits & GET_SIGNATURES) != 0 || (flagsBits & GET_SIGNING_CERTIFICATES) != 0) {
                 PackageParser.collectCertificates(pkg, false /* skipVerify */);
             }
             return PackageParser.generatePackageInfo(pkg, null, (int) flagsBits, 0, 0, null,

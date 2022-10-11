@@ -42,6 +42,7 @@ import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.PowerManager.PARTIAL_WAKE_LOCK;
 import static android.os.Process.INVALID_UID;
+import static android.os.Process.SYSTEM_UID;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
@@ -73,13 +74,9 @@ import static com.android.server.wm.LockTaskController.LOCK_TASK_AUTH_LAUNCHABLE
 import static com.android.server.wm.LockTaskController.LOCK_TASK_AUTH_LAUNCHABLE_PRIV;
 import static com.android.server.wm.RootWindowContainer.MATCH_ATTACHED_TASK_OR_RECENT_TASKS;
 import static com.android.server.wm.RootWindowContainer.MATCH_ATTACHED_TASK_OR_RECENT_TASKS_AND_RESTORE;
-import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
-import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.Task.FLAG_FORCE_HIDDEN_FOR_PINNED_TASK;
 import static com.android.server.wm.Task.REPARENT_KEEP_ROOT_TASK_AT_FRONT;
 import static com.android.server.wm.Task.TAG_CLEANUP;
-import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
-import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
 import android.Manifest;
@@ -93,6 +90,7 @@ import android.app.AppOpsManagerInternal;
 import android.app.IActivityClientController;
 import android.app.ProfilerInfo;
 import android.app.ResultInfo;
+import android.app.TaskInfo;
 import android.app.WaitResult;
 import android.app.servertransaction.ActivityLifecycleItem;
 import android.app.servertransaction.ClientTransaction;
@@ -121,7 +119,6 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
@@ -155,6 +152,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 // TODO: This class has become a dumping ground. Let's
 // - Move things relating to the hierarchy to RootWindowContainer
@@ -245,6 +243,9 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
 
     /** Helper class to abstract out logic for fetching the set of currently running tasks */
     private RunningTasks mRunningTasks;
+
+    /** Helper for {@link Task#fillTaskInfo}. */
+    final TaskInfoHelper mTaskInfoHelper = new TaskInfoHelper();
 
     private final ActivityTaskSupervisorHandler mHandler;
     final Looper mLooper;
@@ -886,11 +887,12 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
 
                 logIfTransactionTooLarge(r.intent, r.getSavedState());
 
-                if (r.isEmbedded()) {
+                final TaskFragment organizedTaskFragment = r.getOrganizedTaskFragment();
+                if (organizedTaskFragment != null) {
                     // Sending TaskFragmentInfo to client to ensure the info is updated before
                     // the activity creation.
                     mService.mTaskFragmentOrganizerController.dispatchPendingInfoChangedEvent(
-                            r.getOrganizedTaskFragment());
+                            organizedTaskFragment);
                 }
 
                 // Create activity launch transaction.
@@ -1316,7 +1318,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
     }
 
     void acquireLaunchWakelock() {
-        if (VALIDATE_WAKE_LOCK_CALLER && Binder.getCallingUid() != Process.myUid()) {
+        if (VALIDATE_WAKE_LOCK_CALLER && Binder.getCallingUid() != SYSTEM_UID) {
             throw new IllegalStateException("Calling must be system uid");
         }
         mLaunchingActivityWakeLock.acquire();
@@ -1389,8 +1391,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
 
             if (mLaunchingActivityWakeLock.isHeld()) {
                 mHandler.removeMessages(LAUNCH_TIMEOUT_MSG);
-                if (VALIDATE_WAKE_LOCK_CALLER &&
-                        Binder.getCallingUid() != Process.myUid()) {
+                if (VALIDATE_WAKE_LOCK_CALLER && Binder.getCallingUid() != SYSTEM_UID) {
                     throw new IllegalStateException("Calling must be system uid");
                 }
                 mLaunchingActivityWakeLock.release();
@@ -1434,10 +1435,10 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                 mUserLeaving = true;
             }
 
-            task.mTransitionController.requestTransitionIfNeeded(TRANSIT_TO_FRONT,
-                    0 /* flags */, task, task /* readyGroupRef */,
-                    options != null ? options.getRemoteTransition() : null,
-                    null /* displayChange */);
+            final Transition newTransition = task.mTransitionController.isShellTransitionsEnabled()
+                    ? task.mTransitionController.isCollecting() ? null
+                    : task.mTransitionController.createTransition(TRANSIT_TO_FRONT) : null;
+            task.mTransitionController.collect(task);
             reason = reason + " findTaskToMoveToFront";
             boolean reparented = false;
             if (task.isResizeable() && canUseActivityOptionsLaunchBounds(options)) {
@@ -1480,6 +1481,17 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             handleNonResizableTaskIfNeeded(task, WINDOWING_MODE_UNDEFINED,
                     mRootWindowContainer.getDefaultTaskDisplayArea(), currentRootTask,
                     forceNonResizeable);
+            if (r != null) {
+                // Use a starting window to reduce the transition latency for reshowing the task.
+                // Note that with shell transition, this should be executed before requesting
+                // transition to avoid delaying the starting window.
+                r.showStartingWindow(true /* taskSwitch */);
+            }
+            if (newTransition != null) {
+                task.mTransitionController.requestStartTransition(newTransition, task,
+                        options != null ? options.getRemoteTransition() : null,
+                        null /* displayChange */);
+            }
         } finally {
             mUserLeaving = false;
         }
@@ -1800,7 +1812,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         if (!mGoingToSleepWakeLock.isHeld()) {
             mGoingToSleepWakeLock.acquire();
             if (mLaunchingActivityWakeLock.isHeld()) {
-                if (VALIDATE_WAKE_LOCK_CALLER && Binder.getCallingUid() != Process.myUid()) {
+                if (VALIDATE_WAKE_LOCK_CALLER && Binder.getCallingUid() != SYSTEM_UID) {
                     throw new IllegalStateException("Calling must be system uid");
                 }
                 mLaunchingActivityWakeLock.release();
@@ -1921,9 +1933,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         ArrayList<ActivityRecord> readyToStopActivities = null;
         for (int i = mStoppingActivities.size() - 1; i >= 0; --i) {
             final ActivityRecord s = mStoppingActivities.get(i);
-            final boolean animating = s.isAnimating(TRANSITION | PARENTS,
-                    ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_RECENTS)
-                    || s.inTransition();
+            final boolean animating = s.isInTransition();
             ProtoLog.v(WM_DEBUG_STATES, "Stopping %s: nowVisible=%b animating=%b "
                     + "finishing=%s", s, s.nowVisible, animating, s.finishing);
             if (!animating || mService.mShuttingDown) {
@@ -2073,7 +2083,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
      * activity releases the top state and reports back, message about acquiring top state will be
      * sent to the new top resumed activity.
      */
-    void updateTopResumedActivityIfNeeded() {
+    void updateTopResumedActivityIfNeeded(String reason) {
         final ActivityRecord prevTopActivity = mTopResumedActivity;
         final Task topRootTask = mRootWindowContainer.getTopDisplayFocusedRootTask();
         if (topRootTask == null || topRootTask.getTopResumedActivity() == prevTopActivity) {
@@ -2108,6 +2118,12 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                 mTopResumedActivity.app.addToPendingTop();
             }
             mService.updateOomAdj();
+        }
+        // Update the last resumed activity and focused app when the top resumed activity changed
+        // because the new top resumed activity might be already resumed and thus won't have
+        // activity state change to update the records to AMS.
+        if (mTopResumedActivity != null) {
+            mService.setLastResumedActivityUncheckLocked(mTopResumedActivity, reason);
         }
         scheduleTopResumedActivityStateIfNeeded();
 
@@ -2461,8 +2477,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                 case LAUNCH_TIMEOUT_MSG: {
                     if (mLaunchingActivityWakeLock.isHeld()) {
                         Slog.w(TAG, "Launch timeout has expired, giving up wake lock!");
-                        if (VALIDATE_WAKE_LOCK_CALLER
-                                && Binder.getCallingUid() != Process.myUid()) {
+                        if (VALIDATE_WAKE_LOCK_CALLER && Binder.getCallingUid() != SYSTEM_UID) {
                             throw new IllegalStateException("Calling must be system uid");
                         }
                         mLaunchingActivityWakeLock.release();
@@ -2618,6 +2633,41 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         } finally {
             synchronized (mService.mGlobalLock) {
                 mService.continueWindowLayout();
+            }
+        }
+    }
+
+    /**
+     * Fills the info that needs to iterate all activities of task, such as the number of
+     * non-finishing activities and collecting launch cookies.
+     */
+    static class TaskInfoHelper implements Consumer<ActivityRecord> {
+        private TaskInfo mInfo;
+        private ActivityRecord mTopRunning;
+
+        ActivityRecord fillAndReturnTop(Task task, TaskInfo info) {
+            info.numActivities = 0;
+            info.baseActivity = null;
+            mInfo = info;
+            task.forAllActivities(this);
+            final ActivityRecord top = mTopRunning;
+            mTopRunning = null;
+            mInfo = null;
+            return top;
+        }
+
+        @Override
+        public void accept(ActivityRecord r) {
+            if (r.mLaunchCookie != null) {
+                mInfo.addLaunchCookie(r.mLaunchCookie);
+            }
+            if (r.finishing) {
+                return;
+            }
+            mInfo.numActivities++;
+            mInfo.baseActivity = r.mActivityComponent;
+            if (mTopRunning == null) {
+                mTopRunning = r;
             }
         }
     }

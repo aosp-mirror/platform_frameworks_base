@@ -19,8 +19,12 @@ package com.android.server.accessibility.magnification;
 import static com.android.server.testutils.TestUtils.strictMock;
 
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
+import android.annotation.UiContext;
+import android.content.Context;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.RemoteException;
@@ -76,7 +80,8 @@ public class WindowMagnificationGestureHandlerTest {
 
     private WindowMagnificationManager mWindowMagnificationManager;
     private MockWindowMagnificationConnection mMockConnection;
-    private WindowMagnificationGestureHandler mWindowMagnificationGestureHandler;
+    private SpyWindowMagnificationGestureHandler mWindowMagnificationGestureHandler;
+    private WindowMagnificationGestureHandler mMockWindowMagnificationGestureHandler;
     @Mock
     MagnificationGestureHandler.Callback mMockCallback;
     @Mock
@@ -89,9 +94,11 @@ public class WindowMagnificationGestureHandlerTest {
                 mock(WindowMagnificationManager.Callback.class), mMockTrace,
                 new MagnificationScaleProvider(mContext));
         mMockConnection = new MockWindowMagnificationConnection();
-        mWindowMagnificationGestureHandler = new WindowMagnificationGestureHandler(
+        mWindowMagnificationGestureHandler = new SpyWindowMagnificationGestureHandler(
                 mContext, mWindowMagnificationManager, mMockTrace, mMockCallback,
                 /** detectTripleTap= */true,   /** detectShortcutTrigger= */true, DISPLAY_0);
+        mMockWindowMagnificationGestureHandler =
+                mWindowMagnificationGestureHandler.getMockGestureHandler();
         mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
         mWindowMagnificationGestureHandler.setNext(strictMock(EventStreamTransformation.class));
     }
@@ -152,6 +159,18 @@ public class WindowMagnificationGestureHandlerTest {
                 }
             });
         });
+    }
+
+    @Test
+    public void testTripleTapAndHold_logSessionDuration() {
+        // perform triple tap on spy gesture handler
+        goFromStateIdleTo(STATE_SHOW_MAGNIFIER_TRIPLE_TAP_AND_HOLD);
+
+        // perform up event on spy gesture handler
+        returnToNormalFrom(STATE_SHOW_MAGNIFIER_TRIPLE_TAP_AND_HOLD);
+
+        verify(mMockWindowMagnificationGestureHandler)
+                .logMagnificationTripleTapAndHoldSession(anyLong());
     }
 
     private void forEachState(IntConsumer action) {
@@ -334,5 +353,32 @@ public class WindowMagnificationGestureHandlerTest {
 
     private String stateDump() {
         return "\nCurrent state dump:\n" + mWindowMagnificationGestureHandler.mCurrentState;
+    }
+
+    private static class SpyWindowMagnificationGestureHandler
+            extends WindowMagnificationGestureHandler {
+
+        private final WindowMagnificationGestureHandler mMockWindowMagnificationGestureHandler;
+
+        SpyWindowMagnificationGestureHandler(@UiContext Context context,
+                WindowMagnificationManager windowMagnificationMgr,
+                AccessibilityTraceManager trace,
+                Callback callback,
+                boolean detectTripleTap, boolean detectShortcutTrigger, int displayId) {
+            super(context, windowMagnificationMgr, trace, callback, detectTripleTap,
+                    detectShortcutTrigger, displayId);
+            mMockWindowMagnificationGestureHandler = mock(WindowMagnificationGestureHandler.class);
+        }
+
+        WindowMagnificationGestureHandler getMockGestureHandler() {
+            return mMockWindowMagnificationGestureHandler;
+        }
+
+        @Override
+        void logMagnificationTripleTapAndHoldSession(long duration) {
+            super.logMagnificationTripleTapAndHoldSession(duration);
+            mMockWindowMagnificationGestureHandler
+                    .logMagnificationTripleTapAndHoldSession(duration);
+        }
     }
 }

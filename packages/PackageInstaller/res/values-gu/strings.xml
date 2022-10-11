@@ -53,7 +53,7 @@
     <string name="uninstall_application_title" msgid="4045420072401428123">"ઍપ્લિકેશન અનઇન્સ્ટૉલ કરો"</string>
     <string name="uninstall_update_title" msgid="824411791011583031">"અપડેટ અનઇન્સ્ટૉલ કરો"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g>, નીચેની ઍપ્લિકેશનનો ભાગ છે:"</string>
-    <string name="uninstall_application_text" msgid="3816830743706143980">"શું તમે આ ઍપને અનઇન્સ્ટૉલ કરવા માંગો છો?"</string>
+    <string name="uninstall_application_text" msgid="3816830743706143980">"શું તમે આ ઍપ્લિકેશનને અનઇન્સ્ટૉલ કરવા માંગો છો?"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"શું તમે "<b>"બધા"</b>" વપરાશકર્તાઓ માટે આ ઍપ્લિકેશનને અનઇન્સ્ટૉલ કરવા માગો છો? ડિવાઇસ પરના "<b>"બધા"</b>" વપરાશકર્તાઓની ઍપ્લિકેશન અને તેનો ડેટા કાઢી નાખવામાં આવશે."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"શું તમે <xliff:g id="USERNAME">%1$s</xliff:g> વપરાશકર્તા માટે આ ઍપ્લિકેશનને અનઇન્સ્ટૉલ કરવા માગો છો?"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"શું તમે તમારી ઑફિસની પ્રોફાઇલમાંથી આ ઍપને અનઇન્સ્ટૉલ કરવા માગો છો?"</string>
