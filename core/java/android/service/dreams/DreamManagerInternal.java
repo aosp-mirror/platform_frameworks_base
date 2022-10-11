@@ -29,16 +29,18 @@ public abstract class DreamManagerInternal {
      *
      * @param doze If true, starts the doze dream component if one has been configured,
      * otherwise starts the user-specified dream.
+     * @param reason The reason to start dreaming, which is logged to help debugging.
      */
-    public abstract void startDream(boolean doze);
+    public abstract void startDream(boolean doze, String reason);
 
     /**
      * Called by the power manager to stop a dream.
      *
      * @param immediate If true, ends the dream summarily, otherwise gives it some time
      * to perform a proper exit transition.
+     * @param reason The reason to stop dreaming, which is logged to help debugging.
      */
-    public abstract void stopDream(boolean immediate);
+    public abstract void stopDream(boolean immediate, String reason);
 
     /**
      * Called by the power manager to determine whether a dream is running.

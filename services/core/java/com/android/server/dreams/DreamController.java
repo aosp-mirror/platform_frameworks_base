@@ -118,7 +118,7 @@ final class DreamController {
 
     public void startDream(Binder token, ComponentName name,
             boolean isPreviewMode, boolean canDoze, int userId, PowerManager.WakeLock wakeLock,
-            ComponentName overlayComponentName) {
+            ComponentName overlayComponentName, String reason) {
         stopDream(true /*immediate*/, "starting new dream");
 
         Trace.traceBegin(Trace.TRACE_TAG_POWER, "startDream");
@@ -128,7 +128,7 @@ final class DreamController {
 
             Slog.i(TAG, "Starting dream: name=" + name
                     + ", isPreviewMode=" + isPreviewMode + ", canDoze=" + canDoze
-                    + ", userId=" + userId);
+                    + ", userId=" + userId + ", reason='" + reason + "'");
 
             mCurrentDream = new DreamRecord(token, name, isPreviewMode, canDoze, userId, wakeLock);
 
