@@ -6875,6 +6875,14 @@ public final class Settings {
         @Readable
         public static final String VOICE_INTERACTION_SERVICE = "voice_interaction_service";
 
+
+        /**
+         * The currently selected credential service(s) flattened ComponentName.
+         *
+         * @hide
+         */
+        public static final String CREDENTIAL_SERVICE = "credential_service";
+
         /**
          * The currently selected autofill service flattened ComponentName.
          * @hide
