@@ -17,12 +17,17 @@
 package com.android.server.wm.flicker.launch
 
 import android.platform.test.annotations.Postsubmit
+import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.statusBarLayerPositionAtEnd
+import com.android.server.wm.traces.common.ComponentNameMatcher
 import org.junit.FixMethodOrder
+import org.junit.Ignore
+import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
@@ -49,11 +54,54 @@ open class OpenAppFromNotificationCold(testSpec: FlickerTestParameter) :
             setup {
                 // Close the app that posted the notification to trigger a cold start next time
                 // it is open - can't just kill it because that would remove the notification.
+                tapl.setExpectedRotationCheckEnabled(false)
                 tapl.goHome()
                 tapl.workspace.switchToOverview()
                 tapl.overview.dismissAllTasks()
             }
         }
+
+    @Postsubmit
+    @Test
+    override fun appWindowBecomesVisible() = appWindowBecomesVisible_coldStart()
+
+    @Postsubmit
+    @Test
+    override fun appLayerBecomesVisible() = appLayerBecomesVisible_coldStart()
+
+    /** {@inheritDoc} */
+    @Test
+    @Ignore("Not applicable to this CUJ. Display starts locked and app is full screen at the end")
+    override fun navBarLayerPositionAtStartAndEnd() {}
+
+    /** {@inheritDoc} */
+    @Test
+    @Ignore("Not applicable to this CUJ. Display starts off and app is full screen at the end")
+    override fun statusBarLayerPositionAtStartAndEnd() {}
+
+    /** {@inheritDoc} */
+    @Test
+    @Ignore("Not applicable to this CUJ. Display starts off and app is full screen at the end")
+    override fun statusBarLayerIsVisibleAtStartAndEnd() =
+        super.statusBarLayerIsVisibleAtStartAndEnd()
+
+    /**
+     * Checks the position of the [ComponentNameMatcher.STATUS_BAR] at the start and end of the
+     * transition
+     */
+    @Presubmit
+    @Test
+    open fun statusBarLayerPositionAtEnd() = testSpec.statusBarLayerPositionAtEnd()
+
+    /** {@inheritDoc} */
+    @Test
+    @Ignore("Not applicable to this CUJ. Display starts locked and app is full screen at the end")
+    override fun navBarLayerIsVisibleAtStartAndEnd() = super.navBarLayerIsVisibleAtStartAndEnd()
+
+    /** {@inheritDoc} */
+    @Test
+    @Ignore("Not applicable to this CUJ. Display starts locked and app is full screen at the end")
+    override fun navBarWindowIsAlwaysVisible() {}
 
     companion object {
         /**
