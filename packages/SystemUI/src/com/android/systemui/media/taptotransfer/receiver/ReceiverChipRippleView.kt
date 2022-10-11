@@ -18,6 +18,7 @@ package com.android.systemui.media.taptotransfer.receiver
 
 import android.content.Context
 import android.util.AttributeSet
+import com.android.systemui.ripple.RippleShader
 import com.android.systemui.ripple.RippleView
 
 /**
@@ -25,9 +26,9 @@ import com.android.systemui.ripple.RippleView
  */
 class ReceiverChipRippleView(context: Context?, attrs: AttributeSet?) : RippleView(context, attrs) {
     init {
-        // TODO: use RippleShape#ELLIPSE when calling setupShader.
-        setupShader()
+        setupShader(RippleShader.RippleShape.ELLIPSE)
         setRippleFill(true)
+        setSparkleStrength(0f)
         duration = 3000L
     }
 }
