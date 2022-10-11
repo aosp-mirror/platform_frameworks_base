@@ -1068,7 +1068,7 @@ base::expected<const ResolvedBag*, NullOrIOError> AssetManager2::ResolveBag(
 base::expected<const ResolvedBag*, NullOrIOError> AssetManager2::GetBag(uint32_t resid) const {
   std::vector<uint32_t> found_resids;
   const auto bag = GetBag(resid, found_resids);
-  cached_bag_resid_stacks_.emplace(resid, found_resids);
+  cached_bag_resid_stacks_.emplace(resid, std::move(found_resids));
   return bag;
 }
 
@@ -1468,7 +1468,6 @@ base::expected<std::monostate, NullOrIOError> Theme::ApplyStyle(uint32_t resid, 
       continue;
     }
 
-    Theme::Entry new_entry{attr_res_id, it->cookie, (*bag)->type_spec_flags, it->value};
     auto entry_it = std::lower_bound(entries_.begin(), entries_.end(), attr_res_id,
                                      ThemeEntryKeyComparer{});
     if (entry_it != entries_.end() && entry_it->attr_res_id == attr_res_id) {
@@ -1477,10 +1476,10 @@ base::expected<std::monostate, NullOrIOError> Theme::ApplyStyle(uint32_t resid, 
         /// true.
         entries_.erase(entry_it);
       } else if (force) {
-        *entry_it = new_entry;
+        *entry_it = Entry{attr_res_id, it->cookie, (*bag)->type_spec_flags, it->value};
       }
     } else {
-      entries_.insert(entry_it, new_entry);
+      entries_.insert(entry_it, Entry{attr_res_id, it->cookie, (*bag)->type_spec_flags, it->value});
     }
   }
   return {};
