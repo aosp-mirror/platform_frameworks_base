@@ -306,6 +306,10 @@ public class Flags {
     // 1500 - chooser
     public static final UnreleasedFlag CHOOSER_UNBUNDLED = new UnreleasedFlag(1500);
 
+    // 1600 - accessibility
+    public static final UnreleasedFlag A11Y_FLOATING_MENU_FLING_SPRING_ANIMATIONS =
+            new UnreleasedFlag(1600);
+
     // Pay no attention to the reflection behind the curtain.
     // ========================== Curtain ==========================
     // |                                                           |
