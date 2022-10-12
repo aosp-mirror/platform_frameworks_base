@@ -16,12 +16,10 @@
 
 package com.android.systemui.temporarydisplay.chipbar
 
-import android.app.StatusBarManager
 import android.content.Context
 import android.graphics.Rect
 import android.media.MediaRoute2Info
 import android.os.PowerManager
-import android.util.Log
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
@@ -38,7 +36,6 @@ import com.android.systemui.animation.ViewHierarchyAnimator
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.media.taptotransfer.MediaTttFlags
 import com.android.systemui.media.taptotransfer.common.MediaTttLogger
 import com.android.systemui.media.taptotransfer.common.MediaTttUtils
 import com.android.systemui.media.taptotransfer.sender.ChipStateSender
@@ -46,7 +43,6 @@ import com.android.systemui.media.taptotransfer.sender.MediaTttSenderLogger
 import com.android.systemui.media.taptotransfer.sender.MediaTttSenderUiEventLogger
 import com.android.systemui.media.taptotransfer.sender.TransferStatus
 import com.android.systemui.plugins.FalsingManager
-import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.temporarydisplay.TemporaryDisplayRemovalReason
 import com.android.systemui.temporarydisplay.TemporaryViewDisplayController
@@ -76,7 +72,6 @@ import javax.inject.Inject
  */
 @SysUISingleton
 open class ChipbarCoordinator @Inject constructor(
-        private val commandQueue: CommandQueue,
         context: Context,
         @MediaTttSenderLogger logger: MediaTttLogger,
         windowManager: WindowManager,
@@ -87,7 +82,6 @@ open class ChipbarCoordinator @Inject constructor(
         private val uiEventLogger: MediaTttSenderUiEventLogger,
         private val falsingManager: FalsingManager,
         private val falsingCollector: FalsingCollector,
-        private val mediaTttFlags: MediaTttFlags,
         private val viewUtil: ViewUtil,
 ) : TemporaryViewDisplayController<ChipSenderInfo, MediaTttLogger>(
         context,
@@ -108,50 +102,14 @@ open class ChipbarCoordinator @Inject constructor(
         gravity = Gravity.TOP.or(Gravity.CENTER_HORIZONTAL)
     }
 
-    private val commandQueueCallbacks = object : CommandQueue.Callbacks {
-        override fun updateMediaTapToTransferSenderDisplay(
-                @StatusBarManager.MediaTransferSenderState displayState: Int,
-                routeInfo: MediaRoute2Info,
-                undoCallback: IUndoMediaTransferCallback?
-        ) {
-            this@ChipbarCoordinator.updateMediaTapToTransferSenderDisplay(
-                displayState, routeInfo, undoCallback
-            )
-        }
-    }
-
-    private fun updateMediaTapToTransferSenderDisplay(
-        @StatusBarManager.MediaTransferSenderState displayState: Int,
-        routeInfo: MediaRoute2Info,
-        undoCallback: IUndoMediaTransferCallback?
-    ) {
-        val chipState: ChipStateSender? = ChipStateSender.getSenderStateFromId(displayState)
-        val stateName = chipState?.name ?: "Invalid"
-        logger.logStateChange(stateName, routeInfo.id, routeInfo.clientPackageName)
-
-        if (chipState == null) {
-            Log.e(SENDER_TAG, "Unhandled MediaTransferSenderState $displayState")
-            return
-        }
-        uiEventLogger.logSenderStateChange(chipState)
-
-        if (chipState == ChipStateSender.FAR_FROM_RECEIVER) {
-            removeView(removalReason = ChipStateSender.FAR_FROM_RECEIVER.name)
-        } else {
-            displayView(ChipSenderInfo(chipState, routeInfo, undoCallback))
-        }
-    }
-
-    override fun start() {
-        if (mediaTttFlags.isMediaTttEnabled()) {
-            commandQueue.addCallback(commandQueueCallbacks)
-        }
-    }
+    override fun start() {}
 
     override fun updateView(
         newInfo: ChipSenderInfo,
         currentView: ViewGroup
     ) {
+        // TODO(b/245610654): Adding logging here.
+
         val chipState = newInfo.state
 
         // Detect falsing touches on the chip.

@@ -53,6 +53,8 @@ import javax.inject.Inject
  * A controller to display and hide the Media Tap-To-Transfer chip on the **receiving** device.
  *
  * This chip is shown when a user is transferring media to/from a sending device and this device.
+ *
+ * TODO(b/245610654): Re-name this to be MediaTttReceiverCoordinator.
  */
 @SysUISingleton
 class MediaTttChipControllerReceiver @Inject constructor(
@@ -120,7 +122,7 @@ class MediaTttChipControllerReceiver @Inject constructor(
         uiEventLogger.logReceiverStateChange(chipState)
 
         if (chipState == ChipStateReceiver.FAR_FROM_SENDER) {
-            removeView(removalReason = ChipStateReceiver.FAR_FROM_SENDER::class.simpleName!!)
+            removeView(removalReason = ChipStateReceiver.FAR_FROM_SENDER.name)
             return
         }
         if (appIcon == null) {
