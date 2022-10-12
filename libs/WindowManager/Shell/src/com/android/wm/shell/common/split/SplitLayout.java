@@ -118,6 +118,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     private boolean mFreezeDividerWindow = false;
     private int mOrientation;
     private int mRotation;
+    private int mDensity;
 
     private final boolean mDimNonImeSide;
 
@@ -290,9 +291,11 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         final int rotation = configuration.windowConfiguration.getRotation();
         final Rect rootBounds = configuration.windowConfiguration.getBounds();
         final int orientation = configuration.orientation;
+        final int density = configuration.densityDpi;
 
         if (mOrientation == orientation
                 && mRotation == rotation
+                && mDensity == density
                 && mRootBounds.equals(rootBounds)) {
             return false;
         }
@@ -303,6 +306,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         mTempRect.set(mRootBounds);
         mRootBounds.set(rootBounds);
         mRotation = rotation;
+        mDensity = density;
         mDividerSnapAlgorithm = getSnapAlgorithm(mContext, mRootBounds, null);
         initDividerPosition(mTempRect);
         updateInvisibleRect();
