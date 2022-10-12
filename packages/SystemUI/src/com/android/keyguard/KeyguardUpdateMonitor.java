@@ -2347,7 +2347,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      */
     public void requestFaceAuth(boolean userInitiatedRequest,
             @FaceAuthApiRequestReason String reason) {
-        mLogger.logFaceAuthRequested(userInitiatedRequest);
+        mLogger.logFaceAuthRequested(userInitiatedRequest, reason);
         updateFaceListeningState(BIOMETRIC_ACTION_START, apiRequestReasonToUiEvent(reason));
     }
 
