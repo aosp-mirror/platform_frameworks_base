@@ -44,7 +44,8 @@ import java.io.PrintWriter;
 import javax.inject.Inject;
 
 /**
- * A global state to track all input states for the algorithm.
+ * Global state to track all input states for
+ * {@link com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm}.
  */
 @SysUISingleton
 public class AmbientState implements Dumpable {
