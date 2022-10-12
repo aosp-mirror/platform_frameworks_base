@@ -19,12 +19,12 @@
 <com.android.systemui.temporarydisplay.chipbar.ChipbarRootView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
-    android:id="@+id/media_ttt_sender_chip"
+    android:id="@+id/chipbar_root_view"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content">
 
     <LinearLayout
-        android:id="@+id/media_ttt_sender_chip_inner"
+        android:id="@+id/chipbar_inner"
         android:orientation="horizontal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -39,7 +39,7 @@
         >
 
         <com.android.internal.widget.CachingIconView
-            android:id="@+id/app_icon"
+            android:id="@+id/start_icon"
             android:layout_width="@dimen/media_ttt_app_icon_size"
             android:layout_height="@dimen/media_ttt_app_icon_size"
             android:layout_marginEnd="12dp"
@@ -69,7 +69,7 @@
             />
 
         <ImageView
-            android:id="@+id/failure_icon"
+            android:id="@+id/error"
             android:layout_width="@dimen/media_ttt_status_icon_size"
             android:layout_height="@dimen/media_ttt_status_icon_size"
             android:layout_marginStart="@dimen/media_ttt_last_item_start_margin"
@@ -78,11 +78,11 @@
             android:alpha="0.0"
             />
 
+        <!-- TODO(b/245610654): Re-name all the media-specific dimens to chipbar dimens instead. -->
         <TextView
-            android:id="@+id/undo"
+            android:id="@+id/end_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/media_transfer_undo"
             android:textColor="?androidprv:attr/textColorOnAccent"
             android:layout_marginStart="@dimen/media_ttt_last_item_start_margin"
             android:textSize="@dimen/media_ttt_text_size"

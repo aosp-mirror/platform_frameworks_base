@@ -18,7 +18,6 @@ package com.android.systemui.temporarydisplay.chipbar
 
 import android.content.Context
 import android.graphics.Rect
-import android.media.MediaRoute2Info
 import android.os.PowerManager
 import android.view.Gravity
 import android.view.MotionEvent
@@ -27,25 +26,24 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
 import android.widget.TextView
-import com.android.internal.statusbar.IUndoMediaTransferCallback
 import com.android.internal.widget.CachingIconView
 import com.android.systemui.Gefingerpoken
 import com.android.systemui.R
 import com.android.systemui.animation.Interpolators
 import com.android.systemui.animation.ViewHierarchyAnimator
 import com.android.systemui.classifier.FalsingCollector
+import com.android.systemui.common.shared.model.ContentDescription.Companion.loadContentDescription
+import com.android.systemui.common.shared.model.Text.Companion.loadText
+import com.android.systemui.common.ui.binder.IconViewBinder
+import com.android.systemui.common.ui.binder.TextViewBinder
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.media.taptotransfer.common.MediaTttLogger
 import com.android.systemui.media.taptotransfer.common.MediaTttUtils
-import com.android.systemui.media.taptotransfer.sender.ChipStateSender
 import com.android.systemui.media.taptotransfer.sender.MediaTttSenderLogger
-import com.android.systemui.media.taptotransfer.sender.MediaTttSenderUiEventLogger
-import com.android.systemui.media.taptotransfer.sender.TransferStatus
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.temporarydisplay.TemporaryViewDisplayController
-import com.android.systemui.temporarydisplay.TemporaryViewInfo
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.view.ViewUtil
 import javax.inject.Inject
@@ -78,11 +76,10 @@ open class ChipbarCoordinator @Inject constructor(
         accessibilityManager: AccessibilityManager,
         configurationController: ConfigurationController,
         powerManager: PowerManager,
-        private val uiEventLogger: MediaTttSenderUiEventLogger,
         private val falsingManager: FalsingManager,
         private val falsingCollector: FalsingCollector,
         private val viewUtil: ViewUtil,
-) : TemporaryViewDisplayController<ChipSenderInfo, MediaTttLogger>(
+) : TemporaryViewDisplayController<ChipbarInfo, MediaTttLogger>(
         context,
         logger,
         windowManager,
@@ -104,15 +101,13 @@ open class ChipbarCoordinator @Inject constructor(
     override fun start() {}
 
     override fun updateView(
-        newInfo: ChipSenderInfo,
+        newInfo: ChipbarInfo,
         currentView: ViewGroup
     ) {
         // TODO(b/245610654): Adding logging here.
 
-        val chipState = newInfo.state
-
         // Detect falsing touches on the chip.
-        parent = currentView.requireViewById(R.id.media_ttt_sender_chip)
+        parent = currentView.requireViewById(R.id.chipbar_root_view)
         parent.touchHandler = object : Gefingerpoken {
             override fun onTouchEvent(ev: MotionEvent?): Boolean {
                 falsingCollector.onTouchEvent(ev)
@@ -120,47 +115,49 @@ open class ChipbarCoordinator @Inject constructor(
             }
         }
 
-        // App icon
-        val iconInfo = MediaTttUtils.getIconInfoFromPackageName(
-            context, newInfo.routeInfo.clientPackageName, logger
-        )
-        val iconView = currentView.requireViewById<CachingIconView>(R.id.app_icon)
-        iconView.setImageDrawable(iconInfo.drawable)
-        iconView.contentDescription = iconInfo.contentDescription
+        // ---- Start icon ----
+        val iconView = currentView.requireViewById<CachingIconView>(R.id.start_icon)
+        IconViewBinder.bind(newInfo.startIcon, iconView)
 
-        // Text
-        val otherDeviceName = newInfo.routeInfo.name.toString()
-        val chipText = chipState.getChipTextString(context, otherDeviceName)
-        currentView.requireViewById<TextView>(R.id.text).text = chipText
+        // ---- Text ----
+        val textView = currentView.requireViewById<TextView>(R.id.text)
+        TextViewBinder.bind(textView, newInfo.text)
 
+        // ---- End item ----
         // Loading
         currentView.requireViewById<View>(R.id.loading).visibility =
-            (chipState.transferStatus == TransferStatus.IN_PROGRESS).visibleIfTrue()
+            (newInfo.endItem == ChipbarEndItem.Loading).visibleIfTrue()
 
-        // Undo
-        val undoView = currentView.requireViewById<View>(R.id.undo)
-        val undoClickListener = chipState.undoClickListener(
-                this,
-                newInfo.routeInfo,
-                newInfo.undoCallback,
-                uiEventLogger,
-                falsingManager,
-        )
-        undoView.setOnClickListener(undoClickListener)
-        undoView.visibility = (undoClickListener != null).visibleIfTrue()
+        // Error
+        currentView.requireViewById<View>(R.id.error).visibility =
+            (newInfo.endItem == ChipbarEndItem.Error).visibleIfTrue()
 
-        // Failure
-        currentView.requireViewById<View>(R.id.failure_icon).visibility =
-            (chipState.transferStatus == TransferStatus.FAILED).visibleIfTrue()
+        // Button
+        val buttonView = currentView.requireViewById<TextView>(R.id.end_button)
+        if (newInfo.endItem is ChipbarEndItem.Button) {
+            TextViewBinder.bind(buttonView, newInfo.endItem.text)
 
-        // For accessibility
+            val onClickListener = View.OnClickListener { clickedView ->
+                if (falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) return@OnClickListener
+                newInfo.endItem.onClickListener.onClick(clickedView)
+            }
+
+            buttonView.setOnClickListener(onClickListener)
+            buttonView.visibility = View.VISIBLE
+        } else {
+            buttonView.visibility = View.GONE
+        }
+
+        // ---- Overall accessibility ----
         currentView.requireViewById<ViewGroup>(
-                R.id.media_ttt_sender_chip_inner
-        ).contentDescription = "${iconInfo.contentDescription} $chipText"
+                R.id.chipbar_inner
+        ).contentDescription =
+            "${newInfo.startIcon.contentDescription.loadContentDescription(context)} " +
+                "${newInfo.text.loadText(context)}"
     }
 
     override fun animateViewIn(view: ViewGroup) {
-        val chipInnerView = view.requireViewById<ViewGroup>(R.id.media_ttt_sender_chip_inner)
+        val chipInnerView = view.requireViewById<ViewGroup>(R.id.chipbar_inner)
         ViewHierarchyAnimator.animateAddition(
             chipInnerView,
             ViewHierarchyAnimator.Hotspot.TOP,
@@ -175,7 +172,7 @@ open class ChipbarCoordinator @Inject constructor(
 
     override fun animateViewOut(view: ViewGroup, onAnimationEnd: Runnable) {
         ViewHierarchyAnimator.animateRemoval(
-            view.requireViewById<ViewGroup>(R.id.media_ttt_sender_chip_inner),
+            view.requireViewById<ViewGroup>(R.id.chipbar_inner),
             ViewHierarchyAnimator.Hotspot.TOP,
             Interpolators.EMPHASIZED_ACCELERATE,
             ANIMATION_DURATION,
@@ -195,14 +192,6 @@ open class ChipbarCoordinator @Inject constructor(
             View.GONE
         }
     }
-}
-
-data class ChipSenderInfo(
-    val state: ChipStateSender,
-    val routeInfo: MediaRoute2Info,
-    val undoCallback: IUndoMediaTransferCallback? = null
-) : TemporaryViewInfo {
-    override fun getTimeoutMs() = state.timeout
 }
 
 const val SENDER_TAG = "MediaTapToTransferSender"
