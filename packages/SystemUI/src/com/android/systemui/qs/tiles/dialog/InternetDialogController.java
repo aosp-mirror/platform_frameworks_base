@@ -197,7 +197,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
             };
 
     protected List<SubscriptionInfo> getSubscriptionInfo() {
-        return mKeyguardUpdateMonitor.getFilteredSubscriptionInfo(false);
+        return mKeyguardUpdateMonitor.getFilteredSubscriptionInfo();
     }
 
     @Inject
