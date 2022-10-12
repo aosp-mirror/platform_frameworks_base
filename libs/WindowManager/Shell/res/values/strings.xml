@@ -198,4 +198,8 @@
      <string name="minimize_button_text">Minimize</string>
     <!-- Accessibility text for the close window button [CHAR LIMIT=NONE] -->
     <string name="close_button_text">Close</string>
+    <!-- Accessibility text for the caption back button [CHAR LIMIT=NONE] -->
+    <string name="back_button_text">Back</string>
+    <!-- Accessibility text for the caption handle [CHAR LIMIT=NONE] -->
+    <string name="handle_text">Handle</string>
 </resources>

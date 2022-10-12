@@ -17,6 +17,9 @@
 package com.android.server.timezonedetector;
 
 import android.annotation.NonNull;
+import android.app.time.TimeZoneCapabilitiesAndConfig;
+import android.app.time.TimeZoneConfiguration;
+import android.app.timezonedetector.ManualTimeZoneSuggestion;
 import android.content.Context;
 import android.os.Handler;
 
@@ -31,13 +34,49 @@ public final class TimeZoneDetectorInternalImpl implements TimeZoneDetectorInter
 
     @NonNull private final Context mContext;
     @NonNull private final Handler mHandler;
+    @NonNull private final CurrentUserIdentityInjector mCurrentUserIdentityInjector;
+    @NonNull private final ServiceConfigAccessor mServiceConfigAccessor;
     @NonNull private final TimeZoneDetectorStrategy mTimeZoneDetectorStrategy;
 
     public TimeZoneDetectorInternalImpl(@NonNull Context context, @NonNull Handler handler,
+            @NonNull CurrentUserIdentityInjector currentUserIdentityInjector,
+            @NonNull ServiceConfigAccessor serviceConfigAccessor,
             @NonNull TimeZoneDetectorStrategy timeZoneDetectorStrategy) {
         mContext = Objects.requireNonNull(context);
         mHandler = Objects.requireNonNull(handler);
+        mCurrentUserIdentityInjector = Objects.requireNonNull(currentUserIdentityInjector);
+        mServiceConfigAccessor = Objects.requireNonNull(serviceConfigAccessor);
         mTimeZoneDetectorStrategy = Objects.requireNonNull(timeZoneDetectorStrategy);
+    }
+
+    @Override
+    @NonNull
+    public TimeZoneCapabilitiesAndConfig getCapabilitiesAndConfigForDpm() {
+        int currentUserId = mCurrentUserIdentityInjector.getCurrentUserId();
+        ConfigurationInternal configurationInternal =
+                mServiceConfigAccessor.getConfigurationInternal(currentUserId);
+        final boolean bypassUserPolicyChecks = true;
+        return configurationInternal.createCapabilitiesAndConfig(bypassUserPolicyChecks);
+    }
+
+    @Override
+    public boolean updateConfigurationForDpm(@NonNull TimeZoneConfiguration configuration) {
+        Objects.requireNonNull(configuration);
+
+        int currentUserId = mCurrentUserIdentityInjector.getCurrentUserId();
+        final boolean bypassUserPolicyChecks = true;
+        return mServiceConfigAccessor.updateConfiguration(
+                currentUserId, configuration, bypassUserPolicyChecks);
+    }
+
+    @Override
+    public boolean setManualTimeZoneForDpm(@NonNull ManualTimeZoneSuggestion timeZoneSuggestion) {
+        Objects.requireNonNull(timeZoneSuggestion);
+
+        int currentUserId = mCurrentUserIdentityInjector.getCurrentUserId();
+        final boolean bypassUserPolicyChecks = true;
+        return mTimeZoneDetectorStrategy.suggestManualTimeZone(
+                currentUserId, timeZoneSuggestion, bypassUserPolicyChecks);
     }
 
     @Override

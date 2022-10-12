@@ -64,6 +64,7 @@ import com.android.server.LocalServices;
 import com.android.server.pm.parsing.pkg.PackageImpl;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.permission.LegacyPermissionDataProvider;
+import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageUserState;
 import com.android.server.pm.pkg.PackageUserStateInternal;
 import com.android.server.pm.pkg.SuspendParams;
@@ -657,6 +658,7 @@ public class PackageManagerSettingsTests {
                 null /*usesStaticLibrariesVersions*/,
                 null /*mimeGroups*/,
                 UUID.randomUUID());
+        origPkgSetting01.setPkg(mockAndroidPackage(origPkgSetting01));
         final PackageSetting testPkgSetting01 = new PackageSetting(origPkgSetting01);
         verifySettingCopy(origPkgSetting01, testPkgSetting01);
     }
@@ -698,6 +700,7 @@ public class PackageManagerSettingsTests {
                 .build();
         origPkgSetting01.modifyUserState(0).putSuspendParams("suspendingPackage1",
                 new SuspendParams(dialogInfo1, appExtras1, launcherExtras1));
+        origPkgSetting01.setPkg(mockAndroidPackage(origPkgSetting01));
         final PackageSetting testPkgSetting01 = new PackageSetting(
                 PACKAGE_NAME /*pkgName*/,
                 REAL_PACKAGE_NAME /*realPkgName*/,
@@ -718,6 +721,8 @@ public class PackageManagerSettingsTests {
                 UUID.randomUUID());
         testPkgSetting01.copyPackageSetting(origPkgSetting01, true);
         verifySettingCopy(origPkgSetting01, testPkgSetting01);
+        verifyUserStatesCopy(origPkgSetting01.readUserState(0),
+                origPkgSetting01.getStateForUser(UserHandle.of(0)));
         verifyUserStatesCopy(origPkgSetting01.readUserState(0),
                 testPkgSetting01.readUserState(0));
     }
@@ -749,7 +754,9 @@ public class PackageManagerSettingsTests {
                 null /*usesStaticLibrariesVersions*/,
                 null /*mimeGroups*/,
                 UUID.randomUUID());
+        assertThat(testPkgSetting01.getPrimaryCpuAbi(), is("arm64-v8a"));
         assertThat(testPkgSetting01.getPrimaryCpuAbiLegacy(), is("arm64-v8a"));
+        assertThat(testPkgSetting01.getSecondaryCpuAbi(), is("armeabi"));
         assertThat(testPkgSetting01.getSecondaryCpuAbiLegacy(), is("armeabi"));
         assertThat(testPkgSetting01.getFlags(), is(0));
         assertThat(testPkgSetting01.getPrivateFlags(), is(0));
@@ -785,10 +792,14 @@ public class PackageManagerSettingsTests {
                 null /*usesStaticLibrariesVersions*/,
                 null /*mimeGroups*/,
                 UUID.randomUUID());
+        assertThat(testPkgSetting01.getPrimaryCpuAbi(), is("arm64-v8a"));
         assertThat(testPkgSetting01.getPrimaryCpuAbiLegacy(), is("arm64-v8a"));
+        assertThat(testPkgSetting01.getSecondaryCpuAbi(), is("armeabi"));
         assertThat(testPkgSetting01.getSecondaryCpuAbiLegacy(), is("armeabi"));
         assertThat(testPkgSetting01.getFlags(), is(ApplicationInfo.FLAG_SYSTEM));
+        assertThat(testPkgSetting01.isSystem(), is(true));
         assertThat(testPkgSetting01.getPrivateFlags(), is(ApplicationInfo.PRIVATE_FLAG_PRIVILEGED));
+        assertThat(testPkgSetting01.isPrivileged(), is(true));
         final PackageUserState userState = testPkgSetting01.readUserState(0);
         verifyUserState(userState,  false /*notLaunched*/,
                 false /*stopped*/, true /*installed*/);
@@ -859,8 +870,12 @@ public class PackageManagerSettingsTests {
         assertThat(testPkgSetting01.getPath(), is(UPDATED_CODE_PATH));
         assertThat(testPkgSetting01.getPackageName(), is(PACKAGE_NAME));
         assertThat(testPkgSetting01.getFlags(), is(ApplicationInfo.FLAG_SYSTEM));
+        assertThat(testPkgSetting01.isSystem(), is(true));
         assertThat(testPkgSetting01.getPrivateFlags(), is(ApplicationInfo.PRIVATE_FLAG_PRIVILEGED));
+        assertThat(testPkgSetting01.isPrivileged(), is(true));
+        assertThat(testPkgSetting01.getPrimaryCpuAbi(), is("arm64-v8a"));
         assertThat(testPkgSetting01.getPrimaryCpuAbiLegacy(), is("arm64-v8a"));
+        assertThat(testPkgSetting01.getSecondaryCpuAbi(), is("armeabi"));
         assertThat(testPkgSetting01.getSecondaryCpuAbiLegacy(), is("armeabi"));
         // signatures object must be different
         assertNotSame(testPkgSetting01.getSignatures(), originalSignatures);
@@ -901,6 +916,7 @@ public class PackageManagerSettingsTests {
         assertThat(testPkgSetting01.getPackageName(), is(PACKAGE_NAME));
         assertThat(testPkgSetting01.getFlags(), is(0));
         assertThat(testPkgSetting01.getPrivateFlags(), is(0));
+        assertThat(testPkgSetting01.getPrimaryCpuAbi(), is("x86_64"));
         assertThat(testPkgSetting01.getPrimaryCpuAbiLegacy(), is("x86_64"));
         assertThat(testPkgSetting01.getSecondaryCpuAbiLegacy(), is("x86"));
         assertThat(testPkgSetting01.getVersionCode(), is(INITIAL_VERSION_CODE));
@@ -944,7 +960,9 @@ public class PackageManagerSettingsTests {
         assertThat(testPkgSetting01.getPackageName(), is(PACKAGE_NAME));
         assertThat(testPkgSetting01.getFlags(), is(0));
         assertThat(testPkgSetting01.getPrivateFlags(), is(0));
+        assertThat(testPkgSetting01.getPrimaryCpuAbi(), is("x86_64"));
         assertThat(testPkgSetting01.getPrimaryCpuAbiLegacy(), is("x86_64"));
+        assertThat(testPkgSetting01.getSecondaryCpuAbi(), is("x86"));
         assertThat(testPkgSetting01.getSecondaryCpuAbiLegacy(), is("x86"));
         assertThat(testPkgSetting01.getVersionCode(), is(INITIAL_VERSION_CODE));
         final PackageUserState userState = testPkgSetting01.readUserState(0);
@@ -987,7 +1005,9 @@ public class PackageManagerSettingsTests {
         assertThat(testPkgSetting01.getPackageName(), is(PACKAGE_NAME));
         assertThat(testPkgSetting01.getFlags(), is(0));
         assertThat(testPkgSetting01.getPrivateFlags(), is(0));
+        assertThat(testPkgSetting01.getPrimaryCpuAbi(), is("arm64-v8a"));
         assertThat(testPkgSetting01.getPrimaryCpuAbiLegacy(), is("arm64-v8a"));
+        assertThat(testPkgSetting01.getSecondaryCpuAbi(), is("armeabi"));
         assertThat(testPkgSetting01.getSecondaryCpuAbiLegacy(), is("armeabi"));
         assertNotSame(testPkgSetting01.getSignatures(), disabledSignatures);
         assertThat(testPkgSetting01.getVersionCode(), is(UPDATED_VERSION_CODE));
@@ -1207,13 +1227,20 @@ public class PackageManagerSettingsTests {
         // assertNotSame(origPkgSetting.mOldCodePaths, testPkgSetting.mOldCodePaths);
         // assertThat(origPkgSetting.mOldCodePaths, is(not(testPkgSetting.mOldCodePaths)));
         assertSame(origPkgSetting.getPkg(), testPkgSetting.getPkg());
+        assertSame(origPkgSetting.getAndroidPackage(), origPkgSetting.getPkg());
+        assertThat(origPkgSetting.getAndroidPackage().getPackageName(),
+                is(origPkgSetting.getPackageName()));
         // No equals() method for this object
         // assertThat(origPkgSetting.pkg, is(testPkgSetting.pkg));
         assertThat(origPkgSetting.getFlags(), is(testPkgSetting.getFlags()));
         assertThat(origPkgSetting.getPrivateFlags(), is(testPkgSetting.getPrivateFlags()));
+        assertSame(origPkgSetting.getPrimaryCpuAbi(), testPkgSetting.getPrimaryCpuAbi());
+        assertThat(origPkgSetting.getPrimaryCpuAbi(), is(testPkgSetting.getPrimaryCpuAbi()));
         assertSame(origPkgSetting.getPrimaryCpuAbiLegacy(), testPkgSetting.getPrimaryCpuAbiLegacy());
         assertThat(origPkgSetting.getPrimaryCpuAbiLegacy(), is(testPkgSetting.getPrimaryCpuAbiLegacy()));
         assertThat(origPkgSetting.getRealName(), is(testPkgSetting.getRealName()));
+        assertSame(origPkgSetting.getSecondaryCpuAbi(), testPkgSetting.getSecondaryCpuAbi());
+        assertThat(origPkgSetting.getSecondaryCpuAbi(), is(testPkgSetting.getSecondaryCpuAbi()));
         assertSame(origPkgSetting.getSecondaryCpuAbiLegacy(), testPkgSetting.getSecondaryCpuAbiLegacy());
         assertThat(origPkgSetting.getSecondaryCpuAbiLegacy(), is(testPkgSetting.getSecondaryCpuAbiLegacy()));
         assertSame(origPkgSetting.getSignatures(), testPkgSetting.getSignatures());
@@ -1241,6 +1268,11 @@ public class PackageManagerSettingsTests {
                 origSuspendParams.getAppExtras(), testSuspendParams.getAppExtras()), is(true));
         assertThat(BaseBundle.kindofEquals(origSuspendParams.getLauncherExtras(),
                 testSuspendParams.getLauncherExtras()), is(true));
+    }
+
+    private void verifyUserStatesCopy(PackageUserState origPus,
+            PackageUserState testPus) {
+        assertThat(userStateEquals(origPus, testPus), is(true));
         // Verify that disabledComponents and enabledComponents are copied
         assertThat(origPus.getDisabledComponents(), is(notNullValue()));
         assertThat(origPus.getDisabledComponents().equals(testPus.getDisabledComponents()),
@@ -1572,5 +1604,10 @@ public class PackageManagerSettingsTests {
         assertThat(ps.getKeySetData().getAliases().get("C"), is(3L));
         assertThat(ps.getKeySetData().getUpgradeKeySets().length, is(1));
         assertThat(ps.getKeySetData().getUpgradeKeySets()[0], is(3L));
+    }
+
+    @NonNull
+    private AndroidPackage mockAndroidPackage(PackageSetting pkgSetting) {
+        return PackageImpl.forTesting(pkgSetting.getPackageName()).hideAsParsed().hideAsFinal();
     }
 }

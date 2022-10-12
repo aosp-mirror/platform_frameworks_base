@@ -1960,7 +1960,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"Nepavyksta pasiekti nuotolinio įrenginio iš jūsų „<xliff:g id="DEVICE">%1$s</xliff:g>“. Pabandykite naudoti „Android TV“ įrenginį."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"Nepavyksta pasiekti nuotolinio įrenginio iš jūsų „<xliff:g id="DEVICE">%1$s</xliff:g>“. Pabandykite naudoti planšetinį kompiuterį."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Nepavyksta pasiekti nuotolinio įrenginio iš jūsų „<xliff:g id="DEVICE">%1$s</xliff:g>“. Pabandykite naudoti telefoną."</string>
-    <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Ši programa sukurta naudoti senesnės versijos sistemoje „Android“ ir gali tinkamai neveikti. Pabandykite patikrinti, ar yra naujinių, arba susisiekite su kūrėju."</string>
+    <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Ši programa sukurta senesnės versijos „Android“. Ji gali tinkamai neveikti ir joje nėra naujausių saugos ir privatumo apsaugos priemonių. Patikrinkite, ar yra naujinių, arba susisiekite su programos kūrėju."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Tikrinti, ar yra naujinių"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Turite naujų pranešimų"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Atidaryti SMS programą, norint peržiūrėti"</string>
@@ -2053,8 +2053,7 @@
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Leisti vienkartinę prieigą"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Neleisti"</string>
     <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"Įrenginyje įrašoma, kas įvyksta jūsų įrenginyje. Programos gali naudoti šiuos žurnalus, kad surastų ir išspręstų problemas.\n\nKai kuriuose žurnaluose gali būti neskelbtinos informacijos, todėl visus įrenginio žurnalus leiskite pasiekti tik programoms, kuriomis pasitikite. \n\nJei neleisite šiai programai pasiekti visų įrenginio žurnalų, ji vis tiek galės pasiekti savo žurnalus. Įrenginio gamintojui vis tiek gali būti leidžiama pasiekti tam tikrus žurnalus ar informaciją jūsų įrenginyje."</string>
-    <!-- no translation found for log_access_confirmation_body (7379536536425265262) -->
-    <skip />
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"Įrenginyje įrašoma, kas jame įvyksta. Programos gali naudoti šiuos žurnalus, kai reikia surasti ir išspręsti problemas.\n\nKai kuriuose žurnaluose gali būti neskelbtinos informacijos, todėl visus įrenginio žurnalus leiskite pasiekti tik programoms, kuriomis pasitikite. \n\nJei neleisite šiai programai pasiekti visų įrenginio žurnalų, ji vis tiek galės pasiekti savo žurnalus. Įrenginio gamintojui vis tiek gali būti leidžiama pasiekti tam tikrus žurnalus ar informaciją jūsų įrenginyje.\n\nSužinokite daugiau adresu g.co/android/devicelogs."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Daugiau neberodyti"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"„<xliff:g id="APP_0">%1$s</xliff:g>“ nori rodyti „<xliff:g id="APP_2">%2$s</xliff:g>“ fragmentus"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Redaguoti"</string>

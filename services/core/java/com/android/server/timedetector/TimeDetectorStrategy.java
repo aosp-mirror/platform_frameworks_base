@@ -93,8 +93,12 @@ public interface TimeDetectorStrategy extends Dumpable {
      * invalid, or the device configuration prevented the suggestion being used, {@code true} if the
      * suggestion was accepted. A suggestion that is valid but does not change the time because it
      * matches the current device time is considered accepted.
+     *
+     * @param bypassUserPolicyChecks {@code true} for device policy manager use cases where device
+     *   policy restrictions that should apply to actual users can be ignored
      */
-    boolean suggestManualTime(@UserIdInt int userId, @NonNull ManualTimeSuggestion timeSuggestion);
+    boolean suggestManualTime(@UserIdInt int userId, @NonNull ManualTimeSuggestion timeSuggestion,
+            boolean bypassUserPolicyChecks);
 
     /** Processes the suggested time from network sources. */
     void suggestNetworkTime(@NonNull NetworkTimeSuggestion timeSuggestion);

@@ -22,7 +22,7 @@ import android.os.Handler
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.plugins.Clock
+import com.android.systemui.plugins.ClockController
 import com.android.systemui.plugins.ClockId
 import com.android.systemui.plugins.ClockMetadata
 import com.android.systemui.plugins.ClockProviderPlugin
@@ -48,8 +48,8 @@ class ClockRegistryTest : SysuiTestCase() {
     @JvmField @Rule val mockito = MockitoJUnit.rule()
     @Mock private lateinit var mockContext: Context
     @Mock private lateinit var mockPluginManager: PluginManager
-    @Mock private lateinit var mockClock: Clock
-    @Mock private lateinit var mockDefaultClock: Clock
+    @Mock private lateinit var mockClock: ClockController
+    @Mock private lateinit var mockDefaultClock: ClockController
     @Mock private lateinit var mockThumbnail: Drawable
     @Mock private lateinit var mockHandler: Handler
     @Mock private lateinit var mockContentResolver: ContentResolver
@@ -60,7 +60,7 @@ class ClockRegistryTest : SysuiTestCase() {
     private var settingValue: String = ""
 
     companion object {
-        private fun failFactory(): Clock {
+        private fun failFactory(): ClockController {
             fail("Unexpected call to createClock")
             return null!!
         }
@@ -73,17 +73,17 @@ class ClockRegistryTest : SysuiTestCase() {
 
     private class FakeClockPlugin : ClockProviderPlugin {
         private val metadata = mutableListOf<ClockMetadata>()
-        private val createCallbacks = mutableMapOf<ClockId, () -> Clock>()
+        private val createCallbacks = mutableMapOf<ClockId, () -> ClockController>()
         private val thumbnailCallbacks = mutableMapOf<ClockId, () -> Drawable?>()
 
         override fun getClocks() = metadata
-        override fun createClock(id: ClockId): Clock = createCallbacks[id]!!()
+        override fun createClock(id: ClockId): ClockController = createCallbacks[id]!!()
         override fun getClockThumbnail(id: ClockId): Drawable? = thumbnailCallbacks[id]!!()
 
         fun addClock(
             id: ClockId,
             name: String,
-            create: () -> Clock = ::failFactory,
+            create: () -> ClockController = ::failFactory,
             getThumbnail: () -> Drawable? = ::failThumbnail
         ): FakeClockPlugin {
             metadata.add(ClockMetadata(id, name))

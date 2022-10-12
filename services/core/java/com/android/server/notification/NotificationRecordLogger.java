@@ -177,11 +177,13 @@ public interface NotificationRecordLogger {
         NOTIFICATION_CANCEL_USER_PEEK(190),
         @UiEvent(doc = "Notification was canceled due to user dismissal from the always-on display")
         NOTIFICATION_CANCEL_USER_AOD(191),
+        @UiEvent(doc = "Notification was canceled due to user dismissal from a bubble")
+        NOTIFICATION_CANCEL_USER_BUBBLE(1228),
+        @UiEvent(doc = "Notification was canceled due to user dismissal from the lockscreen")
+        NOTIFICATION_CANCEL_USER_LOCKSCREEN(193),
         @UiEvent(doc = "Notification was canceled due to user dismissal from the notification"
                 + " shade.")
         NOTIFICATION_CANCEL_USER_SHADE(192),
-        @UiEvent(doc = "Notification was canceled due to user dismissal from the lockscreen")
-        NOTIFICATION_CANCEL_USER_LOCKSCREEN(193),
         @UiEvent(doc = "Notification was canceled due to an assistant adjustment update.")
         NOTIFICATION_CANCEL_ASSISTANT(906);
 
@@ -232,6 +234,10 @@ public interface NotificationRecordLogger {
                     return NOTIFICATION_CANCEL_USER_AOD;
                 case NotificationStats.DISMISSAL_SHADE:
                     return NOTIFICATION_CANCEL_USER_SHADE;
+                case NotificationStats.DISMISSAL_BUBBLE:
+                    return NOTIFICATION_CANCEL_USER_BUBBLE;
+                case NotificationStats.DISMISSAL_LOCKSCREEN:
+                    return NOTIFICATION_CANCEL_USER_LOCKSCREEN;
                 default:
                     if (NotificationManagerService.DBG) {
                         throw new IllegalArgumentException("Unexpected surface for user-dismiss "

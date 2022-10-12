@@ -171,6 +171,10 @@ public class ThemeOverlayController extends CoreStartable implements Dumpable {
 
         @Override
         public void onColorsChanged(WallpaperColors wallpaperColors, int which, int userId) {
+            WallpaperColors currentColors = mCurrentColors.get(userId);
+            if (wallpaperColors != null && wallpaperColors.equals(currentColors)) {
+                return;
+            }
             boolean currentUser = userId == mUserTracker.getUserId();
             if (currentUser && !mAcceptColorEvents
                     && mWakefulnessLifecycle.getWakefulness() != WAKEFULNESS_ASLEEP) {

@@ -47,6 +47,7 @@ import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
+import com.android.systemui.util.view.ViewUtil
 import com.google.common.truth.Truth.assertThat
 import dagger.Lazy
 import org.junit.Before
@@ -90,6 +91,8 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
     private lateinit var lazyFalsingCollector: Lazy<FalsingCollector>
     @Mock
     private lateinit var falsingCollector: FalsingCollector
+    @Mock
+    private lateinit var viewUtil: ViewUtil
     private lateinit var commandQueueCallback: CommandQueue.Callbacks
     private lateinit var fakeAppIconDrawable: Drawable
     private lateinit var fakeClock: FakeSystemClock
@@ -130,7 +133,8 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
             powerManager,
             senderUiEventLogger,
             lazyFalsingManager,
-            lazyFalsingCollector
+            lazyFalsingCollector,
+            viewUtil,
         )
 
         val callbackCaptor = ArgumentCaptor.forClass(CommandQueue.Callbacks::class.java)
@@ -837,6 +841,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         uiEventLogger: MediaTttSenderUiEventLogger,
         falsingManager: Lazy<FalsingManager>,
         falsingCollector: Lazy<FalsingCollector>,
+        viewUtil: ViewUtil,
     ) : MediaTttChipControllerSender(
         commandQueue,
         context,
@@ -849,6 +854,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         uiEventLogger,
         falsingManager,
         falsingCollector,
+        viewUtil,
     ) {
         override fun animateViewOut(view: ViewGroup, onAnimationEnd: Runnable) {
             // Just bypass the animation in tests

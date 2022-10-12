@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.Optional;
 
 /** A partially implemented, fake implementation of ServiceConfigAccessor for tests. */
-class FakeServiceConfigAccessor implements ServiceConfigAccessor {
+public class FakeServiceConfigAccessor implements ServiceConfigAccessor {
 
     private final List<ConfigurationChangeListener> mConfigurationInternalChangeListeners =
             new ArrayList<>();
@@ -55,7 +55,8 @@ class FakeServiceConfigAccessor implements ServiceConfigAccessor {
 
     @Override
     public boolean updateConfiguration(
-            @UserIdInt int userID, @NonNull TimeZoneConfiguration requestedChanges) {
+            @UserIdInt int userID, @NonNull TimeZoneConfiguration requestedChanges,
+            boolean bypassUserPolicyChecks) {
         assertNotNull(mConfigurationInternal);
         assertNotNull(requestedChanges);
 
@@ -63,7 +64,7 @@ class FakeServiceConfigAccessor implements ServiceConfigAccessor {
         // old configuration merged with the new if the user has the capability to up the settings.
         // Then, if the configuration changed, the change listener is invoked.
         TimeZoneCapabilitiesAndConfig capabilitiesAndConfig =
-                mConfigurationInternal.createCapabilitiesAndConfig();
+                mConfigurationInternal.createCapabilitiesAndConfig(bypassUserPolicyChecks);
         TimeZoneCapabilities capabilities = capabilitiesAndConfig.getCapabilities();
         TimeZoneConfiguration configuration = capabilitiesAndConfig.getConfiguration();
         TimeZoneConfiguration newConfiguration =

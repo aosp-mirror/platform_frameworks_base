@@ -174,7 +174,7 @@ public class Flags {
     public static final ResourceBooleanFlag FULL_SCREEN_USER_SWITCHER =
             new ResourceBooleanFlag(506, R.bool.config_enableFullscreenUserSwitcher);
 
-    public static final UnreleasedFlag NEW_FOOTER_ACTIONS = new UnreleasedFlag(507, true);
+    public static final ReleasedFlag NEW_FOOTER_ACTIONS = new ReleasedFlag(507);
 
     /***************************************/
     // 600- status bar
@@ -211,7 +211,7 @@ public class Flags {
     public static final UnreleasedFlag REGION_SAMPLING = new UnreleasedFlag(801);
 
     // 802 - wallpaper rendering
-    public static final UnreleasedFlag USE_CANVAS_RENDERER = new UnreleasedFlag(802);
+    public static final UnreleasedFlag USE_CANVAS_RENDERER = new UnreleasedFlag(802, true);
 
     // 803 - screen contents translation
     public static final UnreleasedFlag SCREEN_CONTENTS_TRANSLATION = new UnreleasedFlag(803);
@@ -305,6 +305,10 @@ public class Flags {
 
     // 1500 - chooser
     public static final UnreleasedFlag CHOOSER_UNBUNDLED = new UnreleasedFlag(1500);
+
+    // 1600 - accessibility
+    public static final UnreleasedFlag A11Y_FLOATING_MENU_FLING_SPRING_ANIMATIONS =
+            new UnreleasedFlag(1600);
 
     // Pay no attention to the reflection behind the curtain.
     // ========================== Curtain ==========================

@@ -27,9 +27,9 @@ import static android.provider.Settings.Secure.VOLUME_HUSH_MUTE;
 import static android.provider.Settings.Secure.VOLUME_HUSH_OFF;
 import static android.provider.Settings.Secure.VOLUME_HUSH_VIBRATE;
 
-import static com.android.server.audio.AudioEventLogger.Event.ALOGE;
-import static com.android.server.audio.AudioEventLogger.Event.ALOGI;
-import static com.android.server.audio.AudioEventLogger.Event.ALOGW;
+import static com.android.server.utils.EventLogger.Event.ALOGE;
+import static com.android.server.utils.EventLogger.Event.ALOGI;
+import static com.android.server.utils.EventLogger.Event.ALOGW;
 
 import android.Manifest;
 import android.annotation.IntDef;
@@ -185,6 +185,7 @@ import com.android.server.audio.AudioServiceEvents.VolumeEvent;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.UserManagerInternal.UserRestrictionsListener;
 import com.android.server.pm.UserManagerService;
+import com.android.server.utils.EventLogger;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
 import java.io.FileDescriptor;
@@ -989,7 +990,7 @@ public class AudioService extends IAudioService.Stub
     public AudioService(Context context, AudioSystemAdapter audioSystem,
             SystemServerAdapter systemServer, SettingsAdapter settings, @Nullable Looper looper,
             AppOpsManager appOps) {
-        sLifecycleLogger.log(new AudioEventLogger.StringEvent("AudioService()"));
+        sLifecycleLogger.log(new EventLogger.StringEvent("AudioService()"));
         mContext = context;
         mContentResolver = context.getContentResolver();
         mAppOps = appOps;
@@ -1538,14 +1539,14 @@ public class AudioService extends IAudioService.Stub
         if (!mSystemReady ||
                 (AudioSystem.checkAudioFlinger() != AudioSystem.AUDIO_STATUS_OK)) {
             Log.e(TAG, "Audioserver died.");
-            sLifecycleLogger.log(new AudioEventLogger.StringEvent(
+            sLifecycleLogger.log(new EventLogger.StringEvent(
                     "onAudioServerDied() audioserver died"));
             sendMsg(mAudioHandler, MSG_AUDIO_SERVER_DIED, SENDMSG_NOOP, 0, 0,
                     null, 500);
             return;
         }
         Log.i(TAG, "Audioserver started.");
-        sLifecycleLogger.log(new AudioEventLogger.StringEvent(
+        sLifecycleLogger.log(new EventLogger.StringEvent(
                 "onAudioServerDied() audioserver started"));
 
         updateAudioHalPids();
@@ -1775,7 +1776,7 @@ public class AudioService extends IAudioService.Stub
 
         // did it work? check based on status
         if (status != AudioSystem.AUDIO_STATUS_OK) {
-            sLifecycleLogger.log(new AudioEventLogger.StringEvent(
+            sLifecycleLogger.log(new EventLogger.StringEvent(
                     caller + ": initStreamVolume failed with " + status + " will retry")
                     .printLog(ALOGE, TAG));
             sendMsg(mAudioHandler, MSG_REINIT_VOLUMES, SENDMSG_NOOP, 0, 0,
@@ -1789,7 +1790,7 @@ public class AudioService extends IAudioService.Stub
         }
 
         // success
-        sLifecycleLogger.log(new AudioEventLogger.StringEvent(
+        sLifecycleLogger.log(new EventLogger.StringEvent(
                 caller + ": initStreamVolume succeeded").printLog(ALOGI, TAG));
     }
 
@@ -1812,7 +1813,7 @@ public class AudioService extends IAudioService.Stub
             }
         }
         if (!success) {
-            sLifecycleLogger.log(new AudioEventLogger.StringEvent(
+            sLifecycleLogger.log(new EventLogger.StringEvent(
                     caller + ": initStreamVolume succeeded but invalid mix/max levels, will retry")
                     .printLog(ALOGW, TAG));
             sendMsg(mAudioHandler, MSG_REINIT_VOLUMES, SENDMSG_NOOP, 0, 0,
@@ -2763,7 +2764,7 @@ public class AudioService extends IAudioService.Stub
                 "setPreferredDeviceForStrategy u/pid:%d/%d strat:%d dev:%s",
                 Binder.getCallingUid(), Binder.getCallingPid(), strategy,
                 devices.stream().map(e -> e.toString()).collect(Collectors.joining(",")));
-        sDeviceLogger.log(new AudioEventLogger.StringEvent(logString).printLog(TAG));
+        sDeviceLogger.log(new EventLogger.StringEvent(logString).printLog(TAG));
         if (devices.stream().anyMatch(device ->
                 device.getRole() == AudioDeviceAttributes.ROLE_INPUT)) {
             Log.e(TAG, "Unsupported input routing in " + logString);
@@ -2783,7 +2784,7 @@ public class AudioService extends IAudioService.Stub
     public int removePreferredDevicesForStrategy(int strategy) {
         final String logString =
                 String.format("removePreferredDeviceForStrategy strat:%d", strategy);
-        sDeviceLogger.log(new AudioEventLogger.StringEvent(logString).printLog(TAG));
+        sDeviceLogger.log(new EventLogger.StringEvent(logString).printLog(TAG));
 
         final int status = mDeviceBroker.removePreferredDevicesForStrategySync(strategy);
         if (status != AudioSystem.SUCCESS) {
@@ -2849,7 +2850,7 @@ public class AudioService extends IAudioService.Stub
                 "setPreferredDevicesForCapturePreset u/pid:%d/%d source:%d dev:%s",
                 Binder.getCallingUid(), Binder.getCallingPid(), capturePreset,
                 devices.stream().map(e -> e.toString()).collect(Collectors.joining(",")));
-        sDeviceLogger.log(new AudioEventLogger.StringEvent(logString).printLog(TAG));
+        sDeviceLogger.log(new EventLogger.StringEvent(logString).printLog(TAG));
         if (devices.stream().anyMatch(device ->
                 device.getRole() == AudioDeviceAttributes.ROLE_OUTPUT)) {
             Log.e(TAG, "Unsupported output routing in " + logString);
@@ -2870,7 +2871,7 @@ public class AudioService extends IAudioService.Stub
     public int clearPreferredDevicesForCapturePreset(int capturePreset) {
         final String logString = String.format(
                 "removePreferredDeviceForCapturePreset source:%d", capturePreset);
-        sDeviceLogger.log(new AudioEventLogger.StringEvent(logString).printLog(TAG));
+        sDeviceLogger.log(new EventLogger.StringEvent(logString).printLog(TAG));
 
         final int status = mDeviceBroker.clearPreferredDevicesForCapturePresetSync(capturePreset);
         if (status != AudioSystem.SUCCESS) {
@@ -3771,7 +3772,7 @@ public class AudioService extends IAudioService.Stub
             return;
         }
 
-        final AudioEventLogger.Event event = (device == null)
+        final EventLogger.Event event = (device == null)
                 ? new VolumeEvent(VolumeEvent.VOL_SET_STREAM_VOL, streamType,
                     index/*val1*/, flags/*val2*/, callingPackage)
                 : new DeviceVolumeEvent(streamType, index, device, callingPackage);
@@ -6887,7 +6888,7 @@ public class AudioService extends IAudioService.Stub
         // verify arguments
         Objects.requireNonNull(device);
         AudioManager.enforceValidVolumeBehavior(deviceVolumeBehavior);
-        sVolumeLogger.log(new AudioEventLogger.StringEvent("setDeviceVolumeBehavior: dev:"
+        sVolumeLogger.log(new EventLogger.StringEvent("setDeviceVolumeBehavior: dev:"
                 + AudioSystem.getOutputDeviceName(device.getInternalType()) + " addr:"
                 + device.getAddress() + " behavior:"
                 + AudioDeviceVolumeManager.volumeBehaviorName(deviceVolumeBehavior)
@@ -6943,7 +6944,7 @@ public class AudioService extends IAudioService.Stub
         }
 
         // log event and caller
-        sDeviceLogger.log(new AudioEventLogger.StringEvent(
+        sDeviceLogger.log(new EventLogger.StringEvent(
                 "Volume behavior " + deviceVolumeBehavior + " for dev=0x"
                       + Integer.toHexString(audioSystemDeviceOut) + " from:" + caller));
         // make sure we have a volume entry for this device, and that volume is updated according
@@ -7589,7 +7590,7 @@ public class AudioService extends IAudioService.Stub
             final int status = AudioSystem.initStreamVolume(
                     streamType, mIndexMin / 10, mIndexMax / 10);
             if (status != AudioSystem.AUDIO_STATUS_OK) {
-                sLifecycleLogger.log(new AudioEventLogger.StringEvent(
+                sLifecycleLogger.log(new EventLogger.StringEvent(
                          "VSS() stream:" + streamType + " initStreamVolume=" + status)
                         .printLog(ALOGE, TAG));
                 sendMsg(mAudioHandler, MSG_REINIT_VOLUMES, SENDMSG_NOOP, 0, 0,
@@ -8178,10 +8179,10 @@ public class AudioService extends IAudioService.Stub
             streamState.setIndex(index, update.mDevice, update.mCaller,
                     // trusted as index is always validated before message is posted
                     true /*hasModifyAudioSettings*/);
-            sVolumeLogger.log(new AudioEventLogger.StringEvent(update.mCaller + " dev:0x"
+            sVolumeLogger.log(new EventLogger.StringEvent(update.mCaller + " dev:0x"
                     + Integer.toHexString(update.mDevice) + " volIdx:" + index));
         } else {
-            sVolumeLogger.log(new AudioEventLogger.StringEvent(update.mCaller
+            sVolumeLogger.log(new EventLogger.StringEvent(update.mCaller
                     + " update vol on dev:0x" + Integer.toHexString(update.mDevice)));
         }
         setDeviceVolume(streamState, update.mDevice);
@@ -8628,7 +8629,7 @@ public class AudioService extends IAudioService.Stub
 
     private void avrcpSupportsAbsoluteVolume(String address, boolean support) {
         // address is not used for now, but may be used when multiple a2dp devices are supported
-        sVolumeLogger.log(new AudioEventLogger.StringEvent("avrcpSupportsAbsoluteVolume addr="
+        sVolumeLogger.log(new EventLogger.StringEvent("avrcpSupportsAbsoluteVolume addr="
                 + address + " support=" + support).printLog(TAG));
         mDeviceBroker.setAvrcpAbsoluteVolumeSupported(support);
         setAvrcpAbsoluteVolumeSupported(support);
@@ -10049,29 +10050,36 @@ public class AudioService extends IAudioService.Stub
     static final int LOG_NB_EVENTS_DYN_POLICY = 10;
     static final int LOG_NB_EVENTS_SPATIAL = 30;
 
-    static final AudioEventLogger sLifecycleLogger = new AudioEventLogger(LOG_NB_EVENTS_LIFECYCLE,
+    static final EventLogger
+            sLifecycleLogger = new EventLogger(LOG_NB_EVENTS_LIFECYCLE,
             "audio services lifecycle");
 
-    final private AudioEventLogger mModeLogger = new AudioEventLogger(LOG_NB_EVENTS_PHONE_STATE,
+    final private EventLogger
+            mModeLogger = new EventLogger(LOG_NB_EVENTS_PHONE_STATE,
             "phone state (logged after successful call to AudioSystem.setPhoneState(int, int))");
 
     // logs for wired + A2DP device connections:
     // - wired: logged before onSetWiredDeviceConnectionState() is executed
     // - A2DP: logged at reception of method call
-    /*package*/ static final AudioEventLogger sDeviceLogger = new AudioEventLogger(
+    /*package*/ static final EventLogger
+            sDeviceLogger = new EventLogger(
             LOG_NB_EVENTS_DEVICE_CONNECTION, "wired/A2DP/hearing aid device connection");
 
-    static final AudioEventLogger sForceUseLogger = new AudioEventLogger(
+    static final EventLogger
+            sForceUseLogger = new EventLogger(
             LOG_NB_EVENTS_FORCE_USE,
             "force use (logged before setForceUse() is executed)");
 
-    static final AudioEventLogger sVolumeLogger = new AudioEventLogger(LOG_NB_EVENTS_VOLUME,
+    static final EventLogger
+            sVolumeLogger = new EventLogger(LOG_NB_EVENTS_VOLUME,
             "volume changes (logged when command received by AudioService)");
 
-    static final AudioEventLogger sSpatialLogger = new AudioEventLogger(LOG_NB_EVENTS_SPATIAL,
+    static final EventLogger
+            sSpatialLogger = new EventLogger(LOG_NB_EVENTS_SPATIAL,
             "spatial audio");
 
-    final private AudioEventLogger mDynPolicyLogger = new AudioEventLogger(LOG_NB_EVENTS_DYN_POLICY,
+    final private EventLogger
+            mDynPolicyLogger = new EventLogger(LOG_NB_EVENTS_DYN_POLICY,
             "dynamic policy events (logged when command received by AudioService)");
 
     private static final String[] RINGER_MODE_NAMES = new String[] {
@@ -10656,7 +10664,7 @@ public class AudioService extends IAudioService.Stub
                 pcb.asBinder().linkToDeath(app, 0/*flags*/);
 
                 // logging after registration so we have the registration id
-                mDynPolicyLogger.log((new AudioEventLogger.StringEvent("registerAudioPolicy for "
+                mDynPolicyLogger.log((new EventLogger.StringEvent("registerAudioPolicy for "
                         + pcb.asBinder() + " u/pid:" + Binder.getCallingUid() + "/"
                         + Binder.getCallingPid() + " with config:" + app.toCompactLogString()))
                         .printLog(TAG));
@@ -10854,7 +10862,7 @@ public class AudioService extends IAudioService.Stub
 
 
     private void unregisterAudioPolicyInt(@NonNull IAudioPolicyCallback pcb, String operationName) {
-        mDynPolicyLogger.log((new AudioEventLogger.StringEvent(operationName + " for "
+        mDynPolicyLogger.log((new EventLogger.StringEvent(operationName + " for "
                 + pcb.asBinder()).printLog(TAG)));
         synchronized (mAudioPolicies) {
             AudioPolicyProxy app = mAudioPolicies.remove(pcb.asBinder());
@@ -11382,7 +11390,7 @@ public class AudioService extends IAudioService.Stub
         }
 
         public void binderDied() {
-            mDynPolicyLogger.log((new AudioEventLogger.StringEvent("AudioPolicy "
+            mDynPolicyLogger.log((new EventLogger.StringEvent("AudioPolicy "
                     + mPolicyCallback.asBinder() + " died").printLog(TAG)));
             release();
         }

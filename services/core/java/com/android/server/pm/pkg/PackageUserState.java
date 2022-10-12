@@ -18,6 +18,7 @@ package com.android.server.pm.pkg;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.content.pm.PackageManager;
 import android.content.pm.overlay.OverlayPaths;
 import android.os.UserHandle;
@@ -28,12 +29,19 @@ import java.util.Map;
 
 
 /**
- * The parent of this class is {@link PackageState}, which handles non-user state, exposing this
- * interface for per-user state.
+ * State for an app for a specific user, such as installed/enabled.
+ *
+ * Querying for a non-existent user does not throw an exception, so it is the responsibility of
+ * the caller to check for valid users if necessary. A default value assuming the app is installed
+ * for the non-existent user will be returned.
+ *
+ * The parent of this class is {@link PackageState}, which handles non-user state and holds one or
+ * many different {@link PackageUserState PackageUserStates}. This class is
+ * accessed through {@link PackageState#getStateForUser(UserHandle)}.
  *
  * @hide
  */
-//@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
 @Immutable
 public interface PackageUserState {
 

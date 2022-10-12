@@ -120,9 +120,13 @@ public interface TimeZoneDetectorStrategy extends Dumpable {
 
     /**
      * Suggests a time zone for the device using manually-entered (i.e. user sourced) information.
+     *
+     * @param bypassUserPolicyChecks {@code true} for device policy manager use cases where device
+     *   policy restrictions that should apply to actual users can be ignored
      */
     boolean suggestManualTimeZone(
-            @UserIdInt int userId, @NonNull ManualTimeZoneSuggestion suggestion);
+            @UserIdInt int userId, @NonNull ManualTimeZoneSuggestion suggestion,
+            boolean bypassUserPolicyChecks);
 
     /**
      * Suggests a time zone for the device, or withdraws a previous suggestion if
