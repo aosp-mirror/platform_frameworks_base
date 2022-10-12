@@ -61,7 +61,7 @@ public class TraceInjectionMethodAdapter extends AdviceAdapter {
 
     public TraceInjectionMethodAdapter(MethodVisitor methodVisitor, int access,
             String name, String descriptor, TraceInjectionConfiguration params) {
-        super(Opcodes.ASM7, methodVisitor, access, name, descriptor);
+        super(Opcodes.ASM9, methodVisitor, access, name, descriptor);
         mParams = params;
         mIsConstructor = "<init>".equals(name);
     }
@@ -157,7 +157,7 @@ public class TraceInjectionMethodAdapter extends AdviceAdapter {
     class TracingAnnotationVisitor extends AnnotationVisitor {
 
         TracingAnnotationVisitor(AnnotationVisitor annotationVisitor) {
-            super(Opcodes.ASM7, annotationVisitor);
+            super(Opcodes.ASM9, annotationVisitor);
         }
 
         @Override
