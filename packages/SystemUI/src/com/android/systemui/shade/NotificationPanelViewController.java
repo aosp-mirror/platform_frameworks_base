@@ -4405,7 +4405,7 @@ public final class NotificationPanelViewController extends PanelViewController {
         }
         mSysUiState.setFlag(SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED,
                         isFullyExpanded() && !isInSettings())
-                .setFlag(SYSUI_STATE_QUICK_SETTINGS_EXPANDED, isInSettings())
+                .setFlag(SYSUI_STATE_QUICK_SETTINGS_EXPANDED, isFullyExpanded() && isInSettings())
                 .commitUpdate(mDisplayId);
     }
 
