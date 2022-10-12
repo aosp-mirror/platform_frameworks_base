@@ -257,6 +257,12 @@ public class ActivityOptions extends ComponentOptions {
     private static final String KEY_LAUNCH_TASK_ID = "android.activity.launchTaskId";
 
     /**
+     * See {@link #setDisableStartingWindow}.
+     * @hide
+     */
+    private static final String KEY_DISABLE_STARTING_WINDOW = "android.activity.disableStarting";
+
+    /**
      * See {@link #setPendingIntentLaunchFlags(int)}
      * @hide
      */
@@ -467,6 +473,7 @@ public class ActivityOptions extends ComponentOptions {
     private PictureInPictureParams mLaunchIntoPipParams;
     private boolean mDismissKeyguard;
     private boolean mIgnorePendingIntentCreatorForegroundState;
+    private boolean mDisableStartingWindow;
 
     /**
      * Create an ActivityOptions specifying a custom animation to run when
@@ -1272,6 +1279,7 @@ public class ActivityOptions extends ComponentOptions {
         mDismissKeyguard = opts.getBoolean(KEY_DISMISS_KEYGUARD);
         mIgnorePendingIntentCreatorForegroundState = opts.getBoolean(
                 KEY_IGNORE_PENDING_INTENT_CREATOR_FOREGROUND_STATE);
+        mDisableStartingWindow = opts.getBoolean(KEY_DISABLE_STARTING_WINDOW);
     }
 
     /**
@@ -1668,6 +1676,22 @@ public class ActivityOptions extends ComponentOptions {
     @SystemApi
     public int getLaunchTaskId() {
         return mLaunchTaskId;
+    }
+
+    /**
+     * Sets whether recents disable showing starting window when activity launch.
+     * @hide
+     */
+    @RequiresPermission(START_TASKS_FROM_RECENTS)
+    public void setDisableStartingWindow(boolean disable) {
+        mDisableStartingWindow = disable;
+    }
+
+    /**
+     * @hide
+     */
+    public boolean getDisableStartingWindow() {
+        return mDisableStartingWindow;
     }
 
     /**
@@ -2177,6 +2201,9 @@ public class ActivityOptions extends ComponentOptions {
         if (mIgnorePendingIntentCreatorForegroundState) {
             b.putBoolean(KEY_IGNORE_PENDING_INTENT_CREATOR_FOREGROUND_STATE,
                     mIgnorePendingIntentCreatorForegroundState);
+        }
+        if (mDisableStartingWindow) {
+            b.putBoolean(KEY_DISABLE_STARTING_WINDOW, mDisableStartingWindow);
         }
         return b;
     }

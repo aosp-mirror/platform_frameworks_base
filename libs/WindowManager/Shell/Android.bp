@@ -45,6 +45,9 @@ filegroup {
         "src/com/android/wm/shell/util/**/*.java",
         "src/com/android/wm/shell/common/split/SplitScreenConstants.java",
         "src/com/android/wm/shell/sysui/ShellSharedConstants.java",
+        "src/com/android/wm/shell/common/TransactionPool.java",
+        "src/com/android/wm/shell/animation/Interpolators.java",
+        "src/com/android/wm/shell/startingsurface/SplashScreenExitAnimationUtils.java",
     ],
     path: "src",
 }

@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification;
 
+import android.annotation.Nullable;
 import android.util.ArraySet;
 
 import androidx.annotation.VisibleForTesting;
@@ -24,6 +25,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import javax.inject.Inject;
@@ -41,6 +43,7 @@ public class DynamicPrivacyController implements KeyguardStateController.Callbac
 
     private boolean mLastDynamicUnlocked;
     private boolean mCacheInvalid;
+    @Nullable private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
 
     @Inject
     DynamicPrivacyController(NotificationLockscreenUserManager notificationLockscreenUserManager,
@@ -97,7 +100,7 @@ public class DynamicPrivacyController implements KeyguardStateController.Callbac
      * contents aren't revealed yet?
      */
     public boolean isInLockedDownShade() {
-        if (!mKeyguardStateController.isShowing() || !mKeyguardStateController.isMethodSecure()) {
+        if (!isStatusBarKeyguardShowing() || !mKeyguardStateController.isMethodSecure()) {
             return false;
         }
         int state = mStateController.getState();
@@ -108,6 +111,15 @@ public class DynamicPrivacyController implements KeyguardStateController.Callbac
             return false;
         }
         return true;
+    }
+
+    private boolean isStatusBarKeyguardShowing() {
+        return mStatusBarKeyguardViewManager != null && mStatusBarKeyguardViewManager.isShowing();
+    }
+
+    public void setStatusBarKeyguardViewManager(
+            StatusBarKeyguardViewManager statusBarKeyguardViewManager) {
+        mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
     }
 
     public interface Listener {

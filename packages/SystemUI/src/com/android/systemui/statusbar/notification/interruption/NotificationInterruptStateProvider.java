@@ -37,6 +37,19 @@ public interface NotificationInterruptStateProvider {
     boolean shouldHeadsUp(NotificationEntry entry);
 
     /**
+     * Returns the value of whether this entry should peek (from shouldHeadsUp(entry)), but only
+     * optionally logs the status.
+     *
+     * This method should be used in cases where the caller needs to check whether a notification
+     * qualifies for a heads up, but is not necessarily guaranteed to make the heads-up happen.
+     *
+     * @param entry the entry to check
+     * @param log whether or not to log the results of this check
+     * @return true if the entry should heads up, false otherwise
+     */
+    boolean checkHeadsUp(NotificationEntry entry, boolean log);
+
+    /**
      * Whether the notification should appear as a bubble with a fly-out on top of the screen.
      *
      * @param entry the entry to check

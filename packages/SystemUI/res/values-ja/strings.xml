@@ -94,6 +94,11 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"画面の録画セッション中の通知"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"録画を開始しますか？"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"録画中に機密情報が画面に表示されたりデバイスで再生されたりした場合、Android システムでキャプチャされることがあります。これには、パスワード、お支払い情報、写真、メッセージ、音声などが含まれます。"</string>
+    <string name="screenrecord_option_entire_screen" msgid="1732437834603426934">"画面全体を録画する"</string>
+    <string name="screenrecord_option_single_app" msgid="5954863081500035825">"1 つのアプリを録画する"</string>
+    <string name="screenrecord_warning_entire_screen" msgid="8141407178104195610">"録画中は、画面に表示されている内容やデバイスで再生されている内容に Android がアクセスできるため、パスワード、お支払いの詳細、メッセージなどの機密情報にご注意ください。"</string>
+    <string name="screenrecord_warning_single_app" msgid="7760723997065948283">"アプリの録画中は、そのアプリで表示されている内容や再生されている内容に Android がアクセスできるため、パスワード、お支払いの詳細、メッセージなどの機密情報にご注意ください。"</string>
+    <string name="screenrecord_start_recording" msgid="348286842544768740">"録画を開始"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"録音"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"デバイスの音声"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"デバイスからの音（音楽、通話、着信音など）"</string>
@@ -361,6 +366,13 @@
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"この機能を提供するサービスは、録画中またはキャスト中に画面上に表示される情報、またはキャスト先に転送される情報すべてにアクセスできます。これには、パスワード、お支払いの詳細、写真、メッセージ、再生される音声などが含まれます。"</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"録画やキャストを開始しますか？"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> で録画やキャストを開始しますか？"</string>
+    <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> に共有や録画を許可しますか？"</string>
+    <string name="media_projection_permission_dialog_option_entire_screen" msgid="392086473225692983">"画面全体"</string>
+    <string name="media_projection_permission_dialog_option_single_app" msgid="1591110238124910521">"1 つのアプリ"</string>
+    <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"共有、録画、キャスト中は、画面に表示されている内容やデバイスで再生している内容に <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> がアクセスできるため、パスワード、お支払いの詳細、メッセージなどの機密情報にご注意ください。"</string>
+    <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"アプリの共有、録画、キャスト中は、そのアプリで表示されている内容や再生している内容に <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> がアクセスできるため、パスワード、お支払いの詳細、メッセージなどの機密情報にご注意ください。"</string>
+    <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"続行"</string>
+    <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"アプリの共有、録画"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"すべて消去"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"管理"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"履歴"</string>

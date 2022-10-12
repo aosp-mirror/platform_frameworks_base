@@ -19,7 +19,6 @@ package com.android.systemui.shared.system;
 import static android.app.ActivityManager.LOCK_TASK_MODE_LOCKED;
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
 import static android.app.ActivityManager.LOCK_TASK_MODE_PINNED;
-import static android.app.ActivityManager.RECENT_IGNORE_UNAVAILABLE;
 import static android.app.ActivityTaskManager.getService;
 
 import android.annotation.NonNull;
@@ -27,7 +26,6 @@ import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityClient;
 import android.app.ActivityManager;
-import android.app.ActivityManager.RecentTaskInfo;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
@@ -252,8 +250,9 @@ public class ActivityManagerWrapper {
     public boolean startActivityFromRecents(int taskId, ActivityOptions options) {
         try {
             Bundle optsBundle = options == null ? null : options.toBundle();
-            getService().startActivityFromRecents(taskId, optsBundle);
-            return true;
+            return ActivityManager.isStartResultSuccessful(
+                    getService().startActivityFromRecents(
+                            taskId, optsBundle));
         } catch (Exception e) {
             return false;
         }

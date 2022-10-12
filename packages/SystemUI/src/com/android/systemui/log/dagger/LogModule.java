@@ -322,7 +322,7 @@ public class LogModule {
     @SysUISingleton
     @KeyguardUpdateMonitorLog
     public static LogBuffer provideKeyguardUpdateMonitorLogBuffer(LogBufferFactory factory) {
-        return factory.create("KeyguardUpdateMonitorLog", 200);
+        return factory.create("KeyguardUpdateMonitorLog", 400);
     }
 
     /**

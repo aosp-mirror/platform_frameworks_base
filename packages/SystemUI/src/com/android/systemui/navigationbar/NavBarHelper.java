@@ -48,6 +48,7 @@ import android.view.accessibility.AccessibilityManager;
 
 import androidx.annotation.NonNull;
 
+import com.android.keyguard.KeyguardViewController;
 import com.android.systemui.Dumpable;
 import com.android.systemui.accessibility.AccessibilityButtonModeObserver;
 import com.android.systemui.accessibility.AccessibilityButtonTargetsObserver;
@@ -60,7 +61,6 @@ import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.phone.BarTransitions.TransitionMode;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
-import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -90,7 +90,7 @@ public final class NavBarHelper implements
     private final AccessibilityManager mAccessibilityManager;
     private final Lazy<AssistManager> mAssistManagerLazy;
     private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
-    private final KeyguardStateController mKeyguardStateController;
+    private final KeyguardViewController mKeyguardViewController;
     private final UserTracker mUserTracker;
     private final SystemActions mSystemActions;
     private final AccessibilityButtonModeObserver mAccessibilityButtonModeObserver;
@@ -125,7 +125,7 @@ public final class NavBarHelper implements
             OverviewProxyService overviewProxyService,
             Lazy<AssistManager> assistManagerLazy,
             Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
-            KeyguardStateController keyguardStateController,
+            KeyguardViewController keyguardViewController,
             NavigationModeController navigationModeController,
             UserTracker userTracker,
             DumpManager dumpManager) {
@@ -134,7 +134,7 @@ public final class NavBarHelper implements
         mAccessibilityManager = accessibilityManager;
         mAssistManagerLazy = assistManagerLazy;
         mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
-        mKeyguardStateController = keyguardStateController;
+        mKeyguardViewController = keyguardViewController;
         mUserTracker = userTracker;
         mSystemActions = systemActions;
         accessibilityManager.addAccessibilityServicesStateChangeListener(this);
@@ -326,7 +326,7 @@ public final class NavBarHelper implements
             shadeWindowView =
                     mCentralSurfacesOptionalLazy.get().get().getNotificationShadeWindowView();
         }
-        boolean isKeyguardShowing = mKeyguardStateController.isShowing();
+        boolean isKeyguardShowing = mKeyguardViewController.isShowing();
         boolean imeVisibleOnShade = shadeWindowView != null && shadeWindowView.isAttachedToWindow()
                 && shadeWindowView.getRootWindowInsets().isVisible(WindowInsets.Type.ime());
         return imeVisibleOnShade

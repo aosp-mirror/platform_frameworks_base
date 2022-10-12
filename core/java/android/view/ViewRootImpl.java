@@ -1102,7 +1102,7 @@ public final class ViewRootImpl implements ViewParent,
 
         // Update the last resource config in case the resource configuration was changed while
         // activity relaunched.
-        mLastConfigurationFromResources.setTo(getConfiguration());
+        updateLastConfigurationFromResources(getConfiguration());
     }
 
     private Configuration getConfiguration() {
@@ -5396,13 +5396,7 @@ public final class ViewRootImpl implements ViewParent,
             // Update the display with new DisplayAdjustments.
             updateInternalDisplay(mDisplay.getDisplayId(), localResources);
 
-            final int lastLayoutDirection = mLastConfigurationFromResources.getLayoutDirection();
-            final int currentLayoutDirection = config.getLayoutDirection();
-            mLastConfigurationFromResources.setTo(config);
-            if (lastLayoutDirection != currentLayoutDirection
-                    && mViewLayoutDirectionInitial == View.LAYOUT_DIRECTION_INHERIT) {
-                mView.setLayoutDirection(currentLayoutDirection);
-            }
+            updateLastConfigurationFromResources(config);
             mView.dispatchConfigurationChanged(config);
 
             // We could have gotten this {@link Configuration} update after we called
@@ -5414,6 +5408,17 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         updateForceDarkMode();
+    }
+
+    private void updateLastConfigurationFromResources(Configuration resConfig) {
+        final int lastLayoutDirection = mLastConfigurationFromResources.getLayoutDirection();
+        final int currentLayoutDirection = resConfig.getLayoutDirection();
+        mLastConfigurationFromResources.setTo(resConfig);
+        // Update layout direction in case the language or screen layout is changed.
+        if (lastLayoutDirection != currentLayoutDirection && mView != null
+                && mViewLayoutDirectionInitial == View.LAYOUT_DIRECTION_INHERIT) {
+            mView.setLayoutDirection(currentLayoutDirection);
+        }
     }
 
     /**
