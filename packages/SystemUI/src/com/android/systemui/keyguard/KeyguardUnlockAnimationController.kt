@@ -666,7 +666,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
             return
         }
 
-        if (keyguardViewController.isShowing && !playingCannedUnlockAnimation) {
+        if (keyguardStateController.isShowing && !playingCannedUnlockAnimation) {
             showOrHideSurfaceIfDismissAmountThresholdsReached()
 
             // If the surface is visible or it's about to be, start updating its appearance to
@@ -726,7 +726,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
     private fun finishKeyguardExitRemoteAnimationIfReachThreshold() {
         // no-op if keyguard is not showing or animation is not enabled.
         if (!KeyguardService.sEnableRemoteKeyguardGoingAwayAnimation ||
-                !keyguardViewController.isShowing) {
+                !keyguardStateController.isShowing) {
             return
         }
 
@@ -849,7 +849,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
      * animation.
      */
     fun hideKeyguardViewAfterRemoteAnimation() {
-        if (keyguardViewController.isShowing) {
+        if (keyguardStateController.isShowing) {
             // Hide the keyguard, with no fade out since we animated it away during the unlock.
 
             keyguardViewController.hide(
