@@ -84,6 +84,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         long protectorId = manager.createLskfBasedProtector(mGateKeeperService,
                 LockscreenCredential.createNone(), sp, USER_ID);
         assertFalse(lskfGatekeeperHandleExists(USER_ID));
+        assertFalse(manager.hasPasswordMetrics(protectorId, USER_ID));
 
         AuthenticationResult result = manager.unlockLskfBasedProtector(mGateKeeperService,
                 protectorId, LockscreenCredential.createNone(), USER_ID, null);
@@ -103,6 +104,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         long protectorId = manager.createLskfBasedProtector(mGateKeeperService, password, sp,
                 USER_ID);
         assertTrue(lskfGatekeeperHandleExists(USER_ID));
+        assertTrue(manager.hasPasswordMetrics(protectorId, USER_ID));
 
         AuthenticationResult result = manager.unlockLskfBasedProtector(mGateKeeperService,
                 protectorId, password, USER_ID, null);

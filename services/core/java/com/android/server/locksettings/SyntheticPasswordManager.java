@@ -99,7 +99,8 @@ import java.util.Set;
  *       PASSWORD_DATA_NAME: Data used for LSKF verification, such as the scrypt salt and
  *                           parameters.  Only exists for LSKF-based protectors.
  *       PASSWORD_METRICS_NAME: Metrics about the LSKF, encrypted by a key derived from the SP.
- *                              Only exists for LSKF-based protectors.
+ *                              Only exists for LSKF-based protectors.  Doesn't exist when the LSKF
+ *                              is empty, except in old protectors.
  *       SECDISCARDABLE_NAME: A large number of random bytes that all need to be known in order to
  *                            decrypt SP_BLOB_NAME.  When the protector is deleted, this file is
  *                            overwritten and deleted as a "best-effort" attempt to support secure
@@ -838,7 +839,9 @@ public class SyntheticPasswordManager {
             synchronizeFrpPassword(pwd, 0, userId);
         }
         saveState(PASSWORD_DATA_NAME, pwd.toBytes(), protectorId, userId);
-        savePasswordMetrics(credential, sp, protectorId, userId);
+        if (!credential.isNone()) {
+            savePasswordMetrics(credential, sp, protectorId, userId);
+        }
         createSyntheticPasswordBlob(protectorId, PROTECTOR_TYPE_LSKF_BASED, sp, protectorSecret,
                 sid, userId);
         return protectorId;
@@ -1149,7 +1152,8 @@ public class SyntheticPasswordManager {
 
         // Upgrade case: store the metrics if the device did not have stored metrics before, should
         // only happen once on old protectors.
-        if (result.syntheticPassword != null && !hasPasswordMetrics(protectorId, userId)) {
+        if (result.syntheticPassword != null && !credential.isNone() &&
+                !hasPasswordMetrics(protectorId, userId)) {
             savePasswordMetrics(credential, result.syntheticPassword, protectorId, userId);
         }
         return result;
@@ -1422,10 +1426,16 @@ public class SyntheticPasswordManager {
     public @Nullable PasswordMetrics getPasswordMetrics(SyntheticPassword sp, long protectorId,
             int userId) {
         final byte[] encrypted = loadState(PASSWORD_METRICS_NAME, protectorId, userId);
-        if (encrypted == null) return null;
+        if (encrypted == null) {
+            Slogf.e(TAG, "Failed to read password metrics file for user %d", userId);
+            return null;
+        }
         final byte[] decrypted = SyntheticPasswordCrypto.decrypt(sp.deriveMetricsKey(),
                 /* personalization= */ new byte[0], encrypted);
-        if (decrypted == null) return null;
+        if (decrypted == null) {
+            Slogf.e(TAG, "Failed to decrypt password metrics file for user %d", userId);
+            return null;
+        }
         return VersionedPasswordMetrics.deserialize(decrypted).getMetrics();
     }
 
@@ -1437,7 +1447,8 @@ public class SyntheticPasswordManager {
         saveState(PASSWORD_METRICS_NAME, encrypted, protectorId, userId);
     }
 
-    private boolean hasPasswordMetrics(long protectorId, int userId) {
+    @VisibleForTesting
+    boolean hasPasswordMetrics(long protectorId, int userId) {
         return hasState(PASSWORD_METRICS_NAME, protectorId, userId);
     }
 
