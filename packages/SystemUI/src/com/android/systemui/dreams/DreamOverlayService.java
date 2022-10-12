@@ -64,28 +64,25 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
     private final Executor mExecutor;
     // A controller for the dream overlay container view (which contains both the status bar and the
     // content area).
-    private final DreamOverlayContainerViewController mDreamOverlayContainerViewController;
+    private DreamOverlayContainerViewController mDreamOverlayContainerViewController;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Nullable
     private final ComponentName mLowLightDreamComponent;
     private final UiEventLogger mUiEventLogger;
+    private final WindowManager mWindowManager;
 
     // A reference to the {@link Window} used to hold the dream overlay.
     private Window mWindow;
 
-    // True if the service has been destroyed.
-    private boolean mDestroyed;
+    // True if a dream has bound to the service and dream overlay service has started.
+    private boolean mStarted = false;
 
-    private final Complication.Host mHost = new Complication.Host() {
-        @Override
-        public void requestExitDream() {
-            mExecutor.execute(DreamOverlayService.this::requestExit);
-        }
-    };
+    // True if the service has been destroyed.
+    private boolean mDestroyed = false;
+
+    private final DreamOverlayComponent mDreamOverlayComponent;
 
     private final LifecycleRegistry mLifecycleRegistry;
-
-    private ViewModelStore mViewModelStore = new ViewModelStore();
 
     private DreamOverlayTouchMonitor mDreamOverlayTouchMonitor;
 
@@ -103,7 +100,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
                 }
             };
 
-    private DreamOverlayStateController mStateController;
+    private final DreamOverlayStateController mStateController;
 
     @VisibleForTesting
     public enum DreamOverlayEvent implements UiEventLogger.UiEventEnum {
@@ -128,6 +125,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
     public DreamOverlayService(
             Context context,
             @Main Executor executor,
+            WindowManager windowManager,
             DreamOverlayComponent.Factory dreamOverlayComponentFactory,
             DreamOverlayStateController stateController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
@@ -136,19 +134,19 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
                     ComponentName lowLightDreamComponent) {
         mContext = context;
         mExecutor = executor;
+        mWindowManager = windowManager;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mLowLightDreamComponent = lowLightDreamComponent;
         mKeyguardUpdateMonitor.registerCallback(mKeyguardCallback);
         mStateController = stateController;
         mUiEventLogger = uiEventLogger;
 
-        final DreamOverlayComponent component =
-                dreamOverlayComponentFactory.create(mViewModelStore, mHost);
-        mDreamOverlayContainerViewController = component.getDreamOverlayContainerViewController();
+        final ViewModelStore viewModelStore = new ViewModelStore();
+        final Complication.Host host =
+                () -> mExecutor.execute(DreamOverlayService.this::requestExit);
+        mDreamOverlayComponent = dreamOverlayComponentFactory.create(viewModelStore, host);
+        mLifecycleRegistry = mDreamOverlayComponent.getLifecycleRegistry();
         setCurrentState(Lifecycle.State.CREATED);
-        mLifecycleRegistry = component.getLifecycleRegistry();
-        mDreamOverlayTouchMonitor = component.getDreamOverlayTouchMonitor();
-        mDreamOverlayTouchMonitor.init();
     }
 
     private void setCurrentState(Lifecycle.State state) {
@@ -159,34 +157,48 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
     public void onDestroy() {
         mKeyguardUpdateMonitor.removeCallback(mKeyguardCallback);
         setCurrentState(Lifecycle.State.DESTROYED);
-        final WindowManager windowManager = mContext.getSystemService(WindowManager.class);
-        if (mWindow != null) {
-            windowManager.removeView(mWindow.getDecorView());
-        }
-        mStateController.setOverlayActive(false);
-        mStateController.setLowLightActive(false);
+
+        resetCurrentDreamOverlay();
+
         mDestroyed = true;
         super.onDestroy();
     }
 
     @Override
     public void onStartDream(@NonNull WindowManager.LayoutParams layoutParams) {
-        mUiEventLogger.log(DreamOverlayEvent.DREAM_OVERLAY_ENTER_START);
         setCurrentState(Lifecycle.State.STARTED);
-        final ComponentName dreamComponent = getDreamComponent();
-        mStateController.setLowLightActive(
-                dreamComponent != null && dreamComponent.equals(mLowLightDreamComponent));
+
         mExecutor.execute(() -> {
+            mUiEventLogger.log(DreamOverlayEvent.DREAM_OVERLAY_ENTER_START);
+
             if (mDestroyed) {
                 // The task could still be executed after the service has been destroyed. Bail if
                 // that is the case.
                 return;
             }
+
+            if (mStarted) {
+                // Reset the current dream overlay before starting a new one. This can happen
+                // when two dreams overlap (briefly, for a smoother dream transition) and both
+                // dreams are bound to the dream overlay service.
+                resetCurrentDreamOverlay();
+            }
+
+            mDreamOverlayContainerViewController =
+                    mDreamOverlayComponent.getDreamOverlayContainerViewController();
+            mDreamOverlayTouchMonitor = mDreamOverlayComponent.getDreamOverlayTouchMonitor();
+            mDreamOverlayTouchMonitor.init();
+
             mStateController.setShouldShowComplications(shouldShowComplications());
             addOverlayWindowLocked(layoutParams);
             setCurrentState(Lifecycle.State.RESUMED);
             mStateController.setOverlayActive(true);
+            final ComponentName dreamComponent = getDreamComponent();
+            mStateController.setLowLightActive(
+                    dreamComponent != null && dreamComponent.equals(mLowLightDreamComponent));
             mUiEventLogger.log(DreamOverlayEvent.DREAM_OVERLAY_COMPLETE_START);
+
+            mStarted = true;
         });
     }
 
@@ -222,8 +234,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         removeContainerViewFromParent();
         mWindow.setContentView(mDreamOverlayContainerViewController.getContainerView());
 
-        final WindowManager windowManager = mContext.getSystemService(WindowManager.class);
-        windowManager.addView(mWindow.getDecorView(), mWindow.getAttributes());
+        mWindowManager.addView(mWindow.getDecorView(), mWindow.getAttributes());
     }
 
     private void removeContainerViewFromParent() {
@@ -237,5 +248,19 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         }
         Log.w(TAG, "Removing dream overlay container view parent!");
         parentView.removeView(containerView);
+    }
+
+    private void resetCurrentDreamOverlay() {
+        if (mStarted && mWindow != null) {
+            mWindowManager.removeView(mWindow.getDecorView());
+        }
+
+        mStateController.setOverlayActive(false);
+        mStateController.setLowLightActive(false);
+
+        mDreamOverlayContainerViewController = null;
+        mDreamOverlayTouchMonitor = null;
+
+        mStarted = false;
     }
 }
