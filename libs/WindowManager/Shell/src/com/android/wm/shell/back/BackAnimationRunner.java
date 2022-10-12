@@ -79,9 +79,8 @@ class BackAnimationRunner {
         }
     }
 
-    IOnBackInvokedCallback getGestureStartedCallback() {
+    void startGesture() {
         mWaitingAnimation = true;
-        return mCallback;
     }
 
     boolean onGestureFinished(boolean triggerBack) {
