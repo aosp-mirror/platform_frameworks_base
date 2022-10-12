@@ -886,7 +886,8 @@ class MediaCarouselController @Inject constructor(
                     interactedSubcardRank,
                     interactedSubcardCardinality,
                     receivedLatencyMillis,
-                    null // Media cards cannot have subcards.
+                    null, // Media cards cannot have subcards.
+                    null // Media cards don't have dimensions today.
             )
             /* ktlint-disable max-line-length */
             if (DEBUG) {

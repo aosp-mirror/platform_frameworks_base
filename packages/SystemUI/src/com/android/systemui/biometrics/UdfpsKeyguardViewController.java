@@ -219,7 +219,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
                 mView.animateInUdfpsBouncer(null);
             }
 
-            if (mKeyguardStateController.isOccluded()) {
+            if (mKeyguardViewManager.isOccluded()) {
                 mKeyguardUpdateMonitor.requestFaceAuthOnOccludingApp(true);
             }
 

@@ -32,6 +32,7 @@ import android.testing.TestableLooper;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import org.junit.Assert;
@@ -57,6 +58,8 @@ public class DynamicPrivacyControllerTest extends SysuiTestCase {
         mDynamicPrivacyController = new DynamicPrivacyController(
                 mLockScreenUserManager, mKeyguardStateController,
                 mock(StatusBarStateController.class));
+        mDynamicPrivacyController.setStatusBarKeyguardViewManager(
+                mock(StatusBarKeyguardViewManager.class));
         mDynamicPrivacyController.addListener(mListener);
         // Disable dynamic privacy by default
         allowNotificationsInPublic(false);

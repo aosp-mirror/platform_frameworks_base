@@ -260,6 +260,9 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
         var mostRecentViewInfo: ViewInfo? = null
 
         override val windowLayoutParams = commonWindowLayoutParams
+
+        override fun start() {}
+
         override fun updateView(newInfo: ViewInfo, currentView: ViewGroup) {
             mostRecentViewInfo = newInfo
         }

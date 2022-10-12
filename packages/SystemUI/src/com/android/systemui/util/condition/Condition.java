@@ -34,9 +34,26 @@ public abstract class Condition implements CallbackController<Condition.Callback
     private final String mTag = getClass().getSimpleName();
 
     private final ArrayList<WeakReference<Callback>> mCallbacks = new ArrayList<>();
-    private boolean mIsConditionMet = false;
+    private final boolean mOverriding;
+    private Boolean mIsConditionMet;
     private boolean mStarted = false;
-    private boolean mOverriding = false;
+
+    /**
+     * By default, conditions have an initial value of false and are not overriding.
+     */
+    public Condition() {
+        this(false, false);
+    }
+
+    /**
+     * Constructor for specifying initial state and overriding condition attribute.
+     * @param initialConditionMet Initial state of the condition.
+     * @param overriding Whether this condition overrides others.
+     */
+    protected Condition(Boolean initialConditionMet, boolean overriding) {
+        mIsConditionMet = initialConditionMet;
+        mOverriding = overriding;
+    }
 
     /**
      * Starts monitoring the condition.
@@ -47,14 +64,6 @@ public abstract class Condition implements CallbackController<Condition.Callback
      * Stops monitoring the condition.
      */
     protected abstract void stop();
-
-    /**
-     * Sets whether this condition's value overrides others in determining the overall state.
-     */
-    public void setOverriding(boolean overriding) {
-        mOverriding = overriding;
-        updateCondition(mIsConditionMet);
-    }
 
     /**
      * Returns whether the current condition overrides
@@ -110,13 +119,31 @@ public abstract class Condition implements CallbackController<Condition.Callback
      * @param isConditionMet True if the condition has been fulfilled. False otherwise.
      */
     protected void updateCondition(boolean isConditionMet) {
-        if (mIsConditionMet == isConditionMet) {
+        if (mIsConditionMet != null && mIsConditionMet == isConditionMet) {
             return;
         }
 
         if (shouldLog()) Log.d(mTag, "updating condition to " + isConditionMet);
         mIsConditionMet = isConditionMet;
+        sendUpdate();
+    }
 
+    /**
+     * Clears the set condition value. This is purposefully separate from
+     * {@link #updateCondition(boolean)} to avoid confusion around {@code null} values.
+     */
+    protected void clearCondition() {
+        if (mIsConditionMet == null) {
+            return;
+        }
+
+        if (shouldLog()) Log.d(mTag, "clearing condition");
+
+        mIsConditionMet = null;
+        sendUpdate();
+    }
+
+    private void sendUpdate() {
         final Iterator<WeakReference<Callback>> iterator = mCallbacks.iterator();
         while (iterator.hasNext()) {
             final Callback cb = iterator.next().get();
@@ -128,8 +155,21 @@ public abstract class Condition implements CallbackController<Condition.Callback
         }
     }
 
+    /**
+     * Returns whether the condition is set. This method should be consulted to understand the
+     * value of {@link #isConditionMet()}.
+     * @return {@code true} if value is present, {@code false} otherwise.
+     */
+    public boolean isConditionSet() {
+        return mIsConditionMet != null;
+    }
+
+    /**
+     * Returns whether the condition has been met. Note that this method will return {@code false}
+     * if the condition is not set as well.
+     */
     public boolean isConditionMet() {
-        return mIsConditionMet;
+        return Boolean.TRUE.equals(mIsConditionMet);
     }
 
     private boolean shouldLog() {

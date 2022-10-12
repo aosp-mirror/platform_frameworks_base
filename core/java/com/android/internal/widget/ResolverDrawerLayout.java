@@ -17,6 +17,9 @@
 
 package com.android.internal.widget;
 
+import static android.content.res.Resources.ID_NULL;
+
+import android.annotation.IdRes;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -96,6 +99,8 @@ public class ResolverDrawerLayout extends ViewGroup {
 
     private int mTopOffset;
     private boolean mShowAtTop;
+    @IdRes
+    private int mIgnoreOffsetTopLimitViewId = ID_NULL;
 
     private boolean mIsDragging;
     private boolean mOpenOnClick;
@@ -156,6 +161,10 @@ public class ResolverDrawerLayout extends ViewGroup {
         mIsMaxCollapsedHeightSmallExplicit =
                 a.hasValue(R.styleable.ResolverDrawerLayout_maxCollapsedHeightSmall);
         mShowAtTop = a.getBoolean(R.styleable.ResolverDrawerLayout_showAtTop, false);
+        if (a.hasValue(R.styleable.ResolverDrawerLayout_ignoreOffsetTopLimit)) {
+            mIgnoreOffsetTopLimitViewId = a.getResourceId(
+                    R.styleable.ResolverDrawerLayout_ignoreOffsetTopLimit, ID_NULL);
+        }
         a.recycle();
 
         mScrollIndicatorDrawable = mContext.getDrawable(R.drawable.scroll_indicator_material);
@@ -577,12 +586,32 @@ public class ResolverDrawerLayout extends ViewGroup {
                 dy -= 1.0f;
             }
 
+            boolean isIgnoreOffsetLimitSet = false;
+            int ignoreOffsetLimit = 0;
+            View ignoreOffsetLimitView = findIgnoreOffsetLimitView();
+            if (ignoreOffsetLimitView != null) {
+                LayoutParams lp = (LayoutParams) ignoreOffsetLimitView.getLayoutParams();
+                ignoreOffsetLimit = ignoreOffsetLimitView.getBottom() + lp.bottomMargin;
+                isIgnoreOffsetLimitSet = true;
+            }
             final int childCount = getChildCount();
             for (int i = 0; i < childCount; i++) {
                 final View child = getChildAt(i);
+                if (child.getVisibility() == View.GONE) {
+                    continue;
+                }
                 final LayoutParams lp = (LayoutParams) child.getLayoutParams();
                 if (!lp.ignoreOffset) {
                     child.offsetTopAndBottom((int) dy);
+                } else if (isIgnoreOffsetLimitSet) {
+                    int top = child.getTop();
+                    int targetTop = Math.max(
+                            (int) (ignoreOffsetLimit + lp.topMargin + dy),
+                            lp.mFixedTop);
+                    if (top != targetTop) {
+                        child.offsetTopAndBottom(targetTop - top);
+                    }
+                    ignoreOffsetLimit = child.getBottom() + lp.bottomMargin;
                 }
             }
             final boolean isCollapsedOld = mCollapseOffset != 0;
@@ -1024,6 +1053,8 @@ public class ResolverDrawerLayout extends ViewGroup {
         final int rightEdge = width - getPaddingRight();
         final int widthAvailable = rightEdge - leftEdge;
 
+        boolean isIgnoreOffsetLimitSet = false;
+        int ignoreOffsetLimit = 0;
         final int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
             final View child = getChildAt(i);
@@ -1036,9 +1067,24 @@ public class ResolverDrawerLayout extends ViewGroup {
                 continue;
             }
 
+            if (mIgnoreOffsetTopLimitViewId != ID_NULL && !isIgnoreOffsetLimitSet) {
+                if (mIgnoreOffsetTopLimitViewId == child.getId()) {
+                    ignoreOffsetLimit = child.getBottom() + lp.bottomMargin;
+                    isIgnoreOffsetLimitSet = true;
+                }
+            }
+
             int top = ypos + lp.topMargin;
             if (lp.ignoreOffset) {
-                top -= mCollapseOffset;
+                if (!isDragging()) {
+                    lp.mFixedTop = (int) (top - mCollapseOffset);
+                }
+                if (isIgnoreOffsetLimitSet) {
+                    top = Math.max(ignoreOffsetLimit + lp.topMargin, (int) (top - mCollapseOffset));
+                    ignoreOffsetLimit = top + child.getMeasuredHeight() + lp.bottomMargin;
+                } else {
+                    top -= mCollapseOffset;
+                }
             }
             final int bottom = top + child.getMeasuredHeight();
 
@@ -1102,11 +1148,23 @@ public class ResolverDrawerLayout extends ViewGroup {
         mCollapsibleHeightReserved = ss.mCollapsibleHeightReserved;
     }
 
+    private View findIgnoreOffsetLimitView() {
+        if (mIgnoreOffsetTopLimitViewId == ID_NULL) {
+            return null;
+        }
+        View v = findViewById(mIgnoreOffsetTopLimitViewId);
+        if (v != null && v != this && v.getParent() == this && v.getVisibility() != View.GONE) {
+            return v;
+        }
+        return null;
+    }
+
     public static class LayoutParams extends MarginLayoutParams {
         public boolean alwaysShow;
         public boolean ignoreOffset;
         public boolean hasNestedScrollIndicator;
         public int maxHeight;
+        int mFixedTop;
 
         public LayoutParams(Context c, AttributeSet attrs) {
             super(c, attrs);

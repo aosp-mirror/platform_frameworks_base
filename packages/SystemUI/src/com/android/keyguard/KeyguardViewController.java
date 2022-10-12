@@ -94,6 +94,11 @@ public interface KeyguardViewController {
     void setOccluded(boolean occluded, boolean animate);
 
     /**
+     * @return Whether the keyguard is showing
+     */
+    boolean isShowing();
+
+    /**
      * Dismisses the keyguard by going to the next screen or making it gone.
      */
     void dismissAndCollapse();
