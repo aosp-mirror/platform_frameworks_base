@@ -139,8 +139,18 @@ void ASurfaceControl_release(ASurfaceControl* aSurfaceControl) {
 }
 
 ASurfaceControl* ASurfaceControl_fromSurfaceControl(JNIEnv* env, jobject surfaceControlObj) {
-    return reinterpret_cast<ASurfaceControl*>(
-            android_view_SurfaceControl_getNativeSurfaceControl(env, surfaceControlObj));
+    LOG_ALWAYS_FATAL_IF(!env,
+                        "nullptr passed to ASurfaceControl_fromSurfaceControl as env argument");
+    LOG_ALWAYS_FATAL_IF(!surfaceControlObj,
+                        "nullptr passed to ASurfaceControl_fromSurfaceControl as surfaceControlObj "
+                        "argument");
+    SurfaceControl* surfaceControl =
+            android_view_SurfaceControl_getNativeSurfaceControl(env, surfaceControlObj);
+    LOG_ALWAYS_FATAL_IF(!surfaceControl,
+                        "surfaceControlObj passed to ASurfaceControl_fromSurfaceControl is not "
+                        "valid");
+    SurfaceControl_acquire(surfaceControl);
+    return reinterpret_cast<ASurfaceControl*>(surfaceControl);
 }
 
 struct ASurfaceControlStats {
@@ -200,8 +210,17 @@ void ASurfaceTransaction_delete(ASurfaceTransaction* aSurfaceTransaction) {
 }
 
 ASurfaceTransaction* ASurfaceTransaction_fromTransaction(JNIEnv* env, jobject transactionObj) {
-    return reinterpret_cast<ASurfaceTransaction*>(
-            android_view_SurfaceTransaction_getNativeSurfaceTransaction(env, transactionObj));
+    LOG_ALWAYS_FATAL_IF(!env,
+                        "nullptr passed to ASurfaceTransaction_fromTransaction as env argument");
+    LOG_ALWAYS_FATAL_IF(!transactionObj,
+                        "nullptr passed to ASurfaceTransaction_fromTransaction as transactionObj "
+                        "argument");
+    Transaction* transaction =
+            android_view_SurfaceTransaction_getNativeSurfaceTransaction(env, transactionObj);
+    LOG_ALWAYS_FATAL_IF(!transaction,
+                        "surfaceControlObj passed to ASurfaceTransaction_fromTransaction is not "
+                        "valid");
+    return reinterpret_cast<ASurfaceTransaction*>(transaction);
 }
 
 void ASurfaceTransaction_apply(ASurfaceTransaction* aSurfaceTransaction) {
