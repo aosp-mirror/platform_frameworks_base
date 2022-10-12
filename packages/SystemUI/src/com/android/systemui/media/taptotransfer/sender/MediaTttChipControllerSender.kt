@@ -48,7 +48,6 @@ import com.android.systemui.temporarydisplay.TemporaryViewDisplayController
 import com.android.systemui.temporarydisplay.TemporaryViewInfo
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.view.ViewUtil
-import dagger.Lazy
 import javax.inject.Inject
 
 /**
@@ -57,7 +56,7 @@ import javax.inject.Inject
  */
 @SysUISingleton
 open class MediaTttChipControllerSender @Inject constructor(
-        commandQueue: CommandQueue,
+        private val commandQueue: CommandQueue,
         context: Context,
         @MediaTttSenderLogger logger: MediaTttLogger,
         windowManager: WindowManager,
@@ -66,10 +65,8 @@ open class MediaTttChipControllerSender @Inject constructor(
         configurationController: ConfigurationController,
         powerManager: PowerManager,
         private val uiEventLogger: MediaTttSenderUiEventLogger,
-        // Added Lazy<> to delay the time we create Falsing instances.
-        // And overcome performance issue, check [b/247817628] for details.
-        private val falsingManager: Lazy<FalsingManager>,
-        private val falsingCollector: Lazy<FalsingCollector>,
+        private val falsingManager: FalsingManager,
+        private val falsingCollector: FalsingCollector,
         private val viewUtil: ViewUtil,
 ) : TemporaryViewDisplayController<ChipSenderInfo, MediaTttLogger>(
         context,
@@ -102,10 +99,6 @@ open class MediaTttChipControllerSender @Inject constructor(
         }
     }
 
-    init {
-        commandQueue.addCallback(commandQueueCallbacks)
-    }
-
     private fun updateMediaTapToTransferSenderDisplay(
         @StatusBarManager.MediaTransferSenderState displayState: Int,
         routeInfo: MediaRoute2Info,
@@ -128,6 +121,10 @@ open class MediaTttChipControllerSender @Inject constructor(
         }
     }
 
+    override fun start() {
+        commandQueue.addCallback(commandQueueCallbacks)
+    }
+
     override fun updateView(
         newInfo: ChipSenderInfo,
         currentView: ViewGroup
@@ -138,7 +135,7 @@ open class MediaTttChipControllerSender @Inject constructor(
         parent = currentView.requireViewById(R.id.media_ttt_sender_chip)
         parent.touchHandler = object : Gefingerpoken {
             override fun onTouchEvent(ev: MotionEvent?): Boolean {
-                falsingCollector.get().onTouchEvent(ev)
+                falsingCollector.onTouchEvent(ev)
                 return false
             }
         }
@@ -167,7 +164,7 @@ open class MediaTttChipControllerSender @Inject constructor(
                 newInfo.routeInfo,
                 newInfo.undoCallback,
                 uiEventLogger,
-                falsingManager.get(),
+                falsingManager,
         )
         undoView.setOnClickListener(undoClickListener)
         undoView.visibility = (undoClickListener != null).visibleIfTrue()

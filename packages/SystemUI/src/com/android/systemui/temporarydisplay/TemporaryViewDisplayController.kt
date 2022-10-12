@@ -32,6 +32,7 @@ import android.view.accessibility.AccessibilityManager
 import android.view.accessibility.AccessibilityManager.FLAG_CONTENT_CONTROLS
 import android.view.accessibility.AccessibilityManager.FLAG_CONTENT_ICONS
 import android.view.accessibility.AccessibilityManager.FLAG_CONTENT_TEXT
+import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.concurrency.DelayableExecutor
@@ -61,7 +62,7 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
     @LayoutRes private val viewLayoutRes: Int,
     private val windowTitle: String,
     private val wakeReason: String,
-) {
+) : CoreStartable(context) {
     /**
      * Window layout params that will be used as a starting point for the [windowLayoutParams] of
      * all subclasses.

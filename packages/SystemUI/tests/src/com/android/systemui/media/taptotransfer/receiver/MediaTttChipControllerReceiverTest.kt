@@ -110,6 +110,7 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
             receiverUiEventLogger,
             viewUtil,
         )
+        controllerReceiver.start()
 
         val callbackCaptor = ArgumentCaptor.forClass(CommandQueue.Callbacks::class.java)
         verify(commandQueue).addCallback(callbackCaptor.capture())
