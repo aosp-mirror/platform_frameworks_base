@@ -6031,7 +6031,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             new DumpHelper(mPermissionManager, mStorageEventHelper,
                     mDomainVerificationManager, mInstallerService, mRequiredVerifierPackages,
                     knownPackages, mChangedPackagesTracker, availableFeatures, protectedBroadcasts,
-                    getPerUidReadTimeouts(snapshot)
+                    getPerUidReadTimeouts(snapshot), mSnapshotStatistics
             ).doDump(snapshot, fd, pw, args);
         }
     }
