@@ -490,6 +490,8 @@ public final class GameManagerService extends IGameManagerService.Stub {
         private final Object mModeConfigLock = new Object();
         @GuardedBy("mModeConfigLock")
         private final ArrayMap<Integer, GameModeConfiguration> mModeConfigs = new ArrayMap<>();
+        // if adding new properties or make any of the below overridable, the method
+        // copyAndApplyOverride should be updated accordingly
         private boolean mPerfModeOptedIn = false;
         private boolean mBatteryModeOptedIn = false;
         private boolean mAllowDownscale = true;
@@ -798,6 +800,42 @@ public final class GameManagerService extends IGameManagerService.Stub {
             synchronized (mModeConfigLock) {
                 return mModeConfigs.size() > 0 || mBatteryModeOptedIn || mPerfModeOptedIn;
             }
+        }
+
+        GamePackageConfiguration copyAndApplyOverride(GamePackageConfiguration overrideConfig) {
+            GamePackageConfiguration copy = new GamePackageConfiguration(mPackageName);
+            // if a game mode is overridden, we treat it with the highest priority and reset any
+            // opt-in game modes so that interventions are always executed.
+            copy.mPerfModeOptedIn = mPerfModeOptedIn && !(overrideConfig != null
+                    && overrideConfig.getGameModeConfiguration(GameManager.GAME_MODE_PERFORMANCE)
+                    != null);
+            copy.mBatteryModeOptedIn = mBatteryModeOptedIn && !(overrideConfig != null
+                    && overrideConfig.getGameModeConfiguration(GameManager.GAME_MODE_BATTERY)
+                    != null);
+
+            // if any game mode is overridden, we will consider all interventions forced-active,
+            // this can be done more granular by checking if a specific intervention is
+            // overridden under each game mode override, but only if necessary.
+            copy.mAllowDownscale = mAllowDownscale || overrideConfig != null;
+            copy.mAllowAngle = mAllowAngle || overrideConfig != null;
+            copy.mAllowFpsOverride = mAllowFpsOverride || overrideConfig != null;
+            if (overrideConfig != null) {
+                synchronized (copy.mModeConfigLock) {
+                    synchronized (mModeConfigLock) {
+                        for (Map.Entry<Integer, GameModeConfiguration> entry :
+                                mModeConfigs.entrySet()) {
+                            copy.mModeConfigs.put(entry.getKey(), entry.getValue());
+                        }
+                    }
+                    synchronized (overrideConfig.mModeConfigLock) {
+                        for (Map.Entry<Integer, GameModeConfiguration> entry :
+                                overrideConfig.mModeConfigs.entrySet()) {
+                            copy.mModeConfigs.put(entry.getKey(), entry.getValue());
+                        }
+                    }
+                }
+            }
+            return copy;
         }
 
         public String toString() {
@@ -1375,7 +1413,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
             // look for the existing GamePackageConfiguration override
             configOverride = settings.getConfigOverride(packageName);
             if (configOverride == null) {
-                configOverride = new GamePackageConfiguration(mPackageManager, packageName, userId);
+                configOverride = new GamePackageConfiguration(packageName);
                 settings.setConfigOverride(packageName, configOverride);
             }
         }
@@ -1430,18 +1468,12 @@ public final class GameManagerService extends IGameManagerService.Stub {
                     return;
                 }
                 // if the game mode to reset is the only mode other than standard mode or there
-                // is device config, the config override is removed.
+                // is device config, the entire package config override is removed.
                 if (Integer.bitCount(modesBitfield) <= 2 || deviceConfig == null) {
                     settings.removeConfigOverride(packageName);
                 } else {
-                    final GamePackageConfiguration.GameModeConfiguration defaultModeConfig =
-                            deviceConfig.getGameModeConfiguration(gameModeToReset);
-                    // otherwise we reset the mode by copying the original config.
-                    if (defaultModeConfig == null) {
-                        configOverride.removeModeConfig(gameModeToReset);
-                    } else {
-                        configOverride.addModeConfig(defaultModeConfig);
-                    }
+                    // otherwise we reset the mode by removing the game mode config override
+                    configOverride.removeModeConfig(gameModeToReset);
                 }
             } else {
                 settings.removeConfigOverride(packageName);
@@ -1661,18 +1693,21 @@ public final class GameManagerService extends IGameManagerService.Stub {
      * @hide
      */
     public GamePackageConfiguration getConfig(String packageName, int userId) {
-        GamePackageConfiguration packageConfig = null;
+        GamePackageConfiguration overrideConfig = null;
+        GamePackageConfiguration config;
+        synchronized (mDeviceConfigLock) {
+            config = mConfigs.get(packageName);
+        }
+
         synchronized (mLock) {
             if (mSettings.containsKey(userId)) {
-                packageConfig = mSettings.get(userId).getConfigOverride(packageName);
+                overrideConfig = mSettings.get(userId).getConfigOverride(packageName);
             }
         }
-        if (packageConfig == null) {
-            synchronized (mDeviceConfigLock) {
-                packageConfig = mConfigs.get(packageName);
-            }
+        if (overrideConfig == null || config == null) {
+            return overrideConfig == null ? config : overrideConfig;
         }
-        return packageConfig;
+        return config.copyAndApplyOverride(overrideConfig);
     }
 
     private void registerPackageReceiver() {
