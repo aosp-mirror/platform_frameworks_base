@@ -103,6 +103,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.net.NetworkUtilsInternal;
 import com.android.internal.os.BackgroundThread;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
 import com.android.org.conscrypt.TrustedCertificateStore;
 
@@ -3821,6 +3822,27 @@ public class DevicePolicyManager {
      * the driver of the vehicle.
      */
     public static final int OPERATION_SAFETY_REASON_DRIVING_DISTRACTION = 1;
+
+    /**
+     * Prevent an app from being placed into app standby buckets, such that it will not be subject
+     * to device resources restrictions as a result of app standby buckets.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int EXEMPT_FROM_APP_STANDBY =  0;
+
+    /**
+     * Exemptions to platform restrictions, given to an application through
+     * {@link #setApplicationExemptions(String, Set)}.
+     *
+     * @hide
+     */
+    @IntDef(prefix = { "EXEMPT_FROM_"}, value = {
+            EXEMPT_FROM_APP_STANDBY
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ApplicationExemptionConstants {}
 
     /**
      * Broadcast action: notify system apps (e.g. settings, SysUI, etc) that the device management
@@ -14724,6 +14746,95 @@ public class DevicePolicyManager {
             }
         }
         return false;
+    }
+
+    /**
+     * Service-specific error code used in {@link #setApplicationExemptions(String, Set)} and
+     * {@link #getApplicationExemptions(String)}.
+     * @hide
+     */
+    public static final int ERROR_PACKAGE_NAME_NOT_FOUND = 1;
+
+    /**
+     * Called by an application with the
+     * {@link  android.Manifest.permission#MANAGE_DEVICE_POLICY_APP_EXEMPTIONS} permission, to
+     * grant platform restriction exemptions to a given application.
+     *
+     * @param  packageName The package name of the application to be exempt.
+     * @param  exemptions The set of exemptions to be applied.
+     * @throws SecurityException If the caller does not have
+     *             {@link  android.Manifest.permission#MANAGE_DEVICE_POLICY_APP_EXEMPTIONS}
+     * @throws NameNotFoundException If either the package is not installed or the package is not
+     *              visible to the caller.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_DEVICE_POLICY_APP_EXEMPTIONS)
+    public void setApplicationExemptions(@NonNull String packageName,
+            @NonNull @ApplicationExemptionConstants Set<Integer> exemptions)
+            throws NameNotFoundException {
+        throwIfParentInstance("setApplicationExemptions");
+        if (mService != null) {
+            try {
+                mService.setApplicationExemptions(packageName,
+                        ArrayUtils.convertToIntArray(new ArraySet<>(exemptions)));
+            } catch (ServiceSpecificException e) {
+                switch (e.errorCode) {
+                    case ERROR_PACKAGE_NAME_NOT_FOUND:
+                        throw new NameNotFoundException(e.getMessage());
+                    default:
+                        throw new RuntimeException(
+                                "Unknown error setting application exemptions: " + e.errorCode, e);
+                }
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Returns all the platform restriction exemptions currently applied to an application. Called
+     * by an application with the
+     * {@link  android.Manifest.permission#MANAGE_DEVICE_POLICY_APP_EXEMPTIONS} permission.
+     *
+     * @param  packageName The package name to check.
+     * @return A set of platform restrictions an application is exempt from.
+     * @throws SecurityException If the caller does not have
+     *             {@link  android.Manifest.permission#MANAGE_DEVICE_POLICY_APP_EXEMPTIONS}
+     * @throws NameNotFoundException If either the package is not installed or the package is not
+     *              visible to the caller.
+     * @hide
+     */
+    @NonNull
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_DEVICE_POLICY_APP_EXEMPTIONS)
+    public Set<Integer> getApplicationExemptions(@NonNull String packageName)
+            throws NameNotFoundException {
+        throwIfParentInstance("getApplicationExemptions");
+        if (mService == null) {
+            return Collections.emptySet();
+        }
+        try {
+            return intArrayToSet(mService.getApplicationExemptions(packageName));
+        } catch (ServiceSpecificException e) {
+            switch (e.errorCode) {
+                case ERROR_PACKAGE_NAME_NOT_FOUND:
+                    throw new NameNotFoundException(e.getMessage());
+                default:
+                    throw new RuntimeException(
+                            "Unknown error getting application exemptions: " + e.errorCode, e);
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    private Set<Integer> intArrayToSet(int[] array) {
+        Set<Integer> set = new ArraySet<>();
+        for (int item : array) {
+            set.add(item);
+        }
+        return set;
     }
 
     /**
