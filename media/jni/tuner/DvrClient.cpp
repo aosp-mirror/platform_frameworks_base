@@ -303,7 +303,17 @@ Result DvrClient::close() {
 
     return Result::INVALID_STATE;
 }
+Result DvrClient::setStatusCheckIntervalHint(int64_t durationInMs) {
+    if (mTunerDvr == nullptr) {
+      return Result::INVALID_STATE;
+    }
+    if (durationInMs < 0) {
+      return Result::INVALID_ARGUMENT;
+    }
 
+    Status s = mTunerDvr->setStatusCheckIntervalHint(durationInMs);
+    return ClientHelper::getServiceSpecificErrorCode(s);
+}
 /////////////// TunerDvrCallback ///////////////////////
 TunerDvrCallback::TunerDvrCallback(sp<DvrClientCallback> dvrClientCallback)
         : mDvrClientCallback(dvrClientCallback) {}

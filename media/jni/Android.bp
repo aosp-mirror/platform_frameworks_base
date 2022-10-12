@@ -175,7 +175,7 @@ cc_library_shared {
 
     shared_libs: [
         "android.hardware.graphics.bufferqueue@2.0",
-        "android.hardware.tv.tuner-V1-ndk",
+        "android.hardware.tv.tuner-V2-ndk",
         "libbinder_ndk",
         "libandroid_runtime",
         "libcutils",
