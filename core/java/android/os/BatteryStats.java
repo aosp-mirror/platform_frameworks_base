@@ -2017,7 +2017,7 @@ public abstract class BatteryStats {
         public static final int EVENT_PACKAGE_INSTALLED = 0x000b;
         // Event for a package being uninstalled.
         public static final int EVENT_PACKAGE_UNINSTALLED = 0x000c;
-        // Event for a package being uninstalled.
+        // Event for an alarm being sent out to an app.
         public static final int EVENT_ALARM = 0x000d;
         // Record that we have decided we need to collect new stats data.
         public static final int EVENT_COLLECT_EXTERNAL_STATS = 0x000e;
