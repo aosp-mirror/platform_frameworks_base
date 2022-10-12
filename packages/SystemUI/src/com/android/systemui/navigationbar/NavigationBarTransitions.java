@@ -36,6 +36,7 @@ import com.android.systemui.statusbar.phone.BarTransitions;
 import com.android.systemui.statusbar.phone.LightBarTransitionsController;
 
 import java.io.PrintWriter;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -75,15 +76,27 @@ public final class NavigationBarTransitions extends BarTransitions implements
     private List<DarkIntensityListener> mDarkIntensityListeners;
 
     private final Handler mHandler = Handler.getMain();
-    private final IWallpaperVisibilityListener mWallpaperVisibilityListener =
-            new IWallpaperVisibilityListener.Stub() {
+
+    static final class WallpaperVisibilityListener extends IWallpaperVisibilityListener.Stub {
+        private final WeakReference<NavigationBarTransitions> mSelf;
+
+        WallpaperVisibilityListener(NavigationBarTransitions self) {
+            mSelf = new WeakReference<>(self);
+        }
+
         @Override
         public void onWallpaperVisibilityChanged(boolean newVisibility,
-        int displayId) throws RemoteException {
-            mWallpaperVisible = newVisibility;
-            mHandler.post(() -> applyLightsOut(true, false));
+                int displayId) throws RemoteException {
+            NavigationBarTransitions self = mSelf.get();
+            if (self == null) {
+                return;
+            }
+            self.mWallpaperVisible = newVisibility;
+            self.mHandler.post(() -> self.applyLightsOut(true, false));
         }
-    };
+    }
+
+    private final IWallpaperVisibilityListener mWallpaperVisibilityListener;
 
     @Inject
     public NavigationBarTransitions(
@@ -91,6 +104,7 @@ public final class NavigationBarTransitions extends BarTransitions implements
             IWindowManager windowManagerService,
             LightBarTransitionsController.Factory lightBarTransitionsControllerFactory) {
         super(view, R.drawable.nav_background);
+
         mView = view;
         mWindowManagerService = windowManagerService;
         mLightTransitionsController = lightBarTransitionsControllerFactory.create(this);
@@ -98,6 +112,7 @@ public final class NavigationBarTransitions extends BarTransitions implements
                 .getBoolean(R.bool.config_navigation_bar_enable_auto_dim_no_visible_wallpaper);
         mDarkIntensityListeners = new ArrayList();
 
+        mWallpaperVisibilityListener = new WallpaperVisibilityListener(this);
         try {
             mWallpaperVisible = mWindowManagerService.registerWallpaperVisibilityListener(
                     mWallpaperVisibilityListener, Display.DEFAULT_DISPLAY);
