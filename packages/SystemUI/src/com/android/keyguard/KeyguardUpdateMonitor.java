@@ -3164,14 +3164,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      * Whether the keyguard is showing and not occluded.
      */
     public boolean isKeyguardVisible() {
-        return isKeyguardShowing() && !mKeyguardOccluded;
-    }
-
-    /**
-     * Whether the keyguard is showing. It may still be occluded and not visible.
-     */
-    public boolean isKeyguardShowing() {
-        return mKeyguardShowing;
+        return mKeyguardShowing && !mKeyguardOccluded;
     }
 
     /**
