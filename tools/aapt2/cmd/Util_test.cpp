@@ -25,6 +25,7 @@
 #include "util/Files.h"
 
 using ::android::ConfigDescription;
+using testing::UnorderedElementsAre;
 
 namespace aapt {
 
@@ -409,6 +410,63 @@ TEST (UtilTest, RegularExpressionNonEnglish) {
   EXPECT_TRUE(std::regex_search("file.KOŃCÓWKA", expression));
   EXPECT_TRUE(std::regex_search("file.kOńcÓwkA", expression));
   EXPECT_FALSE(std::regex_search("file.koncowka", expression));
+}
+
+TEST(UtilTest, ParseConfigWithDirectives) {
+  const std::string& content = R"(
+bool/remove_me#remove
+bool/keep_name#no_collapse
+string/foo#no_obfuscate
+dimen/bar#no_obfuscate
+)";
+  aapt::test::Context context;
+  std::unordered_set<ResourceName> resource_exclusion;
+  std::set<ResourceName> name_collapse_exemptions;
+
+  EXPECT_TRUE(ParseResourceConfig(content, &context, resource_exclusion, name_collapse_exemptions));
+
+  EXPECT_THAT(name_collapse_exemptions,
+              UnorderedElementsAre(ResourceName({}, ResourceType::kString, "foo"),
+                                   ResourceName({}, ResourceType::kDimen, "bar"),
+                                   ResourceName({}, ResourceType::kBool, "keep_name")));
+  EXPECT_THAT(resource_exclusion,
+              UnorderedElementsAre(ResourceName({}, ResourceType::kBool, "remove_me")));
+}
+
+TEST(UtilTest, ParseConfigResourceWithPackage) {
+  const std::string& content = R"(
+package:bool/remove_me#remove
+)";
+  aapt::test::Context context;
+  std::unordered_set<ResourceName> resource_exclusion;
+  std::set<ResourceName> name_collapse_exemptions;
+
+  EXPECT_FALSE(
+      ParseResourceConfig(content, &context, resource_exclusion, name_collapse_exemptions));
+}
+
+TEST(UtilTest, ParseConfigInvalidName) {
+  const std::string& content = R"(
+package:bool/1231#remove
+)";
+  aapt::test::Context context;
+  std::unordered_set<ResourceName> resource_exclusion;
+  std::set<ResourceName> name_collapse_exemptions;
+
+  EXPECT_FALSE(
+      ParseResourceConfig(content, &context, resource_exclusion, name_collapse_exemptions));
+}
+
+TEST(UtilTest, ParseConfigNoHash) {
+  const std::string& content = R"(
+package:bool/my_bool
+)";
+  aapt::test::Context context;
+  std::unordered_set<ResourceName> resource_exclusion;
+  std::set<ResourceName> name_collapse_exemptions;
+
+  EXPECT_FALSE(
+      ParseResourceConfig(content, &context, resource_exclusion, name_collapse_exemptions));
 }
 
 }  // namespace aapt
