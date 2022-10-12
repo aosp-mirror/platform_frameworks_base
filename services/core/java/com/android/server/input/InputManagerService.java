@@ -2682,7 +2682,13 @@ public class InputManagerService extends IInputManager.Stub
     public String getInputDeviceBluetoothAddress(int deviceId) {
         super.getInputDeviceBluetoothAddress_enforcePermission();
 
-        return mNative.getBluetoothAddress(deviceId);
+        final String address = mNative.getBluetoothAddress(deviceId);
+        if (address == null) return null;
+        if (!BluetoothAdapter.checkBluetoothAddress(address)) {
+            throw new IllegalStateException("The Bluetooth address of input device " + deviceId
+                    + " should not be invalid: address=" + address);
+        }
+        return address;
     }
 
     @EnforcePermission(Manifest.permission.MONITOR_INPUT)
