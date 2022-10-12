@@ -40,6 +40,7 @@ import com.android.server.criticalevents.CriticalEventLog;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.OptionalInt;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -332,9 +333,10 @@ class AnrController {
             String criticalEvents =
                     CriticalEventLog.getInstance().logLinesForSystemServerTraceFile();
             final File tracesFile = ActivityManagerService.dumpStackTraces(firstPids,
-                    null /* processCpuTracker */, null /* lastPids */, nativePids,
+                    null /* processCpuTracker */, null /* lastPids */,
+                    CompletableFuture.completedFuture(nativePids),
                     null /* logExceptionCreatingFile */, "Pre-dump", criticalEvents,
-                    null/* AnrLatencyTracker */);
+                    Runnable::run, null/* AnrLatencyTracker */);
             if (tracesFile != null) {
                 tracesFile.renameTo(
                         new File(tracesFile.getParent(), tracesFile.getName() + "_pre"));

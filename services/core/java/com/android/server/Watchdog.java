@@ -49,7 +49,7 @@ import android.util.Dumpable;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
-import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.ProcessCpuTracker;
@@ -75,6 +75,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -894,8 +895,9 @@ public class Watchdog implements Dumpable {
         ProcessCpuTracker processCpuTracker = new ProcessCpuTracker(false);
         StringWriter tracesFileException = new StringWriter();
         final File stack = ActivityManagerService.dumpStackTraces(
-                pids, processCpuTracker, new SparseArray<>(), getInterestingNativePids(),
-                tracesFileException, subject, criticalEvents, /* latencyTracker= */null);
+                pids, processCpuTracker, new SparseBooleanArray(),
+                CompletableFuture.completedFuture(getInterestingNativePids()), tracesFileException,
+                subject, criticalEvents, Runnable::run, /* latencyTracker= */null);
         // Give some extra time to make sure the stack traces get written.
         // The system's been hanging for a whlie, another second or two won't hurt much.
         SystemClock.sleep(5000);

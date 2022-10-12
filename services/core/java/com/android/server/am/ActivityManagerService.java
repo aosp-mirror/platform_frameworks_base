@@ -332,6 +332,7 @@ import android.util.Pair;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
@@ -467,11 +468,15 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiFunction;
+import java.util.function.Supplier;
 
 public class ActivityManagerService extends IActivityManager.Stub
         implements Watchdog.Monitor, BatteryStatsImpl.BatteryCallback, ActivityManagerGlobalLock {
@@ -3427,14 +3432,15 @@ public class ActivityManagerService extends IActivityManager.Stub
      * @param lastPids of dalvik VM processes to dump stack traces for last
      * @param nativePids optional list of native pids to dump stack crawls
      * @param logExceptionCreatingFile optional writer to which we log errors creating the file
+     * @param auxiliaryTaskExecutor executor to execute auxiliary tasks on
      * @param latencyTracker the latency tracker instance of the current ANR.
      */
     public static File dumpStackTraces(ArrayList<Integer> firstPids,
-            ProcessCpuTracker processCpuTracker, SparseArray<Boolean> lastPids,
-            ArrayList<Integer> nativePids, StringWriter logExceptionCreatingFile,
-            AnrLatencyTracker latencyTracker) {
-        return dumpStackTraces(firstPids, processCpuTracker, lastPids, nativePids,
-                logExceptionCreatingFile, null, null, null, latencyTracker);
+            ProcessCpuTracker processCpuTracker, SparseBooleanArray lastPids,
+            Future<ArrayList<Integer>> nativePidsFuture, StringWriter logExceptionCreatingFile,
+            @NonNull Executor auxiliaryTaskExecutor, AnrLatencyTracker latencyTracker) {
+        return dumpStackTraces(firstPids, processCpuTracker, lastPids, nativePidsFuture,
+                logExceptionCreatingFile, null, null, null, auxiliaryTaskExecutor, latencyTracker);
     }
 
     /**
@@ -3445,14 +3451,17 @@ public class ActivityManagerService extends IActivityManager.Stub
      * @param logExceptionCreatingFile optional writer to which we log errors creating the file
      * @param subject optional line related to the error
      * @param criticalEventSection optional lines containing recent critical events.
+     * @param auxiliaryTaskExecutor executor to execute auxiliary tasks on
      * @param latencyTracker the latency tracker instance of the current ANR.
      */
     public static File dumpStackTraces(ArrayList<Integer> firstPids,
-            ProcessCpuTracker processCpuTracker, SparseArray<Boolean> lastPids,
-            ArrayList<Integer> nativePids, StringWriter logExceptionCreatingFile,
-            String subject, String criticalEventSection, AnrLatencyTracker latencyTracker) {
-        return dumpStackTraces(firstPids, processCpuTracker, lastPids, nativePids,
-                logExceptionCreatingFile, null, subject, criticalEventSection, latencyTracker);
+            ProcessCpuTracker processCpuTracker, SparseBooleanArray lastPids,
+            Future<ArrayList<Integer>> nativePidsFuture, StringWriter logExceptionCreatingFile,
+            String subject, String criticalEventSection, @NonNull Executor auxiliaryTaskExecutor,
+            AnrLatencyTracker latencyTracker) {
+        return dumpStackTraces(firstPids, processCpuTracker, lastPids, nativePidsFuture,
+                logExceptionCreatingFile, null, subject, criticalEventSection,
+                auxiliaryTaskExecutor, latencyTracker);
     }
 
     /**
@@ -3460,49 +3469,26 @@ public class ActivityManagerService extends IActivityManager.Stub
      *                        of the very first pid to be dumped.
      */
     /* package */ static File dumpStackTraces(ArrayList<Integer> firstPids,
-            ProcessCpuTracker processCpuTracker, SparseArray<Boolean> lastPids,
-            ArrayList<Integer> nativePids, StringWriter logExceptionCreatingFile,
+            ProcessCpuTracker processCpuTracker, SparseBooleanArray lastPids,
+            Future<ArrayList<Integer>> nativePidsFuture, StringWriter logExceptionCreatingFile,
             AtomicLong firstPidEndOffset, String subject, String criticalEventSection,
-            AnrLatencyTracker latencyTracker) {
+            @NonNull Executor auxiliaryTaskExecutor, AnrLatencyTracker latencyTracker) {
         try {
+
             if (latencyTracker != null) {
                 latencyTracker.dumpStackTracesStarted();
             }
-            ArrayList<Integer> extraPids = null;
 
-            Slog.i(TAG, "dumpStackTraces pids=" + lastPids + " nativepids=" + nativePids);
+            Slog.i(TAG, "dumpStackTraces pids=" + lastPids);
 
             // Measure CPU usage as soon as we're called in order to get a realistic sampling
             // of the top users at the time of the request.
-            if (processCpuTracker != null) {
-                if (latencyTracker != null) {
-                    latencyTracker.processCpuTrackerMethodsCalled();
-                }
-                processCpuTracker.init();
-                try {
-                    Thread.sleep(200);
-                } catch (InterruptedException ignored) {
-                }
-
-                processCpuTracker.update();
-
-                // We'll take the stack crawls of just the top apps using CPU.
-                final int workingStatsNumber = processCpuTracker.countWorkingStats();
-                extraPids = new ArrayList<>();
-                for (int i = 0; i < workingStatsNumber && extraPids.size() < 5; i++) {
-                    ProcessCpuTracker.Stats stats = processCpuTracker.getWorkingStats(i);
-                    if (lastPids.indexOfKey(stats.pid) >= 0) {
-                        if (DEBUG_ANR) Slog.d(TAG, "Collecting stacks for extra pid " + stats.pid);
-
-                        extraPids.add(stats.pid);
-                    } else {
-                        Slog.i(TAG, "Skipping next CPU consuming process, not a java proc: "
-                                + stats.pid);
-                    }
-                }
-                if (latencyTracker != null) {
-                    latencyTracker.processCpuTrackerMethodsReturned();
-                }
+            Supplier<ArrayList<Integer>> extraPidsSupplier = processCpuTracker != null
+                    ? () -> getExtraPids(processCpuTracker, lastPids, latencyTracker) : null;
+            Future<ArrayList<Integer>> extraPidsFuture = null;
+            if (extraPidsSupplier != null) {
+                extraPidsFuture =
+                        CompletableFuture.supplyAsync(extraPidsSupplier, auxiliaryTaskExecutor);
             }
 
             final File tracesDir = new File(ANR_TRACE_DIR);
@@ -3536,7 +3522,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             long firstPidEndPos = dumpStackTraces(
-                    tracesFile.getAbsolutePath(), firstPids, nativePids, extraPids, latencyTracker);
+                    tracesFile.getAbsolutePath(), firstPids, nativePidsFuture,
+                    extraPidsFuture, latencyTracker);
             if (firstPidEndOffset != null) {
                 firstPidEndOffset.set(firstPidEndPos);
             }
@@ -3553,6 +3540,42 @@ public class ActivityManagerService extends IActivityManager.Stub
     @GuardedBy("ActivityManagerService.class")
     private static SimpleDateFormat sAnrFileDateFormat;
     static final String ANR_FILE_PREFIX = "anr_";
+
+    private static ArrayList<Integer> getExtraPids(ProcessCpuTracker processCpuTracker,
+            SparseBooleanArray lastPids, AnrLatencyTracker latencyTracker) {
+        if (latencyTracker != null) {
+            latencyTracker.processCpuTrackerMethodsCalled();
+        }
+        ArrayList<Integer> extraPids = new ArrayList<>();
+        processCpuTracker.init();
+        try {
+            Thread.sleep(200);
+        } catch (InterruptedException ignored) {
+        }
+
+        processCpuTracker.update();
+
+        // We'll take the stack crawls of just the top apps using CPU.
+        final int workingStatsNumber = processCpuTracker.countWorkingStats();
+        for (int i = 0; i < workingStatsNumber && extraPids.size() < 5; i++) {
+            ProcessCpuTracker.Stats stats = processCpuTracker.getWorkingStats(i);
+            if (lastPids.indexOfKey(stats.pid) >= 0) {
+                if (DEBUG_ANR) {
+                    Slog.d(TAG, "Collecting stacks for extra pid " + stats.pid);
+                }
+
+                extraPids.add(stats.pid);
+            } else {
+                Slog.i(TAG,
+                        "Skipping next CPU consuming process, not a java proc: "
+                        + stats.pid);
+            }
+        }
+        if (latencyTracker != null) {
+            latencyTracker.processCpuTrackerMethodsReturned();
+        }
+        return extraPids;
+    }
 
     private static synchronized File createAnrDumpFile(File tracesDir) throws IOException {
         if (sAnrFileDateFormat == null) {
@@ -3660,8 +3683,8 @@ public class ActivityManagerService extends IActivityManager.Stub
      * @return The end offset of the trace of the very first PID
      */
     public static long dumpStackTraces(String tracesFile,
-            ArrayList<Integer> firstPids, ArrayList<Integer> nativePids,
-            ArrayList<Integer> extraPids, AnrLatencyTracker latencyTracker) {
+            ArrayList<Integer> firstPids, Future<ArrayList<Integer>> nativePidsFuture,
+            Future<ArrayList<Integer>> extraPidsFuture, AnrLatencyTracker latencyTracker) {
 
         Slog.i(TAG, "Dumping to " + tracesFile);
 
@@ -3682,6 +3705,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (latencyTracker != null) {
                 latencyTracker.dumpingFirstPidsStarted();
             }
+
             int num = firstPids.size();
             for (int i = 0; i < num; i++) {
                 final int pid = firstPids.get(i);
@@ -3723,6 +3747,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         // Next collect the stacks of the native pids
+        ArrayList<Integer> nativePids = collectPids(nativePidsFuture, "native pids");
+
+        Slog.i(TAG, "dumpStackTraces nativepids=" + nativePids);
+
         if (nativePids != null) {
             if (latencyTracker != null) {
                 latencyTracker.dumpingNativePidsStarted();
@@ -3758,6 +3786,19 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         // Lastly, dump stacks for all extra PIDs from the CPU tracker.
+        ArrayList<Integer> extraPids = collectPids(extraPidsFuture, "extra pids");
+
+        if (extraPidsFuture != null) {
+            try {
+                extraPids = extraPidsFuture.get();
+            } catch (ExecutionException e) {
+                Slog.w(TAG, "Failed to collect extra pids", e.getCause());
+            } catch (InterruptedException e) {
+                Slog.w(TAG, "Interrupted while collecting extra pids", e);
+            }
+        }
+        Slog.i(TAG, "dumpStackTraces extraPids=" + extraPids);
+
         if (extraPids != null) {
             if (latencyTracker != null) {
                 latencyTracker.dumpingExtraPidsStarted();
@@ -3791,6 +3832,24 @@ public class ActivityManagerService extends IActivityManager.Stub
         Slog.i(TAG, "Done dumping");
 
         return firstPidEnd;
+    }
+
+    private static ArrayList<Integer> collectPids(Future<ArrayList<Integer>> pidsFuture,
+            String logName) {
+
+        ArrayList<Integer> pids = null;
+
+        if (pidsFuture == null) {
+            return pids;
+        }
+        try {
+            pids = pidsFuture.get();
+        } catch (ExecutionException e) {
+            Slog.w(TAG, "Failed to collect " + logName, e.getCause());
+        } catch (InterruptedException e) {
+            Slog.w(TAG, "Interrupted while collecting " + logName , e);
+        }
+        return pids;
     }
 
     @Override
