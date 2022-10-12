@@ -44,7 +44,6 @@ import com.android.systemui.media.taptotransfer.sender.MediaTttSenderUiEventLogg
 import com.android.systemui.media.taptotransfer.sender.TransferStatus
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.policy.ConfigurationController
-import com.android.systemui.temporarydisplay.TemporaryDisplayRemovalReason
 import com.android.systemui.temporarydisplay.TemporaryViewDisplayController
 import com.android.systemui.temporarydisplay.TemporaryViewInfo
 import com.android.systemui.util.concurrency.DelayableExecutor
@@ -183,23 +182,6 @@ open class ChipbarCoordinator @Inject constructor(
             includeMargins = true,
             onAnimationEnd,
         )
-    }
-
-    override fun shouldIgnoreViewRemoval(info: ChipSenderInfo, removalReason: String): Boolean {
-        // Don't remove the chip if we're in progress or succeeded, since the user should still be
-        // able to see the status of the transfer. (But do remove it if it's finally timed out.)
-        val transferStatus = info.state.transferStatus
-        if (
-            (transferStatus == TransferStatus.IN_PROGRESS ||
-                transferStatus == TransferStatus.SUCCEEDED) &&
-            removalReason != TemporaryDisplayRemovalReason.REASON_TIMEOUT
-        ) {
-            logger.logRemovalBypass(
-                removalReason, bypassReason = "transferStatus=${transferStatus.name}"
-            )
-            return true
-        }
-        return false
     }
 
     override fun getTouchableRegion(view: View, outRect: Rect) {

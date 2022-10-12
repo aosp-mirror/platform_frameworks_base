@@ -47,6 +47,8 @@ constructor(
     private val uiEventLogger: MediaTttSenderUiEventLogger,
 ) : CoreStartable {
 
+    private var displayedState: ChipStateSender? = null
+
     private val commandQueueCallbacks =
         object : CommandQueue.Callbacks {
             override fun updateMediaTapToTransferSenderDisplay(
@@ -84,8 +86,27 @@ constructor(
         uiEventLogger.logSenderStateChange(chipState)
 
         if (chipState == ChipStateSender.FAR_FROM_RECEIVER) {
-            chipbarCoordinator.removeView(removalReason = ChipStateSender.FAR_FROM_RECEIVER.name)
+            // Return early if we're not displaying a chip anyway
+            val currentDisplayedState = displayedState ?: return
+
+            val removalReason = ChipStateSender.FAR_FROM_RECEIVER.name
+            if (
+                currentDisplayedState.transferStatus == TransferStatus.IN_PROGRESS ||
+                    currentDisplayedState.transferStatus == TransferStatus.SUCCEEDED
+            ) {
+                // Don't remove the chip if we're in progress or succeeded, since the user should
+                // still be able to see the status of the transfer.
+                logger.logRemovalBypass(
+                    removalReason,
+                    bypassReason = "transferStatus=${currentDisplayedState.transferStatus.name}"
+                )
+                return
+            }
+
+            displayedState = null
+            chipbarCoordinator.removeView(removalReason)
         } else {
+            displayedState = chipState
             chipbarCoordinator.displayView(ChipSenderInfo(chipState, routeInfo, undoCallback))
         }
     }
