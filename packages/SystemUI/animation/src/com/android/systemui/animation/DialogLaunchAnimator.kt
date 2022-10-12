@@ -29,12 +29,12 @@ import android.view.GhostView
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
+import android.view.ViewRootImpl
 import android.view.WindowInsets
 import android.view.WindowManager
 import android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
 import android.widget.FrameLayout
 import com.android.internal.jank.InteractionJankMonitor
-import com.android.internal.jank.InteractionJankMonitor.Configuration
 import com.android.internal.jank.InteractionJankMonitor.CujType
 import kotlin.math.roundToInt
 
@@ -46,6 +46,7 @@ private const val TAG = "DialogLaunchAnimator"
  *
  * This animator also allows to easily animate a dialog into an activity.
  *
+ * @see show
  * @see showFromView
  * @see showFromDialog
  * @see createActivityLaunchController
@@ -67,8 +68,81 @@ constructor(
             ActivityLaunchAnimator.INTERPOLATORS.copy(
                 positionXInterpolator = ActivityLaunchAnimator.INTERPOLATORS.positionInterpolator
             )
+    }
 
-        private val TAG_LAUNCH_ANIMATION_RUNNING = R.id.tag_launch_animation_running
+    /**
+     * A controller that takes care of applying the dialog launch and exit animations to the source
+     * that triggered the animation.
+     */
+    interface Controller {
+        /** The [ViewRootImpl] of this controller. */
+        val viewRoot: ViewRootImpl
+
+        /**
+         * The identity object of the source animated by this controller. This animator will ensure
+         * that 2 animations with the same source identity are not going to run at the same time, to
+         * avoid flickers when a dialog is shown from the same source more or less at the same time
+         * (for instance if the user clicks an expandable button twice).
+         */
+        val sourceIdentity: Any
+
+        /**
+         * Move the drawing of the source in the overlay of [viewGroup].
+         *
+         * Once this method is called, and until [stopDrawingInOverlay] is called, the source
+         * controlled by this Controller should be drawn in the overlay of [viewGroup] so that it is
+         * drawn above all other elements in the same [viewRoot].
+         */
+        fun startDrawingInOverlayOf(viewGroup: ViewGroup)
+
+        /**
+         * Move the drawing of the source back in its original location.
+         *
+         * @see startDrawingInOverlayOf
+         */
+        fun stopDrawingInOverlay()
+
+        /**
+         * Create the [LaunchAnimator.Controller] that will be called to animate the source
+         * controlled by this [Controller] during the dialog launch animation.
+         *
+         * At the end of this animation, the source should *not* be visible anymore (until the
+         * dialog is closed and is animated back into the source).
+         */
+        fun createLaunchController(): LaunchAnimator.Controller
+
+        /**
+         * Create the [LaunchAnimator.Controller] that will be called to animate the source
+         * controlled by this [Controller] during the dialog exit animation.
+         *
+         * At the end of this animation, the source should be visible again.
+         */
+        fun createExitController(): LaunchAnimator.Controller
+
+        /**
+         * Whether we should animate the dialog back into the source when it is dismissed. If this
+         * methods returns `false`, then the dialog will simply fade out and
+         * [onExitAnimationCancelled] will be called.
+         *
+         * Note that even when this returns `true`, the exit animation might still be cancelled (in
+         * which case [onExitAnimationCancelled] will also be called).
+         */
+        fun shouldAnimateExit(): Boolean
+
+        /**
+         * Called if we decided to *not* animate the dialog into the source for some reason. This
+         * means that [createExitController] will *not* be called and this implementation should
+         * make sure that the source is back in its original state, before it was animated into the
+         * dialog. In particular, the source should be visible again.
+         */
+        fun onExitAnimationCancelled()
+
+        /**
+         * Return the [InteractionJankMonitor.Configuration.Builder] to be used for animations
+         * controlled by this controller.
+         */
+        // TODO(b/252723237): Make this non-nullable
+        fun jankConfigurationBuilder(cuj: Int): InteractionJankMonitor.Configuration.Builder?
     }
 
     /**
@@ -96,7 +170,28 @@ constructor(
         dialog: Dialog,
         view: View,
         cuj: DialogCuj? = null,
-        animateBackgroundBoundsChange: Boolean = false,
+        animateBackgroundBoundsChange: Boolean = false
+    ) {
+        show(dialog, createController(view), cuj, animateBackgroundBoundsChange)
+    }
+
+    /**
+     * Show [dialog] by expanding it from a source controlled by [controller].
+     *
+     * If [animateBackgroundBoundsChange] is true, then the background of the dialog will be
+     * animated when the dialog bounds change.
+     *
+     * Note: The background of [view] should be a (rounded) rectangle so that it can be properly
+     * animated.
+     *
+     * Caveats: When calling this function and [dialog] is not a fullscreen dialog, then it will be
+     * made fullscreen and 2 views will be inserted between the dialog DecorView and its children.
+     */
+    fun show(
+        dialog: Dialog,
+        controller: Controller,
+        cuj: DialogCuj? = null,
+        animateBackgroundBoundsChange: Boolean = false
     ) {
         if (Looper.myLooper() != Looper.getMainLooper()) {
             throw IllegalStateException(
@@ -109,9 +204,10 @@ constructor(
         // intent is to launch a dialog from another dialog.
         val animatedParent =
             openedDialogs.firstOrNull {
-                it.dialog.window.decorView.viewRootImpl == view.viewRootImpl
+                it.dialog.window.decorView.viewRootImpl == controller.viewRoot
             }
-        val animateFrom = animatedParent?.dialogContentWithBackground ?: view
+        val animateFrom =
+            animatedParent?.dialogContentWithBackground?.let { createController(it) } ?: controller
 
         if (animatedParent == null && animateFrom !is LaunchableView) {
             // Make sure the View we launch from implements LaunchableView to avoid visibility
@@ -126,14 +222,16 @@ constructor(
             )
         }
 
-        // Make sure we don't run the launch animation from the same view twice at the same time.
-        if (animateFrom.getTag(TAG_LAUNCH_ANIMATION_RUNNING) != null) {
-            Log.e(TAG, "Not running dialog launch animation as there is already one running")
+        // Make sure we don't run the launch animation from the same source twice at the same time.
+        if (openedDialogs.any { it.controller.sourceIdentity == controller.sourceIdentity }) {
+            Log.e(
+                TAG,
+                "Not running dialog launch animation from source as it is already expanded into a" +
+                    " dialog"
+            )
             dialog.show()
             return
         }
-
-        animateFrom.setTag(TAG_LAUNCH_ANIMATION_RUNNING, true)
 
         val animatedDialog =
             AnimatedDialog(
@@ -146,16 +244,99 @@ constructor(
                 animateBackgroundBoundsChange,
                 animatedParent,
                 isForTesting,
-                cuj
+                cuj,
             )
 
         openedDialogs.add(animatedDialog)
         animatedDialog.start()
     }
 
+    /** Create a [Controller] that can animate [source] to & from a dialog. */
+    private fun createController(source: View): Controller {
+        return object : Controller {
+            override val viewRoot: ViewRootImpl
+                get() = source.viewRootImpl
+
+            override val sourceIdentity: Any = source
+
+            override fun startDrawingInOverlayOf(viewGroup: ViewGroup) {
+                // Create a temporary ghost of the source (which will make it invisible) and add it
+                // to the host dialog.
+                GhostView.addGhost(source, viewGroup)
+
+                // The ghost of the source was just created, so the source is currently invisible.
+                // We need to make sure that it stays invisible as long as the dialog is shown or
+                // animating.
+                (source as? LaunchableView)?.setShouldBlockVisibilityChanges(true)
+            }
+
+            override fun stopDrawingInOverlay() {
+                // Note: here we should remove the ghost from the overlay, but in practice this is
+                // already done by the launch controllers created below.
+
+                // Make sure we allow the source to change its visibility again.
+                (source as? LaunchableView)?.setShouldBlockVisibilityChanges(false)
+                source.visibility = View.VISIBLE
+            }
+
+            override fun createLaunchController(): LaunchAnimator.Controller {
+                val delegate = GhostedViewLaunchAnimatorController(source)
+                return object : LaunchAnimator.Controller by delegate {
+                    override fun onLaunchAnimationStart(isExpandingFullyAbove: Boolean) {
+                        // Remove the temporary ghost added by [startDrawingInOverlayOf]. Another
+                        // ghost (that ghosts only the source content, and not its background) will
+                        // be added right after this by the delegate and will be animated.
+                        GhostView.removeGhost(source)
+                        delegate.onLaunchAnimationStart(isExpandingFullyAbove)
+                    }
+
+                    override fun onLaunchAnimationEnd(isExpandingFullyAbove: Boolean) {
+                        delegate.onLaunchAnimationEnd(isExpandingFullyAbove)
+
+                        // We hide the source when the dialog is showing. We will make this view
+                        // visible again when dismissing the dialog. This does nothing if the source
+                        // implements [LaunchableView], as it's already INVISIBLE in that case.
+                        source.visibility = View.INVISIBLE
+                    }
+                }
+            }
+
+            override fun createExitController(): LaunchAnimator.Controller {
+                return GhostedViewLaunchAnimatorController(source)
+            }
+
+            override fun shouldAnimateExit(): Boolean {
+                // The source should be invisible by now, if it's not then something else changed
+                // its visibility and we probably don't want to run the animation.
+                if (source.visibility != View.INVISIBLE) {
+                    return false
+                }
+
+                return source.isAttachedToWindow && ((source.parent as? View)?.isShown ?: true)
+            }
+
+            override fun onExitAnimationCancelled() {
+                // Make sure we allow the source to change its visibility again.
+                (source as? LaunchableView)?.setShouldBlockVisibilityChanges(false)
+
+                // If the view is invisible it's probably because of us, so we make it visible
+                // again.
+                if (source.visibility == View.INVISIBLE) {
+                    source.visibility = View.VISIBLE
+                }
+            }
+
+            override fun jankConfigurationBuilder(
+                cuj: Int
+            ): InteractionJankMonitor.Configuration.Builder? {
+                return InteractionJankMonitor.Configuration.Builder.withView(cuj, source)
+            }
+        }
+    }
+
     /**
-     * Launch [dialog] from [another dialog][animateFrom] that was shown using [showFromView]. This
-     * will allow for dismissing the whole stack.
+     * Launch [dialog] from [another dialog][animateFrom] that was shown using [show]. This will
+     * allow for dismissing the whole stack.
      *
      * @see dismissStack
      */
@@ -181,32 +362,55 @@ constructor(
 
     /**
      * Create an [ActivityLaunchAnimator.Controller] that can be used to launch an activity from the
-     * dialog that contains [View]. Note that the dialog must have been show using [showFromView]
-     * and be currently showing, otherwise this will return null.
+     * dialog that contains [View]. Note that the dialog must have been shown using this animator,
+     * otherwise this method will return null.
      *
      * The returned controller will take care of dismissing the dialog at the right time after the
      * activity started, when the dialog to app animation is done (or when it is cancelled). If this
      * method returns null, then the dialog won't be dismissed.
-     *
-     * Note: The background of [view] should be a (rounded) rectangle so that it can be properly
-     * animated.
      *
      * @param view any view inside the dialog to animate.
      */
     @JvmOverloads
     fun createActivityLaunchController(
         view: View,
-        cujType: Int? = null
+        cujType: Int? = null,
     ): ActivityLaunchAnimator.Controller? {
         val animatedDialog =
             openedDialogs.firstOrNull {
                 it.dialog.window.decorView.viewRootImpl == view.viewRootImpl
             }
                 ?: return null
+        return createActivityLaunchController(animatedDialog, cujType)
+    }
 
+    /**
+     * Create an [ActivityLaunchAnimator.Controller] that can be used to launch an activity from
+     * [dialog]. Note that the dialog must have been shown using this animator, otherwise this
+     * method will return null.
+     *
+     * The returned controller will take care of dismissing the dialog at the right time after the
+     * activity started, when the dialog to app animation is done (or when it is cancelled). If this
+     * method returns null, then the dialog won't be dismissed.
+     *
+     * @param dialog the dialog to animate.
+     */
+    @JvmOverloads
+    fun createActivityLaunchController(
+        dialog: Dialog,
+        cujType: Int? = null,
+    ): ActivityLaunchAnimator.Controller? {
+        val animatedDialog = openedDialogs.firstOrNull { it.dialog == dialog } ?: return null
+        return createActivityLaunchController(animatedDialog, cujType)
+    }
+
+    private fun createActivityLaunchController(
+        animatedDialog: AnimatedDialog,
+        cujType: Int? = null
+    ): ActivityLaunchAnimator.Controller? {
         // At this point, we know that the intent of the caller is to dismiss the dialog to show
-        // an app, so we disable the exit animation into the touch surface because we will never
-        // want to run it anyways.
+        // an app, so we disable the exit animation into the source because we will never want to
+        // run it anyways.
         animatedDialog.exitAnimationDisabled = true
 
         val dialog = animatedDialog.dialog
@@ -252,7 +456,7 @@ constructor(
 
                 // If this dialog was shown from a cascade of other dialogs, make sure those ones
                 // are dismissed too.
-                animatedDialog.touchSurface = animatedDialog.prepareForStackDismiss()
+                animatedDialog.prepareForStackDismiss()
 
                 // Remove the dim.
                 dialog.window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
@@ -283,12 +487,11 @@ constructor(
     }
 
     /**
-     * Ensure that all dialogs currently shown won't animate into their touch surface when
-     * dismissed.
+     * Ensure that all dialogs currently shown won't animate into their source when dismissed.
      *
      * This is a temporary API meant to be called right before we both dismiss a dialog and start an
-     * activity, which currently does not look good if we animate the dialog into the touch surface
-     * at the same time as the activity starts.
+     * activity, which currently does not look good if we animate the dialog into their source at
+     * the same time as the activity starts.
      *
      * TODO(b/193634619): Remove this function and animate dialog into opening activity instead.
      */
@@ -297,13 +500,11 @@ constructor(
     }
 
     /**
-     * Dismiss [dialog]. If it was launched from another dialog using [showFromView], also dismiss
-     * the stack of dialogs, animating back to the original touchSurface.
+     * Dismiss [dialog]. If it was launched from another dialog using this animator, also dismiss
+     * the stack of dialogs and simply fade out [dialog].
      */
     fun dismissStack(dialog: Dialog) {
-        openedDialogs
-            .firstOrNull { it.dialog == dialog }
-            ?.let { it.touchSurface = it.prepareForStackDismiss() }
+        openedDialogs.firstOrNull { it.dialog == dialog }?.prepareForStackDismiss()
         dialog.dismiss()
     }
 
@@ -337,8 +538,11 @@ private class AnimatedDialog(
     private val callback: DialogLaunchAnimator.Callback,
     private val interactionJankMonitor: InteractionJankMonitor,
 
-    /** The view that triggered the dialog after being tapped. */
-    var touchSurface: View,
+    /**
+     * The controller of the source that triggered the dialog and that will animate into/from the
+     * dialog.
+     */
+    val controller: DialogLaunchAnimator.Controller,
 
     /**
      * A callback that will be called with this [AnimatedDialog] after the dialog was dismissed and
@@ -383,17 +587,18 @@ private class AnimatedDialog(
     private var originalDialogBackgroundColor = Color.BLACK
 
     /**
-     * Whether we are currently launching/showing the dialog by animating it from [touchSurface].
+     * Whether we are currently launching/showing the dialog by animating it from its source
+     * controlled by [controller].
      */
     private var isLaunching = true
 
-    /** Whether we are currently dismissing/hiding the dialog by animating into [touchSurface]. */
+    /** Whether we are currently dismissing/hiding the dialog by animating into its source. */
     private var isDismissing = false
 
     private var dismissRequested = false
     var exitAnimationDisabled = false
 
-    private var isTouchSurfaceGhostDrawn = false
+    private var isSourceDrawnInDialog = false
     private var isOriginalDialogViewLaidOut = false
 
     /** A layout listener to animate the dialog height change. */
@@ -410,13 +615,19 @@ private class AnimatedDialog(
      */
     private var decorViewLayoutListener: View.OnLayoutChangeListener? = null
 
+    private var hasInstrumentedJank = false
+
     fun start() {
         if (cuj != null) {
-            val config = Configuration.Builder.withView(cuj.cujType, touchSurface)
-            if (cuj.tag != null) {
-                config.setTag(cuj.tag)
+            val config = controller.jankConfigurationBuilder(cuj.cujType)
+            if (config != null) {
+                if (cuj.tag != null) {
+                    config.setTag(cuj.tag)
+                }
+
+                interactionJankMonitor.begin(config)
+                hasInstrumentedJank = true
             }
-            interactionJankMonitor.begin(config)
         }
 
         // Create the dialog so that its onCreate() method is called, which usually sets the dialog
@@ -618,47 +829,45 @@ private class AnimatedDialog(
         // Show the dialog.
         dialog.show()
 
-        addTouchSurfaceGhost()
+        moveSourceDrawingToDialog()
     }
 
-    private fun addTouchSurfaceGhost() {
+    private fun moveSourceDrawingToDialog() {
         if (decorView.viewRootImpl == null) {
-            // Make sure that we have access to the dialog view root to synchronize the creation of
-            // the ghost.
-            decorView.post(::addTouchSurfaceGhost)
+            // Make sure that we have access to the dialog view root to move the drawing to the
+            // dialog overlay.
+            decorView.post(::moveSourceDrawingToDialog)
             return
         }
 
-        // Create a ghost of the touch surface (which will make the touch surface invisible) and add
-        // it to the host dialog. We trigger a one off synchronization to make sure that this is
-        // done in sync between the two different windows.
+        // Move the drawing of the source in the overlay of this dialog, then animate. We trigger a
+        // one-off synchronization to make sure that this is done in sync between the two different
+        // windows.
         synchronizeNextDraw(
             then = {
-                isTouchSurfaceGhostDrawn = true
+                isSourceDrawnInDialog = true
                 maybeStartLaunchAnimation()
             }
         )
-        GhostView.addGhost(touchSurface, decorView)
-
-        // The ghost of the touch surface was just created, so the touch surface is currently
-        // invisible. We need to make sure that it stays invisible as long as the dialog is shown or
-        // animating.
-        (touchSurface as? LaunchableView)?.setShouldBlockVisibilityChanges(true)
+        controller.startDrawingInOverlayOf(decorView)
     }
 
     /**
-     * Synchronize the next draw of the touch surface and dialog view roots so that they are
-     * performed at the same time, in the same transaction. This is necessary to make sure that the
-     * ghost of the touch surface is drawn at the same time as the touch surface is made invisible
-     * (or inversely, removed from the UI when the touch surface is made visible).
+     * Synchronize the next draw of the source and dialog view roots so that they are performed at
+     * the same time, in the same transaction. This is necessary to make sure that the source is
+     * drawn in the overlay at the same time as it is removed from its original position (or
+     * inversely, removed from the overlay when the source is moved back to its original position).
      */
     private fun synchronizeNextDraw(then: () -> Unit) {
         if (forceDisableSynchronization) {
+            // Don't synchronize when inside an automated test.
             then()
             return
         }
 
-        ViewRootSync.synchronizeNextDraw(touchSurface, decorView, then)
+        ViewRootSync.synchronizeNextDraw(decorView, controller.viewRoot.view, then)
+        decorView.invalidate()
+        controller.viewRoot.view.invalidate()
     }
 
     private fun findFirstViewGroupWithBackground(view: View): ViewGroup? {
@@ -681,7 +890,7 @@ private class AnimatedDialog(
     }
 
     private fun maybeStartLaunchAnimation() {
-        if (!isTouchSurfaceGhostDrawn || !isOriginalDialogViewLaidOut) {
+        if (!isSourceDrawnInDialog || !isOriginalDialogViewLaidOut) {
             return
         }
 
@@ -690,19 +899,7 @@ private class AnimatedDialog(
 
         startAnimation(
             isLaunching = true,
-            onLaunchAnimationStart = {
-                // Remove the temporary ghost. Another ghost (that ghosts only the touch surface
-                // content, and not its background) will be added right after this and will be
-                // animated.
-                GhostView.removeGhost(touchSurface)
-            },
             onLaunchAnimationEnd = {
-                touchSurface.setTag(R.id.tag_launch_animation_running, null)
-
-                // We hide the touch surface when the dialog is showing. We will make this view
-                // visible again when dismissing the dialog.
-                touchSurface.visibility = View.INVISIBLE
-
                 isLaunching = false
 
                 // dismiss was called during the animation, dismiss again now to actually dismiss.
@@ -718,7 +915,10 @@ private class AnimatedDialog(
                         backgroundLayoutListener
                     )
                 }
-                cuj?.run { interactionJankMonitor.end(cujType) }
+
+                if (hasInstrumentedJank) {
+                    interactionJankMonitor.end(cuj!!.cujType)
+                }
             }
         )
     }
@@ -753,8 +953,8 @@ private class AnimatedDialog(
     }
 
     /**
-     * Hide the dialog into the touch surface and call [onAnimationFinished] when the animation is
-     * done (passing animationRan=true) or if it's skipped (passing animationRan=false) to actually
+     * Hide the dialog into the source and call [onAnimationFinished] when the animation is done
+     * (passing animationRan=true) or if it's skipped (passing animationRan=false) to actually
      * dismiss the dialog.
      */
     private fun hideDialogIntoView(onAnimationFinished: (Boolean) -> Unit) {
@@ -763,17 +963,9 @@ private class AnimatedDialog(
             decorView.removeOnLayoutChangeListener(decorViewLayoutListener)
         }
 
-        if (!shouldAnimateDialogIntoView()) {
-            Log.i(TAG, "Skipping animation of dialog into the touch surface")
-
-            // Make sure we allow the touch surface to change its visibility again.
-            (touchSurface as? LaunchableView)?.setShouldBlockVisibilityChanges(false)
-
-            // If the view is invisible it's probably because of us, so we make it visible again.
-            if (touchSurface.visibility == View.INVISIBLE) {
-                touchSurface.visibility = View.VISIBLE
-            }
-
+        if (!shouldAnimateDialogIntoSource()) {
+            Log.i(TAG, "Skipping animation of dialog into the source")
+            controller.onExitAnimationCancelled()
             onAnimationFinished(false /* instantDismiss */)
             onDialogDismissed(this@AnimatedDialog)
             return
@@ -786,10 +978,6 @@ private class AnimatedDialog(
                 dialog.window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
             },
             onLaunchAnimationEnd = {
-                // Make sure we allow the touch surface to change its visibility again.
-                (touchSurface as? LaunchableView)?.setShouldBlockVisibilityChanges(false)
-
-                touchSurface.visibility = View.VISIBLE
                 val dialogContentWithBackground = this.dialogContentWithBackground!!
                 dialogContentWithBackground.visibility = View.INVISIBLE
 
@@ -799,14 +987,11 @@ private class AnimatedDialog(
                     )
                 }
 
-                // Make sure that the removal of the ghost and making the touch surface visible is
-                // done at the same time.
-                synchronizeNextDraw(
-                    then = {
-                        onAnimationFinished(true /* instantDismiss */)
-                        onDialogDismissed(this@AnimatedDialog)
-                    }
-                )
+                controller.stopDrawingInOverlay()
+                synchronizeNextDraw {
+                    onAnimationFinished(true /* instantDismiss */)
+                    onDialogDismissed(this@AnimatedDialog)
+                }
             }
         )
     }
@@ -816,27 +1001,34 @@ private class AnimatedDialog(
         onLaunchAnimationStart: () -> Unit = {},
         onLaunchAnimationEnd: () -> Unit = {}
     ) {
-        // Create 2 ghost controllers to animate both the dialog and the touch surface in the
-        // dialog.
-        val startView = if (isLaunching) touchSurface else dialogContentWithBackground!!
-        val endView = if (isLaunching) dialogContentWithBackground!! else touchSurface
-        val startViewController = GhostedViewLaunchAnimatorController(startView)
-        val endViewController = GhostedViewLaunchAnimatorController(endView)
-        startViewController.launchContainer = decorView
-        endViewController.launchContainer = decorView
+        // Create 2 controllers to animate both the dialog and the source.
+        val startController =
+            if (isLaunching) {
+                controller.createLaunchController()
+            } else {
+                GhostedViewLaunchAnimatorController(dialogContentWithBackground!!)
+            }
+        val endController =
+            if (isLaunching) {
+                GhostedViewLaunchAnimatorController(dialogContentWithBackground!!)
+            } else {
+                controller.createExitController()
+            }
+        startController.launchContainer = decorView
+        endController.launchContainer = decorView
 
-        val endState = endViewController.createAnimatorState()
+        val endState = endController.createAnimatorState()
         val controller =
             object : LaunchAnimator.Controller {
                 override var launchContainer: ViewGroup
-                    get() = startViewController.launchContainer
+                    get() = startController.launchContainer
                     set(value) {
-                        startViewController.launchContainer = value
-                        endViewController.launchContainer = value
+                        startController.launchContainer = value
+                        endController.launchContainer = value
                     }
 
                 override fun createAnimatorState(): LaunchAnimator.State {
-                    return startViewController.createAnimatorState()
+                    return startController.createAnimatorState()
                 }
 
                 override fun onLaunchAnimationStart(isExpandingFullyAbove: Boolean) {
@@ -845,15 +1037,29 @@ private class AnimatedDialog(
                     // onLaunchAnimationStart on the controller (which will create its own ghost).
                     onLaunchAnimationStart()
 
-                    startViewController.onLaunchAnimationStart(isExpandingFullyAbove)
-                    endViewController.onLaunchAnimationStart(isExpandingFullyAbove)
+                    startController.onLaunchAnimationStart(isExpandingFullyAbove)
+                    endController.onLaunchAnimationStart(isExpandingFullyAbove)
                 }
 
                 override fun onLaunchAnimationEnd(isExpandingFullyAbove: Boolean) {
-                    startViewController.onLaunchAnimationEnd(isExpandingFullyAbove)
-                    endViewController.onLaunchAnimationEnd(isExpandingFullyAbove)
+                    // onLaunchAnimationEnd is called by an Animator at the end of the animation,
+                    // on a Choreographer animation tick. The following calls will move the animated
+                    // content from the dialog overlay back to its original position, and this
+                    // change must be reflected in the next frame given that we then sync the next
+                    // frame of both the content and dialog ViewRoots. However, in case that content
+                    // is rendered by Compose, whose compositions are also scheduled on a
+                    // Choreographer frame, any state change made *right now* won't be reflected in
+                    // the next frame given that a Choreographer frame can't schedule another and
+                    // have it happen in the same frame. So we post the forwarded calls to
+                    // [Controller.onLaunchAnimationEnd], leaving this Choreographer frame, ensuring
+                    // that the move of the content back to its original window will be reflected in
+                    // the next frame right after [onLaunchAnimationEnd] is called.
+                    dialog.context.mainExecutor.execute {
+                        startController.onLaunchAnimationEnd(isExpandingFullyAbove)
+                        endController.onLaunchAnimationEnd(isExpandingFullyAbove)
 
-                    onLaunchAnimationEnd()
+                        onLaunchAnimationEnd()
+                    }
                 }
 
                 override fun onLaunchAnimationProgress(
@@ -861,11 +1067,11 @@ private class AnimatedDialog(
                     progress: Float,
                     linearProgress: Float
                 ) {
-                    startViewController.onLaunchAnimationProgress(state, progress, linearProgress)
+                    startController.onLaunchAnimationProgress(state, progress, linearProgress)
 
                     // The end view is visible only iff the starting view is not visible.
                     state.visible = !state.visible
-                    endViewController.onLaunchAnimationProgress(state, progress, linearProgress)
+                    endController.onLaunchAnimationProgress(state, progress, linearProgress)
 
                     // If the dialog content is complex, its dimension might change during the
                     // launch animation. The animation end position might also change during the
@@ -873,14 +1079,16 @@ private class AnimatedDialog(
                     // Therefore we update the end state to the new position/size. Usually the
                     // dialog dimension or position will change in the early frames, so changing the
                     // end state shouldn't really be noticeable.
-                    endViewController.fillGhostedViewState(endState)
+                    if (endController is GhostedViewLaunchAnimatorController) {
+                        endController.fillGhostedViewState(endState)
+                    }
                 }
             }
 
         launchAnimator.startAnimation(controller, endState, originalDialogBackgroundColor)
     }
 
-    private fun shouldAnimateDialogIntoView(): Boolean {
+    private fun shouldAnimateDialogIntoSource(): Boolean {
         // Don't animate if the dialog was previously hidden using hide() or if we disabled the exit
         // animation.
         if (exitAnimationDisabled || !dialog.isShowing) {
@@ -888,24 +1096,12 @@ private class AnimatedDialog(
         }
 
         // If we are dreaming, the dialog was probably closed because of that so we don't animate
-        // into the touchSurface.
+        // into the source.
         if (callback.isDreaming()) {
             return false
         }
 
-        // The touch surface should be invisible by now, if it's not then something else changed its
-        // visibility and we probably don't want to run the animation.
-        if (touchSurface.visibility != View.INVISIBLE) {
-            return false
-        }
-
-        // If the touch surface is not attached or one of its ancestors is not visible, then we
-        // don't run the animation either.
-        if (!touchSurface.isAttachedToWindow) {
-            return false
-        }
-
-        return (touchSurface.parent as? View)?.isShown ?: true
+        return controller.shouldAnimateExit()
     }
 
     /** A layout listener to animate the change of bounds of the dialog background. */
@@ -988,17 +1184,13 @@ private class AnimatedDialog(
         }
     }
 
-    fun prepareForStackDismiss(): View {
+    fun prepareForStackDismiss() {
         if (parentAnimatedDialog == null) {
-            return touchSurface
+            return
         }
         parentAnimatedDialog.exitAnimationDisabled = true
         parentAnimatedDialog.dialog.hide()
-        val view = parentAnimatedDialog.prepareForStackDismiss()
+        parentAnimatedDialog.prepareForStackDismiss()
         parentAnimatedDialog.dialog.dismiss()
-        // Make the touch surface invisible, so we end up animating to it when we actually
-        // dismiss the stack
-        view.visibility = View.INVISIBLE
-        return view
     }
 }
