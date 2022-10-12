@@ -208,6 +208,24 @@ genrule {
 }
 
 genrule {
+    name: "sdk-annotations-module-lib.zip",
+    defaults: ["sdk-annotations-defaults"],
+    srcs: [
+        ":android-non-updatable-doc-stubs-module-lib{.annotations.zip}",
+        ":all-modules-module-lib-annotations",
+    ],
+}
+
+genrule {
+    name: "sdk-annotations-system-server.zip",
+    defaults: ["sdk-annotations-defaults"],
+    srcs: [
+        ":android-non-updatable-doc-stubs-system-server{.annotations.zip}",
+        ":all-modules-system-server-annotations",
+    ],
+}
+
+genrule {
     name: "combined-removed-dex",
     visibility: [
         "//frameworks/base/boot",
