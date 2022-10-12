@@ -1009,7 +1009,9 @@ public final class PendingIntent implements Parcelable {
                 options = activityOptions.toBundle();
             }
 
-            return ActivityManager.getService().sendIntentSender(
+            final IApplicationThread app = ActivityThread.currentActivityThread()
+                    .getApplicationThread();
+            return ActivityManager.getService().sendIntentSender(app,
                     mTarget, mWhitelistToken, code, intent, resolvedType,
                     onFinished != null
                             ? new FinishedDispatcher(this, onFinished, handler)

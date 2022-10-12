@@ -556,7 +556,8 @@ interface IActivityManager {
     void startConfirmDeviceCredentialIntent(in Intent intent, in Bundle options);
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void sendIdleJobTrigger();
-    int sendIntentSender(in IIntentSender target, in IBinder whitelistToken, int code,
+    int sendIntentSender(in IApplicationThread caller, in IIntentSender target,
+            in IBinder whitelistToken, int code,
             in Intent intent, in String resolvedType, in IIntentReceiver finishedReceiver,
             in String requiredPermission, in Bundle options);
     boolean isBackgroundRestricted(in String packageName);

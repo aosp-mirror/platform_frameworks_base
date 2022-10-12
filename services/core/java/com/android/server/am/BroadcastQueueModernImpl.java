@@ -749,8 +749,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
      * ordered broadcast; assumes the sender is still a warm process.
      */
     private void scheduleResultTo(@NonNull BroadcastRecord r) {
-        if ((r.callerApp == null) || (r.resultTo == null)) return;
-        final ProcessRecord app = r.callerApp;
+        if ((r.resultToApp == null) || (r.resultTo == null)) return;
+        final ProcessRecord app = r.resultToApp;
         final IApplicationThread thread = app.getThread();
         if (thread != null) {
             mService.mOomAdjuster.mCachedAppOptimizer.unfreezeTemporarily(

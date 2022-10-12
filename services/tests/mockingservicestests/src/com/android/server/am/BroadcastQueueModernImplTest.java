@@ -140,7 +140,7 @@ public class BroadcastQueueModernImplTest {
     private BroadcastRecord makeBroadcastRecord(Intent intent, BroadcastOptions options,
             List receivers, boolean ordered) {
         return new BroadcastRecord(mImpl, intent, mProcess, PACKAGE_RED, null, 21, 42, false, null,
-                null, null, null, AppOpsManager.OP_NONE, options, receivers, null,
+                null, null, null, AppOpsManager.OP_NONE, options, receivers, null, null,
                 Activity.RESULT_OK, null, null, ordered, false, false, UserHandle.USER_SYSTEM,
                 false, null, false, null);
     }

@@ -520,8 +520,8 @@ public class BroadcastQueueTest {
             IIntentReceiver orderedResultTo, Bundle orderedExtras, int userId) {
         return new BroadcastRecord(mQueue, intent, callerApp, callerApp.info.packageName, null,
                 callerApp.getPid(), callerApp.info.uid, false, null, null, null, null,
-                AppOpsManager.OP_NONE, options, receivers, orderedResultTo, Activity.RESULT_OK,
-                null, orderedExtras, ordered, false, false, userId, false, null,
+                AppOpsManager.OP_NONE, options, receivers, callerApp, orderedResultTo,
+                Activity.RESULT_OK, null, orderedExtras, ordered, false, false, userId, false, null,
                 false, null);
     }
 
@@ -1277,8 +1277,8 @@ public class BroadcastQueueTest {
         final BroadcastRecord r = new BroadcastRecord(mQueue, intent, callerApp,
                 callerApp.info.packageName, null, callerApp.getPid(), callerApp.info.uid, false,
                 null, null, null, null, AppOpsManager.OP_NONE, BroadcastOptions.makeBasic(),
-                List.of(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN)), null, Activity.RESULT_OK,
-                null, null, false, false, false, UserHandle.USER_SYSTEM, true,
+                List.of(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN)), null, null,
+                Activity.RESULT_OK, null, null, false, false, false, UserHandle.USER_SYSTEM, true,
                 backgroundActivityStartsToken, false, null);
         enqueueBroadcast(r);
 
