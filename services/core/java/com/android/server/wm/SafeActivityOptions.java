@@ -263,7 +263,7 @@ public class SafeActivityOptions {
             ActivityOptions options, int callingPid, int callingUid) {
         // If a launch task id is specified, then ensure that the caller is the recents
         // component or has the START_TASKS_FROM_RECENTS permission
-        if (options.getLaunchTaskId() != INVALID_TASK_ID
+        if ((options.getLaunchTaskId() != INVALID_TASK_ID || options.getDisableStartingWindow())
                 && !supervisor.mRecentTasks.isCallerRecents(callingUid)) {
             final int startInTaskPerm = ActivityTaskManagerService.checkPermission(
                     START_TASKS_FROM_RECENTS, callingPid, callingUid);

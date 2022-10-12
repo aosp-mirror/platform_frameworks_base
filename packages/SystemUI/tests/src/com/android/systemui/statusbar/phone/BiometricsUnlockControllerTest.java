@@ -100,6 +100,8 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
     @Mock
     private AuthController mAuthController;
     @Mock
+    private DozeParameters mDozeParameters;
+    @Mock
     private MetricsLogger mMetricsLogger;
     @Mock
     private NotificationMediaManager mNotificationMediaManager;
@@ -125,7 +127,7 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         TestableResources res = getContext().getOrCreateTestableResources();
-        when(mKeyguardStateController.isShowing()).thenReturn(true);
+        when(mStatusBarKeyguardViewManager.isShowing()).thenReturn(true);
         when(mUpdateMonitor.isDeviceInteractive()).thenReturn(true);
         when(mKeyguardStateController.isFaceAuthEnabled()).thenReturn(true);
         when(mKeyguardStateController.isUnlocked()).thenReturn(false);
@@ -137,7 +139,7 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
         mBiometricUnlockController = new BiometricUnlockController(mDozeScrimController,
                 mKeyguardViewMediator, mScrimController, mShadeController,
                 mNotificationShadeWindowController, mKeyguardStateController, mHandler,
-                mUpdateMonitor, res.getResources(), mKeyguardBypassController,
+                mUpdateMonitor, res.getResources(), mKeyguardBypassController, mDozeParameters,
                 mMetricsLogger, mDumpManager, mPowerManager,
                 mNotificationMediaManager, mWakefulnessLifecycle, mScreenLifecycle,
                 mAuthController, mStatusBarStateController, mKeyguardUnlockAnimationController,
@@ -175,7 +177,7 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
     public void onBiometricAuthenticated_whenFingerprintAndNotInteractive_wakeAndUnlock() {
         reset(mUpdateMonitor);
         reset(mStatusBarKeyguardViewManager);
-        when(mKeyguardStateController.isShowing()).thenReturn(true);
+        when(mStatusBarKeyguardViewManager.isShowing()).thenReturn(true);
         when(mUpdateMonitor.isUnlockingWithBiometricAllowed(anyBoolean())).thenReturn(true);
         when(mDozeScrimController.isPulsing()).thenReturn(true);
         // the value of isStrongBiometric doesn't matter here since we only care about the returned
@@ -192,7 +194,7 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
     public void onBiometricAuthenticated_whenDeviceIsAlreadyUnlocked_wakeAndUnlock() {
         reset(mUpdateMonitor);
         reset(mStatusBarKeyguardViewManager);
-        when(mKeyguardStateController.isShowing()).thenReturn(false);
+        when(mStatusBarKeyguardViewManager.isShowing()).thenReturn(false);
         when(mKeyguardStateController.isUnlocked()).thenReturn(true);
         when(mUpdateMonitor.isUnlockingWithBiometricAllowed(anyBoolean())).thenReturn(true);
         when(mDozeScrimController.isPulsing()).thenReturn(false);

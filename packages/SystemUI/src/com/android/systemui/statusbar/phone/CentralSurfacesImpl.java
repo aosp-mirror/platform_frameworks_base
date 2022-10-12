@@ -476,6 +476,7 @@ public class CentralSurfacesImpl extends CoreStartable implements
     private final KeyguardStateController mKeyguardStateController;
     private final HeadsUpManagerPhone mHeadsUpManager;
     private final StatusBarTouchableRegionManager mStatusBarTouchableRegionManager;
+    private final DynamicPrivacyController mDynamicPrivacyController;
     private final FalsingCollector mFalsingCollector;
     private final FalsingManager mFalsingManager;
     private final BroadcastDispatcher mBroadcastDispatcher;
@@ -778,6 +779,7 @@ public class CentralSurfacesImpl extends CoreStartable implements
         mHeadsUpManager = headsUpManagerPhone;
         mKeyguardIndicationController = keyguardIndicationController;
         mStatusBarTouchableRegionManager = statusBarTouchableRegionManager;
+        mDynamicPrivacyController = dynamicPrivacyController;
         mFalsingCollector = falsingCollector;
         mFalsingManager = falsingManager;
         mBroadcastDispatcher = broadcastDispatcher;
@@ -1568,6 +1570,7 @@ public class CentralSurfacesImpl extends CoreStartable implements
                 .setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
         mBiometricUnlockController.setKeyguardViewController(mStatusBarKeyguardViewManager);
         mRemoteInputManager.addControllerCallback(mStatusBarKeyguardViewManager);
+        mDynamicPrivacyController.setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
 
         mLightBarController.setBiometricUnlockController(mBiometricUnlockController);
         mMediaManager.setBiometricUnlockController(mBiometricUnlockController);
@@ -2079,7 +2082,7 @@ public class CentralSurfacesImpl extends CoreStartable implements
 
         // Trimming will happen later if Keyguard is showing - doing it here might cause a jank in
         // the bouncer appear animation.
-        if (!mKeyguardStateController.isShowing()) {
+        if (!mStatusBarKeyguardViewManager.isShowing()) {
             WindowManagerGlobal.getInstance().trimMemory(ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN);
         }
     }
@@ -2516,8 +2519,8 @@ public class CentralSurfacesImpl extends CoreStartable implements
         };
         // Do not deferKeyguard when occluded because, when keyguard is occluded,
         // we do not launch the activity until keyguard is done.
-        boolean occluded = mKeyguardStateController.isShowing()
-                && mKeyguardStateController.isOccluded();
+        boolean occluded = mStatusBarKeyguardViewManager.isShowing()
+                && mStatusBarKeyguardViewManager.isOccluded();
         boolean deferred = !occluded;
         executeRunnableDismissingKeyguard(runnable, cancelRunnable, dismissShadeDirectly,
                 willLaunchResolverActivity, deferred /* deferred */, animate);
@@ -2587,8 +2590,8 @@ public class CentralSurfacesImpl extends CoreStartable implements
             @Override
             public boolean onDismiss() {
                 if (runnable != null) {
-                    if (mKeyguardStateController.isShowing()
-                            && mKeyguardStateController.isOccluded()) {
+                    if (mStatusBarKeyguardViewManager.isShowing()
+                            && mStatusBarKeyguardViewManager.isOccluded()) {
                         mStatusBarKeyguardViewManager.addAfterKeyguardGoneRunnable(runnable);
                     } else {
                         mMainExecutor.execute(runnable);
@@ -2682,7 +2685,7 @@ public class CentralSurfacesImpl extends CoreStartable implements
 
     private void executeWhenUnlocked(OnDismissAction action, boolean requiresShadeOpen,
             boolean afterKeyguardGone) {
-        if (mKeyguardStateController.isShowing() && requiresShadeOpen) {
+        if (mStatusBarKeyguardViewManager.isShowing() && requiresShadeOpen) {
             mStatusBarStateController.setLeaveOpenOnKeyguardHide(true);
         }
         dismissKeyguardThenExecute(action, null /* cancelAction */,
@@ -2706,7 +2709,7 @@ public class CentralSurfacesImpl extends CoreStartable implements
             mBiometricUnlockController.startWakeAndUnlock(
                     BiometricUnlockController.MODE_WAKE_AND_UNLOCK_PULSING);
         }
-        if (mKeyguardStateController.isShowing()) {
+        if (mStatusBarKeyguardViewManager.isShowing()) {
             mStatusBarKeyguardViewManager.dismissWithAction(action, cancelAction,
                     afterKeyguardGone);
         } else {
@@ -2842,8 +2845,8 @@ public class CentralSurfacesImpl extends CoreStartable implements
     }
 
     private void logStateToEventlog() {
-        boolean isShowing = mKeyguardStateController.isShowing();
-        boolean isOccluded = mKeyguardStateController.isOccluded();
+        boolean isShowing = mStatusBarKeyguardViewManager.isShowing();
+        boolean isOccluded = mStatusBarKeyguardViewManager.isOccluded();
         boolean isBouncerShowing = mStatusBarKeyguardViewManager.isBouncerShowing();
         boolean isSecure = mKeyguardStateController.isMethodSecure();
         boolean unlocked = mKeyguardStateController.canDismissLockScreen();
@@ -3239,17 +3242,18 @@ public class CentralSurfacesImpl extends CoreStartable implements
         Trace.traceCounter(Trace.TRACE_TAG_APP, "dozing", mDozing ? 1 : 0);
         Trace.beginSection("CentralSurfaces#updateDozingState");
 
-        boolean keyguardVisible = mKeyguardStateController.isVisible();
+        boolean visibleNotOccluded = mStatusBarKeyguardViewManager.isShowing()
+                && !mStatusBarKeyguardViewManager.isOccluded();
         // If we're dozing and we'll be animating the screen off, the keyguard isn't currently
         // visible but will be shortly for the animation, so we should proceed as if it's visible.
-        boolean keyguardVisibleOrWillBe =
-                keyguardVisible || (mDozing && mDozeParameters.shouldDelayKeyguardShow());
+        boolean visibleNotOccludedOrWillBe =
+                visibleNotOccluded || (mDozing && mDozeParameters.shouldDelayKeyguardShow());
 
         boolean wakeAndUnlock = mBiometricUnlockController.getMode()
                 == BiometricUnlockController.MODE_WAKE_AND_UNLOCK;
         boolean animate = (!mDozing && mDozeServiceHost.shouldAnimateWakeup() && !wakeAndUnlock)
                 || (mDozing && mDozeParameters.shouldControlScreenOff()
-                && keyguardVisibleOrWillBe);
+                && visibleNotOccludedOrWillBe);
 
         mNotificationPanelViewController.setDozing(mDozing, animate);
         updateQsExpansionEnabled();
@@ -3930,7 +3934,11 @@ public class CentralSurfacesImpl extends CoreStartable implements
 
     @Override
     public boolean isKeyguardShowing() {
-        return mKeyguardStateController.isShowing();
+        if (mStatusBarKeyguardViewManager == null) {
+            Slog.i(TAG, "isKeyguardShowing() called before startKeyguard(), returning true");
+            return true;
+        }
+        return mStatusBarKeyguardViewManager.isShowing();
     }
 
     @Override
