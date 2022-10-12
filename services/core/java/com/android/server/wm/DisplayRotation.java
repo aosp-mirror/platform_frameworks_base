@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.util.RotationUtils.deltaRotation;
@@ -55,6 +56,7 @@ import android.os.Handler;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.util.ArraySet;
 import android.util.Slog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
@@ -75,6 +77,7 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayDeque;
+import java.util.Set;
 
 /**
  * Defines the mapping between orientation and rotation of a display.
@@ -1521,6 +1524,15 @@ public class DisplayRotation {
         proto.end(token);
     }
 
+    boolean isDeviceInPosture(DeviceStateController.FoldState state, boolean isTabletop) {
+        if (mFoldController == null) return false;
+        return mFoldController.isDeviceInPosture(state, isTabletop);
+    }
+
+    boolean isDisplaySeparatingHinge() {
+        return mFoldController != null && mFoldController.isSeparatingHinge();
+    }
+
     /**
      * Called by the DeviceStateManager callback when the device state changes.
      */
@@ -1538,6 +1550,63 @@ public class DisplayRotation {
         private DeviceStateController.FoldState mFoldState =
                 DeviceStateController.FoldState.UNKNOWN;
         private boolean mInHalfFoldTransition = false;
+        private final boolean mIsDisplayAlwaysSeparatingHinge;
+        private final Set<Integer> mTabletopRotations;
+
+        FoldController() {
+            mTabletopRotations = new ArraySet<>();
+            int[] tabletop_rotations = mContext.getResources().getIntArray(
+                    R.array.config_deviceTabletopRotations);
+            if (tabletop_rotations != null) {
+                for (int angle : tabletop_rotations) {
+                    switch (angle) {
+                        case 0:
+                            mTabletopRotations.add(Surface.ROTATION_0);
+                            break;
+                        case 90:
+                            mTabletopRotations.add(Surface.ROTATION_90);
+                            break;
+                        case 180:
+                            mTabletopRotations.add(Surface.ROTATION_180);
+                            break;
+                        case 270:
+                            mTabletopRotations.add(Surface.ROTATION_270);
+                            break;
+                        default:
+                            ProtoLog.e(WM_DEBUG_ORIENTATION,
+                                    "Invalid surface rotation angle in "
+                                            + "config_deviceTabletopRotations: %d",
+                                    angle);
+                    }
+                }
+            } else {
+                ProtoLog.w(WM_DEBUG_ORIENTATION,
+                        "config_deviceTabletopRotations is not defined. Half-fold "
+                                + "letterboxing will work inconsistently.");
+            }
+            mIsDisplayAlwaysSeparatingHinge = mContext.getResources().getBoolean(
+                    R.bool.config_isDisplayHingeAlwaysSeparating);
+        }
+
+        boolean isDeviceInPosture(DeviceStateController.FoldState state, boolean isTabletop) {
+            if (state != mFoldState) {
+                return false;
+            }
+            if (mFoldState == DeviceStateController.FoldState.HALF_FOLDED) {
+                return !(isTabletop ^ mTabletopRotations.contains(mRotation));
+            }
+            return true;
+        }
+
+        DeviceStateController.FoldState getFoldState() {
+            return mFoldState;
+        }
+
+        boolean isSeparatingHinge() {
+            return mFoldState == DeviceStateController.FoldState.HALF_FOLDED
+                    || (mFoldState == DeviceStateController.FoldState.OPEN
+                        && mIsDisplayAlwaysSeparatingHinge);
+        }
 
         boolean overrideFrozenRotation() {
             return mFoldState == DeviceStateController.FoldState.HALF_FOLDED;
@@ -1585,6 +1654,15 @@ public class DisplayRotation {
                 // Tell the device to update its orientation.
                 mService.updateRotation(false /* alwaysSendConfiguration */,
                         false /* forceRelayout */);
+            }
+            // Alert the activity of possible new bounds.
+            final Task topFullscreenTask =
+                    mDisplayContent.getTask(t -> t.getWindowingMode() == WINDOWING_MODE_FULLSCREEN);
+            if (topFullscreenTask != null) {
+                final ActivityRecord top = topFullscreenTask.topRunningActivity();
+                if (top != null) {
+                    top.recomputeConfiguration();
+                }
             }
         }
     }
