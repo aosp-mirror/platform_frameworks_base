@@ -454,6 +454,10 @@ public final class JobServiceContext implements ServiceConnection {
         return mTimeoutElapsed;
     }
 
+    long getRemainingGuaranteedTimeMs(long nowElapsed) {
+        return Math.max(0, mExecutionStartTimeElapsed + mMinExecutionGuaranteeMillis - nowElapsed);
+    }
+
     boolean isWithinExecutionGuaranteeTime() {
         return sElapsedRealtimeClock.millis()
                 < mExecutionStartTimeElapsed + mMinExecutionGuaranteeMillis;
