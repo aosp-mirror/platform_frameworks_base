@@ -4194,6 +4194,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mCameraGestureTriggered = true;
         if (mRequestedOrSleepingDefaultDisplay) {
             mCameraGestureTriggeredDuringGoingToSleep = true;
+            // Wake device up early to prevent display doing redundant turning off/on stuff.
+            wakeUpFromPowerKey(event.getDownTime());
         }
         return true;
     }
