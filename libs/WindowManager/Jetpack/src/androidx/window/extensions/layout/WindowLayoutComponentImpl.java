@@ -117,9 +117,7 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
         if (mWindowLayoutChangeListeners.containsKey(context)
                 // In theory this method can be called on the same consumer with different context.
                 || mWindowLayoutChangeListeners.containsValue(consumer)) {
-            throw new IllegalArgumentException(
-                    "Context or Consumer has already been registered for WindowLayoutInfo"
-                            + " callback.");
+            return;
         }
         if (!context.isUiContext()) {
             throw new IllegalArgumentException("Context must be a UI Context, which should be"
