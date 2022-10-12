@@ -24,6 +24,7 @@ import android.media.VolumeShaper;
 import android.util.Log;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.server.utils.EventLogger;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -262,7 +263,7 @@ public final class FadeOutManager {
                 if (apc != null) {
                     try {
                         PlaybackActivityMonitor.sEventLogger.log(
-                                (new AudioEventLogger.StringEvent("unfading out piid:"
+                                (new EventLogger.StringEvent("unfading out piid:"
                                         + piid)).printLog(TAG));
                         apc.getPlayerProxy().applyVolumeShaper(
                                 FADEOUT_VSHAPE,

@@ -800,7 +800,7 @@ public class PowerManagerServiceTest {
         doAnswer(inv -> {
             when(mDreamManagerInternalMock.isDreaming()).thenReturn(true);
             return null;
-        }).when(mDreamManagerInternalMock).startDream(anyBoolean());
+        }).when(mDreamManagerInternalMock).startDream(anyBoolean(), anyString());
 
         setMinimumScreenOffTimeoutConfig(5);
         createService();
@@ -822,7 +822,7 @@ public class PowerManagerServiceTest {
         doAnswer(inv -> {
             when(mDreamManagerInternalMock.isDreaming()).thenReturn(true);
             return null;
-        }).when(mDreamManagerInternalMock).startDream(anyBoolean());
+        }).when(mDreamManagerInternalMock).startDream(anyBoolean(), anyString());
 
         setMinimumScreenOffTimeoutConfig(5);
         createService();
@@ -1271,7 +1271,7 @@ public class PowerManagerServiceTest {
         doAnswer(inv -> {
             when(mDreamManagerInternalMock.isDreaming()).thenReturn(true);
             return null;
-        }).when(mDreamManagerInternalMock).startDream(anyBoolean());
+        }).when(mDreamManagerInternalMock).startDream(anyBoolean(), anyString());
 
         final String pkg = mContextSpy.getOpPackageName();
         final Binder token = new Binder();
@@ -1767,7 +1767,7 @@ public class PowerManagerServiceTest {
         forceDozing();
         // Allow handleSandman() to be called asynchronously
         advanceTime(500);
-        verify(mDreamManagerInternalMock).startDream(eq(true));
+        verify(mDreamManagerInternalMock).startDream(eq(true), anyString());
     }
 
     @Test
@@ -1805,7 +1805,7 @@ public class PowerManagerServiceTest {
 
         // Allow handleSandman() to be called asynchronously
         advanceTime(500);
-        verify(mDreamManagerInternalMock).startDream(eq(true));
+        verify(mDreamManagerInternalMock).startDream(eq(true), anyString());
     }
 
     @Test

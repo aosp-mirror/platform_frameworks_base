@@ -368,9 +368,12 @@ static jlong nativeCreate(JNIEnv* env, jclass clazz, jobject sessionObj,
     return reinterpret_cast<jlong>(surface.get());
 }
 
-static void nativeRelease(JNIEnv* env, jclass clazz, jlong nativeObject) {
-    sp<SurfaceControl> ctrl(reinterpret_cast<SurfaceControl *>(nativeObject));
+static void release(SurfaceControl* ctrl) {
     ctrl->decStrong((void *)nativeCreate);
+}
+
+static jlong nativeGetNativeSurfaceControlFinalizer(JNIEnv* env, jclass clazz) {
+    return static_cast<jlong>(reinterpret_cast<uintptr_t>(&release));
 }
 
 static void nativeDisconnect(JNIEnv* env, jclass clazz, jlong nativeObject) {
@@ -884,34 +887,6 @@ static void nativeSetDestinationFrame(JNIEnv* env, jclass clazz, jlong transacti
     SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
     Rect crop(l, t, r, b);
     transaction->setDestinationFrame(ctrl, crop);
-}
-
-static jlongArray nativeGetPhysicalDisplayIds(JNIEnv* env, jclass clazz) {
-    const auto displayIds = SurfaceComposerClient::getPhysicalDisplayIds();
-    jlongArray array = env->NewLongArray(displayIds.size());
-    if (array == nullptr) {
-        jniThrowException(env, "java/lang/OutOfMemoryError", nullptr);
-        return nullptr;
-    }
-
-    if (displayIds.empty()) {
-        return array;
-    }
-
-    jlong* values = env->GetLongArrayElements(array, 0);
-    for (size_t i = 0; i < displayIds.size(); ++i) {
-        values[i] = static_cast<jlong>(displayIds[i].value);
-    }
-
-    env->ReleaseLongArrayElements(array, values, 0);
-    return array;
-}
-
-static jobject nativeGetPhysicalDisplayToken(JNIEnv* env, jclass clazz, jlong physicalDisplayId) {
-    const auto id = DisplayId::fromValue<PhysicalDisplayId>(physicalDisplayId);
-    if (!id) return nullptr;
-    sp<IBinder> token = SurfaceComposerClient::getPhysicalDisplayToken(*id);
-    return javaObjectForIBinder(env, token);
 }
 
 static jobject nativeGetDisplayedContentSamplingAttributes(JNIEnv* env, jclass clazz,
@@ -1925,8 +1900,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeCopyFromSurfaceControl },
     {"nativeWriteToParcel", "(JLandroid/os/Parcel;)V",
             (void*)nativeWriteToParcel },
-    {"nativeRelease", "(J)V",
-            (void*)nativeRelease },
+    {"nativeGetNativeSurfaceControlFinalizer", "()J",
+            (void*) nativeGetNativeSurfaceControlFinalizer },
     {"nativeDisconnect", "(J)V",
             (void*)nativeDisconnect },
     {"nativeUpdateDefaultBufferSize", "(JII)V",
@@ -1992,10 +1967,6 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetFrameRate },
     {"nativeSetDefaultFrameRateCompatibility", "(JJI)V",
             (void*)nativeSetDefaultFrameRateCompatibility},
-    {"nativeGetPhysicalDisplayIds", "()[J",
-            (void*)nativeGetPhysicalDisplayIds },
-    {"nativeGetPhysicalDisplayToken", "(J)Landroid/os/IBinder;",
-            (void*)nativeGetPhysicalDisplayToken },
     {"nativeSetDisplaySurface", "(JLandroid/os/IBinder;J)V",
             (void*)nativeSetDisplaySurface },
     {"nativeSetDisplayLayerStack", "(JLandroid/os/IBinder;I)V",

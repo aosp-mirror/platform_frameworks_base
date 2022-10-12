@@ -16,16 +16,21 @@
 
 package com.android.server.pm.pkg;
 
+import android.annotation.AppIdInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
+import android.annotation.SystemApi;
 import android.annotation.UserIdInt;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.SigningInfo;
 import android.os.UserHandle;
 import android.processor.immutability.Immutable;
 import android.util.SparseArray;
+
+import com.android.internal.R;
 
 import java.io.File;
 import java.util.List;
@@ -33,12 +38,23 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * The exposed system server process API for package data, shared with the internal
- * PackageManagerService implementation. All returned data is guaranteed immutable.
+ * A wrapper containing device-specific state for an application. It wraps the mostly stateless
+ * {@link AndroidPackage}, available through {@link #getAndroidPackage()}.
+ *
+ * Any fields whose values depend on dynamic state, disk location, enforcement policy,
+ * cross-package dependencies, system/device owner/admin configuration, etc. are placed in this
+ * interface.
+ *
+ * The backing memory is shared with the internal system server and thus there is no cost to
+ * access these objects, unless the public API equivalent {@link PackageInfo} or
+ * {@link ApplicationInfo}.
+ *
+ * This also means the data is immutable and will throw {@link UnsupportedOperationException} if
+ * any collection type is mutated.
  *
  * @hide
  */
-//@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
 @Immutable
 public interface PackageState {
 
@@ -92,9 +108,11 @@ public interface PackageState {
      * The non-user-specific UID, or the UID if the user ID is
      * {@link android.os.UserHandle#SYSTEM}.
      */
+    @AppIdInt
     int getAppId();
 
     /**
+     * @see PackageInfo#packageName
      * @see AndroidPackage#getPackageName()
      */
     @NonNull

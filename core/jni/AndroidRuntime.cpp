@@ -1530,12 +1530,14 @@ static const RegJNIRec gRegJNI[] = {
         REG_JNI(register_android_os_VintfRuntimeInfo),
         REG_JNI(register_android_service_DataLoaderService),
         REG_JNI(register_android_view_DisplayEventReceiver),
-        REG_JNI(register_android_view_InputApplicationHandle),
-        REG_JNI(register_android_view_InputWindowHandle),
         REG_JNI(register_android_view_Surface),
         REG_JNI(register_android_view_SurfaceControl),
         REG_JNI(register_android_view_SurfaceControlHdrLayerInfoListener),
         REG_JNI(register_android_view_SurfaceSession),
+        REG_JNI(register_android_view_InputApplicationHandle),
+        // This must be called after register_android_view_SurfaceControl since it has a dependency
+        // on the Java SurfaceControl object that references a native resource via static request.
+        REG_JNI(register_android_view_InputWindowHandle),
         REG_JNI(register_android_view_CompositionSamplingListener),
         REG_JNI(register_android_view_TextureView),
         REG_JNI(register_android_view_TunnelModeEnabledListener),

@@ -54,6 +54,7 @@ import android.util.Log;
 import android.util.PrintWriterPrinter;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.server.utils.EventLogger;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -343,7 +344,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
         if (AudioService.DEBUG_COMM_RTE) {
             Log.v(TAG, "setCommunicationRouteForClient: device: " + device);
         }
-        AudioService.sDeviceLogger.log((new AudioEventLogger.StringEvent(
+        AudioService.sDeviceLogger.log((new EventLogger.StringEvent(
                                         "setCommunicationRouteForClient for pid: " + pid
                                         + " device: " + device
                                         + " from API: " + eventSource)).printLog(TAG));
@@ -1229,7 +1230,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
     }
 
     private void onSendBecomingNoisyIntent() {
-        AudioService.sDeviceLogger.log((new AudioEventLogger.StringEvent(
+        AudioService.sDeviceLogger.log((new EventLogger.StringEvent(
                 "broadcast ACTION_AUDIO_BECOMING_NOISY")).printLog(TAG));
         mSystemServer.sendDeviceBecomingNoisyIntent();
     }
@@ -1467,7 +1468,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
                 case MSG_L_BT_ACTIVE_DEVICE_CHANGE_EXT: {
                     final BtDeviceInfo info = (BtDeviceInfo) msg.obj;
                     if (info.mDevice == null) break;
-                    AudioService.sDeviceLogger.log((new AudioEventLogger.StringEvent(
+                    AudioService.sDeviceLogger.log((new EventLogger.StringEvent(
                             "msg: onBluetoothActiveDeviceChange "
                                     + " state=" + info.mState
                                     // only querying address as this is the only readily available
@@ -1857,7 +1858,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
             Log.v(TAG, "onUpdateCommunicationRoute, preferredCommunicationDevice: "
                     + preferredCommunicationDevice + " eventSource: " + eventSource);
         }
-        AudioService.sDeviceLogger.log((new AudioEventLogger.StringEvent(
+        AudioService.sDeviceLogger.log((new EventLogger.StringEvent(
                 "onUpdateCommunicationRoute, preferredCommunicationDevice: "
                 + preferredCommunicationDevice + " eventSource: " + eventSource)));
 

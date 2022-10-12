@@ -1958,7 +1958,8 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"Setelan ini tidak dapat diakses di <xliff:g id="DEVICE">%1$s</xliff:g>. Coba di perangkat Android TV."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"Setelan ini tidak dapat diakses di <xliff:g id="DEVICE">%1$s</xliff:g>. Coba di tablet."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Setelan ini tidak dapat diakses di <xliff:g id="DEVICE">%1$s</xliff:g>. Coba di ponsel."</string>
-    <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Aplikasi ini dibuat untuk Android versi lama dan mungkin tidak berfungsi sebagaimana mestinya. Coba periksa apakah ada update, atau hubungi developer."</string>
+    <!-- no translation found for deprecated_target_sdk_message (5246906284426844596) -->
+    <skip />
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Periksa apakah ada update"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Ada pesan baru"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Buka aplikasi SMS untuk melihat"</string>
@@ -2051,8 +2052,7 @@
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Izinkan akses satu kali"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Jangan izinkan"</string>
     <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"Log perangkat merekam hal-hal yang terjadi di perangkat Anda. Aplikasi dapat menggunakan log ini untuk menemukan dan memperbaiki masalah.\n\nBeberapa log mungkin berisi info sensitif, jadi hanya izinkan aplikasi yang Anda percayai untuk mengakses semua log perangkat. \n\nJika Anda tidak mengizinkan aplikasi ini mengakses semua log perangkat, aplikasi masih dapat mengakses log-nya sendiri. Produsen perangkat masih dapat mengakses beberapa log atau info di perangkat Anda."</string>
-    <!-- no translation found for log_access_confirmation_body (7379536536425265262) -->
-    <skip />
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"Log perangkat merekam hal-hal yang terjadi di perangkat Anda. Aplikasi dapat menggunakan log ini untuk menemukan dan memperbaiki masalah.\n\nBeberapa log mungkin berisi info sensitif, jadi hanya izinkan aplikasi yang Anda percayai untuk mengakses semua log perangkat. \n\nJika Anda tidak mengizinkan aplikasi ini mengakses semua log perangkat, aplikasi masih dapat mengakses log-nya sendiri. Produsen perangkat masih dapat mengakses beberapa log atau info di perangkat Anda.\n\nPelajari lebih lanjut di g.co/android/devicelogs."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Jangan tampilkan lagi"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> ingin menampilkan potongan <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Edit"</string>

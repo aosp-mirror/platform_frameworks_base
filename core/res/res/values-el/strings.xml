@@ -1958,7 +1958,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"Δεν είναι δυνατή η πρόσβαση σε αυτό το στοιχείο από τη συσκευή <xliff:g id="DEVICE">%1$s</xliff:g>. Δοκιμάστε στη συσκευή Android TV."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"Δεν είναι δυνατή η πρόσβαση σε αυτό το στοιχείο από τη συσκευή <xliff:g id="DEVICE">%1$s</xliff:g>. Δοκιμάστε στο tablet σας."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Δεν είναι δυνατή η πρόσβαση σε αυτό το στοιχείο από τη συσκευή <xliff:g id="DEVICE">%1$s</xliff:g>. Δοκιμάστε στο τηλέφωνό σας."</string>
-    <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Αυτή η εφαρμογή δημιουργήθηκε για παλαιότερη έκδοση του Android και μπορεί να μην λειτουργεί σωστά. Δοκιμάστε να ελέγξετε εάν υπάρχουν ενημερώσεις ή επικοινωνήστε με τον προγραμματιστή."</string>
+    <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Αυτή η εφαρμογή σχεδιάστηκε για μια παλαιότερη έκδοση του Android. Ενδέχεται να μην λειτουργεί σωστά και δεν περιλαμβάνει τις πιο πρόσφατες λειτουργίες ασφάλειας και προστασίας απορρήτου. Ελέγξτε αν υπάρχει διαθέσιμη μια ενημέρωση ή επικοινωνήστε με τον προγραμματιστή της εφαρμογής."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Έλεγχος για ενημέρωση"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Έχετε νέα μηνύματα"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Άνοιγμα της εφαρμογής SMS για προβολή"</string>
@@ -2290,7 +2290,7 @@
     <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"Η εφαρμογή <xliff:g id="APP">%1$s</xliff:g> εκτελείται στο παρασκήνιο. Πατήστε για διαχείριση της χρήσης της μπαταρίας."</string>
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"Η εφαρμογή <xliff:g id="APP">%1$s</xliff:g> μπορεί να επηρεάσει τη διάρκεια ζωής μπαταρίας. Πατήστε για έλεγχο των ενεργών εφαρμογών."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Έλεγχος ενεργών εφαρμογών"</string>
-    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Δεν είναι δυνατή η πρόσβαση στην κάμερα του τηλεφώνου από τη συσκευή <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
+    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Δεν είναι δυνατή η πρόσβαση στην κάμερα τηλεφώνου από το <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Δεν είναι δυνατή η πρόσβαση στην κάμερα του tablet από τη συσκευή <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Δεν είναι δυνατή η πρόσβαση σε αυτό το στοιχείο κατά τη ροή. Δοκιμάστε στο τηλέφωνό σας."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Προεπιλογή συστήματος"</string>

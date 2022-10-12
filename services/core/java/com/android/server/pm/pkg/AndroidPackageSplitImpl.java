@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+/** @hide */
 public class AndroidPackageSplitImpl implements AndroidPackageSplit {
 
     @Nullable

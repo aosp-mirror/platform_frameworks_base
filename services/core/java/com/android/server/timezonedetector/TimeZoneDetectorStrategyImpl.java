@@ -317,7 +317,8 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
 
     @Override
     public synchronized boolean suggestManualTimeZone(
-            @UserIdInt int userId, @NonNull ManualTimeZoneSuggestion suggestion) {
+            @UserIdInt int userId, @NonNull ManualTimeZoneSuggestion suggestion,
+            boolean bypassUserPolicyChecks) {
 
         ConfigurationInternal currentUserConfig = mCurrentConfigurationInternal;
         if (currentUserConfig.getUserId() != userId) {
@@ -334,7 +335,7 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
         String cause = "Manual time suggestion received: suggestion=" + suggestion;
 
         TimeZoneCapabilitiesAndConfig capabilitiesAndConfig =
-                currentUserConfig.createCapabilitiesAndConfig();
+                currentUserConfig.createCapabilitiesAndConfig(bypassUserPolicyChecks);
         TimeZoneCapabilities capabilities = capabilitiesAndConfig.getCapabilities();
         if (capabilities.getSetManualTimeZoneCapability() != CAPABILITY_POSSESSED) {
             Slog.i(LOG_TAG, "User does not have the capability needed to set the time zone manually"
@@ -757,7 +758,9 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
 
         ipw.increaseIndent(); // level 1
         ipw.println("mCurrentConfigurationInternal=" + mCurrentConfigurationInternal);
-        ipw.println("[Capabilities=" + mCurrentConfigurationInternal.createCapabilitiesAndConfig()
+        final boolean bypassUserPolicyChecks = false;
+        ipw.println("[Capabilities="
+                + mCurrentConfigurationInternal.createCapabilitiesAndConfig(bypassUserPolicyChecks)
                 + "]");
         ipw.println("mEnvironment.getDeviceTimeZone()=" + mEnvironment.getDeviceTimeZone());
         ipw.println("mEnvironment.getDeviceTimeZoneConfidence()="

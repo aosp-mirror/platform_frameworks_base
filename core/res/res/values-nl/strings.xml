@@ -1958,7 +1958,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"Je hebt hier geen toegang toe op je <xliff:g id="DEVICE">%1$s</xliff:g>. Probeer het in plaats daarvan op je Android TV-apparaat."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"Je hebt hier geen toegang toe op je <xliff:g id="DEVICE">%1$s</xliff:g>. Probeer het in plaats daarvan op je tablet."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Je hebt hier geen toegang toe op je <xliff:g id="DEVICE">%1$s</xliff:g>. Probeer het in plaats daarvan op je telefoon."</string>
-    <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Deze app is ontwikkeld voor een oudere versie van Android en werkt mogelijk niet op de juiste manier. Controleer op updates of neem contact op met de ontwikkelaar."</string>
+    <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Deze app is ontworpen voor een oudere versie van Android. De app werkt misschien niet goed en bevat niet de nieuwste beveiligings- en privacybeschermingsopties. Check op een update of neem contact op met de ontwikkelaar van de app."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Checken op updates"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Je hebt nieuwe berichten"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Open je sms-app om ze te bekijken"</string>

@@ -2528,10 +2528,20 @@ public class MediaPlayer extends PlayerBase
         }
 
         /**
+         * Returns whether this track contains haptic channels in the audio track.
+         * @hide
+         */
+        public boolean hasHapticChannels() {
+            return mFormat != null && mFormat.containsKey(MediaFormat.KEY_HAPTIC_CHANNEL_COUNT)
+                    && mFormat.getInteger(MediaFormat.KEY_HAPTIC_CHANNEL_COUNT) > 0;
+        }
+
+        /**
          * Gets the {@link MediaFormat} of the track.  If the format is
          * unknown or could not be determined, null is returned.
          */
         public MediaFormat getFormat() {
+            // Note: The format isn't exposed for audio because it is incomplete.
             if (mTrackType == MEDIA_TRACK_TYPE_TIMEDTEXT
                     || mTrackType == MEDIA_TRACK_TYPE_SUBTITLE) {
                 return mFormat;
@@ -2574,6 +2584,11 @@ public class MediaPlayer extends PlayerBase
                 mFormat.setInteger(MediaFormat.KEY_IS_AUTOSELECT, in.readInt());
                 mFormat.setInteger(MediaFormat.KEY_IS_DEFAULT, in.readInt());
                 mFormat.setInteger(MediaFormat.KEY_IS_FORCED_SUBTITLE, in.readInt());
+            } else if (mTrackType == MEDIA_TRACK_TYPE_AUDIO) {
+                boolean hasHapticChannels = in.readBoolean();
+                if (hasHapticChannels) {
+                    mFormat.setInteger(MediaFormat.KEY_HAPTIC_CHANNEL_COUNT, in.readInt());
+                }
             }
         }
 
@@ -2604,6 +2619,13 @@ public class MediaPlayer extends PlayerBase
                 dest.writeInt(mFormat.getInteger(MediaFormat.KEY_IS_AUTOSELECT));
                 dest.writeInt(mFormat.getInteger(MediaFormat.KEY_IS_DEFAULT));
                 dest.writeInt(mFormat.getInteger(MediaFormat.KEY_IS_FORCED_SUBTITLE));
+            } else if (mTrackType == MEDIA_TRACK_TYPE_AUDIO) {
+                boolean hasHapticChannels =
+                        mFormat.containsKey(MediaFormat.KEY_HAPTIC_CHANNEL_COUNT);
+                dest.writeBoolean(hasHapticChannels);
+                if (hasHapticChannels) {
+                    dest.writeInt(mFormat.getInteger(MediaFormat.KEY_HAPTIC_CHANNEL_COUNT));
+                }
             }
         }
 

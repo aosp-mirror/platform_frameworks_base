@@ -77,6 +77,7 @@ import java.util.function.Supplier;
 @RunWith(AndroidTestingRunner.class)
 public class WindowDecorationTests extends ShellTestCase {
     private static final int CAPTION_HEIGHT_DP = 32;
+    private static final int CAPTION_WIDTH_DP = 216;
     private static final int SHADOW_RADIUS_DP = 5;
     private static final Rect TASK_BOUNDS = new Rect(100, 300, 400, 400);
     private static final Point TASK_POSITION_IN_PARENT = new Point(40, 60);
@@ -220,7 +221,7 @@ public class WindowDecorationTests extends ShellTestCase {
 
         verify(captionContainerSurfaceBuilder).setParent(decorContainerSurface);
         verify(captionContainerSurfaceBuilder).setContainerLayer();
-        verify(mMockSurfaceControlStartT).setPosition(captionContainerSurface, 20, 40);
+        verify(mMockSurfaceControlStartT).setPosition(captionContainerSurface, -46, 8);
         verify(mMockSurfaceControlStartT).setWindowCrop(captionContainerSurface, 300, 64);
         verify(mMockSurfaceControlStartT).show(captionContainerSurface);
 
@@ -410,7 +411,7 @@ public class WindowDecorationTests extends ShellTestCase {
         @Override
         void relayout(ActivityManager.RunningTaskInfo taskInfo) {
             relayout(null /* taskInfo */, 0 /* layoutResId */, mMockView, CAPTION_HEIGHT_DP,
-                    mOutsetsDp, SHADOW_RADIUS_DP, mMockSurfaceControlStartT,
+                    CAPTION_WIDTH_DP, mOutsetsDp, SHADOW_RADIUS_DP, mMockSurfaceControlStartT,
                     mMockSurfaceControlFinishT, mMockWindowContainerTransaction, mRelayoutResult);
         }
     }

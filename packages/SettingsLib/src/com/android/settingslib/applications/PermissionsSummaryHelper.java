@@ -21,30 +21,28 @@ import android.permission.RuntimePermissionPresentationInfo;
 
 import java.text.Collator;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
-public class PermissionsSummaryHelper  {
+/**
+ * Helper to get the runtime permissions for an app.
+ */
+public class PermissionsSummaryHelper {
 
     public static void getPermissionSummary(Context context, String pkg,
             final PermissionsResultCallback callback) {
         final PermissionControllerManager permController =
                 context.getSystemService(PermissionControllerManager.class);
         permController.getAppPermissions(pkg, permissions -> {
-            final int permissionCount = permissions.size();
 
-            int grantedStandardCount = 0;
             int grantedAdditionalCount = 0;
             int requestedCount = 0;
             List<CharSequence> grantedStandardLabels = new ArrayList<>();
 
-            for (int i = 0; i < permissionCount; i++) {
-                RuntimePermissionPresentationInfo permission = permissions.get(i);
+            for (RuntimePermissionPresentationInfo permission : permissions) {
                 requestedCount++;
                 if (permission.isGranted()) {
                     if (permission.isStandard()) {
                         grantedStandardLabels.add(permission.getLabel());
-                        grantedStandardCount++;
                     } else {
                         grantedAdditionalCount++;
                     }
@@ -53,23 +51,21 @@ public class PermissionsSummaryHelper  {
 
             Collator collator = Collator.getInstance();
             collator.setStrength(Collator.PRIMARY);
-            Collections.sort(grantedStandardLabels, collator);
+            grantedStandardLabels.sort(collator);
 
-            callback.onPermissionSummaryResult(grantedStandardCount, requestedCount,
-                    grantedAdditionalCount, grantedStandardLabels);
+            callback.onPermissionSummaryResult(
+                    requestedCount, grantedAdditionalCount, grantedStandardLabels);
         }, null);
     }
 
-    public static abstract class PermissionsResultCallback {
-        public void onAppWithPermissionsCountsResult(int standardGrantedPermissionAppCount,
-                int standardUsedPermissionAppCount) {
-            /* do nothing - stub */
-        }
+    /**
+     * Callback for the runtime permissions result for an app.
+     */
+    public interface PermissionsResultCallback {
 
-        public void onPermissionSummaryResult(int standardGrantedPermissionCount,
+        /** The runtime permission summary result for an app. */
+        void onPermissionSummaryResult(
                 int requestedPermissionCount, int additionalGrantedPermissionCount,
-                List<CharSequence> grantedGroupLabels) {
-            /* do nothing - stub */
-        }
+                List<CharSequence> grantedGroupLabels);
     }
 }

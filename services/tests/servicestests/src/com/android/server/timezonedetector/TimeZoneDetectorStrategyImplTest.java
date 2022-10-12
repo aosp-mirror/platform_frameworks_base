@@ -53,6 +53,7 @@ import com.android.server.timezonedetector.TimeZoneDetectorStrategyImpl.Qualifie
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -60,9 +61,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
+
 /**
  * White-box unit tests for {@link TimeZoneDetectorStrategyImpl}.
  */
+@RunWith(JUnitParamsRunner.class)
 public class TimeZoneDetectorStrategyImplTest {
 
     private static final @UserIdInt int USER_ID = 9876;
@@ -561,55 +566,10 @@ public class TimeZoneDetectorStrategyImplTest {
                 .resetConfigurationTracking();
 
         // Auto time zone detection is enabled so the manual suggestion should be ignored.
-        script.simulateManualTimeZoneSuggestion(
-                USER_ID, createManualSuggestion("Europe/Paris"), false /* expectedResult */)
-                .verifyTimeZoneNotChanged();
-
-        assertNull(mTimeZoneDetectorStrategy.getLatestManualSuggestion());
-    }
-
-    @Test
-    public void testManualSuggestion_restricted_simulateAutoTimeZoneEnabled() {
-        Script script = new Script()
-                .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID, TIME_ZONE_CONFIDENCE_LOW)
-                .simulateConfigurationInternalChange(CONFIG_USER_RESTRICTED_AUTO_ENABLED)
-                .resetConfigurationTracking();
-
-        // User is restricted so the manual suggestion should be ignored.
-        script.simulateManualTimeZoneSuggestion(
-                USER_ID, createManualSuggestion("Europe/Paris"), false /* expectedResult */)
-                .verifyTimeZoneNotChanged();
-
-        assertNull(mTimeZoneDetectorStrategy.getLatestManualSuggestion());
-    }
-
-    @Test
-    public void testManualSuggestion_unrestricted_autoTimeZoneDetectionDisabled() {
-        Script script = new Script()
-                .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID, TIME_ZONE_CONFIDENCE_LOW)
-                .simulateConfigurationInternalChange(CONFIG_AUTO_DISABLED_GEO_DISABLED)
-                .resetConfigurationTracking();
-
-        // Auto time zone detection is disabled so the manual suggestion should be used.
-        ManualTimeZoneSuggestion manualSuggestion = createManualSuggestion("Europe/Paris");
-        script.simulateManualTimeZoneSuggestion(
-                USER_ID, manualSuggestion, true /* expectedResult */)
-            .verifyTimeZoneChangedAndReset(manualSuggestion);
-
-        assertEquals(manualSuggestion, mTimeZoneDetectorStrategy.getLatestManualSuggestion());
-    }
-
-    @Test
-    public void testManualSuggestion_restricted_autoTimeZoneDetectionDisabled() {
-        Script script = new Script()
-                .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID, TIME_ZONE_CONFIDENCE_LOW)
-                .simulateConfigurationInternalChange(CONFIG_USER_RESTRICTED_AUTO_DISABLED)
-                .resetConfigurationTracking();
-
-        // Restricted users do not have the capability.
-        ManualTimeZoneSuggestion manualSuggestion = createManualSuggestion("Europe/Paris");
-        script.simulateManualTimeZoneSuggestion(
-                USER_ID, manualSuggestion, false /* expectedResult */)
+        boolean bypassUserPolicyChecks = false;
+        boolean expectedResult = false;
+        script.simulateManualTimeZoneSuggestion(USER_ID, createManualSuggestion("Europe/Paris"),
+                        bypassUserPolicyChecks, expectedResult)
                 .verifyTimeZoneNotChanged();
 
         assertNull(mTimeZoneDetectorStrategy.getLatestManualSuggestion());
@@ -624,11 +584,61 @@ public class TimeZoneDetectorStrategyImplTest {
 
         // Unrestricted users have the capability.
         ManualTimeZoneSuggestion manualSuggestion = createManualSuggestion("Europe/Paris");
+        boolean bypassUserPolicyChecks = false;
+        boolean expectedResult = true;
         script.simulateManualTimeZoneSuggestion(
-                USER_ID, manualSuggestion, true /* expectedResult */)
+                USER_ID, manualSuggestion, bypassUserPolicyChecks, expectedResult)
                 .verifyTimeZoneChangedAndReset(manualSuggestion);
 
         assertEquals(manualSuggestion, mTimeZoneDetectorStrategy.getLatestManualSuggestion());
+    }
+
+    @Test
+    @Parameters({ "true,true", "true,false", "false,true", "false,false" })
+    public void testManualSuggestion_autoTimeEnabled_userRestrictions(
+            boolean userConfigAllowed, boolean bypassUserPolicyChecks) {
+        ConfigurationInternal config =
+                new ConfigurationInternal.Builder(CONFIG_USER_RESTRICTED_AUTO_ENABLED)
+                        .setUserConfigAllowed(userConfigAllowed)
+                        .build();
+        Script script = new Script()
+                .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID, TIME_ZONE_CONFIDENCE_LOW)
+                .simulateConfigurationInternalChange(config)
+                .resetConfigurationTracking();
+
+        // User is restricted so the manual suggestion should be ignored.
+        boolean expectedResult = false;
+        script.simulateManualTimeZoneSuggestion(USER_ID, createManualSuggestion("Europe/Paris"),
+                        bypassUserPolicyChecks, expectedResult)
+                .verifyTimeZoneNotChanged();
+
+        assertNull(mTimeZoneDetectorStrategy.getLatestManualSuggestion());
+    }
+
+    @Test
+    @Parameters({ "true,true", "true,false", "false,true", "false,false" })
+    public void testManualSuggestion_autoTimeDisabled_userRestrictions(
+            boolean userConfigAllowed, boolean bypassUserPolicyChecks) {
+        ConfigurationInternal config =
+                new ConfigurationInternal.Builder(CONFIG_AUTO_DISABLED_GEO_DISABLED)
+                        .setUserConfigAllowed(userConfigAllowed)
+                        .build();
+        Script script = new Script()
+                .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID, TIME_ZONE_CONFIDENCE_LOW)
+                .simulateConfigurationInternalChange(config)
+                .resetConfigurationTracking();
+
+        ManualTimeZoneSuggestion manualSuggestion = createManualSuggestion("Europe/Paris");
+        boolean expectedResult = userConfigAllowed || bypassUserPolicyChecks;
+        script.simulateManualTimeZoneSuggestion(
+                        USER_ID, manualSuggestion, bypassUserPolicyChecks, expectedResult);
+        if (expectedResult) {
+            script.verifyTimeZoneChangedAndReset(manualSuggestion);
+            assertEquals(manualSuggestion, mTimeZoneDetectorStrategy.getLatestManualSuggestion());
+        } else {
+            script.verifyTimeZoneNotChanged();
+            assertNull(mTimeZoneDetectorStrategy.getLatestManualSuggestion());
+        }
     }
 
     @Test
@@ -1071,8 +1081,10 @@ public class TimeZoneDetectorStrategyImplTest {
 
         // Make sure the manual suggestion is recorded.
         ManualTimeZoneSuggestion manualSuggestion = createManualSuggestion("Zone1");
-        script.simulateManualTimeZoneSuggestion(USER_ID, manualSuggestion,
-                true /* expectedResult */)
+        boolean bypassUserPolicyChecks = false;
+        boolean expectedResult = true;
+        script.simulateManualTimeZoneSuggestion(
+                USER_ID, manualSuggestion, bypassUserPolicyChecks, expectedResult)
                 .verifyTimeZoneChangedAndReset(manualSuggestion);
         expectedDeviceTimeZoneId = manualSuggestion.getZoneId();
         assertMetricsState(expectedInternalConfig, expectedDeviceTimeZoneId,
@@ -1350,9 +1362,9 @@ public class TimeZoneDetectorStrategyImplTest {
         /** Simulates the time zone detection strategy receiving a user-originated suggestion. */
         Script simulateManualTimeZoneSuggestion(
                 @UserIdInt int userId, ManualTimeZoneSuggestion manualTimeZoneSuggestion,
-                boolean expectedResult) {
+                boolean bypassUserPolicyChecks, boolean expectedResult) {
             boolean actualResult = mTimeZoneDetectorStrategy.suggestManualTimeZone(
-                    userId, manualTimeZoneSuggestion);
+                    userId, manualTimeZoneSuggestion, bypassUserPolicyChecks);
             assertEquals(expectedResult, actualResult);
             return this;
         }

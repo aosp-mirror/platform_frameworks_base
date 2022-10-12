@@ -159,12 +159,14 @@ int main(int argc, char** argv)
     }
 
     if (!displayId) { // no diplsay id is specified
-        if (ids.size() == 1) {
-            displayId = ids.front();
-        } else {
-            fprintf(stderr, "Please specify a display ID (-d display-id) for multi-display device.\n");
+        displayId = ids.front();
+        if (ids.size() > 1) {
+            fprintf(stderr,
+                    "[Warning] Multiple displays were found, but no display id was specified! "
+                    "Defaulting to the first display found, however this default is not guaranteed "
+                    "to be consistent across captures. A display id should be specified.\n");
+            fprintf(stderr, "A display ID can be specified with the [-d display-id] option.\n");
             fprintf(stderr, "See \"dumpsys SurfaceFlinger --display-id\" for valid display IDs.\n");
-            return 1;
         }
     }
 

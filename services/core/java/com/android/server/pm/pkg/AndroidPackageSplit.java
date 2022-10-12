@@ -18,27 +18,58 @@ package com.android.server.pm.pkg;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.processor.immutability.Immutable;
+
+import com.android.internal.R;
 
 import java.util.List;
 
-/** @hide */
+/**
+ * Representation of the parsed state of a single split APK. Note this includes the base.apk.
+ *
+ * The information here is very minimal, mostly used for loading a specific class, and most
+ * important state is collected across all splits for a package into the parent
+ * {@link AndroidPackage} values.
+ *
+ * @hide
+ */
+@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
 @Immutable
 public interface AndroidPackageSplit {
 
+    /**
+     * @return The unique name given to the split, or null if this is the base.
+     */
     @Nullable
     String getName();
 
+    /**
+     * @return Physical location of the split APK on disk, pointing to a single file with the .apk
+     * extension.
+     */
     @NonNull
     String getPath();
 
+    /**
+     * @see R.styleable#AndroidManifest_revisionCode
+     */
     int getRevisionCode();
 
+    /**
+     * @see R.styleable#AndroidManifestApplication_hasCode
+     */
     boolean isHasCode();
 
+    /**
+     * @see R.styleable#AndroidManifestApplication_classLoader
+     */
     @Nullable
     String getClassLoaderName();
 
+    /**
+     * @see R.styleable#AndroidManifestUsesSplit
+     */
     @NonNull
     List<AndroidPackageSplit> getDependencies();
 }

@@ -2892,7 +2892,6 @@ package android.view {
 
   public final class SurfaceControl implements android.os.Parcelable {
     ctor public SurfaceControl(@NonNull android.view.SurfaceControl, @NonNull String);
-    method @NonNull public static android.os.IBinder getInternalDisplayToken();
     method public boolean isSameSurface(@NonNull android.view.SurfaceControl);
   }
 
@@ -3145,6 +3144,7 @@ package android.view.inputmethod {
     method @NonNull @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public java.util.List<android.view.inputmethod.InputMethodInfo> getInputMethodListAsUser(int);
     method public boolean hasActiveInputConnection(@Nullable android.view.View);
     method public boolean isInputMethodPickerShown();
+    method @RequiresPermission("android.permission.TEST_INPUT_METHOD") public void setStylusWindowIdleTimeoutForTest(long);
     field public static final long CLEAR_SHOW_FORCED_FLAG_WHEN_LEAVING = 214016041L; // 0xcc1a029L
   }
 

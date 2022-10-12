@@ -30,6 +30,8 @@ public class DisplayControl {
     private static native IBinder nativeCreateDisplay(String name, boolean secure);
     private static native void nativeDestroyDisplay(IBinder displayToken);
     private static native void nativeOverrideHdrTypes(IBinder displayToken, int[] modes);
+    private static native long[] nativeGetPhysicalDisplayIds();
+    private static native IBinder nativeGetPhysicalDisplayToken(long physicalDisplayId);
 
     /**
      * Create a display in SurfaceFlinger.
@@ -62,5 +64,19 @@ public class DisplayControl {
     @RequiresPermission(Manifest.permission.ACCESS_SURFACE_FLINGER)
     public static void overrideHdrTypes(@NonNull IBinder displayToken, @NonNull int[] modes) {
         nativeOverrideHdrTypes(displayToken, modes);
+    }
+
+    /**
+     * Gets all the physical display ids.
+     */
+    public static long[] getPhysicalDisplayIds() {
+        return nativeGetPhysicalDisplayIds();
+    }
+
+    /**
+     * Gets the display's token from the physical display id
+     */
+    public static IBinder getPhysicalDisplayToken(long physicalDisplayId) {
+        return nativeGetPhysicalDisplayToken(physicalDisplayId);
     }
 }

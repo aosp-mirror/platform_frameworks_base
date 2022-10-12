@@ -171,7 +171,7 @@ class EnterSplitScreenFromOverview(testSpec: FlickerTestParameter) : SplitScreen
         super.taskBarWindowIsAlwaysVisible()
 
     /** {@inheritDoc} */
-    @Presubmit
+    @FlakyTest(bugId = 252736515)
     @Test
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
         super.visibleLayersShownMoreThanOneConsecutiveEntry()

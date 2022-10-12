@@ -1958,7 +1958,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"<xliff:g id="DEVICE">%1$s</xliff:g> からはアクセスできません。Android TV デバイスでのアクセスをお試しください。"</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"<xliff:g id="DEVICE">%1$s</xliff:g> からはアクセスできません。タブレットでのアクセスをお試しください。"</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"<xliff:g id="DEVICE">%1$s</xliff:g> からはアクセスできません。スマートフォンでのアクセスをお試しください。"</string>
-    <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"このアプリは以前のバージョンの Android 用に作成されており、正常に動作しない可能性があります。アップデートを確認するか、デベロッパーにお問い合わせください。"</string>
+    <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"このアプリは Android の以前のバージョンを対象としているため、正しく動作しない可能性があります。最新のセキュリティ保護やプライバシー保護は組み込まれていません。アップデートをご確認いただくか、アプリのデベロッパーにお問い合わせください。"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"アップデートを確認"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"新着メッセージがあります"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"表示するには SMS アプリを開きます"</string>

@@ -30,6 +30,8 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
+import com.android.server.utils.EventLogger;
+
 import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -587,7 +589,7 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
     /**
      * Inner class for recording event logging
      */
-    private static final class RecordingEvent extends AudioEventLogger.Event {
+    private static final class RecordingEvent extends EventLogger.Event {
         private final int mRecEvent;
         private final int mRIId;
         private final int mClientUid;
@@ -641,6 +643,7 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
         }
     }
 
-    private static final AudioEventLogger sEventLogger = new AudioEventLogger(50,
+    private static final EventLogger
+            sEventLogger = new EventLogger(50,
             "recording activity received by AudioService");
 }

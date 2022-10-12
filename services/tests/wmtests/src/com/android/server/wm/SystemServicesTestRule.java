@@ -79,6 +79,7 @@ import com.android.server.LockGuard;
 import com.android.server.UiThread;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityManagerService;
+import com.android.server.display.DisplayControl;
 import com.android.server.display.color.ColorDisplayService;
 import com.android.server.firewall.IntentFirewall;
 import com.android.server.input.InputManagerService;
@@ -177,6 +178,7 @@ public class SystemServicesTestRule implements TestRule {
                 .mockStatic(LocalServices.class, spyStubOnly)
                 .mockStatic(DeviceConfig.class, spyStubOnly)
                 .mockStatic(SurfaceControl.class, mockStubOnly)
+                .mockStatic(DisplayControl.class, mockStubOnly)
                 .mockStatic(LockGuard.class, mockStubOnly)
                 .mockStatic(Watchdog.class, mockStubOnly)
                 .strictness(Strictness.LENIENT)

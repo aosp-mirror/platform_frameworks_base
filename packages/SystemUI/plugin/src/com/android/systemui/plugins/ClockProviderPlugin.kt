@@ -39,19 +39,19 @@ interface ClockProvider {
     fun getClocks(): List<ClockMetadata>
 
     /** Initializes and returns the target clock design */
-    fun createClock(id: ClockId): Clock
+    fun createClock(id: ClockId): ClockController
 
     /** A static thumbnail for rendering in some examples */
     fun getClockThumbnail(id: ClockId): Drawable?
 }
 
 /** Interface for controlling an active clock */
-interface Clock {
+interface ClockController {
     /** A small version of the clock, appropriate for smaller viewports */
-    val smallClock: View
+    val smallClock: ClockFaceController
 
     /** A large version of the clock, appropriate when a bigger viewport is available */
-    val largeClock: View
+    val largeClock: ClockFaceController
 
     /** Events that clocks may need to respond to */
     val events: ClockEvents
@@ -61,7 +61,7 @@ interface Clock {
 
     /** Initializes various rendering parameters. If never called, provides reasonable defaults. */
     fun initialize(resources: Resources, dozeFraction: Float, foldFraction: Float) {
-        events.onColorPaletteChanged(resources, true, true)
+        events.onColorPaletteChanged(resources)
         animations.doze(dozeFraction)
         animations.fold(foldFraction)
         events.onTimeTick()
@@ -71,10 +71,19 @@ interface Clock {
     fun dump(pw: PrintWriter) { }
 }
 
+/** Interface for a specific clock face version rendered by the clock */
+interface ClockFaceController {
+    /** View that renders the clock face */
+    val view: View
+
+    /** Events specific to this clock face */
+    val events: ClockFaceEvents
+}
+
 /** Events that should call when various rendering parameters change */
 interface ClockEvents {
     /** Call every time tick */
-    fun onTimeTick()
+    fun onTimeTick() { }
 
     /** Call whenever timezone changes */
     fun onTimeZoneChanged(timeZone: TimeZone) { }
@@ -89,11 +98,7 @@ interface ClockEvents {
     fun onFontSettingChanged() { }
 
     /** Call whenever the color palette should update */
-    fun onColorPaletteChanged(
-            resources: Resources,
-            smallClockIsDark: Boolean,
-            largeClockIsDark: Boolean
-    ) { }
+    fun onColorPaletteChanged(resources: Resources) { }
 }
 
 /** Methods which trigger various clock animations */
@@ -109,6 +114,12 @@ interface ClockAnimations {
 
     /** Runs the battery animation (if any). */
     fun charge() { }
+}
+
+/** Events that have specific data about the related face */
+interface ClockFaceEvents {
+    /** Region Darkness specific to the clock face */
+    fun onRegionDarknessChanged(isDark: Boolean) { }
 }
 
 /** Some data about a clock design */
