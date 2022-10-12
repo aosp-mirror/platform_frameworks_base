@@ -798,6 +798,12 @@ sp<IBinder> ibinderForJavaObject(JNIEnv* env, jobject obj)
     if (env->IsInstanceOf(obj, gBinderOffsets.mClass)) {
         JavaBBinderHolder* jbh = (JavaBBinderHolder*)
             env->GetLongField(obj, gBinderOffsets.mObject);
+
+        if (jbh == nullptr) {
+            ALOGE("JavaBBinderHolder null on binder");
+            return nullptr;
+        }
+
         return jbh->get(env, obj);
     }
 
