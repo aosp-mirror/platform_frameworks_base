@@ -16,7 +16,7 @@
 
 package com.android.server.wm.flicker.launch
 
-import android.platform.test.annotations.Postsubmit
+import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.RequiresDevice
 import android.view.Surface
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
@@ -81,87 +81,101 @@ class OpenAppColdFromIcon(testSpec: FlickerTestParameter) :
         }
 
     /** {@inheritDoc} */
-    @Postsubmit @Test override fun appWindowAsTopWindowAtEnd() = super.appWindowAsTopWindowAtEnd()
+    @FlakyTest(bugId = 240916028)
+    @Test
+    override fun appWindowAsTopWindowAtEnd() = super.appWindowAsTopWindowAtEnd()
 
     /** {@inheritDoc} */
-    @Postsubmit
+    @FlakyTest(bugId = 240916028)
     @Test
     override fun appWindowReplacesLauncherAsTopWindow() =
         super.appWindowReplacesLauncherAsTopWindow()
 
     /** {@inheritDoc} */
-    @Postsubmit @Test override fun appLayerBecomesVisible() = super.appLayerBecomesVisible()
+    @FlakyTest(bugId = 240916028)
+    @Test
+    override fun appLayerBecomesVisible() = super.appLayerBecomesVisible()
 
     /** {@inheritDoc} */
-    @Postsubmit @Test override fun appLayerReplacesLauncher() = super.appLayerReplacesLauncher()
+    @FlakyTest(bugId = 240916028)
+    @Test
+    override fun appLayerReplacesLauncher() = super.appLayerReplacesLauncher()
 
     /** {@inheritDoc} */
-    @Postsubmit @Test override fun appWindowBecomesTopWindow() = super.appWindowBecomesTopWindow()
+    @FlakyTest(bugId = 240916028)
+    @Test
+    override fun appWindowBecomesTopWindow() = super.appWindowBecomesTopWindow()
 
     /** {@inheritDoc} */
-    @Postsubmit @Test override fun appWindowBecomesVisible() = super.appWindowBecomesVisible()
+    @FlakyTest(bugId = 240916028)
+    @Test
+    override fun appWindowBecomesVisible() = super.appWindowBecomesVisible()
 
     /** {@inheritDoc} */
-    @Postsubmit @Test override fun entireScreenCovered() = super.entireScreenCovered()
+    @FlakyTest(bugId = 240916028)
+    @Test
+    override fun entireScreenCovered() = super.entireScreenCovered()
 
     /** {@inheritDoc} */
-    @Postsubmit @Test override fun focusChanges() = super.focusChanges()
+    @FlakyTest(bugId = 240916028) @Test override fun focusChanges() = super.focusChanges()
 
     /** {@inheritDoc} */
-    @Postsubmit
+    @FlakyTest(bugId = 240916028)
     @Test
     override fun navBarLayerIsVisibleAtStartAndEnd() = super.navBarLayerIsVisibleAtStartAndEnd()
 
     /** {@inheritDoc} */
-    @Postsubmit
+    @FlakyTest(bugId = 240916028)
     @Test
     override fun taskBarLayerIsVisibleAtStartAndEnd() = super.taskBarLayerIsVisibleAtStartAndEnd()
 
     /** {@inheritDoc} */
-    @Postsubmit
+    @FlakyTest(bugId = 240916028)
     @Test
     override fun taskBarWindowIsAlwaysVisible() = super.taskBarWindowIsAlwaysVisible()
 
     /** {@inheritDoc} */
-    @Postsubmit
+    @FlakyTest(bugId = 240916028)
     @Test
     override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
 
     /** {@inheritDoc} */
-    @Postsubmit
+    @FlakyTest(bugId = 240916028)
     @Test
     override fun navBarWindowIsAlwaysVisible() = super.navBarWindowIsAlwaysVisible()
 
     /** {@inheritDoc} */
-    @Postsubmit
+    @FlakyTest(bugId = 240916028)
     @Test
     override fun statusBarLayerPositionAtStartAndEnd() = super.statusBarLayerPositionAtStartAndEnd()
 
     /** {@inheritDoc} */
-    @Postsubmit
+    @FlakyTest(bugId = 240916028)
     @Test
     override fun statusBarLayerIsVisibleAtStartAndEnd() =
         super.statusBarLayerIsVisibleAtStartAndEnd()
 
     /** {@inheritDoc} */
-    @Postsubmit
+    @FlakyTest(bugId = 240916028)
     @Test
     override fun statusBarWindowIsAlwaysVisible() = super.statusBarWindowIsAlwaysVisible()
 
     /** {@inheritDoc} */
-    @Postsubmit
+    @FlakyTest(bugId = 240916028)
     @Test
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
         super.visibleLayersShownMoreThanOneConsecutiveEntry()
 
     /** {@inheritDoc} */
-    @Postsubmit
+    @FlakyTest(bugId = 240916028)
     @Test
     override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
         super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
     /** {@inheritDoc} */
-    @Postsubmit @Test override fun appWindowIsTopWindowAtEnd() = super.appWindowIsTopWindowAtEnd()
+    @FlakyTest(bugId = 240916028)
+    @Test
+    override fun appWindowIsTopWindowAtEnd() = super.appWindowIsTopWindowAtEnd()
 
     companion object {
         /**
