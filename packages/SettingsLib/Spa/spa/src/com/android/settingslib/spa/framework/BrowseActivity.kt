@@ -30,7 +30,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.android.settingslib.spa.R
-import com.android.settingslib.spa.framework.common.SpaEnvironment
+import com.android.settingslib.spa.framework.common.SpaEnvironmentFactory
 import com.android.settingslib.spa.framework.compose.LocalNavController
 import com.android.settingslib.spa.framework.compose.NavControllerWrapperImpl
 import com.android.settingslib.spa.framework.compose.localNavController
@@ -50,8 +50,8 @@ private const val NULL_PAGE_NAME = "NULL"
  *   $ adb shell am start -n <BrowseActivityComponent> -e spa:SpaActivity:destination HOME
  *   $ adb shell am start -n <BrowseActivityComponent> -e spa:SpaActivity:destination ARGUMENT/bar/5
  */
-open class BrowseActivity(spaEnvironment: SpaEnvironment) : ComponentActivity() {
-    private val sppRepository by spaEnvironment.pageProviderRepository
+open class BrowseActivity : ComponentActivity() {
+    private val spaEnvironment get() = SpaEnvironmentFactory.instance
 
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R.style.Theme_SpaLib_DayNight)
@@ -67,6 +67,7 @@ open class BrowseActivity(spaEnvironment: SpaEnvironment) : ComponentActivity() 
 
     @Composable
     private fun MainContent() {
+        val sppRepository by spaEnvironment.pageProviderRepository
         val navController = rememberNavController()
         CompositionLocalProvider(navController.localNavController()) {
             NavHost(navController, NULL_PAGE_NAME) {
@@ -84,6 +85,7 @@ open class BrowseActivity(spaEnvironment: SpaEnvironment) : ComponentActivity() 
 
     @Composable
     private fun InitialDestinationNavigator() {
+        val sppRepository by spaEnvironment.pageProviderRepository
         val destinationNavigated = rememberSaveable { mutableStateOf(false) }
         if (destinationNavigated.value) return
         destinationNavigated.value = true

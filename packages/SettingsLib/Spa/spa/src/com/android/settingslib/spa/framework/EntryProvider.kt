@@ -30,7 +30,7 @@ import android.net.Uri
 import android.util.Log
 import com.android.settingslib.spa.framework.common.SettingsEntry
 import com.android.settingslib.spa.framework.common.SettingsPage
-import com.android.settingslib.spa.framework.common.SpaEnvironment
+import com.android.settingslib.spa.framework.common.SpaEnvironmentFactory
 
 private const val TAG = "EntryProvider"
 
@@ -49,9 +49,8 @@ private const val TAG = "EntryProvider"
  *   $ adb shell content query --uri content://<AuthorityPath>/search_static
  *   $ adb shell content query --uri content://<AuthorityPath>/search_dynamic
  */
-open class EntryProvider(spaEnvironment: SpaEnvironment) : ContentProvider() {
-    private val entryRepository by spaEnvironment.entryRepository
-    private val browseActivityClass = spaEnvironment.browseActivityClass
+open class EntryProvider : ContentProvider() {
+    private val spaEnvironment get() = SpaEnvironmentFactory.instance
 
     /**
      * Enum to define all column names in provider.
@@ -221,6 +220,7 @@ open class EntryProvider(spaEnvironment: SpaEnvironment) : ContentProvider() {
     }
 
     private fun queryPageDebug(): Cursor {
+        val entryRepository by spaEnvironment.entryRepository
         val cursor = MatrixCursor(QueryEnum.PAGE_DEBUG_QUERY.getColumns())
         for (pageWithEntry in entryRepository.getAllPageWithEntry()) {
             val command = createBrowsePageAdbCommand(pageWithEntry.page)
@@ -232,6 +232,7 @@ open class EntryProvider(spaEnvironment: SpaEnvironment) : ContentProvider() {
     }
 
     private fun queryEntryDebug(): Cursor {
+        val entryRepository by spaEnvironment.entryRepository
         val cursor = MatrixCursor(QueryEnum.ENTRY_DEBUG_QUERY.getColumns())
         for (entry in entryRepository.getAllEntries()) {
             val command = createBrowsePageAdbCommand(entry.containerPage(), entry.id)
@@ -243,6 +244,7 @@ open class EntryProvider(spaEnvironment: SpaEnvironment) : ContentProvider() {
     }
 
     private fun queryPageInfo(): Cursor {
+        val entryRepository by spaEnvironment.entryRepository
         val cursor = MatrixCursor(QueryEnum.PAGE_INFO_QUERY.getColumns())
         for (pageWithEntry in entryRepository.getAllPageWithEntry()) {
             val page = pageWithEntry.page
@@ -261,6 +263,7 @@ open class EntryProvider(spaEnvironment: SpaEnvironment) : ContentProvider() {
     }
 
     private fun queryEntryInfo(): Cursor {
+        val entryRepository by spaEnvironment.entryRepository
         val cursor = MatrixCursor(QueryEnum.ENTRY_INFO_QUERY.getColumns())
         for (entry in entryRepository.getAllEntries()) {
             cursor.newRow()
@@ -276,6 +279,7 @@ open class EntryProvider(spaEnvironment: SpaEnvironment) : ContentProvider() {
     }
 
     private fun querySearchSitemap(): Cursor {
+        val entryRepository by spaEnvironment.entryRepository
         val cursor = MatrixCursor(QueryEnum.SEARCH_SITEMAP_QUERY.getColumns())
         for (entry in entryRepository.getAllEntries()) {
             if (!entry.isAllowSearch) continue
@@ -287,6 +291,7 @@ open class EntryProvider(spaEnvironment: SpaEnvironment) : ContentProvider() {
     }
 
     private fun querySearchStaticData(): Cursor {
+        val entryRepository by spaEnvironment.entryRepository
         val cursor = MatrixCursor(QueryEnum.SEARCH_STATIC_DATA_QUERY.getColumns())
         for (entry in entryRepository.getAllEntries()) {
             if (!entry.isAllowSearch || entry.isSearchDataDynamic) continue
@@ -296,6 +301,7 @@ open class EntryProvider(spaEnvironment: SpaEnvironment) : ContentProvider() {
     }
 
     private fun querySearchDynamicData(): Cursor {
+        val entryRepository by spaEnvironment.entryRepository
         val cursor = MatrixCursor(QueryEnum.SEARCH_DYNAMIC_DATA_QUERY.getColumns())
         for (entry in entryRepository.getAllEntries()) {
             if (!entry.isAllowSearch || !entry.isSearchDataDynamic) continue
@@ -317,25 +323,30 @@ open class EntryProvider(spaEnvironment: SpaEnvironment) : ContentProvider() {
     }
 
     private fun createBrowsePageIntent(page: SettingsPage, entryId: String? = null): Intent {
-        if (context == null || page.hasRuntimeParam())
-            return Intent()
-
-        return Intent().setComponent(ComponentName(context!!, browseActivityClass)).apply {
-            putExtra(BrowseActivity.KEY_DESTINATION, page.buildRoute())
-            if (entryId != null) {
-                putExtra(BrowseActivity.KEY_HIGHLIGHT_ENTRY, entryId)
+        if (!isPageBrowsable(page)) return Intent()
+        return Intent().setComponent(ComponentName(context!!, spaEnvironment.browseActivityClass!!))
+            .apply {
+                putExtra(BrowseActivity.KEY_DESTINATION, page.buildRoute())
+                if (entryId != null) {
+                    putExtra(BrowseActivity.KEY_HIGHLIGHT_ENTRY, entryId)
+                }
             }
-        }
     }
 
     private fun createBrowsePageAdbCommand(page: SettingsPage, entryId: String? = null): String? {
-        if (context == null || page.hasRuntimeParam()) return null
+        if (!isPageBrowsable(page)) return null
         val packageName = context!!.packageName
-        val activityName = browseActivityClass.name.replace(packageName, "")
+        val activityName = spaEnvironment.browseActivityClass!!.name.replace(packageName, "")
         val destinationParam = " -e ${BrowseActivity.KEY_DESTINATION} ${page.buildRoute()}"
         val highlightParam =
             if (entryId != null) " -e ${BrowseActivity.KEY_HIGHLIGHT_ENTRY} $entryId" else ""
         return "adb shell am start -n $packageName/$activityName$destinationParam$highlightParam"
+    }
+
+    private fun isPageBrowsable(page: SettingsPage): Boolean {
+        return context != null &&
+            spaEnvironment.browseActivityClass != null &&
+            !page.hasRuntimeParam()
     }
 }
 

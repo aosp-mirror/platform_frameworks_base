@@ -18,4 +18,4 @@ package com.android.settingslib.spa.gallery
 
 import com.android.settingslib.spa.framework.BrowseActivity
 
-class MainActivity : BrowseActivity(GallerySpaEnvironment)
+class GalleryMainActivity : BrowseActivity()

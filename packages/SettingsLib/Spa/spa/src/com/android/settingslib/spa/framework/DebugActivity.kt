@@ -37,7 +37,7 @@ import com.android.settingslib.spa.framework.BrowseActivity.Companion.KEY_DESTIN
 import com.android.settingslib.spa.framework.BrowseActivity.Companion.KEY_HIGHLIGHT_ENTRY
 import com.android.settingslib.spa.framework.common.SettingsEntry
 import com.android.settingslib.spa.framework.common.SettingsPage
-import com.android.settingslib.spa.framework.common.SpaEnvironment
+import com.android.settingslib.spa.framework.common.SpaEnvironmentFactory
 import com.android.settingslib.spa.framework.compose.localNavController
 import com.android.settingslib.spa.framework.compose.navigator
 import com.android.settingslib.spa.framework.compose.toState
@@ -63,8 +63,8 @@ private const val PARAM_NAME_ENTRY_ID = "eid"
  * For gallery, Activity = com.android.settingslib.spa.gallery/.GalleryDebugActivity
  * For SettingsGoogle, Activity = com.android.settings/.spa.SpaDebugActivity
  */
-open class DebugActivity(private val spaEnvironment: SpaEnvironment) : ComponentActivity() {
-    private val entryRepository by spaEnvironment.entryRepository
+open class DebugActivity : ComponentActivity() {
+    private val spaEnvironment get() = SpaEnvironmentFactory.instance
 
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R.style.Theme_SpaLib_DayNight)
@@ -128,6 +128,7 @@ open class DebugActivity(private val spaEnvironment: SpaEnvironment) : Component
 
     @Composable
     fun RootPage() {
+        val entryRepository by spaEnvironment.entryRepository
         val allPageWithEntry = remember { entryRepository.getAllPageWithEntry() }
         val allEntry = remember { entryRepository.getAllEntries() }
         HomeScaffold(title = "Settings Debug") {
@@ -141,6 +142,7 @@ open class DebugActivity(private val spaEnvironment: SpaEnvironment) : Component
             })
             Preference(object : PreferenceModel {
                 override val title = "Query EntryProvider"
+                override val enabled = isEntryProviderAvailable().toState()
                 override val onClick = { displayDebugMessage() }
             })
         }
@@ -148,6 +150,7 @@ open class DebugActivity(private val spaEnvironment: SpaEnvironment) : Component
 
     @Composable
     fun AllPages() {
+        val entryRepository by spaEnvironment.entryRepository
         val allPageWithEntry = remember { entryRepository.getAllPageWithEntry() }
         RegularScaffold(title = "All Pages (${allPageWithEntry.size})") {
             for (pageWithEntry in allPageWithEntry) {
@@ -164,6 +167,7 @@ open class DebugActivity(private val spaEnvironment: SpaEnvironment) : Component
 
     @Composable
     fun AllEntries() {
+        val entryRepository by spaEnvironment.entryRepository
         val allEntry = remember { entryRepository.getAllEntries() }
         RegularScaffold(title = "All Entries (${allEntry.size})") {
             EntryList(allEntry)
@@ -172,6 +176,7 @@ open class DebugActivity(private val spaEnvironment: SpaEnvironment) : Component
 
     @Composable
     fun OnePage(arguments: Bundle?) {
+        val entryRepository by spaEnvironment.entryRepository
         val id = arguments!!.getString(PARAM_NAME_PAGE_ID, "")
         val pageWithEntry = entryRepository.getPageWithEntry(id)!!
         RegularScaffold(title = "Page - ${pageWithEntry.page.displayName}") {
@@ -180,7 +185,7 @@ open class DebugActivity(private val spaEnvironment: SpaEnvironment) : Component
             Text(text = "Entry size: ${pageWithEntry.entries.size}")
             Preference(model = object : PreferenceModel {
                 override val title = "open page"
-                override val enabled = (!pageWithEntry.page.hasRuntimeParam()).toState()
+                override val enabled = isPageClickable(pageWithEntry.page).toState()
                 override val onClick = openPage(pageWithEntry.page)
             })
             EntryList(pageWithEntry.entries)
@@ -189,13 +194,14 @@ open class DebugActivity(private val spaEnvironment: SpaEnvironment) : Component
 
     @Composable
     fun OneEntry(arguments: Bundle?) {
+        val entryRepository by spaEnvironment.entryRepository
         val id = arguments!!.getString(PARAM_NAME_ENTRY_ID, "")
         val entry = entryRepository.getEntry(id)!!
         val entryContent = remember { entry.formatContent() }
         RegularScaffold(title = "Entry - ${entry.displayTitle()}") {
             Preference(model = object : PreferenceModel {
                 override val title = "open entry"
-                override val enabled = (!entry.containerPage().hasRuntimeParam()).toState()
+                override val enabled = isEntryClickable(entry).toState()
                 override val onClick = openEntry(entry)
             })
             Text(text = entryContent)
@@ -216,7 +222,7 @@ open class DebugActivity(private val spaEnvironment: SpaEnvironment) : Component
 
     @Composable
     private fun openPage(page: SettingsPage): (() -> Unit)? {
-        if (page.hasRuntimeParam()) return null
+        if (!isPageClickable(page)) return null
         val context = LocalContext.current
         val route = page.buildRoute()
         val intent = Intent(context, spaEnvironment.browseActivityClass).apply {
@@ -230,7 +236,7 @@ open class DebugActivity(private val spaEnvironment: SpaEnvironment) : Component
 
     @Composable
     private fun openEntry(entry: SettingsEntry): (() -> Unit)? {
-        if (entry.containerPage().hasRuntimeParam()) return null
+        if (!isEntryClickable(entry)) return null
         val context = LocalContext.current
         val route = entry.containerPage().buildRoute()
         val intent = Intent(context, spaEnvironment.browseActivityClass).apply {
@@ -241,5 +247,18 @@ open class DebugActivity(private val spaEnvironment: SpaEnvironment) : Component
             Log.d(TAG, "OpenEntry: $route")
             context.startActivity(intent)
         }
+    }
+
+    private fun isEntryProviderAvailable(): Boolean {
+        return spaEnvironment.entryProviderAuthorities != null
+    }
+
+    private fun isPageClickable(page: SettingsPage): Boolean {
+        return spaEnvironment.browseActivityClass != null && !page.hasRuntimeParam()
+    }
+
+    private fun isEntryClickable(entry: SettingsEntry): Boolean {
+        return spaEnvironment.browseActivityClass != null &&
+            !entry.containerPage().hasRuntimeParam()
     }
 }

@@ -16,6 +16,12 @@
 
 package com.android.settingslib.spa.gallery
 
-import com.android.settingslib.spa.framework.DebugActivity
+import android.app.Application
+import com.android.settingslib.spa.framework.common.SpaEnvironmentFactory
 
-class GalleryDebugActivity : DebugActivity()
+class GalleryApplication : Application() {
+    override fun onCreate() {
+        super.onCreate()
+        SpaEnvironmentFactory.instance = GallerySpaEnvironment
+    }
+}
