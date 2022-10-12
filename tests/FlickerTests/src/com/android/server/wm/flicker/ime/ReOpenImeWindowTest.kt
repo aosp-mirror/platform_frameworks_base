@@ -16,7 +16,7 @@
 
 package com.android.server.wm.flicker.ime
 
-import android.platform.test.annotations.FlakyTest
+import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.BaseTest
@@ -47,6 +47,7 @@ open class ReOpenImeWindowTest(testSpec: FlickerTestParameter) : BaseTest(testSp
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit = {
         setup {
+            tapl.workspace.switchToOverview().dismissAllTasks()
             testApp.launchViaIntent(wmHelper)
             testApp.openIME(wmHelper)
             this.setRotation(testSpec.startRotation)
@@ -61,7 +62,7 @@ open class ReOpenImeWindowTest(testSpec: FlickerTestParameter) : BaseTest(testSp
     }
 
     /** {@inheritDoc} */
-    @FlakyTest(bugId = 251214932)
+    @Presubmit
     @Test
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
         // depends on how much of the animation transactions are sent to SF at once
@@ -79,23 +80,23 @@ open class ReOpenImeWindowTest(testSpec: FlickerTestParameter) : BaseTest(testSp
     }
 
     /** {@inheritDoc} */
-    @FlakyTest(bugId = 251214932)
+    @Presubmit
     @Test
     override fun visibleWindowsShownMoreThanOneConsecutiveEntry() {
         val component = ComponentNameMatcher("", "RecentTaskScreenshotSurface")
         testSpec.assertWm {
             this.visibleWindowsShownMoreThanOneConsecutiveEntry(
                 ignoreWindows =
-                    listOf(
-                        ComponentNameMatcher.SPLASH_SCREEN,
-                        ComponentNameMatcher.SNAPSHOT,
-                        component
-                    )
+                listOf(
+                    ComponentNameMatcher.SPLASH_SCREEN,
+                    ComponentNameMatcher.SNAPSHOT,
+                    component
+                )
             )
         }
     }
 
-    @FlakyTest(bugId = 251214932)
+    @Presubmit
     @Test
     fun launcherWindowBecomesInvisible() {
         testSpec.assertWm {
@@ -105,11 +106,11 @@ open class ReOpenImeWindowTest(testSpec: FlickerTestParameter) : BaseTest(testSp
         }
     }
 
-    @FlakyTest(bugId = 251214932)
+    @Presubmit
     @Test
     fun imeWindowIsAlwaysVisible() = testSpec.imeWindowIsAlwaysVisible()
 
-    @FlakyTest(bugId = 251214932)
+    @Presubmit
     @Test
     fun imeAppWindowIsAlwaysVisible() {
         // the app starts visible in live tile, and stays visible for the duration of entering
@@ -119,13 +120,13 @@ open class ReOpenImeWindowTest(testSpec: FlickerTestParameter) : BaseTest(testSp
         testSpec.assertWm { this.isAppWindowVisible(testApp) }
     }
 
-    @FlakyTest(bugId = 251214932)
+    @Presubmit
     @Test
     fun imeLayerBecomesVisible() {
         testSpec.assertLayers { this.isVisible(ComponentNameMatcher.IME) }
     }
 
-    @FlakyTest(bugId = 251214932)
+    @Presubmit
     @Test
     fun appLayerReplacesLauncher() {
         testSpec.assertLayers {
@@ -135,60 +136,6 @@ open class ReOpenImeWindowTest(testSpec: FlickerTestParameter) : BaseTest(testSp
                 .then()
                 .isVisible(testApp)
         }
-    }
-
-    @FlakyTest(bugId = 251214932)
-    @Test
-    override fun navBarLayerPositionAtStartAndEnd() {
-        super.navBarLayerPositionAtStartAndEnd()
-    }
-
-    @FlakyTest(bugId = 251214932)
-    @Test
-    override fun navBarWindowIsAlwaysVisible() {
-        super.navBarWindowIsAlwaysVisible()
-    }
-
-    @FlakyTest(bugId = 251214932)
-    @Test
-    override fun statusBarLayerIsVisibleAtStartAndEnd() {
-        super.statusBarLayerIsVisibleAtStartAndEnd()
-    }
-
-    @FlakyTest(bugId = 251214932)
-    @Test
-    override fun entireScreenCovered() {
-        super.entireScreenCovered()
-    }
-
-    @FlakyTest(bugId = 251214932)
-    @Test
-    override fun navBarLayerIsVisibleAtStartAndEnd() {
-        super.navBarLayerIsVisibleAtStartAndEnd()
-    }
-
-    @FlakyTest(bugId = 251214932)
-    @Test
-    override fun statusBarLayerPositionAtStartAndEnd() {
-        super.statusBarLayerPositionAtStartAndEnd()
-    }
-
-    @FlakyTest(bugId = 251214932)
-    @Test
-    override fun statusBarWindowIsAlwaysVisible() {
-        super.statusBarWindowIsAlwaysVisible()
-    }
-
-    @FlakyTest(bugId = 251214932)
-    @Test
-    override fun taskBarLayerIsVisibleAtStartAndEnd() {
-        super.taskBarLayerIsVisibleAtStartAndEnd()
-    }
-
-    @FlakyTest(bugId = 251214932)
-    @Test
-    override fun taskBarWindowIsAlwaysVisible() {
-        super.taskBarWindowIsAlwaysVisible()
     }
 
     companion object {
