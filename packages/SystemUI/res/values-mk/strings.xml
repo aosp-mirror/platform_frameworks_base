@@ -94,6 +94,11 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Тековно известување за сесија за снимање на екранот"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Да се започне со снимање?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"При снимањето, системот Android може да ги сними сите чувствителни податоци што се видливи на вашиот екран или пуштени на уредот. Ова вклучува лозинки, податоци за плаќање, фотографии, пораки и аудио."</string>
+    <string name="screenrecord_option_entire_screen" msgid="1732437834603426934">"Снимај го целиот екран"</string>
+    <string name="screenrecord_option_single_app" msgid="5954863081500035825">"Снимај една апликација"</string>
+    <string name="screenrecord_warning_entire_screen" msgid="8141407178104195610">"Додека снимате, Android има пристап до сѐ што е видливо на вашиот екран или пуштено на вашиот уред. Затоа, бидете внимателни со лозинки, детали за плаќање, пораки или други чувствителни податоци."</string>
+    <string name="screenrecord_warning_single_app" msgid="7760723997065948283">"Додека снимате апликација, Android има пристап до сѐ што се прикажува или пушта на таа апликација. Затоа, бидете внимателни со лозинки, детали за плаќање, пораки или други чувствителни податоци."</string>
+    <string name="screenrecord_start_recording" msgid="348286842544768740">"Започни со снимање"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Снимај аудио"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Аудио од уредот"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Звук од вашиот уред, како на пр., музика, повици и мелодии"</string>
@@ -361,6 +366,13 @@
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Услугата што ја обезбедува функцијава ќе има пристап до сите податоци што се видливи на екранот или пуштени од вашиот уред додека се снима или емитува. Ова вклучува податоци како лозинките, деталите за плаќање, фотографиите, пораките и аудиото што го пуштате."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Да почне снимање или емитување?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Да почне снимање или емитување со <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
+    <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"Да ѝ се дозволи на <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> да споделува или снима?"</string>
+    <string name="media_projection_permission_dialog_option_entire_screen" msgid="392086473225692983">"Цел екран"</string>
+    <string name="media_projection_permission_dialog_option_single_app" msgid="1591110238124910521">"Една апликација"</string>
+    <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"Кога споделувате, снимате или емитувате, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> има пристап до сѐ што е видливо на вашиот екран или пуштено на вашиот уред. Затоа, бидете внимателни со лозинки, детали за плаќање, пораки или други чувствителни податоци."</string>
+    <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"Кога споделувате, снимате или емитувате апликација, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> има пристап до сѐ што се прикажува или пушта на таа апликација. Затоа, бидете внимателни со лозинки, детали за плаќање, пораки или други чувствителни податоци."</string>
+    <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"Продолжи"</string>
+    <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"Споделете или снимете апликација"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Избриши сѐ"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Управувајте"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Историја"</string>

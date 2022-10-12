@@ -4289,7 +4289,7 @@ public final class NotificationPanelViewController extends PanelViewController {
                 }
 
                 if (event.getActionMasked() == MotionEvent.ACTION_DOWN && isFullyExpanded()
-                        && mKeyguardStateController.isShowing()) {
+                        && mStatusBarKeyguardViewManager.isShowing()) {
                     mStatusBarKeyguardViewManager.updateKeyguardPosition(event.getX());
                 }
 

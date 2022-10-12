@@ -35,16 +35,9 @@ public interface KeyguardStateController extends CallbackController<Callback> {
     }
 
     /**
-     * If the keyguard is visible. This is unrelated to being locked or not.
-     */
-    default boolean isVisible() {
-        return isShowing() && !isOccluded();
-    }
-
-    /**
-     * If the keyguard is showing. This includes when it's occluded by an activity, and when
-     * the device is asleep or in always on mode, except when the screen timed out and the user
-     * can unlock by quickly pressing power.
+     * If the lock screen is visible.
+     * The keyguard is also visible when the device is asleep or in always on mode, except when
+     * the screen timed out and the user can unlock by quickly pressing power.
      *
      * This is unrelated to being locked or not.
      *

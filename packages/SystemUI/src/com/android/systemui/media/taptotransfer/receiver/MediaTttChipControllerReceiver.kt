@@ -55,7 +55,7 @@ import javax.inject.Inject
  */
 @SysUISingleton
 class MediaTttChipControllerReceiver @Inject constructor(
-        commandQueue: CommandQueue,
+        private val commandQueue: CommandQueue,
         context: Context,
         @MediaTttReceiverLogger logger: MediaTttLogger,
         windowManager: WindowManager,
@@ -101,10 +101,6 @@ class MediaTttChipControllerReceiver @Inject constructor(
         }
     }
 
-    init {
-        commandQueue.addCallback(commandQueueCallbacks)
-    }
-
     private fun updateMediaTapToTransferReceiverDisplay(
         @StatusBarManager.MediaTransferReceiverState displayState: Int,
         routeInfo: MediaRoute2Info,
@@ -139,6 +135,10 @@ class MediaTttChipControllerReceiver @Inject constructor(
                 // the UI.
                 mainHandler
         )
+    }
+
+    override fun start() {
+        commandQueue.addCallback(commandQueueCallbacks)
     }
 
     override fun updateView(newInfo: ChipReceiverInfo, currentView: ViewGroup) {

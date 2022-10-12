@@ -163,6 +163,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
     private PowerManager.WakeLock mWakeLock;
     private final com.android.systemui.shade.ShadeController mShadeController;
     private final KeyguardUpdateMonitor mUpdateMonitor;
+    private final DozeParameters mDozeParameters;
     private final KeyguardStateController mKeyguardStateController;
     private final NotificationShadeWindowController mNotificationShadeWindowController;
     private final SessionTracker mSessionTracker;
@@ -277,7 +278,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
             KeyguardStateController keyguardStateController, Handler handler,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             @Main Resources resources,
-            KeyguardBypassController keyguardBypassController,
+            KeyguardBypassController keyguardBypassController, DozeParameters dozeParameters,
             MetricsLogger metricsLogger, DumpManager dumpManager,
             PowerManager powerManager,
             NotificationMediaManager notificationMediaManager,
@@ -293,6 +294,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         mPowerManager = powerManager;
         mShadeController = shadeController;
         mUpdateMonitor = keyguardUpdateMonitor;
+        mDozeParameters = dozeParameters;
         mUpdateMonitor.registerCallback(this);
         mMediaManager = notificationMediaManager;
         mLatencyTracker = latencyTracker;
@@ -550,7 +552,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         boolean deviceDreaming = mUpdateMonitor.isDreaming();
 
         if (!mUpdateMonitor.isDeviceInteractive()) {
-            if (!mKeyguardStateController.isShowing()
+            if (!mKeyguardViewController.isShowing()
                     && !mScreenOffAnimationController.isKeyguardShowDelayed()) {
                 if (mKeyguardStateController.isUnlocked()) {
                     return MODE_WAKE_AND_UNLOCK;
@@ -567,7 +569,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         if (unlockingAllowed && deviceDreaming) {
             return MODE_WAKE_AND_UNLOCK_FROM_DREAM;
         }
-        if (mKeyguardStateController.isShowing()) {
+        if (mKeyguardViewController.isShowing()) {
             if (mKeyguardViewController.bouncerIsOrWillBeShowing() && unlockingAllowed) {
                 return MODE_DISMISS_BOUNCER;
             } else if (unlockingAllowed) {
@@ -586,7 +588,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         boolean bypass = mKeyguardBypassController.getBypassEnabled()
                 || mAuthController.isUdfpsFingerDown();
         if (!mUpdateMonitor.isDeviceInteractive()) {
-            if (!mKeyguardStateController.isShowing()) {
+            if (!mKeyguardViewController.isShowing()) {
                 return bypass ? MODE_WAKE_AND_UNLOCK : MODE_ONLY_WAKE;
             } else if (!unlockingAllowed) {
                 return bypass ? MODE_SHOW_BOUNCER : MODE_NONE;
@@ -610,7 +612,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         if (unlockingAllowed && mKeyguardStateController.isOccluded()) {
             return MODE_UNLOCK_COLLAPSING;
         }
-        if (mKeyguardStateController.isShowing()) {
+        if (mKeyguardViewController.isShowing()) {
             if ((mKeyguardViewController.bouncerIsOrWillBeShowing()
                     || mKeyguardBypassController.getAltBouncerShowing()) && unlockingAllowed) {
                 return MODE_DISMISS_BOUNCER;

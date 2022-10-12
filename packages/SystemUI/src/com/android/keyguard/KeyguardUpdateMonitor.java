@@ -620,7 +620,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      * of them based on carrier config. e.g. In this case we should only show one carrier name
      * on the status bar and quick settings.
      */
-    public List<SubscriptionInfo> getFilteredSubscriptionInfo(boolean forceReload) {
+    public List<SubscriptionInfo> getFilteredSubscriptionInfo() {
         List<SubscriptionInfo> subscriptions = getSubscriptionInfo(false);
         if (subscriptions.size() == 2) {
             SubscriptionInfo info1 = subscriptions.get(0);
@@ -2347,7 +2347,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      */
     public void requestFaceAuth(boolean userInitiatedRequest,
             @FaceAuthApiRequestReason String reason) {
-        mLogger.logFaceAuthRequested(userInitiatedRequest);
+        mLogger.logFaceAuthRequested(userInitiatedRequest, reason);
         updateFaceListeningState(BIOMETRIC_ACTION_START, apiRequestReasonToUiEvent(reason));
     }
 
@@ -3178,7 +3178,14 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      * Whether the keyguard is showing and not occluded.
      */
     public boolean isKeyguardVisible() {
-        return mKeyguardShowing && !mKeyguardOccluded;
+        return isKeyguardShowing() && !mKeyguardOccluded;
+    }
+
+    /**
+     * Whether the keyguard is showing. It may still be occluded and not visible.
+     */
+    public boolean isKeyguardShowing() {
+        return mKeyguardShowing;
     }
 
     /**

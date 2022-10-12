@@ -21,8 +21,8 @@
     <string name="label_destination" msgid="9132510997381599275">"గమ్యం"</string>
     <string name="label_copies" msgid="3634531042822968308">"కాపీలు"</string>
     <string name="label_copies_summary" msgid="3861966063536529540">"కాపీలు:"</string>
-    <string name="label_paper_size" msgid="908654383827777759">"కాగితపు పరిమాణం"</string>
-    <string name="label_paper_size_summary" msgid="5668204981332138168">"కాగితపు పరిమాణం:"</string>
+    <string name="label_paper_size" msgid="908654383827777759">"కాగితపు సైజ్‌"</string>
+    <string name="label_paper_size_summary" msgid="5668204981332138168">"కాగితపు సైజ్‌:"</string>
     <string name="label_color" msgid="1108690305218188969">"రంగు"</string>
     <string name="label_duplex" msgid="5370037254347072243">"రెండు వైపుల"</string>
     <string name="label_orientation" msgid="2853142581990496477">"ఓరియంటేషన్"</string>
@@ -40,7 +40,7 @@
     <string name="print_dialog" msgid="32628687461331979">"ముద్రణ డైలాగ్"</string>
     <string name="current_page_template" msgid="5145005201131935302">"<xliff:g id="CURRENT_PAGE">%1$d</xliff:g>/<xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
     <string name="page_description_template" msgid="6831239682256197161">"<xliff:g id="PAGE_COUNT">%2$d</xliff:g>లో <xliff:g id="CURRENT_PAGE">%1$d</xliff:g>వ పేజీ"</string>
-    <string name="summary_template" msgid="8899734908625669193">"సారాంశం, కాపీలు <xliff:g id="COPIES">%1$s</xliff:g>, కాగితం పరిమాణం <xliff:g id="PAPER_SIZE">%2$s</xliff:g>"</string>
+    <string name="summary_template" msgid="8899734908625669193">"సారాంశం, కాపీలు <xliff:g id="COPIES">%1$s</xliff:g>, కాగితం సైజ్‌ <xliff:g id="PAPER_SIZE">%2$s</xliff:g>"</string>
     <string name="expand_handle" msgid="7282974448109280522">"విస్తరణ హ్యాండిల్"</string>
     <string name="collapse_handle" msgid="6886637989442507451">"కుదింపు హ్యాండిల్"</string>
     <string name="print_button" msgid="645164566271246268">"ప్రింట్ చేయండి"</string>

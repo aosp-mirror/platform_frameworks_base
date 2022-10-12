@@ -137,11 +137,11 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
     public boolean shouldBubbleUp(NotificationEntry entry) {
         final StatusBarNotification sbn = entry.getSbn();
 
-        if (!canAlertCommon(entry)) {
+        if (!canAlertCommon(entry, true)) {
             return false;
         }
 
-        if (!canAlertAwakeCommon(entry)) {
+        if (!canAlertAwakeCommon(entry, true)) {
             return false;
         }
 
@@ -163,10 +163,15 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
 
     @Override
     public boolean shouldHeadsUp(NotificationEntry entry) {
+        return checkHeadsUp(entry, true);
+    }
+
+    @Override
+    public boolean checkHeadsUp(NotificationEntry entry, boolean log) {
         if (mStatusBarStateController.isDozing()) {
-            return shouldHeadsUpWhenDozing(entry);
+            return shouldHeadsUpWhenDozing(entry, log);
         } else {
-            return shouldHeadsUpWhenAwake(entry);
+            return shouldHeadsUpWhenAwake(entry, log);
         }
     }
 
@@ -263,61 +268,61 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
         }
     }
 
-    private boolean shouldHeadsUpWhenAwake(NotificationEntry entry) {
+    private boolean shouldHeadsUpWhenAwake(NotificationEntry entry, boolean log) {
         StatusBarNotification sbn = entry.getSbn();
 
         if (!mUseHeadsUp) {
-            mLogger.logNoHeadsUpFeatureDisabled();
+            if (log) mLogger.logNoHeadsUpFeatureDisabled();
             return false;
         }
 
-        if (!canAlertCommon(entry)) {
+        if (!canAlertCommon(entry, log)) {
             return false;
         }
 
-        if (!canAlertHeadsUpCommon(entry)) {
+        if (!canAlertHeadsUpCommon(entry, log)) {
             return false;
         }
 
-        if (!canAlertAwakeCommon(entry)) {
+        if (!canAlertAwakeCommon(entry, log)) {
             return false;
         }
 
         if (isSnoozedPackage(sbn)) {
-            mLogger.logNoHeadsUpPackageSnoozed(entry);
+            if (log) mLogger.logNoHeadsUpPackageSnoozed(entry);
             return false;
         }
 
         boolean inShade = mStatusBarStateController.getState() == SHADE;
         if (entry.isBubble() && inShade) {
-            mLogger.logNoHeadsUpAlreadyBubbled(entry);
+            if (log) mLogger.logNoHeadsUpAlreadyBubbled(entry);
             return false;
         }
 
         if (entry.shouldSuppressPeek()) {
-            mLogger.logNoHeadsUpSuppressedByDnd(entry);
+            if (log) mLogger.logNoHeadsUpSuppressedByDnd(entry);
             return false;
         }
 
         if (entry.getImportance() < NotificationManager.IMPORTANCE_HIGH) {
-            mLogger.logNoHeadsUpNotImportant(entry);
+            if (log) mLogger.logNoHeadsUpNotImportant(entry);
             return false;
         }
 
         boolean inUse = mPowerManager.isScreenOn() && !isDreaming();
 
         if (!inUse) {
-            mLogger.logNoHeadsUpNotInUse(entry);
+            if (log) mLogger.logNoHeadsUpNotInUse(entry);
             return false;
         }
 
         for (int i = 0; i < mSuppressors.size(); i++) {
             if (mSuppressors.get(i).suppressAwakeHeadsUp(entry)) {
-                mLogger.logNoHeadsUpSuppressedBy(entry, mSuppressors.get(i));
+                if (log) mLogger.logNoHeadsUpSuppressedBy(entry, mSuppressors.get(i));
                 return false;
             }
         }
-        mLogger.logHeadsUp(entry);
+        if (log) mLogger.logHeadsUp(entry);
         return true;
     }
 
@@ -328,37 +333,37 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
      * @param entry the entry to check
      * @return true if the entry should ambient pulse, false otherwise
      */
-    private boolean shouldHeadsUpWhenDozing(NotificationEntry entry) {
+    private boolean shouldHeadsUpWhenDozing(NotificationEntry entry, boolean log) {
         if (!mAmbientDisplayConfiguration.pulseOnNotificationEnabled(UserHandle.USER_CURRENT)) {
-            mLogger.logNoPulsingSettingDisabled(entry);
+            if (log) mLogger.logNoPulsingSettingDisabled(entry);
             return false;
         }
 
         if (mBatteryController.isAodPowerSave()) {
-            mLogger.logNoPulsingBatteryDisabled(entry);
+            if (log) mLogger.logNoPulsingBatteryDisabled(entry);
             return false;
         }
 
-        if (!canAlertCommon(entry)) {
-            mLogger.logNoPulsingNoAlert(entry);
+        if (!canAlertCommon(entry, log)) {
+            if (log) mLogger.logNoPulsingNoAlert(entry);
             return false;
         }
 
-        if (!canAlertHeadsUpCommon(entry)) {
-            mLogger.logNoPulsingNoAlert(entry);
+        if (!canAlertHeadsUpCommon(entry, log)) {
+            if (log) mLogger.logNoPulsingNoAlert(entry);
             return false;
         }
 
         if (entry.shouldSuppressAmbient()) {
-            mLogger.logNoPulsingNoAmbientEffect(entry);
+            if (log) mLogger.logNoPulsingNoAmbientEffect(entry);
             return false;
         }
 
         if (entry.getImportance() < NotificationManager.IMPORTANCE_DEFAULT) {
-            mLogger.logNoPulsingNotImportant(entry);
+            if (log) mLogger.logNoPulsingNotImportant(entry);
             return false;
         }
-        mLogger.logPulsing(entry);
+        if (log) mLogger.logPulsing(entry);
         return true;
     }
 
@@ -366,18 +371,22 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
      * Common checks between regular & AOD heads up and bubbles.
      *
      * @param entry the entry to check
+     * @param log whether or not to log the results of these checks
      * @return true if these checks pass, false if the notification should not alert
      */
-    private boolean canAlertCommon(NotificationEntry entry) {
+    private boolean canAlertCommon(NotificationEntry entry, boolean log) {
         for (int i = 0; i < mSuppressors.size(); i++) {
             if (mSuppressors.get(i).suppressInterruptions(entry)) {
-                mLogger.logNoAlertingSuppressedBy(entry, mSuppressors.get(i), /* awake */ false);
+                if (log) {
+                    mLogger.logNoAlertingSuppressedBy(entry, mSuppressors.get(i),
+                            /* awake */ false);
+                }
                 return false;
             }
         }
 
         if (mKeyguardNotificationVisibilityProvider.shouldHideNotification(entry)) {
-            mLogger.keyguardHideNotification(entry);
+            if (log) mLogger.keyguardHideNotification(entry);
             return false;
         }
 
@@ -388,19 +397,20 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
      * Common checks for heads up notifications on regular and AOD displays.
      *
      * @param entry the entry to check
+     * @param log whether or not to log the results of these checks
      * @return true if these checks pass, false if the notification should not alert
      */
-    private boolean canAlertHeadsUpCommon(NotificationEntry entry) {
+    private boolean canAlertHeadsUpCommon(NotificationEntry entry, boolean log) {
         StatusBarNotification sbn = entry.getSbn();
 
         // Don't alert notifications that are suppressed due to group alert behavior
         if (sbn.isGroup() && sbn.getNotification().suppressAlertingDueToGrouping()) {
-            mLogger.logNoAlertingGroupAlertBehavior(entry);
+            if (log) mLogger.logNoAlertingGroupAlertBehavior(entry);
             return false;
         }
 
         if (entry.hasJustLaunchedFullScreenIntent()) {
-            mLogger.logNoAlertingRecentFullscreen(entry);
+            if (log) mLogger.logNoAlertingRecentFullscreen(entry);
             return false;
         }
 
@@ -413,12 +423,14 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
      * @param entry the entry to check
      * @return true if these checks pass, false if the notification should not alert
      */
-    private boolean canAlertAwakeCommon(NotificationEntry entry) {
+    private boolean canAlertAwakeCommon(NotificationEntry entry, boolean log) {
         StatusBarNotification sbn = entry.getSbn();
 
         for (int i = 0; i < mSuppressors.size(); i++) {
             if (mSuppressors.get(i).suppressAwakeInterruptions(entry)) {
-                mLogger.logNoAlertingSuppressedBy(entry, mSuppressors.get(i), /* awake */ true);
+                if (log) {
+                    mLogger.logNoAlertingSuppressedBy(entry, mSuppressors.get(i), /* awake */ true);
+                }
                 return false;
             }
         }

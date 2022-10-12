@@ -363,7 +363,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
             mKeyguardUpdateMonitor.onCameraLaunched();
         }
 
-        if (!mKeyguardStateController.isShowing()) {
+        if (!mStatusBarKeyguardViewManager.isShowing()) {
             final Intent cameraIntent = CameraIntents.getInsecureCameraIntent(mContext);
             mCentralSurfaces.startActivityDismissingKeyguard(cameraIntent,
                     false /* onlyProvisioned */, true /* dismissShade */,
@@ -420,7 +420,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
         // TODO(b/169087248) Possibly add haptics here for emergency action. Currently disabled for
         // app-side haptic experimentation.
 
-        if (!mKeyguardStateController.isShowing()) {
+        if (!mStatusBarKeyguardViewManager.isShowing()) {
             mCentralSurfaces.startActivityDismissingKeyguard(emergencyIntent,
                     false /* onlyProvisioned */, true /* dismissShade */,
                     true /* disallowEnterPictureInPictureWhileLaunching */, null /* callback */, 0,

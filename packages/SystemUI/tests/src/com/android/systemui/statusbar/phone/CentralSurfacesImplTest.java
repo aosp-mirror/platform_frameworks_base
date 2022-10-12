@@ -516,32 +516,32 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
 
     @Test
     public void executeRunnableDismissingKeyguard_nullRunnable_showingAndOccluded() {
-        when(mKeyguardStateController.isShowing()).thenReturn(true);
-        when(mKeyguardStateController.isOccluded()).thenReturn(true);
+        when(mStatusBarKeyguardViewManager.isShowing()).thenReturn(true);
+        when(mStatusBarKeyguardViewManager.isOccluded()).thenReturn(true);
 
         mCentralSurfaces.executeRunnableDismissingKeyguard(null, null, false, false, false);
     }
 
     @Test
     public void executeRunnableDismissingKeyguard_nullRunnable_showing() {
-        when(mKeyguardStateController.isShowing()).thenReturn(true);
-        when(mKeyguardStateController.isOccluded()).thenReturn(false);
+        when(mStatusBarKeyguardViewManager.isShowing()).thenReturn(true);
+        when(mStatusBarKeyguardViewManager.isOccluded()).thenReturn(false);
 
         mCentralSurfaces.executeRunnableDismissingKeyguard(null, null, false, false, false);
     }
 
     @Test
     public void executeRunnableDismissingKeyguard_nullRunnable_notShowing() {
-        when(mKeyguardStateController.isShowing()).thenReturn(false);
-        when(mKeyguardStateController.isOccluded()).thenReturn(false);
+        when(mStatusBarKeyguardViewManager.isShowing()).thenReturn(false);
+        when(mStatusBarKeyguardViewManager.isOccluded()).thenReturn(false);
 
         mCentralSurfaces.executeRunnableDismissingKeyguard(null, null, false, false, false);
     }
 
     @Test
     public void executeRunnableDismissingKeyguard_dreaming_notShowing() throws RemoteException {
-        when(mKeyguardStateController.isShowing()).thenReturn(false);
-        when(mKeyguardStateController.isOccluded()).thenReturn(false);
+        when(mStatusBarKeyguardViewManager.isShowing()).thenReturn(false);
+        when(mStatusBarKeyguardViewManager.isOccluded()).thenReturn(false);
         when(mKeyguardUpdateMonitor.isDreaming()).thenReturn(true);
 
         mCentralSurfaces.executeRunnableDismissingKeyguard(() ->  {},
@@ -555,8 +555,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
 
     @Test
     public void executeRunnableDismissingKeyguard_notDreaming_notShowing() throws RemoteException {
-        when(mKeyguardStateController.isShowing()).thenReturn(false);
-        when(mKeyguardStateController.isOccluded()).thenReturn(false);
+        when(mStatusBarKeyguardViewManager.isShowing()).thenReturn(false);
+        when(mStatusBarKeyguardViewManager.isOccluded()).thenReturn(false);
         when(mKeyguardUpdateMonitor.isDreaming()).thenReturn(false);
 
         mCentralSurfaces.executeRunnableDismissingKeyguard(() ->  {},
@@ -571,10 +571,10 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Test
     public void lockscreenStateMetrics_notShowing() {
         // uninteresting state, except that fingerprint must be non-zero
-        when(mKeyguardStateController.isOccluded()).thenReturn(false);
+        when(mStatusBarKeyguardViewManager.isOccluded()).thenReturn(false);
         when(mKeyguardStateController.canDismissLockScreen()).thenReturn(true);
         // interesting state
-        when(mKeyguardStateController.isShowing()).thenReturn(false);
+        when(mStatusBarKeyguardViewManager.isShowing()).thenReturn(false);
         when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(false);
         when(mKeyguardStateController.isMethodSecure()).thenReturn(false);
         mCentralSurfaces.onKeyguardViewManagerStatesUpdated();
@@ -589,10 +589,10 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Test
     public void lockscreenStateMetrics_notShowing_secure() {
         // uninteresting state, except that fingerprint must be non-zero
-        when(mKeyguardStateController.isOccluded()).thenReturn(false);
+        when(mStatusBarKeyguardViewManager.isOccluded()).thenReturn(false);
         when(mKeyguardStateController.canDismissLockScreen()).thenReturn(true);
         // interesting state
-        when(mKeyguardStateController.isShowing()).thenReturn(false);
+        when(mStatusBarKeyguardViewManager.isShowing()).thenReturn(false);
         when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(false);
         when(mKeyguardStateController.isMethodSecure()).thenReturn(true);
 
@@ -608,10 +608,10 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Test
     public void lockscreenStateMetrics_isShowing() {
         // uninteresting state, except that fingerprint must be non-zero
-        when(mKeyguardStateController.isOccluded()).thenReturn(false);
+        when(mStatusBarKeyguardViewManager.isOccluded()).thenReturn(false);
         when(mKeyguardStateController.canDismissLockScreen()).thenReturn(true);
         // interesting state
-        when(mKeyguardStateController.isShowing()).thenReturn(true);
+        when(mStatusBarKeyguardViewManager.isShowing()).thenReturn(true);
         when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(false);
         when(mKeyguardStateController.isMethodSecure()).thenReturn(false);
 
@@ -627,10 +627,10 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Test
     public void lockscreenStateMetrics_isShowing_secure() {
         // uninteresting state, except that fingerprint must be non-zero
-        when(mKeyguardStateController.isOccluded()).thenReturn(false);
+        when(mStatusBarKeyguardViewManager.isOccluded()).thenReturn(false);
         when(mKeyguardStateController.canDismissLockScreen()).thenReturn(true);
         // interesting state
-        when(mKeyguardStateController.isShowing()).thenReturn(true);
+        when(mStatusBarKeyguardViewManager.isShowing()).thenReturn(true);
         when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(false);
         when(mKeyguardStateController.isMethodSecure()).thenReturn(true);
 
@@ -646,10 +646,10 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Test
     public void lockscreenStateMetrics_isShowingBouncer() {
         // uninteresting state, except that fingerprint must be non-zero
-        when(mKeyguardStateController.isOccluded()).thenReturn(false);
+        when(mStatusBarKeyguardViewManager.isOccluded()).thenReturn(false);
         when(mKeyguardStateController.canDismissLockScreen()).thenReturn(true);
         // interesting state
-        when(mKeyguardStateController.isShowing()).thenReturn(true);
+        when(mStatusBarKeyguardViewManager.isShowing()).thenReturn(true);
         when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(true);
         when(mKeyguardStateController.isMethodSecure()).thenReturn(true);
 
@@ -1053,9 +1053,9 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void startActivityDismissingKeyguard_isShowingAndIsOccluded() {
-        when(mKeyguardStateController.isShowing()).thenReturn(true);
-        when(mKeyguardStateController.isOccluded()).thenReturn(true);
+    public void startActivityDismissingKeyguard_isShowingandIsOccluded() {
+        when(mStatusBarKeyguardViewManager.isShowing()).thenReturn(true);
+        when(mStatusBarKeyguardViewManager.isOccluded()).thenReturn(true);
         mCentralSurfaces.startActivityDismissingKeyguard(
                 new Intent(),
                 /* onlyProvisioned = */false,
