@@ -176,7 +176,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
 
         // and the keyguard goes away
         mViewMediator.setShowingLocked(false);
-        when(mStatusBarKeyguardViewManager.isShowing()).thenReturn(false);
+        when(mKeyguardStateController.isShowing()).thenReturn(false);
         mViewMediator.mUpdateCallback.onKeyguardVisibilityChanged(false);
 
         TestableLooper.get(this).processAllMessages();
@@ -201,7 +201,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
 
         // and the keyguard goes away
         mViewMediator.setShowingLocked(false);
-        when(mStatusBarKeyguardViewManager.isShowing()).thenReturn(false);
+        when(mKeyguardStateController.isShowing()).thenReturn(false);
         mViewMediator.mUpdateCallback.onKeyguardVisibilityChanged(false);
 
         TestableLooper.get(this).processAllMessages();
