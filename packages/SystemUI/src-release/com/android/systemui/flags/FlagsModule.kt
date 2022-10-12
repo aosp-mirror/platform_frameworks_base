@@ -16,29 +16,15 @@
 
 package com.android.systemui.flags
 
-import com.android.internal.statusbar.IStatusBarService
 import dagger.Binds
 import dagger.Module
-import dagger.Provides
 
 @Module(includes = [
     FeatureFlagsReleaseStartableModule::class,
+    FlagsCommonModule::class,
     ServerFlagReaderModule::class
 ])
 abstract class FlagsModule {
     @Binds
     abstract fun bindsFeatureFlagRelease(impl: FeatureFlagsRelease): FeatureFlags
-
-    @Module
-    companion object {
-        @JvmStatic
-        @Provides
-        fun providesRestarter(barService: IStatusBarService): Restarter {
-            return object: Restarter {
-                override fun restart() {
-                    barService.restart()
-                }
-            }
-        }
-    }
 }
