@@ -32,6 +32,9 @@ import com.android.systemui.keyboard.KeyboardUI
 import com.android.systemui.keyguard.KeyguardViewMediator
 import com.android.systemui.log.SessionTracker
 import com.android.systemui.media.RingtonePlayer
+import com.android.systemui.media.taptotransfer.MediaTttCommandLineHelper
+import com.android.systemui.media.taptotransfer.receiver.MediaTttChipControllerReceiver
+import com.android.systemui.media.taptotransfer.sender.MediaTttChipControllerSender
 import com.android.systemui.power.PowerUI
 import com.android.systemui.recents.Recents
 import com.android.systemui.settings.dagger.MultiUserUtilsModule
@@ -213,4 +216,26 @@ abstract class SystemUICoreStartableModule {
     @IntoMap
     @ClassKey(KeyguardLiftController::class)
     abstract fun bindKeyguardLiftController(sysui: KeyguardLiftController): CoreStartable
+
+    /** Inject into MediaTttChipControllerReceiver. */
+    @Binds
+    @IntoMap
+    @ClassKey(MediaTttChipControllerReceiver::class)
+    abstract fun bindMediaTttChipControllerReceiver(
+            sysui: MediaTttChipControllerReceiver
+    ): CoreStartable
+
+    /** Inject into MediaTttChipControllerSender. */
+    @Binds
+    @IntoMap
+    @ClassKey(MediaTttChipControllerSender::class)
+    abstract fun bindMediaTttChipControllerSender(
+            sysui: MediaTttChipControllerSender
+    ): CoreStartable
+
+    /** Inject into MediaTttCommandLineHelper. */
+    @Binds
+    @IntoMap
+    @ClassKey(MediaTttCommandLineHelper::class)
+    abstract fun bindMediaTttCommandLineHelper(sysui: MediaTttCommandLineHelper): CoreStartable
 }
