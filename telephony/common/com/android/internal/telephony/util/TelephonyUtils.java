@@ -27,6 +27,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.os.SystemProperties;
+import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 
 import java.io.PrintWriter;
@@ -191,5 +192,60 @@ public final class TelephonyUtils {
         }
         // This is the error case. The well-defined value for UNKNOWN is -1.
         return "UNKNOWN(" + state + ")";
+    }
+
+    /**
+     * Convert display name source to string.
+     *
+     * @param source The display name source.
+     * @return The display name source in string format.
+     */
+    @NonNull
+    public static String displayNameSourceToString(
+            @SubscriptionManager.SimDisplayNameSource int source) {
+        switch (source) {
+            case SubscriptionManager.NAME_SOURCE_UNKNOWN: return "UNKNOWN";
+            case SubscriptionManager.NAME_SOURCE_CARRIER_ID: return "CARRIER_ID";
+            case SubscriptionManager.NAME_SOURCE_SIM_SPN: return "SIM_SPN";
+            case SubscriptionManager.NAME_SOURCE_USER_INPUT: return "USER_INPUT";
+            case SubscriptionManager.NAME_SOURCE_CARRIER: return "CARRIER";
+            case SubscriptionManager.NAME_SOURCE_SIM_PNN: return "SIM_PNN";
+            default:
+                return "UNKNOWN(" + source + ")";
+        }
+    }
+
+    /**
+     * Convert subscription type to string.
+     *
+     * @param type The subscription type.
+     * @return The subscription type in string format.
+     */
+    @NonNull
+    public static String subscriptionTypeToString(@SubscriptionManager.SubscriptionType int type) {
+        switch (type) {
+            case SubscriptionManager.SUBSCRIPTION_TYPE_LOCAL_SIM: return "LOCAL_SIM";
+            case SubscriptionManager.SUBSCRIPTION_TYPE_REMOTE_SIM: return "REMOTE_SIM";
+            default:
+                return "UNKNOWN(" + type + ")";
+        }
+    }
+
+    /**
+     * Convert usage setting to string.
+     *
+     * @param usageSetting Usage setting.
+     * @return The usage setting in string format.
+     */
+    @NonNull
+    public static String usageSettingToString(@SubscriptionManager.UsageSetting int usageSetting) {
+        switch (usageSetting) {
+            case SubscriptionManager.USAGE_SETTING_UNKNOWN: return "UNKNOWN";
+            case SubscriptionManager.USAGE_SETTING_DEFAULT: return "DEFAULT";
+            case SubscriptionManager.USAGE_SETTING_VOICE_CENTRIC: return "VOICE_CENTRIC";
+            case SubscriptionManager.USAGE_SETTING_DATA_CENTRIC: return "DATA_CENTRIC";
+            default:
+                return "UNKNOWN(" + usageSetting + ")";
+        }
     }
 }
