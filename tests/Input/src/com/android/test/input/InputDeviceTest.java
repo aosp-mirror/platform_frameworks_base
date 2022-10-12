@@ -87,6 +87,7 @@ public class InputDeviceTest {
                 .setHasSensor(true)
                 .setHasBattery(true)
                 .setCountryCode(InputDeviceCountryCode.INTERNATIONAL)
+                .setSupportsUsi(true)
                 .build();
 
         Parcel parcel = Parcel.obtain();
