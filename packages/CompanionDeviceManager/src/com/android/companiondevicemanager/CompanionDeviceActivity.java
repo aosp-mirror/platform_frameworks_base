@@ -46,6 +46,7 @@ import static java.util.Objects.requireNonNull;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
+import android.companion.AssociatedDevice;
 import android.companion.AssociationInfo;
 import android.companion.AssociationRequest;
 import android.companion.CompanionDeviceManager;
@@ -331,6 +332,7 @@ public class CompanionDeviceActivity extends FragmentActivity implements
     private void onUserSelectedDevice(@NonNull DeviceFilterPair<?> selectedDevice) {
         final MacAddress macAddress = selectedDevice.getMacAddress();
         mRequest.setDisplayName(selectedDevice.getDisplayName());
+        mRequest.setAssociatedDevice(new AssociatedDevice(selectedDevice.getDevice()));
         onAssociationApproved(macAddress);
     }
 

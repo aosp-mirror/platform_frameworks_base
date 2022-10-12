@@ -270,7 +270,8 @@ class AssociationRequestsProcessor {
         final long callingIdentity = Binder.clearCallingIdentity();
         try {
             association = mService.createAssociation(userId, packageName, macAddress,
-                    request.getDisplayName(), request.getDeviceProfile(), request.isSelfManaged());
+                    request.getDisplayName(), request.getDeviceProfile(),
+                    request.getAssociatedDevice(), request.isSelfManaged());
         } finally {
             Binder.restoreCallingIdentity(callingIdentity);
         }
