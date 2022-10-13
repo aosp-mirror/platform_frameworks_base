@@ -132,8 +132,11 @@ public class RotationButtonController {
             mMainThreadHandler.postAtFrontOfQueue(() -> {
                 // If the screen rotation changes while locked, potentially update lock to flow with
                 // new screen rotation and hide any showing suggestions.
-                if (isRotationLocked()) {
-                    if (shouldOverrideUserLockPrefs(rotation)) {
+                boolean rotationLocked = isRotationLocked();
+                // The isVisible check makes the rotation button disappear when we are not locked
+                // (e.g. for tabletop auto-rotate).
+                if (rotationLocked || mRotationButton.isVisible()) {
+                    if (shouldOverrideUserLockPrefs(rotation) && rotationLocked) {
                         setRotationLockedAtAngle(rotation);
                     }
                     setRotateSuggestionButtonState(false /* visible */, true /* forced */);

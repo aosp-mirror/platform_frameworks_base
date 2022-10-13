@@ -7,12 +7,12 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.qs.QS
 import com.android.systemui.shade.NotificationPanelViewController
+import com.android.systemui.shade.STATE_OPENING
+import com.android.systemui.shade.ShadeExpansionChangeEvent
+import com.android.systemui.shade.ShadeExpansionStateManager
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
-import com.android.systemui.statusbar.phone.panelstate.PanelExpansionChangeEvent
-import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager
-import com.android.systemui.statusbar.phone.panelstate.STATE_OPENING
 import com.android.systemui.statusbar.policy.FakeConfigurationController
 import org.junit.Before
 import org.junit.Test
@@ -40,7 +40,7 @@ class ShadeTransitionControllerTest : SysuiTestCase() {
     private lateinit var controller: ShadeTransitionController
 
     private val configurationController = FakeConfigurationController()
-    private val panelExpansionStateManager = PanelExpansionStateManager()
+    private val shadeExpansionStateManager = ShadeExpansionStateManager()
 
     @Before
     fun setUp() {
@@ -49,7 +49,7 @@ class ShadeTransitionControllerTest : SysuiTestCase() {
         controller =
             ShadeTransitionController(
                 configurationController,
-                panelExpansionStateManager,
+                shadeExpansionStateManager,
                 dumpManager,
                 context,
                 splitShadeOverScrollerFactory = { _, _ -> splitShadeOverScroller },
@@ -166,7 +166,7 @@ class ShadeTransitionControllerTest : SysuiTestCase() {
     }
 
     private fun startPanelExpansion() {
-        panelExpansionStateManager.onPanelExpansionChanged(
+        shadeExpansionStateManager.onPanelExpansionChanged(
             DEFAULT_EXPANSION_EVENT.fraction,
             DEFAULT_EXPANSION_EVENT.expanded,
             DEFAULT_EXPANSION_EVENT.tracking,
@@ -194,7 +194,7 @@ class ShadeTransitionControllerTest : SysuiTestCase() {
     companion object {
         private const val DEFAULT_DRAG_DOWN_AMOUNT = 123f
         private val DEFAULT_EXPANSION_EVENT =
-            PanelExpansionChangeEvent(
+            ShadeExpansionChangeEvent(
                 fraction = 0.5f,
                 expanded = true,
                 tracking = true,

@@ -38,6 +38,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.graphics.Rect;
+import android.hardware.biometrics.BiometricFingerprintConstants;
 import android.hardware.biometrics.BiometricOverlayConstants;
 import android.hardware.biometrics.ComponentInfoInternal;
 import android.hardware.biometrics.SensorProperties;
@@ -71,12 +72,12 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
-import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.Execution;
@@ -245,7 +246,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mWindowManager,
                 mStatusBarStateController,
                 mFgExecutor,
-                new PanelExpansionStateManager(),
+                new ShadeExpansionStateManager(),
                 mStatusBarKeyguardViewManager,
                 mDumpManager,
                 mKeyguardUpdateMonitor,
@@ -682,7 +683,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void aodInterruptCancelTimeoutActionWhenFingerUp() throws RemoteException {
+    public void aodInterruptCancelTimeoutActionOnFingerUp() throws RemoteException {
         when(mUdfpsView.isWithinSensorArea(anyFloat(), anyFloat())).thenReturn(true);
         when(mKeyguardUpdateMonitor.isFingerprintDetectionRunning()).thenReturn(true);
 
@@ -708,6 +709,56 @@ public class UdfpsControllerTest extends SysuiTestCase {
         when(mUdfpsView.isDisplayConfigured()).thenReturn(false);
 
         // WHEN ACTION_DOWN is received
+        MotionEvent downEvent = MotionEvent.obtain(0, 0, ACTION_DOWN, 0, 0, 0);
+        mTouchListenerCaptor.getValue().onTouch(mUdfpsView, downEvent);
+        mBiometricsExecutor.runAllReady();
+        downEvent.recycle();
+
+        // WHEN ACTION_MOVE is received
+        MotionEvent moveEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, 0, 0, 0);
+        mTouchListenerCaptor.getValue().onTouch(mUdfpsView, moveEvent);
+        mBiometricsExecutor.runAllReady();
+        moveEvent.recycle();
+        mFgExecutor.runAllReady();
+
+        // Configure UdfpsView to accept the finger up event
+        when(mUdfpsView.isDisplayConfigured()).thenReturn(true);
+
+        // WHEN it times out
+        mFgExecutor.advanceClockToNext();
+        mFgExecutor.runAllReady();
+
+        // THEN the display should be unconfigured once. If the timeout action is not
+        // cancelled, the display would be unconfigured twice which would cause two
+        // FP attempts.
+        verify(mUdfpsView, times(1)).unconfigureDisplay();
+    }
+
+    @Test
+    public void aodInterruptCancelTimeoutActionOnAcquired() throws RemoteException {
+        when(mUdfpsView.isWithinSensorArea(anyFloat(), anyFloat())).thenReturn(true);
+        when(mKeyguardUpdateMonitor.isFingerprintDetectionRunning()).thenReturn(true);
+
+        // GIVEN AOD interrupt
+        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, TEST_UDFPS_SENSOR_ID,
+                BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
+        mScreenObserver.onScreenTurnedOn();
+        mFgExecutor.runAllReady();
+        mUdfpsController.onAodInterrupt(0, 0, 0f, 0f);
+        mFgExecutor.runAllReady();
+
+        // Configure UdfpsView to accept the acquired event
+        when(mUdfpsView.isDisplayConfigured()).thenReturn(true);
+
+        // WHEN acquired is received
+        mOverlayController.onAcquired(TEST_UDFPS_SENSOR_ID,
+                BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_GOOD);
+
+        // Configure UdfpsView to accept the ACTION_DOWN event
+        when(mUdfpsView.isDisplayConfigured()).thenReturn(false);
+
+        // WHEN ACTION_DOWN is received
+        verify(mUdfpsView).setOnTouchListener(mTouchListenerCaptor.capture());
         MotionEvent downEvent = MotionEvent.obtain(0, 0, ACTION_DOWN, 0, 0, 0);
         mTouchListenerCaptor.getValue().onTouch(mUdfpsView, downEvent);
         mBiometricsExecutor.runAllReady();

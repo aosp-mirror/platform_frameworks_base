@@ -1136,10 +1136,13 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 final LauncherAppsServiceInternal launcherApps = LocalServices.getService(
                         LauncherAppsServiceInternal.class);
 
-                launcherApps.startShortcut(caller.mUid, caller.mPid, callingPackage,
-                        hop.getShortcutInfo().getPackage(), null /* default featureId */,
+                final boolean success = launcherApps.startShortcut(caller.mUid, caller.mPid,
+                        callingPackage, hop.getShortcutInfo().getPackage(), null /* featureId */,
                         hop.getShortcutInfo().getId(), null /* sourceBounds */, launchOpts,
                         hop.getShortcutInfo().getUserId());
+                if (success) {
+                    effects |= TRANSACT_EFFECTS_LIFECYCLE;
+                }
                 break;
             }
             case HIERARCHY_OP_TYPE_REPARENT_CHILDREN: {

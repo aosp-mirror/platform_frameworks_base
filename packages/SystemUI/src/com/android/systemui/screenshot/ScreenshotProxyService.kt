@@ -19,14 +19,14 @@ import android.app.Service
 import android.content.Intent
 import android.os.IBinder
 import android.util.Log
-import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager
+import com.android.systemui.shade.ShadeExpansionStateManager
 import javax.inject.Inject
 
 /**
  * Provides state from the main SystemUI process on behalf of the Screenshot process.
  */
 internal class ScreenshotProxyService @Inject constructor(
-    private val mExpansionMgr: PanelExpansionStateManager
+    private val mExpansionMgr: ShadeExpansionStateManager
 ) : Service() {
 
     private val mBinder: IBinder = object : IScreenshotProxy.Stub() {

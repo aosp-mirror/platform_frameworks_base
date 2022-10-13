@@ -41,7 +41,6 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.phone.PhoneStatusBarViewController
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
-import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager
 import com.android.systemui.statusbar.window.StatusBarWindowStateController
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -117,7 +116,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
             notificationShadeDepthController,
             view,
             notificationPanelViewController,
-            PanelExpansionStateManager(),
+            ShadeExpansionStateManager(),
             stackScrollLayoutController,
             statusBarKeyguardViewManager,
             statusBarWindowStateController,

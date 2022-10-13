@@ -24,14 +24,12 @@ import com.android.tools.lint.detector.api.Issue
 import org.junit.Test
 
 @Suppress("UnstableApiUsage")
-class GetMainLooperViaContextDetectorTest : LintDetectorTest() {
+class NonInjectedMainThreadDetectorTest : LintDetectorTest() {
 
-    override fun getDetector(): Detector = GetMainLooperViaContextDetector()
+    override fun getDetector(): Detector = NonInjectedMainThreadDetector()
     override fun lint(): TestLintTask = super.lint().allowMissingSdk(true)
 
-    override fun getIssues(): List<Issue> = listOf(GetMainLooperViaContextDetector.ISSUE)
-
-    private val explanation = "Please inject a @Main Executor instead."
+    override fun getIssues(): List<Issue> = listOf(NonInjectedMainThreadDetector.ISSUE)
 
     @Test
     fun testGetMainThreadHandler() {
@@ -43,7 +41,7 @@ class GetMainLooperViaContextDetectorTest : LintDetectorTest() {
                     import android.content.Context;
                     import android.os.Handler;
 
-                    public class TestClass1 {
+                    public class TestClass {
                         public void test(Context context) {
                           Handler mainThreadHandler = context.getMainThreadHandler();
                         }
@@ -53,10 +51,16 @@ class GetMainLooperViaContextDetectorTest : LintDetectorTest() {
                     .indented(),
                 *stubs
             )
-            .issues(GetMainLooperViaContextDetector.ISSUE)
+            .issues(NonInjectedMainThreadDetector.ISSUE)
             .run()
-            .expectWarningCount(1)
-            .expectContains(explanation)
+            .expect(
+                """
+                src/test/pkg/TestClass.java:7: Warning: Replace with injected @Main Executor. [NonInjectedMainThread]
+                      Handler mainThreadHandler = context.getMainThreadHandler();
+                                                          ~~~~~~~~~~~~~~~~~~~~
+                0 errors, 1 warnings
+                """
+            )
     }
 
     @Test
@@ -69,7 +73,7 @@ class GetMainLooperViaContextDetectorTest : LintDetectorTest() {
                     import android.content.Context;
                     import android.os.Looper;
 
-                    public class TestClass1 {
+                    public class TestClass {
                         public void test(Context context) {
                           Looper mainLooper = context.getMainLooper();
                         }
@@ -79,10 +83,16 @@ class GetMainLooperViaContextDetectorTest : LintDetectorTest() {
                     .indented(),
                 *stubs
             )
-            .issues(GetMainLooperViaContextDetector.ISSUE)
+            .issues(NonInjectedMainThreadDetector.ISSUE)
             .run()
-            .expectWarningCount(1)
-            .expectContains(explanation)
+            .expect(
+                """
+                src/test/pkg/TestClass.java:7: Warning: Replace with injected @Main Executor. [NonInjectedMainThread]
+                      Looper mainLooper = context.getMainLooper();
+                                                  ~~~~~~~~~~~~~
+                0 errors, 1 warnings
+                """
+            )
     }
 
     @Test
@@ -95,7 +105,7 @@ class GetMainLooperViaContextDetectorTest : LintDetectorTest() {
                     import android.content.Context;
                     import java.util.concurrent.Executor;
 
-                    public class TestClass1 {
+                    public class TestClass {
                         public void test(Context context) {
                           Executor mainExecutor = context.getMainExecutor();
                         }
@@ -105,10 +115,16 @@ class GetMainLooperViaContextDetectorTest : LintDetectorTest() {
                     .indented(),
                 *stubs
             )
-            .issues(GetMainLooperViaContextDetector.ISSUE)
+            .issues(NonInjectedMainThreadDetector.ISSUE)
             .run()
-            .expectWarningCount(1)
-            .expectContains(explanation)
+            .expect(
+                """
+                src/test/pkg/TestClass.java:7: Warning: Replace with injected @Main Executor. [NonInjectedMainThread]
+                      Executor mainExecutor = context.getMainExecutor();
+                                                      ~~~~~~~~~~~~~~~
+                0 errors, 1 warnings
+                """
+            )
     }
 
     private val stubs = androidStubs

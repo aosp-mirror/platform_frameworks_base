@@ -2021,7 +2021,12 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 // non-fullscreen bounds. Then when this new PIP task exits PIP, it can restore
                 // to its previous freeform bounds.
                 rootTask.setLastNonFullscreenBounds(task.mLastNonFullscreenBounds);
-                rootTask.setBounds(task.getBounds());
+                // When creating a new Task for PiP, set its initial bounds as the TaskFragment in
+                // case the activity is embedded, so that it can be animated to PiP window from the
+                // current bounds.
+                // Use Task#setBoundsUnchecked to skip checking windowing mode as the windowing mode
+                // will be updated later after this is collected in transition.
+                rootTask.setBoundsUnchecked(r.getTaskFragment().getBounds());
 
                 // Move the last recents animation transaction from original task to the new one.
                 if (task.mLastRecentsAnimationTransaction != null) {

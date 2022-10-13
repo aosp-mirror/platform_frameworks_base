@@ -7,12 +7,12 @@ import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.shade.PanelState
+import com.android.systemui.shade.STATE_OPENING
+import com.android.systemui.shade.ShadeExpansionChangeEvent
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.phone.ScrimController
-import com.android.systemui.statusbar.phone.panelstate.PanelExpansionChangeEvent
-import com.android.systemui.statusbar.phone.panelstate.PanelState
-import com.android.systemui.statusbar.phone.panelstate.STATE_OPENING
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.util.LargeScreenUtils
@@ -35,7 +35,7 @@ constructor(
     private var inSplitShade = false
     private var splitShadeScrimTransitionDistance = 0
     private var lastExpansionFraction: Float? = null
-    private var lastExpansionEvent: PanelExpansionChangeEvent? = null
+    private var lastExpansionEvent: ShadeExpansionChangeEvent? = null
     private var currentPanelState: Int? = null
 
     init {
@@ -61,8 +61,8 @@ constructor(
         onStateChanged()
     }
 
-    fun onPanelExpansionChanged(panelExpansionChangeEvent: PanelExpansionChangeEvent) {
-        lastExpansionEvent = panelExpansionChangeEvent
+    fun onPanelExpansionChanged(shadeExpansionChangeEvent: ShadeExpansionChangeEvent) {
+        lastExpansionEvent = shadeExpansionChangeEvent
         onStateChanged()
     }
 
@@ -75,7 +75,7 @@ constructor(
     }
 
     private fun calculateScrimExpansionFraction(
-        expansionEvent: PanelExpansionChangeEvent,
+        expansionEvent: ShadeExpansionChangeEvent,
         @PanelState panelState: Int?
     ): Float {
         return if (canUseCustomFraction(panelState)) {

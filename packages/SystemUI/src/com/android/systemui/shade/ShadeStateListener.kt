@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone.panelstate
+package com.android.systemui.shade
 
 /** A listener interface to be notified of state change events for the notification panel. */
-fun interface PanelStateListener {
-    /** Called when the panel's expansion state has changed.   */
+fun interface ShadeStateListener {
+    /** Called when the panel's expansion state has changed. */
     fun onPanelStateChanged(@PanelState state: Int)
 }

@@ -135,8 +135,11 @@ public final class TransitionInfo implements Parcelable {
     /** This change happened underneath something else. */
     public static final int FLAG_IS_OCCLUDED = 1 << 15;
 
+    /** The container is a system window, excluding wallpaper and input-method. */
+    public static final int FLAG_IS_SYSTEM_WINDOW = 1 << 16;
+
     /** The first unused bit. This can be used by remotes to attach custom flags to this change. */
-    public static final int FLAG_FIRST_CUSTOM = 1 << 16;
+    public static final int FLAG_FIRST_CUSTOM = 1 << 17;
 
     /** @hide */
     @IntDef(prefix = { "FLAG_" }, value = {
@@ -157,6 +160,7 @@ public final class TransitionInfo implements Parcelable {
             FLAG_CROSS_PROFILE_WORK_THUMBNAIL,
             FLAG_IS_BEHIND_STARTING_WINDOW,
             FLAG_IS_OCCLUDED,
+            FLAG_IS_SYSTEM_WINDOW,
             FLAG_FIRST_CUSTOM
     })
     public @interface ChangeFlags {}
@@ -369,6 +373,9 @@ public final class TransitionInfo implements Parcelable {
         if ((flags & FLAG_IS_OCCLUDED) != 0) {
             sb.append(sb.length() == 0 ? "" : "|").append("IS_OCCLUDED");
         }
+        if ((flags & FLAG_IS_SYSTEM_WINDOW) != 0) {
+            sb.append(sb.length() == 0 ? "" : "|").append("FLAG_IS_SYSTEM_WINDOW");
+        }
         if ((flags & FLAG_FIRST_CUSTOM) != 0) {
             sb.append(sb.length() == 0 ? "" : "|").append("FIRST_CUSTOM");
         }
@@ -407,6 +414,7 @@ public final class TransitionInfo implements Parcelable {
     public static final class Change implements Parcelable {
         private final WindowContainerToken mContainer;
         private WindowContainerToken mParent;
+        private WindowContainerToken mLastParent;
         private final SurfaceControl mLeash;
         private @TransitionMode int mMode = TRANSIT_NONE;
         private @ChangeFlags int mFlags = FLAG_NONE;
@@ -435,6 +443,7 @@ public final class TransitionInfo implements Parcelable {
         private Change(Parcel in) {
             mContainer = in.readTypedObject(WindowContainerToken.CREATOR);
             mParent = in.readTypedObject(WindowContainerToken.CREATOR);
+            mLastParent = in.readTypedObject(WindowContainerToken.CREATOR);
             mLeash = new SurfaceControl();
             mLeash.readFromParcel(in);
             mMode = in.readInt();
@@ -456,6 +465,14 @@ public final class TransitionInfo implements Parcelable {
         /** Sets the parent of this change's container. The parent must be a participant or null. */
         public void setParent(@Nullable WindowContainerToken parent) {
             mParent = parent;
+        }
+
+        /**
+         * Sets the parent of this change's container before the transition if this change's
+         * container is reparented in the transition.
+         */
+        public void setLastParent(@Nullable WindowContainerToken lastParent) {
+            mLastParent = lastParent;
         }
 
         /** Sets the transition mode for this change */
@@ -539,6 +556,17 @@ public final class TransitionInfo implements Parcelable {
         @Nullable
         public WindowContainerToken getParent() {
             return mParent;
+        }
+
+        /**
+         * @return the parent of the changing container before the transition if it is reparented
+         * in the transition. The parent window may not be collected in the transition as a
+         * participant, and it may have been detached from the display. {@code null} if the changing
+         * container has not been reparented in the transition, or if the parent is not organizable.
+         */
+        @Nullable
+        public WindowContainerToken getLastParent() {
+            return mLastParent;
         }
 
         /** @return which action this change represents. */
@@ -640,6 +668,7 @@ public final class TransitionInfo implements Parcelable {
         public void writeToParcel(@NonNull Parcel dest, int flags) {
             dest.writeTypedObject(mContainer, flags);
             dest.writeTypedObject(mParent, flags);
+            dest.writeTypedObject(mLastParent, flags);
             mLeash.writeToParcel(dest, flags);
             dest.writeInt(mMode);
             dest.writeInt(mFlags);
@@ -679,13 +708,37 @@ public final class TransitionInfo implements Parcelable {
 
         @Override
         public String toString() {
-            String out = "{" + mContainer + "(" + mParent + ") leash=" + mLeash
-                    + " m=" + modeToString(mMode) + " f=" + flagsToString(mFlags) + " sb="
-                    + mStartAbsBounds + " eb=" + mEndAbsBounds + " eo=" + mEndRelOffset + " r="
-                    + mStartRotation + "->" + mEndRotation + ":" + mRotationAnimation
-                    + " endFixedRotation=" + mEndFixedRotation;
-            if (mSnapshot != null) out += " snapshot=" + mSnapshot;
-            return out + "}";
+            final StringBuilder sb = new StringBuilder();
+            sb.append('{'); sb.append(mContainer);
+            sb.append(" m="); sb.append(modeToString(mMode));
+            sb.append(" f="); sb.append(flagsToString(mFlags));
+            if (mParent != null) {
+                sb.append(" p="); sb.append(mParent);
+            }
+            if (mLeash != null) {
+                sb.append(" leash="); sb.append(mLeash);
+            }
+            sb.append(" sb="); sb.append(mStartAbsBounds);
+            sb.append(" eb="); sb.append(mEndAbsBounds);
+            if (mEndRelOffset.x != 0 || mEndRelOffset.y != 0) {
+                sb.append(" eo="); sb.append(mEndRelOffset);
+            }
+            if (mStartRotation != mEndRotation) {
+                sb.append(" r="); sb.append(mStartRotation);
+                sb.append("->"); sb.append(mEndRotation);
+                sb.append(':'); sb.append(mRotationAnimation);
+            }
+            if (mEndFixedRotation != ROTATION_UNDEFINED) {
+                sb.append(" endFixedRotation="); sb.append(mEndFixedRotation);
+            }
+            if (mSnapshot != null) {
+                sb.append(" snapshot="); sb.append(mSnapshot);
+            }
+            if (mLastParent != null) {
+                sb.append(" lastParent="); sb.append(mLastParent);
+            }
+            sb.append('}');
+            return sb.toString();
         }
     }
 
