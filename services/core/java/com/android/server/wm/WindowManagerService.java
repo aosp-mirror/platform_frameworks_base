@@ -7763,6 +7763,11 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
+        public boolean isKeyguardSecure(@UserIdInt int userId) {
+            return mPolicy.isKeyguardSecure(userId);
+        }
+
+        @Override
         public void showGlobalActions() {
             WindowManagerService.this.showGlobalActions();
         }

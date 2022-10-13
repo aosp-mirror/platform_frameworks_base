@@ -69,7 +69,6 @@ import android.annotation.UiThread;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
-import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -337,7 +336,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
     // Ongoing notification
     private NotificationManager mNotificationManager;
-    KeyguardManager mKeyguardManager;
     @Nullable private StatusBarManagerInternal mStatusBarManagerInternal;
     private final Notification.Builder mImeSwitcherNotification;
     private final PendingIntent mImeSwitchPendingIntent;
@@ -1941,7 +1939,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 final int currentUserId = mSettings.getCurrentUserId();
                 mSettings.switchCurrentUser(currentUserId,
                         !mUserManagerInternal.isUserUnlockingOrUnlocked(currentUserId));
-                mKeyguardManager = mContext.getSystemService(KeyguardManager.class);
                 mNotificationManager = mContext.getSystemService(NotificationManager.class);
                 mStatusBarManagerInternal =
                         LocalServices.getService(StatusBarManagerInternal.class);
@@ -3005,7 +3002,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         if (!mShowOngoingImeSwitcherForPhones) return false;
         if (mMenuController.getSwitchingDialogLocked() != null) return false;
         if (mWindowManagerInternal.isKeyguardShowingAndNotOccluded()
-                && mKeyguardManager != null && mKeyguardManager.isKeyguardSecure()) return false;
+                && mWindowManagerInternal.isKeyguardSecure(mSettings.getCurrentUserId())) {
+            return false;
+        }
         if ((visibility & InputMethodService.IME_ACTIVE) == 0
                 || (visibility & InputMethodService.IME_INVISIBLE) != 0) {
             return false;
