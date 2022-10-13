@@ -109,7 +109,6 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
         if (mTaskViewTransitions != null) {
             mTaskViewTransitions.addTaskView(this);
         }
-        setUseAlpha();
         getHolder().addCallback(this);
         mGuard.open("release");
     }
