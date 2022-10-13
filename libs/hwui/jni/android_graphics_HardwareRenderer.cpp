@@ -867,17 +867,19 @@ static void android_view_ThreadedRenderer_setDisplayDensityDpi(JNIEnv*, jclass, 
     DeviceInfo::setDensity(density);
 }
 
-static void android_view_ThreadedRenderer_initDisplayInfo(JNIEnv*, jclass, jint physicalWidth,
+static void android_view_ThreadedRenderer_initDisplayInfo(JNIEnv* env, jclass, jint physicalWidth,
                                                           jint physicalHeight, jfloat refreshRate,
                                                           jint wideColorDataspace,
                                                           jlong appVsyncOffsetNanos,
-                                                          jlong presentationDeadlineNanos) {
+                                                          jlong presentationDeadlineNanos,
+                                                          jboolean supportFp16ForHdr) {
     DeviceInfo::setWidth(physicalWidth);
     DeviceInfo::setHeight(physicalHeight);
     DeviceInfo::setRefreshRate(refreshRate);
     DeviceInfo::setWideColorDataspace(static_cast<ADataSpace>(wideColorDataspace));
     DeviceInfo::setAppVsyncOffsetNanos(appVsyncOffsetNanos);
     DeviceInfo::setPresentationDeadlineNanos(presentationDeadlineNanos);
+    DeviceInfo::setSupportFp16ForHdr(supportFp16ForHdr);
 }
 
 static void android_view_ThreadedRenderer_setDrawingEnabled(JNIEnv*, jclass, jboolean enabled) {
@@ -1027,7 +1029,7 @@ static const JNINativeMethod gMethods[] = {
         {"nSetForceDark", "(JZ)V", (void*)android_view_ThreadedRenderer_setForceDark},
         {"nSetDisplayDensityDpi", "(I)V",
          (void*)android_view_ThreadedRenderer_setDisplayDensityDpi},
-        {"nInitDisplayInfo", "(IIFIJJ)V", (void*)android_view_ThreadedRenderer_initDisplayInfo},
+        {"nInitDisplayInfo", "(IIFIJJZ)V", (void*)android_view_ThreadedRenderer_initDisplayInfo},
         {"preload", "()V", (void*)android_view_ThreadedRenderer_preload},
         {"isWebViewOverlaysEnabled", "()Z",
          (void*)android_view_ThreadedRenderer_isWebViewOverlaysEnabled},
