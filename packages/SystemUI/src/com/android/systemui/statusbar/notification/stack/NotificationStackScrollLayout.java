@@ -1115,6 +1115,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         updateAlgorithmLayoutMinHeight();
         updateOwnTranslationZ();
 
+        // Give The Algorithm information regarding the QS height so it can layout notifications
+        // properly. Needed for some devices that grows notifications down-to-top
+        mStackScrollAlgorithm.updateQSFrameTop(mQsHeader == null ? 0 : mQsHeader.getHeight());
+
         // Once the layout has finished, we don't need to animate any scrolling clampings anymore.
         mAnimateStackYForContentHeightChange = false;
     }

@@ -63,12 +63,12 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
-import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
@@ -111,7 +111,7 @@ public class UdfpsController implements DozeReceiver {
     private final WindowManager mWindowManager;
     private final DelayableExecutor mFgExecutor;
     @NonNull private final Executor mBiometricExecutor;
-    @NonNull private final PanelExpansionStateManager mPanelExpansionStateManager;
+    @NonNull private final ShadeExpansionStateManager mShadeExpansionStateManager;
     @NonNull private final StatusBarStateController mStatusBarStateController;
     @NonNull private final KeyguardStateController mKeyguardStateController;
     @NonNull private final StatusBarKeyguardViewManager mKeyguardViewManager;
@@ -205,7 +205,7 @@ public class UdfpsController implements DozeReceiver {
             mFgExecutor.execute(() -> UdfpsController.this.showUdfpsOverlay(
                     new UdfpsControllerOverlay(mContext, mFingerprintManager, mInflater,
                             mWindowManager, mAccessibilityManager, mStatusBarStateController,
-                            mPanelExpansionStateManager, mKeyguardViewManager,
+                            mShadeExpansionStateManager, mKeyguardViewManager,
                             mKeyguardUpdateMonitor, mDialogManager, mDumpManager,
                             mLockscreenShadeTransitionController, mConfigurationController,
                             mSystemClock, mKeyguardStateController,
@@ -245,7 +245,7 @@ public class UdfpsController implements DozeReceiver {
                     mAcquiredReceived = true;
                     final UdfpsView view = mOverlay.getOverlayView();
                     if (view != null) {
-                        view.unconfigureDisplay();
+                        unconfigureDisplay(view);
                     }
                     if (acquiredGood) {
                         mOverlay.onAcquiredGood();
@@ -582,7 +582,7 @@ public class UdfpsController implements DozeReceiver {
             @NonNull WindowManager windowManager,
             @NonNull StatusBarStateController statusBarStateController,
             @Main DelayableExecutor fgExecutor,
-            @NonNull PanelExpansionStateManager panelExpansionStateManager,
+            @NonNull ShadeExpansionStateManager shadeExpansionStateManager,
             @NonNull StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             @NonNull DumpManager dumpManager,
             @NonNull KeyguardUpdateMonitor keyguardUpdateMonitor,
@@ -615,7 +615,7 @@ public class UdfpsController implements DozeReceiver {
         mFingerprintManager = checkNotNull(fingerprintManager);
         mWindowManager = windowManager;
         mFgExecutor = fgExecutor;
-        mPanelExpansionStateManager = panelExpansionStateManager;
+        mShadeExpansionStateManager = shadeExpansionStateManager;
         mStatusBarStateController = statusBarStateController;
         mKeyguardStateController = keyguardStateController;
         mKeyguardViewManager = statusBarKeyguardViewManager;
@@ -735,6 +735,19 @@ public class UdfpsController implements DozeReceiver {
 
         mOverlay = null;
         mOrientationListener.disable();
+
+    }
+
+    private void unconfigureDisplay(@NonNull UdfpsView view) {
+        if (view.isDisplayConfigured()) {
+            view.unconfigureDisplay();
+
+            if (mCancelAodTimeoutAction != null) {
+                mCancelAodTimeoutAction.run();
+                mCancelAodTimeoutAction = null;
+            }
+            mIsAodInterruptActive = false;
+        }
     }
 
     /**
@@ -810,11 +823,11 @@ public class UdfpsController implements DozeReceiver {
      * sensors, this can result in illumination persisting for longer than necessary.
      */
     void onCancelUdfps() {
-        if (mOverlay != null && mOverlay.getOverlayView() != null) {
-            onFingerUp(mOverlay.getRequestId(), mOverlay.getOverlayView());
-        }
         if (!mIsAodInterruptActive) {
             return;
+        }
+        if (mOverlay != null && mOverlay.getOverlayView() != null) {
+            onFingerUp(mOverlay.getRequestId(), mOverlay.getOverlayView());
         }
         if (mCancelAodTimeoutAction != null) {
             mCancelAodTimeoutAction.run();
@@ -909,15 +922,8 @@ public class UdfpsController implements DozeReceiver {
             }
         }
         mOnFingerDown = false;
-        if (view.isDisplayConfigured()) {
-            view.unconfigureDisplay();
-        }
+        unconfigureDisplay(view);
 
-        if (mCancelAodTimeoutAction != null) {
-            mCancelAodTimeoutAction.run();
-            mCancelAodTimeoutAction = null;
-        }
-        mIsAodInterruptActive = false;
     }
 
     /**

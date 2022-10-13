@@ -452,14 +452,17 @@ public class PipTransition extends PipTransitionController {
             @NonNull Transitions.TransitionFinishCallback finishCallback,
             @NonNull TaskInfo taskInfo, @Nullable TransitionInfo.Change pipTaskChange) {
         TransitionInfo.Change pipChange = pipTaskChange;
-        if (pipChange == null) {
+        if (mCurrentPipTaskToken == null) {
+            ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: There is no existing PiP Task for TRANSIT_EXIT_PIP", TAG);
+        } else if (pipChange == null) {
             // The pipTaskChange is null, this can happen if we are reparenting the PIP activity
             // back to its original Task. In that case, we should animate the activity leash
-            // instead, which should be the only non-task, independent, TRANSIT_CHANGE window.
+            // instead, which should be the change whose last parent is the recorded PiP Task.
             for (int i = info.getChanges().size() - 1; i >= 0; --i) {
                 final TransitionInfo.Change change = info.getChanges().get(i);
-                if (change.getTaskInfo() == null && change.getMode() == TRANSIT_CHANGE
-                        && TransitionInfo.isIndependent(change, info)) {
+                if (mCurrentPipTaskToken.equals(change.getLastParent())) {
+                    // Find the activity that is exiting PiP.
                     pipChange = change;
                     break;
                 }

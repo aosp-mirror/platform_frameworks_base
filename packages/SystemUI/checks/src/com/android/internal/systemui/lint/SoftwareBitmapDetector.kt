@@ -47,7 +47,7 @@ class SoftwareBitmapDetector : Detector(), SourceCodeScanner {
                     ISSUE,
                     referenced,
                     context.getNameLocation(referenced),
-                    "Usage of Config.HARDWARE is highly encouraged."
+                    "Replace software bitmap with `Config.HARDWARE`"
             )
         }
     }
@@ -56,12 +56,12 @@ class SoftwareBitmapDetector : Detector(), SourceCodeScanner {
         @JvmField
         val ISSUE: Issue =
             Issue.create(
-                id = "SoftwareBitmapDetector",
-                briefDescription = "Software bitmap detected. Please use Config.HARDWARE instead.",
-                explanation =
-                "Software bitmaps occupy twice as much memory, when compared to Config.HARDWARE. " +
-                        "In case you need to manipulate the pixels, please consider to either use" +
-                        "a shader (encouraged), or a short lived software bitmap.",
+                id = "SoftwareBitmap",
+                briefDescription = "Software bitmap",
+                explanation = """
+                        Software bitmaps occupy twice as much memory as `Config.HARDWARE` bitmaps \
+                        do. However, hardware bitmaps are read-only. If you need to manipulate the \
+                        pixels, use a shader (preferably) or a short lived software bitmap.""",
                 category = Category.PERFORMANCE,
                 priority = 8,
                 severity = Severity.WARNING,

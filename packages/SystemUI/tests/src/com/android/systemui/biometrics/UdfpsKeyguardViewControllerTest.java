@@ -41,14 +41,14 @@ import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.shade.ShadeExpansionChangeEvent;
+import com.android.systemui.shade.ShadeExpansionListener;
+import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
-import com.android.systemui.statusbar.phone.panelstate.PanelExpansionChangeEvent;
-import com.android.systemui.statusbar.phone.panelstate.PanelExpansionListener;
-import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
@@ -76,7 +76,7 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
     @Mock
     private StatusBarStateController mStatusBarStateController;
     @Mock
-    private PanelExpansionStateManager mPanelExpansionStateManager;
+    private ShadeExpansionStateManager mShadeExpansionStateManager;
     @Mock
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     @Mock
@@ -109,8 +109,8 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
     @Captor private ArgumentCaptor<StatusBarStateController.StateListener> mStateListenerCaptor;
     private StatusBarStateController.StateListener mStatusBarStateListener;
 
-    @Captor private ArgumentCaptor<PanelExpansionListener> mExpansionListenerCaptor;
-    private List<PanelExpansionListener> mExpansionListeners;
+    @Captor private ArgumentCaptor<ShadeExpansionListener> mExpansionListenerCaptor;
+    private List<ShadeExpansionListener> mExpansionListeners;
 
     @Captor private ArgumentCaptor<StatusBarKeyguardViewManager.AlternateAuthInterceptor>
             mAltAuthInterceptorCaptor;
@@ -130,7 +130,7 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
         mController = new UdfpsKeyguardViewController(
                 mView,
                 mStatusBarStateController,
-                mPanelExpansionStateManager,
+                mShadeExpansionStateManager,
                 mStatusBarKeyguardViewManager,
                 mKeyguardUpdateMonitor,
                 mDumpManager,
@@ -182,8 +182,8 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
         mController.onViewDetached();
 
         verify(mStatusBarStateController).removeCallback(mStatusBarStateListener);
-        for (PanelExpansionListener listener : mExpansionListeners) {
-            verify(mPanelExpansionStateManager).removeExpansionListener(listener);
+        for (ShadeExpansionListener listener : mExpansionListeners) {
+            verify(mShadeExpansionStateManager).removeExpansionListener(listener);
         }
         verify(mKeyguardStateController).removeCallback(mKeyguardStateControllerCallback);
     }
@@ -513,7 +513,7 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
     }
 
     private void captureStatusBarExpansionListeners() {
-        verify(mPanelExpansionStateManager, times(2))
+        verify(mShadeExpansionStateManager, times(2))
                 .addExpansionListener(mExpansionListenerCaptor.capture());
         // first (index=0) is from super class, UdfpsAnimationViewController.
         // second (index=1) is from UdfpsKeyguardViewController
@@ -521,10 +521,10 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
     }
 
     private void updateStatusBarExpansion(float fraction, boolean expanded) {
-        PanelExpansionChangeEvent event =
-                new PanelExpansionChangeEvent(
+        ShadeExpansionChangeEvent event =
+                new ShadeExpansionChangeEvent(
                         fraction, expanded, /* tracking= */ false, /* dragDownPxAmount= */ 0f);
-        for (PanelExpansionListener listener : mExpansionListeners) {
+        for (ShadeExpansionListener listener : mExpansionListeners) {
             listener.onPanelExpansionChanged(event);
         }
     }

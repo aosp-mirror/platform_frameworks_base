@@ -1087,6 +1087,12 @@
       "group": "WM_DEBUG_FOCUS",
       "at": "com\/android\/server\/wm\/WindowState.java"
     },
+    "-1043981272": {
+      "message": "Reverting orientation. Rotating to %s from %s rather than %s.",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_ORIENTATION",
+      "at": "com\/android\/server\/wm\/DisplayRotation.java"
+    },
     "-1042574499": {
       "message": "Attempted to add Accessibility overlay window with unknown token %s.  Aborting.",
       "level": "WARN",
@@ -4284,6 +4290,12 @@
       "level": "WARN",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "2066210760": {
+      "message": "foldStateChanged: displayId %d, halfFoldStateChanged %s, saved rotation: %d, mUserRotation: %d, mLastSensorRotation: %d, mLastOrientation: %d, mRotation: %d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_ORIENTATION",
+      "at": "com\/android\/server\/wm\/DisplayRotation.java"
     },
     "2070726247": {
       "message": "InsetsSource updateVisibility for %s, serverVisible: %s clientVisible: %s",

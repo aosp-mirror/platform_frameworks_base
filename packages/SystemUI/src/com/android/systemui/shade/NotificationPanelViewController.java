@@ -28,6 +28,9 @@ import static com.android.systemui.animation.Interpolators.EMPHASIZED_ACCELERATE
 import static com.android.systemui.animation.Interpolators.EMPHASIZED_DECELERATE;
 import static com.android.systemui.classifier.Classifier.QS_COLLAPSE;
 import static com.android.systemui.classifier.Classifier.QUICK_SETTINGS;
+import static com.android.systemui.shade.ShadeExpansionStateManagerKt.STATE_CLOSED;
+import static com.android.systemui.shade.ShadeExpansionStateManagerKt.STATE_OPEN;
+import static com.android.systemui.shade.ShadeExpansionStateManagerKt.STATE_OPENING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_QUICK_SETTINGS_EXPANDED;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
@@ -36,9 +39,6 @@ import static com.android.systemui.statusbar.StatusBarState.SHADE_LOCKED;
 import static com.android.systemui.statusbar.VibratorHelper.TOUCH_VIBRATION_ATTRIBUTES;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_ALL;
 import static com.android.systemui.statusbar.notification.stack.StackStateAnimator.ANIMATION_DURATION_FOLD_TO_AOD;
-import static com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManagerKt.STATE_CLOSED;
-import static com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManagerKt.STATE_OPEN;
-import static com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManagerKt.STATE_OPENING;
 import static com.android.systemui.util.DumpUtilsKt.asIndenting;
 
 import android.animation.Animator;
@@ -202,8 +202,6 @@ import com.android.systemui.statusbar.phone.TapAgainViewController;
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment;
-import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
-import com.android.systemui.statusbar.phone.panelstate.PanelState;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardQsUserSwitchController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -760,7 +758,7 @@ public final class NotificationPanelViewController extends PanelViewController {
             LargeScreenShadeHeaderController largeScreenShadeHeaderController,
             ScreenOffAnimationController screenOffAnimationController,
             LockscreenGestureLogger lockscreenGestureLogger,
-            PanelExpansionStateManager panelExpansionStateManager,
+            ShadeExpansionStateManager shadeExpansionStateManager,
             NotificationRemoteInputManager remoteInputManager,
             Optional<SysUIUnfoldComponent> unfoldComponent,
             InteractionJankMonitor interactionJankMonitor,
@@ -789,7 +787,7 @@ public final class NotificationPanelViewController extends PanelViewController {
                 flingAnimationUtilsBuilder.get(),
                 statusBarTouchableRegionManager,
                 lockscreenGestureLogger,
-                panelExpansionStateManager,
+                shadeExpansionStateManager,
                 ambientState,
                 interactionJankMonitor,
                 shadeLogger,
@@ -860,7 +858,7 @@ public final class NotificationPanelViewController extends PanelViewController {
                 new DynamicPrivacyControlListener();
         dynamicPrivacyController.addListener(dynamicPrivacyControlListener);
 
-        panelExpansionStateManager.addStateListener(this::onPanelStateChanged);
+        shadeExpansionStateManager.addStateListener(this::onPanelStateChanged);
 
         mBottomAreaShadeAlphaAnimator = ValueAnimator.ofFloat(1f, 0);
         mBottomAreaShadeAlphaAnimator.addUpdateListener(animation -> {
@@ -3385,8 +3383,9 @@ public final class NotificationPanelViewController extends PanelViewController {
     }
 
     private void updateQsFrameTranslation() {
-        mQsFrameTranslateController.translateQsFrame(mQsFrame, mQs, mOverExpansion,
-                mQsTranslationForFullShadeTransition);
+        mQsFrameTranslateController.translateQsFrame(mQsFrame, mQs,
+                mNavigationBarBottomHeight + mAmbientState.getStackTopMargin());
+
     }
 
     @Override
@@ -4407,7 +4406,7 @@ public final class NotificationPanelViewController extends PanelViewController {
         }
         mSysUiState.setFlag(SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED,
                         isFullyExpanded() && !isInSettings())
-                .setFlag(SYSUI_STATE_QUICK_SETTINGS_EXPANDED, isInSettings())
+                .setFlag(SYSUI_STATE_QUICK_SETTINGS_EXPANDED, isFullyExpanded() && isInSettings())
                 .commitUpdate(mDisplayId);
     }
 

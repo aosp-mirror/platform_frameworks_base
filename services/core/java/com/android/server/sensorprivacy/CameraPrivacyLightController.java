@@ -46,6 +46,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
+
 
 class CameraPrivacyLightController implements AppOpsManager.OnOpActiveChangedListener,
         SensorEventListener {
@@ -275,7 +277,7 @@ class CameraPrivacyLightController implements AppOpsManager.OnOpActiveChangedLis
     public void onSensorChanged(SensorEvent event) {
         // Using log space to represent human sensation (Fechner's Law) instead of lux
         // because lux values causes bright flashes to skew the average very high.
-        addElement(event.timestamp, Math.max(0,
+        addElement(TimeUnit.NANOSECONDS.toMillis(event.timestamp), Math.max(0,
                 (int) (Math.log(event.values[0]) * LIGHT_VALUE_MULTIPLIER)));
         updateLightSession();
         mHandler.removeCallbacksAndMessages(mDelayedUpdateToken);
