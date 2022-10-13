@@ -26,6 +26,8 @@ import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.provider.DeviceConfig.NAMESPACE_CONSTRAIN_DISPLAY_APIS;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
+import static android.view.InsetsState.ITYPE_TOP_MANDATORY_GESTURES;
+import static android.view.InsetsState.ITYPE_TOP_TAPPABLE_ELEMENT;
 import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_180;
 import static android.view.Surface.ROTATION_270;
@@ -84,6 +86,7 @@ import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 import android.provider.DeviceConfig;
 import android.provider.DeviceConfig.Properties;
+import android.view.InsetsFrameProvider;
 import android.view.InsetsVisibilities;
 import android.view.WindowManager;
 
@@ -3079,6 +3082,11 @@ public class SizeCompatTests extends WindowTestsBase {
         attrs.layoutInDisplayCutoutMode =
                 WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
         attrs.setFitInsetsTypes(0 /* types */);
+        attrs.providedInsets = new InsetsFrameProvider[] {
+                new InsetsFrameProvider(ITYPE_STATUS_BAR),
+                new InsetsFrameProvider(ITYPE_TOP_TAPPABLE_ELEMENT),
+                new InsetsFrameProvider(ITYPE_TOP_MANDATORY_GESTURES)
+        };
         final TestWindowState statusBar = new TestWindowState(
                 displayContent.mWmService, mock(Session.class), new TestIWindow(), attrs, token);
         token.addWindow(statusBar);

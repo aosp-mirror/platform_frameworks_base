@@ -1,6 +1,7 @@
 package com.android.settingslib.spaprivileged.framework.common
 
 import android.app.admin.DevicePolicyManager
+import android.app.usage.StorageStatsManager
 import android.content.Context
 import android.os.UserManager
 
@@ -9,3 +10,6 @@ val Context.userManager get() = getSystemService(UserManager::class.java)!!
 
 /** The [DevicePolicyManager] instance. */
 val Context.devicePolicyManager get() = getSystemService(DevicePolicyManager::class.java)!!
+
+/** The [StorageStatsManager] instance. */
+val Context.storageStatsManager get() = getSystemService(StorageStatsManager::class.java)!!

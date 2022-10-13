@@ -16,6 +16,9 @@
 
 package com.android.systemui.statusbar.window;
 
+import static android.view.InsetsState.ITYPE_STATUS_BAR;
+import static android.view.InsetsState.ITYPE_TOP_MANDATORY_GESTURES;
+import static android.view.InsetsState.ITYPE_TOP_TAPPABLE_ELEMENT;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR;
@@ -27,6 +30,7 @@ import static com.android.systemui.util.leak.RotationUtils.ROTATION_UPSIDE_DOWN;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Insets;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.Binder;
@@ -36,6 +40,7 @@ import android.util.Log;
 import android.view.DisplayCutout;
 import android.view.Gravity;
 import android.view.IWindowManager;
+import android.view.InsetsFrameProvider;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
@@ -221,6 +226,19 @@ public class StatusBarWindowController {
         lp.setTitle("StatusBar");
         lp.packageName = mContext.getPackageName();
         lp.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+        final InsetsFrameProvider gestureInsetsProvider =
+                new InsetsFrameProvider(ITYPE_TOP_MANDATORY_GESTURES);
+        final int safeTouchRegionHeight = mContext.getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.display_cutout_touchable_region_size);
+        if (safeTouchRegionHeight > 0) {
+            gestureInsetsProvider.minimalInsetsSizeInDisplayCutoutSafe =
+                    Insets.of(0, safeTouchRegionHeight, 0, 0);
+        }
+        lp.providedInsets = new InsetsFrameProvider[] {
+                new InsetsFrameProvider(ITYPE_STATUS_BAR),
+                new InsetsFrameProvider(ITYPE_TOP_TAPPABLE_ELEMENT),
+                gestureInsetsProvider
+        };
         return lp;
 
     }

@@ -16,6 +16,7 @@
 
 package com.android.server.inputmethod;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.res.Resources;
 import android.os.LocaleList;
@@ -123,6 +124,7 @@ final class SubtypeUtils {
             source -> source != null ? source.getLocaleObject() : null;
 
     @VisibleForTesting
+    @NonNull
     static ArrayList<InputMethodSubtype> getImplicitlyApplicableSubtypesLocked(
             Resources res, InputMethodInfo imi) {
         final LocaleList systemLocales = res.getConfiguration().getLocales();

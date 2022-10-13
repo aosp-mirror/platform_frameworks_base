@@ -96,13 +96,6 @@ public class FeatureFlagUtils {
     /** @hide */
     public static final String SETTINGS_AUTO_TEXT_WRAPPING = "settings_auto_text_wrapping";
 
-    /** Flag to enable / disable the Simple Cursor accessibility feature in
-     *  Settings.
-     * @hide
-     */
-    public static final String SETTINGS_ACCESSIBILITY_SIMPLE_CURSOR =
-            "settings_accessibility_simple_cursor";
-
     /**
      * Enable new language and keyboard settings UI
      * @hide
@@ -149,7 +142,6 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put(SETTINGS_APP_ALLOW_DARK_THEME_ACTIVATION_AT_BEDTIME, "true");
         DEFAULT_FLAGS.put(SETTINGS_HIDE_SECOND_LAYER_PAGE_NAVIGATE_UP_BUTTON_IN_TWO_PANE, "true");
         DEFAULT_FLAGS.put(SETTINGS_AUTO_TEXT_WRAPPING, "false");
-        DEFAULT_FLAGS.put(SETTINGS_ACCESSIBILITY_SIMPLE_CURSOR, "false");
         DEFAULT_FLAGS.put(SETTINGS_NEW_KEYBOARD_UI, "false");
         DEFAULT_FLAGS.put(SETTINGS_ENABLE_SPA, "false");
         DEFAULT_FLAGS.put(SETTINGS_ADB_METRICS_WRITER, "false");

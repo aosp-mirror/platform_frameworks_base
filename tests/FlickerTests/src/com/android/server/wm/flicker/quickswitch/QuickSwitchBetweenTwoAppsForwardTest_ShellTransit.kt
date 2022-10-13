@@ -23,6 +23,7 @@ import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.navBarWindowIsVisibleAtStartAndEnd
+import com.android.server.wm.traces.common.ComponentNameMatcher
 import org.junit.Assume
 import org.junit.Before
 import org.junit.FixMethodOrder
@@ -62,8 +63,8 @@ open class QuickSwitchBetweenTwoAppsForwardTest_ShellTransit(testSpec: FlickerTe
     override fun navBarWindowIsAlwaysVisible() = super.navBarWindowIsAlwaysVisible()
 
     /**
-     * Checks that [ComponentMatcher.NAV_BAR] window is visible and above the app windows at the
-     * start and end of the WM trace
+     * Checks that [ComponentNameMatcher.NAV_BAR] window is visible and above the app windows at
+     * the start and end of the WM trace
      */
     @Presubmit
     @Test
@@ -76,4 +77,13 @@ open class QuickSwitchBetweenTwoAppsForwardTest_ShellTransit(testSpec: FlickerTe
     @Test
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
         super.visibleLayersShownMoreThanOneConsecutiveEntry()
+
+    @FlakyTest(bugId = 250518877)
+    @Test
+    override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
+
+    @FlakyTest(bugId = 250522691)
+    @Test
+    override fun startsWithApp1LayersCoverFullScreen() =
+        super.startsWithApp1LayersCoverFullScreen()
 }

@@ -17,6 +17,7 @@
 package com.android.server.translation;
 
 import static android.view.translation.TranslationManager.EXTRA_CAPABILITIES;
+import static android.view.translation.TranslationManager.STATUS_SYNC_CALL_FAIL;
 import static android.view.translation.UiTranslationManager.EXTRA_PACKAGE_NAME;
 import static android.view.translation.UiTranslationManager.EXTRA_SOURCE_LOCALE;
 import static android.view.translation.UiTranslationManager.EXTRA_STATE;
@@ -32,7 +33,9 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -40,6 +43,7 @@ import android.os.IRemoteCallback;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
+import android.service.translation.TranslationService;
 import android.service.translation.TranslationServiceInfo;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -156,10 +160,25 @@ final class TranslationManagerServiceImpl extends
                 return null;
             }
             final ComponentName serviceComponent = ComponentName.unflattenFromString(serviceName);
+            if (!isServiceAvailableForUser(serviceComponent)) {
+                if (mMaster.verbose) {
+                    Slog.v(TAG, "ensureRemoteServiceLocked(): " + serviceComponent
+                            + " is not available,");
+                }
+                return null;
+            }
             mRemoteTranslationService = new RemoteTranslationService(getContext(), serviceComponent,
                     mUserId, /* isInstantAllowed= */ false, mRemoteServiceCallback);
         }
         return mRemoteTranslationService;
+    }
+
+    private boolean isServiceAvailableForUser(ComponentName serviceComponent) {
+        Intent intent = new Intent(TranslationService.SERVICE_INTERFACE)
+                .setComponent(serviceComponent);
+        final ResolveInfo resolveInfo = getContext().getPackageManager().resolveServiceAsUser(
+                intent, PackageManager.GET_SERVICES | PackageManager.GET_META_DATA, mUserId);
+        return resolveInfo != null && resolveInfo.serviceInfo != null;
     }
 
     @GuardedBy("mLock")
@@ -170,6 +189,9 @@ final class TranslationManagerServiceImpl extends
         if (remoteService != null) {
             remoteService.onTranslationCapabilitiesRequest(sourceFormat, destFormat,
                     resultReceiver);
+        } else {
+            Slog.v(TAG, "onTranslationCapabilitiesRequestLocked(): no remote service.");
+            resultReceiver.send(STATUS_SYNC_CALL_FAIL, null);
         }
     }
 
@@ -184,10 +206,13 @@ final class TranslationManagerServiceImpl extends
 
     @GuardedBy("mLock")
     void onSessionCreatedLocked(@NonNull TranslationContext translationContext, int sessionId,
-            IResultReceiver resultReceiver) {
+            IResultReceiver resultReceiver) throws RemoteException {
         final RemoteTranslationService remoteService = ensureRemoteServiceLocked();
         if (remoteService != null) {
             remoteService.onSessionCreated(translationContext, sessionId, resultReceiver);
+        } else {
+            Slog.v(TAG, "onSessionCreatedLocked(): no remote service.");
+            resultReceiver.send(STATUS_SYNC_CALL_FAIL, null);
         }
     }
 

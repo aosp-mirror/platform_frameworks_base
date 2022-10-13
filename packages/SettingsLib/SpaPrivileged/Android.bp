@@ -30,7 +30,7 @@ android_library {
     ],
     kotlincflags: [
         "-Xjvm-default=all",
-        "-Xopt-in=kotlin.RequiresOptIn",
+        "-opt-in=kotlin.RequiresOptIn",
     ],
 }
 

@@ -21,6 +21,8 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
+import static android.view.InsetsState.ITYPE_TOP_MANDATORY_GESTURES;
+import static android.view.InsetsState.ITYPE_TOP_TAPPABLE_ELEMENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR;
@@ -45,6 +47,7 @@ import static org.mockito.Mockito.verify;
 
 import android.app.StatusBarManager;
 import android.platform.test.annotations.Presubmit;
+import android.view.InsetsFrameProvider;
 import android.view.InsetsSource;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
@@ -70,7 +73,7 @@ public class InsetsPolicyTest extends WindowTestsBase {
 
     @Test
     public void testControlsForDispatch_regular() {
-        addWindow(TYPE_STATUS_BAR, "statusBar");
+        addStatusBar();
         addWindow(TYPE_NAVIGATION_BAR, "navBar");
 
         final InsetsSourceControl[] controls = addAppWindowAndGetControlsForDispatch();
@@ -82,7 +85,7 @@ public class InsetsPolicyTest extends WindowTestsBase {
 
     @Test
     public void testControlsForDispatch_multiWindowTaskVisible() {
-        addWindow(TYPE_STATUS_BAR, "statusBar");
+        addStatusBar();
         addWindow(TYPE_NAVIGATION_BAR, "navBar");
 
         final WindowState win = createWindow(null, WINDOWING_MODE_MULTI_WINDOW,
@@ -95,7 +98,7 @@ public class InsetsPolicyTest extends WindowTestsBase {
 
     @Test
     public void testControlsForDispatch_freeformTaskVisible() {
-        addWindow(TYPE_STATUS_BAR, "statusBar");
+        addStatusBar();
         addWindow(TYPE_NAVIGATION_BAR, "navBar");
 
         final WindowState win = createWindow(null, WINDOWING_MODE_FREEFORM,
@@ -108,8 +111,7 @@ public class InsetsPolicyTest extends WindowTestsBase {
 
     @Test
     public void testControlsForDispatch_forceStatusBarVisible() {
-        addWindow(TYPE_STATUS_BAR, "statusBar").mAttrs.privateFlags |=
-                PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR;
+        addStatusBar().mAttrs.privateFlags |= PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR;
         addWindow(TYPE_NAVIGATION_BAR, "navBar");
 
         final InsetsSourceControl[] controls = addAppWindowAndGetControlsForDispatch();
@@ -123,7 +125,7 @@ public class InsetsPolicyTest extends WindowTestsBase {
     public void testControlsForDispatch_statusBarForceShowNavigation() {
         addWindow(TYPE_NOTIFICATION_SHADE, "notificationShade").mAttrs.privateFlags |=
                 PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION;
-        addWindow(TYPE_STATUS_BAR, "statusBar");
+        addStatusBar();
         addWindow(TYPE_NAVIGATION_BAR, "navBar");
 
         final InsetsSourceControl[] controls = addAppWindowAndGetControlsForDispatch();
@@ -152,7 +154,7 @@ public class InsetsPolicyTest extends WindowTestsBase {
     public void testControlsForDispatch_remoteInsetsControllerControlsBars_appHasNoControl() {
         mDisplayContent.setRemoteInsetsController(createDisplayWindowInsetsController());
         mDisplayContent.getInsetsPolicy().setRemoteInsetsControllerControlsSystemBars(true);
-        addWindow(TYPE_STATUS_BAR, "statusBar");
+        addStatusBar();
         addWindow(TYPE_NAVIGATION_BAR, "navBar");
 
         final InsetsSourceControl[] controls = addAppWindowAndGetControlsForDispatch();
@@ -163,7 +165,7 @@ public class InsetsPolicyTest extends WindowTestsBase {
 
     @Test
     public void testControlsForDispatch_topAppHidesStatusBar() {
-        addWindow(TYPE_STATUS_BAR, "statusBar");
+        addStatusBar();
         addWindow(TYPE_NAVIGATION_BAR, "navBar");
 
         // Add a fullscreen (MATCH_PARENT x MATCH_PARENT) app window which hides status bar.
@@ -256,7 +258,7 @@ public class InsetsPolicyTest extends WindowTestsBase {
     @SetupWindows(addWindows = W_ACTIVITY)
     @Test
     public void testShowTransientBars_bothCanBeTransient_appGetsBothFakeControls() {
-        final WindowState statusBar = addNonFocusableWindow(TYPE_STATUS_BAR, "statusBar");
+        final WindowState statusBar = addStatusBar();
         statusBar.setHasSurface(true);
         statusBar.getControllableInsetProvider().setServerVisible(true);
         final WindowState navBar = addNonFocusableWindow(TYPE_NAVIGATION_BAR, "navBar");
@@ -298,8 +300,7 @@ public class InsetsPolicyTest extends WindowTestsBase {
     @SetupWindows(addWindows = W_ACTIVITY)
     @Test
     public void testShowTransientBars_statusBarCanBeTransient_appGetsStatusBarFakeControl() {
-        addNonFocusableWindow(TYPE_STATUS_BAR, "statusBar")
-                .getControllableInsetProvider().getSource().setVisible(false);
+        addStatusBar().getControllableInsetProvider().getSource().setVisible(false);
         addNonFocusableWindow(TYPE_NAVIGATION_BAR, "navBar")
                 .getControllableInsetProvider().setServerVisible(true);
 
@@ -328,8 +329,8 @@ public class InsetsPolicyTest extends WindowTestsBase {
     @SetupWindows(addWindows = W_ACTIVITY)
     @Test
     public void testAbortTransientBars_bothCanBeAborted_appGetsBothRealControls() {
-        final InsetsSource statusBarSource = addNonFocusableWindow(TYPE_STATUS_BAR, "statusBar")
-                .getControllableInsetProvider().getSource();
+        final InsetsSource statusBarSource =
+                addStatusBar().getControllableInsetProvider().getSource();
         final InsetsSource navBarSource = addNonFocusableWindow(TYPE_NAVIGATION_BAR, "navBar")
                 .getControllableInsetProvider().getSource();
         statusBarSource.setVisible(false);
@@ -381,8 +382,7 @@ public class InsetsPolicyTest extends WindowTestsBase {
 
     @Test
     public void testShowTransientBars_abortsWhenControlTargetChanges() {
-        addNonFocusableWindow(TYPE_STATUS_BAR, "statusBar")
-                .getControllableInsetProvider().getSource().setVisible(false);
+        addStatusBar().getControllableInsetProvider().getSource().setVisible(false);
         addNonFocusableWindow(TYPE_NAVIGATION_BAR, "navBar")
                 .getControllableInsetProvider().getSource().setVisible(false);
         final WindowState app = addWindow(TYPE_APPLICATION, "app");
@@ -403,6 +403,18 @@ public class InsetsPolicyTest extends WindowTestsBase {
     private WindowState addNonFocusableWindow(int type, String name) {
         WindowState win = addWindow(type, name);
         win.mAttrs.flags |= FLAG_NOT_FOCUSABLE;
+        return win;
+    }
+
+    private WindowState addStatusBar() {
+        final WindowState win = createWindow(null, TYPE_STATUS_BAR, "statusBar");
+        win.mAttrs.flags |= FLAG_NOT_FOCUSABLE;
+        win.mAttrs.providedInsets = new InsetsFrameProvider[] {
+                new InsetsFrameProvider(ITYPE_STATUS_BAR),
+                new InsetsFrameProvider(ITYPE_TOP_TAPPABLE_ELEMENT),
+                new InsetsFrameProvider(ITYPE_TOP_MANDATORY_GESTURES)
+        };
+        mDisplayContent.getDisplayPolicy().addWindowLw(win, win.mAttrs);
         return win;
     }
 

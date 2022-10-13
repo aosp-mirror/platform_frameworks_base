@@ -2036,9 +2036,11 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             if (resolvedUserIds.length != 1) {
                 return Collections.emptyList();
             }
+            final int callingUid = Binder.getCallingUid();
             final long ident = Binder.clearCallingIdentity();
             try {
-                return getInputMethodListLocked(resolvedUserIds[0], directBootAwareness);
+                return getInputMethodListLocked(
+                        resolvedUserIds[0], directBootAwareness, callingUid);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -2057,9 +2059,10 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             if (resolvedUserIds.length != 1) {
                 return Collections.emptyList();
             }
+            final int callingUid = Binder.getCallingUid();
             final long ident = Binder.clearCallingIdentity();
             try {
-                return getEnabledInputMethodListLocked(resolvedUserIds[0]);
+                return getEnabledInputMethodListLocked(resolvedUserIds[0], callingUid);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -2090,12 +2093,14 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
     @GuardedBy("ImfLock.class")
     private List<InputMethodInfo> getInputMethodListLocked(@UserIdInt int userId,
-            @DirectBootAwareness int directBootAwareness) {
+            @DirectBootAwareness int directBootAwareness, int callingUid) {
         final ArrayList<InputMethodInfo> methodList;
+        final InputMethodSettings settings;
         if (userId == mSettings.getCurrentUserId()
                 && directBootAwareness == DirectBootAwareness.AUTO) {
             // Create a copy.
             methodList = new ArrayList<>(mMethodList);
+            settings = mSettings;
         } else {
             final ArrayMap<String, InputMethodInfo> methodMap = new ArrayMap<>();
             methodList = new ArrayList<>();
@@ -2104,19 +2109,31 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             AdditionalSubtypeUtils.load(additionalSubtypeMap, userId);
             queryInputMethodServicesInternal(mContext, userId, additionalSubtypeMap, methodMap,
                     methodList, directBootAwareness);
+            settings = new InputMethodSettings(mContext, methodMap, userId, true /* copyOnWrite */);
         }
+        // filter caller's access to input methods
+        methodList.removeIf(imi ->
+                !canCallerAccessInputMethod(imi.getPackageName(), callingUid, userId, settings));
         return methodList;
     }
 
     @GuardedBy("ImfLock.class")
-    private List<InputMethodInfo> getEnabledInputMethodListLocked(@UserIdInt int userId) {
+    private List<InputMethodInfo> getEnabledInputMethodListLocked(@UserIdInt int userId,
+            int callingUid) {
+        final ArrayList<InputMethodInfo> methodList;
+        final InputMethodSettings settings;
         if (userId == mSettings.getCurrentUserId()) {
-            return mSettings.getEnabledInputMethodListLocked();
+            methodList = mSettings.getEnabledInputMethodListLocked();
+            settings = mSettings;
+        } else {
+            final ArrayMap<String, InputMethodInfo> methodMap = queryMethodMapForUser(userId);
+            settings = new InputMethodSettings(mContext, methodMap, userId, true /* copyOnWrite */);
+            methodList = settings.getEnabledInputMethodListLocked();
         }
-        final ArrayMap<String, InputMethodInfo> methodMap = queryMethodMapForUser(userId);
-        final InputMethodSettings settings = new InputMethodSettings(mContext, methodMap, userId,
-                true);
-        return settings.getEnabledInputMethodListLocked();
+        // filter caller's access to input methods
+        methodList.removeIf(imi ->
+                !canCallerAccessInputMethod(imi.getPackageName(), callingUid, userId, settings));
+        return methodList;
     }
 
     @GuardedBy("ImfLock.class")
@@ -2155,10 +2172,11 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         synchronized (ImfLock.class) {
+            final int callingUid = Binder.getCallingUid();
             final long ident = Binder.clearCallingIdentity();
             try {
                 return getEnabledInputMethodSubtypeListLocked(imiId,
-                        allowsImplicitlyEnabledSubtypes, userId);
+                        allowsImplicitlyEnabledSubtypes, userId, callingUid);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -2167,7 +2185,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
     @GuardedBy("ImfLock.class")
     private List<InputMethodSubtype> getEnabledInputMethodSubtypeListLocked(String imiId,
-            boolean allowsImplicitlyEnabledSubtypes, @UserIdInt int userId) {
+            boolean allowsImplicitlyEnabledSubtypes, @UserIdInt int userId, int callingUid) {
         if (userId == mSettings.getCurrentUserId()) {
             final InputMethodInfo imi;
             String selectedMethodId = getSelectedMethodIdLocked();
@@ -2176,7 +2194,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             } else {
                 imi = mMethodMap.get(imiId);
             }
-            if (imi == null) {
+            if (imi == null || !canCallerAccessInputMethod(
+                    imi.getPackageName(), callingUid, userId, mSettings)) {
                 return Collections.emptyList();
             }
             return mSettings.getEnabledInputMethodSubtypeListLocked(
@@ -2189,6 +2208,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
         final InputMethodSettings settings = new InputMethodSettings(mContext, methodMap, userId,
                 true);
+        if (!canCallerAccessInputMethod(imi.getPackageName(), callingUid, userId, settings)) {
+            return Collections.emptyList();
+        }
         return settings.getEnabledInputMethodSubtypeListLocked(
                 imi, allowsImplicitlyEnabledSubtypes);
     }
@@ -5438,6 +5460,34 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         return true;
     }
 
+    /**
+     * Filter the access to the input method by rules of the package visibility. Return {@code true}
+     * if the given input method is the currently selected one or visible to the caller.
+     *
+     * @param targetPkgName The package name of input method to check.
+     * @param callingUid The caller that is going to access the input method.
+     * @param userId The user ID where the input method resides.
+     * @param settings The input method settings under the given user ID.
+     * @return {@code true} if caller is able to access the input method.
+     */
+    private boolean canCallerAccessInputMethod(@NonNull String targetPkgName, int callingUid,
+            @UserIdInt int userId, @NonNull InputMethodSettings settings) {
+        final String methodId = settings.getSelectedInputMethod();
+        final ComponentName selectedInputMethod = methodId != null
+                ? InputMethodUtils.convertIdToComponentName(methodId) : null;
+        if (selectedInputMethod != null
+                && selectedInputMethod.getPackageName().equals(targetPkgName)) {
+            return true;
+        }
+        final boolean canAccess = !mPackageManagerInternal.filterAppAccess(
+                targetPkgName, callingUid, userId);
+        if (DEBUG && !canAccess) {
+            Slog.d(TAG, "Input method " + targetPkgName
+                    + " is not visible to the caller " + callingUid);
+        }
+        return canAccess;
+    }
+
     private void publishLocalService() {
         LocalServices.addService(InputMethodManagerInternal.class, new LocalServiceImpl());
     }
@@ -5459,14 +5509,15 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         @Override
         public List<InputMethodInfo> getInputMethodListAsUser(@UserIdInt int userId) {
             synchronized (ImfLock.class) {
-                return getInputMethodListLocked(userId, DirectBootAwareness.AUTO);
+                return getInputMethodListLocked(userId, DirectBootAwareness.AUTO,
+                        Process.SYSTEM_UID);
             }
         }
 
         @Override
         public List<InputMethodInfo> getEnabledInputMethodListAsUser(@UserIdInt int userId) {
             synchronized (ImfLock.class) {
-                return getEnabledInputMethodListLocked(userId);
+                return getEnabledInputMethodListLocked(userId, Process.SYSTEM_UID);
             }
         }
 
@@ -6096,8 +6147,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             try (PrintWriter pr = shellCommand.getOutPrintWriter()) {
                 for (int userId : userIds) {
                     final List<InputMethodInfo> methods = all
-                            ? getInputMethodListLocked(userId, DirectBootAwareness.AUTO)
-                            : getEnabledInputMethodListLocked(userId);
+                            ? getInputMethodListLocked(
+                                    userId, DirectBootAwareness.AUTO, Process.SHELL_UID)
+                            : getEnabledInputMethodListLocked(userId, Process.SHELL_UID);
                     if (userIds.length > 1) {
                         pr.print("User #");
                         pr.print(userId);

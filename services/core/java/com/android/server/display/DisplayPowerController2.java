@@ -542,13 +542,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         mScreenBrightnessForVrRangeMinimum = clampAbsoluteBrightness(
                 pm.getBrightnessConstraint(PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MINIMUM_VR));
 
-        // Check the setting, but also verify that it is the default display. Only the default
-        // display has an automatic brightness controller running.
-        // TODO: b/179021925 - Fix to work with multiple displays
-        mUseSoftwareAutoBrightnessConfig = resources.getBoolean(
-                R.bool.config_automatic_brightness_available)
-                && mDisplayId == Display.DEFAULT_DISPLAY;
-
         mAllowAutoBrightnessWhileDozingConfig = resources.getBoolean(
                 R.bool.config_allowAutoBrightnessWhileDozing);
 
@@ -928,6 +921,8 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
     }
 
     private void setUpAutoBrightness(Resources resources, Handler handler) {
+        mUseSoftwareAutoBrightnessConfig = mDisplayDeviceConfig.isAutoBrightnessAvailable();
+
         if (!mUseSoftwareAutoBrightnessConfig) {
             return;
         }

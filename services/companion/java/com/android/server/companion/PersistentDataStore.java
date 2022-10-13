@@ -229,6 +229,11 @@ final class PersistentDataStore {
     /**
      * Reads previously persisted data for the given user "into" the provided containers.
      *
+     * Note that {@link AssociationInfo#getAssociatedDevice()} will always be {@code null} after
+     * retrieval from this datastore because it is not persisted (by design). This means that
+     * persisted data is not guaranteed to be identical to the initial data that was stored at the
+     * time of association.
+     *
      * @param userId Android UserID
      * @param associationsOut a container to read the {@link AssociationInfo}s "into".
      * @param previouslyUsedIdsPerPackageOut a container to read the used IDs "into".
@@ -292,6 +297,9 @@ final class PersistentDataStore {
 
     /**
      * Persisted data to the disk.
+     *
+     * Note that associatedDevice field in {@link AssociationInfo} is not persisted by this
+     * datastore implementation.
      *
      * @param userId Android UserID
      * @param associations a set of user's associations.
@@ -419,7 +427,7 @@ final class PersistentDataStore {
         final long timeApproved = readLongAttribute(parser, XML_ATTR_TIME_APPROVED, 0L);
 
         out.add(new AssociationInfo(associationId, userId, appPackage,
-                MacAddress.fromString(deviceAddress), null, profile,
+                MacAddress.fromString(deviceAddress), null, profile, null,
                 /* managedByCompanionApp */ false, notify, /* revoked */ false, timeApproved,
                 Long.MAX_VALUE));
     }
@@ -556,9 +564,11 @@ final class PersistentDataStore {
             boolean notify, boolean revoked, long timeApproved, long lastTimeConnected) {
         AssociationInfo associationInfo = null;
         try {
+            // We do not persist AssociatedDevice, which means that AssociationInfo retrieved from
+            // datastore is not guaranteed to be identical to the one from initial association.
             associationInfo = new AssociationInfo(associationId, userId, appPackage, macAddress,
-                    displayName, profile, selfManaged, notify, revoked, timeApproved,
-                    lastTimeConnected);
+                    displayName, profile, null, selfManaged, notify, revoked,
+                    timeApproved, lastTimeConnected);
         } catch (Exception e) {
             if (DEBUG) Log.w(TAG, "Could not create AssociationInfo", e);
         }

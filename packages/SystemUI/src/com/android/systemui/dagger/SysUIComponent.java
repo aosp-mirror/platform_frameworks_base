@@ -27,9 +27,6 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardSliceProvider;
 import com.android.systemui.media.muteawait.MediaMuteAwaitConnectionCli;
 import com.android.systemui.media.nearby.NearbyMediaDevicesManager;
-import com.android.systemui.media.taptotransfer.MediaTttCommandLineHelper;
-import com.android.systemui.media.taptotransfer.receiver.MediaTttChipControllerReceiver;
-import com.android.systemui.media.taptotransfer.sender.MediaTttChipControllerSender;
 import com.android.systemui.people.PeopleProvider;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.unfold.FoldStateLogger;
@@ -133,9 +130,6 @@ public interface SysUIComponent {
         });
         getNaturalRotationUnfoldProgressProvider().ifPresent(o -> o.init());
         // No init method needed, just needs to be gotten so that it's created.
-        getMediaTttChipControllerSender();
-        getMediaTttChipControllerReceiver();
-        getMediaTttCommandLineHelper();
         getMediaMuteAwaitConnectionCli();
         getNearbyMediaDevicesManager();
         getUnfoldLatencyTracker().init();
@@ -204,15 +198,6 @@ public interface SysUIComponent {
      * For devices with a hinge: the rotation animation
      */
     Optional<NaturalRotationUnfoldProgressProvider> getNaturalRotationUnfoldProgressProvider();
-
-    /** */
-    Optional<MediaTttChipControllerSender> getMediaTttChipControllerSender();
-
-    /** */
-    Optional<MediaTttChipControllerReceiver> getMediaTttChipControllerReceiver();
-
-    /** */
-    Optional<MediaTttCommandLineHelper> getMediaTttCommandLineHelper();
 
     /** */
     Optional<MediaMuteAwaitConnectionCli> getMediaMuteAwaitConnectionCli();

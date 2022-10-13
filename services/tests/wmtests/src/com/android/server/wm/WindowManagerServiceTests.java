@@ -217,6 +217,12 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         mWm.relayoutWindow(win.mSession, win.mClient, win.mAttrs, w, h, View.VISIBLE, 0, 0, 0,
                 outFrames, outConfig, outSurfaceControl, outInsetsState, outControls, outBundle);
         assertEquals(0, outConfig.getMergedConfiguration().densityDpi);
+        // Non activity window can still get the last config.
+        win.mActivityRecord = null;
+        win.fillClientWindowFramesAndConfiguration(outFrames, outConfig,
+                false /* useLatestConfig */, true /* relayoutVisible */);
+        assertEquals(win.getConfiguration().densityDpi,
+                outConfig.getMergedConfiguration().densityDpi);
     }
 
     @Test

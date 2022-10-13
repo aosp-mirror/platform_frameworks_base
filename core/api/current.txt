@@ -8947,6 +8947,7 @@ package android.companion {
 
   public final class AssociationInfo implements android.os.Parcelable {
     method public int describeContents();
+    method @Nullable public android.os.Parcelable getAssociatedDevice();
     method @Nullable public android.net.MacAddress getDeviceMacAddress();
     method @Nullable public String getDeviceProfile();
     method @Nullable public CharSequence getDisplayName();
@@ -52022,6 +52023,7 @@ package android.view.accessibility {
     field public static final int CONTENT_CHANGE_TYPE_DRAG_CANCELLED = 512; // 0x200
     field public static final int CONTENT_CHANGE_TYPE_DRAG_DROPPED = 256; // 0x100
     field public static final int CONTENT_CHANGE_TYPE_DRAG_STARTED = 128; // 0x80
+    field public static final int CONTENT_CHANGE_TYPE_ENABLED = 4096; // 0x1000
     field public static final int CONTENT_CHANGE_TYPE_ERROR = 2048; // 0x800
     field public static final int CONTENT_CHANGE_TYPE_PANE_APPEARED = 16; // 0x10
     field public static final int CONTENT_CHANGE_TYPE_PANE_DISAPPEARED = 32; // 0x20

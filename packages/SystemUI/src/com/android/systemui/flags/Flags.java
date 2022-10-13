@@ -116,7 +116,7 @@ public class Flags {
      * the framework APIs.
      */
     public static final UnreleasedFlag USER_INTERACTOR_AND_REPO_USE_CONTROLLER =
-            new UnreleasedFlag(210, true);
+            new UnreleasedFlag(210);
 
     /**
      * Whether `UserSwitcherController` should use the user interactor.
@@ -127,8 +127,7 @@ public class Flags {
      * <p>Note: do not set this to true if {@link #USER_INTERACTOR_AND_REPO_USE_CONTROLLER} is
      * {@code true} as it would created a cycle between controller -> interactor -> controller.
      */
-    public static final UnreleasedFlag USER_CONTROLLER_USES_INTERACTOR =
-            new UnreleasedFlag(211, false);
+    public static final ReleasedFlag USER_CONTROLLER_USES_INTERACTOR = new ReleasedFlag(211);
 
     /***************************************/
     // 300 - power menu
@@ -218,7 +217,7 @@ public class Flags {
 
     /***************************************/
     // 900 - media
-    public static final UnreleasedFlag MEDIA_TAP_TO_TRANSFER = new UnreleasedFlag(900);
+    public static final ReleasedFlag MEDIA_TAP_TO_TRANSFER = new ReleasedFlag(900);
     public static final UnreleasedFlag MEDIA_SESSION_ACTIONS = new UnreleasedFlag(901);
     public static final ReleasedFlag MEDIA_NEARBY_DEVICES = new ReleasedFlag(903);
     public static final ReleasedFlag MEDIA_MUTE_AWAIT = new ReleasedFlag(904);
@@ -236,7 +235,7 @@ public class Flags {
     // 1100 - windowing
     @Keep
     public static final SysPropBooleanFlag WM_ENABLE_SHELL_TRANSITIONS =
-            new SysPropBooleanFlag(1100, "persist.wm.debug.shell_transit", false);
+            new SysPropBooleanFlag(1100, "persist.wm.debug.shell_transit", true);
 
     /**
      * b/170163464: animate bubbles expanded view collapse with home gesture
@@ -300,8 +299,8 @@ public class Flags {
     public static final UnreleasedFlag SCREENSHOT_REQUEST_PROCESSOR = new UnreleasedFlag(1300);
     public static final UnreleasedFlag SCREENSHOT_WORK_PROFILE_POLICY = new UnreleasedFlag(1301);
 
-    // 1400 - columbus, b/242800729
-    public static final UnreleasedFlag QUICK_TAP_IN_PCC = new UnreleasedFlag(1400);
+    // 1400 - columbus
+    public static final ReleasedFlag QUICK_TAP_IN_PCC = new ReleasedFlag(1400);
 
     // 1500 - chooser
     public static final UnreleasedFlag CHOOSER_UNBUNDLED = new UnreleasedFlag(1500);

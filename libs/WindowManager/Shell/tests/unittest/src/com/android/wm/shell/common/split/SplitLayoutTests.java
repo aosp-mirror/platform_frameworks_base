@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.common.split;
 
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -90,6 +91,14 @@ public class SplitLayoutTests extends ShellTestCase {
 
         // Verify updateConfiguration returns true if the root bounds changed.
         config.windowConfiguration.setBounds(new Rect(0, 0, 2160, 1080));
+        assertThat(mSplitLayout.updateConfiguration(config)).isTrue();
+
+        // Verify updateConfiguration returns true if the orientation changed.
+        config.orientation = ORIENTATION_LANDSCAPE;
+        assertThat(mSplitLayout.updateConfiguration(config)).isTrue();
+
+        // Verify updateConfiguration returns true if the density changed.
+        config.densityDpi = 123;
         assertThat(mSplitLayout.updateConfiguration(config)).isTrue();
     }
 
