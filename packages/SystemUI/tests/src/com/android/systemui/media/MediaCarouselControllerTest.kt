@@ -25,6 +25,11 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.media.MediaCarouselController.Companion.ANIMATION_BASE_DURATION
+import com.android.systemui.media.MediaCarouselController.Companion.DURATION
+import com.android.systemui.media.MediaCarouselController.Companion.PAGINATION_DELAY
+import com.android.systemui.media.MediaCarouselController.Companion.TRANSFORM_BEZIER
+import com.android.systemui.media.MediaHierarchyManager.Companion.LOCATION_QS
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.notification.collection.provider.OnReorderingAllowedListener
@@ -397,5 +402,25 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         // mediaCarouselScrollHandler.visibleMediaIndex is unchanged (= 0), and the new player is
         // added to the end because it was active less recently.
         assertEquals(mediaCarouselController.getCurrentVisibleMediaContentIntent(), clickIntent2)
+    }
+
+    @Test
+    fun testSetCurrentState_UpdatePageIndicatorAlphaWhenSquish() {
+        val delta = 0.0001F
+        val paginationSquishMiddle = TRANSFORM_BEZIER.getInterpolation(
+                (PAGINATION_DELAY + DURATION / 2) / ANIMATION_BASE_DURATION)
+        val paginationSquishEnd = TRANSFORM_BEZIER.getInterpolation(
+                (PAGINATION_DELAY + DURATION) / ANIMATION_BASE_DURATION)
+        whenever(mediaHostStatesManager.mediaHostStates)
+            .thenReturn(mutableMapOf(LOCATION_QS to mediaHostState))
+        whenever(mediaHostState.visible).thenReturn(true)
+        mediaCarouselController.currentEndLocation = LOCATION_QS
+        whenever(mediaHostState.squishFraction).thenReturn(paginationSquishMiddle)
+        mediaCarouselController.updatePageIndicatorAlpha()
+        assertEquals(mediaCarouselController.pageIndicator.alpha, 0.5F, delta)
+
+        whenever(mediaHostState.squishFraction).thenReturn(paginationSquishEnd)
+        mediaCarouselController.updatePageIndicatorAlpha()
+        assertEquals(mediaCarouselController.pageIndicator.alpha, 1.0F, delta)
     }
 }
