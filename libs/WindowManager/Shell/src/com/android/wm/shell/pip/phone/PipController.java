@@ -745,6 +745,15 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                 // Directly move PiP to its final destination bounds without animation.
                 mPipTaskOrganizer.scheduleFinishResizePip(postChangeBounds);
             }
+
+            // if the pip window size is beyond allowed bounds user resize to normal bounds
+            if (mPipBoundsState.getBounds().width() < mPipBoundsState.getMinSize().x
+                    || mPipBoundsState.getBounds().width() > mPipBoundsState.getMaxSize().x
+                    || mPipBoundsState.getBounds().height() < mPipBoundsState.getMinSize().y
+                    || mPipBoundsState.getBounds().height() > mPipBoundsState.getMaxSize().y) {
+                mTouchHandler.userResizeTo(mPipBoundsState.getNormalBounds(), snapFraction);
+            }
+
         } else {
             updateDisplayLayout.run();
         }
