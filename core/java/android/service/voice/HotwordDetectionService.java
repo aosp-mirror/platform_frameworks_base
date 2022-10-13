@@ -25,6 +25,7 @@ import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.app.Service;
 import android.content.ContentCaptureOptions;
 import android.content.Context;
@@ -90,10 +91,10 @@ public abstract class HotwordDetectionService extends Service {
     /**
      * Feature flag for Attention Service.
      *
-     * TODO(b/247920386): Add TestApi annotation
      * @hide
      */
-    public static final boolean ENABLE_PROXIMITY_RESULT = false;
+    @TestApi
+    public static final boolean ENABLE_PROXIMITY_RESULT = true;
 
     /**
      * Indicates that the updated status is successful.

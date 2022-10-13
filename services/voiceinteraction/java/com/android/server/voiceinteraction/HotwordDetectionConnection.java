@@ -19,7 +19,6 @@ package com.android.server.voiceinteraction;
 import static android.Manifest.permission.CAPTURE_AUDIO_HOTWORD;
 import static android.Manifest.permission.RECORD_AUDIO;
 import static android.service.attention.AttentionService.PROXIMITY_UNKNOWN;
-import static android.service.voice.HotwordDetectedResult.EXTRA_PROXIMITY_METERS;
 import static android.service.voice.HotwordDetectionService.AUDIO_SOURCE_EXTERNAL;
 import static android.service.voice.HotwordDetectionService.AUDIO_SOURCE_MICROPHONE;
 import static android.service.voice.HotwordDetectionService.ENABLE_PROXIMITY_RESULT;
@@ -199,7 +198,7 @@ final class HotwordDetectionConnection {
     @Nullable AttentionManagerInternal mAttentionManagerInternal = null;
 
     final AttentionManagerInternal.ProximityUpdateCallbackInternal mProximityCallbackInternal =
-            this::setProximityMeters;
+            this::setProximityValue;
 
 
     volatile HotwordDetectionServiceIdentity mIdentity;
@@ -494,7 +493,7 @@ final class HotwordDetectionConnection {
                         mSoftwareCallback.onError();
                         return;
                     }
-                    saveProximityMetersToBundle(result);
+                    saveProximityValueToBundle(result);
                     HotwordDetectedResult newResult;
                     try {
                         newResult = mHotwordAudioStreamManager.startCopyingAudioStreams(result);
@@ -629,7 +628,7 @@ final class HotwordDetectionConnection {
                         externalCallback.onError(CALLBACK_ONDETECTED_GOT_SECURITY_EXCEPTION);
                         return;
                     }
-                    saveProximityMetersToBundle(result);
+                    saveProximityValueToBundle(result);
                     HotwordDetectedResult newResult;
                     try {
                         newResult = mHotwordAudioStreamManager.startCopyingAudioStreams(result);
@@ -1217,15 +1216,15 @@ final class HotwordDetectionConnection {
         });
     }
 
-    private void saveProximityMetersToBundle(HotwordDetectedResult result) {
+    private void saveProximityValueToBundle(HotwordDetectedResult result) {
         synchronized (mLock) {
             if (result != null && mProximityMeters != PROXIMITY_UNKNOWN) {
-                result.getExtras().putDouble(EXTRA_PROXIMITY_METERS, mProximityMeters);
+                result.setProximity(mProximityMeters);
             }
         }
     }
 
-    private void setProximityMeters(double proximityMeters) {
+    private void setProximityValue(double proximityMeters) {
         synchronized (mLock) {
             mProximityMeters = proximityMeters;
         }

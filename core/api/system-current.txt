@@ -12120,6 +12120,7 @@ package android.service.voice {
     method public static int getMaxScore();
     method @Nullable public android.media.MediaSyncEvent getMediaSyncEvent();
     method public int getPersonalizedScore();
+    method public int getProximity();
     method public int getScore();
     method public boolean isHotwordDetectionPersonalized();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
@@ -12133,6 +12134,9 @@ package android.service.voice {
     field public static final int CONFIDENCE_LEVEL_VERY_HIGH = 6; // 0x6
     field @NonNull public static final android.os.Parcelable.Creator<android.service.voice.HotwordDetectedResult> CREATOR;
     field public static final int HOTWORD_OFFSET_UNSET = -1; // 0xffffffff
+    field public static final int PROXIMITY_FAR = 2; // 0x2
+    field public static final int PROXIMITY_NEAR = 1; // 0x1
+    field public static final int PROXIMITY_UNKNOWN = -1; // 0xffffffff
   }
 
   public static final class HotwordDetectedResult.Builder {
