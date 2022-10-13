@@ -1040,25 +1040,38 @@
         android:priority="900" />
 
     <!-- Allows an application to read from external storage.
-      <p>Any app that declares the {@link #WRITE_EXTERNAL_STORAGE} permission is implicitly
-      granted this permission.</p>
+      <p class="note"><strong>Note: </strong>Starting in API level 33, this permission has no
+      effect. If your app accesses other apps' media files, request one or more of these permissions
+      instead: <a href="#READ_MEDIA_IMAGES"><code>READ_MEDIA_IMAGES</code></a>,
+      <a href="#READ_MEDIA_VIDEO"><code>READ_MEDIA_VIDEO</code></a>,
+      <a href="#READ_MEDIA_AUDIO"><code>READ_MEDIA_AUDIO</code></a>. Learn more about the
+      <a href="{@docRoot}training/data-storage/shared/media#storage-permission">storage
+      permissions</a> that are associated with media files.</p>
+
       <p>This permission is enforced starting in API level 19.  Before API level 19, this
       permission is not enforced and all apps still have access to read from external storage.
       You can test your app with the permission enforced by enabling <em>Protect USB
-      storage</em> under Developer options in the Settings app on a device running Android 4.1 or
-      higher.</p>
+      storage</em> under <b>Developer options</b> in the Settings app on a device running Android
+      4.1 or higher.</p>
       <p>Also starting in API level 19, this permission is <em>not</em> required to
-      read/write files in your application-specific directories returned by
+      read or write files in your application-specific directories returned by
       {@link android.content.Context#getExternalFilesDir} and
-      {@link android.content.Context#getExternalCacheDir}.
-      <p class="note"><strong>Note:</strong> If <em>both</em> your <a
+      {@link android.content.Context#getExternalCacheDir}.</p>
+      <p>Starting in API level 29, apps don't need to request this permission to access files in
+      their app-specific directory on external storage, or their own files in the
+      <a href="{@docRoot}reference/android/provider/MediaStore"><code>MediaStore</code></a>. Apps
+      shouldn't request this permission unless they need to access other apps' files in the
+      <code>MediaStore</code>. Read more about these changes in the
+      <a href="{@docRoot}training/data-storage#scoped-storage">scoped storage</a> section of the
+      developer documentation.</p>
+      <p>If <em>both</em> your <a
       href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code
       minSdkVersion}</a> and <a
       href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
       targetSdkVersion}</a> values are set to 3 or lower, the system implicitly
       grants your app this permission. If you don't need this permission, be sure your <a
       href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
-      targetSdkVersion}</a> is 4 or higher.
+      targetSdkVersion}</a> is 4 or higher.</p>
 
       <p> This is a soft restricted permission which cannot be held by an app it its
       full form until the installer on record allowlists the permission.
