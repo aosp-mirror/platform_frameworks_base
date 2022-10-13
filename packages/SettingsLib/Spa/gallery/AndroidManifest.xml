@@ -18,12 +18,13 @@
     package="com.android.settingslib.spa.gallery">
 
     <application
+        android:name=".GalleryApplication"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_label"
         android:supportsRtl="true"
         android:enableOnBackInvokedCallback="true">
         <activity
-            android:name=".MainActivity"
+            android:name=".GalleryMainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
