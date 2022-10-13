@@ -31,6 +31,9 @@ import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.shade.ShadeExpansionChangeEvent;
+import com.android.systemui.shade.ShadeExpansionListener;
+import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
@@ -38,9 +41,6 @@ import com.android.systemui.statusbar.phone.KeyguardBouncer;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
-import com.android.systemui.statusbar.phone.panelstate.PanelExpansionChangeEvent;
-import com.android.systemui.statusbar.phone.panelstate.PanelExpansionListener;
-import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.time.SystemClock;
@@ -88,7 +88,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
     protected UdfpsKeyguardViewController(
             @NonNull UdfpsKeyguardView view,
             @NonNull StatusBarStateController statusBarStateController,
-            @NonNull PanelExpansionStateManager panelExpansionStateManager,
+            @NonNull ShadeExpansionStateManager shadeExpansionStateManager,
             @NonNull StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             @NonNull KeyguardUpdateMonitor keyguardUpdateMonitor,
             @NonNull DumpManager dumpManager,
@@ -100,7 +100,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
             @NonNull SystemUIDialogManager systemUIDialogManager,
             @NonNull UdfpsController udfpsController,
             @NonNull ActivityLaunchAnimator activityLaunchAnimator) {
-        super(view, statusBarStateController, panelExpansionStateManager, systemUIDialogManager,
+        super(view, statusBarStateController, shadeExpansionStateManager, systemUIDialogManager,
                 dumpManager);
         mKeyguardViewManager = statusBarKeyguardViewManager;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
@@ -153,7 +153,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         mQsExpansion = mKeyguardViewManager.getQsExpansion();
         updateGenericBouncerVisibility();
         mConfigurationController.addCallback(mConfigurationListener);
-        getPanelExpansionStateManager().addExpansionListener(mPanelExpansionListener);
+        getShadeExpansionStateManager().addExpansionListener(mShadeExpansionListener);
         updateScaleFactor();
         mView.updatePadding();
         updateAlpha();
@@ -174,7 +174,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         mKeyguardViewManager.removeAlternateAuthInterceptor(mAlternateAuthInterceptor);
         mKeyguardUpdateMonitor.requestFaceAuthOnOccludingApp(false);
         mConfigurationController.removeCallback(mConfigurationListener);
-        getPanelExpansionStateManager().removeExpansionListener(mPanelExpansionListener);
+        getShadeExpansionStateManager().removeExpansionListener(mShadeExpansionListener);
         if (mLockScreenShadeTransitionController.getUdfpsKeyguardViewController() == this) {
             mLockScreenShadeTransitionController.setUdfpsKeyguardViewController(null);
         }
@@ -502,9 +502,9 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
                 }
             };
 
-    private final PanelExpansionListener mPanelExpansionListener = new PanelExpansionListener() {
+    private final ShadeExpansionListener mShadeExpansionListener = new ShadeExpansionListener() {
         @Override
-        public void onPanelExpansionChanged(PanelExpansionChangeEvent event) {
+        public void onPanelExpansionChanged(ShadeExpansionChangeEvent event) {
             float fraction = event.getFraction();
             mPanelExpansionFraction =
                     mKeyguardViewManager.isBouncerInTransit() ? BouncerPanelExpansionCalculator

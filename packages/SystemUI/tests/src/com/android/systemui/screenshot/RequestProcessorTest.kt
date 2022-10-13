@@ -99,13 +99,14 @@ class RequestProcessorTest {
             policy.getDefaultDisplayId(),
             DisplayContentInfo(component, bounds, UserHandle.of(USER_ID), TASK_ID))
 
-        val request = ScreenshotRequest(TAKE_SCREENSHOT_FULLSCREEN, SCREENSHOT_KEY_CHORD)
+        val request = ScreenshotRequest(TAKE_SCREENSHOT_FULLSCREEN, SCREENSHOT_OTHER)
         val processor = RequestProcessor(imageCapture, policy, flags, scope)
 
         val processedRequest = processor.process(request)
 
         // Request has topComponent added, but otherwise unchanged.
         assertThat(processedRequest.type).isEqualTo(TAKE_SCREENSHOT_FULLSCREEN)
+        assertThat(processedRequest.source).isEqualTo(SCREENSHOT_OTHER)
         assertThat(processedRequest.topComponent).isEqualTo(component)
     }
 

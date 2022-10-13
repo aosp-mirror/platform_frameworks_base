@@ -10,11 +10,11 @@ import com.android.systemui.R
 import com.android.systemui.animation.Interpolators
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.qs.QS
+import com.android.systemui.shade.PanelState
+import com.android.systemui.shade.STATE_CLOSED
+import com.android.systemui.shade.STATE_OPENING
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.phone.ScrimController
-import com.android.systemui.statusbar.phone.panelstate.PanelState
-import com.android.systemui.statusbar.phone.panelstate.STATE_CLOSED
-import com.android.systemui.statusbar.phone.panelstate.STATE_OPENING
 import com.android.systemui.statusbar.policy.ConfigurationController
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -37,6 +37,7 @@ constructor(
     private var previousOverscrollAmount = 0
     private var dragDownAmount: Float = 0f
     @PanelState private var panelState: Int = STATE_CLOSED
+
     private var releaseOverScrollAnimator: Animator? = null
 
     private val qS: QS

@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.systemui.statusbar.phone.panelstate
+package com.android.systemui.shade
 
 import android.annotation.FloatRange
 
-data class PanelExpansionChangeEvent(
+data class ShadeExpansionChangeEvent(
     /** 0 when collapsed, 1 when fully expanded. */
     @FloatRange(from = 0.0, to = 1.0) val fraction: Float,
     /** Whether the panel should be considered expanded */
