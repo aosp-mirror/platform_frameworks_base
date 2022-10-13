@@ -30,11 +30,11 @@ import com.android.settingslib.spa.framework.common.EntrySearchData
 import com.android.settingslib.spa.framework.common.SettingsEntry
 import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
+import com.android.settingslib.spa.framework.common.createSettingsPage
 import com.android.settingslib.spa.framework.compose.toState
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.gallery.R
 import com.android.settingslib.spa.gallery.SettingsPageProviderEnum
-import com.android.settingslib.spa.gallery.createSettingsPage
 import com.android.settingslib.spa.gallery.preference.PreferencePageModel.Companion.ASYNC_PREFERENCE_TITLE
 import com.android.settingslib.spa.gallery.preference.PreferencePageModel.Companion.AUTO_UPDATE_PREFERENCE_TITLE
 import com.android.settingslib.spa.gallery.preference.PreferencePageModel.Companion.DISABLE_PREFERENCE_SUMMARY
@@ -66,7 +66,8 @@ object PreferencePageProvider : SettingsPageProvider {
     }
 
     override val name = SettingsPageProviderEnum.PREFERENCE.name
-    private val owner = createSettingsPage(SettingsPageProviderEnum.PREFERENCE)
+    override val displayName = SettingsPageProviderEnum.PREFERENCE.displayName
+    private val owner = createSettingsPage()
 
     private fun createEntry(entry: EntryEnum): SettingsEntryBuilder {
         return SettingsEntryBuilder.create(owner, entry.name, entry.displayName)
