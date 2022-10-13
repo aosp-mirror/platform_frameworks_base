@@ -329,46 +329,47 @@ public class SettingsStateTest extends AndroidTestCase {
         final String testKey1 = SETTING_NAME;
         final String testValue1 = Strings.repeat("A", 100);
         settingsState.insertSettingLocked(testKey1, testValue1, null, true, TEST_PACKAGE);
-        int expectedMemUsage = testKey1.length() + testValue1.length()
-                + testValue1.length() /* size for default */;
+        int expectedMemUsage = (testKey1.length() + testValue1.length()
+                + testValue1.length() /* size for default */) * Character.BYTES;
         assertEquals(expectedMemUsage, settingsState.getMemoryUsage(TEST_PACKAGE));
 
         // Test inserting another key
         final String testKey2 = SETTING_NAME + "2";
         settingsState.insertSettingLocked(testKey2, testValue1, null, false, TEST_PACKAGE);
-        expectedMemUsage += testKey2.length() + testValue1.length();
+        expectedMemUsage += (testKey2.length() + testValue1.length()) * Character.BYTES;
         assertEquals(expectedMemUsage, settingsState.getMemoryUsage(TEST_PACKAGE));
 
         // Test updating first key with new default
         final String testValue2 = Strings.repeat("A", 300);
         settingsState.insertSettingLocked(testKey1, testValue2, null, true, TEST_PACKAGE);
-        expectedMemUsage += (testValue2.length() - testValue1.length()) * 2;
+        expectedMemUsage += (testValue2.length() - testValue1.length()) * 2 * Character.BYTES;
         assertEquals(expectedMemUsage, settingsState.getMemoryUsage(TEST_PACKAGE));
 
         // Test updating first key without new default
         final String testValue3 = Strings.repeat("A", 50);
         settingsState.insertSettingLocked(testKey1, testValue3, null, false, TEST_PACKAGE);
-        expectedMemUsage -= testValue2.length() - testValue3.length();
+        expectedMemUsage -= (testValue2.length() - testValue3.length()) * Character.BYTES;
         assertEquals(expectedMemUsage, settingsState.getMemoryUsage(TEST_PACKAGE));
 
         // Test updating second key
         settingsState.insertSettingLocked(testKey2, testValue2, null, false, TEST_PACKAGE);
-        expectedMemUsage -= testValue1.length() - testValue2.length();
+        expectedMemUsage -= (testValue1.length() - testValue2.length()) * Character.BYTES;
         assertEquals(expectedMemUsage, settingsState.getMemoryUsage(TEST_PACKAGE));
 
         // Test resetting key
         settingsState.resetSettingLocked(testKey1);
-        expectedMemUsage += testValue2.length() - testValue3.length();
+        expectedMemUsage += (testValue2.length() - testValue3.length()) * Character.BYTES;
         assertEquals(expectedMemUsage, settingsState.getMemoryUsage(TEST_PACKAGE));
 
         // Test resetting default value
         settingsState.resetSettingDefaultValueLocked(testKey1);
-        expectedMemUsage -= testValue2.length();
+        expectedMemUsage -= testValue2.length() * Character.BYTES;
         assertEquals(expectedMemUsage, settingsState.getMemoryUsage(TEST_PACKAGE));
 
         // Test deletion
         settingsState.deleteSettingLocked(testKey2);
-        expectedMemUsage -= testValue2.length() + testKey2.length() /* key is deleted too */;
+        expectedMemUsage -= (testValue2.length() + testKey2.length() /* key is deleted too */)
+                * Character.BYTES;
         assertEquals(expectedMemUsage, settingsState.getMemoryUsage(TEST_PACKAGE));
 
         // Test another package with a different key
@@ -376,7 +377,8 @@ public class SettingsStateTest extends AndroidTestCase {
         final String testKey3 = SETTING_NAME + "3";
         settingsState.insertSettingLocked(testKey3, testValue1, null, true, testPackage2);
         assertEquals(expectedMemUsage, settingsState.getMemoryUsage(TEST_PACKAGE));
-        final int expectedMemUsage2 = testKey3.length() + testValue1.length() * 2;
+        final int expectedMemUsage2 = (testKey3.length() + testValue1.length() * 2)
+                * Character.BYTES;
         assertEquals(expectedMemUsage2, settingsState.getMemoryUsage(testPackage2));
 
         // Test system package
