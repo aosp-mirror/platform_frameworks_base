@@ -25,20 +25,78 @@ import java.lang.annotation.RetentionPolicy;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
+import java.util.Locale;
 
+/**
+ * Logs human-readable events for debugging purposes.
+ */
 public class EventLogger {
 
-    // ring buffer of events to log.
+    /** Identifies the source of events. */
+    private final String mTag;
+
+    /** Stores the events using a ring buffer. */
     private final LinkedList<Event> mEvents;
 
-    private final String mTitle;
-
-    // the maximum number of events to keep in log
+    /**
+     * The maximum number of events to keep in {@code mEvents}.
+     *
+     * <p>Calling {@link #log} when the size of {@link #mEvents} matches the threshold will
+     * cause the oldest event to be evicted.
+     */
     private final int mMemSize;
 
-    public static abstract class Event {
-        // formatter for timestamps
-        private final static SimpleDateFormat sFormat = new SimpleDateFormat("MM-dd HH:mm:ss:SSS");
+    /**
+     * Constructor for logger.
+     * @param size the maximum number of events to keep in log
+     * @param tag the string displayed before the recorded log
+     */
+    public EventLogger(int size, String tag) {
+        mEvents = new LinkedList<Event>();
+        mMemSize = size;
+        mTag = tag;
+    }
+
+    public synchronized void log(Event evt) {
+        if (mEvents.size() >= mMemSize) {
+            mEvents.removeFirst();
+        }
+        mEvents.add(evt);
+    }
+
+    /**
+     * Add a string-based event to the log, and print it to logcat as info.
+     * @param msg the message for the logs
+     * @param tag the logcat tag to use
+     */
+    public synchronized void loglogi(String msg, String tag) {
+        final Event event = new StringEvent(msg);
+        log(event.printLog(tag));
+    }
+
+    /**
+     * Same as {@link #loglogi(String, String)} but specifying the logcat type
+     * @param msg the message for the logs
+     * @param logType the type of logcat entry
+     * @param tag the logcat tag to use
+     */
+    public synchronized void loglog(String msg, @Event.LogType int logType, String tag) {
+        final Event event = new StringEvent(msg);
+        log(event.printLog(logType, tag));
+    }
+
+    public synchronized void dump(PrintWriter pw) {
+        pw.println("Events log: " + mTag);
+        for (Event evt : mEvents) {
+            pw.println(evt.toString());
+        }
+    }
+
+    public abstract static class Event {
+
+        /** Timestamps formatter. */
+        private static final SimpleDateFormat sFormat =
+                new SimpleDateFormat("MM-dd HH:mm:ss:SSS", Locale.US);
 
         private final long mTimestamp;
 
@@ -114,7 +172,7 @@ public class EventLogger {
          * Timestamp information will be automatically added, do not include it.
          * @return a string representation of the event that occurred.
          */
-        abstract public String eventToString();
+        public abstract String eventToString();
     }
 
     public static class StringEvent extends Event {
@@ -127,52 +185,6 @@ public class EventLogger {
         @Override
         public String eventToString() {
             return mMsg;
-        }
-    }
-
-    /**
-     * Constructor for logger.
-     * @param size the maximum number of events to keep in log
-     * @param title the string displayed before the recorded log
-     */
-    public EventLogger(int size, String title) {
-        mEvents = new LinkedList<Event>();
-        mMemSize = size;
-        mTitle = title;
-    }
-
-    public synchronized void log(Event evt) {
-        if (mEvents.size() >= mMemSize) {
-            mEvents.removeFirst();
-        }
-        mEvents.add(evt);
-    }
-
-    /**
-     * Add a string-based event to the log, and print it to logcat as info.
-     * @param msg the message for the logs
-     * @param tag the logcat tag to use
-     */
-    public synchronized void loglogi(String msg, String tag) {
-        final Event event = new StringEvent(msg);
-        log(event.printLog(tag));
-    }
-
-    /**
-     * Same as {@link #loglogi(String, String)} but specifying the logcat type
-     * @param msg the message for the logs
-     * @param logType the type of logcat entry
-     * @param tag the logcat tag to use
-     */
-    public synchronized void loglog(String msg, @Event.LogType int logType, String tag) {
-        final Event event = new StringEvent(msg);
-        log(event.printLog(logType, tag));
-    }
-
-    public synchronized void dump(PrintWriter pw) {
-        pw.println("Audio event log: " + mTitle);
-        for (Event evt : mEvents) {
-            pw.println(evt.toString());
         }
     }
 }

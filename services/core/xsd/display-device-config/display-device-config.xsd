@@ -383,6 +383,7 @@
     </xs:complexType>
 
     <xs:complexType name="autoBrightness">
+        <xs:attribute name="enabled" type="xs:boolean" use="optional" default="true"/>
         <xs:sequence>
             <!-- Sets the debounce for autoBrightness brightening in millis-->
             <xs:element name="brighteningLightDebounceMillis" type="xs:nonNegativeInteger"

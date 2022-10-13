@@ -543,7 +543,6 @@ public final class AutofillManager {
      *  {@link com.android.server.autofill.PresentationStatsEventLogger#getNoPresentationEventReason(int)}
      *  as well.</p>
      *
-     *  TODO(b/233833662): Expose this as a public API in U.
      *  @hide
      */
     @IntDef(prefix = { "COMMIT_REASON_" }, value = {

@@ -4485,6 +4485,17 @@ static jint android_media_tv_Tuner_configure_dvr(JNIEnv *env, jobject dvr, jobje
     return (jint)result;
 }
 
+static jint android_media_tv_Tuner_set_status_check_interval_hint(JNIEnv *env, jobject dvr,
+                                                                  jlong durationInMs) {
+    sp<DvrClient> dvrClient = getDvrClient(env, dvr);
+    if (dvrClient == nullptr) {
+        ALOGD("Failed to set status check interval hint: dvr client not found");
+        return (int)Result::NOT_INITIALIZED;
+    }
+    Result result = dvrClient->setStatusCheckIntervalHint(durationInMs);
+    return (jint)result;
+}
+
 static jint android_media_tv_Tuner_start_dvr(JNIEnv *env, jobject dvr) {
     sp<DvrClient> dvrClient = getDvrClient(env, dvr);
     if (dvrClient == nullptr) {
@@ -4828,6 +4839,8 @@ static const JNINativeMethod gDvrRecorderMethods[] = {
             (void *)android_media_tv_Tuner_detach_filter },
     { "nativeConfigureDvr", "(Landroid/media/tv/tuner/dvr/DvrSettings;)I",
             (void *)android_media_tv_Tuner_configure_dvr },
+    { "nativeSetStatusCheckIntervalHint", "(J)I",
+            (void *)android_media_tv_Tuner_set_status_check_interval_hint},
     { "nativeStartDvr", "()I", (void *)android_media_tv_Tuner_start_dvr },
     { "nativeStopDvr", "()I", (void *)android_media_tv_Tuner_stop_dvr },
     { "nativeFlushDvr", "()I", (void *)android_media_tv_Tuner_flush_dvr },
@@ -4844,6 +4857,8 @@ static const JNINativeMethod gDvrPlaybackMethods[] = {
             (void *)android_media_tv_Tuner_detach_filter},
     { "nativeConfigureDvr", "(Landroid/media/tv/tuner/dvr/DvrSettings;)I",
             (void *)android_media_tv_Tuner_configure_dvr},
+    { "nativeSetStatusCheckIntervalHint", "(J)I",
+            (void *)android_media_tv_Tuner_set_status_check_interval_hint},
     { "nativeStartDvr", "()I", (void *)android_media_tv_Tuner_start_dvr},
     { "nativeStopDvr", "()I", (void *)android_media_tv_Tuner_stop_dvr},
     { "nativeFlushDvr", "()I", (void *)android_media_tv_Tuner_flush_dvr},

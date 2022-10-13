@@ -250,8 +250,9 @@ public class ActivityManagerWrapper {
     public boolean startActivityFromRecents(int taskId, ActivityOptions options) {
         try {
             Bundle optsBundle = options == null ? null : options.toBundle();
-            getService().startActivityFromRecents(taskId, optsBundle);
-            return true;
+            return ActivityManager.isStartResultSuccessful(
+                    getService().startActivityFromRecents(
+                            taskId, optsBundle));
         } catch (Exception e) {
             return false;
         }

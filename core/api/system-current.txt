@@ -7132,6 +7132,7 @@ package android.media.tv.tuner {
     field public static final int TUNER_VERSION_1_0 = 65536; // 0x10000
     field public static final int TUNER_VERSION_1_1 = 65537; // 0x10001
     field public static final int TUNER_VERSION_2_0 = 131072; // 0x20000
+    field public static final int TUNER_VERSION_3_0 = 196608; // 0x30000
     field public static final int TUNER_VERSION_UNKNOWN = 0; // 0x0
   }
 
@@ -7149,6 +7150,7 @@ package android.media.tv.tuner.dvr {
     method public long read(@NonNull byte[], long, long);
     method public long seek(long);
     method public void setFileDescriptor(@NonNull android.os.ParcelFileDescriptor);
+    method public int setPlaybackBufferStatusCheckIntervalHint(long);
     method public int start();
     method public int stop();
     field public static final int PLAYBACK_STATUS_ALMOST_EMPTY = 2; // 0x2
@@ -7164,6 +7166,7 @@ package android.media.tv.tuner.dvr {
     method public int detachFilter(@NonNull android.media.tv.tuner.filter.Filter);
     method public int flush();
     method public void setFileDescriptor(@NonNull android.os.ParcelFileDescriptor);
+    method public int setRecordBufferStatusCheckIntervalHint(long);
     method public int start();
     method public int stop();
     method public long write(long);
@@ -11982,9 +11985,29 @@ package android.service.voice {
     method public int getStart();
   }
 
+  public final class HotwordAudioStream implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.media.AudioFormat getAudioFormat();
+    method @NonNull public android.os.ParcelFileDescriptor getAudioStream();
+    method @NonNull public android.os.PersistableBundle getMetadata();
+    method @Nullable public android.media.AudioTimestamp getTimestamp();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.voice.HotwordAudioStream> CREATOR;
+  }
+
+  public static final class HotwordAudioStream.Builder {
+    ctor public HotwordAudioStream.Builder(@NonNull android.media.AudioFormat, @NonNull android.os.ParcelFileDescriptor);
+    method @NonNull public android.service.voice.HotwordAudioStream build();
+    method @NonNull public android.service.voice.HotwordAudioStream.Builder setAudioFormat(@NonNull android.media.AudioFormat);
+    method @NonNull public android.service.voice.HotwordAudioStream.Builder setAudioStream(@NonNull android.os.ParcelFileDescriptor);
+    method @NonNull public android.service.voice.HotwordAudioStream.Builder setMetadata(@NonNull android.os.PersistableBundle);
+    method @NonNull public android.service.voice.HotwordAudioStream.Builder setTimestamp(@NonNull android.media.AudioTimestamp);
+  }
+
   public final class HotwordDetectedResult implements android.os.Parcelable {
     method public int describeContents();
     method public int getAudioChannel();
+    method @NonNull public java.util.List<android.service.voice.HotwordAudioStream> getAudioStreams();
     method public int getConfidenceLevel();
     method @NonNull public android.os.PersistableBundle getExtras();
     method public int getHotwordDurationMillis();
@@ -12014,6 +12037,7 @@ package android.service.voice {
     ctor public HotwordDetectedResult.Builder();
     method @NonNull public android.service.voice.HotwordDetectedResult build();
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setAudioChannel(int);
+    method @NonNull public android.service.voice.HotwordDetectedResult.Builder setAudioStreams(@NonNull java.util.List<android.service.voice.HotwordAudioStream>);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setConfidenceLevel(int);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setExtras(@NonNull android.os.PersistableBundle);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setHotwordDetectionPersonalized(boolean);

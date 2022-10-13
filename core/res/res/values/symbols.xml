@@ -1626,6 +1626,7 @@
   <java-symbol type="xml" name="password_kbd_symbols_shift" />
   <java-symbol type="xml" name="power_profile" />
   <java-symbol type="xml" name="power_profile_test" />
+  <java-symbol type="xml" name="irq_device_map" />
   <java-symbol type="xml" name="sms_short_codes" />
   <java-symbol type="xml" name="audio_assets" />
   <java-symbol type="xml" name="global_keys" />
@@ -2238,6 +2239,9 @@
   <java-symbol type="array" name="config_supportedDreamComplications" />
   <java-symbol type="array" name="config_disabledDreamComponents" />
   <java-symbol type="bool" name="config_dismissDreamOnActivityStart" />
+  <java-symbol type="integer" name="config_dreamOverlayReconnectTimeoutMs" />
+  <java-symbol type="integer" name="config_dreamOverlayMaxReconnectAttempts" />
+  <java-symbol type="integer" name="config_minDreamOverlayDurationMs" />
   <java-symbol type="string" name="config_loggable_dream_prefix" />
   <java-symbol type="string" name="config_dozeComponent" />
   <java-symbol type="string" name="enable_explore_by_touch_warning_title" />

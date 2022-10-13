@@ -75,15 +75,34 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
     }
 
     @Test
-    public void testLskfBasedProtector() throws RemoteException {
+    public void testNoneLskfBasedProtector() throws RemoteException {
+        final int USER_ID = 10;
+        MockSyntheticPasswordManager manager = new MockSyntheticPasswordManager(mContext, mStorage,
+                mGateKeeperService, mUserManager, mPasswordSlotManager);
+        SyntheticPassword sp = manager.newSyntheticPassword(USER_ID);
+        assertFalse(lskfGatekeeperHandleExists(USER_ID));
+        long protectorId = manager.createLskfBasedProtector(mGateKeeperService,
+                LockscreenCredential.createNone(), sp, USER_ID);
+        assertFalse(lskfGatekeeperHandleExists(USER_ID));
+
+        AuthenticationResult result = manager.unlockLskfBasedProtector(mGateKeeperService,
+                protectorId, LockscreenCredential.createNone(), USER_ID, null);
+        assertArrayEquals(result.syntheticPassword.deriveKeyStorePassword(),
+                sp.deriveKeyStorePassword());
+    }
+
+    @Test
+    public void testNonNoneLskfBasedProtector() throws RemoteException {
         final int USER_ID = 10;
         final LockscreenCredential password = newPassword("user-password");
         final LockscreenCredential badPassword = newPassword("bad-password");
         MockSyntheticPasswordManager manager = new MockSyntheticPasswordManager(mContext, mStorage,
                 mGateKeeperService, mUserManager, mPasswordSlotManager);
         SyntheticPassword sp = manager.newSyntheticPassword(USER_ID);
+        assertFalse(lskfGatekeeperHandleExists(USER_ID));
         long protectorId = manager.createLskfBasedProtector(mGateKeeperService, password, sp,
                 USER_ID);
+        assertTrue(lskfGatekeeperHandleExists(USER_ID));
 
         AuthenticationResult result = manager.unlockLskfBasedProtector(mGateKeeperService,
                 protectorId, password, USER_ID, null);
@@ -93,6 +112,10 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         result = manager.unlockLskfBasedProtector(mGateKeeperService, protectorId, badPassword,
                 USER_ID, null);
         assertNull(result.syntheticPassword);
+    }
+
+    private boolean lskfGatekeeperHandleExists(int userId) throws RemoteException {
+        return mGateKeeperService.getSecureUserId(SyntheticPasswordManager.fakeUserId(userId)) != 0;
     }
 
     private boolean hasSyntheticPassword(int userId) throws RemoteException {
@@ -427,6 +450,21 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         mService.setLockCredential(profilePassword, nonePassword(), MANAGED_PROFILE_USER_ID);
         assertNotNull(
                 mService.getHashFactor(profilePassword, MANAGED_PROFILE_USER_ID));
+    }
+
+    @Test
+    public void testPasswordData_scryptParams() {
+        // CREDENTIAL_TYPE_NONE should result in the minimum scrypt params being used.
+        PasswordData data = PasswordData.create(CREDENTIAL_TYPE_NONE);
+        assertEquals(1, data.scryptLogN);
+        assertEquals(0, data.scryptLogR);
+        assertEquals(0, data.scryptLogP);
+
+        // Any other credential type should result in the real scrypt params being used.
+        data = PasswordData.create(CREDENTIAL_TYPE_PASSWORD);
+        assertTrue(data.scryptLogN > 1);
+        assertTrue(data.scryptLogR > 0);
+        assertTrue(data.scryptLogP > 0);
     }
 
     @Test

@@ -2333,7 +2333,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      */
     public void requestFaceAuth(boolean userInitiatedRequest,
             @FaceAuthApiRequestReason String reason) {
-        mLogger.logFaceAuthRequested(userInitiatedRequest);
+        mLogger.logFaceAuthRequested(userInitiatedRequest, reason);
         updateFaceListeningState(BIOMETRIC_ACTION_START, apiRequestReasonToUiEvent(reason));
     }
 
@@ -3164,14 +3164,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      * Whether the keyguard is showing and not occluded.
      */
     public boolean isKeyguardVisible() {
-        return isKeyguardShowing() && !mKeyguardOccluded;
-    }
-
-    /**
-     * Whether the keyguard is showing. It may still be occluded and not visible.
-     */
-    public boolean isKeyguardShowing() {
-        return mKeyguardShowing;
+        return mKeyguardShowing && !mKeyguardOccluded;
     }
 
     /**

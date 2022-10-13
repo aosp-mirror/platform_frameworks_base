@@ -49,7 +49,6 @@ import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
 import com.android.systemui.util.view.ViewUtil
 import com.google.common.truth.Truth.assertThat
-import dagger.Lazy
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -84,11 +83,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
     @Mock
     private lateinit var commandQueue: CommandQueue
     @Mock
-    private lateinit var lazyFalsingManager: Lazy<FalsingManager>
-    @Mock
     private lateinit var falsingManager: FalsingManager
-    @Mock
-    private lateinit var lazyFalsingCollector: Lazy<FalsingCollector>
     @Mock
     private lateinit var falsingCollector: FalsingCollector
     @Mock
@@ -119,8 +114,6 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         senderUiEventLogger = MediaTttSenderUiEventLogger(uiEventLoggerFake)
 
         whenever(accessibilityManager.getRecommendedTimeoutMillis(any(), any())).thenReturn(TIMEOUT)
-        whenever(lazyFalsingManager.get()).thenReturn(falsingManager)
-        whenever(lazyFalsingCollector.get()).thenReturn(falsingCollector)
 
         controllerSender = TestMediaTttChipControllerSender(
             commandQueue,
@@ -132,10 +125,11 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
             configurationController,
             powerManager,
             senderUiEventLogger,
-            lazyFalsingManager,
-            lazyFalsingCollector,
+            falsingManager,
+            falsingCollector,
             viewUtil,
         )
+        controllerSender.start()
 
         val callbackCaptor = ArgumentCaptor.forClass(CommandQueue.Callbacks::class.java)
         verify(commandQueue).addCallback(callbackCaptor.capture())
@@ -441,7 +435,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
 
     @Test
     fun transferToReceiverSucceeded_withUndoRunnable_falseTap_callbackNotRun() {
-        whenever(lazyFalsingManager.get().isFalseTap(anyInt())).thenReturn(true)
+        whenever(falsingManager.isFalseTap(anyInt())).thenReturn(true)
         var undoCallbackCalled = false
         val undoCallback = object : IUndoMediaTransferCallback.Stub() {
             override fun onUndoTriggered() {
@@ -457,7 +451,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
 
     @Test
     fun transferToReceiverSucceeded_withUndoRunnable_realTap_callbackRun() {
-        whenever(lazyFalsingManager.get().isFalseTap(anyInt())).thenReturn(false)
+        whenever(falsingManager.isFalseTap(anyInt())).thenReturn(false)
         var undoCallbackCalled = false
         val undoCallback = object : IUndoMediaTransferCallback.Stub() {
             override fun onUndoTriggered() {
@@ -839,8 +833,8 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         configurationController: ConfigurationController,
         powerManager: PowerManager,
         uiEventLogger: MediaTttSenderUiEventLogger,
-        falsingManager: Lazy<FalsingManager>,
-        falsingCollector: Lazy<FalsingCollector>,
+        falsingManager: FalsingManager,
+        falsingCollector: FalsingCollector,
         viewUtil: ViewUtil,
     ) : MediaTttChipControllerSender(
         commandQueue,

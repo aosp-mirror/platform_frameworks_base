@@ -17,10 +17,14 @@
 package android.credentials.ui;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.android.internal.util.AnnotationValidations;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Holds metadata and credential entries for a single provider.
@@ -36,13 +40,24 @@ public class ProviderData implements Parcelable {
     public static final String EXTRA_PROVIDER_DATA_LIST =
             "android.credentials.ui.extra.PROVIDER_DATA_LIST";
 
-    // TODO: add entry data.
-
     @NonNull
     private final String mPackageName;
+    @NonNull
+    private final List<Entry> mCredentialEntries;
+    @NonNull
+    private final List<Entry> mActionChips;
+    @Nullable
+    private final Entry mAuthenticationEntry;
 
-    public ProviderData(@NonNull String packageName) {
+    public ProviderData(
+            @NonNull String packageName,
+            @NonNull List<Entry> credentialEntries,
+            @NonNull List<Entry> actionChips,
+            @Nullable Entry authenticationEntry) {
         mPackageName = packageName;
+        mCredentialEntries = credentialEntries;
+        mActionChips = actionChips;
+        mAuthenticationEntry = authenticationEntry;
     }
 
     /** Returns the provider package name. */
@@ -51,15 +66,46 @@ public class ProviderData implements Parcelable {
         return mPackageName;
     }
 
+    @NonNull
+    public List<Entry> getCredentialEntries() {
+        return mCredentialEntries;
+    }
+
+    @NonNull
+    public List<Entry> getActionChips() {
+        return mActionChips;
+    }
+
+    @Nullable
+    public Entry getAuthenticationEntry() {
+        return mAuthenticationEntry;
+    }
+
     protected ProviderData(@NonNull Parcel in) {
         String packageName = in.readString8();
         mPackageName = packageName;
         AnnotationValidations.validate(NonNull.class, null, mPackageName);
+
+        List<Entry> credentialEntries = new ArrayList<>();
+        in.readTypedList(credentialEntries, Entry.CREATOR);
+        mCredentialEntries = credentialEntries;
+        AnnotationValidations.validate(NonNull.class, null, mCredentialEntries);
+
+        List<Entry> actionChips  = new ArrayList<>();
+        in.readTypedList(actionChips, Entry.CREATOR);
+        mActionChips = actionChips;
+        AnnotationValidations.validate(NonNull.class, null, mActionChips);
+
+        Entry authenticationEntry = in.readTypedObject(Entry.CREATOR);
+        mAuthenticationEntry = authenticationEntry;
     }
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString8(mPackageName);
+        dest.writeTypedList(mCredentialEntries);
+        dest.writeTypedList(mActionChips);
+        dest.writeTypedObject(mAuthenticationEntry, flags);
     }
 
     @Override

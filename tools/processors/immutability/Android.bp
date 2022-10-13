@@ -67,6 +67,7 @@ java_test_host {
         "--add-exports jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED",
         "--add-exports jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED",
     ],
+    test_config_template: "AndroidTestTemplate.xml",
 }
 
 filegroup {

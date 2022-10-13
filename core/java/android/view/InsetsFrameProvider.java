@@ -59,6 +59,7 @@ public class InsetsFrameProvider implements Parcelable {
     private static final int HAS_INSETS_SIZE_OVERRIDE = 2;
 
     private static Rect sTmpRect = new Rect();
+    private static Rect sTmpRect2 = new Rect();
 
     /**
      * The type of insets to provide.
@@ -87,6 +88,18 @@ public class InsetsFrameProvider implements Parcelable {
      * element of some types, the insets reported to the window with that types will be overridden.
      */
     public InsetsSizeOverride[] insetsSizeOverrides = null;
+
+    /**
+     * This field, if set, is indicating the insets needs to be at least the given size inside the
+     * display cutout safe area. This will be compared to the insets size calculated based on other
+     * attributes, and will be applied when this is larger. This is independent of the
+     * PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT in LayoutParams, as this is not going to change
+     * the layout of the window, but only change the insets frame. This can be applied to insets
+     * calculated based on all three source frames.
+     *
+     * Be cautious, this will not be in effect for the window types whose insets size is overridden.
+     */
+    public Insets minimalInsetsSizeInDisplayCutoutSafe = null;
 
     public InsetsFrameProvider(int type) {
         this(type, SOURCE_FRAME, null, null);
@@ -202,7 +215,8 @@ public class InsetsFrameProvider implements Parcelable {
 
     public static void calculateInsetsFrame(Rect displayFrame, Rect containerBounds,
             Rect displayCutoutSafe, Rect inOutFrame, int source, Insets insetsSize,
-            @WindowManager.LayoutParams.PrivateFlags int privateFlags) {
+            @WindowManager.LayoutParams.PrivateFlags int privateFlags,
+            Insets displayCutoutSafeInsetsSize) {
         boolean extendByCutout = false;
         if (source == InsetsFrameProvider.SOURCE_DISPLAY) {
             inOutFrame.set(displayFrame);
@@ -214,6 +228,33 @@ public class InsetsFrameProvider implements Parcelable {
         if (insetsSize == null) {
             return;
         }
+        if (displayCutoutSafeInsetsSize != null) {
+            sTmpRect2.set(inOutFrame);
+        }
+        calculateInsetsFrame(inOutFrame, insetsSize);
+
+        if (extendByCutout) {
+            WindowLayout.extendFrameByCutout(displayCutoutSafe, displayFrame, inOutFrame, sTmpRect);
+        }
+
+        if (displayCutoutSafeInsetsSize != null) {
+            // The insets is at least with the given size within the display cutout safe area.
+            // Calculate the smallest size.
+            calculateInsetsFrame(sTmpRect2, displayCutoutSafeInsetsSize);
+            WindowLayout.extendFrameByCutout(displayCutoutSafe, displayFrame, sTmpRect2, sTmpRect);
+            // If it's larger than previous calculation, use it.
+            if (sTmpRect2.contains(inOutFrame)) {
+                inOutFrame.set(sTmpRect2);
+            }
+        }
+    }
+
+    /**
+     * Calculate the insets frame given the insets size and the source frame.
+     * @param inOutFrame the source frame.
+     * @param insetsSize the insets size. Only the first non-zero value will be taken.
+     */
+    private static void calculateInsetsFrame(Rect inOutFrame, Insets insetsSize) {
         // Only one side of the provider shall be applied. Check in the order of left - top -
         // right - bottom, only the first non-zero value will be applied.
         if (insetsSize.left != 0) {
@@ -226,10 +267,6 @@ public class InsetsFrameProvider implements Parcelable {
             inOutFrame.top = inOutFrame.bottom - insetsSize.bottom;
         } else {
             inOutFrame.setEmpty();
-        }
-
-        if (extendByCutout) {
-            WindowLayout.extendFrameByCutout(displayCutoutSafe, displayFrame, inOutFrame, sTmpRect);
         }
     }
 

@@ -145,7 +145,7 @@ public final class CompanionDeviceManager {
      *     <li>for WiFi - {@link android.net.wifi.ScanResult}</li>
      * </ul>
      *
-     * @deprecated use {@link #EXTRA_ASSOCIATION} instead.
+     * @deprecated use {@link AssociationInfo#getAssociatedDevice()} instead.
      */
     @Deprecated
     public static final String EXTRA_DEVICE = "android.companion.extra.DEVICE";
