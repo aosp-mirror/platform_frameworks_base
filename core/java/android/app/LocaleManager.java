@@ -127,6 +127,7 @@ public class LocaleManager {
      * <p>This API can be used by an app's installer
      * (per {@link android.content.pm.InstallSourceInfo#getInstallingPackageName}) to retrieve
      * the app's locales.
+     * <p>This API can be used by the current input method to retrieve locales of another packages.
      * All other cases require {@code android.Manifest.permission#READ_APP_SPECIFIC_LOCALES}.
      * Apps should generally retrieve their own locales via their in-process LocaleLists,
      * or by calling {@link #getApplicationLocales()}.

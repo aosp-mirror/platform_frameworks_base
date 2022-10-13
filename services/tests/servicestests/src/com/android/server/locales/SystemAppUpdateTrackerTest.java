@@ -47,6 +47,8 @@ import android.util.AtomicFile;
 import android.util.TypedXmlPullParser;
 import android.util.Xml;
 
+import androidx.test.InstrumentationRegistry;
+
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.util.XmlUtils;
 import com.android.server.wm.ActivityTaskManagerInternal;
@@ -124,6 +126,8 @@ public class SystemAppUpdateTrackerTest {
         doReturn(DEFAULT_INSTALL_SOURCE_INFO).when(mMockPackageManager)
                 .getInstallSourceInfo(anyString());
         doReturn(mMockPackageManager).when(mMockContext).getPackageManager();
+        doReturn(InstrumentationRegistry.getContext().getContentResolver())
+                .when(mMockContext).getContentResolver();
 
         mStoragefile = new AtomicFile(new File(
                 Environment.getExternalStorageDirectory(), "systemUpdateUnitTests.xml"));
