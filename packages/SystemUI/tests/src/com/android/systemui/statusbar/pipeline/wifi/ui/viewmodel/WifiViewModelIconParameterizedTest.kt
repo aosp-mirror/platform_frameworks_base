@@ -23,9 +23,9 @@ import com.android.settingslib.AccessibilityContentDescriptions.WIFI_CONNECTION_
 import com.android.settingslib.AccessibilityContentDescriptions.WIFI_NO_CONNECTION
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.ContentDescription
-import com.android.systemui.statusbar.connectivity.WifiIcons
 import com.android.systemui.statusbar.connectivity.WifiIcons.WIFI_FULL_ICONS
 import com.android.systemui.statusbar.connectivity.WifiIcons.WIFI_NO_INTERNET_ICONS
+import com.android.systemui.statusbar.connectivity.WifiIcons.WIFI_NO_NETWORK
 import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
@@ -144,7 +144,12 @@ internal class WifiViewModelIconParameterizedTest(private val testCase: TestCase
 
         /** A function that, given a context, calculates the correct content description string. */
         val contentDescription: (Context) -> String,
-    )
+
+        /** A human-readable description used for the test names. */
+        val description: String,
+    ) {
+        override fun toString() = description
+    }
 
     // Note: We use default values for the boolean parameters to reflect a "typical configuration"
     //   for wifi. This allows each TestCase to only define the parameter values that are critical
@@ -158,12 +163,21 @@ internal class WifiViewModelIconParameterizedTest(private val testCase: TestCase
 
         /** The expected output. Null if we expect the output to be null. */
         val expected: Expected?
-    )
+    ) {
+        override fun toString(): String {
+            return "when INPUT(enabled=$enabled, " +
+                "forceHidden=$forceHidden, " +
+                "showWhenEnabled=$alwaysShowIconWhenEnabled, " +
+                "hasDataCaps=$hasDataCapabilities, " +
+                "network=$network) then " +
+                "EXPECTED($expected)"
+        }
+    }
 
     companion object {
-        @Parameters(name = "{0}")
-        @JvmStatic
-        fun data(): Collection<TestCase> =
+        @Parameters(name = "{0}") @JvmStatic fun data(): Collection<TestCase> = testData
+
+        private val testData: List<TestCase> =
             listOf(
                 // Enabled = false => no networks shown
                 TestCase(
@@ -215,11 +229,12 @@ internal class WifiViewModelIconParameterizedTest(private val testCase: TestCase
                     network = WifiNetworkModel.Inactive,
                     expected =
                         Expected(
-                            iconResource = WifiIcons.WIFI_NO_NETWORK,
+                            iconResource = WIFI_NO_NETWORK,
                             contentDescription = { context ->
                                 "${context.getString(WIFI_NO_CONNECTION)}," +
                                     context.getString(NO_INTERNET)
-                            }
+                            },
+                            description = "No network icon",
                         ),
                 ),
                 TestCase(
@@ -231,7 +246,8 @@ internal class WifiViewModelIconParameterizedTest(private val testCase: TestCase
                             contentDescription = { context ->
                                 "${context.getString(WIFI_CONNECTION_STRENGTH[4])}," +
                                     context.getString(NO_INTERNET)
-                            }
+                            },
+                            description = "No internet level 4 icon",
                         ),
                 ),
                 TestCase(
@@ -242,7 +258,8 @@ internal class WifiViewModelIconParameterizedTest(private val testCase: TestCase
                             iconResource = WIFI_FULL_ICONS[2],
                             contentDescription = { context ->
                                 context.getString(WIFI_CONNECTION_STRENGTH[2])
-                            }
+                            },
+                            description = "Full internet level 2 icon",
                         ),
                 ),
 
@@ -252,11 +269,12 @@ internal class WifiViewModelIconParameterizedTest(private val testCase: TestCase
                     network = WifiNetworkModel.Inactive,
                     expected =
                         Expected(
-                            iconResource = WifiIcons.WIFI_NO_NETWORK,
+                            iconResource = WIFI_NO_NETWORK,
                             contentDescription = { context ->
                                 "${context.getString(WIFI_NO_CONNECTION)}," +
                                     context.getString(NO_INTERNET)
-                            }
+                            },
+                            description = "No network icon",
                         ),
                 ),
                 TestCase(
@@ -268,7 +286,8 @@ internal class WifiViewModelIconParameterizedTest(private val testCase: TestCase
                             contentDescription = { context ->
                                 "${context.getString(WIFI_CONNECTION_STRENGTH[2])}," +
                                     context.getString(NO_INTERNET)
-                            }
+                            },
+                            description = "No internet level 2 icon",
                         ),
                 ),
                 TestCase(
@@ -279,7 +298,8 @@ internal class WifiViewModelIconParameterizedTest(private val testCase: TestCase
                             iconResource = WIFI_FULL_ICONS[0],
                             contentDescription = { context ->
                                 context.getString(WIFI_CONNECTION_STRENGTH[0])
-                            }
+                            },
+                            description = "Full internet level 0 icon",
                         ),
                 ),
 
@@ -309,7 +329,8 @@ internal class WifiViewModelIconParameterizedTest(private val testCase: TestCase
                             iconResource = WIFI_FULL_ICONS[4],
                             contentDescription = { context ->
                                 context.getString(WIFI_CONNECTION_STRENGTH[4])
-                            }
+                            },
+                            description = "Full internet level 4 icon",
                         ),
                 ),
 

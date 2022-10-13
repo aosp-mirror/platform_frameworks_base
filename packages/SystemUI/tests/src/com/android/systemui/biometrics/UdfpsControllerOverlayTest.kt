@@ -17,13 +17,23 @@
 package com.android.systemui.biometrics
 
 import android.graphics.Rect
-import android.hardware.biometrics.BiometricOverlayConstants.*
+import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_BP
+import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_KEYGUARD
+import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_OTHER
+import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_SETTINGS
+import android.hardware.biometrics.BiometricOverlayConstants.REASON_ENROLL_ENROLLING
+import android.hardware.biometrics.BiometricOverlayConstants.REASON_ENROLL_FIND_SENSOR
+import android.hardware.biometrics.BiometricOverlayConstants.ShowReason
 import android.hardware.fingerprint.FingerprintManager
 import android.hardware.fingerprint.IUdfpsOverlayControllerCallback
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
-import android.view.*
+import android.view.LayoutInflater
+import android.view.MotionEvent
+import android.view.Surface
 import android.view.Surface.Rotation
+import android.view.View
+import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardUpdateMonitor
@@ -32,11 +42,11 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.shade.ShadeExpansionStateManager
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.phone.SystemUIDialogManager
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController
-import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.time.SystemClock
@@ -52,8 +62,8 @@ import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
-import org.mockito.junit.MockitoJUnit
 import org.mockito.Mockito.`when` as whenever
+import org.mockito.junit.MockitoJUnit
 
 private const val REQUEST_ID = 2L
 
@@ -75,7 +85,7 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
     @Mock private lateinit var windowManager: WindowManager
     @Mock private lateinit var accessibilityManager: AccessibilityManager
     @Mock private lateinit var statusBarStateController: StatusBarStateController
-    @Mock private lateinit var panelExpansionStateManager: PanelExpansionStateManager
+    @Mock private lateinit var shadeExpansionStateManager: ShadeExpansionStateManager
     @Mock private lateinit var statusBarKeyguardViewManager: StatusBarKeyguardViewManager
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
     @Mock private lateinit var dialogManager: SystemUIDialogManager
@@ -117,7 +127,7 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
     private fun withReason(@ShowReason reason: Int, block: () -> Unit) {
         controllerOverlay = UdfpsControllerOverlay(
             context, fingerprintManager, inflater, windowManager, accessibilityManager,
-            statusBarStateController, panelExpansionStateManager, statusBarKeyguardViewManager,
+            statusBarStateController, shadeExpansionStateManager, statusBarKeyguardViewManager,
             keyguardUpdateMonitor, dialogManager, dumpManager, transitionController,
             configurationController, systemClock, keyguardStateController,
             unlockedScreenOffAnimationController, udfpsDisplayMode, REQUEST_ID, reason,

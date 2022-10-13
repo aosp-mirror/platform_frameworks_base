@@ -21,7 +21,9 @@ import androidx.annotation.VisibleForTesting
 /** Provides information about the current wifi network. */
 sealed class WifiNetworkModel {
     /** A model representing that we have no active wifi network. */
-    object Inactive : WifiNetworkModel()
+    object Inactive : WifiNetworkModel() {
+        override fun toString() = "WifiNetwork.Inactive"
+    }
 
     /**
      * A model representing that our wifi network is actually a carrier merged network, meaning it's
@@ -29,7 +31,9 @@ sealed class WifiNetworkModel {
      *
      * See [android.net.wifi.WifiInfo.isCarrierMerged] for more information.
      */
-    object CarrierMerged : WifiNetworkModel()
+    object CarrierMerged : WifiNetworkModel() {
+        override fun toString() = "WifiNetwork.CarrierMerged"
+    }
 
     /** Provides information about an active wifi network. */
     data class Active(
@@ -70,6 +74,24 @@ sealed class WifiNetworkModel {
             require(level == null || level in MIN_VALID_LEVEL..MAX_VALID_LEVEL) {
                 "0 <= wifi level <= 4 required; level was $level"
             }
+        }
+
+        override fun toString(): String {
+            // Only include the passpoint-related values in the string if we have them. (Most
+            // networks won't have them so they'll be mostly clutter.)
+            val passpointString =
+                if (isPasspointAccessPoint ||
+                    isOnlineSignUpForPasspointAccessPoint ||
+                    passpointProviderFriendlyName != null) {
+                    ", isPasspointAp=$isPasspointAccessPoint, " +
+                        "isOnlineSignUpForPasspointAp=$isOnlineSignUpForPasspointAccessPoint, " +
+                        "passpointName=$passpointProviderFriendlyName"
+            } else {
+                ""
+            }
+
+            return "WifiNetworkModel.Active(networkId=$networkId, isValidated=$isValidated, " +
+                "level=$level, ssid=$ssid$passpointString)"
         }
 
         companion object {

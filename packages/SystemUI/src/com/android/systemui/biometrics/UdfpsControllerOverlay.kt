@@ -43,11 +43,11 @@ import com.android.systemui.R
 import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.shade.ShadeExpansionStateManager
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.phone.SystemUIDialogManager
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController
-import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.time.SystemClock
@@ -67,7 +67,7 @@ class UdfpsControllerOverlay(
     private val windowManager: WindowManager,
     private val accessibilityManager: AccessibilityManager,
     private val statusBarStateController: StatusBarStateController,
-    private val panelExpansionStateManager: PanelExpansionStateManager,
+    private val shadeExpansionStateManager: ShadeExpansionStateManager,
     private val statusBarKeyguardViewManager: StatusBarKeyguardViewManager,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     private val dialogManager: SystemUIDialogManager,
@@ -192,7 +192,7 @@ class UdfpsControllerOverlay(
                     },
                     enrollHelper ?: throw IllegalStateException("no enrollment helper"),
                     statusBarStateController,
-                    panelExpansionStateManager,
+                    shadeExpansionStateManager,
                     dialogManager,
                     dumpManager,
                     overlayParams.scaleFactor
@@ -202,7 +202,7 @@ class UdfpsControllerOverlay(
                 UdfpsKeyguardViewController(
                     view.addUdfpsView(R.layout.udfps_keyguard_view),
                     statusBarStateController,
-                    panelExpansionStateManager,
+                    shadeExpansionStateManager,
                     statusBarKeyguardViewManager,
                     keyguardUpdateMonitor,
                     dumpManager,
@@ -221,7 +221,7 @@ class UdfpsControllerOverlay(
                 UdfpsBpViewController(
                     view.addUdfpsView(R.layout.udfps_bp_view),
                     statusBarStateController,
-                    panelExpansionStateManager,
+                    shadeExpansionStateManager,
                     dialogManager,
                     dumpManager
                 )
@@ -231,7 +231,7 @@ class UdfpsControllerOverlay(
                 UdfpsFpmOtherViewController(
                     view.addUdfpsView(R.layout.udfps_fpm_other_view),
                     statusBarStateController,
-                    panelExpansionStateManager,
+                    shadeExpansionStateManager,
                     dialogManager,
                     dumpManager
                 )

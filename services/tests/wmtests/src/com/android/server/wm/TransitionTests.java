@@ -1322,6 +1322,35 @@ public class TransitionTests extends WindowTestsBase {
     }
 
     @Test
+    public void testReparentChangeLastParent() {
+        final Transition transition = createTestTransition(TRANSIT_CHANGE);
+        final ArrayMap<WindowContainer, Transition.ChangeInfo> changes = transition.mChanges;
+        final ArraySet<WindowContainer> participants = transition.mParticipants;
+
+        // Reparent activity in transition.
+        final Task lastParent = createTask(mDisplayContent);
+        final Task newParent = createTask(mDisplayContent);
+        final ActivityRecord activity = createActivityRecord(lastParent);
+        activity.mVisibleRequested = true;
+        // Skip manipulate the SurfaceControl.
+        doNothing().when(activity).setDropInputMode(anyInt());
+        changes.put(activity, new Transition.ChangeInfo(activity));
+        activity.reparent(newParent, POSITION_TOP);
+        activity.mVisibleRequested = false;
+
+        participants.add(activity);
+        final ArrayList<WindowContainer> targets = Transition.calculateTargets(
+                participants, changes);
+        final TransitionInfo info = Transition.calculateTransitionInfo(
+                transition.mType, 0 /* flags */, targets, changes, mMockT);
+
+        // Change contains last parent info.
+        assertEquals(1, info.getChanges().size());
+        assertEquals(lastParent.mRemoteToken.toWindowContainerToken(),
+                info.getChanges().get(0).getLastParent());
+    }
+
+    @Test
     public void testIncludeEmbeddedActivityReparent() {
         final Transition transition = createTestTransition(TRANSIT_OPEN);
         final Task task = createTask(mDisplayContent);
