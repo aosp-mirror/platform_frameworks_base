@@ -41,7 +41,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.List;
-import java.util.concurrent.CancellationException;
 
 @Presubmit
 @RunWith(AndroidJUnit4.class)
