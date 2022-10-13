@@ -28,7 +28,6 @@ import static com.android.internal.util.CollectionUtils.any;
 import static com.android.internal.util.Preconditions.checkState;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 import static com.android.server.companion.AssociationStore.CHANGE_TYPE_UPDATED_ADDRESS_UNCHANGED;
-import static com.android.server.companion.MetricUtils.logCreateAssociation;
 import static com.android.server.companion.MetricUtils.logRemoveAssociation;
 import static com.android.server.companion.PackageUtils.enforceUsesCompanionDeviceFeature;
 import static com.android.server.companion.PackageUtils.getPackageInfo;
@@ -38,7 +37,6 @@ import static com.android.server.companion.PermissionsUtils.enforceCallerCanMana
 import static com.android.server.companion.PermissionsUtils.enforceCallerIsSystemOr;
 import static com.android.server.companion.PermissionsUtils.enforceCallerIsSystemOrCanInteractWithUserId;
 import static com.android.server.companion.PermissionsUtils.sanitizeWithCallerChecks;
-import static com.android.server.companion.RolesUtils.addRoleHolderForAssociation;
 import static com.android.server.companion.RolesUtils.removeRoleHolderForAssociation;
 
 import static java.util.Objects.requireNonNull;
@@ -55,7 +53,6 @@ import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.companion.AssociatedDevice;
 import android.companion.AssociationInfo;
 import android.companion.AssociationRequest;
 import android.companion.DeviceNotAssociatedException;
@@ -819,7 +816,8 @@ public class CompanionDeviceManagerService extends SystemService {
             getContext().enforceCallingOrSelfPermission(
                     android.Manifest.permission.ASSOCIATE_COMPANION_DEVICES, "createAssociation");
 
-            legacyCreateAssociation(userId, macAddress, packageName, null);
+            final MacAddress macAddressObj = MacAddress.fromString(macAddress);
+            createNewAssociation(userId, packageName, macAddressObj, null, null, false);
         }
 
         private void checkCanCallNotificationApi(String callingPackage) {
@@ -871,45 +869,12 @@ public class CompanionDeviceManagerService extends SystemService {
         }
     }
 
-    /**
-     * @deprecated use
-     * {@link #createAssociation(int, String, MacAddress, CharSequence, String, AssociatedDevice,
-     * boolean)}
-     */
-    @Deprecated
-    void legacyCreateAssociation(@UserIdInt int userId, @NonNull String deviceMacAddress,
-            @NonNull String packageName, @Nullable String deviceProfile) {
-        final MacAddress macAddress = MacAddress.fromString(deviceMacAddress);
-        createAssociation(userId, packageName, macAddress, null, deviceProfile, null, false);
-    }
-
-    AssociationInfo createAssociation(@UserIdInt int userId, @NonNull String packageName,
+    void createNewAssociation(@UserIdInt int userId, @NonNull String packageName,
             @Nullable MacAddress macAddress, @Nullable CharSequence displayName,
-            @Nullable String deviceProfile, @Nullable AssociatedDevice associatedDevice,
-            boolean selfManaged) {
-        final int id = getNewAssociationIdForPackage(userId, packageName);
-        final long timestamp = System.currentTimeMillis();
-
-        final AssociationInfo association = new AssociationInfo(id, userId, packageName,
-                macAddress, displayName, deviceProfile, associatedDevice, selfManaged,
-                /* notifyOnDeviceNearby */ false, /* revoked */ false, timestamp, Long.MAX_VALUE);
-        Slog.i(TAG, "New CDM association created=" + association);
-        mAssociationStore.addAssociation(association);
-
-        // If the "Device Profile" is specified, make the companion application a holder of the
-        // corresponding role.
-        if (deviceProfile != null) {
-            addRoleHolderForAssociation(getContext(), association);
-        }
-
-        updateSpecialAccessPermissionForAssociatedPackage(association);
-        logCreateAssociation(deviceProfile);
-
-        // Don't need to update the mRevokedAssociationsPendingRoleHolderRemoval since
-        // maybeRemoveRoleHolderForAssociation in PackageInactivityListener will handle the case
-        // that there are other devices with the same profile, so the role holder won't be removed.
-
-        return association;
+            @Nullable String deviceProfile, boolean isSelfManaged) {
+        mAssociationRequestsProcessor.createAssociation(userId, packageName, macAddress,
+                displayName, deviceProfile, /* associatedDevice */ null, isSelfManaged,
+                /* callback */ null, /* resultReceiver */ null);
     }
 
     @NonNull
@@ -946,7 +911,7 @@ public class CompanionDeviceManagerService extends SystemService {
         return usedIdsForPackage;
     }
 
-    private int getNewAssociationIdForPackage(@UserIdInt int userId, @NonNull String packageName) {
+    int getNewAssociationIdForPackage(@UserIdInt int userId, @NonNull String packageName) {
         synchronized (mPreviouslyUsedIds) {
             // First: collect all IDs currently in use for this user's Associations.
             final SparseBooleanArray usedIds = new SparseBooleanArray();
@@ -1170,7 +1135,7 @@ public class CompanionDeviceManagerService extends SystemService {
         }
     }
 
-    private void updateSpecialAccessPermissionForAssociatedPackage(AssociationInfo association) {
+    void updateSpecialAccessPermissionForAssociatedPackage(AssociationInfo association) {
         final PackageInfo packageInfo =
                 getPackageInfo(getContext(), association.getUserId(), association.getPackageName());
 

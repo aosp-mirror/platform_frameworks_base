@@ -17,6 +17,7 @@
 package com.android.server.companion;
 
 import android.companion.AssociationInfo;
+import android.net.MacAddress;
 import android.os.Binder;
 import android.os.ShellCommand;
 
@@ -63,7 +64,9 @@ class CompanionDeviceShellCommand extends ShellCommand {
                     int userId = getNextIntArgRequired();
                     String packageName = getNextArgRequired();
                     String address = getNextArgRequired();
-                    mService.legacyCreateAssociation(userId, address, packageName, null);
+                    final MacAddress macAddress = MacAddress.fromString(address);
+                    mService.createNewAssociation(userId, packageName, macAddress,
+                            null, null, false);
                 }
                 break;
 
