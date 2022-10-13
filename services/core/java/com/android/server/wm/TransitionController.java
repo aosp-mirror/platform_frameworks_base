@@ -126,17 +126,25 @@ class TransitionController {
         mTransitionTracer = transitionTracer;
         mTransitionPlayerDeath = () -> {
             synchronized (mAtm.mGlobalLock) {
-                // Clean-up/finish any playing transitions.
-                for (int i = 0; i < mPlayingTransitions.size(); ++i) {
-                    mPlayingTransitions.get(i).cleanUpOnFailure();
-                }
-                mPlayingTransitions.clear();
-                mTransitionPlayer = null;
-                mTransitionPlayerProc = null;
-                mRemotePlayer.clear();
-                mRunningLock.doNotifyLocked();
+                detachPlayer();
             }
         };
+    }
+
+    private void detachPlayer() {
+        if (mTransitionPlayer == null) return;
+        // Clean-up/finish any playing transitions.
+        for (int i = 0; i < mPlayingTransitions.size(); ++i) {
+            mPlayingTransitions.get(i).cleanUpOnFailure();
+        }
+        mPlayingTransitions.clear();
+        if (mCollectingTransition != null) {
+            mCollectingTransition.abort();
+        }
+        mTransitionPlayer = null;
+        mTransitionPlayerProc = null;
+        mRemotePlayer.clear();
+        mRunningLock.doNotifyLocked();
     }
 
     /** @see #createTransition(int, int) */
@@ -193,7 +201,7 @@ class TransitionController {
                 if (mTransitionPlayer.asBinder() != null) {
                     mTransitionPlayer.asBinder().unlinkToDeath(mTransitionPlayerDeath, 0);
                 }
-                mTransitionPlayer = null;
+                detachPlayer();
             }
             if (player.asBinder() != null) {
                 player.asBinder().linkToDeath(mTransitionPlayerDeath, 0);
