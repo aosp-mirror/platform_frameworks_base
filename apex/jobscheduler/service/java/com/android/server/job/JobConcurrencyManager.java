@@ -34,6 +34,7 @@ import android.content.IntentFilter;
 import android.content.pm.UserInfo;
 import android.os.BatteryStats;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -181,6 +182,7 @@ class JobConcurrencyManager {
     private final JobSchedulerService mService;
     private final Context mContext;
     private final Handler mHandler;
+    private final Injector mInjector;
 
     private PowerManager mPowerManager;
 
@@ -378,9 +380,15 @@ class JobConcurrencyManager {
     }
 
     JobConcurrencyManager(JobSchedulerService service) {
+        this(service, new Injector());
+    }
+
+    @VisibleForTesting
+    JobConcurrencyManager(JobSchedulerService service, Injector injector) {
         mService = service;
         mLock = mService.mLock;
         mContext = service.getTestableContext();
+        mInjector = injector;
 
         mHandler = JobSchedulerBackgroundThread.getHandler();
 
@@ -414,7 +422,7 @@ class JobConcurrencyManager {
                 ServiceManager.getService(BatteryStats.SERVICE_NAME));
         for (int i = 0; i < STANDARD_CONCURRENCY_LIMIT; i++) {
             mIdleContexts.add(
-                    new JobServiceContext(mService, this, batteryStats,
+                    mInjector.createJobServiceContext(mService, this, batteryStats,
                             mService.mJobPackageTracker, mContext.getMainLooper()));
         }
     }
@@ -657,14 +665,39 @@ class JobConcurrencyManager {
             return;
         }
 
+        prepareForAssignmentDeterminationLocked(
+                mRecycledIdle, mRecycledPreferredUidOnly, mRecycledStoppable);
+
+        if (DEBUG) {
+            Slog.d(TAG, printAssignments("running jobs initial",
+                    mRecycledStoppable, mRecycledPreferredUidOnly));
+        }
+
+        determineAssignmentsLocked(
+                mRecycledChanged, mRecycledIdle, mRecycledPreferredUidOnly, mRecycledStoppable);
+
+        if (DEBUG) {
+            Slog.d(TAG, printAssignments("running jobs final",
+                    mRecycledStoppable, mRecycledPreferredUidOnly, mRecycledChanged));
+
+            Slog.d(TAG, "work count results: " + mWorkCountTracker);
+        }
+
+        carryOutAssignmentChangesLocked(mRecycledChanged);
+
+        cleanUpAfterAssignmentChangesLocked(
+                mRecycledChanged, mRecycledIdle, mRecycledPreferredUidOnly, mRecycledStoppable);
+
+        noteConcurrency();
+    }
+
+    @VisibleForTesting
+    @GuardedBy("mLock")
+    void prepareForAssignmentDeterminationLocked(final ArraySet<ContextAssignment> idle,
+            final List<ContextAssignment> preferredUidOnly,
+            final List<ContextAssignment> stoppable) {
         final PendingJobQueue pendingJobQueue = mService.getPendingJobQueue();
         final List<JobServiceContext> activeServices = mActiveServices;
-
-        // To avoid GC churn, we recycle the arrays.
-        final ArraySet<ContextAssignment> changed = mRecycledChanged;
-        final ArraySet<ContextAssignment> idle = mRecycledIdle;
-        final ArrayList<ContextAssignment> preferredUidOnly = mRecycledPreferredUidOnly;
-        final ArrayList<ContextAssignment> stoppable = mRecycledStoppable;
 
         updateCounterConfigLocked();
         // Reset everything since we'll re-evaluate the current state.
@@ -719,15 +752,21 @@ class JobConcurrencyManager {
             assignment.context = jsc;
             idle.add(assignment);
         }
-        if (DEBUG) {
-            Slog.d(TAG, printAssignments("running jobs initial", stoppable, preferredUidOnly));
-        }
 
         mWorkCountTracker.onCountDone();
+    }
 
-        JobStatus nextPending;
+    @VisibleForTesting
+    @GuardedBy("mLock")
+    void determineAssignmentsLocked(final ArraySet<ContextAssignment> changed,
+            final ArraySet<ContextAssignment> idle,
+            final List<ContextAssignment> preferredUidOnly,
+            final List<ContextAssignment> stoppable) {
+        final PendingJobQueue pendingJobQueue = mService.getPendingJobQueue();
+        final List<JobServiceContext> activeServices = mActiveServices;
         pendingJobQueue.resetIterator();
-        int projectedRunningCount = numRunningJobs;
+        JobStatus nextPending;
+        int projectedRunningCount = activeServices.size();
         while ((nextPending = pendingJobQueue.next()) != null) {
             if (mRunningJobs.contains(nextPending)) {
                 // Should never happen.
@@ -895,13 +934,10 @@ class JobConcurrencyManager {
                         packageStats);
             }
         }
-        if (DEBUG) {
-            Slog.d(TAG, printAssignments("running jobs final",
-                    stoppable, preferredUidOnly, changed));
+    }
 
-            Slog.d(TAG, "assignJobsToContexts: " + mWorkCountTracker.toString());
-        }
-
+    @GuardedBy("mLock")
+    private void carryOutAssignmentChangesLocked(final ArraySet<ContextAssignment> changed) {
         for (int c = changed.size() - 1; c >= 0; --c) {
             final ContextAssignment assignment = changed.valueAt(c);
             final JobStatus js = assignment.context.getRunningJobLocked();
@@ -925,6 +961,13 @@ class JobConcurrencyManager {
             assignment.clear();
             mContextAssignmentPool.release(assignment);
         }
+    }
+
+    @GuardedBy("mLock")
+    private void cleanUpAfterAssignmentChangesLocked(final ArraySet<ContextAssignment> changed,
+            final ArraySet<ContextAssignment> idle,
+            final List<ContextAssignment> preferredUidOnly,
+            final List<ContextAssignment> stoppable) {
         for (int s = stoppable.size() - 1; s >= 0; --s) {
             final ContextAssignment assignment = stoppable.get(s);
             assignment.clear();
@@ -947,7 +990,6 @@ class JobConcurrencyManager {
         preferredUidOnly.clear();
         mWorkCountTracker.resetStagingCount();
         mActivePkgStats.forEach(mPackageStatsStagingCountClearer);
-        noteConcurrency();
     }
 
     @GuardedBy("mLock")
@@ -1496,7 +1538,7 @@ class JobConcurrencyManager {
 
     @NonNull
     private JobServiceContext createNewJobServiceContext() {
-        return new JobServiceContext(mService, this,
+        return mInjector.createJobServiceContext(mService, this,
                 IBatteryStats.Stub.asInterface(
                         ServiceManager.getService(BatteryStats.SERVICE_NAME)),
                 mService.mJobPackageTracker, mContext.getMainLooper());
@@ -1777,6 +1819,10 @@ class JobConcurrencyManager {
 
     @VisibleForTesting
     static class WorkTypeConfig {
+        @VisibleForTesting
+        static final String KEY_PREFIX_MAX = CONFIG_KEY_PREFIX_CONCURRENCY + "max_";
+        @VisibleForTesting
+        static final String KEY_PREFIX_MIN = CONFIG_KEY_PREFIX_CONCURRENCY + "min_";
         @VisibleForTesting
         static final String KEY_PREFIX_MAX_TOTAL = CONFIG_KEY_PREFIX_CONCURRENCY + "max_total_";
         private static final String KEY_PREFIX_MAX_TOP = CONFIG_KEY_PREFIX_CONCURRENCY + "max_top_";
@@ -2329,7 +2375,8 @@ class JobConcurrencyManager {
         }
     }
 
-    private static final class ContextAssignment {
+    @VisibleForTesting
+    static final class ContextAssignment {
         public JobServiceContext context;
         public int preferredUid = JobServiceContext.NO_PREFERRED_UID;
         public int workType = WORK_TYPE_NONE;
@@ -2377,5 +2424,16 @@ class JobConcurrencyManager {
         final PackageStats packageStats = getPkgStatsLocked(userId, packageName);
         mActivePkgStats.add(userId, packageName, packageStats);
         return packageStats;
+    }
+
+    @VisibleForTesting
+    static class Injector {
+        @NonNull
+        JobServiceContext createJobServiceContext(JobSchedulerService service,
+                JobConcurrencyManager concurrencyManager, IBatteryStats batteryStats,
+                JobPackageTracker tracker, Looper looper) {
+            return new JobServiceContext(service, concurrencyManager, batteryStats,
+                    tracker, looper);
+        }
     }
 }
