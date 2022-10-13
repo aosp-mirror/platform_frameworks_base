@@ -245,6 +245,23 @@ interface IVoiceInteractionManagerService {
 
     /**
      * Set configuration and pass read-only data to hotword detection service.
+     *
+     * @param options Application configuration data to provide to the
+     * {@link HotwordDetectionService}. PersistableBundle does not allow any remotable objects or
+     * other contents that can be used to communicate with other processes.
+     * @param sharedMemory The unrestricted data blob to provide to the
+     * {@link HotwordDetectionService}. Use this to provide the hotword models data or other
+     * such data to the trusted process.
+     */
+    @EnforcePermission("MANAGE_HOTWORD_DETECTION")
+    void updateState(
+            in PersistableBundle options,
+            in SharedMemory sharedMemory);
+
+    /**
+     * Set configuration and pass read-only data to hotword detection service when creating
+     * the detector.
+     *
      * Caller must provide an identity, used for permission tracking purposes.
      * The uid/pid elements of the identity will be ignored by the server and replaced with the ones
      * provided by binder.
@@ -259,7 +276,7 @@ interface IVoiceInteractionManagerService {
      * @param detectorType Indicate which detector is used.
      */
     @EnforcePermission("MANAGE_HOTWORD_DETECTION")
-    void updateState(
+    void initAndVerifyDetector(
             in Identity originatorIdentity,
             in PersistableBundle options,
             in SharedMemory sharedMemory,

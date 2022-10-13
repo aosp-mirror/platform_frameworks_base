@@ -1242,6 +1242,19 @@ public class VoiceInteractionManagerService extends SystemService {
         @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_HOTWORD_DETECTION)
         @Override
         public void updateState(
+                @Nullable PersistableBundle options,
+                @Nullable SharedMemory sharedMemory) {
+            synchronized (this) {
+                enforceIsCurrentVoiceInteractionService();
+
+                Binder.withCleanCallingIdentity(
+                        () -> mImpl.updateStateLocked(options, sharedMemory));
+            }
+        }
+
+        @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_HOTWORD_DETECTION)
+        @Override
+        public void initAndVerifyDetector(
                 @NonNull Identity voiceInteractorIdentity,
                 @Nullable PersistableBundle options,
                 @Nullable SharedMemory sharedMemory,
@@ -1250,21 +1263,12 @@ public class VoiceInteractionManagerService extends SystemService {
             synchronized (this) {
                 enforceIsCurrentVoiceInteractionService();
 
-                if (mImpl == null) {
-                    Slog.w(TAG, "updateState without running voice interaction service");
-                    return;
-                }
-
                 voiceInteractorIdentity.uid = Binder.getCallingUid();
                 voiceInteractorIdentity.pid = Binder.getCallingPid();
 
-                final long caller = Binder.clearCallingIdentity();
-                try {
-                    mImpl.updateStateLocked(
-                            voiceInteractorIdentity, options, sharedMemory, callback, detectorType);
-                } finally {
-                    Binder.restoreCallingIdentity(caller);
-                }
+                Binder.withCleanCallingIdentity(
+                        () -> mImpl.initAndVerifyDetectorLocked(voiceInteractorIdentity, options,
+                                sharedMemory, callback, detectorType));
             }
         }
 
