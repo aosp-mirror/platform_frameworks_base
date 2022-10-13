@@ -1336,7 +1336,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
         try {
             final float fps = 0.0f;
             final int uid = mPackageManager.getPackageUidAsUser(packageName, userId);
-            nativeSetOverrideFrameRate(uid, fps);
+            setOverrideFrameRate(uid, fps);
         } catch (PackageManager.NameNotFoundException e) {
             return;
         }
@@ -1368,7 +1368,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
         try {
             final float fps = modeConfig.getFps();
             final int uid = mPackageManager.getPackageUidAsUser(packageName, userId);
-            nativeSetOverrideFrameRate(uid, fps);
+            setOverrideFrameRate(uid, fps);
         } catch (PackageManager.NameNotFoundException e) {
             return;
         }
@@ -1377,18 +1377,18 @@ public final class GameManagerService extends IGameManagerService.Stub {
 
     private void updateInterventions(String packageName,
             @GameMode int gameMode, @UserIdInt int userId) {
-        if (gameMode == GameManager.GAME_MODE_STANDARD
-                || gameMode == GameManager.GAME_MODE_UNSUPPORTED) {
-            resetFps(packageName, userId);
-            return;
-        }
         final GamePackageConfiguration packageConfig = getConfig(packageName, userId);
-        if (packageConfig == null) {
-            Slog.v(TAG, "Package configuration not found for " + packageName);
-            return;
-        }
-        if (packageConfig.willGamePerformOptimizations(gameMode)) {
-            return;
+        if (gameMode == GameManager.GAME_MODE_STANDARD
+                || gameMode == GameManager.GAME_MODE_UNSUPPORTED || packageConfig == null
+                || packageConfig.willGamePerformOptimizations(gameMode)) {
+            resetFps(packageName, userId);
+            // resolution scaling does not need to be reset as it's now read dynamically on game
+            // restart, see #getResolutionScalingFactor and CompatModePackages#getCompatScale.
+            // TODO: reset Angle intervention here once implemented
+            if (packageConfig == null) {
+                Slog.v(TAG, "Package configuration not found for " + packageName);
+                return;
+            }
         }
         updateFps(packageConfig, packageName, gameMode, userId);
         updateUseAngle(packageName, gameMode);
@@ -1807,6 +1807,11 @@ public final class GameManagerService extends IGameManagerService.Stub {
                 Process.THREAD_PRIORITY_BACKGROUND, true /*allowIo*/);
         handlerThread.start();
         return handlerThread;
+    }
+
+    @VisibleForTesting
+    void setOverrideFrameRate(int uid, float frameRate) {
+        nativeSetOverrideFrameRate(uid, frameRate);
     }
 
     /**

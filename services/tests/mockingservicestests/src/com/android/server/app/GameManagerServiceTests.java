@@ -73,7 +73,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoSession;
 import org.mockito.quality.Strictness;
 
@@ -93,6 +95,7 @@ public class GameManagerServiceTests {
     private static final String PACKAGE_NAME_INVALID = "com.android.app";
     private static final int USER_ID_1 = 1001;
     private static final int USER_ID_2 = 1002;
+    private static final int DEFAULT_PACKAGE_UID = 12345;
 
     private MockitoSession mMockingSession;
     private String mPackageName;
@@ -207,6 +210,8 @@ public class GameManagerServiceTests {
                 .thenReturn(packages);
         when(mMockPackageManager.getApplicationInfoAsUser(anyString(), anyInt(), anyInt()))
                 .thenReturn(applicationInfo);
+        when(mMockPackageManager.getPackageUidAsUser(mPackageName, USER_ID_1)).thenReturn(
+                DEFAULT_PACKAGE_UID);
         LocalServices.addService(PowerManagerInternal.class, mMockPowerManager);
     }
 
@@ -385,6 +390,12 @@ public class GameManagerServiceTests {
     private void mockInterventionsEnabledNoOptInFromXml() throws Exception {
         seedGameManagerServiceMetaDataFromFile(mPackageName, 123,
                 "res/xml/game_manager_service_metadata_config_interventions_enabled_no_opt_in.xml");
+    }
+
+    private void mockInterventionsEnabledAllOptInFromXml() throws Exception {
+        seedGameManagerServiceMetaDataFromFile(mPackageName, 123,
+                "res/xml/game_manager_service_metadata_config_interventions_enabled_all_opt_in"
+                        + ".xml");
     }
 
     private void mockInterventionsDisabledNoOptInFromXml() throws Exception {
@@ -1621,6 +1632,82 @@ public class GameManagerServiceTests {
         // and all queued messages should be removed
         assertTrue(settings.readPersistentDataLocked());
         assertFalse(gameManagerService.mHandler.hasEqualMessages(WRITE_SETTINGS, USER_ID_1));
+    }
+
+    @Test
+    public void testResetInterventions_onDeviceConfigReset() throws Exception {
+        mockModifyGameModeGranted();
+        String configStringBefore =
+                "mode=2,downscaleFactor=1.0,fps=90";
+        when(DeviceConfig.getProperty(anyString(), anyString()))
+                .thenReturn(configStringBefore);
+        mockInterventionsEnabledNoOptInFromXml();
+        GameManagerService gameManagerService = Mockito.spy(new GameManagerService(mMockContext,
+                mTestLooper.getLooper()));
+        startUser(gameManagerService, USER_ID_1);
+        gameManagerService.setGameMode(mPackageName, GameManager.GAME_MODE_PERFORMANCE, USER_ID_1);
+        Mockito.verify(gameManagerService).setOverrideFrameRate(
+                ArgumentMatchers.eq(DEFAULT_PACKAGE_UID),
+                ArgumentMatchers.eq(90.0f));
+        checkFps(gameManagerService, GameManager.GAME_MODE_PERFORMANCE, 90);
+
+        String configStringAfter = "";
+        when(DeviceConfig.getProperty(anyString(), anyString()))
+                .thenReturn(configStringAfter);
+        gameManagerService.updateConfigsForUser(USER_ID_1, false, mPackageName);
+        Mockito.verify(gameManagerService).setOverrideFrameRate(
+                ArgumentMatchers.eq(DEFAULT_PACKAGE_UID),
+                ArgumentMatchers.eq(0.0f));
+    }
+
+    @Test
+    public void testResetInterventions_onInterventionsDisabled() throws Exception {
+        mockModifyGameModeGranted();
+        String configStringBefore =
+                "mode=2,downscaleFactor=1.0,fps=90";
+        when(DeviceConfig.getProperty(anyString(), anyString()))
+                .thenReturn(configStringBefore);
+        mockInterventionsEnabledNoOptInFromXml();
+        GameManagerService gameManagerService = Mockito.spy(new GameManagerService(mMockContext,
+                mTestLooper.getLooper()));
+        startUser(gameManagerService, USER_ID_1);
+        gameManagerService.setGameMode(mPackageName, GameManager.GAME_MODE_PERFORMANCE, USER_ID_1);
+        Mockito.verify(gameManagerService).setOverrideFrameRate(
+                ArgumentMatchers.eq(DEFAULT_PACKAGE_UID),
+                ArgumentMatchers.eq(90.0f));
+        checkFps(gameManagerService, GameManager.GAME_MODE_PERFORMANCE, 90);
+
+        mockInterventionsDisabledNoOptInFromXml();
+        gameManagerService.updateConfigsForUser(USER_ID_1, false, mPackageName);
+        Mockito.verify(gameManagerService).setOverrideFrameRate(
+                ArgumentMatchers.eq(DEFAULT_PACKAGE_UID),
+                ArgumentMatchers.eq(0.0f));
+        checkFps(gameManagerService, GameManager.GAME_MODE_PERFORMANCE, 0);
+    }
+
+    @Test
+    public void testResetInterventions_onGameModeOptedIn() throws Exception {
+        mockModifyGameModeGranted();
+        String configStringBefore =
+                "mode=2,downscaleFactor=1.0,fps=90";
+        when(DeviceConfig.getProperty(anyString(), anyString()))
+                .thenReturn(configStringBefore);
+        mockInterventionsEnabledNoOptInFromXml();
+        GameManagerService gameManagerService = Mockito.spy(new GameManagerService(mMockContext,
+                mTestLooper.getLooper()));
+        startUser(gameManagerService, USER_ID_1);
+
+        gameManagerService.setGameMode(mPackageName, GameManager.GAME_MODE_PERFORMANCE, USER_ID_1);
+        Mockito.verify(gameManagerService).setOverrideFrameRate(
+                ArgumentMatchers.eq(DEFAULT_PACKAGE_UID),
+                ArgumentMatchers.eq(90.0f));
+        checkFps(gameManagerService, GameManager.GAME_MODE_PERFORMANCE, 90);
+
+        mockInterventionsEnabledAllOptInFromXml();
+        gameManagerService.updateConfigsForUser(USER_ID_1, false, mPackageName);
+        Mockito.verify(gameManagerService).setOverrideFrameRate(
+                ArgumentMatchers.eq(DEFAULT_PACKAGE_UID),
+                ArgumentMatchers.eq(0.0f));
     }
 
     private static void deleteFolder(File folder) {
