@@ -91,7 +91,7 @@ import java.util.Set;
  * other hand, not overriding in {@link ComputerLocked} may leave a function walking
  * unstable data.
  */
-@VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
+@VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
 public interface Computer extends PackageDataSnapshot {
 
     int getVersion();
