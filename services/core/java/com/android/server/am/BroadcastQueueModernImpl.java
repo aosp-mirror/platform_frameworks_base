@@ -44,6 +44,7 @@ import android.annotation.Nullable;
 import android.annotation.UptimeMillisLong;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.BroadcastOptions;
 import android.app.IApplicationThread;
 import android.app.RemoteServiceException.CannotDeliverBroadcastException;
 import android.app.UidObserver;
@@ -523,6 +524,17 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 return (r.callingUid == testRecord.callingUid)
                         && (r.userId == testRecord.userId)
                         && removeMatching.test(testRecord.intent);
+            }, mBroadcastConsumerSkipAndCanceled, true);
+        }
+
+        final int policy = (r.options != null)
+                ? r.options.getDeliveryGroupPolicy() : BroadcastOptions.DELIVERY_GROUP_POLICY_ALL;
+        if (policy == BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT) {
+            forEachMatchingBroadcast(QUEUE_PREDICATE_ANY, (testRecord, testIndex) -> {
+                // We only allow caller to remove broadcasts they enqueued
+                return (r.callingUid == testRecord.callingUid)
+                        && (r.userId == testRecord.userId)
+                        && r.matchesDeliveryGroup(testRecord);
             }, mBroadcastConsumerSkipAndCanceled, true);
         }
 
