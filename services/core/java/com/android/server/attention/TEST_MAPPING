@@ -7,7 +7,7 @@
           "include-filter": "android.voiceinteraction.cts.AlwaysOnHotwordDetectorTest"
         },
         {
-          "include-filter": "android.voiceinteraction.cts.HotwordDetectedResultTest"
+          "include-filter": "android.voiceinteraction.cts.unittests.HotwordDetectedResultTest"
         },
         {
           "include-filter": "android.voiceinteraction.cts.HotwordDetectionServiceBasicTest"
