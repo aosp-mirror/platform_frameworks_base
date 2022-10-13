@@ -326,7 +326,7 @@ static std::unique_ptr<ResourceTable> BuildTableWithSparseEntries(
   return table;
 }
 
-TEST_F(TableFlattenerTest, FlattenSparseEntryWithMinSdkO) {
+TEST_F(TableFlattenerTest, FlattenSparseEntryWithMinSdkSV2) {
   std::unique_ptr<IAaptContext> context = test::ContextBuilder()
                                               .SetCompilationPackage("android")
                                               .SetPackageId(0x01)
@@ -369,7 +369,7 @@ TEST_F(TableFlattenerTest, FlattenSparseEntryWithMinSdkO) {
   EXPECT_EQ(4u, value->value.data);
 }
 
-TEST_F(TableFlattenerTest, FlattenSparseEntryWithConfigSdkVersionO) {
+TEST_F(TableFlattenerTest, FlattenSparseEntryWithConfigSdkVersionSV2) {
   std::unique_ptr<IAaptContext> context = test::ContextBuilder()
                                               .SetCompilationPackage("android")
                                               .SetPackageId(0x01)
@@ -388,7 +388,7 @@ TEST_F(TableFlattenerTest, FlattenSparseEntryWithConfigSdkVersionO) {
   std::string sparse_contents;
   ASSERT_TRUE(Flatten(context.get(), options, table_in.get(), &sparse_contents));
 
-  EXPECT_GT(no_sparse_contents.size(), sparse_contents.size());
+  EXPECT_EQ(no_sparse_contents.size(), sparse_contents.size());
 }
 
 TEST_F(TableFlattenerTest, FlattenSparseEntryRegardlessOfMinSdkWhenForced) {
