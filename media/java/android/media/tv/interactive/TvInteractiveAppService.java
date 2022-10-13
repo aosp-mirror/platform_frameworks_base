@@ -455,6 +455,13 @@ public abstract class TvInteractiveAppService extends Service {
         }
 
         /**
+         * Receives started recording's ID.
+         * @hide
+         */
+        public void onRecordingStarted(@Nullable String recordingId) {
+        }
+
+        /**
          * Receives signing result.
          * @param signingId the ID to identify the request. It's the same as the corresponding ID in
          *        {@link Session#requestSigning(String, String, String, byte[])}
@@ -905,6 +912,27 @@ public abstract class TvInteractiveAppService extends Service {
         }
 
         /**
+         * Requests starting of recording
+         *
+         * @hide
+         */
+        @CallSuper
+        public void requestStartRecording(@Nullable Uri programUri) {
+            executeOrPostRunnableOnMainThread(() -> {
+                try {
+                    if (DEBUG) {
+                        Log.d(TAG, "requestStartRecording");
+                    }
+                    if (mSessionCallback != null) {
+                        mSessionCallback.onRequestStartRecording(programUri);
+                    }
+                } catch (RemoteException e) {
+                    Log.w(TAG, "error in requestStartRecording", e);
+                }
+            });
+        }
+
+        /**
          * Requests signing of the given data.
          *
          * <p>This is used when the corresponding server of the broadcast-independent interactive
@@ -1112,6 +1140,10 @@ public abstract class TvInteractiveAppService extends Service {
                 Log.d(TAG, "notifyAdResponse (requestId=" + response.getId() + ")");
             }
             onAdResponse(response);
+        }
+
+        void notifyRecordingStarted(String recordingId) {
+            onRecordingStarted(recordingId);
         }
 
         /**

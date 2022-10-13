@@ -487,6 +487,18 @@ public final class TvInteractiveAppManager {
             }
 
             @Override
+            public void onRequestStartRecording(Uri programUri, int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postRequestStartRecording(programUri);
+                }
+            }
+
+            @Override
             public void onRequestSigning(
                     String id, String algorithm, String alias, byte[] data, int seq) {
                 synchronized (mSessionCallbackRecordMap) {
@@ -1030,6 +1042,18 @@ public final class TvInteractiveAppManager {
             }
             try {
                 mService.sendCurrentTvInputId(mToken, inputId, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        void notifyRecordingStarted(@Nullable String recordingId) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.notifyRecordingStarted(mToken, recordingId, mUserId);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -1696,6 +1720,15 @@ public final class TvInteractiveAppManager {
             });
         }
 
+        void postRequestStartRecording(Uri programUri) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onRequestStartRecording(mSession, programUri);
+                }
+            });
+        }
+
         void postRequestSigning(String id, String algorithm, String alias, byte[] data) {
             mHandler.post(new Runnable() {
                 @Override
@@ -1844,6 +1877,15 @@ public final class TvInteractiveAppManager {
          * @param session A {@link TvInteractiveAppService.Session} associated with this callback.
          */
         public void onRequestCurrentTvInputId(Session session) {
+        }
+
+        /**
+         * This is called when {@link TvInteractiveAppService.Session#RequestStartRecording} is
+         * called.
+         *
+         * @param session A {@link TvInteractiveAppService.Session} associated with this callback.
+         */
+        public void onRequestStartRecording(Session session, Uri programUri) {
         }
 
         /**

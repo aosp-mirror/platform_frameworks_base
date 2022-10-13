@@ -1047,6 +1047,29 @@ public class TvInteractiveAppManagerService extends SystemService {
         }
 
         @Override
+        public void notifyRecordingStarted(IBinder sessionToken, String recordingId, int userId) {
+            final int callingUid = Binder.getCallingUid();
+            final int callingPid = Binder.getCallingPid();
+            final int resolvedUserId = resolveCallingUserId(callingPid, callingUid, userId,
+                    "notifyRecordingStarted");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        SessionState sessionState = getSessionStateLocked(sessionToken, callingUid,
+                                resolvedUserId);
+                        getSessionLocked(sessionState).notifyRecordingStarted(recordingId);
+                    } catch (RemoteException | SessionNotFoundException e) {
+                        Slogf.e(TAG, "error in notifyRecordingStarted", e);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+
+        }
+
+        @Override
         public void startInteractiveApp(IBinder sessionToken, int userId) {
             if (DEBUG) {
                 Slogf.d(TAG, "BinderService#start(userId=%d)", userId);
@@ -2208,6 +2231,23 @@ public class TvInteractiveAppManagerService extends SystemService {
                     mSessionState.mClient.onRequestCurrentTvInputId(mSessionState.mSeq);
                 } catch (RemoteException e) {
                     Slogf.e(TAG, "error in onRequestCurrentTvInputId", e);
+                }
+            }
+        }
+
+        @Override
+        public void onRequestStartRecording(Uri programUri) {
+            synchronized (mLock) {
+                if (DEBUG) {
+                    Slogf.d(TAG, "onRequestStartRecording: " + programUri);
+                }
+                if (mSessionState.mSession == null || mSessionState.mClient == null) {
+                    return;
+                }
+                try {
+                    mSessionState.mClient.onRequestStartRecording(programUri, mSessionState.mSeq);
+                } catch (RemoteException e) {
+                    Slogf.e(TAG, "error in onRequestStartRecording", e);
                 }
             }
         }
