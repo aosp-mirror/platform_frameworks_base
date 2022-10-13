@@ -3383,8 +3383,9 @@ public final class NotificationPanelViewController extends PanelViewController {
     }
 
     private void updateQsFrameTranslation() {
-        mQsFrameTranslateController.translateQsFrame(mQsFrame, mQs, mOverExpansion,
-                mQsTranslationForFullShadeTransition);
+        mQsFrameTranslateController.translateQsFrame(mQsFrame, mQs,
+                mNavigationBarBottomHeight + mAmbientState.getStackTopMargin());
+
     }
 
     @Override
