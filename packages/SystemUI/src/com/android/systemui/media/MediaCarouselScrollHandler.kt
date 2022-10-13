@@ -47,7 +47,7 @@ private const val SETTINGS_BUTTON_TRANSLATION_FRACTION = 0.3f
  * were not provided, and a default spring was not set via [PhysicsAnimator.setDefaultSpringConfig].
  */
 private val translationConfig = PhysicsAnimator.SpringConfig(
-        SpringForce.STIFFNESS_MEDIUM,
+        SpringForce.STIFFNESS_LOW,
         SpringForce.DAMPING_RATIO_LOW_BOUNCY)
 
 /**
