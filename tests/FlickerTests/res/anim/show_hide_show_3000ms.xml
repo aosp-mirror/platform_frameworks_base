@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <!--
   ~ Copyright (C) 2022 The Android Open Source Project
   ~
@@ -15,7 +14,18 @@
   ~ limitations under the License.
   -->
 
-<translate xmlns:android="http://schemas.android.com/apk/res/android"
-    android:duration="2000"
-    android:fromXDelta="0"
-    android:toXDelta="0" />
+<set
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:fillAfter="true">
+
+    <alpha
+        android:fromAlpha="1.0"
+        android:toAlpha="0.0"
+        android:duration="1000" />
+
+    <alpha
+        android:startOffset="2000"
+        android:fromAlpha="1.0"
+        android:toAlpha="1.0"
+        android:duration="1000" />
+</set>

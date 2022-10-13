@@ -30,13 +30,11 @@ import com.android.server.wm.flicker.R
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.server.wm.flicker.helpers.StandardAppHelper
-import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.rules.RemoveAllTasksButHomeRule
 import com.android.server.wm.traces.common.ComponentNameMatcher
 import com.android.server.wm.traces.common.WindowManagerConditionsFactory
-import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -50,7 +48,7 @@ import org.junit.runners.Parameterized
  *
  * Actions:
  * ```
- *     Launches SimpleActivity with alpha_2000ms animation
+ *     Launches SimpleActivity with a special animation.
  * ```
  */
 @RequiresDevice
@@ -89,21 +87,31 @@ class OverrideTaskTransitionTest(val testSpec: FlickerTestParameter) {
     @Presubmit
     @Test
     fun testSimpleActivityIsShownDirectly() {
-        Assume.assumeFalse(isShellTransitionsEnabled)
         testSpec.assertLayers {
+            // Before the app launches, only the launcher is visible.
             isVisible(ComponentNameMatcher.LAUNCHER)
-                .isInvisible(ComponentNameMatcher.SPLASH_SCREEN)
-                .isInvisible(testApp)
-                .then()
-                // The custom animation should block the entire launcher from the very beginning
-                .isInvisible(ComponentNameMatcher.LAUNCHER)
+                    .isInvisible(testApp)
+                    .then()
+                    // Animation starts, but the app may not be drawn yet which means the Splash
+                    // may be visible.
+                    .isInvisible(testApp, isOptional = true)
+                    .isVisible(ComponentNameMatcher.SPLASH_SCREEN, isOptional = true)
+                    .then()
+                    // App shows up with the custom animation starting at alpha=1.
+                    .isVisible(testApp)
+                    .then()
+                    // App custom animation continues to alpha=0 (invisible).
+                    .isInvisible(testApp)
+                    .then()
+                    // App custom animation ends with it being visible.
+                    .isVisible(testApp)
         }
     }
 
     private fun createCustomTaskAnimation(): Bundle {
         return android.app.ActivityOptions.makeCustomTaskAnimation(
                 instrumentation.context,
-                R.anim.show_2000ms,
+                R.anim.show_hide_show_3000ms,
                 0,
                 Handler.getMain(),
                 null,
