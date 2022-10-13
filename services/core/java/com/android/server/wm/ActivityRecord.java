@@ -4066,7 +4066,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // to the restarted activity.
             nowVisible = mVisibleRequested;
         }
-        mTransitionController.requestCloseTransitionIfNeeded(this);
+        // upgrade transition trigger to task if this is the last activity since it means we are
+        // closing the task.
+        final WindowContainer trigger = remove && task != null && task.getChildCount() == 1
+                ? task : this;
+        mTransitionController.requestCloseTransitionIfNeeded(trigger);
         cleanUp(true /* cleanServices */, true /* setState */);
         if (remove) {
             if (mStartingData != null && mVisible && task != null) {
