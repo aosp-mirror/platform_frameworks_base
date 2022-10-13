@@ -17,6 +17,7 @@ package com.android.systemui.shared.animation
 
 import android.graphics.Point
 import android.view.Surface
+import android.view.Surface.Rotation
 import android.view.View
 import android.view.WindowManager
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider
@@ -58,14 +59,14 @@ class UnfoldMoveFromCenterAnimator @JvmOverloads constructor(
      * Updates display properties in order to calculate the initial position for the views
      * Must be called before [registerViewForAnimation]
      */
-    fun updateDisplayProperties() {
+    @JvmOverloads
+    fun updateDisplayProperties(@Rotation rotation: Int = windowManager.defaultDisplay.rotation) {
         windowManager.defaultDisplay.getSize(screenSize)
 
         // Simple implementation to get current fold orientation,
         // this might not be correct on all devices
         // TODO: use JetPack WindowManager library to get the fold orientation
-        isVerticalFold = windowManager.defaultDisplay.rotation == Surface.ROTATION_0 ||
-            windowManager.defaultDisplay.rotation == Surface.ROTATION_180
+        isVerticalFold = rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_180
     }
 
     /**

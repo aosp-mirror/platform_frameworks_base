@@ -26,8 +26,6 @@ import android.os.Trace
 import android.view.Choreographer
 import android.view.Display
 import android.view.DisplayInfo
-import android.view.IRotationWatcher
-import android.view.IWindowManager
 import android.view.Surface
 import android.view.SurfaceControl
 import android.view.SurfaceControlViewHost
@@ -40,6 +38,7 @@ import com.android.systemui.statusbar.LightRevealEffect
 import com.android.systemui.statusbar.LightRevealScrim
 import com.android.systemui.statusbar.LinearLightRevealEffect
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider.TransitionProgressListener
+import com.android.systemui.unfold.updates.RotationChangeProvider
 import com.android.systemui.util.traceSection
 import com.android.wm.shell.displayareahelper.DisplayAreaHelper
 import java.util.Optional
@@ -58,7 +57,7 @@ constructor(
     private val displayAreaHelper: Optional<DisplayAreaHelper>,
     @Main private val executor: Executor,
     @UiBackground private val backgroundExecutor: Executor,
-    private val windowManagerInterface: IWindowManager
+    private val rotationChangeProvider: RotationChangeProvider,
 ) {
 
     private val transitionListener = TransitionListener()
@@ -78,7 +77,7 @@ constructor(
     fun init() {
         deviceStateManager.registerCallback(executor, FoldListener())
         unfoldTransitionProgressProvider.addCallback(transitionListener)
-        windowManagerInterface.watchRotation(rotationWatcher, context.display.displayId)
+        rotationChangeProvider.addCallback(rotationWatcher)
 
         val containerBuilder =
             SurfaceControl.Builder(SurfaceSession())
@@ -86,7 +85,9 @@ constructor(
                 .setName("unfold-overlay-container")
 
         displayAreaHelper.get().attachToRootDisplayArea(
-                Display.DEFAULT_DISPLAY, containerBuilder) { builder ->
+            Display.DEFAULT_DISPLAY,
+            containerBuilder
+        ) { builder ->
             executor.execute {
                 overlayContainer = builder.build()
 
@@ -244,8 +245,8 @@ constructor(
         }
     }
 
-    private inner class RotationWatcher : IRotationWatcher.Stub() {
-        override fun onRotationChanged(newRotation: Int) =
+    private inner class RotationWatcher : RotationChangeProvider.RotationListener {
+        override fun onRotationChanged(newRotation: Int) {
             traceSection("UnfoldLightRevealOverlayAnimation#onRotationChanged") {
                 if (currentRotation != newRotation) {
                     currentRotation = newRotation
@@ -253,6 +254,7 @@ constructor(
                     root?.relayout(getLayoutParams())
                 }
             }
+        }
     }
 
     private inner class FoldListener :
