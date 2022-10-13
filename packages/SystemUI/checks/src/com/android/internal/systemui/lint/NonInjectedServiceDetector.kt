@@ -16,6 +16,7 @@
 
 package com.android.internal.systemui.lint
 
+import com.android.SdkConstants.CLASS_CONTEXT
 import com.android.tools.lint.detector.api.Category
 import com.android.tools.lint.detector.api.Detector
 import com.android.tools.lint.detector.api.Implementation
@@ -32,7 +33,7 @@ import org.jetbrains.uast.UCallExpression
 class NonInjectedServiceDetector : Detector(), SourceCodeScanner {
 
     override fun getApplicableMethodNames(): List<String> {
-        return listOf("getSystemService")
+        return listOf("getSystemService", "get")
     }
 
     override fun visitMethodCall(context: JavaContext, node: UCallExpression, method: PsiMethod) {
@@ -40,14 +41,25 @@ class NonInjectedServiceDetector : Detector(), SourceCodeScanner {
         if (
             !evaluator.isStatic(method) &&
                 method.name == "getSystemService" &&
-                method.containingClass?.qualifiedName == "android.content.Context"
+                method.containingClass?.qualifiedName == CLASS_CONTEXT
         ) {
             context.report(
                 ISSUE,
                 method,
                 context.getNameLocation(node),
-                "Use @Inject to get the handle to a system-level services instead of using " +
-                    "Context.getSystemService()"
+                "Use `@Inject` to get system-level service handles instead of " +
+                    "`Context.getSystemService()`"
+            )
+        } else if (
+            evaluator.isStatic(method) &&
+                method.name == "get" &&
+                method.containingClass?.qualifiedName == "android.accounts.AccountManager"
+        ) {
+            context.report(
+                ISSUE,
+                method,
+                context.getNameLocation(node),
+                "Replace `AccountManager.get()` with an injected instance of `AccountManager`"
             )
         }
     }
@@ -57,14 +69,14 @@ class NonInjectedServiceDetector : Detector(), SourceCodeScanner {
         val ISSUE: Issue =
             Issue.create(
                 id = "NonInjectedService",
-                briefDescription =
-                    "System-level services should be retrieved using " +
-                        "@Inject instead of Context.getSystemService().",
+                briefDescription = "System service not injected",
                 explanation =
-                    "Context.getSystemService() should be avoided because it makes testing " +
-                        "difficult. Instead, use an injected service. For example, " +
-                        "instead of calling Context.getSystemService(UserManager.class), " +
-                        "use @Inject and add UserManager to the constructor",
+                    """
+                    `Context.getSystemService()` should be avoided because it makes testing \
+                    difficult. Instead, use an injected service. For example, instead of calling \
+                    `Context.getSystemService(UserManager.class)` in a class, annotate the class' \
+                    constructor with `@Inject` and add `UserManager` to the parameters.
+                    """,
                 category = Category.CORRECTNESS,
                 priority = 8,
                 severity = Severity.WARNING,

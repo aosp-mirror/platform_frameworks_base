@@ -31,8 +31,6 @@ class SoftwareBitmapDetectorTest : LintDetectorTest() {
 
     override fun getIssues(): List<Issue> = listOf(SoftwareBitmapDetector.ISSUE)
 
-    private val explanation = "Usage of Config.HARDWARE is highly encouraged."
-
     @Test
     fun testSoftwareBitmap() {
         lint()
@@ -41,7 +39,7 @@ class SoftwareBitmapDetectorTest : LintDetectorTest() {
                         """
                     import android.graphics.Bitmap;
 
-                    public class TestClass1 {
+                    public class TestClass {
                         public void test() {
                           Bitmap.createBitmap(300, 300, Bitmap.Config.RGB_565);
                           Bitmap.createBitmap(300, 300, Bitmap.Config.ARGB_8888);
@@ -54,8 +52,17 @@ class SoftwareBitmapDetectorTest : LintDetectorTest() {
             )
             .issues(SoftwareBitmapDetector.ISSUE)
             .run()
-            .expectWarningCount(2)
-            .expectContains(explanation)
+            .expect(
+                """
+                src/android/graphics/Bitmap.java:5: Warning: Replace software bitmap with Config.HARDWARE [SoftwareBitmap]
+                        ARGB_8888,
+                        ~~~~~~~~~
+                src/android/graphics/Bitmap.java:6: Warning: Replace software bitmap with Config.HARDWARE [SoftwareBitmap]
+                        RGB_565,
+                        ~~~~~~~
+                0 errors, 2 warnings
+                """
+            )
     }
 
     @Test
@@ -66,7 +73,7 @@ class SoftwareBitmapDetectorTest : LintDetectorTest() {
                         """
                     import android.graphics.Bitmap;
 
-                    public class TestClass1 {
+                    public class TestClass {
                         public void test() {
                           Bitmap.createBitmap(300, 300, Bitmap.Config.HARDWARE);
                         }
@@ -78,7 +85,7 @@ class SoftwareBitmapDetectorTest : LintDetectorTest() {
             )
             .issues(SoftwareBitmapDetector.ISSUE)
             .run()
-            .expectWarningCount(0)
+            .expectClean()
     }
 
     private val stubs = androidStubs
