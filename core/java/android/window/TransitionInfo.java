@@ -135,8 +135,11 @@ public final class TransitionInfo implements Parcelable {
     /** This change happened underneath something else. */
     public static final int FLAG_IS_OCCLUDED = 1 << 15;
 
+    /** The container is a system window, excluding wallpaper and input-method. */
+    public static final int FLAG_IS_SYSTEM_WINDOW = 1 << 16;
+
     /** The first unused bit. This can be used by remotes to attach custom flags to this change. */
-    public static final int FLAG_FIRST_CUSTOM = 1 << 16;
+    public static final int FLAG_FIRST_CUSTOM = 1 << 17;
 
     /** @hide */
     @IntDef(prefix = { "FLAG_" }, value = {
@@ -157,6 +160,7 @@ public final class TransitionInfo implements Parcelable {
             FLAG_CROSS_PROFILE_WORK_THUMBNAIL,
             FLAG_IS_BEHIND_STARTING_WINDOW,
             FLAG_IS_OCCLUDED,
+            FLAG_IS_SYSTEM_WINDOW,
             FLAG_FIRST_CUSTOM
     })
     public @interface ChangeFlags {}
@@ -368,6 +372,9 @@ public final class TransitionInfo implements Parcelable {
         }
         if ((flags & FLAG_IS_OCCLUDED) != 0) {
             sb.append(sb.length() == 0 ? "" : "|").append("IS_OCCLUDED");
+        }
+        if ((flags & FLAG_IS_SYSTEM_WINDOW) != 0) {
+            sb.append(sb.length() == 0 ? "" : "|").append("FLAG_IS_SYSTEM_WINDOW");
         }
         if ((flags & FLAG_FIRST_CUSTOM) != 0) {
             sb.append(sb.length() == 0 ? "" : "|").append("FIRST_CUSTOM");
@@ -701,14 +708,37 @@ public final class TransitionInfo implements Parcelable {
 
         @Override
         public String toString() {
-            String out = "{" + mContainer + "(" + mParent + ") leash=" + mLeash
-                    + " m=" + modeToString(mMode) + " f=" + flagsToString(mFlags) + " sb="
-                    + mStartAbsBounds + " eb=" + mEndAbsBounds + " eo=" + mEndRelOffset + " r="
-                    + mStartRotation + "->" + mEndRotation + ":" + mRotationAnimation
-                    + " endFixedRotation=" + mEndFixedRotation;
-            if (mSnapshot != null) out += " snapshot=" + mSnapshot;
-            if (mLastParent != null) out += " lastParent=" + mLastParent;
-            return out + "}";
+            final StringBuilder sb = new StringBuilder();
+            sb.append('{'); sb.append(mContainer);
+            sb.append(" m="); sb.append(modeToString(mMode));
+            sb.append(" f="); sb.append(flagsToString(mFlags));
+            if (mParent != null) {
+                sb.append(" p="); sb.append(mParent);
+            }
+            if (mLeash != null) {
+                sb.append(" leash="); sb.append(mLeash);
+            }
+            sb.append(" sb="); sb.append(mStartAbsBounds);
+            sb.append(" eb="); sb.append(mEndAbsBounds);
+            if (mEndRelOffset.x != 0 || mEndRelOffset.y != 0) {
+                sb.append(" eo="); sb.append(mEndRelOffset);
+            }
+            if (mStartRotation != mEndRotation) {
+                sb.append(" r="); sb.append(mStartRotation);
+                sb.append("->"); sb.append(mEndRotation);
+                sb.append(':'); sb.append(mRotationAnimation);
+            }
+            if (mEndFixedRotation != ROTATION_UNDEFINED) {
+                sb.append(" endFixedRotation="); sb.append(mEndFixedRotation);
+            }
+            if (mSnapshot != null) {
+                sb.append(" snapshot="); sb.append(mSnapshot);
+            }
+            if (mLastParent != null) {
+                sb.append(" lastParent="); sb.append(mLastParent);
+            }
+            sb.append('}');
+            return sb.toString();
         }
     }
 
