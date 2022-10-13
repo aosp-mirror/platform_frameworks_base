@@ -31,8 +31,6 @@ class RegisterReceiverViaContextDetectorTest : LintDetectorTest() {
 
     override fun getIssues(): List<Issue> = listOf(RegisterReceiverViaContextDetector.ISSUE)
 
-    private val explanation = "BroadcastReceivers should be registered via BroadcastDispatcher."
-
     @Test
     fun testRegisterReceiver() {
         lint()
@@ -44,7 +42,7 @@ class RegisterReceiverViaContextDetectorTest : LintDetectorTest() {
                     import android.content.Context;
                     import android.content.IntentFilter;
 
-                    public class TestClass1 {
+                    public class TestClass {
                         public void bind(Context context, BroadcastReceiver receiver,
                             IntentFilter filter) {
                           context.registerReceiver(receiver, filter, 0);
@@ -57,8 +55,14 @@ class RegisterReceiverViaContextDetectorTest : LintDetectorTest() {
             )
             .issues(RegisterReceiverViaContextDetector.ISSUE)
             .run()
-            .expectWarningCount(1)
-            .expectContains(explanation)
+            .expect(
+                """
+                src/test/pkg/TestClass.java:9: Warning: Register BroadcastReceiver using BroadcastDispatcher instead of Context [RegisterReceiverViaContext]
+                      context.registerReceiver(receiver, filter, 0);
+                              ~~~~~~~~~~~~~~~~
+                0 errors, 1 warnings
+                """
+            )
     }
 
     @Test
@@ -74,7 +78,7 @@ class RegisterReceiverViaContextDetectorTest : LintDetectorTest() {
                     import android.os.Handler;
                     import android.os.UserHandle;
 
-                    public class TestClass1 {
+                    public class TestClass {
                         public void bind(Context context, BroadcastReceiver receiver,
                             IntentFilter filter, Handler handler) {
                           context.registerReceiverAsUser(receiver, UserHandle.ALL, filter,
@@ -88,8 +92,14 @@ class RegisterReceiverViaContextDetectorTest : LintDetectorTest() {
             )
             .issues(RegisterReceiverViaContextDetector.ISSUE)
             .run()
-            .expectWarningCount(1)
-            .expectContains(explanation)
+            .expect(
+                """
+                src/test/pkg/TestClass.java:11: Warning: Register BroadcastReceiver using BroadcastDispatcher instead of Context [RegisterReceiverViaContext]
+                      context.registerReceiverAsUser(receiver, UserHandle.ALL, filter,
+                              ~~~~~~~~~~~~~~~~~~~~~~
+                0 errors, 1 warnings
+                """
+            )
     }
 
     @Test
@@ -105,7 +115,7 @@ class RegisterReceiverViaContextDetectorTest : LintDetectorTest() {
                     import android.os.Handler;
                     import android.os.UserHandle;
 
-                    public class TestClass1 {
+                    public class TestClass {
                         public void bind(Context context, BroadcastReceiver receiver,
                             IntentFilter filter, Handler handler) {
                           context.registerReceiverForAllUsers(receiver, filter, "permission",
@@ -119,8 +129,14 @@ class RegisterReceiverViaContextDetectorTest : LintDetectorTest() {
             )
             .issues(RegisterReceiverViaContextDetector.ISSUE)
             .run()
-            .expectWarningCount(1)
-            .expectContains(explanation)
+            .expect(
+                """
+                src/test/pkg/TestClass.java:11: Warning: Register BroadcastReceiver using BroadcastDispatcher instead of Context [RegisterReceiverViaContext]
+                      context.registerReceiverForAllUsers(receiver, filter, "permission",
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                0 errors, 1 warnings
+                """
+            )
     }
 
     private val stubs = androidStubs

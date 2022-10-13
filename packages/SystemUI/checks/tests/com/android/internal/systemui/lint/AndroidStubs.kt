@@ -16,16 +16,21 @@
 
 package com.android.internal.systemui.lint
 
+import com.android.annotations.NonNull
 import com.android.tools.lint.checks.infrastructure.LintDetectorTest.java
+import org.intellij.lang.annotations.Language
+
+@Suppress("UnstableApiUsage")
+@NonNull
+private fun indentedJava(@NonNull @Language("JAVA") source: String) = java(source).indented()
 
 /*
  * This file contains stubs of framework APIs and System UI classes for testing purposes only. The
  * stubs are not used in the lint detectors themselves.
  */
-@Suppress("UnstableApiUsage")
 internal val androidStubs =
     arrayOf(
-        java(
+        indentedJava(
             """
 package android.app;
 
@@ -34,7 +39,16 @@ public class ActivityManager {
 }
 """
         ),
-        java(
+        indentedJava(
+            """
+package android.accounts;
+
+public class AccountManager {
+    public static AccountManager get(Context context) { return null; }
+}
+"""
+        ),
+        indentedJava(
             """
 package android.os;
 import android.content.pm.UserInfo;
@@ -45,39 +59,39 @@ public class UserManager {
 }
 """
         ),
-        java("""
+        indentedJava("""
 package android.annotation;
 
 public @interface UserIdInt {}
 """),
-        java("""
+        indentedJava("""
 package android.content.pm;
 
 public class UserInfo {}
 """),
-        java("""
+        indentedJava("""
 package android.os;
 
 public class Looper {}
 """),
-        java("""
+        indentedJava("""
 package android.os;
 
 public class Handler {}
 """),
-        java("""
+        indentedJava("""
 package android.content;
 
 public class ServiceConnection {}
 """),
-        java("""
+        indentedJava("""
 package android.os;
 
 public enum UserHandle {
     ALL
 }
 """),
-        java(
+        indentedJava(
             """
 package android.content;
 import android.os.UserHandle;
@@ -108,7 +122,7 @@ public class Context {
 }
 """
         ),
-        java(
+        indentedJava(
             """
 package android.app;
 import android.content.Context;
@@ -116,7 +130,7 @@ import android.content.Context;
 public class Activity extends Context {}
 """
         ),
-        java(
+        indentedJava(
             """
 package android.graphics;
 
@@ -132,17 +146,17 @@ public class Bitmap {
 }
 """
         ),
-        java("""
+        indentedJava("""
 package android.content;
 
 public class BroadcastReceiver {}
 """),
-        java("""
+        indentedJava("""
 package android.content;
 
 public class IntentFilter {}
 """),
-        java(
+        indentedJava(
             """
 package com.android.systemui.settings;
 import android.content.pm.UserInfo;
@@ -150,6 +164,25 @@ import android.content.pm.UserInfo;
 public interface UserTracker {
     int getUserId();
     UserInfo getUserInfo();
+}
+"""
+        ),
+        indentedJava(
+            """
+package androidx.annotation;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+
+import static java.lang.annotation.ElementType.CONSTRUCTOR;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.PARAMETER;
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.SOURCE;
+
+@Retention(SOURCE)
+@Target({METHOD,CONSTRUCTOR,TYPE,PARAMETER})
+public @interface WorkerThread {
 }
 """
         ),
