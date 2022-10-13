@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.systemui.statusbar.phone.panelstate
+package com.android.systemui.shade
 
 /** A listener interface to be notified of expansion events for the notification panel. */
-fun interface PanelExpansionListener {
+fun interface ShadeExpansionListener {
     /**
      * Invoked whenever the notification panel expansion changes, at every animation frame. This is
      * the main expansion that happens when the user is swiping up to dismiss the lock screen and
      * swiping to pull down the notification shade.
      */
-    fun onPanelExpansionChanged(event: PanelExpansionChangeEvent)
+    fun onPanelExpansionChanged(event: ShadeExpansionChangeEvent)
 }

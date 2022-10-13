@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone.panelstate
+package com.android.systemui.shade
 
 import android.annotation.IntDef
 import android.util.Log
@@ -29,10 +29,10 @@ import javax.inject.Inject
  * TODO(b/200063118): Make this class the one source of truth for the state of panel expansion.
  */
 @SysUISingleton
-class PanelExpansionStateManager @Inject constructor() {
+class ShadeExpansionStateManager @Inject constructor() {
 
-    private val expansionListeners = mutableListOf<PanelExpansionListener>()
-    private val stateListeners = mutableListOf<PanelStateListener>()
+    private val expansionListeners = mutableListOf<ShadeExpansionListener>()
+    private val stateListeners = mutableListOf<ShadeStateListener>()
 
     @PanelState private var state: Int = STATE_CLOSED
     @FloatRange(from = 0.0, to = 1.0) private var fraction: Float = 0f
@@ -45,24 +45,25 @@ class PanelExpansionStateManager @Inject constructor() {
      *
      * Listener will also be immediately notified with the current values.
      */
-    fun addExpansionListener(listener: PanelExpansionListener) {
+    fun addExpansionListener(listener: ShadeExpansionListener) {
         expansionListeners.add(listener)
         listener.onPanelExpansionChanged(
-            PanelExpansionChangeEvent(fraction, expanded, tracking, dragDownPxAmount))
+            ShadeExpansionChangeEvent(fraction, expanded, tracking, dragDownPxAmount)
+        )
     }
 
     /** Removes an expansion listener. */
-    fun removeExpansionListener(listener: PanelExpansionListener) {
+    fun removeExpansionListener(listener: ShadeExpansionListener) {
         expansionListeners.remove(listener)
     }
 
     /** Adds a listener that will be notified when the panel state has changed. */
-    fun addStateListener(listener: PanelStateListener) {
+    fun addStateListener(listener: ShadeStateListener) {
         stateListeners.add(listener)
     }
 
     /** Removes a state listener. */
-    fun removeStateListener(listener: PanelStateListener) {
+    fun removeStateListener(listener: ShadeStateListener) {
         stateListeners.remove(listener)
     }
 
@@ -110,25 +111,26 @@ class PanelExpansionStateManager @Inject constructor() {
 
         debugLog(
             "panelExpansionChanged:" +
-                    "start state=${oldState.panelStateToString()} " +
-                    "end state=${state.panelStateToString()} " +
-                    "f=$fraction " +
-                    "expanded=$expanded " +
-                    "tracking=$tracking " +
-                    "dragDownPxAmount=$dragDownPxAmount " +
-                    "${if (fullyOpened) " fullyOpened" else ""} " +
-                    if (fullyClosed) " fullyClosed" else ""
+                "start state=${oldState.panelStateToString()} " +
+                "end state=${state.panelStateToString()} " +
+                "f=$fraction " +
+                "expanded=$expanded " +
+                "tracking=$tracking " +
+                "dragDownPxAmount=$dragDownPxAmount " +
+                "${if (fullyOpened) " fullyOpened" else ""} " +
+                if (fullyClosed) " fullyClosed" else ""
         )
 
         val expansionChangeEvent =
-            PanelExpansionChangeEvent(fraction, expanded, tracking, dragDownPxAmount)
+            ShadeExpansionChangeEvent(fraction, expanded, tracking, dragDownPxAmount)
         expansionListeners.forEach { it.onPanelExpansionChanged(expansionChangeEvent) }
     }
 
     /** Updates the panel state if necessary. */
     fun updateState(@PanelState state: Int) {
         debugLog(
-            "update state: ${this.state.panelStateToString()} -> ${state.panelStateToString()}")
+            "update state: ${this.state.panelStateToString()} -> ${state.panelStateToString()}"
+        )
         if (this.state != state) {
             updateStateInternal(state)
         }
@@ -165,5 +167,5 @@ fun Int.panelStateToString(): String {
     }
 }
 
-private val TAG = PanelExpansionStateManager::class.simpleName
+private val TAG = ShadeExpansionStateManager::class.simpleName
 private val DEBUG = Compile.IS_DEBUG && Log.isLoggable(TAG, Log.DEBUG)
