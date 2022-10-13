@@ -20,12 +20,12 @@ import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
 import static com.android.keyguard.KeyguardClockSwitch.LARGE;
 import static com.android.keyguard.KeyguardClockSwitch.SMALL;
+import static com.android.systemui.shade.ShadeExpansionStateManagerKt.STATE_CLOSED;
+import static com.android.systemui.shade.ShadeExpansionStateManagerKt.STATE_OPEN;
+import static com.android.systemui.shade.ShadeExpansionStateManagerKt.STATE_OPENING;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
 import static com.android.systemui.statusbar.StatusBarState.SHADE_LOCKED;
-import static com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManagerKt.STATE_CLOSED;
-import static com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManagerKt.STATE_OPEN;
-import static com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManagerKt.STATE_OPENING;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -156,7 +156,6 @@ import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.StatusBarTouchableRegionManager;
 import com.android.systemui.statusbar.phone.TapAgainViewController;
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
-import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardQsUserSwitchController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -297,8 +296,8 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     private final FalsingManagerFake mFalsingManager = new FalsingManagerFake();
     private final Optional<SysUIUnfoldComponent> mSysUIUnfoldComponent = Optional.empty();
     private final DisplayMetrics mDisplayMetrics = new DisplayMetrics();
-    private final PanelExpansionStateManager mPanelExpansionStateManager =
-            new PanelExpansionStateManager();
+    private final ShadeExpansionStateManager mShadeExpansionStateManager =
+            new ShadeExpansionStateManager();
     private FragmentHostManager.FragmentListener mFragmentListener;
 
     @Before
@@ -475,7 +474,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mLargeScreenShadeHeaderController,
                 mScreenOffAnimationController,
                 mLockscreenGestureLogger,
-                mPanelExpansionStateManager,
+                mShadeExpansionStateManager,
                 mNotificationRemoteInputManager,
                 mSysUIUnfoldComponent,
                 mInteractionJankMonitor,
@@ -1252,10 +1251,10 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     @Test
     public void testQsToBeImmediatelyExpandedWhenOpeningPanelInSplitShade() {
         enableSplitShade(/* enabled= */ true);
-        mPanelExpansionStateManager.updateState(STATE_CLOSED);
+        mShadeExpansionStateManager.updateState(STATE_CLOSED);
         assertThat(mNotificationPanelViewController.mQsExpandImmediate).isFalse();
 
-        mPanelExpansionStateManager.updateState(STATE_OPENING);
+        mShadeExpansionStateManager.updateState(STATE_OPENING);
 
         assertThat(mNotificationPanelViewController.mQsExpandImmediate).isTrue();
     }
@@ -1263,11 +1262,11 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     @Test
     public void testQsNotToBeImmediatelyExpandedWhenGoingFromUnlockedToLocked() {
         enableSplitShade(/* enabled= */ true);
-        mPanelExpansionStateManager.updateState(STATE_CLOSED);
+        mShadeExpansionStateManager.updateState(STATE_CLOSED);
 
         mStatusBarStateController.setState(KEYGUARD);
         // going to lockscreen would trigger STATE_OPENING
-        mPanelExpansionStateManager.updateState(STATE_OPENING);
+        mShadeExpansionStateManager.updateState(STATE_OPENING);
 
         assertThat(mNotificationPanelViewController.mQsExpandImmediate).isFalse();
     }
@@ -1275,11 +1274,11 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     @Test
     public void testQsImmediateResetsWhenPanelOpensOrCloses() {
         mNotificationPanelViewController.mQsExpandImmediate = true;
-        mPanelExpansionStateManager.updateState(STATE_OPEN);
+        mShadeExpansionStateManager.updateState(STATE_OPEN);
         assertThat(mNotificationPanelViewController.mQsExpandImmediate).isFalse();
 
         mNotificationPanelViewController.mQsExpandImmediate = true;
-        mPanelExpansionStateManager.updateState(STATE_CLOSED);
+        mShadeExpansionStateManager.updateState(STATE_CLOSED);
         assertThat(mNotificationPanelViewController.mQsExpandImmediate).isFalse();
     }
 
@@ -1300,7 +1299,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
 
     @Test
     public void testPanelClosedWhenClosingQsInSplitShade() {
-        mPanelExpansionStateManager.onPanelExpansionChanged(/* fraction= */ 1,
+        mShadeExpansionStateManager.onPanelExpansionChanged(/* fraction= */ 1,
                 /* expanded= */ true, /* tracking= */ false, /* dragDownPxAmount= */ 0);
         enableSplitShade(/* enabled= */ true);
         mNotificationPanelViewController.setExpandedFraction(1f);
@@ -1312,7 +1311,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
 
     @Test
     public void testPanelStaysOpenWhenClosingQs() {
-        mPanelExpansionStateManager.onPanelExpansionChanged(/* fraction= */ 1,
+        mShadeExpansionStateManager.onPanelExpansionChanged(/* fraction= */ 1,
                 /* expanded= */ true, /* tracking= */ false, /* dragDownPxAmount= */ 0);
         mNotificationPanelViewController.setExpandedFraction(1f);
 
