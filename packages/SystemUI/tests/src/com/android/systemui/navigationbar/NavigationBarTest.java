@@ -80,6 +80,7 @@ import com.android.systemui.accessibility.SystemActions;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.buttons.ButtonDispatcher;
 import com.android.systemui.navigationbar.buttons.DeadZone;
@@ -196,6 +197,8 @@ public class NavigationBarTest extends SysuiTestCase {
     private KeyguardStateController mKeyguardStateController;
     @Mock
     private UserContextProvider mUserContextProvider;
+    @Mock
+    private WakefulnessLifecycle mWakefulnessLifecycle;
     @Mock
     private Resources mResources;
     private FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
@@ -474,7 +477,8 @@ public class NavigationBarTest extends SysuiTestCase {
                 mNavigationBarTransitions,
                 mEdgeBackGestureHandler,
                 Optional.of(mock(BackAnimation.class)),
-                mUserContextProvider));
+                mUserContextProvider,
+                mWakefulnessLifecycle));
     }
 
     private void processAllMessages() {
