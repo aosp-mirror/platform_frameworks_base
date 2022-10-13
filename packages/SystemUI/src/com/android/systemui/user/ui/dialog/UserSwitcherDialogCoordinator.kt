@@ -48,7 +48,7 @@ constructor(
     private val dialogLaunchAnimator: DialogLaunchAnimator,
     private val interactor: UserInteractor,
     private val featureFlags: FeatureFlags,
-) : CoreStartable(context) {
+) : CoreStartable {
 
     private var currentDialog: Dialog? = null
 

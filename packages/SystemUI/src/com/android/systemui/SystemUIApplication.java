@@ -45,8 +45,6 @@ import com.android.systemui.dagger.SysUIComponent;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.util.NotificationChannels;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.TreeMap;
@@ -287,14 +285,10 @@ public class SystemUIApplication extends Application implements
         CoreStartable startable;
         if (DEBUG) Log.d(TAG, "loading: " + clsName);
         try {
-            Constructor<?> constructor = Class.forName(clsName).getConstructor(
-                    Context.class);
-            startable = (CoreStartable) constructor.newInstance(this);
+            startable = (CoreStartable) Class.forName(clsName).newInstance();
         } catch (ClassNotFoundException
-                | NoSuchMethodException
                 | IllegalAccessException
-                | InstantiationException
-                | InvocationTargetException ex) {
+                | InstantiationException ex) {
             throw new RuntimeException(ex);
         }
 
