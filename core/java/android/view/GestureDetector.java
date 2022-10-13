@@ -96,7 +96,8 @@ public class GestureDetector {
          * current move {@link MotionEvent}. The distance in x and y is also supplied for
          * convenience.
          *
-         * @param e1 The first down motion event that started the scrolling.
+         * @param e1 The first down motion event that started the scrolling. A {@code null} event
+         *           indicates an incomplete event stream or error state.
          * @param e2 The move motion event that triggered the current onScroll.
          * @param distanceX The distance along the X axis that has been scrolled since the last
          *              call to onScroll. This is NOT the distance between {@code e1}
@@ -106,7 +107,7 @@ public class GestureDetector {
          *              and {@code e2}.
          * @return true if the event is consumed, else false
          */
-        boolean onScroll(@NonNull MotionEvent e1, @NonNull MotionEvent e2, float distanceX,
+        boolean onScroll(@Nullable MotionEvent e1, @NonNull MotionEvent e2, float distanceX,
                 float distanceY);
 
         /**
@@ -122,7 +123,8 @@ public class GestureDetector {
          * and the matching up {@link MotionEvent}. The calculated velocity is supplied along
          * the x and y axis in pixels per second.
          *
-         * @param e1 The first down motion event that started the fling.
+         * @param e1 The first down motion event that started the fling. A {@code null} event
+         *           indicates an incomplete event stream or error state.
          * @param e2 The move motion event that triggered the current onFling.
          * @param velocityX The velocity of this fling measured in pixels per second
          *              along the x axis.
@@ -130,7 +132,7 @@ public class GestureDetector {
          *              along the y axis.
          * @return true if the event is consumed, else false
          */
-        boolean onFling(@NonNull MotionEvent e1, @NonNull MotionEvent e2, float velocityX,
+        boolean onFling(@Nullable MotionEvent e1, @NonNull MotionEvent e2, float velocityX,
                 float velocityY);
     }
 
@@ -201,12 +203,12 @@ public class GestureDetector {
         public void onLongPress(@NonNull MotionEvent e) {
         }
 
-        public boolean onScroll(@NonNull MotionEvent e1, @NonNull MotionEvent e2,
+        public boolean onScroll(@Nullable MotionEvent e1, @NonNull MotionEvent e2,
                 float distanceX, float distanceY) {
             return false;
         }
 
-        public boolean onFling(@NonNull MotionEvent e1, @NonNull MotionEvent e2, float velocityX,
+        public boolean onFling(@Nullable MotionEvent e1, @NonNull MotionEvent e2, float velocityX,
                 float velocityY) {
             return false;
         }
