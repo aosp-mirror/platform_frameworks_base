@@ -245,7 +245,7 @@ public class UdfpsController implements DozeReceiver {
                     mAcquiredReceived = true;
                     final UdfpsView view = mOverlay.getOverlayView();
                     if (view != null) {
-                        view.unconfigureDisplay();
+                        unconfigureDisplay(view);
                     }
                     if (acquiredGood) {
                         mOverlay.onAcquiredGood();
@@ -737,6 +737,19 @@ public class UdfpsController implements DozeReceiver {
 
         mOverlay = null;
         mOrientationListener.disable();
+
+    }
+
+    private void unconfigureDisplay(@NonNull UdfpsView view) {
+        if (view.isDisplayConfigured()) {
+            view.unconfigureDisplay();
+
+            if (mCancelAodTimeoutAction != null) {
+                mCancelAodTimeoutAction.run();
+                mCancelAodTimeoutAction = null;
+            }
+            mIsAodInterruptActive = false;
+        }
     }
 
     /**
@@ -812,11 +825,11 @@ public class UdfpsController implements DozeReceiver {
      * sensors, this can result in illumination persisting for longer than necessary.
      */
     void onCancelUdfps() {
-        if (mOverlay != null && mOverlay.getOverlayView() != null) {
-            onFingerUp(mOverlay.getRequestId(), mOverlay.getOverlayView());
-        }
         if (!mIsAodInterruptActive) {
             return;
+        }
+        if (mOverlay != null && mOverlay.getOverlayView() != null) {
+            onFingerUp(mOverlay.getRequestId(), mOverlay.getOverlayView());
         }
         if (mCancelAodTimeoutAction != null) {
             mCancelAodTimeoutAction.run();
@@ -911,15 +924,8 @@ public class UdfpsController implements DozeReceiver {
             }
         }
         mOnFingerDown = false;
-        if (view.isDisplayConfigured()) {
-            view.unconfigureDisplay();
-        }
+        unconfigureDisplay(view);
 
-        if (mCancelAodTimeoutAction != null) {
-            mCancelAodTimeoutAction.run();
-            mCancelAodTimeoutAction = null;
-        }
-        mIsAodInterruptActive = false;
     }
 
     /**
