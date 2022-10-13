@@ -626,17 +626,6 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
         mUdfpsController.onAodInterrupt(screenX, screenY, major, minor);
     }
 
-    /**
-     * Cancel a fingerprint scan manually. This will get rid of the white circle on the udfps
-     * sensor area even if the user hasn't explicitly lifted their finger yet.
-     */
-    public void onCancelUdfps() {
-        if (mUdfpsController == null) {
-            return;
-        }
-        mUdfpsController.onCancelUdfps();
-    }
-
     private void sendResultAndCleanUp(@DismissedReason int reason,
             @Nullable byte[] credentialAttestation) {
         if (mReceiver == null) {
@@ -964,8 +953,6 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
         } else {
             Log.w(TAG, "onBiometricError callback but dialog is gone");
         }
-
-        onCancelUdfps();
     }
 
     @Override
