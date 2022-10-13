@@ -2438,11 +2438,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * Subclasses override this to specify a default movement method.
      */
     protected MovementMethod getDefaultMovementMethod() {
-        if (isFocusable() || isFocusableInTouchMode()) {
-            return ArrowKeyMovementMethod.getInstance();
-        } else {
-            return null;
-        }
+        return null;
     }
 
     /**
@@ -2657,12 +2653,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     /**
      * Gets the {@link android.text.method.MovementMethod} being used for this TextView,
      * which provides positioning, scrolling, and text selection functionality.
-     * By default, this returns an instance of {@link android.text.method.ArrowKeyMovementMethod}
-     * if this View is focusable or focusable in touch mode.
-     *
+     * This will frequently be null for non-EditText TextViews.
      * @return the movement method being used for this TextView.
      * @see android.text.method.MovementMethod
-     * @see android.text.method.ArrowKeyMovementMethod
      */
     public final MovementMethod getMovementMethod() {
         return mMovement;
