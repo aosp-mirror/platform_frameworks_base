@@ -92,6 +92,7 @@ public class ZenModeHelper {
 
     // The amount of time rules instances can exist without their owning app being installed.
     private static final int RULE_INSTANCE_GRACE_PERIOD = 1000 * 60 * 60 * 72;
+    static final int RULE_LIMIT_PER_PACKAGE = 100;
 
     private final Context mContext;
     private final H mHandler;
@@ -288,8 +289,9 @@ public class ZenModeHelper {
         return null;
     }
 
-    public String addAutomaticZenRule(AutomaticZenRule automaticZenRule, String reason) {
-        if (!isSystemRule(automaticZenRule)) {
+    public String addAutomaticZenRule(String pkg, AutomaticZenRule automaticZenRule,
+            String reason) {
+        if (!ZenModeConfig.SYSTEM_AUTHORITY.equals(pkg)) {
             PackageItemInfo component = getServiceInfo(automaticZenRule.getOwner());
             if (component == null) {
                 component = getActivityInfo(automaticZenRule.getConfigurationActivity());
@@ -305,10 +307,11 @@ public class ZenModeHelper {
             int newRuleInstanceCount = getCurrentInstanceCount(automaticZenRule.getOwner())
                     + getCurrentInstanceCount(automaticZenRule.getConfigurationActivity())
                     + 1;
-            if (ruleInstanceLimit > 0 && ruleInstanceLimit < newRuleInstanceCount) {
+            int newPackageRuleCount = getPackageRuleCount(pkg) + 1;
+            if (newPackageRuleCount > RULE_LIMIT_PER_PACKAGE
+                    || (ruleInstanceLimit > 0 && ruleInstanceLimit < newRuleInstanceCount)) {
                 throw new IllegalArgumentException("Rule instance limit exceeded");
             }
-
         }
 
         ZenModeConfig newConfig;
@@ -321,7 +324,7 @@ public class ZenModeHelper {
             }
             newConfig = mConfig.copy();
             ZenRule rule = new ZenRule();
-            populateZenRule(automaticZenRule, rule, true);
+            populateZenRule(pkg, automaticZenRule, rule, true);
             newConfig.automaticRules.put(rule.id, rule);
             if (setConfigLocked(newConfig, reason, rule.component, true)) {
                 return rule.id;
@@ -351,7 +354,7 @@ public class ZenModeHelper {
                             "Cannot update rules not owned by your condition provider");
                 }
             }
-            populateZenRule(automaticZenRule, rule, false);
+            populateZenRule(rule.pkg, automaticZenRule, rule, false);
             return setConfigLocked(newConfig, reason, rule.component, true);
         }
     }
@@ -381,7 +384,14 @@ public class ZenModeHelper {
             newConfig = mConfig.copy();
             for (int i = newConfig.automaticRules.size() - 1; i >= 0; i--) {
                 ZenRule rule = newConfig.automaticRules.get(newConfig.automaticRules.keyAt(i));
-                if (rule.pkg.equals(packageName) && canManageAutomaticZenRule(rule)) {
+                String pkg = rule.pkg != null
+                        ? rule.pkg
+                        : (rule.component != null)
+                                ? rule.component.getPackageName()
+                                : (rule.configurationActivity != null)
+                                        ? rule.configurationActivity.getPackageName()
+                                        : null;
+                if (Objects.equals(pkg, packageName) && canManageAutomaticZenRule(rule)) {
                     newConfig.automaticRules.removeAt(i);
                 }
             }
@@ -464,6 +474,23 @@ public class ZenModeHelper {
         return count;
     }
 
+    // Equivalent method to getCurrentInstanceCount, but for all rules associated with a specific
+    // package rather than a condition provider service or activity.
+    private int getPackageRuleCount(String pkg) {
+        if (pkg == null) {
+            return 0;
+        }
+        int count = 0;
+        synchronized (mConfig) {
+            for (ZenRule rule : mConfig.automaticRules.values()) {
+                if (pkg.equals(rule.pkg)) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
     public boolean canManageAutomaticZenRule(ZenRule rule) {
         final int callingUid = Binder.getCallingUid();
         if (callingUid == 0 || callingUid == Process.SYSTEM_UID) {
@@ -505,11 +532,6 @@ public class ZenModeHelper {
         }
     }
 
-    private boolean isSystemRule(AutomaticZenRule rule) {
-        return rule.getOwner() != null
-                && ZenModeConfig.SYSTEM_AUTHORITY.equals(rule.getOwner().getPackageName());
-    }
-
     private ServiceInfo getServiceInfo(ComponentName owner) {
         Intent queryIntent = new Intent();
         queryIntent.setComponent(owner);
@@ -545,15 +567,14 @@ public class ZenModeHelper {
         return null;
     }
 
-    private void populateZenRule(AutomaticZenRule automaticZenRule, ZenRule rule, boolean isNew) {
+    private void populateZenRule(String pkg, AutomaticZenRule automaticZenRule, ZenRule rule,
+            boolean isNew) {
         if (isNew) {
             rule.id = ZenModeConfig.newRuleId();
             rule.creationTime = System.currentTimeMillis();
             rule.component = automaticZenRule.getOwner();
             rule.configurationActivity = automaticZenRule.getConfigurationActivity();
-            rule.pkg = (rule.component != null)
-                    ? rule.component.getPackageName()
-                    : rule.configurationActivity.getPackageName();
+            rule.pkg = pkg;
         }
 
         if (rule.enabled != automaticZenRule.isEnabled()) {
@@ -570,10 +591,13 @@ public class ZenModeHelper {
     }
 
     protected AutomaticZenRule createAutomaticZenRule(ZenRule rule) {
-        return new AutomaticZenRule(rule.name, rule.component, rule.configurationActivity,
+        AutomaticZenRule azr =  new AutomaticZenRule(rule.name, rule.component,
+                rule.configurationActivity,
                 rule.conditionId, rule.zenPolicy,
                 NotificationManager.zenModeToInterruptionFilter(rule.zenMode),
                 rule.enabled, rule.creationTime);
+        azr.setPackageName(rule.pkg);
+        return azr;
     }
 
     public void setManualZenMode(int zenMode, Uri conditionId, String caller, String reason) {

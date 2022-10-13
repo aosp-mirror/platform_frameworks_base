@@ -601,6 +601,9 @@ public class PreferencesHelper implements RankingConfig {
             if (r == null) {
                 throw new IllegalArgumentException("Invalid package");
             }
+            if (fromTargetApp) {
+                group.setBlocked(false);
+            }
             final NotificationChannelGroup oldGroup = r.groups.get(group.getId());
             if (!group.equals(oldGroup)) {
                 // will log for new entries as well as name/description changes

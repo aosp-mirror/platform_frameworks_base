@@ -16,12 +16,15 @@
 
 package android.service.voice;
 
+import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.hardware.soundtrigger.IRecognitionStatusCallback;
 import android.hardware.soundtrigger.KeyphraseEnrollmentInfo;
 import android.hardware.soundtrigger.KeyphraseMetadata;
@@ -195,8 +198,10 @@ public class AlwaysOnHotwordDetector {
     private final Callback mExternalCallback;
     private final Object mLock = new Object();
     private final Handler mHandler;
+    private final Context mContext;
 
     private int mAvailability = STATE_NOT_READY;
+    private boolean mIsGrantedHotwordPermission;
 
     /**
      * Additional payload for {@link Callback#onDetected}.
@@ -324,19 +329,32 @@ public class AlwaysOnHotwordDetector {
         public abstract void onRecognitionResumed();
     }
 
+    private static boolean hasHotwordPermission(Context context) {
+        return context.checkSelfPermission(Manifest.permission.CAPTURE_AUDIO_HOTWORD)
+            == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private static boolean hasRecordAudioPermission(Context context) {
+        return context.checkSelfPermission(Manifest.permission.RECORD_AUDIO)
+            == PackageManager.PERMISSION_GRANTED;
+    }
+
     /**
+     * @param context The context to check permission
      * @param text The keyphrase text to get the detector for.
      * @param locale The java locale for the detector.
      * @param callback A non-null Callback for receiving the recognition events.
+     * @param keyphraseEnrollmentInfo The Enrollment info of key phrase
      * @param voiceInteractionService The current voice interaction service.
      * @param modelManagementService A service that allows management of sound models.
      *
      * @hide
      */
-    public AlwaysOnHotwordDetector(String text, Locale locale, Callback callback,
+    public AlwaysOnHotwordDetector(Context context, String text, Locale locale, Callback callback,
             KeyphraseEnrollmentInfo keyphraseEnrollmentInfo,
             IVoiceInteractionService voiceInteractionService,
             IVoiceInteractionManagerService modelManagementService) {
+        mContext = context;
         mText = text;
         mLocale = locale;
         mKeyphraseEnrollmentInfo = keyphraseEnrollmentInfo;
@@ -346,6 +364,7 @@ public class AlwaysOnHotwordDetector {
         mInternalCallback = new SoundTriggerListener(mHandler);
         mVoiceInteractionService = voiceInteractionService;
         mModelManagementService = modelManagementService;
+        mIsGrantedHotwordPermission = hasHotwordPermission(mContext);
         new RefreshAvailabiltyTask().execute();
     }
 
@@ -402,6 +421,12 @@ public class AlwaysOnHotwordDetector {
      */
     public boolean startRecognition(@RecognitionFlags int recognitionFlags) {
         if (DBG) Slog.d(TAG, "startRecognition(" + recognitionFlags + ")");
+
+        if (!mIsGrantedHotwordPermission || !hasRecordAudioPermission(mContext)) {
+            throw new IllegalStateException("Must have the RECORD_AUDIO and CAPTURE_AUDIO_HOTWORD "
+                + "permissions to access the detector.");
+        }
+
         synchronized (mLock) {
             if (mAvailability == STATE_INVALID) {
                 throw new IllegalStateException("startRecognition called on an invalid detector");
@@ -430,6 +455,12 @@ public class AlwaysOnHotwordDetector {
      */
     public boolean stopRecognition() {
         if (DBG) Slog.d(TAG, "stopRecognition()");
+
+        if (!mIsGrantedHotwordPermission || !hasRecordAudioPermission(mContext)) {
+            throw new IllegalStateException("Must have the RECORD_AUDIO and CAPTURE_AUDIO_HOTWORD "
+                + "permissions to access the detector.");
+        }
+
         synchronized (mLock) {
             if (mAvailability == STATE_INVALID) {
                 throw new IllegalStateException("stopRecognition called on an invalid detector");
@@ -546,7 +577,8 @@ public class AlwaysOnHotwordDetector {
         synchronized (mLock) {
             if (mAvailability == STATE_INVALID
                     || mAvailability == STATE_HARDWARE_UNAVAILABLE
-                    || mAvailability == STATE_KEYPHRASE_UNSUPPORTED) {
+                    || mAvailability == STATE_KEYPHRASE_UNSUPPORTED
+                    || !hasRecordAudioPermission(mContext)) {
                 Slog.w(TAG, "Received onSoundModelsChanged for an unsupported keyphrase/config");
                 return;
             }
@@ -717,6 +749,10 @@ public class AlwaysOnHotwordDetector {
          * @return The initial availability without checking the enrollment status.
          */
         private int internalGetInitialAvailability() {
+            if (!mIsGrantedHotwordPermission) {
+                return STATE_HARDWARE_UNAVAILABLE;
+            }
+
             synchronized (mLock) {
                 // This detector has already been invalidated.
                 if (mAvailability == STATE_INVALID) {

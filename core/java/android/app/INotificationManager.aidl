@@ -184,7 +184,7 @@ interface INotificationManager
     void setNotificationPolicyAccessGrantedForUser(String pkg, int userId, boolean granted);
     AutomaticZenRule getAutomaticZenRule(String id);
     List<ZenModeConfig.ZenRule> getZenRules();
-    String addAutomaticZenRule(in AutomaticZenRule automaticZenRule);
+    String addAutomaticZenRule(in AutomaticZenRule automaticZenRule, String pkg);
     boolean updateAutomaticZenRule(String id, in AutomaticZenRule automaticZenRule);
     boolean removeAutomaticZenRule(String id);
     boolean removeAutomaticZenRules(String packageName);

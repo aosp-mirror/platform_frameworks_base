@@ -23,6 +23,9 @@ import static android.graphics.GraphicBuffer.USAGE_SW_READ_RARELY;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import android.app.ActivityManager.TaskSnapshot;
 import android.content.ComponentName;
 import android.graphics.Canvas;
@@ -32,9 +35,14 @@ import android.graphics.GraphicBuffer;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.UserManager;
+import android.os.UserManagerInternal;
+
+import com.android.server.LocalServices;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 
 import java.io.File;
 
@@ -50,10 +58,26 @@ class TaskSnapshotPersisterTestBase extends WindowTestsBase {
     TaskSnapshotLoader mLoader;
     int mTestUserId;
 
+    @BeforeClass
+    public static void setUpOnce() {
+        final UserManagerInternal userManager = mock(UserManagerInternal.class);
+        LocalServices.addService(UserManagerInternal.class, userManager);
+    }
+
+    @AfterClass
+    public static void tearDownOnce() {
+        LocalServices.removeServiceForTest(UserManagerInternal.class);
+    }
+
     @Before
     public void setUp() {
         final UserManager um = UserManager.get(getInstrumentation().getTargetContext());
         mTestUserId = um.getUserHandle();
+
+        final UserManagerInternal userManagerInternal =
+                LocalServices.getService(UserManagerInternal.class);
+        when(userManagerInternal.isUserUnlocked(mTestUserId)).thenReturn(true);
+
         mPersister = new TaskSnapshotPersister(mWm, userId -> FILES_DIR);
         mLoader = new TaskSnapshotLoader(mPersister);
         mPersister.start();

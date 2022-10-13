@@ -201,6 +201,89 @@ public class NotificationInterruptionStateProvider {
         return true;
     }
 
+    public boolean shouldLaunchFullScreenIntentWhenAdded(NotificationEntry entry) {
+        if (entry.notification.getNotification().fullScreenIntent == null) {
+            return false;
+        }
+
+        // Never show FSI when suppressed by DND
+        if (entry.shouldSuppressFullScreenIntent()) {
+            if (DEBUG) {
+                Log.d(TAG, "No FullScreenIntent: Suppressed by DND: " + entry.key);
+            }
+            return false;
+        }
+
+        // Never show FSI if importance is not HIGH
+        if (entry.importance < NotificationManager.IMPORTANCE_HIGH) {
+            if (DEBUG) {
+                Log.d(TAG, "No FullScreenIntent: Not important enough: " + entry.key);
+            }
+            return false;
+        }
+
+        // If the notification has suppressive GroupAlertBehavior, block FSI and warn.
+        StatusBarNotification sbn = entry.notification;
+        if (sbn.isGroup() && sbn.getNotification().suppressAlertingDueToGrouping()) {
+            // b/231322873: Detect and report an event when a notification has both an FSI and a
+            // suppressive groupAlertBehavior, and now correctly block the FSI from firing.
+            final int uid = entry.notification.getUid();
+            android.util.EventLog.writeEvent(0x534e4554, "231322873", uid, "groupAlertBehavior");
+            if (DEBUG) {
+                Log.w(TAG, "No FullScreenIntent: WARNING: GroupAlertBehavior will prevent HUN: "
+                        + entry.key);
+            }
+            return false;
+        }
+
+        // If the screen is off, then launch the FullScreenIntent
+        if (!mPowerManager.isInteractive()) {
+            if (DEBUG) {
+                Log.d(TAG, "FullScreenIntent: Device is not interactive: " + entry.key);
+            }
+            return true;
+        }
+
+        // If the device is currently dreaming, then launch the FullScreenIntent
+        if (isDreaming()) {
+            if (DEBUG) {
+                Log.d(TAG, "FullScreenIntent: Device is dreaming: " + entry.key);
+            }
+            return true;
+        }
+
+        // If the keyguard is showing, then launch the FullScreenIntent
+        if (mStatusBarStateController.getState() == StatusBarState.KEYGUARD) {
+            if (DEBUG) {
+                Log.d(TAG, "FullScreenIntent: Keyguard is showing: " + entry.key);
+            }
+            return true;
+        }
+
+        // If the notification should HUN, then we don't need FSI
+        if (shouldHeadsUp(entry)) {
+            if (DEBUG) {
+                Log.d(TAG, "No FullScreenIntent: Expected to HUN: " + entry.key);
+            }
+            return false;
+        }
+
+        // If the notification won't HUN for some other reason (DND/snooze/etc), launch FSI.
+        if (DEBUG) {
+            Log.d(TAG, "FullScreenIntent: Expected not to HUN: " + entry.key);
+        }
+        return true;
+    }
+
+    private boolean isDreaming() {
+        try {
+            return mDreamManager.isDreaming();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to query dream manager.", e);
+            return false;
+        }
+    }
+
     /**
      * Whether the notification should peek in from the top and alert the user.
      *
@@ -256,13 +339,7 @@ public class NotificationInterruptionStateProvider {
             return false;
         }
 
-        boolean isDreaming = false;
-        try {
-            isDreaming = mDreamManager.isDreaming();
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to query dream manager.", e);
-        }
-        boolean inUse = mPowerManager.isScreenOn() && !isDreaming;
+        boolean inUse = mPowerManager.isScreenOn() && !isDreaming();
 
         if (!inUse) {
             if (DEBUG_HEADS_UP) {
@@ -413,19 +490,6 @@ public class NotificationInterruptionStateProvider {
 
     protected NotificationPresenter getPresenter() {
         return mPresenter;
-    }
-
-    /**
-     * When an entry was added, should we launch its fullscreen intent? Examples are Alarms or
-     * incoming calls.
-     *
-     * @param entry the entry that was added
-     * @return {@code true} if we should launch the full screen intent
-     */
-    public boolean shouldLaunchFullScreenIntentWhenAdded(NotificationEntry entry) {
-        return entry.notification.getNotification().fullScreenIntent != null
-            && (!shouldHeadsUp(entry)
-                || mStatusBarStateController.getState() == StatusBarState.KEYGUARD);
     }
 
     /** A component which can suppress heads-up notifications due to the overall state of the UI. */
