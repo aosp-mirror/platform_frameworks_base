@@ -29,6 +29,7 @@ android_library {
         "androidx.compose.runtime_runtime",
         "androidx.compose.runtime_runtime-livedata",
         "androidx.compose.ui_ui-tooling-preview",
+        "androidx.lifecycle_lifecycle-livedata-ktx",
         "androidx.navigation_navigation-compose",
         "com.google.android.material_material",
         "lottie_compose",
