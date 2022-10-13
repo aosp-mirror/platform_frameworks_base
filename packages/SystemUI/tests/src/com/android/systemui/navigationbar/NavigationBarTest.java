@@ -72,7 +72,6 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
-import com.android.keyguard.KeyguardViewController;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.SysuiTestableContext;
 import com.android.systemui.accessibility.AccessibilityButtonModeObserver;
@@ -194,7 +193,7 @@ public class NavigationBarTest extends SysuiTestCase {
     @Mock
     private CentralSurfaces mCentralSurfaces;
     @Mock
-    private KeyguardViewController mKeyguardViewController;
+    private KeyguardStateController mKeyguardStateController;
     @Mock
     private UserContextProvider mUserContextProvider;
     @Mock
@@ -240,7 +239,7 @@ public class NavigationBarTest extends SysuiTestCase {
                     mock(AccessibilityButtonTargetsObserver.class),
                     mSystemActions, mOverviewProxyService,
                     () -> mock(AssistManager.class), () -> Optional.of(mCentralSurfaces),
-                    mKeyguardViewController, mock(NavigationModeController.class),
+                    mKeyguardStateController, mock(NavigationModeController.class),
                     mock(UserTracker.class), mock(DumpManager.class)));
             mNavigationBar = createNavBar(mContext);
             mExternalDisplayNavigationBar = createNavBar(mSysuiTestableContextExternal);
@@ -380,7 +379,7 @@ public class NavigationBarTest extends SysuiTestCase {
 
         // Verify navbar didn't alter and showing back icon when the keyguard is showing without
         // requesting IME insets visible.
-        doReturn(true).when(mKeyguardViewController).isShowing();
+        doReturn(true).when(mKeyguardStateController).isShowing();
         mNavigationBar.setImeWindowStatus(DEFAULT_DISPLAY, null, IME_VISIBLE,
                 BACK_DISPOSITION_DEFAULT, true);
         assertFalse((mNavigationBar.getNavigationIconHints() & NAVIGATION_HINT_BACK_ALT) != 0);
