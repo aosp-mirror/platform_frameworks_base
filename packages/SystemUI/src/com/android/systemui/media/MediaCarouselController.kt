@@ -11,6 +11,7 @@ import android.util.MathUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.PathInterpolator
 import android.widget.LinearLayout
 import androidx.annotation.VisibleForTesting
 import com.android.internal.logging.InstanceId
@@ -95,7 +96,8 @@ class MediaCarouselController @Inject constructor(
      * finished
      */
     @MediaLocation
-    private var currentEndLocation: Int = -1
+    @VisibleForTesting
+    var currentEndLocation: Int = -1
 
     /**
      * The ending location of the view where it ends when all animations and transitions have
@@ -126,7 +128,8 @@ class MediaCarouselController @Inject constructor(
     lateinit var settingsButton: View
         private set
     private val mediaContent: ViewGroup
-    private val pageIndicator: PageIndicator
+    @VisibleForTesting
+    val pageIndicator: PageIndicator
     private val visualStabilityCallback: OnReorderingAllowedListener
     private var needsReordering: Boolean = false
     private var keysNeedRemoval = mutableSetOf<String>()
@@ -149,6 +152,27 @@ class MediaCarouselController @Inject constructor(
                 }
             }
         }
+
+    companion object {
+        const val ANIMATION_BASE_DURATION = 2200f
+        const val DURATION = 167f
+        const val DETAILS_DELAY = 1067f
+        const val CONTROLS_DELAY = 1400f
+        const val PAGINATION_DELAY = 1900f
+        const val MEDIATITLES_DELAY = 1000f
+        const val MEDIACONTAINERS_DELAY = 967f
+        val TRANSFORM_BEZIER = PathInterpolator (0.68F, 0F, 0F, 1F)
+        val REVERSE_BEZIER = PathInterpolator (0F, 0.68F, 1F, 0F)
+
+        fun calculateAlpha(squishinessFraction: Float, delay: Float, duration: Float): Float {
+            val transformStartFraction = delay / ANIMATION_BASE_DURATION
+            val transformDurationFraction = duration / ANIMATION_BASE_DURATION
+            val squishinessToTime = REVERSE_BEZIER.getInterpolation(squishinessFraction)
+            return MathUtils.constrain((squishinessToTime - transformStartFraction) /
+                    transformDurationFraction, 0F, 1F)
+        }
+    }
+
     private val configListener = object : ConfigurationController.ConfigurationListener {
         override fun onDensityOrFontScaleChanged() {
             // System font changes should only happen when UMO is offscreen or a flicker may occur
@@ -633,12 +657,17 @@ class MediaCarouselController @Inject constructor(
         }
     }
 
-    private fun updatePageIndicatorAlpha() {
+    @VisibleForTesting
+    fun updatePageIndicatorAlpha() {
         val hostStates = mediaHostStatesManager.mediaHostStates
         val endIsVisible = hostStates[currentEndLocation]?.visible ?: false
         val startIsVisible = hostStates[currentStartLocation]?.visible ?: false
         val startAlpha = if (startIsVisible) 1.0f else 0.0f
-        val endAlpha = if (endIsVisible) 1.0f else 0.0f
+        // when squishing in split shade, only use endState, which keeps changing
+        // to provide squishFraction
+        val squishFraction = hostStates[currentEndLocation]?.squishFraction ?: 1.0F
+        val endAlpha = (if (endIsVisible) 1.0f else 0.0f) *
+                calculateAlpha(squishFraction, PAGINATION_DELAY, DURATION)
         var alpha = 1.0f
         if (!endIsVisible || !startIsVisible) {
             var progress = currentTransitionProgress
@@ -687,6 +716,7 @@ class MediaCarouselController @Inject constructor(
             mediaCarouselScrollHandler.setCarouselBounds(
                     currentCarouselWidth, currentCarouselHeight)
             updatePageIndicatorLocation()
+            updatePageIndicatorAlpha()
         }
     }
 
