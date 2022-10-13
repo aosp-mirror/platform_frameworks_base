@@ -47,6 +47,8 @@ import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.withArgCaptor
 import com.android.systemui.util.time.FakeSystemClock
+import java.util.ArrayList
+import java.util.function.Consumer
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -57,10 +59,8 @@ import org.mockito.BDDMockito.given
 import org.mockito.Mockito.never
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
-import org.mockito.MockitoAnnotations
-import java.util.ArrayList
-import java.util.function.Consumer
 import org.mockito.Mockito.`when` as whenever
+import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -671,8 +671,64 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         verify(mHeadsUpManager, never()).showNotification(mGroupChild2)
     }
 
+    @Test
+    fun testOnRankingApplied_newEntryShouldAlert() {
+        // GIVEN that mEntry has never interrupted in the past, and now should
+        assertFalse(mEntry.hasInterrupted())
+        setShouldHeadsUp(mEntry)
+        whenever(mNotifPipeline.allNotifs).thenReturn(listOf(mEntry))
+
+        // WHEN a ranking applied update occurs
+        mCollectionListener.onRankingApplied()
+        mBeforeTransformGroupsListener.onBeforeTransformGroups(listOf(mEntry))
+        mBeforeFinalizeFilterListener.onBeforeFinalizeFilter(listOf(mEntry))
+
+        // THEN the notification is shown
+        finishBind(mEntry)
+        verify(mHeadsUpManager).showNotification(mEntry)
+    }
+
+    @Test
+    fun testOnRankingApplied_alreadyAlertedEntryShouldNotAlertAgain() {
+        // GIVEN that mEntry has alerted in the past
+        mEntry.setInterruption()
+        setShouldHeadsUp(mEntry)
+        whenever(mNotifPipeline.allNotifs).thenReturn(listOf(mEntry))
+
+        // WHEN a ranking applied update occurs
+        mCollectionListener.onRankingApplied()
+        mBeforeTransformGroupsListener.onBeforeTransformGroups(listOf(mEntry))
+        mBeforeFinalizeFilterListener.onBeforeFinalizeFilter(listOf(mEntry))
+
+        // THEN the notification is never bound or shown
+        verify(mHeadsUpViewBinder, never()).bindHeadsUpView(any(), any())
+        verify(mHeadsUpManager, never()).showNotification(any())
+    }
+
+    @Test
+    fun testOnRankingApplied_entryUpdatedToHun() {
+        // GIVEN that mEntry is added in a state where it should not HUN
+        setShouldHeadsUp(mEntry, false)
+        mCollectionListener.onEntryAdded(mEntry)
+
+        // and it is then updated such that it should now HUN
+        setShouldHeadsUp(mEntry)
+        whenever(mNotifPipeline.allNotifs).thenReturn(listOf(mEntry))
+
+        // WHEN a ranking applied update occurs
+        mCollectionListener.onRankingApplied()
+        mBeforeTransformGroupsListener.onBeforeTransformGroups(listOf(mEntry))
+        mBeforeFinalizeFilterListener.onBeforeFinalizeFilter(listOf(mEntry))
+
+        // THEN the notification is shown
+        finishBind(mEntry)
+        verify(mHeadsUpManager).showNotification(mEntry)
+    }
+
     private fun setShouldHeadsUp(entry: NotificationEntry, should: Boolean = true) {
         whenever(mNotificationInterruptStateProvider.shouldHeadsUp(entry)).thenReturn(should)
+        whenever(mNotificationInterruptStateProvider.checkHeadsUp(eq(entry), any()))
+                .thenReturn(should)
     }
 
     private fun finishBind(entry: NotificationEntry) {
