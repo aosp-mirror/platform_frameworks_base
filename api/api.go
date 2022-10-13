@@ -148,18 +148,35 @@ func createMergedStubsSrcjar(ctx android.LoadHookContext, modules []string) {
 	ctx.CreateModule(genrule.GenRuleFactory, &props)
 }
 
-func createMergedPublicAnnotationsFilegroup(ctx android.LoadHookContext, modules []string) {
-	props := fgProps{}
-	props.Name = proptools.StringPtr("all-modules-public-annotations")
-	props.Srcs = createSrcs(modules, "{.public.annotations.zip}")
-	ctx.CreateModule(android.FileGroupFactory, &props)
-}
-
-func createMergedSystemAnnotationsFilegroup(ctx android.LoadHookContext, modules []string) {
-	props := fgProps{}
-	props.Name = proptools.StringPtr("all-modules-system-annotations")
-	props.Srcs = createSrcs(modules, "{.system.annotations.zip}")
-	ctx.CreateModule(android.FileGroupFactory, &props)
+func createMergedAnnotationsFilegroups(ctx android.LoadHookContext, modules, system_server_modules []string) {
+	for _, i := range []struct{
+		name    string
+		tag     string
+		modules []string
+	}{
+		{
+			name: "all-modules-public-annotations",
+			tag:  "{.public.annotations.zip}",
+			modules: modules,
+		}, {
+			name: "all-modules-system-annotations",
+			tag:  "{.system.annotations.zip}",
+			modules: modules,
+		}, {
+			name: "all-modules-module-lib-annotations",
+			tag:  "{.module-lib.annotations.zip}",
+			modules: modules,
+		}, {
+			name: "all-modules-system-server-annotations",
+			tag:  "{.system-server.annotations.zip}",
+			modules: system_server_modules,
+		},
+	} {
+		props := fgProps{}
+		props.Name = proptools.StringPtr(i.name)
+		props.Srcs = createSrcs(i.modules, i.tag)
+		ctx.CreateModule(android.FileGroupFactory, &props)
+	}
 }
 
 func createFilteredApiVersions(ctx android.LoadHookContext, modules []string) {
@@ -172,17 +189,43 @@ func createFilteredApiVersions(ctx android.LoadHookContext, modules []string) {
 	//    difficult to achieve.
 	modules = remove(modules, art)
 
-	props := genruleProps{}
-	props.Name = proptools.StringPtr("api-versions-xml-public-filtered")
-	props.Tools = []string{"api_versions_trimmer"}
-	props.Out = []string{"api-versions-public-filtered.xml"}
-	props.Cmd = proptools.StringPtr("$(location api_versions_trimmer) $(out) $(in)")
-	// Note: order matters: first parameter is the full api-versions.xml
-	// after that the stubs files in any order
-	// stubs files are all modules that export API surfaces EXCEPT ART
-	props.Srcs = append([]string{":api_versions_public{.api_versions.xml}"}, createSrcs(modules, ".stubs{.jar}")...)
-	props.Dists = []android.Dist{{Targets: []string{"sdk"}}}
-	ctx.CreateModule(genrule.GenRuleFactory, &props)
+	for _, i := range []struct{
+		name string
+		out  string
+		in   string
+	}{
+		{
+			// We shouldn't need public-filtered or system-filtered.
+			// public-filtered is currently used to lint things that
+			// use the module sdk or the system server sdk, but those
+			// should be switched over to module-filtered and
+			// system-server-filtered, and then public-filtered can
+			// be removed.
+			name: "api-versions-xml-public-filtered",
+			out:  "api-versions-public-filtered.xml",
+			in:   ":api_versions_public{.api_versions.xml}",
+		}, {
+			name: "api-versions-xml-module-lib-filtered",
+			out:  "api-versions-module-lib-filtered.xml",
+			in:   ":api_versions_module_lib{.api_versions.xml}",
+		}, {
+			name: "api-versions-xml-system-server-filtered",
+			out:  "api-versions-system-server-filtered.xml",
+			in:   ":api_versions_system_server{.api_versions.xml}",
+		},
+	} {
+		props := genruleProps{}
+		props.Name = proptools.StringPtr(i.name)
+		props.Out = []string{i.out}
+		// Note: order matters: first parameter is the full api-versions.xml
+		// after that the stubs files in any order
+		// stubs files are all modules that export API surfaces EXCEPT ART
+		props.Srcs = append([]string{i.in}, createSrcs(modules, ".stubs{.jar}")...)
+		props.Tools = []string{"api_versions_trimmer"}
+		props.Cmd = proptools.StringPtr("$(location api_versions_trimmer) $(out) $(in)")
+		props.Dists = []android.Dist{{Targets: []string{"sdk"}}}
+		ctx.CreateModule(genrule.GenRuleFactory, &props)
+	}
 }
 
 func createMergedPublicStubs(ctx android.LoadHookContext, modules []string) {
@@ -279,11 +322,12 @@ func createMergedTxts(ctx android.LoadHookContext, bootclasspath, system_server_
 
 func (a *CombinedApis) createInternalModules(ctx android.LoadHookContext) {
 	bootclasspath := a.properties.Bootclasspath
+	system_server_classpath := a.properties.System_server_classpath
 	if ctx.Config().VendorConfig("ANDROID").Bool("include_nonpublic_framework_api") {
 		bootclasspath = append(bootclasspath, a.properties.Conditional_bootclasspath...)
 		sort.Strings(bootclasspath)
 	}
-	createMergedTxts(ctx, bootclasspath, a.properties.System_server_classpath)
+	createMergedTxts(ctx, bootclasspath, system_server_classpath)
 
 	createMergedStubsSrcjar(ctx, bootclasspath)
 
@@ -292,8 +336,7 @@ func (a *CombinedApis) createInternalModules(ctx android.LoadHookContext) {
 	createMergedFrameworkModuleLibStubs(ctx, bootclasspath)
 	createMergedFrameworkImpl(ctx, bootclasspath)
 
-	createMergedPublicAnnotationsFilegroup(ctx, bootclasspath)
-	createMergedSystemAnnotationsFilegroup(ctx, bootclasspath)
+	createMergedAnnotationsFilegroups(ctx, bootclasspath, system_server_classpath)
 
 	createFilteredApiVersions(ctx, bootclasspath)
 
