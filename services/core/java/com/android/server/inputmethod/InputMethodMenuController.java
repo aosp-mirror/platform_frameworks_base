@@ -21,7 +21,6 @@ import static com.android.server.inputmethod.InputMethodUtils.NOT_A_SUBTYPE_ID;
 
 import android.annotation.Nullable;
 import android.app.AlertDialog;
-import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.TypedArray;
@@ -56,7 +55,6 @@ final class InputMethodMenuController {
     private final InputMethodUtils.InputMethodSettings mSettings;
     private final InputMethodSubtypeSwitchingController mSwitchingController;
     private final ArrayMap<String, InputMethodInfo> mMethodMap;
-    private final KeyguardManager mKeyguardManager;
     private final WindowManagerInternal mWindowManagerInternal;
 
     private AlertDialog.Builder mDialogBuilder;
@@ -76,7 +74,6 @@ final class InputMethodMenuController {
         mSettings = mService.mSettings;
         mSwitchingController = mService.mSwitchingController;
         mMethodMap = mService.mMethodMap;
-        mKeyguardManager = mService.mKeyguardManager;
         mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
     }
 
@@ -209,8 +206,8 @@ final class InputMethodMenuController {
     }
 
     private boolean isScreenLocked() {
-        return mKeyguardManager != null && mKeyguardManager.isKeyguardLocked()
-                && mKeyguardManager.isKeyguardSecure();
+        return mWindowManagerInternal.isKeyguardLocked()
+                && mWindowManagerInternal.isKeyguardSecure(mSettings.getCurrentUserId());
     }
 
     void updateKeyboardFromSettingsLocked() {
