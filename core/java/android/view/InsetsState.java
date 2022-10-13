@@ -518,6 +518,22 @@ public class InsetsState implements Parcelable {
     }
 
     /**
+     * FIXME (b/253420890): This can be removed once the requested visibilities are migrated to
+     *                      public types.
+     */
+    public boolean hasVisibleSource(@InsetsType int types) {
+        for (InsetsSource source : mSources) {
+            if (source == null) {
+                continue;
+            }
+            if (source.isVisible() && (toPublicType(source.getType()) & types) != 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Returns the source visibility or the default visibility if the source doesn't exist. This is
      * useful if when treating this object as a request.
      *

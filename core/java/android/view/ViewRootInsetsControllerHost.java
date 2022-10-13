@@ -145,8 +145,10 @@ public class ViewRootInsetsControllerHost implements InsetsController.Host {
     }
 
     @Override
-    public void updateCompatSysUiVisibility(int type, boolean visible, boolean hasControl) {
-        mViewRoot.updateCompatSysUiVisibility(type, visible, hasControl);
+    public void updateCompatSysUiVisibility(int visibleTypes, int requestedVisibleTypes,
+            int controllableTypes) {
+        mViewRoot.updateCompatSysUiVisibility(visibleTypes, requestedVisibleTypes,
+                controllableTypes);
     }
 
     @Override
