@@ -484,6 +484,25 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         }
 
         @Override
+        public void setImeWindowStatus(int displayId, IBinder token, int vis, int backDisposition,
+                boolean showImeSwitcher) {
+            StatusBarManagerService.this.setImeWindowStatus(displayId, token, vis, backDisposition,
+                    showImeSwitcher);
+        }
+
+        @Override
+        public void setIcon(String slot, String iconPackage, int iconId, int iconLevel,
+                String contentDescription) {
+            StatusBarManagerService.this.setIcon(slot, iconPackage, iconId, iconLevel,
+                    contentDescription);
+        }
+
+        @Override
+        public void setIconVisibility(String slot, boolean visibility) {
+            StatusBarManagerService.this.setIconVisibility(slot, visibility);
+        }
+
+        @Override
         public void showChargingAnimation(int batteryLevel) {
             if (mBar != null) {
                 try {
