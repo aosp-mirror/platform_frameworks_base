@@ -120,7 +120,7 @@ constructor(
                     onClicked = { parameters ->
                         quickAffordanceInteractor.onQuickAffordanceClicked(
                             configKey = parameters.configKey,
-                            animationController = parameters.animationController,
+                            expandable = parameters.expandable,
                         )
                     },
                     isClickable = isClickable,

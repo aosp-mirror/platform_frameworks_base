@@ -29,7 +29,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.settingslib.Utils
 import com.android.systemui.R
-import com.android.systemui.animation.ActivityLaunchAnimator
+import com.android.systemui.animation.Expandable
 import com.android.systemui.animation.Interpolators
 import com.android.systemui.common.ui.binder.IconViewBinder
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBottomAreaViewModel
@@ -280,7 +280,7 @@ object KeyguardBottomAreaViewBinder {
                 viewModel.onClicked(
                     KeyguardQuickAffordanceViewModel.OnClickedParameters(
                         configKey = viewModel.configKey,
-                        animationController = ActivityLaunchAnimator.Controller.fromView(view),
+                        expandable = Expandable.fromView(view),
                     )
                 )
             }

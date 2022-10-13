@@ -18,7 +18,7 @@
 package com.android.systemui.keyguard.domain.quickaffordance
 
 import android.content.Intent
-import com.android.systemui.animation.ActivityLaunchAnimator
+import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordanceToggleState
 import kotlinx.coroutines.flow.Flow
@@ -28,9 +28,7 @@ interface KeyguardQuickAffordanceConfig {
 
     val state: Flow<State>
 
-    fun onQuickAffordanceClicked(
-        animationController: ActivityLaunchAnimator.Controller?
-    ): OnClickedResult
+    fun onQuickAffordanceClicked(expandable: Expandable?): OnClickedResult
 
     /**
      * Encapsulates the state of a "quick affordance" in the keyguard bottom area (for example, a

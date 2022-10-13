@@ -20,7 +20,7 @@ import android.content.Intent
 import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.animation.ActivityLaunchAnimator
+import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.doze.util.BurnInHelperWrapper
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
@@ -60,7 +60,7 @@ import org.mockito.MockitoAnnotations
 @RunWith(JUnit4::class)
 class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
 
-    @Mock private lateinit var animationController: ActivityLaunchAnimator.Controller
+    @Mock private lateinit var expandable: Expandable
     @Mock private lateinit var burnInHelperWrapper: BurnInHelperWrapper
     @Mock private lateinit var lockPatternUtils: LockPatternUtils
     @Mock private lateinit var keyguardStateController: KeyguardStateController
@@ -535,7 +535,7 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
             viewModel.onClicked.invoke(
                 KeyguardQuickAffordanceViewModel.OnClickedParameters(
                     configKey = configKey,
-                    animationController = animationController,
+                    expandable = expandable,
                 )
             )
             if (testConfig.intent != null) {

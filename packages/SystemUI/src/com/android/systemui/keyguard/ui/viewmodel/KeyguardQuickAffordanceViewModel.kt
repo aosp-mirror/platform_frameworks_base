@@ -16,7 +16,7 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
-import com.android.systemui.animation.ActivityLaunchAnimator
+import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.keyguard.domain.quickaffordance.KeyguardQuickAffordanceConfig
 import kotlin.reflect.KClass
@@ -34,6 +34,6 @@ data class KeyguardQuickAffordanceViewModel(
 ) {
     data class OnClickedParameters(
         val configKey: KClass<out KeyguardQuickAffordanceConfig>,
-        val animationController: ActivityLaunchAnimator.Controller?,
+        val expandable: Expandable?,
     )
 }

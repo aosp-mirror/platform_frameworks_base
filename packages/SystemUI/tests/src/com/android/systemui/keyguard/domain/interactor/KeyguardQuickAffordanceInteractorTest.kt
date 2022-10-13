@@ -12,9 +12,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
-package com.android.systemui.keyguard.domain.usecase
+package com.android.systemui.keyguard.domain.interactor
 
 import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
@@ -22,8 +23,6 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
-import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
-import com.android.systemui.keyguard.domain.interactor.KeyguardQuickAffordanceInteractor
 import com.android.systemui.keyguard.domain.model.KeyguardQuickAffordanceModel
 import com.android.systemui.keyguard.domain.model.KeyguardQuickAffordancePosition
 import com.android.systemui.keyguard.domain.quickaffordance.FakeKeyguardQuickAffordanceConfig
