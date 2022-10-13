@@ -24,13 +24,14 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
+import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.plugins.ClockAnimations
 import com.android.systemui.plugins.ClockController
 import com.android.systemui.plugins.ClockEvents
 import com.android.systemui.plugins.ClockFaceController
 import com.android.systemui.plugins.ClockFaceEvents
-import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.mockito.any
@@ -79,6 +80,7 @@ class ClockEventControllerTest : SysuiTestCase() {
     @Mock private lateinit var smallClockEvents: ClockFaceEvents
     @Mock private lateinit var largeClockEvents: ClockFaceEvents
     @Mock private lateinit var parentView: View
+    @Mock private lateinit var transitionRepository: KeyguardTransitionRepository
     private lateinit var repository: FakeKeyguardRepository
 
     private lateinit var underTest: ClockEventController
@@ -98,6 +100,7 @@ class ClockEventControllerTest : SysuiTestCase() {
 
         underTest = ClockEventController(
             KeyguardInteractor(repository = repository),
+            KeyguardTransitionInteractor(repository = transitionRepository),
             broadcastDispatcher,
             batteryController,
             keyguardUpdateMonitor,
@@ -132,7 +135,6 @@ class ClockEventControllerTest : SysuiTestCase() {
 
     @Test
     fun themeChanged_verifyClockPaletteUpdated() = runBlocking(IMMEDIATE) {
-        clockEventController.clock = clock
         verify(smallClockEvents).onRegionDarknessChanged(anyBoolean())
         verify(largeClockEvents).onRegionDarknessChanged(anyBoolean())
 
@@ -145,7 +147,6 @@ class ClockEventControllerTest : SysuiTestCase() {
 
     @Test
     fun fontChanged_verifyFontSizeUpdated() = runBlocking(IMMEDIATE) {
-        clockEventController.clock = clock
         verify(smallClockEvents).onRegionDarknessChanged(anyBoolean())
         verify(largeClockEvents).onRegionDarknessChanged(anyBoolean())
 

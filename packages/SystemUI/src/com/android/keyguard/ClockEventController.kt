@@ -32,8 +32,9 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags.REGION_SAMPLING
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.lifecycle.repeatWhenAttached
-import com.android.systemui.plugins.Clock
+import com.android.systemui.plugins.ClockController
 import com.android.systemui.shared.regionsampling.RegionSamplingInstance
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback
@@ -56,6 +57,7 @@ import kotlinx.coroutines.launch
  */
 open class ClockEventController @Inject constructor(
     private val keyguardInteractor: KeyguardInteractor,
+    private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val broadcastDispatcher: BroadcastDispatcher,
     private val batteryController: BatteryController,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
@@ -216,6 +218,7 @@ open class ClockEventController @Inject constructor(
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 listenForDozing(this)
                 listenForDozeAmount(this)
+                listenForDozeAmountTransition(this)
             }
         }
     }
@@ -246,7 +249,7 @@ open class ClockEventController @Inject constructor(
     }
 
     @VisibleForTesting
-    internal suspend fun listenForDozeAmount(scope: CoroutineScope): Job {
+    internal fun listenForDozeAmount(scope: CoroutineScope): Job {
         return scope.launch {
             keyguardInteractor.dozeAmount.collect {
                 dozeAmount = it
@@ -256,7 +259,18 @@ open class ClockEventController @Inject constructor(
     }
 
     @VisibleForTesting
-    internal suspend fun listenForDozing(scope: CoroutineScope): Job {
+    internal fun listenForDozeAmountTransition(scope: CoroutineScope): Job {
+        return scope.launch {
+            keyguardTransitionInteractor.aodToLockscreenTransition.collect {
+                // Would eventually run this:
+                // dozeAmount = it.value
+                // clock?.animations?.doze(dozeAmount)
+            }
+        }
+    }
+
+    @VisibleForTesting
+    internal fun listenForDozing(scope: CoroutineScope): Job {
         return scope.launch {
             combine (
                 keyguardInteractor.dozeAmount,
