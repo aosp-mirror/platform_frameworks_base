@@ -19,9 +19,13 @@ import androidx.compose.material.ChipDefaults
 import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Text
+import androidx.compose.material.TopAppBar
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -71,8 +75,13 @@ fun CreatePasskeyScreen(
           onOptionSelected = {viewModel.onCreateOptionSelected(it)},
           onCancel = cancelActivity,
           multiProvider = uiState.providers.size > 1,
-          onMoreOptionSelected = {viewModel.onMoreOptionSelected()}
+          onMoreOptionSelected = {viewModel.onMoreOptionSelected(it)}
         )
+        CreateScreenState.MORE_OPTIONS_SELECTION -> MoreOptionSelectionCard(
+            providerInfo = uiState.selectedProvider!!,
+            onCancel = cancelActivity,
+            onBackButtonSelected = {viewModel.onBackButtonSelected(it)}
+          )
       }
     },
     scrimColor = Color.Transparent,
@@ -202,6 +211,67 @@ fun ProviderSelectionCard(
   }
 }
 
+@Composable
+fun MoreOptionSelectionCard(
+  providerInfo: ProviderInfo,
+  onCancel: () -> Unit,
+  onBackButtonSelected: (String) -> Unit
+) {
+  Card(
+    backgroundColor = lightBackgroundColor,
+  ) {
+    Column() {
+      TopAppBar(
+        title = { Text(text = stringResource(R.string.string_more_options), style = Typography.subtitle1) },
+        backgroundColor = lightBackgroundColor,
+        elevation = 0.dp,
+        navigationIcon =
+        {
+          IconButton(onClick = { onBackButtonSelected(providerInfo.name) }) {
+            Icon(Icons.Filled.ArrowBack, "backIcon"
+            )
+          }
+        }
+      )
+      Divider(
+         thickness = 24.dp,
+         color = Color.Transparent
+      )
+      Text(
+        text = stringResource(R.string.create_passkey_at),
+        style = Typography.body1,
+        modifier = Modifier.padding(horizontal = 28.dp)
+      )
+      Card(
+        shape = Shapes.medium,
+        modifier = Modifier
+          .padding(horizontal = 24.dp)
+          .align(alignment = Alignment.CenterHorizontally)
+      ) {
+        LazyColumn(
+          verticalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
+        }
+      }
+      Divider(
+        thickness = 24.dp,
+        color = Color.Transparent
+      )
+      Row(
+        horizontalArrangement = Arrangement.Start,
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
+      ) {
+        CancelButton(stringResource(R.string.string_cancel), onCancel)
+      }
+      Divider(
+        thickness = 18.dp,
+        color = Color.Transparent,
+        modifier = Modifier.padding(bottom = 16.dp)
+      )
+    }
+  }
+}
+
 @ExperimentalMaterialApi
 @Composable
 fun ProviderRow(providerInfo: ProviderInfo, onProviderSelected: (String) -> Unit) {
@@ -276,7 +346,7 @@ fun CreationSelectionCard(
   onOptionSelected: (String) -> Unit,
   onCancel: () -> Unit,
   multiProvider: Boolean,
-  onMoreOptionSelected: () -> Unit,
+  onMoreOptionSelected: (String) -> Unit,
 ) {
   Card(
     backgroundColor = lightBackgroundColor,
@@ -318,7 +388,7 @@ fun CreationSelectionCard(
           }
           if (multiProvider) {
             item {
-              MoreOptionRow(onSelect = onMoreOptionSelected)
+              MoreOptionRow(onSelect = { onMoreOptionSelected(providerInfo.name) })
             }
           }
         }
@@ -389,7 +459,7 @@ fun MoreOptionRow(onSelect: () -> Unit) {
     shape = Shapes.large
   ) {
       Text(
-        text = stringResource(R.string.string_more_options),
+        text = stringResource(R.string.string_create_at_another_place),
         style = Typography.h6,
       )
   }
