@@ -407,6 +407,7 @@ public final class TransitionInfo implements Parcelable {
     public static final class Change implements Parcelable {
         private final WindowContainerToken mContainer;
         private WindowContainerToken mParent;
+        private WindowContainerToken mLastParent;
         private final SurfaceControl mLeash;
         private @TransitionMode int mMode = TRANSIT_NONE;
         private @ChangeFlags int mFlags = FLAG_NONE;
@@ -435,6 +436,7 @@ public final class TransitionInfo implements Parcelable {
         private Change(Parcel in) {
             mContainer = in.readTypedObject(WindowContainerToken.CREATOR);
             mParent = in.readTypedObject(WindowContainerToken.CREATOR);
+            mLastParent = in.readTypedObject(WindowContainerToken.CREATOR);
             mLeash = new SurfaceControl();
             mLeash.readFromParcel(in);
             mMode = in.readInt();
@@ -456,6 +458,14 @@ public final class TransitionInfo implements Parcelable {
         /** Sets the parent of this change's container. The parent must be a participant or null. */
         public void setParent(@Nullable WindowContainerToken parent) {
             mParent = parent;
+        }
+
+        /**
+         * Sets the parent of this change's container before the transition if this change's
+         * container is reparented in the transition.
+         */
+        public void setLastParent(@Nullable WindowContainerToken lastParent) {
+            mLastParent = lastParent;
         }
 
         /** Sets the transition mode for this change */
@@ -539,6 +549,17 @@ public final class TransitionInfo implements Parcelable {
         @Nullable
         public WindowContainerToken getParent() {
             return mParent;
+        }
+
+        /**
+         * @return the parent of the changing container before the transition if it is reparented
+         * in the transition. The parent window may not be collected in the transition as a
+         * participant, and it may have been detached from the display. {@code null} if the changing
+         * container has not been reparented in the transition, or if the parent is not organizable.
+         */
+        @Nullable
+        public WindowContainerToken getLastParent() {
+            return mLastParent;
         }
 
         /** @return which action this change represents. */
@@ -640,6 +661,7 @@ public final class TransitionInfo implements Parcelable {
         public void writeToParcel(@NonNull Parcel dest, int flags) {
             dest.writeTypedObject(mContainer, flags);
             dest.writeTypedObject(mParent, flags);
+            dest.writeTypedObject(mLastParent, flags);
             mLeash.writeToParcel(dest, flags);
             dest.writeInt(mMode);
             dest.writeInt(mFlags);
@@ -685,6 +707,7 @@ public final class TransitionInfo implements Parcelable {
                     + mStartRotation + "->" + mEndRotation + ":" + mRotationAnimation
                     + " endFixedRotation=" + mEndFixedRotation;
             if (mSnapshot != null) out += " snapshot=" + mSnapshot;
+            if (mLastParent != null) out += " lastParent=" + mLastParent;
             return out + "}";
         }
     }
