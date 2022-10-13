@@ -59,4 +59,13 @@ class HeadsUpCoordinatorLogger constructor(
                     " numPostedEntries=$int1 logicalGroupSize=$int2"
         })
     }
+
+    fun logEntryUpdatedByRanking(key: String, shouldHun: Boolean) {
+        buffer.log(TAG, LogLevel.DEBUG, {
+            str1 = key
+            bool1 = shouldHun
+        }, {
+            "updating entry via ranking applied: $str1 updated shouldHeadsUp=$bool1"
+        })
+    }
 }
