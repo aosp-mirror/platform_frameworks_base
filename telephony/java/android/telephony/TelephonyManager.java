@@ -54,6 +54,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
+import android.net.NetworkCapabilities;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Binder;
@@ -17112,11 +17113,12 @@ public class TelephonyManager {
     }
 
     /**
-     * A premium capability boosting the network to allow real-time interactive traffic.
-     * Corresponds to NetworkCapabilities#NET_CAPABILITY_REALTIME_INTERACTIVE_TRAFFIC.
+     * A premium capability that boosts the network to allow for real-time interactive traffic
+     * by prioritizing low latency communication.
+     * Corresponds to {@link NetworkCapabilities#NET_CAPABILITY_PRIORITIZE_LATENCY}.
      */
-    // TODO(b/245748544): add @link once NET_CAPABILITY_REALTIME_INTERACTIVE_TRAFFIC is defined.
-    public static final int PREMIUM_CAPABILITY_REALTIME_INTERACTIVE_TRAFFIC = 1;
+    public static final int PREMIUM_CAPABILITY_PRIORITIZE_LATENCY =
+            NetworkCapabilities.NET_CAPABILITY_PRIORITIZE_LATENCY;
 
     /**
      * Purchasable premium capabilities.
@@ -17124,7 +17126,7 @@ public class TelephonyManager {
      */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = { "PREMIUM_CAPABILITY_" }, value = {
-            PREMIUM_CAPABILITY_REALTIME_INTERACTIVE_TRAFFIC})
+            PREMIUM_CAPABILITY_PRIORITIZE_LATENCY})
     public @interface PremiumCapability {}
 
     /**
@@ -17136,8 +17138,8 @@ public class TelephonyManager {
      */
     public static String convertPremiumCapabilityToString(@PremiumCapability int capability) {
         switch (capability) {
-            case PREMIUM_CAPABILITY_REALTIME_INTERACTIVE_TRAFFIC:
-                return "REALTIME_INTERACTIVE_TRAFFIC";
+            case PREMIUM_CAPABILITY_PRIORITIZE_LATENCY:
+                return "PRIORITIZE_LATENCY";
             default:
                 return "UNKNOWN (" + capability + ")";
         }
@@ -17175,11 +17177,18 @@ public class TelephonyManager {
     public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_SUCCESS = 1;
 
     /**
-     * Purchase premium capability failed because the request is throttled for the amount of time
+     * Purchase premium capability failed because the request is throttled.
+     * If purchasing premium capabilities is throttled, it will be for the amount of time
      * specified by {@link CarrierConfigManager
-     * #KEY_PREMIUM_CAPABILITY_NOTIFICATION_BACKOFF_HYSTERESIS_TIME_MILLIS_LONG}
-     * or {@link CarrierConfigManager
      * #KEY_PREMIUM_CAPABILITY_PURCHASE_CONDITION_BACKOFF_HYSTERESIS_TIME_MILLIS_LONG}.
+     * If displaying the network boost notification is throttled, it will be for the amount of time
+     * specified by {@link CarrierConfigManager
+     * #KEY_PREMIUM_CAPABILITY_NOTIFICATION_BACKOFF_HYSTERESIS_TIME_INT_ARRAY}.
+     * If a foreground application requests premium capabilities, the network boost notification
+     * will be displayed to the user regardless of the throttled status.
+     * We will show the network boost notification to the user up to the daily and monthly maximum
+     * number of times specified by {@link CarrierConfigManager
+     * #KEY_PREMIUM_CAPABILITY_MAXIMUM_NOTIFICATION_COUNT_INT_ARRAY}.
      * Subsequent attempts will return the same error until the request is no longer throttled
      * or throttling conditions change.
      */
@@ -17199,10 +17208,14 @@ public class TelephonyManager {
     public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_ALREADY_IN_PROGRESS = 4;
 
     /**
-     * Purchase premium capability failed because the user disabled the feature.
-     * Subsequent attempts will return the same error until the user re-enables the feature.
+     * Purchase premium capability failed because a foreground application requested the same
+     * capability. The notification for the current application will be dismissed and a new
+     * notification will be displayed to the user for the foreground application.
+     * Subsequent attempts will return
+     * {@link #PURCHASE_PREMIUM_CAPABILITY_RESULT_ALREADY_IN_PROGRESS} until the foreground
+     * application's request is completed.
      */
-    public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_USER_DISABLED = 5;
+    public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_OVERRIDDEN = 5;
 
     /**
      * Purchase premium capability failed because the user canceled the operation.
@@ -17249,7 +17262,8 @@ public class TelephonyManager {
     public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_FEATURE_NOT_SUPPORTED = 10;
 
     /**
-     * Purchase premium capability failed because the telephony service is down or unavailable.
+     * Purchase premium capability failed because the telephony service is unavailable
+     * or there was an error in the phone process.
      * Subsequent attempts will return the same error until request conditions are satisfied.
      */
     public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_REQUEST_FAILED = 11;
@@ -17271,6 +17285,14 @@ public class TelephonyManager {
     public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_NETWORK_CONGESTED = 13;
 
     /**
+     * Purchase premium capability failed because the request was not made on the default data
+     * subscription, indicated by {@link SubscriptionManager#getDefaultDataSubscriptionId()}.
+     * Subsequent attempts will return the same error until the request is made on the default
+     * data subscription.
+     */
+    public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_NOT_DEFAULT_DATA = 14;
+
+    /**
      * Results of the purchase premium capability request.
      * @hide
      */
@@ -17280,14 +17302,15 @@ public class TelephonyManager {
             PURCHASE_PREMIUM_CAPABILITY_RESULT_THROTTLED,
             PURCHASE_PREMIUM_CAPABILITY_RESULT_ALREADY_PURCHASED,
             PURCHASE_PREMIUM_CAPABILITY_RESULT_ALREADY_IN_PROGRESS,
-            PURCHASE_PREMIUM_CAPABILITY_RESULT_USER_DISABLED,
+            PURCHASE_PREMIUM_CAPABILITY_RESULT_OVERRIDDEN,
             PURCHASE_PREMIUM_CAPABILITY_RESULT_USER_CANCELED,
             PURCHASE_PREMIUM_CAPABILITY_RESULT_CARRIER_DISABLED,
             PURCHASE_PREMIUM_CAPABILITY_RESULT_CARRIER_ERROR,
             PURCHASE_PREMIUM_CAPABILITY_RESULT_TIMEOUT,
             PURCHASE_PREMIUM_CAPABILITY_RESULT_FEATURE_NOT_SUPPORTED,
             PURCHASE_PREMIUM_CAPABILITY_RESULT_NETWORK_NOT_AVAILABLE,
-            PURCHASE_PREMIUM_CAPABILITY_RESULT_NETWORK_CONGESTED})
+            PURCHASE_PREMIUM_CAPABILITY_RESULT_NETWORK_CONGESTED,
+            PURCHASE_PREMIUM_CAPABILITY_RESULT_NOT_DEFAULT_DATA})
     public @interface PurchasePremiumCapabilityResult {}
 
     /**
@@ -17308,8 +17331,8 @@ public class TelephonyManager {
                 return "ALREADY_PURCHASED";
             case PURCHASE_PREMIUM_CAPABILITY_RESULT_ALREADY_IN_PROGRESS:
                 return "ALREADY_IN_PROGRESS";
-            case PURCHASE_PREMIUM_CAPABILITY_RESULT_USER_DISABLED:
-                return "USER_DISABLED";
+            case PURCHASE_PREMIUM_CAPABILITY_RESULT_OVERRIDDEN:
+                return "OVERRIDDEN";
             case PURCHASE_PREMIUM_CAPABILITY_RESULT_USER_CANCELED:
                 return "USER_CANCELED";
             case PURCHASE_PREMIUM_CAPABILITY_RESULT_CARRIER_DISABLED:
@@ -17326,6 +17349,8 @@ public class TelephonyManager {
                 return "NETWORK_NOT_AVAILABLE";
             case PURCHASE_PREMIUM_CAPABILITY_RESULT_NETWORK_CONGESTED:
                 return "NETWORK_CONGESTED";
+            case PURCHASE_PREMIUM_CAPABILITY_RESULT_NOT_DEFAULT_DATA:
+                return "NOT_DEFAULT_DATA";
             default:
                 return "UNKNOWN (" + result + ")";
         }
@@ -17343,7 +17368,7 @@ public class TelephonyManager {
      * @param callback The result of the purchase request.
      *                 One of {@link PurchasePremiumCapabilityResult}.
      * @throws SecurityException if the caller does not hold permission READ_BASIC_PHONE_STATE.
-     * @see #isPremiumCapabilityAvailableForPurchase(int) to check whether the capability is valid
+     * @see #isPremiumCapabilityAvailableForPurchase(int) to check whether the capability is valid.
      */
     @RequiresPermission(android.Manifest.permission.READ_BASIC_PHONE_STATE)
     public void purchasePremiumCapability(@PremiumCapability int capability,
