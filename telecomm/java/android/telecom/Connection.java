@@ -66,6 +66,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -2531,11 +2532,21 @@ public abstract class Connection extends Conferenceable {
      */
     public final void setCallerDisplayName(String callerDisplayName, int presentation) {
         checkImmutable();
-        Log.d(this, "setCallerDisplayName %s", callerDisplayName);
-        mCallerDisplayName = callerDisplayName;
-        mCallerDisplayNamePresentation = presentation;
-        for (Listener l : mListeners) {
-            l.onCallerDisplayNameChanged(this, callerDisplayName, presentation);
+        boolean nameChanged = !Objects.equals(mCallerDisplayName, callerDisplayName);
+        boolean presentationChanged = mCallerDisplayNamePresentation != presentation;
+        if (nameChanged) {
+            // Ensure the new name is not clobbering the old one with a null value due to the caller
+            // wanting to only set the presentation and not knowing the display name.
+            mCallerDisplayName = callerDisplayName;
+        }
+        if (presentationChanged) {
+            mCallerDisplayNamePresentation = presentation;
+        }
+        if (nameChanged || presentationChanged) {
+            for (Listener l : mListeners) {
+                l.onCallerDisplayNameChanged(this, mCallerDisplayName,
+                        mCallerDisplayNamePresentation);
+            }
         }
     }
 
