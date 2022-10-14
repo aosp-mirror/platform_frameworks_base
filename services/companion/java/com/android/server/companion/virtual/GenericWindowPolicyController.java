@@ -44,6 +44,7 @@ import android.view.Display;
 import android.window.DisplayWindowPolicyController;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.BlockedAppStreamingActivity;
 
 import java.util.List;
@@ -112,7 +113,9 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
     final ArraySet<Integer> mRunningUids = new ArraySet<>();
     @Nullable private final ActivityListener mActivityListener;
     private final Handler mHandler = new Handler(Looper.getMainLooper());
-    private final ArraySet<RunningAppsChangedListener> mRunningAppsChangedListener =
+    @NonNull
+    @GuardedBy("mGenericWindowPolicyControllerLock")
+    private final ArraySet<RunningAppsChangedListener> mRunningAppsChangedListeners =
             new ArraySet<>();
     @Nullable
     private final @AssociationRequest.DeviceProfile String mDeviceProfile;
@@ -178,12 +181,16 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
 
     /** Register a listener for running applications changes. */
     public void registerRunningAppsChangedListener(@NonNull RunningAppsChangedListener listener) {
-        mRunningAppsChangedListener.add(listener);
+        synchronized (mGenericWindowPolicyControllerLock) {
+            mRunningAppsChangedListeners.add(listener);
+        }
     }
 
     /** Unregister a listener for running applications changes. */
     public void unregisterRunningAppsChangedListener(@NonNull RunningAppsChangedListener listener) {
-        mRunningAppsChangedListener.remove(listener);
+        synchronized (mGenericWindowPolicyControllerLock) {
+            mRunningAppsChangedListeners.remove(listener);
+        }
     }
 
     @Override
@@ -283,12 +290,16 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
                 // Post callback on the main thread so it doesn't block activity launching
                 mHandler.post(() -> mActivityListener.onDisplayEmpty(mDisplayId));
             }
-        }
-        mHandler.post(() -> {
-            for (RunningAppsChangedListener listener : mRunningAppsChangedListener) {
-                listener.onRunningAppsChanged(runningUids);
+            if (!mRunningAppsChangedListeners.isEmpty()) {
+                final ArraySet<RunningAppsChangedListener> listeners =
+                        new ArraySet<>(mRunningAppsChangedListeners);
+                mHandler.post(() -> {
+                    for (RunningAppsChangedListener listener : listeners) {
+                        listener.onRunningAppsChanged(runningUids);
+                    }
+                });
             }
-        });
+        }
     }
 
     @Override
@@ -353,5 +364,12 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
             }
         }
         return true;
+    }
+
+    @VisibleForTesting
+    int getRunningAppsChangedListenersSizeForTesting() {
+        synchronized (mGenericWindowPolicyControllerLock) {
+            return mRunningAppsChangedListeners.size();
+        }
     }
 }

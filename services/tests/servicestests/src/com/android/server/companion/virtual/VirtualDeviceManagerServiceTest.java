@@ -891,4 +891,34 @@ public class VirtualDeviceManagerServiceTest {
         verify(mContext).startActivityAsUser(argThat(intent ->
                 intent.filterEquals(blockedAppIntent)), any(), any());
     }
+
+    @Test
+    public void registerRunningAppsChangedListener_onRunningAppsChanged_listenersNotified() {
+        ArraySet<Integer> uids = new ArraySet<>(Arrays.asList(UID_1, UID_2));
+        mDeviceImpl.onVirtualDisplayCreatedLocked(
+                mDeviceImpl.createWindowPolicyController(), DISPLAY_ID);
+        GenericWindowPolicyController gwpc = mDeviceImpl.getWindowPolicyControllersForTesting().get(
+                DISPLAY_ID);
+
+        gwpc.onRunningAppsChanged(uids);
+        mDeviceImpl.onRunningAppsChanged(uids);
+
+        assertThat(gwpc.getRunningAppsChangedListenersSizeForTesting()).isEqualTo(1);
+        verify(mRunningAppsChangedCallback).accept(new ArraySet<>(Arrays.asList(UID_1, UID_2)));
+    }
+
+    @Test
+    public void noRunningAppsChangedListener_onRunningAppsChanged_doesNotThrowException() {
+        ArraySet<Integer> uids = new ArraySet<>(Arrays.asList(UID_1, UID_2));
+        mDeviceImpl.onVirtualDisplayCreatedLocked(
+                mDeviceImpl.createWindowPolicyController(), DISPLAY_ID);
+        GenericWindowPolicyController gwpc = mDeviceImpl.getWindowPolicyControllersForTesting().get(
+                DISPLAY_ID);
+        mDeviceImpl.onVirtualDisplayRemovedLocked(DISPLAY_ID);
+
+        // This call should not throw any exceptions.
+        gwpc.onRunningAppsChanged(uids);
+
+        assertThat(gwpc.getRunningAppsChangedListenersSizeForTesting()).isEqualTo(0);
+    }
 }
