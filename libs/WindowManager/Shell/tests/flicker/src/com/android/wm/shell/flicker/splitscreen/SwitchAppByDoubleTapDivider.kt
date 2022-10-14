@@ -26,7 +26,7 @@ import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.helpers.isRotated
+import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import com.android.wm.shell.flicker.SPLIT_SCREEN_DIVIDER_COMPONENT
 import com.android.wm.shell.flicker.appWindowIsVisibleAtEnd
@@ -79,10 +79,18 @@ class SwitchAppByDoubleTapDivider(testSpec: FlickerTestParameter) : SplitScreenB
                 secondaryApp.windowMatchesAnyOf(window)
             } ?: return@add false
 
-            if (testSpec.startRotation.isRotated()) {
-                return@add primaryAppWindow.frame.right <= secondaryAppWindow.frame.left
+            if (isLandscape(testSpec.endRotation)) {
+                return@add if (testSpec.isTablet) {
+                    secondaryAppWindow.frame.right <= primaryAppWindow.frame.left
+                } else {
+                    primaryAppWindow.frame.right <= secondaryAppWindow.frame.left
+                }
             } else {
-                return@add primaryAppWindow.frame.bottom <= secondaryAppWindow.frame.top
+                return@add if (testSpec.isTablet) {
+                    primaryAppWindow.frame.bottom <= secondaryAppWindow.frame.top
+                } else {
+                    primaryAppWindow.frame.bottom <= secondaryAppWindow.frame.top
+                }
             }
         }.waitForAndVerify()
     }
@@ -101,12 +109,25 @@ class SwitchAppByDoubleTapDivider(testSpec: FlickerTestParameter) : SplitScreenB
             val secondaryVisibleRegion = secondaryAppLayer.visibleRegion?.bounds
                 ?: return@add false
 
-            if (testSpec.startRotation.isRotated()) {
-                return@add primaryVisibleRegion.right <= secondaryVisibleRegion.left
+            if (isLandscape(testSpec.endRotation)) {
+                return@add if (testSpec.isTablet) {
+                    secondaryVisibleRegion.right <= primaryVisibleRegion.left
+                } else {
+                    primaryVisibleRegion.right <= secondaryVisibleRegion.left
+                }
             } else {
-                return@add primaryVisibleRegion.bottom <= secondaryVisibleRegion.top
+                return@add if (testSpec.isTablet) {
+                    primaryVisibleRegion.bottom <= secondaryVisibleRegion.top
+                } else {
+                    primaryVisibleRegion.bottom <= secondaryVisibleRegion.top
+                }
             }
         }.waitForAndVerify()
+    }
+
+    private fun isLandscape(rotation: Int): Boolean {
+        val displayBounds = WindowUtils.getDisplayBounds(rotation)
+        return displayBounds.width > displayBounds.height
     }
 
     @IwTest(focusArea = "sysui")
