@@ -738,16 +738,6 @@ public final class InputMethodManager {
     private final class DelegateImpl implements
             ImeFocusController.InputMethodManagerDelegate {
 
-        private boolean startInput(@StartInputReason int startInputReason, View focusedView,
-                @StartInputFlags int startInputFlags, @SoftInputModeFlags int softInputMode,
-                int windowFlags) {
-            ImeTracing.getInstance().triggerClientDump(
-                    "InputMethodManager.DelegateImpl#startInput", InputMethodManager.this,
-                    null /* icProto */);
-            return startInputOnWindowFocusGainInternal(startInputReason, focusedView,
-                    startInputFlags, softInputMode, windowFlags);
-        }
-
         private void finishInput() {
             ImeTracing.getInstance().triggerClientDump(
                     "InputMethodManager.DelegateImpl#finishInput", InputMethodManager.this,
@@ -920,7 +910,8 @@ public final class InputMethodManager {
             }
 
             if (startInput) {
-                startInput(StartInputReason.CHECK_FOCUS, null /* focusedView */,
+                startInputOnWindowFocusGainInternal(StartInputReason.CHECK_FOCUS,
+                        null /* focusedView */,
                         0 /* startInputFlags */, 0 /* softInputMode */, 0 /* windowFlags */);
             }
             return true;
@@ -2410,7 +2401,7 @@ public final class InputMethodManager {
     }
 
     /**
-     * Called when {@link DelegateImpl#startInput}, {@link #restartInput(View)},
+     * Called when {@link DelegateImpl#checkFocus}, {@link #restartInput(View)},
      * {@link #MSG_BIND} or {@link #MSG_UNBIND}.
      * Note that this method should *NOT* be called inside of {@code mH} lock to prevent start input
      * background thread may blocked by other methods which already inside {@code mH} lock.
