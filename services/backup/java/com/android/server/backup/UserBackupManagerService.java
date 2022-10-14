@@ -3721,19 +3721,32 @@ public class UserBackupManagerService {
             Slog.w(TAG, "agentDisconnected: the backup agent for " + packageName
                     + " died: cancel current operations");
 
-            // handleCancel() causes the PerformFullTransportBackupTask to go on to
-            // tearDownAgentAndKill: that will unbindBackupAgent in the Activity Manager, so
-            // that the package being backed up doesn't get stuck in restricted mode until the
-            // backup time-out elapses.
-            for (int token : mOperationStorage.operationTokensForPackage(packageName)) {
-                if (MORE_DEBUG) {
-                    Slog.d(TAG, "agentDisconnected: will handleCancel(all) for token:"
-                            + Integer.toHexString(token));
+            // Offload operation cancellation off the main thread as the cancellation callbacks
+            // might call out to BackupTransport. Other operations started on the same package
+            // before the cancellation callback has executed will also be cancelled by the callback.
+            Runnable cancellationRunnable = () -> {
+                // handleCancel() causes the PerformFullTransportBackupTask to go on to
+                // tearDownAgentAndKill: that will unbindBackupAgent in the Activity Manager, so
+                // that the package being backed up doesn't get stuck in restricted mode until the
+                // backup time-out elapses.
+                for (int token : mOperationStorage.operationTokensForPackage(packageName)) {
+                    if (MORE_DEBUG) {
+                        Slog.d(TAG, "agentDisconnected: will handleCancel(all) for token:"
+                                + Integer.toHexString(token));
+                    }
+                    handleCancel(token, true /* cancelAll */);
                 }
-                handleCancel(token, true /* cancelAll */);
-            }
+            };
+            getThreadForAsyncOperation(/* operationName */ "agent-disconnected",
+                    cancellationRunnable).start();
+
             mAgentConnectLock.notifyAll();
         }
+    }
+
+    @VisibleForTesting
+    Thread getThreadForAsyncOperation(String operationName, Runnable operation) {
+        return new Thread(operation, operationName);
     }
 
     /**
