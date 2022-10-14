@@ -738,15 +738,6 @@ public final class InputMethodManager {
     private final class DelegateImpl implements
             ImeFocusController.InputMethodManagerDelegate {
 
-        private void finishInput() {
-            ImeTracing.getInstance().triggerClientDump(
-                    "InputMethodManager.DelegateImpl#finishInput", InputMethodManager.this,
-                    null /* icProto */);
-            synchronized (mH) {
-                finishInputLocked();
-            }
-        }
-
         /**
          * Used by {@link ImeFocusController} to finish input connection and callback
          * {@link InputMethodService#onFinishInput()}.
@@ -899,7 +890,7 @@ public final class InputMethodManager {
                 }
                 // Close the connection when no next served view coming.
                 if (mNextServedView == null) {
-                    finishInput();
+                    finishInputLocked();
                     closeCurrentInput();
                     return false;
                 }
@@ -939,7 +930,7 @@ public final class InputMethodManager {
                     return;
                 }
                 if (mServedView != null) {
-                    finishInput();
+                    finishInputLocked();
                 }
                 setCurrentRootView(null);
             }
