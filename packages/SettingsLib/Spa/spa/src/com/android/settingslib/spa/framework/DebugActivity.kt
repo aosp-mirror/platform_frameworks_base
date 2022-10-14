@@ -35,6 +35,7 @@ import androidx.navigation.navArgument
 import com.android.settingslib.spa.R
 import com.android.settingslib.spa.framework.BrowseActivity.Companion.KEY_DESTINATION
 import com.android.settingslib.spa.framework.BrowseActivity.Companion.KEY_HIGHLIGHT_ENTRY
+import com.android.settingslib.spa.framework.common.LogCategory
 import com.android.settingslib.spa.framework.common.SettingsEntry
 import com.android.settingslib.spa.framework.common.SettingsPage
 import com.android.settingslib.spa.framework.common.SpaEnvironmentFactory
@@ -69,7 +70,7 @@ open class DebugActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R.style.Theme_SpaLib_DayNight)
         super.onCreate(savedInstanceState)
-        Log.d(TAG, "onCreate")
+        spaEnvironment.logger.message(TAG, "onCreate", category = LogCategory.FRAMEWORK)
 
         setContent {
             SettingsTheme {
@@ -94,7 +95,7 @@ open class DebugActivity : ComponentActivity() {
                         cursor.getBoolean(query, EntryProvider.ColumnEnum.HAS_RUNTIME_PARAM)
                     val message = "Page Info: $route ($entryCount) " +
                         (if (hasRuntimeParam) "with" else "no") + "-runtime-params"
-                    Log.d(TAG, message)
+                    spaEnvironment.logger.message(TAG, message, category = LogCategory.FRAMEWORK)
                 }
             }
         } catch (e: Exception) {
@@ -229,7 +230,9 @@ open class DebugActivity : ComponentActivity() {
             putExtra(KEY_DESTINATION, route)
         }
         return {
-            Log.d(TAG, "OpenPage: $route")
+            spaEnvironment.logger.message(
+                TAG, "OpenPage: $route", category = LogCategory.FRAMEWORK
+            )
             context.startActivity(intent)
         }
     }
@@ -244,7 +247,9 @@ open class DebugActivity : ComponentActivity() {
             putExtra(KEY_HIGHLIGHT_ENTRY, entry.id)
         }
         return {
-            Log.d(TAG, "OpenEntry: $route")
+            spaEnvironment.logger.message(
+                TAG, "OpenEntry: $route", category = LogCategory.FRAMEWORK
+            )
             context.startActivity(intent)
         }
     }
