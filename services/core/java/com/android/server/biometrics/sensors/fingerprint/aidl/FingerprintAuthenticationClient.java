@@ -333,6 +333,9 @@ class FingerprintAuthenticationClient extends AuthenticationClient<AidlSession>
                 mALSProbeCallback.getProbe().disable();
             }
         });
+        if (getBiometricContext().isAwake()) {
+            mALSProbeCallback.getProbe().enable();
+        }
 
         if (session.hasContextMethods()) {
             return session.getSession().authenticateWithContext(mOperationId, opContext);

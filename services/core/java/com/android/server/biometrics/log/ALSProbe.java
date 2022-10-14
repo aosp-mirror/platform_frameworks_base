@@ -30,7 +30,10 @@ import android.util.Slog;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 /** Probe for ambient light. */
 final class ALSProbe implements Probe {
@@ -47,12 +50,18 @@ final class ALSProbe implements Probe {
 
     private boolean mEnabled = false;
     private boolean mDestroyed = false;
+    private boolean mDestroyRequested = false;
+    private boolean mDisableRequested = false;
+    private volatile NextConsumer mNextConsumer = null;
     private volatile float mLastAmbientLux = -1;
 
     private final SensorEventListener mLightSensorListener = new SensorEventListener() {
         @Override
         public void onSensorChanged(SensorEvent event) {
             mLastAmbientLux = event.values[0];
+            if (mNextConsumer != null) {
+                completeNextConsumer(mLastAmbientLux);
+            }
         }
 
         @Override
@@ -102,27 +111,82 @@ final class ALSProbe implements Probe {
 
     @Override
     public synchronized void enable() {
-        if (!mDestroyed) {
+        if (!mDestroyed && !mDestroyRequested) {
+            mDisableRequested = false;
             enableLightSensorLoggingLocked();
         }
     }
 
     @Override
     public synchronized void disable() {
-        if (!mDestroyed) {
+        mDisableRequested = true;
+
+        // if a final consumer is set it will call destroy/disable on the next value if requested
+        if (!mDestroyed && mNextConsumer == null) {
             disableLightSensorLoggingLocked();
         }
     }
 
     @Override
     public synchronized void destroy() {
-        disable();
-        mDestroyed = true;
+        mDestroyRequested = true;
+
+        // if a final consumer is set it will call destroy/disable on the next value if requested
+        if (!mDestroyed && mNextConsumer == null) {
+            disable();
+            mDestroyed = true;
+        }
     }
 
     /** The most recent lux reading. */
-    public float getCurrentLux() {
+    public float getMostRecentLux() {
         return mLastAmbientLux;
+    }
+
+    /**
+     * Register a listener for the next available ALS reading, which will be reported to the given
+     * consumer even if this probe is {@link #disable()}'ed or {@link #destroy()}'ed before a value
+     * is available.
+     *
+     * This method is intended to be used for event logs that occur when the screen may be
+     * off and sampling may have been {@link #disable()}'ed. In these cases, this method will turn
+     * on the sensor (if needed), fetch & report the first value, and then destroy or disable this
+     * probe (if needed).
+     *
+     * @param consumer consumer to notify when the data is available
+     * @param handler handler for notifying the consumer, or null
+     */
+    public synchronized void awaitNextLux(@NonNull Consumer<Float> consumer,
+            @Nullable Handler handler) {
+        final NextConsumer nextConsumer = new NextConsumer(consumer, handler);
+        final float current = mLastAmbientLux;
+        if (current > 0) {
+            nextConsumer.consume(current);
+        } else if (mDestroyed) {
+            nextConsumer.consume(-1f);
+        } else if (mNextConsumer != null) {
+            mNextConsumer.add(nextConsumer);
+        } else {
+            mNextConsumer = nextConsumer;
+            enableLightSensorLoggingLocked();
+        }
+    }
+
+    private synchronized void completeNextConsumer(float value) {
+        Slog.v(TAG, "Finishing next consumer");
+
+        final NextConsumer consumer = mNextConsumer;
+        mNextConsumer = null;
+
+        if (mDestroyRequested) {
+            destroy();
+        } else if (mDisableRequested) {
+            disable();
+        }
+
+        if (consumer != null) {
+            consumer.consume(value);
+        }
     }
 
     private void enableLightSensorLoggingLocked() {
@@ -159,5 +223,31 @@ final class ALSProbe implements Probe {
         Slog.e(TAG, "Max time exceeded for ALS logger - disabling: "
                 + mLightSensorListener.hashCode());
         disable();
+    }
+
+    private static class NextConsumer {
+        @NonNull private final Consumer<Float> mConsumer;
+        @Nullable private final Handler mHandler;
+        @NonNull private final List<NextConsumer> mOthers = new ArrayList<>();
+
+        private NextConsumer(@NonNull Consumer<Float> consumer, @Nullable Handler handler) {
+            mConsumer = consumer;
+            mHandler = handler;
+        }
+
+        public void consume(float value) {
+            if (mHandler != null) {
+                mHandler.post(() -> mConsumer.accept(value));
+            } else {
+                mConsumer.accept(value);
+            }
+            for (NextConsumer c : mOthers) {
+                c.consume(value);
+            }
+        }
+
+        public void add(NextConsumer consumer) {
+            mOthers.add(consumer);
+        }
     }
 }
