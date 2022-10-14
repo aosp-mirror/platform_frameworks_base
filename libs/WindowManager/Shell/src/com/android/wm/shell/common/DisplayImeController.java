@@ -21,12 +21,10 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.IntDef;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.IDisplayWindowInsetsController;
@@ -43,7 +41,7 @@ import android.view.animation.PathInterpolator;
 
 import androidx.annotation.VisibleForTesting;
 
-import com.android.internal.view.IInputMethodManager;
+import com.android.internal.inputmethod.IInputMethodManagerGlobal;
 import com.android.wm.shell.sysui.ShellInit;
 
 import java.util.ArrayList;
@@ -514,16 +512,10 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
     }
 
     void removeImeSurface() {
-        final IInputMethodManager imms = getImms();
-        if (imms != null) {
-            try {
-                // Remove the IME surface to make the insets invisible for
-                // non-client controlled insets.
-                imms.removeImeSurface();
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to remove IME surface.", e);
-            }
-        }
+        // Remove the IME surface to make the insets invisible for
+        // non-client controlled insets.
+        IInputMethodManagerGlobal.removeImeSurface(
+                e -> Slog.e(TAG, "Failed to remove IME surface.", e));
     }
 
     /**
@@ -595,11 +587,6 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
         default void onImeVisibilityChanged(int displayId, boolean isShowing) {
 
         }
-    }
-
-    public IInputMethodManager getImms() {
-        return IInputMethodManager.Stub.asInterface(
-                ServiceManager.getService(Context.INPUT_METHOD_SERVICE));
     }
 
     private static boolean haveSameLeash(InsetsSourceControl a, InsetsSourceControl b) {
