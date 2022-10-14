@@ -98,7 +98,7 @@ final class SettingsState {
     private static final long MAX_WRITE_SETTINGS_DELAY_MILLIS = 2000;
 
     public static final int MAX_BYTES_PER_APP_PACKAGE_UNLIMITED = -1;
-    public static final int MAX_BYTES_PER_APP_PACKAGE_LIMITED = 20000;
+    public static final int MAX_BYTES_PER_APP_PACKAGE_LIMITED = 40000;
 
     public static final int VERSION_UNDEFINED = -1;
 
@@ -732,19 +732,19 @@ final class SettingsState {
     }
 
     @GuardedBy("mLock")
-    private int getNewMemoryUsagePerPackageLocked(String packageName, int deltaKeySize,
+    private int getNewMemoryUsagePerPackageLocked(String packageName, int deltaKeyLength,
             String oldValue, String newValue, String oldDefaultValue, String newDefaultValue) {
         if (isExemptFromMemoryUsageCap(packageName)) {
             return 0;
         }
-        final Integer currentSize = mPackageToMemoryUsage.get(packageName);
-        final int oldValueSize = (oldValue != null) ? oldValue.length() : 0;
-        final int newValueSize = (newValue != null) ? newValue.length() : 0;
-        final int oldDefaultValueSize = (oldDefaultValue != null) ? oldDefaultValue.length() : 0;
-        final int newDefaultValueSize = (newDefaultValue != null) ? newDefaultValue.length() : 0;
-        final int deltaSize = deltaKeySize + newValueSize + newDefaultValueSize
-                - oldValueSize - oldDefaultValueSize;
-        return Math.max((currentSize != null) ? currentSize + deltaSize : deltaSize, 0);
+        final int currentSize = mPackageToMemoryUsage.getOrDefault(packageName, 0);
+        final int oldValueLength = (oldValue != null) ? oldValue.length() : 0;
+        final int newValueLength = (newValue != null) ? newValue.length() : 0;
+        final int oldDefaultValueLength = (oldDefaultValue != null) ? oldDefaultValue.length() : 0;
+        final int newDefaultValueLength = (newDefaultValue != null) ? newDefaultValue.length() : 0;
+        final int deltaSize = (deltaKeyLength + newValueLength + newDefaultValueLength
+                - oldValueLength - oldDefaultValueLength) * Character.BYTES;
+        return Math.max(currentSize + deltaSize, 0);
     }
 
     @GuardedBy("mLock")
