@@ -759,7 +759,14 @@ public final class InputMethodManager {
         }
 
         @Override
-        public void onPostWindowFocus(View viewForWindowFocus,
+        public void onPreWindowGainedFocus(ViewRootImpl viewRootImpl) {
+            synchronized (mH) {
+                setCurrentRootViewLocked(viewRootImpl);
+            }
+        }
+
+        @Override
+        public void onPostWindowGainedFocus(View viewForWindowFocus,
                 @NonNull WindowManager.LayoutParams windowAttribute) {
             boolean forceFocus = false;
             synchronized (mH) {
@@ -932,19 +939,14 @@ public final class InputMethodManager {
                 if (mServedView != null) {
                     finishInputLocked();
                 }
-                setCurrentRootView(null);
+                setCurrentRootViewLocked(null);
             }
         }
 
-        /**
-         * Used for {@link ImeFocusController} to set the current focused root view.
-         */
-        @Override
-        public void setCurrentRootView(ViewRootImpl rootView) {
-            synchronized (mH) {
-                mImeDispatcher.switchRootView(mCurRootView, rootView);
-                mCurRootView = rootView;
-            }
+        @GuardedBy("mH")
+        private void setCurrentRootViewLocked(ViewRootImpl rootView) {
+            mImeDispatcher.switchRootView(mCurRootView, rootView);
+            mCurRootView = rootView;
         }
 
         /**
