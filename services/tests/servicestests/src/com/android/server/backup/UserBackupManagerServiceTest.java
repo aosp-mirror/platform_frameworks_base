@@ -18,6 +18,7 @@ package com.android.server.backup;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -61,6 +62,7 @@ import java.util.function.IntConsumer;
 public class UserBackupManagerServiceTest {
     private static final String TEST_PACKAGE = "package1";
     private static final String[] TEST_PACKAGES = new String[] { TEST_PACKAGE };
+    private static final int WORKER_THREAD_TIMEOUT_MILLISECONDS = 1;
 
     @Mock Context mContext;
     @Mock IBackupManagerMonitor mBackupManagerMonitor;
@@ -179,6 +181,7 @@ public class UserBackupManagerServiceTest {
 
         mService.agentDisconnected("com.android.foo");
 
+        mService.waitForAsyncOperation();
         verify(mOperationStorage).cancelOperation(eq(123), eq(true), any(IntConsumer.class));
         verify(mOperationStorage).cancelOperation(eq(456), eq(true), any());
         verify(mOperationStorage).cancelOperation(eq(789), eq(true), any());
@@ -207,6 +210,8 @@ public class UserBackupManagerServiceTest {
         boolean isEnabledStatePersisted = false;
         boolean shouldUseNewBackupEligibilityRules = false;
 
+        private volatile Thread mWorkerThread = null;
+
         TestBackupService(Context context, PackageManager packageManager,
                 LifecycleOperationStorage operationStorage) {
             super(context, packageManager, operationStorage);
@@ -228,6 +233,24 @@ public class UserBackupManagerServiceTest {
         @Override
         boolean shouldUseNewBackupEligibilityRules() {
             return shouldUseNewBackupEligibilityRules;
+        }
+
+        @Override
+        Thread getThreadForAsyncOperation(String operationName, Runnable operation) {
+            mWorkerThread = super.getThreadForAsyncOperation(operationName, operation);
+            return mWorkerThread;
+        }
+
+        private void waitForAsyncOperation() {
+            if (mWorkerThread == null) {
+                return;
+            }
+
+            try {
+                mWorkerThread.join(/* millis */ WORKER_THREAD_TIMEOUT_MILLISECONDS);
+            } catch (InterruptedException e) {
+                fail("Failed waiting for worker thread to complete: " + e.getMessage());
+            }
         }
     }
 }
