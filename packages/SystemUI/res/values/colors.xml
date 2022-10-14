@@ -219,6 +219,8 @@
     <!-- Accessibility floating menu -->
     <color name="accessibility_floating_menu_background">#CCFFFFFF</color> <!-- 80% -->
     <color name="accessibility_floating_menu_stroke_dark">#26FFFFFF</color> <!-- 15% -->
+    <color name="accessibility_floating_menu_message_background">@*android:color/background_material_light</color>
+    <color name="accessibility_floating_menu_message_text">@*android:color/primary_text_default_material_light</color>
 
     <!-- Wallet screen -->
     <color name="wallet_card_border">#33FFFFFF</color>

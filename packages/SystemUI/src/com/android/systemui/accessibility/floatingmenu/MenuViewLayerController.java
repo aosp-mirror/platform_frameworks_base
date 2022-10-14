@@ -22,6 +22,7 @@ import android.content.Context;
 import android.graphics.PixelFormat;
 import android.view.WindowInsets;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityManager;
 
 /**
  * Controls the {@link MenuViewLayer} whether to be attached to the window via the interface
@@ -32,9 +33,10 @@ class MenuViewLayerController implements IAccessibilityFloatingMenu {
     private final MenuViewLayer mMenuViewLayer;
     private boolean mIsShowing;
 
-    MenuViewLayerController(Context context, WindowManager windowManager) {
+    MenuViewLayerController(Context context, WindowManager windowManager,
+            AccessibilityManager accessibilityManager) {
         mWindowManager = windowManager;
-        mMenuViewLayer = new MenuViewLayer(context, windowManager, this);
+        mMenuViewLayer = new MenuViewLayer(context, windowManager, accessibilityManager, this);
     }
 
     @Override

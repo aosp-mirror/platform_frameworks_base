@@ -1336,6 +1336,14 @@
     <dimen name="accessibility_floating_menu_large_single_radius">35dp</dimen>
     <dimen name="accessibility_floating_menu_large_multiple_radius">35dp</dimen>
 
+    <dimen name="accessibility_floating_menu_message_container_horizontal_padding">15dp</dimen>
+    <dimen name="accessibility_floating_menu_message_text_vertical_padding">8dp</dimen>
+    <dimen name="accessibility_floating_menu_message_margin">8dp</dimen>
+    <dimen name="accessibility_floating_menu_message_elevation">5dp</dimen>
+    <dimen name="accessibility_floating_menu_message_text_size">14sp</dimen>
+    <dimen name="accessibility_floating_menu_message_min_width">312dp</dimen>
+    <dimen name="accessibility_floating_menu_message_min_height">48dp</dimen>
+
     <dimen name="accessibility_floating_tooltip_arrow_width">8dp</dimen>
     <dimen name="accessibility_floating_tooltip_arrow_height">16dp</dimen>
     <dimen name="accessibility_floating_tooltip_arrow_margin">-2dp</dimen>

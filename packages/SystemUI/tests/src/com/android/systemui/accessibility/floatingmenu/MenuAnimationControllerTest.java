@@ -78,4 +78,13 @@ public class MenuAnimationControllerTest extends SysuiTestCase {
 
         verify(mViewPropertyAnimator).withEndAction(any(Runnable.class));
     }
+
+    @Test
+    public void startGrowAnimation_menuCompletelyOpaque() {
+        mMenuAnimationController.startShrinkAnimation(null);
+
+        mMenuAnimationController.startGrowAnimation();
+
+        assertThat(mMenuView.getAlpha()).isEqualTo(/* completelyOpaque */ 1.0f);
+    }
 }

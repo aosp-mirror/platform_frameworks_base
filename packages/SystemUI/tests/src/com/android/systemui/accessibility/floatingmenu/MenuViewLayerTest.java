@@ -29,6 +29,7 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityManager;
 
 import androidx.test.filters.SmallTest;
 
@@ -58,7 +59,10 @@ public class MenuViewLayerTest extends SysuiTestCase {
     @Before
     public void setUp() throws Exception {
         final WindowManager stubWindowManager = mContext.getSystemService(WindowManager.class);
-        mMenuViewLayer = new MenuViewLayer(mContext, stubWindowManager, mFloatingMenu);
+        final AccessibilityManager stubAccessibilityManager = mContext.getSystemService(
+                AccessibilityManager.class);
+        mMenuViewLayer = new MenuViewLayer(mContext, stubWindowManager, stubAccessibilityManager,
+                mFloatingMenu);
     }
 
     @Test
