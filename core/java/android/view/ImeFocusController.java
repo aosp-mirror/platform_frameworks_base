@@ -84,15 +84,11 @@ public final class ImeFocusController {
 
     @UiThread
     void onPreWindowFocus(boolean hasWindowFocus, WindowManager.LayoutParams windowAttribute) {
+        mHasImeFocus = WindowManager.LayoutParams.mayUseInputMethod(windowAttribute.flags);
         if (!hasWindowFocus || !mHasImeFocus || isInLocalFocusMode(windowAttribute)) {
             return;
         }
         getImmDelegate().onPreWindowGainedFocus(mViewRootImpl);
-    }
-
-    @UiThread
-    void updateImeFocusable(WindowManager.LayoutParams windowAttribute) {
-        mHasImeFocus = WindowManager.LayoutParams.mayUseInputMethod(windowAttribute.flags);
     }
 
     @UiThread
