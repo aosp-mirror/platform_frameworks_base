@@ -32,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import com.android.settingslib.spa.framework.theme.SettingsTheme
+import com.android.settingslib.spa.framework.util.EntryHighlight
 import com.android.settingslib.spa.widget.preference.BaseLayout
 import kotlin.math.roundToInt
 
@@ -108,33 +109,35 @@ fun SettingsSlider(model: SettingsSliderModel) {
 internal fun SettingsSlider(
     title: String,
     initValue: Int,
+    modifier: Modifier = Modifier,
     valueRange: IntRange = 0..100,
     onValueChange: ((value: Int) -> Unit)? = null,
     onValueChangeFinished: (() -> Unit)? = null,
     icon: ImageVector? = null,
     showSteps: Boolean = false,
-    modifier: Modifier = Modifier,
 ) {
     var sliderPosition by rememberSaveable { mutableStateOf(initValue.toFloat()) }
-    BaseLayout(
-        title = title,
-        subTitle = {
-            Slider(
-                value = sliderPosition,
-                onValueChange = {
-                    sliderPosition = it
-                    onValueChange?.invoke(sliderPosition.roundToInt())
-                },
-                modifier = modifier,
-                valueRange = valueRange.first.toFloat()..valueRange.last.toFloat(),
-                steps = if (showSteps) (valueRange.count() - 2) else 0,
-                onValueChangeFinished = onValueChangeFinished,
-            )
-        },
-        icon = if (icon != null) ({
-            Icon(imageVector = icon, contentDescription = null)
-        }) else null,
-    )
+    EntryHighlight {
+        BaseLayout(
+            title = title,
+            subTitle = {
+                Slider(
+                    value = sliderPosition,
+                    onValueChange = {
+                        sliderPosition = it
+                        onValueChange?.invoke(sliderPosition.roundToInt())
+                    },
+                    modifier = modifier,
+                    valueRange = valueRange.first.toFloat()..valueRange.last.toFloat(),
+                    steps = if (showSteps) (valueRange.count() - 2) else 0,
+                    onValueChangeFinished = onValueChangeFinished,
+                )
+            },
+            icon = if (icon != null) ({
+                Icon(imageVector = icon, contentDescription = null)
+            }) else null,
+        )
+    }
 }
 
 @Preview
