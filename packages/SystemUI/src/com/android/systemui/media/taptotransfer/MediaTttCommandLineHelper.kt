@@ -43,7 +43,7 @@ class MediaTttCommandLineHelper @Inject constructor(
     private val commandRegistry: CommandRegistry,
     private val context: Context,
     @Main private val mainExecutor: Executor
-) : CoreStartable(context) {
+) : CoreStartable {
 
     /** All commands for the sender device. */
     inner class SenderCommand : Command {

@@ -47,7 +47,7 @@ class KeyguardLiftController @Inject constructor(
     private val asyncSensorManager: AsyncSensorManager,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     private val dumpManager: DumpManager
-) : Dumpable, CoreStartable(context) {
+) : Dumpable, CoreStartable {
 
     private val pickupSensor = asyncSensorManager.getDefaultSensor(Sensor.TYPE_PICK_UP_GESTURE)
     private var isListening = false
