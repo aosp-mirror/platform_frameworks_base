@@ -16,18 +16,15 @@
 
 package com.android.internal.systemui.lint
 
-import com.android.tools.lint.checks.infrastructure.LintDetectorTest
 import com.android.tools.lint.checks.infrastructure.TestFiles
-import com.android.tools.lint.checks.infrastructure.TestLintTask
 import com.android.tools.lint.detector.api.Detector
 import com.android.tools.lint.detector.api.Issue
 import org.junit.Test
 
 @Suppress("UnstableApiUsage")
-class SoftwareBitmapDetectorTest : LintDetectorTest() {
+class SoftwareBitmapDetectorTest : SystemUILintDetectorTest() {
 
     override fun getDetector(): Detector = SoftwareBitmapDetector()
-    override fun lint(): TestLintTask = super.lint().allowMissingSdk(true)
 
     override fun getIssues(): List<Issue> = listOf(SoftwareBitmapDetector.ISSUE)
 
