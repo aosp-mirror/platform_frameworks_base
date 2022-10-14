@@ -41,12 +41,16 @@ import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.ColorSpace;
 import android.graphics.Picture;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.hardware.HardwareBuffer;
+import android.media.Image;
+import android.media.ImageReader;
 import android.os.SystemProperties;
 import android.util.Slog;
+import android.view.SurfaceControl;
 import android.view.WindowManager.LayoutParams;
 import android.view.WindowManager.TransitionOldType;
 import android.view.WindowManager.TransitionType;
@@ -59,9 +63,11 @@ import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 import android.view.animation.ScaleAnimation;
 import android.view.animation.TranslateAnimation;
+import android.window.ScreenCapture;
 
 import com.android.internal.R;
 
+import java.nio.ByteBuffer;
 import java.util.List;
 
 /** @hide */
@@ -1261,5 +1267,91 @@ public class TransitionAnimation {
         }
 
         return set;
+    }
+
+    /** Returns whether the hardware buffer passed in is marked as protected. */
+    public static boolean hasProtectedContent(HardwareBuffer hardwareBuffer) {
+        return (hardwareBuffer.getUsage() & HardwareBuffer.USAGE_PROTECTED_CONTENT)
+                == HardwareBuffer.USAGE_PROTECTED_CONTENT;
+    }
+
+    /** Returns the luminance in 0~1. */
+    public static float getBorderLuma(SurfaceControl surfaceControl, int w, int h) {
+        final ScreenCapture.ScreenshotHardwareBuffer buffer =
+                ScreenCapture.captureLayers(surfaceControl, new Rect(0, 0, w, h), 1);
+        if (buffer != null) {
+            return getBorderLuma(buffer.getHardwareBuffer(), buffer.getColorSpace());
+        }
+        return 0;
+    }
+
+    /** Returns the luminance in 0~1. */
+    public static float getBorderLuma(HardwareBuffer hwBuffer, ColorSpace colorSpace) {
+        if (hwBuffer == null) {
+            return 0;
+        }
+        final int format = hwBuffer.getFormat();
+        // Only support RGB format in 4 bytes. And protected buffer is not readable.
+        if (format != HardwareBuffer.RGBA_8888 || hasProtectedContent(hwBuffer)) {
+            return 0;
+        }
+
+        final ImageReader ir = ImageReader.newInstance(hwBuffer.getWidth(), hwBuffer.getHeight(),
+                format, 1 /* maxImages */);
+        ir.getSurface().attachAndQueueBufferWithColorSpace(hwBuffer, colorSpace);
+        final Image image = ir.acquireLatestImage();
+        if (image == null || image.getPlaneCount() < 1) {
+            return 0;
+        }
+
+        final Image.Plane plane = image.getPlanes()[0];
+        final ByteBuffer buffer = plane.getBuffer();
+        final int width = image.getWidth();
+        final int height = image.getHeight();
+        final int pixelStride = plane.getPixelStride();
+        final int rowStride = plane.getRowStride();
+        final int sampling = 10;
+        final int[] borderLumas = new int[(width + height) * 2 / sampling];
+
+        // Grab the top and bottom borders.
+        int i = 0;
+        for (int x = 0, size = width - sampling; x < size; x += sampling) {
+            borderLumas[i++] = getPixelLuminance(buffer, x, 0, pixelStride, rowStride);
+            borderLumas[i++] = getPixelLuminance(buffer, x, height - 1, pixelStride, rowStride);
+        }
+
+        // Grab the left and right borders.
+        for (int y = 0, size = height - sampling; y < size; y += sampling) {
+            borderLumas[i++] = getPixelLuminance(buffer, 0, y, pixelStride, rowStride);
+            borderLumas[i++] = getPixelLuminance(buffer, width - 1, y, pixelStride, rowStride);
+        }
+
+        ir.close();
+
+        // Get "mode" by histogram.
+        final int[] histogram = new int[256];
+        int maxCount = 0;
+        int mostLuma = 0;
+        for (int luma : borderLumas) {
+            final int count = ++histogram[luma];
+            if (count > maxCount) {
+                maxCount = count;
+                mostLuma = luma;
+            }
+        }
+        return mostLuma / 255f;
+    }
+
+    /** Returns the luminance of the pixel in 0~255. */
+    private static int getPixelLuminance(ByteBuffer buffer, int x, int y, int pixelStride,
+            int rowStride) {
+        final int color = buffer.getInt(y * rowStride + x * pixelStride);
+        // The buffer from ImageReader is always in native order (little-endian), so extract the
+        // color components in reversed order.
+        final int r = color & 0xff;
+        final int g = (color >> 8) & 0xff;
+        final int b = (color >> 16) & 0xff;
+        // Approximation of WCAG 2.0 relative luminance.
+        return ((r * 8) + (g * 22) + (b * 2)) >> 5;
     }
 }
