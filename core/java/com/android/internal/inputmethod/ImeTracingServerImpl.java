@@ -19,8 +19,6 @@ package com.android.internal.inputmethod;
 import static android.os.Build.IS_USER;
 
 import android.annotation.Nullable;
-import android.os.RemoteException;
-import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.SystemClock;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
@@ -71,7 +69,7 @@ class ImeTracingServerImpl extends ImeTracing {
 
     private final Object mEnabledLock = new Object();
 
-    ImeTracingServerImpl() throws ServiceNotFoundException {
+    ImeTracingServerImpl() {
         mBufferClients = new TraceBuffer<>(BUFFER_CAPACITY);
         mTraceFileClients = new File(TRACE_DIRNAME + TRACE_FILENAME_CLIENTS);
         mBufferIms = new TraceBuffer<>(BUFFER_CAPACITY);
@@ -132,8 +130,6 @@ class ImeTracingServerImpl extends ImeTracing {
 
         try {
             sendToService(null, IME_TRACING_FROM_IMMS, where);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Exception while sending ime-related manager service dump to server", e);
         } finally {
             mDumpInProgress = false;
         }
