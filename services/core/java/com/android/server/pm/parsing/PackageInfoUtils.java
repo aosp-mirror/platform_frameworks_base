@@ -54,6 +54,7 @@ import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
+import com.android.server.SystemConfig;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.parsing.pkg.PackageImpl;
 import com.android.server.pm.pkg.AndroidPackage;
@@ -1005,11 +1006,14 @@ public class PackageInfoUtils {
     /** @see ApplicationInfo#privateFlagsExt */
     public static int appInfoPrivateFlagsExt(AndroidPackage pkg,
                                              @Nullable PackageStateInternal pkgSetting) {
+        var isAllowlistedForHiddenApis = SystemConfig.getInstance().getHiddenApiWhitelistedApps()
+                .contains(pkg.getPackageName());
         // @formatter:off
         int pkgWithoutStateFlags = flag(pkg.isProfileable(), ApplicationInfo.PRIVATE_FLAG_EXT_PROFILEABLE)
                 | flag(pkg.hasRequestForegroundServiceExemption(), ApplicationInfo.PRIVATE_FLAG_EXT_REQUEST_FOREGROUND_SERVICE_EXEMPTION)
                 | flag(pkg.areAttributionsUserVisible(), ApplicationInfo.PRIVATE_FLAG_EXT_ATTRIBUTIONS_ARE_USER_VISIBLE)
-                | flag(pkg.isOnBackInvokedCallbackEnabled(), ApplicationInfo.PRIVATE_FLAG_EXT_ENABLE_ON_BACK_INVOKED_CALLBACK);
+                | flag(pkg.isOnBackInvokedCallbackEnabled(), ApplicationInfo.PRIVATE_FLAG_EXT_ENABLE_ON_BACK_INVOKED_CALLBACK)
+                | flag(isAllowlistedForHiddenApis, ApplicationInfo.PRIVATE_FLAG_EXT_ALLOWLISTED_FOR_HIDDEN_APIS);
         return appInfoPrivateFlagsExt(pkgWithoutStateFlags, pkgSetting);
         // @formatter:on
     }
