@@ -22,11 +22,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.android.settingslib.spa.framework.common.SettingsEntry
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
+import com.android.settingslib.spa.framework.common.createSettingsPage
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.gallery.R
 import com.android.settingslib.spa.gallery.SettingsPageProviderEnum
 import com.android.settingslib.spa.gallery.button.ActionButtonPageProvider
-import com.android.settingslib.spa.gallery.createSettingsPage
 import com.android.settingslib.spa.gallery.page.ArgumentPageModel
 import com.android.settingslib.spa.gallery.page.ArgumentPageProvider
 import com.android.settingslib.spa.gallery.page.FooterPageProvider
@@ -40,9 +40,10 @@ import com.android.settingslib.spa.widget.scaffold.HomeScaffold
 
 object HomePageProvider : SettingsPageProvider {
     override val name = SettingsPageProviderEnum.HOME.name
+    override val displayName = SettingsPageProviderEnum.HOME.displayName
+    private val owner = createSettingsPage()
 
     override fun buildEntry(arguments: Bundle?): List<SettingsEntry> {
-        val owner = createSettingsPage(SettingsPageProviderEnum.HOME)
         return listOf(
             PreferenceMainPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
             ArgumentPageProvider.buildInjectEntry("foo")!!.setLink(fromPage = owner).build(),

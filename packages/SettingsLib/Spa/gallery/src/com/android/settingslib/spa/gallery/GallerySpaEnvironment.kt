@@ -16,11 +16,9 @@
 
 package com.android.settingslib.spa.gallery
 
-import android.os.Bundle
-import androidx.navigation.NamedNavArgument
-import com.android.settingslib.spa.framework.common.SettingsPage
 import com.android.settingslib.spa.framework.common.SettingsPageProviderRepository
 import com.android.settingslib.spa.framework.common.SpaEnvironment
+import com.android.settingslib.spa.framework.common.createSettingsPage
 import com.android.settingslib.spa.gallery.button.ActionButtonPageProvider
 import com.android.settingslib.spa.gallery.home.HomePageProvider
 import com.android.settingslib.spa.gallery.page.ArgumentPageProvider
@@ -49,19 +47,6 @@ enum class SettingsPageProviderEnum(val displayName: String) {
     // Add your SPPs
 }
 
-fun createSettingsPage(
-    SppName: SettingsPageProviderEnum,
-    parameter: List<NamedNavArgument> = emptyList(),
-    arguments: Bundle? = null
-): SettingsPage {
-    return SettingsPage.create(
-        name = SppName.name,
-        displayName = SppName.displayName,
-        parameter = parameter,
-        arguments = arguments,
-    )
-}
-
 object GallerySpaEnvironment : SpaEnvironment() {
     override val pageProviderRepository = lazy {
         SettingsPageProviderRepository(
@@ -82,7 +67,7 @@ object GallerySpaEnvironment : SpaEnvironment() {
                 ActionButtonPageProvider,
             ),
             rootPages = listOf(
-                createSettingsPage(SettingsPageProviderEnum.HOME)
+                HomePageProvider.createSettingsPage(),
             )
         )
     }
