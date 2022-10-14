@@ -1272,6 +1272,25 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      */
     public static final int AXIS_GENERIC_16 = 47;
 
+    /**
+     * Axis constant: X gesture offset axis of a motion event.
+     * <p>
+     * <ul>
+     * <li>For a touch pad, reports the distance that a swipe gesture has moved in the X axis, as a
+     * proportion of the touch pad's size. For example, if a touch pad is 1000 units wide, and a
+     * swipe gesture starts at X = 500 then moves to X = 400, this axis would have a value of
+     * -0.1.
+     * </ul>
+     */
+    public static final int AXIS_GESTURE_X_OFFSET = 48;
+
+    /**
+     * Axis constant: Y gesture offset axis of a motion event.
+     *
+     * The same as {@link #AXIS_GESTURE_X_OFFSET}, but for the Y axis.
+     */
+    public static final int AXIS_GESTURE_Y_OFFSET = 49;
+
     // NOTE: If you add a new axis here you must also add it to:
     //  frameworks/native/include/android/input.h
     //  frameworks/native/libs/input/InputEventLabels.cpp
@@ -1325,6 +1344,8 @@ public final class MotionEvent extends InputEvent implements Parcelable {
         names.append(AXIS_GENERIC_14, "AXIS_GENERIC_14");
         names.append(AXIS_GENERIC_15, "AXIS_GENERIC_15");
         names.append(AXIS_GENERIC_16, "AXIS_GENERIC_16");
+        names.append(AXIS_GESTURE_X_OFFSET, "AXIS_GESTURE_X_OFFSET");
+        names.append(AXIS_GESTURE_Y_OFFSET, "AXIS_GESTURE_Y_OFFSET");
     }
 
     /**
