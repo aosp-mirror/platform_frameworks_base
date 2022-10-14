@@ -100,6 +100,11 @@ object Flags {
     // TODO(b/257315550): Tracking Bug
     val NO_HUN_FOR_OLD_WHEN = unreleasedFlag(118, "no_hun_for_old_when")
 
+    // TODO(b/260335638): Tracking Bug
+    @JvmField
+    val NOTIFICATION_INLINE_REPLY_ANIMATION =
+        unreleasedFlag(174148361, "notification_inline_reply_animation", teamfood = true)
+
     val FILTER_UNSEEN_NOTIFS_ON_KEYGUARD =
         unreleasedFlag(254647461, "filter_unseen_notifs_on_keyguard", teamfood = true)
 

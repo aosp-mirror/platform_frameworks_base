@@ -70,7 +70,7 @@ import java.util.List;
 
 /**
  * A frame layout containing the actual payload of the notification, including the contracted,
- * expanded and heads up layout. This class is responsible for clipping the content and and
+ * expanded and heads up layout. This class is responsible for clipping the content and
  * switching between the expanded, contracted and the heads up view depending on its clipped size.
  */
 public class NotificationContentView extends FrameLayout implements NotificationFadeAware {
