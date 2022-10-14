@@ -20,6 +20,7 @@ package com.android.systemui.user.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.android.systemui.R
+import com.android.systemui.common.shared.model.Text
 import com.android.systemui.common.ui.drawable.CircularDrawable
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
@@ -161,7 +162,12 @@ private constructor(
     ): UserViewModel {
         return UserViewModel(
             viewKey = model.id,
-            name = model.name,
+            name =
+                if (model.isGuest) {
+                    Text.Resource(com.android.settingslib.R.string.guest_exit_quick_settings_button)
+                } else {
+                    model.name
+                },
             image = CircularDrawable(model.image),
             isSelectionMarkerVisible = model.isSelected,
             alpha =
@@ -187,6 +193,7 @@ private constructor(
                         isAddSupervisedUser = model == UserActionModel.ADD_SUPERVISED_USER,
                         isAddUser = model == UserActionModel.ADD_USER,
                         isGuest = model == UserActionModel.ENTER_GUEST_MODE,
+                        isTablet = true,
                     )
                 },
             textResourceId =
@@ -199,6 +206,7 @@ private constructor(
                         isGuestUserResetting = guestUserInteractor.isGuestUserResetting,
                         isAddSupervisedUser = model == UserActionModel.ADD_SUPERVISED_USER,
                         isAddUser = model == UserActionModel.ADD_USER,
+                        isTablet = true,
                     )
                 },
             onClicked = {
