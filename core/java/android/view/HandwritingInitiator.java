@@ -162,7 +162,13 @@ public class HandwritingInitiator {
                         if (candidateView == getConnectedView()) {
                             startHandwriting(candidateView);
                         } else {
-                            candidateView.requestFocus();
+                            if (candidateView.getRevealOnFocusHint()) {
+                                candidateView.setRevealOnFocusHint(false);
+                                candidateView.requestFocus();
+                                candidateView.setRevealOnFocusHint(true);
+                            } else {
+                                candidateView.requestFocus();
+                            }
                         }
                     }
                 }
