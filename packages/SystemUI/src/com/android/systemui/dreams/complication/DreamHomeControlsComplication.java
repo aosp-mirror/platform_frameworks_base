@@ -71,7 +71,7 @@ public class DreamHomeControlsComplication implements Complication {
     /**
      * {@link CoreStartable} for registering the complication with SystemUI on startup.
      */
-    public static class Registrant extends CoreStartable {
+    public static class Registrant implements CoreStartable {
         private final DreamHomeControlsComplication mComplication;
         private final DreamOverlayStateController mDreamOverlayStateController;
         private final ControlsComponent mControlsComponent;
@@ -90,11 +90,9 @@ public class DreamHomeControlsComplication implements Complication {
                 };
 
         @Inject
-        public Registrant(Context context, DreamHomeControlsComplication complication,
+        public Registrant(DreamHomeControlsComplication complication,
                 DreamOverlayStateController dreamOverlayStateController,
                 ControlsComponent controlsComponent) {
-            super(context);
-
             mComplication = complication;
             mControlsComponent = controlsComponent;
             mDreamOverlayStateController = dreamOverlayStateController;

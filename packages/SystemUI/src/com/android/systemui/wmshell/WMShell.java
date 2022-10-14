@@ -89,8 +89,10 @@ import javax.inject.Inject;
  *       -> WMShell starts and binds SysUI with Shell components via exported Shell interfaces
  */
 @SysUISingleton
-public final class WMShell extends CoreStartable
-        implements CommandQueue.Callbacks, ProtoTraceable<SystemUiTraceProto> {
+public final class WMShell implements
+        CoreStartable,
+        CommandQueue.Callbacks,
+        ProtoTraceable<SystemUiTraceProto> {
     private static final String TAG = WMShell.class.getName();
     private static final int INVALID_SYSUI_STATE_MASK =
             SYSUI_STATE_DIALOG_SHOWING
@@ -102,6 +104,7 @@ public final class WMShell extends CoreStartable
                     | SYSUI_STATE_BUBBLES_MANAGE_MENU_EXPANDED
                     | SYSUI_STATE_QUICK_SETTINGS_EXPANDED;
 
+    private final Context mContext;
     // Shell interfaces
     private final ShellInterface mShell;
     private final Optional<Pip> mPipOptional;
@@ -163,7 +166,8 @@ public final class WMShell extends CoreStartable
     private WakefulnessLifecycle.Observer mWakefulnessObserver;
 
     @Inject
-    public WMShell(Context context,
+    public WMShell(
+            Context context,
             ShellInterface shell,
             Optional<Pip> pipOptional,
             Optional<SplitScreen> splitScreenOptional,
@@ -179,7 +183,7 @@ public final class WMShell extends CoreStartable
             WakefulnessLifecycle wakefulnessLifecycle,
             UserTracker userTracker,
             @Main Executor sysUiMainExecutor) {
-        super(context);
+        mContext = context;
         mShell = shell;
         mCommandQueue = commandQueue;
         mConfigurationController = configurationController;

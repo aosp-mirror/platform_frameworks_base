@@ -19,11 +19,11 @@ import kotlinx.coroutines.withContext
 
 @SysUISingleton
 class ChooserSelector @Inject constructor(
-        context: Context,
+        private val context: Context,
         private val featureFlags: FeatureFlags,
         @Application private val coroutineScope: CoroutineScope,
         @Background private val bgDispatcher: CoroutineDispatcher
-) : CoreStartable(context) {
+) : CoreStartable {
 
     private val packageManager = context.packageManager
     private val chooserComponent = ComponentName.unflattenFromString(
