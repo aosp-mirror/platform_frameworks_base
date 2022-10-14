@@ -89,8 +89,7 @@ public class TakeScreenshotService extends Service {
                     Log.d(TAG, "Received ACTION_CLOSE_SYSTEM_DIALOGS");
                 }
                 if (!mScreenshot.isPendingSharedTransition()) {
-                    mUiEventLogger.log(SCREENSHOT_DISMISSED_OTHER);
-                    mScreenshot.dismissScreenshot(false);
+                    mScreenshot.dismissScreenshot(SCREENSHOT_DISMISSED_OTHER);
                 }
             }
         }
