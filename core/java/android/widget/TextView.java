@@ -9436,17 +9436,23 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         // The operation should be applied to all characters touched by the line joining the points.
-        int startOffset = mLayout.getOffsetForHorizontal(line, startPoint.x);
-        int endOffset = mLayout.getOffsetForHorizontal(line, endPoint.x);
-        if (startOffset == endOffset) {
+        float lineVerticalCenter = (mLayout.getLineTop(line)
+                + mLayout.getLineBottom(line, /* includeLineSpacing= */ false)) / 2f;
+        // Create a rectangle which is +/-0.1f around the line's vertical center, so that the
+        // rectangle doesn't touch the line above or below. (The line height is at least 1f.)
+        RectF area = new RectF(
+                Math.min(startPoint.x, endPoint.x),
+                lineVerticalCenter + 0.1f,
+                Math.max(startPoint.x, endPoint.x),
+                lineVerticalCenter - 0.1f);
+        Range<Integer> range = mLayout.getRangeForRect(
+                area, new GraphemeClusterSegmentFinder(mText, mTextPaint),
+                Layout.INCLUSION_STRATEGY_ANY_OVERLAP);
+        if (range == null) {
             return handleGestureFailure(gesture);
-        } else if (startOffset > endOffset) {
-            int tmp = startOffset;
-            startOffset = endOffset;
-            endOffset = tmp;
         }
-        // TODO(b/247557062): The boundary offsets might be off by one. We should check which side
-        // of the offset the point is on, and adjust if necessary.
+        int startOffset = range.getLower();
+        int endOffset = range.getUpper();
         // TODO(b/247557062): This doesn't handle bidirectional text correctly.
 
         Pattern whitespacePattern = getWhitespacePattern();
