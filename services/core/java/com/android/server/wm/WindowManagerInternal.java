@@ -21,6 +21,7 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.content.ClipData;
 import android.content.Context;
 import android.graphics.Matrix;
@@ -450,6 +451,15 @@ public abstract class WindowManagerInternal {
     * @return Whether the keyguard is showing and not occluded.
     */
     public abstract boolean isKeyguardShowingAndNotOccluded();
+
+    /**
+     * Return whether the keyguard is secured by a PIN, pattern or password or a SIM card is
+     * currently locked.
+     *
+     * @param userId User ID to be queried about.
+     * @return {@code true} if a PIN, pattern or password is set or a SIM card is locked.
+     */
+    public abstract boolean isKeyguardSecure(@UserIdInt int userId);
 
     /**
      * Gets the frame of a window given its token.

@@ -104,6 +104,10 @@ void DeviceInfo::setWideColorDataspace(ADataSpace dataspace) {
     }
 }
 
+void DeviceInfo::setSupportFp16ForHdr(bool supportFp16ForHdr) {
+    get()->mSupportFp16ForHdr = supportFp16ForHdr;
+}
+
 void DeviceInfo::onRefreshRateChanged(int64_t vsyncPeriod) {
     mVsyncPeriod = vsyncPeriod;
 }

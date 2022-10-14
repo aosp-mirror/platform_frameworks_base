@@ -87,6 +87,7 @@ import android.content.pm.PackageManagerInternal;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.BatteryManager;
+import android.os.BatteryStatsInternal;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -116,6 +117,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.EventLog;
 import android.util.IndentingPrintWriter;
+import android.util.IntArray;
 import android.util.Log;
 import android.util.LongArrayQueue;
 import android.util.Pair;
@@ -249,6 +251,7 @@ public class AlarmManagerService extends SystemService {
     private ActivityManagerInternal mActivityManagerInternal;
     private final EconomyManagerInternal mEconomyManagerInternal;
     private PackageManagerInternal mPackageManagerInternal;
+    private BatteryStatsInternal mBatteryStatsInternal;
     private RoleManager mRoleManager;
     private volatile PermissionManagerServiceInternal mLocalPermissionManager;
 
@@ -2112,6 +2115,8 @@ public class AlarmManagerService extends SystemService {
             AppStandbyInternal appStandbyInternal =
                     LocalServices.getService(AppStandbyInternal.class);
             appStandbyInternal.addListener(new AppStandbyTracker());
+
+            mBatteryStatsInternal = LocalServices.getService(BatteryStatsInternal.class);
 
             mRoleManager = getContext().getSystemService(RoleManager.class);
 
@@ -4783,8 +4788,12 @@ public class AlarmManagerService extends SystemService {
                             }
                             final ArraySet<Pair<String, Integer>> triggerPackages =
                                     new ArraySet<>();
+                            final IntArray wakeupUids = new IntArray();
                             for (int i = 0; i < triggerList.size(); i++) {
                                 final Alarm a = triggerList.get(i);
+                                if (a.wakeup) {
+                                    wakeupUids.add(a.uid);
+                                }
                                 if (mConstants.USE_TARE_POLICY) {
                                     if (!isExemptFromTare(a)) {
                                         triggerPackages.add(Pair.create(
@@ -4795,6 +4804,11 @@ public class AlarmManagerService extends SystemService {
                                     triggerPackages.add(Pair.create(
                                             a.sourcePackage, UserHandle.getUserId(a.creatorUid)));
                                 }
+                            }
+                            if (wakeupUids.size() > 0 && mBatteryStatsInternal != null) {
+                                mBatteryStatsInternal.noteCpuWakingActivity(
+                                        BatteryStatsInternal.CPU_WAKEUP_SUBSYSTEM_ALARM, nowELAPSED,
+                                        wakeupUids.toArray());
                             }
                             deliverAlarmsLocked(triggerList, nowELAPSED);
                             mTemporaryQuotaReserve.cleanUpExpiredQuotas(nowELAPSED);

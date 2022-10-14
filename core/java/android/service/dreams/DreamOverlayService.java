@@ -42,8 +42,11 @@ public abstract class DreamOverlayService extends Service {
     private IDreamOverlay mDreamOverlay = new IDreamOverlay.Stub() {
         @Override
         public void startDream(WindowManager.LayoutParams layoutParams,
-                IDreamOverlayCallback callback) {
+                IDreamOverlayCallback callback, String dreamComponent,
+                boolean shouldShowComplications) {
             mDreamOverlayCallback = callback;
+            mDreamComponent = ComponentName.unflattenFromString(dreamComponent);
+            mShowComplications = shouldShowComplications;
             onStartDream(layoutParams);
         }
     };
@@ -56,10 +59,6 @@ public abstract class DreamOverlayService extends Service {
     @Nullable
     @Override
     public final IBinder onBind(@NonNull Intent intent) {
-        mShowComplications = intent.getBooleanExtra(DreamService.EXTRA_SHOW_COMPLICATIONS,
-                DreamService.DEFAULT_SHOW_COMPLICATIONS);
-        mDreamComponent = intent.getParcelableExtra(DreamService.EXTRA_DREAM_COMPONENT,
-                ComponentName.class);
         return mDreamOverlay.asBinder();
     }
 

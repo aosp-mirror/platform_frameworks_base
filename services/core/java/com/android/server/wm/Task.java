@@ -2605,6 +2605,13 @@ class Task extends TaskFragment {
         return boundsChange;
     }
 
+    /** Sets the requested bounds regardless of the windowing mode. */
+    int setBoundsUnchecked(@NonNull Rect bounds) {
+        final int boundsChange = super.setBounds(bounds);
+        updateSurfaceBounds();
+        return boundsChange;
+    }
+
     @Override
     public boolean isCompatible(int windowingMode, int activityType) {
         // TODO: Should we just move this to ConfigurationContainer?
@@ -5852,10 +5859,7 @@ class Task extends TaskFragment {
             return BOUNDS_CHANGE_NONE;
         }
 
-        final int result = super.setBounds(!inMultiWindowMode() ? null : bounds);
-
-        updateSurfaceBounds();
-        return result;
+        return setBoundsUnchecked(!inMultiWindowMode() ? null : bounds);
     }
 
     @Override

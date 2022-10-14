@@ -124,7 +124,7 @@ public class SystemDataTransportTest extends InstrumentationTestCase {
         assertTransportBehavior(input, expected);
     }
 
-    public void testMutiplePingPing() {
+    public void testMultiplePingPing() {
         final byte[] input = concat(
                 generatePacket(MESSAGE_REQUEST_PING, /* sequence */ 1, "red"),
                 generatePacket(MESSAGE_REQUEST_PING, /* sequence */ 2, "green"));
@@ -248,7 +248,7 @@ public class SystemDataTransportTest extends InstrumentationTestCase {
         }
 
         @Override
-        public int read(byte b[], int off, int len) throws IOException {
+        public int read(byte[] b, int off, int len) throws IOException {
             // Instead of hanging indefinitely, wait a bit and claim that
             // nothing was read, without hitting EOF
             SystemClock.sleep(100);
@@ -259,13 +259,13 @@ public class SystemDataTransportTest extends InstrumentationTestCase {
     private static class DelayingInputStream extends FilterInputStream {
         private final long mDelay;
 
-        public DelayingInputStream(InputStream in, long delay) {
+        DelayingInputStream(InputStream in, long delay) {
             super(in);
             mDelay = delay;
         }
 
         @Override
-        public int read(byte b[], int off, int len) throws IOException {
+        public int read(byte[] b, int off, int len) throws IOException {
             SystemClock.sleep(mDelay);
             return super.read(b, off, len);
         }
@@ -274,25 +274,25 @@ public class SystemDataTransportTest extends InstrumentationTestCase {
     private static class DelayingOutputStream extends FilterOutputStream {
         private final long mDelay;
 
-        public DelayingOutputStream(OutputStream out, long delay) {
+        DelayingOutputStream(OutputStream out, long delay) {
             super(out);
             mDelay = delay;
         }
 
         @Override
-        public void write(byte b[], int off, int len) throws IOException {
+        public void write(byte[] b, int off, int len) throws IOException {
             SystemClock.sleep(mDelay);
             super.write(b, off, len);
         }
     }
 
     private static class TrickleInputStream extends FilterInputStream {
-        public TrickleInputStream(InputStream in) {
+        TrickleInputStream(InputStream in) {
             super(in);
         }
 
         @Override
-        public int read(byte b[], int off, int len) throws IOException {
+        public int read(byte[] b, int off, int len) throws IOException {
             return super.read(b, off, 1);
         }
     }

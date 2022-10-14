@@ -2319,6 +2319,22 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertTrue(activity1.getTask().getTaskInfo().launchCookies.contains(launchCookie));
     }
 
+    @Test
+    public void testOrientationForScreenOrientationBehind() {
+        final Task task = createTask(mDisplayContent);
+        // Activity below
+        new ActivityBuilder(mAtm)
+                .setTask(task)
+                .setScreenOrientation(SCREEN_ORIENTATION_PORTRAIT)
+                .build();
+        final ActivityRecord activityTop = new ActivityBuilder(mAtm)
+                .setTask(task)
+                .setScreenOrientation(SCREEN_ORIENTATION_BEHIND)
+                .build();
+        final int topOrientation = activityTop.getRequestedConfigurationOrientation();
+        assertEquals(SCREEN_ORIENTATION_PORTRAIT, topOrientation);
+    }
+
     private void verifyProcessInfoUpdate(ActivityRecord activity, State state,
             boolean shouldUpdate, boolean activityChange) {
         reset(activity.app);

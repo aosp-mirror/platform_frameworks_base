@@ -325,6 +325,7 @@ public class PackageInstallerSessionTest {
                 actual.getSessionErrorMessage());
         assertEquals(expected.isPrepared(), actual.isPrepared());
         assertEquals(expected.isCommitted(), actual.isCommitted());
+        assertEquals(expected.isPreapprovalRequested(), actual.isPreapprovalRequested());
         assertEquals(expected.createdMillis, actual.createdMillis);
         assertEquals(expected.isSealed(), actual.isSealed());
         assertEquals(expected.isMultiPackage(), actual.isMultiPackage());

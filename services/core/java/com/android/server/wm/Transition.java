@@ -1561,6 +1561,10 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             if (info.mEndParent != null) {
                 change.setParent(info.mEndParent.mRemoteToken.toWindowContainerToken());
             }
+            if (info.mStartParent != null && info.mStartParent.mRemoteToken != null
+                    && target.getParent() != info.mStartParent) {
+                change.setLastParent(info.mStartParent.mRemoteToken.toWindowContainerToken());
+            }
             change.setMode(info.getTransitMode(target));
             change.setStartAbsBounds(info.mAbsoluteBounds);
             change.setFlags(info.getChangeFlags(target));
@@ -1840,14 +1844,14 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 flags |= FLAG_TRANSLUCENT;
             }
             final Task task = wc.asTask();
-            if (task != null && task.voiceSession != null) {
-                flags |= FLAG_IS_VOICE_INTERACTION;
-            }
             if (task != null) {
                 final ActivityRecord topActivity = task.getTopNonFinishingActivity();
                 if (topActivity != null && topActivity.mStartingData != null
                         && topActivity.mStartingData.hasImeSurface()) {
                     flags |= FLAG_WILL_IME_SHOWN;
+                }
+                if (task.voiceSession != null) {
+                    flags |= FLAG_IS_VOICE_INTERACTION;
                 }
             }
             Task parentTask = null;
@@ -1876,19 +1880,25 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                     // Whether the container fills its parent Task bounds.
                     flags |= FLAG_FILLS_TASK;
                 }
-            }
-            final DisplayContent dc = wc.asDisplayContent();
-            if (dc != null) {
-                flags |= FLAG_IS_DISPLAY;
-                if (dc.hasAlertWindowSurfaces()) {
-                    flags |= FLAG_DISPLAY_HAS_ALERT_WINDOWS;
+            } else {
+                final DisplayContent dc = wc.asDisplayContent();
+                if (dc != null) {
+                    flags |= FLAG_IS_DISPLAY;
+                    if (dc.hasAlertWindowSurfaces()) {
+                        flags |= FLAG_DISPLAY_HAS_ALERT_WINDOWS;
+                    }
+                } else if (isWallpaper(wc)) {
+                    flags |= FLAG_IS_WALLPAPER;
+                } else if (isInputMethod(wc)) {
+                    flags |= FLAG_IS_INPUT_METHOD;
+                } else {
+                    // In this condition, the wc can only be WindowToken or DisplayArea.
+                    final int type = wc.getWindowType();
+                    if (type >= WindowManager.LayoutParams.FIRST_SYSTEM_WINDOW
+                            && type <= WindowManager.LayoutParams.LAST_SYSTEM_WINDOW) {
+                        flags |= TransitionInfo.FLAG_IS_SYSTEM_WINDOW;
+                    }
                 }
-            }
-            if (isWallpaper(wc)) {
-                flags |= FLAG_IS_WALLPAPER;
-            }
-            if (isInputMethod(wc)) {
-                flags |= FLAG_IS_INPUT_METHOD;
             }
             if (occludesKeyguard(wc)) {
                 flags |= FLAG_OCCLUDES_KEYGUARD;

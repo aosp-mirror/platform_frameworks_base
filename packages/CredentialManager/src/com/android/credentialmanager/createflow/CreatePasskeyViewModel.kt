@@ -52,7 +52,17 @@ class CreatePasskeyViewModel(
     }
   }
 
-  fun onMoreOptionSelected() {
-    Log.d("Account Selector", "On more option selected")
+  fun onMoreOptionSelected(providerName: String) {
+    uiState = uiState.copy(
+        currentScreenState = CreateScreenState.MORE_OPTIONS_SELECTION,
+        selectedProvider = getProviderInfoByName(providerName)
+    )
+  }
+
+  fun onBackButtonSelected(providerName: String) {
+    uiState = uiState.copy(
+        currentScreenState = CreateScreenState.CREATION_OPTION_SELECTION,
+        selectedProvider = getProviderInfoByName(providerName)
+    )
   }
 }

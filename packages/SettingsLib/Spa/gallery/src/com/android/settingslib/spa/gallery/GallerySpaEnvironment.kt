@@ -87,7 +87,7 @@ object GallerySpaEnvironment : SpaEnvironment() {
         )
     }
 
-    override val browseActivityClass = MainActivity::class.java
+    override val browseActivityClass = GalleryMainActivity::class.java
 
     override val entryProviderAuthorities = "com.android.spa.gallery.provider"
 }

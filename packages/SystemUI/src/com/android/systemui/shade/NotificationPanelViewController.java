@@ -3383,8 +3383,9 @@ public final class NotificationPanelViewController extends PanelViewController {
     }
 
     private void updateQsFrameTranslation() {
-        mQsFrameTranslateController.translateQsFrame(mQsFrame, mQs, mOverExpansion,
-                mQsTranslationForFullShadeTransition);
+        mQsFrameTranslateController.translateQsFrame(mQsFrame, mQs,
+                mNavigationBarBottomHeight + mAmbientState.getStackTopMargin());
+
     }
 
     @Override
@@ -4287,7 +4288,7 @@ public final class NotificationPanelViewController extends PanelViewController {
                 }
 
                 if (event.getActionMasked() == MotionEvent.ACTION_DOWN && isFullyExpanded()
-                        && mStatusBarKeyguardViewManager.isShowing()) {
+                        && mKeyguardStateController.isShowing()) {
                     mStatusBarKeyguardViewManager.updateKeyguardPosition(event.getX());
                 }
 
@@ -4405,7 +4406,7 @@ public final class NotificationPanelViewController extends PanelViewController {
         }
         mSysUiState.setFlag(SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED,
                         isFullyExpanded() && !isInSettings())
-                .setFlag(SYSUI_STATE_QUICK_SETTINGS_EXPANDED, isInSettings())
+                .setFlag(SYSUI_STATE_QUICK_SETTINGS_EXPANDED, isFullyExpanded() && isInSettings())
                 .commitUpdate(mDisplayId);
     }
 

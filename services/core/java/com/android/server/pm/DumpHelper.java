@@ -26,6 +26,7 @@ import android.content.ComponentName;
 import android.content.pm.FeatureInfo;
 import android.content.pm.PackageManager;
 import android.os.Binder;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.incremental.PerUidReadTimeouts;
 import android.service.pm.PackageServiceDumpProto;
@@ -60,6 +61,7 @@ final class DumpHelper {
     private final ArrayMap<String, FeatureInfo> mAvailableFeatures;
     private final ArraySet<String> mProtectedBroadcasts;
     private final PerUidReadTimeouts[] mPerUidReadTimeouts;
+    private final SnapshotStatistics mSnapshotStatistics;
 
     DumpHelper(
             PermissionManagerServiceInternal permissionManager,
@@ -70,7 +72,8 @@ final class DumpHelper {
             ChangedPackagesTracker changedPackagesTracker,
             ArrayMap<String, FeatureInfo> availableFeatures,
             ArraySet<String> protectedBroadcasts,
-            PerUidReadTimeouts[] perUidReadTimeouts) {
+            PerUidReadTimeouts[] perUidReadTimeouts,
+            SnapshotStatistics snapshotStatistics) {
         mPermissionManager = permissionManager;
         mStorageEventHelper = storageEventHelper;
         mDomainVerificationManager = domainVerificationManager;
@@ -81,6 +84,7 @@ final class DumpHelper {
         mAvailableFeatures = availableFeatures;
         mProtectedBroadcasts = protectedBroadcasts;
         mPerUidReadTimeouts = perUidReadTimeouts;
+        mSnapshotStatistics = snapshotStatistics;
     }
 
     @NeverCompile // Avoid size overhead of debugging code.
@@ -585,6 +589,9 @@ final class DumpHelper {
             if (dumpState.onTitlePrinted()) {
                 pw.println();
             }
+            pw.println("Snapshot statistics:");
+            mSnapshotStatistics.dump(pw, "   " /* indent */, SystemClock.currentTimeMicro(),
+                    snapshot.getUsed(), dumpState.isBrief());
         }
 
         if (!checkin

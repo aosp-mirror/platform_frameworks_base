@@ -25,6 +25,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.eq;
@@ -48,6 +49,8 @@ import com.android.internal.widget.VerifyCredentialResponse;
 import com.android.server.locksettings.SyntheticPasswordManager.AuthenticationResult;
 import com.android.server.locksettings.SyntheticPasswordManager.PasswordData;
 import com.android.server.locksettings.SyntheticPasswordManager.SyntheticPassword;
+
+import libcore.util.HexEncoding;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -84,6 +87,8 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         long protectorId = manager.createLskfBasedProtector(mGateKeeperService,
                 LockscreenCredential.createNone(), sp, USER_ID);
         assertFalse(lskfGatekeeperHandleExists(USER_ID));
+        assertFalse(manager.hasPasswordData(protectorId, USER_ID));
+        assertFalse(manager.hasPasswordMetrics(protectorId, USER_ID));
 
         AuthenticationResult result = manager.unlockLskfBasedProtector(mGateKeeperService,
                 protectorId, LockscreenCredential.createNone(), USER_ID, null);
@@ -103,6 +108,8 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         long protectorId = manager.createLskfBasedProtector(mGateKeeperService, password, sp,
                 USER_ID);
         assertTrue(lskfGatekeeperHandleExists(USER_ID));
+        assertTrue(manager.hasPasswordData(protectorId, USER_ID));
+        assertTrue(manager.hasPasswordMetrics(protectorId, USER_ID));
 
         AuthenticationResult result = manager.unlockLskfBasedProtector(mGateKeeperService,
                 protectorId, password, USER_ID, null);
@@ -452,19 +459,46 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
                 mService.getHashFactor(profilePassword, MANAGED_PROFILE_USER_ID));
     }
 
+    // Tests stretching of a nonempty LSKF.
     @Test
-    public void testPasswordData_scryptParams() {
-        // CREDENTIAL_TYPE_NONE should result in the minimum scrypt params being used.
-        PasswordData data = PasswordData.create(CREDENTIAL_TYPE_NONE);
-        assertEquals(1, data.scryptLogN);
-        assertEquals(0, data.scryptLogR);
-        assertEquals(0, data.scryptLogP);
+    public void testStretchLskf_enabled() {
+        byte[] actual = mSpManager.stretchLskf(newPin("12345"), createTestPasswordData());
+        String expected = "467986710DE8F0D4F4A3668DFF58C9B7E5DB96A79B7CCF415BBD4D7767F8CFFA";
+        assertEquals(expected, HexEncoding.encodeToString(actual));
+    }
 
-        // Any other credential type should result in the real scrypt params being used.
-        data = PasswordData.create(CREDENTIAL_TYPE_PASSWORD);
-        assertTrue(data.scryptLogN > 1);
-        assertTrue(data.scryptLogR > 0);
-        assertTrue(data.scryptLogP > 0);
+    // Tests the case where stretching is disabled for an empty LSKF.
+    @Test
+    public void testStretchLskf_disabled() {
+        byte[] actual = mSpManager.stretchLskf(nonePassword(), null);
+        // "default-password", zero padded
+        String expected = "64656661756C742D70617373776F726400000000000000000000000000000000";
+        assertEquals(expected, HexEncoding.encodeToString(actual));
+    }
+
+    // Tests the legacy case where stretching is enabled for an empty LSKF.
+    @Test
+    public void testStretchLskf_emptyButEnabled() {
+        byte[] actual = mSpManager.stretchLskf(nonePassword(), createTestPasswordData());
+        String expected = "9E6DDCC1EC388BB1E1CD54097AF924CA80BCB90993196FA8F6122FF58EB333DE";
+        assertEquals(expected, HexEncoding.encodeToString(actual));
+    }
+
+    // Tests the forbidden case where stretching is disabled for a nonempty LSKF.
+    @Test
+    public void testStretchLskf_nonEmptyButDisabled() {
+        assertThrows(IllegalArgumentException.class,
+                () -> mSpManager.stretchLskf(newPin("12345"), null));
+    }
+
+    private PasswordData createTestPasswordData() {
+        PasswordData data = new PasswordData();
+        // For the unit test, the scrypt parameters have to be constant; the salt can't be random.
+        data.scryptLogN = 11;
+        data.scryptLogR = 3;
+        data.scryptLogP = 1;
+        data.salt = "abcdefghijklmnop".getBytes();
+        return data;
     }
 
     @Test

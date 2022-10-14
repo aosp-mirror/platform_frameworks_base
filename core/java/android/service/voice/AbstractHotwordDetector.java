@@ -126,21 +126,26 @@ abstract class AbstractHotwordDetector implements HotwordDetector {
             Slog.d(TAG, "updateState()");
         }
         throwIfDetectorIsNoLongerActive();
-        synchronized (mLock) {
-            updateStateLocked(options, sharedMemory, null /* callback */, mDetectorType);
+        try {
+            mManagerService.updateState(options, sharedMemory);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
-    protected void updateStateLocked(@Nullable PersistableBundle options,
-            @Nullable SharedMemory sharedMemory, IHotwordRecognitionStatusCallback callback,
+    protected void initAndVerifyDetector(
+            @Nullable PersistableBundle options,
+            @Nullable SharedMemory sharedMemory,
+            @NonNull IHotwordRecognitionStatusCallback callback,
             int detectorType) {
         if (DEBUG) {
-            Slog.d(TAG, "updateStateLocked()");
+            Slog.d(TAG, "initAndVerifyDetector()");
         }
         Identity identity = new Identity();
         identity.packageName = ActivityThread.currentOpPackageName();
         try {
-            mManagerService.updateState(identity, options, sharedMemory, callback, detectorType);
+            mManagerService.initAndVerifyDetector(identity, options, sharedMemory, callback,
+                    detectorType);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

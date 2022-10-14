@@ -53,6 +53,9 @@ final class InkWindow extends PhoneWindow {
         final LayoutParams attrs = getAttributes();
         attrs.layoutInDisplayCutoutMode = LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
         attrs.setFitInsetsTypes(0);
+        // disable window animations.
+        // TODO(b/253477462): replace with API when available
+        attrs.windowAnimations = -1;
         // TODO(b/210039666): use INPUT_FEATURE_NO_INPUT_CHANNEL once b/216179339 is fixed.
         setAttributes(attrs);
         // Ink window is not touchable with finger.

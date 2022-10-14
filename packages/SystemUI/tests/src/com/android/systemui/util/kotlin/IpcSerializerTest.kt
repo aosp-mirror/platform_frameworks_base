@@ -26,6 +26,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.junit.Assert.assertTrue
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -35,6 +36,7 @@ class IpcSerializerTest : SysuiTestCase() {
 
     private val serializer = IpcSerializer()
 
+    @Ignore("b/253046405")
     @Test
     fun serializeManyIncomingIpcs(): Unit = runBlocking(Dispatchers.Main.immediate) {
         val processor = launch(start = CoroutineStart.LAZY) { serializer.process() }

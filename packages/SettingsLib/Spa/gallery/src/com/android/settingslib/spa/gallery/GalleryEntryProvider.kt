@@ -18,4 +18,4 @@ package com.android.settingslib.spa.gallery
 
 import com.android.settingslib.spa.framework.EntryProvider
 
-class GalleryEntryProvider : EntryProvider(GallerySpaEnvironment)
+class GalleryEntryProvider : EntryProvider()

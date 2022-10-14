@@ -81,7 +81,7 @@ public class Transitions implements RemoteCallable<Transitions> {
 
     /** Set to {@code true} to enable shell transitions. */
     public static final boolean ENABLE_SHELL_TRANSITIONS =
-            SystemProperties.getBoolean("persist.wm.debug.shell_transit", true);
+            SystemProperties.getBoolean("persist.wm.debug.shell_transit", false);
     public static final boolean SHELL_TRANSITIONS_ROTATION = ENABLE_SHELL_TRANSITIONS
             && SystemProperties.getBoolean("persist.wm.debug.shell_transit_rotate", false);
 
@@ -322,6 +322,11 @@ public class Transitions implements RemoteCallable<Transitions> {
         boolean isOpening = isOpeningType(info.getType());
         for (int i = info.getChanges().size() - 1; i >= 0; --i) {
             final TransitionInfo.Change change = info.getChanges().get(i);
+            if ((change.getFlags() & TransitionInfo.FLAG_IS_SYSTEM_WINDOW) != 0) {
+                // Currently system windows are controlled by WindowState, so don't change their
+                // surfaces. Otherwise their window tokens could be hidden unexpectedly.
+                continue;
+            }
             final SurfaceControl leash = change.getLeash();
             final int mode = info.getChanges().get(i).getMode();
 

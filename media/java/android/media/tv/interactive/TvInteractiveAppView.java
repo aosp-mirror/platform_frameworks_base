@@ -581,6 +581,22 @@ public class TvInteractiveAppView extends ViewGroup {
     }
 
     /**
+     * Alerts the TV interactive app that a recording has been started with recordingId
+     *
+     * @param recordingId The Id of the recording started
+     *
+     * @hide
+     */
+    public void notifyRecordingStarted(@Nullable String recordingId) {
+        if (DEBUG) {
+            Log.d(TAG, "notifyRecordingStarted");
+        }
+        if (mSession != null) {
+            mSession.notifyRecordingStarted(recordingId);
+        }
+    }
+
+    /**
      * Sends signing result to related TV interactive app.
      *
      * <p>This is used when the corresponding server of the broadcast-independent interactive
@@ -838,6 +854,19 @@ public class TvInteractiveAppView extends ViewGroup {
          * @param iAppServiceId The ID of the TV interactive app service bound to this view.
          */
         public void onRequestCurrentTvInputId(@NonNull String iAppServiceId) {
+        }
+
+        /**
+         * This is called when {@link TvInteractiveAppService.Session#requestStartRecording(Uri)}
+         * is called.
+         * @param iAppServiceId The ID of the TV interactive app service bound to this view.
+         * @param programUri The program URI to record
+         *
+         * @hide
+         */
+        public void onRequestStartRecording(
+                @NonNull String iAppServiceId,
+                @Nullable Uri programUri) {
         }
 
         /**
@@ -1160,6 +1189,20 @@ public class TvInteractiveAppView extends ViewGroup {
             }
             if (mCallback != null) {
                 mCallback.onRequestCurrentTvInputId(mIAppServiceId);
+            }
+        }
+
+        @Override
+        public void onRequestStartRecording(Session session, Uri programUri) {
+            if (DEBUG) {
+                Log.d(TAG, "onRequestStartRecording");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onRequestStartRecording - session not created");
+                return;
+            }
+            if (mCallback != null) {
+                mCallback.onRequestStartRecording(mIAppServiceId, programUri);
             }
         }
 

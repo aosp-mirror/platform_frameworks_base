@@ -306,9 +306,9 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * requests are processed in first-in, first-out order and reprocess requests are processed in
      * first-in, first-out order, respectively. However, the processing order of a regular request
      * and a reprocess request in progress is not specified. In other words, a regular request
-     * will always be processed before regular requets that are submitted later. A reprocess request
-     * will always be processed before reprocess requests that are submitted later. However, a
-     * regular request may not be processed before reprocess requests that are submitted later.<p>
+     * will always be processed before regular requests that are submitted later. A reprocess
+     * request will always be processed before reprocess requests that are submitted later. However,
+     * a regular request may not be processed before reprocess requests that are submitted later.<p>
      *
      * <p>Requests submitted through this method have higher priority than
      * those submitted through {@link #setRepeatingRequest} or
