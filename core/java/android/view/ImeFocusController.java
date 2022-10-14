@@ -74,9 +74,10 @@ public final class ImeFocusController {
         }
         mHasImeFocus = hasImeFocus;
         if (mHasImeFocus) {
-            onPreWindowFocus(true /* hasWindowFocus */, windowAttribute);
-            onPostWindowFocus(mViewRootImpl.mView.findFocus(), true /* hasWindowFocus */,
-                    windowAttribute);
+            getImmDelegate().onPreWindowGainedFocus(mViewRootImpl);
+            final View focusedView = mViewRootImpl.mView.findFocus();
+            View viewForWindowFocus = focusedView != null ? focusedView : mViewRootImpl.mView;
+            getImmDelegate().onPostWindowGainedFocus(viewForWindowFocus, windowAttribute);
         }
     }
 
