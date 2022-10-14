@@ -41,6 +41,6 @@ android_test {
     ],
     kotlincflags: [
         "-Xjvm-default=all",
-        "-Xopt-in=kotlin.RequiresOptIn",
+        "-opt-in=kotlin.RequiresOptIn",
     ],
 }

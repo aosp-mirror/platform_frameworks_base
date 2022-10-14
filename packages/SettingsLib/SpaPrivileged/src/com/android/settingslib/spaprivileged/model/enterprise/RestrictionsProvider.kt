@@ -20,7 +20,7 @@ import android.app.admin.DevicePolicyResources.Strings.Settings
 import android.content.Context
 import android.os.UserHandle
 import android.os.UserManager
-import androidx.lifecycle.LiveData
+import androidx.lifecycle.liveData
 import com.android.settingslib.RestrictedLockUtils.EnforcedAdmin
 import com.android.settingslib.RestrictedLockUtilsInternal
 import com.android.settingslib.spaprivileged.R
@@ -58,13 +58,8 @@ class RestrictionsProvider(
     private val userManager by lazy { UserManager.get(context) }
     private val enterpriseRepository by lazy { EnterpriseRepository(context) }
 
-    val restrictedMode = object : LiveData<RestrictedMode>() {
-        override fun onActive() {
-            postValue(getRestrictedMode())
-        }
-
-        override fun onInactive() {
-        }
+    val restrictedMode = liveData {
+        emit(getRestrictedMode())
     }
 
     private fun getRestrictedMode(): RestrictedMode {

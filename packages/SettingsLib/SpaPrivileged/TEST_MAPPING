@@ -1,9 +1,6 @@
 {
   "presubmit": [
     {
-      "name": "SpaLibTests"
-    },
-    {
       "name": "SpaPrivilegedLibTests"
     },
     {
