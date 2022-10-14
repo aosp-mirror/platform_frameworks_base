@@ -36,6 +36,7 @@ import android.graphics.ColorSpace;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.hardware.OverlayProperties;
 import android.hardware.display.BrightnessInfo;
 import android.hardware.display.DeviceProductInfo;
 import android.hardware.display.DisplayManager;
@@ -1287,6 +1288,18 @@ public final class Display {
                 return mGlobal.getPreferredWideGamutColorSpace();
             }
             return null;
+        }
+    }
+
+    /** @hide */
+    @Nullable
+    public OverlayProperties getOverlaySupport() {
+        synchronized (mLock) {
+            updateDisplayInfoLocked();
+            if (mDisplayInfo.type != TYPE_VIRTUAL) {
+                return mGlobal.getOverlaySupport();
+            }
+            return new OverlayProperties();
         }
     }
 

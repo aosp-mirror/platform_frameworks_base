@@ -81,9 +81,11 @@ import android.content.pm.InstallationFile;
 import android.content.pm.InstallationFileParcel;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
+import android.content.pm.PackageInstaller.PreapprovalDetails;
 import android.content.pm.PackageInstaller.SessionInfo;
 import android.content.pm.PackageInstaller.SessionParams;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.PackageInfoFlags;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.SigningDetails;
 import android.content.pm.dex.DexMetadataHelper;
@@ -92,8 +94,13 @@ import android.content.pm.parsing.ApkLiteParseUtils;
 import android.content.pm.parsing.PackageLite;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
+import android.content.res.ApkAssets;
+import android.content.res.AssetManager;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.icu.util.ULocale;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -193,6 +200,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static final int MSG_INSTALL = 3;
     private static final int MSG_ON_PACKAGE_INSTALLED = 4;
     private static final int MSG_SESSION_VALIDATION_FAILURE = 5;
+    private static final int MSG_PRE_APPROVAL_REQUEST = 6;
 
     /** XML constants used for persisting a session */
     static final String TAG_SESSION = "session";
@@ -275,7 +283,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      * #mValidatedTargetSdk} is compared with {@link Build.VERSION_CODES#R} before getting the
      * target sdk version from a validated apk in {@link #validateApkInstallLocked()}, the compared
      * result will not trigger any user action in
-     * {@link #checkUserActionRequirement(PackageInstallerSession)}.
+     * {@link #checkUserActionRequirement(PackageInstallerSession, IntentSender)}.
      */
     private static final int INVALID_TARGET_SDK_VERSION = Integer.MAX_VALUE;
 
@@ -360,6 +368,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @GuardedBy("mLock")
     private boolean mShouldBeSealed = false;
 
+    private final AtomicBoolean mPreapprovalRequested = new AtomicBoolean(false);
     private final AtomicBoolean mCommitted = new AtomicBoolean(false);
 
     /**
@@ -386,6 +395,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     @GuardedBy("mLock")
     private IntentSender mRemoteStatusReceiver;
+
+    @GuardedBy("mLock")
+    private PreapprovalDetails mPreapprovalDetails;
 
     /** Fields derived from commit parsing */
     @GuardedBy("mLock")
@@ -740,17 +752,21 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     final Bundle extras = (Bundle) args.arg3;
                     final IntentSender statusReceiver = (IntentSender) args.arg4;
                     final int returnCode = args.argi1;
+                    final boolean isPreapproval = args.argi2 == 1;
                     args.recycle();
 
                     sendOnPackageInstalled(mContext, statusReceiver, sessionId,
                             isInstallerDeviceOwnerOrAffiliatedProfileOwner(), userId,
-                            packageName, returnCode, message, extras);
+                            packageName, returnCode, isPreapproval, message, extras);
 
                     break;
                 case MSG_SESSION_VALIDATION_FAILURE:
                     final int error = msg.arg1;
                     final String detailMessage = (String) msg.obj;
                     onSessionValidationFailure(error, detailMessage);
+                    break;
+                case MSG_PRE_APPROVAL_REQUEST:
+                    handlePreapprovalRequest();
                     break;
             }
 
@@ -779,10 +795,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      */
     private boolean isInstallerDeviceOwnerOrAffiliatedProfileOwner() {
         assertNotLocked("isInstallerDeviceOwnerOrAffiliatedProfileOwner");
-        // It is safe to access mInstallerUid and mInstallSource without lock
-        // because they are immutable after sealing.
-        assertSealed("isInstallerDeviceOwnerOrAffiliatedProfileOwner");
-        if (userId != UserHandle.getUserId(mInstallerUid)) {
+        if (userId != UserHandle.getUserId(getInstallerUid())) {
             return false;
         }
         DevicePolicyManagerInternal dpmi =
@@ -874,7 +887,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         if (snapshot.isInstallDisabledForPackage(getInstallerPackageName(), mInstallerUid,
                 userId)) {
-            // show the installer to account for device poslicy or unknown sources use cases
+            // show the installer to account for device policy or unknown sources use cases
             return USER_ACTION_REQUIRED;
         }
 
@@ -1031,18 +1044,22 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     mResolvedBaseFile.getAbsolutePath() : null;
             info.progress = progress;
             info.sealed = mSealed;
-            info.isCommitted = mCommitted.get();
+            info.isCommitted = isCommitted();
+            info.isPreapprovalRequested = isPreapprovalRequested();
             info.active = mActiveCount.get() > 0;
 
             info.mode = params.mode;
             info.installReason = params.installReason;
             info.installScenario = params.installScenario;
             info.sizeBytes = params.sizeBytes;
-            info.appPackageName = mPackageName != null ? mPackageName : params.appPackageName;
+            info.appPackageName = mPreapprovalDetails != null ? mPreapprovalDetails.getPackageName()
+                    : mPackageName != null ? mPackageName : params.appPackageName;
             if (includeIcon) {
-                info.appIcon = params.appIcon;
+                info.appIcon = mPreapprovalDetails != null && mPreapprovalDetails.getIcon() != null
+                        ? mPreapprovalDetails.getIcon() : params.appIcon;
             }
-            info.appLabel = params.appLabel;
+            info.appLabel =
+                    mPreapprovalDetails != null ? mPreapprovalDetails.getLabel() : params.appLabel;
 
             info.installLocation = params.installLocation;
             if (!scrubData) {
@@ -1086,6 +1103,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
+    /** @hide */
+    boolean isPreapprovalRequested() {
+        return mPreapprovalRequested.get();
+    }
+
     /** {@hide} */
     boolean isCommitted() {
         return mCommitted.get();
@@ -1122,6 +1144,14 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     @GuardedBy("mLock")
+    private void assertPreparedAndNotPreapprovalRequestedLocked(String cookie) {
+        assertPreparedAndNotSealedLocked(cookie);
+        if (isPreapprovalRequested()) {
+            throw new IllegalStateException(cookie + " not allowed after requesting");
+        }
+    }
+
+    @GuardedBy("mLock")
     private void assertPreparedAndNotSealedLocked(String cookie) {
         assertPreparedAndNotCommittedOrDestroyedLocked(cookie);
         if (mSealed) {
@@ -1132,7 +1162,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @GuardedBy("mLock")
     private void assertPreparedAndNotCommittedOrDestroyedLocked(String cookie) {
         assertPreparedAndNotDestroyedLocked(cookie);
-        if (mCommitted.get()) {
+        if (isCommitted()) {
             throw new SecurityException(cookie + " not allowed after commit");
         }
     }
@@ -1173,7 +1203,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     @GuardedBy("mProgressLock")
     private void computeProgressLocked(boolean forcePublish) {
-        if (!isIncrementalInstallation() || !mCommitted.get()) {
+        if (!isIncrementalInstallation() || !isCommitted()) {
             mProgress = MathUtils.constrain(mClientProgress * 0.8f, 0f, 0.8f)
                     + MathUtils.constrain(mInternalProgress * 0.2f, 0f, 0.2f);
         } else {
@@ -1200,7 +1230,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         assertCallerIsOwnerRootOrVerifier();
         synchronized (mLock) {
             assertPreparedAndNotDestroyedLocked("getNames");
-            if (!mCommitted.get()) {
+            if (!isCommitted()) {
                 return getNamesLocked();
             } else {
                 return getStageDirContentsLocked();
@@ -1640,11 +1670,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     @Override
     public void commit(@NonNull IntentSender statusReceiver, boolean forTransfer) {
-        if (hasParentSessionId()) {
-            throw new IllegalStateException(
-                    "Session " + sessionId + " is a child of multi-package session "
-                            + getParentSessionId() +  " and may not be committed directly.");
-        }
+        assertNotChild("commit");
 
         if (!markAsSealed(statusReceiver, forTransfer)) {
             return;
@@ -1706,6 +1732,20 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             dispatchSessionFinished(e.error, msg, null);
             maybeFinishChildSessions(e.error, msg);
         }
+    }
+
+    @WorkerThread
+    private void handlePreapprovalRequest() {
+        /**
+         * Stops the process if the session needs user action. When the user answers the yes,
+         * {@link #setPermissionsResult(boolean)} is called and then
+         * {@link #MSG_PRE_APPROVAL_REQUEST} is handled to come back here to check again.
+         */
+        if (sendPendingUserActionIntentIfNeeded()) {
+            return;
+        }
+
+        dispatchSessionPreappoved();
     }
 
     private final class FileSystemConnector extends
@@ -1835,7 +1875,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         //             single / child sessions.
         try {
             synchronized (mLock) {
-                if (mCommitted.get()) {
+                if (isCommitted()) {
                     return true;
                 }
                 // Read transfers from the original owner stay open, but as the session's data
@@ -2115,7 +2155,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      */
     @WorkerThread
     private boolean sendPendingUserActionIntentIfNeeded() {
-        assertNotChild("PackageInstallerSession#sendPendingUserActionIntentIfNeeded");
+        // To support pre-approval request of atomic install, we allow child session to handle
+        // the result by itself since it has the status receiver.
+        if (isCommitted()) {
+            assertNotChild("PackageInstallerSession#sendPendingUserActionIntentIfNeeded");
+        }
 
         final IntentSender statusReceiver = getRemoteStatusReceiver();
         return sessionContains(s -> checkUserActionRequirement(s, statusReceiver));
@@ -2420,7 +2464,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         // User needs to confirm installation;
         // give installer an intent they can use to involve
         // user.
-        final Intent intent = new Intent(PackageInstaller.ACTION_CONFIRM_INSTALL);
+        final boolean isPreapproval = isPreapprovalRequested() && !isCommitted();
+        final Intent intent = new Intent(
+                isPreapproval ? PackageInstaller.ACTION_CONFIRM_PRE_APPROVAL
+                        : PackageInstaller.ACTION_CONFIRM_INSTALL);
         intent.setPackage(mPm.getPackageInstallerPackageName());
         intent.putExtra(PackageInstaller.EXTRA_SESSION_ID, sessionId);
 
@@ -3009,6 +3056,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 }
             }
         }
+
+        assertPreapprovalDetailsConsistentIfNeededLocked(packageLite, pkgInfo);
+
         if (packageLite.isUseEmbeddedDex()) {
             for (File file : mResolvedStagedFiles) {
                 if (file.getName().endsWith(".apk")
@@ -3253,6 +3303,78 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
+    @GuardedBy("mLock")
+    private void assertPreapprovalDetailsConsistentIfNeededLocked(@NonNull PackageLite packageLite,
+            @Nullable PackageInfo info) throws PackageManagerException {
+        if (mPreapprovalDetails == null || !isPreapprovalRequested()) {
+            return;
+        }
+
+        if (!TextUtils.equals(mPackageName, mPreapprovalDetails.getPackageName())) {
+            throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
+                    mPreapprovalDetails + " inconsistent with " + mPackageName);
+        }
+
+        // In case the app label in PreapprovalDetails from different locale in split APK,
+        // we check all APK files to find the app label.
+        final PackageInfo packageInfo =
+                info != null ? info : mContext.getPackageManager().getPackageArchiveInfo(
+                        packageLite.getPath(), PackageInfoFlags.of(0));
+        if (packageInfo == null) {
+            throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
+                    "Failure to obtain package info.");
+        }
+        final List<String> filePaths = packageLite.getAllApkPaths();
+        final String appLabel = mPreapprovalDetails.getLabel();
+        final ULocale appLocale = mPreapprovalDetails.getLocale();
+        final ApplicationInfo appInfo = packageInfo.applicationInfo;
+        boolean appLabelMatched = false;
+        for (int i = filePaths.size() - 1; i >= 0 && !appLabelMatched; i--) {
+            appLabelMatched |= TextUtils.equals(getAppLabel(filePaths.get(i), appLocale, appInfo),
+                    appLabel);
+        }
+        if (!appLabelMatched) {
+            throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
+                    mPreapprovalDetails + " inconsistent with app label");
+        }
+    }
+
+    private CharSequence getAppLabel(String path, ULocale locale, ApplicationInfo appInfo)
+            throws PackageManagerException {
+        final Resources pRes = mContext.getResources();
+        final AssetManager assetManager = new AssetManager();
+        final Configuration config = new Configuration(pRes.getConfiguration());
+        final ApkAssets apkAssets;
+        try {
+            apkAssets = ApkAssets.loadFromPath(path);
+        } catch (IOException e) {
+            throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
+                    "Failure to get resources from package archive " + path);
+        }
+        assetManager.setApkAssets(new ApkAssets[]{apkAssets}, false /* invalidateCaches */);
+        config.setLocale(locale.toLocale());
+        final Resources res = new Resources(assetManager, pRes.getDisplayMetrics(), config);
+        return tryLoadingAppLabel(res, appInfo);
+    }
+
+    private CharSequence tryLoadingAppLabel(@NonNull Resources res, @NonNull ApplicationInfo info) {
+        CharSequence label = null;
+        // Try to load the label from the package's resources. If an app has not explicitly
+        // specified any label, just use the package name.
+        if (info.labelRes != 0) {
+            try {
+                label = res.getText(info.labelRes);
+            } catch (Resources.NotFoundException ignore) {
+            }
+        }
+        if (label == null) {
+            label = (info.nonLocalizedLabel != null)
+                    ? info.nonLocalizedLabel : info.packageName;
+        }
+
+        return label;
+    }
+
     private SigningDetails unsafeGetCertsWithoutVerification(String path)
             throws PackageManagerException {
         final ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
@@ -3469,11 +3591,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     void setPermissionsResult(boolean accepted) {
-        if (!isSealed()) {
+        if (!isSealed() && !isPreapprovalRequested()) {
             throw new SecurityException("Must be sealed to accept permissions");
         }
 
-        PackageInstallerSession root = hasParentSessionId()
+        // To support pre-approval request of atomic install, we allow child session to handle
+        // the result by itself since it has the status receiver.
+        final PackageInstallerSession root = hasParentSessionId() && isCommitted()
                 ? mSessionProvider.getSession(getParentSessionId()) : this;
 
         if (accepted) {
@@ -3481,7 +3605,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             synchronized (mLock) {
                 mPermissionsManuallyAccepted = true;
             }
-            root.mHandler.obtainMessage(MSG_INSTALL).sendToTarget();
+            root.mHandler.obtainMessage(
+                    isCommitted() ? MSG_INSTALL : MSG_PRE_APPROVAL_REQUEST).sendToTarget();
         } else {
             root.destroy();
             root.dispatchSessionFinished(INSTALL_FAILED_ABORTED, "User rejected permissions", null);
@@ -3593,7 +3718,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             mDestroyed = true;
             r = () -> {
                 assertNotLocked("abandonStaged");
-                if (isStaged() && mCommitted.get()) {
+                if (isStaged() && isCommitted()) {
                     mStagingManager.abortCommittedSession(mStagedSession);
                 }
                 destroy();
@@ -3937,7 +4062,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private boolean canBeAddedAsChild(int parentCandidate) {
         synchronized (mLock) {
             return (!hasParentSessionId() || mParentSessionId == parentCandidate)
-                    && !mCommitted.get()
+                    && !isCommitted()
                     && !mDestroyed;
         }
     }
@@ -4096,8 +4221,66 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             args.arg3 = extras;
             args.arg4 = statusReceiver;
             args.argi1 = returnCode;
+            args.argi2 = isPreapprovalRequested() && !isCommitted() ? 1 : 0;
             mHandler.obtainMessage(MSG_ON_PACKAGE_INSTALLED, args).sendToTarget();
         }
+    }
+
+    private void dispatchSessionPreappoved() {
+        final IntentSender target = getRemoteStatusReceiver();
+        final Intent intent = new Intent();
+        intent.putExtra(PackageInstaller.EXTRA_SESSION_ID, sessionId);
+        intent.putExtra(PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_SUCCESS);
+        intent.putExtra(PackageInstaller.EXTRA_PRE_APPROVAL, true);
+        try {
+            target.sendIntent(mContext, 0 /* code */, intent, null /* onFinished */,
+                    null /* handler */);
+        } catch (IntentSender.SendIntentException ignored) {
+        }
+    }
+
+    @Override
+    public void requestUserPreapproval(@NonNull PreapprovalDetails details,
+            @NonNull IntentSender statusReceiver) {
+        validatePreapprovalRequest(details, statusReceiver);
+        dispatchPreapprovalRequest();
+    }
+
+    /**
+     * Validates whether the necessary information (e.g., PreapprovalDetails) are provided.
+     */
+    private void validatePreapprovalRequest(@NonNull PreapprovalDetails details,
+            @NonNull IntentSender statusReceiver) {
+        assertCallerIsOwnerOrRoot();
+        if (isMultiPackage()) {
+            throw new IllegalStateException(
+                    "Session " + sessionId + " is a parent of multi-package session and "
+                            + "requestUserPreapproval on the parent session isn't supported.");
+        }
+
+        synchronized (mLock) {
+            assertPreparedAndNotSealedLocked("request of session " + sessionId);
+            mPreapprovalDetails = details;
+            setRemoteStatusReceiver(statusReceiver);
+        }
+    }
+
+    private void dispatchPreapprovalRequest() {
+        synchronized (mLock) {
+            assertPreparedAndNotPreapprovalRequestedLocked("dispatchPreapprovalRequest");
+        }
+
+        // Mark this session are pre-approval requested, and ready to progress to the next phase.
+        markAsPreapprovalRequested();
+
+        mHandler.obtainMessage(MSG_PRE_APPROVAL_REQUEST).sendToTarget();
+    }
+
+    /**
+     * Marks this session as pre-approval requested, and prevents further related modification.
+     */
+    private void markAsPreapprovalRequested() {
+        mPreapprovalRequested.set(true);
     }
 
     void setSessionReady() {
@@ -4265,6 +4448,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         pw.printPair("mClientProgress", clientProgress);
         pw.printPair("mProgress", progress);
         pw.printPair("mCommitted", mCommitted);
+        pw.printPair("mPreapprovalRequested", mPreapprovalRequested);
         pw.printPair("mSealed", mSealed);
         pw.printPair("mPermissionsManuallyAccepted", mPermissionsManuallyAccepted);
         pw.printPair("mStageDirInUse", mStageDirInUse);
@@ -4282,6 +4466,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         pw.printPair("mSessionReady", mSessionReady);
         pw.printPair("mSessionErrorCode", mSessionErrorCode);
         pw.printPair("mSessionErrorMessage", mSessionErrorMessage);
+        pw.printPair("mPreapprovalDetails", mPreapprovalDetails);
         pw.println();
 
         pw.decreaseIndent();
@@ -4295,6 +4480,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         final Intent fillIn = new Intent();
         fillIn.putExtra(PackageInstaller.EXTRA_SESSION_ID, sessionId);
         fillIn.putExtra(PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_PENDING_USER_ACTION);
+        fillIn.putExtra(PackageInstaller.EXTRA_PRE_APPROVAL,
+                PackageInstaller.ACTION_CONFIRM_PRE_APPROVAL.equals(intent.getAction()));
         fillIn.putExtra(Intent.EXTRA_INTENT, intent);
         try {
             target.sendIntent(context, 0, fillIn, null, null);
@@ -4307,7 +4494,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      */
     private static void sendOnPackageInstalled(Context context, IntentSender target, int sessionId,
             boolean showNotification, int userId, String basePackageName, int returnCode,
-            String msg, Bundle extras) {
+            boolean isPreapproval, String msg, Bundle extras) {
         if (INSTALL_SUCCEEDED == returnCode && showNotification) {
             boolean update = (extras != null) && extras.getBoolean(Intent.EXTRA_REPLACING);
             Notification notification = PackageInstallerService.buildSuccessNotification(context,
@@ -4330,6 +4517,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         fillIn.putExtra(PackageInstaller.EXTRA_STATUS_MESSAGE,
                 PackageManager.installStatusToString(returnCode, msg));
         fillIn.putExtra(PackageInstaller.EXTRA_LEGACY_STATUS, returnCode);
+        fillIn.putExtra(PackageInstaller.EXTRA_PRE_APPROVAL, isPreapproval);
         if (extras != null) {
             final String existing = extras.getString(
                     PackageManager.EXTRA_FAILURE_EXISTING_PACKAGE);
@@ -4448,7 +4636,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 writeStringAttribute(out, ATTR_SESSION_STAGE_CID, stageCid);
             }
             writeBooleanAttribute(out, ATTR_PREPARED, mPrepared);
-            writeBooleanAttribute(out, ATTR_COMMITTED, mCommitted.get());
+            writeBooleanAttribute(out, ATTR_COMMITTED, isCommitted());
             writeBooleanAttribute(out, ATTR_DESTROYED, mDestroyed);
             writeBooleanAttribute(out, ATTR_SEALED, mSealed);
 

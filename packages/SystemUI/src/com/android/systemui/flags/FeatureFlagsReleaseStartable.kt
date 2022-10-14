@@ -16,9 +16,7 @@
 
 package com.android.systemui.flags
 
-import android.content.Context
 import com.android.systemui.CoreStartable
-import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dump.DumpManager
 import dagger.Binds
 import dagger.Module
@@ -28,8 +26,7 @@ import javax.inject.Inject
 
 class FeatureFlagsReleaseStartable
 @Inject
-constructor(@Application context: Context, dumpManager: DumpManager, featureFlags: FeatureFlags) :
-    CoreStartable(context) {
+constructor(dumpManager: DumpManager, featureFlags: FeatureFlags) : CoreStartable {
 
     init {
         dumpManager.registerDumpable(FeatureFlagsRelease.TAG) { pw, args ->

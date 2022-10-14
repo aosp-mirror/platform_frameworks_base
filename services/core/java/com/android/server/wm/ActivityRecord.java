@@ -256,6 +256,7 @@ import android.app.TaskInfo.CameraCompatControlState;
 import android.app.WaitResult;
 import android.app.WindowConfiguration;
 import android.app.admin.DevicePolicyManager;
+import android.app.assist.ActivityId;
 import android.app.servertransaction.ActivityConfigurationChangeItem;
 import android.app.servertransaction.ActivityLifecycleItem;
 import android.app.servertransaction.ActivityRelaunchItem;
@@ -4065,7 +4066,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // to the restarted activity.
             nowVisible = mVisibleRequested;
         }
-        mTransitionController.requestCloseTransitionIfNeeded(this);
+        // upgrade transition trigger to task if this is the last activity since it means we are
+        // closing the task.
+        final WindowContainer trigger = remove && task != null && task.getChildCount() == 1
+                ? task : this;
+        mTransitionController.requestCloseTransitionIfNeeded(trigger);
         cleanUp(true /* cleanServices */, true /* setState */);
         if (remove) {
             if (mStartingData != null && mVisible && task != null) {
@@ -5585,7 +5590,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                         LocalServices.getService(ContentCaptureManagerInternal.class);
                 if (contentCaptureService != null) {
                     contentCaptureService.notifyActivityEvent(mUserId, mActivityComponent,
-                            ActivityEvent.TYPE_ACTIVITY_STARTED);
+                            ActivityEvent.TYPE_ACTIVITY_STARTED,
+                            new ActivityId(getTask() != null ? getTask().mTaskId : INVALID_TASK_ID,
+                                    shareableActivityToken));
                 }
                 break;
             case PAUSED:
@@ -7631,6 +7638,31 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             Configuration config) {
         super.applyFixedRotationTransform(info, displayFrames, config);
         ensureActivityConfiguration(0 /* globalChanges */, false /* preserveWindow */);
+    }
+
+    /**
+     * Returns the requested {@link Configuration.Orientation} for the current activity.
+     *
+     * <p>When The current orientation is set to {@link SCREEN_ORIENTATION_BEHIND} it returns the
+     * requested orientation for the activity below which is the first activity with an explicit
+     * (different from {@link SCREEN_ORIENTATION_UNSET}) orientation which is not {@link
+     * SCREEN_ORIENTATION_BEHIND}.
+     */
+    @Configuration.Orientation
+    @Override
+    int getRequestedConfigurationOrientation(boolean forDisplay) {
+        if (mOrientation == SCREEN_ORIENTATION_BEHIND && task != null) {
+            // We use Task here because we want to be consistent with what happens in
+            // multi-window mode where other tasks orientations are ignored.
+            final ActivityRecord belowCandidate = task.getActivity(
+                    a -> a.mOrientation != SCREEN_ORIENTATION_UNSET && !a.finishing
+                            && a.mOrientation != ActivityInfo.SCREEN_ORIENTATION_BEHIND, this,
+                    false /* includeBoundary */, true /* traverseTopToBottom */);
+            if (belowCandidate != null) {
+                return belowCandidate.getRequestedConfigurationOrientation(forDisplay);
+            }
+        }
+        return super.getRequestedConfigurationOrientation(forDisplay);
     }
 
     @Override

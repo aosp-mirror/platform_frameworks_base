@@ -23,8 +23,8 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.text.SimpleDateFormat;
+import java.util.ArrayDeque;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.Locale;
 
 /**
@@ -36,7 +36,7 @@ public class EventLogger {
     private final String mTag;
 
     /** Stores the events using a ring buffer. */
-    private final LinkedList<Event> mEvents;
+    private final ArrayDeque<Event> mEvents;
 
     /**
      * The maximum number of events to keep in {@code mEvents}.
@@ -52,16 +52,18 @@ public class EventLogger {
      * @param tag the string displayed before the recorded log
      */
     public EventLogger(int size, String tag) {
-        mEvents = new LinkedList<Event>();
+        mEvents = new ArrayDeque<>(size);
         mMemSize = size;
         mTag = tag;
     }
 
-    public synchronized void log(Event evt) {
+    /** Enqueues {@code event} to be logged. */
+    public synchronized void log(Event event) {
         if (mEvents.size() >= mMemSize) {
-            mEvents.removeFirst();
+            mEvents.removeLast();
         }
-        mEvents.add(evt);
+
+        mEvents.addFirst(event);
     }
 
     /**
@@ -85,8 +87,10 @@ public class EventLogger {
         log(event.printLog(logType, tag));
     }
 
+    /** Dumps events using {@link PrintWriter} */
     public synchronized void dump(PrintWriter pw) {
         pw.println("Events log: " + mTag);
+
         for (Event evt : mEvents) {
             pw.println(evt.toString());
         }

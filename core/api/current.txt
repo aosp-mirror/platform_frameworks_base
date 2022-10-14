@@ -4749,7 +4749,7 @@ package android.app {
     method @Deprecated public int startOp(@NonNull String, int, @NonNull String);
     method public int startOp(@NonNull String, int, @Nullable String, @Nullable String, @Nullable String);
     method @Deprecated public int startOpNoThrow(@NonNull String, int, @NonNull String);
-    method public int startOpNoThrow(@NonNull String, int, @NonNull String, @NonNull String, @Nullable String);
+    method public int startOpNoThrow(@NonNull String, int, @NonNull String, @Nullable String, @Nullable String);
     method public int startProxyOp(@NonNull String, int, @NonNull String, @Nullable String, @Nullable String);
     method public int startProxyOpNoThrow(@NonNull String, int, @NonNull String, @Nullable String, @Nullable String);
     method public void startWatchingActive(@NonNull String[], @NonNull java.util.concurrent.Executor, @NonNull android.app.AppOpsManager.OnOpActiveChangedListener);
@@ -11596,6 +11596,7 @@ package android.content.pm {
     field public static final String ACTION_SESSION_UPDATED = "android.content.pm.action.SESSION_UPDATED";
     field public static final String EXTRA_OTHER_PACKAGE_NAME = "android.content.pm.extra.OTHER_PACKAGE_NAME";
     field public static final String EXTRA_PACKAGE_NAME = "android.content.pm.extra.PACKAGE_NAME";
+    field public static final String EXTRA_PRE_APPROVAL = "android.content.pm.extra.PRE_APPROVAL";
     field public static final String EXTRA_SESSION = "android.content.pm.extra.SESSION";
     field public static final String EXTRA_SESSION_ID = "android.content.pm.extra.SESSION_ID";
     field public static final String EXTRA_STATUS = "android.content.pm.extra.STATUS";
@@ -11652,6 +11653,7 @@ package android.content.pm {
     method public void removeChildSessionId(int);
     method public void removeSplit(@NonNull String) throws java.io.IOException;
     method public void requestChecksums(@NonNull String, int, @NonNull java.util.List<java.security.cert.Certificate>, @NonNull java.util.concurrent.Executor, @NonNull android.content.pm.PackageManager.OnChecksumsReadyListener) throws java.security.cert.CertificateEncodingException, java.io.FileNotFoundException;
+    method public void requestUserPreapproval(@NonNull android.content.pm.PackageInstaller.PreapprovalDetails, @NonNull android.content.IntentSender);
     method @Deprecated public void setChecksums(@NonNull String, @NonNull java.util.List<android.content.pm.Checksum>, @Nullable byte[]) throws java.io.IOException;
     method public void setStagingProgress(float);
     method public void transfer(@NonNull String) throws android.content.pm.PackageManager.NameNotFoundException;
@@ -19425,9 +19427,30 @@ package android.location {
   public final class GnssCapabilities implements android.os.Parcelable {
     method public int describeContents();
     method public boolean hasAntennaInfo();
+    method public boolean hasGeofencing();
     method @Deprecated public boolean hasGnssAntennaInfo();
+    method public boolean hasLowPowerMode();
+    method public boolean hasMeasurementCorrections();
+    method public boolean hasMeasurementCorrectionsExcessPathLength();
+    method public boolean hasMeasurementCorrectionsForDriving();
+    method public boolean hasMeasurementCorrectionsLosSats();
+    method public boolean hasMeasurementCorrectionsReflectingPlane();
+    method public boolean hasMeasurementCorrelationVectors();
     method public boolean hasMeasurements();
+    method public boolean hasMsa();
+    method public boolean hasMsb();
     method public boolean hasNavigationMessages();
+    method public boolean hasOnDemandTime();
+    method public boolean hasPowerMultibandAcquisition();
+    method public boolean hasPowerMultibandTracking();
+    method public boolean hasPowerOtherModes();
+    method public boolean hasPowerSinglebandAcquisition();
+    method public boolean hasPowerSinglebandTracking();
+    method public boolean hasPowerTotal();
+    method public boolean hasSatelliteBlocklist();
+    method public boolean hasSatellitePvt();
+    method public boolean hasScheduling();
+    method public boolean hasSingleShot();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.location.GnssCapabilities> CREATOR;
   }
@@ -19437,8 +19460,29 @@ package android.location {
     ctor public GnssCapabilities.Builder(@NonNull android.location.GnssCapabilities);
     method @NonNull public android.location.GnssCapabilities build();
     method @NonNull public android.location.GnssCapabilities.Builder setHasAntennaInfo(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasGeofencing(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasLowPowerMode(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasMeasurementCorrections(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasMeasurementCorrectionsExcessPathLength(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasMeasurementCorrectionsForDriving(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasMeasurementCorrectionsLosSats(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasMeasurementCorrectionsReflectingPlane(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasMeasurementCorrelationVectors(boolean);
     method @NonNull public android.location.GnssCapabilities.Builder setHasMeasurements(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasMsa(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasMsb(boolean);
     method @NonNull public android.location.GnssCapabilities.Builder setHasNavigationMessages(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasOnDemandTime(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasPowerMultibandAcquisition(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasPowerMultibandTracking(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasPowerOtherModes(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasPowerSinglebandAcquisition(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasPowerSinglebandTracking(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasPowerTotal(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasSatelliteBlocklist(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasSatellitePvt(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasScheduling(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasSingleShot(boolean);
   }
 
   public final class GnssClock implements android.os.Parcelable {
@@ -41554,6 +41598,7 @@ package android.telephony {
     field public static final String KEY_DATA_LIMIT_NOTIFICATION_BOOL = "data_limit_notification_bool";
     field public static final String KEY_DATA_LIMIT_THRESHOLD_BYTES_LONG = "data_limit_threshold_bytes_long";
     field public static final String KEY_DATA_RAPID_NOTIFICATION_BOOL = "data_rapid_notification_bool";
+    field public static final String KEY_DATA_SWITCH_VALIDATION_MIN_INTERVAL_MILLIS_LONG = "data_switch_validation_min_gap_long";
     field public static final String KEY_DATA_SWITCH_VALIDATION_TIMEOUT_LONG = "data_switch_validation_timeout_long";
     field public static final String KEY_DATA_WARNING_NOTIFICATION_BOOL = "data_warning_notification_bool";
     field public static final String KEY_DATA_WARNING_THRESHOLD_BYTES_LONG = "data_warning_threshold_bytes_long";
@@ -43773,7 +43818,7 @@ package android.telephony {
     method public void registerTelephonyCallback(int, @NonNull java.util.concurrent.Executor, @NonNull android.telephony.TelephonyCallback);
     method @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public void requestCellInfoUpdate(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.TelephonyManager.CellInfoCallback);
     method @RequiresPermission(allOf={android.Manifest.permission.MODIFY_PHONE_STATE, android.Manifest.permission.ACCESS_FINE_LOCATION}) public android.telephony.NetworkScan requestNetworkScan(android.telephony.NetworkScanRequest, java.util.concurrent.Executor, android.telephony.TelephonyScanManager.NetworkScanCallback);
-    method @Nullable @RequiresPermission(allOf={android.Manifest.permission.MODIFY_PHONE_STATE, android.Manifest.permission.ACCESS_FINE_LOCATION}) public android.telephony.NetworkScan requestNetworkScan(int, @NonNull android.telephony.NetworkScanRequest, @NonNull java.util.concurrent.Executor, @NonNull android.telephony.TelephonyScanManager.NetworkScanCallback);
+    method @Nullable @RequiresPermission(allOf={android.Manifest.permission.MODIFY_PHONE_STATE}) public android.telephony.NetworkScan requestNetworkScan(int, @NonNull android.telephony.NetworkScanRequest, @NonNull java.util.concurrent.Executor, @NonNull android.telephony.TelephonyScanManager.NetworkScanCallback);
     method public void sendDialerSpecialCode(String);
     method public String sendEnvelopeWithStatus(String);
     method @RequiresPermission(android.Manifest.permission.CALL_PHONE) public void sendUssdRequest(String, android.telephony.TelephonyManager.UssdResponseCallback, android.os.Handler);
@@ -48388,9 +48433,9 @@ package android.view {
 
   public static interface GestureDetector.OnGestureListener {
     method public boolean onDown(@NonNull android.view.MotionEvent);
-    method public boolean onFling(@NonNull android.view.MotionEvent, @NonNull android.view.MotionEvent, float, float);
+    method public boolean onFling(@Nullable android.view.MotionEvent, @NonNull android.view.MotionEvent, float, float);
     method public void onLongPress(@NonNull android.view.MotionEvent);
-    method public boolean onScroll(@NonNull android.view.MotionEvent, @NonNull android.view.MotionEvent, float, float);
+    method public boolean onScroll(@Nullable android.view.MotionEvent, @NonNull android.view.MotionEvent, float, float);
     method public void onShowPress(@NonNull android.view.MotionEvent);
     method public boolean onSingleTapUp(@NonNull android.view.MotionEvent);
   }
@@ -48401,9 +48446,9 @@ package android.view {
     method public boolean onDoubleTap(@NonNull android.view.MotionEvent);
     method public boolean onDoubleTapEvent(@NonNull android.view.MotionEvent);
     method public boolean onDown(@NonNull android.view.MotionEvent);
-    method public boolean onFling(@NonNull android.view.MotionEvent, @NonNull android.view.MotionEvent, float, float);
+    method public boolean onFling(@Nullable android.view.MotionEvent, @NonNull android.view.MotionEvent, float, float);
     method public void onLongPress(@NonNull android.view.MotionEvent);
-    method public boolean onScroll(@NonNull android.view.MotionEvent, @NonNull android.view.MotionEvent, float, float);
+    method public boolean onScroll(@Nullable android.view.MotionEvent, @NonNull android.view.MotionEvent, float, float);
     method public void onShowPress(@NonNull android.view.MotionEvent);
     method public boolean onSingleTapConfirmed(@NonNull android.view.MotionEvent);
     method public boolean onSingleTapUp(@NonNull android.view.MotionEvent);

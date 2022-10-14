@@ -23,8 +23,10 @@ import static android.companion.CompanionDeviceManager.COMPANION_DEVICE_DISCOVER
 import static android.content.ComponentName.createRelative;
 
 import static com.android.server.companion.CompanionDeviceManagerService.DEBUG;
+import static com.android.server.companion.MetricUtils.logCreateAssociation;
 import static com.android.server.companion.PackageUtils.enforceUsesCompanionDeviceFeature;
 import static com.android.server.companion.PermissionsUtils.enforcePermissionsForAssociation;
+import static com.android.server.companion.RolesUtils.addRoleHolderForAssociation;
 import static com.android.server.companion.RolesUtils.isRoleHolder;
 import static com.android.server.companion.Utils.prepareForIpc;
 
@@ -35,8 +37,10 @@ import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.annotation.UserIdInt;
 import android.app.PendingIntent;
+import android.companion.AssociatedDevice;
 import android.companion.AssociationInfo;
 import android.companion.AssociationRequest;
+import android.companion.CompanionDeviceManager;
 import android.companion.IAssociationRequestCallback;
 import android.content.ComponentName;
 import android.content.Context;
@@ -87,7 +91,7 @@ import java.util.Set;
  * required.
  *
  * If the user's approval is NOT required: an {@link AssociationRequestsProcessor} invokes
- * {@link #createAssociationAndNotifyApplication(AssociationRequest, String, int, MacAddress, IAssociationRequestCallback)}
+ * {@link #createAssociationAndNotifyApplication(AssociationRequest, String, int, MacAddress, IAssociationRequestCallback, ResultReceiver)}
  * which after calling to  {@link CompanionDeviceManagerService} to create an association, notifies
  * the requester via
  * {@link android.companion.CompanionDeviceManager.Callback#onAssociationCreated(AssociationInfo)}.
@@ -99,7 +103,7 @@ import java.util.Set;
  * from the Approval UI in via {@link #mOnRequestConfirmationReceiver} and invokes
  * {@link #processAssociationRequestApproval(AssociationRequest, IAssociationRequestCallback, ResultReceiver, MacAddress)}
  * which one more time checks that the packages holds all necessary permissions before proceeding to
- * {@link #createAssociationAndNotifyApplication(AssociationRequest, String, int, MacAddress, IAssociationRequestCallback)}.
+ * {@link #createAssociationAndNotifyApplication(AssociationRequest, String, int, MacAddress, IAssociationRequestCallback, ResultReceiver)}.
  *
  * @see #processNewAssociationRequest(AssociationRequest, String, int, IAssociationRequestCallback)
  * @see #processAssociationRequestApproval(AssociationRequest, IAssociationRequestCallback,
@@ -132,10 +136,10 @@ class AssociationRequestsProcessor {
     private final @NonNull Context mContext;
     private final @NonNull CompanionDeviceManagerService mService;
     private final @NonNull PackageManagerInternal mPackageManager;
-    private final @NonNull AssociationStore mAssociationStore;
+    private final @NonNull AssociationStoreImpl mAssociationStore;
 
     AssociationRequestsProcessor(@NonNull CompanionDeviceManagerService service,
-            @NonNull AssociationStore associationStore) {
+            @NonNull AssociationStoreImpl associationStore) {
         mContext = service.getContext();
         mService = service;
         mPackageManager = service.mPackageManagerInternal;
@@ -174,7 +178,7 @@ class AssociationRequestsProcessor {
                 && !willAddRoleHolder(request, packageName, userId)) {
             // 2a. Create association right away.
             createAssociationAndNotifyApplication(request, packageName, userId,
-                    /*macAddress*/ null, callback);
+                    /* macAddress */ null, callback, /* resultReceiver */ null);
             return;
         }
 
@@ -253,34 +257,110 @@ class AssociationRequestsProcessor {
         }
 
         // 2. Create association and notify the application.
-        final AssociationInfo association = createAssociationAndNotifyApplication(
-                request, packageName, userId, macAddress, callback);
-
-        // 3. Send the association back the Approval Activity, so that it can report back to the app
-        // via Activity.setResult().
-        final Bundle data = new Bundle();
-        data.putParcelable(EXTRA_ASSOCIATION, association);
-        resultReceiver.send(RESULT_CODE_ASSOCIATION_CREATED, data);
+        createAssociationAndNotifyApplication(request, packageName, userId, macAddress, callback,
+                resultReceiver);
     }
 
-    private AssociationInfo createAssociationAndNotifyApplication(
+    private void createAssociationAndNotifyApplication(
             @NonNull AssociationRequest request, @NonNull String packageName, @UserIdInt int userId,
-            @Nullable MacAddress macAddress, @NonNull IAssociationRequestCallback callback) {
-        final AssociationInfo association;
+            @Nullable MacAddress macAddress, @NonNull IAssociationRequestCallback callback,
+            @NonNull ResultReceiver resultReceiver) {
         final long callingIdentity = Binder.clearCallingIdentity();
         try {
-            association = mService.createAssociation(userId, packageName, macAddress,
+            createAssociation(userId, packageName, macAddress,
                     request.getDisplayName(), request.getDeviceProfile(),
-                    request.getAssociatedDevice(), request.isSelfManaged());
+                    request.getAssociatedDevice(), request.isSelfManaged(),
+                    callback, resultReceiver);
         } finally {
             Binder.restoreCallingIdentity(callingIdentity);
         }
+    }
 
-        try {
-            callback.onAssociationCreated(association);
-        } catch (RemoteException ignore) { }
+    public void createAssociation(@UserIdInt int userId, @NonNull String packageName,
+            @Nullable MacAddress macAddress, @Nullable CharSequence displayName,
+            @Nullable String deviceProfile, @Nullable AssociatedDevice associatedDevice,
+            boolean selfManaged, @Nullable IAssociationRequestCallback callback,
+            @Nullable ResultReceiver resultReceiver) {
+        final int id = mService.getNewAssociationIdForPackage(userId, packageName);
+        final long timestamp = System.currentTimeMillis();
 
-        return association;
+        final AssociationInfo association = new AssociationInfo(id, userId, packageName,
+                macAddress, displayName, deviceProfile, associatedDevice, selfManaged,
+                /* notifyOnDeviceNearby */ false, /* revoked */ false, timestamp, Long.MAX_VALUE);
+
+        if (deviceProfile != null) {
+            // If the "Device Profile" is specified, make the companion application a holder of the
+            // corresponding role.
+            addRoleHolderForAssociation(mService.getContext(), association, success -> {
+                if (success) {
+                    addAssociationToStore(association, deviceProfile);
+
+                    sendCallbackAndFinish(association, callback, resultReceiver);
+                } else {
+                    Slog.e(TAG, "Failed to add u" + userId + "\\" + packageName
+                            + " to the list of " + deviceProfile + " holders.");
+
+                    sendCallbackAndFinish(null, callback, resultReceiver);
+                }
+            });
+        } else {
+            addAssociationToStore(association, null);
+
+            sendCallbackAndFinish(association, callback, resultReceiver);
+        }
+
+        // Don't need to update the mRevokedAssociationsPendingRoleHolderRemoval since
+        // maybeRemoveRoleHolderForAssociation in PackageInactivityListener will handle the case
+        // that there are other devices with the same profile, so the role holder won't be removed.
+    }
+
+    private void addAssociationToStore(@NonNull AssociationInfo association,
+            @Nullable String deviceProfile) {
+        Slog.i(TAG, "New CDM association created=" + association);
+
+        mAssociationStore.addAssociation(association);
+
+        mService.updateSpecialAccessPermissionForAssociatedPackage(association);
+
+        logCreateAssociation(deviceProfile);
+    }
+
+    private void sendCallbackAndFinish(@Nullable AssociationInfo association,
+            @Nullable IAssociationRequestCallback callback,
+            @Nullable ResultReceiver resultReceiver) {
+        if (association != null) {
+            // Send the association back via the app's callback
+            if (callback != null) {
+                try {
+                    callback.onAssociationCreated(association);
+                } catch (RemoteException ignore) {
+                }
+            }
+
+            // Send the association back to CompanionDeviceActivity, so that it can report
+            // back to the app via Activity.setResult().
+            if (resultReceiver != null) {
+                final Bundle data = new Bundle();
+                data.putParcelable(EXTRA_ASSOCIATION, association);
+                resultReceiver.send(RESULT_CODE_ASSOCIATION_CREATED, data);
+            }
+        } else {
+            // Send the association back via the app's callback
+            if (callback != null) {
+                try {
+                    // TODO: update to INTERNAL_ERROR once it's added.
+                    callback.onFailure(CompanionDeviceManager.REASON_CANCELED);
+                } catch (RemoteException ignore) {
+                }
+            }
+
+            // Send the association back to CompanionDeviceActivity, so that it can report
+            // back to the app via Activity.setResult().
+            if (resultReceiver != null) {
+                final Bundle data = new Bundle();
+                resultReceiver.send(CompanionDeviceManager.RESULT_INTERNAL_ERROR, data);
+            }
+        }
     }
 
     private boolean willAddRoleHolder(@NonNull AssociationRequest request,

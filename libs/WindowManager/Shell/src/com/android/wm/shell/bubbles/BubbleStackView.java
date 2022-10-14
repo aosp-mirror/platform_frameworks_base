@@ -938,7 +938,6 @@ public class BubbleStackView extends FrameLayout
         addView(mAnimatingOutSurfaceContainer);
 
         mAnimatingOutSurfaceView = new SurfaceView(getContext());
-        mAnimatingOutSurfaceView.setUseAlpha();
         mAnimatingOutSurfaceView.setZOrderOnTop(true);
         boolean supportsRoundedCorners = ScreenDecorationsUtils.supportsRoundedCornersOnWindows(
                 mContext.getResources());

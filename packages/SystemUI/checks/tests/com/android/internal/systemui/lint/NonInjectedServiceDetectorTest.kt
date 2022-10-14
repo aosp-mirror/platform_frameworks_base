@@ -39,7 +39,7 @@ class NonInjectedServiceDetectorTest : LintDetectorTest() {
                         package test.pkg;
                         import android.content.Context;
 
-                        public class TestClass1 {
+                        public class TestClass {
                             public void getSystemServiceWithoutDagger(Context context) {
                                 context.getSystemService("user");
                             }
@@ -51,8 +51,14 @@ class NonInjectedServiceDetectorTest : LintDetectorTest() {
             )
             .issues(NonInjectedServiceDetector.ISSUE)
             .run()
-            .expectWarningCount(1)
-            .expectContains("Use @Inject to get the handle")
+            .expect(
+                """
+                src/test/pkg/TestClass.java:6: Warning: Use @Inject to get system-level service handles instead of Context.getSystemService() [NonInjectedService]
+                        context.getSystemService("user");
+                                ~~~~~~~~~~~~~~~~
+                0 errors, 1 warnings
+                """
+            )
     }
 
     @Test
@@ -65,7 +71,7 @@ class NonInjectedServiceDetectorTest : LintDetectorTest() {
                         import android.content.Context;
                         import android.os.UserManager;
 
-                        public class TestClass2 {
+                        public class TestClass {
                             public void getSystemServiceWithoutDagger(Context context) {
                                 context.getSystemService(UserManager.class);
                             }
@@ -77,8 +83,46 @@ class NonInjectedServiceDetectorTest : LintDetectorTest() {
             )
             .issues(NonInjectedServiceDetector.ISSUE)
             .run()
-            .expectWarningCount(1)
-            .expectContains("Use @Inject to get the handle")
+            .expect(
+                """
+                src/test/pkg/TestClass.java:7: Warning: Use @Inject to get system-level service handles instead of Context.getSystemService() [NonInjectedService]
+                        context.getSystemService(UserManager.class);
+                                ~~~~~~~~~~~~~~~~
+                0 errors, 1 warnings
+                """
+            )
+    }
+
+    @Test
+    fun testGetAccountManager() {
+        lint()
+            .files(
+                TestFiles.java(
+                        """
+                        package test.pkg;
+                        import android.content.Context;
+                        import android.accounts.AccountManager;
+
+                        public class TestClass {
+                            public void getSystemServiceWithoutDagger(Context context) {
+                                AccountManager.get(context);
+                            }
+                        }
+                        """
+                    )
+                    .indented(),
+                *stubs
+            )
+            .issues(NonInjectedServiceDetector.ISSUE)
+            .run()
+            .expect(
+                """
+                src/test/pkg/TestClass.java:7: Warning: Replace AccountManager.get() with an injected instance of AccountManager [NonInjectedService]
+                        AccountManager.get(context);
+                                       ~~~
+                0 errors, 1 warnings
+                """
+            )
     }
 
     private val stubs = androidStubs

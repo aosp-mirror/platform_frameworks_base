@@ -204,6 +204,7 @@ import android.app.ProcessMemoryState;
 import android.app.ProfilerInfo;
 import android.app.SyncNotedAppOp;
 import android.app.WaitResult;
+import android.app.assist.ActivityId;
 import android.app.backup.BackupManager.OperationType;
 import android.app.backup.IBackupManager;
 import android.app.compat.CompatChanges;
@@ -2915,7 +2916,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * @param taskRoot Task's root
      */
     public void updateActivityUsageStats(ComponentName activity, int userId, int event,
-            IBinder appToken, ComponentName taskRoot) {
+            IBinder appToken, ComponentName taskRoot, ActivityId activityId) {
         if (DEBUG_SWITCH) {
             Slog.d(TAG_SWITCH, "updateActivityUsageStats: comp="
                     + activity + " hash=" + appToken.hashCode() + " event=" + event);
@@ -2932,7 +2933,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (contentCaptureService != null && (event == Event.ACTIVITY_PAUSED
                 || event == Event.ACTIVITY_RESUMED || event == Event.ACTIVITY_STOPPED
                 || event == Event.ACTIVITY_DESTROYED)) {
-            contentCaptureService.notifyActivityEvent(userId, activity, event);
+            contentCaptureService.notifyActivityEvent(userId, activity, event, activityId);
         }
         // Currently we have move most of logic to the client side. When the activity lifecycle
         // event changed, the client side will notify the VoiceInteractionManagerService. But
@@ -14887,7 +14888,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             if (!Build.IS_DEBUGGABLE && callingUid != ROOT_UID && callingUid != SHELL_UID
-                    && callingUid != SYSTEM_UID) {
+                    && callingUid != SYSTEM_UID && !hasActiveInstrumentationLocked(callingPid)) {
                 // If it's not debug build and not called from root/shell/system uid, reject it.
                 final String msg = "Permission Denial: instrumentation test "
                         + className + " from pid=" + callingPid + ", uid=" + callingUid
@@ -14992,6 +14993,17 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         return true;
+    }
+
+    @GuardedBy("this")
+    private boolean hasActiveInstrumentationLocked(int pid) {
+        if (pid == 0) {
+            return false;
+        }
+        synchronized (mPidsSelfLocked) {
+            ProcessRecord process = mPidsSelfLocked.get(pid);
+            return process != null && process.getActiveInstrumentation() != null;
+        }
     }
 
     @GuardedBy("this")
@@ -17106,9 +17118,9 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         public void updateActivityUsageStats(ComponentName activity, int userId, int event,
-                IBinder appToken, ComponentName taskRoot) {
+                IBinder appToken, ComponentName taskRoot, ActivityId activityId) {
             ActivityManagerService.this.updateActivityUsageStats(activity, userId, event,
-                    appToken, taskRoot);
+                    appToken, taskRoot, activityId);
         }
 
         @Override

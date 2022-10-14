@@ -50,6 +50,7 @@ commands += [
     "cd $ANDROID_BUILD_TOP",
     "source build/envsetup.sh",
     f"rm {target}",  # remove the file first so soong doesn't think there is no work to do
+    f"rm {path}/{FIX_DIR}.zip", # remove in case there are fixes from a prior run that we don't want applied if this run fails
     f"m {target}",
 ]
 

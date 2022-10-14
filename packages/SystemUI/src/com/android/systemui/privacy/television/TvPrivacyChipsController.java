@@ -70,8 +70,8 @@ import javax.inject.Inject;
  * recording audio, camera, the screen, or accessing the location.
  */
 @SysUISingleton
-public class TvPrivacyChipsController extends CoreStartable
-        implements PrivacyItemController.Callback {
+public class TvPrivacyChipsController 
+        implements CoreStartable, PrivacyItemController.Callback {
     private static final String TAG = "TvPrivacyChipsController";
     private static final boolean DEBUG = false;
 
@@ -106,6 +106,7 @@ public class TvPrivacyChipsController extends CoreStartable
     // How long chips stay expanded after an update.
     private static final int EXPANDED_DURATION_MS = 4000;
 
+    private final Context mContext;
     private final Handler mUiThreadHandler = new Handler(Looper.getMainLooper());
     private final Runnable mCollapseRunnable = this::collapseChips;
     private final Runnable mUpdatePrivacyItemsRunnable = this::updateChipsAndAnnounce;
@@ -130,7 +131,7 @@ public class TvPrivacyChipsController extends CoreStartable
     @Inject
     public TvPrivacyChipsController(Context context, PrivacyItemController privacyItemController,
             IWindowManager iWindowManager) {
-        super(context);
+        mContext = context;
         if (DEBUG) Log.d(TAG, "TvPrivacyChipsController running");
         mPrivacyItemController = privacyItemController;
         mIWindowManager = iWindowManager;

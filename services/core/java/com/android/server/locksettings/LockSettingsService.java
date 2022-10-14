@@ -256,10 +256,10 @@ public class LockSettingsService extends ILockSettings.Stub {
     @GuardedBy("mUserCreationAndRemovalLock")
     private boolean mBootComplete;
 
-    // Current password metric for all users on the device. Updated when user unlocks
-    // the device or changes password. Removed when user is stopped.
+    // Current password metrics for all secured users on the device. Updated when user unlocks the
+    // device or changes password. Removed when user is stopped.
     @GuardedBy("this")
-    final SparseArray<PasswordMetrics> mUserPasswordMetrics = new SparseArray<>();
+    private final SparseArray<PasswordMetrics> mUserPasswordMetrics = new SparseArray<>();
     @VisibleForTesting
     protected boolean mHasSecureLockScreen;
 
@@ -2274,8 +2274,11 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
     }
 
-    private PasswordMetrics loadPasswordMetrics(SyntheticPassword sp, int userHandle) {
+    private @Nullable PasswordMetrics loadPasswordMetrics(SyntheticPassword sp, int userHandle) {
         synchronized (mSpManager) {
+            if (!isUserSecure(userHandle)) {
+                return null;
+            }
             return mSpManager.getPasswordMetrics(sp, getCurrentLskfBasedProtectorId(userHandle),
                     userHandle);
         }
@@ -2703,14 +2706,13 @@ public class LockSettingsService extends ILockSettings.Stub {
         return handle;
     }
 
-    private void onCredentialVerified(SyntheticPassword sp, PasswordMetrics metrics, int userId) {
+    private void onCredentialVerified(SyntheticPassword sp, @Nullable PasswordMetrics metrics,
+            int userId) {
 
         if (metrics != null) {
             synchronized (this) {
                 mUserPasswordMetrics.put(userId,  metrics);
             }
-        } else {
-            Slog.wtf(TAG, "Null metrics after credential verification");
         }
 
         unlockKeystore(sp.deriveKeyStorePassword(), userId);

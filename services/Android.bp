@@ -88,7 +88,6 @@ filegroup {
         ":services.appwidget-sources",
         ":services.autofill-sources",
         ":services.backup-sources",
-        ":backuplib-sources",
         ":services.companion-sources",
         ":services.contentcapture-sources",
         ":services.contentsuggestions-sources",

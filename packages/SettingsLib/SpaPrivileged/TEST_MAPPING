@@ -1,0 +1,10 @@
+{
+  "presubmit": [
+    {
+      "name": "SpaPrivilegedLibTests"
+    },
+    {
+      "name": "SettingsSpaUnitTests"
+    }
+  ]
+}

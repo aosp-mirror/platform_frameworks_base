@@ -69,7 +69,6 @@ import android.annotation.UiThread;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
-import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -105,7 +104,6 @@ import android.os.Parcel;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
-import android.os.ServiceManager;
 import android.os.ShellCallback;
 import android.os.ShellCommand;
 import android.os.SystemClock;
@@ -190,7 +188,7 @@ import com.android.server.inputmethod.InputMethodManagerInternal.InputMethodList
 import com.android.server.inputmethod.InputMethodSubtypeSwitchingController.ImeSubtypeListItem;
 import com.android.server.inputmethod.InputMethodUtils.InputMethodSettings;
 import com.android.server.pm.UserManagerInternal;
-import com.android.server.statusbar.StatusBarManagerService;
+import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.utils.PriorityDump;
 import com.android.server.wm.WindowManagerInternal;
 
@@ -338,8 +336,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
     // Ongoing notification
     private NotificationManager mNotificationManager;
-    KeyguardManager mKeyguardManager;
-    private @Nullable StatusBarManagerService mStatusBar;
+    @Nullable private StatusBarManagerInternal mStatusBarManagerInternal;
     private final Notification.Builder mImeSwitcherNotification;
     private final PendingIntent mImeSwitchPendingIntent;
     private boolean mShowOngoingImeSwitcherForPhones;
@@ -1650,9 +1647,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             // Called on ActivityManager thread.
             // TODO: Dispatch this to a worker thread as needed.
             if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
-                StatusBarManagerService statusBarService = (StatusBarManagerService) ServiceManager
-                        .getService(Context.STATUS_BAR_SERVICE);
-                mService.systemRunning(statusBarService);
+                mService.systemRunning();
             }
         }
 
@@ -1933,7 +1928,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     /**
      * TODO(b/32343335): The entire systemRunning() method needs to be revisited.
      */
-    public void systemRunning(StatusBarManagerService statusBar) {
+    public void systemRunning() {
         synchronized (ImfLock.class) {
             if (DEBUG) {
                 Slog.d(TAG, "--- systemReady");
@@ -1944,9 +1939,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 final int currentUserId = mSettings.getCurrentUserId();
                 mSettings.switchCurrentUser(currentUserId,
                         !mUserManagerInternal.isUserUnlockingOrUnlocked(currentUserId));
-                mKeyguardManager = mContext.getSystemService(KeyguardManager.class);
                 mNotificationManager = mContext.getSystemService(NotificationManager.class);
-                mStatusBar = statusBar;
+                mStatusBarManagerInternal =
+                        LocalServices.getService(StatusBarManagerInternal.class);
                 hideStatusBarIconLocked();
                 updateSystemUiLocked(mImeWindowVis, mBackDisposition);
                 mShowOngoingImeSwitcherForPhones = mRes.getBoolean(
@@ -2965,11 +2960,11 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     final CharSequence contentDescription = applicationInfo != null
                             ? userAwarePackageManager.getApplicationLabel(applicationInfo)
                             : null;
-                    if (mStatusBar != null) {
-                        mStatusBar.setIcon(mSlotIme, packageName, iconId, 0,
+                    if (mStatusBarManagerInternal != null) {
+                        mStatusBarManagerInternal.setIcon(mSlotIme, packageName, iconId, 0,
                                 contentDescription  != null
                                         ? contentDescription.toString() : null);
-                        mStatusBar.setIconVisibility(mSlotIme, true);
+                        mStatusBarManagerInternal.setIconVisibility(mSlotIme, true);
                     }
                 }
             } finally {
@@ -2980,8 +2975,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
     @GuardedBy("ImfLock.class")
     private void hideStatusBarIconLocked() {
-        if (mStatusBar != null) {
-            mStatusBar.setIconVisibility(mSlotIme, false);
+        if (mStatusBarManagerInternal != null) {
+            mStatusBarManagerInternal.setIconVisibility(mSlotIme, false);
         }
     }
 
@@ -3007,7 +3002,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         if (!mShowOngoingImeSwitcherForPhones) return false;
         if (mMenuController.getSwitchingDialogLocked() != null) return false;
         if (mWindowManagerInternal.isKeyguardShowingAndNotOccluded()
-                && mKeyguardManager != null && mKeyguardManager.isKeyguardSecure()) return false;
+                && mWindowManagerInternal.isKeyguardSecure(mSettings.getCurrentUserId())) {
+            return false;
+        }
         if ((visibility & InputMethodService.IME_ACTIVE) == 0
                 || (visibility & InputMethodService.IME_INVISIBLE) != 0) {
             return false;
@@ -3160,9 +3157,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             }
             // mImeWindowVis should be updated before calling shouldShowImeSwitcherLocked().
             final boolean needsToShowImeSwitcher = shouldShowImeSwitcherLocked(vis);
-            if (mStatusBar != null) {
-                mStatusBar.setImeWindowStatus(mCurTokenDisplayId, getCurTokenLocked(), vis,
-                        backDisposition, needsToShowImeSwitcher);
+            if (mStatusBarManagerInternal != null) {
+                mStatusBarManagerInternal.setImeWindowStatus(mCurTokenDisplayId,
+                        getCurTokenLocked(), vis, backDisposition, needsToShowImeSwitcher);
             }
             final InputMethodInfo imi = mMethodMap.get(getSelectedMethodIdLocked());
             if (imi != null && needsToShowImeSwitcher) {

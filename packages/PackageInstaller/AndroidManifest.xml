@@ -59,6 +59,10 @@
                 <action android:name="android.content.pm.action.CONFIRM_INSTALL" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
+            <intent-filter android:priority="1">
+                <action android:name="android.content.pm.action.CONFIRM_PRE_APPROVAL" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
         </activity>
 
         <activity android:name=".InstallStaging"

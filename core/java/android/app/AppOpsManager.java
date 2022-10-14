@@ -8189,7 +8189,7 @@ public class AppOpsManager {
      * @see #startOp(String, int, String, String, String)
      */
     public int startOpNoThrow(@NonNull String op, int uid, @NonNull String packageName,
-            @NonNull String attributionTag, @Nullable String message) {
+            @Nullable String attributionTag, @Nullable String message) {
         return startOpNoThrow(strOpToOp(op), uid, packageName, false, attributionTag, message);
     }
 

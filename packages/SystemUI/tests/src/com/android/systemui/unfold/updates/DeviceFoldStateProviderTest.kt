@@ -25,16 +25,21 @@ import com.android.systemui.unfold.config.ResourceUnfoldTransitionConfig
 import com.android.systemui.unfold.config.UnfoldTransitionConfig
 import com.android.systemui.unfold.system.ActivityManagerActivityTypeProvider
 import com.android.systemui.unfold.updates.FoldProvider.FoldCallback
+import com.android.systemui.unfold.updates.RotationChangeProvider.RotationListener
 import com.android.systemui.unfold.updates.hinge.HingeAngleProvider
 import com.android.systemui.unfold.updates.screen.ScreenStatusProvider
 import com.android.systemui.unfold.updates.screen.ScreenStatusProvider.ScreenListener
 import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.capture
 import com.google.common.truth.Truth.assertThat
 import java.util.concurrent.Executor
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentCaptor
+import org.mockito.Captor
 import org.mockito.Mock
+import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 
@@ -47,6 +52,12 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
 
     @Mock
     private lateinit var handler: Handler
+
+    @Mock
+    private lateinit var rotationChangeProvider: RotationChangeProvider
+
+    @Captor
+    private lateinit var rotationListener: ArgumentCaptor<RotationListener>
 
     private val foldProvider = TestFoldProvider()
     private val screenOnStatusProvider = TestScreenOnStatusProvider()
@@ -76,6 +87,7 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
                 screenOnStatusProvider,
                 foldProvider,
                 activityTypeProvider,
+                rotationChangeProvider,
                 context.mainExecutor,
                 handler
             )
@@ -91,6 +103,8 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
                 }
             })
         foldStateProvider.start()
+
+        verify(rotationChangeProvider).addCallback(capture(rotationListener))
 
         whenever(handler.postDelayed(any<Runnable>(), any())).then { invocationOnMock ->
             scheduledRunnable = invocationOnMock.getArgument<Runnable>(0)
@@ -370,6 +384,27 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
         screenOnStatusProvider.notifyScreenTurningOn()
 
         assertThat(testHingeAngleProvider.isStarted).isFalse()
+    }
+
+    @Test
+    fun onRotationChanged_whileInProgress_cancelled() {
+        setFoldState(folded = false)
+        assertThat(foldUpdates).containsExactly(FOLD_UPDATE_START_OPENING)
+
+        rotationListener.value.onRotationChanged(1)
+
+        assertThat(foldUpdates).containsExactly(
+            FOLD_UPDATE_START_OPENING, FOLD_UPDATE_FINISH_HALF_OPEN)
+    }
+
+    @Test
+    fun onRotationChanged_whileNotInProgress_noUpdates() {
+        setFoldState(folded = true)
+        assertThat(foldUpdates).containsExactly(FOLD_UPDATE_FINISH_CLOSED)
+
+        rotationListener.value.onRotationChanged(1)
+
+        assertThat(foldUpdates).containsExactly(FOLD_UPDATE_FINISH_CLOSED)
     }
 
     private fun setupForegroundActivityType(isHomeActivity: Boolean?) {

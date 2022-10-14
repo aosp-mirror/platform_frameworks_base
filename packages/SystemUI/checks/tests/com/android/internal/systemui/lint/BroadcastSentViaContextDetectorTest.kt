@@ -41,7 +41,7 @@ class BroadcastSentViaContextDetectorTest : LintDetectorTest() {
                     package test.pkg;
                     import android.content.Context;
 
-                    public class TestClass1 {
+                    public class TestClass {
                         public void send(Context context) {
                           Intent intent = new Intent(Intent.ACTION_VIEW);
                           context.sendBroadcast(intent);
@@ -54,10 +54,13 @@ class BroadcastSentViaContextDetectorTest : LintDetectorTest() {
             )
             .issues(BroadcastSentViaContextDetector.ISSUE)
             .run()
-            .expectWarningCount(1)
-            .expectContains(
-                "Please don't call sendBroadcast/sendBroadcastAsUser directly on " +
-                    "Context, use com.android.systemui.broadcast.BroadcastSender instead."
+            .expect(
+                """
+                src/test/pkg/TestClass.java:7: Warning: Context.sendBroadcast() should be replaced with BroadcastSender.sendBroadcast() [BroadcastSentViaContext]
+                      context.sendBroadcast(intent);
+                              ~~~~~~~~~~~~~
+                0 errors, 1 warnings
+                """
             )
     }
 
@@ -71,7 +74,7 @@ class BroadcastSentViaContextDetectorTest : LintDetectorTest() {
                     import android.content.Context;
                     import android.os.UserHandle;
 
-                    public class TestClass1 {
+                    public class TestClass {
                         public void send(Context context) {
                           Intent intent = new Intent(Intent.ACTION_VIEW);
                           context.sendBroadcastAsUser(intent, UserHandle.ALL, "permission");
@@ -84,10 +87,13 @@ class BroadcastSentViaContextDetectorTest : LintDetectorTest() {
             )
             .issues(BroadcastSentViaContextDetector.ISSUE)
             .run()
-            .expectWarningCount(1)
-            .expectContains(
-                "Please don't call sendBroadcast/sendBroadcastAsUser directly on " +
-                    "Context, use com.android.systemui.broadcast.BroadcastSender instead."
+            .expect(
+                """
+                src/test/pkg/TestClass.java:8: Warning: Context.sendBroadcastAsUser() should be replaced with BroadcastSender.sendBroadcastAsUser() [BroadcastSentViaContext]
+                      context.sendBroadcastAsUser(intent, UserHandle.ALL, "permission");
+                              ~~~~~~~~~~~~~~~~~~~
+                0 errors, 1 warnings
+                """
             )
     }
 
@@ -101,7 +107,7 @@ class BroadcastSentViaContextDetectorTest : LintDetectorTest() {
                     import android.app.Activity;
                     import android.os.UserHandle;
 
-                    public class TestClass1 {
+                    public class TestClass {
                         public void send(Activity activity) {
                           Intent intent = new Intent(Intent.ACTION_VIEW);
                           activity.sendBroadcastAsUser(intent, UserHandle.ALL, "permission");
@@ -115,11 +121,41 @@ class BroadcastSentViaContextDetectorTest : LintDetectorTest() {
             )
             .issues(BroadcastSentViaContextDetector.ISSUE)
             .run()
-            .expectWarningCount(1)
-            .expectContains(
-                "Please don't call sendBroadcast/sendBroadcastAsUser directly on " +
-                    "Context, use com.android.systemui.broadcast.BroadcastSender instead."
+            .expect(
+                """
+                src/test/pkg/TestClass.java:8: Warning: Context.sendBroadcastAsUser() should be replaced with BroadcastSender.sendBroadcastAsUser() [BroadcastSentViaContext]
+                      activity.sendBroadcastAsUser(intent, UserHandle.ALL, "permission");
+                               ~~~~~~~~~~~~~~~~~~~
+                0 errors, 1 warnings
+                """
             )
+    }
+
+    @Test
+    fun testSendBroadcastInBroadcastSender() {
+        lint()
+            .files(
+                TestFiles.java(
+                        """
+                    package com.android.systemui.broadcast;
+                    import android.app.Activity;
+                    import android.os.UserHandle;
+
+                    public class BroadcastSender {
+                        public void send(Activity activity) {
+                          Intent intent = new Intent(Intent.ACTION_VIEW);
+                          activity.sendBroadcastAsUser(intent, UserHandle.ALL, "permission");
+                        }
+
+                    }
+                """
+                    )
+                    .indented(),
+                *stubs
+            )
+            .issues(BroadcastSentViaContextDetector.ISSUE)
+            .run()
+            .expectClean()
     }
 
     @Test
@@ -131,7 +167,7 @@ class BroadcastSentViaContextDetectorTest : LintDetectorTest() {
                     package test.pkg;
                     import android.content.Context;
 
-                    public class TestClass1 {
+                    public class TestClass {
                         public void sendBroadcast() {
                           Intent intent = new Intent(Intent.ACTION_VIEW);
                           context.startActivity(intent);

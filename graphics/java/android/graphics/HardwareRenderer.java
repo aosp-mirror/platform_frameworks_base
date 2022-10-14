@@ -1347,7 +1347,8 @@ public class HardwareRenderer {
 
             nInitDisplayInfo(largestWidth, largestHeight, defaultDisplay.getRefreshRate(),
                     wideColorDataspace, defaultDisplay.getAppVsyncOffsetNanos(),
-                    defaultDisplay.getPresentationDeadlineNanos());
+                    defaultDisplay.getPresentationDeadlineNanos(),
+                    defaultDisplay.getOverlaySupport().supportFp16ForHdr());
 
             mDisplayInitialized = true;
         }
@@ -1527,7 +1528,8 @@ public class HardwareRenderer {
     private static native void nSetDisplayDensityDpi(int densityDpi);
 
     private static native void nInitDisplayInfo(int width, int height, float refreshRate,
-            int wideColorDataspace, long appVsyncOffsetNanos, long presentationDeadlineNanos);
+            int wideColorDataspace, long appVsyncOffsetNanos, long presentationDeadlineNanos,
+            boolean supportsFp16ForHdr);
 
     private static native void nSetDrawingEnabled(boolean drawingEnabled);
 
