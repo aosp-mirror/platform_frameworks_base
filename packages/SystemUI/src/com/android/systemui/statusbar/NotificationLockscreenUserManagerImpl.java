@@ -189,7 +189,6 @@ public class NotificationLockscreenUserManagerImpl implements
     protected NotificationPresenter mPresenter;
     protected ContentObserver mLockscreenSettingsObserver;
     protected ContentObserver mSettingsObserver;
-    private boolean mHideSilentNotificationsOnLockscreen;
 
     @Inject
     public NotificationLockscreenUserManagerImpl(Context context,
@@ -266,12 +265,6 @@ public class NotificationLockscreenUserManagerImpl implements
                 UserHandle.USER_ALL);
 
         mContext.getContentResolver().registerContentObserver(
-                mSecureSettings.getUriFor(Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS),
-                true,
-                mLockscreenSettingsObserver,
-                UserHandle.USER_ALL);
-
-        mContext.getContentResolver().registerContentObserver(
                 Settings.Global.getUriFor(Settings.Global.ZEN_MODE), false,
                 mSettingsObserver);
 
@@ -339,9 +332,6 @@ public class NotificationLockscreenUserManagerImpl implements
                 null /* admin */, mCurrentUserId);
         final boolean allowedByDpm = (dpmFlags
                 & DevicePolicyManager.KEYGUARD_DISABLE_SECURE_NOTIFICATIONS) == 0;
-
-        mHideSilentNotificationsOnLockscreen = mSecureSettings.getIntForUser(
-                Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS, 1, mCurrentUserId) == 0;
 
         setShowLockscreenNotifications(show && allowedByDpm);
 
