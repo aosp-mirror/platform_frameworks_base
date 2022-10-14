@@ -737,11 +737,8 @@ public final class InputMethodManager {
 
     private final class DelegateImpl implements
             ImeFocusController.InputMethodManagerDelegate {
-        /**
-         * Used by {@link ImeFocusController} to start input connection.
-         */
-        @Override
-        public boolean startInput(@StartInputReason int startInputReason, View focusedView,
+
+        private boolean startInput(@StartInputReason int startInputReason, View focusedView,
                 @StartInputFlags int startInputFlags, @SoftInputModeFlags int softInputMode,
                 int windowFlags) {
             ImeTracing.getInstance().triggerClientDump(

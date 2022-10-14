@@ -26,8 +26,6 @@ import android.util.proto.ProtoOutputStream;
 import android.view.inputmethod.InputMethodManager;
 
 import com.android.internal.inputmethod.InputMethodDebug;
-import com.android.internal.inputmethod.StartInputFlags;
-import com.android.internal.inputmethod.StartInputReason;
 
 /**
  * Responsible for IME focus handling inside {@link ViewRootImpl}.
@@ -189,13 +187,6 @@ public final class ImeFocusController {
      * @hide
      */
     public interface InputMethodManagerDelegate {
-        /**
-         * Starts the input connection.
-         */
-        boolean startInput(@StartInputReason int startInputReason, View focusedView,
-                @StartInputFlags int startInputFlags,
-                @WindowManager.LayoutParams.SoftInputModeFlags int softInputMode, int windowFlags);
-
         void onPostWindowFocus(View viewForWindowFocus,
                 @NonNull WindowManager.LayoutParams windowAttribute);
         void onViewFocusChanged(@NonNull View view, boolean hasFocus);
