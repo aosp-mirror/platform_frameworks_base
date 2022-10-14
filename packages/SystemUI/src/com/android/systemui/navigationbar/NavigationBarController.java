@@ -21,6 +21,7 @@ import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_GESTURE
 import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR;
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import static com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler.DEBUG_MISSING_GESTURE_TAG;
 import static com.android.systemui.shared.recents.utilities.Utilities.isTablet;
 
 import android.content.ContentResolver;
@@ -141,7 +142,13 @@ public class NavigationBarController implements
     public void onConfigChanged(Configuration newConfig) {
         boolean isOldConfigTablet = mIsTablet;
         mIsTablet = isTablet(mContext);
+        boolean willApplyConfig = mConfigChanges.applyNewConfig(mContext.getResources());
         boolean largeScreenChanged = mIsTablet != isOldConfigTablet;
+        // TODO(b/243765256): Disable this logging once b/243765256 is fixed.
+        Log.d(DEBUG_MISSING_GESTURE_TAG, "NavbarController: newConfig=" + newConfig
+                + " mTaskbarDelegate initialized=" + mTaskbarDelegate.isInitialized()
+                + " willApplyConfigToNavbars=" + willApplyConfig
+                + " navBarCount=" + mNavigationBars.size());
         if (mTaskbarDelegate.isInitialized()) {
             mTaskbarDelegate.onConfigurationChanged(newConfig);
         }
@@ -150,7 +157,7 @@ public class NavigationBarController implements
             return;
         }
 
-        if (mConfigChanges.applyNewConfig(mContext.getResources())) {
+        if (willApplyConfig) {
             for (int i = 0; i < mNavigationBars.size(); i++) {
                 recreateNavigationBar(mNavigationBars.keyAt(i));
             }
