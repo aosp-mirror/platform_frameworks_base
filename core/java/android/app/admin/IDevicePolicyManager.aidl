@@ -117,7 +117,10 @@ interface IDevicePolicyManager {
 
     void lockNow(int flags, boolean parent);
 
-    void wipeDataWithReason(int flags, String wipeReasonForUser, boolean parent);
+    /**
+    * @param factoryReset only applicable when `targetSdk >= U`, either tries to factoryReset/fail or removeUser/fail otherwise
+    **/
+    void wipeDataWithReason(int flags, String wipeReasonForUser, boolean parent, boolean factoryReset);
 
     void setFactoryResetProtectionPolicy(in ComponentName who, in FactoryResetProtectionPolicy policy);
     FactoryResetProtectionPolicy getFactoryResetProtectionPolicy(in ComponentName who);
@@ -161,7 +164,7 @@ interface IDevicePolicyManager {
     boolean hasGrantedPolicy(in ComponentName policyReceiver, int usesPolicy, int userHandle);
 
     void reportPasswordChanged(in PasswordMetrics metrics, int userId);
-    void reportFailedPasswordAttempt(int userHandle);
+    void reportFailedPasswordAttempt(int userHandle, boolean parent);
     void reportSuccessfulPasswordAttempt(int userHandle);
     void reportFailedBiometricAttempt(int userHandle);
     void reportSuccessfulBiometricAttempt(int userHandle);

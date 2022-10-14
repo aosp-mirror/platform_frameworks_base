@@ -646,6 +646,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
     private static final long USE_SET_LOCATION_ENABLED = 117835097L;
 
+    /**
+     * Forces wipeDataNoLock to attempt removing the user or throw an error as
+     * opposed to trying to factory reset the device first and only then falling back to user
+     * removal.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    public static final long EXPLICIT_WIPE_BEHAVIOUR = 242193913L;
+
     // Only add to the end of the list. Do not change or rearrange these values, that will break
     // historical data. Do not use negative numbers or zero, logger only handles positive
     // integers.
@@ -6699,8 +6708,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public void wipeDataWithReason(int flags, String wipeReasonForUser,
-            boolean calledOnParentInstance) {
+    public void wipeDataWithReason(int flags, @NonNull String wipeReasonForUser,
+            boolean calledOnParentInstance, boolean factoryReset) {
         if (!mHasFeature && !hasCallingOrSelfPermission(permission.MASTER_CLEAR)) {
             return;
         }
@@ -6782,7 +6791,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 "DevicePolicyManager.wipeDataWithReason() from %s, organization-owned? %s",
                 adminName, calledByProfileOwnerOnOrgOwnedDevice);
 
-        wipeDataNoLock(adminComp, flags, internalReason, wipeReasonForUser, userId);
+        wipeDataNoLock(adminComp, flags, internalReason, wipeReasonForUser, userId,
+                calledOnParentInstance, factoryReset);
     }
 
     private String getGenericWipeReason(
@@ -6844,8 +6854,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Slogf.i(LOG_TAG, "Cleaning up device-wide policies done.");
     }
 
+    /**
+     * @param factoryReset null: legacy behaviour, false: attempt to remove user, true: attempt to
+     *                     factory reset
+     */
     private void wipeDataNoLock(ComponentName admin, int flags, String internalReason,
-                                String wipeReasonForUser, int userId) {
+            @NonNull String wipeReasonForUser, int userId, boolean calledOnParentInstance,
+            @Nullable Boolean factoryReset) {
         wtfIfInLock();
 
         mInjector.binderWithCleanCallingIdentity(() -> {
@@ -6863,7 +6878,37 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         + " restriction is set for user " + userId);
             }
 
-            if (userId == UserHandle.USER_SYSTEM) {
+            boolean isSystemUser = userId == UserHandle.USER_SYSTEM;
+            boolean wipeDevice;
+            if (factoryReset == null || !CompatChanges.isChangeEnabled(EXPLICIT_WIPE_BEHAVIOUR)) {
+                // Legacy mode
+                wipeDevice = isSystemUser;
+            } else {
+                // Explicit behaviour
+                if (factoryReset) {
+                    // TODO(b/254031494) Replace with new factory reset permission checks
+                    boolean hasPermission = isDeviceOwnerUserId(userId)
+                            || (isOrganizationOwnedDeviceWithManagedProfile()
+                            && calledOnParentInstance);
+                    Preconditions.checkState(hasPermission,
+                            "Admin %s does not have permission to factory reset the device.",
+                            userId);
+                    wipeDevice = true;
+                } else {
+                    Preconditions.checkCallAuthorization(!isSystemUser,
+                            "User %s is a system user and cannot be removed", userId);
+                    boolean isLastNonHeadlessUser = getUserInfo(userId).isFull()
+                            && mUserManager.getAliveUsers().stream()
+                            .filter((it) -> it.getUserHandle().getIdentifier() != userId)
+                            .noneMatch(UserInfo::isFull);
+                    Preconditions.checkState(!isLastNonHeadlessUser,
+                            "Removing user %s would leave the device without any active users. "
+                                    + "Consider factory resetting the device instead.",
+                            userId);
+                    wipeDevice = false;
+                }
+            }
+            if (wipeDevice) {
                 forceWipeDeviceNoLock(
                         (flags & WIPE_EXTERNAL_STORAGE) != 0,
                         internalReason,
@@ -7131,7 +7176,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public void reportFailedPasswordAttempt(int userHandle) {
+    public void reportFailedPasswordAttempt(int userHandle, boolean parent) {
         Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
 
         final CallerIdentity caller = getCallerIdentity();
@@ -7153,7 +7198,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 saveSettingsLocked(userHandle);
                 if (mHasFeature) {
                     strictestAdmin = getAdminWithMinimumFailedPasswordsForWipeLocked(
-                            userHandle, /* parent */ false);
+                            userHandle, /* parent= */ false);
                     int max = strictestAdmin != null
                             ? strictestAdmin.maximumFailedPasswordsForWipe : 0;
                     if (max > 0 && policy.mFailedPasswordAttempts >= max) {
@@ -7183,10 +7228,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             // IMPORTANT: Call without holding the lock to prevent deadlock.
             try {
                 wipeDataNoLock(strictestAdmin.info.getComponent(),
-                        /*flags=*/ 0,
-                        /*reason=*/ "reportFailedPasswordAttempt()",
+                        /* flags= */ 0,
+                        /* reason= */ "reportFailedPasswordAttempt()",
                         getFailedPasswordAttemptWipeMessage(),
-                        userId);
+                        userId,
+                        /* calledOnParentInstance= */ parent,
+                        // factoryReset=null to enable U- behaviour
+                        /* factoryReset= */ null);
             } catch (SecurityException e) {
                 Slogf.w(LOG_TAG, "Failed to wipe user " + userId
                         + " after max failed password attempts reached.", e);
@@ -7195,7 +7243,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         if (mInjector.securityLogIsLoggingEnabled()) {
             SecurityLog.writeEvent(SecurityLog.TAG_KEYGUARD_DISMISS_AUTH_ATTEMPT,
-                    /*result*/ 0, /*method strength*/ 1);
+                    /* result= */ 0, /* method strength= */ 1);
         }
     }
 

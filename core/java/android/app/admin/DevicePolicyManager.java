@@ -171,6 +171,7 @@ public class DevicePolicyManager {
     private final boolean mParentInstance;
     private final DevicePolicyResourcesManager mResourcesManager;
 
+
     /** @hide */
     public DevicePolicyManager(Context context, IDevicePolicyManager service) {
         this(context, service, false);
@@ -6207,46 +6208,46 @@ public class DevicePolicyManager {
     public static final int WIPE_SILENTLY = 0x0008;
 
     /**
-     * Ask that all user data be wiped. If called as a secondary user, the user will be removed and
-     * other users will remain unaffected. Calling from the primary user will cause the device to
-     * reboot, erasing all device data - including all the secondary users and their data - while
-     * booting up.
-     * <p>
-     * The calling device admin must have requested {@link DeviceAdminInfo#USES_POLICY_WIPE_DATA} to
-     * be able to call this method; if it has not, a security exception will be thrown.
-     *
-     * If the caller is a profile owner of an organization-owned managed profile, it may
-     * additionally call this method on the parent instance.
-     * Calling this method on the parent {@link DevicePolicyManager} instance would wipe the
-     * entire device, while calling it on the current profile instance would relinquish the device
-     * for personal use, removing the managed profile and all policies set by the profile owner.
+     * See {@link #wipeData(int, CharSequence)}
      *
      * @param flags Bit mask of additional options: currently supported flags are
-     *            {@link #WIPE_EXTERNAL_STORAGE}, {@link #WIPE_RESET_PROTECTION_DATA},
-     *            {@link #WIPE_EUICC} and {@link #WIPE_SILENTLY}.
-     * @throws SecurityException if the calling application does not own an active administrator
-     *            that uses {@link DeviceAdminInfo#USES_POLICY_WIPE_DATA} or is not granted the
-     *            {@link android.Manifest.permission#MASTER_CLEAR} permission.
+     *              {@link #WIPE_EXTERNAL_STORAGE}, {@link #WIPE_RESET_PROTECTION_DATA},
+     *              {@link #WIPE_EUICC} and {@link #WIPE_SILENTLY}.
+     * @throws SecurityException     if the calling application does not own an active
+     *                               administrator
+     *                               that uses {@link DeviceAdminInfo#USES_POLICY_WIPE_DATA} and is
+     *                               not granted the
+     *                               {@link android.Manifest.permission#MASTER_CLEAR} permission.
+     * @throws IllegalStateException if called on last full-user or system-user
+     * @see #wipeDevice(int)
+     * @see #wipeData(int, CharSequence)
      */
     public void wipeData(int flags) {
-        wipeDataInternal(flags, "");
+        wipeDataInternal(flags,
+                /* wipeReasonForUser= */ "",
+                /* factoryReset= */ false);
     }
 
     /**
-     * Ask that all user data be wiped. If called as a secondary user, the user will be removed and
-     * other users will remain unaffected, the provided reason for wiping data can be shown to
-     * user. Calling from the primary user will cause the device to reboot, erasing all device data
-     * - including all the secondary users and their data - while booting up. In this case, we don't
-     * show the reason to the user since the device would be factory reset.
-     * <p>
-     * The calling device admin must have requested {@link DeviceAdminInfo#USES_POLICY_WIPE_DATA} to
-     * be able to call this method; if it has not, a security exception will be thrown.
+     * Ask that all user data be wiped.
      *
-     * If the caller is a profile owner of an organization-owned managed profile, it may
-     * additionally call this method on the parent instance.
-     * Calling this method on the parent {@link DevicePolicyManager} instance would wipe the
-     * entire device, while calling it on the current profile instance would relinquish the device
-     * for personal use, removing the managed profile and all policies set by the profile owner.
+     * <p>
+     * If called as a secondary user or managed profile, the user itself and its associated user
+     * data will be wiped. In particular, If the caller is a profile owner of an
+     * organization-owned managed profile, calling this method will relinquish the device for
+     * personal use, removing the managed profile and all policies set by the profile owner.
+     * </p>
+     *
+     * <p>
+     * Calling this method from the primary user will only work if the calling app is targeting
+     * Android 13 or below, in which case it will cause the device to reboot, erasing all device
+     * data - including all the secondary users and their data - while booting up. If an app
+     * targeting Android 13+ is calling this method from the primary user or last full user,
+     * {@link IllegalStateException} will be thrown.
+     * </p>
+     *
+     * If an app wants to wipe the entire device irrespective of which user they are from, they
+     * should use {@link #wipeDevice} instead.
      *
      * @param flags Bit mask of additional options: currently supported flags are
      *            {@link #WIPE_EXTERNAL_STORAGE}, {@link #WIPE_RESET_PROTECTION_DATA} and
@@ -6254,30 +6255,61 @@ public class DevicePolicyManager {
      * @param reason a string that contains the reason for wiping data, which can be
      *            presented to the user.
      * @throws SecurityException if the calling application does not own an active administrator
-     *            that uses {@link DeviceAdminInfo#USES_POLICY_WIPE_DATA} or is not granted the
+     *            that uses {@link DeviceAdminInfo#USES_POLICY_WIPE_DATA} and is not granted the
      *            {@link android.Manifest.permission#MASTER_CLEAR} permission.
      * @throws IllegalArgumentException if the input reason string is null or empty, or if
      *            {@link #WIPE_SILENTLY} is set.
+     * @throws IllegalStateException if called on last full-user or system-user
+     * @see #wipeDevice(int)
+     * @see #wipeData(int)
      */
     public void wipeData(int flags, @NonNull CharSequence reason) {
         Objects.requireNonNull(reason, "reason string is null");
         Preconditions.checkStringNotEmpty(reason, "reason string is empty");
         Preconditions.checkArgument((flags & WIPE_SILENTLY) == 0, "WIPE_SILENTLY cannot be set");
-        wipeDataInternal(flags, reason.toString());
+        wipeDataInternal(flags, reason.toString(), /* factoryReset= */ false);
     }
 
     /**
-     * Internal function for both {@link #wipeData(int)} and
-     * {@link #wipeData(int, CharSequence)} to call.
+     * Ask that the device be wiped and factory reset.
      *
+     * <p>
+     * The calling Device Owner or Organization Owned Profile Owner must have requested
+     * {@link DeviceAdminInfo#USES_POLICY_WIPE_DATA} to be able to call this method; if it has
+     * not, a security exception will be thrown.
+     *
+     * @param flags Bit mask of additional options: currently supported flags are
+     *              {@link #WIPE_EXTERNAL_STORAGE}, {@link #WIPE_RESET_PROTECTION_DATA},
+     *              {@link #WIPE_EUICC} and {@link #WIPE_SILENTLY}.
+     * @throws SecurityException if the calling application does not own an active administrator
+     *                           that uses {@link DeviceAdminInfo#USES_POLICY_WIPE_DATA} and is not
+     *                           granted the {@link android.Manifest.permission#MASTER_CLEAR}
+     *                           permission.
      * @see #wipeData(int)
      * @see #wipeData(int, CharSequence)
-     * @hide
      */
-    private void wipeDataInternal(int flags, @NonNull String wipeReasonForUser) {
+    // TODO(b/255323293) Add host-side tests
+    public void wipeDevice(int flags) {
+        wipeDataInternal(flags,
+                /* wipeReasonForUser= */ "",
+                /* factoryReset= */ true);
+    }
+
+    /**
+     * Internal function for {@link #wipeData(int)}, {@link #wipeData(int, CharSequence)}
+     * and {@link #wipeDevice(int)} to call.
+     *
+     * @hide
+     * @see #wipeData(int)
+     * @see #wipeData(int, CharSequence)
+     * @see #wipeDevice(int)
+     */
+    private void wipeDataInternal(int flags, @NonNull String wipeReasonForUser,
+            boolean factoryReset) {
         if (mService != null) {
             try {
-                mService.wipeDataWithReason(flags, wipeReasonForUser, mParentInstance);
+                mService.wipeDataWithReason(flags, wipeReasonForUser, mParentInstance,
+                        factoryReset);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -8642,7 +8674,7 @@ public class DevicePolicyManager {
     public void reportFailedPasswordAttempt(int userHandle) {
         if (mService != null) {
             try {
-                mService.reportFailedPasswordAttempt(userHandle);
+                mService.reportFailedPasswordAttempt(userHandle, mParentInstance);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
