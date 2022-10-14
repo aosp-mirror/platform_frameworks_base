@@ -92,6 +92,8 @@ public class ConsumerIrService extends IConsumerIrService.Stub {
     @Override
     @EnforcePermission(TRANSMIT_IR)
     public void transmit(String packageName, int carrierFrequency, int[] pattern) {
+        super.transmit_enforcePermission();
+
         long totalXmitTime = 0;
 
         for (int slice : pattern) {
@@ -128,6 +130,8 @@ public class ConsumerIrService extends IConsumerIrService.Stub {
     @Override
     @EnforcePermission(TRANSMIT_IR)
     public int[] getCarrierFrequencies() {
+        super.getCarrierFrequencies_enforcePermission();
+
         throwIfNoIrEmitter();
 
         synchronized(mHalLock) {

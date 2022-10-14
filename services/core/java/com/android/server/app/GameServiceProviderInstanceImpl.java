@@ -185,6 +185,8 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
                 @Override
                 @EnforcePermission(MANAGE_GAME_ACTIVITY)
                 public void createGameSession(int taskId) {
+                    super.createGameSession_enforcePermission();
+
                     mBackgroundExecutor.execute(() -> {
                         GameServiceProviderInstanceImpl.this.createGameSession(taskId);
                     });
@@ -197,6 +199,8 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
                 @EnforcePermission(MANAGE_GAME_ACTIVITY)
                 public void takeScreenshot(int taskId,
                         @NonNull AndroidFuture gameScreenshotResultFuture) {
+                    super.takeScreenshot_enforcePermission();
+
                     mBackgroundExecutor.execute(() -> {
                         GameServiceProviderInstanceImpl.this.takeScreenshot(taskId,
                                 gameScreenshotResultFuture);
@@ -206,6 +210,8 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
                 @Override
                 @EnforcePermission(MANAGE_GAME_ACTIVITY)
                 public void restartGame(int taskId) {
+                    super.restartGame_enforcePermission();
+
                     mBackgroundExecutor.execute(() -> {
                         GameServiceProviderInstanceImpl.this.restartGame(taskId);
                     });

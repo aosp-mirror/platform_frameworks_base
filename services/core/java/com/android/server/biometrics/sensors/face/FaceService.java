@@ -99,6 +99,8 @@ public class FaceService extends SystemService {
         @Override
         public ITestSession createTestSession(int sensorId, @NonNull ITestSessionCallback callback,
                 @NonNull String opPackageName) {
+            super.createTestSession_enforcePermission();
+
             final ServiceProvider provider = mRegistry.getProviderForSensor(sensorId);
 
             if (provider == null) {
@@ -112,6 +114,8 @@ public class FaceService extends SystemService {
         @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
         @Override
         public byte[] dumpSensorServiceStateProto(int sensorId, boolean clearSchedulerBuffer) {
+            super.dumpSensorServiceStateProto_enforcePermission();
+
             final ProtoOutputStream proto = new ProtoOutputStream();
             final ServiceProvider provider = mRegistry.getProviderForSensor(sensorId);
             if (provider != null) {
@@ -125,6 +129,8 @@ public class FaceService extends SystemService {
         @Override // Binder call
         public List<FaceSensorPropertiesInternal> getSensorPropertiesInternal(
                 String opPackageName) {
+            super.getSensorPropertiesInternal_enforcePermission();
+
             return mRegistry.getAllProperties();
         }
 
@@ -132,6 +138,8 @@ public class FaceService extends SystemService {
         @Override // Binder call
         public FaceSensorPropertiesInternal getSensorProperties(int sensorId,
                 @NonNull String opPackageName) {
+            super.getSensorProperties_enforcePermission();
+
             final ServiceProvider provider = mRegistry.getProviderForSensor(sensorId);
             if (provider == null) {
                 Slog.w(TAG, "No matching sensor for getSensorProperties, sensorId: " + sensorId
@@ -146,6 +154,8 @@ public class FaceService extends SystemService {
         @Override // Binder call
         public void generateChallenge(IBinder token, int sensorId, int userId,
                 IFaceServiceReceiver receiver, String opPackageName) {
+            super.generateChallenge_enforcePermission();
+
             final ServiceProvider provider = mRegistry.getProviderForSensor(sensorId);
             if (provider == null) {
                 Slog.w(TAG, "No matching sensor for generateChallenge, sensorId: " + sensorId);
@@ -159,6 +169,8 @@ public class FaceService extends SystemService {
         @Override // Binder call
         public void revokeChallenge(IBinder token, int sensorId, int userId, String opPackageName,
                 long challenge) {
+            super.revokeChallenge_enforcePermission();
+
             final ServiceProvider provider = mRegistry.getProviderForSensor(sensorId);
             if (provider == null) {
                 Slog.w(TAG, "No matching sensor for revokeChallenge, sensorId: " + sensorId);
@@ -173,6 +185,8 @@ public class FaceService extends SystemService {
         public long enroll(int userId, final IBinder token, final byte[] hardwareAuthToken,
                 final IFaceServiceReceiver receiver, final String opPackageName,
                 final int[] disabledFeatures, Surface previewSurface, boolean debugConsent) {
+            super.enroll_enforcePermission();
+
             final Pair<Integer, ServiceProvider> provider = mRegistry.getSingleProvider();
             if (provider == null) {
                 Slog.w(TAG, "Null provider for enroll");
@@ -201,12 +215,16 @@ public class FaceService extends SystemService {
                 final IFaceServiceReceiver receiver, final String opPackageName,
                 final int[] disabledFeatures) {
             // TODO(b/145027036): Implement this.
+            super.enrollRemotely_enforcePermission();
+
             return -1;
         }
 
         @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_BIOMETRIC)
         @Override // Binder call
         public void cancelEnrollment(final IBinder token, long requestId) {
+            super.cancelEnrollment_enforcePermission();
+
             final Pair<Integer, ServiceProvider> provider = mRegistry.getSingleProvider();
             if (provider == null) {
                 Slog.w(TAG, "Null provider for cancelEnrollment");
@@ -223,6 +241,8 @@ public class FaceService extends SystemService {
                 boolean isKeyguardBypassEnabled) {
             // TODO(b/152413782): If the sensor supports face detect and the device is encrypted or
             //  lockdown, something wrong happened. See similar path in FingerprintService.
+
+            super.authenticate_enforcePermission();
 
             final boolean restricted = false; // Face APIs are private
             final int statsClient = Utils.isKeyguard(getContext(), opPackageName)
@@ -249,6 +269,8 @@ public class FaceService extends SystemService {
         @Override // Binder call
         public long detectFace(final IBinder token, final int userId,
                 final IFaceServiceReceiver receiver, final String opPackageName) {
+            super.detectFace_enforcePermission();
+
             if (!Utils.isKeyguard(getContext(), opPackageName)) {
                 Slog.w(TAG, "detectFace called from non-sysui package: " + opPackageName);
                 return -1;
@@ -278,6 +300,8 @@ public class FaceService extends SystemService {
                 IBinder token, long operationId, int userId,
                 IBiometricSensorReceiver sensorReceiver, String opPackageName, long requestId,
                 int cookie, boolean allowBackgroundAuthentication) {
+            super.prepareForAuthentication_enforcePermission();
+
             final ServiceProvider provider = mRegistry.getProviderForSensor(sensorId);
             if (provider == null) {
                 Slog.w(TAG, "Null provider for prepareForAuthentication");
@@ -295,6 +319,8 @@ public class FaceService extends SystemService {
         @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
         @Override // Binder call
         public void startPreparedClient(int sensorId, int cookie) {
+            super.startPreparedClient_enforcePermission();
+
             final ServiceProvider provider = mRegistry.getProviderForSensor(sensorId);
             if (provider == null) {
                 Slog.w(TAG, "Null provider for startPreparedClient");
@@ -308,6 +334,8 @@ public class FaceService extends SystemService {
         @Override // Binder call
         public void cancelAuthentication(final IBinder token, final String opPackageName,
                 final long requestId) {
+            super.cancelAuthentication_enforcePermission();
+
             final Pair<Integer, ServiceProvider> provider = mRegistry.getSingleProvider();
             if (provider == null) {
                 Slog.w(TAG, "Null provider for cancelAuthentication");
@@ -321,6 +349,8 @@ public class FaceService extends SystemService {
         @Override // Binder call
         public void cancelFaceDetect(final IBinder token, final String opPackageName,
                 final long requestId) {
+            super.cancelFaceDetect_enforcePermission();
+
             if (!Utils.isKeyguard(getContext(), opPackageName)) {
                 Slog.w(TAG, "cancelFaceDetect called from non-sysui package: "
                         + opPackageName);
@@ -340,6 +370,8 @@ public class FaceService extends SystemService {
         @Override // Binder call
         public void cancelAuthenticationFromService(int sensorId, final IBinder token,
                 final String opPackageName, final long requestId) {
+            super.cancelAuthenticationFromService_enforcePermission();
+
             final ServiceProvider provider = mRegistry.getProviderForSensor(sensorId);
             if (provider == null) {
                 Slog.w(TAG, "Null provider for cancelAuthenticationFromService");
@@ -353,6 +385,8 @@ public class FaceService extends SystemService {
         @Override // Binder call
         public void remove(final IBinder token, final int faceId, final int userId,
                 final IFaceServiceReceiver receiver, final String opPackageName) {
+            super.remove_enforcePermission();
+
             final Pair<Integer, ServiceProvider> provider = mRegistry.getSingleProvider();
             if (provider == null) {
                 Slog.w(TAG, "Null provider for remove");
@@ -367,6 +401,8 @@ public class FaceService extends SystemService {
         @Override // Binder call
         public void removeAll(final IBinder token, final int userId,
                 final IFaceServiceReceiver receiver, final String opPackageName) {
+            super.removeAll_enforcePermission();
+
             final FaceServiceReceiver internalReceiver = new FaceServiceReceiver() {
                 int sensorsFinishedRemoving = 0;
                 final int numSensors = getSensorPropertiesInternal(
@@ -399,6 +435,8 @@ public class FaceService extends SystemService {
         @Override // Binder call
         public void addLockoutResetCallback(final IBiometricServiceLockoutResetCallback callback,
                 final String opPackageName) {
+            super.addLockoutResetCallback_enforcePermission();
+
             mLockoutResetDispatcher.addCallback(callback, opPackageName);
         }
 
@@ -458,6 +496,8 @@ public class FaceService extends SystemService {
         @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
         @Override // Binder call
         public boolean isHardwareDetected(int sensorId, String opPackageName) {
+            super.isHardwareDetected_enforcePermission();
+
             final long token = Binder.clearCallingIdentity();
             try {
                 final ServiceProvider provider = mRegistry.getProviderForSensor(sensorId);
@@ -474,6 +514,8 @@ public class FaceService extends SystemService {
         @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
         @Override // Binder call
         public List<Face> getEnrolledFaces(int sensorId, int userId, String opPackageName) {
+            super.getEnrolledFaces_enforcePermission();
+
             if (userId != UserHandle.getCallingUserId()) {
                 Utils.checkPermission(getContext(), INTERACT_ACROSS_USERS);
             }
@@ -490,6 +532,8 @@ public class FaceService extends SystemService {
         @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
         @Override // Binder call
         public boolean hasEnrolledFaces(int sensorId, int userId, String opPackageName) {
+            super.hasEnrolledFaces_enforcePermission();
+
             if (userId != UserHandle.getCallingUserId()) {
                 Utils.checkPermission(getContext(), INTERACT_ACROSS_USERS);
             }
@@ -506,6 +550,8 @@ public class FaceService extends SystemService {
         @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
         @Override // Binder call
         public @LockoutTracker.LockoutMode int getLockoutModeForUser(int sensorId, int userId) {
+            super.getLockoutModeForUser_enforcePermission();
+
             final ServiceProvider provider = mRegistry.getProviderForSensor(sensorId);
             if (provider == null) {
                 Slog.w(TAG, "Null provider for getLockoutModeForUser");
@@ -519,6 +565,8 @@ public class FaceService extends SystemService {
         @Override
         public void invalidateAuthenticatorId(int sensorId, int userId,
                 IInvalidationCallback callback) {
+            super.invalidateAuthenticatorId_enforcePermission();
+
             final ServiceProvider provider = mRegistry.getProviderForSensor(sensorId);
             if (provider == null) {
                 Slog.w(TAG, "Null provider for invalidateAuthenticatorId");
@@ -530,6 +578,8 @@ public class FaceService extends SystemService {
         @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
         @Override // Binder call
         public long getAuthenticatorId(int sensorId, int userId) {
+
+            super.getAuthenticatorId_enforcePermission();
 
             final ServiceProvider provider = mRegistry.getProviderForSensor(sensorId);
             if (provider == null) {
@@ -544,6 +594,8 @@ public class FaceService extends SystemService {
         @Override // Binder call
         public void resetLockout(IBinder token, int sensorId, int userId, byte[] hardwareAuthToken,
                 String opPackageName) {
+            super.resetLockout_enforcePermission();
+
             final ServiceProvider provider = mRegistry.getProviderForSensor(sensorId);
             if (provider == null) {
                 Slog.w(TAG, "Null provider for resetLockout, caller: " + opPackageName);
@@ -558,6 +610,8 @@ public class FaceService extends SystemService {
         public void setFeature(final IBinder token, int userId, int feature, boolean enabled,
                 final byte[] hardwareAuthToken, IFaceServiceReceiver receiver,
                 final String opPackageName) {
+            super.setFeature_enforcePermission();
+
             final Pair<Integer, ServiceProvider> provider = mRegistry.getSingleProvider();
             if (provider == null) {
                 Slog.w(TAG, "Null provider for setFeature");
@@ -572,6 +626,8 @@ public class FaceService extends SystemService {
         @Override
         public void getFeature(final IBinder token, int userId, int feature,
                 IFaceServiceReceiver receiver, final String opPackageName) {
+            super.getFeature_enforcePermission();
+
             final Pair<Integer, ServiceProvider> provider = mRegistry.getSingleProvider();
             if (provider == null) {
                 Slog.w(TAG, "Null provider for getFeature");
@@ -615,6 +671,8 @@ public class FaceService extends SystemService {
         @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
         public void registerAuthenticators(
                 @NonNull List<FaceSensorPropertiesInternal> hidlSensors) {
+            super.registerAuthenticators_enforcePermission();
+
             mRegistry.registerAll(() -> {
                 final List<ServiceProvider> providers = new ArrayList<>();
                 for (FaceSensorPropertiesInternal hidlSensor : hidlSensors) {

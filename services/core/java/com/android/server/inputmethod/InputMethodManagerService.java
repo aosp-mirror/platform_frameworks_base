@@ -3898,6 +3898,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             int displayId) {
         // Always call subtype picker, because subtype picker is a superset of input method
         // picker.
+        super.showInputMethodPickerFromSystem_enforcePermission();
+
         mHandler.obtainMessage(MSG_SHOW_IM_SUBTYPE_PICKER, auxiliarySubtypeMode, displayId)
                 .sendToTarget();
     }
@@ -3907,6 +3909,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
      */
     @EnforcePermission(Manifest.permission.TEST_INPUT_METHOD)
     public boolean isInputMethodPickerShownForTest() {
+        super.isInputMethodPickerShownForTest_enforcePermission();
+
         synchronized (ImfLock.class) {
             return mMenuController.isisInputMethodPickerShownForTestLocked();
         }
@@ -4186,6 +4190,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @EnforcePermission(Manifest.permission.INTERNAL_SYSTEM_WINDOW)
     @Override
     public void removeImeSurface() {
+        super.removeImeSurface_enforcePermission();
+
         mHandler.obtainMessage(MSG_REMOVE_IME_SURFACE).sendToTarget();
     }
 
@@ -4385,6 +4391,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @EnforcePermission(Manifest.permission.INJECT_EVENTS)
     @Override
     public void addVirtualStylusIdForTestSession(IInputMethodClient client) {
+        super.addVirtualStylusIdForTestSession_enforcePermission();
+
         int uid = Binder.getCallingUid();
         synchronized (ImfLock.class) {
             if (!canInteractWithImeLocked(uid, client, "addVirtualStylusIdForTestSession")) {
@@ -4410,6 +4418,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @Override
     public void setStylusWindowIdleTimeoutForTest(
             IInputMethodClient client, @DurationMillisLong long timeout) {
+        super.setStylusWindowIdleTimeoutForTest_enforcePermission();
+
         int uid = Binder.getCallingUid();
         synchronized (ImfLock.class) {
             if (!canInteractWithImeLocked(uid, client, "setStylusWindowIdleTimeoutForTest")) {
@@ -4507,6 +4517,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @EnforcePermission(Manifest.permission.CONTROL_UI_TRACING)
     @Override
     public void startImeTrace() {
+        super.startImeTrace_enforcePermission();
+
         ImeTracing.getInstance().startTrace(null /* printwriter */);
         ArrayMap<IBinder, ClientState> clients;
         synchronized (ImfLock.class) {
@@ -4523,6 +4535,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @EnforcePermission(Manifest.permission.CONTROL_UI_TRACING)
     @Override
     public void stopImeTrace() {
+        super.stopImeTrace_enforcePermission();
+
         ImeTracing.getInstance().stopTrace(null /* printwriter */);
         ArrayMap<IBinder, ClientState> clients;
         synchronized (ImfLock.class) {

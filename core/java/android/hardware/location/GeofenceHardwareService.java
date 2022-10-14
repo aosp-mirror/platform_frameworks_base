@@ -79,12 +79,16 @@ public class GeofenceHardwareService extends Service {
         @Override
         public int[] getMonitoringTypes() {
 
+            super.getMonitoringTypes_enforcePermission();
+
             return mGeofenceHardwareImpl.getMonitoringTypes();
         }
 
         @android.annotation.EnforcePermission(android.Manifest.permission.LOCATION_HARDWARE)
         @Override
         public int getStatusOfMonitoringType(int monitoringType) {
+
+            super.getStatusOfMonitoringType_enforcePermission();
 
             return mGeofenceHardwareImpl.getStatusOfMonitoringType(monitoringType);
         }
@@ -95,6 +99,8 @@ public class GeofenceHardwareService extends Service {
                 int monitoringType,
                 GeofenceHardwareRequestParcelable request,
                 IGeofenceHardwareCallback callback) {
+            super.addCircularFence_enforcePermission();
+
             checkPermission(Binder.getCallingPid(), Binder.getCallingUid(), monitoringType);
             return mGeofenceHardwareImpl.addCircularFence(monitoringType, request, callback);
         }
@@ -102,6 +108,8 @@ public class GeofenceHardwareService extends Service {
         @android.annotation.EnforcePermission(android.Manifest.permission.LOCATION_HARDWARE)
         @Override
         public boolean removeGeofence(int id, int monitoringType) {
+
+            super.removeGeofence_enforcePermission();
 
             checkPermission(Binder.getCallingPid(), Binder.getCallingUid(), monitoringType);
             return mGeofenceHardwareImpl.removeGeofence(id, monitoringType);
@@ -111,6 +119,8 @@ public class GeofenceHardwareService extends Service {
         @Override
         public boolean pauseGeofence(int id, int monitoringType) {
 
+            super.pauseGeofence_enforcePermission();
+
             checkPermission(Binder.getCallingPid(), Binder.getCallingUid(), monitoringType);
             return mGeofenceHardwareImpl.pauseGeofence(id, monitoringType);
         }
@@ -118,6 +128,8 @@ public class GeofenceHardwareService extends Service {
         @android.annotation.EnforcePermission(android.Manifest.permission.LOCATION_HARDWARE)
         @Override
         public boolean resumeGeofence(int id, int monitoringType, int monitorTransitions) {
+
+            super.resumeGeofence_enforcePermission();
 
             checkPermission(Binder.getCallingPid(), Binder.getCallingUid(), monitoringType);
             return mGeofenceHardwareImpl.resumeGeofence(id, monitoringType, monitorTransitions);
@@ -128,6 +140,8 @@ public class GeofenceHardwareService extends Service {
         public boolean registerForMonitorStateChangeCallback(int monitoringType,
                 IGeofenceHardwareMonitorCallback callback) {
 
+            super.registerForMonitorStateChangeCallback_enforcePermission();
+
             checkPermission(Binder.getCallingPid(), Binder.getCallingUid(), monitoringType);
             return mGeofenceHardwareImpl.registerForMonitorStateChangeCallback(monitoringType,
                     callback);
@@ -137,6 +151,8 @@ public class GeofenceHardwareService extends Service {
         @Override
         public boolean unregisterForMonitorStateChangeCallback(int monitoringType,
                 IGeofenceHardwareMonitorCallback callback) {
+
+            super.unregisterForMonitorStateChangeCallback_enforcePermission();
 
             checkPermission(Binder.getCallingPid(), Binder.getCallingUid(), monitoringType);
             return mGeofenceHardwareImpl.unregisterForMonitorStateChangeCallback(monitoringType,

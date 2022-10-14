@@ -3422,6 +3422,8 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void setToastRateLimitingEnabled(boolean enable) {
 
+            super.setToastRateLimitingEnabled_enforcePermission();
+
             synchronized (mToastQueue) {
                 int uid = Binder.getCallingUid();
                 int userId = UserHandle.getUserId(uid);

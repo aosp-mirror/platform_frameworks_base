@@ -504,6 +504,8 @@ public class ContextHubService extends IContextHubService.Stub {
     @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     @Override
     public int registerCallback(IContextHubCallback callback) throws RemoteException {
+        super.registerCallback_enforcePermission();
+
         mCallbacksList.register(callback);
 
         Log.d(TAG, "Added callback, total callbacks " +
@@ -514,12 +516,16 @@ public class ContextHubService extends IContextHubService.Stub {
     @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     @Override
     public int[] getContextHubHandles() throws RemoteException {
+        super.getContextHubHandles_enforcePermission();
+
         return ContextHubServiceUtil.createPrimitiveIntArray(mContextHubIdToInfoMap.keySet());
     }
 
     @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     @Override
     public ContextHubInfo getContextHubInfo(int contextHubHandle) throws RemoteException {
+        super.getContextHubInfo_enforcePermission();
+
         if (!mContextHubIdToInfoMap.containsKey(contextHubHandle)) {
             Log.e(TAG, "Invalid Context Hub handle " + contextHubHandle + " in getContextHubInfo");
             return null;
@@ -536,6 +542,8 @@ public class ContextHubService extends IContextHubService.Stub {
      */
     @Override
     public List<ContextHubInfo> getContextHubs() throws RemoteException {
+        super.getContextHubs_enforcePermission();
+
         return mContextHubInfoList;
     }
 
@@ -602,6 +610,8 @@ public class ContextHubService extends IContextHubService.Stub {
     @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     @Override
     public int loadNanoApp(int contextHubHandle, NanoApp nanoApp) throws RemoteException {
+        super.loadNanoApp_enforcePermission();
+
         if (mContextHubWrapper == null) {
             return -1;
         }
@@ -629,6 +639,8 @@ public class ContextHubService extends IContextHubService.Stub {
     @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     @Override
     public int unloadNanoApp(int nanoAppHandle) throws RemoteException {
+        super.unloadNanoApp_enforcePermission();
+
         if (mContextHubWrapper == null) {
             return -1;
         }
@@ -655,6 +667,8 @@ public class ContextHubService extends IContextHubService.Stub {
     @Override
     public NanoAppInstanceInfo getNanoAppInstanceInfo(int nanoAppHandle) throws RemoteException {
 
+        super.getNanoAppInstanceInfo_enforcePermission();
+
         return mNanoAppStateManager.getNanoAppInstanceInfo(nanoAppHandle);
     }
 
@@ -662,6 +676,8 @@ public class ContextHubService extends IContextHubService.Stub {
     @Override
     public int[] findNanoAppOnHub(
             int contextHubHandle, NanoAppFilter filter) throws RemoteException {
+
+        super.findNanoAppOnHub_enforcePermission();
 
         ArrayList<Integer> foundInstances = new ArrayList<>();
         if (filter != null) {
@@ -707,6 +723,8 @@ public class ContextHubService extends IContextHubService.Stub {
     @Override
     public int sendMessage(int contextHubHandle, int nanoAppHandle, ContextHubMessage msg)
             throws RemoteException {
+        super.sendMessage_enforcePermission();
+
         if (mContextHubWrapper == null) {
             return -1;
         }
@@ -928,6 +946,8 @@ public class ContextHubService extends IContextHubService.Stub {
     public IContextHubClient createClient(
             int contextHubId, IContextHubClientCallback clientCallback,
             @Nullable String attributionTag, String packageName) throws RemoteException {
+        super.createClient_enforcePermission();
+
         if (!isValidContextHubId(contextHubId)) {
             throw new IllegalArgumentException("Invalid context hub ID " + contextHubId);
         }
@@ -956,6 +976,8 @@ public class ContextHubService extends IContextHubService.Stub {
     public IContextHubClient createPendingIntentClient(
             int contextHubId, PendingIntent pendingIntent, long nanoAppId,
             @Nullable String attributionTag) throws RemoteException {
+        super.createPendingIntentClient_enforcePermission();
+
         if (!isValidContextHubId(contextHubId)) {
             throw new IllegalArgumentException("Invalid context hub ID " + contextHubId);
         }
@@ -978,6 +1000,8 @@ public class ContextHubService extends IContextHubService.Stub {
     public void loadNanoAppOnHub(
             int contextHubId, IContextHubTransactionCallback transactionCallback,
             NanoAppBinary nanoAppBinary) throws RemoteException {
+        super.loadNanoAppOnHub_enforcePermission();
+
         if (!checkHalProxyAndContextHubId(
                 contextHubId, transactionCallback, ContextHubTransaction.TYPE_LOAD_NANOAPP)) {
             return;
@@ -1007,6 +1031,8 @@ public class ContextHubService extends IContextHubService.Stub {
     public void unloadNanoAppFromHub(
             int contextHubId, IContextHubTransactionCallback transactionCallback, long nanoAppId)
             throws RemoteException {
+        super.unloadNanoAppFromHub_enforcePermission();
+
         if (!checkHalProxyAndContextHubId(
                 contextHubId, transactionCallback, ContextHubTransaction.TYPE_UNLOAD_NANOAPP)) {
             return;
@@ -1030,6 +1056,8 @@ public class ContextHubService extends IContextHubService.Stub {
     public void enableNanoApp(
             int contextHubId, IContextHubTransactionCallback transactionCallback, long nanoAppId)
             throws RemoteException {
+        super.enableNanoApp_enforcePermission();
+
         if (!checkHalProxyAndContextHubId(
                 contextHubId, transactionCallback, ContextHubTransaction.TYPE_ENABLE_NANOAPP)) {
             return;
@@ -1053,6 +1081,8 @@ public class ContextHubService extends IContextHubService.Stub {
     public void disableNanoApp(
             int contextHubId, IContextHubTransactionCallback transactionCallback, long nanoAppId)
             throws RemoteException {
+        super.disableNanoApp_enforcePermission();
+
         if (!checkHalProxyAndContextHubId(
                 contextHubId, transactionCallback, ContextHubTransaction.TYPE_DISABLE_NANOAPP)) {
             return;
@@ -1074,6 +1104,8 @@ public class ContextHubService extends IContextHubService.Stub {
     @Override
     public void queryNanoApps(int contextHubId, IContextHubTransactionCallback transactionCallback)
             throws RemoteException {
+        super.queryNanoApps_enforcePermission();
+
         if (!checkHalProxyAndContextHubId(
                 contextHubId, transactionCallback, ContextHubTransaction.TYPE_QUERY_NANOAPPS)) {
             return;

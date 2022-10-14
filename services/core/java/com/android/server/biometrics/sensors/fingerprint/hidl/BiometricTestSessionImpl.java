@@ -136,12 +136,16 @@ public class BiometricTestSessionImpl extends ITestSession.Stub {
     @Override
     public void setTestHalEnabled(boolean enabled) {
 
+        super.setTestHalEnabled_enforcePermission();
+
         mFingerprint21.setTestHalEnabled(enabled);
     }
 
     @android.annotation.EnforcePermission(android.Manifest.permission.TEST_BIOMETRIC)
     @Override
     public void startEnroll(int userId) {
+
+        super.startEnroll_enforcePermission();
 
         mFingerprint21.scheduleEnroll(mSensorId, new Binder(), new byte[69], userId, mReceiver,
                 mContext.getOpPackageName(), FingerprintManager.ENROLL_ENROLL);
@@ -150,6 +154,8 @@ public class BiometricTestSessionImpl extends ITestSession.Stub {
     @android.annotation.EnforcePermission(android.Manifest.permission.TEST_BIOMETRIC)
     @Override
     public void finishEnroll(int userId) {
+
+        super.finishEnroll_enforcePermission();
 
         int nextRandomId = mRandom.nextInt();
         while (mEnrollmentIds.contains(nextRandomId)) {
@@ -166,6 +172,8 @@ public class BiometricTestSessionImpl extends ITestSession.Stub {
     public void acceptAuthentication(int userId)  {
 
         // Fake authentication with any of the existing fingers
+        super.acceptAuthentication_enforcePermission();
+
         List<Fingerprint> fingerprints = FingerprintUtils.getLegacyInstance(mSensorId)
                 .getBiometricsForUser(mContext, userId);
         if (fingerprints.isEmpty()) {
@@ -181,12 +189,16 @@ public class BiometricTestSessionImpl extends ITestSession.Stub {
     @Override
     public void rejectAuthentication(int userId)  {
 
+        super.rejectAuthentication_enforcePermission();
+
         mHalResultController.onAuthenticated(0 /* deviceId */, 0 /* fingerId */, userId, null);
     }
 
     @android.annotation.EnforcePermission(android.Manifest.permission.TEST_BIOMETRIC)
     @Override
     public void notifyAcquired(int userId, int acquireInfo)  {
+
+        super.notifyAcquired_enforcePermission();
 
         mHalResultController.onAcquired(0 /* deviceId */, acquireInfo, 0 /* vendorCode */);
     }
@@ -195,12 +207,16 @@ public class BiometricTestSessionImpl extends ITestSession.Stub {
     @Override
     public void notifyError(int userId, int errorCode)  {
 
+        super.notifyError_enforcePermission();
+
         mHalResultController.onError(0 /* deviceId */, errorCode, 0 /* vendorCode */);
     }
 
     @android.annotation.EnforcePermission(android.Manifest.permission.TEST_BIOMETRIC)
     @Override
     public void cleanupInternalState(int userId)  {
+
+        super.cleanupInternalState_enforcePermission();
 
         mFingerprint21.scheduleInternalCleanup(mSensorId, userId, new ClientMonitorCallback() {
             @Override

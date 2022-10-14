@@ -178,6 +178,8 @@ public class AuthService extends SystemService {
         public ITestSession createTestSession(int sensorId, @NonNull ITestSessionCallback callback,
                 @NonNull String opPackageName) throws RemoteException {
 
+            super.createTestSession_enforcePermission();
+
             final long identity = Binder.clearCallingIdentity();
             try {
                 return mInjector.getBiometricService()
@@ -192,6 +194,8 @@ public class AuthService extends SystemService {
         public List<SensorPropertiesInternal> getSensorProperties(String opPackageName)
                 throws RemoteException {
 
+            super.getSensorProperties_enforcePermission();
+
             final long identity = Binder.clearCallingIdentity();
             try {
                 // Get the result from BiometricService, since it is the source of truth for all
@@ -205,6 +209,8 @@ public class AuthService extends SystemService {
         @android.annotation.EnforcePermission(android.Manifest.permission.TEST_BIOMETRIC)
         @Override
         public String getUiPackage() {
+
+            super.getUiPackage_enforcePermission();
 
             return getContext().getResources()
                     .getString(R.string.config_biometric_prompt_ui_package);
