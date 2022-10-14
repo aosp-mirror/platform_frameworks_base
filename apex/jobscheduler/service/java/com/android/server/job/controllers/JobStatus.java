@@ -126,7 +126,7 @@ public final class JobStatus {
     /**
      * Keeps track of how many flexible constraints must be satisfied for the job to execute.
      */
-    private int mNumRequiredFlexibleConstraints;
+    private final int mNumRequiredFlexibleConstraints;
 
     /**
      * Number of required flexible constraints that have been dropped.
@@ -343,7 +343,8 @@ public final class JobStatus {
     public static final int INTERNAL_FLAG_HAS_FOREGROUND_EXEMPTION = 1 << 0;
 
     /** Minimum difference between start and end time to have flexible constraint */
-    private static final long MIN_WINDOW_FOR_FLEXIBILITY_MS = HOUR_IN_MILLIS;
+    @VisibleForTesting
+    static final long MIN_WINDOW_FOR_FLEXIBILITY_MS = HOUR_IN_MILLIS;
     /**
      * Versatile, persistable flags for a job that's updated within the system server,
      * as opposed to {@link JobInfo#flags} that's set by callers.
@@ -580,6 +581,8 @@ public final class JobStatus {
             mNumRequiredFlexibleConstraints =
                     NUM_SYSTEM_WIDE_FLEXIBLE_CONSTRAINTS + (mPreferUnmetered ? 1 : 0);
             requiredConstraints |= CONSTRAINT_FLEXIBLE;
+        } else {
+            mNumRequiredFlexibleConstraints = 0;
         }
 
         this.requiredConstraints = requiredConstraints;
@@ -1152,7 +1155,7 @@ public final class JobStatus {
 
     /** Returns the number of flexible job constraints required to be satisfied to execute */
     public int getNumRequiredFlexibleConstraints() {
-        return mNumRequiredFlexibleConstraints;
+        return mNumRequiredFlexibleConstraints - mNumDroppedFlexibleConstraints;
     }
 
     /**
@@ -1585,14 +1588,8 @@ public final class JobStatus {
 
     /** Adjusts the number of required flexible constraints by the given number */
     public void adjustNumRequiredFlexibleConstraints(int adjustment) {
-        mNumRequiredFlexibleConstraints += adjustment;
-        if (mNumRequiredFlexibleConstraints < 0) {
-            mNumRequiredFlexibleConstraints = 0;
-        }
-        mNumDroppedFlexibleConstraints -= adjustment;
-        if (mNumDroppedFlexibleConstraints < 0) {
-            mNumDroppedFlexibleConstraints = 0;
-        }
+        mNumDroppedFlexibleConstraints = Math.max(0, Math.min(mNumRequiredFlexibleConstraints,
+                mNumDroppedFlexibleConstraints - adjustment));
     }
 
     /**
