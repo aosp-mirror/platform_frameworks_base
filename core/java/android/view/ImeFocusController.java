@@ -65,7 +65,8 @@ public final class ImeFocusController {
 
     @UiThread
     void onTraversal(boolean hasWindowFocus, WindowManager.LayoutParams windowAttribute) {
-        final boolean hasImeFocus = updateImeFocusable(windowAttribute, false /* force */);
+        final boolean hasImeFocus = WindowManager.LayoutParams.mayUseInputMethod(
+                windowAttribute.flags);
         if (!hasWindowFocus || isInLocalFocusMode(windowAttribute)) {
             return;
         }
@@ -83,20 +84,11 @@ public final class ImeFocusController {
 
     @UiThread
     void onPreWindowFocus(boolean hasWindowFocus, WindowManager.LayoutParams windowAttribute) {
+        mHasImeFocus = WindowManager.LayoutParams.mayUseInputMethod(windowAttribute.flags);
         if (!hasWindowFocus || !mHasImeFocus || isInLocalFocusMode(windowAttribute)) {
             return;
         }
         getImmDelegate().onPreWindowGainedFocus(mViewRootImpl);
-    }
-
-    @UiThread
-    boolean updateImeFocusable(WindowManager.LayoutParams windowAttribute, boolean force) {
-        final boolean hasImeFocus = WindowManager.LayoutParams.mayUseInputMethod(
-                windowAttribute.flags);
-        if (force) {
-            mHasImeFocus = hasImeFocus;
-        }
-        return hasImeFocus;
     }
 
     @UiThread
