@@ -55,13 +55,13 @@ jboolean AGnssRil::setRefLocation(jint type, jint mcc, jint mnc, jint lac, jlong
         case IAGnssRil::AGnssRefLocationType::UMTS_CELLID:
         case IAGnssRil::AGnssRefLocationType::LTE_CELLID:
         case IAGnssRil::AGnssRefLocationType::NR_CELLID:
-            location.cellID.mcc = mcc;
-            location.cellID.mnc = mnc;
-            location.cellID.lac = lac;
-            location.cellID.cid = cid;
-            location.cellID.tac = tac;
-            location.cellID.pcid = pcid;
-            location.cellID.arfcn = arfcn;
+            location.cellID.mcc = static_cast<int>(mcc);
+            location.cellID.mnc = static_cast<int>(mnc);
+            location.cellID.lac = static_cast<int>(lac);
+            location.cellID.cid = static_cast<long>(cid);
+            location.cellID.tac = static_cast<int>(tac);
+            location.cellID.pcid = static_cast<int>(pcid);
+            location.cellID.arfcn = static_cast<int>(arfcn);
             break;
         default:
             ALOGE("Unknown cellid (%s:%d).", __FUNCTION__, __LINE__);
@@ -106,20 +106,24 @@ jboolean AGnssRil_V1_0::setSetId(jint type, const jstring& setid_string) {
     return checkHidlReturn(result, "IAGnssRil_V1_0 setSetId() failed.");
 }
 
-jboolean AGnssRil_V1_0::setRefLocation(jint type, jint mcc, jint mnc, jint lac, jlong cid, jint,
-                                       jint, jint) {
+jboolean AGnssRil_V1_0::setRefLocation(jint type, jint mcc, jint mnc, jint lac, jlong cid, jint tac,
+                                       jint pcid, jint) {
     IAGnssRil_V1_0::AGnssRefLocation location;
-    switch (static_cast<IAGnssRil_V1_0::AGnssRefLocationType>(type)) {
+    location.type = static_cast<IAGnssRil_V1_0::AGnssRefLocationType>(type);
+
+    switch (location.type) {
         case IAGnssRil_V1_0::AGnssRefLocationType::GSM_CELLID:
         case IAGnssRil_V1_0::AGnssRefLocationType::UMTS_CELLID:
-            location.type = static_cast<IAGnssRil_V1_0::AGnssRefLocationType>(type);
-            location.cellID.mcc = mcc;
-            location.cellID.mnc = mnc;
-            location.cellID.lac = lac;
-            location.cellID.cid = cid;
+        case IAGnssRil_V1_0::AGnssRefLocationType::LTE_CELLID:
+            location.cellID.mcc = static_cast<uint16_t>(mcc);
+            location.cellID.mnc = static_cast<uint16_t>(mnc);
+            location.cellID.lac = static_cast<uint16_t>(lac);
+            location.cellID.cid = static_cast<uint32_t>(cid);
+            location.cellID.tac = static_cast<uint16_t>(tac);
+            location.cellID.pcid = static_cast<uint16_t>(pcid);
             break;
         default:
-            ALOGE("Neither a GSM nor a UMTS cellid (%s:%d).", __FUNCTION__, __LINE__);
+            ALOGE("Unknown cellid (%s:%d).", __FUNCTION__, __LINE__);
             return JNI_FALSE;
             break;
     }
