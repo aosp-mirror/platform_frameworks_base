@@ -19,6 +19,9 @@ package com.android.settingslib.spa.framework.common
 import android.os.Bundle
 import android.widget.Toast
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.ProvidedValue
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -27,6 +30,16 @@ import com.android.settingslib.spa.framework.compose.LocalNavController
 
 const val INJECT_ENTRY_NAME = "INJECT"
 const val ROOT_ENTRY_NAME = "ROOT"
+
+interface EntryData {
+    val pageId: String
+    val entryId: String
+    val isHighlighted: Boolean
+        get() = false
+}
+
+val LocalEntryDataProvider =
+    compositionLocalOf<EntryData> { error("LocalEntryDataProvider: No Default Value!") }
 
 /**
  * Defines data of a Settings entry.
@@ -121,7 +134,22 @@ data class SettingsEntry(
             // TODO: Add highlight entry logic
             Toast.makeText(context, "entry $id highlighted", Toast.LENGTH_SHORT).show()
         }
-        uiLayoutImpl(fullArgument(runtimeArguments))
+
+        CompositionLocalProvider(provideLocalEntryData()) {
+            uiLayoutImpl(fullArgument(runtimeArguments))
+        }
+    }
+
+    @Composable
+    fun provideLocalEntryData(): ProvidedValue<EntryData> {
+        val controller = LocalNavController.current
+        return LocalEntryDataProvider provides remember {
+            object : EntryData {
+                override val pageId = containerPage().id
+                override val entryId = id
+                override val isHighlighted = controller.highlightEntryId == id
+            }
+        }
     }
 }
 
