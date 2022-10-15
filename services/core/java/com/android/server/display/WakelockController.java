@@ -16,12 +16,15 @@
 
 package com.android.server.display;
 
+import android.annotation.IntDef;
 import android.hardware.display.DisplayManagerInternal;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * A utility class to acquire/release suspend blockers and manage appropriate states around it.
@@ -29,7 +32,25 @@ import java.io.PrintWriter;
  * display states as needed.
  */
 public final class WakelockController {
+    public static final int WAKE_LOCK_PROXIMITY_POSITIVE = 1;
+    public static final int WAKE_LOCK_PROXIMITY_NEGATIVE = 2;
+    public static final int WAKE_LOCK_PROXIMITY_DEBOUNCE = 3;
+    public static final int WAKE_LOCK_STATE_CHANGED = 4;
+    public static final int WAKE_LOCK_UNFINISHED_BUSINESS = 5;
+
+    private static final int WAKE_LOCK_MAX = WAKE_LOCK_UNFINISHED_BUSINESS;
     private static final boolean DEBUG = false;
+
+    @IntDef(flag = true, prefix = "WAKE_LOCK_", value = {
+            WAKE_LOCK_PROXIMITY_POSITIVE,
+            WAKE_LOCK_PROXIMITY_NEGATIVE,
+            WAKE_LOCK_PROXIMITY_DEBOUNCE,
+            WAKE_LOCK_STATE_CHANGED,
+            WAKE_LOCK_UNFINISHED_BUSINESS
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface WAKE_LOCK_TYPE {
+    }
 
     // Asynchronous callbacks into the power manager service.
     // Only invoked from the handler thread while no locks are held.
@@ -58,17 +79,17 @@ public final class WakelockController {
     // (i.e. DisplayPowerController2).
     private boolean mOnStateChangedPending;
 
-    // Count of positive proximity messages currently held. Used to keep track of how many
-    // suspend blocker acquisitions are pending when shutting down the DisplayPowerController2.
-    // Should only be accessed on the Handler thread of the class managing the Display states
-    // (i.e. DisplayPowerController2).
-    private int mOnProximityPositiveMessages;
+    // When true, it implies that a positive proximity wakelock is currently held. Used to keep
+    // track if suspend blocker acquisitions is pending when shutting down the
+    // DisplayPowerController2. Should only be accessed on the Handler thread of the class
+    // managing the Display states (i.e. DisplayPowerController2).
+    private boolean mIsProximityPositiveAcquired;
 
-    // Count of negative proximity messages currently held. Used to keep track of how many
-    // suspend blocker acquisitions are pending when shutting down the DisplayPowerController2.
-    // Should only be accessed on the Handler thread of the class managing the Display states
-    // (i.e. DisplayPowerController2).
-    private int mOnProximityNegativeMessages;
+    // When true, it implies that a negative proximity wakelock is currently held. Used to keep
+    // track if suspend blocker acquisitions is pending when shutting down the
+    // DisplayPowerController2. Should only be accessed on the Handler thread of the class
+    // managing the Display states (i.e. DisplayPowerController2).
+    private boolean mIsProximityNegativeAcquired;
 
     /**
      * The constructor of WakelockController. Manages the initialization of all the local entities
@@ -87,9 +108,86 @@ public final class WakelockController {
     }
 
     /**
+     * A utility to acquire a wakelock
+     *
+     * @param wakelock The type of Wakelock to be acquired
+     * @return True of the wakelock is successfully acquired. False if it is already acquired
+     */
+    public boolean acquireWakelock(@WAKE_LOCK_TYPE int wakelock) {
+        return acquireWakelockInternal(wakelock);
+    }
+
+    /**
+     * A utility to release a wakelock
+     *
+     * @param wakelock The type of Wakelock to be released
+     * @return True of an acquired wakelock is successfully released. False if it is already
+     * acquired
+     */
+    public boolean releaseWakelock(@WAKE_LOCK_TYPE int wakelock) {
+        return releaseWakelockInternal(wakelock);
+    }
+
+    /**
+     * A utility to release all the wakelock acquired by the system
+     */
+    public void releaseAll() {
+        for (int i = WAKE_LOCK_PROXIMITY_POSITIVE; i < WAKE_LOCK_MAX; i++) {
+            releaseWakelockInternal(i);
+        }
+    }
+
+    private boolean acquireWakelockInternal(@WAKE_LOCK_TYPE int wakelock) {
+        switch (wakelock) {
+            case WAKE_LOCK_PROXIMITY_POSITIVE:
+                return acquireProxPositiveSuspendBlocker();
+            case WAKE_LOCK_PROXIMITY_NEGATIVE:
+                return acquireProxNegativeSuspendBlocker();
+            case WAKE_LOCK_PROXIMITY_DEBOUNCE:
+                return acquireProxDebounceSuspendBlocker();
+            case WAKE_LOCK_STATE_CHANGED:
+                return acquireStateChangedSuspendBlocker();
+            case WAKE_LOCK_UNFINISHED_BUSINESS:
+                return acquireUnfinishedBusinessSuspendBlocker();
+            default:
+                throw new RuntimeException("Invalid wakelock attempted to be acquired");
+        }
+    }
+
+    private boolean releaseWakelockInternal(@WAKE_LOCK_TYPE int wakelock) {
+        switch (wakelock) {
+            case WAKE_LOCK_PROXIMITY_POSITIVE:
+                return releaseProxPositiveSuspendBlocker();
+            case WAKE_LOCK_PROXIMITY_NEGATIVE:
+                return releaseProxNegativeSuspendBlocker();
+            case WAKE_LOCK_PROXIMITY_DEBOUNCE:
+                return releaseProxDebounceSuspendBlocker();
+            case WAKE_LOCK_STATE_CHANGED:
+                return releaseStateChangedSuspendBlocker();
+            case WAKE_LOCK_UNFINISHED_BUSINESS:
+                return releaseUnfinishedBusinessSuspendBlocker();
+            default:
+                throw new RuntimeException("Invalid wakelock attempted to be released");
+        }
+    }
+
+    /**
+     * Acquires the proximity positive wakelock and notifies the PowerManagerService about the
+     * changes.
+     */
+    private boolean acquireProxPositiveSuspendBlocker() {
+        if (!mIsProximityPositiveAcquired) {
+            mDisplayPowerCallbacks.acquireSuspendBlocker(mSuspendBlockerIdProxPositive);
+            mIsProximityPositiveAcquired = true;
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Acquires the state change wakelock and notifies the PowerManagerService about the changes.
      */
-    public boolean acquireStateChangedSuspendBlocker() {
+    private boolean acquireStateChangedSuspendBlocker() {
         // Grab a wake lock if we have change of the display state
         if (!mOnStateChangedPending) {
             if (DEBUG) {
@@ -105,18 +203,20 @@ public final class WakelockController {
     /**
      * Releases the state change wakelock and notifies the PowerManagerService about the changes.
      */
-    public void releaseStateChangedSuspendBlocker() {
+    private boolean releaseStateChangedSuspendBlocker() {
         if (mOnStateChangedPending) {
             mDisplayPowerCallbacks.releaseSuspendBlocker(mSuspendBlockerIdOnStateChanged);
             mOnStateChangedPending = false;
+            return true;
         }
+        return false;
     }
 
     /**
      * Acquires the unfinished business wakelock and notifies the PowerManagerService about the
      * changes.
      */
-    public void acquireUnfinishedBusinessSuspendBlocker() {
+    private boolean acquireUnfinishedBusinessSuspendBlocker() {
         // Grab a wake lock if we have unfinished business.
         if (!mUnfinishedBusiness) {
             if (DEBUG) {
@@ -124,79 +224,84 @@ public final class WakelockController {
             }
             mDisplayPowerCallbacks.acquireSuspendBlocker(mSuspendBlockerIdUnfinishedBusiness);
             mUnfinishedBusiness = true;
+            return true;
         }
+        return false;
     }
 
     /**
      * Releases the unfinished business wakelock and notifies the PowerManagerService about the
      * changes.
      */
-    public void releaseUnfinishedBusinessSuspendBlocker() {
+    private boolean releaseUnfinishedBusinessSuspendBlocker() {
         if (mUnfinishedBusiness) {
             if (DEBUG) {
                 Slog.d(mTag, "Finished business...");
             }
             mDisplayPowerCallbacks.releaseSuspendBlocker(mSuspendBlockerIdUnfinishedBusiness);
             mUnfinishedBusiness = false;
+            return true;
         }
-    }
-
-    /**
-     * Acquires the proximity positive wakelock and notifies the PowerManagerService about the
-     * changes.
-     */
-    public void acquireProxPositiveSuspendBlocker() {
-        mDisplayPowerCallbacks.acquireSuspendBlocker(mSuspendBlockerIdProxPositive);
-        mOnProximityPositiveMessages++;
+        return false;
     }
 
     /**
      * Releases the proximity positive wakelock and notifies the PowerManagerService about the
      * changes.
      */
-    public void releaseProxPositiveSuspendBlocker() {
-        for (int i = 0; i < mOnProximityPositiveMessages; i++) {
+    private boolean releaseProxPositiveSuspendBlocker() {
+        if (mIsProximityPositiveAcquired) {
             mDisplayPowerCallbacks.releaseSuspendBlocker(mSuspendBlockerIdProxPositive);
+            mIsProximityPositiveAcquired = false;
+            return true;
         }
-        mOnProximityPositiveMessages = 0;
+        return false;
     }
 
     /**
      * Acquires the proximity negative wakelock and notifies the PowerManagerService about the
      * changes.
      */
-    public void acquireProxNegativeSuspendBlocker() {
-        mOnProximityNegativeMessages++;
-        mDisplayPowerCallbacks.acquireSuspendBlocker(mSuspendBlockerIdProxNegative);
+    private boolean acquireProxNegativeSuspendBlocker() {
+        if (!mIsProximityNegativeAcquired) {
+            mDisplayPowerCallbacks.acquireSuspendBlocker(mSuspendBlockerIdProxNegative);
+            mIsProximityNegativeAcquired = true;
+            return true;
+        }
+        return false;
     }
 
     /**
      * Releases the proximity negative wakelock and notifies the PowerManagerService about the
      * changes.
      */
-    public void releaseProxNegativeSuspendBlocker() {
-        for (int i = 0; i < mOnProximityNegativeMessages; i++) {
+    private boolean releaseProxNegativeSuspendBlocker() {
+        if (mIsProximityNegativeAcquired) {
             mDisplayPowerCallbacks.releaseSuspendBlocker(mSuspendBlockerIdProxNegative);
+            mIsProximityNegativeAcquired = false;
+            return true;
         }
-        mOnProximityNegativeMessages = 0;
+        return false;
     }
 
     /**
      * Acquires the proximity debounce wakelock and notifies the PowerManagerService about the
      * changes.
      */
-    public void acquireProxDebounceSuspendBlocker() {
+    private boolean acquireProxDebounceSuspendBlocker() {
         if (!mHasProximityDebounced) {
             mDisplayPowerCallbacks.acquireSuspendBlocker(mSuspendBlockerIdProxDebounce);
+            mHasProximityDebounced = true;
+            return true;
         }
-        mHasProximityDebounced = true;
+        return false;
     }
 
     /**
      * Releases the proximity debounce wakelock and notifies the PowerManagerService about the
      * changes.
      */
-    public boolean releaseProxDebounceSuspendBlocker() {
+    private boolean releaseProxDebounceSuspendBlocker() {
         if (mHasProximityDebounced) {
             mDisplayPowerCallbacks.releaseSuspendBlocker(mSuspendBlockerIdProxDebounce);
             mHasProximityDebounced = false;
@@ -210,9 +315,11 @@ public final class WakelockController {
      */
     public Runnable getOnProximityPositiveRunnable() {
         return () -> {
-            mOnProximityPositiveMessages--;
-            mDisplayPowerCallbacks.onProximityPositive();
-            mDisplayPowerCallbacks.releaseSuspendBlocker(mSuspendBlockerIdProxPositive);
+            if (mIsProximityPositiveAcquired) {
+                mIsProximityPositiveAcquired = false;
+                mDisplayPowerCallbacks.onProximityPositive();
+                mDisplayPowerCallbacks.releaseSuspendBlocker(mSuspendBlockerIdProxPositive);
+            }
         };
     }
 
@@ -221,9 +328,11 @@ public final class WakelockController {
      */
     public Runnable getOnStateChangedRunnable() {
         return () -> {
-            mOnStateChangedPending = false;
-            mDisplayPowerCallbacks.onStateChanged();
-            mDisplayPowerCallbacks.releaseSuspendBlocker(mSuspendBlockerIdOnStateChanged);
+            if (mOnStateChangedPending) {
+                mOnStateChangedPending = false;
+                mDisplayPowerCallbacks.onStateChanged();
+                mDisplayPowerCallbacks.releaseSuspendBlocker(mSuspendBlockerIdOnStateChanged);
+            }
         };
     }
 
@@ -232,9 +341,11 @@ public final class WakelockController {
      */
     public Runnable getOnProximityNegativeRunnable() {
         return () -> {
-            mOnProximityNegativeMessages--;
-            mDisplayPowerCallbacks.onProximityNegative();
-            mDisplayPowerCallbacks.releaseSuspendBlocker(mSuspendBlockerIdProxNegative);
+            if (mIsProximityNegativeAcquired) {
+                mIsProximityNegativeAcquired = false;
+                mDisplayPowerCallbacks.onProximityNegative();
+                mDisplayPowerCallbacks.releaseSuspendBlocker(mSuspendBlockerIdProxNegative);
+            }
         };
     }
 
@@ -246,8 +357,8 @@ public final class WakelockController {
         pw.println("  mDisplayId=" + mDisplayId);
         pw.println("  mUnfinishedBusiness=" + hasUnfinishedBusiness());
         pw.println("  mOnStateChangePending=" + isOnStateChangedPending());
-        pw.println("  mOnProximityPositiveMessages=" + getOnProximityPositiveMessages());
-        pw.println("  mOnProximityNegativeMessages=" + getOnProximityNegativeMessages());
+        pw.println("  mOnProximityPositiveMessages=" + isProximityPositiveAcquired());
+        pw.println("  mOnProximityNegativeMessages=" + isProximityNegativeAcquired());
     }
 
     @VisibleForTesting
@@ -286,13 +397,13 @@ public final class WakelockController {
     }
 
     @VisibleForTesting
-    int getOnProximityPositiveMessages() {
-        return mOnProximityPositiveMessages;
+    boolean isProximityPositiveAcquired() {
+        return mIsProximityPositiveAcquired;
     }
 
     @VisibleForTesting
-    int getOnProximityNegativeMessages() {
-        return mOnProximityNegativeMessages;
+    boolean isProximityNegativeAcquired() {
+        return mIsProximityNegativeAcquired;
     }
 
     @VisibleForTesting
