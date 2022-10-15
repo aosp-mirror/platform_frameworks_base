@@ -222,7 +222,9 @@ fun MoreOptionSelectionCard(
   ) {
     Column() {
       TopAppBar(
-        title = { Text(text = stringResource(R.string.string_more_options), style = Typography.subtitle1) },
+        title = {
+          Text(text = stringResource(R.string.string_more_options), style = Typography.subtitle1)
+        },
         backgroundColor = lightBackgroundColor,
         elevation = 0.dp,
         navigationIcon =
@@ -343,7 +345,7 @@ fun NavigationButton(
 @Composable
 fun CreationSelectionCard(
   providerInfo: ProviderInfo,
-  onOptionSelected: (String) -> Unit,
+  onOptionSelected: (Int) -> Unit,
   onCancel: () -> Unit,
   multiProvider: Boolean,
   onMoreOptionSelected: (String) -> Unit,
@@ -414,7 +416,7 @@ fun CreationSelectionCard(
 
 @ExperimentalMaterialApi
 @Composable
-fun CreateOptionRow(createOptionInfo: CreateOptionInfo, onOptionSelected: (String) -> Unit) {
+fun CreateOptionRow(createOptionInfo: CreateOptionInfo, onOptionSelected: (Int) -> Unit) {
   Chip(
     modifier = Modifier.fillMaxWidth(),
     onClick = {onOptionSelected(createOptionInfo.id)},
