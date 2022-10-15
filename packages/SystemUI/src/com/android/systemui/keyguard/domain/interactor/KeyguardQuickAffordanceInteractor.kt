@@ -19,7 +19,7 @@ package com.android.systemui.keyguard.domain.interactor
 
 import android.content.Intent
 import com.android.internal.widget.LockPatternUtils
-import com.android.systemui.animation.ActivityLaunchAnimator
+import com.android.systemui.animation.Expandable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.model.KeyguardQuickAffordanceModel
 import com.android.systemui.keyguard.domain.model.KeyguardQuickAffordancePosition
@@ -67,19 +67,19 @@ constructor(
      *
      * @param configKey The configuration key corresponding to the [KeyguardQuickAffordanceModel] of
      * the affordance that was clicked
-     * @param animationController An optional controller for the activity-launch animation
+     * @param expandable An optional [Expandable] for the activity- or dialog-launch animation
      */
     fun onQuickAffordanceClicked(
         configKey: KClass<out KeyguardQuickAffordanceConfig>,
-        animationController: ActivityLaunchAnimator.Controller?,
+        expandable: Expandable?,
     ) {
         @Suppress("UNCHECKED_CAST") val config = registry.get(configKey as KClass<Nothing>)
-        when (val result = config.onQuickAffordanceClicked(animationController)) {
+        when (val result = config.onQuickAffordanceClicked(expandable)) {
             is KeyguardQuickAffordanceConfig.OnClickedResult.StartActivity ->
                 launchQuickAffordance(
                     intent = result.intent,
                     canShowWhileLocked = result.canShowWhileLocked,
-                    animationController = animationController
+                    expandable = expandable,
                 )
             is KeyguardQuickAffordanceConfig.OnClickedResult.Handled -> Unit
         }
@@ -104,6 +104,7 @@ constructor(
                 KeyguardQuickAffordanceModel.Visible(
                     configKey = configs[index]::class,
                     icon = visibleState.icon,
+                    toggle = visibleState.toggle,
                 )
             } else {
                 KeyguardQuickAffordanceModel.Hidden
@@ -114,7 +115,7 @@ constructor(
     private fun launchQuickAffordance(
         intent: Intent,
         canShowWhileLocked: Boolean,
-        animationController: ActivityLaunchAnimator.Controller?,
+        expandable: Expandable?,
     ) {
         @LockPatternUtils.StrongAuthTracker.StrongAuthFlags
         val strongAuthFlags =
@@ -130,13 +131,13 @@ constructor(
             activityStarter.postStartActivityDismissingKeyguard(
                 intent,
                 0 /* delay */,
-                animationController
+                expandable?.activityLaunchController(),
             )
         } else {
             activityStarter.startActivity(
                 intent,
                 true /* dismissShade */,
-                animationController,
+                expandable?.activityLaunchController(),
                 true /* showOverLockscreenWhenLocked */,
             )
         }

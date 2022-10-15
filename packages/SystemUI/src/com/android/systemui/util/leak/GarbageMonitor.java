@@ -564,12 +564,13 @@ public class GarbageMonitor implements Dumpable {
 
     /** */
     @SysUISingleton
-    public static class Service extends CoreStartable implements Dumpable {
+    public static class Service implements CoreStartable,  Dumpable {
+        private final Context mContext;
         private final GarbageMonitor mGarbageMonitor;
 
         @Inject
         public Service(Context context, GarbageMonitor garbageMonitor) {
-            super(context);
+            mContext = context;
             mGarbageMonitor = garbageMonitor;
         }
 
