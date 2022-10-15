@@ -124,7 +124,7 @@
     <string name="roamingTextSearching" msgid="5323235489657753486">"Leter etter tjeneste"</string>
     <string name="wfcRegErrorTitle" msgid="3193072971584858020">"Kunne ikke konfigurere wifi-anrop"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="468830943567116703">"For å ringe og sende meldinger over Wi-Fi, må du først be operatøren om å konfigurere denne tjenesten. Deretter slår du på wifi-anrop igjen fra Innstillinger. (Feilkode: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
+    <item msgid="468830943567116703">"For å ringe og sende meldinger over Wifi, må du først be operatøren om å konfigurere denne tjenesten. Deretter slår du på wifi-anrop igjen fra Innstillinger. (Feilkode: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="4795145070505729156">"Problem med å registrere wifi-anrop med operatøren din: <xliff:g id="CODE">%1$s</xliff:g>"</item>
@@ -135,7 +135,7 @@
     <string name="wfcSpnFormat_spn_wifi_calling_vo_hyphen" msgid="3836827895369365298">"<xliff:g id="SPN">%s</xliff:g>-Wifi-anrop"</string>
     <string name="wfcSpnFormat_wlan_call" msgid="4895315549916165700">"WLAN-anrop"</string>
     <string name="wfcSpnFormat_spn_wlan_call" msgid="255919245825481510">"<xliff:g id="SPN">%s</xliff:g> WLAN-anrop"</string>
-    <string name="wfcSpnFormat_spn_wifi" msgid="7232899594327126970">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
+    <string name="wfcSpnFormat_spn_wifi" msgid="7232899594327126970">"<xliff:g id="SPN">%s</xliff:g> Wifi"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="8383917598312067365">"Wifi-anrop | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="6865214948822061486">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
     <string name="wfcSpnFormat_wifi_calling" msgid="6178935388378661755">"Wifi-anrop"</string>
@@ -143,9 +143,9 @@
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"Wifi-anrop"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"Av"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"Ring via Wi-Fi"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"Ring via Wifi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"Ring over mobilnettverk"</string>
-    <string name="wfc_mode_wifi_only_summary" msgid="104951993894678665">"Bare Wi-Fi"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="104951993894678665">"Bare Wifi"</string>
     <!-- no translation found for crossSimFormat_spn (9125246077491634262) -->
     <skip />
     <string name="crossSimFormat_spn_cross_sim_calling" msgid="5620807020002879057">"<xliff:g id="SPN">%s</xliff:g>-reserve for anrop"</string>
@@ -516,14 +516,14 @@
     <string name="permdesc_changeNetworkState" msgid="649341947816898736">"Lar appen endre innstillingene for nettverkstilknytning."</string>
     <string name="permlab_changeTetherState" msgid="9079611809931863861">"endre tilknytningsoppsett"</string>
     <string name="permdesc_changeTetherState" msgid="3025129606422533085">"Lar appen endre innstillingene for delt nettforbindelse."</string>
-    <string name="permlab_accessWifiState" msgid="5552488500317911052">"se Wi-Fi-tilkoblinger"</string>
-    <string name="permdesc_accessWifiState" msgid="6913641669259483363">"Lar appen se informasjon om Wi-Fi-nettverk, f.eks. hvorvidt Wi-Fi er aktivert og navn på tilkoblede Wi-Fi-enheter."</string>
-    <string name="permlab_changeWifiState" msgid="7947824109713181554">"koble til og fra Wi-Fi"</string>
-    <string name="permdesc_changeWifiState" msgid="7170350070554505384">"Lar appen koble til og fra Wi-Fi-tilgangspunkter, og å gjøre endringer i enhetens konfigurasjon for Wi-Fi-nettverk."</string>
+    <string name="permlab_accessWifiState" msgid="5552488500317911052">"se Wifi-tilkoblinger"</string>
+    <string name="permdesc_accessWifiState" msgid="6913641669259483363">"Lar appen se informasjon om Wifi-nettverk, f.eks. hvorvidt Wifi er aktivert og navn på tilkoblede Wifi-enheter."</string>
+    <string name="permlab_changeWifiState" msgid="7947824109713181554">"koble til og fra wifi"</string>
+    <string name="permdesc_changeWifiState" msgid="7170350070554505384">"Lar appen koble til og fra wifi-tilgangspunkter, og å gjøre endringer i enhetens konfigurasjon for wifi-nettverk."</string>
     <string name="permlab_changeWifiMulticastState" msgid="285626875870754696">"tillate multicast for trådløse nettverk"</string>
-    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="191079868596433554">"Lar appen motta pakker som sendes til alle enhetene på et Wi-Fi-nettverk ved hjelp av multikastingsadresser,  Dette bruker mer strøm enn modusen uten multikasting."</string>
-    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="1336952358450652595">"Lar appen motta pakker som sendes til alle enhetene på et Wi-Fi-nettverk ved hjelp av multikastingsadresser, ikke bare Android TV-enheten din. Dette bruker mer strøm enn modus uten multikasting."</string>
-    <string name="permdesc_changeWifiMulticastState" product="default" msgid="8296627590220222740">"Lar appen motta pakker som sendes til alle enhetene på et Wi-Fi-nettverk ved hjelp av multikastingsadresser,  Dette bruker mer strøm enn modusen uten multikasting."</string>
+    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="191079868596433554">"Lar appen motta pakker som sendes til alle enhetene på et Wifi-nettverk ved hjelp av multikastingsadresser,  Dette bruker mer strøm enn modusen uten multikasting."</string>
+    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="1336952358450652595">"Lar appen motta pakker som sendes til alle enhetene på et Wifi-nettverk ved hjelp av multikastingsadresser, ikke bare Android TV-enheten din. Dette bruker mer strøm enn modus uten multikasting."</string>
+    <string name="permdesc_changeWifiMulticastState" product="default" msgid="8296627590220222740">"Lar appen motta pakker som sendes til alle enhetene på et Wifi-nettverk ved hjelp av multikastingsadresser,  Dette bruker mer strøm enn modusen uten multikasting."</string>
     <string name="permlab_bluetoothAdmin" msgid="6490373569441946064">"endre Bluetooth-innstillinger"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="5370837055438574863">"Lar appen konfigurere det lokale Bluetooth-nettbrettet, samt oppdage og koble sammen med eksterne enheter."</string>
     <string name="permdesc_bluetoothAdmin" product="tv" msgid="1623992984547014588">"Lar appen konfigurere Bluetooth på Android TV-enheten din samt oppdage og koble sammen med eksterne enheter."</string>
@@ -546,8 +546,8 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Lar appen vise annonser til Bluetooth-enheter i nærheten"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"fastslå relativ posisjon mellom enheter som bruker ultrabredbånd"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"tillate at appen fastslår den relative posisjonen mellom enheter i nærheten som bruker ultrabredbånd"</string>
-    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"samhandle med Wi-Fi-enheter i nærheten"</string>
-    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Lar appen annonsere, koble til og fastslå den relative posisjonen til Wi-Fi-enheter i nærheten"</string>
+    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"samhandle med wifi-enheter i nærheten"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Lar appen annonsere, koble til og fastslå den relative posisjonen til wifi-enheter i nærheten"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informasjon om prioritert NFC-betalingstjeneste"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Gir appen tilgang til informasjon om prioritert NFC-betalingstjeneste, for eksempel registrerte hjelpemidler og destinasjon."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kontroller overføring av data med NFC-teknologi"</string>
@@ -1293,7 +1293,7 @@
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"Alarmlyder"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"Varsellyder"</string>
     <string name="ringtone_unknown" msgid="5059495249862816475">"Ukjent"</string>
-    <string name="wifi_available_sign_in" msgid="381054692557675237">"Logg på Wi-Fi-nettverket"</string>
+    <string name="wifi_available_sign_in" msgid="381054692557675237">"Logg på Wifi-nettverket"</string>
     <string name="network_available_sign_in" msgid="1520342291829283114">"Logg på nettverk"</string>
     <!-- no translation found for network_available_sign_in_detailed (7520423801613396556) -->
     <skip />
@@ -1576,10 +1576,10 @@
     <string name="data_usage_warning_title" msgid="9034893717078325845">"Varsel om databruk"</string>
     <string name="data_usage_warning_body" msgid="1669325367188029454">"Du har brukt <xliff:g id="APP">%s</xliff:g> med data"</string>
     <string name="data_usage_mobile_limit_title" msgid="3911447354393775241">"Grensen for mobildata er nådd"</string>
-    <string name="data_usage_wifi_limit_title" msgid="2069698056520812232">"Datagrensen for Wi-Fi er nådd"</string>
+    <string name="data_usage_wifi_limit_title" msgid="2069698056520812232">"Datagrensen for wifi er nådd"</string>
     <string name="data_usage_limit_body" msgid="3567699582000085710">"Data er på pause i resten av syklusen"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="101888478915677895">"Over grensen for mobildata"</string>
-    <string name="data_usage_wifi_limit_snoozed_title" msgid="1622359254521960508">"Over grensen din for Wi-Fi-data"</string>
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="1622359254521960508">"Over grensen din for wifi-data"</string>
     <string name="data_usage_limit_snoozed_body" msgid="545146591766765678">"Du er <xliff:g id="SIZE">%s</xliff:g> over den angitte grensen din"</string>
     <string name="data_usage_restricted_title" msgid="126711424380051268">"Bakgrunnsdata er begrenset"</string>
     <string name="data_usage_restricted_body" msgid="5338694433686077733">"Trykk for å fjerne begrensningen."</string>

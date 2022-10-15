@@ -1958,7 +1958,7 @@
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Šī lietotne pieprasa papildu drošību. Mēģiniet tai piekļūt savā tālrunī."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"Šajā ierīcē (<xliff:g id="DEVICE">%1$s</xliff:g>) nevar piekļūt tālvadībai. Mēģiniet tai piekļūt savā Android TV ierīcē."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"Šajā ierīcē (<xliff:g id="DEVICE">%1$s</xliff:g>) nevar piekļūt tālvadībai. Mēģiniet tai piekļūt savā planšetdatorā."</string>
-    <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Šajā ierīcē (<xliff:g id="DEVICE">%1$s</xliff:g>) nevar piekļūt tālvadībai. Mēģiniet tai piekļūt savā tālrunī."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Ierīcē <xliff:g id="DEVICE">%1$s</xliff:g> nevar piekļūt šai funkcijai. Mēģiniet tai piekļūt tālrunī."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Šī lietotne tika izstrādāta vecākai Android versijai un var nedarboties pareizi. Meklējiet atjauninājumus vai sazinieties ar izstrādātāju."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Meklēt atjauninājumu"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Jums ir jaunas īsziņas."</string>
