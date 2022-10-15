@@ -102,6 +102,7 @@ constructor(
     interface UserCallback {
         /** Returns `true` if this callback can be cleaned-up. */
         fun isEvictable(): Boolean = false
+
         /** Notifies that the state of users on the device has changed. */
         fun onUserStateChanged()
     }
@@ -164,10 +165,11 @@ constructor(
         get() =
             if (isNewImpl) {
                 combine(
+                    repository.selectedUserInfo,
                     repository.userInfos,
                     repository.userSwitcherSettings,
                     keyguardInteractor.isKeyguardShowing,
-                ) { userInfos, settings, isDeviceLocked ->
+                ) { _, userInfos, settings, isDeviceLocked ->
                     buildList {
                         val hasGuestUser = userInfos.any { it.isGuest }
                         if (
@@ -183,35 +185,45 @@ constructor(
                             add(UserActionModel.ENTER_GUEST_MODE)
                         }
 
-                        if (isDeviceLocked && !settings.isAddUsersFromLockscreen) {
+                        if (!isDeviceLocked || settings.isAddUsersFromLockscreen) {
                             // The device is locked and our setting to allow actions that add users
                             // from the lock-screen is not enabled. The guest action from above is
                             // always allowed, even when the device is locked, but the various "add
                             // user" actions below are not. We can finish building the list here.
-                            return@buildList
+
+                            val canCreateUsers =
+                                UserActionsUtil.canCreateUser(
+                                    manager,
+                                    repository,
+                                    settings.isUserSwitcherEnabled,
+                                    settings.isAddUsersFromLockscreen,
+                                )
+
+                            if (canCreateUsers) {
+                                add(UserActionModel.ADD_USER)
+                            }
+
+                            if (
+                                UserActionsUtil.canCreateSupervisedUser(
+                                    manager,
+                                    repository,
+                                    settings.isUserSwitcherEnabled,
+                                    settings.isAddUsersFromLockscreen,
+                                    supervisedUserPackageName,
+                                )
+                            ) {
+                                add(UserActionModel.ADD_SUPERVISED_USER)
+                            }
                         }
 
                         if (
-                            UserActionsUtil.canCreateUser(
-                                manager,
+                            UserActionsUtil.canManageUsers(
                                 repository,
                                 settings.isUserSwitcherEnabled,
                                 settings.isAddUsersFromLockscreen,
                             )
                         ) {
-                            add(UserActionModel.ADD_USER)
-                        }
-
-                        if (
-                            UserActionsUtil.canCreateSupervisedUser(
-                                manager,
-                                repository,
-                                settings.isUserSwitcherEnabled,
-                                settings.isAddUsersFromLockscreen,
-                                supervisedUserPackageName,
-                            )
-                        ) {
-                            add(UserActionModel.ADD_SUPERVISED_USER)
+                            add(UserActionModel.NAVIGATE_TO_USER_MANAGEMENT)
                         }
                     }
                 }
@@ -264,7 +276,10 @@ constructor(
                                 toRecord(
                                     action = it,
                                     selectedUserId = selectedUserInfo.id,
-                                    isAddFromLockscreenEnabled = settings.isAddUsersFromLockscreen,
+                                    isRestricted =
+                                        it != UserActionModel.ENTER_GUEST_MODE &&
+                                            it != UserActionModel.NAVIGATE_TO_USER_MANAGEMENT &&
+                                            !settings.isAddUsersFromLockscreen,
                                 )
                             }
                     )
@@ -482,12 +497,12 @@ constructor(
                             .setAction(UserManager.ACTION_CREATE_SUPERVISED_USER)
                             .setPackage(supervisedUserPackageName)
                             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
-                        /* dismissShade= */ false,
+                        /* dismissShade= */ true,
                     )
                 UserActionModel.NAVIGATE_TO_USER_MANAGEMENT ->
                     activityStarter.startActivity(
                         Intent(Settings.ACTION_USER_SETTINGS),
-                        /* dismissShade= */ false,
+                        /* dismissShade= */ true,
                     )
             }
         } else {
@@ -575,20 +590,13 @@ constructor(
     private suspend fun toRecord(
         action: UserActionModel,
         selectedUserId: Int,
-        isAddFromLockscreenEnabled: Boolean,
+        isRestricted: Boolean,
     ): UserRecord {
         return LegacyUserDataHelper.createRecord(
             context = applicationContext,
             selectedUserId = selectedUserId,
             actionType = action,
-            isRestricted =
-                if (action == UserActionModel.ENTER_GUEST_MODE) {
-                    // Entering guest mode is never restricted, so it's allowed to happen from the
-                    // lockscreen even if the "add from lockscreen" system setting is off.
-                    false
-                } else {
-                    !isAddFromLockscreenEnabled
-                },
+            isRestricted = isRestricted,
             isSwitchToEnabled =
                 canSwitchUsers(selectedUserId) &&
                     // If the user is auto-created is must not be currently resetting.

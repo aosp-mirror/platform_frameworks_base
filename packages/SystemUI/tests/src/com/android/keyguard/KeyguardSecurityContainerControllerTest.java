@@ -221,15 +221,17 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
     public void onResourcesUpdate_callsThroughOnRotationChange() {
         // Rotation is the same, shouldn't cause an update
         mKeyguardSecurityContainerController.updateResources();
-        verify(mView, never()).initMode(MODE_DEFAULT, mGlobalSettings, mFalsingManager,
-                mUserSwitcherController);
+        verify(mView, never()).initMode(eq(MODE_DEFAULT), eq(mGlobalSettings), eq(mFalsingManager),
+                eq(mUserSwitcherController),
+                any(KeyguardSecurityContainer.UserSwitcherViewMode.UserSwitcherCallback.class));
 
         // Update rotation. Should trigger update
         mConfiguration.orientation = Configuration.ORIENTATION_LANDSCAPE;
 
         mKeyguardSecurityContainerController.updateResources();
-        verify(mView).initMode(MODE_DEFAULT, mGlobalSettings, mFalsingManager,
-                mUserSwitcherController);
+        verify(mView).initMode(eq(MODE_DEFAULT), eq(mGlobalSettings), eq(mFalsingManager),
+                eq(mUserSwitcherController),
+                any(KeyguardSecurityContainer.UserSwitcherViewMode.UserSwitcherCallback.class));
     }
 
     private void touchDown() {
@@ -263,8 +265,9 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
                 .thenReturn((KeyguardInputViewController) mKeyguardPasswordViewController);
 
         mKeyguardSecurityContainerController.showSecurityScreen(SecurityMode.Pattern);
-        verify(mView).initMode(MODE_DEFAULT, mGlobalSettings, mFalsingManager,
-                mUserSwitcherController);
+        verify(mView).initMode(eq(MODE_DEFAULT), eq(mGlobalSettings), eq(mFalsingManager),
+                eq(mUserSwitcherController),
+                any(KeyguardSecurityContainer.UserSwitcherViewMode.UserSwitcherCallback.class));
     }
 
     @Test
@@ -275,8 +278,9 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
                 .thenReturn((KeyguardInputViewController) mKeyguardPasswordViewController);
 
         mKeyguardSecurityContainerController.showSecurityScreen(SecurityMode.Pattern);
-        verify(mView).initMode(MODE_ONE_HANDED, mGlobalSettings, mFalsingManager,
-                mUserSwitcherController);
+        verify(mView).initMode(eq(MODE_ONE_HANDED), eq(mGlobalSettings), eq(mFalsingManager),
+                eq(mUserSwitcherController),
+                any(KeyguardSecurityContainer.UserSwitcherViewMode.UserSwitcherCallback.class));
     }
 
     @Test
@@ -285,8 +289,26 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
         setupGetSecurityView();
 
         mKeyguardSecurityContainerController.showSecurityScreen(SecurityMode.Password);
-        verify(mView).initMode(MODE_DEFAULT, mGlobalSettings, mFalsingManager,
-                mUserSwitcherController);
+        verify(mView).initMode(eq(MODE_DEFAULT), eq(mGlobalSettings), eq(mFalsingManager),
+                eq(mUserSwitcherController),
+                any(KeyguardSecurityContainer.UserSwitcherViewMode.UserSwitcherCallback.class));
+    }
+
+    @Test
+    public void addUserSwitcherCallback() {
+        ArgumentCaptor<KeyguardSecurityContainer.UserSwitcherViewMode.UserSwitcherCallback>
+                captor = ArgumentCaptor.forClass(
+                KeyguardSecurityContainer.UserSwitcherViewMode.UserSwitcherCallback.class);
+
+        setupGetSecurityView();
+
+        mKeyguardSecurityContainerController.showSecurityScreen(SecurityMode.Password);
+        verify(mView).initMode(anyInt(), any(GlobalSettings.class), any(FalsingManager.class),
+                any(UserSwitcherController.class),
+                captor.capture());
+        captor.getValue().showUnlockToContinueMessage();
+        verify(mKeyguardPasswordViewControllerMock).showMessage(
+                getContext().getString(R.string.keyguard_unlock_to_continue), null);
     }
 
     @Test
