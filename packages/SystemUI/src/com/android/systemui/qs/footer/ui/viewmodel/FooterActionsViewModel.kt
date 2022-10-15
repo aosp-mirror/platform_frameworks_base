@@ -23,7 +23,6 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import com.android.settingslib.Utils
-import com.android.settingslib.drawable.UserIconDrawable
 import com.android.systemui.R
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.ContentDescription
@@ -250,22 +249,19 @@ class FooterActionsViewModel(
         status: UserSwitcherStatusModel.Enabled
     ): FooterActionsButtonViewModel {
         val icon = status.currentUserImage!!
-        val iconTint =
-            if (status.isGuestUser && icon !is UserIconDrawable) {
-                Utils.getColorAttrDefaultColor(context, android.R.attr.colorForeground)
-            } else {
-                null
-            }
 
         return FooterActionsButtonViewModel(
             id = R.id.multi_user_switch,
-            Icon.Loaded(
-                icon,
-                ContentDescription.Loaded(userSwitcherContentDescription(status.currentUserName)),
-            ),
-            iconTint,
-            R.drawable.qs_footer_action_circle,
-            this::onUserSwitcherClicked,
+            icon =
+                Icon.Loaded(
+                    icon,
+                    ContentDescription.Loaded(
+                        userSwitcherContentDescription(status.currentUserName)
+                    ),
+                ),
+            iconTint = null,
+            background = R.drawable.qs_footer_action_circle,
+            onClick = this::onUserSwitcherClicked,
         )
     }
 
