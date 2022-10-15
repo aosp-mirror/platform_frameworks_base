@@ -130,6 +130,10 @@ class ActivityEmbeddingAnimationAdapter {
         if (!cropRect.intersect(mWholeAnimationBounds)) {
             // Hide the surface when it is outside of the animation area.
             t.setAlpha(mLeash, 0);
+        } else if (mAnimation.hasExtension()) {
+            // Allow the surface to be shown in its original bounds in case we want to use edge
+            // extensions.
+            cropRect.union(mChange.getEndAbsBounds());
         }
 
         // cropRect is in absolute coordinate, so we need to translate it to surface top left.

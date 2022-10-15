@@ -23,9 +23,9 @@ import com.android.settingslib.spa.framework.common.SettingsEntry
 import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
 import com.android.settingslib.spa.framework.common.SettingsPage
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
+import com.android.settingslib.spa.framework.common.createSettingsPage
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.gallery.SettingsPageProviderEnum
-import com.android.settingslib.spa.gallery.createSettingsPage
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.scaffold.RegularScaffold
 
@@ -43,13 +43,13 @@ object ArgumentPageProvider : SettingsPageProvider {
     }
 
     override val name = SettingsPageProviderEnum.ARGUMENT.name
-
+    override val displayName = SettingsPageProviderEnum.ARGUMENT.displayName
     override val parameter = ArgumentPageModel.parameter
 
     override fun buildEntry(arguments: Bundle?): List<SettingsEntry> {
         if (!ArgumentPageModel.isValidArgument(arguments)) return emptyList()
 
-        val owner = createSettingsPage(SettingsPageProviderEnum.ARGUMENT, parameter, arguments)
+        val owner = createSettingsPage(arguments)
         val entryList = mutableListOf<SettingsEntry>()
         entryList.add(
             createEntry(owner, EntryEnum.STRING_PARAM)
@@ -86,7 +86,7 @@ object ArgumentPageProvider : SettingsPageProvider {
         if (!ArgumentPageModel.isValidArgument(arguments)) return null
 
         return SettingsEntryBuilder.createInject(
-            owner = createSettingsPage(SettingsPageProviderEnum.ARGUMENT, parameter, arguments),
+            owner = createSettingsPage(arguments),
             displayName = "${name}_$stringParam",
         )
             // Set attributes

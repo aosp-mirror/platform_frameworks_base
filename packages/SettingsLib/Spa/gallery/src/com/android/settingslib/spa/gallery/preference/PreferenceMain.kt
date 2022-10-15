@@ -20,8 +20,8 @@ import android.os.Bundle
 import androidx.compose.runtime.Composable
 import com.android.settingslib.spa.framework.common.SettingsEntry
 import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
-import com.android.settingslib.spa.framework.common.SettingsPage
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
+import com.android.settingslib.spa.framework.common.createSettingsPage
 import com.android.settingslib.spa.framework.compose.navigator
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
@@ -31,22 +31,20 @@ private const val TITLE = "Category: Preference"
 
 object PreferenceMainPageProvider : SettingsPageProvider {
     override val name = "PreferenceMain"
+    private val owner = createSettingsPage()
 
     override fun buildEntry(arguments: Bundle?): List<SettingsEntry> {
         return listOf(
-            PreferencePageProvider.buildInjectEntry()
-                .setLink(fromPage = SettingsPage.create(name)).build(),
-            SwitchPreferencePageProvider.buildInjectEntry()
-                .setLink(fromPage = SettingsPage.create(name)).build(),
-            MainSwitchPreferencePageProvider.buildInjectEntry()
-                .setLink(fromPage = SettingsPage.create(name)).build(),
+            PreferencePageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
+            SwitchPreferencePageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
+            MainSwitchPreferencePageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
             TwoTargetSwitchPreferencePageProvider.buildInjectEntry()
-                .setLink(fromPage = SettingsPage.create(name)).build(),
+                .setLink(fromPage = owner).build(),
         )
     }
 
     fun buildInjectEntry(): SettingsEntryBuilder {
-        return SettingsEntryBuilder.createInject(owner = SettingsPage.create(name))
+        return SettingsEntryBuilder.createInject(owner = owner)
             .setIsAllowSearch(true)
             .setUiLayoutFn {
                 Preference(object : PreferenceModel {

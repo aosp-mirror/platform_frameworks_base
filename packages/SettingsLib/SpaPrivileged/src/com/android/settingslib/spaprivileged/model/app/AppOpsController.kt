@@ -24,7 +24,7 @@ import android.content.Context
 import android.content.pm.ApplicationInfo
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
+import androidx.lifecycle.map
 
 class AppOpsController(
     context: Context,
@@ -36,7 +36,7 @@ class AppOpsController(
     val mode: LiveData<Int>
         get() = _mode
     val isAllowed: LiveData<Boolean>
-        get() = Transformations.map(_mode) { it == MODE_ALLOWED }
+        get() = _mode.map { it == MODE_ALLOWED }
 
     fun setAllowed(allowed: Boolean) {
         val mode = if (allowed) MODE_ALLOWED else MODE_ERRORED

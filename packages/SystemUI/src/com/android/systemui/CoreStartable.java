@@ -16,39 +16,41 @@
 
 package com.android.systemui;
 
-import android.content.Context;
 import android.content.res.Configuration;
 
 import androidx.annotation.NonNull;
 
-import com.android.internal.annotations.VisibleForTesting;
-
 import java.io.PrintWriter;
 
 /**
- * A top-level module of system UI code (sometimes called "system UI services" elsewhere in code).
- * Which CoreStartable modules are loaded can be controlled via a config resource.
+ * Code that needs to be run when SystemUI is started.
+ *
+ * Which CoreStartable modules are loaded is controlled via the dagger graph. Bind them into the
+ * CoreStartable map with code such as:
+ *
+ *  <pre>
+ *  &#64;Binds
+ *  &#64;IntoMap
+ *  &#64;ClassKey(FoobarStartable::class)
+ *  abstract fun bind(impl: FoobarStartable): CoreStartable
+ *  </pre>
  *
  * @see SystemUIApplication#startServicesIfNeeded()
  */
-public abstract class CoreStartable implements Dumpable {
-    protected final Context mContext;
-
-    public CoreStartable(Context context) {
-        mContext = context;
-    }
+public interface CoreStartable extends Dumpable {
 
     /** Main entry point for implementations. Called shortly after app startup. */
-    public abstract void start();
+    void start();
 
-    protected void onConfigurationChanged(Configuration newConfig) {
+    /** */
+    default void onConfigurationChanged(Configuration newConfig) {
     }
 
     @Override
-    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
+    default void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
     }
 
-    @VisibleForTesting
-    protected void onBootCompleted() {
+    /** Called when the device reports BOOT_COMPLETED. */
+    default void onBootCompleted() {
     }
 }

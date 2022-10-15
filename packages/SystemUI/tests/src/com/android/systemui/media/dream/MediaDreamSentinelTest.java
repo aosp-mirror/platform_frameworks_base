@@ -73,7 +73,7 @@ public class MediaDreamSentinelTest extends SysuiTestCase {
 
     @Test
     public void testOnMediaDataLoaded_complicationAddition() {
-        final MediaDreamSentinel sentinel = new MediaDreamSentinel(mContext, mMediaDataManager,
+        final MediaDreamSentinel sentinel = new MediaDreamSentinel(mMediaDataManager,
                 mDreamOverlayStateController, mMediaEntryComplication, mFeatureFlags);
         sentinel.start();
 
@@ -94,7 +94,7 @@ public class MediaDreamSentinelTest extends SysuiTestCase {
 
     @Test
     public void testOnMediaDataRemoved_complicationRemoval() {
-        final MediaDreamSentinel sentinel = new MediaDreamSentinel(mContext, mMediaDataManager,
+        final MediaDreamSentinel sentinel = new MediaDreamSentinel(mMediaDataManager,
                 mDreamOverlayStateController, mMediaEntryComplication, mFeatureFlags);
         sentinel.start();
 
@@ -114,7 +114,7 @@ public class MediaDreamSentinelTest extends SysuiTestCase {
 
     @Test
     public void testOnMediaDataLoaded_complicationRemoval() {
-        final MediaDreamSentinel sentinel = new MediaDreamSentinel(mContext, mMediaDataManager,
+        final MediaDreamSentinel sentinel = new MediaDreamSentinel(mMediaDataManager,
                 mDreamOverlayStateController, mMediaEntryComplication, mFeatureFlags);
         sentinel.start();
 
@@ -139,7 +139,7 @@ public class MediaDreamSentinelTest extends SysuiTestCase {
     public void testOnMediaDataLoaded_mediaComplicationDisabled_doesNotAddComplication() {
         when(mFeatureFlags.isEnabled(DREAM_MEDIA_COMPLICATION)).thenReturn(false);
 
-        final MediaDreamSentinel sentinel = new MediaDreamSentinel(mContext, mMediaDataManager,
+        final MediaDreamSentinel sentinel = new MediaDreamSentinel(mMediaDataManager,
                 mDreamOverlayStateController, mMediaEntryComplication, mFeatureFlags);
 
         sentinel.start();

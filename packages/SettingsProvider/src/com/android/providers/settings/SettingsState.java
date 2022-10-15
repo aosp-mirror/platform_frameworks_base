@@ -48,6 +48,7 @@ import android.util.Xml;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FrameworkStatsLog;
 
@@ -97,7 +98,7 @@ final class SettingsState {
     private static final long MAX_WRITE_SETTINGS_DELAY_MILLIS = 2000;
 
     public static final int MAX_BYTES_PER_APP_PACKAGE_UNLIMITED = -1;
-    public static final int MAX_BYTES_PER_APP_PACKAGE_LIMITED = 20000;
+    public static final int MAX_BYTES_PER_APP_PACKAGE_LIMITED = 40000;
 
     public static final int VERSION_UNDEFINED = -1;
 
@@ -376,8 +377,8 @@ final class SettingsState {
             Setting newSetting = new Setting(name, oldSetting.getValue(), null,
                     oldSetting.getPackageName(), oldSetting.getTag(), false,
                     oldSetting.getId());
-            int newSize = getNewMemoryUsagePerPackageLocked(newSetting.getPackageName(), oldValue,
-                    newSetting.getValue(), oldDefaultValue, newSetting.getDefaultValue());
+            int newSize = getNewMemoryUsagePerPackageLocked(newSetting.getPackageName(), 0,
+                    oldValue, newSetting.getValue(), oldDefaultValue, newSetting.getDefaultValue());
             checkNewMemoryUsagePerPackageLocked(newSetting.getPackageName(), newSize);
             mSettings.put(name, newSetting);
             updateMemoryUsagePerPackageLocked(newSetting.getPackageName(), newSize);
@@ -414,8 +415,9 @@ final class SettingsState {
         String oldDefaultValue = (oldState != null) ? oldState.defaultValue : null;
         String newDefaultValue = makeDefault ? value : oldDefaultValue;
 
-        int newSize = getNewMemoryUsagePerPackageLocked(packageName, oldValue, value,
-                oldDefaultValue, newDefaultValue);
+        int newSize = getNewMemoryUsagePerPackageLocked(packageName,
+                oldValue == null ? name.length() : 0 /* deltaKeySize */,
+                oldValue, value, oldDefaultValue, newDefaultValue);
         checkNewMemoryUsagePerPackageLocked(packageName, newSize);
 
         Setting newState;
@@ -559,8 +561,12 @@ final class SettingsState {
         }
 
         Setting oldState = mSettings.remove(name);
-        int newSize = getNewMemoryUsagePerPackageLocked(oldState.packageName, oldState.value,
-                null, oldState.defaultValue, null);
+        if (oldState == null) {
+            return false;
+        }
+        int newSize = getNewMemoryUsagePerPackageLocked(oldState.packageName,
+                -name.length() /* deltaKeySize */,
+                oldState.value, null, oldState.defaultValue, null);
 
         FrameworkStatsLog.write(FrameworkStatsLog.SETTING_CHANGED, name, /* value= */ "",
                 /* newValue= */ "", oldState.value, /* tag */ "", false, getUserIdFromKey(mKey),
@@ -583,15 +589,16 @@ final class SettingsState {
         }
 
         Setting setting = mSettings.get(name);
+        if (setting == null) {
+            return false;
+        }
 
         Setting oldSetting = new Setting(setting);
         String oldValue = setting.getValue();
         String oldDefaultValue = setting.getDefaultValue();
-        String newValue = oldDefaultValue;
-        String newDefaultValue = oldDefaultValue;
 
-        int newSize = getNewMemoryUsagePerPackageLocked(setting.packageName, oldValue,
-                newValue, oldDefaultValue, newDefaultValue);
+        int newSize = getNewMemoryUsagePerPackageLocked(setting.packageName, 0, oldValue,
+                oldDefaultValue, oldDefaultValue, oldDefaultValue);
         checkNewMemoryUsagePerPackageLocked(setting.packageName, newSize);
 
         if (!setting.reset()) {
@@ -725,19 +732,19 @@ final class SettingsState {
     }
 
     @GuardedBy("mLock")
-    private int getNewMemoryUsagePerPackageLocked(String packageName, String oldValue,
-            String newValue, String oldDefaultValue, String newDefaultValue) {
+    private int getNewMemoryUsagePerPackageLocked(String packageName, int deltaKeyLength,
+            String oldValue, String newValue, String oldDefaultValue, String newDefaultValue) {
         if (isExemptFromMemoryUsageCap(packageName)) {
             return 0;
         }
-        final Integer currentSize = mPackageToMemoryUsage.get(packageName);
-        final int oldValueSize = (oldValue != null) ? oldValue.length() : 0;
-        final int newValueSize = (newValue != null) ? newValue.length() : 0;
-        final int oldDefaultValueSize = (oldDefaultValue != null) ? oldDefaultValue.length() : 0;
-        final int newDefaultValueSize = (newDefaultValue != null) ? newDefaultValue.length() : 0;
-        final int deltaSize = newValueSize + newDefaultValueSize
-                - oldValueSize - oldDefaultValueSize;
-        return Math.max((currentSize != null) ? currentSize + deltaSize : deltaSize, 0);
+        final int currentSize = mPackageToMemoryUsage.getOrDefault(packageName, 0);
+        final int oldValueLength = (oldValue != null) ? oldValue.length() : 0;
+        final int newValueLength = (newValue != null) ? newValue.length() : 0;
+        final int oldDefaultValueLength = (oldDefaultValue != null) ? oldDefaultValue.length() : 0;
+        final int newDefaultValueLength = (newDefaultValue != null) ? newDefaultValue.length() : 0;
+        final int deltaSize = (deltaKeyLength + newValueLength + newDefaultValueLength
+                - oldValueLength - oldDefaultValueLength) * Character.BYTES;
+        return Math.max(currentSize + deltaSize, 0);
     }
 
     @GuardedBy("mLock")
@@ -1576,5 +1583,12 @@ final class SettingsState {
             return true;
         }
         return false;
+    }
+
+    @VisibleForTesting
+    public int getMemoryUsage(String packageName) {
+        synchronized (mLock) {
+            return mPackageToMemoryUsage.getOrDefault(packageName, 0);
+        }
     }
 }

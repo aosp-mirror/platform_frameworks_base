@@ -268,8 +268,7 @@ import dagger.Lazy;
  * </b>
  */
 @SysUISingleton
-public class CentralSurfacesImpl extends CoreStartable implements
-        CentralSurfaces {
+public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
     private static final String BANNER_ACTION_CANCEL =
             "com.android.systemui.statusbar.banner_action_cancel";
@@ -290,6 +289,7 @@ public class CentralSurfacesImpl extends CoreStartable implements
 
     private static final UiEventLogger sUiEventLogger = new UiEventLoggerImpl();
 
+    private final Context mContext;
     private final LockscreenShadeTransitionController mLockscreenShadeTransitionController;
     private CentralSurfacesCommandQueueCallbacks mCommandQueueCallbacks;
     private float mTransitionToFullShadeProgress = 0f;
@@ -747,7 +747,7 @@ public class CentralSurfacesImpl extends CoreStartable implements
             DeviceStateManager deviceStateManager,
             WiredChargingRippleController wiredChargingRippleController,
             IDreamManager dreamManager) {
-        super(context);
+        mContext = context;
         mNotificationsController = notificationsController;
         mFragmentService = fragmentService;
         mLightBarController = lightBarController;
