@@ -102,7 +102,7 @@ import kotlin.Unit;
  * {@link com.android.keyguard.KeyguardUpdateMonitor}
  */
 @SysUISingleton
-public class AuthController extends CoreStartable implements CommandQueue.Callbacks,
+public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
         AuthDialogCallback, DozeReceiver {
 
     private static final String TAG = "AuthController";
@@ -110,6 +110,7 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
     private static final int SENSOR_PRIVACY_DELAY = 500;
 
     private final Handler mHandler;
+    private final Context mContext;
     private final Execution mExecution;
     private final CommandQueue mCommandQueue;
     private final StatusBarStateController mStatusBarStateController;
@@ -669,7 +670,7 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
             @NonNull InteractionJankMonitor jankMonitor,
             @Main Handler handler,
             @Background DelayableExecutor bgExecutor) {
-        super(context);
+        mContext = context;
         mExecution = execution;
         mUserManager = userManager;
         mLockPatternUtils = lockPatternUtils;
@@ -1099,8 +1100,7 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
     }
 
     @Override
-    protected void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
+    public void onConfigurationChanged(Configuration newConfig) {
         updateSensorLocations();
 
         // Save the state of the current dialog (buttons showing, etc)

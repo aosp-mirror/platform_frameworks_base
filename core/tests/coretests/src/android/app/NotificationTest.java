@@ -59,6 +59,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.spy;
 
 import android.annotation.Nullable;
+import android.app.Notification.CallStyle;
 import android.content.Context;
 import android.content.Intent;
 import android.content.LocusId;
@@ -92,6 +93,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.List;
 import java.util.function.Consumer;
 
 @RunWith(AndroidJUnit4.class)
@@ -531,6 +533,108 @@ public class NotificationTest {
     }
 
     @Test
+    public void testCallStyle_getSystemActions_forIncomingCall() {
+        PendingIntent answerIntent = createPendingIntent("answer");
+        PendingIntent declineIntent = createPendingIntent("decline");
+        Notification.CallStyle style = Notification.CallStyle.forIncomingCall(
+                new Person.Builder().setName("A Caller").build(),
+                declineIntent,
+                answerIntent
+        );
+        style.setBuilder(new Notification.Builder(mContext, "Channel"));
+
+        List<Notification.Action> actions = style.getActionsListWithSystemActions();
+
+        assertEquals(2, actions.size());
+        assertEquals(declineIntent, actions.get(0).actionIntent);
+        assertEquals(answerIntent, actions.get(1).actionIntent);
+    }
+
+    @Test
+    public void testCallStyle_getSystemActions_forOngoingCall() {
+        PendingIntent hangUpIntent = createPendingIntent("hangUp");
+        Notification.CallStyle style = Notification.CallStyle.forOngoingCall(
+                new Person.Builder().setName("A Caller").build(),
+                hangUpIntent
+        );
+        style.setBuilder(new Notification.Builder(mContext, "Channel"));
+
+        List<Notification.Action> actions = style.getActionsListWithSystemActions();
+
+        assertEquals(1, actions.size());
+        assertEquals(hangUpIntent, actions.get(0).actionIntent);
+    }
+
+    @Test
+    public void testCallStyle_getSystemActions_forIncomingCallWithOtherActions() {
+        PendingIntent answerIntent = createPendingIntent("answer");
+        PendingIntent declineIntent = createPendingIntent("decline");
+        Notification.CallStyle style = Notification.CallStyle.forIncomingCall(
+                new Person.Builder().setName("A Caller").build(),
+                declineIntent,
+                answerIntent
+        );
+        Notification.Action actionToKeep = makeNotificationAction(null);
+        Notification.Action actionToDrop = makeNotificationAction(null);
+        Notification.Builder notifBuilder = new Notification.Builder(mContext, "Channel")
+                .addAction(actionToKeep)
+                .addAction(actionToDrop); //expect to move this action to the end
+        style.setBuilder(notifBuilder); //add a builder with actions
+
+        List<Notification.Action> actions = style.getActionsListWithSystemActions();
+
+        assertEquals(4, actions.size());
+        assertEquals(declineIntent, actions.get(0).actionIntent);
+        assertEquals(actionToKeep, actions.get(1));
+        assertEquals(answerIntent, actions.get(2).actionIntent);
+        assertEquals(actionToDrop, actions.get(3));
+    }
+
+    @Test
+    public void testCallStyle_getSystemActions_forOngoingCallWithOtherActions() {
+        PendingIntent hangUpIntent = createPendingIntent("hangUp");
+        Notification.CallStyle style = Notification.CallStyle.forOngoingCall(
+                new Person.Builder().setName("A Caller").build(),
+                hangUpIntent
+        );
+        Notification.Action firstAction = makeNotificationAction(null);
+        Notification.Action secondAction = makeNotificationAction(null);
+        Notification.Builder notifBuilder = new Notification.Builder(mContext, "Channel")
+                .addAction(firstAction)
+                .addAction(secondAction);
+        style.setBuilder(notifBuilder); //add a builder with actions
+
+        List<Notification.Action> actions = style.getActionsListWithSystemActions();
+
+        assertEquals(3, actions.size());
+        assertEquals(hangUpIntent, actions.get(0).actionIntent);
+        assertEquals(firstAction, actions.get(1));
+        assertEquals(secondAction, actions.get(2));
+    }
+
+    @Test
+    public void testCallStyle_getSystemActions_dropsOldSystemActions() {
+        PendingIntent hangUpIntent = createPendingIntent("decline");
+        Notification.CallStyle style = Notification.CallStyle.forOngoingCall(
+                new Person.Builder().setName("A Caller").build(),
+                hangUpIntent
+        );
+        Bundle actionExtras = new Bundle();
+        actionExtras.putBoolean("key_action_priority", true);
+        Notification.Action oldSystemAction = makeNotificationAction(
+                builder -> builder.addExtras(actionExtras)
+        );
+        Notification.Builder notifBuilder = new Notification.Builder(mContext, "Channel")
+                .addAction(oldSystemAction);
+        style.setBuilder(notifBuilder); //add a builder with actions
+
+        List<Notification.Action> actions = style.getActionsListWithSystemActions();
+
+        assertFalse("Old versions of system actions should be dropped.",
+                actions.contains(oldSystemAction));
+    }
+
+    @Test
     public void testBuild_ensureSmallIconIsNotTooBig_resizesIcon() {
         Icon hugeIcon = Icon.createWithBitmap(
                 Bitmap.createBitmap(3000, 3000, Bitmap.Config.ARGB_8888));
@@ -788,7 +892,7 @@ public class NotificationTest {
 
     @Test
     public void testRestoreFromExtras_Call_invalidExtra_noCrash() {
-        Notification.Style style = new Notification.CallStyle();
+        Notification.Style style = new CallStyle();
         Bundle fakeTypes = new Bundle();
         fakeTypes.putParcelable(EXTRA_CALL_PERSON, new Bundle());
         fakeTypes.putParcelable(EXTRA_ANSWER_INTENT, new Bundle());
@@ -961,5 +1065,13 @@ public class NotificationTest {
             transformation.accept(actionBuilder);
         }
         return actionBuilder.build();
+    }
+
+    /**
+     * Creates a PendingIntent with the given action.
+     */
+    private PendingIntent createPendingIntent(String action) {
+        return PendingIntent.getActivity(mContext, 0, new Intent(action),
+                PendingIntent.FLAG_MUTABLE);
     }
 }

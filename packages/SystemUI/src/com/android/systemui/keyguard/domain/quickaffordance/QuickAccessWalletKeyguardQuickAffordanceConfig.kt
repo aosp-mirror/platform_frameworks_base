@@ -23,7 +23,7 @@ import android.service.quickaccesswallet.GetWalletCardsResponse
 import android.service.quickaccesswallet.QuickAccessWalletClient
 import android.util.Log
 import com.android.systemui.R
-import com.android.systemui.animation.ActivityLaunchAnimator
+import com.android.systemui.animation.Expandable
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.common.shared.model.ContentDescription
@@ -84,11 +84,11 @@ constructor(
     }
 
     override fun onQuickAffordanceClicked(
-        animationController: ActivityLaunchAnimator.Controller?,
+        expandable: Expandable?,
     ): KeyguardQuickAffordanceConfig.OnClickedResult {
         walletController.startQuickAccessUiIntent(
             activityStarter,
-            animationController,
+            expandable?.activityLaunchController(),
             /* hasCard= */ true,
         )
         return KeyguardQuickAffordanceConfig.OnClickedResult.Handled

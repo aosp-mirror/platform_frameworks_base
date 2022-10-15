@@ -344,4 +344,14 @@ public class LogModule {
     public static LogBuffer provideKeyguardLogBuffer(LogBufferFactory factory) {
         return factory.create("KeyguardLog", 250);
     }
+
+    /**
+     * Provides a {@link LogBuffer} for Udfps logs.
+     */
+    @Provides
+    @SysUISingleton
+    @UdfpsLog
+    public static LogBuffer provideUdfpsLogBuffer(LogBufferFactory factory) {
+        return factory.create("UdfpsLog", 1000);
+    }
 }

@@ -24,11 +24,13 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ActivityLaunchAnimator
+import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
+import com.android.systemui.util.mockito.whenever
 import com.android.systemui.wallet.controller.QuickAccessWalletController
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.launchIn
@@ -40,7 +42,6 @@ import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
 import org.mockito.Mock
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 
 @SmallTest
@@ -135,8 +136,11 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
     @Test
     fun onQuickAffordanceClicked() {
         val animationController: ActivityLaunchAnimator.Controller = mock()
+        val expandable: Expandable = mock {
+            whenever(this.activityLaunchController()).thenReturn(animationController)
+        }
 
-        assertThat(underTest.onQuickAffordanceClicked(animationController))
+        assertThat(underTest.onQuickAffordanceClicked(expandable))
             .isEqualTo(KeyguardQuickAffordanceConfig.OnClickedResult.Handled)
         verify(walletController)
             .startQuickAccessUiIntent(
