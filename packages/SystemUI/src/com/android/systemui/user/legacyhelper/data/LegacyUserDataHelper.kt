@@ -80,6 +80,7 @@ object LegacyUserDataHelper {
                     context = context,
                     selectedUserId = selectedUserId,
                 ),
+            isManageUsers = actionType == UserActionModel.NAVIGATE_TO_USER_MANAGEMENT,
         )
     }
 
@@ -90,6 +91,7 @@ object LegacyUserDataHelper {
             record.isAddUser -> UserActionModel.ADD_USER
             record.isAddSupervisedUser -> UserActionModel.ADD_SUPERVISED_USER
             record.isGuest -> UserActionModel.ENTER_GUEST_MODE
+            record.isManageUsers -> UserActionModel.NAVIGATE_TO_USER_MANAGEMENT
             else -> error("Not a known action: $record")
         }
     }
