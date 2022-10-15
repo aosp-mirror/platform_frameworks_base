@@ -96,8 +96,8 @@
     <string name="screenrecord_description" msgid="1123231719680353736">"錄影時，Android 系統可擷取螢幕上顯示或裝置播放的任何敏感資料，包括密碼、付款資料、相片、訊息和音訊。"</string>
     <string name="screenrecord_option_entire_screen" msgid="1732437834603426934">"錄製整個螢幕畫面"</string>
     <string name="screenrecord_option_single_app" msgid="5954863081500035825">"錄製單一應用程式"</string>
-    <string name="screenrecord_warning_entire_screen" msgid="8141407178104195610">"進行錄製時，Android 可以存取顯示在螢幕畫面上或在裝置上播放的所有內容。因此請謹慎處理密碼、付款資料、訊息或其他機密資訊。"</string>
-    <string name="screenrecord_warning_single_app" msgid="7760723997065948283">"錄製應用程式時，Android 可以存取在該應用程式中顯示或播放的所有內容。因此請謹慎處理密碼、付款資料、訊息或其他機密資訊。"</string>
+    <string name="screenrecord_warning_entire_screen" msgid="8141407178104195610">"進行錄製時，Android 可存取顯示在螢幕畫面上或在裝置上播放的所有內容。因此請謹慎處理密碼、付款資料、訊息或其他敏感資料。"</string>
+    <string name="screenrecord_warning_single_app" msgid="7760723997065948283">"錄製應用程式時，Android 可存取在該應用程式中顯示或播放的所有內容。因此請謹慎處理密碼、付款資料、訊息或其他敏感資料。"</string>
     <string name="screenrecord_start_recording" msgid="348286842544768740">"開始錄製"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"錄音"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"裝置音訊"</string>
@@ -366,11 +366,11 @@
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"在錄影或投放時，此功能的服務供應商可以存取螢幕顯示或裝置播放的任何資料，當中包括密碼、付款詳情、相片、訊息和播放的語音等。"</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"要開始錄影或投放嗎？"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"要使用「<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>」開始錄影或投放嗎？"</string>
-    <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"允許 <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> 分享或錄製？"</string>
+    <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"允許 <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> 分享或錄製嗎？"</string>
     <string name="media_projection_permission_dialog_option_entire_screen" msgid="392086473225692983">"整個螢幕畫面"</string>
     <string name="media_projection_permission_dialog_option_single_app" msgid="1591110238124910521">"單一應用程式"</string>
-    <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"進行分享、錄製或投放時，<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> 可以存取顯示在螢幕畫面上或在裝置上播放的所有內容。因此請謹慎處理密碼、付款資料、訊息或其他機密資訊。"</string>
-    <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"進行分享、錄製或投放應用程式時，<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> 可以存取在該應用程式中顯示或播放的所有內容。因此請謹慎處理密碼、付款資料、訊息或其他機密資訊。"</string>
+    <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"進行分享、錄製或投放時，<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> 可存取顯示在螢幕畫面上或在裝置上播放的所有內容。因此請謹慎處理密碼、付款資料、訊息或其他敏感資料。"</string>
+    <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"進行分享、錄製或投放時，<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> 可存取顯示在螢幕畫面上或在裝置上播放的所有內容。因此請謹慎處理密碼、付款資料、訊息或其他敏感資料。"</string>
     <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"繼續"</string>
     <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"分享或錄製應用程式"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"全部清除"</string>
