@@ -192,16 +192,6 @@ class FooterActionsViewModelTest : SysuiTestCase() {
         // UserManager change.
         assertThat(iconTint()).isNull()
 
-        // Trigger a user info change: there should now be a tint.
-        userInfoController.updateInfo { userAccount = "doe" }
-        assertThat(iconTint())
-            .isEqualTo(
-                Utils.getColorAttrDefaultColor(
-                    context,
-                    android.R.attr.colorForeground,
-                )
-            )
-
         // Make sure we don't tint the icon if it is a user image (and not the default image), even
         // in guest mode.
         userInfoController.updateInfo { this.picture = mock<UserIconDrawable>() }

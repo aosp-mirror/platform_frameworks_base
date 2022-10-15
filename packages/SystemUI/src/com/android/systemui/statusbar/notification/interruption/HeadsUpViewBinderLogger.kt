@@ -47,6 +47,14 @@ class HeadsUpViewBinderLogger @Inject constructor(@NotificationHeadsUpLog val bu
             "start unbinding heads up entry $str1 "
         })
     }
+
+    fun entryBindStageParamsNullOnUnbind(entry: NotificationEntry) {
+        buffer.log(TAG, INFO, {
+            str1 = entry.logKey
+        }, {
+            "heads up entry bind stage params null on unbind $str1 "
+        })
+    }
 }
 
 private const val TAG = "HeadsUpViewBinder"
