@@ -1958,8 +1958,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"Qasja është e pamundur në <xliff:g id="DEVICE">%1$s</xliff:g>. Provoje në pajisjen Android TV më mirë."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"Qasja është e pamundur në <xliff:g id="DEVICE">%1$s</xliff:g>. Provoje në tablet më mirë."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Qasja është e pamundur në <xliff:g id="DEVICE">%1$s</xliff:g>. Provoje në telefon më mirë."</string>
-    <!-- no translation found for deprecated_target_sdk_message (5246906284426844596) -->
-    <skip />
+    <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Ky aplikacion është krijuar për një version më të vjetër të Android. Mund të mos funksionojë siç duhet dhe nuk përfshin mbrojtjet më të fundit të sigurisë dhe privatësisë. Kontrollo për një përditësim ose kontakto zhvilluesin e aplikacionit."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Kontrollo për përditësim"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Ke mesazhe të reja"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Hap aplikacionin SMS për ta parë"</string>

@@ -760,10 +760,10 @@
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Kontrolatu zenbat aldiz idatzi duzun oker pasahitza pantaila desblokeatzen saiatzean, eta blokeatu Android TV gailua edo ezabatu bertako datu guztiak pasahitza gehiegitan idazten baduzu oker."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Kontrolatu zenbatetan idazten duzun pasahitza oker pantaila desblokeatzen saiatzean eta, gehiegitan idazten bada oker, blokeatu informazio- eta aisia-sistema edo ezabatu hango eduki guztia."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Kontrolatu pantaila desblokeatzen saiatzean idatzitako pasahitz oker kopurua, eta blokeatu telefonoa edo ezabatu bere datuak pasahitza gehiegitan oker idazten bada."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Kontrolatu pantaila desblokeatzen saiatzean idatzitako pasahitz oker kopurua, eta blokeatu tableta edo ezabatu erabiltzailearen datuak pasahitza gehiegitan oker idazten bada."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Kontrolatu zenbat aldiz idatzi duzun oker pasahitza pantaila desblokeatzen saiatzean, eta blokeatu Android TV gailua edo ezabatu erabiltzailearen datuak pasahitza gehiegitan idazten baduzu oker."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Kontrolatu pantaila desblokeatzen saiatzean idatzitako pasahitz oker kopurua, eta blokeatu tableta edo ezabatu erabiltzaile-datuak pasahitza gehiegitan oker idazten bada."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Kontrolatu zenbat aldiz idatzi duzun oker pasahitza pantaila desblokeatzen saiatzean, eta blokeatu Android TV gailua edo ezabatu erabiltzaile-datuak pasahitza gehiegitan idazten baduzu oker."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Kontrolatu zenbatetan idazten duzun pasahitza oker pantaila desblokeatzen saiatzean eta, gehiegitan idazten bada oker, blokeatu informazio- eta aisia-sistema edo ezabatu profil honetako eduki guztia."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Kontrolatu pantaila desblokeatzen saiatzean idatzitako pasahitz oker kopurua, eta blokeatu telefonoa edo ezabatu erabiltzailearen datuak pasahitza gehiegitan oker idazten bada."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Kontrolatu pantaila desblokeatzen saiatzean idatzitako pasahitz oker kopurua, eta blokeatu telefonoa edo ezabatu erabiltzaile-datuak pasahitza gehiegitan oker idazten bada."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Aldatu pantailaren blokeoa"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Aldatu pantailaren blokeoa."</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"Blokeatu pantaila"</string>
@@ -774,7 +774,7 @@
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Berrezarri informazio- eta aisia-sistemako jatorrizko datuak abisatu gabe, bertan zegoen eduki guztia ezabatzeko."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Ezabatu telefonoaren datuak abisatu gabe, jatorrizko datuak berrezarrita."</string>
     <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Ezabatu profileko eduki guztia"</string>
-    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Ezabatu erabiltzailearen datuak"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Ezabatu erabiltzaile-datuak"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Ezabatu erabiltzaileak tabletan dituen datuak abisatu gabe."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Ezabatu erabiltzaileak Android TV gailuan dituen datuak abisatu gabe."</string>
     <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Ezabatu informazio- eta aisia-sisteman dagoen profil honetako eduki guztia abisatu gabe."</string>
@@ -1131,7 +1131,7 @@
     <string name="Midnight" msgid="8176019203622191377">"Gauerdia"</string>
     <string name="elapsed_time_short_format_mm_ss" msgid="8689459651807876423">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
     <string name="elapsed_time_short_format_h_mm_ss" msgid="2302144714803345056">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
-    <string name="selectAll" msgid="1532369154488982046">"Hautatu guztiak"</string>
+    <string name="selectAll" msgid="1532369154488982046">"Hautatu dena"</string>
     <string name="cut" msgid="2561199725874745819">"Ebaki"</string>
     <string name="copy" msgid="5472512047143665218">"Kopiatu"</string>
     <string name="failed_to_copy_to_clipboard" msgid="725919885138539875">"Ezin izan da kopiatu arbelean"</string>
@@ -1958,8 +1958,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"Aplikazioa ezin da <xliff:g id="DEVICE">%1$s</xliff:g> erabilita atzitu. Gailu horren ordez, erabili Android TV darabilen bat."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"Aplikazioa ezin da <xliff:g id="DEVICE">%1$s</xliff:g> erabilita atzitu. Gailu horren ordez, erabili tableta."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Aplikazioa ezin da <xliff:g id="DEVICE">%1$s</xliff:g> erabilita atzitu. Gailu horren ordez, erabili telefonoa."</string>
-    <!-- no translation found for deprecated_target_sdk_message (5246906284426844596) -->
-    <skip />
+    <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Android-en bertsio zaharrago baterako sortu da aplikazio hau. Baliteke behar bezala ez funtzionatzea, eta ez ditu barne hartzen azken segurtasun- eta pribatutasun-babesak. Begiratu ea eguneratzerik dagoen edo jarri aplikazioaren garatzailearekin harremanetan."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Bilatu eguneratzeak"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Mezu berriak dituzu"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Mezuak ikusteko, ireki SMSetarako aplikazioa"</string>
