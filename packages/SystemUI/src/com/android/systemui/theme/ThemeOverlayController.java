@@ -100,7 +100,7 @@ import javax.inject.Inject;
  * associated work profiles
  */
 @SysUISingleton
-public class ThemeOverlayController extends CoreStartable implements Dumpable {
+public class ThemeOverlayController implements CoreStartable, Dumpable {
     protected static final String TAG = "ThemeOverlayController";
     private static final boolean DEBUG = true;
 
@@ -114,6 +114,7 @@ public class ThemeOverlayController extends CoreStartable implements Dumpable {
     private final SecureSettings mSecureSettings;
     private final Executor mMainExecutor;
     private final Handler mBgHandler;
+    private final Context mContext;
     private final boolean mIsMonetEnabled;
     private final UserTracker mUserTracker;
     private final DeviceProvisionedController mDeviceProvisionedController;
@@ -361,8 +362,7 @@ public class ThemeOverlayController extends CoreStartable implements Dumpable {
             UserManager userManager, DeviceProvisionedController deviceProvisionedController,
             UserTracker userTracker, DumpManager dumpManager, FeatureFlags featureFlags,
             @Main Resources resources, WakefulnessLifecycle wakefulnessLifecycle) {
-        super(context);
-
+        mContext = context;
         mIsMonetEnabled = featureFlags.isEnabled(Flags.MONET);
         mDeviceProvisionedController = deviceProvisionedController;
         mBroadcastDispatcher = broadcastDispatcher;

@@ -26,7 +26,8 @@ import com.android.systemui.unfold.util.CallbackController
  *
  * onTransitionProgress callback could be called on each frame.
  *
- * Use [createUnfoldTransitionProgressProvider] to create instances of this interface
+ * Use [createUnfoldSharedComponent] to create instances of this interface when dagger is not
+ * available.
  */
 interface UnfoldTransitionProgressProvider : CallbackController<TransitionProgressListener> {
 

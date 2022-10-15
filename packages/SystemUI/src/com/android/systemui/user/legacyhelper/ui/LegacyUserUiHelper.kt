@@ -22,7 +22,6 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import com.android.systemui.R
 import com.android.systemui.user.data.source.UserRecord
-import kotlin.math.ceil
 
 /**
  * Defines utility functions for helping with legacy UI code for users.
@@ -32,16 +31,6 @@ import kotlin.math.ceil
  * simplify UserSwitcherController (or delete it), the code here could be moved into its call-sites.
  */
 object LegacyUserUiHelper {
-
-    /** Returns the maximum number of columns for user items in the user switcher. */
-    fun getMaxUserSwitcherItemColumns(userCount: Int): Int {
-        // TODO(b/243844097): remove this once we remove the old user switcher implementation.
-        return if (userCount < 5) {
-            4
-        } else {
-            ceil(userCount / 2.0).toInt()
-        }
-    }
 
     @JvmStatic
     @DrawableRes

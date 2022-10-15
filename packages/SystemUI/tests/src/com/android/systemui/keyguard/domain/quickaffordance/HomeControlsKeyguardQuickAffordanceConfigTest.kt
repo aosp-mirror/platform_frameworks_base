@@ -20,7 +20,7 @@ package com.android.systemui.keyguard.domain.quickaffordance
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.animation.ActivityLaunchAnimator
+import com.android.systemui.animation.Expandable
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.controls.dagger.ControlsComponent
 import com.android.systemui.keyguard.domain.quickaffordance.KeyguardQuickAffordanceConfig.OnClickedResult
@@ -44,7 +44,7 @@ import org.mockito.MockitoAnnotations
 class HomeControlsKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
 
     @Mock private lateinit var component: ControlsComponent
-    @Mock private lateinit var animationController: ActivityLaunchAnimator.Controller
+    @Mock private lateinit var expandable: Expandable
 
     private lateinit var underTest: HomeControlsKeyguardQuickAffordanceConfig
 
@@ -103,7 +103,7 @@ class HomeControlsKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
     fun `onQuickAffordanceClicked - canShowWhileLockedSetting is true`() = runBlockingTest {
         whenever(component.canShowWhileLockedSetting).thenReturn(MutableStateFlow(true))
 
-        val onClickedResult = underTest.onQuickAffordanceClicked(animationController)
+        val onClickedResult = underTest.onQuickAffordanceClicked(expandable)
 
         assertThat(onClickedResult).isInstanceOf(OnClickedResult.StartActivity::class.java)
         assertThat((onClickedResult as OnClickedResult.StartActivity).canShowWhileLocked).isTrue()
@@ -113,7 +113,7 @@ class HomeControlsKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
     fun `onQuickAffordanceClicked - canShowWhileLockedSetting is false`() = runBlockingTest {
         whenever(component.canShowWhileLockedSetting).thenReturn(MutableStateFlow(false))
 
-        val onClickedResult = underTest.onQuickAffordanceClicked(animationController)
+        val onClickedResult = underTest.onQuickAffordanceClicked(expandable)
 
         assertThat(onClickedResult).isInstanceOf(OnClickedResult.StartActivity::class.java)
         assertThat((onClickedResult as OnClickedResult.StartActivity).canShowWhileLocked).isFalse()

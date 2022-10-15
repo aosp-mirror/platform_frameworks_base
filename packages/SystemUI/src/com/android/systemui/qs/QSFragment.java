@@ -691,6 +691,15 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         if (mQSAnimator != null) {
             mQSAnimator.setPosition(expansion);
         }
+        if (mStatusBarStateController.getState() == StatusBarState.KEYGUARD
+                || mStatusBarStateController.getState() == StatusBarState.SHADE_LOCKED) {
+            // At beginning, state is 0 and will apply wrong squishiness to MediaHost in lockscreen
+            // and media player expect no change by squishiness in lock screen shade
+            mQsMediaHost.setSquishFraction(1.0F);
+        } else {
+            mQsMediaHost.setSquishFraction(mSquishinessFraction);
+        }
+
     }
 
     private void setAlphaAnimationProgress(float progress) {

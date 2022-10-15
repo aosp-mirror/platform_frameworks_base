@@ -231,7 +231,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
             }
 
             @Override
-            protected void onConfigurationChanged(Configuration newConfig) {
+            public void onConfigurationChanged(Configuration newConfig) {
                 super.onConfigurationChanged(newConfig);
                 mExecutor.runAllReady();
             }
