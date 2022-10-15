@@ -46,6 +46,7 @@ import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.annotation.UiThread;
 import android.annotation.UserIdInt;
 import android.app.ActivityThread;
 import android.compat.annotation.ChangeId;
@@ -771,7 +772,7 @@ public final class InputMethodManager {
             boolean forceFocus = false;
             synchronized (mH) {
                 // Update mNextServedView when focusedView changed.
-                onViewFocusChanged(viewForWindowFocus, true);
+                onViewFocusChangedInternal(viewForWindowFocus, true);
 
                 // Starting new input when the next focused view is same as served view but the
                 // currently active connection (if any) is not associated with it.
@@ -846,35 +847,7 @@ public final class InputMethodManager {
 
         @Override
         public void onViewFocusChanged(@Nullable View view, boolean hasFocus) {
-            if (view == null || view.isTemporarilyDetached()) {
-                return;
-            }
-            final ViewRootImpl viewRootImpl = view.getViewRootImpl();
-            synchronized (mH) {
-                if (mCurRootView != viewRootImpl) {
-                    return;
-                }
-                if (!view.hasImeFocus() || !view.hasWindowFocus()) {
-                    return;
-                }
-                if (DEBUG) {
-                    Log.d(TAG, "onViewFocusChanged, view=" + InputMethodDebug.dumpViewInfo(view));
-                }
-
-                // We don't need to track the next served view when the view lost focus here
-                // because:
-                // 1) The current view focus may be cleared temporary when in touch mode, closing
-                //    input at this moment isn't the right way.
-                // 2) We only care about the served view change when it focused, since changing
-                //    input connection when the focus target changed is reasonable.
-                // 3) Setting the next served view as null when no more served view should be
-                //    handled in other special events (e.g. view detached from window or the window
-                //    dismissed).
-                if (hasFocus) {
-                    mNextServedView = view;
-                }
-            }
-            viewRootImpl.dispatchCheckFocus();
+            onViewFocusChangedInternal(view, hasFocus);
         }
 
         @Override
@@ -2729,6 +2702,40 @@ public final class InputMethodManager {
         if (controller != null) {
             controller.checkFocus(false /* forceNewFocus */, true /* startInput */);
         }
+    }
+
+    @UiThread
+    private void onViewFocusChangedInternal(@Nullable View view, boolean hasFocus) {
+        if (view == null || view.isTemporarilyDetached()) {
+            return;
+        }
+        final ViewRootImpl viewRootImpl = view.getViewRootImpl();
+        synchronized (mH) {
+            if (mCurRootView != viewRootImpl) {
+                return;
+            }
+            if (!view.hasImeFocus() || !view.hasWindowFocus()) {
+                return;
+            }
+            if (DEBUG) {
+                Log.d(TAG, "onViewFocusChangedInternal, view="
+                        + InputMethodDebug.dumpViewInfo(view));
+            }
+
+            // We don't need to track the next served view when the view lost focus here
+            // because:
+            // 1) The current view focus may be cleared temporary when in touch mode, closing
+            //    input at this moment isn't the right way.
+            // 2) We only care about the served view change when it focused, since changing
+            //    input connection when the focus target changed is reasonable.
+            // 3) Setting the next served view as null when no more served view should be
+            //    handled in other special events (e.g. view detached from window or the window
+            //    dismissed).
+            if (hasFocus) {
+                mNextServedView = view;
+            }
+        }
+        viewRootImpl.dispatchCheckFocus();
     }
 
     @UnsupportedAppUsage
