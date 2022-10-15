@@ -94,16 +94,11 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notifikasi yang sedang berjalan untuk sesi rekaman layar"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Mulai merekam?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"Saat merekam, Sistem Android dapat ikut merekam informasi sensitif yang terlihat di layar atau diputar di perangkat Anda. Informasi ini mencakup sandi, info pembayaran, foto, pesan, dan audio."</string>
-    <!-- no translation found for screenrecord_option_entire_screen (1732437834603426934) -->
-    <skip />
-    <!-- no translation found for screenrecord_option_single_app (5954863081500035825) -->
-    <skip />
-    <!-- no translation found for screenrecord_warning_entire_screen (8141407178104195610) -->
-    <skip />
-    <!-- no translation found for screenrecord_warning_single_app (7760723997065948283) -->
-    <skip />
-    <!-- no translation found for screenrecord_start_recording (348286842544768740) -->
-    <skip />
+    <string name="screenrecord_option_entire_screen" msgid="1732437834603426934">"Rekam seluruh layar"</string>
+    <string name="screenrecord_option_single_app" msgid="5954863081500035825">"Rekam satu aplikasi"</string>
+    <string name="screenrecord_warning_entire_screen" msgid="8141407178104195610">"Saat Anda merekam, Android akan memiliki akses ke semua hal yang ditampilkan di layar atau yang diputar di perangkat Anda. Jadi, berhati-hatilah saat memasukkan sandi, detail pembayaran, pesan, atau informasi sensitif lainnya."</string>
+    <string name="screenrecord_warning_single_app" msgid="7760723997065948283">"Saat Anda merekam aplikasi, Android akan memiliki akses ke semua hal yang ditampilkan atau yang diputar di aplikasi tersebut. Jadi, berhati-hatilah saat memasukkan sandi, detail pembayaran, pesan, atau informasi sensitif lainnya."</string>
+    <string name="screenrecord_start_recording" msgid="348286842544768740">"Mulai merekam"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Rekam audio"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Audio perangkat"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Suara dari perangkat Anda, seperti musik, panggilan, dan nada dering"</string>
@@ -371,20 +366,13 @@
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Layanan yang menyediakan fungsi ini akan memiliki akses ke semua informasi yang terlihat di layar atau diputar dari perangkat saat merekam atau melakukan transmisi. Ini mencakup informasi seperti sandi, detail pembayaran, foto, pesan, dan audio yang Anda putar."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Mulai merekam atau melakukan transmisi?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Mulai merekam atau melakukan transmisi dengan <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
-    <!-- no translation found for media_projection_permission_dialog_title (7130975432309482596) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_option_entire_screen (392086473225692983) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_option_single_app (1591110238124910521) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_warning_entire_screen (3989078820637452717) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_warning_single_app (1659532781536753059) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_continue (1827799658916736006) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_app_selector_title (894251621057480704) -->
-    <skip />
+    <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"Izinkan <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> untuk membagikan atau merekam?"</string>
+    <string name="media_projection_permission_dialog_option_entire_screen" msgid="392086473225692983">"Seluruh layar"</string>
+    <string name="media_projection_permission_dialog_option_single_app" msgid="1591110238124910521">"Satu aplikasi"</string>
+    <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"Jika Anda membagikan, merekam, atau mentransmisikan, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> akan memiliki akses ke semua hal yang ditampilkan di layar atau yang diputar di perangkat Anda. Jadi, berhati-hatilah saat memasukkan sandi, detail pembayaran, pesan, atau informasi sensitif lainnya."</string>
+    <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"Jika Anda membagikan, merekam, atau mentransmisikan suatu aplikasi, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> akan memiliki akses ke semua hal yang ditampilkan atau yang diputar di aplikasi tersebut. Jadi, berhati-hatilah saat memasukkan sandi, detail pembayaran, pesan, atau informasi sensitif lainnya."</string>
+    <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"Lanjutkan"</string>
+    <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"Bagikan atau rekam aplikasi"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Hapus semua"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Kelola"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Histori"</string>
