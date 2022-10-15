@@ -249,7 +249,7 @@ constructor(
 
     override fun startActivity(intent: Intent) {
         if (useInteractor) {
-            activityStarter.startActivity(intent, /* dismissShade= */ false)
+            activityStarter.startActivity(intent, /* dismissShade= */ true)
         } else {
             _oldImpl.startActivity(intent)
         }

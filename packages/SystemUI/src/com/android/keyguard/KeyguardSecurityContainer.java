@@ -67,7 +67,6 @@ import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.view.WindowInsetsAnimation;
 import android.view.WindowManager;
-import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -318,7 +317,8 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
     }
 
     void initMode(@Mode int mode, GlobalSettings globalSettings, FalsingManager falsingManager,
-            UserSwitcherController userSwitcherController) {
+            UserSwitcherController userSwitcherController,
+            UserSwitcherViewMode.UserSwitcherCallback userSwitcherCallback) {
         if (mCurrentMode == mode) return;
         Log.i(TAG, "Switching mode from " + modeToString(mCurrentMode) + " to "
                 + modeToString(mode));
@@ -330,7 +330,7 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
                 mViewMode = new OneHandedViewMode();
                 break;
             case MODE_USER_SWITCHER:
-                mViewMode = new UserSwitcherViewMode();
+                mViewMode = new UserSwitcherViewMode(userSwitcherCallback);
                 break;
             default:
                 mViewMode = new DefaultViewMode();
@@ -864,6 +864,12 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
         private UserSwitcherController.UserSwitchCallback mUserSwitchCallback =
                 this::setupUserSwitcher;
 
+        private UserSwitcherCallback mUserSwitcherCallback;
+
+        UserSwitcherViewMode(UserSwitcherCallback userSwitcherCallback) {
+            mUserSwitcherCallback = userSwitcherCallback;
+        }
+
         @Override
         public void init(@NonNull ConstraintLayout v, @NonNull GlobalSettings globalSettings,
                 @NonNull KeyguardSecurityViewFlipper viewFlipper,
@@ -1040,34 +1046,25 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
                 }
             };
 
-            if (adapter.getCount() < 2) {
-                // The drop down arrow is at index 1
-                ((LayerDrawable) mUserSwitcher.getBackground()).getDrawable(1).setAlpha(0);
-                anchor.setClickable(false);
-                return;
-            } else {
-                ((LayerDrawable) mUserSwitcher.getBackground()).getDrawable(1).setAlpha(255);
-            }
-
             anchor.setOnClickListener((v) -> {
                 if (mFalsingManager.isFalseTap(LOW_PENALTY)) return;
                 mPopup = new KeyguardUserSwitcherPopupMenu(v.getContext(), mFalsingManager);
                 mPopup.setAnchorView(anchor);
                 mPopup.setAdapter(adapter);
-                mPopup.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                        public void onItemClick(AdapterView parent, View view, int pos, long id) {
-                            if (mFalsingManager.isFalseTap(LOW_PENALTY)) return;
-                            if (!view.isEnabled()) return;
-
-                            // Subtract one for the header
-                            UserRecord user = adapter.getItem(pos - 1);
-                            if (!user.isCurrent) {
-                                adapter.onUserListItemClicked(user);
-                            }
-                            mPopup.dismiss();
-                            mPopup = null;
-                        }
-                    });
+                mPopup.setOnItemClickListener((parent, view, pos, id) -> {
+                    if (mFalsingManager.isFalseTap(LOW_PENALTY)) return;
+                    if (!view.isEnabled()) return;
+                    // Subtract one for the header
+                    UserRecord user = adapter.getItem(pos - 1);
+                    if (user.isManageUsers || user.isAddSupervisedUser) {
+                        mUserSwitcherCallback.showUnlockToContinueMessage();
+                    }
+                    if (!user.isCurrent) {
+                        adapter.onUserListItemClicked(user);
+                    }
+                    mPopup.dismiss();
+                    mPopup = null;
+                });
                 mPopup.show();
             });
         }
@@ -1121,6 +1118,10 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
                 constraintSet.constrainHeight(mViewFlipper.getId(), MATCH_CONSTRAINT);
                 constraintSet.applyTo(mView);
             }
+        }
+
+        interface UserSwitcherCallback {
+            void showUnlockToContinueMessage();
         }
     }
 
