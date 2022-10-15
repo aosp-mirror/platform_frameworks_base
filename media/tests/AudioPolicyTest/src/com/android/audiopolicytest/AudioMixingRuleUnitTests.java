@@ -22,9 +22,11 @@ import static android.media.audiopolicy.AudioMixingRule.MIX_ROLE_INJECTOR;
 import static android.media.audiopolicy.AudioMixingRule.MIX_ROLE_PLAYERS;
 import static android.media.audiopolicy.AudioMixingRule.RULE_EXCLUDE_ATTRIBUTE_CAPTURE_PRESET;
 import static android.media.audiopolicy.AudioMixingRule.RULE_EXCLUDE_ATTRIBUTE_USAGE;
+import static android.media.audiopolicy.AudioMixingRule.RULE_EXCLUDE_AUDIO_SESSION_ID;
 import static android.media.audiopolicy.AudioMixingRule.RULE_EXCLUDE_UID;
 import static android.media.audiopolicy.AudioMixingRule.RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET;
 import static android.media.audiopolicy.AudioMixingRule.RULE_MATCH_ATTRIBUTE_USAGE;
+import static android.media.audiopolicy.AudioMixingRule.RULE_MATCH_AUDIO_SESSION_ID;
 import static android.media.audiopolicy.AudioMixingRule.RULE_MATCH_UID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -61,12 +63,14 @@ public class AudioMixingRuleUnitTests {
             new AudioAttributes.Builder().setCapturePreset(VOICE_RECOGNITION).build();
     private static final int TEST_UID = 42;
     private static final int OTHER_UID = 77;
+    private static final int TEST_SESSION_ID = 1234;
 
     @Test
     public void testConstructValidRule() {
         AudioMixingRule rule = new AudioMixingRule.Builder()
                 .addMixRule(RULE_MATCH_ATTRIBUTE_USAGE, USAGE_MEDIA_AUDIO_ATTRIBUTES)
                 .addMixRule(RULE_MATCH_UID, TEST_UID)
+                .excludeMixRule(RULE_MATCH_AUDIO_SESSION_ID, TEST_SESSION_ID)
                 .build();
 
         // Based on the rules, the mix type should fall back to MIX_ROLE_PLAYERS,
@@ -74,7 +78,8 @@ public class AudioMixingRuleUnitTests {
         assertEquals(rule.getTargetMixRole(), MIX_ROLE_PLAYERS);
         assertThat(rule.getCriteria(), containsInAnyOrder(
                 isAudioMixMatchUsageCriterion(USAGE_MEDIA),
-                isAudioMixMatchUidCriterion(TEST_UID)));
+                isAudioMixMatchUidCriterion(TEST_UID),
+                isAudioMixExcludeSessionCriterion(TEST_SESSION_ID)));
     }
 
     @Test
@@ -183,6 +188,30 @@ public class AudioMixingRuleUnitTests {
                         .build());
     }
 
+    @Test
+    public void sessionIdRuleCompatibleWithPlayersMix() {
+        int sessionId = 42;
+        AudioMixingRule rule = new AudioMixingRule.Builder()
+                .addMixRule(RULE_MATCH_AUDIO_SESSION_ID, sessionId)
+                .setTargetMixRole(MIX_ROLE_PLAYERS)
+                .build();
+
+        assertEquals(rule.getTargetMixRole(), MIX_ROLE_PLAYERS);
+        assertThat(rule.getCriteria(), containsInAnyOrder(isAudioMixSessionCriterion(sessionId)));
+    }
+
+    @Test
+    public void sessionIdRuleCompatibleWithInjectorMix() {
+        AudioMixingRule rule = new AudioMixingRule.Builder()
+                .addMixRule(RULE_MATCH_AUDIO_SESSION_ID, TEST_SESSION_ID)
+                .setTargetMixRole(MIX_ROLE_INJECTOR)
+                .build();
+
+        assertEquals(rule.getTargetMixRole(), MIX_ROLE_INJECTOR);
+        assertThat(rule.getCriteria(),
+                containsInAnyOrder(isAudioMixSessionCriterion(TEST_SESSION_ID)));
+    }
+
 
     private static Matcher isAudioMixUidCriterion(int uid, boolean exclude) {
         return new CustomTypeSafeMatcher<AudioMixMatchCriterion>("uid mix criterion") {
@@ -257,5 +286,31 @@ public class AudioMixingRuleUnitTests {
         return isAudioMixUsageCriterion(usage, /*exclude=*/ false);
     }
 
+    private static Matcher isAudioMixSessionCriterion(int sessionId, boolean exclude) {
+        return new CustomTypeSafeMatcher<AudioMixMatchCriterion>("sessionId mix criterion") {
+            @Override
+            public boolean matchesSafely(AudioMixMatchCriterion item) {
+                int excludeRule =
+                        exclude ? RULE_EXCLUDE_AUDIO_SESSION_ID : RULE_MATCH_AUDIO_SESSION_ID;
+                return item.getRule() == excludeRule && item.getIntProp() == sessionId;
+            }
+
+            @Override
+            public void describeMismatchSafely(
+                    AudioMixMatchCriterion item, Description mismatchDescription) {
+                mismatchDescription.appendText(
+                        String.format("is not %s criterion with session id %d",
+                        exclude ? "exclude" : "match", sessionId));
+            }
+        };
+    }
+
+    private static Matcher isAudioMixSessionCriterion(int sessionId) {
+        return isAudioMixSessionCriterion(sessionId, /*exclude=*/ false);
+    }
+
+    private static Matcher isAudioMixExcludeSessionCriterion(int sessionId) {
+        return isAudioMixSessionCriterion(sessionId, /*exclude=*/ true);
+    }
 
 }

@@ -26,8 +26,6 @@ import android.util.proto.ProtoOutputStream;
 import android.view.inputmethod.InputMethodManager;
 
 import com.android.internal.inputmethod.InputMethodDebug;
-import com.android.internal.inputmethod.StartInputFlags;
-import com.android.internal.inputmethod.StartInputReason;
 
 /**
  * Responsible for IME focus handling inside {@link ViewRootImpl}.
@@ -67,7 +65,8 @@ public final class ImeFocusController {
 
     @UiThread
     void onTraversal(boolean hasWindowFocus, WindowManager.LayoutParams windowAttribute) {
-        final boolean hasImeFocus = updateImeFocusable(windowAttribute, false /* force */);
+        final boolean hasImeFocus = WindowManager.LayoutParams.mayUseInputMethod(
+                windowAttribute.flags);
         if (!hasWindowFocus || isInLocalFocusMode(windowAttribute)) {
             return;
         }
@@ -76,30 +75,20 @@ public final class ImeFocusController {
         }
         mHasImeFocus = hasImeFocus;
         if (mHasImeFocus) {
-            onPreWindowFocus(true /* hasWindowFocus */, windowAttribute);
-            onPostWindowFocus(mViewRootImpl.mView.findFocus(), true /* hasWindowFocus */,
-                    windowAttribute);
+            getImmDelegate().onPreWindowGainedFocus(mViewRootImpl);
+            final View focusedView = mViewRootImpl.mView.findFocus();
+            View viewForWindowFocus = focusedView != null ? focusedView : mViewRootImpl.mView;
+            getImmDelegate().onPostWindowGainedFocus(viewForWindowFocus, windowAttribute);
         }
     }
 
     @UiThread
     void onPreWindowFocus(boolean hasWindowFocus, WindowManager.LayoutParams windowAttribute) {
-        if (!mHasImeFocus || isInLocalFocusMode(windowAttribute)) {
+        mHasImeFocus = WindowManager.LayoutParams.mayUseInputMethod(windowAttribute.flags);
+        if (!hasWindowFocus || !mHasImeFocus || isInLocalFocusMode(windowAttribute)) {
             return;
         }
-        if (hasWindowFocus) {
-            getImmDelegate().setCurrentRootView(mViewRootImpl);
-        }
-    }
-
-    @UiThread
-    boolean updateImeFocusable(WindowManager.LayoutParams windowAttribute, boolean force) {
-        final boolean hasImeFocus = WindowManager.LayoutParams.mayUseInputMethod(
-                windowAttribute.flags);
-        if (force) {
-            mHasImeFocus = hasImeFocus;
-        }
-        return hasImeFocus;
+        getImmDelegate().onPreWindowGainedFocus(mViewRootImpl);
     }
 
     @UiThread
@@ -115,7 +104,7 @@ public final class ImeFocusController {
                     windowAttribute.softInputMode));
         }
 
-        getImmDelegate().onPostWindowFocus(viewForWindowFocus, windowAttribute);
+        getImmDelegate().onPostWindowGainedFocus(viewForWindowFocus, windowAttribute);
     }
 
     /**
@@ -189,14 +178,8 @@ public final class ImeFocusController {
      * @hide
      */
     public interface InputMethodManagerDelegate {
-        /**
-         * Starts the input connection.
-         */
-        boolean startInput(@StartInputReason int startInputReason, View focusedView,
-                @StartInputFlags int startInputFlags,
-                @WindowManager.LayoutParams.SoftInputModeFlags int softInputMode, int windowFlags);
-
-        void onPostWindowFocus(View viewForWindowFocus,
+        void onPreWindowGainedFocus(ViewRootImpl viewRootImpl);
+        void onPostWindowGainedFocus(View viewForWindowFocus,
                 @NonNull WindowManager.LayoutParams windowAttribute);
         void onViewFocusChanged(@NonNull View view, boolean hasFocus);
         boolean checkFocus(boolean forceNewFocus, boolean startInput, ViewRootImpl viewRootImpl);
@@ -204,7 +187,6 @@ public final class ImeFocusController {
         void onWindowDismissed(ViewRootImpl viewRootImpl);
 
         void finishInputAndReportToIme();
-        void setCurrentRootView(ViewRootImpl rootView);
         boolean isCurrentRootView(ViewRootImpl rootView);
     }
 

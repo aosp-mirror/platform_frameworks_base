@@ -105,10 +105,6 @@ public class Flags {
      */
     public static final UnreleasedFlag MODERN_BOUNCER = new UnreleasedFlag(208);
 
-    /** Whether UserSwitcherActivity should use modern architecture. */
-    public static final ReleasedFlag MODERN_USER_SWITCHER_ACTIVITY =
-            new ReleasedFlag(209, true);
-
     /**
      * Whether the user interactor and repository should use `UserSwitcherController`.
      *
@@ -308,6 +304,9 @@ public class Flags {
     // 1600 - accessibility
     public static final UnreleasedFlag A11Y_FLOATING_MENU_FLING_SPRING_ANIMATIONS =
             new UnreleasedFlag(1600);
+
+    // 1700 - clipboard
+    public static final UnreleasedFlag CLIPBOARD_OVERLAY_REFACTOR = new UnreleasedFlag(1700);
 
     // Pay no attention to the reflection behind the curtain.
     // ========================== Curtain ==========================

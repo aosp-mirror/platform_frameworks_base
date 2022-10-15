@@ -21,6 +21,7 @@ import static android.view.WindowManagerPolicyConstants.TYPE_LAYER_OFFSET;
 import static android.window.TransitionInfo.FLAG_IS_BEHIND_STARTING_WINDOW;
 
 import static com.android.wm.shell.transition.TransitionAnimationHelper.addBackgroundToTransition;
+import static com.android.wm.shell.transition.TransitionAnimationHelper.edgeExtendWindow;
 import static com.android.wm.shell.transition.TransitionAnimationHelper.getTransitionBackgroundColorIfSet;
 
 import android.animation.Animator;
@@ -45,6 +46,7 @@ import com.android.wm.shell.transition.Transitions;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 
 /** To run the ActivityEmbedding animations. */
 class ActivityEmbeddingAnimationRunner {
@@ -65,10 +67,31 @@ class ActivityEmbeddingAnimationRunner {
     void startAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction) {
+        // There may be some surface change that we want to apply after the start transaction is
+        // applied to make sure the surface is ready.
+        final List<Consumer<SurfaceControl.Transaction>> postStartTransactionCallbacks =
+                new ArrayList<>();
         final Animator animator = createAnimator(info, startTransaction, finishTransaction,
-                () -> mController.onAnimationFinished(transition));
-        startTransaction.apply();
-        animator.start();
+                () -> mController.onAnimationFinished(transition), postStartTransactionCallbacks);
+
+        // Start the animation.
+        if (!postStartTransactionCallbacks.isEmpty()) {
+            // postStartTransactionCallbacks require that the start transaction is already
+            // applied to run otherwise they may result in flickers and UI inconsistencies.
+            startTransaction.apply(true /* sync */);
+
+            // Run tasks that require startTransaction to already be applied
+            final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+            for (Consumer<SurfaceControl.Transaction> postStartTransactionCallback :
+                    postStartTransactionCallbacks) {
+                postStartTransactionCallback.accept(t);
+            }
+            t.apply();
+            animator.start();
+        } else {
+            startTransaction.apply();
+            animator.start();
+        }
     }
 
     /**
@@ -85,9 +108,13 @@ class ActivityEmbeddingAnimationRunner {
     Animator createAnimator(@NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
-            @NonNull Runnable animationFinishCallback) {
-        final List<ActivityEmbeddingAnimationAdapter> adapters =
-                createAnimationAdapters(info, startTransaction, finishTransaction);
+            @NonNull Runnable animationFinishCallback,
+            @NonNull List<Consumer<SurfaceControl.Transaction>> postStartTransactionCallbacks) {
+        final List<ActivityEmbeddingAnimationAdapter> adapters = createAnimationAdapters(info,
+                startTransaction);
+        addEdgeExtensionIfNeeded(startTransaction, finishTransaction, postStartTransactionCallbacks,
+                adapters);
+        addBackgroundColorIfNeeded(info, startTransaction, finishTransaction, adapters);
         long duration = 0;
         for (ActivityEmbeddingAnimationAdapter adapter : adapters) {
             duration = Math.max(duration, adapter.getDurationHint());
@@ -131,8 +158,7 @@ class ActivityEmbeddingAnimationRunner {
      */
     @NonNull
     private List<ActivityEmbeddingAnimationAdapter> createAnimationAdapters(
-            @NonNull TransitionInfo info, @NonNull SurfaceControl.Transaction startTransaction,
-            @NonNull SurfaceControl.Transaction finishTransaction) {
+            @NonNull TransitionInfo info, @NonNull SurfaceControl.Transaction startTransaction) {
         boolean isChangeTransition = false;
         for (TransitionInfo.Change change : info.getChanges()) {
             if (change.hasFlags(FLAG_IS_BEHIND_STARTING_WINDOW)) {
@@ -148,25 +174,23 @@ class ActivityEmbeddingAnimationRunner {
             return createChangeAnimationAdapters(info, startTransaction);
         }
         if (Transitions.isClosingType(info.getType())) {
-            return createCloseAnimationAdapters(info, startTransaction, finishTransaction);
+            return createCloseAnimationAdapters(info);
         }
-        return createOpenAnimationAdapters(info, startTransaction, finishTransaction);
+        return createOpenAnimationAdapters(info);
     }
 
     @NonNull
     private List<ActivityEmbeddingAnimationAdapter> createOpenAnimationAdapters(
-            @NonNull TransitionInfo info, @NonNull SurfaceControl.Transaction startTransaction,
-            @NonNull SurfaceControl.Transaction finishTransaction) {
-        return createOpenCloseAnimationAdapters(info, startTransaction, finishTransaction,
-                true /* isOpening */, mAnimationSpec::loadOpenAnimation);
+            @NonNull TransitionInfo info) {
+        return createOpenCloseAnimationAdapters(info, true /* isOpening */,
+                mAnimationSpec::loadOpenAnimation);
     }
 
     @NonNull
     private List<ActivityEmbeddingAnimationAdapter> createCloseAnimationAdapters(
-            @NonNull TransitionInfo info, @NonNull SurfaceControl.Transaction startTransaction,
-            @NonNull SurfaceControl.Transaction finishTransaction) {
-        return createOpenCloseAnimationAdapters(info, startTransaction, finishTransaction,
-                false /* isOpening */, mAnimationSpec::loadCloseAnimation);
+            @NonNull TransitionInfo info) {
+        return createOpenCloseAnimationAdapters(info, false /* isOpening */,
+                mAnimationSpec::loadCloseAnimation);
     }
 
     /**
@@ -175,8 +199,7 @@ class ActivityEmbeddingAnimationRunner {
      */
     @NonNull
     private List<ActivityEmbeddingAnimationAdapter> createOpenCloseAnimationAdapters(
-            @NonNull TransitionInfo info, @NonNull SurfaceControl.Transaction startTransaction,
-            @NonNull SurfaceControl.Transaction finishTransaction, boolean isOpening,
+            @NonNull TransitionInfo info, boolean isOpening,
             @NonNull AnimationProvider animationProvider) {
         // We need to know if the change window is only a partial of the whole animation screen.
         // If so, we will need to adjust it to make the whole animation screen looks like one.
@@ -200,8 +223,7 @@ class ActivityEmbeddingAnimationRunner {
         final List<ActivityEmbeddingAnimationAdapter> adapters = new ArrayList<>();
         for (TransitionInfo.Change change : openingChanges) {
             final ActivityEmbeddingAnimationAdapter adapter = createOpenCloseAnimationAdapter(
-                    info, change, startTransaction, finishTransaction, animationProvider,
-                    openingWholeScreenBounds);
+                    info, change, animationProvider, openingWholeScreenBounds);
             if (isOpening) {
                 adapter.overrideLayer(offsetLayer++);
             }
@@ -209,8 +231,7 @@ class ActivityEmbeddingAnimationRunner {
         }
         for (TransitionInfo.Change change : closingChanges) {
             final ActivityEmbeddingAnimationAdapter adapter = createOpenCloseAnimationAdapter(
-                    info, change, startTransaction, finishTransaction, animationProvider,
-                    closingWholeScreenBounds);
+                    info, change, animationProvider, closingWholeScreenBounds);
             if (!isOpening) {
                 adapter.overrideLayer(offsetLayer++);
             }
@@ -219,20 +240,51 @@ class ActivityEmbeddingAnimationRunner {
         return adapters;
     }
 
+    /** Adds edge extension to the surfaces that have such an animation property. */
+    private void addEdgeExtensionIfNeeded(@NonNull SurfaceControl.Transaction startTransaction,
+            @NonNull SurfaceControl.Transaction finishTransaction,
+            @NonNull List<Consumer<SurfaceControl.Transaction>> postStartTransactionCallbacks,
+            @NonNull List<ActivityEmbeddingAnimationAdapter> adapters) {
+        for (ActivityEmbeddingAnimationAdapter adapter : adapters) {
+            final Animation animation = adapter.mAnimation;
+            if (!animation.hasExtension()) {
+                continue;
+            }
+            final TransitionInfo.Change change = adapter.mChange;
+            if (Transitions.isOpeningType(adapter.mChange.getMode())) {
+                // Need to screenshot after startTransaction is applied otherwise activity
+                // may not be visible or ready yet.
+                postStartTransactionCallbacks.add(
+                        t -> edgeExtendWindow(change, animation, t, finishTransaction));
+            } else {
+                // Can screenshot now (before startTransaction is applied)
+                edgeExtendWindow(change, animation, startTransaction, finishTransaction);
+            }
+        }
+    }
+
+    /** Adds background color to the transition if any animation has such a property. */
+    private void addBackgroundColorIfNeeded(@NonNull TransitionInfo info,
+            @NonNull SurfaceControl.Transaction startTransaction,
+            @NonNull SurfaceControl.Transaction finishTransaction,
+            @NonNull List<ActivityEmbeddingAnimationAdapter> adapters) {
+        for (ActivityEmbeddingAnimationAdapter adapter : adapters) {
+            final int backgroundColor = getTransitionBackgroundColorIfSet(info, adapter.mChange,
+                    adapter.mAnimation, 0 /* defaultColor */);
+            if (backgroundColor != 0) {
+                // We only need to show one color.
+                addBackgroundToTransition(info.getRootLeash(), backgroundColor, startTransaction,
+                        finishTransaction);
+                return;
+            }
+        }
+    }
+
     @NonNull
     private ActivityEmbeddingAnimationAdapter createOpenCloseAnimationAdapter(
             @NonNull TransitionInfo info, @NonNull TransitionInfo.Change change,
-            @NonNull SurfaceControl.Transaction startTransaction,
-            @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull AnimationProvider animationProvider, @NonNull Rect wholeAnimationBounds) {
         final Animation animation = animationProvider.get(info, change, wholeAnimationBounds);
-        // We may want to show a background color for open/close transition.
-        final int backgroundColor = getTransitionBackgroundColorIfSet(info, change, animation,
-                0 /* defaultColor */);
-        if (backgroundColor != 0) {
-            addBackgroundToTransition(info.getRootLeash(), backgroundColor, startTransaction,
-                    finishTransaction);
-        }
         return new ActivityEmbeddingAnimationAdapter(animation, change, change.getLeash(),
                 wholeAnimationBounds);
     }

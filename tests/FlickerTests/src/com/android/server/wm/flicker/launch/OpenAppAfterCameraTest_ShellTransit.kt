@@ -24,6 +24,7 @@ import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import org.junit.Assume
 import org.junit.Before
 import org.junit.FixMethodOrder
+import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
@@ -47,96 +48,115 @@ class OpenAppAfterCameraTest_ShellTransit(testSpec: FlickerTestParameter) :
     }
 
     @FlakyTest
+    @Test
     override fun appLayerReplacesLauncher() {
         super.appLayerReplacesLauncher()
     }
 
     @FlakyTest
+    @Test
     override fun appLayerBecomesVisible() {
         super.appLayerBecomesVisible()
     }
 
     @FlakyTest
+    @Test
     override fun appWindowBecomesTopWindow() {
         super.appWindowBecomesTopWindow()
     }
 
     @FlakyTest
+    @Test
     override fun appWindowBecomesVisible() {
         super.appWindowBecomesVisible()
     }
 
     @FlakyTest
+    @Test
     override fun appWindowIsTopWindowAtEnd() {
         super.appWindowIsTopWindowAtEnd()
     }
 
     @FlakyTest
+    @Test
     override fun appWindowReplacesLauncherAsTopWindow() {
         super.appWindowReplacesLauncherAsTopWindow()
     }
 
     @FlakyTest
+    @Test
     override fun entireScreenCovered() {
         super.entireScreenCovered()
     }
 
     @FlakyTest
+    @Test
     override fun navBarLayerIsVisibleAtStartAndEnd() {
         super.navBarLayerIsVisibleAtStartAndEnd()
     }
 
     @FlakyTest
+    @Test
     override fun navBarLayerPositionAtStartAndEnd() {
         super.navBarLayerPositionAtStartAndEnd()
     }
 
     @FlakyTest
+    @Test
     override fun navBarWindowIsAlwaysVisible() {
         super.navBarWindowIsAlwaysVisible()
     }
 
     @FlakyTest
+    @Test
     override fun statusBarLayerIsVisibleAtStartAndEnd() {
         super.statusBarLayerIsVisibleAtStartAndEnd()
     }
 
     @FlakyTest
+    @Test
     override fun statusBarLayerPositionAtStartAndEnd() {
         super.statusBarLayerPositionAtStartAndEnd()
     }
 
     @FlakyTest
+    @Test
     override fun statusBarWindowIsAlwaysVisible() {
         super.statusBarWindowIsAlwaysVisible()
     }
 
     @FlakyTest
+    @Test
     override fun taskBarLayerIsVisibleAtStartAndEnd() {
         super.taskBarLayerIsVisibleAtStartAndEnd()
     }
 
     @FlakyTest
+    @Test
     override fun taskBarWindowIsAlwaysVisible() {
         super.taskBarWindowIsAlwaysVisible()
     }
 
     @FlakyTest
+    @Test
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
         super.visibleLayersShownMoreThanOneConsecutiveEntry()
     }
 
     @FlakyTest
+    @Test
     override fun visibleWindowsShownMoreThanOneConsecutiveEntry() {
         super.visibleWindowsShownMoreThanOneConsecutiveEntry()
     }
 
     @FlakyTest
+    @Test
     override fun focusChanges() {
         super.focusChanges()
     }
 
     @FlakyTest
+    @Test
     override fun appWindowAsTopWindowAtEnd() {
         super.appWindowAsTopWindowAtEnd()
     }

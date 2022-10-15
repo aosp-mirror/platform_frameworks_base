@@ -737,28 +737,6 @@ public final class InputMethodManager {
 
     private final class DelegateImpl implements
             ImeFocusController.InputMethodManagerDelegate {
-        /**
-         * Used by {@link ImeFocusController} to start input connection.
-         */
-        @Override
-        public boolean startInput(@StartInputReason int startInputReason, View focusedView,
-                @StartInputFlags int startInputFlags, @SoftInputModeFlags int softInputMode,
-                int windowFlags) {
-            ImeTracing.getInstance().triggerClientDump(
-                    "InputMethodManager.DelegateImpl#startInput", InputMethodManager.this,
-                    null /* icProto */);
-            return startInputOnWindowFocusGainInternal(startInputReason, focusedView,
-                    startInputFlags, softInputMode, windowFlags);
-        }
-
-        private void finishInput() {
-            ImeTracing.getInstance().triggerClientDump(
-                    "InputMethodManager.DelegateImpl#finishInput", InputMethodManager.this,
-                    null /* icProto */);
-            synchronized (mH) {
-                finishInputLocked();
-            }
-        }
 
         /**
          * Used by {@link ImeFocusController} to finish input connection and callback
@@ -781,7 +759,14 @@ public final class InputMethodManager {
         }
 
         @Override
-        public void onPostWindowFocus(View viewForWindowFocus,
+        public void onPreWindowGainedFocus(ViewRootImpl viewRootImpl) {
+            synchronized (mH) {
+                setCurrentRootViewLocked(viewRootImpl);
+            }
+        }
+
+        @Override
+        public void onPostWindowGainedFocus(View viewForWindowFocus,
                 @NonNull WindowManager.LayoutParams windowAttribute) {
             boolean forceFocus = false;
             synchronized (mH) {
@@ -912,7 +897,7 @@ public final class InputMethodManager {
                 }
                 // Close the connection when no next served view coming.
                 if (mNextServedView == null) {
-                    finishInput();
+                    finishInputLocked();
                     closeCurrentInput();
                     return false;
                 }
@@ -923,7 +908,8 @@ public final class InputMethodManager {
             }
 
             if (startInput) {
-                startInput(StartInputReason.CHECK_FOCUS, null /* focusedView */,
+                startInputOnWindowFocusGainInternal(StartInputReason.CHECK_FOCUS,
+                        null /* focusedView */,
                         0 /* startInputFlags */, 0 /* softInputMode */, 0 /* windowFlags */);
             }
             return true;
@@ -951,21 +937,16 @@ public final class InputMethodManager {
                     return;
                 }
                 if (mServedView != null) {
-                    finishInput();
+                    finishInputLocked();
                 }
-                setCurrentRootView(null);
+                setCurrentRootViewLocked(null);
             }
         }
 
-        /**
-         * Used for {@link ImeFocusController} to set the current focused root view.
-         */
-        @Override
-        public void setCurrentRootView(ViewRootImpl rootView) {
-            synchronized (mH) {
-                mImeDispatcher.switchRootView(mCurRootView, rootView);
-                mCurRootView = rootView;
-            }
+        @GuardedBy("mH")
+        private void setCurrentRootViewLocked(ViewRootImpl rootView) {
+            mImeDispatcher.switchRootView(mCurRootView, rootView);
+            mCurRootView = rootView;
         }
 
         /**
@@ -2413,7 +2394,7 @@ public final class InputMethodManager {
     }
 
     /**
-     * Called when {@link DelegateImpl#startInput}, {@link #restartInput(View)},
+     * Called when {@link DelegateImpl#checkFocus}, {@link #restartInput(View)},
      * {@link #MSG_BIND} or {@link #MSG_UNBIND}.
      * Note that this method should *NOT* be called inside of {@code mH} lock to prevent start input
      * background thread may blocked by other methods which already inside {@code mH} lock.

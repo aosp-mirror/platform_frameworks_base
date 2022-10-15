@@ -42,13 +42,19 @@ private const val NULL_PAGE_NAME = "NULL"
 
 /**
  * The Activity to render ALL SPA pages, and handles jumps between SPA pages.
+ *
  * One can open any SPA page by:
- *   $ adb shell am start -n <BrowseActivityComponent> -e spa:SpaActivity:destination <SpaPageRoute>
- * For gallery, BrowseActivityComponent = com.android.settingslib.spa.gallery/.MainActivity
- * For SettingsGoogle, BrowseActivityComponent = com.android.settings/.spa.SpaActivity
+ * ```
+ * $ adb shell am start -n <BrowseActivityComponent> -e spaActivityDestination <SpaPageRoute>
+ * ```
+ * - For Gallery, BrowseActivityComponent = com.android.settingslib.spa.gallery/.GalleryMainActivity
+ * - For Settings, BrowseActivityComponent = com.android.settings/.spa.SpaActivity
+ *
  * Some examples:
- *   $ adb shell am start -n <BrowseActivityComponent> -e spa:SpaActivity:destination HOME
- *   $ adb shell am start -n <BrowseActivityComponent> -e spa:SpaActivity:destination ARGUMENT/bar/5
+ * ```
+ * $ adb shell am start -n <BrowseActivityComponent> -e spaActivityDestination HOME
+ * $ adb shell am start -n <BrowseActivityComponent> -e spaActivityDestination ARGUMENT/bar/5
+ * ```
  */
 open class BrowseActivity : ComponentActivity() {
     private val spaEnvironment get() = SpaEnvironmentFactory.instance

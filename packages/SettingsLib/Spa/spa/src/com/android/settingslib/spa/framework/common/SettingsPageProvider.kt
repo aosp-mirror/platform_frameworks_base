@@ -21,12 +21,16 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NamedNavArgument
 
 /**
- * An SettingsPageProvider represent a Settings page.
+ * An SettingsPageProvider which is used to create Settings page instances.
  */
 interface SettingsPageProvider {
 
-    /** The page name without arguments. */
+    /** The page provider name, needs to be *unique* and *stable*. */
     val name: String
+
+    /** The display name of this page provider, for better readability. */
+    val displayName: String?
+        get() = null
 
     /** The page parameters, default is no parameters. */
     val parameter: List<NamedNavArgument>
@@ -37,4 +41,13 @@ interface SettingsPageProvider {
     fun Page(arguments: Bundle?)
 
     fun buildEntry(arguments: Bundle?): List<SettingsEntry> = emptyList()
+}
+
+fun SettingsPageProvider.createSettingsPage(arguments: Bundle? = null): SettingsPage {
+    return SettingsPage.create(
+        name = name,
+        displayName = displayName,
+        parameter = parameter,
+        arguments = arguments
+    )
 }

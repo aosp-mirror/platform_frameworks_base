@@ -286,7 +286,7 @@ public final class ViewRootImpl implements ViewParent,
      * @hide
      */
     public static final boolean LOCAL_LAYOUT =
-            SystemProperties.getBoolean("persist.debug.local_layout", false);
+            SystemProperties.getBoolean("persist.debug.local_layout", true);
 
     /**
      * Set this system property to true to force the view hierarchy to render
@@ -3798,7 +3798,6 @@ public final class ViewRootImpl implements ViewParent,
             }
 
             mAttachInfo.mHasWindowFocus = hasWindowFocus;
-            mImeFocusController.updateImeFocusable(mWindowAttributes, true /* force */);
             mImeFocusController.onPreWindowFocus(hasWindowFocus, mWindowAttributes);
 
             if (mView != null) {

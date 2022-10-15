@@ -59,6 +59,7 @@ import static com.android.internal.policy.TransitionAnimation.WALLPAPER_TRANSITI
 import static com.android.internal.policy.TransitionAnimation.WALLPAPER_TRANSITION_NONE;
 import static com.android.internal.policy.TransitionAnimation.WALLPAPER_TRANSITION_OPEN;
 import static com.android.wm.shell.transition.TransitionAnimationHelper.addBackgroundToTransition;
+import static com.android.wm.shell.transition.TransitionAnimationHelper.edgeExtendWindow;
 import static com.android.wm.shell.transition.TransitionAnimationHelper.getTransitionBackgroundColorIfSet;
 import static com.android.wm.shell.transition.TransitionAnimationHelper.loadAttributeAnimation;
 import static com.android.wm.shell.transition.TransitionAnimationHelper.sDisableCustomTaskAnimationProperty;
@@ -76,10 +77,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Canvas;
 import android.graphics.Insets;
-import android.graphics.Paint;
-import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -89,7 +87,6 @@ import android.os.IBinder;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.view.Choreographer;
-import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.WindowManager;
@@ -97,7 +94,6 @@ import android.view.WindowManager.TransitionType;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
-import android.window.ScreenCapture;
 import android.window.TransitionInfo;
 import android.window.TransitionMetrics;
 import android.window.TransitionRequestInfo;
@@ -524,123 +520,6 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             animGroupStore.add(animator);
             animations.add(animator);
         }
-    }
-
-    private void edgeExtendWindow(TransitionInfo.Change change,
-            Animation a, SurfaceControl.Transaction startTransaction,
-            SurfaceControl.Transaction finishTransaction) {
-        // Do not create edge extension surface for transfer starting window change.
-        // The app surface could be empty thus nothing can draw on the hardware renderer, which will
-        // block this thread when calling Surface#unlockCanvasAndPost.
-        if ((change.getFlags() & FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT) != 0) {
-            return;
-        }
-        final Transformation transformationAtStart = new Transformation();
-        a.getTransformationAt(0, transformationAtStart);
-        final Transformation transformationAtEnd = new Transformation();
-        a.getTransformationAt(1, transformationAtEnd);
-
-        // We want to create an extension surface that is the maximal size and the animation will
-        // take care of cropping any part that overflows.
-        final Insets maxExtensionInsets = Insets.min(
-                transformationAtStart.getInsets(), transformationAtEnd.getInsets());
-
-        final int targetSurfaceHeight = Math.max(change.getStartAbsBounds().height(),
-                change.getEndAbsBounds().height());
-        final int targetSurfaceWidth = Math.max(change.getStartAbsBounds().width(),
-                change.getEndAbsBounds().width());
-        if (maxExtensionInsets.left < 0) {
-            final Rect edgeBounds = new Rect(0, 0, 1, targetSurfaceHeight);
-            final Rect extensionRect = new Rect(0, 0,
-                    -maxExtensionInsets.left, targetSurfaceHeight);
-            final int xPos = maxExtensionInsets.left;
-            final int yPos = 0;
-            createExtensionSurface(change.getLeash(), edgeBounds, extensionRect, xPos, yPos,
-                    "Left Edge Extension", startTransaction, finishTransaction);
-        }
-
-        if (maxExtensionInsets.top < 0) {
-            final Rect edgeBounds = new Rect(0, 0, targetSurfaceWidth, 1);
-            final Rect extensionRect = new Rect(0, 0,
-                    targetSurfaceWidth, -maxExtensionInsets.top);
-            final int xPos = 0;
-            final int yPos = maxExtensionInsets.top;
-            createExtensionSurface(change.getLeash(), edgeBounds, extensionRect, xPos, yPos,
-                    "Top Edge Extension", startTransaction, finishTransaction);
-        }
-
-        if (maxExtensionInsets.right < 0) {
-            final Rect edgeBounds = new Rect(targetSurfaceWidth - 1, 0,
-                    targetSurfaceWidth, targetSurfaceHeight);
-            final Rect extensionRect = new Rect(0, 0,
-                    -maxExtensionInsets.right, targetSurfaceHeight);
-            final int xPos = targetSurfaceWidth;
-            final int yPos = 0;
-            createExtensionSurface(change.getLeash(), edgeBounds, extensionRect, xPos, yPos,
-                    "Right Edge Extension", startTransaction, finishTransaction);
-        }
-
-        if (maxExtensionInsets.bottom < 0) {
-            final Rect edgeBounds = new Rect(0, targetSurfaceHeight - 1,
-                    targetSurfaceWidth, targetSurfaceHeight);
-            final Rect extensionRect = new Rect(0, 0,
-                    targetSurfaceWidth, -maxExtensionInsets.bottom);
-            final int xPos = maxExtensionInsets.left;
-            final int yPos = targetSurfaceHeight;
-            createExtensionSurface(change.getLeash(), edgeBounds, extensionRect, xPos, yPos,
-                    "Bottom Edge Extension", startTransaction, finishTransaction);
-        }
-    }
-
-    private SurfaceControl createExtensionSurface(SurfaceControl surfaceToExtend, Rect edgeBounds,
-            Rect extensionRect, int xPos, int yPos, String layerName,
-            SurfaceControl.Transaction startTransaction,
-            SurfaceControl.Transaction finishTransaction) {
-        final SurfaceControl edgeExtensionLayer = new SurfaceControl.Builder()
-                .setName(layerName)
-                .setParent(surfaceToExtend)
-                .setHidden(true)
-                .setCallsite("DefaultTransitionHandler#startAnimation")
-                .setOpaque(true)
-                .setBufferSize(extensionRect.width(), extensionRect.height())
-                .build();
-
-        ScreenCapture.LayerCaptureArgs captureArgs =
-                new ScreenCapture.LayerCaptureArgs.Builder(surfaceToExtend)
-                        .setSourceCrop(edgeBounds)
-                        .setFrameScale(1)
-                        .setPixelFormat(PixelFormat.RGBA_8888)
-                        .setChildrenOnly(true)
-                        .setAllowProtected(true)
-                        .build();
-        final ScreenCapture.ScreenshotHardwareBuffer edgeBuffer =
-                ScreenCapture.captureLayers(captureArgs);
-
-        if (edgeBuffer == null) {
-            ProtoLog.e(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
-                    "Failed to capture edge of window.");
-            return null;
-        }
-
-        android.graphics.BitmapShader shader =
-                new android.graphics.BitmapShader(edgeBuffer.asBitmap(),
-                        android.graphics.Shader.TileMode.CLAMP,
-                        android.graphics.Shader.TileMode.CLAMP);
-        final Paint paint = new Paint();
-        paint.setShader(shader);
-
-        final Surface surface = new Surface(edgeExtensionLayer);
-        Canvas c = surface.lockHardwareCanvas();
-        c.drawRect(extensionRect, paint);
-        surface.unlockCanvasAndPost(c);
-        surface.release();
-
-        startTransaction.setLayer(edgeExtensionLayer, Integer.MIN_VALUE);
-        startTransaction.setPosition(edgeExtensionLayer, xPos, yPos);
-        startTransaction.setVisibility(edgeExtensionLayer, true);
-        finishTransaction.remove(edgeExtensionLayer);
-
-        return edgeExtensionLayer;
     }
 
     @Nullable
