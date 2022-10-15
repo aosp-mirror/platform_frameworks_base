@@ -114,6 +114,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.NavigationBarComponent.NavigationBarScope;
 import com.android.systemui.navigationbar.NavigationModeController.ModeChangedListener;
@@ -211,6 +212,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     private final NotificationShadeDepthController mNotificationShadeDepthController;
     private final OnComputeInternalInsetsListener mOnComputeInternalInsetsListener;
     private final UserContextProvider mUserContextProvider;
+    private final WakefulnessLifecycle mWakefulnessLifecycle;
     private final RegionSamplingHelper mRegionSamplingHelper;
     private final int mNavColorSampleMargin;
     private NavigationBarFrame mFrame;
@@ -451,6 +453,28 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
                 }
             };
 
+    private final WakefulnessLifecycle.Observer mWakefulnessObserver =
+            new WakefulnessLifecycle.Observer() {
+                private void notifyScreenStateChanged(boolean isScreenOn) {
+                    notifyNavigationBarScreenOn();
+                    mView.onScreenStateChanged(isScreenOn);
+                }
+
+                @Override
+                public void onStartedWakingUp() {
+                    notifyScreenStateChanged(true);
+                    if (isGesturalModeOnDefaultDisplay(getContext(), mNavBarMode)) {
+                        mRegionSamplingHelper.start(mSamplingBounds);
+                    }
+                }
+
+                @Override
+                public void onFinishedGoingToSleep() {
+                    notifyScreenStateChanged(false);
+                    mRegionSamplingHelper.stop();
+                }
+            };
+
     @Inject
     NavigationBar(
             NavigationBarView navigationBarView,
@@ -491,7 +515,8 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
             NavigationBarTransitions navigationBarTransitions,
             EdgeBackGestureHandler edgeBackGestureHandler,
             Optional<BackAnimation> backAnimation,
-            UserContextProvider userContextProvider) {
+            UserContextProvider userContextProvider,
+            WakefulnessLifecycle wakefulnessLifecycle) {
         super(navigationBarView);
         mFrame = navigationBarFrame;
         mContext = context;
@@ -529,6 +554,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         mTelecomManagerOptional = telecomManagerOptional;
         mInputMethodManager = inputMethodManager;
         mUserContextProvider = userContextProvider;
+        mWakefulnessLifecycle = wakefulnessLifecycle;
 
         mNavColorSampleMargin = getResources()
                 .getDimensionPixelSize(R.dimen.navigation_handle_sample_horizontal_margin);
@@ -682,11 +708,10 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         prepareNavigationBarView();
         checkNavBarModes();
 
-        IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
-        filter.addAction(Intent.ACTION_SCREEN_ON);
-        filter.addAction(Intent.ACTION_USER_SWITCHED);
+        IntentFilter filter = new IntentFilter(Intent.ACTION_USER_SWITCHED);
         mBroadcastDispatcher.registerReceiverWithHandler(mBroadcastReceiver, filter,
                 Handler.getMain(), UserHandle.ALL);
+        mWakefulnessLifecycle.addObserver(mWakefulnessObserver);
         notifyNavigationBarScreenOn();
 
         mOverviewProxyService.addCallback(mOverviewProxyListener);
@@ -737,6 +762,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         getBarTransitions().destroy();
         mOverviewProxyService.removeCallback(mOverviewProxyListener);
         mBroadcastDispatcher.unregisterReceiver(mBroadcastReceiver);
+        mWakefulnessLifecycle.removeObserver(mWakefulnessObserver);
         if (mOrientationHandle != null) {
             resetSecondaryHandle();
             getBarTransitions().removeDarkIntensityListener(mOrientationHandleIntensityListener);
@@ -1619,19 +1645,6 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
                 return;
             }
             String action = intent.getAction();
-            if (Intent.ACTION_SCREEN_OFF.equals(action)
-                    || Intent.ACTION_SCREEN_ON.equals(action)) {
-                notifyNavigationBarScreenOn();
-                boolean isScreenOn = Intent.ACTION_SCREEN_ON.equals(action);
-                mView.onScreenStateChanged(isScreenOn);
-                if (isScreenOn) {
-                    if (isGesturalModeOnDefaultDisplay(getContext(), mNavBarMode)) {
-                        mRegionSamplingHelper.start(mSamplingBounds);
-                    }
-                } else {
-                    mRegionSamplingHelper.stop();
-                }
-            }
             if (Intent.ACTION_USER_SWITCHED.equals(action)) {
                 // The accessibility settings may be different for the new user
                 updateAccessibilityStateFlags();

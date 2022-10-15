@@ -46,6 +46,7 @@ import com.android.settingslib.fuelgauge.Estimate;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.power.PowerUI.WarningsUI;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
@@ -84,6 +85,7 @@ public class PowerUITest extends SysuiTestCase {
     private PowerUI mPowerUI;
     @Mock private EnhancedEstimates mEnhancedEstimates;
     @Mock private PowerManager mPowerManager;
+    @Mock private WakefulnessLifecycle mWakefulnessLifecycle;
     @Mock private IThermalService mThermalServiceMock;
     private IThermalEventListener mUsbThermalEventListener;
     private IThermalEventListener mSkinThermalEventListener;
@@ -680,7 +682,7 @@ public class PowerUITest extends SysuiTestCase {
     private void createPowerUi() {
         mPowerUI = new PowerUI(
                 mContext, mBroadcastDispatcher, mCommandQueue, mCentralSurfacesOptionalLazy,
-                mMockWarnings, mEnhancedEstimates, mPowerManager);
+                mMockWarnings, mEnhancedEstimates, mWakefulnessLifecycle, mPowerManager);
         mPowerUI.mThermalService = mThermalServiceMock;
     }
 

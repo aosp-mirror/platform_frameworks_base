@@ -109,11 +109,12 @@ class KeyguardSecurityViewTransition : Transition() {
             object : AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: Animator) {
                     runningSecurityShiftAnimator = null
+                    if (shouldRestoreLayerType) {
+                        v.setLayerType(View.LAYER_TYPE_NONE, /* paint= */ null)
+                    }
                 }
             }
         )
-
-        var finishedFadingOutNonSecurityView = false
 
         runningSecurityShiftAnimator.addUpdateListener { animation: ValueAnimator ->
             val switchPoint = SECURITY_SHIFT_ANIMATION_FADE_OUT_PROPORTION
@@ -153,6 +154,13 @@ class KeyguardSecurityViewTransition : Transition() {
                         startRect.right + currentTranslation,
                         startRect.bottom
                     )
+                } else {
+                    v.setLeftTopRightBottom(
+                        startRect.left,
+                        startRect.top,
+                        startRect.right,
+                        startRect.bottom
+                    )
                 }
             } else {
                 // And in again over the remaining (100-X)%.
@@ -175,31 +183,12 @@ class KeyguardSecurityViewTransition : Transition() {
                         endRect.right - translationRemaining,
                         endRect.bottom
                     )
-                }
-            }
-            if (animation.animatedFraction == 1.0f && shouldRestoreLayerType) {
-                v.setLayerType(View.LAYER_TYPE_NONE, /* paint= */ null)
-            }
-
-            // For views that are not the security view flipper, we do not want to apply
-            // an x translation animation. Instead, we want to fade out, move to final position and
-            // then fade in.
-            if (v !is KeyguardSecurityViewFlipper) {
-                // Opacity goes close to 0 but does not fully get to 0.
-                if (opacity - 0.001f < 0f) {
+                } else {
                     v.setLeftTopRightBottom(
                         endRect.left,
                         endRect.top,
                         endRect.right,
                         endRect.bottom
-                    )
-                    finishedFadingOutNonSecurityView = true
-                } else if (!finishedFadingOutNonSecurityView) {
-                    v.setLeftTopRightBottom(
-                        startRect.left,
-                        startRect.top,
-                        startRect.right,
-                        startRect.bottom
                     )
                 }
             }
