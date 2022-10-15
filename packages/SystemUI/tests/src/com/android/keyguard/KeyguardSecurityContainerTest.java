@@ -119,7 +119,7 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
         int systemBarInsetAmount = 0;
 
         mKeyguardSecurityContainer.initMode(MODE_DEFAULT, mGlobalSettings, mFalsingManager,
-                mUserSwitcherController);
+                mUserSwitcherController, () -> {});
 
         Insets imeInset = Insets.of(0, 0, 0, imeInsetAmount);
         Insets systemBarInset = Insets.of(0, 0, 0, systemBarInsetAmount);
@@ -141,7 +141,7 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
         int systemBarInsetAmount = paddingBottom + 1;
 
         mKeyguardSecurityContainer.initMode(MODE_DEFAULT, mGlobalSettings, mFalsingManager,
-                mUserSwitcherController);
+                mUserSwitcherController, () -> {});
 
         Insets imeInset = Insets.of(0, 0, 0, imeInsetAmount);
         Insets systemBarInset = Insets.of(0, 0, 0, systemBarInsetAmount);
@@ -158,9 +158,10 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
     @Test
     public void testDefaultViewMode() {
         mKeyguardSecurityContainer.initMode(MODE_ONE_HANDED, mGlobalSettings, mFalsingManager,
-                mUserSwitcherController);
+                mUserSwitcherController, () -> {
+                });
         mKeyguardSecurityContainer.initMode(MODE_DEFAULT, mGlobalSettings, mFalsingManager,
-                mUserSwitcherController);
+                mUserSwitcherController, () -> {});
         ConstraintSet.Constraint viewFlipperConstraint =
                 getViewConstraint(mSecurityViewFlipper.getId());
         assertThat(viewFlipperConstraint.layout.topToTop).isEqualTo(PARENT_ID);
@@ -377,7 +378,7 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
     private void setupUserSwitcher() {
         when(mGlobalSettings.getInt(any(), anyInt())).thenReturn(ONE_HANDED_KEYGUARD_SIDE_RIGHT);
         mKeyguardSecurityContainer.initMode(KeyguardSecurityContainer.MODE_USER_SWITCHER,
-                mGlobalSettings, mFalsingManager, mUserSwitcherController);
+                mGlobalSettings, mFalsingManager, mUserSwitcherController, () -> {});
     }
 
     private ArrayList<UserRecord> buildUserRecords(int count) {
@@ -387,7 +388,8 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
                     0 /* flags */);
             users.add(new UserRecord(info, null, false /* isGuest */, false /* isCurrent */,
                     false /* isAddUser */, false /* isRestricted */, true /* isSwitchToEnabled */,
-                    false /* isAddSupervisedUser */, null /* enforcedAdmin */));
+                    false /* isAddSupervisedUser */, null /* enforcedAdmin */,
+                    false /* isManageUsers */));
         }
         return users;
     }
@@ -395,7 +397,7 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
     private void setupForUpdateKeyguardPosition(boolean oneHandedMode) {
         int mode = oneHandedMode ? MODE_ONE_HANDED : MODE_DEFAULT;
         mKeyguardSecurityContainer.initMode(mode, mGlobalSettings, mFalsingManager,
-                mUserSwitcherController);
+                mUserSwitcherController, () -> {});
     }
 
     /** Get the ConstraintLayout constraint of the view. */

@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.android.credentialmanager
 
 import android.app.slice.Slice
@@ -9,11 +25,8 @@ import android.credentials.ui.ProviderData
 import android.credentials.ui.RequestInfo
 import android.graphics.drawable.Icon
 import android.os.Binder
-import com.android.credentialmanager.createflow.CreateOptionInfo
 import com.android.credentialmanager.createflow.CreatePasskeyUiState
 import com.android.credentialmanager.createflow.CreateScreenState
-import com.android.credentialmanager.createflow.ProviderInfo
-import com.android.credentialmanager.getflow.CredentialOptionInfo
 import com.android.credentialmanager.getflow.GetCredentialUiState
 import com.android.credentialmanager.getflow.GetScreenState
 
@@ -41,6 +54,39 @@ class CredentialManagerRepo(
     ) ?: testProviderList()
   }
 
+  fun getCredentialInitialUiState(): GetCredentialUiState {
+    val providerList = GetFlowUtils.toProviderList(providerList, context)
+    return GetCredentialUiState(
+      providerList,
+      GetScreenState.CREDENTIAL_SELECTION,
+      providerList.first()
+    )
+  }
+
+  fun createPasskeyInitialUiState(): CreatePasskeyUiState {
+    val providerList = CreateFlowUtils.toProviderList(providerList, context)
+    return CreatePasskeyUiState(
+      providers = providerList,
+      currentScreenState = CreateScreenState.PASSKEY_INTRO,
+    )
+  }
+
+  companion object {
+    lateinit var repo: CredentialManagerRepo
+
+    fun setup(
+      context: Context,
+      intent: Intent,
+    ) {
+      repo = CredentialManagerRepo(context, intent)
+    }
+
+    fun getInstance(): CredentialManagerRepo {
+      return repo
+    }
+  }
+
+  // TODO: below are prototype functionalities. To be removed for productionization.
   private fun testProviderList(): List<ProviderData> {
     return listOf(
       ProviderData(
@@ -93,144 +139,5 @@ class CredentialManagerRepo(
       id,
       slice
     )
-  }
-
-  private fun getCredentialProviderList():
-    List<com.android.credentialmanager.getflow.ProviderInfo> {
-      return listOf(
-        com.android.credentialmanager.getflow.ProviderInfo(
-          icon = context.getDrawable(R.drawable.ic_passkey)!!,
-          name = "Google Password Manager",
-          appDomainName = "tribank.us",
-          credentialTypeIcon = context.getDrawable(R.drawable.ic_passkey)!!,
-          credentialOptions = listOf(
-            CredentialOptionInfo(
-              icon = context.getDrawable(R.drawable.ic_passkey)!!,
-              title = "Elisa Backett",
-              subtitle = "elisa.beckett@gmail.com",
-              id = "id-1",
-            ),
-            CredentialOptionInfo(
-              icon = context.getDrawable(R.drawable.ic_passkey)!!,
-              title = "Elisa Backett Work",
-              subtitle = "elisa.beckett.work@google.com",
-              id = "id-2",
-            ),
-          )
-        ),
-        com.android.credentialmanager.getflow.ProviderInfo(
-          icon = context.getDrawable(R.drawable.ic_passkey)!!,
-          name = "Lastpass",
-          appDomainName = "tribank.us",
-          credentialTypeIcon = context.getDrawable(R.drawable.ic_passkey)!!,
-          credentialOptions = listOf(
-            CredentialOptionInfo(
-              icon = context.getDrawable(R.drawable.ic_passkey)!!,
-              title = "Elisa Backett",
-              subtitle = "elisa.beckett@lastpass.com",
-              id = "id-1",
-            ),
-          )
-        ),
-        com.android.credentialmanager.getflow.ProviderInfo(
-          icon = context.getDrawable(R.drawable.ic_passkey)!!,
-          name = "Dashlane",
-          appDomainName = "tribank.us",
-          credentialTypeIcon = context.getDrawable(R.drawable.ic_passkey)!!,
-          credentialOptions = listOf(
-            CredentialOptionInfo(
-              icon = context.getDrawable(R.drawable.ic_passkey)!!,
-              title = "Elisa Backett",
-              subtitle = "elisa.beckett@dashlane.com",
-              id = "id-1",
-            ),
-          )
-        ),
-      )
-  }
-
-  private fun createCredentialProviderList(): List<ProviderInfo> {
-    return listOf(
-      ProviderInfo(
-        icon = context.getDrawable(R.drawable.ic_passkey)!!,
-        name = "Google Password Manager",
-        appDomainName = "tribank.us",
-        credentialTypeIcon = context.getDrawable(R.drawable.ic_passkey)!!,
-        createOptions = listOf(
-          CreateOptionInfo(
-            icon = context.getDrawable(R.drawable.ic_passkey)!!,
-            title = "Elisa Backett",
-            subtitle = "elisa.beckett@gmail.com",
-            id = "id-1",
-          ),
-          CreateOptionInfo(
-            icon = context.getDrawable(R.drawable.ic_passkey)!!,
-            title = "Elisa Backett Work",
-            subtitle = "elisa.beckett.work@google.com",
-            id = "id-2",
-          ),
-        )
-      ),
-      ProviderInfo(
-        icon = context.getDrawable(R.drawable.ic_passkey)!!,
-        name = "Lastpass",
-        appDomainName = "tribank.us",
-        credentialTypeIcon = context.getDrawable(R.drawable.ic_passkey)!!,
-        createOptions = listOf(
-          CreateOptionInfo(
-            icon = context.getDrawable(R.drawable.ic_passkey)!!,
-            title = "Elisa Backett",
-            subtitle = "elisa.beckett@lastpass.com",
-            id = "id-1",
-          ),
-        )
-      ),
-      ProviderInfo(
-        icon = context.getDrawable(R.drawable.ic_passkey)!!,
-        name = "Dashlane",
-        appDomainName = "tribank.us",
-        credentialTypeIcon = context.getDrawable(R.drawable.ic_passkey)!!,
-        createOptions = listOf(
-          CreateOptionInfo(
-            icon = context.getDrawable(R.drawable.ic_passkey)!!,
-            title = "Elisa Backett",
-            subtitle = "elisa.beckett@dashlane.com",
-            id = "id-1",
-          ),
-        )
-      ),
-    )
-  }
-
-  fun getCredentialInitialUiState(): GetCredentialUiState {
-    val providerList = getCredentialProviderList()
-    return GetCredentialUiState(
-      providerList,
-      GetScreenState.CREDENTIAL_SELECTION,
-      providerList.first()
-    )
-  }
-
-  fun createPasskeyInitialUiState(): CreatePasskeyUiState {
-    val providerList = createCredentialProviderList()
-    return CreatePasskeyUiState(
-      providers = providerList,
-      currentScreenState = CreateScreenState.PASSKEY_INTRO,
-    )
-  }
-
-  companion object {
-    lateinit var repo: CredentialManagerRepo
-
-    fun setup(
-      context: Context,
-      intent: Intent,
-    ) {
-      repo = CredentialManagerRepo(context, intent)
-    }
-
-    fun getInstance(): CredentialManagerRepo {
-      return repo
-    }
   }
 }

@@ -1138,10 +1138,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         mHandler.removeCallbacksAndMessages(null);
 
         // Release any outstanding wakelocks we're still holding because of pending messages.
-        mWakelockController.releaseUnfinishedBusinessSuspendBlocker();
-        mWakelockController.releaseStateChangedSuspendBlocker();
-        mWakelockController.releaseProxPositiveSuspendBlocker();
-        mWakelockController.releaseProxNegativeSuspendBlocker();
+        mWakelockController.releaseAll();
 
         final float brightness = mPowerState != null
                 ? mPowerState.getScreenBrightness()
@@ -1729,7 +1726,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
 
         // Grab a wake lock if we have unfinished business.
         if (!finished) {
-            mWakelockController.acquireUnfinishedBusinessSuspendBlocker();
+            mWakelockController.acquireWakelock(WakelockController.WAKE_LOCK_UNFINISHED_BUSINESS);
         }
 
         // Notify the power manager when ready.
@@ -1749,7 +1746,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
 
         // Release the wake lock when we have no unfinished business.
         if (finished) {
-            mWakelockController.releaseUnfinishedBusinessSuspendBlocker();
+            mWakelockController.releaseWakelock(WakelockController.WAKE_LOCK_UNFINISHED_BUSINESS);
         }
 
         // Record if dozing for future comparison.
@@ -2248,7 +2245,8 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                 mSensorManager.unregisterListener(mProximitySensorListener);
                 // release wake lock(must be last)
                 boolean proxDebounceSuspendBlockerReleased =
-                        mWakelockController.releaseProxDebounceSuspendBlocker();
+                        mWakelockController.releaseWakelock(
+                                WakelockController.WAKE_LOCK_PROXIMITY_DEBOUNCE);
                 if (proxDebounceSuspendBlockerReleased) {
                     mPendingProximityDebounceTime = -1;
                 }
@@ -2272,11 +2270,13 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
             if (positive) {
                 mPendingProximity = PROXIMITY_POSITIVE;
                 mPendingProximityDebounceTime = time + PROXIMITY_SENSOR_POSITIVE_DEBOUNCE_DELAY;
-                mWakelockController.acquireProxDebounceSuspendBlocker(); // acquire wake lock
+                mWakelockController.acquireWakelock(
+                        WakelockController.WAKE_LOCK_PROXIMITY_DEBOUNCE); // acquire wake lock
             } else {
                 mPendingProximity = PROXIMITY_NEGATIVE;
                 mPendingProximityDebounceTime = time + PROXIMITY_SENSOR_NEGATIVE_DEBOUNCE_DELAY;
-                mWakelockController.acquireProxDebounceSuspendBlocker(); // acquire wake lock
+                mWakelockController.acquireWakelock(
+                        WakelockController.WAKE_LOCK_PROXIMITY_DEBOUNCE); // acquire wake lock
             }
 
             // Debounce the new sensor reading.
@@ -2300,7 +2300,8 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                 updatePowerState();
                 // (must be last)
                 boolean proxDebounceSuspendBlockerReleased =
-                        mWakelockController.releaseProxDebounceSuspendBlocker();
+                        mWakelockController.releaseWakelock(
+                                WakelockController.WAKE_LOCK_PROXIMITY_DEBOUNCE);
                 if (proxDebounceSuspendBlockerReleased) {
                     mPendingProximityDebounceTime = -1;
                 }
@@ -2315,7 +2316,8 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
     }
 
     private void sendOnStateChangedWithWakelock() {
-        boolean wakeLockAcquired = mWakelockController.acquireStateChangedSuspendBlocker();
+        boolean wakeLockAcquired = mWakelockController.acquireWakelock(
+                WakelockController.WAKE_LOCK_STATE_CHANGED);
         if (wakeLockAcquired) {
             mHandler.post(mWakelockController.getOnStateChangedRunnable());
         }
@@ -2479,13 +2481,13 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
     }
 
     private void sendOnProximityPositiveWithWakelock() {
-        mWakelockController.acquireProxPositiveSuspendBlocker();
+        mWakelockController.acquireWakelock(WakelockController.WAKE_LOCK_PROXIMITY_POSITIVE);
         mHandler.post(mWakelockController.getOnProximityPositiveRunnable());
     }
 
 
     private void sendOnProximityNegativeWithWakelock() {
-        mWakelockController.acquireProxNegativeSuspendBlocker();
+        mWakelockController.acquireWakelock(WakelockController.WAKE_LOCK_PROXIMITY_NEGATIVE);
         mHandler.post(mWakelockController.getOnProximityNegativeRunnable());
     }
 
