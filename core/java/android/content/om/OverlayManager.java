@@ -31,8 +31,6 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 
-import com.android.server.SystemConfig;
-
 import java.util.List;
 
 /**
@@ -50,7 +48,7 @@ import java.util.List;
  * <overlayable name="OverlayableResourcesName" actor="overlay://namespace/actorName">
  * }</pre></p>
  *
- * <p>Actors are defined through {@link SystemConfig}. Only system packages can be used.
+ * <p>Actors are defined through SystemConfig. Only system packages can be used.
  * The namespace "android" is reserved for use by AOSP and any "android" definitions must
  * have an implementation on device that fulfill their intended functionality.</p>
  *

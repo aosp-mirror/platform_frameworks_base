@@ -17,6 +17,9 @@
 package com.android.settingslib.spa.framework.common
 
 import android.app.Activity
+import android.util.Log
+
+private const val TAG = "SpaEnvironment"
 
 object SpaEnvironmentFactory {
     private var spaEnvironment: SpaEnvironment? = null
@@ -28,8 +31,10 @@ object SpaEnvironmentFactory {
             return spaEnvironment!!
         }
         set(env: SpaEnvironment) {
-            if (spaEnvironment != null)
-                throw UnsupportedOperationException("Spa environment is already set")
+            if (spaEnvironment != null) {
+                Log.w(TAG, "Spa environment is already set, ignore the latter one.")
+                return
+            }
             spaEnvironment = env
         }
 }

@@ -36,6 +36,12 @@ public class RequestInfo implements Parcelable {
      */
     public static final @NonNull String EXTRA_REQUEST_INFO =
             "android.credentials.ui.extra.REQUEST_INFO";
+    /**
+     * The intent extra key for the {@code ResultReceiver} object when launching the UX
+     * activities.
+     */
+    public static final @NonNull String EXTRA_RESULT_RECEIVER =
+            "android.credentials.ui.extra.RESULT_RECEIVER";
 
     /** Type value for an executeGetCredential request. */
     public static final @NonNull String TYPE_GET = "android.credentials.ui.TYPE_GET";

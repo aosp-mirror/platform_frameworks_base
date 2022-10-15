@@ -45,7 +45,6 @@ import android.window.OnBackInvokedCallback;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Parcelling;
 import com.android.internal.util.Parcelling.BuiltIn.ForBoolean;
-import com.android.server.SystemConfig;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -803,7 +802,6 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public static final int PRIVATE_FLAG_EXT_ATTRIBUTIONS_ARE_USER_VISIBLE = 1 << 2;
 
-
     /**
      * If false, {@link android.view.KeyEvent#KEYCODE_BACK} related events will be forwarded to
      * the Activities, Dialogs and Views and {@link android.app.Activity#onBackPressed()},
@@ -815,12 +813,24 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public static final int PRIVATE_FLAG_EXT_ENABLE_ON_BACK_INVOKED_CALLBACK = 1 << 3;
 
+    /**
+     * Whether or not this package is allowed to access hidden APIs. Replacement for legacy
+     * implementation of {@link #isPackageWhitelistedForHiddenApis()}.
+     *
+     * This is an internal flag and should never be used outside of this class. The real API for
+     * the hidden API enforcement policy is {@link #getHiddenApiEnforcementPolicy()}.
+     *
+     * @hide
+     */
+    public static final int PRIVATE_FLAG_EXT_ALLOWLISTED_FOR_HIDDEN_APIS = 1 << 4;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "PRIVATE_FLAG_EXT_" }, value = {
             PRIVATE_FLAG_EXT_PROFILEABLE,
             PRIVATE_FLAG_EXT_REQUEST_FOREGROUND_SERVICE_EXEMPTION,
             PRIVATE_FLAG_EXT_ATTRIBUTIONS_ARE_USER_VISIBLE,
             PRIVATE_FLAG_EXT_ENABLE_ON_BACK_INVOKED_CALLBACK,
+            PRIVATE_FLAG_EXT_ALLOWLISTED_FOR_HIDDEN_APIS,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ApplicationInfoPrivateFlagsExt {}
@@ -2222,7 +2232,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     }
 
     private boolean isPackageWhitelistedForHiddenApis() {
-        return SystemConfig.getInstance().getHiddenApiWhitelistedApps().contains(packageName);
+        return (privateFlagsExt & PRIVATE_FLAG_EXT_ALLOWLISTED_FOR_HIDDEN_APIS) != 0;
     }
 
     /**

@@ -29,7 +29,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.settingslib.Utils
 import com.android.systemui.R
-import com.android.systemui.animation.ActivityLaunchAnimator
+import com.android.systemui.animation.Expandable
 import com.android.systemui.animation.Interpolators
 import com.android.systemui.common.ui.binder.IconViewBinder
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBottomAreaViewModel
@@ -238,14 +238,26 @@ object KeyguardBottomAreaViewBinder {
 
         IconViewBinder.bind(viewModel.icon, view)
 
+        view.isActivated = viewModel.isActivated
         view.drawable.setTint(
             Utils.getColorAttrDefaultColor(
                 view.context,
-                com.android.internal.R.attr.textColorPrimary
+                if (viewModel.isActivated) {
+                    com.android.internal.R.attr.textColorPrimaryInverse
+                } else {
+                    com.android.internal.R.attr.textColorPrimary
+                },
             )
         )
         view.backgroundTintList =
-            Utils.getColorAttr(view.context, com.android.internal.R.attr.colorSurface)
+            Utils.getColorAttr(
+                view.context,
+                if (viewModel.isActivated) {
+                    com.android.internal.R.attr.colorAccentPrimary
+                } else {
+                    com.android.internal.R.attr.colorSurface
+                }
+            )
 
         view.isClickable = viewModel.isClickable
         if (viewModel.isClickable) {
@@ -268,7 +280,7 @@ object KeyguardBottomAreaViewBinder {
                 viewModel.onClicked(
                     KeyguardQuickAffordanceViewModel.OnClickedParameters(
                         configKey = viewModel.configKey,
-                        animationController = ActivityLaunchAnimator.Controller.fromView(view),
+                        expandable = Expandable.fromView(view),
                     )
                 )
             }

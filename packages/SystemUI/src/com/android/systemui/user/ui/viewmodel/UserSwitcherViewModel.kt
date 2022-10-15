@@ -19,7 +19,6 @@ package com.android.systemui.user.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.android.systemui.R
 import com.android.systemui.common.ui.drawable.CircularDrawable
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
@@ -30,6 +29,7 @@ import com.android.systemui.user.legacyhelper.ui.LegacyUserUiHelper
 import com.android.systemui.user.shared.model.UserActionModel
 import com.android.systemui.user.shared.model.UserModel
 import javax.inject.Inject
+import kotlin.math.ceil
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -52,8 +52,7 @@ private constructor(
         userInteractor.users.map { models -> models.map { user -> toViewModel(user) } }
 
     /** The maximum number of columns that the user selection grid should use. */
-    val maximumUserColumns: Flow<Int> =
-        users.map { LegacyUserUiHelper.getMaxUserSwitcherItemColumns(it.size) }
+    val maximumUserColumns: Flow<Int> = users.map { getMaxUserSwitcherItemColumns(it.size) }
 
     private val _isMenuVisible = MutableStateFlow(false)
     /**
@@ -118,6 +117,15 @@ private constructor(
         _isMenuVisible.value = false
     }
 
+    /** Returns the maximum number of columns for user items in the user switcher. */
+    private fun getMaxUserSwitcherItemColumns(userCount: Int): Int {
+        return if (userCount < 5) {
+            4
+        } else {
+            ceil(userCount / 2.0).toInt()
+        }
+    }
+
     private fun createFinishRequestedFlow(): Flow<Boolean> {
         var mostRecentSelectedUserId: Int? = null
         var mostRecentIsInteractive: Boolean? = null
@@ -171,27 +179,23 @@ private constructor(
         return UserActionViewModel(
             viewKey = model.ordinal.toLong(),
             iconResourceId =
-                if (model == UserActionModel.NAVIGATE_TO_USER_MANAGEMENT) {
-                    R.drawable.ic_manage_users
-                } else {
-                    LegacyUserUiHelper.getUserSwitcherActionIconResourceId(
-                        isAddSupervisedUser = model == UserActionModel.ADD_SUPERVISED_USER,
-                        isAddUser = model == UserActionModel.ADD_USER,
-                        isGuest = model == UserActionModel.ENTER_GUEST_MODE,
-                    )
-                },
+                LegacyUserUiHelper.getUserSwitcherActionIconResourceId(
+                    isAddSupervisedUser = model == UserActionModel.ADD_SUPERVISED_USER,
+                    isAddUser = model == UserActionModel.ADD_USER,
+                    isGuest = model == UserActionModel.ENTER_GUEST_MODE,
+                    isManageUsers = model == UserActionModel.NAVIGATE_TO_USER_MANAGEMENT,
+                    isTablet = true,
+                ),
             textResourceId =
-                if (model == UserActionModel.NAVIGATE_TO_USER_MANAGEMENT) {
-                    R.string.manage_users
-                } else {
-                    LegacyUserUiHelper.getUserSwitcherActionTextResourceId(
-                        isGuest = model == UserActionModel.ENTER_GUEST_MODE,
-                        isGuestUserAutoCreated = guestUserInteractor.isGuestUserAutoCreated,
-                        isGuestUserResetting = guestUserInteractor.isGuestUserResetting,
-                        isAddSupervisedUser = model == UserActionModel.ADD_SUPERVISED_USER,
-                        isAddUser = model == UserActionModel.ADD_USER,
-                    )
-                },
+                LegacyUserUiHelper.getUserSwitcherActionTextResourceId(
+                    isGuest = model == UserActionModel.ENTER_GUEST_MODE,
+                    isGuestUserAutoCreated = guestUserInteractor.isGuestUserAutoCreated,
+                    isGuestUserResetting = guestUserInteractor.isGuestUserResetting,
+                    isAddSupervisedUser = model == UserActionModel.ADD_SUPERVISED_USER,
+                    isAddUser = model == UserActionModel.ADD_USER,
+                    isManageUsers = model == UserActionModel.NAVIGATE_TO_USER_MANAGEMENT,
+                    isTablet = true,
+                ),
             onClicked = {
                 userInteractor.executeAction(action = model)
                 // We don't finish because we want to show a dialog over the full-screen UI and

@@ -12,31 +12,17 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
-package com.android.credentialmanager.createflow
+package com.android.systemui.keyguard.shared.quickaffordance
 
-import android.graphics.drawable.Drawable
-
-data class ProviderInfo(
-  val icon: Drawable,
-  val name: String,
-  val appDomainName: String,
-  val credentialTypeIcon: Drawable,
-  val createOptions: List<CreateOptionInfo>,
-)
-
-data class CreateOptionInfo(
-  val icon: Drawable,
-  val title: String,
-  val subtitle: String,
-  val id: Int,
-)
-
-/** The name of the current screen. */
-enum class CreateScreenState {
-  PASSKEY_INTRO,
-  PROVIDER_SELECTION,
-  CREATION_OPTION_SELECTION,
-  MORE_OPTIONS_SELECTION,
+/** Enumerates all possible toggle states for a quick affordance on the lock-screen. */
+sealed class KeyguardQuickAffordanceToggleState {
+    /** Toggling is not supported. */
+    object NotSupported : KeyguardQuickAffordanceToggleState()
+    /** The quick affordance is on. */
+    object On : KeyguardQuickAffordanceToggleState()
+    /** The quick affordance is off. */
+    object Off : KeyguardQuickAffordanceToggleState()
 }

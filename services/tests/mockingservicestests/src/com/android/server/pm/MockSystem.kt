@@ -38,6 +38,7 @@ import android.os.UserManager
 import android.os.incremental.IncrementalManager
 import android.provider.DeviceConfig
 import android.util.ArrayMap
+import android.util.ArraySet
 import android.util.DisplayMetrics
 import android.util.EventLog
 import android.view.Display
@@ -294,6 +295,8 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
         wheneverStatic { SystemConfig.getInstance() }.thenReturn(mocks.systemConfig)
         whenever(mocks.systemConfig.availableFeatures).thenReturn(DEFAULT_AVAILABLE_FEATURES_MAP)
         whenever(mocks.systemConfig.sharedLibraries).thenReturn(DEFAULT_SHARED_LIBRARIES_LIST)
+        whenever(mocks.systemConfig.defaultVrComponents).thenReturn(ArraySet())
+        whenever(mocks.systemConfig.hiddenApiWhitelistedApps).thenReturn(ArraySet())
         wheneverStatic { SystemProperties.getBoolean("fw.free_cache_v2", true) }.thenReturn(true)
         wheneverStatic { Environment.getPackageCacheDirectory() }.thenReturn(packageCacheDirectory)
         wheneverStatic { SystemProperties.digestOf("ro.build.fingerprint") }.thenReturn("cacheName")

@@ -57,14 +57,18 @@ import com.android.systemui.settings.UserTracker
 import com.android.systemui.shade.NotificationShadeWindowView
 import com.android.systemui.telephony.TelephonyListenerManager
 import com.android.systemui.user.data.source.UserRecord
+import com.android.systemui.user.legacyhelper.data.LegacyUserDataHelper
+import com.android.systemui.user.shared.model.UserActionModel
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
+import com.android.systemui.util.mockito.kotlinArgumentCaptor
 import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.settings.GlobalSettings
 import com.android.systemui.util.settings.SecureSettings
 import com.android.systemui.util.time.FakeSystemClock
+import com.google.common.truth.Truth
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -123,7 +127,7 @@ class UserSwitcherControllerOldImplTest : SysuiTestCase() {
     private val ownerId = UserHandle.USER_SYSTEM
     private val ownerInfo = UserInfo(ownerId, "Owner", null,
             UserInfo.FLAG_ADMIN or UserInfo.FLAG_FULL or UserInfo.FLAG_INITIALIZED or
-                    UserInfo.FLAG_PRIMARY or UserInfo.FLAG_SYSTEM,
+                    UserInfo.FLAG_PRIMARY or UserInfo.FLAG_SYSTEM or UserInfo.FLAG_ADMIN,
             UserManager.USER_TYPE_FULL_SYSTEM)
     private val guestId = 1234
     private val guestInfo = UserInfo(guestId, "Guest", null,
@@ -597,6 +601,76 @@ class UserSwitcherControllerOldImplTest : SysuiTestCase() {
     }
 
     @Test
+    fun testCanManageUser_userSwitcherEnabled_addUserWhenLocked() {
+        `when`(
+            globalSettings.getIntForUser(
+                eq(Settings.Global.USER_SWITCHER_ENABLED),
+                anyInt(),
+                eq(UserHandle.USER_SYSTEM)
+            )
+        ).thenReturn(1)
+
+        `when`(
+            globalSettings.getIntForUser(
+                eq(Settings.Global.ADD_USERS_WHEN_LOCKED),
+                anyInt(),
+                eq(UserHandle.USER_SYSTEM)
+            )
+        ).thenReturn(1)
+        setupController()
+        assertTrue(userSwitcherController.canManageUsers())
+    }
+
+    @Test
+    fun testCanManageUser_userSwitcherDisabled_addUserWhenLocked() {
+        `when`(
+            globalSettings.getIntForUser(
+                eq(Settings.Global.USER_SWITCHER_ENABLED),
+                anyInt(),
+                eq(UserHandle.USER_SYSTEM)
+            )
+        ).thenReturn(0)
+
+        `when`(
+            globalSettings.getIntForUser(
+                eq(Settings.Global.ADD_USERS_WHEN_LOCKED),
+                anyInt(),
+                eq(UserHandle.USER_SYSTEM)
+            )
+        ).thenReturn(1)
+        setupController()
+        assertFalse(userSwitcherController.canManageUsers())
+    }
+
+    @Test
+    fun testCanManageUser_userSwitcherEnabled_isAdmin() {
+        `when`(
+            globalSettings.getIntForUser(
+                eq(Settings.Global.USER_SWITCHER_ENABLED),
+                anyInt(),
+                eq(UserHandle.USER_SYSTEM)
+            )
+        ).thenReturn(1)
+
+        setupController()
+        assertTrue(userSwitcherController.canManageUsers())
+    }
+
+    @Test
+    fun testCanManageUser_userSwitcherDisabled_isAdmin() {
+        `when`(
+            globalSettings.getIntForUser(
+                eq(Settings.Global.USER_SWITCHER_ENABLED),
+                anyInt(),
+                eq(UserHandle.USER_SYSTEM)
+            )
+        ).thenReturn(0)
+
+        setupController()
+        assertFalse(userSwitcherController.canManageUsers())
+    }
+
+    @Test
     fun addUserSwitchCallback() {
         val broadcastReceiverCaptor = argumentCaptor<BroadcastReceiver>()
         verify(broadcastDispatcher).registerReceiver(
@@ -631,5 +705,23 @@ class UserSwitcherControllerOldImplTest : SysuiTestCase() {
         verify(userManager, never()).createGuest(context)
         bgExecutor.runAllReady()
         verify(userManager).createGuest(context)
+    }
+
+    @Test
+    fun onUserItemClicked_manageUsers() {
+        val manageUserRecord = LegacyUserDataHelper.createRecord(
+            mContext,
+            ownerId,
+            UserActionModel.NAVIGATE_TO_USER_MANAGEMENT,
+            isRestricted = false,
+            isSwitchToEnabled = true
+        )
+
+        userSwitcherController.onUserListItemClicked(manageUserRecord, null)
+        val intentCaptor = kotlinArgumentCaptor<Intent>()
+        verify(activityStarter).startActivity(intentCaptor.capture(),
+            eq(true)
+        )
+        Truth.assertThat(intentCaptor.value.action).isEqualTo(Settings.ACTION_USER_SETTINGS)
     }
 }

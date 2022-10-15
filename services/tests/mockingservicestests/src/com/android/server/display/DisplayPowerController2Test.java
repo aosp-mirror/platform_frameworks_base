@@ -177,15 +177,19 @@ public final class DisplayPowerController2Test {
         advanceTime(1);
 
         // two times, one for unfinished business and one for proximity
-        verify(mWakelockController).acquireUnfinishedBusinessSuspendBlocker();
-        verify(mWakelockController).acquireProxDebounceSuspendBlocker();
+        verify(mWakelockController).acquireWakelock(
+                WakelockController.WAKE_LOCK_UNFINISHED_BUSINESS);
+        verify(mWakelockController).acquireWakelock(
+                WakelockController.WAKE_LOCK_PROXIMITY_DEBOUNCE);
 
 
         dpc.stop();
         advanceTime(1);
         // two times, one for unfinished business and one for proximity
-        verify(mWakelockController).acquireUnfinishedBusinessSuspendBlocker();
-        verify(mWakelockController).acquireProxDebounceSuspendBlocker();
+        verify(mWakelockController).acquireWakelock(
+                WakelockController.WAKE_LOCK_UNFINISHED_BUSINESS);
+        verify(mWakelockController).acquireWakelock(
+                WakelockController.WAKE_LOCK_PROXIMITY_DEBOUNCE);
     }
 
     /**

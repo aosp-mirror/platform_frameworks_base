@@ -82,6 +82,15 @@ object UserActionsUtil {
         )
     }
 
+    fun canManageUsers(
+        repository: UserRepository,
+        isUserSwitcherEnabled: Boolean,
+        isAddUsersFromLockScreenEnabled: Boolean,
+    ): Boolean {
+        return isUserSwitcherEnabled &&
+            (repository.getSelectedUserInfo().isAdmin || isAddUsersFromLockScreenEnabled)
+    }
+
     /**
      * Returns `true` if the current user is allowed to add users to the device; `false` otherwise.
      */
