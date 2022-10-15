@@ -42,11 +42,11 @@ import javax.inject.Inject
 @SysUISingleton
 class UserFileManagerImpl @Inject constructor(
     // Context of system process and system user.
-    val context: Context,
+    private val context: Context,
     val userManager: UserManager,
     val broadcastDispatcher: BroadcastDispatcher,
     @Background val backgroundExecutor: DelayableExecutor
-) : UserFileManager, CoreStartable(context) {
+) : UserFileManager, CoreStartable {
     companion object {
         private const val FILES = "files"
         @VisibleForTesting internal const val SHARED_PREFS = "shared_prefs"

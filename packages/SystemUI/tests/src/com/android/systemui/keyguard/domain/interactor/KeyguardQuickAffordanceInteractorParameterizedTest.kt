@@ -12,20 +12,20 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
-package com.android.systemui.keyguard.domain.usecase
+package com.android.systemui.keyguard.domain.interactor
 
 import android.content.Intent
 import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ActivityLaunchAnimator
+import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
-import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
-import com.android.systemui.keyguard.domain.interactor.KeyguardQuickAffordanceInteractor
 import com.android.systemui.keyguard.domain.model.KeyguardQuickAffordancePosition
 import com.android.systemui.keyguard.domain.quickaffordance.FakeKeyguardQuickAffordanceConfig
 import com.android.systemui.keyguard.domain.quickaffordance.FakeKeyguardQuickAffordanceRegistry
@@ -195,6 +195,7 @@ class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
     @Mock private lateinit var userTracker: UserTracker
     @Mock private lateinit var activityStarter: ActivityStarter
     @Mock private lateinit var animationController: ActivityLaunchAnimator.Controller
+    @Mock private lateinit var expandable: Expandable
 
     private lateinit var underTest: KeyguardQuickAffordanceInteractor
 
@@ -208,6 +209,7 @@ class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+        whenever(expandable.activityLaunchController()).thenReturn(animationController)
 
         homeControls = object : FakeKeyguardQuickAffordanceConfig() {}
         underTest =
@@ -259,7 +261,7 @@ class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
 
         underTest.onQuickAffordanceClicked(
             configKey = homeControls::class,
-            animationController = animationController,
+            expandable = expandable,
         )
 
         if (startActivity) {

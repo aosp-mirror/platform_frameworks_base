@@ -17,7 +17,7 @@
 
 package com.android.systemui.keyguard.domain.quickaffordance
 
-import com.android.systemui.animation.ActivityLaunchAnimator
+import com.android.systemui.animation.Expandable
 import com.android.systemui.keyguard.domain.quickaffordance.KeyguardQuickAffordanceConfig.OnClickedResult
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,7 +40,7 @@ abstract class FakeKeyguardQuickAffordanceConfig : KeyguardQuickAffordanceConfig
     override val state: Flow<KeyguardQuickAffordanceConfig.State> = _state
 
     override fun onQuickAffordanceClicked(
-        animationController: ActivityLaunchAnimator.Controller?,
+        expandable: Expandable?,
     ): OnClickedResult {
         return onClickedResult
     }

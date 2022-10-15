@@ -28,6 +28,7 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.same;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -215,7 +216,7 @@ public class FingerprintAuthenticationClientTest {
 
     @Test
     public void luxProbeWhenAwake() throws RemoteException {
-        when(mBiometricContext.isAwake()).thenReturn(false, true, false);
+        when(mBiometricContext.isAwake()).thenReturn(false);
         when(mBiometricContext.isAod()).thenReturn(false);
         final FingerprintAuthenticationClient client = createClient();
         client.start(mCallback);
@@ -228,12 +229,35 @@ public class FingerprintAuthenticationClientTest {
         verify(mLuxProbe, never()).enable();
 
         reset(mLuxProbe);
+        when(mBiometricContext.isAwake()).thenReturn(true);
+
         mContextInjector.getValue().accept(opContext);
         verify(mLuxProbe).enable();
         verify(mLuxProbe, never()).disable();
 
+        when(mBiometricContext.isAwake()).thenReturn(false);
+
         mContextInjector.getValue().accept(opContext);
         verify(mLuxProbe).disable();
+    }
+
+    @Test
+    public void luxProbeEnabledOnStartWhenWake() throws RemoteException {
+        luxProbeEnabledOnStart(true /* isAwake */);
+    }
+
+    @Test
+    public void luxProbeNotEnabledOnStartWhenNotWake() throws RemoteException {
+        luxProbeEnabledOnStart(false /* isAwake */);
+    }
+
+    private void luxProbeEnabledOnStart(boolean isAwake) throws RemoteException {
+        when(mBiometricContext.isAwake()).thenReturn(isAwake);
+        when(mBiometricContext.isAod()).thenReturn(false);
+        final FingerprintAuthenticationClient client = createClient();
+        client.start(mCallback);
+
+        verify(mLuxProbe, isAwake ? times(1) : never()).enable();
     }
 
     @Test

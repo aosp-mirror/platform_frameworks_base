@@ -40,11 +40,12 @@ import javax.inject.Inject;
  * {@link DreamOverlayRegistrant} is responsible for telling system server that SystemUI should be
  * the designated dream overlay component.
  */
-public class DreamOverlayRegistrant extends CoreStartable {
+public class DreamOverlayRegistrant implements CoreStartable {
     private static final String TAG = "DreamOverlayRegistrant";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     private final IDreamManager mDreamManager;
     private final ComponentName mOverlayServiceComponent;
+    private final Context mContext;
     private final Resources mResources;
     private boolean mCurrentRegisteredState = false;
 
@@ -98,7 +99,7 @@ public class DreamOverlayRegistrant extends CoreStartable {
 
     @Inject
     public DreamOverlayRegistrant(Context context, @Main Resources resources) {
-        super(context);
+        mContext = context;
         mResources = resources;
         mDreamManager = IDreamManager.Stub.asInterface(
                 ServiceManager.getService(DreamService.DREAM_SERVICE));

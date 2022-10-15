@@ -56,13 +56,12 @@ abstract class ActivityEmbeddingAnimationTestBase extends ShellTestCase {
     @Mock
     SurfaceControl.Transaction mFinishTransaction;
     @Mock
-    Transitions.TransitionFinishCallback mFinishCallback;
-    @Mock
     Animator mAnimator;
 
     ActivityEmbeddingController mController;
     ActivityEmbeddingAnimationRunner mAnimRunner;
     ActivityEmbeddingAnimationSpec mAnimSpec;
+    Transitions.TransitionFinishCallback mFinishCallback;
 
     @CallSuper
     @Before
@@ -75,9 +74,11 @@ abstract class ActivityEmbeddingAnimationTestBase extends ShellTestCase {
         assertNotNull(mAnimRunner);
         mAnimSpec = mAnimRunner.mAnimationSpec;
         assertNotNull(mAnimSpec);
+        mFinishCallback = (wct, wctCB) -> {};
         spyOn(mController);
         spyOn(mAnimRunner);
         spyOn(mAnimSpec);
+        spyOn(mFinishCallback);
     }
 
     /** Creates a mock {@link TransitionInfo.Change}. */

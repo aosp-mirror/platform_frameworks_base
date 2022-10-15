@@ -825,6 +825,16 @@ public class PipTouchHandler {
     }
 
     /**
+     * Resizes the pip window and updates user resized bounds
+     *
+     * @param bounds target bounds to resize to
+     * @param snapFraction snap fraction to apply after resizing
+     */
+    void userResizeTo(Rect bounds, float snapFraction) {
+        mPipResizeGestureHandler.userResizeTo(bounds, snapFraction);
+    }
+
+    /**
      * Gesture controlling normal movement of the PIP.
      */
     private class DefaultPipTouchGesture extends PipTouchGesture {

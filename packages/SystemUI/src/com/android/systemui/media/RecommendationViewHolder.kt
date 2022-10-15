@@ -106,5 +106,20 @@ class RecommendationViewHolder private constructor(itemView: View) {
             R.id.media_subtitle2,
             R.id.media_subtitle3
         )
+
+        val mediaTitlesAndSubtitlesIds = setOf(
+            R.id.media_title1,
+            R.id.media_title2,
+            R.id.media_title3,
+            R.id.media_subtitle1,
+            R.id.media_subtitle2,
+            R.id.media_subtitle3
+        )
+
+        val mediaContainersIds = setOf(
+            R.id.media_cover1_container,
+            R.id.media_cover2_container,
+            R.id.media_cover3_container
+        )
     }
 }
