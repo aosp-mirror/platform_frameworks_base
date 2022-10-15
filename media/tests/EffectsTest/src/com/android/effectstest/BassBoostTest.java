@@ -304,13 +304,13 @@ public class BassBoostTest extends Activity implements OnCheckedChangeListener {
                 for (int j = 0; j < NUM_EFFECTS; j++) {
                     effects[j] = new BassBoost(0, mSession);
                     effects[j].setControlStatusListener(mEffectListener);
-                    yield();
+                    this.yield();
                 }
                 for (int j = NUM_EFFECTS - 1; j >= 0; j--) {
                     Log.w(TAG, "HammerReleaseTest releasing effect " + (Object) effects[j]);
                     effects[j].release();
                     effects[j] = null;
-                    yield();
+                    this.yield();
                 }
             }
             Log.w(TAG, "HammerReleaseTest ended");
