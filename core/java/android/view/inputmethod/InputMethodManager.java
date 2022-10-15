@@ -649,6 +649,7 @@ public final class InputMethodManager {
     private static final int MSG_REPORT_FULLSCREEN_MODE = 10;
     private static final int MSG_BIND_ACCESSIBILITY_SERVICE = 11;
     private static final int MSG_UNBIND_ACCESSIBILITY_SERVICE = 12;
+    private static final int MSG_SET_INTERACTIVE = 13;
     private static final int MSG_UPDATE_VIRTUAL_DISPLAY_TO_SCREEN_MATRIX = 30;
     private static final int MSG_ON_SHOW_REQUESTED = 31;
 
@@ -1160,22 +1161,12 @@ public final class InputMethodManager {
                 case MSG_SET_ACTIVE: {
                     final boolean active = msg.arg1 != 0;
                     final boolean fullscreen = msg.arg2 != 0;
-                    final boolean reportToImeController = msg.obj != null && (boolean) msg.obj;
                     if (DEBUG) {
                         Log.i(TAG, "handleMessage: MSG_SET_ACTIVE " + active + ", was " + mActive);
                     }
                     synchronized (mH) {
                         mActive = active;
                         mFullscreenMode = fullscreen;
-
-                        // Report active state to ImeFocusController to handle IME input
-                        // connection lifecycle callback when it allowed.
-                        final ImeFocusController controller = getFocusController();
-                        final View rootView = mCurRootView != null ? mCurRootView.getView() : null;
-                        if (controller != null && rootView != null && reportToImeController) {
-                            rootView.post(() -> controller.onInteractiveChanged(active));
-                            return;
-                        }
 
                         if (!active) {
                             // Some other client has starting using the IME, so note
@@ -1197,6 +1188,28 @@ public final class InputMethodManager {
                                 startInputOnWindowFocusGainInternal(reason, null, 0, 0, 0);
                             }
                         }
+                    }
+                    return;
+                }
+                case MSG_SET_INTERACTIVE: {
+                    final boolean interactive = msg.arg1 != 0;
+                    final boolean fullscreen = msg.arg2 != 0;
+                    if (DEBUG) {
+                        Log.i(TAG, "handleMessage: MSG_SET_INTERACTIVE " + interactive
+                                + ", was " + mActive);
+                    }
+                    synchronized (mH) {
+                        mActive = interactive;
+                        mFullscreenMode = fullscreen;
+
+                        // Report active state to ImeFocusController to handle IME input
+                        // connection lifecycle callback when it allowed.
+                        final ImeFocusController controller = getFocusController();
+                        final View rootView = mCurRootView != null ? mCurRootView.getView() : null;
+                        if (controller == null || rootView == null) {
+                            return;
+                        }
+                        rootView.post(() -> controller.onInteractiveChanged(interactive));
                     }
                     return;
                 }
@@ -1317,9 +1330,14 @@ public final class InputMethodManager {
         }
 
         @Override
-        public void setActive(boolean active, boolean fullscreen, boolean reportToImeController) {
-            mH.obtainMessage(MSG_SET_ACTIVE, active ? 1 : 0, fullscreen ? 1 : 0,
-                    reportToImeController).sendToTarget();
+        public void setActive(boolean active, boolean fullscreen) {
+            mH.obtainMessage(MSG_SET_ACTIVE, active ? 1 : 0, fullscreen ? 1 : 0).sendToTarget();
+        }
+
+        @Override
+        public void setInteractive(boolean interactive, boolean fullscreen) {
+            mH.obtainMessage(MSG_SET_INTERACTIVE, interactive ? 1 : 0, fullscreen ? 1 : 0)
+                    .sendToTarget();
         }
 
         @Override

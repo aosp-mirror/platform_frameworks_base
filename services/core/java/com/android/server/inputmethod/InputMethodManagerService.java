@@ -2330,8 +2330,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             // Since we set active false to current client and set mCurClient to null, let's unbind
             // all accessibility too. That means, when input method get disconnected (including
             // switching ime), we also unbind accessibility
-            mCurClient.mClient.setActive(false /* active */, false /* fullscreen */,
-                    false /* reportToImeController */);
+            mCurClient.mClient.setActive(false /* active */, false /* fullscreen */);
             mCurClient.mClient.onUnbindMethod(getSequenceNumberLocked(), unbindClientReason);
             mCurClient.mSessionRequested = false;
             mCurClient.mSessionRequestedForAccessibility = false;
@@ -2638,8 +2637,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         unbindCurrentClientLocked(UnbindReason.SWITCH_CLIENT);
         // If the screen is on, inform the new client it is active
         if (mIsInteractive) {
-            cs.mClient.setActive(true /* active */, false /* fullscreen */,
-                    false /* reportToImeController */);
+            cs.mClient.setActive(true /* active */, false /* fullscreen */);
         }
     }
 
@@ -5016,10 +5014,15 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             updateSystemUiLocked(interactive ? mImeWindowVis : 0, mBackDisposition);
 
             // Inform the current client of the change in active status
-            if (mCurClient != null && mCurClient.mClient != null) {
-                mCurClient.mClient.setActive(mIsInteractive, mInFullscreenMode,
-                        mImePlatformCompatUtils.shouldFinishInputWithReportToIme(
-                                getCurMethodUidLocked()));
+            if (mCurClient == null || mCurClient.mClient == null) {
+                return;
+            }
+            if (mImePlatformCompatUtils.shouldUseSetInteractiveProtocol(getCurMethodUidLocked())) {
+                // Eligible IME processes use new "setInteractive" protocol.
+                mCurClient.mClient.setInteractive(mIsInteractive, mInFullscreenMode);
+            } else {
+                // Legacy IME processes continue using legacy "setActive" protocol.
+                mCurClient.mClient.setActive(mIsInteractive, mInFullscreenMode);
             }
         }
     }
