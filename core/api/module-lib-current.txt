@@ -296,6 +296,17 @@ package android.net.netstats {
 
 }
 
+package android.net.wifi {
+
+  public final class WifiKeystore {
+    method @NonNull public static byte[] get(@NonNull String);
+    method @NonNull public static String[] list(@NonNull String);
+    method public static boolean put(@NonNull String, @NonNull byte[]);
+    method public static boolean remove(@NonNull String);
+  }
+
+}
+
 package android.os {
 
   public class ArtModuleServiceManager {
