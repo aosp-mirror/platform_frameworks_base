@@ -620,7 +620,9 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             mode = KeyguardSecurityContainer.MODE_ONE_HANDED;
         }
 
-        mView.initMode(mode, mGlobalSettings, mFalsingManager, mUserSwitcherController);
+        mView.initMode(mode, mGlobalSettings, mFalsingManager, mUserSwitcherController,
+                () -> showMessage(getContext().getString(R.string.keyguard_unlock_to_continue),
+                        null));
     }
 
     public void reportFailedUnlockAttempt(int userId, int timeoutMs) {
