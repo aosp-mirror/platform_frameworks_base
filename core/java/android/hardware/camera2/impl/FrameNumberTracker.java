@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
 
 /**
@@ -63,11 +64,11 @@ public class FrameNumberTracker {
     }
 
     private void update() {
-        Iterator iter = mFutureErrorMap.entrySet().iterator();
+        Iterator<Map.Entry<Long, Integer>> iter = mFutureErrorMap.entrySet().iterator();
         while (iter.hasNext()) {
-            TreeMap.Entry pair = (TreeMap.Entry)iter.next();
-            Long errorFrameNumber = (Long)pair.getKey();
-            int requestType = (int) pair.getValue();
+            Map.Entry<Long, Integer> pair = iter.next();
+            long errorFrameNumber = pair.getKey();
+            int requestType = pair.getValue();
             Boolean removeError = false;
             if (errorFrameNumber == mCompletedFrameNumber[requestType] + 1) {
                 removeError = true;

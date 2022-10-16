@@ -56,6 +56,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
@@ -592,7 +593,7 @@ public class NotificationLogger implements StateListener {
                 return;
             }
             if (loggedExpansionState != null
-                    && state.mIsExpanded == loggedExpansionState) {
+                    && Objects.equals(state.mIsExpanded, loggedExpansionState)) {
                 return;
             }
             mLoggedExpansionState.put(key, state.mIsExpanded);

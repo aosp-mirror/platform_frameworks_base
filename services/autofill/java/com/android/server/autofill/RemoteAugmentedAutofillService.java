@@ -245,6 +245,7 @@ final class RemoteAugmentedAutofillService
         });
     }
 
+    @SuppressWarnings("ReturnValueIgnored")
     private void maybeRequestShowInlineSuggestions(int sessionId,
             @Nullable InlineSuggestionsRequest request,
             @Nullable List<Dataset> inlineSuggestionsData, @Nullable Bundle clientState,

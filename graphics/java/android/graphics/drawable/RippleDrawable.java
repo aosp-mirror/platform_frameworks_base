@@ -758,7 +758,7 @@ public class RippleDrawable extends LayerDrawable {
         if (mBackground != null) {
             mBackground.onHotspotBoundsChanged();
         }
-        float newRadius = Math.round(getComputedRadius());
+        float newRadius = getComputedRadius();
         for (int i = 0; i < mRunningAnimations.size(); i++) {
             RippleAnimationSession s = mRunningAnimations.get(i);
             s.setRadius(newRadius);

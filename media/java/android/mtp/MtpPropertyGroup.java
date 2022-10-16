@@ -230,7 +230,7 @@ class MtpPropertyGroup {
                 case MtpConstants.PROPERTY_PERSISTENT_UID:
                     // The persistent uid must be unique and never reused among all objects,
                     // and remain the same between sessions.
-                    long puid = (object.getPath().toString().hashCode() << 32)
+                    long puid = (((long) object.getPath().toString().hashCode()) << 32)
                             + object.getModifiedTime();
                     list.append(id, property.code, property.type, puid);
                     break;

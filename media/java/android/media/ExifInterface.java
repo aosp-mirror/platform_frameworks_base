@@ -70,6 +70,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
@@ -4833,12 +4834,13 @@ public class ExifInterface {
             for (int i = 1; i < entryValues.length; ++i) {
                 final Pair<Integer, Integer> guessDataFormat = guessDataFormat(entryValues[i]);
                 int first = -1, second = -1;
-                if (guessDataFormat.first == dataFormat.first
-                        || guessDataFormat.second == dataFormat.first) {
+                if (Objects.equals(guessDataFormat.first, dataFormat.first)
+                        || Objects.equals(guessDataFormat.second, dataFormat.first)) {
                     first = dataFormat.first;
                 }
-                if (dataFormat.second != -1 && (guessDataFormat.first == dataFormat.second
-                        || guessDataFormat.second == dataFormat.second)) {
+                if (dataFormat.second != -1
+                        && (Objects.equals(guessDataFormat.first, dataFormat.second)
+                        || Objects.equals(guessDataFormat.second, dataFormat.second))) {
                     second = dataFormat.second;
                 }
                 if (first == -1 && second == -1) {

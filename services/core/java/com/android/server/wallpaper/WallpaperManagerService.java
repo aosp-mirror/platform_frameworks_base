@@ -1888,12 +1888,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         }
     }
 
-    private static final HashMap<Integer, String> sWallpaperType = new HashMap<Integer, String>() {
-        {
-            put(FLAG_SYSTEM, RECORD_FILE);
-            put(FLAG_LOCK, RECORD_LOCK_FILE);
-        }
-    };
+    private static final Map<Integer, String> sWallpaperType = Map.of(
+            FLAG_SYSTEM, RECORD_FILE,
+            FLAG_LOCK, RECORD_LOCK_FILE);
 
     private void errorCheck(int userID) {
         sWallpaperType.forEach((type, filename) -> {

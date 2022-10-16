@@ -68,4 +68,4 @@ public class ConsoleMessage {
     public int lineNumber() {
         return mLineNumber;
     }
-};
+}

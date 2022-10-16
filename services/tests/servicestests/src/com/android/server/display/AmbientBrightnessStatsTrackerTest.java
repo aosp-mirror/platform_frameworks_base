@@ -424,7 +424,7 @@ public class AmbientBrightnessStatsTrackerTest {
 
         @Override
         public LocalDate getLocalDate() {
-            return LocalDate.from(mLocalDate);
+            return mLocalDate;
         }
     }
 

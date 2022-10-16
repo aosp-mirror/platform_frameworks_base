@@ -53,6 +53,7 @@ import com.android.server.people.data.DataManager;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
@@ -372,7 +373,8 @@ public class PeopleService extends SystemService {
         @Override
         public boolean equals(Object o) {
             ListenerKey key = (ListenerKey) o;
-            return key.getPackageName().equals(mPackageName) && key.getUserId() == mUserId
+            return key.getPackageName().equals(mPackageName)
+                    && Objects.equals(key.getUserId(), mUserId)
                     && key.getShortcutId().equals(mShortcutId);
         }
 

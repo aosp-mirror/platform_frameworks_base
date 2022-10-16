@@ -637,8 +637,7 @@ public class VcnManagementServiceTest {
         final BroadcastReceiver receiver = getPackageChangeReceiver();
 
         verify(mMockContext).registerReceiver(any(), argThat(filter -> {
-            return filter.hasAction(Intent.ACTION_PACKAGE_REMOVED)
-                    && filter.hasAction(Intent.ACTION_PACKAGE_REMOVED);
+            return filter.hasAction(Intent.ACTION_PACKAGE_REMOVED);
         }), any(), any());
 
         receiver.onReceive(mMockContext, new Intent(Intent.ACTION_PACKAGE_REMOVED));

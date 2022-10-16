@@ -2325,10 +2325,9 @@ public class AudioManager {
         return AudioSystem.SUCCESS;
     }
 
-    private final Map<Integer, Object> mDevRoleForCapturePresetListeners = new HashMap<>(){{
-            put(AudioSystem.DEVICE_ROLE_PREFERRED,
-                    new DevRoleListeners<OnPreferredDevicesForCapturePresetChangedListener>());
-        }};
+    private final Map<Integer, Object> mDevRoleForCapturePresetListeners = Map.of(
+            AudioSystem.DEVICE_ROLE_PREFERRED,
+            new DevRoleListeners<OnPreferredDevicesForCapturePresetChangedListener>());
 
     private class DevRoleListenerInfo<T> {
         final @NonNull Executor mExecutor;
@@ -6483,15 +6482,17 @@ public class AudioManager {
     // AudioPort implementation
     //
 
-    static final int AUDIOPORT_GENERATION_INIT = 0;
-    static Integer sAudioPortGeneration = new Integer(AUDIOPORT_GENERATION_INIT);
-    static ArrayList<AudioPort> sAudioPortsCached = new ArrayList<AudioPort>();
-    static ArrayList<AudioPort> sPreviousAudioPortsCached = new ArrayList<AudioPort>();
-    static ArrayList<AudioPatch> sAudioPatchesCached = new ArrayList<AudioPatch>();
+    private static final int AUDIOPORT_GENERATION_INIT = 0;
+    private static Object sAudioPortGenerationLock = new Object();
+    @GuardedBy("sAudioPortGenerationLock")
+    private static int sAudioPortGeneration = AUDIOPORT_GENERATION_INIT;
+    private static ArrayList<AudioPort> sAudioPortsCached = new ArrayList<AudioPort>();
+    private static ArrayList<AudioPort> sPreviousAudioPortsCached = new ArrayList<AudioPort>();
+    private static ArrayList<AudioPatch> sAudioPatchesCached = new ArrayList<AudioPatch>();
 
     static int resetAudioPortGeneration() {
         int generation;
-        synchronized (sAudioPortGeneration) {
+        synchronized (sAudioPortGenerationLock) {
             generation = sAudioPortGeneration;
             sAudioPortGeneration = AUDIOPORT_GENERATION_INIT;
         }
@@ -6501,7 +6502,7 @@ public class AudioManager {
     static int updateAudioPortCache(ArrayList<AudioPort> ports, ArrayList<AudioPatch> patches,
                                     ArrayList<AudioPort> previousPorts) {
         sAudioPortEventHandler.init();
-        synchronized (sAudioPortGeneration) {
+        synchronized (sAudioPortGenerationLock) {
 
             if (sAudioPortGeneration == AUDIOPORT_GENERATION_INIT) {
                 int[] patchGeneration = new int[1];

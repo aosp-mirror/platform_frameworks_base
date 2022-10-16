@@ -21,6 +21,8 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.os.IBinder;
 import android.util.Log;
 
+import com.android.internal.annotations.GuardedBy;
+
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookieStore;
@@ -31,7 +33,9 @@ import java.util.List;
 public class MediaHTTPService extends IMediaHTTPService.Stub {
     private static final String TAG = "MediaHTTPService";
     @Nullable private List<HttpCookie> mCookies;
-    private Boolean mCookieStoreInitialized = new Boolean(false);
+    private final Object mCookieStoreInitializedLock = new Object();
+    @GuardedBy("mCookieStoreInitializedLock")
+    private boolean mCookieStoreInitialized = false;
 
     public MediaHTTPService(@Nullable List<HttpCookie> cookies) {
         mCookies = cookies;
@@ -40,7 +44,7 @@ public class MediaHTTPService extends IMediaHTTPService.Stub {
 
     public IMediaHTTPConnection makeHTTPConnection() {
 
-        synchronized (mCookieStoreInitialized) {
+        synchronized (mCookieStoreInitializedLock) {
             // Only need to do it once for all connections
             if ( !mCookieStoreInitialized )  {
                 CookieHandler cookieHandler = CookieHandler.getDefault();
@@ -78,8 +82,8 @@ public class MediaHTTPService extends IMediaHTTPService.Stub {
 
                 Log.v(TAG, "makeHTTPConnection(" + this + "): cookieHandler: " + cookieHandler +
                         " Cookies: " + mCookies);
-            }   // mCookieStoreInitialized
-        }   // synchronized
+            }
+        }
 
         return new MediaHTTPConnection();
     }

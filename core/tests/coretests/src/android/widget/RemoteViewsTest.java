@@ -128,6 +128,7 @@ public class RemoteViewsTest {
         RemoteViews clone = child.clone();
     }
 
+    @SuppressWarnings("ReturnValueIgnored")
     @Test
     public void clone_repeatedly() {
         RemoteViews original = new RemoteViews(mPackage, R.layout.remote_views_test);
@@ -485,6 +486,7 @@ public class RemoteViewsTest {
         }
     }
 
+    @SuppressWarnings("ReturnValueIgnored")
     @Test
     public void nestedAddViews() {
         RemoteViews views = new RemoteViews(mPackage, R.layout.remote_views_test);
@@ -509,6 +511,7 @@ public class RemoteViewsTest {
         parcelAndRecreate(views);
     }
 
+    @SuppressWarnings("ReturnValueIgnored")
     @Test
     public void nestedLandscapeViews() {
         RemoteViews views = new RemoteViews(mPackage, R.layout.remote_views_test);

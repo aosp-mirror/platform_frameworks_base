@@ -353,4 +353,4 @@ public class LifecycleOperationStorage implements OperationStorage {
             op.callback.handleCancel(cancelAll);
         }
     }
-};
+}
