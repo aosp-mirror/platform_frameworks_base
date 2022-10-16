@@ -50,7 +50,6 @@ import com.android.server.utils.AlarmQueue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.function.Predicate;
 
 /**
@@ -397,10 +396,10 @@ public final class FlexibilityController extends StateController {
             return;
         }
         final long nowElapsed = sElapsedRealtimeClock.millis();
-        List<JobStatus> jobsByUid = mService.getJobStore().getJobsByUid(uid);
+        ArraySet<JobStatus> jobsByUid = mService.getJobStore().getJobsBySourceUid(uid);
         boolean hasPrefetch = false;
         for (int i = 0; i < jobsByUid.size(); i++) {
-            JobStatus js = jobsByUid.get(i);
+            JobStatus js = jobsByUid.valueAt(i);
             if (js.hasFlexibilityConstraint()) {
                 js.setFlexibilityConstraintSatisfied(nowElapsed, isFlexibilitySatisfiedLocked(js));
                 hasPrefetch |= js.getJob().isPrefetch();
