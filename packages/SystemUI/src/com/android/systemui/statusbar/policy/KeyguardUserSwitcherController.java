@@ -53,6 +53,7 @@ import com.android.systemui.user.data.source.UserRecord;
 import com.android.systemui.util.ViewController;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -456,7 +457,7 @@ public class KeyguardUserSwitcherController extends ViewController<KeyguardUserS
         }
 
         void refreshUserOrder() {
-            ArrayList<UserRecord> users = super.getUsers();
+            List<UserRecord> users = super.getUsers();
             mUsersOrdered = new ArrayList<>(users.size());
             for (int i = 0; i < users.size(); i++) {
                 UserRecord record = users.get(i);
