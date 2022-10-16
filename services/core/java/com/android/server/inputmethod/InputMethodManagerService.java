@@ -20,7 +20,6 @@ import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_NORMAL;
 import static android.os.IServiceManager.DUMP_FLAG_PROTO;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
-import static android.server.inputmethod.InputMethodManagerServiceProto.ACCESSIBILITY_REQUESTING_NO_SOFT_KEYBOARD;
 import static android.server.inputmethod.InputMethodManagerServiceProto.BACK_DISPOSITION;
 import static android.server.inputmethod.InputMethodManagerServiceProto.BOUND_TO_METHOD;
 import static android.server.inputmethod.InputMethodManagerServiceProto.CUR_ATTRIBUTE;
@@ -54,7 +53,6 @@ import static com.android.server.inputmethod.InputMethodUtils.isSoftInputModeSta
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.Manifest;
-import android.accessibilityservice.AccessibilityService;
 import android.annotation.AnyThread;
 import android.annotation.BinderThread;
 import android.annotation.DrawableRes;
@@ -531,13 +529,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     /**
-     * {@code true} if the Ime policy has been set to {@link WindowManager#DISPLAY_IME_POLICY_HIDE}.
-     *
-     * This prevents the IME from showing when it otherwise may have shown.
-     */
-    boolean mImeHiddenByDisplayPolicy;
-
-    /**
      * The client that is currently bound to an input method.
      */
     private ClientState mCurClient;
@@ -777,7 +768,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     int mImeWindowVis;
 
     private LocaleList mLastSystemLocales;
-    private boolean mAccessibilityRequestingNoSoftKeyboard;
     private final MyPackageMonitor mMyPackageMonitor = new MyPackageMonitor();
     private final String mSlotIme;
 
@@ -1182,11 +1172,10 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 } else if (accessibilityRequestingNoImeUri.equals(uri)) {
                     final int accessibilitySoftKeyboardSetting = Settings.Secure.getIntForUser(
                             mContext.getContentResolver(),
-                            Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE, 0 /* def */, mUserId);
-                    mAccessibilityRequestingNoSoftKeyboard =
-                            (accessibilitySoftKeyboardSetting & AccessibilityService.SHOW_MODE_MASK)
-                                    == AccessibilityService.SHOW_MODE_HIDDEN;
-                    if (mAccessibilityRequestingNoSoftKeyboard) {
+                            Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE, 0, mUserId);
+                    mVisibilityStateComputer.getImePolicy().setA11yRequestNoSoftKeyboard(
+                            accessibilitySoftKeyboardSetting);
+                    if (mVisibilityStateComputer.getImePolicy().isA11yRequestNoSoftKeyboard()) {
                         final boolean showRequested = mShowRequested;
                         hideCurrentInputLocked(mCurFocusedWindow, null /* statsToken */,
                                 0 /* flags */, null /* resultReceiver */,
@@ -2477,15 +2466,15 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         // session & other conditions.
         mDisplayIdToShowIme = computeImeDisplayIdForTarget(cs.mSelfReportedDisplayId,
                 mImeDisplayValidator);
+        final boolean imeHiddenByPolicy = mDisplayIdToShowIme == INVALID_DISPLAY;
+        mVisibilityStateComputer.getImePolicy().setImeHiddenByDisplayPolicy(imeHiddenByPolicy);
 
-        if (mDisplayIdToShowIme == INVALID_DISPLAY) {
-            mImeHiddenByDisplayPolicy = true;
+        if (imeHiddenByPolicy) {
             hideCurrentInputLocked(mCurFocusedWindow, null /* statsToken */, 0 /* flags */,
                     null /* resultReceiver */,
                     SoftInputShowHideReason.HIDE_DISPLAY_IME_POLICY_HIDE);
             return InputBindResult.NO_IME;
         }
-        mImeHiddenByDisplayPolicy = false;
 
         if (mCurClient != cs) {
             prepareClientSwitchLocked(cs);
@@ -3383,13 +3372,11 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
         // TODO(b/246309664): make mShowRequested as per-window state.
         mShowRequested = true;
-        if (mAccessibilityRequestingNoSoftKeyboard || mImeHiddenByDisplayPolicy) {
-            ImeTracker.get().onFailed(statsToken, ImeTracker.PHASE_SERVER_ACCESSIBILITY);
+
+        if (!mVisibilityStateComputer.onImeShowFlags(statsToken, flags)) {
             return false;
         }
-        ImeTracker.get().onProgress(statsToken, ImeTracker.PHASE_SERVER_ACCESSIBILITY);
 
-        mVisibilityStateComputer.onImeShowFlags(flags);
         if (!mSystemReady) {
             ImeTracker.get().onFailed(statsToken, ImeTracker.PHASE_SERVER_SYSTEM_READY);
             return false;
@@ -4678,8 +4665,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             proto.write(BACK_DISPOSITION, mBackDisposition);
             proto.write(IME_WINDOW_VISIBILITY, mImeWindowVis);
             proto.write(SHOW_IME_WITH_HARD_KEYBOARD, mMenuController.getShowImeWithHardKeyboard());
-            proto.write(ACCESSIBILITY_REQUESTING_NO_SOFT_KEYBOARD,
-                    mAccessibilityRequestingNoSoftKeyboard);
             proto.end(token);
         }
     }
@@ -5909,7 +5894,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             p.println("  mInFullscreenMode=" + mInFullscreenMode);
             p.println("  mSystemReady=" + mSystemReady + " mInteractive=" + mIsInteractive);
             p.println("  mSettingsObserver=" + mSettingsObserver);
-            p.println("  mImeHiddenByDisplayPolicy=" + mImeHiddenByDisplayPolicy);
             p.println("  mStylusIds=" + (mStylusIds != null
                     ? Arrays.toString(mStylusIds.toArray()) : ""));
             p.println("  mSwitchingController:");

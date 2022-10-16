@@ -16,6 +16,8 @@
 
 package com.android.server.inputmethod;
 
+import static android.accessibilityservice.AccessibilityService.SHOW_MODE_HIDDEN;
+import static android.server.inputmethod.InputMethodManagerServiceProto.ACCESSIBILITY_REQUESTING_NO_SOFT_KEYBOARD;
 import static android.server.inputmethod.InputMethodManagerServiceProto.SHOW_EXPLICITLY_REQUESTED;
 import static android.server.inputmethod.InputMethodManagerServiceProto.SHOW_FORCED;
 import static android.view.Display.DEFAULT_DISPLAY;
@@ -24,6 +26,7 @@ import static android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 
 import static com.android.internal.inputmethod.InputMethodDebug.softInputModeToString;
 
+import android.accessibilityservice.AccessibilityService;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.os.IBinder;
@@ -123,14 +126,21 @@ public final class ImeVisibilityStateComputer {
      * @param statsToken The token for tracking this show request
      * @param showFlags The additional operation flags to indicate whether this show request mode is
      *                  implicit or explicit.
+     * @return {@code true} when the computer has proceed this show request operation.
      */
-    void onImeShowFlags(int showFlags) {
+    boolean onImeShowFlags(@NonNull ImeTracker.Token statsToken, int showFlags) {
+        if (mPolicy.mA11yRequestingNoSoftKeyboard || mPolicy.mImeHiddenByDisplayPolicy) {
+            ImeTracker.get().onFailed(statsToken, ImeTracker.PHASE_SERVER_ACCESSIBILITY);
+            return false;
+        }
+        ImeTracker.get().onProgress(statsToken, ImeTracker.PHASE_SERVER_ACCESSIBILITY);
         if ((showFlags & InputMethodManager.SHOW_FORCED) != 0) {
             mRequestedShowExplicitly = true;
             mShowForced = true;
         } else if ((showFlags & InputMethodManager.SHOW_IMPLICIT) == 0) {
             mRequestedShowExplicitly = true;
         }
+        return true;
     }
 
     /**
@@ -229,12 +239,15 @@ public final class ImeVisibilityStateComputer {
     void dumpDebug(ProtoOutputStream proto, long fieldId) {
         proto.write(SHOW_EXPLICITLY_REQUESTED, mRequestedShowExplicitly);
         proto.write(SHOW_FORCED, mShowForced);
+        proto.write(ACCESSIBILITY_REQUESTING_NO_SOFT_KEYBOARD,
+                mPolicy.isA11yRequestNoSoftKeyboard());
     }
 
     void dump(PrintWriter pw) {
         final Printer p = new PrintWriterPrinter(pw);
         p.println(" mRequestedShowExplicitly=" + mRequestedShowExplicitly
                 + " mShowForced=" + mShowForced);
+        p.println("  mImeHiddenByDisplayPolicy=" + mPolicy.isImeHiddenByDisplayPolicy());
     }
 
     /**
@@ -254,17 +267,31 @@ public final class ImeVisibilityStateComputer {
         private boolean mImeHiddenByDisplayPolicy;
 
         /**
-         * Set when a11y requests to hide IME by A11yService#setShowMode(SHOW_MODE_HIDDEN)
+         * Set when the accessibility service requests to hide IME by
+         * {@link AccessibilityService.SoftKeyboardController#setShowMode}
          */
-        private boolean mAccessibilityRequestingNoSoftKeyboard;
+        private boolean mA11yRequestingNoSoftKeyboard;
 
         void setImeHiddenByDisplayPolicy(boolean hideIme) {
             mImeHiddenByDisplayPolicy = hideIme;
         }
 
-        void setA11yRequestNoSoftKeyboard(boolean a11yRequestNoIme) {
-            mAccessibilityRequestingNoSoftKeyboard = a11yRequestNoIme;
+        boolean isImeHiddenByDisplayPolicy() {
+            return mImeHiddenByDisplayPolicy;
         }
+
+        void setA11yRequestNoSoftKeyboard(int keyboardShowMode) {
+            mA11yRequestingNoSoftKeyboard =
+                    (keyboardShowMode & AccessibilityService.SHOW_MODE_MASK) == SHOW_MODE_HIDDEN;
+        }
+
+        boolean isA11yRequestNoSoftKeyboard() {
+            return mA11yRequestingNoSoftKeyboard;
+        }
+    }
+
+    ImeVisibilityPolicy getImePolicy() {
+        return mPolicy;
     }
 
     /**
