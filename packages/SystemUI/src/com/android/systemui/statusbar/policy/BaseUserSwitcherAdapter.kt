@@ -35,8 +35,8 @@ protected constructor(
     protected val controller: UserSwitcherController,
 ) : BaseAdapter() {
 
-    protected open val users: ArrayList<UserRecord>
-        get() = controller.users
+    protected open val users: List<UserRecord>
+        get() = controller.users.filter { !controller.isKeyguardShowing || !it.isRestricted }
 
     init {
         controller.addAdapter(WeakReference(this))
@@ -112,6 +112,7 @@ protected constructor(
                     item.isGuest,
                     item.isAddSupervisedUser,
                     isTablet,
+                    item.isManageUsers,
                 )
             return checkNotNull(context.getDrawable(iconRes))
         }

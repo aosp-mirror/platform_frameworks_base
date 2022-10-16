@@ -241,4 +241,6 @@
     <string name="clock_title_bubble">Bubble</string>
     <!-- Name of the "Analog" clock face [CHAR LIMIT=15]-->
     <string name="clock_title_analog">Analog</string>
+    <!-- Title of bouncer when we want to authenticate before continuing with action. [CHAR LIMIT=NONE] -->
+    <string name="keyguard_unlock_to_continue">Unlock your device to continue</string>
 </resources>

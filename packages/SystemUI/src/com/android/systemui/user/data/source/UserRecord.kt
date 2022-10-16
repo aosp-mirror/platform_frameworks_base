@@ -47,6 +47,9 @@ data class UserRecord(
      * If not disabled, this is `null`.
      */
     @JvmField val enforcedAdmin: RestrictedLockUtils.EnforcedAdmin? = null,
+
+    /** Whether this record is to go to the Settings page to manage users. */
+    @JvmField val isManageUsers: Boolean = false
 ) {
     /** Returns a new instance of [UserRecord] with its [isCurrent] set to the given value. */
     fun copyWithIsCurrent(isCurrent: Boolean): UserRecord {

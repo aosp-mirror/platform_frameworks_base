@@ -39,6 +39,7 @@ object LegacyUserUiHelper {
         isGuest: Boolean,
         isAddSupervisedUser: Boolean,
         isTablet: Boolean = false,
+        isManageUsers: Boolean,
     ): Int {
         return if (isAddUser && isTablet) {
             R.drawable.ic_account_circle_filled
@@ -48,6 +49,8 @@ object LegacyUserUiHelper {
             R.drawable.ic_account_circle
         } else if (isAddSupervisedUser) {
             R.drawable.ic_add_supervised_user
+        } else if (isManageUsers) {
+            R.drawable.ic_manage_users
         } else {
             R.drawable.ic_avatar_user
         }
@@ -74,6 +77,7 @@ object LegacyUserUiHelper {
                         isAddUser = record.isAddUser,
                         isAddSupervisedUser = record.isAddSupervisedUser,
                         isTablet = isTablet,
+                        isManageUsers = record.isManageUsers,
                     )
                 )
         }
@@ -103,8 +107,9 @@ object LegacyUserUiHelper {
         isAddUser: Boolean,
         isAddSupervisedUser: Boolean,
         isTablet: Boolean = false,
+        isManageUsers: Boolean,
     ): Int {
-        check(isGuest || isAddUser || isAddSupervisedUser)
+        check(isGuest || isAddUser || isAddSupervisedUser || isManageUsers)
 
         return when {
             isGuest && isGuestUserAutoCreated && isGuestUserResetting ->
@@ -114,6 +119,7 @@ object LegacyUserUiHelper {
             isGuest -> com.android.internal.R.string.guest_name
             isAddUser -> com.android.settingslib.R.string.user_add_user
             isAddSupervisedUser -> R.string.add_user_supervised
+            isManageUsers -> R.string.manage_users
             else -> error("This should never happen!")
         }
     }
