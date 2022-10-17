@@ -208,7 +208,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
      * @return {@code true} until the target {@link InputConnection} receives
      * {@link InputConnection#closeConnection()} as a result of {@link #deactivate()}.
      */
-    public boolean isFinished() {
+    private boolean isFinished() {
         synchronized (mLock) {
             return mFinished;
         }
