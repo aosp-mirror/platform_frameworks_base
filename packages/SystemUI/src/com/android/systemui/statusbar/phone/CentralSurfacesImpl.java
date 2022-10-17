@@ -91,7 +91,6 @@ import android.util.EventLog;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.MathUtils;
-import android.util.Slog;
 import android.view.Display;
 import android.view.IRemoteAnimationRunner;
 import android.view.IWindowManager;
@@ -3813,8 +3812,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         if (mDevicePolicyManager.getCameraDisabled(null,
                 mLockscreenUserManager.getCurrentUserId())) {
             return false;
-        } else if (mStatusBarKeyguardViewManager == null
-                || (isKeyguardShowing() && isKeyguardSecure())) {
+        } else if (isKeyguardShowing() && isKeyguardSecure()) {
             // Check if the admin has disabled the camera specifically for the keyguard
             return (mDevicePolicyManager.getKeyguardDisabledFeatures(null,
                     mLockscreenUserManager.getCurrentUserId())
@@ -4222,14 +4220,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
     @Override
     public boolean isKeyguardSecure() {
-        if (mStatusBarKeyguardViewManager == null) {
-            // startKeyguard() hasn't been called yet, so we don't know.
-            // Make sure anything that needs to know isKeyguardSecure() checks and re-checks this
-            // value onVisibilityChanged().
-            Slog.w(TAG, "isKeyguardSecure() called before startKeyguard(), returning false",
-                    new Throwable());
-            return false;
-        }
         return mStatusBarKeyguardViewManager.isSecure();
     }
     @Override
@@ -4289,11 +4279,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             .Callback() {
         @Override
         public void onFinished() {
-            if (mStatusBarKeyguardViewManager == null) {
-                Log.w(TAG, "Tried to notify keyguard visibility when "
-                        + "mStatusBarKeyguardViewManager was null");
-                return;
-            }
             if (mKeyguardStateController.isKeyguardFadingAway()) {
                 mStatusBarKeyguardViewManager.onKeyguardFadedAway();
             }
