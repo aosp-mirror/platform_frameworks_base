@@ -402,6 +402,9 @@
                  android:permission="com.android.systemui.permission.SELF"
                  android:exported="false" />
 
+        <service android:name=".screenshot.ScreenshotCrossProfileService"
+                 android:permission="com.android.systemui.permission.SELF"
+                 android:exported="false" />
 
         <service android:name=".screenrecord.RecordingService" />
 

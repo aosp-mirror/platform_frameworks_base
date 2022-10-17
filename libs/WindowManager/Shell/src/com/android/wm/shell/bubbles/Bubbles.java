@@ -23,7 +23,6 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.app.NotificationChannel;
 import android.content.pm.UserInfo;
-import android.os.Bundle;
 import android.os.UserHandle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.RankingMap;
@@ -113,9 +112,6 @@ public interface Bubbles {
      */
     @Nullable
     Bubble getBubbleWithShortcutId(String shortcutId);
-
-    /** Called for any taskbar changes. */
-    void onTaskbarChanged(Bundle b);
 
     /**
      * We intercept notification entries (including group summaries) dismissed by the user when
