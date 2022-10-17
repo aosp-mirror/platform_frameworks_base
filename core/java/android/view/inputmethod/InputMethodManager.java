@@ -903,18 +903,6 @@ public final class InputMethodManager {
             mImeDispatcher.switchRootView(mCurRootView, rootView);
             mCurRootView = rootView;
         }
-
-        /**
-         * Used for {@link ImeFocusController} to return if the root view from the
-         * controller is this {@link InputMethodManager} currently focused.
-         * TODO: Address event-order problem when get current root view in multi-threads.
-         */
-        @Override
-        public boolean isCurrentRootView(ViewRootImpl rootView) {
-            synchronized (mH) {
-                return mCurRootView == rootView;
-            }
-        }
     }
 
     /** @hide */
@@ -1182,17 +1170,24 @@ public final class InputMethodManager {
                     synchronized (mH) {
                         mActive = interactive;
                         mFullscreenMode = fullscreen;
-
                         if (interactive) {
-                            // Report active state to ImeFocusController to handle IME input
-                            // connection lifecycle callback when it allowed.
-                            final ImeFocusController controller = getFocusController();
                             final View rootView =
                                     mCurRootView != null ? mCurRootView.getView() : null;
-                            if (controller == null || rootView == null) {
+                            if (rootView == null) {
                                 return;
                             }
-                            rootView.post(controller::onInteractive);
+                            // Find the next view focus to start the input connection when the
+                            // device was interactive.
+                            final ViewRootImpl currentViewRootImpl = mCurRootView;
+                            rootView.post(() -> {
+                                synchronized (mH) {
+                                    if (mCurRootView != currentViewRootImpl) {
+                                        return;
+                                    }
+                                }
+                                final View focusedView = currentViewRootImpl.getView().findFocus();
+                                onViewFocusChangedInternal(focusedView, focusedView != null);
+                            });
                         } else {
                             finishInputLocked();
                             if (isImeSessionAvailableLocked()) {
