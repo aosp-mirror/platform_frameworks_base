@@ -396,17 +396,12 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             // Emit all trace events for this process into a consistent track
             queue.traceTrackName = TAG + ".mRunning[" + queueIndex + "]";
 
-            // If we're already warm, boost OOM adjust now; if cold we'll boost
-            // it after the app has been started
-            if (processWarm) {
-                notifyStartedRunning(queue);
-            }
-
             // If we're already warm, schedule next pending broadcast now;
             // otherwise we'll wait for the cold start to circle back around
             queue.makeActiveNextPending();
             if (processWarm) {
                 queue.traceProcessRunningBegin();
+                notifyStartedRunning(queue);
                 scheduleReceiverWarmLocked(queue);
             } else {
                 queue.traceProcessStartingBegin();
@@ -441,15 +436,22 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
     @Override
     public boolean onApplicationAttachedLocked(@NonNull ProcessRecord app) {
+        // Process records can be recycled, so always start by looking up the
+        // relevant per-process queue
+        final BroadcastProcessQueue queue = getProcessQueue(app);
+        if (queue != null) {
+            queue.app = app;
+        }
+
         boolean didSomething = false;
-        if ((mRunningColdStart != null) && (mRunningColdStart.app == app)) {
+        if ((mRunningColdStart != null) && (mRunningColdStart == queue)) {
             // We've been waiting for this app to cold start, and it's ready
             // now; dispatch its next broadcast and clear the slot
-            final BroadcastProcessQueue queue = mRunningColdStart;
             mRunningColdStart = null;
 
             queue.traceProcessEnd();
             queue.traceProcessRunningBegin();
+            notifyStartedRunning(queue);
             scheduleReceiverWarmLocked(queue);
 
             // We might be willing to kick off another cold start
@@ -471,19 +473,25 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
     @Override
     public void onApplicationCleanupLocked(@NonNull ProcessRecord app) {
-        if ((mRunningColdStart != null) && (mRunningColdStart.app == app)) {
+        // Process records can be recycled, so always start by looking up the
+        // relevant per-process queue
+        final BroadcastProcessQueue queue = getProcessQueue(app);
+        if (queue != null) {
+            queue.app = null;
+        }
+
+        if ((mRunningColdStart != null) && (mRunningColdStart == queue)) {
             // We've been waiting for this app to cold start, and it had
             // trouble; clear the slot and fail delivery below
             mRunningColdStart = null;
+
+            queue.traceProcessEnd();
 
             // We might be willing to kick off another cold start
             enqueueUpdateRunningList();
         }
 
-        final BroadcastProcessQueue queue = getProcessQueue(app);
         if (queue != null) {
-            queue.app = null;
-
             // If queue was running a broadcast, fail it
             if (queue.isActive()) {
                 finishReceiverLocked(queue, BroadcastRecord.DELIVERY_FAILURE);
@@ -567,7 +575,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 }
             } else {
                 // Otherwise we don't need to block at all
-                blockedUntilTerminalCount = 0;
+                blockedUntilTerminalCount = -1;
             }
 
             queue.enqueueOrReplaceBroadcast(r, i, blockedUntilTerminalCount);
@@ -619,9 +627,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         if (DEBUG_BROADCAST) logv("Scheduling " + r + " to cold " + queue);
         queue.app = mService.startProcessLocked(queue.processName, info, true, intentFlags,
                 hostingRecord, zygotePolicyFlags, allowWhileBooting, false);
-        if (queue.app != null) {
-            notifyStartedRunning(queue);
-        } else {
+        if (queue.app == null) {
             mRunningColdStart = null;
             finishReceiverLocked(queue, BroadcastRecord.DELIVERY_FAILURE);
             return;
@@ -1157,6 +1163,12 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 if (queue != null) {
                     checkState(queue.isActive(), "isActive " + queue);
                 }
+            }
+
+            // Verify that pending cold start hasn't been orphaned
+            if (mRunningColdStart != null) {
+                checkState(getRunningIndexOf(mRunningColdStart) >= 0,
+                        "isOrphaned " + mRunningColdStart);
             }
 
             // Verify health of all known process queues
