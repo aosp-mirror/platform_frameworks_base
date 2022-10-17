@@ -145,6 +145,35 @@ public class BrightLineClassifierTest extends SysuiTestCase {
     }
 
     @Test
+    public void testIsFalseTouch_SeekBar_FalseTouch() {
+        when(mClassifierA.classifyGesture(anyInt(), anyDouble(), anyDouble()))
+                .thenReturn(mFalsedResult);
+        when(mSingleTapClassfier.isTap(any(List.class), anyDouble())).thenReturn(mFalsedResult);
+        assertThat(mBrightLineFalsingManager.isFalseTouch(Classifier.MEDIA_SEEKBAR)).isTrue();
+    }
+
+    @Test
+    public void testIsFalseTouch_SeekBar_RealTouch() {
+        when(mSingleTapClassfier.isTap(any(List.class), anyDouble())).thenReturn(mFalsedResult);
+        assertThat(mBrightLineFalsingManager.isFalseTouch(Classifier.MEDIA_SEEKBAR)).isFalse();
+    }
+
+    @Test
+    public void testIsFalseTouch_SeekBar_FalseTap() {
+        when(mClassifierA.classifyGesture(anyInt(), anyDouble(), anyDouble()))
+                .thenReturn(mFalsedResult);
+        when(mSingleTapClassfier.isTap(any(List.class), anyDouble())).thenReturn(mFalsedResult);
+        assertThat(mBrightLineFalsingManager.isFalseTouch(Classifier.MEDIA_SEEKBAR)).isTrue();
+    }
+
+    @Test
+    public void testIsFalseTouch_SeekBar_RealTap() {
+        when(mClassifierA.classifyGesture(anyInt(), anyDouble(), anyDouble()))
+                .thenReturn(mFalsedResult);
+        assertThat(mBrightLineFalsingManager.isFalseTouch(Classifier.MEDIA_SEEKBAR)).isFalse();
+    }
+
+    @Test
     public void testIsFalseTouch_ClassifierBRejects() {
         when(mClassifierB.classifyGesture(anyInt(), anyDouble(), anyDouble()))
                 .thenReturn(mFalsedResult);

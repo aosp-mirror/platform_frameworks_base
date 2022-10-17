@@ -2164,7 +2164,8 @@ public final class NotificationPanelViewController {
                     mShadeLog.logMotionEvent(event,
                             "onQsIntercept: move ignored because qs tracking disabled");
                 }
-                if ((h > getTouchSlop(event) || (h < -getTouchSlop(event) && mQsExpanded))
+                float touchSlop = getTouchSlop(event);
+                if ((h > touchSlop || (h < -touchSlop && mQsExpanded))
                         && Math.abs(h) > Math.abs(x - mInitialTouchX)
                         && shouldQuickSettingsIntercept(mInitialTouchX, mInitialTouchY, h)) {
                     if (DEBUG_LOGCAT) Log.d(TAG, "onQsIntercept - start tracking expansion");
@@ -2179,6 +2180,9 @@ public final class NotificationPanelViewController {
                     mInitialTouchX = x;
                     mNotificationStackScrollLayoutController.cancelLongPress();
                     return true;
+                } else {
+                    mShadeLog.logQsTrackingNotStarted(mInitialTouchY, y, h, touchSlop, mQsExpanded,
+                            mCollapsedOnDown, mKeyguardShowing, isQsExpansionEnabled());
                 }
                 break;
 
@@ -6051,6 +6055,10 @@ public final class NotificationPanelViewController {
                 mShadeLog.logMotionEvent(event, "onTouch: PulseExpansionHandler handled event");
                 return true;
             }
+            if (mPulsing) {
+                mShadeLog.logMotionEvent(event, "onTouch: eat touch, device pulsing");
+                return true;
+            }
             if (mListenForHeadsUp && !mHeadsUpTouchHelper.isTrackingHeadsUp()
                     && !mNotificationStackScrollLayoutController.isLongPressInProgress()
                     && mHeadsUpTouchHelper.onInterceptTouchEvent(event)) {
@@ -6073,7 +6081,7 @@ public final class NotificationPanelViewController {
             }
 
             handled |= handleTouch(event);
-            return !mDozing || mPulsing || handled;
+            return !mDozing || handled;
         }
 
         private boolean handleTouch(MotionEvent event) {

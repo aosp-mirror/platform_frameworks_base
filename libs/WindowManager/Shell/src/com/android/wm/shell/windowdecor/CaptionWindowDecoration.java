@@ -218,7 +218,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         View handle = caption.findViewById(R.id.caption_handle);
         VectorDrawable handleBackground = (VectorDrawable) handle.getBackground();
         handleBackground.setTintList(buttonTintColor);
-        caption.setBackgroundColor(v == View.VISIBLE ? Color.WHITE : Color.TRANSPARENT);
+        caption.getBackground().setTint(v == View.VISIBLE ? Color.WHITE : Color.TRANSPARENT);
     }
 
     private void closeDragResizeListener() {

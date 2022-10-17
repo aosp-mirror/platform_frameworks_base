@@ -467,6 +467,9 @@ public final class PowerManagerService extends SystemService
     // True if the device should wake up when plugged or unplugged.
     private boolean mWakeUpWhenPluggedOrUnpluggedConfig;
 
+    // True if the device should keep dreaming when undocked.
+    private boolean mKeepDreamingWhenUndockingConfig;
+
     // True if the device should wake up when plugged or unplugged in theater mode.
     private boolean mWakeUpWhenPluggedOrUnpluggedInTheaterModeConfig;
 
@@ -1374,6 +1377,8 @@ public final class PowerManagerService extends SystemService
                 com.android.internal.R.bool.config_powerDecoupleInteractiveModeFromDisplay);
         mWakeUpWhenPluggedOrUnpluggedConfig = resources.getBoolean(
                 com.android.internal.R.bool.config_unplugTurnsOnScreen);
+        mKeepDreamingWhenUndockingConfig = resources.getBoolean(
+                com.android.internal.R.bool.config_keepDreamingWhenUndocking);
         mWakeUpWhenPluggedOrUnpluggedInTheaterModeConfig = resources.getBoolean(
                 com.android.internal.R.bool.config_allowTheaterModeWakeFromUnplug);
         mSuspendWhenScreenOffDueToProximityConfig = resources.getBoolean(
@@ -1919,6 +1924,13 @@ public final class PowerManagerService extends SystemService
         }
     }
 
+    private void napInternal(long eventTime, int uid, boolean allowWake) {
+        synchronized (mLock) {
+            dreamPowerGroupLocked(mPowerGroups.get(Display.DEFAULT_DISPLAY_GROUP),
+                    eventTime, uid, allowWake);
+        }
+    }
+
     private void onUserAttention() {
         synchronized (mLock) {
             if (userActivityNoUpdateLocked(mPowerGroups.get(Display.DEFAULT_DISPLAY_GROUP),
@@ -2034,7 +2046,8 @@ public final class PowerManagerService extends SystemService
     }
 
     @GuardedBy("mLock")
-    private boolean dreamPowerGroupLocked(PowerGroup powerGroup, long eventTime, int uid) {
+    private boolean dreamPowerGroupLocked(PowerGroup powerGroup, long eventTime, int uid,
+            boolean allowWake) {
         if (DEBUG_SPEW) {
             Slog.d(TAG, "dreamPowerGroup: groupId=" + powerGroup.getGroupId() + ", eventTime="
                     + eventTime + ", uid=" + uid);
@@ -2042,7 +2055,7 @@ public final class PowerManagerService extends SystemService
         if (!mBootCompleted || !mSystemReady) {
             return false;
         }
-        return powerGroup.dreamLocked(eventTime, uid);
+        return powerGroup.dreamLocked(eventTime, uid, allowWake);
     }
 
     @GuardedBy("mLock")
@@ -2484,6 +2497,14 @@ public final class PowerManagerService extends SystemService
             boolean wasPowered, int oldPlugType, boolean dockedOnWirelessCharger) {
         // Don't wake when powered unless configured to do so.
         if (!mWakeUpWhenPluggedOrUnpluggedConfig) {
+            return false;
+        }
+
+        // Don't wake when undocking while dreaming if configured not to.
+        if (mKeepDreamingWhenUndockingConfig
+                && getGlobalWakefulnessLocked() == WAKEFULNESS_DREAMING
+                && wasPowered && !mIsPowered
+                && oldPlugType == BatteryManager.BATTERY_PLUGGED_DOCK) {
             return false;
         }
 
@@ -3086,7 +3107,8 @@ public final class PowerManagerService extends SystemService
                 changed = sleepPowerGroupLocked(powerGroup, time,
                         PowerManager.GO_TO_SLEEP_REASON_INATTENTIVE, Process.SYSTEM_UID);
             } else if (shouldNapAtBedTimeLocked()) {
-                changed = dreamPowerGroupLocked(powerGroup, time, Process.SYSTEM_UID);
+                changed = dreamPowerGroupLocked(powerGroup, time,
+                        Process.SYSTEM_UID, /* allowWake= */ false);
             } else {
                 changed = dozePowerGroupLocked(powerGroup, time,
                         PowerManager.GO_TO_SLEEP_REASON_TIMEOUT, Process.SYSTEM_UID);
@@ -4408,6 +4430,8 @@ public final class PowerManagerService extends SystemService
                     + mWakeUpWhenPluggedOrUnpluggedInTheaterModeConfig);
             pw.println("  mTheaterModeEnabled="
                     + mTheaterModeEnabled);
+            pw.println("  mKeepDreamingWhenUndockingConfig="
+                    + mKeepDreamingWhenUndockingConfig);
             pw.println("  mSuspendWhenScreenOffDueToProximityConfig="
                     + mSuspendWhenScreenOffDueToProximityConfig);
             pw.println("  mDreamsSupportedConfig=" + mDreamsSupportedConfig);
@@ -5701,10 +5725,7 @@ public final class PowerManagerService extends SystemService
             final int uid = Binder.getCallingUid();
             final long ident = Binder.clearCallingIdentity();
             try {
-                synchronized (mLock) {
-                    dreamPowerGroupLocked(mPowerGroups.get(Display.DEFAULT_DISPLAY_GROUP),
-                            eventTime, uid);
-                }
+                napInternal(eventTime, uid, /* allowWake= */ false);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -6631,6 +6652,11 @@ public final class PowerManagerService extends SystemService
         @Override
         public boolean interceptPowerKeyDown(KeyEvent event) {
             return interceptPowerKeyDownInternal(event);
+        }
+
+        @Override
+        public void nap(long eventTime, boolean allowWake) {
+            napInternal(eventTime, Process.SYSTEM_UID, allowWake);
         }
     }
 

@@ -33,7 +33,6 @@ import androidx.lifecycle.MutableLiveData
 import com.android.systemui.classifier.Classifier.MEDIA_SEEKBAR
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.plugins.FalsingManager
-import com.android.systemui.plugins.FalsingManager.LOW_PENALTY
 import com.android.systemui.statusbar.NotificationMediaManager
 import com.android.systemui.util.concurrency.RepeatableExecutor
 import javax.inject.Inject
@@ -333,11 +332,7 @@ class SeekBarViewModel @Inject constructor(
         }
 
         override fun onStopTrackingTouch(bar: SeekBar) {
-            // in addition to the normal functionality of both functions.
-            // isFalseTouch returns true if there is a real/false tap since it is not a move.
-            // isFalseTap returns true if there is a real/false move since it is not a tap.
-            if (falsingManager.isFalseTouch(MEDIA_SEEKBAR) &&
-                    falsingManager.isFalseTap(LOW_PENALTY)) {
+            if (falsingManager.isFalseTouch(MEDIA_SEEKBAR)) {
                 viewModel.onSeekFalse()
             }
             viewModel.onSeek(bar.progress.toLong())

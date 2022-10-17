@@ -613,16 +613,11 @@ public class BubbleStackView extends FrameLayout
                 mBubbleContainer.setActiveController(mStackAnimationController);
                 hideFlyoutImmediate();
 
-                if (mPositioner.showingInTaskbar()) {
-                    // In taskbar, the stack isn't draggable so we shouldn't dispatch touch events.
-                    mMagnetizedObject = null;
-                } else {
-                    // Save the magnetized stack so we can dispatch touch events to it.
-                    mMagnetizedObject = mStackAnimationController.getMagnetizedStack();
-                    mMagnetizedObject.clearAllTargets();
-                    mMagnetizedObject.addTarget(mMagneticTarget);
-                    mMagnetizedObject.setMagnetListener(mStackMagnetListener);
-                }
+                // Save the magnetized stack so we can dispatch touch events to it.
+                mMagnetizedObject = mStackAnimationController.getMagnetizedStack();
+                mMagnetizedObject.clearAllTargets();
+                mMagnetizedObject.addTarget(mMagneticTarget);
+                mMagnetizedObject.setMagnetListener(mStackMagnetListener);
 
                 mIsDraggingStack = true;
 
@@ -641,10 +636,7 @@ public class BubbleStackView extends FrameLayout
         public void onMove(@NonNull View v, @NonNull MotionEvent ev, float viewInitialX,
                 float viewInitialY, float dx, float dy) {
             // If we're expanding or collapsing, ignore all touch events.
-            if (mIsExpansionAnimating
-                    // Also ignore events if we shouldn't be draggable.
-                    || (mPositioner.showingInTaskbar() && !mIsExpanded)
-                    || mShowedUserEducationInTouchListenerActive) {
+            if (mIsExpansionAnimating || mShowedUserEducationInTouchListenerActive) {
                 return;
             }
 
@@ -661,7 +653,7 @@ public class BubbleStackView extends FrameLayout
             // bubble since it's stuck to the target.
             if (!passEventToMagnetizedObject(ev)) {
                 updateBubbleShadows(true /* showForAllBubbles */);
-                if (mBubbleData.isExpanded() || mPositioner.showingInTaskbar()) {
+                if (mBubbleData.isExpanded()) {
                     mExpandedAnimationController.dragBubbleOut(
                             v, viewInitialX + dx, viewInitialY + dy);
                 } else {
@@ -678,9 +670,7 @@ public class BubbleStackView extends FrameLayout
         public void onUp(@NonNull View v, @NonNull MotionEvent ev, float viewInitialX,
                 float viewInitialY, float dx, float dy, float velX, float velY) {
             // If we're expanding or collapsing, ignore all touch events.
-            if (mIsExpansionAnimating
-                    // Also ignore events if we shouldn't be draggable.
-                    || (mPositioner.showingInTaskbar() && !mIsExpanded)) {
+            if (mIsExpansionAnimating) {
                 return;
             }
             if (mShowedUserEducationInTouchListenerActive) {
@@ -696,6 +686,8 @@ public class BubbleStackView extends FrameLayout
 
                     // Re-show the expanded view if we hid it.
                     showExpandedViewIfNeeded();
+                } else if (mPositioner.showingInTaskbar()) {
+                    mStackAnimationController.snapStackBack();
                 } else {
                     // Fling the stack to the edge, and save whether or not it's going to end up on
                     // the left side of the screen.
