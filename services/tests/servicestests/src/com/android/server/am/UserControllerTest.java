@@ -24,6 +24,7 @@ import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
 import static android.app.ActivityManagerInternal.ALLOW_NON_FULL_IN_PROFILE;
 import static android.app.ActivityManagerInternal.ALLOW_PROFILES_OR_NON_FULL;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.os.UserHandle.USER_SYSTEM;
 import static android.testing.DexmakerShareClassLoaderRule.runWithDexmakerShareClassLoader;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
@@ -246,7 +247,7 @@ public class UserControllerTest {
         mUserController.setInitialConfig(/* userSwitchUiEnabled= */ false,
                 /* maxRunningUsers= */ 3, /* delayUserDataLocking= */ false);
 
-        mUserController.startUser(TEST_USER_ID, true /* foreground */);
+        mUserController.startUser(TEST_USER_ID, /* foreground= */ true);
         verify(mInjector.getWindowManager(), never()).startFreezingScreen(anyInt(), anyInt());
         verify(mInjector.getWindowManager(), never()).stopFreezingScreen();
         verify(mInjector.getWindowManager(), never()).setSwitchingUser(anyBoolean());
@@ -258,6 +259,8 @@ public class UserControllerTest {
         assertFalse(mUserController.startUser(TEST_PRE_CREATED_USER_ID, /* foreground= */ true));
         // Make sure no intents have been fired for pre-created users.
         assertTrue(mInjector.mSentIntents.isEmpty());
+
+        verifyUserNeverAssignedToDisplay();
     }
 
     @Test
@@ -280,6 +283,8 @@ public class UserControllerTest {
         // binder calls, but their side effects (in this case, that the user is stopped right away)
         assertWithMessage("wrong binder message calls").that(mInjector.mHandler.getMessageCodes())
                 .containsExactly(USER_START_MSG);
+
+        verifyUserAssignedToDisplay(TEST_PRE_CREATED_USER_ID, Display.DEFAULT_DISPLAY);
     }
 
     private void startUserAssertions(
@@ -303,6 +308,7 @@ public class UserControllerTest {
         assertEquals("User must be in STATE_BOOTING", UserState.STATE_BOOTING, userState.state);
         assertEquals("Unexpected old user id", 0, reportMsg.arg1);
         assertEquals("Unexpected new user id", TEST_USER_ID, reportMsg.arg2);
+        verifyUserAssignedToDisplay(TEST_USER_ID, Display.DEFAULT_DISPLAY);
     }
 
     @Test
@@ -313,6 +319,8 @@ public class UserControllerTest {
         mUserController.startUserInForeground(NONEXIST_USER_ID);
         verify(mInjector.getWindowManager(), times(1)).setSwitchingUser(anyBoolean());
         verify(mInjector.getWindowManager()).setSwitchingUser(false);
+
+        verifyUserNeverAssignedToDisplay();
     }
 
     @Test
@@ -395,6 +403,7 @@ public class UserControllerTest {
         verify(mInjector, times(0)).dismissKeyguard(any(), anyString());
         verify(mInjector.getWindowManager(), times(1)).stopFreezingScreen();
         continueUserSwitchAssertions(TEST_USER_ID, false);
+        verifyOnUserStarting(USER_SYSTEM, /* visible= */ false);
     }
 
     @Test
@@ -403,7 +412,7 @@ public class UserControllerTest {
         mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
                 /* maxRunningUsers= */ 3, /* delayUserDataLocking= */ false);
         // Start user -- this will update state of mUserController
-        mUserController.startUser(TEST_USER_ID, true);
+        mUserController.startUser(TEST_USER_ID, /* foreground=*/ true);
         Message reportMsg = mInjector.mHandler.getMessageForCode(REPORT_USER_SWITCH_MSG);
         assertNotNull(reportMsg);
         UserState userState = (UserState) reportMsg.obj;
@@ -415,6 +424,7 @@ public class UserControllerTest {
         verify(mInjector, times(1)).dismissKeyguard(any(), anyString());
         verify(mInjector.getWindowManager(), times(1)).stopFreezingScreen();
         continueUserSwitchAssertions(TEST_USER_ID, false);
+        verifyOnUserStarting(USER_SYSTEM, /* visible= */ false);
     }
 
     @Test
@@ -423,7 +433,7 @@ public class UserControllerTest {
                 /* maxRunningUsers= */ 3, /* delayUserDataLocking= */ false);
 
         // Start user -- this will update state of mUserController
-        mUserController.startUser(TEST_USER_ID, true);
+        mUserController.startUser(TEST_USER_ID, /* foreground=*/ true);
         Message reportMsg = mInjector.mHandler.getMessageForCode(REPORT_USER_SWITCH_MSG);
         assertNotNull(reportMsg);
         UserState userState = (UserState) reportMsg.obj;
@@ -521,6 +531,7 @@ public class UserControllerTest {
         assertFalse(mUserController.canStartMoreUsers());
         assertEquals(Arrays.asList(new Integer[] {0, TEST_USER_ID1, TEST_USER_ID2}),
                 mUserController.getRunningUsersLU());
+        verifyOnUserStarting(USER_SYSTEM, /* visible= */ false);
     }
 
     /**
@@ -530,7 +541,7 @@ public class UserControllerTest {
      */
     @Test
     public void testUserLockingFromUserSwitchingForMultipleUsersDelayedLockingMode()
-            throws InterruptedException, RemoteException {
+            throws Exception {
         mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
                 /* maxRunningUsers= */ 3, /* delayUserDataLocking= */ true);
 
@@ -645,6 +656,8 @@ public class UserControllerTest {
         setUpUser(TEST_USER_ID1, 0);
         assertThrows(IllegalArgumentException.class,
                 () -> mUserController.startProfile(TEST_USER_ID1));
+
+        verifyUserNeverAssignedToDisplay();
     }
 
     @Test
@@ -660,6 +673,8 @@ public class UserControllerTest {
         setUpUser(TEST_USER_ID1, UserInfo.FLAG_PROFILE | UserInfo.FLAG_DISABLED, /* preCreated= */
                 false, UserManager.USER_TYPE_PROFILE_MANAGED);
         assertThat(mUserController.startProfile(TEST_USER_ID1)).isFalse();
+
+        verifyUserNeverAssignedToDisplay();
     }
 
     @Test
@@ -949,6 +964,10 @@ public class UserControllerTest {
         verify(mInjector.getUserManagerInternal(), never()).unassignUserFromDisplay(userId);
     }
 
+    private void verifyOnUserStarting(@UserIdInt int userId, boolean visible) {
+        verify(mInjector).onUserStarting(userId, visible);
+    }
+
     // Should be public to allow mocking
     private static class TestInjector extends UserController.Injector {
         public final TestHandler mHandler;
@@ -1083,6 +1102,11 @@ public class UserControllerTest {
         @Override
         protected LockPatternUtils getLockPatternUtils() {
             return mLockPatternUtilsMock;
+        }
+
+        @Override
+        void onUserStarting(@UserIdInt int userId, boolean visible) {
+            Log.i(TAG, "onUserStarting(" + userId + ", " + visible + ")");
         }
     }
 

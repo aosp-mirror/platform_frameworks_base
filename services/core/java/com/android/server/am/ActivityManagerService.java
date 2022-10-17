@@ -8342,14 +8342,14 @@ public class ActivityManagerService extends IActivityManager.Stub
         mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_USER_FOREGROUND_START,
                 Integer.toString(currentUserId), currentUserId);
 
-        // On Automotive, at this point the system user has already been started and unlocked,
-        // and some of the tasks we do here have already been done. So skip those in that case.
-        // TODO(b/132262830, b/203885241): this workdound shouldn't be necessary once we move the
-        // headless-user start logic to UserManager-land
+        // On Automotive / Headless System User Mode, at this point the system user has already been
+        // started and unlocked, and some of the tasks we do here have already been done. So skip
+        // those in that case.
+        // TODO(b/242195409): this workaround shouldn't be necessary once we move the headless-user
+        // start logic to UserManager-land
         final boolean bootingSystemUser = currentUserId == UserHandle.USER_SYSTEM;
-
         if (bootingSystemUser) {
-            mSystemServiceManager.onUserStarting(t, currentUserId);
+            mUserController.onSystemUserStarting();
         }
 
         synchronized (this) {

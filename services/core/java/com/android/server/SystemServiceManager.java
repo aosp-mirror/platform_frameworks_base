@@ -75,13 +75,17 @@ public final class SystemServiceManager implements Dumpable {
     // Constants used on onUser(...)
     // NOTE: do not change their values, as they're used on Trace calls and changes might break
     // performance tests that rely on them.
-    private static final String USER_STARTING = "Start"; // Logged as onStartUser
-    private static final String USER_UNLOCKING = "Unlocking"; // Logged as onUnlockingUser
-    private static final String USER_UNLOCKED = "Unlocked"; // Logged as onUnlockedUser
-    private static final String USER_SWITCHING = "Switch"; // Logged as onSwitchUser
-    private static final String USER_STOPPING = "Stop"; // Logged as onStopUser
-    private static final String USER_STOPPED = "Cleanup"; // Logged as onCleanupUser
-    private static final String USER_COMPLETED_EVENT = "CompletedEvent"; // onCompletedEventUser
+    private static final String USER_STARTING = "Start"; // Logged as onUserStarting()
+    private static final String USER_UNLOCKING = "Unlocking"; // Logged as onUserUnlocking()
+    private static final String USER_UNLOCKED = "Unlocked"; // Logged as onUserUnlocked()
+    private static final String USER_SWITCHING = "Switch"; // Logged as onUserSwitching()
+    private static final String USER_STOPPING = "Stop"; // Logged as onUserStopping()
+    private static final String USER_STOPPED = "Cleanup"; // Logged as onUserStopped()
+    private static final String USER_COMPLETED_EVENT = "CompletedEvent"; // onUserCompletedEvent()
+    private static final String USER_VISIBLE = "Visible"; // Logged on onUserVisible() and
+                                                          // onUserStarting() (when visible is true)
+    private static final String USER_INVISIBLE = "Invisible"; // Logged on onUserStopping()
+                                                              // (when visibilityChanged is true)
 
     // The default number of threads to use if lifecycle thread pool is enabled.
     private static final int DEFAULT_MAX_USER_POOL_THREADS = 3;
@@ -350,15 +354,38 @@ public final class SystemServiceManager implements Dumpable {
     /**
      * Starts the given user.
      */
-    public void onUserStarting(@NonNull TimingsTraceAndSlog t, @UserIdInt int userId) {
-        EventLog.writeEvent(EventLogTags.SSM_USER_STARTING, userId);
+    public void onUserStarting(@NonNull TimingsTraceAndSlog t, @UserIdInt int userId,
+            boolean visible) {
+        EventLog.writeEvent(EventLogTags.SSM_USER_STARTING, userId, visible ? 1 : 0);
 
         final TargetUser targetUser = newTargetUser(userId);
         synchronized (mTargetUsers) {
             mTargetUsers.put(userId, targetUser);
         }
 
+        if (visible) {
+            // Must send the user visiiblity change first, for 2 reasons:
+            // 1. Automotive need to update the user-zone mapping ASAP and it's one of the few
+            // services listening to this event (OTOH, there  are manyy listeners to USER_STARTING
+            // and some can take a while to process it)
+            // 2. When a user is switched from bg to fg, the onUserVisibilityChanged() callback is
+            // called onUserSwitching(), so calling it before onUserStarting() make it more
+            // consistent with that
+            onUser(t, USER_VISIBLE, /* prevUser= */ null, targetUser);
+        }
         onUser(t, USER_STARTING, /* prevUser= */ null, targetUser);
+    }
+
+    /**
+     * Updates the user visibility.
+     *
+     * <p><b>NOTE: </b>this method should only be called when a user that is already running become
+     * visible; if the user is starting visible, callers should call
+     * {@link #onUserStarting(TimingsTraceAndSlog, int, boolean)} instead
+     */
+    public void onUserVisible(@UserIdInt int userId) {
+        EventLog.writeEvent(EventLogTags.SSM_USER_VISIBLE, userId);
+        onUser(USER_VISIBLE, userId);
     }
 
     /**
@@ -408,9 +435,12 @@ public final class SystemServiceManager implements Dumpable {
     /**
      * Stops the given user.
      */
-    public void onUserStopping(@UserIdInt int userId) {
-        EventLog.writeEvent(EventLogTags.SSM_USER_STOPPING, userId);
+    public void onUserStopping(@UserIdInt int userId, boolean visibilityChanged) {
+        EventLog.writeEvent(EventLogTags.SSM_USER_STOPPING, userId, visibilityChanged ? 1 : 0);
         onUser(USER_STOPPING, userId);
+        if (visibilityChanged) {
+            onUser(USER_INVISIBLE, userId);
+        }
     }
 
     /**
@@ -456,13 +486,12 @@ public final class SystemServiceManager implements Dumpable {
         TargetUser targetUser = getTargetUser(userId);
         Preconditions.checkState(targetUser != null, "No TargetUser for " + userId);
 
-        onUser(TimingsTraceAndSlog.newAsyncLog(), onWhat, /* prevUser= */ null,
-                targetUser);
+        onUser(TimingsTraceAndSlog.newAsyncLog(), onWhat, /* prevUser= */ null, targetUser);
     }
 
     private void onUser(@NonNull TimingsTraceAndSlog t, @NonNull String onWhat,
             @Nullable TargetUser prevUser, @NonNull TargetUser curUser) {
-        onUser(t, onWhat, prevUser, curUser, /* completedEventType=*/ null);
+        onUser(t, onWhat, prevUser, curUser, /* completedEventType= */ null);
     }
 
     private void onUser(@NonNull TimingsTraceAndSlog t, @NonNull String onWhat,
@@ -533,6 +562,12 @@ public final class SystemServiceManager implements Dumpable {
                     case USER_COMPLETED_EVENT:
                         threadPool.submit(getOnUserCompletedEventRunnable(
                                 t, service, serviceName, curUser, completedEventType));
+                        break;
+                    case USER_VISIBLE:
+                        service.onUserVisibilityChanged(curUser, /* visible= */ true);
+                        break;
+                    case USER_INVISIBLE:
+                        service.onUserVisibilityChanged(curUser, /* visible= */ false);
                         break;
                     default:
                         throw new IllegalArgumentException(onWhat + " what?");

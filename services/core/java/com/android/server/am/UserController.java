@@ -100,6 +100,7 @@ import android.util.EventLog;
 import android.util.IntArray;
 import android.util.Pair;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
@@ -174,6 +175,9 @@ class UserController implements Handler.Callback {
     static final int START_USER_SWITCH_FG_MSG = 120;
     static final int COMPLETE_USER_SWITCH_MSG = 130;
     static final int USER_COMPLETED_EVENT_MSG = 140;
+    static final int USER_VISIBLE_MSG = 150;
+
+    private static final int NO_ARG2 = 0;
 
     // Message constant to clear {@link UserJourneySession} from {@link mUserIdToUserJourneyMap} if
     // the user journey, defined in the UserLifecycleJourneyReported atom for statsd, is not
@@ -420,6 +424,17 @@ class UserController implements Handler.Callback {
 
     /** @see #getLastUserUnlockingUptime */
     private volatile long mLastUserUnlockingUptime = 0;
+
+    /**
+     * List of visible users (as defined by {@link UserManager#isUserVisible()}).
+     *
+     * <p>It's only used to call {@link SystemServiceManager} when the visibility is changed upon
+     * the user starting or stopping.
+     *
+     * <p>Note: only the key is used, not the value.
+     */
+    @GuardedBy("mLock")
+    private final SparseBooleanArray mVisibleUsers = new SparseBooleanArray();
 
     UserController(ActivityManagerService service) {
         this(new Injector(service));
@@ -1050,11 +1065,27 @@ class UserController implements Handler.Callback {
             // instead.
             userManagerInternal.unassignUserFromDisplay(userId);
 
+            final boolean visibilityChanged;
+            boolean visibleBefore;
+            synchronized (mLock) {
+                visibleBefore = mVisibleUsers.get(userId);
+                if (visibleBefore) {
+                    if (DEBUG_MU) {
+                        Slogf.d(TAG, "Removing %d from mVisibleUsers", userId);
+                    }
+                    mVisibleUsers.delete(userId);
+                    visibilityChanged = true;
+                } else {
+                    visibilityChanged = false;
+                }
+            }
+
             updateStartedUserArrayLU();
 
             final boolean allowDelayedLockingCopied = allowDelayedLocking;
             Runnable finishUserStoppingAsync = () ->
-                    mHandler.post(() -> finishUserStopping(userId, uss, allowDelayedLockingCopied));
+                    mHandler.post(() -> finishUserStopping(userId, uss, allowDelayedLockingCopied,
+                            visibilityChanged));
 
             if (mInjector.getUserManager().isPreCreated(userId)) {
                 finishUserStoppingAsync.run();
@@ -1092,7 +1123,7 @@ class UserController implements Handler.Callback {
     }
 
     private void finishUserStopping(final int userId, final UserState uss,
-            final boolean allowDelayedLocking) {
+            final boolean allowDelayedLocking, final boolean visibilityChanged) {
         EventLog.writeEvent(EventLogTags.UC_FINISH_USER_STOPPING, userId);
         synchronized (mLock) {
             if (uss.state != UserState.STATE_STOPPING) {
@@ -1109,7 +1140,7 @@ class UserController implements Handler.Callback {
         mInjector.batteryStatsServiceNoteEvent(
                 BatteryStats.HistoryItem.EVENT_USER_RUNNING_FINISH,
                 Integer.toString(userId), userId);
-        mInjector.getSystemServiceManager().onUserStopping(userId);
+        mInjector.getSystemServiceManager().onUserStopping(userId, visibilityChanged);
 
         Runnable finishUserStoppedAsync = () ->
                 mHandler.post(() -> finishUserStopped(uss, allowDelayedLocking));
@@ -1513,16 +1544,17 @@ class UserController implements Handler.Callback {
     private boolean startUserInternal(@UserIdInt int userId, int displayId, boolean foreground,
             @Nullable IProgressListener unlockListener, @NonNull TimingsTraceAndSlog t) {
         if (DEBUG_MU) {
-            Slogf.i(TAG, "Starting user %d on display %d %s", userId, displayId,
+            Slogf.i(TAG, "Starting user %d on display %d%s", userId, displayId,
                     foreground ? " in foreground" : "");
         }
 
-        if (displayId != Display.DEFAULT_DISPLAY) {
+        boolean onSecondaryDisplay = displayId != Display.DEFAULT_DISPLAY;
+        if (onSecondaryDisplay) {
             Preconditions.checkArgument(!foreground, "Cannot start user %d in foreground AND "
                     + "on secondary display (%d)", userId, displayId);
         }
-        // TODO(b/239982558): log display id (or use a new event)
-        EventLog.writeEvent(EventLogTags.UC_START_USER_INTERNAL, userId);
+        EventLog.writeEvent(EventLogTags.UC_START_USER_INTERNAL, userId, foreground ? 1 : 0,
+                displayId);
 
         final int callingUid = Binder.getCallingUid();
         final int callingPid = Binder.getCallingPid();
@@ -1571,8 +1603,9 @@ class UserController implements Handler.Callback {
                 return false;
             }
 
-            if (foreground && userInfo.preCreated) {
-                Slogf.w(TAG, "Cannot start pre-created user #" + userId + " as foreground");
+            if ((foreground || onSecondaryDisplay) && userInfo.preCreated) {
+                Slogf.w(TAG, "Cannot start pre-created user #" + userId + " in foreground or on "
+                        + "secondary display");
                 return false;
             }
 
@@ -1656,6 +1689,28 @@ class UserController implements Handler.Callback {
             }
             t.traceEnd();
 
+            // Need to call UM when user is on background, as there are some cases where the user
+            // cannot be started in background on a secondary display (for example, if user is a
+            // profile).
+            // TODO(b/253103846): it's also explicitly checking if the user is the USER_SYSTEM, as
+            // the UM call would return true during boot (when CarService / BootUserInitializer
+            // calls AM.startUserInBackground() because the system user is still the current user.
+            // TODO(b/244644281): another fragility of this check is that it must wait to call
+            // UMI.isUserVisible() until the user state is check, as that method checks if the
+            // profile of the current user is started. We should fix that dependency so the logic
+            // belongs to just one place (like UserDisplayAssigner)
+            boolean visible = foreground
+                    || userId != UserHandle.USER_SYSTEM
+                            && mInjector.getUserManagerInternal().isUserVisible(userId);
+            if (visible) {
+                synchronized (mLock) {
+                    if (DEBUG_MU) {
+                        Slogf.d(TAG, "Adding %d to mVisibleUsers", userId);
+                    }
+                    mVisibleUsers.put(userId, true);
+                }
+            }
+
             // Make sure user is in the started state.  If it is currently
             // stopping, we need to knock that off.
             if (uss.state == UserState.STATE_STOPPING) {
@@ -1692,8 +1747,15 @@ class UserController implements Handler.Callback {
                 // Booting up a new user, need to tell system services about it.
                 // Note that this is on the same handler as scheduling of broadcasts,
                 // which is important because it needs to go first.
-                mHandler.sendMessage(mHandler.obtainMessage(USER_START_MSG, userId, 0));
+                mHandler.sendMessage(mHandler.obtainMessage(USER_START_MSG, userId,
+                        visible ? 1 : 0));
                 t.traceEnd();
+            } else if (visible) {
+                // User was already running and became visible (for example, when switching to a
+                // user that was started in the background before), so it's necessary to explicitly
+                // notify the services (while when the user starts from BOOTING, USER_START_MSG
+                // takes care of that.
+                mHandler.sendMessage(mHandler.obtainMessage(USER_VISIBLE_MSG, userId, NO_ARG2));
             }
 
             t.traceBegin("sendMessages");
@@ -2110,6 +2172,11 @@ class UserController implements Handler.Callback {
         mHandler.sendMessage(mHandler.obtainMessage(REPORT_USER_SWITCH_COMPLETE_MSG, newUserId, 0));
         stopGuestOrEphemeralUserIfBackground(oldUserId);
         stopUserOnSwitchIfEnforced(oldUserId);
+        if (oldUserId == UserHandle.USER_SYSTEM) {
+            // System user is never stopped, but its visibility is changed (as it is brought to the
+            // background)
+            updateSystemUserVisibility(/* visible= */ false);
+        }
 
         t.traceEnd(); // end continueUserSwitch
     }
@@ -2413,9 +2480,7 @@ class UserController implements Handler.Callback {
     void setAllowUserUnlocking(boolean allowed) {
         mAllowUserUnlocking = allowed;
         if (DEBUG_MU) {
-            // TODO(b/245335748): use Slogf.d instead
-            // Slogf.d(TAG, new Exception(), "setAllowUserUnlocking(%b)", allowed);
-            android.util.Slog.d(TAG, "setAllowUserUnlocking():" + allowed, new Exception());
+            Slogf.d(TAG, new Exception(), "setAllowUserUnlocking(%b)", allowed);
         }
     }
 
@@ -2457,8 +2522,32 @@ class UserController implements Handler.Callback {
     }
 
     void onSystemReady() {
+        if (DEBUG_MU) {
+            Slogf.d(TAG, "onSystemReady()");
+
+        }
         updateCurrentProfileIds();
         mInjector.reportCurWakefulnessUsageEvent();
+    }
+
+    // TODO(b/242195409): remove this method if initial system user boot logic is refactored?
+    void onSystemUserStarting() {
+        updateSystemUserVisibility(/* visible= */ !UserManager.isHeadlessSystemUserMode());
+    }
+
+    private void updateSystemUserVisibility(boolean visible) {
+        if (DEBUG_MU) {
+            Slogf.d(TAG, "updateSystemUserVisibility(): visible=%b", visible);
+        }
+        int userId = UserHandle.USER_SYSTEM;
+        synchronized (mLock) {
+            if (visible) {
+                mVisibleUsers.put(userId, true);
+            } else {
+                mVisibleUsers.delete(userId);
+            }
+        }
+        mInjector.onUserStarting(userId, visible);
     }
 
     /**
@@ -2846,6 +2935,9 @@ class UserController implements Handler.Callback {
                     proto.end(uToken);
                 }
             }
+            for (int i = 0; i < mVisibleUsers.size(); i++) {
+                proto.write(UserControllerProto.VISIBLE_USERS_ARRAY, mVisibleUsers.keyAt(i));
+            }
             proto.end(token);
         }
     }
@@ -2899,7 +2991,8 @@ class UserController implements Handler.Callback {
             if (mSwitchingToSystemUserMessage != null) {
                 pw.println("  mSwitchingToSystemUserMessage: " + mSwitchingToSystemUserMessage);
             }
-            pw.println("  mLastUserUnlockingUptime:" + mLastUserUnlockingUptime);
+            pw.println("  mLastUserUnlockingUptime: " + mLastUserUnlockingUptime);
+            pw.println("  mVisibleUsers: " + mVisibleUsers);
         }
     }
 
@@ -2936,8 +3029,7 @@ class UserController implements Handler.Callback {
                 logUserLifecycleEvent(msg.arg1, USER_LIFECYCLE_EVENT_START_USER,
                         USER_LIFECYCLE_EVENT_STATE_BEGIN);
 
-                mInjector.getSystemServiceManager().onUserStarting(
-                        TimingsTraceAndSlog.newAsyncLog(), msg.arg1);
+                mInjector.onUserStarting(/* userId= */ msg.arg1, /* visible= */ msg.arg2 == 1);
                 scheduleOnUserCompletedEvent(msg.arg1,
                         UserCompletedEventType.EVENT_TYPE_USER_STARTING,
                         USER_COMPLETED_EVENT_DELAY_MS);
@@ -3017,6 +3109,9 @@ class UserController implements Handler.Callback {
                 break;
             case COMPLETE_USER_SWITCH_MSG:
                 completeUserSwitch(msg.arg1);
+                break;
+            case USER_VISIBLE_MSG:
+                mInjector.getSystemServiceManager().onUserVisible(/* userId= */ msg.arg1);
                 break;
         }
         return false;
@@ -3530,6 +3625,11 @@ class UserController implements Handler.Callback {
 
         boolean isUsersOnSecondaryDisplaysEnabled() {
             return UserManager.isUsersOnSecondaryDisplaysEnabled();
+        }
+
+        void onUserStarting(int userId, boolean visible) {
+            getSystemServiceManager().onUserStarting(TimingsTraceAndSlog.newAsyncLog(), userId,
+                    visible);
         }
     }
 }
