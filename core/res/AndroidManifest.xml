@@ -3941,7 +3941,7 @@
     <permission android:name="android.permission.MANAGE_APP_OPS_RESTRICTIONS"
         android:protectionLevel="signature|installer" />
 
-    <!-- Allows an application to update the user app op modes.
+    <!-- @TestApi Allows an application to update the user app op modes.
          Not for use by third party apps.
          @hide -->
     <permission android:name="android.permission.MANAGE_APP_OPS_MODES"
@@ -4745,7 +4745,7 @@
     <permission android:name="android.permission.CHANGE_COMPONENT_ENABLED_STATE"
         android:protectionLevel="signature|privileged|role" />
 
-    <!-- @SystemApi Allows an application to grant specific permissions.
+    <!-- @SystemApi @TestApi iAllows an application to grant specific permissions.
          @hide -->
     <permission android:name="android.permission.GRANT_RUNTIME_PERMISSIONS"
         android:protectionLevel="signature|installer|verifier" />
@@ -4779,7 +4779,7 @@
     <permission android:name="android.permission.RESTORE_RUNTIME_PERMISSIONS"
                 android:protectionLevel="signature" />
 
-    <!-- @SystemApi Allows an application to change policy_fixed permissions.
+    <!-- @SystemApi @TestApi Allows an application to change policy_fixed permissions.
     @hide -->
     <permission android:name="android.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY"
                 android:protectionLevel="signature|installer" />
