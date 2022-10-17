@@ -19,6 +19,7 @@ package com.android.systemui.keyguard;
 import static android.view.WindowManagerPolicyConstants.OFF_BECAUSE_OF_USER;
 
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_NON_STRONG_BIOMETRICS_TIMEOUT;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -225,6 +226,28 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
 
         // THEN the bouncer prompt reason should return PROMPT_REASON_DEVICE_ADMIN
         assertEquals(KeyguardSecurityView.PROMPT_REASON_DEVICE_ADMIN,
+                mViewMediator.mViewMediatorCallback.getBouncerPromptReason());
+    }
+
+    @Test
+    public void testBouncerPrompt_nonStrongIdleTimeout() {
+        // GIVEN trust agents enabled and biometrics are enrolled
+        when(mUpdateMonitor.isTrustUsuallyManaged(anyInt())).thenReturn(true);
+        when(mUpdateMonitor.isUnlockingWithBiometricsPossible(anyInt())).thenReturn(true);
+
+        // WHEN the strong auth reason is STRONG_AUTH_REQUIRED_AFTER_NON_STRONG_BIOMETRICS_TIMEOUT
+        KeyguardUpdateMonitor.StrongAuthTracker strongAuthTracker =
+                mock(KeyguardUpdateMonitor.StrongAuthTracker.class);
+        when(mUpdateMonitor.getStrongAuthTracker()).thenReturn(strongAuthTracker);
+        when(strongAuthTracker.hasUserAuthenticatedSinceBoot()).thenReturn(true);
+        when(strongAuthTracker.isNonStrongBiometricAllowedAfterIdleTimeout(
+                anyInt())).thenReturn(false);
+        when(strongAuthTracker.getStrongAuthForUser(anyInt())).thenReturn(
+                STRONG_AUTH_REQUIRED_AFTER_NON_STRONG_BIOMETRICS_TIMEOUT);
+
+        // THEN the bouncer prompt reason should return
+        // STRONG_AUTH_REQUIRED_AFTER_NON_STRONG_BIOMETRICS_TIMEOUT
+        assertEquals(KeyguardSecurityView.PROMPT_REASON_NON_STRONG_BIOMETRIC_TIMEOUT,
                 mViewMediator.mViewMediatorCallback.getBouncerPromptReason());
     }
 
