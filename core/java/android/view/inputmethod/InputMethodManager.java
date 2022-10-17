@@ -834,39 +834,7 @@ public final class InputMethodManager {
         @Override
         public boolean checkFocus(boolean forceNewFocus, boolean startInput,
                 ViewRootImpl viewRootImpl) {
-            synchronized (mH) {
-                if (mCurRootView != viewRootImpl) {
-                    return false;
-                }
-                if (mServedView == mNextServedView && !forceNewFocus) {
-                    return false;
-                }
-                if (DEBUG) {
-                    Log.v(TAG, "checkFocus: view=" + mServedView
-                            + " next=" + mNextServedView
-                            + " force=" + forceNewFocus
-                            + " package="
-                            + (mServedView != null ? mServedView.getContext().getPackageName()
-                            : "<none>"));
-                }
-                // Close the connection when no next served view coming.
-                if (mNextServedView == null) {
-                    finishInputLocked();
-                    closeCurrentInput();
-                    return false;
-                }
-                mServedView = mNextServedView;
-                if (mServedInputConnection != null) {
-                    mServedInputConnection.finishComposingTextFromImm();
-                }
-            }
-
-            if (startInput) {
-                startInputOnWindowFocusGainInternal(StartInputReason.CHECK_FOCUS,
-                        null /* focusedView */,
-                        0 /* startInputFlags */, 0 /* softInputMode */, 0 /* windowFlags */);
-            }
-            return true;
+            return checkFocusInternal(forceNewFocus, startInput, viewRootImpl);
         }
 
         @Override
@@ -2370,8 +2338,8 @@ public final class InputMethodManager {
     }
 
     /**
-     * Called when {@link DelegateImpl#checkFocus}, {@link #restartInput(View)},
-     * {@link #MSG_BIND} or {@link #MSG_UNBIND}.
+     * Called from {@link #checkFocusInternal(boolean, boolean, ViewRootImpl)},
+     * {@link #restartInput(View)}, {@link #MSG_BIND} or {@link #MSG_UNBIND}.
      * Note that this method should *NOT* be called inside of {@code mH} lock to prevent start input
      * background thread may blocked by other methods which already inside {@code mH} lock.
      */
@@ -2705,6 +2673,43 @@ public final class InputMethodManager {
         if (controller != null) {
             controller.checkFocus(false /* forceNewFocus */, true /* startInput */);
         }
+    }
+
+    private boolean checkFocusInternal(boolean forceNewFocus, boolean startInput,
+            ViewRootImpl viewRootImpl) {
+        synchronized (mH) {
+            if (mCurRootView != viewRootImpl) {
+                return false;
+            }
+            if (mServedView == mNextServedView && !forceNewFocus) {
+                return false;
+            }
+            if (DEBUG) {
+                Log.v(TAG, "checkFocus: view=" + mServedView
+                        + " next=" + mNextServedView
+                        + " force=" + forceNewFocus
+                        + " package="
+                        + (mServedView != null ? mServedView.getContext().getPackageName()
+                        : "<none>"));
+            }
+            // Close the connection when no next served view coming.
+            if (mNextServedView == null) {
+                finishInputLocked();
+                closeCurrentInput();
+                return false;
+            }
+            mServedView = mNextServedView;
+            if (mServedInputConnection != null) {
+                mServedInputConnection.finishComposingTextFromImm();
+            }
+        }
+
+        if (startInput) {
+            startInputOnWindowFocusGainInternal(StartInputReason.CHECK_FOCUS,
+                    null /* focusedView */,
+                    0 /* startInputFlags */, 0 /* softInputMode */, 0 /* windowFlags */);
+        }
+        return true;
     }
 
     @UiThread
