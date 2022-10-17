@@ -177,19 +177,36 @@ final class IInputMethodClientInvoker {
     }
 
     @AnyThread
-    void setActive(boolean active, boolean fullscreen, boolean reportToImeController) {
+    void setActive(boolean active, boolean fullscreen) {
         if (mIsProxy) {
-            setActiveInternal(active, fullscreen, reportToImeController);
+            setActiveInternal(active, fullscreen);
         } else {
-            mHandler.post(() -> setActiveInternal(active, fullscreen, reportToImeController));
+            mHandler.post(() -> setActiveInternal(active, fullscreen));
         }
     }
 
     @AnyThread
-    private void setActiveInternal(boolean active, boolean fullscreen,
-            boolean reportToImeController) {
+    private void setActiveInternal(boolean active, boolean fullscreen) {
         try {
-            mTarget.setActive(active, fullscreen, reportToImeController);
+            mTarget.setActive(active, fullscreen);
+        } catch (RemoteException e) {
+            logRemoteException(e);
+        }
+    }
+
+    @AnyThread
+    void setInteractive(boolean interactive, boolean fullscreen) {
+        if (mIsProxy) {
+            setInteractiveInternal(interactive, fullscreen);
+        } else {
+            mHandler.post(() -> setInteractiveInternal(interactive, fullscreen));
+        }
+    }
+
+    @AnyThread
+    private void setInteractiveInternal(boolean interactive, boolean fullscreen) {
+        try {
+            mTarget.setInteractive(interactive, fullscreen);
         } catch (RemoteException e) {
             logRemoteException(e);
         }
