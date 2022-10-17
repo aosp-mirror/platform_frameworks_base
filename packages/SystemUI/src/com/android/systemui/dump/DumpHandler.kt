@@ -24,7 +24,7 @@ import com.android.systemui.R
 import com.android.systemui.dump.DumpHandler.Companion.PRIORITY_ARG_CRITICAL
 import com.android.systemui.dump.DumpHandler.Companion.PRIORITY_ARG_HIGH
 import com.android.systemui.dump.DumpHandler.Companion.PRIORITY_ARG_NORMAL
-import com.android.systemui.log.LogBuffer
+import com.android.systemui.plugins.log.LogBuffer
 import com.android.systemui.shared.system.UncaughtExceptionPreHandlerManager
 import java.io.PrintWriter
 import javax.inject.Inject

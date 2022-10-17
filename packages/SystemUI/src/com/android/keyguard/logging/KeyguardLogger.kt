@@ -16,15 +16,15 @@
 
 package com.android.keyguard.logging
 
-import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
-import com.android.systemui.log.LogLevel.DEBUG
-import com.android.systemui.log.LogLevel.ERROR
-import com.android.systemui.log.LogLevel.VERBOSE
-import com.android.systemui.log.LogLevel.WARNING
-import com.android.systemui.log.MessageInitializer
-import com.android.systemui.log.MessagePrinter
 import com.android.systemui.log.dagger.KeyguardLog
+import com.android.systemui.plugins.log.LogBuffer
+import com.android.systemui.plugins.log.LogLevel
+import com.android.systemui.plugins.log.LogLevel.DEBUG
+import com.android.systemui.plugins.log.LogLevel.ERROR
+import com.android.systemui.plugins.log.LogLevel.VERBOSE
+import com.android.systemui.plugins.log.LogLevel.WARNING
+import com.android.systemui.plugins.log.MessageInitializer
+import com.android.systemui.plugins.log.MessagePrinter
 import com.google.errorprone.annotations.CompileTimeConstant
 import javax.inject.Inject
 
