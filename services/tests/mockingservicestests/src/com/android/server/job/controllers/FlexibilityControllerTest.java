@@ -48,6 +48,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.app.AlarmManager;
+import android.app.AppGlobals;
 import android.app.job.JobInfo;
 import android.content.ComponentName;
 import android.content.Context;
@@ -80,11 +81,13 @@ public class FlexibilityControllerTest {
     private static final String SOURCE_PACKAGE = "com.android.frameworks.mockingservicestests";
     private static final int SOURCE_USER_ID = 0;
     private static final long FROZEN_TIME = 100L;
+
     private MockitoSession mMockingSession;
     private FlexibilityController mFlexibilityController;
     private DeviceConfig.Properties.Builder mDeviceConfigPropertiesBuilder;
     private JobStore mJobStore;
     private FlexibilityController.FcConfig mFcConfig;
+    private int mSourceUid;
 
     @Mock
     private AlarmManager mAlarmManager;
@@ -98,7 +101,7 @@ public class FlexibilityControllerTest {
     private PackageManager mPackageManager;
 
     @Before
-    public void setup() {
+    public void setup() throws Exception {
         mMockingSession = mockitoSession()
                 .initMocks(this)
                 .strictness(Strictness.LENIENT)
@@ -143,6 +146,8 @@ public class FlexibilityControllerTest {
         mFlexibilityController = new FlexibilityController(mJobSchedulerService,
                 mPrefetchController);
         mFcConfig = mFlexibilityController.getFcConfig();
+
+        mSourceUid = AppGlobals.getPackageManager().getPackageUid(SOURCE_PACKAGE, 0, 0);
 
         setDeviceConfigString(KEY_PERCENTS_TO_DROP_NUM_FLEXIBLE_CONSTRAINTS, "50,60,70,80");
         setDeviceConfigLong(KEY_DEADLINE_PROXIMITY_LIMIT, 0L);
@@ -648,20 +653,22 @@ public class FlexibilityControllerTest {
     public void testTopAppBypass() {
         JobInfo.Builder jb = createJob(0);
         JobStatus js = createJobStatus("testTopAppBypass", jb);
-        js.adjustNumRequiredFlexibleConstraints(100);
         mJobStore.add(js);
 
         // Needed because if before and after Uid bias is the same, nothing happens.
-        when(mJobSchedulerService.getUidBias(js.getUid()))
+        when(mJobSchedulerService.getUidBias(mSourceUid))
                 .thenReturn(JobInfo.BIAS_FOREGROUND_SERVICE);
 
         synchronized (mFlexibilityController.mLock) {
-            setUidBias(js.getUid(), JobInfo.BIAS_TOP_APP);
+            mFlexibilityController.maybeStartTrackingJobLocked(js, null);
+            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(js));
+
+            setUidBias(mSourceUid, JobInfo.BIAS_TOP_APP);
 
             assertTrue(mFlexibilityController.isFlexibilitySatisfiedLocked(js));
             assertTrue(js.isConstraintSatisfied(CONSTRAINT_FLEXIBLE));
 
-            setUidBias(js.getUid(), JobInfo.BIAS_FOREGROUND_SERVICE);
+            setUidBias(mSourceUid, JobInfo.BIAS_FOREGROUND_SERVICE);
 
             assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(js));
             assertFalse(js.isConstraintSatisfied(CONSTRAINT_FLEXIBLE));
@@ -858,18 +865,18 @@ public class FlexibilityControllerTest {
 
         final ArraySet<String> pkgs = new ArraySet<>();
         pkgs.add(js.getSourcePackageName());
-        when(mJobSchedulerService.getPackagesForUidLocked(js.getUid())).thenReturn(pkgs);
+        when(mJobSchedulerService.getPackagesForUidLocked(mSourceUid)).thenReturn(pkgs);
 
-        setUidBias(js.getUid(), BIAS_TOP_APP);
-        setUidBias(js.getUid(), BIAS_FOREGROUND_SERVICE);
+        setUidBias(mSourceUid, BIAS_TOP_APP);
+        setUidBias(mSourceUid, BIAS_FOREGROUND_SERVICE);
         assertEquals(100L, (long) mFlexibilityController.mPrefetchLifeCycleStart
                 .getOrDefault(js.getSourceUserId(), js.getSourcePackageName(), 0L));
 
         JobSchedulerService.sElapsedRealtimeClock =
                 Clock.fixed(Instant.ofEpochMilli(50L), ZoneOffset.UTC);
 
-        setUidBias(js.getUid(), BIAS_TOP_APP);
-        setUidBias(js.getUid(), BIAS_FOREGROUND_SERVICE);
+        setUidBias(mSourceUid, BIAS_TOP_APP);
+        setUidBias(mSourceUid, BIAS_FOREGROUND_SERVICE);
         assertEquals(100L, (long) mFlexibilityController
                 .mPrefetchLifeCycleStart.get(js.getSourceUserId(), js.getSourcePackageName()));
 
