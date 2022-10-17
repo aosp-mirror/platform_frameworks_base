@@ -1181,7 +1181,6 @@ android.app.usage.IUsageStatsManager
 android.app.usage.StorageStats$1
 android.app.usage.StorageStats
 android.app.usage.StorageStatsManager
-android.app.usage.TimeSparseArray
 android.app.usage.UsageEvents$1
 android.app.usage.UsageEvents$Event
 android.app.usage.UsageEvents
@@ -4702,6 +4701,7 @@ android.media.AudioManager$ServiceEventHandlerDelegate
 android.media.AudioManager
 android.media.AudioManagerInternal$RingerModeDelegate
 android.media.AudioManagerInternal
+android.media.AudioMetadata
 android.media.AudioMixPort
 android.media.AudioMixPortConfig
 android.media.AudioPatch
@@ -4737,9 +4737,11 @@ android.media.AudioSystem
 android.media.AudioTimestamp
 android.media.AudioTrack$1
 android.media.AudioTrack$2
+android.media.AudioTrack$NativePositionEventHandlerDelegate
 android.media.AudioTrack$TunerConfiguration
 android.media.AudioTrack
 android.media.AudioTrackRoutingProxy
+android.media.CallbackUtil$LazyListenerManager
 android.media.CamcorderProfile
 android.media.CameraProfile
 android.media.DecoderCapabilities
@@ -4845,7 +4847,6 @@ android.media.MediaCodec$OutputFrame
 android.media.MediaCodec$ParameterDescriptor
 android.media.MediaCodec$PersistentSurface
 android.media.MediaCodec$QueueRequest
-android.media.MediaCodec
 android.media.MediaCodecInfo$AudioCapabilities
 android.media.MediaCodecInfo$CodecCapabilities
 android.media.MediaCodecInfo$CodecProfileLevel
@@ -4854,10 +4855,10 @@ android.media.MediaCodecInfo$Feature
 android.media.MediaCodecInfo$VideoCapabilities$$ExternalSyntheticLambda0
 android.media.MediaCodecInfo$VideoCapabilities$PerformancePoint
 android.media.MediaCodecInfo$VideoCapabilities
-android.media.MediaCodecInfo
 android.media.MediaCodecList
 android.media.MediaCrypto
 android.media.MediaCryptoException
+android.media.MediaDataSource
 android.media.MediaDescrambler
 android.media.MediaDescription$1
 android.media.MediaDescription$Builder
@@ -4942,6 +4943,7 @@ android.media.MediaRouter$Static$1$1
 android.media.MediaRouter$Static$1
 android.media.MediaRouter$Static$Client$$ExternalSyntheticLambda0
 android.media.MediaRouter$Static$Client$$ExternalSyntheticLambda1
+android.media.MediaRouter$Static$Client$1
 android.media.MediaRouter$Static$Client
 android.media.MediaRouter$Static
 android.media.MediaRouter$UserRouteInfo$SessionVolumeProvider
