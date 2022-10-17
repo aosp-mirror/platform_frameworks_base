@@ -144,7 +144,7 @@ public final class DisplayPowerController2Test {
                     SensorManager sensorManager) {
                 return new DisplayPowerProximityStateController(wakelockController,
                         displayDeviceConfig, looper, nudgeUpdatePowerState, displayId,
-                        sensorManager);
+                        sensorManager, /* injector= */ null);
             }
         };
 

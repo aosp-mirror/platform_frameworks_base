@@ -2691,7 +2691,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                 int displayId, SensorManager sensorManager) {
             return new DisplayPowerProximityStateController(wakelockController, displayDeviceConfig,
                     looper, nudgeUpdatePowerState,
-                    displayId, sensorManager);
+                    displayId, sensorManager, /* injector= */ null);
         }
     }
 
