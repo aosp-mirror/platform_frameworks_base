@@ -79,6 +79,7 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.text.style.SuggestionSpan;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Pools.Pool;
 import android.util.Pools.SimplePool;
 import android.util.PrintWriterPrinter;
@@ -2426,24 +2427,9 @@ public final class InputMethodManager {
         // Okay we are now ready to call into the served view and have it
         // do its stuff.
         // Life is good: let's hook everything up!
-        EditorInfo editorInfo = new EditorInfo();
-        // Note: Use Context#getOpPackageName() rather than Context#getPackageName() so that the
-        // system can verify the consistency between the uid of this process and package name passed
-        // from here. See comment of Context#getOpPackageName() for details.
-        editorInfo.packageName = view.getContext().getOpPackageName();
-        editorInfo.autofillId = view.getAutofillId();
-        editorInfo.fieldId = view.getId();
-        InputConnection ic = view.onCreateInputConnection(editorInfo);
-        if (DEBUG) Log.v(TAG, "Starting input: editorInfo=" + editorInfo + " ic=" + ic);
-
-        // Clear autofill and field ids if a connection could not be established.
-        // This ensures that even disconnected EditorInfos have well-defined attributes,
-        // making them consistently and straightforwardly comparable.
-        if (ic == null) {
-            editorInfo.autofillId = AutofillId.NO_AUTOFILL_ID;
-            editorInfo.fieldId = 0;
-        }
-
+        final Pair<InputConnection, EditorInfo> connectionPair = createInputConnection(view);
+        final InputConnection ic = connectionPair.first;
+        final EditorInfo editorInfo = connectionPair.second;
         final Handler icHandler;
         InputBindResult res = null;
         synchronized (mH) {
@@ -4017,5 +4003,28 @@ public final class InputMethodManager {
         for (int i = 0; i < mAccessibilityInputMethodSession.size(); i++) {
             consumer.accept(mAccessibilityInputMethodSession.valueAt(i));
         }
+    }
+
+    @UiThread
+    private static Pair<InputConnection, EditorInfo> createInputConnection(
+            @NonNull View servedView) {
+        final EditorInfo editorInfo = new EditorInfo();
+        // Note: Use Context#getOpPackageName() rather than Context#getPackageName() so that the
+        // system can verify the consistency between the uid of this process and package name passed
+        // from here. See comment of Context#getOpPackageName() for details.
+        editorInfo.packageName = servedView.getContext().getOpPackageName();
+        editorInfo.autofillId = servedView.getAutofillId();
+        editorInfo.fieldId = servedView.getId();
+        final InputConnection ic = servedView.onCreateInputConnection(editorInfo);
+        if (DEBUG) Log.v(TAG, "Starting input: editorInfo=" + editorInfo + " ic=" + ic);
+
+        // Clear autofill and field ids if a connection could not be established.
+        // This ensures that even disconnected EditorInfos have well-defined attributes,
+        // making them consistently and straightforwardly comparable.
+        if (ic == null) {
+            editorInfo.autofillId = AutofillId.NO_AUTOFILL_ID;
+            editorInfo.fieldId = 0;
+        }
+        return new Pair<>(ic, editorInfo);
     }
 }
