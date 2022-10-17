@@ -268,7 +268,7 @@
     <string name="keep_screen_on" msgid="1187161672348797558">"জাগ্ৰত কৰি ৰাখক"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"চ্চাৰ্জ হৈ থকাৰ সময়ত স্ক্ৰীন কেতিয়াও সুপ্ত অৱস্থালৈ নাযায়"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"ব্লুটুথ HCI স্নুপ ল’গ সক্ষম কৰক"</string>
-    <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"ব্লুটুথ পেকেট সংগ্ৰহ কৰক। (এই ছেটিংটো সলনি কৰাৰ পিছত ব্লুটুথ ট’গল কৰক)"</string>
+    <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"ব্লুটুথ পেকেট সংগ্ৰহ কৰক। (এই ছেটিংটো সলনি কৰাৰ পাছত ব্লুটুথ ট’গল কৰক)"</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"ঔইএম আনলক"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"বুটল\'ডাৰটো আনলক কৰিবলৈ অনুমতি দিয়ক"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"ঔইএম আনলক কৰাৰ অনুমতি দিবনে?"</string>
@@ -513,8 +513,8 @@
     <string name="active_input_method_subtypes" msgid="4232680535471633046">"সক্ৰিয়হৈ থকা ইনপুট পদ্ধতিসমূহ"</string>
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"ছিষ্টেমৰ ভাষা ব্যৱহাৰ কৰক"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>ৰ ছেটিং খুলিব পৰা নগ\'ল"</string>
-    <string name="ime_security_warning" msgid="6547562217880551450">"এই ইনপুট পদ্ধতিটোৱে আপুনি টাইপ কৰা আপোনাৰ ব্যক্তিগত ডেটা যেনে পাছৱৰ্ডসমূহ আৰু ক্ৰেডিট কাৰ্ডৰ নম্বৰসমূহকে ধৰি আটাইবোৰ পাঠ সংগ্ৰহ কৰিবলৈ সক্ষম হ\'ব পাৰে। <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> এপটোৰ লগত ই সংলগ্ন। এই ইনপুট পদ্ধতিটো ব্যৱহাৰ কৰেনে?"</string>
-    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"টোকা: ৰিবুট কৰাৰ পিছত আপুনি ফ\'নটো আনলক নকৰালৈকে এই এপটো ষ্টাৰ্ট নহ’ব"</string>
+    <string name="ime_security_warning" msgid="6547562217880551450">"এই ইনপুট পদ্ধতিটোৱে আপুনি টাইপ কৰা আপোনাৰ ব্যক্তিগত ডেটা যেনে পাছৱৰ্ডসমূহ আৰু ক্ৰেডিট কাৰ্ডৰ নম্বৰসমূহকে ধৰি আটাইবোৰ পাঠ সংগ্ৰহ কৰিবলৈ সক্ষম হ\'ব পাৰে। <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> এপ্‌টোৰ লগত ই সংলগ্ন। এই ইনপুট পদ্ধতিটো ব্যৱহাৰ কৰেনে?"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"টোকা: ৰিবুট কৰাৰ পাছত আপুনি ফ\'নটো আনলক নকৰালৈকে এই এপ্‌টো ষ্টাৰ্ট নহ’ব"</string>
     <string name="ims_reg_title" msgid="8197592958123671062">"আইএমএছ পঞ্জীয়ন স্থিতি"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"পঞ্জীকৃত"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"পঞ্জীকৃত নহয়"</string>
