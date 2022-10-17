@@ -36,6 +36,18 @@
     <!-- Description of the privileges the application will get if associated with the companion device of WATCH profile for singleDevice(type) [CHAR LIMIT=NONE] -->
     <string name="summary_watch_single_device">The app is needed to manage your <xliff:g id="device_name" example="My Watch">%1$s</xliff:g>. <xliff:g id="app_name" example="Android Wear">%2$s</xliff:g> will be allowed to interact with these permissions:</string>
 
+    <!-- TODO(b/256140614) To replace all glasses related strings with final versions -->
+    <!-- ================= DEVICE_PROFILE_GLASSES ================= -->
+
+    <!-- The name of the "glasses" device type [CHAR LIMIT=30] -->
+    <string name="profile_name_glasses">glasses</string>
+
+    <!-- Description of the privileges the application will get if associated with the companion device of GLASSES profile (type) [CHAR LIMIT=NONE] -->
+    <string name="summary_glasses">This app is needed to manage your <xliff:g id="device_name" example="My Glasses">%1$s</xliff:g>. <xliff:g id="app_name" example="Glasses">%2$s</xliff:g> will be allowed to access your Phone, SMS, Contacts, Microphone and Nearby devices permissions.</string>
+
+    <!-- Description of the privileges the application will get if associated with the companion device of GLASSES profile for singleDevice(type) [CHAR LIMIT=NONE] -->
+    <string name="summary_glasses_single_device">The app is needed to manage your <xliff:g id="device_name" example="My Glasses">%1$s</xliff:g>. <xliff:g id="app_name" example="Glasses">%2$s</xliff:g> will be allowed to interact with these permissions:</string>
+
     <!-- ================= DEVICE_PROFILE_APP_STREAMING ================= -->
 
     <!-- Confirmation for associating an application with a companion device of APP_STREAMING profile (type) [CHAR LIMIT=NONE] -->

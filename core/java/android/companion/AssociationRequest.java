@@ -73,6 +73,21 @@ public final class AssociationRequest implements Parcelable {
     public static final String DEVICE_PROFILE_WATCH = "android.app.role.COMPANION_DEVICE_WATCH";
 
     /**
+     * Device profile: glasses.
+     *
+     * If specified, the current request may have a modified UI to highlight that the device being
+     * set up is a glasses device, and some extra permissions may be granted to the app
+     * as a result.
+     *
+     * Using it requires declaring uses-permission
+     * {@link android.Manifest.permission#REQUEST_COMPANION_PROFILE_GLASSES} in the manifest.
+     *
+     * @see AssociationRequest.Builder#setDeviceProfile
+     */
+    @RequiresPermission(Manifest.permission.REQUEST_COMPANION_PROFILE_GLASSES)
+    public static final String DEVICE_PROFILE_GLASSES = "android.app.role.COMPANION_DEVICE_GLASSES";
+
+    /**
      * Device profile: a virtual display capable of rendering Android applications, and sending back
      * input events.
      *
@@ -116,7 +131,8 @@ public final class AssociationRequest implements Parcelable {
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @StringDef(value = { DEVICE_PROFILE_WATCH, DEVICE_PROFILE_COMPUTER,
-            DEVICE_PROFILE_AUTOMOTIVE_PROJECTION, DEVICE_PROFILE_APP_STREAMING })
+            DEVICE_PROFILE_AUTOMOTIVE_PROJECTION, DEVICE_PROFILE_APP_STREAMING,
+            DEVICE_PROFILE_GLASSES })
     public @interface DeviceProfile {}
 
     /**
