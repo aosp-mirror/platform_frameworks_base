@@ -17,7 +17,6 @@
 package com.android.systemui.media.dagger;
 
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.dagger.MediaTttReceiverLogBuffer;
 import com.android.systemui.log.dagger.MediaTttSenderLogBuffer;
 import com.android.systemui.media.MediaDataManager;
@@ -35,6 +34,7 @@ import com.android.systemui.media.taptotransfer.receiver.MediaTttChipControllerR
 import com.android.systemui.media.taptotransfer.receiver.MediaTttReceiverLogger;
 import com.android.systemui.media.taptotransfer.sender.MediaTttChipControllerSender;
 import com.android.systemui.media.taptotransfer.sender.MediaTttSenderLogger;
+import com.android.systemui.plugins.log.LogBuffer;
 
 import java.util.Optional;
 

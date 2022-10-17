@@ -19,7 +19,7 @@ package com.android.systemui.dump
 import androidx.test.filters.SmallTest
 import com.android.systemui.Dumpable
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.log.LogBuffer
+import com.android.systemui.plugins.log.LogBuffer
 import com.android.systemui.shared.system.UncaughtExceptionPreHandlerManager
 import com.android.systemui.util.mockito.any
 import org.junit.Before

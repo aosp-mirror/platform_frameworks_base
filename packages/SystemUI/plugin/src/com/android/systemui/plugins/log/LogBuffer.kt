@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.systemui.log
+package com.android.systemui.plugins.log
 
 import android.os.Trace
 import android.util.Log
-import com.android.systemui.log.dagger.LogModule
-import com.android.systemui.util.collection.RingBuffer
+import com.android.systemui.plugins.util.RingBuffer
 import com.google.errorprone.annotations.CompileTimeConstant
 import java.io.PrintWriter
 import java.util.concurrent.ArrayBlockingQueue
@@ -61,15 +60,18 @@ import kotlin.math.max
  * In either case, `level` can be any of `verbose`, `debug`, `info`, `warn`, `error`, `assert`, or
  * the first letter of any of the previous.
  *
- * Buffers are provided by [LogModule]. Instances should be created using a [LogBufferFactory].
+ * In SystemUI, buffers are provided by LogModule. Instances should be created using a SysUI
+ * LogBufferFactory.
  *
  * @param name The name of this buffer, printed when the buffer is dumped and in some other
  * situations.
  * @param maxSize The maximum number of messages to keep in memory at any one time. Buffers start
- * out empty and grow up to [maxSize] as new messages are logged. Once the buffer's size reaches
- * the maximum, it behaves like a ring buffer.
+ * out empty and grow up to [maxSize] as new messages are logged. Once the buffer's size reaches the
+ * maximum, it behaves like a ring buffer.
  */
-class LogBuffer @JvmOverloads constructor(
+class LogBuffer
+@JvmOverloads
+constructor(
     private val name: String,
     private val maxSize: Int,
     private val logcatEchoTracker: LogcatEchoTracker,
@@ -78,7 +80,7 @@ class LogBuffer @JvmOverloads constructor(
     private val buffer = RingBuffer(maxSize) { LogMessageImpl.create() }
 
     private val echoMessageQueue: BlockingQueue<LogMessage>? =
-            if (logcatEchoTracker.logInBackgroundThread) ArrayBlockingQueue(10) else null
+        if (logcatEchoTracker.logInBackgroundThread) ArrayBlockingQueue(10) else null
 
     init {
         if (logcatEchoTracker.logInBackgroundThread && echoMessageQueue != null) {
@@ -133,11 +135,11 @@ class LogBuffer @JvmOverloads constructor(
      */
     @JvmOverloads
     inline fun log(
-            tag: String,
-            level: LogLevel,
-            messageInitializer: MessageInitializer,
-            noinline messagePrinter: MessagePrinter,
-            exception: Throwable? = null,
+        tag: String,
+        level: LogLevel,
+        messageInitializer: MessageInitializer,
+        noinline messagePrinter: MessagePrinter,
+        exception: Throwable? = null,
     ) {
         val message = obtain(tag, level, messagePrinter, exception)
         messageInitializer(message)
@@ -152,14 +154,13 @@ class LogBuffer @JvmOverloads constructor(
      * log message is built during runtime, use the [LogBuffer.log] overloaded method that takes in
      * an initializer and a message printer.
      *
-     * Log buffers are limited by the number of entries, so logging more frequently
-     * will limit the time window that the LogBuffer covers in a bug report.  Richer logs, on the
-     * other hand, make a bug report more actionable, so using the [log] with a messagePrinter to
-     * add more detail to every log may do more to improve overall logging than adding more logs
-     * with this method.
+     * Log buffers are limited by the number of entries, so logging more frequently will limit the
+     * time window that the LogBuffer covers in a bug report. Richer logs, on the other hand, make a
+     * bug report more actionable, so using the [log] with a messagePrinter to add more detail to
+     * every log may do more to improve overall logging than adding more logs with this method.
      */
     fun log(tag: String, level: LogLevel, @CompileTimeConstant message: String) =
-            log(tag, level, {str1 = message}, { str1!! })
+        log(tag, level, { str1 = message }, { str1!! })
 
     /**
      * You should call [log] instead of this method.
@@ -172,10 +173,10 @@ class LogBuffer @JvmOverloads constructor(
      */
     @Synchronized
     fun obtain(
-            tag: String,
-            level: LogLevel,
-            messagePrinter: MessagePrinter,
-            exception: Throwable? = null,
+        tag: String,
+        level: LogLevel,
+        messagePrinter: MessagePrinter,
+        exception: Throwable? = null,
     ): LogMessage {
         if (!mutable) {
             return FROZEN_MESSAGE
@@ -189,8 +190,7 @@ class LogBuffer @JvmOverloads constructor(
      * You should call [log] instead of this method.
      *
      * After acquiring a message via [obtain], call this method to signal to the buffer that you
-     * have finished filling in its data fields. The message will be echoed to logcat if
-     * necessary.
+     * have finished filling in its data fields. The message will be echoed to logcat if necessary.
      */
     @Synchronized
     fun commit(message: LogMessage) {
@@ -213,7 +213,8 @@ class LogBuffer @JvmOverloads constructor(
 
     /** Sends message to echo after determining whether to use Logcat and/or systrace. */
     private fun echoToDesiredEndpoints(message: LogMessage) {
-        val includeInLogcat = logcatEchoTracker.isBufferLoggable(name, message.level) ||
+        val includeInLogcat =
+            logcatEchoTracker.isBufferLoggable(name, message.level) ||
                 logcatEchoTracker.isTagLoggable(message.tag, message.level)
         echo(message, toLogcat = includeInLogcat, toSystrace = systrace)
     }
@@ -221,7 +222,12 @@ class LogBuffer @JvmOverloads constructor(
     /** Converts the entire buffer to a newline-delimited string */
     @Synchronized
     fun dump(pw: PrintWriter, tailLength: Int) {
-        val iterationStart = if (tailLength <= 0) { 0 } else { max(0, buffer.size - tailLength) }
+        val iterationStart =
+            if (tailLength <= 0) {
+                0
+            } else {
+                max(0, buffer.size - tailLength)
+            }
 
         for (i in iterationStart until buffer.size) {
             buffer[i].dump(pw)
@@ -229,9 +235,9 @@ class LogBuffer @JvmOverloads constructor(
     }
 
     /**
-     * "Freezes" the contents of the buffer, making it immutable until [unfreeze] is called.
-     * Calls to [log], [obtain], and [commit] will not affect the buffer and will return dummy
-     * values if necessary.
+     * "Freezes" the contents of the buffer, making it immutable until [unfreeze] is called. Calls
+     * to [log], [obtain], and [commit] will not affect the buffer and will return dummy values if
+     * necessary.
      */
     @Synchronized
     fun freeze() {
@@ -241,9 +247,7 @@ class LogBuffer @JvmOverloads constructor(
         }
     }
 
-    /**
-     * Undoes the effects of calling [freeze].
-     */
+    /** Undoes the effects of calling [freeze]. */
     @Synchronized
     fun unfreeze() {
         if (frozen) {
@@ -265,8 +269,11 @@ class LogBuffer @JvmOverloads constructor(
     }
 
     private fun echoToSystrace(message: LogMessage, strMessage: String) {
-        Trace.instantForTrack(Trace.TRACE_TAG_APP, "UI Events",
-            "$name - ${message.level.shortString} ${message.tag}: $strMessage")
+        Trace.instantForTrack(
+            Trace.TRACE_TAG_APP,
+            "UI Events",
+            "$name - ${message.level.shortString} ${message.tag}: $strMessage"
+        )
     }
 
     private fun echoToLogcat(message: LogMessage, strMessage: String) {

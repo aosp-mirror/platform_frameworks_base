@@ -1,10 +1,10 @@
 package com.android.systemui.shade
 
 import android.view.MotionEvent
-import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
-import com.android.systemui.log.LogMessage
 import com.android.systemui.log.dagger.ShadeLog
+import com.android.systemui.plugins.log.LogBuffer
+import com.android.systemui.plugins.log.LogLevel
+import com.android.systemui.plugins.log.LogMessage
 import com.google.errorprone.annotations.CompileTimeConstant
 import javax.inject.Inject
 
