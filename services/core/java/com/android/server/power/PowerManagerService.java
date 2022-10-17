@@ -467,6 +467,9 @@ public final class PowerManagerService extends SystemService
     // True if the device should wake up when plugged or unplugged.
     private boolean mWakeUpWhenPluggedOrUnpluggedConfig;
 
+    // True if the device should keep dreaming when undocked.
+    private boolean mKeepDreamingWhenUndockingConfig;
+
     // True if the device should wake up when plugged or unplugged in theater mode.
     private boolean mWakeUpWhenPluggedOrUnpluggedInTheaterModeConfig;
 
@@ -1374,6 +1377,8 @@ public final class PowerManagerService extends SystemService
                 com.android.internal.R.bool.config_powerDecoupleInteractiveModeFromDisplay);
         mWakeUpWhenPluggedOrUnpluggedConfig = resources.getBoolean(
                 com.android.internal.R.bool.config_unplugTurnsOnScreen);
+        mKeepDreamingWhenUndockingConfig = resources.getBoolean(
+                com.android.internal.R.bool.config_keepDreamingWhenUndocking);
         mWakeUpWhenPluggedOrUnpluggedInTheaterModeConfig = resources.getBoolean(
                 com.android.internal.R.bool.config_allowTheaterModeWakeFromUnplug);
         mSuspendWhenScreenOffDueToProximityConfig = resources.getBoolean(
@@ -2484,6 +2489,14 @@ public final class PowerManagerService extends SystemService
             boolean wasPowered, int oldPlugType, boolean dockedOnWirelessCharger) {
         // Don't wake when powered unless configured to do so.
         if (!mWakeUpWhenPluggedOrUnpluggedConfig) {
+            return false;
+        }
+
+        // Don't wake when undocking while dreaming if configured not to.
+        if (mKeepDreamingWhenUndockingConfig
+                && getGlobalWakefulnessLocked() == WAKEFULNESS_DREAMING
+                && wasPowered && !mIsPowered
+                && oldPlugType == BatteryManager.BATTERY_PLUGGED_DOCK) {
             return false;
         }
 
@@ -4408,6 +4421,8 @@ public final class PowerManagerService extends SystemService
                     + mWakeUpWhenPluggedOrUnpluggedInTheaterModeConfig);
             pw.println("  mTheaterModeEnabled="
                     + mTheaterModeEnabled);
+            pw.println("  mKeepDreamingWhenUndockingConfig="
+                    + mKeepDreamingWhenUndockingConfig);
             pw.println("  mSuspendWhenScreenOffDueToProximityConfig="
                     + mSuspendWhenScreenOffDueToProximityConfig);
             pw.println("  mDreamsSupportedConfig=" + mDreamsSupportedConfig);
