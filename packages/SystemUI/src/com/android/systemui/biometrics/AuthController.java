@@ -72,6 +72,8 @@ import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.CoreStartable;
+import com.android.systemui.biometrics.domain.interactor.BiometricPromptCredentialInteractor;
+import com.android.systemui.biometrics.ui.viewmodel.CredentialViewModel;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -121,6 +123,10 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
     @Nullable private final FaceManager mFaceManager;
     private final Provider<UdfpsController> mUdfpsControllerFactory;
     private final Provider<SidefpsController> mSidefpsControllerFactory;
+
+    // TODO: these should be migrated out once ready
+    @NonNull private final Provider<BiometricPromptCredentialInteractor> mBiometricPromptInteractor;
+    @NonNull private final Provider<CredentialViewModel> mCredentialViewModelProvider;
 
     private final Display mDisplay;
     private float mScaleFactor = 1f;
@@ -683,6 +689,8 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
             @NonNull LockPatternUtils lockPatternUtils,
             @NonNull UdfpsLogger udfpsLogger,
             @NonNull StatusBarStateController statusBarStateController,
+            @NonNull Provider<BiometricPromptCredentialInteractor> biometricPromptInteractor,
+            @NonNull Provider<CredentialViewModel> credentialViewModelProvider,
             @NonNull InteractionJankMonitor jankMonitor,
             @Main Handler handler,
             @Background DelayableExecutor bgExecutor,
@@ -705,6 +713,9 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
         mInteractionJankMonitor = jankMonitor;
         mUdfpsEnrolledForUser = new SparseBooleanArray();
         mVibratorHelper = vibrator;
+
+        mBiometricPromptInteractor = biometricPromptInteractor;
+        mCredentialViewModelProvider = credentialViewModelProvider;
 
         mOrientationListener = new BiometricDisplayListener(
                 context,
@@ -1204,7 +1215,8 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
                 .setMultiSensorConfig(multiSensorConfig)
                 .setScaleFactorProvider(() -> getScaleFactor())
                 .build(bgExecutor, sensorIds, mFpProps, mFaceProps, wakefulnessLifecycle,
-                        userManager, lockPatternUtils, mInteractionJankMonitor);
+                        userManager, lockPatternUtils, mInteractionJankMonitor,
+                        mBiometricPromptInteractor, mCredentialViewModelProvider);
     }
 
     @Override
