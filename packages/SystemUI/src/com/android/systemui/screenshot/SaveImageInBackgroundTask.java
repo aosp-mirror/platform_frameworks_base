@@ -173,6 +173,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
             mImageData.deleteAction = createDeleteAction(mContext, mContext.getResources(), uri);
             mImageData.quickShareAction = createQuickShareAction(mContext,
                     mQuickShareData.quickShareAction, uri);
+            mImageData.subject = getSubjectString();
 
             mParams.mActionsReadyListener.onActionsReady(mImageData);
             if (DEBUG_CALLBACK) {
@@ -237,8 +238,6 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
 
             // Create a share intent, this will always go through the chooser activity first
             // which should not trigger auto-enter PiP
-            String subjectDate = DateFormat.getDateTimeInstance().format(new Date(mImageTime));
-            String subject = String.format(SCREENSHOT_SHARE_SUBJECT_TEMPLATE, subjectDate);
             Intent sharingIntent = new Intent(Intent.ACTION_SEND);
             sharingIntent.setDataAndType(uri, "image/png");
             sharingIntent.putExtra(Intent.EXTRA_STREAM, uri);
@@ -248,7 +247,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                     new String[]{ClipDescription.MIMETYPE_TEXT_PLAIN}),
                     new ClipData.Item(uri));
             sharingIntent.setClipData(clipdata);
-            sharingIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
+            sharingIntent.putExtra(Intent.EXTRA_SUBJECT, getSubjectString());
             sharingIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                     .addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
 
@@ -318,7 +317,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
             // by setting the (otherwise unused) request code to the current user id.
             int requestCode = mContext.getUserId();
 
-            // Create a edit action
+            // Create an edit action
             PendingIntent editAction = PendingIntent.getBroadcastAsUser(context, requestCode,
                     new Intent(context, ActionProxyReceiver.class)
                             .putExtra(ScreenshotController.EXTRA_ACTION_INTENT, pendingIntent)
@@ -478,5 +477,10 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
             mQuickShareData.quickShareAction = quickShareActions.get(0);
             mParams.mQuickShareActionsReadyListener.onActionsReady(mQuickShareData);
         }
+    }
+
+    private String getSubjectString() {
+        String subjectDate = DateFormat.getDateTimeInstance().format(new Date(mImageTime));
+        return String.format(SCREENSHOT_SHARE_SUBJECT_TEMPLATE, subjectDate);
     }
 }

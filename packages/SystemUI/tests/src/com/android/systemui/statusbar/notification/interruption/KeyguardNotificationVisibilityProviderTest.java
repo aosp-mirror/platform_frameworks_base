@@ -29,6 +29,7 @@ import static com.android.systemui.statusbar.notification.collection.EntryUtilKt
 import static com.android.systemui.util.mockito.KotlinMockitoHelpersKt.argThat;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -305,15 +306,59 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
     }
 
     @Test
-    public void hideSilentNotificationsPerUserSetting() {
-        when(mKeyguardStateController.isShowing()).thenReturn(true);
+    public void hideSilentOnLockscreenSetting() {
+        // GIVEN an 'unfiltered-keyguard-showing' state and notifications shown on lockscreen
+        setupUnfilteredState(mEntry);
         mFakeSettings.putBool(Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS, true);
+
+        // WHEN the show silent notifs on lockscreen setting is false
         mFakeSettings.putBool(Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS, false);
+
+        // WHEN the notification is not high priority and not ambient
+        mEntry = new NotificationEntryBuilder()
+                .setImportance(IMPORTANCE_LOW)
+                .build();
+        when(mHighPriorityProvider.isHighPriority(any())).thenReturn(false);
+
+        // THEN filter out the entry
+        assertTrue(mKeyguardNotificationVisibilityProvider.shouldHideNotification(mEntry));
+    }
+
+    @Test
+    public void showSilentOnLockscreenSetting() {
+        // GIVEN an 'unfiltered-keyguard-showing' state and notifications shown on lockscreen
+        setupUnfilteredState(mEntry);
+        mFakeSettings.putBool(Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS, true);
+
+        // WHEN the show silent notifs on lockscreen setting is true
+        mFakeSettings.putBool(Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS, true);
+
+        // WHEN the notification is not high priority and not ambient
+        mEntry = new NotificationEntryBuilder()
+                .setImportance(IMPORTANCE_LOW)
+                .build();
+        when(mHighPriorityProvider.isHighPriority(mEntry)).thenReturn(false);
+
+        // THEN do not filter out the entry
+        assertFalse(mKeyguardNotificationVisibilityProvider.shouldHideNotification(mEntry));
+    }
+
+    @Test
+    public void defaultSilentOnLockscreenSettingIsHide() {
+        // GIVEN an 'unfiltered-keyguard-showing' state and notifications shown on lockscreen
+        setupUnfilteredState(mEntry);
+        mFakeSettings.putBool(Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS, true);
+
+        // WHEN the notification is not high priority and not ambient
         mEntry = new NotificationEntryBuilder()
                 .setUser(new UserHandle(NOTIF_USER_ID))
                 .setImportance(IMPORTANCE_LOW)
                 .build();
         when(mHighPriorityProvider.isHighPriority(any())).thenReturn(false);
+
+        // WhHEN the show silent notifs on lockscreen setting is unset
+        assertNull(mFakeSettings.getString(Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS));
+
         assertTrue(mKeyguardNotificationVisibilityProvider.shouldHideNotification(mEntry));
     }
 
@@ -428,25 +473,6 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
 
         // THEN filter out the entry
         assertTrue(mKeyguardNotificationVisibilityProvider.shouldHideNotification(mEntry));
-    }
-
-    @Test
-    public void showSilentOnLockscreenSetting() {
-        // GIVEN an 'unfiltered-keyguard-showing' state
-        setupUnfilteredState(mEntry);
-
-        // WHEN the notification is not high priority and not ambient
-        mEntry.setRanking(new RankingBuilder()
-                .setKey(mEntry.getKey())
-                .setImportance(IMPORTANCE_LOW)
-                .build());
-        when(mHighPriorityProvider.isHighPriority(mEntry)).thenReturn(false);
-
-        // WHEN the show silent notifs on lockscreen setting is true
-        mFakeSettings.putBool(Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS, true);
-
-        // THEN do not filter out the entry
-        assertFalse(mKeyguardNotificationVisibilityProvider.shouldHideNotification(mEntry));
     }
 
     @Test

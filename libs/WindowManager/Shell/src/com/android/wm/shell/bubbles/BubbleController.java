@@ -28,10 +28,6 @@ import static com.android.wm.shell.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_CONTRO
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_GESTURE;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.wm.shell.bubbles.BubblePositioner.TASKBAR_POSITION_BOTTOM;
-import static com.android.wm.shell.bubbles.BubblePositioner.TASKBAR_POSITION_LEFT;
-import static com.android.wm.shell.bubbles.BubblePositioner.TASKBAR_POSITION_NONE;
-import static com.android.wm.shell.bubbles.BubblePositioner.TASKBAR_POSITION_RIGHT;
 import static com.android.wm.shell.bubbles.Bubbles.DISMISS_BLOCKED;
 import static com.android.wm.shell.bubbles.Bubbles.DISMISS_GROUP_CANCELLED;
 import static com.android.wm.shell.bubbles.Bubbles.DISMISS_INVALID_INTENT;
@@ -41,6 +37,7 @@ import static com.android.wm.shell.bubbles.Bubbles.DISMISS_NO_LONGER_BUBBLE;
 import static com.android.wm.shell.bubbles.Bubbles.DISMISS_PACKAGE_REMOVED;
 import static com.android.wm.shell.bubbles.Bubbles.DISMISS_SHORTCUT_REMOVED;
 import static com.android.wm.shell.bubbles.Bubbles.DISMISS_USER_CHANGED;
+import static com.android.wm.shell.floating.FloatingTasksController.SHOW_FLOATING_TASKS_AS_BUBBLES;
 
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
@@ -59,10 +56,8 @@ import android.content.pm.ShortcutInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
-import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -125,18 +120,6 @@ import java.util.function.IntConsumer;
 public class BubbleController implements ConfigurationChangeListener {
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "BubbleController" : TAG_BUBBLES;
-
-    // TODO(b/173386799) keep in sync with Launcher3, not hooked up to anything
-    public static final String EXTRA_TASKBAR_CREATED = "taskbarCreated";
-    public static final String EXTRA_BUBBLE_OVERFLOW_OPENED = "bubbleOverflowOpened";
-    public static final String EXTRA_TASKBAR_VISIBLE = "taskbarVisible";
-    public static final String EXTRA_TASKBAR_POSITION = "taskbarPosition";
-    public static final String EXTRA_TASKBAR_ICON_SIZE = "taskbarIconSize";
-    public static final String EXTRA_TASKBAR_BUBBLE_XY = "taskbarBubbleXY";
-    public static final String EXTRA_TASKBAR_SIZE = "taskbarSize";
-    public static final String LEFT_POSITION = "Left";
-    public static final String RIGHT_POSITION = "Right";
-    public static final String BOTTOM_POSITION = "Bottom";
 
     // Should match with PhoneWindowManager
     private static final String SYSTEM_DIALOG_REASON_KEY = "reason";
@@ -470,52 +453,6 @@ public class BubbleController implements ConfigurationChangeListener {
         mBubbleData.setExpanded(true);
     }
 
-    /** Called when any taskbar state changes (e.g. visibility, position, sizes). */
-    private void onTaskbarChanged(Bundle b) {
-        if (b == null) {
-            return;
-        }
-        boolean isVisible = b.getBoolean(EXTRA_TASKBAR_VISIBLE, false /* default */);
-        String position = b.getString(EXTRA_TASKBAR_POSITION, RIGHT_POSITION /* default */);
-        @BubblePositioner.TaskbarPosition int taskbarPosition = TASKBAR_POSITION_NONE;
-        switch (position) {
-            case LEFT_POSITION:
-                taskbarPosition = TASKBAR_POSITION_LEFT;
-                break;
-            case RIGHT_POSITION:
-                taskbarPosition = TASKBAR_POSITION_RIGHT;
-                break;
-            case BOTTOM_POSITION:
-                taskbarPosition = TASKBAR_POSITION_BOTTOM;
-                break;
-        }
-        int[] itemPosition = b.getIntArray(EXTRA_TASKBAR_BUBBLE_XY);
-        int iconSize = b.getInt(EXTRA_TASKBAR_ICON_SIZE);
-        int taskbarSize = b.getInt(EXTRA_TASKBAR_SIZE);
-        Log.w(TAG, "onTaskbarChanged:"
-                + " isVisible: " + isVisible
-                + " position: " + position
-                + " itemPosition: " + itemPosition[0] + "," + itemPosition[1]
-                + " iconSize: " + iconSize);
-        PointF point = new PointF(itemPosition[0], itemPosition[1]);
-        mBubblePositioner.setPinnedLocation(isVisible ? point : null);
-        mBubblePositioner.updateForTaskbar(iconSize, taskbarPosition, isVisible, taskbarSize);
-        if (mStackView != null) {
-            if (isVisible && b.getBoolean(EXTRA_TASKBAR_CREATED, false /* default */)) {
-                // If taskbar was created, add and remove the window so that bubbles display on top
-                removeFromWindowManagerMaybe();
-                addToWindowManagerMaybe();
-            }
-            mStackView.updateStackPosition();
-            mBubbleIconFactory = new BubbleIconFactory(mContext);
-            mBubbleBadgeIconFactory = new BubbleBadgeIconFactory(mContext);
-            mStackView.onDisplaySizeChanged();
-        }
-        if (b.getBoolean(EXTRA_BUBBLE_OVERFLOW_OPENED, false)) {
-            openBubbleOverflow();
-        }
-    }
-
     /**
      * Called when the status bar has become visible or invisible (either permanently or
      * temporarily).
@@ -653,6 +590,11 @@ public class BubbleController implements ConfigurationChangeListener {
                 mStackView.setExpandListener(mExpandListener);
             }
             mStackView.setUnbubbleConversationCallback(mSysuiProxy::onUnbubbleConversation);
+        }
+        if (SHOW_FLOATING_TASKS_AS_BUBBLES && mBubblePositioner.isLargeScreen()) {
+            mBubblePositioner.setUsePinnedLocation(true);
+        } else {
+            mBubblePositioner.setUsePinnedLocation(false);
         }
 
         addToWindowManagerMaybe();
@@ -1728,13 +1670,6 @@ public class BubbleController implements ConfigurationChangeListener {
         public void expandStackAndSelectBubble(Bubble bubble) {
             mMainExecutor.execute(() -> {
                 BubbleController.this.expandStackAndSelectBubble(bubble);
-            });
-        }
-
-        @Override
-        public void onTaskbarChanged(Bundle b) {
-            mMainExecutor.execute(() -> {
-                BubbleController.this.onTaskbarChanged(b);
             });
         }
 
