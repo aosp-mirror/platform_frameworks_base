@@ -1560,4 +1560,8 @@ please see styles_device_defaults.xml.
     <style name="NotificationTombstoneAction" parent="NotificationAction">
         <item name="textColor">#555555</item>
     </style>
+
+    <!-- The default style for input method switch dialog -->
+    <style name="InputMethodSwitchDialogStyle" parent="AlertDialog.DeviceDefault">
+    </style>
 </resources>
