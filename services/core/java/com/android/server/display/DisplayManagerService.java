@@ -1523,6 +1523,7 @@ public final class DisplayManagerService extends SystemService {
             display.setUserDisabledHdrTypes(mUserDisabledHdrTypes);
         }
         if (isDefault) {
+            notifyDefaultDisplayDeviceUpdated(display);
             recordStableDisplayStatsIfNeededLocked(display);
             recordTopInsetLocked(display);
         }
@@ -1617,6 +1618,10 @@ public final class DisplayManagerService extends SystemService {
             mHandler.post(work);
         }
         final int displayId = display.getDisplayIdLocked();
+
+        if (displayId == Display.DEFAULT_DISPLAY) {
+            notifyDefaultDisplayDeviceUpdated(display);
+        }
         DisplayPowerControllerInterface dpc = mDisplayPowerControllers.get(displayId);
         if (dpc != null) {
             dpc.onDisplayChanged();
@@ -1624,6 +1629,11 @@ public final class DisplayManagerService extends SystemService {
         mPersistentDataStore.saveIfNeeded();
         mHandler.sendEmptyMessage(MSG_LOAD_BRIGHTNESS_CONFIGURATIONS);
         handleLogicalDisplayChangedLocked(display);
+    }
+
+    private void notifyDefaultDisplayDeviceUpdated(LogicalDisplay display) {
+        mDisplayModeDirector.defaultDisplayDeviceUpdated(display.getPrimaryDisplayDeviceLocked()
+                .mDisplayDeviceConfig);
     }
 
     private void handleLogicalDisplayDeviceStateTransitionLocked(@NonNull LogicalDisplay display) {

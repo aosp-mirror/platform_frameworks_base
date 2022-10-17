@@ -47,6 +47,13 @@ import java.nio.file.Path;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public final class DisplayDeviceConfigTest {
+    private static final int DEFAULT_PEAK_REFRESH_RATE = 75;
+    private static final int DEFAULT_REFRESH_RATE = 120;
+    private static final int[] LOW_BRIGHTNESS_THRESHOLD_OF_PEAK_REFRESH_RATE = new int[]{10, 30};
+    private static final int[] LOW_AMBIENT_THRESHOLD_OF_PEAK_REFRESH_RATE = new int[]{1, 21};
+    private static final int[] HIGH_BRIGHTNESS_THRESHOLD_OF_PEAK_REFRESH_RATE = new int[]{160};
+    private static final int[] HIGH_AMBIENT_THRESHOLD_OF_PEAK_REFRESH_RATE = new int[]{30000};
+
     private DisplayDeviceConfig mDisplayDeviceConfig;
     private static final float ZERO_DELTA = 0.0f;
     private static final float SMALL_DELTA = 0.0001f;
@@ -200,8 +207,16 @@ public final class DisplayDeviceConfigTest {
                 mDisplayDeviceConfig.getAmbientDarkeningLevelsIdle(), ZERO_DELTA);
         assertArrayEquals(new float[]{29, 30, 31},
                 mDisplayDeviceConfig.getAmbientDarkeningPercentagesIdle(), ZERO_DELTA);
-
-
+        assertEquals(mDisplayDeviceConfig.getDefaultRefreshRate(), DEFAULT_REFRESH_RATE);
+        assertEquals(mDisplayDeviceConfig.getDefaultPeakRefreshRate(), DEFAULT_PEAK_REFRESH_RATE);
+        assertArrayEquals(mDisplayDeviceConfig.getLowDisplayBrightnessThresholds(),
+                LOW_BRIGHTNESS_THRESHOLD_OF_PEAK_REFRESH_RATE);
+        assertArrayEquals(mDisplayDeviceConfig.getLowAmbientBrightnessThresholds(),
+                LOW_AMBIENT_THRESHOLD_OF_PEAK_REFRESH_RATE);
+        assertArrayEquals(mDisplayDeviceConfig.getHighDisplayBrightnessThresholds(),
+                HIGH_BRIGHTNESS_THRESHOLD_OF_PEAK_REFRESH_RATE);
+        assertArrayEquals(mDisplayDeviceConfig.getHighAmbientBrightnessThresholds(),
+                HIGH_AMBIENT_THRESHOLD_OF_PEAK_REFRESH_RATE);
         // Todo(brup): Add asserts for BrightnessThrottlingData, DensityMapping,
         // HighBrightnessModeData AmbientLightSensor, RefreshRateLimitations and ProximitySensor.
     }
@@ -463,6 +478,21 @@ public final class DisplayDeviceConfigTest {
         when(mResources.getIntArray(R.array.config_screenDarkeningThresholds))
                 .thenReturn(new int[]{370, 380, 390});
 
+        // Configs related to refresh rates and blocking zones
+        when(mResources.getInteger(com.android.internal.R.integer.config_defaultPeakRefreshRate))
+                .thenReturn(DEFAULT_PEAK_REFRESH_RATE);
+        when(mResources.getInteger(com.android.internal.R.integer.config_defaultRefreshRate))
+                .thenReturn(DEFAULT_REFRESH_RATE);
+        when(mResources.getIntArray(R.array.config_brightnessThresholdsOfPeakRefreshRate))
+                .thenReturn(LOW_BRIGHTNESS_THRESHOLD_OF_PEAK_REFRESH_RATE);
+        when(mResources.getIntArray(R.array.config_ambientThresholdsOfPeakRefreshRate))
+                .thenReturn(LOW_AMBIENT_THRESHOLD_OF_PEAK_REFRESH_RATE);
+        when(mResources.getIntArray(
+                R.array.config_highDisplayBrightnessThresholdsOfFixedRefreshRate))
+                .thenReturn(HIGH_BRIGHTNESS_THRESHOLD_OF_PEAK_REFRESH_RATE);
+        when(mResources.getIntArray(
+                R.array.config_highAmbientBrightnessThresholdsOfFixedRefreshRate))
+                .thenReturn(HIGH_AMBIENT_THRESHOLD_OF_PEAK_REFRESH_RATE);
         mDisplayDeviceConfig = DisplayDeviceConfig.create(mContext, true);
     }
 
