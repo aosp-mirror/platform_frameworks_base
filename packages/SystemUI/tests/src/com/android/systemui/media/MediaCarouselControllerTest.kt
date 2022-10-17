@@ -281,6 +281,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         verify(logger).logRecommendationRemoved(eq(packageName), eq(instanceId!!))
     }
 
+    @Test
     fun testMediaLoaded_ScrollToActivePlayer() {
         listener.value.onMediaDataLoaded("playing local",
                 null,
@@ -292,8 +293,8 @@ class MediaCarouselControllerTest : SysuiTestCase() {
                 DATA.copy(active = true, isPlaying = false,
                         playbackLocation = MediaData.PLAYBACK_LOCAL, resumption = false))
         // adding a media recommendation card.
-        MediaPlayerData.addMediaRecommendation(SMARTSPACE_KEY, EMPTY_SMARTSPACE_MEDIA_DATA, panel,
-                false, clock)
+        listener.value.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, EMPTY_SMARTSPACE_MEDIA_DATA,
+                false)
         mediaCarouselController.shouldScrollToActivePlayer = true
         // switching between media players.
         listener.value.onMediaDataLoaded("playing local",
