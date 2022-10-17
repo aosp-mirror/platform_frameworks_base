@@ -84,4 +84,8 @@
     <string name="maximize_button_text" msgid="1650859196290301963">"Ekranı Kapla"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"Küçült"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Kapat"</string>
+    <!-- no translation found for back_button_text (1469718707134137085) -->
+    <skip />
+    <!-- no translation found for handle_text (1766582106752184456) -->
+    <skip />
 </resources>

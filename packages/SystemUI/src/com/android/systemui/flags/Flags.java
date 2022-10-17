@@ -219,6 +219,7 @@ public class Flags {
     public static final ReleasedFlag MEDIA_MUTE_AWAIT = new ReleasedFlag(904);
     public static final UnreleasedFlag DREAM_MEDIA_COMPLICATION = new UnreleasedFlag(905);
     public static final UnreleasedFlag DREAM_MEDIA_TAP_TO_OPEN = new UnreleasedFlag(906);
+    public static final UnreleasedFlag UMO_SURFACE_RIPPLE = new UnreleasedFlag(907);
 
     // 1000 - dock
     public static final ReleasedFlag SIMULATE_DOCK_THROUGH_CHARGING =
@@ -227,6 +228,8 @@ public class Flags {
 
     public static final UnreleasedFlag ROUNDED_BOX_RIPPLE =
             new UnreleasedFlag(1002, /* teamfood= */ true);
+
+    public static final UnreleasedFlag REFACTORED_DOCK_SETUP = new UnreleasedFlag(1003, true);
 
     // 1100 - windowing
     @Keep

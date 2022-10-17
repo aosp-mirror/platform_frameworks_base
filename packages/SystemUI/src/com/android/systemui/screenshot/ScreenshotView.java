@@ -87,6 +87,8 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.screenshot.ScreenshotController.SavedImageData.ActionTransition;
 import com.android.systemui.shared.system.InputChannelCompat;
 import com.android.systemui.shared.system.InputMonitorCompat;
@@ -168,6 +170,8 @@ public class ScreenshotView extends FrameLayout implements
 
     private final InteractionJankMonitor mInteractionJankMonitor;
     private long mDefaultTimeoutOfTimeoutHandler;
+    private ActionIntentExecutor mActionExecutor;
+    private FeatureFlags mFlags;
 
     private enum PendingInteraction {
         PREVIEW,
@@ -422,9 +426,12 @@ public class ScreenshotView extends FrameLayout implements
      * Note: must be called before any other (non-constructor) method or null pointer exceptions
      * may occur.
      */
-    void init(UiEventLogger uiEventLogger, ScreenshotViewCallback callbacks) {
+    void init(UiEventLogger uiEventLogger, ScreenshotViewCallback callbacks,
+            ActionIntentExecutor actionExecutor, FeatureFlags flags) {
         mUiEventLogger = uiEventLogger;
         mCallbacks = callbacks;
+        mActionExecutor = actionExecutor;
+        mFlags = flags;
     }
 
     void setScreenshot(Bitmap bitmap, Insets screenInsets) {
@@ -759,18 +766,37 @@ public class ScreenshotView extends FrameLayout implements
     void setChipIntents(ScreenshotController.SavedImageData imageData) {
         mShareChip.setOnClickListener(v -> {
             mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SHARE_TAPPED, 0, mPackageName);
-            startSharedTransition(
-                    imageData.shareTransition.get());
+            if (mFlags.isEnabled(Flags.SCREENSHOT_WORK_PROFILE_POLICY)) {
+                mActionExecutor.launchIntentAsync(ActionIntentCreator.INSTANCE.createShareIntent(
+                                imageData.uri, imageData.subject),
+                        imageData.shareTransition.get().bundle,
+                        imageData.owner.getIdentifier(), false);
+            } else {
+                startSharedTransition(imageData.shareTransition.get());
+            }
         });
         mEditChip.setOnClickListener(v -> {
             mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_EDIT_TAPPED, 0, mPackageName);
-            startSharedTransition(
-                    imageData.editTransition.get());
+            if (mFlags.isEnabled(Flags.SCREENSHOT_WORK_PROFILE_POLICY)) {
+                mActionExecutor.launchIntentAsync(
+                        ActionIntentCreator.INSTANCE.createEditIntent(imageData.uri, mContext),
+                        imageData.editTransition.get().bundle,
+                        imageData.owner.getIdentifier(), true);
+            } else {
+                startSharedTransition(imageData.editTransition.get());
+            }
         });
         mScreenshotPreview.setOnClickListener(v -> {
             mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_PREVIEW_TAPPED, 0, mPackageName);
-            startSharedTransition(
-                    imageData.editTransition.get());
+            if (mFlags.isEnabled(Flags.SCREENSHOT_WORK_PROFILE_POLICY)) {
+                mActionExecutor.launchIntentAsync(
+                        ActionIntentCreator.INSTANCE.createEditIntent(imageData.uri, mContext),
+                        imageData.editTransition.get().bundle,
+                        imageData.owner.getIdentifier(), true);
+            } else {
+                startSharedTransition(
+                        imageData.editTransition.get());
+            }
         });
         if (mQuickShareChip != null) {
             mQuickShareChip.setPendingIntent(imageData.quickShareAction.actionIntent,

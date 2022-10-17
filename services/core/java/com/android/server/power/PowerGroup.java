@@ -229,8 +229,8 @@ public class PowerGroup {
         }
     }
 
-    boolean dreamLocked(long eventTime, int uid) {
-        if (eventTime < mLastWakeTime || mWakefulness != WAKEFULNESS_AWAKE) {
+    boolean dreamLocked(long eventTime, int uid, boolean allowWake) {
+        if (eventTime < mLastWakeTime || (!allowWake && mWakefulness != WAKEFULNESS_AWAKE)) {
             return false;
         }
 
