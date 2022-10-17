@@ -430,25 +430,27 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     }
                     UserState userState = getUserStateLocked(userId);
                     Iterator<ComponentName> it = userState.mEnabledServices.iterator();
+                    boolean anyServiceRemoved = false;
                     while (it.hasNext()) {
                         ComponentName comp = it.next();
                         String compPkg = comp.getPackageName();
                         if (compPkg.equals(packageName)) {
                             it.remove();
                             userState.mBindingServices.remove(comp);
-                            // Update the enabled services setting.
-                            persistComponentNamesToSettingLocked(
-                                    Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
-                                    userState.mEnabledServices, userId);
-                            // Update the touch exploration granted services setting.
                             userState.mTouchExplorationGrantedServices.remove(comp);
-                            persistComponentNamesToSettingLocked(
-                                    Settings.Secure.
-                                    TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES,
-                                    userState.mTouchExplorationGrantedServices, userId);
-                            onUserStateChangedLocked(userState);
-                            return;
+                            anyServiceRemoved = true;
                         }
+                    }
+                    if (anyServiceRemoved) {
+                        // Update the enabled services setting.
+                        persistComponentNamesToSettingLocked(
+                                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
+                                userState.mEnabledServices, userId);
+                        // Update the touch exploration granted services setting.
+                        persistComponentNamesToSettingLocked(
+                                Settings.Secure.TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES,
+                                userState.mTouchExplorationGrantedServices, userId);
+                        onUserStateChangedLocked(userState);
                     }
                 }
             }
