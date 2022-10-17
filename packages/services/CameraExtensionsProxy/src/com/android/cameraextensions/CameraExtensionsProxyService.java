@@ -19,7 +19,6 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Camera;
 import android.graphics.GraphicBuffer;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
@@ -124,26 +123,31 @@ public class CameraExtensionsProxyService extends Service {
 
     private static final String CAMERA_EXTENSION_VERSION_NAME =
             "androidx.camera.extensions.impl.ExtensionVersionImpl";
-    private static final String LATEST_VERSION = "1.3.0";
+    private static final String LATEST_VERSION = "1.4.0";
     // No support for the init sequence
     private static final String NON_INIT_VERSION_PREFIX = "1.0";
     // Support advanced API and latency queries
     private static final String ADVANCED_VERSION_PREFIX = "1.2";
     // Support for the capture request & result APIs
     private static final String RESULTS_VERSION_PREFIX = "1.3";
-    private static final String[] ADVANCED_VERSION_PREFIXES = {ADVANCED_VERSION_PREFIX,
-            RESULTS_VERSION_PREFIX};
-    private static final String[] SUPPORTED_VERSION_PREFIXES = {RESULTS_VERSION_PREFIX,
-            ADVANCED_VERSION_PREFIX, "1.1", NON_INIT_VERSION_PREFIX};
+    // Support for various latency improvements
+    private static final String LATENCY_VERSION_PREFIX = "1.4";
+    private static final String[] ADVANCED_VERSION_PREFIXES = {LATENCY_VERSION_PREFIX,
+            ADVANCED_VERSION_PREFIX, RESULTS_VERSION_PREFIX };
+    private static final String[] SUPPORTED_VERSION_PREFIXES = {LATENCY_VERSION_PREFIX,
+            RESULTS_VERSION_PREFIX, ADVANCED_VERSION_PREFIX, "1.1", NON_INIT_VERSION_PREFIX};
     private static final boolean EXTENSIONS_PRESENT = checkForExtensions();
     private static final String EXTENSIONS_VERSION = EXTENSIONS_PRESENT ?
             (new ExtensionVersionImpl()).checkApiVersion(LATEST_VERSION) : null;
     private static final boolean LATENCY_API_SUPPORTED = checkForLatencyAPI();
+    private static final boolean LATENCY_IMPROVEMENTS_SUPPORTED = EXTENSIONS_PRESENT &&
+            (EXTENSIONS_VERSION.startsWith(LATENCY_VERSION_PREFIX));
     private static final boolean ADVANCED_API_SUPPORTED = checkForAdvancedAPI();
     private static final boolean INIT_API_SUPPORTED = EXTENSIONS_PRESENT &&
             (!EXTENSIONS_VERSION.startsWith(NON_INIT_VERSION_PREFIX));
     private static final boolean RESULT_API_SUPPORTED = EXTENSIONS_PRESENT &&
-            (EXTENSIONS_VERSION.startsWith(RESULTS_VERSION_PREFIX));
+            (EXTENSIONS_VERSION.startsWith(RESULTS_VERSION_PREFIX) ||
+            EXTENSIONS_VERSION.startsWith(LATENCY_VERSION_PREFIX));
 
     private HashMap<String, CameraCharacteristics> mCharacteristicsHashMap = new HashMap<>();
     private HashMap<String, Long> mMetadataVendorIdMap = new HashMap<>();
@@ -1169,6 +1173,10 @@ public class CameraExtensionsProxyService extends Service {
                 ret.outputConfigs.add(entry);
             }
             ret.sessionTemplateId = sessionConfig.getSessionTemplateId();
+            ret.sessionType = -1;
+            if (LATENCY_IMPROVEMENTS_SUPPORTED) {
+                ret.sessionType = sessionConfig.getSessionType();
+            }
             ret.sessionParameter = initializeParcelableMetadata(
                     sessionConfig.getSessionParameters(), cameraId);
             mCameraId = cameraId;
@@ -1312,6 +1320,15 @@ public class CameraExtensionsProxyService extends Service {
         }
 
         @Override
+        public int getSessionType() {
+            if (LATENCY_IMPROVEMENTS_SUPPORTED) {
+                return mPreviewExtender.onSessionType();
+            }
+
+            return -1;
+        }
+
+        @Override
         public int getProcessorType() {
             ProcessorType processorType = mPreviewExtender.getProcessorType();
             if (processorType == ProcessorType.PROCESSOR_TYPE_REQUEST_UPDATE_ONLY) {
@@ -1404,6 +1421,15 @@ public class CameraExtensionsProxyService extends Service {
         @Override
         public CaptureStageImpl onDisableSession() {
             return initializeParcelable(mImageExtender.onDisableSession(), mCameraId);
+        }
+
+        @Override
+        public int getSessionType() {
+            if (LATENCY_IMPROVEMENTS_SUPPORTED) {
+                return mImageExtender.onSessionType();
+            }
+
+            return -1;
         }
 
         @Override
