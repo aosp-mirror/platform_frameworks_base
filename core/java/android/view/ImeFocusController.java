@@ -132,19 +132,6 @@ public final class ImeFocusController {
     }
 
     /**
-     * Calling IMS#onStartInput when the device screen-on again).
-     */
-    @UiThread
-    public void onInteractive() {
-        final InputMethodManagerDelegate immDelegate = getImmDelegate();
-        if (!immDelegate.isCurrentRootView(mViewRootImpl)) {
-            return;
-        }
-        final View focusedView = mViewRootImpl.mView.findFocus();
-        onViewFocusChanged(focusedView, focusedView != null);
-    }
-
-    /**
      * @param windowAttribute {@link WindowManager.LayoutParams} to be checked.
      * @return Whether the window is in local focus mode or not.
      */
@@ -179,8 +166,6 @@ public final class ImeFocusController {
         boolean checkFocus(boolean forceNewFocus, boolean startInput, ViewRootImpl viewRootImpl);
         void onViewDetachedFromWindow(View view, ViewRootImpl viewRootImpl);
         void onWindowDismissed(ViewRootImpl viewRootImpl);
-
-        boolean isCurrentRootView(ViewRootImpl rootView);
     }
 
     /**
