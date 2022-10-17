@@ -741,26 +741,6 @@ public final class InputMethodManager {
     private final class DelegateImpl implements
             ImeFocusController.InputMethodManagerDelegate {
 
-        /**
-         * Used by {@link ImeFocusController} to finish input connection and callback
-         * {@link InputMethodService#onFinishInput()}.
-         *
-         * This method is especially for when ImeFocusController received device screen-off event to
-         * ensure the entire finish input connection and the connection lifecycle callback to
-         * IME can be done for security concern.
-         */
-        @Override
-        public void finishInputAndReportToIme() {
-            synchronized (mH) {
-                finishInputLocked();
-                if (isImeSessionAvailableLocked()) {
-                    mCurBindState.mImeSession.finishInput();
-                }
-                forAccessibilitySessionsLocked(
-                        IAccessibilityInputMethodSessionInvoker::finishInput);
-            }
-        }
-
         @Override
         public void onPreWindowGainedFocus(ViewRootImpl viewRootImpl) {
             synchronized (mH) {
@@ -1203,14 +1183,24 @@ public final class InputMethodManager {
                         mActive = interactive;
                         mFullscreenMode = fullscreen;
 
-                        // Report active state to ImeFocusController to handle IME input
-                        // connection lifecycle callback when it allowed.
-                        final ImeFocusController controller = getFocusController();
-                        final View rootView = mCurRootView != null ? mCurRootView.getView() : null;
-                        if (controller == null || rootView == null) {
-                            return;
+                        if (interactive) {
+                            // Report active state to ImeFocusController to handle IME input
+                            // connection lifecycle callback when it allowed.
+                            final ImeFocusController controller = getFocusController();
+                            final View rootView =
+                                    mCurRootView != null ? mCurRootView.getView() : null;
+                            if (controller == null || rootView == null) {
+                                return;
+                            }
+                            rootView.post(controller::onInteractive);
+                        } else {
+                            finishInputLocked();
+                            if (isImeSessionAvailableLocked()) {
+                                mCurBindState.mImeSession.finishInput();
+                            }
+                            forAccessibilitySessionsLocked(
+                                    IAccessibilityInputMethodSessionInvoker::finishInput);
                         }
-                        rootView.post(() -> controller.onInteractiveChanged(interactive));
                     }
                     return;
                 }

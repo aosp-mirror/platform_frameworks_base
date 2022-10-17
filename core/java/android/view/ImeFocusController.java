@@ -132,22 +132,16 @@ public final class ImeFocusController {
     }
 
     /**
-     * To handle the lifecycle of the input connection when the device interactivity state changed.
-     * (i.e. Calling IMS#onFinishInput when the device screen-off and Calling IMS#onStartInput
-     * when the device screen-on again).
+     * Calling IMS#onStartInput when the device screen-on again).
      */
     @UiThread
-    public void onInteractiveChanged(boolean interactive) {
+    public void onInteractive() {
         final InputMethodManagerDelegate immDelegate = getImmDelegate();
         if (!immDelegate.isCurrentRootView(mViewRootImpl)) {
             return;
         }
-        if (interactive) {
-            final View focusedView = mViewRootImpl.mView.findFocus();
-            onViewFocusChanged(focusedView, focusedView != null);
-        } else {
-            mDelegate.finishInputAndReportToIme();
-        }
+        final View focusedView = mViewRootImpl.mView.findFocus();
+        onViewFocusChanged(focusedView, focusedView != null);
     }
 
     /**
@@ -186,7 +180,6 @@ public final class ImeFocusController {
         void onViewDetachedFromWindow(View view, ViewRootImpl viewRootImpl);
         void onWindowDismissed(ViewRootImpl viewRootImpl);
 
-        void finishInputAndReportToIme();
         boolean isCurrentRootView(ViewRootImpl rootView);
     }
 
