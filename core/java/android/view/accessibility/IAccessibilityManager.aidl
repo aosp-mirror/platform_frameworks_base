@@ -109,9 +109,9 @@ interface IAccessibilityManager {
 
     oneway void setAccessibilityWindowAttributes(int displayId, int windowId, int userId, in AccessibilityWindowAttributes attributes);
 
-    // Requires Manifest.permission.MANAGE_ACCESSIBILITY
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_ACCESSIBILITY)")
     boolean registerProxyForDisplay(IAccessibilityServiceClient proxy, int displayId);
 
-    // Requires Manifest.permission.MANAGE_ACCESSIBILITY
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_ACCESSIBILITY)")
     boolean unregisterProxyForDisplay(int displayId);
 }
