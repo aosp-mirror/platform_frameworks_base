@@ -1068,6 +1068,11 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
         return mUdfpsEnrolledForUser.get(userId);
     }
 
+    /** If BiometricPrompt is currently being shown to the user. */
+    public boolean isShowing() {
+        return mCurrentDialog != null;
+    }
+
     private void showDialog(SomeArgs args, boolean skipAnimation, Bundle savedState) {
         mCurrentDialogArgs = args;
 
