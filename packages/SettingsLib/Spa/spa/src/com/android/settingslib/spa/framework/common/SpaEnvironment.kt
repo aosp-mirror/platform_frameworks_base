@@ -48,5 +48,7 @@ abstract class SpaEnvironment {
 
     open val entryProviderAuthorities: String? = null
 
+    open val logger: SpaLogger = object : SpaLogger {}
+
     // TODO: add other environment setup here.
 }
