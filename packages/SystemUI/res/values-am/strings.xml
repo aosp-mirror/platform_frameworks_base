@@ -94,19 +94,14 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ለአንድ የማያ ገጽ ቀረጻ ክፍለ-ጊዜ በመካሄድ ያለ ማሳወቂያ"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"መቅረጽ ይጀመር?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"እየቀረጹ ሳለ የAndroid ስርዓት በማያ ገጽዎ ላይ የሚታይ ወይም በመሣሪያዎ ላይ የሚጫወት ማንኛውም ሚስጥራዊነት ያለው መረጃን መያዝ ይችላል። ይህ የይለፍ ቃላትን፣ የክፍያ መረጃን፣ ፎቶዎችን፣ መልዕክቶችን እና ኦዲዮን ያካትታል።"</string>
-    <!-- no translation found for screenrecord_option_entire_screen (1732437834603426934) -->
-    <skip />
-    <!-- no translation found for screenrecord_option_single_app (5954863081500035825) -->
-    <skip />
-    <!-- no translation found for screenrecord_warning_entire_screen (8141407178104195610) -->
-    <skip />
-    <!-- no translation found for screenrecord_warning_single_app (7760723997065948283) -->
-    <skip />
-    <!-- no translation found for screenrecord_start_recording (348286842544768740) -->
-    <skip />
+    <string name="screenrecord_option_entire_screen" msgid="1732437834603426934">"መላው ማያ ገጹን ቅረጽ"</string>
+    <string name="screenrecord_option_single_app" msgid="5954863081500035825">"አንድ ነጠላ መተግበሪያን ቅረጽ"</string>
+    <string name="screenrecord_warning_entire_screen" msgid="8141407178104195610">"እየቀረጹ እያለ Android በማያ ገጽዎ ላይ ለሚታይ ወይም በመሣሪያዎ ላይ ለሚጫወት ማንኛውም ነገር መዳረሻ አለው። ስለዚህ በይለፍ ቃላት፣ በክፍያ ዝርዝሮች፣ በመልዕክቶች ወይም በሌሎች ልዩ ጥንቃቄ የሚያስፈልጋቸው መረጃዎች ላይ ጥንቃቄ ያድርጉ።"</string>
+    <string name="screenrecord_warning_single_app" msgid="7760723997065948283">"አንድን መተግበሪያ እየቀረጹ ሳለ Android በዚያ መተግበሪያ ላይ ለሚታይ ወይም ለሚጫወት ማንኛውም ነገር መዳረሻ አለው። ስለዚህ በይለፍ ቃላት፣ በክፍያ ዝርዝሮች፣ በመልዕክቶች ወይም በሌሎች ልዩ ጥንቃቄ የሚያስፈልጋቸው መረጃዎች ላይ ጥንቃቄ ያድርጉ።"</string>
+    <string name="screenrecord_start_recording" msgid="348286842544768740">"መቅረጽ ጀምር"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"ኦዲዮን ቅረጽ"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"የመሣሪያ ኦዲዮ"</string>
-    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"እንደ ሙዚቃ፣ ጥሪዎች እና የጥሪ ቅላጼዎች ያሉ የመሣሪያዎ ድምጽ"</string>
+    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"እንደ ሙዚቃ፣ ጥሪዎች እና የጥሪ ቅላጼዎች ያሉ የመሣሪያዎ ድምፅ"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"ማይክሮፎን"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"የመሣሪያ ኦዲዮ እና ማይክሮፎን"</string>
     <string name="screenrecord_start" msgid="330991441575775004">"ጀምር"</string>
@@ -274,14 +269,14 @@
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"የ<xliff:g id="DATA_LIMIT">%s</xliff:g> ማስጠንቀቂያ"</string>
     <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"የሥራ መተግበሪያዎች"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"የምሽት ብርሃን"</string>
-    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"ጸሐይ ስትጠልቅ ይበራል"</string>
-    <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"ጸሐይ እስክትወጣ ድረስ"</string>
+    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"ፀሐይ ስትጠልቅ ይበራል"</string>
+    <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"ፀሐይ እስክትወጣ ድረስ"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"<xliff:g id="TIME">%s</xliff:g> ላይ ይበራል"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"እስከ <xliff:g id="TIME">%s</xliff:g> ድረስ"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"ጨለማ ገጽታ"</string>
     <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"ባትሪ ቆጣቢ"</string>
-    <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"ጸሐይ ስትጠልቅ ይበራል"</string>
-    <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"ጸሐይ እስክትወጣ ድረስ"</string>
+    <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"ፀሐይ ስትጠልቅ ይበራል"</string>
+    <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"ፀሐይ እስክትወጣ ድረስ"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"<xliff:g id="TIME">%s</xliff:g> ላይ ይበራል"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"እስከ <xliff:g id="TIME">%s</xliff:g> ድረስ"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at_bedtime" msgid="2274300599408864897">"በመኝታ ሰዓት ላይ"</string>
@@ -371,20 +366,13 @@
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"ይህን ተግባር የሚያቀርበው አገልግሎት በእርስዎ ማያ ገጽ ላይ ያለን ወይም በእርስዎ መሣሪያ ላይ በመጫወት ላይ ያለን ሁሉንም መረጃ በቀረጻ ወይም casting ላይ እያለ መዳረሻ ይኖረዋል። ይህ እንደ የይለፍ ቃላት፣ የክፍያ ዝርዝሮች፣ ፎቶዎች፣ መልዕክቶች እና እርስዎ የሚጫውቱት ኦዲዮን የመሳሰለ መረጃን ያካትታል።"</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"ቀረጻ ወይም cast ማድረግ ይጀምር?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"ከ<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ጋር ቀረጻ ወይም casting ይጀምር?"</string>
-    <!-- no translation found for media_projection_permission_dialog_title (7130975432309482596) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_option_entire_screen (392086473225692983) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_option_single_app (1591110238124910521) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_warning_entire_screen (3989078820637452717) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_warning_single_app (1659532781536753059) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_continue (1827799658916736006) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_app_selector_title (894251621057480704) -->
-    <skip />
+    <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> እንዲያጋራ ወይም እንዲቀርጽ ይፈቀድለት?"</string>
+    <string name="media_projection_permission_dialog_option_entire_screen" msgid="392086473225692983">"መላው ማያ ገጽ"</string>
+    <string name="media_projection_permission_dialog_option_single_app" msgid="1591110238124910521">"አንድ ነጠላ መተግበሪያ"</string>
+    <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"ሲያጋሩ፣ ሲቀርጹ ወይም cast ሲያደርጉ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> በማያ ገጽዎ ላይ ለሚታይ ወይም በመሣሪያዎ ላይ ለሚጫወት ማንኛውም ነገር መዳረሻ አለው። ስለዚህ በይለፍ ቃላት፣ በክፍያ ዝርዝሮች፣ በመልዕክቶች ወይም በሌሎች ልዩ ጥንቃቄ የሚያስፈልጋቸው መረጃዎች ላይ ጥንቃቄ ያድርጉ።"</string>
+    <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"አንድን መተግበሪያ ሲያጋሩ፣ ሲቀርጹ ወይም cast ሲያደርጉ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> በዚያ መተግበሪያ ላይ ለሚታይ ወይም ለሚጫወት ማንኛውም ነገር መዳረሻ አለው። ስለዚህ በይለፍ ቃላት፣ በክፍያ ዝርዝሮች፣ በመልዕክቶች ወይም በሌሎች ልዩ ጥንቃቄ የሚያስፈልጋቸው መረጃዎች ላይ ጥንቃቄ ያድርጉ።"</string>
+    <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"ቀጥል"</string>
+    <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"መተግበሪያ ያጋሩ ወይም ይቅረጹ"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"ሁሉንም አጽዳ"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"ያቀናብሩ"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"ታሪክ"</string>
@@ -445,7 +433,7 @@
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"የሥዕል መግለጫ ጽሑፎች ንብርብር"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"አንቃ"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"አሰናክል"</string>
-    <string name="sound_settings" msgid="8874581353127418308">"ድምጽ እና ንዝረት"</string>
+    <string name="sound_settings" msgid="8874581353127418308">"ድምፅ እና ንዝረት"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"ቅንብሮች"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"መተግበሪያ ተሰክቷል"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"ይሄ እስኪነቅሉት ድረስ በእይታ ውስጥ ያስቀምጠዋል። ለመንቀል ተመለስ እና አጠቃላይ ዕይታ የሚለውን ይጫኑ እና ይያዙ።"</string>
@@ -527,11 +515,11 @@
     <string name="notification_silence_title" msgid="8608090968400832335">"ፀጥ ያለ"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"ነባሪ"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"ራስ-ሰር"</string>
-    <string name="notification_channel_summary_low" msgid="4860617986908931158">"ምንም ድምጽ ወይም ንዝረት የለም"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"ምንም ድምጽ ወይም ንዝረት የለም እና በውይይት ክፍል ላይ አይታይም"</string>
+    <string name="notification_channel_summary_low" msgid="4860617986908931158">"ምንም ድምፅ ወይም ንዝረት የለም"</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"ምንም ድምፅ ወይም ንዝረት የለም እና በውይይት ክፍል ላይ አይታይም"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"በእርስዎ የስልክ ቅንብሮች የሚወሰን ሆኖ ሊደውል ወይም ሊነዝር ይችላል"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"በእርስዎ የስልክ ቅንብሮች የሚወሰን ሆኖ ሊደውል ወይም ሊነዝር ይችላል። የ<xliff:g id="APP_NAME">%1$s</xliff:g> አረፋ ውይይቶች በነባሪነት።"</string>
-    <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"ይህ ማሳወቂያ ድምጽ ወይም ንዝረት መደረግ ካለበት ስርዓቱ እንዲወሰን ያድርጉት"</string>
+    <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"ይህ ማሳወቂያ ድምፅ ወይም ንዝረት መደረግ ካለበት ስርዓቱ እንዲወሰን ያድርጉት"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;ሁኔታ:&lt;/b&gt; ለነባሪ ከፍ ተዋውቋል።"</string>
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;ሁኔታ:&lt;/b&gt; ወደ ዝምታ ዝቅ ተደርጓል"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;ሁኔታ:&lt;/b&gt; ክፍተኛ ደረጃ ተሰጥቶታል"</string>

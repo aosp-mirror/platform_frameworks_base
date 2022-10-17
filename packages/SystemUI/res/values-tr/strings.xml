@@ -94,16 +94,11 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Ekran kaydı oturumu için devam eden bildirim"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Kayıt başlatılsın mı?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"Kayıt sırasında Android Sistemi, ekranınızda görünen veya cihazınızda oynatılan hassas bilgileri yakalayabilir. Buna şifreler, ödeme bilgileri, fotoğraflar, mesajlar ve sesler dahildir."</string>
-    <!-- no translation found for screenrecord_option_entire_screen (1732437834603426934) -->
-    <skip />
-    <!-- no translation found for screenrecord_option_single_app (5954863081500035825) -->
-    <skip />
-    <!-- no translation found for screenrecord_warning_entire_screen (8141407178104195610) -->
-    <skip />
-    <!-- no translation found for screenrecord_warning_single_app (7760723997065948283) -->
-    <skip />
-    <!-- no translation found for screenrecord_start_recording (348286842544768740) -->
-    <skip />
+    <string name="screenrecord_option_entire_screen" msgid="1732437834603426934">"Tüm ekranı kaydedin"</string>
+    <string name="screenrecord_option_single_app" msgid="5954863081500035825">"Tek bir uygulamayı kaydedin"</string>
+    <string name="screenrecord_warning_entire_screen" msgid="8141407178104195610">"Kayıt özelliğini kullandığınızda Android, ekranınızda görünen veya cihazınızda oynatılan her şeye erişebilir. Dolayısıyla şifreler, ödeme ayrıntıları, mesajlar veya diğer hassas bilgiler konusunda dikkatli olun."</string>
+    <string name="screenrecord_warning_single_app" msgid="7760723997065948283">"Bir uygulamayı kaydetme özelliğini kullandığınızda Android, söz konusu uygulamada gösterilen veya oynatılan her şeye erişebilir. Dolayısıyla şifreler, ödeme ayrıntıları, mesajlar veya diğer hassas bilgiler konusunda dikkatli olun."</string>
+    <string name="screenrecord_start_recording" msgid="348286842544768740">"Kaydı başlat"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Ses kaydet"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Cihaz sesi"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Müzik, aramalar, zil sesleri gibi cihazınızdan sesler"</string>
@@ -371,20 +366,13 @@
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Bu işlevi sağlayan hizmet, ekranınızda görünen veya kayıt ya da yayın sırasında cihazınızdan oynatılan tüm bilgilere erişecektir. Bu bilgiler arasında şifreler, ödeme detayları, fotoğraflar, mesajlar ve çaldığınız sesler gibi bilgiler yer alır."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Kayıt veya yayınlama başlatılsın mı?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ile kayıt veya yayınlama başlatılsın mı?"</string>
-    <!-- no translation found for media_projection_permission_dialog_title (7130975432309482596) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_option_entire_screen (392086473225692983) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_option_single_app (1591110238124910521) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_warning_entire_screen (3989078820637452717) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_warning_single_app (1659532781536753059) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_continue (1827799658916736006) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_app_selector_title (894251621057480704) -->
-    <skip />
+    <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> uygulamasının paylaşmasına veya kaydetmesine izin verilsin mi?"</string>
+    <string name="media_projection_permission_dialog_option_entire_screen" msgid="392086473225692983">"Tüm ekran"</string>
+    <string name="media_projection_permission_dialog_option_single_app" msgid="1591110238124910521">"Tek bir uygulama"</string>
+    <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"Paylaşım, kayıt ve yayınlama özelliklerini kullandığınızda <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>, ekranınızda görünen veya cihazınızda oynatılan her şeye erişebilir. Dolayısıyla şifreler, ödeme ayrıntıları, mesajlar veya diğer hassas bilgiler konusunda dikkatli olun."</string>
+    <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"Bir uygulamayı paylaşma, kaydetme ve yayınlama özelliklerini kullandığınızda <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>, söz konusu uygulamada gösterilen veya oynatılan her şeye erişebilir. Dolayısıyla şifreler, ödeme ayrıntıları, mesajlar veya diğer hassas bilgiler konusunda dikkatli olun."</string>
+    <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"Devam"</string>
+    <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"Uygulamayı paylaşın veya kaydedin"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Tümünü temizle"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Yönet"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Geçmiş"</string>
