@@ -43,6 +43,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
@@ -53,6 +54,9 @@ import org.mockito.junit.MockitoRule;
 public class MenuItemAccessibilityDelegateTest extends SysuiTestCase {
     @Rule
     public MockitoRule mockito = MockitoJUnit.rule();
+
+    @Mock
+    private DismissAnimationController.DismissCallback mStubDismissCallback;
 
     private RecyclerView mStubListView;
     private MenuView mMenuView;
@@ -87,7 +91,7 @@ public class MenuItemAccessibilityDelegateTest extends SysuiTestCase {
 
         mMenuItemAccessibilityDelegate.onInitializeAccessibilityNodeInfo(mStubListView, info);
 
-        assertThat(info.getActionList().size()).isEqualTo(5);
+        assertThat(info.getActionList().size()).isEqualTo(6);
     }
 
     @Test
@@ -153,6 +157,17 @@ public class MenuItemAccessibilityDelegateTest extends SysuiTestCase {
 
         assertThat(moveOutEdgeAndShowAction).isTrue();
         verify(mMenuAnimationController).moveOutEdgeAndShow();
+    }
+
+    @Test
+    public void performRemoveMenuAction_success() {
+        mMenuAnimationController.setDismissCallback(mStubDismissCallback);
+        final boolean removeMenuAction =
+                mMenuItemAccessibilityDelegate.performAccessibilityAction(mStubListView,
+                        R.id.action_remove_menu, null);
+
+        assertThat(removeMenuAction).isTrue();
+        verify(mMenuAnimationController).removeMenu();
     }
 
     @Test

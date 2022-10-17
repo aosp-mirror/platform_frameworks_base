@@ -172,4 +172,8 @@ class DismissAnimationController implements ComponentCallbacks {
                 R.dimen.dismiss_circle_small);
         mSizePercent = mMinDismissSize / maxDismissSize;
     }
+
+    interface DismissCallback {
+        void onDismiss();
+    }
 }
