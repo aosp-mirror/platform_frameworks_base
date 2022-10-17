@@ -199,10 +199,9 @@ open class MediaTttChipControllerSender @Inject constructor(
             ViewHierarchyAnimator.Hotspot.TOP,
             Interpolators.EMPHASIZED_ACCELERATE,
             ANIMATION_DURATION,
+            includeMargins = true,
             onAnimationEnd,
         )
-        // TODO(b/203800644): Add includeMargins as an option to ViewHierarchyAnimator so that the
-        //   animateChipOut matches the animateChipIn.
     }
 
     override fun shouldIgnoreViewRemoval(info: ChipSenderInfo, removalReason: String): Boolean {
