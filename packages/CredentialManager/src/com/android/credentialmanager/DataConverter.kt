@@ -60,6 +60,7 @@ class GetFlowUtils {
           title = credentialEntryUi.userName.toString(),
           subtitle = credentialEntryUi.displayName?.toString() ?: "Unknown display name",
           id = it.entryId,
+          usageData = credentialEntryUi.usageData?.toString() ?: "Unknown usageData",
         )
       }
     }
@@ -99,6 +100,7 @@ class CreateFlowUtils {
           title = saveEntryUi.title.toString(),
           subtitle = saveEntryUi.subTitle?.toString() ?: "Unknown subtitle",
           id = it.entryId,
+          usageData = saveEntryUi.usageData?.toString() ?: "Unknown usageData",
         )
       }
     }
