@@ -336,6 +336,7 @@ public class GlobalSettingsValidators {
         VALIDATORS.put(Global.Wearable.SCREEN_UNLOCK_SOUND_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.Wearable.CHARGING_SOUNDS_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.Wearable.BEDTIME_MODE, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.BEDTIME_HARD_MODE, BOOLEAN_VALIDATOR);
         VALIDATORS.put(
                 Global.Wearable.EARLY_UPDATES_STATUS,
                 new DiscreteValueValidator(
@@ -348,4 +349,3 @@ public class GlobalSettingsValidators {
                           }));
     }
 }
-

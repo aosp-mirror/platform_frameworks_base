@@ -657,6 +657,7 @@ public class SettingsBackupTest {
                     Settings.Global.Wearable.CHARGING_SOUNDS_ENABLED,
                     Settings.Global.Wearable.SCREEN_UNLOCK_SOUND_ENABLED,
                     Settings.Global.Wearable.BEDTIME_MODE,
+                    Settings.Global.Wearable.BEDTIME_HARD_MODE,
                     Settings.Global.Wearable.EARLY_UPDATES_STATUS);
 
     private static final Set<String> BACKUP_DENY_LIST_SECURE_SETTINGS =
