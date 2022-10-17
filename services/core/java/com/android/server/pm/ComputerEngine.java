@@ -5244,9 +5244,9 @@ public class ComputerEngine implements Computer {
 
     @Nullable
     @Override
-    public String getInstallerPackageName(@NonNull String packageName) {
+    public String getInstallerPackageName(@NonNull String packageName, @UserIdInt int userId) {
         final int callingUid = Binder.getCallingUid();
-        final InstallSource installSource = getInstallSource(packageName, callingUid);
+        final InstallSource installSource = getInstallSource(packageName, callingUid, userId);
         if (installSource == null) {
             throw new IllegalArgumentException("Unknown package: " + packageName);
         }
@@ -5262,7 +5262,8 @@ public class ComputerEngine implements Computer {
     }
 
     @Nullable
-    private InstallSource getInstallSource(@NonNull String packageName, int callingUid) {
+    private InstallSource getInstallSource(@NonNull String packageName, int callingUid,
+            int userId) {
         final PackageStateInternal ps = mSettings.getPackage(packageName);
 
         // Installer info for Apex is not stored in PackageManager
@@ -5270,8 +5271,7 @@ public class ComputerEngine implements Computer {
             return InstallSource.EMPTY;
         }
 
-        if (ps == null || shouldFilterApplicationIncludingUninstalled(
-                ps, callingUid, UserHandle.getUserId(callingUid))) {
+        if (ps == null || shouldFilterApplicationIncludingUninstalled(ps, callingUid, userId)) {
             return null;
         }
 
@@ -5288,7 +5288,7 @@ public class ComputerEngine implements Computer {
         String initiatingPackageName;
         String originatingPackageName;
 
-        final InstallSource installSource = getInstallSource(packageName, callingUid);
+        final InstallSource installSource = getInstallSource(packageName, callingUid, userId);
         if (installSource == null) {
             return null;
         }

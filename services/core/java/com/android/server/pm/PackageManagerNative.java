@@ -72,12 +72,12 @@ final class PackageManagerNative extends IPackageManagerNative.Stub {
     @Override
     public String getInstallerForPackage(String packageName) throws RemoteException {
         final Computer snapshot = mPm.snapshotComputer();
-        final String installerName = snapshot.getInstallerPackageName(packageName);
+        final int callingUser = UserHandle.getUserId(Binder.getCallingUid());
+        final String installerName = snapshot.getInstallerPackageName(packageName, callingUser);
         if (!TextUtils.isEmpty(installerName)) {
             return installerName;
         }
         // differentiate between preload and sideload
-        int callingUser = UserHandle.getUserId(Binder.getCallingUid());
         ApplicationInfo appInfo = snapshot.getApplicationInfo(packageName,
                 /*flags*/ 0,
                 /*userId*/ callingUser);

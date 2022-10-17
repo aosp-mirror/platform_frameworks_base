@@ -705,7 +705,8 @@ final class DeletePackageHelper {
         final int uid = Binder.getCallingUid();
         if (!isOrphaned(snapshot, internalPackageName)
                 && !allowSilentUninstall
-                && !isCallerAllowedToSilentlyUninstall(snapshot, uid, internalPackageName)) {
+                && !isCallerAllowedToSilentlyUninstall(
+                        snapshot, uid, internalPackageName, userId)) {
             mPm.mHandler.post(() -> {
                 try {
                     final Intent intent = new Intent(Intent.ACTION_UNINSTALL_PACKAGE);
@@ -816,15 +817,15 @@ final class DeletePackageHelper {
     }
 
     private boolean isCallerAllowedToSilentlyUninstall(@NonNull Computer snapshot, int callingUid,
-            String pkgName) {
+            String pkgName, int userId) {
         if (callingUid == Process.SHELL_UID || callingUid == Process.ROOT_UID
                 || UserHandle.getAppId(callingUid) == Process.SYSTEM_UID) {
             return true;
         }
         final int callingUserId = UserHandle.getUserId(callingUid);
         // If the caller installed the pkgName, then allow it to silently uninstall.
-        if (callingUid == snapshot.getPackageUid(snapshot.getInstallerPackageName(pkgName), 0,
-                callingUserId)) {
+        if (callingUid == snapshot.getPackageUid(
+                snapshot.getInstallerPackageName(pkgName, userId), 0, callingUserId)) {
             return true;
         }
 
