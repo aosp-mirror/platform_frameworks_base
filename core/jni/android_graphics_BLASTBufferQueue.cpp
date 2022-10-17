@@ -71,10 +71,12 @@ public:
         }
     }
 
-    void onTransactionHang(bool isGpuHang) {
+    void onTransactionHang(const std::string& reason) {
         if (mTransactionHangObject) {
+            JNIEnv* env = getenv(mVm);
+            ScopedLocalRef<jstring> jReason(env, env->NewStringUTF(reason.c_str()));
             getenv(mVm)->CallVoidMethod(mTransactionHangObject,
-                                        gTransactionHangCallback.onTransactionHang, isGpuHang);
+                                        gTransactionHangCallback.onTransactionHang, jReason.get());
         }
     }
 
@@ -177,7 +179,7 @@ static bool nativeIsSameSurfaceControl(JNIEnv* env, jclass clazz, jlong ptr, jlo
     sp<BLASTBufferQueue> queue = reinterpret_cast<BLASTBufferQueue*>(ptr);
     return queue->isSameSurfaceControl(reinterpret_cast<SurfaceControl*>(surfaceControl));
 }
-  
+
 static void nativeSetTransactionHangCallback(JNIEnv* env, jclass clazz, jlong ptr,
                                              jobject transactionHangCallback) {
     sp<BLASTBufferQueue> queue = reinterpret_cast<BLASTBufferQueue*>(ptr);
@@ -186,9 +188,8 @@ static void nativeSetTransactionHangCallback(JNIEnv* env, jclass clazz, jlong pt
     } else {
         sp<TransactionHangCallbackWrapper> wrapper =
                 new TransactionHangCallbackWrapper{env, transactionHangCallback};
-        queue->setTransactionHangCallback([wrapper](bool isGpuHang) {
-            wrapper->onTransactionHang(isGpuHang);
-        });
+        queue->setTransactionHangCallback(
+                [wrapper](const std::string& reason) { wrapper->onTransactionHang(reason); });
     }
 }
 
@@ -236,7 +237,8 @@ int register_android_graphics_BLASTBufferQueue(JNIEnv* env) {
     jclass transactionHangClass =
             FindClassOrDie(env, "android/graphics/BLASTBufferQueue$TransactionHangCallback");
     gTransactionHangCallback.onTransactionHang =
-            GetMethodIDOrDie(env, transactionHangClass, "onTransactionHang", "(Z)V");
+            GetMethodIDOrDie(env, transactionHangClass, "onTransactionHang",
+                             "(Ljava/lang/String;)V");
 
     return 0;
 }
