@@ -41,6 +41,7 @@ import com.android.systemui.qs.tileimpl.QSFactoryImpl;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsImplementation;
 import com.android.systemui.screenshot.ReferenceScreenshotModule;
+import com.android.systemui.settings.dagger.MultiUserUtilsModule;
 import com.android.systemui.shade.NotificationShadeWindowControllerImpl;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeControllerImpl;
@@ -93,6 +94,7 @@ import dagger.Provides;
         AospPolicyModule.class,
         GestureModule.class,
         MediaModule.class,
+        MultiUserUtilsModule.class,
         PowerModule.class,
         QSModule.class,
         ReferenceScreenshotModule.class,
