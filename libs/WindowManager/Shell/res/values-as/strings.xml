@@ -39,14 +39,14 @@
     <string name="accessibility_divider" msgid="703810061635792791">"স্প্লিট স্ক্ৰীনৰ বিভাজক"</string>
     <string name="divider_title" msgid="5482989479865361192">"বিভাজিত স্ক্ৰীনৰ বিভাজক"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"বাওঁফালৰ স্ক্ৰীনখন সম্পূৰ্ণ স্ক্ৰীন কৰক"</string>
-    <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"বাওঁফালৰ স্ক্ৰীণখন ৭০% কৰক"</string>
-    <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"বাওঁফালৰ স্ক্ৰীণখন ৫০% কৰক"</string>
-    <string name="accessibility_action_divider_left_30" msgid="6023611335723838727">"বাওঁফালৰ স্ক্ৰীণখন ৩০% কৰক"</string>
+    <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"বাওঁফালৰ স্ক্ৰীনখন ৭০% কৰক"</string>
+    <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"বাওঁফালৰ স্ক্ৰীনখন ৫০% কৰক"</string>
+    <string name="accessibility_action_divider_left_30" msgid="6023611335723838727">"বাওঁফালৰ স্ক্ৰীনখন ৩০% কৰক"</string>
     <string name="accessibility_action_divider_right_full" msgid="3408505054325944903">"সোঁফালৰ স্ক্ৰীনখন সম্পূৰ্ণ স্ক্ৰীন কৰক"</string>
     <string name="accessibility_action_divider_top_full" msgid="3495871951082107594">"শীৰ্ষ স্ক্ৰীনখন সম্পূৰ্ণ স্ক্ৰীন কৰক"</string>
-    <string name="accessibility_action_divider_top_70" msgid="1779164068887875474">"শীর্ষ স্ক্ৰীণখন ৭০% কৰক"</string>
-    <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"শীর্ষ স্ক্ৰীণখন ৫০% কৰক"</string>
-    <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"শীর্ষ স্ক্ৰীণখন ৩০% কৰক"</string>
+    <string name="accessibility_action_divider_top_70" msgid="1779164068887875474">"শীর্ষ স্ক্ৰীনখন ৭০% কৰক"</string>
+    <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"শীর্ষ স্ক্ৰীনখন ৫০% কৰক"</string>
+    <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"শীর্ষ স্ক্ৰীনখন ৩০% কৰক"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"তলৰ স্ক্ৰীনখন সম্পূৰ্ণ স্ক্ৰীন কৰক"</string>
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"এখন হাতেৰে ব্যৱহাৰ কৰা ম’ড ব্যৱহাৰ কৰা"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"বাহিৰ হ’বলৈ স্ক্ৰীনখনৰ একেবাৰে তলৰ পৰা ওপৰলৈ ছোৱাইপ কৰক অথবা এপ্‌টোৰ ওপৰত যিকোনো ঠাইত টিপক"</string>
@@ -86,4 +86,8 @@
     <string name="maximize_button_text" msgid="1650859196290301963">"সৰ্বাধিক মাত্ৰালৈ বঢ়াওক"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"মিনিমাইজ কৰক"</string>
     <string name="close_button_text" msgid="2913281996024033299">"বন্ধ কৰক"</string>
+    <!-- no translation found for back_button_text (1469718707134137085) -->
+    <skip />
+    <!-- no translation found for handle_text (1766582106752184456) -->
+    <skip />
 </resources>
