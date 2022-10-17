@@ -1249,7 +1249,7 @@ public final class ViewRootImpl implements ViewParent,
                     final float[] sizeCompatScale = { 1f };
                     res = mWindowSession.addToDisplayAsUser(mWindow, mWindowAttributes,
                             getHostVisibility(), mDisplay.getDisplayId(), userId,
-                            mInsetsController.getRequestedVisibilities(), inputChannel, mTempInsets,
+                            mInsetsController.getRequestedVisibleTypes(), inputChannel, mTempInsets,
                             mTempControls, attachedFrame, sizeCompatScale);
                     if (!attachedFrame.isValid()) {
                         attachedFrame = null;
@@ -1288,7 +1288,7 @@ public final class ViewRootImpl implements ViewParent,
                 mWindowLayout.computeFrames(mWindowAttributes, state,
                         displayCutoutSafe, winConfig.getBounds(), winConfig.getWindowingMode(),
                         UNSPECIFIED_LENGTH, UNSPECIFIED_LENGTH,
-                        mInsetsController.getRequestedVisibilities(), 1f /* compactScale */,
+                        mInsetsController.getRequestedVisibleTypes(), 1f /* compactScale */,
                         mTmpFrames);
                 setFrame(mTmpFrames.frame);
                 registerBackCallbackOnWindow();
@@ -8160,7 +8160,7 @@ public final class ViewRootImpl implements ViewParent,
             state.getDisplayCutoutSafe(displayCutoutSafe);
             mWindowLayout.computeFrames(mWindowAttributes.forRotation(winConfig.getRotation()),
                     state, displayCutoutSafe, winConfig.getBounds(), winConfig.getWindowingMode(),
-                    measuredWidth, measuredHeight, mInsetsController.getRequestedVisibilities(),
+                    measuredWidth, measuredHeight, mInsetsController.getRequestedVisibleTypes(),
                     1f /* compatScale */, mTmpFrames);
             mWinFrameInScreen.set(mTmpFrames.frame);
             if (mTranslator != null) {

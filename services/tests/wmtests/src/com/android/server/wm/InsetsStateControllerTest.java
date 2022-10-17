@@ -24,6 +24,7 @@ import static android.view.InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
+import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
@@ -48,7 +49,6 @@ import android.platform.test.annotations.Presubmit;
 import android.util.SparseArray;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
-import android.view.InsetsVisibilities;
 
 import androidx.test.filters.SmallTest;
 
@@ -187,10 +187,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         getController().getSourceProvider(ITYPE_IME).setWindowContainer(mImeWindow, null, null);
         getController().onImeControlTargetChanged(
                 mDisplayContent.getImeInputTarget().getWindowState());
-        final InsetsVisibilities requestedVisibilities = new InsetsVisibilities();
-        requestedVisibilities.setVisibility(ITYPE_IME, true);
-        mDisplayContent.getImeInputTarget().getWindowState()
-                .setRequestedVisibilities(requestedVisibilities);
+        mDisplayContent.getImeInputTarget().getWindowState().setRequestedVisibleTypes(ime(), ime());
         getController().onInsetsModified(mDisplayContent.getImeInputTarget().getWindowState());
 
         // Send our spy window (app) into the system so that we can detect the invocation.

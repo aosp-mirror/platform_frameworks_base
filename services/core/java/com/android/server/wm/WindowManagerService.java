@@ -268,7 +268,6 @@ import android.view.InputDevice;
 import android.view.InputWindowHandle;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
-import android.view.InsetsVisibilities;
 import android.view.KeyEvent;
 import android.view.MagnificationSpec;
 import android.view.MotionEvent;
@@ -283,6 +282,7 @@ import android.view.TaskTransitionSpec;
 import android.view.View;
 import android.view.WindowContentFrameStats;
 import android.view.WindowInsets;
+import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowManager;
 import android.view.WindowManager.DisplayImePolicy;
 import android.view.WindowManager.LayoutParams;
@@ -1408,7 +1408,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public int addWindow(Session session, IWindow client, LayoutParams attrs, int viewVisibility,
-            int displayId, int requestUserId, InsetsVisibilities requestedVisibilities,
+            int displayId, int requestUserId, @InsetsType int requestedVisibleTypes,
             InputChannel outInputChannel, InsetsState outInsetsState,
             InsetsSourceControl[] outActiveControls, Rect outAttachedFrame,
             float[] outSizeCompatScale) {
@@ -1634,7 +1634,7 @@ public class WindowManagerService extends IWindowManager.Stub
             attrs.flags = sanitizeFlagSlippery(attrs.flags, win.getName(), callingUid, callingPid);
             attrs.inputFeatures = sanitizeSpyWindow(attrs.inputFeatures, win.getName(), callingUid,
                     callingPid);
-            win.setRequestedVisibilities(requestedVisibilities);
+            win.setRequestedVisibleTypes(requestedVisibleTypes);
 
             res = displayPolicy.validateAddingWindowLw(attrs, callingPid, callingUid);
             if (res != ADD_OKAY) {
@@ -4427,7 +4427,8 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public void updateDisplayWindowRequestedVisibilities(int displayId, InsetsVisibilities vis) {
+    public void updateDisplayWindowRequestedVisibleTypes(
+            int displayId, @InsetsType int requestedVisibleTypes) {
         if (mContext.checkCallingOrSelfPermission(MANAGE_APP_TOKENS)
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Must hold permission " + MANAGE_APP_TOKENS);
@@ -4439,7 +4440,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (dc == null || dc.mRemoteInsetsControlTarget == null) {
                     return;
                 }
-                dc.mRemoteInsetsControlTarget.setRequestedVisibilities(vis);
+                dc.mRemoteInsetsControlTarget.setRequestedVisibleTypes(requestedVisibleTypes);
                 dc.getInsetsStateController().onInsetsModified(dc.mRemoteInsetsControlTarget);
             }
         } finally {

@@ -77,7 +77,6 @@ import android.view.ActionMode;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.InputQueue;
-import android.view.InsetsState;
 import android.view.KeyEvent;
 import android.view.KeyboardShortcutGroup;
 import android.view.LayoutInflater;
@@ -2711,9 +2710,10 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                     && ((windowFlags & translucentFlag) == 0 || force);
         }
 
-        public boolean isVisible(InsetsState state, int color, int windowFlags, boolean force) {
-            final boolean present = isPresent(state.hasVisibleSource(insetsType), windowFlags,
-                    force);
+        public boolean isVisible(@InsetsType int requestedVisibleTypes, int color, int windowFlags,
+                boolean force) {
+            final boolean requestedVisible = (requestedVisibleTypes & insetsType) != 0;
+            final boolean present = isPresent(requestedVisible, windowFlags, force);
             return isVisible(present, color, windowFlags, force);
         }
     }

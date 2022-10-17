@@ -24,6 +24,8 @@ import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.InsetsState.ITYPE_TOP_MANDATORY_GESTURES;
 import static android.view.InsetsState.ITYPE_TOP_TAPPABLE_ELEMENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
+import static android.view.WindowInsets.Type.navigationBars;
+import static android.view.WindowInsets.Type.statusBars;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION;
@@ -51,7 +53,7 @@ import android.view.InsetsFrameProvider;
 import android.view.InsetsSource;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
-import android.view.InsetsVisibilities;
+import android.view.WindowInsets;
 
 import androidx.test.filters.SmallTest;
 
@@ -170,9 +172,7 @@ public class InsetsPolicyTest extends WindowTestsBase {
 
         // Add a fullscreen (MATCH_PARENT x MATCH_PARENT) app window which hides status bar.
         final WindowState fullscreenApp = addWindow(TYPE_APPLICATION, "fullscreenApp");
-        final InsetsVisibilities requestedVisibilities = new InsetsVisibilities();
-        requestedVisibilities.setVisibility(ITYPE_STATUS_BAR, false);
-        fullscreenApp.setRequestedVisibilities(requestedVisibilities);
+        fullscreenApp.setRequestedVisibleTypes(0, WindowInsets.Type.statusBars());
 
         // Add a non-fullscreen dialog window.
         final WindowState dialog = addWindow(TYPE_APPLICATION, "dialog");
@@ -205,9 +205,8 @@ public class InsetsPolicyTest extends WindowTestsBase {
 
         // Assume mFocusedWindow is updated but mTopFullscreenOpaqueWindowState hasn't.
         final WindowState newFocusedFullscreenApp = addWindow(TYPE_APPLICATION, "newFullscreenApp");
-        final InsetsVisibilities newRequestedVisibilities = new InsetsVisibilities();
-        newRequestedVisibilities.setVisibility(ITYPE_STATUS_BAR, true);
-        newFocusedFullscreenApp.setRequestedVisibilities(newRequestedVisibilities);
+        newFocusedFullscreenApp.setRequestedVisibleTypes(
+                WindowInsets.Type.statusBars(), WindowInsets.Type.statusBars());
         // Make sure status bar is hidden by previous insets state.
         mDisplayContent.getInsetsPolicy().updateBarControlTarget(fullscreenApp);
 
@@ -268,10 +267,8 @@ public class InsetsPolicyTest extends WindowTestsBase {
         doNothing().when(policy).startAnimation(anyBoolean(), any());
 
         // Make both system bars invisible.
-        final InsetsVisibilities requestedVisibilities = new InsetsVisibilities();
-        requestedVisibilities.setVisibility(ITYPE_STATUS_BAR, false);
-        requestedVisibilities.setVisibility(ITYPE_NAVIGATION_BAR, false);
-        mAppWindow.setRequestedVisibilities(requestedVisibilities);
+        mAppWindow.setRequestedVisibleTypes(
+                0, navigationBars() | statusBars());
         policy.updateBarControlTarget(mAppWindow);
         waitUntilWindowAnimatorIdle();
         assertFalse(mDisplayContent.getInsetsStateController().getRawInsetsState()
@@ -364,10 +361,8 @@ public class InsetsPolicyTest extends WindowTestsBase {
         assertTrue(state.getSource(ITYPE_STATUS_BAR).isVisible());
         assertTrue(state.getSource(ITYPE_NAVIGATION_BAR).isVisible());
 
-        final InsetsVisibilities requestedVisibilities = new InsetsVisibilities();
-        requestedVisibilities.setVisibility(ITYPE_STATUS_BAR, true);
-        requestedVisibilities.setVisibility(ITYPE_NAVIGATION_BAR, true);
-        mAppWindow.setRequestedVisibilities(requestedVisibilities);
+        mAppWindow.setRequestedVisibleTypes(
+                navigationBars() | statusBars(), navigationBars() | statusBars());
         policy.onInsetsModified(mAppWindow);
         waitUntilWindowAnimatorIdle();
 

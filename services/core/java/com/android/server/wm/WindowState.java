@@ -769,6 +769,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     private final InsetsVisibilities mRequestedVisibilities = new InsetsVisibilities();
 
+    private @InsetsType int mRequestedVisibleTypes = WindowInsets.Type.defaultVisible();
+
     /**
      * Freeze the insets state in some cases that not necessarily keeps up-to-date to the client.
      * (e.g app exiting transition)
@@ -854,10 +856,38 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     /**
-     * @see #getRequestedVisibility(int)
+     * Returns requested visible types of insets.
+     *
+     * @return an integer as the requested visible insets types.
      */
-    void setRequestedVisibilities(InsetsVisibilities visibilities) {
-        mRequestedVisibilities.set(visibilities);
+    @InsetsType int getRequestedVisibleTypes() {
+        return mRequestedVisibleTypes;
+    }
+
+    /**
+     * @see #getRequestedVisibleTypes()
+     */
+    void setRequestedVisibleTypes(@InsetsType int requestedVisibleTypes) {
+        if (mRequestedVisibleTypes != requestedVisibleTypes) {
+            mRequestedVisibleTypes = requestedVisibleTypes;
+
+            // TODO (253420890): Remove this when removing mRequestedVisibilities.
+            final @InsetsType int defaultVisibleTypes = WindowInsets.Type.defaultVisible();
+            final InsetsVisibilities insetsVisibilities = new InsetsVisibilities();
+            for (@InternalInsetsType int i = InsetsState.SIZE - 1; i >= 0; i--) {
+                @InsetsType int type = InsetsState.toPublicType(i);
+                if ((type & (requestedVisibleTypes ^ defaultVisibleTypes)) != 0) {
+                    // We only set the visibility if it is different from the default one.
+                    insetsVisibilities.setVisibility(i, (type & requestedVisibleTypes) != 0);
+                }
+            }
+            mRequestedVisibilities.set(insetsVisibilities);
+        }
+    }
+
+    @VisibleForTesting
+    void setRequestedVisibleTypes(@InsetsType int requestedVisibleTypes, @InsetsType int mask) {
+        setRequestedVisibleTypes(mRequestedVisibleTypes & ~mask | requestedVisibleTypes & mask);
     }
 
     /**

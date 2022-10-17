@@ -26,6 +26,7 @@ import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
+import static android.view.WindowInsets.Type.statusBars;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
@@ -92,7 +93,6 @@ import android.view.Gravity;
 import android.view.InputWindowHandle;
 import android.view.InsetsSource;
 import android.view.InsetsState;
-import android.view.InsetsVisibilities;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 
@@ -430,9 +430,7 @@ public class WindowStateTests extends WindowTestsBase {
                         null /* imeFrameProvider */);
         mDisplayContent.getInsetsStateController().onBarControlTargetChanged(
                 app, null /* fakeTopControlling */, app, null /* fakeNavControlling */);
-        final InsetsVisibilities requestedVisibilities = new InsetsVisibilities();
-        requestedVisibilities.setVisibility(ITYPE_STATUS_BAR, false);
-        app.setRequestedVisibilities(requestedVisibilities);
+        app.setRequestedVisibleTypes(0, statusBars());
         mDisplayContent.getInsetsStateController().getSourceProvider(ITYPE_STATUS_BAR)
                 .updateClientVisibility(app);
         waitUntilHandlersIdle();

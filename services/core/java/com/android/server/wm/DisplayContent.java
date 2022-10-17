@@ -227,6 +227,7 @@ import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.SurfaceSession;
 import android.view.WindowInsets;
+import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowManager;
 import android.view.WindowManager.DisplayImePolicy;
 import android.view.WindowManagerPolicyConstants.PointerEventListener;
@@ -6695,6 +6696,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     class RemoteInsetsControlTarget implements InsetsControlTarget {
         private final IDisplayWindowInsetsController mRemoteInsetsController;
         private final InsetsVisibilities mRequestedVisibilities = new InsetsVisibilities();
+        private @InsetsType int mRequestedVisibleTypes = WindowInsets.Type.defaultVisible();
         private final boolean mCanShowTransient;
 
         RemoteInsetsControlTarget(IDisplayWindowInsetsController controller) {
@@ -6707,12 +6709,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
          * Notifies the remote insets controller that the top focused window has changed.
          *
          * @param component The application component that is open in the top focussed window.
-         * @param requestedVisibilities The insets visibilities requested by the focussed window.
+         * @param requestedVisibleTypes The insets types requested visible by the focused window.
          */
         void topFocusedWindowChanged(ComponentName component,
-                InsetsVisibilities requestedVisibilities) {
+                @InsetsType int requestedVisibleTypes) {
             try {
-                mRemoteInsetsController.topFocusedWindowChanged(component, requestedVisibilities);
+                mRemoteInsetsController.topFocusedWindowChanged(component, requestedVisibleTypes);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Failed to deliver package in top focused window change", e);
             }
@@ -6748,7 +6750,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
 
         @Override
-        public void hideInsets(@WindowInsets.Type.InsetsType int types, boolean fromIme) {
+        public void hideInsets(@InsetsType int types, boolean fromIme) {
             try {
                 mRemoteInsetsController.hideInsets(types, fromIme);
             } catch (RemoteException e) {
@@ -6769,8 +6771,34 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             return mRequestedVisibilities.getVisibility(type);
         }
 
-        void setRequestedVisibilities(InsetsVisibilities requestedVisibilities) {
-            mRequestedVisibilities.set(requestedVisibilities);
+        /**
+         * Returns requested visible types of insets.
+         *
+         * @return an integer as the requested visible insets types.
+         */
+        @InsetsType int getRequestedVisibleTypes() {
+            return mRequestedVisibleTypes;
+        }
+
+        /**
+         * @see #getRequestedVisibleTypes()
+         */
+        void setRequestedVisibleTypes(@InsetsType int requestedVisibleTypes) {
+            if (mRequestedVisibleTypes != requestedVisibleTypes) {
+                mRequestedVisibleTypes = requestedVisibleTypes;
+
+                // TODO (253420890): Remove this when removing mRequestedVisibilities.
+                final @InsetsType int defaultVisibleTypes = WindowInsets.Type.defaultVisible();
+                final InsetsVisibilities insetsVisibilities = new InsetsVisibilities();
+                for (@InternalInsetsType int i = InsetsState.SIZE - 1; i >= 0; i--) {
+                    @InsetsType int type = InsetsState.toPublicType(i);
+                    if ((type & (requestedVisibleTypes ^ defaultVisibleTypes)) != 0) {
+                        // We only set the visibility if it is different from the default one.
+                        insetsVisibilities.setVisibility(i, (type & requestedVisibleTypes) != 0);
+                    }
+                }
+                mRequestedVisibilities.set(insetsVisibilities);
+            }
         }
     }
 

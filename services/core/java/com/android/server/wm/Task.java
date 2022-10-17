@@ -3514,7 +3514,7 @@ class Task extends TaskFragment {
             final WindowState topMainWin = getWindow(w -> w.mAttrs.type == TYPE_BASE_APPLICATION);
             if (topMainWin != null) {
                 info.mainWindowLayoutParams = topMainWin.getAttrs();
-                info.requestedVisibilities.set(topMainWin.getRequestedVisibilities());
+                info.requestedVisibleTypes = topMainWin.getRequestedVisibleTypes();
             }
         }
         // If the developer has persist a different configuration, we need to override it to the

@@ -71,10 +71,10 @@ import android.util.MergedConfiguration;
 import android.view.IWindowSessionCallback;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
-import android.view.InsetsVisibilities;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.View;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.window.ClientWindowFrames;
 import android.window.ScreenCapture;
@@ -338,7 +338,7 @@ public class WindowManagerServiceTests extends WindowTestsBase {
                 .getWindowType(eq(windowContextToken));
 
         mWm.addWindow(session, new TestIWindow(), params, View.VISIBLE, DEFAULT_DISPLAY,
-                UserHandle.USER_SYSTEM, new InsetsVisibilities(), null, new InsetsState(),
+                UserHandle.USER_SYSTEM, WindowInsets.Type.defaultVisible(), null, new InsetsState(),
                 new InsetsSourceControl[0], new Rect(), new float[1]);
 
         verify(mWm.mWindowContextListenerController, never()).registerWindowContainerListener(any(),

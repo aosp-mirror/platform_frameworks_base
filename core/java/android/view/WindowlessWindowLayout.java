@@ -18,6 +18,7 @@ package android.view;
 
 import android.app.WindowConfiguration.WindowingMode;
 import android.graphics.Rect;
+import android.view.WindowInsets.Type.InsetsType;
 import android.window.ClientWindowFrames;
 
 /**
@@ -29,7 +30,7 @@ public class WindowlessWindowLayout extends WindowLayout {
     @Override
     public void computeFrames(WindowManager.LayoutParams attrs, InsetsState state,
             Rect displayCutoutSafe, Rect windowBounds, @WindowingMode int windowingMode,
-            int requestedWidth, int requestedHeight, InsetsVisibilities requestedVisibilities,
+            int requestedWidth, int requestedHeight, @InsetsType int requestedVisibleTypes,
             float compatScale, ClientWindowFrames frames) {
         frames.frame.set(0, 0, attrs.width, attrs.height);
         frames.displayFrame.set(frames.frame);

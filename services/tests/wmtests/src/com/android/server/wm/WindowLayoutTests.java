@@ -41,7 +41,6 @@ import android.platform.test.annotations.Presubmit;
 import android.view.DisplayCutout;
 import android.view.Gravity;
 import android.view.InsetsState;
-import android.view.InsetsVisibilities;
 import android.view.WindowInsets;
 import android.view.WindowLayout;
 import android.view.WindowManager;
@@ -81,7 +80,7 @@ public class WindowLayoutTests {
     private int mWindowingMode;
     private int mRequestedWidth;
     private int mRequestedHeight;
-    private InsetsVisibilities mRequestedVisibilities;
+    private int mRequestedVisibleTypes;
     private float mCompatScale;
 
     @Before
@@ -98,14 +97,14 @@ public class WindowLayoutTests {
         mWindowingMode = WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
         mRequestedWidth = DISPLAY_WIDTH;
         mRequestedHeight = DISPLAY_HEIGHT;
-        mRequestedVisibilities = new InsetsVisibilities();
+        mRequestedVisibleTypes = WindowInsets.Type.defaultVisible();
         mCompatScale = 1f;
         mFrames.attachedFrame = null;
     }
 
     private void computeFrames() {
         mWindowLayout.computeFrames(mAttrs, mState, mDisplayCutoutSafe, mWindowBounds,
-                mWindowingMode, mRequestedWidth, mRequestedHeight, mRequestedVisibilities,
+                mWindowingMode, mRequestedWidth, mRequestedHeight, mRequestedVisibleTypes,
                 mCompatScale, mFrames);
     }
 

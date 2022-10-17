@@ -552,7 +552,7 @@ class InsetsPolicy {
             ComponentName component = focusedWin.mActivityRecord != null
                     ? focusedWin.mActivityRecord.mActivityComponent : null;
             mDisplayContent.mRemoteInsetsControlTarget.topFocusedWindowChanged(
-                    component, focusedWin.getRequestedVisibilities());
+                    component, focusedWin.getRequestedVisibleTypes());
             return mDisplayContent.mRemoteInsetsControlTarget;
         }
         if (mPolicy.areSystemBarsForcedShownLw()) {
@@ -612,7 +612,7 @@ class InsetsPolicy {
             ComponentName component = focusedWin.mActivityRecord != null
                     ? focusedWin.mActivityRecord.mActivityComponent : null;
             mDisplayContent.mRemoteInsetsControlTarget.topFocusedWindowChanged(
-                    component, focusedWin.getRequestedVisibilities());
+                    component, focusedWin.getRequestedVisibleTypes());
             return mDisplayContent.mRemoteInsetsControlTarget;
         }
         if (mPolicy.areSystemBarsForcedShownLw()) {

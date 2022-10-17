@@ -25,7 +25,8 @@ import android.content.pm.ActivityInfo;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.InsetsState;
-import android.view.InsetsVisibilities;
+import android.view.WindowInsets;
+import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowManager;
 
 /**
@@ -181,11 +182,7 @@ public final class StartingWindowInfo implements Parcelable {
      */
     public TaskSnapshot taskSnapshot;
 
-    /**
-     * The requested insets visibility of the top main window.
-     * @hide
-     */
-    public final InsetsVisibilities requestedVisibilities = new InsetsVisibilities();
+    public @InsetsType int requestedVisibleTypes = WindowInsets.Type.defaultVisible();
 
     public StartingWindowInfo() {
 
@@ -218,7 +215,7 @@ public final class StartingWindowInfo implements Parcelable {
         dest.writeInt(splashScreenThemeResId);
         dest.writeBoolean(isKeyguardOccluded);
         dest.writeTypedObject(taskSnapshot, flags);
-        requestedVisibilities.writeToParcel(dest, flags);
+        dest.writeInt(requestedVisibleTypes);
     }
 
     void readFromParcel(@NonNull Parcel source) {
@@ -232,7 +229,7 @@ public final class StartingWindowInfo implements Parcelable {
         splashScreenThemeResId = source.readInt();
         isKeyguardOccluded = source.readBoolean();
         taskSnapshot = source.readTypedObject(TaskSnapshot.CREATOR);
-        requestedVisibilities.readFromParcel(source);
+        requestedVisibleTypes = source.readInt();
     }
 
     @Override
