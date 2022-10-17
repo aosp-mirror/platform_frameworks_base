@@ -91,6 +91,11 @@ public class KeyguardBouncer {
                         mBouncerPromptReason = mCallback.getBouncerPromptReason();
                     }
                 }
+
+                @Override
+                public void onNonStrongBiometricAllowedChanged(int userId) {
+                    mBouncerPromptReason = mCallback.getBouncerPromptReason();
+                }
             };
     private final Runnable mRemoveViewRunnable = this::removeView;
     private final KeyguardBypassController mKeyguardBypassController;

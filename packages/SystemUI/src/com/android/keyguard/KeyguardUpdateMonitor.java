@@ -1413,6 +1413,16 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         }
     }
 
+    private void notifyNonStrongBiometricStateChanged(int userId) {
+        Assert.isMainThread();
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+            if (cb != null) {
+                cb.onNonStrongBiometricAllowedChanged(userId);
+            }
+        }
+    }
+
     private void dispatchErrorMessage(CharSequence message) {
         Assert.isMainThread();
         for (int i = 0; i < mCallbacks.size(); i++) {
@@ -1763,11 +1773,14 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
     public static class StrongAuthTracker extends LockPatternUtils.StrongAuthTracker {
         private final Consumer<Integer> mStrongAuthRequiredChangedCallback;
+        private final Consumer<Integer> mNonStrongBiometricAllowedChanged;
 
         public StrongAuthTracker(Context context,
-                Consumer<Integer> strongAuthRequiredChangedCallback) {
+                Consumer<Integer> strongAuthRequiredChangedCallback,
+                Consumer<Integer> nonStrongBiometricAllowedChanged) {
             super(context);
             mStrongAuthRequiredChangedCallback = strongAuthRequiredChangedCallback;
+            mNonStrongBiometricAllowedChanged = nonStrongBiometricAllowedChanged;
         }
 
         public boolean isUnlockingWithBiometricAllowed(boolean isStrongBiometric) {
@@ -1784,6 +1797,14 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         @Override
         public void onStrongAuthRequiredChanged(int userId) {
             mStrongAuthRequiredChangedCallback.accept(userId);
+        }
+
+        // TODO(b/247091681): Renaming the inappropriate onIsNonStrongBiometricAllowedChanged
+        //  callback wording for Weak/Convenience idle timeout constraint that only allow
+        //  Strong-Auth
+        @Override
+        public void onIsNonStrongBiometricAllowedChanged(int userId) {
+            mNonStrongBiometricAllowedChanged.accept(userId);
         }
     }
 
@@ -1933,7 +1954,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         mSubscriptionManager = subscriptionManager;
         mTelephonyListenerManager = telephonyListenerManager;
         mDeviceProvisioned = isDeviceProvisionedInSettingsDb();
-        mStrongAuthTracker = new StrongAuthTracker(context, this::notifyStrongAuthStateChanged);
+        mStrongAuthTracker = new StrongAuthTracker(context, this::notifyStrongAuthStateChanged,
+                this::notifyNonStrongBiometricStateChanged);
         mBackgroundExecutor = backgroundExecutor;
         mBroadcastDispatcher = broadcastDispatcher;
         mInteractionJankMonitor = interactionJankMonitor;
