@@ -1958,8 +1958,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"Sellele ei pääse teie seadmes <xliff:g id="DEVICE">%1$s</xliff:g> juurde. Proovige juurde pääseda oma Android TV seadmes."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"Sellele ei pääse teie seadmes <xliff:g id="DEVICE">%1$s</xliff:g> juurde. Proovige juurde pääseda oma tahvelarvutis."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Sellele ei pääse teie seadmes <xliff:g id="DEVICE">%1$s</xliff:g> juurde. Proovige juurde pääseda oma telefonis."</string>
-    <!-- no translation found for deprecated_target_sdk_message (5246906284426844596) -->
-    <skip />
+    <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"See rakendus on loodud Androidi vanema versiooni jaoks. See ei pruugi õigesti töötada ega hõlma uusimaid turva- ja privaatsusfunktsioone. Otsige värskendust või võtke ühendust rakenduse arendajaga."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Otsi värskendust"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Teile on uusi sõnumeid"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Avage vaatamiseks SMS-rakendus"</string>

@@ -1958,8 +1958,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"Non se puido acceder a este contido desde o teu dispositivo (<xliff:g id="DEVICE">%1$s</xliff:g>). Proba a facelo desde o dispositivo con Android TV."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"Non se puido acceder a este contido desde o teu dispositivo (<xliff:g id="DEVICE">%1$s</xliff:g>). Proba a facelo desde a tableta."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Non se puido acceder a este contido desde o teu dispositivo (<xliff:g id="DEVICE">%1$s</xliff:g>). Proba a facelo desde o teléfono."</string>
-    <!-- no translation found for deprecated_target_sdk_message (5246906284426844596) -->
-    <skip />
+    <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Esta aplicación deseñouse para unha versión anterior de Android. Quizais non funcione correctamente e non inclúa as últimas medidas de protección de privacidade e seguranza. Comproba se hai actualizacións ou ponte en contacto co programador da aplicación."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Buscar actualización"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Tes mensaxes novas"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Abre a aplicación de SMS para ver as mensaxes"</string>

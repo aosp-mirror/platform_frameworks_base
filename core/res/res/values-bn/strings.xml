@@ -1958,8 +1958,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"আপনার <xliff:g id="DEVICE">%1$s</xliff:g>-এ এটি অ্যাক্সেস করা যাবে না। পরিবর্তে আপনার Android TV ডিভাইসে ব্যবহার করে দেখুন।"</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"আপনার <xliff:g id="DEVICE">%1$s</xliff:g>-এ এটি অ্যাক্সেস করা যাবে না। পরিবর্তে আপনার ট্যাবলেটে ব্যবহার করে দেখুন।"</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"আপনার <xliff:g id="DEVICE">%1$s</xliff:g>-এ এটি অ্যাক্সেস করা যাবে না। পরিবর্তে আপনার ফোনে ব্যবহার করে দেখুন।"</string>
-    <!-- no translation found for deprecated_target_sdk_message (5246906284426844596) -->
-    <skip />
+    <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Android-এর আরও পুরনো ভার্সনের জন্য এই অ্যাপ তৈরি করা হয়েছিল। এটি সঠিকভাবে কাজ নাও করতে পারে এবং এর মধ্যে লেটেস্ট সুরক্ষা ও গোপনীয়তার নিরাপত্তা ব্যবস্থা অন্তর্ভুক্ত করা নেই। আপডেটের জন্য চেক করুন বা অ্যাপের ডেভেলপারের সাথে যোগাযোগ করুন।"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"আপডেট পাওয়া যাচ্ছে কিনা দেখুন"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"আপনার নতুন মেসেজ আছে"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"দেখার জন্য SMS অ্যাপ্লিকেশান খুলুন"</string>
