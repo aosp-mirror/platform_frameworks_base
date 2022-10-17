@@ -645,6 +645,20 @@ class LargeScreenShadeHeaderControllerCombinedTest : SysuiTestCase() {
         verify(animator).start()
     }
 
+    @Test
+    fun privacyChipParentVisibleFromStart() {
+        verify(privacyIconsController).onParentVisible()
+    }
+
+    @Test
+    fun privacyChipParentVisibleAlways() {
+        controller.largeScreenActive = true
+        controller.largeScreenActive = false
+        controller.largeScreenActive = true
+
+        verify(privacyIconsController, never()).onParentInvisible()
+    }
+
     private fun createWindowInsets(
         topCutout: Rect? = Rect()
     ): WindowInsets {
