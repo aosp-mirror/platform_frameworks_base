@@ -5194,6 +5194,15 @@ public abstract class Context {
     public static final String DROPBOX_SERVICE = "dropbox";
 
     /**
+     * System service name for BackgroundInstallControlService. This service supervises the MBAs
+     * on device and provides the related metadata of the MBAs.
+     *
+     * @hide
+     */
+    @SuppressLint("ServiceName")
+    public static final String BACKGROUND_INSTALL_CONTROL_SERVICE = "background_install_control";
+
+    /**
      * System service name for BinaryTransparencyService. This is used to retrieve measurements
      * pertaining to various pre-installed and system binaries on device for the purposes of
      * providing transparency to the user.
