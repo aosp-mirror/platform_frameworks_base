@@ -265,6 +265,6 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
     private void verifyAttachment(VerificationMode times) {
         verify(mClockRegistry, times).registerClockChangeListener(
                 any(ClockRegistry.ClockChangeListener.class));
-        verify(mClockEventController, times).registerListeners();
+        verify(mClockEventController, times).registerListeners(mView);
     }
 }
