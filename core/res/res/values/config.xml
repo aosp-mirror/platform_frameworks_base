@@ -2444,6 +2444,8 @@
     <integer name="config_attentionMaximumExtension">900000</integer> <!-- 15 minutes.  -->
     <!-- Is the system user the only user allowed to dream. -->
     <bool name="config_dreamsOnlyEnabledForSystemUser">false</bool>
+    <!-- Whether dreams are disabled when ambient mode is suppressed. -->
+    <bool name="config_dreamsDisabledByAmbientModeSuppressionConfig">false</bool>
 
     <!-- Whether to dismiss the active dream when an activity is started. Doesn't apply to
          assistant activities (ACTIVITY_TYPE_ASSISTANT) -->
