@@ -16,9 +16,9 @@
 
 package com.android.wm.shell.flicker.splitscreen
 
+import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.IwTest
 import android.platform.test.annotations.Presubmit
-import android.view.WindowManagerPolicyConstants
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -121,7 +121,7 @@ class CopyContentInSplit(testSpec: FlickerTestParameter) : SplitScreenBase(testS
     override fun navBarLayerIsVisibleAtStartAndEnd() = super.navBarLayerIsVisibleAtStartAndEnd()
 
     /** {@inheritDoc} */
-    @Presubmit
+    @FlakyTest(bugId = 206753786)
     @Test
     override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
 
@@ -173,11 +173,7 @@ class CopyContentInSplit(testSpec: FlickerTestParameter) : SplitScreenBase(testS
         @JvmStatic
         fun getParams(): List<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
-                .getConfigNonRotationTests(
-                    // TODO(b/176061063):The 3 buttons of nav bar do not exist in the hierarchy.
-                    supportedNavigationModes =
-                        listOf(WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY)
-                )
+                .getConfigNonRotationTests()
         }
     }
 }
