@@ -36,6 +36,7 @@ import com.android.settingslib.Utils
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.media.taptotransfer.MediaTttFlags
 import com.android.systemui.media.taptotransfer.common.MediaTttLogger
 import com.android.systemui.media.taptotransfer.common.MediaTttUtils
 import com.android.systemui.statusbar.CommandQueue
@@ -52,6 +53,8 @@ import javax.inject.Inject
  * A controller to display and hide the Media Tap-To-Transfer chip on the **receiving** device.
  *
  * This chip is shown when a user is transferring media to/from a sending device and this device.
+ *
+ * TODO(b/245610654): Re-name this to be MediaTttReceiverCoordinator.
  */
 @SysUISingleton
 class MediaTttChipControllerReceiver @Inject constructor(
@@ -64,6 +67,7 @@ class MediaTttChipControllerReceiver @Inject constructor(
         configurationController: ConfigurationController,
         powerManager: PowerManager,
         @Main private val mainHandler: Handler,
+        private val mediaTttFlags: MediaTttFlags,
         private val uiEventLogger: MediaTttReceiverUiEventLogger,
         private val viewUtil: ViewUtil,
 ) : TemporaryViewDisplayController<ChipReceiverInfo, MediaTttLogger>(
@@ -118,7 +122,7 @@ class MediaTttChipControllerReceiver @Inject constructor(
         uiEventLogger.logReceiverStateChange(chipState)
 
         if (chipState == ChipStateReceiver.FAR_FROM_SENDER) {
-            removeView(removalReason = ChipStateReceiver.FAR_FROM_SENDER::class.simpleName!!)
+            removeView(removalReason = ChipStateReceiver.FAR_FROM_SENDER.name)
             return
         }
         if (appIcon == null) {
@@ -138,7 +142,9 @@ class MediaTttChipControllerReceiver @Inject constructor(
     }
 
     override fun start() {
-        commandQueue.addCallback(commandQueueCallbacks)
+        if (mediaTttFlags.isMediaTttEnabled()) {
+            commandQueue.addCallback(commandQueueCallbacks)
+        }
     }
 
     override fun updateView(newInfo: ChipReceiverInfo, currentView: ViewGroup) {

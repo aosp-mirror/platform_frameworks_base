@@ -34,13 +34,14 @@ import com.android.systemui.log.SessionTracker
 import com.android.systemui.media.RingtonePlayer
 import com.android.systemui.media.taptotransfer.MediaTttCommandLineHelper
 import com.android.systemui.media.taptotransfer.receiver.MediaTttChipControllerReceiver
-import com.android.systemui.media.taptotransfer.sender.MediaTttChipControllerSender
+import com.android.systemui.media.taptotransfer.sender.MediaTttSenderCoordinator
 import com.android.systemui.power.PowerUI
 import com.android.systemui.recents.Recents
 import com.android.systemui.settings.dagger.MultiUserUtilsModule
 import com.android.systemui.shortcut.ShortcutKeyDispatcher
 import com.android.systemui.statusbar.notification.InstantAppNotifier
 import com.android.systemui.statusbar.phone.KeyguardLiftController
+import com.android.systemui.temporarydisplay.chipbar.ChipbarCoordinator
 import com.android.systemui.theme.ThemeOverlayController
 import com.android.systemui.toast.ToastUI
 import com.android.systemui.usb.StorageNotification
@@ -217,6 +218,12 @@ abstract class SystemUICoreStartableModule {
     @ClassKey(KeyguardLiftController::class)
     abstract fun bindKeyguardLiftController(sysui: KeyguardLiftController): CoreStartable
 
+    /** Inject into MediaTttSenderCoordinator. */
+    @Binds
+    @IntoMap
+    @ClassKey(MediaTttSenderCoordinator::class)
+    abstract fun bindMediaTttSenderCoordinator(sysui: MediaTttSenderCoordinator): CoreStartable
+
     /** Inject into MediaTttChipControllerReceiver. */
     @Binds
     @IntoMap
@@ -225,17 +232,15 @@ abstract class SystemUICoreStartableModule {
             sysui: MediaTttChipControllerReceiver
     ): CoreStartable
 
-    /** Inject into MediaTttChipControllerSender. */
-    @Binds
-    @IntoMap
-    @ClassKey(MediaTttChipControllerSender::class)
-    abstract fun bindMediaTttChipControllerSender(
-            sysui: MediaTttChipControllerSender
-    ): CoreStartable
-
     /** Inject into MediaTttCommandLineHelper. */
     @Binds
     @IntoMap
     @ClassKey(MediaTttCommandLineHelper::class)
     abstract fun bindMediaTttCommandLineHelper(sysui: MediaTttCommandLineHelper): CoreStartable
+
+    /** Inject into ChipbarCoordinator. */
+    @Binds
+    @IntoMap
+    @ClassKey(ChipbarCoordinator::class)
+    abstract fun bindChipbarController(sysui: ChipbarCoordinator): CoreStartable
 }
