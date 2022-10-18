@@ -94,16 +94,11 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"اسکرین ریکارڈ سیشن کیلئے جاری اطلاع"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"ریکارڈنگ شروع کریں؟"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"‏ریکارڈ کرنے کے دوران، Android سسٹم آپ کی اسکرین پر نظر آنے والی یا آپ کے آلہ پر چلنے والی کسی بھی حساس معلومات کو کیپچر کر سکتا ہے۔ اس میں پاس ورڈز، ادائیگی کی معلومات، تصاویر، پیغامات اور آڈیو شامل ہیں۔"</string>
-    <!-- no translation found for screenrecord_option_entire_screen (1732437834603426934) -->
-    <skip />
-    <!-- no translation found for screenrecord_option_single_app (5954863081500035825) -->
-    <skip />
-    <!-- no translation found for screenrecord_warning_entire_screen (8141407178104195610) -->
-    <skip />
-    <!-- no translation found for screenrecord_warning_single_app (7760723997065948283) -->
-    <skip />
-    <!-- no translation found for screenrecord_start_recording (348286842544768740) -->
-    <skip />
+    <string name="screenrecord_option_entire_screen" msgid="1732437834603426934">"پوری اسکرین کو ریکارڈ کریں"</string>
+    <string name="screenrecord_option_single_app" msgid="5954863081500035825">"واحد ایپ کو ریکارڈ کریں"</string>
+    <string name="screenrecord_warning_entire_screen" msgid="8141407178104195610">"‏جب آپ ریکارڈنگ کر رہے ہوتے ہیں تو Android کو آپ کی اسکرین پر دکھائی دینے والی یا آپ کے آلے پر چلائی گئی ہر چیز تک رسائی حاصل ہوتی ہے۔ اس لیے پاس ورڈز، ادائیگی کی تفصیلات، پیغامات، یا دیگر حساس معلومات کے سلسلے میں محتاط رہیں۔"</string>
+    <string name="screenrecord_warning_single_app" msgid="7760723997065948283">"‏جب آپ کسی ایپ کو ریکارڈ کر رہے ہوتے ہیں تو Android کو اس ایپ پر دکھائی گئی یا چلائی گئی ہر چیز تک رسائی حاصل ہوتی ہے۔ اس لیے پاس ورڈز، ادائیگی کی تفصیلات، پیغامات یا دیگر حساس معلومات کے سلسلے میں محتاط رہیں۔"</string>
+    <string name="screenrecord_start_recording" msgid="348286842544768740">"ریکارڈنگ شروع کریں"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"آڈیو ریکارڈ کریں"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"آلہ کا آڈیو"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"آپ کے آلے سے آواز، جیسے موسیقی، کالز اور رِنگ ٹونز"</string>
@@ -371,20 +366,13 @@
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"یہ فنکشن فراہم کرنے والی سروس کو اس تمام معلومات تک رسائی حاصل ہوگی جو آپ کی اسکرین پر نظر آتی ہے یا ریکارڈنگ یا کاسٹنگ کے دوران آپ کے آلے سے چلائی جاتی ہے۔ اس میں پاس ورڈز، ادائیگی کی تفصیلات، تصاویر، پیغامات اور وہ آڈیو جو آپ چلاتے ہیں جیسی معلومات شامل ہے۔"</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"ریکارڈنگ یا کاسٹنگ شروع کریں؟"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> کے ذریعے ریکارڈنگ یا کاسٹنگ شروع کریں؟"</string>
-    <!-- no translation found for media_projection_permission_dialog_title (7130975432309482596) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_option_entire_screen (392086473225692983) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_option_single_app (1591110238124910521) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_warning_entire_screen (3989078820637452717) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_warning_single_app (1659532781536753059) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_continue (1827799658916736006) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_app_selector_title (894251621057480704) -->
-    <skip />
+    <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> کو اشتراک یا ریکارڈ کرنے کی اجازت دیں؟"</string>
+    <string name="media_projection_permission_dialog_option_entire_screen" msgid="392086473225692983">"پوری اسکرین"</string>
+    <string name="media_projection_permission_dialog_option_single_app" msgid="1591110238124910521">"واحد ایپ"</string>
+    <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"جب آپ اشتراک، ریکارڈنگ یا کاسٹ کر رہے ہوتے ہیں تو <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> کو آپ کی اسکرین پر دکھائی دینے والی یا آپ کے آلے پر چلائی گئی ہر چیز تک رسائی حاصل ہوتی ہے۔ اس لیے پاس ورڈز، ادائیگی کی تفصیلات، پیغامات، یا دیگر حساس معلومات کے سلسلے میں محتاط رہیں۔"</string>
+    <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"جب آپ اشتراک، ریکارڈنگ یا کاسٹ کر رہے ہوتے ہیں تو <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> کو آپ کی اسکرین پر دکھائی گئی یا آپ کے آلے پر چلائی گئی ہر چیز تک رسائی حاصل ہوتی ہے۔ اس لیے پاس ورڈز، ادائیگی کی تفصیلات، پیغامات، یا دیگر حساس معلومات کے سلسلے میں محتاط رہیں۔"</string>
+    <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"جاری رکھیں"</string>
+    <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"ایپ کا اشتراک یا ریکارڈ کریں"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"سبھی کو صاف کریں"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"نظم کریں"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"سرگزشت"</string>

@@ -249,6 +249,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     private Callback mCallback;
     private boolean mWallpaperSupportsAmbientMode;
     private boolean mScreenOn;
+    private boolean mTransparentScrimBackground;
 
     // Scrim blanking callbacks
     private Runnable mPendingFrameCallback;
@@ -341,6 +342,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         mScrimBehind.setDefaultFocusHighlightEnabled(false);
         mNotificationsScrim.setDefaultFocusHighlightEnabled(false);
         mScrimInFront.setDefaultFocusHighlightEnabled(false);
+        mTransparentScrimBackground = notificationsScrim.getResources()
+                .getBoolean(R.bool.notification_scrim_transparent);
         updateScrims();
         mKeyguardUpdateMonitor.registerCallback(mKeyguardVisibilityCallback);
     }
@@ -777,13 +780,16 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
                 float behindFraction = getInterpolatedFraction();
                 behindFraction = (float) Math.pow(behindFraction, 0.8f);
                 if (mClipsQsScrim) {
-                    mBehindAlpha = 1;
-                    mNotificationsAlpha = behindFraction * mDefaultScrimAlpha;
+                    mBehindAlpha = mTransparentScrimBackground ? 0 : 1;
+                    mNotificationsAlpha =
+                            mTransparentScrimBackground ? 0 : behindFraction * mDefaultScrimAlpha;
                 } else {
-                    mBehindAlpha = behindFraction * mDefaultScrimAlpha;
+                    mBehindAlpha =
+                            mTransparentScrimBackground ? 0 : behindFraction * mDefaultScrimAlpha;
                     // Delay fade-in of notification scrim a bit further, to coincide with the
                     // view fade in. Otherwise the empty panel can be quite jarring.
-                    mNotificationsAlpha = MathUtils.constrainedMap(0f, 1f, 0.3f, 0.75f,
+                    mNotificationsAlpha = mTransparentScrimBackground
+                            ? 0 : MathUtils.constrainedMap(0f, 1f, 0.3f, 0.75f,
                             mPanelExpansionFraction);
                 }
                 mBehindTint = mState.getBehindTint();

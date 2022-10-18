@@ -432,8 +432,9 @@ public class AnimationHandler {
 
     /**
      * Callbacks that receives notifications for animation timing and frame commit timing.
+     * @hide
      */
-    interface AnimationFrameCallback {
+    public interface AnimationFrameCallback {
         /**
          * Run animation based on the frame time.
          * @param frameTime The frame start time, in the {@link SystemClock#uptimeMillis()} time

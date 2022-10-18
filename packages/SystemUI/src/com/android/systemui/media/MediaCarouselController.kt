@@ -133,7 +133,7 @@ class MediaCarouselController @Inject constructor(
     private val visualStabilityCallback: OnReorderingAllowedListener
     private var needsReordering: Boolean = false
     private var keysNeedRemoval = mutableSetOf<String>()
-    var shouldScrollToActivePlayer: Boolean = false
+    var shouldScrollToKey: Boolean = false
     private var isRtl: Boolean = false
         set(value) {
             if (value != field) {
@@ -436,7 +436,10 @@ class MediaCarouselController @Inject constructor(
         return mediaCarousel
     }
 
-    private fun reorderAllPlayers(previousVisiblePlayerKey: MediaPlayerData.MediaSortKey?) {
+    private fun reorderAllPlayers(
+            previousVisiblePlayerKey: MediaPlayerData.MediaSortKey?,
+            key: String? = null
+    ) {
         mediaContent.removeAllViews()
         for (mediaPlayer in MediaPlayerData.players()) {
             mediaPlayer.mediaViewHolder?.let {
@@ -446,18 +449,18 @@ class MediaCarouselController @Inject constructor(
             }
         }
         mediaCarouselScrollHandler.onPlayersChanged()
-
+        MediaPlayerData.updateVisibleMediaPlayers()
         // Automatically scroll to the active player if needed
-        if (shouldScrollToActivePlayer) {
-            shouldScrollToActivePlayer = false
-            val activeMediaIndex = MediaPlayerData.firstActiveMediaIndex()
-            if (activeMediaIndex != -1) {
+        if (shouldScrollToKey) {
+            shouldScrollToKey = false
+            val mediaIndex = key?.let { MediaPlayerData.getMediaPlayerIndex(it) } ?: -1
+            if (mediaIndex != -1) {
                 previousVisiblePlayerKey?.let {
                     val previousVisibleIndex = MediaPlayerData.playerKeys()
                             .indexOfFirst { key -> it == key }
                     mediaCarouselScrollHandler
-                            .scrollToPlayer(previousVisibleIndex, activeMediaIndex)
-                } ?: mediaCarouselScrollHandler.scrollToPlayer(destIndex = activeMediaIndex)
+                            .scrollToPlayer(previousVisibleIndex, mediaIndex)
+                } ?: mediaCarouselScrollHandler.scrollToPlayer(destIndex = mediaIndex)
             }
         }
     }
@@ -471,9 +474,8 @@ class MediaCarouselController @Inject constructor(
     ): Boolean = traceSection("MediaCarouselController#addOrUpdatePlayer") {
         MediaPlayerData.moveIfExists(oldKey, key)
         val existingPlayer = MediaPlayerData.getMediaPlayer(key)
-        val curVisibleMediaKey = MediaPlayerData.playerKeys()
+        val curVisibleMediaKey = MediaPlayerData.visiblePlayerKeys()
                 .elementAtOrNull(mediaCarouselScrollHandler.visibleMediaIndex)
-        val isCurVisibleMediaPlaying = curVisibleMediaKey?.data?.isPlaying
         if (existingPlayer == null) {
             val newPlayer = mediaControlPanelFactory.get()
             newPlayer.attachPlayer(MediaViewHolder.create(
@@ -488,8 +490,10 @@ class MediaCarouselController @Inject constructor(
                 key, data, newPlayer, systemClock, isSsReactivated, debugLogger
             )
             updatePlayerToState(newPlayer, noAnimation = true)
-            if (data.active) {
-                reorderAllPlayers(curVisibleMediaKey)
+            // Media data added from a recommendation card should starts playing.
+            if ((shouldScrollToKey && data.isPlaying == true) ||
+                    (!shouldScrollToKey && data.active)) {
+                reorderAllPlayers(curVisibleMediaKey, key)
             } else {
                 needsReordering = true
             }
@@ -498,14 +502,16 @@ class MediaCarouselController @Inject constructor(
             MediaPlayerData.addMediaPlayer(
                 key, data, existingPlayer, systemClock, isSsReactivated, debugLogger
             )
-            // Check the playing status of both current visible and new media players
-            // To make sure we scroll to the active playing media card.
+            val packageName = MediaPlayerData.smartspaceMediaData?.packageName ?: String()
+            // In case of recommendations hits.
+            // Check the playing status of media player and the package name.
+            // To make sure we scroll to the right app's media player.
             if (isReorderingAllowed ||
-                    shouldScrollToActivePlayer &&
+                    shouldScrollToKey &&
                     data.isPlaying == true &&
-                    isCurVisibleMediaPlaying == false
+                    packageName == data.packageName
             ) {
-                reorderAllPlayers(curVisibleMediaKey)
+                reorderAllPlayers(curVisibleMediaKey, key)
             } else {
                 needsReordering = true
             }
@@ -534,7 +540,7 @@ class MediaCarouselController @Inject constructor(
 
         val existingSmartspaceMediaKey = MediaPlayerData.smartspaceMediaKey()
         existingSmartspaceMediaKey?.let {
-            val removedPlayer = MediaPlayerData.removeMediaPlayer(existingSmartspaceMediaKey)
+            val removedPlayer = MediaPlayerData.removeMediaPlayer(existingSmartspaceMediaKey, true)
             removedPlayer?.run { debugLogger.logPotentialMemoryLeak(existingSmartspaceMediaKey) }
         }
 
@@ -546,7 +552,7 @@ class MediaCarouselController @Inject constructor(
                 ViewGroup.LayoutParams.WRAP_CONTENT)
         newRecs.recommendationViewHolder?.recommendations?.setLayoutParams(lp)
         newRecs.bindRecommendation(data)
-        val curVisibleMediaKey = MediaPlayerData.playerKeys()
+        val curVisibleMediaKey = MediaPlayerData.visiblePlayerKeys()
                 .elementAtOrNull(mediaCarouselScrollHandler.visibleMediaIndex)
         MediaPlayerData.addMediaRecommendation(
             key, data, newRecs, shouldPrioritize, systemClock, debugLogger
@@ -572,7 +578,10 @@ class MediaCarouselController @Inject constructor(
                 logger.logRecommendationRemoved(it.packageName, it.instanceId)
             }
         }
-        val removed = MediaPlayerData.removeMediaPlayer(key)
+        val removed = MediaPlayerData.removeMediaPlayer(
+                key,
+                dismissMediaData || dismissRecommendation
+        )
         removed?.apply {
             mediaCarouselScrollHandler.onPrePlayerRemoved(removed)
             mediaContent.removeView(removed.mediaViewHolder?.player)
@@ -835,18 +844,20 @@ class MediaCarouselController @Inject constructor(
     fun logSmartspaceImpression(qsExpanded: Boolean) {
         val visibleMediaIndex = mediaCarouselScrollHandler.visibleMediaIndex
         if (MediaPlayerData.players().size > visibleMediaIndex) {
-            val mediaControlPanel = MediaPlayerData.players().elementAt(visibleMediaIndex)
+            val mediaControlPanel = MediaPlayerData.getMediaControlPanel(visibleMediaIndex)
             val hasActiveMediaOrRecommendationCard =
                     MediaPlayerData.hasActiveMediaOrRecommendationCard()
             if (!hasActiveMediaOrRecommendationCard && !qsExpanded) {
                 // Skip logging if on LS or QQS, and there is no active media card
                 return
             }
-            logSmartspaceCardReported(800, // SMARTSPACE_CARD_SEEN
-                    mediaControlPanel.mSmartspaceId,
-                    mediaControlPanel.mUid,
-                    intArrayOf(mediaControlPanel.surfaceForSmartspaceLogging))
-            mediaControlPanel.mIsImpressed = true
+            mediaControlPanel?.let {
+                logSmartspaceCardReported(800, // SMARTSPACE_CARD_SEEN
+                        it.mSmartspaceId,
+                        it.mUid,
+                        intArrayOf(it.surfaceForSmartspaceLogging))
+                it.mIsImpressed = true
+            }
         }
     }
 
@@ -885,7 +896,7 @@ class MediaCarouselController @Inject constructor(
             return
         }
 
-        val mediaControlKey = MediaPlayerData.playerKeys().elementAt(rank)
+        val mediaControlKey = MediaPlayerData.visiblePlayerKeys().elementAt(rank)
         // Only log media resume card when Smartspace data is available
         if (!mediaControlKey.isSsMediaRec &&
                 !mediaManager.smartspaceMediaData.isActive &&
@@ -960,7 +971,8 @@ class MediaCarouselController @Inject constructor(
         pw.apply {
             println("keysNeedRemoval: $keysNeedRemoval")
             println("dataKeys: ${MediaPlayerData.dataKeys()}")
-            println("playerSortKeys: ${MediaPlayerData.playerKeys()}")
+            println("orderedPlayerSortKeys: ${MediaPlayerData.playerKeys()}")
+            println("visiblePlayerSortKeys: ${MediaPlayerData.visiblePlayerKeys()}")
             println("smartspaceMediaData: ${MediaPlayerData.smartspaceMediaData}")
             println("shouldPrioritizeSs: ${MediaPlayerData.shouldPrioritizeSs}")
             println("current size: $currentCarouselWidth x $currentCarouselHeight")
@@ -1000,6 +1012,7 @@ internal object MediaPlayerData {
     data class MediaSortKey(
         val isSsMediaRec: Boolean, // Whether the item represents a Smartspace media recommendation.
         val data: MediaData,
+        val key: String,
         val updateTime: Long = 0,
         val isSsReactivated: Boolean = false
     )
@@ -1018,6 +1031,8 @@ internal object MediaPlayerData {
 
     private val mediaPlayers = TreeMap<MediaSortKey, MediaControlPanel>(comparator)
     private val mediaData: MutableMap<String, MediaSortKey> = mutableMapOf()
+    // A map that tracks order of visible media players before they get reordered.
+    private val visibleMediaPlayers = LinkedHashMap<String, MediaSortKey>()
 
     fun addMediaPlayer(
         key: String,
@@ -1032,9 +1047,10 @@ internal object MediaPlayerData {
             debugLogger?.logPotentialMemoryLeak(key)
         }
         val sortKey = MediaSortKey(isSsMediaRec = false,
-                data, clock.currentTimeMillis(), isSsReactivated = isSsReactivated)
+                data, key, clock.currentTimeMillis(), isSsReactivated = isSsReactivated)
         mediaData.put(key, sortKey)
         mediaPlayers.put(sortKey, player)
+        visibleMediaPlayers.put(key, sortKey)
     }
 
     fun addMediaRecommendation(
@@ -1050,10 +1066,16 @@ internal object MediaPlayerData {
         if (removedPlayer != null && removedPlayer != player) {
             debugLogger?.logPotentialMemoryLeak(key)
         }
-        val sortKey = MediaSortKey(isSsMediaRec = true,
-            EMPTY.copy(isPlaying = false), clock.currentTimeMillis(), isSsReactivated = true)
+        val sortKey = MediaSortKey(
+            isSsMediaRec = true,
+            EMPTY.copy(isPlaying = false),
+            key,
+            clock.currentTimeMillis(),
+            isSsReactivated = true
+        )
         mediaData.put(key, sortKey)
         mediaPlayers.put(sortKey, player)
+        visibleMediaPlayers.put(key, sortKey)
         smartspaceMediaData = data
     }
 
@@ -1067,10 +1089,16 @@ internal object MediaPlayerData {
         }
 
         mediaData.remove(oldKey)?.let {
+            // MediaPlayer should not be visible
+            // no need to set isDismissed flag.
             val removedPlayer = removeMediaPlayer(newKey)
             removedPlayer?.run { debugLogger?.logPotentialMemoryLeak(newKey) }
             mediaData.put(newKey, it)
         }
+    }
+
+    fun getMediaControlPanel(visibleIndex: Int): MediaControlPanel? {
+        return mediaPlayers.get(visiblePlayerKeys().elementAt(visibleIndex))
     }
 
     fun getMediaPlayer(key: String): MediaControlPanel? {
@@ -1087,9 +1115,16 @@ internal object MediaPlayerData {
         return -1
     }
 
-    fun removeMediaPlayer(key: String) = mediaData.remove(key)?.let {
+    /**
+     * Removes media player given the key.
+     * @param isDismissed determines whether the media player is removed from the carousel.
+     */
+    fun removeMediaPlayer(key: String, isDismissed: Boolean = false) = mediaData.remove(key)?.let {
         if (it.isSsMediaRec) {
             smartspaceMediaData = null
+        }
+        if (isDismissed) {
+            visibleMediaPlayers.remove(key)
         }
         mediaPlayers.remove(it)
     }
@@ -1101,6 +1136,8 @@ internal object MediaPlayerData {
     fun players() = mediaPlayers.values
 
     fun playerKeys() = mediaPlayers.keys
+
+    fun visiblePlayerKeys() = visibleMediaPlayers.values
 
     /** Returns the index of the first non-timeout media. */
     fun firstActiveMediaIndex(): Int {
@@ -1126,6 +1163,7 @@ internal object MediaPlayerData {
     fun clear() {
         mediaData.clear()
         mediaPlayers.clear()
+        visibleMediaPlayers.clear()
     }
 
     /* Returns true if there is active media player card or recommendation card */
@@ -1140,4 +1178,16 @@ internal object MediaPlayerData {
     }
 
     fun isSsReactivated(key: String): Boolean = mediaData.get(key)?.isSsReactivated ?: false
+
+    /**
+     * This method is called when media players are reordered.
+     * To make sure we have the new version of the order of
+     * media players visible to user.
+     */
+    fun updateVisibleMediaPlayers() {
+        visibleMediaPlayers.clear()
+        playerKeys().forEach {
+            visibleMediaPlayers.put(it.key, it)
+        }
+    }
 }
