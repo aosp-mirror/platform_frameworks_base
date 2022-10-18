@@ -21,9 +21,14 @@ import java.util.List;
 import dagger.Module;
 import dagger.Provides;
 
-/** Dagger Module for clock package. */
+/**
+ * Dagger Module for clock package.
+ *
+ * @deprecated Migrate to ClockRegistry
+ */
 @Module
-public abstract class ClockModule {
+@Deprecated
+public abstract class ClockInfoModule {
 
     /** */
     @Provides
