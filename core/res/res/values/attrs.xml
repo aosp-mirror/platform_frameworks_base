@@ -9086,7 +9086,8 @@
         <attr name="dotColor" format="color|reference"/>
         <!-- Color of the dot when it's activated -->
         <attr name="dotActivatedColor" format="color|reference"/>
-
+        <!-- Keep dot in activated state until segment completion -->
+        <attr name="keepDotActivated" format="boolean"/>
     </declare-styleable>
 
     <!-- =============================== -->
