@@ -57,6 +57,7 @@ public class StackScrollAlgorithm {
     private float mGapHeight;
     private float mGapHeightOnLockscreen;
     private int mCollapsedSize;
+    private boolean mEnableNotificationClipping;
 
     private StackScrollAlgorithmState mTempAlgorithmState = new StackScrollAlgorithmState();
     private boolean mIsExpanded;
@@ -85,6 +86,7 @@ public class StackScrollAlgorithm {
         mPaddingBetweenElements = res.getDimensionPixelSize(
                 R.dimen.notification_divider_height);
         mCollapsedSize = res.getDimensionPixelSize(R.dimen.notification_min_height);
+        mEnableNotificationClipping = res.getBoolean(R.bool.notification_enable_clipping);
         mClipNotificationScrollToTop = res.getBoolean(R.bool.config_clipNotificationScrollToTop);
         int statusBarHeight = SystemBarUtils.getStatusBarHeight(context);
         mHeadsUpInset = statusBarHeight + res.getDimensionPixelSize(
@@ -289,7 +291,7 @@ public class StackScrollAlgorithm {
                 // The bottom of this view is peeking out from under the previous view.
                 // Clip the part that is peeking out.
                 float overlapAmount = newNotificationEnd - firstHeadsUpEnd;
-                state.clipBottomAmount = (int) overlapAmount;
+                state.clipBottomAmount = mEnableNotificationClipping ? (int) overlapAmount : 0;
             } else {
                 state.clipBottomAmount = 0;
             }

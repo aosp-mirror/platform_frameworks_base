@@ -25,6 +25,9 @@
     <!-- Whether to enable clipping on Quick Settings -->
     <bool name="qs_enable_clipping">true</bool>
 
+    <!-- Whether to enable clipping on Notification Views -->
+    <bool name="notification_enable_clipping">true</bool>
+
     <!-- Whether to enable transparent background for notification scrims -->
     <bool name="notification_scrim_transparent">false</bool>
 </resources>
