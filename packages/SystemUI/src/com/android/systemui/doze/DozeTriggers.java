@@ -198,7 +198,7 @@ public class DozeTriggers implements DozeMachine.Part {
         mAllowPulseTriggers = true;
         mSessionTracker = sessionTracker;
 
-        mDozeSensors = new DozeSensors(context, mSensorManager, dozeParameters,
+        mDozeSensors = new DozeSensors(mSensorManager, dozeParameters,
                 config, wakeLock, this::onSensor, this::onProximityFar, dozeLog, proximitySensor,
                 secureSettings, authController, devicePostureController);
         mDockManager = dockManager;
