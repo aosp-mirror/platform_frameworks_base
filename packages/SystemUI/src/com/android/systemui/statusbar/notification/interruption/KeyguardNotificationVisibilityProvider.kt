@@ -231,7 +231,7 @@ private class KeyguardNotificationVisibilityProviderImpl @Inject constructor(
     private fun readShowSilentNotificationSetting() {
         val showSilentNotifs =
                 secureSettings.getBoolForUser(Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS,
-                        true, UserHandle.USER_CURRENT)
+                        false, UserHandle.USER_CURRENT)
         hideSilentNotificationsOnLockscreen = !showSilentNotifs
     }
 }

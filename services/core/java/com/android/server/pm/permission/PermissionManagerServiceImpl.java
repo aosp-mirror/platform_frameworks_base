@@ -738,26 +738,21 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         boolean overridePolicy = false;
 
         if (callingUid != Process.SYSTEM_UID && callingUid != Process.ROOT_UID) {
-            final long callingIdentity = Binder.clearCallingIdentity();
-            try {
-                if ((flagMask & FLAG_PERMISSION_POLICY_FIXED) != 0) {
-                    if (checkAdjustPolicyFlagPermission) {
-                        mContext.enforceCallingOrSelfPermission(
-                                Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY,
-                                "Need " + Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY
-                                        + " to change policy flags");
-                    } else if (mPackageManagerInt.getUidTargetSdkVersion(callingUid)
-                            >= Build.VERSION_CODES.Q) {
-                        throw new IllegalArgumentException(
-                                Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY + " needs "
-                                        + " to be checked for packages targeting "
-                                        + Build.VERSION_CODES.Q + " or later when changing policy "
-                                        + "flags");
-                    }
-                    overridePolicy = true;
+            if ((flagMask & FLAG_PERMISSION_POLICY_FIXED) != 0) {
+                if (checkAdjustPolicyFlagPermission) {
+                    mContext.enforceCallingOrSelfPermission(
+                            Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY,
+                            "Need " + Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY
+                                    + " to change policy flags");
+                } else if (mPackageManagerInt.getUidTargetSdkVersion(callingUid)
+                        >= Build.VERSION_CODES.Q) {
+                    throw new IllegalArgumentException(
+                            Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY + " needs "
+                                    + " to be checked for packages targeting "
+                                    + Build.VERSION_CODES.Q + " or later when changing policy "
+                                    + "flags");
                 }
-            } finally {
-                Binder.restoreCallingIdentity(callingIdentity);
+                overridePolicy = true;
             }
         }
 

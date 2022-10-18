@@ -86,4 +86,6 @@
     <string name="maximize_button_text" msgid="1650859196290301963">"મોટું કરો"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"નાનું કરો"</string>
     <string name="close_button_text" msgid="2913281996024033299">"બંધ કરો"</string>
+    <string name="back_button_text" msgid="1469718707134137085">"પાછળ"</string>
+    <string name="handle_text" msgid="1766582106752184456">"હૅન્ડલ"</string>
 </resources>

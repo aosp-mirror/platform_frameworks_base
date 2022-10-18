@@ -30,6 +30,7 @@ import com.android.settingslib.spa.framework.common.EntrySearchData
 import com.android.settingslib.spa.framework.common.SettingsEntry
 import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
+import com.android.settingslib.spa.framework.common.SpaEnvironmentFactory
 import com.android.settingslib.spa.framework.common.createSettingsPage
 import com.android.settingslib.spa.framework.compose.toState
 import com.android.settingslib.spa.framework.theme.SettingsTheme
@@ -44,12 +45,13 @@ import com.android.settingslib.spa.gallery.preference.PreferencePageModel.Compan
 import com.android.settingslib.spa.gallery.preference.PreferencePageModel.Companion.SIMPLE_PREFERENCE_KEYWORDS
 import com.android.settingslib.spa.gallery.preference.PreferencePageModel.Companion.SIMPLE_PREFERENCE_SUMMARY
 import com.android.settingslib.spa.gallery.preference.PreferencePageModel.Companion.SIMPLE_PREFERENCE_TITLE
-import com.android.settingslib.spa.gallery.preference.PreferencePageModel.Companion.logMsg
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
 import com.android.settingslib.spa.widget.preference.SimplePreferenceMacro
 import com.android.settingslib.spa.widget.scaffold.RegularScaffold
 import com.android.settingslib.spa.widget.ui.SettingsIcon
+
+private const val TAG = "PreferencePage"
 
 object PreferencePageProvider : SettingsPageProvider {
     // Defines all entry name in this page.
@@ -67,6 +69,7 @@ object PreferencePageProvider : SettingsPageProvider {
 
     override val name = SettingsPageProviderEnum.PREFERENCE.name
     override val displayName = SettingsPageProviderEnum.PREFERENCE.displayName
+    private val spaLogger = SpaEnvironmentFactory.instance.logger
     private val owner = createSettingsPage()
 
     private fun createEntry(entry: EntryEnum): SettingsEntryBuilder {
@@ -79,7 +82,7 @@ object PreferencePageProvider : SettingsPageProvider {
             createEntry(EntryEnum.SIMPLE_PREFERENCE)
                 .setIsAllowSearch(true)
                 .setMacro {
-                    logMsg("create macro for ${EntryEnum.SIMPLE_PREFERENCE}")
+                    spaLogger.message(TAG, "create macro for ${EntryEnum.SIMPLE_PREFERENCE}")
                     SimplePreferenceMacro(title = SIMPLE_PREFERENCE_TITLE)
                 }
                 .build()
@@ -88,7 +91,7 @@ object PreferencePageProvider : SettingsPageProvider {
             createEntry(EntryEnum.SUMMARY_PREFERENCE)
                 .setIsAllowSearch(true)
                 .setMacro {
-                    logMsg("create macro for ${EntryEnum.SUMMARY_PREFERENCE}")
+                    spaLogger.message(TAG, "create macro for ${EntryEnum.SUMMARY_PREFERENCE}")
                     SimplePreferenceMacro(
                         title = SIMPLE_PREFERENCE_TITLE,
                         summary = SIMPLE_PREFERENCE_SUMMARY,
@@ -102,7 +105,7 @@ object PreferencePageProvider : SettingsPageProvider {
             createEntry(EntryEnum.DISABLED_PREFERENCE)
                 .setIsAllowSearch(true)
                 .setMacro {
-                    logMsg("create macro for ${EntryEnum.DISABLED_PREFERENCE}")
+                    spaLogger.message(TAG, "create macro for ${EntryEnum.DISABLED_PREFERENCE}")
                     SimplePreferenceMacro(
                         title = DISABLE_PREFERENCE_TITLE,
                         summary = DISABLE_PREFERENCE_SUMMARY,
@@ -188,7 +191,7 @@ object PreferencePageProvider : SettingsPageProvider {
         return SettingsEntryBuilder.createInject(owner = owner)
             .setIsAllowSearch(true)
             .setMacro {
-                logMsg("create macro for INJECT entry")
+                spaLogger.message(TAG, "create macro for INJECT entry")
                 SimplePreferenceMacro(
                     title = PAGE_TITLE,
                     clickRoute = SettingsPageProviderEnum.PREFERENCE.name

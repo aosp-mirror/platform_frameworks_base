@@ -291,4 +291,9 @@ public class KeyguardUpdateMonitorCallback {
      * Called when the notification shade is expanded or collapsed.
      */
     public void onShadeExpandedChanged(boolean expanded) { }
+
+    /**
+     * Called when the non-strong biometric state changed.
+     */
+    public void onNonStrongBiometricAllowedChanged(int userId) { }
 }

@@ -17601,6 +17601,11 @@ public final class Settings {
             public static final String BEDTIME_MODE = "bedtime_mode";
 
             /**
+             * Whether hard bedtime mode is active thus limiting user interactions.
+             */
+            public static final String BEDTIME_HARD_MODE = "bedtime_hard_mode";
+
+            /**
              * Whether the current watchface is decomposable.
              * @hide
              */

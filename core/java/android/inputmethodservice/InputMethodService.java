@@ -565,9 +565,10 @@ public class InputMethodService extends AbstractInputMethodService {
      *
      * @hide
      */
+    @TestApi
     @ChangeId
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
-    private static final long DISALLOW_INPUT_METHOD_INTERFACE_OVERRIDE = 148086656L;
+    public static final long DISALLOW_INPUT_METHOD_INTERFACE_OVERRIDE = 148086656L;
 
     LayoutInflater mInflater;
     TypedArray mThemeAttrs;

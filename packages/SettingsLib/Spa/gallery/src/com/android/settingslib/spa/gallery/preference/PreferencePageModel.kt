@@ -17,7 +17,6 @@
 package com.android.settingslib.spa.gallery.preference
 
 import android.os.Bundle
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
@@ -27,10 +26,13 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.settingslib.spa.framework.common.PageModel
+import com.android.settingslib.spa.framework.common.SpaEnvironmentFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+
+private const val TAG = "PreferencePageModel"
 
 class PreferencePageModel : PageModel() {
     companion object {
@@ -53,11 +55,9 @@ class PreferencePageModel : PageModel() {
             pageModel.initOnce()
             return pageModel
         }
-
-        fun logMsg(message: String) {
-            Log.d("PreferencePageModel", message)
-        }
     }
+
+    private val spaLogger = SpaEnvironmentFactory.instance.logger
 
     private val asyncSummary = mutableStateOf(" ")
 
@@ -67,26 +67,25 @@ class PreferencePageModel : PageModel() {
         private var tick = 0
         private var updateJob: Job? = null
         override fun onActive() {
-            logMsg("autoUpdater.active")
+            spaLogger.message(TAG, "autoUpdater.active")
             updateJob = viewModelScope.launch(Dispatchers.IO) {
                 while (true) {
                     delay(1000L)
                     tick++
-                    logMsg("autoUpdater.value $tick")
+                    spaLogger.message(TAG, "autoUpdater.value $tick")
                     postValue(tick.toString())
                 }
             }
         }
 
         override fun onInactive() {
-            logMsg("autoUpdater.inactive")
+            spaLogger.message(TAG, "autoUpdater.inactive")
             updateJob?.cancel()
         }
     }
 
     override fun initialize(arguments: Bundle?) {
-        logMsg("init with args " + arguments.toString())
-
+        spaLogger.message(TAG, "initialize with args " + arguments.toString())
         viewModelScope.launch(Dispatchers.IO) {
             delay(2000L)
             asyncSummary.value = ASYNC_PREFERENCE_SUMMARY
@@ -94,22 +93,22 @@ class PreferencePageModel : PageModel() {
     }
 
     fun getAsyncSummary(): State<String> {
-        logMsg("getAsyncSummary")
+        spaLogger.message(TAG, "getAsyncSummary")
         return asyncSummary
     }
 
     fun getManualUpdaterSummary(): State<String> {
-        logMsg("getManualUpdaterSummary")
+        spaLogger.message(TAG, "getManualUpdaterSummary")
         return derivedStateOf { manualUpdater.value.toString() }
     }
 
     fun manualUpdaterOnClick() {
-        logMsg("manualUpdaterOnClick")
+        spaLogger.message(TAG, "manualUpdaterOnClick")
         manualUpdater.value = manualUpdater.value + 1
     }
 
     fun getAutoUpdaterSummary(): LiveData<String> {
-        logMsg("getAutoUpdaterSummary")
+        spaLogger.message(TAG, "getAutoUpdaterSummary")
         return autoUpdater
     }
 }

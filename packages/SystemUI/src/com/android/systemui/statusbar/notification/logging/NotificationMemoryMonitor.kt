@@ -73,15 +73,19 @@ constructor(
     fun notificationMemoryUse(
         notifications: Collection<NotificationEntry>
     ): List<NotificationMemoryUsage> {
-        return notifications.asSequence().map { entry ->
-            val packageName = entry.sbn.packageName
-            val notificationObjectUsage =
-                computeNotificationObjectUse(entry.sbn.notification, hashSetOf())
-            NotificationMemoryUsage(
-                packageName,
-                NotificationUtils.logKey(entry.sbn.key),
-                notificationObjectUsage)
-        }.toList()
+        return notifications
+            .asSequence()
+            .map { entry ->
+                val packageName = entry.sbn.packageName
+                val notificationObjectUsage =
+                    computeNotificationObjectUse(entry.sbn.notification, hashSetOf())
+                NotificationMemoryUsage(
+                    packageName,
+                    NotificationUtils.logKey(entry.sbn.key),
+                    notificationObjectUsage
+                )
+            }
+            .toList()
     }
 
     /**
