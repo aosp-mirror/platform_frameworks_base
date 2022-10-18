@@ -20,6 +20,7 @@ import static android.Manifest.permission.ADD_ALWAYS_UNLOCKED_DISPLAY;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.content.ComponentName;
@@ -112,6 +113,7 @@ public final class VirtualDeviceParams implements Parcelable {
     @NonNull private final ArraySet<ComponentName> mBlockedActivities;
     @ActivityPolicy
     private final int mDefaultActivityPolicy;
+    @Nullable private final String mName;
 
     private VirtualDeviceParams(
             @LockState int lockState,
@@ -121,7 +123,8 @@ public final class VirtualDeviceParams implements Parcelable {
             @NavigationPolicy int defaultNavigationPolicy,
             @NonNull Set<ComponentName> allowedActivities,
             @NonNull Set<ComponentName> blockedActivities,
-            @ActivityPolicy int defaultActivityPolicy) {
+            @ActivityPolicy int defaultActivityPolicy,
+            @Nullable String name) {
         Preconditions.checkNotNull(usersWithMatchingAccounts);
         Preconditions.checkNotNull(allowedCrossTaskNavigations);
         Preconditions.checkNotNull(blockedCrossTaskNavigations);
@@ -136,6 +139,7 @@ public final class VirtualDeviceParams implements Parcelable {
         mAllowedActivities = new ArraySet<>(allowedActivities);
         mBlockedActivities = new ArraySet<>(blockedActivities);
         mDefaultActivityPolicy = defaultActivityPolicy;
+        mName = name;
     }
 
     @SuppressWarnings("unchecked")
@@ -148,6 +152,7 @@ public final class VirtualDeviceParams implements Parcelable {
         mAllowedActivities = (ArraySet<ComponentName>) parcel.readArraySet(null);
         mBlockedActivities = (ArraySet<ComponentName>) parcel.readArraySet(null);
         mDefaultActivityPolicy = parcel.readInt();
+        mName = parcel.readString8();
     }
 
     /**
@@ -243,6 +248,16 @@ public final class VirtualDeviceParams implements Parcelable {
         return mDefaultActivityPolicy;
     }
 
+    /**
+     * Returns the (optional) name of the virtual device.
+     *
+     * @see Builder#setName
+     */
+    @Nullable
+    public String getName() {
+        return mName;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -258,6 +273,7 @@ public final class VirtualDeviceParams implements Parcelable {
         dest.writeArraySet(mAllowedActivities);
         dest.writeArraySet(mBlockedActivities);
         dest.writeInt(mDefaultActivityPolicy);
+        dest.writeString8(mName);
     }
 
     @Override
@@ -276,7 +292,8 @@ public final class VirtualDeviceParams implements Parcelable {
                 && mDefaultNavigationPolicy == that.mDefaultNavigationPolicy
                 && Objects.equals(mAllowedActivities, that.mAllowedActivities)
                 && Objects.equals(mBlockedActivities, that.mBlockedActivities)
-                && mDefaultActivityPolicy == that.mDefaultActivityPolicy;
+                && mDefaultActivityPolicy == that.mDefaultActivityPolicy
+                && Objects.equals(mName, that.mName);
     }
 
     @Override
@@ -284,7 +301,7 @@ public final class VirtualDeviceParams implements Parcelable {
         return Objects.hash(
                 mLockState, mUsersWithMatchingAccounts, mAllowedCrossTaskNavigations,
                 mBlockedCrossTaskNavigations, mDefaultNavigationPolicy,  mAllowedActivities,
-                mBlockedActivities, mDefaultActivityPolicy);
+                mBlockedActivities, mDefaultActivityPolicy, mName);
     }
 
     @Override
@@ -299,6 +316,7 @@ public final class VirtualDeviceParams implements Parcelable {
                 + " mAllowedActivities=" + mAllowedActivities
                 + " mBlockedActivities=" + mBlockedActivities
                 + " mDefaultActivityPolicy=" + mDefaultActivityPolicy
+                + " mName=" + mName
                 + ")";
     }
 
@@ -331,6 +349,7 @@ public final class VirtualDeviceParams implements Parcelable {
         @ActivityPolicy
         private int mDefaultActivityPolicy = ACTIVITY_POLICY_DEFAULT_ALLOWED;
         private boolean mDefaultActivityPolicyConfigured = false;
+        @Nullable private String mName;
 
         /**
          * Sets the lock state of the device. The permission {@code ADD_ALWAYS_UNLOCKED_DISPLAY}
@@ -494,6 +513,21 @@ public final class VirtualDeviceParams implements Parcelable {
         }
 
         /**
+         * Sets the optional virtual device name.
+         *
+         * <p>This string is not typically intended to be displayed to end users, but rather for
+         * debugging and other developer-facing purposes.
+         *
+         * <p>3rd party applications may be able to see the name (i.e. it's not private to the
+         * device owner)
+         */
+        @NonNull
+        public Builder setName(@NonNull String name) {
+            mName = name;
+            return this;
+        }
+
+        /**
          * Builds the {@link VirtualDeviceParams} instance.
          */
         @NonNull
@@ -506,7 +540,8 @@ public final class VirtualDeviceParams implements Parcelable {
                     mDefaultNavigationPolicy,
                     mAllowedActivities,
                     mBlockedActivities,
-                    mDefaultActivityPolicy);
+                    mDefaultActivityPolicy,
+                    mName);
         }
     }
 }

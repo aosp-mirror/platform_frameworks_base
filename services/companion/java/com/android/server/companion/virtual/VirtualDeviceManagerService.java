@@ -28,6 +28,7 @@ import android.companion.CompanionDeviceManager.OnAssociationsChangedListener;
 import android.companion.virtual.IVirtualDevice;
 import android.companion.virtual.IVirtualDeviceActivityListener;
 import android.companion.virtual.IVirtualDeviceManager;
+import android.companion.virtual.VirtualDevice;
 import android.companion.virtual.VirtualDeviceManager;
 import android.companion.virtual.VirtualDeviceParams;
 import android.content.Context;
@@ -342,6 +343,19 @@ public class VirtualDeviceManagerService extends SystemService {
             }
             mLocalService.onVirtualDisplayCreated(displayId);
             return displayId;
+        }
+
+        @Override // Binder call
+        public List<VirtualDevice> getVirtualDevices() {
+            List<VirtualDevice> virtualDevices = new ArrayList<>();
+            synchronized (mVirtualDeviceManagerLock) {
+                for (int i = 0; i < mVirtualDevices.size(); i++) {
+                    final VirtualDeviceImpl device = mVirtualDevices.valueAt(i);
+                    virtualDevices.add(
+                            new VirtualDevice(device.getDeviceId(), device.getDeviceName()));
+                }
+            }
+            return virtualDevices;
         }
 
         @Nullable

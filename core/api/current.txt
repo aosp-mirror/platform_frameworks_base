@@ -9070,6 +9070,24 @@ package android.companion {
 
 }
 
+package android.companion.virtual {
+
+  public final class VirtualDevice implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getDeviceId();
+    method @Nullable public String getName();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.companion.virtual.VirtualDevice> CREATOR;
+  }
+
+  public final class VirtualDeviceManager {
+    method @NonNull public java.util.List<android.companion.virtual.VirtualDevice> getVirtualDevices();
+    field public static final int DEFAULT_DEVICE_ID = 0; // 0x0
+    field public static final int INVALID_DEVICE_ID = -1; // 0xffffffff
+  }
+
+}
+
 package android.content {
 
   public abstract class AbstractThreadedSyncAdapter {
@@ -9667,6 +9685,7 @@ package android.content {
     method public abstract android.content.Context createConfigurationContext(@NonNull android.content.res.Configuration);
     method @NonNull public android.content.Context createContext(@NonNull android.content.ContextParams);
     method public abstract android.content.Context createContextForSplit(String) throws android.content.pm.PackageManager.NameNotFoundException;
+    method @NonNull public android.content.Context createDeviceContext(int);
     method public abstract android.content.Context createDeviceProtectedStorageContext();
     method @DisplayContext public abstract android.content.Context createDisplayContext(@NonNull android.view.Display);
     method public abstract android.content.Context createPackageContext(String, int) throws android.content.pm.PackageManager.NameNotFoundException;
@@ -9697,6 +9716,7 @@ package android.content {
     method public abstract android.content.ContentResolver getContentResolver();
     method public abstract java.io.File getDataDir();
     method public abstract java.io.File getDatabasePath(String);
+    method public int getDeviceId();
     method public abstract java.io.File getDir(String, int);
     method @Nullable public android.view.Display getDisplay();
     method @Nullable public final android.graphics.drawable.Drawable getDrawable(@DrawableRes int);
@@ -9892,6 +9912,7 @@ package android.content {
     field public static final String USER_SERVICE = "user";
     field public static final String VIBRATOR_MANAGER_SERVICE = "vibrator_manager";
     field @Deprecated public static final String VIBRATOR_SERVICE = "vibrator";
+    field public static final String VIRTUAL_DEVICE_SERVICE = "virtualdevice";
     field public static final String VPN_MANAGEMENT_SERVICE = "vpn_management";
     field @UiContext public static final String WALLPAPER_SERVICE = "wallpaper";
     field public static final String WIFI_AWARE_SERVICE = "wifiaware";
