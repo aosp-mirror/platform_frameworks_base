@@ -517,7 +517,12 @@ public class ZygoteInit {
             if (shouldProfileSystemServer() && (Build.IS_USERDEBUG || Build.IS_ENG)) {
                 try {
                     Log.d(TAG, "Preparing system server profile");
-                    prepareSystemServerProfile(systemServerClasspath);
+                    final String standaloneSystemServerJars =
+                            Os.getenv("STANDALONE_SYSTEMSERVER_JARS");
+                    final String systemServerPaths = standaloneSystemServerJars != null
+                            ? String.join(":", systemServerClasspath, standaloneSystemServerJars)
+                            : systemServerClasspath;
+                    prepareSystemServerProfile(systemServerPaths);
                 } catch (Exception e) {
                     Log.wtf(TAG, "Failed to set up system server profile", e);
                 }
@@ -603,12 +608,12 @@ public class ZygoteInit {
      * permissions. From the installer perspective the system server is a regular package which can
      * capture profile information.
      */
-    private static void prepareSystemServerProfile(String systemServerClasspath)
+    private static void prepareSystemServerProfile(String systemServerPaths)
             throws RemoteException {
-        if (systemServerClasspath.isEmpty()) {
+        if (systemServerPaths.isEmpty()) {
             return;
         }
-        String[] codePaths = systemServerClasspath.split(":");
+        String[] codePaths = systemServerPaths.split(":");
 
         final IInstalld installd = IInstalld.Stub
                 .asInterface(ServiceManager.getService("installd"));
