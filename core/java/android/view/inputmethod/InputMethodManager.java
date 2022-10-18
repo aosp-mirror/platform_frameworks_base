@@ -873,12 +873,25 @@ public final class InputMethodManager {
     /**
      * Checks whether the active input connection (if any) is for the given view.
      *
+     * <p>Note that {@code view} parameter does not take
+     * {@link View#checkInputConnectionProxy(View)} into account. This method returns {@code true}
+     * when and only when the specified {@code view} is the actual {@link View} instance that is
+     * connected to the IME.</p>
+     *
+     * @param view {@link View} to be checked.
+     * @return {@code true} if {@code view} is currently interacting with IME.
      * @hide
-     * @see #hasActiveInputConnectionInternal(View)}
      */
     @TestApi
     public boolean hasActiveInputConnection(@Nullable View view) {
-        return hasActiveInputConnectionInternal(view);
+        synchronized (mH) {
+            return mCurRootView != null
+                    && view != null
+                    && mServedView == view
+                    && mServedInputConnection != null
+                    && mServedInputConnection.isAssociatedWith(view)
+                    && isImeSessionAvailableLocked();
+        }
     }
 
     /**
