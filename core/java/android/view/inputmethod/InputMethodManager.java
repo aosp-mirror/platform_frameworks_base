@@ -33,8 +33,6 @@ import static android.view.inputmethod.InputMethodManagerProto.FULLSCREEN_MODE;
 import static android.view.inputmethod.InputMethodManagerProto.SERVED_CONNECTING;
 
 import static com.android.internal.inputmethod.StartInputReason.BOUND_TO_IMMS;
-import static com.android.internal.inputmethod.StartInputReason.WINDOW_FOCUS_GAIN_REPORT_WITHOUT_CONNECTION;
-import static com.android.internal.inputmethod.StartInputReason.WINDOW_FOCUS_GAIN_REPORT_WITH_CONNECTION;
 
 import android.Manifest;
 import android.annotation.DisplayContext;
@@ -805,19 +803,13 @@ public final class InputMethodManager {
             synchronized (mH) {
                 // For some reason we didn't do a startInput + windowFocusGain, so
                 // we'll just do a window focus gain and call it a day.
-                boolean nextFocusHasConnection = mServedView != null && mServedView == focusedView
-                        && hasActiveInputConnectionInternal(focusedView);
                 if (DEBUG) {
-                    Log.v(TAG, "Reporting focus gain, without startInput"
-                            + ", nextFocusIsServedView=" + nextFocusHasConnection);
+                    Log.v(TAG, "Reporting focus gain, without startInput");
                 }
 
-                final int startInputReason = nextFocusHasConnection
-                        ? WINDOW_FOCUS_GAIN_REPORT_WITH_CONNECTION
-                        : WINDOW_FOCUS_GAIN_REPORT_WITHOUT_CONNECTION;
                 // ignore the result
                 mServiceInvoker.startInputOrWindowGainedFocus(
-                        startInputReason, mClient,
+                        StartInputReason.WINDOW_FOCUS_GAIN_REPORT_ONLY, mClient,
                         focusedView.getWindowToken(), startInputFlags, softInputMode,
                         windowFlags,
                         null,
