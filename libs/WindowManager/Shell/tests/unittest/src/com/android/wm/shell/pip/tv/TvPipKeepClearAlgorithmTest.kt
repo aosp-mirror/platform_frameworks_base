@@ -21,23 +21,24 @@ import android.graphics.Rect
 import android.testing.AndroidTestingRunner
 import android.util.Size
 import android.view.Gravity
-import org.junit.runner.RunWith
-import com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_NONE
 import com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_BOTTOM
+import com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_NONE
 import com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_RIGHT
 import com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_TOP
 import com.android.wm.shell.pip.tv.TvPipKeepClearAlgorithm.Placement
-import org.junit.Before
-import org.junit.Test
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertNull
 import junit.framework.Assert.assertTrue
+import org.junit.Before
+import org.junit.Test
+import org.junit.runner.RunWith
 
 @RunWith(AndroidTestingRunner::class)
 class TvPipKeepClearAlgorithmTest {
     private val DEFAULT_PIP_SIZE = Size(384, 216)
-    private val EXPANDED_WIDE_PIP_SIZE = Size(384*2, 216)
+    private val EXPANDED_WIDE_PIP_SIZE = Size(384 * 2, 216)
+    private val EXPANDED_TALL_PIP_SIZE = Size(384, 216 * 4)
     private val DASHBOARD_WIDTH = 484
     private val BOTTOM_SHEET_HEIGHT = 524
     private val STASH_OFFSET = 64
@@ -483,6 +484,38 @@ class TvPipKeepClearAlgorithmTest {
 
         gravity = Gravity.RIGHT
         testAnchorPositionWithInsets(insets)
+    }
+
+    @Test
+    fun test_AnchorRightExpandedPiP_UnrestrictedRightSidebar_PushedLeft() {
+        pipSize = EXPANDED_TALL_PIP_SIZE
+        gravity = Gravity.RIGHT
+
+        val sidebar = makeSideBar(DASHBOARD_WIDTH, Gravity.RIGHT)
+        unrestrictedAreas.add(sidebar)
+
+        val expectedBounds = anchorBoundsOffsetBy(SCREEN_EDGE_INSET - sidebar.width() - PADDING, 0)
+
+        val placement = getActualPlacement()
+        assertEquals(expectedBounds, placement.bounds)
+        assertNotStashed(placement)
+    }
+
+    @Test
+    fun test_AnchorRightExpandedPiP_RestrictedRightSidebar_StashedRight() {
+        pipSize = EXPANDED_TALL_PIP_SIZE
+        gravity = Gravity.RIGHT
+
+        val sidebar = makeSideBar(DASHBOARD_WIDTH, Gravity.RIGHT)
+        restrictedAreas.add(sidebar)
+
+        val expectedBounds = getExpectedAnchorBounds()
+        expectedBounds.offsetTo(SCREEN_SIZE.width - STASH_OFFSET, expectedBounds.top)
+
+        val placement = getActualPlacement()
+        assertEquals(expectedBounds, placement.bounds)
+        assertEquals(STASH_TYPE_RIGHT, placement.stashType)
+        assertEquals(getExpectedAnchorBounds(), placement.unstashDestinationBounds)
     }
 
     private fun testAnchorPositionWithInsets(insets: Insets) {
