@@ -82,6 +82,9 @@ public final class InputWindowHandle {
     // Input event dispatching is paused.
     public boolean paused;
 
+    // Window is trusted overlay.
+    public boolean trustedOverlay;
+
     // Id of process and user that owns the window.
     public int ownerPid;
     public int ownerUid;
