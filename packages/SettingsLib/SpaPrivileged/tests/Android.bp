@@ -23,6 +23,7 @@ android_test {
     certificate: "platform",
     platform_apis: true,
     test_suites: ["device-tests"],
+    defaults: ["SpaPrivilegedLib-defaults"],
 
     srcs: [
         ":SpaPrivilegedLib_srcs",
@@ -30,8 +31,6 @@ android_test {
     ],
 
     static_libs: [
-        "SpaPrivilegedLib",
-        "androidx.compose.runtime_runtime",
         "androidx.compose.ui_ui-test-junit4",
         "androidx.compose.ui_ui-test-manifest",
         "androidx.test.ext.junit",
@@ -40,7 +39,6 @@ android_test {
         "truth-prebuilt",
     ],
     kotlincflags: [
-        "-Xjvm-default=all",
         "-opt-in=kotlin.RequiresOptIn",
     ],
 }
