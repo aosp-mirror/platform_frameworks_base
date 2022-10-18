@@ -587,7 +587,7 @@ public class ScreenshotController {
         // Wait until this window is attached to request because it is
         // the reference used to locate the target window (below).
         withWindowAttached(() -> {
-            requestScrollCapture();
+            requestScrollCapture(owner);
             mWindow.peekDecorView().getViewRootImpl().setActivityConfigCallback(
                     new ViewRootImpl.ActivityConfigCallback() {
                         @Override
@@ -599,11 +599,11 @@ public class ScreenshotController {
                                 mScreenshotView.hideScrollChip();
                                 // Delay scroll capture eval a bit to allow the underlying activity
                                 // to set up in the new orientation.
-                                mScreenshotHandler.postDelayed(
-                                        ScreenshotController.this::requestScrollCapture, 150);
+                                mScreenshotHandler.postDelayed(() -> {
+                                    requestScrollCapture(owner);
+                                }, 150);
                                 mScreenshotView.updateInsets(
-                                        mWindowManager.getCurrentWindowMetrics()
-                                                .getWindowInsets());
+                                        mWindowManager.getCurrentWindowMetrics().getWindowInsets());
                                 // Screenshot animation calculations won't be valid anymore,
                                 // so just end
                                 if (mScreenshotAnimation != null
@@ -651,7 +651,7 @@ public class ScreenshotController {
         mScreenshotHandler.cancelTimeout(); // restarted after animation
     }
 
-    private void requestScrollCapture() {
+    private void requestScrollCapture(UserHandle owner) {
         if (!allowLongScreenshots()) {
             Log.d(TAG, "Long screenshots not supported on this device");
             return;
@@ -664,10 +664,11 @@ public class ScreenshotController {
                 mScrollCaptureClient.request(DEFAULT_DISPLAY);
         mLastScrollCaptureRequest = future;
         mLastScrollCaptureRequest.addListener(() ->
-                onScrollCaptureResponseReady(future), mMainExecutor);
+                onScrollCaptureResponseReady(future, owner), mMainExecutor);
     }
 
-    private void onScrollCaptureResponseReady(Future<ScrollCaptureResponse> responseFuture) {
+    private void onScrollCaptureResponseReady(Future<ScrollCaptureResponse> responseFuture,
+            UserHandle owner) {
         try {
             if (mLastScrollCaptureResponse != null) {
                 mLastScrollCaptureResponse.close();
@@ -697,7 +698,7 @@ public class ScreenshotController {
                 mScreenshotView.prepareScrollingTransition(response, mScreenBitmap, newScreenshot,
                         mScreenshotTakenInPortrait);
                 // delay starting scroll capture to make sure the scrim is up before the app moves
-                mScreenshotView.post(() -> runBatchScrollCapture(response));
+                mScreenshotView.post(() -> runBatchScrollCapture(response, owner));
             });
         } catch (InterruptedException | ExecutionException e) {
             Log.e(TAG, "requestScrollCapture failed", e);
@@ -706,7 +707,7 @@ public class ScreenshotController {
 
     ListenableFuture<ScrollCaptureController.LongScreenshot> mLongScreenshotFuture;
 
-    private void runBatchScrollCapture(ScrollCaptureResponse response) {
+    private void runBatchScrollCapture(ScrollCaptureResponse response, UserHandle owner) {
         // Clear the reference to prevent close() in dismissScreenshot
         mLastScrollCaptureResponse = null;
 
@@ -740,6 +741,8 @@ public class ScreenshotController {
                                     longScreenshot));
 
             final Intent intent = new Intent(mContext, LongScreenshotActivity.class);
+            intent.putExtra(LongScreenshotActivity.EXTRA_SCREENSHOT_USER_HANDLE,
+                    owner);
             intent.setFlags(
                     Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
