@@ -236,18 +236,7 @@ constructor(
                     }
                     .flatMapLatest { isActionable ->
                         if (isActionable) {
-                            repository.actions.map { actions ->
-                                actions +
-                                    if (actions.isNotEmpty()) {
-                                        // If we have actions, we add NAVIGATE_TO_USER_MANAGEMENT
-                                        // because that's a user switcher specific action that is
-                                        // not known to the our data source or other features.
-                                        listOf(UserActionModel.NAVIGATE_TO_USER_MANAGEMENT)
-                                    } else {
-                                        // If no actions, don't add the navigate action.
-                                        emptyList()
-                                    }
-                            }
+                            repository.actions
                         } else {
                             // If not actionable it means that we're not allowed to show actions
                             // when
