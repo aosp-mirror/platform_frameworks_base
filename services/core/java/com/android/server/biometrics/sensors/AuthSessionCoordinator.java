@@ -16,10 +16,22 @@
 
 package com.android.server.biometrics.sensors;
 
+import static com.android.server.biometrics.sensors.AuthResultCoordinator.AUTHENTICATOR_LOCKED;
+import static com.android.server.biometrics.sensors.AuthResultCoordinator.AUTHENTICATOR_UNLOCKED;
+
 import android.hardware.biometrics.BiometricManager.Authenticators;
+import android.os.SystemClock;
+import android.util.Pair;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
+
+import java.time.Clock;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -28,20 +40,31 @@ import java.util.Set;
  * This class is not thread-safe. In general, all calls to this class should be made on the same
  * handler to ensure no collisions.
  */
-class AuthSessionCoordinator implements AuthSessionListener {
+public class AuthSessionCoordinator implements AuthSessionListener {
     private static final String TAG = "AuthSessionCoordinator";
 
     private final Set<Integer> mAuthOperations;
+    private final MultiBiometricLockoutState mMultiBiometricLockoutState;
+    private final List<Pair<Integer, Long>> mTimedLockouts;
+    private final RingBuffer mRingBuffer;
+    private final Clock mClock;
 
     private int mUserId;
     private boolean mIsAuthenticating;
     private AuthResultCoordinator mAuthResultCoordinator;
-    private MultiBiometricLockoutState mMultiBiometricLockoutState;
 
-    AuthSessionCoordinator() {
+    public AuthSessionCoordinator() {
+        this(SystemClock.currentNetworkTimeClock());
+    }
+
+    @VisibleForTesting
+    AuthSessionCoordinator(Clock clock) {
         mAuthOperations = new HashSet<>();
         mAuthResultCoordinator = new AuthResultCoordinator();
-        mMultiBiometricLockoutState = new MultiBiometricLockoutState();
+        mMultiBiometricLockoutState = new MultiBiometricLockoutState(clock);
+        mRingBuffer = new RingBuffer(100);
+        mTimedLockouts = new ArrayList<>();
+        mClock = clock;
     }
 
     /**
@@ -51,7 +74,9 @@ class AuthSessionCoordinator implements AuthSessionListener {
         mAuthOperations.clear();
         mUserId = userId;
         mIsAuthenticating = true;
-        mAuthResultCoordinator.resetState();
+        mAuthOperations.clear();
+        mAuthResultCoordinator = new AuthResultCoordinator();
+        mRingBuffer.addApiCall("internal : onAuthSessionStarted(" + userId + ")");
     }
 
     /**
@@ -64,14 +89,27 @@ class AuthSessionCoordinator implements AuthSessionListener {
     void endAuthSession() {
         if (mIsAuthenticating) {
             mAuthOperations.clear();
-            AuthResult res =
-                    mAuthResultCoordinator.getResult();
-            if (res.getStatus() == AuthResult.AUTHENTICATED) {
-                mMultiBiometricLockoutState.onUserUnlocked(mUserId, res.getBiometricStrength());
-            } else if (res.getStatus() == AuthResult.LOCKED_OUT) {
-                mMultiBiometricLockoutState.onUserLocked(mUserId, res.getBiometricStrength());
+            final long currentTime = mClock.millis();
+            for (Pair<Integer, Long> timedLockouts : mTimedLockouts) {
+                mMultiBiometricLockoutState.increaseLockoutTime(mUserId, timedLockouts.first,
+                        timedLockouts.second + currentTime);
             }
-            mAuthResultCoordinator.resetState();
+            // User unlocks can also unlock timed lockout Authenticator.Types
+            final Map<Integer, Integer> result = mAuthResultCoordinator.getResult();
+            for (int authenticator : Arrays.asList(Authenticators.BIOMETRIC_CONVENIENCE,
+                    Authenticators.BIOMETRIC_WEAK, Authenticators.BIOMETRIC_STRONG)) {
+                final Integer value = result.get(authenticator);
+                if ((value & AUTHENTICATOR_UNLOCKED) == AUTHENTICATOR_UNLOCKED) {
+                    mMultiBiometricLockoutState.setAuthenticatorTo(mUserId, authenticator,
+                            true /* canAuthenticate */);
+                    mMultiBiometricLockoutState.clearLockoutTime(mUserId, authenticator);
+                } else if ((value & AUTHENTICATOR_LOCKED) == AUTHENTICATOR_LOCKED) {
+                    mMultiBiometricLockoutState.setAuthenticatorTo(mUserId, authenticator,
+                            false /* canAuthenticate */);
+                }
+
+            }
+            mRingBuffer.addApiCall("internal : onAuthSessionEnded(" + mUserId + ")");
             mIsAuthenticating = false;
         }
     }
@@ -79,12 +117,15 @@ class AuthSessionCoordinator implements AuthSessionListener {
     /**
      * @return true if a user can authenticate with a given strength.
      */
-    boolean getCanAuthFor(int userId, @Authenticators.Types int strength) {
+    public boolean getCanAuthFor(int userId, @Authenticators.Types int strength) {
         return mMultiBiometricLockoutState.canUserAuthenticate(userId, strength);
     }
 
     @Override
-    public void authStartedFor(int userId, int sensorId) {
+    public void authStartedFor(int userId, int sensorId, long requestId) {
+        mRingBuffer.addApiCall(
+                "authStartedFor(userId=" + userId + ", sensorId=" + sensorId + ", requestId="
+                        + requestId + ")");
         if (!mIsAuthenticating) {
             onAuthSessionStarted(userId);
         }
@@ -105,34 +146,58 @@ class AuthSessionCoordinator implements AuthSessionListener {
 
     @Override
     public void authenticatedFor(int userId, @Authenticators.Types int biometricStrength,
-            int sensorId) {
+            int sensorId, long requestId) {
+        final String authStr =
+                "authenticatedFor(userId=" + userId + ", strength=" + biometricStrength
+                        + " , sensorId=" + sensorId + ", requestId= " + requestId + ")";
+        mRingBuffer.addApiCall(authStr);
         mAuthResultCoordinator.authenticatedFor(biometricStrength);
-        attemptToFinish(userId, sensorId,
-                "authenticatedFor(userId=" + userId + ", biometricStrength=" + biometricStrength
-                        + ", sensorId=" + sensorId + "");
+        attemptToFinish(userId, sensorId, authStr);
     }
 
     @Override
     public void lockedOutFor(int userId, @Authenticators.Types int biometricStrength,
-            int sensorId) {
-        mAuthResultCoordinator.lockedOutFor(biometricStrength);
-        attemptToFinish(userId, sensorId,
+            int sensorId, long requestId) {
+        final String lockedOutStr =
                 "lockOutFor(userId=" + userId + ", biometricStrength=" + biometricStrength
-                        + ", sensorId=" + sensorId + "");
+                        + ", sensorId=" + sensorId + ", requestId=" + requestId + ")";
+        mRingBuffer.addApiCall(lockedOutStr);
+        mAuthResultCoordinator.lockedOutFor(biometricStrength);
+        attemptToFinish(userId, sensorId, lockedOutStr);
+    }
+
+    @Override
+    public void lockOutTimed(int userId, @Authenticators.Types int biometricStrength, int sensorId,
+            long time, long requestId) {
+        final String lockedOutStr =
+                "lockOutTimedFor(userId=" + userId + ", biometricStrength=" + biometricStrength
+                        + ", sensorId=" + sensorId + "time=" + time + ", requestId=" + requestId
+                        + ")";
+        mRingBuffer.addApiCall(lockedOutStr);
+        mTimedLockouts.add(new Pair<>(biometricStrength, time));
+        attemptToFinish(userId, sensorId, lockedOutStr);
     }
 
     @Override
     public void authEndedFor(int userId, @Authenticators.Types int biometricStrength,
-            int sensorId) {
-        mAuthResultCoordinator.authEndedFor(biometricStrength);
-        attemptToFinish(userId, sensorId,
+            int sensorId, long requestId) {
+        final String authEndedStr =
                 "authEndedFor(userId=" + userId + " ,biometricStrength=" + biometricStrength
-                        + ", sensorId=" + sensorId);
+                        + ", sensorId=" + sensorId + ", requestId=" + requestId + ")";
+        mRingBuffer.addApiCall(authEndedStr);
+        attemptToFinish(userId, sensorId, authEndedStr);
     }
 
     @Override
-    public void resetLockoutFor(int userId, @Authenticators.Types int biometricStrength) {
-        mMultiBiometricLockoutState.onUserUnlocked(userId, biometricStrength);
+    public void resetLockoutFor(int userId, @Authenticators.Types int biometricStrength,
+            long requestId) {
+        final String resetLockStr =
+                "resetLockoutFor(userId=" + userId + " ,biometricStrength=" + biometricStrength
+                        + ", requestId=" + requestId + ")";
+        mRingBuffer.addApiCall(resetLockStr);
+        mMultiBiometricLockoutState.setAuthenticatorTo(userId, biometricStrength,
+                true /*canAuthenticate */);
+        mMultiBiometricLockoutState.clearLockoutTime(userId, biometricStrength);
     }
 
     private void attemptToFinish(int userId, int sensorId, String description) {
@@ -154,4 +219,49 @@ class AuthSessionCoordinator implements AuthSessionListener {
         }
     }
 
+    /**
+     * Returns a string representation of the past N API calls as well as the
+     * permanent and timed lockout states for each user's authenticators.
+     */
+    @Override
+    public String toString() {
+        return mRingBuffer + "\n" + mMultiBiometricLockoutState;
+    }
+
+    private static class RingBuffer {
+        private final String[] mApiCalls;
+        private final int mSize;
+        private int mCurr;
+        private int mApiCallNumber;
+
+        RingBuffer(int size) {
+            if (size <= 0) {
+                Slog.wtf(TAG, "Cannot initialize ring buffer of size: " + size);
+            }
+            mApiCalls = new String[size];
+            mCurr = 0;
+            mSize = size;
+            mApiCallNumber = 0;
+        }
+
+        void addApiCall(String str) {
+            mApiCalls[mCurr] = str;
+            mCurr++;
+            mCurr %= mSize;
+            mApiCallNumber++;
+        }
+
+        @Override
+        public String toString() {
+            String buffer = "";
+            int apiCall = mApiCallNumber > mSize ? mApiCallNumber - mSize : 0;
+            for (int i = 0; i < mSize; i++) {
+                final int location = (mCurr + i) % mSize;
+                if (mApiCalls[location] != null) {
+                    buffer += String.format("#%-5d %s\n", apiCall++, mApiCalls[location]);
+                }
+            }
+            return buffer;
+        }
+    }
 }

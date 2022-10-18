@@ -25,25 +25,34 @@ interface AuthSessionListener {
     /**
      * Indicates an auth operation has started for a given user and sensor.
      */
-    void authStartedFor(int userId, int sensorId);
+    void authStartedFor(int userId, int sensorId, long requestId);
 
     /**
      * Indicates a successful authentication occurred for a sensor of a given strength.
      */
-    void authenticatedFor(int userId, @Authenticators.Types int biometricStrength, int sensorId);
+    void authenticatedFor(int userId, @Authenticators.Types int biometricStrength, int sensorId,
+            long requestId);
 
     /**
      * Indicates authentication ended for a sensor of a given strength.
      */
-    void authEndedFor(int userId, @Authenticators.Types int biometricStrength, int sensorId);
+    void authEndedFor(int userId, @Authenticators.Types int biometricStrength, int sensorId,
+            long requestId);
 
     /**
      * Indicates a lockout occurred for a sensor of a given strength.
      */
-    void lockedOutFor(int userId, @Authenticators.Types int biometricStrength, int sensorId);
+    void lockedOutFor(int userId, @Authenticators.Types int biometricStrength, int sensorId,
+            long requestId);
+
+    /**
+     * Indicates a timed lockout occurred for a sensor of a given strength.
+     */
+    void lockOutTimed(int userId, @Authenticators.Types int biometricStrength, int sensorId,
+            long duration, long requestId);
 
     /**
      * Indicates that a reset lockout has happened for a given strength.
      */
-    void resetLockoutFor(int uerId, @Authenticators.Types int biometricStrength);
+    void resetLockoutFor(int uerId, @Authenticators.Types int biometricStrength, long requestId);
 }

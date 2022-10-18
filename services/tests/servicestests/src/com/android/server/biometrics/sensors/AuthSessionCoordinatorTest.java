@@ -22,12 +22,18 @@ import static android.hardware.biometrics.BiometricManager.Authenticators.BIOMET
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.Mockito.when;
+
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import java.time.Clock;
 
 @Presubmit
 @SmallTest
@@ -36,20 +42,51 @@ public class AuthSessionCoordinatorTest {
     private static final int SECONDARY_USER = 10;
 
     private AuthSessionCoordinator mCoordinator;
+    @Mock
+    private Clock mClock;
 
     @Before
     public void setUp() throws Exception {
-        mCoordinator = new AuthSessionCoordinator();
+        MockitoAnnotations.initMocks(this);
+        when(mClock.millis()).thenReturn(0L);
+        mCoordinator = new AuthSessionCoordinator(mClock);
     }
 
     @Test
     public void testUserUnlocked() {
+        mCoordinator.authStartedFor(PRIMARY_USER, 1 /* sensorId */, 0 /* requestId */);
+        mCoordinator.lockedOutFor(PRIMARY_USER, BIOMETRIC_STRONG, 1 /* sensorId */,
+                0 /* requestId */);
+
         assertThat(mCoordinator.getCanAuthFor(PRIMARY_USER, BIOMETRIC_CONVENIENCE)).isFalse();
         assertThat(mCoordinator.getCanAuthFor(PRIMARY_USER, BIOMETRIC_WEAK)).isFalse();
         assertThat(mCoordinator.getCanAuthFor(PRIMARY_USER, BIOMETRIC_STRONG)).isFalse();
 
-        mCoordinator.authStartedFor(PRIMARY_USER, 1);
-        mCoordinator.authenticatedFor(PRIMARY_USER, BIOMETRIC_WEAK, 1);
+        mCoordinator.authStartedFor(PRIMARY_USER, 1 /* sensorId */, 0 /* requestId */);
+        mCoordinator.authenticatedFor(PRIMARY_USER, BIOMETRIC_WEAK, 1 /* sensorId */,
+                0 /* requestId */);
+
+        assertThat(mCoordinator.getCanAuthFor(PRIMARY_USER, BIOMETRIC_CONVENIENCE)).isTrue();
+        assertThat(mCoordinator.getCanAuthFor(PRIMARY_USER, BIOMETRIC_WEAK)).isTrue();
+        assertThat(mCoordinator.getCanAuthFor(PRIMARY_USER, BIOMETRIC_STRONG)).isFalse();
+    }
+
+    @Test
+    public void testUserLocked() {
+        mCoordinator.authStartedFor(PRIMARY_USER, 1 /* sensorId */, 0 /* requestId */);
+        mCoordinator.authStartedFor(PRIMARY_USER, 2 /* sensorId */, 0 /* requestId */);
+        mCoordinator.lockedOutFor(PRIMARY_USER, BIOMETRIC_STRONG, 1 /* sensorId */,
+                0 /* requestId */);
+        mCoordinator.authenticatedFor(PRIMARY_USER, BIOMETRIC_WEAK, 2 /* sensorId */,
+                0 /* requestId */);
+
+        assertThat(mCoordinator.getCanAuthFor(PRIMARY_USER, BIOMETRIC_CONVENIENCE)).isFalse();
+        assertThat(mCoordinator.getCanAuthFor(PRIMARY_USER, BIOMETRIC_WEAK)).isFalse();
+        assertThat(mCoordinator.getCanAuthFor(PRIMARY_USER, BIOMETRIC_STRONG)).isFalse();
+
+        mCoordinator.authStartedFor(PRIMARY_USER, 1 /* sensorId */, 0 /* requestId */);
+        mCoordinator.authenticatedFor(PRIMARY_USER, BIOMETRIC_WEAK, 1 /* sensorId */,
+                0 /* requestId */);
 
         assertThat(mCoordinator.getCanAuthFor(PRIMARY_USER, BIOMETRIC_CONVENIENCE)).isTrue();
         assertThat(mCoordinator.getCanAuthFor(PRIMARY_USER, BIOMETRIC_WEAK)).isTrue();
@@ -58,15 +95,16 @@ public class AuthSessionCoordinatorTest {
 
     @Test
     public void testUserCanAuthDuringLockoutOfSameSession() {
-        mCoordinator.resetLockoutFor(PRIMARY_USER, BIOMETRIC_STRONG);
+        mCoordinator.resetLockoutFor(PRIMARY_USER, BIOMETRIC_STRONG, 0 /* requestId */);
 
         assertThat(mCoordinator.getCanAuthFor(PRIMARY_USER, BIOMETRIC_CONVENIENCE)).isTrue();
         assertThat(mCoordinator.getCanAuthFor(PRIMARY_USER, BIOMETRIC_WEAK)).isTrue();
         assertThat(mCoordinator.getCanAuthFor(PRIMARY_USER, BIOMETRIC_STRONG)).isTrue();
 
-        mCoordinator.authStartedFor(PRIMARY_USER, 1);
-        mCoordinator.authStartedFor(PRIMARY_USER, 2);
-        mCoordinator.lockedOutFor(PRIMARY_USER, BIOMETRIC_WEAK, 2);
+        mCoordinator.authStartedFor(PRIMARY_USER, 1 /* sensorId */, 0 /* requestId */);
+        mCoordinator.authStartedFor(PRIMARY_USER, 2 /* sensorId */, 0 /* requestId */);
+        mCoordinator.lockedOutFor(PRIMARY_USER, BIOMETRIC_WEAK, 2 /* sensorId */,
+                0 /* requestId */);
 
         assertThat(mCoordinator.getCanAuthFor(PRIMARY_USER, BIOMETRIC_CONVENIENCE)).isTrue();
         assertThat(mCoordinator.getCanAuthFor(PRIMARY_USER, BIOMETRIC_WEAK)).isTrue();
@@ -75,7 +113,15 @@ public class AuthSessionCoordinatorTest {
 
     @Test
     public void testMultiUserAuth() {
-        mCoordinator.resetLockoutFor(PRIMARY_USER, BIOMETRIC_STRONG);
+        mCoordinator.authStartedFor(PRIMARY_USER, 1 /* sensorId */, 0 /* requestId */);
+        mCoordinator.lockedOutFor(PRIMARY_USER, BIOMETRIC_STRONG, 1 /* sensorId */,
+                0 /* requestId */);
+
+        mCoordinator.authStartedFor(SECONDARY_USER, 1 /* sensorId */, 0 /* requestId */);
+        mCoordinator.lockedOutFor(SECONDARY_USER, BIOMETRIC_STRONG, 1 /* sensorId */,
+                0 /* requestId */);
+
+        mCoordinator.resetLockoutFor(PRIMARY_USER, BIOMETRIC_STRONG, 0 /* requestId */);
 
         assertThat(mCoordinator.getCanAuthFor(PRIMARY_USER, BIOMETRIC_CONVENIENCE)).isTrue();
         assertThat(mCoordinator.getCanAuthFor(PRIMARY_USER, BIOMETRIC_WEAK)).isTrue();
@@ -85,9 +131,10 @@ public class AuthSessionCoordinatorTest {
         assertThat(mCoordinator.getCanAuthFor(SECONDARY_USER, BIOMETRIC_WEAK)).isFalse();
         assertThat(mCoordinator.getCanAuthFor(SECONDARY_USER, BIOMETRIC_STRONG)).isFalse();
 
-        mCoordinator.authStartedFor(PRIMARY_USER, 1);
-        mCoordinator.authStartedFor(PRIMARY_USER, 2);
-        mCoordinator.lockedOutFor(PRIMARY_USER, BIOMETRIC_WEAK, 2);
+        mCoordinator.authStartedFor(PRIMARY_USER, 1 /* sensorId */, 0 /* requestId */);
+        mCoordinator.authStartedFor(PRIMARY_USER, 2 /* sensorId */, 0 /* requestId */);
+        mCoordinator.lockedOutFor(PRIMARY_USER, BIOMETRIC_WEAK, 2 /* sensorId */,
+                0 /* requestId */);
 
         assertThat(mCoordinator.getCanAuthFor(PRIMARY_USER, BIOMETRIC_CONVENIENCE)).isTrue();
         assertThat(mCoordinator.getCanAuthFor(PRIMARY_USER, BIOMETRIC_WEAK)).isTrue();

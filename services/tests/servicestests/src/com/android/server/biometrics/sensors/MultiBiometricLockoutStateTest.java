@@ -22,6 +22,8 @@ import static android.hardware.biometrics.BiometricManager.Authenticators.BIOMET
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.Mockito.when;
+
 import android.platform.test.annotations.Presubmit;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -31,6 +33,10 @@ import androidx.test.filters.SmallTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import java.time.Clock;
 
 @SmallTest
 @Presubmit
@@ -38,111 +44,155 @@ import org.junit.runner.RunWith;
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class MultiBiometricLockoutStateTest {
     private static final int PRIMARY_USER = 0;
-    private MultiBiometricLockoutState mCoordinator;
+    private MultiBiometricLockoutState mLockoutState;
+    @Mock
+    private Clock mClock;
+
+    private static void unlockAllBiometrics(MultiBiometricLockoutState lockoutState, int userId) {
+        lockoutState.setAuthenticatorTo(userId, BIOMETRIC_STRONG, true /* canAuthenticate */);
+        assertThat(lockoutState.canUserAuthenticate(userId, BIOMETRIC_STRONG)).isTrue();
+        assertThat(lockoutState.canUserAuthenticate(userId, BIOMETRIC_WEAK)).isTrue();
+        assertThat(lockoutState.canUserAuthenticate(userId, BIOMETRIC_CONVENIENCE)).isTrue();
+    }
+
+    private static void lockoutAllBiometrics(MultiBiometricLockoutState lockoutState, int userId) {
+        lockoutState.setAuthenticatorTo(userId, BIOMETRIC_STRONG, false /* canAuthenticate */);
+        assertThat(lockoutState.canUserAuthenticate(userId, BIOMETRIC_STRONG)).isFalse();
+        assertThat(lockoutState.canUserAuthenticate(userId, BIOMETRIC_WEAK)).isFalse();
+        assertThat(lockoutState.canUserAuthenticate(userId, BIOMETRIC_CONVENIENCE)).isFalse();
+    }
 
     private void unlockAllBiometrics() {
-        unlockAllBiometrics(mCoordinator, PRIMARY_USER);
+        unlockAllBiometrics(mLockoutState, PRIMARY_USER);
     }
 
     private void lockoutAllBiometrics() {
-        lockoutAllBiometrics(mCoordinator, PRIMARY_USER);
-    }
-
-    private static void unlockAllBiometrics(MultiBiometricLockoutState coordinator, int userId) {
-        coordinator.onUserUnlocked(userId, BIOMETRIC_STRONG);
-        assertThat(coordinator.canUserAuthenticate(userId, BIOMETRIC_STRONG)).isTrue();
-        assertThat(coordinator.canUserAuthenticate(userId, BIOMETRIC_WEAK)).isTrue();
-        assertThat(coordinator.canUserAuthenticate(userId, BIOMETRIC_CONVENIENCE)).isTrue();
-    }
-
-    private static void lockoutAllBiometrics(MultiBiometricLockoutState coordinator, int userId) {
-        coordinator.onUserLocked(userId, BIOMETRIC_STRONG);
-        assertThat(coordinator.canUserAuthenticate(userId, BIOMETRIC_STRONG)).isFalse();
-        assertThat(coordinator.canUserAuthenticate(userId, BIOMETRIC_WEAK)).isFalse();
-        assertThat(coordinator.canUserAuthenticate(userId, BIOMETRIC_CONVENIENCE)).isFalse();
+        lockoutAllBiometrics(mLockoutState, PRIMARY_USER);
     }
 
     @Before
     public void setUp() throws Exception {
-        mCoordinator = new MultiBiometricLockoutState();
+        MockitoAnnotations.initMocks(this);
+        when(mClock.millis()).thenReturn(0L);
+        mLockoutState = new MultiBiometricLockoutState(mClock);
     }
 
     @Test
     public void testInitialStateLockedOut() {
-        assertThat(mCoordinator.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_STRONG)).isFalse();
-        assertThat(mCoordinator.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_WEAK)).isFalse();
-        assertThat(mCoordinator.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_CONVENIENCE)).isFalse();
+        assertThat(mLockoutState.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_STRONG)).isTrue();
+        assertThat(mLockoutState.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_WEAK)).isTrue();
+        assertThat(mLockoutState.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_CONVENIENCE)).isTrue();
     }
 
     @Test
     public void testConvenienceLockout() {
         unlockAllBiometrics();
-        mCoordinator.onUserLocked(PRIMARY_USER, BIOMETRIC_CONVENIENCE);
-        assertThat(mCoordinator.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_STRONG)).isTrue();
-        assertThat(mCoordinator.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_WEAK)).isTrue();
-        assertThat(mCoordinator.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_CONVENIENCE)).isFalse();
+        mLockoutState.setAuthenticatorTo(PRIMARY_USER, BIOMETRIC_CONVENIENCE,
+                false /* canAuthenticate */);
+        assertThat(mLockoutState.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_STRONG)).isTrue();
+        assertThat(mLockoutState.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_WEAK)).isTrue();
+        assertThat(
+                mLockoutState.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_CONVENIENCE)).isFalse();
     }
 
     @Test
     public void testWeakLockout() {
         unlockAllBiometrics();
-        mCoordinator.onUserLocked(PRIMARY_USER, BIOMETRIC_WEAK);
-        assertThat(mCoordinator.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_STRONG)).isTrue();
-        assertThat(mCoordinator.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_WEAK)).isFalse();
-        assertThat(mCoordinator.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_CONVENIENCE)).isFalse();
+        mLockoutState.setAuthenticatorTo(PRIMARY_USER, BIOMETRIC_WEAK, false /* canAuthenticate */);
+        assertThat(mLockoutState.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_STRONG)).isTrue();
+        assertThat(mLockoutState.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_WEAK)).isFalse();
+        assertThat(
+                mLockoutState.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_CONVENIENCE)).isFalse();
     }
 
     @Test
     public void testStrongLockout() {
-        unlockAllBiometrics();
-        mCoordinator.onUserLocked(PRIMARY_USER, BIOMETRIC_STRONG);
-        assertThat(mCoordinator.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_STRONG)).isFalse();
-        assertThat(mCoordinator.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_WEAK)).isFalse();
-        assertThat(mCoordinator.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_CONVENIENCE)).isFalse();
+        lockoutAllBiometrics();
+        mLockoutState.setAuthenticatorTo(PRIMARY_USER, BIOMETRIC_STRONG,
+                false /* canAuthenticate */);
+        assertThat(mLockoutState.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_STRONG)).isFalse();
+        assertThat(mLockoutState.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_WEAK)).isFalse();
+        assertThat(
+                mLockoutState.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_CONVENIENCE)).isFalse();
     }
 
     @Test
     public void testConvenienceUnlock() {
         lockoutAllBiometrics();
-        mCoordinator.onUserUnlocked(PRIMARY_USER, BIOMETRIC_CONVENIENCE);
-        assertThat(mCoordinator.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_STRONG)).isFalse();
-        assertThat(mCoordinator.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_WEAK)).isFalse();
-        assertThat(mCoordinator.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_CONVENIENCE)).isTrue();
+        mLockoutState.setAuthenticatorTo(PRIMARY_USER, BIOMETRIC_CONVENIENCE,
+                true /* canAuthenticate */);
+        assertThat(mLockoutState.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_STRONG)).isFalse();
+        assertThat(mLockoutState.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_WEAK)).isFalse();
+        assertThat(mLockoutState.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_CONVENIENCE)).isTrue();
     }
 
     @Test
     public void testWeakUnlock() {
         lockoutAllBiometrics();
-        mCoordinator.onUserUnlocked(PRIMARY_USER, BIOMETRIC_WEAK);
-        assertThat(mCoordinator.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_STRONG)).isFalse();
-        assertThat(mCoordinator.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_WEAK)).isTrue();
-        assertThat(mCoordinator.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_CONVENIENCE)).isTrue();
+        mLockoutState.setAuthenticatorTo(PRIMARY_USER, BIOMETRIC_WEAK, true /* canAuthenticate */);
+        assertThat(mLockoutState.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_STRONG)).isFalse();
+        assertThat(mLockoutState.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_WEAK)).isTrue();
+        assertThat(mLockoutState.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_CONVENIENCE)).isTrue();
     }
 
     @Test
     public void testStrongUnlock() {
         lockoutAllBiometrics();
-        mCoordinator.onUserUnlocked(PRIMARY_USER, BIOMETRIC_STRONG);
-        assertThat(mCoordinator.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_STRONG)).isTrue();
-        assertThat(mCoordinator.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_WEAK)).isTrue();
-        assertThat(mCoordinator.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_CONVENIENCE)).isTrue();
+        mLockoutState.setAuthenticatorTo(PRIMARY_USER, BIOMETRIC_STRONG,
+                true /* canAuthenticate */);
+        assertThat(mLockoutState.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_STRONG)).isTrue();
+        assertThat(mLockoutState.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_WEAK)).isTrue();
+        assertThat(mLockoutState.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_CONVENIENCE)).isTrue();
     }
 
     @Test
     public void multiUser_userOneDoesNotAffectUserTwo() {
         final int userOne = 1;
         final int userTwo = 2;
-        MultiBiometricLockoutState coordinator = new MultiBiometricLockoutState();
-        lockoutAllBiometrics(coordinator, userOne);
-        lockoutAllBiometrics(coordinator, userTwo);
+        MultiBiometricLockoutState lockoutState = new MultiBiometricLockoutState(mClock);
+        lockoutAllBiometrics(lockoutState, userOne);
+        lockoutAllBiometrics(lockoutState, userTwo);
 
-        coordinator.onUserUnlocked(userOne, BIOMETRIC_WEAK);
-        assertThat(coordinator.canUserAuthenticate(userOne, BIOMETRIC_STRONG)).isFalse();
-        assertThat(coordinator.canUserAuthenticate(userOne, BIOMETRIC_WEAK)).isTrue();
-        assertThat(coordinator.canUserAuthenticate(userOne, BIOMETRIC_CONVENIENCE)).isTrue();
+        lockoutState.setAuthenticatorTo(userOne, BIOMETRIC_WEAK, true /* canAuthenticate */);
+        assertThat(lockoutState.canUserAuthenticate(userOne, BIOMETRIC_STRONG)).isFalse();
+        assertThat(lockoutState.canUserAuthenticate(userOne, BIOMETRIC_WEAK)).isTrue();
+        assertThat(lockoutState.canUserAuthenticate(userOne, BIOMETRIC_CONVENIENCE)).isTrue();
 
-        assertThat(coordinator.canUserAuthenticate(userTwo, BIOMETRIC_STRONG)).isFalse();
-        assertThat(coordinator.canUserAuthenticate(userTwo, BIOMETRIC_WEAK)).isFalse();
-        assertThat(coordinator.canUserAuthenticate(userTwo, BIOMETRIC_CONVENIENCE)).isFalse();
+        assertThat(lockoutState.canUserAuthenticate(userTwo, BIOMETRIC_STRONG)).isFalse();
+        assertThat(lockoutState.canUserAuthenticate(userTwo, BIOMETRIC_WEAK)).isFalse();
+        assertThat(lockoutState.canUserAuthenticate(userTwo, BIOMETRIC_CONVENIENCE)).isFalse();
+    }
+
+    @Test
+    public void testTimedLockout() {
+        assertThat(mLockoutState.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_STRONG)).isTrue();
+        assertThat(mLockoutState.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_WEAK)).isTrue();
+        assertThat(mLockoutState.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_CONVENIENCE)).isTrue();
+
+        mLockoutState.increaseLockoutTime(PRIMARY_USER, BIOMETRIC_STRONG,
+                System.currentTimeMillis() + 1);
+        assertThat(mLockoutState.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_STRONG)).isFalse();
+        assertThat(mLockoutState.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_WEAK)).isFalse();
+        assertThat(
+                mLockoutState.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_CONVENIENCE)).isFalse();
+    }
+
+    @Test
+    public void testTimedLockoutAfterDuration() {
+        assertThat(mLockoutState.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_STRONG)).isTrue();
+        assertThat(mLockoutState.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_WEAK)).isTrue();
+        assertThat(mLockoutState.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_CONVENIENCE)).isTrue();
+
+        when(mClock.millis()).thenReturn(0L);
+        mLockoutState.increaseLockoutTime(PRIMARY_USER, BIOMETRIC_STRONG, 1);
+        assertThat(mLockoutState.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_STRONG)).isFalse();
+        assertThat(mLockoutState.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_WEAK)).isFalse();
+        assertThat(
+                mLockoutState.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_CONVENIENCE)).isFalse();
+
+        when(mClock.millis()).thenReturn(2L);
+        assertThat(mLockoutState.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_STRONG)).isTrue();
+        assertThat(mLockoutState.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_WEAK)).isTrue();
+        assertThat(mLockoutState.canUserAuthenticate(PRIMARY_USER, BIOMETRIC_CONVENIENCE)).isTrue();
     }
 }
