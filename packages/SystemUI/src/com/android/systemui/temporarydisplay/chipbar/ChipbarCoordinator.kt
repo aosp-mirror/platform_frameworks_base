@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.systemui.media.taptotransfer.sender
+package com.android.systemui.temporarydisplay.chipbar
 
-import android.app.StatusBarManager
 import android.content.Context
 import android.graphics.Rect
 import android.media.MediaRoute2Info
 import android.os.PowerManager
-import android.util.Log
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
@@ -40,10 +38,12 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.media.taptotransfer.common.MediaTttLogger
 import com.android.systemui.media.taptotransfer.common.MediaTttUtils
+import com.android.systemui.media.taptotransfer.sender.ChipStateSender
+import com.android.systemui.media.taptotransfer.sender.MediaTttSenderLogger
+import com.android.systemui.media.taptotransfer.sender.MediaTttSenderUiEventLogger
+import com.android.systemui.media.taptotransfer.sender.TransferStatus
 import com.android.systemui.plugins.FalsingManager
-import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.policy.ConfigurationController
-import com.android.systemui.temporarydisplay.TemporaryDisplayRemovalReason
 import com.android.systemui.temporarydisplay.TemporaryViewDisplayController
 import com.android.systemui.temporarydisplay.TemporaryViewInfo
 import com.android.systemui.util.concurrency.DelayableExecutor
@@ -51,12 +51,26 @@ import com.android.systemui.util.view.ViewUtil
 import javax.inject.Inject
 
 /**
- * A controller to display and hide the Media Tap-To-Transfer chip on the **sending** device. This
- * chip is shown when a user is transferring media to/from this device and a receiver device.
+ * A coordinator for showing/hiding the chipbar.
+ *
+ * The chipbar is a UI element that displays on top of all content. It appears at the top of the
+ * screen and consists of an icon, one line of text, and an optional end icon or action. It will
+ * auto-dismiss after some amount of seconds. The user is *not* able to manually dismiss the
+ * chipbar.
+ *
+ * It should be only be used for critical and temporary information that the user *must* be aware
+ * of. In general, prefer using heads-up notifications, since they are dismissable and will remain
+ * in the list of notifications until the user dismisses them.
+ *
+ * Only one chipbar may be shown at a time.
+ * TODO(b/245610654): Should we just display whichever chipbar was most recently requested, or do we
+ *   need to maintain a priority ordering?
+ *
+ * TODO(b/245610654): Remove all media-related items from this class so it's just for generic
+ *   chipbars.
  */
 @SysUISingleton
-open class MediaTttChipControllerSender @Inject constructor(
-        private val commandQueue: CommandQueue,
+open class ChipbarCoordinator @Inject constructor(
         context: Context,
         @MediaTttSenderLogger logger: MediaTttLogger,
         windowManager: WindowManager,
@@ -76,59 +90,25 @@ open class MediaTttChipControllerSender @Inject constructor(
         accessibilityManager,
         configurationController,
         powerManager,
-        R.layout.media_ttt_chip,
+        R.layout.chipbar,
         MediaTttUtils.WINDOW_TITLE,
         MediaTttUtils.WAKE_REASON,
 ) {
 
-    private lateinit var parent: MediaTttChipRootView
+    private lateinit var parent: ChipbarRootView
 
     override val windowLayoutParams = commonWindowLayoutParams.apply {
         gravity = Gravity.TOP.or(Gravity.CENTER_HORIZONTAL)
     }
 
-    private val commandQueueCallbacks = object : CommandQueue.Callbacks {
-        override fun updateMediaTapToTransferSenderDisplay(
-                @StatusBarManager.MediaTransferSenderState displayState: Int,
-                routeInfo: MediaRoute2Info,
-                undoCallback: IUndoMediaTransferCallback?
-        ) {
-            this@MediaTttChipControllerSender.updateMediaTapToTransferSenderDisplay(
-                displayState, routeInfo, undoCallback
-            )
-        }
-    }
-
-    private fun updateMediaTapToTransferSenderDisplay(
-        @StatusBarManager.MediaTransferSenderState displayState: Int,
-        routeInfo: MediaRoute2Info,
-        undoCallback: IUndoMediaTransferCallback?
-    ) {
-        val chipState: ChipStateSender? = ChipStateSender.getSenderStateFromId(displayState)
-        val stateName = chipState?.name ?: "Invalid"
-        logger.logStateChange(stateName, routeInfo.id, routeInfo.clientPackageName)
-
-        if (chipState == null) {
-            Log.e(SENDER_TAG, "Unhandled MediaTransferSenderState $displayState")
-            return
-        }
-        uiEventLogger.logSenderStateChange(chipState)
-
-        if (chipState == ChipStateSender.FAR_FROM_RECEIVER) {
-            removeView(removalReason = ChipStateSender.FAR_FROM_RECEIVER.name)
-        } else {
-            displayView(ChipSenderInfo(chipState, routeInfo, undoCallback))
-        }
-    }
-
-    override fun start() {
-        commandQueue.addCallback(commandQueueCallbacks)
-    }
+    override fun start() {}
 
     override fun updateView(
         newInfo: ChipSenderInfo,
         currentView: ViewGroup
     ) {
+        // TODO(b/245610654): Adding logging here.
+
         val chipState = newInfo.state
 
         // Detect falsing touches on the chip.
@@ -202,23 +182,6 @@ open class MediaTttChipControllerSender @Inject constructor(
             includeMargins = true,
             onAnimationEnd,
         )
-    }
-
-    override fun shouldIgnoreViewRemoval(info: ChipSenderInfo, removalReason: String): Boolean {
-        // Don't remove the chip if we're in progress or succeeded, since the user should still be
-        // able to see the status of the transfer. (But do remove it if it's finally timed out.)
-        val transferStatus = info.state.transferStatus
-        if (
-            (transferStatus == TransferStatus.IN_PROGRESS ||
-                transferStatus == TransferStatus.SUCCEEDED) &&
-            removalReason != TemporaryDisplayRemovalReason.REASON_TIMEOUT
-        ) {
-            logger.logRemovalBypass(
-                removalReason, bypassReason = "transferStatus=${transferStatus.name}"
-            )
-            return true
-        }
-        return false
     }
 
     override fun getTouchableRegion(view: View, outRect: Rect) {

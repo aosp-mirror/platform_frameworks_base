@@ -389,9 +389,9 @@ public class ActivityStartController {
         SafeActivityOptions bottomOptions = null;
         if (options != null) {
             // To ensure the first N-1 activities (N == total # of activities) are also launched
-            // into the correct display, use a copy of the passed-in options (keeping only
-            // display-related info) for these activities.
-            bottomOptions = options.selectiveCloneDisplayOptions();
+            // into the correct display and root task, use a copy of the passed-in options (keeping
+            // only display-related and launch-root-task information) for these activities.
+            bottomOptions = options.selectiveCloneLaunchOptions();
         }
         try {
             intents = ArrayUtils.filterNotNull(intents, Intent[]::new);

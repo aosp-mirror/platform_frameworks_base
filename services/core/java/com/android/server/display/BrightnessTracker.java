@@ -220,6 +220,11 @@ public class BrightnessTracker {
     }
 
     private void backgroundStart(float initialBrightness) {
+        synchronized (mDataCollectionLock) {
+            if (mStarted) {
+                return;
+            }
+        }
         if (DEBUG) {
             Slog.d(TAG, "Background start");
         }
@@ -250,6 +255,11 @@ public class BrightnessTracker {
 
     /** Stop listening for events */
     void stop() {
+        synchronized (mDataCollectionLock) {
+            if (!mStarted) {
+                return;
+            }
+        }
         if (DEBUG) {
             Slog.d(TAG, "Stop");
         }

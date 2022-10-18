@@ -2479,6 +2479,8 @@
     <integer name="config_attentionMaximumExtension">900000</integer> <!-- 15 minutes.  -->
     <!-- Is the system user the only user allowed to dream. -->
     <bool name="config_dreamsOnlyEnabledForSystemUser">false</bool>
+    <!-- Whether dreams are disabled when ambient mode is suppressed. -->
+    <bool name="config_dreamsDisabledByAmbientModeSuppressionConfig">false</bool>
 
     <!-- Whether to dismiss the active dream when an activity is started. Doesn't apply to
          assistant activities (ACTIVITY_TYPE_ASSISTANT) -->
@@ -5956,4 +5958,8 @@
          TODO(b/236022708) Move rear display state to device state config file
     -->
     <integer name="config_deviceStateRearDisplay">-1</integer>
+
+    <!-- Whether the lock screen is allowed to run its own live wallpaper,
+         different from the home screen wallpaper. -->
+    <bool name="config_independentLockscreenLiveWallpaper">false</bool>
 </resources>

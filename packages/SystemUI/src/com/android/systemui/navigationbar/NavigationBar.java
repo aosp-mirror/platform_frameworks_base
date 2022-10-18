@@ -679,7 +679,9 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     public void onViewAttached() {
         final Display display = mView.getDisplay();
         mView.setComponents(mRecentsOptional);
-        mView.setComponents(mCentralSurfacesOptionalLazy.get().get().getPanelController());
+        if (mCentralSurfacesOptionalLazy.get().isPresent()) {
+            mView.setComponents(mCentralSurfacesOptionalLazy.get().get().getPanelController());
+        }
         mView.setDisabledFlags(mDisabledFlags1, mSysUiFlagsContainer);
         mView.setOnVerticalChangedListener(this::onVerticalChanged);
         mView.setOnTouchListener(this::onNavigationTouch);
