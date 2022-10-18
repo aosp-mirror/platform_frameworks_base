@@ -5915,4 +5915,8 @@
          TODO(b/236022708) Move rear display state to device state config file
     -->
     <integer name="config_deviceStateRearDisplay">-1</integer>
+
+    <!-- Whether the lock screen is allowed to run its own live wallpaper,
+         different from the home screen wallpaper. -->
+    <bool name="config_independentLockscreenLiveWallpaper">false</bool>
 </resources>
