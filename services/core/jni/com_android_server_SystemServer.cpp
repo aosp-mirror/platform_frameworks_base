@@ -109,8 +109,13 @@ static void android_server_SystemServer_startHidlServices(JNIEnv* env, jobject /
     LOG_ALWAYS_FATAL_IF(env->GetJavaVM(&vm) != JNI_OK, "Cannot get Java VM");
 
     sp<ISensorManager> sensorService = new SensorManager(vm);
-    err = sensorService->registerAsService();
-    LOG_ALWAYS_FATAL_IF(err != OK, "Cannot register %s: %d", ISensorManager::descriptor, err);
+    if (IServiceManager::Transport::HWBINDER ==
+        hardware::defaultServiceManager1_2()->getTransport(ISensorManager::descriptor, "default")) {
+        err = sensorService->registerAsService();
+        LOG_ALWAYS_FATAL_IF(err != OK, "Cannot register %s: %d", ISensorManager::descriptor, err);
+    } else {
+        ALOGW("%s is deprecated. Skipping registration.", ISensorManager::descriptor);
+    }
 
     sp<ISchedulingPolicyService> schedulingService = new SchedulingPolicyService();
     if (IServiceManager::Transport::HWBINDER ==
