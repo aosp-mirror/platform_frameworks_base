@@ -525,6 +525,7 @@ public class BroadcastRecordTest {
                 0 /* appOp */,
                 null /* options */,
                 new ArrayList<>(receivers), // Make a copy to not affect the original list.
+                null /* resultToApp */,
                 null /* resultTo */,
                 0 /* resultCode */,
                 null /* resultData */,

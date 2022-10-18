@@ -114,6 +114,14 @@ class BroadcastProcessQueue {
     private int mActiveIndex;
 
     /**
+     * When defined, the receiver actively being dispatched into this process
+     * was considered "blocked" until at least the given count of other
+     * receivers have reached a terminal state; typically used for ordered
+     * broadcasts and priority traunches.
+     */
+    private int mActiveBlockedUntilTerminalCount;
+
+    /**
      * Count of {@link #mActive} broadcasts that have been dispatched since this
      * queue was last idle.
      */
@@ -304,6 +312,7 @@ class BroadcastProcessQueue {
         final SomeArgs next = mPending.removeFirst();
         mActive = (BroadcastRecord) next.arg1;
         mActiveIndex = next.argi1;
+        mActiveBlockedUntilTerminalCount = next.argi2;
         mActiveCountSinceIdle++;
         mActiveViaColdStart = false;
         next.recycle();
@@ -316,6 +325,7 @@ class BroadcastProcessQueue {
     public void makeActiveIdle() {
         mActive = null;
         mActiveIndex = 0;
+        mActiveBlockedUntilTerminalCount = -1;
         mActiveCountSinceIdle = 0;
         mActiveViaColdStart = false;
         invalidateRunnableAt();
@@ -664,27 +674,14 @@ class BroadcastProcessQueue {
         }
         pw.print(" because ");
         pw.print(reasonToString(mRunnableAtReason));
-        if (mRunnableAtReason == REASON_BLOCKED) {
-            final SomeArgs next = mPending.peekFirst();
-            if (next != null) {
-                final BroadcastRecord r = (BroadcastRecord) next.arg1;
-                final int blockedUntilTerminalCount = next.argi2;
-                pw.print(" waiting for ");
-                pw.print(blockedUntilTerminalCount);
-                pw.print(" at ");
-                pw.print(r.terminalCount);
-                pw.print(" of ");
-                pw.print(r.receivers.size());
-            }
-        }
         pw.println();
         pw.increaseIndent();
         if (mActive != null) {
-            dumpRecord(now, pw, mActive, mActiveIndex);
+            dumpRecord(now, pw, mActive, mActiveIndex, mActiveBlockedUntilTerminalCount);
         }
         for (SomeArgs args : mPending) {
             final BroadcastRecord r = (BroadcastRecord) args.arg1;
-            dumpRecord(now, pw, r, args.argi1);
+            dumpRecord(now, pw, r, args.argi1, args.argi2);
         }
         pw.decreaseIndent();
         pw.println();
@@ -692,7 +689,7 @@ class BroadcastProcessQueue {
 
     @NeverCompile
     private void dumpRecord(@UptimeMillisLong long now, @NonNull IndentingPrintWriter pw,
-            @NonNull BroadcastRecord record, int recordIndex) {
+            @NonNull BroadcastRecord record, int recordIndex, int blockedUntilTerminalCount) {
         TimeUtils.formatDuration(record.enqueueTime, now, pw);
         pw.print(' ');
         pw.println(record.toShortString());
@@ -714,5 +711,13 @@ class BroadcastProcessQueue {
             pw.print(info.activityInfo.name);
         }
         pw.println();
+        if (blockedUntilTerminalCount != -1) {
+            pw.print("    blocked until ");
+            pw.print(blockedUntilTerminalCount);
+            pw.print(", currently at ");
+            pw.print(record.terminalCount);
+            pw.print(" of ");
+            pw.println(record.receivers.size());
+        }
     }
 }

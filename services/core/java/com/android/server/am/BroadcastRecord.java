@@ -94,6 +94,7 @@ final class BroadcastRecord extends Binder {
     final @Nullable BroadcastOptions options; // BroadcastOptions supplied by caller
     final @NonNull List<Object> receivers;   // contains BroadcastFilter and ResolveInfo
     final @DeliveryState int[] delivery;   // delivery state of each receiver
+    @Nullable ProcessRecord resultToApp; // who receives final result if non-null
     @Nullable IIntentReceiver resultTo; // who receives final result if non-null
     boolean deferred;
     int splitCount;         // refcount for result callback, when split
@@ -345,7 +346,8 @@ final class BroadcastRecord extends Binder {
             boolean _callerInstantApp, String _resolvedType,
             String[] _requiredPermissions, String[] _excludedPermissions,
             String[] _excludedPackages, int _appOp,
-            BroadcastOptions _options, List _receivers, IIntentReceiver _resultTo, int _resultCode,
+            BroadcastOptions _options, List _receivers,
+            ProcessRecord _resultToApp, IIntentReceiver _resultTo, int _resultCode,
             String _resultData, Bundle _resultExtras, boolean _serialized, boolean _sticky,
             boolean _initialSticky, int _userId, boolean allowBackgroundActivityStarts,
             @Nullable IBinder backgroundActivityStartsToken, boolean timeoutExempt,
@@ -372,6 +374,7 @@ final class BroadcastRecord extends Binder {
         delivery = new int[_receivers != null ? _receivers.size() : 0];
         scheduledTime = new long[delivery.length];
         terminalTime = new long[delivery.length];
+        resultToApp = _resultToApp;
         resultTo = _resultTo;
         resultCode = _resultCode;
         resultData = _resultData;
@@ -421,6 +424,7 @@ final class BroadcastRecord extends Binder {
         delivery = from.delivery;
         scheduledTime = from.scheduledTime;
         terminalTime = from.terminalTime;
+        resultToApp = from.resultToApp;
         resultTo = from.resultTo;
         enqueueTime = from.enqueueTime;
         enqueueRealTime = from.enqueueRealTime;
@@ -480,8 +484,8 @@ final class BroadcastRecord extends Binder {
         BroadcastRecord split = new BroadcastRecord(queue, intent, callerApp, callerPackage,
                 callerFeatureId, callingPid, callingUid, callerInstantApp, resolvedType,
                 requiredPermissions, excludedPermissions, excludedPackages, appOp, options,
-                splitReceivers, resultTo, resultCode, resultData, resultExtras, ordered, sticky,
-                initialSticky, userId, allowBackgroundActivityStarts,
+                splitReceivers, resultToApp, resultTo, resultCode, resultData, resultExtras,
+                ordered, sticky, initialSticky, userId, allowBackgroundActivityStarts,
                 mBackgroundActivityStartsToken, timeoutExempt, filterExtrasForReceiver);
         split.enqueueTime = this.enqueueTime;
         split.enqueueRealTime = this.enqueueRealTime;
@@ -559,7 +563,7 @@ final class BroadcastRecord extends Binder {
             final BroadcastRecord br = new BroadcastRecord(queue, intent, callerApp, callerPackage,
                     callerFeatureId, callingPid, callingUid, callerInstantApp, resolvedType,
                     requiredPermissions, excludedPermissions, excludedPackages, appOp, options,
-                    uid2receiverList.valueAt(i), null /* _resultTo */,
+                    uid2receiverList.valueAt(i), null /* _resultToApp */, null /* _resultTo */,
                     resultCode, resultData, resultExtras, ordered, sticky, initialSticky, userId,
                     allowBackgroundActivityStarts, mBackgroundActivityStartsToken, timeoutExempt,
                     filterExtrasForReceiver);
