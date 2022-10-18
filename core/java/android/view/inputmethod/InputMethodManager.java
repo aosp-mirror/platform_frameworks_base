@@ -1117,14 +1117,19 @@ public final class InputMethodManager {
                         // Check focus again in case that "onWindowFocus" is called before
                         // handling this message.
                         final View servedView = getServedViewLocked();
-                        if (servedView != null && canStartInput(servedView)) {
-                            if (mCurRootView != null && mCurRootView.getImeFocusController()
-                                    .checkFocus(mRestartOnNextWindowFocus, false)) {
-                                final int reason = active ? StartInputReason.ACTIVATED_BY_IMMS
-                                        : StartInputReason.DEACTIVATED_BY_IMMS;
-                                startInputOnWindowFocusGainInternal(reason, null, 0, 0, 0);
-                            }
+                        if (servedView == null || !canStartInput(servedView)) {
+                            return;
                         }
+                        if (mCurRootView == null) {
+                            return;
+                        }
+                        if (!mCurRootView.getImeFocusController().checkFocus(
+                                mRestartOnNextWindowFocus, false)) {
+                            return;
+                        }
+                        final int reason = active ? StartInputReason.ACTIVATED_BY_IMMS
+                                : StartInputReason.DEACTIVATED_BY_IMMS;
+                        startInputOnWindowFocusGainInternal(reason, null, 0, 0, 0);
                     }
                     return;
                 }
