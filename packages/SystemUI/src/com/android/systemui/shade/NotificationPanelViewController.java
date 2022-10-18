@@ -689,6 +689,7 @@ public final class NotificationPanelViewController {
     private int mScreenCornerRadius;
     private boolean mQSAnimatingHiddenFromCollapsed;
     private boolean mUseLargeScreenShadeHeader;
+    private boolean mEnableQsClipping;
 
     private int mQsClipTop;
     private int mQsClipBottom;
@@ -1298,6 +1299,8 @@ public final class NotificationPanelViewController {
 
         mSplitShadeFullTransitionDistance =
                 mResources.getDimensionPixelSize(R.dimen.split_shade_full_transition_distance);
+
+        mEnableQsClipping = mResources.getBoolean(R.bool.qs_enable_clipping);
     }
 
     private void onSplitShadeEnabledChanged() {
@@ -2952,8 +2955,10 @@ public final class NotificationPanelViewController {
             mQsTranslationForFullShadeTransition = qsTranslation;
             updateQsFrameTranslation();
             float currentTranslation = mQsFrame.getTranslationY();
-            mQsClipTop = (int) (top - currentTranslation - mQsFrame.getTop());
-            mQsClipBottom = (int) (bottom - currentTranslation - mQsFrame.getTop());
+            mQsClipTop = mEnableQsClipping
+                    ? (int) (top - currentTranslation - mQsFrame.getTop()) : 0;
+            mQsClipBottom = mEnableQsClipping
+                    ? (int) (bottom - currentTranslation - mQsFrame.getTop()) : 0;
             mQsVisible = qsVisible;
             mQs.setQsVisible(mQsVisible);
             mQs.setFancyClipping(
