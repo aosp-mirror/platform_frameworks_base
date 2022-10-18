@@ -817,6 +817,39 @@ public class VibratorManagerServiceTest {
         verify(mBatteryStatsMock).noteVibratorOn(UID, 5000);
         // The second vibration shouldn't have recorded that the vibrators were turned on.
         verify(mBatteryStatsMock, times(1)).noteVibratorOn(anyInt(), anyLong());
+        // No segment played is the prebaked CLICK from the second vibration.
+        assertFalse(mVibratorProviders.get(1).getAllEffectSegments().stream()
+                .anyMatch(PrebakedSegment.class::isInstance));
+        // Clean up repeating effect.
+        service.cancelVibrate(VibrationAttributes.USAGE_FILTER_MATCH_ALL, service);
+    }
+
+    @Test
+    public void vibrate_withOngoingRepeatingVibrationBeingCancelled_playsAfterPreviousIsCancelled()
+            throws Exception {
+        mockVibrators(1);
+        FakeVibratorControllerProvider fakeVibrator = mVibratorProviders.get(1);
+        fakeVibrator.setOffLatency(50); // Add latency so cancellation is slow.
+        fakeVibrator.setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL);
+        fakeVibrator.setSupportedEffects(VibrationEffect.EFFECT_CLICK);
+        VibratorManagerService service = createSystemReadyService();
+
+        VibrationEffect repeatingEffect = VibrationEffect.createWaveform(
+                new long[]{10, 10_000}, new int[]{255, 0}, 1);
+        vibrate(service, repeatingEffect, ALARM_ATTRS);
+
+        // VibrationThread will start this vibration async, wait until the off waveform step.
+        assertTrue(waitUntil(s -> fakeVibrator.getOffCount() > 0, service, TEST_TIMEOUT_MILLIS));
+
+        // Cancel vibration right before requesting a new one.
+        // This should trigger slow IVibrator.off before setting the vibration status to cancelled.
+        service.cancelVibrate(VibrationAttributes.USAGE_FILTER_MATCH_ALL, service);
+        vibrateAndWaitUntilFinished(service, VibrationEffect.get(VibrationEffect.EFFECT_CLICK),
+                ALARM_ATTRS);
+
+        // Check that second vibration was played.
+        assertTrue(fakeVibrator.getAllEffectSegments().stream()
+                .anyMatch(PrebakedSegment.class::isInstance));
     }
 
     @Test
@@ -867,6 +900,11 @@ public class VibratorManagerServiceTest {
 
         // The second vibration shouldn't have recorded that the vibrators were turned on.
         verify(mBatteryStatsMock, times(1)).noteVibratorOn(anyInt(), anyLong());
+        // The second vibration shouldn't have played any prebaked segment.
+        assertFalse(mVibratorProviders.get(1).getAllEffectSegments().stream()
+                .anyMatch(PrebakedSegment.class::isInstance));
+        // Clean up long effect.
+        service.cancelVibrate(VibrationAttributes.USAGE_FILTER_MATCH_ALL, service);
     }
 
     @Test
