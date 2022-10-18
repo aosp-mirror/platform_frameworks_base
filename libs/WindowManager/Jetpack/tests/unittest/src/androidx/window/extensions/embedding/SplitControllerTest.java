@@ -132,6 +132,7 @@ public class SplitControllerTest {
 
     private SplitController mSplitController;
     private SplitPresenter mSplitPresenter;
+    private TransactionManager mTransactionManager;
 
     @Before
     public void setUp() {
@@ -140,8 +141,10 @@ public class SplitControllerTest {
                 .getCurrentWindowLayoutInfo(anyInt(), any());
         mSplitController = new SplitController(mWindowLayoutComponent);
         mSplitPresenter = mSplitController.mPresenter;
+        mTransactionManager = mSplitController.mTransactionManager;
         spyOn(mSplitController);
         spyOn(mSplitPresenter);
+        spyOn(mTransactionManager);
         doNothing().when(mSplitPresenter).applyTransaction(any(), anyInt(), anyBoolean());
         final Configuration activityConfig = new Configuration();
         activityConfig.windowConfiguration.setBounds(TASK_BOUNDS);
@@ -212,6 +215,8 @@ public class SplitControllerTest {
 
     @Test
     public void testOnTaskFragmentAppearEmptyTimeout() {
+        // Setup to make sure a transaction record is started.
+        mTransactionManager.startNewTransaction();
         final TaskFragmentContainer tf = mSplitController.newContainer(mActivity, TASK_ID);
         doCallRealMethod().when(mSplitController).onTaskFragmentAppearEmptyTimeout(any(), any());
         mSplitController.onTaskFragmentAppearEmptyTimeout(mTransaction, tf);
@@ -615,6 +620,8 @@ public class SplitControllerTest {
 
     @Test
     public void testResolveActivityToContainer_placeholderRule_notInTaskFragment() {
+        // Setup to make sure a transaction record is started.
+        mTransactionManager.startNewTransaction();
         setupPlaceholderRule(mActivity);
         final SplitPlaceholderRule placeholderRule =
                 (SplitPlaceholderRule) mSplitController.getSplitRules().get(0);
@@ -647,6 +654,8 @@ public class SplitControllerTest {
 
     @Test
     public void testResolveActivityToContainer_placeholderRule_inTopMostTaskFragment() {
+        // Setup to make sure a transaction record is started.
+        mTransactionManager.startNewTransaction();
         setupPlaceholderRule(mActivity);
         final SplitPlaceholderRule placeholderRule =
                 (SplitPlaceholderRule) mSplitController.getSplitRules().get(0);
@@ -679,6 +688,8 @@ public class SplitControllerTest {
 
     @Test
     public void testResolveActivityToContainer_placeholderRule_inSecondarySplit() {
+        // Setup to make sure a transaction record is started.
+        mTransactionManager.startNewTransaction();
         setupPlaceholderRule(mActivity);
         final SplitPlaceholderRule placeholderRule =
                 (SplitPlaceholderRule) mSplitController.getSplitRules().get(0);
@@ -961,6 +972,8 @@ public class SplitControllerTest {
 
     @Test
     public void testGetPlaceholderOptions() {
+        // Setup to make sure a transaction record is started.
+        mTransactionManager.startNewTransaction();
         doReturn(true).when(mActivity).isResumed();
 
         assertNull(mSplitController.getPlaceholderOptions(mActivity, false /* isOnCreated */));
@@ -1147,8 +1160,6 @@ public class SplitControllerTest {
                         + "of other properties",
                 SplitController.haveSamePresentation(splitRule1, splitRule2,
                         new WindowMetrics(TASK_BOUNDS, WindowInsets.CONSUMED)));
-
-
     }
 
     /** Creates a mock activity in the organizer process. */
