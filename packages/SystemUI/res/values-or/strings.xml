@@ -94,16 +94,11 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ଏକ ସ୍କ୍ରି‍ନ୍‍ ରେକର୍ଡ୍‍ ସେସନ୍‍ ପାଇଁ ଚାଲୁଥିବା ବିଜ୍ଞପ୍ତି"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"ରେକର୍ଡିଂ ଆରମ୍ଭ କରିବେ?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"ରେକର୍ଡିଂ ସମୟରେ, Android ସିଷ୍ଟମ୍ ଆପଣଙ୍କ ସ୍କ୍ରିନରେ ଦେଖାଯାଉଥିବା ବା ଆପଣଙ୍କ ଡିଭାଇସରେ ଚାଲୁଥିବା ଯେ କୌଣସି ସମ୍ବେଦନଶୀଳ ସୂଚନାକୁ କ୍ୟାପଚର୍ କରିପାରିବ। ଏଥିରେ ପାସୱାର୍ଡ, ପେମେଣ୍ଟ ସୂଚନା, ଫଟୋ, ମେସେଜ ଏବଂ ଅଡିଓ ଅନ୍ତର୍ଭୁକ୍ତ।"</string>
-    <!-- no translation found for screenrecord_option_entire_screen (1732437834603426934) -->
-    <skip />
-    <!-- no translation found for screenrecord_option_single_app (5954863081500035825) -->
-    <skip />
-    <!-- no translation found for screenrecord_warning_entire_screen (8141407178104195610) -->
-    <skip />
-    <!-- no translation found for screenrecord_warning_single_app (7760723997065948283) -->
-    <skip />
-    <!-- no translation found for screenrecord_start_recording (348286842544768740) -->
-    <skip />
+    <string name="screenrecord_option_entire_screen" msgid="1732437834603426934">"ସମ୍ପୂର୍ଣ୍ଣ ସ୍କ୍ରିନ ରେକର୍ଡ କର"</string>
+    <string name="screenrecord_option_single_app" msgid="5954863081500035825">"ଏକ ସିଙ୍ଗଲ ଆପ ରେକର୍ଡ କରନ୍ତୁ"</string>
+    <string name="screenrecord_warning_entire_screen" msgid="8141407178104195610">"ଆପଣ ରେକର୍ଡିଂ କରିବା ବେଳେ, ଆପଣଙ୍କ ସ୍କ୍ରିନରେ ଦେଖାଯାଉଥିବା କିମ୍ବା ଆପଣଙ୍କ ଡିଭାଇସରେ ପ୍ଲେ ହେଉଥିବା ସବୁକିଛିକୁ Androidର ଆକ୍ସେସ ଅଛି। ତେଣୁ ପାସୱାର୍ଡ, ପେମେଣ୍ଟ ବିବରଣୀ, ମେସେଜ କିମ୍ବା ଅନ୍ୟ ସମ୍ବେଦନଶୀଳ ସୂଚନା ପ୍ରତି ସତର୍କ ରୁହନ୍ତୁ।"</string>
+    <string name="screenrecord_warning_single_app" msgid="7760723997065948283">"ଆପଣ ଏକ ଆପ ରେକର୍ଡିଂ କରିବା ବେଳେ, ସେହି ଆପରେ ଦେଖାଯାଉଥିବା କିମ୍ବା ପ୍ଲେ ହେଉଥିବା ସବୁକିଛିକୁ Androidର ଆକ୍ସେସ ଅଛି। ତେଣୁ ପାସୱାର୍ଡ, ପେମେଣ୍ଟ ବିବରଣୀ, ମେସେଜ କିମ୍ବା ଅନ୍ୟ ସମ୍ବେଦନଶୀଳ ସୂଚନା ପ୍ରତି ସତର୍କ ରୁହନ୍ତୁ।"</string>
+    <string name="screenrecord_start_recording" msgid="348286842544768740">"ରେକର୍ଡିଂ ଆରମ୍ଭ କରନ୍ତୁ"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"ଅଡିଓ ରେକର୍ଡ କରନ୍ତୁ"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"ଡିଭାଇସ୍ ଅଡିଓ"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"ଆପଣଙ୍କ ଡିଭାଇସରୁ ସାଉଣ୍ଡ, ଯେପରିକି ସଙ୍ଗୀତ, କଲ୍ ଏବଂ ରିଂଟୋନଗୁଡ଼ିକ"</string>
@@ -371,20 +366,13 @@
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"ରେକର୍ଡିଂ ବା କାଷ୍ଟିଂ ବେଳେ ଆପଣଙ୍କର ଡିଭାଇସରେ ଦେଖାଯାଉଥିବା ବା ଆପଣଙ୍କ ଡିଭାଇସରୁ ପ୍ଲେ କରାଯାଉଥିବା ସବୁ ସୂଚନାକୁ ଏହି ଫଙ୍କସନ୍ ପ୍ରଦାନ କରୁଥିବା ସେବାର ଆକ୍ସେସ୍ ରହିବ। ପାସ୍‌ୱାର୍ଡ, ପେମେଣ୍ଟ ବିବରଣୀ, ଫଟୋ, ମେସେଜ୍ ଏବଂ ଆପଣ ଚଲାଉଥିବା ଅଡିଓ ପରି ସୂଚନା ଏଥିରେ ଅନ୍ତର୍ଭୁକ୍ତ ଅଛି।"</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"ରେକର୍ଡିଂ ବା କାଷ୍ଟିଂ ଆରମ୍ଭ କରିବେ?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ସହ ରେକର୍ଡିଂ ବା କାଷ୍ଟିଂ ଆରମ୍ଭ କରିବେ?"</string>
-    <!-- no translation found for media_projection_permission_dialog_title (7130975432309482596) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_option_entire_screen (392086473225692983) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_option_single_app (1591110238124910521) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_warning_entire_screen (3989078820637452717) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_warning_single_app (1659532781536753059) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_continue (1827799658916736006) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_app_selector_title (894251621057480704) -->
-    <skip />
+    <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"ସେୟାର କିମ୍ବା ରେକର୍ଡ କରିବା ପାଇଁ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>କୁ ଅନୁମତି ଦେବେ?"</string>
+    <string name="media_projection_permission_dialog_option_entire_screen" msgid="392086473225692983">"ସମ୍ପୂର୍ଣ୍ଣ ସ୍କ୍ରିନ"</string>
+    <string name="media_projection_permission_dialog_option_single_app" msgid="1591110238124910521">"ଏକ ସିଙ୍ଗଲ ଆପ"</string>
+    <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"ଆପଣ ସେୟାର, ରେକର୍ଡ କିମ୍ବା କାଷ୍ଟ କରିବା ସମୟରେ, ଆପଣଙ୍କ ସ୍କ୍ରିନରେ ଦେଖାଯାଉଥିବା କିମ୍ବା ଆପଣଙ୍କ ଡିଭାଇସରେ ପ୍ଲେ ହେଉଥିବା ସବୁକିଛିକୁ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>ର ଆକ୍ସେସ ଅଛି। ତେଣୁ ପାସୱାର୍ଡ, ପେମେଣ୍ଟ ବିବରଣୀ, ମେସେଜ କିମ୍ବା ଅନ୍ୟ ସମ୍ବେଦନଶୀଳ ସୂଚନା ପ୍ରତି ସତର୍କ ରୁହନ୍ତୁ।"</string>
+    <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"ଆପଣ ସେୟାର, ରେକର୍ଡ କିମ୍ବା କାଷ୍ଟ କରିବା ସମୟରେ, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ଆପରେ ଦେଖାଯାଉଥିବା କିମ୍ବା ପ୍ଲେ ହେଉଥିବା ସବୁକିଛିକୁ ସେହି ଆପର ଆକ୍ସେସ ଅଛି। ତେଣୁ ପାସୱାର୍ଡ, ପେମେଣ୍ଟ ବିବରଣୀ, ମେସେଜ କିମ୍ବା ଅନ୍ୟ ସମ୍ବେଦନଶୀଳ ସୂଚନା ପ୍ରତି ସତର୍କ ରୁହନ୍ତୁ।"</string>
+    <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"ଜାରି ରଖନ୍ତୁ"</string>
+    <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"ଏକ ଆପକୁ ସେୟାର କିମ୍ବା ରେକର୍ଡ କରନ୍ତୁ"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"ସମସ୍ତ ଖାଲି କରନ୍ତୁ"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"ପରିଚାଳନା କରନ୍ତୁ"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"ଇତିହାସ"</string>

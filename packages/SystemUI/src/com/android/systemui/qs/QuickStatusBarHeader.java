@@ -25,6 +25,7 @@ import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Pair;
 import android.view.DisplayCutout;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
@@ -228,6 +229,16 @@ public class QuickStatusBarHeader extends FrameLayout {
             mBatteryRemainingIcon.setPercentShowMode(BatteryMeterView.MODE_ESTIMATE);
         } else {
             mBatteryRemainingIcon.setPercentShowMode(BatteryMeterView.MODE_ON);
+        }
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        // If using combined headers, only react to touches inside QuickQSPanel
+        if (!mUseCombinedQSHeader || event.getY() > mHeaderQsPanel.getTop()) {
+            return super.onTouchEvent(event);
+        } else {
+            return false;
         }
     }
 

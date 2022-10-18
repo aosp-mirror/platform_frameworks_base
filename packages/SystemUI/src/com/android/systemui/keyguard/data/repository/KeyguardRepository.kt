@@ -21,6 +21,7 @@ import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCall
 import com.android.systemui.common.shared.model.Position
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.doze.DozeHost
+import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import javax.inject.Inject
@@ -84,6 +85,9 @@ interface KeyguardRepository {
      * for both flows if needed.
      */
     val dozeAmount: Flow<Float>
+
+    /** Observable for the [StatusBarState] */
+    val statusBarState: Flow<StatusBarState>
 
     /**
      * Returns `true` if the keyguard is showing; `false` otherwise.
@@ -185,6 +189,24 @@ constructor(
         return keyguardStateController.isShowing
     }
 
+    override val statusBarState: Flow<StatusBarState> = conflatedCallbackFlow {
+        val callback =
+            object : StatusBarStateController.StateListener {
+                override fun onStateChanged(state: Int) {
+                    trySendWithFailureLogging(statusBarStateIntToObject(state), TAG, "state")
+                }
+            }
+
+        statusBarStateController.addCallback(callback)
+        trySendWithFailureLogging(
+            statusBarStateIntToObject(statusBarStateController.getState()),
+            TAG,
+            "initial state"
+        )
+
+        awaitClose { statusBarStateController.removeCallback(callback) }
+    }
+
     override fun setAnimateDozingTransitions(animate: Boolean) {
         _animateBottomAreaDozingTransitions.value = animate
     }
@@ -195,6 +217,15 @@ constructor(
 
     override fun setClockPosition(x: Int, y: Int) {
         _clockPosition.value = Position(x, y)
+    }
+
+    private fun statusBarStateIntToObject(value: Int): StatusBarState {
+        return when (value) {
+            0 -> StatusBarState.SHADE
+            1 -> StatusBarState.KEYGUARD
+            2 -> StatusBarState.SHADE_LOCKED
+            else -> throw IllegalArgumentException("Invalid StatusBarState value: $value")
+        }
     }
 
     companion object {
