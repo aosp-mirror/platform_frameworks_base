@@ -994,7 +994,7 @@ public final class InputMethodManager {
 
             return mServedInputConnection != null
                     && mServedInputConnection.isActive()
-                    && mServedInputConnection.getServedView() == view;
+                    && mServedInputConnection.isAssociatedWith(view);
         }
     }
 
