@@ -18,14 +18,13 @@ package com.android.server.wm.flicker.launch
 
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Postsubmit
+import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.navBarLayerPositionAtEnd
-import com.android.server.wm.flicker.statusBarLayerPositionAtEnd
-import org.junit.Assume
+import com.android.server.wm.traces.common.ComponentNameMatcher
 import org.junit.FixMethodOrder
 import org.junit.Ignore
 import org.junit.Test
@@ -66,42 +65,36 @@ open class OpenAppFromLockNotificationCold(testSpec: FlickerTestParameter) :
         }
 
     /** {@inheritDoc} */
-    @FlakyTest(bugId = 229735718)
-    @Test
-    override fun entireScreenCovered() = super.entireScreenCovered()
-
-    /** {@inheritDoc} */
     @FlakyTest(bugId = 203538234)
     @Test
     override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
         super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
     /** {@inheritDoc} */
-    @FlakyTest(bugId = 203538234)
-    @Test
-    override fun appWindowBecomesTopWindow() = super.appWindowBecomesTopWindow()
-
-    /** {@inheritDoc} */
     @Test @Ignore("Display is off at the start") override fun navBarLayerPositionAtStartAndEnd() {}
-
-    /** Checks the position of the [ComponentMatcher.NAV_BAR] at the end of the transition */
-    @Postsubmit
-    @Test
-    fun navBarLayerPositionAtEnd() {
-        Assume.assumeFalse(testSpec.isTablet)
-        testSpec.navBarLayerPositionAtEnd()
-    }
 
     /** {@inheritDoc} */
     @Test
     @Ignore("Display is off at the start")
     override fun statusBarLayerPositionAtStartAndEnd() {}
 
+    /** {@inheritDoc} */
+    @Test
+    @Ignore("Display is off at the start")
+    override fun taskBarLayerIsVisibleAtStartAndEnd() {}
+
+    /** {@inheritDoc} */
+    @Test
+    @Ignore("Display is off at the start")
+    override fun statusBarLayerIsVisibleAtStartAndEnd() =
+        super.statusBarLayerIsVisibleAtStartAndEnd()
+
     /**
-     * Checks the position of the [ComponentMatcher.STATUS_BAR] at the start and end of the
+     * Checks the position of the [ComponentNameMatcher.STATUS_BAR] at the start and end of the
      * transition
      */
-    @Postsubmit @Test fun statusBarLayerPositionEnd() = testSpec.statusBarLayerPositionAtEnd()
+    @Presubmit @Test override fun statusBarLayerPositionAtEnd() =
+        super.statusBarLayerPositionAtEnd()
 
     /** {@inheritDoc} */
     @Postsubmit
@@ -109,17 +102,9 @@ open class OpenAppFromLockNotificationCold(testSpec: FlickerTestParameter) :
     override fun navBarLayerIsVisibleAtStartAndEnd() = super.navBarLayerIsVisibleAtStartAndEnd()
 
     /** {@inheritDoc} */
-    @Postsubmit
     @Test
-    override fun navBarWindowIsAlwaysVisible() = super.navBarWindowIsAlwaysVisible()
-
-    /** {@inheritDoc} */
-    @Postsubmit @Test override fun appLayerBecomesVisible() = super.appLayerBecomesVisible()
-
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun statusBarWindowIsAlwaysVisible() = super.statusBarWindowIsAlwaysVisible()
+    @Ignore("Not applicable to this CUJ. Display starts locked and app is full screen at the end")
+    override fun navBarWindowIsAlwaysVisible() {}
 
     /** {@inheritDoc} */
     @Postsubmit @Test override fun appWindowBecomesVisible() = super.appWindowBecomesVisible()
@@ -127,17 +112,8 @@ open class OpenAppFromLockNotificationCold(testSpec: FlickerTestParameter) :
     /** {@inheritDoc} */
     @Postsubmit
     @Test
-    override fun statusBarLayerIsVisibleAtStartAndEnd() =
-        super.statusBarLayerIsVisibleAtStartAndEnd()
-
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
         super.visibleLayersShownMoreThanOneConsecutiveEntry()
-
-    /** {@inheritDoc} */
-    @Postsubmit @Test override fun appWindowIsTopWindowAtEnd() = super.appWindowIsTopWindowAtEnd()
 
     companion object {
         /**
