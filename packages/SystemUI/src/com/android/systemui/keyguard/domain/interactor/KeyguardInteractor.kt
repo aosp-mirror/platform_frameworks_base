@@ -38,7 +38,7 @@ constructor(
     val dozeAmount: Flow<Float> = repository.dozeAmount
     /** Whether the system is in doze mode. */
     val isDozing: Flow<Boolean> = repository.isDozing
-    /** Whether the keyguard is showing ot not. */
+    /** Whether the keyguard is showing to not. */
     val isKeyguardShowing: Flow<Boolean> = repository.isKeyguardShowing
 
     fun isKeyguardShowing(): Boolean {

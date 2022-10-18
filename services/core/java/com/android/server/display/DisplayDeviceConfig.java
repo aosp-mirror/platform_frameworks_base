@@ -150,7 +150,7 @@ import javax.xml.datatype.DatatypeConfigurationException;
  *       <quirk>canSetBrightnessViaHwc</quirk>
  *      </quirks>
  *
- *      <autoBrightness>
+ *      <autoBrightness enable="true">
  *          <brighteningLightDebounceMillis>
  *              2000
  *          </brighteningLightDebounceMillis>
@@ -506,6 +506,11 @@ public class DisplayDeviceConfig {
     // Represents the auto-brightness darkening light debounce.
     private long mAutoBrightnessDarkeningLightDebounce =
             INVALID_AUTO_BRIGHTNESS_LIGHT_DEBOUNCE;
+
+    // This setting allows non-default displays to have autobrightness enabled.
+    private boolean mAutoBrightnessAvailable = false;
+    // This stores the raw value loaded from the config file - true if not written.
+    private boolean mDdcAutoBrightnessAvailable = true;
 
     // Brightness Throttling data may be updated via the DeviceConfig. Here we store the original
     // data, which comes from the ddc, and the current one, which may be the DeviceConfig
@@ -1119,6 +1124,10 @@ public class DisplayDeviceConfig {
         return mProximitySensor;
     }
 
+    boolean isAutoBrightnessAvailable() {
+        return mAutoBrightnessAvailable;
+    }
+
     /**
      * @param quirkValue The quirk to test.
      * @return {@code true} if the specified quirk is present in this configuration, {@code false}
@@ -1271,6 +1280,8 @@ public class DisplayDeviceConfig {
                 + mAutoBrightnessDarkeningLightDebounce
                 + ", mBrightnessLevelsLux= " + Arrays.toString(mBrightnessLevelsLux)
                 + ", mBrightnessLevelsNits= " + Arrays.toString(mBrightnessLevelsNits)
+                + ", mDdcAutoBrightnessAvailable= " + mDdcAutoBrightnessAvailable
+                + ", mAutoBrightnessAvailable= " + mAutoBrightnessAvailable
                 + "}";
     }
 
@@ -1349,6 +1360,7 @@ public class DisplayDeviceConfig {
         loadBrightnessChangeThresholdsFromXml();
         setProxSensorUnspecified();
         loadAutoBrightnessConfigsFromConfigXml();
+        loadAutoBrightnessAvailableFromConfigXml();
         mLoadedFrom = "<config.xml>";
     }
 
@@ -1367,6 +1379,7 @@ public class DisplayDeviceConfig {
         setSimpleMappingStrategyValues();
         loadAmbientLightSensorFromConfigXml();
         setProxSensorUnspecified();
+        loadAutoBrightnessAvailableFromConfigXml();
     }
 
     private void copyUninitializedValuesFromSecondaryConfig(DisplayConfiguration defaultConfig) {
@@ -1559,9 +1572,11 @@ public class DisplayDeviceConfig {
     }
 
     private void loadAutoBrightnessConfigValues(DisplayConfiguration config) {
-        loadAutoBrightnessBrighteningLightDebounce(config.getAutoBrightness());
-        loadAutoBrightnessDarkeningLightDebounce(config.getAutoBrightness());
-        loadAutoBrightnessDisplayBrightnessMapping(config.getAutoBrightness());
+        final AutoBrightness autoBrightness = config.getAutoBrightness();
+        loadAutoBrightnessBrighteningLightDebounce(autoBrightness);
+        loadAutoBrightnessDarkeningLightDebounce(autoBrightness);
+        loadAutoBrightnessDisplayBrightnessMapping(autoBrightness);
+        loadEnableAutoBrightness(autoBrightness);
     }
 
     /**
@@ -1621,6 +1636,11 @@ public class DisplayDeviceConfig {
                         .getDisplayBrightnessPoint().get(i).getLux().floatValue();
             }
         }
+    }
+
+    private void loadAutoBrightnessAvailableFromConfigXml() {
+        mAutoBrightnessAvailable = mContext.getResources().getBoolean(
+                R.bool.config_automatic_brightness_available);
     }
 
     private void loadBrightnessMapFromConfigXml() {
@@ -2261,6 +2281,20 @@ public class DisplayDeviceConfig {
             levels[i + 1] = (float) lux[i];
         }
         return levels;
+    }
+
+    private void loadEnableAutoBrightness(AutoBrightness autobrightness) {
+        // mDdcAutoBrightnessAvailable is initialised to true, so that we fallback to using the
+        // config.xml values if the autobrightness tag is not defined in the ddc file.
+        // Autobrightness can still be turned off globally via config_automatic_brightness_available
+        mDdcAutoBrightnessAvailable = true;
+        if (autobrightness != null) {
+            mDdcAutoBrightnessAvailable = autobrightness.getEnabled();
+        }
+
+        mAutoBrightnessAvailable = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_automatic_brightness_available)
+                && mDdcAutoBrightnessAvailable;
     }
 
     static class SensorData {

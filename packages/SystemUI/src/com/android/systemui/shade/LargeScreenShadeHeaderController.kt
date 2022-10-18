@@ -280,6 +280,9 @@ class LargeScreenShadeHeaderController @Inject constructor(
                     context.getString(com.android.internal.R.string.status_bar_alarm_clock)
             )
         }
+        if (combinedHeaders) {
+            privacyIconsController.onParentVisible()
+        }
     }
 
     override fun onViewAttached() {
