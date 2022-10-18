@@ -260,4 +260,20 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
         verify(mWindowManager).updateViewLayout(any(), mLayoutParameters.capture());
         assertThat((mLayoutParameters.getValue().flags & FLAG_SECURE) == 0).isTrue();
     }
+
+    @Test
+    public void setKeyguardShowing_enablesSecureFlag() {
+        mNotificationShadeWindowController.setBouncerShowing(true);
+
+        verify(mWindowManager).updateViewLayout(any(), mLayoutParameters.capture());
+        assertThat((mLayoutParameters.getValue().flags & FLAG_SECURE) != 0).isTrue();
+    }
+
+    @Test
+    public void setKeyguardNotShowing_disablesSecureFlag() {
+        mNotificationShadeWindowController.setBouncerShowing(false);
+
+        verify(mWindowManager).updateViewLayout(any(), mLayoutParameters.capture());
+        assertThat((mLayoutParameters.getValue().flags & FLAG_SECURE) == 0).isTrue();
+    }
 }
