@@ -62,6 +62,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.DumpUtils;
 import com.android.server.LocalServices;
 import com.android.server.Watchdog;
@@ -107,9 +108,14 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     private final Object mLock = new Object();
 
     private final UserManagerInternal mUserManagerInternal;
+
+    @GuardedBy("mLock")
     private final SparseArray<UserRecord> mUserRecords = new SparseArray<>();
+    @GuardedBy("mLock")
     private final ArrayMap<IBinder, ClientRecord> mAllClientRecords = new ArrayMap<>();
+    @GuardedBy("mLock")
     private int mCurrentActiveUserId = -1;
+
     private final IAudioService mAudioService;
     private final AudioPlayerStateMonitor mAudioPlayerStateMonitor;
     private final Handler mHandler = new Handler();
@@ -682,6 +688,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         }
     }
 
+    @GuardedBy("mLock")
     private void registerClientLocked(IMediaRouterClient client,
             int uid, int pid, String packageName, int userId, boolean trusted) {
         final IBinder binder = client.asBinder();
@@ -711,6 +718,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         }
     }
 
+    @GuardedBy("mLock")
     private void registerClientGroupIdLocked(IMediaRouterClient client, String groupId) {
         final IBinder binder = client.asBinder();
         ClientRecord clientRecord = mAllClientRecords.get(binder);
@@ -735,6 +743,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         }
     }
 
+    @GuardedBy("mLock")
     private void unregisterClientLocked(IMediaRouterClient client, boolean died) {
         ClientRecord clientRecord = mAllClientRecords.remove(client.asBinder());
         if (clientRecord != null) {
@@ -749,6 +758,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         }
     }
 
+    @GuardedBy("mLock")
     private MediaRouterClientState getStateLocked(IMediaRouterClient client) {
         ClientRecord clientRecord = mAllClientRecords.get(client.asBinder());
         if (clientRecord != null) {
@@ -757,6 +767,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         return null;
     }
 
+    @GuardedBy("mLock")
     private void setDiscoveryRequestLocked(IMediaRouterClient client,
             int routeTypes, boolean activeScan) {
         final IBinder binder = client.asBinder();
@@ -781,6 +792,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         }
     }
 
+    @GuardedBy("mLock")
     private void setSelectedRouteLocked(IMediaRouterClient client,
             String routeId, boolean explicit) {
         ClientRecord clientRecord = mAllClientRecords.get(client.asBinder());
@@ -831,6 +843,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         }
     }
 
+    @GuardedBy("mLock")
     private void requestSetVolumeLocked(IMediaRouterClient client,
             String routeId, int volume) {
         final IBinder binder = client.asBinder();
@@ -841,6 +854,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         }
     }
 
+    @GuardedBy("mLock")
     private void requestUpdateVolumeLocked(IMediaRouterClient client,
             String routeId, int direction) {
         final IBinder binder = client.asBinder();
@@ -851,6 +865,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         }
     }
 
+    @GuardedBy("mLock")
     private void initializeUserLocked(UserRecord userRecord) {
         if (DEBUG) {
             Slog.d(TAG, userRecord + ": Initialized");
@@ -860,6 +875,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         }
     }
 
+    @GuardedBy("mLock")
     private void disposeUserIfNeededLocked(UserRecord userRecord) {
         // If there are no records left and the user is no longer current then go ahead
         // and purge the user record and all of its associated state.  If the user is current
@@ -878,16 +894,19 @@ public final class MediaRouterService extends IMediaRouterService.Stub
      * Returns {@code true} if the given {@code userId} corresponds to the active user or a profile
      * of the active user, returns {@code false} otherwise.
      */
+    @GuardedBy("mLock")
     private boolean isUserActiveLocked(int userId) {
         return mUserManagerInternal.getProfileParentId(userId) == mCurrentActiveUserId;
     }
 
+    @GuardedBy("mLock")
     private void initializeClientLocked(ClientRecord clientRecord) {
         if (DEBUG) {
             Slog.d(TAG, clientRecord + ": Registered");
         }
     }
 
+    @GuardedBy("mLock")
     private void disposeClientLocked(ClientRecord clientRecord, boolean died) {
         if (DEBUG) {
             if (died) {
