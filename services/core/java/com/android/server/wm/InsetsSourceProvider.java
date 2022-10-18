@@ -48,6 +48,7 @@ import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
+import android.view.WindowInsets;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
@@ -455,8 +456,9 @@ abstract class InsetsSourceProvider {
         }
         final Point surfacePosition = getWindowFrameSurfacePosition();
         mAdapter = new ControlAdapter(surfacePosition);
-        if (getSource().getType() == ITYPE_IME) {
-            setClientVisible(target.getRequestedVisibility(mSource.getType()));
+        final int type = getSource().getType();
+        if (type == ITYPE_IME) {
+            setClientVisible(target.isRequestedVisible(WindowInsets.Type.ime()));
         }
         final Transaction t = mDisplayContent.getSyncTransaction();
         mWindowContainer.startAnimation(t, mAdapter, !mClientVisible /* hidden */,
@@ -469,8 +471,8 @@ abstract class InsetsSourceProvider {
         final SurfaceControl leash = mAdapter.mCapturedLeash;
         mControlTarget = target;
         updateVisibility();
-        mControl = new InsetsSourceControl(mSource.getType(), leash, mClientVisible,
-                surfacePosition, mInsetsHint);
+        mControl = new InsetsSourceControl(type, leash, mClientVisible, surfacePosition,
+                mInsetsHint);
 
         ProtoLog.d(WM_DEBUG_WINDOW_INSETS,
                 "InsetsSource Control %s for target %s", mControl, mControlTarget);
@@ -488,7 +490,8 @@ abstract class InsetsSourceProvider {
     }
 
     boolean updateClientVisibility(InsetsControlTarget caller) {
-        final boolean requestedVisible = caller.getRequestedVisibility(mSource.getType());
+        final boolean requestedVisible =
+                caller.isRequestedVisible(InsetsState.toPublicType(mSource.getType()));
         if (caller != mControlTarget || requestedVisible == mClientVisible) {
             return false;
         }

@@ -177,8 +177,8 @@ class InsetsPolicy {
                         : navControlTarget == notificationShade
                                 ? getNavControlTarget(topApp, true /* fake */)
                                 : null);
-        mStatusBar.updateVisibility(statusControlTarget, ITYPE_STATUS_BAR);
-        mNavBar.updateVisibility(navControlTarget, ITYPE_NAVIGATION_BAR);
+        mStatusBar.updateVisibility(statusControlTarget, Type.statusBars());
+        mNavBar.updateVisibility(navControlTarget, Type.navigationBars());
     }
 
     boolean isHidden(@InternalInsetsType int type) {
@@ -455,7 +455,7 @@ class InsetsPolicy {
 
             if (originalImeSource != null) {
                 final boolean imeVisibility =
-                        w.mActivityRecord.mLastImeShown || w.getRequestedVisibility(ITYPE_IME);
+                        w.mActivityRecord.mLastImeShown || w.isRequestedVisible(Type.ime());
                 final InsetsState state = copyState ? new InsetsState(originalState)
                         : originalState;
                 final InsetsSource imeSource = new InsetsSource(originalImeSource);
@@ -501,11 +501,11 @@ class InsetsPolicy {
     private void checkAbortTransient(InsetsControlTarget caller) {
         if (mShowingTransientTypes.size() != 0) {
             final IntArray abortTypes = new IntArray();
-            final boolean imeRequestedVisible = caller.getRequestedVisibility(ITYPE_IME);
+            final boolean imeRequestedVisible = caller.isRequestedVisible(Type.ime());
             for (int i = mShowingTransientTypes.size() - 1; i >= 0; i--) {
                 final @InternalInsetsType int type = mShowingTransientTypes.get(i);
                 if ((mStateController.isFakeTarget(type, caller)
-                                && caller.getRequestedVisibility(type))
+                                && caller.isRequestedVisible(InsetsState.toPublicType(type)))
                         || (type == ITYPE_NAVIGATION_BAR && imeRequestedVisible)) {
                     mShowingTransientTypes.remove(i);
                     abortTypes.add(type);
@@ -734,8 +734,8 @@ class InsetsPolicy {
         }
 
         private void updateVisibility(@Nullable InsetsControlTarget controlTarget,
-                @InternalInsetsType int type) {
-            setVisible(controlTarget == null || controlTarget.getRequestedVisibility(type));
+                @Type.InsetsType int type) {
+            setVisible(controlTarget == null || controlTarget.isRequestedVisible(type));
         }
 
         private void setVisible(boolean visible) {

@@ -1459,7 +1459,8 @@ public final class WindowInsets {
             }
         }
 
-        static String toString(@InsetsType int types) {
+        /** @hide */
+        public static String toString(@InsetsType int types) {
             StringBuilder result = new StringBuilder();
             if ((types & STATUS_BARS) != 0) {
                 result.append("statusBars |");

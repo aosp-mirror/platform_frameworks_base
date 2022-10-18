@@ -47,7 +47,6 @@ import static android.view.Display.STATE_UNKNOWN;
 import static android.view.Display.isSuspendedState;
 import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_LEFT_GESTURES;
-import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_RIGHT_GESTURES;
 import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_270;
@@ -55,6 +54,7 @@ import static android.view.Surface.ROTATION_90;
 import static android.view.View.GONE;
 import static android.view.WindowInsets.Type.displayCutout;
 import static android.view.WindowInsets.Type.ime;
+import static android.view.WindowInsets.Type.navigationBars;
 import static android.view.WindowInsets.Type.systemBars;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
@@ -216,7 +216,6 @@ import android.view.InputDevice;
 import android.view.InsetsSource;
 import android.view.InsetsState;
 import android.view.InsetsState.InternalInsetsType;
-import android.view.InsetsVisibilities;
 import android.view.MagnificationSpec;
 import android.view.PrivacyIndicatorBounds;
 import android.view.RemoteAnimationDefinition;
@@ -789,11 +788,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // higher window hierarchy, we don't give it focus if the next IME layering target
         // doesn't request IME visible.
         if (w.mIsImWindow && w.isChildWindow() && (mImeLayeringTarget == null
-                || !mImeLayeringTarget.getRequestedVisibility(ITYPE_IME))) {
+                || !mImeLayeringTarget.isRequestedVisible(ime()))) {
             return false;
         }
         if (w.mAttrs.type == TYPE_INPUT_METHOD_DIALOG && mImeLayeringTarget != null
-                && !mImeLayeringTarget.getRequestedVisibility(ITYPE_IME)
+                && !mImeLayeringTarget.isRequestedVisible(ime())
                 && !mImeLayeringTarget.isVisibleRequested()) {
             return false;
         }
@@ -2060,7 +2059,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // is opened for logging metrics.
         if (mWmService.mAccessibilityController.hasCallbacks()) {
             final boolean isImeShow = mImeControlTarget != null
-                    && mImeControlTarget.getRequestedVisibility(ITYPE_IME);
+                    && mImeControlTarget.isRequestedVisible(ime());
             mWmService.mAccessibilityController.updateImeVisibilityIfNeeded(mDisplayId, isImeShow);
         }
     }
@@ -5685,7 +5684,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         final int type = win.mAttrs.type;
         final int privateFlags = win.mAttrs.privateFlags;
         final boolean stickyHideNav =
-                !win.getRequestedVisibility(ITYPE_NAVIGATION_BAR)
+                !win.isRequestedVisible(navigationBars())
                         && win.mAttrs.insetsFlags.behavior == BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
         return (!stickyHideNav || ignoreRequest) && type != TYPE_INPUT_METHOD
                 && type != TYPE_NOTIFICATION_SHADE && win.getActivityType() != ACTIVITY_TYPE_HOME
@@ -6695,7 +6694,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     class RemoteInsetsControlTarget implements InsetsControlTarget {
         private final IDisplayWindowInsetsController mRemoteInsetsController;
-        private final InsetsVisibilities mRequestedVisibilities = new InsetsVisibilities();
         private @InsetsType int mRequestedVisibleTypes = WindowInsets.Type.defaultVisible();
         private final boolean mCanShowTransient;
 
@@ -6764,19 +6762,15 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
 
         @Override
-        public boolean getRequestedVisibility(@InternalInsetsType int type) {
-            if (type == ITYPE_IME) {
+        public boolean isRequestedVisible(@InsetsType int types) {
+            if (types == ime()) {
                 return getInsetsStateController().getImeSourceProvider().isImeShowing();
             }
-            return mRequestedVisibilities.getVisibility(type);
+            return (mRequestedVisibleTypes & types) != 0;
         }
 
-        /**
-         * Returns requested visible types of insets.
-         *
-         * @return an integer as the requested visible insets types.
-         */
-        @InsetsType int getRequestedVisibleTypes() {
+        @Override
+        public @InsetsType int getRequestedVisibleTypes() {
             return mRequestedVisibleTypes;
         }
 
@@ -6786,18 +6780,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         void setRequestedVisibleTypes(@InsetsType int requestedVisibleTypes) {
             if (mRequestedVisibleTypes != requestedVisibleTypes) {
                 mRequestedVisibleTypes = requestedVisibleTypes;
-
-                // TODO (253420890): Remove this when removing mRequestedVisibilities.
-                final @InsetsType int defaultVisibleTypes = WindowInsets.Type.defaultVisible();
-                final InsetsVisibilities insetsVisibilities = new InsetsVisibilities();
-                for (@InternalInsetsType int i = InsetsState.SIZE - 1; i >= 0; i--) {
-                    @InsetsType int type = InsetsState.toPublicType(i);
-                    if ((type & (requestedVisibleTypes ^ defaultVisibleTypes)) != 0) {
-                        // We only set the visibility if it is different from the default one.
-                        insetsVisibilities.setVisibility(i, (type & requestedVisibleTypes) != 0);
-                    }
-                }
-                mRequestedVisibilities.set(insetsVisibilities);
             }
         }
     }

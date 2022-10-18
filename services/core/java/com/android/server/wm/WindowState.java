@@ -30,7 +30,6 @@ import static android.os.PowerManager.DRAW_WAKE_LOCK;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_INVALID;
-import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.SurfaceControl.Transaction;
 import static android.view.SurfaceControl.getGlobalTransaction;
 import static android.view.ViewRootImpl.LOCAL_LAYOUT;
@@ -41,6 +40,7 @@ import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_
 import static android.view.WindowCallbacks.RESIZE_MODE_DOCKED_DIVIDER;
 import static android.view.WindowCallbacks.RESIZE_MODE_FREEFORM;
 import static android.view.WindowCallbacks.RESIZE_MODE_INVALID;
+import static android.view.WindowInsets.Type.navigationBars;
 import static android.view.WindowInsets.Type.systemBars;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 import static android.view.WindowLayout.UNSPECIFIED_LENGTH;
@@ -233,7 +233,6 @@ import android.view.InputWindowHandle;
 import android.view.InsetsSource;
 import android.view.InsetsState;
 import android.view.InsetsState.InternalInsetsType;
-import android.view.InsetsVisibilities;
 import android.view.Surface;
 import android.view.Surface.Rotation;
 import android.view.SurfaceControl;
@@ -767,8 +766,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     private boolean mIsDimming = false;
 
-    private final InsetsVisibilities mRequestedVisibilities = new InsetsVisibilities();
-
     private @InsetsType int mRequestedVisibleTypes = WindowInsets.Type.defaultVisible();
 
     /**
@@ -835,24 +832,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     private int mSurfaceTranslationY;
 
-    /**
-     * Returns the visibility of the given {@link InternalInsetsType type} requested by the client.
-     *
-     * @param type the given {@link InternalInsetsType type}.
-     * @return {@code true} if the type is requested visible.
-     */
     @Override
-    public boolean getRequestedVisibility(@InternalInsetsType int type) {
-        return mRequestedVisibilities.getVisibility(type);
-    }
-
-    /**
-     * Returns all the requested visibilities.
-     *
-     * @return an {@link InsetsVisibilities} as the requested visibilities.
-     */
-    InsetsVisibilities getRequestedVisibilities() {
-        return mRequestedVisibilities;
+    public boolean isRequestedVisible(@InsetsType int types) {
+        return (mRequestedVisibleTypes & types) != 0;
     }
 
     /**
@@ -860,7 +842,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      *
      * @return an integer as the requested visible insets types.
      */
-    @InsetsType int getRequestedVisibleTypes() {
+    @Override
+    public @InsetsType int getRequestedVisibleTypes() {
         return mRequestedVisibleTypes;
     }
 
@@ -870,18 +853,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     void setRequestedVisibleTypes(@InsetsType int requestedVisibleTypes) {
         if (mRequestedVisibleTypes != requestedVisibleTypes) {
             mRequestedVisibleTypes = requestedVisibleTypes;
-
-            // TODO (253420890): Remove this when removing mRequestedVisibilities.
-            final @InsetsType int defaultVisibleTypes = WindowInsets.Type.defaultVisible();
-            final InsetsVisibilities insetsVisibilities = new InsetsVisibilities();
-            for (@InternalInsetsType int i = InsetsState.SIZE - 1; i >= 0; i--) {
-                @InsetsType int type = InsetsState.toPublicType(i);
-                if ((type & (requestedVisibleTypes ^ defaultVisibleTypes)) != 0) {
-                    // We only set the visibility if it is different from the default one.
-                    insetsVisibilities.setVisibility(i, (type & requestedVisibleTypes) != 0);
-                }
-            }
-            mRequestedVisibilities.set(insetsVisibilities);
         }
     }
 
@@ -1003,7 +974,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     boolean isImplicitlyExcludingAllSystemGestures() {
         final boolean stickyHideNav =
                 mAttrs.insetsFlags.behavior == BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-                        && !getRequestedVisibility(ITYPE_NAVIGATION_BAR);
+                        && !isRequestedVisible(navigationBars());
         return stickyHideNav && mWmService.mConstants.mSystemGestureExcludedByPreQStickyImmersive
                 && mActivityRecord != null && mActivityRecord.mTargetSdk < Build.VERSION_CODES.Q;
     }
@@ -1748,7 +1719,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     InsetsState getInsetsStateWithVisibilityOverride() {
         final InsetsState state = new InsetsState(getInsetsState());
         for (@InternalInsetsType int type = 0; type < InsetsState.SIZE; type++) {
-            final boolean requestedVisible = getRequestedVisibility(type);
+            final boolean requestedVisible = isRequestedVisible(InsetsState.toPublicType(type));
             InsetsSource source = state.peekSource(type);
             if (source != null && source.isVisible() != requestedVisible) {
                 source = new InsetsSource(source);
@@ -4466,9 +4437,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         pw.println(prefix + "keepClearAreas: restricted=" + mKeepClearAreas
                           + ", unrestricted=" + mUnrestrictedKeepClearAreas);
         if (dumpAll) {
-            final String visibilityString = mRequestedVisibilities.toString();
-            if (!visibilityString.isEmpty()) {
-                pw.println(prefix + "Requested visibilities: " + visibilityString);
+            if (mRequestedVisibleTypes != WindowInsets.Type.defaultVisible()) {
+                pw.println(prefix + "Requested non-default-visibility types: "
+                        + WindowInsets.Type.toString(
+                                mRequestedVisibleTypes ^ WindowInsets.Type.defaultVisible()));
             }
         }
 
