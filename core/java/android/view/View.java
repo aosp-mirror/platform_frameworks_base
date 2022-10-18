@@ -5063,6 +5063,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private boolean mHoveringTouchDelegate = false;
 
     /**
+     * Configuration for this view to act as a handwriting initiation delegate. This allows
+     * handwriting mode for a delegator editor view to be initiated by stylus movement on this
+     * delegate view.
+     */
+    private HandwritingDelegateConfiguration mHandwritingDelegateConfiguration;
+
+    /**
      * Solid color to use as a background when creating the drawing cache. Enables
      * the cache to use 16 bit bitmaps instead of 32 bit.
      */
@@ -12252,6 +12259,30 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (ai != null) {
             ai.mViewRootImpl.getHandwritingInitiator().updateHandwritingAreasForView(this);
         }
+    }
+
+    /**
+     * Configures this view to act as a handwriting initiation delegate. This allows handwriting
+     * mode for a delegator editor view to be initiated by stylus movement on this delegate view.
+     *
+     * <p>If {@code null} is passed, this view will no longer act as a handwriting initiation
+     * delegate.
+     */
+    public void setHandwritingDelegateConfiguration(
+            @Nullable HandwritingDelegateConfiguration configuration) {
+        mHandwritingDelegateConfiguration = configuration;
+        if (configuration != null) {
+            setHandwritingArea(new Rect(0, 0, getWidth(), getHeight()));
+        }
+    }
+
+    /**
+     * If this view has been configured as a handwriting initiation delegate, returns the delegate
+     * configuration.
+     */
+    @Nullable
+    public HandwritingDelegateConfiguration getHandwritingDelegateConfiguration() {
+        return mHandwritingDelegateConfiguration;
     }
 
     /**
@@ -24205,7 +24236,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
         }
         rebuildOutline();
-        if (onCheckIsTextEditor()) {
+        if (onCheckIsTextEditor() || mHandwritingDelegateConfiguration != null) {
             setHandwritingArea(new Rect(0, 0, newWidth, newHeight));
         }
     }
