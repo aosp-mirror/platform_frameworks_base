@@ -2533,6 +2533,10 @@ public class ActivityRecordTests extends WindowTestsBase {
         // Can specify orientation if app doesn't occludes parent.
         assertEquals(SCREEN_ORIENTATION_LANDSCAPE, activity.getOrientation());
 
+        doReturn(true).when(activity).shouldIgnoreOrientationRequests();
+        assertEquals(SCREEN_ORIENTATION_UNSET, activity.getOrientation());
+
+        doReturn(false).when(activity).shouldIgnoreOrientationRequests();
         activity.setOccludesParent(true);
         activity.setVisible(false);
         activity.setVisibleRequested(false);
