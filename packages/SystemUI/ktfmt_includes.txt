@@ -246,8 +246,6 @@
 -packages/SystemUI/src/com/android/systemui/media/taptotransfer/receiver/MediaTttReceiverLogger.kt
 -packages/SystemUI/src/com/android/systemui/media/taptotransfer/receiver/ReceiverChipRippleView.kt
 -packages/SystemUI/src/com/android/systemui/media/taptotransfer/sender/ChipStateSender.kt
--packages/SystemUI/src/com/android/systemui/media/taptotransfer/sender/MediaTttChipControllerSender.kt
--packages/SystemUI/src/com/android/systemui/media/taptotransfer/sender/MediaTttChipRootView.kt
 -packages/SystemUI/src/com/android/systemui/media/taptotransfer/sender/MediaTttSenderLogger.kt
 -packages/SystemUI/src/com/android/systemui/media/taptotransfer/sender/MediaTttSenderUiEventLogger.kt
 -packages/SystemUI/src/com/android/systemui/navigationbar/gestural/BackPanel.kt
@@ -528,6 +526,8 @@
 -packages/SystemUI/src/com/android/systemui/statusbar/window/StatusBarWindowStateController.kt
 -packages/SystemUI/src/com/android/systemui/temporarydisplay/TemporaryViewInfo.kt
 -packages/SystemUI/src/com/android/systemui/temporarydisplay/TemporaryViewDisplayController.kt
+-packages/SystemUI/src/com/android/systemui/temporarydisplay/chipbar/ChipbarCoordinator.kt
+-packages/SystemUI/src/com/android/systemui/temporarydisplay/chipbar/ChipbarRootView.kt
 -packages/SystemUI/src/com/android/systemui/toast/ToastDefaultAnimation.kt
 -packages/SystemUI/src/com/android/systemui/toast/ToastLogger.kt
 -packages/SystemUI/src/com/android/systemui/tv/TVSystemUICoreStartableModule.kt
@@ -678,7 +678,6 @@
 -packages/SystemUI/tests/src/com/android/systemui/media/taptotransfer/MediaTttCommandLineHelperTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/media/taptotransfer/common/MediaTttLoggerTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/media/taptotransfer/receiver/MediaTttChipControllerReceiverTest.kt
--packages/SystemUI/tests/src/com/android/systemui/media/taptotransfer/sender/MediaTttChipControllerSenderTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/media/taptotransfer/sender/MediaTttSenderUiEventLoggerTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/navigationbar/gestural/FloatingRotationButtonPositionCalculatorTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/privacy/AppOpsPrivacyItemMonitorTest.kt
@@ -833,6 +832,7 @@
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/policy/WalletControllerImplTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/window/StatusBarWindowStateControllerTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/temporarydisplay/TemporaryViewDisplayControllerTest.kt
+-packages/SystemUI/tests/src/com/android/systemui/temporarydisplay/chipbar/ChipbarCoordinatorTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/unfold/FoldStateLoggingProviderTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/unfold/UnfoldLatencyTrackerTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/unfold/UnfoldTransitionWallpaperControllerTest.kt

@@ -253,7 +253,7 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
         accessibilityManager,
         configurationController,
         powerManager,
-        R.layout.media_ttt_chip,
+        R.layout.chipbar,
         "Window Title",
         "WAKE_REASON",
     ) {
