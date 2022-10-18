@@ -628,8 +628,9 @@ class MediaRouter2ServiceImpl {
                     mUserRecords.valueAt(i).dump(pw, indent + "  ");
                 }
             } else {
-                pw.println(indent + "<no user records>");
+                pw.println(indent + "  <no user records>");
             }
+            mEventLogger.dump(pw, indent);
         }
     }
 
@@ -1382,8 +1383,6 @@ class MediaRouter2ServiceImpl {
             if (!mHandler.runWithScissors(() -> mHandler.dump(pw, indent), 1000)) {
                 pw.println(indent + "<could not dump handler state>");
             }
-
-            mEventLogger.dump(pw, indent);
         }
     }
 
