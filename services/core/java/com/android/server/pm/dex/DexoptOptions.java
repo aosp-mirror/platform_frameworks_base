@@ -40,10 +40,6 @@ public final class DexoptOptions {
     // will only consider the primary apk.
     public static final int DEXOPT_ONLY_SECONDARY_DEX = 1 << 3;
 
-    // When set, dexopt will optimize only dex files that are used by other apps.
-    // Currently, this flag is ignored for primary apks.
-    public static final int DEXOPT_ONLY_SHARED_DEX = 1 << 4;
-
     // When set, dexopt will attempt to scale down the optimizations previously applied in order
     // save disk space.
     public static final int DEXOPT_DOWNGRADE = 1 << 5;
@@ -105,7 +101,6 @@ public final class DexoptOptions {
                 DEXOPT_FORCE |
                 DEXOPT_BOOT_COMPLETE |
                 DEXOPT_ONLY_SECONDARY_DEX |
-                DEXOPT_ONLY_SHARED_DEX |
                 DEXOPT_DOWNGRADE |
                 DEXOPT_AS_SHARED_LIBRARY |
                 DEXOPT_IDLE_BACKGROUND_JOB |
@@ -144,10 +139,6 @@ public final class DexoptOptions {
 
     public boolean isDexoptOnlySecondaryDex() {
         return (mFlags & DEXOPT_ONLY_SECONDARY_DEX) != 0;
-    }
-
-    public boolean isDexoptOnlySharedDex() {
-        return (mFlags & DEXOPT_ONLY_SHARED_DEX) != 0;
     }
 
     public boolean isDowngrade() {

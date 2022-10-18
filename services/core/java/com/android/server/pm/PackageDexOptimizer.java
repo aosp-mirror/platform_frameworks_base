@@ -652,12 +652,6 @@ public class PackageDexOptimizer {
     @DexOptResult
     private int dexOptSecondaryDexPathLI(ApplicationInfo info, String path,
             PackageDexUsage.DexUseInfo dexUseInfo, DexoptOptions options) {
-        if (options.isDexoptOnlySharedDex() && !dexUseInfo.isUsedByOtherApps()) {
-            // We are asked to optimize only the dex files used by other apps and this is not
-            // on of them: skip it.
-            return DEX_OPT_SKIPPED;
-        }
-
         String compilerFilter = getRealCompilerFilter(info, options.getCompilerFilter(),
                 dexUseInfo.isUsedByOtherApps());
         // Get the dexopt flags after getRealCompilerFilter to make sure we get the correct flags.
