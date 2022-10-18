@@ -89,24 +89,6 @@ static sp<Surface> getSurface(JNIEnv* env, jobject surface) {
 
 extern "C" {
 
-static jint SurfaceUtils_nativeDetectSurfaceType(JNIEnv* env, jobject thiz, jobject surface) {
-    ALOGV("nativeDetectSurfaceType");
-    sp<ANativeWindow> anw;
-    if ((anw = getNativeWindow(env, surface)) == NULL) {
-        ALOGE("%s: Could not retrieve native window from surface.", __FUNCTION__);
-        return BAD_VALUE;
-    }
-    int32_t fmt = 0;
-    status_t err = anw->query(anw.get(), NATIVE_WINDOW_FORMAT, &fmt);
-    if (err != NO_ERROR) {
-        ALOGE("%s: Error while querying surface pixel format %s (%d).", __FUNCTION__,
-              strerror(-err), err);
-        OVERRIDE_SURFACE_ERROR(err);
-        return err;
-    }
-    return fmt;
-}
-
 static jint SurfaceUtils_nativeDetectSurfaceDataspace(JNIEnv* env, jobject thiz, jobject surface) {
     ALOGV("nativeDetectSurfaceDataspace");
     sp<ANativeWindow> anw;
@@ -122,6 +104,27 @@ static jint SurfaceUtils_nativeDetectSurfaceDataspace(JNIEnv* env, jobject thiz,
         OVERRIDE_SURFACE_ERROR(err);
         return err;
     }
+    return fmt;
+}
+
+static jint SurfaceUtils_nativeDetectSurfaceType(JNIEnv* env, jobject thiz, jobject surface) {
+    ALOGV("nativeDetectSurfaceType");
+    sp<ANativeWindow> anw;
+    if ((anw = getNativeWindow(env, surface)) == NULL) {
+        ALOGE("%s: Could not retrieve native window from surface.", __FUNCTION__);
+        return BAD_VALUE;
+    }
+    int32_t halFmt = 0;
+    status_t err = anw->query(anw.get(), NATIVE_WINDOW_FORMAT, &halFmt);
+    if (err != NO_ERROR) {
+        ALOGE("%s: Error while querying surface pixel format %s (%d).", __FUNCTION__,
+              strerror(-err), err);
+        OVERRIDE_SURFACE_ERROR(err);
+        return err;
+    }
+    int32_t dataspace = SurfaceUtils_nativeDetectSurfaceDataspace(env, thiz, surface);
+    int32_t fmt = static_cast<int32_t>(
+            mapHalFormatDataspaceToPublicFormat(halFmt, static_cast<android_dataspace>(dataspace)));
     return fmt;
 }
 
