@@ -68,7 +68,7 @@ class CreatePasskeyViewModel(
     }
   }
 
-  fun onMoreOptionSelected(providerName: String) {
+  fun onMoreOptionsSelected(providerName: String) {
     uiState = uiState.copy(
         currentScreenState = CreateScreenState.MORE_OPTIONS_SELECTION,
         selectedProvider = getProviderInfoByName(providerName)
@@ -79,6 +79,13 @@ class CreatePasskeyViewModel(
     uiState = uiState.copy(
         currentScreenState = CreateScreenState.CREATION_OPTION_SELECTION,
         selectedProvider = getProviderInfoByName(providerName)
+    )
+  }
+
+  fun onMoreOptionsRowSelected(providerName: String) {
+    uiState = uiState.copy(
+      currentScreenState = CreateScreenState.MORE_OPTIONS_ROW_INTRO,
+      selectedProvider = getProviderInfoByName(providerName)
     )
   }
 }

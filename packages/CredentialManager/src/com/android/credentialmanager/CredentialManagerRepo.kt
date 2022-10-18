@@ -92,30 +92,38 @@ class CredentialManagerRepo(
       ProviderData(
         "com.google",
         listOf<Entry>(
-          newEntry(1, "elisa.beckett@gmail.com", "Elisa Backett"),
-          newEntry(2, "elisa.work@google.com", "Elisa Backett Work"),
+          newEntry(1, "elisa.beckett@gmail.com", "Elisa Backett",
+            "20 passwords and 7 passkeys saved"),
+          newEntry(2, "elisa.work@google.com", "Elisa Backett Work",
+            "20 passwords and 7 passkeys saved"),
         ),
         listOf<Entry>(
-          newEntry(3, "Go to Settings", ""),
-          newEntry(4, "Switch Account", ""),
+          newEntry(3, "Go to Settings", "",
+            "20 passwords and 7 passkeys saved"),
+          newEntry(4, "Switch Account", "",
+            "20 passwords and 7 passkeys saved"),
         ),
         null
       ),
       ProviderData(
         "com.dashlane",
         listOf<Entry>(
-          newEntry(5, "elisa.beckett@dashlane.com", "Elisa Backett"),
-          newEntry(6, "elisa.work@dashlane.com", "Elisa Backett Work"),
+          newEntry(5, "elisa.beckett@dashlane.com", "Elisa Backett",
+            "20 passwords and 7 passkeys saved"),
+          newEntry(6, "elisa.work@dashlane.com", "Elisa Backett Work",
+            "20 passwords and 7 passkeys saved"),
         ),
         listOf<Entry>(
-          newEntry(7, "Manage Accounts", "Manage your accounts in the dashlane app"),
+          newEntry(7, "Manage Accounts", "Manage your accounts in the dashlane app",
+            "20 passwords and 7 passkeys saved"),
         ),
         null
       ),
       ProviderData(
         "com.lastpass",
         listOf<Entry>(
-          newEntry(8, "elisa.beckett@lastpass.com", "Elisa Backett"),
+          newEntry(8, "elisa.beckett@lastpass.com", "Elisa Backett",
+            "20 passwords and 7 passkeys saved"),
         ),
         listOf<Entry>(),
         null
@@ -124,7 +132,7 @@ class CredentialManagerRepo(
     )
   }
 
-  private fun newEntry(id: Int, title: String, subtitle: String): Entry {
+  private fun newEntry(id: Int, title: String, subtitle: String, usageData: String): Entry {
     val slice = Slice.Builder(
       Entry.CREDENTIAL_MANAGER_ENTRY_URI, SliceSpec(Entry.VERSION, 1)
     )
@@ -134,6 +142,7 @@ class CredentialManagerRepo(
         Icon.createWithResource(context, R.drawable.ic_passkey),
         null,
         listOf(Entry.HINT_ICON))
+      .addText(usageData, Slice.SUBTYPE_MESSAGE, listOf(Entry.HINT_SUBTITLE))
       .build()
     return Entry(
       id,

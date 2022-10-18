@@ -31,6 +31,7 @@ data class CredentialOptionInfo(
   val title: String,
   val subtitle: String,
   val id: Int,
+  val usageData: String
 )
 
 /** The name of the current screen. */
