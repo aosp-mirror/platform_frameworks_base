@@ -83,7 +83,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         whenever(mediaTttFlags.isMediaTttEnabled()).thenReturn(true)
-        whenever(accessibilityManager.getRecommendedTimeoutMillis(any(), any())).thenReturn(1000)
+        whenever(accessibilityManager.getRecommendedTimeoutMillis(any(), any())).thenReturn(TIMEOUT)
 
         fakeClock = FakeSystemClock()
         fakeExecutor = FakeExecutor(fakeClock)
@@ -316,7 +316,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
     }
 
     @Test
-    fun transferToReceiverTriggeredThenFarFromReceiver_viewStillDisplayed() {
+    fun transferToReceiverTriggeredThenFarFromReceiver_viewStillDisplayedButStillTimesOut() {
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_TRIGGERED,
             routeInfo,
@@ -332,10 +332,14 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
 
         verify(windowManager, never()).removeView(any())
         verify(logger).logRemovalBypass(any(), any())
+
+        fakeClock.advanceTime(TIMEOUT + 1L)
+
+        verify(windowManager).removeView(any())
     }
 
     @Test
-    fun transferToThisDeviceTriggeredThenFarFromReceiver_viewStillDisplayed() {
+    fun transferToThisDeviceTriggeredThenFarFromReceiver_viewStillDisplayedButDoesTimeOut() {
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_TRIGGERED,
             routeInfo,
@@ -351,10 +355,14 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
 
         verify(windowManager, never()).removeView(any())
         verify(logger).logRemovalBypass(any(), any())
+
+        fakeClock.advanceTime(TIMEOUT + 1L)
+
+        verify(windowManager).removeView(any())
     }
 
     @Test
-    fun transferToReceiverSucceededThenFarFromReceiver_viewStillDisplayed() {
+    fun transferToReceiverSucceededThenFarFromReceiver_viewStillDisplayedButDoesTimeOut() {
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED,
             routeInfo,
@@ -370,10 +378,14 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
 
         verify(windowManager, never()).removeView(any())
         verify(logger).logRemovalBypass(any(), any())
+
+        fakeClock.advanceTime(TIMEOUT + 1L)
+
+        verify(windowManager).removeView(any())
     }
 
     @Test
-    fun transferToThisDeviceSucceededThenFarFromReceiver_viewStillDisplayed() {
+    fun transferToThisDeviceSucceededThenFarFromReceiver_viewStillDisplayedButDoesTimeOut() {
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_SUCCEEDED,
             routeInfo,
@@ -389,6 +401,10 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
 
         verify(windowManager, never()).removeView(any())
         verify(logger).logRemovalBypass(any(), any())
+
+        fakeClock.advanceTime(TIMEOUT + 1L)
+
+        verify(windowManager).removeView(any())
     }
 
     private fun getChipView(): ViewGroup {
@@ -434,6 +450,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
 }
 
 private const val OTHER_DEVICE_NAME = "My Tablet"
+private const val TIMEOUT = 10000
 
 private val routeInfo =
     MediaRoute2Info.Builder("id", OTHER_DEVICE_NAME)

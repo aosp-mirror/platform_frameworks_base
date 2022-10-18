@@ -131,7 +131,7 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
        )
         cancelViewTimeout?.run()
         cancelViewTimeout = mainExecutor.executeDelayed(
-            { removeView(TemporaryDisplayRemovalReason.REASON_TIMEOUT) },
+            { removeView(REMOVAL_REASON_TIMEOUT) },
             timeout.toLong()
         )
     }
@@ -175,9 +175,6 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
      */
     fun removeView(removalReason: String) {
         val currentDisplayInfo = displayInfo ?: return
-        if (shouldIgnoreViewRemoval(currentDisplayInfo.info, removalReason)) {
-            return
-        }
 
         val currentView = currentDisplayInfo.view
         animateViewOut(currentView) { windowManager.removeView(currentView) }
@@ -191,13 +188,6 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
         // No need to time the view out since it's already gone
         cancelViewTimeout?.run()
     }
-
-    /**
-     * Returns true if a view removal request should be ignored and false otherwise.
-     *
-     * Allows subclasses to keep the view visible for longer in certain circumstances.
-     */
-    open fun shouldIgnoreViewRemoval(info: T, removalReason: String): Boolean = false
 
     /**
      * A method implemented by subclasses to update [currentView] based on [newInfo].
@@ -236,10 +226,7 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
     )
 }
 
-object TemporaryDisplayRemovalReason {
-    const val REASON_TIMEOUT = "TIMEOUT"
-    const val REASON_SCREEN_TAP = "SCREEN_TAP"
-}
+private const val REMOVAL_REASON_TIMEOUT = "TIMEOUT"
 
 private data class IconInfo(
     val iconName: String,
