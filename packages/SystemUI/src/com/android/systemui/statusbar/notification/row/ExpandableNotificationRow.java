@@ -1487,7 +1487,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             l.setAlpha(alpha);
         }
         if (mChildrenContainer != null) {
-            mChildrenContainer.setContentAlpha(alpha);
+            mChildrenContainer.setAlpha(alpha);
         }
     }
 
