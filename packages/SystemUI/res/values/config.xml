@@ -771,4 +771,8 @@
         <item>@color/dream_overlay_aqi_very_unhealthy</item>
         <item>@color/dream_overlay_aqi_hazardous</item>
     </integer-array>
+
+    <!-- Whether the device should display hotspot UI. If true, UI will display only when tethering
+         is available. If false, UI will never show regardless of tethering availability" -->
+    <bool name="config_show_wifi_tethering">true</bool>
 </resources>
