@@ -250,7 +250,7 @@ public class LogModule {
     /**
      * Provides a buffer for our connections and disconnections to MediaBrowserService.
      *
-     * See {@link com.android.systemui.media.ResumeMediaBrowser}.
+     * See {@link com.android.systemui.media.controls.resume.ResumeMediaBrowser}.
      */
     @Provides
     @SysUISingleton
@@ -262,7 +262,7 @@ public class LogModule {
     /**
      * Provides a buffer for updates to the media carousel.
      *
-     * See {@link com.android.systemui.media.MediaCarouselController}.
+     * See {@link com.android.systemui.media.controls.ui.MediaCarouselController}.
      */
     @Provides
     @SysUISingleton
