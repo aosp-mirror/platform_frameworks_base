@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.media.taptotransfer.sender
+package com.android.systemui.temporarydisplay.chipbar
 
 import android.content.Context
 import android.util.AttributeSet
@@ -22,8 +22,8 @@ import android.view.MotionEvent
 import android.widget.FrameLayout
 import com.android.systemui.Gefingerpoken
 
-/** A simple subclass that allows for observing touch events on chip. */
-class MediaTttChipRootView(
+/** A simple subclass that allows for observing touch events on chipbar. */
+class ChipbarRootView(
         context: Context,
         attrs: AttributeSet?
 ) : FrameLayout(context, attrs) {
