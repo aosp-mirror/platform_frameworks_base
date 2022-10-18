@@ -3914,6 +3914,23 @@ public class DevicePolicyManager {
         throw new SecurityException("not implemented");
     }
 
+    // TODO: Expose this as SystemAPI once we add the query API
+    /**
+     * @hide
+     */
+    public static final String AUTO_TIMEZONE_POLICY = "autoTimezone";
+
+    // TODO: Expose this as SystemAPI once we add the query API
+    /**
+     * @hide
+     */
+    public static String PERMISSION_GRANT_POLICY(
+            @NonNull String packageName, @NonNull String permission) {
+        Objects.requireNonNull(packageName);
+        Objects.requireNonNull(permission);
+        return "permissionGrant_" + packageName + "_" + permission;
+    }
+
     /**
      * This object is a single place to tack on invalidation and disable calls.  All
      * binder caches in this class derive from this Config, so all can be invalidated or
