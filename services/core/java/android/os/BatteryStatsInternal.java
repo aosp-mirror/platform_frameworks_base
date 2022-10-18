@@ -27,7 +27,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.Collection;
 import java.util.List;
 
-
 /**
  * Battery stats local system service interface. This is used to pass internal data out of
  * BatteryStatsImpl, as well as make unchecked calls into BatteryStatsImpl.
