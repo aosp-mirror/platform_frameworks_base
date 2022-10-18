@@ -740,12 +740,13 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         // Animation length is already expected to be scaled.
         va.overrideDurationScale(1.0f);
         va.setDuration(anim.computeDurationHint());
-        va.addUpdateListener(animation -> {
+        final ValueAnimator.AnimatorUpdateListener updateListener = animation -> {
             final long currentPlayTime = Math.min(va.getDuration(), va.getCurrentPlayTime());
 
             applyTransformation(currentPlayTime, transaction, leash, anim, transformation, matrix,
                     position, cornerRadius, clipRect);
-        });
+        };
+        va.addUpdateListener(updateListener);
 
         final Runnable finisher = () -> {
             applyTransformation(va.getDuration(), transaction, leash, anim, transformation, matrix,
@@ -758,20 +759,30 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             });
         };
         va.addListener(new AnimatorListenerAdapter() {
+            // It is possible for the end/cancel to be called more than once, which may cause
+            // issues if the animating surface has already been released. Track the finished
+            // state here to skip duplicate callbacks. See b/252872225.
             private boolean mFinished = false;
 
             @Override
             public void onAnimationEnd(Animator animation) {
-                if (mFinished) return;
-                mFinished = true;
-                finisher.run();
+                onFinish();
             }
 
             @Override
             public void onAnimationCancel(Animator animation) {
+                onFinish();
+            }
+
+            private void onFinish() {
                 if (mFinished) return;
                 mFinished = true;
                 finisher.run();
+                // The update listener can continue to be called after the animation has ended if
+                // end() is called manually again before the finisher removes the animation.
+                // Remove it manually here to prevent animating a released surface.
+                // See b/252872225.
+                va.removeUpdateListener(updateListener);
             }
         });
         animations.add(va);
