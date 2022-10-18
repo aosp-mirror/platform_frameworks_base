@@ -1506,6 +1506,30 @@ public class UserManager {
     public static final String DISALLOW_CELLULAR_2G = "no_cellular_2g";
 
     /**
+     * This user restriction specifies if Ultra-wideband is disallowed on the device. If
+     * Ultra-wideband is disallowed it cannot be turned on via Settings.
+     *
+     * <p>This restriction can only be set by a device owner or a profile owner of an
+     * organization-owned managed profile on the parent profile.
+     * In both cases, the restriction applies globally on the device and will turn off the
+     * ultra-wideband radio if it's currently on and prevent the radio from being turned on in
+     * the future.
+     *
+     * <p>
+     * Ultra-wideband (UWB) is a radio technology that can use a very low energy level
+     * for short-range, high-bandwidth communications over a large portion of the radio spectrum.
+     *
+     * <p>Default is <code>false</code>.
+     *
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_ULTRA_WIDEBAND_RADIO = "no_ultra_wideband_radio";
+
+    /**
      * List of key values that can be passed into the various user restriction related methods
      * in {@link UserManager} & {@link DevicePolicyManager}.
      * Note: This is slightly different from the real set of user restrictions listed in {@link
@@ -1587,6 +1611,7 @@ public class UserManager {
             DISALLOW_WIFI_DIRECT,
             DISALLOW_ADD_WIFI_CONFIG,
             DISALLOW_CELLULAR_2G,
+            DISALLOW_ULTRA_WIDEBAND_RADIO,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface UserRestrictionKey {}

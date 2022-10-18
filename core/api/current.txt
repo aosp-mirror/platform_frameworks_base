@@ -32615,6 +32615,7 @@ package android.os {
     field public static final String DISALLOW_SHARING_ADMIN_CONFIGURED_WIFI = "no_sharing_admin_configured_wifi";
     field public static final String DISALLOW_SMS = "no_sms";
     field public static final String DISALLOW_SYSTEM_ERROR_DIALOGS = "no_system_error_dialogs";
+    field public static final String DISALLOW_ULTRA_WIDEBAND_RADIO = "no_ultra_wideband_radio";
     field public static final String DISALLOW_UNIFIED_PASSWORD = "no_unified_password";
     field public static final String DISALLOW_UNINSTALL_APPS = "no_uninstall_apps";
     field public static final String DISALLOW_UNMUTE_MICROPHONE = "no_unmute_microphone";
