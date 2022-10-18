@@ -30,6 +30,18 @@ enum class LogCategory {
     VIEW,
 }
 
+// Defines the log events in Spa.
+enum class LogEvent {
+    // Page related events.
+    PAGE_ENTER,
+    PAGE_LEAVE,
+
+    // Entry related events.
+    ENTRY_CLICK,
+    ENTRY_SWITCH_ON,
+    ENTRY_SWITCH_OFF,
+}
+
 /**
  * The interface of logger in Spa
  */
@@ -38,7 +50,13 @@ interface SpaLogger {
     fun message(tag: String, msg: String, category: LogCategory = LogCategory.DEFAULT) {}
 
     // log a user event.
-    fun event(id: String, event: String, category: LogCategory = LogCategory.DEFAULT) {}
+    fun event(
+        id: String,
+        event: LogEvent,
+        category: LogCategory = LogCategory.DEFAULT,
+        details: String? = null
+    ) {
+    }
 }
 
 class LocalLogger : SpaLogger {
@@ -46,7 +64,8 @@ class LocalLogger : SpaLogger {
         Log.d("SpaMsg-$category", "[$tag] $msg")
     }
 
-    override fun event(id: String, event: String, category: LogCategory) {
-        Log.d("SpaEvent-$category", "[$id] $event")
+    override fun event(id: String, event: LogEvent, category: LogCategory, details: String?) {
+        val extraMsg = if (details == null) "" else " ($details)"
+        Log.d("SpaEvent-$category", "[$id] $event$extraMsg")
     }
 }
