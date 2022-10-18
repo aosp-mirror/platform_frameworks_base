@@ -1296,6 +1296,7 @@ public class MediaRecorder implements AudioRouting,
      * start() or before setOutputFormat().
      * @throws IOException if prepare fails otherwise.
      */
+    @RequiresPermission(value = android.Manifest.permission.RECORD_AUDIO, conditional = true)
     public void prepare() throws IllegalStateException, IOException
     {
         if (mPath != null) {
@@ -1334,6 +1335,7 @@ public class MediaRecorder implements AudioRouting,
      * @throws IllegalStateException if it is called before
      * prepare() or when the camera is already in use by another app.
      */
+    @RequiresPermission(value = android.Manifest.permission.RECORD_AUDIO, conditional = true)
     public native void start() throws IllegalStateException;
 
     /**
