@@ -1717,7 +1717,7 @@ public final class InputMethodManager {
     public boolean isAcceptingText() {
         checkFocus();
         synchronized (mH) {
-            return mServedInputConnection != null && !mServedInputConnection.isFinished();
+            return mServedInputConnection != null;
         }
     }
 
