@@ -1348,6 +1348,13 @@ public class BatteryStatsImpl extends BatteryStats {
     LongSamplingCounter mMobileRadioActiveUnknownTime;
     LongSamplingCounter mMobileRadioActiveUnknownCount;
 
+    /**
+     * The soonest the Mobile Radio stats can be updated due to a mobile radio power state change
+     * after it was last updated.
+     */
+    @VisibleForTesting
+    protected static final long MOBILE_RADIO_POWER_STATE_UPDATE_FREQ_MS = 1000 * 60 * 10;
+
     int mWifiRadioPowerState = DataConnectionRealTimeInfo.DC_POWER_STATE_LOW;
 
     @GuardedBy("this")
@@ -6282,6 +6289,15 @@ public class BatteryStatsImpl extends BatteryStats {
             } else {
                 mMobileRadioActiveTimer.stopRunningLocked(realElapsedRealtimeMs);
                 mMobileRadioActivePerAppTimer.stopRunningLocked(realElapsedRealtimeMs);
+
+                if (mLastModemActivityInfo != null) {
+                    if (elapsedRealtimeMs < mLastModemActivityInfo.getTimestampMillis()
+                            + MOBILE_RADIO_POWER_STATE_UPDATE_FREQ_MS) {
+                        // Modem Activity info has been collected recently, don't bother
+                        // triggering another update.
+                        return false;
+                    }
+                }
                 // Tell the caller to collect radio network/power stats.
                 return true;
             }
