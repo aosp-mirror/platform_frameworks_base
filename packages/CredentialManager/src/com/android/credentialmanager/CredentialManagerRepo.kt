@@ -16,6 +16,7 @@
 
 package com.android.credentialmanager
 
+import android.app.Activity
 import android.app.slice.Slice
 import android.app.slice.SliceSpec
 import android.content.Context
@@ -23,8 +24,11 @@ import android.content.Intent
 import android.credentials.ui.Entry
 import android.credentials.ui.ProviderData
 import android.credentials.ui.RequestInfo
+import android.credentials.ui.UserSelectionResult
 import android.graphics.drawable.Icon
 import android.os.Binder
+import android.os.Bundle
+import android.os.ResultReceiver
 import com.android.credentialmanager.createflow.CreatePasskeyUiState
 import com.android.credentialmanager.createflow.CreateScreenState
 import com.android.credentialmanager.getflow.GetCredentialUiState
@@ -37,6 +41,8 @@ class CredentialManagerRepo(
 ) {
   private val requestInfo: RequestInfo
   private val providerList: List<ProviderData>
+  // TODO: require non-null.
+  val resultReceiver: ResultReceiver?
 
   init {
     requestInfo = intent.extras?.getParcelable(
@@ -52,6 +58,29 @@ class CredentialManagerRepo(
       ProviderData.EXTRA_PROVIDER_DATA_LIST,
       ProviderData::class.java
     ) ?: testProviderList()
+
+    resultReceiver = intent.getParcelableExtra(
+      RequestInfo.EXTRA_RESULT_RECEIVER,
+      ResultReceiver::class.java
+    )
+  }
+
+  fun onCancel() {
+    resultReceiver?.send(Activity.RESULT_CANCELED, null)
+  }
+
+  fun onOptionSelected(providerPackageName: String, entryId: Int) {
+    val userSelectionResult = UserSelectionResult(
+      requestInfo.token,
+      providerPackageName,
+      entryId
+    )
+    val resultData = Bundle()
+    resultData.putParcelable(
+      UserSelectionResult.EXTRA_USER_SELECTION_RESULT,
+      userSelectionResult
+    )
+    resultReceiver?.send(Activity.RESULT_OK, resultData)
   }
 
   fun getCredentialInitialUiState(): GetCredentialUiState {

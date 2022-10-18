@@ -38,7 +38,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.credentialmanager.R
 import com.android.credentialmanager.ui.theme.Grey100
 import com.android.credentialmanager.ui.theme.Shapes
@@ -50,8 +49,7 @@ import com.android.credentialmanager.ui.theme.lightSurface1
 @ExperimentalMaterialApi
 @Composable
 fun CreatePasskeyScreen(
-  viewModel: CreatePasskeyViewModel = viewModel(),
-  cancelActivity: () -> Unit,
+  viewModel: CreatePasskeyViewModel,
 ) {
   val state = rememberModalBottomSheetState(
     initialValue = ModalBottomSheetValue.Expanded,
@@ -64,17 +62,17 @@ fun CreatePasskeyScreen(
       when (uiState.currentScreenState) {
         CreateScreenState.PASSKEY_INTRO -> ConfirmationCard(
           onConfirm = {viewModel.onConfirmIntro()},
-          onCancel = cancelActivity,
+          onCancel = {viewModel.onCancel()},
         )
         CreateScreenState.PROVIDER_SELECTION -> ProviderSelectionCard(
           providerList = uiState.providers,
-          onCancel = cancelActivity,
+          onCancel = {viewModel.onCancel()},
           onProviderSelected = {viewModel.onProviderSelected(it)}
         )
         CreateScreenState.CREATION_OPTION_SELECTION -> CreationSelectionCard(
           providerInfo = uiState.selectedProvider!!,
           onOptionSelected = {viewModel.onCreateOptionSelected(it)},
-          onCancel = cancelActivity,
+          onCancel = {viewModel.onCancel()},
           multiProvider = uiState.providers.size > 1,
           onMoreOptionsSelected = {viewModel.onMoreOptionsSelected(it)}
         )
@@ -93,7 +91,7 @@ fun CreatePasskeyScreen(
   ) {}
   LaunchedEffect(state.currentValue) {
     if (state.currentValue == ModalBottomSheetValue.Hidden) {
-      cancelActivity()
+      viewModel.onCancel()
     }
   }
 }
