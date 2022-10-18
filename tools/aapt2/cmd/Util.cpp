@@ -447,4 +447,41 @@ std::regex GetRegularExpression(const std::string &input) {
   return case_insensitive;
 }
 
+bool ParseResourceConfig(const std::string& content, IAaptContext* context,
+                         std::unordered_set<ResourceName>& out_resource_exclude_list,
+                         std::set<ResourceName>& out_name_collapse_exemptions) {
+  for (StringPiece line : util::Tokenize(content, '\n')) {
+    line = util::TrimWhitespace(line);
+    if (line.empty()) {
+      continue;
+    }
+
+    auto split_line = util::Split(line, '#');
+    if (split_line.size() < 2) {
+      context->GetDiagnostics()->Error(android::DiagMessage(line) << "No # found in line");
+      return false;
+    }
+    StringPiece resource_string = split_line[0];
+    StringPiece directives = split_line[1];
+    ResourceNameRef resource_name;
+    if (!ResourceUtils::ParseResourceName(resource_string, &resource_name)) {
+      context->GetDiagnostics()->Error(android::DiagMessage(line) << "Malformed resource name");
+      return false;
+    }
+    if (!resource_name.package.empty()) {
+      context->GetDiagnostics()->Error(android::DiagMessage(line)
+                                       << "Package set for resource. Only use type/name");
+      return false;
+    }
+    for (StringPiece directive : util::Tokenize(directives, ',')) {
+      if (directive == "remove") {
+        out_resource_exclude_list.insert(resource_name.ToResourceName());
+      } else if (directive == "no_collapse" || directive == "no_obfuscate") {
+        out_name_collapse_exemptions.insert(resource_name.ToResourceName());
+      }
+    }
+  }
+  return true;
+}
+
 }  // namespace aapt

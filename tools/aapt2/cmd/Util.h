@@ -18,12 +18,15 @@
 #define AAPT_SPLIT_UTIL_H
 
 #include <regex>
+#include <set>
+#include <unordered_set>
 
 #include "AppInfo.h"
 #include "SdkConstants.h"
 #include "androidfw/IDiagnostics.h"
 #include "androidfw/StringPiece.h"
 #include "filter/ConfigFilter.h"
+#include "process/IResourceTableConsumer.h"
 #include "split/TableSplitter.h"
 #include "xml/XmlDom.h"
 
@@ -75,6 +78,10 @@ void SetLongVersionCode(xml::Element* manifest, uint64_t version_code);
 
 // Returns a case insensitive regular expression based on the input.
 std::regex GetRegularExpression(const std::string &input);
+
+bool ParseResourceConfig(const std::string& content, IAaptContext* context,
+                         std::unordered_set<ResourceName>& out_resource_exclude_list,
+                         std::set<ResourceName>& out_name_collapse_exemptions);
 
 }  // namespace aapt
 

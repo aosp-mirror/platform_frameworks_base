@@ -21,7 +21,9 @@
 #include "Diagnostics.h"
 #include "LoadedApk.h"
 #include "ValueVisitor.h"
+#include "android-base/file.h"
 #include "android-base/macros.h"
+#include "android-base/stringprintf.h"
 #include "androidfw/StringPiece.h"
 #include "cmd/Util.h"
 #include "format/binary/TableFlattener.h"
@@ -353,6 +355,27 @@ int Convert(IAaptContext* context, LoadedApk* apk, IArchiveWriter* output_writer
   return 0;
 }
 
+bool ExtractResourceConfig(const std::string& path, IAaptContext* context,
+                           TableFlattenerOptions& out_options) {
+  std::string content;
+  if (!android::base::ReadFileToString(path, &content, true /*follow_symlinks*/)) {
+    context->GetDiagnostics()->Error(android::DiagMessage(path) << "failed reading config file");
+    return false;
+  }
+  std::unordered_set<ResourceName> resources_exclude_list;
+  bool result = ParseResourceConfig(content, context, resources_exclude_list,
+                                    out_options.name_collapse_exemptions);
+  if (!result) {
+    return false;
+  }
+  if (!resources_exclude_list.empty()) {
+    context->GetDiagnostics()->Error(android::DiagMessage(path)
+                                     << "Unsupported '#remove' directive in resource config.");
+    return false;
+  }
+  return true;
+}
+
 const char* ConvertCommand::kOutputFormatProto = "proto";
 const char* ConvertCommand::kOutputFormatBinary = "binary";
 
@@ -400,6 +423,11 @@ int ConvertCommand::Action(const std::vector<std::string>& args) {
   }
   if (force_sparse_encoding_) {
     table_flattener_options_.sparse_entries = SparseEntriesMode::Forced;
+  }
+  if (resources_config_path_) {
+    if (!ExtractResourceConfig(*resources_config_path_, &context, table_flattener_options_)) {
+      return 1;
+    }
   }
 
   return Convert(&context, apk.get(), writer.get(), format, table_flattener_options_,
