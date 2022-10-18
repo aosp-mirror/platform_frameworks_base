@@ -16,6 +16,9 @@
 
 package com.android.server.dreams;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
+
+import android.app.ActivityTaskManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -34,8 +37,6 @@ import android.os.UserHandle;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamService;
 import android.util.Slog;
-import android.view.IWindowManager;
-import android.view.WindowManagerGlobal;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -60,7 +61,7 @@ final class DreamController {
     private final Context mContext;
     private final Handler mHandler;
     private final Listener mListener;
-    private final IWindowManager mIWindowManager;
+    private final ActivityTaskManager mActivityTaskManager;
     private long mDreamStartTime;
     private String mSavedStopReason;
 
@@ -93,7 +94,7 @@ final class DreamController {
         mContext = context;
         mHandler = handler;
         mListener = listener;
-        mIWindowManager = WindowManagerGlobal.getWindowManagerService();
+        mActivityTaskManager = mContext.getSystemService(ActivityTaskManager.class);
         mCloseNotificationShadeIntent = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         mCloseNotificationShadeIntent.putExtra("reason", "dream");
     }
@@ -228,6 +229,8 @@ final class DreamController {
                 mContext.unbindService(oldDream);
             }
             oldDream.releaseWakeLockIfNeeded();
+
+            mActivityTaskManager.removeRootTasksWithActivityTypes(new int[] {ACTIVITY_TYPE_DREAM});
 
             mHandler.post(() -> mListener.onDreamStopped(oldDream.mToken));
         } finally {
