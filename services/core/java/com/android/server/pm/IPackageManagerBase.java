@@ -492,7 +492,7 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
     @Override
     @Deprecated
     public final String getInstallerPackageName(@NonNull String packageName) {
-        return snapshot().getInstallerPackageName(packageName);
+        return snapshot().getInstallerPackageName(packageName, UserHandle.getCallingUserId());
     }
 
     @Override
