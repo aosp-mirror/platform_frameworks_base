@@ -39324,6 +39324,7 @@ package android.service.notification {
     field public static final int HINT_HOST_DISABLE_CALL_EFFECTS = 4; // 0x4
     field public static final int HINT_HOST_DISABLE_EFFECTS = 1; // 0x1
     field public static final int HINT_HOST_DISABLE_NOTIFICATION_EFFECTS = 2; // 0x2
+    field public static final String INTENT_CATEGORY_SETTINGS_HOME = "android.service.notification.category.SETTINGS_HOME";
     field public static final int INTERRUPTION_FILTER_ALARMS = 4; // 0x4
     field public static final int INTERRUPTION_FILTER_ALL = 1; // 0x1
     field public static final int INTERRUPTION_FILTER_NONE = 3; // 0x3
