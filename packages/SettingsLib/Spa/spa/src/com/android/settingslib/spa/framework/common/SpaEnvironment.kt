@@ -24,18 +24,16 @@ private const val TAG = "SpaEnvironment"
 object SpaEnvironmentFactory {
     private var spaEnvironment: SpaEnvironment? = null
 
-    var instance: SpaEnvironment
+    fun reset(env: SpaEnvironment) {
+        spaEnvironment = env
+        Log.d(TAG, "reset")
+    }
+
+    val instance: SpaEnvironment
         get() {
             if (spaEnvironment == null)
                 throw UnsupportedOperationException("Spa environment is not set")
             return spaEnvironment!!
-        }
-        set(env: SpaEnvironment) {
-            if (spaEnvironment != null) {
-                Log.w(TAG, "Spa environment is already set, ignore the latter one.")
-                return
-            }
-            spaEnvironment = env
         }
 }
 
@@ -47,6 +45,8 @@ abstract class SpaEnvironment {
     open val browseActivityClass: Class<out Activity>? = null
 
     open val entryProviderAuthorities: String? = null
+
+    open val logger: SpaLogger = object : SpaLogger {}
 
     // TODO: add other environment setup here.
 }

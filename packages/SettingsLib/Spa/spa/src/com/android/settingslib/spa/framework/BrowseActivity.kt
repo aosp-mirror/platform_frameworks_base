@@ -17,20 +17,25 @@
 package com.android.settingslib.spa.framework
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.android.settingslib.spa.R
+import com.android.settingslib.spa.framework.common.LogCategory
 import com.android.settingslib.spa.framework.common.SpaEnvironmentFactory
+import com.android.settingslib.spa.framework.common.createSettingsPage
 import com.android.settingslib.spa.framework.compose.LocalNavController
 import com.android.settingslib.spa.framework.compose.NavControllerWrapperImpl
 import com.android.settingslib.spa.framework.compose.localNavController
@@ -62,7 +67,7 @@ open class BrowseActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R.style.Theme_SpaLib_DayNight)
         super.onCreate(savedInstanceState)
-        Log.d(TAG, "onCreate")
+        spaEnvironment.logger.message(TAG, "onCreate", category = LogCategory.FRAMEWORK)
 
         setContent {
             SettingsTheme {
@@ -78,11 +83,43 @@ open class BrowseActivity : ComponentActivity() {
         CompositionLocalProvider(navController.localNavController()) {
             NavHost(navController, NULL_PAGE_NAME) {
                 composable(NULL_PAGE_NAME) {}
-                for (page in sppRepository.getAllProviders()) {
+                for (spp in sppRepository.getAllProviders()) {
                     composable(
-                        route = page.name + page.parameter.navRoute(),
-                        arguments = page.parameter,
-                    ) { navBackStackEntry -> page.Page(navBackStackEntry.arguments) }
+                        route = spp.name + spp.parameter.navRoute(),
+                        arguments = spp.parameter,
+                    ) { navBackStackEntry ->
+                        val lifecycleOwner = LocalLifecycleOwner.current
+                        val spaLogger = spaEnvironment.logger
+                        val sp = spp.createSettingsPage(arguments = navBackStackEntry.arguments)
+
+                        DisposableEffect(lifecycleOwner) {
+                            val observer = LifecycleEventObserver { _, event ->
+                                if (event == Lifecycle.Event.ON_START) {
+                                    spaLogger.event(
+                                        sp.id,
+                                        "enter page ${sp.formatDisplayTitle()}",
+                                        category = LogCategory.FRAMEWORK
+                                    )
+                                } else if (event == Lifecycle.Event.ON_STOP) {
+                                    spaLogger.event(
+                                        sp.id,
+                                        "leave page ${sp.formatDisplayTitle()}",
+                                        category = LogCategory.FRAMEWORK
+                                    )
+                                }
+                            }
+
+                            // Add the observer to the lifecycle
+                            lifecycleOwner.lifecycle.addObserver(observer)
+
+                            // When the effect leaves the Composition, remove the observer
+                            onDispose {
+                                lifecycleOwner.lifecycle.removeObserver(observer)
+                            }
+                        }
+
+                        spp.Page(navBackStackEntry.arguments)
+                    }
                 }
             }
             InitialDestinationNavigator()

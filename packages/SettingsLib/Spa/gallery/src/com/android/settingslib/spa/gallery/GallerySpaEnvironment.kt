@@ -16,6 +16,7 @@
 
 package com.android.settingslib.spa.gallery
 
+import com.android.settingslib.spa.framework.common.LocalLogger
 import com.android.settingslib.spa.framework.common.SettingsPageProviderRepository
 import com.android.settingslib.spa.framework.common.SpaEnvironment
 import com.android.settingslib.spa.framework.common.createSettingsPage
@@ -75,4 +76,6 @@ object GallerySpaEnvironment : SpaEnvironment() {
     override val browseActivityClass = GalleryMainActivity::class.java
 
     override val entryProviderAuthorities = "com.android.spa.gallery.provider"
+
+    override val logger = LocalLogger()
 }

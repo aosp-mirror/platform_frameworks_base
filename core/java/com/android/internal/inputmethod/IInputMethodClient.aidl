@@ -27,7 +27,8 @@ oneway interface IInputMethodClient {
     void onBindAccessibilityService(in InputBindResult res, int id);
     void onUnbindMethod(int sequence, int unbindReason);
     void onUnbindAccessibilityService(int sequence, int id);
-    void setActive(boolean active, boolean fullscreen, boolean reportToImeController);
+    void setActive(boolean active, boolean fullscreen);
+    void setInteractive(boolean active, boolean fullscreen);
     void scheduleStartInputIfNecessary(boolean fullscreen);
     void reportFullscreenMode(boolean fullscreen);
     void updateVirtualDisplayToScreenMatrix(int bindSequence, in float[] matrixValues);

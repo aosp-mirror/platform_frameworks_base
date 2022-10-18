@@ -46,6 +46,7 @@ import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.annotation.UiThread;
 import android.annotation.UserIdInt;
 import android.app.ActivityThread;
 import android.compat.annotation.ChangeId;
@@ -78,6 +79,7 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.text.style.SuggestionSpan;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Pools.Pool;
 import android.util.Pools.SimplePool;
 import android.util.PrintWriterPrinter;
@@ -648,6 +650,7 @@ public final class InputMethodManager {
     private static final int MSG_REPORT_FULLSCREEN_MODE = 10;
     private static final int MSG_BIND_ACCESSIBILITY_SERVICE = 11;
     private static final int MSG_UNBIND_ACCESSIBILITY_SERVICE = 12;
+    private static final int MSG_SET_INTERACTIVE = 13;
     private static final int MSG_UPDATE_VIRTUAL_DISPLAY_TO_SCREEN_MATRIX = 30;
     private static final int MSG_ON_SHOW_REQUESTED = 31;
 
@@ -738,26 +741,6 @@ public final class InputMethodManager {
     private final class DelegateImpl implements
             ImeFocusController.InputMethodManagerDelegate {
 
-        /**
-         * Used by {@link ImeFocusController} to finish input connection and callback
-         * {@link InputMethodService#onFinishInput()}.
-         *
-         * This method is especially for when ImeFocusController received device screen-off event to
-         * ensure the entire finish input connection and the connection lifecycle callback to
-         * IME can be done for security concern.
-         */
-        @Override
-        public void finishInputAndReportToIme() {
-            synchronized (mH) {
-                finishInputLocked();
-                if (isImeSessionAvailableLocked()) {
-                    mCurBindState.mImeSession.finishInput();
-                }
-                forAccessibilitySessionsLocked(
-                        IAccessibilityInputMethodSessionInvoker::finishInput);
-            }
-        }
-
         @Override
         public void onPreWindowGainedFocus(ViewRootImpl viewRootImpl) {
             synchronized (mH) {
@@ -771,7 +754,7 @@ public final class InputMethodManager {
             boolean forceFocus = false;
             synchronized (mH) {
                 // Update mNextServedView when focusedView changed.
-                onViewFocusChanged(viewForWindowFocus, true);
+                onViewFocusChangedInternal(viewForWindowFocus, true);
 
                 // Starting new input when the next focused view is same as served view but the
                 // currently active connection (if any) is not associated with it.
@@ -846,35 +829,7 @@ public final class InputMethodManager {
 
         @Override
         public void onViewFocusChanged(@Nullable View view, boolean hasFocus) {
-            if (view == null || view.isTemporarilyDetached()) {
-                return;
-            }
-            final ViewRootImpl viewRootImpl = view.getViewRootImpl();
-            synchronized (mH) {
-                if (mCurRootView != viewRootImpl) {
-                    return;
-                }
-                if (!view.hasImeFocus() || !view.hasWindowFocus()) {
-                    return;
-                }
-                if (DEBUG) {
-                    Log.d(TAG, "onViewFocusChanged, view=" + InputMethodDebug.dumpViewInfo(view));
-                }
-
-                // We don't need to track the next served view when the view lost focus here
-                // because:
-                // 1) The current view focus may be cleared temporary when in touch mode, closing
-                //    input at this moment isn't the right way.
-                // 2) We only care about the served view change when it focused, since changing
-                //    input connection when the focus target changed is reasonable.
-                // 3) Setting the next served view as null when no more served view should be
-                //    handled in other special events (e.g. view detached from window or the window
-                //    dismissed).
-                if (hasFocus) {
-                    mNextServedView = view;
-                }
-            }
-            viewRootImpl.dispatchCheckFocus();
+            onViewFocusChangedInternal(view, hasFocus);
         }
 
         @Override
@@ -947,18 +902,6 @@ public final class InputMethodManager {
         private void setCurrentRootViewLocked(ViewRootImpl rootView) {
             mImeDispatcher.switchRootView(mCurRootView, rootView);
             mCurRootView = rootView;
-        }
-
-        /**
-         * Used for {@link ImeFocusController} to return if the root view from the
-         * controller is this {@link InputMethodManager} currently focused.
-         * TODO: Address event-order problem when get current root view in multi-threads.
-         */
-        @Override
-        public boolean isCurrentRootView(ViewRootImpl rootView) {
-            synchronized (mH) {
-                return mCurRootView == rootView;
-            }
         }
     }
 
@@ -1187,22 +1130,12 @@ public final class InputMethodManager {
                 case MSG_SET_ACTIVE: {
                     final boolean active = msg.arg1 != 0;
                     final boolean fullscreen = msg.arg2 != 0;
-                    final boolean reportToImeController = msg.obj != null && (boolean) msg.obj;
                     if (DEBUG) {
                         Log.i(TAG, "handleMessage: MSG_SET_ACTIVE " + active + ", was " + mActive);
                     }
                     synchronized (mH) {
                         mActive = active;
                         mFullscreenMode = fullscreen;
-
-                        // Report active state to ImeFocusController to handle IME input
-                        // connection lifecycle callback when it allowed.
-                        final ImeFocusController controller = getFocusController();
-                        final View rootView = mCurRootView != null ? mCurRootView.getView() : null;
-                        if (controller != null && rootView != null && reportToImeController) {
-                            rootView.post(() -> controller.onInteractiveChanged(active));
-                            return;
-                        }
 
                         if (!active) {
                             // Some other client has starting using the IME, so note
@@ -1223,6 +1156,45 @@ public final class InputMethodManager {
                                         : StartInputReason.DEACTIVATED_BY_IMMS;
                                 startInputOnWindowFocusGainInternal(reason, null, 0, 0, 0);
                             }
+                        }
+                    }
+                    return;
+                }
+                case MSG_SET_INTERACTIVE: {
+                    final boolean interactive = msg.arg1 != 0;
+                    final boolean fullscreen = msg.arg2 != 0;
+                    if (DEBUG) {
+                        Log.i(TAG, "handleMessage: MSG_SET_INTERACTIVE " + interactive
+                                + ", was " + mActive);
+                    }
+                    synchronized (mH) {
+                        mActive = interactive;
+                        mFullscreenMode = fullscreen;
+                        if (interactive) {
+                            final View rootView =
+                                    mCurRootView != null ? mCurRootView.getView() : null;
+                            if (rootView == null) {
+                                return;
+                            }
+                            // Find the next view focus to start the input connection when the
+                            // device was interactive.
+                            final ViewRootImpl currentViewRootImpl = mCurRootView;
+                            rootView.post(() -> {
+                                synchronized (mH) {
+                                    if (mCurRootView != currentViewRootImpl) {
+                                        return;
+                                    }
+                                }
+                                final View focusedView = currentViewRootImpl.getView().findFocus();
+                                onViewFocusChangedInternal(focusedView, focusedView != null);
+                            });
+                        } else {
+                            finishInputLocked();
+                            if (isImeSessionAvailableLocked()) {
+                                mCurBindState.mImeSession.finishInput();
+                            }
+                            forAccessibilitySessionsLocked(
+                                    IAccessibilityInputMethodSessionInvoker::finishInput);
                         }
                     }
                     return;
@@ -1344,9 +1316,14 @@ public final class InputMethodManager {
         }
 
         @Override
-        public void setActive(boolean active, boolean fullscreen, boolean reportToImeController) {
-            mH.obtainMessage(MSG_SET_ACTIVE, active ? 1 : 0, fullscreen ? 1 : 0,
-                    reportToImeController).sendToTarget();
+        public void setActive(boolean active, boolean fullscreen) {
+            mH.obtainMessage(MSG_SET_ACTIVE, active ? 1 : 0, fullscreen ? 1 : 0).sendToTarget();
+        }
+
+        @Override
+        public void setInteractive(boolean interactive, boolean fullscreen) {
+            mH.obtainMessage(MSG_SET_INTERACTIVE, interactive ? 1 : 0, fullscreen ? 1 : 0)
+                    .sendToTarget();
         }
 
         @Override
@@ -2453,24 +2430,9 @@ public final class InputMethodManager {
         // Okay we are now ready to call into the served view and have it
         // do its stuff.
         // Life is good: let's hook everything up!
-        EditorInfo editorInfo = new EditorInfo();
-        // Note: Use Context#getOpPackageName() rather than Context#getPackageName() so that the
-        // system can verify the consistency between the uid of this process and package name passed
-        // from here. See comment of Context#getOpPackageName() for details.
-        editorInfo.packageName = view.getContext().getOpPackageName();
-        editorInfo.autofillId = view.getAutofillId();
-        editorInfo.fieldId = view.getId();
-        InputConnection ic = view.onCreateInputConnection(editorInfo);
-        if (DEBUG) Log.v(TAG, "Starting input: editorInfo=" + editorInfo + " ic=" + ic);
-
-        // Clear autofill and field ids if a connection could not be established.
-        // This ensures that even disconnected EditorInfos have well-defined attributes,
-        // making them consistently and straightforwardly comparable.
-        if (ic == null) {
-            editorInfo.autofillId = AutofillId.NO_AUTOFILL_ID;
-            editorInfo.fieldId = 0;
-        }
-
+        final Pair<InputConnection, EditorInfo> connectionPair = createInputConnection(view);
+        final InputConnection ic = connectionPair.first;
+        final EditorInfo editorInfo = connectionPair.second;
         final Handler icHandler;
         InputBindResult res = null;
         synchronized (mH) {
@@ -2729,6 +2691,40 @@ public final class InputMethodManager {
         if (controller != null) {
             controller.checkFocus(false /* forceNewFocus */, true /* startInput */);
         }
+    }
+
+    @UiThread
+    private void onViewFocusChangedInternal(@Nullable View view, boolean hasFocus) {
+        if (view == null || view.isTemporarilyDetached()) {
+            return;
+        }
+        final ViewRootImpl viewRootImpl = view.getViewRootImpl();
+        synchronized (mH) {
+            if (mCurRootView != viewRootImpl) {
+                return;
+            }
+            if (!view.hasImeFocus() || !view.hasWindowFocus()) {
+                return;
+            }
+            if (DEBUG) {
+                Log.d(TAG, "onViewFocusChangedInternal, view="
+                        + InputMethodDebug.dumpViewInfo(view));
+            }
+
+            // We don't need to track the next served view when the view lost focus here
+            // because:
+            // 1) The current view focus may be cleared temporary when in touch mode, closing
+            //    input at this moment isn't the right way.
+            // 2) We only care about the served view change when it focused, since changing
+            //    input connection when the focus target changed is reasonable.
+            // 3) Setting the next served view as null when no more served view should be
+            //    handled in other special events (e.g. view detached from window or the window
+            //    dismissed).
+            if (hasFocus) {
+                mNextServedView = view;
+            }
+        }
+        viewRootImpl.dispatchCheckFocus();
     }
 
     @UnsupportedAppUsage
@@ -4010,5 +4006,28 @@ public final class InputMethodManager {
         for (int i = 0; i < mAccessibilityInputMethodSession.size(); i++) {
             consumer.accept(mAccessibilityInputMethodSession.valueAt(i));
         }
+    }
+
+    @UiThread
+    private static Pair<InputConnection, EditorInfo> createInputConnection(
+            @NonNull View servedView) {
+        final EditorInfo editorInfo = new EditorInfo();
+        // Note: Use Context#getOpPackageName() rather than Context#getPackageName() so that the
+        // system can verify the consistency between the uid of this process and package name passed
+        // from here. See comment of Context#getOpPackageName() for details.
+        editorInfo.packageName = servedView.getContext().getOpPackageName();
+        editorInfo.autofillId = servedView.getAutofillId();
+        editorInfo.fieldId = servedView.getId();
+        final InputConnection ic = servedView.onCreateInputConnection(editorInfo);
+        if (DEBUG) Log.v(TAG, "Starting input: editorInfo=" + editorInfo + " ic=" + ic);
+
+        // Clear autofill and field ids if a connection could not be established.
+        // This ensures that even disconnected EditorInfos have well-defined attributes,
+        // making them consistently and straightforwardly comparable.
+        if (ic == null) {
+            editorInfo.autofillId = AutofillId.NO_AUTOFILL_ID;
+            editorInfo.fieldId = 0;
+        }
+        return new Pair<>(ic, editorInfo);
     }
 }

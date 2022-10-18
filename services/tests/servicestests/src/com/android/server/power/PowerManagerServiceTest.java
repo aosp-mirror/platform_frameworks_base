@@ -681,6 +681,31 @@ public class PowerManagerServiceTest {
         assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
     }
 
+    /**
+     * Tests that dreaming continues when undocking and configured to do so.
+     */
+    @Test
+    public void testWakefulnessDream_shouldKeepDreamingWhenUndocked() {
+        createService();
+        startSystem();
+
+        when(mResourcesSpy.getBoolean(
+                com.android.internal.R.bool.config_keepDreamingWhenUndocking))
+                .thenReturn(true);
+        mService.readConfigurationLocked();
+
+        when(mBatteryManagerInternalMock.getPlugType())
+                .thenReturn(BatteryManager.BATTERY_PLUGGED_DOCK);
+        setPluggedIn(true);
+
+        forceAwake();  // Needs to be awake first before it can dream.
+        forceDream();
+        when(mBatteryManagerInternalMock.getPlugType()).thenReturn(0);
+        setPluggedIn(false);
+
+        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_DREAMING);
+    }
+
     @Test
     public void testWakefulnessDoze_goToSleep() {
         createService();

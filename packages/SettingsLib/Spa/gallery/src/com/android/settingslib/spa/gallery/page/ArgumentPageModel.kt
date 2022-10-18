@@ -17,13 +17,13 @@
 package com.android.settingslib.spa.gallery.page
 
 import android.os.Bundle
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.android.settingslib.spa.framework.common.EntrySearchData
 import com.android.settingslib.spa.framework.common.PageModel
+import com.android.settingslib.spa.framework.common.SpaEnvironmentFactory
 import com.android.settingslib.spa.framework.compose.navigator
 import com.android.settingslib.spa.framework.compose.stateOf
 import com.android.settingslib.spa.framework.util.getIntArg
@@ -31,6 +31,8 @@ import com.android.settingslib.spa.framework.util.getStringArg
 import com.android.settingslib.spa.framework.util.navLink
 import com.android.settingslib.spa.gallery.SettingsPageProviderEnum
 import com.android.settingslib.spa.widget.preference.PreferenceModel
+
+private const val TAG = "ArgumentPageModel"
 
 // Defines all the resources for this page.
 // In real Settings App, resources data is defined in xml, rather than SPP.
@@ -93,7 +95,9 @@ class ArgumentPageModel : PageModel() {
     private var intParam: Int? = null
 
     override fun initialize(arguments: Bundle?) {
-        logMsg("init with args " + arguments.toString())
+        SpaEnvironmentFactory.instance.logger.message(
+            TAG, "Initialize with args " + arguments.toString()
+        )
         this.arguments = arguments
         stringParam = parameter.getStringArg(STRING_PARAM_NAME, arguments)
         intParam = parameter.getIntArg(INT_PARAM_NAME, arguments)
@@ -134,8 +138,4 @@ class ArgumentPageModel : PageModel() {
             )
         }
     }
-}
-
-private fun logMsg(message: String) {
-    Log.d("ArgumentPageModel", message)
 }

@@ -49,6 +49,7 @@ public class ConfirmUserCreationActivity extends AlertActivity
     private String mAccountType;
     private PersistableBundle mAccountOptions;
     private boolean mCanProceed;
+    private boolean mIsFirstClick;
     private UserManager mUserManager;
 
     @Override
@@ -82,6 +83,7 @@ public class ConfirmUserCreationActivity extends AlertActivity
             ap.mNegativeButtonText = getString(android.R.string.cancel);
             ap.mNegativeButtonListener = this;
         }
+        mIsFirstClick = true;
         setupAlert();
     }
 
@@ -128,7 +130,8 @@ public class ConfirmUserCreationActivity extends AlertActivity
     @Override
     public void onClick(DialogInterface dialog, int which) {
         setResult(RESULT_CANCELED);
-        if (which == BUTTON_POSITIVE && mCanProceed) {
+        if (which == BUTTON_POSITIVE && mCanProceed && mIsFirstClick) {
+            mIsFirstClick = false;
             Log.i(TAG, "Ok, creating user");
             UserInfo user = mUserManager.createUser(mUserName, USER_TYPE, 0);
             if (user == null) {
