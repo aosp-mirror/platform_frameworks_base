@@ -50,7 +50,7 @@ import com.android.systemui.animation.ShadeInterpolation;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.flags.Flags;
-import com.android.systemui.media.MediaHost;
+import com.android.systemui.media.controls.ui.MediaHost;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.dagger.QSFragmentComponent;
