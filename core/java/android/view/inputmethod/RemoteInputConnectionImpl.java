@@ -218,8 +218,24 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
         return mParentInputMethodManager.isActive() && !isFinished();
     }
 
-    public View getServedView() {
+    private View getServedView() {
         return mServedView.get();
+    }
+
+    /**
+     * Queries if the given {@link View} is associated with this {@link RemoteInputConnectionImpl}
+     * or not.
+     *
+     * @param view {@link View}.
+     * @return {@code true} if the given {@link View} is not null and is associated with this
+     *         {@link RemoteInputConnectionImpl}.
+     */
+    @AnyThread
+    public boolean isAssociatedWith(@Nullable View view) {
+        if (view == null) {
+            return false;
+        }
+        return mServedView.refersTo(view);
     }
 
     /**
