@@ -21662,7 +21662,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 return PackageManager.DELETE_FAILED_INTERNAL_ERROR;
             }
 
-            if (isSystemApp(uninstalledPs)) {
+            if (isSystemApp(uninstalledPs)
+                    && (deleteFlags & PackageManager.DELETE_SYSTEM_APP) == 0) {
                 UserInfo userInfo = mUserManager.getUserInfo(userId);
                 if (userInfo == null || !userInfo.isAdmin()) {
                     Slog.w(TAG, "Not removing package " + packageName
