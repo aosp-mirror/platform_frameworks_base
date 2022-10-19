@@ -825,9 +825,8 @@ public final class InputMethodManager {
         }
 
         @Override
-        public void checkFocus(boolean forceNewFocus, boolean startInput,
-                ViewRootImpl viewRootImpl) {
-            checkFocusInternal(forceNewFocus, startInput, viewRootImpl);
+        public void onScheduledCheckFocus(@NonNull ViewRootImpl viewRootImpl) {
+            checkFocusInternal(false, true, viewRootImpl);
         }
 
         @Override
