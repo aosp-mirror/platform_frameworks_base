@@ -63,6 +63,24 @@ public class SplashScreenExitAnimationUtils {
 
     /**
      * Creates and starts the animator to fade out the icon, reveal the app, and shift up main
+     * window with rounded corner radius.
+     */
+    static void startAnimations(ViewGroup splashScreenView,
+            SurfaceControl firstWindowSurface, int mainWindowShiftLength,
+            TransactionPool transactionPool, Rect firstWindowFrame, int animationDuration,
+            int iconFadeOutDuration, float iconStartAlpha, float brandingStartAlpha,
+            int appRevealDelay, int appRevealDuration, Animator.AnimatorListener animatorListener,
+            float roundedCornerRadius) {
+        ValueAnimator animator =
+                createAnimator(splashScreenView, firstWindowSurface, mainWindowShiftLength,
+                        transactionPool, firstWindowFrame, animationDuration, iconFadeOutDuration,
+                        iconStartAlpha, brandingStartAlpha, appRevealDelay, appRevealDuration,
+                        animatorListener, roundedCornerRadius);
+        animator.start();
+    }
+
+    /**
+     * Creates and starts the animator to fade out the icon, reveal the app, and shift up main
      * window.
      * @hide
      */
@@ -71,12 +89,10 @@ public class SplashScreenExitAnimationUtils {
             TransactionPool transactionPool, Rect firstWindowFrame, int animationDuration,
             int iconFadeOutDuration, float iconStartAlpha, float brandingStartAlpha,
             int appRevealDelay, int appRevealDuration, Animator.AnimatorListener animatorListener) {
-        ValueAnimator animator =
-                createAnimator(splashScreenView, firstWindowSurface, mainWindowShiftLength,
-                        transactionPool, firstWindowFrame, animationDuration, iconFadeOutDuration,
-                        iconStartAlpha, brandingStartAlpha, appRevealDelay, appRevealDuration,
-                        animatorListener);
-        animator.start();
+        startAnimations(splashScreenView, firstWindowSurface, mainWindowShiftLength,
+                transactionPool, firstWindowFrame, animationDuration, iconFadeOutDuration,
+                iconStartAlpha, brandingStartAlpha, appRevealDelay, appRevealDuration,
+                animatorListener, 0f /* roundedCornerRadius */);
     }
 
     /**
@@ -87,7 +103,8 @@ public class SplashScreenExitAnimationUtils {
             SurfaceControl firstWindowSurface, int mMainWindowShiftLength,
             TransactionPool transactionPool, Rect firstWindowFrame, int animationDuration,
             int iconFadeOutDuration, float iconStartAlpha, float brandingStartAlpha,
-            int appRevealDelay, int appRevealDuration, Animator.AnimatorListener animatorListener) {
+            int appRevealDelay, int appRevealDuration, Animator.AnimatorListener animatorListener,
+            float roundedCornerRadius) {
         // reveal app
         final float transparentRatio = 0.8f;
         final int globalHeight = splashScreenView.getHeight();
@@ -124,7 +141,7 @@ public class SplashScreenExitAnimationUtils {
 
             shiftUpAnimation = new ShiftUpAnimation(0, -mMainWindowShiftLength, occludeHoleView,
                     firstWindowSurface, splashScreenView, transactionPool, firstWindowFrame,
-                    mMainWindowShiftLength);
+                    mMainWindowShiftLength, roundedCornerRadius);
         }
 
         ValueAnimator animator = ValueAnimator.ofFloat(0f, 1f);
@@ -289,8 +306,8 @@ public class SplashScreenExitAnimationUtils {
         public ShiftUpAnimation(float fromYDelta, float toYDelta, View occludeHoleView,
                                 SurfaceControl firstWindowSurface, ViewGroup splashScreenView,
                                 TransactionPool transactionPool, Rect firstWindowFrame,
-                                int mainWindowShiftLength) {
-            mFromYDelta = fromYDelta;
+                                int mainWindowShiftLength, float roundedCornerRadius) {
+            mFromYDelta = fromYDelta - roundedCornerRadius;
             mToYDelta = toYDelta;
             mOccludeHoleView = occludeHoleView;
             mApplier = new SyncRtSurfaceTransactionApplier(occludeHoleView);
