@@ -93,6 +93,24 @@ data class SettingsPage(
         }
         return false
     }
+
+    fun enterPage() {
+        SpaEnvironmentFactory.instance.logger.event(
+            id,
+            LogEvent.PAGE_ENTER,
+            category = LogCategory.FRAMEWORK,
+            details = formatDisplayTitle()
+        )
+    }
+
+    fun leavePage() {
+        SpaEnvironmentFactory.instance.logger.event(
+            id,
+            LogEvent.PAGE_LEAVE,
+            category = LogCategory.FRAMEWORK,
+            details = formatDisplayTitle()
+        )
+    }
 }
 
 fun String.toHashId(): String {

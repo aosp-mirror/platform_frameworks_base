@@ -1958,7 +1958,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"無法在 <xliff:g id="DEVICE">%1$s</xliff:g> 上存取此應用程式，請改用 Android TV 裝置。"</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"無法在 <xliff:g id="DEVICE">%1$s</xliff:g> 上存取此應用程式，請改用平板電腦。"</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"無法在 <xliff:g id="DEVICE">%1$s</xliff:g> 上存取此應用程式，請改用手機。"</string>
-    <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"這個應用程式是專為舊版 Android 所打造，因此可能無法正常運作，且不提供最新的安全性和隱私保護服務。請檢查是否有更新版本，或與應用程式的開發人員聯絡。"</string>
+    <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"此應用程式專為舊版 Android 而設。因此可能無法正常運作，且不提供最新的安全性和私隱保護。請檢查是否有更新版本，或聯絡應用程式開發人員。"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"檢查更新"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"您有新的訊息"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"開啟短訊應用程式查看內容"</string>

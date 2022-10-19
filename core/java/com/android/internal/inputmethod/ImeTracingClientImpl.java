@@ -18,9 +18,6 @@ package com.android.internal.inputmethod;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.os.RemoteException;
-import android.os.ServiceManager.ServiceNotFoundException;
-import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 import android.view.inputmethod.InputMethodManager;
 
@@ -30,8 +27,8 @@ import java.io.PrintWriter;
  * An implementation of {@link ImeTracing} for non system_server processes.
  */
 class ImeTracingClientImpl extends ImeTracing {
-    ImeTracingClientImpl() throws ServiceNotFoundException, RemoteException {
-        sEnabled = mService.isImeTraceEnabled();
+    ImeTracingClientImpl() {
+        sEnabled = IInputMethodManagerGlobal.isImeTraceEnabled();
     }
 
     @Override
@@ -56,8 +53,6 @@ class ImeTracingClientImpl extends ImeTracing {
             ProtoOutputStream proto = new ProtoOutputStream();
             immInstance.dumpDebug(proto, icProto);
             sendToService(proto.getBytes(), IME_TRACING_FROM_CLIENT, where);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Exception while sending ime-related client dump to server", e);
         } finally {
             mDumpInProgress = false;
         }
@@ -81,8 +76,6 @@ class ImeTracingClientImpl extends ImeTracing {
             ProtoOutputStream proto = new ProtoOutputStream();
             dumper.dumpToProto(proto, icProto);
             sendToService(proto.getBytes(), IME_TRACING_FROM_IMS, where);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Exception while sending ime-related service dump to server", e);
         } finally {
             mDumpInProgress = false;
         }

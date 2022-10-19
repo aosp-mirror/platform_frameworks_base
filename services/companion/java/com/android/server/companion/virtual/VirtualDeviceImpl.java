@@ -222,6 +222,11 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         return mAssociationInfo.getDisplayName();
     }
 
+    /** Returns the optional name of the device. */
+    String getDeviceName() {
+        return mParams.getName();
+    }
+
     /** Returns the unique device ID of this device. */
     @Override // Binder call
     public int getDeviceId() {

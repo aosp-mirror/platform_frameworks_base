@@ -31,6 +31,7 @@ data class CreateOptionInfo(
   val title: String,
   val subtitle: String,
   val id: Int,
+  val usageData: String
 )
 
 /** The name of the current screen. */
@@ -39,4 +40,5 @@ enum class CreateScreenState {
   PROVIDER_SELECTION,
   CREATION_OPTION_SELECTION,
   MORE_OPTIONS_SELECTION,
+  MORE_OPTIONS_ROW_INTRO,
 }

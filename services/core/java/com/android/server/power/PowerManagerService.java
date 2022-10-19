@@ -131,6 +131,7 @@ import com.android.server.compat.PlatformCompat;
 import com.android.server.lights.LightsManager;
 import com.android.server.lights.LogicalLight;
 import com.android.server.policy.WindowManagerPolicy;
+import com.android.server.power.AmbientDisplaySuppressionController.AmbientDisplaySuppressionChangedCallback;
 import com.android.server.power.batterysaver.BatterySaverController;
 import com.android.server.power.batterysaver.BatterySaverPolicy;
 import com.android.server.power.batterysaver.BatterySaverStateMachine;
@@ -526,6 +527,9 @@ public final class PowerManagerService extends SystemService
     // has expired, then assume the device is receiving insufficient current to charge
     // effectively and terminate the dream.  Use -1 to disable this safety feature.
     private int mDreamsBatteryLevelDrainCutoffConfig;
+
+    // Whether dreams should be disabled when ambient mode is suppressed.
+    private boolean mDreamsDisabledByAmbientModeSuppressionConfig;
 
     // True if dreams are enabled by the user.
     private boolean mDreamsEnabledSetting;
@@ -989,8 +993,8 @@ public final class PowerManagerService extends SystemService
         }
 
         AmbientDisplaySuppressionController createAmbientDisplaySuppressionController(
-                Context context) {
-            return new AmbientDisplaySuppressionController(context);
+                @NonNull AmbientDisplaySuppressionChangedCallback callback) {
+            return new AmbientDisplaySuppressionController(callback);
         }
 
         InattentiveSleepWarningController createInattentiveSleepWarningController() {
@@ -1089,7 +1093,8 @@ public final class PowerManagerService extends SystemService
         mConstants = new Constants(mHandler);
         mAmbientDisplayConfiguration = mInjector.createAmbientDisplayConfiguration(context);
         mAmbientDisplaySuppressionController =
-                mInjector.createAmbientDisplaySuppressionController(context);
+                mInjector.createAmbientDisplaySuppressionController(
+                        mAmbientSuppressionChangedCallback);
         mAttentionDetector = new AttentionDetector(this::onUserAttention, mLock);
         mFaceDownDetector = new FaceDownDetector(this::onFlip);
         mScreenUndimDetector = new ScreenUndimDetector();
@@ -1450,6 +1455,8 @@ public final class PowerManagerService extends SystemService
                 com.android.internal.R.integer.config_dreamsBatteryLevelMinimumWhenNotPowered);
         mDreamsBatteryLevelDrainCutoffConfig = resources.getInteger(
                 com.android.internal.R.integer.config_dreamsBatteryLevelDrainCutoff);
+        mDreamsDisabledByAmbientModeSuppressionConfig = resources.getBoolean(
+                com.android.internal.R.bool.config_dreamsDisabledByAmbientModeSuppressionConfig);
         mDozeAfterScreenOff = resources.getBoolean(
                 com.android.internal.R.bool.config_dozeAfterScreenOffByDefault);
         mMinimumScreenOffTimeoutConfig = resources.getInteger(
@@ -3381,7 +3388,7 @@ public final class PowerManagerService extends SystemService
                 }
 
                 // Doze has ended or will be stopped.  Update the power state.
-                sleepPowerGroupLocked(powerGroup, now,  PowerManager.GO_TO_SLEEP_REASON_TIMEOUT,
+                sleepPowerGroupLocked(powerGroup, now, PowerManager.GO_TO_SLEEP_REASON_TIMEOUT,
                         Process.SYSTEM_UID);
             }
         }
@@ -3392,12 +3399,32 @@ public final class PowerManagerService extends SystemService
         }
     }
 
+    @GuardedBy("mLock")
+    private void onDreamSuppressionChangedLocked(final boolean isSuppressed) {
+        if (!mDreamsDisabledByAmbientModeSuppressionConfig) {
+            return;
+        }
+        if (!isSuppressed && mIsPowered && mDreamsSupportedConfig && mDreamsEnabledSetting
+                && shouldNapAtBedTimeLocked() && isItBedTimeYetLocked(
+                mPowerGroups.get(Display.DEFAULT_DISPLAY_GROUP))) {
+            napInternal(SystemClock.uptimeMillis(), Process.SYSTEM_UID, /* allowWake= */ true);
+        } else if (isSuppressed) {
+            mDirty |= DIRTY_SETTINGS;
+            updatePowerStateLocked();
+        }
+    }
+
+
     /**
      * Returns true if the {@code groupId} is allowed to dream in its current state.
      */
     @GuardedBy("mLock")
     private boolean canDreamLocked(final PowerGroup powerGroup) {
+        final boolean dreamsSuppressed = mDreamsDisabledByAmbientModeSuppressionConfig
+                && mAmbientDisplaySuppressionController.isSuppressed();
+
         if (!mBootCompleted
+                || dreamsSuppressed
                 || getGlobalWakefulnessLocked() != WAKEFULNESS_DREAMING
                 || !mDreamsSupportedConfig
                 || !mDreamsEnabledSetting
@@ -5092,6 +5119,16 @@ public final class PowerManagerService extends SystemService
             }
         }
     };
+
+    private final AmbientDisplaySuppressionChangedCallback mAmbientSuppressionChangedCallback =
+            new AmbientDisplaySuppressionChangedCallback() {
+                @Override
+                public void onSuppressionChanged(boolean isSuppressed) {
+                    synchronized (mLock) {
+                        onDreamSuppressionChangedLocked(isSuppressed);
+                    }
+                }
+            };
 
     /**
      * Callback for asynchronous operations performed by the power manager.

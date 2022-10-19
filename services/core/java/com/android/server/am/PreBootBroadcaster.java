@@ -57,7 +57,6 @@ public abstract class PreBootBroadcaster extends IIntentReceiver.Stub {
     private static final String TAG = "PreBootBroadcaster";
 
     private final ActivityManagerService mService;
-    private final ProcessRecord mSystemApp;
     private final int mUserId;
     private final ProgressReporter mProgress;
     private final boolean mQuiet;
@@ -70,9 +69,6 @@ public abstract class PreBootBroadcaster extends IIntentReceiver.Stub {
     public PreBootBroadcaster(ActivityManagerService service, int userId,
             ProgressReporter progress, boolean quiet) {
         mService = service;
-        synchronized (mService) {
-            mSystemApp = mService.getProcessRecordLocked("system", android.os.Process.SYSTEM_UID);
-        }
         mUserId = userId;
         mProgress = progress;
         mQuiet = quiet;
@@ -127,7 +123,7 @@ public abstract class PreBootBroadcaster extends IIntentReceiver.Stub {
                 TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
                 REASON_PRE_BOOT_COMPLETED, "");
         synchronized (mService) {
-            mService.broadcastIntentLocked(mSystemApp, "android", null, mIntent, null, this, 0,
+            mService.broadcastIntentLocked(null, null, null, mIntent, null, this, 0,
                     null, null, null, null, null, AppOpsManager.OP_NONE, bOptions.toBundle(), true,
                     false, ActivityManagerService.MY_PID,
                     Process.SYSTEM_UID, Binder.getCallingUid(), Binder.getCallingPid(), mUserId);

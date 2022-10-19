@@ -1099,6 +1099,11 @@ public class ContextWrapper extends Context {
     }
 
     @Override
+    public @NonNull Context createDeviceContext(int deviceId) {
+        return mBase.createDeviceContext(deviceId);
+    }
+
+    @Override
     @NonNull
     public Context createWindowContext(@WindowType int type, @Nullable Bundle options) {
         return mBase.createWindowContext(type, options);
@@ -1164,6 +1169,11 @@ public class ContextWrapper extends Context {
     @Override
     public void updateDisplay(int displayId) {
         mBase.updateDisplay(displayId);
+    }
+
+    @Override
+    public int getDeviceId() {
+        return mBase.getDeviceId();
     }
 
     @Override

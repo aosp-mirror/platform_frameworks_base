@@ -21,11 +21,15 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.biometrics.common.OperationContext;
 
+import com.android.server.biometrics.sensors.AuthSessionCoordinator;
+
 import java.util.function.Consumer;
 
 /**
  * Cache for system state not directly related to biometric operations that is used for
  * logging or optimizations.
+ *
+ * This class is also used to inject dependencies such as {@link AuthSessionCoordinator}
  */
 public interface BiometricContext {
     /** Gets the context source from the system context. */
@@ -59,4 +63,7 @@ public interface BiometricContext {
 
     /** Unsubscribe from context changes. */
     void unsubscribe(@NonNull OperationContext context);
+
+    /** Obtains an AuthSessionCoordinator. */
+    AuthSessionCoordinator getAuthSessionCoordinator();
 }

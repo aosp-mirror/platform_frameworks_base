@@ -233,24 +233,6 @@ public interface PooledLambda {
     }
 
     /**
-     * {@link PooledConsumer} factory
-     *
-     * @param function non-capturing lambda(typically an unbounded method reference)
-     *                 to be invoked on call
-     * @param arg1 placeholder for a missing argument. Use {@link #__} to get one
-     * @param arg2 parameter supplied to {@code function} on call
-     * @return a {@link PooledConsumer}, equivalent to lambda:
-     *         {@code (arg1) -> function(arg1, arg2) }
-     */
-    static <A, B> PooledConsumer<A> obtainConsumer(
-            BiConsumer<? super A, ? super B> function,
-            ArgumentPlaceholder<A> arg1, B arg2) {
-        return acquire(PooledLambdaImpl.sPool,
-                function, 2, 1, ReturnType.VOID, arg1, arg2, null, null, null, null, null, null,
-                null, null, null, null);
-    }
-
-    /**
      * {@link PooledPredicate} factory
      *
      * @param function non-capturing lambda(typically an unbounded method reference)
@@ -329,24 +311,6 @@ public interface PooledLambda {
     }
 
     /**
-     * {@link PooledConsumer} factory
-     *
-     * @param function non-capturing lambda(typically an unbounded method reference)
-     *                 to be invoked on call
-     * @param arg1 parameter supplied to {@code function} on call
-     * @param arg2 placeholder for a missing argument. Use {@link #__} to get one
-     * @return a {@link PooledConsumer}, equivalent to lambda:
-     *         {@code (arg2) -> function(arg1, arg2) }
-     */
-    static <A, B> PooledConsumer<B> obtainConsumer(
-            BiConsumer<? super A, ? super B> function,
-            A arg1, ArgumentPlaceholder<B> arg2) {
-        return acquire(PooledLambdaImpl.sPool,
-                function, 2, 1, ReturnType.VOID, arg1, arg2, null, null, null, null, null, null,
-                null, null, null, null);
-    }
-
-    /**
      * {@link PooledPredicate} factory
      *
      * @param function non-capturing lambda(typically an unbounded method reference)
@@ -418,63 +382,6 @@ public interface PooledLambda {
     }
 
     /**
-     * {@link PooledConsumer} factory
-     *
-     * @param function non-capturing lambda(typically an unbounded method reference)
-     *                 to be invoked on call
-     * @param arg1 placeholder for a missing argument. Use {@link #__} to get one
-     * @param arg2 parameter supplied to {@code function} on call
-     * @param arg3 parameter supplied to {@code function} on call
-     * @return a {@link PooledConsumer}, equivalent to lambda:
-     *         {@code (arg1) -> function(arg1, arg2, arg3) }
-     */
-    static <A, B, C> PooledConsumer<A> obtainConsumer(
-            TriConsumer<? super A, ? super B, ? super C> function,
-            ArgumentPlaceholder<A> arg1, B arg2, C arg3) {
-        return acquire(PooledLambdaImpl.sPool,
-                function, 3, 1, ReturnType.VOID, arg1, arg2, arg3, null, null, null, null, null,
-                null, null, null, null);
-    }
-
-    /**
-     * {@link PooledConsumer} factory
-     *
-     * @param function non-capturing lambda(typically an unbounded method reference)
-     *                 to be invoked on call
-     * @param arg1 parameter supplied to {@code function} on call
-     * @param arg2 placeholder for a missing argument. Use {@link #__} to get one
-     * @param arg3 parameter supplied to {@code function} on call
-     * @return a {@link PooledConsumer}, equivalent to lambda:
-     *         {@code (arg2) -> function(arg1, arg2, arg3) }
-     */
-    static <A, B, C> PooledConsumer<B> obtainConsumer(
-            TriConsumer<? super A, ? super B, ? super C> function,
-            A arg1, ArgumentPlaceholder<B> arg2, C arg3) {
-        return acquire(PooledLambdaImpl.sPool,
-                function, 3, 1, ReturnType.VOID, arg1, arg2, arg3, null, null, null, null, null,
-                null, null, null, null);
-    }
-
-    /**
-     * {@link PooledConsumer} factory
-     *
-     * @param function non-capturing lambda(typically an unbounded method reference)
-     *                 to be invoked on call
-     * @param arg1 parameter supplied to {@code function} on call
-     * @param arg2 parameter supplied to {@code function} on call
-     * @param arg3 placeholder for a missing argument. Use {@link #__} to get one
-     * @return a {@link PooledConsumer}, equivalent to lambda:
-     *         {@code (arg3) -> function(arg1, arg2, arg3) }
-     */
-    static <A, B, C> PooledConsumer<C> obtainConsumer(
-            TriConsumer<? super A, ? super B, ? super C> function,
-            A arg1, B arg2, ArgumentPlaceholder<C> arg3) {
-        return acquire(PooledLambdaImpl.sPool,
-                function, 3, 1, ReturnType.VOID, arg1, arg2, arg3, null, null, null, null, null,
-                null, null, null, null);
-    }
-
-    /**
      * Factory of {@link Message}s that contain an
      * ({@link PooledLambda#recycleOnUse auto-recycling}) {@link PooledRunnable} as its
      * {@link Message#getCallback internal callback}.
@@ -526,86 +433,6 @@ public interface PooledLambda {
             A arg1, B arg2, C arg3, D arg4) {
         return acquire(PooledLambdaImpl.sPool,
                 function, 4, 0, ReturnType.VOID, arg1, arg2, arg3, arg4, null, null, null, null,
-                null, null, null, null);
-    }
-
-    /**
-     * {@link PooledConsumer} factory
-     *
-     * @param function non-capturing lambda(typically an unbounded method reference)
-     *                 to be invoked on call
-     * @param arg1 placeholder for a missing argument. Use {@link #__} to get one
-     * @param arg2 parameter supplied to {@code function} on call
-     * @param arg3 parameter supplied to {@code function} on call
-     * @param arg4 parameter supplied to {@code function} on call
-     * @return a {@link PooledConsumer}, equivalent to lambda:
-     *         {@code (arg1) -> function(arg1, arg2, arg3, arg4) }
-     */
-    static <A, B, C, D> PooledConsumer<A> obtainConsumer(
-            QuadConsumer<? super A, ? super B, ? super C, ? super D> function,
-            ArgumentPlaceholder<A> arg1, B arg2, C arg3, D arg4) {
-        return acquire(PooledLambdaImpl.sPool,
-                function, 4, 1, ReturnType.VOID, arg1, arg2, arg3, arg4, null, null, null, null,
-                null, null, null, null);
-    }
-
-    /**
-     * {@link PooledConsumer} factory
-     *
-     * @param function non-capturing lambda(typically an unbounded method reference)
-     *                 to be invoked on call
-     * @param arg1 parameter supplied to {@code function} on call
-     * @param arg2 placeholder for a missing argument. Use {@link #__} to get one
-     * @param arg3 parameter supplied to {@code function} on call
-     * @param arg4 parameter supplied to {@code function} on call
-     * @return a {@link PooledConsumer}, equivalent to lambda:
-     *         {@code (arg2) -> function(arg1, arg2, arg3, arg4) }
-     */
-    static <A, B, C, D> PooledConsumer<B> obtainConsumer(
-            QuadConsumer<? super A, ? super B, ? super C, ? super D> function,
-            A arg1, ArgumentPlaceholder<B> arg2, C arg3, D arg4) {
-        return acquire(PooledLambdaImpl.sPool,
-                function, 4, 1, ReturnType.VOID, arg1, arg2, arg3, arg4, null, null, null, null,
-                null, null, null, null);
-    }
-
-    /**
-     * {@link PooledConsumer} factory
-     *
-     * @param function non-capturing lambda(typically an unbounded method reference)
-     *                 to be invoked on call
-     * @param arg1 parameter supplied to {@code function} on call
-     * @param arg2 parameter supplied to {@code function} on call
-     * @param arg3 placeholder for a missing argument. Use {@link #__} to get one
-     * @param arg4 parameter supplied to {@code function} on call
-     * @return a {@link PooledConsumer}, equivalent to lambda:
-     *         {@code (arg3) -> function(arg1, arg2, arg3, arg4) }
-     */
-    static <A, B, C, D> PooledConsumer<C> obtainConsumer(
-            QuadConsumer<? super A, ? super B, ? super C, ? super D> function,
-            A arg1, B arg2, ArgumentPlaceholder<C> arg3, D arg4) {
-        return acquire(PooledLambdaImpl.sPool,
-                function, 4, 1, ReturnType.VOID, arg1, arg2, arg3, arg4, null, null, null, null,
-                null, null, null, null);
-    }
-
-    /**
-     * {@link PooledConsumer} factory
-     *
-     * @param function non-capturing lambda(typically an unbounded method reference)
-     *                 to be invoked on call
-     * @param arg1 parameter supplied to {@code function} on call
-     * @param arg2 parameter supplied to {@code function} on call
-     * @param arg3 parameter supplied to {@code function} on call
-     * @param arg4 placeholder for a missing argument. Use {@link #__} to get one
-     * @return a {@link PooledConsumer}, equivalent to lambda:
-     *         {@code (arg4) -> function(arg1, arg2, arg3, arg4) }
-     */
-    static <A, B, C, D> PooledConsumer<D> obtainConsumer(
-            QuadConsumer<? super A, ? super B, ? super C, ? super D> function,
-            A arg1, B arg2, C arg3, ArgumentPlaceholder<D> arg4) {
-        return acquire(PooledLambdaImpl.sPool,
-                function, 4, 1, ReturnType.VOID, arg1, arg2, arg3, arg4, null, null, null, null,
                 null, null, null, null);
     }
 

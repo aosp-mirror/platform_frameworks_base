@@ -31,6 +31,7 @@ import com.android.settingslib.spa.framework.compose.stateOf
 import com.android.settingslib.spa.framework.compose.toState
 import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.framework.theme.SettingsTheme
+import com.android.settingslib.spa.framework.util.WrapOnSwitchWithLog
 import com.android.settingslib.spa.widget.ui.SettingsSwitch
 
 /**
@@ -100,15 +101,16 @@ internal fun InternalSwitchPreference(
 ) {
     val checkedValue = checked.value
     val indication = LocalIndication.current
+    val onChangeWithLog = WrapOnSwitchWithLog(onCheckedChange)
     val modifier = remember(checkedValue, changeable.value) {
-        if (checkedValue != null && onCheckedChange != null) {
+        if (checkedValue != null && onChangeWithLog != null) {
             Modifier.toggleable(
                 value = checkedValue,
                 interactionSource = MutableInteractionSource(),
                 indication = indication,
                 enabled = changeable.value,
                 role = Role.Switch,
-                onValueChange = onCheckedChange,
+                onValueChange = onChangeWithLog,
             )
         } else Modifier
     }
@@ -121,7 +123,13 @@ internal fun InternalSwitchPreference(
         paddingEnd = paddingEnd,
         paddingVertical = paddingVertical,
     ) {
-        SettingsSwitch(checked = checked, changeable = changeable)
+        SettingsSwitch(
+            checked = checked,
+            changeable = changeable,
+            // The onCheckedChange is handled on the whole SwitchPreference.
+            // DO NOT set it on SettingsSwitch.
+            onCheckedChange = null,
+        )
     }
 }
 

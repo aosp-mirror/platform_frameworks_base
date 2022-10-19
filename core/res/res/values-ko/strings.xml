@@ -1958,8 +1958,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"<xliff:g id="DEVICE">%1$s</xliff:g>에서는 액세스할 수 없습니다. 대신 Android TV 기기에서 시도해 보세요."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"<xliff:g id="DEVICE">%1$s</xliff:g>에서는 액세스할 수 없습니다. 대신 태블릿에서 시도해 보세요."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"<xliff:g id="DEVICE">%1$s</xliff:g>에서는 액세스할 수 없습니다. 대신 휴대전화에서 시도해 보세요."</string>
-    <!-- no translation found for deprecated_target_sdk_message (5246906284426844596) -->
-    <skip />
+    <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"이 앱은 Android 이전 버전에 맞게 설계되었습니다. 정상 동작하지 않을 수 있으며 최신 보안 및 개인 정보 보호 기능을 포함하지 않습니다. 업데이트를 확인하거나 앱 개발자에게 문의하세요."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"업데이트 확인"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"새 메시지 있음"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"SMS 앱을 열고 확인"</string>

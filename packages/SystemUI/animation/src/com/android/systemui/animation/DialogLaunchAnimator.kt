@@ -865,7 +865,7 @@ private class AnimatedDialog(
             return
         }
 
-        ViewRootSync.synchronizeNextDraw(decorView, controller.viewRoot.view, then)
+        ViewRootSync.synchronizeNextDraw(controller.viewRoot.view, decorView, then)
         decorView.invalidate()
         controller.viewRoot.view.invalidate()
     }

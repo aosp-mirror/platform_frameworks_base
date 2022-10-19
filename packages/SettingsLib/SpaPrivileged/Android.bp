@@ -41,9 +41,6 @@ java_defaults {
         "SpaPrivilegedLib",
     ],
     kotlincflags: ["-Xjvm-default=all"],
-    javacflags: [
-        "-J-Xmx4G",
-    ],
 }
 
 // Expose the srcs to tests, so the tests can access the internal classes.

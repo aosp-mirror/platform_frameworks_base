@@ -24,6 +24,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
@@ -89,23 +90,16 @@ open class BrowseActivity : ComponentActivity() {
                         arguments = spp.parameter,
                     ) { navBackStackEntry ->
                         val lifecycleOwner = LocalLifecycleOwner.current
-                        val spaLogger = spaEnvironment.logger
-                        val sp = spp.createSettingsPage(arguments = navBackStackEntry.arguments)
+                        val sp = remember(navBackStackEntry.arguments) {
+                            spp.createSettingsPage(arguments = navBackStackEntry.arguments)
+                        }
 
                         DisposableEffect(lifecycleOwner) {
                             val observer = LifecycleEventObserver { _, event ->
                                 if (event == Lifecycle.Event.ON_START) {
-                                    spaLogger.event(
-                                        sp.id,
-                                        "enter page ${sp.formatDisplayTitle()}",
-                                        category = LogCategory.FRAMEWORK
-                                    )
+                                    sp.enterPage()
                                 } else if (event == Lifecycle.Event.ON_STOP) {
-                                    spaLogger.event(
-                                        sp.id,
-                                        "leave page ${sp.formatDisplayTitle()}",
-                                        category = LogCategory.FRAMEWORK
-                                    )
+                                    sp.leavePage()
                                 }
                             }
 

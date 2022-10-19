@@ -27,6 +27,8 @@ import com.android.internal.statusbar.IUndoMediaTransferCallback
 import com.android.systemui.R
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.temporarydisplay.DEFAULT_TIMEOUT_MILLIS
+import com.android.systemui.temporarydisplay.chipbar.ChipSenderInfo
+import com.android.systemui.temporarydisplay.chipbar.ChipbarCoordinator
 
 /**
  * A class enumerating all the possible states of the media tap-to-transfer chip on the sender
@@ -105,7 +107,7 @@ enum class ChipStateSender(
         transferStatus = TransferStatus.SUCCEEDED,
     ) {
         override fun undoClickListener(
-            controllerSender: MediaTttChipControllerSender,
+            chipbarCoordinator: ChipbarCoordinator,
             routeInfo: MediaRoute2Info,
             undoCallback: IUndoMediaTransferCallback?,
             uiEventLogger: MediaTttSenderUiEventLogger,
@@ -123,9 +125,9 @@ enum class ChipStateSender(
                 undoCallback.onUndoTriggered()
                 // The external service should eventually send us a TransferToThisDeviceTriggered
                 // state, but that may take too long to go through the binder and the user may be
-                // confused ast o why the UI hasn't changed yet. So, we immediately change the UI
+                // confused as to why the UI hasn't changed yet. So, we immediately change the UI
                 // here.
-                controllerSender.displayView(
+                chipbarCoordinator.displayView(
                     ChipSenderInfo(
                         TRANSFER_TO_THIS_DEVICE_TRIGGERED, routeInfo, undoCallback
                     )
@@ -144,7 +146,7 @@ enum class ChipStateSender(
         transferStatus = TransferStatus.SUCCEEDED,
     ) {
         override fun undoClickListener(
-            controllerSender: MediaTttChipControllerSender,
+            chipbarCoordinator: ChipbarCoordinator,
             routeInfo: MediaRoute2Info,
             undoCallback: IUndoMediaTransferCallback?,
             uiEventLogger: MediaTttSenderUiEventLogger,
@@ -164,7 +166,7 @@ enum class ChipStateSender(
                 // state, but that may take too long to go through the binder and the user may be
                 // confused as to why the UI hasn't changed yet. So, we immediately change the UI
                 // here.
-                controllerSender.displayView(
+                chipbarCoordinator.displayView(
                     ChipSenderInfo(
                         TRANSFER_TO_RECEIVER_TRIGGERED, routeInfo, undoCallback
                     )
@@ -213,13 +215,13 @@ enum class ChipStateSender(
      * Returns a click listener for the undo button on the chip. Returns null if this chip state
      * doesn't have an undo button.
      *
-     * @param controllerSender passed as a parameter in case we want to display a new chip state
+     * @param chipbarCoordinator passed as a parameter in case we want to display a new chipbar
      *   when undo is clicked.
      * @param undoCallback if present, the callback that should be called when the user clicks the
      *   undo button. The undo button will only be shown if this is non-null.
      */
     open fun undoClickListener(
-        controllerSender: MediaTttChipControllerSender,
+        chipbarCoordinator: ChipbarCoordinator,
         routeInfo: MediaRoute2Info,
         undoCallback: IUndoMediaTransferCallback?,
         uiEventLogger: MediaTttSenderUiEventLogger,

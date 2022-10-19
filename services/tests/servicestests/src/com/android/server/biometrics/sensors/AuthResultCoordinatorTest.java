@@ -16,12 +16,18 @@
 
 package com.android.server.biometrics.sensors;
 
+import static com.android.server.biometrics.sensors.AuthResultCoordinator.AUTHENTICATOR_DEFAULT;
+import static com.android.server.biometrics.sensors.AuthResultCoordinator.AUTHENTICATOR_LOCKED;
+import static com.android.server.biometrics.sensors.AuthResultCoordinator.AUTHENTICATOR_UNLOCKED;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import android.hardware.biometrics.BiometricManager;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.Map;
 
 public class AuthResultCoordinatorTest {
     private AuthResultCoordinator mAuthResultCoordinator;
@@ -33,62 +39,107 @@ public class AuthResultCoordinatorTest {
 
     @Test
     public void testDefaultMessage() {
-        checkResult(mAuthResultCoordinator.getResult(),
-                AuthResult.FAILED,
-                BiometricManager.Authenticators.BIOMETRIC_CONVENIENCE);
+        final Map<Integer, Integer> authMap = mAuthResultCoordinator.getResult();
+
+        assertThat(authMap.get(BiometricManager.Authenticators.BIOMETRIC_STRONG)).isEqualTo(
+                AUTHENTICATOR_DEFAULT);
+        assertThat(authMap.get(BiometricManager.Authenticators.BIOMETRIC_WEAK)).isEqualTo(
+                AUTHENTICATOR_DEFAULT);
+        assertThat(authMap.get(BiometricManager.Authenticators.BIOMETRIC_CONVENIENCE)).isEqualTo(
+                AUTHENTICATOR_DEFAULT);
     }
 
     @Test
     public void testSingleMessageCoordinator() {
         mAuthResultCoordinator.authenticatedFor(
                 BiometricManager.Authenticators.BIOMETRIC_CONVENIENCE);
-        checkResult(mAuthResultCoordinator.getResult(),
-                AuthResult.AUTHENTICATED,
-                BiometricManager.Authenticators.BIOMETRIC_CONVENIENCE);
+
+        final Map<Integer, Integer> authMap = mAuthResultCoordinator.getResult();
+
+        assertThat(authMap.get(BiometricManager.Authenticators.BIOMETRIC_STRONG)).isEqualTo(
+                AUTHENTICATOR_DEFAULT);
+        assertThat(authMap.get(BiometricManager.Authenticators.BIOMETRIC_WEAK)).isEqualTo(
+                AUTHENTICATOR_DEFAULT);
+        assertThat(authMap.get(BiometricManager.Authenticators.BIOMETRIC_CONVENIENCE)).isEqualTo(
+                AUTHENTICATOR_UNLOCKED);
     }
 
     @Test
     public void testLockout() {
         mAuthResultCoordinator.lockedOutFor(
                 BiometricManager.Authenticators.BIOMETRIC_CONVENIENCE);
-        checkResult(mAuthResultCoordinator.getResult(),
-                AuthResult.LOCKED_OUT,
-                BiometricManager.Authenticators.BIOMETRIC_CONVENIENCE);
+
+        final Map<Integer, Integer> authMap = mAuthResultCoordinator.getResult();
+
+        assertThat(authMap.get(BiometricManager.Authenticators.BIOMETRIC_STRONG)).isEqualTo(
+                AUTHENTICATOR_DEFAULT);
+        assertThat(authMap.get(BiometricManager.Authenticators.BIOMETRIC_WEAK)).isEqualTo(
+                AUTHENTICATOR_DEFAULT);
+        assertThat(authMap.get(BiometricManager.Authenticators.BIOMETRIC_CONVENIENCE)).isEqualTo(
+                AUTHENTICATOR_LOCKED);
     }
 
     @Test
-    public void testHigherStrengthPrecedence() {
+    public void testConvenientLockout() {
         mAuthResultCoordinator.authenticatedFor(
                 BiometricManager.Authenticators.BIOMETRIC_CONVENIENCE);
-        mAuthResultCoordinator.authenticatedFor(
-                BiometricManager.Authenticators.BIOMETRIC_WEAK);
-        checkResult(mAuthResultCoordinator.getResult(),
-                AuthResult.AUTHENTICATED,
-                BiometricManager.Authenticators.BIOMETRIC_WEAK);
 
-        mAuthResultCoordinator.authenticatedFor(
-                BiometricManager.Authenticators.BIOMETRIC_STRONG);
-        checkResult(mAuthResultCoordinator.getResult(),
-                AuthResult.AUTHENTICATED,
-                BiometricManager.Authenticators.BIOMETRIC_STRONG);
+        Map<Integer, Integer> authMap = mAuthResultCoordinator.getResult();
+
+        assertThat(authMap.get(BiometricManager.Authenticators.BIOMETRIC_STRONG)).isEqualTo(
+                AUTHENTICATOR_DEFAULT);
+        assertThat(authMap.get(BiometricManager.Authenticators.BIOMETRIC_WEAK)).isEqualTo(
+                AUTHENTICATOR_DEFAULT);
+        assertThat(authMap.get(BiometricManager.Authenticators.BIOMETRIC_CONVENIENCE)).isEqualTo(
+                AUTHENTICATOR_UNLOCKED);
     }
 
     @Test
-    public void testAuthPrecedence() {
+    public void testWeakLockout() {
+        mAuthResultCoordinator.authenticatedFor(
+                BiometricManager.Authenticators.BIOMETRIC_WEAK);
+
+        Map<Integer, Integer> authMap = mAuthResultCoordinator.getResult();
+
+        assertThat(authMap.get(BiometricManager.Authenticators.BIOMETRIC_STRONG)).isEqualTo(
+                AUTHENTICATOR_DEFAULT);
+        assertThat(authMap.get(BiometricManager.Authenticators.BIOMETRIC_WEAK)).isEqualTo(
+                AUTHENTICATOR_UNLOCKED);
+        assertThat(authMap.get(BiometricManager.Authenticators.BIOMETRIC_CONVENIENCE)).isEqualTo(
+                AUTHENTICATOR_UNLOCKED);
+    }
+
+    @Test
+    public void testStrongLockout() {
+        mAuthResultCoordinator.authenticatedFor(
+                BiometricManager.Authenticators.BIOMETRIC_STRONG);
+
+        final Map<Integer, Integer> authMap = mAuthResultCoordinator.getResult();
+
+        assertThat(authMap.get(BiometricManager.Authenticators.BIOMETRIC_STRONG)).isEqualTo(
+                AUTHENTICATOR_UNLOCKED);
+        assertThat(authMap.get(BiometricManager.Authenticators.BIOMETRIC_WEAK)).isEqualTo(
+                AUTHENTICATOR_UNLOCKED);
+        assertThat(authMap.get(BiometricManager.Authenticators.BIOMETRIC_CONVENIENCE)).isEqualTo(
+                AUTHENTICATOR_UNLOCKED);
+    }
+
+    @Test
+    public void testAuthAndLockout() {
         mAuthResultCoordinator.authenticatedFor(
                 BiometricManager.Authenticators.BIOMETRIC_WEAK);
         mAuthResultCoordinator.lockedOutFor(
                 BiometricManager.Authenticators.BIOMETRIC_WEAK);
-        checkResult(mAuthResultCoordinator.getResult(),
-                AuthResult.AUTHENTICATED,
-                BiometricManager.Authenticators.BIOMETRIC_WEAK);
 
-    }
+        final Map<Integer, Integer> authMap = mAuthResultCoordinator.getResult();
 
-    void checkResult(AuthResult res, int status,
-            @BiometricManager.Authenticators.Types int strength) {
-        assertThat(res.getStatus()).isEqualTo(status);
-        assertThat(res.getBiometricStrength()).isEqualTo(strength);
+        assertThat(authMap.get(BiometricManager.Authenticators.BIOMETRIC_STRONG)).isEqualTo(
+                AUTHENTICATOR_DEFAULT);
+        assertThat(authMap.get(BiometricManager.Authenticators.BIOMETRIC_WEAK)).isEqualTo(
+                AUTHENTICATOR_UNLOCKED | AUTHENTICATOR_LOCKED);
+        assertThat(authMap.get(BiometricManager.Authenticators.BIOMETRIC_CONVENIENCE)).isEqualTo(
+                AUTHENTICATOR_UNLOCKED | AUTHENTICATOR_LOCKED);
+
     }
 
 }

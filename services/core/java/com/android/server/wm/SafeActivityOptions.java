@@ -119,13 +119,13 @@ public class SafeActivityOptions {
 
     /**
      * To ensure that two activities, one using this object, and the other using the
-     * SafeActivityOptions returned from this function, are launched into the same display through
-     * ActivityStartController#startActivities, all display-related information, i.e.
-     * displayAreaToken, launchDisplayId and callerDisplayId, are cloned.
+     * SafeActivityOptions returned from this function, are launched into the same display/root task
+     * through ActivityStartController#startActivities, all display-related information, i.e.
+     * displayAreaToken, launchDisplayId, callerDisplayId and the launch root task are cloned.
      */
-    @Nullable SafeActivityOptions selectiveCloneDisplayOptions() {
-        final ActivityOptions options = cloneLaunchingDisplayOptions(mOriginalOptions);
-        final ActivityOptions callerOptions = cloneLaunchingDisplayOptions(mCallerOptions);
+    @Nullable SafeActivityOptions selectiveCloneLaunchOptions() {
+        final ActivityOptions options = cloneLaunchingOptions(mOriginalOptions);
+        final ActivityOptions callerOptions = cloneLaunchingOptions(mCallerOptions);
         if (options == null && callerOptions == null) {
             return null;
         }
@@ -138,11 +138,12 @@ public class SafeActivityOptions {
         return safeOptions;
     }
 
-    private ActivityOptions cloneLaunchingDisplayOptions(ActivityOptions options) {
+    private ActivityOptions cloneLaunchingOptions(ActivityOptions options) {
         return options == null ? null : ActivityOptions.makeBasic()
                 .setLaunchTaskDisplayArea(options.getLaunchTaskDisplayArea())
                 .setLaunchDisplayId(options.getLaunchDisplayId())
-                .setCallerDisplayId((options.getCallerDisplayId()));
+                .setCallerDisplayId(options.getCallerDisplayId())
+                .setLaunchRootTask(options.getLaunchRootTask());
     }
 
     /**

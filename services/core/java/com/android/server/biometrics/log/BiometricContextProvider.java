@@ -35,6 +35,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.InstanceId;
 import com.android.internal.statusbar.ISessionListener;
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.server.biometrics.sensors.AuthSessionCoordinator;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -59,7 +60,8 @@ final class BiometricContextProvider implements BiometricContext {
                     sInstance = new BiometricContextProvider(
                             new AmbientDisplayConfiguration(context),
                             IStatusBarService.Stub.asInterface(ServiceManager.getServiceOrThrow(
-                                    Context.STATUS_BAR_SERVICE)), null /* handler */);
+                                    Context.STATUS_BAR_SERVICE)), null /* handler */,
+                            new AuthSessionCoordinator());
                 } catch (ServiceNotFoundException e) {
                     throw new IllegalStateException("Failed to find required service", e);
                 }
@@ -76,13 +78,16 @@ final class BiometricContextProvider implements BiometricContext {
     private final Map<Integer, InstanceId> mSession = new ConcurrentHashMap<>();
 
     private final AmbientDisplayConfiguration mAmbientDisplayConfiguration;
+    private final AuthSessionCoordinator mAuthSessionCoordinator;
     private boolean mIsAod = false;
     private boolean mIsAwake = false;
 
     @VisibleForTesting
     BiometricContextProvider(@NonNull AmbientDisplayConfiguration ambientDisplayConfiguration,
-            @NonNull IStatusBarService service, @Nullable Handler handler) {
+            @NonNull IStatusBarService service, @Nullable Handler handler,
+            AuthSessionCoordinator authSessionCoordinator) {
         mAmbientDisplayConfiguration = ambientDisplayConfiguration;
+        mAuthSessionCoordinator = authSessionCoordinator;
         try {
             service.setBiometicContextListener(new IBiometricContextListener.Stub() {
                 @Override
@@ -188,6 +193,11 @@ final class BiometricContextProvider implements BiometricContext {
     @Override
     public void unsubscribe(@NonNull OperationContext context) {
         mSubscribers.remove(context);
+    }
+
+    @Override
+    public AuthSessionCoordinator getAuthSessionCoordinator() {
+        return mAuthSessionCoordinator;
     }
 
     private void notifySubscribers() {

@@ -1958,8 +1958,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"No s\'hi pot accedir des del teu <xliff:g id="DEVICE">%1$s</xliff:g>. Prova-ho al dispositiu Android TV."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"No s\'hi pot accedir des del teu <xliff:g id="DEVICE">%1$s</xliff:g>. Prova-ho a la tauleta."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"No s\'hi pot accedir des del teu <xliff:g id="DEVICE">%1$s</xliff:g>. Prova-ho al telèfon."</string>
-    <!-- no translation found for deprecated_target_sdk_message (5246906284426844596) -->
-    <skip />
+    <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Aquesta aplicació es va compilar per a una versió anterior d\'Android. Pot ser que no funcioni correctament i no inclou les darreres proteccions de seguretat i privadesa. Comprova si hi ha actualitzacions o contacta amb el desenvolupador de l\'aplicació."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Cerca actualitzacions"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Tens missatges nous"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Obre l\'aplicació d\'SMS per veure\'ls"</string>

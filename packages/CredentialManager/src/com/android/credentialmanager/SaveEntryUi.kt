@@ -29,6 +29,7 @@ class SaveEntryUi(
   val title: CharSequence,
   val subTitle: CharSequence?,
   val icon: Icon?,
+  val usageData: CharSequence?,
   // TODO: add
 ) {
   companion object {
@@ -38,18 +39,21 @@ class SaveEntryUi(
       var title: String? = null
       var subTitle: String? = null
       var icon: Icon? = null
+      var usageData: String? = null
 
       items.forEach {
         if (it.hasHint(Entry.HINT_ICON)) {
           icon = it.icon
-        } else if (it.hasHint(Entry.HINT_SUBTITLE)) {
+        } else if (it.hasHint(Entry.HINT_SUBTITLE) && it.subType == null) {
           subTitle = it.text.toString()
         } else if (it.hasHint(Entry.HINT_TITLE)) {
           title = it.text.toString()
+        } else if (it.hasHint(Entry.HINT_SUBTITLE) && it.subType == Slice.SUBTYPE_MESSAGE) {
+          usageData = it.text.toString()
         }
       }
       // TODO: fail NPE more elegantly.
-      return SaveEntryUi(title!!, subTitle, icon)
+      return SaveEntryUi(title!!, subTitle, icon, usageData)
     }
   }
 }

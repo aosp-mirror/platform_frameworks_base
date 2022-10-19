@@ -108,6 +108,14 @@ class AutoEnterPipOnGoToHomeTest(testSpec: FlickerTestParameter) : EnterPipTest(
         }
     }
 
+    @FlakyTest(bugId = 239807171)
+    @Test
+    override fun pipAppLayerAlwaysVisible() = super.pipAppLayerAlwaysVisible()
+
+    @FlakyTest(bugId = 239807171)
+    @Test
+    override fun pipLayerRemainInsideVisibleBounds() = super.pipLayerRemainInsideVisibleBounds()
+
     @Presubmit
     @Test
     override fun focusChanges() {
