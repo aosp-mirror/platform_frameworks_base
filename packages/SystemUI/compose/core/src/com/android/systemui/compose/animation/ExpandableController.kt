@@ -40,17 +40,16 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.animation.ActivityLaunchAnimator
+import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.animation.Expandable
 import com.android.systemui.animation.LaunchAnimator
 import kotlin.math.roundToInt
 
-/** A controller that can control animated launches. */
+/** A controller that can control animated launches from an [Expandable]. */
 interface ExpandableController {
-    /** Create an [ActivityLaunchAnimator.Controller] to animate into an Activity. */
-    fun forActivity(): ActivityLaunchAnimator.Controller
-
-    /** Create a [DialogLaunchAnimator.Controller] to animate into a Dialog. */
-    fun forDialog(): DialogLaunchAnimator.Controller
+    /** The [Expandable] controlled by this controller. */
+    val expandable: Expandable
 }
 
 /**
@@ -120,13 +119,26 @@ internal class ExpandableControllerImpl(
     private val layoutDirection: LayoutDirection,
     private val isComposed: State<Boolean>,
 ) : ExpandableController {
-    override fun forActivity(): ActivityLaunchAnimator.Controller {
-        return activityController()
-    }
+    override val expandable: Expandable =
+        object : Expandable {
+            override fun activityLaunchController(
+                cujType: Int?,
+            ): ActivityLaunchAnimator.Controller? {
+                if (!isComposed.value) {
+                    return null
+                }
 
-    override fun forDialog(): DialogLaunchAnimator.Controller {
-        return dialogController()
-    }
+                return activityController(cujType)
+            }
+
+            override fun dialogLaunchController(cuj: DialogCuj?): DialogLaunchAnimator.Controller? {
+                if (!isComposed.value) {
+                    return null
+                }
+
+                return dialogController(cuj)
+            }
+        }
 
     /**
      * Create a [LaunchAnimator.Controller] that is going to be used to drive an activity or dialog
@@ -233,7 +245,7 @@ internal class ExpandableControllerImpl(
     }
 
     /** Create an [ActivityLaunchAnimator.Controller] that can be used to animate activities. */
-    private fun activityController(): ActivityLaunchAnimator.Controller {
+    private fun activityController(cujType: Int?): ActivityLaunchAnimator.Controller {
         val delegate = launchController()
         return object : ActivityLaunchAnimator.Controller, LaunchAnimator.Controller by delegate {
             override fun onLaunchAnimationStart(isExpandingFullyAbove: Boolean) {
@@ -248,10 +260,11 @@ internal class ExpandableControllerImpl(
         }
     }
 
-    private fun dialogController(): DialogLaunchAnimator.Controller {
+    private fun dialogController(cuj: DialogCuj?): DialogLaunchAnimator.Controller {
         return object : DialogLaunchAnimator.Controller {
             override val viewRoot: ViewRootImpl = composeViewRoot.viewRootImpl
             override val sourceIdentity: Any = this@ExpandableControllerImpl
+            override val cuj: DialogCuj? = cuj
 
             override fun startDrawingInOverlayOf(viewGroup: ViewGroup) {
                 val newOverlay = viewGroup.overlay as ViewGroupOverlay
@@ -294,9 +307,7 @@ internal class ExpandableControllerImpl(
                 isDialogShowing.value = false
             }
 
-            override fun jankConfigurationBuilder(
-                cuj: Int
-            ): InteractionJankMonitor.Configuration.Builder? {
+            override fun jankConfigurationBuilder(): InteractionJankMonitor.Configuration.Builder? {
                 // TODO(b/252723237): Add support for jank monitoring when animating from a
                 // Composable.
                 return null

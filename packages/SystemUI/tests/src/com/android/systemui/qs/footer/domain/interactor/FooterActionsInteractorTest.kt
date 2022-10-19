@@ -23,13 +23,13 @@ import android.os.UserHandle
 import android.provider.Settings
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
-import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.nano.MetricsProto
 import com.android.internal.logging.testing.FakeMetricsLogger
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ActivityLaunchAnimator
+import com.android.systemui.animation.Expandable
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.globalactions.GlobalActionsDialogLite
@@ -70,13 +70,13 @@ class FooterActionsInteractorTest : SysuiTestCase() {
         val underTest = utils.footerActionsInteractor(qsSecurityFooterUtils = qsSecurityFooterUtils)
 
         val quickSettingsContext = mock<Context>()
-        underTest.showDeviceMonitoringDialog(quickSettingsContext)
+
+        underTest.showDeviceMonitoringDialog(quickSettingsContext, null)
         verify(qsSecurityFooterUtils).showDeviceMonitoringDialog(quickSettingsContext, null)
 
-        val view = mock<View>()
-        whenever(view.context).thenReturn(quickSettingsContext)
-        underTest.showDeviceMonitoringDialog(view)
-        verify(qsSecurityFooterUtils).showDeviceMonitoringDialog(quickSettingsContext, null)
+        val expandable = mock<Expandable>()
+        underTest.showDeviceMonitoringDialog(quickSettingsContext, expandable)
+        verify(qsSecurityFooterUtils).showDeviceMonitoringDialog(quickSettingsContext, expandable)
     }
 
     @Test
@@ -85,8 +85,8 @@ class FooterActionsInteractorTest : SysuiTestCase() {
         val underTest = utils.footerActionsInteractor(uiEventLogger = uiEventLogger)
 
         val globalActionsDialogLite = mock<GlobalActionsDialogLite>()
-        val view = mock<View>()
-        underTest.showPowerMenuDialog(globalActionsDialogLite, view)
+        val expandable = mock<Expandable>()
+        underTest.showPowerMenuDialog(globalActionsDialogLite, expandable)
 
         // Event is logged.
         val logs = uiEventLogger.logs
@@ -99,7 +99,7 @@ class FooterActionsInteractorTest : SysuiTestCase() {
             .showOrHideDialog(
                 /* keyguardShowing= */ false,
                 /* isDeviceProvisioned= */ true,
-                view,
+                expandable,
             )
     }
 
@@ -167,11 +167,11 @@ class FooterActionsInteractorTest : SysuiTestCase() {
                 userSwitchDialogController = userSwitchDialogController,
             )
 
-        val view = mock<View>()
-        underTest.showUserSwitcher(view)
+        val expandable = mock<Expandable>()
+        underTest.showUserSwitcher(context, expandable)
 
         // Dialog is shown.
-        verify(userSwitchDialogController).showDialog(view)
+        verify(userSwitchDialogController).showDialog(context, expandable)
     }
 
     @Test
@@ -184,12 +184,9 @@ class FooterActionsInteractorTest : SysuiTestCase() {
                 activityStarter = activityStarter,
             )
 
-        // The clicked view. The context is necessary because it's used to build the intent, that
-        // we check below.
-        val view = mock<View>()
-        whenever(view.context).thenReturn(context)
-
-        underTest.showUserSwitcher(view)
+        // The clicked expandable.
+        val expandable = mock<Expandable>()
+        underTest.showUserSwitcher(context, expandable)
 
         // Dialog is shown.
         val intentCaptor = argumentCaptor<Intent>()
