@@ -5876,10 +5876,12 @@
                 android:protectionLevel="signature" />
 
     <!-- @SystemApi Allows applications to kill UIDs.
+        <p>This permission can be granted to the SYSTEM_SUPERVISOR role used for parental
+        controls.
         <p>Not for use by third-party applications.
          @hide -->
     <permission android:name="android.permission.KILL_UID"
-                android:protectionLevel="signature|installer" />
+                android:protectionLevel="signature|installer|role" />
 
     <!-- @SystemApi Allows applications to read the local WiFi and Bluetooth MAC address.
         @hide -->
