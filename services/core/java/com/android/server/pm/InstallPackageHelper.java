@@ -763,7 +763,7 @@ final class InstallPackageHelper {
                 || (installFlags & PackageManager.INSTALL_REQUEST_DOWNGRADE) != 0);
 
         if (ps != null && doSnapshotOrRestore) {
-            final String seInfo = AndroidPackageUtils.getSeInfo(request.getPkg(), ps);
+            final String seInfo = ps.getSeInfo();
             final RollbackManagerInternal rollbackManager =
                     mInjector.getLocalService(RollbackManagerInternal.class);
             rollbackManager.snapshotAndRestoreUserData(packageName,

@@ -213,7 +213,7 @@ public class AppDataHelper {
 
         final int appId = UserHandle.getAppId(pkg.getUid());
 
-        String pkgSeInfo = AndroidPackageUtils.getSeInfo(pkg, ps);
+        String pkgSeInfo = ps.getSeInfo();
 
         Preconditions.checkNotNull(pkgSeInfo);
 

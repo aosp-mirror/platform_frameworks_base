@@ -139,7 +139,7 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
                 .strictness(Strictness.LENIENT)
                 .mockStatic(SystemProperties::class.java)
                 .mockStatic(SystemConfig::class.java)
-                .mockStatic(SELinuxMMAC::class.java)
+                .mockStatic(SELinuxMMAC::class.java, Mockito.CALLS_REAL_METHODS)
                 .mockStatic(FallbackCategoryProvider::class.java)
                 .mockStatic(PackageManagerServiceUtils::class.java)
                 .mockStatic(Environment::class.java)

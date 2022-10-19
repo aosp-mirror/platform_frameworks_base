@@ -27,7 +27,6 @@ import android.content.pm.dex.DexMetadataHelper;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
 import android.os.incremental.IncrementalManager;
-import android.text.TextUtils;
 
 import com.android.internal.content.NativeLibraryHelper;
 import com.android.internal.util.ArrayUtils;
@@ -286,16 +285,6 @@ public class AndroidPackageUtils {
      */
     public static String getRawSecondaryCpuAbi(@NonNull AndroidPackage pkg) {
         return ((AndroidPackageHidden) pkg).getSecondaryCpuAbi();
-    }
-
-    public static String getSeInfo(AndroidPackage pkg, @Nullable PackageStateInternal pkgSetting) {
-        if (pkgSetting != null) {
-            String overrideSeInfo = pkgSetting.getTransientState().getOverrideSeInfo();
-            if (!TextUtils.isEmpty(overrideSeInfo)) {
-                return overrideSeInfo;
-            }
-        }
-        return ((AndroidPackageHidden) pkg).getSeInfo();
     }
 
     @Deprecated

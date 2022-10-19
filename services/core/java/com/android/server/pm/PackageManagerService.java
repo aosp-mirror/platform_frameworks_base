@@ -1560,7 +1560,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 AndroidPackage pkg = packageState.getPkg();
                 SharedUserApi sharedUser = snapshot.getSharedUser(
                         packageState.getSharedUserAppId());
-                String oldSeInfo = AndroidPackageUtils.getSeInfo(pkg, packageState);
+                String oldSeInfo = packageState.getSeInfo();
 
                 if (pkg == null) {
                     Slog.e(TAG, "Failed to find package " + packageName);
