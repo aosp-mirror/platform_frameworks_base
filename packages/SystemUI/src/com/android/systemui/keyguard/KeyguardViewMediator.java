@@ -1567,7 +1567,8 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     /**
      * It will let us know when the device is waking up.
      */
-    public void onStartedWakingUp(boolean cameraGestureTriggered) {
+    public void onStartedWakingUp(@PowerManager.WakeReason int pmWakeReason,
+            boolean cameraGestureTriggered) {
         Trace.beginSection("KeyguardViewMediator#onStartedWakingUp");
 
         // TODO: Rename all screen off/on references to interactive/sleeping
@@ -1582,7 +1583,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             if (DEBUG) Log.d(TAG, "onStartedWakingUp, seq = " + mDelayedShowingSequence);
             notifyStartedWakingUp();
         }
-        mUpdateMonitor.dispatchStartedWakingUp();
+        mUpdateMonitor.dispatchStartedWakingUp(pmWakeReason);
         maybeSendUserPresentBroadcast();
         Trace.endSection();
     }

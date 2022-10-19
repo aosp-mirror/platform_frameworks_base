@@ -108,6 +108,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.telephony.TelephonyListenerManager;
+import com.android.systemui.util.settings.GlobalSettings;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -208,6 +209,9 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     private UiEventLogger mUiEventLogger;
     @Mock
     private PowerManager mPowerManager;
+    @Mock
+    private GlobalSettings mGlobalSettings;
+    private FaceWakeUpTriggersConfig mFaceWakeUpTriggersConfig;
 
     private final int mCurrentUserId = 100;
     private final UserInfo mCurrentUserInfo = new UserInfo(mCurrentUserId, "Test user", 0);
@@ -291,6 +295,12 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         ExtendedMockito.doReturn(KeyguardUpdateMonitor.getCurrentUser())
                 .when(ActivityManager::getCurrentUser);
         ExtendedMockito.doReturn(mActivityService).when(ActivityManager::getService);
+
+        mFaceWakeUpTriggersConfig = new FaceWakeUpTriggersConfig(
+                mContext.getResources(),
+                mGlobalSettings,
+                mDumpManager
+        );
 
         mTestableLooper = TestableLooper.get(this);
         allowTestableLooperAsMainThread();
@@ -605,16 +615,22 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
     @Test
     public void testTriesToAuthenticate_whenKeyguard() {
-        mKeyguardUpdateMonitor.dispatchStartedWakingUp();
-        mTestableLooper.processAllMessages();
         keyguardIsVisible();
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp(PowerManager.WAKE_REASON_POWER_BUTTON);
+        mTestableLooper.processAllMessages();
         verify(mFaceManager).authenticate(any(), any(), any(), any(), anyInt(), anyBoolean());
+        verify(mUiEventLogger).logWithInstanceIdAndPosition(
+                eq(FaceAuthUiEvent.FACE_AUTH_UPDATED_STARTED_WAKING_UP),
+                eq(0),
+                eq(null),
+                any(),
+                eq(PowerManager.WAKE_REASON_POWER_BUTTON));
     }
 
     @Test
     public void skipsAuthentication_whenStatusBarShadeLocked() {
         mStatusBarStateListener.onStateChanged(StatusBarState.SHADE_LOCKED);
-        mKeyguardUpdateMonitor.dispatchStartedWakingUp();
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp(PowerManager.WAKE_REASON_POWER_BUTTON);
         mTestableLooper.processAllMessages();
 
         keyguardIsVisible();
@@ -628,7 +644,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                 STRONG_AUTH_REQUIRED_AFTER_BOOT);
         mKeyguardUpdateMonitor.setKeyguardBypassController(mKeyguardBypassController);
 
-        mKeyguardUpdateMonitor.dispatchStartedWakingUp();
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp(PowerManager.WAKE_REASON_POWER_BUTTON);
         mTestableLooper.processAllMessages();
         keyguardIsVisible();
         verify(mFaceManager, never()).authenticate(any(), any(), any(), any(), anyInt(),
@@ -652,7 +668,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mKeyguardUpdateMonitor.setKeyguardBypassController(mKeyguardBypassController);
         when(mStrongAuthTracker.getStrongAuthForUser(anyInt())).thenReturn(strongAuth);
 
-        mKeyguardUpdateMonitor.dispatchStartedWakingUp();
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp(PowerManager.WAKE_REASON_POWER_BUTTON);
         mTestableLooper.processAllMessages();
         keyguardIsVisible();
         verify(mFaceManager).authenticate(any(), any(), any(), any(), anyInt(), anyBoolean());
@@ -677,7 +693,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     @Test
     public void testTriesToAuthenticate_whenTrustOnAgentKeyguard_ifBypass() {
         mKeyguardUpdateMonitor.setKeyguardBypassController(mKeyguardBypassController);
-        mKeyguardUpdateMonitor.dispatchStartedWakingUp();
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp(PowerManager.WAKE_REASON_POWER_BUTTON);
         mTestableLooper.processAllMessages();
         when(mKeyguardBypassController.canBypass()).thenReturn(true);
         mKeyguardUpdateMonitor.onTrustChanged(true /* enabled */,
@@ -689,7 +705,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
     @Test
     public void testIgnoresAuth_whenTrustAgentOnKeyguard_withoutBypass() {
-        mKeyguardUpdateMonitor.dispatchStartedWakingUp();
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp(PowerManager.WAKE_REASON_POWER_BUTTON);
         mTestableLooper.processAllMessages();
         mKeyguardUpdateMonitor.onTrustChanged(true /* enabled */,
                 KeyguardUpdateMonitor.getCurrentUser(), 0 /* flags */, new ArrayList<>());
@@ -700,7 +716,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
     @Test
     public void testIgnoresAuth_whenLockdown() {
-        mKeyguardUpdateMonitor.dispatchStartedWakingUp();
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp(PowerManager.WAKE_REASON_POWER_BUTTON);
         mTestableLooper.processAllMessages();
         when(mStrongAuthTracker.getStrongAuthForUser(anyInt())).thenReturn(
                 KeyguardUpdateMonitor.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN);
@@ -712,7 +728,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
     @Test
     public void testTriesToAuthenticate_whenLockout() {
-        mKeyguardUpdateMonitor.dispatchStartedWakingUp();
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp(PowerManager.WAKE_REASON_POWER_BUTTON);
         mTestableLooper.processAllMessages();
         when(mStrongAuthTracker.getStrongAuthForUser(anyInt())).thenReturn(
                 KeyguardUpdateMonitor.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT);
@@ -736,7 +752,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
     @Test
     public void testFaceAndFingerprintLockout_onlyFace() {
-        mKeyguardUpdateMonitor.dispatchStartedWakingUp();
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp(PowerManager.WAKE_REASON_POWER_BUTTON);
         mTestableLooper.processAllMessages();
         keyguardIsVisible();
 
@@ -747,7 +763,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
     @Test
     public void testFaceAndFingerprintLockout_onlyFingerprint() {
-        mKeyguardUpdateMonitor.dispatchStartedWakingUp();
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp(PowerManager.WAKE_REASON_POWER_BUTTON);
         mTestableLooper.processAllMessages();
         keyguardIsVisible();
 
@@ -759,7 +775,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
     @Test
     public void testFaceAndFingerprintLockout() {
-        mKeyguardUpdateMonitor.dispatchStartedWakingUp();
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp(PowerManager.WAKE_REASON_POWER_BUTTON);
         mTestableLooper.processAllMessages();
         keyguardIsVisible();
 
@@ -858,7 +874,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         when(mFaceManager.getLockoutModeForUser(eq(FACE_SENSOR_ID), eq(newUser)))
                 .thenReturn(faceLockoutMode);
 
-        mKeyguardUpdateMonitor.dispatchStartedWakingUp();
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp(PowerManager.WAKE_REASON_POWER_BUTTON);
         mTestableLooper.processAllMessages();
         keyguardIsVisible();
 
@@ -1032,7 +1048,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     @Test
     public void testOccludingAppFingerprintListeningState() {
         // GIVEN keyguard isn't visible (app occluding)
-        mKeyguardUpdateMonitor.dispatchStartedWakingUp();
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp(PowerManager.WAKE_REASON_POWER_BUTTON);
         mKeyguardUpdateMonitor.setKeyguardShowing(true, true);
         when(mStrongAuthTracker.hasUserAuthenticatedSinceBoot()).thenReturn(true);
 
@@ -1047,7 +1063,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     @Test
     public void testOccludingAppRequestsFingerprint() {
         // GIVEN keyguard isn't visible (app occluding)
-        mKeyguardUpdateMonitor.dispatchStartedWakingUp();
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp(PowerManager.WAKE_REASON_POWER_BUTTON);
         mKeyguardUpdateMonitor.setKeyguardShowing(true, true);
 
         // WHEN an occluding app requests fp
@@ -1138,7 +1154,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         biometricsNotDisabledThroughDevicePolicyManager();
         mStatusBarStateListener.onStateChanged(StatusBarState.SHADE_LOCKED);
         setKeyguardBouncerVisibility(false /* isVisible */);
-        mKeyguardUpdateMonitor.dispatchStartedWakingUp();
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp(PowerManager.WAKE_REASON_POWER_BUTTON);
         when(mKeyguardBypassController.canBypass()).thenReturn(true);
         keyguardIsVisible();
 
@@ -1517,7 +1533,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
     @Test
     public void testFingerprintCanAuth_whenCancellationNotReceivedAndAuthFailed() {
-        mKeyguardUpdateMonitor.dispatchStartedWakingUp();
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp(PowerManager.WAKE_REASON_POWER_BUTTON);
         mTestableLooper.processAllMessages();
         keyguardIsVisible();
 
@@ -1564,6 +1580,36 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         fingerprintAcquireStart();
 
         verify(mPowerManager, never()).wakeUp(anyLong(), anyInt(), anyString());
+    }
+
+    @Test
+    public void testDreamingStopped_faceDoesNotRun() {
+        mKeyguardUpdateMonitor.dispatchDreamingStopped();
+        mTestableLooper.processAllMessages();
+
+        verify(mFaceManager, never()).authenticate(
+                any(), any(), any(), any(), anyInt(), anyBoolean());
+    }
+
+    @Test
+    public void testFaceWakeupTrigger_runFaceAuth_onlyOnConfiguredTriggers() {
+        // keyguard is visible
+        keyguardIsVisible();
+
+        // WHEN device wakes up from an application
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp(PowerManager.WAKE_REASON_APPLICATION);
+        mTestableLooper.processAllMessages();
+
+        // THEN face auth isn't triggered
+        verify(mFaceManager, never()).authenticate(
+                any(), any(), any(), any(), anyInt(), anyBoolean());
+
+        // WHEN device wakes up from the power button
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp(PowerManager.WAKE_REASON_POWER_BUTTON);
+        mTestableLooper.processAllMessages();
+
+        // THEN face auth is triggered
+        verify(mFaceManager).authenticate(any(), any(), any(), any(), anyInt(), anyBoolean());
     }
 
     private void cleanupKeyguardUpdateMonitor() {
@@ -1686,7 +1732,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     private void deviceIsInteractive() {
-        mKeyguardUpdateMonitor.dispatchStartedWakingUp();
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp(PowerManager.WAKE_REASON_POWER_BUTTON);
     }
 
     private void bouncerFullyVisible() {
@@ -1736,7 +1782,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                     mKeyguardUpdateMonitorLogger, mUiEventLogger, () -> mSessionTracker,
                     mPowerManager, mTrustManager, mSubscriptionManager, mUserManager,
                     mDreamManager, mDevicePolicyManager, mSensorPrivacyManager, mTelephonyManager,
-                    mPackageManager, mFaceManager, mFingerprintManager, mBiometricManager);
+                    mPackageManager, mFaceManager, mFingerprintManager, mBiometricManager,
+                    mFaceWakeUpTriggersConfig);
             setStrongAuthTracker(KeyguardUpdateMonitorTest.this.mStrongAuthTracker);
         }
 

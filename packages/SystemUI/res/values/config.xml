@@ -643,6 +643,18 @@
         <item>26</item> <!-- MOUTH_COVERING_DETECTED -->
     </integer-array>
 
+    <!-- Which device wake-ups will trigger face auth. These values correspond with
+         PowerManager#WakeReason. -->
+    <integer-array name="config_face_auth_wake_up_triggers">
+        <item>1</item> <!-- WAKE_REASON_POWER_BUTTON -->
+        <item>4</item> <!-- WAKE_REASON_GESTURE -->
+        <item>6</item> <!-- WAKE_REASON_WAKE_KEY -->
+        <item>7</item> <!-- WAKE_REASON_WAKE_MOTION -->
+        <item>9</item> <!-- WAKE_REASON_LID -->
+        <item>10</item> <!-- WAKE_REASON_DISPLAY_GROUP_ADDED -->
+        <item>12</item> <!-- WAKE_REASON_UNFOLD_DEVICE -->
+    </integer-array>
+
     <!-- Whether the communal service should be enabled -->
     <bool name="config_communalServiceEnabled">false</bool>
 
