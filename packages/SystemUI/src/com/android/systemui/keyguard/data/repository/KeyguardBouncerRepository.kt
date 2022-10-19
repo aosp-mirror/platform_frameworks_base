@@ -21,7 +21,6 @@ import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.keyguard.ViewMediatorCallback
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.keyguard.shared.model.BouncerCallbackActionsModel
 import com.android.systemui.keyguard.shared.model.BouncerShowMessageModel
 import com.android.systemui.keyguard.shared.model.KeyguardBouncerModel
 import com.android.systemui.statusbar.phone.KeyguardBouncer.EXPANSION_HIDDEN
@@ -54,8 +53,6 @@ constructor(
     val hide = _hide.asStateFlow()
     private val _startingToHide = MutableStateFlow(false)
     val startingToHide = _startingToHide.asStateFlow()
-    private val _onDismissAction = MutableStateFlow<BouncerCallbackActionsModel?>(null)
-    val onDismissAction = _onDismissAction.asStateFlow()
     private val _disappearAnimation = MutableStateFlow<Runnable?>(null)
     val startingDisappearAnimation = _disappearAnimation.asStateFlow()
     private val _keyguardPosition = MutableStateFlow(0f)
@@ -118,10 +115,6 @@ constructor(
 
     fun setStartingToHide(startingToHide: Boolean) {
         _startingToHide.value = startingToHide
-    }
-
-    fun setOnDismissAction(bouncerCallbackActionsModel: BouncerCallbackActionsModel?) {
-        _onDismissAction.value = bouncerCallbackActionsModel
     }
 
     fun setStartDisappearAnimation(runnable: Runnable?) {

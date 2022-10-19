@@ -20,7 +20,6 @@ import android.view.View
 import com.android.systemui.keyguard.data.BouncerView
 import com.android.systemui.keyguard.data.BouncerViewDelegate
 import com.android.systemui.keyguard.domain.interactor.BouncerInteractor
-import com.android.systemui.keyguard.shared.model.BouncerCallbackActionsModel
 import com.android.systemui.keyguard.shared.model.BouncerShowMessageModel
 import com.android.systemui.keyguard.shared.model.KeyguardBouncerModel
 import com.android.systemui.statusbar.phone.KeyguardBouncer.EXPANSION_VISIBLE
@@ -62,9 +61,6 @@ constructor(
 
     /** Observe whether bouncer is starting to hide. */
     val startingToHide: Flow<Unit> = interactor.startingToHide
-
-    /** Observe whether we want to set the dismiss action to the bouncer. */
-    val setDismissAction: Flow<BouncerCallbackActionsModel> = interactor.onDismissAction
 
     /** Observe whether we want to start the disappear animation. */
     val startDisappearAnimation: Flow<Runnable> = interactor.startingDisappearAnimation

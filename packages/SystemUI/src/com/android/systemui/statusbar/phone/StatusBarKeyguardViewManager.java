@@ -172,7 +172,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             if (mBouncerAnimating) {
                 mCentralSurfaces.setBouncerHiddenFraction(expansion);
             }
-            updateStates();
         }
 
         @Override

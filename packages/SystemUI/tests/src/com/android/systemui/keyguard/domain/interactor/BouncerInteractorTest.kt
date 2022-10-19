@@ -27,8 +27,8 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.BouncerView
+import com.android.systemui.keyguard.data.BouncerViewDelegate
 import com.android.systemui.keyguard.data.repository.KeyguardBouncerRepository
-import com.android.systemui.keyguard.shared.model.BouncerCallbackActionsModel
 import com.android.systemui.keyguard.shared.model.BouncerShowMessageModel
 import com.android.systemui.keyguard.shared.model.KeyguardBouncerModel
 import com.android.systemui.plugins.ActivityStarter
@@ -57,6 +57,7 @@ class BouncerInteractorTest : SysuiTestCase() {
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private lateinit var repository: KeyguardBouncerRepository
     @Mock(answer = Answers.RETURNS_DEEP_STUBS) private lateinit var bouncerView: BouncerView
+    @Mock private lateinit var bouncerViewDelegate: BouncerViewDelegate
     @Mock private lateinit var keyguardStateController: KeyguardStateController
     @Mock private lateinit var keyguardSecurityModel: KeyguardSecurityModel
     @Mock private lateinit var bouncerCallbackInteractor: BouncerCallbackInteractor
@@ -86,6 +87,7 @@ class BouncerInteractorTest : SysuiTestCase() {
             )
         `when`(repository.startingDisappearAnimation.value).thenReturn(null)
         `when`(repository.show.value).thenReturn(null)
+        `when`(bouncerView.delegate).thenReturn(bouncerViewDelegate)
     }
 
     @Test
@@ -124,7 +126,6 @@ class BouncerInteractorTest : SysuiTestCase() {
         verify(falsingCollector).onBouncerHidden()
         verify(keyguardStateController).notifyBouncerShowing(false)
         verify(repository).setShowingSoon(false)
-        verify(repository).setOnDismissAction(null)
         verify(repository).setVisible(false)
         verify(repository).setHide(true)
         verify(repository).setShow(null)
@@ -178,8 +179,7 @@ class BouncerInteractorTest : SysuiTestCase() {
         val onDismissAction = mock(ActivityStarter.OnDismissAction::class.java)
         val cancelAction = mock(Runnable::class.java)
         bouncerInteractor.setDismissAction(onDismissAction, cancelAction)
-        verify(repository)
-            .setOnDismissAction(BouncerCallbackActionsModel(onDismissAction, cancelAction))
+        verify(bouncerViewDelegate).setDismissAction(onDismissAction, cancelAction)
     }
 
     @Test
@@ -269,10 +269,9 @@ class BouncerInteractorTest : SysuiTestCase() {
 
     @Test
     fun testWillDismissWithAction() {
-        `when`(repository.onDismissAction.value?.onDismissAction)
-            .thenReturn(mock(ActivityStarter.OnDismissAction::class.java))
+        `when`(bouncerViewDelegate.willDismissWithActions()).thenReturn(true)
         assertThat(bouncerInteractor.willDismissWithAction()).isTrue()
-        `when`(repository.onDismissAction.value?.onDismissAction).thenReturn(null)
+        `when`(bouncerViewDelegate.willDismissWithActions()).thenReturn(false)
         assertThat(bouncerInteractor.willDismissWithAction()).isFalse()
     }
 }
