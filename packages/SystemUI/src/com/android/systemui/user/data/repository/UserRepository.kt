@@ -220,7 +220,12 @@ constructor(
             val result = withContext(backgroundDispatcher) { manager.aliveUsers }
 
             if (result != null) {
-                _userInfos.value = result.sortedBy { it.creationTime }
+                _userInfos.value =
+                    result
+                        // Users should be sorted by ascending creation time.
+                        .sortedBy { it.creationTime }
+                        // The guest user is always last, regardless of creation time.
+                        .sortedBy { it.isGuest }
             }
         }
     }
