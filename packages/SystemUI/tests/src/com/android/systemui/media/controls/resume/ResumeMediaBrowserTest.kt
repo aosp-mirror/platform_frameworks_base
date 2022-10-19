@@ -37,8 +37,8 @@ import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
-import org.mockito.MockitoAnnotations
 import org.mockito.Mockito.`when` as whenever
+import org.mockito.MockitoAnnotations
 
 private const val PACKAGE_NAME = "package"
 private const val CLASS_NAME = "class"
@@ -47,7 +47,9 @@ private const val MEDIA_ID = "media ID"
 private const val ROOT = "media browser root"
 
 private fun <T> capture(argumentCaptor: ArgumentCaptor<T>): T = argumentCaptor.capture()
+
 private fun <T> eq(value: T): T = Mockito.eq(value) ?: value
+
 private fun <T> any(): T = Mockito.any<T>()
 
 @SmallTest
@@ -57,10 +59,8 @@ public class ResumeMediaBrowserTest : SysuiTestCase() {
 
     private lateinit var resumeBrowser: TestableResumeMediaBrowser
     private val component = ComponentName(PACKAGE_NAME, CLASS_NAME)
-    private val description = MediaDescription.Builder()
-            .setTitle(TITLE)
-            .setMediaId(MEDIA_ID)
-            .build()
+    private val description =
+        MediaDescription.Builder().setTitle(TITLE).setMediaId(MEDIA_ID).build()
 
     @Mock lateinit var callback: ResumeMediaBrowser.Callback
     @Mock lateinit var listener: MediaResumeListener
@@ -81,19 +81,20 @@ public class ResumeMediaBrowserTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
 
         whenever(browserFactory.create(any(), capture(connectionCallback), any()))
-                .thenReturn(browser)
+            .thenReturn(browser)
 
         whenever(mediaController.transportControls).thenReturn(transportControls)
         whenever(mediaController.sessionToken).thenReturn(token)
 
-        resumeBrowser = TestableResumeMediaBrowser(
-            context,
-            callback,
-            component,
-            browserFactory,
-            logger,
-            mediaController
-        )
+        resumeBrowser =
+            TestableResumeMediaBrowser(
+                context,
+                callback,
+                component,
+                browserFactory,
+                logger,
+                mediaController
+            )
     }
 
     @Test
@@ -329,30 +330,20 @@ public class ResumeMediaBrowserTest : SysuiTestCase() {
         verify(oldBrowser).disconnect()
     }
 
-    /**
-     * Helper function to mock a failed connection
-     */
+    /** Helper function to mock a failed connection */
     private fun setupBrowserFailed() {
-        whenever(browser.connect()).thenAnswer {
-            connectionCallback.value.onConnectionFailed()
-        }
+        whenever(browser.connect()).thenAnswer { connectionCallback.value.onConnectionFailed() }
     }
 
-    /**
-     * Helper function to mock a successful connection only
-     */
+    /** Helper function to mock a successful connection only */
     private fun setupBrowserConnection() {
-        whenever(browser.connect()).thenAnswer {
-            connectionCallback.value.onConnected()
-        }
+        whenever(browser.connect()).thenAnswer { connectionCallback.value.onConnected() }
         whenever(browser.isConnected()).thenReturn(true)
         whenever(browser.getRoot()).thenReturn(ROOT)
         whenever(browser.sessionToken).thenReturn(token)
     }
 
-    /**
-     * Helper function to mock a successful connection, but no media results
-     */
+    /** Helper function to mock a successful connection, but no media results */
     private fun setupBrowserConnectionNoResults() {
         setupBrowserConnection()
         whenever(browser.subscribe(any(), capture(subscriptionCallback))).thenAnswer {
@@ -360,9 +351,7 @@ public class ResumeMediaBrowserTest : SysuiTestCase() {
         }
     }
 
-    /**
-     * Helper function to mock a successful connection, but no playable results
-     */
+    /** Helper function to mock a successful connection, but no playable results */
     private fun setupBrowserConnectionNotPlayable() {
         setupBrowserConnection()
 
@@ -373,9 +362,7 @@ public class ResumeMediaBrowserTest : SysuiTestCase() {
         }
     }
 
-    /**
-     * Helper function to mock a successful connection with playable media
-     */
+    /** Helper function to mock a successful connection with playable media */
     private fun setupBrowserConnectionValidMedia() {
         setupBrowserConnection()
 
@@ -387,9 +374,7 @@ public class ResumeMediaBrowserTest : SysuiTestCase() {
         }
     }
 
-    /**
-     * Override so media controller use is testable
-     */
+    /** Override so media controller use is testable */
     private class TestableResumeMediaBrowser(
         context: Context,
         callback: Callback,

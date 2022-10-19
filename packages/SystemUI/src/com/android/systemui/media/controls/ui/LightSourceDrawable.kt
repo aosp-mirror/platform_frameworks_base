@@ -55,9 +55,7 @@ private data class RippleData(
     var highlight: Float
 )
 
-/**
- * Drawable that can draw an animated gradient when tapped.
- */
+/** Drawable that can draw an animated gradient when tapped. */
 @Keep
 class LightSourceDrawable : Drawable() {
 
@@ -67,17 +65,15 @@ class LightSourceDrawable : Drawable() {
     private var paint = Paint()
 
     var highlightColor = Color.WHITE
-    set(value) {
-        if (field == value) {
-            return
+        set(value) {
+            if (field == value) {
+                return
+            }
+            field = value
+            invalidateSelf()
         }
-        field = value
-        invalidateSelf()
-    }
 
-    /**
-     * Draw a small highlight under the finger before expanding (or cancelling) it.
-     */
+    /** Draw a small highlight under the finger before expanding (or cancelling) it. */
     private var active: Boolean = false
         set(value) {
             if (value == field) {
@@ -91,46 +87,54 @@ class LightSourceDrawable : Drawable() {
                 rippleData.progress = RIPPLE_DOWN_PROGRESS
             } else {
                 rippleAnimation?.cancel()
-                rippleAnimation = ValueAnimator.ofFloat(rippleData.alpha, 0f).apply {
-                    duration = RIPPLE_CANCEL_DURATION
-                    interpolator = Interpolators.LINEAR_OUT_SLOW_IN
-                    addUpdateListener {
-                        rippleData.alpha = it.animatedValue as Float
-                        invalidateSelf()
-                    }
-                    addListener(object : AnimatorListenerAdapter() {
-                        var cancelled = false
-                        override fun onAnimationCancel(animation: Animator?) {
-                            cancelled = true
-                        }
-
-                        override fun onAnimationEnd(animation: Animator?) {
-                            if (cancelled) {
-                                return
-                            }
-                            rippleData.progress = 0f
-                            rippleData.alpha = 0f
-                            rippleAnimation = null
+                rippleAnimation =
+                    ValueAnimator.ofFloat(rippleData.alpha, 0f).apply {
+                        duration = RIPPLE_CANCEL_DURATION
+                        interpolator = Interpolators.LINEAR_OUT_SLOW_IN
+                        addUpdateListener {
+                            rippleData.alpha = it.animatedValue as Float
                             invalidateSelf()
                         }
-                    })
-                    start()
-                }
+                        addListener(
+                            object : AnimatorListenerAdapter() {
+                                var cancelled = false
+                                override fun onAnimationCancel(animation: Animator?) {
+                                    cancelled = true
+                                }
+
+                                override fun onAnimationEnd(animation: Animator?) {
+                                    if (cancelled) {
+                                        return
+                                    }
+                                    rippleData.progress = 0f
+                                    rippleData.alpha = 0f
+                                    rippleAnimation = null
+                                    invalidateSelf()
+                                }
+                            }
+                        )
+                        start()
+                    }
             }
             invalidateSelf()
         }
 
     private var rippleAnimation: Animator? = null
 
-    /**
-     * Draw background and gradient.
-     */
+    /** Draw background and gradient. */
     override fun draw(canvas: Canvas) {
         val radius = lerp(rippleData.minSize, rippleData.maxSize, rippleData.progress)
         val centerColor =
-                ColorUtils.setAlphaComponent(highlightColor, (rippleData.alpha * 255).toInt())
-        paint.shader = RadialGradient(rippleData.x, rippleData.y, radius,
-                intArrayOf(centerColor, Color.TRANSPARENT), GRADIENT_STOPS, Shader.TileMode.CLAMP)
+            ColorUtils.setAlphaComponent(highlightColor, (rippleData.alpha * 255).toInt())
+        paint.shader =
+            RadialGradient(
+                rippleData.x,
+                rippleData.y,
+                radius,
+                intArrayOf(centerColor, Color.TRANSPARENT),
+                GRADIENT_STOPS,
+                Shader.TileMode.CLAMP
+            )
         canvas.drawCircle(rippleData.x, rippleData.y, radius, paint)
     }
 
@@ -162,8 +166,8 @@ class LightSourceDrawable : Drawable() {
             rippleData.maxSize = a.getDimension(R.styleable.IlluminationDrawable_rippleMaxSize, 0f)
         }
         if (a.hasValue(R.styleable.IlluminationDrawable_highlight)) {
-            rippleData.highlight = a.getInteger(R.styleable.IlluminationDrawable_highlight, 0) /
-                    100f
+            rippleData.highlight =
+                a.getInteger(R.styleable.IlluminationDrawable_highlight, 0) / 100f
         }
     }
 
@@ -193,40 +197,44 @@ class LightSourceDrawable : Drawable() {
         invalidateSelf()
     }
 
-    /**
-     * Draws an animated ripple that expands fading away.
-     */
+    /** Draws an animated ripple that expands fading away. */
     private fun illuminate() {
         rippleData.alpha = 1f
         invalidateSelf()
 
         rippleAnimation?.cancel()
-        rippleAnimation = AnimatorSet().apply {
-            playTogether(ValueAnimator.ofFloat(1f, 0f).apply {
-                startDelay = 133
-                duration = RIPPLE_ANIM_DURATION - startDelay
-                interpolator = Interpolators.LINEAR_OUT_SLOW_IN
-                addUpdateListener {
-                    rippleData.alpha = it.animatedValue as Float
-                    invalidateSelf()
-                }
-            }, ValueAnimator.ofFloat(rippleData.progress, 1f).apply {
-                duration = RIPPLE_ANIM_DURATION
-                interpolator = Interpolators.LINEAR_OUT_SLOW_IN
-                addUpdateListener {
-                    rippleData.progress = it.animatedValue as Float
-                    invalidateSelf()
-                }
-            })
-            addListener(object : AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animation: Animator?) {
-                    rippleData.progress = 0f
-                    rippleAnimation = null
-                    invalidateSelf()
-                }
-            })
-            start()
-        }
+        rippleAnimation =
+            AnimatorSet().apply {
+                playTogether(
+                    ValueAnimator.ofFloat(1f, 0f).apply {
+                        startDelay = 133
+                        duration = RIPPLE_ANIM_DURATION - startDelay
+                        interpolator = Interpolators.LINEAR_OUT_SLOW_IN
+                        addUpdateListener {
+                            rippleData.alpha = it.animatedValue as Float
+                            invalidateSelf()
+                        }
+                    },
+                    ValueAnimator.ofFloat(rippleData.progress, 1f).apply {
+                        duration = RIPPLE_ANIM_DURATION
+                        interpolator = Interpolators.LINEAR_OUT_SLOW_IN
+                        addUpdateListener {
+                            rippleData.progress = it.animatedValue as Float
+                            invalidateSelf()
+                        }
+                    }
+                )
+                addListener(
+                    object : AnimatorListenerAdapter() {
+                        override fun onAnimationEnd(animation: Animator?) {
+                            rippleData.progress = 0f
+                            rippleAnimation = null
+                            invalidateSelf()
+                        }
+                    }
+                )
+                start()
+            }
     }
 
     override fun setHotspot(x: Float, y: Float) {
@@ -251,8 +259,13 @@ class LightSourceDrawable : Drawable() {
 
     override fun getDirtyBounds(): Rect {
         val radius = lerp(rippleData.minSize, rippleData.maxSize, rippleData.progress)
-        val bounds = Rect((rippleData.x - radius).toInt(), (rippleData.y - radius).toInt(),
-                (rippleData.x + radius).toInt(), (rippleData.y + radius).toInt())
+        val bounds =
+            Rect(
+                (rippleData.x - radius).toInt(),
+                (rippleData.y - radius).toInt(),
+                (rippleData.x + radius).toInt(),
+                (rippleData.y + radius).toInt()
+            )
         bounds.union(super.getDirtyBounds())
         return bounds
     }

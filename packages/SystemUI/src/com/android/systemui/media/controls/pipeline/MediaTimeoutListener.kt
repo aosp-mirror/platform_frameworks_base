@@ -22,8 +22,8 @@ import android.os.SystemProperties
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.media.controls.util.MediaControllerFactory
 import com.android.systemui.media.controls.models.player.MediaData
+import com.android.systemui.media.controls.util.MediaControllerFactory
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.NotificationMediaManager.isPlayingState
 import com.android.systemui.statusbar.SysuiStatusBarStateController
@@ -33,18 +33,18 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @VisibleForTesting
-val PAUSED_MEDIA_TIMEOUT = SystemProperties
-        .getLong("debug.sysui.media_timeout", TimeUnit.MINUTES.toMillis(10))
+val PAUSED_MEDIA_TIMEOUT =
+    SystemProperties.getLong("debug.sysui.media_timeout", TimeUnit.MINUTES.toMillis(10))
 
 @VisibleForTesting
-val RESUME_MEDIA_TIMEOUT = SystemProperties
-        .getLong("debug.sysui.media_timeout_resume", TimeUnit.DAYS.toMillis(3))
+val RESUME_MEDIA_TIMEOUT =
+    SystemProperties.getLong("debug.sysui.media_timeout_resume", TimeUnit.DAYS.toMillis(3))
 
-/**
- * Controller responsible for keeping track of playback states and expiring inactive streams.
- */
+/** Controller responsible for keeping track of playback states and expiring inactive streams. */
 @SysUISingleton
-class MediaTimeoutListener @Inject constructor(
+class MediaTimeoutListener
+@Inject
+constructor(
     private val mediaControllerFactory: MediaControllerFactory,
     @Main private val mainExecutor: DelayableExecutor,
     private val logger: MediaTimeoutLogger,
@@ -58,7 +58,9 @@ class MediaTimeoutListener @Inject constructor(
      * Callback representing that a media object is now expired:
      * @param key Media control unique identifier
      * @param timedOut True when expired for {@code PAUSED_MEDIA_TIMEOUT} for active media,
+     * ```
      *                 or {@code RESUME_MEDIA_TIMEOUT} for resume media
+     * ```
      */
     lateinit var timeoutCallback: (String, Boolean) -> Unit
 
@@ -70,21 +72,25 @@ class MediaTimeoutListener @Inject constructor(
     lateinit var stateCallback: (String, PlaybackState) -> Unit
 
     init {
-        statusBarStateController.addCallback(object : StatusBarStateController.StateListener {
-            override fun onDozingChanged(isDozing: Boolean) {
-                if (!isDozing) {
-                    // Check whether any timeouts should have expired
-                    mediaListeners.forEach { (key, listener) ->
-                        if (listener.cancellation != null &&
-                                listener.expiration <= systemClock.elapsedRealtime()) {
-                            // We dozed too long - timeout now, and cancel the pending one
-                            listener.expireMediaTimeout(key, "timeout happened while dozing")
-                            listener.doTimeout()
+        statusBarStateController.addCallback(
+            object : StatusBarStateController.StateListener {
+                override fun onDozingChanged(isDozing: Boolean) {
+                    if (!isDozing) {
+                        // Check whether any timeouts should have expired
+                        mediaListeners.forEach { (key, listener) ->
+                            if (
+                                listener.cancellation != null &&
+                                    listener.expiration <= systemClock.elapsedRealtime()
+                            ) {
+                                // We dozed too long - timeout now, and cancel the pending one
+                                listener.expireMediaTimeout(key, "timeout happened while dozing")
+                                listener.doTimeout()
+                            }
                         }
                     }
                 }
             }
-        })
+        )
     }
 
     override fun onMediaDataLoaded(
@@ -147,10 +153,8 @@ class MediaTimeoutListener @Inject constructor(
         return mediaListeners[key]?.timedOut ?: false
     }
 
-    private inner class PlaybackStateListener(
-        var key: String,
-        data: MediaData
-    ) : MediaController.Callback() {
+    private inner class PlaybackStateListener(var key: String, data: MediaData) :
+        MediaController.Callback() {
 
         var timedOut = false
         var lastState: PlaybackState? = null
@@ -164,11 +168,12 @@ class MediaTimeoutListener @Inject constructor(
                 mediaController?.unregisterCallback(this)
                 field = value
                 val token = field.token
-                mediaController = if (token != null) {
-                    mediaControllerFactory.create(token)
-                } else {
-                    null
-                }
+                mediaController =
+                    if (token != null) {
+                        mediaControllerFactory.create(token)
+                    } else {
+                        null
+                    }
                 mediaController?.registerCallback(this)
                 // Let's register the cancellations, but not dispatch events now.
                 // Timeouts didn't happen yet and reentrant events are troublesome.
@@ -214,7 +219,8 @@ class MediaTimeoutListener @Inject constructor(
             logger.logPlaybackState(key, state)
 
             val playingStateSame = (state?.state?.isPlaying() == isPlaying())
-            val actionsSame = (lastState?.actions == state?.actions) &&
+            val actionsSame =
+                (lastState?.actions == state?.actions) &&
                     areCustomActionListsEqual(lastState?.customActions, state?.customActions)
             val resumptionChanged = resumption != mediaData.resumption
 
@@ -239,15 +245,14 @@ class MediaTimeoutListener @Inject constructor(
                     return
                 }
                 expireMediaTimeout(key, "PLAYBACK STATE CHANGED - $state, $resumption")
-                val timeout = if (mediaData.resumption) {
-                    RESUME_MEDIA_TIMEOUT
-                } else {
-                    PAUSED_MEDIA_TIMEOUT
-                }
+                val timeout =
+                    if (mediaData.resumption) {
+                        RESUME_MEDIA_TIMEOUT
+                    } else {
+                        PAUSED_MEDIA_TIMEOUT
+                    }
                 expiration = systemClock.elapsedRealtime() + timeout
-                cancellation = mainExecutor.executeDelayed({
-                    doTimeout()
-                }, timeout)
+                cancellation = mainExecutor.executeDelayed({ doTimeout() }, timeout)
             } else {
                 expireMediaTimeout(key, "playback started - $state, $key")
                 timedOut = false
@@ -303,9 +308,11 @@ class MediaTimeoutListener @Inject constructor(
         firstAction: PlaybackState.CustomAction,
         secondAction: PlaybackState.CustomAction
     ): Boolean {
-        if (firstAction.action != secondAction.action ||
+        if (
+            firstAction.action != secondAction.action ||
                 firstAction.name != secondAction.name ||
-                firstAction.icon != secondAction.icon) {
+                firstAction.icon != secondAction.icon
+        ) {
             return false
         }
 

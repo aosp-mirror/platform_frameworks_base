@@ -24,40 +24,32 @@ import javax.inject.Inject
 
 private const val TAG = "MediaView"
 
-/**
- * A buffered log for media view events that are too noisy for regular logging
- */
+/** A buffered log for media view events that are too noisy for regular logging */
 @SysUISingleton
-class MediaViewLogger @Inject constructor(
-    @MediaViewLog private val buffer: LogBuffer
-) {
+class MediaViewLogger @Inject constructor(@MediaViewLog private val buffer: LogBuffer) {
     fun logMediaSize(reason: String, width: Int, height: Int) {
         buffer.log(
-                TAG,
-                LogLevel.DEBUG,
-                {
-                    str1 = reason
-                    int1 = width
-                    int2 = height
-                },
-                {
-                    "size ($str1): $int1 x $int2"
-                }
+            TAG,
+            LogLevel.DEBUG,
+            {
+                str1 = reason
+                int1 = width
+                int2 = height
+            },
+            { "size ($str1): $int1 x $int2" }
         )
     }
 
     fun logMediaLocation(reason: String, startLocation: Int, endLocation: Int) {
         buffer.log(
-                TAG,
-                LogLevel.DEBUG,
-                {
-                    str1 = reason
-                    int1 = startLocation
-                    int2 = endLocation
-                },
-                {
-                    "location ($str1): $int1 -> $int2"
-                }
+            TAG,
+            LogLevel.DEBUG,
+            {
+                str1 = reason
+                int1 = startLocation
+                int2 = endLocation
+            },
+            { "location ($str1): $int1 -> $int2" }
         )
     }
 }

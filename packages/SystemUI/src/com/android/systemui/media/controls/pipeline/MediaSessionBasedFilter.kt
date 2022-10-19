@@ -40,7 +40,9 @@ private const val TAG = "MediaSessionBasedFilter"
  * sessions. In this situation, there should only be a media object for the remote session. To
  * achieve this, update events for the local session need to be filtered.
  */
-class MediaSessionBasedFilter @Inject constructor(
+class MediaSessionBasedFilter
+@Inject
+constructor(
     context: Context,
     private val sessionManager: MediaSessionManager,
     @Main private val foregroundExecutor: Executor,
@@ -52,7 +54,7 @@ class MediaSessionBasedFilter @Inject constructor(
     // Keep track of MediaControllers for a given package to check if an app is casting and it
     // filter loaded events for local sessions.
     private val packageControllers: LinkedHashMap<String, MutableList<MediaController>> =
-            LinkedHashMap()
+        LinkedHashMap()
 
     // Keep track of the key used for the session tokens. This information is used to know when to
     // dispatch a removed event so that a media object for a local session will be removed.
@@ -61,11 +63,12 @@ class MediaSessionBasedFilter @Inject constructor(
     // Keep track of which media session tokens have associated notifications.
     private val tokensWithNotifications: MutableSet<MediaSession.Token> = mutableSetOf()
 
-    private val sessionListener = object : MediaSessionManager.OnActiveSessionsChangedListener {
-        override fun onActiveSessionsChanged(controllers: List<MediaController>) {
-            handleControllersChanged(controllers)
+    private val sessionListener =
+        object : MediaSessionManager.OnActiveSessionsChangedListener {
+            override fun onActiveSessionsChanged(controllers: List<MediaController>) {
+                handleControllersChanged(controllers)
+            }
         }
-    }
 
     init {
         backgroundExecutor.execute {
@@ -75,14 +78,10 @@ class MediaSessionBasedFilter @Inject constructor(
         }
     }
 
-    /**
-     * Add a listener for filtered [MediaData] changes
-     */
+    /** Add a listener for filtered [MediaData] changes */
     fun addListener(listener: MediaDataManager.Listener) = listeners.add(listener)
 
-    /**
-     * Remove a listener that was registered with addListener
-     */
+    /** Remove a listener that was registered with addListener */
     fun removeListener(listener: MediaDataManager.Listener) = listeners.remove(listener)
 
     /**
@@ -102,31 +101,32 @@ class MediaSessionBasedFilter @Inject constructor(
         isSsReactivated: Boolean
     ) {
         backgroundExecutor.execute {
-            data.token?.let {
-                tokensWithNotifications.add(it)
-            }
+            data.token?.let { tokensWithNotifications.add(it) }
             val isMigration = oldKey != null && key != oldKey
             if (isMigration) {
                 keyedTokens.remove(oldKey)?.let { removed -> keyedTokens.put(key, removed) }
             }
             if (data.token != null) {
-                keyedTokens.get(key)?.let {
-                    tokens ->
-                    tokens.add(data.token)
-                } ?: run {
-                    val tokens = mutableSetOf(data.token)
-                    keyedTokens.put(key, tokens)
-                }
+                keyedTokens.get(key)?.let { tokens -> tokens.add(data.token) }
+                    ?: run {
+                        val tokens = mutableSetOf(data.token)
+                        keyedTokens.put(key, tokens)
+                    }
             }
             // Determine if an app is casting by checking if it has a session with playback type
             // PLAYBACK_TYPE_REMOTE.
-            val remoteControllers = packageControllers.get(data.packageName)?.filter {
-                it.playbackInfo?.playbackType == PlaybackInfo.PLAYBACK_TYPE_REMOTE
-            }
+            val remoteControllers =
+                packageControllers.get(data.packageName)?.filter {
+                    it.playbackInfo?.playbackType == PlaybackInfo.PLAYBACK_TYPE_REMOTE
+                }
             // Limiting search to only apps with a single remote session.
             val remote = if (remoteControllers?.size == 1) remoteControllers.firstOrNull() else null
-            if (isMigration || remote == null || remote.sessionToken == data.token ||
-                    !tokensWithNotifications.contains(remote.sessionToken)) {
+            if (
+                isMigration ||
+                    remote == null ||
+                    remote.sessionToken == data.token ||
+                    !tokensWithNotifications.contains(remote.sessionToken)
+            ) {
                 // Not filtering in this case. Passing the event along to listeners.
                 dispatchMediaDataLoaded(key, oldKey, data, immediately)
             } else {
@@ -148,9 +148,7 @@ class MediaSessionBasedFilter @Inject constructor(
         data: SmartspaceMediaData,
         shouldPrioritize: Boolean
     ) {
-        backgroundExecutor.execute {
-            dispatchSmartspaceMediaDataLoaded(key, data)
-        }
+        backgroundExecutor.execute { dispatchSmartspaceMediaDataLoaded(key, data) }
     }
 
     override fun onMediaDataRemoved(key: String) {
@@ -162,9 +160,7 @@ class MediaSessionBasedFilter @Inject constructor(
     }
 
     override fun onSmartspaceMediaDataRemoved(key: String, immediately: Boolean) {
-        backgroundExecutor.execute {
-            dispatchSmartspaceMediaDataRemoved(key, immediately)
-        }
+        backgroundExecutor.execute { dispatchSmartspaceMediaDataRemoved(key, immediately) }
     }
 
     private fun dispatchMediaDataLoaded(
@@ -179,9 +175,7 @@ class MediaSessionBasedFilter @Inject constructor(
     }
 
     private fun dispatchMediaDataRemoved(key: String) {
-        foregroundExecutor.execute {
-            listeners.toSet().forEach { it.onMediaDataRemoved(key) }
-        }
+        foregroundExecutor.execute { listeners.toSet().forEach { it.onMediaDataRemoved(key) } }
     }
 
     private fun dispatchSmartspaceMediaDataLoaded(key: String, info: SmartspaceMediaData) {
@@ -198,15 +192,12 @@ class MediaSessionBasedFilter @Inject constructor(
 
     private fun handleControllersChanged(controllers: List<MediaController>) {
         packageControllers.clear()
-        controllers.forEach {
-            controller ->
-            packageControllers.get(controller.packageName)?.let {
-                tokens ->
-                tokens.add(controller)
-            } ?: run {
-                val tokens = mutableListOf(controller)
-                packageControllers.put(controller.packageName, tokens)
-            }
+        controllers.forEach { controller ->
+            packageControllers.get(controller.packageName)?.let { tokens -> tokens.add(controller) }
+                ?: run {
+                    val tokens = mutableListOf(controller)
+                    packageControllers.put(controller.packageName, tokens)
+                }
         }
         tokensWithNotifications.retainAll(controllers.map { it.sessionToken })
     }

@@ -25,55 +25,38 @@ import android.util.Log
 import androidx.annotation.VisibleForTesting
 import com.android.internal.logging.InstanceId
 
-@VisibleForTesting
-const val KEY_SMARTSPACE_APP_NAME = "KEY_SMARTSPACE_APP_NAME"
+@VisibleForTesting const val KEY_SMARTSPACE_APP_NAME = "KEY_SMARTSPACE_APP_NAME"
 
 /** State of a Smartspace media recommendations view. */
 data class SmartspaceMediaData(
-    /**
-     * Unique id of a Smartspace media target.
-     */
+    /** Unique id of a Smartspace media target. */
     val targetId: String,
-    /**
-     * Indicates if the status is active.
-     */
+    /** Indicates if the status is active. */
     val isActive: Boolean,
-    /**
-     * Package name of the media recommendations' provider-app.
-     */
+    /** Package name of the media recommendations' provider-app. */
     val packageName: String,
-    /**
-     * Action to perform when the card is tapped. Also contains the target's extra info.
-     */
+    /** Action to perform when the card is tapped. Also contains the target's extra info. */
     val cardAction: SmartspaceAction?,
-    /**
-     * List of media recommendations.
-     */
+    /** List of media recommendations. */
     val recommendations: List<SmartspaceAction>,
-    /**
-     * Intent for the user's initiated dismissal.
-     */
+    /** Intent for the user's initiated dismissal. */
     val dismissIntent: Intent?,
-    /**
-     * The timestamp in milliseconds that headphone is connected.
-     */
+    /** The timestamp in milliseconds that headphone is connected. */
     val headphoneConnectionTimeMillis: Long,
-    /**
-     * Instance ID for [MediaUiEventLogger]
-     */
+    /** Instance ID for [MediaUiEventLogger] */
     val instanceId: InstanceId
 ) {
     /**
      * Indicates if all the data is valid.
      *
      * TODO(b/230333302): Make MediaControlPanel more flexible so that we can display fewer than
+     * ```
      *     [NUM_REQUIRED_RECOMMENDATIONS].
+     * ```
      */
     fun isValid() = getValidRecommendations().size >= NUM_REQUIRED_RECOMMENDATIONS
 
-    /**
-     * Returns the list of [recommendations] that have valid data.
-     */
+    /** Returns the list of [recommendations] that have valid data. */
     fun getValidRecommendations() = recommendations.filter { it.icon != null }
 
     /** Returns the upstream app name if available. */
@@ -92,7 +75,8 @@ data class SmartspaceMediaData(
         Log.w(
             TAG,
             "Package $packageName does not have a main launcher activity. " +
-                    "Fallback to full app name")
+                "Fallback to full app name"
+        )
         return try {
             val applicationInfo = packageManager.getApplicationInfo(packageName, /* flags= */ 0)
             packageManager.getApplicationLabel(applicationInfo)

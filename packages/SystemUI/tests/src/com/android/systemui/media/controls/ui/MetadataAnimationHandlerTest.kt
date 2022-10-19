@@ -16,7 +16,6 @@
 
 package com.android.systemui.media.controls.ui
 
-import org.mockito.Mockito.`when` as whenever
 import android.animation.Animator
 import android.test.suitebuilder.annotation.SmallTest
 import android.testing.AndroidTestingRunner
@@ -29,10 +28,11 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.Mockito.verify
-import org.mockito.Mockito.times
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when` as whenever
 import org.mockito.junit.MockitoJUnit
 
 @SmallTest
@@ -55,8 +55,7 @@ class MetadataAnimationHandlerTest : SysuiTestCase() {
         handler = MetadataAnimationHandler(exitAnimator, enterAnimator)
     }
 
-    @After
-    fun tearDown() {}
+    @After fun tearDown() {}
 
     @Test
     fun firstBind_startsAnimationSet() {

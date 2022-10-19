@@ -35,26 +35,30 @@ class RecommendationViewHolder private constructor(itemView: View) {
 
     // Recommendation screen
     val cardIcon = itemView.requireViewById<ImageView>(R.id.recommendation_card_icon)
-    val mediaCoverItems = listOf<ImageView>(
-        itemView.requireViewById(R.id.media_cover1),
-        itemView.requireViewById(R.id.media_cover2),
-        itemView.requireViewById(R.id.media_cover3)
-    )
-    val mediaCoverContainers = listOf<ViewGroup>(
-        itemView.requireViewById(R.id.media_cover1_container),
-        itemView.requireViewById(R.id.media_cover2_container),
-        itemView.requireViewById(R.id.media_cover3_container)
-    )
-    val mediaTitles: List<TextView> = listOf(
-        itemView.requireViewById(R.id.media_title1),
-        itemView.requireViewById(R.id.media_title2),
-        itemView.requireViewById(R.id.media_title3)
-    )
-    val mediaSubtitles: List<TextView> = listOf(
-        itemView.requireViewById(R.id.media_subtitle1),
-        itemView.requireViewById(R.id.media_subtitle2),
-        itemView.requireViewById(R.id.media_subtitle3)
-    )
+    val mediaCoverItems =
+        listOf<ImageView>(
+            itemView.requireViewById(R.id.media_cover1),
+            itemView.requireViewById(R.id.media_cover2),
+            itemView.requireViewById(R.id.media_cover3)
+        )
+    val mediaCoverContainers =
+        listOf<ViewGroup>(
+            itemView.requireViewById(R.id.media_cover1_container),
+            itemView.requireViewById(R.id.media_cover2_container),
+            itemView.requireViewById(R.id.media_cover3_container)
+        )
+    val mediaTitles: List<TextView> =
+        listOf(
+            itemView.requireViewById(R.id.media_title1),
+            itemView.requireViewById(R.id.media_title2),
+            itemView.requireViewById(R.id.media_title3)
+        )
+    val mediaSubtitles: List<TextView> =
+        listOf(
+            itemView.requireViewById(R.id.media_subtitle1),
+            itemView.requireViewById(R.id.media_subtitle2),
+            itemView.requireViewById(R.id.media_subtitle3)
+        )
 
     val gutsViewHolder = GutsViewHolder(itemView)
 
@@ -78,13 +82,14 @@ class RecommendationViewHolder private constructor(itemView: View) {
          * @param inflater LayoutInflater to use to inflate the layout.
          * @param parent Parent of inflated view.
          */
-        @JvmStatic fun create(inflater: LayoutInflater, parent: ViewGroup):
-            RecommendationViewHolder {
+        @JvmStatic
+        fun create(inflater: LayoutInflater, parent: ViewGroup): RecommendationViewHolder {
             val itemView =
                 inflater.inflate(
                     R.layout.media_smartspace_recommendations,
                     parent,
-                    false /* attachToRoot */)
+                    false /* attachToRoot */
+                )
             // Because this media view (a TransitionLayout) is used to measure and layout the views
             // in various states before being attached to its parent, we can't depend on the default
             // LAYOUT_DIRECTION_INHERIT to correctly resolve the ltr direction.
@@ -93,35 +98,38 @@ class RecommendationViewHolder private constructor(itemView: View) {
         }
 
         // Res Ids for the control components on the recommendation view.
-        val controlsIds = setOf(
-            R.id.recommendation_card_icon,
-            R.id.media_cover1,
-            R.id.media_cover2,
-            R.id.media_cover3,
-            R.id.media_cover1_container,
-            R.id.media_cover2_container,
-            R.id.media_cover3_container,
-            R.id.media_title1,
-            R.id.media_title2,
-            R.id.media_title3,
-            R.id.media_subtitle1,
-            R.id.media_subtitle2,
-            R.id.media_subtitle3
-        )
+        val controlsIds =
+            setOf(
+                R.id.recommendation_card_icon,
+                R.id.media_cover1,
+                R.id.media_cover2,
+                R.id.media_cover3,
+                R.id.media_cover1_container,
+                R.id.media_cover2_container,
+                R.id.media_cover3_container,
+                R.id.media_title1,
+                R.id.media_title2,
+                R.id.media_title3,
+                R.id.media_subtitle1,
+                R.id.media_subtitle2,
+                R.id.media_subtitle3
+            )
 
-        val mediaTitlesAndSubtitlesIds = setOf(
-            R.id.media_title1,
-            R.id.media_title2,
-            R.id.media_title3,
-            R.id.media_subtitle1,
-            R.id.media_subtitle2,
-            R.id.media_subtitle3
-        )
+        val mediaTitlesAndSubtitlesIds =
+            setOf(
+                R.id.media_title1,
+                R.id.media_title2,
+                R.id.media_title3,
+                R.id.media_subtitle1,
+                R.id.media_subtitle2,
+                R.id.media_subtitle3
+            )
 
-        val mediaContainersIds = setOf(
-            R.id.media_cover1_container,
-            R.id.media_cover2_container,
-            R.id.media_cover3_container
-        )
+        val mediaContainersIds =
+            setOf(
+                R.id.media_cover1_container,
+                R.id.media_cover2_container,
+                R.id.media_cover3_container
+            )
     }
 }

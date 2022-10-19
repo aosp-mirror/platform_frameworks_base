@@ -60,7 +60,6 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.bluetooth.BroadcastDialogController
 import com.android.systemui.broadcast.BroadcastSender
 import com.android.systemui.media.controls.MediaTestUtils
-import com.android.systemui.media.controls.pipeline.EMPTY_SMARTSPACE_MEDIA_DATA
 import com.android.systemui.media.controls.models.GutsViewHolder
 import com.android.systemui.media.controls.models.player.MediaAction
 import com.android.systemui.media.controls.models.player.MediaButton
@@ -68,9 +67,10 @@ import com.android.systemui.media.controls.models.player.MediaData
 import com.android.systemui.media.controls.models.player.MediaDeviceData
 import com.android.systemui.media.controls.models.player.MediaViewHolder
 import com.android.systemui.media.controls.models.player.SeekBarViewModel
+import com.android.systemui.media.controls.models.recommendation.KEY_SMARTSPACE_APP_NAME
 import com.android.systemui.media.controls.models.recommendation.RecommendationViewHolder
 import com.android.systemui.media.controls.models.recommendation.SmartspaceMediaData
-import com.android.systemui.media.controls.models.recommendation.KEY_SMARTSPACE_APP_NAME
+import com.android.systemui.media.controls.pipeline.EMPTY_SMARTSPACE_MEDIA_DATA
 import com.android.systemui.media.controls.pipeline.MediaDataManager
 import com.android.systemui.media.controls.util.MediaUiEventLogger
 import com.android.systemui.media.dialog.MediaOutputDialogFactory
@@ -177,8 +177,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
     private lateinit var session: MediaSession
     private lateinit var device: MediaDeviceData
-    private val disabledDevice = MediaDeviceData(false, null, DISABLED_DEVICE_NAME, null,
-            showBroadcastButton = false)
+    private val disabledDevice =
+        MediaDeviceData(false, null, DISABLED_DEVICE_NAME, null, showBroadcastButton = false)
     private lateinit var mediaData: MediaData
     private val clock = FakeSystemClock()
     @Mock private lateinit var logger: MediaUiEventLogger
@@ -225,24 +225,27 @@ public class MediaControlPanelTest : SysuiTestCase() {
         whenever(packageManager.getApplicationLabel(any())).thenReturn(PACKAGE)
         context.setMockPackageManager(packageManager)
 
-        player = object : MediaControlPanel(
-            context,
-            bgExecutor,
-            mainExecutor,
-            activityStarter,
-            broadcastSender,
-            mediaViewController,
-            seekBarViewModel,
-            Lazy { mediaDataManager },
-            mediaOutputDialogFactory,
-            mediaCarouselController,
-            falsingManager,
-            clock,
-            logger,
-            keyguardStateController,
-            activityIntentHelper,
-            lockscreenUserManager,
-            broadcastDialogController) {
+        player =
+            object :
+                MediaControlPanel(
+                    context,
+                    bgExecutor,
+                    mainExecutor,
+                    activityStarter,
+                    broadcastSender,
+                    mediaViewController,
+                    seekBarViewModel,
+                    Lazy { mediaDataManager },
+                    mediaOutputDialogFactory,
+                    mediaCarouselController,
+                    falsingManager,
+                    clock,
+                    logger,
+                    keyguardStateController,
+                    activityIntentHelper,
+                    lockscreenUserManager,
+                    broadcastDialogController
+                ) {
                 override fun loadAnimator(
                     animId: Int,
                     otionInterpolator: Interpolator,
@@ -263,18 +266,20 @@ public class MediaControlPanelTest : SysuiTestCase() {
         // Set valid recommendation data
         val extras = Bundle()
         extras.putString(KEY_SMARTSPACE_APP_NAME, REC_APP_NAME)
-        val intent = Intent().apply {
-            putExtras(extras)
-            setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        }
+        val intent =
+            Intent().apply {
+                putExtras(extras)
+                setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
         whenever(smartspaceAction.intent).thenReturn(intent)
         whenever(smartspaceAction.extras).thenReturn(extras)
-        smartspaceData = EMPTY_SMARTSPACE_MEDIA_DATA.copy(
-            packageName = PACKAGE,
-            instanceId = instanceId,
-            recommendations = listOf(smartspaceAction, smartspaceAction, smartspaceAction),
-            cardAction = smartspaceAction
-        )
+        smartspaceData =
+            EMPTY_SMARTSPACE_MEDIA_DATA.copy(
+                packageName = PACKAGE,
+                instanceId = instanceId,
+                recommendations = listOf(smartspaceAction, smartspaceAction, smartspaceAction),
+                cardAction = smartspaceAction
+            )
     }
 
     private fun initGutsViewHolderMocks() {
@@ -292,36 +297,39 @@ public class MediaControlPanelTest : SysuiTestCase() {
     }
 
     private fun initDeviceMediaData(shouldShowBroadcastButton: Boolean, name: String) {
-        device = MediaDeviceData(true, null, name, null,
-                showBroadcastButton = shouldShowBroadcastButton)
+        device =
+            MediaDeviceData(true, null, name, null, showBroadcastButton = shouldShowBroadcastButton)
 
         // Create media session
-        val metadataBuilder = MediaMetadata.Builder().apply {
-            putString(MediaMetadata.METADATA_KEY_ARTIST, SESSION_ARTIST)
-            putString(MediaMetadata.METADATA_KEY_TITLE, SESSION_TITLE)
-        }
-        val playbackBuilder = PlaybackState.Builder().apply {
-            setState(PlaybackState.STATE_PAUSED, 6000L, 1f)
-            setActions(PlaybackState.ACTION_PLAY)
-        }
-        session = MediaSession(context, SESSION_KEY).apply {
-            setMetadata(metadataBuilder.build())
-            setPlaybackState(playbackBuilder.build())
-        }
+        val metadataBuilder =
+            MediaMetadata.Builder().apply {
+                putString(MediaMetadata.METADATA_KEY_ARTIST, SESSION_ARTIST)
+                putString(MediaMetadata.METADATA_KEY_TITLE, SESSION_TITLE)
+            }
+        val playbackBuilder =
+            PlaybackState.Builder().apply {
+                setState(PlaybackState.STATE_PAUSED, 6000L, 1f)
+                setActions(PlaybackState.ACTION_PLAY)
+            }
+        session =
+            MediaSession(context, SESSION_KEY).apply {
+                setMetadata(metadataBuilder.build())
+                setPlaybackState(playbackBuilder.build())
+            }
         session.setActive(true)
 
-        mediaData = MediaTestUtils.emptyMediaData.copy(
+        mediaData =
+            MediaTestUtils.emptyMediaData.copy(
                 artist = ARTIST,
                 song = TITLE,
                 packageName = PACKAGE,
                 token = session.sessionToken,
                 device = device,
-                instanceId = instanceId)
+                instanceId = instanceId
+            )
     }
 
-    /**
-     * Initialize elements in media view holder
-     */
+    /** Initialize elements in media view holder */
     private fun initMediaViewHolderMocks() {
         whenever(seekBarViewModel.progress).thenReturn(seekBarData)
 
@@ -362,7 +370,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
                         action1.id,
                         action2.id,
                         action3.id,
-                        action4.id)
+                        action4.id
+                    )
             }
 
         whenever(viewHolder.player).thenReturn(view)
@@ -407,9 +416,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
         whenever(viewHolder.actionsTopBarrier).thenReturn(actionsTopBarrier)
     }
 
-    /**
-     * Initialize elements for the recommendation view holder
-     */
+    /** Initialize elements for the recommendation view holder */
     private fun initRecommendationViewHolderMocks() {
         recTitle1 = TextView(context)
         recTitle2 = TextView(context)
@@ -432,9 +439,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
             .thenReturn(listOf(coverContainer1, coverContainer2, coverContainer3))
         whenever(recommendationViewHolder.mediaTitles)
             .thenReturn(listOf(recTitle1, recTitle2, recTitle3))
-        whenever(recommendationViewHolder.mediaSubtitles).thenReturn(
-            listOf(recSubtitle1, recSubtitle2, recSubtitle3)
-        )
+        whenever(recommendationViewHolder.mediaSubtitles)
+            .thenReturn(listOf(recSubtitle1, recSubtitle2, recSubtitle3))
 
         whenever(recommendationViewHolder.gutsViewHolder).thenReturn(gutsViewHolder)
 
@@ -466,12 +472,13 @@ public class MediaControlPanelTest : SysuiTestCase() {
     fun bindSemanticActions() {
         val icon = context.getDrawable(android.R.drawable.ic_media_play)
         val bg = context.getDrawable(R.drawable.qs_media_round_button_background)
-        val semanticActions = MediaButton(
-            playOrPause = MediaAction(icon, Runnable {}, "play", bg),
-            nextOrCustom = MediaAction(icon, Runnable {}, "next", bg),
-            custom0 = MediaAction(icon, null, "custom 0", bg),
-            custom1 = MediaAction(icon, null, "custom 1", bg)
-        )
+        val semanticActions =
+            MediaButton(
+                playOrPause = MediaAction(icon, Runnable {}, "play", bg),
+                nextOrCustom = MediaAction(icon, Runnable {}, "next", bg),
+                custom0 = MediaAction(icon, null, "custom 0", bg),
+                custom1 = MediaAction(icon, null, "custom 1", bg)
+            )
         val state = mediaData.copy(semanticActions = semanticActions)
         player.attachPlayer(viewHolder)
         player.bindPlayer(state, PACKAGE)
@@ -514,15 +521,16 @@ public class MediaControlPanelTest : SysuiTestCase() {
         val bg = context.getDrawable(R.drawable.qs_media_round_button_background)
 
         // Setup button state: no prev or next button and their slots reserved
-        val semanticActions = MediaButton(
-            playOrPause = MediaAction(icon, Runnable {}, "play", bg),
-            nextOrCustom = null,
-            prevOrCustom = null,
-            custom0 = MediaAction(icon, null, "custom 0", bg),
-            custom1 = MediaAction(icon, null, "custom 1", bg),
-            false,
-            true
-        )
+        val semanticActions =
+            MediaButton(
+                playOrPause = MediaAction(icon, Runnable {}, "play", bg),
+                nextOrCustom = null,
+                prevOrCustom = null,
+                custom0 = MediaAction(icon, null, "custom 0", bg),
+                custom1 = MediaAction(icon, null, "custom 1", bg),
+                false,
+                true
+            )
         val state = mediaData.copy(semanticActions = semanticActions)
 
         player.attachPlayer(viewHolder)
@@ -543,15 +551,16 @@ public class MediaControlPanelTest : SysuiTestCase() {
         val bg = context.getDrawable(R.drawable.qs_media_round_button_background)
 
         // Setup button state: no prev or next button and their slots reserved
-        val semanticActions = MediaButton(
-            playOrPause = MediaAction(icon, Runnable {}, "play", bg),
-            nextOrCustom = null,
-            prevOrCustom = null,
-            custom0 = MediaAction(icon, null, "custom 0", bg),
-            custom1 = MediaAction(icon, null, "custom 1", bg),
-            true,
-            false
-        )
+        val semanticActions =
+            MediaButton(
+                playOrPause = MediaAction(icon, Runnable {}, "play", bg),
+                nextOrCustom = null,
+                prevOrCustom = null,
+                custom0 = MediaAction(icon, null, "custom 0", bg),
+                custom1 = MediaAction(icon, null, "custom 1", bg),
+                true,
+                false
+            )
         val state = mediaData.copy(semanticActions = semanticActions)
 
         player.attachPlayer(viewHolder)
@@ -659,10 +668,11 @@ public class MediaControlPanelTest : SysuiTestCase() {
         useRealConstraintSets()
 
         val icon = context.getDrawable(android.R.drawable.ic_media_play)
-        val semanticActions = MediaButton(
-            playOrPause = MediaAction(icon, Runnable {}, "play", null),
-            nextOrCustom = MediaAction(icon, Runnable {}, "next", null)
-        )
+        val semanticActions =
+            MediaButton(
+                playOrPause = MediaAction(icon, Runnable {}, "play", null),
+                nextOrCustom = MediaAction(icon, Runnable {}, "next", null)
+            )
         val state = mediaData.copy(semanticActions = semanticActions)
 
         player.attachPlayer(viewHolder)
@@ -732,9 +742,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
         useRealConstraintSets()
 
         val icon = context.getDrawable(android.R.drawable.ic_media_play)
-        val semanticActions = MediaButton(
-            nextOrCustom = MediaAction(icon, Runnable {}, "next", null)
-        )
+        val semanticActions =
+            MediaButton(nextOrCustom = MediaAction(icon, Runnable {}, "next", null))
         val state = mediaData.copy(semanticActions = semanticActions)
 
         player.attachPlayer(viewHolder)
@@ -749,10 +758,11 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Test
     fun bind_notScrubbing_scrubbingViewsGone() {
         val icon = context.getDrawable(android.R.drawable.ic_media_play)
-        val semanticActions = MediaButton(
-            prevOrCustom = MediaAction(icon, {}, "prev", null),
-            nextOrCustom = MediaAction(icon, {}, "next", null)
-        )
+        val semanticActions =
+            MediaButton(
+                prevOrCustom = MediaAction(icon, {}, "prev", null),
+                nextOrCustom = MediaAction(icon, {}, "next", null)
+            )
         val state = mediaData.copy(semanticActions = semanticActions)
 
         player.attachPlayer(viewHolder)
@@ -783,10 +793,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Test
     fun setIsScrubbing_noPrevButton_scrubbingTimesNotShown() {
         val icon = context.getDrawable(android.R.drawable.ic_media_play)
-        val semanticActions = MediaButton(
-            prevOrCustom = null,
-            nextOrCustom = MediaAction(icon, {}, "next", null)
-        )
+        val semanticActions =
+            MediaButton(prevOrCustom = null, nextOrCustom = MediaAction(icon, {}, "next", null))
         val state = mediaData.copy(semanticActions = semanticActions)
         player.attachPlayer(viewHolder)
         player.bindPlayer(state, PACKAGE)
@@ -803,10 +811,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Test
     fun setIsScrubbing_noNextButton_scrubbingTimesNotShown() {
         val icon = context.getDrawable(android.R.drawable.ic_media_play)
-        val semanticActions = MediaButton(
-            prevOrCustom = MediaAction(icon, {}, "prev", null),
-            nextOrCustom = null
-        )
+        val semanticActions =
+            MediaButton(prevOrCustom = MediaAction(icon, {}, "prev", null), nextOrCustom = null)
         val state = mediaData.copy(semanticActions = semanticActions)
         player.attachPlayer(viewHolder)
         player.bindPlayer(state, PACKAGE)
@@ -823,10 +829,11 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Test
     fun setIsScrubbing_true_scrubbingViewsShownAndPrevNextHiddenOnlyInExpanded() {
         val icon = context.getDrawable(android.R.drawable.ic_media_play)
-        val semanticActions = MediaButton(
-            prevOrCustom = MediaAction(icon, {}, "prev", null),
-            nextOrCustom = MediaAction(icon, {}, "next", null)
-        )
+        val semanticActions =
+            MediaButton(
+                prevOrCustom = MediaAction(icon, {}, "prev", null),
+                nextOrCustom = MediaAction(icon, {}, "next", null)
+            )
         val state = mediaData.copy(semanticActions = semanticActions)
         player.attachPlayer(viewHolder)
         player.bindPlayer(state, PACKAGE)
@@ -845,10 +852,11 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Test
     fun setIsScrubbing_trueThenFalse_scrubbingTimeGoneAtEnd() {
         val icon = context.getDrawable(android.R.drawable.ic_media_play)
-        val semanticActions = MediaButton(
-            prevOrCustom = MediaAction(icon, {}, "prev", null),
-            nextOrCustom = MediaAction(icon, {}, "next", null)
-        )
+        val semanticActions =
+            MediaButton(
+                prevOrCustom = MediaAction(icon, {}, "prev", null),
+                nextOrCustom = MediaAction(icon, {}, "next", null)
+            )
         val state = mediaData.copy(semanticActions = semanticActions)
 
         player.attachPlayer(viewHolder)
@@ -872,18 +880,20 @@ public class MediaControlPanelTest : SysuiTestCase() {
     fun bindNotificationActions() {
         val icon = context.getDrawable(android.R.drawable.ic_media_play)
         val bg = context.getDrawable(R.drawable.qs_media_round_button_background)
-        val actions = listOf(
-            MediaAction(icon, Runnable {}, "previous", bg),
-            MediaAction(icon, Runnable {}, "play", bg),
-            MediaAction(icon, null, "next", bg),
-            MediaAction(icon, null, "custom 0", bg),
-            MediaAction(icon, Runnable {}, "custom 1", bg)
-        )
-        val state = mediaData.copy(
-            actions = actions,
-            actionsToShowInCompact = listOf(1, 2),
-            semanticActions = null
-        )
+        val actions =
+            listOf(
+                MediaAction(icon, Runnable {}, "previous", bg),
+                MediaAction(icon, Runnable {}, "play", bg),
+                MediaAction(icon, null, "next", bg),
+                MediaAction(icon, null, "custom 0", bg),
+                MediaAction(icon, Runnable {}, "custom 1", bg)
+            )
+        val state =
+            mediaData.copy(
+                actions = actions,
+                actionsToShowInCompact = listOf(1, 2),
+                semanticActions = null
+            )
 
         player.attachPlayer(viewHolder)
         player.bindPlayer(state, PACKAGE)
@@ -931,15 +941,12 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
         val icon = context.getDrawable(R.drawable.ic_media_play)
         val bg = context.getDrawable(R.drawable.ic_media_play_container)
-        val semanticActions0 = MediaButton(
-            playOrPause = MediaAction(mockAvd0, Runnable {}, "play", null)
-        )
-        val semanticActions1 = MediaButton(
-            playOrPause = MediaAction(mockAvd1, Runnable {}, "pause", null)
-        )
-        val semanticActions2 = MediaButton(
-            playOrPause = MediaAction(mockAvd2, Runnable {}, "loading", null)
-        )
+        val semanticActions0 =
+            MediaButton(playOrPause = MediaAction(mockAvd0, Runnable {}, "play", null))
+        val semanticActions1 =
+            MediaButton(playOrPause = MediaAction(mockAvd1, Runnable {}, "pause", null))
+        val semanticActions2 =
+            MediaButton(playOrPause = MediaAction(mockAvd2, Runnable {}, "loading", null))
         val state0 = mediaData.copy(semanticActions = semanticActions0)
         val state1 = mediaData.copy(semanticActions = semanticActions1)
         val state2 = mediaData.copy(semanticActions = semanticActions2)
@@ -1102,11 +1109,10 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
         val mockAvd0 = mock(AnimatedVectorDrawable::class.java)
         whenever(mockAvd0.mutate()).thenReturn(mockAvd0)
-        val semanticActions0 = MediaButton(
-                playOrPause = MediaAction(mockAvd0, Runnable {}, "play", null)
-        )
-        val state = mediaData.copy(resumption = true, semanticActions = semanticActions0,
-                isPlaying = false)
+        val semanticActions0 =
+            MediaButton(playOrPause = MediaAction(mockAvd0, Runnable {}, "play", null))
+        val state =
+            mediaData.copy(resumption = true, semanticActions = semanticActions0, isPlaying = false)
         player.attachPlayer(viewHolder)
         player.bindPlayer(state, PACKAGE)
         assertThat(seamlessText.getText()).isEqualTo(APP_NAME)
@@ -1445,9 +1451,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
     @Test
     fun actionPlayPauseClick_isLogged() {
-        val semanticActions = MediaButton(
-            playOrPause = MediaAction(null, Runnable {}, "play", null)
-        )
+        val semanticActions =
+            MediaButton(playOrPause = MediaAction(null, Runnable {}, "play", null))
         val data = mediaData.copy(semanticActions = semanticActions)
 
         player.attachPlayer(viewHolder)
@@ -1459,9 +1464,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
     @Test
     fun actionPrevClick_isLogged() {
-        val semanticActions = MediaButton(
-            prevOrCustom = MediaAction(null, Runnable {}, "previous", null)
-        )
+        val semanticActions =
+            MediaButton(prevOrCustom = MediaAction(null, Runnable {}, "previous", null))
         val data = mediaData.copy(semanticActions = semanticActions)
 
         player.attachPlayer(viewHolder)
@@ -1473,9 +1477,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
     @Test
     fun actionNextClick_isLogged() {
-        val semanticActions = MediaButton(
-            nextOrCustom = MediaAction(null, Runnable {}, "next", null)
-        )
+        val semanticActions =
+            MediaButton(nextOrCustom = MediaAction(null, Runnable {}, "next", null))
         val data = mediaData.copy(semanticActions = semanticActions)
 
         player.attachPlayer(viewHolder)
@@ -1487,9 +1490,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
     @Test
     fun actionCustom0Click_isLogged() {
-        val semanticActions = MediaButton(
-            custom0 = MediaAction(null, Runnable {}, "custom 0", null)
-        )
+        val semanticActions =
+            MediaButton(custom0 = MediaAction(null, Runnable {}, "custom 0", null))
         val data = mediaData.copy(semanticActions = semanticActions)
 
         player.attachPlayer(viewHolder)
@@ -1501,9 +1503,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
     @Test
     fun actionCustom1Click_isLogged() {
-        val semanticActions = MediaButton(
-            custom1 = MediaAction(null, Runnable {}, "custom 1", null)
-        )
+        val semanticActions =
+            MediaButton(custom1 = MediaAction(null, Runnable {}, "custom 1", null))
         val data = mediaData.copy(semanticActions = semanticActions)
 
         player.attachPlayer(viewHolder)
@@ -1515,13 +1516,14 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
     @Test
     fun actionCustom2Click_isLogged() {
-        val actions = listOf(
-            MediaAction(null, Runnable {}, "action 0", null),
-            MediaAction(null, Runnable {}, "action 1", null),
-            MediaAction(null, Runnable {}, "action 2", null),
-            MediaAction(null, Runnable {}, "action 3", null),
-            MediaAction(null, Runnable {}, "action 4", null)
-        )
+        val actions =
+            listOf(
+                MediaAction(null, Runnable {}, "action 0", null),
+                MediaAction(null, Runnable {}, "action 1", null),
+                MediaAction(null, Runnable {}, "action 2", null),
+                MediaAction(null, Runnable {}, "action 3", null),
+                MediaAction(null, Runnable {}, "action 4", null)
+            )
         val data = mediaData.copy(actions = actions)
 
         player.attachPlayer(viewHolder)
@@ -1533,13 +1535,14 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
     @Test
     fun actionCustom3Click_isLogged() {
-        val actions = listOf(
-            MediaAction(null, Runnable {}, "action 0", null),
-            MediaAction(null, Runnable {}, "action 1", null),
-            MediaAction(null, Runnable {}, "action 2", null),
-            MediaAction(null, Runnable {}, "action 3", null),
-            MediaAction(null, Runnable {}, "action 4", null)
-        )
+        val actions =
+            listOf(
+                MediaAction(null, Runnable {}, "action 0", null),
+                MediaAction(null, Runnable {}, "action 1", null),
+                MediaAction(null, Runnable {}, "action 2", null),
+                MediaAction(null, Runnable {}, "action 3", null),
+                MediaAction(null, Runnable {}, "action 4", null)
+            )
         val data = mediaData.copy(actions = actions)
 
         player.attachPlayer(viewHolder)
@@ -1551,13 +1554,14 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
     @Test
     fun actionCustom4Click_isLogged() {
-        val actions = listOf(
-            MediaAction(null, Runnable {}, "action 0", null),
-            MediaAction(null, Runnable {}, "action 1", null),
-            MediaAction(null, Runnable {}, "action 2", null),
-            MediaAction(null, Runnable {}, "action 3", null),
-            MediaAction(null, Runnable {}, "action 4", null)
-        )
+        val actions =
+            listOf(
+                MediaAction(null, Runnable {}, "action 0", null),
+                MediaAction(null, Runnable {}, "action 1", null),
+                MediaAction(null, Runnable {}, "action 2", null),
+                MediaAction(null, Runnable {}, "action 3", null),
+                MediaAction(null, Runnable {}, "action 4", null)
+            )
         val data = mediaData.copy(actions = actions)
 
         player.attachPlayer(viewHolder)
@@ -1621,8 +1625,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
         // THEN it shows without dismissing keyguard first
         captor.value.onClick(viewHolder.player)
-        verify(activityStarter).startActivity(eq(clickIntent), eq(true),
-                nullable(), eq(true))
+        verify(activityStarter).startActivity(eq(clickIntent), eq(true), nullable(), eq(true))
     }
 
     @Test
@@ -1710,20 +1713,22 @@ public class MediaControlPanelTest : SysuiTestCase() {
     fun bindRecommendation_listHasTooFewRecs_notDisplayed() {
         player.attachRecommendation(recommendationViewHolder)
         val icon = Icon.createWithResource(context, R.drawable.ic_1x_mobiledata)
-        val data = smartspaceData.copy(
-            recommendations = listOf(
-                SmartspaceAction.Builder("id1", "title1")
-                    .setSubtitle("subtitle1")
-                    .setIcon(icon)
-                    .setExtras(Bundle.EMPTY)
-                    .build(),
-                SmartspaceAction.Builder("id2", "title2")
-                    .setSubtitle("subtitle2")
-                    .setIcon(icon)
-                    .setExtras(Bundle.EMPTY)
-                    .build(),
+        val data =
+            smartspaceData.copy(
+                recommendations =
+                    listOf(
+                        SmartspaceAction.Builder("id1", "title1")
+                            .setSubtitle("subtitle1")
+                            .setIcon(icon)
+                            .setExtras(Bundle.EMPTY)
+                            .build(),
+                        SmartspaceAction.Builder("id2", "title2")
+                            .setSubtitle("subtitle2")
+                            .setIcon(icon)
+                            .setExtras(Bundle.EMPTY)
+                            .build(),
+                    )
             )
-        )
 
         player.bindRecommendation(data)
 
@@ -1735,30 +1740,32 @@ public class MediaControlPanelTest : SysuiTestCase() {
     fun bindRecommendation_listHasTooFewRecsWithIcons_notDisplayed() {
         player.attachRecommendation(recommendationViewHolder)
         val icon = Icon.createWithResource(context, R.drawable.ic_1x_mobiledata)
-        val data = smartspaceData.copy(
-            recommendations = listOf(
-                SmartspaceAction.Builder("id1", "title1")
-                    .setSubtitle("subtitle1")
-                    .setIcon(icon)
-                    .setExtras(Bundle.EMPTY)
-                    .build(),
-                SmartspaceAction.Builder("id2", "title2")
-                    .setSubtitle("subtitle2")
-                    .setIcon(icon)
-                    .setExtras(Bundle.EMPTY)
-                    .build(),
-                SmartspaceAction.Builder("id2", "empty icon 1")
-                    .setSubtitle("subtitle2")
-                    .setIcon(null)
-                    .setExtras(Bundle.EMPTY)
-                    .build(),
-                SmartspaceAction.Builder("id2", "empty icon 2")
-                    .setSubtitle("subtitle2")
-                    .setIcon(null)
-                    .setExtras(Bundle.EMPTY)
-                    .build(),
+        val data =
+            smartspaceData.copy(
+                recommendations =
+                    listOf(
+                        SmartspaceAction.Builder("id1", "title1")
+                            .setSubtitle("subtitle1")
+                            .setIcon(icon)
+                            .setExtras(Bundle.EMPTY)
+                            .build(),
+                        SmartspaceAction.Builder("id2", "title2")
+                            .setSubtitle("subtitle2")
+                            .setIcon(icon)
+                            .setExtras(Bundle.EMPTY)
+                            .build(),
+                        SmartspaceAction.Builder("id2", "empty icon 1")
+                            .setSubtitle("subtitle2")
+                            .setIcon(null)
+                            .setExtras(Bundle.EMPTY)
+                            .build(),
+                        SmartspaceAction.Builder("id2", "empty icon 2")
+                            .setSubtitle("subtitle2")
+                            .setIcon(null)
+                            .setExtras(Bundle.EMPTY)
+                            .build(),
+                    )
             )
-        )
 
         player.bindRecommendation(data)
 
@@ -1778,25 +1785,27 @@ public class MediaControlPanelTest : SysuiTestCase() {
         val subtitle3 = "Subtitle3"
         val icon = Icon.createWithResource(context, R.drawable.ic_1x_mobiledata)
 
-        val data = smartspaceData.copy(
-            recommendations = listOf(
-                SmartspaceAction.Builder("id1", title1)
-                    .setSubtitle(subtitle1)
-                    .setIcon(icon)
-                    .setExtras(Bundle.EMPTY)
-                    .build(),
-                SmartspaceAction.Builder("id2", title2)
-                    .setSubtitle(subtitle2)
-                    .setIcon(icon)
-                    .setExtras(Bundle.EMPTY)
-                    .build(),
-                SmartspaceAction.Builder("id3", title3)
-                    .setSubtitle(subtitle3)
-                    .setIcon(icon)
-                    .setExtras(Bundle.EMPTY)
-                    .build()
+        val data =
+            smartspaceData.copy(
+                recommendations =
+                    listOf(
+                        SmartspaceAction.Builder("id1", title1)
+                            .setSubtitle(subtitle1)
+                            .setIcon(icon)
+                            .setExtras(Bundle.EMPTY)
+                            .build(),
+                        SmartspaceAction.Builder("id2", title2)
+                            .setSubtitle(subtitle2)
+                            .setIcon(icon)
+                            .setExtras(Bundle.EMPTY)
+                            .build(),
+                        SmartspaceAction.Builder("id3", title3)
+                            .setSubtitle(subtitle3)
+                            .setIcon(icon)
+                            .setExtras(Bundle.EMPTY)
+                            .build()
+                    )
             )
-        )
         player.bindRecommendation(data)
 
         assertThat(recTitle1.text).isEqualTo(title1)
@@ -1811,15 +1820,17 @@ public class MediaControlPanelTest : SysuiTestCase() {
     fun bindRecommendation_noTitle_subtitleNotShown() {
         player.attachRecommendation(recommendationViewHolder)
 
-        val data = smartspaceData.copy(
-            recommendations = listOf(
-                SmartspaceAction.Builder("id1", "")
-                    .setSubtitle("fake subtitle")
-                    .setIcon(Icon.createWithResource(context, R.drawable.ic_1x_mobiledata))
-                    .setExtras(Bundle.EMPTY)
-                    .build()
+        val data =
+            smartspaceData.copy(
+                recommendations =
+                    listOf(
+                        SmartspaceAction.Builder("id1", "")
+                            .setSubtitle("fake subtitle")
+                            .setIcon(Icon.createWithResource(context, R.drawable.ic_1x_mobiledata))
+                            .setExtras(Bundle.EMPTY)
+                            .build()
+                    )
             )
-        )
         player.bindRecommendation(data)
 
         assertThat(recSubtitle1.text).isEqualTo("")
@@ -1831,25 +1842,27 @@ public class MediaControlPanelTest : SysuiTestCase() {
         player.attachRecommendation(recommendationViewHolder)
 
         val icon = Icon.createWithResource(context, R.drawable.ic_1x_mobiledata)
-        val data = smartspaceData.copy(
-            recommendations = listOf(
-                SmartspaceAction.Builder("id1", "")
-                    .setSubtitle("fake subtitle")
-                    .setIcon(icon)
-                    .setExtras(Bundle.EMPTY)
-                    .build(),
-                SmartspaceAction.Builder("id2", "title2")
-                    .setSubtitle("fake subtitle")
-                    .setIcon(icon)
-                    .setExtras(Bundle.EMPTY)
-                    .build(),
-                SmartspaceAction.Builder("id3", "")
-                    .setSubtitle("fake subtitle")
-                    .setIcon(icon)
-                    .setExtras(Bundle.EMPTY)
-                    .build()
+        val data =
+            smartspaceData.copy(
+                recommendations =
+                    listOf(
+                        SmartspaceAction.Builder("id1", "")
+                            .setSubtitle("fake subtitle")
+                            .setIcon(icon)
+                            .setExtras(Bundle.EMPTY)
+                            .build(),
+                        SmartspaceAction.Builder("id2", "title2")
+                            .setSubtitle("fake subtitle")
+                            .setIcon(icon)
+                            .setExtras(Bundle.EMPTY)
+                            .build(),
+                        SmartspaceAction.Builder("id3", "")
+                            .setSubtitle("fake subtitle")
+                            .setIcon(icon)
+                            .setExtras(Bundle.EMPTY)
+                            .build()
+                    )
             )
-        )
         player.bindRecommendation(data)
 
         assertThat(expandedSet.getVisibility(recTitle1.id)).isEqualTo(ConstraintSet.VISIBLE)
@@ -1863,25 +1876,27 @@ public class MediaControlPanelTest : SysuiTestCase() {
         player.attachRecommendation(recommendationViewHolder)
 
         val icon = Icon.createWithResource(context, R.drawable.ic_1x_mobiledata)
-        val data = smartspaceData.copy(
-            recommendations = listOf(
-                SmartspaceAction.Builder("id1", "")
-                    .setSubtitle("")
-                    .setIcon(icon)
-                    .setExtras(Bundle.EMPTY)
-                    .build(),
-                SmartspaceAction.Builder("id2", "title2")
-                    .setSubtitle("")
-                    .setIcon(icon)
-                    .setExtras(Bundle.EMPTY)
-                    .build(),
-                SmartspaceAction.Builder("id3", "title3")
-                    .setSubtitle("subtitle3")
-                    .setIcon(icon)
-                    .setExtras(Bundle.EMPTY)
-                    .build()
+        val data =
+            smartspaceData.copy(
+                recommendations =
+                    listOf(
+                        SmartspaceAction.Builder("id1", "")
+                            .setSubtitle("")
+                            .setIcon(icon)
+                            .setExtras(Bundle.EMPTY)
+                            .build(),
+                        SmartspaceAction.Builder("id2", "title2")
+                            .setSubtitle("")
+                            .setIcon(icon)
+                            .setExtras(Bundle.EMPTY)
+                            .build(),
+                        SmartspaceAction.Builder("id3", "title3")
+                            .setSubtitle("subtitle3")
+                            .setIcon(icon)
+                            .setExtras(Bundle.EMPTY)
+                            .build()
+                    )
             )
-        )
         player.bindRecommendation(data)
 
         assertThat(expandedSet.getVisibility(recSubtitle1.id)).isEqualTo(ConstraintSet.VISIBLE)
@@ -1893,25 +1908,27 @@ public class MediaControlPanelTest : SysuiTestCase() {
     fun bindRecommendation_noneHaveSubtitles_subtitleViewsGone() {
         useRealConstraintSets()
         player.attachRecommendation(recommendationViewHolder)
-        val data = smartspaceData.copy(
-            recommendations = listOf(
-                SmartspaceAction.Builder("id1", "title1")
-                    .setSubtitle("")
-                    .setIcon(Icon.createWithResource(context, R.drawable.ic_1x_mobiledata))
-                    .setExtras(Bundle.EMPTY)
-                    .build(),
-                SmartspaceAction.Builder("id2", "title2")
-                    .setSubtitle("")
-                    .setIcon(Icon.createWithResource(context, R.drawable.ic_alarm))
-                    .setExtras(Bundle.EMPTY)
-                    .build(),
-                SmartspaceAction.Builder("id3", "title3")
-                    .setSubtitle("")
-                    .setIcon(Icon.createWithResource(context, R.drawable.ic_3g_mobiledata))
-                    .setExtras(Bundle.EMPTY)
-                    .build()
+        val data =
+            smartspaceData.copy(
+                recommendations =
+                    listOf(
+                        SmartspaceAction.Builder("id1", "title1")
+                            .setSubtitle("")
+                            .setIcon(Icon.createWithResource(context, R.drawable.ic_1x_mobiledata))
+                            .setExtras(Bundle.EMPTY)
+                            .build(),
+                        SmartspaceAction.Builder("id2", "title2")
+                            .setSubtitle("")
+                            .setIcon(Icon.createWithResource(context, R.drawable.ic_alarm))
+                            .setExtras(Bundle.EMPTY)
+                            .build(),
+                        SmartspaceAction.Builder("id3", "title3")
+                            .setSubtitle("")
+                            .setIcon(Icon.createWithResource(context, R.drawable.ic_3g_mobiledata))
+                            .setExtras(Bundle.EMPTY)
+                            .build()
+                    )
             )
-        )
 
         player.bindRecommendation(data)
 
@@ -1924,25 +1941,27 @@ public class MediaControlPanelTest : SysuiTestCase() {
     fun bindRecommendation_noneHaveTitles_titleAndSubtitleViewsGone() {
         useRealConstraintSets()
         player.attachRecommendation(recommendationViewHolder)
-        val data = smartspaceData.copy(
-            recommendations = listOf(
-                SmartspaceAction.Builder("id1", "")
-                    .setSubtitle("subtitle1")
-                    .setIcon(Icon.createWithResource(context, R.drawable.ic_1x_mobiledata))
-                    .setExtras(Bundle.EMPTY)
-                    .build(),
-                SmartspaceAction.Builder("id2", "")
-                    .setSubtitle("subtitle2")
-                    .setIcon(Icon.createWithResource(context, R.drawable.ic_alarm))
-                    .setExtras(Bundle.EMPTY)
-                    .build(),
-                SmartspaceAction.Builder("id3", "")
-                    .setSubtitle("subtitle3")
-                    .setIcon(Icon.createWithResource(context, R.drawable.ic_3g_mobiledata))
-                    .setExtras(Bundle.EMPTY)
-                    .build()
+        val data =
+            smartspaceData.copy(
+                recommendations =
+                    listOf(
+                        SmartspaceAction.Builder("id1", "")
+                            .setSubtitle("subtitle1")
+                            .setIcon(Icon.createWithResource(context, R.drawable.ic_1x_mobiledata))
+                            .setExtras(Bundle.EMPTY)
+                            .build(),
+                        SmartspaceAction.Builder("id2", "")
+                            .setSubtitle("subtitle2")
+                            .setIcon(Icon.createWithResource(context, R.drawable.ic_alarm))
+                            .setExtras(Bundle.EMPTY)
+                            .build(),
+                        SmartspaceAction.Builder("id3", "")
+                            .setSubtitle("subtitle3")
+                            .setIcon(Icon.createWithResource(context, R.drawable.ic_3g_mobiledata))
+                            .setExtras(Bundle.EMPTY)
+                            .build()
+                    )
             )
-        )
 
         player.bindRecommendation(data)
 
@@ -1955,20 +1974,23 @@ public class MediaControlPanelTest : SysuiTestCase() {
     }
 
     private fun getScrubbingChangeListener(): SeekBarViewModel.ScrubbingChangeListener =
-        withArgCaptor { verify(seekBarViewModel).setScrubbingChangeListener(capture()) }
+        withArgCaptor {
+            verify(seekBarViewModel).setScrubbingChangeListener(capture())
+        }
 
-    private fun getEnabledChangeListener(): SeekBarViewModel.EnabledChangeListener =
-        withArgCaptor { verify(seekBarViewModel).setEnabledChangeListener(capture()) }
+    private fun getEnabledChangeListener(): SeekBarViewModel.EnabledChangeListener = withArgCaptor {
+        verify(seekBarViewModel).setEnabledChangeListener(capture())
+    }
 
     /**
-     *  Update our test to use real ConstraintSets instead of mocks.
+     * Update our test to use real ConstraintSets instead of mocks.
      *
-     *  Some item visibilities, such as the seekbar visibility, are dependent on other action's
-     *  visibilities. If we use mocks for the ConstraintSets, then action visibility changes are
-     *  just thrown away instead of being saved for reference later. This method sets us up to use
-     *  ConstraintSets so that we do save visibility changes.
+     * Some item visibilities, such as the seekbar visibility, are dependent on other action's
+     * visibilities. If we use mocks for the ConstraintSets, then action visibility changes are just
+     * thrown away instead of being saved for reference later. This method sets us up to use
+     * ConstraintSets so that we do save visibility changes.
      *
-     *  TODO(b/229740380): Can/should we use real expanded and collapsed sets for all tests?
+     * TODO(b/229740380): Can/should we use real expanded and collapsed sets for all tests?
      */
     private fun useRealConstraintSets() {
         expandedSet = ConstraintSet()

@@ -98,11 +98,6 @@ class GutsViewHolder constructor(itemView: View) {
     }
 
     companion object {
-        val ids = setOf(
-            R.id.remove_text,
-            R.id.cancel,
-            R.id.dismiss,
-            R.id.settings
-        )
+        val ids = setOf(R.id.remove_text, R.id.cancel, R.id.dismiss, R.id.settings)
     }
 }

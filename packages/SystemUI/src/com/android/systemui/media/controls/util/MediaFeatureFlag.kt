@@ -20,9 +20,7 @@ import android.content.Context
 import com.android.systemui.util.Utils
 import javax.inject.Inject
 
-/**
- * Provides access to the current value of the feature flag.
- */
+/** Provides access to the current value of the feature flag. */
 class MediaFeatureFlag @Inject constructor(private val context: Context) {
     val enabled
         get() = Utils.useQsMediaPlayer(context)

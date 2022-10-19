@@ -42,7 +42,9 @@ import javax.inject.Inject
  * A class responsible for controlling a single instance of a media player handling interactions
  * with the view instance and keeping the media view states up to date.
  */
-class MediaViewController @Inject constructor(
+class MediaViewController
+@Inject
+constructor(
     private val context: Context,
     private val configurationController: ConfigurationController,
     private val mediaHostStatesManager: MediaHostStatesManager,
@@ -50,17 +52,18 @@ class MediaViewController @Inject constructor(
 ) {
 
     /**
-     * Indicating that the media view controller is for a notification-based player,
-     * session-based player, or recommendation
+     * Indicating that the media view controller is for a notification-based player, session-based
+     * player, or recommendation
      */
     enum class TYPE {
-        PLAYER, RECOMMENDATION
+        PLAYER,
+        RECOMMENDATION
     }
 
     companion object {
-        @JvmField
-        val GUTS_ANIMATION_DURATION = 500L
-        val controlIds = setOf(
+        @JvmField val GUTS_ANIMATION_DURATION = 500L
+        val controlIds =
+            setOf(
                 R.id.media_progress_bar,
                 R.id.actionNext,
                 R.id.actionPrev,
@@ -71,22 +74,20 @@ class MediaViewController @Inject constructor(
                 R.id.action4,
                 R.id.media_scrubbing_elapsed_time,
                 R.id.media_scrubbing_total_time
-        )
+            )
 
-        val detailIds = setOf(
+        val detailIds =
+            setOf(
                 R.id.header_title,
                 R.id.header_artist,
                 R.id.actionPlayPause,
-        )
+            )
     }
 
-    /**
-     * A listener when the current dimensions of the player change
-     */
+    /** A listener when the current dimensions of the player change */
     lateinit var sizeChangedListener: () -> Unit
     private var firstRefresh: Boolean = true
-    @VisibleForTesting
-    private var transitionLayout: TransitionLayout? = null
+    @VisibleForTesting private var transitionLayout: TransitionLayout? = null
     private val layoutController = TransitionLayoutController()
     private var animationDelay: Long = 0
     private var animationDuration: Long = 0
@@ -94,116 +95,98 @@ class MediaViewController @Inject constructor(
     private val measurement = MeasurementOutput(0, 0)
     private var type: TYPE = TYPE.PLAYER
 
-    /**
-     * A map containing all viewStates for all locations of this mediaState
-     */
+    /** A map containing all viewStates for all locations of this mediaState */
     private val viewStates: MutableMap<CacheKey, TransitionViewState?> = mutableMapOf()
 
     /**
      * The ending location of the view where it ends when all animations and transitions have
      * finished
      */
-    @MediaLocation
-    var currentEndLocation: Int = -1
+    @MediaLocation var currentEndLocation: Int = -1
 
-    /**
-     * The starting location of the view where it starts for all animations and transitions
-     */
-    @MediaLocation
-    private var currentStartLocation: Int = -1
+    /** The starting location of the view where it starts for all animations and transitions */
+    @MediaLocation private var currentStartLocation: Int = -1
 
-    /**
-     * The progress of the transition or 1.0 if there is no transition happening
-     */
+    /** The progress of the transition or 1.0 if there is no transition happening */
     private var currentTransitionProgress: Float = 1.0f
 
-    /**
-     * A temporary state used to store intermediate measurements.
-     */
+    /** A temporary state used to store intermediate measurements. */
     private val tmpState = TransitionViewState()
 
-    /**
-     * A temporary state used to store intermediate measurements.
-     */
+    /** A temporary state used to store intermediate measurements. */
     private val tmpState2 = TransitionViewState()
 
-    /**
-     * A temporary state used to store intermediate measurements.
-     */
+    /** A temporary state used to store intermediate measurements. */
     private val tmpState3 = TransitionViewState()
 
-    /**
-     * A temporary cache key to be used to look up cache entries
-     */
+    /** A temporary cache key to be used to look up cache entries */
     private val tmpKey = CacheKey()
 
     /**
-     * The current width of the player. This might not factor in case the player is animating
-     * to the current state, but represents the end state
+     * The current width of the player. This might not factor in case the player is animating to the
+     * current state, but represents the end state
      */
     var currentWidth: Int = 0
     /**
-     * The current height of the player. This might not factor in case the player is animating
-     * to the current state, but represents the end state
+     * The current height of the player. This might not factor in case the player is animating to
+     * the current state, but represents the end state
      */
     var currentHeight: Int = 0
 
-    /**
-     * Get the translationX of the layout
-     */
+    /** Get the translationX of the layout */
     var translationX: Float = 0.0f
         private set
         get() {
             return transitionLayout?.translationX ?: 0.0f
         }
 
-    /**
-     * Get the translationY of the layout
-     */
+    /** Get the translationY of the layout */
     var translationY: Float = 0.0f
         private set
         get() {
             return transitionLayout?.translationY ?: 0.0f
         }
 
-    /**
-     * A callback for RTL config changes
-     */
-    private val configurationListener = object : ConfigurationController.ConfigurationListener {
-        override fun onConfigChanged(newConfig: Configuration?) {
-            // Because the TransitionLayout is not always attached (and calculates/caches layout
-            // results regardless of attach state), we have to force the layoutDirection of the view
-            // to the correct value for the user's current locale to ensure correct recalculation
-            // when/after calling refreshState()
-            newConfig?.apply {
-                if (transitionLayout?.rawLayoutDirection != layoutDirection) {
-                    transitionLayout?.layoutDirection = layoutDirection
-                    refreshState()
+    /** A callback for RTL config changes */
+    private val configurationListener =
+        object : ConfigurationController.ConfigurationListener {
+            override fun onConfigChanged(newConfig: Configuration?) {
+                // Because the TransitionLayout is not always attached (and calculates/caches layout
+                // results regardless of attach state), we have to force the layoutDirection of the
+                // view
+                // to the correct value for the user's current locale to ensure correct
+                // recalculation
+                // when/after calling refreshState()
+                newConfig?.apply {
+                    if (transitionLayout?.rawLayoutDirection != layoutDirection) {
+                        transitionLayout?.layoutDirection = layoutDirection
+                        refreshState()
+                    }
                 }
             }
         }
-    }
 
-    /**
-     * A callback for media state changes
-     */
-    val stateCallback = object : MediaHostStatesManager.Callback {
-        override fun onHostStateChanged(
-            @MediaLocation location: Int,
-            mediaHostState: MediaHostState
-        ) {
-            if (location == currentEndLocation || location == currentStartLocation) {
-                setCurrentState(currentStartLocation,
+    /** A callback for media state changes */
+    val stateCallback =
+        object : MediaHostStatesManager.Callback {
+            override fun onHostStateChanged(
+                @MediaLocation location: Int,
+                mediaHostState: MediaHostState
+            ) {
+                if (location == currentEndLocation || location == currentStartLocation) {
+                    setCurrentState(
+                        currentStartLocation,
                         currentEndLocation,
                         currentTransitionProgress,
-                        applyImmediately = false)
+                        applyImmediately = false
+                    )
+                }
             }
         }
-    }
 
     /**
-     * The expanded constraint set used to render a expanded player. If it is modified, make sure
-     * to call [refreshState]
+     * The expanded constraint set used to render a expanded player. If it is modified, make sure to
+     * call [refreshState]
      */
     val collapsedLayout = ConstraintSet()
 
@@ -213,9 +196,7 @@ class MediaViewController @Inject constructor(
      */
     val expandedLayout = ConstraintSet()
 
-    /**
-     * Whether the guts are visible for the associated player.
-     */
+    /** Whether the guts are visible for the associated player. */
     var isGutsVisible = false
         private set
 
@@ -237,17 +218,17 @@ class MediaViewController @Inject constructor(
         configurationController.removeCallback(configurationListener)
     }
 
-    /**
-     * Show guts with an animated transition.
-     */
+    /** Show guts with an animated transition. */
     fun openGuts() {
         if (isGutsVisible) return
         isGutsVisible = true
         animatePendingStateChange(GUTS_ANIMATION_DURATION, 0L)
-        setCurrentState(currentStartLocation,
-                currentEndLocation,
-                currentTransitionProgress,
-                applyImmediately = false)
+        setCurrentState(
+            currentStartLocation,
+            currentEndLocation,
+            currentTransitionProgress,
+            applyImmediately = false
+        )
     }
 
     /**
@@ -262,10 +243,12 @@ class MediaViewController @Inject constructor(
         if (!immediate) {
             animatePendingStateChange(GUTS_ANIMATION_DURATION, 0L)
         }
-        setCurrentState(currentStartLocation,
-                currentEndLocation,
-                currentTransitionProgress,
-                applyImmediately = immediate)
+        setCurrentState(
+            currentStartLocation,
+            currentEndLocation,
+            currentTransitionProgress,
+            applyImmediately = immediate
+        )
     }
 
     private fun ensureAllMeasurements() {
@@ -275,21 +258,20 @@ class MediaViewController @Inject constructor(
         }
     }
 
-    /**
-     * Get the constraintSet for a given expansion
-     */
+    /** Get the constraintSet for a given expansion */
     private fun constraintSetForExpansion(expansion: Float): ConstraintSet =
-            if (expansion > 0) expandedLayout else collapsedLayout
+        if (expansion > 0) expandedLayout else collapsedLayout
 
     /**
      * Set the views to be showing/hidden based on the [isGutsVisible] for a given
      * [TransitionViewState].
      */
     private fun setGutsViewState(viewState: TransitionViewState) {
-        val controlsIds = when (type) {
-            TYPE.PLAYER -> MediaViewHolder.controlsIds
-            TYPE.RECOMMENDATION -> RecommendationViewHolder.controlsIds
-        }
+        val controlsIds =
+            when (type) {
+                TYPE.PLAYER -> MediaViewHolder.controlsIds
+                TYPE.RECOMMENDATION -> RecommendationViewHolder.controlsIds
+            }
         val gutsIds = GutsViewHolder.ids
         controlsIds.forEach { id ->
             viewState.widgetStates.get(id)?.let { state ->
@@ -307,9 +289,7 @@ class MediaViewController @Inject constructor(
         }
     }
 
-    /**
-     * Apply squishFraction to a copy of viewState such that the cached version is untouched.
-    */
+    /** Apply squishFraction to a copy of viewState such that the cached version is untouched. */
     internal fun squishViewState(
         viewState: TransitionViewState,
         squishFraction: Float
@@ -347,8 +327,8 @@ class MediaViewController @Inject constructor(
      * Obtain a new viewState for a given media state. This usually returns a cached state, but if
      * it's not available, it will recreate one by measuring, which may be expensive.
      */
-     @VisibleForTesting
-     fun obtainViewState(state: MediaHostState?): TransitionViewState? {
+    @VisibleForTesting
+    fun obtainViewState(state: MediaHostState?): TransitionViewState? {
         if (state == null || state.measurementInput == null) {
             return null
         }
@@ -371,10 +351,12 @@ class MediaViewController @Inject constructor(
         }
         // Let's create a new measurement
         if (state.expansion == 0.0f || state.expansion == 1.0f) {
-            result = transitionLayout!!.calculateViewState(
+            result =
+                transitionLayout!!.calculateViewState(
                     state.measurementInput!!,
                     constraintSetForExpansion(state.expansion),
-                    TransitionViewState())
+                    TransitionViewState()
+                )
 
             setGutsViewState(result)
             // We don't want to cache interpolated or null states as this could quickly fill up
@@ -390,10 +372,8 @@ class MediaViewController @Inject constructor(
             val startViewState = obtainViewState(startState) as TransitionViewState
             val endState = state.copy().also { it.expansion = 1.0f }
             val endViewState = obtainViewState(endState) as TransitionViewState
-            result = layoutController.getInterpolatedState(
-                    startViewState,
-                    endViewState,
-                    state.expansion)
+            result =
+                layoutController.getInterpolatedState(startViewState, endViewState, state.expansion)
         }
         if (state.squishFraction <= 1f) {
             return squishViewState(result, state.squishFraction)
@@ -401,11 +381,7 @@ class MediaViewController @Inject constructor(
         return result
     }
 
-    private fun getKey(
-        state: MediaHostState,
-        guts: Boolean,
-        result: CacheKey
-    ): CacheKey {
+    private fun getKey(state: MediaHostState, guts: Boolean, result: CacheKey): CacheKey {
         result.apply {
             heightMeasureSpec = state.measurementInput?.heightMeasureSpec ?: 0
             widthMeasureSpec = state.measurementInput?.widthMeasureSpec ?: 0
@@ -416,41 +392,39 @@ class MediaViewController @Inject constructor(
     }
 
     /**
-     * Attach a view to this controller. This may perform measurements if it's not available yet
-     * and should therefore be done carefully.
+     * Attach a view to this controller. This may perform measurements if it's not available yet and
+     * should therefore be done carefully.
      */
-    fun attach(
-        transitionLayout: TransitionLayout,
-        type: TYPE
-    ) = traceSection("MediaViewController#attach") {
-        updateMediaViewControllerType(type)
-        logger.logMediaLocation("attach $type", currentStartLocation, currentEndLocation)
-        this.transitionLayout = transitionLayout
-        layoutController.attach(transitionLayout)
-        if (currentEndLocation == -1) {
-            return
-        }
-        // Set the previously set state immediately to the view, now that it's finally attached
-        setCurrentState(
+    fun attach(transitionLayout: TransitionLayout, type: TYPE) =
+        traceSection("MediaViewController#attach") {
+            updateMediaViewControllerType(type)
+            logger.logMediaLocation("attach $type", currentStartLocation, currentEndLocation)
+            this.transitionLayout = transitionLayout
+            layoutController.attach(transitionLayout)
+            if (currentEndLocation == -1) {
+                return
+            }
+            // Set the previously set state immediately to the view, now that it's finally attached
+            setCurrentState(
                 startLocation = currentStartLocation,
                 endLocation = currentEndLocation,
                 transitionProgress = currentTransitionProgress,
-                applyImmediately = true)
-    }
+                applyImmediately = true
+            )
+        }
 
     /**
-     * Obtain a measurement for a given location. This makes sure that the state is up to date
-     * and all widgets know their location. Calling this method may create a measurement if we
-     * don't have a cached value available already.
+     * Obtain a measurement for a given location. This makes sure that the state is up to date and
+     * all widgets know their location. Calling this method may create a measurement if we don't
+     * have a cached value available already.
      */
-    fun getMeasurementsForState(
-        hostState: MediaHostState
-    ): MeasurementOutput? = traceSection("MediaViewController#getMeasurementsForState") {
-        val viewState = obtainViewState(hostState) ?: return null
-        measurement.measuredWidth = viewState.width
-        measurement.measuredHeight = viewState.height
-        return measurement
-    }
+    fun getMeasurementsForState(hostState: MediaHostState): MeasurementOutput? =
+        traceSection("MediaViewController#getMeasurementsForState") {
+            val viewState = obtainViewState(hostState) ?: return null
+            measurement.measuredWidth = viewState.width
+            measurement.measuredHeight = viewState.height
+            return measurement
+        }
 
     /**
      * Set a new state for the controlled view which can be an interpolation between multiple
@@ -461,67 +435,85 @@ class MediaViewController @Inject constructor(
         @MediaLocation endLocation: Int,
         transitionProgress: Float,
         applyImmediately: Boolean
-    ) = traceSection("MediaViewController#setCurrentState") {
-        currentEndLocation = endLocation
-        currentStartLocation = startLocation
-        currentTransitionProgress = transitionProgress
-        logger.logMediaLocation("setCurrentState", startLocation, endLocation)
+    ) =
+        traceSection("MediaViewController#setCurrentState") {
+            currentEndLocation = endLocation
+            currentStartLocation = startLocation
+            currentTransitionProgress = transitionProgress
+            logger.logMediaLocation("setCurrentState", startLocation, endLocation)
 
-        val shouldAnimate = animateNextStateChange && !applyImmediately
+            val shouldAnimate = animateNextStateChange && !applyImmediately
 
-        val endHostState = mediaHostStatesManager.mediaHostStates[endLocation] ?: return
-        val startHostState = mediaHostStatesManager.mediaHostStates[startLocation]
+            val endHostState = mediaHostStatesManager.mediaHostStates[endLocation] ?: return
+            val startHostState = mediaHostStatesManager.mediaHostStates[startLocation]
 
-        // Obtain the view state that we'd want to be at the end
-        // The view might not be bound yet or has never been measured and in that case will be
-        // reset once the state is fully available
-        var endViewState = obtainViewState(endHostState) ?: return
-        endViewState = updateViewStateToCarouselSize(endViewState, endLocation, tmpState2)!!
-        layoutController.setMeasureState(endViewState)
+            // Obtain the view state that we'd want to be at the end
+            // The view might not be bound yet or has never been measured and in that case will be
+            // reset once the state is fully available
+            var endViewState = obtainViewState(endHostState) ?: return
+            endViewState = updateViewStateToCarouselSize(endViewState, endLocation, tmpState2)!!
+            layoutController.setMeasureState(endViewState)
 
-        // If the view isn't bound, we can drop the animation, otherwise we'll execute it
-        animateNextStateChange = false
-        if (transitionLayout == null) {
-            return
-        }
-
-        val result: TransitionViewState
-        var startViewState = obtainViewState(startHostState)
-        startViewState = updateViewStateToCarouselSize(startViewState, startLocation, tmpState3)
-
-        if (!endHostState.visible) {
-            // Let's handle the case where the end is gone first. In this case we take the
-            // start viewState and will make it gone
-            if (startViewState == null || startHostState == null || !startHostState.visible) {
-                // the start isn't a valid state, let's use the endstate directly
-                result = endViewState
-            } else {
-                // Let's get the gone presentation from the start state
-                result = layoutController.getGoneState(startViewState,
-                        startHostState.disappearParameters,
-                        transitionProgress,
-                        tmpState)
+            // If the view isn't bound, we can drop the animation, otherwise we'll execute it
+            animateNextStateChange = false
+            if (transitionLayout == null) {
+                return
             }
-        } else if (startHostState != null && !startHostState.visible) {
-            // We have a start state and it is gone.
-            // Let's get presentation from the endState
-            result = layoutController.getGoneState(endViewState, endHostState.disappearParameters,
-                    1.0f - transitionProgress,
-                    tmpState)
-        } else if (transitionProgress == 1.0f || startViewState == null) {
-            // We're at the end. Let's use that state
-            result = endViewState
-        } else if (transitionProgress == 0.0f) {
-            // We're at the start. Let's use that state
-            result = startViewState
-        } else {
-            result = layoutController.getInterpolatedState(startViewState, endViewState,
-                    transitionProgress, tmpState)
+
+            val result: TransitionViewState
+            var startViewState = obtainViewState(startHostState)
+            startViewState = updateViewStateToCarouselSize(startViewState, startLocation, tmpState3)
+
+            if (!endHostState.visible) {
+                // Let's handle the case where the end is gone first. In this case we take the
+                // start viewState and will make it gone
+                if (startViewState == null || startHostState == null || !startHostState.visible) {
+                    // the start isn't a valid state, let's use the endstate directly
+                    result = endViewState
+                } else {
+                    // Let's get the gone presentation from the start state
+                    result =
+                        layoutController.getGoneState(
+                            startViewState,
+                            startHostState.disappearParameters,
+                            transitionProgress,
+                            tmpState
+                        )
+                }
+            } else if (startHostState != null && !startHostState.visible) {
+                // We have a start state and it is gone.
+                // Let's get presentation from the endState
+                result =
+                    layoutController.getGoneState(
+                        endViewState,
+                        endHostState.disappearParameters,
+                        1.0f - transitionProgress,
+                        tmpState
+                    )
+            } else if (transitionProgress == 1.0f || startViewState == null) {
+                // We're at the end. Let's use that state
+                result = endViewState
+            } else if (transitionProgress == 0.0f) {
+                // We're at the start. Let's use that state
+                result = startViewState
+            } else {
+                result =
+                    layoutController.getInterpolatedState(
+                        startViewState,
+                        endViewState,
+                        transitionProgress,
+                        tmpState
+                    )
+            }
+            logger.logMediaSize("setCurrentState", result.width, result.height)
+            layoutController.setState(
+                result,
+                applyImmediately,
+                shouldAnimate,
+                animationDuration,
+                animationDelay
+            )
         }
-        logger.logMediaSize("setCurrentState", result.width, result.height)
-        layoutController.setState(result, applyImmediately, shouldAnimate, animationDuration,
-                animationDelay)
-    }
 
     private fun updateViewStateToCarouselSize(
         viewState: TransitionViewState?,
@@ -558,8 +550,8 @@ class MediaViewController @Inject constructor(
     }
 
     /**
-     * Retrieves the [TransitionViewState] and [MediaHostState] of a [@MediaLocation].
-     * In the event of [location] not being visible, [locationWhenHidden] will be used instead.
+     * Retrieves the [TransitionViewState] and [MediaHostState] of a [@MediaLocation]. In the event
+     * of [location] not being visible, [locationWhenHidden] will be used instead.
      *
      * @param location Target
      * @param locationWhenHidden Location that will be used when the target is not
@@ -576,40 +568,37 @@ class MediaViewController @Inject constructor(
      * This updates the width the view will me measured with.
      */
     fun onLocationPreChange(@MediaLocation newLocation: Int) {
-        obtainViewStateForLocation(newLocation)?.let {
-            layoutController.setMeasureState(it)
-        }
+        obtainViewStateForLocation(newLocation)?.let { layoutController.setMeasureState(it) }
     }
 
-    /**
-     * Request that the next state change should be animated with the given parameters.
-     */
+    /** Request that the next state change should be animated with the given parameters. */
     fun animatePendingStateChange(duration: Long, delay: Long) {
         animateNextStateChange = true
         animationDuration = duration
         animationDelay = delay
     }
 
-    /**
-     * Clear all existing measurements and refresh the state to match the view.
-     */
-    fun refreshState() = traceSection("MediaViewController#refreshState") {
-        // Let's clear all of our measurements and recreate them!
-        viewStates.clear()
-        if (firstRefresh) {
-            // This is the first bind, let's ensure we pre-cache all measurements. Otherwise
-            // We'll just load these on demand.
-            ensureAllMeasurements()
-            firstRefresh = false
+    /** Clear all existing measurements and refresh the state to match the view. */
+    fun refreshState() =
+        traceSection("MediaViewController#refreshState") {
+            // Let's clear all of our measurements and recreate them!
+            viewStates.clear()
+            if (firstRefresh) {
+                // This is the first bind, let's ensure we pre-cache all measurements. Otherwise
+                // We'll just load these on demand.
+                ensureAllMeasurements()
+                firstRefresh = false
+            }
+            setCurrentState(
+                currentStartLocation,
+                currentEndLocation,
+                currentTransitionProgress,
+                applyImmediately = true
+            )
         }
-        setCurrentState(currentStartLocation, currentEndLocation, currentTransitionProgress,
-                applyImmediately = true)
-    }
 }
 
-/**
- * An internal key for the cache of mediaViewStates. This is a subset of the full host state.
- */
+/** An internal key for the cache of mediaViewStates. This is a subset of the full host state. */
 private data class CacheKey(
     var widthMeasureSpec: Int = -1,
     var heightMeasureSpec: Int = -1,

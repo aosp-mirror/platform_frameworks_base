@@ -42,22 +42,20 @@ import org.xmlpull.v1.XmlPullParser
 
 private const val BACKGROUND_ANIM_DURATION = 370L
 
-/**
- * Drawable that can draw an animated gradient when tapped.
- */
+/** Drawable that can draw an animated gradient when tapped. */
 @Keep
 class IlluminationDrawable : Drawable() {
 
     private var themeAttrs: IntArray? = null
     private var cornerRadiusOverride = -1f
     var cornerRadius = 0f
-    get() {
-        return if (cornerRadiusOverride >= 0) {
-            cornerRadiusOverride
-        } else {
-            field
+        get() {
+            return if (cornerRadiusOverride >= 0) {
+                cornerRadiusOverride
+            } else {
+                field
+            }
         }
-    }
     private var highlightColor = Color.TRANSPARENT
     private var tmpHsl = floatArrayOf(0f, 0f, 0f)
     private var paint = Paint()
@@ -65,22 +63,27 @@ class IlluminationDrawable : Drawable() {
     private val lightSources = arrayListOf<LightSourceDrawable>()
 
     private var backgroundColor = Color.TRANSPARENT
-    set(value) {
-        if (value == field) {
-            return
+        set(value) {
+            if (value == field) {
+                return
+            }
+            field = value
+            animateBackground()
         }
-        field = value
-        animateBackground()
-    }
 
     private var backgroundAnimation: ValueAnimator? = null
 
-    /**
-     * Draw background and gradient.
-     */
+    /** Draw background and gradient. */
     override fun draw(canvas: Canvas) {
-        canvas.drawRoundRect(0f, 0f, bounds.width().toFloat(), bounds.height().toFloat(),
-                cornerRadius, cornerRadius, paint)
+        canvas.drawRoundRect(
+            0f,
+            0f,
+            bounds.width().toFloat(),
+            bounds.height().toFloat(),
+            cornerRadius,
+            cornerRadius,
+            paint
+        )
     }
 
     override fun getOutline(outline: Outline) {
@@ -105,12 +108,11 @@ class IlluminationDrawable : Drawable() {
 
     private fun updateStateFromTypedArray(a: TypedArray) {
         if (a.hasValue(R.styleable.IlluminationDrawable_cornerRadius)) {
-            cornerRadius = a.getDimension(R.styleable.IlluminationDrawable_cornerRadius,
-                    cornerRadius)
+            cornerRadius =
+                a.getDimension(R.styleable.IlluminationDrawable_cornerRadius, cornerRadius)
         }
         if (a.hasValue(R.styleable.IlluminationDrawable_highlight)) {
-            highlight = a.getInteger(R.styleable.IlluminationDrawable_highlight, 0) /
-                    100f
+            highlight = a.getInteger(R.styleable.IlluminationDrawable_highlight, 0) / 100f
         }
     }
 
@@ -163,34 +165,42 @@ class IlluminationDrawable : Drawable() {
     private fun animateBackground() {
         ColorUtils.colorToHSL(backgroundColor, tmpHsl)
         val L = tmpHsl[2]
-        tmpHsl[2] = MathUtils.constrain(if (L < 1f - highlight) {
-            L + highlight
-        } else {
-            L - highlight
-        }, 0f, 1f)
+        tmpHsl[2] =
+            MathUtils.constrain(
+                if (L < 1f - highlight) {
+                    L + highlight
+                } else {
+                    L - highlight
+                },
+                0f,
+                1f
+            )
 
         val initialBackground = paint.color
         val initialHighlight = highlightColor
         val finalHighlight = ColorUtils.HSLToColor(tmpHsl)
 
         backgroundAnimation?.cancel()
-        backgroundAnimation = ValueAnimator.ofFloat(0f, 1f).apply {
-            duration = BACKGROUND_ANIM_DURATION
-            interpolator = Interpolators.FAST_OUT_LINEAR_IN
-            addUpdateListener {
-                val progress = it.animatedValue as Float
-                paint.color = blendARGB(initialBackground, backgroundColor, progress)
-                highlightColor = blendARGB(initialHighlight, finalHighlight, progress)
-                lightSources.forEach { it.highlightColor = highlightColor }
-                invalidateSelf()
-            }
-            addListener(object : AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animation: Animator?) {
-                    backgroundAnimation = null
+        backgroundAnimation =
+            ValueAnimator.ofFloat(0f, 1f).apply {
+                duration = BACKGROUND_ANIM_DURATION
+                interpolator = Interpolators.FAST_OUT_LINEAR_IN
+                addUpdateListener {
+                    val progress = it.animatedValue as Float
+                    paint.color = blendARGB(initialBackground, backgroundColor, progress)
+                    highlightColor = blendARGB(initialHighlight, finalHighlight, progress)
+                    lightSources.forEach { it.highlightColor = highlightColor }
+                    invalidateSelf()
                 }
-            })
-            start()
-        }
+                addListener(
+                    object : AnimatorListenerAdapter() {
+                        override fun onAnimationEnd(animation: Animator?) {
+                            backgroundAnimation = null
+                        }
+                    }
+                )
+                start()
+            }
     }
 
     override fun setTintList(tint: ColorStateList?) {

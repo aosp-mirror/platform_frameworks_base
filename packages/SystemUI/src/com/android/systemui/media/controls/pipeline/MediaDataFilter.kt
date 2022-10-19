@@ -23,9 +23,9 @@ import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.broadcast.BroadcastSender
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.media.controls.util.MediaUiEventLogger
 import com.android.systemui.media.controls.models.player.MediaData
 import com.android.systemui.media.controls.models.recommendation.SmartspaceMediaData
+import com.android.systemui.media.controls.util.MediaUiEventLogger
 import com.android.systemui.settings.CurrentUserTracker
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.util.time.SystemClock
@@ -37,7 +37,8 @@ import kotlin.collections.LinkedHashMap
 
 private const val TAG = "MediaDataFilter"
 private const val DEBUG = true
-private const val EXPORTED_SMARTSPACE_TRAMPOLINE_ACTIVITY_NAME = ("com.google" +
+private const val EXPORTED_SMARTSPACE_TRAMPOLINE_ACTIVITY_NAME =
+    ("com.google" +
         ".android.apps.gsa.staticplugins.opa.smartspace.ExportedSmartspaceTrampolineActivity")
 private const val RESUMABLE_MEDIA_MAX_AGE_SECONDS_KEY = "resumable_media_max_age_seconds"
 
@@ -46,8 +47,8 @@ private const val RESUMABLE_MEDIA_MAX_AGE_SECONDS_KEY = "resumable_media_max_age
  * available within this time window, smartspace recommendations will be shown instead.
  */
 @VisibleForTesting
-internal val SMARTSPACE_MAX_AGE = SystemProperties
-        .getLong("debug.sysui.smartspace_max_age", TimeUnit.MINUTES.toMillis(30))
+internal val SMARTSPACE_MAX_AGE =
+    SystemProperties.getLong("debug.sysui.smartspace_max_age", TimeUnit.MINUTES.toMillis(30))
 
 /**
  * Filters data updates from [MediaDataCombineLatest] based on the current user ID, and handles user
@@ -57,7 +58,9 @@ internal val SMARTSPACE_MAX_AGE = SystemProperties
  * This is added at the end of the pipeline since we may still need to handle callbacks from
  * background users (e.g. timeouts).
  */
-class MediaDataFilter @Inject constructor(
+class MediaDataFilter
+@Inject
+constructor(
     private val context: Context,
     private val broadcastDispatcher: BroadcastDispatcher,
     private val broadcastSender: BroadcastSender,
@@ -79,12 +82,13 @@ class MediaDataFilter @Inject constructor(
     private var reactivatedKey: String? = null
 
     init {
-        userTracker = object : CurrentUserTracker(broadcastDispatcher) {
-            override fun onUserSwitched(newUserId: Int) {
-                // Post this so we can be sure lockscreenUserManager already got the broadcast
-                executor.execute { handleUserSwitched(newUserId) }
+        userTracker =
+            object : CurrentUserTracker(broadcastDispatcher) {
+                override fun onUserSwitched(newUserId: Int) {
+                    // Post this so we can be sure lockscreenUserManager already got the broadcast
+                    executor.execute { handleUserSwitched(newUserId) }
+                }
             }
-        }
         userTracker.startTracking()
     }
 
@@ -111,9 +115,7 @@ class MediaDataFilter @Inject constructor(
         userEntries.put(key, data)
 
         // Notify listeners
-        listeners.forEach {
-            it.onMediaDataLoaded(key, oldKey, data)
-        }
+        listeners.forEach { it.onMediaDataLoaded(key, oldKey, data) }
     }
 
     override fun onSmartspaceMediaDataLoaded(
@@ -131,14 +133,11 @@ class MediaDataFilter @Inject constructor(
         smartspaceMediaData = data
 
         // Before forwarding the smartspace target, first check if we have recently inactive media
-        val sorted = userEntries.toSortedMap(compareBy {
-            userEntries.get(it)?.lastActive ?: -1
-        })
+        val sorted = userEntries.toSortedMap(compareBy { userEntries.get(it)?.lastActive ?: -1 })
         val timeSinceActive = timeSinceActiveForMostRecentMedia(sorted)
         var smartspaceMaxAgeMillis = SMARTSPACE_MAX_AGE
         data.cardAction?.let {
-            val smartspaceMaxAgeSeconds =
-                it.extras.getLong(RESUMABLE_MEDIA_MAX_AGE_SECONDS_KEY, 0)
+            val smartspaceMaxAgeSeconds = it.extras.getLong(RESUMABLE_MEDIA_MAX_AGE_SECONDS_KEY, 0)
             if (smartspaceMaxAgeSeconds > 0) {
                 smartspaceMaxAgeMillis = TimeUnit.SECONDS.toMillis(smartspaceMaxAgeSeconds)
             }
@@ -155,13 +154,21 @@ class MediaDataFilter @Inject constructor(
                 Log.d(TAG, "reactivating $lastActiveKey instead of smartspace")
                 reactivatedKey = lastActiveKey
                 val mediaData = sorted.get(lastActiveKey)!!.copy(active = true)
-                logger.logRecommendationActivated(mediaData.appUid, mediaData.packageName,
-                    mediaData.instanceId)
+                logger.logRecommendationActivated(
+                    mediaData.appUid,
+                    mediaData.packageName,
+                    mediaData.instanceId
+                )
                 listeners.forEach {
-                    it.onMediaDataLoaded(lastActiveKey, lastActiveKey, mediaData,
-                            receivedSmartspaceCardLatency =
+                    it.onMediaDataLoaded(
+                        lastActiveKey,
+                        lastActiveKey,
+                        mediaData,
+                        receivedSmartspaceCardLatency =
                             (systemClock.currentTimeMillis() - data.headphoneConnectionTimeMillis)
-                                    .toInt(), isSsReactivated = true)
+                                .toInt(),
+                        isSsReactivated = true
+                    )
                 }
             }
         } else {
@@ -173,8 +180,10 @@ class MediaDataFilter @Inject constructor(
             Log.d(TAG, "Invalid recommendation data. Skip showing the rec card")
             return
         }
-        logger.logRecommendationAdded(smartspaceMediaData.packageName,
-            smartspaceMediaData.instanceId)
+        logger.logRecommendationAdded(
+            smartspaceMediaData.packageName,
+            smartspaceMediaData.instanceId
+        )
         listeners.forEach { it.onSmartspaceMediaDataLoaded(key, data, shouldPrioritizeMutable) }
     }
 
@@ -182,9 +191,7 @@ class MediaDataFilter @Inject constructor(
         allEntries.remove(key)
         userEntries.remove(key)?.let {
             // Only notify listeners if something actually changed
-            listeners.forEach {
-                it.onMediaDataRemoved(key)
-            }
+            listeners.forEach { it.onMediaDataRemoved(key) }
         }
     }
 
@@ -197,16 +204,17 @@ class MediaDataFilter @Inject constructor(
             // Notify listeners to update with actual active value
             userEntries.get(lastActiveKey)?.let { mediaData ->
                 listeners.forEach {
-                    it.onMediaDataLoaded(
-                            lastActiveKey, lastActiveKey, mediaData, immediately)
+                    it.onMediaDataLoaded(lastActiveKey, lastActiveKey, mediaData, immediately)
                 }
             }
         }
 
         if (smartspaceMediaData.isActive) {
-            smartspaceMediaData = EMPTY_SMARTSPACE_MEDIA_DATA.copy(
-                targetId = smartspaceMediaData.targetId,
-                instanceId = smartspaceMediaData.instanceId)
+            smartspaceMediaData =
+                EMPTY_SMARTSPACE_MEDIA_DATA.copy(
+                    targetId = smartspaceMediaData.targetId,
+                    instanceId = smartspaceMediaData.instanceId
+                )
         }
         listeners.forEach { it.onSmartspaceMediaDataRemoved(key, immediately) }
     }
@@ -221,25 +229,19 @@ class MediaDataFilter @Inject constructor(
         userEntries.clear()
         keyCopy.forEach {
             if (DEBUG) Log.d(TAG, "Removing $it after user change")
-            listenersCopy.forEach { listener ->
-                listener.onMediaDataRemoved(it)
-            }
+            listenersCopy.forEach { listener -> listener.onMediaDataRemoved(it) }
         }
 
         allEntries.forEach { (key, data) ->
             if (lockscreenUserManager.isCurrentProfile(data.userId)) {
                 if (DEBUG) Log.d(TAG, "Re-adding $key after user change")
                 userEntries.put(key, data)
-                listenersCopy.forEach { listener ->
-                    listener.onMediaDataLoaded(key, null, data)
-                }
+                listenersCopy.forEach { listener -> listener.onMediaDataLoaded(key, null, data) }
             }
         }
     }
 
-    /**
-     * Invoked when the user has dismissed the media carousel
-     */
+    /** Invoked when the user has dismissed the media carousel */
     fun onSwipeToDismiss() {
         if (DEBUG) Log.d(TAG, "Media carousel swiped away")
         val mediaKeys = userEntries.keys.toSet()
@@ -250,55 +252,52 @@ class MediaDataFilter @Inject constructor(
         if (smartspaceMediaData.isActive) {
             val dismissIntent = smartspaceMediaData.dismissIntent
             if (dismissIntent == null) {
-                Log.w(TAG, "Cannot create dismiss action click action: " +
-                        "extras missing dismiss_intent.")
-            } else if (dismissIntent.getComponent() != null &&
-                    dismissIntent.getComponent().getClassName()
-                    == EXPORTED_SMARTSPACE_TRAMPOLINE_ACTIVITY_NAME) {
+                Log.w(
+                    TAG,
+                    "Cannot create dismiss action click action: " + "extras missing dismiss_intent."
+                )
+            } else if (
+                dismissIntent.getComponent() != null &&
+                    dismissIntent.getComponent().getClassName() ==
+                        EXPORTED_SMARTSPACE_TRAMPOLINE_ACTIVITY_NAME
+            ) {
                 // Dismiss the card Smartspace data through Smartspace trampoline activity.
                 context.startActivity(dismissIntent)
             } else {
                 broadcastSender.sendBroadcast(dismissIntent)
             }
-            smartspaceMediaData = EMPTY_SMARTSPACE_MEDIA_DATA.copy(
-                targetId = smartspaceMediaData.targetId,
-                instanceId = smartspaceMediaData.instanceId)
-            mediaDataManager.dismissSmartspaceRecommendation(smartspaceMediaData.targetId,
-                delay = 0L)
+            smartspaceMediaData =
+                EMPTY_SMARTSPACE_MEDIA_DATA.copy(
+                    targetId = smartspaceMediaData.targetId,
+                    instanceId = smartspaceMediaData.instanceId
+                )
+            mediaDataManager.dismissSmartspaceRecommendation(
+                smartspaceMediaData.targetId,
+                delay = 0L
+            )
         }
     }
 
-    /**
-     * Are there any active media entries, including the recommendation?
-     */
-    fun hasActiveMediaOrRecommendation() = userEntries.any { it.value.active } ||
+    /** Are there any active media entries, including the recommendation? */
+    fun hasActiveMediaOrRecommendation() =
+        userEntries.any { it.value.active } ||
             (smartspaceMediaData.isActive &&
                 (smartspaceMediaData.isValid() || reactivatedKey != null))
 
-    /**
-     * Are there any media entries we should display?
-     */
-    fun hasAnyMediaOrRecommendation() = userEntries.isNotEmpty() ||
-            (smartspaceMediaData.isActive && smartspaceMediaData.isValid())
+    /** Are there any media entries we should display? */
+    fun hasAnyMediaOrRecommendation() =
+        userEntries.isNotEmpty() || (smartspaceMediaData.isActive && smartspaceMediaData.isValid())
 
-    /**
-     * Are there any media notifications active (excluding the recommendation)?
-     */
+    /** Are there any media notifications active (excluding the recommendation)? */
     fun hasActiveMedia() = userEntries.any { it.value.active }
 
-    /**
-     * Are there any media entries we should display (excluding the recommendation)?
-     */
+    /** Are there any media entries we should display (excluding the recommendation)? */
     fun hasAnyMedia() = userEntries.isNotEmpty()
 
-    /**
-     * Add a listener for filtered [MediaData] changes
-     */
+    /** Add a listener for filtered [MediaData] changes */
     fun addListener(listener: MediaDataManager.Listener) = _listeners.add(listener)
 
-    /**
-     * Remove a listener that was registered with addListener
-     */
+    /** Remove a listener that was registered with addListener */
     fun removeListener(listener: MediaDataManager.Listener) = _listeners.remove(listener)
 
     /**
@@ -318,8 +317,6 @@ class MediaDataFilter @Inject constructor(
 
         val now = systemClock.elapsedRealtime()
         val lastActiveKey = sortedEntries.lastKey() // most recently active
-        return sortedEntries.get(lastActiveKey)?.let {
-            now - it.lastActive
-        } ?: Long.MAX_VALUE
+        return sortedEntries.get(lastActiveKey)?.let { now - it.lastActive } ?: Long.MAX_VALUE
     }
 }

@@ -59,9 +59,7 @@ import javax.inject.Inject
 
 private val TAG: String = MediaHierarchyManager::class.java.simpleName
 
-/**
- * Similarly to isShown but also excludes views that have 0 alpha
- */
+/** Similarly to isShown but also excludes views that have 0 alpha */
 val View.isShownNotFaded: Boolean
     get() {
         var current: View = this
@@ -86,7 +84,9 @@ val View.isShownNotFaded: Boolean
  * and animate the positions of the views to achieve seamless transitions.
  */
 @SysUISingleton
-class MediaHierarchyManager @Inject constructor(
+class MediaHierarchyManager
+@Inject
+constructor(
     private val context: Context,
     private val statusBarStateController: SysuiStatusBarStateController,
     private val keyguardStateController: KeyguardStateController,
@@ -101,12 +101,10 @@ class MediaHierarchyManager @Inject constructor(
     @Main private val handler: Handler,
 ) {
 
-    /**
-     * Track the media player setting status on lock screen.
-     */
+    /** Track the media player setting status on lock screen. */
     private var allowMediaPlayerOnLockScreen: Boolean = true
     private val lockScreenMediaPlayerUri =
-            secureSettings.getUriFor(Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN)
+        secureSettings.getUriFor(Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN)
 
     /**
      * Whether we "skip" QQS during panel expansion.
@@ -118,8 +116,8 @@ class MediaHierarchyManager @Inject constructor(
 
     /**
      * The root overlay of the hierarchy. This is where the media notification is attached to
-     * whenever the view is transitioning from one host to another. It also make sure that the
-     * view is always in its final state when it is attached to a view host.
+     * whenever the view is transitioning from one host to another. It also make sure that the view
+     * is always in its final state when it is attached to a view host.
      */
     private var rootOverlay: ViewGroupOverlay? = null
 
@@ -138,69 +136,68 @@ class MediaHierarchyManager @Inject constructor(
      */
     private var animationStartCrossFadeProgress = 0.0f
 
-    /**
-     * The starting alpha of the animation
-     */
+    /** The starting alpha of the animation */
     private var animationStartAlpha = 0.0f
 
-    /**
-     * The starting location of the cross fade if an animation is running right now.
-     */
-    @MediaLocation
-    private var crossFadeAnimationStartLocation = -1
+    /** The starting location of the cross fade if an animation is running right now. */
+    @MediaLocation private var crossFadeAnimationStartLocation = -1
 
-    /**
-     * The end location of the cross fade if an animation is running right now.
-     */
-    @MediaLocation
-    private var crossFadeAnimationEndLocation = -1
+    /** The end location of the cross fade if an animation is running right now. */
+    @MediaLocation private var crossFadeAnimationEndLocation = -1
     private var targetBounds: Rect = Rect()
     private val mediaFrame
         get() = mediaCarouselController.mediaFrame
     private var statusbarState: Int = statusBarStateController.state
-    private var animator = ValueAnimator.ofFloat(0.0f, 1.0f).apply {
-        interpolator = Interpolators.FAST_OUT_SLOW_IN
-        addUpdateListener {
-            updateTargetState()
-            val currentAlpha: Float
-            var boundsProgress = animatedFraction
-            if (isCrossFadeAnimatorRunning) {
-                animationCrossFadeProgress = MathUtils.lerp(animationStartCrossFadeProgress, 1.0f,
-                    animatedFraction)
-                // When crossfading, let's keep the bounds at the right location during fading
-                boundsProgress = if (animationCrossFadeProgress < 0.5f) 0.0f else 1.0f
-                currentAlpha = calculateAlphaFromCrossFade(animationCrossFadeProgress)
-            } else {
-                // If we're not crossfading, let's interpolate from the start alpha to 1.0f
-                currentAlpha = MathUtils.lerp(animationStartAlpha, 1.0f, animatedFraction)
-            }
-            interpolateBounds(animationStartBounds, targetBounds, boundsProgress,
-                    result = currentBounds)
-            resolveClipping(currentClipping)
-            applyState(currentBounds, currentAlpha, clipBounds = currentClipping)
-        }
-        addListener(object : AnimatorListenerAdapter() {
-            private var cancelled: Boolean = false
-
-            override fun onAnimationCancel(animation: Animator?) {
-                cancelled = true
-                animationPending = false
-                rootView?.removeCallbacks(startAnimation)
-            }
-
-            override fun onAnimationEnd(animation: Animator?) {
-                isCrossFadeAnimatorRunning = false
-                if (!cancelled) {
-                    applyTargetStateIfNotAnimating()
+    private var animator =
+        ValueAnimator.ofFloat(0.0f, 1.0f).apply {
+            interpolator = Interpolators.FAST_OUT_SLOW_IN
+            addUpdateListener {
+                updateTargetState()
+                val currentAlpha: Float
+                var boundsProgress = animatedFraction
+                if (isCrossFadeAnimatorRunning) {
+                    animationCrossFadeProgress =
+                        MathUtils.lerp(animationStartCrossFadeProgress, 1.0f, animatedFraction)
+                    // When crossfading, let's keep the bounds at the right location during fading
+                    boundsProgress = if (animationCrossFadeProgress < 0.5f) 0.0f else 1.0f
+                    currentAlpha = calculateAlphaFromCrossFade(animationCrossFadeProgress)
+                } else {
+                    // If we're not crossfading, let's interpolate from the start alpha to 1.0f
+                    currentAlpha = MathUtils.lerp(animationStartAlpha, 1.0f, animatedFraction)
                 }
+                interpolateBounds(
+                    animationStartBounds,
+                    targetBounds,
+                    boundsProgress,
+                    result = currentBounds
+                )
+                resolveClipping(currentClipping)
+                applyState(currentBounds, currentAlpha, clipBounds = currentClipping)
             }
+            addListener(
+                object : AnimatorListenerAdapter() {
+                    private var cancelled: Boolean = false
 
-            override fun onAnimationStart(animation: Animator?) {
-                cancelled = false
-                animationPending = false
-            }
-        })
-    }
+                    override fun onAnimationCancel(animation: Animator?) {
+                        cancelled = true
+                        animationPending = false
+                        rootView?.removeCallbacks(startAnimation)
+                    }
+
+                    override fun onAnimationEnd(animation: Animator?) {
+                        isCrossFadeAnimatorRunning = false
+                        if (!cancelled) {
+                            applyTargetStateIfNotAnimating()
+                        }
+                    }
+
+                    override fun onAnimationStart(animation: Animator?) {
+                        cancelled = false
+                        animationPending = false
+                    }
+                }
+            )
+        }
 
     private fun resolveClipping(result: Rect) {
         if (animationStartClipping.isEmpty) result.set(targetClipping)
@@ -210,42 +207,31 @@ class MediaHierarchyManager @Inject constructor(
 
     private val mediaHosts = arrayOfNulls<MediaHost>(LOCATION_DREAM_OVERLAY + 1)
     /**
-     * The last location where this view was at before going to the desired location. This is
-     * useful for guided transitions.
+     * The last location where this view was at before going to the desired location. This is useful
+     * for guided transitions.
      */
-    @MediaLocation
-    private var previousLocation = -1
-    /**
-     * The desired location where the view will be at the end of the transition.
-     */
-    @MediaLocation
-    private var desiredLocation = -1
+    @MediaLocation private var previousLocation = -1
+    /** The desired location where the view will be at the end of the transition. */
+    @MediaLocation private var desiredLocation = -1
 
     /**
-     * The current attachment location where the view is currently attached.
-     * Usually this matches the desired location except for animations whenever a view moves
-     * to the new desired location, during which it is in [IN_OVERLAY].
+     * The current attachment location where the view is currently attached. Usually this matches
+     * the desired location except for animations whenever a view moves to the new desired location,
+     * during which it is in [IN_OVERLAY].
      */
-    @MediaLocation
-    private var currentAttachmentLocation = -1
+    @MediaLocation private var currentAttachmentLocation = -1
 
     private var inSplitShade = false
 
-    /**
-     * Is there any active media in the carousel?
-     */
+    /** Is there any active media in the carousel? */
     private var hasActiveMedia: Boolean = false
         get() = mediaHosts.get(LOCATION_QQS)?.visible == true
 
-    /**
-     * Are we currently waiting on an animation to start?
-     */
+    /** Are we currently waiting on an animation to start? */
     private var animationPending: Boolean = false
     private val startAnimation: Runnable = Runnable { animator.start() }
 
-    /**
-     * The expansion of quick settings
-     */
+    /** The expansion of quick settings */
     var qsExpansion: Float = 0.0f
         set(value) {
             if (field != value) {
@@ -258,9 +244,7 @@ class MediaHierarchyManager @Inject constructor(
             }
         }
 
-    /**
-     * Is quick setting expanded?
-     */
+    /** Is quick setting expanded? */
     var qsExpanded: Boolean = false
         set(value) {
             if (field != value) {
@@ -281,9 +265,8 @@ class MediaHierarchyManager @Inject constructor(
     private var distanceForFullShadeTransition = 0
 
     /**
-     * The amount of progress we are currently in if we're transitioning to the full shade.
-     * 0.0f means we're not transitioning yet, while 1 means we're all the way in the full
-     * shade.
+     * The amount of progress we are currently in if we're transitioning to the full shade. 0.0f
+     * means we're not transitioning yet, while 1 means we're all the way in the full shade.
      */
     private var fullShadeTransitionProgress = 0f
         set(value) {
@@ -305,9 +288,7 @@ class MediaHierarchyManager @Inject constructor(
             }
         }
 
-    /**
-     * Is there currently a cross-fade animation running driven by an animator?
-     */
+    /** Is there currently a cross-fade animation running driven by an animator? */
     private var isCrossFadeAnimatorRunning = false
 
     /**
@@ -316,8 +297,10 @@ class MediaHierarchyManager @Inject constructor(
      * the transition starts, this will no longer return true.
      */
     private val isTransitioningToFullShade: Boolean
-        get() = fullShadeTransitionProgress != 0f && !bypassController.bypassEnabled &&
-            statusbarState == StatusBarState.KEYGUARD
+        get() =
+            fullShadeTransitionProgress != 0f &&
+                !bypassController.bypassEnabled &&
+                statusbarState == StatusBarState.KEYGUARD
 
     /**
      * Set the amount of pixels we have currently dragged down if we're transitioning to the full
@@ -354,17 +337,13 @@ class MediaHierarchyManager @Inject constructor(
             }
         }
 
-    /**
-     * Are location changes currently blocked?
-     */
+    /** Are location changes currently blocked? */
     private val blockLocationChanges: Boolean
         get() {
             return goingToSleep || dozeAnimationRunning
         }
 
-    /**
-     * Are we currently going to sleep
-     */
+    /** Are we currently going to sleep */
     private var goingToSleep: Boolean = false
         set(value) {
             if (field != value) {
@@ -375,9 +354,7 @@ class MediaHierarchyManager @Inject constructor(
             }
         }
 
-    /**
-     * Are we currently fullyAwake
-     */
+    /** Are we currently fullyAwake */
     private var fullyAwake: Boolean = false
         set(value) {
             if (field != value) {
@@ -388,9 +365,7 @@ class MediaHierarchyManager @Inject constructor(
             }
         }
 
-    /**
-     * Is the doze animation currently Running
-     */
+    /** Is the doze animation currently Running */
     private var dozeAnimationRunning: Boolean = false
         private set(value) {
             if (field != value) {
@@ -401,9 +376,7 @@ class MediaHierarchyManager @Inject constructor(
             }
         }
 
-    /**
-     * Is the dream overlay currently active
-     */
+    /** Is the dream overlay currently active */
     private var dreamOverlayActive: Boolean = false
         private set(value) {
             if (field != value) {
@@ -412,9 +385,7 @@ class MediaHierarchyManager @Inject constructor(
             }
         }
 
-    /**
-     * Is the dream media complication currently active
-     */
+    /** Is the dream media complication currently active */
     private var dreamMediaComplicationActive: Boolean = false
         private set(value) {
             if (field != value) {
@@ -424,16 +395,13 @@ class MediaHierarchyManager @Inject constructor(
         }
 
     /**
-     * The current cross fade progress. 0.5f means it's just switching
-     * between the start and the end location and the content is fully faded, while 0.75f means
-     * that we're halfway faded in again in the target state.
-     * This is only valid while [isCrossFadeAnimatorRunning] is true.
+     * The current cross fade progress. 0.5f means it's just switching between the start and the end
+     * location and the content is fully faded, while 0.75f means that we're halfway faded in again
+     * in the target state. This is only valid while [isCrossFadeAnimatorRunning] is true.
      */
     private var animationCrossFadeProgress = 1.0f
 
-    /**
-     * The current carousel Alpha.
-     */
+    /** The current carousel Alpha. */
     private var carouselAlpha: Float = 1.0f
         set(value) {
             if (field == value) {
@@ -447,8 +415,8 @@ class MediaHierarchyManager @Inject constructor(
      * Calculate the alpha of the view when given a cross-fade progress.
      *
      * @param crossFadeProgress The current cross fade progress. 0.5f means it's just switching
-     * between the start and the end location and the content is fully faded, while 0.75f means
-     * that we're halfway faded in again in the target state.
+     * between the start and the end location and the content is fully faded, while 0.75f means that
+     * we're halfway faded in again in the target state.
      */
     private fun calculateAlphaFromCrossFade(crossFadeProgress: Float): Float {
         if (crossFadeProgress <= 0.5f) {
@@ -460,132 +428,152 @@ class MediaHierarchyManager @Inject constructor(
 
     init {
         updateConfiguration()
-        configurationController.addCallback(object : ConfigurationController.ConfigurationListener {
-            override fun onConfigChanged(newConfig: Configuration?) {
-                updateConfiguration()
-                updateDesiredLocation(forceNoAnimation = true, forceStateUpdate = true)
-            }
-        })
-        statusBarStateController.addCallback(object : StatusBarStateController.StateListener {
-            override fun onStatePreChange(oldState: Int, newState: Int) {
-                // We're updating the location before the state change happens, since we want the
-                // location of the previous state to still be up to date when the animation starts
-                statusbarState = newState
-                updateDesiredLocation()
-            }
-
-            override fun onStateChanged(newState: Int) {
-                updateTargetState()
-                // Enters shade from lock screen
-                if (newState == StatusBarState.SHADE_LOCKED && isLockScreenShadeVisibleToUser()) {
-                    mediaCarouselController.logSmartspaceImpression(qsExpanded)
+        configurationController.addCallback(
+            object : ConfigurationController.ConfigurationListener {
+                override fun onConfigChanged(newConfig: Configuration?) {
+                    updateConfiguration()
+                    updateDesiredLocation(forceNoAnimation = true, forceStateUpdate = true)
                 }
-                mediaCarouselController.mediaCarouselScrollHandler.visibleToUser = isVisibleToUser()
             }
+        )
+        statusBarStateController.addCallback(
+            object : StatusBarStateController.StateListener {
+                override fun onStatePreChange(oldState: Int, newState: Int) {
+                    // We're updating the location before the state change happens, since we want
+                    // the
+                    // location of the previous state to still be up to date when the animation
+                    // starts
+                    statusbarState = newState
+                    updateDesiredLocation()
+                }
 
-            override fun onDozeAmountChanged(linear: Float, eased: Float) {
-                dozeAnimationRunning = linear != 0.0f && linear != 1.0f
-            }
-
-            override fun onDozingChanged(isDozing: Boolean) {
-                if (!isDozing) {
-                    dozeAnimationRunning = false
-                    // Enters lock screen from screen off
-                    if (isLockScreenVisibleToUser()) {
+                override fun onStateChanged(newState: Int) {
+                    updateTargetState()
+                    // Enters shade from lock screen
+                    if (
+                        newState == StatusBarState.SHADE_LOCKED && isLockScreenShadeVisibleToUser()
+                    ) {
                         mediaCarouselController.logSmartspaceImpression(qsExpanded)
                     }
-                } else {
-                    updateDesiredLocation()
-                    qsExpanded = false
-                    closeGuts()
+                    mediaCarouselController.mediaCarouselScrollHandler.visibleToUser =
+                        isVisibleToUser()
                 }
-                mediaCarouselController.mediaCarouselScrollHandler.visibleToUser = isVisibleToUser()
-            }
 
-            override fun onExpandedChanged(isExpanded: Boolean) {
-                // Enters shade from home screen
-                if (isHomeScreenShadeVisibleToUser()) {
-                    mediaCarouselController.logSmartspaceImpression(qsExpanded)
+                override fun onDozeAmountChanged(linear: Float, eased: Float) {
+                    dozeAnimationRunning = linear != 0.0f && linear != 1.0f
                 }
-                mediaCarouselController.mediaCarouselScrollHandler.visibleToUser = isVisibleToUser()
-            }
-        })
 
-        dreamOverlayStateController.addCallback(object : DreamOverlayStateController.Callback {
-            override fun onComplicationsChanged() {
-                dreamMediaComplicationActive = dreamOverlayStateController.complications.any {
-                    it is MediaDreamComplication
+                override fun onDozingChanged(isDozing: Boolean) {
+                    if (!isDozing) {
+                        dozeAnimationRunning = false
+                        // Enters lock screen from screen off
+                        if (isLockScreenVisibleToUser()) {
+                            mediaCarouselController.logSmartspaceImpression(qsExpanded)
+                        }
+                    } else {
+                        updateDesiredLocation()
+                        qsExpanded = false
+                        closeGuts()
+                    }
+                    mediaCarouselController.mediaCarouselScrollHandler.visibleToUser =
+                        isVisibleToUser()
+                }
+
+                override fun onExpandedChanged(isExpanded: Boolean) {
+                    // Enters shade from home screen
+                    if (isHomeScreenShadeVisibleToUser()) {
+                        mediaCarouselController.logSmartspaceImpression(qsExpanded)
+                    }
+                    mediaCarouselController.mediaCarouselScrollHandler.visibleToUser =
+                        isVisibleToUser()
                 }
             }
+        )
 
-            override fun onStateChanged() {
-                dreamOverlayStateController.isOverlayActive.also { dreamOverlayActive = it }
-            }
-        })
+        dreamOverlayStateController.addCallback(
+            object : DreamOverlayStateController.Callback {
+                override fun onComplicationsChanged() {
+                    dreamMediaComplicationActive =
+                        dreamOverlayStateController.complications.any {
+                            it is MediaDreamComplication
+                        }
+                }
 
-        wakefulnessLifecycle.addObserver(object : WakefulnessLifecycle.Observer {
-            override fun onFinishedGoingToSleep() {
-                goingToSleep = false
+                override fun onStateChanged() {
+                    dreamOverlayStateController.isOverlayActive.also { dreamOverlayActive = it }
+                }
             }
+        )
 
-            override fun onStartedGoingToSleep() {
-                goingToSleep = true
-                fullyAwake = false
-            }
+        wakefulnessLifecycle.addObserver(
+            object : WakefulnessLifecycle.Observer {
+                override fun onFinishedGoingToSleep() {
+                    goingToSleep = false
+                }
 
-            override fun onFinishedWakingUp() {
-                goingToSleep = false
-                fullyAwake = true
-            }
+                override fun onStartedGoingToSleep() {
+                    goingToSleep = true
+                    fullyAwake = false
+                }
 
-            override fun onStartedWakingUp() {
-                goingToSleep = false
+                override fun onFinishedWakingUp() {
+                    goingToSleep = false
+                    fullyAwake = true
+                }
+
+                override fun onStartedWakingUp() {
+                    goingToSleep = false
+                }
             }
-        })
+        )
 
         mediaCarouselController.updateUserVisibility = {
             mediaCarouselController.mediaCarouselScrollHandler.visibleToUser = isVisibleToUser()
         }
         mediaCarouselController.updateHostVisibility = {
-            mediaHosts.forEach {
-                it?.updateViewVisibility()
-            }
+            mediaHosts.forEach { it?.updateViewVisibility() }
         }
 
-        panelEventsEvents.registerListener(object : NotifPanelEvents.Listener {
-            override fun onExpandImmediateChanged(isExpandImmediateEnabled: Boolean) {
-                skipQqsOnExpansion = isExpandImmediateEnabled
-                updateDesiredLocation()
-            }
-        })
-
-        val settingsObserver: ContentObserver = object : ContentObserver(handler) {
-            override fun onChange(selfChange: Boolean, uri: Uri?) {
-                if (uri == lockScreenMediaPlayerUri) {
-                    allowMediaPlayerOnLockScreen =
-                            secureSettings.getBoolForUser(
-                                    Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN,
-                                    true,
-                                    UserHandle.USER_CURRENT
-                            )
+        panelEventsEvents.registerListener(
+            object : NotifPanelEvents.Listener {
+                override fun onExpandImmediateChanged(isExpandImmediateEnabled: Boolean) {
+                    skipQqsOnExpansion = isExpandImmediateEnabled
+                    updateDesiredLocation()
                 }
             }
-        }
+        )
+
+        val settingsObserver: ContentObserver =
+            object : ContentObserver(handler) {
+                override fun onChange(selfChange: Boolean, uri: Uri?) {
+                    if (uri == lockScreenMediaPlayerUri) {
+                        allowMediaPlayerOnLockScreen =
+                            secureSettings.getBoolForUser(
+                                Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN,
+                                true,
+                                UserHandle.USER_CURRENT
+                            )
+                    }
+                }
+            }
         secureSettings.registerContentObserverForUser(
-                Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN,
-                settingsObserver,
-                UserHandle.USER_ALL)
+            Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN,
+            settingsObserver,
+            UserHandle.USER_ALL
+        )
     }
 
     private fun updateConfiguration() {
-        distanceForFullShadeTransition = context.resources.getDimensionPixelSize(
-                R.dimen.lockscreen_shade_media_transition_distance)
+        distanceForFullShadeTransition =
+            context.resources.getDimensionPixelSize(
+                R.dimen.lockscreen_shade_media_transition_distance
+            )
         inSplitShade = LargeScreenUtils.shouldUseSplitNotificationShade(context.resources)
     }
 
     /**
-     * Register a media host and create a view can be attached to a view hierarchy
-     * and where the players will be placed in when the host is the currently desired state.
+     * Register a media host and create a view can be attached to a view hierarchy and where the
+     * players will be placed in when the host is the currently desired state.
      *
      * @return the hostView associated with this location
      */
@@ -613,27 +601,26 @@ class MediaHierarchyManager @Inject constructor(
         return viewHost
     }
 
-    /**
-     * Close the guts in all players in [MediaCarouselController].
-     */
+    /** Close the guts in all players in [MediaCarouselController]. */
     fun closeGuts() {
         mediaCarouselController.closeGuts()
     }
 
     private fun createUniqueObjectHost(): UniqueObjectHostView {
         val viewHost = UniqueObjectHostView(context)
-        viewHost.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
-            override fun onViewAttachedToWindow(p0: View?) {
-                if (rootOverlay == null) {
-                    rootView = viewHost.viewRootImpl.view
-                    rootOverlay = (rootView!!.overlay as ViewGroupOverlay)
+        viewHost.addOnAttachStateChangeListener(
+            object : View.OnAttachStateChangeListener {
+                override fun onViewAttachedToWindow(p0: View?) {
+                    if (rootOverlay == null) {
+                        rootView = viewHost.viewRootImpl.view
+                        rootOverlay = (rootView!!.overlay as ViewGroupOverlay)
+                    }
+                    viewHost.removeOnAttachStateChangeListener(this)
                 }
-                viewHost.removeOnAttachStateChangeListener(this)
-            }
 
-            override fun onViewDetachedFromWindow(p0: View?) {
+                override fun onViewDetachedFromWindow(p0: View?) {}
             }
-        })
+        )
         return viewHost
     }
 
@@ -643,127 +630,141 @@ class MediaHierarchyManager @Inject constructor(
      *
      * @param forceNoAnimation optional parameter telling the system not to animate
      * @param forceStateUpdate optional parameter telling the system to update transition state
+     * ```
      *                         even if location did not change
+     * ```
      */
     private fun updateDesiredLocation(
         forceNoAnimation: Boolean = false,
         forceStateUpdate: Boolean = false
-    ) = traceSection("MediaHierarchyManager#updateDesiredLocation") {
-        val desiredLocation = calculateLocation()
-        if (desiredLocation != this.desiredLocation || forceStateUpdate) {
-            if (this.desiredLocation >= 0 && desiredLocation != this.desiredLocation) {
-                // Only update previous location when it actually changes
-                previousLocation = this.desiredLocation
-            } else if (forceStateUpdate) {
-                val onLockscreen = (!bypassController.bypassEnabled &&
-                        (statusbarState == StatusBarState.KEYGUARD))
-                if (desiredLocation == LOCATION_QS && previousLocation == LOCATION_LOCKSCREEN &&
-                        !onLockscreen) {
-                    // If media active state changed and the device is now unlocked, update the
-                    // previous location so we animate between the correct hosts
-                    previousLocation = LOCATION_QQS
+    ) =
+        traceSection("MediaHierarchyManager#updateDesiredLocation") {
+            val desiredLocation = calculateLocation()
+            if (desiredLocation != this.desiredLocation || forceStateUpdate) {
+                if (this.desiredLocation >= 0 && desiredLocation != this.desiredLocation) {
+                    // Only update previous location when it actually changes
+                    previousLocation = this.desiredLocation
+                } else if (forceStateUpdate) {
+                    val onLockscreen =
+                        (!bypassController.bypassEnabled &&
+                            (statusbarState == StatusBarState.KEYGUARD))
+                    if (
+                        desiredLocation == LOCATION_QS &&
+                            previousLocation == LOCATION_LOCKSCREEN &&
+                            !onLockscreen
+                    ) {
+                        // If media active state changed and the device is now unlocked, update the
+                        // previous location so we animate between the correct hosts
+                        previousLocation = LOCATION_QQS
+                    }
                 }
+                val isNewView = this.desiredLocation == -1
+                this.desiredLocation = desiredLocation
+                // Let's perform a transition
+                val animate =
+                    !forceNoAnimation && shouldAnimateTransition(desiredLocation, previousLocation)
+                val (animDuration, delay) = getAnimationParams(previousLocation, desiredLocation)
+                val host = getHost(desiredLocation)
+                val willFade = calculateTransformationType() == TRANSFORMATION_TYPE_FADE
+                if (!willFade || isCurrentlyInGuidedTransformation() || !animate) {
+                    // if we're fading, we want the desired location / measurement only to change
+                    // once fully faded. This is happening in the host attachment
+                    mediaCarouselController.onDesiredLocationChanged(
+                        desiredLocation,
+                        host,
+                        animate,
+                        animDuration,
+                        delay
+                    )
+                }
+                performTransitionToNewLocation(isNewView, animate)
             }
-            val isNewView = this.desiredLocation == -1
-            this.desiredLocation = desiredLocation
-            // Let's perform a transition
-            val animate = !forceNoAnimation &&
-                    shouldAnimateTransition(desiredLocation, previousLocation)
-            val (animDuration, delay) = getAnimationParams(previousLocation, desiredLocation)
-            val host = getHost(desiredLocation)
-            val willFade = calculateTransformationType() == TRANSFORMATION_TYPE_FADE
-            if (!willFade || isCurrentlyInGuidedTransformation() || !animate) {
-                // if we're fading, we want the desired location / measurement only to change
-                // once fully faded. This is happening in the host attachment
-                mediaCarouselController.onDesiredLocationChanged(desiredLocation, host,
-                    animate, animDuration, delay)
-            }
-            performTransitionToNewLocation(isNewView, animate)
         }
-    }
 
-    private fun performTransitionToNewLocation(
-        isNewView: Boolean,
-        animate: Boolean
-    ) = traceSection("MediaHierarchyManager#performTransitionToNewLocation") {
-        if (previousLocation < 0 || isNewView) {
-            cancelAnimationAndApplyDesiredState()
-            return
-        }
-        val currentHost = getHost(desiredLocation)
-        val previousHost = getHost(previousLocation)
-        if (currentHost == null || previousHost == null) {
-            cancelAnimationAndApplyDesiredState()
-            return
-        }
-        updateTargetState()
-        if (isCurrentlyInGuidedTransformation()) {
-            applyTargetStateIfNotAnimating()
-        } else if (animate) {
-            val wasCrossFading = isCrossFadeAnimatorRunning
-            val previewsCrossFadeProgress = animationCrossFadeProgress
-            animator.cancel()
-            if (currentAttachmentLocation != previousLocation ||
-                    !previousHost.hostView.isAttachedToWindow) {
-                // Let's animate to the new position, starting from the current position
-                // We also go in here in case the view was detached, since the bounds wouldn't
-                // be correct anymore
-                animationStartBounds.set(currentBounds)
-                animationStartClipping.set(currentClipping)
-            } else {
-                // otherwise, let's take the freshest state, since the current one could
-                // be outdated
-                animationStartBounds.set(previousHost.currentBounds)
-                animationStartClipping.set(previousHost.currentClipping)
+    private fun performTransitionToNewLocation(isNewView: Boolean, animate: Boolean) =
+        traceSection("MediaHierarchyManager#performTransitionToNewLocation") {
+            if (previousLocation < 0 || isNewView) {
+                cancelAnimationAndApplyDesiredState()
+                return
             }
-            val transformationType = calculateTransformationType()
-            var needsCrossFade = transformationType == TRANSFORMATION_TYPE_FADE
-            var crossFadeStartProgress = 0.0f
-            // The alpha is only relevant when not cross fading
-            var newCrossFadeStartLocation = previousLocation
-            if (wasCrossFading) {
-                if (currentAttachmentLocation == crossFadeAnimationEndLocation) {
-                    if (needsCrossFade) {
-                        // We were previously crossFading and we've already reached
-                        // the end view, Let's start crossfading from the same position there
-                        crossFadeStartProgress = 1.0f - previewsCrossFadeProgress
-                    }
-                    // Otherwise let's fade in from the current alpha, but not cross fade
+            val currentHost = getHost(desiredLocation)
+            val previousHost = getHost(previousLocation)
+            if (currentHost == null || previousHost == null) {
+                cancelAnimationAndApplyDesiredState()
+                return
+            }
+            updateTargetState()
+            if (isCurrentlyInGuidedTransformation()) {
+                applyTargetStateIfNotAnimating()
+            } else if (animate) {
+                val wasCrossFading = isCrossFadeAnimatorRunning
+                val previewsCrossFadeProgress = animationCrossFadeProgress
+                animator.cancel()
+                if (
+                    currentAttachmentLocation != previousLocation ||
+                        !previousHost.hostView.isAttachedToWindow
+                ) {
+                    // Let's animate to the new position, starting from the current position
+                    // We also go in here in case the view was detached, since the bounds wouldn't
+                    // be correct anymore
+                    animationStartBounds.set(currentBounds)
+                    animationStartClipping.set(currentClipping)
                 } else {
-                    // We haven't reached the previous location yet, let's still cross fade from
-                    // where we were.
-                    newCrossFadeStartLocation = crossFadeAnimationStartLocation
-                    if (newCrossFadeStartLocation == desiredLocation) {
-                        // we're crossFading back to where we were, let's start at the end position
-                        crossFadeStartProgress = 1.0f - previewsCrossFadeProgress
+                    // otherwise, let's take the freshest state, since the current one could
+                    // be outdated
+                    animationStartBounds.set(previousHost.currentBounds)
+                    animationStartClipping.set(previousHost.currentClipping)
+                }
+                val transformationType = calculateTransformationType()
+                var needsCrossFade = transformationType == TRANSFORMATION_TYPE_FADE
+                var crossFadeStartProgress = 0.0f
+                // The alpha is only relevant when not cross fading
+                var newCrossFadeStartLocation = previousLocation
+                if (wasCrossFading) {
+                    if (currentAttachmentLocation == crossFadeAnimationEndLocation) {
+                        if (needsCrossFade) {
+                            // We were previously crossFading and we've already reached
+                            // the end view, Let's start crossfading from the same position there
+                            crossFadeStartProgress = 1.0f - previewsCrossFadeProgress
+                        }
+                        // Otherwise let's fade in from the current alpha, but not cross fade
                     } else {
-                        // Let's start from where we are right now
-                        crossFadeStartProgress = previewsCrossFadeProgress
-                        // We need to force cross fading as we haven't reached the end location yet
-                        needsCrossFade = true
+                        // We haven't reached the previous location yet, let's still cross fade from
+                        // where we were.
+                        newCrossFadeStartLocation = crossFadeAnimationStartLocation
+                        if (newCrossFadeStartLocation == desiredLocation) {
+                            // we're crossFading back to where we were, let's start at the end
+                            // position
+                            crossFadeStartProgress = 1.0f - previewsCrossFadeProgress
+                        } else {
+                            // Let's start from where we are right now
+                            crossFadeStartProgress = previewsCrossFadeProgress
+                            // We need to force cross fading as we haven't reached the end location
+                            // yet
+                            needsCrossFade = true
+                        }
+                    }
+                } else if (needsCrossFade) {
+                    // let's not flicker and start with the same alpha
+                    crossFadeStartProgress = (1.0f - carouselAlpha) / 2.0f
+                }
+                isCrossFadeAnimatorRunning = needsCrossFade
+                crossFadeAnimationStartLocation = newCrossFadeStartLocation
+                crossFadeAnimationEndLocation = desiredLocation
+                animationStartAlpha = carouselAlpha
+                animationStartCrossFadeProgress = crossFadeStartProgress
+                adjustAnimatorForTransition(desiredLocation, previousLocation)
+                if (!animationPending) {
+                    rootView?.let {
+                        // Let's delay the animation start until we finished laying out
+                        animationPending = true
+                        it.postOnAnimation(startAnimation)
                     }
                 }
-            } else if (needsCrossFade) {
-                // let's not flicker and start with the same alpha
-                crossFadeStartProgress = (1.0f - carouselAlpha) / 2.0f
+            } else {
+                cancelAnimationAndApplyDesiredState()
             }
-            isCrossFadeAnimatorRunning = needsCrossFade
-            crossFadeAnimationStartLocation = newCrossFadeStartLocation
-            crossFadeAnimationEndLocation = desiredLocation
-            animationStartAlpha = carouselAlpha
-            animationStartCrossFadeProgress = crossFadeStartProgress
-            adjustAnimatorForTransition(desiredLocation, previousLocation)
-            if (!animationPending) {
-                rootView?.let {
-                    // Let's delay the animation start until we finished laying out
-                    animationPending = true
-                    it.postOnAnimation(startAnimation)
-                }
-            }
-        } else {
-            cancelAnimationAndApplyDesiredState()
         }
-    }
 
     private fun shouldAnimateTransition(
         @MediaLocation currentLocation: Int,
@@ -777,23 +778,29 @@ class MediaHierarchyManager @Inject constructor(
         }
         // This is an invalid transition, and can happen when using the camera gesture from the
         // lock screen. Disallow.
-        if (previousLocation == LOCATION_LOCKSCREEN &&
-            desiredLocation == LOCATION_QQS &&
-            statusbarState == StatusBarState.SHADE) {
+        if (
+            previousLocation == LOCATION_LOCKSCREEN &&
+                desiredLocation == LOCATION_QQS &&
+                statusbarState == StatusBarState.SHADE
+        ) {
             return false
         }
 
-        if (currentLocation == LOCATION_QQS &&
+        if (
+            currentLocation == LOCATION_QQS &&
                 previousLocation == LOCATION_LOCKSCREEN &&
                 (statusBarStateController.leaveOpenOnKeyguardHide() ||
-                        statusbarState == StatusBarState.SHADE_LOCKED)) {
+                    statusbarState == StatusBarState.SHADE_LOCKED)
+        ) {
             // Usually listening to the isShown is enough to determine this, but there is some
             // non-trivial reattaching logic happening that will make the view not-shown earlier
             return true
         }
 
-        if (statusbarState == StatusBarState.KEYGUARD && (currentLocation == LOCATION_LOCKSCREEN ||
-                        previousLocation == LOCATION_LOCKSCREEN)) {
+        if (
+            statusbarState == StatusBarState.KEYGUARD &&
+                (currentLocation == LOCATION_LOCKSCREEN || previousLocation == LOCATION_LOCKSCREEN)
+        ) {
             // We're always fading from lockscreen to keyguard in situations where the player
             // is already fully hidden
             return false
@@ -814,8 +821,10 @@ class MediaHierarchyManager @Inject constructor(
         var delay = 0L
         if (previousLocation == LOCATION_LOCKSCREEN && desiredLocation == LOCATION_QQS) {
             // Going to the full shade, let's adjust the animation duration
-            if (statusbarState == StatusBarState.SHADE &&
-                    keyguardStateController.isKeyguardFadingAway) {
+            if (
+                statusbarState == StatusBarState.SHADE &&
+                    keyguardStateController.isKeyguardFadingAway
+            ) {
                 delay = keyguardStateController.keyguardFadingAwayDelay
             }
             animDuration = (StackStateAnimator.ANIMATION_DURATION_GO_TO_FULL_SHADE / 2f).toLong()
@@ -834,14 +843,16 @@ class MediaHierarchyManager @Inject constructor(
         }
     }
 
-    /**
-     * Updates the bounds that the view wants to be in at the end of the animation.
-     */
+    /** Updates the bounds that the view wants to be in at the end of the animation. */
     private fun updateTargetState() {
         var starthost = getHost(previousLocation)
         var endHost = getHost(desiredLocation)
-        if (isCurrentlyInGuidedTransformation() && !isCurrentlyFading() && starthost != null &&
-            endHost != null) {
+        if (
+            isCurrentlyInGuidedTransformation() &&
+                !isCurrentlyFading() &&
+                starthost != null &&
+                endHost != null
+        ) {
             val progress = getTransformationProgress()
             // If either of the hosts are invisible, let's keep them at the other host location to
             // have a nicer disappear animation. Otherwise the currentBounds of the state might
@@ -868,14 +879,15 @@ class MediaHierarchyManager @Inject constructor(
         progress: Float,
         result: Rect? = null
     ): Rect {
-        val left = MathUtils.lerp(startBounds.left.toFloat(),
-                endBounds.left.toFloat(), progress).toInt()
-        val top = MathUtils.lerp(startBounds.top.toFloat(),
-                endBounds.top.toFloat(), progress).toInt()
-        val right = MathUtils.lerp(startBounds.right.toFloat(),
-                endBounds.right.toFloat(), progress).toInt()
-        val bottom = MathUtils.lerp(startBounds.bottom.toFloat(),
-                endBounds.bottom.toFloat(), progress).toInt()
+        val left =
+            MathUtils.lerp(startBounds.left.toFloat(), endBounds.left.toFloat(), progress).toInt()
+        val top =
+            MathUtils.lerp(startBounds.top.toFloat(), endBounds.top.toFloat(), progress).toInt()
+        val right =
+            MathUtils.lerp(startBounds.right.toFloat(), endBounds.right.toFloat(), progress).toInt()
+        val bottom =
+            MathUtils.lerp(startBounds.bottom.toFloat(), endBounds.bottom.toFloat(), progress)
+                .toInt()
         val resultBounds = result ?: Rect()
         resultBounds.set(left, top, right, bottom)
         return resultBounds
@@ -884,17 +896,15 @@ class MediaHierarchyManager @Inject constructor(
     /** @return true if this transformation is guided by an external progress like a finger */
     fun isCurrentlyInGuidedTransformation(): Boolean {
         return hasValidStartAndEndLocations() &&
-                getTransformationProgress() >= 0 &&
-                areGuidedTransitionHostsVisible()
+            getTransformationProgress() >= 0 &&
+            areGuidedTransitionHostsVisible()
     }
 
     private fun hasValidStartAndEndLocations(): Boolean {
         return previousLocation != -1 && desiredLocation != -1
     }
 
-    /**
-     * Calculate the transformation type for the current animation
-     */
+    /** Calculate the transformation type for the current animation */
     @VisibleForTesting
     @TransformationType
     fun calculateTransformationType(): Int {
@@ -904,8 +914,10 @@ class MediaHierarchyManager @Inject constructor(
             }
             return TRANSFORMATION_TYPE_FADE
         }
-        if (previousLocation == LOCATION_LOCKSCREEN && desiredLocation == LOCATION_QS ||
-            previousLocation == LOCATION_QS && desiredLocation == LOCATION_LOCKSCREEN) {
+        if (
+            previousLocation == LOCATION_LOCKSCREEN && desiredLocation == LOCATION_QS ||
+                previousLocation == LOCATION_QS && desiredLocation == LOCATION_LOCKSCREEN
+        ) {
             // animating between ls and qs should fade, as QS is clipped.
             return TRANSFORMATION_TYPE_FADE
         }
@@ -918,7 +930,7 @@ class MediaHierarchyManager @Inject constructor(
 
     private fun areGuidedTransitionHostsVisible(): Boolean {
         return getHost(previousLocation)?.visible == true &&
-                getHost(desiredLocation)?.visible == true
+            getHost(desiredLocation)?.visible == true
     }
 
     /**
@@ -966,103 +978,115 @@ class MediaHierarchyManager @Inject constructor(
         }
     }
 
-    /**
-     * Apply the current state to the view, updating it's bounds and desired state
-     */
+    /** Apply the current state to the view, updating it's bounds and desired state */
     private fun applyState(
         bounds: Rect,
         alpha: Float,
         immediately: Boolean = false,
         clipBounds: Rect = EMPTY_RECT
-    ) = traceSection("MediaHierarchyManager#applyState") {
-        currentBounds.set(bounds)
-        currentClipping = clipBounds
-        carouselAlpha = if (isCurrentlyFading()) alpha else 1.0f
-        val onlyUseEndState = !isCurrentlyInGuidedTransformation() || isCurrentlyFading()
-        val startLocation = if (onlyUseEndState) -1 else previousLocation
-        val progress = if (onlyUseEndState) 1.0f else getTransformationProgress()
-        val endLocation = resolveLocationForFading()
-        mediaCarouselController.setCurrentState(startLocation, endLocation, progress, immediately)
-        updateHostAttachment()
-        if (currentAttachmentLocation == IN_OVERLAY) {
-            // Setting the clipping on the hierarchy of `mediaFrame` does not work
-            if (!currentClipping.isEmpty) {
-                currentBounds.intersect(currentClipping)
-            }
-            mediaFrame.setLeftTopRightBottom(
+    ) =
+        traceSection("MediaHierarchyManager#applyState") {
+            currentBounds.set(bounds)
+            currentClipping = clipBounds
+            carouselAlpha = if (isCurrentlyFading()) alpha else 1.0f
+            val onlyUseEndState = !isCurrentlyInGuidedTransformation() || isCurrentlyFading()
+            val startLocation = if (onlyUseEndState) -1 else previousLocation
+            val progress = if (onlyUseEndState) 1.0f else getTransformationProgress()
+            val endLocation = resolveLocationForFading()
+            mediaCarouselController.setCurrentState(
+                startLocation,
+                endLocation,
+                progress,
+                immediately
+            )
+            updateHostAttachment()
+            if (currentAttachmentLocation == IN_OVERLAY) {
+                // Setting the clipping on the hierarchy of `mediaFrame` does not work
+                if (!currentClipping.isEmpty) {
+                    currentBounds.intersect(currentClipping)
+                }
+                mediaFrame.setLeftTopRightBottom(
                     currentBounds.left,
                     currentBounds.top,
                     currentBounds.right,
-                    currentBounds.bottom)
-        }
-    }
-
-    private fun updateHostAttachment() = traceSection(
-        "MediaHierarchyManager#updateHostAttachment"
-    ) {
-        var newLocation = resolveLocationForFading()
-        var canUseOverlay = !isCurrentlyFading()
-        if (isCrossFadeAnimatorRunning) {
-            if (getHost(newLocation)?.visible == true &&
-                getHost(newLocation)?.hostView?.isShown == false &&
-                newLocation != desiredLocation) {
-                // We're crossfading but the view is already hidden. Let's move to the overlay
-                // instead. This happens when animating to the full shade using a button click.
-                canUseOverlay = true
-            }
-        }
-        val inOverlay = isTransitionRunning() && rootOverlay != null && canUseOverlay
-        newLocation = if (inOverlay) IN_OVERLAY else newLocation
-        if (currentAttachmentLocation != newLocation) {
-            currentAttachmentLocation = newLocation
-
-            // Remove the carousel from the old host
-            (mediaFrame.parent as ViewGroup?)?.removeView(mediaFrame)
-
-            // Add it to the new one
-            if (inOverlay) {
-                rootOverlay!!.add(mediaFrame)
-            } else {
-                val targetHost = getHost(newLocation)!!.hostView
-                // When adding back to the host, let's make sure to reset the bounds.
-                // Usually adding the view will trigger a layout that does this automatically,
-                // but we sometimes suppress this.
-                targetHost.addView(mediaFrame)
-                val left = targetHost.paddingLeft
-                val top = targetHost.paddingTop
-                mediaFrame.setLeftTopRightBottom(
-                        left,
-                        top,
-                        left + currentBounds.width(),
-                        top + currentBounds.height())
-
-                if (mediaFrame.childCount > 0) {
-                    val child = mediaFrame.getChildAt(0)
-                    if (mediaFrame.height < child.height) {
-                        Log.wtf(TAG, "mediaFrame height is too small for child: " +
-                            "${mediaFrame.height} vs ${child.height}")
-                    }
-                }
-            }
-            if (isCrossFadeAnimatorRunning) {
-                // When cross-fading with an animation, we only notify the media carousel of the
-                // location change, once the view is reattached to the new place and not immediately
-                // when the desired location changes. This callback will update the measurement
-                // of the carousel, only once we've faded out at the old location and then reattach
-                // to fade it in at the new location.
-                mediaCarouselController.onDesiredLocationChanged(
-                    newLocation,
-                    getHost(newLocation),
-                    animate = false
+                    currentBounds.bottom
                 )
             }
         }
-    }
+
+    private fun updateHostAttachment() =
+        traceSection("MediaHierarchyManager#updateHostAttachment") {
+            var newLocation = resolveLocationForFading()
+            var canUseOverlay = !isCurrentlyFading()
+            if (isCrossFadeAnimatorRunning) {
+                if (
+                    getHost(newLocation)?.visible == true &&
+                        getHost(newLocation)?.hostView?.isShown == false &&
+                        newLocation != desiredLocation
+                ) {
+                    // We're crossfading but the view is already hidden. Let's move to the overlay
+                    // instead. This happens when animating to the full shade using a button click.
+                    canUseOverlay = true
+                }
+            }
+            val inOverlay = isTransitionRunning() && rootOverlay != null && canUseOverlay
+            newLocation = if (inOverlay) IN_OVERLAY else newLocation
+            if (currentAttachmentLocation != newLocation) {
+                currentAttachmentLocation = newLocation
+
+                // Remove the carousel from the old host
+                (mediaFrame.parent as ViewGroup?)?.removeView(mediaFrame)
+
+                // Add it to the new one
+                if (inOverlay) {
+                    rootOverlay!!.add(mediaFrame)
+                } else {
+                    val targetHost = getHost(newLocation)!!.hostView
+                    // When adding back to the host, let's make sure to reset the bounds.
+                    // Usually adding the view will trigger a layout that does this automatically,
+                    // but we sometimes suppress this.
+                    targetHost.addView(mediaFrame)
+                    val left = targetHost.paddingLeft
+                    val top = targetHost.paddingTop
+                    mediaFrame.setLeftTopRightBottom(
+                        left,
+                        top,
+                        left + currentBounds.width(),
+                        top + currentBounds.height()
+                    )
+
+                    if (mediaFrame.childCount > 0) {
+                        val child = mediaFrame.getChildAt(0)
+                        if (mediaFrame.height < child.height) {
+                            Log.wtf(
+                                TAG,
+                                "mediaFrame height is too small for child: " +
+                                    "${mediaFrame.height} vs ${child.height}"
+                            )
+                        }
+                    }
+                }
+                if (isCrossFadeAnimatorRunning) {
+                    // When cross-fading with an animation, we only notify the media carousel of the
+                    // location change, once the view is reattached to the new place and not
+                    // immediately
+                    // when the desired location changes. This callback will update the measurement
+                    // of the carousel, only once we've faded out at the old location and then
+                    // reattach
+                    // to fade it in at the new location.
+                    mediaCarouselController.onDesiredLocationChanged(
+                        newLocation,
+                        getHost(newLocation),
+                        animate = false
+                    )
+                }
+            }
+        }
 
     /**
-     * Calculate the location when cross fading between locations. While fading out,
-     * the content should remain in the previous location, while after the switch it should
-     * be at the desired location.
+     * Calculate the location when cross fading between locations. While fading out, the content
+     * should remain in the previous location, while after the switch it should be at the desired
+     * location.
      */
     private fun resolveLocationForFading(): Int {
         if (isCrossFadeAnimatorRunning) {
@@ -1079,7 +1103,8 @@ class MediaHierarchyManager @Inject constructor(
 
     private fun isTransitionRunning(): Boolean {
         return isCurrentlyInGuidedTransformation() && getTransformationProgress() != 1.0f ||
-                animator.isRunning || animationPending
+            animator.isRunning ||
+            animationPending
     }
 
     @MediaLocation
@@ -1088,31 +1113,39 @@ class MediaHierarchyManager @Inject constructor(
             // Keep the current location until we're allowed to again
             return desiredLocation
         }
-        val onLockscreen = (!bypassController.bypassEnabled &&
-            (statusbarState == StatusBarState.KEYGUARD))
-        val location = when {
-            dreamOverlayActive && dreamMediaComplicationActive -> LOCATION_DREAM_OVERLAY
-            (qsExpansion > 0.0f || inSplitShade) && !onLockscreen -> LOCATION_QS
-            qsExpansion > 0.4f && onLockscreen -> LOCATION_QS
-            !hasActiveMedia -> LOCATION_QS
-            onLockscreen && isSplitShadeExpanding() -> LOCATION_QS
-            onLockscreen && isTransformingToFullShadeAndInQQS() -> LOCATION_QQS
-            onLockscreen && allowMediaPlayerOnLockScreen -> LOCATION_LOCKSCREEN
-            else -> LOCATION_QQS
-        }
+        val onLockscreen =
+            (!bypassController.bypassEnabled && (statusbarState == StatusBarState.KEYGUARD))
+        val location =
+            when {
+                dreamOverlayActive && dreamMediaComplicationActive -> LOCATION_DREAM_OVERLAY
+                (qsExpansion > 0.0f || inSplitShade) && !onLockscreen -> LOCATION_QS
+                qsExpansion > 0.4f && onLockscreen -> LOCATION_QS
+                !hasActiveMedia -> LOCATION_QS
+                onLockscreen && isSplitShadeExpanding() -> LOCATION_QS
+                onLockscreen && isTransformingToFullShadeAndInQQS() -> LOCATION_QQS
+                onLockscreen && allowMediaPlayerOnLockScreen -> LOCATION_LOCKSCREEN
+                else -> LOCATION_QQS
+            }
         // When we're on lock screen and the player is not active, we should keep it in QS.
         // Otherwise it will try to animate a transition that doesn't make sense.
-        if (location == LOCATION_LOCKSCREEN && getHost(location)?.visible != true &&
-            !statusBarStateController.isDozing) {
+        if (
+            location == LOCATION_LOCKSCREEN &&
+                getHost(location)?.visible != true &&
+                !statusBarStateController.isDozing
+        ) {
             return LOCATION_QS
         }
-        if (location == LOCATION_LOCKSCREEN && desiredLocation == LOCATION_QS &&
-            collapsingShadeFromQS) {
+        if (
+            location == LOCATION_LOCKSCREEN &&
+                desiredLocation == LOCATION_QS &&
+                collapsingShadeFromQS
+        ) {
             // When collapsing on the lockscreen, we want to remain in QS
             return LOCATION_QS
         }
-        if (location != LOCATION_LOCKSCREEN && desiredLocation == LOCATION_LOCKSCREEN &&
-            !fullyAwake) {
+        if (
+            location != LOCATION_LOCKSCREEN && desiredLocation == LOCATION_LOCKSCREEN && !fullyAwake
+        ) {
             // When unlocking from dozing / while waking up, the media shouldn't be transitioning
             // in an animated way. Let's keep it in the lockscreen until we're fully awake and
             // reattach it without an animation
@@ -1129,9 +1162,7 @@ class MediaHierarchyManager @Inject constructor(
         return inSplitShade && isTransitioningToFullShade
     }
 
-    /**
-     * Are we currently transforming to the full shade and already in QQS
-     */
+    /** Are we currently transforming to the full shade and already in QQS */
     private fun isTransformingToFullShadeAndInQQS(): Boolean {
         if (!isTransitioningToFullShade) {
             return false
@@ -1143,9 +1174,7 @@ class MediaHierarchyManager @Inject constructor(
         return fullShadeTransitionProgress > 0.5f
     }
 
-    /**
-     * Is the current transformationType fading
-     */
+    /** Is the current transformationType fading */
     private fun isCurrentlyFading(): Boolean {
         if (isSplitShadeExpanding()) {
             // Split shade always uses transition instead of fade.
@@ -1157,60 +1186,49 @@ class MediaHierarchyManager @Inject constructor(
         return isCrossFadeAnimatorRunning
     }
 
-    /**
-     * Returns true when the media card could be visible to the user if existed.
-     */
+    /** Returns true when the media card could be visible to the user if existed. */
     private fun isVisibleToUser(): Boolean {
-        return isLockScreenVisibleToUser() || isLockScreenShadeVisibleToUser() ||
-                isHomeScreenShadeVisibleToUser()
+        return isLockScreenVisibleToUser() ||
+            isLockScreenShadeVisibleToUser() ||
+            isHomeScreenShadeVisibleToUser()
     }
 
     private fun isLockScreenVisibleToUser(): Boolean {
         return !statusBarStateController.isDozing &&
-                !keyguardViewController.isBouncerShowing &&
-                statusBarStateController.state == StatusBarState.KEYGUARD &&
-                allowMediaPlayerOnLockScreen &&
-                statusBarStateController.isExpanded &&
-                !qsExpanded
+            !keyguardViewController.isBouncerShowing &&
+            statusBarStateController.state == StatusBarState.KEYGUARD &&
+            allowMediaPlayerOnLockScreen &&
+            statusBarStateController.isExpanded &&
+            !qsExpanded
     }
 
     private fun isLockScreenShadeVisibleToUser(): Boolean {
         return !statusBarStateController.isDozing &&
-                !keyguardViewController.isBouncerShowing &&
-                (statusBarStateController.state == StatusBarState.SHADE_LOCKED ||
-                        (statusBarStateController.state == StatusBarState.KEYGUARD && qsExpanded))
+            !keyguardViewController.isBouncerShowing &&
+            (statusBarStateController.state == StatusBarState.SHADE_LOCKED ||
+                (statusBarStateController.state == StatusBarState.KEYGUARD && qsExpanded))
     }
 
     private fun isHomeScreenShadeVisibleToUser(): Boolean {
         return !statusBarStateController.isDozing &&
-                statusBarStateController.state == StatusBarState.SHADE &&
-                statusBarStateController.isExpanded
+            statusBarStateController.state == StatusBarState.SHADE &&
+            statusBarStateController.isExpanded
     }
 
     companion object {
-        /**
-         * Attached in expanded quick settings
-         */
+        /** Attached in expanded quick settings */
         const val LOCATION_QS = 0
 
-        /**
-         * Attached in the collapsed QS
-         */
+        /** Attached in the collapsed QS */
         const val LOCATION_QQS = 1
 
-        /**
-         * Attached on the lock screen
-         */
+        /** Attached on the lock screen */
         const val LOCATION_LOCKSCREEN = 2
 
-        /**
-         * Attached on the dream overlay
-         */
+        /** Attached on the dream overlay */
         const val LOCATION_DREAM_OVERLAY = 3
 
-        /**
-         * Attached at the root of the hierarchy in an overlay
-         */
+        /** Attached at the root of the hierarchy in an overlay */
         const val IN_OVERLAY = -1000
 
         /**
@@ -1226,18 +1244,29 @@ class MediaHierarchyManager @Inject constructor(
         const val TRANSFORMATION_TYPE_FADE = 1
     }
 }
+
 private val EMPTY_RECT = Rect()
 
-@IntDef(prefix = ["TRANSFORMATION_TYPE_"], value = [
-    MediaHierarchyManager.TRANSFORMATION_TYPE_TRANSITION,
-    MediaHierarchyManager.TRANSFORMATION_TYPE_FADE])
+@IntDef(
+    prefix = ["TRANSFORMATION_TYPE_"],
+    value =
+        [
+            MediaHierarchyManager.TRANSFORMATION_TYPE_TRANSITION,
+            MediaHierarchyManager.TRANSFORMATION_TYPE_FADE
+        ]
+)
 @Retention(AnnotationRetention.SOURCE)
 private annotation class TransformationType
 
-@IntDef(prefix = ["LOCATION_"], value = [
-    MediaHierarchyManager.LOCATION_QS,
-    MediaHierarchyManager.LOCATION_QQS,
-    MediaHierarchyManager.LOCATION_LOCKSCREEN,
-    MediaHierarchyManager.LOCATION_DREAM_OVERLAY])
+@IntDef(
+    prefix = ["LOCATION_"],
+    value =
+        [
+            MediaHierarchyManager.LOCATION_QS,
+            MediaHierarchyManager.LOCATION_QQS,
+            MediaHierarchyManager.LOCATION_LOCKSCREEN,
+            MediaHierarchyManager.LOCATION_DREAM_OVERLAY
+        ]
+)
 @Retention(AnnotationRetention.SOURCE)
 annotation class MediaLocation
