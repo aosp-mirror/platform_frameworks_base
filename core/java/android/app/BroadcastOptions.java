@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -34,6 +35,10 @@ import android.os.PowerExemptionManager;
 import android.os.PowerExemptionManager.ReasonCode;
 import android.os.PowerExemptionManager.TempAllowListType;
 
+import com.android.internal.util.Preconditions;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 
 /**
@@ -59,6 +64,8 @@ public class BroadcastOptions extends ComponentOptions {
     private boolean mIsAlarmBroadcast = false;
     private long mIdForResponseEvent;
     private @Nullable IntentFilter mRemoveMatchingFilter;
+    private @DeliveryGroupPolicy int mDeliveryGroupPolicy;
+    private @Nullable String mDeliveryGroupKey;
 
     /**
      * Change ID which is invalid.
@@ -190,6 +197,46 @@ public class BroadcastOptions extends ComponentOptions {
     private static final String KEY_REMOVE_MATCHING_FILTER =
             "android:broadcast.removeMatchingFilter";
 
+    /**
+     * Corresponds to {@link #setDeliveryGroupPolicy(int)}.
+     */
+    private static final String KEY_DELIVERY_GROUP_POLICY =
+            "android:broadcast.deliveryGroupPolicy";
+
+    /**
+     * Corresponds to {@link #setDeliveryGroupKey(String, String)}.
+     */
+    private static final String KEY_DELIVERY_GROUP_KEY =
+            "android:broadcast.deliveryGroupKey";
+
+    /**
+     * The list of delivery group policies which specify how multiple broadcasts belonging to
+     * the same delivery group has to be handled.
+     * @hide
+     */
+    @IntDef(flag = true, prefix = { "DELIVERY_GROUP_POLICY_" }, value = {
+            DELIVERY_GROUP_POLICY_ALL,
+            DELIVERY_GROUP_POLICY_MOST_RECENT,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DeliveryGroupPolicy {}
+
+    /**
+     * Delivery group policy that indicates that all the broadcasts in the delivery group
+     * need to be delivered as is.
+     *
+     * @hide
+     */
+    public static final int DELIVERY_GROUP_POLICY_ALL = 0;
+
+    /**
+     * Delivery group policy that indicates that only the most recent broadcast in the delivery
+     * group need to be delivered and the rest can be dropped.
+     *
+     * @hide
+     */
+    public static final int DELIVERY_GROUP_POLICY_MOST_RECENT = 1;
+
     public static BroadcastOptions makeBasic() {
         BroadcastOptions opts = new BroadcastOptions();
         return opts;
@@ -236,6 +283,9 @@ public class BroadcastOptions extends ComponentOptions {
         mIsAlarmBroadcast = opts.getBoolean(KEY_ALARM_BROADCAST, false);
         mRemoveMatchingFilter = opts.getParcelable(KEY_REMOVE_MATCHING_FILTER,
                 IntentFilter.class);
+        mDeliveryGroupPolicy = opts.getInt(KEY_DELIVERY_GROUP_POLICY,
+                DELIVERY_GROUP_POLICY_ALL);
+        mDeliveryGroupKey = opts.getString(KEY_DELIVERY_GROUP_KEY);
     }
 
     /**
@@ -639,6 +689,41 @@ public class BroadcastOptions extends ComponentOptions {
     }
 
     /**
+     * Set delivery group policy for this broadcast to specify how multiple broadcasts belonging to
+     * the same delivery group has to be handled.
+     *
+     * @hide
+     */
+    public void setDeliveryGroupPolicy(@DeliveryGroupPolicy int policy) {
+        mDeliveryGroupPolicy = policy;
+    }
+
+    /** @hide */
+    public @DeliveryGroupPolicy int getDeliveryGroupPolicy() {
+        return mDeliveryGroupPolicy;
+    }
+
+    /**
+     * Set namespace and key to identify the delivery group that this broadcast belongs to.
+     * If no namespace and key is set, then by default {@link Intent#filterEquals(Intent)} will be
+     * used to identify the delivery group.
+     *
+     * @hide
+     */
+    public void setDeliveryGroupKey(@NonNull String namespace, @NonNull String key) {
+        Preconditions.checkArgument(!namespace.contains("/"),
+                "namespace should not contain '/'");
+        Preconditions.checkArgument(!key.contains("/"),
+                "key should not contain '/'");
+        mDeliveryGroupKey = namespace + "/" + key;
+    }
+
+    /** @hide */
+    public String getDeliveryGroupKey() {
+        return mDeliveryGroupKey;
+    }
+
+    /**
      * Returns the created options as a Bundle, which can be passed to
      * {@link android.content.Context#sendBroadcast(android.content.Intent)
      * Context.sendBroadcast(Intent)} and related methods.
@@ -685,6 +770,12 @@ public class BroadcastOptions extends ComponentOptions {
         }
         if (mRemoveMatchingFilter != null) {
             b.putParcelable(KEY_REMOVE_MATCHING_FILTER, mRemoveMatchingFilter);
+        }
+        if (mDeliveryGroupPolicy != DELIVERY_GROUP_POLICY_ALL) {
+            b.putInt(KEY_DELIVERY_GROUP_POLICY, mDeliveryGroupPolicy);
+        }
+        if (mDeliveryGroupKey != null) {
+            b.putString(KEY_DELIVERY_GROUP_KEY, mDeliveryGroupKey);
         }
         return b.isEmpty() ? null : b;
     }

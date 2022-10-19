@@ -796,6 +796,16 @@ final class BroadcastRecord extends Binder {
         }
     }
 
+    public boolean matchesDeliveryGroup(@NonNull BroadcastRecord other) {
+        final String key = (options != null) ? options.getDeliveryGroupKey() : null;
+        final String otherKey = (other.options != null)
+                ? other.options.getDeliveryGroupKey() : null;
+        if (key == null && otherKey == null) {
+            return intent.filterEquals(other.intent);
+        }
+        return Objects.equals(key, otherKey);
+    }
+
     @Override
     public String toString() {
         if (mCachedToString == null) {
