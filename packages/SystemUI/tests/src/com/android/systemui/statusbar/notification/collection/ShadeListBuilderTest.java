@@ -38,6 +38,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
@@ -2109,6 +2110,85 @@ public class ShadeListBuilderTest extends SysuiTestCase {
                         child(3),
                         child(2)
                 )
+        );
+    }
+
+    @Test
+    public void groupRevertingToSummaryDoesNotRetainStablePositionWithLegacyIndexLogic() {
+        when(mNotifPipelineFlags.isStabilityIndexFixEnabled()).thenReturn(false);
+
+        // GIVEN a notification group is on screen
+        mStabilityManager.setAllowEntryReordering(false);
+
+        // WHEN the list is originally built with reordering disabled (and section changes allowed)
+        addNotif(0, PACKAGE_1).setRank(2);
+        addNotif(1, PACKAGE_1).setRank(3);
+        addGroupSummary(2, PACKAGE_1, "group").setRank(4);
+        addGroupChild(3, PACKAGE_1, "group").setRank(5);
+        addGroupChild(4, PACKAGE_1, "group").setRank(6);
+        dispatchBuild();
+
+        verifyBuiltList(
+                notif(0),
+                notif(1),
+                group(
+                        summary(2),
+                        child(3),
+                        child(4)
+                )
+        );
+
+        // WHEN the notification summary rank increases and children removed
+        setNewRank(notif(2).entry, 1);
+        mEntrySet.remove(4);
+        mEntrySet.remove(3);
+        dispatchBuild();
+
+        // VERIFY the summary (incorrectly) moves to the top of the section where it is ranked,
+        // despite visual stability being active
+        verifyBuiltList(
+                notif(2),
+                notif(0),
+                notif(1)
+        );
+    }
+
+    @Test
+    public void groupRevertingToSummaryRetainsStablePosition() {
+        when(mNotifPipelineFlags.isStabilityIndexFixEnabled()).thenReturn(true);
+
+        // GIVEN a notification group is on screen
+        mStabilityManager.setAllowEntryReordering(false);
+
+        // WHEN the list is originally built with reordering disabled (and section changes allowed)
+        addNotif(0, PACKAGE_1).setRank(2);
+        addNotif(1, PACKAGE_1).setRank(3);
+        addGroupSummary(2, PACKAGE_1, "group").setRank(4);
+        addGroupChild(3, PACKAGE_1, "group").setRank(5);
+        addGroupChild(4, PACKAGE_1, "group").setRank(6);
+        dispatchBuild();
+
+        verifyBuiltList(
+                notif(0),
+                notif(1),
+                group(
+                        summary(2),
+                        child(3),
+                        child(4)
+                )
+        );
+
+        // WHEN the notification summary rank increases and children removed
+        setNewRank(notif(2).entry, 1);
+        mEntrySet.remove(4);
+        mEntrySet.remove(3);
+        dispatchBuild();
+
+        // VERIFY the summary stays in the same location on rebuild
+        verifyBuiltList(
+                notif(0),
+                notif(1),
+                notif(2)
         );
     }
 
