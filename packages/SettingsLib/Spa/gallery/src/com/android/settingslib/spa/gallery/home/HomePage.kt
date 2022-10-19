@@ -31,6 +31,7 @@ import com.android.settingslib.spa.gallery.page.ArgumentPageModel
 import com.android.settingslib.spa.gallery.page.ArgumentPageProvider
 import com.android.settingslib.spa.gallery.page.FooterPageProvider
 import com.android.settingslib.spa.gallery.page.IllustrationPageProvider
+import com.android.settingslib.spa.gallery.page.ProgressBarPageProvider
 import com.android.settingslib.spa.gallery.page.SettingsPagerPageProvider
 import com.android.settingslib.spa.gallery.page.SliderPageProvider
 import com.android.settingslib.spa.gallery.preference.PreferenceMainPageProvider
@@ -54,6 +55,7 @@ object HomePageProvider : SettingsPageProvider {
             IllustrationPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
             CategoryPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
             ActionButtonPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
+            ProgressBarPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
         )
     }
 
