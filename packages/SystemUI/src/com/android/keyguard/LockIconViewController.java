@@ -24,6 +24,8 @@ import static com.android.keyguard.LockIconView.ICON_LOCK;
 import static com.android.keyguard.LockIconView.ICON_UNLOCK;
 import static com.android.systemui.classifier.Classifier.LOCK_ICON;
 import static com.android.systemui.doze.util.BurnInHelperKt.getBurnInOffset;
+import static com.android.systemui.flags.Flags.DOZING_MIGRATION_1;
+import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -46,6 +48,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
 
 import com.android.systemui.Dumpable;
@@ -55,6 +58,10 @@ import com.android.systemui.biometrics.AuthRippleController;
 import com.android.systemui.biometrics.UdfpsController;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
+import com.android.systemui.keyguard.shared.model.TransitionStep;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
@@ -67,6 +74,7 @@ import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import java.io.PrintWriter;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
@@ -103,6 +111,9 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     @NonNull private CharSequence mLockedLabel;
     @NonNull private final VibratorHelper mVibrator;
     @Nullable private final AuthRippleController mAuthRippleController;
+    @NonNull private final FeatureFlags mFeatureFlags;
+    @NonNull private final KeyguardTransitionInteractor mTransitionInteractor;
+    @NonNull private final KeyguardInteractor mKeyguardInteractor;
 
     // Tracks the velocity of a touch to help filter out the touches that move too fast.
     private VelocityTracker mVelocityTracker;
@@ -139,6 +150,20 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     private boolean mDownDetected;
     private final Rect mSensorTouchLocation = new Rect();
 
+    @VisibleForTesting
+    final Consumer<TransitionStep> mDozeTransitionCallback = (TransitionStep step) -> {
+        mInterpolatedDarkAmount = step.getValue();
+        mView.setDozeAmount(step.getValue());
+        updateBurnInOffsets();
+    };
+
+    @VisibleForTesting
+    final Consumer<Boolean> mIsDozingCallback = (Boolean isDozing) -> {
+        mIsDozing = isDozing;
+        updateBurnInOffsets();
+        updateVisibility();
+    };
+
     @Inject
     public LockIconViewController(
             @Nullable LockIconView view,
@@ -154,7 +179,10 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
             @NonNull @Main DelayableExecutor executor,
             @NonNull VibratorHelper vibrator,
             @Nullable AuthRippleController authRippleController,
-            @NonNull @Main Resources resources
+            @NonNull @Main Resources resources,
+            @NonNull KeyguardTransitionInteractor transitionInteractor,
+            @NonNull KeyguardInteractor keyguardInteractor,
+            @NonNull FeatureFlags featureFlags
     ) {
         super(view);
         mStatusBarStateController = statusBarStateController;
@@ -168,6 +196,9 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         mExecutor = executor;
         mVibrator = vibrator;
         mAuthRippleController = authRippleController;
+        mTransitionInteractor = transitionInteractor;
+        mKeyguardInteractor = keyguardInteractor;
+        mFeatureFlags = featureFlags;
 
         mMaxBurnInOffsetX = resources.getDimensionPixelSize(R.dimen.udfps_burn_in_offset_x);
         mMaxBurnInOffsetY = resources.getDimensionPixelSize(R.dimen.udfps_burn_in_offset_y);
@@ -184,6 +215,12 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     @Override
     protected void onInit() {
         mView.setAccessibilityDelegate(mAccessibilityDelegate);
+
+        if (mFeatureFlags.isEnabled(DOZING_MIGRATION_1)) {
+            collectFlow(mView, mTransitionInteractor.getDozeAmountTransition(),
+                    mDozeTransitionCallback);
+            collectFlow(mView, mKeyguardInteractor.isDozing(), mIsDozingCallback);
+        }
     }
 
     @Override
@@ -379,14 +416,17 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         pw.println(" mShowUnlockIcon: " + mShowUnlockIcon);
         pw.println(" mShowLockIcon: " + mShowLockIcon);
         pw.println(" mShowAodUnlockedIcon: " + mShowAodUnlockedIcon);
-        pw.println("  mIsDozing: " + mIsDozing);
-        pw.println("  mIsBouncerShowing: " + mIsBouncerShowing);
-        pw.println("  mUserUnlockedWithBiometric: " + mUserUnlockedWithBiometric);
-        pw.println("  mRunningFPS: " + mRunningFPS);
-        pw.println("  mCanDismissLockScreen: " + mCanDismissLockScreen);
-        pw.println("  mStatusBarState: " + StatusBarState.toString(mStatusBarState));
-        pw.println("  mInterpolatedDarkAmount: " + mInterpolatedDarkAmount);
-        pw.println("  mSensorTouchLocation: " + mSensorTouchLocation);
+        pw.println();
+        pw.println(" mIsDozing: " + mIsDozing);
+        pw.println(" isFlagEnabled(DOZING_MIGRATION_1): "
+                + mFeatureFlags.isEnabled(DOZING_MIGRATION_1));
+        pw.println(" mIsBouncerShowing: " + mIsBouncerShowing);
+        pw.println(" mUserUnlockedWithBiometric: " + mUserUnlockedWithBiometric);
+        pw.println(" mRunningFPS: " + mRunningFPS);
+        pw.println(" mCanDismissLockScreen: " + mCanDismissLockScreen);
+        pw.println(" mStatusBarState: " + StatusBarState.toString(mStatusBarState));
+        pw.println(" mInterpolatedDarkAmount: " + mInterpolatedDarkAmount);
+        pw.println(" mSensorTouchLocation: " + mSensorTouchLocation);
 
         if (mView != null) {
             mView.dump(pw, args);
@@ -427,16 +467,20 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
             new StatusBarStateController.StateListener() {
                 @Override
                 public void onDozeAmountChanged(float linear, float eased) {
-                    mInterpolatedDarkAmount = eased;
-                    mView.setDozeAmount(eased);
-                    updateBurnInOffsets();
+                    if (!mFeatureFlags.isEnabled(DOZING_MIGRATION_1)) {
+                        mInterpolatedDarkAmount = eased;
+                        mView.setDozeAmount(eased);
+                        updateBurnInOffsets();
+                    }
                 }
 
                 @Override
                 public void onDozingChanged(boolean isDozing) {
-                    mIsDozing = isDozing;
-                    updateBurnInOffsets();
-                    updateVisibility();
+                    if (!mFeatureFlags.isEnabled(DOZING_MIGRATION_1)) {
+                        mIsDozing = isDozing;
+                        updateBurnInOffsets();
+                        updateVisibility();
+                    }
                 }
 
                 @Override
