@@ -27,6 +27,7 @@ import com.android.settingslib.spa.framework.common.EntrySearchData
 import com.android.settingslib.spa.framework.compose.navigator
 import com.android.settingslib.spa.framework.compose.stateOf
 import com.android.settingslib.spa.framework.util.WrapOnClickWithLog
+import com.android.settingslib.spa.framework.util.EntryHighlight
 import com.android.settingslib.spa.widget.ui.createSettingsIcon
 
 data class SimplePreferenceMacro(
@@ -115,12 +116,14 @@ fun Preference(
             )
         } else Modifier
     }
-    BasePreference(
-        title = model.title,
-        summary = model.summary,
-        singleLineSummary = singleLineSummary,
-        modifier = modifier,
-        icon = model.icon,
-        enabled = model.enabled,
-    )
+    EntryHighlight {
+        BasePreference(
+            title = model.title,
+            summary = model.summary,
+            singleLineSummary = singleLineSummary,
+            modifier = modifier,
+            icon = model.icon,
+            enabled = model.enabled,
+        )
+    }
 }
