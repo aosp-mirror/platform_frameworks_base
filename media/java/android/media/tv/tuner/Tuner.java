@@ -289,6 +289,7 @@ public class Tuner implements AutoCloseable  {
     private Integer mFrontendHandle;
     private Tuner mFeOwnerTuner = null;
     private int mFrontendType = FrontendSettings.TYPE_UNDEFINED;
+    private Integer mDesiredFrontendId = null;
     private int mUserId;
     private Lnb mLnb;
     private Integer mLnbHandle;
@@ -1326,10 +1327,18 @@ public class Tuner implements AutoCloseable  {
 
     private boolean requestFrontend() {
         int[] feHandle = new int[1];
-        TunerFrontendRequest request = new TunerFrontendRequest();
-        request.clientId = mClientId;
-        request.frontendType = mFrontendType;
-        boolean granted = mTunerResourceManager.requestFrontend(request, feHandle);
+        boolean granted = false;
+        try {
+            TunerFrontendRequest request = new TunerFrontendRequest();
+            request.clientId = mClientId;
+            request.frontendType = mFrontendType;
+            request.desiredId = mDesiredFrontendId == null
+                    ? TunerFrontendRequest.DEFAULT_DESIRED_ID
+                    : mDesiredFrontendId;
+            granted = mTunerResourceManager.requestFrontend(request, feHandle);
+        } finally {
+            mDesiredFrontendId = null;
+        }
         if (granted) {
             mFrontendHandle = feHandle[0];
             mFrontend = nativeOpenFrontendByHandle(mFrontendHandle);
@@ -2367,6 +2376,50 @@ public class Tuner implements AutoCloseable  {
     }
 
     /**
+     * Request a frontend by frontend id.
+     *
+     * <p> This API is used if the applications want to select a desired frontend before
+     * {@link tune} to use a specific satellite or sending SatCR DiSEqC command for {@link tune}.
+     *
+     * @param desiredId the desired fronted Id. It can be retrieved by
+     * {@link getAvailableFrontendInfos}
+     *
+     * @return result status of open operation.
+     * @throws SecurityException if the caller does not have appropriate permissions.
+     */
+    @Result
+    public int requestFrontendById(int desiredId) {
+        mFrontendLock.lock();
+        try {
+            if (mFeOwnerTuner != null) {
+                Log.e(TAG, "Operation connot be done by sharee of tuner");
+                return RESULT_INVALID_STATE;
+            }
+            if (mFrontendHandle != null) {
+                Log.e(TAG, "A frontend has been opened before");
+                return RESULT_INVALID_STATE;
+            }
+            FrontendInfo frontendInfo = getFrontendInfoById(desiredId);
+            if (frontendInfo == null) {
+                Log.e(TAG, "Failed to get a FrontendInfo by frontend id: " + desiredId);
+                return RESULT_UNAVAILABLE;
+            }
+            int frontendType = frontendInfo.getType();
+            if (DEBUG) {
+                Log.d(TAG, "Opening frontend with type " + frontendType + ", id " + desiredId);
+            }
+            mFrontendType = frontendType;
+            mDesiredFrontendId = desiredId;
+            if (!checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND, mFrontendLock)) {
+                return RESULT_UNAVAILABLE;
+            }
+            return RESULT_SUCCESS;
+        } finally {
+            mFrontendLock.unlock();
+        }
+    }
+
+    /**
      * Open a shared filter instance.
      *
      * @param context the context of the caller.
@@ -2445,7 +2498,7 @@ public class Tuner implements AutoCloseable  {
         return granted;
     }
 
-    private boolean checkResource(int resourceType, ReentrantLock localLock)  {
+    private boolean checkResource(int resourceType, ReentrantLock localLock) {
         switch (resourceType) {
             case TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND: {
                 if (mFrontendHandle == null && !requestResource(resourceType, localLock)) {
@@ -2483,7 +2536,7 @@ public class Tuner implements AutoCloseable  {
     // 3) if no, then first release the held lock and grab the TRMS lock to avoid deadlock
     // 4) grab the local lock again and release the TRMS lock
     // If localLock is null, we'll assume the caller does not want the lock related operations
-    private boolean requestResource(int resourceType, ReentrantLock localLock)  {
+    private boolean requestResource(int resourceType, ReentrantLock localLock) {
         boolean enableLockOperations = localLock != null;
 
         // release the local lock first to avoid deadlock
