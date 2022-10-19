@@ -58,7 +58,6 @@ import android.Manifest;
 import android.accessibilityservice.AccessibilityService;
 import android.annotation.AnyThread;
 import android.annotation.BinderThread;
-import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
 import android.annotation.DurationMillisLong;
 import android.annotation.EnforcePermission;
@@ -69,9 +68,6 @@ import android.annotation.UiThread;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentProvider;
@@ -94,7 +90,6 @@ import android.inputmethodservice.InputMethodService;
 import android.media.AudioManagerInternal;
 import android.net.Uri;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.IBinder;
@@ -170,8 +165,6 @@ import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.internal.inputmethod.StartInputFlags;
 import com.android.internal.inputmethod.StartInputReason;
 import com.android.internal.inputmethod.UnbindReason;
-import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
-import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ConcurrentUtils;
@@ -255,13 +248,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     private static final String HANDLER_THREAD_NAME = "android.imms";
 
     /**
-     * A protected broadcast intent action for internal use for {@link PendingIntent} in
-     * the notification.
-     */
-    private static final String ACTION_SHOW_INPUT_METHOD_PICKER =
-            "com.android.server.inputmethod.InputMethodManagerService.SHOW_INPUT_METHOD_PICKER";
-
-    /**
      * When set, {@link #startInputUncheckedLocked} will return
      * {@link InputBindResult#NO_EDITOR} instead of starting an IME connection
      * unless {@link StartInputFlags#IS_TEXT_EDITOR} is set. This behavior overrides
@@ -334,13 +320,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @GuardedBy("ImfLock.class")
     private int mDisplayIdToShowIme = INVALID_DISPLAY;
 
-    // Ongoing notification
-    private NotificationManager mNotificationManager;
     @Nullable private StatusBarManagerInternal mStatusBarManagerInternal;
-    private final Notification.Builder mImeSwitcherNotification;
-    private final PendingIntent mImeSwitchPendingIntent;
     private boolean mShowOngoingImeSwitcherForPhones;
-    private boolean mNotificationShown;
     @GuardedBy("ImfLock.class")
     private final HandwritingModeController mHwController;
     @GuardedBy("ImfLock.class")
@@ -1253,17 +1234,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 return;
             } else if (Intent.ACTION_LOCALE_CHANGED.equals(action)) {
                 onActionLocaleChanged();
-            } else if (ACTION_SHOW_INPUT_METHOD_PICKER.equals(action)) {
-                // ACTION_SHOW_INPUT_METHOD_PICKER action is a protected-broadcast and it is
-                // guaranteed to be send only from the system, so that there is no need for extra
-                // security check such as
-                // {@link #canShowInputMethodPickerLocked(IInputMethodClient)}.
-                mHandler.obtainMessage(
-                        MSG_SHOW_IM_SUBTYPE_PICKER,
-                        // TODO(b/120076400): Design and implement IME switcher for heterogeneous
-                        // navbar configuration.
-                        InputMethodManager.SHOW_IM_PICKER_MODE_INCLUDE_AUXILIARY_SUBTYPES,
-                        DEFAULT_DISPLAY).sendToTarget();
             } else {
                 Slog.w(TAG, "Unexpected intent " + intent);
             }
@@ -1720,27 +1690,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
         mSlotIme = mContext.getString(com.android.internal.R.string.status_bar_ime);
 
-        Bundle extras = new Bundle();
-        extras.putBoolean(Notification.EXTRA_ALLOW_DURING_SETUP, true);
-        @ColorInt final int accentColor = mContext.getColor(
-                com.android.internal.R.color.system_notification_accent_color);
-        mImeSwitcherNotification =
-                new Notification.Builder(mContext, SystemNotificationChannels.VIRTUAL_KEYBOARD)
-                        .setSmallIcon(com.android.internal.R.drawable.ic_notification_ime_default)
-                        .setWhen(0)
-                        .setOngoing(true)
-                        .addExtras(extras)
-                        .setCategory(Notification.CATEGORY_SYSTEM)
-                        .setColor(accentColor);
-
-        Intent intent = new Intent(ACTION_SHOW_INPUT_METHOD_PICKER)
-                .setPackage(mContext.getPackageName());
-        mImeSwitchPendingIntent = PendingIntent.getBroadcast(mContext, 0, intent,
-                PendingIntent.FLAG_IMMUTABLE);
-
         mShowOngoingImeSwitcherForPhones = false;
 
-        mNotificationShown = false;
         final int userId = mActivityManagerInternal.getCurrentUserId();
 
         mLastSwitchUserId = userId;
@@ -1939,7 +1890,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 final int currentUserId = mSettings.getCurrentUserId();
                 mSettings.switchCurrentUser(currentUserId,
                         !mUserManagerInternal.isUserUnlockingOrUnlocked(currentUserId));
-                mNotificationManager = mContext.getSystemService(NotificationManager.class);
                 mStatusBarManagerInternal =
                         LocalServices.getService(StatusBarManagerInternal.class);
                 hideStatusBarIconLocked();
@@ -1977,7 +1927,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 broadcastFilterForSystemUser.addAction(Intent.ACTION_USER_ADDED);
                 broadcastFilterForSystemUser.addAction(Intent.ACTION_USER_REMOVED);
                 broadcastFilterForSystemUser.addAction(Intent.ACTION_LOCALE_CHANGED);
-                broadcastFilterForSystemUser.addAction(ACTION_SHOW_INPUT_METHOD_PICKER);
                 mContext.registerReceiver(new ImmsBroadcastReceiverForSystemUser(),
                         broadcastFilterForSystemUser);
 
@@ -3158,41 +3107,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             if (mStatusBarManagerInternal != null) {
                 mStatusBarManagerInternal.setImeWindowStatus(mCurTokenDisplayId,
                         getCurTokenLocked(), vis, backDisposition, needsToShowImeSwitcher);
-            }
-            final InputMethodInfo imi = mMethodMap.get(getSelectedMethodIdLocked());
-            if (imi != null && needsToShowImeSwitcher) {
-                // Used to load label
-                final CharSequence title = mRes.getText(
-                        com.android.internal.R.string.select_input_method);
-                final int currentUserId = mSettings.getCurrentUserId();
-                final Context userAwareContext = mContext.getUserId() == currentUserId
-                        ? mContext
-                        : mContext.createContextAsUser(UserHandle.of(currentUserId), 0 /* flags */);
-                final CharSequence summary = InputMethodUtils.getImeAndSubtypeDisplayName(
-                        userAwareContext, imi, mCurrentSubtype);
-                mImeSwitcherNotification.setContentTitle(title)
-                        .setContentText(summary)
-                        .setContentIntent(mImeSwitchPendingIntent);
-                // TODO(b/120076400): Figure out what is the best behavior
-                if ((mNotificationManager != null)
-                        && !mWindowManagerInternal.hasNavigationBar(DEFAULT_DISPLAY)) {
-                    if (DEBUG) {
-                        Slog.d(TAG, "--- show notification: label =  " + summary);
-                    }
-                    mNotificationManager.notifyAsUser(null,
-                            SystemMessage.NOTE_SELECT_INPUT_METHOD,
-                            mImeSwitcherNotification.build(), UserHandle.ALL);
-                    mNotificationShown = true;
-                }
-            } else {
-                if (mNotificationShown && mNotificationManager != null) {
-                    if (DEBUG) {
-                        Slog.d(TAG, "--- hide notification");
-                    }
-                    mNotificationManager.cancelAsUser(null,
-                            SystemMessage.NOTE_SELECT_INPUT_METHOD, UserHandle.ALL);
-                    mNotificationShown = false;
-                }
             }
         } finally {
             Binder.restoreCallingIdentity(ident);

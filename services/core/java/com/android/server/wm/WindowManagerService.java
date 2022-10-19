@@ -7917,11 +7917,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public boolean hasNavigationBar(int displayId) {
-            return WindowManagerService.this.hasNavigationBar(displayId);
-        }
-
-        @Override
         public boolean isHardKeyboardAvailable() {
             synchronized (mGlobalLock) {
                 return mHardKeyboardAvailable;

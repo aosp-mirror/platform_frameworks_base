@@ -613,15 +613,6 @@ public abstract class WindowManagerInternal {
             @NonNull IBinder imeTargetWindowToken);
 
     /**
-     * Returns the presence of a software navigation bar on the specified display.
-     *
-     * @param displayId the id of display to check if there is a software navigation bar.
-     * @return {@code true} if there is a software navigation. {@code false} otherwise, including
-     *         the case when the specified display does not exist.
-     */
-    public abstract boolean hasNavigationBar(int displayId);
-
-    /**
       * Returns true when the hardware keyboard is available.
       */
     public abstract boolean isHardKeyboardAvailable();
