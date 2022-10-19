@@ -2209,11 +2209,19 @@ public class ComputerEngine implements Computer {
     }
 
     public final boolean isCallerSameApp(String packageName, int uid) {
+        return isCallerSameApp(packageName, uid, false /* resolveIsolatedUid */);
+    }
+
+    @Override
+    public final boolean isCallerSameApp(String packageName, int uid, boolean resolveIsolatedUid) {
         if (Process.isSdkSandboxUid(uid)) {
             return (packageName != null
                     && packageName.equals(mService.getSdkSandboxPackageName()));
         }
         AndroidPackage pkg = mPackages.get(packageName);
+        if (resolveIsolatedUid && Process.isIsolated(uid)) {
+            uid = getIsolatedOwner(uid);
+        }
         return pkg != null
                 && UserHandle.getAppId(uid) == pkg.getUid();
     }
