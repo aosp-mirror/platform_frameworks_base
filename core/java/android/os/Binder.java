@@ -1246,8 +1246,21 @@ public class Binder implements IBinder {
         // If the call was {@link IBinder#FLAG_ONEWAY} then these exceptions
         // disappear into the ether.
         final boolean tagEnabled = Trace.isTagEnabled(Trace.TRACE_TAG_AIDL);
+        final boolean hasFullyQualifiedName = getMaxTransactionId() > 0;
         final String transactionTraceName;
-        if (tagEnabled) {
+
+        if (tagEnabled && hasFullyQualifiedName) {
+            // If tracing enabled and we have a fully qualified name, fetch the name
+            transactionTraceName = getTransactionTraceName(code);
+        } else if (tagEnabled && isStackTrackingEnabled()) {
+            // If tracing is enabled and we *don't* have a fully qualified name, fetch the
+            // 'best effort' name only for stack tracking. This works around noticeable perf impact
+            // on low latency binder calls (<100us). The tracing call itself is between (1-10us) and
+            // the perf impact can be quite noticeable while benchmarking such binder calls.
+            // The primary culprits are ContentProviders and Cursors which convenienty don't
+            // autogenerate their AIDL and hence will not have a fully qualified name.
+            //
+            // TODO(b/253426478): Relax this constraint after a more robust fix
             transactionTraceName = getTransactionTraceName(code);
         } else {
             transactionTraceName = null;
