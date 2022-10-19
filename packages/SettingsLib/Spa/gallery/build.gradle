@@ -21,12 +21,12 @@ plugins {
 
 android {
     namespace 'com.android.settingslib.spa.gallery'
-    compileSdk 33
+    compileSdk spa_target_sdk
 
     defaultConfig {
         applicationId "com.android.settingslib.spa.gallery"
         minSdk spa_min_sdk
-        targetSdk 33
+        targetSdk spa_target_sdk
         versionCode 1
         versionName "1.0"
     }

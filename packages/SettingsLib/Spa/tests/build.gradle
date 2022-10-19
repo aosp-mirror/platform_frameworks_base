@@ -21,11 +21,11 @@ plugins {
 
 android {
     namespace 'com.android.settingslib.spa.tests'
-    compileSdk 33
+    compileSdk spa_target_sdk
 
     defaultConfig {
         minSdk spa_min_sdk
-        targetSdk 33
+        targetSdk spa_target_sdk
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }

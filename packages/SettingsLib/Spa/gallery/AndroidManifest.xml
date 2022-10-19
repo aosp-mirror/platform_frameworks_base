@@ -17,6 +17,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.android.settingslib.spa.gallery">
 
+    <uses-sdk android:minSdkVersion="21"/>
+
     <application
         android:name=".GalleryApplication"
         android:icon="@mipmap/ic_launcher"
