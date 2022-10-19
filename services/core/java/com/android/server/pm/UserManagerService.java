@@ -2633,6 +2633,9 @@ public class UserManagerService extends IUserManager.Stub {
     /** @return a specific user restriction that's in effect currently. */
     @Override
     public boolean hasUserRestriction(String restrictionKey, @UserIdInt int userId) {
+        if (!userExists(userId)) {
+            return false;
+        }
         checkManageOrInteractPermissionIfCallerInOtherProfileGroup(userId, "hasUserRestriction");
         return mLocalService.hasUserRestriction(restrictionKey, userId);
     }

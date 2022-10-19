@@ -176,6 +176,13 @@ public class UserManagerServiceTest {
     }
 
     @Test
+    public void testHasUserRestriction_NonExistentUserReturnsFalse() {
+        int nonExistentUserId = UserHandle.USER_NULL;
+        assertThat(mUserManagerService.hasUserRestriction(DISALLOW_USER_SWITCH, nonExistentUserId))
+                .isFalse();
+    }
+
+    @Test
     public void testSetUserRestrictionWithIncorrectID() throws Exception {
         int incorrectId = 1;
         while (mUserManagerService.userExists(incorrectId)) {
