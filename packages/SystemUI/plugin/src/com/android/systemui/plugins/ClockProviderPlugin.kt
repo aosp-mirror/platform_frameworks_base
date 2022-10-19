@@ -14,6 +14,7 @@
 package com.android.systemui.plugins
 
 import android.content.res.Resources
+import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.view.View
 import com.android.systemui.plugins.annotations.ProvidesInterface
@@ -114,6 +115,17 @@ interface ClockAnimations {
 
     /** Runs the battery animation (if any). */
     fun charge() { }
+
+    /** Move the clock, for example, if the notification tray appears in split-shade mode. */
+    fun onPositionUpdated(fromRect: Rect, toRect: Rect, fraction: Float) { }
+
+    /**
+     * Whether this clock has a custom position update animation. If true, the keyguard will call
+     * `onPositionUpdated` to notify the clock of a position update animation. If false, a default
+     * animation will be used (e.g. a simple translation).
+     */
+    val hasCustomPositionUpdatedAnimation
+        get() = false
 }
 
 /** Events that have specific data about the related face */

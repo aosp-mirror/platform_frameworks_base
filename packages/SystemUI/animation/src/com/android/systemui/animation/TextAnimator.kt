@@ -82,6 +82,14 @@ class TextAnimator(layout: Layout, private val invalidateCallback: () -> Unit) {
         /** Mutable Y coordinate of the glyph position relative from the baseline. */
         var y: Float = 0f
 
+        /**
+         * The current line of text being drawn, in a multi-line TextView.
+         */
+        var lineNo: Int = 0
+
+        /**
+         * Mutable text size of the glyph in pixels.
+         */
         /** Mutable text size of the glyph in pixels. */
         var textSize: Float = 0f
 

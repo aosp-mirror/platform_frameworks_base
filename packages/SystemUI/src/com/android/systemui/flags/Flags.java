@@ -125,6 +125,12 @@ public class Flags {
      */
     public static final UnreleasedFlag USER_CONTROLLER_USES_INTERACTOR = new UnreleasedFlag(211);
 
+    /**
+     * Whether the clock on a wide lock screen should use the new "stepping" animation for moving
+     * the digits when the clock moves.
+     */
+    public static final UnreleasedFlag STEP_CLOCK_ANIMATION = new UnreleasedFlag(211);
+
     /***************************************/
     // 300 - power menu
     public static final ReleasedFlag POWER_MENU_LITE =
