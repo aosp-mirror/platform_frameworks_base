@@ -927,7 +927,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
         // Initialize all of the brightness tracking state
         final float brightness = convertToNits(mPowerState.getScreenBrightness());
-        if (brightness >= PowerManager.BRIGHTNESS_MIN) {
+        if (mBrightnessTracker != null && brightness >= PowerManager.BRIGHTNESS_MIN) {
             mBrightnessTracker.start(brightness);
         }
         mBrightnessSettingListener = brightnessValue -> {
@@ -1059,7 +1059,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             }
 
             loadAmbientLightSensor();
-            if (mBrightnessTracker != null) {
+            // BrightnessTracker should only use one light sensor, we want to use the light sensor
+            // from the default display and not e.g. temporary displays when switching layouts.
+            if (mBrightnessTracker != null && mDisplayId == Display.DEFAULT_DISPLAY) {
                 mBrightnessTracker.setLightSensor(mLightSensor);
             }
 
@@ -2485,7 +2487,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             boolean hadUserDataPoint) {
         final float brightnessInNits = convertToNits(brightness);
         if (mPowerRequest.useAutoBrightness && brightnessInNits >= 0.0f
-                && mAutomaticBrightnessController != null) {
+                && mAutomaticBrightnessController != null && mBrightnessTracker != null) {
             // We only want to track changes on devices that can actually map the display backlight
             // values into a physical brightness unit since the value provided by the API is in
             // nits and not using the arbitrary backlight units.
