@@ -1,4 +1,5 @@
-<resources>
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <string name="app_name">CredentialManager</string>
   <string name="string_cancel">Cancel</string>
   <string name="string_continue">Continue</string>
@@ -12,4 +13,7 @@
   <string name="choose_create_option_title">Create a passkey at</string>
   <string name="choose_sign_in_title">Use saved sign in</string>
   <string name="create_passkey_at">Create passkey at</string>
+  <string name="use_provider_for_all_title">Use <xliff:g id="providerInfoName">%1$s</xliff:g> for all your sign-ins?</string>
+  <string name="set_as_default">Set as default</string>
+  <string name="use_once">Use once</string>
 </resources>

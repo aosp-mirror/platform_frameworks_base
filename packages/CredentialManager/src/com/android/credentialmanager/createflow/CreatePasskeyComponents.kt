@@ -83,6 +83,8 @@ fun CreatePasskeyScreen(
             onOptionSelected = {viewModel.onMoreOptionsRowSelected(it)}
           )
         CreateScreenState.MORE_OPTIONS_ROW_INTRO -> MoreOptionsRowIntroCard(
+          providerInfo = uiState.selectedProvider!!,
+          onDefaultOrNotSelected = {viewModel.onDefaultOrNotSelected(it)}
         )
       }
     },
@@ -282,10 +284,37 @@ fun MoreOptionsSelectionCard(
 @ExperimentalMaterialApi
 @Composable
 fun MoreOptionsRowIntroCard(
+  providerInfo: ProviderInfo,
+  onDefaultOrNotSelected: (String) -> Unit,
 ) {
   Card(
     backgroundColor = lightBackgroundColor,
   ) {
+    Column() {
+      Text(
+        text = stringResource(R.string.use_provider_for_all_title, providerInfo.name),
+        style = Typography.subtitle1,
+        modifier = Modifier.padding(all = 24.dp).align(alignment = Alignment.CenterHorizontally)
+      )
+      Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
+      ) {
+        CancelButton(
+          stringResource(R.string.use_once),
+          onclick = { onDefaultOrNotSelected(providerInfo.name) }
+        )
+        ConfirmButton(
+          stringResource(R.string.set_as_default),
+          onclick = { onDefaultOrNotSelected(providerInfo.name) }
+        )
+      }
+      Divider(
+        thickness = 18.dp,
+        color = Color.Transparent,
+        modifier = Modifier.padding(bottom = 40.dp)
+      )
+    }
   }
 }
 

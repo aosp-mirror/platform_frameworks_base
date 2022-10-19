@@ -112,4 +112,12 @@ class CreatePasskeyViewModel(
     CredentialManagerRepo.getInstance().onCancel()
     dialogResult.value = DialogResult(ResultState.CANCELED)
   }
+
+  fun onDefaultOrNotSelected(providerName: String) {
+    uiState = uiState.copy(
+      currentScreenState = CreateScreenState.CREATION_OPTION_SELECTION,
+      selectedProvider = getProviderInfoByName(providerName)
+    )
+    // TODO: implement the if choose as default or not logic later
+  }
 }
