@@ -304,6 +304,9 @@ public class Flags {
     // 1500 - chooser
     public static final UnreleasedFlag CHOOSER_UNBUNDLED = new UnreleasedFlag(1500);
 
+    // 1700 - clipboard
+    public static final UnreleasedFlag CLIPBOARD_OVERLAY_REFACTOR = new UnreleasedFlag(1700);
+
     // Pay no attention to the reflection behind the curtain.
     // ========================== Curtain ==========================
     // |                                                           |
