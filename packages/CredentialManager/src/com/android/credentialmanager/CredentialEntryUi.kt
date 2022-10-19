@@ -29,6 +29,7 @@ class CredentialEntryUi(
   val userName: CharSequence,
   val displayName: CharSequence?,
   val icon: Icon?,
+  val usageData: CharSequence?,
   // TODO: add last used.
 ) {
   companion object {
@@ -38,18 +39,21 @@ class CredentialEntryUi(
       var title: String? = null
       var subTitle: String? = null
       var icon: Icon? = null
+      var usageData: String? = null
 
       items.forEach {
         if (it.hasHint(Entry.HINT_ICON)) {
           icon = it.icon
-        } else if (it.hasHint(Entry.HINT_SUBTITLE)) {
+        } else if (it.hasHint(Entry.HINT_SUBTITLE) && it.subType == null) {
           subTitle = it.text.toString()
         } else if (it.hasHint(Entry.HINT_TITLE)) {
           title = it.text.toString()
+        } else if (it.hasHint(Entry.HINT_SUBTITLE) && it.subType == Slice.SUBTYPE_MESSAGE) {
+          usageData = it.text.toString()
         }
       }
       // TODO: fail NPE more elegantly.
-      return CredentialEntryUi(title!!, subTitle, icon)
+      return CredentialEntryUi(title!!, subTitle, icon, usageData)
     }
   }
 }

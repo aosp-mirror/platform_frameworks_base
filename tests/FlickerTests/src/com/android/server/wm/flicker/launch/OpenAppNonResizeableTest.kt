@@ -27,7 +27,6 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.FlickerServiceCompatible
 import com.android.server.wm.flicker.helpers.NonResizeableAppHelper
-import com.android.server.wm.flicker.statusBarLayerPositionAtEnd
 import com.android.server.wm.traces.common.ComponentNameMatcher
 import org.junit.Assume
 import org.junit.FixMethodOrder
@@ -69,7 +68,7 @@ open class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) :
     override val testApp = NonResizeableAppHelper(instrumentation)
 
     /**
-     * Checks that the [ComponentMatcher.NAV_BAR] layer starts invisible, becomes visible during
+     * Checks that the [ComponentNameMatcher.NAV_BAR] layer starts invisible, becomes visible during
      * unlocking animation and remains visible at the end
      */
     @FlakyTest(bugId = 227083463)
@@ -91,7 +90,7 @@ open class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) :
     }
 
     /**
-     * Checks that the [ComponentMatcher.NAV_BAR] starts the transition invisible, then becomes
+     * Checks that the [ComponentNameMatcher.NAV_BAR] starts the transition invisible, then becomes
      * visible during the unlocking animation and remains visible at the end of the transition
      */
     @Presubmit
@@ -106,7 +105,7 @@ open class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) :
     }
 
     /**
-     * Checks that the [ComponentMatcher.TASK_BAR] starts the transition invisible, then becomes
+     * Checks that the [ComponentNameMatcher.TASK_BAR] starts the transition invisible, then becomes
      * visible during the unlocking animation and remains visible at the end of the transition
      */
     @Presubmit
@@ -117,7 +116,7 @@ open class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) :
     }
 
     /**
-     * Checks that the [ComponentMatcher.STATUS_BAR] layer is visible at the end of the trace
+     * Checks that the [ComponentNameMatcher.STATUS_BAR] layer is visible at the end of the trace
      *
      * It is not possible to check at the start because the screen is off
      */
@@ -130,32 +129,34 @@ open class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) :
     /** {@inheritDoc} */
     @Test
     @Ignore("Not applicable to this CUJ. Display starts off and app is full screen at the end")
-    override fun taskBarLayerIsVisibleAtStartAndEnd() {}
+    override fun taskBarLayerIsVisibleAtStartAndEnd() {
+    }
 
     /** {@inheritDoc} */
     @Test
     @Ignore("Not applicable to this CUJ. Display starts off and app is full screen at the end")
-    override fun navBarLayerIsVisibleAtStartAndEnd() {}
+    override fun navBarLayerIsVisibleAtStartAndEnd() {
+    }
 
     /** {@inheritDoc} */
     @Test
     @Ignore("Not applicable to this CUJ. Display starts off and app is full screen at the end")
-    override fun taskBarWindowIsAlwaysVisible() {}
+    override fun taskBarWindowIsAlwaysVisible() {
+    }
 
     /** {@inheritDoc} */
     @Test
     @Ignore("Not applicable to this CUJ. Display starts off and app is full screen at the end")
-    override fun navBarWindowIsAlwaysVisible() {}
+    override fun navBarWindowIsAlwaysVisible() {
+    }
 
     /** {@inheritDoc} */
     @Test
     @Ignore("Not applicable to this CUJ. Display starts off and app is full screen at the end")
-    override fun statusBarWindowIsAlwaysVisible() {}
+    override fun statusBarWindowIsAlwaysVisible() {
+    }
 
-    /** Checks the position of the [ComponentMatcher.STATUS_BAR] at the end of the transition */
-    @Presubmit @Test fun statusBarLayerPositionEnd() = testSpec.statusBarLayerPositionAtEnd()
-
-    /** Checks the [ComponentMatcher.NAV_BAR] is visible at the end of the transition */
+    /** Checks the [ComponentNameMatcher.NAV_BAR] is visible at the end of the transition */
     @Postsubmit
     @Test
     fun navBarLayerIsVisibleAtEnd() {
@@ -186,7 +187,9 @@ open class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) :
     }
 
     /** {@inheritDoc} */
-    @FlakyTest @Test override fun entireScreenCovered() = super.entireScreenCovered()
+    @FlakyTest
+    @Test
+    override fun entireScreenCovered() = super.entireScreenCovered()
 
     @FlakyTest(bugId = 218470989)
     @Test

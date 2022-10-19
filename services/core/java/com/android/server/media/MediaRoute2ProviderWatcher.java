@@ -63,10 +63,15 @@ final class MediaRoute2ProviderWatcher {
     }
 
     public void dump(PrintWriter pw, String prefix) {
-        pw.println(prefix + "Watcher");
-        pw.println(prefix + "  mUserId=" + mUserId);
-        pw.println(prefix + "  mRunning=" + mRunning);
-        pw.println(prefix + "  mProxies.size()=" + mProxies.size());
+        pw.println(prefix + "MediaRoute2ProviderWatcher");
+        prefix += "  ";
+        if (mProxies.isEmpty()) {
+            pw.println(prefix + "<no provider service proxies>");
+        } else {
+            for (MediaRoute2ProviderServiceProxy proxy : mProxies) {
+                proxy.dump(pw, prefix);
+            }
+        }
     }
 
     public void start() {

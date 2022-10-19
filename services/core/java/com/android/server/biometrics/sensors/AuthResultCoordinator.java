@@ -17,9 +17,11 @@
 package com.android.server.biometrics.sensors;
 
 import android.hardware.biometrics.BiometricManager.Authenticators;
+import android.util.ArrayMap;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
+import java.util.Map;
+import java.util.function.IntFunction;
 
 /**
  * A class that takes in a series of authentication attempts (successes, failures, lockouts)
@@ -30,64 +32,64 @@ import java.util.List;
  */
 class AuthResultCoordinator {
 
+    /**
+     * Indicates no change has occurred with this authenticator.
+     */
+    static final int AUTHENTICATOR_DEFAULT = 0;
+    /**
+     * Indicated this authenticator has received a lockout.
+     */
+    static final int AUTHENTICATOR_LOCKED = 1 << 0;
+    /**
+     * Indicates this authenticator has received a successful unlock.
+     */
+    static final int AUTHENTICATOR_UNLOCKED = 1 << 1;
     private static final String TAG = "AuthResultCoordinator";
-    private final List<AuthResult> mOperations;
+    private final Map<Integer, Integer> mAuthenticatorState;
 
     AuthResultCoordinator() {
-        mOperations = new ArrayList<>();
+        mAuthenticatorState = new ArrayMap<>();
+        mAuthenticatorState.put(Authenticators.BIOMETRIC_STRONG, AUTHENTICATOR_DEFAULT);
+        mAuthenticatorState.put(Authenticators.BIOMETRIC_WEAK, AUTHENTICATOR_DEFAULT);
+        mAuthenticatorState.put(Authenticators.BIOMETRIC_CONVENIENCE, AUTHENTICATOR_DEFAULT);
+    }
+
+    private void updateState(@Authenticators.Types int strength, IntFunction<Integer> mapper) {
+        switch (strength) {
+            case Authenticators.BIOMETRIC_STRONG:
+                mAuthenticatorState.put(Authenticators.BIOMETRIC_STRONG,
+                        mapper.apply(mAuthenticatorState.get(Authenticators.BIOMETRIC_STRONG)));
+                // fall through
+            case Authenticators.BIOMETRIC_WEAK:
+                mAuthenticatorState.put(Authenticators.BIOMETRIC_WEAK,
+                        mapper.apply(mAuthenticatorState.get(Authenticators.BIOMETRIC_WEAK)));
+                // fall through
+            case Authenticators.BIOMETRIC_CONVENIENCE:
+                mAuthenticatorState.put(Authenticators.BIOMETRIC_CONVENIENCE,
+                        mapper.apply(
+                                mAuthenticatorState.get(Authenticators.BIOMETRIC_CONVENIENCE)));
+        }
     }
 
     /**
      * Adds auth success for a given strength to the current operation list.
      */
     void authenticatedFor(@Authenticators.Types int strength) {
-        mOperations.add(new AuthResult(AuthResult.AUTHENTICATED, strength));
-    }
-
-    /**
-     * Adds auth ended for a given strength to the current operation list.
-     */
-    void authEndedFor(@Authenticators.Types int strength) {
-        mOperations.add(new AuthResult(AuthResult.FAILED, strength));
+        updateState(strength, (old) -> AUTHENTICATOR_UNLOCKED | old);
     }
 
     /**
      * Adds a lock out of a given strength to the current operation list.
      */
     void lockedOutFor(@Authenticators.Types int strength) {
-        mOperations.add(new AuthResult(AuthResult.LOCKED_OUT, strength));
+        updateState(strength, (old) -> AUTHENTICATOR_LOCKED | old);
     }
 
     /**
-     * Obtains an auth result & strength from a current set of biometric operations.
+     * Returns the current authenticator state. Each authenticator will have
+     * the associated operations that were performed on them(DEFAULT, LOCKED, UNLOCKED).
      */
-    AuthResult getResult() {
-        AuthResult result = new AuthResult(AuthResult.FAILED, Authenticators.BIOMETRIC_CONVENIENCE);
-        return mOperations.stream().filter(
-                (element) -> element.getStatus() != AuthResult.FAILED).reduce(result,
-                ((curr, next) -> {
-                    int strengthCompare = curr.getBiometricStrength() - next.getBiometricStrength();
-                    if (strengthCompare < 0) {
-                        return curr;
-                    } else if (strengthCompare == 0) {
-                        // Equal level of strength, favor authentication.
-                        if (curr.getStatus() == AuthResult.AUTHENTICATED) {
-                            return curr;
-                        } else {
-                            // Either next is Authenticated, or it is not, either way return this
-                            // one.
-                            return next;
-                        }
-                    } else {
-                        // curr is a weaker biometric
-                        return next;
-                    }
-                }));
-    }
-
-    void resetState() {
-        mOperations.clear();
+    final Map<Integer, Integer> getResult() {
+        return Collections.unmodifiableMap(mAuthenticatorState);
     }
 }
-
-

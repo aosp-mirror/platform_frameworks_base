@@ -89,8 +89,8 @@ public class CrossProfileIntentResolverEngine {
 
     /**
      * Resolves intent in directly linked profiles and return list of {@link CrossProfileDomainInfo}
-     * which contains {@link ResolveInfo}. This would also recursively call profiles not directly
-     * linked.
+     * which contains {@link ResolveInfo}. This would also iteratively call profiles not directly
+     * linked using Breadth First Search.
      *
      * It first finds {@link CrossProfileIntentFilter} configured in current profile to find list of
      * target user profiles that can serve current intent request. It uses corresponding strategy
@@ -117,7 +117,23 @@ public class CrossProfileIntentResolverEngine {
         List<CrossProfileIntentFilter> matchingFilters =
                 computer.getMatchingCrossProfileIntentFilters(intent, resolvedType, userId);
 
-        if (matchingFilters == null || matchingFilters.isEmpty()) return crossProfileDomainInfos;
+        if (matchingFilters == null || matchingFilters.isEmpty()) {
+            /** if intent is web intent, checking if parent profile should handle the intent even
+            if there is no matching filter. The configuration is based on user profile
+            restriction android.os.UserManager#ALLOW_PARENT_PROFILE_APP_LINKING **/
+            if (intent.hasWebURI()) {
+                UserInfo parent = computer.getProfileParent(userId);
+                if (parent != null) {
+                    CrossProfileDomainInfo generalizedCrossProfileDomainInfo = computer
+                            .getCrossProfileDomainPreferredLpr(intent, resolvedType, flags, userId,
+                                    parent.id);
+                    if (generalizedCrossProfileDomainInfo != null) {
+                        crossProfileDomainInfos.add(generalizedCrossProfileDomainInfo);
+                    }
+                }
+            }
+            return crossProfileDomainInfos;
+        }
 
         UserManagerInternal umInternal = LocalServices.getService(UserManagerInternal.class);
         UserInfo sourceUserInfo = umInternal.getUserInfo(userId);

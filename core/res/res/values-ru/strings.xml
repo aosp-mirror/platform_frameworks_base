@@ -1960,8 +1960,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"Эта функция недоступна на устройстве <xliff:g id="DEVICE">%1$s</xliff:g>. Используйте Android TV."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"Эта функция недоступна на устройстве <xliff:g id="DEVICE">%1$s</xliff:g>. Используйте планшет."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"На устройстве <xliff:g id="DEVICE">%1$s</xliff:g> эта функция недоступна. Используйте телефон."</string>
-    <!-- no translation found for deprecated_target_sdk_message (5246906284426844596) -->
-    <skip />
+    <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Это приложение было разработано для более ранней версии Android. Оно не соответствует последним требованиям к обеспечению конфиденциальности и безопасности данных и может работать некорректно. Проверьте наличие обновлений или свяжитесь с разработчиком приложения."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Проверить обновления"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Новые сообщения"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Чтобы просмотреть, откройте приложение для обмена SMS"</string>

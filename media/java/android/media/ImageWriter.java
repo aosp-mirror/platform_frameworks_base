@@ -248,7 +248,7 @@ public class ImageWriter implements AutoCloseable {
     }
 
     private void initializeImageWriter(Surface surface, int maxImages,
-            boolean useSurfaceImageFormatInfo, boolean useLegacyImageFormat, int imageFormat,
+            boolean useSurfaceImageFormatInfo, int imageFormat,
             int hardwareBufferFormat, int dataSpace, int width, int height, long usage) {
         if (surface == null || maxImages < 1) {
             throw new IllegalArgumentException("Illegal input argument: surface " + surface
@@ -265,7 +265,7 @@ public class ImageWriter implements AutoCloseable {
             // nativeInit internally overrides UNKNOWN format. So does surface format query after
             // nativeInit and before getEstimatedNativeAllocBytes().
             imageFormat = SurfaceUtils.getSurfaceFormat(surface);
-            mDataSpace = dataSpace = PublicFormatUtils.getHalDataspace(dataSpace);
+            mDataSpace = dataSpace = PublicFormatUtils.getHalDataspace(imageFormat);
             mHardwareBufferFormat =
                 hardwareBufferFormat = PublicFormatUtils.getHalFormat(imageFormat);
         }
@@ -280,35 +280,9 @@ public class ImageWriter implements AutoCloseable {
         mWidth = width == -1 ? surfSize.getWidth() : width;
         mHeight = height == -1 ? surfSize.getHeight() : height;
 
-        if (hardwareBufferFormat == HardwareBuffer.BLOB) {
-            // TODO(b/246344817): remove mWriterFormat and mDataSpace re-set here after fixing.
-            mWriterFormat = imageFormat = getImageFormatByBLOB(dataSpace);
-            mDataSpace = PublicFormatUtils.getHalDataspace(imageFormat);
-
-            mEstimatedNativeAllocBytes = ImageUtils.getEstimatedNativeAllocBytes(mWidth, mHeight,
+        mEstimatedNativeAllocBytes = ImageUtils.getEstimatedNativeAllocBytes(mWidth, mHeight,
                 imageFormat, /*buffer count*/ 1);
-        } else {
-            mEstimatedNativeAllocBytes =
-                ImageUtils.getEstimatedNativeAllocBytes(mWidth, mHeight,
-                    useLegacyImageFormat ? imageFormat : hardwareBufferFormat, /*buffer count*/ 1);
-        }
         VMRuntime.getRuntime().registerNativeAllocation(mEstimatedNativeAllocBytes);
-    }
-
-    // Several public formats use the same native HAL_PIXEL_FORMAT_BLOB. The native
-    // allocation estimation sequence depends on the public formats values. To avoid
-    // possible errors, convert where necessary.
-    private int getImageFormatByBLOB(int dataspace) {
-        switch (dataspace) {
-            case DataSpace.DATASPACE_DEPTH:
-                return ImageFormat.DEPTH_POINT_CLOUD;
-            case DataSpace.DATASPACE_DYNAMIC_DEPTH:
-                return ImageFormat.DEPTH_JPEG;
-            case DataSpace.DATASPACE_HEIF:
-                return ImageFormat.HEIC;
-            default:
-                return ImageFormat.JPEG;
-        }
     }
 
     private ImageWriter(Surface surface, int maxImages, boolean useSurfaceImageFormatInfo,
@@ -319,7 +293,7 @@ public class ImageWriter implements AutoCloseable {
             mDataSpace = PublicFormatUtils.getHalDataspace(imageFormat);
         }
 
-        initializeImageWriter(surface, maxImages, useSurfaceImageFormatInfo, true,
+        initializeImageWriter(surface, maxImages, useSurfaceImageFormatInfo,
                 imageFormat, mHardwareBufferFormat, mDataSpace, width, height, mUsage);
     }
 
@@ -332,7 +306,7 @@ public class ImageWriter implements AutoCloseable {
             mDataSpace = PublicFormatUtils.getHalDataspace(imageFormat);
         }
 
-        initializeImageWriter(surface, maxImages, useSurfaceImageFormatInfo, true,
+        initializeImageWriter(surface, maxImages, useSurfaceImageFormatInfo,
                 imageFormat, mHardwareBufferFormat, mDataSpace, width, height, usage);
     }
 
@@ -351,7 +325,7 @@ public class ImageWriter implements AutoCloseable {
             mDataSpace = dataSpace;
         }
 
-        initializeImageWriter(surface, maxImages, useSurfaceImageFormatInfo, false,
+        initializeImageWriter(surface, maxImages, useSurfaceImageFormatInfo,
                 imageFormat, hardwareBufferFormat, dataSpace, width, height, usage);
     }
 
@@ -770,13 +744,15 @@ public class ImageWriter implements AutoCloseable {
         // need do some cleanup to make sure no orphaned
         // buffer caused leak.
         Rect crop = image.getCropRect();
+        int hardwareBufferFormat = PublicFormatUtils.getHalFormat(image.getFormat());
         if (image.getNativeContext() != 0) {
-            nativeAttachAndQueueImage(mNativeContext, image.getNativeContext(), image.getFormat(),
-                    image.getTimestamp(), image.getDataSpace(), crop.left, crop.top, crop.right,
-                    crop.bottom, image.getTransform(), image.getScalingMode());
+            nativeAttachAndQueueImage(mNativeContext, image.getNativeContext(),
+                    hardwareBufferFormat, image.getTimestamp(), image.getDataSpace(),
+                    crop.left, crop.top, crop.right, crop.bottom, image.getTransform(),
+                    image.getScalingMode());
         } else {
             GraphicBuffer gb = GraphicBuffer.createFromHardwareBuffer(image.getHardwareBuffer());
-            nativeAttachAndQueueGraphicBuffer(mNativeContext, gb, image.getFormat(),
+            nativeAttachAndQueueGraphicBuffer(mNativeContext, gb, hardwareBufferFormat,
                     image.getTimestamp(), image.getDataSpace(), crop.left, crop.top, crop.right,
                     crop.bottom, image.getTransform(), image.getScalingMode());
             gb.destroy();
@@ -1167,8 +1143,7 @@ public class ImageWriter implements AutoCloseable {
 
             if (mPlanes == null) {
                 int numPlanes = ImageUtils.getNumPlanesForFormat(getFormat());
-                mPlanes = nativeCreatePlanes(numPlanes, getOwner().getFormat(),
-                        getOwner().getDataSpace());
+                mPlanes = nativeCreatePlanes(numPlanes, getOwner().getFormat());
             }
 
             return mPlanes.clone();
@@ -1276,8 +1251,7 @@ public class ImageWriter implements AutoCloseable {
         }
 
         // Create the SurfacePlane object and fill the information
-        private synchronized native SurfacePlane[] nativeCreatePlanes(int numPlanes, int writerFmt,
-                int dataSpace);
+        private synchronized native SurfacePlane[] nativeCreatePlanes(int numPlanes, int writerFmt);
 
         private synchronized native int nativeGetWidth();
 
@@ -1304,10 +1278,10 @@ public class ImageWriter implements AutoCloseable {
             int transform, int scalingMode);
 
     private synchronized native int nativeAttachAndQueueImage(long nativeCtx,
-            long imageNativeBuffer, int imageFormat, long timestampNs, int dataSpace,
+            long imageNativeBuffer, int hardwareBufferFormat, long timestampNs, int dataSpace,
             int left, int top, int right, int bottom, int transform, int scalingMode);
     private synchronized native int nativeAttachAndQueueGraphicBuffer(long nativeCtx,
-            GraphicBuffer graphicBuffer, int imageFormat, long timestampNs, int dataSpace,
+            GraphicBuffer graphicBuffer, int hardwareBufferFormat, long timestampNs, int dataSpace,
             int left, int top, int right, int bottom, int transform, int scalingMode);
 
     private synchronized native void cancelImage(long nativeCtx, Image image);

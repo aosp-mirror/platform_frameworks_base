@@ -23,10 +23,11 @@ import android.content.pm.PackageManager.ApplicationInfoFlags
 import android.content.pm.PackageManager.ResolveInfoFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -41,6 +42,7 @@ import org.mockito.junit.MockitoRule
 
 private const val USER_ID = 0
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 class AppListRepositoryTest {
 
@@ -82,7 +84,7 @@ class AppListRepositoryTest {
     }
 
     @Test
-    fun notShowInstantApps(): Unit = runBlocking {
+    fun notShowInstantApps() = runTest {
         val appListConfig = AppListConfig(userId = USER_ID, showInstantApps = false)
 
         val appListFlow = repository.loadApps(flowOf(appListConfig))
@@ -97,7 +99,7 @@ class AppListRepositoryTest {
     }
 
     @Test
-    fun showInstantApps(): Unit = runBlocking {
+    fun showInstantApps() = runTest {
         val appListConfig = AppListConfig(userId = USER_ID, showInstantApps = true)
 
         val appListFlow = repository.loadApps(flowOf(appListConfig))

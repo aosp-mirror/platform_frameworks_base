@@ -479,7 +479,7 @@ public interface Computer extends PackageDataSnapshot {
     boolean getBlockUninstallForUser(@NonNull String packageName, @UserIdInt int userId);
 
     @Nullable
-    String getInstallerPackageName(@NonNull String packageName);
+    String getInstallerPackageName(@NonNull String packageName, @UserIdInt int userId);
 
     @Nullable
     InstallSourceInfo getInstallSourceInfo(@NonNull String packageName);

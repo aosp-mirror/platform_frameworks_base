@@ -1441,7 +1441,7 @@ public class MediaControlPanel {
             }
 
             // Automatically scroll to the active player once the media is loaded.
-            mMediaCarouselController.setShouldScrollToActivePlayer(true);
+            mMediaCarouselController.setShouldScrollToKey(true);
         });
     }
 

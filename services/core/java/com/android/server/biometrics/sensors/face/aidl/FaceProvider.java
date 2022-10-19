@@ -414,6 +414,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
             boolean allowBackgroundAuthentication, boolean isKeyguardBypassEnabled) {
         mHandler.post(() -> {
             final boolean isStrongBiometric = Utils.isStrongBiometric(sensorId);
+            final int biometricStrength = Utils.getCurrentStrength(sensorId);
             final FaceAuthenticationClient client = new FaceAuthenticationClient(
                     mContext, mSensors.get(sensorId).getLazySession(), token, requestId, callback,
                     userId, operationId, restricted, opPackageName, cookie,
@@ -421,7 +422,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
                     createLogger(BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient),
                     mBiometricContext, isStrongBiometric,
                     mUsageStats, mSensors.get(sensorId).getLockoutCache(),
-                    allowBackgroundAuthentication, isKeyguardBypassEnabled);
+                    allowBackgroundAuthentication, isKeyguardBypassEnabled, biometricStrength);
             scheduleForSensor(sensorId, client);
         });
     }
@@ -490,7 +491,8 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
                     createLogger(BiometricsProtoEnums.ACTION_UNKNOWN,
                             BiometricsProtoEnums.CLIENT_UNKNOWN),
                     mBiometricContext, hardwareAuthToken,
-                    mSensors.get(sensorId).getLockoutCache(), mLockoutResetDispatcher);
+                    mSensors.get(sensorId).getLockoutCache(), mLockoutResetDispatcher,
+                    Utils.getCurrentStrength(sensorId));
 
             scheduleForSensor(sensorId, client);
         });
@@ -623,6 +625,9 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
         }
         pw.println(dump);
         pw.println("HAL deaths since last reboot: " + performanceTracker.getHALDeathCount());
+        pw.println("---AuthSessionCoordinator logs begin---");
+        pw.println(mBiometricContext.getAuthSessionCoordinator());
+        pw.println("---AuthSessionCoordinator logs end  ---");
 
         mSensors.get(sensorId).getScheduler().dump(pw);
         mUsageStats.print(pw);

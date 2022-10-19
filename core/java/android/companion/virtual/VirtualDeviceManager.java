@@ -49,21 +49,21 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.util.ArrayMap;
+import android.util.Log;
 import android.view.Surface;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.function.IntConsumer;
 
 /**
  * System level service for managing virtual devices.
- *
- * @hide
  */
-@SystemApi
 @SystemService(Context.VIRTUAL_DEVICE_SERVICE)
 public final class VirtualDeviceManager {
 
@@ -102,19 +102,28 @@ public final class VirtualDeviceManager {
     /**
      * Status for {@link VirtualDevice#launchPendingIntent}, indicating that the launch was
      * successful.
+     *
+     * @hide
      */
+    @SystemApi
     public static final int LAUNCH_SUCCESS = 0;
 
     /**
      * Status for {@link VirtualDevice#launchPendingIntent}, indicating that the launch failed
      * because the pending intent was canceled.
+     *
+     * @hide
      */
+    @SystemApi
     public static final int LAUNCH_FAILURE_PENDING_INTENT_CANCELED = 1;
 
     /**
      * Status for {@link VirtualDevice#launchPendingIntent}, indicating that the launch failed
      * because no activity starts were detected as a result of calling the pending intent.
+     *
+     * @hide
      */
+    @SystemApi
     public static final int LAUNCH_FAILURE_NO_ACTIVITY = 2;
 
     private final IVirtualDeviceManager mService;
@@ -140,7 +149,10 @@ public final class VirtualDeviceManager {
      * @param params The parameters for creating virtual devices. See {@link VirtualDeviceParams}
      *   for the available options.
      * @return The created virtual device.
+     *
+     * @hide
      */
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     @NonNull
     public VirtualDevice createVirtualDevice(
@@ -154,12 +166,31 @@ public final class VirtualDeviceManager {
     }
 
     /**
+     * Returns the details of all available virtual devices.
+     */
+    @NonNull
+    public List<android.companion.virtual.VirtualDevice> getVirtualDevices() {
+        if (mService == null) {
+            Log.w(TAG, "Failed to retrieve virtual devices; no virtual device manager service.");
+            return new ArrayList<>();
+        }
+        try {
+            return mService.getVirtualDevices();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * A virtual device has its own virtual display, audio output, microphone, and camera etc. The
      * creator of a virtual device can take the output from the virtual display and stream it over
      * to another device, and inject input events that are received from the remote device.
      *
      * TODO(b/204081582): Consider using a builder pattern for the input APIs.
+     *
+     * @hide
      */
+    @SystemApi
     public static class VirtualDevice implements AutoCloseable {
 
         private final Context mContext;
@@ -537,7 +568,10 @@ public final class VirtualDeviceManager {
 
     /**
      * Listener for activity changes in this virtual device.
+     *
+     * @hide
      */
+    @SystemApi
     public interface ActivityListener {
 
         /**

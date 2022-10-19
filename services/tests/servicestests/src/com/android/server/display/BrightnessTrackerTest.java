@@ -21,6 +21,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -883,6 +884,29 @@ public class BrightnessTrackerTest {
         startTracker(mTracker);
         assertNull(mInjector.mSensorListener);
         assertNull(mInjector.mLightSensor);
+    }
+
+    @Test
+    public void testOnlyOneReceiverRegistered() {
+        assertNull(mInjector.mLightSensor);
+        assertNull(mInjector.mSensorListener);
+        startTracker(mTracker, 0.3f, false);
+
+        assertNotNull(mInjector.mLightSensor);
+        assertNotNull(mInjector.mSensorListener);
+        Sensor registeredLightSensor = mInjector.mLightSensor;
+        SensorEventListener registeredSensorListener = mInjector.mSensorListener;
+
+        mTracker.start(0.3f);
+        assertSame(registeredLightSensor, mInjector.mLightSensor);
+        assertSame(registeredSensorListener, mInjector.mSensorListener);
+
+        mTracker.stop();
+        assertNull(mInjector.mLightSensor);
+        assertNull(mInjector.mSensorListener);
+
+        // mInjector asserts that we aren't removing a null receiver
+        mTracker.stop();
     }
 
     private InputStream getInputStream(String data) {

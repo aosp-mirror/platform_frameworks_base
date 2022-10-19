@@ -262,7 +262,7 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                 if (oldRecord.resultTo != null) {
                     try {
                         oldRecord.mIsReceiverAppRunning = true;
-                        performReceiveLocked(oldRecord.callerApp, oldRecord.resultTo,
+                        performReceiveLocked(oldRecord.resultToApp, oldRecord.resultTo,
                                 oldRecord.intent,
                                 Activity.RESULT_CANCELED, null, null,
                                 false, false, oldRecord.userId, oldRecord.callingUid, r.callingUid,
@@ -1120,7 +1120,7 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                                 r.dispatchTime = now;
                             }
                             r.mIsReceiverAppRunning = true;
-                            performReceiveLocked(r.callerApp, r.resultTo,
+                            performReceiveLocked(r.resultToApp, r.resultTo,
                                     new Intent(r.intent), r.resultCode,
                                     r.resultData, r.resultExtras, false, false, r.userId,
                                     r.callingUid, r.callingUid,

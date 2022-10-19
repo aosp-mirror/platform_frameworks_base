@@ -16,8 +16,8 @@
 
 package com.android.server.wm.flicker.launch
 
-import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Postsubmit
+import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -95,12 +95,13 @@ class OpenAppFromLockNotificationWithLockOverlayApp(testSpec: FlickerTestParamet
     }
 
     /** {@inheritDoc} */
-    @FlakyTest(bugId = 229735718)
-    @Test
-    override fun entireScreenCovered() = super.entireScreenCovered()
+    @Presubmit @Test override fun appLayerBecomesVisible() = super.appLayerBecomesVisible()
 
     /** {@inheritDoc} */
-    @Postsubmit @Test override fun appWindowBecomesTopWindow() = super.appWindowBecomesTopWindow()
+    @Postsubmit
+    @Test
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
 
     companion object {
         /**

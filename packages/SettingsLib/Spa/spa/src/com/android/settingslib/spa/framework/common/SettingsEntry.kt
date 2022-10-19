@@ -32,14 +32,16 @@ const val INJECT_ENTRY_NAME = "INJECT"
 const val ROOT_ENTRY_NAME = "ROOT"
 
 interface EntryData {
-    val pageId: String
-    val entryId: String
+    val pageId: String?
+        get() = null
+    val entryId: String?
+        get() = null
     val isHighlighted: Boolean
         get() = false
 }
 
 val LocalEntryDataProvider =
-    compositionLocalOf<EntryData> { error("LocalEntryDataProvider: No Default Value!") }
+    compositionLocalOf<EntryData> { object : EntryData{} }
 
 /**
  * Defines data of a Settings entry.

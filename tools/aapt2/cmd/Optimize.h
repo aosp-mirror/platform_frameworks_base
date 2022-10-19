@@ -123,6 +123,14 @@ class OptimizeCommand : public Command {
     AddOptionalFlag("--resource-path-shortening-map",
         "Path to output the map of old resource paths to shortened paths.",
         &options_.shortened_paths_map_path);
+    AddOptionalSwitch(
+        "--deduplicate-entry-values",
+        "Whether to deduplicate pairs of resource entry and value for simple resources.\n"
+        "This is recommended to be used together with '--collapse-resource-names' flag or for\n"
+        "APKs where resource names are manually collapsed. For such APKs this flag allows to\n"
+        "store the same resource value only once in resource table which decreases APK size.\n"
+        "Has no effect on APKs where resource names are kept.",
+        &options_.table_flattener_options.deduplicate_entry_values);
     AddOptionalSwitch("-v", "Enables verbose logging", &verbose_);
   }
 

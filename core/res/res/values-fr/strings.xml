@@ -1959,8 +1959,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"Impossible d\'accéder à ces paramètres sur votre <xliff:g id="DEVICE">%1$s</xliff:g>. Essayez plutôt sur votre appareil Android TV."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"Impossible d\'accéder à ces paramètres sur votre <xliff:g id="DEVICE">%1$s</xliff:g>. Essayez plutôt sur votre tablette."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Impossible d\'accéder à ces paramètres sur votre <xliff:g id="DEVICE">%1$s</xliff:g>. Essayez plutôt sur votre téléphone."</string>
-    <!-- no translation found for deprecated_target_sdk_message (5246906284426844596) -->
-    <skip />
+    <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Cette appli a été conçue pour une ancienne version d\'Android. Elle risque de ne pas fonctionner correctement et n\'inclut pas les derniers dispositifs de sécurité et de protection de la confidentialité. Recherchez une mise à jour ou contactez le développeur de l\'appli."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Rechercher une mise à jour"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Vous avez de nouveaux messages"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Ouvrir l\'application de SMS pour afficher le message"</string>

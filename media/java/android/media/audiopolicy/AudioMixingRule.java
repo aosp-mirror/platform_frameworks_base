@@ -704,8 +704,12 @@ public class AudioMixingRule {
          * Combines all of the matching and exclusion rules that have been set and return a new
          * {@link AudioMixingRule} object.
          * @return a new {@link AudioMixingRule} object
+         * @throws IllegalArgumentException if the rule is empty.
          */
         public AudioMixingRule build() {
+            if (mCriteria.isEmpty()) {
+                throw new IllegalArgumentException("Cannot build AudioMixingRule with no rules.");
+            }
             return new AudioMixingRule(
                     mTargetMixType == AudioMix.MIX_TYPE_INVALID
                             ? AudioMix.MIX_TYPE_PLAYERS : mTargetMixType,

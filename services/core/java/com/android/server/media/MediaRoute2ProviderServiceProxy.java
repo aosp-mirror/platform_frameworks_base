@@ -84,12 +84,7 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
     }
 
     public void dump(PrintWriter pw, String prefix) {
-        pw.println(prefix + "Proxy");
-        pw.println(prefix + "  mUserId=" + mUserId);
-        pw.println(prefix + "  mRunning=" + mRunning);
-        pw.println(prefix + "  mBound=" + mBound);
-        pw.println(prefix + "  mActiveConnection=" + mActiveConnection);
-        pw.println(prefix + "  mConnectionReady=" + mConnectionReady);
+        pw.println(prefix + getDebugString());
     }
 
     public void setManagerScanning(boolean managerScanning) {
@@ -494,7 +489,16 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
 
     @Override
     public String toString() {
-        return "Service connection " + mComponentName.flattenToShortString();
+        return getDebugString();
+    }
+
+    private String getDebugString() {
+        return TextUtils.formatSimple(
+                "ProviderServiceProxy - package: %s, bound: %b, connection (active:%b, ready:%b)",
+                mComponentName.getPackageName(),
+                mBound,
+                mActiveConnection != null,
+                mConnectionReady);
     }
 
     private final class Connection implements DeathRecipient {

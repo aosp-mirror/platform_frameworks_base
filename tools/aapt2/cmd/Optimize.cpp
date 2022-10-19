@@ -305,51 +305,14 @@ class Optimizer {
   OptimizeContext* context_;
 };
 
-bool ParseConfig(const std::string& content, IAaptContext* context, OptimizeOptions* options) {
-  size_t line_no = 0;
-  for (StringPiece line : util::Tokenize(content, '\n')) {
-    line_no++;
-    line = util::TrimWhitespace(line);
-    if (line.empty()) {
-      continue;
-    }
-
-    auto split_line = util::Split(line, '#');
-    if (split_line.size() < 2) {
-      context->GetDiagnostics()->Error(android::DiagMessage(line) << "No # found in line");
-      return false;
-    }
-    StringPiece resource_string = split_line[0];
-    StringPiece directives = split_line[1];
-    ResourceNameRef resource_name;
-    if (!ResourceUtils::ParseResourceName(resource_string, &resource_name)) {
-      context->GetDiagnostics()->Error(android::DiagMessage(line) << "Malformed resource name");
-      return false;
-    }
-    if (!resource_name.package.empty()) {
-      context->GetDiagnostics()->Error(android::DiagMessage(line)
-                                       << "Package set for resource. Only use type/name");
-      return false;
-    }
-    for (StringPiece directive : util::Tokenize(directives, ',')) {
-      if (directive == "remove") {
-        options->resources_exclude_list.insert(resource_name.ToResourceName());
-      } else if (directive == "no_collapse" || directive == "no_obfuscate") {
-        options->table_flattener_options.name_collapse_exemptions.insert(
-            resource_name.ToResourceName());
-      }
-    }
-  }
-  return true;
-}
-
 bool ExtractConfig(const std::string& path, IAaptContext* context, OptimizeOptions* options) {
   std::string content;
   if (!android::base::ReadFileToString(path, &content, true /*follow_symlinks*/)) {
     context->GetDiagnostics()->Error(android::DiagMessage(path) << "failed reading config file");
     return false;
   }
-  return ParseConfig(content, context, options);
+  return ParseResourceConfig(content, context, options->resources_exclude_list,
+                             options->table_flattener_options.name_collapse_exemptions);
 }
 
 bool ExtractAppDataFromManifest(OptimizeContext* context, const LoadedApk* apk,

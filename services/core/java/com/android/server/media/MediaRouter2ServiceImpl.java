@@ -628,8 +628,9 @@ class MediaRouter2ServiceImpl {
                     mUserRecords.valueAt(i).dump(pw, indent + "  ");
                 }
             } else {
-                pw.println(indent + "<no user records>");
+                pw.println(indent + "  <no user records>");
             }
+            mEventLogger.dump(pw, indent);
         }
     }
 
@@ -725,8 +726,12 @@ class MediaRouter2ServiceImpl {
             return;
         }
 
-        mEventLogger.log(EventLogger.StringEvent.from("unregisterRouter2",
-                "router id: %d", routerRecord.mRouterId));
+        mEventLogger.log(
+                EventLogger.StringEvent.from(
+                        "unregisterRouter2",
+                        "package: %s, router id: %d",
+                        routerRecord.mPackageName,
+                        routerRecord.mRouterId));
 
         UserRecord userRecord = routerRecord.mUserRecord;
         userRecord.mRouterRecords.remove(routerRecord);
@@ -1034,9 +1039,12 @@ class MediaRouter2ServiceImpl {
         UserRecord userRecord = managerRecord.mUserRecord;
 
         mEventLogger.log(
-                EventLogger.StringEvent.from("unregisterManager",
-                        "userId: %d, managerId: %d",
-                        userRecord.mUserId, managerRecord.mManagerId));
+                EventLogger.StringEvent.from(
+                        "unregisterManager",
+                        "package: %s, userId: %d, managerId: %d",
+                        managerRecord.mPackageName,
+                        userRecord.mUserId,
+                        managerRecord.mManagerId));
 
         userRecord.mManagerRecords.remove(managerRecord);
         managerRecord.dispose();
@@ -1375,8 +1383,6 @@ class MediaRouter2ServiceImpl {
             if (!mHandler.runWithScissors(() -> mHandler.dump(pw, indent), 1000)) {
                 pw.println(indent + "<could not dump handler state>");
             }
-
-            mEventLogger.dump(pw, indent);
         }
     }
 

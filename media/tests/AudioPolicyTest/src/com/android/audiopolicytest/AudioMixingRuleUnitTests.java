@@ -212,6 +212,12 @@ public class AudioMixingRuleUnitTests {
                 containsInAnyOrder(isAudioMixSessionCriterion(TEST_SESSION_ID)));
     }
 
+    @Test
+    public void audioMixingRuleWithNoRulesFails() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new AudioMixingRule.Builder().build());
+    }
+
 
     private static Matcher isAudioMixUidCriterion(int uid, boolean exclude) {
         return new CustomTypeSafeMatcher<AudioMixMatchCriterion>("uid mix criterion") {

@@ -1958,8 +1958,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"无法在您的<xliff:g id="DEVICE">%1$s</xliff:g>上访问此设置，您可以尝试在 Android TV 设备上访问。"</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"无法在您的<xliff:g id="DEVICE">%1$s</xliff:g>上访问此设置，您可以尝试在平板电脑上访问。"</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"无法在您的<xliff:g id="DEVICE">%1$s</xliff:g>上访问此设置，您可以尝试在手机上访问。"</string>
-    <!-- no translation found for deprecated_target_sdk_message (5246906284426844596) -->
-    <skip />
+    <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"此应用专为旧版 Android 系统打造。它可能无法正常运行，也不包含最新的安全和隐私保护功能。请检查是否有更新，或与应用开发者联系。"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"检查更新"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"您有新消息"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"打开短信应用查看"</string>

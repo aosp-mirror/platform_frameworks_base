@@ -123,6 +123,7 @@ interface IInputMethodManager {
     @JavaPassthrough(annotation="@android.annotation.RequiresNoPermission")
     void startProtoDump(in byte[] protoDump, int source, String where);
 
+    @JavaPassthrough(annotation="@android.annotation.RequiresNoPermission")
     boolean isImeTraceEnabled();
 
     // Starts an ime trace.

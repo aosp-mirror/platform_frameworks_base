@@ -207,6 +207,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     private int mTopStageAfterFoldDismiss = STAGE_TYPE_UNDEFINED;
 
     private DefaultMixedHandler mMixedHandler;
+    private final Toast mSplitUnsupportedToast;
 
     private final SplitWindowManager.ParentContainerCallbacks mParentContainerCallbacks =
             new SplitWindowManager.ParentContainerCallbacks() {
@@ -300,6 +301,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mDisplayLayout = new DisplayLayout(displayController.getDisplayLayout(displayId));
         transitions.addHandler(this);
         mTaskOrganizer.addFocusListener(this);
+        mSplitUnsupportedToast = Toast.makeText(mContext,
+                R.string.dock_non_resizeble_failed_to_dock_text, Toast.LENGTH_SHORT);
     }
 
     @VisibleForTesting
@@ -329,6 +332,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mDisplayController.addDisplayWindowListener(this);
         mDisplayLayout = new DisplayLayout();
         transitions.addHandler(this);
+        mSplitUnsupportedToast = Toast.makeText(mContext,
+                R.string.dock_non_resizeble_failed_to_dock_text, Toast.LENGTH_SHORT);
     }
 
     public void setMixedHandler(DefaultMixedHandler mixedHandler) {
@@ -470,6 +475,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                         mMainExecutor.execute(() ->
                                 exitSplitScreen(mMainStage.getChildCount() == 0
                                         ? mSideStage : mMainStage, EXIT_REASON_UNKNOWN));
+                        mSplitUnsupportedToast.show();
                     } else {
                         // Switch the split position if launching as MULTIPLE_TASK failed.
                         if ((fillInIntent.getFlags() & FLAG_ACTIVITY_MULTIPLE_TASK) != 0) {
@@ -736,6 +742,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             mMainExecutor.execute(() ->
                     exitSplitScreen(mMainStage.getChildCount() == 0
                             ? mSideStage : mMainStage, EXIT_REASON_UNKNOWN));
+            mSplitUnsupportedToast.show();
         } else {
             mSyncQueue.queue(evictWct);
         }
@@ -2287,13 +2294,11 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         @Override
         public void onNoLongerSupportMultiWindow() {
             if (mMainStage.isActive()) {
-                final Toast splitUnsupportedToast = Toast.makeText(mContext,
-                        R.string.dock_non_resizeble_failed_to_dock_text, Toast.LENGTH_SHORT);
                 final boolean isMainStage = mMainStageListener == this;
                 if (!ENABLE_SHELL_TRANSITIONS) {
                     StageCoordinator.this.exitSplitScreen(isMainStage ? mMainStage : mSideStage,
                             EXIT_REASON_APP_DOES_NOT_SUPPORT_MULTIWINDOW);
-                    splitUnsupportedToast.show();
+                    mSplitUnsupportedToast.show();
                     return;
                 }
 
@@ -2302,7 +2307,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 prepareExitSplitScreen(stageType, wct);
                 mSplitTransitions.startDismissTransition(wct,StageCoordinator.this, stageType,
                         EXIT_REASON_APP_DOES_NOT_SUPPORT_MULTIWINDOW);
-                splitUnsupportedToast.show();
+                mSplitUnsupportedToast.show();
             }
         }
 

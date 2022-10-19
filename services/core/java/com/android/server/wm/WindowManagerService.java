@@ -317,6 +317,7 @@ import com.android.server.LocalServices;
 import com.android.server.UiThread;
 import com.android.server.Watchdog;
 import com.android.server.input.InputManagerService;
+import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.policy.WindowManagerPolicy.ScreenOffListener;
@@ -9289,6 +9290,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     recentsApp.getTask().setCanAffectSystemUiFlags(behindSystemBars);
                     mWindowPlacerLocked.requestTraversal();
                 }
+                InputMethodManagerInternal.get().maybeFinishStylusHandwriting();
             }
         } finally {
             Binder.restoreCallingIdentity(token);

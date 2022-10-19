@@ -26,6 +26,7 @@ import com.android.settingslib.spa.framework.common.EntryMacro
 import com.android.settingslib.spa.framework.common.EntrySearchData
 import com.android.settingslib.spa.framework.compose.navigator
 import com.android.settingslib.spa.framework.compose.stateOf
+import com.android.settingslib.spa.framework.util.WrapOnClickWithLog
 import com.android.settingslib.spa.widget.ui.createSettingsIcon
 
 data class SimplePreferenceMacro(
@@ -105,10 +106,14 @@ fun Preference(
     model: PreferenceModel,
     singleLineSummary: Boolean = false,
 ) {
-    val modifier = remember(model.enabled.value, model.onClick) {
-        model.onClick?.let { onClick ->
-            Modifier.clickable(enabled = model.enabled.value, onClick = onClick)
-        } ?: Modifier
+    val onClickWithLog = WrapOnClickWithLog(model.onClick)
+    val modifier = remember(model.enabled.value) {
+        if (onClickWithLog != null) {
+            Modifier.clickable(
+                enabled = model.enabled.value,
+                onClick = onClickWithLog
+            )
+        } else Modifier
     }
     BasePreference(
         title = model.title,

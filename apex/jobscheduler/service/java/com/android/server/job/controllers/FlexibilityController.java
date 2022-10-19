@@ -237,7 +237,7 @@ public final class FlexibilityController extends StateController {
     @GuardedBy("mLock")
     boolean isFlexibilitySatisfiedLocked(JobStatus js) {
         return !mFlexibilityEnabled
-                || mService.getUidBias(js.getUid()) == JobInfo.BIAS_TOP_APP
+                || mService.getUidBias(js.getSourceUid()) == JobInfo.BIAS_TOP_APP
                 || mService.isCurrentlyRunningLocked(js)
                 || getNumSatisfiedRequiredConstraintsLocked(js)
                 >= js.getNumRequiredFlexibleConstraints();
@@ -587,7 +587,7 @@ public final class FlexibilityController extends StateController {
                 }
                 if (latest - nowElapsed < mDeadlineProximityLimitMs) {
                     if (DEBUG) {
-                        Slog.d(TAG, "deadline proximity met: " + js.getUid());
+                        Slog.d(TAG, "deadline proximity met: " + js);
                     }
                     mFlexibilityTracker.adjustJobsRequiredConstraints(js,
                             -js.getNumRequiredFlexibleConstraints(), nowElapsed);
@@ -600,7 +600,7 @@ public final class FlexibilityController extends StateController {
                 }
                 if (latest - nextTimeElapsed <= mDeadlineProximityLimitMs) {
                     if (DEBUG) {
-                        Slog.d(TAG, "last alarm set: " + js.getUid());
+                        Slog.d(TAG, "last alarm set: " + js);
                     }
                     addAlarm(js, latest - mDeadlineProximityLimitMs);
                     return;
