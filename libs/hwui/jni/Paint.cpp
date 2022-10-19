@@ -344,6 +344,20 @@ namespace PaintGlue {
         return result;
     }
 
+    // Required for API O and O_MR1
+    static jint getTextRunCursor___JJCAIIIII(JNIEnv* env, jobject clazz, jlong paintHandle,
+                                             jlong typefaceHandle, jcharArray text,
+                                             jint contextStart, jint contextCount, jint dir,
+                                             jint offset, jint cursorOpt) {
+        Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+        Typeface* typeface = reinterpret_cast<Typeface*>(typefaceHandle);
+        jchar* textArray = env->GetCharArrayElements(text, nullptr);
+        jint result = doTextRunCursor(env, paint, typeface, textArray, contextStart, contextCount,
+                                      dir, offset, cursorOpt);
+        env->ReleaseCharArrayElements(text, textArray, JNI_ABORT);
+        return result;
+    }
+
     static jint getTextRunCursor___String(JNIEnv* env, jobject clazz, jlong paintHandle,
                                           jstring text, jint contextStart, jint contextEnd,
                                           jint dir, jint offset, jint cursorOpt) {
@@ -1288,6 +1302,7 @@ static const JNINativeMethod methods[] = {
 
         {"nGetTextRunCursor", "(JJLjava/lang/String;IIIII)I",
          (void*)PaintGlue::getTextRunCursor___JJStringIIIII},
+        {"nGetTextRunCursor", "(JJ[CIIIII)I", (void*)PaintGlue::getTextRunCursor___JJCAIIIII},
         {"nGetTextRunCursor", "(J[CIIIII)I", (void*)PaintGlue::getTextRunCursor___C},
         {"nGetTextRunCursor", "(JLjava/lang/String;IIIII)I",
          (void*)PaintGlue::getTextRunCursor___String},
