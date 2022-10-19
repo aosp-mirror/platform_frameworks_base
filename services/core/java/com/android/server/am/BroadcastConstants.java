@@ -133,7 +133,7 @@ public class BroadcastConstants {
      */
     public boolean MODERN_QUEUE_ENABLED = DEFAULT_MODERN_QUEUE_ENABLED;
     private static final String KEY_MODERN_QUEUE_ENABLED = "modern_queue_enabled";
-    private static final boolean DEFAULT_MODERN_QUEUE_ENABLED = false;
+    private static final boolean DEFAULT_MODERN_QUEUE_ENABLED = true;
 
     /**
      * For {@link BroadcastQueueModernImpl}: Maximum number of process queues to
