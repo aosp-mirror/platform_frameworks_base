@@ -11889,9 +11889,37 @@ package android.service.timezone {
     method public abstract void onStopUpdates();
     method public final void reportPermanentFailure(@NonNull Throwable);
     method public final void reportSuggestion(@NonNull android.service.timezone.TimeZoneProviderSuggestion);
+    method public final void reportSuggestion(@NonNull android.service.timezone.TimeZoneProviderSuggestion, @NonNull android.service.timezone.TimeZoneProviderStatus);
     method public final void reportUncertain();
+    method public final void reportUncertain(@NonNull android.service.timezone.TimeZoneProviderStatus);
     field public static final String PRIMARY_LOCATION_TIME_ZONE_PROVIDER_SERVICE_INTERFACE = "android.service.timezone.PrimaryLocationTimeZoneProviderService";
     field public static final String SECONDARY_LOCATION_TIME_ZONE_PROVIDER_SERVICE_INTERFACE = "android.service.timezone.SecondaryLocationTimeZoneProviderService";
+  }
+
+  public final class TimeZoneProviderStatus implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getConnectivityDependencyStatus();
+    method public int getLocationDetectionDependencyStatus();
+    method public int getTimeZoneResolutionOperationStatus();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.timezone.TimeZoneProviderStatus> CREATOR;
+    field public static final int DEPENDENCY_STATUS_BLOCKED_BY_ENVIRONMENT = 4; // 0x4
+    field public static final int DEPENDENCY_STATUS_BLOCKED_BY_SETTINGS = 6; // 0x6
+    field public static final int DEPENDENCY_STATUS_DEGRADED_BY_SETTINGS = 5; // 0x5
+    field public static final int DEPENDENCY_STATUS_NOT_APPLICABLE = 1; // 0x1
+    field public static final int DEPENDENCY_STATUS_OK = 2; // 0x2
+    field public static final int DEPENDENCY_STATUS_TEMPORARILY_UNAVAILABLE = 3; // 0x3
+    field public static final int OPERATION_STATUS_FAILED = 3; // 0x3
+    field public static final int OPERATION_STATUS_NOT_APPLICABLE = 1; // 0x1
+    field public static final int OPERATION_STATUS_OK = 2; // 0x2
+  }
+
+  public static final class TimeZoneProviderStatus.Builder {
+    ctor public TimeZoneProviderStatus.Builder();
+    method @NonNull public android.service.timezone.TimeZoneProviderStatus build();
+    method @NonNull public android.service.timezone.TimeZoneProviderStatus.Builder setConnectivityDependencyStatus(int);
+    method @NonNull public android.service.timezone.TimeZoneProviderStatus.Builder setLocationDetectionDependencyStatus(int);
+    method @NonNull public android.service.timezone.TimeZoneProviderStatus.Builder setTimeZoneResolutionOperationStatus(int);
   }
 
   public final class TimeZoneProviderSuggestion implements android.os.Parcelable {
