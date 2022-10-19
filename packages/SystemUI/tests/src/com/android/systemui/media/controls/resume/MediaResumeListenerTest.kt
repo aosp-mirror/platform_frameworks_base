@@ -36,13 +36,13 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.media.controls.MediaTestUtils
 import com.android.systemui.media.controls.models.player.MediaData
 import com.android.systemui.media.controls.models.player.MediaDeviceData
-import com.android.systemui.media.controls.pipeline.RESUME_MEDIA_TIMEOUT
 import com.android.systemui.media.controls.pipeline.MediaDataManager
+import com.android.systemui.media.controls.pipeline.RESUME_MEDIA_TIMEOUT
 import com.android.systemui.tuner.TunerService
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
-import org.junit.After
 import com.google.common.truth.Truth.assertThat
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -68,7 +68,9 @@ private const val MEDIA_PREFERENCES = "media_control_prefs"
 private const val RESUME_COMPONENTS = "package1/class1:package2/class2:package3/class3"
 
 private fun <T> capture(argumentCaptor: ArgumentCaptor<T>): T = argumentCaptor.capture()
+
 private fun <T> eq(value: T): T = Mockito.eq(value) ?: value
+
 private fun <T> any(): T = Mockito.any<T>()
 
 @SmallTest
@@ -98,26 +100,32 @@ class MediaResumeListenerTest : SysuiTestCase() {
     private lateinit var resumeListener: MediaResumeListener
     private val clock = FakeSystemClock()
 
-    private var originalQsSetting = Settings.Global.getInt(context.contentResolver,
-        Settings.Global.SHOW_MEDIA_ON_QUICK_SETTINGS, 1)
-    private var originalResumeSetting = Settings.Secure.getInt(context.contentResolver,
-        Settings.Secure.MEDIA_CONTROLS_RESUME, 0)
+    private var originalQsSetting =
+        Settings.Global.getInt(
+            context.contentResolver,
+            Settings.Global.SHOW_MEDIA_ON_QUICK_SETTINGS,
+            1
+        )
+    private var originalResumeSetting =
+        Settings.Secure.getInt(context.contentResolver, Settings.Secure.MEDIA_CONTROLS_RESUME, 0)
 
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
 
-        Settings.Global.putInt(context.contentResolver,
-            Settings.Global.SHOW_MEDIA_ON_QUICK_SETTINGS, 1)
-        Settings.Secure.putInt(context.contentResolver,
-            Settings.Secure.MEDIA_CONTROLS_RESUME, 1)
+        Settings.Global.putInt(
+            context.contentResolver,
+            Settings.Global.SHOW_MEDIA_ON_QUICK_SETTINGS,
+            1
+        )
+        Settings.Secure.putInt(context.contentResolver, Settings.Secure.MEDIA_CONTROLS_RESUME, 1)
 
         whenever(resumeBrowserFactory.create(capture(callbackCaptor), any()))
-                .thenReturn(resumeBrowser)
+            .thenReturn(resumeBrowser)
 
         // resume components are stored in sharedpreferences
         whenever(mockContext.getSharedPreferences(eq(MEDIA_PREFERENCES), anyInt()))
-                .thenReturn(sharedPrefs)
+            .thenReturn(sharedPrefs)
         whenever(sharedPrefs.getString(any(), any())).thenReturn(RESUME_COMPONENTS)
         whenever(sharedPrefs.edit()).thenReturn(sharedPrefsEditor)
         whenever(sharedPrefsEditor.putString(any(), any())).thenReturn(sharedPrefsEditor)
@@ -125,36 +133,59 @@ class MediaResumeListenerTest : SysuiTestCase() {
         whenever(mockContext.contentResolver).thenReturn(context.contentResolver)
 
         executor = FakeExecutor(clock)
-        resumeListener = MediaResumeListener(mockContext, broadcastDispatcher, executor,
-                tunerService, resumeBrowserFactory, dumpManager, clock)
+        resumeListener =
+            MediaResumeListener(
+                mockContext,
+                broadcastDispatcher,
+                executor,
+                tunerService,
+                resumeBrowserFactory,
+                dumpManager,
+                clock
+            )
         resumeListener.setManager(mediaDataManager)
         mediaDataManager.addListener(resumeListener)
 
-        data = MediaTestUtils.emptyMediaData.copy(
+        data =
+            MediaTestUtils.emptyMediaData.copy(
                 song = TITLE,
                 packageName = PACKAGE_NAME,
-                token = token)
+                token = token
+            )
     }
 
     @After
     fun tearDown() {
-        Settings.Global.putInt(context.contentResolver,
-            Settings.Global.SHOW_MEDIA_ON_QUICK_SETTINGS, originalQsSetting)
-        Settings.Secure.putInt(context.contentResolver,
-            Settings.Secure.MEDIA_CONTROLS_RESUME, originalResumeSetting)
+        Settings.Global.putInt(
+            context.contentResolver,
+            Settings.Global.SHOW_MEDIA_ON_QUICK_SETTINGS,
+            originalQsSetting
+        )
+        Settings.Secure.putInt(
+            context.contentResolver,
+            Settings.Secure.MEDIA_CONTROLS_RESUME,
+            originalResumeSetting
+        )
     }
 
     @Test
     fun testWhenNoResumption_doesNothing() {
-        Settings.Secure.putInt(context.contentResolver,
-            Settings.Secure.MEDIA_CONTROLS_RESUME, 0)
+        Settings.Secure.putInt(context.contentResolver, Settings.Secure.MEDIA_CONTROLS_RESUME, 0)
 
         // When listener is created, we do NOT register a user change listener
-        val listener = MediaResumeListener(context, broadcastDispatcher, executor, tunerService,
-                resumeBrowserFactory, dumpManager, clock)
+        val listener =
+            MediaResumeListener(
+                context,
+                broadcastDispatcher,
+                executor,
+                tunerService,
+                resumeBrowserFactory,
+                dumpManager,
+                clock
+            )
         listener.setManager(mediaDataManager)
-        verify(broadcastDispatcher, never()).registerReceiver(eq(listener.userChangeReceiver),
-            any(), any(), any(), anyInt(), any())
+        verify(broadcastDispatcher, never())
+            .registerReceiver(eq(listener.userChangeReceiver), any(), any(), any(), anyInt(), any())
 
         // When data is loaded, we do NOT execute or update anything
         listener.onMediaDataLoaded(KEY, OLD_KEY, data)
@@ -175,9 +206,7 @@ class MediaResumeListenerTest : SysuiTestCase() {
     fun testOnLoad_checksForResume_badService() {
         setUpMbsWithValidResolveInfo()
 
-        whenever(resumeBrowser.testConnection()).thenAnswer {
-            callbackCaptor.value.onError()
-        }
+        whenever(resumeBrowser.testConnection()).thenAnswer { callbackCaptor.value.onError() }
 
         // When media data is loaded that has not been checked yet, and does not have a MBS
         resumeListener.onMediaDataLoaded(KEY, null, data)
@@ -231,7 +260,7 @@ class MediaResumeListenerTest : SysuiTestCase() {
 
         // But we do not tell it to add new controls
         verify(mediaDataManager, never())
-                .addResumptionControls(anyInt(), any(), any(), any(), any(), any(), any())
+            .addResumptionControls(anyInt(), any(), any(), any(), any(), any(), any())
     }
 
     @Test
@@ -258,8 +287,15 @@ class MediaResumeListenerTest : SysuiTestCase() {
 
         // Make sure broadcast receiver is registered
         resumeListener.setManager(mediaDataManager)
-        verify(broadcastDispatcher).registerReceiver(eq(resumeListener.userChangeReceiver),
-                any(), any(), any(), anyInt(), any())
+        verify(broadcastDispatcher)
+            .registerReceiver(
+                eq(resumeListener.userChangeReceiver),
+                any(),
+                any(),
+                any(),
+                anyInt(),
+                any()
+            )
 
         // When we get an unlock event
         val intent = Intent(Intent.ACTION_USER_UNLOCKED)
@@ -269,8 +305,8 @@ class MediaResumeListenerTest : SysuiTestCase() {
         verify(resumeBrowser, times(3)).findRecentMedia()
 
         // Then since the mock service found media, the manager should be informed
-        verify(mediaDataManager, times(3)).addResumptionControls(anyInt(),
-                any(), any(), any(), any(), any(), eq(PACKAGE_NAME))
+        verify(mediaDataManager, times(3))
+            .addResumptionControls(anyInt(), any(), any(), any(), any(), any(), eq(PACKAGE_NAME))
     }
 
     @Test
@@ -309,12 +345,14 @@ class MediaResumeListenerTest : SysuiTestCase() {
 
         // Then we save an update with the current time
         verify(sharedPrefsEditor).putString(any(), (capture(componentCaptor)))
-        componentCaptor.value.split(ResumeMediaBrowser.DELIMITER.toRegex())
-                .dropLastWhile { it.isEmpty() }.forEach {
-            val result = it.split("/")
-            assertThat(result.size).isEqualTo(3)
-            assertThat(result[2].toLong()).isEqualTo(currentTime)
-        }
+        componentCaptor.value
+            .split(ResumeMediaBrowser.DELIMITER.toRegex())
+            .dropLastWhile { it.isEmpty() }
+            .forEach {
+                val result = it.split("/")
+                assertThat(result.size).isEqualTo(3)
+                assertThat(result[2].toLong()).isEqualTo(currentTime)
+            }
         verify(sharedPrefsEditor, times(1)).apply()
     }
 
@@ -333,8 +371,16 @@ class MediaResumeListenerTest : SysuiTestCase() {
         val lastPlayed = clock.currentTimeMillis()
         val componentsString = "$PACKAGE_NAME/$CLASS_NAME/$lastPlayed:"
         whenever(sharedPrefs.getString(any(), any())).thenReturn(componentsString)
-        val resumeListener = MediaResumeListener(mockContext, broadcastDispatcher, executor,
-                tunerService, resumeBrowserFactory, dumpManager, clock)
+        val resumeListener =
+            MediaResumeListener(
+                mockContext,
+                broadcastDispatcher,
+                executor,
+                tunerService,
+                resumeBrowserFactory,
+                dumpManager,
+                clock
+            )
         resumeListener.setManager(mediaDataManager)
         mediaDataManager.addListener(resumeListener)
 
@@ -344,8 +390,8 @@ class MediaResumeListenerTest : SysuiTestCase() {
 
         // We add its resume controls
         verify(resumeBrowser, times(1)).findRecentMedia()
-        verify(mediaDataManager, times(1)).addResumptionControls(anyInt(),
-                any(), any(), any(), any(), any(), eq(PACKAGE_NAME))
+        verify(mediaDataManager, times(1))
+            .addResumptionControls(anyInt(), any(), any(), any(), any(), any(), eq(PACKAGE_NAME))
     }
 
     @Test
@@ -354,8 +400,16 @@ class MediaResumeListenerTest : SysuiTestCase() {
         val lastPlayed = clock.currentTimeMillis() - RESUME_MEDIA_TIMEOUT - 100
         val componentsString = "$PACKAGE_NAME/$CLASS_NAME/$lastPlayed:"
         whenever(sharedPrefs.getString(any(), any())).thenReturn(componentsString)
-        val resumeListener = MediaResumeListener(mockContext, broadcastDispatcher, executor,
-                tunerService, resumeBrowserFactory, dumpManager, clock)
+        val resumeListener =
+            MediaResumeListener(
+                mockContext,
+                broadcastDispatcher,
+                executor,
+                tunerService,
+                resumeBrowserFactory,
+                dumpManager,
+                clock
+            )
         resumeListener.setManager(mediaDataManager)
         mediaDataManager.addListener(resumeListener)
 
@@ -365,8 +419,8 @@ class MediaResumeListenerTest : SysuiTestCase() {
 
         // We do not try to add resume controls
         verify(resumeBrowser, times(0)).findRecentMedia()
-        verify(mediaDataManager, times(0)).addResumptionControls(anyInt(),
-                any(), any(), any(), any(), any(), any())
+        verify(mediaDataManager, times(0))
+            .addResumptionControls(anyInt(), any(), any(), any(), any(), any(), any())
     }
 
     @Test
@@ -385,8 +439,16 @@ class MediaResumeListenerTest : SysuiTestCase() {
         val lastPlayed = currentTime - 1000
         val componentsString = "$PACKAGE_NAME/$CLASS_NAME/$lastPlayed:"
         whenever(sharedPrefs.getString(any(), any())).thenReturn(componentsString)
-        val resumeListener = MediaResumeListener(mockContext, broadcastDispatcher, executor,
-                tunerService, resumeBrowserFactory, dumpManager, clock)
+        val resumeListener =
+            MediaResumeListener(
+                mockContext,
+                broadcastDispatcher,
+                executor,
+                tunerService,
+                resumeBrowserFactory,
+                dumpManager,
+                clock
+            )
         resumeListener.setManager(mediaDataManager)
         mediaDataManager.addListener(resumeListener)
 
@@ -396,12 +458,14 @@ class MediaResumeListenerTest : SysuiTestCase() {
 
         // Then we store the new lastPlayed time
         verify(sharedPrefsEditor).putString(any(), (capture(componentCaptor)))
-        componentCaptor.value.split(ResumeMediaBrowser.DELIMITER.toRegex())
-                .dropLastWhile { it.isEmpty() }.forEach {
-                    val result = it.split("/")
-                    assertThat(result.size).isEqualTo(3)
-                    assertThat(result[2].toLong()).isEqualTo(currentTime)
-                }
+        componentCaptor.value
+            .split(ResumeMediaBrowser.DELIMITER.toRegex())
+            .dropLastWhile { it.isEmpty() }
+            .forEach {
+                val result = it.split("/")
+                assertThat(result.size).isEqualTo(3)
+                assertThat(result[2].toLong()).isEqualTo(currentTime)
+            }
         verify(sharedPrefsEditor, times(1)).apply()
     }
 
@@ -422,9 +486,7 @@ class MediaResumeListenerTest : SysuiTestCase() {
         setUpMbsWithValidResolveInfo()
 
         // Set up mocks to return with an error
-        whenever(resumeBrowser.testConnection()).thenAnswer {
-            callbackCaptor.value.onError()
-        }
+        whenever(resumeBrowser.testConnection()).thenAnswer { callbackCaptor.value.onError() }
 
         resumeListener.onMediaDataLoaded(key = KEY, oldKey = null, data)
         executor.runAllReady()

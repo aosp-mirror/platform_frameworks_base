@@ -69,21 +69,18 @@ class ColorSchemeTransitionTest : SysuiTestCase() {
         animatingColorTransitionFactory = { _, _, _ -> mockAnimatingTransition }
         whenever(extractColor.invoke(colorScheme)).thenReturn(TARGET_COLOR)
 
-        colorSchemeTransition = ColorSchemeTransition(
-            context, mediaViewHolder, animatingColorTransitionFactory
-        )
+        colorSchemeTransition =
+            ColorSchemeTransition(context, mediaViewHolder, animatingColorTransitionFactory)
 
-        colorTransition = object : AnimatingColorTransition(
-            DEFAULT_COLOR, extractColor, applyColor
-        ) {
-            override fun buildAnimator(): ValueAnimator {
-                return valueAnimator
+        colorTransition =
+            object : AnimatingColorTransition(DEFAULT_COLOR, extractColor, applyColor) {
+                override fun buildAnimator(): ValueAnimator {
+                    return valueAnimator
+                }
             }
-        }
     }
 
-    @After
-    fun tearDown() {}
+    @After fun tearDown() {}
 
     @Test
     fun testColorTransition_nullColorScheme_keepsDefault() {

@@ -17,17 +17,15 @@
 package com.android.systemui.media.controls.pipeline
 
 import android.content.Context
-
 import com.android.settingslib.bluetooth.LocalBluetoothManager
 import com.android.settingslib.media.InfoMediaManager
 import com.android.settingslib.media.LocalMediaManager
-
 import javax.inject.Inject
 
-/**
- * Factory to create [LocalMediaManager] objects.
- */
-class LocalMediaManagerFactory @Inject constructor(
+/** Factory to create [LocalMediaManager] objects. */
+class LocalMediaManagerFactory
+@Inject
+constructor(
     private val context: Context,
     private val localBluetoothManager: LocalBluetoothManager?
 ) {

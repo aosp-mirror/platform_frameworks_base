@@ -30,7 +30,8 @@ import com.android.systemui.util.animation.UniqueObjectHostView
 import java.util.Objects
 import javax.inject.Inject
 
-class MediaHost constructor(
+class MediaHost
+constructor(
     private val state: MediaHostStateHolder,
     private val mediaHierarchyManager: MediaHierarchyManager,
     private val mediaDataManager: MediaDataManager,
@@ -45,14 +46,10 @@ class MediaHost constructor(
 
     private var inited: Boolean = false
 
-    /**
-     * Are we listening to media data changes?
-     */
+    /** Are we listening to media data changes? */
     private var listeningToMediaData = false
 
-    /**
-     * Get the current bounds on the screen. This makes sure the state is fresh and up to date
-     */
+    /** Get the current bounds on the screen. This makes sure the state is fresh and up to date */
     val currentBounds: Rect = Rect()
         get() {
             hostView.getLocationOnScreen(tmpLocationOnScreen)
@@ -81,38 +78,39 @@ class MediaHost constructor(
      */
     val currentClipping = Rect()
 
-    private val listener = object : MediaDataManager.Listener {
-        override fun onMediaDataLoaded(
-            key: String,
-            oldKey: String?,
-            data: MediaData,
-            immediately: Boolean,
-            receivedSmartspaceCardLatency: Int,
-            isSsReactivated: Boolean
-        ) {
-            if (immediately) {
+    private val listener =
+        object : MediaDataManager.Listener {
+            override fun onMediaDataLoaded(
+                key: String,
+                oldKey: String?,
+                data: MediaData,
+                immediately: Boolean,
+                receivedSmartspaceCardLatency: Int,
+                isSsReactivated: Boolean
+            ) {
+                if (immediately) {
+                    updateViewVisibility()
+                }
+            }
+
+            override fun onSmartspaceMediaDataLoaded(
+                key: String,
+                data: SmartspaceMediaData,
+                shouldPrioritize: Boolean
+            ) {
                 updateViewVisibility()
             }
-        }
 
-        override fun onSmartspaceMediaDataLoaded(
-            key: String,
-            data: SmartspaceMediaData,
-            shouldPrioritize: Boolean
-        ) {
-            updateViewVisibility()
-        }
-
-        override fun onMediaDataRemoved(key: String) {
-            updateViewVisibility()
-        }
-
-        override fun onSmartspaceMediaDataRemoved(key: String, immediately: Boolean) {
-            if (immediately) {
+            override fun onMediaDataRemoved(key: String) {
                 updateViewVisibility()
             }
+
+            override fun onSmartspaceMediaDataRemoved(key: String, immediately: Boolean) {
+                if (immediately) {
+                    updateViewVisibility()
+                }
+            }
         }
-    }
 
     fun addVisibilityChangeListener(listener: (Boolean) -> Unit) {
         visibleChangedListeners.add(listener)
@@ -123,12 +121,14 @@ class MediaHost constructor(
     }
 
     /**
-     * Initialize this MediaObject and create a host view.
-     * All state should already be set on this host before calling this method in order to avoid
-     * unnecessary state changes which lead to remeasurings later on.
+     * Initialize this MediaObject and create a host view. All state should already be set on this
+     * host before calling this method in order to avoid unnecessary state changes which lead to
+     * remeasurings later on.
      *
      * @param location the location this host name has. Used to identify the host during
+     * ```
      *                 transitions.
+     * ```
      */
     fun init(@MediaLocation location: Int) {
         if (inited) {
@@ -141,36 +141,42 @@ class MediaHost constructor(
         // Listen by default, as the host might not be attached by our clients, until
         // they get a visibility change. We still want to stay up to date in that case!
         setListeningToMediaData(true)
-        hostView.addOnAttachStateChangeListener(object : OnAttachStateChangeListener {
-            override fun onViewAttachedToWindow(v: View?) {
-                setListeningToMediaData(true)
-                updateViewVisibility()
-            }
+        hostView.addOnAttachStateChangeListener(
+            object : OnAttachStateChangeListener {
+                override fun onViewAttachedToWindow(v: View?) {
+                    setListeningToMediaData(true)
+                    updateViewVisibility()
+                }
 
-            override fun onViewDetachedFromWindow(v: View?) {
-                setListeningToMediaData(false)
+                override fun onViewDetachedFromWindow(v: View?) {
+                    setListeningToMediaData(false)
+                }
             }
-        })
+        )
 
         // Listen to measurement updates and update our state with it
-        hostView.measurementManager = object : UniqueObjectHostView.MeasurementManager {
-            override fun onMeasure(input: MeasurementInput): MeasurementOutput {
-                // Modify the measurement to exactly match the dimensions
-                if (View.MeasureSpec.getMode(input.widthMeasureSpec) == View.MeasureSpec.AT_MOST) {
-                    input.widthMeasureSpec = View.MeasureSpec.makeMeasureSpec(
-                            View.MeasureSpec.getSize(input.widthMeasureSpec),
-                            View.MeasureSpec.EXACTLY)
+        hostView.measurementManager =
+            object : UniqueObjectHostView.MeasurementManager {
+                override fun onMeasure(input: MeasurementInput): MeasurementOutput {
+                    // Modify the measurement to exactly match the dimensions
+                    if (
+                        View.MeasureSpec.getMode(input.widthMeasureSpec) == View.MeasureSpec.AT_MOST
+                    ) {
+                        input.widthMeasureSpec =
+                            View.MeasureSpec.makeMeasureSpec(
+                                View.MeasureSpec.getSize(input.widthMeasureSpec),
+                                View.MeasureSpec.EXACTLY
+                            )
+                    }
+                    // This will trigger a state change that ensures that we now have a state
+                    // available
+                    state.measurementInput = input
+                    return mediaHostStatesManager.updateCarouselDimensions(location, state)
                 }
-                // This will trigger a state change that ensures that we now have a state available
-                state.measurementInput = input
-                return mediaHostStatesManager.updateCarouselDimensions(location, state)
             }
-        }
 
         // Whenever the state changes, let our state manager know
-        state.changedListener = {
-            mediaHostStatesManager.updateHostState(location, state)
-        }
+        state.changedListener = { mediaHostStatesManager.updateHostState(location, state) }
 
         updateViewVisibility()
     }
@@ -191,17 +197,16 @@ class MediaHost constructor(
      * the visibility has changed
      */
     fun updateViewVisibility() {
-        state.visible = if (showsOnlyActiveMedia) {
-            mediaDataManager.hasActiveMediaOrRecommendation()
-        } else {
-            mediaDataManager.hasAnyMediaOrRecommendation()
-        }
+        state.visible =
+            if (showsOnlyActiveMedia) {
+                mediaDataManager.hasActiveMediaOrRecommendation()
+            } else {
+                mediaDataManager.hasAnyMediaOrRecommendation()
+            }
         val newVisibility = if (visible) View.VISIBLE else View.GONE
         if (newVisibility != hostView.visibility) {
             hostView.visibility = newVisibility
-            visibleChangedListeners.forEach {
-                it.invoke(visible)
-            }
+            visibleChangedListeners.forEach { it.invoke(visible) }
         }
     }
 
@@ -269,14 +274,10 @@ class MediaHost constructor(
 
         private var lastDisappearHash = disappearParameters.hashCode()
 
-        /**
-         * A listener for all changes. This won't be copied over when invoking [copy]
-         */
+        /** A listener for all changes. This won't be copied over when invoking [copy] */
         var changedListener: (() -> Unit)? = null
 
-        /**
-         * Get a copy of this state. This won't copy any listeners it may have set
-         */
+        /** Get a copy of this state. This won't copy any listeners it may have set */
         override fun copy(): MediaHostState {
             val mediaHostState = MediaHostStateHolder()
             mediaHostState.expansion = expansion
@@ -331,15 +332,13 @@ class MediaHost constructor(
 }
 
 /**
- * A description of a media host state that describes the behavior whenever the media carousel
- * is hosted. The HostState notifies the media players of changes to their properties, who
- * in turn will create view states from it.
- * When adding a new property to this, make sure to update the listener and notify them
- * about the changes.
- * In case you need to have a different rendering based on the state, you can add a new
- * constraintState to the [MediaViewController]. Otherwise, similar host states will resolve
- * to the same viewstate, a behavior that is described in [CacheKey]. Make sure to only update
- * that key if the underlying view needs to have a different measurement.
+ * A description of a media host state that describes the behavior whenever the media carousel is
+ * hosted. The HostState notifies the media players of changes to their properties, who in turn will
+ * create view states from it. When adding a new property to this, make sure to update the listener
+ * and notify them about the changes. In case you need to have a different rendering based on the
+ * state, you can add a new constraintState to the [MediaViewController]. Otherwise, similar host
+ * states will resolve to the same viewstate, a behavior that is described in [CacheKey]. Make sure
+ * to only update that key if the underlying view needs to have a different measurement.
  */
 interface MediaHostState {
 
@@ -349,46 +348,36 @@ interface MediaHostState {
     }
 
     /**
-     * The last measurement input that this state was measured with. Infers width and height of
-     * the players.
+     * The last measurement input that this state was measured with. Infers width and height of the
+     * players.
      */
     var measurementInput: MeasurementInput?
 
     /**
-     * The expansion of the player, [COLLAPSED] for fully collapsed (up to 3 actions),
-     * [EXPANDED] for fully expanded (up to 5 actions).
+     * The expansion of the player, [COLLAPSED] for fully collapsed (up to 3 actions), [EXPANDED]
+     * for fully expanded (up to 5 actions).
      */
     var expansion: Float
 
-    /**
-     * Fraction of the height animation.
-     */
+    /** Fraction of the height animation. */
     var squishFraction: Float
 
-    /**
-     * Is this host only showing active media or is it showing all of them including resumption?
-     */
+    /** Is this host only showing active media or is it showing all of them including resumption? */
     var showsOnlyActiveMedia: Boolean
 
-    /**
-     * If the view should be VISIBLE or GONE.
-     */
+    /** If the view should be VISIBLE or GONE. */
     val visible: Boolean
 
-    /**
-     * Does this host need any falsing protection?
-     */
+    /** Does this host need any falsing protection? */
     var falsingProtectionNeeded: Boolean
 
     /**
      * The parameters how the view disappears from this location when going to a host that's not
-     * visible. If modified, make sure to set this value again on the host to ensure the values
-     * are propagated
+     * visible. If modified, make sure to set this value again on the host to ensure the values are
+     * propagated
      */
     var disappearParameters: DisappearParameters
 
-    /**
-     * Get a copy of this view state, deepcopying all appropriate members
-     */
+    /** Get a copy of this view state, deepcopying all appropriate members */
     fun copy(): MediaHostState
 }

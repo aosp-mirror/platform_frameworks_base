@@ -48,17 +48,12 @@ import org.mockito.junit.MockitoJUnit
 @TestableLooper.RunWithLooper
 class KeyguardMediaControllerTest : SysuiTestCase() {
 
-    @Mock
-    private lateinit var mediaHost: MediaHost
-    @Mock
-    private lateinit var bypassController: KeyguardBypassController
-    @Mock
-    private lateinit var statusBarStateController: SysuiStatusBarStateController
-    @Mock
-    private lateinit var configurationController: ConfigurationController
+    @Mock private lateinit var mediaHost: MediaHost
+    @Mock private lateinit var bypassController: KeyguardBypassController
+    @Mock private lateinit var statusBarStateController: SysuiStatusBarStateController
+    @Mock private lateinit var configurationController: ConfigurationController
 
-    @JvmField @Rule
-    val mockito = MockitoJUnit.rule()
+    @JvmField @Rule val mockito = MockitoJUnit.rule()
 
     private val mediaContainerView: MediaContainerView = MediaContainerView(context, null)
     private val hostView = UniqueObjectHostView(context)
@@ -76,15 +71,16 @@ class KeyguardMediaControllerTest : SysuiTestCase() {
         hostView.layoutParams = FrameLayout.LayoutParams(100, 100)
         testableLooper = TestableLooper.get(this)
         fakeHandler = FakeHandler(testableLooper.looper)
-        keyguardMediaController = KeyguardMediaController(
-            mediaHost,
-            bypassController,
-            statusBarStateController,
-            context,
-            settings,
-            fakeHandler,
-            configurationController,
-        )
+        keyguardMediaController =
+            KeyguardMediaController(
+                mediaHost,
+                bypassController,
+                statusBarStateController,
+                context,
+                settings,
+                fakeHandler,
+                configurationController,
+            )
         keyguardMediaController.attachSinglePaneContainer(mediaContainerView)
         keyguardMediaController.useSplitShade = false
     }
@@ -153,8 +149,10 @@ class KeyguardMediaControllerTest : SysuiTestCase() {
         keyguardMediaController.attachSplitShadeContainer(splitShadeContainer)
         keyguardMediaController.useSplitShade = true
 
-        assertTrue("HostView wasn't attached to the split pane container",
-            splitShadeContainer.childCount == 1)
+        assertTrue(
+            "HostView wasn't attached to the split pane container",
+            splitShadeContainer.childCount == 1
+        )
     }
 
     @Test
@@ -162,8 +160,10 @@ class KeyguardMediaControllerTest : SysuiTestCase() {
         val splitShadeContainer = FrameLayout(context)
         keyguardMediaController.attachSplitShadeContainer(splitShadeContainer)
 
-        assertTrue("HostView wasn't attached to the single pane container",
-            mediaContainerView.childCount == 1)
+        assertTrue(
+            "HostView wasn't attached to the single pane container",
+            mediaContainerView.childCount == 1
+        )
     }
 
     @Test

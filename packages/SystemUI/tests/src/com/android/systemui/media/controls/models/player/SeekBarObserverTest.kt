@@ -34,8 +34,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.verify
-import org.mockito.junit.MockitoJUnit
 import org.mockito.Mockito.`when` as whenever
+import org.mockito.junit.MockitoJUnit
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -57,10 +57,14 @@ class SeekBarObserverTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        context.orCreateTestableResources
-            .addOverride(R.dimen.qs_media_enabled_seekbar_height, enabledHeight)
-        context.orCreateTestableResources
-            .addOverride(R.dimen.qs_media_disabled_seekbar_height, disabledHeight)
+        context.orCreateTestableResources.addOverride(
+            R.dimen.qs_media_enabled_seekbar_height,
+            enabledHeight
+        )
+        context.orCreateTestableResources.addOverride(
+            R.dimen.qs_media_disabled_seekbar_height,
+            disabledHeight
+        )
 
         seekBarView = SeekBar(context)
         seekBarView.progressDrawable = mockSquigglyProgress
@@ -70,11 +74,12 @@ class SeekBarObserverTest : SysuiTestCase() {
         whenever(mockHolder.scrubbingElapsedTimeView).thenReturn(scrubbingElapsedTimeView)
         whenever(mockHolder.scrubbingTotalTimeView).thenReturn(scrubbingTotalTimeView)
 
-        observer = object : SeekBarObserver(mockHolder) {
-            override fun buildResetAnimator(targetTime: Int): Animator {
-                return mockSeekbarAnimator
+        observer =
+            object : SeekBarObserver(mockHolder) {
+                override fun buildResetAnimator(targetTime: Int): Animator {
+                    return mockSeekbarAnimator
+                }
             }
-        }
     }
 
     @Test

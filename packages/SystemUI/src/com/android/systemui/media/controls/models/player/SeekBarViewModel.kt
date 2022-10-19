@@ -42,8 +42,8 @@ private const val MIN_FLING_VELOCITY_SCALE_FACTOR = 10
 
 private fun PlaybackState.isInMotion(): Boolean {
     return this.state == PlaybackState.STATE_PLAYING ||
-            this.state == PlaybackState.STATE_FAST_FORWARDING ||
-            this.state == PlaybackState.STATE_REWINDING
+        this.state == PlaybackState.STATE_FAST_FORWARDING ||
+        this.state == PlaybackState.STATE_REWINDING
 }
 
 /**
@@ -59,8 +59,8 @@ private fun PlaybackState.computePosition(duration: Long): Long {
         val updateTime = this.getLastPositionUpdateTime()
         val currentTime = SystemClock.elapsedRealtime()
         if (updateTime > 0) {
-            var position = (this.playbackSpeed * (currentTime - updateTime)).toLong() +
-                    this.getPosition()
+            var position =
+                (this.playbackSpeed * (currentTime - updateTime)).toLong() + this.getPosition()
             if (duration >= 0 && position > duration) {
                 position = duration.toLong()
             } else if (position < 0) {
@@ -73,7 +73,9 @@ private fun PlaybackState.computePosition(duration: Long): Long {
 }
 
 /** ViewModel for seek bar in QS media player. */
-class SeekBarViewModel @Inject constructor(
+class SeekBarViewModel
+@Inject
+constructor(
     @Background private val bgExecutor: RepeatableExecutor,
     private val falsingManager: FalsingManager,
 ) {
@@ -86,9 +88,7 @@ class SeekBarViewModel @Inject constructor(
             }
             _progress.postValue(value)
         }
-    private val _progress = MutableLiveData<Progress>().apply {
-        postValue(_data)
-    }
+    private val _progress = MutableLiveData<Progress>().apply { postValue(_data) }
     val progress: LiveData<Progress>
         get() = _progress
     private var controller: MediaController? = null
@@ -100,20 +100,21 @@ class SeekBarViewModel @Inject constructor(
             }
         }
     private var playbackState: PlaybackState? = null
-    private var callback = object : MediaController.Callback() {
-        override fun onPlaybackStateChanged(state: PlaybackState?) {
-            playbackState = state
-            if (playbackState == null || PlaybackState.STATE_NONE.equals(playbackState)) {
+    private var callback =
+        object : MediaController.Callback() {
+            override fun onPlaybackStateChanged(state: PlaybackState?) {
+                playbackState = state
+                if (playbackState == null || PlaybackState.STATE_NONE.equals(playbackState)) {
+                    clearController()
+                } else {
+                    checkIfPollingNeeded()
+                }
+            }
+
+            override fun onSessionDestroyed() {
                 clearController()
-            } else {
-                checkIfPollingNeeded()
             }
         }
-
-        override fun onSessionDestroyed() {
-            clearController()
-        }
-    }
     private var cancel: Runnable? = null
 
     /** Indicates if the seek interaction is considered a false guesture. */
@@ -121,12 +122,13 @@ class SeekBarViewModel @Inject constructor(
 
     /** Listening state (QS open or closed) is used to control polling of progress. */
     var listening = true
-        set(value) = bgExecutor.execute {
-            if (field != value) {
-                field = value
-                checkIfPollingNeeded()
+        set(value) =
+            bgExecutor.execute {
+                if (field != value) {
+                    field = value
+                    checkIfPollingNeeded()
+                }
             }
-        }
 
     private var scrubbingChangeListener: ScrubbingChangeListener? = null
     private var enabledChangeListener: EnabledChangeListener? = null
@@ -144,14 +146,13 @@ class SeekBarViewModel @Inject constructor(
 
     lateinit var logSeek: () -> Unit
 
-    /**
-     * Event indicating that the user has started interacting with the seek bar.
-     */
+    /** Event indicating that the user has started interacting with the seek bar. */
     @AnyThread
-    fun onSeekStarting() = bgExecutor.execute {
-        scrubbing = true
-        isFalseSeek = false
-    }
+    fun onSeekStarting() =
+        bgExecutor.execute {
+            scrubbing = true
+            isFalseSeek = false
+        }
 
     /**
      * Event indicating that the user has moved the seek bar.
@@ -159,47 +160,51 @@ class SeekBarViewModel @Inject constructor(
      * @param position Current location in the track.
      */
     @AnyThread
-    fun onSeekProgress(position: Long) = bgExecutor.execute {
-        if (scrubbing) {
-            // The user hasn't yet finished their touch gesture, so only update the data for visual
-            // feedback and don't update [controller] yet.
-            _data = _data.copy(elapsedTime = position.toInt())
-        } else {
-            // The seek progress came from an a11y action and we should immediately update to the
-            // new position. (a11y actions to change the seekbar position don't trigger
-            // SeekBar.OnSeekBarChangeListener.onStartTrackingTouch or onStopTrackingTouch.)
-            onSeek(position)
+    fun onSeekProgress(position: Long) =
+        bgExecutor.execute {
+            if (scrubbing) {
+                // The user hasn't yet finished their touch gesture, so only update the data for
+                // visual
+                // feedback and don't update [controller] yet.
+                _data = _data.copy(elapsedTime = position.toInt())
+            } else {
+                // The seek progress came from an a11y action and we should immediately update to
+                // the
+                // new position. (a11y actions to change the seekbar position don't trigger
+                // SeekBar.OnSeekBarChangeListener.onStartTrackingTouch or onStopTrackingTouch.)
+                onSeek(position)
+            }
         }
-    }
 
-    /**
-     * Event indicating that the seek interaction is a false gesture and it should be ignored.
-     */
+    /** Event indicating that the seek interaction is a false gesture and it should be ignored. */
     @AnyThread
-    fun onSeekFalse() = bgExecutor.execute {
-        if (scrubbing) {
-            isFalseSeek = true
+    fun onSeekFalse() =
+        bgExecutor.execute {
+            if (scrubbing) {
+                isFalseSeek = true
+            }
         }
-    }
 
     /**
      * Handle request to change the current position in the media track.
      * @param position Place to seek to in the track.
      */
     @AnyThread
-    fun onSeek(position: Long) = bgExecutor.execute {
-        if (isFalseSeek) {
-            scrubbing = false
-            checkPlaybackPosition()
-        } else {
-            logSeek()
-            controller?.transportControls?.seekTo(position)
-            // Invalidate the cached playbackState to avoid the thumb jumping back to the previous
-            // position.
-            playbackState = null
-            scrubbing = false
+    fun onSeek(position: Long) =
+        bgExecutor.execute {
+            if (isFalseSeek) {
+                scrubbing = false
+                checkPlaybackPosition()
+            } else {
+                logSeek()
+                controller?.transportControls?.seekTo(position)
+                // Invalidate the cached playbackState to avoid the thumb jumping back to the
+                // previous
+                // position.
+                playbackState = null
+                scrubbing = false
+            }
         }
-    }
 
     /**
      * Updates media information.
@@ -216,11 +221,18 @@ class SeekBarViewModel @Inject constructor(
         val seekAvailable = ((playbackState?.actions ?: 0L) and PlaybackState.ACTION_SEEK_TO) != 0L
         val position = playbackState?.position?.toInt()
         val duration = mediaMetadata?.getLong(MediaMetadata.METADATA_KEY_DURATION)?.toInt() ?: 0
-        val playing = NotificationMediaManager
-                .isPlayingState(playbackState?.state ?: PlaybackState.STATE_NONE)
-        val enabled = if (playbackState == null ||
-                playbackState?.getState() == PlaybackState.STATE_NONE ||
-                (duration <= 0)) false else true
+        val playing =
+            NotificationMediaManager.isPlayingState(
+                playbackState?.state ?: PlaybackState.STATE_NONE
+            )
+        val enabled =
+            if (
+                playbackState == null ||
+                    playbackState?.getState() == PlaybackState.STATE_NONE ||
+                    (duration <= 0)
+            )
+                false
+            else true
         _data = Progress(enabled, seekAvailable, playing, scrubbing, position, duration)
         checkIfPollingNeeded()
     }
@@ -231,26 +243,26 @@ class SeekBarViewModel @Inject constructor(
      * This should be called when the media session behind the controller has been destroyed.
      */
     @AnyThread
-    fun clearController() = bgExecutor.execute {
-        controller = null
-        playbackState = null
-        cancel?.run()
-        cancel = null
-        _data = _data.copy(enabled = false)
-    }
+    fun clearController() =
+        bgExecutor.execute {
+            controller = null
+            playbackState = null
+            cancel?.run()
+            cancel = null
+            _data = _data.copy(enabled = false)
+        }
 
-    /**
-     * Call to clean up any resources.
-     */
+    /** Call to clean up any resources. */
     @AnyThread
-    fun onDestroy() = bgExecutor.execute {
-        controller = null
-        playbackState = null
-        cancel?.run()
-        cancel = null
-        scrubbingChangeListener = null
-        enabledChangeListener = null
-    }
+    fun onDestroy() =
+        bgExecutor.execute {
+            controller = null
+            playbackState = null
+            cancel?.run()
+            cancel = null
+            scrubbingChangeListener = null
+            enabledChangeListener = null
+        }
 
     @WorkerThread
     private fun checkPlaybackPosition() {
@@ -266,8 +278,12 @@ class SeekBarViewModel @Inject constructor(
         val needed = listening && !scrubbing && playbackState?.isInMotion() ?: false
         if (needed) {
             if (cancel == null) {
-                cancel = bgExecutor.executeRepeatedly(this::checkPlaybackPosition, 0L,
-                        POSITION_UPDATE_INTERVAL_MILLIS)
+                cancel =
+                    bgExecutor.executeRepeatedly(
+                        this::checkPlaybackPosition,
+                        0L,
+                        POSITION_UPDATE_INTERVAL_MILLIS
+                    )
             }
         } else {
             cancel?.run()
@@ -353,9 +369,10 @@ class SeekBarViewModel @Inject constructor(
         // Gesture detector helps decide which touch events to intercept.
         private val detector = GestureDetectorCompat(bar.context, this)
         // Velocity threshold used to decide when a fling is considered a false gesture.
-        private val flingVelocity: Int = ViewConfiguration.get(bar.context).run {
-            getScaledMinimumFlingVelocity() * MIN_FLING_VELOCITY_SCALE_FACTOR
-        }
+        private val flingVelocity: Int =
+            ViewConfiguration.get(bar.context).run {
+                getScaledMinimumFlingVelocity() * MIN_FLING_VELOCITY_SCALE_FACTOR
+            }
         // Indicates if the gesture should go to the seek bar or if it should be intercepted.
         private var shouldGoToSeekBar = false
 
@@ -385,9 +402,9 @@ class SeekBarViewModel @Inject constructor(
         /**
          * Handle down events that press down on the thumb.
          *
-         * On the down action, determine a target box around the thumb to know when a scroll
-         * gesture starts by clicking on the thumb. The target box will be used by subsequent
-         * onScroll events.
+         * On the down action, determine a target box around the thumb to know when a scroll gesture
+         * starts by clicking on the thumb. The target box will be used by subsequent onScroll
+         * events.
          *
          * Returns true when the down event hits within the target box of the thumb.
          */
@@ -398,17 +415,19 @@ class SeekBarViewModel @Inject constructor(
             // TODO: account for thumb offset
             val progress = bar.getProgress()
             val range = bar.max - bar.min
-            val widthFraction = if (range > 0) {
-                (progress - bar.min).toDouble() / range
-            } else {
-                0.0
-            }
+            val widthFraction =
+                if (range > 0) {
+                    (progress - bar.min).toDouble() / range
+                } else {
+                    0.0
+                }
             val availableWidth = bar.width - padL - padR
-            val thumbX = if (bar.isLayoutRtl()) {
-                padL + availableWidth * (1 - widthFraction)
-            } else {
-                padL + availableWidth * widthFraction
-            }
+            val thumbX =
+                if (bar.isLayoutRtl()) {
+                    padL + availableWidth * (1 - widthFraction)
+                } else {
+                    padL + availableWidth * widthFraction
+                }
             // Set the min, max boundaries of the thumb box.
             // I'm cheating by using the height of the seek bar as the width of the box.
             val halfHeight: Int = bar.height / 2
