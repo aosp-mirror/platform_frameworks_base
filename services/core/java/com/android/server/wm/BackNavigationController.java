@@ -588,6 +588,7 @@ class BackNavigationController {
 
         ProtoLog.d(WM_DEBUG_BACK_PREVIEW,
                 "Setting Activity.mLauncherTaskBehind to true. Activity=%s", activity);
+        activity.mTaskSupervisor.mStoppingActivities.remove(activity);
         activity.getDisplayContent().ensureActivitiesVisible(null /* starting */,
                 0 /* configChanges */, false /* preserveWindows */, true);
     }
