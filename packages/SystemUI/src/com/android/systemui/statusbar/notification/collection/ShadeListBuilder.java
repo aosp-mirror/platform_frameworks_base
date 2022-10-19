@@ -96,6 +96,7 @@ public class ShadeListBuilder implements Dumpable, PipelineDumpable {
     // used exclusivly by ShadeListBuilder#notifySectionEntriesUpdated
     // TODO replace temp with collection pool for readability
     private final ArrayList<ListEntry> mTempSectionMembers = new ArrayList<>();
+    private final NotifPipelineFlags mFlags;
     private final boolean mAlwaysLogList;
 
     private List<ListEntry> mNotifList = new ArrayList<>();
@@ -141,6 +142,7 @@ public class ShadeListBuilder implements Dumpable, PipelineDumpable {
     ) {
         mSystemClock = systemClock;
         mLogger = logger;
+        mFlags = flags;
         mAlwaysLogList = flags.isDevLoggingEnabled();
         mInteractionTracker = interactionTracker;
         mChoreographer = pipelineChoreographer;
@@ -1036,27 +1038,41 @@ public class ShadeListBuilder implements Dumpable, PipelineDumpable {
     /**
      * Assign the index of each notification relative to the total order
      */
-    private static void assignIndexes(List<ListEntry> notifList) {
+    private void assignIndexes(List<ListEntry> notifList) {
         if (notifList.size() == 0) return;
         NotifSection currentSection = requireNonNull(notifList.get(0).getSection());
         int sectionMemberIndex = 0;
         for (int i = 0; i < notifList.size(); i++) {
-            ListEntry entry = notifList.get(i);
+            final ListEntry entry = notifList.get(i);
             NotifSection section = requireNonNull(entry.getSection());
             if (section.getIndex() != currentSection.getIndex()) {
                 sectionMemberIndex = 0;
                 currentSection = section;
             }
-            entry.getAttachState().setStableIndex(sectionMemberIndex);
-            if (entry instanceof GroupEntry) {
-                GroupEntry parent = (GroupEntry) entry;
-                for (int j = 0; j < parent.getChildren().size(); j++) {
-                    entry = parent.getChildren().get(j);
-                    entry.getAttachState().setStableIndex(sectionMemberIndex);
-                    sectionMemberIndex++;
+            if (mFlags.isStabilityIndexFixEnabled()) {
+                entry.getAttachState().setStableIndex(sectionMemberIndex++);
+                if (entry instanceof GroupEntry) {
+                    final GroupEntry parent = (GroupEntry) entry;
+                    final NotificationEntry summary = parent.getSummary();
+                    if (summary != null) {
+                        summary.getAttachState().setStableIndex(sectionMemberIndex++);
+                    }
+                    for (NotificationEntry child : parent.getChildren()) {
+                        child.getAttachState().setStableIndex(sectionMemberIndex++);
+                    }
                 }
+            } else {
+                // This old implementation uses the same index number for the group as the first
+                // child, and fails to assign an index to the summary.  Remove once tested.
+                entry.getAttachState().setStableIndex(sectionMemberIndex);
+                if (entry instanceof GroupEntry) {
+                    final GroupEntry parent = (GroupEntry) entry;
+                    for (NotificationEntry child : parent.getChildren()) {
+                        child.getAttachState().setStableIndex(sectionMemberIndex++);
+                    }
+                }
+                sectionMemberIndex++;
             }
-            sectionMemberIndex++;
         }
     }
 
