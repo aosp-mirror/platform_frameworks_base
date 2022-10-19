@@ -245,7 +245,7 @@ public final class FadeOutManager {
                 return;
             }
             try {
-                PlaybackActivityMonitor.sEventLogger.log(
+                PlaybackActivityMonitor.sEventLogger.enqueue(
                         (new PlaybackActivityMonitor.FadeOutEvent(apc, skipRamp)).printLog(TAG));
                 apc.getPlayerProxy().applyVolumeShaper(
                         FADEOUT_VSHAPE,
@@ -262,7 +262,7 @@ public final class FadeOutManager {
                 final AudioPlaybackConfiguration apc = players.get(piid);
                 if (apc != null) {
                     try {
-                        PlaybackActivityMonitor.sEventLogger.log(
+                        PlaybackActivityMonitor.sEventLogger.enqueue(
                                 (new EventLogger.StringEvent("unfading out piid:"
                                         + piid)).printLog(TAG));
                         apc.getPlayerProxy().applyVolumeShaper(

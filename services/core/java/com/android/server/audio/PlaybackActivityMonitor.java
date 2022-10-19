@@ -157,7 +157,7 @@ public final class PlaybackActivityMonitor
             if (index >= 0) {
                 if (!disable) {
                     if (DEBUG) { // hidden behind DEBUG, too noisy otherwise
-                        sEventLogger.log(new EventLogger.StringEvent("unbanning uid:" + uid));
+                        sEventLogger.enqueue(new EventLogger.StringEvent("unbanning uid:" + uid));
                     }
                     mBannedUids.remove(index);
                     // nothing else to do, future playback requests from this uid are ok
@@ -168,7 +168,7 @@ public final class PlaybackActivityMonitor
                         checkBanPlayer(apc, uid);
                     }
                     if (DEBUG) { // hidden behind DEBUG, too noisy otherwise
-                        sEventLogger.log(new EventLogger.StringEvent("banning uid:" + uid));
+                        sEventLogger.enqueue(new EventLogger.StringEvent("banning uid:" + uid));
                     }
                     mBannedUids.add(new Integer(uid));
                 } // no else to handle, uid already not in list, so enabling again is no-op
@@ -209,7 +209,7 @@ public final class PlaybackActivityMonitor
                 updateAllowedCapturePolicy(apc, mAllowedCapturePolicies.get(uid));
             }
         }
-        sEventLogger.log(new NewPlayerEvent(apc));
+        sEventLogger.enqueue(new NewPlayerEvent(apc));
         synchronized(mPlayerLock) {
             mPlayers.put(newPiid, apc);
             maybeMutePlayerAwaitingConnection(apc);
@@ -229,7 +229,7 @@ public final class PlaybackActivityMonitor
         synchronized(mPlayerLock) {
             final AudioPlaybackConfiguration apc = mPlayers.get(new Integer(piid));
             if (checkConfigurationCaller(piid, apc, binderUid)) {
-                sEventLogger.log(new AudioAttrEvent(piid, attr));
+                sEventLogger.enqueue(new AudioAttrEvent(piid, attr));
                 change = apc.handleAudioAttributesEvent(attr);
             } else {
                 Log.e(TAG, "Error updating audio attributes");
@@ -322,7 +322,7 @@ public final class PlaybackActivityMonitor
                 return;
             }
 
-            sEventLogger.log(new PlayerEvent(piid, event, eventValue));
+            sEventLogger.enqueue(new PlayerEvent(piid, event, eventValue));
 
             if (event == AudioPlaybackConfiguration.PLAYER_UPDATE_PORT_ID) {
                 mEventHandler.sendMessage(
@@ -332,7 +332,7 @@ public final class PlaybackActivityMonitor
                 for (Integer uidInteger: mBannedUids) {
                     if (checkBanPlayer(apc, uidInteger.intValue())) {
                         // player was banned, do not update its state
-                        sEventLogger.log(new EventLogger.StringEvent(
+                        sEventLogger.enqueue(new EventLogger.StringEvent(
                                 "not starting piid:" + piid + " ,is banned"));
                         return;
                     }
@@ -412,7 +412,7 @@ public final class PlaybackActivityMonitor
 
     public void playerHasOpPlayAudio(int piid, boolean hasOpPlayAudio, int binderUid) {
         // no check on UID yet because this is only for logging at the moment
-        sEventLogger.log(new PlayerOpPlayAudioEvent(piid, hasOpPlayAudio, binderUid));
+        sEventLogger.enqueue(new PlayerOpPlayAudioEvent(piid, hasOpPlayAudio, binderUid));
     }
 
     public void releasePlayer(int piid, int binderUid) {
@@ -421,7 +421,7 @@ public final class PlaybackActivityMonitor
         synchronized(mPlayerLock) {
             final AudioPlaybackConfiguration apc = mPlayers.get(new Integer(piid));
             if (checkConfigurationCaller(piid, apc, binderUid)) {
-                sEventLogger.log(new EventLogger.StringEvent(
+                sEventLogger.enqueue(new EventLogger.StringEvent(
                         "releasing player piid:" + piid));
                 mPlayers.remove(new Integer(piid));
                 mDuckingManager.removeReleased(apc);
@@ -443,7 +443,7 @@ public final class PlaybackActivityMonitor
     }
 
     /*package*/ void onAudioServerDied() {
-        sEventLogger.log(
+        sEventLogger.enqueue(
                 new EventLogger.StringEvent(
                         "clear port id to piid map"));
         synchronized (mPlayerLock) {
@@ -768,7 +768,7 @@ public final class PlaybackActivityMonitor
                 }
                 if (mute) {
                     try {
-                        sEventLogger.log((new EventLogger.StringEvent("call: muting piid:"
+                        sEventLogger.enqueue((new EventLogger.StringEvent("call: muting piid:"
                                 + piid + " uid:" + apc.getClientUid())).printLog(TAG));
                         apc.getPlayerProxy().setVolume(0.0f);
                         mMutedPlayers.add(new Integer(piid));
@@ -793,7 +793,7 @@ public final class PlaybackActivityMonitor
                 final AudioPlaybackConfiguration apc = mPlayers.get(piid);
                 if (apc != null) {
                     try {
-                        sEventLogger.log(new EventLogger.StringEvent("call: unmuting piid:"
+                        sEventLogger.enqueue(new EventLogger.StringEvent("call: unmuting piid:"
                                 + piid).printLog(TAG));
                         apc.getPlayerProxy().setVolume(1.0f);
                     } catch (Exception e) {
@@ -1081,7 +1081,7 @@ public final class PlaybackActivityMonitor
                     return;
                 }
                 try {
-                    sEventLogger.log((new DuckEvent(apc, skipRamp)).printLog(TAG));
+                    sEventLogger.enqueue((new DuckEvent(apc, skipRamp)).printLog(TAG));
                     apc.getPlayerProxy().applyVolumeShaper(
                             DUCK_VSHAPE,
                             skipRamp ? PLAY_SKIP_RAMP : PLAY_CREATE_IF_NEEDED);
@@ -1096,7 +1096,7 @@ public final class PlaybackActivityMonitor
                     final AudioPlaybackConfiguration apc = players.get(piid);
                     if (apc != null) {
                         try {
-                            sEventLogger.log((new EventLogger.StringEvent("unducking piid:"
+                            sEventLogger.enqueue((new EventLogger.StringEvent("unducking piid:"
                                     + piid)).printLog(TAG));
                             apc.getPlayerProxy().applyVolumeShaper(
                                     DUCK_ID,
@@ -1310,8 +1310,9 @@ public final class PlaybackActivityMonitor
     //==========================================================================================
     void muteAwaitConnection(@NonNull int[] usagesToMute,
             @NonNull AudioDeviceAttributes dev, long timeOutMs) {
-        sEventLogger.loglogi(
-                "muteAwaitConnection() dev:" + dev + " timeOutMs:" + timeOutMs, TAG);
+        sEventLogger.enqueueAndLog(
+                "muteAwaitConnection() dev:" + dev + " timeOutMs:" + timeOutMs,
+                EventLogger.Event.ALOGI, TAG);
         synchronized (mPlayerLock) {
             mutePlayersExpectingDevice(usagesToMute);
             // schedule timeout (remove previously scheduled first)
@@ -1323,7 +1324,8 @@ public final class PlaybackActivityMonitor
     }
 
     void cancelMuteAwaitConnection(String source) {
-        sEventLogger.loglogi("cancelMuteAwaitConnection() from:" + source, TAG);
+        sEventLogger.enqueueAndLog("cancelMuteAwaitConnection() from:" + source,
+                EventLogger.Event.ALOGI, TAG);
         synchronized (mPlayerLock) {
             // cancel scheduled timeout, ignore device, only one expected device at a time
             mEventHandler.removeMessages(MSG_L_TIMEOUT_MUTE_AWAIT_CONNECTION);
@@ -1346,7 +1348,7 @@ public final class PlaybackActivityMonitor
 
     @GuardedBy("mPlayerLock")
     private void mutePlayersExpectingDevice(@NonNull int[] usagesToMute) {
-        sEventLogger.log(new MuteAwaitConnectionEvent(usagesToMute));
+        sEventLogger.enqueue(new MuteAwaitConnectionEvent(usagesToMute));
         mMutedUsagesAwaitingConnection = usagesToMute;
         final Set<Integer> piidSet = mPlayers.keySet();
         final Iterator<Integer> piidIterator = piidSet.iterator();
@@ -1369,7 +1371,7 @@ public final class PlaybackActivityMonitor
         for (int usage : mMutedUsagesAwaitingConnection) {
             if (usage == apc.getAudioAttributes().getUsage()) {
                 try {
-                    sEventLogger.log((new EventLogger.StringEvent(
+                    sEventLogger.enqueue((new EventLogger.StringEvent(
                             "awaiting connection: muting piid:"
                                     + apc.getPlayerInterfaceId()
                                     + " uid:" + apc.getClientUid())).printLog(TAG));
@@ -1394,7 +1396,7 @@ public final class PlaybackActivityMonitor
                 continue;
             }
             try {
-                sEventLogger.log(new EventLogger.StringEvent(
+                sEventLogger.enqueue(new EventLogger.StringEvent(
                         "unmuting piid:" + piid).printLog(TAG));
                 apc.getPlayerProxy().applyVolumeShaper(MUTE_AWAIT_CONNECTION_VSHAPE,
                         VolumeShaper.Operation.REVERSE);
@@ -1452,8 +1454,9 @@ public final class PlaybackActivityMonitor
             public void handleMessage(Message msg) {
                 switch (msg.what) {
                     case MSG_L_TIMEOUT_MUTE_AWAIT_CONNECTION:
-                        sEventLogger.loglogi("Timeout for muting waiting for "
-                                + (AudioDeviceAttributes) msg.obj + ", unmuting", TAG);
+                        sEventLogger.enqueueAndLog("Timeout for muting waiting for "
+                                + (AudioDeviceAttributes) msg.obj + ", unmuting",
+                                EventLogger.Event.ALOGI, TAG);
                         synchronized (mPlayerLock) {
                             unmutePlayersExpectingDevice();
                         }
@@ -1476,7 +1479,7 @@ public final class PlaybackActivityMonitor
                         synchronized (mPlayerLock) {
                             int piid = msg.arg1;
 
-                            sEventLogger.log(
+                            sEventLogger.enqueue(
                                     new PlayerEvent(piid, PLAYER_UPDATE_MUTED, eventValue));
 
                             final AudioPlaybackConfiguration apc = mPlayers.get(piid);

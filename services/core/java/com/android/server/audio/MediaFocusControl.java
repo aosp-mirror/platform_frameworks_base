@@ -185,7 +185,7 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
                 final FocusRequester focusOwner = stackIterator.next();
                 if (focusOwner.hasSameUid(uid) && focusOwner.hasSamePackage(packageName)) {
                     clientsToRemove.add(focusOwner.getClientId());
-                    mEventLogger.log((new EventLogger.StringEvent(
+                    mEventLogger.enqueue((new EventLogger.StringEvent(
                             "focus owner:" + focusOwner.getClientId()
                                     + " in uid:" + uid + " pack: " + packageName
                                     + " getting AUDIOFOCUS_LOSS due to app suspension"))
@@ -433,7 +433,7 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
             FocusRequester fr = stackIterator.next();
             if(fr.hasSameBinder(cb)) {
                 Log.i(TAG, "AudioFocus  removeFocusStackEntryOnDeath(): removing entry for " + cb);
-                mEventLogger.log(new EventLogger.StringEvent(
+                mEventLogger.enqueue(new EventLogger.StringEvent(
                         "focus requester:" + fr.getClientId()
                                 + " in uid:" + fr.getClientUid()
                                 + " pack:" + fr.getPackageName()
@@ -470,7 +470,7 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
             final FocusRequester fr = owner.getValue();
             if (fr.hasSameBinder(cb)) {
                 ownerIterator.remove();
-                mEventLogger.log(new EventLogger.StringEvent(
+                mEventLogger.enqueue(new EventLogger.StringEvent(
                         "focus requester:" + fr.getClientId()
                                 + " in uid:" + fr.getClientUid()
                                 + " pack:" + fr.getPackageName()
@@ -968,7 +968,7 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
         // supposed to be alone in bitfield
         final int uid = (flags == AudioManager.AUDIOFOCUS_FLAG_TEST)
                 ? testUid : Binder.getCallingUid();
-        mEventLogger.log((new EventLogger.StringEvent(
+        mEventLogger.enqueue((new EventLogger.StringEvent(
                 "requestAudioFocus() from uid/pid " + uid
                     + "/" + Binder.getCallingPid()
                     + " AA=" + aa.usageToString() + "/" + aa.contentTypeToString()
@@ -1143,7 +1143,7 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
                 .record();
 
         // AudioAttributes are currently ignored, to be used for zones / a11y
-        mEventLogger.log((new EventLogger.StringEvent(
+        mEventLogger.enqueue((new EventLogger.StringEvent(
                 "abandonAudioFocus() from uid/pid " + Binder.getCallingUid()
                     + "/" + Binder.getCallingPid()
                     + " clientId=" + clientId))
