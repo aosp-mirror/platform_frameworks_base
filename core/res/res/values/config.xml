@@ -3559,9 +3559,9 @@
          config_sidefpsSkipWaitForPowerVendorAcquireMessage -->
     <integer name="config_sidefpsSkipWaitForPowerAcquireMessage">6</integer>
 
-    <!-- This vendor acquired message that will cause the sidefpsKgPowerPress window to be skipped.
-         config_sidefpsSkipWaitForPowerOnFingerUp must be true and
-         config_sidefpsSkipWaitForPowerAcquireMessage must be BIOMETRIC_ACQUIRED_VENDOR == 6. -->
+    <!-- This vendor acquired message will cause the sidefpsKgPowerPress window to be skipped
+         when config_sidefpsSkipWaitForPowerAcquireMessage == 6 (VENDOR) and the vendor acquire
+         message equals this constant -->
     <integer name="config_sidefpsSkipWaitForPowerVendorAcquireMessage">2</integer>
 
     <!-- This config is used to force VoiceInteractionService to start on certain low ram devices.
