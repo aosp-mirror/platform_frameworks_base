@@ -23192,6 +23192,7 @@ package android.media {
     method public int describeContents();
     method @Nullable public String getClientPackageName();
     method public int getConnectionState();
+    method @NonNull public java.util.Set<java.lang.String> getDeduplicationIds();
     method @Nullable public CharSequence getDescription();
     method @Nullable public android.os.Bundle getExtras();
     method @NonNull public java.util.List<java.lang.String> getFeatures();
@@ -23225,6 +23226,7 @@ package android.media {
     method @NonNull public android.media.MediaRoute2Info.Builder clearFeatures();
     method @NonNull public android.media.MediaRoute2Info.Builder setClientPackageName(@Nullable String);
     method @NonNull public android.media.MediaRoute2Info.Builder setConnectionState(int);
+    method @NonNull public android.media.MediaRoute2Info.Builder setDeduplicationIds(@NonNull java.util.Set<java.lang.String>);
     method @NonNull public android.media.MediaRoute2Info.Builder setDescription(@Nullable CharSequence);
     method @NonNull public android.media.MediaRoute2Info.Builder setExtras(@Nullable android.os.Bundle);
     method @NonNull public android.media.MediaRoute2Info.Builder setIconUri(@Nullable android.net.Uri);
