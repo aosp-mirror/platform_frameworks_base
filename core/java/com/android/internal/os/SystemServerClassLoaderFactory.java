@@ -87,6 +87,10 @@ public final class SystemServerClassLoaderFactory {
         if (isTestOnly) {
             return true;
         }
+        // If system server is being profiled, it's OK to create class loaders anytime.
+        if (ZygoteInit.shouldProfileSystemServer()) {
+            return true;
+        }
         return false;
     }
 
