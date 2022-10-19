@@ -1371,6 +1371,39 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
         verify(mInjector).startDreamWhenDockedIfAppropriate(mContext);
     }
 
+    @Test
+    public void dreamWhenDocked_ambientModeSuppressed_suppressionEnabled() {
+        mUiManagerService.setStartDreamImmediatelyOnDock(true);
+        mUiManagerService.setDreamsDisabledByAmbientModeSuppression(true);
+
+        when(mLocalPowerManager.isAmbientDisplaySuppressed()).thenReturn(true);
+        triggerDockIntent();
+        verifyAndSendResultBroadcast();
+        verify(mInjector, never()).startDreamWhenDockedIfAppropriate(mContext);
+    }
+
+    @Test
+    public void dreamWhenDocked_ambientModeSuppressed_suppressionDisabled() {
+        mUiManagerService.setStartDreamImmediatelyOnDock(true);
+        mUiManagerService.setDreamsDisabledByAmbientModeSuppression(false);
+
+        when(mLocalPowerManager.isAmbientDisplaySuppressed()).thenReturn(true);
+        triggerDockIntent();
+        verifyAndSendResultBroadcast();
+        verify(mInjector).startDreamWhenDockedIfAppropriate(mContext);
+    }
+
+    @Test
+    public void dreamWhenDocked_ambientModeNotSuppressed_suppressionEnabled() {
+        mUiManagerService.setStartDreamImmediatelyOnDock(true);
+        mUiManagerService.setDreamsDisabledByAmbientModeSuppression(true);
+
+        when(mLocalPowerManager.isAmbientDisplaySuppressed()).thenReturn(false);
+        triggerDockIntent();
+        verifyAndSendResultBroadcast();
+        verify(mInjector).startDreamWhenDockedIfAppropriate(mContext);
+    }
+
     private void triggerDockIntent() {
         final Intent dockedIntent =
                 new Intent(Intent.ACTION_DOCK_EVENT)
