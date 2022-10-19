@@ -30,6 +30,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags.DOZING_MIGRATION_1
 import com.android.systemui.flags.Flags.REGION_SAMPLING
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
@@ -217,8 +218,11 @@ open class ClockEventController @Inject constructor(
         disposableHandle = parent.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 listenForDozing(this)
-                listenForDozeAmount(this)
-                listenForDozeAmountTransition(this)
+                if (featureFlags.isEnabled(DOZING_MIGRATION_1)) {
+                    listenForDozeAmountTransition(this)
+                } else {
+                    listenForDozeAmount(this)
+                }
             }
         }
     }
@@ -261,10 +265,9 @@ open class ClockEventController @Inject constructor(
     @VisibleForTesting
     internal fun listenForDozeAmountTransition(scope: CoroutineScope): Job {
         return scope.launch {
-            keyguardTransitionInteractor.aodToLockscreenTransition.collect {
-                // Would eventually run this:
-                // dozeAmount = it.value
-                // clock?.animations?.doze(dozeAmount)
+            keyguardTransitionInteractor.dozeAmountTransition.collect {
+                dozeAmount = it.value
+                clock?.animations?.doze(dozeAmount)
             }
         }
     }
