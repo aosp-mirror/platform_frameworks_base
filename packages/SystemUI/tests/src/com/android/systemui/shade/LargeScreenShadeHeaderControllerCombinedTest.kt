@@ -659,6 +659,51 @@ class LargeScreenShadeHeaderControllerCombinedTest : SysuiTestCase() {
         verify(privacyIconsController, never()).onParentInvisible()
     }
 
+    @Test
+    fun clockPivotYInCenter() {
+        val captor = ArgumentCaptor.forClass(View.OnLayoutChangeListener::class.java)
+        verify(clock).addOnLayoutChangeListener(capture(captor))
+        var height = 100
+        val width = 50
+
+        clock.executeLayoutChange(0, 0, width, height, captor.value)
+        verify(clock).pivotY = height.toFloat() / 2
+
+        height = 150
+        clock.executeLayoutChange(0, 0, width, height, captor.value)
+        verify(clock).pivotY = height.toFloat() / 2
+    }
+
+    private fun View.executeLayoutChange(
+            left: Int,
+            top: Int,
+            right: Int,
+            bottom: Int,
+            listener: View.OnLayoutChangeListener
+    ) {
+        val oldLeft = this.left
+        val oldTop = this.top
+        val oldRight = this.right
+        val oldBottom = this.bottom
+        whenever(this.left).thenReturn(left)
+        whenever(this.top).thenReturn(top)
+        whenever(this.right).thenReturn(right)
+        whenever(this.bottom).thenReturn(bottom)
+        whenever(this.height).thenReturn(bottom - top)
+        whenever(this.width).thenReturn(right - left)
+        listener.onLayoutChange(
+                this,
+                oldLeft,
+                oldTop,
+                oldRight,
+                oldBottom,
+                left,
+                top,
+                right,
+                bottom
+        )
+    }
+
     private fun createWindowInsets(
         topCutout: Rect? = Rect()
     ): WindowInsets {

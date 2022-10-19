@@ -22,6 +22,7 @@ import android.os.UserHandle
 import android.provider.Settings
 import android.util.Log
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.internal.annotations.Keep
 import com.android.systemui.plugins.ClockController
 import com.android.systemui.plugins.ClockId
 import com.android.systemui.plugins.ClockMetadata
@@ -201,6 +202,7 @@ open class ClockRegistry(
         val provider: ClockProvider
     )
 
+    @Keep
     private data class ClockSetting(
         val clockId: ClockId,
         val _applied_timestamp: Long?

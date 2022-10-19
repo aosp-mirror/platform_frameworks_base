@@ -142,6 +142,11 @@ public class AmbientState implements Dumpable {
      */
     private boolean mIsFlingRequiredAfterLockScreenSwipeUp = false;
 
+    /**
+     * Whether the shade is currently closing.
+     */
+    private boolean mIsClosing;
+
     @VisibleForTesting
     public boolean isFlingRequiredAfterLockScreenSwipeUp() {
         return mIsFlingRequiredAfterLockScreenSwipeUp;
@@ -717,6 +722,20 @@ public class AmbientState implements Dumpable {
                 && mStatusBarKeyguardViewManager.isBouncerInTransit();
     }
 
+    /**
+     * @param isClosing Whether the shade is currently closing.
+     */
+    public void setIsClosing(boolean isClosing) {
+        mIsClosing = isClosing;
+    }
+
+    /**
+     * @return Whether the shade is currently closing.
+     */
+    public boolean isClosing() {
+        return mIsClosing;
+    }
+
     @Override
     public void dump(PrintWriter pw, String[] args) {
         pw.println("mTopPadding=" + mTopPadding);
@@ -761,5 +780,6 @@ public class AmbientState implements Dumpable {
                 + mIsFlingRequiredAfterLockScreenSwipeUp);
         pw.println("mZDistanceBetweenElements=" + mZDistanceBetweenElements);
         pw.println("mBaseZHeight=" + mBaseZHeight);
+        pw.println("mIsClosing=" + mIsClosing);
     }
 }

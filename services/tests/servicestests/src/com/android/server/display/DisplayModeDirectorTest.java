@@ -1853,6 +1853,20 @@ public class DisplayModeDirectorTest {
         assertNull(vote);
     }
 
+    @Test
+    public void testNotifyDefaultDisplayDeviceUpdated() {
+        DisplayDeviceConfig displayDeviceConfig = mock(DisplayDeviceConfig.class);
+        when(displayDeviceConfig.getLowDisplayBrightnessThresholds()).thenReturn(new int[]{});
+        when(displayDeviceConfig.getLowAmbientBrightnessThresholds()).thenReturn(new int[]{});
+        when(displayDeviceConfig.getHighDisplayBrightnessThresholds()).thenReturn(new int[]{});
+        when(displayDeviceConfig.getHighAmbientBrightnessThresholds()).thenReturn(new int[]{});
+        DisplayModeDirector director =
+                createDirectorFromRefreshRateArray(new float[]{60.0f, 90.0f}, 0);
+        director.defaultDisplayDeviceUpdated(displayDeviceConfig);
+        verify(displayDeviceConfig).getDefaultRefreshRate();
+        verify(displayDeviceConfig).getDefaultPeakRefreshRate();
+    }
+
     private Temperature getSkinTemp(@Temperature.ThrottlingStatus int status) {
         return new Temperature(30.0f, Temperature.TYPE_SKIN, "test_skin_temp", status);
     }

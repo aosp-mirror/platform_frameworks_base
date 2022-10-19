@@ -128,11 +128,10 @@
     <!-- This is hard coded to be sans-serif-condensed to match the icons -->
 
     <style name="TextAppearance.QS.Status">
-        <item name="android:fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:textSize">14sp</item>
         <item name="android:letterSpacing">0.01</item>
-        <item name="android:lineHeight">20sp</item>
     </style>
 
     <style name="TextAppearance.QS.SecurityFooter" parent="@style/TextAppearance.QS.Status">
@@ -143,12 +142,10 @@
     <style name="TextAppearance.QS.Status.Carriers" />
 
     <style name="TextAppearance.QS.Status.Carriers.NoCarrierText">
-        <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
         <item name="android:textColor">?android:attr/textColorSecondary</item>
     </style>
 
     <style name="TextAppearance.QS.Status.Build">
-        <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
         <item name="android:textColor">?android:attr/textColorSecondary</item>
     </style>
 
