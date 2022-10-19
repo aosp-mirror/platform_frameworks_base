@@ -18,7 +18,6 @@ package com.android.keyguard;
 
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
-import android.text.TextUtils;
 
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
@@ -98,15 +97,6 @@ public class KeyguardMessageAreaController<T extends KeyguardMessageArea>
 
     public void setMessage(int resId) {
         mView.setMessage(resId);
-    }
-
-    /**
-     * Set Text if KeyguardMessageArea is empty.
-     */
-    public void setMessageIfEmpty(int resId) {
-        if (TextUtils.isEmpty(mView.getText())) {
-            setMessage(resId);
-        }
     }
 
     public void setNextMessageColor(ColorStateList colorState) {

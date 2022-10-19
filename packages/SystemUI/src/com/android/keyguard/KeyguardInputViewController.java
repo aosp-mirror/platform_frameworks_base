@@ -152,6 +152,7 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
     }
 
     public void startAppearAnimation() {
+        mMessageAreaController.setMessage(getInitialMessageResId());
         mView.startAppearAnimation();
     }
 
@@ -167,6 +168,11 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
     /** Finds the index of this view in the suppplied parent view. */
     public int getIndexIn(KeyguardSecurityViewFlipper view) {
         return view.indexOfChild(mView);
+    }
+
+    /** Determines the message to show in the bouncer when it first appears. */
+    protected int getInitialMessageResId() {
+        return 0;
     }
 
     /** Factory for a {@link KeyguardInputViewController}. */
