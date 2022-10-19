@@ -110,8 +110,8 @@ public final class ImeFocusController {
     /**
      * @see InputMethodManager#checkFocus()
      */
-    public boolean checkFocus(boolean forceNewFocus, boolean startInput) {
-        return getImmDelegate().checkFocus(forceNewFocus, startInput, mViewRootImpl);
+    void checkFocus(boolean forceNewFocus, boolean startInput) {
+        getImmDelegate().checkFocus(forceNewFocus, startInput, mViewRootImpl);
     }
 
     @UiThread
@@ -163,7 +163,7 @@ public final class ImeFocusController {
         void onPostWindowGainedFocus(View viewForWindowFocus,
                 @NonNull WindowManager.LayoutParams windowAttribute);
         void onViewFocusChanged(@NonNull View view, boolean hasFocus);
-        boolean checkFocus(boolean forceNewFocus, boolean startInput, ViewRootImpl viewRootImpl);
+        void checkFocus(boolean forceNewFocus, boolean startInput, ViewRootImpl viewRootImpl);
         void onViewDetachedFromWindow(View view, ViewRootImpl viewRootImpl);
         void onWindowDismissed(ViewRootImpl viewRootImpl);
     }

@@ -776,12 +776,12 @@ public final class InputMethodManager {
                     "InputMethodManager.DelegateImpl#startInputAsyncOnWindowFocusGain",
                     InputMethodManager.this, null /* icProto */);
 
-            final ImeFocusController controller = getFocusController();
-            if (controller == null) {
-                return;
-            }
-
+            final ViewRootImpl viewRootImpl;
             synchronized (mH) {
+                if (mCurRootView == null) {
+                    return;
+                }
+                viewRootImpl = mCurRootView;
                 if (mRestartOnNextWindowFocus) {
                     if (DEBUG) Log.v(TAG, "Restarting due to mRestartOnNextWindowFocus as true");
                     mRestartOnNextWindowFocus = false;
@@ -789,7 +789,7 @@ public final class InputMethodManager {
                 }
             }
 
-            if (controller.checkFocus(forceNewFocus, false)) {
+            if (checkFocusInternal(forceNewFocus, false, viewRootImpl)) {
                 // We need to restart input on the current focus view.  This
                 // should be done in conjunction with telling the system service
                 // about the window gaining focus, to help make the transition
@@ -825,9 +825,9 @@ public final class InputMethodManager {
         }
 
         @Override
-        public boolean checkFocus(boolean forceNewFocus, boolean startInput,
+        public void checkFocus(boolean forceNewFocus, boolean startInput,
                 ViewRootImpl viewRootImpl) {
-            return checkFocusInternal(forceNewFocus, startInput, viewRootImpl);
+            checkFocusInternal(forceNewFocus, startInput, viewRootImpl);
         }
 
         @Override
@@ -935,15 +935,6 @@ public final class InputMethodManager {
     @GuardedBy("mH")
     private View getNextServedViewLocked() {
         return mCurRootView != null ? mNextServedView : null;
-    }
-
-    private ImeFocusController getFocusController() {
-        synchronized (mH) {
-            if (mCurRootView != null) {
-                return mCurRootView.getImeFocusController();
-            }
-            return null;
-        }
     }
 
     /**
@@ -1128,8 +1119,7 @@ public final class InputMethodManager {
                         if (mCurRootView == null) {
                             return;
                         }
-                        if (!mCurRootView.getImeFocusController().checkFocus(
-                                mRestartOnNextWindowFocus, false)) {
+                        if (!checkFocusInternal(mRestartOnNextWindowFocus, false, mCurRootView)) {
                             return;
                         }
                         final int reason = active ? StartInputReason.ACTIVATED_BY_IMMS
@@ -2658,19 +2648,25 @@ public final class InputMethodManager {
     }
 
     /**
-     * Check the next served view from {@link ImeFocusController} if needs to start input.
      * Note that this method should *NOT* be called inside of {@code mH} lock to prevent start input
      * background thread may blocked by other methods which already inside {@code mH} lock.
      * @hide
      */
     @UnsupportedAppUsage
     public void checkFocus() {
-        final ImeFocusController controller = getFocusController();
-        if (controller != null) {
-            controller.checkFocus(false /* forceNewFocus */, true /* startInput */);
+        final ViewRootImpl viewRootImpl;
+        synchronized (mH) {
+            if (mCurRootView == null) {
+                return;
+            }
+            viewRootImpl = mCurRootView;
         }
+        checkFocusInternal(false /* forceNewFocus */, true /* startInput */, viewRootImpl);
     }
 
+    /**
+     * Check the next served view if needs to start input.
+     */
     private boolean checkFocusInternal(boolean forceNewFocus, boolean startInput,
             ViewRootImpl viewRootImpl) {
         synchronized (mH) {
