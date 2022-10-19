@@ -26,6 +26,7 @@ import com.android.tools.lint.detector.api.Scope
 import com.android.tools.lint.detector.api.Severity
 import com.android.tools.lint.detector.api.SourceCodeScanner
 import com.android.tools.lint.detector.api.getUMethod
+import com.google.android.lint.aidl.hasPermissionMethodAnnotation
 import com.intellij.psi.PsiType
 import org.jetbrains.uast.UAnnotation
 import org.jetbrains.uast.UBlockExpression
@@ -148,11 +149,6 @@ class PermissionMethodDetector : Detector(), SourceCodeScanner {
             ),
             enabledByDefault = false
         )
-
-        private fun hasPermissionMethodAnnotation(method: UMethod): Boolean = method.annotations
-            .any {
-                it.hasQualifiedName(ANNOTATION_PERMISSION_METHOD)
-            }
 
         private fun isPermissionMethodReturnType(method: UMethod): Boolean =
             listOf(PsiType.VOID, PsiType.INT, PsiType.BOOLEAN).contains(method.returnType)
