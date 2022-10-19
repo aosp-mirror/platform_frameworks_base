@@ -18,7 +18,7 @@ package com.android.systemui.dump
 
 import android.util.ArrayMap
 import com.android.systemui.Dumpable
-import com.android.systemui.log.LogBuffer
+import com.android.systemui.plugins.log.LogBuffer
 import java.io.PrintWriter
 import javax.inject.Inject
 import javax.inject.Singleton
