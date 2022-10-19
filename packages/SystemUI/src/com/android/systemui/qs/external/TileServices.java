@@ -35,6 +35,7 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.settings.UserTracker;
@@ -53,6 +54,7 @@ import javax.inject.Provider;
 /**
  * Runs the day-to-day operations of which tiles should be bound and when.
  */
+@SysUISingleton
 public class TileServices extends IQSService.Stub {
     static final int DEFAULT_MAX_BOUND = 3;
     static final int REDUCED_MAX_BOUND = 1;

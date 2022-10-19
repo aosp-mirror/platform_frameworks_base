@@ -341,4 +341,10 @@ public abstract class PowerManagerInternal {
      * device is not awake.
      */
     public abstract void nap(long eventTime, boolean allowWake);
+
+    /**
+     * Returns true if ambient display is suppressed by any app with any token. This method will
+     * return false if ambient display is not available.
+     */
+    public abstract boolean isAmbientDisplaySuppressed();
 }

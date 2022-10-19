@@ -19,11 +19,11 @@ package com.android.wm.shell.windowdecor;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.InsetsState;
 import android.view.LayoutInflater;
@@ -142,15 +142,14 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
      */
     abstract void relayout(RunningTaskInfo taskInfo);
 
-    void relayout(RunningTaskInfo taskInfo, int layoutResId, T rootView, float captionHeightDp,
-            float captionWidthDp, Rect outsetsDp, float shadowRadiusDp,
-            SurfaceControl.Transaction startT, SurfaceControl.Transaction finishT,
-            WindowContainerTransaction wct, RelayoutResult<T> outResult) {
+    void relayout(RelayoutParams params, SurfaceControl.Transaction startT,
+            SurfaceControl.Transaction finishT, WindowContainerTransaction wct, T rootView,
+            RelayoutResult<T> outResult) {
         outResult.reset();
 
         final Configuration oldTaskConfig = mTaskInfo.getConfiguration();
-        if (taskInfo != null) {
-            mTaskInfo = taskInfo;
+        if (params.mRunningTaskInfo != null) {
+            mTaskInfo = params.mRunningTaskInfo;
         }
 
         if (!mTaskInfo.isVisible) {
@@ -159,7 +158,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             return;
         }
 
-        if (rootView == null && layoutResId == 0) {
+        if (rootView == null && params.mLayoutResId == 0) {
             throw new IllegalArgumentException("layoutResId and rootView can't both be invalid.");
         }
 
@@ -176,15 +175,15 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                 return;
             }
             mDecorWindowContext = mContext.createConfigurationContext(taskConfig);
-            if (layoutResId != 0) {
-                outResult.mRootView =
-                        (T) LayoutInflater.from(mDecorWindowContext).inflate(layoutResId, null);
+            if (params.mLayoutResId != 0) {
+                outResult.mRootView = (T) LayoutInflater.from(mDecorWindowContext)
+                                .inflate(params.mLayoutResId, null);
             }
         }
 
         if (outResult.mRootView == null) {
-            outResult.mRootView =
-                    (T) LayoutInflater.from(mDecorWindowContext).inflate(layoutResId, null);
+            outResult.mRootView = (T) LayoutInflater.from(mDecorWindowContext)
+                            .inflate(params.mLayoutResId , null);
         }
 
         // DecorationContainerSurface
@@ -200,18 +199,18 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         }
 
         final Rect taskBounds = taskConfig.windowConfiguration.getBounds();
-        outResult.mDensity = taskConfig.densityDpi * DisplayMetrics.DENSITY_DEFAULT_SCALE;
-        final int decorContainerOffsetX = -(int) (outsetsDp.left * outResult.mDensity);
-        final int decorContainerOffsetY = -(int) (outsetsDp.top * outResult.mDensity);
+        final int decorContainerOffsetX = -loadResource(params.mOutsetLeftId);
+        final int decorContainerOffsetY = -loadResource(params.mOutsetTopId);
         outResult.mWidth = taskBounds.width()
-                + (int) (outsetsDp.right * outResult.mDensity)
+                + loadResource(params.mOutsetRightId)
                 - decorContainerOffsetX;
         outResult.mHeight = taskBounds.height()
-                + (int) (outsetsDp.bottom * outResult.mDensity)
+                + loadResource(params.mOutsetBottomId)
                 - decorContainerOffsetY;
         startT.setPosition(
                         mDecorationContainerSurface, decorContainerOffsetX, decorContainerOffsetY)
-                .setWindowCrop(mDecorationContainerSurface, outResult.mWidth, outResult.mHeight)
+                .setWindowCrop(mDecorationContainerSurface,
+                        outResult.mWidth, outResult.mHeight)
                 // TODO(b/244455401): Change the z-order when it's better organized
                 .setLayer(mDecorationContainerSurface, mTaskInfo.numActivities + 1)
                 .show(mDecorationContainerSurface);
@@ -226,12 +225,13 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                     .build();
         }
 
-        float shadowRadius = outResult.mDensity * shadowRadiusDp;
+        float shadowRadius = loadResource(params.mShadowRadiusId);
         int backgroundColorInt = mTaskInfo.taskDescription.getBackgroundColor();
         mTmpColor[0] = (float) Color.red(backgroundColorInt) / 255.f;
         mTmpColor[1] = (float) Color.green(backgroundColorInt) / 255.f;
         mTmpColor[2] = (float) Color.blue(backgroundColorInt) / 255.f;
-        startT.setWindowCrop(mTaskBackgroundSurface, taskBounds.width(), taskBounds.height())
+        startT.setWindowCrop(mTaskBackgroundSurface, taskBounds.width(),
+                        taskBounds.height())
                 .setShadowRadius(mTaskBackgroundSurface, shadowRadius)
                 .setColor(mTaskBackgroundSurface, mTmpColor)
                 // TODO(b/244455401): Change the z-order when it's better organized
@@ -248,8 +248,8 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                     .build();
         }
 
-        final int captionHeight = (int) Math.ceil(captionHeightDp * outResult.mDensity);
-        final int captionWidth = (int) Math.ceil(captionWidthDp * outResult.mDensity);
+        final int captionHeight = loadResource(params.mCaptionHeightId);
+        final int captionWidth = loadResource(params.mCaptionWidthId);
 
         //Prevent caption from going offscreen if task is too high up
         final int captionYPos = taskBounds.top <= captionHeight / 2 ? 0 : captionHeight / 2;
@@ -289,8 +289,10 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
 
             // Caption insets
             mCaptionInsetsRect.set(taskBounds);
-            mCaptionInsetsRect.bottom = mCaptionInsetsRect.top + captionHeight - captionYPos;
-            wct.addRectInsetsProvider(mTaskInfo.token, mCaptionInsetsRect, CAPTION_INSETS_TYPES);
+            mCaptionInsetsRect.bottom =
+                    mCaptionInsetsRect.top + captionHeight - captionYPos;
+            wct.addRectInsetsProvider(mTaskInfo.token, mCaptionInsetsRect,
+                    CAPTION_INSETS_TYPES);
         } else {
             startT.hide(mCaptionContainerSurface);
         }
@@ -305,6 +307,13 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         startT.show(mTaskSurface);
         finishT.setPosition(mTaskSurface, taskPosition.x, taskPosition.y)
                 .setCrop(mTaskSurface, mTaskSurfaceCrop);
+    }
+
+    private int loadResource(int resourceId) {
+        if (resourceId == Resources.ID_NULL) {
+            return 0;
+        }
+        return mDecorWindowContext.getResources().getDimensionPixelSize(resourceId);
     }
 
     /**
@@ -368,13 +377,11 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
     static class RelayoutResult<T extends View & TaskFocusStateConsumer> {
         int mWidth;
         int mHeight;
-        float mDensity;
         T mRootView;
 
         void reset() {
             mWidth = 0;
             mHeight = 0;
-            mDensity = 0;
             mRootView = null;
         }
     }
@@ -394,5 +401,38 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         default SurfaceControlViewHost create(Context c, Display d, WindowlessWindowManager wmm) {
             return new SurfaceControlViewHost(c, d, wmm);
         }
+    }
+
+    static class RelayoutParams{
+        RunningTaskInfo mRunningTaskInfo;
+        int mLayoutResId;
+        int mCaptionHeightId;
+        int mCaptionWidthId;
+        int mShadowRadiusId;
+
+        int mOutsetTopId;
+        int mOutsetBottomId;
+        int mOutsetLeftId;
+        int mOutsetRightId;
+
+        void setOutsets(int leftId, int topId, int rightId, int bottomId) {
+            mOutsetLeftId = leftId;
+            mOutsetTopId = topId;
+            mOutsetRightId = rightId;
+            mOutsetBottomId = bottomId;
+        }
+
+        void reset() {
+            mLayoutResId = Resources.ID_NULL;
+            mCaptionHeightId = Resources.ID_NULL;
+            mCaptionWidthId = Resources.ID_NULL;
+            mShadowRadiusId = Resources.ID_NULL;
+
+            mOutsetTopId = Resources.ID_NULL;
+            mOutsetBottomId = Resources.ID_NULL;
+            mOutsetLeftId = Resources.ID_NULL;
+            mOutsetRightId = Resources.ID_NULL;
+        }
+
     }
 }

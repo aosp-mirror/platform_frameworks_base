@@ -27,6 +27,7 @@ interface ControlsUiController {
     companion object {
         public const val TAG = "ControlsUiController"
         public const val EXTRA_ANIMATE = "extra_animate"
+        public const val EXIT_TO_DREAM = "extra_exit_to_dream"
     }
 
     fun show(parent: ViewGroup, onDismiss: Runnable, activityContext: Context)

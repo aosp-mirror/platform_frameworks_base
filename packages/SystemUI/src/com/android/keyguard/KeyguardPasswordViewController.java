@@ -187,7 +187,7 @@ public class KeyguardPasswordViewController
     @Override
     void resetState() {
         mPasswordEntry.setTextOperationUser(UserHandle.of(KeyguardUpdateMonitor.getCurrentUser()));
-        mMessageAreaController.setMessage("");
+        mMessageAreaController.setMessage(getInitialMessageResId());
         final boolean wasDisabled = mPasswordEntry.isEnabled();
         mView.setPasswordEntryEnabled(true);
         mView.setPasswordEntryInputEnabled(true);
@@ -207,7 +207,6 @@ public class KeyguardPasswordViewController
         if (reason != KeyguardSecurityView.SCREEN_ON || mShowImeAtScreenOn) {
             showInput();
         }
-        mMessageAreaController.setMessageIfEmpty(R.string.keyguard_enter_your_password);
     }
 
     private void showInput() {
@@ -323,5 +322,10 @@ public class KeyguardPasswordViewController
                 // imm.getEnabledInputMethodSubtypeList(null, false) will return the current IME's
                 //enabled input method subtype (The current IME should be LatinIME.)
                 || imm.getEnabledInputMethodSubtypeList(null, false).size() > 1;
+    }
+
+    @Override
+    protected int getInitialMessageResId() {
+        return R.string.keyguard_enter_your_password;
     }
 }
