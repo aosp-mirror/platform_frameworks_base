@@ -728,6 +728,57 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         verify(mNotificationStackSizeCalculator).computeHeight(any(), anyInt(), anyFloat());
     }
 
+    @Test
+    public void testSetOwnScrollY_shadeNotClosing_scrollYChanges() {
+        // Given: shade is not closing, scrollY is 0
+        mAmbientState.setScrollY(0);
+        assertEquals(0, mAmbientState.getScrollY());
+        mAmbientState.setIsClosing(false);
+
+        // When: call NotificationStackScrollLayout.setOwnScrollY to set scrollY to 1
+        mStackScroller.setOwnScrollY(1);
+
+        // Then: scrollY should be set to 1
+        assertEquals(1, mAmbientState.getScrollY());
+
+        // Reset scrollY back to 0 to avoid interfering with other tests
+        mStackScroller.setOwnScrollY(0);
+        assertEquals(0, mAmbientState.getScrollY());
+    }
+
+    @Test
+    public void testSetOwnScrollY_shadeClosing_scrollYDoesNotChange() {
+        // Given: shade is closing, scrollY is 0
+        mAmbientState.setScrollY(0);
+        assertEquals(0, mAmbientState.getScrollY());
+        mAmbientState.setIsClosing(true);
+
+        // When: call NotificationStackScrollLayout.setOwnScrollY to set scrollY to 1
+        mStackScroller.setOwnScrollY(1);
+
+        // Then: scrollY should not change, it should still be 0
+        assertEquals(0, mAmbientState.getScrollY());
+
+        // Reset scrollY and mAmbientState.mIsClosing to avoid interfering with other tests
+        mAmbientState.setIsClosing(false);
+        mStackScroller.setOwnScrollY(0);
+        assertEquals(0, mAmbientState.getScrollY());
+    }
+
+    @Test
+    public void onShadeFlingClosingEnd_scrollYShouldBeSetToZero() {
+        // Given: mAmbientState.mIsClosing is set to be true
+        // mIsExpanded is set to be false
+        mAmbientState.setIsClosing(true);
+        mStackScroller.setIsExpanded(false);
+
+        // When: onExpansionStopped is called
+        mStackScroller.onExpansionStopped();
+
+        // Then: mAmbientState.scrollY should be set to be 0
+        assertEquals(mAmbientState.getScrollY(), 0);
+    }
+
     private void setBarStateForTest(int state) {
         // Can't inject this through the listener or we end up on the actual implementation
         // rather than the mock because the spy just coppied the anonymous inner /shruggie.

@@ -113,11 +113,4 @@ public class KeyguardPinBasedInputViewControllerTest extends SysuiTestCase {
         mKeyguardPinViewController.onResume(KeyguardSecurityView.SCREEN_ON);
         verify(mPasswordEntry).requestFocus();
     }
-
-    @Test
-    public void onResume_setInitialText() {
-        mKeyguardPinViewController.onResume(KeyguardSecurityView.SCREEN_ON);
-        verify(mKeyguardMessageAreaController).setMessageIfEmpty(R.string.keyguard_enter_your_pin);
-    }
 }
-

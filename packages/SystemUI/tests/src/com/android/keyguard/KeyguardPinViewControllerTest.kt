@@ -98,6 +98,6 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
     @Test
     fun startAppearAnimation() {
         pinViewController.startAppearAnimation()
-        verify(keyguardMessageAreaController).setMessageIfEmpty(R.string.keyguard_enter_your_pin)
+        verify(keyguardMessageAreaController).setMessage(R.string.keyguard_enter_your_pin)
     }
 }

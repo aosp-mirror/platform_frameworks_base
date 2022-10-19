@@ -1295,7 +1295,7 @@ public class DreamService extends Service implements Window.Callback {
             Intent i = new Intent(this, DreamActivity.class);
             i.setPackage(getApplicationContext().getPackageName());
             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            i.putExtra(DreamActivity.EXTRA_CALLBACK, new DreamActivityCallback(mDreamToken));
+            i.putExtra(DreamActivity.EXTRA_CALLBACK, new DreamActivityCallbacks(mDreamToken));
             final ServiceInfo serviceInfo = fetchServiceInfo(this,
                     new ComponentName(this, getClass()));
             i.putExtra(DreamActivity.EXTRA_DREAM_TITLE, fetchDreamLabel(this, serviceInfo));
@@ -1488,10 +1488,10 @@ public class DreamService extends Service implements Window.Callback {
     }
 
     /** @hide */
-    final class DreamActivityCallback extends Binder {
+    final class DreamActivityCallbacks extends Binder {
         private final IBinder mActivityDreamToken;
 
-        DreamActivityCallback(IBinder token) {
+        DreamActivityCallbacks(IBinder token) {
             mActivityDreamToken = token;
         }
 
@@ -1515,6 +1515,12 @@ public class DreamService extends Service implements Window.Callback {
 
             mActivity = activity;
             onWindowCreated(activity.getWindow());
+        }
+
+        // If DreamActivity is destroyed, wake up from Dream.
+        void onActivityDestroyed() {
+            mActivity = null;
+            onDestroy();
         }
     }
 

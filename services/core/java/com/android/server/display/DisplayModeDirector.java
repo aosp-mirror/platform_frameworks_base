@@ -79,6 +79,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.concurrent.Callable;
 
 /**
  * The DisplayModeDirector is responsible for determining what modes are allowed to be automatically
@@ -153,8 +154,10 @@ public class DisplayModeDirector {
         mSupportedModesByDisplay = new SparseArray<>();
         mDefaultModeByDisplay = new SparseArray<>();
         mAppRequestObserver = new AppRequestObserver();
-        mSettingsObserver = new SettingsObserver(context, handler);
         mDisplayObserver = new DisplayObserver(context, handler);
+        mDeviceConfig = injector.getDeviceConfig();
+        mDeviceConfigDisplaySettings = new DeviceConfigDisplaySettings();
+        mSettingsObserver = new SettingsObserver(context, handler);
         mBrightnessObserver = new BrightnessObserver(context, handler, injector);
         mUdfpsObserver = new UdfpsObserver();
         final BallotBox ballotBox = (displayId, priority, vote) -> {
@@ -164,10 +167,8 @@ public class DisplayModeDirector {
         };
         mSensorObserver = new SensorObserver(context, ballotBox, injector);
         mSkinThermalStatusObserver = new SkinThermalStatusObserver(injector, ballotBox);
-        mDeviceConfigDisplaySettings = new DeviceConfigDisplaySettings();
         mHbmObserver = new HbmObserver(injector, ballotBox, BackgroundThread.getHandler(),
                 mDeviceConfigDisplaySettings);
-        mDeviceConfig = injector.getDeviceConfig();
         mAlwaysRespectAppRequest = false;
     }
 
@@ -515,6 +516,15 @@ public class DisplayModeDirector {
         synchronized (mLock) {
             mDesiredDisplayModeSpecsListener = desiredDisplayModeSpecsListener;
         }
+    }
+
+    /**
+     * A utility to make this class aware of the new display configs whenever the default display is
+     * changed
+     */
+    public void defaultDisplayDeviceUpdated(DisplayDeviceConfig displayDeviceConfig) {
+        mSettingsObserver.setRefreshRates(displayDeviceConfig);
+        mBrightnessObserver.updateBlockingZoneThresholds(displayDeviceConfig);
     }
 
     /**
@@ -1132,10 +1142,19 @@ public class DisplayModeDirector {
         SettingsObserver(@NonNull Context context, @NonNull Handler handler) {
             super(handler);
             mContext = context;
-            mDefaultPeakRefreshRate = (float) context.getResources().getInteger(
-                    R.integer.config_defaultPeakRefreshRate);
+            setRefreshRates(/* displayDeviceConfig= */ null);
+        }
+
+        /**
+         * This is used to update the refresh rate configs from the DeviceConfig, which
+         * if missing from DisplayDeviceConfig, and finally fallback to config.xml.
+         */
+        public void setRefreshRates(DisplayDeviceConfig displayDeviceConfig) {
+            setDefaultPeakRefreshRate(displayDeviceConfig);
             mDefaultRefreshRate =
-                    (float) context.getResources().getInteger(R.integer.config_defaultRefreshRate);
+                    (displayDeviceConfig == null) ? (float) mContext.getResources().getInteger(
+                            R.integer.config_defaultRefreshRate)
+                            : (float) displayDeviceConfig.getDefaultRefreshRate();
         }
 
         public void observe() {
@@ -1194,6 +1213,23 @@ public class DisplayModeDirector {
                     updateModeSwitchingTypeSettingLocked();
                 }
             }
+        }
+
+        private void setDefaultPeakRefreshRate(DisplayDeviceConfig displayDeviceConfig) {
+            Float defaultPeakRefreshRate = null;
+            try {
+                defaultPeakRefreshRate =
+                        mDeviceConfigDisplaySettings.getDefaultPeakRefreshRate();
+            } catch (Exception exception) {
+                // Do nothing
+            }
+            if (defaultPeakRefreshRate == null) {
+                defaultPeakRefreshRate =
+                        (displayDeviceConfig == null) ? (float) mContext.getResources().getInteger(
+                                R.integer.config_defaultPeakRefreshRate)
+                                : (float) displayDeviceConfig.getDefaultPeakRefreshRate();
+            }
+            mDefaultPeakRefreshRate = defaultPeakRefreshRate;
         }
 
         private void updateLowPowerModeSettingLocked() {
@@ -1508,12 +1544,31 @@ public class DisplayModeDirector {
             mContext = context;
             mHandler = handler;
             mInjector = injector;
+            updateBlockingZoneThresholds(/* displayDeviceConfig= */ null);
+            mRefreshRateInHighZone = context.getResources().getInteger(
+                    R.integer.config_fixedRefreshRateInHighZone);
+        }
 
-            mLowDisplayBrightnessThresholds = context.getResources().getIntArray(
-                    R.array.config_brightnessThresholdsOfPeakRefreshRate);
-            mLowAmbientBrightnessThresholds = context.getResources().getIntArray(
-                    R.array.config_ambientThresholdsOfPeakRefreshRate);
+        /**
+         * This is used to update the blocking zone thresholds from the DeviceConfig, which
+         * if missing from DisplayDeviceConfig, and finally fallback to config.xml.
+         */
+        public void updateBlockingZoneThresholds(DisplayDeviceConfig displayDeviceConfig) {
+            loadLowBrightnessThresholds(displayDeviceConfig);
+            loadHighBrightnessThresholds(displayDeviceConfig);
+        }
 
+        private void loadLowBrightnessThresholds(DisplayDeviceConfig displayDeviceConfig) {
+            mLowDisplayBrightnessThresholds = loadBrightnessThresholds(
+                    () -> mDeviceConfigDisplaySettings.getLowDisplayBrightnessThresholds(),
+                    () -> displayDeviceConfig.getLowDisplayBrightnessThresholds(),
+                    R.array.config_brightnessThresholdsOfPeakRefreshRate,
+                    displayDeviceConfig);
+            mLowAmbientBrightnessThresholds = loadBrightnessThresholds(
+                    () -> mDeviceConfigDisplaySettings.getLowAmbientBrightnessThresholds(),
+                    () -> displayDeviceConfig.getLowAmbientBrightnessThresholds(),
+                    R.array.config_ambientThresholdsOfPeakRefreshRate,
+                    displayDeviceConfig);
             if (mLowDisplayBrightnessThresholds.length != mLowAmbientBrightnessThresholds.length) {
                 throw new RuntimeException("display low brightness threshold array and ambient "
                         + "brightness threshold array have different length: "
@@ -1522,11 +1577,19 @@ public class DisplayModeDirector {
                         + ", ambientBrightnessThresholds="
                         + Arrays.toString(mLowAmbientBrightnessThresholds));
             }
+        }
 
-            mHighDisplayBrightnessThresholds = context.getResources().getIntArray(
-                    R.array.config_highDisplayBrightnessThresholdsOfFixedRefreshRate);
-            mHighAmbientBrightnessThresholds = context.getResources().getIntArray(
-                    R.array.config_highAmbientBrightnessThresholdsOfFixedRefreshRate);
+        private void loadHighBrightnessThresholds(DisplayDeviceConfig displayDeviceConfig) {
+            mHighDisplayBrightnessThresholds = loadBrightnessThresholds(
+                    () -> mDeviceConfigDisplaySettings.getHighDisplayBrightnessThresholds(),
+                    () -> displayDeviceConfig.getHighDisplayBrightnessThresholds(),
+                    R.array.config_highDisplayBrightnessThresholdsOfFixedRefreshRate,
+                    displayDeviceConfig);
+            mHighAmbientBrightnessThresholds = loadBrightnessThresholds(
+                    () -> mDeviceConfigDisplaySettings.getHighAmbientBrightnessThresholds(),
+                    () -> displayDeviceConfig.getHighAmbientBrightnessThresholds(),
+                    R.array.config_highAmbientBrightnessThresholdsOfFixedRefreshRate,
+                    displayDeviceConfig);
             if (mHighDisplayBrightnessThresholds.length
                     != mHighAmbientBrightnessThresholds.length) {
                 throw new RuntimeException("display high brightness threshold array and ambient "
@@ -1536,8 +1599,32 @@ public class DisplayModeDirector {
                         + ", ambientBrightnessThresholds="
                         + Arrays.toString(mHighAmbientBrightnessThresholds));
             }
-            mRefreshRateInHighZone = context.getResources().getInteger(
-                    R.integer.config_fixedRefreshRateInHighZone);
+        }
+
+        private int[] loadBrightnessThresholds(
+                Callable<int[]> loadFromDeviceConfigDisplaySettingsCallable,
+                Callable<int[]> loadFromDisplayDeviceConfigCallable,
+                int brightnessThresholdOfFixedRefreshRateKey,
+                DisplayDeviceConfig displayDeviceConfig) {
+            int[] brightnessThresholds = null;
+            try {
+                brightnessThresholds =
+                        loadFromDeviceConfigDisplaySettingsCallable.call();
+            } catch (Exception exception) {
+                // Do nothing
+            }
+            if (brightnessThresholds == null) {
+                try {
+                    brightnessThresholds =
+                            (displayDeviceConfig == null) ? mContext.getResources().getIntArray(
+                                    brightnessThresholdOfFixedRefreshRateKey)
+                                    : loadFromDisplayDeviceConfigCallable.call();
+                } catch (Exception e) {
+                    Slog.e(TAG, "Unexpectedly failed to load display brightness threshold");
+                    e.printStackTrace();
+                }
+            }
+            return brightnessThresholds;
         }
 
         /**
@@ -1589,7 +1676,6 @@ public class DisplayModeDirector {
                 mLowDisplayBrightnessThresholds = lowDisplayBrightnessThresholds;
                 mLowAmbientBrightnessThresholds = lowAmbientBrightnessThresholds;
             }
-
 
             int[] highDisplayBrightnessThresholds =
                     mDeviceConfigDisplaySettings.getHighDisplayBrightnessThresholds();

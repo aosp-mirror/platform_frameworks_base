@@ -124,7 +124,7 @@ class FaceScanningOverlayProviderImpl(
             view.layoutParams = it
             (view as? FaceScanningOverlay)?.let { overlay ->
                 overlay.setColor(tintColor)
-                overlay.onDisplayChanged(displayUniqueId)
+                overlay.updateConfiguration(displayUniqueId)
             }
         }
     }

@@ -235,6 +235,7 @@ class DumpHandler @Inject constructor(
         pw.println("$ <invocation> buffers")
         pw.println("$ <invocation> bugreport-critical")
         pw.println("$ <invocation> bugreport-normal")
+        pw.println("$ <invocation> config")
         pw.println()
 
         pw.println("Targets can be listed:")
@@ -313,13 +314,21 @@ class DumpHandler @Inject constructor(
         const val PRIORITY_ARG_CRITICAL = "CRITICAL"
         const val PRIORITY_ARG_HIGH = "HIGH"
         const val PRIORITY_ARG_NORMAL = "NORMAL"
+        const val PROTO = "--sysui_proto"
     }
 }
 
 private val PRIORITY_OPTIONS =
         arrayOf(PRIORITY_ARG_CRITICAL, PRIORITY_ARG_HIGH, PRIORITY_ARG_NORMAL)
 
-private val COMMANDS = arrayOf("bugreport-critical", "bugreport-normal", "buffers", "dumpables")
+private val COMMANDS = arrayOf(
+        "bugreport-critical",
+        "bugreport-normal",
+        "buffers",
+        "dumpables",
+        "config",
+        "help"
+)
 
 private class ParsedArgs(
     val rawArgs: Array<String>,
