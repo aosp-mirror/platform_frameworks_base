@@ -129,7 +129,7 @@ public class Flags {
      * Whether the clock on a wide lock screen should use the new "stepping" animation for moving
      * the digits when the clock moves.
      */
-    public static final UnreleasedFlag STEP_CLOCK_ANIMATION = new UnreleasedFlag(211);
+    public static final UnreleasedFlag STEP_CLOCK_ANIMATION = new UnreleasedFlag(212);
 
     /***************************************/
     // 300 - power menu
