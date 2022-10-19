@@ -101,7 +101,14 @@ public class CsipDeviceManager {
         return groupId != BluetoothCsipSetCoordinator.GROUP_ID_INVALID;
     }
 
-    private CachedBluetoothDevice getCachedDevice(int groupId) {
+    /**
+     * To find the device with {@code groupId}.
+     *
+     * @param groupId The group id
+     * @return if we could find a device with this {@code groupId} return this device. Otherwise,
+     * return null.
+     */
+    public CachedBluetoothDevice getCachedDevice(int groupId) {
         log("getCachedDevice: groupId: " + groupId);
         for (int i = mCachedDevices.size() - 1; i >= 0; i--) {
             CachedBluetoothDevice cachedDevice = mCachedDevices.get(i);
