@@ -72,7 +72,6 @@ final class InitAppsHelper {
     private final int mSystemScanFlags;
     private final InstallPackageHelper mInstallPackageHelper;
     private final ApexManager mApexManager;
-    private final ApexPackageInfo mApexPackageInfo;
     private final ExecutorService mExecutorService;
     /* Tracks how long system scan took */
     private long mSystemScanTime;
@@ -96,13 +95,11 @@ final class InitAppsHelper {
     private final List<String> mStubSystemApps = new ArrayList<>();
 
     // TODO(b/198166813): remove PMS dependency
-    InitAppsHelper(PackageManagerService pm,
-            ApexManager apexManager, ApexPackageInfo apexPackageInfo,
+    InitAppsHelper(PackageManagerService pm, ApexManager apexManager,
             InstallPackageHelper installPackageHelper,
             List<ScanPartition> systemPartitions) {
         mPm = pm;
         mApexManager = apexManager;
-        mApexPackageInfo = apexPackageInfo;
         mInstallPackageHelper = installPackageHelper;
         mSystemPartitions = systemPartitions;
         mDirsToScanAsSystem = getSystemScanPartitions();
@@ -165,16 +162,8 @@ final class InitAppsHelper {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "scanApexPackages");
 
         try {
-            final List<ApexManager.ScanResult> apexScanResults;
-            if (ApexPackageInfo.ENABLE_FEATURE_SCAN_APEX) {
-                apexScanResults = mInstallPackageHelper.scanApexPackages(
-                        mApexManager.getAllApexInfos(), mSystemParseFlags, mSystemScanFlags,
-                        packageParser, mExecutorService);
-            } else {
-                apexScanResults = mApexPackageInfo.scanApexPackages(
-                        mApexManager.getAllApexInfos(), packageParser, mExecutorService);
-            }
-            return apexScanResults;
+            return mInstallPackageHelper.scanApexPackages(mApexManager.getAllApexInfos(),
+                    mSystemParseFlags, mSystemScanFlags, packageParser, mExecutorService);
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }

@@ -83,7 +83,7 @@ class InitAppsHelperTest {
         val pms = createPackageManagerService()
         assertThat(pms.isFirstBoot).isEqualTo(true)
         assertThat(pms.isDeviceUpgrading).isEqualTo(false)
-        val initAppsHelper = InitAppsHelper(pms, rule.mocks().apexManager, null, null,
+        val initAppsHelper = InitAppsHelper(pms, rule.mocks().apexManager, null,
             listOf<ScanPartition>())
         assertThat(
             initAppsHelper.systemScanFlags and PackageManagerService.SCAN_FIRST_BOOT_OR_UPGRADE)
@@ -98,7 +98,7 @@ class InitAppsHelperTest {
         val pms = createPackageManagerService()
         assertThat(pms.isFirstBoot).isEqualTo(false)
         assertThat(pms.isDeviceUpgrading).isEqualTo(true)
-        val initAppsHelper = InitAppsHelper(pms, rule.mocks().apexManager, null, null,
+        val initAppsHelper = InitAppsHelper(pms, rule.mocks().apexManager, null,
             listOf<ScanPartition>())
         assertThat(
             initAppsHelper.systemScanFlags and PackageManagerService.SCAN_FIRST_BOOT_OR_UPGRADE)
@@ -112,7 +112,7 @@ class InitAppsHelperTest {
         val pms = createPackageManagerService()
         assertThat(pms.isFirstBoot).isEqualTo(false)
         assertThat(pms.isDeviceUpgrading).isEqualTo(false)
-        val initAppsHelper = InitAppsHelper(pms, rule.mocks().apexManager, null, null,
+        val initAppsHelper = InitAppsHelper(pms, rule.mocks().apexManager, null,
             listOf<ScanPartition>())
         assertThat(
             initAppsHelper.systemScanFlags and PackageManagerService.SCAN_FIRST_BOOT_OR_UPGRADE)
@@ -126,7 +126,7 @@ class InitAppsHelperTest {
         val pms = createPackageManagerService()
         assertThat(pms.isFirstBoot).isEqualTo(false)
         assertThat(pms.isDeviceUpgrading).isEqualTo(true)
-        val initAppsHelper = InitAppsHelper(pms, rule.mocks().apexManager, null, null,
+        val initAppsHelper = InitAppsHelper(pms, rule.mocks().apexManager, null,
             listOf<ScanPartition>())
         assertThat(
             initAppsHelper.systemScanFlags and PackageManagerService.SCAN_FIRST_BOOT_OR_UPGRADE)
