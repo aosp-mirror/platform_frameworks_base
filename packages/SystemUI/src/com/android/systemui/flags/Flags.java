@@ -75,7 +75,9 @@ public class Flags {
 
     public static final UnreleasedFlag STABILITY_INDEX_FIX = new UnreleasedFlag(114, true);
 
-    // next id: 115
+    public static final UnreleasedFlag SEMI_STABLE_SORT = new UnreleasedFlag(115, true);
+
+    // next id: 116
 
     /***************************************/
     // 200 - keyguard/lockscreen
