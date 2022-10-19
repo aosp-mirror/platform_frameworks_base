@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.settingslib.spa.framework.compose.LogCompositions
+import com.android.settingslib.spa.framework.compose.TimeMeasurer.Companion.rememberTimeMeasurer
 import com.android.settingslib.spa.framework.compose.toState
 import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.widget.ui.PlaceholderTitle
@@ -66,7 +67,9 @@ private fun <T : AppRecord> AppListWidget(
     listModel: AppListModel<T>,
     appItem: @Composable (itemState: AppListItemModel<T>) -> Unit,
 ) {
+    val timeMeasurer = rememberTimeMeasurer(TAG)
     appListData.value?.let { (list, option) ->
+        timeMeasurer.logFirst("app list first loaded")
         if (list.isEmpty()) {
             PlaceholderTitle(stringResource(R.string.no_applications))
             return
