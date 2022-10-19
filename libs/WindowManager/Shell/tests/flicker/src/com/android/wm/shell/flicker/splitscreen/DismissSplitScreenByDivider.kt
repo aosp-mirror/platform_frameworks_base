@@ -26,7 +26,6 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.WindowUtils
-import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.wm.shell.flicker.SPLIT_SCREEN_DIVIDER_COMPONENT
 import com.android.wm.shell.flicker.appWindowBecomesInvisible
 import com.android.wm.shell.flicker.appWindowIsVisibleAtEnd
@@ -35,7 +34,6 @@ import com.android.wm.shell.flicker.layerIsVisibleAtEnd
 import com.android.wm.shell.flicker.splitAppLayerBoundsBecomesInvisible
 import com.android.wm.shell.flicker.splitScreenDismissed
 import com.android.wm.shell.flicker.splitScreenDividerBecomesInvisible
-import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -95,7 +93,9 @@ class DismissSplitScreenByDivider (testSpec: FlickerTestParameter) : SplitScreen
     fun primaryAppBoundsBecomesInvisible() = testSpec.splitAppLayerBoundsBecomesInvisible(
         primaryApp, landscapePosLeft = tapl.isTablet, portraitPosTop = false)
 
-    private fun secondaryAppBoundsIsFullscreenAtEnd_internal() {
+    @Presubmit
+    @Test
+    fun secondaryAppBoundsIsFullscreenAtEnd() {
         testSpec.assertLayers {
             this.isVisible(secondaryApp)
                 .isVisible(SPLIT_SCREEN_DIVIDER_COMPONENT)
@@ -113,20 +113,6 @@ class DismissSplitScreenByDivider (testSpec: FlickerTestParameter) : SplitScreen
                     it.visibleRegion(secondaryApp).coversExactly(displayBounds)
                 }
         }
-    }
-
-    @Presubmit
-    @Test
-    fun secondaryAppBoundsIsFullscreenAtEnd() {
-        Assume.assumeFalse(isShellTransitionsEnabled)
-        secondaryAppBoundsIsFullscreenAtEnd_internal()
-    }
-
-    @FlakyTest(bugId = 250528485)
-    @Test
-    fun secondaryAppBoundsIsFullscreenAtEnd_shellTransit() {
-        Assume.assumeTrue(isShellTransitionsEnabled)
-        secondaryAppBoundsIsFullscreenAtEnd_internal()
     }
 
     @Presubmit
