@@ -83,12 +83,6 @@ public class RemoteAnimationAdapterCompat {
                     RemoteAnimationTarget[] wallpapers,
                     RemoteAnimationTarget[] nonApps,
                     final IRemoteAnimationFinishedCallback finishedCallback) {
-                final RemoteAnimationTargetCompat[] appsCompat =
-                        RemoteAnimationTargetCompat.wrap(apps);
-                final RemoteAnimationTargetCompat[] wallpapersCompat =
-                        RemoteAnimationTargetCompat.wrap(wallpapers);
-                final RemoteAnimationTargetCompat[] nonAppsCompat =
-                        RemoteAnimationTargetCompat.wrap(nonApps);
                 final Runnable animationFinishedCallback = new Runnable() {
                     @Override
                     public void run() {
@@ -100,8 +94,8 @@ public class RemoteAnimationAdapterCompat {
                         }
                     }
                 };
-                remoteAnimationAdapter.onAnimationStart(transit, appsCompat, wallpapersCompat,
-                        nonAppsCompat, animationFinishedCallback);
+                remoteAnimationAdapter.onAnimationStart(transit, apps, wallpapers,
+                        nonApps, animationFinishedCallback);
             }
 
             @Override
@@ -121,12 +115,12 @@ public class RemoteAnimationAdapterCompat {
                     SurfaceControl.Transaction t,
                     IRemoteTransitionFinishedCallback finishCallback) {
                 final ArrayMap<SurfaceControl, SurfaceControl> leashMap = new ArrayMap<>();
-                final RemoteAnimationTargetCompat[] appsCompat =
+                final RemoteAnimationTarget[] apps =
                         RemoteAnimationTargetCompat.wrapApps(info, t, leashMap);
-                final RemoteAnimationTargetCompat[] wallpapersCompat =
+                final RemoteAnimationTarget[] wallpapers =
                         RemoteAnimationTargetCompat.wrapNonApps(
                                 info, true /* wallpapers */, t, leashMap);
-                final RemoteAnimationTargetCompat[] nonAppsCompat =
+                final RemoteAnimationTarget[] nonApps =
                         RemoteAnimationTargetCompat.wrapNonApps(
                                 info, false /* wallpapers */, t, leashMap);
 
@@ -189,9 +183,9 @@ public class RemoteAnimationAdapterCompat {
                         }
                     }
                     // Make wallpaper visible immediately since launcher apparently won't do this.
-                    for (int i = wallpapersCompat.length - 1; i >= 0; --i) {
-                        t.show(wallpapersCompat[i].leash);
-                        t.setAlpha(wallpapersCompat[i].leash, 1.f);
+                    for (int i = wallpapers.length - 1; i >= 0; --i) {
+                        t.show(wallpapers[i].leash);
+                        t.setAlpha(wallpapers[i].leash, 1.f);
                     }
                 } else {
                     if (launcherTask != null) {
@@ -237,7 +231,7 @@ public class RemoteAnimationAdapterCompat {
                 }
                 // TODO(bc-unlcok): Pass correct transit type.
                 remoteAnimationAdapter.onAnimationStart(TRANSIT_OLD_NONE,
-                        appsCompat, wallpapersCompat, nonAppsCompat, () -> {
+                        apps, wallpapers, nonApps, () -> {
                             synchronized (mFinishRunnables) {
                                 if (mFinishRunnables.remove(token) == null) return;
                             }
