@@ -100,16 +100,16 @@ class KeyguardPatternViewControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun onPause_clearsTextField() {
+    fun onPause_resetsText() {
         mKeyguardPatternViewController.init()
         mKeyguardPatternViewController.onPause()
-        verify(mKeyguardMessageAreaController).setMessage("")
+        verify(mKeyguardMessageAreaController).setMessage(R.string.keyguard_enter_your_pattern)
     }
 
+
     @Test
-    fun onResume_setInitialText() {
-        mKeyguardPatternViewController.onResume(KeyguardSecurityView.SCREEN_ON)
-        verify(mKeyguardMessageAreaController)
-            .setMessageIfEmpty(R.string.keyguard_enter_your_pattern)
+    fun startAppearAnimation() {
+        mKeyguardPatternViewController.startAppearAnimation()
+        verify(mKeyguardMessageAreaController).setMessage(R.string.keyguard_enter_your_pattern)
     }
 }

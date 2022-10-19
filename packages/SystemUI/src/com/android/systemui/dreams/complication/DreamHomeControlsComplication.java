@@ -210,7 +210,8 @@ public class DreamHomeControlsComplication implements Complication {
 
             final Intent intent = new Intent(mContext, ControlsActivity.class)
                     .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK)
-                    .putExtra(ControlsUiController.EXTRA_ANIMATE, true);
+                    .putExtra(ControlsUiController.EXTRA_ANIMATE, true)
+                    .putExtra(ControlsUiController.EXIT_TO_DREAM, true);
 
             final ActivityLaunchAnimator.Controller controller =
                     v != null ? ActivityLaunchAnimator.Controller.fromView(v, null /* cujType */)

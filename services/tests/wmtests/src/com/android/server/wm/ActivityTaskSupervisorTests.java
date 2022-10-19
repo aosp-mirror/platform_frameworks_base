@@ -40,14 +40,18 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 
+import android.app.ActivityOptions;
 import android.app.WaitResult;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.os.Binder;
 import android.os.ConditionVariable;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.view.Display;
@@ -307,5 +311,41 @@ public class ActivityTaskSupervisorTests extends WindowTestsBase {
         mSupervisor.onUserUnlocked(0);
         waitHandlerIdle(mAtm.mH);
         verify(mRootWindowContainer, timeout(TIMEOUT_MS)).startHomeOnEmptyDisplays("userUnlocked");
+    }
+
+    /** Verifies that launch from recents sets the launch cookie on the activity. */
+    @Test
+    public void testStartActivityFromRecents_withLaunchCookie() {
+        final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
+
+        IBinder launchCookie = new Binder("test_launch_cookie");
+        ActivityOptions options = ActivityOptions.makeBasic();
+        options.setLaunchCookie(launchCookie);
+        SafeActivityOptions safeOptions = SafeActivityOptions.fromBundle(options.toBundle());
+
+        doNothing().when(mSupervisor.mService).moveTaskToFrontLocked(eq(null), eq(null), anyInt(),
+                anyInt(), any());
+
+        mSupervisor.startActivityFromRecents(-1, -1, activity.getRootTaskId(), safeOptions);
+
+        assertThat(activity.mLaunchCookie).isEqualTo(launchCookie);
+        verify(mAtm).moveTaskToFrontLocked(any(), eq(null), anyInt(), anyInt(), eq(safeOptions));
+    }
+
+    /** Verifies that launch from recents doesn't set the launch cookie on the activity. */
+    @Test
+    public void testStartActivityFromRecents_withoutLaunchCookie() {
+        final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
+
+        SafeActivityOptions safeOptions = SafeActivityOptions.fromBundle(
+                ActivityOptions.makeBasic().toBundle());
+
+        doNothing().when(mSupervisor.mService).moveTaskToFrontLocked(eq(null), eq(null), anyInt(),
+                anyInt(), any());
+
+        mSupervisor.startActivityFromRecents(-1, -1, activity.getRootTaskId(), safeOptions);
+
+        assertThat(activity.mLaunchCookie).isNull();
+        verify(mAtm).moveTaskToFrontLocked(any(), eq(null), anyInt(), anyInt(), eq(safeOptions));
     }
 }
