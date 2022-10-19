@@ -1005,7 +1005,6 @@ public class MmTelFeature extends ImsFeature {
     }
 
     /**
-     * Notifies the MmTelFeature that the network has initiated an SRVCC for all IMS calls.
      * Notifies the MmTelFeature that the network has initiated an SRVCC (Single radio voice
      * call continuity) for all IMS calls. When the network initiates an SRVCC, calls from
      * the LTE domain are handed over to the legacy circuit switched domain. The modem requires
