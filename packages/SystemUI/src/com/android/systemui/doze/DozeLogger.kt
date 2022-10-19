@@ -224,10 +224,14 @@ class DozeLogger @Inject constructor(
         })
     }
 
-    fun logPulseDropped(from: String, state: DozeMachine.State) {
+    /**
+     * Log why a pulse was dropped and the current doze machine state. The state can be null
+     * if the DozeMachine is the middle of transitioning between states.
+     */
+    fun logPulseDropped(from: String, state: DozeMachine.State?) {
         buffer.log(TAG, INFO, {
             str1 = from
-            str2 = state.name
+            str2 = state?.name
         }, {
             "Pulse dropped, cannot pulse from=$str1 state=$str2"
         })
