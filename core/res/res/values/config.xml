@@ -2612,6 +2612,9 @@
          movement threshold under which hover is considered "stationary". -->
     <dimen name="config_viewConfigurationHoverSlop">4dp</dimen>
 
+    <!-- Margin around text line bounds where stylus handwriting gestures should be supported. -->
+    <dimen name="config_viewConfigurationHandwritingGestureLineMargin">16dp</dimen>
+
     <!-- Multiplier for gesture thresholds when a MotionEvent classification is ambiguous. -->
     <item name="config_ambiguousGestureMultiplier" format="float" type="dimen">2.0</item>
 

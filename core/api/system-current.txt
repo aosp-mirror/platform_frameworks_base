@@ -401,6 +401,7 @@ package android {
 
   public static final class R.dimen {
     field public static final int config_restrictedIconSize = 17104903; // 0x1050007
+    field public static final int config_viewConfigurationHandwritingGestureLineMargin;
   }
 
   public static final class R.drawable {

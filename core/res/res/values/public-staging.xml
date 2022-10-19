@@ -131,6 +131,8 @@
   </staging-public-group>
 
   <staging-public-group type="dimen" first-id="0x01ca0000">
+    <!-- @hide @SystemApi -->
+    <public name="config_viewConfigurationHandwritingGestureLineMargin" />
   </staging-public-group>
 
   <staging-public-group type="color" first-id="0x01c90000">
