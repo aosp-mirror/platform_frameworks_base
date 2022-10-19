@@ -16,7 +16,6 @@
 
 package com.android.systemui;
 
-import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.Application;
 import android.app.Notification;
@@ -29,7 +28,6 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Looper;
 import android.os.Process;
-import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
@@ -128,13 +126,6 @@ public class SystemUIApplication extends Application implements
                         + ThreadedRenderer.EGL_CONTEXT_PRIORITY_HIGH_IMG);
                 ThreadedRenderer.setContextPriority(
                         ThreadedRenderer.EGL_CONTEXT_PRIORITY_HIGH_IMG);
-            }
-
-            // Enable binder tracing on system server for calls originating from SysUI
-            try {
-                ActivityManager.getService().enableBinderTracing();
-            } catch (RemoteException e) {
-                Log.e(TAG, "Unable to enable binder tracing", e);
             }
 
             registerReceiver(new BroadcastReceiver() {
