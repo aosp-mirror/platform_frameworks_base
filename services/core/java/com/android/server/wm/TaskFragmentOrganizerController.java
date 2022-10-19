@@ -184,19 +184,30 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         }
 
         void dispose() {
-            while (!mOrganizedTaskFragments.isEmpty()) {
-                final TaskFragment taskFragment = mOrganizedTaskFragments.get(0);
-                // Cleanup before remove to prevent it from sending any additional event, such as
-                // #onTaskFragmentVanished, to the removed organizer.
+            for (int i = mOrganizedTaskFragments.size() - 1; i >= 0; i--) {
+                // Cleanup the TaskFragmentOrganizer from all TaskFragments it organized before
+                // removing the windows to prevent it from adding any additional TaskFragment
+                // pending event.
+                final TaskFragment taskFragment = mOrganizedTaskFragments.get(i);
                 taskFragment.onTaskFragmentOrganizerRemoved();
-                taskFragment.removeImmediately();
-                mOrganizedTaskFragments.remove(taskFragment);
             }
+
+            // Defer to avoid unnecessary layout when there are multiple TaskFragments removal.
+            mAtmService.deferWindowLayout();
+            try {
+                while (!mOrganizedTaskFragments.isEmpty()) {
+                    final TaskFragment taskFragment = mOrganizedTaskFragments.remove(0);
+                    taskFragment.removeImmediately();
+                }
+            } finally {
+                mAtmService.continueWindowLayout();
+            }
+
             for (int i = mDeferredTransitions.size() - 1; i >= 0; i--) {
                 // Cleanup any running transaction to unblock the current transition.
                 onTransactionFinished(mDeferredTransitions.keyAt(i));
             }
-            mOrganizer.asBinder().unlinkToDeath(this, 0 /*flags*/);
+            mOrganizer.asBinder().unlinkToDeath(this, 0 /* flags */);
         }
 
         @NonNull
@@ -426,7 +437,6 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
 
     @Override
     public void unregisterOrganizer(@NonNull ITaskFragmentOrganizer organizer) {
-        validateAndGetState(organizer);
         final int pid = Binder.getCallingPid();
         final long uid = Binder.getCallingUid();
         final long origId = Binder.clearCallingIdentity();
@@ -697,11 +707,17 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
     }
 
     private void removeOrganizer(@NonNull ITaskFragmentOrganizer organizer) {
-        final TaskFragmentOrganizerState state = validateAndGetState(organizer);
+        final TaskFragmentOrganizerState state = mTaskFragmentOrganizerState.get(
+                organizer.asBinder());
+        if (state == null) {
+            Slog.w(TAG, "The organizer has already been removed.");
+            return;
+        }
+        // Remove any pending event of this organizer first because state.dispose() may trigger
+        // event dispatch as result of surface placement.
+        mPendingTaskFragmentEvents.remove(organizer.asBinder());
         // remove all of the children of the organized TaskFragment
         state.dispose();
-        // Remove any pending event of this organizer.
-        mPendingTaskFragmentEvents.remove(organizer.asBinder());
         mTaskFragmentOrganizerState.remove(organizer.asBinder());
     }
 
