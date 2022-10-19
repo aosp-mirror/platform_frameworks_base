@@ -43,11 +43,7 @@ protected constructor(
     }
 
     override fun getCount(): Int {
-        return if (controller.isKeyguardShowing) {
-            users.count { !it.isRestricted }
-        } else {
-            users.size
-        }
+        return users.size
     }
 
     override fun getItem(position: Int): UserRecord {

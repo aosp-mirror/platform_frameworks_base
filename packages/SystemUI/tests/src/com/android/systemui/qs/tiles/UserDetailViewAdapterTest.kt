@@ -33,6 +33,7 @@ import com.android.systemui.qs.QSUserSwitcherEvent
 import com.android.systemui.statusbar.policy.UserSwitcherController
 import com.android.systemui.user.data.source.UserRecord
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -137,6 +138,11 @@ class UserDetailViewAdapterTest : SysuiTestCase() {
     @Test
     fun testNotGuestNotCurrentUserIsClickable_sameView() {
         clickableTest(false, false, mUserDetailItemView, true)
+    }
+
+    @Test
+    fun testManageUsersIsNotAvailable() {
+        assertNull(adapter.users.find { it.isManageUsers })
     }
 
     private fun createUserRecord(current: Boolean, guest: Boolean) =
