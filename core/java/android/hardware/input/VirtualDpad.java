@@ -24,7 +24,6 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.view.KeyEvent;
 
-import java.io.Closeable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -39,7 +38,7 @@ import java.util.Set;
  * @hide
  */
 @SystemApi
-public class VirtualDpad implements Closeable {
+public class VirtualDpad extends VirtualInputDevice {
 
     private final Set<Integer> mSupportedKeyCodes =
             Collections.unmodifiableSet(
@@ -50,23 +49,10 @@ public class VirtualDpad implements Closeable {
                                     KeyEvent.KEYCODE_DPAD_LEFT,
                                     KeyEvent.KEYCODE_DPAD_RIGHT,
                                     KeyEvent.KEYCODE_DPAD_CENTER)));
-    private final IVirtualDevice mVirtualDevice;
-    private final IBinder mToken;
 
     /** @hide */
     public VirtualDpad(IVirtualDevice virtualDevice, IBinder token) {
-        mVirtualDevice = virtualDevice;
-        mToken = token;
-    }
-
-    @Override
-    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
-    public void close() {
-        try {
-            mVirtualDevice.unregisterInputDevice(mToken);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        super(virtualDevice, token);
     }
 
     /**

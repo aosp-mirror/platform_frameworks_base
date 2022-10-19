@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,37 +16,45 @@
 
 package android.hardware.input;
 
-import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
-import android.annotation.SystemApi;
 import android.companion.virtual.IVirtualDevice;
 import android.os.IBinder;
 import android.os.RemoteException;
 
+import java.io.Closeable;
+
 /**
- * A virtual touchscreen representing a touch-based display input mechanism on a remote device.
- *
- * This registers an InputDevice that is interpreted like a physically-connected device and
- * dispatches received events to it.
+ * The base class for all virtual input devices such as VirtualKeyboard, VirtualMouse.
+ * This implements the shared functionality such as closing the device and keeping track of
+ * identifiers.
  *
  * @hide
  */
-@SystemApi
-public class VirtualTouchscreen extends VirtualInputDevice {
-    /** @hide */
-    public VirtualTouchscreen(IVirtualDevice virtualDevice, IBinder token) {
-        super(virtualDevice, token);
-    }
+abstract class VirtualInputDevice implements Closeable {
 
     /**
-     * Sends a touch event to the system.
-     *
-     * @param event the event to send
+     * The virtual device to which this VirtualInputDevice belongs to.
      */
+    protected final IVirtualDevice mVirtualDevice;
+
+    /**
+     * The token used to uniquely identify the virtual input device.
+     */
+    protected final IBinder mToken;
+
+    /** @hide */
+    VirtualInputDevice(
+            IVirtualDevice virtualDevice, IBinder token) {
+        mVirtualDevice = virtualDevice;
+        mToken = token;
+    }
+
+
+    @Override
     @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
-    public void sendTouchEvent(@NonNull VirtualTouchEvent event) {
+    public void close() {
         try {
-            mVirtualDevice.sendTouchEvent(mToken, event);
+            mVirtualDevice.unregisterInputDevice(mToken);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
