@@ -64,7 +64,6 @@ import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.sysui.ShellSharedConstants;
-import com.android.wm.shell.transition.Transitions;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -103,9 +102,6 @@ public class BackAnimationControllerTest extends ShellTestCase {
     private IRemoteAnimationRunner mBackAnimationRunner;
 
     @Mock
-    private Transitions mTransitions;
-
-    @Mock
     private ShellController mShellController;
 
     private BackAnimationController mController;
@@ -127,7 +123,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
         mController = new BackAnimationController(mShellInit, mShellController,
                 mShellExecutor, new Handler(mTestableLooper.getLooper()),
                 mActivityTaskManager, mContext,
-                mContentResolver, mTransitions);
+                mContentResolver);
         mController.setEnableUAnimation(true);
         mShellInit.init();
         mEventTime = 0;
@@ -225,7 +221,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
         mController = new BackAnimationController(shellInit, mShellController,
                 mShellExecutor, new Handler(mTestableLooper.getLooper()),
                 mActivityTaskManager, mContext,
-                mContentResolver, mTransitions);
+                mContentResolver);
         shellInit.init();
         mController.setBackToLauncherCallback(mIOnBackInvokedCallback, mBackAnimationRunner);
 
