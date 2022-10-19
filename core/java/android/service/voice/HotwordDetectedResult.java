@@ -32,6 +32,7 @@ import com.android.internal.util.DataClass;
 import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -203,7 +204,7 @@ public final class HotwordDetectedResult implements Parcelable {
     @NonNull
     private final List<HotwordAudioStream> mAudioStreams;
     private static List<HotwordAudioStream> defaultAudioStreams() {
-        return new ArrayList<>();
+        return Collections.emptyList();
     }
 
     /**
