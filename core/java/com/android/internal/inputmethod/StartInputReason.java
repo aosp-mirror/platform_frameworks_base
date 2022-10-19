@@ -31,6 +31,7 @@ import java.lang.annotation.Retention;
         StartInputReason.UNSPECIFIED,
         StartInputReason.WINDOW_FOCUS_GAIN,
         StartInputReason.WINDOW_FOCUS_GAIN_REPORT_ONLY,
+        StartInputReason.SCHEDULED_CHECK_FOCUS,
         StartInputReason.APP_CALLED_RESTART_INPUT_API,
         StartInputReason.CHECK_FOCUS,
         StartInputReason.BOUND_TO_IMMS,
@@ -57,6 +58,11 @@ public @interface StartInputReason {
      * this window focus change event to sync IME input target for system.
      */
     int WINDOW_FOCUS_GAIN_REPORT_ONLY = 2;
+    /**
+     * Similar to {@link #CHECK_FOCUS}, but the one scheduled with
+     * {@link android.view.ViewRootImpl#dispatchCheckFocus()}.
+     */
+    int SCHEDULED_CHECK_FOCUS = 3;
     /**
      * {@link android.view.inputmethod.InputMethodManager#restartInput(android.view.View)} is
      * either explicitly called by the application or indirectly called by some Framework class

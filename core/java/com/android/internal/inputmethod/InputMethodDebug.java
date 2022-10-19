@@ -49,6 +49,8 @@ public final class InputMethodDebug {
                 return "WINDOW_FOCUS_GAIN";
             case StartInputReason.WINDOW_FOCUS_GAIN_REPORT_ONLY:
                 return "WINDOW_FOCUS_GAIN_REPORT_ONLY";
+            case StartInputReason.SCHEDULED_CHECK_FOCUS:
+                return "SCHEDULED_CHECK_FOCUS";
             case StartInputReason.APP_CALLED_RESTART_INPUT_API:
                 return "APP_CALLED_RESTART_INPUT_API";
             case StartInputReason.CHECK_FOCUS:

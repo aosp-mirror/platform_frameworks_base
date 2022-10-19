@@ -789,7 +789,7 @@ public final class InputMethodManager {
                 }
             }
 
-            if (checkFocusInternal(forceNewFocus, false, viewRootImpl)) {
+            if (checkFocusInternal(forceNewFocus, viewRootImpl)) {
                 // We need to restart input on the current focus view.  This
                 // should be done in conjunction with telling the system service
                 // about the window gaining focus, to help make the transition
@@ -826,7 +826,12 @@ public final class InputMethodManager {
 
         @Override
         public void onScheduledCheckFocus(@NonNull ViewRootImpl viewRootImpl) {
-            checkFocusInternal(false, true, viewRootImpl);
+            if (!checkFocusInternal(false, viewRootImpl)) {
+                return;
+            }
+            startInputOnWindowFocusGainInternal(StartInputReason.SCHEDULED_CHECK_FOCUS,
+                    null /* focusedView */, 0 /* startInputFlags */, 0 /* softInputMode */,
+                    0 /* windowFlags */);
         }
 
         @Override
@@ -1118,7 +1123,7 @@ public final class InputMethodManager {
                         if (mCurRootView == null) {
                             return;
                         }
-                        if (!checkFocusInternal(mRestartOnNextWindowFocus, false, mCurRootView)) {
+                        if (!checkFocusInternal(mRestartOnNextWindowFocus, mCurRootView)) {
                             return;
                         }
                         final int reason = active ? StartInputReason.ACTIVATED_BY_IMMS
@@ -2338,8 +2343,7 @@ public final class InputMethodManager {
     }
 
     /**
-     * Called from {@link #checkFocusInternal(boolean, boolean, ViewRootImpl)},
-     * {@link #restartInput(View)}, {@link #MSG_BIND} or {@link #MSG_UNBIND}.
+     * Starts an input connection from the served view that gains the window focus.
      * Note that this method should *NOT* be called inside of {@code mH} lock to prevent start input
      * background thread may blocked by other methods which already inside {@code mH} lock.
      */
@@ -2660,14 +2664,18 @@ public final class InputMethodManager {
             }
             viewRootImpl = mCurRootView;
         }
-        checkFocusInternal(false /* forceNewFocus */, true /* startInput */, viewRootImpl);
+        if (!checkFocusInternal(false /* forceNewFocus */, viewRootImpl)) {
+            return;
+        }
+        startInputOnWindowFocusGainInternal(StartInputReason.CHECK_FOCUS,
+                null /* focusedView */,
+                0 /* startInputFlags */, 0 /* softInputMode */, 0 /* windowFlags */);
     }
 
     /**
      * Check the next served view if needs to start input.
      */
-    private boolean checkFocusInternal(boolean forceNewFocus, boolean startInput,
-            ViewRootImpl viewRootImpl) {
+    private boolean checkFocusInternal(boolean forceNewFocus, ViewRootImpl viewRootImpl) {
         synchronized (mH) {
             if (mCurRootView != viewRootImpl) {
                 return false;
@@ -2693,12 +2701,6 @@ public final class InputMethodManager {
             if (mServedInputConnection != null) {
                 mServedInputConnection.finishComposingTextFromImm();
             }
-        }
-
-        if (startInput) {
-            startInputOnWindowFocusGainInternal(StartInputReason.CHECK_FOCUS,
-                    null /* focusedView */,
-                    0 /* startInputFlags */, 0 /* softInputMode */, 0 /* windowFlags */);
         }
         return true;
     }
