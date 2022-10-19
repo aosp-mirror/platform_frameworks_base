@@ -73,7 +73,11 @@ public class Flags {
 
     public static final UnreleasedFlag NOTIFICATION_DISMISSAL_FADE = new UnreleasedFlag(113, true);
 
-    // next id: 114
+    public static final UnreleasedFlag STABILITY_INDEX_FIX = new UnreleasedFlag(114, true);
+
+    public static final UnreleasedFlag SEMI_STABLE_SORT = new UnreleasedFlag(115, true);
+
+    // next id: 116
 
     /***************************************/
     // 200 - keyguard/lockscreen
