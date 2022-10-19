@@ -1068,4 +1068,345 @@ TEST_F(ManifestFixerTest, ComponentPropertyOnlyOneAttributeDefined) {
       </manifest>)";
   EXPECT_THAT(Verify(input), NotNull());
 }
+
+TEST_F(ManifestFixerTest, IntentFilterActionMustHaveNonEmptyName) {
+  std::string input = R"(
+    <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="android">
+      <application>
+        <activity android:name=".MainActivity">
+          <intent-filter>
+            <action android:name="" />
+          </intent-filter>
+        </activity>
+      </application>
+    </manifest>)";
+  EXPECT_THAT(Verify(input), IsNull());
+
+  input = R"(
+    <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+             package="android">
+      <application>
+        <activity android:name=".MainActivity">
+          <intent-filter>
+            <action />
+          </intent-filter>
+        </activity>
+      </application>
+    </manifest>)";
+  EXPECT_THAT(Verify(input), IsNull());
+
+  input = R"(
+    <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="android">
+      <application>
+        <activity android:name=".MainActivity">
+          <intent-filter>
+            <action android:name="android.intent.action.MAIN" />
+          </intent-filter>
+        </activity>
+      </application>
+    </manifest>)";
+  EXPECT_THAT(Verify(input), NotNull());
+}
+
+TEST_F(ManifestFixerTest, IntentFilterCategoryMustHaveNonEmptyName) {
+  std::string input = R"(
+    <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="android">
+      <application>
+        <activity android:name=".MainActivity">
+          <intent-filter>
+            <category android:name="" />
+          </intent-filter>
+        </activity>
+      </application>
+    </manifest>)";
+  EXPECT_THAT(Verify(input), IsNull());
+
+  input = R"(
+    <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+             package="android">
+      <application>
+        <activity android:name=".MainActivity">
+          <intent-filter>
+            <category />
+          </intent-filter>
+        </activity>
+      </application>
+    </manifest>)";
+  EXPECT_THAT(Verify(input), IsNull());
+
+  input = R"(
+    <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="android">
+      <application>
+        <activity android:name=".MainActivity">
+          <intent-filter>
+            <category android:name="android.intent.category.LAUNCHER" />
+          </intent-filter>
+        </activity>
+      </application>
+    </manifest>)";
+  EXPECT_THAT(Verify(input), NotNull());
+}
+
+TEST_F(ManifestFixerTest, IntentFilterPathMustStartWithLeadingSlashOnDeepLinks) {
+  // No DeepLink.
+  std::string input = R"(
+    <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+             package="android">
+      <application>
+        <activity android:name=".MainActivity">
+          <intent-filter>
+            <data />
+          </intent-filter>
+        </activity>
+      </application>
+    </manifest>)";
+  EXPECT_THAT(Verify(input), NotNull());
+
+  // No DeepLink, missing ACTION_VIEW.
+  input = R"(
+    <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="android">
+      <application>
+        <activity android:name=".MainActivity">
+          <intent-filter>
+            <category android:name="android.intent.category.DEFAULT" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="http"
+                          android:host="www.example.com"
+                          android:pathPrefix="pathPattern" />
+          </intent-filter>
+        </activity>
+      </application>
+    </manifest>)";
+  EXPECT_THAT(Verify(input), NotNull());
+
+  // DeepLink, missing DEFAULT category while DEFAULT is recommended but not required.
+  input = R"(
+    <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="android">
+      <application>
+        <activity android:name=".MainActivity">
+          <intent-filter>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="http"
+                          android:host="www.example.com"
+                          android:pathPrefix="pathPattern" />
+          </intent-filter>
+        </activity>
+      </application>
+    </manifest>)";
+  EXPECT_THAT(Verify(input), IsNull());
+
+  // No DeepLink, missing BROWSABLE category.
+  input = R"(
+    <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="android">
+      <application>
+        <activity android:name=".MainActivity">
+          <intent-filter>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.DEFAULT" />
+            <data android:scheme="http"
+                          android:host="www.example.com"
+                          android:pathPrefix="pathPattern" />
+          </intent-filter>
+        </activity>
+      </application>
+    </manifest>)";
+  EXPECT_THAT(Verify(input), NotNull());
+
+  // No DeepLink, missing 'android:scheme' in <data> tag.
+  input = R"(
+    <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="android">
+      <application>
+        <activity android:name=".MainActivity">
+          <intent-filter>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.DEFAULT" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:host="www.example.com"
+                          android:pathPrefix="pathPattern" />
+          </intent-filter>
+        </activity>
+      </application>
+    </manifest>)";
+  EXPECT_THAT(Verify(input), NotNull());
+
+  // No DeepLink, <action> is ACTION_MAIN not ACTION_VIEW.
+  input = R"(
+    <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="android">
+      <application>
+        <activity android:name=".MainActivity">
+          <intent-filter>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.DEFAULT" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="http"
+                          android:host="www.example.com"
+                          android:pathPrefix="pathPattern" />
+          </intent-filter>
+        </activity>
+      </application>
+    </manifest>)";
+  EXPECT_THAT(Verify(input), NotNull());
+
+  // DeepLink with no leading slash in android:path.
+  input = R"(
+    <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="android">
+      <application>
+        <activity android:name=".MainActivity">
+          <intent-filter>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.DEFAULT" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="http"
+                          android:host="www.example.com"
+                          android:path="path" />
+          </intent-filter>
+        </activity>
+      </application>
+    </manifest>)";
+  EXPECT_THAT(Verify(input), IsNull());
+
+  // DeepLink with leading slash in android:path.
+  input = R"(
+    <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="android">
+      <application>
+        <activity android:name=".MainActivity">
+          <intent-filter>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.DEFAULT" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="http"
+                          android:host="www.example.com"
+                          android:path="/path" />
+          </intent-filter>
+        </activity>
+      </application>
+    </manifest>)";
+  EXPECT_THAT(Verify(input), NotNull());
+
+  // DeepLink with no leading slash in android:pathPrefix.
+  input = R"(
+    <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="android">
+      <application>
+        <activity android:name=".MainActivity">
+          <intent-filter>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.DEFAULT" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="http"
+                          android:host="www.example.com"
+                          android:pathPrefix="pathPrefix" />
+          </intent-filter>
+        </activity>
+      </application>
+    </manifest>)";
+  EXPECT_THAT(Verify(input), IsNull());
+
+  // DeepLink with leading slash in android:pathPrefix.
+  input = R"(
+    <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="android">
+      <application>
+        <activity android:name=".MainActivity">
+          <intent-filter>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.DEFAULT" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="http"
+                          android:host="www.example.com"
+                          android:pathPrefix="/pathPrefix" />
+          </intent-filter>
+        </activity>
+      </application>
+    </manifest>)";
+  EXPECT_THAT(Verify(input), NotNull());
+
+  // DeepLink with no leading slash in android:pathPattern.
+  input = R"(
+    <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="android">
+      <application>
+        <activity android:name=".MainActivity">
+          <intent-filter>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.DEFAULT" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="http"
+                          android:host="www.example.com"
+                          android:pathPattern="pathPattern" />
+          </intent-filter>
+        </activity>
+      </application>
+    </manifest>)";
+  EXPECT_THAT(Verify(input), IsNull());
+
+  // DeepLink with leading slash in android:pathPattern.
+  input = R"(
+    <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="android">
+      <application>
+        <activity android:name=".MainActivity">
+          <intent-filter>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.DEFAULT" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="http"
+                          android:host="www.example.com"
+                          android:pathPattern="/pathPattern" />
+          </intent-filter>
+        </activity>
+      </application>
+    </manifest>)";
+  EXPECT_THAT(Verify(input), NotNull());
+
+  // DeepLink with '.' start in pathPattern.
+  input = R"(
+    <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="android">
+      <application>
+        <activity android:name=".MainActivity">
+          <intent-filter>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.DEFAULT" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="http"
+                          android:host="www.example.com"
+                          android:pathPattern=".*\\.pathPattern" />
+          </intent-filter>
+        </activity>
+      </application>
+    </manifest>)";
+  EXPECT_THAT(Verify(input), NotNull());
+
+  // DeepLink with '*' start in pathPattern.
+  input = R"(
+    <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="android">
+      <application>
+        <activity android:name=".MainActivity">
+          <intent-filter>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.DEFAULT" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="http"
+                          android:host="www.example.com"
+                          android:pathPattern="*" />
+          </intent-filter>
+        </activity>
+      </application>
+    </manifest>)";
+  EXPECT_THAT(Verify(input), NotNull());
+}
 }  // namespace aapt
