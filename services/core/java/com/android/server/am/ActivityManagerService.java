@@ -13893,7 +13893,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (DEBUG_BROADCAST_LIGHT) Slog.v(TAG_BROADCAST,
                 (sticky ? "Broadcast sticky: ": "Broadcast: ") + intent
                 + " ordered=" + ordered + " userid=" + userId);
-        if ((resultTo != null) && !ordered) {
+        if ((resultTo != null) && !ordered && !mEnableModernQueue) {
             Slog.w(TAG, "Broadcast " + intent + " not ordered but result callback requested!");
         }
 
@@ -16891,6 +16891,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         public boolean isSystemReady() {
             // no need to synchronize(this) just to read & return the value
             return mSystemReady;
+        }
+
+        @Override
+        public boolean isModernQueueEnabled() {
+            return mEnableModernQueue;
         }
 
         /**
