@@ -20,8 +20,12 @@ import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.android.credentialmanager.CredentialManagerRepo
+import com.android.credentialmanager.common.DialogResult
+import com.android.credentialmanager.common.ResultState
 
 data class CreatePasskeyUiState(
   val providers: List<ProviderInfo>,
@@ -35,6 +39,14 @@ class CreatePasskeyViewModel(
 
   var uiState by mutableStateOf(credManRepo.createPasskeyInitialUiState())
     private set
+
+  val dialogResult: MutableLiveData<DialogResult> by lazy {
+    MutableLiveData<DialogResult>()
+  }
+
+  fun observeDialogResult(): LiveData<DialogResult> {
+    return dialogResult
+  }
 
   fun onConfirmIntro() {
     if (uiState.providers.size > 1) {
@@ -60,6 +72,13 @@ class CreatePasskeyViewModel(
 
   fun onCreateOptionSelected(createOptionId: Int) {
     Log.d("Account Selector", "Option selected for creation: $createOptionId")
+    CredentialManagerRepo.getInstance().onOptionSelected(
+      uiState.selectedProvider!!.name,
+      createOptionId
+    )
+    dialogResult.value = DialogResult(
+      ResultState.COMPLETE,
+    )
   }
 
   fun getProviderInfoByName(providerName: String): ProviderInfo {
@@ -87,5 +106,10 @@ class CreatePasskeyViewModel(
       currentScreenState = CreateScreenState.MORE_OPTIONS_ROW_INTRO,
       selectedProvider = getProviderInfoByName(providerName)
     )
+  }
+
+  fun onCancel() {
+    CredentialManagerRepo.getInstance().onCancel()
+    dialogResult.value = DialogResult(ResultState.CANCELED)
   }
 }

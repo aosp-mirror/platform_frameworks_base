@@ -44,7 +44,6 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.credentialmanager.R
 import com.android.credentialmanager.createflow.CancelButton
 import com.android.credentialmanager.ui.theme.Grey100
@@ -55,8 +54,7 @@ import com.android.credentialmanager.ui.theme.lightBackgroundColor
 @ExperimentalMaterialApi
 @Composable
 fun GetCredentialScreen(
-  viewModel: GetCredentialViewModel = viewModel(),
-  cancelActivity: () -> Unit,
+  viewModel: GetCredentialViewModel,
 ) {
   val state = rememberModalBottomSheetState(
     initialValue = ModalBottomSheetValue.Expanded,
@@ -69,7 +67,7 @@ fun GetCredentialScreen(
       when (uiState.currentScreenState) {
         GetScreenState.CREDENTIAL_SELECTION -> CredentialSelectionCard(
           providerInfo = uiState.selectedProvider!!,
-          onCancel = cancelActivity,
+          onCancel = {viewModel.onCancel()},
           onOptionSelected = {viewModel.onCredentailSelected(it)},
           multiProvider = uiState.providers.size > 1,
           onMoreOptionSelected = {viewModel.onMoreOptionSelected()},
@@ -81,7 +79,7 @@ fun GetCredentialScreen(
   ) {}
   LaunchedEffect(state.currentValue) {
     if (state.currentValue == ModalBottomSheetValue.Hidden) {
-      cancelActivity()
+      viewModel.onCancel()
     }
   }
 }

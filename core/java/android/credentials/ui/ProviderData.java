@@ -41,7 +41,7 @@ public class ProviderData implements Parcelable {
             "android.credentials.ui.extra.PROVIDER_DATA_LIST";
 
     @NonNull
-    private final String mPackageName;
+    private final String mProviderId;
     @NonNull
     private final List<Entry> mCredentialEntries;
     @NonNull
@@ -50,11 +50,11 @@ public class ProviderData implements Parcelable {
     private final Entry mAuthenticationEntry;
 
     public ProviderData(
-            @NonNull String packageName,
+            @NonNull String providerId,
             @NonNull List<Entry> credentialEntries,
             @NonNull List<Entry> actionChips,
             @Nullable Entry authenticationEntry) {
-        mPackageName = packageName;
+        mProviderId = providerId;
         mCredentialEntries = credentialEntries;
         mActionChips = actionChips;
         mAuthenticationEntry = authenticationEntry;
@@ -62,8 +62,8 @@ public class ProviderData implements Parcelable {
 
     /** Returns the provider package name. */
     @NonNull
-    public String getPackageName() {
-        return mPackageName;
+    public String getProviderId() {
+        return mProviderId;
     }
 
     @NonNull
@@ -82,9 +82,9 @@ public class ProviderData implements Parcelable {
     }
 
     protected ProviderData(@NonNull Parcel in) {
-        String packageName = in.readString8();
-        mPackageName = packageName;
-        AnnotationValidations.validate(NonNull.class, null, mPackageName);
+        String providerId = in.readString8();
+        mProviderId = providerId;
+        AnnotationValidations.validate(NonNull.class, null, mProviderId);
 
         List<Entry> credentialEntries = new ArrayList<>();
         in.readTypedList(credentialEntries, Entry.CREATOR);
@@ -102,7 +102,7 @@ public class ProviderData implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeString8(mPackageName);
+        dest.writeString8(mProviderId);
         dest.writeTypedList(mCredentialEntries);
         dest.writeTypedList(mActionChips);
         dest.writeTypedObject(mAuthenticationEntry, flags);
