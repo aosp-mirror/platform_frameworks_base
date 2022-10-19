@@ -24,6 +24,47 @@ import org.intellij.lang.annotations.Language
 @NonNull
 private fun indentedJava(@NonNull @Language("JAVA") source: String) = java(source).indented()
 
+internal val commonSettingsCode =
+    """
+public static float getFloat(ContentResolver cr, String name) { return 0.0f; }
+public static long getLong(ContentResolver cr, String name) {
+    return 0L;
+}
+public static int getInt(ContentResolver cr, String name) {
+    return 0;
+}
+public static String getString(ContentResolver cr, String name) {
+    return "";
+}
+public static float getFloat(ContentResolver cr, String name, float def) {
+    return 0.0f;
+}
+public static long getLong(ContentResolver cr, String name, long def) {
+    return 0L;
+}
+public static int getInt(ContentResolver cr, String name, int def) {
+    return 0;
+}
+public static String getString(ContentResolver cr, String name, String def) {
+    return "";
+}
+public static boolean putFloat(ContentResolver cr, String name, float value) {
+    return true;
+}
+public static boolean putLong(ContentResolver cr, String name, long value) {
+    return true;
+}
+public static boolean putInt(ContentResolver cr, String name, int value) {
+    return true;
+}
+public static boolean putFloat(ContentResolver cr, String name) {
+    return true;
+}
+public static boolean putString(ContentResolver cr, String name, String value) {
+    return true;
+}
+"""
+
 /*
  * This file contains stubs of framework APIs and System UI classes for testing purposes only. The
  * stubs are not used in the lint detectors themselves.
@@ -183,6 +224,30 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 @Retention(SOURCE)
 @Target({METHOD,CONSTRUCTOR,TYPE,PARAMETER})
 public @interface WorkerThread {
+}
+"""
+        ),
+        indentedJava(
+            """
+package android.provider;
+
+public class Settings {
+    public static final class Global {
+        public static final String UNLOCK_SOUND = "unlock_sound";
+        """ +
+                commonSettingsCode +
+                """
+    }
+    public static final class Secure {
+    """ +
+                commonSettingsCode +
+                """
+    }
+    public static final class System {
+    """ +
+                commonSettingsCode +
+                """
+    }
 }
 """
         ),
