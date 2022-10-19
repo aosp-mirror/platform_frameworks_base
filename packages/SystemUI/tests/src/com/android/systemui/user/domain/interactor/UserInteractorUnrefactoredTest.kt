@@ -64,13 +64,7 @@ open class UserInteractorUnrefactoredTest : UserInteractorTest() {
     @Test
     fun `actions - not actionable when locked and not locked`() =
         runBlocking(IMMEDIATE) {
-            userRepository.setActions(
-                listOf(
-                    UserActionModel.ENTER_GUEST_MODE,
-                    UserActionModel.ADD_USER,
-                    UserActionModel.ADD_SUPERVISED_USER,
-                )
-            )
+            setActions()
             userRepository.setActionableWhenLocked(false)
             keyguardRepository.setKeyguardShowing(false)
 
@@ -92,13 +86,7 @@ open class UserInteractorUnrefactoredTest : UserInteractorTest() {
     @Test
     fun `actions - actionable when locked and not locked`() =
         runBlocking(IMMEDIATE) {
-            userRepository.setActions(
-                listOf(
-                    UserActionModel.ENTER_GUEST_MODE,
-                    UserActionModel.ADD_USER,
-                    UserActionModel.ADD_SUPERVISED_USER,
-                )
-            )
+            setActions()
             userRepository.setActionableWhenLocked(true)
             keyguardRepository.setKeyguardShowing(false)
 
@@ -120,13 +108,7 @@ open class UserInteractorUnrefactoredTest : UserInteractorTest() {
     @Test
     fun `actions - actionable when locked and locked`() =
         runBlocking(IMMEDIATE) {
-            userRepository.setActions(
-                listOf(
-                    UserActionModel.ENTER_GUEST_MODE,
-                    UserActionModel.ADD_USER,
-                    UserActionModel.ADD_SUPERVISED_USER,
-                )
-            )
+            setActions()
             userRepository.setActionableWhenLocked(true)
             keyguardRepository.setKeyguardShowing(true)
 
@@ -180,6 +162,10 @@ open class UserInteractorUnrefactoredTest : UserInteractorTest() {
         underTest.executeAction(UserActionModel.NAVIGATE_TO_USER_MANAGEMENT)
 
         verify(activityStarter).startActivity(any(), anyBoolean())
+    }
+
+    private fun setActions() {
+        userRepository.setActions(UserActionModel.values().toList())
     }
 
     companion object {
