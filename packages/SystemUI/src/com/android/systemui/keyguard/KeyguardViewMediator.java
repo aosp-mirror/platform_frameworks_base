@@ -91,6 +91,7 @@ import android.view.animation.AnimationUtils;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.jank.InteractionJankMonitor.Configuration;
@@ -321,6 +322,12 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
 
     // true if the keyguard is hidden by another window
     private boolean mOccluded = false;
+
+    /**
+     * Whether the {@link #mOccludeAnimationController} is currently playing the occlusion
+     * animation.
+     */
+    private boolean mOccludeAnimationPlaying = false;
 
     private boolean mWakeAndUnlocking = false;
 
@@ -831,15 +838,22 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     /**
      * Animation launch controller for activities that occlude the keyguard.
      */
-    private final ActivityLaunchAnimator.Controller mOccludeAnimationController =
+    @VisibleForTesting
+    final ActivityLaunchAnimator.Controller mOccludeAnimationController =
             new ActivityLaunchAnimator.Controller() {
                 @Override
-                public void onLaunchAnimationStart(boolean isExpandingFullyAbove) {}
+                public void onLaunchAnimationStart(boolean isExpandingFullyAbove) {
+                    mOccludeAnimationPlaying = true;
+                }
 
                 @Override
                 public void onLaunchAnimationCancelled(@Nullable Boolean newKeyguardOccludedState) {
                     Log.d(TAG, "Occlude launch animation cancelled. Occluded state is now: "
                             + mOccluded);
+                    mOccludeAnimationPlaying = false;
+
+                    // Ensure keyguard state is set correctly if we're cancelled.
+                    mCentralSurfaces.updateIsKeyguard();
                 }
 
                 @Override
@@ -847,6 +861,12 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                     if (launchIsFullScreen) {
                         mCentralSurfaces.instantCollapseNotificationPanel();
                     }
+
+                    mOccludeAnimationPlaying = false;
+
+                    // Hide the keyguard now that we're done launching the occluding activity over
+                    // it.
+                    mCentralSurfaces.updateIsKeyguard();
 
                     mInteractionJankMonitor.end(CUJ_LOCKSCREEN_OCCLUSION);
                 }
@@ -1758,6 +1778,10 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
      */
     public boolean isShowingAndNotOccluded() {
         return mShowing && !mOccluded;
+    }
+
+    public boolean isOccludeAnimationPlaying() {
+        return mOccludeAnimationPlaying;
     }
 
     /**
