@@ -14,21 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.footer.ui.viewmodel
+package com.android.systemui.compose.theme
 
 import android.annotation.AttrRes
-import android.annotation.ColorInt
-import com.android.systemui.animation.Expandable
-import com.android.systemui.common.shared.model.Icon
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 
-/**
- * A ViewModel for a simple footer actions button. This is used for the user switcher, settings and
- * power buttons.
- */
-data class FooterActionsButtonViewModel(
-    val id: Int,
-    val icon: Icon,
-    @ColorInt val iconTint: Int?,
-    @AttrRes val backgroundColor: Int,
-    val onClick: (Expandable) -> Unit,
-)
+/** Read the [Color] from the given [attribute]. */
+@Composable
+@ReadOnlyComposable
+fun colorAttr(@AttrRes attribute: Int): Color {
+    return AndroidColorScheme.getColor(LocalContext.current, attribute)
+}
