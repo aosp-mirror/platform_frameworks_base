@@ -407,10 +407,7 @@ public class PreparationCoordinator implements Coordinator {
             mLogger.logGroupInflationTookTooLong(group);
             return false;
         }
-        // Only delay release if the summary is not inflated.
-        // TODO(253454977): Once we ensure that all other pipeline filtering and pruning has been
-        //  done by this point, we can revert back to checking for mInflatingNotifs.contains(...)
-        if (!isInflated(group.getSummary())) {
+        if (mInflatingNotifs.contains(group.getSummary())) {
             mLogger.logDelayingGroupRelease(group, group.getSummary());
             return true;
         }
