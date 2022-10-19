@@ -87,7 +87,6 @@ import android.platform.test.annotations.Presubmit;
 import android.provider.DeviceConfig;
 import android.provider.DeviceConfig.Properties;
 import android.view.InsetsFrameProvider;
-import android.view.InsetsVisibilities;
 import android.view.WindowManager;
 
 import androidx.test.filters.MediumTest;
@@ -2302,8 +2301,7 @@ public class SizeCompatTests extends WindowTestsBase {
         // We should get a null LetterboxDetails object as there is no letterboxed activity, so
         // nothing will get passed to SysUI
         verify(statusBar, never()).onSystemBarAttributesChanged(anyInt(), anyInt(),
-                any(), anyBoolean(), anyInt(),
-                any(InsetsVisibilities.class), isNull(), isNull());
+                any(), anyBoolean(), anyInt(), anyInt(), isNull(), isNull());
 
     }
 
@@ -2331,8 +2329,7 @@ public class SizeCompatTests extends WindowTestsBase {
         // Check that letterboxDetails actually gets passed to SysUI
         StatusBarManagerInternal statusBar = displayPolicy.getStatusBarManagerInternal();
         verify(statusBar).onSystemBarAttributesChanged(anyInt(), anyInt(),
-                any(), anyBoolean(), anyInt(),
-                any(InsetsVisibilities.class), isNull(), eq(expectedLetterboxDetails));
+                any(), anyBoolean(), anyInt(), anyInt(), isNull(), eq(expectedLetterboxDetails));
     }
 
     @Test
@@ -2367,8 +2364,7 @@ public class SizeCompatTests extends WindowTestsBase {
         // Check that letterboxDetails actually gets passed to SysUI
         StatusBarManagerInternal statusBarManager = displayPolicy.getStatusBarManagerInternal();
         verify(statusBarManager).onSystemBarAttributesChanged(anyInt(), anyInt(),
-                any(), anyBoolean(), anyInt(),
-                any(InsetsVisibilities.class), isNull(), eq(expectedLetterboxDetails));
+                any(), anyBoolean(), anyInt(), anyInt(), isNull(), eq(expectedLetterboxDetails));
     }
 
     @Test
@@ -2420,8 +2416,7 @@ public class SizeCompatTests extends WindowTestsBase {
         // Check that letterboxDetails actually gets passed to SysUI
         StatusBarManagerInternal statusBar = displayPolicy.getStatusBarManagerInternal();
         verify(statusBar).onSystemBarAttributesChanged(anyInt(), anyInt(),
-                any(), anyBoolean(), anyInt(),
-                any(InsetsVisibilities.class), isNull(), eq(expectedLetterboxDetails));
+                any(), anyBoolean(), anyInt(), anyInt(), isNull(), eq(expectedLetterboxDetails));
     }
 
     private void recomputeNaturalConfigurationOfUnresizableActivity() {

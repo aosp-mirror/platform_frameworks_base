@@ -38,8 +38,8 @@ import android.os.Vibrator;
 import android.util.Log;
 import android.util.Slog;
 import android.view.InsetsState.InternalInsetsType;
-import android.view.InsetsVisibilities;
 import android.view.KeyEvent;
+import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsController.Appearance;
 import android.view.WindowInsetsController.Behavior;
 
@@ -458,7 +458,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
     @Override
     public void onSystemBarAttributesChanged(int displayId, @Appearance int appearance,
             AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
-            @Behavior int behavior, InsetsVisibilities requestedVisibilities, String packageName,
+            @Behavior int behavior, @InsetsType int requestedVisibleTypes, String packageName,
             LetterboxDetails[] letterboxDetails) {
         if (displayId != mDisplayId) {
             return;
@@ -471,7 +471,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
                 appearanceRegions,
                 navbarColorManagedByIme,
                 behavior,
-                requestedVisibilities,
+                requestedVisibleTypes,
                 packageName,
                 letterboxDetails
         );
