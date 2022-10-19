@@ -21,6 +21,7 @@ import android.app.slice.Slice
 import android.app.slice.SliceSpec
 import android.content.Context
 import android.content.Intent
+import android.credentials.ui.Constants
 import android.credentials.ui.Entry
 import android.credentials.ui.ProviderData
 import android.credentials.ui.RequestInfo
@@ -60,7 +61,7 @@ class CredentialManagerRepo(
     ) ?: testProviderList()
 
     resultReceiver = intent.getParcelableExtra(
-      RequestInfo.EXTRA_RESULT_RECEIVER,
+      Constants.EXTRA_RESULT_RECEIVER,
       ResultReceiver::class.java
     )
   }
