@@ -142,8 +142,6 @@ public final class BluetoothMidiDevice {
                             mPacketDecoder.setMaxPacketSize(DEFAULT_PACKET_SIZE);
                         }
                     }
-
-                    openBluetoothDevice(mBluetoothDevice);
                 }
             } else {
                 Log.e(TAG, "onServicesDiscovered received: " + status);
