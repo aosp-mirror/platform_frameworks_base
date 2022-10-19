@@ -117,4 +117,17 @@
     <!-- Whether using the new SubscriptionManagerService or the old SubscriptionController -->
     <bool name="config_using_subscription_manager_service">false</bool>
     <java-symbol type="bool" name="config_using_subscription_manager_service" />
+
+    <!-- Boolean indicating whether the emergency numbers for a country, sourced from modem/config,
+         should be ignored if that country is 'locked' (i.e. ignore_modem_config set to true) in
+         Android Emergency DB. If this value is true, emergency numbers for a country, sourced from
+         modem/config, will be ignored if that country is 'locked' in Android Emergency DB. -->
+    <bool name="ignore_modem_config_emergency_numbers">false</bool>
+    <java-symbol type="bool" name="ignore_modem_config_emergency_numbers" />
+
+    <!-- Boolean indicating whether emergency numbers routing from the android emergency number
+         database should be ignored (i.e. routing will always be set to UNKNOWN). If this value is
+         true, routing from the android emergency number database will be ignored. -->
+    <bool name="ignore_emergency_number_routing_from_db">false</bool>
+    <java-symbol type="bool" name="ignore_emergency_number_routing_from_db" />
 </resources>
