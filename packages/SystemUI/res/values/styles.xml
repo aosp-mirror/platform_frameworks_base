@@ -195,6 +195,11 @@
         <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
 
+    <style name="TextAppearance.AuthNonBioCredential.Icon">
+        <item name="android:layout_width">@dimen/biometric_auth_icon_size</item>
+        <item name="android:layout_height">@dimen/biometric_auth_icon_size</item>
+    </style>
+
     <style name="TextAppearance.AuthNonBioCredential.Title">
         <item name="android:fontFamily">google-sans</item>
         <item name="android:layout_marginTop">20dp</item>
@@ -224,6 +229,7 @@
 
     <style name="TextAppearance.AuthCredential.PasswordEntry" parent="@android:style/TextAppearance.DeviceDefault">
         <item name="android:gravity">center</item>
+        <item name="android:paddingTop">28dp</item>
         <item name="android:singleLine">true</item>
         <item name="android:textColor">?android:attr/colorForeground</item>
         <item name="android:textSize">24sp</item>
@@ -232,7 +238,7 @@
 
     <style name="AuthCredentialHeaderStyle">
         <item name="android:paddingStart">48dp</item>
-        <item name="android:paddingEnd">24dp</item>
+        <item name="android:paddingEnd">48dp</item>
         <item name="android:paddingTop">28dp</item>
         <item name="android:paddingBottom">20dp</item>
         <item name="android:orientation">vertical</item>
