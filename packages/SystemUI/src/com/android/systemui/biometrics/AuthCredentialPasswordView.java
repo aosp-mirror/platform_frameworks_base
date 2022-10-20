@@ -24,6 +24,7 @@ import android.content.Context;
 import android.graphics.Insets;
 import android.os.UserHandle;
 import android.text.InputType;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.view.View;
@@ -151,39 +152,52 @@ public class AuthCredentialPasswordView extends AuthCredentialView
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
 
-        if (mAuthCredentialInput == null || mAuthCredentialHeader == null
-                || mSubtitleView == null || mPasswordField == null || mErrorView == null) {
+        if (mAuthCredentialInput == null || mAuthCredentialHeader == null || mSubtitleView == null
+                || mDescriptionView == null || mPasswordField == null || mErrorView == null) {
             return;
         }
 
-        // b/157910732 In AuthContainerView#getLayoutParams() we used to prevent jank risk when
-        // resizing by IME show or hide, we used to setFitInsetsTypes `~WindowInsets.Type.ime()` to
-        // LP. As a result this view needs to listen onApplyWindowInsets() and handle onLayout.
         int inputLeftBound;
         int inputTopBound;
         int headerRightBound = right;
+        int headerTopBounds = top;
+        final int subTitleBottom = (mSubtitleView.getVisibility() == GONE) ? mTitleView.getBottom()
+                : mSubtitleView.getBottom();
+        final int descBottom = (mDescriptionView.getVisibility() == GONE) ? subTitleBottom
+                : mDescriptionView.getBottom();
         if (getResources().getConfiguration().orientation == ORIENTATION_LANDSCAPE) {
-            inputTopBound = (bottom - (mPasswordField.getHeight() + mErrorView.getHeight())) / 2;
+            inputTopBound = (bottom - mAuthCredentialInput.getHeight()) / 2;
             inputLeftBound = (right - left) / 2;
             headerRightBound = inputLeftBound;
+            headerTopBounds -= Math.min(mIconView.getBottom(), mBottomInset);
         } else {
-            inputTopBound = mSubtitleView.getBottom() + (bottom - mSubtitleView.getBottom()) / 2;
+            inputTopBound =
+                    descBottom + (bottom - descBottom - mAuthCredentialInput.getHeight()) / 2;
             inputLeftBound = (right - left - mAuthCredentialInput.getWidth()) / 2;
         }
 
-        mAuthCredentialHeader.layout(left, top, headerRightBound, bottom);
+        if (mDescriptionView.getBottom() > mBottomInset) {
+            mAuthCredentialHeader.layout(left, headerTopBounds, headerRightBound, bottom);
+        }
         mAuthCredentialInput.layout(inputLeftBound, inputTopBound, right, bottom);
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        final int newWidth = MeasureSpec.getSize(widthMeasureSpec);
         final int newHeight = MeasureSpec.getSize(heightMeasureSpec) - mBottomInset;
 
-        setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), newHeight);
+        setMeasuredDimension(newWidth, newHeight);
 
-        measureChildren(widthMeasureSpec,
-                MeasureSpec.makeMeasureSpec(newHeight, MeasureSpec.AT_MOST));
+        final int halfWidthSpec = MeasureSpec.makeMeasureSpec(getWidth() / 2,
+                MeasureSpec.AT_MOST);
+        final int fullHeightSpec = MeasureSpec.makeMeasureSpec(newHeight, MeasureSpec.UNSPECIFIED);
+        if (getResources().getConfiguration().orientation == ORIENTATION_LANDSCAPE) {
+            measureChildren(halfWidthSpec, fullHeightSpec);
+        } else {
+            measureChildren(widthMeasureSpec, fullHeightSpec);
+        }
     }
 
     @NonNull
@@ -193,6 +207,20 @@ public class AuthCredentialPasswordView extends AuthCredentialView
         final Insets bottomInset = insets.getInsets(ime());
         if (v instanceof AuthCredentialPasswordView && mBottomInset != bottomInset.bottom) {
             mBottomInset = bottomInset.bottom;
+            if (mBottomInset > 0
+                    && getResources().getConfiguration().orientation == ORIENTATION_LANDSCAPE) {
+                mTitleView.setSingleLine(true);
+                mTitleView.setEllipsize(TextUtils.TruncateAt.MARQUEE);
+                mTitleView.setMarqueeRepeatLimit(-1);
+                // select to enable marquee unless a screen reader is enabled
+                mTitleView.setSelected(!mAccessibilityManager.isEnabled()
+                        || !mAccessibilityManager.isTouchExplorationEnabled());
+            } else {
+                mTitleView.setSingleLine(false);
+                mTitleView.setEllipsize(null);
+                // select to enable marquee unless a screen reader is enabled
+                mTitleView.setSelected(false);
+            }
             requestLayout();
         }
         return insets;

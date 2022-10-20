@@ -93,7 +93,9 @@ public class AuthCredentialPatternView extends AuthCredentialView {
     @Override
     protected void onErrorTimeoutFinish() {
         super.onErrorTimeoutFinish();
-        mLockPatternView.setEnabled(true);
+        // select to enable marquee unless a screen reader is enabled
+        mLockPatternView.setEnabled(!mAccessibilityManager.isEnabled()
+                || !mAccessibilityManager.isTouchExplorationEnabled());
     }
 
     public AuthCredentialPatternView(Context context, AttributeSet attrs) {
