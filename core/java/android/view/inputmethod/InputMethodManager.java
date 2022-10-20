@@ -1128,10 +1128,13 @@ public final class InputMethodManager {
                         if (!checkFocusInternalLocked(mRestartOnNextWindowFocus, mCurRootView)) {
                             return;
                         }
-                        final int reason = active ? StartInputReason.ACTIVATED_BY_IMMS
-                                : StartInputReason.DEACTIVATED_BY_IMMS;
-                        startInputOnWindowFocusGainInternal(reason, null, 0, 0, 0);
+                        mCurrentEditorInfo = null;
+                        mCompletions = null;
+                        mServedConnecting = true;
                     }
+                    final int reason = active ? StartInputReason.ACTIVATED_BY_IMMS
+                            : StartInputReason.DEACTIVATED_BY_IMMS;
+                    startInputInner(reason, null, 0, 0, 0);
                     return;
                 }
                 case MSG_SET_INTERACTIVE: {
