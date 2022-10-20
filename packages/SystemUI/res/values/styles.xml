@@ -227,6 +227,7 @@
         <item name="android:singleLine">true</item>
         <item name="android:textColor">?android:attr/colorForeground</item>
         <item name="android:textSize">24sp</item>
+        <item name="android:background">@drawable/edit_text_filled</item>
     </style>
 
     <style name="AuthCredentialHeaderStyle">
