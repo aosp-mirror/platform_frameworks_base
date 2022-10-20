@@ -6172,7 +6172,7 @@ public abstract class Context {
      */
     @CheckResult(suggest="#enforceCallingOrSelfPermission(String,String)")
     @PackageManager.PermissionResult
-    @PermissionMethod
+    @PermissionMethod(orSelf = true)
     public abstract int checkCallingOrSelfPermission(@NonNull @PermissionName String permission);
 
     /**
@@ -6240,7 +6240,7 @@ public abstract class Context {
      *
      * @see #checkCallingOrSelfPermission(String)
      */
-    @PermissionMethod
+    @PermissionMethod(orSelf = true)
     public abstract void enforceCallingOrSelfPermission(
             @NonNull @PermissionName String permission, @Nullable String message);
 

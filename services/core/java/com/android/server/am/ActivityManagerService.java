@@ -6141,6 +6141,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     /**
      * This can be called with or without the global lock held.
      */
+    @PermissionMethod(anyOf = true)
     private void enforceCallingHasAtLeastOnePermission(String func, String... permissions) {
         for (String permission : permissions) {
             if (checkCallingPermission(permission) == PackageManager.PERMISSION_GRANTED) {
