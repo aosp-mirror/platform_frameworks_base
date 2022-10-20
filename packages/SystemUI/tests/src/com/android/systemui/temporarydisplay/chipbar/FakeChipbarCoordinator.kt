@@ -24,7 +24,6 @@ import android.view.accessibility.AccessibilityManager
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.media.taptotransfer.common.MediaTttLogger
 import com.android.systemui.media.taptotransfer.receiver.MediaTttReceiverLogger
-import com.android.systemui.media.taptotransfer.sender.MediaTttSenderUiEventLogger
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.concurrency.DelayableExecutor
@@ -39,7 +38,6 @@ class FakeChipbarCoordinator(
     accessibilityManager: AccessibilityManager,
     configurationController: ConfigurationController,
     powerManager: PowerManager,
-    uiEventLogger: MediaTttSenderUiEventLogger,
     falsingManager: FalsingManager,
     falsingCollector: FalsingCollector,
     viewUtil: ViewUtil,
@@ -52,7 +50,6 @@ class FakeChipbarCoordinator(
         accessibilityManager,
         configurationController,
         powerManager,
-        uiEventLogger,
         falsingManager,
         falsingCollector,
         viewUtil,
