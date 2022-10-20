@@ -98,7 +98,8 @@ import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.FakeFeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.KeyguardViewMediator;
@@ -271,7 +272,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private OngoingCallController mOngoingCallController;
     @Mock private StatusBarHideIconsForBouncerManager mStatusBarHideIconsForBouncerManager;
     @Mock private LockscreenShadeTransitionController mLockscreenTransitionController;
-    @Mock private FeatureFlags mFeatureFlags;
     @Mock private NotificationVisibilityProvider mVisibilityProvider;
     @Mock private WallpaperManager mWallpaperManager;
     @Mock private IWallpaperManager mIWallpaperManager;
@@ -296,9 +296,10 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
 
     private ShadeController mShadeController;
     private final FakeSystemClock mFakeSystemClock = new FakeSystemClock();
-    private FakeExecutor mMainExecutor = new FakeExecutor(mFakeSystemClock);
-    private FakeExecutor mUiBgExecutor = new FakeExecutor(mFakeSystemClock);
-    private InitController mInitController = new InitController();
+    private final FakeExecutor mMainExecutor = new FakeExecutor(mFakeSystemClock);
+    private final FakeExecutor mUiBgExecutor = new FakeExecutor(mFakeSystemClock);
+    private final FakeFeatureFlags mFeatureFlags = new FakeFeatureFlags();
+    private final InitController mInitController = new InitController();
     private final DumpManager mDumpManager = new DumpManager();
 
     @Before
@@ -1014,6 +1015,60 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         mCentralSurfaces.updateResources();
 
         verify(mStatusBarKeyguardViewManager).updateResources();
+    }
+
+    @Test
+    public void collapseShade_callsAnimateCollapsePanels_whenExpanded() {
+        // GIVEN the shade is expanded
+        mCentralSurfaces.setPanelExpanded(true);
+        mCentralSurfaces.setBarStateForTest(StatusBarState.SHADE);
+
+        // WHEN collapseShade is called
+        mCentralSurfaces.collapseShade();
+
+        // VERIFY that animateCollapsePanels is called
+        verify(mShadeController).animateCollapsePanels();
+    }
+
+    @Test
+    public void collapseShade_doesNotCallAnimateCollapsePanels_whenCollapsed() {
+        // GIVEN the shade is collapsed
+        mCentralSurfaces.setPanelExpanded(false);
+        mCentralSurfaces.setBarStateForTest(StatusBarState.SHADE);
+
+        // WHEN collapseShade is called
+        mCentralSurfaces.collapseShade();
+
+        // VERIFY that animateCollapsePanels is NOT called
+        verify(mShadeController, never()).animateCollapsePanels();
+    }
+
+    @Test
+    public void collapseShadeForBugReport_callsAnimateCollapsePanels_whenFlagDisabled() {
+        // GIVEN the shade is expanded & flag enabled
+        mCentralSurfaces.setPanelExpanded(true);
+        mCentralSurfaces.setBarStateForTest(StatusBarState.SHADE);
+        mFeatureFlags.set(Flags.LEAVE_SHADE_OPEN_FOR_BUGREPORT, false);
+
+        // WHEN collapseShadeForBugreport is called
+        mCentralSurfaces.collapseShadeForBugreport();
+
+        // VERIFY that animateCollapsePanels is called
+        verify(mShadeController).animateCollapsePanels();
+    }
+
+    @Test
+    public void collapseShadeForBugReport_doesNotCallAnimateCollapsePanels_whenFlagEnabled() {
+        // GIVEN the shade is expanded & flag enabled
+        mCentralSurfaces.setPanelExpanded(true);
+        mCentralSurfaces.setBarStateForTest(StatusBarState.SHADE);
+        mFeatureFlags.set(Flags.LEAVE_SHADE_OPEN_FOR_BUGREPORT, true);
+
+        // WHEN collapseShadeForBugreport is called
+        mCentralSurfaces.collapseShadeForBugreport();
+
+        // VERIFY that animateCollapsePanels is called
+        verify(mShadeController, never()).animateCollapsePanels();
     }
 
     @Test

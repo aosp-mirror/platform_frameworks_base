@@ -62,17 +62,7 @@ private constructor(
     val isMenuVisible: Flow<Boolean> = _isMenuVisible
     /** The user action menu. */
     val menu: Flow<List<UserActionViewModel>> =
-        userInteractor.actions.map { actions ->
-            if (isNewImpl && actions.isNotEmpty()) {
-                    // If we have actions, we add NAVIGATE_TO_USER_MANAGEMENT because that's a user
-                    // switcher specific action that is not known to the our data source or other
-                    // features.
-                    actions + listOf(UserActionModel.NAVIGATE_TO_USER_MANAGEMENT)
-                } else {
-                    actions
-                }
-                .map { action -> toViewModel(action) }
-        }
+        userInteractor.actions.map { actions -> actions.map { action -> toViewModel(action) } }
 
     /** Whether the button to open the user action menu is visible. */
     val isOpenMenuButtonVisible: Flow<Boolean> = menu.map { it.isNotEmpty() }

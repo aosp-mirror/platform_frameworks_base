@@ -1016,8 +1016,9 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
                             Log.w(TAG, "Bugreport handler could not be launched");
                             mIActivityManager.requestInteractiveBugReport();
                         }
-                        // Close shade so user sees the activity
-                        mCentralSurfacesOptional.ifPresent(CentralSurfaces::collapseShade);
+                        // Maybe close shade (depends on a flag) so user sees the activity
+                        mCentralSurfacesOptional.ifPresent(
+                                CentralSurfaces::collapseShadeForBugreport);
                     } catch (RemoteException e) {
                     }
                 }
@@ -1036,8 +1037,8 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
                 mMetricsLogger.action(MetricsEvent.ACTION_BUGREPORT_FROM_POWER_MENU_FULL);
                 mUiEventLogger.log(GlobalActionsEvent.GA_BUGREPORT_LONG_PRESS);
                 mIActivityManager.requestFullBugReport();
-                // Close shade so user sees the activity
-                mCentralSurfacesOptional.ifPresent(CentralSurfaces::collapseShade);
+                // Maybe close shade (depends on a flag) so user sees the activity
+                mCentralSurfacesOptional.ifPresent(CentralSurfaces::collapseShadeForBugreport);
             } catch (RemoteException e) {
             }
             return false;

@@ -15,6 +15,7 @@
  */
 package com.android.systemui.shared.regionsampling
 
+import android.graphics.Color
 import android.graphics.Rect
 import android.view.View
 import androidx.annotation.VisibleForTesting
@@ -33,18 +34,19 @@ open class RegionSamplingInstance(
         regionSamplingEnabled: Boolean,
         updateFun: UpdateColorCallback
 ) {
-    private var isDark = RegionDarkness.DEFAULT
+    private var regionDarkness = RegionDarkness.DEFAULT
     private var samplingBounds = Rect()
     private val tmpScreenLocation = IntArray(2)
     @VisibleForTesting var regionSampler: RegionSamplingHelper? = null
-
+    private var lightForegroundColor = Color.WHITE
+    private var darkForegroundColor = Color.BLACK
     /**
      * Interface for method to be passed into RegionSamplingHelper
      */
     @FunctionalInterface
     interface UpdateColorCallback {
         /**
-         * Method to update the text colors after clock darkness changed.
+         * Method to update the foreground colors after clock darkness changed.
          */
         fun updateColors()
     }
@@ -59,6 +61,30 @@ open class RegionSamplingInstance(
         return RegionSamplingHelper(sampledView, callback, mainExecutor, bgExecutor)
     }
 
+    /**
+     * Sets the colors to be used for Dark and Light Foreground.
+     *
+     * @param lightColor The color used for Light Foreground.
+     * @param darkColor The color used for Dark Foreground.
+     */
+    fun setForegroundColors(lightColor: Int, darkColor: Int) {
+        lightForegroundColor = lightColor
+        darkForegroundColor = darkColor
+    }
+
+    /**
+     * Determines which foreground color to use based on region darkness.
+     *
+     * @return the determined foreground color
+     */
+    fun currentForegroundColor(): Int{
+        return if (regionDarkness.isDark) {
+            lightForegroundColor
+        } else {
+            darkForegroundColor
+        }
+    }
+
     private fun convertToClockDarkness(isRegionDark: Boolean): RegionDarkness {
         return if (isRegionDark) {
             RegionDarkness.DARK
@@ -68,7 +94,7 @@ open class RegionSamplingInstance(
     }
 
     fun currentRegionDarkness(): RegionDarkness {
-        return isDark
+        return regionDarkness
     }
 
     /**
@@ -97,7 +123,7 @@ open class RegionSamplingInstance(
             regionSampler = createRegionSamplingHelper(sampledView,
                     object : SamplingCallback {
                         override fun onRegionDarknessChanged(isRegionDark: Boolean) {
-                            isDark = convertToClockDarkness(isRegionDark)
+                            regionDarkness = convertToClockDarkness(isRegionDark)
                             updateFun.updateColors()
                         }
                         /**
