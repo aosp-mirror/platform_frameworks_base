@@ -52,6 +52,7 @@ import com.android.systemui.Dumpable
 import com.android.systemui.R
 import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.animation.Expandable
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
@@ -98,10 +99,10 @@ interface FgsManagerController {
     fun init()
 
     /**
-     * Show the foreground services dialog. The dialog will be expanded from [viewLaunchedFrom] if
+     * Show the foreground services dialog. The dialog will be expanded from [expandable] if
      * it's not `null`.
      */
-    fun showDialog(viewLaunchedFrom: View?)
+    fun showDialog(expandable: Expandable?)
 
     /** Add a [OnNumberOfPackagesChangedListener]. */
     fun addOnNumberOfPackagesChangedListener(listener: OnNumberOfPackagesChangedListener)
@@ -367,7 +368,7 @@ class FgsManagerControllerImpl @Inject constructor(
 
     override fun shouldUpdateFooterVisibility() = dialog == null
 
-    override fun showDialog(viewLaunchedFrom: View?) {
+    override fun showDialog(expandable: Expandable?) {
         synchronized(lock) {
             if (dialog == null) {
 
@@ -403,16 +404,18 @@ class FgsManagerControllerImpl @Inject constructor(
                 }
 
                 mainExecutor.execute {
-                    viewLaunchedFrom
-                        ?.let {
-                            dialogLaunchAnimator.showFromView(
-                                dialog, it,
-                                cuj = DialogCuj(
-                                    InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
-                                    INTERACTION_JANK_TAG
-                                )
+                    val controller =
+                        expandable?.dialogLaunchController(
+                            DialogCuj(
+                                InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
+                                INTERACTION_JANK_TAG,
                             )
-                        } ?: dialog.show()
+                        )
+                    if (controller != null) {
+                        dialogLaunchAnimator.show(dialog, controller)
+                    } else {
+                        dialog.show()
+                    }
                 }
 
                 backgroundExecutor.execute {
