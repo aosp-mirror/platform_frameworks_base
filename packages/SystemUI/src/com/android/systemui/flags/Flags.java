@@ -54,9 +54,6 @@ public class Flags {
     public static final UnreleasedFlag NSSL_DEBUG_REMOVE_ANIMATION =
             new UnreleasedFlag(106);
 
-    public static final UnreleasedFlag NEW_PIPELINE_CRASH_ON_CALL_TO_OLD_PIPELINE =
-            new UnreleasedFlag(107);
-
     public static final ResourceBooleanFlag NOTIFICATION_DRAG_TO_CONTENTS =
             new ResourceBooleanFlag(108, R.bool.config_notificationToContents);
 
