@@ -57,7 +57,6 @@ import com.android.systemui.statusbar.policy.UserSwitcherController
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.settings.FakeSettings
 import com.android.systemui.util.settings.GlobalSettings
-import com.android.systemui.util.time.FakeSystemClock
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 
@@ -68,7 +67,6 @@ import kotlinx.coroutines.test.TestCoroutineDispatcher
 class FooterActionsTestUtils(
     private val context: Context,
     private val testableLooper: TestableLooper,
-    private val fakeClock: FakeSystemClock = FakeSystemClock(),
 ) {
     /** Enable or disable the user switcher in the settings. */
     fun setUserSwitcherEnabled(settings: GlobalSettings, enabled: Boolean, userId: Int) {

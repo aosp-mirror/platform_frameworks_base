@@ -20,7 +20,6 @@ import android.content.Intent
 import android.os.UserHandle
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
-import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FeatureFlags
@@ -34,8 +33,8 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
+import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidTestingRunner::class)
@@ -91,7 +90,7 @@ class StatusBarUserSwitcherControllerOldImplTest : SysuiTestCase() {
     fun testStartActivity() {
         `when`(featureFlags.isEnabled(Flags.FULL_SCREEN_USER_SWITCHER)).thenReturn(false)
         statusBarUserSwitcherContainer.callOnClick()
-        verify(userSwitcherDialogController).showDialog(any(View::class.java))
+        verify(userSwitcherDialogController).showDialog(any(), any())
         `when`(featureFlags.isEnabled(Flags.FULL_SCREEN_USER_SWITCHER)).thenReturn(true)
         statusBarUserSwitcherContainer.callOnClick()
         verify(activityStarter).startActivity(any(Intent::class.java),

@@ -25,7 +25,6 @@ import android.graphics.Rect
 import android.os.Looper
 import android.util.Log
 import android.util.MathUtils
-import android.view.GhostView
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
@@ -86,6 +85,9 @@ constructor(
          */
         val sourceIdentity: Any
 
+        /** The CUJ associated to this controller. */
+        val cuj: DialogCuj?
+
         /**
          * Move the drawing of the source in the overlay of [viewGroup].
          *
@@ -142,7 +144,31 @@ constructor(
          * controlled by this controller.
          */
         // TODO(b/252723237): Make this non-nullable
-        fun jankConfigurationBuilder(cuj: Int): InteractionJankMonitor.Configuration.Builder?
+        fun jankConfigurationBuilder(): InteractionJankMonitor.Configuration.Builder?
+
+        companion object {
+            /**
+             * Create a [Controller] that can animate [source] to and from a dialog.
+             *
+             * Important: The view must be attached to a [ViewGroup] when calling this function and
+             * during the animation. For safety, this method will return null when it is not.
+             *
+             * Note: The background of [view] should be a (rounded) rectangle so that it can be
+             * properly animated.
+             */
+            fun fromView(source: View, cuj: DialogCuj? = null): Controller? {
+                if (source.parent !is ViewGroup) {
+                    Log.e(
+                        TAG,
+                        "Skipping animation as view $source is not attached to a ViewGroup",
+                        Exception(),
+                    )
+                    return null
+                }
+
+                return ViewDialogLaunchAnimatorController(source, cuj)
+            }
+        }
     }
 
     /**
@@ -172,7 +198,12 @@ constructor(
         cuj: DialogCuj? = null,
         animateBackgroundBoundsChange: Boolean = false
     ) {
-        show(dialog, createController(view), cuj, animateBackgroundBoundsChange)
+        val controller = Controller.fromView(view, cuj)
+        if (controller == null) {
+            dialog.show()
+        } else {
+            show(dialog, controller, animateBackgroundBoundsChange)
+        }
     }
 
     /**
@@ -187,10 +218,10 @@ constructor(
      * Caveats: When calling this function and [dialog] is not a fullscreen dialog, then it will be
      * made fullscreen and 2 views will be inserted between the dialog DecorView and its children.
      */
+    @JvmOverloads
     fun show(
         dialog: Dialog,
         controller: Controller,
-        cuj: DialogCuj? = null,
         animateBackgroundBoundsChange: Boolean = false
     ) {
         if (Looper.myLooper() != Looper.getMainLooper()) {
@@ -207,7 +238,10 @@ constructor(
                 it.dialog.window.decorView.viewRootImpl == controller.viewRoot
             }
         val animateFrom =
-            animatedParent?.dialogContentWithBackground?.let { createController(it) } ?: controller
+            animatedParent?.dialogContentWithBackground?.let {
+                Controller.fromView(it, controller.cuj)
+            }
+                ?: controller
 
         if (animatedParent == null && animateFrom !is LaunchableView) {
             // Make sure the View we launch from implements LaunchableView to avoid visibility
@@ -244,94 +278,10 @@ constructor(
                 animateBackgroundBoundsChange,
                 animatedParent,
                 isForTesting,
-                cuj,
             )
 
         openedDialogs.add(animatedDialog)
         animatedDialog.start()
-    }
-
-    /** Create a [Controller] that can animate [source] to & from a dialog. */
-    private fun createController(source: View): Controller {
-        return object : Controller {
-            override val viewRoot: ViewRootImpl
-                get() = source.viewRootImpl
-
-            override val sourceIdentity: Any = source
-
-            override fun startDrawingInOverlayOf(viewGroup: ViewGroup) {
-                // Create a temporary ghost of the source (which will make it invisible) and add it
-                // to the host dialog.
-                GhostView.addGhost(source, viewGroup)
-
-                // The ghost of the source was just created, so the source is currently invisible.
-                // We need to make sure that it stays invisible as long as the dialog is shown or
-                // animating.
-                (source as? LaunchableView)?.setShouldBlockVisibilityChanges(true)
-            }
-
-            override fun stopDrawingInOverlay() {
-                // Note: here we should remove the ghost from the overlay, but in practice this is
-                // already done by the launch controllers created below.
-
-                // Make sure we allow the source to change its visibility again.
-                (source as? LaunchableView)?.setShouldBlockVisibilityChanges(false)
-                source.visibility = View.VISIBLE
-            }
-
-            override fun createLaunchController(): LaunchAnimator.Controller {
-                val delegate = GhostedViewLaunchAnimatorController(source)
-                return object : LaunchAnimator.Controller by delegate {
-                    override fun onLaunchAnimationStart(isExpandingFullyAbove: Boolean) {
-                        // Remove the temporary ghost added by [startDrawingInOverlayOf]. Another
-                        // ghost (that ghosts only the source content, and not its background) will
-                        // be added right after this by the delegate and will be animated.
-                        GhostView.removeGhost(source)
-                        delegate.onLaunchAnimationStart(isExpandingFullyAbove)
-                    }
-
-                    override fun onLaunchAnimationEnd(isExpandingFullyAbove: Boolean) {
-                        delegate.onLaunchAnimationEnd(isExpandingFullyAbove)
-
-                        // We hide the source when the dialog is showing. We will make this view
-                        // visible again when dismissing the dialog. This does nothing if the source
-                        // implements [LaunchableView], as it's already INVISIBLE in that case.
-                        source.visibility = View.INVISIBLE
-                    }
-                }
-            }
-
-            override fun createExitController(): LaunchAnimator.Controller {
-                return GhostedViewLaunchAnimatorController(source)
-            }
-
-            override fun shouldAnimateExit(): Boolean {
-                // The source should be invisible by now, if it's not then something else changed
-                // its visibility and we probably don't want to run the animation.
-                if (source.visibility != View.INVISIBLE) {
-                    return false
-                }
-
-                return source.isAttachedToWindow && ((source.parent as? View)?.isShown ?: true)
-            }
-
-            override fun onExitAnimationCancelled() {
-                // Make sure we allow the source to change its visibility again.
-                (source as? LaunchableView)?.setShouldBlockVisibilityChanges(false)
-
-                // If the view is invisible it's probably because of us, so we make it visible
-                // again.
-                if (source.visibility == View.INVISIBLE) {
-                    source.visibility = View.VISIBLE
-                }
-            }
-
-            override fun jankConfigurationBuilder(
-                cuj: Int
-            ): InteractionJankMonitor.Configuration.Builder? {
-                return InteractionJankMonitor.Configuration.Builder.withView(cuj, source)
-            }
-        }
     }
 
     /**
@@ -563,9 +513,6 @@ private class AnimatedDialog(
      * Whether synchronization should be disabled, which can be useful if we are running in a test.
      */
     private val forceDisableSynchronization: Boolean,
-
-    /** Interaction to which the dialog animation is associated. */
-    private val cuj: DialogCuj? = null
 ) {
     /**
      * The DecorView of this dialog window.
@@ -618,8 +565,9 @@ private class AnimatedDialog(
     private var hasInstrumentedJank = false
 
     fun start() {
+        val cuj = controller.cuj
         if (cuj != null) {
-            val config = controller.jankConfigurationBuilder(cuj.cujType)
+            val config = controller.jankConfigurationBuilder()
             if (config != null) {
                 if (cuj.tag != null) {
                     config.setTag(cuj.tag)
@@ -917,7 +865,7 @@ private class AnimatedDialog(
                 }
 
                 if (hasInstrumentedJank) {
-                    interactionJankMonitor.end(cuj!!.cujType)
+                    interactionJankMonitor.end(controller.cuj!!.cujType)
                 }
             }
         )

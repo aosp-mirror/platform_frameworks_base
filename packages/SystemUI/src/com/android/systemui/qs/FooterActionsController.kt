@@ -32,6 +32,7 @@ import com.android.internal.logging.nano.MetricsProto
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.R
 import com.android.systemui.animation.ActivityLaunchAnimator
+import com.android.systemui.animation.Expandable
 import com.android.systemui.globalactions.GlobalActionsDialogLite
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
@@ -156,7 +157,7 @@ internal class FooterActionsController @Inject constructor(
             startSettingsActivity()
         } else if (v === powerMenuLite) {
             uiEventLogger.log(GlobalActionsDialogLite.GlobalActionsEvent.GA_OPEN_QS)
-            globalActionsDialog?.showOrHideDialog(false, true, v)
+            globalActionsDialog?.showOrHideDialog(false, true, Expandable.fromView(powerMenuLite))
         }
     }
 
