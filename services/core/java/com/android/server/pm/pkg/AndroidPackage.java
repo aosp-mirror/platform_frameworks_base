@@ -34,6 +34,7 @@ import android.content.pm.ProviderInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.SigningDetails;
 import android.os.Bundle;
+import android.os.storage.StorageManager;
 import android.processor.immutability.Immutable;
 import android.util.ArraySet;
 import android.util.Pair;
@@ -58,6 +59,7 @@ import java.security.PublicKey;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * The representation of an application on disk, as parsed from its split APKs' manifests.
@@ -109,6 +111,13 @@ public interface AndroidPackage {
      */
     @Nullable
     String getStaticSharedLibraryName();
+
+    /**
+     * @return The {@link UUID} for use with {@link StorageManager} APIs identifying where this
+     * package was installed.
+     */
+    @NonNull
+    UUID getStorageUuid();
 
     /**
      * @see ApplicationInfo#targetSdkVersion
