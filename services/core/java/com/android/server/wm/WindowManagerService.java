@@ -8698,11 +8698,12 @@ public class WindowManagerService extends IWindowManager.Stub
         h.ownerPid = callingPid;
 
         if (region == null) {
-            h.replaceTouchableRegionWithCrop = true;
+            h.replaceTouchableRegionWithCrop(null);
         } else {
             h.touchableRegion.set(region);
+            h.replaceTouchableRegionWithCrop = false;
+            h.setTouchableRegionCrop(surface);
         }
-        h.setTouchableRegionCrop(null /* use the input surface's bounds */);
 
         final SurfaceControl.Transaction t = mTransactionFactory.get();
         t.setInputWindowInfo(surface, h);
