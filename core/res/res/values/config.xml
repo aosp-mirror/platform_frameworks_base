@@ -5920,4 +5920,8 @@
     <!-- Whether the lock screen is allowed to run its own live wallpaper,
          different from the home screen wallpaper. -->
     <bool name="config_independentLockscreenLiveWallpaper">false</bool>
+
+    <!-- List of certificate to be used for font fs-verity integrity verification -->
+    <string-array translatable="false" name="config_fontManagerServiceCerts">
+    </string-array>
 </resources>

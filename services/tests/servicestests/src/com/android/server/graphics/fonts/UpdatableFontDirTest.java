@@ -108,7 +108,7 @@ public final class UpdatableFontDirTest {
         }
 
         @Override
-        public boolean hasFsverity(String path) {
+        public boolean isFromTrustedProvider(String path, byte[] signature) {
             return mHasFsverityPaths.contains(path);
         }
 
@@ -286,6 +286,32 @@ public final class UpdatableFontDirTest {
         dir.loadFontFileMap();
         assertThat(dir.getPostScriptMap()).isEmpty();
         // All font dirs (including dir for "bar.ttf") should be deleted.
+        assertThat(mUpdatableFontFilesDir.list()).hasLength(0);
+        assertThat(dir.getFontFamilyMap()).isEmpty();
+    }
+
+    @Test
+    public void construct_missingSignatureFile() throws Exception {
+        UpdatableFontDir dirForPreparation = new UpdatableFontDir(
+                mUpdatableFontFilesDir, mParser, mFakeFsverityUtil,
+                mConfigFile, mCurrentTimeSupplier, mConfigSupplier);
+        dirForPreparation.loadFontFileMap();
+        dirForPreparation.update(Arrays.asList(
+                newFontUpdateRequest("foo.ttf,1,foo", GOOD_SIGNATURE)));
+        assertThat(mUpdatableFontFilesDir.list()).hasLength(1);
+
+        // Remove signature file next to the font file.
+        File fontDir = dirForPreparation.getPostScriptMap().get("foo");
+        File sigFile = new File(fontDir.getParentFile(), "font.fsv_sig");
+        assertThat(sigFile.exists()).isTrue();
+        sigFile.delete();
+
+        UpdatableFontDir dir = new UpdatableFontDir(
+                mUpdatableFontFilesDir, mParser, mFakeFsverityUtil,
+                mConfigFile, mCurrentTimeSupplier, mConfigSupplier);
+        dir.loadFontFileMap();
+        // The font file should be removed and should not be loaded.
+        assertThat(dir.getPostScriptMap()).isEmpty();
         assertThat(mUpdatableFontFilesDir.list()).hasLength(0);
         assertThat(dir.getFontFamilyMap()).isEmpty();
     }
@@ -782,8 +808,8 @@ public final class UpdatableFontDirTest {
         UpdatableFontDir.FsverityUtil fakeFsverityUtil = new UpdatableFontDir.FsverityUtil() {
 
             @Override
-            public boolean hasFsverity(String path) {
-                return mFakeFsverityUtil.hasFsverity(path);
+            public boolean isFromTrustedProvider(String path, byte[] signature) {
+                return mFakeFsverityUtil.isFromTrustedProvider(path, signature);
             }
 
             @Override
