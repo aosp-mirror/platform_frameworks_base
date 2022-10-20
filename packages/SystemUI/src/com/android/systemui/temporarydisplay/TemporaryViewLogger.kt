@@ -16,8 +16,8 @@
 
 package com.android.systemui.temporarydisplay
 
-import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
+import com.android.systemui.plugins.log.LogBuffer
+import com.android.systemui.plugins.log.LogLevel
 
 /** A logger for temporary view changes -- see [TemporaryViewDisplayController]. */
 open class TemporaryViewLogger(

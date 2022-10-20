@@ -18,10 +18,10 @@ package com.android.systemui.statusbar.pipeline.shared
 
 import android.net.Network
 import android.net.NetworkCapabilities
-import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
 import com.android.systemui.log.dagger.StatusBarConnectivityLog
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.plugins.log.LogBuffer
+import com.android.systemui.plugins.log.LogLevel
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger.Companion.toString
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow

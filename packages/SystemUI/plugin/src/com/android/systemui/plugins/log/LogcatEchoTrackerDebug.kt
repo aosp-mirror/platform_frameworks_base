@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.log
+package com.android.systemui.plugins.log
 
 import android.content.ContentResolver
 import android.database.ContentObserver
@@ -36,19 +36,15 @@ import android.provider.Settings
  * $ adb shell settings put global systemui/tag/<tag> <level>
  * ```
  */
-class LogcatEchoTrackerDebug private constructor(
-    private val contentResolver: ContentResolver
-) : LogcatEchoTracker {
+class LogcatEchoTrackerDebug private constructor(private val contentResolver: ContentResolver) :
+    LogcatEchoTracker {
     private val cachedBufferLevels: MutableMap<String, LogLevel> = mutableMapOf()
     private val cachedTagLevels: MutableMap<String, LogLevel> = mutableMapOf()
     override val logInBackgroundThread = true
 
     companion object Factory {
         @JvmStatic
-        fun create(
-            contentResolver: ContentResolver,
-            mainLooper: Looper
-        ): LogcatEchoTrackerDebug {
+        fun create(contentResolver: ContentResolver, mainLooper: Looper): LogcatEchoTrackerDebug {
             val tracker = LogcatEchoTrackerDebug(contentResolver)
             tracker.attach(mainLooper)
             return tracker
@@ -57,37 +53,35 @@ class LogcatEchoTrackerDebug private constructor(
 
     private fun attach(mainLooper: Looper) {
         contentResolver.registerContentObserver(
-                Settings.Global.getUriFor(BUFFER_PATH),
-                true,
-                object : ContentObserver(Handler(mainLooper)) {
-                    override fun onChange(selfChange: Boolean, uri: Uri?) {
-                        super.onChange(selfChange, uri)
-                        cachedBufferLevels.clear()
-                    }
-                })
+            Settings.Global.getUriFor(BUFFER_PATH),
+            true,
+            object : ContentObserver(Handler(mainLooper)) {
+                override fun onChange(selfChange: Boolean, uri: Uri?) {
+                    super.onChange(selfChange, uri)
+                    cachedBufferLevels.clear()
+                }
+            }
+        )
 
         contentResolver.registerContentObserver(
-                Settings.Global.getUriFor(TAG_PATH),
-                true,
-                object : ContentObserver(Handler(mainLooper)) {
-                    override fun onChange(selfChange: Boolean, uri: Uri?) {
-                        super.onChange(selfChange, uri)
-                        cachedTagLevels.clear()
-                    }
-                })
+            Settings.Global.getUriFor(TAG_PATH),
+            true,
+            object : ContentObserver(Handler(mainLooper)) {
+                override fun onChange(selfChange: Boolean, uri: Uri?) {
+                    super.onChange(selfChange, uri)
+                    cachedTagLevels.clear()
+                }
+            }
+        )
     }
 
-    /**
-     * Whether [bufferName] should echo messages of [level] or higher to logcat.
-     */
+    /** Whether [bufferName] should echo messages of [level] or higher to logcat. */
     @Synchronized
     override fun isBufferLoggable(bufferName: String, level: LogLevel): Boolean {
         return level.ordinal >= getLogLevel(bufferName, BUFFER_PATH, cachedBufferLevels).ordinal
     }
 
-    /**
-     * Whether [tagName] should echo messages of [level] or higher to logcat.
-     */
+    /** Whether [tagName] should echo messages of [level] or higher to logcat. */
     @Synchronized
     override fun isTagLoggable(tagName: String, level: LogLevel): Boolean {
         return level >= getLogLevel(tagName, TAG_PATH, cachedTagLevels)

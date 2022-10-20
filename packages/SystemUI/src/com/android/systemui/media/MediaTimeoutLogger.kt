@@ -18,11 +18,10 @@ package com.android.systemui.media
 
 import android.media.session.PlaybackState
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
 import com.android.systemui.log.dagger.MediaTimeoutListenerLog
+import com.android.systemui.plugins.log.LogBuffer
+import com.android.systemui.plugins.log.LogLevel
 import javax.inject.Inject
-
 private const val TAG = "MediaTimeout"
 
 /**
