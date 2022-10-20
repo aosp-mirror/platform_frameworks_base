@@ -29,7 +29,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
@@ -1123,18 +1122,4 @@ public class BackupManager {
             });
         }
     }
-
-    private class BackupManagerMonitorWrapper extends IBackupManagerMonitor.Stub {
-        final BackupManagerMonitor mMonitor;
-
-        BackupManagerMonitorWrapper(BackupManagerMonitor monitor) {
-            mMonitor = monitor;
-        }
-
-        @Override
-        public void onEvent(final Bundle event) throws RemoteException {
-            mMonitor.onEvent(event);
-        }
-    }
-
 }
