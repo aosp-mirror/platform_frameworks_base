@@ -32,7 +32,8 @@ import org.jetbrains.uast.UReferenceExpression
 class SoftwareBitmapDetector : Detector(), SourceCodeScanner {
 
     override fun getApplicableReferenceNames(): List<String> {
-        return mutableListOf("ALPHA_8", "RGB_565", "ARGB_8888", "RGBA_F16", "RGBA_1010102")
+        return mutableListOf(
+            "ALPHA_8", "RGB_565", "ARGB_4444", "ARGB_8888", "RGBA_F16", "RGBA_1010102")
     }
 
     override fun visitReference(
@@ -40,13 +41,12 @@ class SoftwareBitmapDetector : Detector(), SourceCodeScanner {
             reference: UReferenceExpression,
             referenced: PsiElement
     ) {
-
         val evaluator = context.evaluator
         if (evaluator.isMemberInClass(referenced as? PsiField, "android.graphics.Bitmap.Config")) {
             context.report(
                     ISSUE,
                     referenced,
-                    context.getNameLocation(referenced),
+                    context.getNameLocation(reference),
                     "Replace software bitmap with `Config.HARDWARE`"
             )
         }
