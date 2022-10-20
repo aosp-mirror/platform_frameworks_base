@@ -2999,6 +2999,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if ((metaState & KeyEvent.META_META_MASK) == 0) {
                     return key_not_consumed;
                 }
+                // Share the same behavior with KEYCODE_LANGUAGE_SWITCH.
+            case KeyEvent.KEYCODE_LANGUAGE_SWITCH:
                 if (down && repeatCount == 0) {
                     int direction = (metaState & KeyEvent.META_SHIFT_MASK) != 0 ? -1 : 1;
                     mWindowManagerFuncs.switchKeyboardLayout(event.getDeviceId(), direction);
