@@ -33,6 +33,7 @@ import com.android.systemui.keyguard.KeyguardUnlockAnimationController
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBouncerViewModel
 import com.android.systemui.shade.NotificationShadeWindowView.InteractionEventHandler
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
+import com.android.systemui.statusbar.NotificationInsetsController
 import com.android.systemui.statusbar.NotificationShadeDepthController
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.SysuiStatusBarStateController
@@ -94,6 +95,8 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     private lateinit var phoneStatusBarViewController: PhoneStatusBarViewController
     @Mock
     private lateinit var pulsingGestureListener: PulsingGestureListener
+    @Mock
+    private lateinit var notificationInsetsController: NotificationInsetsController
     @Mock lateinit var keyguardBouncerComponentFactory: KeyguardBouncerComponent.Factory
     @Mock lateinit var keyguardBouncerContainer: ViewGroup
     @Mock lateinit var keyguardBouncerComponent: KeyguardBouncerComponent
@@ -124,6 +127,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
             centralSurfaces,
             notificationShadeWindowController,
             keyguardUnlockAnimationController,
+            notificationInsetsController,
             ambientState,
             pulsingGestureListener,
             featureFlags,

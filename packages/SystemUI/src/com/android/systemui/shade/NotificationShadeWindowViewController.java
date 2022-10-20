@@ -42,6 +42,7 @@ import com.android.systemui.keyguard.ui.binder.KeyguardBouncerViewBinder;
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBouncerViewModel;
 import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
+import com.android.systemui.statusbar.NotificationInsetsController;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
@@ -76,6 +77,7 @@ public class NotificationShadeWindowViewController {
     private final KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
     private final AmbientState mAmbientState;
     private final PulsingGestureListener mPulsingGestureListener;
+    private final NotificationInsetsController mNotificationInsetsController;
 
     private GestureDetector mPulsingWakeupGestureHandler;
     private View mBrightnessMirror;
@@ -111,6 +113,7 @@ public class NotificationShadeWindowViewController {
             CentralSurfaces centralSurfaces,
             NotificationShadeWindowController controller,
             KeyguardUnlockAnimationController keyguardUnlockAnimationController,
+            NotificationInsetsController notificationInsetsController,
             AmbientState ambientState,
             PulsingGestureListener pulsingGestureListener,
             FeatureFlags featureFlags,
@@ -134,6 +137,7 @@ public class NotificationShadeWindowViewController {
         mKeyguardUnlockAnimationController = keyguardUnlockAnimationController;
         mAmbientState = ambientState;
         mPulsingGestureListener = pulsingGestureListener;
+        mNotificationInsetsController = notificationInsetsController;
 
         // This view is not part of the newly inflated expanded status bar.
         mBrightnessMirror = mView.findViewById(R.id.brightness_mirror_container);
@@ -165,6 +169,7 @@ public class NotificationShadeWindowViewController {
         mPulsingWakeupGestureHandler = new GestureDetector(mView.getContext(),
                 mPulsingGestureListener);
 
+        mView.setLayoutInsetsController(mNotificationInsetsController);
         mView.setInteractionEventHandler(new NotificationShadeWindowView.InteractionEventHandler() {
             @Override
             public Boolean handleDispatchTouchEvent(MotionEvent ev) {
