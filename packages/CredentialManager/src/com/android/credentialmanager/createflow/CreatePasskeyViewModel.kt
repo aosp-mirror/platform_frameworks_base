@@ -30,7 +30,8 @@ import com.android.credentialmanager.common.ResultState
 data class CreatePasskeyUiState(
   val providers: List<ProviderInfo>,
   val currentScreenState: CreateScreenState,
-  val selectedProvider: ProviderInfo? = null,
+  val requestDisplayInfo: RequestDisplayInfo,
+  val activeEntry: ActiveEntry? = null,
 )
 
 class CreatePasskeyViewModel(
@@ -56,7 +57,8 @@ class CreatePasskeyViewModel(
     } else if (uiState.providers.size == 1){
       uiState = uiState.copy(
         currentScreenState = CreateScreenState.CREATION_OPTION_SELECTION,
-        selectedProvider = uiState.providers.first()
+        activeEntry = ActiveEntry(uiState.providers.first(),
+          uiState.providers.first().createOptions.first())
       )
     } else {
       throw java.lang.IllegalStateException("Empty provider list.")
@@ -66,14 +68,15 @@ class CreatePasskeyViewModel(
   fun onProviderSelected(providerName: String) {
     uiState = uiState.copy(
       currentScreenState = CreateScreenState.CREATION_OPTION_SELECTION,
-      selectedProvider = getProviderInfoByName(providerName)
+      activeEntry = ActiveEntry(getProviderInfoByName(providerName),
+        getProviderInfoByName(providerName).createOptions.first())
     )
   }
 
   fun onCreateOptionSelected(createOptionId: Int) {
     Log.d("Account Selector", "Option selected for creation: $createOptionId")
     CredentialManagerRepo.getInstance().onOptionSelected(
-      uiState.selectedProvider!!.name,
+      uiState.activeEntry?.activeProvider!!.name,
       createOptionId
     )
     dialogResult.value = DialogResult(
@@ -87,24 +90,22 @@ class CreatePasskeyViewModel(
     }
   }
 
-  fun onMoreOptionsSelected(providerName: String) {
+  fun onMoreOptionsSelected() {
     uiState = uiState.copy(
-        currentScreenState = CreateScreenState.MORE_OPTIONS_SELECTION,
-        selectedProvider = getProviderInfoByName(providerName)
+      currentScreenState = CreateScreenState.MORE_OPTIONS_SELECTION,
     )
   }
 
-  fun onBackButtonSelected(providerName: String) {
+  fun onBackButtonSelected() {
     uiState = uiState.copy(
         currentScreenState = CreateScreenState.CREATION_OPTION_SELECTION,
-        selectedProvider = getProviderInfoByName(providerName)
     )
   }
 
-  fun onMoreOptionsRowSelected(providerName: String) {
+  fun onMoreOptionsRowSelected(activeEntry: ActiveEntry) {
     uiState = uiState.copy(
       currentScreenState = CreateScreenState.MORE_OPTIONS_ROW_INTRO,
-      selectedProvider = getProviderInfoByName(providerName)
+      activeEntry = activeEntry
     )
   }
 
@@ -113,11 +114,24 @@ class CreatePasskeyViewModel(
     dialogResult.value = DialogResult(ResultState.CANCELED)
   }
 
-  fun onDefaultOrNotSelected(providerName: String) {
+  fun onDefaultOrNotSelected() {
     uiState = uiState.copy(
       currentScreenState = CreateScreenState.CREATION_OPTION_SELECTION,
-      selectedProvider = getProviderInfoByName(providerName)
     )
     // TODO: implement the if choose as default or not logic later
+  }
+
+  fun onPrimaryCreateOptionInfoSelected() {
+    var createOptionId = uiState.activeEntry?.activeCreateOptionInfo?.id
+    Log.d("Account Selector", "Option selected for creation: $createOptionId")
+    if (createOptionId != null) {
+      CredentialManagerRepo.getInstance().onOptionSelected(
+        uiState.activeEntry?.activeProvider!!.name,
+        createOptionId
+      )
+    }
+    dialogResult.value = DialogResult(
+      ResultState.COMPLETE,
+    )
   }
 }
