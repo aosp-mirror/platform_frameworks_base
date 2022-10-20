@@ -131,6 +131,7 @@ java_library_static {
         "app-compat-annotations",
         "framework-tethering.stubs.module_lib",
         "service-permission.stubs.system_server",
+        "service-rkp.stubs.system_server",
         "service-sdksandbox.stubs.system_server",
     ],
 

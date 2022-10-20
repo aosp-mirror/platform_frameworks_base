@@ -116,6 +116,7 @@ combined_apis {
     system_server_classpath: [
         "service-media-s",
         "service-permission",
+        "service-rkp",
         "service-sdksandbox",
     ],
 }
