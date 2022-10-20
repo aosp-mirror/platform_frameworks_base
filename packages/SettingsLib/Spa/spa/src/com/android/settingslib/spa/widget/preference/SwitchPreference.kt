@@ -31,9 +31,9 @@ import com.android.settingslib.spa.framework.compose.stateOf
 import com.android.settingslib.spa.framework.compose.toState
 import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.framework.theme.SettingsTheme
-import com.android.settingslib.spa.framework.util.WrapOnSwitchWithLog
-import com.android.settingslib.spa.widget.util.EntryHighlight
+import com.android.settingslib.spa.framework.util.wrapOnSwitchWithLog
 import com.android.settingslib.spa.widget.ui.SettingsSwitch
+import com.android.settingslib.spa.widget.util.EntryHighlight
 
 /**
  * The widget model for [SwitchPreference] widget.
@@ -104,7 +104,7 @@ internal fun InternalSwitchPreference(
 ) {
     val checkedValue = checked.value
     val indication = LocalIndication.current
-    val onChangeWithLog = WrapOnSwitchWithLog(onCheckedChange)
+    val onChangeWithLog = wrapOnSwitchWithLog(onCheckedChange)
     val modifier = remember(checkedValue, changeable.value) {
         if (checkedValue != null && onChangeWithLog != null) {
             Modifier.toggleable(
