@@ -832,7 +832,6 @@
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/policy/WalletControllerImplTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/window/StatusBarWindowStateControllerTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/temporarydisplay/TemporaryViewDisplayControllerTest.kt
--packages/SystemUI/tests/src/com/android/systemui/temporarydisplay/chipbar/ChipbarCoordinatorTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/unfold/FoldStateLoggingProviderTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/unfold/UnfoldLatencyTrackerTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/unfold/UnfoldTransitionWallpaperControllerTest.kt

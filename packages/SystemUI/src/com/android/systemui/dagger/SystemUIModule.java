@@ -33,6 +33,7 @@ import com.android.systemui.biometrics.AlternateUdfpsTouchProvider;
 import com.android.systemui.biometrics.UdfpsDisplayModeProvider;
 import com.android.systemui.biometrics.dagger.BiometricsModule;
 import com.android.systemui.classifier.FalsingModule;
+import com.android.systemui.clipboardoverlay.dagger.ClipboardOverlayModule;
 import com.android.systemui.controls.dagger.ControlsModule;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.demomode.dagger.DemoModeModule;
@@ -118,6 +119,7 @@ import dagger.Provides;
             AssistModule.class,
             BiometricsModule.class,
             BouncerViewModule.class,
+            ClipboardOverlayModule.class,
             ClockModule.class,
             CoroutinesModule.class,
             DreamModule.class,
@@ -165,12 +167,16 @@ public abstract class SystemUIModule {
     @Binds
     abstract BootCompleteCache bindBootCompleteCache(BootCompleteCacheImpl bootCompleteCache);
 
-    /** */
+    /**
+     *
+     */
     @Binds
     public abstract ContextComponentHelper bindComponentHelper(
             ContextComponentResolver componentHelper);
 
-    /** */
+    /**
+     *
+     */
     @Binds
     public abstract NotificationRowBinder bindNotificationRowBinder(
             NotificationRowBinderImpl notificationRowBinder);
@@ -209,6 +215,7 @@ public abstract class SystemUIModule {
     abstract SystemClock bindSystemClock(SystemClockImpl systemClock);
 
     // TODO: This should provided by the WM component
+
     /** Provides Optional of BubbleManager */
     @SysUISingleton
     @Provides
