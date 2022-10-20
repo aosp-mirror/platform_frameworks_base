@@ -25,6 +25,7 @@ import static android.hardware.display.DisplayManager.EventsMask;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD;
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_DEVICE_DISPLAY_GROUP;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC;
@@ -1275,6 +1276,9 @@ public final class DisplayManagerService extends SystemService {
         if ((flags & VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR) != 0) {
             flags &= ~VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP;
         }
+        if ((flags & VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP) == 0 && virtualDevice != null) {
+            flags |= VIRTUAL_DISPLAY_FLAG_DEVICE_DISPLAY_GROUP;
+        }
 
         if (projection != null) {
             try {
@@ -1402,7 +1406,7 @@ public final class DisplayManagerService extends SystemService {
         // If the display is to be added to a device display group, we need to make the
         // LogicalDisplayMapper aware of the link between the new display and its associated virtual
         // device before triggering DISPLAY_DEVICE_EVENT_ADDED.
-        if (virtualDevice != null && (flags & VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP) == 0) {
+        if ((flags & VIRTUAL_DISPLAY_FLAG_DEVICE_DISPLAY_GROUP) != 0) {
             try {
                 final int virtualDeviceId = virtualDevice.getDeviceId();
                 mLogicalDisplayMapper.associateDisplayDeviceWithVirtualDevice(

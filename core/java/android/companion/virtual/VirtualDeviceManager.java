@@ -71,7 +71,6 @@ import java.util.function.IntConsumer;
 @SystemService(Context.VIRTUAL_DEVICE_SERVICE)
 public final class VirtualDeviceManager {
 
-    private static final boolean DEBUG = false;
     private static final String TAG = "VirtualDeviceManager";
 
     private static final int DEFAULT_VIRTUAL_DISPLAY_FLAGS =
@@ -80,7 +79,6 @@ public final class VirtualDeviceManager {
                     | DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY
                     | DisplayManager.VIRTUAL_DISPLAY_FLAG_DESTROY_CONTENT_ON_REMOVAL
                     | DisplayManager.VIRTUAL_DISPLAY_FLAG_SUPPORTS_TOUCH
-                    | DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP
                     | DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_FOCUS;
 
     /**

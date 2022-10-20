@@ -145,7 +145,7 @@ final class DisplayDeviceInfo {
     /**
      * Flag: Indicates that the display should always be unlocked. Only valid on virtual displays
      * that aren't in the default display group.
-     * @see #FLAG_OWN_DISPLAY_GROUP
+     * @see #FLAG_OWN_DISPLAY_GROUP and #FLAG_DEVICE_DISPLAY_GROUP
      * @hide
      */
     public static final int FLAG_ALWAYS_UNLOCKED = 1 << 15;
@@ -170,6 +170,14 @@ final class DisplayDeviceInfo {
      * @hide
      */
     public static final int FLAG_OWN_FOCUS = 1 << 17;
+
+    /**
+     * Flag: indicates that the display should not be a part of the default {@link DisplayGroup} and
+     * instead be part of a {@link DisplayGroup} associated with the Virtual Device.
+     *
+     * @hide
+     */
+    public static final int FLAG_DEVICE_DISPLAY_GROUP = 1 << 18;
 
     /**
      * Touch attachment: Display does not receive touch.
