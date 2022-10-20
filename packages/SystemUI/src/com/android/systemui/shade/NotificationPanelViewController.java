@@ -1675,9 +1675,9 @@ public final class NotificationPanelViewController {
                 transition.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
 
                 boolean customClockAnimation =
-                        mKeyguardStatusViewController
-                                .getClockAnimations()
-                                .getHasCustomPositionUpdatedAnimation();
+                            mKeyguardStatusViewController.getClockAnimations() != null
+                            && mKeyguardStatusViewController.getClockAnimations()
+                                    .getHasCustomPositionUpdatedAnimation();
 
                 if (mFeatureFlags.isEnabled(Flags.STEP_CLOCK_ANIMATION) && customClockAnimation) {
                     // Find the clock, so we can exclude it from this transition.
