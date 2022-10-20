@@ -97,6 +97,7 @@ class UserRepositoryImplUnrefactoredTest : UserRepositoryImplTest() {
                         createUserRecord(2),
                         createActionRecord(UserActionModel.ADD_SUPERVISED_USER),
                         createActionRecord(UserActionModel.ENTER_GUEST_MODE),
+                        createActionRecord(UserActionModel.NAVIGATE_TO_USER_MANAGEMENT),
                     )
                 )
             var models: List<UserModel>? = null
@@ -176,15 +177,17 @@ class UserRepositoryImplUnrefactoredTest : UserRepositoryImplTest() {
                         createUserRecord(2),
                         createActionRecord(UserActionModel.ADD_SUPERVISED_USER),
                         createActionRecord(UserActionModel.ENTER_GUEST_MODE),
+                        createActionRecord(UserActionModel.NAVIGATE_TO_USER_MANAGEMENT),
                     )
                 )
             var models: List<UserActionModel>? = null
             val job = underTest.actions.onEach { models = it }.launchIn(this)
 
-            assertThat(models).hasSize(3)
+            assertThat(models).hasSize(4)
             assertThat(models?.get(0)).isEqualTo(UserActionModel.ADD_USER)
             assertThat(models?.get(1)).isEqualTo(UserActionModel.ADD_SUPERVISED_USER)
             assertThat(models?.get(2)).isEqualTo(UserActionModel.ENTER_GUEST_MODE)
+            assertThat(models?.get(3)).isEqualTo(UserActionModel.NAVIGATE_TO_USER_MANAGEMENT)
             job.cancel()
         }
 
@@ -200,6 +203,7 @@ class UserRepositoryImplUnrefactoredTest : UserRepositoryImplTest() {
             isAddUser = action == UserActionModel.ADD_USER,
             isAddSupervisedUser = action == UserActionModel.ADD_SUPERVISED_USER,
             isGuest = action == UserActionModel.ENTER_GUEST_MODE,
+            isManageUsers = action == UserActionModel.NAVIGATE_TO_USER_MANAGEMENT,
         )
     }
 }

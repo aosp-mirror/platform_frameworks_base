@@ -182,8 +182,7 @@ class MediaProjectionAppSelectorActivity(
 
     override fun shouldGetOnlyDefaultActivities() = false
 
-    // TODO(b/240924732) flip the flag when the recents selector is ready
-    override fun shouldShowContentPreview() = false
+    override fun shouldShowContentPreview() = true
 
     override fun createContentPreviewView(parent: ViewGroup): ViewGroup =
         recentsViewController.createView(parent)

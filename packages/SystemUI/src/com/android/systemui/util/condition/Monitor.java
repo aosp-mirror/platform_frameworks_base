@@ -117,6 +117,7 @@ public class Monitor {
         final SubscriptionState state = new SubscriptionState(subscription);
 
         mExecutor.execute(() -> {
+            if (shouldLog()) Log.d(mTag, "adding subscription");
             mSubscriptions.put(token, state);
 
             // Add and associate conditions.
@@ -143,7 +144,7 @@ public class Monitor {
      */
     public void removeSubscription(@NotNull Subscription.Token token) {
         mExecutor.execute(() -> {
-            if (shouldLog()) Log.d(mTag, "removing callback");
+            if (shouldLog()) Log.d(mTag, "removing subscription");
             if (!mSubscriptions.containsKey(token)) {
                 Log.e(mTag, "subscription not present:" + token);
                 return;

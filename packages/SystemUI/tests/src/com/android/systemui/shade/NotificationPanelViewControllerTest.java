@@ -33,6 +33,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atLeastOnce;
@@ -77,6 +78,7 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.LatencyTracker;
+import com.android.keyguard.FaceAuthApiRequestReason;
 import com.android.keyguard.KeyguardClockSwitch;
 import com.android.keyguard.KeyguardClockSwitchController;
 import com.android.keyguard.KeyguardStatusView;
@@ -94,7 +96,6 @@ import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.camera.CameraGestureHelper;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.classifier.FalsingManagerFake;
-import com.android.systemui.controls.dagger.ControlsComponent;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
@@ -110,7 +111,7 @@ import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QS;
-import com.android.systemui.qrcodescanner.controller.QRCodeScannerController;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSFragment;
 import com.android.systemui.screenrecord.RecordingController;
 import com.android.systemui.shade.transition.ShadeTransitionController;
@@ -166,7 +167,6 @@ import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 import com.android.systemui.unfold.SysUIUnfoldComponent;
 import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.util.time.SystemClock;
-import com.android.systemui.wallet.controller.QuickAccessWalletController;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
 import org.junit.After;
@@ -174,6 +174,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -259,11 +260,8 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     @Mock private KeyguardIndicationController mKeyguardIndicationController;
     @Mock private FragmentService mFragmentService;
     @Mock private FragmentHostManager mFragmentHostManager;
-    @Mock private QuickAccessWalletController mQuickAccessWalletController;
-    @Mock private QRCodeScannerController mQrCodeScannerController;
     @Mock private NotificationRemoteInputManager mNotificationRemoteInputManager;
     @Mock private RecordingController mRecordingController;
-    @Mock private ControlsComponent mControlsComponent;
     @Mock private LockscreenGestureLogger mLockscreenGestureLogger;
     @Mock private DumpManager mDumpManager;
     @Mock private InteractionJankMonitor mInteractionJankMonitor;
@@ -284,6 +282,10 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     @Mock private ViewTreeObserver mViewTreeObserver;
     @Mock private KeyguardBottomAreaViewModel mKeyguardBottomAreaViewModel;
     @Mock private KeyguardBottomAreaInteractor mKeyguardBottomAreaInteractor;
+    @Mock private MotionEvent mDownMotionEvent;
+    @Captor
+    private ArgumentCaptor<NotificationStackScrollLayout.OnEmptySpaceClickListener>
+            mEmptySpaceClickListenerCaptor;
 
     private NotificationPanelViewController.TouchHandler mTouchHandler;
     private ConfigurationController mConfigurationController;
@@ -427,6 +429,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         when(mView.getViewTreeObserver()).thenReturn(mViewTreeObserver);
         when(mView.getParent()).thenReturn(mViewParent);
         when(mQs.getHeader()).thenReturn(mQsHeader);
+        when(mDownMotionEvent.getAction()).thenReturn(MotionEvent.ACTION_DOWN);
 
         mMainHandler = new Handler(Looper.getMainLooper());
         NotificationPanelViewController.PanelEventsEmitter panelEventsEmitter =
@@ -514,6 +517,8 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 .addCallback(mNotificationPanelViewController.mStatusBarStateListener);
         mNotificationPanelViewController
                 .setHeadsUpAppearanceController(mock(HeadsUpAppearanceController.class));
+        verify(mNotificationStackScrollLayoutController)
+                .setOnEmptySpaceClickListener(mEmptySpaceClickListenerCaptor.capture());
     }
 
     @After
@@ -1542,6 +1547,76 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         );
     }
 
+    @Test
+    public void onEmptySpaceClicked_notDozingAndOnKeyguard_requestsFaceAuth() {
+        StatusBarStateController.StateListener statusBarStateListener =
+                mNotificationPanelViewController.mStatusBarStateListener;
+        statusBarStateListener.onStateChanged(KEYGUARD);
+        mNotificationPanelViewController.setDozing(false, false);
+
+        // This sets the dozing state that is read when onMiddleClicked is eventually invoked.
+        mTouchHandler.onTouch(mock(View.class), mDownMotionEvent);
+        mEmptySpaceClickListenerCaptor.getValue().onEmptySpaceClicked(0, 0);
+
+        verify(mUpdateMonitor).requestFaceAuth(true,
+                FaceAuthApiRequestReason.NOTIFICATION_PANEL_CLICKED);
+    }
+
+    @Test
+    public void onEmptySpaceClicked_notDozingAndFaceDetectionIsNotRunning_startsUnlockAnimation() {
+        StatusBarStateController.StateListener statusBarStateListener =
+                mNotificationPanelViewController.mStatusBarStateListener;
+        statusBarStateListener.onStateChanged(KEYGUARD);
+        mNotificationPanelViewController.setDozing(false, false);
+        when(mUpdateMonitor.isFaceDetectionRunning()).thenReturn(false);
+
+        // This sets the dozing state that is read when onMiddleClicked is eventually invoked.
+        mTouchHandler.onTouch(mock(View.class), mDownMotionEvent);
+        mEmptySpaceClickListenerCaptor.getValue().onEmptySpaceClicked(0, 0);
+
+        verify(mNotificationStackScrollLayoutController).setUnlockHintRunning(true);
+    }
+
+    @Test
+    public void onEmptySpaceClicked_notDozingAndFaceDetectionIsRunning_doesNotStartUnlockHint() {
+        StatusBarStateController.StateListener statusBarStateListener =
+                mNotificationPanelViewController.mStatusBarStateListener;
+        statusBarStateListener.onStateChanged(KEYGUARD);
+        mNotificationPanelViewController.setDozing(false, false);
+        when(mUpdateMonitor.isFaceDetectionRunning()).thenReturn(true);
+
+        // This sets the dozing state that is read when onMiddleClicked is eventually invoked.
+        mTouchHandler.onTouch(mock(View.class), mDownMotionEvent);
+        mEmptySpaceClickListenerCaptor.getValue().onEmptySpaceClicked(0, 0);
+
+        verify(mNotificationStackScrollLayoutController, never()).setUnlockHintRunning(true);
+    }
+
+    @Test
+    public void onEmptySpaceClicked_whenDozingAndOnKeyguard_doesNotRequestFaceAuth() {
+        StatusBarStateController.StateListener statusBarStateListener =
+                mNotificationPanelViewController.mStatusBarStateListener;
+        statusBarStateListener.onStateChanged(KEYGUARD);
+        mNotificationPanelViewController.setDozing(true, false);
+
+        // This sets the dozing state that is read when onMiddleClicked is eventually invoked.
+        mTouchHandler.onTouch(mock(View.class), mDownMotionEvent);
+        mEmptySpaceClickListenerCaptor.getValue().onEmptySpaceClicked(0, 0);
+
+        verify(mUpdateMonitor, never()).requestFaceAuth(anyBoolean(), anyString());
+    }
+
+    @Test
+    public void onEmptySpaceClicked_whenStatusBarShadeLocked_doesNotRequestFaceAuth() {
+        StatusBarStateController.StateListener statusBarStateListener =
+                mNotificationPanelViewController.mStatusBarStateListener;
+        statusBarStateListener.onStateChanged(SHADE_LOCKED);
+
+        mEmptySpaceClickListenerCaptor.getValue().onEmptySpaceClicked(0, 0);
+
+        verify(mUpdateMonitor, never()).requestFaceAuth(anyBoolean(), anyString());
+
+    }
 
     /**
      * When shade is flinging to close and this fling is not intercepted,

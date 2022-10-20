@@ -14,17 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.systemui.log
+package com.android.systemui.plugins.log
 
 import android.util.Log
 
-/**
- * Enum version of @Log.Level
- */
-enum class LogLevel(
-    @Log.Level val nativeLevel: Int,
-    val shortString: String
-) {
+/** Enum version of @Log.Level */
+enum class LogLevel(@Log.Level val nativeLevel: Int, val shortString: String) {
     VERBOSE(Log.VERBOSE, "V"),
     DEBUG(Log.DEBUG, "D"),
     INFO(Log.INFO, "I"),

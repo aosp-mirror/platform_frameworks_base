@@ -321,6 +321,7 @@ constructor(
         return when {
             isAddUser -> false
             isAddSupervisedUser -> false
+            isManageUsers -> false
             isGuest -> info != null
             else -> true
         }
@@ -346,6 +347,7 @@ constructor(
             isAddUser -> UserActionModel.ADD_USER
             isAddSupervisedUser -> UserActionModel.ADD_SUPERVISED_USER
             isGuest -> UserActionModel.ENTER_GUEST_MODE
+            isManageUsers -> UserActionModel.NAVIGATE_TO_USER_MANAGEMENT
             else -> error("Don't know how to convert to UserActionModel: $this")
         }
     }

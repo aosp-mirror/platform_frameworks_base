@@ -191,5 +191,18 @@
     <declare-styleable name="DelayableMarqueeTextView">
         <attr name="marqueeDelay" format="integer" />
     </declare-styleable>
+
+    <declare-styleable name="AuthCredentialView">
+        <attr name="lockPatternStyle" format="reference" />
+        <attr name="lockPinPasswordStyle" format="reference" />
+        <attr name="containerStyle" format="reference" />
+        <attr name="headerStyle" format="reference" />
+        <attr name="headerIconStyle" format="reference" />
+        <attr name="titleTextAppearance" format="reference" />
+        <attr name="subTitleTextAppearance" format="reference" />
+        <attr name="descriptionTextAppearance" format="reference" />
+        <attr name="passwordTextAppearance" format="reference" />
+        <attr name="errorTextAppearance" format="reference"/>
+    </declare-styleable>
 </resources>
 
