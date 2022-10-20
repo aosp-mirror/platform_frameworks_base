@@ -27,6 +27,7 @@ import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.broadcastradio.hal2.AnnouncementAggregator;
 
 import java.io.FileDescriptor;
@@ -53,12 +54,24 @@ final class IRadioServiceHidlImpl extends IRadioService.Stub {
     private final List<RadioManager.ModuleProperties> mV1Modules;
 
     IRadioServiceHidlImpl(BroadcastRadioService service) {
-        mService = Objects.requireNonNull(service);
+        mService = Objects.requireNonNull(service, "broadcast radio service cannot be null");
         mHal1 = new com.android.server.broadcastradio.hal1.BroadcastRadioService(mLock);
         mV1Modules = mHal1.loadModules();
         OptionalInt max = mV1Modules.stream().mapToInt(RadioManager.ModuleProperties::getId).max();
         mHal2 = new com.android.server.broadcastradio.hal2.BroadcastRadioService(
                 max.isPresent() ? max.getAsInt() + 1 : 0, mLock);
+    }
+
+    @VisibleForTesting
+    IRadioServiceHidlImpl(BroadcastRadioService service,
+            com.android.server.broadcastradio.hal1.BroadcastRadioService hal1,
+            com.android.server.broadcastradio.hal2.BroadcastRadioService hal2) {
+        mService = Objects.requireNonNull(service, "Broadcast radio service cannot be null");
+        mHal1 = Objects.requireNonNull(hal1,
+                "Broadcast radio service implementation for HIDL 1 HAL cannot be null");
+        mV1Modules = mHal1.loadModules();
+        mHal2 = Objects.requireNonNull(hal2,
+                "Broadcast radio service implementation for HIDL 2 HAL cannot be null");
     }
 
     @Override
@@ -95,8 +108,8 @@ final class IRadioServiceHidlImpl extends IRadioService.Stub {
         if (isDebugEnabled()) {
             Slog.d(TAG, "Adding announcement listener for " + Arrays.toString(enabledTypes));
         }
-        Objects.requireNonNull(enabledTypes);
-        Objects.requireNonNull(listener);
+        Objects.requireNonNull(enabledTypes, "Enabled announcement types cannot be null");
+        Objects.requireNonNull(listener, "Announcement listener cannot be null");
         mService.enforcePolicyAccess();
 
         synchronized (mLock) {

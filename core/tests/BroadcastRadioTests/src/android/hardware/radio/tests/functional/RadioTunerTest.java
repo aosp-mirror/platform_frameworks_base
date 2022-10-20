@@ -33,11 +33,9 @@ import android.content.pm.PackageManager;
 import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
 import android.hardware.radio.RadioTuner;
-import android.test.suitebuilder.annotation.MediumTest;
 import android.util.Log;
 
 import androidx.test.InstrumentationRegistry;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
 import org.junit.Before;
@@ -47,6 +45,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -56,8 +55,7 @@ import java.util.Map;
 /**
  * A test for broadcast radio API.
  */
-@RunWith(AndroidJUnit4.class)
-@MediumTest
+@RunWith(MockitoJUnitRunner.class)
 public class RadioTunerTest {
     private static final String TAG = "BroadcastRadioTests.RadioTuner";
 

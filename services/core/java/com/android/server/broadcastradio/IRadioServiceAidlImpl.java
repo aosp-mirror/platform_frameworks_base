@@ -29,6 +29,8 @@ import android.os.ServiceManager;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
 
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.broadcastradio.aidl.BroadcastRadioServiceImpl;
 import com.android.server.utils.Slogf;
 
 import java.io.FileDescriptor;
@@ -47,7 +49,7 @@ final class IRadioServiceAidlImpl extends IRadioService.Stub {
     private static final List<String> SERVICE_NAMES = Arrays.asList(
             IBroadcastRadio.DESCRIPTOR + "/amfm", IBroadcastRadio.DESCRIPTOR + "/dab");
 
-    private final com.android.server.broadcastradio.aidl.BroadcastRadioServiceImpl mHalAidl;
+    private final BroadcastRadioServiceImpl mHalAidl;
     private final BroadcastRadioService mService;
 
     /**
@@ -65,10 +67,15 @@ final class IRadioServiceAidlImpl extends IRadioService.Stub {
     }
 
     IRadioServiceAidlImpl(BroadcastRadioService service, ArrayList<String> serviceList) {
+        this(service, new BroadcastRadioServiceImpl(serviceList));
         Slogf.i(TAG, "Initialize BroadcastRadioServiceAidl(%s)", service);
-        mService = Objects.requireNonNull(service);
-        mHalAidl =
-                new com.android.server.broadcastradio.aidl.BroadcastRadioServiceImpl(serviceList);
+    }
+
+    @VisibleForTesting
+    IRadioServiceAidlImpl(BroadcastRadioService service, BroadcastRadioServiceImpl halAidl) {
+        mService = Objects.requireNonNull(service, "Broadcast radio service cannot be null");
+        mHalAidl = Objects.requireNonNull(halAidl,
+                "Broadcast radio service implementation for AIDL HAL cannot be null");
     }
 
     @Override
@@ -96,8 +103,8 @@ final class IRadioServiceAidlImpl extends IRadioService.Stub {
         if (isDebugEnabled()) {
             Slogf.d(TAG, "Adding announcement listener for %s", Arrays.toString(enabledTypes));
         }
-        Objects.requireNonNull(enabledTypes);
-        Objects.requireNonNull(listener);
+        Objects.requireNonNull(enabledTypes, "Enabled announcement types cannot be null");
+        Objects.requireNonNull(listener, "Announcement listener cannot be null");
         mService.enforcePolicyAccess();
 
         return mHalAidl.addAnnouncementListener(enabledTypes, listener);
