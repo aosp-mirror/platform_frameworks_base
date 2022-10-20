@@ -51,7 +51,7 @@ class SwitchBackToSplitFromHome(testSpec: FlickerTestParameter) : SplitScreenBas
         get() = {
             super.transition(this)
             setup {
-                SplitScreenUtils.enterSplit(wmHelper, tapl, primaryApp, secondaryApp)
+                SplitScreenUtils.enterSplit(wmHelper, tapl, device, primaryApp, secondaryApp)
 
                 tapl.goHome()
                 wmHelper.StateSyncBuilder().withHomeActivityVisible().waitForAndVerify()

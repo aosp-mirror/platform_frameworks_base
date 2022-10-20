@@ -34,6 +34,7 @@ abstract class SplitScreenBase(testSpec: FlickerTestParameter) : BaseTest(testSp
                 tapl.setEnableRotation(true)
                 setRotation(testSpec.startRotation)
                 tapl.setExpectedRotation(testSpec.startRotation)
+                tapl.workspace.switchToOverview().dismissAllTasks()
             }
             teardown {
                 primaryApp.exit(wmHelper)

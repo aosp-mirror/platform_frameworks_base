@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package com.android.wm.shell.flicker.splitscreen
 
 import android.platform.test.annotations.FlakyTest
-import android.platform.test.annotations.IwTest
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import androidx.test.filters.RequiresDevice
@@ -25,15 +24,18 @@ import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
+import com.android.wm.shell.flicker.SPLIT_SCREEN_DIVIDER_COMPONENT
+import com.android.wm.shell.flicker.appWindowBecomesInvisible
 import com.android.wm.shell.flicker.appWindowBecomesVisible
+import com.android.wm.shell.flicker.appWindowIsInvisibleAtEnd
+import com.android.wm.shell.flicker.appWindowIsVisibleAtStart
+import com.android.wm.shell.flicker.appWindowIsVisibleAtEnd
+import com.android.wm.shell.flicker.layerBecomesInvisible
 import com.android.wm.shell.flicker.layerBecomesVisible
-import com.android.wm.shell.flicker.layerIsVisibleAtEnd
-import com.android.wm.shell.flicker.splitAppLayerBoundsBecomesVisible
 import com.android.wm.shell.flicker.splitAppLayerBoundsIsVisibleAtEnd
-import com.android.wm.shell.flicker.splitScreenDividerBecomesVisible
-import com.android.wm.shell.flicker.splitScreenEntered
-import org.junit.Assume
+import com.android.wm.shell.flicker.splitAppLayerBoundsSnapToDivider
+import com.android.wm.shell.flicker.splitScreenDividerIsVisibleAtStart
+import com.android.wm.shell.flicker.splitScreenDividerIsVisibleAtEnd
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -41,81 +43,137 @@ import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test enter split screen from Overview.
+ * Test quick switch between two split pairs.
  *
- * To run this test: `atest WMShellFlickerTests:EnterSplitScreenFromOverview`
+ * To run this test: `atest WMShellFlickerTests:SwitchBetweenSplitPairs`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class EnterSplitScreenFromOverview(testSpec: FlickerTestParameter) : SplitScreenBase(testSpec) {
+class SwitchBetweenSplitPairs(testSpec: FlickerTestParameter) : SplitScreenBase(testSpec) {
+    private val thirdApp = SplitScreenUtils.getIme(instrumentation)
+    private val fourthApp = SplitScreenUtils.getSendNotification(instrumentation)
+
     override val transition: FlickerBuilder.() -> Unit
         get() = {
             super.transition(this)
             setup {
-                primaryApp.launchViaIntent(wmHelper)
-                secondaryApp.launchViaIntent(wmHelper)
-                tapl.goHome()
-                wmHelper.StateSyncBuilder()
-                    .withAppTransitionIdle()
-                    .withHomeActivityVisible()
-                    .waitForAndVerify()
+                SplitScreenUtils.enterSplit(wmHelper, tapl, device, primaryApp, secondaryApp)
+                SplitScreenUtils.enterSplit(wmHelper, tapl, device, thirdApp, fourthApp)
+                SplitScreenUtils.waitForSplitComplete(wmHelper, thirdApp, fourthApp)
             }
             transitions {
-                SplitScreenUtils.splitFromOverview(tapl, device)
+                tapl.launchedAppState.quickSwitchToPreviousApp()
                 SplitScreenUtils.waitForSplitComplete(wmHelper, primaryApp, secondaryApp)
+            }
+            teardown {
+                thirdApp.exit(wmHelper)
+                fourthApp.exit(wmHelper)
             }
         }
 
-    @IwTest(focusArea = "sysui")
-    @Presubmit
+    @Postsubmit
     @Test
-    fun cujCompleted() = testSpec.splitScreenEntered(primaryApp, secondaryApp, fromOtherApp = true)
+    fun cujCompleted() {
+        testSpec.appWindowIsVisibleAtStart(thirdApp)
+        testSpec.appWindowIsVisibleAtStart(fourthApp)
+        testSpec.splitScreenDividerIsVisibleAtStart()
 
-    @Presubmit
+        testSpec.appWindowIsVisibleAtEnd(primaryApp)
+        testSpec.appWindowIsVisibleAtEnd(secondaryApp)
+        testSpec.appWindowIsInvisibleAtEnd(thirdApp)
+        testSpec.appWindowIsInvisibleAtEnd(fourthApp)
+        testSpec.splitScreenDividerIsVisibleAtEnd()
+    }
+
+    @Postsubmit
     @Test
-    fun splitScreenDividerBecomesVisible() = testSpec.splitScreenDividerBecomesVisible()
+    fun splitScreenDividerInvisibleAtMiddle() =
+        testSpec.assertLayers {
+            this.isVisible(SPLIT_SCREEN_DIVIDER_COMPONENT)
+                .then()
+                .isInvisible(SPLIT_SCREEN_DIVIDER_COMPONENT)
+                .then()
+                .isVisible(SPLIT_SCREEN_DIVIDER_COMPONENT)
+        }
 
-    @Presubmit
+    @FlakyTest(bugId = 247095572)
     @Test
-    fun primaryAppLayerIsVisibleAtEnd() = testSpec.layerIsVisibleAtEnd(primaryApp)
+    fun primaryAppLayerBecomesVisible() = testSpec.layerBecomesVisible(primaryApp)
 
-    @Presubmit
+    @FlakyTest(bugId = 247095572)
     @Test
     fun secondaryAppLayerBecomesVisible() = testSpec.layerBecomesVisible(secondaryApp)
 
-    @Presubmit
+    @FlakyTest(bugId = 247095572)
     @Test
-    fun primaryAppBoundsIsVisibleAtEnd() = testSpec.splitAppLayerBoundsIsVisibleAtEnd(
-        primaryApp, landscapePosLeft = tapl.isTablet, portraitPosTop = false)
+    fun thirdAppLayerBecomesInvisible() = testSpec.layerBecomesInvisible(thirdApp)
 
-    @Presubmit
+    @FlakyTest(bugId = 247095572)
     @Test
-    fun secondaryAppBoundsBecomesVisible() {
-        Assume.assumeFalse(isShellTransitionsEnabled)
-        testSpec.splitAppLayerBoundsBecomesVisible(
-            secondaryApp, landscapePosLeft = !tapl.isTablet, portraitPosTop = true)
-    }
+    fun fourthAppLayerBecomesInvisible() = testSpec.layerBecomesInvisible(fourthApp)
 
-    @FlakyTest(bugId = 244407465)
+    @Postsubmit
     @Test
-    fun secondaryAppBoundsBecomesVisible_shellTransit() {
-        Assume.assumeTrue(isShellTransitionsEnabled)
-        testSpec.splitAppLayerBoundsBecomesVisible(
-            secondaryApp, landscapePosLeft = !tapl.isTablet, portraitPosTop = true)
-    }
+    fun primaryAppBoundsIsVisibleAtEnd() =
+        testSpec.splitAppLayerBoundsIsVisibleAtEnd(
+            primaryApp,
+            landscapePosLeft = tapl.isTablet,
+            portraitPosTop = false
+        )
 
-    @Presubmit
+    @Postsubmit
+    @Test
+    fun secondaryAppBoundsIsVisibleAtEnd() =
+        testSpec.splitAppLayerBoundsIsVisibleAtEnd(
+            secondaryApp,
+            landscapePosLeft = !tapl.isTablet,
+            portraitPosTop = true
+        )
+
+    @Postsubmit
+    @Test
+    fun thirdAppBoundsIsVisibleAtBegin() =
+        testSpec.assertLayersStart {
+            this.splitAppLayerBoundsSnapToDivider(
+                thirdApp,
+                landscapePosLeft = tapl.isTablet,
+                portraitPosTop = false,
+                testSpec.startRotation
+            )
+        }
+
+    @Postsubmit
+    @Test
+    fun fourthAppBoundsIsVisibleAtBegin() =
+        testSpec.assertLayersStart {
+            this.splitAppLayerBoundsSnapToDivider(
+                fourthApp,
+                landscapePosLeft = !tapl.isTablet,
+                portraitPosTop = true,
+                testSpec.startRotation
+            )
+        }
+
+    @Postsubmit
     @Test
     fun primaryAppWindowBecomesVisible() = testSpec.appWindowBecomesVisible(primaryApp)
 
-    @Presubmit
+    @Postsubmit
     @Test
     fun secondaryAppWindowBecomesVisible() = testSpec.appWindowBecomesVisible(secondaryApp)
 
+    @Postsubmit
+    @Test
+    fun thirdAppWindowBecomesVisible() = testSpec.appWindowBecomesInvisible(thirdApp)
+
+    @Postsubmit
+    @Test
+    fun fourthAppWindowBecomesVisible() = testSpec.appWindowBecomesInvisible(fourthApp)
+
     /** {@inheritDoc} */
-    @FlakyTest(bugId = 251269324)
+    @FlakyTest(bugId = 251268711)
     @Test
     override fun entireScreenCovered() =
         super.entireScreenCovered()
@@ -127,7 +185,7 @@ class EnterSplitScreenFromOverview(testSpec: FlickerTestParameter) : SplitScreen
         super.navBarLayerIsVisibleAtStartAndEnd()
 
     /** {@inheritDoc} */
-    @Postsubmit
+    @FlakyTest(bugId = 206753786)
     @Test
     override fun navBarLayerPositionAtStartAndEnd() =
         super.navBarLayerPositionAtStartAndEnd()
@@ -169,7 +227,7 @@ class EnterSplitScreenFromOverview(testSpec: FlickerTestParameter) : SplitScreen
         super.taskBarWindowIsAlwaysVisible()
 
     /** {@inheritDoc} */
-    @FlakyTest(bugId = 252736515)
+    @FlakyTest
     @Test
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
         super.visibleLayersShownMoreThanOneConsecutiveEntry()
