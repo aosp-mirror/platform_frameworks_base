@@ -1607,6 +1607,16 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return false;
     }
 
+    /** Computes LONG, SIZE and COMPAT parts of {@link Configuration#screenLayout}. */
+    static int computeScreenLayout(int sourceScreenLayout, int screenWidthDp,
+            int screenHeightDp) {
+        sourceScreenLayout = sourceScreenLayout
+                & (Configuration.SCREENLAYOUT_LONG_MASK | Configuration.SCREENLAYOUT_SIZE_MASK);
+        final int longSize = Math.max(screenWidthDp, screenHeightDp);
+        final int shortSize = Math.min(screenWidthDp, screenHeightDp);
+        return Configuration.reduceScreenLayout(sourceScreenLayout, longSize, shortSize);
+    }
+
     // TODO: Users would have their own window containers under the display container?
     void switchUser(int userId) {
         for (int i = mChildren.size() - 1; i >= 0; --i) {

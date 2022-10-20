@@ -448,14 +448,8 @@ class WindowToken extends WindowContainer<WindowState> {
         if (mFixedRotationTransformState != null) {
             mFixedRotationTransformState.disassociate(this);
         }
-        // TODO(b/233855302): Remove TaskFragment override if the DisplayContent uses the same
-        //  bounds for screenLayout calculation.
-        final Configuration overrideConfig = new Configuration(config);
-        overrideConfig.screenLayout = TaskFragment.computeScreenLayoutOverride(
-                overrideConfig.screenLayout, overrideConfig.screenWidthDp,
-                overrideConfig.screenHeightDp);
         mFixedRotationTransformState = new FixedRotationTransformState(info, displayFrames,
-                overrideConfig, mDisplayContent.getRotation());
+                new Configuration(config), mDisplayContent.getRotation());
         mFixedRotationTransformState.mAssociatedTokens.add(this);
         mDisplayContent.getDisplayPolicy().simulateLayoutDisplay(displayFrames);
         onFixedRotationStatePrepared();
