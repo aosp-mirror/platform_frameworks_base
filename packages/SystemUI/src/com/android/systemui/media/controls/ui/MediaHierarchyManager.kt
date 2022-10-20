@@ -43,7 +43,8 @@ import com.android.systemui.dreams.DreamOverlayStateController
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.media.dream.MediaDreamComplication
 import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.shade.NotifPanelEvents
+import com.android.systemui.shade.ShadeStateEvents
+import com.android.systemui.shade.ShadeStateEvents.ShadeStateEventsListener
 import com.android.systemui.statusbar.CrossFadeHelper
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.SysuiStatusBarStateController
@@ -96,7 +97,7 @@ constructor(
     private val dreamOverlayStateController: DreamOverlayStateController,
     configurationController: ConfigurationController,
     wakefulnessLifecycle: WakefulnessLifecycle,
-    panelEventsEvents: NotifPanelEvents,
+    panelEventsEvents: ShadeStateEvents,
     private val secureSettings: SecureSettings,
     @Main private val handler: Handler,
 ) {
@@ -534,8 +535,8 @@ constructor(
             mediaHosts.forEach { it?.updateViewVisibility() }
         }
 
-        panelEventsEvents.registerListener(
-            object : NotifPanelEvents.Listener {
+        panelEventsEvents.addShadeStateEventsListener(
+            object : ShadeStateEventsListener {
                 override fun onExpandImmediateChanged(isExpandImmediateEnabled: Boolean) {
                     skipQqsOnExpansion = isExpandImmediateEnabled
                     updateDesiredLocation()
