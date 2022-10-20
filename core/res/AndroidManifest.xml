@@ -668,7 +668,6 @@
     <protected-broadcast android:name="android.media.tv.action.PREVIEW_PROGRAM_BROWSABLE_DISABLED" />
     <protected-broadcast android:name="android.media.tv.action.WATCH_NEXT_PROGRAM_BROWSABLE_DISABLED" />
     <protected-broadcast android:name="android.media.tv.action.CHANNEL_BROWSABLE_REQUESTED" />
-    <protected-broadcast android:name="com.android.server.inputmethod.InputMethodManagerService.SHOW_INPUT_METHOD_PICKER" />
 
     <!-- Time zone rules update intents fired by the system server -->
     <protected-broadcast android:name="com.android.intent.action.timezone.RULES_UPDATE_OPERATION" />
