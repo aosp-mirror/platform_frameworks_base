@@ -4260,6 +4260,13 @@
     <permission android:name="android.permission.BIND_AUTOFILL_SERVICE"
         android:protectionLevel="signature" />
 
+    <!-- Must be required by a CredentialProviderService to ensure that only the
+         system can bind to it.
+         <p>Protection level: signature
+    -->
+    <permission android:name="android.permission.BIND_CREDENTIAL_PROVIDER_SERVICE"
+                android:protectionLevel="signature" />
+
    <!-- Alternative version of android.permission.BIND_AUTOFILL_FIELD_CLASSIFICATION_SERVICE.
         This permission was renamed during the O previews but it was supported on the final O
         release, so we need to carry it over.
