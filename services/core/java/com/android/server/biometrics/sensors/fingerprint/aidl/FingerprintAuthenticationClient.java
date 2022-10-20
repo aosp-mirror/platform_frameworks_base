@@ -16,6 +16,7 @@
 
 package com.android.server.biometrics.sensors.fingerprint.aidl;
 
+import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_START;
 import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_VENDOR;
 
 import android.annotation.NonNull;
@@ -57,6 +58,7 @@ import com.android.server.biometrics.sensors.SensorOverlays;
 import com.android.server.biometrics.sensors.fingerprint.PowerPressHandler;
 import com.android.server.biometrics.sensors.fingerprint.Udfps;
 
+import java.time.Clock;
 import java.util.ArrayList;
 import java.util.function.Supplier;
 
@@ -88,7 +90,9 @@ class FingerprintAuthenticationClient extends AuthenticationClient<AidlSession>
     private long mWaitForAuthKeyguard;
     private long mWaitForAuthBp;
     private long mIgnoreAuthFor;
+    private long mSideFpsLastAcquireStartTime;
     private Runnable mAuthSuccessRunnable;
+    private final Clock mClock;
 
     FingerprintAuthenticationClient(
             @NonNull Context context,
@@ -112,7 +116,8 @@ class FingerprintAuthenticationClient extends AuthenticationClient<AidlSession>
             @Nullable ISidefpsController sidefpsController,
             boolean allowBackgroundAuthentication,
             @NonNull FingerprintSensorPropertiesInternal sensorProps,
-            @NonNull Handler handler) {
+            @NonNull Handler handler,
+            @NonNull Clock clock) {
         super(
                 context,
                 lazyDaemon,
@@ -154,6 +159,8 @@ class FingerprintAuthenticationClient extends AuthenticationClient<AidlSession>
         mSkipWaitForPowerVendorAcquireMessage =
                 context.getResources().getInteger(
                         R.integer.config_sidefpsSkipWaitForPowerVendorAcquireMessage);
+        mSideFpsLastAcquireStartTime = -1;
+        mClock = clock;
 
         if (mSensorProps.isAnySidefpsType()) {
             if (Build.isDebuggable()) {
@@ -235,8 +242,14 @@ class FingerprintAuthenticationClient extends AuthenticationClient<AidlSession>
                             return;
                         }
                         delay = isKeyguard() ? mWaitForAuthKeyguard : mWaitForAuthBp;
-                        Slog.i(TAG, "(sideFPS) Auth succeeded, sideFps waiting for power for: "
-                                + delay + "ms");
+
+                        if (mSideFpsLastAcquireStartTime != -1) {
+                            delay = Math.max(0,
+                                    delay - (mClock.millis() - mSideFpsLastAcquireStartTime));
+                        }
+
+                        Slog.i(TAG, "(sideFPS) Auth succeeded, sideFps "
+                                + "waiting for power until: " + delay + "ms");
                     }
 
                     if (mHandler.hasMessages(MESSAGE_FINGER_UP)) {
@@ -260,6 +273,9 @@ class FingerprintAuthenticationClient extends AuthenticationClient<AidlSession>
         mSensorOverlays.ifUdfps(controller -> controller.onAcquired(getSensorId(), acquiredInfo));
         super.onAcquired(acquiredInfo, vendorCode);
         if (mSensorProps.isAnySidefpsType()) {
+            if (acquiredInfo == FINGERPRINT_ACQUIRED_START) {
+                mSideFpsLastAcquireStartTime = mClock.millis();
+            }
             final boolean shouldLookForVendor =
                     mSkipWaitForPowerAcquireMessage == FINGERPRINT_ACQUIRED_VENDOR;
             final boolean acquireMessageMatch = acquiredInfo == mSkipWaitForPowerAcquireMessage;
