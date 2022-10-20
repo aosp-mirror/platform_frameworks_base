@@ -265,8 +265,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<AidlSession>
             final boolean acquireMessageMatch = acquiredInfo == mSkipWaitForPowerAcquireMessage;
             final boolean vendorMessageMatch = vendorCode == mSkipWaitForPowerVendorAcquireMessage;
             final boolean ignorePowerPress =
-                    (acquireMessageMatch && !shouldLookForVendor) || (shouldLookForVendor
-                            && acquireMessageMatch && vendorMessageMatch);
+                    acquireMessageMatch && (!shouldLookForVendor || vendorMessageMatch);
 
             if (ignorePowerPress) {
                 Slog.d(TAG, "(sideFPS) onFingerUp");
