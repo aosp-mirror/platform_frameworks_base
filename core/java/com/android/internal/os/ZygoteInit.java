@@ -238,6 +238,21 @@ public class ZygoteInit {
         Trace.traceEnd(Trace.TRACE_TAG_DALVIK);
     }
 
+    private static boolean isExperimentEnabled(String experiment) {
+        boolean defaultValue = SystemProperties.getBoolean(
+                "dalvik.vm." + experiment,
+                /*def=*/false);
+        // Can't use device_config since we are the zygote, and it's not initialized at this point.
+        return SystemProperties.getBoolean(
+                "persist.device_config." + DeviceConfig.NAMESPACE_RUNTIME_NATIVE_BOOT
+                        + "." + experiment,
+                defaultValue);
+    }
+
+    /* package-private */ static boolean shouldProfileSystemServer() {
+        return isExperimentEnabled("profilesystemserver");
+    }
+
     /**
      * Performs Zygote process initialization. Loads and initializes commonly used classes.
      *
@@ -341,14 +356,7 @@ public class ZygoteInit {
             // If we are profiling the boot image, reset the Jit counters after preloading the
             // classes. We want to preload for performance, and we can use method counters to
             // infer what clases are used after calling resetJitCounters, for profile purposes.
-            // Can't use device_config since we are the zygote.
-            String prop = SystemProperties.get(
-                    "persist.device_config.runtime_native_boot.profilebootclasspath", "");
-            // Might be empty if the property is unset since the default is "".
-            if (prop.length() == 0) {
-                prop = SystemProperties.get("dalvik.vm.profilebootclasspath", "");
-            }
-            if ("true".equals(prop)) {
+            if (isExperimentEnabled("profilebootclasspath")) {
                 Trace.traceBegin(Trace.TRACE_TAG_DALVIK, "ResetJitCounters");
                 VMRuntime.resetJitCounters();
                 Trace.traceEnd(Trace.TRACE_TAG_DALVIK);
@@ -489,16 +497,6 @@ public class ZygoteInit {
         ZygoteHooks.gcAndFinalize();
     }
 
-    private static boolean shouldProfileSystemServer() {
-        boolean defaultValue = SystemProperties.getBoolean("dalvik.vm.profilesystemserver",
-                /*default=*/ false);
-        // Can't use DeviceConfig since it's not initialized at this point.
-        return SystemProperties.getBoolean(
-                "persist.device_config." + DeviceConfig.NAMESPACE_RUNTIME_NATIVE_BOOT
-                        + ".profilesystemserver",
-                defaultValue);
-    }
-
     /**
      * Finish remaining work for the newly forked system server process.
      */
@@ -585,6 +583,13 @@ public class ZygoteInit {
      * in the forked system server process in the zygote SELinux domain.
      */
     private static void prefetchStandaloneSystemServerJars() {
+        if (shouldProfileSystemServer()) {
+            // We don't prefetch AOT artifacts if we are profiling system server, as we are going to
+            // JIT it.
+            // This method only gets called from native and should already be skipped if we profile
+            // system server. Still, be robust and check it again.
+            return;
+        }
         String envStr = Os.getenv("STANDALONE_SYSTEMSERVER_JARS");
         if (TextUtils.isEmpty(envStr)) {
             return;
