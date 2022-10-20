@@ -167,7 +167,7 @@ public class BroadcastConstants {
      */
     public long DELAY_NORMAL_MILLIS = DEFAULT_DELAY_NORMAL_MILLIS;
     private static final String KEY_DELAY_NORMAL_MILLIS = "bcast_delay_normal_millis";
-    private static final long DEFAULT_DELAY_NORMAL_MILLIS = 10_000 * Build.HW_TIMEOUT_MULTIPLIER;
+    private static final long DEFAULT_DELAY_NORMAL_MILLIS = 1_000;
 
     /**
      * For {@link BroadcastQueueModernImpl}: Delay to apply to broadcasts
@@ -175,7 +175,7 @@ public class BroadcastConstants {
      */
     public long DELAY_CACHED_MILLIS = DEFAULT_DELAY_CACHED_MILLIS;
     private static final String KEY_DELAY_CACHED_MILLIS = "bcast_delay_cached_millis";
-    private static final long DEFAULT_DELAY_CACHED_MILLIS = 30_000 * Build.HW_TIMEOUT_MULTIPLIER;
+    private static final long DEFAULT_DELAY_CACHED_MILLIS = 10_000;
 
     /**
      * For {@link BroadcastQueueModernImpl}: Maximum number of complete

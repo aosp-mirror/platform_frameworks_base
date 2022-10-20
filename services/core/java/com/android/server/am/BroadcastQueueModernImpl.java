@@ -441,7 +441,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         // relevant per-process queue
         final BroadcastProcessQueue queue = getProcessQueue(app);
         if (queue != null) {
-            queue.app = app;
+            queue.setProcess(app);
         }
 
         boolean didSomething = false;
@@ -478,7 +478,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         // relevant per-process queue
         final BroadcastProcessQueue queue = getProcessQueue(app);
         if (queue != null) {
-            queue.app = null;
+            queue.setProcess(null);
         }
 
         if ((mRunningColdStart != null) && (mRunningColdStart == queue)) {
@@ -816,19 +816,21 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         }
 
         final BroadcastRecord r = queue.getActive();
-        r.resultCode = resultCode;
-        r.resultData = resultData;
-        r.resultExtras = resultExtras;
-        if (!r.isNoAbort()) {
-            r.resultAbort = resultAbort;
-        }
+        if (r.ordered) {
+            r.resultCode = resultCode;
+            r.resultData = resultData;
+            r.resultExtras = resultExtras;
+            if (!r.isNoAbort()) {
+                r.resultAbort = resultAbort;
+            }
 
-        // When the caller aborted an ordered broadcast, we mark all remaining
-        // receivers as skipped
-        if (r.ordered && r.resultAbort) {
-            for (int i = r.terminalCount + 1; i < r.receivers.size(); i++) {
-                setDeliveryState(null, null, r, i, r.receivers.get(i),
-                        BroadcastRecord.DELIVERY_SKIPPED);
+            // When the caller aborted an ordered broadcast, we mark all
+            // remaining receivers as skipped
+            if (r.resultAbort) {
+                for (int i = r.terminalCount + 1; i < r.receivers.size(); i++) {
+                    setDeliveryState(null, null, r, i, r.receivers.get(i),
+                            BroadcastRecord.DELIVERY_SKIPPED);
+                }
             }
         }
 
@@ -925,7 +927,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             notifyFinishReceiver(queue, r, index, receiver);
 
             // When entire ordered broadcast finished, deliver final result
-            if (r.ordered && (r.terminalCount == r.receivers.size())) {
+            final boolean recordFinished = (r.terminalCount == r.receivers.size());
+            if (recordFinished) {
                 scheduleResultTo(r);
             }
 
@@ -1217,7 +1220,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
     private void updateWarmProcess(@NonNull BroadcastProcessQueue queue) {
         if (!queue.isProcessWarm()) {
-            queue.app = mService.getProcessRecordLocked(queue.processName, queue.uid);
+            queue.setProcess(mService.getProcessRecordLocked(queue.processName, queue.uid));
         }
     }
 

@@ -549,12 +549,6 @@ public class BroadcastQueueTest {
                 receivers, false, null, null, userId);
     }
 
-    private BroadcastRecord makeOrderedBroadcastRecord(Intent intent, ProcessRecord callerApp,
-            List<Object> receivers, IIntentReceiver orderedResultTo, Bundle orderedExtras) {
-        return makeBroadcastRecord(intent, callerApp, BroadcastOptions.makeBasic(),
-                receivers, true, orderedResultTo, orderedExtras, UserHandle.USER_SYSTEM);
-    }
-
     private BroadcastRecord makeBroadcastRecord(Intent intent, ProcessRecord callerApp,
             BroadcastOptions options, List<Object> receivers) {
         return makeBroadcastRecord(intent, callerApp, options,
@@ -562,12 +556,24 @@ public class BroadcastQueueTest {
     }
 
     private BroadcastRecord makeBroadcastRecord(Intent intent, ProcessRecord callerApp,
+            List<Object> receivers, IIntentReceiver resultTo) {
+        return makeBroadcastRecord(intent, callerApp, BroadcastOptions.makeBasic(),
+                receivers, false, resultTo, null, UserHandle.USER_SYSTEM);
+    }
+
+    private BroadcastRecord makeOrderedBroadcastRecord(Intent intent, ProcessRecord callerApp,
+            List<Object> receivers, IIntentReceiver resultTo, Bundle resultExtras) {
+        return makeBroadcastRecord(intent, callerApp, BroadcastOptions.makeBasic(),
+                receivers, true, resultTo, resultExtras, UserHandle.USER_SYSTEM);
+    }
+
+    private BroadcastRecord makeBroadcastRecord(Intent intent, ProcessRecord callerApp,
             BroadcastOptions options, List<Object> receivers, boolean ordered,
-            IIntentReceiver orderedResultTo, Bundle orderedExtras, int userId) {
+            IIntentReceiver resultTo, Bundle resultExtras, int userId) {
         return new BroadcastRecord(mQueue, intent, callerApp, callerApp.info.packageName, null,
                 callerApp.getPid(), callerApp.info.uid, false, null, null, null, null,
-                AppOpsManager.OP_NONE, options, receivers, callerApp, orderedResultTo,
-                Activity.RESULT_OK, null, orderedExtras, ordered, false, false, userId, false, null,
+                AppOpsManager.OP_NONE, options, receivers, callerApp, resultTo,
+                Activity.RESULT_OK, null, resultExtras, ordered, false, false, userId, false, null,
                 false, null);
     }
 
@@ -1343,6 +1349,26 @@ public class BroadcastQueueTest {
         waitForIdle();
         verify(callerThread).scheduleRegisteredReceiver(any(), argThat(filterEquals(airplane)),
                 eq(Activity.RESULT_OK), any(), argThat(bundleEquals(orderedExtras)), eq(false),
+                anyBoolean(), eq(UserHandle.USER_SYSTEM), anyInt());
+    }
+
+    /**
+     * Verify that we deliver results for unordered broadcasts.
+     */
+    @Test
+    public void testUnordered_ResultTo() throws Exception {
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+        final IApplicationThread callerThread = callerApp.getThread();
+
+        final IIntentReceiver resultTo = mock(IIntentReceiver.class);
+        final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        enqueueBroadcast(makeBroadcastRecord(airplane, callerApp,
+                List.of(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN),
+                        makeManifestReceiver(PACKAGE_BLUE, CLASS_BLUE)), resultTo));
+
+        waitForIdle();
+        verify(callerThread).scheduleRegisteredReceiver(any(), argThat(filterEquals(airplane)),
+                eq(Activity.RESULT_OK), any(), any(), eq(false),
                 anyBoolean(), eq(UserHandle.USER_SYSTEM), anyInt());
     }
 
