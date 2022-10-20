@@ -763,13 +763,11 @@ public final class InputMethodManager {
                     forceFocus = true;
                 }
             }
-            startInputOnWindowFocusGain(viewForWindowFocus,
-                    windowAttribute.softInputMode, windowAttribute.flags, forceFocus);
-        }
 
-        private void startInputOnWindowFocusGain(View focusedView,
-                @SoftInputModeFlags int softInputMode, int windowFlags, boolean forceNewFocus) {
-            int startInputFlags = getStartInputFlags(focusedView, 0);
+            final int softInputMode = windowAttribute.softInputMode;
+            final int windowFlags = windowAttribute.flags;
+
+            int startInputFlags = getStartInputFlags(viewForWindowFocus, 0);
             startInputFlags |= StartInputFlags.WINDOW_GAINED_FOCUS;
 
             ImeTracing.getInstance().triggerClientDump(
@@ -784,9 +782,9 @@ public final class InputMethodManager {
                 if (mRestartOnNextWindowFocus) {
                     if (DEBUG) Log.v(TAG, "Restarting due to mRestartOnNextWindowFocus as true");
                     mRestartOnNextWindowFocus = false;
-                    forceNewFocus = true;
+                    forceFocus = true;
                 }
-                checkFocusResult = checkFocusInternalLocked(forceNewFocus, mCurRootView);
+                checkFocusResult = checkFocusInternalLocked(forceFocus, mCurRootView);
             }
 
             if (checkFocusResult) {
@@ -795,7 +793,7 @@ public final class InputMethodManager {
                 // about the window gaining focus, to help make the transition
                 // smooth.
                 if (startInputOnWindowFocusGainInternal(StartInputReason.WINDOW_FOCUS_GAIN,
-                        focusedView, startInputFlags, softInputMode, windowFlags)) {
+                        viewForWindowFocus, startInputFlags, softInputMode, windowFlags)) {
                     return;
                 }
             }
@@ -810,7 +808,7 @@ public final class InputMethodManager {
                 // ignore the result
                 mServiceInvoker.startInputOrWindowGainedFocus(
                         StartInputReason.WINDOW_FOCUS_GAIN_REPORT_ONLY, mClient,
-                        focusedView.getWindowToken(), startInputFlags, softInputMode,
+                        viewForWindowFocus.getWindowToken(), startInputFlags, softInputMode,
                         windowFlags,
                         null,
                         null, null,
