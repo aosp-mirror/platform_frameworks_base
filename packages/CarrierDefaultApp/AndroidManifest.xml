@@ -71,5 +71,22 @@
                 <data android:host="*" />
             </intent-filter>
         </activity-alias>
+
+        <receiver android:name="com.android.carrierdefaultapp.SliceStoreBroadcastReceiver"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="com.android.phone.slicestore.action.START_SLICE_STORE" />
+                <action android:name="com.android.phone.slicestore.action.SLICE_STORE_RESPONSE_TIMEOUT" />
+                <action android:name="com.android.phone.slicestore.action.NOTIFICATION_CANCELED" />
+            </intent-filter>
+        </receiver>
+        <activity android:name="com.android.carrierdefaultapp.SliceStoreActivity"
+                  android:label="@string/slice_store_label"
+                  android:exported="true"
+                  android:configChanges="keyboardHidden|orientation|screenSize">
+            <intent-filter>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity>
     </application>
 </manifest>
