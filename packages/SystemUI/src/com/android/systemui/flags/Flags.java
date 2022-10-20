@@ -227,8 +227,7 @@ public class Flags {
             new ReleasedFlag(1000);
     public static final ReleasedFlag DOCK_SETUP_ENABLED = new ReleasedFlag(1001);
 
-    public static final UnreleasedFlag ROUNDED_BOX_RIPPLE =
-            new UnreleasedFlag(1002, /* teamfood= */ true);
+    public static final ReleasedFlag ROUNDED_BOX_RIPPLE = new ReleasedFlag(1002);
 
     public static final UnreleasedFlag REFACTORED_DOCK_SETUP = new UnreleasedFlag(1003, true);
 
