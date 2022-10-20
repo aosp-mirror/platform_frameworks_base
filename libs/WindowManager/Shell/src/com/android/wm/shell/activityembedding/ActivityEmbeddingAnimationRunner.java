@@ -303,6 +303,7 @@ class ActivityEmbeddingAnimationRunner {
         // 3. Animate the TaskFragment using Activity Change info (start/end bounds).
         // This is because the TaskFragment surface/change won't contain the Activity's before its
         // reparent.
+        Animation changeAnimation = null;
         for (TransitionInfo.Change change : info.getChanges()) {
             if (change.getMode() != TRANSIT_CHANGE
                     || change.getStartAbsBounds().equals(change.getEndAbsBounds())) {
@@ -325,8 +326,14 @@ class ActivityEmbeddingAnimationRunner {
                 }
             }
 
+            // There are two animations in the array. The first one is for the start leash
+            // (snapshot), and the second one is for the end leash (TaskFragment).
             final Animation[] animations = mAnimationSpec.createChangeBoundsChangeAnimations(change,
                     boundsAnimationChange.getEndAbsBounds());
+            // Keep track as we might need to add background color for the animation.
+            // Although there may be multiple change animation, record one of them is sufficient
+            // because the background color will be added to the root leash for the whole animation.
+            changeAnimation = animations[1];
 
             // Create a screenshot based on change, but attach it to the top of the
             // boundsAnimationChange.
@@ -345,6 +352,9 @@ class ActivityEmbeddingAnimationRunner {
                     animations[1], boundsAnimationChange));
         }
 
+        // If there is no corresponding open/close window with the change, we should show background
+        // color to cover the empty part of the screen.
+        boolean shouldShouldBackgroundColor = true;
         // Handle the other windows that don't have bounds change in the same transition.
         for (TransitionInfo.Change change : info.getChanges()) {
             if (handledChanges.contains(change)) {
@@ -359,11 +369,20 @@ class ActivityEmbeddingAnimationRunner {
                 animation = ActivityEmbeddingAnimationSpec.createNoopAnimation(change);
             } else if (Transitions.isClosingType(change.getMode())) {
                 animation = mAnimationSpec.createChangeBoundsCloseAnimation(change);
+                shouldShouldBackgroundColor = false;
             } else {
                 animation = mAnimationSpec.createChangeBoundsOpenAnimation(change);
+                shouldShouldBackgroundColor = false;
             }
             adapters.add(new ActivityEmbeddingAnimationAdapter(animation, change));
         }
+
+        if (shouldShouldBackgroundColor && changeAnimation != null) {
+            // Change animation may leave part of the screen empty. Show background color to cover
+            // that.
+            changeAnimation.setShowBackdrop(true);
+        }
+
         return adapters;
     }
 
