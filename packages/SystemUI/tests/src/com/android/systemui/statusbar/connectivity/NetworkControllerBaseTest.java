@@ -70,7 +70,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.log.LogBuffer;
+import com.android.systemui.plugins.log.LogBuffer;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
 import com.android.systemui.telephony.TelephonyListenerManager;
