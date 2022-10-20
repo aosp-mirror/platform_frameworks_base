@@ -498,6 +498,17 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     }
 
     @Override // Binder call
+    public int getInputDeviceId(IBinder token) {
+        final long binderToken = Binder.clearCallingIdentity();
+        try {
+            return mInputController.getInputDeviceId(token);
+        } finally {
+            Binder.restoreCallingIdentity(binderToken);
+        }
+    }
+
+
+    @Override // Binder call
     public boolean sendDpadKeyEvent(IBinder token, VirtualKeyEvent event) {
         final long binderToken = Binder.clearCallingIdentity();
         try {

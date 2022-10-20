@@ -31,6 +31,7 @@ import android.hardware.input.VirtualMouseScrollEvent;
 import android.hardware.input.VirtualTouchEvent;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.IInputConstants;
 import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.Slog;
@@ -75,7 +76,7 @@ class InputController {
     @interface PhysType {
     }
 
-    private final Object mLock;
+    final Object mLock;
 
     /* Token -> file descriptor associations. */
     @VisibleForTesting
@@ -217,6 +218,19 @@ class InputController {
                     == inputDeviceDescriptor.getDisplayId()) {
                 updateActivePointerDisplayIdLocked();
             }
+        }
+    }
+
+    /**
+     * @return the device id for a given token (identifiying a device)
+     */
+    int getInputDeviceId(IBinder token) {
+        synchronized (mLock) {
+            final InputDeviceDescriptor inputDeviceDescriptor = mInputDeviceDescriptors.get(token);
+            if (inputDeviceDescriptor == null) {
+                throw new IllegalArgumentException("Could not get device id for given token");
+            }
+            return inputDeviceDescriptor.getInputDeviceId();
         }
     }
 
@@ -393,7 +407,19 @@ class InputController {
                         + inputDeviceDescriptor.getCreationOrderNumber());
                 fout.println("          type: " + inputDeviceDescriptor.getType());
                 fout.println("          phys: " + inputDeviceDescriptor.getPhys());
+                fout.println(
+                        "          inputDeviceId: " + inputDeviceDescriptor.getInputDeviceId());
             }
+        }
+    }
+
+    @VisibleForTesting
+    void addDeviceForTesting(IBinder deviceToken, int fd, int type, int displayId,
+            String phys, int inputDeviceId) {
+        synchronized (mLock) {
+            mInputDeviceDescriptors.put(deviceToken,
+                    new InputDeviceDescriptor(fd, () -> {}, type, displayId, phys,
+                            inputDeviceId));
         }
     }
 
@@ -493,16 +519,20 @@ class InputController {
         private final @Type int mType;
         private final int mDisplayId;
         private final String mPhys;
+        // The input device id that was associated to the device by the InputReader on device
+        // creation.
+        private final int mInputDeviceId;
         // Monotonically increasing number; devices with lower numbers were created earlier.
         private final long mCreationOrderNumber;
 
         InputDeviceDescriptor(int fd, IBinder.DeathRecipient deathRecipient, @Type int type,
-                int displayId, String phys) {
+                int displayId, String phys, int inputDeviceId) {
             mFd = fd;
             mDeathRecipient = deathRecipient;
             mType = type;
             mDisplayId = displayId;
             mPhys = phys;
+            mInputDeviceId = inputDeviceId;
             mCreationOrderNumber = sNextCreationOrderNumber.getAndIncrement();
         }
 
@@ -533,6 +563,10 @@ class InputController {
         public String getPhys() {
             return mPhys;
         }
+
+        public int getInputDeviceId() {
+            return mInputDeviceId;
+        }
     }
 
     private final class BinderDeathRecipient implements IBinder.DeathRecipient {
@@ -558,6 +592,8 @@ class InputController {
         private final CountDownLatch mDeviceAddedLatch = new CountDownLatch(1);
         private final InputManager.InputDeviceListener mListener;
 
+        private int mInputDeviceId = IInputConstants.INVALID_INPUT_DEVICE_ID;
+
         WaitForDevice(String deviceName, int vendorId, int productId) {
             mListener = new InputManager.InputDeviceListener() {
                 @Override
@@ -572,6 +608,7 @@ class InputController {
                     if (id.getVendorId() != vendorId || id.getProductId() != productId) {
                         return;
                     }
+                    mInputDeviceId = deviceId;
                     mDeviceAddedLatch.countDown();
                 }
 
@@ -588,8 +625,13 @@ class InputController {
             InputManager.getInstance().registerInputDeviceListener(mListener, mHandler);
         }
 
-        /** Note: This must not be called from {@link #mHandler}'s thread. */
-        void waitForDeviceCreation() throws DeviceCreationException {
+        /**
+         * Note: This must not be called from {@link #mHandler}'s thread.
+         * @throws DeviceCreationException if the device was not created successfully within the
+         * timeout.
+         * @return The id of the created input device.
+         */
+        int waitForDeviceCreation() throws DeviceCreationException {
             try {
                 if (!mDeviceAddedLatch.await(1, TimeUnit.MINUTES)) {
                     throw new DeviceCreationException(
@@ -599,6 +641,12 @@ class InputController {
                 throw new DeviceCreationException(
                         "Interrupted while waiting for virtual device to be created.", e);
             }
+            if (mInputDeviceId == IInputConstants.INVALID_INPUT_DEVICE_ID) {
+                throw new IllegalStateException(
+                        "Virtual input device was created with an invalid "
+                                + "id=" + mInputDeviceId);
+            }
+            return mInputDeviceId;
         }
 
         @Override
@@ -643,6 +691,8 @@ class InputController {
         final int fd;
         final BinderDeathRecipient binderDeathRecipient;
 
+        final int inputDeviceId;
+
         setUniqueIdAssociation(displayId, phys);
         try (WaitForDevice waiter = new WaitForDevice(deviceName, vendorId, productId)) {
             fd = deviceOpener.get();
@@ -652,7 +702,7 @@ class InputController {
             }
             // The fd is valid from here, so ensure that all failures close the fd after this point.
             try {
-                waiter.waitForDeviceCreation();
+                inputDeviceId = waiter.waitForDeviceCreation();
 
                 binderDeathRecipient = new BinderDeathRecipient(deviceToken);
                 try {
@@ -672,7 +722,8 @@ class InputController {
 
         synchronized (mLock) {
             mInputDeviceDescriptors.put(deviceToken,
-                    new InputDeviceDescriptor(fd, binderDeathRecipient, type, displayId, phys));
+                    new InputDeviceDescriptor(fd, binderDeathRecipient, type, displayId, phys,
+                            inputDeviceId));
         }
     }
 

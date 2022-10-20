@@ -49,6 +49,17 @@ abstract class VirtualInputDevice implements Closeable {
         mToken = token;
     }
 
+    /**
+     * @return The device id of this device.
+     * @hide
+     */
+    public int getInputDeviceId() {
+        try {
+            return mVirtualDevice.getInputDeviceId(mToken);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 
     @Override
     @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
