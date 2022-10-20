@@ -667,7 +667,8 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
                     mBiometricContext, isStrongBiometric,
                     mTaskStackListener, mLockoutTracker,
                     mUdfpsOverlayController, mSidefpsController, mUdfpsOverlay,
-                    allowBackgroundAuthentication, mSensorProperties);
+                    allowBackgroundAuthentication, mSensorProperties,
+                    Utils.getCurrentStrength(mSensorId));
             mScheduler.scheduleClientMonitor(client, mBiometricStateCallback);
         });
     }

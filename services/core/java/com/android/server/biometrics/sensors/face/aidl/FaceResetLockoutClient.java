@@ -89,9 +89,9 @@ public class FaceResetLockoutClient extends HalClientMonitor<AidlSession> implem
     void onLockoutCleared() {
         resetLocalLockoutStateToNone(getSensorId(), getTargetUserId(), mLockoutCache,
                 mLockoutResetDispatcher);
+        mCallback.onClientFinished(this, true /* success */);
         getBiometricContext().getAuthSessionCoordinator()
                 .resetLockoutFor(getTargetUserId(), mBiometricStrength, getRequestId());
-        mCallback.onClientFinished(this, true /* success */);
     }
 
     public boolean interruptsPrecedingClients() {

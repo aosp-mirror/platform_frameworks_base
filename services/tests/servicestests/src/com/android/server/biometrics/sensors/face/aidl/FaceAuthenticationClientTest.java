@@ -47,7 +47,6 @@ import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.AuthSessionCoordinator;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
-import com.android.server.biometrics.sensors.LockoutCache;
 import com.android.server.biometrics.sensors.face.UsageStats;
 
 import org.junit.Before;
@@ -84,8 +83,6 @@ public class FaceAuthenticationClientTest {
     private BiometricLogger mBiometricLogger;
     @Mock
     private BiometricContext mBiometricContext;
-    @Mock
-    private LockoutCache mLockoutCache;
     @Mock
     private UsageStats mUsageStats;
     @Mock
@@ -161,7 +158,7 @@ public class FaceAuthenticationClientTest {
                 false /* restricted */, "test-owner", 4 /* cookie */,
                 false /* requireConfirmation */, 9 /* sensorId */,
                 mBiometricLogger, mBiometricContext, true /* isStrongBiometric */,
-                mUsageStats, mLockoutCache, false /* allowBackgroundAuthentication */,
+                mUsageStats, null /* mLockoutCache */, false /* allowBackgroundAuthentication */,
                 false /* isKeyguardBypassEnabled */, null /* sensorPrivacyManager */,
                 0 /* biometricStrength */) {
             @Override

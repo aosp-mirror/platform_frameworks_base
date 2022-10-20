@@ -53,22 +53,28 @@ public class AuthSessionCoordinatorTest {
     }
 
     @Test
-    public void testUserUnlocked() {
+    public void testUserUnlockedWithWeak() {
         mCoordinator.authStartedFor(PRIMARY_USER, 1 /* sensorId */, 0 /* requestId */);
         mCoordinator.lockedOutFor(PRIMARY_USER, BIOMETRIC_STRONG, 1 /* sensorId */,
                 0 /* requestId */);
 
-        assertThat(mCoordinator.getCanAuthFor(PRIMARY_USER, BIOMETRIC_CONVENIENCE)).isFalse();
-        assertThat(mCoordinator.getCanAuthFor(PRIMARY_USER, BIOMETRIC_WEAK)).isFalse();
-        assertThat(mCoordinator.getCanAuthFor(PRIMARY_USER, BIOMETRIC_STRONG)).isFalse();
+        assertThat(mCoordinator.getLockoutStateFor(PRIMARY_USER, BIOMETRIC_CONVENIENCE)).isEqualTo(
+                LockoutTracker.LOCKOUT_PERMANENT);
+        assertThat(mCoordinator.getLockoutStateFor(PRIMARY_USER, BIOMETRIC_WEAK)).isEqualTo(
+                LockoutTracker.LOCKOUT_PERMANENT);
+        assertThat(mCoordinator.getLockoutStateFor(PRIMARY_USER, BIOMETRIC_STRONG)).isEqualTo(
+                LockoutTracker.LOCKOUT_PERMANENT);
 
         mCoordinator.authStartedFor(PRIMARY_USER, 1 /* sensorId */, 0 /* requestId */);
-        mCoordinator.authenticatedFor(PRIMARY_USER, BIOMETRIC_WEAK, 1 /* sensorId */,
-                0 /* requestId */);
+        mCoordinator.authEndedFor(PRIMARY_USER, BIOMETRIC_WEAK, 1 /* sensorId */,
+                0 /* requestId */, true /* wasSuccessful */);
 
-        assertThat(mCoordinator.getCanAuthFor(PRIMARY_USER, BIOMETRIC_CONVENIENCE)).isTrue();
-        assertThat(mCoordinator.getCanAuthFor(PRIMARY_USER, BIOMETRIC_WEAK)).isTrue();
-        assertThat(mCoordinator.getCanAuthFor(PRIMARY_USER, BIOMETRIC_STRONG)).isFalse();
+        assertThat(mCoordinator.getLockoutStateFor(PRIMARY_USER, BIOMETRIC_CONVENIENCE)).isEqualTo(
+                LockoutTracker.LOCKOUT_PERMANENT);
+        assertThat(mCoordinator.getLockoutStateFor(PRIMARY_USER, BIOMETRIC_WEAK)).isEqualTo(
+                LockoutTracker.LOCKOUT_PERMANENT);
+        assertThat(mCoordinator.getLockoutStateFor(PRIMARY_USER, BIOMETRIC_STRONG)).isEqualTo(
+                LockoutTracker.LOCKOUT_PERMANENT);
     }
 
     @Test
@@ -77,38 +83,79 @@ public class AuthSessionCoordinatorTest {
         mCoordinator.authStartedFor(PRIMARY_USER, 2 /* sensorId */, 0 /* requestId */);
         mCoordinator.lockedOutFor(PRIMARY_USER, BIOMETRIC_STRONG, 1 /* sensorId */,
                 0 /* requestId */);
-        mCoordinator.authenticatedFor(PRIMARY_USER, BIOMETRIC_WEAK, 2 /* sensorId */,
-                0 /* requestId */);
+        mCoordinator.authEndedFor(PRIMARY_USER, BIOMETRIC_WEAK, 2 /* sensorId */,
+                0 /* requestId */, false /* wasSuccessful */);
 
-        assertThat(mCoordinator.getCanAuthFor(PRIMARY_USER, BIOMETRIC_CONVENIENCE)).isFalse();
-        assertThat(mCoordinator.getCanAuthFor(PRIMARY_USER, BIOMETRIC_WEAK)).isFalse();
-        assertThat(mCoordinator.getCanAuthFor(PRIMARY_USER, BIOMETRIC_STRONG)).isFalse();
+        assertThat(mCoordinator.getLockoutStateFor(PRIMARY_USER, BIOMETRIC_CONVENIENCE)).isEqualTo(
+                LockoutTracker.LOCKOUT_PERMANENT);
+        assertThat(mCoordinator.getLockoutStateFor(PRIMARY_USER, BIOMETRIC_WEAK)).isEqualTo(
+                LockoutTracker.LOCKOUT_PERMANENT);
+        assertThat(mCoordinator.getLockoutStateFor(PRIMARY_USER, BIOMETRIC_STRONG)).isEqualTo(
+                LockoutTracker.LOCKOUT_PERMANENT);
 
         mCoordinator.authStartedFor(PRIMARY_USER, 1 /* sensorId */, 0 /* requestId */);
-        mCoordinator.authenticatedFor(PRIMARY_USER, BIOMETRIC_WEAK, 1 /* sensorId */,
-                0 /* requestId */);
+        mCoordinator.authEndedFor(PRIMARY_USER, BIOMETRIC_WEAK, 1 /* sensorId */,
+                0 /* requestId */, false /* wasSuccessful */);
 
-        assertThat(mCoordinator.getCanAuthFor(PRIMARY_USER, BIOMETRIC_CONVENIENCE)).isTrue();
-        assertThat(mCoordinator.getCanAuthFor(PRIMARY_USER, BIOMETRIC_WEAK)).isTrue();
-        assertThat(mCoordinator.getCanAuthFor(PRIMARY_USER, BIOMETRIC_STRONG)).isFalse();
+        assertThat(mCoordinator.getLockoutStateFor(PRIMARY_USER, BIOMETRIC_CONVENIENCE)).isEqualTo(
+                LockoutTracker.LOCKOUT_PERMANENT);
+        assertThat(mCoordinator.getLockoutStateFor(PRIMARY_USER, BIOMETRIC_WEAK)).isEqualTo(
+                LockoutTracker.LOCKOUT_PERMANENT);
+        assertThat(mCoordinator.getLockoutStateFor(PRIMARY_USER, BIOMETRIC_STRONG)).isEqualTo(
+                LockoutTracker.LOCKOUT_PERMANENT);
+    }
+
+    @Test
+    public void testWeakAndConvenientCannotResetLockout() {
+        mCoordinator.authStartedFor(PRIMARY_USER, 1 /* sensorId */, 0 /* requestId */);
+        mCoordinator.lockedOutFor(PRIMARY_USER, BIOMETRIC_STRONG, 1 /* sensorId */,
+                0 /* requestId */);
+        assertThat(mCoordinator.getLockoutStateFor(PRIMARY_USER, BIOMETRIC_CONVENIENCE)).isEqualTo(
+                LockoutTracker.LOCKOUT_PERMANENT);
+        assertThat(mCoordinator.getLockoutStateFor(PRIMARY_USER, BIOMETRIC_WEAK)).isEqualTo(
+                LockoutTracker.LOCKOUT_PERMANENT);
+        assertThat(mCoordinator.getLockoutStateFor(PRIMARY_USER, BIOMETRIC_STRONG)).isEqualTo(
+                LockoutTracker.LOCKOUT_PERMANENT);
+
+        mCoordinator.resetLockoutFor(PRIMARY_USER, BIOMETRIC_WEAK, 0 /* requestId */);
+        assertThat(mCoordinator.getLockoutStateFor(PRIMARY_USER, BIOMETRIC_CONVENIENCE)).isEqualTo(
+                LockoutTracker.LOCKOUT_PERMANENT);
+        assertThat(mCoordinator.getLockoutStateFor(PRIMARY_USER, BIOMETRIC_WEAK)).isEqualTo(
+                LockoutTracker.LOCKOUT_PERMANENT);
+        assertThat(mCoordinator.getLockoutStateFor(PRIMARY_USER, BIOMETRIC_STRONG)).isEqualTo(
+                LockoutTracker.LOCKOUT_PERMANENT);
+
+        mCoordinator.resetLockoutFor(PRIMARY_USER, BIOMETRIC_CONVENIENCE, 0 /* requestId */);
+        assertThat(mCoordinator.getLockoutStateFor(PRIMARY_USER, BIOMETRIC_CONVENIENCE)).isEqualTo(
+                LockoutTracker.LOCKOUT_PERMANENT);
+        assertThat(mCoordinator.getLockoutStateFor(PRIMARY_USER, BIOMETRIC_WEAK)).isEqualTo(
+                LockoutTracker.LOCKOUT_PERMANENT);
+        assertThat(mCoordinator.getLockoutStateFor(PRIMARY_USER, BIOMETRIC_STRONG)).isEqualTo(
+                LockoutTracker.LOCKOUT_PERMANENT);
     }
 
     @Test
     public void testUserCanAuthDuringLockoutOfSameSession() {
         mCoordinator.resetLockoutFor(PRIMARY_USER, BIOMETRIC_STRONG, 0 /* requestId */);
 
-        assertThat(mCoordinator.getCanAuthFor(PRIMARY_USER, BIOMETRIC_CONVENIENCE)).isTrue();
-        assertThat(mCoordinator.getCanAuthFor(PRIMARY_USER, BIOMETRIC_WEAK)).isTrue();
-        assertThat(mCoordinator.getCanAuthFor(PRIMARY_USER, BIOMETRIC_STRONG)).isTrue();
+        assertThat(mCoordinator.getLockoutStateFor(PRIMARY_USER, BIOMETRIC_CONVENIENCE)).isEqualTo(
+                LockoutTracker.LOCKOUT_NONE);
+        assertThat(mCoordinator.getLockoutStateFor(PRIMARY_USER, BIOMETRIC_WEAK)).isEqualTo(
+                LockoutTracker.LOCKOUT_NONE);
+        assertThat(mCoordinator.getLockoutStateFor(PRIMARY_USER, BIOMETRIC_STRONG)).isEqualTo(
+                LockoutTracker.LOCKOUT_NONE);
 
         mCoordinator.authStartedFor(PRIMARY_USER, 1 /* sensorId */, 0 /* requestId */);
         mCoordinator.authStartedFor(PRIMARY_USER, 2 /* sensorId */, 0 /* requestId */);
         mCoordinator.lockedOutFor(PRIMARY_USER, BIOMETRIC_WEAK, 2 /* sensorId */,
                 0 /* requestId */);
 
-        assertThat(mCoordinator.getCanAuthFor(PRIMARY_USER, BIOMETRIC_CONVENIENCE)).isTrue();
-        assertThat(mCoordinator.getCanAuthFor(PRIMARY_USER, BIOMETRIC_WEAK)).isTrue();
-        assertThat(mCoordinator.getCanAuthFor(PRIMARY_USER, BIOMETRIC_WEAK)).isTrue();
+        assertThat(mCoordinator.getLockoutStateFor(PRIMARY_USER, BIOMETRIC_CONVENIENCE)).isEqualTo(
+                LockoutTracker.LOCKOUT_NONE);
+        assertThat(mCoordinator.getLockoutStateFor(PRIMARY_USER, BIOMETRIC_WEAK)).isEqualTo(
+                LockoutTracker.LOCKOUT_NONE);
+        assertThat(mCoordinator.getLockoutStateFor(PRIMARY_USER, BIOMETRIC_WEAK)).isEqualTo(
+                LockoutTracker.LOCKOUT_NONE);
     }
 
     @Test
@@ -123,25 +170,39 @@ public class AuthSessionCoordinatorTest {
 
         mCoordinator.resetLockoutFor(PRIMARY_USER, BIOMETRIC_STRONG, 0 /* requestId */);
 
-        assertThat(mCoordinator.getCanAuthFor(PRIMARY_USER, BIOMETRIC_CONVENIENCE)).isTrue();
-        assertThat(mCoordinator.getCanAuthFor(PRIMARY_USER, BIOMETRIC_WEAK)).isTrue();
-        assertThat(mCoordinator.getCanAuthFor(PRIMARY_USER, BIOMETRIC_STRONG)).isTrue();
+        assertThat(mCoordinator.getLockoutStateFor(PRIMARY_USER, BIOMETRIC_CONVENIENCE)).isEqualTo(
+                LockoutTracker.LOCKOUT_NONE);
+        assertThat(mCoordinator.getLockoutStateFor(PRIMARY_USER, BIOMETRIC_WEAK)).isEqualTo(
+                LockoutTracker.LOCKOUT_NONE);
+        assertThat(mCoordinator.getLockoutStateFor(PRIMARY_USER, BIOMETRIC_STRONG)).isEqualTo(
+                LockoutTracker.LOCKOUT_NONE);
 
-        assertThat(mCoordinator.getCanAuthFor(SECONDARY_USER, BIOMETRIC_CONVENIENCE)).isFalse();
-        assertThat(mCoordinator.getCanAuthFor(SECONDARY_USER, BIOMETRIC_WEAK)).isFalse();
-        assertThat(mCoordinator.getCanAuthFor(SECONDARY_USER, BIOMETRIC_STRONG)).isFalse();
+        assertThat(
+                mCoordinator.getLockoutStateFor(SECONDARY_USER, BIOMETRIC_CONVENIENCE)).isEqualTo(
+                LockoutTracker.LOCKOUT_PERMANENT);
+        assertThat(mCoordinator.getLockoutStateFor(SECONDARY_USER, BIOMETRIC_WEAK)).isEqualTo(
+                LockoutTracker.LOCKOUT_PERMANENT);
+        assertThat(mCoordinator.getLockoutStateFor(SECONDARY_USER, BIOMETRIC_STRONG)).isEqualTo(
+                LockoutTracker.LOCKOUT_PERMANENT);
 
         mCoordinator.authStartedFor(PRIMARY_USER, 1 /* sensorId */, 0 /* requestId */);
         mCoordinator.authStartedFor(PRIMARY_USER, 2 /* sensorId */, 0 /* requestId */);
         mCoordinator.lockedOutFor(PRIMARY_USER, BIOMETRIC_WEAK, 2 /* sensorId */,
                 0 /* requestId */);
 
-        assertThat(mCoordinator.getCanAuthFor(PRIMARY_USER, BIOMETRIC_CONVENIENCE)).isTrue();
-        assertThat(mCoordinator.getCanAuthFor(PRIMARY_USER, BIOMETRIC_WEAK)).isTrue();
-        assertThat(mCoordinator.getCanAuthFor(PRIMARY_USER, BIOMETRIC_WEAK)).isTrue();
+        assertThat(mCoordinator.getLockoutStateFor(PRIMARY_USER, BIOMETRIC_CONVENIENCE)).isEqualTo(
+                LockoutTracker.LOCKOUT_NONE);
+        assertThat(mCoordinator.getLockoutStateFor(PRIMARY_USER, BIOMETRIC_WEAK)).isEqualTo(
+                LockoutTracker.LOCKOUT_NONE);
+        assertThat(mCoordinator.getLockoutStateFor(PRIMARY_USER, BIOMETRIC_WEAK)).isEqualTo(
+                LockoutTracker.LOCKOUT_NONE);
 
-        assertThat(mCoordinator.getCanAuthFor(SECONDARY_USER, BIOMETRIC_CONVENIENCE)).isFalse();
-        assertThat(mCoordinator.getCanAuthFor(SECONDARY_USER, BIOMETRIC_WEAK)).isFalse();
-        assertThat(mCoordinator.getCanAuthFor(SECONDARY_USER, BIOMETRIC_STRONG)).isFalse();
+        assertThat(
+                mCoordinator.getLockoutStateFor(SECONDARY_USER, BIOMETRIC_CONVENIENCE)).isEqualTo(
+                LockoutTracker.LOCKOUT_PERMANENT);
+        assertThat(mCoordinator.getLockoutStateFor(SECONDARY_USER, BIOMETRIC_WEAK)).isEqualTo(
+                LockoutTracker.LOCKOUT_PERMANENT);
+        assertThat(mCoordinator.getLockoutStateFor(SECONDARY_USER, BIOMETRIC_STRONG)).isEqualTo(
+                LockoutTracker.LOCKOUT_PERMANENT);
     }
 }

@@ -410,6 +410,17 @@ public class AuthService extends SystemService {
         }
 
         @Override
+        public void resetLockout(int userId, byte[] hardwareAuthToken) throws RemoteException {
+            checkInternalPermission();
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                mBiometricService.resetLockout(userId, hardwareAuthToken);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
         public CharSequence getButtonLabel(
                 int userId,
                 String opPackageName,
