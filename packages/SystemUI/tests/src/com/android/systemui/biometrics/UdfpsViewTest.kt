@@ -68,7 +68,8 @@ class UdfpsViewTest : SysuiTestCase() {
         view = LayoutInflater.from(context).inflate(R.layout.udfps_view, null) as UdfpsView
         view.animationViewController = animationViewController
         val sensorBounds = SensorLocationInternal("", SENSOR_X, SENSOR_Y, SENSOR_RADIUS).rect
-        view.overlayParams = UdfpsOverlayParams(sensorBounds, 1920, 1080, 1f, Surface.ROTATION_0)
+        view.overlayParams = UdfpsOverlayParams(sensorBounds, sensorBounds, 1920,
+            1080, 1f, Surface.ROTATION_0)
         view.setUdfpsDisplayModeProvider(hbmProvider)
         ViewUtils.attachView(view)
     }
@@ -133,7 +134,8 @@ class UdfpsViewTest : SysuiTestCase() {
     @Test
     fun isNotWithinSensorArea() {
         whenever(animationViewController.touchTranslation).thenReturn(PointF(0f, 0f))
-        assertThat(view.isWithinSensorArea(SENSOR_RADIUS * 2.5f, SENSOR_RADIUS.toFloat())).isFalse()
+        assertThat(view.isWithinSensorArea(SENSOR_RADIUS * 2.5f, SENSOR_RADIUS.toFloat()))
+            .isFalse()
         assertThat(view.isWithinSensorArea(SENSOR_RADIUS.toFloat(), SENSOR_RADIUS * 2.5f)).isFalse()
     }
 

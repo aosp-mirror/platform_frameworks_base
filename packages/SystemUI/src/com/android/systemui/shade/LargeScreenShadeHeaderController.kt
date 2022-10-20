@@ -292,6 +292,7 @@ class LargeScreenShadeHeaderController @Inject constructor(
             clock.addOnLayoutChangeListener { v, _, _, _, _, _, _, _, _ ->
                 val newPivot = if (v.isLayoutRtl) v.width.toFloat() else 0f
                 v.pivotX = newPivot
+                v.pivotY = v.height.toFloat() / 2
             }
         }
 

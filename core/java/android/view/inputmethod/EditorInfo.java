@@ -595,6 +595,10 @@ public class EditorInfo implements InputType, Parcelable {
                 == HandwritingGesture.GESTURE_TYPE_SELECT) {
             list.add(SelectGesture.class);
         }
+        if ((mSupportedHandwritingGestureTypes & HandwritingGesture.GESTURE_TYPE_SELECT_RANGE)
+                == HandwritingGesture.GESTURE_TYPE_SELECT_RANGE) {
+            list.add(SelectRangeGesture.class);
+        }
         if ((mSupportedHandwritingGestureTypes & HandwritingGesture.GESTURE_TYPE_INSERT)
                 == HandwritingGesture.GESTURE_TYPE_INSERT) {
             list.add(InsertGesture.class);
@@ -602,6 +606,10 @@ public class EditorInfo implements InputType, Parcelable {
         if ((mSupportedHandwritingGestureTypes & HandwritingGesture.GESTURE_TYPE_DELETE)
                 == HandwritingGesture.GESTURE_TYPE_DELETE) {
             list.add(DeleteGesture.class);
+        }
+        if ((mSupportedHandwritingGestureTypes & HandwritingGesture.GESTURE_TYPE_DELETE_RANGE)
+                == HandwritingGesture.GESTURE_TYPE_DELETE_RANGE) {
+            list.add(DeleteRangeGesture.class);
         }
         if ((mSupportedHandwritingGestureTypes & HandwritingGesture.GESTURE_TYPE_REMOVE_SPACE)
                 == HandwritingGesture.GESTURE_TYPE_REMOVE_SPACE) {

@@ -16,6 +16,7 @@
 
 package com.android.systemui.biometrics
 
+import android.content.Context
 import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_BP
 import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_KEYGUARD
 import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_OTHER
@@ -23,9 +24,9 @@ import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_SETTING
 import android.hardware.biometrics.BiometricOverlayConstants.REASON_ENROLL_ENROLLING
 import android.hardware.biometrics.BiometricOverlayConstants.REASON_ENROLL_FIND_SENSOR
 import android.hardware.biometrics.BiometricOverlayConstants.REASON_UNKNOWN
-import android.hardware.fingerprint.IUdfpsOverlayController
 import android.hardware.fingerprint.IUdfpsOverlayControllerCallback
 import android.util.Log
+import android.view.LayoutInflater
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.commandline.Command
 import com.android.systemui.statusbar.commandline.CommandRegistry
@@ -41,14 +42,17 @@ private const val SENSOR_ID = 0
  */
 @SysUISingleton
 class UdfpsShell @Inject constructor(
-    commandRegistry: CommandRegistry
+    commandRegistry: CommandRegistry,
+    private val udfpsOverlay: UdfpsOverlay
 ) : Command {
 
     /**
      * Set in [UdfpsController.java] constructor, used to show and hide the UDFPS overlay.
      * TODO: inject after b/229290039 is resolved
      */
-    var udfpsOverlayController: IUdfpsOverlayController? = null
+    var udfpsOverlayController: UdfpsController.UdfpsOverlayController? = null
+    var context: Context? = null
+    var inflater: LayoutInflater? = null
 
     init {
         commandRegistry.registerCommand("udfps") { this }
@@ -57,6 +61,11 @@ class UdfpsShell @Inject constructor(
     override fun execute(pw: PrintWriter, args: List<String>) {
         if (args.size == 1 && args[0] == "hide") {
             hideOverlay()
+        } else if (args.size == 2 && args[0] == "udfpsOverlay" && args[1] == "show") {
+            hideOverlay()
+            showUdfpsOverlay()
+        } else if (args.size == 2 && args[0] == "udfpsOverlay" && args[1] == "hide") {
+            hideUdfpsOverlay()
         } else if (args.size == 2 && args[0] == "show") {
             showOverlay(getEnrollmentReason(args[1]))
         } else {
@@ -102,6 +111,16 @@ class UdfpsShell @Inject constructor(
                     }
                 }
         )
+    }
+
+    private fun showUdfpsOverlay() {
+        Log.v(TAG, "showUdfpsOverlay")
+        udfpsOverlay.show(REQUEST_ID)
+    }
+
+    private fun hideUdfpsOverlay() {
+        Log.v(TAG, "hideUdfpsOverlay")
+        udfpsOverlay.hide()
     }
 
     private fun hideOverlay() {

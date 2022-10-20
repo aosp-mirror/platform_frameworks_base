@@ -428,8 +428,6 @@ public final class ViewRootImpl implements ViewParent,
     final DisplayManager mDisplayManager;
     final String mBasePackageName;
 
-    private @Surface.Rotation int mDisplayInstallOrientation;
-
     final int[] mTmpLocation = new int[2];
 
     final TypedValue mTmpValue = new TypedValue();
@@ -1134,7 +1132,6 @@ public final class ViewRootImpl implements ViewParent,
             if (mView == null) {
                 mView = view;
 
-                mDisplayInstallOrientation = mDisplay.getInstallOrientation();
                 mViewLayoutDirectionInitial = mView.getRawLayoutDirection();
                 mFallbackEventHandler.setView(view);
                 mWindowAttributes.copyFrom(attrs);
@@ -1905,7 +1902,6 @@ public final class ViewRootImpl implements ViewParent,
         updateInternalDisplay(displayId, mView.getResources());
         mImeFocusController.onMovedToDisplay();
         mAttachInfo.mDisplayState = mDisplay.getState();
-        mDisplayInstallOrientation = mDisplay.getInstallOrientation();
         // Internal state updated, now notify the view hierarchy.
         mView.dispatchMovedToDisplay(mDisplay, config);
     }
@@ -5718,7 +5714,7 @@ public final class ViewRootImpl implements ViewParent,
                     enqueueInputEvent(event, null, 0, true);
                 } break;
                 case MSG_CHECK_FOCUS: {
-                    getImeFocusController().checkFocus(false, true);
+                    getImeFocusController().onScheduledCheckFocus();
                 } break;
                 case MSG_CLOSE_SYSTEM_DIALOGS: {
                     if (mView != null) {
@@ -8235,7 +8231,7 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         final int transformHint = SurfaceControl.rotationToBufferTransform(
-                (mDisplayInstallOrientation + mDisplay.getRotation()) % 4);
+                (mDisplay.getInstallOrientation() + mDisplay.getRotation()) % 4);
 
         WindowLayout.computeSurfaceSize(mWindowAttributes, winConfig.getMaxBounds(), requestedWidth,
                 requestedHeight, mWinFrameInScreen, mPendingDragResizing, mSurfaceSize);
@@ -8260,7 +8256,7 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         mLastTransformHint = transformHint;
-      
+
         mSurfaceControl.setTransformHint(transformHint);
 
         if (mAttachInfo.mContentCaptureManager != null) {

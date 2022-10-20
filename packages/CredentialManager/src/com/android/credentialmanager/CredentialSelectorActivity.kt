@@ -23,9 +23,15 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.Observer
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.credentialmanager.common.DialogType
+import com.android.credentialmanager.common.DialogResult
+import com.android.credentialmanager.common.ResultState
 import com.android.credentialmanager.createflow.CreatePasskeyScreen
+import com.android.credentialmanager.createflow.CreatePasskeyViewModel
 import com.android.credentialmanager.getflow.GetCredentialScreen
+import com.android.credentialmanager.getflow.GetCredentialViewModel
 import com.android.credentialmanager.ui.theme.CredentialSelectorTheme
 
 @ExperimentalMaterialApi
@@ -57,10 +63,20 @@ class CredentialSelectorActivity : ComponentActivity() {
     val dialogType = DialogType.toDialogType(operationType)
     when (dialogType) {
       DialogType.CREATE_PASSKEY -> {
-        CreatePasskeyScreen(cancelActivity = onCancel)
+        val viewModel: CreatePasskeyViewModel = viewModel()
+        viewModel.observeDialogResult().observe(
+          this@CredentialSelectorActivity,
+          onCancel
+        )
+        CreatePasskeyScreen(viewModel = viewModel)
       }
       DialogType.GET_CREDENTIALS -> {
-        GetCredentialScreen(cancelActivity = onCancel)
+        val viewModel: GetCredentialViewModel = viewModel()
+        viewModel.observeDialogResult().observe(
+          this@CredentialSelectorActivity,
+          onCancel
+        )
+        GetCredentialScreen(viewModel = viewModel)
       }
       else -> {
         Log.w("AccountSelector", "Unknown type, not rendering any UI")
@@ -69,7 +85,9 @@ class CredentialSelectorActivity : ComponentActivity() {
     }
   }
 
-  private val onCancel = {
-    this@CredentialSelectorActivity.finish()
+  private val onCancel = Observer<DialogResult> {
+    if (it.resultState == ResultState.COMPLETE || it.resultState == ResultState.CANCELED) {
+      this@CredentialSelectorActivity.finish()
+    }
   }
 }

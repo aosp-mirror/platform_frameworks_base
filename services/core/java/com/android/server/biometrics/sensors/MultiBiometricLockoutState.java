@@ -22,7 +22,6 @@ import static android.hardware.biometrics.BiometricManager.Authenticators.BIOMET
 import static android.hardware.biometrics.BiometricManager.Authenticators.BIOMETRIC_WEAK;
 
 import android.hardware.biometrics.BiometricManager;
-import android.os.SystemClock;
 import android.util.Slog;
 
 import java.time.Clock;
@@ -42,10 +41,6 @@ class MultiBiometricLockoutState {
     private static final String TAG = "MultiBiometricLockoutState";
     private final Map<Integer, Map<Integer, AuthenticatorState>> mCanUserAuthenticate;
     private final Clock mClock;
-
-    MultiBiometricLockoutState() {
-        this(SystemClock.currentNetworkTimeClock());
-    }
 
     MultiBiometricLockoutState(Clock clock) {
         mCanUserAuthenticate = new HashMap<>();

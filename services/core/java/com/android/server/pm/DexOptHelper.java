@@ -18,6 +18,7 @@ package com.android.server.pm;
 
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 
+import static com.android.server.LocalManagerRegistry.ManagerNotFoundException;
 import static com.android.server.pm.ApexManager.ActiveApexInfo;
 import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import static com.android.server.pm.PackageManagerService.DEBUG_DEXOPT;
@@ -34,6 +35,7 @@ import static com.android.server.pm.PackageManagerServiceUtils.REMOVE_IF_NULL_PK
 
 import android.Manifest;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
@@ -56,9 +58,16 @@ import android.util.Slog;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
+import com.android.server.LocalManagerRegistry;
+import com.android.server.art.ArtManagerLocal;
+import com.android.server.art.model.ArtFlags;
+import com.android.server.art.model.OptimizeParams;
+import com.android.server.art.model.OptimizeResult;
+import com.android.server.pm.PackageDexOptimizer.DexOptResult;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.DexoptOptions;
 import com.android.server.pm.pkg.AndroidPackage;
+import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateInternal;
 
 import dalvik.system.DexFile;
@@ -72,11 +81,15 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
-final class DexOptHelper {
+/**
+ * Helper class for dex optimization operations in PackageManagerService.
+ */
+public final class DexOptHelper {
     private static final long SEVEN_DAYS_IN_MILLISECONDS = 7 * 24 * 60 * 60 * 1000;
 
     private final PackageManagerService mPm;
@@ -405,11 +418,12 @@ final class DexOptHelper {
      * {@link PackageDexOptimizer#DEX_OPT_CANCELLED}
      * {@link PackageDexOptimizer#DEX_OPT_FAILED}
      */
-    @PackageDexOptimizer.DexOptResult
+    @DexOptResult
     /* package */ int performDexOptWithStatus(DexoptOptions options) {
         return performDexOptTraced(options);
     }
 
+    @DexOptResult
     private int performDexOptTraced(DexoptOptions options) {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
         try {
@@ -421,7 +435,13 @@ final class DexOptHelper {
 
     // Run dexopt on a given package. Returns true if dexopt did not fail, i.e.
     // if the package can now be considered up to date for the given filter.
+    @DexOptResult
     private int performDexOptInternal(DexoptOptions options) {
+        Optional<Integer> artSrvRes = performDexOptWithArtService(options);
+        if (artSrvRes.isPresent()) {
+            return artSrvRes.get();
+        }
+
         AndroidPackage p;
         PackageSetting pkgSetting;
         synchronized (mPm.mLock) {
@@ -446,8 +466,74 @@ final class DexOptHelper {
         }
     }
 
-    private int performDexOptInternalWithDependenciesLI(AndroidPackage p,
-            @NonNull PackageStateInternal pkgSetting, DexoptOptions options) {
+    /**
+     * Performs dexopt on the given package using ART Service.
+     *
+     * @return a {@link DexOptResult}, or empty if the request isn't supported so that it is
+     *     necessary to fall back to the legacy code paths.
+     */
+    private Optional<Integer> performDexOptWithArtService(DexoptOptions options) {
+        ArtManagerLocal artManager = getArtManagerLocal();
+        if (artManager == null) {
+            return Optional.empty();
+        }
+
+        try (PackageManagerLocal.FilteredSnapshot snapshot =
+                        getPackageManagerLocal().withFilteredSnapshot()) {
+            PackageState ops = snapshot.getPackageState(options.getPackageName());
+            if (ops == null) {
+                return Optional.of(PackageDexOptimizer.DEX_OPT_FAILED);
+            }
+            AndroidPackage oap = ops.getAndroidPackage();
+            if (oap == null) {
+                return Optional.of(PackageDexOptimizer.DEX_OPT_FAILED);
+            }
+            if (oap.isApex()) {
+                return Optional.of(PackageDexOptimizer.DEX_OPT_SKIPPED);
+            }
+
+            // TODO(b/245301593): Delete the conditional when ART Service supports
+            // FLAG_SHOULD_INCLUDE_DEPENDENCIES and we can just set it unconditionally.
+            /*@OptimizeFlags*/ int extraFlags = ops.getUsesLibraries().isEmpty()
+                    ? 0
+                    : ArtFlags.FLAG_SHOULD_INCLUDE_DEPENDENCIES;
+
+            OptimizeParams params = options.convertToOptimizeParams(extraFlags);
+            if (params == null) {
+                return Optional.empty();
+            }
+
+            // TODO(b/251903639): Either remove controlDexOptBlocking, or don't ignore it here.
+            OptimizeResult result;
+            try {
+                result = artManager.optimizePackage(snapshot, options.getPackageName(), params);
+            } catch (UnsupportedOperationException e) {
+                reportArtManagerFallback(options.getPackageName(), e.toString());
+                return Optional.empty();
+            }
+
+            // TODO(b/251903639): Move this to ArtManagerLocal.addOptimizePackageDoneCallback when
+            // it is implemented.
+            for (OptimizeResult.PackageOptimizeResult pkgRes : result.getPackageOptimizeResults()) {
+                PackageState ps = snapshot.getPackageState(pkgRes.getPackageName());
+                AndroidPackage ap = ps != null ? ps.getAndroidPackage() : null;
+                if (ap != null) {
+                    CompilerStats.PackageStats stats = mPm.getOrCreateCompilerPackageStats(ap);
+                    for (OptimizeResult.DexContainerFileOptimizeResult dexRes :
+                            pkgRes.getDexContainerFileOptimizeResults()) {
+                        stats.setCompileTime(
+                                dexRes.getDexContainerFile(), dexRes.getDex2oatWallTimeMillis());
+                    }
+                }
+            }
+
+            return Optional.of(convertToDexOptResult(result));
+        }
+    }
+
+    @DexOptResult
+    private int performDexOptInternalWithDependenciesLI(
+            AndroidPackage p, @NonNull PackageStateInternal pkgSetting, DexoptOptions options) {
         // System server gets a special path.
         if (PLATFORM_PACKAGE_NAME.equals(p.getPackageName())) {
             return mPm.getDexManager().dexoptSystemServer(options);
@@ -514,10 +600,20 @@ final class DexOptHelper {
 
         // Whoever is calling forceDexOpt wants a compiled package.
         // Don't use profiles since that may cause compilation to be skipped.
-        final int res = performDexOptInternalWithDependenciesLI(pkg, packageState,
-                new DexoptOptions(packageName, REASON_CMDLINE,
-                        getDefaultCompilerFilter(), null /* splitName */,
-                        DexoptOptions.DEXOPT_FORCE | DexoptOptions.DEXOPT_BOOT_COMPLETE));
+        DexoptOptions options = new DexoptOptions(packageName, REASON_CMDLINE,
+                getDefaultCompilerFilter(), null /* splitName */,
+                DexoptOptions.DEXOPT_FORCE | DexoptOptions.DEXOPT_BOOT_COMPLETE);
+
+        // performDexOptWithArtService ignores the snapshot and takes its own, so it can race with
+        // the package checks above, but at worst the effect is only a bit less friendly error
+        // below.
+        Optional<Integer> artSrvRes = performDexOptWithArtService(options);
+        int res;
+        if (artSrvRes.isPresent()) {
+            res = artSrvRes.get();
+        } else {
+            res = performDexOptInternalWithDependenciesLI(pkg, packageState, options);
+        }
 
         Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         if (res != PackageDexOptimizer.DEX_OPT_PERFORMED) {
@@ -799,5 +895,60 @@ final class DexOptHelper {
             }
         }
         return false;
+    }
+
+    private @NonNull PackageManagerLocal getPackageManagerLocal() {
+        try {
+            return LocalManagerRegistry.getManagerOrThrow(PackageManagerLocal.class);
+        } catch (ManagerNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Called whenever we need to fall back from ART Service to the legacy dexopt code.
+     */
+    public static void reportArtManagerFallback(String packageName, String reason) {
+        // STOPSHIP(b/251903639): Minimize these calls to avoid platform getting shipped with code
+        // paths that will always bypass ART Service.
+        Slog.i(TAG, "Falling back to old PackageManager dexopt for " + packageName + ": " + reason);
+    }
+
+    /**
+     * Returns {@link ArtManagerLocal} if one is found and should be used for package optimization.
+     */
+    private @Nullable ArtManagerLocal getArtManagerLocal() {
+        if (!"true".equals(SystemProperties.get("dalvik.vm.useartservice", ""))) {
+            return null;
+        }
+        try {
+            return LocalManagerRegistry.getManagerOrThrow(ArtManagerLocal.class);
+        } catch (ManagerNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Converts an ART Service {@link OptimizeResult} to {@link DexOptResult}.
+     *
+     * For interfacing {@link ArtManagerLocal} with legacy dex optimization code in PackageManager.
+     */
+    @DexOptResult
+    private static int convertToDexOptResult(OptimizeResult result) {
+        /*@OptimizeStatus*/ int status = result.getFinalStatus();
+        switch (status) {
+            case OptimizeResult.OPTIMIZE_SKIPPED:
+                return PackageDexOptimizer.DEX_OPT_SKIPPED;
+            case OptimizeResult.OPTIMIZE_FAILED:
+                return PackageDexOptimizer.DEX_OPT_FAILED;
+            case OptimizeResult.OPTIMIZE_PERFORMED:
+                return PackageDexOptimizer.DEX_OPT_PERFORMED;
+            case OptimizeResult.OPTIMIZE_CANCELLED:
+                return PackageDexOptimizer.DEX_OPT_CANCELLED;
+            default:
+                throw new IllegalArgumentException("OptimizeResult for "
+                        + result.getPackageOptimizeResults().get(0).getPackageName()
+                        + " has unsupported status " + status);
+        }
     }
 }

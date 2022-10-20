@@ -547,6 +547,18 @@ public class ScrollView extends FrameLayout {
                         handled = fullScroll(View.FOCUS_DOWN);
                     }
                     break;
+                case KeyEvent.KEYCODE_MOVE_HOME:
+                    handled = fullScroll(View.FOCUS_UP);
+                    break;
+                case KeyEvent.KEYCODE_MOVE_END:
+                    handled = fullScroll(View.FOCUS_DOWN);
+                    break;
+                case KeyEvent.KEYCODE_PAGE_UP:
+                    handled = pageScroll(View.FOCUS_UP);
+                    break;
+                case KeyEvent.KEYCODE_PAGE_DOWN:
+                    handled = pageScroll(View.FOCUS_DOWN);
+                    break;
                 case KeyEvent.KEYCODE_SPACE:
                     pageScroll(event.isShiftPressed() ? View.FOCUS_UP : View.FOCUS_DOWN);
                     break;

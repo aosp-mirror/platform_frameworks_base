@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spa.widget
+package com.android.settingslib.spa.widget.preference
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -25,14 +25,14 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-class SettingsSliderTest {
+class SliderPreferenceTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
     @Test
     fun title_displayed() {
         composeTestRule.setContent {
-            SettingsSlider(object : SettingsSliderModel {
+            SliderPreference(object : SliderPreferenceModel {
                 override val title = "Slider"
                 override val initValue = 40
             })
@@ -41,5 +41,5 @@ class SettingsSliderTest {
         composeTestRule.onNodeWithText("Slider").assertIsDisplayed()
     }
 
-    // TODO: Add more unit tests for SettingsSlider widget.
+    // TODO: Add more unit tests for SliderPreference widget.
 }

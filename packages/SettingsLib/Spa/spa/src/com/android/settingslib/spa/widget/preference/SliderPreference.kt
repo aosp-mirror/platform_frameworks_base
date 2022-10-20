@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spa.widget
+package com.android.settingslib.spa.widget.preference
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccessAlarm
 import androidx.compose.material.icons.outlined.MusicNote
 import androidx.compose.material.icons.outlined.MusicOff
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Slider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,32 +31,32 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import com.android.settingslib.spa.framework.theme.SettingsTheme
-import com.android.settingslib.spa.widget.preference.BaseLayout
-import kotlin.math.roundToInt
+import com.android.settingslib.spa.framework.util.EntryHighlight
+import com.android.settingslib.spa.widget.ui.SettingsSlider
 
 /**
- * The widget model for [SettingsSlider] widget.
+ * The widget model for [SliderPreference] widget.
  */
-interface SettingsSliderModel {
+interface SliderPreferenceModel {
     /**
-     * The title of this [SettingsSlider].
+     * The title of this [SliderPreference].
      */
     val title: String
 
     /**
-     * The initial position of the [SettingsSlider].
+     * The initial position of the [SliderPreference].
      */
     val initValue: Int
 
     /**
-     * The value range for this [SettingsSlider].
+     * The value range for this [SliderPreference].
      */
     val valueRange: IntRange
         get() = 0..100
 
     /**
      * The lambda to be invoked during the value change by dragging or a click. This callback is
-     * used to get the real time value of the [SettingsSlider].
+     * used to get the real time value of the [SliderPreference].
      */
     val onValueChange: ((value: Int) -> Unit)?
         get() = null
@@ -70,7 +69,7 @@ interface SettingsSliderModel {
         get() = null
 
     /**
-     * The icon image for [SettingsSlider]. If not specified, the slider hides the icon by default.
+     * The icon image for [SliderPreference]. If not specified, the slider hides the icon by default.
      */
     val icon: ImageVector?
         get() = null
@@ -89,46 +88,44 @@ interface SettingsSliderModel {
 /**
  * Settings slider widget.
  *
- * Data is provided through [SettingsSliderModel].
+ * Data is provided through [SliderPreferenceModel].
  */
 @Composable
-fun SettingsSlider(model: SettingsSliderModel) {
-    SettingsSlider(
-        title = model.title,
-        initValue = model.initValue,
-        valueRange = model.valueRange,
-        onValueChange = model.onValueChange,
-        onValueChangeFinished = model.onValueChangeFinished,
-        icon = model.icon,
-        showSteps = model.showSteps,
-    )
+fun SliderPreference(model: SliderPreferenceModel) {
+    EntryHighlight {
+        SliderPreference(
+            title = model.title,
+            initValue = model.initValue,
+            valueRange = model.valueRange,
+            onValueChange = model.onValueChange,
+            onValueChangeFinished = model.onValueChangeFinished,
+            icon = model.icon,
+            showSteps = model.showSteps,
+        )
+    }
 }
 
 @Composable
-internal fun SettingsSlider(
+internal fun SliderPreference(
     title: String,
     initValue: Int,
+    modifier: Modifier = Modifier,
     valueRange: IntRange = 0..100,
     onValueChange: ((value: Int) -> Unit)? = null,
     onValueChangeFinished: (() -> Unit)? = null,
     icon: ImageVector? = null,
     showSteps: Boolean = false,
-    modifier: Modifier = Modifier,
 ) {
-    var sliderPosition by rememberSaveable { mutableStateOf(initValue.toFloat()) }
     BaseLayout(
         title = title,
         subTitle = {
-            Slider(
-                value = sliderPosition,
-                onValueChange = {
-                    sliderPosition = it
-                    onValueChange?.invoke(sliderPosition.roundToInt())
-                },
-                modifier = modifier,
-                valueRange = valueRange.first.toFloat()..valueRange.last.toFloat(),
-                steps = if (showSteps) (valueRange.count() - 2) else 0,
-                onValueChangeFinished = onValueChangeFinished,
+            SettingsSlider(
+                initValue,
+                modifier,
+                valueRange,
+                onValueChange,
+                onValueChangeFinished,
+                showSteps
             )
         },
         icon = if (icon != null) ({
@@ -139,11 +136,11 @@ internal fun SettingsSlider(
 
 @Preview
 @Composable
-private fun SettingsSliderPreview() {
+private fun SliderPreferencePreview() {
     SettingsTheme {
         val initValue = 30
         var sliderPosition by rememberSaveable { mutableStateOf(initValue) }
-        SettingsSlider(
+        SliderPreference(
             title = "Alarm Volume",
             initValue = 30,
             onValueChange = { sliderPosition = it },
@@ -157,10 +154,10 @@ private fun SettingsSliderPreview() {
 
 @Preview
 @Composable
-private fun SettingsSliderIconChangePreview() {
+private fun SliderPreferenceIconChangePreview() {
     SettingsTheme {
         var icon by remember { mutableStateOf(Icons.Outlined.MusicNote) }
-        SettingsSlider(
+        SliderPreference(
             title = "Media Volume",
             initValue = 40,
             onValueChange = { it: Int ->
@@ -173,9 +170,9 @@ private fun SettingsSliderIconChangePreview() {
 
 @Preview
 @Composable
-private fun SettingsSliderStepsPreview() {
+private fun SliderPreferenceStepsPreview() {
     SettingsTheme {
-        SettingsSlider(
+        SliderPreference(
             title = "Display Text",
             initValue = 2,
             valueRange = 1..5,

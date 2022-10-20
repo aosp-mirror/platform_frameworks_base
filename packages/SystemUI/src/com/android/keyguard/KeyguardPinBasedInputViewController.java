@@ -127,7 +127,6 @@ public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinB
     public void onResume(int reason) {
         super.onResume(reason);
         mPasswordEntry.requestFocus();
-        mMessageAreaController.setMessageIfEmpty(R.string.keyguard_enter_your_pin);
     }
 
     @Override

@@ -20,8 +20,12 @@ import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.android.credentialmanager.CredentialManagerRepo
+import com.android.credentialmanager.common.DialogResult
+import com.android.credentialmanager.common.ResultState
 
 data class GetCredentialUiState(
   val providers: List<ProviderInfo>,
@@ -36,11 +40,31 @@ class GetCredentialViewModel(
   var uiState by mutableStateOf(credManRepo.getCredentialInitialUiState())
       private set
 
+  val dialogResult: MutableLiveData<DialogResult> by lazy {
+    MutableLiveData<DialogResult>()
+  }
+
+  fun observeDialogResult(): LiveData<DialogResult> {
+    return dialogResult
+  }
+
   fun onCredentailSelected(credentialId: Int) {
     Log.d("Account Selector", "credential selected: $credentialId")
+    CredentialManagerRepo.getInstance().onOptionSelected(
+      uiState.selectedProvider!!.name,
+      credentialId
+    )
+    dialogResult.value = DialogResult(
+      ResultState.COMPLETE,
+    )
   }
 
   fun onMoreOptionSelected() {
     Log.d("Account Selector", "More Option selected")
+  }
+
+  fun onCancel() {
+    CredentialManagerRepo.getInstance().onCancel()
+    dialogResult.value = DialogResult(ResultState.CANCELED)
   }
 }

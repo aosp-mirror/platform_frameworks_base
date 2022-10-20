@@ -38,7 +38,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.credentialmanager.R
 import com.android.credentialmanager.ui.theme.Grey100
 import com.android.credentialmanager.ui.theme.Shapes
@@ -50,8 +49,7 @@ import com.android.credentialmanager.ui.theme.lightSurface1
 @ExperimentalMaterialApi
 @Composable
 fun CreatePasskeyScreen(
-  viewModel: CreatePasskeyViewModel = viewModel(),
-  cancelActivity: () -> Unit,
+  viewModel: CreatePasskeyViewModel,
 ) {
   val state = rememberModalBottomSheetState(
     initialValue = ModalBottomSheetValue.Expanded,
@@ -64,17 +62,17 @@ fun CreatePasskeyScreen(
       when (uiState.currentScreenState) {
         CreateScreenState.PASSKEY_INTRO -> ConfirmationCard(
           onConfirm = {viewModel.onConfirmIntro()},
-          onCancel = cancelActivity,
+          onCancel = {viewModel.onCancel()},
         )
         CreateScreenState.PROVIDER_SELECTION -> ProviderSelectionCard(
           providerList = uiState.providers,
-          onCancel = cancelActivity,
+          onCancel = {viewModel.onCancel()},
           onProviderSelected = {viewModel.onProviderSelected(it)}
         )
         CreateScreenState.CREATION_OPTION_SELECTION -> CreationSelectionCard(
           providerInfo = uiState.selectedProvider!!,
           onOptionSelected = {viewModel.onCreateOptionSelected(it)},
-          onCancel = cancelActivity,
+          onCancel = {viewModel.onCancel()},
           multiProvider = uiState.providers.size > 1,
           onMoreOptionsSelected = {viewModel.onMoreOptionsSelected(it)}
         )
@@ -85,6 +83,8 @@ fun CreatePasskeyScreen(
             onOptionSelected = {viewModel.onMoreOptionsRowSelected(it)}
           )
         CreateScreenState.MORE_OPTIONS_ROW_INTRO -> MoreOptionsRowIntroCard(
+          providerInfo = uiState.selectedProvider!!,
+          onDefaultOrNotSelected = {viewModel.onDefaultOrNotSelected(it)}
         )
       }
     },
@@ -93,7 +93,7 @@ fun CreatePasskeyScreen(
   ) {}
   LaunchedEffect(state.currentValue) {
     if (state.currentValue == ModalBottomSheetValue.Hidden) {
-      cancelActivity()
+      viewModel.onCancel()
     }
   }
 }
@@ -284,10 +284,37 @@ fun MoreOptionsSelectionCard(
 @ExperimentalMaterialApi
 @Composable
 fun MoreOptionsRowIntroCard(
+  providerInfo: ProviderInfo,
+  onDefaultOrNotSelected: (String) -> Unit,
 ) {
   Card(
     backgroundColor = lightBackgroundColor,
   ) {
+    Column() {
+      Text(
+        text = stringResource(R.string.use_provider_for_all_title, providerInfo.name),
+        style = Typography.subtitle1,
+        modifier = Modifier.padding(all = 24.dp).align(alignment = Alignment.CenterHorizontally)
+      )
+      Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
+      ) {
+        CancelButton(
+          stringResource(R.string.use_once),
+          onclick = { onDefaultOrNotSelected(providerInfo.name) }
+        )
+        ConfirmButton(
+          stringResource(R.string.set_as_default),
+          onclick = { onDefaultOrNotSelected(providerInfo.name) }
+        )
+      }
+      Divider(
+        thickness = 18.dp,
+        color = Color.Transparent,
+        modifier = Modifier.padding(bottom = 40.dp)
+      )
+    }
   }
 }
 
