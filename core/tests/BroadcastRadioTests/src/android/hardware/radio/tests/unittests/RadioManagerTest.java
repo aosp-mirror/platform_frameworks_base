@@ -18,14 +18,36 @@ package android.hardware.radio.tests.unittests;
 
 import static com.google.common.truth.Truth.assertWithMessage;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import android.content.Context;
+import android.hardware.radio.Announcement;
+import android.hardware.radio.IAnnouncementListener;
+import android.hardware.radio.ICloseHandle;
+import android.hardware.radio.IRadioService;
 import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
 import android.hardware.radio.RadioMetadata;
+import android.hardware.radio.RadioTuner;
+import android.os.RemoteException;
+import android.util.ArrayMap;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
 
+@RunWith(MockitoJUnitRunner.class)
 public final class RadioManagerTest {
 
     private static final int REGION = RadioManager.REGION_ITU_2;
@@ -91,6 +113,24 @@ public final class RadioManagerTest {
     private static final RadioMetadata METADATA = createMetadata();
     private static final RadioManager.ProgramInfo DAB_PROGRAM_INFO =
             createDabProgramInfo(DAB_SELECTOR);
+
+    private static final int EVENT_ANNOUNCEMENT_TYPE = Announcement.TYPE_EVENT;
+    private static final List<Announcement> TEST_ANNOUNCEMENT_LIST = Arrays.asList(
+            new Announcement(DAB_SELECTOR, EVENT_ANNOUNCEMENT_TYPE,
+                    /* vendorInfo= */ new ArrayMap<>()));
+
+    private RadioManager mRadioManager;
+
+    @Mock
+    private IRadioService mRadioServiceMock;
+    @Mock
+    private Context mContextMock;
+    @Mock
+    private RadioTuner.Callback mCallbackMock;
+    @Mock
+    private Announcement.OnListUpdatedListener mEventListener;
+    @Mock
+    private ICloseHandle mCloseHandleMock;
 
     @Test
     public void getType_forBandDescriptor() {
@@ -606,6 +646,80 @@ public final class RadioManagerTest {
                 .that(DAB_PROGRAM_INFO).isNotEqualTo(dabProgramInfoCompared);
     }
 
+    @Test
+    public void listModules_forRadioManager() throws Exception {
+        createRadioManager();
+        List<RadioManager.ModuleProperties> modules = new ArrayList<>();
+
+        mRadioManager.listModules(modules);
+
+        assertWithMessage("Modules in radio manager")
+                .that(modules).containsExactly(AMFM_PROPERTIES);
+    }
+
+    @Test
+    public void openTuner_forRadioModule() throws Exception {
+        createRadioManager();
+        int moduleId = 0;
+        boolean withAudio = true;
+
+        mRadioManager.openTuner(moduleId, FM_BAND_CONFIG, withAudio, mCallbackMock,
+                /* handler= */ null);
+
+        verify(mRadioServiceMock).openTuner(eq(moduleId), eq(FM_BAND_CONFIG), eq(withAudio), any());
+    }
+
+    @Test
+    public void addAnnouncementListener_withListenerNotAddedBefore() throws Exception {
+        createRadioManager();
+        Set<Integer> enableTypeSet = createAnnouncementTypeSet(EVENT_ANNOUNCEMENT_TYPE);
+        int[] enableTypesExpected = new int[]{EVENT_ANNOUNCEMENT_TYPE};
+        ArgumentCaptor<IAnnouncementListener> announcementListener =
+                ArgumentCaptor.forClass(IAnnouncementListener.class);
+
+        mRadioManager.addAnnouncementListener(enableTypeSet, mEventListener);
+
+        verify(mRadioServiceMock).addAnnouncementListener(eq(enableTypesExpected),
+                announcementListener.capture());
+
+        announcementListener.getValue().onListUpdated(TEST_ANNOUNCEMENT_LIST);
+
+        verify(mEventListener).onListUpdated(TEST_ANNOUNCEMENT_LIST);
+    }
+
+    @Test
+    public void addAnnouncementListener_withListenerAddedBefore_closesPreviousOne()
+            throws Exception {
+        createRadioManager();
+        Set<Integer> enableTypeSet = createAnnouncementTypeSet(EVENT_ANNOUNCEMENT_TYPE);
+        mRadioManager.addAnnouncementListener(enableTypeSet, mEventListener);
+
+        mRadioManager.addAnnouncementListener(enableTypeSet, mEventListener);
+
+        verify(mCloseHandleMock).close();
+    }
+
+    @Test
+    public void removeAnnouncementListener_withListenerNotAddedBefore_ignores() throws Exception {
+        createRadioManager();
+
+        mRadioManager.removeAnnouncementListener(mEventListener);
+
+        verify(mCloseHandleMock, never()).close();
+    }
+
+    @Test
+    public void removeAnnouncementListener_withListenerAddedTwice_closesTheFirstOne()
+            throws Exception {
+        createRadioManager();
+        Set<Integer> enableTypeSet = createAnnouncementTypeSet(EVENT_ANNOUNCEMENT_TYPE);
+        mRadioManager.addAnnouncementListener(enableTypeSet, mEventListener);
+
+        mRadioManager.removeAnnouncementListener(mEventListener);
+
+        verify(mCloseHandleMock).close();
+    }
+
     private static RadioManager.ModuleProperties createAmFmProperties() {
         return new RadioManager.ModuleProperties(PROPERTIES_ID, SERVICE_NAME, CLASS_ID,
                 IMPLEMENTOR, PRODUCT, VERSION, SERIAL, NUM_TUNERS, NUM_AUDIO_SOURCES,
@@ -645,4 +759,14 @@ public final class RadioManagerTest {
                 SIGNAL_QUALITY, METADATA, /* vendorInfo= */ null);
     }
 
+    private void createRadioManager() throws RemoteException {
+        when(mRadioServiceMock.listModules()).thenReturn(Arrays.asList(AMFM_PROPERTIES));
+        when(mRadioServiceMock.addAnnouncementListener(any(), any())).thenReturn(mCloseHandleMock);
+
+        mRadioManager = new RadioManager(mContextMock, mRadioServiceMock);
+    }
+
+    private Set<Integer> createAnnouncementTypeSet(int enableType) {
+        return Set.of(enableType);
+    }
 }

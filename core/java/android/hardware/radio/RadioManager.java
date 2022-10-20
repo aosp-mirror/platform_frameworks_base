@@ -36,6 +36,7 @@ import android.os.ServiceManager.ServiceNotFoundException;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
@@ -1851,9 +1852,17 @@ public class RadioManager {
     /**
      * @hide
      */
-    public RadioManager(@NonNull Context context) throws ServiceNotFoundException {
+    public RadioManager(Context context) throws ServiceNotFoundException {
+        this(context, IRadioService.Stub.asInterface(ServiceManager.getServiceOrThrow(
+                Context.RADIO_SERVICE)));
+    }
+
+    /**
+     * @hide
+     */
+    @VisibleForTesting
+    public RadioManager(Context context, IRadioService service) {
         mContext = context;
-        mService = IRadioService.Stub.asInterface(
-                ServiceManager.getServiceOrThrow(Context.RADIO_SERVICE));
+        mService = service;
     }
 }
