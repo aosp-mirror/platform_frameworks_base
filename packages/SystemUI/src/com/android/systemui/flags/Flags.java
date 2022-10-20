@@ -363,6 +363,10 @@ public class Flags {
     // 1700 - clipboard
     public static final UnreleasedFlag CLIPBOARD_OVERLAY_REFACTOR = new UnreleasedFlag(1700);
 
+    // 1800 - shade container
+    public static final UnreleasedFlag LEAVE_SHADE_OPEN_FOR_BUGREPORT =
+            new UnreleasedFlag(1800, true);
+
     // Pay no attention to the reflection behind the curtain.
     // ========================== Curtain ==========================
     // |                                                           |
