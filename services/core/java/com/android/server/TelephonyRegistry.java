@@ -2581,33 +2581,39 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         if (!checkNotifyPermission("notifyBarringInfo()")) {
             return;
         }
-        if (barringInfo == null) {
-            log("Received null BarringInfo for subId=" + subId + ", phoneId=" + phoneId);
-            mBarringInfo.set(phoneId, new BarringInfo());
+        if (!validatePhoneId(phoneId)) {
+            loge("Received invalid phoneId for BarringInfo = " + phoneId);
             return;
         }
 
         synchronized (mRecords) {
-            if (validatePhoneId(phoneId)) {
-                mBarringInfo.set(phoneId, barringInfo);
-                // Barring info is non-null
-                BarringInfo biNoLocation = barringInfo.createLocationInfoSanitizedCopy();
-                if (VDBG) log("listen: call onBarringInfoChanged=" + barringInfo);
-                for (Record r : mRecords) {
-                    if (r.matchTelephonyCallbackEvent(
-                            TelephonyCallback.EVENT_BARRING_INFO_CHANGED)
-                            && idMatch(r, subId, phoneId)) {
-                        try {
-                            if (DBG_LOC) {
-                                log("notifyBarringInfo: mBarringInfo="
-                                        + barringInfo + " r=" + r);
-                            }
-                            r.callback.onBarringInfoChanged(
-                                    checkFineLocationAccess(r, Build.VERSION_CODES.BASE)
-                                        ? barringInfo : biNoLocation);
-                        } catch (RemoteException ex) {
-                            mRemoveList.add(r.binder);
+            if (barringInfo == null) {
+                loge("Received null BarringInfo for subId=" + subId + ", phoneId=" + phoneId);
+                mBarringInfo.set(phoneId, new BarringInfo());
+                return;
+            }
+            if (barringInfo.equals(mBarringInfo.get(phoneId))) {
+                if (VDBG) log("Ignoring duplicate barring info.");
+                return;
+            }
+            mBarringInfo.set(phoneId, barringInfo);
+            // Barring info is non-null
+            BarringInfo biNoLocation = barringInfo.createLocationInfoSanitizedCopy();
+            if (VDBG) log("listen: call onBarringInfoChanged=" + barringInfo);
+            for (Record r : mRecords) {
+                if (r.matchTelephonyCallbackEvent(
+                        TelephonyCallback.EVENT_BARRING_INFO_CHANGED)
+                        && idMatch(r, subId, phoneId)) {
+                    try {
+                        if (DBG_LOC) {
+                            log("notifyBarringInfo: mBarringInfo="
+                                    + barringInfo + " r=" + r);
                         }
+                        r.callback.onBarringInfoChanged(
+                                checkFineLocationAccess(r, Build.VERSION_CODES.BASE)
+                                    ? barringInfo : biNoLocation);
+                    } catch (RemoteException ex) {
+                        mRemoveList.add(r.binder);
                     }
                 }
             }
