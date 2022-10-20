@@ -8531,11 +8531,12 @@ public class CarrierConfigManager {
 
     /**
      * Boolean indicating if the VoNR setting is visible in the Call Settings menu.
-     * If true, the VoNR setting menu will be visible. If false, the menu will be gone.
+     * If this flag is set and VoNR is enabled for this carrier (see {@link #KEY_VONR_ENABLED_BOOL})
+     * the VoNR setting menu will be visible. If {@link #KEY_VONR_ENABLED_BOOL} or
+     * this setting is false, the menu will be gone.
      *
-     * Disabled by default.
+     * Enabled by default.
      *
-     * @hide
      */
     public static final String KEY_VONR_SETTING_VISIBILITY_BOOL = "vonr_setting_visibility_bool";
 
@@ -8545,7 +8546,6 @@ public class CarrierConfigManager {
      *
      * Disabled by default.
      *
-     * @hide
      */
     public static final String KEY_VONR_ENABLED_BOOL = "vonr_enabled_bool";
 
