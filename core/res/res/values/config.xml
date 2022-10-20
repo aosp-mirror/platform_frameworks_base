@@ -5881,4 +5881,8 @@
          TODO(b/236022708) Move rear display state to device state config file
     -->
     <integer name="config_deviceStateRearDisplay">-1</integer>
+
+    <!-- List of certificate to be used for font fs-verity integrity verification -->
+    <string-array translatable="false" name="config_fontManagerServiceCerts">
+    </string-array>
 </resources>
