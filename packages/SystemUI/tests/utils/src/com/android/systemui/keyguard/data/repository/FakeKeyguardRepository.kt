@@ -18,6 +18,7 @@
 package com.android.systemui.keyguard.data.repository
 
 import com.android.systemui.common.shared.model.Position
+import com.android.systemui.keyguard.shared.model.StatusBarState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -43,6 +44,9 @@ class FakeKeyguardRepository : KeyguardRepository {
 
     private val _dozeAmount = MutableStateFlow(0f)
     override val dozeAmount: Flow<Float> = _dozeAmount
+
+    private val _statusBarState = MutableStateFlow(StatusBarState.SHADE)
+    override val statusBarState: Flow<StatusBarState> = _statusBarState
 
     override fun isKeyguardShowing(): Boolean {
         return _isKeyguardShowing.value

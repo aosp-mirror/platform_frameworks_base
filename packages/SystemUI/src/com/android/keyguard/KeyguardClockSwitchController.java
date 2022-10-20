@@ -165,7 +165,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     protected void onViewAttached() {
         mClockRegistry.registerClockChangeListener(mClockChangedListener);
         setClock(mClockRegistry.createCurrentClock());
-        mClockEventController.registerListeners();
+        mClockEventController.registerListeners(mView);
         mKeyguardClockTopMargin =
                 mView.getResources().getDimensionPixelSize(R.dimen.keyguard_clock_top_margin);
 

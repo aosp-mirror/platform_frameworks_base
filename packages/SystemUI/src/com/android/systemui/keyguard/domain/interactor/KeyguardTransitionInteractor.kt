@@ -18,30 +18,20 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.keyguard.data.repository.KeyguardRepository
+import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
+import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
+import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
+import com.android.systemui.keyguard.shared.model.TransitionStep
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 
-/**
- * Encapsulates business-logic related to the keyguard but not to a more specific part within it.
- */
+/** Encapsulates business-logic related to the keyguard transitions. */
 @SysUISingleton
-class KeyguardInteractor
+class KeyguardTransitionInteractor
 @Inject
 constructor(
-    private val repository: KeyguardRepository,
+    repository: KeyguardTransitionRepository,
 ) {
-    /**
-     * The amount of doze the system is in, where `1.0` is fully dozing and `0.0` is not dozing at
-     * all.
-     */
-    val dozeAmount: Flow<Float> = repository.dozeAmount
-    /** Whether the system is in doze mode. */
-    val isDozing: Flow<Boolean> = repository.isDozing
-    /** Whether the keyguard is showing to not. */
-    val isKeyguardShowing: Flow<Boolean> = repository.isKeyguardShowing
-
-    fun isKeyguardShowing(): Boolean {
-        return repository.isKeyguardShowing()
-    }
+    /** AOD->LOCKSCREEN transition information. */
+    val aodToLockscreenTransition: Flow<TransitionStep> = repository.transition(AOD, LOCKSCREEN)
 }
