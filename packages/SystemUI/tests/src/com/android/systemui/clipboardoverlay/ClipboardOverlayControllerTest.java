@@ -40,6 +40,7 @@ import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.screenshot.TimeoutHandler;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -47,6 +48,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+@Ignore("b/254635291")
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class ClipboardOverlayControllerTest extends SysuiTestCase {
