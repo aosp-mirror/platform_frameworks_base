@@ -27,7 +27,7 @@ import com.android.settingslib.spa.framework.common.EntrySearchData
 import com.android.settingslib.spa.framework.compose.navigator
 import com.android.settingslib.spa.framework.compose.stateOf
 import com.android.settingslib.spa.framework.util.WrapOnClickWithLog
-import com.android.settingslib.spa.framework.util.EntryHighlight
+import com.android.settingslib.spa.widget.util.EntryHighlight
 import com.android.settingslib.spa.widget.ui.createSettingsIcon
 
 data class SimplePreferenceMacro(
