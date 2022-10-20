@@ -226,14 +226,8 @@ object Flags {
     // 1000 - dock
     val SIMULATE_DOCK_THROUGH_CHARGING = ReleasedFlag(1000)
 
-    // TODO(b/254512444): Tracking Bug
-    @JvmField val DOCK_SETUP_ENABLED = ReleasedFlag(1001)
-
     // TODO(b/254512758): Tracking Bug
     @JvmField val ROUNDED_BOX_RIPPLE = ReleasedFlag(1002)
-
-    // TODO(b/254512525): Tracking Bug
-    @JvmField val REFACTORED_DOCK_SETUP = ReleasedFlag(1003, teamfood = true)
 
     // 1100 - windowing
     @Keep
