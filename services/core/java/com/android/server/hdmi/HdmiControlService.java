@@ -3237,6 +3237,9 @@ public class HdmiControlService extends SystemService {
     }
 
     private void invokeCallback(IHdmiControlCallback callback, int result) {
+        if (callback == null) {
+            return;
+        }
         try {
             callback.onComplete(result);
         } catch (RemoteException e) {
