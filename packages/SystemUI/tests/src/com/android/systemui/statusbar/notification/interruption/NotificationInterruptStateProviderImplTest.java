@@ -51,12 +51,14 @@ import android.testing.AndroidTestingRunner;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
+import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl.NotificationInterruptEvent;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -97,6 +99,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     NotifPipelineFlags mFlags;
     @Mock
     KeyguardNotificationVisibilityProvider mKeyguardNotificationVisibilityProvider;
+    UiEventLoggerFake mUiEventLoggerFake;
     @Mock
     PendingIntent mPendingIntent;
 
@@ -106,6 +109,8 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     public void setup() {
         MockitoAnnotations.initMocks(this);
         when(mFlags.fullScreenIntentRequiresKeyguard()).thenReturn(false);
+
+        mUiEventLoggerFake = new UiEventLoggerFake();
 
         mNotifInterruptionStateProvider =
                 new NotificationInterruptStateProviderImpl(
@@ -120,7 +125,8 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
                         mLogger,
                         mMockHandler,
                         mFlags,
-                        mKeyguardNotificationVisibilityProvider);
+                        mKeyguardNotificationVisibilityProvider,
+                        mUiEventLoggerFake);
         mNotifInterruptionStateProvider.mUseHeadsUp = true;
     }
 
@@ -442,6 +448,13 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
         verify(mLogger, never()).logNoFullscreen(any(), any());
         verify(mLogger).logNoFullscreenWarning(entry, "GroupAlertBehavior will prevent HUN");
         verify(mLogger, never()).logFullscreen(any(), any());
+
+        assertThat(mUiEventLoggerFake.numLogs()).isEqualTo(1);
+        UiEventLoggerFake.FakeUiEvent fakeUiEvent = mUiEventLoggerFake.get(0);
+        assertThat(fakeUiEvent.eventId).isEqualTo(
+                NotificationInterruptEvent.FSI_SUPPRESSED_SUPPRESSIVE_GROUP_ALERT_BEHAVIOR.getId());
+        assertThat(fakeUiEvent.uid).isEqualTo(entry.getSbn().getUid());
+        assertThat(fakeUiEvent.packageName).isEqualTo(entry.getSbn().getPackageName());
     }
 
     @Test
@@ -600,6 +613,13 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
         verify(mLogger, never()).logNoFullscreen(any(), any());
         verify(mLogger).logNoFullscreenWarning(entry, "Expected not to HUN while not on keyguard");
         verify(mLogger, never()).logFullscreen(any(), any());
+
+        assertThat(mUiEventLoggerFake.numLogs()).isEqualTo(1);
+        UiEventLoggerFake.FakeUiEvent fakeUiEvent = mUiEventLoggerFake.get(0);
+        assertThat(fakeUiEvent.eventId).isEqualTo(
+                NotificationInterruptEvent.FSI_SUPPRESSED_NO_HUN_OR_KEYGUARD.getId());
+        assertThat(fakeUiEvent.uid).isEqualTo(entry.getSbn().getUid());
+        assertThat(fakeUiEvent.packageName).isEqualTo(entry.getSbn().getPackageName());
     }
 
     /**
