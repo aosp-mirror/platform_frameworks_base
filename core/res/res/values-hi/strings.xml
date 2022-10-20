@@ -264,7 +264,6 @@
     <string name="global_action_lockdown" msgid="2475471405907902963">"फ़ाेन लॉक करें"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"नई सूचना"</string>
-    <string name="notification_channel_virtual_keyboard" msgid="6465975799223304567">"वर्चुअल कीबोर्ड"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"सामान्य कीबोर्ड"</string>
     <string name="notification_channel_security" msgid="8516754650348238057">"सुरक्षा"</string>
     <string name="notification_channel_car_mode" msgid="2123919247040988436">"कार मोड"</string>
@@ -1136,7 +1135,7 @@
     <string name="copy" msgid="5472512047143665218">"कॉपी करें"</string>
     <string name="failed_to_copy_to_clipboard" msgid="725919885138539875">"क्लिपबोर्ड पर कॉपी नहीं हो सका"</string>
     <string name="paste" msgid="461843306215520225">"चिपकाएं"</string>
-    <string name="paste_as_plain_text" msgid="7664800665823182587">"सादे पाठ के रूप में चिपकाएं"</string>
+    <string name="paste_as_plain_text" msgid="7664800665823182587">"सादे टेक्स्ट के रूप में चिपकाएं"</string>
     <string name="replace" msgid="7842675434546657444">"बदलें•"</string>
     <string name="delete" msgid="1514113991712129054">"मिटाएं"</string>
     <string name="copyUrl" msgid="6229645005987260230">"यूआरएल को कॉपी करें"</string>

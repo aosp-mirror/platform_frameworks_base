@@ -264,7 +264,6 @@
     <string name="global_action_lockdown" msgid="2475471405907902963">"Tam gizlilik"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"Yeni bildirim"</string>
-    <string name="notification_channel_virtual_keyboard" msgid="6465975799223304567">"Sanal klavye"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"Fiziksel klavye"</string>
     <string name="notification_channel_security" msgid="8516754650348238057">"Güvenlik"</string>
     <string name="notification_channel_car_mode" msgid="2123919247040988436">"Araç modu"</string>
