@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spa.framework
+package com.android.settingslib.spa.framework.debug
 
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.Text
@@ -33,8 +30,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.android.settingslib.spa.R
-import com.android.settingslib.spa.framework.BrowseActivity.Companion.KEY_DESTINATION
-import com.android.settingslib.spa.framework.BrowseActivity.Companion.KEY_HIGHLIGHT_ENTRY
 import com.android.settingslib.spa.framework.common.LogCategory
 import com.android.settingslib.spa.framework.common.SettingsEntry
 import com.android.settingslib.spa.framework.common.SettingsPage
@@ -60,11 +55,10 @@ private const val PARAM_NAME_ENTRY_ID = "eid"
 /**
  * The Debug Activity to display all Spa Pages & Entries.
  * One can open the debug activity by:
- *   $ adb shell am start -n <Activity>
- * For gallery, Activity = com.android.settingslib.spa.gallery/.GalleryDebugActivity
- * For SettingsGoogle, Activity = com.android.settings/.spa.SpaDebugActivity
+ *   $ adb shell am start -n <Package>/com.android.settingslib.spa.framework.debug.DebugActivity
+ * For gallery, Package = com.android.settingslib.spa.gallery
  */
-open class DebugActivity : ComponentActivity() {
+class DebugActivity : ComponentActivity() {
     private val spaEnvironment get() = SpaEnvironmentFactory.instance
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -76,30 +70,6 @@ open class DebugActivity : ComponentActivity() {
             SettingsTheme {
                 MainContent()
             }
-        }
-    }
-
-    private fun displayDebugMessage() {
-        val entryProviderAuthorities = spaEnvironment.entryProviderAuthorities ?: return
-
-        try {
-            val query = EntryProvider.QueryEnum.PAGE_INFO_QUERY
-            contentResolver.query(
-                Uri.parse("content://$entryProviderAuthorities/${query.queryPath}"),
-                null, null, null
-            ).use { cursor ->
-                while (cursor != null && cursor.moveToNext()) {
-                    val route = cursor.getString(query, EntryProvider.ColumnEnum.PAGE_ROUTE)
-                    val entryCount = cursor.getInt(query, EntryProvider.ColumnEnum.PAGE_ENTRY_COUNT)
-                    val hasRuntimeParam =
-                        cursor.getBoolean(query, EntryProvider.ColumnEnum.HAS_RUNTIME_PARAM)
-                    val message = "Page Info: $route ($entryCount) " +
-                        (if (hasRuntimeParam) "with" else "no") + "-runtime-params"
-                    spaEnvironment.logger.message(TAG, message, category = LogCategory.FRAMEWORK)
-                }
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Provider querying exception:", e)
         }
     }
 
@@ -141,11 +111,6 @@ open class DebugActivity : ComponentActivity() {
                 override val title = "List All Entries (${allEntry.size})"
                 override val onClick = navigator(route = ROUTE_All_ENTRIES)
             })
-            Preference(object : PreferenceModel {
-                override val title = "Query EntryProvider"
-                override val enabled = isEntryProviderAvailable().toState()
-                override val onClick = { displayDebugMessage() }
-            })
         }
     }
 
@@ -177,6 +142,7 @@ open class DebugActivity : ComponentActivity() {
 
     @Composable
     fun OnePage(arguments: Bundle?) {
+        val context = LocalContext.current
         val entryRepository by spaEnvironment.entryRepository
         val id = arguments!!.getString(PARAM_NAME_PAGE_ID, "")
         val pageWithEntry = entryRepository.getPageWithEntry(id)!!
@@ -186,7 +152,9 @@ open class DebugActivity : ComponentActivity() {
             Text(text = "Entry size: ${pageWithEntry.entries.size}")
             Preference(model = object : PreferenceModel {
                 override val title = "open page"
-                override val enabled = isPageClickable(pageWithEntry.page).toState()
+                override val enabled =
+                    pageWithEntry.page.isBrowsable(context, spaEnvironment.browseActivityClass)
+                        .toState()
                 override val onClick = openPage(pageWithEntry.page)
             })
             EntryList(pageWithEntry.entries)
@@ -195,6 +163,7 @@ open class DebugActivity : ComponentActivity() {
 
     @Composable
     fun OneEntry(arguments: Bundle?) {
+        val context = LocalContext.current
         val entryRepository by spaEnvironment.entryRepository
         val id = arguments!!.getString(PARAM_NAME_ENTRY_ID, "")
         val entry = entryRepository.getEntry(id)!!
@@ -202,7 +171,9 @@ open class DebugActivity : ComponentActivity() {
         RegularScaffold(title = "Entry - ${entry.displayTitle()}") {
             Preference(model = object : PreferenceModel {
                 override val title = "open entry"
-                override val enabled = isEntryClickable(entry).toState()
+                override val enabled =
+                    entry.containerPage().isBrowsable(context, spaEnvironment.browseActivityClass)
+                        .toState()
                 override val onClick = openEntry(entry)
             })
             Text(text = entryContent)
@@ -223,12 +194,10 @@ open class DebugActivity : ComponentActivity() {
 
     @Composable
     private fun openPage(page: SettingsPage): (() -> Unit)? {
-        if (!isPageClickable(page)) return null
         val context = LocalContext.current
+        val intent =
+            page.createBrowseIntent(context, spaEnvironment.browseActivityClass) ?: return null
         val route = page.buildRoute()
-        val intent = Intent(context, spaEnvironment.browseActivityClass).apply {
-            putExtra(KEY_DESTINATION, route)
-        }
         return {
             spaEnvironment.logger.message(
                 TAG, "OpenPage: $route", category = LogCategory.FRAMEWORK
@@ -239,13 +208,11 @@ open class DebugActivity : ComponentActivity() {
 
     @Composable
     private fun openEntry(entry: SettingsEntry): (() -> Unit)? {
-        if (!isEntryClickable(entry)) return null
         val context = LocalContext.current
+        val intent = entry.containerPage()
+            .createBrowseIntent(context, spaEnvironment.browseActivityClass, entry.id)
+            ?: return null
         val route = entry.containerPage().buildRoute()
-        val intent = Intent(context, spaEnvironment.browseActivityClass).apply {
-            putExtra(KEY_DESTINATION, route)
-            putExtra(KEY_HIGHLIGHT_ENTRY, entry.id)
-        }
         return {
             spaEnvironment.logger.message(
                 TAG, "OpenEntry: $route", category = LogCategory.FRAMEWORK
@@ -253,17 +220,9 @@ open class DebugActivity : ComponentActivity() {
             context.startActivity(intent)
         }
     }
-
-    private fun isEntryProviderAvailable(): Boolean {
-        return spaEnvironment.entryProviderAuthorities != null
-    }
-
-    private fun isPageClickable(page: SettingsPage): Boolean {
-        return spaEnvironment.browseActivityClass != null && !page.hasRuntimeParam()
-    }
-
-    private fun isEntryClickable(entry: SettingsEntry): Boolean {
-        return spaEnvironment.browseActivityClass != null &&
-            !entry.containerPage().hasRuntimeParam()
-    }
 }
+
+/**
+ * A blank activity without any page.
+ */
+class BlankActivity : ComponentActivity()

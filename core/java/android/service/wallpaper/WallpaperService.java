@@ -284,7 +284,6 @@ public abstract class WallpaperService extends Service {
         private Display mDisplay;
         private Context mDisplayContext;
         private int mDisplayState;
-        private @Surface.Rotation int mDisplayInstallOrientation;
         private float mWallpaperDimAmount = 0.05f;
         private float mPreviousWallpaperDimAmount = mWallpaperDimAmount;
         private float mDefaultDimAmount = mWallpaperDimAmount;
@@ -1159,7 +1158,7 @@ public abstract class WallpaperService extends Service {
                             mSurfaceControl, mInsetsState, mTempControls, mSyncSeqIdBundle);
 
                     final int transformHint = SurfaceControl.rotationToBufferTransform(
-                            (mDisplayInstallOrientation + mDisplay.getRotation()) % 4);
+                            (mDisplay.getInstallOrientation() + mDisplay.getRotation()) % 4);
                     mSurfaceControl.setTransformHint(transformHint);
                     WindowLayout.computeSurfaceSize(mLayout, maxBounds, mWidth, mHeight,
                             mWinFrames.frame, false /* dragResizing */, mSurfaceSize);
@@ -1420,7 +1419,6 @@ public abstract class WallpaperService extends Service {
             mWallpaperDimAmount = mDefaultDimAmount;
             mPreviousWallpaperDimAmount = mWallpaperDimAmount;
             mDisplayState = mDisplay.getState();
-            mDisplayInstallOrientation = mDisplay.getInstallOrientation();
 
             if (DEBUG) Log.v(TAG, "onCreate(): " + this);
             onCreate(mSurfaceHolder);

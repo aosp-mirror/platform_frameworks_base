@@ -1196,7 +1196,8 @@ public final class ApplicationExitInfo implements Parcelable {
         return sb.toString();
     }
 
-    private static String reasonCodeToString(@Reason int reason) {
+    /** @hide */
+    public static String reasonCodeToString(@Reason int reason) {
         switch (reason) {
             case REASON_EXIT_SELF:
                 return "EXIT_SELF";

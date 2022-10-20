@@ -88,7 +88,7 @@ public class TaskPositionerTests extends WindowTestsBase {
 
     @After
     public void tearDown() {
-        mPositioner = null;
+        TaskPositioner.setFactory(null);
     }
 
     @Test

@@ -33,8 +33,8 @@ import com.android.settingslib.spa.framework.common.SettingsPage
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
 import com.android.settingslib.spa.framework.compose.navigator
 import com.android.settingslib.spa.framework.theme.SettingsTheme
-import com.android.settingslib.spa.widget.SettingsSlider
-import com.android.settingslib.spa.widget.SettingsSliderModel
+import com.android.settingslib.spa.widget.preference.SliderPreference
+import com.android.settingslib.spa.widget.preference.SliderPreferenceModel
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
 import com.android.settingslib.spa.widget.scaffold.RegularScaffold
@@ -51,7 +51,7 @@ object SliderPageProvider : SettingsPageProvider {
             SettingsEntryBuilder.create("Simple Slider", owner)
                 .setIsAllowSearch(true)
                 .setUiLayoutFn {
-                    SettingsSlider(object : SettingsSliderModel {
+                    SliderPreference(object : SliderPreferenceModel {
                         override val title = "Simple Slider"
                         override val initValue = 40
                     })
@@ -61,7 +61,7 @@ object SliderPageProvider : SettingsPageProvider {
             SettingsEntryBuilder.create("Slider with icon", owner)
                 .setIsAllowSearch(true)
                 .setUiLayoutFn {
-                    SettingsSlider(object : SettingsSliderModel {
+                    SliderPreference(object : SliderPreferenceModel {
                         override val title = "Slider with icon"
                         override val initValue = 30
                         override val onValueChangeFinished = {
@@ -78,7 +78,7 @@ object SliderPageProvider : SettingsPageProvider {
                     val initValue = 0
                     var icon by remember { mutableStateOf(Icons.Outlined.MusicOff) }
                     var sliderPosition by remember { mutableStateOf(initValue) }
-                    SettingsSlider(object : SettingsSliderModel {
+                    SliderPreference(object : SliderPreferenceModel {
                         override val title = "Slider with changeable icon"
                         override val initValue = initValue
                         override val onValueChange = { it: Int ->
@@ -96,7 +96,7 @@ object SliderPageProvider : SettingsPageProvider {
             SettingsEntryBuilder.create("Slider with steps", owner)
                 .setIsAllowSearch(true)
                 .setUiLayoutFn {
-                    SettingsSlider(object : SettingsSliderModel {
+                    SliderPreference(object : SliderPreferenceModel {
                         override val title = "Slider with steps"
                         override val initValue = 2
                         override val valueRange = 1..5

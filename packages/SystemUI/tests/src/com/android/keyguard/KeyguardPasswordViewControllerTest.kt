@@ -114,9 +114,8 @@ class KeyguardPasswordViewControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun onResume_testSetInitialText() {
-        keyguardPasswordViewController.onResume(KeyguardSecurityView.SCREEN_ON)
-        verify(mKeyguardMessageAreaController)
-            .setMessageIfEmpty(R.string.keyguard_enter_your_password)
+    fun startAppearAnimation() {
+        keyguardPasswordViewController.startAppearAnimation()
+        verify(mKeyguardMessageAreaController).setMessage(R.string.keyguard_enter_your_password)
     }
 }

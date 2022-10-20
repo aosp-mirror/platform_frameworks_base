@@ -40,13 +40,13 @@
             android:layout_height="@dimen/large_screen_shade_header_min_height"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/privacy_container"
-            app:layout_constraintBottom_toTopOf="@id/date"
+            app:layout_constraintBottom_toBottomOf="@id/carrier_group"
             app:layout_constraintEnd_toStartOf="@id/carrier_group"
             app:layout_constraintHorizontal_bias="0"
         />
         <Transform
-            android:scaleX="2.4"
-            android:scaleY="2.4"
+            android:scaleX="2.57"
+            android:scaleY="2.57"
             />
     </Constraint>
 
@@ -54,11 +54,11 @@
         android:id="@+id/date">
         <Layout
             android:layout_width="0dp"
-            android:layout_height="@dimen/qs_header_non_clickable_element_height"
+            android:layout_height="@dimen/new_qs_header_non_clickable_element_height"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toStartOf="@id/space"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/clock"
+            app:layout_constraintTop_toBottomOf="@id/carrier_group"
             app:layout_constraintHorizontal_bias="0"
             app:layout_constraintHorizontal_chainStyle="spread_inside"
         />
@@ -87,7 +87,7 @@
         android:id="@+id/statusIcons">
         <Layout
             android:layout_width="0dp"
-            android:layout_height="@dimen/qs_header_non_clickable_element_height"
+            android:layout_height="@dimen/new_qs_header_non_clickable_element_height"
             app:layout_constrainedWidth="true"
             app:layout_constraintStart_toEndOf="@id/space"
             app:layout_constraintEnd_toStartOf="@id/batteryRemainingIcon"
@@ -101,8 +101,8 @@
         android:id="@+id/batteryRemainingIcon">
         <Layout
             android:layout_width="wrap_content"
-            android:layout_height="@dimen/qs_header_non_clickable_element_height"
-            app:layout_constraintHeight_min="@dimen/qs_header_non_clickable_element_height"
+            android:layout_height="@dimen/new_qs_header_non_clickable_element_height"
+            app:layout_constraintHeight_min="@dimen/new_qs_header_non_clickable_element_height"
             app:layout_constraintStart_toEndOf="@id/statusIcons"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/date"

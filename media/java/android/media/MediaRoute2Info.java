@@ -539,9 +539,9 @@ public final class MediaRoute2Info implements Parcelable {
     }
 
     /**
-     * Gets the Deduplication ID of the route if available.
-     * @see RouteDiscoveryPreference#shouldRemoveDuplicates()
-     * @hide
+     * Gets the deduplication IDs associated to the route.
+     *
+     * <p>Two routes with a matching deduplication ID originate from the same receiver device.
      */
     @NonNull
     public Set<String> getDeduplicationIds() {
@@ -1017,13 +1017,7 @@ public final class MediaRoute2Info implements Parcelable {
         }
 
         /**
-         * Sets the deduplication ID of the route.
-         * Routes have the same ID could be removed even when
-         * they are from different providers.
-         * <p>
-         * If it's {@code null}, the route will not be removed.
-         * @see RouteDiscoveryPreference#shouldRemoveDuplicates()
-         * @hide
+         * Sets the {@link MediaRoute2Info#getDeduplicationIds() deduplication IDs} of the route.
          */
         @NonNull
         public Builder setDeduplicationIds(@NonNull Set<String> id) {

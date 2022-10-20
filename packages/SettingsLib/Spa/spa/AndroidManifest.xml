@@ -14,4 +14,7 @@
   limitations under the License.
   -->
 
-<manifest package="com.android.settingslib.spa" />
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.android.settingslib.spa">
+    <uses-sdk android:minSdkVersion="21"/>
+</manifest>

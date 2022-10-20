@@ -54,7 +54,7 @@ public class AuthSessionCoordinator implements AuthSessionListener {
     private AuthResultCoordinator mAuthResultCoordinator;
 
     public AuthSessionCoordinator() {
-        this(SystemClock.currentNetworkTimeClock());
+        this(SystemClock.elapsedRealtimeClock());
     }
 
     @VisibleForTesting

@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.systemui.log
+package com.android.systemui.plugins.log
 
-/**
- * Recyclable implementation of [LogMessage].
- */
+/** Recyclable implementation of [LogMessage]. */
 data class LogMessageImpl(
     override var level: LogLevel,
     override var tag: String,
@@ -68,23 +66,24 @@ data class LogMessageImpl(
     companion object Factory {
         fun create(): LogMessageImpl {
             return LogMessageImpl(
-                    LogLevel.DEBUG,
-                    DEFAULT_TAG,
-                    0,
-                    DEFAULT_PRINTER,
-                    null,
-                    null,
-                    null,
-                    null,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0.0,
-                    false,
-                    false,
-                    false,
-                    false)
+                LogLevel.DEBUG,
+                DEFAULT_TAG,
+                0,
+                DEFAULT_PRINTER,
+                null,
+                null,
+                null,
+                null,
+                0,
+                0,
+                0,
+                0,
+                0.0,
+                false,
+                false,
+                false,
+                false
+            )
         }
     }
 }

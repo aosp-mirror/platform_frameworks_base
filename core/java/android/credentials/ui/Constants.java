@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spa.gallery
+package android.credentials.ui;
 
-import com.android.settingslib.spa.framework.DebugActivity
+/**
+ * Constants for the ui protocol that doesn't fit into other individual data structures.
+ *
+ * @hide
+ */
+public class Constants {
 
-class GalleryDebugActivity : DebugActivity()
+    /**
+    * The intent extra key for the {@code ResultReceiver} object when launching the UX
+    * activities.
+    */
+    public static final String EXTRA_RESULT_RECEIVER =
+            "android.credentials.ui.extra.RESULT_RECEIVER";
+
+}

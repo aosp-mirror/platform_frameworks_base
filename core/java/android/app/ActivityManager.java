@@ -4401,7 +4401,7 @@ public class ActivityManager {
      */
     @TestApi
     @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
-            android.Manifest.permission.CREATE_USERS})
+            android.Manifest.permission.INTERACT_ACROSS_USERS})
     public boolean startUserInBackgroundOnSecondaryDisplay(@UserIdInt int userId,
             int displayId) {
         if (!UserManager.isUsersOnSecondaryDisplaysEnabled()) {

@@ -35,6 +35,7 @@ import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CorrectionInfo;
 import android.view.inputmethod.DeleteGesture;
+import android.view.inputmethod.DeleteRangeGesture;
 import android.view.inputmethod.DumpableInputConnection;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
@@ -44,6 +45,7 @@ import android.view.inputmethod.InsertGesture;
 import android.view.inputmethod.JoinOrSplitGesture;
 import android.view.inputmethod.RemoveSpaceGesture;
 import android.view.inputmethod.SelectGesture;
+import android.view.inputmethod.SelectRangeGesture;
 import android.widget.TextView;
 
 import java.util.concurrent.Executor;
@@ -275,8 +277,12 @@ public final class EditableInputConnection extends BaseInputConnection
         int result;
         if (gesture instanceof SelectGesture) {
             result = mTextView.performHandwritingSelectGesture((SelectGesture) gesture);
+        } else if (gesture instanceof SelectRangeGesture) {
+            result = mTextView.performHandwritingSelectRangeGesture((SelectRangeGesture) gesture);
         } else if (gesture instanceof DeleteGesture) {
             result = mTextView.performHandwritingDeleteGesture((DeleteGesture) gesture);
+        } else if (gesture instanceof DeleteRangeGesture) {
+            result = mTextView.performHandwritingDeleteRangeGesture((DeleteRangeGesture) gesture);
         } else if (gesture instanceof InsertGesture) {
             result = mTextView.performHandwritingInsertGesture((InsertGesture) gesture);
         } else if (gesture instanceof RemoveSpaceGesture) {

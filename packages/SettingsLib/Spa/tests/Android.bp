@@ -34,4 +34,5 @@ android_test {
         "truth-prebuilt",
     ],
     kotlincflags: ["-Xjvm-default=all"],
+    min_sdk_version: "31",
 }

@@ -26,6 +26,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.logging.MetricsLogger;
@@ -42,6 +43,9 @@ import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.BaseUserSwitcherAdapter;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.user.data.source.UserRecord;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -82,6 +86,13 @@ public class UserDetailView extends PseudoGridView {
         private final UiEventLogger mUiEventLogger;
         private final FalsingManager mFalsingManager;
         private @Nullable UserSwitchDialogController.DialogShower mDialogShower;
+
+        @NonNull
+        @Override
+        protected List<UserRecord> getUsers() {
+            return super.getUsers().stream().filter(
+                    userRecord -> !userRecord.isManageUsers).collect(Collectors.toList());
+        }
 
         @Inject
         public Adapter(Context context, UserSwitcherController controller,

@@ -20,6 +20,7 @@ import android.view.Surface.Rotation
 
 data class UdfpsOverlayParams(
     val sensorBounds: Rect = Rect(),
+    val overlayBounds: Rect = Rect(),
     val naturalDisplayWidth: Int = 0,
     val naturalDisplayHeight: Int = 0,
     val scaleFactor: Float = 1f,

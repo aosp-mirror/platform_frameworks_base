@@ -17,6 +17,7 @@
 package com.android.settingslib.spa.widget.preference
 
 import androidx.compose.runtime.Composable
+import com.android.settingslib.spa.framework.util.EntryHighlight
 import com.android.settingslib.spa.widget.ui.SettingsSwitch
 
 @Composable
@@ -25,16 +26,18 @@ fun TwoTargetSwitchPreference(
     icon: @Composable (() -> Unit)? = null,
     onClick: () -> Unit,
 ) {
-    TwoTargetPreference(
-        title = model.title,
-        summary = model.summary,
-        onClick = onClick,
-        icon = icon,
-    ) {
-        SettingsSwitch(
-            checked = model.checked,
-            changeable = model.changeable,
-            onCheckedChange = model.onCheckedChange,
-        )
+    EntryHighlight {
+        TwoTargetPreference(
+            title = model.title,
+            summary = model.summary,
+            onClick = onClick,
+            icon = icon,
+        ) {
+            SettingsSwitch(
+                checked = model.checked,
+                changeable = model.changeable,
+                onCheckedChange = model.onCheckedChange,
+            )
+        }
     }
 }

@@ -2578,6 +2578,9 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                         // activity lifecycle transaction to make sure the override pending app
                         // transition will be applied immediately.
                         targetActivity.applyOptionsAnimation();
+                        if (activityOptions != null && activityOptions.getLaunchCookie() != null) {
+                            targetActivity.mLaunchCookie = activityOptions.getLaunchCookie();
+                        }
                     } finally {
                         mActivityMetricsLogger.notifyActivityLaunched(launchingState,
                                 START_TASK_TO_FRONT, false /* newActivityCreated */,

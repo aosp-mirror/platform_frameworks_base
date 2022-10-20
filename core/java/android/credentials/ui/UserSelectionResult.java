@@ -43,11 +43,16 @@ public class UserSelectionResult implements Parcelable {
     @NonNull
     private final IBinder mRequestToken;
 
+    @NonNull
+    private final String mProviderId;
+
     // TODO: consider switching to string or other types, depending on the service implementation.
     private final int mEntryId;
 
-    public UserSelectionResult(@NonNull IBinder requestToken, int entryId) {
+    public UserSelectionResult(@NonNull IBinder requestToken, @NonNull String providerId,
+            int entryId) {
         mRequestToken = requestToken;
+        mProviderId = providerId;
         mEntryId = entryId;
     }
 
@@ -57,23 +62,33 @@ public class UserSelectionResult implements Parcelable {
         return mRequestToken;
     }
 
+    /** Returns provider package name whose entry was selected by the user. */
+    @NonNull
+    public String getProviderId() {
+        return mProviderId;
+    }
+
     /** Returns the id of the visual entry that the user selected. */
-    public int geEntryId() {
+    public int getEntryId() {
         return mEntryId;
     }
 
     protected UserSelectionResult(@NonNull Parcel in) {
         IBinder requestToken = in.readStrongBinder();
+        String providerId = in.readString8();
         int entryId = in.readInt();
 
         mRequestToken = requestToken;
         AnnotationValidations.validate(NonNull.class, null, mRequestToken);
+        mProviderId = providerId;
+        AnnotationValidations.validate(NonNull.class, null, mProviderId);
         mEntryId = entryId;
     }
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeStrongBinder(mRequestToken);
+        dest.writeString8(mProviderId);
         dest.writeInt(mEntryId);
     }
 

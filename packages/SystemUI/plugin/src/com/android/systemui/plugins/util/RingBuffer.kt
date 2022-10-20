@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.util.collection
+package com.android.systemui.plugins.util
 
 import kotlin.math.max
 
@@ -32,19 +32,16 @@ import kotlin.math.max
  * @param factory A function that creates a fresh instance of T. Used by the buffer while it's
  * growing to [maxSize].
  */
-class RingBuffer<T>(
-    private val maxSize: Int,
-    private val factory: () -> T
-) : Iterable<T> {
+class RingBuffer<T>(private val maxSize: Int, private val factory: () -> T) : Iterable<T> {
 
     private val buffer = MutableList<T?>(maxSize) { null }
 
     /**
      * An abstract representation that points to the "end" of the buffer. Increments every time
-     * [advance] is called and never wraps. Use [indexOf] to calculate the associated index into
-     * the backing array. Always points to the "next" available slot in the buffer. Before the
-     * buffer has completely filled, the value pointed to will be null. Afterward, it will be the
-     * value at the "beginning" of the buffer.
+     * [advance] is called and never wraps. Use [indexOf] to calculate the associated index into the
+     * backing array. Always points to the "next" available slot in the buffer. Before the buffer
+     * has completely filled, the value pointed to will be null. Afterward, it will be the value at
+     * the "beginning" of the buffer.
      *
      * This value is unlikely to overflow. Assuming [advance] is called at rate of 100 calls/ms,
      * omega will overflow after a little under three million years of continuous operation.
@@ -60,24 +57,23 @@ class RingBuffer<T>(
 
     /**
      * Advances the buffer's position by one and returns the value that is now present at the "end"
-     * of the buffer. If the buffer is not yet full, uses [factory] to create a new item.
-     * Otherwise, reuses the value that was previously at the "beginning" of the buffer.
+     * of the buffer. If the buffer is not yet full, uses [factory] to create a new item. Otherwise,
+     * reuses the value that was previously at the "beginning" of the buffer.
      *
-     * IMPORTANT: The value is returned as-is, without being reset. It will retain any data that
-     * was previously stored on it.
+     * IMPORTANT: The value is returned as-is, without being reset. It will retain any data that was
+     * previously stored on it.
      */
     fun advance(): T {
         val index = indexOf(omega)
         omega += 1
-        val entry = buffer[index] ?: factory().also {
-            buffer[index] = it
-        }
+        val entry = buffer[index] ?: factory().also { buffer[index] = it }
         return entry
     }
 
     /**
      * Returns the value stored at [index], which can range from 0 (the "start", or oldest element
-     * of the buffer) to [size] - 1 (the "end", or newest element of the buffer).
+     * of the buffer) to [size]
+     * - 1 (the "end", or newest element of the buffer).
      */
     operator fun get(index: Int): T {
         if (index < 0 || index >= size) {

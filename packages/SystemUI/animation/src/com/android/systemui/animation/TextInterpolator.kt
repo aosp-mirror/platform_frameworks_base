@@ -231,7 +231,9 @@ class TextInterpolator(layout: Layout) {
                     val origin = layout.getDrawOrigin(lineNo)
                     canvas.translate(origin, layout.getLineBaseline(lineNo).toFloat())
 
-                    run.fontRuns.forEach { fontRun -> drawFontRun(canvas, run, fontRun, tmpPaint) }
+                    run.fontRuns.forEach { fontRun ->
+                        drawFontRun(canvas, run, fontRun, lineNo, tmpPaint)
+                    }
                 } finally {
                     canvas.restore()
                 }
@@ -341,7 +343,7 @@ class TextInterpolator(layout: Layout) {
     var glyphFilter: GlyphCallback? = null
 
     // Draws single font run.
-    private fun drawFontRun(c: Canvas, line: Run, run: FontRun, paint: Paint) {
+    private fun drawFontRun(c: Canvas, line: Run, run: FontRun, lineNo: Int, paint: Paint) {
         var arrayIndex = 0
         val font = fontInterpolator.lerp(run.baseFont, run.targetFont, progress)
 
@@ -360,11 +362,13 @@ class TextInterpolator(layout: Layout) {
         tmpGlyph.font = font
         tmpGlyph.runStart = run.start
         tmpGlyph.runLength = run.end - run.start
+        tmpGlyph.lineNo = lineNo
 
         tmpPaintForGlyph.set(paint)
         var prevStart = run.start
 
         for (i in run.start until run.end) {
+            tmpGlyph.glyphIndex = i
             tmpGlyph.glyphId = line.glyphIds[i]
             tmpGlyph.x = MathUtils.lerp(line.baseX[i], line.targetX[i], progress)
             tmpGlyph.y = MathUtils.lerp(line.baseY[i], line.targetY[i], progress)

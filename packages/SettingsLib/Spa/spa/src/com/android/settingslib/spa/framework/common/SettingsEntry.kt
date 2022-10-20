@@ -17,15 +17,11 @@
 package com.android.settingslib.spa.framework.common
 
 import android.os.Bundle
-import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ProvidedValue
 import androidx.compose.runtime.compositionLocalOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.platform.LocalContext
 import com.android.settingslib.spa.framework.compose.LocalNavController
 
 const val INJECT_ENTRY_NAME = "INJECT"
@@ -126,17 +122,6 @@ data class SettingsEntry(
 
     @Composable
     fun UiLayout(runtimeArguments: Bundle? = null) {
-        val context = LocalContext.current
-        val controller = LocalNavController.current
-        val highlight = rememberSaveable {
-            mutableStateOf(controller.highlightEntryId == id)
-        }
-        if (highlight.value) {
-            highlight.value = false
-            // TODO: Add highlight entry logic
-            Toast.makeText(context, "entry $id highlighted", Toast.LENGTH_SHORT).show()
-        }
-
         CompositionLocalProvider(provideLocalEntryData()) {
             uiLayoutImpl(fullArgument(runtimeArguments))
         }

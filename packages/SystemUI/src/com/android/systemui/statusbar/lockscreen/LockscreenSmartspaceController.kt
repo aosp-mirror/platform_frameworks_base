@@ -119,6 +119,7 @@ class LockscreenSmartspaceController @Inject constructor(
                     regionSamplingEnabled,
                     updateFun
             )
+            initializeTextColors(regionSamplingInstance)
             regionSamplingInstance.startRegionSampler()
             regionSamplingInstances.put(v, regionSamplingInstance)
             connectSession()
@@ -362,18 +363,20 @@ class LockscreenSmartspaceController @Inject constructor(
         }
     }
 
+    private fun initializeTextColors(regionSamplingInstance: RegionSamplingInstance) {
+        val lightThemeContext = ContextThemeWrapper(context, R.style.Theme_SystemUI_LightWallpaper)
+        val darkColor = Utils.getColorAttrDefaultColor(lightThemeContext, R.attr.wallpaperTextColor)
+
+        val darkThemeContext = ContextThemeWrapper(context, R.style.Theme_SystemUI)
+        val lightColor = Utils.getColorAttrDefaultColor(darkThemeContext, R.attr.wallpaperTextColor)
+
+        regionSamplingInstance.setForegroundColors(lightColor, darkColor)
+    }
+
     private fun updateTextColorFromRegionSampler() {
         smartspaceViews.forEach {
-            val isRegionDark = regionSamplingInstances.getValue(it).currentRegionDarkness()
-            val themeID = if (isRegionDark.isDark) {
-                R.style.Theme_SystemUI
-            } else {
-                R.style.Theme_SystemUI_LightWallpaper
-            }
-            val themedContext = ContextThemeWrapper(context, themeID)
-            val wallpaperTextColor =
-                    Utils.getColorAttrDefaultColor(themedContext, R.attr.wallpaperTextColor)
-            it.setPrimaryTextColor(wallpaperTextColor)
+            val textColor = regionSamplingInstances.getValue(it).currentForegroundColor()
+            it.setPrimaryTextColor(textColor)
         }
     }
 

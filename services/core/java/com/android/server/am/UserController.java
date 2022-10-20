@@ -16,7 +16,6 @@
 
 package com.android.server.am;
 
-import static android.Manifest.permission.CREATE_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_PROFILES;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
@@ -1482,7 +1481,7 @@ class UserController implements Handler.Callback {
     // defined
     boolean startUserOnSecondaryDisplay(@UserIdInt int userId, int displayId) {
         checkCallingHasOneOfThosePermissions("startUserOnSecondaryDisplay",
-                MANAGE_USERS, CREATE_USERS);
+                MANAGE_USERS, INTERACT_ACROSS_USERS);
 
         // DEFAULT_DISPLAY is used for the current foreground user only
         Preconditions.checkArgument(displayId != Display.DEFAULT_DISPLAY,

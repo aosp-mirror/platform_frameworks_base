@@ -28,26 +28,29 @@ import com.android.settingslib.spa.framework.compose.toState
 import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.framework.theme.SettingsShape
 import com.android.settingslib.spa.framework.theme.SettingsTheme
+import com.android.settingslib.spa.framework.util.EntryHighlight
 
 @Composable
 fun MainSwitchPreference(model: SwitchPreferenceModel) {
-    Surface(
-        modifier = Modifier.padding(SettingsDimension.itemPaddingEnd),
-        color = when (model.checked.value) {
-            true -> MaterialTheme.colorScheme.primaryContainer
-            else -> MaterialTheme.colorScheme.secondaryContainer
-        },
-        shape = SettingsShape.CornerLarge,
-    ) {
-        InternalSwitchPreference(
-            title = model.title,
-            checked = model.checked,
-            changeable = model.changeable,
-            onCheckedChange = model.onCheckedChange,
-            paddingStart = 20.dp,
-            paddingEnd = 20.dp,
-            paddingVertical = 18.dp,
-        )
+    EntryHighlight {
+        Surface(
+            modifier = Modifier.padding(SettingsDimension.itemPaddingEnd),
+            color = when (model.checked.value) {
+                true -> MaterialTheme.colorScheme.primaryContainer
+                else -> MaterialTheme.colorScheme.secondaryContainer
+            },
+            shape = SettingsShape.CornerLarge,
+        ) {
+            InternalSwitchPreference(
+                title = model.title,
+                checked = model.checked,
+                changeable = model.changeable,
+                onCheckedChange = model.onCheckedChange,
+                paddingStart = 20.dp,
+                paddingEnd = 20.dp,
+                paddingVertical = 18.dp,
+            )
+        }
     }
 }
 

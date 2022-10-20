@@ -18,6 +18,7 @@ package com.android.tests.rollback.host;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeTrue;
 
 import com.android.tradefed.testtype.DeviceJUnit4ClassRunner;
 import com.android.tradefed.testtype.junit4.BaseHostJUnit4Test;
@@ -35,6 +36,7 @@ import java.util.concurrent.TimeUnit;
  */
 @RunWith(DeviceJUnit4ClassRunner.class)
 public class MultiUserRollbackTest extends BaseHostJUnit4Test {
+    private boolean mSupportMultiUsers;
     // The user that was running originally when the test starts.
     private int mOriginalUserId;
     private int mSecondaryUserId = -1;
@@ -46,14 +48,20 @@ public class MultiUserRollbackTest extends BaseHostJUnit4Test {
 
     @After
     public void tearDown() throws Exception {
-        removeSecondaryUserIfNecessary();
-        runPhaseForUsers("cleanUp", mOriginalUserId);
-        uninstallPackage("com.android.cts.install.lib.testapp.A");
-        uninstallPackage("com.android.cts.install.lib.testapp.B");
+        if (mSupportMultiUsers) {
+            removeSecondaryUserIfNecessary();
+            runPhaseForUsers("cleanUp", mOriginalUserId);
+            uninstallPackage("com.android.cts.install.lib.testapp.A");
+            uninstallPackage("com.android.cts.install.lib.testapp.B");
+        }
     }
 
     @Before
     public void setup() throws Exception {
+        assumeTrue("Device does not support multiple users",
+                getDevice().isMultiUserSupported());
+
+        mSupportMultiUsers = true;
         mOriginalUserId = getDevice().getCurrentUser();
         createAndStartSecondaryUser();
         installPackage("RollbackTest.apk", "--user all");

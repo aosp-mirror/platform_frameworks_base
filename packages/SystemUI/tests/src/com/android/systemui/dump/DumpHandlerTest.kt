@@ -17,11 +17,13 @@
 package com.android.systemui.dump
 
 import androidx.test.filters.SmallTest
+import com.android.systemui.CoreStartable
 import com.android.systemui.Dumpable
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.log.LogBuffer
+import com.android.systemui.plugins.log.LogBuffer
 import com.android.systemui.shared.system.UncaughtExceptionPreHandlerManager
 import com.android.systemui.util.mockito.any
+import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
@@ -30,6 +32,8 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 import java.io.PrintWriter
+import java.io.StringWriter
+import javax.inject.Provider
 
 @SmallTest
 class DumpHandlerTest : SysuiTestCase() {
@@ -66,7 +70,9 @@ class DumpHandlerTest : SysuiTestCase() {
             mContext,
             dumpManager,
             logBufferEulogizer,
-            mutableMapOf(),
+            mutableMapOf(
+                EmptyCoreStartable::class.java to Provider { EmptyCoreStartable() }
+            ),
             exceptionHandlerManager
         )
     }
@@ -153,5 +159,21 @@ class DumpHandlerTest : SysuiTestCase() {
                 any(Array<String>::class.java))
         verify(buffer1).dump(pw, 0)
         verify(buffer2).dump(pw, 0)
+    }
+
+    @Test
+    fun testConfigDump() {
+        // GIVEN a StringPrintWriter
+        val stringWriter = StringWriter()
+        val spw = PrintWriter(stringWriter)
+
+        // When a config dump is requested
+        dumpHandler.dump(spw, arrayOf("config"))
+
+        assertThat(stringWriter.toString()).contains(EmptyCoreStartable::class.java.simpleName)
+    }
+
+    private class EmptyCoreStartable : CoreStartable {
+        override fun start() {}
     }
 }

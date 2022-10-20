@@ -6768,6 +6768,11 @@ public final class PowerManagerService extends SystemService
         public void nap(long eventTime, boolean allowWake) {
             napInternal(eventTime, Process.SYSTEM_UID, allowWake);
         }
+
+        @Override
+        public boolean isAmbientDisplaySuppressed() {
+            return mAmbientDisplaySuppressionController.isSuppressed();
+        }
     }
 
     /**
