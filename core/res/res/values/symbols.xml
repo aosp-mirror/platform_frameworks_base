@@ -2273,6 +2273,7 @@
   <java-symbol type="id" name="media_actions" />
 
   <java-symbol type="dimen" name="config_mediaMetadataBitmapMaxSize" />
+  <java-symbol type="array" name="config_fontManagerServiceCerts" />
 
     <!-- From SystemUI -->
   <java-symbol type="anim" name="push_down_in" />
