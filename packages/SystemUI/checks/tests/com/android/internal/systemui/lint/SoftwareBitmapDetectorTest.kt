@@ -51,12 +51,12 @@ class SoftwareBitmapDetectorTest : SystemUILintDetectorTest() {
             .run()
             .expect(
                 """
-                src/android/graphics/Bitmap.java:5: Warning: Replace software bitmap with Config.HARDWARE [SoftwareBitmap]
-                        ARGB_8888,
-                        ~~~~~~~~~
-                src/android/graphics/Bitmap.java:6: Warning: Replace software bitmap with Config.HARDWARE [SoftwareBitmap]
-                        RGB_565,
-                        ~~~~~~~
+                src/TestClass.java:5: Warning: Replace software bitmap with Config.HARDWARE [SoftwareBitmap]
+                      Bitmap.createBitmap(300, 300, Bitmap.Config.RGB_565);
+                                                                  ~~~~~~~
+                src/TestClass.java:6: Warning: Replace software bitmap with Config.HARDWARE [SoftwareBitmap]
+                      Bitmap.createBitmap(300, 300, Bitmap.Config.ARGB_8888);
+                                                                  ~~~~~~~~~
                 0 errors, 2 warnings
                 """
             )
@@ -67,7 +67,7 @@ class SoftwareBitmapDetectorTest : SystemUILintDetectorTest() {
         lint()
             .files(
                 TestFiles.java(
-                        """
+                    """
                     import android.graphics.Bitmap;
 
                     public class TestClass {
@@ -76,8 +76,7 @@ class SoftwareBitmapDetectorTest : SystemUILintDetectorTest() {
                         }
                     }
                 """
-                    )
-                    .indented(),
+                ),
                 *stubs
             )
             .issues(SoftwareBitmapDetector.ISSUE)
