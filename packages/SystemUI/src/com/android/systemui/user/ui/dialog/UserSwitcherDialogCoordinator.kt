@@ -30,6 +30,7 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.user.domain.interactor.UserInteractor
 import com.android.systemui.user.domain.model.ShowDialogRequestModel
+import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collect
@@ -41,19 +42,19 @@ import kotlinx.coroutines.launch
 class UserSwitcherDialogCoordinator
 @Inject
 constructor(
-    @Application private val context: Context,
-    @Application private val applicationScope: CoroutineScope,
-    private val falsingManager: FalsingManager,
-    private val broadcastSender: BroadcastSender,
-    private val dialogLaunchAnimator: DialogLaunchAnimator,
-    private val interactor: UserInteractor,
-    private val featureFlags: FeatureFlags,
+    @Application private val context: Lazy<Context>,
+    @Application private val applicationScope: Lazy<CoroutineScope>,
+    private val falsingManager: Lazy<FalsingManager>,
+    private val broadcastSender: Lazy<BroadcastSender>,
+    private val dialogLaunchAnimator: Lazy<DialogLaunchAnimator>,
+    private val interactor: Lazy<UserInteractor>,
+    private val featureFlags: Lazy<FeatureFlags>,
 ) : CoreStartable {
 
     private var currentDialog: Dialog? = null
 
     override fun start() {
-        if (featureFlags.isEnabled(Flags.USER_INTERACTOR_AND_REPO_USE_CONTROLLER)) {
+        if (featureFlags.get().isEnabled(Flags.USER_INTERACTOR_AND_REPO_USE_CONTROLLER)) {
             return
         }
 
@@ -62,8 +63,8 @@ constructor(
     }
 
     private fun startHandlingDialogShowRequests() {
-        applicationScope.launch {
-            interactor.dialogShowRequests.filterNotNull().collect { request ->
+        applicationScope.get().launch {
+            interactor.get().dialogShowRequests.filterNotNull().collect { request ->
                 currentDialog?.let {
                     if (it.isShowing) {
                         it.cancel()
@@ -74,48 +75,48 @@ constructor(
                     when (request) {
                         is ShowDialogRequestModel.ShowAddUserDialog ->
                             AddUserDialog(
-                                context = context,
+                                context = context.get(),
                                 userHandle = request.userHandle,
                                 isKeyguardShowing = request.isKeyguardShowing,
                                 showEphemeralMessage = request.showEphemeralMessage,
-                                falsingManager = falsingManager,
-                                broadcastSender = broadcastSender,
-                                dialogLaunchAnimator = dialogLaunchAnimator,
+                                falsingManager = falsingManager.get(),
+                                broadcastSender = broadcastSender.get(),
+                                dialogLaunchAnimator = dialogLaunchAnimator.get(),
                             )
                         is ShowDialogRequestModel.ShowUserCreationDialog ->
                             UserCreatingDialog(
-                                context,
+                                context.get(),
                                 request.isGuest,
                             )
                         is ShowDialogRequestModel.ShowExitGuestDialog ->
                             ExitGuestDialog(
-                                context = context,
+                                context = context.get(),
                                 guestUserId = request.guestUserId,
                                 isGuestEphemeral = request.isGuestEphemeral,
                                 targetUserId = request.targetUserId,
                                 isKeyguardShowing = request.isKeyguardShowing,
-                                falsingManager = falsingManager,
-                                dialogLaunchAnimator = dialogLaunchAnimator,
+                                falsingManager = falsingManager.get(),
+                                dialogLaunchAnimator = dialogLaunchAnimator.get(),
                                 onExitGuestUserListener = request.onExitGuestUser,
                             )
                     }
 
                 currentDialog?.show()
-                interactor.onDialogShown()
+                interactor.get().onDialogShown()
             }
         }
     }
 
     private fun startHandlingDialogDismissRequests() {
-        applicationScope.launch {
-            interactor.dialogDismissRequests.filterNotNull().collect {
+        applicationScope.get().launch {
+            interactor.get().dialogDismissRequests.filterNotNull().collect {
                 currentDialog?.let {
                     if (it.isShowing) {
                         it.cancel()
                     }
                 }
 
-                interactor.onDialogDismissed()
+                interactor.get().onDialogDismissed()
             }
         }
     }

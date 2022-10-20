@@ -27,17 +27,17 @@ import com.android.systemui.screenshot.TimeoutHandler;
 import javax.inject.Inject;
 
 /**
- * A factory that churns out ClipboardOverlayControllers on demand.
+ * A factory that churns out ClipboardOverlayControllerLegacys on demand.
  */
 @SysUISingleton
-public class ClipboardOverlayControllerFactory {
+public class ClipboardOverlayControllerLegacyFactory {
 
     private final UiEventLogger mUiEventLogger;
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final BroadcastSender mBroadcastSender;
 
     @Inject
-    public ClipboardOverlayControllerFactory(BroadcastDispatcher broadcastDispatcher,
+    public ClipboardOverlayControllerLegacyFactory(BroadcastDispatcher broadcastDispatcher,
             BroadcastSender broadcastSender, UiEventLogger uiEventLogger) {
         this.mBroadcastDispatcher = broadcastDispatcher;
         this.mBroadcastSender = broadcastSender;
@@ -45,10 +45,10 @@ public class ClipboardOverlayControllerFactory {
     }
 
     /**
-     * One new ClipboardOverlayController, coming right up!
+     * One new ClipboardOverlayControllerLegacy, coming right up!
      */
-    public ClipboardOverlayController create(Context context) {
-        return new ClipboardOverlayController(context, mBroadcastDispatcher, mBroadcastSender,
+    public ClipboardOverlayControllerLegacy create(Context context) {
+        return new ClipboardOverlayControllerLegacy(context, mBroadcastDispatcher, mBroadcastSender,
                 new TimeoutHandler(context), mUiEventLogger);
     }
 }

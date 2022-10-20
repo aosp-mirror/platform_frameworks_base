@@ -22,6 +22,9 @@ import android.graphics.drawable.Drawable
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.common.shared.model.ContentDescription
+import com.android.systemui.common.shared.model.ContentDescription.Companion.loadContentDescription
+import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.util.mockito.any
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -59,6 +62,34 @@ class MediaTttUtilsTest : SysuiTestCase() {
             )
             .thenReturn(applicationInfo)
         context.setMockPackageManager(packageManager)
+    }
+
+    @Test
+    fun getIconFromPackageName_nullPackageName_returnsDefault() {
+        val icon = MediaTttUtils.getIconFromPackageName(context, appPackageName = null, logger)
+
+        val expectedDesc =
+            ContentDescription.Resource(R.string.media_output_dialog_unknown_launch_app_name)
+                .loadContentDescription(context)
+        assertThat(icon.contentDescription.loadContentDescription(context)).isEqualTo(expectedDesc)
+    }
+
+    @Test
+    fun getIconFromPackageName_invalidPackageName_returnsDefault() {
+        val icon = MediaTttUtils.getIconFromPackageName(context, "fakePackageName", logger)
+
+        val expectedDesc =
+            ContentDescription.Resource(R.string.media_output_dialog_unknown_launch_app_name)
+                .loadContentDescription(context)
+        assertThat(icon.contentDescription.loadContentDescription(context)).isEqualTo(expectedDesc)
+    }
+
+    @Test
+    fun getIconFromPackageName_validPackageName_returnsAppInfo() {
+        val icon = MediaTttUtils.getIconFromPackageName(context, PACKAGE_NAME, logger)
+
+        assertThat(icon)
+            .isEqualTo(Icon.Loaded(appIconFromPackageName, ContentDescription.Loaded(APP_NAME)))
     }
 
     @Test

@@ -268,6 +268,26 @@ class UserSwitcherViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    fun `menu actions`() =
+        runBlocking(IMMEDIATE) {
+            userRepository.setActions(UserActionModel.values().toList())
+            var actions: List<UserActionViewModel>? = null
+            val job = underTest.menu.onEach { actions = it }.launchIn(this)
+
+            assertThat(actions?.map { it.viewKey })
+                .isEqualTo(
+                    listOf(
+                        UserActionModel.ENTER_GUEST_MODE.ordinal.toLong(),
+                        UserActionModel.ADD_USER.ordinal.toLong(),
+                        UserActionModel.ADD_SUPERVISED_USER.ordinal.toLong(),
+                        UserActionModel.NAVIGATE_TO_USER_MANAGEMENT.ordinal.toLong(),
+                    )
+                )
+
+            job.cancel()
+        }
+
+    @Test
     fun `isFinishRequested - finishes when user is switched`() =
         runBlocking(IMMEDIATE) {
             setUsers(count = 2)

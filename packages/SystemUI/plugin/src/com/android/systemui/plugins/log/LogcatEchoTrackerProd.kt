@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.systemui.log
+package com.android.systemui.plugins.log
 
-/**
- * Production version of [LogcatEchoTracker] that isn't configurable.
- */
+/** Production version of [LogcatEchoTracker] that isn't configurable. */
 class LogcatEchoTrackerProd : LogcatEchoTracker {
     override val logInBackgroundThread = false
 

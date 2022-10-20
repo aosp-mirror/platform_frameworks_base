@@ -22,11 +22,11 @@ import android.os.Looper;
 
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.LogBufferFactory;
-import com.android.systemui.log.LogcatEchoTracker;
-import com.android.systemui.log.LogcatEchoTrackerDebug;
-import com.android.systemui.log.LogcatEchoTrackerProd;
+import com.android.systemui.plugins.log.LogBuffer;
+import com.android.systemui.plugins.log.LogcatEchoTracker;
+import com.android.systemui.plugins.log.LogcatEchoTrackerDebug;
+import com.android.systemui.plugins.log.LogcatEchoTrackerProd;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.util.Compile;
 

@@ -1,8 +1,8 @@
 package com.android.systemui.statusbar.notification.stack
 
-import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel.INFO
 import com.android.systemui.log.dagger.NotificationHeadsUpLog
+import com.android.systemui.plugins.log.LogBuffer
+import com.android.systemui.plugins.log.LogLevel.INFO
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.logKey
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.AnimationEvent.ANIMATION_TYPE_ADD
