@@ -61,55 +61,6 @@ public class RunningTasksTest extends WindowTestsBase {
     }
 
     @Test
-    public void testCollectTasksByLastActiveTime() {
-        // Create a number of stacks with tasks (of incrementing active time)
-        final ArrayList<DisplayContent> displays = new ArrayList<>();
-        final DisplayContent display = new TestDisplayContent.Builder(mAtm, 1000, 2500).build();
-        displays.add(display);
-
-        final int numStacks = 2;
-        for (int stackIndex = 0; stackIndex < numStacks; stackIndex++) {
-            final Task stack = new TaskBuilder(mSupervisor)
-                    .setDisplay(display)
-                    .setOnTop(false)
-                    .build();
-        }
-
-        final int numTasks = 10;
-        int activeTime = 0;
-        final List<Task> rootTasks = new ArrayList<>();
-        display.getDefaultTaskDisplayArea().forAllRootTasks(task -> {
-            rootTasks.add(task);
-        }, false /* traverseTopToBottom */);
-        for (int i = 0; i < numTasks; i++) {
-            final Task task =
-                    createTask(rootTasks.get(i % numStacks), ".Task" + i, i, activeTime++, null);
-            doReturn(false).when(task).isVisible();
-        }
-
-        // Ensure that the latest tasks were returned in order of decreasing last active time,
-        // collected from all tasks across all the stacks
-        final int numFetchTasks = 5;
-        ArrayList<RunningTaskInfo> tasks = new ArrayList<>();
-        mRunningTasks.getTasks(5, tasks, FLAG_ALLOWED | FLAG_CROSS_USERS, mRootWindowContainer,
-                -1 /* callingUid */, PROFILE_IDS);
-        assertThat(tasks).hasSize(numFetchTasks);
-        for (int i = 0; i < numFetchTasks; i++) {
-            assertEquals(numTasks - i - 1, tasks.get(i).id);
-        }
-
-        // Ensure that requesting more than the total number of tasks only returns the subset
-        // and does not crash
-        tasks.clear();
-        mRunningTasks.getTasks(100, tasks, FLAG_ALLOWED | FLAG_CROSS_USERS,
-                mRootWindowContainer, -1 /* callingUid */, PROFILE_IDS);
-        assertThat(tasks).hasSize(numTasks);
-        for (int i = 0; i < numTasks; i++) {
-            assertEquals(numTasks - i - 1, tasks.get(i).id);
-        }
-    }
-
-    @Test
     public void testTaskInfo_expectNoExtrasByDefault() {
         final DisplayContent display = new TestDisplayContent.Builder(mAtm, 1000, 2500).build();
         final int numTasks = 10;
@@ -120,7 +71,7 @@ public class RunningTasksTest extends WindowTestsBase {
                     .build();
             final Bundle data = new Bundle();
             data.putInt("key", 100);
-            createTask(stack, ".Task" + i, i, i, data);
+            createTask(stack, ".Task" + i, i, data);
         }
 
         final int numFetchTasks = 5;
@@ -145,7 +96,7 @@ public class RunningTasksTest extends WindowTestsBase {
                     .build();
             final Bundle data = new Bundle();
             data.putInt("key", 100);
-            createTask(stack, ".Task" + i, i, i, data);
+            createTask(stack, ".Task" + i, i, data);
         }
 
         final int numFetchTasks = 5;
@@ -162,46 +113,63 @@ public class RunningTasksTest extends WindowTestsBase {
     }
 
     @Test
-    public void testUpdateLastActiveTimeOfVisibleTasks() {
+    public void testGetTasksSortByFocusAndVisibility() {
         final DisplayContent display = new TestDisplayContent.Builder(mAtm, 1000, 2500).build();
+        final Task stack = new TaskBuilder(mSupervisor)
+                .setDisplay(display)
+                .setOnTop(true)
+                .build();
+
         final int numTasks = 10;
         final ArrayList<Task> tasks = new ArrayList<>();
         for (int i = 0; i < numTasks; i++) {
-            final Task task = createTask(null, ".Task" + i, i, i, null);
+            final Task task = createTask(stack, ".Task" + i, i, null);
             doReturn(false).when(task).isVisible();
             tasks.add(task);
         }
 
-        final Task visibleTask = tasks.get(0);
-        doReturn(true).when(visibleTask).isVisible();
-
-        final Task focusedTask = tasks.get(1);
+        final Task focusedTask = tasks.get(numTasks - 1);
         doReturn(true).when(focusedTask).isVisible();
-        doReturn(true).when(focusedTask).isFocused();
+        display.mFocusedApp = focusedTask.getTopNonFinishingActivity();
 
-        // Ensure that the last active time of visible tasks were updated while the focused one had
-        // the largest last active time.
+        final Task visibleTaskTop = tasks.get(numTasks - 2);
+        doReturn(true).when(visibleTaskTop).isVisible();
+
+        final Task visibleTaskBottom = tasks.get(numTasks - 3);
+        doReturn(true).when(visibleTaskBottom).isVisible();
+
+        // Ensure that the focused Task is on top, visible tasks below, then invisible tasks.
         final int numFetchTasks = 5;
         final ArrayList<RunningTaskInfo> fetchTasks = new ArrayList<>();
         mRunningTasks.getTasks(numFetchTasks, fetchTasks,
                 FLAG_ALLOWED | FLAG_CROSS_USERS | FLAG_KEEP_INTENT_EXTRA, mRootWindowContainer,
                 -1 /* callingUid */, PROFILE_IDS);
         assertThat(fetchTasks).hasSize(numFetchTasks);
-        assertEquals(fetchTasks.get(0).id, focusedTask.mTaskId);
-        assertEquals(fetchTasks.get(1).id, visibleTask.mTaskId);
+        for (int i = 0; i < numFetchTasks; i++) {
+            assertEquals(numTasks - i - 1, fetchTasks.get(i).id);
+        }
+
+        // Ensure that requesting more than the total number of tasks only returns the subset
+        // and does not crash
+        fetchTasks.clear();
+        mRunningTasks.getTasks(100, fetchTasks,
+                FLAG_ALLOWED | FLAG_CROSS_USERS | FLAG_KEEP_INTENT_EXTRA, mRootWindowContainer,
+                -1 /* callingUid */, PROFILE_IDS);
+        assertThat(fetchTasks).hasSize(numTasks);
+        for (int i = 0; i < numTasks; i++) {
+            assertEquals(numTasks - i - 1, fetchTasks.get(i).id);
+        }
     }
 
     /**
-     * Create a task with a single activity in it, with the given last active time.
+     * Create a task with a single activity in it.
      */
-    private Task createTask(Task stack, String className, int taskId,
-            int lastActiveTime, Bundle extras) {
+    private Task createTask(Task stack, String className, int taskId, Bundle extras) {
         final Task task = new TaskBuilder(mAtm.mTaskSupervisor)
                 .setComponent(new ComponentName(mContext.getPackageName(), className))
                 .setTaskId(taskId)
                 .setParentTaskFragment(stack)
                 .build();
-        task.lastActiveTime = lastActiveTime;
         final ActivityRecord activity = new ActivityBuilder(mAtm)
                 .setTask(task)
                 .setComponent(new ComponentName(mContext.getPackageName(), ".TaskActivity"))
