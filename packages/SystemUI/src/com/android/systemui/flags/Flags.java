@@ -151,9 +151,6 @@ public class Flags {
 
     /***************************************/
     // 400 - smartspace
-    // TODO(b/254513080): Tracking Bug
-    public static final ReleasedFlag SMARTSPACE_DEDUPING =
-            new ReleasedFlag(400);
 
     // TODO(b/254513100): Tracking Bug
     public static final ReleasedFlag SMARTSPACE_SHARED_ELEMENT_TRANSITION_ENABLED =
