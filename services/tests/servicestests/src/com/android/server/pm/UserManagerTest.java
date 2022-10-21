@@ -601,6 +601,7 @@ public final class UserManagerTest {
         assertThat(userProps.getShowInLauncher()).isEqualTo(typeProps.getShowInLauncher());
         assertThat(userProps.getShowInSettings()).isEqualTo(typeProps.getShowInSettings());
         assertThrows(SecurityException.class, userProps::getStartWithParent);
+        assertThrows(SecurityException.class, userProps::getInheritDevicePolicy);
     }
 
     // Make sure only max managed profiles can be created

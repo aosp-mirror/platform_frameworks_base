@@ -60,10 +60,12 @@ public class UserManagerServiceUserPropertiesTest {
                 .setShowInLauncher(21)
                 .setStartWithParent(false)
                 .setShowInSettings(45)
+                .setInheritDevicePolicy(67)
                 .build();
         final UserProperties actualProps = new UserProperties(defaultProps);
         actualProps.setShowInLauncher(14);
         actualProps.setShowInSettings(32);
+        actualProps.setInheritDevicePolicy(51);
 
         // Write the properties to xml.
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -102,11 +104,13 @@ public class UserManagerServiceUserPropertiesTest {
                 .setShowInLauncher(2145)
                 .setStartWithParent(true)
                 .setShowInSettings(3452)
+                .setInheritDevicePolicy(1732)
                 .build();
         final UserProperties orig = new UserProperties(defaultProps);
         orig.setShowInLauncher(2841);
         orig.setStartWithParent(false);
         orig.setShowInSettings(1437);
+        orig.setInheritDevicePolicy(9456);
 
         // Test every permission level. (Currently, it's linear so it's easy.)
         for (int permLevel = 0; permLevel < 4; permLevel++) {
@@ -142,6 +146,8 @@ public class UserManagerServiceUserPropertiesTest {
 
         // Items requiring exposeAll.
         assertEqualGetterOrThrows(orig::getStartWithParent, copy::getStartWithParent, exposeAll);
+        assertEqualGetterOrThrows(orig::getInheritDevicePolicy,
+                copy::getInheritDevicePolicy, exposeAll);
 
         // Items requiring hasManagePermission - put them here using hasManagePermission.
         assertEqualGetterOrThrows(orig::getShowInSettings, copy::getShowInSettings,
@@ -190,5 +196,7 @@ public class UserManagerServiceUserPropertiesTest {
         assertThat(expected.getShowInLauncher()).isEqualTo(actual.getShowInLauncher());
         assertThat(expected.getStartWithParent()).isEqualTo(actual.getStartWithParent());
         assertThat(expected.getShowInSettings()).isEqualTo(actual.getShowInSettings());
+        assertThat(expected.getInheritDevicePolicy()).isEqualTo(
+                actual.getInheritDevicePolicy());
     }
 }
