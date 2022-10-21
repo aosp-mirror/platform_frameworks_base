@@ -80,6 +80,7 @@ import android.view.WindowManager;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.colorextraction.ColorExtractor;
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
@@ -343,7 +344,8 @@ public class BubblesTest extends SysuiTestCase {
                         mock(NotificationInterruptLogger.class),
                         mock(Handler.class),
                         mock(NotifPipelineFlags.class),
-                        mock(KeyguardNotificationVisibilityProvider.class)
+                        mock(KeyguardNotificationVisibilityProvider.class),
+                        mock(UiEventLogger.class)
                 );
         when(mShellTaskOrganizer.getExecutor()).thenReturn(syncExecutor);
         mBubbleController = new TestableBubbleController(
