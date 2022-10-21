@@ -28,6 +28,7 @@ import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
@@ -123,6 +124,12 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
     /** Map of all display groups indexed by display group id. */
     private final SparseArray<DisplayGroup> mDisplayGroups = new SparseArray<>();
 
+    /**
+     * Map of display groups which are linked to virtual devices (all displays in the group are
+     * linked to that device). Keyed by virtual device unique id.
+     */
+    private final SparseIntArray mDeviceDisplayGroupIds = new SparseIntArray();
+
     private final DisplayDeviceRepository mDisplayDeviceRepo;
     private final DeviceStateToLayoutMap mDeviceStateToLayoutMap;
     private final Listener mListener;
@@ -156,6 +163,12 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
      * Array used in {@link #updateLogicalDisplaysLocked} to track events that need to be sent out.
      */
     private final SparseIntArray mDisplayGroupsToUpdate = new SparseIntArray();
+
+    /**
+     * ArrayMap of display device unique ID to virtual device ID. Used in {@link
+     * #updateLogicalDisplaysLocked} to establish which Virtual Devices own which Virtual Displays.
+     */
+    private final ArrayMap<String, Integer> mVirtualDeviceDisplayMapping = new ArrayMap<>();
 
     private int mNextNonDefaultGroupId = Display.DEFAULT_DISPLAY_GROUP + 1;
     private Layout mCurrentLayout = null;
@@ -362,6 +375,19 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
         mDeviceStateToLayoutMap.dumpLocked(ipw);
     }
 
+    /**
+     * Creates an association between a displayDevice and a virtual device. Any displays associated
+     * with this virtual device will be grouped together in a single {@link DisplayGroup} unless
+     * created with {@link Display.FLAG_OWN_DISPLAY_GROUP}.
+     *
+     * @param displayDevice the displayDevice to be linked
+     * @param virtualDeviceUniqueId the unique ID of the virtual device.
+     */
+    void associateDisplayDeviceWithVirtualDevice(
+            DisplayDevice displayDevice, int virtualDeviceUniqueId) {
+        mVirtualDeviceDisplayMapping.put(displayDevice.getUniqueId(), virtualDeviceUniqueId);
+    }
+
     void setDeviceStateLocked(int state, boolean isOverrideActive) {
         Slog.i(TAG, "Requesting Transition to state: " + state + ", from state=" + mDeviceState
                 + ", interactive=" + mInteractive);
@@ -556,6 +582,9 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
         }
         DisplayDeviceInfo deviceInfo = device.getDisplayDeviceInfoLocked();
 
+        // Remove any virtual device mapping which exists for the display.
+        mVirtualDeviceDisplayMapping.remove(device.getUniqueId());
+
         if (layoutDisplay.getAddress().equals(deviceInfo.address)) {
             layout.removeDisplayLocked(DEFAULT_DISPLAY);
 
@@ -749,24 +778,44 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
                 // We wait until we sent the EVENT_REMOVED event before actually removing the
                 // group.
                 mDisplayGroups.delete(id);
+                // Remove possible reference to the removed group.
+                int deviceIndex = mDeviceDisplayGroupIds.indexOfValue(id);
+                if (deviceIndex >= 0) {
+                    mDeviceDisplayGroupIds.removeAt(deviceIndex);
+                }
             }
         }
     }
 
     private void assignDisplayGroupLocked(LogicalDisplay display) {
         final int displayId = display.getDisplayIdLocked();
+        final String primaryDisplayUniqueId = display.getPrimaryDisplayDeviceLocked().getUniqueId();
+        final Integer linkedDeviceUniqueId =
+                mVirtualDeviceDisplayMapping.get(primaryDisplayUniqueId);
 
         // Get current display group data
         int groupId = getDisplayGroupIdFromDisplayIdLocked(displayId);
+        Integer deviceDisplayGroupId = null;
+        if (linkedDeviceUniqueId != null
+                && mDeviceDisplayGroupIds.indexOfKey(linkedDeviceUniqueId) > 0) {
+            deviceDisplayGroupId = mDeviceDisplayGroupIds.get(linkedDeviceUniqueId);
+        }
         final DisplayGroup oldGroup = getDisplayGroupLocked(groupId);
 
         // Get the new display group if a change is needed
         final DisplayInfo info = display.getDisplayInfoLocked();
         final boolean needsOwnDisplayGroup = (info.flags & Display.FLAG_OWN_DISPLAY_GROUP) != 0;
         final boolean hasOwnDisplayGroup = groupId != Display.DEFAULT_DISPLAY_GROUP;
+        final boolean needsDeviceDisplayGroup =
+                !needsOwnDisplayGroup && linkedDeviceUniqueId != null;
+        final boolean hasDeviceDisplayGroup =
+                deviceDisplayGroupId != null && groupId == deviceDisplayGroupId;
         if (groupId == Display.INVALID_DISPLAY_GROUP
-                || hasOwnDisplayGroup != needsOwnDisplayGroup) {
-            groupId = assignDisplayGroupIdLocked(needsOwnDisplayGroup);
+                || hasOwnDisplayGroup != needsOwnDisplayGroup
+                || hasDeviceDisplayGroup != needsDeviceDisplayGroup) {
+            groupId =
+                    assignDisplayGroupIdLocked(
+                            needsOwnDisplayGroup, needsDeviceDisplayGroup, linkedDeviceUniqueId);
         }
 
         // Create a new group if needed
@@ -931,7 +980,17 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
         display.setPhase(phase);
     }
 
-    private int assignDisplayGroupIdLocked(boolean isOwnDisplayGroup) {
+    private int assignDisplayGroupIdLocked(
+            boolean isOwnDisplayGroup, boolean isDeviceDisplayGroup, Integer linkedDeviceUniqueId) {
+        if (isDeviceDisplayGroup && linkedDeviceUniqueId != null) {
+            int deviceDisplayGroupId = mDeviceDisplayGroupIds.get(linkedDeviceUniqueId);
+            // A value of 0 indicates that no device display group was found.
+            if (deviceDisplayGroupId == 0) {
+                deviceDisplayGroupId = mNextNonDefaultGroupId++;
+                mDeviceDisplayGroupIds.put(linkedDeviceUniqueId, deviceDisplayGroupId);
+            }
+            return deviceDisplayGroupId;
+        }
         return isOwnDisplayGroup ? mNextNonDefaultGroupId++ : Display.DEFAULT_DISPLAY_GROUP;
     }
 
