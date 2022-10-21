@@ -284,7 +284,7 @@ public class Flags {
     public static final ReleasedFlag ROUNDED_BOX_RIPPLE = new ReleasedFlag(1002);
 
     // TODO(b/254512525): Tracking Bug
-    public static final UnreleasedFlag REFACTORED_DOCK_SETUP = new UnreleasedFlag(1003, true);
+    public static final ReleasedFlag REFACTORED_DOCK_SETUP = new ReleasedFlag(1003);
 
     // 1100 - windowing
     @Keep
