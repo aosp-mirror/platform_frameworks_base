@@ -2250,8 +2250,8 @@ public class DisplayModeDirectorTest {
 
         // Notify that the default display is updated, such that DisplayDeviceConfig has new values
         DisplayDeviceConfig displayDeviceConfig = mock(DisplayDeviceConfig.class);
-        when(displayDeviceConfig.getDefaultRefreshRate()).thenReturn(50);
-        when(displayDeviceConfig.getDefaultPeakRefreshRate()).thenReturn(55);
+        when(displayDeviceConfig.getDefaultLowRefreshRate()).thenReturn(50);
+        when(displayDeviceConfig.getDefaultHighRefreshRate()).thenReturn(55);
         when(displayDeviceConfig.getLowDisplayBrightnessThresholds()).thenReturn(new int[]{25});
         when(displayDeviceConfig.getLowAmbientBrightnessThresholds()).thenReturn(new int[]{30});
         when(displayDeviceConfig.getHighDisplayBrightnessThresholds()).thenReturn(new int[]{210});
