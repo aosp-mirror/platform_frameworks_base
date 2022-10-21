@@ -591,11 +591,15 @@ public class HdmiCecLocalDeviceTvTest {
 
     @Test
     public void handleReportAudioStatus_SamOnArcOff_setStreamVolumeNotCalled() {
+        mHdmiControlService.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_CONTROL,
+                HdmiControlManager.SYSTEM_AUDIO_CONTROL_ENABLED);
         // Emulate Audio device on port 0x1000 (does not support ARC)
         mNativeWrapper.setPortConnectionStatus(1, true);
         HdmiCecMessage hdmiCecMessage = HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
                 ADDR_AUDIO_SYSTEM, 0x1000, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
         mNativeWrapper.onCecMessage(hdmiCecMessage);
+        mTestLooper.dispatchAll();
 
         HdmiCecFeatureAction systemAudioAutoInitiationAction =
                 new SystemAudioAutoInitiationAction(mHdmiCecLocalDeviceTv, ADDR_AUDIO_SYSTEM);
@@ -822,6 +826,10 @@ public class HdmiCecLocalDeviceTvTest {
 
     @Test
     public void receiveSetAudioVolumeLevel_samActivated_respondsFeatureAbort_noVolumeChange() {
+        mHdmiControlService.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_CONTROL,
+                HdmiControlManager.SYSTEM_AUDIO_CONTROL_ENABLED);
+
         mNativeWrapper.onCecMessage(HdmiCecMessageBuilder.buildSetSystemAudioMode(
                 ADDR_AUDIO_SYSTEM, ADDR_TV, true));
         mTestLooper.dispatchAll();
