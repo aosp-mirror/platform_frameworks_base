@@ -53,8 +53,12 @@ public final class CredentialsDisplayContent implements Parcelable {
 
     private CredentialsDisplayContent(@NonNull Parcel in) {
         mHeader = in.readCharSequence();
-        mCredentialEntries = in.createTypedArrayList(CredentialEntry.CREATOR);
-        mActions = in.createTypedArrayList(Action.CREATOR);
+        List<CredentialEntry> credentialEntries = new ArrayList<>();
+        in.readTypedList(credentialEntries, CredentialEntry.CREATOR);
+        mCredentialEntries = credentialEntries;
+        List<Action> actions = new ArrayList<>();
+        in.readTypedList(actions, Action.CREATOR);
+        mActions = actions;
     }
 
     public static final @NonNull Creator<CredentialsDisplayContent> CREATOR =
@@ -78,8 +82,8 @@ public final class CredentialsDisplayContent implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeCharSequence(mHeader);
-        dest.writeTypedList(mCredentialEntries);
-        dest.writeTypedList(mActions);
+        dest.writeTypedList(mCredentialEntries, flags);
+        dest.writeTypedList(mActions, flags);
     }
 
     /**

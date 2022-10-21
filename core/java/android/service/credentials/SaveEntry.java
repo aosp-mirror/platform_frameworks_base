@@ -40,10 +40,9 @@ public final class SaveEntry implements Parcelable {
     private final @Nullable Credential mCredential;
 
     private SaveEntry(@NonNull Parcel in) {
-        mSlice = in.readParcelable(Slice.class.getClassLoader(), Slice.class);
-        mPendingIntent = in.readParcelable(PendingIntent.class.getClassLoader(),
-                PendingIntent.class);
-        mCredential = in.readParcelable(Credential.class.getClassLoader(), Credential.class);
+        mSlice = in.readTypedObject(Slice.CREATOR);
+        mPendingIntent = in.readTypedObject(PendingIntent.CREATOR);
+        mCredential = in.readTypedObject(Credential.CREATOR);
     }
 
     public static final @NonNull Creator<SaveEntry> CREATOR = new Creator<SaveEntry>() {
@@ -65,9 +64,9 @@ public final class SaveEntry implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        mSlice.writeToParcel(dest, flags);
-        mPendingIntent.writeToParcel(dest, flags);
-        mCredential.writeToParcel(dest, flags);
+        dest.writeTypedObject(mSlice, flags);
+        dest.writeTypedObject(mPendingIntent, flags);
+        dest.writeTypedObject(mCredential, flags);
     }
 
     /* package-private */ SaveEntry(

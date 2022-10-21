@@ -54,7 +54,7 @@ public final class CreateCredentialRequest implements Parcelable {
     private CreateCredentialRequest(@NonNull Parcel in) {
         mCallingPackage = in.readString8();
         mType = in.readString8();
-        mData = in.readBundle();
+        mData = in.readTypedObject(Bundle.CREATOR);
     }
 
     public static final @NonNull Creator<CreateCredentialRequest> CREATOR =
@@ -79,7 +79,7 @@ public final class CreateCredentialRequest implements Parcelable {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString8(mCallingPackage);
         dest.writeString8(mType);
-        dest.writeBundle(mData);
+        dest.writeTypedObject(mData, flags);
     }
 
     /** Returns the calling package of the calling app. */

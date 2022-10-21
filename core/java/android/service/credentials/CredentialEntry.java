@@ -65,12 +65,10 @@ public final class CredentialEntry implements Parcelable {
     }
 
     private CredentialEntry(@NonNull Parcel in) {
-        mType = in.readString();
-        mSlice = in.readParcelable(Slice.class.getClassLoader(), Slice.class);
-        mPendingIntent = in.readParcelable(PendingIntent.class.getClassLoader(),
-                PendingIntent.class);
-        mCredential = in.readParcelable(Credential.class.getClassLoader(),
-                Credential.class);
+        mType = in.readString8();
+        mSlice = in.readTypedObject(Slice.CREATOR);
+        mPendingIntent = in.readTypedObject(PendingIntent.CREATOR);
+        mCredential = in.readTypedObject(Credential.CREATOR);
         mAutoSelectAllowed = in.readBoolean();
     }
 
@@ -95,9 +93,9 @@ public final class CredentialEntry implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString8(mType);
-        mSlice.writeToParcel(dest, flags);
-        mPendingIntent.writeToParcel(dest, flags);
-        mCredential.writeToParcel(dest, flags);
+        dest.writeTypedObject(mSlice, flags);
+        dest.writeTypedObject(mPendingIntent, flags);
+        dest.writeTypedObject(mCredential, flags);
         dest.writeBoolean(mAutoSelectAllowed);
     }
 
