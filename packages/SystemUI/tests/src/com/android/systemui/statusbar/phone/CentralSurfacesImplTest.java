@@ -80,6 +80,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.internal.jank.InteractionJankMonitor;
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.logging.testing.FakeMetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
@@ -323,7 +324,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                         mock(NotificationInterruptLogger.class),
                         new Handler(TestableLooper.get(this).getLooper()),
                         mock(NotifPipelineFlags.class),
-                        mock(KeyguardNotificationVisibilityProvider.class));
+                        mock(KeyguardNotificationVisibilityProvider.class),
+                        mock(UiEventLogger.class));
 
         mContext.addMockSystemService(TrustManager.class, mock(TrustManager.class));
         mContext.addMockSystemService(FingerprintManager.class, mock(FingerprintManager.class));
@@ -1157,7 +1159,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 NotificationInterruptLogger logger,
                 Handler mainHandler,
                 NotifPipelineFlags flags,
-                KeyguardNotificationVisibilityProvider keyguardNotificationVisibilityProvider) {
+                KeyguardNotificationVisibilityProvider keyguardNotificationVisibilityProvider,
+                UiEventLogger uiEventLogger) {
             super(
                     contentResolver,
                     powerManager,
@@ -1170,7 +1173,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                     logger,
                     mainHandler,
                     flags,
-                    keyguardNotificationVisibilityProvider
+                    keyguardNotificationVisibilityProvider,
+                    uiEventLogger
             );
             mUseHeadsUp = true;
         }
