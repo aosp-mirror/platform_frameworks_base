@@ -84,6 +84,15 @@
           "include-filter": "android.os.cts.SharedMemoryTest"
         }
       ]
+    },
+    {
+      "file_patterns": ["Environment[^/]*\\.java"],
+      "name": "FrameworksCoreTests",
+      "options": [
+        {
+          "include-filter": "android.os.EnvironmentTest"
+        }
+      ]
     }
   ],
   "postsubmit": [
