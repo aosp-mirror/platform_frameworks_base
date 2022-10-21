@@ -222,6 +222,83 @@ class WifiRepositoryImplTest : SysuiTestCase() {
     }
 
     @Test
+    fun isWifiDefault_initiallyGetsDefault() = runBlocking(IMMEDIATE) {
+        val job = underTest.isWifiDefault.launchIn(this)
+
+        assertThat(underTest.isWifiDefault.value).isFalse()
+
+        job.cancel()
+    }
+
+    @Test
+    fun isWifiDefault_wifiNetwork_isTrue() = runBlocking(IMMEDIATE) {
+        val job = underTest.isWifiDefault.launchIn(this)
+
+        val wifiInfo = mock<WifiInfo>().apply {
+            whenever(this.ssid).thenReturn(SSID)
+        }
+
+        getDefaultNetworkCallback().onCapabilitiesChanged(
+            NETWORK,
+            createWifiNetworkCapabilities(wifiInfo)
+        )
+
+        assertThat(underTest.isWifiDefault.value).isTrue()
+
+        job.cancel()
+    }
+
+    @Test
+    fun isWifiDefault_cellularVcnNetwork_isTrue() = runBlocking(IMMEDIATE) {
+        val job = underTest.isWifiDefault.launchIn(this)
+
+        val capabilities = mock<NetworkCapabilities>().apply {
+            whenever(this.hasTransport(TRANSPORT_CELLULAR)).thenReturn(true)
+            whenever(this.transportInfo).thenReturn(VcnTransportInfo(PRIMARY_WIFI_INFO))
+        }
+
+        getDefaultNetworkCallback().onCapabilitiesChanged(NETWORK, capabilities)
+
+        assertThat(underTest.isWifiDefault.value).isTrue()
+
+        job.cancel()
+    }
+
+    @Test
+    fun isWifiDefault_cellularNotVcnNetwork_isFalse() = runBlocking(IMMEDIATE) {
+        val job = underTest.isWifiDefault.launchIn(this)
+
+        val capabilities = mock<NetworkCapabilities>().apply {
+            whenever(this.hasTransport(TRANSPORT_CELLULAR)).thenReturn(true)
+            whenever(this.transportInfo).thenReturn(mock())
+        }
+
+        getDefaultNetworkCallback().onCapabilitiesChanged(NETWORK, capabilities)
+
+        assertThat(underTest.isWifiDefault.value).isFalse()
+
+        job.cancel()
+    }
+
+    @Test
+    fun isWifiDefault_wifiNetworkLost_isFalse() = runBlocking(IMMEDIATE) {
+        val job = underTest.isWifiDefault.launchIn(this)
+
+        // First, add a network
+        getDefaultNetworkCallback()
+            .onCapabilitiesChanged(NETWORK, createWifiNetworkCapabilities(PRIMARY_WIFI_INFO))
+        assertThat(underTest.isWifiDefault.value).isTrue()
+
+        // WHEN the network is lost
+        getDefaultNetworkCallback().onLost(NETWORK)
+
+        // THEN we update to false
+        assertThat(underTest.isWifiDefault.value).isFalse()
+
+        job.cancel()
+    }
+
+    @Test
     fun wifiNetwork_initiallyGetsDefault() = runBlocking(IMMEDIATE) {
         var latest: WifiNetworkModel? = null
         val job = underTest
@@ -742,6 +819,12 @@ class WifiRepositoryImplTest : SysuiTestCase() {
     private fun getNetworkCallback(): ConnectivityManager.NetworkCallback {
         val callbackCaptor = argumentCaptor<ConnectivityManager.NetworkCallback>()
         verify(connectivityManager).registerNetworkCallback(any(), callbackCaptor.capture())
+        return callbackCaptor.value!!
+    }
+
+    private fun getDefaultNetworkCallback(): ConnectivityManager.NetworkCallback {
+        val callbackCaptor = argumentCaptor<ConnectivityManager.NetworkCallback>()
+        verify(connectivityManager).registerDefaultNetworkCallback(callbackCaptor.capture())
         return callbackCaptor.value!!
     }
 
