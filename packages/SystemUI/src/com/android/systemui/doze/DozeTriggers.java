@@ -536,13 +536,13 @@ public class DozeTriggers implements DozeMachine.Part {
             return;
         }
 
-        if (!mAllowPulseTriggers || mDozeHost.isPulsePending() || !canPulse()) {
+        if (!mAllowPulseTriggers || mDozeHost.isPulsePending() || !canPulse(dozeState)) {
             if (!mAllowPulseTriggers) {
                 mDozeLog.tracePulseDropped("requestPulse - !mAllowPulseTriggers");
             } else if (mDozeHost.isPulsePending()) {
                 mDozeLog.tracePulseDropped("requestPulse - pulsePending");
-            } else if (!canPulse()) {
-                mDozeLog.tracePulseDropped("requestPulse", dozeState);
+            } else if (!canPulse(dozeState)) {
+                mDozeLog.tracePulseDropped("requestPulse - dozeState cannot pulse", dozeState);
             }
             runIfNotNull(onPulseSuppressedListener);
             return;
@@ -559,15 +559,16 @@ public class DozeTriggers implements DozeMachine.Part {
                 // not in pocket, continue pulsing
                 final boolean isPulsePending = mDozeHost.isPulsePending();
                 mDozeHost.setPulsePending(false);
-                if (!isPulsePending || mDozeHost.isPulsingBlocked() || !canPulse()) {
+                if (!isPulsePending || mDozeHost.isPulsingBlocked() || !canPulse(dozeState)) {
                     if (!isPulsePending) {
                         mDozeLog.tracePulseDropped("continuePulseRequest - pulse no longer"
                                 + " pending, pulse was cancelled before it could start"
                                 + " transitioning to pulsing state.");
                     } else if (mDozeHost.isPulsingBlocked()) {
                         mDozeLog.tracePulseDropped("continuePulseRequest - pulsingBlocked");
-                    } else if (!canPulse()) {
-                        mDozeLog.tracePulseDropped("continuePulseRequest", mMachine.getState());
+                    } else if (!canPulse(dozeState)) {
+                        mDozeLog.tracePulseDropped("continuePulseRequest"
+                                + " - doze state cannot pulse", dozeState);
                     }
                     runIfNotNull(onPulseSuppressedListener);
                     return;
@@ -582,10 +583,10 @@ public class DozeTriggers implements DozeMachine.Part {
                 .ifPresent(uiEventEnum -> mUiEventLogger.log(uiEventEnum, getKeyguardSessionId()));
     }
 
-    private boolean canPulse() {
-        return mMachine.getState() == DozeMachine.State.DOZE
-                || mMachine.getState() == DozeMachine.State.DOZE_AOD
-                || mMachine.getState() == DozeMachine.State.DOZE_AOD_DOCKED;
+    private boolean canPulse(DozeMachine.State dozeState) {
+        return dozeState == DozeMachine.State.DOZE
+                || dozeState == DozeMachine.State.DOZE_AOD
+                || dozeState == DozeMachine.State.DOZE_AOD_DOCKED;
     }
 
     @Nullable
