@@ -54,7 +54,7 @@ constexpr const uint32_t kFabricatedOverlayMagic = 0x4f525246; // FRRO (big endi
 // The version should only be changed when a backwards-incompatible change must be made to the
 // fabricated overlay file format. Old fabricated overlays must be migrated to the new file format
 // to prevent losing fabricated overlay data.
-constexpr const uint32_t kFabricatedOverlayCurrentVersion = 2;
+constexpr const uint32_t kFabricatedOverlayCurrentVersion = 3;
 
 // Returns whether or not the path represents a fabricated overlay.
 bool IsFabricatedOverlay(const std::string& path);
