@@ -108,6 +108,7 @@ import com.android.systemui.media.KeyguardMediaController;
 import com.android.systemui.media.MediaDataManager;
 import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.model.SysUiState;
+import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QS;
@@ -254,6 +255,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     @Mock private KeyguardMediaController mKeyguardMediaController;
     @Mock private PrivacyDotViewController mPrivacyDotViewController;
     @Mock private NavigationModeController mNavigationModeController;
+    @Mock private NavigationBarController mNavigationBarController;
     @Mock private LargeScreenShadeHeaderController mLargeScreenShadeHeaderController;
     @Mock private ContentResolver mContentResolver;
     @Mock private TapAgainViewController mTapAgainViewController;
@@ -393,6 +395,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mConfigurationController,
                 mStatusBarStateController,
                 mFalsingManager,
+                mShadeExpansionStateManager,
                 mLockscreenShadeTransitionController,
                 new FalsingCollectorFake(),
                 mDumpManager);
@@ -431,6 +434,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         when(mView.getParent()).thenReturn(mViewParent);
         when(mQs.getHeader()).thenReturn(mQsHeader);
         when(mDownMotionEvent.getAction()).thenReturn(MotionEvent.ACTION_DOWN);
+        when(mSysUiState.setFlag(anyInt(), anyBoolean())).thenReturn(mSysUiState);
 
         mMainHandler = new Handler(Looper.getMainLooper());
         NotificationPanelViewController.PanelEventsEmitter panelEventsEmitter =
@@ -474,6 +478,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mPrivacyDotViewController,
                 mTapAgainViewController,
                 mNavigationModeController,
+                mNavigationBarController,
                 mFragmentService,
                 mContentResolver,
                 mRecordingController,
