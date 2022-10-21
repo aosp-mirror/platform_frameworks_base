@@ -189,8 +189,13 @@ class AnimatableClockView @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas) {
         lastDraw = getTimestamp()
-        // intentionally doesn't call super.onDraw here or else the text will be rendered twice
-        textAnimator?.draw(canvas)
+        // Use textAnimator to render text if animation is enabled.
+        // Otherwise default to using standard draw functions.
+        if (isAnimationEnabled) {
+            textAnimator?.draw(canvas)
+        } else {
+            super.onDraw(canvas)
+        }
     }
 
     override fun invalidate() {
@@ -345,6 +350,9 @@ class AnimatableClockView @JvmOverloads constructor(
                 onAnimationEnd = onAnimationEnd
             )
             textAnimator?.glyphFilter = glyphFilter
+            if (color != null && !isAnimationEnabled) {
+                setTextColor(color)
+            }
         } else {
             // when the text animator is set, update its start values
             onTextAnimatorInitialized = Runnable {
@@ -359,6 +367,9 @@ class AnimatableClockView @JvmOverloads constructor(
                     onAnimationEnd = onAnimationEnd
                 )
                 textAnimator?.glyphFilter = glyphFilter
+                if (color != null && !isAnimationEnabled) {
+                    setTextColor(color)
+                }
             }
         }
     }
