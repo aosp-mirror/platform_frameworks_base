@@ -119,6 +119,7 @@
     <dimen name="bouncer_user_switcher_width">248dp</dimen>
     <dimen name="bouncer_user_switcher_popup_header_height">12dp</dimen>
     <dimen name="bouncer_user_switcher_popup_divider_height">4dp</dimen>
+    <dimen name="bouncer_user_switcher_popup_items_divider_height">2dp</dimen>
     <dimen name="bouncer_user_switcher_item_padding_vertical">10dp</dimen>
     <dimen name="bouncer_user_switcher_item_padding_horizontal">12dp</dimen>
     <dimen name="bouncer_user_switcher_header_padding_end">44dp</dimen>
