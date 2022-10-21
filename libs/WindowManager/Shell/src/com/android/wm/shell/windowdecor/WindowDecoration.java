@@ -91,7 +91,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
     SurfaceControl mTaskBackgroundSurface;
 
     SurfaceControl mCaptionContainerSurface;
-    private CaptionWindowManager mCaptionWindowManager;
+    private WindowlessWindowManager mCaptionWindowManager;
     private SurfaceControlViewHost mViewHost;
 
     private final Rect mCaptionInsetsRect = new Rect();
@@ -199,13 +199,14 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         }
 
         final Rect taskBounds = taskConfig.windowConfiguration.getBounds();
-        final int decorContainerOffsetX = -loadResource(params.mOutsetLeftId);
-        final int decorContainerOffsetY = -loadResource(params.mOutsetTopId);
+        final Resources resources = mDecorWindowContext.getResources();
+        final int decorContainerOffsetX = -loadDimensionPixelSize(resources, params.mOutsetLeftId);
+        final int decorContainerOffsetY = -loadDimensionPixelSize(resources, params.mOutsetTopId);
         outResult.mWidth = taskBounds.width()
-                + loadResource(params.mOutsetRightId)
+                + loadDimensionPixelSize(resources, params.mOutsetRightId)
                 - decorContainerOffsetX;
         outResult.mHeight = taskBounds.height()
-                + loadResource(params.mOutsetBottomId)
+                + loadDimensionPixelSize(resources, params.mOutsetBottomId)
                 - decorContainerOffsetY;
         startT.setPosition(
                         mDecorationContainerSurface, decorContainerOffsetX, decorContainerOffsetY)
@@ -225,7 +226,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                     .build();
         }
 
-        float shadowRadius = loadResource(params.mShadowRadiusId);
+        float shadowRadius = loadDimension(resources, params.mShadowRadiusId);
         int backgroundColorInt = mTaskInfo.taskDescription.getBackgroundColor();
         mTmpColor[0] = (float) Color.red(backgroundColorInt) / 255.f;
         mTmpColor[1] = (float) Color.green(backgroundColorInt) / 255.f;
@@ -248,8 +249,8 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                     .build();
         }
 
-        final int captionHeight = loadResource(params.mCaptionHeightId);
-        final int captionWidth = loadResource(params.mCaptionWidthId);
+        final int captionHeight = loadDimensionPixelSize(resources, params.mCaptionHeightId);
+        final int captionWidth = loadDimensionPixelSize(resources, params.mCaptionWidthId);
 
         //Prevent caption from going offscreen if task is too high up
         final int captionYPos = taskBounds.top <= captionHeight / 2 ? 0 : captionHeight / 2;
@@ -264,8 +265,9 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         if (mCaptionWindowManager == null) {
             // Put caption under a container surface because ViewRootImpl sets the destination frame
             // of windowless window layers and BLASTBufferQueue#update() doesn't support offset.
-            mCaptionWindowManager = new CaptionWindowManager(
-                    mTaskInfo.getConfiguration(), mCaptionContainerSurface);
+            mCaptionWindowManager = new WindowlessWindowManager(
+                    mTaskInfo.getConfiguration(), mCaptionContainerSurface,
+                    null /* hostInputToken */);
         }
 
         // Caption view
@@ -307,13 +309,6 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         startT.show(mTaskSurface);
         finishT.setPosition(mTaskSurface, taskPosition.x, taskPosition.y)
                 .setCrop(mTaskSurface, mTaskSurfaceCrop);
-    }
-
-    private int loadResource(int resourceId) {
-        if (resourceId == Resources.ID_NULL) {
-            return 0;
-        }
-        return mDecorWindowContext.getResources().getDimensionPixelSize(resourceId);
     }
 
     /**
@@ -374,33 +369,18 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         releaseViews();
     }
 
-    static class RelayoutResult<T extends View & TaskFocusStateConsumer> {
-        int mWidth;
-        int mHeight;
-        T mRootView;
-
-        void reset() {
-            mWidth = 0;
-            mHeight = 0;
-            mRootView = null;
+    private static int loadDimensionPixelSize(Resources resources, int resourceId) {
+        if (resourceId == Resources.ID_NULL) {
+            return 0;
         }
+        return resources.getDimensionPixelSize(resourceId);
     }
 
-    private static class CaptionWindowManager extends WindowlessWindowManager {
-        CaptionWindowManager(Configuration config, SurfaceControl rootSurface) {
-            super(config, rootSurface, null /* hostInputToken */);
+    private static float loadDimension(Resources resources, int resourceId) {
+        if (resourceId == Resources.ID_NULL) {
+            return 0;
         }
-
-        @Override
-        public void setConfiguration(Configuration configuration) {
-            super.setConfiguration(configuration);
-        }
-    }
-
-    interface SurfaceControlViewHostFactory {
-        default SurfaceControlViewHost create(Context c, Display d, WindowlessWindowManager wmm) {
-            return new SurfaceControlViewHost(c, d, wmm);
-        }
+        return resources.getDimension(resourceId);
     }
 
     static class RelayoutParams{
@@ -433,6 +413,23 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             mOutsetLeftId = Resources.ID_NULL;
             mOutsetRightId = Resources.ID_NULL;
         }
+    }
 
+    static class RelayoutResult<T extends View & TaskFocusStateConsumer> {
+        int mWidth;
+        int mHeight;
+        T mRootView;
+
+        void reset() {
+            mWidth = 0;
+            mHeight = 0;
+            mRootView = null;
+        }
+    }
+
+    interface SurfaceControlViewHostFactory {
+        default SurfaceControlViewHost create(Context c, Display d, WindowlessWindowManager wmm) {
+            return new SurfaceControlViewHost(c, d, wmm);
+        }
     }
 }
