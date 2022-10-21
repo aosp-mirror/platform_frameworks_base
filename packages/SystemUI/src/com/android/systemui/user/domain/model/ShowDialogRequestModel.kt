@@ -18,14 +18,18 @@
 package com.android.systemui.user.domain.model
 
 import android.os.UserHandle
+import com.android.systemui.qs.user.UserSwitchDialogController
 
 /** Encapsulates a request to show a dialog. */
-sealed class ShowDialogRequestModel {
+sealed class ShowDialogRequestModel(
+    open val dialogShower: UserSwitchDialogController.DialogShower? = null,
+) {
     data class ShowAddUserDialog(
         val userHandle: UserHandle,
         val isKeyguardShowing: Boolean,
         val showEphemeralMessage: Boolean,
-    ) : ShowDialogRequestModel()
+        override val dialogShower: UserSwitchDialogController.DialogShower?,
+    ) : ShowDialogRequestModel(dialogShower)
 
     data class ShowUserCreationDialog(
         val isGuest: Boolean,
@@ -37,5 +41,6 @@ sealed class ShowDialogRequestModel {
         val isGuestEphemeral: Boolean,
         val isKeyguardShowing: Boolean,
         val onExitGuestUser: (guestId: Int, targetId: Int, forceRemoveGuest: Boolean) -> Unit,
-    ) : ShowDialogRequestModel()
+        override val dialogShower: UserSwitchDialogController.DialogShower?,
+    ) : ShowDialogRequestModel(dialogShower)
 }

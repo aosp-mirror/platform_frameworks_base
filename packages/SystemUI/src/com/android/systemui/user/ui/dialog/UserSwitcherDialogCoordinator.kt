@@ -19,8 +19,10 @@ package com.android.systemui.user.ui.dialog
 
 import android.app.Dialog
 import android.content.Context
+import com.android.internal.jank.InteractionJankMonitor
 import com.android.settingslib.users.UserCreatingDialog
 import com.android.systemui.CoreStartable
+import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.broadcast.BroadcastSender
 import com.android.systemui.dagger.SysUISingleton
@@ -71,37 +73,58 @@ constructor(
                     }
                 }
 
-                currentDialog =
+                val (dialog, dialogCuj) =
                     when (request) {
                         is ShowDialogRequestModel.ShowAddUserDialog ->
-                            AddUserDialog(
-                                context = context.get(),
-                                userHandle = request.userHandle,
-                                isKeyguardShowing = request.isKeyguardShowing,
-                                showEphemeralMessage = request.showEphemeralMessage,
-                                falsingManager = falsingManager.get(),
-                                broadcastSender = broadcastSender.get(),
-                                dialogLaunchAnimator = dialogLaunchAnimator.get(),
+                            Pair(
+                                AddUserDialog(
+                                    context = context.get(),
+                                    userHandle = request.userHandle,
+                                    isKeyguardShowing = request.isKeyguardShowing,
+                                    showEphemeralMessage = request.showEphemeralMessage,
+                                    falsingManager = falsingManager.get(),
+                                    broadcastSender = broadcastSender.get(),
+                                    dialogLaunchAnimator = dialogLaunchAnimator.get(),
+                                ),
+                                DialogCuj(
+                                    InteractionJankMonitor.CUJ_USER_DIALOG_OPEN,
+                                    INTERACTION_JANK_ADD_NEW_USER_TAG,
+                                ),
                             )
                         is ShowDialogRequestModel.ShowUserCreationDialog ->
-                            UserCreatingDialog(
-                                context.get(),
-                                request.isGuest,
+                            Pair(
+                                UserCreatingDialog(
+                                    context.get(),
+                                    request.isGuest,
+                                ),
+                                null,
                             )
                         is ShowDialogRequestModel.ShowExitGuestDialog ->
-                            ExitGuestDialog(
-                                context = context.get(),
-                                guestUserId = request.guestUserId,
-                                isGuestEphemeral = request.isGuestEphemeral,
-                                targetUserId = request.targetUserId,
-                                isKeyguardShowing = request.isKeyguardShowing,
-                                falsingManager = falsingManager.get(),
-                                dialogLaunchAnimator = dialogLaunchAnimator.get(),
-                                onExitGuestUserListener = request.onExitGuestUser,
+                            Pair(
+                                ExitGuestDialog(
+                                    context = context.get(),
+                                    guestUserId = request.guestUserId,
+                                    isGuestEphemeral = request.isGuestEphemeral,
+                                    targetUserId = request.targetUserId,
+                                    isKeyguardShowing = request.isKeyguardShowing,
+                                    falsingManager = falsingManager.get(),
+                                    dialogLaunchAnimator = dialogLaunchAnimator.get(),
+                                    onExitGuestUserListener = request.onExitGuestUser,
+                                ),
+                                DialogCuj(
+                                    InteractionJankMonitor.CUJ_USER_DIALOG_OPEN,
+                                    INTERACTION_JANK_EXIT_GUEST_MODE_TAG,
+                                ),
                             )
                     }
+                currentDialog = dialog
 
-                currentDialog?.show()
+                if (request.dialogShower != null && dialogCuj != null) {
+                    request.dialogShower?.showDialog(dialog, dialogCuj)
+                } else {
+                    dialog.show()
+                }
+
                 interactor.get().onDialogShown()
             }
         }
@@ -119,5 +142,10 @@ constructor(
                 interactor.get().onDialogDismissed()
             }
         }
+    }
+
+    companion object {
+        private const val INTERACTION_JANK_ADD_NEW_USER_TAG = "add_new_user"
+        private const val INTERACTION_JANK_EXIT_GUEST_MODE_TAG = "exit_guest_mode"
     }
 }

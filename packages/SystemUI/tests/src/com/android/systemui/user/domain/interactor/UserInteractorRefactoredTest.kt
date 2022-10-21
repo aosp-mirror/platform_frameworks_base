@@ -28,6 +28,7 @@ import androidx.test.filters.SmallTest
 import com.android.internal.R.drawable.ic_account_circle
 import com.android.systemui.R
 import com.android.systemui.common.shared.model.Text
+import com.android.systemui.qs.user.UserSwitchDialogController
 import com.android.systemui.user.data.model.UserSwitcherSettingsModel
 import com.android.systemui.user.data.source.UserRecord
 import com.android.systemui.user.domain.model.ShowDialogRequestModel
@@ -316,14 +317,16 @@ class UserInteractorRefactoredTest : UserInteractorTest() {
             keyguardRepository.setKeyguardShowing(false)
             var dialogRequest: ShowDialogRequestModel? = null
             val job = underTest.dialogShowRequests.onEach { dialogRequest = it }.launchIn(this)
+            val dialogShower: UserSwitchDialogController.DialogShower = mock()
 
-            underTest.executeAction(UserActionModel.ADD_USER)
+            underTest.executeAction(UserActionModel.ADD_USER, dialogShower)
             assertThat(dialogRequest)
                 .isEqualTo(
                     ShowDialogRequestModel.ShowAddUserDialog(
                         userHandle = userInfos[0].userHandle,
                         isKeyguardShowing = false,
                         showEphemeralMessage = false,
+                        dialogShower = dialogShower,
                     )
                 )
 
