@@ -123,6 +123,16 @@ public final class HotwordAudioStream implements Parcelable {
         }
     }
 
+    /**
+     * Provides an instance of {@link Builder} with state corresponding to this instance.
+     * @hide
+     */
+    public Builder buildUpon() {
+        return new Builder(mAudioFormat, mAudioStreamParcelFileDescriptor)
+            .setTimestamp(mTimestamp)
+            .setMetadata(mMetadata);
+    }
+
     /* package-private */
     HotwordAudioStream(
             @NonNull AudioFormat audioFormat,
