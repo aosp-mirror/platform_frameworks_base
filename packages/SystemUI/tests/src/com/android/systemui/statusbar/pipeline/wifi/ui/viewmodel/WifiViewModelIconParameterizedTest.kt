@@ -88,6 +88,7 @@ internal class WifiViewModelIconParameterizedTest(private val testCase: TestCase
     fun wifiIcon() =
         runBlocking(IMMEDIATE) {
             wifiRepository.setIsWifiEnabled(testCase.enabled)
+            wifiRepository.setIsWifiDefault(testCase.isDefault)
             connectivityRepository.setForceHiddenIcons(
                 if (testCase.forceHidden) {
                     setOf(ConnectivitySlot.WIFI)
@@ -152,6 +153,7 @@ internal class WifiViewModelIconParameterizedTest(private val testCase: TestCase
         val forceHidden: Boolean = false,
         val alwaysShowIconWhenEnabled: Boolean = false,
         val hasDataCapabilities: Boolean = true,
+        val isDefault: Boolean = false,
         val network: WifiNetworkModel,
 
         /** The expected output. Null if we expect the output to be null. */
@@ -162,6 +164,7 @@ internal class WifiViewModelIconParameterizedTest(private val testCase: TestCase
                 "forceHidden=$forceHidden, " +
                 "showWhenEnabled=$alwaysShowIconWhenEnabled, " +
                 "hasDataCaps=$hasDataCapabilities, " +
+                "isDefault=$isDefault, " +
                 "network=$network) then " +
                 "EXPECTED($expected)"
         }
@@ -293,6 +296,46 @@ internal class WifiViewModelIconParameterizedTest(private val testCase: TestCase
                                 context.getString(WIFI_CONNECTION_STRENGTH[0])
                             },
                             description = "Full internet level 0 icon",
+                        ),
+                ),
+
+                // isDefault = true => all Inactive and Active networks shown
+                TestCase(
+                    isDefault = true,
+                    network = WifiNetworkModel.Inactive,
+                    expected =
+                        Expected(
+                            iconResource = WIFI_NO_NETWORK,
+                            contentDescription = { context ->
+                                "${context.getString(WIFI_NO_CONNECTION)}," +
+                                    context.getString(NO_INTERNET)
+                            },
+                            description = "No network icon",
+                        ),
+                ),
+                TestCase(
+                    isDefault = true,
+                    network = WifiNetworkModel.Active(NETWORK_ID, isValidated = false, level = 3),
+                    expected =
+                        Expected(
+                            iconResource = WIFI_NO_INTERNET_ICONS[3],
+                            contentDescription = { context ->
+                                "${context.getString(WIFI_CONNECTION_STRENGTH[3])}," +
+                                    context.getString(NO_INTERNET)
+                            },
+                            description = "No internet level 3 icon",
+                        ),
+                ),
+                TestCase(
+                    isDefault = true,
+                    network = WifiNetworkModel.Active(NETWORK_ID, isValidated = true, level = 1),
+                    expected =
+                        Expected(
+                            iconResource = WIFI_FULL_ICONS[1],
+                            contentDescription = { context ->
+                                context.getString(WIFI_CONNECTION_STRENGTH[1])
+                            },
+                            description = "Full internet level 1 icon",
                         ),
                 ),
 
