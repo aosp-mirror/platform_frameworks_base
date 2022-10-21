@@ -20,7 +20,9 @@ import android.content.Context
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroupOverlay
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -41,10 +43,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathOperation
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawOutline
+import androidx.compose.ui.graphics.drawscope.ContentDrawScope
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -53,7 +62,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Density
 import androidx.lifecycle.ViewTreeLifecycleOwner
 import androidx.lifecycle.ViewTreeViewModelStoreOwner
+import com.android.systemui.animation.Expandable
 import com.android.systemui.animation.LaunchAnimator
+import kotlin.math.max
 import kotlin.math.min
 
 /**
@@ -85,10 +96,11 @@ fun Expandable(
     shape: Shape,
     modifier: Modifier = Modifier,
     contentColor: Color = contentColorFor(color),
+    borderStroke: BorderStroke? = null,
     content: @Composable (ExpandableController) -> Unit,
 ) {
     Expandable(
-        rememberExpandableController(color, shape, contentColor),
+        rememberExpandableController(color, shape, contentColor, borderStroke),
         modifier,
         content,
     )
@@ -189,9 +201,13 @@ fun Expandable(
         }
         else -> {
             Box(
-                modifier.clip(shape).background(color, shape).onGloballyPositioned {
-                    controller.boundsInComposeViewRoot.value = it.boundsInRoot()
-                }
+                modifier
+                    .clip(shape)
+                    .background(color, shape)
+                    .border(controller)
+                    .onGloballyPositioned {
+                        controller.boundsInComposeViewRoot.value = it.boundsInRoot()
+                    }
             ) { wrappedContent(controller) }
         }
     }
@@ -204,7 +220,7 @@ private fun AnimatedContentInOverlay(
     sizeInOriginalLayout: Size,
     animatorState: State<LaunchAnimator.State?>,
     overlay: ViewGroupOverlay,
-    controller: ExpandableController,
+    controller: ExpandableControllerImpl,
     content: @Composable (ExpandableController) -> Unit,
     composeViewRoot: View,
     onOverlayComposeViewChanged: (View?) -> Unit,
@@ -254,24 +270,7 @@ private fun AnimatedContentInOverlay(
                                     return@drawWithContent
                                 }
 
-                                val topRadius = animatorState.topCornerRadius
-                                val bottomRadius = animatorState.bottomCornerRadius
-                                if (topRadius == bottomRadius) {
-                                    // Shortcut to avoid Outline calculation and allocation.
-                                    val cornerRadius = CornerRadius(topRadius)
-                                    drawRoundRect(color, cornerRadius = cornerRadius)
-                                } else {
-                                    val shape =
-                                        RoundedCornerShape(
-                                            topStart = topRadius,
-                                            topEnd = topRadius,
-                                            bottomStart = bottomRadius,
-                                            bottomEnd = bottomRadius,
-                                        )
-                                    val outline = shape.createOutline(size, layoutDirection, this)
-                                    drawOutline(outline, color = color)
-                                }
-
+                                drawBackground(animatorState, color, controller.borderStroke)
                                 drawContent()
                             },
                             // We center the content in the expanding container.
@@ -360,3 +359,107 @@ private fun getOverlayViewGroup(context: Context, overlay: ViewGroupOverlay): Vi
     overlay.remove(view)
     return current as ViewGroup
 }
+
+private fun Modifier.border(controller: ExpandableControllerImpl): Modifier {
+    return if (controller.borderStroke != null) {
+        this.border(controller.borderStroke, controller.shape)
+    } else {
+        this
+    }
+}
+
+private fun ContentDrawScope.drawBackground(
+    animatorState: LaunchAnimator.State,
+    color: Color,
+    border: BorderStroke?,
+) {
+    val topRadius = animatorState.topCornerRadius
+    val bottomRadius = animatorState.bottomCornerRadius
+    if (topRadius == bottomRadius) {
+        // Shortcut to avoid Outline calculation and allocation.
+        val cornerRadius = CornerRadius(topRadius)
+
+        // Draw the background.
+        drawRoundRect(color, cornerRadius = cornerRadius)
+
+        // Draw the border.
+        if (border != null) {
+            // Copied from androidx.compose.foundation.Border.kt
+            val strokeWidth = border.width.toPx()
+            val halfStroke = strokeWidth / 2
+            val borderStroke = Stroke(strokeWidth)
+
+            drawRoundRect(
+                brush = border.brush,
+                topLeft = Offset(halfStroke, halfStroke),
+                size = Size(size.width - strokeWidth, size.height - strokeWidth),
+                cornerRadius = cornerRadius.shrink(halfStroke),
+                style = borderStroke
+            )
+        }
+    } else {
+        val shape =
+            RoundedCornerShape(
+                topStart = topRadius,
+                topEnd = topRadius,
+                bottomStart = bottomRadius,
+                bottomEnd = bottomRadius,
+            )
+        val outline = shape.createOutline(size, layoutDirection, this)
+
+        // Draw the background.
+        drawOutline(outline, color = color)
+
+        // Draw the border.
+        if (border != null) {
+            // Copied from androidx.compose.foundation.Border.kt.
+            val strokeWidth = border.width.toPx()
+            val path =
+                createRoundRectPath(
+                    (outline as Outline.Rounded).roundRect,
+                    strokeWidth,
+                )
+
+            drawPath(path, border.brush)
+        }
+    }
+}
+
+/**
+ * Helper method that creates a round rect with the inner region removed by the given stroke width.
+ *
+ * Copied from androidx.compose.foundation.Border.kt.
+ */
+private fun createRoundRectPath(
+    roundedRect: RoundRect,
+    strokeWidth: Float,
+): Path {
+    return Path().apply {
+        addRoundRect(roundedRect)
+        val insetPath =
+            Path().apply { addRoundRect(createInsetRoundedRect(strokeWidth, roundedRect)) }
+        op(this, insetPath, PathOperation.Difference)
+    }
+}
+
+/* Copied from androidx.compose.foundation.Border.kt. */
+private fun createInsetRoundedRect(widthPx: Float, roundedRect: RoundRect) =
+    RoundRect(
+        left = widthPx,
+        top = widthPx,
+        right = roundedRect.width - widthPx,
+        bottom = roundedRect.height - widthPx,
+        topLeftCornerRadius = roundedRect.topLeftCornerRadius.shrink(widthPx),
+        topRightCornerRadius = roundedRect.topRightCornerRadius.shrink(widthPx),
+        bottomLeftCornerRadius = roundedRect.bottomLeftCornerRadius.shrink(widthPx),
+        bottomRightCornerRadius = roundedRect.bottomRightCornerRadius.shrink(widthPx)
+    )
+
+/**
+ * Helper method to shrink the corner radius by the given value, clamping to 0 if the resultant
+ * corner radius would be negative.
+ *
+ * Copied from androidx.compose.foundation.Border.kt.
+ */
+private fun CornerRadius.shrink(value: Float): CornerRadius =
+    CornerRadius(max(0f, this.x - value), max(0f, this.y - value))
