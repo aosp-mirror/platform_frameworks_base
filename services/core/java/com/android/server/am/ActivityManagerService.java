@@ -14455,10 +14455,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         filterNonExportedComponents(intent, callingUid, registeredReceivers,
                 mPlatformCompat, callerPackage);
         int NR = registeredReceivers != null ? registeredReceivers.size() : 0;
-        if (!ordered && NR > 0) {
+        if (!ordered && NR > 0 && !mEnableModernQueue) {
             // If we are not serializing this broadcast, then send the
             // registered receivers separately so they don't wait for the
-            // components to be launched.
+            // components to be launched. We don't do this split for the modern
+            // queue because delivery to registered receivers isn't blocked
+            // behind manifest receivers.
             if (isCallerSystem) {
                 checkBroadcastFromSystem(intent, callerApp, callerPackage, callingUid,
                         isProtectedBroadcast, registeredReceivers);

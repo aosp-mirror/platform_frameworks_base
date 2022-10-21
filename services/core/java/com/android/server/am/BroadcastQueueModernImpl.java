@@ -210,6 +210,12 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     private final BroadcastConstants mFgConstants;
     private final BroadcastConstants mBgConstants;
 
+    /**
+     * Timestamp when last {@link #testAllProcessQueues} failure was observed;
+     * used for throttling log messages.
+     */
+    private @UptimeMillisLong long mLastTestFailureTime;
+
     private static final int MSG_UPDATE_RUNNING_LIST = 1;
     private static final int MSG_DELIVERY_TIMEOUT_SOFT = 2;
     private static final int MSG_DELIVERY_TIMEOUT_HARD = 3;
@@ -521,6 +527,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
     @Override
     public void enqueueBroadcastLocked(@NonNull BroadcastRecord r) {
+        if (DEBUG_BROADCAST) logv("Enqueuing " + r + " for " + r.receivers.size() + " receivers");
+
         r.applySingletonPolicy(mService);
 
         final IntentFilter removeMatchingFilter = (r.options != null)
@@ -859,10 +867,11 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             mLocalHandler.removeMessages(MSG_DELIVERY_TIMEOUT_HARD, queue);
         }
 
-        // Even if we have more broadcasts, if we've made reasonable progress
-        // and someone else is waiting, retire ourselves to avoid starvation
-        final boolean shouldRetire = (mRunnableHead != null)
-                && (queue.getActiveCountSinceIdle() >= mConstants.MAX_RUNNING_ACTIVE_BROADCASTS);
+        // If we've made reasonable progress, periodically retire ourselves to
+        // avoid starvation of other processes and stack overflow when a
+        // broadcast is immediately finished without waiting
+        final boolean shouldRetire =
+                (queue.getActiveCountSinceIdle() >= mConstants.MAX_RUNNING_ACTIVE_BROADCASTS);
 
         if (queue.isRunnable() && queue.isProcessWarm() && !shouldRetire) {
             // We're on a roll; move onto the next broadcast for this process
@@ -1034,7 +1043,11 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             BroadcastProcessQueue leaf = mProcessQueues.valueAt(i);
             while (leaf != null) {
                 if (!test.test(leaf)) {
-                    logv("Test " + label + " failed due to " + leaf.toShortString(), pw);
+                    final long now = SystemClock.uptimeMillis();
+                    if (now > mLastTestFailureTime + DateUtils.SECOND_IN_MILLIS) {
+                        mLastTestFailureTime = now;
+                        logv("Test " + label + " failed due to " + leaf.toShortString(), pw);
+                    }
                     return false;
                 }
                 leaf = leaf.processNameNext;

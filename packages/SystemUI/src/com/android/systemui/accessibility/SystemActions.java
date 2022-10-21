@@ -597,6 +597,7 @@ public class SystemActions implements CoreStartable {
                 case INTENT_ACTION_DPAD_CENTER: {
                     Intent intent = new Intent(intentAction);
                     intent.setPackage(context.getPackageName());
+                    intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
                     return PendingIntent.getBroadcast(context, 0, intent,
                             PendingIntent.FLAG_IMMUTABLE);
                 }
