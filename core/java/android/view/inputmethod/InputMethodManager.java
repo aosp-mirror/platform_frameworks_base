@@ -30,7 +30,9 @@ import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodCl
 import static android.view.inputmethod.InputMethodManagerProto.ACTIVE;
 import static android.view.inputmethod.InputMethodManagerProto.CUR_ID;
 import static android.view.inputmethod.InputMethodManagerProto.FULLSCREEN_MODE;
+import static android.view.inputmethod.InputMethodManagerProto.NEXT_SERVED_VIEW;
 import static android.view.inputmethod.InputMethodManagerProto.SERVED_CONNECTING;
+import static android.view.inputmethod.InputMethodManagerProto.SERVED_VIEW;
 
 import static com.android.internal.inputmethod.StartInputReason.BOUND_TO_IMMS;
 
@@ -3990,6 +3992,8 @@ public final class InputMethodManager {
             proto.write(FULLSCREEN_MODE, mFullscreenMode);
             proto.write(ACTIVE, mActive);
             proto.write(SERVED_CONNECTING, mServedConnecting);
+            proto.write(SERVED_VIEW, Objects.toString(mServedView));
+            proto.write(NEXT_SERVED_VIEW, Objects.toString(mNextServedView));
             proto.end(token);
             if (mCurRootView != null) {
                 mCurRootView.dumpDebug(proto, VIEW_ROOT_IMPL);
