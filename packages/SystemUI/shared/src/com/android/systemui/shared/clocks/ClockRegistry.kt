@@ -21,7 +21,6 @@ import android.os.Handler
 import android.os.UserHandle
 import android.provider.Settings
 import android.util.Log
-import com.android.systemui.dagger.qualifiers.Main
 import com.android.internal.annotations.Keep
 import com.android.systemui.plugins.ClockController
 import com.android.systemui.plugins.ClockId
@@ -31,7 +30,6 @@ import com.android.systemui.plugins.ClockProviderPlugin
 import com.android.systemui.plugins.PluginListener
 import com.android.systemui.shared.plugins.PluginManager
 import com.google.gson.Gson
-import javax.inject.Inject
 
 private val TAG = ClockRegistry::class.simpleName
 private const val DEBUG = true
@@ -43,13 +41,6 @@ open class ClockRegistry(
     val handler: Handler,
     defaultClockProvider: ClockProvider
 ) {
-    @Inject constructor(
-        context: Context,
-        pluginManager: PluginManager,
-        @Main handler: Handler,
-        defaultClockProvider: DefaultClockProvider
-    ) : this(context, pluginManager, handler, defaultClockProvider as ClockProvider) { }
-
     // Usually this would be a typealias, but a SAM provides better java interop
     fun interface ClockChangeListener {
         fun onClockChanged()
