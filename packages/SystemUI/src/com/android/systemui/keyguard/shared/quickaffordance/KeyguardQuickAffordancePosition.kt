@@ -12,20 +12,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
-package com.android.systemui.keyguard.domain.quickaffordance
+package com.android.systemui.keyguard.shared.quickaffordance
 
-/**
- * Unique identifier keys for all known built-in quick affordances.
- *
- * Please ensure uniqueness by never associating more than one class with each key.
- */
-object BuiltInKeyguardQuickAffordanceKeys {
-    // Please keep alphabetical order of const names to simplify future maintenance.
-    const val HOME_CONTROLS = "home"
-    const val QR_CODE_SCANNER = "qr_code_scanner"
-    const val QUICK_ACCESS_WALLET = "wallet"
-    // Please keep alphabetical order of const names to simplify future maintenance.
+/** Enumerates all possible positions for quick affordances that can appear on the lock-screen. */
+enum class KeyguardQuickAffordancePosition {
+    BOTTOM_START,
+    BOTTOM_END,
 }

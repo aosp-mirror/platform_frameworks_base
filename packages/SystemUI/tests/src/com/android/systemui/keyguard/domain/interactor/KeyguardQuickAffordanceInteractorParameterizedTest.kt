@@ -25,12 +25,12 @@ import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
+import com.android.systemui.keyguard.data.quickaffordance.BuiltInKeyguardQuickAffordanceKeys
+import com.android.systemui.keyguard.data.quickaffordance.FakeKeyguardQuickAffordanceConfig
+import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceConfig
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
-import com.android.systemui.keyguard.domain.model.KeyguardQuickAffordancePosition
-import com.android.systemui.keyguard.domain.quickaffordance.BuiltInKeyguardQuickAffordanceKeys
-import com.android.systemui.keyguard.domain.quickaffordance.FakeKeyguardQuickAffordanceConfig
 import com.android.systemui.keyguard.domain.quickaffordance.FakeKeyguardQuickAffordanceRegistry
-import com.android.systemui.keyguard.domain.quickaffordance.KeyguardQuickAffordanceConfig
+import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancePosition
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.KeyguardStateController

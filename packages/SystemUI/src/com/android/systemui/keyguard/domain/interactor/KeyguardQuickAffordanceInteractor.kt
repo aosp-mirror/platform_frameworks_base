@@ -21,10 +21,10 @@ import android.content.Intent
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.animation.Expandable
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceConfig
 import com.android.systemui.keyguard.domain.model.KeyguardQuickAffordanceModel
-import com.android.systemui.keyguard.domain.model.KeyguardQuickAffordancePosition
-import com.android.systemui.keyguard.domain.quickaffordance.KeyguardQuickAffordanceConfig
 import com.android.systemui.keyguard.domain.quickaffordance.KeyguardQuickAffordanceRegistry
+import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancePosition
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.KeyguardStateController
