@@ -214,13 +214,29 @@ public class Flags {
     public static final ReleasedFlag STATUS_BAR_LETTERBOX_APPEARANCE =
             new ReleasedFlag(603, false);
 
-    // TODO(b/254512623): Tracking Bug
+    /**
+     * @deprecated replaced by mobile and wifi specific flags.
+     *
+     * TODO(b/254512623): Tracking Bug
+     */
+    @Deprecated
     public static final UnreleasedFlag NEW_STATUS_BAR_PIPELINE_BACKEND =
             new UnreleasedFlag(604, false);
 
-    // TODO(b/254512660): Tracking Bug
+    /**
+     * @deprecated replaced by mobile and wifi specific flags.
+     *
+     * TODO(b/254512660): Tracking Bug
+     */
+    @Deprecated
     public static final UnreleasedFlag NEW_STATUS_BAR_PIPELINE_FRONTEND =
             new UnreleasedFlag(605, false);
+
+    public static final UnreleasedFlag NEW_STATUS_BAR_MOBILE_ICONS =
+            new UnreleasedFlag(606, false);
+
+    public static final UnreleasedFlag NEW_STATUS_BAR_WIFI_ICON =
+            new UnreleasedFlag(607, false);
 
     /***************************************/
     // 700 - dialer/calls

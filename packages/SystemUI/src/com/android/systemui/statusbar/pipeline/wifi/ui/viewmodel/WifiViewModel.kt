@@ -124,9 +124,10 @@ constructor(
     private val wifiIcon: StateFlow<Icon.Resource?> =
         combine(
             interactor.isEnabled,
+            interactor.isDefault,
             interactor.isForceHidden,
             interactor.wifiNetwork,
-        ) { isEnabled, isForceHidden, wifiNetwork ->
+        ) { isEnabled, isDefault, isForceHidden, wifiNetwork ->
             if (!isEnabled || isForceHidden || wifiNetwork is WifiNetworkModel.CarrierMerged) {
                 return@combine null
             }
@@ -135,6 +136,7 @@ constructor(
             val icon = Icon.Resource(iconResId, wifiNetwork.contentDescription())
 
             return@combine when {
+                isDefault -> icon
                 wifiConstants.alwaysShowIconIfEnabled -> icon
                 !connectivityConstants.hasDataCapabilities -> icon
                 wifiNetwork is WifiNetworkModel.Active && wifiNetwork.isValidated -> icon

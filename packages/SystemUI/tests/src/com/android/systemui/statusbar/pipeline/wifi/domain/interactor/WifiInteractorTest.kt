@@ -178,6 +178,29 @@ class WifiInteractorTest : SysuiTestCase() {
     }
 
     @Test
+    fun isDefault_matchesRepoIsDefault() = runBlocking(IMMEDIATE) {
+        var latest: Boolean? = null
+        val job = underTest
+            .isDefault
+            .onEach { latest = it }
+            .launchIn(this)
+
+        wifiRepository.setIsWifiDefault(true)
+        yield()
+        assertThat(latest).isTrue()
+
+        wifiRepository.setIsWifiDefault(false)
+        yield()
+        assertThat(latest).isFalse()
+
+        wifiRepository.setIsWifiDefault(true)
+        yield()
+        assertThat(latest).isTrue()
+
+        job.cancel()
+    }
+
+    @Test
     fun wifiNetwork_matchesRepoWifiNetwork() = runBlocking(IMMEDIATE) {
         val wifiNetwork = WifiNetworkModel.Active(
             networkId = 45,
