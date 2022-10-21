@@ -24,7 +24,6 @@ import android.app.ActivityOptions
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
 import android.service.controls.Control
@@ -59,7 +58,10 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.globalactions.GlobalActionsPopupMenu
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.settings.UserFileManager
+import com.android.systemui.settings.UserTracker
 import com.android.systemui.shade.ShadeController
+import com.android.systemui.statusbar.policy.DeviceControlsControllerImpl
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.concurrency.DelayableExecutor
 import dagger.Lazy
@@ -76,13 +78,14 @@ class ControlsUiControllerImpl @Inject constructor (
         @Main val uiExecutor: DelayableExecutor,
         @Background val bgExecutor: DelayableExecutor,
         val controlsListingController: Lazy<ControlsListingController>,
-        @Main val sharedPreferences: SharedPreferences,
         val controlActionCoordinator: ControlActionCoordinator,
         private val activityStarter: ActivityStarter,
         private val shadeController: ShadeController,
         private val iconCache: CustomIconCache,
         private val controlsMetricsLogger: ControlsMetricsLogger,
-        private val keyguardStateController: KeyguardStateController
+        private val keyguardStateController: KeyguardStateController,
+        private val userFileManager: UserFileManager,
+        private val userTracker: UserTracker,
 ) : ControlsUiController {
 
     companion object {
@@ -110,6 +113,12 @@ class ControlsUiControllerImpl @Inject constructor (
     private lateinit var onDismiss: Runnable
     private val popupThemedContext = ContextThemeWrapper(context, R.style.Control_ListPopupWindow)
     private var retainCache = false
+    private val sharedPreferences
+        get() = userFileManager.getSharedPreferences(
+            fileName = DeviceControlsControllerImpl.PREFS_CONTROLS_FILE,
+            mode = 0,
+            userId = userTracker.userId
+        )
 
     private val collator = Collator.getInstance(context.resources.configuration.locales[0])
     private val localeComparator = compareBy<SelectionItem, CharSequence>(collator) {
