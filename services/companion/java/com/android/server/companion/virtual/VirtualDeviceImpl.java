@@ -38,6 +38,8 @@ import android.companion.virtual.VirtualDeviceManager.ActivityListener;
 import android.companion.virtual.VirtualDeviceParams;
 import android.companion.virtual.audio.IAudioConfigChangedCallback;
 import android.companion.virtual.audio.IAudioRoutingCallback;
+import android.companion.virtual.sensor.VirtualSensorConfig;
+import android.companion.virtual.sensor.VirtualSensorEvent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -611,6 +613,21 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         } finally {
             Binder.restoreCallingIdentity(binderToken);
         }
+    }
+
+    @Override // Binder call
+    public void createVirtualSensor(
+            @NonNull IBinder deviceToken,
+            @NonNull VirtualSensorConfig config) {
+    }
+
+    @Override // Binder call
+    public void unregisterSensor(IBinder token) {
+    }
+
+    @Override // Binder call
+    public boolean sendSensorEvent(IBinder token, VirtualSensorEvent event) {
+        return true;
     }
 
     @Override

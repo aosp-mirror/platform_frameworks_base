@@ -23,20 +23,22 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.companion.virtual.sensor.VirtualSensorConfig;
 import android.content.ComponentName;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
 import android.util.ArraySet;
+import android.util.SparseArray;
 import android.util.SparseIntArray;
-
-import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -158,6 +160,7 @@ public final class VirtualDeviceParams implements Parcelable {
     @Nullable private final String mName;
     // Mapping of @PolicyType to @DevicePolicy
     @NonNull private final SparseIntArray mDevicePolicies;
+    @NonNull private final List<VirtualSensorConfig> mVirtualSensorConfigs;
 
     private VirtualDeviceParams(
             @LockState int lockState,
@@ -169,24 +172,22 @@ public final class VirtualDeviceParams implements Parcelable {
             @NonNull Set<ComponentName> blockedActivities,
             @ActivityPolicy int defaultActivityPolicy,
             @Nullable String name,
-            @NonNull SparseIntArray devicePolicies) {
-        Preconditions.checkNotNull(usersWithMatchingAccounts);
-        Preconditions.checkNotNull(allowedCrossTaskNavigations);
-        Preconditions.checkNotNull(blockedCrossTaskNavigations);
-        Preconditions.checkNotNull(allowedActivities);
-        Preconditions.checkNotNull(blockedActivities);
-        Preconditions.checkNotNull(devicePolicies);
-
+            @NonNull SparseIntArray devicePolicies,
+            @NonNull List<VirtualSensorConfig> virtualSensorConfigs) {
         mLockState = lockState;
-        mUsersWithMatchingAccounts = new ArraySet<>(usersWithMatchingAccounts);
-        mAllowedCrossTaskNavigations = new ArraySet<>(allowedCrossTaskNavigations);
-        mBlockedCrossTaskNavigations = new ArraySet<>(blockedCrossTaskNavigations);
+        mUsersWithMatchingAccounts =
+                new ArraySet<>(Objects.requireNonNull(usersWithMatchingAccounts));
+        mAllowedCrossTaskNavigations =
+                new ArraySet<>(Objects.requireNonNull(allowedCrossTaskNavigations));
+        mBlockedCrossTaskNavigations =
+                new ArraySet<>(Objects.requireNonNull(blockedCrossTaskNavigations));
         mDefaultNavigationPolicy = defaultNavigationPolicy;
-        mAllowedActivities = new ArraySet<>(allowedActivities);
-        mBlockedActivities = new ArraySet<>(blockedActivities);
+        mAllowedActivities = new ArraySet<>(Objects.requireNonNull(allowedActivities));
+        mBlockedActivities = new ArraySet<>(Objects.requireNonNull(blockedActivities));
         mDefaultActivityPolicy = defaultActivityPolicy;
         mName = name;
-        mDevicePolicies = devicePolicies;
+        mDevicePolicies = Objects.requireNonNull(devicePolicies);
+        mVirtualSensorConfigs = Objects.requireNonNull(virtualSensorConfigs);
     }
 
     @SuppressWarnings("unchecked")
@@ -201,6 +202,8 @@ public final class VirtualDeviceParams implements Parcelable {
         mDefaultActivityPolicy = parcel.readInt();
         mName = parcel.readString8();
         mDevicePolicies = parcel.readSparseIntArray();
+        mVirtualSensorConfigs = new ArrayList<>();
+        parcel.readTypedList(mVirtualSensorConfigs, VirtualSensorConfig.CREATOR);
     }
 
     /**
@@ -316,6 +319,15 @@ public final class VirtualDeviceParams implements Parcelable {
         return mDevicePolicies.get(policyType, DEVICE_POLICY_DEFAULT);
     }
 
+    /**
+     * Returns the configurations for all sensors that should be created for this device.
+     *
+     * @see Builder#addVirtualSensorConfig
+     */
+    public @NonNull List<VirtualSensorConfig> getVirtualSensorConfigs() {
+        return mVirtualSensorConfigs;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -333,6 +345,7 @@ public final class VirtualDeviceParams implements Parcelable {
         dest.writeInt(mDefaultActivityPolicy);
         dest.writeString8(mName);
         dest.writeSparseIntArray(mDevicePolicies);
+        dest.writeTypedList(mVirtualSensorConfigs);
     }
 
     @Override
@@ -428,6 +441,7 @@ public final class VirtualDeviceParams implements Parcelable {
         private boolean mDefaultActivityPolicyConfigured = false;
         @Nullable private String mName;
         @NonNull private SparseIntArray mDevicePolicies = new SparseIntArray();
+        @NonNull private List<VirtualSensorConfig> mVirtualSensorConfigs = new ArrayList<>();
 
         /**
          * Sets the lock state of the device. The permission {@code ADD_ALWAYS_UNLOCKED_DISPLAY}
@@ -467,8 +481,7 @@ public final class VirtualDeviceParams implements Parcelable {
         @NonNull
         public Builder setUsersWithMatchingAccounts(
                 @NonNull Set<UserHandle> usersWithMatchingAccounts) {
-            Preconditions.checkNotNull(usersWithMatchingAccounts);
-            mUsersWithMatchingAccounts = usersWithMatchingAccounts;
+            mUsersWithMatchingAccounts = Objects.requireNonNull(usersWithMatchingAccounts);
             return this;
         }
 
@@ -491,7 +504,6 @@ public final class VirtualDeviceParams implements Parcelable {
         @NonNull
         public Builder setAllowedCrossTaskNavigations(
                 @NonNull Set<ComponentName> allowedCrossTaskNavigations) {
-            Preconditions.checkNotNull(allowedCrossTaskNavigations);
             if (mDefaultNavigationPolicyConfigured
                     && mDefaultNavigationPolicy != NAVIGATION_POLICY_DEFAULT_BLOCKED) {
                 throw new IllegalArgumentException(
@@ -500,7 +512,7 @@ public final class VirtualDeviceParams implements Parcelable {
             }
             mDefaultNavigationPolicy = NAVIGATION_POLICY_DEFAULT_BLOCKED;
             mDefaultNavigationPolicyConfigured = true;
-            mAllowedCrossTaskNavigations = allowedCrossTaskNavigations;
+            mAllowedCrossTaskNavigations = Objects.requireNonNull(allowedCrossTaskNavigations);
             return this;
         }
 
@@ -523,7 +535,6 @@ public final class VirtualDeviceParams implements Parcelable {
         @NonNull
         public Builder setBlockedCrossTaskNavigations(
                 @NonNull Set<ComponentName> blockedCrossTaskNavigations) {
-            Preconditions.checkNotNull(blockedCrossTaskNavigations);
             if (mDefaultNavigationPolicyConfigured
                      && mDefaultNavigationPolicy != NAVIGATION_POLICY_DEFAULT_ALLOWED) {
                 throw new IllegalArgumentException(
@@ -532,7 +543,7 @@ public final class VirtualDeviceParams implements Parcelable {
             }
             mDefaultNavigationPolicy = NAVIGATION_POLICY_DEFAULT_ALLOWED;
             mDefaultNavigationPolicyConfigured = true;
-            mBlockedCrossTaskNavigations = blockedCrossTaskNavigations;
+            mBlockedCrossTaskNavigations = Objects.requireNonNull(blockedCrossTaskNavigations);
             return this;
         }
 
@@ -551,7 +562,6 @@ public final class VirtualDeviceParams implements Parcelable {
          */
         @NonNull
         public Builder setAllowedActivities(@NonNull Set<ComponentName> allowedActivities) {
-            Preconditions.checkNotNull(allowedActivities);
             if (mDefaultActivityPolicyConfigured
                     && mDefaultActivityPolicy != ACTIVITY_POLICY_DEFAULT_BLOCKED) {
                 throw new IllegalArgumentException(
@@ -559,7 +569,7 @@ public final class VirtualDeviceParams implements Parcelable {
             }
             mDefaultActivityPolicy = ACTIVITY_POLICY_DEFAULT_BLOCKED;
             mDefaultActivityPolicyConfigured = true;
-            mAllowedActivities = allowedActivities;
+            mAllowedActivities = Objects.requireNonNull(allowedActivities);
             return this;
         }
 
@@ -578,7 +588,6 @@ public final class VirtualDeviceParams implements Parcelable {
          */
         @NonNull
         public Builder setBlockedActivities(@NonNull Set<ComponentName> blockedActivities) {
-            Preconditions.checkNotNull(blockedActivities);
             if (mDefaultActivityPolicyConfigured
                     && mDefaultActivityPolicy != ACTIVITY_POLICY_DEFAULT_ALLOWED) {
                 throw new IllegalArgumentException(
@@ -586,7 +595,7 @@ public final class VirtualDeviceParams implements Parcelable {
             }
             mDefaultActivityPolicy = ACTIVITY_POLICY_DEFAULT_ALLOWED;
             mDefaultActivityPolicyConfigured = true;
-            mBlockedActivities = blockedActivities;
+            mBlockedActivities = Objects.requireNonNull(blockedActivities);
             return this;
         }
 
@@ -621,10 +630,49 @@ public final class VirtualDeviceParams implements Parcelable {
         }
 
         /**
+         * Adds a configuration for a sensor that should be created for this virtual device.
+         *
+         * Device sensors must remain valid for the entire lifetime of the device, hence they are
+         * created together with the device itself, and removed when the device is removed.
+         *
+         * Requires {@link #DEVICE_POLICY_CUSTOM} to be set for {@link #POLICY_TYPE_SENSORS}.
+         *
+         * @see android.companion.virtual.sensor.VirtualSensor
+         * @see #addDevicePolicy
+         */
+        @NonNull
+        public Builder addVirtualSensorConfig(@NonNull VirtualSensorConfig virtualSensorConfig) {
+            mVirtualSensorConfigs.add(Objects.requireNonNull(virtualSensorConfig));
+            return this;
+        }
+
+        /**
          * Builds the {@link VirtualDeviceParams} instance.
+         *
+         * @throws IllegalArgumentException if there's mismatch between policy definition and
+         * the passed parameters or if there are sensor configs with the same type and name.
+         *
          */
         @NonNull
         public VirtualDeviceParams build() {
+            if (!mVirtualSensorConfigs.isEmpty()
+                    && (mDevicePolicies.get(POLICY_TYPE_SENSORS, DEVICE_POLICY_DEFAULT)
+                            != DEVICE_POLICY_CUSTOM)) {
+                throw new IllegalArgumentException(
+                        "DEVICE_POLICY_CUSTOM for POLICY_TYPE_SENSORS is required for creating "
+                                + "virtual sensors.");
+            }
+            SparseArray<Set<String>> sensorNameByType = new SparseArray();
+            for (int i = 0; i < mVirtualSensorConfigs.size(); ++i) {
+                VirtualSensorConfig config = mVirtualSensorConfigs.get(i);
+                Set<String> sensorNames = sensorNameByType.get(config.getType(), new ArraySet<>());
+                if (!sensorNames.add(config.getName())) {
+                    throw new IllegalArgumentException(
+                            "Sensor names must be unique for a particular sensor type.");
+                }
+                sensorNameByType.put(config.getType(), sensorNames);
+            }
+
             return new VirtualDeviceParams(
                     mLockState,
                     mUsersWithMatchingAccounts,
@@ -635,7 +683,8 @@ public final class VirtualDeviceParams implements Parcelable {
                     mBlockedActivities,
                     mDefaultActivityPolicy,
                     mName,
-                    mDevicePolicies);
+                    mDevicePolicies,
+                    mVirtualSensorConfigs);
         }
     }
 }

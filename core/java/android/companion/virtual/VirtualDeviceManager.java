@@ -28,6 +28,8 @@ import android.app.PendingIntent;
 import android.companion.AssociationInfo;
 import android.companion.virtual.audio.VirtualAudioDevice;
 import android.companion.virtual.audio.VirtualAudioDevice.AudioConfigurationChangeCallback;
+import android.companion.virtual.sensor.VirtualSensor;
+import android.companion.virtual.sensor.VirtualSensorConfig;
 import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.Point;
@@ -58,6 +60,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.function.IntConsumer;
 
@@ -250,7 +253,10 @@ public final class VirtualDeviceManager {
                 };
         @Nullable
         private VirtualAudioDevice mVirtualAudioDevice;
+        @NonNull
+        private List<VirtualSensor> mVirtualSensors = new ArrayList<>();
 
+        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         private VirtualDevice(
                 IVirtualDeviceManager service,
                 Context context,
@@ -264,6 +270,10 @@ public final class VirtualDeviceManager {
                     associationId,
                     params,
                     mActivityListenerBinder);
+            final List<VirtualSensorConfig> virtualSensorConfigs = params.getVirtualSensorConfigs();
+            for (int i = 0; i < virtualSensorConfigs.size(); ++i) {
+                mVirtualSensors.add(createVirtualSensor(virtualSensorConfigs.get(i)));
+            }
         }
 
         /**
@@ -275,6 +285,23 @@ public final class VirtualDeviceManager {
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
+        }
+
+        /**
+         * Returns this device's sensor with the given type and name, if any.
+         *
+         * @see VirtualDeviceParams.Builder#addVirtualSensorConfig
+         *
+         * @param type The type of the sensor.
+         * @param name The name of the sensor.
+         * @return The matching sensor if found, {@code null} otherwise.
+         */
+        @Nullable
+        public VirtualSensor getVirtualSensor(int type, @NonNull String name) {
+            return mVirtualSensors.stream()
+                    .filter(sensor -> sensor.getType() == type && sensor.getName().equals(name))
+                    .findAny()
+                    .orElse(null);
         }
 
         /**
@@ -379,6 +406,7 @@ public final class VirtualDeviceManager {
         @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         public void close() {
             try {
+                // This also takes care of unregistering all virtual sensors.
                 mVirtualDevice.close();
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
@@ -558,6 +586,28 @@ public final class VirtualDeviceManager {
                 // should only be used for informational purposes, and not for identifying the
                 // display in code.
                 return "VirtualDevice_" + mVirtualDevice.getAssociationId();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
+         * Creates a virtual sensor, capable of injecting sensor events into the system. Only for
+         * internal use, since device sensors must remain valid for the entire lifetime of the
+         * device.
+         *
+         * @param config The configuration of the sensor.
+         * @hide
+         */
+        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+        @NonNull
+        public VirtualSensor createVirtualSensor(@NonNull VirtualSensorConfig config) {
+            Objects.requireNonNull(config);
+            try {
+                final IBinder token = new Binder(
+                        "android.hardware.sensor.VirtualSensor:" + config.getName());
+                mVirtualDevice.createVirtualSensor(token, config);
+                return new VirtualSensor(config.getType(), config.getName(), mVirtualDevice, token);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
