@@ -2439,6 +2439,11 @@
     <!-- Whether dreams are disabled when ambient mode is suppressed. -->
     <bool name="config_dreamsDisabledByAmbientModeSuppressionConfig">false</bool>
 
+    <!-- The duration in milliseconds of the dream opening animation.  -->
+    <integer name="config_dreamOpenAnimationDuration">250</integer>
+    <!-- The duration in milliseconds of the dream closing animation.  -->
+    <integer name="config_dreamCloseAnimationDuration">100</integer>
+
     <!-- Whether to dismiss the active dream when an activity is started. Doesn't apply to
          assistant activities (ACTIVITY_TYPE_ASSISTANT) -->
     <bool name="config_dismissDreamOnActivityStart">false</bool>
