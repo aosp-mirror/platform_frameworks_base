@@ -61,10 +61,6 @@ public class Flags {
     public static final ResourceBooleanFlag NOTIFICATION_DRAG_TO_CONTENTS =
             new ResourceBooleanFlag(108, R.bool.config_notificationToContents);
 
-    // TODO(b/254512703): Tracking Bug
-    public static final ReleasedFlag REMOVE_UNRANKED_NOTIFICATIONS =
-            new ReleasedFlag(109);
-
     // TODO(b/254512517): Tracking Bug
     public static final UnreleasedFlag FSI_REQUIRES_KEYGUARD =
             new UnreleasedFlag(110, true);
@@ -158,9 +154,6 @@ public class Flags {
 
     /***************************************/
     // 400 - smartspace
-    // TODO(b/254513080): Tracking Bug
-    public static final ReleasedFlag SMARTSPACE_DEDUPING =
-            new ReleasedFlag(400);
 
     // TODO(b/254513100): Tracking Bug
     public static final ReleasedFlag SMARTSPACE_SHARED_ELEMENT_TRANSITION_ENABLED =
