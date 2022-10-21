@@ -16,13 +16,16 @@
 
 package com.android.settingslib.spa.widget.ui
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.android.settingslib.spa.framework.theme.surfaceTone
 import kotlin.math.roundToInt
 
 @Composable
@@ -45,5 +48,8 @@ fun SettingsSlider(
         valueRange = valueRange.first.toFloat()..valueRange.last.toFloat(),
         steps = if (showSteps) (valueRange.count() - 2) else 0,
         onValueChangeFinished = onValueChangeFinished,
+        colors = SliderDefaults.colors(
+            inactiveTrackColor = MaterialTheme.colorScheme.surfaceTone
+        )
     )
 }

@@ -668,7 +668,6 @@
     <protected-broadcast android:name="android.media.tv.action.PREVIEW_PROGRAM_BROWSABLE_DISABLED" />
     <protected-broadcast android:name="android.media.tv.action.WATCH_NEXT_PROGRAM_BROWSABLE_DISABLED" />
     <protected-broadcast android:name="android.media.tv.action.CHANNEL_BROWSABLE_REQUESTED" />
-    <protected-broadcast android:name="com.android.server.inputmethod.InputMethodManagerService.SHOW_INPUT_METHOD_PICKER" />
 
     <!-- Time zone rules update intents fired by the system server -->
     <protected-broadcast android:name="com.android.intent.action.timezone.RULES_UPDATE_OPERATION" />
@@ -4260,6 +4259,13 @@
     -->
     <permission android:name="android.permission.BIND_AUTOFILL_SERVICE"
         android:protectionLevel="signature" />
+
+    <!-- Must be required by a CredentialProviderService to ensure that only the
+         system can bind to it.
+         <p>Protection level: signature
+    -->
+    <permission android:name="android.permission.BIND_CREDENTIAL_PROVIDER_SERVICE"
+                android:protectionLevel="signature" />
 
    <!-- Alternative version of android.permission.BIND_AUTOFILL_FIELD_CLASSIFICATION_SERVICE.
         This permission was renamed during the O previews but it was supported on the final O

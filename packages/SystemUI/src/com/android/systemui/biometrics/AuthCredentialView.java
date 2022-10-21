@@ -77,7 +77,7 @@ public abstract class AuthCredentialView extends LinearLayout {
     protected final Handler mHandler;
     protected final LockPatternUtils mLockPatternUtils;
 
-    private final AccessibilityManager mAccessibilityManager;
+    protected final AccessibilityManager mAccessibilityManager;
     private final UserManager mUserManager;
     private final DevicePolicyManager mDevicePolicyManager;
 
@@ -86,10 +86,10 @@ public abstract class AuthCredentialView extends LinearLayout {
     private boolean mShouldAnimatePanel;
     private boolean mShouldAnimateContents;
 
-    private TextView mTitleView;
+    protected TextView mTitleView;
     protected TextView mSubtitleView;
-    private TextView mDescriptionView;
-    private ImageView mIconView;
+    protected TextView mDescriptionView;
+    protected ImageView mIconView;
     protected TextView mErrorView;
 
     protected @Utils.CredentialType int mCredentialType;

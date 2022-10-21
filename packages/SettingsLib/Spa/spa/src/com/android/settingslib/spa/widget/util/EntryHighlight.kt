@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spa.framework.util
+package com.android.settingslib.spa.widget.util
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box

@@ -61,7 +61,7 @@ message SystemMessage {
 
     // Notify the user that they should select an input method
     // Package: android
-    NOTE_SELECT_INPUT_METHOD = 8;
+    NOTE_SELECT_INPUT_METHOD = 8 [deprecated = true];
 
     // Notify the user about limited functionality before decryption
     // Package: android

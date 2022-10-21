@@ -17,6 +17,7 @@
 package com.android.systemui.common.shared.model
 
 import android.annotation.StringRes
+import android.content.Context
 
 /**
  * Models a content description, that can either be already [loaded][ContentDescription.Loaded] or
@@ -30,4 +31,20 @@ sealed class ContentDescription {
     data class Resource(
         @StringRes val res: Int,
     ) : ContentDescription()
+
+    companion object {
+        /**
+         * Returns the loaded content description string, or null if we don't have one.
+         *
+         * Prefer [com.android.systemui.common.ui.binder.ContentDescriptionViewBinder.bind] over
+         * this method. This should only be used for testing or concatenation purposes.
+         */
+        fun ContentDescription?.loadContentDescription(context: Context): String? {
+            return when (this) {
+                null -> null
+                is Loaded -> this.description
+                is Resource -> context.getString(this.res)
+            }
+        }
+    }
 }

@@ -37,7 +37,7 @@ interface EntryData {
 }
 
 val LocalEntryDataProvider =
-    compositionLocalOf<EntryData> { object : EntryData{} }
+    compositionLocalOf<EntryData> { object : EntryData {} }
 
 /**
  * Defines data of a Settings entry.

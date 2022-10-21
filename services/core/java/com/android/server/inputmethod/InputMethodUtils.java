@@ -179,16 +179,6 @@ final class InputMethodUtils {
         }
     }
 
-    static CharSequence getImeAndSubtypeDisplayName(Context context, InputMethodInfo imi,
-            InputMethodSubtype subtype) {
-        final CharSequence imiLabel = imi.loadLabel(context.getPackageManager());
-        return subtype != null
-                ? TextUtils.concat(subtype.getDisplayName(context,
-                        imi.getPackageName(), imi.getServiceInfo().applicationInfo),
-                                (TextUtils.isEmpty(imiLabel) ? "" : " - " + imiLabel))
-                : imiLabel;
-    }
-
     /**
      * Returns true if a package name belongs to a UID.
      *

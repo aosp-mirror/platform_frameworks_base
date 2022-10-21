@@ -17,6 +17,11 @@
 package com.android.server.credentials;
 
 import android.annotation.NonNull;
+import android.app.AppGlobals;
+import android.content.ComponentName;
+import android.content.pm.PackageManager;
+import android.content.pm.ServiceInfo;
+import android.os.RemoteException;
 import android.util.Log;
 
 import com.android.server.infra.AbstractPerUserSystemService;
@@ -24,7 +29,7 @@ import com.android.server.infra.AbstractPerUserSystemService;
 /**
  * Per-user implementation of {@link CredentialManagerService}
  */
-public class CredentialManagerServiceImpl extends
+public final class CredentialManagerServiceImpl extends
         AbstractPerUserSystemService<CredentialManagerServiceImpl, CredentialManagerService> {
     private static final String TAG = "CredManSysServiceImpl";
 
@@ -32,6 +37,20 @@ public class CredentialManagerServiceImpl extends
             @NonNull CredentialManagerService master,
             @NonNull Object lock, int userId) {
         super(master, lock, userId);
+    }
+
+    @Override // from PerUserSystemService
+    protected ServiceInfo newServiceInfoLocked(@NonNull ComponentName serviceComponent)
+            throws PackageManager.NameNotFoundException {
+        ServiceInfo si;
+        try {
+            si = AppGlobals.getPackageManager().getServiceInfo(serviceComponent,
+                    PackageManager.GET_META_DATA, mUserId);
+        } catch (RemoteException e) {
+            throw new PackageManager.NameNotFoundException(
+                    "Could not get service for " + serviceComponent);
+        }
+        return si;
     }
 
     /**

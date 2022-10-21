@@ -83,6 +83,7 @@ final class BroadcastRecord extends Binder {
     final boolean alarm;    // originated from an alarm triggering?
     final boolean pushMessage; // originated from a push message?
     final boolean pushMessageOverQuota; // originated from a push message which was over quota?
+    final boolean interactive; // originated from user interaction?
     final boolean initialSticky; // initial broadcast from register to sticky?
     final boolean prioritized; // contains more than one priority tranche
     final int userId;       // user id this broadcast was for
@@ -392,6 +393,7 @@ final class BroadcastRecord extends Binder {
         alarm = options != null && options.isAlarmBroadcast();
         pushMessage = options != null && options.isPushMessagingBroadcast();
         pushMessageOverQuota = options != null && options.isPushMessagingOverQuotaBroadcast();
+        interactive = options != null && options.isInteractiveBroadcast();
         this.filterExtrasForReceiver = filterExtrasForReceiver;
     }
 
@@ -450,6 +452,7 @@ final class BroadcastRecord extends Binder {
         alarm = from.alarm;
         pushMessage = from.pushMessage;
         pushMessageOverQuota = from.pushMessageOverQuota;
+        interactive = from.interactive;
         filterExtrasForReceiver = from.filterExtrasForReceiver;
     }
 
@@ -609,6 +612,18 @@ final class BroadcastRecord extends Binder {
 
     boolean isNoAbort() {
         return (intent.getFlags() & Intent.FLAG_RECEIVER_NO_ABORT) != 0;
+    }
+
+    /**
+     * Core policy determination about this broadcast's delivery prioritization
+     */
+    boolean isUrgent() {
+        // TODO: flags for controlling policy
+        // TODO: migrate alarm-prioritization flag to BroadcastConstants
+        return (isForeground()
+                || interactive
+                || alarm)
+                && receivers.size() == 1;
     }
 
     @NonNull String getHostingRecordTriggerType() {

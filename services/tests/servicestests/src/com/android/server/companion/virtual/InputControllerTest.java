@@ -16,6 +16,8 @@
 
 package com.android.server.companion.virtual;
 
+import static com.google.common.truth.Truth.assertWithMessage;
+
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -25,6 +27,7 @@ import static org.mockito.Mockito.verify;
 
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.input.IInputManager;
+import android.hardware.input.InputManager;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -88,6 +91,30 @@ public class InputControllerTest {
     }
 
     @Test
+    public void registerInputDevice_deviceCreation_hasDeviceId() {
+        final IBinder device1Token = new Binder("device1");
+        mInputController.createMouse("mouse", /*vendorId= */ 1, /*productId= */ 1, device1Token,
+                /* displayId= */ 1);
+        int device1Id = mInputController.getInputDeviceId(device1Token);
+
+        final IBinder device2Token = new Binder("device2");
+        mInputController.createKeyboard("keyboard", /*vendorId= */2, /*productId= */ 2,
+                device2Token, 2);
+        int device2Id = mInputController.getInputDeviceId(device2Token);
+
+        assertWithMessage("Different devices should have different id").that(
+                device1Id).isNotEqualTo(device2Id);
+
+
+        int[] deviceIds = InputManager.getInstance().getInputDeviceIds();
+        assertWithMessage("InputManager's deviceIds list should contain id of device 1").that(
+                deviceIds).asList().contains(device1Id);
+        assertWithMessage("InputManager's deviceIds list should contain id of device 2").that(
+                deviceIds).asList().contains(device2Id);
+
+    }
+
+    @Test
     public void unregisterInputDevice_allMiceUnregistered_clearPointerDisplayId() {
         final IBinder deviceToken = new Binder();
         mInputController.createMouse("name", /*vendorId= */ 1, /*productId= */ 1, deviceToken,
@@ -115,4 +142,5 @@ public class InputControllerTest {
         mInputController.unregisterInputDevice(deviceToken);
         verify(mInputManagerInternalMock).setVirtualMousePointerDisplayId(eq(1));
     }
+
 }

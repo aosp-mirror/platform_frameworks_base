@@ -203,6 +203,12 @@ public interface Computer extends PackageDataSnapshot {
     boolean filterSharedLibPackage(@Nullable PackageStateInternal ps, int uid, int userId,
             long flags);
     boolean isCallerSameApp(String packageName, int uid);
+    /**
+     * Returns true if the package name and the uid represent the same app.
+     *
+     * @param resolveIsolatedUid if true, resolves an isolated uid into the real uid.
+     */
+    boolean isCallerSameApp(String packageName, int uid, boolean resolveIsolatedUid);
     boolean isComponentVisibleToInstantApp(@Nullable ComponentName component);
     boolean isComponentVisibleToInstantApp(@Nullable ComponentName component,
             @PackageManager.ComponentType int type);

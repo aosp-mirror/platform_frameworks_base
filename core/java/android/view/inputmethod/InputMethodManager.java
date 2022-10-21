@@ -776,20 +776,20 @@ public final class InputMethodManager {
                     "InputMethodManager.DelegateImpl#startInputAsyncOnWindowFocusGain",
                     InputMethodManager.this, null /* icProto */);
 
-            final ViewRootImpl viewRootImpl;
+            boolean checkFocusResult;
             synchronized (mH) {
                 if (mCurRootView == null) {
                     return;
                 }
-                viewRootImpl = mCurRootView;
                 if (mRestartOnNextWindowFocus) {
                     if (DEBUG) Log.v(TAG, "Restarting due to mRestartOnNextWindowFocus as true");
                     mRestartOnNextWindowFocus = false;
                     forceNewFocus = true;
                 }
+                checkFocusResult = checkFocusInternalLocked(forceNewFocus, mCurRootView);
             }
 
-            if (checkFocusInternal(forceNewFocus, false, viewRootImpl)) {
+            if (checkFocusResult) {
                 // We need to restart input on the current focus view.  This
                 // should be done in conjunction with telling the system service
                 // about the window gaining focus, to help make the transition
@@ -825,8 +825,15 @@ public final class InputMethodManager {
         }
 
         @Override
-        public void onScheduledCheckFocus(@NonNull ViewRootImpl viewRootImpl) {
-            checkFocusInternal(false, true, viewRootImpl);
+        public void onScheduledCheckFocus(ViewRootImpl viewRootImpl) {
+            synchronized (mH) {
+                if (!checkFocusInternalLocked(false, viewRootImpl)) {
+                    return;
+                }
+            }
+            startInputOnWindowFocusGainInternal(StartInputReason.SCHEDULED_CHECK_FOCUS,
+                    null /* focusedView */, 0 /* startInputFlags */, 0 /* softInputMode */,
+                    0 /* windowFlags */);
         }
 
         @Override
@@ -1118,7 +1125,7 @@ public final class InputMethodManager {
                         if (mCurRootView == null) {
                             return;
                         }
-                        if (!checkFocusInternal(mRestartOnNextWindowFocus, false, mCurRootView)) {
+                        if (!checkFocusInternalLocked(mRestartOnNextWindowFocus, mCurRootView)) {
                             return;
                         }
                         final int reason = active ? StartInputReason.ACTIVATED_BY_IMMS
@@ -2338,8 +2345,7 @@ public final class InputMethodManager {
     }
 
     /**
-     * Called from {@link #checkFocusInternal(boolean, boolean, ViewRootImpl)},
-     * {@link #restartInput(View)}, {@link #MSG_BIND} or {@link #MSG_UNBIND}.
+     * Starts an input connection from the served view that gains the window focus.
      * Note that this method should *NOT* be called inside of {@code mH} lock to prevent start input
      * background thread may blocked by other methods which already inside {@code mH} lock.
      */
@@ -2653,52 +2659,47 @@ public final class InputMethodManager {
      */
     @UnsupportedAppUsage
     public void checkFocus() {
-        final ViewRootImpl viewRootImpl;
         synchronized (mH) {
             if (mCurRootView == null) {
                 return;
             }
-            viewRootImpl = mCurRootView;
+            if (!checkFocusInternalLocked(false /* forceNewFocus */, mCurRootView)) {
+                return;
+            }
         }
-        checkFocusInternal(false /* forceNewFocus */, true /* startInput */, viewRootImpl);
+        startInputOnWindowFocusGainInternal(StartInputReason.CHECK_FOCUS,
+                null /* focusedView */,
+                0 /* startInputFlags */, 0 /* softInputMode */, 0 /* windowFlags */);
     }
 
     /**
      * Check the next served view if needs to start input.
      */
-    private boolean checkFocusInternal(boolean forceNewFocus, boolean startInput,
-            ViewRootImpl viewRootImpl) {
-        synchronized (mH) {
-            if (mCurRootView != viewRootImpl) {
-                return false;
-            }
-            if (mServedView == mNextServedView && !forceNewFocus) {
-                return false;
-            }
-            if (DEBUG) {
-                Log.v(TAG, "checkFocus: view=" + mServedView
-                        + " next=" + mNextServedView
-                        + " force=" + forceNewFocus
-                        + " package="
-                        + (mServedView != null ? mServedView.getContext().getPackageName()
-                        : "<none>"));
-            }
-            // Close the connection when no next served view coming.
-            if (mNextServedView == null) {
-                finishInputLocked();
-                closeCurrentInput();
-                return false;
-            }
-            mServedView = mNextServedView;
-            if (mServedInputConnection != null) {
-                mServedInputConnection.finishComposingTextFromImm();
-            }
+    @GuardedBy("mH")
+    private boolean checkFocusInternalLocked(boolean forceNewFocus, ViewRootImpl viewRootImpl) {
+        if (mCurRootView != viewRootImpl) {
+            return false;
         }
-
-        if (startInput) {
-            startInputOnWindowFocusGainInternal(StartInputReason.CHECK_FOCUS,
-                    null /* focusedView */,
-                    0 /* startInputFlags */, 0 /* softInputMode */, 0 /* windowFlags */);
+        if (mServedView == mNextServedView && !forceNewFocus) {
+            return false;
+        }
+        if (DEBUG) {
+            Log.v(TAG, "checkFocus: view=" + mServedView
+                    + " next=" + mNextServedView
+                    + " force=" + forceNewFocus
+                    + " package="
+                    + (mServedView != null ? mServedView.getContext().getPackageName()
+                    : "<none>"));
+        }
+        // Close the connection when no next served view coming.
+        if (mNextServedView == null) {
+            finishInputLocked();
+            closeCurrentInput();
+            return false;
+        }
+        mServedView = mNextServedView;
+        if (mServedInputConnection != null) {
+            mServedInputConnection.finishComposingTextFromImm();
         }
         return true;
     }

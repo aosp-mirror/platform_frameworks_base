@@ -40,6 +40,7 @@ import static android.os.Process.ROOT_UID;
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.UserIdInt;
 import android.app.AppOpsManager;
 import android.app.compat.CompatChanges;
@@ -101,6 +102,7 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.sysprop.DisplayProperties;
 import android.text.TextUtils;
@@ -202,8 +204,6 @@ public final class DisplayManagerService extends SystemService {
     private static final String FORCE_WIFI_DISPLAY_ENABLE = "persist.debug.wfd.enable";
 
     private static final String PROP_DEFAULT_DISPLAY_TOP_INSET = "persist.sys.displayinset.top";
-    private static final String PROP_USE_NEW_DISPLAY_POWER_CONTROLLER =
-            "persist.sys.use_new_display_power_controller";
     private static final long WAIT_FOR_DEFAULT_DISPLAY_TIMEOUT = 10000;
     // This value needs to be in sync with the threshold
     // in RefreshRateConfigs::getFrameRateDivisor.
@@ -2575,6 +2575,7 @@ public final class DisplayManagerService extends SystemService {
         mLogicalDisplayMapper.forEachLocked(this::addDisplayPowerControllerLocked);
     }
 
+    @RequiresPermission(Manifest.permission.READ_DEVICE_CONFIG)
     private void addDisplayPowerControllerLocked(LogicalDisplay display) {
         if (mPowerHandler == null) {
             // initPowerManagement has not yet been called.
@@ -2588,7 +2589,8 @@ public final class DisplayManagerService extends SystemService {
                 display, mSyncRoot);
         final DisplayPowerControllerInterface displayPowerController;
 
-        if (SystemProperties.getInt(PROP_USE_NEW_DISPLAY_POWER_CONTROLLER, 0) == 1) {
+        if (DeviceConfig.getBoolean("display_manager",
+                "use_newly_structured_display_power_controller", false)) {
             displayPowerController = new DisplayPowerController2(
                     mContext, /* injector= */ null, mDisplayPowerCallbacks, mPowerHandler,
                     mSensorManager, mDisplayBlanker, display, mBrightnessTracker, brightnessSetting,

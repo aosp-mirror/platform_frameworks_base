@@ -5242,25 +5242,30 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 Map<String, String> classLoaderContextMap,
                 String loaderIsa) {
             int callingUid = Binder.getCallingUid();
-            if (PackageManagerService.PLATFORM_PACKAGE_NAME.equals(loadingPackageName)
-                    && callingUid != Process.SYSTEM_UID) {
+
+            // TODO(b/254043366): System server should not report its own dex load because there's
+            // nothing ART can do with it.
+
+            Computer snapshot = snapshot();
+
+            // System server should be able to report dex load on behalf of other apps. E.g., it
+            // could potentially resend the notifications in order to migrate the existing dex load
+            // info to ART Service.
+            if (!PackageManagerServiceUtils.isSystemOrRoot()
+                    && !snapshot.isCallerSameApp(
+                            loadingPackageName, callingUid, true /* resolveIsolatedUid */)) {
                 Slog.w(PackageManagerService.TAG,
-                        "Non System Server process reporting dex loads as system server. uid="
-                                + callingUid);
-                // Do not record dex loads from processes pretending to be system server.
-                // Only the system server should be assigned the package "android", so reject calls
-                // that don't satisfy the constraint.
-                //
-                // notifyDexLoad is a PM API callable from the app process. So in theory, apps could
-                // craft calls to this API and pretend to be system server. Doing so poses no
-                // particular danger for dex load reporting or later dexopt, however it is a
-                // sensible check to do in order to verify the expectations.
+                        TextUtils.formatSimple(
+                                "Invalid dex load report. loadingPackageName=%s, uid=%d",
+                                loadingPackageName, callingUid));
                 return;
             }
 
+            // TODO(b/254043366): Call `ArtManagerLocal.notifyDexLoad`.
+
             int userId = UserHandle.getCallingUserId();
-            ApplicationInfo ai = snapshot().getApplicationInfo(loadingPackageName, /*flags*/ 0,
-                    userId);
+            ApplicationInfo ai =
+                    snapshot.getApplicationInfo(loadingPackageName, /*flags*/ 0, userId);
             if (ai == null) {
                 Slog.w(PackageManagerService.TAG, "Loading a package that does not exist for the calling user. package="
                         + loadingPackageName + ", user=" + userId);

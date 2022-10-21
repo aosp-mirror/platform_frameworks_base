@@ -21,6 +21,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
 
 import android.app.backup.BackupTransport;
+import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.RestoreDescription;
 import android.app.backup.RestoreSet;
 import android.content.Intent;
@@ -254,6 +255,9 @@ public class BackupTransportClientTest {
             ITransportStatusCallback c) throws RemoteException {}
         @Override public void abortFullRestore(ITransportStatusCallback c) throws RemoteException {}
         @Override public void getTransportFlags(AndroidFuture<Integer> f) throws RemoteException {}
+        @Override
+        public void getBackupManagerMonitor(AndroidFuture<IBackupManagerMonitor> resultFuture)
+                throws RemoteException {}
         @Override public IBinder asBinder() {
             return null;
         }

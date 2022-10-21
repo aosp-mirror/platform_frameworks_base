@@ -62,6 +62,7 @@ public class BroadcastOptions extends ComponentOptions {
     private long mRequireCompatChangeId = CHANGE_INVALID;
     private boolean mRequireCompatChangeEnabled = true;
     private boolean mIsAlarmBroadcast = false;
+    private boolean mIsInteractiveBroadcast = false;
     private long mIdForResponseEvent;
     private @Nullable IntentFilter mRemoveMatchingFilter;
     private @DeliveryGroupPolicy int mDeliveryGroupPolicy;
@@ -166,6 +167,13 @@ public class BroadcastOptions extends ComponentOptions {
      */
     public static final String KEY_ALARM_BROADCAST =
             "android:broadcast.is_alarm";
+
+    /**
+     * Corresponds to {@link #setInteractiveBroadcast(boolean)}
+     * @hide
+     */
+    public static final String KEY_INTERACTIVE_BROADCAST =
+            "android:broadcast.is_interactive";
 
     /**
      * @hide
@@ -281,6 +289,7 @@ public class BroadcastOptions extends ComponentOptions {
         mRequireCompatChangeEnabled = opts.getBoolean(KEY_REQUIRE_COMPAT_CHANGE_ENABLED, true);
         mIdForResponseEvent = opts.getLong(KEY_ID_FOR_RESPONSE_EVENT);
         mIsAlarmBroadcast = opts.getBoolean(KEY_ALARM_BROADCAST, false);
+        mIsInteractiveBroadcast = opts.getBoolean(KEY_INTERACTIVE_BROADCAST, false);
         mRemoveMatchingFilter = opts.getParcelable(KEY_REMOVE_MATCHING_FILTER,
                 IntentFilter.class);
         mDeliveryGroupPolicy = opts.getInt(KEY_DELIVERY_GROUP_POLICY,
@@ -599,6 +608,27 @@ public class BroadcastOptions extends ComponentOptions {
     }
 
     /**
+     * When set, this broadcast will be understood as having originated from
+     * some direct interaction by the user such as a notification tap or button
+     * press.  Only the OS itself may use this option.
+     * @hide
+     * @param broadcastIsInteractive
+     * @see #isInteractiveBroadcast()
+     */
+    public void setInteractiveBroadcast(boolean broadcastIsInteractive) {
+        mIsInteractiveBroadcast = broadcastIsInteractive;
+    }
+
+    /**
+     * Did this broadcast originate with a direct user interaction?
+     * @return true if this broadcast is the result of an interaction, false otherwise
+     * @hide
+     */
+    public boolean isInteractiveBroadcast() {
+        return mIsInteractiveBroadcast;
+    }
+
+    /**
      * Did this broadcast originate from a push message from the server?
      *
      * @return true if this broadcast is a push message, false otherwise.
@@ -742,6 +772,9 @@ public class BroadcastOptions extends ComponentOptions {
         }
         if (mIsAlarmBroadcast) {
             b.putBoolean(KEY_ALARM_BROADCAST, true);
+        }
+        if (mIsInteractiveBroadcast) {
+            b.putBoolean(KEY_INTERACTIVE_BROADCAST, true);
         }
         if (mMinManifestReceiverApiLevel != 0) {
             b.putInt(KEY_MIN_MANIFEST_RECEIVER_API_LEVEL, mMinManifestReceiverApiLevel);

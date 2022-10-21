@@ -44,3 +44,6 @@ internal fun materialColorScheme(isDarkTheme: Boolean): ColorScheme {
 
 val ColorScheme.divider: Color
     get() = onSurface.copy(SettingsOpacity.Divider)
+
+val ColorScheme.surfaceTone: Color
+    get() = primary.copy(SettingsOpacity.SurfaceTone)
