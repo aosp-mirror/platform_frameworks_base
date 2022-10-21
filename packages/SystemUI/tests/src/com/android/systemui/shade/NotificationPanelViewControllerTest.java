@@ -757,6 +757,38 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testOnTouchEvent_expansionResumesAfterBriefTouch() {
+        // Start shade collapse with swipe up
+        onTouchEvent(MotionEvent.obtain(0L /* downTime */,
+                0L /* eventTime */, MotionEvent.ACTION_DOWN, 0f /* x */, 0f /* y */,
+                0 /* metaState */));
+        onTouchEvent(MotionEvent.obtain(0L /* downTime */,
+                0L /* eventTime */, MotionEvent.ACTION_MOVE, 0f /* x */, 300f /* y */,
+                0 /* metaState */));
+        onTouchEvent(MotionEvent.obtain(0L /* downTime */,
+                0L /* eventTime */, MotionEvent.ACTION_UP, 0f /* x */, 300f /* y */,
+                0 /* metaState */));
+
+        assertThat(mNotificationPanelViewController.getClosing()).isTrue();
+        assertThat(mNotificationPanelViewController.getIsFlinging()).isTrue();
+
+        // simulate touch that does not exceed touch slop
+        onTouchEvent(MotionEvent.obtain(2L /* downTime */,
+                2L /* eventTime */, MotionEvent.ACTION_DOWN, 0f /* x */, 300f /* y */,
+                0 /* metaState */));
+
+        mNotificationPanelViewController.setTouchSlopExceeded(false);
+
+        onTouchEvent(MotionEvent.obtain(2L /* downTime */,
+                2L /* eventTime */, MotionEvent.ACTION_UP, 0f /* x */, 300f /* y */,
+                0 /* metaState */));
+
+        // fling should still be called after a touch that does not exceed touch slop
+        assertThat(mNotificationPanelViewController.getClosing()).isTrue();
+        assertThat(mNotificationPanelViewController.getIsFlinging()).isTrue();
+    }
+
+    @Test
     public void handleTouchEventFromStatusBar_panelsNotEnabled_returnsFalseAndNoViewEvent() {
         when(mCommandQueue.panelsEnabled()).thenReturn(false);
 
