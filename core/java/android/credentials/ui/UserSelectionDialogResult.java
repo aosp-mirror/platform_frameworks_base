@@ -17,6 +17,8 @@
 package android.credentials.ui;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -24,24 +26,33 @@ import android.os.Parcelable;
 import com.android.internal.util.AnnotationValidations;
 
 /**
- * User selection result information of a UX flow.
- *
- * Returned as part of the activity result intent data when the user dialog completes
- * successfully.
+ * Result data matching {@link BaseDialogResult#RESULT_CODE_DIALOG_COMPLETE_WITH_SELECTION}.
  *
  * @hide
  */
-public class UserSelectionResult implements Parcelable {
+public class UserSelectionDialogResult extends BaseDialogResult implements Parcelable {
+    /** Parses and returns a UserSelectionDialogResult from the given resultData. */
+    @Nullable
+    public static UserSelectionDialogResult fromResultData(@NonNull Bundle resultData) {
+        return resultData.getParcelable(
+            EXTRA_USER_SELECTION_RESULT, UserSelectionDialogResult.class);
+    }
 
     /**
-    * The intent extra key for the {@code UserSelectionResult} object when the credential selector
-    * activity finishes.
-    */
-    public static final String EXTRA_USER_SELECTION_RESULT =
-            "android.credentials.ui.extra.USER_SELECTION_RESULT";
+     * Used for the UX to construct the {@code resultData Bundle} to send via the {@code
+     *  ResultReceiver}.
+     */
+    public static void addToBundle(
+            @NonNull UserSelectionDialogResult result, @NonNull Bundle bundle) {
+        bundle.putParcelable(EXTRA_USER_SELECTION_RESULT, result);
+    }
 
-    @NonNull
-    private final IBinder mRequestToken;
+    /**
+     * The intent extra key for the {@code UserSelectionDialogResult} object when the credential
+     * selector activity finishes.
+     */
+    private static final String EXTRA_USER_SELECTION_RESULT =
+            "android.credentials.ui.extra.USER_SELECTION_RESULT";
 
     @NonNull
     private final String mProviderId;
@@ -49,17 +60,12 @@ public class UserSelectionResult implements Parcelable {
     // TODO: consider switching to string or other types, depending on the service implementation.
     private final int mEntryId;
 
-    public UserSelectionResult(@NonNull IBinder requestToken, @NonNull String providerId,
+    public UserSelectionDialogResult(
+            @NonNull IBinder requestToken, @NonNull String providerId,
             int entryId) {
-        mRequestToken = requestToken;
+        super(requestToken);
         mProviderId = providerId;
         mEntryId = entryId;
-    }
-
-    /** Returns token of the app request that initiated this user dialog. */
-    @NonNull
-    public IBinder getRequestToken() {
-        return mRequestToken;
     }
 
     /** Returns provider package name whose entry was selected by the user. */
@@ -73,13 +79,11 @@ public class UserSelectionResult implements Parcelable {
         return mEntryId;
     }
 
-    protected UserSelectionResult(@NonNull Parcel in) {
-        IBinder requestToken = in.readStrongBinder();
+    protected UserSelectionDialogResult(@NonNull Parcel in) {
+        super(in);
         String providerId = in.readString8();
         int entryId = in.readInt();
 
-        mRequestToken = requestToken;
-        AnnotationValidations.validate(NonNull.class, null, mRequestToken);
         mProviderId = providerId;
         AnnotationValidations.validate(NonNull.class, null, mProviderId);
         mEntryId = entryId;
@@ -87,7 +91,7 @@ public class UserSelectionResult implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeStrongBinder(mRequestToken);
+        super.writeToParcel(dest, flags);
         dest.writeString8(mProviderId);
         dest.writeInt(mEntryId);
     }
@@ -97,16 +101,16 @@ public class UserSelectionResult implements Parcelable {
         return 0;
     }
 
-    public static final @NonNull Creator<UserSelectionResult> CREATOR =
-            new Creator<UserSelectionResult>() {
+    public static final @NonNull Creator<UserSelectionDialogResult> CREATOR =
+            new Creator<UserSelectionDialogResult>() {
         @Override
-        public UserSelectionResult createFromParcel(@NonNull Parcel in) {
-            return new UserSelectionResult(in);
+        public UserSelectionDialogResult createFromParcel(@NonNull Parcel in) {
+            return new UserSelectionDialogResult(in);
         }
 
         @Override
-        public UserSelectionResult[] newArray(int size) {
-            return new UserSelectionResult[size];
+        public UserSelectionDialogResult[] newArray(int size) {
+            return new UserSelectionDialogResult[size];
         }
     };
 }
