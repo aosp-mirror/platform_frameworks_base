@@ -22,7 +22,7 @@ import androidx.test.filters.SmallTest
 import com.android.settingslib.AccessibilityContentDescriptions.WIFI_CONNECTION_STRENGTH
 import com.android.settingslib.AccessibilityContentDescriptions.WIFI_NO_CONNECTION
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.common.shared.model.ContentDescription
+import com.android.systemui.common.shared.model.ContentDescription.Companion.loadContentDescription
 import com.android.systemui.statusbar.connectivity.WifiIcons.WIFI_FULL_ICONS
 import com.android.systemui.statusbar.connectivity.WifiIcons.WIFI_NO_INTERNET_ICONS
 import com.android.systemui.statusbar.connectivity.WifiIcons.WIFI_NO_NETWORK
@@ -125,18 +125,11 @@ internal class WifiViewModelIconParameterizedTest(private val testCase: TestCase
                 } else {
                     testCase.expected.contentDescription.invoke(context)
                 }
-            assertThat(iconFlow.value?.contentDescription?.getAsString())
+            assertThat(iconFlow.value?.contentDescription?.loadContentDescription(context))
                 .isEqualTo(expectedContentDescription)
 
             job.cancel()
         }
-
-    private fun ContentDescription.getAsString(): String? {
-        return when (this) {
-            is ContentDescription.Loaded -> this.description
-            is ContentDescription.Resource -> context.getString(this.res)
-        }
-    }
 
     internal data class Expected(
         /** The resource that should be used for the icon. */

@@ -264,10 +264,9 @@ public class ImageWriter implements AutoCloseable {
         if (useSurfaceImageFormatInfo) {
             // nativeInit internally overrides UNKNOWN format. So does surface format query after
             // nativeInit and before getEstimatedNativeAllocBytes().
-            imageFormat = SurfaceUtils.getSurfaceFormat(surface);
-            mDataSpace = dataSpace = PublicFormatUtils.getHalDataspace(imageFormat);
-            mHardwareBufferFormat =
-                hardwareBufferFormat = PublicFormatUtils.getHalFormat(imageFormat);
+            mHardwareBufferFormat = hardwareBufferFormat = SurfaceUtils.getSurfaceFormat(surface);
+            mDataSpace = dataSpace = SurfaceUtils.getSurfaceDataspace(surface);
+            imageFormat = PublicFormatUtils.getPublicFormat(hardwareBufferFormat, dataSpace);
         }
 
         // Estimate the native buffer allocation size and register it so it gets accounted for

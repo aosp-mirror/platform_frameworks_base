@@ -166,6 +166,14 @@ final class OverlayManagerServiceImpl {
         CollectionUtils.addAll(updatedTargets, removeOverlaysForUser(
                 (info) -> !userPackages.containsKey(info.packageName), newUserId));
 
+        final ArraySet<String> overlaidByOthers = new ArraySet<>();
+        for (AndroidPackage androidPackage : userPackages.values()) {
+            final String overlayTarget = androidPackage.getOverlayTarget();
+            if (!TextUtils.isEmpty(overlayTarget)) {
+                overlaidByOthers.add(overlayTarget);
+            }
+        }
+
         // Update the state of all installed packages containing overlays, and initialize new
         // overlays that are not currently in the settings.
         for (int i = 0, n = userPackages.size(); i < n; i++) {
@@ -175,8 +183,10 @@ final class OverlayManagerServiceImpl {
                         updatePackageOverlays(pkg, newUserId, 0 /* flags */));
 
                 // When a new user is switched to for the first time, package manager must be
-                // informed of the overlay paths for all packages installed in the user.
-                updatedTargets.add(new PackageAndUser(pkg.getPackageName(), newUserId));
+                // informed of the overlay paths for all overlaid packages installed in the user.
+                if (overlaidByOthers.contains(pkg.getPackageName())) {
+                    updatedTargets.add(new PackageAndUser(pkg.getPackageName(), newUserId));
+                }
             } catch (OperationFailedException e) {
                 Slog.e(TAG, "failed to initialize overlays of '" + pkg.getPackageName()
                         + "' for user " + newUserId + "", e);

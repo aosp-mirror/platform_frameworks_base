@@ -777,7 +777,7 @@ final class IRemoteInputConnectionInvoker {
     }
 
     /**
-     * Invokes {@link IRemoteInputConnection#replaceText(InputConnectionCommandHeader, int, int,
+     * Invokes {@code IRemoteInputConnection#replaceText(InputConnectionCommandHeader, int, int,
      * CharSequence, TextAttribute)}.
      *
      * @param start the character index where the replacement should start.
@@ -788,6 +788,8 @@ final class IRemoteInputConnectionInvoker {
      *     that this means you can't position the cursor within the text.
      * @param text the text to replace. This may include styles.
      * @param textAttribute The extra information about the text. This value may be null.
+     * @return {@code true} if the invocation is completed without {@link RemoteException}, {@code
+     *     false} otherwise.
      */
     @AnyThread
     public boolean replaceText(

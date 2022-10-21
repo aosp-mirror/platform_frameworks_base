@@ -23,7 +23,7 @@ import com.android.settingslib.spa.framework.common.LogEvent
 import com.android.settingslib.spa.framework.common.SpaEnvironmentFactory
 
 @Composable
-fun LogEntryEvent(): (event: LogEvent) -> Unit {
+fun logEntryEvent(): (event: LogEvent) -> Unit {
     val entryId = LocalEntryDataProvider.current.entryId ?: return {}
     return {
         SpaEnvironmentFactory.instance.logger.event(entryId, it, category = LogCategory.VIEW)
@@ -31,9 +31,9 @@ fun LogEntryEvent(): (event: LogEvent) -> Unit {
 }
 
 @Composable
-fun WrapOnClickWithLog(onClick: (() -> Unit)?): (() -> Unit)? {
+fun wrapOnClickWithLog(onClick: (() -> Unit)?): (() -> Unit)? {
     if (onClick == null) return null
-    val logEvent = LogEntryEvent()
+    val logEvent = logEntryEvent()
     return {
         logEvent(LogEvent.ENTRY_CLICK)
         onClick()
@@ -41,9 +41,9 @@ fun WrapOnClickWithLog(onClick: (() -> Unit)?): (() -> Unit)? {
 }
 
 @Composable
-fun WrapOnSwitchWithLog(onSwitch: ((checked: Boolean) -> Unit)?): ((checked: Boolean) -> Unit)? {
+fun wrapOnSwitchWithLog(onSwitch: ((checked: Boolean) -> Unit)?): ((checked: Boolean) -> Unit)? {
     if (onSwitch == null) return null
-    val logEvent = LogEntryEvent()
+    val logEvent = logEntryEvent()
     return {
         val event = if (it) LogEvent.ENTRY_SWITCH_ON else LogEvent.ENTRY_SWITCH_OFF
         logEvent(event)

@@ -20,14 +20,20 @@ import android.app.StatusBarManager
 import android.content.Context
 import android.media.MediaRoute2Info
 import android.util.Log
+import android.view.View
+import com.android.internal.logging.UiEventLogger
 import com.android.internal.statusbar.IUndoMediaTransferCallback
 import com.android.systemui.CoreStartable
+import com.android.systemui.R
+import com.android.systemui.common.shared.model.Text
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.media.taptotransfer.MediaTttFlags
 import com.android.systemui.media.taptotransfer.common.MediaTttLogger
+import com.android.systemui.media.taptotransfer.common.MediaTttUtils
 import com.android.systemui.statusbar.CommandQueue
-import com.android.systemui.temporarydisplay.chipbar.ChipSenderInfo
 import com.android.systemui.temporarydisplay.chipbar.ChipbarCoordinator
+import com.android.systemui.temporarydisplay.chipbar.ChipbarEndItem
+import com.android.systemui.temporarydisplay.chipbar.ChipbarInfo
 import com.android.systemui.temporarydisplay.chipbar.SENDER_TAG
 import javax.inject.Inject
 
@@ -107,7 +113,89 @@ constructor(
             chipbarCoordinator.removeView(removalReason)
         } else {
             displayedState = chipState
-            chipbarCoordinator.displayView(ChipSenderInfo(chipState, routeInfo, undoCallback))
+            chipbarCoordinator.displayView(
+                createChipbarInfo(
+                    chipState,
+                    routeInfo,
+                    undoCallback,
+                    context,
+                    logger,
+                )
+            )
         }
+    }
+
+    /**
+     * Creates an instance of [ChipbarInfo] that can be sent to [ChipbarCoordinator] for display.
+     */
+    private fun createChipbarInfo(
+        chipStateSender: ChipStateSender,
+        routeInfo: MediaRoute2Info,
+        undoCallback: IUndoMediaTransferCallback?,
+        context: Context,
+        logger: MediaTttLogger,
+    ): ChipbarInfo {
+        val packageName = routeInfo.clientPackageName
+        val otherDeviceName = routeInfo.name.toString()
+
+        return ChipbarInfo(
+            // Display the app's icon as the start icon
+            startIcon = MediaTttUtils.getIconFromPackageName(context, packageName, logger),
+            text = chipStateSender.getChipTextString(context, otherDeviceName),
+            endItem =
+                when (chipStateSender.endItem) {
+                    null -> null
+                    is SenderEndItem.Loading -> ChipbarEndItem.Loading
+                    is SenderEndItem.Error -> ChipbarEndItem.Error
+                    is SenderEndItem.UndoButton -> {
+                        if (undoCallback != null) {
+                            getUndoButton(
+                                undoCallback,
+                                chipStateSender.endItem.uiEventOnClick,
+                                chipStateSender.endItem.newState,
+                                routeInfo,
+                            )
+                        } else {
+                            null
+                        }
+                    }
+                }
+        )
+    }
+
+    /**
+     * Returns an undo button for the chip.
+     *
+     * When the button is clicked: [undoCallback] will be triggered, [uiEvent] will be logged, and
+     * this coordinator will transition to [newState].
+     */
+    private fun getUndoButton(
+        undoCallback: IUndoMediaTransferCallback,
+        uiEvent: UiEventLogger.UiEventEnum,
+        @StatusBarManager.MediaTransferSenderState newState: Int,
+        routeInfo: MediaRoute2Info,
+    ): ChipbarEndItem.Button {
+        val onClickListener =
+            View.OnClickListener {
+                uiEventLogger.logUndoClicked(uiEvent)
+                undoCallback.onUndoTriggered()
+
+                // The external service should eventually send us a new TransferTriggered state, but
+                // but that may take too long to go through the binder and the user may be confused
+                // as to why the UI hasn't changed yet. So, we immediately change the UI here.
+                updateMediaTapToTransferSenderDisplay(
+                    newState,
+                    routeInfo,
+                    // Since we're force-updating the UI, we don't have any [undoCallback] from the
+                    // external service (and TransferTriggered states don't have undo callbacks
+                    // anyway).
+                    undoCallback = null,
+                )
+            }
+
+        return ChipbarEndItem.Button(
+            Text.Resource(R.string.media_transfer_undo),
+            onClickListener,
+        )
     }
 }

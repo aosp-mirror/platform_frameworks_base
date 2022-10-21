@@ -17,6 +17,7 @@
 package com.android.systemui.doze;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.service.dreams.DreamService;
@@ -59,6 +60,7 @@ public class DozeService extends DreamService
         mPluginManager.addPluginListener(this, DozeServicePlugin.class, false /* allowMultiple */);
         DozeComponent dozeComponent = mDozeComponentBuilder.build(this);
         mDozeMachine = dozeComponent.getDozeMachine();
+        mDozeMachine.onConfigurationChanged(getResources().getConfiguration());
     }
 
     @Override
@@ -124,6 +126,12 @@ public class DozeService extends DreamService
         if (mDozeMachine != null) {
             mDozeMachine.requestState(DozeMachine.State.DOZE_AOD);
         }
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        mDozeMachine.onConfigurationChanged(newConfig);
     }
 
     @Override

@@ -19,7 +19,7 @@
 
     <uses-permission android:name="android.permission.ACCESS_BROADCAST_RADIO" />
 
-    <application>
+    <application android:debuggable="true">
         <uses-library android:name="android.test.runner" />
     </application>
 

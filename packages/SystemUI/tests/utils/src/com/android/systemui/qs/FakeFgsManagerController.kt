@@ -16,7 +16,7 @@
 
 package com.android.systemui.qs
 
-import android.view.View
+import com.android.systemui.animation.Expandable
 import com.android.systemui.qs.FgsManagerController.OnDialogDismissedListener
 import com.android.systemui.qs.FgsManagerController.OnNumberOfPackagesChangedListener
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -54,7 +54,7 @@ class FakeFgsManagerController(
 
     override fun init() {}
 
-    override fun showDialog(viewLaunchedFrom: View?) {}
+    override fun showDialog(expandable: Expandable?) {}
 
     override fun addOnNumberOfPackagesChangedListener(listener: OnNumberOfPackagesChangedListener) {
         numRunningPackagesListeners.add(listener)

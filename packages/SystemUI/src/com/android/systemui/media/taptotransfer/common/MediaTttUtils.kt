@@ -21,6 +21,8 @@ import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import com.android.settingslib.Utils
 import com.android.systemui.R
+import com.android.systemui.common.shared.model.ContentDescription
+import com.android.systemui.common.shared.model.Icon
 
 /** Utility methods for media tap-to-transfer. */
 class MediaTttUtils {
@@ -29,6 +31,23 @@ class MediaTttUtils {
         // UpdateMediaTapToTransferReceiverDisplayTest
         const val WINDOW_TITLE = "Media Transfer Chip View"
         const val WAKE_REASON = "MEDIA_TRANSFER_ACTIVATED"
+
+        /**
+         * Returns the information needed to display the icon in [Icon] form.
+         *
+         * See [getIconInfoFromPackageName].
+         */
+        fun getIconFromPackageName(
+            context: Context,
+            appPackageName: String?,
+            logger: MediaTttLogger,
+        ): Icon {
+            val iconInfo = getIconInfoFromPackageName(context, appPackageName, logger)
+            return Icon.Loaded(
+                iconInfo.drawable,
+                ContentDescription.Loaded(iconInfo.contentDescription)
+            )
+        }
 
         /**
          * Returns the information needed to display the icon.

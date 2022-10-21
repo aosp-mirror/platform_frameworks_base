@@ -20,7 +20,7 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
-import com.android.settingslib.spa.framework.util.WrapOnSwitchWithLog
+import com.android.settingslib.spa.framework.util.wrapOnSwitchWithLog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,7 +35,7 @@ fun SettingsSwitch(
     if (checkedValue != null) {
         Checkbox(
             checked = checkedValue,
-            onCheckedChange = WrapOnSwitchWithLog(onCheckedChange),
+            onCheckedChange = wrapOnSwitchWithLog(onCheckedChange),
             enabled = changeable.value,
         )
     } else {

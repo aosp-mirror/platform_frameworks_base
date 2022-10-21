@@ -741,9 +741,6 @@
     <!-- Text shown in place of notification contents when the notification is hidden on a secure lockscreen -->
     <string name="notification_hidden_text">New notification</string>
 
-    <!-- Text shown when viewing channel settings for notifications related to the virtual keyboard -->
-    <string name="notification_channel_virtual_keyboard">Virtual keyboard</string>
-
     <!-- Text shown when viewing channel settings for notifications related to the hardware keyboard -->
     <string name="notification_channel_physical_keyboard">Physical keyboard</string>
 

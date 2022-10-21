@@ -1094,7 +1094,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
         mCentralSurfaces.endAffordanceLaunch();
         // The second condition is for SIM card locked bouncer
-        if (bouncerIsScrimmed() && needsFullscreenBouncer()) {
+        if (bouncerIsScrimmed() && !needsFullscreenBouncer()) {
             hideBouncer(false);
             updateStates();
         } else {
