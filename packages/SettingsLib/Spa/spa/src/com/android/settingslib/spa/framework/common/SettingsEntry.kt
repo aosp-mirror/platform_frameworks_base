@@ -65,7 +65,13 @@ data class SettingsEntry(
      * ========================================
      */
     val isAllowSearch: Boolean = false,
+
+    // Indicate whether the search indexing data of entry is dynamic.
     val isSearchDataDynamic: Boolean = false,
+
+    // Indicate whether the status of entry is mutable.
+    // If so, for instance, we'll reindex its status for search.
+    val mutableStatus: Boolean = false,
 
     /**
      * ========================================
@@ -74,8 +80,14 @@ data class SettingsEntry(
      */
 
     /**
-     * API to get Search related data for this entry.
-     * Returns null if this entry is not available for the search at the moment.
+     * API to get the status data of the entry, such as isDisabled / isSwitchOff.
+     * Returns null if this entry do NOT have any status.
+     */
+    private val statusDataImpl: (arguments: Bundle?) -> EntryStatusData? = { null },
+
+    /**
+     * API to get Search indexing data for this entry, such as title / keyword.
+     * Returns null if this entry do NOT support search.
      */
     private val searchDataImpl: (arguments: Bundle?) -> EntrySearchData? = { null },
 
@@ -116,6 +128,10 @@ data class SettingsEntry(
         return arguments
     }
 
+    fun getStatusData(runtimeArguments: Bundle? = null): EntryStatusData? {
+        return statusDataImpl(fullArgument(runtimeArguments))
+    }
+
     fun getSearchData(runtimeArguments: Bundle? = null): EntrySearchData? {
         return searchDataImpl(fullArgument(runtimeArguments))
     }
@@ -151,8 +167,10 @@ class SettingsEntryBuilder(private val name: String, private val owner: Settings
     // Attributes
     private var isAllowSearch: Boolean = false
     private var isSearchDataDynamic: Boolean = false
+    private var mutableStatus: Boolean = false
 
     // Functions
+    private var statusDataFn: (arguments: Bundle?) -> EntryStatusData? = { null }
     private var searchDataFn: (arguments: Bundle?) -> EntrySearchData? = { null }
     private var uiLayoutFn: (@Composable (arguments: Bundle?) -> Unit) = { }
 
@@ -170,8 +188,10 @@ class SettingsEntryBuilder(private val name: String, private val owner: Settings
             // attributes
             isAllowSearch = isAllowSearch,
             isSearchDataDynamic = isSearchDataDynamic,
+            mutableStatus = mutableStatus,
 
             // functions
+            statusDataImpl = statusDataFn,
             searchDataImpl = searchDataFn,
             uiLayoutImpl = uiLayoutFn,
         )
@@ -201,12 +221,23 @@ class SettingsEntryBuilder(private val name: String, private val owner: Settings
         return this
     }
 
+    fun setHasMutableStatus(hasMutableStatus: Boolean): SettingsEntryBuilder {
+        this.mutableStatus = hasMutableStatus
+        return this
+    }
+
     fun setMacro(fn: (arguments: Bundle?) -> EntryMacro): SettingsEntryBuilder {
+        setStatusDataFn { fn(it).getStatusData() }
         setSearchDataFn { fn(it).getSearchData() }
         setUiLayoutFn {
             val macro = remember { fn(it) }
             macro.UiLayout()
         }
+        return this
+    }
+
+    fun setStatusDataFn(fn: (arguments: Bundle?) -> EntryStatusData?): SettingsEntryBuilder {
+        this.statusDataFn = fn
         return this
     }
 

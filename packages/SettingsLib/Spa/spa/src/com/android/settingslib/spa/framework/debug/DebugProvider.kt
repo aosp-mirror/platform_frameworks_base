@@ -170,6 +170,7 @@ class DebugProvider : ContentProvider() {
                 .add(ColumnEnum.ENTRY_NAME.id, entry.displayName)
                 .add(ColumnEnum.ENTRY_ROUTE.id, entry.containerPage().buildRoute())
                 .add(ColumnEnum.ENTRY_INTENT_URI.id, intent.toUri(URI_INTENT_SCHEME))
+                .add(ColumnEnum.ENTRY_HIERARCHY_PATH.id, entryRepository.getEntryPath(entry.id))
         }
         return cursor
     }
