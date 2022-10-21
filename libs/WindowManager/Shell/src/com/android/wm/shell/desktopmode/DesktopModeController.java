@@ -20,6 +20,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_OPEN;
+import static android.view.WindowManager.TRANSIT_TO_FRONT;
 
 import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE;
@@ -181,7 +182,18 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
     /**
      * Show apps on desktop
      */
-    WindowContainerTransaction showDesktopApps() {
+    void showDesktopApps() {
+        WindowContainerTransaction wct = bringDesktopAppsToFront();
+
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+            mTransitions.startTransition(TRANSIT_TO_FRONT, wct, null /* handler */);
+        } else {
+            mShellTaskOrganizer.applyTransaction(wct);
+        }
+    }
+
+    @NonNull
+    private WindowContainerTransaction bringDesktopAppsToFront() {
         ArraySet<Integer> activeTasks = mDesktopModeTaskRepository.getActiveTasks();
         ProtoLog.d(WM_SHELL_DESKTOP_MODE, "bringDesktopAppsToFront: tasks=%s", activeTasks.size());
         ArrayList<RunningTaskInfo> taskInfos = new ArrayList<>();
@@ -197,11 +209,6 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
         for (RunningTaskInfo task : taskInfos) {
             wct.reorder(task.token, true);
         }
-
-        if (!Transitions.ENABLE_SHELL_TRANSITIONS) {
-            mShellTaskOrganizer.applyTransaction(wct);
-        }
-
         return wct;
     }
 
@@ -259,7 +266,7 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
         if (wct == null) {
             wct = new WindowContainerTransaction();
         }
-        wct.merge(showDesktopApps(), true /* transfer */);
+        wct.merge(bringDesktopAppsToFront(), true /* transfer */);
         wct.reorder(request.getTriggerTask().token, true /* onTop */);
 
         return wct;
