@@ -13373,27 +13373,19 @@ public class ActivityManagerService extends IActivityManager.Stub
         int callingPid;
         boolean instantApp;
         synchronized(this) {
-            if (caller != null) {
-                callerApp = getRecordForAppLOSP(caller);
-                if (callerApp == null) {
-                    throw new SecurityException(
-                            "Unable to find app for caller " + caller
-                            + " (pid=" + Binder.getCallingPid()
-                            + ") when registering receiver " + receiver);
-                }
-                if (callerApp.info.uid != SYSTEM_UID
-                        && !callerApp.getPkgList().containsKey(callerPackage)
-                        && !"android".equals(callerPackage)) {
-                    throw new SecurityException("Given caller package " + callerPackage
-                            + " is not running in process " + callerApp);
-                }
-                callingUid = callerApp.info.uid;
-                callingPid = callerApp.getPid();
-            } else {
-                callerPackage = null;
-                callingUid = Binder.getCallingUid();
-                callingPid = Binder.getCallingPid();
+            callerApp = getRecordForAppLOSP(caller);
+            if (callerApp == null) {
+                Slog.w(TAG, "registerReceiverWithFeature: no app for " + caller);
+                return null;
             }
+            if (callerApp.info.uid != SYSTEM_UID
+                    && !callerApp.getPkgList().containsKey(callerPackage)
+                    && !"android".equals(callerPackage)) {
+                throw new SecurityException("Given caller package " + callerPackage
+                        + " is not running in process " + callerApp);
+            }
+            callingUid = callerApp.info.uid;
+            callingPid = callerApp.getPid();
 
             instantApp = isInstantApp(callerApp, callerPackage, callingUid);
             userId = mUserController.handleIncomingUser(callingPid, callingUid, userId, true,
