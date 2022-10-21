@@ -107,6 +107,7 @@ package android {
     field public static final String LAUNCH_MULTI_PANE_SETTINGS_DEEP_LINK = "android.permission.LAUNCH_MULTI_PANE_SETTINGS_DEEP_LINK";
     field public static final String LOADER_USAGE_STATS = "android.permission.LOADER_USAGE_STATS";
     field public static final String LOCATION_HARDWARE = "android.permission.LOCATION_HARDWARE";
+    field public static final String MANAGE_DEVICE_LOCK_STATE = "android.permission.MANAGE_DEVICE_LOCK_STATE";
     field public static final String MANAGE_DOCUMENTS = "android.permission.MANAGE_DOCUMENTS";
     field public static final String MANAGE_EXTERNAL_STORAGE = "android.permission.MANAGE_EXTERNAL_STORAGE";
     field public static final String MANAGE_MEDIA = "android.permission.MANAGE_MEDIA";
@@ -9845,6 +9846,7 @@ package android.content {
     field public static final int CONTEXT_RESTRICTED = 4; // 0x4
     field public static final String CREDENTIAL_SERVICE = "credential";
     field public static final String CROSS_PROFILE_APPS_SERVICE = "crossprofileapps";
+    field public static final String DEVICE_LOCK_SERVICE = "device_lock";
     field public static final String DEVICE_POLICY_SERVICE = "device_policy";
     field public static final String DISPLAY_HASH_SERVICE = "display_hash";
     field public static final String DISPLAY_SERVICE = "display";
@@ -11991,6 +11993,7 @@ package android.content.pm {
     field public static final String FEATURE_CONTROLS = "android.software.controls";
     field public static final String FEATURE_CREDENTIALS = "android.software.credentials";
     field public static final String FEATURE_DEVICE_ADMIN = "android.software.device_admin";
+    field public static final String FEATURE_DEVICE_LOCK = "android.software.device_lock";
     field public static final String FEATURE_EMBEDDED = "android.hardware.type.embedded";
     field public static final String FEATURE_ETHERNET = "android.hardware.ethernet";
     field public static final String FEATURE_EXPANDED_PICTURE_IN_PICTURE = "android.software.expanded_picture_in_picture";
