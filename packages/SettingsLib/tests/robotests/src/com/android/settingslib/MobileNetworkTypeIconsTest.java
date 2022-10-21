@@ -41,19 +41,19 @@ public class MobileNetworkTypeIconsTest {
         MobileNetworkTypeIcon icon =
                 MobileNetworkTypeIcons.getNetworkTypeIcon(TelephonyIcons.FOUR_G);
 
-        assertThat(icon.getName()).isEqualTo(TelephonyIcons.H_PLUS.name);
+        assertThat(icon.getName()).isEqualTo(TelephonyIcons.FOUR_G.name);
         assertThat(icon.getIconResId()).isEqualTo(TelephonyIcons.ICON_4G);
     }
 
     @Test
     public void getNetworkTypeIcon_unknown_returnsUnknown() {
-        SignalIcon.MobileIconGroup unknownGroup =
-                new SignalIcon.MobileIconGroup("testUnknownNameHere", 45, 6);
+        SignalIcon.MobileIconGroup unknownGroup = new SignalIcon.MobileIconGroup(
+                "testUnknownNameHere", /* dataContentDesc= */ 45, /* dataType= */ 6);
 
         MobileNetworkTypeIcon icon = MobileNetworkTypeIcons.getNetworkTypeIcon(unknownGroup);
 
         assertThat(icon.getName()).isEqualTo("testUnknownNameHere");
-        assertThat(icon.getIconResId()).isEqualTo(45);
-        assertThat(icon.getContentDescriptionResId()).isEqualTo(6);
+        assertThat(icon.getIconResId()).isEqualTo(6);
+        assertThat(icon.getContentDescriptionResId()).isEqualTo(45);
     }
 }
