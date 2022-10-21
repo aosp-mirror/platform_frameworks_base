@@ -751,6 +751,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             if (DEBUG) Log.d(TAG, "keyguardGone");
             mKeyguardViewControllerLazy.get().setKeyguardGoingAwayState(false);
             mKeyguardDisplayManager.hide();
+            mUpdateMonitor.startBiometricWatchdog();
             Trace.endSection();
         }
 

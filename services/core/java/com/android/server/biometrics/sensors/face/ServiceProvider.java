@@ -128,4 +128,10 @@ public interface ServiceProvider extends BiometricServiceProvider<FaceSensorProp
             @NonNull String opPackageName);
 
     void dumpHal(int sensorId, @NonNull FileDescriptor fd, @NonNull String[] args);
+
+    /**
+     * Schedules watchdog for canceling hung operations
+     * @param sensorId sensor ID of the associated operation
+     */
+    default void scheduleWatchdog(int sensorId) {}
 }

@@ -768,6 +768,20 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
         }
     }
 
+    /**
+     * Schedules a watchdog.
+     *
+     * @hide
+     */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    public void scheduleWatchdog() {
+        try {
+            mService.scheduleWatchdog();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     private void cancelEnrollment(long requestId) {
         if (mService != null) {
             try {

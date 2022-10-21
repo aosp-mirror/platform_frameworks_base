@@ -1125,6 +1125,20 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     }
 
     /**
+     * Schedules a watchdog.
+     *
+     * @hide
+     */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    public void scheduleWatchdog() {
+        try {
+            mService.scheduleWatchdog();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * @hide
      */
     public void addLockoutResetCallback(final LockoutResetCallback callback) {

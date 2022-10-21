@@ -879,6 +879,18 @@ public class FingerprintService extends SystemService {
                 provider.onPowerPressed();
             }
         }
+
+        @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
+        @Override
+        public void scheduleWatchdog() {
+            final Pair<Integer, ServiceProvider> provider = mRegistry.getSingleProvider();
+            if (provider == null) {
+                Slog.w(TAG, "Null provider for scheduling watchdog");
+                return;
+            }
+
+            provider.second.scheduleWatchdog(provider.first);
+        }
     };
 
     public FingerprintService(Context context) {

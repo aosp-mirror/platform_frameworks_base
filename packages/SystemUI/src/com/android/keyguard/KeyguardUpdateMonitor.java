@@ -106,7 +106,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
@@ -3795,5 +3794,18 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             pw.println("    mNeedsSlowUnlockTransition=" + mNeedsSlowUnlockTransition);
         }
         mListenModels.print(pw);
+    }
+
+    /**
+     * Schedules a watchdog for the face and fingerprint BiometricScheduler.
+     * Cancels all operations in the scheduler if it is hung for 10 seconds.
+     */
+    public void startBiometricWatchdog() {
+        if (mFaceManager != null) {
+            mFaceManager.scheduleWatchdog();
+        }
+        if (mFpm != null) {
+            mFpm.scheduleWatchdog();
+        }
     }
 }
