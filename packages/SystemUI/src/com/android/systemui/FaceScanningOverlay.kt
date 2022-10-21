@@ -169,9 +169,8 @@ class FaceScanningOverlay(
                 playSequentially(
                     cameraProtectionAnimator,
                     createRimAppearAnimator(),
-                        createPulseAnimator(), createPulseAnimator(),
-                        createPulseAnimator(), createPulseAnimator(),
-                        createPulseAnimator(), createPulseAnimator())
+                    createPulseAnimator()
+                )
             } else {
                 val rimDisappearAnimator = ValueAnimator.ofFloat(
                         rimProgress,
@@ -257,21 +256,14 @@ class FaceScanningOverlay(
         invalidate()
     }
 
-    fun createPulseAnimator(): AnimatorSet {
-        return AnimatorSet().apply {
-            val pulseInwards = ValueAnimator.ofFloat(
-                    PULSE_RADIUS_OUT, PULSE_RADIUS_IN).apply {
-                duration = PULSE_DURATION_INWARDS
-                interpolator = Interpolators.STANDARD
-                addUpdateListener(this@FaceScanningOverlay::updateRimProgress)
-            }
-            val pulseOutwards = ValueAnimator.ofFloat(
-                    PULSE_RADIUS_IN, PULSE_RADIUS_OUT).apply {
-                duration = PULSE_DURATION_OUTWARDS
-                interpolator = Interpolators.STANDARD
-                addUpdateListener(this@FaceScanningOverlay::updateRimProgress)
-            }
-            playSequentially(pulseInwards, pulseOutwards)
+    private fun createPulseAnimator(): ValueAnimator {
+        return ValueAnimator.ofFloat(
+                PULSE_RADIUS_OUT, PULSE_RADIUS_IN).apply {
+            duration = HALF_PULSE_DURATION
+            interpolator = Interpolators.STANDARD
+            repeatCount = 11 // Pulse inwards and outwards, reversing direction, 6 times
+            repeatMode = ValueAnimator.REVERSE
+            addUpdateListener(this@FaceScanningOverlay::updateRimProgress)
         }
     }
 
@@ -363,8 +355,7 @@ class FaceScanningOverlay(
         private const val CAMERA_PROTECTION_APPEAR_DURATION = 250L
         private const val PULSE_APPEAR_DURATION = 250L // without start delay
 
-        private const val PULSE_DURATION_INWARDS = 500L
-        private const val PULSE_DURATION_OUTWARDS = 500L
+        private const val HALF_PULSE_DURATION = 500L
 
         private const val PULSE_SUCCESS_DISAPPEAR_DURATION = 400L
         private const val CAMERA_PROTECTION_SUCCESS_DISAPPEAR_DURATION = 500L // without start delay
