@@ -69,6 +69,7 @@ interface IUserManager {
     boolean canAddMoreManagedProfiles(int userId, boolean allowedToRemoveOne);
     UserInfo getProfileParent(int userId);
     boolean isSameProfileGroup(int userId, int otherUserHandle);
+    boolean isHeadlessSystemUserMode();
     boolean isUserOfType(int userId, in String userType);
     @UnsupportedAppUsage
     UserInfo getUserInfo(int userId);
