@@ -18,6 +18,7 @@ package android.telephony.ims.stub;
 
 import android.annotation.IntDef;
 import android.annotation.IntRange;
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.RemoteException;
 import android.telephony.SmsManager;
@@ -174,6 +175,9 @@ public class ImsSmsImplBase {
      * {@link #onSmsReceived(int, String, byte[])} has been called to deliver the result to the IMS
      * provider.
      *
+     * If the framework needs to provide the PDU used to acknowledge the SMS,
+     * {@link #acknowledgeSms(int, int, int, byte[])} will be called.
+     *
      * @param token token provided in {@link #onSmsReceived(int, String, byte[])}
      * @param messageRef the message reference, which may be 1 byte if it is in
      *     {@link SmsMessage#FORMAT_3GPP} format (see TS.123.040) or 2 bytes if it is in
@@ -183,6 +187,27 @@ public class ImsSmsImplBase {
     public void acknowledgeSms(int token, @IntRange(from = 0, to = 65535)  int messageRef,
             @DeliverStatusResult int result) {
         Log.e(LOG_TAG, "acknowledgeSms() not implemented.");
+    }
+
+    /**
+     * This method will be called by the platform after
+     * {@link #onSmsReceived(int, String, byte[])} has been called to acknowledge an incoming SMS.
+     *
+     * This method is only called in cases where the framework needs to provide the PDU such as the
+     * case where we provide the Short Message Transfer Layer PDU (see 3GPP TS 23.040). Otherwise,
+     * {@link #acknowledgeSms(int, int, int)} will be used.
+     *
+     * @param token token provided in {@link #onSmsReceived(int, String, byte[])}
+     * @param messageRef the message reference, which may be 1 byte if it is in
+     *     {@link SmsMessage#FORMAT_3GPP} format (see TS.123.040) or 2 bytes if it is in
+     *     {@link SmsMessage#FORMAT_3GPP2} format (see 3GPP2 C.S0015-B).
+     * @param result result of delivering the message.
+     * @param pdu PDU representing the contents of the message.
+     */
+    public void acknowledgeSms(int token, @IntRange(from = 0, to = 65535)  int messageRef,
+            @DeliverStatusResult int result, @NonNull byte[] pdu) {
+        Log.e(LOG_TAG, "acknowledgeSms() not implemented. acknowledgeSms(int, int, int) called.");
+        acknowledgeSms(token, messageRef, result);
     }
 
     /**
