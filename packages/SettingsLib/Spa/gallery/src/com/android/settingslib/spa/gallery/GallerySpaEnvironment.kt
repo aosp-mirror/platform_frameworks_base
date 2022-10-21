@@ -25,6 +25,7 @@ import com.android.settingslib.spa.gallery.home.HomePageProvider
 import com.android.settingslib.spa.gallery.page.ArgumentPageProvider
 import com.android.settingslib.spa.gallery.page.FooterPageProvider
 import com.android.settingslib.spa.gallery.page.IllustrationPageProvider
+import com.android.settingslib.spa.gallery.page.ProgressBarPageProvider
 import com.android.settingslib.spa.gallery.page.SettingsPagerPageProvider
 import com.android.settingslib.spa.gallery.page.SliderPageProvider
 import com.android.settingslib.spa.gallery.preference.MainSwitchPreferencePageProvider
@@ -66,6 +67,7 @@ object GallerySpaEnvironment : SpaEnvironment() {
                 IllustrationPageProvider,
                 CategoryPageProvider,
                 ActionButtonPageProvider,
+                ProgressBarPageProvider,
             ),
             rootPages = listOf(
                 HomePageProvider.createSettingsPage(),
