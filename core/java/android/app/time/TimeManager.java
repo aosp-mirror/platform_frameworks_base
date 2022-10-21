@@ -88,8 +88,6 @@ public final class TimeManager {
 
     /**
      * Returns the calling user's time capabilities and configuration.
-     *
-     * @hide
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION)
     @NonNull
@@ -107,10 +105,26 @@ public final class TimeManager {
     /**
      * Modifies the time detection configuration.
      *
-     * @return {@code true} if all the configuration settings specified have been set to the
-     * new values, {@code false} if none have
+     * <p>The ability to modify configuration settings can be subject to restrictions. For
+     * example, they may be determined by device hardware, general policy (i.e. only the primary
+     * user can set them), or by a managed device policy. Use {@link
+     * #getTimeCapabilitiesAndConfig()} to obtain information at runtime about the user's
+     * capabilities.
      *
-     * @hide
+     * <p>Attempts to modify configuration settings with capabilities that are {@link
+     * Capabilities#CAPABILITY_NOT_SUPPORTED} or {@link
+     * Capabilities#CAPABILITY_NOT_ALLOWED} will have no effect and a {@code false}
+     * will be returned. Modifying configuration settings with capabilities that are {@link
+     * Capabilities#CAPABILITY_NOT_APPLICABLE} or {@link
+     * Capabilities#CAPABILITY_POSSESSED} will succeed. See {@link
+     * TimeZoneCapabilities} for further details.
+     *
+     * <p>If the supplied configuration only has some values set, then only the specified settings
+     * will be updated (where the user's capabilities allow) and other settings will be left
+     * unchanged.
+     *
+     * @return {@code true} if all the configuration settings specified have been set to the
+     *   new values, {@code false} if none have
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION)
     public boolean updateTimeConfiguration(@NonNull TimeConfiguration configuration) {
@@ -280,8 +294,6 @@ public final class TimeManager {
     /**
      * Returns a snapshot of the device's current system clock time state. See also {@link
      * #confirmTime(UnixEpochTime)} for how this information can be used.
-     *
-     * @hide
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION)
     @NonNull
@@ -306,8 +318,6 @@ public final class TimeManager {
      * <p>Returns {@code false} if the confirmation is invalid, i.e. if the time being
      * confirmed is no longer the time the device is currently set to. Confirming a time
      * in which the system already has high confidence will return {@code true}.
-     *
-     * @hide
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION)
     public boolean confirmTime(@NonNull UnixEpochTime unixEpochTime) {
@@ -329,8 +339,6 @@ public final class TimeManager {
      * capabilities prevents the time being accepted, e.g. if the device is currently set to
      * "automatic time detection". This method returns {@code true} if the time was accepted even
      * if it is the same as the current device time.
-     *
-     * @hide
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION)
     public boolean setManualTime(@NonNull UnixEpochTime unixEpochTime) {
@@ -353,8 +361,6 @@ public final class TimeManager {
      * Returns a snapshot of the device's current time zone state. See also {@link
      * #confirmTimeZone(String)} and {@link #setManualTimeZone(String)} for how this information may
      * be used.
-     *
-     * @hide
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION)
     @NonNull
@@ -379,8 +385,6 @@ public final class TimeManager {
      * <p>Returns {@code false} if the confirmation is invalid, i.e. if the time zone ID being
      * confirmed is no longer the time zone ID the device is currently set to. Confirming a time
      * zone ID in which the system already has high confidence returns {@code true}.
-     *
-     * @hide
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION)
     public boolean confirmTimeZone(@NonNull String timeZoneId) {
@@ -402,8 +406,6 @@ public final class TimeManager {
      * capabilities prevents the time zone being accepted, e.g. if the device is currently set to
      * "automatic time zone detection". {@code true} is returned if the time zone is accepted. A
      * time zone that is accepted and matches the current device time zone returns {@code true}.
-     *
-     * @hide
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION)
     public boolean setManualTimeZone(@NonNull String timeZoneId) {
