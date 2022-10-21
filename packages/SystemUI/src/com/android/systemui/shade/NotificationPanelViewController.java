@@ -151,6 +151,8 @@ import com.android.systemui.media.KeyguardMediaController;
 import com.android.systemui.media.MediaDataManager;
 import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.model.SysUiState;
+import com.android.systemui.navigationbar.NavigationBarController;
+import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.FalsingManager.FalsingTapListener;
@@ -583,6 +585,7 @@ public final class NotificationPanelViewController {
     private final SysUiState mSysUiState;
 
     private final NotificationShadeDepthController mDepthController;
+    private final NavigationBarController mNavigationBarController;
     private final int mDisplayId;
 
     private KeyguardIndicationController mKeyguardIndicationController;
@@ -861,6 +864,7 @@ public final class NotificationPanelViewController {
             PrivacyDotViewController privacyDotViewController,
             TapAgainViewController tapAgainViewController,
             NavigationModeController navigationModeController,
+            NavigationBarController navigationBarController,
             FragmentService fragmentService,
             ContentResolver contentResolver,
             RecordingController recordingController,
@@ -954,6 +958,7 @@ public final class NotificationPanelViewController {
         mNotificationsQSContainerController = notificationsQSContainerController;
         mNotificationListContainer = notificationListContainer;
         mNotificationStackSizeCalculator = notificationStackSizeCalculator;
+        mNavigationBarController = navigationBarController;
         mKeyguardBottomAreaViewControllerProvider = keyguardBottomAreaViewControllerProvider;
         mNotificationsQSContainerController.init();
         mNotificationStackScrollLayoutController = notificationStackScrollLayoutController;
@@ -2681,12 +2686,16 @@ public final class NotificationPanelViewController {
             mQsExpanded = expanded;
             updateQsState();
             updateExpandedHeightToMaxHeight();
-            mFalsingCollector.setQsExpanded(expanded);
-            mCentralSurfaces.setQsExpanded(expanded);
-            mNotificationsQSContainerController.setQsExpanded(expanded);
-            mPulseExpansionHandler.setQsExpanded(expanded);
-            mKeyguardBypassController.setQSExpanded(expanded);
-            mPrivacyDotViewController.setQsExpanded(expanded);
+            setStatusAccessibilityImportance(expanded
+                    ? View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
+                    : View.IMPORTANT_FOR_ACCESSIBILITY_AUTO);
+            updateSystemUiStateFlags();
+            NavigationBarView navigationBarView =
+                    mNavigationBarController.getNavigationBarView(mDisplayId);
+            if (navigationBarView != null) {
+                navigationBarView.onStatusBarPanelStateChanged();
+            }
+            mShadeExpansionStateManager.onQsExpansionChanged(expanded);
         }
     }
 
@@ -5193,7 +5202,8 @@ public final class NotificationPanelViewController {
      */
     public void updatePanelExpansionAndVisibility() {
         mShadeExpansionStateManager.onPanelExpansionChanged(
-                mExpandedFraction, isExpanded(), mTracking, mExpansionDragDownAmountPx);
+                mExpandedFraction, isExpanded(),
+                mTracking, mExpansionDragDownAmountPx);
         updateVisibility();
     }
 
