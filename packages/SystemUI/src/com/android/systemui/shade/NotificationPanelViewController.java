@@ -1443,6 +1443,16 @@ public final class NotificationPanelViewController {
         mMaxAllowedKeyguardNotifications = maxAllowed;
     }
 
+    @VisibleForTesting
+    boolean getClosing() {
+        return mClosing;
+    }
+
+    @VisibleForTesting
+    boolean getIsFlinging() {
+        return mIsFlinging;
+    }
+
     private void updateMaxDisplayedNotifications(boolean recompute) {
         if (recompute) {
             setMaxDisplayedNotifications(Math.max(computeMaxKeyguardNotifications(), 1));
@@ -3718,6 +3728,11 @@ public final class NotificationPanelViewController {
         setListening(true);
     }
 
+    @VisibleForTesting
+    void setTouchSlopExceeded(boolean isTouchSlopExceeded) {
+        mTouchSlopExceeded = isTouchSlopExceeded;
+    }
+
     public void setOverExpansion(float overExpansion) {
         if (overExpansion == mOverExpansion) {
             return;
@@ -4778,6 +4793,7 @@ public final class NotificationPanelViewController {
         mAmbientState.setSwipingUp(false);
         if ((mTracking && mTouchSlopExceeded) || Math.abs(x - mInitialExpandX) > mTouchSlop
                 || Math.abs(y - mInitialExpandY) > mTouchSlop
+                || (!isFullyExpanded() && !isFullyCollapsed())
                 || event.getActionMasked() == MotionEvent.ACTION_CANCEL || forceCancel) {
             mVelocityTracker.computeCurrentVelocity(1000);
             float vel = mVelocityTracker.getYVelocity();
