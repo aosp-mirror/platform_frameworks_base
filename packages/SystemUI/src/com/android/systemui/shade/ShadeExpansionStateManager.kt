@@ -21,6 +21,7 @@ import android.util.Log
 import androidx.annotation.FloatRange
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.util.Compile
+import java.util.concurrent.CopyOnWriteArrayList
 import javax.inject.Inject
 
 /**
@@ -31,12 +32,14 @@ import javax.inject.Inject
 @SysUISingleton
 class ShadeExpansionStateManager @Inject constructor() {
 
-    private val expansionListeners = mutableListOf<ShadeExpansionListener>()
-    private val stateListeners = mutableListOf<ShadeStateListener>()
+    private val expansionListeners = CopyOnWriteArrayList<ShadeExpansionListener>()
+    private val qsExpansionListeners = CopyOnWriteArrayList<ShadeQsExpansionListener>()
+    private val stateListeners = CopyOnWriteArrayList<ShadeStateListener>()
 
     @PanelState private var state: Int = STATE_CLOSED
     @FloatRange(from = 0.0, to = 1.0) private var fraction: Float = 0f
     private var expanded: Boolean = false
+    private var qsExpanded: Boolean = false
     private var tracking: Boolean = false
     private var dragDownPxAmount: Float = 0f
 
@@ -55,6 +58,15 @@ class ShadeExpansionStateManager @Inject constructor() {
     /** Removes an expansion listener. */
     fun removeExpansionListener(listener: ShadeExpansionListener) {
         expansionListeners.remove(listener)
+    }
+
+    fun addQsExpansionListener(listener: ShadeQsExpansionListener) {
+        qsExpansionListeners.add(listener)
+        listener.onQsExpansionChanged(qsExpanded)
+    }
+
+    fun removeQsExpansionListener(listener: ShadeQsExpansionListener) {
+        qsExpansionListeners.remove(listener)
     }
 
     /** Adds a listener that will be notified when the panel state has changed. */
@@ -124,6 +136,14 @@ class ShadeExpansionStateManager @Inject constructor() {
         val expansionChangeEvent =
             ShadeExpansionChangeEvent(fraction, expanded, tracking, dragDownPxAmount)
         expansionListeners.forEach { it.onPanelExpansionChanged(expansionChangeEvent) }
+    }
+
+    /** Called when the quick settings expansion changes to fully expanded or collapsed. */
+    fun onQsExpansionChanged(qsExpanded: Boolean) {
+        this.qsExpanded = qsExpanded
+
+        debugLog("qsExpanded=$qsExpanded")
+        qsExpansionListeners.forEach { it.onQsExpansionChanged(qsExpanded) }
     }
 
     /** Updates the panel state if necessary. */

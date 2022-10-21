@@ -1796,18 +1796,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     }
 
     @Override
-    public void setQsExpanded(boolean expanded) {
-        mNotificationShadeWindowController.setQsExpanded(expanded);
-        mNotificationPanelViewController.setStatusAccessibilityImportance(expanded
-                ? View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
-                : View.IMPORTANT_FOR_ACCESSIBILITY_AUTO);
-        mNotificationPanelViewController.updateSystemUiStateFlags();
-        if (getNavigationBarView() != null) {
-            getNavigationBarView().onStatusBarPanelStateChanged();
-        }
-    }
-
-    @Override
     public boolean isWakeUpComingFromTouch() {
         return mWakeUpComingFromTouch;
     }
