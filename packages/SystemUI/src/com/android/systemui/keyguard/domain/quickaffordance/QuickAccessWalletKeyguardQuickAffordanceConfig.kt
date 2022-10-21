@@ -44,6 +44,8 @@ constructor(
     private val activityStarter: ActivityStarter,
 ) : KeyguardQuickAffordanceConfig {
 
+    override val key: String = BuiltInKeyguardQuickAffordanceKeys.QUICK_ACCESS_WALLET
+
     override val state: Flow<KeyguardQuickAffordanceConfig.State> = conflatedCallbackFlow {
         val callback =
             object : QuickAccessWalletClient.OnWalletCardsRetrievedCallback {

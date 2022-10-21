@@ -18,12 +18,10 @@ package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.Icon
-import com.android.systemui.keyguard.domain.quickaffordance.KeyguardQuickAffordanceConfig
-import kotlin.reflect.KClass
 
 /** Models the UI state of a keyguard quick affordance button. */
 data class KeyguardQuickAffordanceViewModel(
-    val configKey: KClass<out KeyguardQuickAffordanceConfig>? = null,
+    val configKey: String? = null,
     val isVisible: Boolean = false,
     /** Whether to animate the transition of the quick affordance from invisible to visible. */
     val animateReveal: Boolean = false,
@@ -33,7 +31,7 @@ data class KeyguardQuickAffordanceViewModel(
     val isActivated: Boolean = false,
 ) {
     data class OnClickedParameters(
-        val configKey: KClass<out KeyguardQuickAffordanceConfig>,
+        val configKey: String,
         val expandable: Expandable?,
     )
 }

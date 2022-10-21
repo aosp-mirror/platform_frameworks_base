@@ -51,6 +51,8 @@ constructor(
 
     private val appContext = context.applicationContext
 
+    override val key: String = BuiltInKeyguardQuickAffordanceKeys.HOME_CONTROLS
+
     override val state: Flow<KeyguardQuickAffordanceConfig.State> =
         component.canShowWhileLockedSetting.flatMapLatest { canShowWhileLocked ->
             if (canShowWhileLocked) {

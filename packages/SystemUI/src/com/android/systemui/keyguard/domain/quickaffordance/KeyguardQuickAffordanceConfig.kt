@@ -26,8 +26,18 @@ import kotlinx.coroutines.flow.Flow
 /** Defines interface that can act as data source for a single quick affordance model. */
 interface KeyguardQuickAffordanceConfig {
 
+    /** Unique identifier for this quick affordance. It must be globally unique. */
+    val key: String
+
+    /** The observable [State] of the affordance. */
     val state: Flow<State>
 
+    /**
+     * Notifies that the affordance was clicked by the user.
+     *
+     * @param expandable An [Expandable] to use when animating dialogs or activities
+     * @return An [OnClickedResult] telling the caller what to do next
+     */
     fun onQuickAffordanceClicked(expandable: Expandable?): OnClickedResult
 
     /**

@@ -18,9 +18,7 @@
 package com.android.systemui.keyguard.domain.model
 
 import com.android.systemui.common.shared.model.Icon
-import com.android.systemui.keyguard.domain.quickaffordance.KeyguardQuickAffordanceConfig
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordanceToggleState
-import kotlin.reflect.KClass
 
 /**
  * Models a "quick affordance" in the keyguard bottom area (for example, a button on the
@@ -33,7 +31,7 @@ sealed class KeyguardQuickAffordanceModel {
     /** A affordance is visible. */
     data class Visible(
         /** Identifier for the affordance this is modeling. */
-        val configKey: KClass<out KeyguardQuickAffordanceConfig>,
+        val configKey: String,
         /** An icon for the affordance. */
         val icon: Icon,
         /** The toggle state for the affordance. */

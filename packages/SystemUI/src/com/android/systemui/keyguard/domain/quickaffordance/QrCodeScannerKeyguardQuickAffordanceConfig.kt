@@ -37,6 +37,8 @@ constructor(
     private val controller: QRCodeScannerController,
 ) : KeyguardQuickAffordanceConfig {
 
+    override val key: String = BuiltInKeyguardQuickAffordanceKeys.QR_CODE_SCANNER
+
     override val state: Flow<KeyguardQuickAffordanceConfig.State> = conflatedCallbackFlow {
         val callback =
             object : QRCodeScannerController.Callback {

@@ -29,7 +29,9 @@ import kotlinx.coroutines.yield
  * This class is abstract to force tests to provide extensions of it as the system that references
  * these configs uses each implementation's class type to refer to them.
  */
-abstract class FakeKeyguardQuickAffordanceConfig : KeyguardQuickAffordanceConfig {
+abstract class FakeKeyguardQuickAffordanceConfig(
+    override val key: String,
+) : KeyguardQuickAffordanceConfig {
 
     var onClickedResult: OnClickedResult = OnClickedResult.Handled
 

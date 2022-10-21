@@ -18,7 +18,6 @@
 package com.android.systemui.keyguard.domain.quickaffordance
 
 import com.android.systemui.keyguard.domain.model.KeyguardQuickAffordancePosition
-import kotlin.reflect.KClass
 
 /** Fake implementation of [FakeKeyguardQuickAffordanceRegistry], for tests. */
 class FakeKeyguardQuickAffordanceRegistry(
@@ -33,11 +32,8 @@ class FakeKeyguardQuickAffordanceRegistry(
     }
 
     override fun get(
-        configClass: KClass<out FakeKeyguardQuickAffordanceConfig>
+        key: String,
     ): FakeKeyguardQuickAffordanceConfig {
-        return configsByPosition.values
-            .flatten()
-            .associateBy { config -> config::class }
-            .getValue(configClass)
+        return configsByPosition.values.flatten().associateBy { config -> config.key }.getValue(key)
     }
 }
