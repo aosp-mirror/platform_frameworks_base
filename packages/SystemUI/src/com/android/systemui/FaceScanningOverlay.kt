@@ -19,6 +19,7 @@ package com.android.systemui
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.AnimatorSet
+import android.animation.TimeInterpolator
 import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Canvas
@@ -163,54 +164,14 @@ class FaceScanningOverlay(
         }
 
         rimAnimator?.cancel()
-        rimAnimator = AnimatorSet().apply {
-            if (showScanningAnim) {
-                // animate in camera protection, rim, and then pulse in/out
-                playSequentially(
-                    cameraProtectionAnimator,
-                    createRimAppearAnimator(),
-                    createPulseAnimator()
-                )
-            } else {
-                val rimDisappearAnimator = ValueAnimator.ofFloat(
-                        rimProgress,
-                        if (faceAuthSucceeded) PULSE_RADIUS_SUCCESS
-                        else SHOW_CAMERA_PROTECTION_SCALE
-                ).apply {
-                    duration =
-                            if (faceAuthSucceeded) PULSE_SUCCESS_DISAPPEAR_DURATION
-                            else PULSE_ERROR_DISAPPEAR_DURATION
-                    interpolator =
-                            if (faceAuthSucceeded) Interpolators.STANDARD_DECELERATE
-                            else Interpolators.STANDARD
-                    addUpdateListener(this@FaceScanningOverlay::updateRimProgress)
-                    addListener(object : AnimatorListenerAdapter() {
-                        override fun onAnimationEnd(animation: Animator) {
-                            rimProgress = HIDDEN_RIM_SCALE
-                            invalidate()
-                        }
-                    })
-                }
-                if (faceAuthSucceeded) {
-                    val successOpacityAnimator = ValueAnimator.ofInt(255, 0).apply {
-                        duration = PULSE_SUCCESS_DISAPPEAR_DURATION
-                        interpolator = Interpolators.LINEAR
-                        addUpdateListener(this@FaceScanningOverlay::updateRimAlpha)
-                        addListener(object : AnimatorListenerAdapter() {
-                            override fun onAnimationEnd(animation: Animator) {
-                                rimPaint.alpha = 255
-                                invalidate()
-                            }
-                        })
-                    }
-                    val rimSuccessAnimator = AnimatorSet()
-                    rimSuccessAnimator.playTogether(rimDisappearAnimator, successOpacityAnimator)
-                    playTogether(rimSuccessAnimator, cameraProtectionAnimator)
-                } else {
-                    playTogether(rimDisappearAnimator, cameraProtectionAnimator)
-                }
-            }
-
+        rimAnimator = if (showScanningAnim) {
+            createFaceScanningRimAnimator()
+        } else if (faceAuthSucceeded) {
+            createFaceSuccessRimAnimator()
+        } else {
+            createFaceNotSuccessRimAnimator()
+        }
+        rimAnimator?.apply {
             addListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: Animator) {
                     rimAnimator = null
@@ -219,7 +180,77 @@ class FaceScanningOverlay(
                     }
                 }
             })
-            start()
+        }
+        rimAnimator?.start()
+    }
+
+    private fun createFaceSuccessRimAnimator(): AnimatorSet {
+        val rimSuccessAnimator = AnimatorSet()
+        rimSuccessAnimator.playTogether(
+            createRimDisappearAnimator(
+                PULSE_RADIUS_SUCCESS,
+                PULSE_SUCCESS_DISAPPEAR_DURATION,
+                Interpolators.STANDARD_DECELERATE
+            ),
+            createSuccessOpacityAnimator(),
+        )
+        return AnimatorSet().apply {
+            playTogether(rimSuccessAnimator, cameraProtectionAnimator)
+        }
+    }
+
+    private fun createFaceNotSuccessRimAnimator(): AnimatorSet {
+        return AnimatorSet().apply {
+            playTogether(
+                createRimDisappearAnimator(
+                    SHOW_CAMERA_PROTECTION_SCALE,
+                    PULSE_ERROR_DISAPPEAR_DURATION,
+                    Interpolators.STANDARD
+                ),
+                cameraProtectionAnimator,
+            )
+        }
+    }
+
+    private fun createRimDisappearAnimator(
+        endValue: Float,
+        animDuration: Long,
+        timeInterpolator: TimeInterpolator
+    ): ValueAnimator {
+        return ValueAnimator.ofFloat(rimProgress, endValue).apply {
+            duration = animDuration
+            interpolator = timeInterpolator
+            addUpdateListener(this@FaceScanningOverlay::updateRimProgress)
+            addListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    rimProgress = HIDDEN_RIM_SCALE
+                    invalidate()
+                }
+            })
+        }
+    }
+
+    private fun createSuccessOpacityAnimator(): ValueAnimator {
+        return ValueAnimator.ofInt(255, 0).apply {
+            duration = PULSE_SUCCESS_DISAPPEAR_DURATION
+            interpolator = Interpolators.LINEAR
+            addUpdateListener(this@FaceScanningOverlay::updateRimAlpha)
+            addListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    rimPaint.alpha = 255
+                    invalidate()
+                }
+            })
+        }
+    }
+
+    private fun createFaceScanningRimAnimator(): AnimatorSet {
+        return AnimatorSet().apply {
+            playSequentially(
+                cameraProtectionAnimator,
+                createRimAppearAnimator(),
+                createPulseAnimator()
+            )
         }
     }
 
