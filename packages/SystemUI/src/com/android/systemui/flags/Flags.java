@@ -143,6 +143,12 @@ public class Flags {
     // TODO(b/254513102): Tracking Bug
     public static final ReleasedFlag USER_CONTROLLER_USES_INTERACTOR = new ReleasedFlag(211);
 
+    /**
+     * Whether the clock on a wide lock screen should use the new "stepping" animation for moving
+     * the digits when the clock moves.
+     */
+    public static final UnreleasedFlag STEP_CLOCK_ANIMATION = new UnreleasedFlag(212);
+
     /***************************************/
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
