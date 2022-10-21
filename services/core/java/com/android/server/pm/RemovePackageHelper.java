@@ -308,7 +308,7 @@ final class RemovePackageHelper {
                 mPm.mSettings.getKeySetManagerService().removeAppKeySetDataLPw(packageName);
                 final Computer snapshot = mPm.snapshotComputer();
                 mPm.mAppsFilter.removePackage(snapshot,
-                        snapshot.getPackageStateInternal(packageName), false /* isReplace */);
+                        snapshot.getPackageStateInternal(packageName));
                 removedAppId = mPm.mSettings.removePackageLPw(packageName);
                 if (outInfo != null) {
                     outInfo.mRemovedAppId = removedAppId;

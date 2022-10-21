@@ -1147,7 +1147,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         var done = SystemClock.currentTimeMicro();
 
         if (mSnapshotStatistics != null) {
-            mSnapshotStatistics.rebuild(now, done, hits);
+            mSnapshotStatistics.rebuild(now, done, hits, newSnapshot.getPackageStates().size());
         }
         return newSnapshot;
     }
@@ -4220,7 +4220,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             mSettings.removeUserLPw(userId);
             mPendingBroadcasts.remove(userId);
             mDeletePackageHelper.removeUnusedPackagesLPw(userManager, userId);
-            mAppsFilter.onUserDeleted(userId);
+            mAppsFilter.onUserDeleted(snapshotComputer(), userId);
         }
         mInstantAppRegistry.onUserRemoved(userId);
     }
