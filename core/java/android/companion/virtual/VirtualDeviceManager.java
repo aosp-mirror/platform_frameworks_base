@@ -182,6 +182,28 @@ public final class VirtualDeviceManager {
     }
 
     /**
+     * Returns the device policy for the given virtual device and policy type.
+     *
+     * <p>In case the virtual device identifier is not valid, or there's no explicitly specified
+     * policy for that device and policy type, then
+     * {@link VirtualDeviceParams#DEVICE_POLICY_DEFAULT} is returned.
+     *
+     * @hide
+     */
+    public @VirtualDeviceParams.DevicePolicy int getDevicePolicy(
+            int deviceId, @VirtualDeviceParams.PolicyType int policyType) {
+        if (mService == null) {
+            Log.w(TAG, "Failed to retrieve device policy; no virtual device manager service.");
+            return VirtualDeviceParams.DEVICE_POLICY_DEFAULT;
+        }
+        try {
+            return mService.getDevicePolicy(deviceId, policyType);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * A virtual device has its own virtual display, audio output, microphone, and camera etc. The
      * creator of a virtual device can take the output from the virtual display and stream it over
      * to another device, and inject input events that are received from the remote device.

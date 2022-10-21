@@ -37,6 +37,8 @@ public class VirtualDeviceParamsTest {
         VirtualDeviceParams originalParams = new VirtualDeviceParams.Builder()
                 .setLockState(VirtualDeviceParams.LOCK_STATE_ALWAYS_UNLOCKED)
                 .setUsersWithMatchingAccounts(Set.of(UserHandle.of(123), UserHandle.of(456)))
+                .addDevicePolicy(VirtualDeviceParams.POLICY_TYPE_SENSORS,
+                        VirtualDeviceParams.DEVICE_POLICY_CUSTOM)
                 .build();
         Parcel parcel = Parcel.obtain();
         originalParams.writeToParcel(parcel, 0);
@@ -47,5 +49,7 @@ public class VirtualDeviceParamsTest {
         assertThat(params.getLockState()).isEqualTo(VirtualDeviceParams.LOCK_STATE_ALWAYS_UNLOCKED);
         assertThat(params.getUsersWithMatchingAccounts())
                 .containsExactly(UserHandle.of(123), UserHandle.of(456));
+        assertThat(params.getDevicePolicy(VirtualDeviceParams.POLICY_TYPE_SENSORS))
+                .isEqualTo(VirtualDeviceParams.DEVICE_POLICY_CUSTOM);
     }
 }

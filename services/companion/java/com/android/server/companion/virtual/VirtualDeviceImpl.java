@@ -227,6 +227,12 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         return mParams.getName();
     }
 
+    /** Returns the policy specified for this policy type */
+    public @VirtualDeviceParams.DevicePolicy int getDevicePolicy(
+            @VirtualDeviceParams.PolicyType int policyType) {
+        return mParams.getDevicePolicy(policyType);
+    }
+
     /** Returns the unique device ID of this device. */
     @Override // Binder call
     public int getDeviceId() {
