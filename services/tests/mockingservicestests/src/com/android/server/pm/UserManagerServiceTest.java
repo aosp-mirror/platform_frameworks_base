@@ -123,24 +123,4 @@ public final class UserManagerServiceTest extends UserManagerServiceOrInternalTe
         assertWithMessage("isUserRunning(%s)", PROFILE_USER_ID)
                 .that(mUms.isUserRunning(PROFILE_USER_ID)).isFalse();
     }
-
-    @Override
-    protected boolean isUserVisible(int userId) {
-        return mUms.isUserVisibleUnchecked(userId);
-    }
-
-    @Override
-    protected boolean isUserVisibleOnDisplay(int userId, int displayId) {
-        return mUms.isUserVisibleOnDisplay(userId, displayId);
-    }
-
-    @Override
-    protected int getDisplayAssignedToUser(int userId) {
-        return mUms.getDisplayAssignedToUser(userId);
-    }
-
-    @Override
-    protected int getUserAssignedToDisplay(int displayId) {
-        return mUms.getUserAssignedToDisplay(displayId);
-    }
 }
