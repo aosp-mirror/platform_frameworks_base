@@ -322,4 +322,7 @@ oneway interface IStatusBar
 
     /** Unregisters a nearby media devices provider. */
     void unregisterNearbyMediaDevicesProvider(in INearbyMediaDevicesProvider provider);
+
+    /** Dump protos from SystemUI. The proto definition is defined there */
+    void dumpProto(in String[] args, in ParcelFileDescriptor pfd);
 }
