@@ -18,6 +18,9 @@ package com.android.internal.util;
 
 import android.annotation.NonNull;
 
+import com.android.modules.utils.BinaryXmlSerializer;
+import com.android.modules.utils.FastDataOutput;
+
 import java.io.DataOutput;
 import java.io.OutputStream;
 

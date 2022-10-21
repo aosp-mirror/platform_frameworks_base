@@ -18,6 +18,9 @@ package com.android.internal.util;
 
 import android.annotation.NonNull;
 
+import com.android.modules.utils.BinaryXmlPullParser;
+import com.android.modules.utils.FastDataInput;
+
 import java.io.DataInput;
 import java.io.InputStream;
 

@@ -19,6 +19,8 @@ package com.android.internal.util;
 import android.annotation.NonNull;
 import android.util.CharsetUtils;
 
+import com.android.modules.utils.FastDataOutput;
+
 import java.io.DataOutput;
 import java.io.IOException;
 import java.io.OutputStream;

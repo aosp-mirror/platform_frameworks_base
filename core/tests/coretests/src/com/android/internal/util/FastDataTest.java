@@ -23,6 +23,9 @@ import static org.junit.Assert.fail;
 import android.annotation.NonNull;
 import android.util.ExceptionUtils;
 
+import com.android.modules.utils.FastDataInput;
+import com.android.modules.utils.FastDataOutput;
+
 import libcore.util.HexEncoding;
 
 import org.junit.Assume;
