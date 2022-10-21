@@ -16,6 +16,7 @@ package com.android.systemui.shared.clocks
 import android.content.Context
 import android.content.res.Resources
 import android.graphics.Color
+import android.graphics.Rect
 import android.icu.text.NumberFormat
 import android.util.TypedValue
 import android.view.LayoutInflater
@@ -130,6 +131,10 @@ class DefaultClockController(
             lp.topMargin = (-0.5f * view.bottom).toInt()
             view.setLayoutParams(lp)
         }
+
+        fun moveForSplitShade(fromRect: Rect, toRect: Rect, fraction: Float) {
+            view.moveForSplitShade(fromRect, toRect, fraction)
+        }
     }
 
     inner class DefaultClockEvents : ClockEvents {
@@ -209,6 +214,13 @@ class DefaultClockController(
                 clocks.forEach { it.animateDoze(dozeState.isActive, !hasJumped) }
             }
         }
+
+        override fun onPositionUpdated(fromRect: Rect, toRect: Rect, fraction: Float) {
+            largeClock.moveForSplitShade(fromRect, toRect, fraction)
+        }
+
+        override val hasCustomPositionUpdatedAnimation: Boolean
+            get() = true
     }
 
     private class AnimationState(
