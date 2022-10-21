@@ -236,7 +236,7 @@ public class A2dpProfile implements LocalBluetoothProfile {
     /**
      * @return whether high quality audio is enabled or not
      */
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     public boolean isHighQualityAudioEnabled(BluetoothDevice device) {
         BluetoothDevice bluetoothDevice = (device != null) ? device : getActiveDevice();
         if (bluetoothDevice == null) {
@@ -288,7 +288,7 @@ public class A2dpProfile implements LocalBluetoothProfile {
      * @param device to get codec label from
      * @return the label associated with the device codec
      */
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     public String getHighQualityAudioOptionLabel(BluetoothDevice device) {
         BluetoothDevice bluetoothDevice = (device != null) ? device : getActiveDevice();
         int unknownCodecId = R.string.bluetooth_profile_a2dp_high_quality_unknown_codec;
