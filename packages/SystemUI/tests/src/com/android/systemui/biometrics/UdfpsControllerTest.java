@@ -665,7 +665,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
         mUdfpsController.onAodInterrupt(0, 0, 0f, 0f);
         when(mUdfpsView.isDisplayConfigured()).thenReturn(true);
         // WHEN it is cancelled
-        mUdfpsController.onCancelUdfps();
+        mUdfpsController.cancelAodInterrupt();
         // THEN the display is unconfigured
         verify(mUdfpsView).unconfigureDisplay();
     }
