@@ -99,7 +99,7 @@ class FaceScanningProviderFactory @Inject constructor(
     }
 
     fun shouldShowFaceScanningAnim(): Boolean {
-        return canShowFaceScanningAnim() && keyguardUpdateMonitor.isFaceScanning
+        return canShowFaceScanningAnim() && keyguardUpdateMonitor.isFaceDetectionRunning
     }
 }
 
