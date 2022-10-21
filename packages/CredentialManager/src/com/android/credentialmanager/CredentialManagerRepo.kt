@@ -20,6 +20,7 @@ import android.app.slice.Slice
 import android.app.slice.SliceSpec
 import android.content.Context
 import android.content.Intent
+import android.credentials.CreateCredentialRequest
 import android.credentials.ui.Constants
 import android.credentials.ui.Entry
 import android.credentials.ui.ProviderData
@@ -50,11 +51,7 @@ class CredentialManagerRepo(
     requestInfo = intent.extras?.getParcelable(
       RequestInfo.EXTRA_REQUEST_INFO,
       RequestInfo::class.java
-    ) ?: RequestInfo(
-      Binder(),
-      RequestInfo.TYPE_CREATE,
-      /*isFirstUsage=*/false
-    )
+    ) ?: testRequestInfo()
 
     providerList = intent.extras?.getParcelableArrayList(
       ProviderData.EXTRA_PROVIDER_DATA_LIST,
@@ -176,6 +173,20 @@ class CredentialManagerRepo(
     return Entry(
       id,
       slice
+    )
+  }
+
+  private fun testRequestInfo(): RequestInfo {
+    val data = Bundle()
+    return RequestInfo.newCreateRequestInfo(
+      Binder(),
+      CreateCredentialRequest(
+        // TODO: use the jetpack type and utils once defined.
+        "androidx.credentials.TYPE_PUBLIC_KEY_CREDENTIAL",
+        data
+      ),
+      /*isFirstUsage=*/false,
+      "tribank.us"
     )
   }
 }
