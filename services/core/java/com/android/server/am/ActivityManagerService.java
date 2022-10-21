@@ -470,6 +470,7 @@ import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiFunction;
 
 public class ActivityManagerService extends IActivityManager.Stub
@@ -3455,13 +3456,13 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     /**
-     * @param firstPidOffsets Optional, when it's set, it receives the start/end offset
+     * @param firstPidEndOffset Optional, when it's set, it receives the start/end offset
      *                        of the very first pid to be dumped.
      */
     /* package */ static File dumpStackTraces(ArrayList<Integer> firstPids,
             ProcessCpuTracker processCpuTracker, SparseArray<Boolean> lastPids,
             ArrayList<Integer> nativePids, StringWriter logExceptionCreatingFile,
-            long[] firstPidOffsets, String subject, String criticalEventSection,
+            AtomicLong firstPidEndOffset, String subject, String criticalEventSection,
             AnrLatencyTracker latencyTracker) {
         try {
             if (latencyTracker != null) {
@@ -3534,15 +3535,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                         + (criticalEventSection != null ? criticalEventSection : ""));
             }
 
-            Pair<Long, Long> offsets = dumpStackTraces(
+            long firstPidEndPos = dumpStackTraces(
                     tracesFile.getAbsolutePath(), firstPids, nativePids, extraPids, latencyTracker);
-            if (firstPidOffsets != null) {
-                if (offsets == null) {
-                    firstPidOffsets[0] = firstPidOffsets[1] = -1;
-                } else {
-                    firstPidOffsets[0] = offsets.first; // Start offset to the ANR trace file
-                    firstPidOffsets[1] = offsets.second; // End offset to the ANR trace file
-                }
+            if (firstPidEndOffset != null) {
+                firstPidEndOffset.set(firstPidEndPos);
             }
 
             return tracesFile;
@@ -3661,9 +3657,9 @@ public class ActivityManagerService extends IActivityManager.Stub
 
 
     /**
-     * @return The start/end offset of the trace of the very first PID
+     * @return The end offset of the trace of the very first PID
      */
-    public static Pair<Long, Long> dumpStackTraces(String tracesFile,
+    public static long dumpStackTraces(String tracesFile,
             ArrayList<Integer> firstPids, ArrayList<Integer> nativePids,
             ArrayList<Integer> extraPids, AnrLatencyTracker latencyTracker) {
 
@@ -3679,7 +3675,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         // As applications are usually interested with the ANR stack traces, but we can't share with
         // them the stack traces other than their own stacks. So after the very first PID is
         // dumped, remember the current file size.
-        long firstPidStart = -1;
         long firstPidEnd = -1;
 
         // First collect all of the stacks of the most important pids.
@@ -3692,11 +3687,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 final int pid = firstPids.get(i);
                 // We don't copy ANR traces from the system_server intentionally.
                 final boolean firstPid = i == 0 && MY_PID != pid;
-                File tf = null;
-                if (firstPid) {
-                    tf = new File(tracesFile);
-                    firstPidStart = tf.exists() ? tf.length() : 0;
-                }
                 if (latencyTracker != null) {
                     latencyTracker.dumpingPidStarted(pid);
                 }
@@ -3712,11 +3702,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (remainingTime <= 0) {
                     Slog.e(TAG, "Aborting stack trace dump (current firstPid=" + pid
                             + "); deadline exceeded.");
-                    return firstPidStart >= 0 ? new Pair<>(firstPidStart, firstPidEnd) : null;
+                    return firstPidEnd;
                 }
 
                 if (firstPid) {
-                    firstPidEnd = tf.length();
+                    firstPidEnd = new File(tracesFile).length();
                     // Full latency dump
                     if (latencyTracker != null) {
                         appendtoANRFile(tracesFile,
@@ -3755,7 +3745,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (remainingTime <= 0) {
                     Slog.e(TAG, "Aborting stack trace dump (current native pid=" + pid +
                         "); deadline exceeded.");
-                    return firstPidStart >= 0 ? new Pair<>(firstPidStart, firstPidEnd) : null;
+                    return firstPidEnd;
                 }
 
                 if (DEBUG_ANR) {
@@ -3785,7 +3775,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (remainingTime <= 0) {
                     Slog.e(TAG, "Aborting stack trace dump (current extra pid=" + pid +
                             "); deadline exceeded.");
-                    return firstPidStart >= 0 ? new Pair<>(firstPidStart, firstPidEnd) : null;
+                    return firstPidEnd;
                 }
 
                 if (DEBUG_ANR) {
@@ -3800,7 +3790,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         appendtoANRFile(tracesFile, "----- dumping ended at " + SystemClock.uptimeMillis() + "\n");
         Slog.i(TAG, "Done dumping");
 
-        return firstPidStart >= 0 ? new Pair<>(firstPidStart, firstPidEnd) : null;
+        return firstPidEnd;
     }
 
     @Override
