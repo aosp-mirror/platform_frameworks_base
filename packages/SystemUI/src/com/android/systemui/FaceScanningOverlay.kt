@@ -96,32 +96,6 @@ class FaceScanningOverlay(
         }
     }
 
-    private fun drawFaceScanningRim(canvas: Canvas) {
-        val rimPath = Path(protectionPath)
-        scalePath(rimPath, rimProgress)
-        rimPaint.style = Paint.Style.FILL
-        val rimPaintAlpha = rimPaint.alpha
-        rimPaint.color = ColorUtils.blendARGB(
-            faceScanningAnimColor,
-            Color.WHITE,
-            statusBarStateController.dozeAmount
-        )
-        rimPaint.alpha = rimPaintAlpha
-        canvas.drawPath(rimPath, rimPaint)
-    }
-
-    private fun drawCameraProtection(canvas: Canvas) {
-        val scaledProtectionPath = Path(protectionPath)
-        scalePath(scaledProtectionPath, cameraProtectionProgress)
-        paint.style = Paint.Style.FILL
-        paint.color = cameraProtectionColor
-        canvas.drawPath(scaledProtectionPath, paint)
-    }
-
-    override fun updateVisOnUpdateCutout(): Boolean {
-        return false // instead, we always update the visibility whenever face scanning starts/ends
-    }
-
     override fun enableShowProtection(show: Boolean) {
         val showScanningAnimNow = keyguardUpdateMonitor.isFaceDetectionRunning && show
         if (showScanningAnimNow == showScanningAnim) {
@@ -182,6 +156,61 @@ class FaceScanningOverlay(
             })
         }
         rimAnimator?.start()
+    }
+
+    override fun updateVisOnUpdateCutout(): Boolean {
+        return false // instead, we always update the visibility whenever face scanning starts/ends
+    }
+
+    override fun updateProtectionBoundingPath() {
+        super.updateProtectionBoundingPath()
+        rimRect.set(protectionRect)
+        rimRect.scale(rimProgress)
+    }
+
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        if (mBounds.isEmpty()) {
+            super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+            return
+        }
+        if (showScanningAnim) {
+            // Make sure that our measured height encompasses the extra space for the animation
+            mTotalBounds.union(mBoundingRect)
+            mTotalBounds.union(
+                rimRect.left.toInt(),
+                rimRect.top.toInt(),
+                rimRect.right.toInt(),
+                rimRect.bottom.toInt())
+            setMeasuredDimension(
+                resolveSizeAndState(mTotalBounds.width(), widthMeasureSpec, 0),
+                resolveSizeAndState(mTotalBounds.height(), heightMeasureSpec, 0))
+        } else {
+            setMeasuredDimension(
+                resolveSizeAndState(mBoundingRect.width(), widthMeasureSpec, 0),
+                resolveSizeAndState(mBoundingRect.height(), heightMeasureSpec, 0))
+        }
+    }
+
+    private fun drawFaceScanningRim(canvas: Canvas) {
+        val rimPath = Path(protectionPath)
+        scalePath(rimPath, rimProgress)
+        rimPaint.style = Paint.Style.FILL
+        val rimPaintAlpha = rimPaint.alpha
+        rimPaint.color = ColorUtils.blendARGB(
+            faceScanningAnimColor,
+            Color.WHITE,
+            statusBarStateController.dozeAmount
+        )
+        rimPaint.alpha = rimPaintAlpha
+        canvas.drawPath(rimPath, rimPaint)
+    }
+
+    private fun drawCameraProtection(canvas: Canvas) {
+        val scaledProtectionPath = Path(protectionPath)
+        scalePath(scaledProtectionPath, cameraProtectionProgress)
+        paint.style = Paint.Style.FILL
+        paint.color = cameraProtectionColor
+        canvas.drawPath(scaledProtectionPath, paint)
     }
 
     private fun createFaceSuccessRimAnimator(): AnimatorSet {
@@ -295,35 +324,6 @@ class FaceScanningOverlay(
             repeatCount = 11 // Pulse inwards and outwards, reversing direction, 6 times
             repeatMode = ValueAnimator.REVERSE
             addUpdateListener(this@FaceScanningOverlay::updateRimProgress)
-        }
-    }
-
-    override fun updateProtectionBoundingPath() {
-        super.updateProtectionBoundingPath()
-        rimRect.set(protectionRect)
-        rimRect.scale(rimProgress)
-    }
-
-    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        if (mBounds.isEmpty()) {
-            super.onMeasure(widthMeasureSpec, heightMeasureSpec)
-            return
-        }
-        if (showScanningAnim) {
-            // Make sure that our measured height encompasses the extra space for the animation
-            mTotalBounds.union(mBoundingRect)
-            mTotalBounds.union(
-                    rimRect.left.toInt(),
-                    rimRect.top.toInt(),
-                    rimRect.right.toInt(),
-                    rimRect.bottom.toInt())
-            setMeasuredDimension(
-                    resolveSizeAndState(mTotalBounds.width(), widthMeasureSpec, 0),
-                    resolveSizeAndState(mTotalBounds.height(), heightMeasureSpec, 0))
-        } else {
-            setMeasuredDimension(
-                    resolveSizeAndState(mBoundingRect.width(), widthMeasureSpec, 0),
-                    resolveSizeAndState(mBoundingRect.height(), heightMeasureSpec, 0))
         }
     }
 
