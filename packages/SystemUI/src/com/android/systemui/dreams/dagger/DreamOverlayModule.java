@@ -47,8 +47,6 @@ public abstract class DreamOverlayModule {
     public static final String BURN_IN_PROTECTION_UPDATE_INTERVAL =
             "burn_in_protection_update_interval";
     public static final String MILLIS_UNTIL_FULL_JITTER = "millis_until_full_jitter";
-    public static final String DREAM_OVERLAY_OPEN_ANIMATION_DURATION = "over_open_anim_duration";
-    public static final String DREAM_OVERLAY_OPEN_ANIMATION_DELAY = "over_open_anim_delay";
 
     /** */
     @Provides
@@ -114,28 +112,6 @@ public abstract class DreamOverlayModule {
     @Named(MILLIS_UNTIL_FULL_JITTER)
     static long providesMillisUntilFullJitter(@Main Resources resources) {
         return resources.getInteger(R.integer.config_dreamOverlayMillisUntilFullJitter);
-    }
-
-    /**
-     * The duration in milliseconds of the dream overlay open animation.
-     */
-    @Provides
-    @Named(DREAM_OVERLAY_OPEN_ANIMATION_DURATION)
-    static int providesOverlayOpenAnimationDuration(@Main Resources resources) {
-        return resources.getInteger(R.integer.complicationFadeInMs);
-    }
-
-    /**
-     * The delay in milliseconds before dream overlay starts animating in.
-     *
-     * We use the dream open animation duration here so overlay starts animating after dream content
-     * has fully animated in.
-     */
-    @Provides
-    @Named(DREAM_OVERLAY_OPEN_ANIMATION_DELAY)
-    static int providesOverlayOpenAnimationDelay(@Main Resources resources) {
-        return resources.getInteger(
-                com.android.internal.R.integer.config_dreamOpenAnimationDuration);
     }
 
     @Provides

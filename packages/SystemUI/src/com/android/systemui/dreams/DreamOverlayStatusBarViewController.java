@@ -41,7 +41,6 @@ import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.DreamOverlayStatusBarItemsProvider.StatusBarItem;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
-import com.android.systemui.dreams.dagger.DreamOverlayModule;
 import com.android.systemui.statusbar.policy.IndividualSensorPrivacyController;
 import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.ZenModeController;
@@ -59,7 +58,6 @@ import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
 /**
  * View controller for {@link DreamOverlayStatusBarView}.
@@ -84,9 +82,6 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
             new ArrayList<>();
 
     private boolean mIsAttached;
-
-    private final int mOpenAnimationDuration;
-    private final int mOpenAnimationDelay;
 
     private final NetworkRequest mNetworkRequest = new NetworkRequest.Builder()
             .clearCapabilities()
@@ -157,9 +152,7 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
             ZenModeController zenModeController,
             StatusBarWindowStateController statusBarWindowStateController,
             DreamOverlayStatusBarItemsProvider statusBarItemsProvider,
-            DreamOverlayStateController dreamOverlayStateController,
-            @Named(DreamOverlayModule.DREAM_OVERLAY_OPEN_ANIMATION_DURATION) int openAnimDuration,
-            @Named(DreamOverlayModule.DREAM_OVERLAY_OPEN_ANIMATION_DELAY) int openAnimDelay) {
+            DreamOverlayStateController dreamOverlayStateController) {
         super(view);
         mResources = resources;
         mMainExecutor = mainExecutor;
@@ -174,10 +167,6 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
         mStatusBarItemsProvider = statusBarItemsProvider;
         mZenModeController = zenModeController;
         mDreamOverlayStateController = dreamOverlayStateController;
-        mOpenAnimationDuration = openAnimDuration;
-        mOpenAnimationDelay = openAnimDelay;
-
-        mView.setAlpha(0f);
 
         // Register to receive show/hide updates for the system status bar. Our custom status bar
         // needs to hide when the system status bar is showing to ovoid overlapping status bars.
@@ -209,11 +198,6 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
         updateLowLightState();
 
         mTouchInsetSession.addViewToTracking(mView);
-
-        mView.animate()
-                .alpha(1f)
-                .setStartDelay(mOpenAnimationDelay)
-                .setDuration(mOpenAnimationDuration);
     }
 
     @Override
