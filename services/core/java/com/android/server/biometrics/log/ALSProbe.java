@@ -52,16 +52,13 @@ final class ALSProbe implements Probe {
     private boolean mDestroyed = false;
     private boolean mDestroyRequested = false;
     private boolean mDisableRequested = false;
-    private volatile NextConsumer mNextConsumer = null;
+    private NextConsumer mNextConsumer = null;
     private volatile float mLastAmbientLux = -1;
 
     private final SensorEventListener mLightSensorListener = new SensorEventListener() {
         @Override
         public void onSensorChanged(SensorEvent event) {
-            mLastAmbientLux = event.values[0];
-            if (mNextConsumer != null) {
-                completeNextConsumer(mLastAmbientLux);
-            }
+            onNext(event.values[0]);
         }
 
         @Override
@@ -133,8 +130,26 @@ final class ALSProbe implements Probe {
 
         // if a final consumer is set it will call destroy/disable on the next value if requested
         if (!mDestroyed && mNextConsumer == null) {
-            disable();
+            disableLightSensorLoggingLocked();
             mDestroyed = true;
+        }
+    }
+
+    private synchronized void onNext(float value) {
+        mLastAmbientLux = value;
+
+        final NextConsumer consumer = mNextConsumer;
+        mNextConsumer = null;
+        if (consumer != null) {
+            Slog.v(TAG, "Finishing next consumer");
+
+            if (mDestroyRequested) {
+                destroy();
+            } else if (mDisableRequested) {
+                disable();
+            }
+
+            consumer.consume(value);
         }
     }
 
@@ -160,7 +175,7 @@ final class ALSProbe implements Probe {
             @Nullable Handler handler) {
         final NextConsumer nextConsumer = new NextConsumer(consumer, handler);
         final float current = mLastAmbientLux;
-        if (current > 0) {
+        if (current > -1f) {
             nextConsumer.consume(current);
         } else if (mDestroyed) {
             nextConsumer.consume(-1f);
@@ -169,23 +184,6 @@ final class ALSProbe implements Probe {
         } else {
             mNextConsumer = nextConsumer;
             enableLightSensorLoggingLocked();
-        }
-    }
-
-    private synchronized void completeNextConsumer(float value) {
-        Slog.v(TAG, "Finishing next consumer");
-
-        final NextConsumer consumer = mNextConsumer;
-        mNextConsumer = null;
-
-        if (mDestroyRequested) {
-            destroy();
-        } else if (mDisableRequested) {
-            disable();
-        }
-
-        if (consumer != null) {
-            consumer.consume(value);
         }
     }
 
@@ -219,9 +217,13 @@ final class ALSProbe implements Probe {
         }
     }
 
-    private void onTimeout() {
+    private synchronized void onTimeout() {
         Slog.e(TAG, "Max time exceeded for ALS logger - disabling: "
                 + mLightSensorListener.hashCode());
+
+        // if consumers are waiting but there was no sensor change, complete them with the latest
+        // value before disabling
+        onNext(mLastAmbientLux);
         disable();
     }
 

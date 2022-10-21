@@ -178,6 +178,23 @@ public class ALSProbeTest {
     }
 
     @Test
+    public void testWatchDogCompletesAwait() {
+        mProbe.enable();
+
+        AtomicInteger lux = new AtomicInteger(-9);
+        mProbe.awaitNextLux((v) -> lux.set(Math.round(v)), null /* handler */);
+
+        verify(mSensorManager).registerListener(
+                mSensorEventListenerCaptor.capture(), any(), anyInt());
+
+        moveTimeBy(TIMEOUT_MS);
+
+        assertThat(lux.get()).isEqualTo(-1);
+        verify(mSensorManager).unregisterListener(any(SensorEventListener.class));
+        verifyNoMoreInteractions(mSensorManager);
+    }
+
+    @Test
     public void testNextLuxWhenAlreadyEnabledAndNotAvailable() {
         testNextLuxWhenAlreadyEnabled(false /* dataIsAvailable */);
     }
