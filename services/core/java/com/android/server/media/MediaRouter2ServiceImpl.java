@@ -1681,113 +1681,72 @@ class MediaRouter2ServiceImpl {
         }
 
         private void onProviderStateChangedOnHandler(@NonNull MediaRoute2Provider provider) {
-            MediaRoute2ProviderInfo currentInfo = provider.getProviderInfo();
-
+            MediaRoute2ProviderInfo newInfo = provider.getProviderInfo();
             int providerInfoIndex =
                     indexOfRouteProviderInfoByUniqueId(provider.getUniqueId(), mLastProviderInfos);
-
-            MediaRoute2ProviderInfo prevInfo =
+            MediaRoute2ProviderInfo oldInfo =
                     providerInfoIndex == -1 ? null : mLastProviderInfos.get(providerInfoIndex);
-
-            // Ignore if no changes
-            if (Objects.equals(prevInfo, currentInfo)) {
+            if (oldInfo == newInfo) {
+                // Nothing to do.
                 return;
             }
 
-            boolean hasAddedOrModifiedRoutes = false;
-            boolean hasRemovedRoutes = false;
-
-            boolean isSystemProvider = provider.mIsSystemRouteProvider;
-
-            if (prevInfo == null) {
-                // Provider is being added.
-                mLastProviderInfos.add(currentInfo);
-                addToRoutesMap(currentInfo.getRoutes(), isSystemProvider);
-                // Check if new provider exposes routes.
-                hasAddedOrModifiedRoutes = !currentInfo.getRoutes().isEmpty();
-            } else if (currentInfo == null) {
-                // Provider is being removed.
-                hasRemovedRoutes = true;
-                mLastProviderInfos.remove(prevInfo);
-                removeFromRoutesMap(prevInfo.getRoutes(), isSystemProvider);
-            } else {
-                // Provider is being updated.
-                mLastProviderInfos.set(providerInfoIndex, currentInfo);
-                final Collection<MediaRoute2Info> currentRoutes = currentInfo.getRoutes();
-
-                // Checking for individual routes.
-                for (MediaRoute2Info route : currentRoutes) {
-                    if (!route.isValid()) {
-                        Slog.w(
-                                TAG,
-                                "onProviderStateChangedOnHandler: Ignoring invalid route : "
-                                        + route);
-                        continue;
-                    }
-
-                    MediaRoute2Info prevRoute = prevInfo.getRoute(route.getOriginalId());
-                    if (prevRoute == null || !Objects.equals(prevRoute, route)) {
-                        hasAddedOrModifiedRoutes = true;
-                        mLastNotifiedRoutesToPrivilegedRouters.put(route.getId(), route);
-                        if (!isSystemProvider) {
-                            mLastNotifiedRoutesToNonPrivilegedRouters.put(route.getId(), route);
-                        }
-                    }
+            Collection<MediaRoute2Info> newRoutes;
+            Set<String> newRouteIds;
+            if (newInfo != null) {
+                // Adding or updating a provider.
+                newRoutes = newInfo.getRoutes();
+                newRouteIds =
+                        newRoutes.stream().map(MediaRoute2Info::getId).collect(Collectors.toSet());
+                if (providerInfoIndex >= 0) {
+                    mLastProviderInfos.set(providerInfoIndex, newInfo);
+                } else {
+                    mLastProviderInfos.add(newInfo);
                 }
+            } else /* newInfo == null */ {
+                // Removing a provider.
+                mLastProviderInfos.remove(oldInfo);
+                newRouteIds = Collections.emptySet();
+                newRoutes = Collections.emptySet();
+            }
 
-                // Checking for individual removals
-                for (MediaRoute2Info prevRoute : prevInfo.getRoutes()) {
-                    if (currentInfo.getRoute(prevRoute.getOriginalId()) == null) {
-                        hasRemovedRoutes = true;
-                        mLastNotifiedRoutesToPrivilegedRouters.remove(prevRoute.getId());
-                        if (!isSystemProvider) {
-                            mLastNotifiedRoutesToNonPrivilegedRouters.remove(prevRoute.getId());
-                        }
-                    }
+            // Add new routes to the maps.
+            boolean hasAddedOrModifiedRoutes = false;
+            for (MediaRoute2Info newRouteInfo : newRoutes) {
+                if (!newRouteInfo.isValid()) {
+                    Slog.w(TAG, "onProviderStateChangedOnHandler: Ignoring invalid route : "
+                            + newRouteInfo);
+                    continue;
+                }
+                if (!provider.mIsSystemRouteProvider) {
+                    mLastNotifiedRoutesToNonPrivilegedRouters.put(
+                            newRouteInfo.getId(), newRouteInfo);
+                }
+                MediaRoute2Info oldRouteInfo =
+                        mLastNotifiedRoutesToPrivilegedRouters.put(
+                                newRouteInfo.getId(), newRouteInfo);
+                hasAddedOrModifiedRoutes |=
+                        oldRouteInfo == null || !oldRouteInfo.equals(newRouteInfo);
+            }
+
+            // Remove stale routes from the maps.
+            Collection<MediaRoute2Info> oldRoutes =
+                    oldInfo == null ? Collections.emptyList() : oldInfo.getRoutes();
+            boolean hasRemovedRoutes = false;
+            for (MediaRoute2Info oldRoute : oldRoutes) {
+                String oldRouteId = oldRoute.getId();
+                if (!newRouteIds.contains(oldRouteId)) {
+                    hasRemovedRoutes = true;
+                    mLastNotifiedRoutesToPrivilegedRouters.remove(oldRouteId);
+                    mLastNotifiedRoutesToNonPrivilegedRouters.remove(oldRouteId);
                 }
             }
 
             dispatchUpdates(
                     hasAddedOrModifiedRoutes,
                     hasRemovedRoutes,
-                    isSystemProvider,
+                    provider.mIsSystemRouteProvider,
                     mSystemProvider.getDefaultRoute());
-        }
-
-        /**
-         * Adds provided routes to {@link #mLastNotifiedRoutesToPrivilegedRouters}. Also adds them
-         * to {@link #mLastNotifiedRoutesToNonPrivilegedRouters} if they were provided by a
-         * non-system route provider. Overwrites any route with matching id that already exists.
-         *
-         * @param routes list of routes to be added.
-         * @param isSystemRoutes indicates whether routes come from a system route provider.
-         */
-        private void addToRoutesMap(
-                @NonNull Collection<MediaRoute2Info> routes, boolean isSystemRoutes) {
-            for (MediaRoute2Info route : routes) {
-                if (!isSystemRoutes) {
-                    mLastNotifiedRoutesToNonPrivilegedRouters.put(route.getId(), route);
-                }
-                mLastNotifiedRoutesToPrivilegedRouters.put(route.getId(), route);
-            }
-        }
-
-        /**
-         * Removes provided routes from {@link #mLastNotifiedRoutesToPrivilegedRouters}. Also
-         * removes them from {@link #mLastNotifiedRoutesToNonPrivilegedRouters} if they were
-         * provided by a non-system route provider.
-         *
-         * @param routes list of routes to be removed.
-         * @param isSystemRoutes whether routes come from a system route provider.
-         */
-        private void removeFromRoutesMap(
-                @NonNull Collection<MediaRoute2Info> routes, boolean isSystemRoutes) {
-            for (MediaRoute2Info route : routes) {
-                if (!isSystemRoutes) {
-                    mLastNotifiedRoutesToNonPrivilegedRouters.remove(route.getId());
-                }
-                mLastNotifiedRoutesToPrivilegedRouters.remove(route.getId());
-            }
         }
 
         /**
