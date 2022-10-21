@@ -16,6 +16,7 @@
 
 package android.companion;
 
+import android.bluetooth.BluetoothDevice;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -23,19 +24,14 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 /**
- * Loose wrapper around device parcelable. Device can be one of three types:
+ * Container for device info from an association that is not self-managed.
+ * Device can be one of three types:
  *
  * <ul>
  *     <li>for classic Bluetooth - {@link android.bluetooth.BluetoothDevice}</li>
  *     <li>for Bluetooth LE - {@link android.bluetooth.le.ScanResult}</li>
  *     <li>for WiFi - {@link android.net.wifi.ScanResult}</li>
  * </ul>
- *
- * This class serves as temporary wrapper to deliver a loosely-typed parcelable object from
- * {@link com.android.companiondevicemanager.CompanionDeviceActivity} to the Companion app,
- * and should only be used internally.
- *
- * @hide
  */
 public final class AssociatedDevice implements Parcelable {
     private static final int CLASSIC_BLUETOOTH = 0;
@@ -44,6 +40,7 @@ public final class AssociatedDevice implements Parcelable {
 
     @NonNull private final Parcelable mDevice;
 
+    /** @hide */
     public AssociatedDevice(@NonNull Parcelable device) {
         mDevice = device;
     }
@@ -54,11 +51,39 @@ public final class AssociatedDevice implements Parcelable {
     }
 
     /**
-     * Return device info. Cast to expected device type.
+     * Return bluetooth device info. Null if associated device is not a bluetooth device.
+     * @return Remote bluetooth device details containing MAC address.
      */
-    @NonNull
-    public Parcelable getDevice() {
-        return mDevice;
+    @Nullable
+    public BluetoothDevice getBluetoothDevice() {
+        if (mDevice instanceof BluetoothDevice) {
+            return (BluetoothDevice) mDevice;
+        }
+        return null;
+    }
+
+    /**
+     * Return bluetooth LE device info. Null if associated device is not a BLE device.
+     * @return BLE scan result containing details of detected BLE device.
+     */
+    @Nullable
+    public android.bluetooth.le.ScanResult getBleDevice() {
+        if (mDevice instanceof android.bluetooth.le.ScanResult) {
+            return (android.bluetooth.le.ScanResult) mDevice;
+        }
+        return null;
+    }
+
+    /**
+     * Return Wi-Fi device info. Null if associated device is not a Wi-Fi device.
+     * @return Wi-Fi scan result containing details of detected access point.
+     */
+    @Nullable
+    public android.net.wifi.ScanResult getWifiDevice() {
+        if (mDevice instanceof android.net.wifi.ScanResult) {
+            return (android.net.wifi.ScanResult) mDevice;
+        }
+        return null;
     }
 
     @Override
