@@ -401,6 +401,11 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     private final float mWindowCornerRadius;
 
     /**
+     * The duration in milliseconds of the dream open animation.
+     */
+    private final int mDreamOpenAnimationDuration;
+
+    /**
      * The animation used for hiding keyguard. This is used to fetch the animation timings if
      * WindowManager is not providing us with them.
      */
@@ -947,8 +952,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                         }
 
                         mOccludeByDreamAnimator = ValueAnimator.ofFloat(0f, 1f);
-                        // Use the same duration as for the UNOCCLUDE.
-                        mOccludeByDreamAnimator.setDuration(UNOCCLUDE_ANIMATION_DURATION);
+                        mOccludeByDreamAnimator.setDuration(mDreamOpenAnimationDuration);
                         mOccludeByDreamAnimator.setInterpolator(Interpolators.LINEAR);
                         mOccludeByDreamAnimator.addUpdateListener(
                                 animation -> {
@@ -1180,6 +1184,9 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         mPowerButtonY = context.getResources().getDimensionPixelSize(
                 R.dimen.physical_power_button_center_screen_location_y);
         mWindowCornerRadius = ScreenDecorationsUtils.getWindowCornerRadius(context);
+
+        mDreamOpenAnimationDuration = context.getResources().getInteger(
+                com.android.internal.R.integer.config_dreamOpenAnimationDuration);
     }
 
     public void userActivity() {
