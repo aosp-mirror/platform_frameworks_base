@@ -47,6 +47,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
 @SmallTest
@@ -78,7 +79,6 @@ public class HdmiCecLocalDevicePlaybackTest {
     private TestLooper mTestLooper = new TestLooper();
     private FakePowerManagerWrapper mPowerManager;
     private ArrayList<HdmiCecLocalDevice> mLocalDevices = new ArrayList<>();
-    private ArrayList<Integer> mLocalDeviceTypes = new ArrayList<>();
     private int mPlaybackPhysicalAddress;
     private int mPlaybackLogicalAddress;
     private boolean mWokenUp;
@@ -91,10 +91,10 @@ public class HdmiCecLocalDevicePlaybackTest {
         Context context = InstrumentationRegistry.getTargetContext();
         mMyLooper = mTestLooper.getLooper();
 
-        mLocalDeviceTypes.add(HdmiDeviceInfo.DEVICE_PLAYBACK);
         mHdmiControlService =
                 new HdmiControlService(InstrumentationRegistry.getTargetContext(),
-                        mLocalDeviceTypes, new FakeAudioDeviceVolumeManagerWrapper()) {
+                        Collections.singletonList(HdmiDeviceInfo.DEVICE_PLAYBACK),
+                        new FakeAudioDeviceVolumeManagerWrapper()) {
 
                     @Override
                     void wakeUp() {
@@ -128,8 +128,6 @@ public class HdmiCecLocalDevicePlaybackTest {
                     }
                 };
 
-        mHdmiCecLocalDevicePlayback = new HdmiCecLocalDevicePlayback(mHdmiControlService);
-        mHdmiCecLocalDevicePlayback.init();
         mHdmiControlService.setHdmiCecConfig(new FakeHdmiCecConfig(context));
         mHdmiControlService.setIoLooper(mMyLooper);
         mNativeWrapper = new FakeNativeWrapper();
@@ -137,7 +135,6 @@ public class HdmiCecLocalDevicePlaybackTest {
                 mHdmiControlService, mNativeWrapper, mHdmiControlService.getAtomWriter());
         mHdmiControlService.setCecController(mHdmiCecController);
         mHdmiControlService.setHdmiMhlController(HdmiMhlControllerStub.create(mHdmiControlService));
-        mLocalDevices.add(mHdmiCecLocalDevicePlayback);
         HdmiPortInfo[] hdmiPortInfos = new HdmiPortInfo[1];
         hdmiPortInfos[0] =
                 new HdmiPortInfo(1, HdmiPortInfo.PORT_OUTPUT, 0x0000, true, false, false);
@@ -148,10 +145,11 @@ public class HdmiCecLocalDevicePlaybackTest {
         mPowerManager = new FakePowerManagerWrapper(context);
         mHdmiControlService.setPowerManager(mPowerManager);
         mHdmiControlService.setPowerManagerInternal(mPowerManagerInternal);
-        mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mPlaybackPhysicalAddress = 0x2000;
         mNativeWrapper.setPhysicalAddress(mPlaybackPhysicalAddress);
         mTestLooper.dispatchAll();
+        mHdmiCecLocalDevicePlayback = mHdmiControlService.playback();
+        mLocalDevices.add(mHdmiCecLocalDevicePlayback);
         mPlaybackLogicalAddress = mHdmiCecLocalDevicePlayback.getDeviceInfo().getLogicalAddress();
         mHdmiControlService.getHdmiCecNetwork().addCecDevice(INFO_TV);
         mNativeWrapper.clearResultMessages();
@@ -1108,7 +1106,11 @@ public class HdmiCecLocalDevicePlaybackTest {
                 HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
                 HdmiControlManager.POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_STANDBY_NOW);
         mPowerManager.setInteractive(true);
-        HdmiCecMessage message = HdmiCecMessageBuilder.buildActiveSource(ADDR_TV, 0x0000);
+        HdmiCecMessage message = HdmiCecMessageBuilder.buildActiveSource(mPlaybackLogicalAddress,
+                mPlaybackPhysicalAddress);
+        assertThat(mHdmiCecLocalDevicePlayback.handleActiveSource(message))
+                .isEqualTo(Constants.HANDLED);
+        message = HdmiCecMessageBuilder.buildActiveSource(ADDR_TV, 0x0000);
         assertThat(mHdmiCecLocalDevicePlayback.handleActiveSource(message))
                 .isEqualTo(Constants.HANDLED);
         mTestLooper.dispatchAll();
