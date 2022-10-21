@@ -84,6 +84,6 @@
     <string name="maximize_button_text" msgid="1650859196290301963">"Maksimiziranje"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"Minimiziranje"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Zatvaranje"</string>
-    <string name="back_button_text" msgid="1469718707134137085">"Natrag"</string>
-    <string name="handle_text" msgid="1766582106752184456">"Pokazivač"</string>
+    <string name="back_button_text" msgid="1469718707134137085">"Nazad"</string>
+    <string name="handle_text" msgid="1766582106752184456">"Identifikator"</string>
 </resources>
