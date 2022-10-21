@@ -860,6 +860,11 @@ static void android_view_ThreadedRenderer_setRtAnimationsEnabled(JNIEnv* env, jo
     RenderProxy::setRtAnimationsEnabled(enabled);
 }
 
+static void android_view_ThreadedRenderer_notifyCallbackPending(JNIEnv*, jclass, jlong proxyPtr) {
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
+    proxy->notifyCallbackPending();
+}
+
 // Plumbs the display density down to DeviceInfo.
 static void android_view_ThreadedRenderer_setDisplayDensityDpi(JNIEnv*, jclass, jint densityDpi) {
     // Convert from dpi to density-independent pixels.
@@ -1037,6 +1042,8 @@ static const JNINativeMethod gMethods[] = {
         {"nIsDrawingEnabled", "()Z", (void*)android_view_ThreadedRenderer_isDrawingEnabled},
         {"nSetRtAnimationsEnabled", "(Z)V",
          (void*)android_view_ThreadedRenderer_setRtAnimationsEnabled},
+        {"nNotifyCallbackPending", "(J)V",
+         (void*)android_view_ThreadedRenderer_notifyCallbackPending},
 };
 
 static JavaVM* mJvm = nullptr;
