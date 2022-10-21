@@ -112,8 +112,9 @@ public class Flags {
             new ResourceBooleanFlag(205, R.bool.config_enableFaceScanningAnimation);
 
     // TODO(b/254512676): Tracking Bug
-    public static final UnreleasedFlag LOCKSCREEN_CUSTOM_CLOCKS = new UnreleasedFlag(207);
-  
+    public static final UnreleasedFlag LOCKSCREEN_CUSTOM_CLOCKS =
+            new UnreleasedFlag(207, /* teamfood = */ true);
+
     /**
      * Flag to enable the usage of the new bouncer data source. This is a refactor of and
      * eventual replacement of KeyguardBouncer.java.
