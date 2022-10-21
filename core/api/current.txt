@@ -45407,7 +45407,7 @@ package android.text {
     method public final int getParagraphLeft(int);
     method public final int getParagraphRight(int);
     method public float getPrimaryHorizontal(int);
-    method @Nullable public android.util.Range<java.lang.Integer> getRangeForRect(@NonNull android.graphics.RectF, @NonNull android.text.SegmentFinder, @NonNull android.text.Layout.TextInclusionStrategy);
+    method @Nullable public int[] getRangeForRect(@NonNull android.graphics.RectF, @NonNull android.text.SegmentFinder, @NonNull android.text.Layout.TextInclusionStrategy);
     method public float getSecondaryHorizontal(int);
     method public void getSelectionPath(int, int, android.graphics.Path);
     method public final float getSpacingAdd();
