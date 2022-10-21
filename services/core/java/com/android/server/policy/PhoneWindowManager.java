@@ -4193,7 +4193,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mRequestedOrSleepingDefaultDisplay) {
             mCameraGestureTriggeredDuringGoingToSleep = true;
             // Wake device up early to prevent display doing redundant turning off/on stuff.
-            wakeUpFromPowerKey(event.getDownTime());
+            wakeUp(SystemClock.uptimeMillis(), mAllowTheaterModeWakeFromPowerKey,
+                    PowerManager.WAKE_REASON_CAMERA_LAUNCH,
+                    "android.policy:CAMERA_GESTURE_PREVENT_LOCK");
         }
         return true;
     }
@@ -4726,11 +4728,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
             mDefaultDisplayRotation.updateOrientationListener();
             reportScreenStateToVrManager(false);
-            if (mCameraGestureTriggeredDuringGoingToSleep) {
-                wakeUp(SystemClock.uptimeMillis(), mAllowTheaterModeWakeFromPowerKey,
-                        PowerManager.WAKE_REASON_CAMERA_LAUNCH,
-                        "com.android.systemui:CAMERA_GESTURE_PREVENT_LOCK");
-            }
         }
     }
 
