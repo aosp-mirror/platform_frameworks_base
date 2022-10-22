@@ -88,6 +88,7 @@
 -keep,allowoptimization,allowaccessmodification class com.android.server.location.gnss.GnssPowerStats { *; }
 -keep,allowoptimization,allowaccessmodification class com.android.server.location.gnss.hal.GnssNative { *; }
 -keep,allowoptimization,allowaccessmodification class com.android.server.pm.PackageManagerShellCommandDataLoader { *; }
+-keep,allowoptimization,allowaccessmodification class com.android.server.sensors.SensorManagerInternal$RuntimeSensorStateChangeCallback { *; }
 -keep,allowoptimization,allowaccessmodification class com.android.server.sensors.SensorManagerInternal$ProximityActiveListener { *; }
 -keep,allowoptimization,allowaccessmodification class com.android.server.sensors.SensorService { *; }
 -keep,allowoptimization,allowaccessmodification class com.android.server.soundtrigger_middleware.SoundTriggerMiddlewareImpl$AudioSessionProvider$AudioSession { *; }

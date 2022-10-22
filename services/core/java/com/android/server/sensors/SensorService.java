@@ -29,7 +29,9 @@ import com.android.server.SystemServerInitThreadPool;
 import com.android.server.SystemService;
 import com.android.server.utils.TimingsTraceAndSlog;
 
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 
@@ -39,6 +41,8 @@ public class SensorService extends SystemService {
     @GuardedBy("mLock")
     private final ArrayMap<ProximityActiveListener, ProximityListenerProxy> mProximityListeners =
             new ArrayMap<>();
+    @GuardedBy("mLock")
+    private final Set<Integer> mRuntimeSensorHandles = new HashSet<>();
     @GuardedBy("mLock")
     private Future<?> mSensorServiceStart;
     @GuardedBy("mLock")
@@ -51,6 +55,12 @@ public class SensorService extends SystemService {
     private static native void registerProximityActiveListenerNative(long ptr);
     private static native void unregisterProximityActiveListenerNative(long ptr);
 
+    private static native int registerRuntimeSensorNative(long ptr, int deviceId, int type,
+            String name, String vendor,
+            SensorManagerInternal.RuntimeSensorStateChangeCallback callback);
+    private static native void unregisterRuntimeSensorNative(long ptr, int handle);
+    private static native boolean sendRuntimeSensorEventNative(long ptr, int handle, int type,
+            long timestampNanos, float[] values);
 
     public SensorService(Context ctx) {
         super(ctx);
@@ -84,6 +94,38 @@ public class SensorService extends SystemService {
     }
 
     class LocalService extends SensorManagerInternal {
+        @Override
+        public int createRuntimeSensor(int deviceId, int type, @NonNull String name,
+                @NonNull String vendor, @NonNull RuntimeSensorStateChangeCallback callback) {
+            synchronized (mLock) {
+                int handle = registerRuntimeSensorNative(mPtr, deviceId, type, name, vendor,
+                        callback);
+                mRuntimeSensorHandles.add(handle);
+                return handle;
+            }
+        }
+
+        @Override
+        public void removeRuntimeSensor(int handle) {
+            synchronized (mLock) {
+                if (mRuntimeSensorHandles.contains(handle)) {
+                    mRuntimeSensorHandles.remove(handle);
+                    unregisterRuntimeSensorNative(mPtr, handle);
+                }
+            }
+        }
+
+        @Override
+        public boolean sendSensorEvent(int handle, int type, long timestampNanos,
+                @NonNull float[] values) {
+            synchronized (mLock) {
+                if (!mRuntimeSensorHandles.contains(handle)) {
+                    return false;
+                }
+                return sendRuntimeSensorEventNative(mPtr, handle, type, timestampNanos, values);
+            }
+        }
+
         @Override
         public void addProximityActiveListener(@NonNull Executor executor,
                 @NonNull ProximityActiveListener listener) {
