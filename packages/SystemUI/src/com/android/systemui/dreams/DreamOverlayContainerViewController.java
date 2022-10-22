@@ -76,9 +76,6 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
     private final int mDreamOverlayMaxTranslationY;
     private final BouncerCallbackInteractor mBouncerCallbackInteractor;
 
-    private final int mOpenAnimationDuration;
-    private final int mOpenAnimationDelay;
-
     private long mJitterStartTimeMillis;
 
     private boolean mBouncerAnimating;
@@ -137,9 +134,7 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
             @Named(DreamOverlayModule.BURN_IN_PROTECTION_UPDATE_INTERVAL) long
                     burnInProtectionUpdateInterval,
             @Named(DreamOverlayModule.MILLIS_UNTIL_FULL_JITTER) long millisUntilFullJitter,
-            BouncerCallbackInteractor bouncerCallbackInteractor,
-            @Named(DreamOverlayModule.DREAM_OVERLAY_OPEN_ANIMATION_DURATION) int openAnimDuration,
-            @Named(DreamOverlayModule.DREAM_OVERLAY_OPEN_ANIMATION_DELAY) int openAnimDelay) {
+            BouncerCallbackInteractor bouncerCallbackInteractor) {
         super(containerView);
         mDreamOverlayContentView = contentView;
         mStatusBarViewController = statusBarViewController;
@@ -151,7 +146,6 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
                 R.dimen.dream_overlay_y_offset);
         final View view = mComplicationHostViewController.getView();
 
-        mDreamOverlayContentView.setAlpha(0f);
         mDreamOverlayContentView.addView(view,
                 new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.MATCH_PARENT));
@@ -161,8 +155,6 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
         mBurnInProtectionUpdateInterval = burnInProtectionUpdateInterval;
         mMillisUntilFullJitter = millisUntilFullJitter;
         mBouncerCallbackInteractor = bouncerCallbackInteractor;
-        mOpenAnimationDuration = openAnimDuration;
-        mOpenAnimationDelay = openAnimDelay;
     }
 
     @Override
@@ -180,11 +172,6 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
             bouncer.addBouncerExpansionCallback(mBouncerExpansionCallback);
         }
         mBouncerCallbackInteractor.addBouncerExpansionCallback(mBouncerExpansionCallback);
-
-        mDreamOverlayContentView.animate()
-                .alpha(1f)
-                .setStartDelay(mOpenAnimationDelay)
-                .setDuration(mOpenAnimationDuration);
     }
 
     @Override
