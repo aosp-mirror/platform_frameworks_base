@@ -4604,23 +4604,24 @@ package android.app {
 
   public class AlarmManager {
     method public boolean canScheduleExactAlarms();
-    method public void cancel(android.app.PendingIntent);
-    method public void cancel(android.app.AlarmManager.OnAlarmListener);
+    method public void cancel(@NonNull android.app.PendingIntent);
+    method public void cancel(@NonNull android.app.AlarmManager.OnAlarmListener);
     method public void cancelAll();
     method public android.app.AlarmManager.AlarmClockInfo getNextAlarmClock();
-    method public void set(int, long, android.app.PendingIntent);
-    method public void set(int, long, String, android.app.AlarmManager.OnAlarmListener, android.os.Handler);
-    method @RequiresPermission(android.Manifest.permission.SCHEDULE_EXACT_ALARM) public void setAlarmClock(android.app.AlarmManager.AlarmClockInfo, android.app.PendingIntent);
-    method public void setAndAllowWhileIdle(int, long, android.app.PendingIntent);
-    method @RequiresPermission(value=android.Manifest.permission.SCHEDULE_EXACT_ALARM, conditional=true) public void setExact(int, long, android.app.PendingIntent);
-    method @RequiresPermission(value=android.Manifest.permission.SCHEDULE_EXACT_ALARM, conditional=true) public void setExact(int, long, String, android.app.AlarmManager.OnAlarmListener, android.os.Handler);
-    method @RequiresPermission(value=android.Manifest.permission.SCHEDULE_EXACT_ALARM, conditional=true) public void setExactAndAllowWhileIdle(int, long, android.app.PendingIntent);
-    method public void setInexactRepeating(int, long, long, android.app.PendingIntent);
-    method public void setRepeating(int, long, long, android.app.PendingIntent);
+    method public void set(int, long, @NonNull android.app.PendingIntent);
+    method public void set(int, long, @Nullable String, @NonNull android.app.AlarmManager.OnAlarmListener, @Nullable android.os.Handler);
+    method @RequiresPermission(android.Manifest.permission.SCHEDULE_EXACT_ALARM) public void setAlarmClock(@NonNull android.app.AlarmManager.AlarmClockInfo, @NonNull android.app.PendingIntent);
+    method public void setAndAllowWhileIdle(int, long, @NonNull android.app.PendingIntent);
+    method @RequiresPermission(value=android.Manifest.permission.SCHEDULE_EXACT_ALARM, conditional=true) public void setExact(int, long, @NonNull android.app.PendingIntent);
+    method @RequiresPermission(value=android.Manifest.permission.SCHEDULE_EXACT_ALARM, conditional=true) public void setExact(int, long, @Nullable String, @NonNull android.app.AlarmManager.OnAlarmListener, @Nullable android.os.Handler);
+    method @RequiresPermission(value=android.Manifest.permission.SCHEDULE_EXACT_ALARM, conditional=true) public void setExactAndAllowWhileIdle(int, long, @NonNull android.app.PendingIntent);
+    method public void setInexactRepeating(int, long, long, @NonNull android.app.PendingIntent);
+    method public void setRepeating(int, long, long, @NonNull android.app.PendingIntent);
     method @RequiresPermission(android.Manifest.permission.SET_TIME) public void setTime(long);
     method @RequiresPermission(android.Manifest.permission.SET_TIME_ZONE) public void setTimeZone(String);
-    method public void setWindow(int, long, long, android.app.PendingIntent);
-    method public void setWindow(int, long, long, String, android.app.AlarmManager.OnAlarmListener, android.os.Handler);
+    method public void setWindow(int, long, long, @NonNull android.app.PendingIntent);
+    method public void setWindow(int, long, long, @Nullable String, @NonNull android.app.AlarmManager.OnAlarmListener, @Nullable android.os.Handler);
+    method public void setWindow(int, long, long, @Nullable String, @NonNull java.util.concurrent.Executor, @NonNull android.app.AlarmManager.OnAlarmListener);
     field public static final String ACTION_NEXT_ALARM_CLOCK_CHANGED = "android.app.action.NEXT_ALARM_CLOCK_CHANGED";
     field public static final String ACTION_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED = "android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED";
     field public static final int ELAPSED_REALTIME = 3; // 0x3

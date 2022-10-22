@@ -2708,7 +2708,7 @@ public class QuotaControllerTest {
                     SOURCE_USER_ID, SOURCE_PACKAGE, standbyBucket);
         }
         verify(mAlarmManager, timeout(1000).times(0)).setWindow(
-                anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+                anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any(Handler.class));
 
         final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
         // Test with timing sessions out of window but still under max execution limit.
@@ -2725,7 +2725,7 @@ public class QuotaControllerTest {
                     SOURCE_USER_ID, SOURCE_PACKAGE, standbyBucket);
         }
         verify(mAlarmManager, timeout(1000).times(0)).setWindow(
-                anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+                anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any(Handler.class));
 
         mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
                 createTimingSession(now - 2 * HOUR_IN_MILLIS, 55 * MINUTE_IN_MILLIS, 1), false);
@@ -2734,7 +2734,7 @@ public class QuotaControllerTest {
                     SOURCE_USER_ID, SOURCE_PACKAGE, standbyBucket);
         }
         verify(mAlarmManager, timeout(1000).times(0)).setWindow(
-                anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+                anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any(Handler.class));
 
         synchronized (mQuotaController.mLock) {
             mQuotaController.prepareForExecutionLocked(jobStatus);
@@ -2749,7 +2749,8 @@ public class QuotaControllerTest {
                     SOURCE_USER_ID, SOURCE_PACKAGE, standbyBucket);
         }
         verify(mAlarmManager, timeout(1000).times(1)).setWindow(
-                anyInt(), eq(expectedAlarmTime), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+                anyInt(), eq(expectedAlarmTime), anyLong(), eq(TAG_QUOTA_CHECK), any(),
+                any(Handler.class));
     }
 
     @Test
@@ -2771,7 +2772,7 @@ public class QuotaControllerTest {
                     SOURCE_USER_ID, SOURCE_PACKAGE, standbyBucket);
         }
         verify(mAlarmManager, timeout(1000).times(0)).setWindow(
-                anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+                anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any(Handler.class));
 
         // Test with timing sessions out of window.
         final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
@@ -2782,7 +2783,7 @@ public class QuotaControllerTest {
                     SOURCE_USER_ID, SOURCE_PACKAGE, standbyBucket);
         }
         verify(mAlarmManager, timeout(1000).times(0)).setWindow(
-                anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+                anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any(Handler.class));
 
         // Test with timing sessions in window but still in quota.
         final long end = now - (2 * HOUR_IN_MILLIS - 5 * MINUTE_IN_MILLIS);
@@ -2796,7 +2797,7 @@ public class QuotaControllerTest {
                     SOURCE_USER_ID, SOURCE_PACKAGE, standbyBucket);
         }
         verify(mAlarmManager, timeout(1000).times(0)).setWindow(
-                anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+                anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any(Handler.class));
 
         // Add some more sessions, but still in quota.
         mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
@@ -2808,7 +2809,7 @@ public class QuotaControllerTest {
                     SOURCE_USER_ID, SOURCE_PACKAGE, standbyBucket);
         }
         verify(mAlarmManager, timeout(1000).times(0)).setWindow(
-                anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+                anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any(Handler.class));
 
         // Test when out of quota.
         mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
@@ -2818,7 +2819,8 @@ public class QuotaControllerTest {
                     SOURCE_USER_ID, SOURCE_PACKAGE, standbyBucket);
         }
         verify(mAlarmManager, timeout(1000).times(1)).setWindow(
-                anyInt(), eq(expectedAlarmTime), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+                anyInt(), eq(expectedAlarmTime), anyLong(), eq(TAG_QUOTA_CHECK), any(),
+                any(Handler.class));
 
         // Alarm already scheduled, so make sure it's not scheduled again.
         synchronized (mQuotaController.mLock) {
@@ -2826,7 +2828,8 @@ public class QuotaControllerTest {
                     SOURCE_USER_ID, SOURCE_PACKAGE, standbyBucket);
         }
         verify(mAlarmManager, timeout(1000).times(1)).setWindow(
-                anyInt(), eq(expectedAlarmTime), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+                anyInt(), eq(expectedAlarmTime), anyLong(), eq(TAG_QUOTA_CHECK), any(),
+                any(Handler.class));
     }
 
     @Test
@@ -2850,7 +2853,7 @@ public class QuotaControllerTest {
                     SOURCE_USER_ID, SOURCE_PACKAGE, standbyBucket);
         }
         verify(mAlarmManager, timeout(1000).times(0)).setWindow(
-                anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+                anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any(Handler.class));
 
         // Test with timing sessions out of window.
         final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
@@ -2861,7 +2864,7 @@ public class QuotaControllerTest {
                     SOURCE_USER_ID, SOURCE_PACKAGE, standbyBucket);
         }
         verify(mAlarmManager, timeout(1000).times(0)).setWindow(
-                anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+                anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any(Handler.class));
 
         // Test with timing sessions in window but still in quota.
         final long start = now - (6 * HOUR_IN_MILLIS);
@@ -2873,7 +2876,7 @@ public class QuotaControllerTest {
                     SOURCE_USER_ID, SOURCE_PACKAGE, standbyBucket);
         }
         verify(mAlarmManager, timeout(1000).times(0)).setWindow(
-                anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+                anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any(Handler.class));
 
         // Add some more sessions, but still in quota.
         mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
@@ -2885,7 +2888,7 @@ public class QuotaControllerTest {
                     SOURCE_USER_ID, SOURCE_PACKAGE, standbyBucket);
         }
         verify(mAlarmManager, timeout(1000).times(0)).setWindow(
-                anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+                anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any(Handler.class));
 
         // Test when out of quota.
         mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
@@ -2895,7 +2898,8 @@ public class QuotaControllerTest {
                     SOURCE_USER_ID, SOURCE_PACKAGE, standbyBucket);
         }
         verify(mAlarmManager, timeout(1000).times(1)).setWindow(
-                anyInt(), eq(expectedAlarmTime), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+                anyInt(), eq(expectedAlarmTime), anyLong(), eq(TAG_QUOTA_CHECK), any(),
+                any(Handler.class));
 
         // Alarm already scheduled, so make sure it's not scheduled again.
         synchronized (mQuotaController.mLock) {
@@ -2903,7 +2907,8 @@ public class QuotaControllerTest {
                     SOURCE_USER_ID, SOURCE_PACKAGE, standbyBucket);
         }
         verify(mAlarmManager, timeout(1000).times(1)).setWindow(
-                anyInt(), eq(expectedAlarmTime), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+                anyInt(), eq(expectedAlarmTime), anyLong(), eq(TAG_QUOTA_CHECK), any(),
+                any(Handler.class));
     }
 
     /**
@@ -2932,7 +2937,7 @@ public class QuotaControllerTest {
                     SOURCE_USER_ID, SOURCE_PACKAGE, effectiveStandbyBucket);
         }
         verify(mAlarmManager, timeout(1000).times(0)).setWindow(
-                anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+                anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any(Handler.class));
 
         // Test with timing sessions out of window.
         final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
@@ -2943,7 +2948,7 @@ public class QuotaControllerTest {
                     SOURCE_USER_ID, SOURCE_PACKAGE, effectiveStandbyBucket);
         }
         verify(mAlarmManager, timeout(1000).times(0)).setWindow(
-                anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+                anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any(Handler.class));
 
         // Test with timing sessions in window but still in quota.
         final long start = now - (6 * HOUR_IN_MILLIS);
@@ -2955,7 +2960,7 @@ public class QuotaControllerTest {
                     SOURCE_USER_ID, SOURCE_PACKAGE, effectiveStandbyBucket);
         }
         verify(mAlarmManager, timeout(1000).times(0)).setWindow(
-                anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+                anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any(Handler.class));
 
         // Add some more sessions, but still in quota.
         mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
@@ -2967,7 +2972,7 @@ public class QuotaControllerTest {
                     SOURCE_USER_ID, SOURCE_PACKAGE, effectiveStandbyBucket);
         }
         verify(mAlarmManager, timeout(1000).times(0)).setWindow(
-                anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+                anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any(Handler.class));
 
         // Test when out of quota.
         mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
@@ -2977,7 +2982,8 @@ public class QuotaControllerTest {
                     SOURCE_USER_ID, SOURCE_PACKAGE, effectiveStandbyBucket);
         }
         verify(mAlarmManager, timeout(1000).times(1)).setWindow(
-                anyInt(), eq(expectedAlarmTime), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+                anyInt(), eq(expectedAlarmTime), anyLong(), eq(TAG_QUOTA_CHECK), any(),
+                any(Handler.class));
 
         // Alarm already scheduled, so make sure it's not scheduled again.
         synchronized (mQuotaController.mLock) {
@@ -2985,7 +2991,8 @@ public class QuotaControllerTest {
                     SOURCE_USER_ID, SOURCE_PACKAGE, effectiveStandbyBucket);
         }
         verify(mAlarmManager, timeout(1000).times(1)).setWindow(
-                anyInt(), eq(expectedAlarmTime), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+                anyInt(), eq(expectedAlarmTime), anyLong(), eq(TAG_QUOTA_CHECK), any(),
+                any(Handler.class));
     }
 
     @Test
@@ -3013,7 +3020,7 @@ public class QuotaControllerTest {
                     SOURCE_USER_ID, SOURCE_PACKAGE, standbyBucket);
         }
         verify(mAlarmManager, timeout(1000).times(0)).setWindow(
-                anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+                anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any(Handler.class));
 
         // Test with timing sessions out of window.
         final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
@@ -3023,7 +3030,7 @@ public class QuotaControllerTest {
             mQuotaController.maybeScheduleStartAlarmLocked(0, "com.android.test", standbyBucket);
         }
         verify(mAlarmManager, timeout(1000).times(0)).setWindow(
-                anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+                anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any(Handler.class));
 
         // Test with timing sessions in window but still in quota.
         final long start = now - (6 * HOUR_IN_MILLIS);
@@ -3039,7 +3046,7 @@ public class QuotaControllerTest {
                     SOURCE_USER_ID, SOURCE_PACKAGE, standbyBucket);
         }
         verify(mAlarmManager, timeout(1000).times(0)).setWindow(
-                anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+                anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any(Handler.class));
 
         // Add some more sessions, but still in quota.
         mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
@@ -3051,7 +3058,7 @@ public class QuotaControllerTest {
                     SOURCE_USER_ID, SOURCE_PACKAGE, standbyBucket);
         }
         verify(mAlarmManager, timeout(1000).times(0)).setWindow(
-                anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+                anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any(Handler.class));
 
         // Test when out of quota.
         mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
@@ -3061,7 +3068,8 @@ public class QuotaControllerTest {
                     SOURCE_USER_ID, SOURCE_PACKAGE, standbyBucket);
         }
         verify(mAlarmManager, timeout(1000).times(1)).setWindow(
-                anyInt(), eq(expectedAlarmTime), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+                anyInt(), eq(expectedAlarmTime), anyLong(), eq(TAG_QUOTA_CHECK), any(),
+                any(Handler.class));
 
         // Alarm already scheduled, so make sure it's not scheduled again.
         synchronized (mQuotaController.mLock) {
@@ -3069,7 +3077,8 @@ public class QuotaControllerTest {
                     SOURCE_USER_ID, SOURCE_PACKAGE, standbyBucket);
         }
         verify(mAlarmManager, timeout(1000).times(1)).setWindow(
-                anyInt(), eq(expectedAlarmTime), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+                anyInt(), eq(expectedAlarmTime), anyLong(), eq(TAG_QUOTA_CHECK), any(),
+                any(Handler.class));
     }
 
     /** Tests that the start alarm is properly rescheduled if the app's bucket is changed. */
@@ -3108,7 +3117,8 @@ public class QuotaControllerTest {
                     SOURCE_USER_ID, SOURCE_PACKAGE, ACTIVE_INDEX);
         }
         inOrder.verify(mAlarmManager, timeout(1000).times(0))
-                .setWindow(anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+                .setWindow(anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(),
+                        any(Handler.class));
         inOrder.verify(mAlarmManager, timeout(1000).times(0))
                 .cancel(any(AlarmManager.OnAlarmListener.class));
 
@@ -3123,7 +3133,7 @@ public class QuotaControllerTest {
         }
         inOrder.verify(mAlarmManager, timeout(1000).times(1)).setWindow(
                 anyInt(), eq(expectedWorkingAlarmTime), anyLong(),
-                eq(TAG_QUOTA_CHECK), any(), any());
+                eq(TAG_QUOTA_CHECK), any(), any(Handler.class));
 
         final long expectedFrequentAlarmTime =
                 outOfQuotaTime + (8 * HOUR_IN_MILLIS)
@@ -3135,7 +3145,7 @@ public class QuotaControllerTest {
         }
         inOrder.verify(mAlarmManager, timeout(1000).times(1)).setWindow(
                 anyInt(), eq(expectedFrequentAlarmTime), anyLong(),
-                eq(TAG_QUOTA_CHECK), any(), any());
+                eq(TAG_QUOTA_CHECK), any(), any(Handler.class));
 
         final long expectedRareAlarmTime =
                 outOfQuotaTime + (24 * HOUR_IN_MILLIS)
@@ -3146,7 +3156,8 @@ public class QuotaControllerTest {
                     SOURCE_USER_ID, SOURCE_PACKAGE, RARE_INDEX);
         }
         inOrder.verify(mAlarmManager, timeout(1000).times(1)).setWindow(
-                anyInt(), eq(expectedRareAlarmTime), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+                anyInt(), eq(expectedRareAlarmTime), anyLong(), eq(TAG_QUOTA_CHECK), any(),
+                any(Handler.class));
 
         // And back up again.
         setStandbyBucket(FREQUENT_INDEX, jobStatus);
@@ -3156,7 +3167,7 @@ public class QuotaControllerTest {
         }
         inOrder.verify(mAlarmManager, timeout(1000).times(1)).setWindow(
                 anyInt(), eq(expectedFrequentAlarmTime), anyLong(),
-                eq(TAG_QUOTA_CHECK), any(), any());
+                eq(TAG_QUOTA_CHECK), any(), any(Handler.class));
 
         setStandbyBucket(WORKING_INDEX, jobStatus);
         synchronized (mQuotaController.mLock) {
@@ -3165,7 +3176,7 @@ public class QuotaControllerTest {
         }
         inOrder.verify(mAlarmManager, timeout(1000).times(1)).setWindow(
                 anyInt(), eq(expectedWorkingAlarmTime), anyLong(),
-                eq(TAG_QUOTA_CHECK), any(), any());
+                eq(TAG_QUOTA_CHECK), any(), any(Handler.class));
 
         setStandbyBucket(ACTIVE_INDEX, jobStatus);
         synchronized (mQuotaController.mLock) {
@@ -3173,7 +3184,8 @@ public class QuotaControllerTest {
                     SOURCE_USER_ID, SOURCE_PACKAGE, ACTIVE_INDEX);
         }
         inOrder.verify(mAlarmManager, timeout(1000).times(0))
-                .setWindow(anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+                .setWindow(anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(),
+                        any(Handler.class));
         inOrder.verify(mAlarmManager, timeout(1000).times(1))
                 .cancel(any(AlarmManager.OnAlarmListener.class));
     }
@@ -3210,7 +3222,7 @@ public class QuotaControllerTest {
                     SOURCE_USER_ID, SOURCE_PACKAGE, standbyBucket);
         }
         verify(mAlarmManager, timeout(1000).times(0)).setWindow(
-                anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+                anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any(Handler.class));
 
         // Valid time in the future, so the count should be used.
         stats.jobRateLimitExpirationTimeElapsed = now + 5 * MINUTE_IN_MILLIS / 2;
@@ -3221,7 +3233,7 @@ public class QuotaControllerTest {
         }
         verify(mAlarmManager, timeout(1000).times(1)).setWindow(
                 anyInt(), eq(expectedWorkingAlarmTime), anyLong(),
-                eq(TAG_QUOTA_CHECK), any(), any());
+                eq(TAG_QUOTA_CHECK), any(), any(Handler.class));
     }
 
     /**
@@ -3318,7 +3330,8 @@ public class QuotaControllerTest {
                     SOURCE_USER_ID, SOURCE_PACKAGE, standbyBucket);
         }
         verify(mAlarmManager, timeout(1000).times(1)).setWindow(
-                anyInt(), eq(expectedAlarmTime), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+                anyInt(), eq(expectedAlarmTime), anyLong(), eq(TAG_QUOTA_CHECK), any(),
+                any(Handler.class));
     }
 
     private void runTestMaybeScheduleStartAlarmLocked_SmallRollingQuota_MaxTimeCheck() {
@@ -3355,7 +3368,8 @@ public class QuotaControllerTest {
                     SOURCE_USER_ID, SOURCE_PACKAGE, standbyBucket);
         }
         verify(mAlarmManager, timeout(1000).times(1)).setWindow(
-                anyInt(), eq(expectedAlarmTime), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+                anyInt(), eq(expectedAlarmTime), anyLong(), eq(TAG_QUOTA_CHECK), any(),
+                any(Handler.class));
     }
 
     @Test
@@ -4611,7 +4625,7 @@ public class QuotaControllerTest {
                     SOURCE_USER_ID, SOURCE_PACKAGE, standbyBucket);
         }
         verify(mAlarmManager, timeout(1000).times(0)).setWindow(
-                anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+                anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any(Handler.class));
 
         // Ran jobs up to the job limit. All of them should be allowed to run.
         for (int i = 0; i < mQcConstants.MAX_JOB_COUNT_PER_RATE_LIMITING_WINDOW; ++i) {
@@ -4630,7 +4644,7 @@ public class QuotaControllerTest {
         }
         // Start alarm shouldn't have been scheduled since the app was in quota up until this point.
         verify(mAlarmManager, timeout(1000).times(0)).setWindow(
-                anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+                anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any(Handler.class));
 
         // The app is now out of job count quota
         JobStatus throttledJob = createJobStatus(
@@ -4649,7 +4663,7 @@ public class QuotaControllerTest {
         final long expectedWorkingAlarmTime = stats.jobRateLimitExpirationTimeElapsed;
         verify(mAlarmManager, timeout(1000).times(1)).setWindow(
                 anyInt(), eq(expectedWorkingAlarmTime), anyLong(),
-                eq(TAG_QUOTA_CHECK), any(), any());
+                eq(TAG_QUOTA_CHECK), any(), any(Handler.class));
     }
 
     /**
@@ -4680,7 +4694,7 @@ public class QuotaControllerTest {
                     SOURCE_USER_ID, SOURCE_PACKAGE, standbyBucket);
         }
         verify(mAlarmManager, timeout(1000).times(0)).setWindow(
-                anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+                anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any(Handler.class));
 
         // Ran jobs up to the job limit. All of them should be allowed to run.
         for (int i = 0; i < mQcConstants.MAX_SESSION_COUNT_PER_RATE_LIMITING_WINDOW; ++i) {
@@ -4701,7 +4715,7 @@ public class QuotaControllerTest {
         }
         // Start alarm shouldn't have been scheduled since the app was in quota up until this point.
         verify(mAlarmManager, timeout(1000).times(0)).setWindow(
-                anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+                anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any(Handler.class));
 
         // The app is now out of session count quota
         JobStatus throttledJob = createJobStatus(
@@ -4721,7 +4735,7 @@ public class QuotaControllerTest {
         final long expectedWorkingAlarmTime = stats.sessionRateLimitExpirationTimeElapsed;
         verify(mAlarmManager, timeout(1000).times(1)).setWindow(
                 anyInt(), eq(expectedWorkingAlarmTime), anyLong(),
-                eq(TAG_QUOTA_CHECK), any(), any());
+                eq(TAG_QUOTA_CHECK), any(), any(Handler.class));
     }
 
     @Test
@@ -5185,7 +5199,8 @@ public class QuotaControllerTest {
                     SOURCE_USER_ID, SOURCE_PACKAGE, standbyBucket);
         }
         inOrder.verify(mAlarmManager, timeout(1000).times(0))
-                .setWindow(anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+                .setWindow(anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(),
+                        any(Handler.class));
 
         // Test with timing sessions out of window.
         final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
@@ -5196,7 +5211,8 @@ public class QuotaControllerTest {
                     SOURCE_USER_ID, SOURCE_PACKAGE, standbyBucket);
         }
         inOrder.verify(mAlarmManager, timeout(1000).times(0))
-                .setWindow(anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+                .setWindow(anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(),
+                        any(Handler.class));
 
         // Test with timing sessions in window but still in quota.
         final long end = now - (22 * HOUR_IN_MILLIS - 5 * MINUTE_IN_MILLIS);
@@ -5208,7 +5224,8 @@ public class QuotaControllerTest {
                     SOURCE_USER_ID, SOURCE_PACKAGE, standbyBucket);
         }
         inOrder.verify(mAlarmManager, timeout(1000).times(0))
-                .setWindow(anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+                .setWindow(anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(),
+                        any(Handler.class));
 
         // Add some more sessions, but still in quota.
         mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
@@ -5220,7 +5237,8 @@ public class QuotaControllerTest {
                     SOURCE_USER_ID, SOURCE_PACKAGE, standbyBucket);
         }
         inOrder.verify(mAlarmManager, timeout(1000).times(0))
-                .setWindow(anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+                .setWindow(anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(),
+                        any(Handler.class));
 
         // Test when out of quota.
         mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
@@ -5230,7 +5248,8 @@ public class QuotaControllerTest {
                     SOURCE_USER_ID, SOURCE_PACKAGE, standbyBucket);
         }
         inOrder.verify(mAlarmManager, timeout(1000).times(1)).setWindow(
-                anyInt(), eq(expectedAlarmTime), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+                anyInt(), eq(expectedAlarmTime), anyLong(), eq(TAG_QUOTA_CHECK), any(),
+                any(Handler.class));
 
         // Alarm already scheduled, so make sure it's not scheduled again.
         synchronized (mQuotaController.mLock) {
@@ -5238,7 +5257,8 @@ public class QuotaControllerTest {
                     SOURCE_USER_ID, SOURCE_PACKAGE, standbyBucket);
         }
         inOrder.verify(mAlarmManager, timeout(1000).times(0))
-                .setWindow(anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+                .setWindow(anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(),
+                        any(Handler.class));
     }
 
     /** Tests that the start alarm is properly rescheduled if the app's bucket is changed. */
@@ -5282,7 +5302,8 @@ public class QuotaControllerTest {
                     SOURCE_USER_ID, SOURCE_PACKAGE, ACTIVE_INDEX);
         }
         inOrder.verify(mAlarmManager, timeout(1000).times(0))
-                .setWindow(anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+                .setWindow(anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(),
+                        any(Handler.class));
         inOrder.verify(mAlarmManager, timeout(1000).times(0))
                 .cancel(any(AlarmManager.OnAlarmListener.class));
 
@@ -5297,7 +5318,7 @@ public class QuotaControllerTest {
         }
         inOrder.verify(mAlarmManager, timeout(1000).times(1)).setWindow(
                 anyInt(), eq(expectedWorkingAlarmTime), anyLong(),
-                eq(TAG_QUOTA_CHECK), any(), any());
+                eq(TAG_QUOTA_CHECK), any(), any(Handler.class));
 
         setStandbyBucket(FREQUENT_INDEX);
         final long expectedFrequentAlarmTime =
@@ -5308,7 +5329,7 @@ public class QuotaControllerTest {
         }
         inOrder.verify(mAlarmManager, timeout(1000).times(1)).setWindow(
                 anyInt(), eq(expectedFrequentAlarmTime), anyLong(),
-                eq(TAG_QUOTA_CHECK), any(), any());
+                eq(TAG_QUOTA_CHECK), any(), any(Handler.class));
 
         setStandbyBucket(RARE_INDEX);
         final long expectedRareAlarmTime =
@@ -5319,7 +5340,8 @@ public class QuotaControllerTest {
                     SOURCE_USER_ID, SOURCE_PACKAGE, RARE_INDEX);
         }
         inOrder.verify(mAlarmManager, timeout(1000).times(1)).setWindow(
-                anyInt(), eq(expectedRareAlarmTime), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+                anyInt(), eq(expectedRareAlarmTime), anyLong(), eq(TAG_QUOTA_CHECK), any(),
+                any(Handler.class));
 
         // And back up again.
         setStandbyBucket(FREQUENT_INDEX);
@@ -5329,7 +5351,7 @@ public class QuotaControllerTest {
         }
         inOrder.verify(mAlarmManager, timeout(1000).times(1)).setWindow(
                 anyInt(), eq(expectedFrequentAlarmTime), anyLong(),
-                eq(TAG_QUOTA_CHECK), any(), any());
+                eq(TAG_QUOTA_CHECK), any(), any(Handler.class));
 
         setStandbyBucket(WORKING_INDEX);
         synchronized (mQuotaController.mLock) {
@@ -5338,7 +5360,7 @@ public class QuotaControllerTest {
         }
         inOrder.verify(mAlarmManager, timeout(1000).times(1)).setWindow(
                 anyInt(), eq(expectedWorkingAlarmTime), anyLong(),
-                eq(TAG_QUOTA_CHECK), any(), any());
+                eq(TAG_QUOTA_CHECK), any(), any(Handler.class));
 
         setStandbyBucket(ACTIVE_INDEX);
         synchronized (mQuotaController.mLock) {
@@ -5346,7 +5368,8 @@ public class QuotaControllerTest {
                     SOURCE_USER_ID, SOURCE_PACKAGE, ACTIVE_INDEX);
         }
         inOrder.verify(mAlarmManager, timeout(1000).times(0))
-                .setWindow(anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+                .setWindow(anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(),
+                        any(Handler.class));
         inOrder.verify(mAlarmManager, timeout(1000).times(1))
                 .cancel(any(AlarmManager.OnAlarmListener.class));
     }
@@ -5388,7 +5411,8 @@ public class QuotaControllerTest {
                     SOURCE_USER_ID, SOURCE_PACKAGE, WORKING_INDEX);
         }
         verify(mAlarmManager, timeout(1000).times(1)).setWindow(
-                anyInt(), eq(expectedAlarmTime), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+                anyInt(), eq(expectedAlarmTime), anyLong(), eq(TAG_QUOTA_CHECK), any(),
+                any(Handler.class));
     }
 
     /** Tests that TimingSessions aren't saved when the device is charging. */

@@ -35,6 +35,7 @@ import static org.mockito.Mockito.when;
 
 import android.app.AlarmManager;
 import android.content.Context;
+import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.util.ArraySet;
@@ -222,7 +223,8 @@ public class AlarmQueueTest {
 
         alarmQueue.addAlarm("com.android.test.1", nowElapsed + HOUR_IN_MILLIS);
         verify(mAlarmManager, timeout(1000).times(1)).setWindow(
-                anyInt(), eq(nowElapsed + HOUR_IN_MILLIS), anyLong(), eq(ALARM_TAG), any(), any());
+                anyInt(), eq(nowElapsed + HOUR_IN_MILLIS), anyLong(), eq(ALARM_TAG), any(), any(
+                        Handler.class));
     }
 
     @Test
