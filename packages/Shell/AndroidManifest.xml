@@ -154,6 +154,7 @@
     <uses-permission android:name="android.permission.CONTROL_UI_TRACING" />
     <uses-permission android:name="android.permission.SIGNAL_PERSISTENT_PROCESSES" />
     <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES" />
+    <uses-permission android:name="android.permission.KILL_ALL_BACKGROUND_PROCESSES" />
     <!-- Internal permissions granted to the shell. -->
     <uses-permission android:name="android.permission.FORCE_BACK" />
     <uses-permission android:name="android.permission.BATTERY_STATS" />
