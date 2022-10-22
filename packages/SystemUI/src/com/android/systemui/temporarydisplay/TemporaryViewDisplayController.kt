@@ -22,7 +22,6 @@ import android.graphics.PixelFormat
 import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.os.PowerManager
-import android.os.SystemClock
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -35,6 +34,7 @@ import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.concurrency.DelayableExecutor
+import com.android.systemui.util.wakelock.WakeLock
 
 /**
  * A generic controller that can temporarily display a new view in a new window.
@@ -54,6 +54,7 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
     private val configurationController: ConfigurationController,
     private val powerManager: PowerManager,
     @LayoutRes private val viewLayoutRes: Int,
+    private val wakeLockBuilder: WakeLock.Builder,
 ) : CoreStartable {
     /**
      * Window layout params that will be used as a starting point for the [windowLayoutParams] of
@@ -64,7 +65,8 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
         height = WindowManager.LayoutParams.WRAP_CONTENT
         type = WindowManager.LayoutParams.TYPE_SYSTEM_ERROR
         flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-            WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+            WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
+            WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
         format = PixelFormat.TRANSLUCENT
         setTrustedOverlay()
     }
@@ -82,6 +84,15 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
 
     /** A [Runnable] that, when run, will cancel the pending timeout of the view. */
     private var cancelViewTimeout: Runnable? = null
+
+    /**
+     * A wakelock that is acquired when view is displayed and screen off,
+     * then released when view is removed.
+     */
+    private var wakeLock: WakeLock? = null
+
+    /** A string that keeps track of wakelock reason once it is acquired till it gets released */
+    private var wakeReasonAcquired: String? = null
 
     /**
      * Displays the view with the provided [newInfo].
@@ -113,11 +124,15 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
             // the view to show over the dream state, so we should only wake up if the screen is
             // completely off.)
             if (!powerManager.isScreenOn) {
-                powerManager.wakeUp(
-                    SystemClock.uptimeMillis(),
-                    PowerManager.WAKE_REASON_APPLICATION,
-                    "com.android.systemui:${newInfo.wakeReason}",
-                )
+                wakeLock = wakeLockBuilder
+                    .setTag(newInfo.windowTitle)
+                    .setLevelsAndFlags(
+                        PowerManager.FULL_WAKE_LOCK or
+                        PowerManager.ACQUIRE_CAUSES_WAKEUP
+                    )
+                    .build()
+                wakeLock?.acquire(newInfo.wakeReason)
+                wakeReasonAcquired = newInfo.wakeReason
             }
             logger.logViewAddition(newInfo.windowTitle)
             inflateAndUpdateView(newInfo)
@@ -155,6 +170,7 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
             it.copyFrom(windowLayoutParams)
             it.title = newInfo.windowTitle
         }
+        newView.keepScreenOn = true
         windowManager.addView(newView, paramsWithTitle)
         animateViewIn(newView)
     }
@@ -183,7 +199,10 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
         val currentDisplayInfo = displayInfo ?: return
 
         val currentView = currentDisplayInfo.view
-        animateViewOut(currentView) { windowManager.removeView(currentView) }
+        animateViewOut(currentView) {
+            windowManager.removeView(currentView)
+            wakeLock?.release(wakeReasonAcquired)
+        }
 
         logger.logViewRemoval(removalReason)
         configurationController.removeCallback(displayScaleListener)
