@@ -872,6 +872,33 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     }
 
     @Override
+    public void setAppWidgetHidden(String callingPackage, int hostId) {
+        final int userId = UserHandle.getCallingUserId();
+
+        if (DEBUG) {
+            Slog.i(TAG, "setAppWidgetHidden() " + userId);
+        }
+
+        mSecurityPolicy.enforceCallFromPackage(callingPackage);
+
+        synchronized (mLock) {
+            ensureGroupStateLoadedLocked(userId, /* enforceUserUnlockingOrUnlocked */false);
+
+            HostId id = new HostId(Binder.getCallingUid(), hostId, callingPackage);
+            Host host = lookupHostLocked(id);
+
+            if (host != null) {
+                try {
+                    mAppOpsManagerInternal.updateAppWidgetVisibility(host.getWidgetUids(), false);
+                } catch (NullPointerException e) {
+                    Slog.e(TAG, "setAppWidgetHidden(): Getting host uids: " + host.toString(), e);
+                    throw e;
+                }
+            }
+        }
+    }
+
+    @Override
     public void deleteAppWidgetId(String callingPackage, int appWidgetId) {
         final int userId = UserHandle.getCallingUserId();
 

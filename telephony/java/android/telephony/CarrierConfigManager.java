@@ -8715,6 +8715,8 @@ public class CarrierConfigManager {
      * premium capabilities should be blocked when
      * {@link TelephonyManager#purchasePremiumCapability(int, Executor, Consumer)}
      * returns a failure due to user action or timeout.
+     * The maximum number of network boost notifications to show the user are defined in
+     * {@link #KEY_PREMIUM_CAPABILITY_MAXIMUM_NOTIFICATION_COUNT_INT_ARRAY}.
      *
      * The default value is 30 minutes.
      *
@@ -8724,6 +8726,22 @@ public class CarrierConfigManager {
     public static final String
             KEY_PREMIUM_CAPABILITY_NOTIFICATION_BACKOFF_HYSTERESIS_TIME_MILLIS_LONG =
             "premium_capability_notification_backoff_hysteresis_time_millis_long";
+
+    /**
+     * The maximum number of times that we display the notification for a network boost via premium
+     * capabilities when {@link TelephonyManager#purchasePremiumCapability(int, Executor, Consumer)}
+     * returns a failure due to user action or timeout.
+     *
+     * An int array with 2 values: {max_notifications_per_day, max_notifications_per_month}.
+     *
+     * The default value is {2, 10}, meaning we display a maximum of 2 network boost notifications
+     * per day and 10 notifications per month.
+     *
+     * @see TelephonyManager#PURCHASE_PREMIUM_CAPABILITY_RESULT_USER_CANCELED
+     * @see TelephonyManager#PURCHASE_PREMIUM_CAPABILITY_RESULT_TIMEOUT
+     */
+    public static final String KEY_PREMIUM_CAPABILITY_MAXIMUM_NOTIFICATION_COUNT_INT_ARRAY =
+            "premium_capability_maximum_notification_count_int_array";
 
     /**
      * The amount of time in milliseconds that the purchase request should be throttled when
@@ -8750,6 +8768,20 @@ public class CarrierConfigManager {
      */
     public static final String KEY_PREMIUM_CAPABILITY_PURCHASE_URL_STRING =
             "premium_capability_purchase_url_string";
+
+    /**
+     * Whether to allow premium capabilities to be purchased when the device is connected to LTE.
+     * If this is {@code true}, applications can call
+     * {@link TelephonyManager#purchasePremiumCapability(int, Executor, Consumer)}
+     * when connected to {@link TelephonyManager#NETWORK_TYPE_LTE} to purchase and use
+     * premium capabilities.
+     * If this is {@code false}, applications can only purchase and use premium capabilities when
+     * conencted to {@link TelephonyManager#NETWORK_TYPE_NR}.
+     *
+     * This is {@code false} by default.
+     */
+    public static final String KEY_PREMIUM_CAPABILITY_SUPPORTED_ON_LTE_BOOL =
+            "premium_capability_supported_on_lte_bool";
 
     /**
      * IWLAN handover rules that determine whether handover is allowed or disallowed between
@@ -9432,15 +9464,18 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_UNTHROTTLE_DATA_RETRY_WHEN_TAC_CHANGES_BOOL, false);
         sDefaults.putBoolean(KEY_VONR_SETTING_VISIBILITY_BOOL, true);
         sDefaults.putBoolean(KEY_VONR_ENABLED_BOOL, false);
-        sDefaults.putIntArray(KEY_SUPPORTED_PREMIUM_CAPABILITIES_INT_ARRAY, new int[]{});
+        sDefaults.putIntArray(KEY_SUPPORTED_PREMIUM_CAPABILITIES_INT_ARRAY, new int[] {});
         sDefaults.putLong(KEY_PREMIUM_CAPABILITY_NOTIFICATION_DISPLAY_TIMEOUT_MILLIS_LONG,
                 TimeUnit.MINUTES.toMillis(30));
         sDefaults.putLong(KEY_PREMIUM_CAPABILITY_NOTIFICATION_BACKOFF_HYSTERESIS_TIME_MILLIS_LONG,
                 TimeUnit.MINUTES.toMillis(30));
+        sDefaults.putIntArray(KEY_PREMIUM_CAPABILITY_MAXIMUM_NOTIFICATION_COUNT_INT_ARRAY,
+                new int[] {2, 10});
         sDefaults.putLong(
                 KEY_PREMIUM_CAPABILITY_PURCHASE_CONDITION_BACKOFF_HYSTERESIS_TIME_MILLIS_LONG,
                 TimeUnit.MINUTES.toMillis(30));
         sDefaults.putString(KEY_PREMIUM_CAPABILITY_PURCHASE_URL_STRING, null);
+        sDefaults.putBoolean(KEY_PREMIUM_CAPABILITY_SUPPORTED_ON_LTE_BOOL, false);
         sDefaults.putStringArray(KEY_IWLAN_HANDOVER_POLICY_STRING_ARRAY, new String[]{
                 "source=GERAN|UTRAN|EUTRAN|NGRAN|IWLAN, "
                         + "target=GERAN|UTRAN|EUTRAN|NGRAN|IWLAN, type=allowed"});

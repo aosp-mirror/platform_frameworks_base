@@ -159,7 +159,8 @@ constructor(
                             null
                         }
                     }
-                }
+                },
+            vibrationEffect = chipStateSender.transferStatus.vibrationEffect,
         )
     }
 

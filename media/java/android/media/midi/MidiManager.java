@@ -240,8 +240,7 @@ public final class MidiManager {
      * @param handler The {@link android.os.Handler Handler} that will be used for delivering the
      *                device notifications. If handler is null, then the thread used for the
      *                callback is unspecified.
-     * @deprecated Use the {@link #registerDeviceCallback}
-     *             method with Executor and transport instead.
+     * @deprecated Use {@link #registerDeviceCallback(int, Executor, DeviceCallback)} instead.
      */
     @Deprecated
     public void registerDeviceCallback(DeviceCallback callback, Handler handler) {

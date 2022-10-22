@@ -18,6 +18,8 @@ package com.android.systemui.dump
 
 import android.util.ArrayMap
 import com.android.systemui.Dumpable
+import com.android.systemui.ProtoDumpable
+import com.android.systemui.dump.nano.SystemUIProtoDump
 import com.android.systemui.plugins.log.LogBuffer
 import java.io.PrintWriter
 import javax.inject.Inject
@@ -90,7 +92,7 @@ open class DumpManager @Inject constructor() {
         target: String,
         pw: PrintWriter,
         args: Array<String>,
-        tailLength: Int
+        tailLength: Int,
     ) {
         for (dumpable in dumpables.values) {
             if (dumpable.name.endsWith(target)) {
@@ -103,6 +105,36 @@ open class DumpManager @Inject constructor() {
             if (buffer.name.endsWith(target)) {
                 dumpBuffer(buffer, pw, tailLength)
                 return
+            }
+        }
+    }
+
+    @Synchronized
+    fun dumpProtoTarget(
+        target: String,
+        protoDump: SystemUIProtoDump,
+        args: Array<String>
+    ) {
+        for (dumpable in dumpables.values) {
+            if (dumpable.dumpable is ProtoDumpable && dumpable.name.endsWith(target)) {
+                dumpProtoDumpable(dumpable.dumpable, protoDump, args)
+                return
+            }
+        }
+    }
+
+    @Synchronized
+    fun dumpProtoDumpables(
+        systemUIProtoDump: SystemUIProtoDump,
+        args: Array<String>
+    ) {
+        for (dumpable in dumpables.values) {
+            if (dumpable.dumpable is ProtoDumpable) {
+                dumpProtoDumpable(
+                    dumpable.dumpable,
+                    systemUIProtoDump,
+                    args
+                )
             }
         }
     }
@@ -182,6 +214,14 @@ open class DumpManager @Inject constructor() {
         pw.println("BUFFER ${buffer.name}:")
         pw.println("============================================================================")
         buffer.dumpable.dump(pw, tailLength)
+    }
+
+    private fun dumpProtoDumpable(
+        protoDumpable: ProtoDumpable,
+        systemUIProtoDump: SystemUIProtoDump,
+        args: Array<String>
+    ) {
+        protoDumpable.dumpProto(systemUIProtoDump, args)
     }
 
     private fun canAssignToNameLocked(name: String, newDumpable: Any): Boolean {

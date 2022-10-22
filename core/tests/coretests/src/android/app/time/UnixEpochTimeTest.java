@@ -16,11 +16,9 @@
 
 package android.app.time;
 
-import static android.app.timezonedetector.ParcelableTestSupport.assertRoundTripParcelable;
 import static android.app.timezonedetector.ShellCommandTestSupport.createShellCommandWithArgsAndOptions;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
 
 import android.os.ShellCommand;
 
@@ -31,34 +29,11 @@ import org.junit.runner.RunWith;
 
 /**
  * Tests for non-SDK methods on {@link UnixEpochTime}.
+ *
+ * <p>See also {@link android.app.time.cts.UnixEpochTimeTest} for SDK methods.
  */
 @RunWith(AndroidJUnit4.class)
 public class UnixEpochTimeTest {
-
-    @Test
-    public void testEqualsAndHashcode() {
-        UnixEpochTime one1000one = new UnixEpochTime(1000, 1);
-        assertEqualsAndHashCode(one1000one, one1000one);
-
-        UnixEpochTime one1000two = new UnixEpochTime(1000, 1);
-        assertEqualsAndHashCode(one1000one, one1000two);
-
-        UnixEpochTime two1000 = new UnixEpochTime(1000, 2);
-        assertNotEquals(one1000one, two1000);
-
-        UnixEpochTime one2000 = new UnixEpochTime(2000, 1);
-        assertNotEquals(one1000one, one2000);
-    }
-
-    private static void assertEqualsAndHashCode(Object one, Object two) {
-        assertEquals(one, two);
-        assertEquals(one.hashCode(), two.hashCode());
-    }
-
-    @Test
-    public void testParceling() {
-        assertRoundTripParcelable(new UnixEpochTime(1000, 1));
-    }
 
     @Test(expected = IllegalArgumentException.class)
     public void testParseCommandLineArg_noElapsedRealtime() {
@@ -88,22 +63,6 @@ public class UnixEpochTimeTest {
         ShellCommand testShellCommand = createShellCommandWithArgsAndOptions(
                 "--elapsed_realtime 54321 --unix_epoch_time 12345 --bad_arg 0");
         UnixEpochTime.parseCommandLineArgs(testShellCommand);
-    }
-
-    @Test
-    public void testAt() {
-        long timeMillis = 1000L;
-        int elapsedRealtimeMillis = 100;
-        UnixEpochTime unixEpochTime = new UnixEpochTime(elapsedRealtimeMillis, timeMillis);
-        // Reference time is after the timestamp.
-        UnixEpochTime at125 = unixEpochTime.at(125);
-        assertEquals(timeMillis + (125 - elapsedRealtimeMillis), at125.getUnixEpochTimeMillis());
-        assertEquals(125, at125.getElapsedRealtimeMillis());
-
-        // Reference time is before the timestamp.
-        UnixEpochTime at75 = unixEpochTime.at(75);
-        assertEquals(timeMillis + (75 - elapsedRealtimeMillis), at75.getUnixEpochTimeMillis());
-        assertEquals(75, at75.getElapsedRealtimeMillis());
     }
 
     @Test

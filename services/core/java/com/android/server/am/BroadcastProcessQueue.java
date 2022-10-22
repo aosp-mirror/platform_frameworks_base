@@ -147,12 +147,16 @@ class BroadcastProcessQueue {
     private int mCountOrdered;
     private int mCountAlarm;
     private int mCountPrioritized;
+    private int mCountInteractive;
+    private int mCountResultTo;
+    private int mCountInstrumented;
 
     private @UptimeMillisLong long mRunnableAt = Long.MAX_VALUE;
     private @Reason int mRunnableAtReason = REASON_EMPTY;
     private boolean mRunnableAtInvalidated;
 
     private boolean mProcessCached;
+    private boolean mProcessInstrumented;
 
     private String mCachedToString;
     private String mCachedToShortString;
@@ -297,12 +301,36 @@ class BroadcastProcessQueue {
     }
 
     /**
+     * Update the actively running "warm" process for this process.
+     */
+    public void setProcess(@Nullable ProcessRecord app) {
+        this.app = app;
+        if (app != null) {
+            setProcessInstrumented(app.getActiveInstrumentation() != null);
+        } else {
+            setProcessInstrumented(false);
+        }
+    }
+
+    /**
      * Update if this process is in the "cached" state, typically signaling that
      * broadcast dispatch should be paused or delayed.
      */
     public void setProcessCached(boolean cached) {
         if (mProcessCached != cached) {
             mProcessCached = cached;
+            invalidateRunnableAt();
+        }
+    }
+
+    /**
+     * Update if this process is in the "instrumented" state, typically
+     * signaling that broadcast dispatch should bypass all pauses or delays, to
+     * avoid holding up test suites.
+     */
+    public void setProcessInstrumented(boolean instrumented) {
+        if (mProcessInstrumented != instrumented) {
+            mProcessInstrumented = instrumented;
             invalidateRunnableAt();
         }
     }
@@ -315,13 +343,12 @@ class BroadcastProcessQueue {
     }
 
     public int getPreferredSchedulingGroupLocked() {
-        if (mCountForeground > 0 || mCountOrdered > 0 || mCountAlarm > 0) {
-            // We have an important broadcast somewhere down the queue, so
+        if (mCountForeground > 0) {
+            // We have a foreground broadcast somewhere down the queue, so
             // boost priority until we drain them all
             return ProcessList.SCHED_GROUP_DEFAULT;
-        } else if ((mActive != null)
-                && (mActive.isForeground() || mActive.ordered || mActive.alarm)) {
-            // We have an important broadcast right now, so boost priority
+        } else if ((mActive != null) && mActive.isForeground()) {
+            // We have a foreground broadcast right now, so boost priority
             return ProcessList.SCHED_GROUP_DEFAULT;
         } else if (!isIdle()) {
             return ProcessList.SCHED_GROUP_BACKGROUND;
@@ -389,6 +416,15 @@ class BroadcastProcessQueue {
         if (record.prioritized) {
             mCountPrioritized++;
         }
+        if (record.interactive) {
+            mCountInteractive++;
+        }
+        if (record.resultTo != null) {
+            mCountResultTo++;
+        }
+        if (record.callerInstrumented) {
+            mCountInstrumented++;
+        }
         invalidateRunnableAt();
     }
 
@@ -407,6 +443,15 @@ class BroadcastProcessQueue {
         }
         if (record.prioritized) {
             mCountPrioritized--;
+        }
+        if (record.interactive) {
+            mCountInteractive--;
+        }
+        if (record.resultTo != null) {
+            mCountResultTo--;
+        }
+        if (record.callerInstrumented) {
+            mCountInstrumented--;
         }
         invalidateRunnableAt();
     }
@@ -553,25 +598,33 @@ class BroadcastProcessQueue {
     }
 
     static final int REASON_EMPTY = 0;
-    static final int REASON_CONTAINS_FOREGROUND = 1;
-    static final int REASON_CONTAINS_ORDERED = 2;
-    static final int REASON_CONTAINS_ALARM = 3;
-    static final int REASON_CONTAINS_PRIORITIZED = 4;
-    static final int REASON_CACHED = 5;
-    static final int REASON_NORMAL = 6;
-    static final int REASON_MAX_PENDING = 7;
-    static final int REASON_BLOCKED = 8;
+    static final int REASON_CACHED = 1;
+    static final int REASON_NORMAL = 2;
+    static final int REASON_MAX_PENDING = 3;
+    static final int REASON_BLOCKED = 4;
+    static final int REASON_INSTRUMENTED = 5;
+    static final int REASON_CONTAINS_FOREGROUND = 10;
+    static final int REASON_CONTAINS_ORDERED = 11;
+    static final int REASON_CONTAINS_ALARM = 12;
+    static final int REASON_CONTAINS_PRIORITIZED = 13;
+    static final int REASON_CONTAINS_INTERACTIVE = 14;
+    static final int REASON_CONTAINS_RESULT_TO = 15;
+    static final int REASON_CONTAINS_INSTRUMENTED = 16;
 
     @IntDef(flag = false, prefix = { "REASON_" }, value = {
             REASON_EMPTY,
-            REASON_CONTAINS_FOREGROUND,
-            REASON_CONTAINS_ORDERED,
-            REASON_CONTAINS_ALARM,
-            REASON_CONTAINS_PRIORITIZED,
             REASON_CACHED,
             REASON_NORMAL,
             REASON_MAX_PENDING,
             REASON_BLOCKED,
+            REASON_INSTRUMENTED,
+            REASON_CONTAINS_FOREGROUND,
+            REASON_CONTAINS_ORDERED,
+            REASON_CONTAINS_ALARM,
+            REASON_CONTAINS_PRIORITIZED,
+            REASON_CONTAINS_INTERACTIVE,
+            REASON_CONTAINS_RESULT_TO,
+            REASON_CONTAINS_INSTRUMENTED,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Reason {}
@@ -579,14 +632,18 @@ class BroadcastProcessQueue {
     static @NonNull String reasonToString(@Reason int reason) {
         switch (reason) {
             case REASON_EMPTY: return "EMPTY";
-            case REASON_CONTAINS_FOREGROUND: return "CONTAINS_FOREGROUND";
-            case REASON_CONTAINS_ORDERED: return "CONTAINS_ORDERED";
-            case REASON_CONTAINS_ALARM: return "CONTAINS_ALARM";
-            case REASON_CONTAINS_PRIORITIZED: return "CONTAINS_PRIORITIZED";
             case REASON_CACHED: return "CACHED";
             case REASON_NORMAL: return "NORMAL";
             case REASON_MAX_PENDING: return "MAX_PENDING";
             case REASON_BLOCKED: return "BLOCKED";
+            case REASON_INSTRUMENTED: return "INSTRUMENTED";
+            case REASON_CONTAINS_FOREGROUND: return "CONTAINS_FOREGROUND";
+            case REASON_CONTAINS_ORDERED: return "CONTAINS_ORDERED";
+            case REASON_CONTAINS_ALARM: return "CONTAINS_ALARM";
+            case REASON_CONTAINS_PRIORITIZED: return "CONTAINS_PRIORITIZED";
+            case REASON_CONTAINS_INTERACTIVE: return "CONTAINS_INTERACTIVE";
+            case REASON_CONTAINS_RESULT_TO: return "CONTAINS_RESULT_TO";
+            case REASON_CONTAINS_INSTRUMENTED: return "CONTAINS_INSTRUMENTED";
             default: return Integer.toString(reason);
         }
     }
@@ -631,6 +688,18 @@ class BroadcastProcessQueue {
             } else if (mCountPrioritized > 0) {
                 mRunnableAt = runnableAt;
                 mRunnableAtReason = REASON_CONTAINS_PRIORITIZED;
+            } else if (mCountInteractive > 0) {
+                mRunnableAt = runnableAt;
+                mRunnableAtReason = REASON_CONTAINS_INTERACTIVE;
+            } else if (mCountResultTo > 0) {
+                mRunnableAt = runnableAt;
+                mRunnableAtReason = REASON_CONTAINS_RESULT_TO;
+            } else if (mCountInstrumented > 0) {
+                mRunnableAt = runnableAt;
+                mRunnableAtReason = REASON_CONTAINS_INSTRUMENTED;
+            } else if (mProcessInstrumented) {
+                mRunnableAt = runnableAt;
+                mRunnableAtReason = REASON_INSTRUMENTED;
             } else if (mProcessCached) {
                 mRunnableAt = runnableAt + constants.DELAY_CACHED_MILLIS;
                 mRunnableAtReason = REASON_CACHED;

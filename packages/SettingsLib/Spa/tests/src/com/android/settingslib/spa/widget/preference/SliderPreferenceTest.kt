@@ -16,6 +16,9 @@
 
 package com.android.settingslib.spa.widget.preference
 
+import androidx.compose.ui.semantics.ProgressBarRangeInfo
+import androidx.compose.ui.semantics.SemanticsProperties.ProgressBarRangeInfo
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
@@ -41,5 +44,20 @@ class SliderPreferenceTest {
         composeTestRule.onNodeWithText("Slider").assertIsDisplayed()
     }
 
-    // TODO: Add more unit tests for SliderPreference widget.
+    @Test
+    fun slider_displayed() {
+        composeTestRule.setContent {
+            SliderPreference(object : SliderPreferenceModel {
+                override val title = "Slider"
+                override val initValue = 40
+            })
+        }
+
+        fun progressEqualsTo(progress: Float): SemanticsMatcher =
+            SemanticsMatcher.expectValue(
+                ProgressBarRangeInfo,
+                ProgressBarRangeInfo(progress, 0f..100f, 0)
+            )
+        composeTestRule.onNode(progressEqualsTo(40f)).assertIsDisplayed()
+    }
 }

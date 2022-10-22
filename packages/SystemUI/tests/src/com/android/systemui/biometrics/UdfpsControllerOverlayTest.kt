@@ -26,6 +26,7 @@ import android.hardware.biometrics.BiometricOverlayConstants.REASON_ENROLL_FIND_
 import android.hardware.biometrics.BiometricOverlayConstants.ShowReason
 import android.hardware.fingerprint.FingerprintManager
 import android.hardware.fingerprint.IUdfpsOverlayControllerCallback
+import android.provider.Settings
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.view.LayoutInflater
@@ -124,14 +125,18 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
         whenever(udfpsEnrollView.context).thenReturn(context)
     }
 
-    private fun withReason(@ShowReason reason: Int, block: () -> Unit) {
+    private fun withReason(
+        @ShowReason reason: Int,
+        isDebuggable: Boolean = false,
+        block: () -> Unit
+    ) {
         controllerOverlay = UdfpsControllerOverlay(
             context, fingerprintManager, inflater, windowManager, accessibilityManager,
             statusBarStateController, shadeExpansionStateManager, statusBarKeyguardViewManager,
             keyguardUpdateMonitor, dialogManager, dumpManager, transitionController,
             configurationController, systemClock, keyguardStateController,
             unlockedScreenOffAnimationController, udfpsDisplayMode, REQUEST_ID, reason,
-            controllerCallback, onTouch, activityLaunchAnimator
+            controllerCallback, onTouch, activityLaunchAnimator, isDebuggable
         )
         block()
     }
@@ -151,8 +156,26 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
     }
 
     @Test
+    fun showUdfpsOverlay_locate_withEnrollmentUiRemoved() {
+        Settings.Global.putInt(mContext.contentResolver, SETTING_REMOVE_ENROLLMENT_UI, 1)
+        withReason(REASON_ENROLL_FIND_SENSOR, isDebuggable = true) {
+            showUdfpsOverlay(isEnrollUseCase = false)
+        }
+        Settings.Global.putInt(mContext.contentResolver, SETTING_REMOVE_ENROLLMENT_UI, 0)
+    }
+
+    @Test
     fun showUdfpsOverlay_enroll() = withReason(REASON_ENROLL_ENROLLING) {
         showUdfpsOverlay(isEnrollUseCase = true)
+    }
+
+    @Test
+    fun showUdfpsOverlay_enroll_withEnrollmentUiRemoved() {
+        Settings.Global.putInt(mContext.contentResolver, SETTING_REMOVE_ENROLLMENT_UI, 1)
+        withReason(REASON_ENROLL_ENROLLING, isDebuggable = true) {
+            showUdfpsOverlay(isEnrollUseCase = false)
+        }
+        Settings.Global.putInt(mContext.contentResolver, SETTING_REMOVE_ENROLLMENT_UI, 0)
     }
 
     @Test
@@ -373,21 +396,33 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
             context.resources.getStringArray(R.array.udfps_accessibility_touch_hints)
         val rotation = Surface.ROTATION_0
         // touch at 0 degrees
-        assertThat(controllerOverlay.onTouchOutsideOfSensorAreaImpl(0.0f /* x */, 0.0f /* y */,
-                0.0f /* sensorX */, 0.0f /* sensorY */, rotation))
-                .isEqualTo(touchHints[0])
+        assertThat(
+            controllerOverlay.onTouchOutsideOfSensorAreaImpl(
+                0.0f /* x */, 0.0f /* y */,
+                0.0f /* sensorX */, 0.0f /* sensorY */, rotation
+            )
+        ).isEqualTo(touchHints[0])
         // touch at 90 degrees
-        assertThat(controllerOverlay.onTouchOutsideOfSensorAreaImpl(0.0f /* x */, -1.0f /* y */,
-                0.0f /* sensorX */, 0.0f /* sensorY */, rotation))
-                .isEqualTo(touchHints[1])
+        assertThat(
+            controllerOverlay.onTouchOutsideOfSensorAreaImpl(
+                0.0f /* x */, -1.0f /* y */,
+                0.0f /* sensorX */, 0.0f /* sensorY */, rotation
+            )
+        ).isEqualTo(touchHints[1])
         // touch at 180 degrees
-        assertThat(controllerOverlay.onTouchOutsideOfSensorAreaImpl(-1.0f /* x */, 0.0f /* y */,
-                0.0f /* sensorX */, 0.0f /* sensorY */, rotation))
-                .isEqualTo(touchHints[2])
+        assertThat(
+            controllerOverlay.onTouchOutsideOfSensorAreaImpl(
+                -1.0f /* x */, 0.0f /* y */,
+                0.0f /* sensorX */, 0.0f /* sensorY */, rotation
+            )
+        ).isEqualTo(touchHints[2])
         // touch at 270 degrees
-        assertThat(controllerOverlay.onTouchOutsideOfSensorAreaImpl(0.0f /* x */, 1.0f /* y */,
-                0.0f /* sensorX */, 0.0f /* sensorY */, rotation))
-                .isEqualTo(touchHints[3])
+        assertThat(
+            controllerOverlay.onTouchOutsideOfSensorAreaImpl(
+                0.0f /* x */, 1.0f /* y */,
+                0.0f /* sensorX */, 0.0f /* sensorY */, rotation
+            )
+        ).isEqualTo(touchHints[3])
     }
 
     fun testTouchOutsideAreaNoRotation90Degrees() = withReason(REASON_ENROLL_ENROLLING) {
@@ -395,21 +430,33 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
             context.resources.getStringArray(R.array.udfps_accessibility_touch_hints)
         val rotation = Surface.ROTATION_90
         // touch at 0 degrees -> 90 degrees
-        assertThat(controllerOverlay.onTouchOutsideOfSensorAreaImpl(0.0f /* x */, 0.0f /* y */,
-                0.0f /* sensorX */, 0.0f /* sensorY */, rotation))
-                .isEqualTo(touchHints[1])
+        assertThat(
+            controllerOverlay.onTouchOutsideOfSensorAreaImpl(
+                0.0f /* x */, 0.0f /* y */,
+                0.0f /* sensorX */, 0.0f /* sensorY */, rotation
+            )
+        ).isEqualTo(touchHints[1])
         // touch at 90 degrees -> 180 degrees
-        assertThat(controllerOverlay.onTouchOutsideOfSensorAreaImpl(0.0f /* x */, -1.0f /* y */,
-                0.0f /* sensorX */, 0.0f /* sensorY */, rotation))
-                .isEqualTo(touchHints[2])
+        assertThat(
+            controllerOverlay.onTouchOutsideOfSensorAreaImpl(
+                0.0f /* x */, -1.0f /* y */,
+                0.0f /* sensorX */, 0.0f /* sensorY */, rotation
+            )
+        ).isEqualTo(touchHints[2])
         // touch at 180 degrees -> 270 degrees
-        assertThat(controllerOverlay.onTouchOutsideOfSensorAreaImpl(-1.0f /* x */, 0.0f /* y */,
-                0.0f /* sensorX */, 0.0f /* sensorY */, rotation))
-                .isEqualTo(touchHints[3])
+        assertThat(
+            controllerOverlay.onTouchOutsideOfSensorAreaImpl(
+                -1.0f /* x */, 0.0f /* y */,
+                0.0f /* sensorX */, 0.0f /* sensorY */, rotation
+            )
+        ).isEqualTo(touchHints[3])
         // touch at 270 degrees -> 0 degrees
-        assertThat(controllerOverlay.onTouchOutsideOfSensorAreaImpl(0.0f /* x */, 1.0f /* y */,
-                0.0f /* sensorX */, 0.0f /* sensorY */, rotation))
-                .isEqualTo(touchHints[0])
+        assertThat(
+            controllerOverlay.onTouchOutsideOfSensorAreaImpl(
+                0.0f /* x */, 1.0f /* y */,
+                0.0f /* sensorX */, 0.0f /* sensorY */, rotation
+            )
+        ).isEqualTo(touchHints[0])
     }
 
     fun testTouchOutsideAreaNoRotation270Degrees() = withReason(REASON_ENROLL_ENROLLING) {
@@ -417,21 +464,33 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
             context.resources.getStringArray(R.array.udfps_accessibility_touch_hints)
         val rotation = Surface.ROTATION_270
         // touch at 0 degrees -> 270 degrees
-        assertThat(controllerOverlay.onTouchOutsideOfSensorAreaImpl(0.0f /* x */, 0.0f /* y */,
-                0.0f /* sensorX */, 0.0f /* sensorY */, rotation))
-                .isEqualTo(touchHints[3])
+        assertThat(
+            controllerOverlay.onTouchOutsideOfSensorAreaImpl(
+                0.0f /* x */, 0.0f /* y */,
+                0.0f /* sensorX */, 0.0f /* sensorY */, rotation
+            )
+        ).isEqualTo(touchHints[3])
         // touch at 90 degrees -> 0 degrees
-        assertThat(controllerOverlay.onTouchOutsideOfSensorAreaImpl(0.0f /* x */, -1.0f /* y */,
-                0.0f /* sensorX */, 0.0f /* sensorY */, rotation))
-                .isEqualTo(touchHints[0])
+        assertThat(
+            controllerOverlay.onTouchOutsideOfSensorAreaImpl(
+                0.0f /* x */, -1.0f /* y */,
+                0.0f /* sensorX */, 0.0f /* sensorY */, rotation
+            )
+        ).isEqualTo(touchHints[0])
         // touch at 180 degrees -> 90 degrees
-        assertThat(controllerOverlay.onTouchOutsideOfSensorAreaImpl(-1.0f /* x */, 0.0f /* y */,
-                0.0f /* sensorX */, 0.0f /* sensorY */, rotation))
-                .isEqualTo(touchHints[1])
+        assertThat(
+            controllerOverlay.onTouchOutsideOfSensorAreaImpl(
+                -1.0f /* x */, 0.0f /* y */,
+                0.0f /* sensorX */, 0.0f /* sensorY */, rotation
+            )
+        ).isEqualTo(touchHints[1])
         // touch at 270 degrees -> 180 degrees
-        assertThat(controllerOverlay.onTouchOutsideOfSensorAreaImpl(0.0f /* x */, 1.0f /* y */,
-                0.0f /* sensorX */, 0.0f /* sensorY */, rotation))
-                .isEqualTo(touchHints[2])
+        assertThat(
+            controllerOverlay.onTouchOutsideOfSensorAreaImpl(
+                0.0f /* x */, 1.0f /* y */,
+                0.0f /* sensorX */, 0.0f /* sensorY */, rotation
+            )
+        ).isEqualTo(touchHints[2])
     }
 }
 

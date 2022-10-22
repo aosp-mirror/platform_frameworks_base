@@ -715,6 +715,9 @@
     <!-- Permission required for CTS test - ActivityPermissionRationaleTest -->
     <uses-permission android:name="android.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY" />
 
+    <!-- Permission required for CTS test - CtsDeviceLockTestCases -->
+    <uses-permission android:name="android.permission.MANAGE_DEVICE_LOCK_STATE" />
+
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"
                 android:defaultToDeviceProtectedStorage="true"

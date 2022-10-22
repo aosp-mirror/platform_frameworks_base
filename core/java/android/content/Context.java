@@ -3938,6 +3938,7 @@ public abstract class Context {
             //@hide: SAFETY_CENTER_SERVICE,
             DISPLAY_HASH_SERVICE,
             CREDENTIAL_SERVICE,
+            DEVICE_LOCK_SERVICE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ServiceName {}
@@ -6071,6 +6072,14 @@ public abstract class Context {
      * @see CredentialManager
      */
     public static final String CREDENTIAL_SERVICE = "credential";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.devicelock.DeviceLockManager}.
+     *
+     * @see #getSystemService(String)
+     */
+    public static final String DEVICE_LOCK_SERVICE = "device_lock";
 
     /**
      * Determine whether the given permission is allowed for a particular

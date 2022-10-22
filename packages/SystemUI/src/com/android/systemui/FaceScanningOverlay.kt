@@ -123,7 +123,7 @@ class FaceScanningOverlay(
     }
 
     override fun enableShowProtection(show: Boolean) {
-        val showScanningAnimNow = keyguardUpdateMonitor.isFaceScanning && show
+        val showScanningAnimNow = keyguardUpdateMonitor.isFaceDetectionRunning && show
         if (showScanningAnimNow == showScanningAnim) {
             return
         }

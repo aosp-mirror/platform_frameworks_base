@@ -369,6 +369,98 @@ public class LogicalDisplayMapperTest {
     }
 
     @Test
+    public void testDevicesAreAddedToDeviceDisplayGroups() {
+        // Create the default internal display of the device.
+        LogicalDisplay defaultDisplay =
+                add(
+                        createDisplayDevice(
+                                Display.TYPE_INTERNAL,
+                                600,
+                                800,
+                                DisplayDeviceInfo.FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY));
+
+        // Create 3 virtual displays associated with a first virtual device.
+        int deviceId1 = 1;
+        TestDisplayDevice display1 =
+                createDisplayDevice(Display.TYPE_VIRTUAL, "virtualDevice1Display1", 600, 800, 0);
+        mLogicalDisplayMapper.associateDisplayDeviceWithVirtualDevice(display1, deviceId1);
+        LogicalDisplay virtualDevice1Display1 = add(display1);
+
+        TestDisplayDevice display2 =
+                createDisplayDevice(Display.TYPE_VIRTUAL, "virtualDevice1Display2", 600, 800, 0);
+        mLogicalDisplayMapper.associateDisplayDeviceWithVirtualDevice(display2, deviceId1);
+        LogicalDisplay virtualDevice1Display2 = add(display2);
+
+        TestDisplayDevice display3 =
+                createDisplayDevice(Display.TYPE_VIRTUAL, "virtualDevice1Display3", 600, 800, 0);
+        mLogicalDisplayMapper.associateDisplayDeviceWithVirtualDevice(display3, deviceId1);
+        LogicalDisplay virtualDevice1Display3 = add(display3);
+
+        // Create another 3 virtual displays associated with a second virtual device.
+        int deviceId2 = 2;
+        TestDisplayDevice display4 =
+                createDisplayDevice(Display.TYPE_VIRTUAL, "virtualDevice2Display1", 600, 800, 0);
+        mLogicalDisplayMapper.associateDisplayDeviceWithVirtualDevice(display4, deviceId2);
+        LogicalDisplay virtualDevice2Display1 = add(display4);
+
+        TestDisplayDevice display5 =
+                createDisplayDevice(Display.TYPE_VIRTUAL, "virtualDevice2Display2", 600, 800, 0);
+        mLogicalDisplayMapper.associateDisplayDeviceWithVirtualDevice(display5, deviceId2);
+        LogicalDisplay virtualDevice2Display2 = add(display5);
+
+        // The final display is created with FLAG_OWN_DISPLAY_GROUP set.
+        TestDisplayDevice display6 =
+                createDisplayDevice(
+                        Display.TYPE_VIRTUAL,
+                        "virtualDevice2Display3",
+                        600,
+                        800,
+                        DisplayDeviceInfo.FLAG_OWN_DISPLAY_GROUP);
+        mLogicalDisplayMapper.associateDisplayDeviceWithVirtualDevice(display6, deviceId2);
+        LogicalDisplay virtualDevice2Display3 = add(display6);
+
+        // Verify that the internal display is in the default display group.
+        assertEquals(
+                DEFAULT_DISPLAY_GROUP,
+                mLogicalDisplayMapper.getDisplayGroupIdFromDisplayIdLocked(id(defaultDisplay)));
+
+        // Verify that all the displays for virtual device 1 are in the same (non-default) display
+        // group.
+        int virtualDevice1DisplayGroupId =
+                mLogicalDisplayMapper.getDisplayGroupIdFromDisplayIdLocked(
+                        id(virtualDevice1Display1));
+        assertNotEquals(DEFAULT_DISPLAY_GROUP, virtualDevice1DisplayGroupId);
+        assertEquals(
+                virtualDevice1DisplayGroupId,
+                mLogicalDisplayMapper.getDisplayGroupIdFromDisplayIdLocked(
+                        id(virtualDevice1Display2)));
+        assertEquals(
+                virtualDevice1DisplayGroupId,
+                mLogicalDisplayMapper.getDisplayGroupIdFromDisplayIdLocked(
+                        id(virtualDevice1Display3)));
+
+        // The first 2 displays for virtual device 2 should be in the same non-default group.
+        int virtualDevice2DisplayGroupId =
+                mLogicalDisplayMapper.getDisplayGroupIdFromDisplayIdLocked(
+                        id(virtualDevice2Display1));
+        assertNotEquals(DEFAULT_DISPLAY_GROUP, virtualDevice2DisplayGroupId);
+        assertEquals(
+                virtualDevice2DisplayGroupId,
+                mLogicalDisplayMapper.getDisplayGroupIdFromDisplayIdLocked(
+                        id(virtualDevice2Display2)));
+        // virtualDevice2Display3 was created with FLAG_OWN_DISPLAY_GROUP and shouldn't be grouped
+        // with other displays of this device or be in the default display group.
+        assertNotEquals(
+                virtualDevice2DisplayGroupId,
+                mLogicalDisplayMapper.getDisplayGroupIdFromDisplayIdLocked(
+                        id(virtualDevice2Display3)));
+        assertNotEquals(
+                DEFAULT_DISPLAY_GROUP,
+                mLogicalDisplayMapper.getDisplayGroupIdFromDisplayIdLocked(
+                        id(virtualDevice2Display3)));
+    }
+
+    @Test
     public void testDeviceShouldBeWoken() {
         assertTrue(mLogicalDisplayMapper.shouldDeviceBeWoken(DEVICE_STATE_OPEN,
                 DEVICE_STATE_CLOSED,
@@ -416,14 +508,22 @@ public class LogicalDisplayMapperTest {
     /////////////////
 
     private TestDisplayDevice createDisplayDevice(int type, int width, int height, int flags) {
-        return createDisplayDevice(new TestUtils.TestDisplayAddress(), type, width, height, flags);
+        return createDisplayDevice(
+                new TestUtils.TestDisplayAddress(), /*  uniqueId */ "", type, width, height, flags);
     }
 
     private TestDisplayDevice createDisplayDevice(
-            DisplayAddress address, int type, int width, int height, int flags) {
+            int type, String uniqueId, int width, int height, int flags) {
+        return createDisplayDevice(
+                new TestUtils.TestDisplayAddress(), uniqueId, type, width, height, flags);
+    }
+
+    private TestDisplayDevice createDisplayDevice(
+            DisplayAddress address, String uniqueId, int type, int width, int height, int flags) {
         TestDisplayDevice device = new TestDisplayDevice();
         DisplayDeviceInfo displayDeviceInfo = device.getSourceInfo();
         displayDeviceInfo.type = type;
+        displayDeviceInfo.uniqueId = uniqueId;
         displayDeviceInfo.width = width;
         displayDeviceInfo.height = height;
         displayDeviceInfo.flags = flags;

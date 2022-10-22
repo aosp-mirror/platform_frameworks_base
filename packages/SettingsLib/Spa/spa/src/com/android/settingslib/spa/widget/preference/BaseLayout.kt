@@ -72,7 +72,7 @@ internal fun BaseLayout(
 }
 
 @Composable
-private fun BaseIcon(
+internal fun BaseIcon(
     icon: @Composable (() -> Unit)?,
     modifier: Modifier,
     paddingStart: Dp,

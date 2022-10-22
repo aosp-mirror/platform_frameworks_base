@@ -151,7 +151,6 @@ import android.util.DisplayMetrics;
 import android.util.FeatureFlagUtils;
 import android.util.IntArray;
 import android.util.Log;
-import android.util.Range;
 import android.util.SparseIntArray;
 import android.util.TypedValue;
 import android.view.AccessibilityIterators.TextSegmentIterator;
@@ -9317,40 +9316,42 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     /** @hide */
     public int performHandwritingSelectGesture(@NonNull SelectGesture gesture) {
-        Range<Integer> range = getRangeForRect(
+        int[] range = getRangeForRect(
                 convertFromScreenToContentCoordinates(gesture.getSelectionArea()),
                 gesture.getGranularity());
         if (range == null) {
             return handleGestureFailure(gesture);
         }
-        Selection.setSelection(getEditableText(), range.getLower(), range.getUpper());
+        Selection.setSelection(getEditableText(), range[0], range[1]);
         mEditor.startSelectionActionModeAsync(/* adjustSelection= */ false);
         return InputConnection.HANDWRITING_GESTURE_RESULT_SUCCESS;
     }
 
     /** @hide */
     public int performHandwritingSelectRangeGesture(@NonNull SelectRangeGesture gesture) {
-        Range<Integer> startRange = getRangeForRect(
+        int[] startRange = getRangeForRect(
                 convertFromScreenToContentCoordinates(gesture.getSelectionStartArea()),
                 gesture.getGranularity());
         if (startRange == null) {
             return handleGestureFailure(gesture);
         }
-        Range<Integer> endRange = getRangeForRect(
+        int[] endRange = getRangeForRect(
                 convertFromScreenToContentCoordinates(gesture.getSelectionEndArea()),
                 gesture.getGranularity());
-        if (endRange == null || endRange.getUpper() <= startRange.getLower()) {
+        if (endRange == null) {
             return handleGestureFailure(gesture);
         }
-        Range<Integer> range = startRange.extend(endRange);
-        Selection.setSelection(getEditableText(), range.getLower(), range.getUpper());
+        int[] range = new int[] {
+                Math.min(startRange[0], endRange[0]), Math.max(startRange[1], endRange[1])
+        };
+        Selection.setSelection(getEditableText(), range[0], range[1]);
         mEditor.startSelectionActionModeAsync(/* adjustSelection= */ false);
         return InputConnection.HANDWRITING_GESTURE_RESULT_SUCCESS;
     }
 
     /** @hide */
     public int performHandwritingDeleteGesture(@NonNull DeleteGesture gesture) {
-        Range<Integer> range = getRangeForRect(
+        int[] range = getRangeForRect(
                 convertFromScreenToContentCoordinates(gesture.getDeletionArea()),
                 gesture.getGranularity());
         if (range == null) {
@@ -9361,42 +9362,44 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             range = adjustHandwritingDeleteGestureRange(range);
         }
 
-        getEditableText().delete(range.getLower(), range.getUpper());
-        Selection.setSelection(getEditableText(), range.getLower());
+        getEditableText().delete(range[0], range[1]);
+        Selection.setSelection(getEditableText(), range[0]);
         return InputConnection.HANDWRITING_GESTURE_RESULT_SUCCESS;
     }
 
     /** @hide */
     public int performHandwritingDeleteRangeGesture(@NonNull DeleteRangeGesture gesture) {
-        Range<Integer> startRange = getRangeForRect(
+        int[] startRange = getRangeForRect(
                 convertFromScreenToContentCoordinates(gesture.getDeletionStartArea()),
                 gesture.getGranularity());
         if (startRange == null) {
             return handleGestureFailure(gesture);
         }
-        Range<Integer> endRange = getRangeForRect(
+        int[] endRange = getRangeForRect(
                 convertFromScreenToContentCoordinates(gesture.getDeletionEndArea()),
                 gesture.getGranularity());
         if (endRange == null) {
             return handleGestureFailure(gesture);
         }
-        Range<Integer> range = startRange.extend(endRange);
+        int[] range = new int[] {
+                Math.min(startRange[0], endRange[0]), Math.max(startRange[1], endRange[1])
+        };
 
         if (gesture.getGranularity() == HandwritingGesture.GRANULARITY_WORD) {
             range = adjustHandwritingDeleteGestureRange(range);
         }
 
-        getEditableText().delete(range.getLower(), range.getUpper());
-        Selection.setSelection(getEditableText(), range.getLower());
+        getEditableText().delete(range[0], range[1]);
+        Selection.setSelection(getEditableText(), range[0]);
         return InputConnection.HANDWRITING_GESTURE_RESULT_SUCCESS;
     }
 
-    private Range<Integer> adjustHandwritingDeleteGestureRange(Range<Integer> range) {
+    private int[] adjustHandwritingDeleteGestureRange(int[] range) {
         // For handwriting delete gestures with word granularity, adjust the start and end offsets
         // to remove extra whitespace around the deleted text.
 
-        int start = range.getLower();
-        int end = range.getUpper();
+        int start = range[0];
+        int end = range[1];
 
         // If the deleted text is at the start of the text, the behavior is the same as the case
         // where the deleted text follows a new line character.
@@ -9425,7 +9428,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 if (start == 0) break;
                 codePointBeforeStart = Character.codePointBefore(mText, start);
             } while (TextUtils.isWhitespaceExceptNewline(codePointBeforeStart));
-            return new Range(start, end);
+            return new int[] {start, end};
         }
 
         if (TextUtils.isWhitespaceExceptNewline(codePointAtEnd)
@@ -9444,7 +9447,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 if (end == mText.length()) break;
                 codePointAtEnd = Character.codePointAt(mText, end);
             } while (TextUtils.isWhitespaceExceptNewline(codePointAtEnd));
-            return new Range(start, end);
+            return new int[] {start, end};
         }
 
         // Return the original range.
@@ -9494,14 +9497,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 lineVerticalCenter + 0.1f,
                 Math.max(startPoint.x, endPoint.x),
                 lineVerticalCenter - 0.1f);
-        Range<Integer> range = mLayout.getRangeForRect(
+        int[] range = mLayout.getRangeForRect(
                 area, new GraphemeClusterSegmentFinder(mText, mTextPaint),
                 Layout.INCLUSION_STRATEGY_ANY_OVERLAP);
         if (range == null) {
             return handleGestureFailure(gesture);
         }
-        int startOffset = range.getLower();
-        int endOffset = range.getUpper();
+        int startOffset = range[0];
+        int endOffset = range[1];
         // TODO(b/247557062): This doesn't handle bidirectional text correctly.
 
         Pattern whitespacePattern = getWhitespacePattern();
@@ -9606,7 +9609,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     @Nullable
-    private Range<Integer> getRangeForRect(@NonNull RectF area, int granularity) {
+    private int[] getRangeForRect(@NonNull RectF area, int granularity) {
         SegmentFinder segmentFinder;
         if (granularity == HandwritingGesture.GRANULARITY_WORD) {
             WordIterator wordIterator = getWordIterator();
