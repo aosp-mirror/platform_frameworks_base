@@ -87,7 +87,6 @@ import com.android.internal.app.IBatteryStats;
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
-import com.android.server.compat.PlatformCompat;
 import com.android.server.lights.LightsManager;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.power.PowerManagerService.BatteryReceiver;
@@ -147,7 +146,6 @@ public class PowerManagerServiceTest {
     @Mock private SystemPropertiesWrapper mSystemPropertiesMock;
     @Mock private AppOpsManager mAppOpsManagerMock;
     @Mock private LowPowerStandbyController mLowPowerStandbyControllerMock;
-    @Mock private PlatformCompat mPlatformCompat;
 
     @Mock
     private InattentiveSleepWarningController mInattentiveSleepWarningControllerMock;
@@ -320,11 +318,6 @@ public class PowerManagerServiceTest {
             @Override
             AppOpsManager createAppOpsManager(Context context) {
                 return mAppOpsManagerMock;
-            }
-
-            @Override
-            PlatformCompat createPlatformCompat(Context context) {
-                return mPlatformCompat;
             }
         });
         return mService;
@@ -505,9 +498,6 @@ public class PowerManagerServiceTest {
         String packageName = "pkg.name";
         when(mAppOpsManagerMock.checkOpNoThrow(AppOpsManager.OP_TURN_SCREEN_ON,
                 Binder.getCallingUid(), packageName)).thenReturn(MODE_ALLOWED);
-        when(mPlatformCompat.isChangeEnabledByPackageName(
-                eq(PowerManagerService.REQUIRE_TURN_SCREEN_ON_PERMISSION), anyString(),
-                anyInt())).thenReturn(true);
         when(mContextSpy.checkCallingOrSelfPermission(
                 android.Manifest.permission.TURN_SCREEN_ON)).thenReturn(
                 PackageManager.PERMISSION_GRANTED);
@@ -532,23 +522,6 @@ public class PowerManagerServiceTest {
                 null /* workSource */, null /* historyTag */, Display.INVALID_DISPLAY, null);
         assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
         mService.getBinderServiceInstance().releaseWakeLock(token, 0 /* flags */);
-
-        // Verify that on older platforms only the appOp is necessary and the permission isn't
-        // checked
-        when(mPlatformCompat.isChangeEnabledByPackageName(
-                eq(PowerManagerService.REQUIRE_TURN_SCREEN_ON_PERMISSION), anyString(),
-                anyInt())).thenReturn(false);
-        when(mContextSpy.checkCallingOrSelfPermission(
-                android.Manifest.permission.TURN_SCREEN_ON)).thenReturn(
-                PackageManager.PERMISSION_DENIED);
-        forceSleep();
-        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_ASLEEP);
-
-        flags = PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP;
-        mService.getBinderServiceInstance().acquireWakeLock(token, flags, tag, packageName,
-                null /* workSource */, null /* historyTag */, Display.INVALID_DISPLAY, null);
-        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
-        mService.getBinderServiceInstance().releaseWakeLock(token, 0 /* flags */);
     }
 
     @Test
@@ -568,7 +541,7 @@ public class PowerManagerServiceTest {
         int flags = PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP;
         mService.getBinderServiceInstance().acquireWakeLock(token, flags, tag, packageName,
                 null /* workSource */, null /* historyTag */, Display.INVALID_DISPLAY, null);
-        if (PowerProperties.permissionless_turn_screen_on().orElse(true)) {
+        if (PowerProperties.permissionless_turn_screen_on().orElse(false)) {
             assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
         } else {
             assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_ASLEEP);
@@ -577,9 +550,6 @@ public class PowerManagerServiceTest {
 
         when(mAppOpsManagerMock.checkOpNoThrow(AppOpsManager.OP_TURN_SCREEN_ON,
                 Binder.getCallingUid(), packageName)).thenReturn(MODE_ALLOWED);
-        when(mPlatformCompat.isChangeEnabledByPackageName(
-                eq(PowerManagerService.REQUIRE_TURN_SCREEN_ON_PERMISSION), anyString(),
-                anyInt())).thenReturn(true);
         when(mContextSpy.checkCallingOrSelfPermission(
                 android.Manifest.permission.TURN_SCREEN_ON)).thenReturn(
                 PackageManager.PERMISSION_DENIED);
@@ -589,7 +559,7 @@ public class PowerManagerServiceTest {
         flags = PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP;
         mService.getBinderServiceInstance().acquireWakeLock(token, flags, tag, packageName,
                 null /* workSource */, null /* historyTag */, Display.INVALID_DISPLAY, null);
-        if (PowerProperties.permissionless_turn_screen_on().orElse(true)) {
+        if (PowerProperties.permissionless_turn_screen_on().orElse(false)) {
             assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
         } else {
             assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_ASLEEP);

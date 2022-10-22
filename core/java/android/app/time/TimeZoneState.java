@@ -18,6 +18,7 @@ package android.app.time;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.ShellCommand;
@@ -36,6 +37,7 @@ import java.util.Objects;
  *
  * @hide
  */
+@SystemApi
 public final class TimeZoneState implements Parcelable {
 
     public static final @NonNull Creator<TimeZoneState> CREATOR = new Creator<>() {

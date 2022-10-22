@@ -67,12 +67,15 @@ import com.android.internal.statusbar.LetterboxDetails;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.GcUtils;
 import com.android.internal.view.AppearanceRegion;
+import com.android.systemui.dump.DumpHandler;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
 import com.android.systemui.statusbar.commandline.CommandRegistry;
 import com.android.systemui.statusbar.policy.CallbackController;
 import com.android.systemui.tracing.ProtoTracer;
 
+import java.io.FileDescriptor;
 import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
@@ -182,6 +185,7 @@ public class CommandQueue extends IStatusBar.Stub implements
     private int mLastUpdatedImeDisplayId = INVALID_DISPLAY;
     private ProtoTracer mProtoTracer;
     private final @Nullable CommandRegistry mRegistry;
+    private final @Nullable DumpHandler mDumpHandler;
 
     /**
      * These methods are called back on the main thread.
@@ -471,12 +475,18 @@ public class CommandQueue extends IStatusBar.Stub implements
     }
 
     public CommandQueue(Context context) {
-        this(context, null, null);
+        this(context, null, null, null);
     }
 
-    public CommandQueue(Context context, ProtoTracer protoTracer, CommandRegistry registry) {
+    public CommandQueue(
+            Context context,
+            ProtoTracer protoTracer,
+            CommandRegistry registry,
+            DumpHandler dumpHandler
+    ) {
         mProtoTracer = protoTracer;
         mRegistry = registry;
+        mDumpHandler = dumpHandler;
         context.getSystemService(DisplayManager.class).registerDisplayListener(this, mHandler);
         // We always have default display.
         setDisabled(DEFAULT_DISPLAY, DISABLE_NONE, DISABLE2_NONE);
@@ -1163,6 +1173,35 @@ public class CommandQueue extends IStatusBar.Stub implements
                     mRegistry.onShellCommand(pw, args);
                 } finally {
                     pw.flush();
+                    try {
+                        // Close the file descriptor so the TransferPipe finishes its thread
+                        pfd.close();
+                    } catch (Exception e) {
+                    }
+                }
+            }
+        };
+        thr.start();
+    }
+
+    @Override
+    public void dumpProto(String[] args, ParcelFileDescriptor pfd) {
+        final FileDescriptor fd = pfd.getFileDescriptor();
+        // This is mimicking Binder#dumpAsync, but on this side of the binder. Might be possible
+        // to just throw this work onto the handler just like the other messages
+        Thread thr = new Thread("Sysui.dumpProto") {
+            public void run() {
+                try {
+                    if (mDumpHandler == null) {
+                        return;
+                    }
+                    // We won't be using the PrintWriter.
+                    OutputStream o = new OutputStream() {
+                        @Override
+                        public void write(int b) {}
+                    };
+                    mDumpHandler.dump(fd, new PrintWriter(o), args);
+                } finally {
                     try {
                         // Close the file descriptor so the TransferPipe finishes its thread
                         pfd.close();

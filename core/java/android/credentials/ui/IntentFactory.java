@@ -34,8 +34,7 @@ public class IntentFactory {
             ArrayList<ProviderData> providerDataList, ResultReceiver resultReceiver) {
         Intent intent = new Intent();
         // TODO: define these as proper config strings.
-        String activityName = "com.androidauth.tatiaccountselector/.CredentialSelectorActivity";
-        // String activityName = "com.android.credentialmanager/.CredentialSelectorActivity";
+        String activityName = "com.android.credentialmanager/.CredentialSelectorActivity";
         intent.setComponent(ComponentName.unflattenFromString(activityName));
 
         intent.putParcelableArrayListExtra(

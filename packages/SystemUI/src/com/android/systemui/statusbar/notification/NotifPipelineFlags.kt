@@ -28,12 +28,7 @@ class NotifPipelineFlags @Inject constructor(
     fun isDevLoggingEnabled(): Boolean =
         featureFlags.isEnabled(Flags.NOTIFICATION_PIPELINE_DEVELOPER_LOGGING)
 
-    fun isSmartspaceDedupingEnabled(): Boolean =
-            featureFlags.isEnabled(Flags.SMARTSPACE) &&
-                    featureFlags.isEnabled(Flags.SMARTSPACE_DEDUPING)
-
-    fun removeUnrankedNotifs(): Boolean =
-        featureFlags.isEnabled(Flags.REMOVE_UNRANKED_NOTIFICATIONS)
+    fun isSmartspaceDedupingEnabled(): Boolean = featureFlags.isEnabled(Flags.SMARTSPACE)
 
     fun fullScreenIntentRequiresKeyguard(): Boolean =
         featureFlags.isEnabled(Flags.FSI_REQUIRES_KEYGUARD)

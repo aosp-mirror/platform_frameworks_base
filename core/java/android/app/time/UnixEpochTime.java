@@ -19,6 +19,7 @@ package android.app.time;
 import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.ShellCommand;
@@ -38,6 +39,7 @@ import java.util.Objects;
  *
  * @hide
  */
+@SystemApi
 public final class UnixEpochTime implements Parcelable {
     @ElapsedRealtimeLong private final long mElapsedRealtimeMillis;
     private final long mUnixEpochTimeMillis;
@@ -153,9 +155,8 @@ public final class UnixEpochTime implements Parcelable {
      * Creates a new Unix epoch time value at {@code elapsedRealtimeTimeMillis} by adjusting this
      * Unix epoch time by the difference between the elapsed realtime value supplied and the one
      * associated with this instance.
-     *
-     * @hide
      */
+    @NonNull
     public UnixEpochTime at(@ElapsedRealtimeLong long elapsedRealtimeTimeMillis) {
         long adjustedUnixEpochTimeMillis =
                 (elapsedRealtimeTimeMillis - mElapsedRealtimeMillis) + mUnixEpochTimeMillis;

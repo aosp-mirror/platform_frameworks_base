@@ -674,7 +674,9 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
     @Test
     fun testOnRankingApplied_newEntryShouldAlert() {
         // GIVEN that mEntry has never interrupted in the past, and now should
+        // and is new enough to do so
         assertFalse(mEntry.hasInterrupted())
+        mCoordinator.setUpdateTime(mEntry, mSystemClock.currentTimeMillis())
         setShouldHeadsUp(mEntry)
         whenever(mNotifPipeline.allNotifs).thenReturn(listOf(mEntry))
 
@@ -690,8 +692,9 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
 
     @Test
     fun testOnRankingApplied_alreadyAlertedEntryShouldNotAlertAgain() {
-        // GIVEN that mEntry has alerted in the past
+        // GIVEN that mEntry has alerted in the past, even if it's new
         mEntry.setInterruption()
+        mCoordinator.setUpdateTime(mEntry, mSystemClock.currentTimeMillis())
         setShouldHeadsUp(mEntry)
         whenever(mNotifPipeline.allNotifs).thenReturn(listOf(mEntry))
 
@@ -723,6 +726,27 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         // THEN the notification is shown
         finishBind(mEntry)
         verify(mHeadsUpManager).showNotification(mEntry)
+    }
+
+    @Test
+    fun testOnRankingApplied_entryUpdatedButTooOld() {
+        // GIVEN that mEntry is added in a state where it should not HUN
+        setShouldHeadsUp(mEntry, false)
+        mCollectionListener.onEntryAdded(mEntry)
+
+        // and it was actually added 10s ago
+        mCoordinator.setUpdateTime(mEntry, mSystemClock.currentTimeMillis() - 10000)
+
+        // WHEN it is updated to HUN and then a ranking update occurs
+        setShouldHeadsUp(mEntry)
+        whenever(mNotifPipeline.allNotifs).thenReturn(listOf(mEntry))
+        mCollectionListener.onRankingApplied()
+        mBeforeTransformGroupsListener.onBeforeTransformGroups(listOf(mEntry))
+        mBeforeFinalizeFilterListener.onBeforeFinalizeFilter(listOf(mEntry))
+
+        // THEN the notification is never bound or shown
+        verify(mHeadsUpViewBinder, never()).bindHeadsUpView(any(), any())
+        verify(mHeadsUpManager, never()).showNotification(any())
     }
 
     private fun setShouldHeadsUp(entry: NotificationEntry, should: Boolean = true) {

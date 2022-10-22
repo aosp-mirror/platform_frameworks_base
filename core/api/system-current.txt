@@ -2502,11 +2502,49 @@ package android.app.time {
     field @NonNull public static final android.os.Parcelable.Creator<android.app.time.ExternalTimeSuggestion> CREATOR;
   }
 
+  public final class TimeCapabilities implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getConfigureAutoDetectionEnabledCapability();
+    method public int getSetManualTimeCapability();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.time.TimeCapabilities> CREATOR;
+  }
+
+  public final class TimeCapabilitiesAndConfig implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.app.time.TimeCapabilities getCapabilities();
+    method @NonNull public android.app.time.TimeConfiguration getConfiguration();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.time.TimeCapabilitiesAndConfig> CREATOR;
+  }
+
+  public final class TimeConfiguration implements android.os.Parcelable {
+    method public int describeContents();
+    method public boolean isAutoDetectionEnabled();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.time.TimeConfiguration> CREATOR;
+  }
+
+  public static final class TimeConfiguration.Builder {
+    ctor public TimeConfiguration.Builder();
+    ctor public TimeConfiguration.Builder(@NonNull android.app.time.TimeConfiguration);
+    method @NonNull public android.app.time.TimeConfiguration build();
+    method @NonNull public android.app.time.TimeConfiguration.Builder setAutoDetectionEnabled(boolean);
+  }
+
   public final class TimeManager {
     method @RequiresPermission(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION) public void addTimeZoneDetectorListener(@NonNull java.util.concurrent.Executor, @NonNull android.app.time.TimeManager.TimeZoneDetectorListener);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION) public boolean confirmTime(@NonNull android.app.time.UnixEpochTime);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION) public boolean confirmTimeZone(@NonNull String);
+    method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION) public android.app.time.TimeCapabilitiesAndConfig getTimeCapabilitiesAndConfig();
+    method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION) public android.app.time.TimeState getTimeState();
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION) public android.app.time.TimeZoneCapabilitiesAndConfig getTimeZoneCapabilitiesAndConfig();
+    method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION) public android.app.time.TimeZoneState getTimeZoneState();
     method @RequiresPermission(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION) public void removeTimeZoneDetectorListener(@NonNull android.app.time.TimeManager.TimeZoneDetectorListener);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION) public boolean setManualTime(@NonNull android.app.time.UnixEpochTime);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION) public boolean setManualTimeZone(@NonNull String);
     method @RequiresPermission(android.Manifest.permission.SUGGEST_EXTERNAL_TIME) public void suggestExternalTime(@NonNull android.app.time.ExternalTimeSuggestion);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION) public boolean updateTimeConfiguration(@NonNull android.app.time.TimeConfiguration);
     method @RequiresPermission(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION) public boolean updateTimeZoneConfiguration(@NonNull android.app.time.TimeZoneConfiguration);
   }
 
@@ -2514,10 +2552,19 @@ package android.app.time {
     method public void onChange();
   }
 
+  public final class TimeState implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.app.time.UnixEpochTime getUnixEpochTime();
+    method public boolean getUserShouldConfirmTime();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.time.TimeState> CREATOR;
+  }
+
   public final class TimeZoneCapabilities implements android.os.Parcelable {
     method public int describeContents();
     method public int getConfigureAutoDetectionEnabledCapability();
     method public int getConfigureGeoDetectionEnabledCapability();
+    method public int getSetManualTimeZoneCapability();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.time.TimeZoneCapabilities> CREATOR;
   }
@@ -2544,6 +2591,24 @@ package android.app.time {
     method @NonNull public android.app.time.TimeZoneConfiguration build();
     method @NonNull public android.app.time.TimeZoneConfiguration.Builder setAutoDetectionEnabled(boolean);
     method @NonNull public android.app.time.TimeZoneConfiguration.Builder setGeoDetectionEnabled(boolean);
+  }
+
+  public final class TimeZoneState implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public String getId();
+    method public boolean getUserShouldConfirmId();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.time.TimeZoneState> CREATOR;
+  }
+
+  public final class UnixEpochTime implements android.os.Parcelable {
+    ctor public UnixEpochTime(long, long);
+    method @NonNull public android.app.time.UnixEpochTime at(long);
+    method public int describeContents();
+    method public long getElapsedRealtimeMillis();
+    method public long getUnixEpochTimeMillis();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.time.UnixEpochTime> CREATOR;
   }
 
 }

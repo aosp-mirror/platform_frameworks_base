@@ -6632,8 +6632,8 @@ public class AudioManager {
             }
         }
         if (k == ports.size()) {
-            // this hould never happen
-            Log.e(TAG, "updatePortConfig port not found for handle: "+port.handle().id());
+            // This can happen in case of stale audio patch referring to a removed device and is
+            // handled by the caller.
             return null;
         }
         AudioGainConfig gainCfg = portCfg.gain();

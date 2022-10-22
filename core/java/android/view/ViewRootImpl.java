@@ -888,20 +888,18 @@ public final class ViewRootImpl implements ViewParent,
     static BLASTBufferQueue.TransactionHangCallback sTransactionHangCallback =
         new BLASTBufferQueue.TransactionHangCallback() {
             @Override
-            public void onTransactionHang(boolean isGPUHang) {
-                if (isGPUHang && !sAnrReported) {
-                    sAnrReported = true;
-                    try {
-                        ActivityManager.getService().appNotResponding(
-                            "Buffer processing hung up due to stuck fence. Indicates GPU hang");
-                    } catch (RemoteException e) {
-                        // We asked the system to crash us, but the system
-                        // already crashed. Unfortunately things may be
-                        // out of control.
-                    }
-                } else {
-                    // TODO: Do something with this later. For now we just ANR
-                    // in dequeue buffer later like we always have.
+            public void onTransactionHang(String reason) {
+                if (sAnrReported) {
+                    return;
+                }
+
+                sAnrReported = true;
+                try {
+                    ActivityManager.getService().appNotResponding(reason);
+                } catch (RemoteException e) {
+                    // We asked the system to crash us, but the system
+                    // already crashed. Unfortunately things may be
+                    // out of control.
                 }
             }
         };

@@ -61,10 +61,6 @@ public class Flags {
     public static final ResourceBooleanFlag NOTIFICATION_DRAG_TO_CONTENTS =
             new ResourceBooleanFlag(108, R.bool.config_notificationToContents);
 
-    // TODO(b/254512703): Tracking Bug
-    public static final ReleasedFlag REMOVE_UNRANKED_NOTIFICATIONS =
-            new ReleasedFlag(109);
-
     // TODO(b/254512517): Tracking Bug
     public static final UnreleasedFlag FSI_REQUIRES_KEYGUARD =
             new UnreleasedFlag(110, true);
@@ -112,8 +108,9 @@ public class Flags {
             new ResourceBooleanFlag(205, R.bool.config_enableFaceScanningAnimation);
 
     // TODO(b/254512676): Tracking Bug
-    public static final UnreleasedFlag LOCKSCREEN_CUSTOM_CLOCKS = new UnreleasedFlag(207);
-  
+    public static final UnreleasedFlag LOCKSCREEN_CUSTOM_CLOCKS =
+            new UnreleasedFlag(207, /* teamfood = */ true);
+
     /**
      * Flag to enable the usage of the new bouncer data source. This is a refactor of and
      * eventual replacement of KeyguardBouncer.java.
@@ -157,9 +154,6 @@ public class Flags {
 
     /***************************************/
     // 400 - smartspace
-    // TODO(b/254513080): Tracking Bug
-    public static final ReleasedFlag SMARTSPACE_DEDUPING =
-            new ReleasedFlag(400);
 
     // TODO(b/254513100): Tracking Bug
     public static final ReleasedFlag SMARTSPACE_SHARED_ELEMENT_TRANSITION_ENABLED =
@@ -213,13 +207,29 @@ public class Flags {
     public static final ReleasedFlag STATUS_BAR_LETTERBOX_APPEARANCE =
             new ReleasedFlag(603, false);
 
-    // TODO(b/254512623): Tracking Bug
+    /**
+     * @deprecated replaced by mobile and wifi specific flags.
+     *
+     * TODO(b/254512623): Tracking Bug
+     */
+    @Deprecated
     public static final UnreleasedFlag NEW_STATUS_BAR_PIPELINE_BACKEND =
             new UnreleasedFlag(604, false);
 
-    // TODO(b/254512660): Tracking Bug
+    /**
+     * @deprecated replaced by mobile and wifi specific flags.
+     *
+     * TODO(b/254512660): Tracking Bug
+     */
+    @Deprecated
     public static final UnreleasedFlag NEW_STATUS_BAR_PIPELINE_FRONTEND =
             new UnreleasedFlag(605, false);
+
+    public static final UnreleasedFlag NEW_STATUS_BAR_MOBILE_ICONS =
+            new UnreleasedFlag(606, false);
+
+    public static final UnreleasedFlag NEW_STATUS_BAR_WIFI_ICON =
+            new UnreleasedFlag(607, false);
 
     /***************************************/
     // 700 - dialer/calls
@@ -284,7 +294,7 @@ public class Flags {
     public static final ReleasedFlag ROUNDED_BOX_RIPPLE = new ReleasedFlag(1002);
 
     // TODO(b/254512525): Tracking Bug
-    public static final UnreleasedFlag REFACTORED_DOCK_SETUP = new UnreleasedFlag(1003, true);
+    public static final ReleasedFlag REFACTORED_DOCK_SETUP = new ReleasedFlag(1003);
 
     // 1100 - windowing
     @Keep

@@ -114,8 +114,6 @@ public final class TimeZoneCapabilities implements Parcelable {
      * <p>The time zone will be ignored in all cases unless the value is {@link
      * Capabilities#CAPABILITY_POSSESSED}. See also
      * {@link TimeZoneConfiguration#isAutoDetectionEnabled()}.
-     *
-     * @hide
      */
     @CapabilityState
     public int getSetManualTimeZoneCapability() {

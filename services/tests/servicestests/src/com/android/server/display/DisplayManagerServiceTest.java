@@ -18,6 +18,7 @@ package com.android.server.display;
 
 import static android.Manifest.permission.ADD_TRUSTED_DISPLAY;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY;
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP;
 
 import static com.android.server.display.VirtualDisplayAdapter.UNIQUE_ID_PREFIX;
 
@@ -658,6 +659,117 @@ public class DisplayManagerServiceTest {
                 Display.DEFAULT_DISPLAY);
         assertEquals(localDisplayManager.getDisplayIdToMirror(secondDisplayId),
                 firstDisplayId);
+    }
+
+    /** Tests that the virtual device is created in a device display group. */
+    @Test
+    public void createVirtualDisplay_addsDisplaysToDeviceDisplayGroups() throws Exception {
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerInternal localService = displayManager.new LocalService();
+
+        registerDefaultDisplays(displayManager);
+        when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
+
+        when(mContext.checkCallingPermission(ADD_TRUSTED_DISPLAY))
+                .thenReturn(PackageManager.PERMISSION_DENIED);
+
+        IVirtualDevice virtualDevice = mock(IVirtualDevice.class);
+        when(mMockVirtualDeviceManagerInternal.isValidVirtualDevice(virtualDevice))
+                .thenReturn(true);
+        when(virtualDevice.getDeviceId()).thenReturn(1);
+
+        // Create a first virtual display. A display group should be created for this display on the
+        // virtual device.
+        final VirtualDisplayConfig.Builder builder1 =
+                new VirtualDisplayConfig.Builder(VIRTUAL_DISPLAY_NAME, 600, 800, 320)
+                        .setUniqueId("uniqueId --- device display group 1");
+
+        int displayId1 =
+                localService.createVirtualDisplay(
+                        builder1.build(),
+                        mMockAppToken /* callback */,
+                        virtualDevice /* virtualDeviceToken */,
+                        mock(DisplayWindowPolicyController.class),
+                        PACKAGE_NAME);
+        int displayGroupId1 = localService.getDisplayInfo(displayId1).displayGroupId;
+
+        // Create a second virtual display. This should be added to the previously created display
+        // group.
+        final VirtualDisplayConfig.Builder builder2 =
+                new VirtualDisplayConfig.Builder(VIRTUAL_DISPLAY_NAME, 600, 800, 320)
+                        .setUniqueId("uniqueId --- device display group 1");
+
+        int displayId2 =
+                localService.createVirtualDisplay(
+                        builder2.build(),
+                        mMockAppToken /* callback */,
+                        virtualDevice /* virtualDeviceToken */,
+                        mock(DisplayWindowPolicyController.class),
+                        PACKAGE_NAME);
+        int displayGroupId2 = localService.getDisplayInfo(displayId2).displayGroupId;
+
+        assertEquals(
+                "Both displays should be added to the same displayGroup.",
+                displayGroupId1,
+                displayGroupId2);
+    }
+
+    /**
+     * Tests that the virtual display is not added to the device display group when
+     * VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP is set.
+     */
+    @Test
+    public void createVirtualDisplay_addsDisplaysToOwnDisplayGroups() throws Exception {
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerInternal localService = displayManager.new LocalService();
+
+        registerDefaultDisplays(displayManager);
+        when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
+
+        when(mContext.checkCallingPermission(ADD_TRUSTED_DISPLAY))
+                .thenReturn(PackageManager.PERMISSION_DENIED);
+
+        IVirtualDevice virtualDevice = mock(IVirtualDevice.class);
+        when(mMockVirtualDeviceManagerInternal.isValidVirtualDevice(virtualDevice))
+                .thenReturn(true);
+        when(virtualDevice.getDeviceId()).thenReturn(1);
+
+        // Create a first virtual display. A display group should be created for this display on the
+        // virtual device.
+        final VirtualDisplayConfig.Builder builder1 =
+                new VirtualDisplayConfig.Builder(VIRTUAL_DISPLAY_NAME, 600, 800, 320)
+                        .setUniqueId("uniqueId --- device display group 1");
+
+        int displayId1 =
+                localService.createVirtualDisplay(
+                        builder1.build(),
+                        mMockAppToken /* callback */,
+                        virtualDevice /* virtualDeviceToken */,
+                        mock(DisplayWindowPolicyController.class),
+                        PACKAGE_NAME);
+        int displayGroupId1 = localService.getDisplayInfo(displayId1).displayGroupId;
+
+        // Create a second virtual display. With the flag VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP,
+        // the display should not be added to the previously created display group.
+        final VirtualDisplayConfig.Builder builder2 =
+                new VirtualDisplayConfig.Builder(VIRTUAL_DISPLAY_NAME, 600, 800, 320)
+                        .setFlags(VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP)
+                        .setUniqueId("uniqueId --- device display group 1");
+
+        int displayId2 =
+                localService.createVirtualDisplay(
+                        builder2.build(),
+                        mMockAppToken /* callback */,
+                        virtualDevice /* virtualDeviceToken */,
+                        mock(DisplayWindowPolicyController.class),
+                        PACKAGE_NAME);
+        int displayGroupId2 = localService.getDisplayInfo(displayId2).displayGroupId;
+
+        assertNotEquals(
+                "Display 1 should be in the device display group and display 2 in its own display"
+                        + " group.",
+                displayGroupId1,
+                displayGroupId2);
     }
 
     @Test

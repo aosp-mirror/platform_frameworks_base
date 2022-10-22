@@ -98,6 +98,7 @@ combined_apis {
         "framework-configinfrastructure",
         "framework-connectivity",
         "framework-connectivity-t",
+        "framework-devicelock",
         "framework-federatedcompute",
         "framework-graphics",
         "framework-healthconnect",
