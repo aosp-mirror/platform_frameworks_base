@@ -36,9 +36,7 @@ class UserSwitcherPopupMenu(
     private var adapter: ListAdapter? = null
 
     init {
-        setBackgroundDrawable(
-            res.getDrawable(R.drawable.bouncer_user_switcher_popup_bg, context.getTheme())
-        )
+        setBackgroundDrawable(null)
         setModal(false)
         setOverlapAnchor(true)
     }
