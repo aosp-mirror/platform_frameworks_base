@@ -18,8 +18,10 @@ package android.window;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.view.RemoteAnimationTarget;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -50,6 +52,8 @@ public class BackEvent implements Parcelable {
 
     @SwipeEdge
     private final int mSwipeEdge;
+    @Nullable
+    private final RemoteAnimationTarget mDepartingAnimationTarget;
 
     /**
      * Creates a new {@link BackEvent} instance.
@@ -58,12 +62,16 @@ public class BackEvent implements Parcelable {
      * @param touchY Absolute Y location of the touch point of this event.
      * @param progress Value between 0 and 1 on how far along the back gesture is.
      * @param swipeEdge Indicates which edge the swipe starts from.
+     * @param departingAnimationTarget The remote animation target of the departing
+     *                                 application window.
      */
-    public BackEvent(float touchX, float touchY, float progress, @SwipeEdge int swipeEdge) {
+    public BackEvent(float touchX, float touchY, float progress, @SwipeEdge int swipeEdge,
+            @Nullable RemoteAnimationTarget departingAnimationTarget) {
         mTouchX = touchX;
         mTouchY = touchY;
         mProgress = progress;
         mSwipeEdge = swipeEdge;
+        mDepartingAnimationTarget = departingAnimationTarget;
     }
 
     private BackEvent(@NonNull Parcel in) {
@@ -71,6 +79,7 @@ public class BackEvent implements Parcelable {
         mTouchY = in.readFloat();
         mProgress = in.readFloat();
         mSwipeEdge = in.readInt();
+        mDepartingAnimationTarget = in.readTypedObject(RemoteAnimationTarget.CREATOR);
     }
 
     public static final Creator<BackEvent> CREATOR = new Creator<BackEvent>() {
@@ -96,6 +105,7 @@ public class BackEvent implements Parcelable {
         dest.writeFloat(mTouchY);
         dest.writeFloat(mProgress);
         dest.writeInt(mSwipeEdge);
+        dest.writeTypedObject(mDepartingAnimationTarget, flags);
     }
 
     /**
@@ -124,6 +134,16 @@ public class BackEvent implements Parcelable {
      */
     public int getSwipeEdge() {
         return mSwipeEdge;
+    }
+
+    /**
+     * Returns the {@link RemoteAnimationTarget} of the top departing application window,
+     * or {@code null} if the top window should not be moved for the current type of back
+     * destination.
+     */
+    @Nullable
+    public RemoteAnimationTarget getDepartingAnimationTarget() {
+        return mDepartingAnimationTarget;
     }
 
     @Override
