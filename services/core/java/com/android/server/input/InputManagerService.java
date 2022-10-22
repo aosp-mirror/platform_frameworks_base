@@ -303,9 +303,9 @@ public class InputManagerService extends IInputManager.Stub
     private final AdditionalDisplayInputProperties mCurrentDisplayProperties =
             new AdditionalDisplayInputProperties();
     @GuardedBy("mAdditionalDisplayInputPropertiesLock")
-    private int mIconType = PointerIcon.TYPE_NOT_SPECIFIED;
+    private int mPointerIconType = PointerIcon.TYPE_NOT_SPECIFIED;
     @GuardedBy("mAdditionalDisplayInputPropertiesLock")
-    private PointerIcon mIcon;
+    private PointerIcon mPointerIcon;
 
     // Holds all the registered gesture monitors that are implemented as spy windows. The spy
     // windows are mapped by their InputChannel tokens.
@@ -2326,12 +2326,12 @@ public class InputManagerService extends IInputManager.Stub
             throw new IllegalArgumentException("Use setCustomPointerIcon to set custom pointers");
         }
         synchronized (mAdditionalDisplayInputPropertiesLock) {
-            mIcon = null;
-            mIconType = iconType;
+            mPointerIcon = null;
+            mPointerIconType = iconType;
 
             if (!mCurrentDisplayProperties.pointerIconVisible) return;
 
-            mNative.setPointerIconType(mIconType);
+            mNative.setPointerIconType(mPointerIconType);
         }
     }
 
@@ -2340,12 +2340,12 @@ public class InputManagerService extends IInputManager.Stub
     public void setCustomPointerIcon(PointerIcon icon) {
         Objects.requireNonNull(icon);
         synchronized (mAdditionalDisplayInputPropertiesLock) {
-            mIconType = PointerIcon.TYPE_CUSTOM;
-            mIcon = icon;
+            mPointerIconType = PointerIcon.TYPE_CUSTOM;
+            mPointerIcon = icon;
 
             if (!mCurrentDisplayProperties.pointerIconVisible) return;
 
-            mNative.setCustomPointerIcon(mIcon);
+            mNative.setCustomPointerIcon(mPointerIcon);
         }
     }
 
@@ -3846,11 +3846,11 @@ public class InputManagerService extends IInputManager.Stub
         if (properties.pointerIconVisible != mCurrentDisplayProperties.pointerIconVisible) {
             mCurrentDisplayProperties.pointerIconVisible = properties.pointerIconVisible;
             if (properties.pointerIconVisible) {
-                if (mIconType == PointerIcon.TYPE_CUSTOM) {
-                    Objects.requireNonNull(mIcon);
-                    mNative.setCustomPointerIcon(mIcon);
+                if (mPointerIconType == PointerIcon.TYPE_CUSTOM) {
+                    Objects.requireNonNull(mPointerIcon);
+                    mNative.setCustomPointerIcon(mPointerIcon);
                 } else {
-                    mNative.setPointerIconType(mIconType);
+                    mNative.setPointerIconType(mPointerIconType);
                 }
             } else {
                 mNative.setPointerIconType(PointerIcon.TYPE_NULL);
