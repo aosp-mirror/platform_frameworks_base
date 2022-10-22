@@ -29,6 +29,7 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 
 import com.android.systemui.R;
+import com.android.systemui.animation.Expandable;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.qs.dagger.QSScope;
@@ -130,7 +131,7 @@ public class QSFgsManagerFooter implements View.OnClickListener,
 
     @Override
     public void onClick(View view) {
-        mFgsManagerController.showDialog(mRootView);
+        mFgsManagerController.showDialog(Expandable.fromView(view));
     }
 
     public void refreshState() {

@@ -17,7 +17,8 @@
 package com.android.systemui.user
 
 import android.os.Bundle
-import android.view.View
+import android.view.WindowInsets.Type
+import android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.ViewModelProvider
 import com.android.systemui.R
@@ -38,10 +39,10 @@ constructor(
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.user_switcher_fullscreen)
-        window.decorView.systemUiVisibility =
-            (View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
-                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
-                View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)
+        window.decorView.getWindowInsetsController().apply {
+            setSystemBarsBehavior(BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE)
+            hide(Type.systemBars())
+        }
         val viewModel =
             ViewModelProvider(this, viewModelFactory.get())[UserSwitcherViewModel::class.java]
         UserSwitcherViewBinder.bind(

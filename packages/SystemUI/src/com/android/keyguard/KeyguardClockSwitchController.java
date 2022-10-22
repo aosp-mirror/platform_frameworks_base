@@ -40,6 +40,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
+import com.android.systemui.plugins.ClockAnimations;
 import com.android.systemui.plugins.ClockController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.clocks.ClockRegistry;
@@ -403,6 +404,11 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         if (clock != null) {
             clock.dump(pw);
         }
+    }
+
+    /** Gets the animations for the current clock. */
+    public ClockAnimations getClockAnimations() {
+        return getClock().getAnimations();
     }
 }
 

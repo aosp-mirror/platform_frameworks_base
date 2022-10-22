@@ -31,6 +31,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.R
+import com.android.systemui.animation.Expandable
 import com.android.systemui.common.ui.binder.IconViewBinder
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.people.ui.view.PeopleViewBinder.bind
@@ -125,7 +126,7 @@ object FooterActionsViewBinder {
                 launch {
                     viewModel.security.collect { security ->
                         if (previousSecurity != security) {
-                            bindSecurity(securityHolder, security)
+                            bindSecurity(view.context, securityHolder, security)
                             previousSecurity = security
                         }
                     }
@@ -159,6 +160,7 @@ object FooterActionsViewBinder {
     }
 
     private fun bindSecurity(
+        quickSettingsContext: Context,
         securityHolder: TextButtonViewHolder,
         security: FooterActionsSecurityButtonViewModel?,
     ) {
@@ -171,9 +173,12 @@ object FooterActionsViewBinder {
         // Make sure that the chevron is visible and that the button is clickable if there is a
         // listener.
         val chevron = securityHolder.chevron
-        if (security.onClick != null) {
+        val onClick = security.onClick
+        if (onClick != null) {
             securityView.isClickable = true
-            securityView.setOnClickListener(security.onClick)
+            securityView.setOnClickListener {
+                onClick(quickSettingsContext, Expandable.fromView(securityView))
+            }
             chevron.isVisible = true
         } else {
             securityView.isClickable = false
@@ -205,7 +210,9 @@ object FooterActionsViewBinder {
             foregroundServicesWithNumberView.isVisible = false
 
             foregroundServicesWithTextView.isVisible = true
-            foregroundServicesWithTextView.setOnClickListener(foregroundServices.onClick)
+            foregroundServicesWithTextView.setOnClickListener {
+                foregroundServices.onClick(Expandable.fromView(foregroundServicesWithTextView))
+            }
             foregroundServicesWithTextHolder.text.text = foregroundServices.text
             foregroundServicesWithTextHolder.newDot.isVisible = foregroundServices.hasNewChanges
         } else {
@@ -213,7 +220,9 @@ object FooterActionsViewBinder {
             foregroundServicesWithTextView.isVisible = false
 
             foregroundServicesWithNumberView.visibility = View.VISIBLE
-            foregroundServicesWithNumberView.setOnClickListener(foregroundServices.onClick)
+            foregroundServicesWithNumberView.setOnClickListener {
+                foregroundServices.onClick(Expandable.fromView(foregroundServicesWithTextView))
+            }
             foregroundServicesWithNumberHolder.number.text = foregroundServicesCount.toString()
             foregroundServicesWithNumberHolder.number.contentDescription = foregroundServices.text
             foregroundServicesWithNumberHolder.newDot.isVisible = foregroundServices.hasNewChanges
@@ -229,7 +238,7 @@ object FooterActionsViewBinder {
         }
 
         buttonView.setBackgroundResource(model.background)
-        buttonView.setOnClickListener(model.onClick)
+        buttonView.setOnClickListener { model.onClick(Expandable.fromView(buttonView)) }
 
         val icon = model.icon
         val iconView = button.icon

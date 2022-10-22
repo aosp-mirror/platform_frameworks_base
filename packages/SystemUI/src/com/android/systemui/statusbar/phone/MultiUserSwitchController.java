@@ -26,6 +26,7 @@ import android.view.ViewGroup;
 
 import com.android.systemui.R;
 import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.animation.Expandable;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.ActivityStarter;
@@ -67,7 +68,7 @@ public class MultiUserSwitchController extends ViewController<MultiUserSwitch> {
                         ActivityLaunchAnimator.Controller.fromView(v, null),
                         true /* showOverlockscreenwhenlocked */, UserHandle.SYSTEM);
             } else {
-                mUserSwitchDialogController.showDialog(v);
+                mUserSwitchDialogController.showDialog(v.getContext(), Expandable.fromView(v));
             }
         }
     };

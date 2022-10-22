@@ -101,9 +101,9 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         final int shadowRadiusID = taskInfo.isFocused
                 ? R.dimen.freeform_decor_shadow_focused_thickness
                 : R.dimen.freeform_decor_shadow_unfocused_thickness;
-        final boolean isFreeform = mTaskInfo.configuration.windowConfiguration.getWindowingMode()
-                == WindowConfiguration.WINDOWING_MODE_FREEFORM;
-        final boolean isDragResizeable = isFreeform && mTaskInfo.isResizeable;
+        final boolean isFreeform =
+                taskInfo.getWindowingMode() == WindowConfiguration.WINDOWING_MODE_FREEFORM;
+        final boolean isDragResizeable = isFreeform && taskInfo.isResizeable;
 
         WindowDecorLinearLayout oldRootView = mResult.mRootView;
         final SurfaceControl oldDecorationSurface = mDecorationContainerSurface;
@@ -114,6 +114,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         int outsetRightId = R.dimen.freeform_resize_handle;
         int outsetBottomId = R.dimen.freeform_resize_handle;
 
+        mRelayoutParams.reset();
         mRelayoutParams.mRunningTaskInfo = taskInfo;
         mRelayoutParams.mLayoutResId = R.layout.caption_window_decoration;
         mRelayoutParams.mCaptionHeightId = R.dimen.freeform_decor_caption_height;

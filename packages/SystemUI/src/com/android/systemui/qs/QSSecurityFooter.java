@@ -39,6 +39,7 @@ import androidx.annotation.Nullable;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
+import com.android.systemui.animation.Expandable;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.common.shared.model.Icon;
 import com.android.systemui.dagger.qualifiers.Background;
@@ -169,7 +170,7 @@ public class QSSecurityFooter extends ViewController<View>
 
     // TODO(b/242040009): Remove this.
     public void showDeviceMonitoringDialog() {
-        mQSSecurityFooterUtils.showDeviceMonitoringDialog(mContext, mView);
+        mQSSecurityFooterUtils.showDeviceMonitoringDialog(mContext, Expandable.fromView(mView));
     }
 
     public void refreshState() {

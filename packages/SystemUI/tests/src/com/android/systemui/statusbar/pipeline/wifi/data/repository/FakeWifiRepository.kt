@@ -27,6 +27,9 @@ class FakeWifiRepository : WifiRepository {
     private val _isWifiEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
     override val isWifiEnabled: StateFlow<Boolean> = _isWifiEnabled
 
+    private val _isWifiDefault: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    override val isWifiDefault: StateFlow<Boolean> = _isWifiDefault
+
     private val _wifiNetwork: MutableStateFlow<WifiNetworkModel> =
         MutableStateFlow(WifiNetworkModel.Inactive)
     override val wifiNetwork: StateFlow<WifiNetworkModel> = _wifiNetwork
@@ -36,6 +39,10 @@ class FakeWifiRepository : WifiRepository {
 
     fun setIsWifiEnabled(enabled: Boolean) {
         _isWifiEnabled.value = enabled
+    }
+
+    fun setIsWifiDefault(default: Boolean) {
+        _isWifiDefault.value = default
     }
 
     fun setWifiNetwork(wifiNetworkModel: WifiNetworkModel) {

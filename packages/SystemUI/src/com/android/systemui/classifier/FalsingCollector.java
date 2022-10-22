@@ -44,9 +44,6 @@ public interface FalsingCollector {
     void onQsDown();
 
     /** */
-    void setQsExpanded(boolean expanded);
-
-    /** */
     boolean shouldEnforceBouncer();
 
     /** */

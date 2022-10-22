@@ -39,7 +39,6 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger.Companion.SB_LOGGING_TAG
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger.Companion.logInputChange
-import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger.Companion.logOutputChange
 import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiActivityModel
 import java.util.concurrent.Executor
@@ -63,6 +62,9 @@ import kotlinx.coroutines.flow.stateIn
 interface WifiRepository {
     /** Observable for the current wifi enabled status. */
     val isWifiEnabled: StateFlow<Boolean>
+
+    /** Observable for the current wifi default status. */
+    val isWifiDefault: StateFlow<Boolean>
 
     /** Observable for the current wifi network. */
     val wifiNetwork: StateFlow<WifiNetworkModel>
@@ -103,13 +105,46 @@ class WifiRepositoryImpl @Inject constructor(
             merge(wifiNetworkChangeEvents, wifiStateChangeEvents)
                 .mapLatest { wifiManager.isWifiEnabled }
                 .distinctUntilChanged()
-                .logOutputChange(logger, "enabled")
+                .logInputChange(logger, "enabled")
                 .stateIn(
                     scope = scope,
                     started = SharingStarted.WhileSubscribed(),
                     initialValue = wifiManager.isWifiEnabled
                 )
         }
+
+    override val isWifiDefault: StateFlow<Boolean> = conflatedCallbackFlow {
+        // Note: This callback doesn't do any logging because we already log every network change
+        // in the [wifiNetwork] callback.
+        val callback = object : ConnectivityManager.NetworkCallback(FLAG_INCLUDE_LOCATION_INFO) {
+            override fun onCapabilitiesChanged(
+                network: Network,
+                networkCapabilities: NetworkCapabilities
+            ) {
+                // This method will always be called immediately after the network becomes the
+                // default, in addition to any time the capabilities change while the network is
+                // the default.
+                // If this network contains valid wifi info, then wifi is the default network.
+                val wifiInfo = networkCapabilitiesToWifiInfo(networkCapabilities)
+                trySend(wifiInfo != null)
+            }
+
+            override fun onLost(network: Network) {
+                // The system no longer has a default network, so wifi is definitely not default.
+                trySend(false)
+            }
+        }
+
+        connectivityManager.registerDefaultNetworkCallback(callback)
+        awaitClose { connectivityManager.unregisterNetworkCallback(callback) }
+    }
+        .distinctUntilChanged()
+        .logInputChange(logger, "isWifiDefault")
+        .stateIn(
+            scope,
+            started = SharingStarted.WhileSubscribed(),
+            initialValue = false
+        )
 
     override val wifiNetwork: StateFlow<WifiNetworkModel> = conflatedCallbackFlow {
         var currentWifi: WifiNetworkModel = WIFI_NETWORK_DEFAULT

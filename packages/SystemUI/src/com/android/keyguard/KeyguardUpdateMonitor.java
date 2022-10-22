@@ -2380,10 +2380,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         stopListeningForFace(FACE_AUTH_STOPPED_USER_INPUT_ON_BOUNCER);
     }
 
-    public boolean isFaceScanning() {
-        return mFaceRunningState == BIOMETRIC_STATE_RUNNING;
-    }
-
     private void updateFaceListeningState(int action, @NonNull FaceAuthUiEvent faceAuthUiEvent) {
         // If this message exists, we should not authenticate again until this message is
         // consumed by the handler
