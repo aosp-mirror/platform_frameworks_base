@@ -7,8 +7,8 @@ import com.android.internal.logging.UiEventLogger
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.media.MediaHost
-import com.android.systemui.media.MediaHostState
+import com.android.systemui.media.controls.ui.MediaHost
+import com.android.systemui.media.controls.ui.MediaHostState
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.qs.customize.QSCustomizerController

@@ -21,9 +21,9 @@ import static com.android.systemui.media.dream.dagger.MediaComplicationComponent
 
 import android.widget.FrameLayout;
 
-import com.android.systemui.media.MediaHierarchyManager;
-import com.android.systemui.media.MediaHost;
-import com.android.systemui.media.MediaHostState;
+import com.android.systemui.media.controls.ui.MediaHierarchyManager;
+import com.android.systemui.media.controls.ui.MediaHost;
+import com.android.systemui.media.controls.ui.MediaHostState;
 import com.android.systemui.util.ViewController;
 
 import javax.inject.Inject;
