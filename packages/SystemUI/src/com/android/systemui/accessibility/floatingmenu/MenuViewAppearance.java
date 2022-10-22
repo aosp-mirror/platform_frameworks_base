@@ -16,12 +16,21 @@
 
 package com.android.systemui.accessibility.floatingmenu;
 
+import static android.view.View.OVER_SCROLL_ALWAYS;
+import static android.view.View.OVER_SCROLL_NEVER;
+
 import static com.android.systemui.accessibility.floatingmenu.MenuViewAppearance.MenuSizeType.SMALL;
 
 import android.annotation.IntDef;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Insets;
+import android.graphics.PointF;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.view.WindowInsets;
+import android.view.WindowManager;
+import android.view.WindowMetrics;
 
 import androidx.annotation.DimenRes;
 
@@ -34,9 +43,13 @@ import java.lang.annotation.RetentionPolicy;
  * Provides the layout resources information of the {@link MenuView}.
  */
 class MenuViewAppearance {
+    private final WindowManager mWindowManager;
     private final Resources mRes;
+    private final Position mPercentagePosition = new Position(/* percentageX= */
+            0f, /* percentageY= */ 0f);
     private int mTargetFeaturesSize;
     private int mSizeType;
+    private int mMargin;
     private int mSmallPadding;
     private int mLargePadding;
     private int mSmallIconSize;
@@ -62,13 +75,15 @@ class MenuViewAppearance {
         int LARGE = 1;
     }
 
-    MenuViewAppearance(Context context) {
+    MenuViewAppearance(Context context, WindowManager windowManager) {
+        mWindowManager = windowManager;
         mRes = context.getResources();
 
         update();
     }
 
     void update() {
+        mMargin = mRes.getDimensionPixelSize(R.dimen.accessibility_floating_menu_margin);
         mSmallPadding =
                 mRes.getDimensionPixelSize(R.dimen.accessibility_floating_menu_small_padding);
         mLargePadding =
@@ -81,7 +96,7 @@ class MenuViewAppearance {
                 mRes.getDimensionPixelSize(R.dimen.accessibility_floating_menu_small_single_radius);
         mSmallMultipleRadius = mRes.getDimensionPixelSize(
                 R.dimen.accessibility_floating_menu_small_multiple_radius);
-        mRadii = createRadii(getMenuRadius(mTargetFeaturesSize));
+        mRadii = createRadii(isMenuOnLeftSide(), getMenuRadius(mTargetFeaturesSize));
         mLargeSingleRadius =
                 mRes.getDimensionPixelSize(R.dimen.accessibility_floating_menu_large_single_radius);
         mLargeMultipleRadius = mRes.getDimensionPixelSize(
@@ -98,13 +113,48 @@ class MenuViewAppearance {
     void setSizeType(int sizeType) {
         mSizeType = sizeType;
 
-        mRadii = createRadii(getMenuRadius(mTargetFeaturesSize));
+        mRadii = createRadii(isMenuOnLeftSide(), getMenuRadius(mTargetFeaturesSize));
     }
 
     void setTargetFeaturesSize(int targetFeaturesSize) {
         mTargetFeaturesSize = targetFeaturesSize;
 
-        mRadii = createRadii(getMenuRadius(targetFeaturesSize));
+        mRadii = createRadii(isMenuOnLeftSide(), getMenuRadius(targetFeaturesSize));
+    }
+
+    void setPercentagePosition(Position percentagePosition) {
+        mPercentagePosition.update(percentagePosition);
+
+        mRadii = createRadii(isMenuOnLeftSide(), getMenuRadius(mTargetFeaturesSize));
+    }
+
+    Rect getMenuDraggableBounds() {
+        final int margin = getMenuMargin();
+        final Rect draggableBounds = getWindowAvailableBounds();
+
+        // Initializes start position for mapping the translation of the menu view.
+        final WindowMetrics windowMetrics = mWindowManager.getCurrentWindowMetrics();
+        final WindowInsets windowInsets = windowMetrics.getWindowInsets();
+        final Insets displayCutoutInsets = windowInsets.getInsetsIgnoringVisibility(
+                WindowInsets.Type.displayCutout());
+        draggableBounds.offset(-displayCutoutInsets.left, -displayCutoutInsets.top);
+
+        draggableBounds.top += margin;
+        draggableBounds.right -= getMenuWidth();
+        draggableBounds.bottom -= Math.min(
+                getWindowAvailableBounds().height() - draggableBounds.top,
+                calculateActualMenuHeight() + margin);
+        return draggableBounds;
+    }
+
+    PointF getMenuPosition() {
+        final Rect draggableBounds = getMenuDraggableBounds();
+
+        return new PointF(
+                draggableBounds.left
+                        + draggableBounds.width() * mPercentagePosition.getPercentageX(),
+                draggableBounds.top
+                        + draggableBounds.height() * mPercentagePosition.getPercentageY());
     }
 
     Drawable getMenuBackground() {
@@ -115,12 +165,21 @@ class MenuViewAppearance {
         return mElevation;
     }
 
+    int getMenuWidth() {
+        return getMenuPadding() * 2 + getMenuIconSize();
+    }
+
     int getMenuHeight() {
-        return calculateActualMenuHeight();
+        return Math.min(getWindowAvailableBounds().height() - mMargin * 2,
+                calculateActualMenuHeight());
     }
 
     int getMenuIconSize() {
         return mSizeType == SMALL ? mSmallIconSize : mLargeIconSize;
+    }
+
+    private int getMenuMargin() {
+        return mMargin;
     }
 
     int getMenuPadding() {
@@ -128,7 +187,10 @@ class MenuViewAppearance {
     }
 
     int[] getMenuInsets() {
-        return new int[]{mInset, 0, 0, 0};
+        final int left = isMenuOnLeftSide() ? mInset : 0;
+        final int right = isMenuOnLeftSide() ? 0 : mInset;
+
+        return new int[]{left, 0, right, 0};
     }
 
     int getMenuStrokeWidth() {
@@ -147,6 +209,14 @@ class MenuViewAppearance {
         return mSizeType == SMALL ? getSmallSize(itemCount) : getLargeSize(itemCount);
     }
 
+    int getMenuScrollMode() {
+        return hasExceededMaxWindowHeight() ? OVER_SCROLL_ALWAYS : OVER_SCROLL_NEVER;
+    }
+
+    private boolean hasExceededMaxWindowHeight() {
+        return calculateActualMenuHeight() > getWindowAvailableBounds().height();
+    }
+
     @DimenRes
     private int getSmallSize(int itemCount) {
         return itemCount > 1 ? mSmallMultipleRadius : mSmallSingleRadius;
@@ -157,8 +227,29 @@ class MenuViewAppearance {
         return itemCount > 1 ? mLargeMultipleRadius : mLargeSingleRadius;
     }
 
-    private static float[] createRadii(float radius) {
-        return new float[]{0.0f, 0.0f, radius, radius, radius, radius, 0.0f, 0.0f};
+    private static float[] createRadii(boolean isMenuOnLeftSide, float radius) {
+        return isMenuOnLeftSide
+                ? new float[]{0.0f, 0.0f, radius, radius, radius, radius, 0.0f, 0.0f}
+                : new float[]{radius, radius, 0.0f, 0.0f, 0.0f, 0.0f, radius, radius};
+    }
+
+    private Rect getWindowAvailableBounds() {
+        final WindowMetrics windowMetrics = mWindowManager.getCurrentWindowMetrics();
+        final WindowInsets windowInsets = windowMetrics.getWindowInsets();
+        final Insets insets = windowInsets.getInsetsIgnoringVisibility(
+                WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());
+
+        final Rect bounds = new Rect(windowMetrics.getBounds());
+        bounds.left += insets.left;
+        bounds.right -= insets.right;
+        bounds.top += insets.top;
+        bounds.bottom -= insets.bottom;
+
+        return bounds;
+    }
+
+    private boolean isMenuOnLeftSide() {
+        return mPercentagePosition.getPercentageX() < 0.5f;
     }
 
     private int calculateActualMenuHeight() {

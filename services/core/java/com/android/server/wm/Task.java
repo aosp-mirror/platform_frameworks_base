@@ -22,7 +22,6 @@ import static android.app.ActivityTaskManager.RESIZE_MODE_FORCED;
 import static android.app.ActivityTaskManager.RESIZE_MODE_SYSTEM_SCREEN_ROTATION;
 import static android.app.ITaskStackListener.FORCED_RESIZEABLE_REASON_SPLIT_SCREEN;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
@@ -5787,12 +5786,10 @@ class Task extends TaskFragment {
             return false;
         }
 
-        // Existing Tasks can be reused if a new root task will be created anyway, or for the
-        // Dream - because there can only ever be one DreamActivity.
+        // Existing Tasks can be reused if a new root task will be created anyway.
         final int windowingMode = getWindowingMode();
         final int activityType = getActivityType();
-        return DisplayContent.alwaysCreateRootTask(windowingMode, activityType)
-                || activityType == ACTIVITY_TYPE_DREAM;
+        return DisplayContent.alwaysCreateRootTask(windowingMode, activityType);
     }
 
     void addChild(WindowContainer child, final boolean toTop, boolean showForAllUsers) {

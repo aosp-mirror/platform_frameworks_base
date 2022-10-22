@@ -117,7 +117,6 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     @Mock private BouncerCallbackInteractor mBouncerCallbackInteractor;
     @Mock private BouncerInteractor mBouncerInteractor;
     @Mock private BouncerView mBouncerView;
-//    @Mock private WeakReference<BouncerViewDelegate> mBouncerViewDelegateWeakReference;
     @Mock private BouncerViewDelegate mBouncerViewDelegate;
 
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;

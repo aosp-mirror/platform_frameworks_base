@@ -20,9 +20,7 @@ import static android.app.StatusBarManager.WINDOW_STATE_HIDDEN;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.never;
@@ -40,7 +38,6 @@ import android.net.NetworkRequest;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.view.View;
-import android.view.ViewPropertyAnimator;
 
 import androidx.test.filters.SmallTest;
 
@@ -107,8 +104,6 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
     View mStatusBarItemView;
     @Mock
     DreamOverlayStateController mDreamOverlayStateController;
-    @Mock
-    ViewPropertyAnimator mViewPropertyAnimator;
 
     private final Executor mMainExecutor = Runnable::run;
 
@@ -120,10 +115,6 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
 
         when(mResources.getString(R.string.dream_overlay_status_bar_notification_indicator))
                 .thenReturn(NOTIFICATION_INDICATOR_FORMATTER_STRING);
-        when(mView.animate()).thenReturn(mViewPropertyAnimator);
-        when(mViewPropertyAnimator.alpha(anyFloat())).thenReturn(mViewPropertyAnimator);
-        when(mViewPropertyAnimator.setStartDelay(anyLong())).thenReturn(mViewPropertyAnimator);
-        when(mViewPropertyAnimator.setDuration(anyLong())).thenReturn(mViewPropertyAnimator);
 
         mController = new DreamOverlayStatusBarViewController(
                 mView,
@@ -139,9 +130,7 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
                 mZenModeController,
                 mStatusBarWindowStateController,
                 mDreamOverlayStatusBarItemsProvider,
-                mDreamOverlayStateController,
-                100 /*openAnimationDuration*/,
-                100 /*openAnimationDelay*/);
+                mDreamOverlayStateController);
     }
 
     @Test
@@ -283,9 +272,7 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
                 mZenModeController,
                 mStatusBarWindowStateController,
                 mDreamOverlayStatusBarItemsProvider,
-                mDreamOverlayStateController,
-                100 /*openAnimationDuration*/,
-                100 /*openAnimationDelay*/);
+                mDreamOverlayStateController);
         controller.onViewAttached();
         verify(mView, never()).showIcon(
                 eq(DreamOverlayStatusBarView.STATUS_ICON_NOTIFICATIONS), eq(true), any());

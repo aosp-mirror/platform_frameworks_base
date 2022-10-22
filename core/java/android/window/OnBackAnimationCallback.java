@@ -13,14 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package android.window;
-
 import android.annotation.NonNull;
 import android.app.Activity;
 import android.app.Dialog;
 import android.view.View;
-
 /**
  * Interface for applications to register back animation callbacks along their custom back
  * handling.
@@ -40,11 +37,10 @@ import android.view.View;
  * @hide
  */
 public interface OnBackAnimationCallback extends OnBackInvokedCallback {
-   /**
-    * Called when a back gesture has been started, or back button has been pressed down.
-    */
+    /**
+     * Called when a back gesture has been started, or back button has been pressed down.
+     */
     default void onBackStarted() { }
-
     /**
      * Called on back gesture progress.
      *
@@ -53,7 +49,6 @@ public interface OnBackAnimationCallback extends OnBackInvokedCallback {
      * @see BackEvent
      */
     default void onBackProgressed(@NonNull BackEvent backEvent) { }
-
     /**
      * Called when a back gesture or back button press has been cancelled.
      */

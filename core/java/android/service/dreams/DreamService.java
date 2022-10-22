@@ -1047,7 +1047,7 @@ public class DreamService extends Service implements Window.Callback {
         }
 
         if (mDreamToken == null) {
-            Slog.w(mTag, "Finish was called before the dream was attached.");
+            if (mDebug) Slog.v(mTag, "finish() called when not attached.");
             stopSelf();
             return;
         }
