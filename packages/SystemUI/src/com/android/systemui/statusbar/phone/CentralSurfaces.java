@@ -262,8 +262,6 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
     @Override
     void startActivity(Intent intent, boolean dismissShade, Callback callback);
 
-    void setQsExpanded(boolean expanded);
-
     boolean isWakeUpComingFromTouch();
 
     boolean isFalsingThresholdNeeded();

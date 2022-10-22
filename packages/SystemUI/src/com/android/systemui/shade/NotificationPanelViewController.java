@@ -79,7 +79,10 @@ import android.os.UserManager;
 import android.os.VibrationEffect;
 import android.provider.Settings;
 import android.transition.ChangeBounds;
+import android.transition.Transition;
 import android.transition.TransitionManager;
+import android.transition.TransitionSet;
+import android.transition.TransitionValues;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.MathUtils;
@@ -148,6 +151,8 @@ import com.android.systemui.media.KeyguardMediaController;
 import com.android.systemui.media.MediaDataManager;
 import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.model.SysUiState;
+import com.android.systemui.navigationbar.NavigationBarController;
+import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.FalsingManager.FalsingTapListener;
@@ -580,6 +585,7 @@ public final class NotificationPanelViewController {
     private final SysUiState mSysUiState;
 
     private final NotificationShadeDepthController mDepthController;
+    private final NavigationBarController mNavigationBarController;
     private final int mDisplayId;
 
     private KeyguardIndicationController mKeyguardIndicationController;
@@ -858,6 +864,7 @@ public final class NotificationPanelViewController {
             PrivacyDotViewController privacyDotViewController,
             TapAgainViewController tapAgainViewController,
             NavigationModeController navigationModeController,
+            NavigationBarController navigationBarController,
             FragmentService fragmentService,
             ContentResolver contentResolver,
             RecordingController recordingController,
@@ -951,6 +958,7 @@ public final class NotificationPanelViewController {
         mNotificationsQSContainerController = notificationsQSContainerController;
         mNotificationListContainer = notificationListContainer;
         mNotificationStackSizeCalculator = notificationStackSizeCalculator;
+        mNavigationBarController = navigationBarController;
         mKeyguardBottomAreaViewControllerProvider = keyguardBottomAreaViewControllerProvider;
         mNotificationsQSContainerController.init();
         mNotificationStackScrollLayoutController = notificationStackScrollLayoutController;
@@ -1440,6 +1448,16 @@ public final class NotificationPanelViewController {
         mMaxAllowedKeyguardNotifications = maxAllowed;
     }
 
+    @VisibleForTesting
+    boolean getClosing() {
+        return mClosing;
+    }
+
+    @VisibleForTesting
+    boolean getIsFlinging() {
+        return mIsFlinging;
+    }
+
     private void updateMaxDisplayedNotifications(boolean recompute) {
         if (recompute) {
             setMaxDisplayedNotifications(Math.max(computeMaxKeyguardNotifications(), 1));
@@ -1667,9 +1685,40 @@ public final class NotificationPanelViewController {
                     // horizontally properly.
                     transition.excludeTarget(R.id.status_view_media_container, true);
                 }
+
                 transition.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
                 transition.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
-                TransitionManager.beginDelayedTransition(mNotificationContainerParent, transition);
+
+                boolean customClockAnimation =
+                            mKeyguardStatusViewController.getClockAnimations() != null
+                            && mKeyguardStatusViewController.getClockAnimations()
+                                    .getHasCustomPositionUpdatedAnimation();
+
+                if (mFeatureFlags.isEnabled(Flags.STEP_CLOCK_ANIMATION) && customClockAnimation) {
+                    // Find the clock, so we can exclude it from this transition.
+                    FrameLayout clockContainerView =
+                            mView.findViewById(R.id.lockscreen_clock_view_large);
+                    View clockView = clockContainerView.getChildAt(0);
+
+                    transition.excludeTarget(clockView, /* exclude= */ true);
+
+                    TransitionSet set = new TransitionSet();
+                    set.addTransition(transition);
+
+                    SplitShadeTransitionAdapter adapter =
+                            new SplitShadeTransitionAdapter(mKeyguardStatusViewController);
+
+                    // Use linear here, so the actual clock can pick its own interpolator.
+                    adapter.setInterpolator(Interpolators.LINEAR);
+                    adapter.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
+                    adapter.addTarget(clockView);
+                    set.addTransition(adapter);
+
+                    TransitionManager.beginDelayedTransition(mNotificationContainerParent, set);
+                } else {
+                    TransitionManager.beginDelayedTransition(
+                            mNotificationContainerParent, transition);
+                }
             }
 
             constraintSet.applyTo(mNotificationContainerParent);
@@ -2637,12 +2686,16 @@ public final class NotificationPanelViewController {
             mQsExpanded = expanded;
             updateQsState();
             updateExpandedHeightToMaxHeight();
-            mFalsingCollector.setQsExpanded(expanded);
-            mCentralSurfaces.setQsExpanded(expanded);
-            mNotificationsQSContainerController.setQsExpanded(expanded);
-            mPulseExpansionHandler.setQsExpanded(expanded);
-            mKeyguardBypassController.setQSExpanded(expanded);
-            mPrivacyDotViewController.setQsExpanded(expanded);
+            setStatusAccessibilityImportance(expanded
+                    ? View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
+                    : View.IMPORTANT_FOR_ACCESSIBILITY_AUTO);
+            updateSystemUiStateFlags();
+            NavigationBarView navigationBarView =
+                    mNavigationBarController.getNavigationBarView(mDisplayId);
+            if (navigationBarView != null) {
+                navigationBarView.onStatusBarPanelStateChanged();
+            }
+            mShadeExpansionStateManager.onQsExpansionChanged(expanded);
         }
     }
 
@@ -3684,6 +3737,11 @@ public final class NotificationPanelViewController {
         setListening(true);
     }
 
+    @VisibleForTesting
+    void setTouchSlopExceeded(boolean isTouchSlopExceeded) {
+        mTouchSlopExceeded = isTouchSlopExceeded;
+    }
+
     public void setOverExpansion(float overExpansion) {
         if (overExpansion == mOverExpansion) {
             return;
@@ -4166,8 +4224,8 @@ public final class NotificationPanelViewController {
     /**
      * Sets the dozing state.
      *
-     * @param dozing              {@code true} when dozing.
-     * @param animate             if transition should be animated.
+     * @param dozing  {@code true} when dozing.
+     * @param animate if transition should be animated.
      */
     public void setDozing(boolean dozing, boolean animate) {
         if (dozing == mDozing) return;
@@ -4307,35 +4365,35 @@ public final class NotificationPanelViewController {
     /**
      * Starts fold to AOD animation.
      *
-     * @param startAction invoked when the animation starts.
-     * @param endAction invoked when the animation finishes, also if it was cancelled.
+     * @param startAction  invoked when the animation starts.
+     * @param endAction    invoked when the animation finishes, also if it was cancelled.
      * @param cancelAction invoked when the animation is cancelled, before endAction.
      */
     public void startFoldToAodAnimation(Runnable startAction, Runnable endAction,
             Runnable cancelAction) {
         mView.animate()
-            .translationX(0)
-            .alpha(1f)
-            .setDuration(ANIMATION_DURATION_FOLD_TO_AOD)
-            .setInterpolator(EMPHASIZED_DECELERATE)
-            .setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationStart(Animator animation) {
-                    startAction.run();
-                }
+                .translationX(0)
+                .alpha(1f)
+                .setDuration(ANIMATION_DURATION_FOLD_TO_AOD)
+                .setInterpolator(EMPHASIZED_DECELERATE)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationStart(Animator animation) {
+                        startAction.run();
+                    }
 
-                @Override
-                public void onAnimationCancel(Animator animation) {
-                    cancelAction.run();
-                }
+                    @Override
+                    public void onAnimationCancel(Animator animation) {
+                        cancelAction.run();
+                    }
 
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    endAction.run();
-                }
-            }).setUpdateListener(anim -> {
-                mKeyguardStatusViewController.animateFoldToAod(anim.getAnimatedFraction());
-            }).start();
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        endAction.run();
+                    }
+                }).setUpdateListener(anim -> {
+                    mKeyguardStatusViewController.animateFoldToAod(anim.getAnimatedFraction());
+                }).start();
     }
 
     /**
@@ -4695,8 +4753,10 @@ public final class NotificationPanelViewController {
     /**
      * Maybe vibrate as panel is opened.
      *
-     * @param openingWithTouch Whether the panel is being opened with touch. If the panel is instead
-     * being opened programmatically (such as by the open panel gesture), we always play haptic.
+     * @param openingWithTouch Whether the panel is being opened with touch. If the panel is
+     *                         instead
+     *                         being opened programmatically (such as by the open panel gesture), we
+     *                         always play haptic.
      */
     private void maybeVibrateOnOpening(boolean openingWithTouch) {
         if (mVibrateOnOpening) {
@@ -4742,6 +4802,7 @@ public final class NotificationPanelViewController {
         mAmbientState.setSwipingUp(false);
         if ((mTracking && mTouchSlopExceeded) || Math.abs(x - mInitialExpandX) > mTouchSlop
                 || Math.abs(y - mInitialExpandY) > mTouchSlop
+                || (!isFullyExpanded() && !isFullyCollapsed())
                 || event.getActionMasked() == MotionEvent.ACTION_CANCEL || forceCancel) {
             mVelocityTracker.computeCurrentVelocity(1000);
             float vel = mVelocityTracker.getYVelocity();
@@ -4861,10 +4922,12 @@ public final class NotificationPanelViewController {
         animator.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
         animator.addListener(new AnimatorListenerAdapter() {
             private boolean mCancelled;
+
             @Override
             public void onAnimationCancel(Animator animation) {
                 mCancelled = true;
             }
+
             @Override
             public void onAnimationEnd(Animator animation) {
                 mIsSpringBackAnimation = false;
@@ -4912,7 +4975,7 @@ public final class NotificationPanelViewController {
         if (isNaN(h)) {
             Log.wtf(TAG, "ExpandedHeight set to NaN");
         }
-        mNotificationShadeWindowController.batchApplyWindowLayoutParams(()-> {
+        mNotificationShadeWindowController.batchApplyWindowLayoutParams(() -> {
             if (mExpandLatencyTracking && h != 0f) {
                 DejankUtils.postAfterTraversal(
                         () -> mLatencyTracker.onActionEnd(LatencyTracker.ACTION_EXPAND_PANEL));
@@ -5103,7 +5166,7 @@ public final class NotificationPanelViewController {
     /**
      * Create an animator that can also overshoot
      *
-     * @param targetHeight the target height
+     * @param targetHeight    the target height
      * @param overshootAmount the amount of overshoot desired
      */
     private ValueAnimator createHeightAnimator(float targetHeight, float overshootAmount) {
@@ -5139,7 +5202,8 @@ public final class NotificationPanelViewController {
      */
     public void updatePanelExpansionAndVisibility() {
         mShadeExpansionStateManager.onPanelExpansionChanged(
-                mExpandedFraction, isExpanded(), mTracking, mExpansionDragDownAmountPx);
+                mExpandedFraction, isExpanded(),
+                mTracking, mExpansionDragDownAmountPx);
         updateVisibility();
     }
 
@@ -5900,7 +5964,7 @@ public final class NotificationPanelViewController {
     public final class TouchHandler implements View.OnTouchListener {
         private long mLastTouchDownTime = -1L;
 
-        /** @see ViewGroup#onInterceptTouchEvent(MotionEvent)  */
+        /** @see ViewGroup#onInterceptTouchEvent(MotionEvent) */
         public boolean onInterceptTouchEvent(MotionEvent event) {
             if (SPEW_LOGCAT) {
                 Log.v(TAG,
@@ -6099,7 +6163,7 @@ public final class NotificationPanelViewController {
                 mShadeLog.logMotionEvent(event, "onTouch: touch ignored due to instant expanding");
                 return false;
             }
-            if (mTouchDisabled  && event.getActionMasked() != MotionEvent.ACTION_CANCEL) {
+            if (mTouchDisabled && event.getActionMasked() != MotionEvent.ACTION_CANCEL) {
                 mShadeLog.logMotionEvent(event, "onTouch: non-cancel action, touch disabled");
                 return false;
             }
@@ -6254,6 +6318,56 @@ public final class NotificationPanelViewController {
         @Override
         public void onConfigurationChanged(Configuration newConfig) {
             loadDimens();
+        }
+    }
+
+    static class SplitShadeTransitionAdapter extends Transition {
+        private static final String PROP_BOUNDS = "splitShadeTransitionAdapter:bounds";
+        private static final String[] TRANSITION_PROPERTIES = { PROP_BOUNDS };
+
+        private final KeyguardStatusViewController mController;
+
+        SplitShadeTransitionAdapter(KeyguardStatusViewController controller) {
+            mController = controller;
+        }
+
+        private void captureValues(TransitionValues transitionValues) {
+            Rect boundsRect = new Rect();
+            boundsRect.left = transitionValues.view.getLeft();
+            boundsRect.top = transitionValues.view.getTop();
+            boundsRect.right = transitionValues.view.getRight();
+            boundsRect.bottom = transitionValues.view.getBottom();
+            transitionValues.values.put(PROP_BOUNDS, boundsRect);
+        }
+
+        @Override
+        public void captureEndValues(TransitionValues transitionValues) {
+            captureValues(transitionValues);
+        }
+
+        @Override
+        public void captureStartValues(TransitionValues transitionValues) {
+            captureValues(transitionValues);
+        }
+
+        @Override
+        public Animator createAnimator(ViewGroup sceneRoot, TransitionValues startValues,
+                TransitionValues endValues) {
+            ValueAnimator anim = ValueAnimator.ofFloat(0, 1);
+
+            Rect from = (Rect) startValues.values.get(PROP_BOUNDS);
+            Rect to = (Rect) endValues.values.get(PROP_BOUNDS);
+
+            anim.addUpdateListener(
+                    animation -> mController.getClockAnimations().onPositionUpdated(
+                            from, to, animation.getAnimatedFraction()));
+
+            return anim;
+        }
+
+        @Override
+        public String[] getTransitionProperties() {
+            return TRANSITION_PROPERTIES;
         }
     }
 }

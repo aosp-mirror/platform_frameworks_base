@@ -17,6 +17,8 @@
 package com.android.systemui.statusbar.notification.interruption;
 
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
+import static com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl.NotificationInterruptEvent.FSI_SUPPRESSED_NO_HUN_OR_KEYGUARD;
+import static com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl.NotificationInterruptEvent.FSI_SUPPRESSED_SUPPRESSIVE_GROUP_ALERT_BEHAVIOR;
 
 import android.app.NotificationManager;
 import android.content.ContentResolver;
@@ -32,6 +34,8 @@ import android.service.notification.StatusBarNotification;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.logging.UiEvent;
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -68,9 +72,29 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
     private final NotificationInterruptLogger mLogger;
     private final NotifPipelineFlags mFlags;
     private final KeyguardNotificationVisibilityProvider mKeyguardNotificationVisibilityProvider;
+    private final UiEventLogger mUiEventLogger;
 
     @VisibleForTesting
     protected boolean mUseHeadsUp = false;
+
+    public enum NotificationInterruptEvent implements UiEventLogger.UiEventEnum {
+        @UiEvent(doc = "FSI suppressed for suppressive GroupAlertBehavior")
+        FSI_SUPPRESSED_SUPPRESSIVE_GROUP_ALERT_BEHAVIOR(1235),
+
+        @UiEvent(doc = "FSI suppressed for requiring neither HUN nor keyguard")
+        FSI_SUPPRESSED_NO_HUN_OR_KEYGUARD(1236);
+
+        private final int mId;
+
+        NotificationInterruptEvent(int id) {
+            mId = id;
+        }
+
+        @Override
+        public int getId() {
+            return mId;
+        }
+    }
 
     @Inject
     public NotificationInterruptStateProviderImpl(
@@ -85,7 +109,8 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
             NotificationInterruptLogger logger,
             @Main Handler mainHandler,
             NotifPipelineFlags flags,
-            KeyguardNotificationVisibilityProvider keyguardNotificationVisibilityProvider) {
+            KeyguardNotificationVisibilityProvider keyguardNotificationVisibilityProvider,
+            UiEventLogger uiEventLogger) {
         mContentResolver = contentResolver;
         mPowerManager = powerManager;
         mDreamManager = dreamManager;
@@ -97,6 +122,7 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
         mLogger = logger;
         mFlags = flags;
         mKeyguardNotificationVisibilityProvider = keyguardNotificationVisibilityProvider;
+        mUiEventLogger = uiEventLogger;
         ContentObserver headsUpObserver = new ContentObserver(mainHandler) {
             @Override
             public void onChange(boolean selfChange) {
@@ -203,7 +229,9 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
             // b/231322873: Detect and report an event when a notification has both an FSI and a
             // suppressive groupAlertBehavior, and now correctly block the FSI from firing.
             final int uid = entry.getSbn().getUid();
+            final String packageName = entry.getSbn().getPackageName();
             android.util.EventLog.writeEvent(0x534e4554, "231322873", uid, "groupAlertBehavior");
+            mUiEventLogger.log(FSI_SUPPRESSED_SUPPRESSIVE_GROUP_ALERT_BEHAVIOR, uid, packageName);
             mLogger.logNoFullscreenWarning(entry, "GroupAlertBehavior will prevent HUN");
             return false;
         }
@@ -249,7 +277,9 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
             // Detect the case determined by b/231322873 to launch FSI while device is in use,
             // as blocked by the correct implementation, and report the event.
             final int uid = entry.getSbn().getUid();
+            final String packageName = entry.getSbn().getPackageName();
             android.util.EventLog.writeEvent(0x534e4554, "231322873", uid, "no hun or keyguard");
+            mUiEventLogger.log(FSI_SUPPRESSED_NO_HUN_OR_KEYGUARD, uid, packageName);
             mLogger.logNoFullscreenWarning(entry, "Expected not to HUN while not on keyguard");
             return false;
         }

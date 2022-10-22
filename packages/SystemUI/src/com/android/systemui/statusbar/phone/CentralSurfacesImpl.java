@@ -1426,6 +1426,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mStackScrollerController.setNotificationActivityStarter(mNotificationActivityStarter);
         mGutsManager.setNotificationActivityStarter(mNotificationActivityStarter);
         mNotificationsController.initialize(
+                this,
                 mPresenter,
                 mNotifListContainer,
                 mStackScrollerController.getNotifStackController(),
@@ -1792,18 +1793,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         startActivityDismissingKeyguard(intent, false, dismissShade,
                 false /* disallowEnterPictureInPictureWhileLaunching */, callback, 0,
                 null /* animationController */, getActivityUserHandle(intent));
-    }
-
-    @Override
-    public void setQsExpanded(boolean expanded) {
-        mNotificationShadeWindowController.setQsExpanded(expanded);
-        mNotificationPanelViewController.setStatusAccessibilityImportance(expanded
-                ? View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
-                : View.IMPORTANT_FOR_ACCESSIBILITY_AUTO);
-        mNotificationPanelViewController.updateSystemUiStateFlags();
-        if (getNavigationBarView() != null) {
-            getNavigationBarView().onStatusBarPanelStateChanged();
-        }
     }
 
     @Override

@@ -1,13 +1,16 @@
 package com.android.systemui.shared.recents.utilities;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.view.Surface.ROTATION_180;
+import static android.view.Surface.ROTATION_270;
+import static android.view.Surface.ROTATION_90;
 
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.view.Surface;
 
 import com.android.systemui.shared.recents.model.ThumbnailData;
+import com.android.wm.shell.util.SplitBounds;
 
 /**
  * Utility class to position the thumbnail in the TaskView
@@ -16,10 +19,26 @@ public class PreviewPositionHelper {
 
     public static final float MAX_PCT_BEFORE_ASPECT_RATIOS_CONSIDERED_DIFFERENT = 0.1f;
 
+    /**
+     * Specifies that a stage is positioned at the top half of the screen if
+     * in portrait mode or at the left half of the screen if in landscape mode.
+     * TODO(b/254378592): Remove after consolidation
+     */
+    public static final int STAGE_POSITION_TOP_OR_LEFT = 0;
+
+    /**
+     * Specifies that a stage is positioned at the bottom half of the screen if
+     * in portrait mode or at the right half of the screen if in landscape mode.
+     * TODO(b/254378592): Remove after consolidation
+     */
+    public static final int STAGE_POSITION_BOTTOM_OR_RIGHT = 1;
+
     // Contains the portion of the thumbnail that is unclipped when fullscreen progress = 1.
     private final RectF mClippedInsets = new RectF();
     private final Matrix mMatrix = new Matrix();
     private boolean mIsOrientationChanged;
+    private SplitBounds mSplitBounds;
+    private int mDesiredStagePosition;
 
     public Matrix getMatrix() {
         return mMatrix;
@@ -33,6 +52,11 @@ public class PreviewPositionHelper {
         return mIsOrientationChanged;
     }
 
+    public void setSplitBounds(SplitBounds splitBounds, int desiredStagePosition) {
+        mSplitBounds = splitBounds;
+        mDesiredStagePosition = desiredStagePosition;
+    }
+
     /**
      * Updates the matrix based on the provided parameters
      */
@@ -42,10 +66,19 @@ public class PreviewPositionHelper {
         boolean isRotated = false;
         boolean isOrientationDifferent;
 
+        float fullscreenTaskWidth = screenWidthPx;
+        if (mSplitBounds != null && !mSplitBounds.appsStackedVertically) {
+            // For landscape, scale the width
+            float taskPercent = mDesiredStagePosition == STAGE_POSITION_TOP_OR_LEFT
+                    ? mSplitBounds.leftTaskPercent
+                    : (1 - (mSplitBounds.leftTaskPercent + mSplitBounds.dividerWidthPercent));
+            // Scale landscape width to that of actual screen
+            fullscreenTaskWidth = screenWidthPx * taskPercent;
+        }
         int thumbnailRotation = thumbnailData.rotation;
         int deltaRotate = getRotationDelta(currentRotation, thumbnailRotation);
         RectF thumbnailClipHint = new RectF();
-        float canvasScreenRatio = canvasWidth / (float) screenWidthPx;
+        float canvasScreenRatio = canvasWidth / fullscreenTaskWidth;
         float scaledTaskbarSize = taskbarSize * canvasScreenRatio;
         thumbnailClipHint.bottom = isTablet ? scaledTaskbarSize : 0;
 
@@ -180,7 +213,7 @@ public class PreviewPositionHelper {
      * portrait or vice versa, {@code false} otherwise
      */
     private boolean isOrientationChange(int deltaRotation) {
-        return deltaRotation == Surface.ROTATION_90 || deltaRotation == Surface.ROTATION_270;
+        return deltaRotation == ROTATION_90 || deltaRotation == ROTATION_270;
     }
 
     private void setThumbnailRotation(int deltaRotate, Rect thumbnailPosition) {
@@ -189,13 +222,13 @@ public class PreviewPositionHelper {
 
         mMatrix.setRotate(90 * deltaRotate);
         switch (deltaRotate) { /* Counter-clockwise */
-            case Surface.ROTATION_90:
+            case ROTATION_90:
                 translateX = thumbnailPosition.height();
                 break;
-            case Surface.ROTATION_270:
+            case ROTATION_270:
                 translateY = thumbnailPosition.width();
                 break;
-            case Surface.ROTATION_180:
+            case ROTATION_180:
                 translateX = thumbnailPosition.width();
                 translateY = thumbnailPosition.height();
                 break;

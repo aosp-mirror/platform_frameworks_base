@@ -23,10 +23,10 @@ import static com.android.systemui.doze.DozeMachine.State.UNINITIALIZED;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -88,6 +88,8 @@ public class DozeTriggersTest extends SysuiTestCase {
     @Mock
     private ProximityCheck mProximityCheck;
     @Mock
+    private DozeLog mDozeLog;
+    @Mock
     private AuthController mAuthController;
     @Mock
     private UiEventLogger mUiEventLogger;
@@ -127,7 +129,7 @@ public class DozeTriggersTest extends SysuiTestCase {
 
         mTriggers = new DozeTriggers(mContext, mHost, config, dozeParameters,
                 asyncSensorManager, wakeLock, mDockManager, mProximitySensor,
-                mProximityCheck, mock(DozeLog.class), mBroadcastDispatcher, new FakeSettings(),
+                mProximityCheck, mDozeLog, mBroadcastDispatcher, new FakeSettings(),
                 mAuthController, mUiEventLogger, mSessionTracker, mKeyguardStateController,
                 mDevicePostureController);
         mTriggers.setDozeMachine(mMachine);
@@ -340,6 +342,16 @@ public class DozeTriggersTest extends SysuiTestCase {
     public void testDestroy() {
         mTriggers.destroy();
         verify(mProximityCheck).destroy();
+    }
+
+    @Test
+    public void testIsExecutingTransition_dropPulse() {
+        when(mHost.isPulsePending()).thenReturn(false);
+        when(mMachine.isExecutingTransition()).thenReturn(true);
+
+        mTriggers.onSensor(DozeLog.PULSE_REASON_SENSOR_LONG_PRESS, 100, 100, null);
+
+        verify(mDozeLog).tracePulseDropped(anyString(), eq(null));
     }
 
     private void waitForSensorManager() {

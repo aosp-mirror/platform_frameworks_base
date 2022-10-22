@@ -135,7 +135,8 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
             DumpManager dumpManager,
             KeyguardStateController keyguardStateController,
             ScreenOffAnimationController screenOffAnimationController,
-            AuthController authController) {
+            AuthController authController,
+            ShadeExpansionStateManager shadeExpansionStateManager) {
         mContext = context;
         mWindowManager = windowManager;
         mActivityManager = activityManager;
@@ -156,6 +157,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
                 .addCallback(mStateListener,
                         SysuiStatusBarStateController.RANK_STATUS_BAR_WINDOW_CONTROLLER);
         configurationController.addCallback(this);
+        shadeExpansionStateManager.addQsExpansionListener(this::onQsExpansionChanged);
 
         float desiredPreferredRefreshRate = context.getResources()
                 .getInteger(R.integer.config_keyguardRefreshRate);
@@ -607,8 +609,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         apply(mCurrentState);
     }
 
-    @Override
-    public void setQsExpanded(boolean expanded) {
+    private void onQsExpansionChanged(Boolean expanded) {
         mCurrentState.mQsExpanded = expanded;
         apply(mCurrentState);
     }
