@@ -19,7 +19,6 @@ package com.android.systemui.dreams;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -29,7 +28,6 @@ import android.content.res.Resources;
 import android.os.Handler;
 import android.testing.AndroidTestingRunner;
 import android.view.ViewGroup;
-import android.view.ViewPropertyAnimator;
 import android.view.ViewRootImpl;
 import android.view.ViewTreeObserver;
 
@@ -94,9 +92,6 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
     @Mock
     BouncerCallbackInteractor mBouncerCallbackInteractor;
 
-    @Mock
-    ViewPropertyAnimator mViewPropertyAnimator;
-
     DreamOverlayContainerViewController mController;
 
     @Before
@@ -105,12 +100,8 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
 
         when(mDreamOverlayContainerView.getResources()).thenReturn(mResources);
         when(mDreamOverlayContainerView.getViewTreeObserver()).thenReturn(mViewTreeObserver);
-        when(mDreamOverlayContainerView.animate()).thenReturn(mViewPropertyAnimator);
         when(mStatusBarKeyguardViewManager.getBouncer()).thenReturn(mBouncer);
         when(mDreamOverlayContainerView.getViewRootImpl()).thenReturn(mViewRoot);
-        when(mViewPropertyAnimator.alpha(anyFloat())).thenReturn(mViewPropertyAnimator);
-        when(mViewPropertyAnimator.setStartDelay(anyLong())).thenReturn(mViewPropertyAnimator);
-        when(mViewPropertyAnimator.setDuration(anyLong())).thenReturn(mViewPropertyAnimator);
 
         mController = new DreamOverlayContainerViewController(
                 mDreamOverlayContainerView,
@@ -124,9 +115,7 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
                 MAX_BURN_IN_OFFSET,
                 BURN_IN_PROTECTION_UPDATE_INTERVAL,
                 MILLIS_UNTIL_FULL_JITTER,
-                mBouncerCallbackInteractor,
-                100 /*openAnimationDuration*/,
-                100 /*openAnimationDelay*/);
+                mBouncerCallbackInteractor);
     }
 
     @Test

@@ -21,7 +21,7 @@ import com.android.settingslib.media.DeviceIconUtil
 import com.android.settingslib.media.LocalMediaManager
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.media.MediaFlags
+import com.android.systemui.media.controls.util.MediaFlags
 import java.util.concurrent.Executor
 import javax.inject.Inject
 
