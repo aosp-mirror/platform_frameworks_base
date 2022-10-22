@@ -17,6 +17,7 @@
 package com.android.systemui.temporarydisplay.chipbar
 
 import android.os.PowerManager
+import android.os.VibrationEffect
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.View
@@ -36,6 +37,7 @@ import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.media.taptotransfer.common.MediaTttLogger
 import com.android.systemui.plugins.FalsingManager
+import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
@@ -66,6 +68,7 @@ class ChipbarCoordinatorTest : SysuiTestCase() {
     @Mock private lateinit var falsingManager: FalsingManager
     @Mock private lateinit var falsingCollector: FalsingCollector
     @Mock private lateinit var viewUtil: ViewUtil
+    @Mock private lateinit var vibratorHelper: VibratorHelper
     private lateinit var fakeClock: FakeSystemClock
     private lateinit var fakeExecutor: FakeExecutor
     private lateinit var uiEventLoggerFake: UiEventLoggerFake
@@ -92,6 +95,7 @@ class ChipbarCoordinatorTest : SysuiTestCase() {
                 falsingManager,
                 falsingCollector,
                 viewUtil,
+                vibratorHelper,
             )
         underTest.start()
     }
@@ -270,6 +274,20 @@ class ChipbarCoordinatorTest : SysuiTestCase() {
         getChipbarView().getEndButton().performClick()
 
         assertThat(isClicked).isTrue()
+    }
+
+    @Test
+    fun displayView_vibrationEffect_doubleClickEffect() {
+        underTest.displayView(
+            ChipbarInfo(
+                Icon.Resource(R.id.check_box, null),
+                Text.Loaded("text"),
+                endItem = null,
+                vibrationEffect = VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK),
+            )
+        )
+
+        verify(vibratorHelper).vibrate(VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK))
     }
 
     @Test

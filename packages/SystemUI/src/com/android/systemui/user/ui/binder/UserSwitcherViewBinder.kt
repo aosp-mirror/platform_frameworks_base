@@ -18,12 +18,15 @@
 package com.android.systemui.user.ui.binder
 
 import android.content.Context
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.LinearLayout.SHOW_DIVIDER_MIDDLE
 import android.widget.TextView
 import androidx.constraintlayout.helper.widget.Flow as FlowWidget
 import androidx.core.view.isVisible
@@ -36,6 +39,7 @@ import com.android.systemui.R
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.user.UserSwitcherPopupMenu
 import com.android.systemui.user.UserSwitcherRootView
+import com.android.systemui.user.shared.model.UserActionModel
 import com.android.systemui.user.ui.viewmodel.UserActionViewModel
 import com.android.systemui.user.ui.viewmodel.UserSwitcherViewModel
 import com.android.systemui.util.children
@@ -168,15 +172,10 @@ object UserSwitcherViewBinder {
         onDismissed: () -> Unit,
     ): UserSwitcherPopupMenu {
         return UserSwitcherPopupMenu(context).apply {
+            this.setDropDownGravity(Gravity.END)
             this.anchorView = anchorView
             setAdapter(adapter)
             setOnDismissListener { onDismissed() }
-            setOnItemClickListener { _, _, position, _ ->
-                val itemPositionExcludingHeader = position - 1
-                adapter.getItem(itemPositionExcludingHeader).onClicked()
-                dismiss()
-            }
-
             show()
         }
     }
@@ -186,38 +185,67 @@ object UserSwitcherViewBinder {
         private val layoutInflater: LayoutInflater,
     ) : BaseAdapter() {
 
-        private val items = mutableListOf<UserActionViewModel>()
+        private var sections = listOf<List<UserActionViewModel>>()
 
         override fun getCount(): Int {
-            return items.size
+            return sections.size
         }
 
-        override fun getItem(position: Int): UserActionViewModel {
-            return items[position]
+        override fun getItem(position: Int): List<UserActionViewModel> {
+            return sections[position]
         }
 
         override fun getItemId(position: Int): Long {
-            return getItem(position).viewKey
+            return position.toLong()
         }
 
         override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-            val view =
-                convertView
-                    ?: layoutInflater.inflate(
+            val section = getItem(position)
+            val context = parent.context
+            val sectionView =
+                convertView as? LinearLayout
+                    ?: LinearLayout(context, null).apply {
+                        this.orientation = LinearLayout.VERTICAL
+                        this.background =
+                            parent.resources.getDrawable(
+                                R.drawable.bouncer_user_switcher_popup_bg,
+                                context.theme
+                            )
+                        this.showDividers = SHOW_DIVIDER_MIDDLE
+                        this.dividerDrawable =
+                            context.getDrawable(
+                                R.drawable.fullscreen_userswitcher_menu_item_divider
+                            )
+                    }
+            sectionView.removeAllViewsInLayout()
+
+            for (viewModel in section) {
+                val view =
+                    layoutInflater.inflate(
                         R.layout.user_switcher_fullscreen_popup_item,
-                        parent,
-                        false
+                        /* parent= */ null
                     )
-            val viewModel = getItem(position)
-            view.requireViewById<ImageView>(R.id.icon).setImageResource(viewModel.iconResourceId)
-            view.requireViewById<TextView>(R.id.text).text =
-                view.resources.getString(viewModel.textResourceId)
-            return view
+                view
+                    .requireViewById<ImageView>(R.id.icon)
+                    .setImageResource(viewModel.iconResourceId)
+                view.requireViewById<TextView>(R.id.text).text =
+                    view.resources.getString(viewModel.textResourceId)
+                view.setOnClickListener { viewModel.onClicked() }
+                sectionView.addView(view)
+            }
+            return sectionView
         }
 
         fun setItems(items: List<UserActionViewModel>) {
-            this.items.clear()
-            this.items.addAll(items)
+            val primarySection =
+                items.filter {
+                    it.viewKey != UserActionModel.NAVIGATE_TO_USER_MANAGEMENT.ordinal.toLong()
+                }
+            val secondarySection =
+                items.filter {
+                    it.viewKey == UserActionModel.NAVIGATE_TO_USER_MANAGEMENT.ordinal.toLong()
+                }
+            this.sections = listOf(primarySection, secondarySection)
             notifyDataSetChanged()
         }
     }

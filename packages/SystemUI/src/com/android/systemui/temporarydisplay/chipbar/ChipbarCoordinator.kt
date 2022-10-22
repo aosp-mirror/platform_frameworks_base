@@ -42,6 +42,7 @@ import com.android.systemui.media.taptotransfer.common.MediaTttLogger
 import com.android.systemui.media.taptotransfer.common.MediaTttUtils
 import com.android.systemui.media.taptotransfer.sender.MediaTttSenderLogger
 import com.android.systemui.plugins.FalsingManager
+import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.temporarydisplay.TemporaryViewDisplayController
 import com.android.systemui.util.concurrency.DelayableExecutor
@@ -79,6 +80,7 @@ open class ChipbarCoordinator @Inject constructor(
         private val falsingManager: FalsingManager,
         private val falsingCollector: FalsingCollector,
         private val viewUtil: ViewUtil,
+        private val vibratorHelper: VibratorHelper,
 ) : TemporaryViewDisplayController<ChipbarInfo, MediaTttLogger>(
         context,
         logger,
@@ -154,6 +156,11 @@ open class ChipbarCoordinator @Inject constructor(
         ).contentDescription =
             "${newInfo.startIcon.contentDescription.loadContentDescription(context)} " +
                 "${newInfo.text.loadText(context)}"
+
+        // ---- Haptics ----
+        newInfo.vibrationEffect?.let {
+            vibratorHelper.vibrate(it)
+        }
     }
 
     override fun animateViewIn(view: ViewGroup) {

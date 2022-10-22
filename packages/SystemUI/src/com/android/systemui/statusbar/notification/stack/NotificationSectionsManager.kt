@@ -19,11 +19,10 @@ import android.annotation.ColorInt
 import android.util.Log
 import android.view.View
 import com.android.internal.annotations.VisibleForTesting
-import com.android.systemui.media.KeyguardMediaController
+import com.android.systemui.media.controls.ui.KeyguardMediaController
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager
 import com.android.systemui.statusbar.notification.collection.render.MediaContainerController
 import com.android.systemui.statusbar.notification.collection.render.SectionHeaderController
-import com.android.systemui.statusbar.notification.collection.render.ShadeViewManager
 import com.android.systemui.statusbar.notification.dagger.AlertingHeader
 import com.android.systemui.statusbar.notification.dagger.IncomingHeader
 import com.android.systemui.statusbar.notification.dagger.PeopleHeader
