@@ -493,8 +493,6 @@ public final class DreamManagerService extends SystemService {
             return;
         }
 
-        stopDreamLocked(true /*immediate*/, "starting new dream");
-
         Slog.i(TAG, "Entering dreamland.");
 
         mCurrentDream = new DreamRecord(name, userId, isPreviewMode, canDoze);
