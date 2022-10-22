@@ -217,6 +217,23 @@ public interface RegistrationManager {
             }
 
             @Override
+            public void onDeregisteredWithDetails(ImsReasonInfo info,
+                    @SuggestedAction int suggestedAction,
+                    @ImsRegistrationImplBase.ImsRegistrationTech int imsRadioTech,
+                    @NonNull SipDetails details) {
+                if (mLocalCallback == null) return;
+
+                final long callingIdentity = Binder.clearCallingIdentity();
+                try {
+                    mExecutor.execute(() -> mLocalCallback.onUnregistered(info, suggestedAction,
+                            imsRadioTech));
+                    mExecutor.execute(() -> mLocalCallback.onUnregistered(info, details));
+                } finally {
+                    restoreCallingIdentity(callingIdentity);
+                }
+            }
+
+            @Override
             public void onTechnologyChangeFailed(int imsRadioTech, ImsReasonInfo info) {
                 if (mLocalCallback == null) return;
 
@@ -311,6 +328,19 @@ public interface RegistrationManager {
                 @ImsRegistrationImplBase.ImsRegistrationTech int imsRadioTech) {
             // Default impl to keep backwards compatibility with old implementations
             onUnregistered(info);
+        }
+
+        /**
+         * Notifies the framework when the IMS Provider is unregistered from the IMS network.
+         *
+         * @param info the {@link ImsReasonInfo} associated with why registration was disconnected.
+         * @param details the {@link SipDetails} related to disconnected Ims registration.
+         *
+         * @hide
+         */
+        @SystemApi
+        public void onUnregistered(@NonNull ImsReasonInfo info,
+                @NonNull SipDetails details) {
         }
 
         /**

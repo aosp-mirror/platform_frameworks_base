@@ -45391,6 +45391,7 @@ package android.telephony.ims {
     method public int describeContents();
     method public int getAttributeFlags();
     method @NonNull public java.util.Set<java.lang.String> getFeatureTags();
+    method @Nullable public android.telephony.ims.SipDetails getSipDetails();
     method public int getTransportType();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field public static final int ATTR_EPDG_OVER_CELL_INTERNET = 1; // 0x1
@@ -45449,6 +45450,22 @@ package android.telephony.ims {
     method public void onRegistering(@NonNull android.telephony.ims.ImsRegistrationAttributes);
     method public void onTechnologyChangeFailed(int, @NonNull android.telephony.ims.ImsReasonInfo);
     method public void onUnregistered(@NonNull android.telephony.ims.ImsReasonInfo);
+  }
+
+  public final class SipDetails implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getCSeq();
+    method @Nullable public String getCallId();
+    method public int getMethod();
+    method public int getReasonHeaderCause();
+    method @NonNull public String getReasonHeaderText();
+    method public int getResponseCode();
+    method @NonNull public String getResponsePhrase();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.SipDetails> CREATOR;
+    field public static final int METHOD_PUBLISH = 2; // 0x2
+    field public static final int METHOD_REGISTER = 1; // 0x1
+    field public static final int METHOD_SUBSCRIBE = 3; // 0x3
   }
 
 }
