@@ -3725,7 +3725,6 @@
   <java-symbol type="integer" name="config_maxUiWidth" />
 
   <!-- system notification channels -->
-  <java-symbol type="string" name="notification_channel_virtual_keyboard" />
   <java-symbol type="string" name="notification_channel_physical_keyboard" />
   <java-symbol type="string" name="notification_channel_security" />
   <java-symbol type="string" name="notification_channel_car_mode" />
