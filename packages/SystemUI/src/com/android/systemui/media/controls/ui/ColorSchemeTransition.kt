@@ -39,12 +39,11 @@ interface ColorTransition {
 }
 
 /**
- * A [ColorTransition] that animates between two specific colors.
- * It uses a ValueAnimator to execute the animation and interpolate between the source color and
- * the target color.
+ * A [ColorTransition] that animates between two specific colors. It uses a ValueAnimator to execute
+ * the animation and interpolate between the source color and the target color.
  *
- * Selection of the target color from the scheme, and application of the interpolated color
- * are delegated to callbacks.
+ * Selection of the target color from the scheme, and application of the interpolated color are
+ * delegated to callbacks.
  */
 open class AnimatingColorTransition(
     private val defaultColor: Int,
@@ -59,9 +58,8 @@ open class AnimatingColorTransition(
     var targetColor: Int = defaultColor
 
     override fun onAnimationUpdate(animation: ValueAnimator) {
-        currentColor = argbEvaluator.evaluate(
-            animation.animatedFraction, sourceColor, targetColor
-        ) as Int
+        currentColor =
+            argbEvaluator.evaluate(animation.animatedFraction, sourceColor, targetColor) as Int
         applyColor(currentColor)
     }
 
@@ -91,111 +89,126 @@ open class AnimatingColorTransition(
 }
 
 typealias AnimatingColorTransitionFactory =
-            (Int, (ColorScheme) -> Int, (Int) -> Unit) -> AnimatingColorTransition
+    (Int, (ColorScheme) -> Int, (Int) -> Unit) -> AnimatingColorTransition
 
 /**
- * ColorSchemeTransition constructs a ColorTransition for each color in the scheme
- * that needs to be transitioned when changed. It also sets up the assignment functions for sending
- * the sending the interpolated colors to the appropriate views.
+ * ColorSchemeTransition constructs a ColorTransition for each color in the scheme that needs to be
+ * transitioned when changed. It also sets up the assignment functions for sending the sending the
+ * interpolated colors to the appropriate views.
  */
-class ColorSchemeTransition internal constructor(
+class ColorSchemeTransition
+internal constructor(
     private val context: Context,
     private val mediaViewHolder: MediaViewHolder,
     animatingColorTransitionFactory: AnimatingColorTransitionFactory
 ) {
-    constructor(context: Context, mediaViewHolder: MediaViewHolder) :
-        this(context, mediaViewHolder, ::AnimatingColorTransition)
+    constructor(
+        context: Context,
+        mediaViewHolder: MediaViewHolder
+    ) : this(context, mediaViewHolder, ::AnimatingColorTransition)
 
     val bgColor = context.getColor(com.android.systemui.R.color.material_dynamic_secondary95)
-    val surfaceColor = animatingColorTransitionFactory(
-        bgColor,
-        ::surfaceFromScheme
-    ) { surfaceColor ->
-        val colorList = ColorStateList.valueOf(surfaceColor)
-        mediaViewHolder.seamlessIcon.imageTintList = colorList
-        mediaViewHolder.seamlessText.setTextColor(surfaceColor)
-        mediaViewHolder.albumView.backgroundTintList = colorList
-        mediaViewHolder.gutsViewHolder.setSurfaceColor(surfaceColor)
-    }
-
-    val accentPrimary = animatingColorTransitionFactory(
-        loadDefaultColor(R.attr.textColorPrimary),
-        ::accentPrimaryFromScheme
-    ) { accentPrimary ->
-        val accentColorList = ColorStateList.valueOf(accentPrimary)
-        mediaViewHolder.actionPlayPause.backgroundTintList = accentColorList
-        mediaViewHolder.gutsViewHolder.setAccentPrimaryColor(accentPrimary)
-    }
-
-    val accentSecondary = animatingColorTransitionFactory(
-        loadDefaultColor(R.attr.textColorPrimary),
-        ::accentSecondaryFromScheme
-    ) { accentSecondary ->
-        val colorList = ColorStateList.valueOf(accentSecondary)
-        (mediaViewHolder.seamlessButton.background as? RippleDrawable)?.let {
-            it.setColor(colorList)
-            it.effectColor = colorList
+    val surfaceColor =
+        animatingColorTransitionFactory(bgColor, ::surfaceFromScheme) { surfaceColor ->
+            val colorList = ColorStateList.valueOf(surfaceColor)
+            mediaViewHolder.seamlessIcon.imageTintList = colorList
+            mediaViewHolder.seamlessText.setTextColor(surfaceColor)
+            mediaViewHolder.albumView.backgroundTintList = colorList
+            mediaViewHolder.gutsViewHolder.setSurfaceColor(surfaceColor)
         }
-    }
 
-    val colorSeamless = animatingColorTransitionFactory(
-        loadDefaultColor(R.attr.textColorPrimary),
-        { colorScheme: ColorScheme ->
-            // A1-100 dark in dark theme, A1-200 in light theme
-            if (context.resources.configuration.uiMode and
-                    Configuration.UI_MODE_NIGHT_MASK == UI_MODE_NIGHT_YES)
-                        colorScheme.accent1[2]
-                        else colorScheme.accent1[3]
-        }, { seamlessColor: Int ->
-            val accentColorList = ColorStateList.valueOf(seamlessColor)
-            mediaViewHolder.seamlessButton.backgroundTintList = accentColorList
-    })
-
-    val textPrimary = animatingColorTransitionFactory(
-        loadDefaultColor(R.attr.textColorPrimary),
-        ::textPrimaryFromScheme
-    ) { textPrimary ->
-        mediaViewHolder.titleText.setTextColor(textPrimary)
-        val textColorList = ColorStateList.valueOf(textPrimary)
-        mediaViewHolder.seekBar.thumb.setTintList(textColorList)
-        mediaViewHolder.seekBar.progressTintList = textColorList
-        mediaViewHolder.scrubbingElapsedTimeView.setTextColor(textColorList)
-        mediaViewHolder.scrubbingTotalTimeView.setTextColor(textColorList)
-        for (button in mediaViewHolder.getTransparentActionButtons()) {
-            button.imageTintList = textColorList
+    val accentPrimary =
+        animatingColorTransitionFactory(
+            loadDefaultColor(R.attr.textColorPrimary),
+            ::accentPrimaryFromScheme
+        ) { accentPrimary ->
+            val accentColorList = ColorStateList.valueOf(accentPrimary)
+            mediaViewHolder.actionPlayPause.backgroundTintList = accentColorList
+            mediaViewHolder.gutsViewHolder.setAccentPrimaryColor(accentPrimary)
         }
-        mediaViewHolder.gutsViewHolder.setTextPrimaryColor(textPrimary)
-    }
 
-    val textPrimaryInverse = animatingColorTransitionFactory(
-        loadDefaultColor(R.attr.textColorPrimaryInverse),
-        ::textPrimaryInverseFromScheme
-    ) { textPrimaryInverse ->
-        mediaViewHolder.actionPlayPause.imageTintList = ColorStateList.valueOf(textPrimaryInverse)
-    }
+    val accentSecondary =
+        animatingColorTransitionFactory(
+            loadDefaultColor(R.attr.textColorPrimary),
+            ::accentSecondaryFromScheme
+        ) { accentSecondary ->
+            val colorList = ColorStateList.valueOf(accentSecondary)
+            (mediaViewHolder.seamlessButton.background as? RippleDrawable)?.let {
+                it.setColor(colorList)
+                it.effectColor = colorList
+            }
+        }
 
-    val textSecondary = animatingColorTransitionFactory(
-        loadDefaultColor(R.attr.textColorSecondary),
-        ::textSecondaryFromScheme
-    ) { textSecondary -> mediaViewHolder.artistText.setTextColor(textSecondary) }
+    val colorSeamless =
+        animatingColorTransitionFactory(
+            loadDefaultColor(R.attr.textColorPrimary),
+            { colorScheme: ColorScheme ->
+                // A1-100 dark in dark theme, A1-200 in light theme
+                if (
+                    context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK ==
+                        UI_MODE_NIGHT_YES
+                )
+                    colorScheme.accent1[2]
+                else colorScheme.accent1[3]
+            },
+            { seamlessColor: Int ->
+                val accentColorList = ColorStateList.valueOf(seamlessColor)
+                mediaViewHolder.seamlessButton.backgroundTintList = accentColorList
+            }
+        )
 
-    val textTertiary = animatingColorTransitionFactory(
-        loadDefaultColor(R.attr.textColorTertiary),
-        ::textTertiaryFromScheme
-    ) { textTertiary ->
-        mediaViewHolder.seekBar.progressBackgroundTintList = ColorStateList.valueOf(textTertiary)
-    }
+    val textPrimary =
+        animatingColorTransitionFactory(
+            loadDefaultColor(R.attr.textColorPrimary),
+            ::textPrimaryFromScheme
+        ) { textPrimary ->
+            mediaViewHolder.titleText.setTextColor(textPrimary)
+            val textColorList = ColorStateList.valueOf(textPrimary)
+            mediaViewHolder.seekBar.thumb.setTintList(textColorList)
+            mediaViewHolder.seekBar.progressTintList = textColorList
+            mediaViewHolder.scrubbingElapsedTimeView.setTextColor(textColorList)
+            mediaViewHolder.scrubbingTotalTimeView.setTextColor(textColorList)
+            for (button in mediaViewHolder.getTransparentActionButtons()) {
+                button.imageTintList = textColorList
+            }
+            mediaViewHolder.gutsViewHolder.setTextPrimaryColor(textPrimary)
+        }
 
-    val colorTransitions = arrayOf(
-        surfaceColor,
-        colorSeamless,
-        accentPrimary,
-        accentSecondary,
-        textPrimary,
-        textPrimaryInverse,
-        textSecondary,
-        textTertiary,
-    )
+    val textPrimaryInverse =
+        animatingColorTransitionFactory(
+            loadDefaultColor(R.attr.textColorPrimaryInverse),
+            ::textPrimaryInverseFromScheme
+        ) { textPrimaryInverse ->
+            mediaViewHolder.actionPlayPause.imageTintList =
+                ColorStateList.valueOf(textPrimaryInverse)
+        }
+
+    val textSecondary =
+        animatingColorTransitionFactory(
+            loadDefaultColor(R.attr.textColorSecondary),
+            ::textSecondaryFromScheme
+        ) { textSecondary -> mediaViewHolder.artistText.setTextColor(textSecondary) }
+
+    val textTertiary =
+        animatingColorTransitionFactory(
+            loadDefaultColor(R.attr.textColorTertiary),
+            ::textTertiaryFromScheme
+        ) { textTertiary ->
+            mediaViewHolder.seekBar.progressBackgroundTintList =
+                ColorStateList.valueOf(textTertiary)
+        }
+
+    val colorTransitions =
+        arrayOf(
+            surfaceColor,
+            colorSeamless,
+            accentPrimary,
+            accentSecondary,
+            textPrimary,
+            textPrimaryInverse,
+            textSecondary,
+            textTertiary,
+        )
 
     private fun loadDefaultColor(id: Int): Int {
         return Utils.getColorAttr(context, id).defaultColor

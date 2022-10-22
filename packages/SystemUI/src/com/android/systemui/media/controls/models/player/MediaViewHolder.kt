@@ -30,9 +30,7 @@ import com.android.systemui.util.animation.TransitionLayout
 
 private const val TAG = "MediaViewHolder"
 
-/**
- * Holder class for media player view
- */
+/** Holder class for media player view */
 class MediaViewHolder constructor(itemView: View) {
     val player = itemView as TransitionLayout
 
@@ -53,8 +51,7 @@ class MediaViewHolder constructor(itemView: View) {
     // These views are only shown while the user is actively scrubbing
     val scrubbingElapsedTimeView: TextView =
         itemView.requireViewById(R.id.media_scrubbing_elapsed_time)
-    val scrubbingTotalTimeView: TextView =
-        itemView.requireViewById(R.id.media_scrubbing_total_time)
+    val scrubbingTotalTimeView: TextView = itemView.requireViewById(R.id.media_scrubbing_total_time)
 
     val gutsViewHolder = GutsViewHolder(itemView)
 
@@ -87,15 +84,7 @@ class MediaViewHolder constructor(itemView: View) {
     }
 
     fun getTransparentActionButtons(): List<ImageButton> {
-        return listOf(
-                actionNext,
-                actionPrev,
-                action0,
-                action1,
-                action2,
-                action3,
-                action4
-        )
+        return listOf(actionNext, actionPrev, action0, action1, action2, action3, action4)
     }
 
     fun marquee(start: Boolean, delay: Long) {
@@ -109,10 +98,8 @@ class MediaViewHolder constructor(itemView: View) {
          * @param inflater LayoutInflater to use to inflate the layout.
          * @param parent Parent of inflated view.
          */
-        @JvmStatic fun create(
-            inflater: LayoutInflater,
-            parent: ViewGroup
-        ): MediaViewHolder {
+        @JvmStatic
+        fun create(inflater: LayoutInflater, parent: ViewGroup): MediaViewHolder {
             val mediaView = inflater.inflate(R.layout.media_session_view, parent, false)
             mediaView.setLayerType(View.LAYER_TYPE_HARDWARE, null)
             // Because this media view (a TransitionLayout) is used to measure and layout the views
@@ -125,7 +112,8 @@ class MediaViewHolder constructor(itemView: View) {
             }
         }
 
-        val controlsIds = setOf(
+        val controlsIds =
+            setOf(
                 R.id.icon,
                 R.id.app_name,
                 R.id.header_title,
@@ -143,27 +131,23 @@ class MediaViewHolder constructor(itemView: View) {
                 R.id.icon,
                 R.id.media_scrubbing_elapsed_time,
                 R.id.media_scrubbing_total_time
-        )
+            )
 
         // Buttons used for notification-based actions
-        val genericButtonIds = setOf(
-            R.id.action0,
-            R.id.action1,
-            R.id.action2,
-            R.id.action3,
-            R.id.action4
-        )
+        val genericButtonIds =
+            setOf(R.id.action0, R.id.action1, R.id.action2, R.id.action3, R.id.action4)
 
-        val expandedBottomActionIds = setOf(
-            R.id.actionPrev,
-            R.id.actionNext,
-            R.id.action0,
-            R.id.action1,
-            R.id.action2,
-            R.id.action3,
-            R.id.action4,
-            R.id.media_scrubbing_elapsed_time,
-            R.id.media_scrubbing_total_time
-        )
+        val expandedBottomActionIds =
+            setOf(
+                R.id.actionPrev,
+                R.id.actionNext,
+                R.id.action0,
+                R.id.action1,
+                R.id.action2,
+                R.id.action3,
+                R.id.action4,
+                R.id.media_scrubbing_elapsed_time,
+                R.id.media_scrubbing_total_time
+            )
     }
 }

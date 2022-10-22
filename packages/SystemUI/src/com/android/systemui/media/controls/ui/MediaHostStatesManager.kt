@@ -38,85 +38,76 @@ class MediaHostStatesManager @Inject constructor() {
      */
     val carouselSizes: MutableMap<Int, MeasurementOutput> = mutableMapOf()
 
-    /**
-     * A map with all media states of all locations.
-     */
+    /** A map with all media states of all locations. */
     val mediaHostStates: MutableMap<Int, MediaHostState> = mutableMapOf()
 
     /**
-     * Notify that a media state for a given location has changed. Should only be called from
-     * Media hosts themselves.
+     * Notify that a media state for a given location has changed. Should only be called from Media
+     * hosts themselves.
      */
-    fun updateHostState(
-        @MediaLocation location: Int,
-        hostState: MediaHostState
-    ) = traceSection("MediaHostStatesManager#updateHostState") {
-        val currentState = mediaHostStates.get(location)
-        if (!hostState.equals(currentState)) {
-            val newState = hostState.copy()
-            mediaHostStates.put(location, newState)
-            updateCarouselDimensions(location, hostState)
-            // First update all the controllers to ensure they get the chance to measure
-            for (controller in controllers) {
-                controller.stateCallback.onHostStateChanged(location, newState)
-            }
+    fun updateHostState(@MediaLocation location: Int, hostState: MediaHostState) =
+        traceSection("MediaHostStatesManager#updateHostState") {
+            val currentState = mediaHostStates.get(location)
+            if (!hostState.equals(currentState)) {
+                val newState = hostState.copy()
+                mediaHostStates.put(location, newState)
+                updateCarouselDimensions(location, hostState)
+                // First update all the controllers to ensure they get the chance to measure
+                for (controller in controllers) {
+                    controller.stateCallback.onHostStateChanged(location, newState)
+                }
 
-            // Then update all other callbacks which may depend on the controllers above
-            for (callback in callbacks) {
-                callback.onHostStateChanged(location, newState)
+                // Then update all other callbacks which may depend on the controllers above
+                for (callback in callbacks) {
+                    callback.onHostStateChanged(location, newState)
+                }
             }
         }
-    }
 
     /**
-     * Get the dimensions of all players combined, which determines the overall height of the
-     * media carousel and the media hosts.
+     * Get the dimensions of all players combined, which determines the overall height of the media
+     * carousel and the media hosts.
      */
     fun updateCarouselDimensions(
         @MediaLocation location: Int,
         hostState: MediaHostState
-    ): MeasurementOutput = traceSection("MediaHostStatesManager#updateCarouselDimensions") {
-        val result = MeasurementOutput(0, 0)
-        for (controller in controllers) {
-            val measurement = controller.getMeasurementsForState(hostState)
-            measurement?.let {
-                if (it.measuredHeight > result.measuredHeight) {
-                    result.measuredHeight = it.measuredHeight
-                }
-                if (it.measuredWidth > result.measuredWidth) {
-                    result.measuredWidth = it.measuredWidth
+    ): MeasurementOutput =
+        traceSection("MediaHostStatesManager#updateCarouselDimensions") {
+            val result = MeasurementOutput(0, 0)
+            for (controller in controllers) {
+                val measurement = controller.getMeasurementsForState(hostState)
+                measurement?.let {
+                    if (it.measuredHeight > result.measuredHeight) {
+                        result.measuredHeight = it.measuredHeight
+                    }
+                    if (it.measuredWidth > result.measuredWidth) {
+                        result.measuredWidth = it.measuredWidth
+                    }
                 }
             }
+            carouselSizes[location] = result
+            return result
         }
-        carouselSizes[location] = result
-        return result
-    }
 
-    /**
-     * Add a callback to be called when a MediaState has updated
-     */
+    /** Add a callback to be called when a MediaState has updated */
     fun addCallback(callback: Callback) {
         callbacks.add(callback)
     }
 
-    /**
-     * Remove a callback that listens to media states
-     */
+    /** Remove a callback that listens to media states */
     fun removeCallback(callback: Callback) {
         callbacks.remove(callback)
     }
 
     /**
-     * Register a controller that listens to media states and is used to determine the size of
-     * the media carousel
+     * Register a controller that listens to media states and is used to determine the size of the
+     * media carousel
      */
     fun addController(controller: MediaViewController) {
         controllers.add(controller)
     }
 
-    /**
-     * Notify the manager about the removal of a controller.
-     */
+    /** Notify the manager about the removal of a controller. */
     fun removeController(controller: MediaViewController) {
         controllers.remove(controller)
     }

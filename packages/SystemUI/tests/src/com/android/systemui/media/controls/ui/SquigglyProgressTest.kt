@@ -50,12 +50,9 @@ class SquigglyProgressTest : SysuiTestCase() {
     private val tint = Color.GREEN
 
     lateinit var squigglyProgress: SquigglyProgress
-    @Mock
-    lateinit var canvas: Canvas
-    @Captor
-    lateinit var paintCaptor: ArgumentCaptor<Paint>
-    @JvmField @Rule
-    val mockitoRule = MockitoJUnit.rule()
+    @Mock lateinit var canvas: Canvas
+    @Captor lateinit var paintCaptor: ArgumentCaptor<Paint>
+    @JvmField @Rule val mockitoRule = MockitoJUnit.rule()
 
     @Before
     fun setup() {
@@ -126,7 +123,6 @@ class SquigglyProgressTest : SysuiTestCase() {
         val (wavePaint, linePaint) = paintCaptor.getAllValues()
 
         assertThat(wavePaint.color).isEqualTo(tint)
-        assertThat(linePaint.color).isEqualTo(
-            ColorUtils.setAlphaComponent(tint, DISABLED_ALPHA))
+        assertThat(linePaint.color).isEqualTo(ColorUtils.setAlphaComponent(tint, DISABLED_ALPHA))
     }
 }

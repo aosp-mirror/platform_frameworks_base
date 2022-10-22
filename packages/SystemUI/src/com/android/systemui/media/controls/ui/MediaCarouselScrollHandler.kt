@@ -44,16 +44,13 @@ private const val RUBBERBAND_FACTOR = 0.2f
 private const val SETTINGS_BUTTON_TRANSLATION_FRACTION = 0.3f
 
 /**
- * Default spring configuration to use for animations where stiffness and/or damping ratio
- * were not provided, and a default spring was not set via [PhysicsAnimator.setDefaultSpringConfig].
+ * Default spring configuration to use for animations where stiffness and/or damping ratio were not
+ * provided, and a default spring was not set via [PhysicsAnimator.setDefaultSpringConfig].
  */
-private val translationConfig = PhysicsAnimator.SpringConfig(
-        SpringForce.STIFFNESS_LOW,
-        SpringForce.DAMPING_RATIO_LOW_BOUNCY)
+private val translationConfig =
+    PhysicsAnimator.SpringConfig(SpringForce.STIFFNESS_LOW, SpringForce.DAMPING_RATIO_LOW_BOUNCY)
 
-/**
- * A controller class for the media scrollview, responsible for touch handling
- */
+/** A controller class for the media scrollview, responsible for touch handling */
 class MediaCarouselScrollHandler(
     private val scrollView: MediaScrollView,
     private val pageIndicator: PageIndicator,
@@ -66,57 +63,36 @@ class MediaCarouselScrollHandler(
     private val logSmartspaceImpression: (Boolean) -> Unit,
     private val logger: MediaUiEventLogger
 ) {
-    /**
-     * Is the view in RTL
-     */
-    val isRtl: Boolean get() = scrollView.isLayoutRtl
-    /**
-     * Do we need falsing protection?
-     */
+    /** Is the view in RTL */
+    val isRtl: Boolean
+        get() = scrollView.isLayoutRtl
+    /** Do we need falsing protection? */
     var falsingProtectionNeeded: Boolean = false
-    /**
-     * The width of the carousel
-     */
+    /** The width of the carousel */
     private var carouselWidth: Int = 0
 
-    /**
-     * The height of the carousel
-     */
+    /** The height of the carousel */
     private var carouselHeight: Int = 0
 
-    /**
-     * How much are we scrolled into the current media?
-     */
+    /** How much are we scrolled into the current media? */
     private var cornerRadius: Int = 0
 
-    /**
-     * The content where the players are added
-     */
+    /** The content where the players are added */
     private var mediaContent: ViewGroup
-    /**
-     * The gesture detector to detect touch gestures
-     */
+    /** The gesture detector to detect touch gestures */
     private val gestureDetector: GestureDetectorCompat
 
-    /**
-     * The settings button view
-     */
+    /** The settings button view */
     private lateinit var settingsButton: View
 
-    /**
-     * What's the currently visible player index?
-     */
+    /** What's the currently visible player index? */
     var visibleMediaIndex: Int = 0
         private set
 
-    /**
-     * How much are we scrolled into the current media?
-     */
+    /** How much are we scrolled into the current media? */
     private var scrollIntoCurrentMedia: Int = 0
 
-    /**
-     * how much is the content translated in X
-     */
+    /** how much is the content translated in X */
     var contentTranslation = 0.0f
         private set(value) {
             field = value
@@ -126,9 +102,7 @@ class MediaCarouselScrollHandler(
             updateClipToOutline()
         }
 
-    /**
-     * The width of a player including padding
-     */
+    /** The width of a player including padding */
     var playerWidthPlusPadding: Int = 0
         set(value) {
             field = value
@@ -136,82 +110,75 @@ class MediaCarouselScrollHandler(
             // it's still at the same place
             var newRelativeScroll = visibleMediaIndex * playerWidthPlusPadding
             if (scrollIntoCurrentMedia > playerWidthPlusPadding) {
-                newRelativeScroll += playerWidthPlusPadding -
-                        (scrollIntoCurrentMedia - playerWidthPlusPadding)
+                newRelativeScroll +=
+                    playerWidthPlusPadding - (scrollIntoCurrentMedia - playerWidthPlusPadding)
             } else {
                 newRelativeScroll += scrollIntoCurrentMedia
             }
             scrollView.relativeScrollX = newRelativeScroll
         }
 
-    /**
-     * Does the dismiss currently show the setting cog?
-     */
+    /** Does the dismiss currently show the setting cog? */
     var showsSettingsButton: Boolean = false
 
-    /**
-     * A utility to detect gestures, used in the touch listener
-     */
-    private val gestureListener = object : GestureDetector.SimpleOnGestureListener() {
-        override fun onFling(
-            eStart: MotionEvent?,
-            eCurrent: MotionEvent?,
-            vX: Float,
-            vY: Float
-        ) = onFling(vX, vY)
+    /** A utility to detect gestures, used in the touch listener */
+    private val gestureListener =
+        object : GestureDetector.SimpleOnGestureListener() {
+            override fun onFling(
+                eStart: MotionEvent?,
+                eCurrent: MotionEvent?,
+                vX: Float,
+                vY: Float
+            ) = onFling(vX, vY)
 
-        override fun onScroll(
-            down: MotionEvent?,
-            lastMotion: MotionEvent?,
-            distanceX: Float,
-            distanceY: Float
-        ) = onScroll(down!!, lastMotion!!, distanceX)
+            override fun onScroll(
+                down: MotionEvent?,
+                lastMotion: MotionEvent?,
+                distanceX: Float,
+                distanceY: Float
+            ) = onScroll(down!!, lastMotion!!, distanceX)
 
-        override fun onDown(e: MotionEvent?): Boolean {
-            if (falsingProtectionNeeded) {
-                falsingCollector.onNotificationStartDismissing()
+            override fun onDown(e: MotionEvent?): Boolean {
+                if (falsingProtectionNeeded) {
+                    falsingCollector.onNotificationStartDismissing()
+                }
+                return false
             }
-            return false
         }
-    }
 
-    /**
-     * The touch listener for the scroll view
-     */
-    private val touchListener = object : Gefingerpoken {
-        override fun onTouchEvent(motionEvent: MotionEvent?) = onTouch(motionEvent!!)
-        override fun onInterceptTouchEvent(ev: MotionEvent?) = onInterceptTouch(ev!!)
-    }
+    /** The touch listener for the scroll view */
+    private val touchListener =
+        object : Gefingerpoken {
+            override fun onTouchEvent(motionEvent: MotionEvent?) = onTouch(motionEvent!!)
+            override fun onInterceptTouchEvent(ev: MotionEvent?) = onInterceptTouch(ev!!)
+        }
 
-    /**
-     * A listener that is invoked when the scrolling changes to update player visibilities
-     */
-    private val scrollChangedListener = object : View.OnScrollChangeListener {
-        override fun onScrollChange(
-            v: View?,
-            scrollX: Int,
-            scrollY: Int,
-            oldScrollX: Int,
-            oldScrollY: Int
-        ) {
-            if (playerWidthPlusPadding == 0) {
-                return
+    /** A listener that is invoked when the scrolling changes to update player visibilities */
+    private val scrollChangedListener =
+        object : View.OnScrollChangeListener {
+            override fun onScrollChange(
+                v: View?,
+                scrollX: Int,
+                scrollY: Int,
+                oldScrollX: Int,
+                oldScrollY: Int
+            ) {
+                if (playerWidthPlusPadding == 0) {
+                    return
+                }
+
+                val relativeScrollX = scrollView.relativeScrollX
+                onMediaScrollingChanged(
+                    relativeScrollX / playerWidthPlusPadding,
+                    relativeScrollX % playerWidthPlusPadding
+                )
             }
-
-            val relativeScrollX = scrollView.relativeScrollX
-            onMediaScrollingChanged(relativeScrollX / playerWidthPlusPadding,
-                    relativeScrollX % playerWidthPlusPadding)
         }
-    }
 
-    /**
-     * Whether the media card is visible to user if any
-     */
+    /** Whether the media card is visible to user if any */
     var visibleToUser: Boolean = false
 
-    /**
-     * Whether the quick setting is expanded or not
-     */
+    /** Whether the quick setting is expanded or not */
     var qsExpanded: Boolean = false
 
     init {
@@ -220,47 +187,61 @@ class MediaCarouselScrollHandler(
         scrollView.setOverScrollMode(View.OVER_SCROLL_NEVER)
         mediaContent = scrollView.contentContainer
         scrollView.setOnScrollChangeListener(scrollChangedListener)
-        scrollView.outlineProvider = object : ViewOutlineProvider() {
-            override fun getOutline(view: View?, outline: Outline?) {
-                outline?.setRoundRect(0, 0, carouselWidth, carouselHeight, cornerRadius.toFloat())
+        scrollView.outlineProvider =
+            object : ViewOutlineProvider() {
+                override fun getOutline(view: View?, outline: Outline?) {
+                    outline?.setRoundRect(
+                        0,
+                        0,
+                        carouselWidth,
+                        carouselHeight,
+                        cornerRadius.toFloat()
+                    )
+                }
             }
-        }
     }
 
     fun onSettingsButtonUpdated(button: View) {
         settingsButton = button
         // We don't have a context to resolve, lets use the settingsbuttons one since that is
         // reinflated appropriately
-        cornerRadius = settingsButton.resources.getDimensionPixelSize(
-                Utils.getThemeAttr(settingsButton.context, android.R.attr.dialogCornerRadius))
+        cornerRadius =
+            settingsButton.resources.getDimensionPixelSize(
+                Utils.getThemeAttr(settingsButton.context, android.R.attr.dialogCornerRadius)
+            )
         updateSettingsPresentation()
         scrollView.invalidateOutline()
     }
 
     private fun updateSettingsPresentation() {
         if (showsSettingsButton && settingsButton.width > 0) {
-            val settingsOffset = MathUtils.map(
+            val settingsOffset =
+                MathUtils.map(
                     0.0f,
                     getMaxTranslation().toFloat(),
                     0.0f,
                     1.0f,
-                    Math.abs(contentTranslation))
-            val settingsTranslation = (1.0f - settingsOffset) * -settingsButton.width *
+                    Math.abs(contentTranslation)
+                )
+            val settingsTranslation =
+                (1.0f - settingsOffset) *
+                    -settingsButton.width *
                     SETTINGS_BUTTON_TRANSLATION_FRACTION
-            val newTranslationX = if (isRtl) {
-                // In RTL, the 0-placement is on the right side of the view, not the left...
-                if (contentTranslation > 0) {
-                    -(scrollView.width - settingsTranslation - settingsButton.width)
+            val newTranslationX =
+                if (isRtl) {
+                    // In RTL, the 0-placement is on the right side of the view, not the left...
+                    if (contentTranslation > 0) {
+                        -(scrollView.width - settingsTranslation - settingsButton.width)
+                    } else {
+                        -settingsTranslation
+                    }
                 } else {
-                    -settingsTranslation
+                    if (contentTranslation > 0) {
+                        settingsTranslation
+                    } else {
+                        scrollView.width - settingsTranslation - settingsButton.width
+                    }
                 }
-            } else {
-                if (contentTranslation > 0) {
-                    settingsTranslation
-                } else {
-                    scrollView.width - settingsTranslation - settingsButton.width
-                }
-            }
             val rotation = (1.0f - settingsOffset) * 50
             settingsButton.rotation = rotation * -Math.signum(contentTranslation)
             val alpha = MathUtils.saturate(MathUtils.map(0.5f, 1.0f, 0.0f, 1.0f, settingsOffset))
@@ -307,16 +288,14 @@ class MediaCarouselScrollHandler(
                 val newScrollX = scrollView.relativeScrollX + dx
                 // Delay the scrolling since scrollView calls springback which cancels
                 // the animation again..
-                mainExecutor.execute {
-                    scrollView.smoothScrollTo(newScrollX, scrollView.scrollY)
-                }
+                mainExecutor.execute { scrollView.smoothScrollTo(newScrollX, scrollView.scrollY) }
             }
             val currentTranslation = scrollView.getContentTranslation()
             if (currentTranslation != 0.0f) {
                 // We started a Swipe but didn't end up with a fling. Let's either go to the
                 // dismissed position or go back.
-                val springBack = Math.abs(currentTranslation) < getMaxTranslation() / 2 ||
-                        isFalseTouch()
+                val springBack =
+                    Math.abs(currentTranslation) < getMaxTranslation() / 2 || isFalseTouch()
                 val newTranslation: Float
                 if (springBack) {
                     newTranslation = 0.0f
@@ -325,13 +304,17 @@ class MediaCarouselScrollHandler(
                     if (!showsSettingsButton) {
                         // Delay the dismiss a bit to avoid too much overlap. Waiting until the
                         // animation has finished also feels a bit too slow here.
-                        mainExecutor.executeDelayed({
-                            dismissCallback.invoke()
-                        }, DISMISS_DELAY)
+                        mainExecutor.executeDelayed({ dismissCallback.invoke() }, DISMISS_DELAY)
                     }
                 }
-                PhysicsAnimator.getInstance(this).spring(CONTENT_TRANSLATION,
-                        newTranslation, startVelocity = 0.0f, config = translationConfig).start()
+                PhysicsAnimator.getInstance(this)
+                    .spring(
+                        CONTENT_TRANSLATION,
+                        newTranslation,
+                        startVelocity = 0.0f,
+                        config = translationConfig
+                    )
+                    .start()
                 scrollView.animationTargetX = newTranslation
             }
         }
@@ -339,10 +322,11 @@ class MediaCarouselScrollHandler(
         return false
     }
 
-    private fun isFalseTouch() = falsingProtectionNeeded &&
-            falsingManager.isFalseTouch(NOTIFICATION_DISMISS)
+    private fun isFalseTouch() =
+        falsingProtectionNeeded && falsingManager.isFalseTouch(NOTIFICATION_DISMISS)
 
-    private fun getMaxTranslation() = if (showsSettingsButton) {
+    private fun getMaxTranslation() =
+        if (showsSettingsButton) {
             settingsButton.width
         } else {
             playerWidthPlusPadding
@@ -352,15 +336,10 @@ class MediaCarouselScrollHandler(
         return gestureDetector.onTouchEvent(motionEvent)
     }
 
-    fun onScroll(
-        down: MotionEvent,
-        lastMotion: MotionEvent,
-        distanceX: Float
-    ): Boolean {
+    fun onScroll(down: MotionEvent, lastMotion: MotionEvent, distanceX: Float): Boolean {
         val totalX = lastMotion.x - down.x
         val currentTranslation = scrollView.getContentTranslation()
-        if (currentTranslation != 0.0f ||
-                !scrollView.canScrollHorizontally((-totalX).toInt())) {
+        if (currentTranslation != 0.0f || !scrollView.canScrollHorizontally((-totalX).toInt())) {
             var newTranslation = currentTranslation - distanceX
             val absTranslation = Math.abs(newTranslation)
             if (absTranslation > getMaxTranslation()) {
@@ -374,14 +353,18 @@ class MediaCarouselScrollHandler(
                         newTranslation = currentTranslation - distanceX * RUBBERBAND_FACTOR
                     } else {
                         // We just crossed the boundary, let's rubberband it all
-                        newTranslation = Math.signum(newTranslation) * (getMaxTranslation() +
-                                (absTranslation - getMaxTranslation()) * RUBBERBAND_FACTOR)
+                        newTranslation =
+                            Math.signum(newTranslation) *
+                                (getMaxTranslation() +
+                                    (absTranslation - getMaxTranslation()) * RUBBERBAND_FACTOR)
                     }
                 } // Otherwise we don't have do do anything, and will remove the unrubberbanded
                 // translation
             }
-            if (Math.signum(newTranslation) != Math.signum(currentTranslation) &&
-                    currentTranslation != 0.0f) {
+            if (
+                Math.signum(newTranslation) != Math.signum(currentTranslation) &&
+                    currentTranslation != 0.0f
+            ) {
                 // We crossed the 0.0 threshold of the translation. Let's see if we're allowed
                 // to scroll into the new direction
                 if (scrollView.canScrollHorizontally(-newTranslation.toInt())) {
@@ -392,8 +375,14 @@ class MediaCarouselScrollHandler(
             }
             val physicsAnimator = PhysicsAnimator.getInstance(this)
             if (physicsAnimator.isRunning()) {
-                physicsAnimator.spring(CONTENT_TRANSLATION,
-                        newTranslation, startVelocity = 0.0f, config = translationConfig).start()
+                physicsAnimator
+                    .spring(
+                        CONTENT_TRANSLATION,
+                        newTranslation,
+                        startVelocity = 0.0f,
+                        config = translationConfig
+                    )
+                    .start()
             } else {
                 contentTranslation = newTranslation
             }
@@ -403,10 +392,7 @@ class MediaCarouselScrollHandler(
         return false
     }
 
-    private fun onFling(
-        vX: Float,
-        vY: Float
-    ): Boolean {
+    private fun onFling(vX: Float, vY: Float): Boolean {
         if (vX * vX < 0.5 * vY * vY) {
             return false
         }
@@ -425,13 +411,17 @@ class MediaCarouselScrollHandler(
                 // Delay the dismiss a bit to avoid too much overlap. Waiting until the animation
                 // has finished also feels a bit too slow here.
                 if (!showsSettingsButton) {
-                    mainExecutor.executeDelayed({
-                        dismissCallback.invoke()
-                    }, DISMISS_DELAY)
+                    mainExecutor.executeDelayed({ dismissCallback.invoke() }, DISMISS_DELAY)
                 }
             }
-            PhysicsAnimator.getInstance(this).spring(CONTENT_TRANSLATION,
-                    newTranslation, startVelocity = vX, config = translationConfig).start()
+            PhysicsAnimator.getInstance(this)
+                .spring(
+                    CONTENT_TRANSLATION,
+                    newTranslation,
+                    startVelocity = vX,
+                    config = translationConfig
+                )
+                .start()
             scrollView.animationTargetX = newTranslation
         } else {
             // We're flinging the player! Let's go either to the previous or to the next player
@@ -444,21 +434,18 @@ class MediaCarouselScrollHandler(
             val view = mediaContent.getChildAt(destIndex)
             // We need to post this since we're dispatching a touch to the underlying view to cancel
             // but canceling will actually abort the animation.
-            mainExecutor.execute {
-                scrollView.smoothScrollTo(view.left, scrollView.scrollY)
-            }
+            mainExecutor.execute { scrollView.smoothScrollTo(view.left, scrollView.scrollY) }
         }
         return true
     }
 
-    /**
-     * Reset the translation of the players when swiped
-     */
+    /** Reset the translation of the players when swiped */
     fun resetTranslation(animate: Boolean = false) {
         if (scrollView.getContentTranslation() != 0.0f) {
             if (animate) {
-                PhysicsAnimator.getInstance(this).spring(CONTENT_TRANSLATION,
-                        0.0f, config = translationConfig).start()
+                PhysicsAnimator.getInstance(this)
+                    .spring(CONTENT_TRANSLATION, 0.0f, config = translationConfig)
+                    .start()
                 scrollView.animationTargetX = 0.0f
             } else {
                 PhysicsAnimator.getInstance(this).cancel()
@@ -486,21 +473,22 @@ class MediaCarouselScrollHandler(
             closeGuts(false)
             updatePlayerVisibilities()
         }
-        val relativeLocation = visibleMediaIndex.toFloat() + if (playerWidthPlusPadding > 0)
-            scrollInAmount.toFloat() / playerWidthPlusPadding else 0f
+        val relativeLocation =
+            visibleMediaIndex.toFloat() +
+                if (playerWidthPlusPadding > 0) scrollInAmount.toFloat() / playerWidthPlusPadding
+                else 0f
         // Fix the location, because PageIndicator does not handle RTL internally
-        val location = if (isRtl) {
-            mediaContent.childCount - relativeLocation - 1
-        } else {
-            relativeLocation
-        }
+        val location =
+            if (isRtl) {
+                mediaContent.childCount - relativeLocation - 1
+            } else {
+                relativeLocation
+            }
         pageIndicator.setLocation(location)
         updateClipToOutline()
     }
 
-    /**
-     * Notified whenever the players or their order has changed
-     */
+    /** Notified whenever the players or their order has changed */
     fun onPlayersChanged() {
         updatePlayerVisibilities()
         updateMediaPaddings()
@@ -530,8 +518,8 @@ class MediaCarouselScrollHandler(
     }
 
     /**
-     * Notify that a player will be removed right away. This gives us the opporunity to look
-     * where it was and update our scroll position.
+     * Notify that a player will be removed right away. This gives us the opporunity to look where
+     * it was and update our scroll position.
      */
     fun onPrePlayerRemoved(removed: MediaControlPanel) {
         val removedIndex = mediaContent.indexOfChild(removed.mediaViewHolder?.player)
@@ -551,9 +539,7 @@ class MediaCarouselScrollHandler(
         }
     }
 
-    /**
-     * Update the bounds of the carousel
-     */
+    /** Update the bounds of the carousel */
     fun setCarouselBounds(currentCarouselWidth: Int, currentCarouselHeight: Int) {
         if (currentCarouselHeight != carouselHeight || currentCarouselWidth != carouselHeight) {
             carouselWidth = currentCarouselWidth
@@ -562,9 +548,7 @@ class MediaCarouselScrollHandler(
         }
     }
 
-    /**
-     * Reset the MediaScrollView to the start.
-     */
+    /** Reset the MediaScrollView to the start. */
     fun scrollToStart() {
         scrollView.relativeScrollX = 0
     }
@@ -582,21 +566,22 @@ class MediaCarouselScrollHandler(
         val destIndex = Math.min(mediaContent.getChildCount() - 1, destIndex)
         val view = mediaContent.getChildAt(destIndex)
         // We need to post this to wait for the active player becomes visible.
-        mainExecutor.executeDelayed({
-            scrollView.smoothScrollTo(view.left, scrollView.scrollY)
-        }, SCROLL_DELAY)
+        mainExecutor.executeDelayed(
+            { scrollView.smoothScrollTo(view.left, scrollView.scrollY) },
+            SCROLL_DELAY
+        )
     }
 
     companion object {
-        private val CONTENT_TRANSLATION = object : FloatPropertyCompat<MediaCarouselScrollHandler>(
-                "contentTranslation") {
-            override fun getValue(handler: MediaCarouselScrollHandler): Float {
-                return handler.contentTranslation
-            }
+        private val CONTENT_TRANSLATION =
+            object : FloatPropertyCompat<MediaCarouselScrollHandler>("contentTranslation") {
+                override fun getValue(handler: MediaCarouselScrollHandler): Float {
+                    return handler.contentTranslation
+                }
 
-            override fun setValue(handler: MediaCarouselScrollHandler, value: Float) {
-                handler.contentTranslation = value
+                override fun setValue(handler: MediaCarouselScrollHandler, value: Float) {
+                    handler.contentTranslation = value
+                }
             }
-        }
     }
 }

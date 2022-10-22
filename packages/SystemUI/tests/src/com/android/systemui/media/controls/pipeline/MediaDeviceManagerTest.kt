@@ -113,7 +113,8 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         fakeFgExecutor = FakeExecutor(FakeSystemClock())
         fakeBgExecutor = FakeExecutor(FakeSystemClock())
         localBluetoothManager = mDependency.injectMockDependency(LocalBluetoothManager::class.java)
-        manager = MediaDeviceManager(
+        manager =
+            MediaDeviceManager(
                 context,
                 controllerFactory,
                 lmmFactory,
@@ -124,7 +125,7 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
                 fakeFgExecutor,
                 fakeBgExecutor,
                 dumpster
-        )
+            )
         manager.addListener(listener)
 
         // Configure mocks.
@@ -138,11 +139,9 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         // Create a media sesssion and notification for testing.
         session = MediaSession(context, SESSION_KEY)
 
-        mediaData = MediaTestUtils.emptyMediaData.copy(
-                packageName = PACKAGE,
-                token = session.sessionToken)
-        whenever(controllerFactory.create(session.sessionToken))
-                .thenReturn(controller)
+        mediaData =
+            MediaTestUtils.emptyMediaData.copy(packageName = PACKAGE, token = session.sessionToken)
+        whenever(controllerFactory.create(session.sessionToken)).thenReturn(controller)
         setupLeAudioConfiguration(false)
     }
 
@@ -358,7 +357,9 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         val deviceCallback = captureCallback()
         // First set a non-null about-to-connect device
         deviceCallback.onAboutToConnectDeviceAdded(
-            "fakeAddress", "AboutToConnectDeviceName", mock(Drawable::class.java)
+            "fakeAddress",
+            "AboutToConnectDeviceName",
+            mock(Drawable::class.java)
         )
         // Run and reset the executors and listeners so we only focus on new events.
         fakeBgExecutor.runAllReady()
@@ -587,8 +588,8 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
     @Test
     fun testRemotePlaybackDeviceOverride() {
         whenever(route.name).thenReturn(DEVICE_NAME)
-        val deviceData = MediaDeviceData(false, null, REMOTE_DEVICE_NAME, null,
-                showBroadcastButton = false)
+        val deviceData =
+            MediaDeviceData(false, null, REMOTE_DEVICE_NAME, null, showBroadcastButton = false)
         val mediaDataWithDevice = mediaData.copy(device = deviceData)
 
         // GIVEN media data that already has a device set
@@ -617,8 +618,8 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         val data = captureDeviceData(KEY)
         assertThat(data.showBroadcastButton).isTrue()
         assertThat(data.enabled).isTrue()
-        assertThat(data.name).isEqualTo(context.getString(
-                R.string.broadcasting_description_is_broadcasting))
+        assertThat(data.name)
+            .isEqualTo(context.getString(R.string.broadcasting_description_is_broadcasting))
     }
 
     @Test
@@ -659,20 +660,21 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
     }
 
     fun setupBroadcastCallback(): BluetoothLeBroadcast.Callback {
-        val callback: BluetoothLeBroadcast.Callback = object : BluetoothLeBroadcast.Callback {
-            override fun onBroadcastStarted(reason: Int, broadcastId: Int) {}
-            override fun onBroadcastStartFailed(reason: Int) {}
-            override fun onBroadcastStopped(reason: Int, broadcastId: Int) {}
-            override fun onBroadcastStopFailed(reason: Int) {}
-            override fun onPlaybackStarted(reason: Int, broadcastId: Int) {}
-            override fun onPlaybackStopped(reason: Int, broadcastId: Int) {}
-            override fun onBroadcastUpdated(reason: Int, broadcastId: Int) {}
-            override fun onBroadcastUpdateFailed(reason: Int, broadcastId: Int) {}
-            override fun onBroadcastMetadataChanged(
-                broadcastId: Int,
-                metadata: BluetoothLeBroadcastMetadata
-            ) {}
-        }
+        val callback: BluetoothLeBroadcast.Callback =
+            object : BluetoothLeBroadcast.Callback {
+                override fun onBroadcastStarted(reason: Int, broadcastId: Int) {}
+                override fun onBroadcastStartFailed(reason: Int) {}
+                override fun onBroadcastStopped(reason: Int, broadcastId: Int) {}
+                override fun onBroadcastStopFailed(reason: Int) {}
+                override fun onPlaybackStarted(reason: Int, broadcastId: Int) {}
+                override fun onPlaybackStopped(reason: Int, broadcastId: Int) {}
+                override fun onBroadcastUpdated(reason: Int, broadcastId: Int) {}
+                override fun onBroadcastUpdateFailed(reason: Int, broadcastId: Int) {}
+                override fun onBroadcastMetadataChanged(
+                    broadcastId: Int,
+                    metadata: BluetoothLeBroadcastMetadata
+                ) {}
+            }
 
         bluetoothLeBroadcast.registerCallback(fakeFgExecutor, callback)
         return callback
@@ -681,7 +683,7 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
     fun setupLeAudioConfiguration(isLeAudio: Boolean) {
         whenever(localBluetoothManager.profileManager).thenReturn(localBluetoothProfileManager)
         whenever(localBluetoothProfileManager.leAudioBroadcastProfile)
-                .thenReturn(localBluetoothLeBroadcast)
+            .thenReturn(localBluetoothLeBroadcast)
         whenever(localBluetoothLeBroadcast.isEnabled(any())).thenReturn(isLeAudio)
         whenever(localBluetoothLeBroadcast.appSourceName).thenReturn(BROADCAST_APP_NAME)
     }
@@ -689,7 +691,7 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
     fun setupBroadcastPackage(currentName: String) {
         whenever(lmm.packageName).thenReturn(PACKAGE)
         whenever(packageManager.getApplicationInfo(eq(PACKAGE), anyInt()))
-                .thenReturn(applicationInfo)
+            .thenReturn(applicationInfo)
         whenever(packageManager.getApplicationLabel(applicationInfo)).thenReturn(currentName)
         context.setMockPackageManager(packageManager)
     }

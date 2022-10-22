@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.android.systemui.media.controls.ui
 
 import android.animation.Animator
@@ -23,8 +39,7 @@ import kotlin.math.cos
 private const val TAG = "Squiggly"
 
 private const val TWO_PI = (Math.PI * 2f).toFloat()
-@VisibleForTesting
-internal const val DISABLED_ALPHA = 77
+@VisibleForTesting internal const val DISABLED_ALPHA = 77
 
 class SquigglyProgress : Drawable() {
 
@@ -86,26 +101,29 @@ class SquigglyProgress : Drawable() {
                 lastFrameTime = SystemClock.uptimeMillis()
             }
             heightAnimator?.cancel()
-            heightAnimator = ValueAnimator.ofFloat(heightFraction, if (animate) 1f else 0f).apply {
-                if (animate) {
-                    startDelay = 60
-                    duration = 800
-                    interpolator = Interpolators.EMPHASIZED_DECELERATE
-                } else {
-                    duration = 550
-                    interpolator = Interpolators.STANDARD_DECELERATE
-                }
-                addUpdateListener {
-                    heightFraction = it.animatedValue as Float
-                    invalidateSelf()
-                }
-                addListener(object : AnimatorListenerAdapter() {
-                    override fun onAnimationEnd(animation: Animator?) {
-                        heightAnimator = null
+            heightAnimator =
+                ValueAnimator.ofFloat(heightFraction, if (animate) 1f else 0f).apply {
+                    if (animate) {
+                        startDelay = 60
+                        duration = 800
+                        interpolator = Interpolators.EMPHASIZED_DECELERATE
+                    } else {
+                        duration = 550
+                        interpolator = Interpolators.STANDARD_DECELERATE
                     }
-                })
-                start()
-            }
+                    addUpdateListener {
+                        heightFraction = it.animatedValue as Float
+                        invalidateSelf()
+                    }
+                    addListener(
+                        object : AnimatorListenerAdapter() {
+                            override fun onAnimationEnd(animation: Animator?) {
+                                heightAnimator = null
+                            }
+                        }
+                    )
+                    start()
+                }
         }
 
     override fun draw(canvas: Canvas) {
@@ -120,9 +138,15 @@ class SquigglyProgress : Drawable() {
         val progress = level / 10_000f
         val totalWidth = bounds.width().toFloat()
         val totalProgressPx = totalWidth * progress
-        val waveProgressPx = totalWidth * (
-            if (!transitionEnabled || progress > matchedWaveEndpoint) progress else
-            lerp(minWaveEndpoint, matchedWaveEndpoint, lerpInv(0f, matchedWaveEndpoint, progress)))
+        val waveProgressPx =
+            totalWidth *
+                (if (!transitionEnabled || progress > matchedWaveEndpoint) progress
+                else
+                    lerp(
+                        minWaveEndpoint,
+                        matchedWaveEndpoint,
+                        lerpInv(0f, matchedWaveEndpoint, progress)
+                    ))
 
         // Build Wiggly Path
         val waveStart = -phaseOffset - waveLength / 2f
@@ -132,10 +156,8 @@ class SquigglyProgress : Drawable() {
         val computeAmplitude: (Float, Float) -> Float = { x, sign ->
             if (transitionEnabled) {
                 val length = transitionPeriods * waveLength
-                val coeff = lerpInvSat(
-                    waveProgressPx + length / 2f,
-                    waveProgressPx - length / 2f,
-                    x)
+                val coeff =
+                    lerpInvSat(waveProgressPx + length / 2f, waveProgressPx - length / 2f, x)
                 sign * heightFraction * lineAmplitude * coeff
             } else {
                 sign * heightFraction * lineAmplitude
@@ -156,10 +178,7 @@ class SquigglyProgress : Drawable() {
             val nextX = currentX + dist
             val midX = currentX + dist / 2
             val nextAmp = computeAmplitude(nextX, waveSign)
-            path.cubicTo(
-                midX, currentAmp,
-                midX, nextAmp,
-                nextX, nextAmp)
+            path.cubicTo(midX, currentAmp, midX, nextAmp, nextX, nextAmp)
             currentAmp = nextAmp
             currentX = nextX
         }
@@ -229,7 +248,7 @@ class SquigglyProgress : Drawable() {
 
     private fun updateColors(tintColor: Int, alpha: Int) {
         wavePaint.color = ColorUtils.setAlphaComponent(tintColor, alpha)
-        linePaint.color = ColorUtils.setAlphaComponent(tintColor,
-                (DISABLED_ALPHA * (alpha / 255f)).toInt())
+        linePaint.color =
+            ColorUtils.setAlphaComponent(tintColor, (DISABLED_ALPHA * (alpha / 255f)).toInt())
     }
 }

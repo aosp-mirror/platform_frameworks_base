@@ -45,7 +45,9 @@ import javax.inject.Named
  * switches media player positioning between split pane container vs single pane container
  */
 @SysUISingleton
-class KeyguardMediaController @Inject constructor(
+class KeyguardMediaController
+@Inject
+constructor(
     @param:Named(KEYGUARD) private val mediaHost: MediaHost,
     private val bypassController: KeyguardBypassController,
     private val statusBarStateController: SysuiStatusBarStateController,
@@ -56,34 +58,40 @@ class KeyguardMediaController @Inject constructor(
 ) {
 
     init {
-        statusBarStateController.addCallback(object : StatusBarStateController.StateListener {
-            override fun onStateChanged(newState: Int) {
-                refreshMediaPosition()
-            }
-        })
-        configurationController.addCallback(object : ConfigurationController.ConfigurationListener {
-            override fun onConfigChanged(newConfig: Configuration?) {
-                updateResources()
-            }
-        })
-
-        val settingsObserver: ContentObserver = object : ContentObserver(handler) {
-            override fun onChange(selfChange: Boolean, uri: Uri?) {
-                if (uri == lockScreenMediaPlayerUri) {
-                    allowMediaPlayerOnLockScreen =
-                            secureSettings.getBoolForUser(
-                                    Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN,
-                                    true,
-                                    UserHandle.USER_CURRENT
-                            )
+        statusBarStateController.addCallback(
+            object : StatusBarStateController.StateListener {
+                override fun onStateChanged(newState: Int) {
                     refreshMediaPosition()
                 }
             }
-        }
+        )
+        configurationController.addCallback(
+            object : ConfigurationController.ConfigurationListener {
+                override fun onConfigChanged(newConfig: Configuration?) {
+                    updateResources()
+                }
+            }
+        )
+
+        val settingsObserver: ContentObserver =
+            object : ContentObserver(handler) {
+                override fun onChange(selfChange: Boolean, uri: Uri?) {
+                    if (uri == lockScreenMediaPlayerUri) {
+                        allowMediaPlayerOnLockScreen =
+                            secureSettings.getBoolForUser(
+                                Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN,
+                                true,
+                                UserHandle.USER_CURRENT
+                            )
+                        refreshMediaPosition()
+                    }
+                }
+            }
         secureSettings.registerContentObserverForUser(
-                Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN,
-                settingsObserver,
-                UserHandle.USER_ALL)
+            Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN,
+            settingsObserver,
+            UserHandle.USER_ALL
+        )
 
         // First let's set the desired state that we want for this host
         mediaHost.expansion = MediaHostState.EXPANDED
@@ -110,27 +118,21 @@ class KeyguardMediaController @Inject constructor(
             refreshMediaPosition()
         }
 
-    /**
-     * Is the media player visible?
-     */
+    /** Is the media player visible? */
     var visible = false
         private set
 
     var visibilityChangedListener: ((Boolean) -> Unit)? = null
 
-    /**
-     * single pane media container placed at the top of the notifications list
-     */
+    /** single pane media container placed at the top of the notifications list */
     var singlePaneContainer: MediaContainerView? = null
         private set
     private var splitShadeContainer: ViewGroup? = null
 
-    /**
-     * Track the media player setting status on lock screen.
-     */
+    /** Track the media player setting status on lock screen. */
     private var allowMediaPlayerOnLockScreen: Boolean = true
     private val lockScreenMediaPlayerUri =
-            secureSettings.getUriFor(Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN)
+        secureSettings.getUriFor(Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN)
 
     /**
      * Attaches media container in single pane mode, situated at the top of the notifications list
@@ -146,9 +148,7 @@ class KeyguardMediaController @Inject constructor(
         onMediaHostVisibilityChanged(mediaHost.visible)
     }
 
-    /**
-     * Called whenever the media hosts visibility changes
-     */
+    /** Called whenever the media hosts visibility changes */
     private fun onMediaHostVisibilityChanged(visible: Boolean) {
         refreshMediaPosition()
         if (visible) {
@@ -159,9 +159,7 @@ class KeyguardMediaController @Inject constructor(
         }
     }
 
-    /**
-     * Attaches media container in split shade mode, situated to the left of notifications
-     */
+    /** Attaches media container in split shade mode, situated to the left of notifications */
     fun attachSplitShadeContainer(container: ViewGroup) {
         splitShadeContainer = container
         reattachHostView()
@@ -183,9 +181,7 @@ class KeyguardMediaController @Inject constructor(
         }
         if (activeContainer?.childCount == 0) {
             // Detach the hostView from its parent view if exists
-            mediaHost.hostView.parent?.let {
-                (it as? ViewGroup)?.removeView(mediaHost.hostView)
-            }
+            mediaHost.hostView.parent?.let { (it as? ViewGroup)?.removeView(mediaHost.hostView) }
             activeContainer.addView(mediaHost.hostView)
         }
     }
@@ -193,7 +189,8 @@ class KeyguardMediaController @Inject constructor(
     fun refreshMediaPosition() {
         val keyguardOrUserSwitcher = (statusBarStateController.state == StatusBarState.KEYGUARD)
         // mediaHost.visible required for proper animations handling
-        visible = mediaHost.visible &&
+        visible =
+            mediaHost.visible &&
                 !bypassController.bypassEnabled &&
                 keyguardOrUserSwitcher &&
                 allowMediaPlayerOnLockScreen

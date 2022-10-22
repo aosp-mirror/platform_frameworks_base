@@ -22,140 +22,91 @@ import com.android.systemui.log.dagger.MediaTimeoutListenerLog
 import com.android.systemui.plugins.log.LogBuffer
 import com.android.systemui.plugins.log.LogLevel
 import javax.inject.Inject
+
 private const val TAG = "MediaTimeout"
 
-/**
- * A buffered log for [MediaTimeoutListener] events
- */
+/** A buffered log for [MediaTimeoutListener] events */
 @SysUISingleton
-class MediaTimeoutLogger @Inject constructor(
-    @MediaTimeoutListenerLog private val buffer: LogBuffer
-) {
-    fun logReuseListener(key: String) = buffer.log(
-        TAG,
-        LogLevel.DEBUG,
-        {
-            str1 = key
-        },
-        {
-            "reuse listener: $str1"
-        }
-    )
+class MediaTimeoutLogger
+@Inject
+constructor(@MediaTimeoutListenerLog private val buffer: LogBuffer) {
+    fun logReuseListener(key: String) =
+        buffer.log(TAG, LogLevel.DEBUG, { str1 = key }, { "reuse listener: $str1" })
 
-    fun logMigrateListener(oldKey: String?, newKey: String?, hadListener: Boolean) = buffer.log(
-        TAG,
-        LogLevel.DEBUG,
-        {
-            str1 = oldKey
-            str2 = newKey
-            bool1 = hadListener
-        },
-        {
-            "migrate from $str1 to $str2, had listener? $bool1"
-        }
-    )
+    fun logMigrateListener(oldKey: String?, newKey: String?, hadListener: Boolean) =
+        buffer.log(
+            TAG,
+            LogLevel.DEBUG,
+            {
+                str1 = oldKey
+                str2 = newKey
+                bool1 = hadListener
+            },
+            { "migrate from $str1 to $str2, had listener? $bool1" }
+        )
 
-    fun logUpdateListener(key: String, wasPlaying: Boolean) = buffer.log(
-        TAG,
-        LogLevel.DEBUG,
-        {
-            str1 = key
-            bool1 = wasPlaying
-        },
-        {
-            "updating $str1, was playing? $bool1"
-        }
-    )
+    fun logUpdateListener(key: String, wasPlaying: Boolean) =
+        buffer.log(
+            TAG,
+            LogLevel.DEBUG,
+            {
+                str1 = key
+                bool1 = wasPlaying
+            },
+            { "updating $str1, was playing? $bool1" }
+        )
 
-    fun logDelayedUpdate(key: String) = buffer.log(
-        TAG,
-        LogLevel.DEBUG,
-        {
-            str1 = key
-        },
-        {
-            "deliver delayed playback state for $str1"
-        }
-    )
+    fun logDelayedUpdate(key: String) =
+        buffer.log(
+            TAG,
+            LogLevel.DEBUG,
+            { str1 = key },
+            { "deliver delayed playback state for $str1" }
+        )
 
-    fun logSessionDestroyed(key: String) = buffer.log(
-        TAG,
-        LogLevel.DEBUG,
-        {
-            str1 = key
-        },
-        {
-            "session destroyed $str1"
-        }
-    )
+    fun logSessionDestroyed(key: String) =
+        buffer.log(TAG, LogLevel.DEBUG, { str1 = key }, { "session destroyed $str1" })
 
-    fun logPlaybackState(key: String, state: PlaybackState?) = buffer.log(
-        TAG,
-        LogLevel.VERBOSE,
-        {
-            str1 = key
-            str2 = state?.toString()
-        },
-        {
-            "state update: key=$str1 state=$str2"
-        }
-    )
-
-    fun logStateCallback(key: String) = buffer.log(
+    fun logPlaybackState(key: String, state: PlaybackState?) =
+        buffer.log(
             TAG,
             LogLevel.VERBOSE,
             {
                 str1 = key
+                str2 = state?.toString()
             },
+            { "state update: key=$str1 state=$str2" }
+        )
+
+    fun logStateCallback(key: String) =
+        buffer.log(TAG, LogLevel.VERBOSE, { str1 = key }, { "dispatching state update for $key" })
+
+    fun logScheduleTimeout(key: String, playing: Boolean, resumption: Boolean) =
+        buffer.log(
+            TAG,
+            LogLevel.DEBUG,
             {
-                "dispatching state update for $key"
-            }
-    )
+                str1 = key
+                bool1 = playing
+                bool2 = resumption
+            },
+            { "schedule timeout $str1, playing=$bool1 resumption=$bool2" }
+        )
 
-    fun logScheduleTimeout(key: String, playing: Boolean, resumption: Boolean) = buffer.log(
-        TAG,
-        LogLevel.DEBUG,
-        {
-            str1 = key
-            bool1 = playing
-            bool2 = resumption
-        },
-        {
-            "schedule timeout $str1, playing=$bool1 resumption=$bool2"
-        }
-    )
+    fun logCancelIgnored(key: String) =
+        buffer.log(TAG, LogLevel.DEBUG, { str1 = key }, { "cancellation already exists for $str1" })
 
-    fun logCancelIgnored(key: String) = buffer.log(
-        TAG,
-        LogLevel.DEBUG,
-        {
-            str1 = key
-        },
-        {
-            "cancellation already exists for $str1"
-        }
-    )
+    fun logTimeout(key: String) =
+        buffer.log(TAG, LogLevel.DEBUG, { str1 = key }, { "execute timeout for $str1" })
 
-    fun logTimeout(key: String) = buffer.log(
-        TAG,
-        LogLevel.DEBUG,
-        {
-            str1 = key
-        },
-        {
-            "execute timeout for $str1"
-        }
-    )
-
-    fun logTimeoutCancelled(key: String, reason: String) = buffer.log(
-        TAG,
-        LogLevel.VERBOSE,
-        {
-            str1 = key
-            str2 = reason
-        },
-        {
-            "media timeout cancelled for $str1, reason: $str2"
-        }
-    )
+    fun logTimeoutCancelled(key: String, reason: String) =
+        buffer.log(
+            TAG,
+            LogLevel.VERBOSE,
+            {
+                str1 = key
+                str2 = reason
+            },
+            { "media timeout cancelled for $str1, reason: $str2" }
+        )
 }

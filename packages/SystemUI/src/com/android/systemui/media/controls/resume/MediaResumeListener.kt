@@ -50,7 +50,9 @@ private const val MEDIA_PREFERENCES = "media_control_prefs"
 private const val MEDIA_PREFERENCE_KEY = "browser_components_"
 
 @SysUISingleton
-class MediaResumeListener @Inject constructor(
+class MediaResumeListener
+@Inject
+constructor(
     private val context: Context,
     private val broadcastDispatcher: BroadcastDispatcher,
     @Background private val backgroundExecutor: Executor,
@@ -62,7 +64,7 @@ class MediaResumeListener @Inject constructor(
 
     private var useMediaResumption: Boolean = Utils.useMediaResumption(context)
     private val resumeComponents: ConcurrentLinkedQueue<Pair<ComponentName, Long>> =
-            ConcurrentLinkedQueue()
+        ConcurrentLinkedQueue()
 
     private lateinit var mediaDataManager: MediaDataManager
 
@@ -75,40 +77,49 @@ class MediaResumeListener @Inject constructor(
     private var currentUserId: Int = context.userId
 
     @VisibleForTesting
-    val userChangeReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            if (Intent.ACTION_USER_UNLOCKED == intent.action) {
-                loadMediaResumptionControls()
-            } else if (Intent.ACTION_USER_SWITCHED == intent.action) {
-                currentUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1)
-                loadSavedComponents()
+    val userChangeReceiver =
+        object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                if (Intent.ACTION_USER_UNLOCKED == intent.action) {
+                    loadMediaResumptionControls()
+                } else if (Intent.ACTION_USER_SWITCHED == intent.action) {
+                    currentUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1)
+                    loadSavedComponents()
+                }
             }
         }
-    }
 
-    private val mediaBrowserCallback = object : ResumeMediaBrowser.Callback() {
-        override fun addTrack(
-            desc: MediaDescription,
-            component: ComponentName,
-            browser: ResumeMediaBrowser
-        ) {
-            val token = browser.token
-            val appIntent = browser.appIntent
-            val pm = context.getPackageManager()
-            var appName: CharSequence = component.packageName
-            val resumeAction = getResumeAction(component)
-            try {
-                appName = pm.getApplicationLabel(
-                        pm.getApplicationInfo(component.packageName, 0))
-            } catch (e: PackageManager.NameNotFoundException) {
-                Log.e(TAG, "Error getting package information", e)
+    private val mediaBrowserCallback =
+        object : ResumeMediaBrowser.Callback() {
+            override fun addTrack(
+                desc: MediaDescription,
+                component: ComponentName,
+                browser: ResumeMediaBrowser
+            ) {
+                val token = browser.token
+                val appIntent = browser.appIntent
+                val pm = context.getPackageManager()
+                var appName: CharSequence = component.packageName
+                val resumeAction = getResumeAction(component)
+                try {
+                    appName =
+                        pm.getApplicationLabel(pm.getApplicationInfo(component.packageName, 0))
+                } catch (e: PackageManager.NameNotFoundException) {
+                    Log.e(TAG, "Error getting package information", e)
+                }
+
+                Log.d(TAG, "Adding resume controls $desc")
+                mediaDataManager.addResumptionControls(
+                    currentUserId,
+                    desc,
+                    resumeAction,
+                    token,
+                    appName.toString(),
+                    appIntent,
+                    component.packageName
+                )
             }
-
-            Log.d(TAG, "Adding resume controls $desc")
-            mediaDataManager.addResumptionControls(currentUserId, desc, resumeAction, token,
-                appName.toString(), appIntent, component.packageName)
         }
-    }
 
     init {
         if (useMediaResumption) {
@@ -116,8 +127,12 @@ class MediaResumeListener @Inject constructor(
             val unlockFilter = IntentFilter()
             unlockFilter.addAction(Intent.ACTION_USER_UNLOCKED)
             unlockFilter.addAction(Intent.ACTION_USER_SWITCHED)
-            broadcastDispatcher.registerReceiver(userChangeReceiver, unlockFilter, null,
-                UserHandle.ALL)
+            broadcastDispatcher.registerReceiver(
+                userChangeReceiver,
+                unlockFilter,
+                null,
+                UserHandle.ALL
+            )
             loadSavedComponents()
         }
     }
@@ -126,12 +141,15 @@ class MediaResumeListener @Inject constructor(
         mediaDataManager = manager
 
         // Add listener for resumption setting changes
-        tunerService.addTunable(object : TunerService.Tunable {
-            override fun onTuningChanged(key: String?, newValue: String?) {
-                useMediaResumption = Utils.useMediaResumption(context)
-                mediaDataManager.setMediaResumptionEnabled(useMediaResumption)
-            }
-        }, Settings.Secure.MEDIA_CONTROLS_RESUME)
+        tunerService.addTunable(
+            object : TunerService.Tunable {
+                override fun onTuningChanged(key: String?, newValue: String?) {
+                    useMediaResumption = Utils.useMediaResumption(context)
+                    mediaDataManager.setMediaResumptionEnabled(useMediaResumption)
+                }
+            },
+            Settings.Secure.MEDIA_CONTROLS_RESUME
+        )
     }
 
     private fun loadSavedComponents() {
@@ -139,8 +157,10 @@ class MediaResumeListener @Inject constructor(
         resumeComponents.clear()
         val prefs = context.getSharedPreferences(MEDIA_PREFERENCES, Context.MODE_PRIVATE)
         val listString = prefs.getString(MEDIA_PREFERENCE_KEY + currentUserId, null)
-        val components = listString?.split(ResumeMediaBrowser.DELIMITER.toRegex())
-            ?.dropLastWhile { it.isEmpty() }
+        val components =
+            listString?.split(ResumeMediaBrowser.DELIMITER.toRegex())?.dropLastWhile {
+                it.isEmpty()
+            }
         var needsUpdate = false
         components?.forEach {
             val info = it.split("/")
@@ -148,17 +168,18 @@ class MediaResumeListener @Inject constructor(
             val className = info[1]
             val component = ComponentName(packageName, className)
 
-            val lastPlayed = if (info.size == 3) {
-                try {
-                    info[2].toLong()
-                } catch (e: NumberFormatException) {
+            val lastPlayed =
+                if (info.size == 3) {
+                    try {
+                        info[2].toLong()
+                    } catch (e: NumberFormatException) {
+                        needsUpdate = true
+                        systemClock.currentTimeMillis()
+                    }
+                } else {
                     needsUpdate = true
                     systemClock.currentTimeMillis()
                 }
-            } else {
-                needsUpdate = true
-                systemClock.currentTimeMillis()
-            }
             resumeComponents.add(component to lastPlayed)
         }
         Log.d(TAG, "loaded resume components ${resumeComponents.toArray().contentToString()}")
@@ -169,9 +190,7 @@ class MediaResumeListener @Inject constructor(
         }
     }
 
-    /**
-     * Load controls for resuming media, if available
-     */
+    /** Load controls for resuming media, if available */
     private fun loadMediaResumptionControls() {
         if (!useMediaResumption) {
             return
@@ -207,9 +226,7 @@ class MediaResumeListener @Inject constructor(
                 val serviceIntent = Intent(MediaBrowserService.SERVICE_INTERFACE)
                 val resumeInfo = pm.queryIntentServices(serviceIntent, 0)
 
-                val inf = resumeInfo?.filter {
-                    it.serviceInfo.packageName == data.packageName
-                }
+                val inf = resumeInfo?.filter { it.serviceInfo.packageName == data.packageName }
                 if (inf != null && inf.size > 0) {
                     backgroundExecutor.execute {
                         tryUpdateResumptionList(key, inf!!.get(0).componentInfo.componentName)
@@ -230,7 +247,8 @@ class MediaResumeListener @Inject constructor(
         Log.d(TAG, "Testing if we can connect to $componentName")
         // Set null action to prevent additional attempts to connect
         mediaDataManager.setResumeAction(key, null)
-        mediaBrowser = mediaBrowserFactory.create(
+        mediaBrowser =
+            mediaBrowserFactory.create(
                 object : ResumeMediaBrowser.Callback() {
                     override fun onConnected() {
                         Log.d(TAG, "Connected to $componentName")
@@ -253,7 +271,8 @@ class MediaResumeListener @Inject constructor(
                         mediaBrowser = null
                     }
                 },
-                componentName)
+                componentName
+            )
         mediaBrowser?.testConnection()
     }
 
@@ -288,9 +307,7 @@ class MediaResumeListener @Inject constructor(
         prefs.edit().putString(MEDIA_PREFERENCE_KEY + currentUserId, sb.toString()).apply()
     }
 
-    /**
-     * Get a runnable which will resume media playback
-     */
+    /** Get a runnable which will resume media playback */
     private fun getResumeAction(componentName: ComponentName): Runnable {
         return Runnable {
             mediaBrowser = mediaBrowserFactory.create(null, componentName)
@@ -299,8 +316,6 @@ class MediaResumeListener @Inject constructor(
     }
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {
-        pw.apply {
-            println("resumeComponents: $resumeComponents")
-        }
+        pw.apply { println("resumeComponents: $resumeComponents") }
     }
 }

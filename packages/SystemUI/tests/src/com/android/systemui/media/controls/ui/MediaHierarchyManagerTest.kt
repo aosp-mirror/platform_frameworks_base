@@ -84,10 +84,8 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
     private lateinit var statusBarCallback: ArgumentCaptor<(StatusBarStateController.StateListener)>
     @Captor
     private lateinit var dreamOverlayCallback:
-            ArgumentCaptor<(DreamOverlayStateController.Callback)>
-    @JvmField
-    @Rule
-    val mockito = MockitoJUnit.rule()
+        ArgumentCaptor<(DreamOverlayStateController.Callback)>
+    @JvmField @Rule val mockito = MockitoJUnit.rule()
     private lateinit var mediaHierarchyManager: MediaHierarchyManager
     private lateinit var mediaFrame: ViewGroup
     private val configurationController = FakeConfigurationController()
@@ -98,13 +96,15 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
 
     @Before
     fun setup() {
-        context.getOrCreateTestableResources().addOverride(
-                R.bool.config_use_split_notification_shade, false)
+        context
+            .getOrCreateTestableResources()
+            .addOverride(R.bool.config_use_split_notification_shade, false)
         mediaFrame = FrameLayout(context)
         testableLooper = TestableLooper.get(this)
         fakeHandler = FakeHandler(testableLooper.looper)
         whenever(mediaCarouselController.mediaFrame).thenReturn(mediaFrame)
-        mediaHierarchyManager = MediaHierarchyManager(
+        mediaHierarchyManager =
+            MediaHierarchyManager(
                 context,
                 statusBarStateController,
                 keyguardStateController,
@@ -116,7 +116,8 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                 wakefulnessLifecycle,
                 notifPanelEvents,
                 settings,
-                fakeHandler,)
+                fakeHandler,
+            )
         verify(wakefulnessLifecycle).addObserver(wakefullnessObserver.capture())
         verify(statusBarStateController).addCallback(statusBarCallback.capture())
         verify(dreamOverlayStateController).addCallback(dreamOverlayCallback.capture())
@@ -125,7 +126,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
         setupHost(qqsHost, MediaHierarchyManager.LOCATION_QQS, QQS_TOP)
         whenever(statusBarStateController.state).thenReturn(StatusBarState.SHADE)
         whenever(mediaCarouselController.mediaCarouselScrollHandler)
-                .thenReturn(mediaCarouselScrollHandler)
+            .thenReturn(mediaCarouselScrollHandler)
         val observer = wakefullnessObserver.value
         assertNotNull("lifecycle observer wasn't registered", observer)
         observer.onFinishedWakingUp()
@@ -151,30 +152,53 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
     fun testBlockedWhenScreenTurningOff() {
         // Let's set it onto QS:
         mediaHierarchyManager.qsExpansion = 1.0f
-        verify(mediaCarouselController).onDesiredLocationChanged(ArgumentMatchers.anyInt(),
-                any(MediaHostState::class.java), anyBoolean(), anyLong(), anyLong())
+        verify(mediaCarouselController)
+            .onDesiredLocationChanged(
+                ArgumentMatchers.anyInt(),
+                any(MediaHostState::class.java),
+                anyBoolean(),
+                anyLong(),
+                anyLong()
+            )
         val observer = wakefullnessObserver.value
         assertNotNull("lifecycle observer wasn't registered", observer)
         observer.onStartedGoingToSleep()
         clearInvocations(mediaCarouselController)
         mediaHierarchyManager.qsExpansion = 0.0f
         verify(mediaCarouselController, times(0))
-                .onDesiredLocationChanged(ArgumentMatchers.anyInt(),
-                any(MediaHostState::class.java), anyBoolean(), anyLong(), anyLong())
+            .onDesiredLocationChanged(
+                ArgumentMatchers.anyInt(),
+                any(MediaHostState::class.java),
+                anyBoolean(),
+                anyLong(),
+                anyLong()
+            )
     }
 
     @Test
     fun testAllowedWhenNotTurningOff() {
         // Let's set it onto QS:
         mediaHierarchyManager.qsExpansion = 1.0f
-        verify(mediaCarouselController).onDesiredLocationChanged(ArgumentMatchers.anyInt(),
-                any(MediaHostState::class.java), anyBoolean(), anyLong(), anyLong())
+        verify(mediaCarouselController)
+            .onDesiredLocationChanged(
+                ArgumentMatchers.anyInt(),
+                any(MediaHostState::class.java),
+                anyBoolean(),
+                anyLong(),
+                anyLong()
+            )
         val observer = wakefullnessObserver.value
         assertNotNull("lifecycle observer wasn't registered", observer)
         clearInvocations(mediaCarouselController)
         mediaHierarchyManager.qsExpansion = 0.0f
-        verify(mediaCarouselController).onDesiredLocationChanged(ArgumentMatchers.anyInt(),
-                any(MediaHostState::class.java), anyBoolean(), anyLong(), anyLong())
+        verify(mediaCarouselController)
+            .onDesiredLocationChanged(
+                ArgumentMatchers.anyInt(),
+                any(MediaHostState::class.java),
+                anyBoolean(),
+                anyLong(),
+                anyLong()
+            )
     }
 
     @Test
@@ -183,22 +207,26 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
 
         // Let's transition all the way to full shade
         mediaHierarchyManager.setTransitionToFullShadeAmount(100000f)
-        verify(mediaCarouselController).onDesiredLocationChanged(
-            eq(MediaHierarchyManager.LOCATION_QQS),
-            any(MediaHostState::class.java),
-            eq(false),
-            anyLong(),
-            anyLong())
+        verify(mediaCarouselController)
+            .onDesiredLocationChanged(
+                eq(MediaHierarchyManager.LOCATION_QQS),
+                any(MediaHostState::class.java),
+                eq(false),
+                anyLong(),
+                anyLong()
+            )
         clearInvocations(mediaCarouselController)
 
         // Let's go back to the lock screen
         mediaHierarchyManager.setTransitionToFullShadeAmount(0.0f)
-        verify(mediaCarouselController).onDesiredLocationChanged(
-            eq(MediaHierarchyManager.LOCATION_LOCKSCREEN),
-            any(MediaHostState::class.java),
-            eq(false),
-            anyLong(),
-            anyLong())
+        verify(mediaCarouselController)
+            .onDesiredLocationChanged(
+                eq(MediaHierarchyManager.LOCATION_LOCKSCREEN),
+                any(MediaHostState::class.java),
+                eq(false),
+                anyLong(),
+                anyLong()
+            )
 
         // Let's make sure alpha is set
         mediaHierarchyManager.setTransitionToFullShadeAmount(2.0f)
@@ -302,7 +330,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
 
         val expectedTranslation = LOCKSCREEN_TOP - QS_TOP
         assertThat(mediaHierarchyManager.getGuidedTransformationTranslationY())
-                .isEqualTo(expectedTranslation)
+            .isEqualTo(expectedTranslation)
     }
 
     @Test
@@ -343,27 +371,31 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
     fun testDream() {
         goToDream()
         setMediaDreamComplicationEnabled(true)
-        verify(mediaCarouselController).onDesiredLocationChanged(
+        verify(mediaCarouselController)
+            .onDesiredLocationChanged(
                 eq(MediaHierarchyManager.LOCATION_DREAM_OVERLAY),
                 nullable(),
                 eq(false),
                 anyLong(),
-                anyLong())
+                anyLong()
+            )
         clearInvocations(mediaCarouselController)
 
         setMediaDreamComplicationEnabled(false)
-        verify(mediaCarouselController).onDesiredLocationChanged(
+        verify(mediaCarouselController)
+            .onDesiredLocationChanged(
                 eq(MediaHierarchyManager.LOCATION_QQS),
                 any(MediaHostState::class.java),
                 eq(false),
                 anyLong(),
-                anyLong())
+                anyLong()
+            )
     }
 
     private fun enableSplitShade() {
-        context.getOrCreateTestableResources().addOverride(
-            R.bool.config_use_split_notification_shade, true
-        )
+        context
+            .getOrCreateTestableResources()
+            .addOverride(R.bool.config_use_split_notification_shade, true)
         configurationController.notifyConfigurationChanged()
     }
 

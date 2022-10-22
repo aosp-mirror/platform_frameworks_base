@@ -21,11 +21,9 @@ import com.android.systemui.media.controls.models.player.MediaDeviceData
 import com.android.systemui.media.controls.models.recommendation.SmartspaceMediaData
 import javax.inject.Inject
 
-/**
- * Combines [MediaDataManager.Listener] events with [MediaDeviceManager.Listener] events.
- */
-class MediaDataCombineLatest @Inject constructor() : MediaDataManager.Listener,
-    MediaDeviceManager.Listener {
+/** Combines [MediaDataManager.Listener] events with [MediaDeviceManager.Listener] events. */
+class MediaDataCombineLatest @Inject constructor() :
+    MediaDataManager.Listener, MediaDeviceManager.Listener {
 
     private val listeners: MutableSet<MediaDataManager.Listener> = mutableSetOf()
     private val entries: MutableMap<String, Pair<MediaData?, MediaDeviceData?>> = mutableMapOf()
@@ -63,11 +61,7 @@ class MediaDataCombineLatest @Inject constructor() : MediaDataManager.Listener,
         listeners.toSet().forEach { it.onSmartspaceMediaDataRemoved(key, immediately) }
     }
 
-    override fun onMediaDeviceChanged(
-        key: String,
-        oldKey: String?,
-        data: MediaDeviceData?
-    ) {
+    override fun onMediaDeviceChanged(key: String, oldKey: String?, data: MediaDeviceData?) {
         if (oldKey != null && oldKey != key && entries.contains(oldKey)) {
             entries[key] = entries.remove(oldKey)?.first to data
             update(key, oldKey)
@@ -86,9 +80,7 @@ class MediaDataCombineLatest @Inject constructor() : MediaDataManager.Listener,
      */
     fun addListener(listener: MediaDataManager.Listener) = listeners.add(listener)
 
-    /**
-     * Remove a listener registered with addListener.
-     */
+    /** Remove a listener registered with addListener. */
     fun removeListener(listener: MediaDataManager.Listener) = listeners.remove(listener)
 
     private fun update(key: String, oldKey: String?) {
@@ -96,18 +88,14 @@ class MediaDataCombineLatest @Inject constructor() : MediaDataManager.Listener,
         if (entry != null && device != null) {
             val data = entry.copy(device = device)
             val listenersCopy = listeners.toSet()
-            listenersCopy.forEach {
-                it.onMediaDataLoaded(key, oldKey, data)
-            }
+            listenersCopy.forEach { it.onMediaDataLoaded(key, oldKey, data) }
         }
     }
 
     private fun remove(key: String) {
         entries.remove(key)?.let {
             val listenersCopy = listeners.toSet()
-            listenersCopy.forEach {
-                it.onMediaDataRemoved(key)
-            }
+            listenersCopy.forEach { it.onMediaDataRemoved(key) }
         }
     }
 }

@@ -27,69 +27,42 @@ import com.android.systemui.R
 data class MediaData(
     val userId: Int,
     val initialized: Boolean = false,
-    /**
-     * App name that will be displayed on the player.
-     */
+    /** App name that will be displayed on the player. */
     val app: String?,
-    /**
-     * App icon shown on player.
-     */
+    /** App icon shown on player. */
     val appIcon: Icon?,
-    /**
-     * Artist name.
-     */
+    /** Artist name. */
     val artist: CharSequence?,
-    /**
-     * Song name.
-     */
+    /** Song name. */
     val song: CharSequence?,
-    /**
-     * Album artwork.
-     */
+    /** Album artwork. */
     val artwork: Icon?,
-    /**
-     * List of generic action buttons for the media player, based on notification actions
-     */
+    /** List of generic action buttons for the media player, based on notification actions */
     val actions: List<MediaAction>,
-    /**
-     * Same as above, but shown on smaller versions of the player, like in QQS or keyguard.
-     */
+    /** Same as above, but shown on smaller versions of the player, like in QQS or keyguard. */
     val actionsToShowInCompact: List<Int>,
     /**
-     * Semantic actions buttons, based on the PlaybackState of the media session.
-     * If present, these actions will be preferred in the UI over [actions]
+     * Semantic actions buttons, based on the PlaybackState of the media session. If present, these
+     * actions will be preferred in the UI over [actions]
      */
     val semanticActions: MediaButton? = null,
-    /**
-     * Package name of the app that's posting the media.
-     */
+    /** Package name of the app that's posting the media. */
     val packageName: String,
-    /**
-     * Unique media session identifier.
-     */
+    /** Unique media session identifier. */
     val token: MediaSession.Token?,
-    /**
-     * Action to perform when the player is tapped.
-     * This is unrelated to {@link #actions}.
-     */
+    /** Action to perform when the player is tapped. This is unrelated to {@link #actions}. */
     val clickIntent: PendingIntent?,
-    /**
-     * Where the media is playing: phone, headphones, ear buds, remote session.
-     */
+    /** Where the media is playing: phone, headphones, ear buds, remote session. */
     val device: MediaDeviceData?,
     /**
-     * When active, a player will be displayed on keyguard and quick-quick settings.
-     * This is unrelated to the stream being playing or not, a player will not be active if
-     * timed out, or in resumption mode.
+     * When active, a player will be displayed on keyguard and quick-quick settings. This is
+     * unrelated to the stream being playing or not, a player will not be active if timed out, or in
+     * resumption mode.
      */
     var active: Boolean,
-    /**
-     * Action that should be performed to restart a non active session.
-     */
+    /** Action that should be performed to restart a non active session. */
     var resumeAction: Runnable?,
-    /**
-     * Playback location: one of PLAYBACK_LOCAL, PLAYBACK_CAST_LOCAL, or PLAYBACK_CAST_REMOTE
-     */
+    /** Playback location: one of PLAYBACK_LOCAL, PLAYBACK_CAST_LOCAL, or PLAYBACK_CAST_REMOTE */
     var playbackLocation: Int = PLAYBACK_LOCAL,
     /**
      * Indicates that this player is a resumption player (ie. It only shows a play actions which
@@ -102,29 +75,19 @@ data class MediaData(
     val notificationKey: String? = null,
     var hasCheckedForResume: Boolean = false,
 
-    /**
-     * If apps do not report PlaybackState, set as null to imply 'undetermined'
-     */
+    /** If apps do not report PlaybackState, set as null to imply 'undetermined' */
     val isPlaying: Boolean? = null,
 
-    /**
-     * Set from the notification and used as fallback when PlaybackState cannot be determined
-     */
+    /** Set from the notification and used as fallback when PlaybackState cannot be determined */
     val isClearable: Boolean = true,
 
-    /**
-     * Timestamp when this player was last active.
-     */
+    /** Timestamp when this player was last active. */
     var lastActive: Long = 0L,
 
-    /**
-     * Instance ID for logging purposes
-     */
+    /** Instance ID for logging purposes */
     val instanceId: InstanceId,
 
-    /**
-     * The UID of the app, used for logging
-     */
+    /** The UID of the app, used for logging */
     val appUid: Int
 ) {
     companion object {
@@ -141,37 +104,21 @@ data class MediaData(
     }
 }
 
-/**
- * Contains [MediaAction] objects which represent specific buttons in the UI
- */
+/** Contains [MediaAction] objects which represent specific buttons in the UI */
 data class MediaButton(
-    /**
-     * Play/pause button
-     */
+    /** Play/pause button */
     val playOrPause: MediaAction? = null,
-    /**
-     * Next button, or custom action
-     */
+    /** Next button, or custom action */
     val nextOrCustom: MediaAction? = null,
-    /**
-     * Previous button, or custom action
-     */
+    /** Previous button, or custom action */
     val prevOrCustom: MediaAction? = null,
-    /**
-     * First custom action space
-     */
+    /** First custom action space */
     val custom0: MediaAction? = null,
-    /**
-     * Second custom action space
-     */
+    /** Second custom action space */
     val custom1: MediaAction? = null,
-    /**
-     * Whether to reserve the empty space when the nextOrCustom is null
-     */
+    /** Whether to reserve the empty space when the nextOrCustom is null */
     val reserveNext: Boolean = false,
-    /**
-     * Whether to reserve the empty space when the prevOrCustom is null
-     */
+    /** Whether to reserve the empty space when the prevOrCustom is null */
     val reservePrev: Boolean = false
 ) {
     fun getActionById(id: Int): MediaAction? {
@@ -201,7 +148,8 @@ data class MediaAction(
 
 /** State of the media device. */
 data class MediaDeviceData
-@JvmOverloads constructor(
+@JvmOverloads
+constructor(
     /** Whether or not to enable the chip */
     val enabled: Boolean,
 
@@ -221,8 +169,8 @@ data class MediaDeviceData
     val showBroadcastButton: Boolean
 ) {
     /**
-     * Check whether [MediaDeviceData] objects are equal in all fields except the icon. The icon
-     * is ignored because it can change by reference frequently depending on the device type's
+     * Check whether [MediaDeviceData] objects are equal in all fields except the icon. The icon is
+     * ignored because it can change by reference frequently depending on the device type's
      * implementation, but this is not usually relevant unless other info has changed
      */
     fun equalsWithoutIcon(other: MediaDeviceData?): Boolean {

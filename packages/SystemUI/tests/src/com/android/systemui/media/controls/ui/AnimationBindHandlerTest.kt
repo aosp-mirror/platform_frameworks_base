@@ -16,24 +16,24 @@
 
 package com.android.systemui.media.controls.ui
 
-import org.mockito.Mockito.`when` as whenever
 import android.graphics.drawable.Animatable2
 import android.graphics.drawable.Drawable
 import android.test.suitebuilder.annotation.SmallTest
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import com.android.systemui.SysuiTestCase
-import junit.framework.Assert.assertTrue
 import junit.framework.Assert.assertFalse
+import junit.framework.Assert.assertTrue
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.Mockito.verify
-import org.mockito.Mockito.times
 import org.mockito.Mockito.never
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when` as whenever
 import org.mockito.junit.MockitoJUnit
 
 @SmallTest
@@ -56,8 +56,7 @@ class AnimationBindHandlerTest : SysuiTestCase() {
         handler = AnimationBindHandler()
     }
 
-    @After
-    fun tearDown() {}
+    @After fun tearDown() {}
 
     @Test
     fun registerNoAnimations_executeCallbackImmediately() {

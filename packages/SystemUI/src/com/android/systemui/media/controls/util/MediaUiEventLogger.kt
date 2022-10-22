@@ -30,17 +30,13 @@ import javax.inject.Inject
 
 private const val INSTANCE_ID_MAX = 1 shl 20
 
-/**
- * A helper class to log events related to the media controls
- */
+/** A helper class to log events related to the media controls */
 @SysUISingleton
 class MediaUiEventLogger @Inject constructor(private val logger: UiEventLogger) {
 
     private val instanceIdSequence = InstanceIdSequence(INSTANCE_ID_MAX)
 
-    /**
-     * Get a new instance ID for a new media control
-     */
+    /** Get a new instance ID for a new media control */
     fun getNewInstanceId(): InstanceId {
         return instanceIdSequence.newInstanceId()
     }
@@ -51,12 +47,13 @@ class MediaUiEventLogger @Inject constructor(private val logger: UiEventLogger) 
         instanceId: InstanceId,
         playbackLocation: Int
     ) {
-        val event = when (playbackLocation) {
-            MediaData.PLAYBACK_LOCAL -> MediaUiEvent.LOCAL_MEDIA_ADDED
-            MediaData.PLAYBACK_CAST_LOCAL -> MediaUiEvent.CAST_MEDIA_ADDED
-            MediaData.PLAYBACK_CAST_REMOTE -> MediaUiEvent.REMOTE_MEDIA_ADDED
-            else -> throw IllegalArgumentException("Unknown playback location")
-        }
+        val event =
+            when (playbackLocation) {
+                MediaData.PLAYBACK_LOCAL -> MediaUiEvent.LOCAL_MEDIA_ADDED
+                MediaData.PLAYBACK_CAST_LOCAL -> MediaUiEvent.CAST_MEDIA_ADDED
+                MediaData.PLAYBACK_CAST_REMOTE -> MediaUiEvent.REMOTE_MEDIA_ADDED
+                else -> throw IllegalArgumentException("Unknown playback location")
+            }
         logger.logWithInstanceId(event, uid, packageName, instanceId)
     }
 
@@ -66,12 +63,13 @@ class MediaUiEventLogger @Inject constructor(private val logger: UiEventLogger) 
         instanceId: InstanceId,
         playbackLocation: Int
     ) {
-        val event = when (playbackLocation) {
-            MediaData.PLAYBACK_LOCAL -> MediaUiEvent.TRANSFER_TO_LOCAL
-            MediaData.PLAYBACK_CAST_LOCAL -> MediaUiEvent.TRANSFER_TO_CAST
-            MediaData.PLAYBACK_CAST_REMOTE -> MediaUiEvent.TRANSFER_TO_REMOTE
-            else -> throw IllegalArgumentException("Unknown playback location")
-        }
+        val event =
+            when (playbackLocation) {
+                MediaData.PLAYBACK_LOCAL -> MediaUiEvent.TRANSFER_TO_LOCAL
+                MediaData.PLAYBACK_CAST_LOCAL -> MediaUiEvent.TRANSFER_TO_CAST
+                MediaData.PLAYBACK_CAST_REMOTE -> MediaUiEvent.TRANSFER_TO_REMOTE
+                else -> throw IllegalArgumentException("Unknown playback location")
+            }
         logger.logWithInstanceId(event, uid, packageName, instanceId)
     }
 
@@ -110,8 +108,12 @@ class MediaUiEventLogger @Inject constructor(private val logger: UiEventLogger) 
     }
 
     fun logLongPressSettings(uid: Int, packageName: String, instanceId: InstanceId) {
-        logger.logWithInstanceId(MediaUiEvent.OPEN_SETTINGS_LONG_PRESS, uid, packageName,
-            instanceId)
+        logger.logWithInstanceId(
+            MediaUiEvent.OPEN_SETTINGS_LONG_PRESS,
+            uid,
+            packageName,
+            instanceId
+        )
     }
 
     fun logCarouselSettings() {
@@ -120,12 +122,13 @@ class MediaUiEventLogger @Inject constructor(private val logger: UiEventLogger) 
     }
 
     fun logTapAction(buttonId: Int, uid: Int, packageName: String, instanceId: InstanceId) {
-        val event = when (buttonId) {
-            R.id.actionPlayPause -> MediaUiEvent.TAP_ACTION_PLAY_PAUSE
-            R.id.actionPrev -> MediaUiEvent.TAP_ACTION_PREV
-            R.id.actionNext -> MediaUiEvent.TAP_ACTION_NEXT
-            else -> MediaUiEvent.TAP_ACTION_OTHER
-        }
+        val event =
+            when (buttonId) {
+                R.id.actionPlayPause -> MediaUiEvent.TAP_ACTION_PLAY_PAUSE
+                R.id.actionPrev -> MediaUiEvent.TAP_ACTION_PREV
+                R.id.actionNext -> MediaUiEvent.TAP_ACTION_NEXT
+                else -> MediaUiEvent.TAP_ACTION_OTHER
+            }
 
         logger.logWithInstanceId(event, uid, packageName, instanceId)
     }
@@ -143,146 +146,128 @@ class MediaUiEventLogger @Inject constructor(private val logger: UiEventLogger) 
     }
 
     fun logCarouselPosition(@MediaLocation location: Int) {
-        val event = when (location) {
-            MediaHierarchyManager.LOCATION_QQS -> MediaUiEvent.MEDIA_CAROUSEL_LOCATION_QQS
-            MediaHierarchyManager.LOCATION_QS -> MediaUiEvent.MEDIA_CAROUSEL_LOCATION_QS
-            MediaHierarchyManager.LOCATION_LOCKSCREEN ->
-                MediaUiEvent.MEDIA_CAROUSEL_LOCATION_LOCKSCREEN
-            MediaHierarchyManager.LOCATION_DREAM_OVERLAY ->
-                MediaUiEvent.MEDIA_CAROUSEL_LOCATION_DREAM
-            else -> throw IllegalArgumentException("Unknown media carousel location $location")
-        }
+        val event =
+            when (location) {
+                MediaHierarchyManager.LOCATION_QQS -> MediaUiEvent.MEDIA_CAROUSEL_LOCATION_QQS
+                MediaHierarchyManager.LOCATION_QS -> MediaUiEvent.MEDIA_CAROUSEL_LOCATION_QS
+                MediaHierarchyManager.LOCATION_LOCKSCREEN ->
+                    MediaUiEvent.MEDIA_CAROUSEL_LOCATION_LOCKSCREEN
+                MediaHierarchyManager.LOCATION_DREAM_OVERLAY ->
+                    MediaUiEvent.MEDIA_CAROUSEL_LOCATION_DREAM
+                else -> throw IllegalArgumentException("Unknown media carousel location $location")
+            }
         logger.log(event)
     }
 
     fun logRecommendationAdded(packageName: String, instanceId: InstanceId) {
-        logger.logWithInstanceId(MediaUiEvent.MEDIA_RECOMMENDATION_ADDED, 0, packageName,
-            instanceId)
+        logger.logWithInstanceId(
+            MediaUiEvent.MEDIA_RECOMMENDATION_ADDED,
+            0,
+            packageName,
+            instanceId
+        )
     }
 
     fun logRecommendationRemoved(packageName: String, instanceId: InstanceId) {
-        logger.logWithInstanceId(MediaUiEvent.MEDIA_RECOMMENDATION_REMOVED, 0, packageName,
-            instanceId)
+        logger.logWithInstanceId(
+            MediaUiEvent.MEDIA_RECOMMENDATION_REMOVED,
+            0,
+            packageName,
+            instanceId
+        )
     }
 
     fun logRecommendationActivated(uid: Int, packageName: String, instanceId: InstanceId) {
-        logger.logWithInstanceId(MediaUiEvent.MEDIA_RECOMMENDATION_ACTIVATED, uid, packageName,
-            instanceId)
+        logger.logWithInstanceId(
+            MediaUiEvent.MEDIA_RECOMMENDATION_ACTIVATED,
+            uid,
+            packageName,
+            instanceId
+        )
     }
 
     fun logRecommendationItemTap(packageName: String, instanceId: InstanceId, position: Int) {
-        logger.logWithInstanceIdAndPosition(MediaUiEvent.MEDIA_RECOMMENDATION_ITEM_TAP, 0,
-            packageName, instanceId, position)
+        logger.logWithInstanceIdAndPosition(
+            MediaUiEvent.MEDIA_RECOMMENDATION_ITEM_TAP,
+            0,
+            packageName,
+            instanceId,
+            position
+        )
     }
 
     fun logRecommendationCardTap(packageName: String, instanceId: InstanceId) {
-        logger.logWithInstanceId(MediaUiEvent.MEDIA_RECOMMENDATION_CARD_TAP, 0, packageName,
-            instanceId)
+        logger.logWithInstanceId(
+            MediaUiEvent.MEDIA_RECOMMENDATION_CARD_TAP,
+            0,
+            packageName,
+            instanceId
+        )
     }
 
     fun logOpenBroadcastDialog(uid: Int, packageName: String, instanceId: InstanceId) {
-        logger.logWithInstanceId(MediaUiEvent.MEDIA_OPEN_BROADCAST_DIALOG, uid, packageName,
-            instanceId)
+        logger.logWithInstanceId(
+            MediaUiEvent.MEDIA_OPEN_BROADCAST_DIALOG,
+            uid,
+            packageName,
+            instanceId
+        )
     }
 }
 
 enum class MediaUiEvent(val metricId: Int) : UiEventLogger.UiEventEnum {
     @UiEvent(doc = "A new media control was added for media playing locally on the device")
     LOCAL_MEDIA_ADDED(1029),
-
     @UiEvent(doc = "A new media control was added for media cast from the device")
     CAST_MEDIA_ADDED(1030),
-
     @UiEvent(doc = "A new media control was added for media playing remotely")
     REMOTE_MEDIA_ADDED(1031),
-
     @UiEvent(doc = "The media for an existing control was transferred to local playback")
     TRANSFER_TO_LOCAL(1032),
-
     @UiEvent(doc = "The media for an existing control was transferred to a cast device")
     TRANSFER_TO_CAST(1033),
-
     @UiEvent(doc = "The media for an existing control was transferred to a remote device")
     TRANSFER_TO_REMOTE(1034),
-
-    @UiEvent(doc = "A new resumable media control was added")
-    RESUME_MEDIA_ADDED(1013),
-
+    @UiEvent(doc = "A new resumable media control was added") RESUME_MEDIA_ADDED(1013),
     @UiEvent(doc = "An existing active media control was converted into resumable media")
     ACTIVE_TO_RESUME(1014),
-
-    @UiEvent(doc = "A media control timed out")
-    MEDIA_TIMEOUT(1015),
-
-    @UiEvent(doc = "A media control was removed from the carousel")
-    MEDIA_REMOVED(1016),
-
-    @UiEvent(doc = "User swiped to another control within the media carousel")
-    CAROUSEL_PAGE(1017),
-
-    @UiEvent(doc = "The user swiped away the media carousel")
-    DISMISS_SWIPE(1018),
-
-    @UiEvent(doc = "The user long pressed on a media control")
-    OPEN_LONG_PRESS(1019),
-
+    @UiEvent(doc = "A media control timed out") MEDIA_TIMEOUT(1015),
+    @UiEvent(doc = "A media control was removed from the carousel") MEDIA_REMOVED(1016),
+    @UiEvent(doc = "User swiped to another control within the media carousel") CAROUSEL_PAGE(1017),
+    @UiEvent(doc = "The user swiped away the media carousel") DISMISS_SWIPE(1018),
+    @UiEvent(doc = "The user long pressed on a media control") OPEN_LONG_PRESS(1019),
     @UiEvent(doc = "The user dismissed a media control via its long press menu")
     DISMISS_LONG_PRESS(1020),
-
     @UiEvent(doc = "The user opened media settings from a media control's long press menu")
     OPEN_SETTINGS_LONG_PRESS(1021),
-
     @UiEvent(doc = "The user opened media settings from the media carousel")
     OPEN_SETTINGS_CAROUSEL(1022),
-
     @UiEvent(doc = "The play/pause button on a media control was tapped")
     TAP_ACTION_PLAY_PAUSE(1023),
-
-    @UiEvent(doc = "The previous button on a media control was tapped")
-    TAP_ACTION_PREV(1024),
-
-    @UiEvent(doc = "The next button on a media control was tapped")
-    TAP_ACTION_NEXT(1025),
-
+    @UiEvent(doc = "The previous button on a media control was tapped") TAP_ACTION_PREV(1024),
+    @UiEvent(doc = "The next button on a media control was tapped") TAP_ACTION_NEXT(1025),
     @UiEvent(doc = "A custom or generic action button on a media control was tapped")
     TAP_ACTION_OTHER(1026),
-
-    @UiEvent(doc = "The user seeked on a media control using the seekbar")
-    ACTION_SEEK(1027),
-
+    @UiEvent(doc = "The user seeked on a media control using the seekbar") ACTION_SEEK(1027),
     @UiEvent(doc = "The user opened the output switcher from a media control")
     OPEN_OUTPUT_SWITCHER(1028),
-
-    @UiEvent(doc = "The user tapped on a media control view")
-    MEDIA_TAP_CONTENT_VIEW(1036),
-
-    @UiEvent(doc = "The media carousel moved to QQS")
-    MEDIA_CAROUSEL_LOCATION_QQS(1037),
-
-    @UiEvent(doc = "THe media carousel moved to QS")
-    MEDIA_CAROUSEL_LOCATION_QS(1038),
-
+    @UiEvent(doc = "The user tapped on a media control view") MEDIA_TAP_CONTENT_VIEW(1036),
+    @UiEvent(doc = "The media carousel moved to QQS") MEDIA_CAROUSEL_LOCATION_QQS(1037),
+    @UiEvent(doc = "THe media carousel moved to QS") MEDIA_CAROUSEL_LOCATION_QS(1038),
     @UiEvent(doc = "The media carousel moved to the lockscreen")
     MEDIA_CAROUSEL_LOCATION_LOCKSCREEN(1039),
-
     @UiEvent(doc = "The media carousel moved to the dream state")
     MEDIA_CAROUSEL_LOCATION_DREAM(1040),
-
     @UiEvent(doc = "A media recommendation card was added to the media carousel")
     MEDIA_RECOMMENDATION_ADDED(1041),
-
     @UiEvent(doc = "A media recommendation card was removed from the media carousel")
     MEDIA_RECOMMENDATION_REMOVED(1042),
-
     @UiEvent(doc = "An existing media control was made active as a recommendation")
     MEDIA_RECOMMENDATION_ACTIVATED(1043),
-
     @UiEvent(doc = "User tapped on an item in a media recommendation card")
     MEDIA_RECOMMENDATION_ITEM_TAP(1044),
-
     @UiEvent(doc = "User tapped on a media recommendation card")
     MEDIA_RECOMMENDATION_CARD_TAP(1045),
-
     @UiEvent(doc = "User opened the broadcast dialog from a media control")
     MEDIA_OPEN_BROADCAST_DIALOG(1079);
 

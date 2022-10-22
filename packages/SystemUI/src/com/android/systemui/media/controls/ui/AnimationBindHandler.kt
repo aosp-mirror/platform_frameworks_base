@@ -20,13 +20,17 @@ import android.graphics.drawable.Animatable2
 import android.graphics.drawable.Drawable
 
 /**
- * AnimationBindHandler is responsible for tracking the bound animation state and preventing
- * jank and conflicts due to media notifications arriving at any time during an animation. It
- * does this in two parts.
- *  - Exit animations fired as a result of user input are tracked. When these are running, any
+ * AnimationBindHandler is responsible for tracking the bound animation state and preventing jank
+ * and conflicts due to media notifications arriving at any time during an animation. It does this
+ * in two parts.
+ * - Exit animations fired as a result of user input are tracked. When these are running, any
+ * ```
  *      bind actions are delayed until the animation completes (and then fired in sequence).
- *  - Continuous animations are tracked using their rebind id. Later calls using the same
+ * ```
+ * - Continuous animations are tracked using their rebind id. Later calls using the same
+ * ```
  *      rebind id will be totally ignored to prevent the continuous animation from restarting.
+ * ```
  */
 internal class AnimationBindHandler : Animatable2.AnimationCallback() {
     private val onAnimationsComplete = mutableListOf<() -> Unit>()
@@ -37,10 +41,10 @@ internal class AnimationBindHandler : Animatable2.AnimationCallback() {
         get() = registrations.any { it.isRunning }
 
     /**
-     * This check prevents rebinding to the action button if the identifier has not changed. A
-     * null value is always considered to be changed. This is used to prevent the connecting
-     * animation from rebinding (and restarting) if multiple buffer PlaybackStates are pushed by
-     * an application in a row.
+     * This check prevents rebinding to the action button if the identifier has not changed. A null
+     * value is always considered to be changed. This is used to prevent the connecting animation
+     * from rebinding (and restarting) if multiple buffer PlaybackStates are pushed by an
+     * application in a row.
      */
     fun updateRebindId(newRebindId: Int?): Boolean {
         if (rebindId == null || newRebindId == null || rebindId != newRebindId) {
