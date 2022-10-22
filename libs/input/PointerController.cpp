@@ -22,9 +22,16 @@
 #include <SkBlendMode.h>
 #include <SkCanvas.h>
 #include <SkColor.h>
+#include <android-base/stringprintf.h>
 #include <android-base/thread_annotations.h>
+#include <ftl/enum.h>
+
+#include <mutex>
 
 #include "PointerControllerContext.h"
+
+#define INDENT "  "
+#define INDENT2 "    "
 
 namespace android {
 
@@ -311,6 +318,14 @@ const ui::Transform& PointerController::getTransformForDisplayLocked(int display
         return info.displayId == displayId;
     });
     return it != di.end() ? it->transform : kIdentityTransform;
+}
+
+void PointerController::dump(std::string& dump) {
+    dump += INDENT "PointerController:\n";
+    std::scoped_lock lock(getLock());
+    dump += StringPrintf(INDENT2 "Presentation: %s\n",
+                         ftl::enum_string(mLocked.presentation).c_str());
+    dump += StringPrintf(INDENT2 "Pointer Display ID: %" PRIu32 "\n", mLocked.pointerDisplayId);
 }
 
 } // namespace android

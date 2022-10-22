@@ -450,6 +450,10 @@ void NativeInputManager::dump(std::string& dump) {
         dump += StringPrintf(INDENT "Pointer Capture: %s, seq=%" PRIu32 "\n",
                              mLocked.pointerCaptureRequest.enable ? "Enabled" : "Disabled",
                              mLocked.pointerCaptureRequest.seq);
+        auto pointerController = mLocked.pointerController.lock();
+        if (pointerController != nullptr) {
+            pointerController->dump(dump);
+        }
     }
     dump += "\n";
 

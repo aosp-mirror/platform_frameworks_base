@@ -27,6 +27,7 @@
 
 #include <map>
 #include <memory>
+#include <string>
 #include <vector>
 
 #include "MouseCursorController.h"
@@ -74,6 +75,8 @@ public:
 
     void onDisplayInfosChangedLocked(const std::vector<gui::DisplayInfo>& displayInfos)
             REQUIRES(getLock());
+
+    void dump(std::string& dump);
 
 protected:
     using WindowListenerConsumer =
