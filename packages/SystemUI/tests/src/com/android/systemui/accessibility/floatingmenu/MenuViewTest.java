@@ -26,6 +26,7 @@ import static org.mockito.Mockito.verify;
 import android.app.UiModeManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
 
@@ -52,7 +53,9 @@ public class MenuViewTest extends SysuiTestCase {
         mNightMode = mUiModeManager.getNightMode();
         mUiModeManager.setNightMode(MODE_NIGHT_YES);
         final MenuViewModel stubMenuViewModel = new MenuViewModel(mContext);
-        final MenuViewAppearance stubMenuViewAppearance = new MenuViewAppearance(mContext);
+        final WindowManager stubWindowManager = mContext.getSystemService(WindowManager.class);
+        final MenuViewAppearance stubMenuViewAppearance = new MenuViewAppearance(mContext,
+                stubWindowManager);
         mMenuView = spy(new MenuView(mContext, stubMenuViewModel, stubMenuViewAppearance));
     }
 

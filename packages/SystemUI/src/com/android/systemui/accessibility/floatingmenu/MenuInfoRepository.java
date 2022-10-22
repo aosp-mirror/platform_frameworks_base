@@ -23,15 +23,18 @@ import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_BUTT
 import static com.android.internal.accessibility.dialog.AccessibilityTargetHelper.getTargets;
 import static com.android.systemui.accessibility.floatingmenu.MenuViewAppearance.MenuSizeType.SMALL;
 
+import android.annotation.FloatRange;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.text.TextUtils;
 
 import com.android.internal.accessibility.dialog.AccessibilityTarget;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.Prefs;
 
 import java.util.List;
 
@@ -39,9 +42,16 @@ import java.util.List;
  * Stores and observe the settings contents for the menu view.
  */
 class MenuInfoRepository {
+    @FloatRange(from = 0.0, to = 1.0)
+    private static final float DEFAULT_MENU_POSITION_X_PERCENT = 1.0f;
+
+    @FloatRange(from = 0.0, to = 1.0)
+    private static final float DEFAULT_MENU_POSITION_Y_PERCENT = 0.9f;
+
     private final Context mContext;
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final OnSettingsContentsChanged mSettingsContentsCallback;
+    private Position mPercentagePosition;
 
     private final ContentObserver mMenuTargetFeaturesContentObserver =
             new ContentObserver(mHandler) {
@@ -65,6 +75,12 @@ class MenuInfoRepository {
     MenuInfoRepository(Context context, OnSettingsContentsChanged settingsContentsChanged) {
         mContext = context;
         mSettingsContentsCallback = settingsContentsChanged;
+
+        mPercentagePosition = getStartPosition();
+    }
+
+    void loadMenuPosition(OnInfoReady<Position> callback) {
+        callback.onReady(mPercentagePosition);
     }
 
     void loadMenuTargetFeatures(OnInfoReady<List<AccessibilityTarget>> callback) {
@@ -73,6 +89,21 @@ class MenuInfoRepository {
 
     void loadMenuSizeType(OnInfoReady<Integer> callback) {
         callback.onReady(getMenuSizeTypeFromSettings(mContext));
+    }
+
+    void updateMenuSavingPosition(Position percentagePosition) {
+        mPercentagePosition = percentagePosition;
+        Prefs.putString(mContext, Prefs.Key.ACCESSIBILITY_FLOATING_MENU_POSITION,
+                percentagePosition.toString());
+    }
+
+    private Position getStartPosition() {
+        final String absolutePositionString = Prefs.getString(mContext,
+                Prefs.Key.ACCESSIBILITY_FLOATING_MENU_POSITION, /* defaultValue= */ null);
+
+        return TextUtils.isEmpty(absolutePositionString)
+                ? new Position(DEFAULT_MENU_POSITION_X_PERCENT, DEFAULT_MENU_POSITION_Y_PERCENT)
+                : Position.fromString(absolutePositionString);
     }
 
     void registerContentObservers() {

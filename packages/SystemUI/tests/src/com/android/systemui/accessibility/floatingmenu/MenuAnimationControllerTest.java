@@ -16,16 +16,10 @@
 
 package com.android.systemui.accessibility.floatingmenu;
 
-import static android.view.View.GONE;
-import static android.view.View.VISIBLE;
-
-import static com.android.systemui.accessibility.floatingmenu.MenuViewLayer.LayerIndex;
-
 import static com.google.common.truth.Truth.assertThat;
 
+import android.graphics.PointF;
 import android.testing.AndroidTestingRunner;
-import android.testing.TestableLooper;
-import android.view.View;
 import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
@@ -36,32 +30,30 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-/** Tests for {@link MenuViewLayer}. */
+/** Tests for {@link MenuAnimationController}. */
 @RunWith(AndroidTestingRunner.class)
-@TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
-public class MenuViewLayerTest extends SysuiTestCase {
-    private MenuViewLayer mMenuViewLayer;
+public class MenuAnimationControllerTest extends SysuiTestCase {
+    private MenuView mMenuView;
+    private MenuAnimationController mMenuAnimationController;
 
     @Before
     public void setUp() throws Exception {
         final WindowManager stubWindowManager = mContext.getSystemService(WindowManager.class);
-        mMenuViewLayer = new MenuViewLayer(mContext, stubWindowManager);
+        final MenuViewAppearance stubMenuViewAppearance = new MenuViewAppearance(mContext,
+                stubWindowManager);
+        final MenuViewModel stubMenuViewModel = new MenuViewModel(mContext);
+        mMenuView = new MenuView(mContext, stubMenuViewModel, stubMenuViewAppearance);
+        mMenuAnimationController = new MenuAnimationController(mMenuView);
     }
 
     @Test
-    public void onAttachedToWindow_menuIsVisible() {
-        mMenuViewLayer.onAttachedToWindow();
-        final View menuView = mMenuViewLayer.getChildAt(LayerIndex.MENU_VIEW);
+    public void moveToPosition_matchPosition() {
+        final PointF destination = new PointF(50, 60);
 
-        assertThat(menuView.getVisibility()).isEqualTo(VISIBLE);
-    }
+        mMenuAnimationController.moveToPosition(destination);
 
-    @Test
-    public void onAttachedToWindow_menuIsGone() {
-        mMenuViewLayer.onDetachedFromWindow();
-        final View menuView = mMenuViewLayer.getChildAt(LayerIndex.MENU_VIEW);
-
-        assertThat(menuView.getVisibility()).isEqualTo(GONE);
+        assertThat(mMenuView.getTranslationX()).isEqualTo(50);
+        assertThat(mMenuView.getTranslationY()).isEqualTo(60);
     }
 }
