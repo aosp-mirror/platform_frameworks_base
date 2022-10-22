@@ -29,6 +29,7 @@ import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dump.DumpHandler;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.MediaDataManager;
 import com.android.systemui.plugins.ActivityStarter;
@@ -181,8 +182,10 @@ public interface CentralSurfacesDependenciesModule {
     static CommandQueue provideCommandQueue(
             Context context,
             ProtoTracer protoTracer,
-            CommandRegistry registry) {
-        return new CommandQueue(context, protoTracer, registry);
+            CommandRegistry registry,
+            DumpHandler dumpHandler
+    ) {
+        return new CommandQueue(context, protoTracer, registry, dumpHandler);
     }
 
     /**

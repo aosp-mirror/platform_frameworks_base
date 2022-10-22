@@ -429,6 +429,7 @@ constructor(
                         isGuestEphemeral = currentlySelectedUserInfo.isEphemeral,
                         isKeyguardShowing = keyguardInteractor.isKeyguardShowing(),
                         onExitGuestUser = this::exitGuestUser,
+                        dialogShower = dialogShower,
                     )
                 )
                 return
@@ -443,6 +444,7 @@ constructor(
                         isGuestEphemeral = currentlySelectedUserInfo.isEphemeral,
                         isKeyguardShowing = keyguardInteractor.isKeyguardShowing(),
                         onExitGuestUser = this::exitGuestUser,
+                        dialogShower = dialogShower,
                     )
                 )
                 return
@@ -477,6 +479,7 @@ constructor(
                             userHandle = currentUser.userHandle,
                             isKeyguardShowing = keyguardInteractor.isKeyguardShowing(),
                             showEphemeralMessage = currentUser.isGuest && currentUser.isEphemeral,
+                            dialogShower = dialogShower,
                         )
                     )
                 }

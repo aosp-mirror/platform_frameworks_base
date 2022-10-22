@@ -110,7 +110,7 @@ class UserRepositoryImplRefactoredTest : UserRepositoryImplTest() {
         val thirdExpectedValue =
             setUpUsers(
                 count = 2,
-                hasGuest = true,
+                isLastGuestUser = true,
                 selectedIndex = 1,
             )
         underTest.refreshUsers()
@@ -121,21 +121,25 @@ class UserRepositoryImplRefactoredTest : UserRepositoryImplTest() {
     }
 
     @Test
-    fun `refreshUsers - sorts by creation time`() = runSelfCancelingTest {
+    fun `refreshUsers - sorts by creation time - guest user last`() = runSelfCancelingTest {
         underTest = create(this)
         val unsortedUsers =
             setUpUsers(
                 count = 3,
                 selectedIndex = 0,
+                isLastGuestUser = true,
             )
-        unsortedUsers[0].creationTime = 900
-        unsortedUsers[1].creationTime = 700
-        unsortedUsers[2].creationTime = 999
-        val expectedUsers = listOf(unsortedUsers[1], unsortedUsers[0], unsortedUsers[2])
+        unsortedUsers[0].creationTime = 999
+        unsortedUsers[1].creationTime = 900
+        unsortedUsers[2].creationTime = 950
+        val expectedUsers =
+            listOf(
+                unsortedUsers[1],
+                unsortedUsers[0],
+                unsortedUsers[2], // last because this is the guest
+            )
         var userInfos: List<UserInfo>? = null
-        var selectedUserInfo: UserInfo? = null
         underTest.userInfos.onEach { userInfos = it }.launchIn(this)
-        underTest.selectedUserInfo.onEach { selectedUserInfo = it }.launchIn(this)
 
         underTest.refreshUsers()
         assertThat(userInfos).isEqualTo(expectedUsers)
@@ -143,14 +147,14 @@ class UserRepositoryImplRefactoredTest : UserRepositoryImplTest() {
 
     private fun setUpUsers(
         count: Int,
-        hasGuest: Boolean = false,
+        isLastGuestUser: Boolean = false,
         selectedIndex: Int = 0,
     ): List<UserInfo> {
         val userInfos =
             (0 until count).map { index ->
                 createUserInfo(
                     index,
-                    isGuest = hasGuest && index == count - 1,
+                    isGuest = isLastGuestUser && index == count - 1,
                 )
             }
         whenever(manager.aliveUsers).thenReturn(userInfos)

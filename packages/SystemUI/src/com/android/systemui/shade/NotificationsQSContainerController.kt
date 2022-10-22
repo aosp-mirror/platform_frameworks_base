@@ -36,17 +36,12 @@ class NotificationsQSContainerController @Inject constructor(
     private val navigationModeController: NavigationModeController,
     private val overviewProxyService: OverviewProxyService,
     private val largeScreenShadeHeaderController: LargeScreenShadeHeaderController,
+    private val shadeExpansionStateManager: ShadeExpansionStateManager,
     private val featureFlags: FeatureFlags,
     @Main private val delayableExecutor: DelayableExecutor
 ) : ViewController<NotificationsQuickSettingsContainer>(view), QSContainerController {
 
-    var qsExpanded = false
-        set(value) {
-            if (field != value) {
-                field = value
-                mView.invalidate()
-            }
-        }
+    private var qsExpanded = false
     private var splitShadeEnabled = false
     private var isQSDetailShowing = false
     private var isQSCustomizing = false
@@ -71,6 +66,13 @@ class NotificationsQSContainerController @Inject constructor(
             taskbarVisible = visible
         }
     }
+    private val shadeQsExpansionListener: ShadeQsExpansionListener =
+        ShadeQsExpansionListener { isQsExpanded ->
+            if (qsExpanded != isQsExpanded) {
+                qsExpanded = isQsExpanded
+                mView.invalidate()
+            }
+        }
 
     // With certain configuration changes (like light/dark changes), the nav bar will disappear
     // for a bit, causing `bottomStableInsets` to be unstable for some time. Debounce the value
@@ -106,6 +108,7 @@ class NotificationsQSContainerController @Inject constructor(
     public override fun onViewAttached() {
         updateResources()
         overviewProxyService.addCallback(taskbarVisibilityListener)
+        shadeExpansionStateManager.addQsExpansionListener(shadeQsExpansionListener)
         mView.setInsetsChangedListener(delayedInsetSetter)
         mView.setQSFragmentAttachedListener { qs: QS -> qs.setContainerController(this) }
         mView.setConfigurationChangedListener { updateResources() }
@@ -113,6 +116,7 @@ class NotificationsQSContainerController @Inject constructor(
 
     override fun onViewDetached() {
         overviewProxyService.removeCallback(taskbarVisibilityListener)
+        shadeExpansionStateManager.removeQsExpansionListener(shadeQsExpansionListener)
         mView.removeOnInsetsChangedListener()
         mView.removeQSFragmentAttachedListener()
         mView.setConfigurationChangedListener(null)

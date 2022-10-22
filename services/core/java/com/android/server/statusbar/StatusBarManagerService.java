@@ -2253,6 +2253,25 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
+        boolean proto = false;
+        for (int i = 0; i < args.length; i++) {
+            if ("--proto".equals(args[i])) {
+                proto = true;
+            }
+        }
+        if (proto) {
+            if (mBar == null)  return;
+            try (TransferPipe tp = new TransferPipe()) {
+                // Sending the command to the remote, which needs to execute async to avoid blocking
+                // See Binder#dumpAsync() for inspiration
+                mBar.dumpProto(args, tp.getWriteFd());
+                // Times out after 5s
+                tp.go(fd);
+            } catch (Throwable t) {
+                Slog.e(TAG, "Error sending command to IStatusBar", t);
+            }
+            return;
+        }
 
         synchronized (mLock) {
             for (int i = 0; i < mDisplayUiState.size(); i++) {

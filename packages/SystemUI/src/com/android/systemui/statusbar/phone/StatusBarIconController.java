@@ -372,7 +372,7 @@ public interface StatusBarIconController {
             mIconSize = mContext.getResources().getDimensionPixelSize(
                     com.android.internal.R.dimen.status_bar_icon_size);
 
-            if (statusBarPipelineFlags.isNewPipelineFrontendEnabled()) {
+            if (statusBarPipelineFlags.useNewMobileIcons()) {
                 // This starts the flow for the new pipeline, and will notify us of changes
                 mMobileIconsViewModel = mobileUiAdapter.createMobileIconsViewModel();
                 MobileIconsBinder.bind(mGroup, mMobileIconsViewModel);
@@ -451,7 +451,7 @@ public interface StatusBarIconController {
         @VisibleForTesting
         protected StatusIconDisplayable addWifiIcon(int index, String slot, WifiIconState state) {
             final BaseStatusBarFrameLayout view;
-            if (mStatusBarPipelineFlags.isNewPipelineFrontendEnabled()) {
+            if (mStatusBarPipelineFlags.useNewWifiIcon()) {
                 view = onCreateModernStatusBarWifiView(slot);
                 // When [ModernStatusBarWifiView] is created, it will automatically apply the
                 // correct view state so we don't need to call applyWifiState.
@@ -474,9 +474,9 @@ public interface StatusBarIconController {
                 String slot,
                 MobileIconState state
         ) {
-            if (mStatusBarPipelineFlags.isNewPipelineFrontendEnabled()) {
+            if (mStatusBarPipelineFlags.useNewMobileIcons()) {
                 throw new IllegalStateException("Attempting to add a mobile icon while the new "
-                        + "pipeline is enabled is not supported");
+                        + "icons are enabled is not supported");
             }
 
             // Use the `subId` field as a key to query for the correct context
@@ -497,7 +497,7 @@ public interface StatusBarIconController {
                 String slot,
                 int subId
         ) {
-            if (!mStatusBarPipelineFlags.isNewPipelineFrontendEnabled()) {
+            if (!mStatusBarPipelineFlags.useNewMobileIcons()) {
                 throw new IllegalStateException("Attempting to add a mobile icon using the new"
                         + "pipeline, but the enabled flag is false.");
             }

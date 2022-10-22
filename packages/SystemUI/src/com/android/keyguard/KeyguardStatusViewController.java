@@ -20,6 +20,7 @@ import android.graphics.Rect;
 import android.util.Slog;
 
 import com.android.keyguard.KeyguardClockSwitch.ClockSize;
+import com.android.systemui.plugins.ClockAnimations;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
@@ -231,5 +232,10 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
         } else {
             mView.setClipBounds(null);
         }
+    }
+
+    /** Gets the animations for the current clock. */
+    public ClockAnimations getClockAnimations() {
+        return mKeyguardClockSwitchController.getClockAnimations();
     }
 }

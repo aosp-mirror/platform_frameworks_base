@@ -224,9 +224,9 @@ public class StatusBarIconControllerImpl implements Tunable,
      */
     @Override
     public void setMobileIcons(String slot, List<MobileIconState> iconStates) {
-        if (mStatusBarPipelineFlags.isNewPipelineFrontendEnabled()) {
+        if (mStatusBarPipelineFlags.useNewMobileIcons()) {
             Log.d(TAG, "ignoring old pipeline callbacks, because the new "
-                    + "pipeline frontend is enabled");
+                    + "icons are enabled");
             return;
         }
         Slot mobileSlot = mStatusBarIconList.getSlot(slot);
@@ -249,9 +249,9 @@ public class StatusBarIconControllerImpl implements Tunable,
 
     @Override
     public void setNewMobileIconSubIds(List<Integer> subIds) {
-        if (!mStatusBarPipelineFlags.isNewPipelineFrontendEnabled()) {
+        if (!mStatusBarPipelineFlags.useNewMobileIcons()) {
             Log.d(TAG, "ignoring new pipeline callback, "
-                    + "since the frontend is disabled");
+                    + "since the new icons are disabled");
             return;
         }
         Slot mobileSlot = mStatusBarIconList.getSlot("mobile");

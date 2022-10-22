@@ -48,7 +48,7 @@ abstract class LocationBasedWifiViewModel(
     /** The color that should be used to tint the icon. */
     val tint: Flow<Int> =
         flowOf(
-            if (statusBarPipelineFlags.useNewPipelineDebugColoring()) {
+            if (statusBarPipelineFlags.useWifiDebugColoring()) {
                 debugTint
             } else {
                 DEFAULT_TINT

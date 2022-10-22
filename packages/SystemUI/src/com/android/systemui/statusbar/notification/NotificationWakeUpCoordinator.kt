@@ -18,8 +18,10 @@ package com.android.systemui.statusbar.notification
 
 import android.animation.ObjectAnimator
 import android.util.FloatProperty
+import com.android.systemui.Dumpable
 import com.android.systemui.animation.Interpolators
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.shade.ShadeExpansionChangeEvent
 import com.android.systemui.shade.ShadeExpansionListener
@@ -32,17 +34,20 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
 import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener
+import java.io.PrintWriter
 import javax.inject.Inject
 import kotlin.math.min
 
 @SysUISingleton
 class NotificationWakeUpCoordinator @Inject constructor(
+    dumpManager: DumpManager,
     private val mHeadsUpManager: HeadsUpManager,
     private val statusBarStateController: StatusBarStateController,
     private val bypassController: KeyguardBypassController,
     private val dozeParameters: DozeParameters,
     private val screenOffAnimationController: ScreenOffAnimationController
-) : OnHeadsUpChangedListener, StatusBarStateController.StateListener, ShadeExpansionListener {
+) : OnHeadsUpChangedListener, StatusBarStateController.StateListener, ShadeExpansionListener,
+    Dumpable {
 
     private val mNotificationVisibility = object : FloatProperty<NotificationWakeUpCoordinator>(
         "notificationVisibility") {
@@ -60,6 +65,7 @@ class NotificationWakeUpCoordinator @Inject constructor(
 
     private var mLinearDozeAmount: Float = 0.0f
     private var mDozeAmount: Float = 0.0f
+    private var mDozeAmountSource: String = "init"
     private var mNotificationVisibleAmount = 0.0f
     private var mNotificationsVisible = false
     private var mNotificationsVisibleForExpansion = false
@@ -142,6 +148,7 @@ class NotificationWakeUpCoordinator @Inject constructor(
         }
 
     init {
+        dumpManager.registerDumpable(this)
         mHeadsUpManager.addListener(this)
         statusBarStateController.addCallback(this)
         addListener(object : WakeUpListener {
@@ -248,13 +255,14 @@ class NotificationWakeUpCoordinator @Inject constructor(
             // Let's notify the scroller that an animation started
             notifyAnimationStart(mLinearDozeAmount == 1.0f)
         }
-        setDozeAmount(linear, eased)
+        setDozeAmount(linear, eased, source = "StatusBar")
     }
 
-    fun setDozeAmount(linear: Float, eased: Float) {
+    fun setDozeAmount(linear: Float, eased: Float, source: String) {
         val changed = linear != mLinearDozeAmount
         mLinearDozeAmount = linear
         mDozeAmount = eased
+        mDozeAmountSource = source
         mStackScrollerController.setDozeAmount(mDozeAmount)
         updateHideAmount()
         if (changed && linear == 0.0f) {
@@ -271,7 +279,7 @@ class NotificationWakeUpCoordinator @Inject constructor(
             // undefined state, so it's an indication that we should do state cleanup. We override
             // the doze amount to 0f (not dozing) so that the notifications are no longer hidden.
             // See: UnlockedScreenOffAnimationController.onFinishedWakingUp()
-            setDozeAmount(0f, 0f)
+            setDozeAmount(0f, 0f, source = "Override: Shade->Shade (lock cancelled by unlock)")
         }
 
         if (overrideDozeAmountIfAnimatingScreenOff(mLinearDozeAmount)) {
@@ -311,12 +319,11 @@ class NotificationWakeUpCoordinator @Inject constructor(
      */
     private fun overrideDozeAmountIfBypass(): Boolean {
         if (bypassController.bypassEnabled) {
-            var amount = 1.0f
-            if (statusBarStateController.state == StatusBarState.SHADE ||
-                statusBarStateController.state == StatusBarState.SHADE_LOCKED) {
-                amount = 0.0f
+            if (statusBarStateController.state == StatusBarState.KEYGUARD) {
+                setDozeAmount(1f, 1f, source = "Override: bypass (keyguard)")
+            } else {
+                setDozeAmount(0f, 0f, source = "Override: bypass (shade)")
             }
-            setDozeAmount(amount, amount)
             return true
         }
         return false
@@ -332,7 +339,7 @@ class NotificationWakeUpCoordinator @Inject constructor(
      */
     private fun overrideDozeAmountIfAnimatingScreenOff(linearDozeAmount: Float): Boolean {
         if (screenOffAnimationController.overrideNotificationsFullyDozingOnKeyguard()) {
-            setDozeAmount(1f, 1f)
+            setDozeAmount(1f, 1f, source = "Override: animating screen off")
             return true
         }
 
@@ -413,6 +420,26 @@ class NotificationWakeUpCoordinator @Inject constructor(
 
     private fun shouldAnimateVisibility() =
             dozeParameters.alwaysOn && !dozeParameters.displayNeedsBlanking
+
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
+        pw.println("mLinearDozeAmount: $mLinearDozeAmount")
+        pw.println("mDozeAmount: $mDozeAmount")
+        pw.println("mDozeAmountSource: $mDozeAmountSource")
+        pw.println("mNotificationVisibleAmount: $mNotificationVisibleAmount")
+        pw.println("mNotificationsVisible: $mNotificationsVisible")
+        pw.println("mNotificationsVisibleForExpansion: $mNotificationsVisibleForExpansion")
+        pw.println("mVisibilityAmount: $mVisibilityAmount")
+        pw.println("mLinearVisibilityAmount: $mLinearVisibilityAmount")
+        pw.println("pulseExpanding: $pulseExpanding")
+        pw.println("state: ${StatusBarState.toString(state)}")
+        pw.println("fullyAwake: $fullyAwake")
+        pw.println("wakingUp: $wakingUp")
+        pw.println("willWakeUp: $willWakeUp")
+        pw.println("collapsedEnoughToHide: $collapsedEnoughToHide")
+        pw.println("pulsing: $pulsing")
+        pw.println("notificationsFullyHidden: $notificationsFullyHidden")
+        pw.println("canShowPulsingHuns: $canShowPulsingHuns")
+    }
 
     interface WakeUpListener {
         /**
