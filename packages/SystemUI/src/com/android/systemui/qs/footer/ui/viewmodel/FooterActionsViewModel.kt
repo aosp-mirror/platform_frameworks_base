@@ -18,7 +18,6 @@ package com.android.systemui.qs.footer.ui.viewmodel
 
 import android.content.Context
 import android.util.Log
-import android.view.View
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
@@ -199,50 +198,51 @@ class FooterActionsViewModel(
      */
     suspend fun observeDeviceMonitoringDialogRequests(quickSettingsContext: Context) {
         footerActionsInteractor.deviceMonitoringDialogRequests.collect {
-            footerActionsInteractor.showDeviceMonitoringDialog(quickSettingsContext)
+            footerActionsInteractor.showDeviceMonitoringDialog(
+                quickSettingsContext,
+                expandable = null,
+            )
         }
     }
 
-    private fun onSecurityButtonClicked(view: View) {
+    private fun onSecurityButtonClicked(quickSettingsContext: Context, expandable: Expandable) {
         if (falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
             return
         }
 
-        footerActionsInteractor.showDeviceMonitoringDialog(view)
+        footerActionsInteractor.showDeviceMonitoringDialog(quickSettingsContext, expandable)
     }
 
-    private fun onForegroundServiceButtonClicked(view: View) {
+    private fun onForegroundServiceButtonClicked(expandable: Expandable) {
         if (falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
             return
         }
 
-        footerActionsInteractor.showForegroundServicesDialog(view)
+        footerActionsInteractor.showForegroundServicesDialog(expandable)
     }
 
-    private fun onUserSwitcherClicked(view: View) {
+    private fun onUserSwitcherClicked(expandable: Expandable) {
         if (falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
             return
         }
 
-        footerActionsInteractor.showUserSwitcher(view)
+        footerActionsInteractor.showUserSwitcher(context, expandable)
     }
 
-    // TODO(b/230830644): Replace View by an Expandable interface that can expand in either dialog
-    // or activity.
-    private fun onSettingsButtonClicked(view: View) {
+    private fun onSettingsButtonClicked(expandable: Expandable) {
         if (falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
             return
         }
 
-        footerActionsInteractor.showSettings(Expandable.fromView(view))
+        footerActionsInteractor.showSettings(expandable)
     }
 
-    private fun onPowerButtonClicked(view: View) {
+    private fun onPowerButtonClicked(expandable: Expandable) {
         if (falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
             return
         }
 
-        footerActionsInteractor.showPowerMenuDialog(globalActionsDialogLite, view)
+        footerActionsInteractor.showPowerMenuDialog(globalActionsDialogLite, expandable)
     }
 
     private fun userSwitcherButton(

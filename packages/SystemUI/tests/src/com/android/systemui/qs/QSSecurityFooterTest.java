@@ -22,7 +22,6 @@ import static junit.framework.Assert.assertNotNull;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -52,6 +51,7 @@ import android.text.SpannableStringBuilder;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.android.systemui.R;
@@ -97,6 +97,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
     private static final int DEFAULT_ICON_ID = R.drawable.ic_info_outline;
 
     private ViewGroup mRootView;
+    private ViewGroup mSecurityFooterView;
     private TextView mFooterText;
     private TestableImageView mPrimaryFooterIcon;
     private QSSecurityFooter mFooter;
@@ -121,21 +122,26 @@ public class QSSecurityFooterTest extends SysuiTestCase {
         Looper looper = mTestableLooper.getLooper();
         Handler mainHandler = new Handler(looper);
         when(mUserTracker.getUserInfo()).thenReturn(mock(UserInfo.class));
-        mRootView = (ViewGroup) new LayoutInflaterBuilder(mContext)
+        mSecurityFooterView = (ViewGroup) new LayoutInflaterBuilder(mContext)
                 .replace("ImageView", TestableImageView.class)
                 .build().inflate(R.layout.quick_settings_security_footer, null, false);
         mFooterUtils = new QSSecurityFooterUtils(getContext(),
                 getContext().getSystemService(DevicePolicyManager.class), mUserTracker,
                 mainHandler, mActivityStarter, mSecurityController, looper, mDialogLaunchAnimator);
-        mFooter = new QSSecurityFooter(mRootView, mainHandler, mSecurityController, looper,
-                mBroadcastDispatcher, mFooterUtils);
-        mFooterText = mRootView.findViewById(R.id.footer_text);
-        mPrimaryFooterIcon = mRootView.findViewById(R.id.primary_footer_icon);
+        mFooter = new QSSecurityFooter(mSecurityFooterView, mainHandler, mSecurityController,
+                looper, mBroadcastDispatcher, mFooterUtils);
+        mFooterText = mSecurityFooterView.findViewById(R.id.footer_text);
+        mPrimaryFooterIcon = mSecurityFooterView.findViewById(R.id.primary_footer_icon);
 
         when(mSecurityController.getDeviceOwnerComponentOnAnyUser())
                 .thenReturn(DEVICE_OWNER_COMPONENT);
         when(mSecurityController.getDeviceOwnerType(DEVICE_OWNER_COMPONENT))
                 .thenReturn(DEVICE_OWNER_TYPE_DEFAULT);
+
+        // mSecurityFooterView must have a ViewGroup parent so that
+        // DialogLaunchAnimator.Controller.fromView() does not return null.
+        mRootView = new FrameLayout(mContext);
+        mRootView.addView(mSecurityFooterView);
         ViewUtils.attachView(mRootView);
 
         mFooter.init();
@@ -153,7 +159,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
         mFooter.refreshState();
 
         TestableLooper.get(this).processAllMessages();
-        assertEquals(View.GONE, mRootView.getVisibility());
+        assertEquals(View.GONE, mSecurityFooterView.getVisibility());
     }
 
     @Test
@@ -165,7 +171,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
         TestableLooper.get(this).processAllMessages();
         assertEquals(mContext.getString(R.string.quick_settings_disclosure_management),
                      mFooterText.getText());
-        assertEquals(View.VISIBLE, mRootView.getVisibility());
+        assertEquals(View.VISIBLE, mSecurityFooterView.getVisibility());
         assertEquals(View.VISIBLE, mPrimaryFooterIcon.getVisibility());
         assertEquals(DEFAULT_ICON_ID, mPrimaryFooterIcon.getLastImageResource());
     }
@@ -181,7 +187,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
         assertEquals(mContext.getString(R.string.quick_settings_disclosure_named_management,
                                         MANAGING_ORGANIZATION),
                 mFooterText.getText());
-        assertEquals(View.VISIBLE, mRootView.getVisibility());
+        assertEquals(View.VISIBLE, mSecurityFooterView.getVisibility());
         assertEquals(View.VISIBLE, mPrimaryFooterIcon.getVisibility());
         assertEquals(DEFAULT_ICON_ID, mPrimaryFooterIcon.getLastImageResource());
     }
@@ -200,7 +206,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
         assertEquals(mContext.getString(
                 R.string.quick_settings_financed_disclosure_named_management,
                 MANAGING_ORGANIZATION), mFooterText.getText());
-        assertEquals(View.VISIBLE, mRootView.getVisibility());
+        assertEquals(View.VISIBLE, mSecurityFooterView.getVisibility());
         assertEquals(View.VISIBLE, mPrimaryFooterIcon.getVisibility());
         assertEquals(DEFAULT_ICON_ID, mPrimaryFooterIcon.getLastImageResource());
     }
@@ -217,7 +223,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
         mFooter.refreshState();
 
         TestableLooper.get(this).processAllMessages();
-        assertEquals(View.GONE, mRootView.getVisibility());
+        assertEquals(View.GONE, mSecurityFooterView.getVisibility());
     }
 
     @Test
@@ -227,8 +233,8 @@ public class QSSecurityFooterTest extends SysuiTestCase {
         mFooter.refreshState();
 
         TestableLooper.get(this).processAllMessages();
-        assertFalse(mRootView.isClickable());
-        assertEquals(View.GONE, mRootView.findViewById(R.id.footer_icon).getVisibility());
+        assertFalse(mSecurityFooterView.isClickable());
+        assertEquals(View.GONE, mSecurityFooterView.findViewById(R.id.footer_icon).getVisibility());
     }
 
     @Test
@@ -241,8 +247,9 @@ public class QSSecurityFooterTest extends SysuiTestCase {
         mFooter.refreshState();
 
         TestableLooper.get(this).processAllMessages();
-        assertTrue(mRootView.isClickable());
-        assertEquals(View.VISIBLE, mRootView.findViewById(R.id.footer_icon).getVisibility());
+        assertTrue(mSecurityFooterView.isClickable());
+        assertEquals(View.VISIBLE,
+                mSecurityFooterView.findViewById(R.id.footer_icon).getVisibility());
     }
 
     @Test
@@ -254,8 +261,8 @@ public class QSSecurityFooterTest extends SysuiTestCase {
         mFooter.refreshState();
 
         TestableLooper.get(this).processAllMessages();
-        assertFalse(mRootView.isClickable());
-        assertEquals(View.GONE, mRootView.findViewById(R.id.footer_icon).getVisibility());
+        assertFalse(mSecurityFooterView.isClickable());
+        assertEquals(View.GONE, mSecurityFooterView.findViewById(R.id.footer_icon).getVisibility());
     }
 
     @Test
@@ -734,11 +741,11 @@ public class QSSecurityFooterTest extends SysuiTestCase {
     @Test
     public void testDialogUsesDialogLauncher() {
         when(mSecurityController.isDeviceManaged()).thenReturn(true);
-        mFooter.onClick(mRootView);
+        mFooter.onClick(mSecurityFooterView);
 
         mTestableLooper.processAllMessages();
 
-        verify(mDialogLaunchAnimator).showFromView(any(), eq(mRootView), any());
+        verify(mDialogLaunchAnimator).show(any(), any());
     }
 
     @Test
@@ -775,7 +782,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
         ArgumentCaptor<AlertDialog> dialogCaptor = ArgumentCaptor.forClass(AlertDialog.class);
 
         mTestableLooper.processAllMessages();
-        verify(mDialogLaunchAnimator).showFromView(dialogCaptor.capture(), any(), any());
+        verify(mDialogLaunchAnimator).show(dialogCaptor.capture(), any());
 
         AlertDialog dialog = dialogCaptor.getValue();
         dialog.create();
@@ -817,8 +824,8 @@ public class QSSecurityFooterTest extends SysuiTestCase {
         verify(mBroadcastDispatcher).registerReceiverWithHandler(captor.capture(), any(), any(),
                 any());
 
-        // Pretend view is not visible temporarily
-        mRootView.onVisibilityAggregated(false);
+        // Pretend view is not attached anymore.
+        mRootView.removeView(mSecurityFooterView);
         captor.getValue().onReceive(mContext,
                 new Intent(DevicePolicyManager.ACTION_SHOW_DEVICE_MONITORING_DIALOG));
         mTestableLooper.processAllMessages();

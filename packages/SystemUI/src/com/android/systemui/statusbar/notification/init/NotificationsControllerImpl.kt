@@ -56,7 +56,6 @@ import javax.inject.Inject
  */
 @SysUISingleton
 class NotificationsControllerImpl @Inject constructor(
-    private val centralSurfaces: Lazy<CentralSurfaces>,
     private val notificationListener: NotificationListener,
     private val commonNotifCollection: Lazy<CommonNotifCollection>,
     private val notifPipeline: Lazy<NotifPipeline>,
@@ -76,6 +75,7 @@ class NotificationsControllerImpl @Inject constructor(
 ) : NotificationsController {
 
     override fun initialize(
+        centralSurfaces: CentralSurfaces,
         presenter: NotificationPresenter,
         listContainer: NotificationListContainer,
         stackController: NotifStackController,
@@ -92,8 +92,8 @@ class NotificationsControllerImpl @Inject constructor(
 
         notificationRowBinder.setNotificationClicker(
                 clickerBuilder.build(
-                    Optional.of(
-                        centralSurfaces.get()), bubblesOptional, notificationActivityStarter))
+                    Optional.ofNullable(centralSurfaces), bubblesOptional,
+                        notificationActivityStarter))
         notificationRowBinder.setUpWithPresenter(
                 presenter,
                 listContainer,

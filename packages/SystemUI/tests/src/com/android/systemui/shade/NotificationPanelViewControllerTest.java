@@ -108,6 +108,7 @@ import com.android.systemui.media.KeyguardMediaController;
 import com.android.systemui.media.MediaDataManager;
 import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.model.SysUiState;
+import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QS;
@@ -254,6 +255,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     @Mock private KeyguardMediaController mKeyguardMediaController;
     @Mock private PrivacyDotViewController mPrivacyDotViewController;
     @Mock private NavigationModeController mNavigationModeController;
+    @Mock private NavigationBarController mNavigationBarController;
     @Mock private LargeScreenShadeHeaderController mLargeScreenShadeHeaderController;
     @Mock private ContentResolver mContentResolver;
     @Mock private TapAgainViewController mTapAgainViewController;
@@ -377,6 +379,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
 
         NotificationWakeUpCoordinator coordinator =
                 new NotificationWakeUpCoordinator(
+                        mDumpManager,
                         mock(HeadsUpManagerPhone.class),
                         new StatusBarStateControllerImpl(new UiEventLoggerFake(), mDumpManager,
                                 mInteractionJankMonitor),
@@ -392,6 +395,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mConfigurationController,
                 mStatusBarStateController,
                 mFalsingManager,
+                mShadeExpansionStateManager,
                 mLockscreenShadeTransitionController,
                 new FalsingCollectorFake(),
                 mDumpManager);
@@ -430,6 +434,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         when(mView.getParent()).thenReturn(mViewParent);
         when(mQs.getHeader()).thenReturn(mQsHeader);
         when(mDownMotionEvent.getAction()).thenReturn(MotionEvent.ACTION_DOWN);
+        when(mSysUiState.setFlag(anyInt(), anyBoolean())).thenReturn(mSysUiState);
 
         mMainHandler = new Handler(Looper.getMainLooper());
         NotificationPanelViewController.PanelEventsEmitter panelEventsEmitter =
@@ -473,6 +478,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mPrivacyDotViewController,
                 mTapAgainViewController,
                 mNavigationModeController,
+                mNavigationBarController,
                 mFragmentService,
                 mContentResolver,
                 mRecordingController,
@@ -754,6 +760,38 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
 
         // THEN touch is tracked
         assertThat(mNotificationPanelViewController.isTracking()).isTrue();
+    }
+
+    @Test
+    public void testOnTouchEvent_expansionResumesAfterBriefTouch() {
+        // Start shade collapse with swipe up
+        onTouchEvent(MotionEvent.obtain(0L /* downTime */,
+                0L /* eventTime */, MotionEvent.ACTION_DOWN, 0f /* x */, 0f /* y */,
+                0 /* metaState */));
+        onTouchEvent(MotionEvent.obtain(0L /* downTime */,
+                0L /* eventTime */, MotionEvent.ACTION_MOVE, 0f /* x */, 300f /* y */,
+                0 /* metaState */));
+        onTouchEvent(MotionEvent.obtain(0L /* downTime */,
+                0L /* eventTime */, MotionEvent.ACTION_UP, 0f /* x */, 300f /* y */,
+                0 /* metaState */));
+
+        assertThat(mNotificationPanelViewController.getClosing()).isTrue();
+        assertThat(mNotificationPanelViewController.getIsFlinging()).isTrue();
+
+        // simulate touch that does not exceed touch slop
+        onTouchEvent(MotionEvent.obtain(2L /* downTime */,
+                2L /* eventTime */, MotionEvent.ACTION_DOWN, 0f /* x */, 300f /* y */,
+                0 /* metaState */));
+
+        mNotificationPanelViewController.setTouchSlopExceeded(false);
+
+        onTouchEvent(MotionEvent.obtain(2L /* downTime */,
+                2L /* eventTime */, MotionEvent.ACTION_UP, 0f /* x */, 300f /* y */,
+                0 /* metaState */));
+
+        // fling should still be called after a touch that does not exceed touch slop
+        assertThat(mNotificationPanelViewController.getClosing()).isTrue();
+        assertThat(mNotificationPanelViewController.getIsFlinging()).isTrue();
     }
 
     @Test
