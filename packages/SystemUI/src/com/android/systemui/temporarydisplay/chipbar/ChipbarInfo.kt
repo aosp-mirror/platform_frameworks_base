@@ -16,6 +16,7 @@
 
 package com.android.systemui.temporarydisplay.chipbar
 
+import android.os.VibrationEffect
 import android.view.View
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
@@ -29,11 +30,13 @@ import com.android.systemui.temporarydisplay.TemporaryViewInfo
  * @property text the text to display.
  * @property endItem an optional end item to display at the end of the chipbar (on the right in LTR
  * locales; on the left in RTL locales).
+ * @property vibrationEffect an optional vibration effect when the chipbar is displayed
  */
 data class ChipbarInfo(
     val startIcon: Icon,
     val text: Text,
     val endItem: ChipbarEndItem?,
+    val vibrationEffect: VibrationEffect? = null,
 ) : TemporaryViewInfo
 
 /** The possible items to display at the end of the chipbar. */
