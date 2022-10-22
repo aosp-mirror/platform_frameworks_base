@@ -140,8 +140,8 @@ public final class CredentialEntry implements Parcelable {
     public static final class Builder {
         private String mType;
         private Slice mSlice;
-        private PendingIntent mPendingIntent;
-        private Credential mCredential;
+        private PendingIntent mPendingIntent = null;
+        private Credential mCredential = null;
         private boolean mAutoSelectAllowed = false;
 
         /**

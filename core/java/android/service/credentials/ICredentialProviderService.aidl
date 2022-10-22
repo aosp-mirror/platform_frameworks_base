@@ -21,13 +21,14 @@ import android.service.credentials.GetCredentialsRequest;
 import android.service.credentials.CreateCredentialRequest;
 import android.service.credentials.IGetCredentialsCallback;
 import android.service.credentials.ICreateCredentialCallback;
+import android.os.ICancellationSignal;
 
 /**
  * Interface from the system to a credential provider service.
  *
  * @hide
  */
-oneway interface ICredentialProviderService {
-    void onGetCredentials(in GetCredentialsRequest request, in ICancellationSignal transport, in IGetCredentialsCallback callback);
-    void onCreateCredential(in CreateCredentialRequest request, in ICancellationSignal transport, in ICreateCredentialCallback callback);
+interface ICredentialProviderService {
+    ICancellationSignal onGetCredentials(in GetCredentialsRequest request, in IGetCredentialsCallback callback);
+    ICancellationSignal onCreateCredential(in CreateCredentialRequest request, in ICreateCredentialCallback callback);
 }
