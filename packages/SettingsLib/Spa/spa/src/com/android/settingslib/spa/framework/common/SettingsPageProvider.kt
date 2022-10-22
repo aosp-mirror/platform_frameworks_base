@@ -41,6 +41,8 @@ interface SettingsPageProvider {
     fun Page(arguments: Bundle?)
 
     fun buildEntry(arguments: Bundle?): List<SettingsEntry> = emptyList()
+
+    fun getTitle(arguments: Bundle?): String = displayName ?: name
 }
 
 fun SettingsPageProvider.createSettingsPage(arguments: Bundle? = null): SettingsPage {

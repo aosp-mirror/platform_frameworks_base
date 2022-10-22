@@ -21,10 +21,13 @@ import java.util.LinkedList
 
 private const val TAG = "EntryRepository"
 private const val MAX_ENTRY_SIZE = 5000
+private const val MAX_ENTRY_DEPTH = 10
 
 data class SettingsPageWithEntry(
     val page: SettingsPage,
     val entries: List<SettingsEntry>,
+    // The inject entry, which to-page is current page.
+    val injectEntry: SettingsEntry,
 )
 
 /**
@@ -42,9 +45,11 @@ class SettingsEntryRepository(sppRepository: SettingsPageProviderRepository) {
         entryMap = mutableMapOf()
         pageWithEntryMap = mutableMapOf()
 
+        val nullPage = SettingsPage.createNull()
         val entryQueue = LinkedList<SettingsEntry>()
         for (page in sppRepository.getAllRootPages()) {
-            val rootEntry = SettingsEntryBuilder.createRoot(owner = page).build()
+            val rootEntry =
+                SettingsEntryBuilder.createRoot(owner = page).setLink(fromPage = nullPage).build()
             if (!entryMap.containsKey(rootEntry.id)) {
                 entryQueue.push(rootEntry)
                 entryMap.put(rootEntry.id, rootEntry)
@@ -57,7 +62,11 @@ class SettingsEntryRepository(sppRepository: SettingsPageProviderRepository) {
             if (page == null || pageWithEntryMap.containsKey(page.id)) continue
             val spp = sppRepository.getProviderOrNull(page.sppName) ?: continue
             val newEntries = spp.buildEntry(page.arguments)
-            pageWithEntryMap[page.id] = SettingsPageWithEntry(page, newEntries)
+            pageWithEntryMap[page.id] = SettingsPageWithEntry(
+                page = page,
+                entries = newEntries,
+                injectEntry = entry
+            )
             for (newEntry in newEntries) {
                 if (!entryMap.containsKey(newEntry.id)) {
                     entryQueue.push(newEntry)
@@ -88,7 +97,29 @@ class SettingsEntryRepository(sppRepository: SettingsPageProviderRepository) {
         return entryMap[entryId]
     }
 
-    fun getEntryPath(entryId: String): String {
-        return "TODO(path_of_$entryId)"
+    private fun getEntryPath(entryId: String): List<SettingsEntry> {
+        val entryPath = ArrayList<SettingsEntry>()
+        var currentEntry = entryMap[entryId]
+        while (currentEntry != null && entryPath.size < MAX_ENTRY_DEPTH) {
+            entryPath.add(currentEntry)
+            val currentPage = currentEntry.containerPage()
+            currentEntry = pageWithEntryMap[currentPage.id]?.injectEntry
+        }
+        return entryPath
+    }
+
+    fun getEntryPathWithDisplayName(entryId: String): List<String> {
+        val entryPath = getEntryPath(entryId)
+        return entryPath.map { it.displayName }
+    }
+
+    fun getEntryPathWithTitle(entryId: String, defaultTitle: String): List<String> {
+        val entryPath = getEntryPath(entryId)
+        return entryPath.map {
+            if (it.toPage == null)
+                defaultTitle
+            else
+                it.toPage.getTitle()!!
+        }
     }
 }

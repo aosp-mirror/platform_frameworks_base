@@ -27,6 +27,8 @@ import com.android.settingslib.spa.framework.util.isRuntimeParam
 import com.android.settingslib.spa.framework.util.navLink
 import com.android.settingslib.spa.framework.util.normalize
 
+private const val NULL_PAGE_NAME = "NULL"
+
 /**
  * Defines data to identify a Settings page.
  */
@@ -47,6 +49,10 @@ data class SettingsPage(
     val arguments: Bundle? = null,
 ) {
     companion object {
+        fun createNull(): SettingsPage {
+            return create(NULL_PAGE_NAME)
+        }
+
         fun create(
             name: String,
             displayName: String? = null,
@@ -99,6 +105,11 @@ data class SettingsPage(
         return false
     }
 
+    fun getTitle(): String? {
+        val sppRepository by SpaEnvironmentFactory.instance.pageProviderRepository
+        return sppRepository.getProviderOrNull(sppName)?.getTitle(arguments)
+    }
+
     fun enterPage() {
         SpaEnvironmentFactory.instance.logger.event(
             id,
@@ -149,6 +160,7 @@ data class SettingsPage(
     fun isBrowsable(context: Context?, browseActivityClass: Class<out Activity>?): Boolean {
         return context != null &&
             browseActivityClass != null &&
+            !isCreateBy(NULL_PAGE_NAME) &&
             !hasRuntimeParam()
     }
 }

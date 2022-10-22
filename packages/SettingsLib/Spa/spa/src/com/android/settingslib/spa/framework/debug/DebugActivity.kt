@@ -167,7 +167,7 @@ class DebugActivity : ComponentActivity() {
         val entryRepository by spaEnvironment.entryRepository
         val id = arguments!!.getString(PARAM_NAME_ENTRY_ID, "")
         val entry = entryRepository.getEntry(id)!!
-        val entryContent = remember { entry.formatContent() }
+        val entryContent = remember { entry.debugContent(entryRepository) }
         RegularScaffold(title = "Entry - ${entry.displayTitle()}") {
             Preference(model = object : PreferenceModel {
                 override val title = "open entry"
