@@ -231,7 +231,7 @@ void PointerController::clearSpots() {
 }
 
 void PointerController::clearSpotsLocked() {
-    for (auto& [displayID, spotController] : mLocked.spotControllers) {
+    for (auto& [displayId, spotController] : mLocked.spotControllers) {
         spotController.clearSpots();
     }
 }
@@ -243,7 +243,7 @@ void PointerController::setInactivityTimeout(InactivityTimeout inactivityTimeout
 void PointerController::reloadPointerResources() {
     std::scoped_lock lock(getLock());
 
-    for (auto& [displayID, spotController] : mLocked.spotControllers) {
+    for (auto& [displayId, spotController] : mLocked.spotControllers) {
         spotController.reloadSpotResources();
     }
 
@@ -294,13 +294,13 @@ void PointerController::onDisplayViewportsUpdated(std::vector<DisplayViewport>& 
 
     std::scoped_lock lock(getLock());
     for (auto it = mLocked.spotControllers.begin(); it != mLocked.spotControllers.end();) {
-        int32_t displayID = it->first;
-        if (!displayIdSet.count(displayID)) {
+        int32_t displayId = it->first;
+        if (!displayIdSet.count(displayId)) {
             /*
              * Ensures that an in-progress animation won't dereference
              * a null pointer to TouchSpotController.
              */
-            mContext.removeAnimationCallback(displayID);
+            mContext.removeAnimationCallback(displayId);
             it = mLocked.spotControllers.erase(it);
         } else {
             ++it;
