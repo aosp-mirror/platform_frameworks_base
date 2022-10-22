@@ -19,6 +19,7 @@ package com.android.systemui.accessibility.floatingmenu;
 import android.annotation.IntDef;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.view.WindowManager;
 import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
@@ -41,11 +42,12 @@ class MenuViewLayer extends FrameLayout {
         int MENU_VIEW = 0;
     }
 
-    MenuViewLayer(@NonNull Context context) {
+    MenuViewLayer(@NonNull Context context, WindowManager windowManager) {
         super(context);
 
         final MenuViewModel menuViewModel = new MenuViewModel(context);
-        final MenuViewAppearance menuViewAppearance = new MenuViewAppearance(context);
+        final MenuViewAppearance menuViewAppearance = new MenuViewAppearance(context,
+                windowManager);
         mMenuView = new MenuView(context, menuViewModel, menuViewAppearance);
 
         addView(mMenuView, LayerIndex.MENU_VIEW);

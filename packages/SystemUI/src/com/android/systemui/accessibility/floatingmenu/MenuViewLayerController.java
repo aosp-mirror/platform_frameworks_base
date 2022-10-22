@@ -20,6 +20,7 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_EXCLUDE_FROM_
 
 import android.content.Context;
 import android.graphics.PixelFormat;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 
 /**
@@ -33,7 +34,7 @@ class MenuViewLayerController implements IAccessibilityFloatingMenu {
 
     MenuViewLayerController(Context context, WindowManager windowManager) {
         mWindowManager = windowManager;
-        mMenuViewLayer = new MenuViewLayer(context);
+        mMenuViewLayer = new MenuViewLayer(context, windowManager);
     }
 
     @Override
@@ -68,9 +69,10 @@ class MenuViewLayerController implements IAccessibilityFloatingMenu {
                 WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSLUCENT);
+        params.receiveInsetsIgnoringZOrder = true;
         params.privateFlags |= PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_MAGNIFICATION;
         params.windowAnimations = android.R.style.Animation_Translucent;
-
+        params.setFitInsetsTypes(WindowInsets.Type.navigationBars());
         return params;
     }
 }
