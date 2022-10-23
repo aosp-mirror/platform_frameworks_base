@@ -252,7 +252,7 @@
     <string name="bugreport_message" msgid="5212529146119624326">"현재 기기 상태에 대한 정보를 수집하여 이메일 메시지로 전송합니다. 버그 신고를 시작하여 전송할 준비가 되려면 약간 시간이 걸립니다."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"대화형 보고서"</string>
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"대부분의 경우 이 옵션을 사용합니다. 신고 진행 상황을 추적하고 문제에 대한 세부정보를 입력하고 스크린샷을 찍을 수 있습니다. 신고하기에 시간이 너무 오래 걸리고 사용 빈도가 낮은 일부 섹션을 생략할 수 있습니다."</string>
-    <string name="bugreport_option_full_title" msgid="7681035745950045690">"전체 보고서"</string>
+    <string name="bugreport_option_full_title" msgid="7681035745950045690">"전체 신고"</string>
     <string name="bugreport_option_full_summary" msgid="1975130009258435885">"기기가 응답하지 않거나 너무 느리거나 모든 보고서 섹션이 필요한 경우 이 옵션을 사용하여 시스템 방해를 최소화합니다. 세부정보를 추가하거나 스크린샷을 추가로 찍을 수 없습니다."</string>
     <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{버그 신고 스크린샷을 #초 후에 찍습니다.}other{버그 신고 스크린샷을 #초 후에 찍습니다.}}"</string>
     <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"버그 신고용 스크린샷 촬영 완료"</string>
