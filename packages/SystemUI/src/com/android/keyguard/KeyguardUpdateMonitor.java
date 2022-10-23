@@ -2351,11 +2351,13 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      * @param userInitiatedRequest true if the user explicitly requested face auth
      * @param reason One of the reasons {@link FaceAuthApiRequestReason} on why this API is being
      * invoked.
+     * @return current face auth detection state, true if it is running.
      */
-    public void requestFaceAuth(boolean userInitiatedRequest,
+    public boolean requestFaceAuth(boolean userInitiatedRequest,
             @FaceAuthApiRequestReason String reason) {
         mLogger.logFaceAuthRequested(userInitiatedRequest, reason);
         updateFaceListeningState(BIOMETRIC_ACTION_START, apiRequestReasonToUiEvent(reason));
+        return isFaceDetectionRunning();
     }
 
     /**

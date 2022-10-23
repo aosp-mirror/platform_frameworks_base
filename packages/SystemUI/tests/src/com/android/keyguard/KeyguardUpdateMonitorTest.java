@@ -26,6 +26,7 @@ import static android.telephony.SubscriptionManager.NAME_SOURCE_CARRIER_ID;
 
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_USER_REQUEST;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT;
+import static com.android.keyguard.FaceAuthApiRequestReason.NOTIFICATION_PANEL_CLICKED;
 import static com.android.keyguard.KeyguardUpdateMonitor.DEFAULT_CANCEL_SIGNAL_TIMEOUT;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -646,6 +647,36 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     public void requiresAuthentication_whenTimeoutKeyguard_andBypass() {
         testStrongAuthExceptOnBouncer(
                 KeyguardUpdateMonitor.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_TIMEOUT);
+    }
+
+    @Test
+    public void requestFaceAuth_whenFaceAuthWasStarted_returnsTrue() throws RemoteException {
+        // This satisfies all the preconditions to run face auth.
+        keyguardNotGoingAway();
+        currentUserIsPrimary();
+        currentUserDoesNotHaveTrust();
+        biometricsNotDisabledThroughDevicePolicyManager();
+        biometricsEnabledForCurrentUser();
+        userNotCurrentlySwitching();
+        bouncerFullyVisibleAndNotGoingToSleep();
+        mTestableLooper.processAllMessages();
+
+        boolean didFaceAuthRun = mKeyguardUpdateMonitor.requestFaceAuth(true,
+                NOTIFICATION_PANEL_CLICKED);
+
+        assertThat(didFaceAuthRun).isTrue();
+    }
+
+    @Test
+    public void requestFaceAuth_whenFaceAuthWasNotStarted_returnsFalse() throws RemoteException {
+        // This ensures face auth won't run.
+        biometricsDisabledForCurrentUser();
+        mTestableLooper.processAllMessages();
+
+        boolean didFaceAuthRun = mKeyguardUpdateMonitor.requestFaceAuth(true,
+                NOTIFICATION_PANEL_CLICKED);
+
+        assertThat(didFaceAuthRun).isFalse();
     }
 
     private void testStrongAuthExceptOnBouncer(int strongAuth) {

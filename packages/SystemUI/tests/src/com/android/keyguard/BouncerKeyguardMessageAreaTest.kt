@@ -66,4 +66,13 @@ class BouncerKeyguardMessageAreaTest : SysuiTestCase() {
         underTest.setMessage(null)
         assertThat(underTest.text).isEqualTo("")
     }
+
+    @Test
+    fun testSetNullClearsPreviousMessage() {
+        underTest.setMessage("something not null")
+        assertThat(underTest.text).isEqualTo("something not null")
+
+        underTest.setMessage(null)
+        assertThat(underTest.text).isEqualTo("")
+    }
 }

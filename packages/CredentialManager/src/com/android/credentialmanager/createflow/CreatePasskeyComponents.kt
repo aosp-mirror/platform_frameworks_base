@@ -70,21 +70,21 @@ fun CreatePasskeyScreen(
           onProviderSelected = {viewModel.onProviderSelected(it)}
         )
         CreateScreenState.CREATION_OPTION_SELECTION -> CreationSelectionCard(
-          providerInfo = uiState.selectedProvider!!,
-          onOptionSelected = {viewModel.onCreateOptionSelected(it)},
+          requestDisplayInfo = uiState.requestDisplayInfo,
+          providerInfo = uiState.activeEntry?.activeProvider!!,
+          onOptionSelected = {viewModel.onPrimaryCreateOptionInfoSelected()},
           onCancel = {viewModel.onCancel()},
           multiProvider = uiState.providers.size > 1,
-          onMoreOptionsSelected = {viewModel.onMoreOptionsSelected(it)}
+          onMoreOptionsSelected = {viewModel.onMoreOptionsSelected()}
         )
         CreateScreenState.MORE_OPTIONS_SELECTION -> MoreOptionsSelectionCard(
-            providerInfo = uiState.selectedProvider!!,
             providerList = uiState.providers,
-            onBackButtonSelected = {viewModel.onBackButtonSelected(it)},
+            onBackButtonSelected = {viewModel.onBackButtonSelected()},
             onOptionSelected = {viewModel.onMoreOptionsRowSelected(it)}
           )
         CreateScreenState.MORE_OPTIONS_ROW_INTRO -> MoreOptionsRowIntroCard(
-          providerInfo = uiState.selectedProvider!!,
-          onDefaultOrNotSelected = {viewModel.onDefaultOrNotSelected(it)}
+          providerInfo = uiState.activeEntry?.activeProvider!!,
+          onDefaultOrNotSelected = {viewModel.onDefaultOrNotSelected()}
         )
       }
     },
@@ -218,10 +218,9 @@ fun ProviderSelectionCard(
 @ExperimentalMaterialApi
 @Composable
 fun MoreOptionsSelectionCard(
-  providerInfo: ProviderInfo,
   providerList: List<ProviderInfo>,
-  onBackButtonSelected: (String) -> Unit,
-  onOptionSelected: (String) -> Unit
+  onBackButtonSelected: () -> Unit,
+  onOptionSelected: (ActiveEntry) -> Unit
 ) {
   Card(
     backgroundColor = lightBackgroundColor,
@@ -235,7 +234,7 @@ fun MoreOptionsSelectionCard(
         elevation = 0.dp,
         navigationIcon =
         {
-          IconButton(onClick = { onBackButtonSelected(providerInfo.name) }) {
+          IconButton(onClick = onBackButtonSelected) {
             Icon(Icons.Filled.ArrowBack, "backIcon"
             )
           }
@@ -264,9 +263,12 @@ fun MoreOptionsSelectionCard(
           providerList.forEach { providerInfo ->
             providerInfo.createOptions.forEach { createOptionInfo ->
               item {
-                MoreOptionsInfoRow(providerInfo = providerInfo,
+                MoreOptionsInfoRow(
+                  providerInfo = providerInfo,
                   createOptionInfo = createOptionInfo,
-                  onOptionSelected = onOptionSelected)
+                  onOptionSelected = {
+                    onOptionSelected(ActiveEntry(providerInfo, createOptionInfo))
+                  })
               }
             }
           }
@@ -285,7 +287,7 @@ fun MoreOptionsSelectionCard(
 @Composable
 fun MoreOptionsRowIntroCard(
   providerInfo: ProviderInfo,
-  onDefaultOrNotSelected: (String) -> Unit,
+  onDefaultOrNotSelected: () -> Unit,
 ) {
   Card(
     backgroundColor = lightBackgroundColor,
@@ -302,11 +304,11 @@ fun MoreOptionsRowIntroCard(
       ) {
         CancelButton(
           stringResource(R.string.use_once),
-          onclick = { onDefaultOrNotSelected(providerInfo.name) }
+          onclick = onDefaultOrNotSelected
         )
         ConfirmButton(
           stringResource(R.string.set_as_default),
-          onclick = { onDefaultOrNotSelected(providerInfo.name) }
+          onclick = onDefaultOrNotSelected
         )
       }
       Divider(
@@ -388,11 +390,12 @@ fun NavigationButton(
 @ExperimentalMaterialApi
 @Composable
 fun CreationSelectionCard(
+  requestDisplayInfo: RequestDisplayInfo,
   providerInfo: ProviderInfo,
-  onOptionSelected: (Int) -> Unit,
+  onOptionSelected: () -> Unit,
   onCancel: () -> Unit,
   multiProvider: Boolean,
-  onMoreOptionsSelected: (String) -> Unit,
+  onMoreOptionsSelected: () -> Unit,
 ) {
   Card(
     backgroundColor = lightBackgroundColor,
@@ -427,14 +430,13 @@ fun CreationSelectionCard(
         LazyColumn(
           verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
-          providerInfo.createOptions.forEach {
             item {
-              CreateOptionRow(createOptionInfo = it, onOptionSelected = onOptionSelected)
+              PrimaryCreateOptionRow(requestDisplayInfo = requestDisplayInfo,
+                onOptionSelected = onOptionSelected)
             }
-          }
           if (multiProvider) {
             item {
-              MoreOptionsRow(onSelect = { onMoreOptionsSelected(providerInfo.name) })
+              MoreOptionsRow(onSelect = onMoreOptionsSelected)
             }
           }
         }
@@ -494,14 +496,45 @@ fun CreateOptionRow(createOptionInfo: CreateOptionInfo, onOptionSelected: (Int) 
 
 @ExperimentalMaterialApi
 @Composable
+fun PrimaryCreateOptionRow(
+  requestDisplayInfo: RequestDisplayInfo,
+  onOptionSelected: () -> Unit
+) {
+  Chip(
+    modifier = Modifier.fillMaxWidth(),
+    onClick = {onOptionSelected()},
+    // TODO: Add an icon generated by provider according to requestDisplayInfo type
+    colors = ChipDefaults.chipColors(
+      backgroundColor = Grey100,
+      leadingIconContentColor = Grey100
+    ),
+    shape = Shapes.large
+  ) {
+    Column() {
+      Text(
+        text = requestDisplayInfo.userName,
+        style = Typography.h6,
+        modifier = Modifier.padding(top = 16.dp)
+      )
+      Text(
+        text = requestDisplayInfo.displayName,
+        style = Typography.body2,
+        modifier = Modifier.padding(bottom = 16.dp)
+      )
+    }
+  }
+}
+
+@ExperimentalMaterialApi
+@Composable
 fun MoreOptionsInfoRow(
   providerInfo: ProviderInfo,
   createOptionInfo: CreateOptionInfo,
-  onOptionSelected: (String) -> Unit
+  onOptionSelected: () -> Unit
 ) {
     Chip(
         modifier = Modifier.fillMaxWidth(),
-        onClick = { onOptionSelected(providerInfo.name) },
+        onClick = onOptionSelected,
         leadingIcon = {
             Image(modifier = Modifier.size(24.dp, 24.dp).padding(start = 10.dp),
                 bitmap = createOptionInfo.icon.toBitmap().asImageBitmap(),
