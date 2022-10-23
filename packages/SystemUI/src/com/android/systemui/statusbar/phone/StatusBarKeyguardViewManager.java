@@ -60,7 +60,6 @@ import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.data.BouncerView;
-import com.android.systemui.keyguard.data.BouncerViewDelegate;
 import com.android.systemui.keyguard.domain.interactor.BouncerCallbackInteractor;
 import com.android.systemui.keyguard.domain.interactor.BouncerInteractor;
 import com.android.systemui.navigationbar.NavigationBarView;
@@ -136,7 +135,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private KeyguardMessageAreaController<AuthKeyguardMessageArea> mKeyguardMessageAreaController;
     private final BouncerCallbackInteractor mBouncerCallbackInteractor;
     private final BouncerInteractor mBouncerInteractor;
-    private final BouncerViewDelegate mBouncerViewDelegate;
+    private final BouncerView mBouncerView;
     private final Lazy<com.android.systemui.shade.ShadeController> mShadeController;
 
     private final BouncerExpansionCallback mExpansionCallback = new BouncerExpansionCallback() {
@@ -327,7 +326,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mKeyguardSecurityModel = keyguardSecurityModel;
         mBouncerCallbackInteractor = bouncerCallbackInteractor;
         mBouncerInteractor = bouncerInteractor;
-        mBouncerViewDelegate = bouncerView.getDelegate();
+        mBouncerView = bouncerView;
         mFoldAodAnimationController = sysUIUnfoldComponent
                 .map(SysUIUnfoldComponent::getFoldAodAnimationController).orElse(null);
         mIsModernBouncerEnabled = featureFlags.isEnabled(Flags.MODERN_BOUNCER);
@@ -804,7 +803,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private void setDozing(boolean dozing) {
         if (mDozing != dozing) {
             mDozing = dozing;
-            if (dozing || mBouncer.needsFullscreenBouncer()
+            if (dozing || needsFullscreenBouncer()
                     || mKeyguardStateController.isOccluded()) {
                 reset(dozing /* hideBouncerWhenShowing */);
             }
@@ -1082,7 +1081,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
      * @return whether a back press can be handled right now.
      */
     public boolean canHandleBackPressed() {
-        return mBouncer.isShowing();
+        return bouncerIsShowing();
     }
 
     /**
@@ -1125,8 +1124,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     public boolean isFullscreenBouncer() {
-        if (mBouncerViewDelegate != null) {
-            return mBouncerViewDelegate.isFullScreenBouncer();
+        if (mBouncerView.getDelegate() != null) {
+            return mBouncerView.getDelegate().isFullScreenBouncer();
         }
         return mBouncer != null && mBouncer.isFullscreenBouncer();
     }
@@ -1285,15 +1284,15 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     public boolean shouldDismissOnMenuPressed() {
-        if (mBouncerViewDelegate != null) {
-            return mBouncerViewDelegate.shouldDismissOnMenuPressed();
+        if (mBouncerView.getDelegate() != null) {
+            return mBouncerView.getDelegate().shouldDismissOnMenuPressed();
         }
         return mBouncer != null && mBouncer.shouldDismissOnMenuPressed();
     }
 
     public boolean interceptMediaKey(KeyEvent event) {
-        if (mBouncerViewDelegate != null) {
-            return mBouncerViewDelegate.interceptMediaKey(event);
+        if (mBouncerView.getDelegate() != null) {
+            return mBouncerView.getDelegate().interceptMediaKey(event);
         }
         return mBouncer != null && mBouncer.interceptMediaKey(event);
     }
@@ -1302,8 +1301,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
      * @return true if the pre IME back event should be handled
      */
     public boolean dispatchBackKeyEventPreIme() {
-        if (mBouncerViewDelegate != null) {
-            return mBouncerViewDelegate.dispatchBackKeyEventPreIme();
+        if (mBouncerView.getDelegate() != null) {
+            return mBouncerView.getDelegate().dispatchBackKeyEventPreIme();
         }
         return mBouncer != null && mBouncer.dispatchBackKeyEventPreIme();
     }

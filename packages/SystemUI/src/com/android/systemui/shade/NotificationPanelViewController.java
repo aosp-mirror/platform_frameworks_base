@@ -147,9 +147,9 @@ import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.domain.interactor.KeyguardBottomAreaInteractor;
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBottomAreaViewModel;
-import com.android.systemui.media.KeyguardMediaController;
-import com.android.systemui.media.MediaDataManager;
-import com.android.systemui.media.MediaHierarchyManager;
+import com.android.systemui.media.controls.pipeline.MediaDataManager;
+import com.android.systemui.media.controls.ui.KeyguardMediaController;
+import com.android.systemui.media.controls.ui.MediaHierarchyManager;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.navigationbar.NavigationBarView;
@@ -3933,20 +3933,19 @@ public final class NotificationPanelViewController {
                     mShadeLog.v("onMiddleClicked on Keyguard, mDozingOnDown: false");
                     // Try triggering face auth, this "might" run. Check
                     // KeyguardUpdateMonitor#shouldListenForFace to see when face auth won't run.
-                    mUpdateMonitor.requestFaceAuth(true,
+                    boolean didFaceAuthRun = mUpdateMonitor.requestFaceAuth(true,
                             FaceAuthApiRequestReason.NOTIFICATION_PANEL_CLICKED);
 
-                    mLockscreenGestureLogger.write(MetricsEvent.ACTION_LS_HINT,
-                            0 /* lengthDp - N/A */, 0 /* velocityDp - N/A */);
-                    mLockscreenGestureLogger
-                            .log(LockscreenUiEvent.LOCKSCREEN_LOCK_SHOW_HINT);
-                    if (!mUpdateMonitor.isFaceDetectionRunning()) {
-                        startUnlockHintAnimation();
-                    }
-                    if (mUpdateMonitor.isFaceEnrolled()) {
+                    if (didFaceAuthRun) {
                         mUpdateMonitor.requestActiveUnlock(
                                 ActiveUnlockConfig.ACTIVE_UNLOCK_REQUEST_ORIGIN.UNLOCK_INTENT,
                                 "lockScreenEmptySpaceTap");
+                    } else {
+                        mLockscreenGestureLogger.write(MetricsEvent.ACTION_LS_HINT,
+                                0 /* lengthDp - N/A */, 0 /* velocityDp - N/A */);
+                        mLockscreenGestureLogger
+                                .log(LockscreenUiEvent.LOCKSCREEN_LOCK_SHOW_HINT);
+                        startUnlockHintAnimation();
                     }
                 }
                 return true;

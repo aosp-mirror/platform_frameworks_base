@@ -273,8 +273,8 @@ constructor(
     /** Tell the bouncer to start the pre hide animation. */
     fun startDisappearAnimation(runnable: Runnable) {
         val finishRunnable = Runnable {
-            repository.setStartDisappearAnimation(null)
             runnable.run()
+            repository.setStartDisappearAnimation(null)
         }
         repository.setStartDisappearAnimation(finishRunnable)
     }
