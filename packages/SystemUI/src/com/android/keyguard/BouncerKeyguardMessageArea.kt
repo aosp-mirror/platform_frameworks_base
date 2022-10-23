@@ -70,7 +70,7 @@ open class BouncerKeyguardMessageArea(context: Context?, attrs: AttributeSet?) :
     }
 
     override fun setMessage(msg: CharSequence?) {
-        if (msg == textAboutToShow || msg == text) {
+        if ((msg == textAboutToShow && msg != null) || msg == text) {
             return
         }
         textAboutToShow = msg
