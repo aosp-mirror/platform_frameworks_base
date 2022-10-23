@@ -22,6 +22,7 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.app.PendingIntent;
@@ -90,6 +91,26 @@ public final class VirtualDeviceManager {
      * Invalid device ID.
      */
     public static final int INVALID_DEVICE_ID = -1;
+
+    /**
+     * Broadcast Action: A Virtual Device was removed.
+     *
+     * <p class="note">This is a protected intent that can only be sent by the system.</p>
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_VIRTUAL_DEVICE_REMOVED =
+            "android.companion.virtual.action.VIRTUAL_DEVICE_REMOVED";
+
+    /**
+     * Int intent extra to be used with {@link #ACTION_VIRTUAL_DEVICE_REMOVED}.
+     * Contains the identifier of the virtual device, which was removed.
+     *
+     * @hide
+     */
+    public static final String EXTRA_VIRTUAL_DEVICE_ID =
+            "android.companion.virtual.extra.VIRTUAL_DEVICE_ID";
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
