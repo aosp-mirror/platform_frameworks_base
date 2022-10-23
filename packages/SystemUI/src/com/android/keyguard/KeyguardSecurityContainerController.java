@@ -219,13 +219,16 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     };
 
 
-    private SwipeListener mSwipeListener = new SwipeListener() {
+    private final SwipeListener mSwipeListener = new SwipeListener() {
         @Override
         public void onSwipeUp() {
             if (!mUpdateMonitor.isFaceDetectionRunning()) {
-                mUpdateMonitor.requestFaceAuth(true, FaceAuthApiRequestReason.SWIPE_UP_ON_BOUNCER);
+                boolean didFaceAuthRun = mUpdateMonitor.requestFaceAuth(true,
+                        FaceAuthApiRequestReason.SWIPE_UP_ON_BOUNCER);
                 mKeyguardSecurityCallback.userActivity();
-                showMessage(null, null);
+                if (didFaceAuthRun) {
+                    showMessage(null, null);
+                }
             }
             if (mUpdateMonitor.isFaceEnrolled()) {
                 mUpdateMonitor.requestActiveUnlock(
@@ -234,7 +237,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             }
         }
     };
-    private ConfigurationController.ConfigurationListener mConfigurationListener =
+    private final ConfigurationController.ConfigurationListener mConfigurationListener =
             new ConfigurationController.ConfigurationListener() {
                 @Override
                 public void onThemeChanged() {

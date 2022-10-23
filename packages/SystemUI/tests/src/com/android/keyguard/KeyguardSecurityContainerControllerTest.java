@@ -146,6 +146,8 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
 
     @Captor
     private ArgumentCaptor<KeyguardUpdateMonitorCallback> mKeyguardUpdateMonitorCallback;
+    @Captor
+    private ArgumentCaptor<KeyguardSecurityContainer.SwipeListener> mSwipeListenerArgumentCaptor;
 
     private Configuration mConfiguration;
 
@@ -473,6 +475,64 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
         //THEN no action has happened, which will not dismiss the security screens
         assertThat(keyguardDone).isEqualTo(false);
         verify(mKeyguardUpdateMonitor, never()).getUserHasTrust(anyInt());
+    }
+
+    @Test
+    public void onSwipeUp_whenFaceDetectionIsNotRunning_initiatesFaceAuth() {
+        KeyguardSecurityContainer.SwipeListener registeredSwipeListener =
+                getRegisteredSwipeListener();
+        when(mKeyguardUpdateMonitor.isFaceDetectionRunning()).thenReturn(false);
+        setupGetSecurityView();
+
+        registeredSwipeListener.onSwipeUp();
+
+        verify(mKeyguardUpdateMonitor).requestFaceAuth(true,
+                FaceAuthApiRequestReason.SWIPE_UP_ON_BOUNCER);
+    }
+
+    @Test
+    public void onSwipeUp_whenFaceDetectionIsRunning_doesNotInitiateFaceAuth() {
+        KeyguardSecurityContainer.SwipeListener registeredSwipeListener =
+                getRegisteredSwipeListener();
+        when(mKeyguardUpdateMonitor.isFaceDetectionRunning()).thenReturn(true);
+
+        registeredSwipeListener.onSwipeUp();
+
+        verify(mKeyguardUpdateMonitor, never())
+                .requestFaceAuth(true,
+                        FaceAuthApiRequestReason.SWIPE_UP_ON_BOUNCER);
+    }
+
+    @Test
+    public void onSwipeUp_whenFaceDetectionIsTriggered_hidesBouncerMessage() {
+        KeyguardSecurityContainer.SwipeListener registeredSwipeListener =
+                getRegisteredSwipeListener();
+        when(mKeyguardUpdateMonitor.requestFaceAuth(true,
+                FaceAuthApiRequestReason.SWIPE_UP_ON_BOUNCER)).thenReturn(true);
+        setupGetSecurityView();
+
+        registeredSwipeListener.onSwipeUp();
+
+        verify(mKeyguardPasswordViewControllerMock).showMessage(null, null);
+    }
+
+    @Test
+    public void onSwipeUp_whenFaceDetectionIsNotTriggered_retainsBouncerMessage() {
+        KeyguardSecurityContainer.SwipeListener registeredSwipeListener =
+                getRegisteredSwipeListener();
+        when(mKeyguardUpdateMonitor.requestFaceAuth(true,
+                FaceAuthApiRequestReason.SWIPE_UP_ON_BOUNCER)).thenReturn(false);
+        setupGetSecurityView();
+
+        registeredSwipeListener.onSwipeUp();
+
+        verify(mKeyguardPasswordViewControllerMock, never()).showMessage(null, null);
+    }
+
+    private KeyguardSecurityContainer.SwipeListener getRegisteredSwipeListener() {
+        mKeyguardSecurityContainerController.onViewAttached();
+        verify(mView).setSwipeListener(mSwipeListenerArgumentCaptor.capture());
+        return mSwipeListenerArgumentCaptor.getValue();
     }
 
     private void setupConditionsToEnableSideFpsHint() {
