@@ -55,7 +55,7 @@ class FaceScanningOverlay(
     private val rimRect = RectF()
     private var cameraProtectionColor = Color.BLACK
     var faceScanningAnimColor = Utils.getColorAttrDefaultColor(context,
-            com.android.systemui.R.attr.wallpaperTextColorAccent)
+            R.attr.wallpaperTextColorAccent)
     private var cameraProtectionAnimator: ValueAnimator? = null
     var hideOverlayRunnable: Runnable? = null
     var faceAuthSucceeded = false
@@ -84,38 +84,37 @@ class FaceScanningOverlay(
     }
 
     override fun drawCutoutProtection(canvas: Canvas) {
-        if (rimProgress > HIDDEN_RIM_SCALE && !protectionRect.isEmpty) {
-            val rimPath = Path(protectionPath)
-            val scaleMatrix = Matrix().apply {
-                val rimBounds = RectF()
-                rimPath.computeBounds(rimBounds, true)
-                setScale(rimProgress, rimProgress, rimBounds.centerX(), rimBounds.centerY())
-            }
-            rimPath.transform(scaleMatrix)
-            rimPaint.style = Paint.Style.FILL
-            val rimPaintAlpha = rimPaint.alpha
-            rimPaint.color = ColorUtils.blendARGB(
-                    faceScanningAnimColor,
-                    Color.WHITE,
-                    statusBarStateController.dozeAmount)
-            rimPaint.alpha = rimPaintAlpha
-            canvas.drawPath(rimPath, rimPaint)
+        if (protectionRect.isEmpty) {
+            return
         }
+        if (rimProgress > HIDDEN_RIM_SCALE) {
+            drawFaceScanningRim(canvas)
+        }
+        if (cameraProtectionProgress > HIDDEN_CAMERA_PROTECTION_SCALE) {
+            drawCameraProtection(canvas)
+        }
+    }
 
-        if (cameraProtectionProgress > HIDDEN_CAMERA_PROTECTION_SCALE &&
-                !protectionRect.isEmpty) {
-            val scaledProtectionPath = Path(protectionPath)
-            val scaleMatrix = Matrix().apply {
-                val protectionPathRect = RectF()
-                scaledProtectionPath.computeBounds(protectionPathRect, true)
-                setScale(cameraProtectionProgress, cameraProtectionProgress,
-                        protectionPathRect.centerX(), protectionPathRect.centerY())
-            }
-            scaledProtectionPath.transform(scaleMatrix)
-            paint.style = Paint.Style.FILL
-            paint.color = cameraProtectionColor
-            canvas.drawPath(scaledProtectionPath, paint)
-        }
+    private fun drawFaceScanningRim(canvas: Canvas) {
+        val rimPath = Path(protectionPath)
+        scalePath(rimPath, rimProgress)
+        rimPaint.style = Paint.Style.FILL
+        val rimPaintAlpha = rimPaint.alpha
+        rimPaint.color = ColorUtils.blendARGB(
+            faceScanningAnimColor,
+            Color.WHITE,
+            statusBarStateController.dozeAmount
+        )
+        rimPaint.alpha = rimPaintAlpha
+        canvas.drawPath(rimPath, rimPaint)
+    }
+
+    private fun drawCameraProtection(canvas: Canvas) {
+        val scaledProtectionPath = Path(protectionPath)
+        scalePath(scaledProtectionPath, cameraProtectionProgress)
+        paint.style = Paint.Style.FILL
+        paint.color = cameraProtectionColor
+        canvas.drawPath(scaledProtectionPath, paint)
     }
 
     override fun updateVisOnUpdateCutout(): Boolean {
@@ -371,5 +370,17 @@ class FaceScanningOverlay(
 
         private const val PULSE_ERROR_DISAPPEAR_DURATION = 200L
         private const val CAMERA_PROTECTION_ERROR_DISAPPEAR_DURATION = 300L // without start delay
+
+        private fun scalePath(path: Path, scalingFactor: Float) {
+            val scaleMatrix = Matrix().apply {
+                val boundingRectangle = RectF()
+                path.computeBounds(boundingRectangle, true)
+                setScale(
+                    scalingFactor, scalingFactor,
+                    boundingRectangle.centerX(), boundingRectangle.centerY()
+                )
+            }
+            path.transform(scaleMatrix)
+        }
     }
 }
