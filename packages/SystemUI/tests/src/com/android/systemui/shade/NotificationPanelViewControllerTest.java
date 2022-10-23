@@ -18,6 +18,7 @@ package com.android.systemui.shade;
 
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
+import static com.android.keyguard.FaceAuthApiRequestReason.NOTIFICATION_PANEL_CLICKED;
 import static com.android.keyguard.KeyguardClockSwitch.LARGE;
 import static com.android.keyguard.KeyguardClockSwitch.SMALL;
 import static com.android.systemui.shade.ShadeExpansionStateManagerKt.STATE_CLOSED;
@@ -1606,7 +1607,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mNotificationPanelViewController.mStatusBarStateListener;
         statusBarStateListener.onStateChanged(KEYGUARD);
         mNotificationPanelViewController.setDozing(false, false);
-        when(mUpdateMonitor.isFaceDetectionRunning()).thenReturn(false);
+        when(mUpdateMonitor.requestFaceAuth(true, NOTIFICATION_PANEL_CLICKED)).thenReturn(false);
 
         // This sets the dozing state that is read when onMiddleClicked is eventually invoked.
         mTouchHandler.onTouch(mock(View.class), mDownMotionEvent);
@@ -1621,7 +1622,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mNotificationPanelViewController.mStatusBarStateListener;
         statusBarStateListener.onStateChanged(KEYGUARD);
         mNotificationPanelViewController.setDozing(false, false);
-        when(mUpdateMonitor.isFaceDetectionRunning()).thenReturn(true);
+        when(mUpdateMonitor.requestFaceAuth(true, NOTIFICATION_PANEL_CLICKED)).thenReturn(true);
 
         // This sets the dozing state that is read when onMiddleClicked is eventually invoked.
         mTouchHandler.onTouch(mock(View.class), mDownMotionEvent);
