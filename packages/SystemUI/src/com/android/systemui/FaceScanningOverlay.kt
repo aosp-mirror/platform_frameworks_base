@@ -151,19 +151,12 @@ class FaceScanningOverlay(
                     if (showScanningAnim) Interpolators.STANDARD_ACCELERATE
                     else if (faceAuthSucceeded) Interpolators.STANDARD
                     else Interpolators.STANDARD_DECELERATE
-            addUpdateListener(ValueAnimator.AnimatorUpdateListener {
-                animation: ValueAnimator ->
-                cameraProtectionProgress = animation.animatedValue as Float
-                invalidate()
-            })
+            addUpdateListener(this@FaceScanningOverlay::updateCameraProtectionProgress)
             addListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: Animator) {
                     cameraProtectionAnimator = null
                     if (!showScanningAnim) {
-                        visibility = View.INVISIBLE
-                        hideOverlayRunnable?.run()
-                        hideOverlayRunnable = null
-                        requestLayout()
+                        hide()
                     }
                 }
             })
@@ -172,22 +165,12 @@ class FaceScanningOverlay(
         rimAnimator?.cancel()
         rimAnimator = AnimatorSet().apply {
             if (showScanningAnim) {
-                val rimAppearAnimator = ValueAnimator.ofFloat(SHOW_CAMERA_PROTECTION_SCALE,
-                        PULSE_RADIUS_OUT).apply {
-                    duration = PULSE_APPEAR_DURATION
-                    interpolator = Interpolators.STANDARD_DECELERATE
-                    addUpdateListener(ValueAnimator.AnimatorUpdateListener {
-                        animation: ValueAnimator ->
-                        rimProgress = animation.animatedValue as Float
-                        invalidate()
-                    })
-                }
-
                 // animate in camera protection, rim, and then pulse in/out
-                playSequentially(cameraProtectionAnimator, rimAppearAnimator,
-                        createPulseAnimator(), createPulseAnimator(),
-                        createPulseAnimator(), createPulseAnimator(),
-                        createPulseAnimator(), createPulseAnimator())
+                playSequentially(
+                    cameraProtectionAnimator,
+                    createRimAppearAnimator(),
+                    createPulseAnimator()
+                )
             } else {
                 val rimDisappearAnimator = ValueAnimator.ofFloat(
                         rimProgress,
@@ -200,11 +183,7 @@ class FaceScanningOverlay(
                     interpolator =
                             if (faceAuthSucceeded) Interpolators.STANDARD_DECELERATE
                             else Interpolators.STANDARD
-                    addUpdateListener(ValueAnimator.AnimatorUpdateListener {
-                        animation: ValueAnimator ->
-                        rimProgress = animation.animatedValue as Float
-                        invalidate()
-                    })
+                    addUpdateListener(this@FaceScanningOverlay::updateRimProgress)
                     addListener(object : AnimatorListenerAdapter() {
                         override fun onAnimationEnd(animation: Animator) {
                             rimProgress = HIDDEN_RIM_SCALE
@@ -216,11 +195,7 @@ class FaceScanningOverlay(
                     val successOpacityAnimator = ValueAnimator.ofInt(255, 0).apply {
                         duration = PULSE_SUCCESS_DISAPPEAR_DURATION
                         interpolator = Interpolators.LINEAR
-                        addUpdateListener(ValueAnimator.AnimatorUpdateListener {
-                            animation: ValueAnimator ->
-                            rimPaint.alpha = animation.animatedValue as Int
-                            invalidate()
-                        })
+                        addUpdateListener(this@FaceScanningOverlay::updateRimAlpha)
                         addListener(object : AnimatorListenerAdapter() {
                             override fun onAnimationEnd(animation: Animator) {
                                 rimPaint.alpha = 255
@@ -248,29 +223,47 @@ class FaceScanningOverlay(
         }
     }
 
-    fun createPulseAnimator(): AnimatorSet {
-        return AnimatorSet().apply {
-            val pulseInwards = ValueAnimator.ofFloat(
-                    PULSE_RADIUS_OUT, PULSE_RADIUS_IN).apply {
-                duration = PULSE_DURATION_INWARDS
-                interpolator = Interpolators.STANDARD
-                addUpdateListener(ValueAnimator.AnimatorUpdateListener {
-                    animation: ValueAnimator ->
-                    rimProgress = animation.animatedValue as Float
-                    invalidate()
-                })
-            }
-            val pulseOutwards = ValueAnimator.ofFloat(
-                    PULSE_RADIUS_IN, PULSE_RADIUS_OUT).apply {
-                duration = PULSE_DURATION_OUTWARDS
-                interpolator = Interpolators.STANDARD
-                addUpdateListener(ValueAnimator.AnimatorUpdateListener {
-                    animation: ValueAnimator ->
-                    rimProgress = animation.animatedValue as Float
-                    invalidate()
-                })
-            }
-            playSequentially(pulseInwards, pulseOutwards)
+    private fun createRimAppearAnimator(): ValueAnimator {
+        return ValueAnimator.ofFloat(
+            SHOW_CAMERA_PROTECTION_SCALE,
+            PULSE_RADIUS_OUT
+        ).apply {
+            duration = PULSE_APPEAR_DURATION
+            interpolator = Interpolators.STANDARD_DECELERATE
+            addUpdateListener(this@FaceScanningOverlay::updateRimProgress)
+        }
+    }
+
+    private fun hide() {
+        visibility = INVISIBLE
+        hideOverlayRunnable?.run()
+        hideOverlayRunnable = null
+        requestLayout()
+    }
+
+    private fun updateRimProgress(animator: ValueAnimator) {
+        rimProgress = animator.animatedValue as Float
+        invalidate()
+    }
+
+    private fun updateCameraProtectionProgress(animator: ValueAnimator) {
+        cameraProtectionProgress = animator.animatedValue as Float
+        invalidate()
+    }
+
+    private fun updateRimAlpha(animator: ValueAnimator) {
+        rimPaint.alpha = animator.animatedValue as Int
+        invalidate()
+    }
+
+    private fun createPulseAnimator(): ValueAnimator {
+        return ValueAnimator.ofFloat(
+                PULSE_RADIUS_OUT, PULSE_RADIUS_IN).apply {
+            duration = HALF_PULSE_DURATION
+            interpolator = Interpolators.STANDARD
+            repeatCount = 11 // Pulse inwards and outwards, reversing direction, 6 times
+            repeatMode = ValueAnimator.REVERSE
+            addUpdateListener(this@FaceScanningOverlay::updateRimProgress)
         }
     }
 
@@ -362,8 +355,7 @@ class FaceScanningOverlay(
         private const val CAMERA_PROTECTION_APPEAR_DURATION = 250L
         private const val PULSE_APPEAR_DURATION = 250L // without start delay
 
-        private const val PULSE_DURATION_INWARDS = 500L
-        private const val PULSE_DURATION_OUTWARDS = 500L
+        private const val HALF_PULSE_DURATION = 500L
 
         private const val PULSE_SUCCESS_DISAPPEAR_DURATION = 400L
         private const val CAMERA_PROTECTION_SUCCESS_DISAPPEAR_DURATION = 500L // without start delay
