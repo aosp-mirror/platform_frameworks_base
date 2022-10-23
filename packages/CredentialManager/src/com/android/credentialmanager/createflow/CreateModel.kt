@@ -34,6 +34,21 @@ data class CreateOptionInfo(
   val usageData: String
 )
 
+data class RequestDisplayInfo(
+  val userName: String,
+  val displayName: String,
+  val type: String,
+)
+
+/**
+ * This is initialized to be the most recent used. Can then be changed if
+ * user selects a different entry on the more option page.
+ */
+data class ActiveEntry (
+  val activeProvider: ProviderInfo,
+  val activeCreateOptionInfo: CreateOptionInfo,
+)
+
 /** The name of the current screen. */
 enum class CreateScreenState {
   PASSKEY_INTRO,
