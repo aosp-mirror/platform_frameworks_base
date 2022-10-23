@@ -38,7 +38,9 @@ public final class CreateCredentialResponse implements Parcelable {
 
     private CreateCredentialResponse(@NonNull Parcel in) {
         mHeader = in.readCharSequence();
-        mSaveEntries = in.createTypedArrayList(SaveEntry.CREATOR);
+        List<SaveEntry> saveEntries = new ArrayList<>();
+        in.readTypedList(saveEntries, SaveEntry.CREATOR);
+        mSaveEntries = saveEntries;
     }
 
     @Override
