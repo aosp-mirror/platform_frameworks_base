@@ -36,6 +36,7 @@ import com.android.credentialmanager.createflow.CreateScreenState
 import com.android.credentialmanager.createflow.RequestDisplayInfo
 import com.android.credentialmanager.getflow.GetCredentialUiState
 import com.android.credentialmanager.getflow.GetScreenState
+import com.android.credentialmanager.jetpack.CredentialEntryUi.Companion.TYPE_PUBLIC_KEY_CREDENTIAL
 
 // Consider repo per screen, similar to view model?
 class CredentialManagerRepo(
@@ -83,17 +84,28 @@ class CredentialManagerRepo(
 
   fun getCredentialInitialUiState(): GetCredentialUiState {
     val providerList = GetFlowUtils.toProviderList(providerList, context)
+    // TODO: covert from real requestInfo
+    val requestDisplayInfo = com.android.credentialmanager.getflow.RequestDisplayInfo(
+      "Elisa Beckett",
+      "beckett-bakert@gmail.com",
+      TYPE_PUBLIC_KEY_CREDENTIAL,
+      "tribank")
     return GetCredentialUiState(
       providerList,
       GetScreenState.CREDENTIAL_SELECTION,
+      requestDisplayInfo,
       providerList.first()
     )
   }
 
   fun createPasskeyInitialUiState(): CreatePasskeyUiState {
     val providerList = CreateFlowUtils.toProviderList(providerList, context)
+    // TODO: covert from real requestInfo
     val requestDisplayInfo = RequestDisplayInfo(
-      "Elisa Beckett", "beckett-bakert@gmail.com", "TYPE_CREATE")
+      "Elisa Beckett",
+      "beckett-bakert@gmail.com",
+      TYPE_PUBLIC_KEY_CREDENTIAL,
+      "tribank")
     return CreatePasskeyUiState(
       providers = providerList,
       currentScreenState = CreateScreenState.PASSKEY_INTRO,
@@ -182,7 +194,7 @@ class CredentialManagerRepo(
       Binder(),
       CreateCredentialRequest(
         // TODO: use the jetpack type and utils once defined.
-        "androidx.credentials.TYPE_PUBLIC_KEY_CREDENTIAL",
+        TYPE_PUBLIC_KEY_CREDENTIAL,
         data
       ),
       /*isFirstUsage=*/false,
