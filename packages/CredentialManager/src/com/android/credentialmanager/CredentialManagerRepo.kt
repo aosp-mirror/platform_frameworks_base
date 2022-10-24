@@ -32,6 +32,7 @@ import android.os.Bundle
 import android.os.ResultReceiver
 import com.android.credentialmanager.createflow.CreatePasskeyUiState
 import com.android.credentialmanager.createflow.CreateScreenState
+import com.android.credentialmanager.createflow.RequestDisplayInfo
 import com.android.credentialmanager.getflow.GetCredentialUiState
 import com.android.credentialmanager.getflow.GetScreenState
 
@@ -95,9 +96,12 @@ class CredentialManagerRepo(
 
   fun createPasskeyInitialUiState(): CreatePasskeyUiState {
     val providerList = CreateFlowUtils.toProviderList(providerList, context)
+    val requestDisplayInfo = RequestDisplayInfo(
+      "Elisa Beckett", "beckett-bakert@gmail.com", "TYPE_CREATE")
     return CreatePasskeyUiState(
       providers = providerList,
       currentScreenState = CreateScreenState.PASSKEY_INTRO,
+      requestDisplayInfo,
     )
   }
 

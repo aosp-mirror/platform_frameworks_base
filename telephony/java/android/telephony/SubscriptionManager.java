@@ -54,6 +54,7 @@ import android.os.Looper;
 import android.os.ParcelUuid;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.provider.Telephony.SimInfo;
 import android.telephony.euicc.EuiccManager;
 import android.telephony.ims.ImsMmTelManager;
@@ -4153,5 +4154,80 @@ public class SubscriptionManager {
             default:
                 return "UNKNOWN(" + usageSetting + ")";
         }
+    }
+
+    /**
+     * Set userHandle for a subscription.
+     *
+     * Used to set an association between a subscription and a user on the device so that voice
+     * calling and SMS from that subscription can be associated with that user.
+     * Data services are always shared between users on the device.
+     *
+     * @param subscriptionId the subId of the subscription.
+     * @param userHandle the userHandle associated with the subscription.
+     * Pass {@code null} user handle to clear the association.
+     *
+     * @throws IllegalArgumentException if subscription is invalid.
+     * @throws SecurityException if the caller doesn't have permissions required.
+     * @throws IllegalStateException if subscription service is not available.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.MANAGE_SUBSCRIPTION_USER_ASSOCIATION)
+    public void setUserHandle(int subscriptionId, @Nullable UserHandle userHandle) {
+        if (!isValidSubscriptionId(subscriptionId)) {
+            throw new IllegalArgumentException("[setUserHandle]: Invalid subscriptionId: "
+                    + subscriptionId);
+        }
+
+        try {
+            ISub iSub = TelephonyManager.getSubscriptionService();
+            if (iSub != null) {
+                iSub.setUserHandle(userHandle, subscriptionId, mContext.getOpPackageName());
+            } else {
+                throw new IllegalStateException("[setUserHandle]: "
+                        + "subscription service unavailable");
+            }
+        } catch (RemoteException ex) {
+            ex.rethrowAsRuntimeException();
+        }
+    }
+
+    /**
+     * Get UserHandle of this subscription.
+     *
+     * Used to get user handle associated with this subscription.
+     *
+     * @param subscriptionId the subId of the subscription.
+     * @return userHandle associated with this subscription
+     * or {@code null} if subscription is not associated with any user.
+     *
+     * @throws IllegalArgumentException if subscription is invalid.
+     * @throws SecurityException if the caller doesn't have permissions required.
+     * @throws IllegalStateException if subscription service is not available.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.MANAGE_SUBSCRIPTION_USER_ASSOCIATION)
+    public @Nullable UserHandle getUserHandle(int subscriptionId) {
+        if (!isValidSubscriptionId(subscriptionId)) {
+            throw new IllegalArgumentException("[getUserHandle]: Invalid subscriptionId: "
+                    + subscriptionId);
+        }
+
+        try {
+            ISub iSub = TelephonyManager.getSubscriptionService();
+            if (iSub != null) {
+                return iSub.getUserHandle(subscriptionId, mContext.getOpPackageName());
+            } else {
+                throw new IllegalStateException("[getUserHandle]: "
+                        + "subscription service unavailable");
+            }
+        } catch (RemoteException ex) {
+            ex.rethrowAsRuntimeException();
+        }
+        return null;
     }
 }

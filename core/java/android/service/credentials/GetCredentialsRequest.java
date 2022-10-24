@@ -49,8 +49,10 @@ public final class GetCredentialsRequest implements Parcelable {
     }
 
     private GetCredentialsRequest(@NonNull Parcel in) {
-        mCallingPackage = in.readString16NoHelper();
-        mGetCredentialOptions = in.createTypedArrayList(GetCredentialOption.CREATOR);
+        mCallingPackage = in.readString8();
+        List<GetCredentialOption> getCredentialOptions = new ArrayList<>();
+        in.readTypedList(getCredentialOptions, GetCredentialOption.CREATOR);
+        mGetCredentialOptions = getCredentialOptions;
     }
 
     public static final @NonNull Creator<GetCredentialsRequest> CREATOR =
@@ -73,7 +75,7 @@ public final class GetCredentialsRequest implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeString16NoHelper(mCallingPackage);
+        dest.writeString8(mCallingPackage);
         dest.writeTypedList(mGetCredentialOptions);
     }
 

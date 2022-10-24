@@ -78,9 +78,8 @@ public final class GetCredentialsResponse implements Parcelable {
     }
 
     private GetCredentialsResponse(@NonNull Parcel in) {
-        mCredentialsDisplayContent = in.readParcelable(CredentialsDisplayContent.class
-                .getClassLoader(), CredentialsDisplayContent.class);
-        mAuthenticationAction = in.readParcelable(Action.class.getClassLoader(), Action.class);
+        mCredentialsDisplayContent = in.readTypedObject(CredentialsDisplayContent.CREATOR);
+        mAuthenticationAction = in.readTypedObject(Action.CREATOR);
     }
 
     public static final @NonNull Creator<GetCredentialsResponse> CREATOR =
@@ -103,8 +102,8 @@ public final class GetCredentialsResponse implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeParcelable(mCredentialsDisplayContent, flags);
-        dest.writeParcelable(mAuthenticationAction, flags);
+        dest.writeTypedObject(mCredentialsDisplayContent, flags);
+        dest.writeTypedObject(mAuthenticationAction, flags);
     }
 
     /**

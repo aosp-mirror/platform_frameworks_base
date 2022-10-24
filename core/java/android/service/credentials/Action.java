@@ -50,9 +50,8 @@ public final class Action implements Parcelable {
     }
 
     private Action(@NonNull Parcel in) {
-        mSlice = in.readParcelable(Slice.class.getClassLoader(), Slice.class);
-        mPendingIntent = in.readParcelable(PendingIntent.class.getClassLoader(),
-                PendingIntent.class);
+        mSlice = in.readTypedObject(Slice.CREATOR);
+        mPendingIntent = in.readTypedObject(PendingIntent.CREATOR);
     }
 
     public static final @NonNull Creator<Action> CREATOR = new Creator<Action>() {
@@ -74,8 +73,8 @@ public final class Action implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        mSlice.writeToParcel(dest, flags);
-        mPendingIntent.writeToParcel(dest, flags);
+        dest.writeTypedObject(mSlice, flags);
+        dest.writeTypedObject(mPendingIntent, flags);
     }
 
     /**
