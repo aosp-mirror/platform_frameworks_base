@@ -62,7 +62,6 @@ android_library {
     optimize: {
         proguard_flags_files: ["proguard.flags"],
     },
-    java_version: "1.8",
     min_sdk_version: "current",
     plugins: ["dagger2-compiler"],
 }

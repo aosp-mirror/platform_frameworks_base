@@ -459,7 +459,7 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
         anim.start();
     }
 
-    private void hideImmediate() {
+    void hideImmediate() {
         // Note this may be called multiple times if multiple dismissal events happen at the same
         // time.
         mTimeoutHandler.cancelTimeout();

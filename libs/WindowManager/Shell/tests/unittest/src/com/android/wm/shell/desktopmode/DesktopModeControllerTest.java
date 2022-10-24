@@ -20,6 +20,8 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOW_CONFIG_BOUNDS;
+import static android.view.WindowManager.TRANSIT_OPEN;
+import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REORDER;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
@@ -35,10 +37,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.testing.AndroidTestingRunner;
 import android.window.DisplayAreaInfo;
+import android.window.TransitionRequestInfo;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 import android.window.WindowContainerTransaction.Change;
@@ -241,6 +245,44 @@ public class DesktopModeControllerTest extends ShellTestCase {
         WindowContainerTransaction.HierarchyOp op2 = wct.getHierarchyOps().get(0);
         assertThat(op2.getType()).isEqualTo(HIERARCHY_OP_TYPE_REORDER);
         assertThat(op2.getContainer()).isEqualTo(token2.binder());
+    }
+
+    @Test
+    public void testHandleTransitionRequest_desktopModeNotActive_returnsNull() {
+        when(DesktopModeStatus.isActive(any())).thenReturn(false);
+        WindowContainerTransaction wct = mController.handleRequest(
+                new Binder(),
+                new TransitionRequestInfo(TRANSIT_OPEN, null /* trigger */, null /* remote */));
+        assertThat(wct).isNull();
+    }
+
+    @Test
+    public void testHandleTransitionRequest_notTransitOpen_returnsNull() {
+        WindowContainerTransaction wct = mController.handleRequest(
+                new Binder(),
+                new TransitionRequestInfo(TRANSIT_TO_FRONT, null /* trigger */, null /* remote */));
+        assertThat(wct).isNull();
+    }
+
+    @Test
+    public void testHandleTransitionRequest_notFreeform_returnsNull() {
+        ActivityManager.RunningTaskInfo trigger = new ActivityManager.RunningTaskInfo();
+        trigger.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        WindowContainerTransaction wct = mController.handleRequest(
+                new Binder(),
+                new TransitionRequestInfo(TRANSIT_TO_FRONT, trigger, null /* remote */));
+        assertThat(wct).isNull();
+    }
+
+    @Test
+    public void testHandleTransitionRequest_returnsWct() {
+        ActivityManager.RunningTaskInfo trigger = new ActivityManager.RunningTaskInfo();
+        trigger.token = new MockToken().mToken;
+        trigger.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        WindowContainerTransaction wct = mController.handleRequest(
+                mock(IBinder.class),
+                new TransitionRequestInfo(TRANSIT_OPEN, trigger, null /* remote */));
+        assertThat(wct).isNotNull();
     }
 
     private static class MockToken {
