@@ -32,6 +32,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.compat.Compatibility;
 import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ClipData;
@@ -96,6 +97,15 @@ public class JobInfo implements Parcelable {
     @ChangeId
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     public static final long THROW_ON_INVALID_PRIORITY_VALUE = 140852299L;
+
+    /**
+     * Require that estimated network bytes are nonnegative.
+     *
+     * @hide
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+    public static final long REJECT_NEGATIVE_NETWORK_ESTIMATES = 253665015L;
 
     /** @hide */
     @IntDef(prefix = { "NETWORK_TYPE_" }, value = {
@@ -1890,11 +1900,13 @@ public class JobInfo implements Parcelable {
          * @return The job object to hand to the JobScheduler. This object is immutable.
          */
         public JobInfo build() {
-            return build(Compatibility.isChangeEnabled(DISALLOW_DEADLINES_FOR_PREFETCH_JOBS));
+            return build(Compatibility.isChangeEnabled(DISALLOW_DEADLINES_FOR_PREFETCH_JOBS),
+                    Compatibility.isChangeEnabled(REJECT_NEGATIVE_NETWORK_ESTIMATES));
         }
 
         /** @hide */
-        public JobInfo build(boolean disallowPrefetchDeadlines) {
+        public JobInfo build(boolean disallowPrefetchDeadlines,
+                boolean rejectNegativeNetworkEstimates) {
             // This check doesn't need to be inside enforceValidity. It's an unnecessary legacy
             // check that would ideally be phased out instead.
             if (mBackoffPolicySet && (mConstraintFlags & CONSTRAINT_FLAG_DEVICE_IDLE) != 0) {
@@ -1903,7 +1915,7 @@ public class JobInfo implements Parcelable {
                         " setRequiresDeviceIdle is an error.");
             }
             JobInfo jobInfo = new JobInfo(this);
-            jobInfo.enforceValidity(disallowPrefetchDeadlines);
+            jobInfo.enforceValidity(disallowPrefetchDeadlines, rejectNegativeNetworkEstimates);
             return jobInfo;
         }
 
@@ -1921,12 +1933,23 @@ public class JobInfo implements Parcelable {
     /**
      * @hide
      */
-    public final void enforceValidity(boolean disallowPrefetchDeadlines) {
+    public final void enforceValidity(boolean disallowPrefetchDeadlines,
+            boolean rejectNegativeNetworkEstimates) {
         // Check that network estimates require network type and are reasonable values.
         if ((networkDownloadBytes > 0 || networkUploadBytes > 0 || minimumNetworkChunkBytes > 0)
                 && networkRequest == null) {
             throw new IllegalArgumentException(
                     "Can't provide estimated network usage without requiring a network");
+        }
+        if (networkRequest != null && rejectNegativeNetworkEstimates) {
+            if (networkUploadBytes != NETWORK_BYTES_UNKNOWN && networkUploadBytes < 0) {
+                throw new IllegalArgumentException(
+                        "Invalid network upload bytes: " + networkUploadBytes);
+            }
+            if (networkDownloadBytes != NETWORK_BYTES_UNKNOWN && networkDownloadBytes < 0) {
+                throw new IllegalArgumentException(
+                        "Invalid network download bytes: " + networkDownloadBytes);
+            }
         }
         final long estimatedTransfer;
         if (networkUploadBytes == NETWORK_BYTES_UNKNOWN) {

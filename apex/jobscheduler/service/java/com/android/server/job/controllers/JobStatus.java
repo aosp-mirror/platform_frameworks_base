@@ -612,9 +612,9 @@ public final class JobStatus {
             requestBuilder.setUids(
                     Collections.singleton(new Range<Integer>(this.sourceUid, this.sourceUid)));
             builder.setRequiredNetwork(requestBuilder.build());
-            // Don't perform prefetch-deadline check at this point. We've already passed the
+            // Don't perform validation checks at this point since we've already passed the
             // initial validation check.
-            job = builder.build(false);
+            job = builder.build(false, false);
         }
 
         updateMediaBackupExemptionStatus();
