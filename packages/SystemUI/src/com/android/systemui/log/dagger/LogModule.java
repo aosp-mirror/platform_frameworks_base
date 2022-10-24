@@ -316,6 +316,16 @@ public class LogModule {
     }
 
     /**
+     * Provides a {@link LogBuffer} for keyguard clock logs.
+     */
+    @Provides
+    @SysUISingleton
+    @KeyguardClockLog
+    public static LogBuffer provideKeyguardClockLog(LogBufferFactory factory) {
+        return factory.create("KeyguardClockLog", 500);
+    }
+
+    /**
      * Provides a {@link LogBuffer} for use by {@link com.android.keyguard.KeyguardUpdateMonitor}.
      */
     @Provides
