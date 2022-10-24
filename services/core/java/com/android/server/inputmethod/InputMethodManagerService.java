@@ -4699,22 +4699,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 return;
             }
             final IBinder requestToken = mVisibilityStateComputer.getWindowTokenFrom(windowToken);
-            if (!setVisible) {
-                if (mCurClient != null) {
-                    ImeTracker.get().onProgress(statsToken,
-                            ImeTracker.PHASE_SERVER_APPLY_IME_VISIBILITY);
-                    mWindowManagerInternal.hideIme(requestToken, mCurClient.mSelfReportedDisplayId,
-                            statsToken);
-                } else {
-                    ImeTracker.get().onFailed(statsToken,
-                            ImeTracker.PHASE_SERVER_APPLY_IME_VISIBILITY);
-                }
-            } else {
-                ImeTracker.get().onProgress(statsToken,
-                        ImeTracker.PHASE_SERVER_APPLY_IME_VISIBILITY);
-                // Send to window manager to show IME after IME layout finishes.
-                mWindowManagerInternal.showImePostLayout(requestToken, statsToken);
-            }
+            mVisibilityApplier.applyImeVisibility(requestToken, statsToken,
+                    setVisible ? ImeVisibilityStateComputer.STATE_SHOW_IME
+                            : ImeVisibilityStateComputer.STATE_HIDE_IME);
         }
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }

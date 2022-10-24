@@ -20,6 +20,8 @@ import static android.view.inputmethod.ImeTracker.DEBUG_IME_VISIBILITY;
 
 import static com.android.server.EventLogTags.IMF_HIDE_IME;
 import static com.android.server.EventLogTags.IMF_SHOW_IME;
+import static com.android.server.inputmethod.ImeVisibilityStateComputer.STATE_HIDE_IME;
+import static com.android.server.inputmethod.ImeVisibilityStateComputer.STATE_SHOW_IME;
 
 import android.annotation.Nullable;
 import android.os.Binder;
@@ -32,6 +34,8 @@ import android.view.inputmethod.ImeTracker;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.inputmethod.InputMethodDebug;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
+import com.android.server.LocalServices;
+import com.android.server.wm.WindowManagerInternal;
 
 import java.util.Objects;
 
@@ -47,8 +51,12 @@ final class DefaultImeVisibilityApplier implements ImeVisibilityApplier {
 
     private InputMethodManagerService mService;
 
+    private final WindowManagerInternal mWindowManagerInternal;
+
+
     DefaultImeVisibilityApplier(InputMethodManagerService service) {
         mService = service;
+        mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
     }
 
     @GuardedBy("ImfLock.class")
@@ -109,6 +117,39 @@ final class DefaultImeVisibilityApplier implements ImeVisibilityApplier {
                 mService.onShowHideSoftInputRequested(false /* show */, windowToken, reason,
                         statsToken);
             }
+        }
+    }
+
+    @GuardedBy("ImfLock.class")
+    @Override
+    public void applyImeVisibility(IBinder windowToken, @Nullable ImeTracker.Token statsToken,
+            @ImeVisibilityStateComputer.VisibilityState int state) {
+        switch (state) {
+            case STATE_SHOW_IME:
+                ImeTracker.get().onProgress(statsToken,
+                        ImeTracker.PHASE_SERVER_APPLY_IME_VISIBILITY);
+                // Send to window manager to show IME after IME layout finishes.
+                mWindowManagerInternal.showImePostLayout(windowToken, statsToken);
+                break;
+            case STATE_HIDE_IME:
+                if (mService.mCurFocusedWindowClient != null) {
+                    ImeTracker.get().onProgress(statsToken,
+                            ImeTracker.PHASE_SERVER_APPLY_IME_VISIBILITY);
+                    // IMMS only knows of focused window, not the actual IME target.
+                    // e.g. it isn't aware of any window that has both
+                    // NOT_FOCUSABLE, ALT_FOCUSABLE_IM flags set and can the IME target.
+                    // Send it to window manager to hide IME from IME target window.
+                    // TODO(b/139861270): send to mCurClient.client once IMMS is aware of
+                    // actual IME target.
+                    mWindowManagerInternal.hideIme(windowToken,
+                            mService.mCurFocusedWindowClient.mSelfReportedDisplayId, statsToken);
+                } else {
+                    ImeTracker.get().onFailed(statsToken,
+                            ImeTracker.PHASE_SERVER_APPLY_IME_VISIBILITY);
+                }
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid IME visibility state: " + state);
         }
     }
 }

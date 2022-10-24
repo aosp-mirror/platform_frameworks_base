@@ -58,12 +58,11 @@ interface ImeVisibilityApplier {
      * according to the given visibility state.
      *
      * @param windowToken The token of a window for applying the IME visibility
-     * @param state The new IME visibility state for the applier to handle
+     * @param statsToken  A token that tracks the progress of an IME request.
+     * @param state       The new IME visibility state for the applier to handle
      */
-    default void applyImeVisibility(IBinder windowToken,
-            @ImeVisibilityStateComputer.VisibilityState int state) {
-        // TODO: migrate IMMS#applyImeVisibility logic to here.
-    }
+    default void applyImeVisibility(IBinder windowToken, @Nullable ImeTracker.Token statsToken,
+            @ImeVisibilityStateComputer.VisibilityState int state) {}
 
     /**
      * Updates the IME Z-ordering relative to the given window.
