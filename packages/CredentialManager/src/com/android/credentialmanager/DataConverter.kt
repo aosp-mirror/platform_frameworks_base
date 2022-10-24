@@ -59,7 +59,8 @@ class GetFlowUtils {
             ?: context.getDrawable(R.drawable.ic_passkey)!!,
           title = credentialEntryUi.userName.toString(),
           subtitle = credentialEntryUi.displayName?.toString() ?: "Unknown display name",
-          id = it.entryId,
+          entryKey = it.key,
+          entrySubkey = it.subkey,
           usageData = credentialEntryUi.usageData?.toString() ?: "Unknown usageData",
         )
       }
@@ -99,7 +100,8 @@ class CreateFlowUtils {
             ?: context.getDrawable(R.drawable.ic_passkey)!!,
           title = saveEntryUi.title.toString(),
           subtitle = saveEntryUi.subTitle?.toString() ?: "Unknown subtitle",
-          id = it.entryId,
+          entryKey = it.key,
+          entrySubkey = it.subkey,
           usageData = saveEntryUi.usageData?.toString() ?: "Unknown usageData",
         )
       }

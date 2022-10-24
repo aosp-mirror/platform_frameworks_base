@@ -30,7 +30,8 @@ data class CredentialOptionInfo(
   val icon: Drawable,
   val title: String,
   val subtitle: String,
-  val id: Int,
+  val entryKey: String,
+  val entrySubkey: String,
   val usageData: String
 )
 
