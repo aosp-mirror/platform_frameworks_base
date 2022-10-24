@@ -17,7 +17,9 @@
 package com.android.systemui.shared.system;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.view.RemoteAnimationTarget.MODE_CLOSING;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
@@ -27,8 +29,7 @@ import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.window.TransitionFilter.CONTAINER_ORDER_TOP;
 
-import static com.android.systemui.shared.system.RemoteAnimationTargetCompat.ACTIVITY_TYPE_RECENTS;
-import static com.android.systemui.shared.system.RemoteAnimationTargetCompat.MODE_CLOSING;
+import static com.android.systemui.shared.system.RemoteAnimationTargetCompat.newTarget;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -45,6 +46,7 @@ import android.util.ArrayMap;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.IRecentsAnimationController;
+import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.window.IRemoteTransition;
 import android.window.IRemoteTransitionFinishedCallback;
@@ -127,9 +129,9 @@ public class RemoteTransitionCompat implements Parcelable {
                     SurfaceControl.Transaction t,
                     IRemoteTransitionFinishedCallback finishedCallback) {
                 final ArrayMap<SurfaceControl, SurfaceControl> leashMap = new ArrayMap<>();
-                final RemoteAnimationTargetCompat[] apps =
+                final RemoteAnimationTarget[] apps =
                         RemoteAnimationTargetCompat.wrapApps(info, t, leashMap);
-                final RemoteAnimationTargetCompat[] wallpapers =
+                final RemoteAnimationTarget[] wallpapers =
                         RemoteAnimationTargetCompat.wrapNonApps(
                                 info, true /* wallpapers */, t, leashMap);
                 // TODO(b/177438007): Move this set-up logic into launcher's animation impl.
@@ -230,7 +232,7 @@ public class RemoteTransitionCompat implements Parcelable {
         private PictureInPictureSurfaceTransaction mPipTransaction = null;
         private IBinder mTransition = null;
         private boolean mKeyguardLocked = false;
-        private RemoteAnimationTargetCompat[] mAppearedTargets;
+        private RemoteAnimationTarget[] mAppearedTargets;
         private boolean mWillFinishToHome = false;
 
         void setup(RecentsAnimationControllerCompat wrapped, TransitionInfo info,
@@ -325,18 +327,15 @@ public class RemoteTransitionCompat implements Parcelable {
             final int layer = mInfo.getChanges().size() * 3;
             mOpeningLeashes = new ArrayList<>();
             mOpeningHome = cancelRecents;
-            final RemoteAnimationTargetCompat[] targets =
-                    new RemoteAnimationTargetCompat[openingTasks.size()];
+            final RemoteAnimationTarget[] targets =
+                    new RemoteAnimationTarget[openingTasks.size()];
             for (int i = 0; i < openingTasks.size(); ++i) {
                 final TransitionInfo.Change change = openingTasks.valueAt(i);
                 mOpeningLeashes.add(change.getLeash());
                 // We are receiving new opening tasks, so convert to onTasksAppeared.
-                final RemoteAnimationTargetCompat target = new RemoteAnimationTargetCompat(
-                        change, layer, info, t);
-                mLeashMap.put(mOpeningLeashes.get(i), target.leash);
-                t.reparent(target.leash, mInfo.getRootLeash());
-                t.setLayer(target.leash, layer);
-                targets[i] = target;
+                targets[i] = newTarget(change, layer, info, t, mLeashMap);
+                t.reparent(targets[i].leash, mInfo.getRootLeash());
+                t.setLayer(targets[i].leash, layer);
             }
             t.apply();
             mAppearedTargets = targets;
