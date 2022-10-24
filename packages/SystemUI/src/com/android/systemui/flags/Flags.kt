@@ -80,9 +80,6 @@ object Flags {
     @JvmField
     val BOUNCER_USER_SWITCHER = ResourceBooleanFlag(204, R.bool.config_enableBouncerUserSwitcher)
 
-    // TODO(b/254512694): Tracking Bug
-    val FACE_SCANNING_ANIM = ResourceBooleanFlag(205, R.bool.config_enableFaceScanningAnimation)
-
     // TODO(b/254512676): Tracking Bug
     @JvmField val LOCKSCREEN_CUSTOM_CLOCKS = UnreleasedFlag(207, teamfood = true)
 
