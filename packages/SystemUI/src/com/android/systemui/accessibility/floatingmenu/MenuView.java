@@ -28,9 +28,12 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 
+import androidx.annotation.NonNull;
+import androidx.core.view.AccessibilityDelegateCompat;
 import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerViewAccessibilityDelegate;
 
 import com.android.internal.accessibility.dialog.AccessibilityTarget;
 
@@ -39,7 +42,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * The container view displays the accessibility features.
+ * The menu view displays the accessibility features.
  */
 @SuppressLint("ViewConstructor")
 class MenuView extends FrameLayout implements
@@ -53,6 +56,8 @@ class MenuView extends FrameLayout implements
     private final RecyclerView mTargetFeaturesView;
     private final ViewTreeObserver.OnDrawListener mSystemGestureExcludeUpdater =
             this::updateSystemGestureExcludeRects;
+    private final Observer<MenuFadeEffectInfo> mFadeEffectInfoObserver =
+            this::onMenuFadeEffectInfoChanged;
     private final Observer<Position> mPercentagePositionObserver = this::onPercentagePosition;
     private final Observer<Integer> mSizeTypeObserver = this::onSizeTypeChanged;
     private final Observer<List<AccessibilityTarget>> mTargetFeaturesObserver =
@@ -65,10 +70,20 @@ class MenuView extends FrameLayout implements
         mMenuViewModel = menuViewModel;
         mMenuViewAppearance = menuViewAppearance;
         mMenuAnimationController = new MenuAnimationController(this);
+
         mAdapter = new AccessibilityTargetAdapter(mTargetFeatures);
         mTargetFeaturesView = new RecyclerView(context);
         mTargetFeaturesView.setAdapter(mAdapter);
         mTargetFeaturesView.setLayoutManager(new LinearLayoutManager(context));
+        mTargetFeaturesView.setAccessibilityDelegateCompat(
+                new RecyclerViewAccessibilityDelegate(mTargetFeaturesView) {
+                    @NonNull
+                    @Override
+                    public AccessibilityDelegateCompat getItemDelegate() {
+                        return new MenuItemAccessibilityDelegate(/* recyclerViewDelegate= */ this,
+                                mMenuAnimationController);
+                    }
+                });
         setLayoutParams(new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
         // Avoid drawing out of bounds of the parent view
         setClipToOutline(true);
@@ -93,6 +108,10 @@ class MenuView extends FrameLayout implements
         mTargetFeaturesView.setOverScrollMode(mMenuViewAppearance.getMenuScrollMode());
     }
 
+    void addOnItemTouchListenerToList(RecyclerView.OnItemTouchListener listener) {
+        mTargetFeaturesView.addOnItemTouchListener(listener);
+    }
+
     @SuppressLint("NotifyDataSetChanged")
     private void onItemSizeChanged() {
         mAdapter.setItemPadding(mMenuViewAppearance.getMenuPadding());
@@ -108,6 +127,16 @@ class MenuView extends FrameLayout implements
         final FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) getLayoutParams();
         layoutParams.height = mMenuViewAppearance.getMenuHeight();
         setLayoutParams(layoutParams);
+    }
+
+    void onEdgeChangedIfNeeded() {
+        final Rect draggableBounds = mMenuViewAppearance.getMenuDraggableBounds();
+        if (getTranslationX() != draggableBounds.left
+                && getTranslationX() != draggableBounds.right) {
+            return;
+        }
+
+        onEdgeChanged();
     }
 
     private void onEdgeChanged() {
@@ -127,7 +156,7 @@ class MenuView extends FrameLayout implements
         onPositionChanged();
     }
 
-    private void onPositionChanged() {
+    void onPositionChanged() {
         final PointF position = mMenuViewAppearance.getMenuPosition();
         mMenuAnimationController.moveToPosition(position);
         onBoundsInParentChanged((int) position.x, (int) position.y);
@@ -135,6 +164,8 @@ class MenuView extends FrameLayout implements
 
     @SuppressLint("NotifyDataSetChanged")
     private void onSizeTypeChanged(int newSizeType) {
+        mMenuAnimationController.fadeInNowIfEnabled();
+
         mMenuViewAppearance.setSizeType(newSizeType);
 
         mAdapter.setItemPadding(mMenuViewAppearance.getMenuPadding());
@@ -144,10 +175,14 @@ class MenuView extends FrameLayout implements
         onSizeChanged();
         onEdgeChanged();
         onPositionChanged();
+
+        mMenuAnimationController.fadeOutIfEnabled();
     }
 
     private void onTargetFeaturesChanged(List<AccessibilityTarget> newTargetFeatures) {
         // TODO(b/252756133): Should update specific item instead of the whole list
+        mMenuAnimationController.fadeInNowIfEnabled();
+
         mTargetFeatures.clear();
         mTargetFeatures.addAll(newTargetFeatures);
         mMenuViewAppearance.setTargetFeaturesSize(mTargetFeatures.size());
@@ -157,10 +192,56 @@ class MenuView extends FrameLayout implements
         onSizeChanged();
         onEdgeChanged();
         onPositionChanged();
+
+        mMenuAnimationController.fadeOutIfEnabled();
+    }
+
+    private void onMenuFadeEffectInfoChanged(MenuFadeEffectInfo fadeEffectInfo) {
+        mMenuAnimationController.updateOpacityWith(fadeEffectInfo.isFadeEffectEnabled(),
+                fadeEffectInfo.getOpacity());
+    }
+
+    Rect getMenuDraggableBounds() {
+        return mMenuViewAppearance.getMenuDraggableBounds();
+    }
+
+    void persistPositionAndUpdateEdge(Position percentagePosition) {
+        mMenuViewModel.updateMenuSavingPosition(percentagePosition);
+        mMenuViewAppearance.setPercentagePosition(percentagePosition);
+
+        onEdgeChangedIfNeeded();
+    }
+
+    /**
+     * Uses the touch events from the parent view to identify if users clicked the extra
+     * space of the menu view. If yes, will use the percentage position and update the
+     * translations of the menu view to meet the effect of moving out from the edge. It’s only
+     * used when the menu view is hidden to the screen edge.
+     *
+     * @param x the current x of the touch event from the parent {@link MenuViewLayer} of the
+     * {@link MenuView}.
+     * @param y the current y of the touch event from the parent {@link MenuViewLayer} of the
+     * {@link MenuView}.
+     * @return true if consume the touch event, otherwise false.
+     */
+    boolean maybeMoveOutEdgeAndShow(int x, int y) {
+        // Utilizes the touch region of the parent view to implement that users could tap extra
+        // the space region to show the menu from the edge.
+        if (!mMenuAnimationController.isMovedToEdge() || !mBoundsInParent.contains(x, y)) {
+            return false;
+        }
+
+        mMenuAnimationController.fadeInNowIfEnabled();
+
+        mMenuAnimationController.moveOutEdgeAndShow();
+
+        mMenuAnimationController.fadeOutIfEnabled();
+        return true;
     }
 
     void show() {
         mMenuViewModel.getPercentagePositionData().observeForever(mPercentagePositionObserver);
+        mMenuViewModel.getFadeEffectInfoData().observeForever(mFadeEffectInfoObserver);
         mMenuViewModel.getTargetFeaturesData().observeForever(mTargetFeaturesObserver);
         mMenuViewModel.getSizeTypeData().observeForever(mSizeTypeObserver);
         setVisibility(VISIBLE);
@@ -173,11 +254,21 @@ class MenuView extends FrameLayout implements
         setVisibility(GONE);
         mBoundsInParent.setEmpty();
         mMenuViewModel.getPercentagePositionData().removeObserver(mPercentagePositionObserver);
+        mMenuViewModel.getFadeEffectInfoData().removeObserver(mFadeEffectInfoObserver);
         mMenuViewModel.getTargetFeaturesData().removeObserver(mTargetFeaturesObserver);
         mMenuViewModel.getSizeTypeData().removeObserver(mSizeTypeObserver);
         mMenuViewModel.unregisterContentObservers();
         getViewTreeObserver().removeOnComputeInternalInsetsListener(this);
         getViewTreeObserver().removeOnDrawListener(mSystemGestureExcludeUpdater);
+    }
+
+    void onDraggingStart() {
+        final int[] insets = mMenuViewAppearance.getMenuMovingStateInsets();
+        getContainerViewInsetLayer().setLayerInset(INDEX_MENU_ITEM, insets[0], insets[1], insets[2],
+                insets[3]);
+
+        final GradientDrawable gradientDrawable = getContainerViewGradient();
+        gradientDrawable.setCornerRadii(mMenuViewAppearance.getMenuMovingStateRadii());
     }
 
     void onBoundsInParentChanged(int newLeft, int newTop) {
@@ -187,6 +278,7 @@ class MenuView extends FrameLayout implements
     void loadLayoutResources() {
         mMenuViewAppearance.update();
 
+        mTargetFeaturesView.setContentDescription(mMenuViewAppearance.getContentDescription());
         setBackground(mMenuViewAppearance.getMenuBackground());
         setElevation(mMenuViewAppearance.getMenuElevation());
         onItemSizeChanged();
