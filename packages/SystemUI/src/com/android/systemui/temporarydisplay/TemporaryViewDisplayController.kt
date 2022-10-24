@@ -121,7 +121,7 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
                     "com.android.systemui:${newInfo.wakeReason}",
                 )
             }
-            logger.logChipAddition()
+            logger.logViewAddition(newInfo.windowTitle)
             inflateAndUpdateView(newInfo)
         }
 
@@ -187,7 +187,7 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
         val currentView = currentDisplayInfo.view
         animateViewOut(currentView) { windowManager.removeView(currentView) }
 
-        logger.logChipRemoval(removalReason)
+        logger.logViewRemoval(removalReason)
         configurationController.removeCallback(displayScaleListener)
         // Re-set to null immediately (instead as part of the animation end runnable) so
         // that if a new view event comes in while this view is animating out, we still display the

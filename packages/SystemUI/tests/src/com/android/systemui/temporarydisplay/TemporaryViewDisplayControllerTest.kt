@@ -100,6 +100,18 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
     }
 
     @Test
+    fun displayView_logged() {
+        underTest.displayView(
+            ViewInfo(
+                name = "name",
+                windowTitle = "Fake Window Title",
+            )
+        )
+
+        verify(logger).logViewAddition("Fake Window Title")
+    }
+
+    @Test
     fun displayView_screenOff_screenWakes() {
         whenever(powerManager.isScreenOn).thenReturn(false)
 
@@ -231,7 +243,7 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
         underTest.removeView(reason)
 
         verify(windowManager).removeView(any())
-        verify(logger).logChipRemoval(reason)
+        verify(logger).logViewRemoval(reason)
     }
 
     @Test

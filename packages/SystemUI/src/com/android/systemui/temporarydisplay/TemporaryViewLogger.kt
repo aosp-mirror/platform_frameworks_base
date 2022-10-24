@@ -24,13 +24,13 @@ open class TemporaryViewLogger(
     internal val buffer: LogBuffer,
     internal val tag: String,
 ) {
-    /** Logs that we added the chip to a new window. */
-    fun logChipAddition() {
-        buffer.log(tag, LogLevel.DEBUG, {}, { "Chip added" })
+    /** Logs that we added the view in a window titled [windowTitle]. */
+    fun logViewAddition(windowTitle: String) {
+        buffer.log(tag, LogLevel.DEBUG, { str1 = windowTitle }, { "View added. window=$str1" })
     }
 
     /** Logs that we removed the chip for the given [reason]. */
-    fun logChipRemoval(reason: String) {
-        buffer.log(tag, LogLevel.DEBUG, { str1 = reason }, { "Chip removed due to: $str1" })
+    fun logViewRemoval(reason: String) {
+        buffer.log(tag, LogLevel.DEBUG, { str1 = reason }, { "View removed due to: $str1" })
     }
 }

@@ -35,12 +35,12 @@ import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.ContentDescription.Companion.loadContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
-import com.android.systemui.media.taptotransfer.common.MediaTttLogger
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
 import com.android.systemui.util.view.ViewUtil
 import com.google.common.truth.Truth.assertThat
@@ -60,7 +60,7 @@ import org.mockito.MockitoAnnotations
 class ChipbarCoordinatorTest : SysuiTestCase() {
     private lateinit var underTest: FakeChipbarCoordinator
 
-    @Mock private lateinit var logger: MediaTttLogger
+    @Mock private lateinit var logger: ChipbarLogger
     @Mock private lateinit var accessibilityManager: AccessibilityManager
     @Mock private lateinit var configurationController: ConfigurationController
     @Mock private lateinit var powerManager: PowerManager
@@ -329,6 +329,30 @@ class ChipbarCoordinatorTest : SysuiTestCase() {
         assertThat(chipbarView.getLoadingIcon().visibility).isEqualTo(View.GONE)
         assertThat(chipbarView.getErrorIcon().visibility).isEqualTo(View.VISIBLE)
         assertThat(chipbarView.getEndButton().visibility).isEqualTo(View.GONE)
+    }
+
+    @Test
+    fun viewUpdates_logged() {
+        val drawable = context.getDrawable(R.drawable.ic_celebration)!!
+        underTest.displayView(
+            createChipbarInfo(
+                Icon.Loaded(drawable, contentDescription = ContentDescription.Loaded("loadedCD")),
+                Text.Loaded("title text"),
+                endItem = ChipbarEndItem.Loading,
+            )
+        )
+
+        verify(logger).logViewUpdate(eq(WINDOW_TITLE), eq("title text"), any())
+
+        underTest.displayView(
+            createChipbarInfo(
+                Icon.Loaded(drawable, ContentDescription.Loaded("new CD")),
+                Text.Loaded("new title text"),
+                endItem = ChipbarEndItem.Error,
+            )
+        )
+
+        verify(logger).logViewUpdate(eq(WINDOW_TITLE), eq("new title text"), any())
     }
 
     private fun createChipbarInfo(
