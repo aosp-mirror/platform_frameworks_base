@@ -51,14 +51,6 @@ class FlagCommandTest : SysuiTestCase() {
     }
 
     @Test
-    fun noOpCommand() {
-        cmd.execute(pw, ArrayList())
-        Mockito.verify(pw, Mockito.atLeastOnce()).println()
-        Mockito.verify(featureFlags).isEnabled(flagA)
-        Mockito.verify(featureFlags).isEnabled(flagB)
-    }
-
-    @Test
     fun readFlagCommand() {
         cmd.execute(pw, listOf(flagA.id.toString()))
         Mockito.verify(featureFlags).isEnabled(flagA)
