@@ -47,6 +47,7 @@ import android.view.OnReceiveContentListener;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
+import android.view.ViewRootImpl;
 import android.view.WindowInsets;
 import android.view.WindowInsetsAnimation;
 import android.view.WindowInsetsController;
@@ -61,6 +62,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.window.OnBackInvokedCallback;
+import android.window.OnBackInvokedDispatcher;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -88,6 +91,7 @@ import java.util.function.Consumer;
  */
 public class RemoteInputView extends LinearLayout implements View.OnClickListener {
 
+    private static final boolean DEBUG = false;
     private static final String TAG = "RemoteInput";
 
     // A marker object that let's us easily find views of this class.
@@ -124,6 +128,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     // TODO(b/193539698): remove this; views shouldn't have access to their controller, and places
     //  that need the controller shouldn't have access to the view
     private RemoteInputViewController mViewController;
+    private ViewRootImpl mTestableViewRootImpl;
 
     /**
      * Enum for logged notification remote input UiEvents.
@@ -430,10 +435,20 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         }
     }
 
+    @VisibleForTesting
+    protected void setViewRootImpl(ViewRootImpl viewRoot) {
+        mTestableViewRootImpl = viewRoot;
+    }
+
+    @VisibleForTesting
+    protected void setEditTextReferenceToSelf() {
+        mEditText.mRemoteInputView = this;
+    }
+
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        mEditText.mRemoteInputView = this;
+        setEditTextReferenceToSelf();
         mEditText.setOnEditorActionListener(mEditorActionHandler);
         mEditText.addTextChangedListener(mTextWatcher);
         if (mEntry.getRow().isChangingPosition()) {
@@ -457,7 +472,50 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     }
 
     @Override
+    public ViewRootImpl getViewRootImpl() {
+        if (mTestableViewRootImpl != null) {
+            return mTestableViewRootImpl;
+        }
+        return super.getViewRootImpl();
+    }
+
+    private void registerBackCallback() {
+        ViewRootImpl viewRoot = getViewRootImpl();
+        if (viewRoot == null) {
+            if (DEBUG) {
+                Log.d(TAG, "ViewRoot was null, NOT registering Predictive Back callback");
+            }
+            return;
+        }
+        if (DEBUG) {
+            Log.d(TAG, "registering Predictive Back callback");
+        }
+        viewRoot.getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
+                OnBackInvokedDispatcher.PRIORITY_OVERLAY, mEditText.mOnBackInvokedCallback);
+    }
+
+    private void unregisterBackCallback() {
+        ViewRootImpl viewRoot = getViewRootImpl();
+        if (viewRoot == null) {
+            if (DEBUG) {
+                Log.d(TAG, "ViewRoot was null, NOT unregistering Predictive Back callback");
+            }
+            return;
+        }
+        if (DEBUG) {
+            Log.d(TAG, "unregistering Predictive Back callback");
+        }
+        viewRoot.getOnBackInvokedDispatcher().unregisterOnBackInvokedCallback(
+                mEditText.mOnBackInvokedCallback);
+    }
+
+    @Override
     public void onVisibilityAggregated(boolean isVisible) {
+        if (isVisible) {
+            registerBackCallback();
+        } else {
+            unregisterBackCallback();
+        }
         super.onVisibilityAggregated(isVisible);
         mEditText.setEnabled(isVisible && !mSending);
     }
@@ -822,10 +880,21 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
             return super.onKeyDown(keyCode, event);
         }
 
+        private final OnBackInvokedCallback mOnBackInvokedCallback = () -> {
+            if (DEBUG) {
+                Log.d(TAG, "Predictive Back Callback dispatched");
+            }
+            respondToKeycodeBack();
+        };
+
+        private void respondToKeycodeBack() {
+            defocusIfNeeded(true /* animate */);
+        }
+
         @Override
         public boolean onKeyUp(int keyCode, KeyEvent event) {
             if (keyCode == KeyEvent.KEYCODE_BACK) {
-                defocusIfNeeded(true /* animate */);
+                respondToKeycodeBack();
                 return true;
             }
             return super.onKeyUp(keyCode, event);
