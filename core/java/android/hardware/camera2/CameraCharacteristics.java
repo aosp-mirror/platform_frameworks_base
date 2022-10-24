@@ -2224,6 +2224,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_REMOSAIC_REPROCESSING REMOSAIC_REPROCESSING}</li>
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_DYNAMIC_RANGE_TEN_BIT DYNAMIC_RANGE_TEN_BIT}</li>
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_STREAM_USE_CASE STREAM_USE_CASE}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_COLOR_SPACE_PROFILES COLOR_SPACE_PROFILES}</li>
      * </ul>
      *
      * <p>This key is available on all devices.</p>
@@ -2249,6 +2250,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see #REQUEST_AVAILABLE_CAPABILITIES_REMOSAIC_REPROCESSING
      * @see #REQUEST_AVAILABLE_CAPABILITIES_DYNAMIC_RANGE_TEN_BIT
      * @see #REQUEST_AVAILABLE_CAPABILITIES_STREAM_USE_CASE
+     * @see #REQUEST_AVAILABLE_CAPABILITIES_COLOR_SPACE_PROFILES
      */
     @PublicKey
     @NonNull
@@ -2471,6 +2473,82 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     @NonNull
     public static final Key<Long> REQUEST_RECOMMENDED_TEN_BIT_DYNAMIC_RANGE_PROFILE =
             new Key<Long>("android.request.recommendedTenBitDynamicRangeProfile", long.class);
+
+    /**
+     * <p>An interface for querying the color space profiles supported by a camera device.</p>
+     * <p>A color space profile is a combination of a color space, an image format, and a dynamic
+     * range profile. Camera clients can retrieve the list of supported color spaces by calling
+     * {@link android.hardware.camera2.params.ColorSpaceProfiles#getSupportedColorSpaces } or
+     * {@link android.hardware.camera2.params.ColorSpaceProfiles#getSupportedColorSpacesForDynamicRange }.
+     * If a camera does not support the
+     * {@link android.hardware.camera2.CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES_DYNAMIC_RANGE_TEN_BIT }
+     * capability, the dynamic range profile will always be
+     * {@link android.hardware.camera2.params.DynamicRangeProfiles#STANDARD }. Color space
+     * capabilities are queried in combination with an {@link android.graphics.ImageFormat }.
+     * If a camera client wants to know the general color space capabilities of a camera device
+     * regardless of image format, it can specify {@link android.graphics.ImageFormat#UNKNOWN }.
+     * The color space for a session can be configured by setting the SessionConfiguration
+     * color space via {@link android.hardware.camera2.params.SessionConfiguration#setColorSpace }.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     */
+    @PublicKey
+    @NonNull
+    @SyntheticKey
+    public static final Key<android.hardware.camera2.params.ColorSpaceProfiles> REQUEST_AVAILABLE_COLOR_SPACE_PROFILES =
+            new Key<android.hardware.camera2.params.ColorSpaceProfiles>("android.request.availableColorSpaceProfiles", android.hardware.camera2.params.ColorSpaceProfiles.class);
+
+    /**
+     * <p>A list of all possible color space profiles supported by a camera device.</p>
+     * <p>A color space profile is a combination of a color space, an image format, and a dynamic range
+     * profile. If a camera does not support the
+     * {@link android.hardware.camera2.CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES_DYNAMIC_RANGE_TEN_BIT }
+     * capability, the dynamic range profile will always be
+     * {@link android.hardware.camera2.params.DynamicRangeProfiles#STANDARD }. Camera clients can
+     * use {@link android.hardware.camera2.params.SessionConfiguration#setColorSpace } to select
+     * a color space.</p>
+     * <p><b>Possible values:</b></p>
+     * <ul>
+     *   <li>{@link #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_UNSPECIFIED UNSPECIFIED}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_SRGB SRGB}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_LINEAR_SRGB LINEAR_SRGB}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_EXTENDED_SRGB EXTENDED_SRGB}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_LINEAR_EXTENDED_SRGB LINEAR_EXTENDED_SRGB}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_BT709 BT709}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_BT2020 BT2020}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_DCI_P3 DCI_P3}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_DISPLAY_P3 DISPLAY_P3}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_NTSC_1953 NTSC_1953}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_SMPTE_C SMPTE_C}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_ADOBE_RGB ADOBE_RGB}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_PRO_PHOTO_RGB PRO_PHOTO_RGB}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_ACES ACES}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_ACESCG ACESCG}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_CIE_XYZ CIE_XYZ}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_CIE_LAB CIE_LAB}</li>
+     * </ul>
+     *
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     * @see #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_UNSPECIFIED
+     * @see #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_SRGB
+     * @see #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_LINEAR_SRGB
+     * @see #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_EXTENDED_SRGB
+     * @see #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_LINEAR_EXTENDED_SRGB
+     * @see #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_BT709
+     * @see #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_BT2020
+     * @see #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_DCI_P3
+     * @see #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_DISPLAY_P3
+     * @see #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_NTSC_1953
+     * @see #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_SMPTE_C
+     * @see #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_ADOBE_RGB
+     * @see #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_PRO_PHOTO_RGB
+     * @see #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_ACES
+     * @see #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_ACESCG
+     * @see #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_CIE_XYZ
+     * @see #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_CIE_LAB
+     * @hide
+     */
+    public static final Key<long[]> REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP =
+            new Key<long[]>("android.request.availableColorSpaceProfilesMap", long[].class);
 
     /**
      * <p>The list of image formats that are supported by this

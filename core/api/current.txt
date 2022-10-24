@@ -17630,6 +17630,7 @@ package android.hardware.camera2 {
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<int[]> NOISE_REDUCTION_AVAILABLE_NOISE_REDUCTION_MODES;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Integer> REPROCESS_MAX_CAPTURE_STALL;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<int[]> REQUEST_AVAILABLE_CAPABILITIES;
+    field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.ColorSpaceProfiles> REQUEST_AVAILABLE_COLOR_SPACE_PROFILES;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.DynamicRangeProfiles> REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Integer> REQUEST_MAX_NUM_INPUT_STREAMS;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Integer> REQUEST_MAX_NUM_OUTPUT_PROC;
@@ -17993,6 +17994,7 @@ package android.hardware.camera2 {
     field public static final int NOISE_REDUCTION_MODE_ZERO_SHUTTER_LAG = 4; // 0x4
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE = 0; // 0x0
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_BURST_CAPTURE = 6; // 0x6
+    field public static final int REQUEST_AVAILABLE_CAPABILITIES_COLOR_SPACE_PROFILES = 20; // 0x14
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_CONSTRAINED_HIGH_SPEED_VIDEO = 9; // 0x9
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_DEPTH_OUTPUT = 8; // 0x8
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_DYNAMIC_RANGE_TEN_BIT = 18; // 0x12
@@ -18344,6 +18346,15 @@ package android.hardware.camera2.params {
     method @NonNull public android.util.Range<java.lang.Float> getZoomRatioRange();
   }
 
+  public final class ColorSpaceProfiles {
+    ctor public ColorSpaceProfiles(@NonNull long[]);
+    method @NonNull public java.util.Set<android.graphics.ColorSpace.Named> getSupportedColorSpaces(int);
+    method @NonNull public java.util.Set<android.graphics.ColorSpace.Named> getSupportedColorSpacesForDynamicRange(int, long);
+    method @NonNull public java.util.Set<java.lang.Long> getSupportedDynamicRangeProfiles(@NonNull android.graphics.ColorSpace.Named, int);
+    method @NonNull public java.util.Set<java.lang.Integer> getSupportedImageFormatsForColorSpace(@NonNull android.graphics.ColorSpace.Named);
+    field public static final int UNSPECIFIED = -1; // 0xffffffff
+  }
+
   public final class ColorSpaceTransform {
     ctor public ColorSpaceTransform(android.util.Rational[]);
     ctor public ColorSpaceTransform(int[]);
@@ -18575,13 +18586,16 @@ package android.hardware.camera2.params {
 
   public final class SessionConfiguration implements android.os.Parcelable {
     ctor public SessionConfiguration(int, @NonNull java.util.List<android.hardware.camera2.params.OutputConfiguration>, @NonNull java.util.concurrent.Executor, @NonNull android.hardware.camera2.CameraCaptureSession.StateCallback);
+    method public void clearColorSpace();
     method public int describeContents();
+    method @Nullable public android.graphics.ColorSpace getColorSpace();
     method public java.util.concurrent.Executor getExecutor();
     method public android.hardware.camera2.params.InputConfiguration getInputConfiguration();
     method public java.util.List<android.hardware.camera2.params.OutputConfiguration> getOutputConfigurations();
     method public android.hardware.camera2.CaptureRequest getSessionParameters();
     method public int getSessionType();
     method public android.hardware.camera2.CameraCaptureSession.StateCallback getStateCallback();
+    method public void setColorSpace(@NonNull android.graphics.ColorSpace.Named);
     method public void setInputConfiguration(@NonNull android.hardware.camera2.params.InputConfiguration);
     method public void setSessionParameters(android.hardware.camera2.CaptureRequest);
     method public void writeToParcel(android.os.Parcel, int);

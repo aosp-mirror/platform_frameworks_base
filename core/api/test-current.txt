@@ -1170,6 +1170,20 @@ package android.hardware.camera2 {
 
 }
 
+package android.hardware.camera2.params {
+
+  public final class ColorSpaceProfiles {
+    method @NonNull public java.util.Map<android.graphics.ColorSpace.Named,java.util.Map<java.lang.Integer,java.util.Set<java.lang.Long>>> getProfileMap();
+  }
+
+  public final class OutputConfiguration implements android.os.Parcelable {
+    method public void clearColorSpace();
+    method @Nullable public android.graphics.ColorSpace getColorSpace();
+    method public void setColorSpace(@NonNull android.graphics.ColorSpace.Named);
+  }
+
+}
+
 package android.hardware.devicestate {
 
   public final class DeviceStateManager {
