@@ -76,6 +76,7 @@ fun CreatePasskeyScreen(
           providerInfo = uiState.activeEntry?.activeProvider!!,
           createOptionInfo = uiState.activeEntry.activeCreateOptionInfo,
           onOptionSelected = {viewModel.onPrimaryCreateOptionInfoSelected()},
+          onConfirm = {viewModel.onPrimaryCreateOptionInfoSelected()},
           onCancel = {viewModel.onCancel()},
           multiProvider = uiState.providers.size > 1,
           onMoreOptionsSelected = {viewModel.onMoreOptionsSelected()}
@@ -397,6 +398,7 @@ fun CreationSelectionCard(
   providerInfo: ProviderInfo,
   createOptionInfo: CreateOptionInfo,
   onOptionSelected: () -> Unit,
+  onConfirm: () -> Unit,
   onCancel: () -> Unit,
   multiProvider: Boolean,
   onMoreOptionsSelected: () -> Unit,
@@ -468,10 +470,17 @@ fun CreationSelectionCard(
         color = Color.Transparent
       )
       Row(
-        horizontalArrangement = Arrangement.Start,
+        horizontalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
       ) {
-        CancelButton(stringResource(R.string.string_cancel), onCancel)
+        CancelButton(
+          stringResource(R.string.string_cancel),
+          onclick = onCancel
+        )
+        ConfirmButton(
+          stringResource(R.string.string_continue),
+          onclick = onConfirm
+        )
       }
       Divider(
         thickness = 18.dp,
