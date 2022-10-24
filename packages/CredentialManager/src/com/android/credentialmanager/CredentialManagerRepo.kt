@@ -16,7 +16,6 @@
 
 package com.android.credentialmanager
 
-import android.app.Activity
 import android.app.slice.Slice
 import android.app.slice.SliceSpec
 import android.content.Context
@@ -25,7 +24,8 @@ import android.credentials.ui.Constants
 import android.credentials.ui.Entry
 import android.credentials.ui.ProviderData
 import android.credentials.ui.RequestInfo
-import android.credentials.ui.UserSelectionResult
+import android.credentials.ui.BaseDialogResult
+import android.credentials.ui.UserSelectionDialogResult
 import android.graphics.drawable.Icon
 import android.os.Binder
 import android.os.Bundle
@@ -68,21 +68,20 @@ class CredentialManagerRepo(
   }
 
   fun onCancel() {
-    resultReceiver?.send(Activity.RESULT_CANCELED, null)
+    val resultData = Bundle()
+    BaseDialogResult.addToBundle(BaseDialogResult(requestInfo.token), resultData)
+    resultReceiver?.send(BaseDialogResult.RESULT_CODE_DIALOG_CANCELED, resultData)
   }
 
   fun onOptionSelected(providerPackageName: String, entryId: Int) {
-    val userSelectionResult = UserSelectionResult(
+    val userSelectionDialogResult = UserSelectionDialogResult(
       requestInfo.token,
       providerPackageName,
       entryId
     )
     val resultData = Bundle()
-    resultData.putParcelable(
-      UserSelectionResult.EXTRA_USER_SELECTION_RESULT,
-      userSelectionResult
-    )
-    resultReceiver?.send(Activity.RESULT_OK, resultData)
+    UserSelectionDialogResult.addToBundle(userSelectionDialogResult, resultData)
+    resultReceiver?.send(BaseDialogResult.RESULT_CODE_DIALOG_COMPLETE_WITH_SELECTION, resultData)
   }
 
   fun getCredentialInitialUiState(): GetCredentialUiState {
