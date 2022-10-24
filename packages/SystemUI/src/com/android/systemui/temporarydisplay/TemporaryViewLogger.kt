@@ -31,6 +31,6 @@ open class TemporaryViewLogger(
 
     /** Logs that we removed the chip for the given [reason]. */
     fun logChipRemoval(reason: String) {
-        buffer.log(tag, LogLevel.DEBUG, { str1 = reason }, { "Chip removed due to $str1" })
+        buffer.log(tag, LogLevel.DEBUG, { str1 = reason }, { "Chip removed due to: $str1" })
     }
 }

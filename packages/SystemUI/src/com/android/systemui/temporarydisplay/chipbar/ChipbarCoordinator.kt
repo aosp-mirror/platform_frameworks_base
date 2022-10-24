@@ -39,7 +39,6 @@ import com.android.systemui.common.ui.binder.TextViewBinder
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.media.taptotransfer.common.MediaTttLogger
-import com.android.systemui.media.taptotransfer.common.MediaTttUtils
 import com.android.systemui.media.taptotransfer.sender.MediaTttSenderLogger
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.VibratorHelper
@@ -90,8 +89,6 @@ open class ChipbarCoordinator @Inject constructor(
         configurationController,
         powerManager,
         R.layout.chipbar,
-        MediaTttUtils.WINDOW_TITLE,
-        MediaTttUtils.WAKE_REASON,
 ) {
 
     private lateinit var parent: ChipbarRootView

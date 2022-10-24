@@ -37,7 +37,10 @@ data class ChipbarInfo(
     val text: Text,
     val endItem: ChipbarEndItem?,
     val vibrationEffect: VibrationEffect? = null,
-) : TemporaryViewInfo
+    override val windowTitle: String,
+    override val wakeReason: String,
+    override val timeoutMs: Int,
+) : TemporaryViewInfo()
 
 /** The possible items to display at the end of the chipbar. */
 sealed class ChipbarEndItem {

@@ -45,11 +45,6 @@ import com.android.systemui.util.concurrency.DelayableExecutor
  *
  * The generic type T is expected to contain all the information necessary for the subclasses to
  * display the view in a certain state, since they receive <T> in [updateView].
- *
- * @property windowTitle the title to use for the window that displays the temporary view. Should be
- *   normally cased, like "Window Title".
- * @property wakeReason a string used for logging if we needed to wake the screen in order to
- *   display the temporary view. Should be screaming snake cased, like WAKE_REASON.
  */
 abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : TemporaryViewLogger>(
     internal val context: Context,
@@ -60,8 +55,6 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
     private val configurationController: ConfigurationController,
     private val powerManager: PowerManager,
     @LayoutRes private val viewLayoutRes: Int,
-    private val windowTitle: String,
-    private val wakeReason: String,
 ) : CoreStartable {
     /**
      * Window layout params that will be used as a starting point for the [windowLayoutParams] of
@@ -74,7 +67,6 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
         type = WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY
         flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
             WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-        title = windowTitle
         format = PixelFormat.TRANSLUCENT
         setTrustedOverlay()
     }
@@ -102,20 +94,31 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
     fun displayView(newInfo: T) {
         val currentDisplayInfo = displayInfo
 
-        if (currentDisplayInfo != null) {
+        if (currentDisplayInfo != null &&
+            currentDisplayInfo.info.windowTitle == newInfo.windowTitle) {
+            // We're already displaying information in the correctly-titled window, so we just need
+            // to update the view.
             currentDisplayInfo.info = newInfo
             updateView(currentDisplayInfo.info, currentDisplayInfo.view)
         } else {
-            // The view is new, so set up all our callbacks and inflate the view
+            if (currentDisplayInfo != null) {
+                // We're already displaying information but that information is under a different
+                // window title. So, we need to remove the old window with the old title and add a
+                // new window with the new title.
+                removeView(removalReason = "New info has new window title: ${newInfo.windowTitle}")
+            }
+
+            // At this point, we're guaranteed to no longer be displaying a view.
+            // So, set up all our callbacks and inflate the view.
             configurationController.addCallback(displayScaleListener)
             // Wake the screen if necessary so the user will see the view. (Per b/239426653, we want
             // the view to show over the dream state, so we should only wake up if the screen is
             // completely off.)
             if (!powerManager.isScreenOn) {
                 powerManager.wakeUp(
-                        SystemClock.uptimeMillis(),
-                        PowerManager.WAKE_REASON_APPLICATION,
-                        "com.android.systemui:$wakeReason",
+                    SystemClock.uptimeMillis(),
+                    PowerManager.WAKE_REASON_APPLICATION,
+                    "com.android.systemui:${newInfo.wakeReason}",
                 )
             }
             logger.logChipAddition()
@@ -124,7 +127,7 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
 
         // Cancel and re-set the view timeout each time we get a new state.
         val timeout = accessibilityManager.getRecommendedTimeoutMillis(
-            newInfo.getTimeoutMs().toInt(),
+            newInfo.timeoutMs,
             // Not all views have controls so FLAG_CONTENT_CONTROLS might be superfluous, but
             // include it just to be safe.
             FLAG_CONTENT_ICONS or FLAG_CONTENT_TEXT or FLAG_CONTENT_CONTROLS
@@ -149,7 +152,12 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
         val newDisplayInfo = DisplayInfo(newView, newInfo)
         displayInfo = newDisplayInfo
         updateView(newDisplayInfo.info, newDisplayInfo.view)
-        windowManager.addView(newView, windowLayoutParams)
+
+        val paramsWithTitle = WindowManager.LayoutParams().also {
+            it.copyFrom(windowLayoutParams)
+            it.title = newInfo.windowTitle
+        }
+        windowManager.addView(newView, paramsWithTitle)
         animateViewIn(newView)
     }
 

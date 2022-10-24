@@ -41,6 +41,7 @@ import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
+import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
@@ -85,10 +86,17 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun displayView_viewAdded() {
-        underTest.displayView(getState())
+    fun displayView_viewAddedWithCorrectTitle() {
+        underTest.displayView(
+            ViewInfo(
+                name = "name",
+                windowTitle = "Fake Window Title",
+            )
+        )
 
-        verify(windowManager).addView(any(), any())
+        val windowParamsCaptor = argumentCaptor<WindowManager.LayoutParams>()
+        verify(windowManager).addView(any(), capture(windowParamsCaptor))
+        assertThat(windowParamsCaptor.value!!.title).isEqualTo("Fake Window Title")
     }
 
     @Test
@@ -110,12 +118,38 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun displayView_twice_viewNotAddedTwice() {
+    fun displayView_twiceWithSameWindowTitle_viewNotAddedTwice() {
         underTest.displayView(getState())
         reset(windowManager)
 
         underTest.displayView(getState())
         verify(windowManager, never()).addView(any(), any())
+    }
+
+    @Test
+    fun displayView_twiceWithDifferentWindowTitles_oldViewRemovedNewViewAdded() {
+        underTest.displayView(
+            ViewInfo(
+                name = "name",
+                windowTitle = "First Fake Window Title",
+            )
+        )
+
+        underTest.displayView(
+            ViewInfo(
+                name = "name",
+                windowTitle = "Second Fake Window Title",
+            )
+        )
+
+        val viewCaptor = argumentCaptor<View>()
+        val windowParamsCaptor = argumentCaptor<WindowManager.LayoutParams>()
+
+        verify(windowManager, times(2)).addView(capture(viewCaptor), capture(windowParamsCaptor))
+
+        assertThat(windowParamsCaptor.allValues[0].title).isEqualTo("First Fake Window Title")
+        assertThat(windowParamsCaptor.allValues[1].title).isEqualTo("Second Fake Window Title")
+        verify(windowManager).removeView(viewCaptor.allValues[0])
     }
 
     @Test
@@ -232,8 +266,6 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
         configurationController,
         powerManager,
         R.layout.chipbar,
-        "Window Title",
-        "WAKE_REASON",
     ) {
         var mostRecentViewInfo: ViewInfo? = null
 
@@ -250,9 +282,12 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
         }
     }
 
-    inner class ViewInfo(val name: String) : TemporaryViewInfo {
-        override fun getTimeoutMs() = 1L
-    }
+    inner class ViewInfo(
+        val name: String,
+        override val windowTitle: String = "Window Title",
+        override val wakeReason: String = "WAKE_REASON",
+        override val timeoutMs: Int = 1
+    ) : TemporaryViewInfo()
 }
 
 private const val TIMEOUT_MS = 10000L

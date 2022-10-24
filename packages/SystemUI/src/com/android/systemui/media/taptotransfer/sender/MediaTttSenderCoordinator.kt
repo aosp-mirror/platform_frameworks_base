@@ -159,6 +159,9 @@ constructor(
                     }
                 },
             vibrationEffect = chipStateSender.transferStatus.vibrationEffect,
+            windowTitle = MediaTttUtils.WINDOW_TITLE_SENDER,
+            wakeReason = MediaTttUtils.WAKE_REASON_SENDER,
+            timeoutMs = chipStateSender.timeout,
         )
     }
 

@@ -27,10 +27,11 @@ import com.android.systemui.common.shared.model.Icon
 /** Utility methods for media tap-to-transfer. */
 class MediaTttUtils {
     companion object {
-        // Used in CTS tests UpdateMediaTapToTransferSenderDisplayTest and
-        // UpdateMediaTapToTransferReceiverDisplayTest
-        const val WINDOW_TITLE = "Media Transfer Chip View"
-        const val WAKE_REASON = "MEDIA_TRANSFER_ACTIVATED"
+        const val WINDOW_TITLE_SENDER = "Media Transfer Chip View (Sender)"
+        const val WINDOW_TITLE_RECEIVER = "Media Transfer Chip View (Receiver)"
+
+        const val WAKE_REASON_SENDER = "MEDIA_TRANSFER_ACTIVATED_SENDER"
+        const val WAKE_REASON_RECEIVER = "MEDIA_TRANSFER_ACTIVATED_RECEIVER"
 
         /**
          * Returns the information needed to display the icon in [Icon] form.
