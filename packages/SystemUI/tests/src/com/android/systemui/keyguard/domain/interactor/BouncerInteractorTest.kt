@@ -97,7 +97,7 @@ class BouncerInteractorTest : SysuiTestCase() {
         verify(repository).setHide(false)
         verify(repository).setStartingToHide(false)
         verify(repository).setScrimmed(true)
-        verify(repository).setExpansion(EXPANSION_VISIBLE)
+        verify(repository).setPanelExpansion(EXPANSION_VISIBLE)
         verify(repository).setShowingSoon(true)
         verify(keyguardStateController).notifyBouncerShowing(true)
         verify(bouncerCallbackInteractor).dispatchStartingToShow()
@@ -108,7 +108,7 @@ class BouncerInteractorTest : SysuiTestCase() {
 
     @Test
     fun testShow_isNotScrimmed() {
-        verify(repository, never()).setExpansion(EXPANSION_VISIBLE)
+        verify(repository, never()).setPanelExpansion(EXPANSION_VISIBLE)
     }
 
     @Test
@@ -132,26 +132,26 @@ class BouncerInteractorTest : SysuiTestCase() {
 
     @Test
     fun testExpansion() {
-        `when`(repository.expansionAmount.value).thenReturn(0.5f)
-        bouncerInteractor.setExpansion(0.6f)
-        verify(repository).setExpansion(0.6f)
+        `when`(repository.panelExpansionAmount.value).thenReturn(0.5f)
+        bouncerInteractor.setPanelExpansion(0.6f)
+        verify(repository).setPanelExpansion(0.6f)
         verify(bouncerCallbackInteractor).dispatchExpansionChanged(0.6f)
     }
 
     @Test
     fun testExpansion_fullyShown() {
-        `when`(repository.expansionAmount.value).thenReturn(0.5f)
+        `when`(repository.panelExpansionAmount.value).thenReturn(0.5f)
         `when`(repository.startingDisappearAnimation.value).thenReturn(null)
-        bouncerInteractor.setExpansion(EXPANSION_VISIBLE)
+        bouncerInteractor.setPanelExpansion(EXPANSION_VISIBLE)
         verify(falsingCollector).onBouncerShown()
         verify(bouncerCallbackInteractor).dispatchFullyShown()
     }
 
     @Test
     fun testExpansion_fullyHidden() {
-        `when`(repository.expansionAmount.value).thenReturn(0.5f)
+        `when`(repository.panelExpansionAmount.value).thenReturn(0.5f)
         `when`(repository.startingDisappearAnimation.value).thenReturn(null)
-        bouncerInteractor.setExpansion(EXPANSION_HIDDEN)
+        bouncerInteractor.setPanelExpansion(EXPANSION_HIDDEN)
         verify(repository).setVisible(false)
         verify(repository).setShow(null)
         verify(falsingCollector).onBouncerHidden()
@@ -161,8 +161,8 @@ class BouncerInteractorTest : SysuiTestCase() {
 
     @Test
     fun testExpansion_startingToHide() {
-        `when`(repository.expansionAmount.value).thenReturn(EXPANSION_VISIBLE)
-        bouncerInteractor.setExpansion(0.1f)
+        `when`(repository.panelExpansionAmount.value).thenReturn(EXPANSION_VISIBLE)
+        bouncerInteractor.setPanelExpansion(0.1f)
         verify(repository).setStartingToHide(true)
         verify(bouncerCallbackInteractor).dispatchStartingToHide()
     }
@@ -234,7 +234,7 @@ class BouncerInteractorTest : SysuiTestCase() {
     @Test
     fun testIsFullShowing() {
         `when`(repository.isVisible.value).thenReturn(true)
-        `when`(repository.expansionAmount.value).thenReturn(EXPANSION_VISIBLE)
+        `when`(repository.panelExpansionAmount.value).thenReturn(EXPANSION_VISIBLE)
         `when`(repository.startingDisappearAnimation.value).thenReturn(null)
         assertThat(bouncerInteractor.isFullyShowing()).isTrue()
         `when`(repository.isVisible.value).thenReturn(false)
@@ -255,7 +255,7 @@ class BouncerInteractorTest : SysuiTestCase() {
         assertThat(bouncerInteractor.isInTransit()).isTrue()
         `when`(repository.showingSoon.value).thenReturn(false)
         assertThat(bouncerInteractor.isInTransit()).isFalse()
-        `when`(repository.expansionAmount.value).thenReturn(0.5f)
+        `when`(repository.panelExpansionAmount.value).thenReturn(0.5f)
         assertThat(bouncerInteractor.isInTransit()).isTrue()
     }
 
