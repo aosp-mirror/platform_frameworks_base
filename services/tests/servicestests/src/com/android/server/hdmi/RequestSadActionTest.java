@@ -18,12 +18,12 @@ package com.android.server.hdmi;
 
 import static com.android.server.SystemService.PHASE_SYSTEM_SERVICES_READY;
 import static com.android.server.hdmi.Constants.ADDR_AUDIO_SYSTEM;
-import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC;
 
 import static com.google.common.truth.Truth.assertThat;
 
 import android.content.Context;
 import android.hardware.hdmi.HdmiControlManager;
+import android.hardware.hdmi.HdmiDeviceInfo;
 import android.os.Looper;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
@@ -69,7 +69,6 @@ public class RequestSadActionTest {
     private FakePowerManagerWrapper mPowerManager;
     private Looper mMyLooper;
     private TestLooper mTestLooper = new TestLooper();
-    private ArrayList<HdmiCecLocalDevice> mLocalDevices = new ArrayList<>();
     private int mTvLogicalAddress;
     private List<byte[]> mSupportedSads;
     private RequestSadCallback mCallback =
@@ -97,7 +96,7 @@ public class RequestSadActionTest {
         mMyLooper = mTestLooper.getLooper();
 
         mHdmiControlService =
-                new HdmiControlService(context, Collections.emptyList(),
+                new HdmiControlService(context, Collections.singletonList(HdmiDeviceInfo.DEVICE_TV),
                         new FakeAudioDeviceVolumeManagerWrapper()) {
                     @Override
                     boolean isControlEnabled() {
@@ -115,8 +114,6 @@ public class RequestSadActionTest {
                     }
                 };
 
-        mHdmiCecLocalDeviceTv = new HdmiCecLocalDeviceTv(mHdmiControlService);
-        mHdmiCecLocalDeviceTv.init();
         mHdmiControlService.setIoLooper(mMyLooper);
         mHdmiControlService.setHdmiCecConfig(new FakeHdmiCecConfig(context));
         mNativeWrapper = new FakeNativeWrapper();
@@ -124,14 +121,13 @@ public class RequestSadActionTest {
                 mHdmiControlService, mNativeWrapper, mHdmiControlService.getAtomWriter());
         mHdmiControlService.setCecController(mHdmiCecController);
         mHdmiControlService.setHdmiMhlController(HdmiMhlControllerStub.create(mHdmiControlService));
-        mLocalDevices.add(mHdmiCecLocalDeviceTv);
         mHdmiControlService.initService();
         mHdmiControlService.onBootPhase(PHASE_SYSTEM_SERVICES_READY);
         mPowerManager = new FakePowerManagerWrapper(context);
         mHdmiControlService.setPowerManager(mPowerManager);
-        mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mNativeWrapper.setPhysicalAddress(0x0000);
         mTestLooper.dispatchAll();
+        mHdmiCecLocalDeviceTv = mHdmiControlService.tv();
         mTvLogicalAddress = mHdmiCecLocalDeviceTv.getDeviceInfo().getLogicalAddress();
         mNativeWrapper.clearResultMessages();
     }
