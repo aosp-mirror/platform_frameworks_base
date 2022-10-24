@@ -28,6 +28,8 @@ import android.content.res.AssetManager;
 import android.graphics.fonts.FontCustomizationParser;
 import android.graphics.fonts.FontFamily;
 import android.graphics.fonts.SystemFonts;
+import android.graphics.text.PositionedGlyphs;
+import android.graphics.text.TextRunShaper;
 import android.text.FontConfig;
 import android.util.ArrayMap;
 
@@ -64,6 +66,8 @@ public class TypefaceSystemFallbackTest {
         "b3em.ttf",  // Supports "a","b","c". The width of "b" is 3em,  others are 1em.
         "c3em.ttf",  // Supports "a","b","c". The width of "c" is 3em,  others are 1em.
         "all2em.ttf",  // Supports "a,","b","c". All of them have the same width of 2em.
+        "fallback.ttf",  // SUpports all small alphabets.
+        "fallback_capital.ttf",  // SUpports all capital alphabets.
         "no_coverage.ttf",  // This font doesn't support any characters.
     };
     private static final String TEST_FONTS_XML;
@@ -165,7 +169,10 @@ public class TypefaceSystemFallbackTest {
 
         Map<String, File> updatableFontMap = new HashMap<>();
         for (File file : new File(TEST_UPDATABLE_FONT_DIR).listFiles()) {
-            updatableFontMap.put(file.getName(), file);
+            final String fileName = file.getName();
+            final int periodIndex = fileName.lastIndexOf(".");
+            final String psName = fileName.substring(0, periodIndex);
+            updatableFontMap.put(psName, file);
         }
 
         FontConfig fontConfig;
@@ -708,6 +715,47 @@ public class TypefaceSystemFallbackTest {
         assertEquals(GLYPH_1EM_WIDTH, paint.measureText("a"), 0.0f);
         assertEquals(GLYPH_3EM_WIDTH, paint.measureText("b"), 0.0f);
         assertEquals(GLYPH_1EM_WIDTH, paint.measureText("c"), 0.0f);
+    }
+
+    private String getFontName(Paint paint, String text) {
+        PositionedGlyphs glyphs = TextRunShaper.shapeTextRun(
+                text, 0, text.length(), 0, text.length(), 0f, 0f, false, paint);
+        assertEquals(1, glyphs.glyphCount());
+        return glyphs.getFont(0).getFile().getName();
+    }
+
+    @Test
+    public void testBuildSystemFallback__Customization_new_named_familyList() {
+        final String xml = "<?xml version='1.0' encoding='UTF-8'?>"
+                + "<familyset>"
+                + "  <family name='sans-serif'>"
+                + "    <font weight='400' style='normal'>fallback_capital.ttf</font>"
+                + "  </family>"
+                + "</familyset>";
+        final String oemXml = "<?xml version='1.0' encoding='UTF-8'?>"
+                + "<fonts-modification version='1'>"
+                + "  <family-list customizationType='new-named-family' name='google-sans'>"
+                + "    <family>"
+                + "      <font weight='400' style='normal'>b3em.ttf</font>"
+                + "    </family>"
+                + "    <family>"
+                + "      <font weight='400' style='normal'>fallback.ttf</font>"
+                + "    </family>"
+                + "  </family-list>"
+                + "</fonts-modification>";
+        final ArrayMap<String, Typeface> fontMap = new ArrayMap<>();
+        final ArrayMap<String, FontFamily[]> fallbackMap = new ArrayMap<>();
+
+        buildSystemFallback(xml, oemXml, fontMap, fallbackMap);
+
+        final Paint paint = new Paint();
+
+        Typeface testTypeface = fontMap.get("google-sans");
+        assertNotNull(testTypeface);
+        paint.setTypeface(testTypeface);
+        assertEquals("b3em.ttf", getFontName(paint, "a"));
+        assertEquals("fallback.ttf", getFontName(paint, "x"));
+        assertEquals("fallback_capital.ttf", getFontName(paint, "A"));
     }
 
     @Test

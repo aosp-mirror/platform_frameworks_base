@@ -2706,6 +2706,7 @@ package android.text {
     method @IntRange(from=0) public int getConfigVersion();
     method @NonNull public java.util.List<android.text.FontConfig.FontFamily> getFontFamilies();
     method public long getLastModifiedTimeMillis();
+    method @NonNull public java.util.List<android.text.FontConfig.NamedFamilyList> getNamedFamilyLists();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.text.FontConfig> CREATOR;
   }
@@ -2735,13 +2736,21 @@ package android.text {
     method public int describeContents();
     method @NonNull public java.util.List<android.text.FontConfig.Font> getFontList();
     method @NonNull public android.os.LocaleList getLocaleList();
-    method @Nullable public String getName();
+    method @Deprecated @Nullable public String getName();
     method public int getVariant();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.text.FontConfig.FontFamily> CREATOR;
     field public static final int VARIANT_COMPACT = 1; // 0x1
     field public static final int VARIANT_DEFAULT = 0; // 0x0
     field public static final int VARIANT_ELEGANT = 2; // 0x2
+  }
+
+  public static final class FontConfig.NamedFamilyList implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public java.util.List<android.text.FontConfig.FontFamily> getFamilies();
+    method @NonNull public String getName();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.text.FontConfig.NamedFamilyList> CREATOR;
   }
 
   public static final class Selection.MemoryTextWatcher implements android.text.TextWatcher {

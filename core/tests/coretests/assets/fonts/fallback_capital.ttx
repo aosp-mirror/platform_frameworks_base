@@ -18,7 +18,6 @@
   <GlyphOrder>
     <GlyphID id="0" name=".notdef"/>
     <GlyphID id="1" name="1em"/>
-    <GlyphID id="2" name="3em"/>
   </GlyphOrder>
 
   <head>
@@ -118,17 +117,37 @@
   <hmtx>
     <mtx name=".notdef" width="500" lsb="93"/>
     <mtx name="1em" width="1000" lsb="93"/>
-    <mtx name="3em" width="3000" lsb="93"/>
   </hmtx>
 
   <cmap>
     <tableVersion version="0"/>
     <cmap_format_4 platformID="3" platEncID="10" language="0">
-      <map code="0x0061" name="1em" />
-      <map code="0x0062" name="3em" />
-      <map code="0x0063" name="1em" />
-      <map code="0x0064" name="1em" />
-      <map code="0x0065" name="1em" />
+      <map code="0x0041" name="1em" /> <!-- "A" -->
+      <map code="0x0042" name="1em" /> <!-- "B" -->
+      <map code="0x0043" name="1em" /> <!-- "C" -->
+      <map code="0x0044" name="1em" /> <!-- "D" -->
+      <map code="0x0045" name="1em" /> <!-- "E" -->
+      <map code="0x0046" name="1em" /> <!-- "F" -->
+      <map code="0x0047" name="1em" /> <!-- "G" -->
+      <map code="0x0048" name="1em" /> <!-- "H" -->
+      <map code="0x0049" name="1em" /> <!-- "I" -->
+      <map code="0x004a" name="1em" /> <!-- "J" -->
+      <map code="0x004b" name="1em" /> <!-- "K" -->
+      <map code="0x004c" name="1em" /> <!-- "L" -->
+      <map code="0x004d" name="1em" /> <!-- "M" -->
+      <map code="0x004e" name="1em" /> <!-- "N" -->
+      <map code="0x004f" name="1em" /> <!-- "O" -->
+      <map code="0x0050" name="1em" /> <!-- "P" -->
+      <map code="0x0051" name="1em" /> <!-- "Q" -->
+      <map code="0x0052" name="1em" /> <!-- "R" -->
+      <map code="0x0053" name="1em" /> <!-- "S" -->
+      <map code="0x0054" name="1em" /> <!-- "T" -->
+      <map code="0x0055" name="1em" /> <!-- "U" -->
+      <map code="0x0056" name="1em" /> <!-- "V" -->
+      <map code="0x0057" name="1em" /> <!-- "W" -->
+      <map code="0x0058" name="1em" /> <!-- "X" -->
+      <map code="0x0059" name="1em" /> <!-- "Y" -->
+      <map code="0x005a" name="1em" /> <!-- "Z" -->
     </cmap_format_4>
   </cmap>
 
@@ -139,7 +158,6 @@
   <glyf>
     <TTGlyph name=".notdef" xMin="0" yMin="0" xMax="0" yMax="0" />
     <TTGlyph name="1em" xMin="0" yMin="0" xMax="0" yMax="0" />
-    <TTGlyph name="3em" xMin="0" yMin="0" xMax="0" yMax="0" />
   </glyf>
 
   <name>
@@ -156,7 +174,7 @@
       Sample Font
     </namerecord>
     <namerecord nameID="6" platformID="3" platEncID="1" langID="0x409">
-      b3em
+      fallback_capital
     </namerecord>
     <namerecord nameID="13" platformID="3" platEncID="1" langID="0x409">
       Licensed under the Apache License, Version 2.0 (the "License");

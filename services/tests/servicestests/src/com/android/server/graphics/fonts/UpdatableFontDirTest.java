@@ -210,7 +210,8 @@ public final class UpdatableFontDirTest {
         assertThat(mUpdatableFontFilesDir.list()).hasLength(2);
         assertNamedFamilyExists(dir.getSystemFontConfig(), "foobar");
         assertThat(dir.getFontFamilyMap()).containsKey("foobar");
-        FontConfig.FontFamily foobar = dir.getFontFamilyMap().get("foobar");
+        assertThat(dir.getFontFamilyMap().get("foobar").getFamilies().size()).isEqualTo(1);
+        FontConfig.FontFamily foobar = dir.getFontFamilyMap().get("foobar").getFamilies().get(0);
         assertThat(foobar.getFontList()).hasSize(2);
         assertThat(foobar.getFontList().get(0).getFile())
                 .isEqualTo(dir.getPostScriptMap().get("foo"));
@@ -326,10 +327,12 @@ public final class UpdatableFontDirTest {
                     new FontStyle(400, FontStyle.FONT_SLANT_UPRIGHT), 0, null, null);
 
             FontConfig.FontFamily family = new FontConfig.FontFamily(
-                    Arrays.asList(fooFont, barFont), "sans-serif", null,
+                    Arrays.asList(fooFont, barFont), null,
                     FontConfig.FontFamily.VARIANT_DEFAULT);
-            return new FontConfig(Collections.singletonList(family),
-                    Collections.emptyList(), 0, 1);
+            return new FontConfig(Collections.emptyList(),
+                    Collections.emptyList(),
+                    Collections.singletonList(new FontConfig.NamedFamilyList(
+                            Collections.singletonList(family), "sans-serif")), 0, 1);
         };
 
         UpdatableFontDir dirForPreparation = new UpdatableFontDir(
@@ -411,7 +414,8 @@ public final class UpdatableFontDirTest {
         assertThat(dir.getPostScriptMap()).containsKey("foo");
         assertThat(mParser.getRevision(dir.getPostScriptMap().get("foo"))).isEqualTo(1);
         assertThat(dir.getFontFamilyMap()).containsKey("foobar");
-        FontConfig.FontFamily foobar = dir.getFontFamilyMap().get("foobar");
+        assertThat(dir.getFontFamilyMap().get("foobar").getFamilies().size()).isEqualTo(1);
+        FontConfig.FontFamily foobar = dir.getFontFamilyMap().get("foobar").getFamilies().get(0);
         assertThat(foobar.getFontList()).hasSize(1);
         assertThat(foobar.getFontList().get(0).getFile())
                 .isEqualTo(dir.getPostScriptMap().get("foo"));
@@ -485,10 +489,12 @@ public final class UpdatableFontDirTest {
                     file, null, "bar", new FontStyle(400, FontStyle.FONT_SLANT_UPRIGHT),
                     0, null, null);
             FontConfig.FontFamily family = new FontConfig.FontFamily(
-                    Collections.singletonList(font), "sans-serif", null,
-                    FontConfig.FontFamily.VARIANT_DEFAULT);
-            return new FontConfig(Collections.singletonList(family),
-                    Collections.emptyList(), 0, 1);
+                    Collections.singletonList(font), null, FontConfig.FontFamily.VARIANT_DEFAULT);
+            return new FontConfig(
+                    Collections.emptyList(),
+                    Collections.emptyList(),
+                    Collections.singletonList(new FontConfig.NamedFamilyList(
+                            Collections.singletonList(family), "sans-serif")), 0, 1);
         });
         dir.loadFontFileMap();
 
@@ -636,9 +642,10 @@ public final class UpdatableFontDirTest {
                     file, null, "test", new FontStyle(400, FontStyle.FONT_SLANT_UPRIGHT), 0, null,
                     null);
             FontConfig.FontFamily family = new FontConfig.FontFamily(
-                    Collections.singletonList(font), "sans-serif", null,
-                    FontConfig.FontFamily.VARIANT_DEFAULT);
-            return new FontConfig(Collections.singletonList(family), Collections.emptyList(), 0, 1);
+                    Collections.singletonList(font), null, FontConfig.FontFamily.VARIANT_DEFAULT);
+            return new FontConfig(Collections.emptyList(), Collections.emptyList(),
+                    Collections.singletonList(new FontConfig.NamedFamilyList(
+                            Collections.singletonList(family), "sans-serif")), 0, 1);
         });
         dir.loadFontFileMap();
 
@@ -873,13 +880,14 @@ public final class UpdatableFontDirTest {
                         + "</family>")));
         assertThat(dir.getPostScriptMap()).containsKey("test");
         assertThat(dir.getFontFamilyMap()).containsKey("test");
-        FontConfig.FontFamily test = dir.getFontFamilyMap().get("test");
+        assertThat(dir.getFontFamilyMap().get("test").getFamilies().size()).isEqualTo(1);
+        FontConfig.FontFamily test = dir.getFontFamilyMap().get("test").getFamilies().get(0);
         assertThat(test.getFontList()).hasSize(1);
         assertThat(test.getFontList().get(0).getFile())
                 .isEqualTo(dir.getPostScriptMap().get("test"));
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void addFontFamily_noName() throws Exception {
         UpdatableFontDir dir = new UpdatableFontDir(
                 mUpdatableFontFilesDir, mParser, mFakeFsverityUtil,
@@ -891,12 +899,7 @@ public final class UpdatableFontDirTest {
                 newAddFontFamilyRequest("<family lang='en'>"
                         + "  <font>test.ttf</font>"
                         + "</family>"));
-        try {
-            dir.update(requests);
-            fail("Expect NullPointerException");
-        } catch (NullPointerException e) {
-            // Expect
-        }
+        dir.update(requests);
     }
 
     @Test
@@ -955,17 +958,16 @@ public final class UpdatableFontDirTest {
         dir.loadFontFileMap();
         assertThat(dir.getSystemFontConfig().getFontFamilies()).isNotEmpty();
         FontConfig.FontFamily firstFontFamily = dir.getSystemFontConfig().getFontFamilies().get(0);
-        assertThat(firstFontFamily.getName()).isNotEmpty();
 
         dir.update(Arrays.asList(
                 newFontUpdateRequest("test.ttf,1,test", GOOD_SIGNATURE),
-                newAddFontFamilyRequest("<family name='" + firstFontFamily.getName() + "'>"
+                newAddFontFamilyRequest("<family name='sans-serif'>"
                         + "  <font>test.ttf</font>"
                         + "</family>")));
         FontConfig fontConfig = dir.getSystemFontConfig();
         assertThat(dir.getSystemFontConfig().getFontFamilies()).isNotEmpty();
         assertThat(fontConfig.getFontFamilies().get(0)).isEqualTo(firstFontFamily);
-        FontConfig.FontFamily updated = getLastFamily(fontConfig, firstFontFamily.getName());
+        FontConfig.FontFamily updated = getLastFamily(fontConfig, "sans-serif");
         assertThat(updated.getFontList()).hasSize(1);
         assertThat(updated.getFontList().get(0).getFile())
                 .isEqualTo(dir.getPostScriptMap().get("test"));
@@ -1005,7 +1007,9 @@ public final class UpdatableFontDirTest {
         mParser.setInput(is, "UTF-8");
         mParser.nextTag();
 
-        FontConfig.FontFamily fontFamily = FontListParser.readFamily(mParser, "", null, true);
+        FontConfig.NamedFamilyList namedFamilyList = FontListParser.readNamedFamily(
+                mParser, "", null, true);
+        FontConfig.FontFamily fontFamily = namedFamilyList.getFamilies().get(0);
         List<FontUpdateRequest.Font> fonts = new ArrayList<>();
         for (FontConfig.Font font : fontFamily.getFontList()) {
             String name = font.getFile().getName();
@@ -1014,7 +1018,8 @@ public final class UpdatableFontDirTest {
                     psName, font.getStyle(), font.getTtcIndex(), font.getFontVariationSettings());
             fonts.add(updateFont);
         }
-        FontUpdateRequest.Family family = new FontUpdateRequest.Family(fontFamily.getName(), fonts);
+        FontUpdateRequest.Family family = new FontUpdateRequest.Family(
+                namedFamilyList.getName(), fonts);
         return new FontUpdateRequest(family);
     }
 
@@ -1035,18 +1040,18 @@ public final class UpdatableFontDirTest {
 
     // Returns the last family with the given name, which will be used for creating Typeface.
     private static FontConfig.FontFamily getLastFamily(FontConfig fontConfig, String familyName) {
-        List<FontConfig.FontFamily> fontFamilies = fontConfig.getFontFamilies();
-        for (int i = fontFamilies.size() - 1; i >= 0; i--) {
-            if (familyName.equals(fontFamilies.get(i).getName())) {
-                return fontFamilies.get(i);
+        List<FontConfig.NamedFamilyList> namedFamilyLists = fontConfig.getNamedFamilyLists();
+        for (int i = namedFamilyLists.size() - 1; i >= 0; i--) {
+            if (familyName.equals(namedFamilyLists.get(i).getName())) {
+                return namedFamilyLists.get(i).getFamilies().get(0);
             }
         }
         return null;
     }
 
     private static void assertNamedFamilyExists(FontConfig fontConfig, String familyName) {
-        assertThat(fontConfig.getFontFamilies().stream()
-                .map(FontConfig.FontFamily::getName)
+        assertThat(fontConfig.getNamedFamilyLists().stream()
+                .map(FontConfig.NamedFamilyList::getName)
                 .collect(Collectors.toSet())).contains(familyName);
     }
 }
