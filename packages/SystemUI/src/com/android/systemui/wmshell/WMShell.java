@@ -22,6 +22,7 @@ import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_B
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BUBBLES_EXPANDED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BUBBLES_MANAGE_MENU_EXPANDED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_DIALOG_SHOWING;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_FREEFORM_ACTIVE_IN_DESKTOP_MODE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_ONE_HANDED_ACTIVE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_QUICK_SETTINGS_EXPANDED;
@@ -55,6 +56,8 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.tracing.ProtoTracer;
 import com.android.systemui.tracing.nano.SystemUiTraceProto;
+import com.android.wm.shell.desktopmode.DesktopMode;
+import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.floating.FloatingTasks;
 import com.android.wm.shell.nano.WmShellTraceProto;
 import com.android.wm.shell.onehanded.OneHanded;
@@ -111,6 +114,7 @@ public final class WMShell implements
     private final Optional<SplitScreen> mSplitScreenOptional;
     private final Optional<OneHanded> mOneHandedOptional;
     private final Optional<FloatingTasks> mFloatingTasksOptional;
+    private final Optional<DesktopMode> mDesktopModeOptional;
 
     private final CommandQueue mCommandQueue;
     private final ConfigurationController mConfigurationController;
@@ -173,6 +177,7 @@ public final class WMShell implements
             Optional<SplitScreen> splitScreenOptional,
             Optional<OneHanded> oneHandedOptional,
             Optional<FloatingTasks> floatingTasksOptional,
+            Optional<DesktopMode> desktopMode,
             CommandQueue commandQueue,
             ConfigurationController configurationController,
             KeyguardStateController keyguardStateController,
@@ -194,6 +199,7 @@ public final class WMShell implements
         mPipOptional = pipOptional;
         mSplitScreenOptional = splitScreenOptional;
         mOneHandedOptional = oneHandedOptional;
+        mDesktopModeOptional = desktopMode;
         mWakefulnessLifecycle = wakefulnessLifecycle;
         mProtoTracer = protoTracer;
         mUserTracker = userTracker;
@@ -219,6 +225,7 @@ public final class WMShell implements
         mPipOptional.ifPresent(this::initPip);
         mSplitScreenOptional.ifPresent(this::initSplitScreen);
         mOneHandedOptional.ifPresent(this::initOneHanded);
+        mDesktopModeOptional.ifPresent(this::initDesktopMode);
     }
 
     @VisibleForTesting
@@ -324,6 +331,16 @@ public final class WMShell implements
                 }
             }
         });
+    }
+
+    void initDesktopMode(DesktopMode desktopMode) {
+        desktopMode.addListener(new DesktopModeTaskRepository.VisibleTasksListener() {
+            @Override
+            public void onVisibilityChanged(boolean hasFreeformTasks) {
+                mSysUiState.setFlag(SYSUI_STATE_FREEFORM_ACTIVE_IN_DESKTOP_MODE, hasFreeformTasks)
+                        .commitUpdate(DEFAULT_DISPLAY);
+            }
+        }, mSysUiMainExecutor);
     }
 
     @Override
