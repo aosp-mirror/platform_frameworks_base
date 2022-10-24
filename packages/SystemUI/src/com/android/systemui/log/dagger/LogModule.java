@@ -43,7 +43,7 @@ public class LogModule {
     @SysUISingleton
     @DozeLog
     public static LogBuffer provideDozeLogBuffer(LogBufferFactory factory) {
-        return factory.create("DozeLog", 120);
+        return factory.create("DozeLog", 150);
     }
 
     /** Provides a logging buffer for all logs related to the data layer of notifications. */

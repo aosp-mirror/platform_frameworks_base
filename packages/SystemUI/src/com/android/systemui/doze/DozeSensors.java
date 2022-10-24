@@ -25,7 +25,6 @@ import static com.android.systemui.plugins.SensorManagerPlugin.Sensor.TYPE_WAKE_
 
 import android.annotation.AnyThread;
 import android.app.ActivityManager;
-import android.content.Context;
 import android.database.ContentObserver;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
@@ -40,7 +39,6 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.IndentingPrintWriter;
-import android.util.Log;
 import android.view.Display;
 
 import androidx.annotation.NonNull;
@@ -91,12 +89,9 @@ import java.util.function.Consumer;
  * trigger callbacks on the provided {@link mProxCallback}.
  */
 public class DozeSensors {
-
-    private static final boolean DEBUG = DozeService.DEBUG;
     private static final String TAG = "DozeSensors";
     private static final UiEventLogger UI_EVENT_LOGGER = new UiEventLoggerImpl();
 
-    private final Context mContext;
     private final AsyncSensorManager mSensorManager;
     private final AmbientDisplayConfiguration mConfig;
     private final WakeLock mWakeLock;
@@ -147,7 +142,6 @@ public class DozeSensors {
     }
 
     DozeSensors(
-            Context context,
             AsyncSensorManager sensorManager,
             DozeParameters dozeParameters,
             AmbientDisplayConfiguration config,
@@ -160,7 +154,6 @@ public class DozeSensors {
             AuthController authController,
             DevicePostureController devicePostureController
     ) {
-        mContext = context;
         mSensorManager = sensorManager;
         mConfig = config;
         mWakeLock = wakeLock;
@@ -608,10 +601,7 @@ public class DozeSensors {
             // cancel the previous sensor:
             if (mRegistered) {
                 final boolean rt = mSensorManager.cancelTriggerSensor(this, oldSensor);
-                if (DEBUG) {
-                    Log.d(TAG, "posture changed, cancelTriggerSensor[" + oldSensor + "] "
-                            + rt);
-                }
+                mDozeLog.traceSensorUnregisterAttempt(oldSensor.toString(), rt, "posture changed");
                 mRegistered = false;
             }
 
@@ -657,19 +647,13 @@ public class DozeSensors {
             if (mRequested && !mDisabled && (enabledBySetting() || mIgnoresSetting)) {
                 if (!mRegistered) {
                     mRegistered = mSensorManager.requestTriggerSensor(this, sensor);
-                    if (DEBUG) {
-                        Log.d(TAG, "requestTriggerSensor[" + sensor + "] " + mRegistered);
-                    }
+                    mDozeLog.traceSensorRegisterAttempt(sensor.toString(), mRegistered);
                 } else {
-                    if (DEBUG) {
-                        Log.d(TAG, "requestTriggerSensor[" + sensor + "] already registered");
-                    }
+                    mDozeLog.traceSkipRegisterSensor(sensor.toString());
                 }
             } else if (mRegistered) {
                 final boolean rt = mSensorManager.cancelTriggerSensor(this, sensor);
-                if (DEBUG) {
-                    Log.d(TAG, "cancelTriggerSensor[" + sensor + "] " + rt);
-                }
+                mDozeLog.traceSensorUnregisterAttempt(sensor.toString(), rt);
                 mRegistered = false;
             }
         }
@@ -707,7 +691,6 @@ public class DozeSensors {
             final Sensor sensor = mSensors[mPosture];
             mDozeLog.traceSensor(mPulseReason);
             mHandler.post(mWakeLock.wrap(() -> {
-                if (DEBUG) Log.d(TAG, "onTrigger: " + triggerEventToString(event));
                 if (sensor != null && sensor.getType() == Sensor.TYPE_PICK_UP_GESTURE) {
                     UI_EVENT_LOGGER.log(DozeSensorsUiEvent.ACTION_AMBIENT_GESTURE_PICKUP);
                 }
@@ -779,11 +762,11 @@ public class DozeSensors {
                     && !mRegistered) {
                 asyncSensorManager.registerPluginListener(mPluginSensor, this);
                 mRegistered = true;
-                if (DEBUG) Log.d(TAG, "registerPluginListener");
+                mDozeLog.tracePluginSensorUpdate(true /* registered */);
             } else if (mRegistered) {
                 asyncSensorManager.unregisterPluginListener(mPluginSensor, this);
                 mRegistered = false;
-                if (DEBUG) Log.d(TAG, "unregisterPluginListener");
+                mDozeLog.tracePluginSensorUpdate(false /* registered */);
             }
         }
 
@@ -816,10 +799,9 @@ public class DozeSensors {
             mHandler.post(mWakeLock.wrap(() -> {
                 final long now = SystemClock.uptimeMillis();
                 if (now < mDebounceFrom + mDebounce) {
-                    Log.d(TAG, "onSensorEvent dropped: " + triggerEventToString(event));
+                    mDozeLog.traceSensorEventDropped(mPulseReason, "debounce");
                     return;
                 }
-                if (DEBUG) Log.d(TAG, "onSensorEvent: " + triggerEventToString(event));
                 mSensorCallback.onSensorPulse(mPulseReason, -1, -1, event.getValues());
             }));
         }
