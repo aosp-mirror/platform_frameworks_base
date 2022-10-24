@@ -20,6 +20,7 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 import android.app.Activity;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.Gravity;
@@ -35,6 +36,8 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Background;
+
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -83,6 +86,15 @@ public class BrightnessDialog extends Activity {
         lp.leftMargin = horizontalMargin;
         lp.rightMargin = horizontalMargin;
         frame.setLayoutParams(lp);
+        Rect bounds = new Rect();
+        frame.addOnLayoutChangeListener(
+                (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+                    // Exclude this view (and its horizontal margins) from triggering gestures.
+                    // This prevents back gesture from being triggered by dragging close to the
+                    // edge of the slider (0% or 100%).
+                    bounds.set(-horizontalMargin, 0, right - left + horizontalMargin, bottom - top);
+                    v.setSystemGestureExclusionRects(List.of(bounds));
+                });
 
         BrightnessSliderController controller = mToggleSliderFactory.create(this, frame);
         controller.init();
