@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.graphics.PointF;
 import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
 import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
@@ -32,6 +33,7 @@ import org.junit.runner.RunWith;
 
 /** Tests for {@link MenuAnimationController}. */
 @RunWith(AndroidTestingRunner.class)
+@TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
 public class MenuAnimationControllerTest extends SysuiTestCase {
     private MenuView mMenuView;
