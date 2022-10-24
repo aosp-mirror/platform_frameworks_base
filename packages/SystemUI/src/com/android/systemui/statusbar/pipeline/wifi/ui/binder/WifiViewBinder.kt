@@ -91,6 +91,7 @@ object WifiViewBinder {
         val activityInView = view.requireViewById<ImageView>(R.id.wifi_in)
         val activityOutView = view.requireViewById<ImageView>(R.id.wifi_out)
         val activityContainerView = view.requireViewById<View>(R.id.inout_container)
+        val airplaneSpacer = view.requireViewById<View>(R.id.wifi_airplane_spacer)
 
         view.isVisible = true
         iconView.isVisible = true
@@ -140,6 +141,12 @@ object WifiViewBinder {
                 launch {
                     viewModel.isActivityContainerVisible.distinctUntilChanged().collect { visible ->
                         activityContainerView.isVisible = visible
+                    }
+                }
+
+                launch {
+                    viewModel.isAirplaneSpacerVisible.distinctUntilChanged().collect { visible ->
+                        airplaneSpacer.isVisible = visible
                     }
                 }
             }

@@ -90,6 +90,8 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
                     "Adding active freeform task: #%d", taskInfo.taskId);
             mDesktopModeTaskRepository.ifPresent(it -> it.addActiveTask(taskInfo.taskId));
+            mDesktopModeTaskRepository.ifPresent(
+                    it -> it.updateVisibleFreeformTasks(taskInfo.taskId, true));
         }
     }
 
@@ -103,6 +105,8 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
                     "Removing active freeform task: #%d", taskInfo.taskId);
             mDesktopModeTaskRepository.ifPresent(it -> it.removeActiveTask(taskInfo.taskId));
+            mDesktopModeTaskRepository.ifPresent(
+                    it -> it.updateVisibleFreeformTasks(taskInfo.taskId, false));
         }
 
         if (!Transitions.ENABLE_SHELL_TRANSITIONS) {
@@ -124,6 +128,8 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener {
                         "Adding active freeform task: #%d", taskInfo.taskId);
                 mDesktopModeTaskRepository.ifPresent(it -> it.addActiveTask(taskInfo.taskId));
             }
+            mDesktopModeTaskRepository.ifPresent(
+                    it -> it.updateVisibleFreeformTasks(taskInfo.taskId, taskInfo.isVisible));
         }
     }
 

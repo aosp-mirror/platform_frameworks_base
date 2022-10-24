@@ -767,7 +767,9 @@ public class ScreenshotView extends FrameLayout implements
         mShareChip.setOnClickListener(v -> {
             mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SHARE_TAPPED, 0, mPackageName);
             if (mFlags.isEnabled(Flags.SCREENSHOT_WORK_PROFILE_POLICY)) {
-                mActionExecutor.launchIntentAsync(ActionIntentCreator.INSTANCE.createShareIntent(
+                prepareSharedTransition();
+                mActionExecutor.launchIntentAsync(
+                        ActionIntentCreator.INSTANCE.createShareIntent(
                                 imageData.uri, imageData.subject),
                         imageData.shareTransition.get().bundle,
                         imageData.owner.getIdentifier(), false);
@@ -778,6 +780,7 @@ public class ScreenshotView extends FrameLayout implements
         mEditChip.setOnClickListener(v -> {
             mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_EDIT_TAPPED, 0, mPackageName);
             if (mFlags.isEnabled(Flags.SCREENSHOT_WORK_PROFILE_POLICY)) {
+                prepareSharedTransition();
                 mActionExecutor.launchIntentAsync(
                         ActionIntentCreator.INSTANCE.createEditIntent(imageData.uri, mContext),
                         imageData.editTransition.get().bundle,
@@ -789,6 +792,7 @@ public class ScreenshotView extends FrameLayout implements
         mScreenshotPreview.setOnClickListener(v -> {
             mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_PREVIEW_TAPPED, 0, mPackageName);
             if (mFlags.isEnabled(Flags.SCREENSHOT_WORK_PROFILE_POLICY)) {
+                prepareSharedTransition();
                 mActionExecutor.launchIntentAsync(
                         ActionIntentCreator.INSTANCE.createEditIntent(imageData.uri, mContext),
                         imageData.editTransition.get().bundle,
@@ -1062,6 +1066,12 @@ public class ScreenshotView extends FrameLayout implements
             }
             Log.e(TAG, "Intent cancelled", e);
         }
+    }
+
+    private void prepareSharedTransition() {
+        mPendingSharedTransition = true;
+        // fade out non-preview UI
+        createScreenshotFadeDismissAnimation().start();
     }
 
     ValueAnimator createScreenshotFadeDismissAnimation() {

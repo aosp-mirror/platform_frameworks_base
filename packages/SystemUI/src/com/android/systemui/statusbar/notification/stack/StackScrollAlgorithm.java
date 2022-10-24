@@ -31,6 +31,7 @@ import com.android.systemui.R;
 import com.android.systemui.animation.ShadeInterpolation;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.NotificationShelf;
+import com.android.systemui.statusbar.notification.SourceType;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
@@ -804,7 +805,7 @@ public class StackScrollAlgorithm {
                 row.isLastInSection() ? 1f : (mSmallCornerRadius / mLargeCornerRadius);
         final float roundness = computeCornerRoundnessForPinnedHun(mHostView.getHeight(),
                 ambientState.getStackY(), getMaxAllowedChildHeight(row), originalCornerRadius);
-        row.setBottomRoundness(roundness, /* animate= */ false);
+        row.requestBottomRoundness(roundness, /* animate = */ false, SourceType.OnScroll);
     }
 
     @VisibleForTesting

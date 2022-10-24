@@ -34,6 +34,8 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.tracing.ProtoTracer;
 import com.android.wm.shell.common.ShellExecutor;
+import com.android.wm.shell.desktopmode.DesktopMode;
+import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.floating.FloatingTasks;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.onehanded.OneHandedEventCallback;
@@ -49,6 +51,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Optional;
+import java.util.concurrent.Executor;
 
 /**
  * Tests for {@link WMShell}.
@@ -76,12 +79,14 @@ public class WMShellTest extends SysuiTestCase {
     @Mock UserTracker mUserTracker;
     @Mock ShellExecutor mSysUiMainExecutor;
     @Mock FloatingTasks mFloatingTasks;
+    @Mock DesktopMode mDesktopMode;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mWMShell = new WMShell(mContext, mShellInterface, Optional.of(mPip),
                 Optional.of(mSplitScreen), Optional.of(mOneHanded), Optional.of(mFloatingTasks),
+                Optional.of(mDesktopMode),
                 mCommandQueue, mConfigurationController, mKeyguardStateController,
                 mKeyguardUpdateMonitor, mScreenLifecycle, mSysUiState, mProtoTracer,
                 mWakefulnessLifecycle, mUserTracker, mSysUiMainExecutor);
@@ -102,5 +107,13 @@ public class WMShellTest extends SysuiTestCase {
         verify(mScreenLifecycle).addObserver(any(ScreenLifecycle.Observer.class));
         verify(mOneHanded).registerTransitionCallback(any(OneHandedTransitionCallback.class));
         verify(mOneHanded).registerEventCallback(any(OneHandedEventCallback.class));
+    }
+
+    @Test
+    public void initDesktopMode_registersListener() {
+        mWMShell.initDesktopMode(mDesktopMode);
+        verify(mDesktopMode).addListener(
+                any(DesktopModeTaskRepository.VisibleTasksListener.class),
+                any(Executor.class));
     }
 }

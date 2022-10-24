@@ -127,7 +127,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
         if (useLargeClock) {
             out = mSmallClockFrame;
             in = mLargeClockFrame;
-            if (indexOfChild(in) == -1) addView(in);
+            if (indexOfChild(in) == -1) addView(in, 0);
             direction = -1;
             statusAreaYTranslation = mSmallClockFrame.getTop() - mStatusArea.getTop()
                     + mSmartspaceTopOffset;
