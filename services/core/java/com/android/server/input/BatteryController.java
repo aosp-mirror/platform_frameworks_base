@@ -65,6 +65,8 @@ final class BatteryController {
 
     @VisibleForTesting
     static final long POLLING_PERIOD_MILLIS = 10_000; // 10 seconds
+    @VisibleForTesting
+    static final long USI_BATTERY_VALIDITY_DURATION_MILLIS = 60 * 60_000; // 1 hour
 
     private final Object mLock = new Object();
     private final Context mContext;
@@ -336,6 +338,17 @@ final class BatteryController {
         }
     }
 
+    private void handleMonitorTimeout(int deviceId) {
+        synchronized (mLock) {
+            final DeviceMonitor monitor = mDeviceMonitors.get(deviceId);
+            if (monitor == null) {
+                return;
+            }
+            final long updateTime = SystemClock.uptimeMillis();
+            monitor.onTimeout(updateTime);
+        }
+    }
+
     /** Gets the current battery state of an input device. */
     public IInputDeviceBatteryState getBatteryState(int deviceId) {
         synchronized (mLock) {
@@ -448,7 +461,7 @@ final class BatteryController {
 
     // Holds the state of an InputDevice for which battery changes are currently being monitored.
     private class DeviceMonitor {
-        private final State mState;
+        protected final State mState;
         // Represents whether the input device has a sysfs battery node.
         protected boolean mHasBattery = false;
 
@@ -463,7 +476,7 @@ final class BatteryController {
             configureDeviceMonitor(eventTime);
         }
 
-        private void processChangesAndNotify(long eventTime, Consumer<Long> changes) {
+        protected void processChangesAndNotify(long eventTime, Consumer<Long> changes) {
             final State oldState = getBatteryStateForReporting();
             changes.accept(eventTime);
             final State newState = getBatteryStateForReporting();
@@ -521,7 +534,7 @@ final class BatteryController {
             stopMonitoring();
         }
 
-        private void updateBatteryStateFromNative(long eventTime) {
+        protected void updateBatteryStateFromNative(long eventTime) {
             mState.updateIfChanged(
                     queryBatteryStateFromNative(mState.deviceId, eventTime, mHasBattery));
         }
@@ -542,6 +555,8 @@ final class BatteryController {
             return false;
         }
 
+        public void onTimeout(long eventTime) {}
+
         // Returns the current battery state that can be used to notify listeners BatteryController.
         public State getBatteryStateForReporting() {
             return new State(mState);
@@ -560,8 +575,69 @@ final class BatteryController {
     // Universal Stylus Initiative (USI) protocol.
     private class UsiDeviceMonitor extends DeviceMonitor {
 
+        // For USI devices, we only treat the battery state as valid for a fixed amount of time
+        // after receiving a battery update. Once the timeout has passed, we signal to all listeners
+        // that there is no longer a battery present for the device. The battery state is valid
+        // as long as this callback is non-null.
+        @Nullable
+        private Runnable mValidityTimeoutCallback;
+
         UsiDeviceMonitor(int deviceId) {
             super(deviceId);
+        }
+
+        @Override
+        public void onPoll(long eventTime) {
+            // Disregard polling for USI devices.
+        }
+
+        @Override
+        public void onUEvent(long eventTime) {
+            processChangesAndNotify(eventTime, (time) -> {
+                updateBatteryStateFromNative(time);
+                markUsiBatteryValid();
+            });
+        }
+
+        @Override
+        public void onTimeout(long eventTime) {
+            processChangesAndNotify(eventTime, (time) -> markUsiBatteryInvalid());
+        }
+
+        @Override
+        public void onConfiguration(long eventTime) {
+            super.onConfiguration(eventTime);
+
+            if (!mHasBattery) {
+                throw new IllegalStateException(
+                        "UsiDeviceMonitor: USI devices are always expected to "
+                                + "report a valid battery, but no battery was detected!");
+            }
+        }
+
+        private void markUsiBatteryValid() {
+            if (mValidityTimeoutCallback != null) {
+                mHandler.removeCallbacks(mValidityTimeoutCallback);
+            } else {
+                final int deviceId = mState.deviceId;
+                mValidityTimeoutCallback =
+                        () -> BatteryController.this.handleMonitorTimeout(deviceId);
+            }
+            mHandler.postDelayed(mValidityTimeoutCallback, USI_BATTERY_VALIDITY_DURATION_MILLIS);
+        }
+
+        private void markUsiBatteryInvalid() {
+            if (mValidityTimeoutCallback == null) {
+                return;
+            }
+            mHandler.removeCallbacks(mValidityTimeoutCallback);
+            mValidityTimeoutCallback = null;
+        }
+
+        @Override
+        public State getBatteryStateForReporting() {
+            return mValidityTimeoutCallback != null
+                    ? new State(mState) : new State(mState.deviceId);
         }
 
         @Override
@@ -574,6 +650,12 @@ final class BatteryController {
         public boolean isPersistent() {
             // Do not remove the battery monitor for USI devices.
             return true;
+        }
+
+        @Override
+        public String toString() {
+            return super.toString()
+                    + ", UsiStateIsValid=" + (mValidityTimeoutCallback != null);
         }
     }
 
@@ -635,7 +717,7 @@ final class BatteryController {
             }
         }
 
-        private void reset(int deviceId) {
+        public void reset(int deviceId) {
             initialize(deviceId, 0 /*updateTime*/, false /*isPresent*/, BatteryState.STATUS_UNKNOWN,
                     Float.NaN /*capacity*/);
         }
