@@ -20,7 +20,7 @@ package com.android.systemui.keyguard.data.quickaffordance
 import android.content.Intent
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.Icon
-import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordanceToggleState
+import com.android.systemui.keyguard.shared.quickaffordance.ActivationState
 import kotlinx.coroutines.flow.Flow
 
 /** Defines interface that can act as data source for a single quick affordance model. */
@@ -29,51 +29,54 @@ interface KeyguardQuickAffordanceConfig {
     /** Unique identifier for this quick affordance. It must be globally unique. */
     val key: String
 
-    /** The observable [State] of the affordance. */
-    val state: Flow<State>
+    /**
+     * The ever-changing state of the affordance.
+     *
+     * Used to populate the lock screen.
+     */
+    val lockScreenState: Flow<LockScreenState>
 
     /**
      * Notifies that the affordance was clicked by the user.
      *
      * @param expandable An [Expandable] to use when animating dialogs or activities
-     * @return An [OnClickedResult] telling the caller what to do next
+     * @return An [OnTriggeredResult] telling the caller what to do next
      */
-    fun onQuickAffordanceClicked(expandable: Expandable?): OnClickedResult
+    fun onTriggered(expandable: Expandable?): OnTriggeredResult
 
     /**
      * Encapsulates the state of a "quick affordance" in the keyguard bottom area (for example, a
      * button on the lock-screen).
      */
-    sealed class State {
+    sealed class LockScreenState {
 
         /** No affordance should show up. */
-        object Hidden : State()
+        object Hidden : LockScreenState()
 
         /** An affordance is visible. */
         data class Visible(
             /** An icon for the affordance. */
             val icon: Icon,
-            /** The toggle state for the affordance. */
-            val toggle: KeyguardQuickAffordanceToggleState =
-                KeyguardQuickAffordanceToggleState.NotSupported,
-        ) : State()
+            /** The activation state of the affordance. */
+            val activationState: ActivationState = ActivationState.NotSupported,
+        ) : LockScreenState()
     }
 
-    sealed class OnClickedResult {
+    sealed class OnTriggeredResult {
         /**
-         * Returning this as a result from the [onQuickAffordanceClicked] method means that the
-         * implementation has taken care of the click, the system will do nothing.
+         * Returning this as a result from the [onTriggered] method means that the implementation
+         * has taken care of the action, the system will do nothing.
          */
-        object Handled : OnClickedResult()
+        object Handled : OnTriggeredResult()
 
         /**
-         * Returning this as a result from the [onQuickAffordanceClicked] method means that the
-         * implementation has _not_ taken care of the click and the system should start an activity
-         * using the given [Intent].
+         * Returning this as a result from the [onTriggered] method means that the implementation
+         * has _not_ taken care of the action and the system should start an activity using the
+         * given [Intent].
          */
         data class StartActivity(
             val intent: Intent,
             val canShowWhileLocked: Boolean,
-        ) : OnClickedResult()
+        ) : OnTriggeredResult()
     }
 }

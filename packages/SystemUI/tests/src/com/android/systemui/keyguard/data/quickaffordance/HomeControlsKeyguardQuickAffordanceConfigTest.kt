@@ -23,7 +23,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.Expandable
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.controls.dagger.ControlsComponent
-import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceConfig.OnClickedResult
+import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceConfig.OnTriggeredResult
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import java.util.Optional
@@ -72,11 +72,11 @@ class HomeControlsKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
         whenever(component.getVisibility()).thenReturn(ControlsComponent.Visibility.AVAILABLE)
         whenever(controlsController.getFavorites()).thenReturn(listOf(mock()))
 
-        val values = mutableListOf<KeyguardQuickAffordanceConfig.State>()
-        val job = underTest.state.onEach(values::add).launchIn(this)
+        val values = mutableListOf<KeyguardQuickAffordanceConfig.LockScreenState>()
+        val job = underTest.lockScreenState.onEach(values::add).launchIn(this)
 
         assertThat(values.last())
-            .isInstanceOf(KeyguardQuickAffordanceConfig.State.Hidden::class.java)
+            .isInstanceOf(KeyguardQuickAffordanceConfig.LockScreenState.Hidden::class.java)
         job.cancel()
     }
 
@@ -91,31 +91,32 @@ class HomeControlsKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
         whenever(component.getVisibility()).thenReturn(ControlsComponent.Visibility.AVAILABLE)
         whenever(controlsController.getFavorites()).thenReturn(listOf(mock()))
 
-        val values = mutableListOf<KeyguardQuickAffordanceConfig.State>()
-        val job = underTest.state.onEach(values::add).launchIn(this)
+        val values = mutableListOf<KeyguardQuickAffordanceConfig.LockScreenState>()
+        val job = underTest.lockScreenState.onEach(values::add).launchIn(this)
 
         assertThat(values.last())
-            .isInstanceOf(KeyguardQuickAffordanceConfig.State.Hidden::class.java)
+            .isInstanceOf(KeyguardQuickAffordanceConfig.LockScreenState.Hidden::class.java)
         job.cancel()
     }
 
     @Test
-    fun `onQuickAffordanceClicked - canShowWhileLockedSetting is true`() = runBlockingTest {
+    fun `onQuickAffordanceTriggered - canShowWhileLockedSetting is true`() = runBlockingTest {
         whenever(component.canShowWhileLockedSetting).thenReturn(MutableStateFlow(true))
 
-        val onClickedResult = underTest.onQuickAffordanceClicked(expandable)
+        val onClickedResult = underTest.onTriggered(expandable)
 
-        assertThat(onClickedResult).isInstanceOf(OnClickedResult.StartActivity::class.java)
-        assertThat((onClickedResult as OnClickedResult.StartActivity).canShowWhileLocked).isTrue()
+        assertThat(onClickedResult).isInstanceOf(OnTriggeredResult.StartActivity::class.java)
+        assertThat((onClickedResult as OnTriggeredResult.StartActivity).canShowWhileLocked).isTrue()
     }
 
     @Test
-    fun `onQuickAffordanceClicked - canShowWhileLockedSetting is false`() = runBlockingTest {
+    fun `onQuickAffordanceTriggered - canShowWhileLockedSetting is false`() = runBlockingTest {
         whenever(component.canShowWhileLockedSetting).thenReturn(MutableStateFlow(false))
 
-        val onClickedResult = underTest.onQuickAffordanceClicked(expandable)
+        val onClickedResult = underTest.onTriggered(expandable)
 
-        assertThat(onClickedResult).isInstanceOf(OnClickedResult.StartActivity::class.java)
-        assertThat((onClickedResult as OnClickedResult.StartActivity).canShowWhileLocked).isFalse()
+        assertThat(onClickedResult).isInstanceOf(OnTriggeredResult.StartActivity::class.java)
+        assertThat((onClickedResult as OnTriggeredResult.StartActivity).canShowWhileLocked)
+            .isFalse()
     }
 }

@@ -248,29 +248,29 @@ class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
     }
 
     @Test
-    fun onQuickAffordanceClicked() = runBlockingTest {
+    fun onQuickAffordanceTriggered() = runBlockingTest {
         setUpMocks(
             needStrongAuthAfterBoot = needStrongAuthAfterBoot,
             keyguardIsUnlocked = keyguardIsUnlocked,
         )
 
         homeControls.setState(
-            state =
-                KeyguardQuickAffordanceConfig.State.Visible(
+            lockScreenState =
+                KeyguardQuickAffordanceConfig.LockScreenState.Visible(
                     icon = DRAWABLE,
                 )
         )
-        homeControls.onClickedResult =
+        homeControls.onTriggeredResult =
             if (startActivity) {
-                KeyguardQuickAffordanceConfig.OnClickedResult.StartActivity(
+                KeyguardQuickAffordanceConfig.OnTriggeredResult.StartActivity(
                     intent = INTENT,
                     canShowWhileLocked = canShowWhileLocked,
                 )
             } else {
-                KeyguardQuickAffordanceConfig.OnClickedResult.Handled
+                KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled
             }
 
-        underTest.onQuickAffordanceClicked(
+        underTest.onQuickAffordanceTriggered(
             configKey = BuiltInKeyguardQuickAffordanceKeys.HOME_CONTROLS,
             expandable = expandable,
         )

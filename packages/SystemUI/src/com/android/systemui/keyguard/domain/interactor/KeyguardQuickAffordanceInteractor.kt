@@ -62,25 +62,25 @@ constructor(
     }
 
     /**
-     * Notifies that a quick affordance has been clicked by the user.
+     * Notifies that a quick affordance has been "triggered" (clicked) by the user.
      *
      * @param configKey The configuration key corresponding to the [KeyguardQuickAffordanceModel] of
      * the affordance that was clicked
      * @param expandable An optional [Expandable] for the activity- or dialog-launch animation
      */
-    fun onQuickAffordanceClicked(
+    fun onQuickAffordanceTriggered(
         configKey: String,
         expandable: Expandable?,
     ) {
         @Suppress("UNCHECKED_CAST") val config = registry.get(configKey)
-        when (val result = config.onQuickAffordanceClicked(expandable)) {
-            is KeyguardQuickAffordanceConfig.OnClickedResult.StartActivity ->
+        when (val result = config.onTriggered(expandable)) {
+            is KeyguardQuickAffordanceConfig.OnTriggeredResult.StartActivity ->
                 launchQuickAffordance(
                     intent = result.intent,
                     canShowWhileLocked = result.canShowWhileLocked,
                     expandable = expandable,
                 )
-            is KeyguardQuickAffordanceConfig.OnClickedResult.Handled -> Unit
+            is KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled -> Unit
         }
     }
 
@@ -94,16 +94,20 @@ constructor(
                 // value and avoid subtle bugs where the downstream isn't receiving any values
                 // because one config implementation is not emitting an initial value. For example,
                 // see b/244296596.
-                config.state.onStart { emit(KeyguardQuickAffordanceConfig.State.Hidden) }
+                config.lockScreenState.onStart {
+                    emit(KeyguardQuickAffordanceConfig.LockScreenState.Hidden)
+                }
             }
         ) { states ->
-            val index = states.indexOfFirst { it is KeyguardQuickAffordanceConfig.State.Visible }
+            val index =
+                states.indexOfFirst { it is KeyguardQuickAffordanceConfig.LockScreenState.Visible }
             if (index != -1) {
-                val visibleState = states[index] as KeyguardQuickAffordanceConfig.State.Visible
+                val visibleState =
+                    states[index] as KeyguardQuickAffordanceConfig.LockScreenState.Visible
                 KeyguardQuickAffordanceModel.Visible(
                     configKey = configs[index].key,
                     icon = visibleState.icon,
-                    toggle = visibleState.toggle,
+                    activationState = visibleState.activationState,
                 )
             } else {
                 KeyguardQuickAffordanceModel.Hidden

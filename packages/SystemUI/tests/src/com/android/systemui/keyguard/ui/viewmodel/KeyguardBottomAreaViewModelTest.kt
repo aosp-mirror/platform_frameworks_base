@@ -31,8 +31,8 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardBottomAreaInterac
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardQuickAffordanceInteractor
 import com.android.systemui.keyguard.domain.quickaffordance.FakeKeyguardQuickAffordanceRegistry
+import com.android.systemui.keyguard.shared.quickaffordance.ActivationState
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancePosition
-import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordanceToggleState
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.KeyguardStateController
@@ -508,28 +508,28 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
                 KeyguardQuickAffordancePosition.BOTTOM_END -> quickAccessWalletAffordanceConfig
             }
 
-        val state =
+        val lockScreenState =
             if (testConfig.isVisible) {
                 if (testConfig.intent != null) {
-                    config.onClickedResult =
-                        KeyguardQuickAffordanceConfig.OnClickedResult.StartActivity(
+                    config.onTriggeredResult =
+                        KeyguardQuickAffordanceConfig.OnTriggeredResult.StartActivity(
                             intent = testConfig.intent,
                             canShowWhileLocked = testConfig.canShowWhileLocked,
                         )
                 }
-                KeyguardQuickAffordanceConfig.State.Visible(
+                KeyguardQuickAffordanceConfig.LockScreenState.Visible(
                     icon = testConfig.icon ?: error("Icon is unexpectedly null!"),
-                    toggle =
+                    activationState =
                         when (testConfig.isActivated) {
-                            true -> KeyguardQuickAffordanceToggleState.On
-                            false -> KeyguardQuickAffordanceToggleState.Off
-                            null -> KeyguardQuickAffordanceToggleState.NotSupported
+                            true -> ActivationState.Active
+                            false -> ActivationState.Inactive
+                            null -> ActivationState.NotSupported
                         }
                 )
             } else {
-                KeyguardQuickAffordanceConfig.State.Hidden
+                KeyguardQuickAffordanceConfig.LockScreenState.Hidden
             }
-        config.setState(state)
+        config.setState(lockScreenState)
         return config.key
     }
 
