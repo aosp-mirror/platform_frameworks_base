@@ -28,30 +28,21 @@ import android.widget.RemoteViews
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.notification.NotificationUtils
-import com.android.systemui.statusbar.notification.collection.NotifPipeline
+import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
-import com.android.systemui.util.mockito.mock
-import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
-class NotificationMemoryMonitorTest : SysuiTestCase() {
-
-    @Before
-    fun setUp() {
-        MockitoAnnotations.initMocks(this)
-    }
+class NotificationMemoryMeterTest : SysuiTestCase() {
 
     @Test
     fun currentNotificationMemoryUse_plainNotification() {
         val notification = createBasicNotification().build()
-        val nmm = createNMMWithNotifications(listOf(notification))
-        val memoryUse = getUseObject(nmm.currentNotificationMemoryUse())
+        val memoryUse =
+            NotificationMemoryMeter.notificationMemoryUse(createNotificationEntry(notification))
         assertNotificationObjectSizes(
             memoryUse,
             smallIcon = notification.smallIcon.bitmap.allocationByteCount,
@@ -69,8 +60,8 @@ class NotificationMemoryMonitorTest : SysuiTestCase() {
     fun currentNotificationMemoryUse_plainNotification_dontDoubleCountSameBitmap() {
         val icon = Icon.createWithBitmap(Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888))
         val notification = createBasicNotification().setLargeIcon(icon).setSmallIcon(icon).build()
-        val nmm = createNMMWithNotifications(listOf(notification))
-        val memoryUse = getUseObject(nmm.currentNotificationMemoryUse())
+        val memoryUse =
+            NotificationMemoryMeter.notificationMemoryUse(createNotificationEntry(notification))
         assertNotificationObjectSizes(
             memoryUse = memoryUse,
             smallIcon = notification.smallIcon.bitmap.allocationByteCount,
@@ -92,8 +83,8 @@ class NotificationMemoryMonitorTest : SysuiTestCase() {
                     RemoteViews(context.packageName, android.R.layout.list_content)
                 )
                 .build()
-        val nmm = createNMMWithNotifications(listOf(notification))
-        val memoryUse = getUseObject(nmm.currentNotificationMemoryUse())
+        val memoryUse =
+            NotificationMemoryMeter.notificationMemoryUse(createNotificationEntry(notification))
         assertNotificationObjectSizes(
             memoryUse = memoryUse,
             smallIcon = notification.smallIcon.bitmap.allocationByteCount,
@@ -112,8 +103,8 @@ class NotificationMemoryMonitorTest : SysuiTestCase() {
         val dataIcon = Icon.createWithData(ByteArray(444444), 0, 444444)
         val notification =
             createBasicNotification().setLargeIcon(dataIcon).setSmallIcon(dataIcon).build()
-        val nmm = createNMMWithNotifications(listOf(notification))
-        val memoryUse = getUseObject(nmm.currentNotificationMemoryUse())
+        val memoryUse =
+            NotificationMemoryMeter.notificationMemoryUse(createNotificationEntry(notification))
         assertNotificationObjectSizes(
             memoryUse = memoryUse,
             smallIcon = 444444,
@@ -141,8 +132,8 @@ class NotificationMemoryMonitorTest : SysuiTestCase() {
                         .bigLargeIcon(bigPictureIcon)
                 )
                 .build()
-        val nmm = createNMMWithNotifications(listOf(notification))
-        val memoryUse = getUseObject(nmm.currentNotificationMemoryUse())
+        val memoryUse =
+            NotificationMemoryMeter.notificationMemoryUse(createNotificationEntry(notification))
         assertNotificationObjectSizes(
             memoryUse = memoryUse,
             smallIcon = notification.smallIcon.bitmap.allocationByteCount,
@@ -167,8 +158,8 @@ class NotificationMemoryMonitorTest : SysuiTestCase() {
             createBasicNotification()
                 .setStyle(Notification.CallStyle.forIncomingCall(person, fakeIntent, fakeIntent))
                 .build()
-        val nmm = createNMMWithNotifications(listOf(notification))
-        val memoryUse = getUseObject(nmm.currentNotificationMemoryUse())
+        val memoryUse =
+            NotificationMemoryMeter.notificationMemoryUse(createNotificationEntry(notification))
         assertNotificationObjectSizes(
             memoryUse = memoryUse,
             smallIcon = notification.smallIcon.bitmap.allocationByteCount,
@@ -203,8 +194,8 @@ class NotificationMemoryMonitorTest : SysuiTestCase() {
                         .addHistoricMessage(historicMessage)
                 )
                 .build()
-        val nmm = createNMMWithNotifications(listOf(notification))
-        val memoryUse = getUseObject(nmm.currentNotificationMemoryUse())
+        val memoryUse =
+            NotificationMemoryMeter.notificationMemoryUse(createNotificationEntry(notification))
         assertNotificationObjectSizes(
             memoryUse = memoryUse,
             smallIcon = notification.smallIcon.bitmap.allocationByteCount,
@@ -225,8 +216,8 @@ class NotificationMemoryMonitorTest : SysuiTestCase() {
         val carIcon = Bitmap.createBitmap(432, 322, Bitmap.Config.ARGB_8888)
         val extender = Notification.CarExtender().setLargeIcon(carIcon)
         val notification = createBasicNotification().extend(extender).build()
-        val nmm = createNMMWithNotifications(listOf(notification))
-        val memoryUse = getUseObject(nmm.currentNotificationMemoryUse())
+        val memoryUse =
+            NotificationMemoryMeter.notificationMemoryUse(createNotificationEntry(notification))
         assertNotificationObjectSizes(
             memoryUse = memoryUse,
             smallIcon = notification.smallIcon.bitmap.allocationByteCount,
@@ -246,8 +237,8 @@ class NotificationMemoryMonitorTest : SysuiTestCase() {
         val wearBackground = Bitmap.createBitmap(443, 433, Bitmap.Config.ARGB_8888)
         val wearExtender = Notification.WearableExtender().setBackground(wearBackground)
         val notification = createBasicNotification().extend(tvExtender).extend(wearExtender).build()
-        val nmm = createNMMWithNotifications(listOf(notification))
-        val memoryUse = getUseObject(nmm.currentNotificationMemoryUse())
+        val memoryUse =
+            NotificationMemoryMeter.notificationMemoryUse(createNotificationEntry(notification))
         assertNotificationObjectSizes(
             memoryUse = memoryUse,
             smallIcon = notification.smallIcon.bitmap.allocationByteCount,
@@ -283,10 +274,10 @@ class NotificationMemoryMonitorTest : SysuiTestCase() {
         extender: Int,
         style: String?,
         styleIcon: Int,
-        hasCustomView: Boolean
+        hasCustomView: Boolean,
     ) {
         assertThat(memoryUse.packageName).isEqualTo("test_pkg")
-        assertThat(memoryUse.notificationId)
+        assertThat(memoryUse.notificationKey)
             .isEqualTo(NotificationUtils.logKey("0|test_pkg|0|test|0"))
         assertThat(memoryUse.objectUsage.smallIcon).isEqualTo(smallIcon)
         assertThat(memoryUse.objectUsage.largeIcon).isEqualTo(largeIcon)
@@ -301,21 +292,14 @@ class NotificationMemoryMonitorTest : SysuiTestCase() {
     }
 
     private fun getUseObject(
-        singleItemUseList: List<NotificationMemoryUsage>
+        singleItemUseList: List<NotificationMemoryUsage>,
     ): NotificationMemoryUsage {
         assertThat(singleItemUseList).hasSize(1)
         return singleItemUseList[0]
     }
 
-    private fun createNMMWithNotifications(
-        notifications: List<Notification>
-    ): NotificationMemoryMonitor {
-        val notifPipeline: NotifPipeline = mock()
-        val notificationEntries =
-            notifications.map { n ->
-                NotificationEntryBuilder().setTag("test").setNotification(n).build()
-            }
-        whenever(notifPipeline.allNotifs).thenReturn(notificationEntries)
-        return NotificationMemoryMonitor(notifPipeline, mock())
-    }
+    private fun createNotificationEntry(
+        notification: Notification,
+    ): NotificationEntry =
+        NotificationEntryBuilder().setTag("test").setNotification(notification).build()
 }

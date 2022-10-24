@@ -29,6 +29,7 @@ class QsWifiViewModel(
     isActivityInViewVisible: Flow<Boolean>,
     isActivityOutViewVisible: Flow<Boolean>,
     isActivityContainerVisible: Flow<Boolean>,
+    isAirplaneSpacerVisible: Flow<Boolean>,
 ) :
     LocationBasedWifiViewModel(
         statusBarPipelineFlags,
@@ -37,4 +38,5 @@ class QsWifiViewModel(
         isActivityInViewVisible,
         isActivityOutViewVisible,
         isActivityContainerVisible,
+        isAirplaneSpacerVisible,
     )
