@@ -95,6 +95,24 @@ public abstract class IContextHubWrapper {
     }
 
     /**
+     * @return the IContextHubWrapper interface
+     */
+    public static IContextHubWrapper getContextHubWrapper() {
+        IContextHubWrapper wrapper = maybeConnectToAidl();
+        if (wrapper == null) {
+            wrapper = maybeConnectTo1_2();
+        }
+        if (wrapper == null) {
+            wrapper = maybeConnectTo1_1();
+        }
+        if (wrapper == null) {
+            wrapper = maybeConnectTo1_0();
+        }
+
+        return wrapper;
+    }
+
+    /**
      * Attempts to connect to the Contexthub HAL 1.0 service, if it exists.
      *
      * @return A valid IContextHubWrapper if the connection was successful, null otherwise.

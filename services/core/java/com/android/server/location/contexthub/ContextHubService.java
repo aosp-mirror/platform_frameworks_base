@@ -122,23 +122,23 @@ public class ContextHubService extends IContextHubService.Stub {
 
     private final Context mContext;
 
-    private final Map<Integer, ContextHubInfo> mContextHubIdToInfoMap;
-    private final List<String> mSupportedContextHubPerms;
-    private final List<ContextHubInfo> mContextHubInfoList;
+    private Map<Integer, ContextHubInfo> mContextHubIdToInfoMap;
+    private List<String> mSupportedContextHubPerms;
+    private List<ContextHubInfo> mContextHubInfoList;
     private final RemoteCallbackList<IContextHubCallback> mCallbacksList =
             new RemoteCallbackList<>();
 
     // Proxy object to communicate with the Context Hub HAL
-    private final IContextHubWrapper mContextHubWrapper;
+    private IContextHubWrapper mContextHubWrapper;
 
     // The manager for transaction queue
-    private final ContextHubTransactionManager mTransactionManager;
+    private ContextHubTransactionManager mTransactionManager;
 
     // The manager for sending messages to/from clients
-    private final ContextHubClientManager mClientManager;
+    private ContextHubClientManager mClientManager;
 
     // The default client for old API clients
-    private final Map<Integer, IContextHubClient> mDefaultClientMap;
+    private Map<Integer, IContextHubClient> mDefaultClientMap;
 
     // The manager for the internal nanoapp state cache
     private final NanoAppStateManager mNanoAppStateManager = new NanoAppStateManager();
@@ -167,7 +167,7 @@ public class ContextHubService extends IContextHubService.Stub {
     // Lock object for sendWifiSettingUpdate()
     private final Object mSendWifiSettingUpdateLock = new Object();
 
-    private final SensorPrivacyManagerInternal mSensorPrivacyManagerInternal;
+    private SensorPrivacyManagerInternal mSensorPrivacyManagerInternal;
 
     private final Map<Integer, AtomicLong> mLastRestartTimestampMap = new HashMap<>();
 
@@ -209,156 +209,9 @@ public class ContextHubService extends IContextHubService.Stub {
         }
     }
 
-    public ContextHubService(Context context) {
-        long startTimeNs = SystemClock.elapsedRealtimeNanos();
+    public ContextHubService(Context context, IContextHubWrapper contextHubWrapper) {
         mContext = context;
-
-        mContextHubWrapper = getContextHubWrapper();
-        if (mContextHubWrapper == null) {
-            mTransactionManager = null;
-            mClientManager = null;
-            mSensorPrivacyManagerInternal = null;
-            mDefaultClientMap = Collections.emptyMap();
-            mContextHubIdToInfoMap = Collections.emptyMap();
-            mSupportedContextHubPerms = Collections.emptyList();
-            mContextHubInfoList = Collections.emptyList();
-            return;
-        }
-
-        Pair<List<ContextHubInfo>, List<String>> hubInfo;
-        try {
-            hubInfo = mContextHubWrapper.getHubs();
-        } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException while getting Context Hub info", e);
-            hubInfo = new Pair(Collections.emptyList(), Collections.emptyList());
-        }
-        long bootTimeNs = SystemClock.elapsedRealtimeNanos() - startTimeNs;
-        int numContextHubs = hubInfo.first.size();
-        ContextHubStatsLog.write(ContextHubStatsLog.CONTEXT_HUB_BOOTED, bootTimeNs, numContextHubs);
-
-        mContextHubIdToInfoMap = Collections.unmodifiableMap(
-                ContextHubServiceUtil.createContextHubInfoMap(hubInfo.first));
-        mSupportedContextHubPerms = hubInfo.second;
-        mContextHubInfoList = new ArrayList<>(mContextHubIdToInfoMap.values());
-        mClientManager = new ContextHubClientManager(mContext, mContextHubWrapper);
-        mTransactionManager = new ContextHubTransactionManager(
-                mContextHubWrapper, mClientManager, mNanoAppStateManager);
-        mSensorPrivacyManagerInternal =
-                LocalServices.getService(SensorPrivacyManagerInternal.class);
-
-        HashMap<Integer, IContextHubClient> defaultClientMap = new HashMap<>();
-        for (int contextHubId : mContextHubIdToInfoMap.keySet()) {
-            mLastRestartTimestampMap.put(contextHubId,
-                    new AtomicLong(SystemClock.elapsedRealtimeNanos()));
-
-            ContextHubInfo contextHubInfo = mContextHubIdToInfoMap.get(contextHubId);
-            IContextHubClient client = mClientManager.registerClient(
-                    contextHubInfo, createDefaultClientCallback(contextHubId),
-                    null /* attributionTag */, mTransactionManager, mContext.getPackageName());
-            defaultClientMap.put(contextHubId, client);
-
-            try {
-                mContextHubWrapper.registerCallback(
-                        contextHubId, new ContextHubServiceCallback(contextHubId));
-            } catch (RemoteException e) {
-                Log.e(TAG, "RemoteException while registering service callback for hub (ID = "
-                        + contextHubId + ")", e);
-            }
-
-            // Do a query to initialize the service cache list of nanoapps
-            // TODO(b/69270990): Remove this when old API is deprecated
-            queryNanoAppsInternal(contextHubId);
-        }
-        mDefaultClientMap = Collections.unmodifiableMap(defaultClientMap);
-
-        if (mContextHubWrapper.supportsLocationSettingNotifications()) {
-            sendLocationSettingUpdate();
-            mContext.getContentResolver().registerContentObserver(
-                    Settings.Secure.getUriFor(Settings.Secure.LOCATION_MODE),
-                    true /* notifyForDescendants */,
-                    new ContentObserver(null /* handler */) {
-                        @Override
-                        public void onChange(boolean selfChange) {
-                            sendLocationSettingUpdate();
-                        }
-                    }, UserHandle.USER_ALL);
-        }
-
-        if (mContextHubWrapper.supportsWifiSettingNotifications()) {
-            sendWifiSettingUpdate(true /* forceUpdate */);
-
-            BroadcastReceiver wifiReceiver = new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    if (WifiManager.WIFI_STATE_CHANGED_ACTION.equals(intent.getAction())
-                            || WifiManager.ACTION_WIFI_SCAN_AVAILABILITY_CHANGED.equals(
-                            intent.getAction())) {
-                        sendWifiSettingUpdate(false /* forceUpdate */);
-                    }
-                }
-            };
-            IntentFilter filter = new IntentFilter();
-            filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
-            filter.addAction(WifiManager.ACTION_WIFI_SCAN_AVAILABILITY_CHANGED);
-            mContext.registerReceiver(wifiReceiver, filter);
-
-            mContext.getContentResolver().registerContentObserver(
-                    Settings.Global.getUriFor(Settings.Global.WIFI_SCAN_ALWAYS_AVAILABLE),
-                    true /* notifyForDescendants */,
-                    new ContentObserver(null /* handler */) {
-                        @Override
-                        public void onChange(boolean selfChange) {
-                            sendWifiSettingUpdate(false /* forceUpdate */);
-                        }
-                    }, UserHandle.USER_ALL);
-        }
-
-        if (mContextHubWrapper.supportsAirplaneModeSettingNotifications()) {
-            sendAirplaneModeSettingUpdate();
-            mContext.getContentResolver().registerContentObserver(
-                    Settings.Global.getUriFor(Settings.Global.AIRPLANE_MODE_ON),
-                    true /* notifyForDescendants */,
-                    new ContentObserver(null /* handler */) {
-                        @Override
-                        public void onChange(boolean selfChange) {
-                            sendAirplaneModeSettingUpdate();
-                        }
-                    }, UserHandle.USER_ALL);
-        }
-
-        if (mContextHubWrapper.supportsMicrophoneSettingNotifications()) {
-            sendMicrophoneDisableSettingUpdateForCurrentUser();
-
-            mSensorPrivacyManagerInternal.addSensorPrivacyListenerForAllUsers(
-                    SensorPrivacyManager.Sensors.MICROPHONE, (userId, enabled) -> {
-                        if (userId == getCurrentUserId()) {
-                            Log.d(TAG, "User: " + userId + "mic privacy: " + enabled);
-                            sendMicrophoneDisableSettingUpdate(enabled);
-                        }
-                    });
-
-        }
-
-        if (mContextHubWrapper.supportsBtSettingNotifications()) {
-            sendBtSettingUpdate(true /* forceUpdate */);
-
-            BroadcastReceiver btReceiver = new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(intent.getAction())
-                            || BluetoothAdapter.ACTION_BLE_STATE_CHANGED.equals(
-                            intent.getAction())) {
-                        sendBtSettingUpdate(false /* forceUpdate */);
-                    }
-                }
-            };
-            IntentFilter filter = new IntentFilter();
-            filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
-            filter.addAction(BluetoothAdapter.ACTION_BLE_STATE_CHANGED);
-            mContext.registerReceiver(btReceiver, filter);
-        }
-
-        scheduleDailyMetricSnapshot();
+        init(contextHubWrapper, /* isFirstInit= */ true);
     }
 
     /**
@@ -437,21 +290,209 @@ public class ContextHubService extends IContextHubService.Stub {
     }
 
     /**
-     * @return the IContextHubWrapper interface
+     * Initializes the private state of the ContextHubService
+     *
+     * @param startTimeNs               the start time when init was called
+     * @param isFirstInit               if true, this is the first time init is called - boot time
+     *
+     * @return      if mContextHubWrapper is not null and a full state init was done
      */
-    private IContextHubWrapper getContextHubWrapper() {
-        IContextHubWrapper wrapper = IContextHubWrapper.maybeConnectToAidl();
-        if (wrapper == null) {
-            wrapper = IContextHubWrapper.maybeConnectTo1_2();
-        }
-        if (wrapper == null) {
-            wrapper = IContextHubWrapper.maybeConnectTo1_1();
-        }
-        if (wrapper == null) {
-            wrapper = IContextHubWrapper.maybeConnectTo1_0();
+    private boolean initContextHubServiceState(long startTimeNs, boolean isFirstInit) {
+        if (mContextHubWrapper == null) {
+            mTransactionManager = null;
+            mClientManager = null;
+            mSensorPrivacyManagerInternal = null;
+            mDefaultClientMap = Collections.emptyMap();
+            mContextHubIdToInfoMap = Collections.emptyMap();
+            mSupportedContextHubPerms = Collections.emptyList();
+            mContextHubInfoList = Collections.emptyList();
+            return false;
         }
 
-        return wrapper;
+        Pair<List<ContextHubInfo>, List<String>> hubInfo;
+        try {
+            hubInfo = mContextHubWrapper.getHubs();
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException while getting Context Hub info", e);
+            hubInfo = new Pair(Collections.emptyList(), Collections.emptyList());
+        }
+
+        if (isFirstInit) {
+            long bootTimeNs = SystemClock.elapsedRealtimeNanos() - startTimeNs;
+            int numContextHubs = hubInfo.first.size();
+            ContextHubStatsLog.write(ContextHubStatsLog.CONTEXT_HUB_BOOTED, bootTimeNs,
+                    numContextHubs);
+        }
+
+        mContextHubIdToInfoMap = Collections.unmodifiableMap(
+                ContextHubServiceUtil.createContextHubInfoMap(hubInfo.first));
+        mSupportedContextHubPerms = hubInfo.second;
+        mContextHubInfoList = new ArrayList<>(mContextHubIdToInfoMap.values());
+        mClientManager = new ContextHubClientManager(mContext, mContextHubWrapper);
+        mTransactionManager = new ContextHubTransactionManager(
+                mContextHubWrapper, mClientManager, mNanoAppStateManager);
+        mSensorPrivacyManagerInternal =
+                LocalServices.getService(SensorPrivacyManagerInternal.class);
+        return true;
+    }
+
+    /**
+     * Creates the default client map that maps context hub IDs to the associated
+     * ClientManager. The client map is unmodifiable
+     */
+    private void initDefaultClientMap() {
+        HashMap<Integer, IContextHubClient> defaultClientMap = new HashMap<>();
+        for (int contextHubId : mContextHubIdToInfoMap.keySet()) {
+            mLastRestartTimestampMap.put(contextHubId,
+                    new AtomicLong(SystemClock.elapsedRealtimeNanos()));
+
+            ContextHubInfo contextHubInfo = mContextHubIdToInfoMap.get(contextHubId);
+            IContextHubClient client = mClientManager.registerClient(
+                    contextHubInfo, createDefaultClientCallback(contextHubId),
+                    /* attributionTag= */ null, mTransactionManager, mContext.getPackageName());
+            defaultClientMap.put(contextHubId, client);
+
+            try {
+                mContextHubWrapper.registerCallback(contextHubId,
+                        new ContextHubServiceCallback(contextHubId));
+            } catch (RemoteException e) {
+                Log.e(TAG, "RemoteException while registering service callback for hub (ID = "
+                        + contextHubId + ")", e);
+            }
+
+            // Do a query to initialize the service cache list of nanoapps
+            // TODO(b/194289715): Remove this when old API is deprecated
+            queryNanoAppsInternal(contextHubId);
+        }
+        mDefaultClientMap = Collections.unmodifiableMap(defaultClientMap);
+    }
+
+    /**
+     * Handles the initialization of location settings notifications
+     */
+    private void initLocationSettingNotifications() {
+        if (mContextHubWrapper == null
+                || !mContextHubWrapper.supportsLocationSettingNotifications()) {
+            return;
+        }
+
+        sendLocationSettingUpdate();
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.LOCATION_MODE),
+                /* notifyForDescendants= */ true,
+                new ContentObserver(/* handler= */ null) {
+                    @Override
+                    public void onChange(boolean selfChange) {
+                        sendLocationSettingUpdate();
+                    }
+                }, UserHandle.USER_ALL);
+    }
+
+    /**
+     * Handles the initialization of wifi settings notifications
+     */
+    private void initWifiSettingNotifications() {
+        if (mContextHubWrapper == null || !mContextHubWrapper.supportsWifiSettingNotifications()) {
+            return;
+        }
+
+        sendWifiSettingUpdate(/* forceUpdate= */ true);
+
+        BroadcastReceiver wifiReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (WifiManager.WIFI_STATE_CHANGED_ACTION.equals(intent.getAction())
+                        || WifiManager.ACTION_WIFI_SCAN_AVAILABILITY_CHANGED.equals(
+                        intent.getAction())) {
+                    sendWifiSettingUpdate(/* forceUpdate= */ false);
+                }
+            }
+        };
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
+        filter.addAction(WifiManager.ACTION_WIFI_SCAN_AVAILABILITY_CHANGED);
+        mContext.registerReceiver(wifiReceiver, filter);
+
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Global.getUriFor(Settings.Global.WIFI_SCAN_ALWAYS_AVAILABLE),
+                /* notifyForDescendants= */ true,
+                new ContentObserver(/* handler= */ null) {
+                    @Override
+                    public void onChange(boolean selfChange) {
+                        sendWifiSettingUpdate(/* forceUpdate= */ false);
+                    }
+                }, UserHandle.USER_ALL);
+    }
+
+    /**
+     * Handles the initialization of airplane mode settings notifications
+     */
+    private void initAirplaneModeSettingNotifications() {
+        if (mContextHubWrapper == null
+                || !mContextHubWrapper.supportsAirplaneModeSettingNotifications()) {
+            return;
+        }
+
+        sendAirplaneModeSettingUpdate();
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Global.getUriFor(Settings.Global.AIRPLANE_MODE_ON),
+                /* notifyForDescendants= */ true,
+                new ContentObserver(/* handler= */ null) {
+                    @Override
+                    public void onChange(boolean selfChange) {
+                        sendAirplaneModeSettingUpdate();
+                    }
+                }, UserHandle.USER_ALL);
+    }
+
+    /**
+     * Handles the initialization of microphone settings notifications
+     */
+    private void initMicrophoneSettingNotifications() {
+        if (mContextHubWrapper == null
+                || !mContextHubWrapper.supportsMicrophoneSettingNotifications()) {
+            return;
+        }
+
+        sendMicrophoneDisableSettingUpdateForCurrentUser();
+        if (mSensorPrivacyManagerInternal == null) {
+            Log.e(TAG, "Unable to add a sensor privacy listener for all users");
+            return;
+        }
+
+        mSensorPrivacyManagerInternal.addSensorPrivacyListenerForAllUsers(
+                SensorPrivacyManager.Sensors.MICROPHONE, (userId, enabled) -> {
+                    if (userId == getCurrentUserId()) {
+                        Log.d(TAG, "User: " + userId + "mic privacy: " + enabled);
+                        sendMicrophoneDisableSettingUpdate(enabled);
+                    }
+                });
+    }
+
+    /**
+     * Handles the initialization of bluetooth settings notifications
+     */
+    private void initBtSettingNotifications() {
+        if (mContextHubWrapper == null || !mContextHubWrapper.supportsBtSettingNotifications()) {
+            return;
+        }
+
+        sendBtSettingUpdate(/* forceUpdate= */ true);
+
+        BroadcastReceiver btReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(intent.getAction())
+                        || BluetoothAdapter.ACTION_BLE_STATE_CHANGED.equals(
+                        intent.getAction())) {
+                    sendBtSettingUpdate(/* forceUpdate= */ false);
+                }
+            }
+        };
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
+        filter.addAction(BluetoothAdapter.ACTION_BLE_STATE_CHANGED);
+        mContext.registerReceiver(btReceiver, filter);
     }
 
     @Override
@@ -708,6 +749,31 @@ public class ContextHubService extends IContextHubService.Stub {
     }
 
     /**
+     * Handles a service restart or service init for the first time
+     *
+     * @param contextHubWrapper         the Context Hub wrapper
+     * @param isFirstInit               if true, this is the first time init is called - boot time
+     */
+    private void init(IContextHubWrapper contextHubWrapper, boolean isFirstInit) {
+        Log.i(TAG, "Starting Context Hub Service init");
+        long startTimeNs = SystemClock.elapsedRealtimeNanos();
+        mContextHubWrapper = contextHubWrapper;
+        if (!initContextHubServiceState(startTimeNs, isFirstInit)) {
+            Log.e(TAG, "Failed to initialize the Context Hub Service");
+            return;
+        }
+        initDefaultClientMap();
+
+        initLocationSettingNotifications();
+        initWifiSettingNotifications();
+        initAirplaneModeSettingNotifications();
+        initMicrophoneSettingNotifications();
+        initBtSettingNotifications();
+
+        scheduleDailyMetricSnapshot();
+    }
+
+    /**
      * Handles a unicast or broadcast message from a nanoapp.
      *
      * @param contextHubId the ID of the hub the message came from
@@ -729,7 +795,7 @@ public class ContextHubService extends IContextHubService.Stub {
 
     /**
      * A helper function to handle a load response from the Context Hub for the old API.
-     * TODO(b/69270990): Remove this once the old APIs are obsolete.
+     * TODO(b/194289715): Remove this once the old APIs are obsolete.
      */
     private void handleLoadResponseOldApi(
             int contextHubId, int result, NanoAppBinary nanoAppBinary) {
@@ -750,7 +816,7 @@ public class ContextHubService extends IContextHubService.Stub {
     /**
      * A helper function to handle an unload response from the Context Hub for the old API.
      * <p>
-     * TODO(b/69270990): Remove this once the old APIs are obsolete.
+     * TODO(b/194289715): Remove this once the old APIs are obsolete.
      */
     private void handleUnloadResponseOldApi(int contextHubId, int result) {
         byte[] data = new byte[1];
@@ -788,10 +854,10 @@ public class ContextHubService extends IContextHubService.Stub {
             ContextHubEventLogger.getInstance().logContextHubRestart(contextHubId);
 
             sendLocationSettingUpdate();
-            sendWifiSettingUpdate(true /* forceUpdate */);
+            sendWifiSettingUpdate(/* forceUpdate= */ true);
             sendAirplaneModeSettingUpdate();
             sendMicrophoneDisableSettingUpdateForCurrentUser();
-            sendBtSettingUpdate(true /* forceUpdate */);
+            sendBtSettingUpdate(/* forceUpdate= */ true);
 
             mTransactionManager.onHubReset();
             queryNanoAppsInternal(contextHubId);
@@ -1066,8 +1132,8 @@ public class ContextHubService extends IContextHubService.Stub {
         mClientManager.forEachClientOfHub(contextHubId, client -> {
             if (client.getPackageName().equals(packageName)) {
                 client.updateNanoAppAuthState(
-                        nanoAppId, Collections.emptyList() /* nanoappPermissions */,
-                        false /* gracePeriodExpired */, true /* forceDenied */);
+                        nanoAppId, /* nanoappPermissions= */ Collections.emptyList(),
+                        /* gracePeriodExpired= */ false, /* forceDenied= */ true);
             }
         });
     }
@@ -1151,7 +1217,7 @@ public class ContextHubService extends IContextHubService.Stub {
         }
         if (!isValidContextHubId(contextHubId)) {
             Log.e(TAG, "Cannot start "
-                    + ContextHubTransaction.typeToString(transactionType, false /* upperCase */)
+                    + ContextHubTransaction.typeToString(transactionType, /* upperCase= */ false)
                     + " transaction for invalid hub ID " + contextHubId);
             try {
                 callback.onTransactionComplete(ContextHubTransaction.RESULT_FAILED_BAD_PARAMS);
@@ -1260,7 +1326,8 @@ public class ContextHubService extends IContextHubService.Stub {
      * Hub.
      */
     private void sendMicrophoneDisableSettingUpdateForCurrentUser() {
-        boolean isEnabled = mSensorPrivacyManagerInternal.isSensorPrivacyEnabled(
+        boolean isEnabled = mSensorPrivacyManagerInternal == null ? false :
+                mSensorPrivacyManagerInternal.isSensorPrivacyEnabled(
                 getCurrentUserId(), SensorPrivacyManager.Sensors.MICROPHONE);
         sendMicrophoneDisableSettingUpdate(isEnabled);
     }
