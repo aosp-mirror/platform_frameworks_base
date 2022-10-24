@@ -20,6 +20,7 @@ import static android.app.job.JobInfo.NETWORK_BYTES_UNKNOWN;
 
 import android.annotation.BytesLong;
 import android.annotation.Nullable;
+import android.compat.Compatibility;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Intent;
 import android.os.Build;
@@ -88,25 +89,11 @@ final public class JobWorkItem implements Parcelable {
      */
     public JobWorkItem(@Nullable Intent intent, @BytesLong long downloadBytes,
             @BytesLong long uploadBytes, @BytesLong long minimumChunkBytes) {
-        if (minimumChunkBytes != NETWORK_BYTES_UNKNOWN && minimumChunkBytes <= 0) {
-            throw new IllegalArgumentException("Minimum chunk size must be positive");
-        }
-        final long estimatedTransfer;
-        if (uploadBytes == NETWORK_BYTES_UNKNOWN) {
-            estimatedTransfer = downloadBytes;
-        } else {
-            estimatedTransfer = uploadBytes
-                    + (downloadBytes == NETWORK_BYTES_UNKNOWN ? 0 : downloadBytes);
-        }
-        if (minimumChunkBytes != NETWORK_BYTES_UNKNOWN && estimatedTransfer != NETWORK_BYTES_UNKNOWN
-                && minimumChunkBytes > estimatedTransfer) {
-            throw new IllegalArgumentException(
-                    "Minimum chunk size can't be greater than estimated network usage");
-        }
         mIntent = intent;
         mNetworkDownloadBytes = downloadBytes;
         mNetworkUploadBytes = uploadBytes;
         mMinimumChunkBytes = minimumChunkBytes;
+        enforceValidity(Compatibility.isChangeEnabled(JobInfo.REJECT_NEGATIVE_NETWORK_ESTIMATES));
     }
 
     /**
@@ -222,7 +209,17 @@ final public class JobWorkItem implements Parcelable {
     /**
      * @hide
      */
-    public void enforceValidity() {
+    public void enforceValidity(boolean rejectNegativeNetworkEstimates) {
+        if (rejectNegativeNetworkEstimates) {
+            if (mNetworkUploadBytes != NETWORK_BYTES_UNKNOWN && mNetworkUploadBytes < 0) {
+                throw new IllegalArgumentException(
+                        "Invalid network upload bytes: " + mNetworkUploadBytes);
+            }
+            if (mNetworkDownloadBytes != NETWORK_BYTES_UNKNOWN && mNetworkDownloadBytes < 0) {
+                throw new IllegalArgumentException(
+                        "Invalid network download bytes: " + mNetworkDownloadBytes);
+            }
+        }
         final long estimatedTransfer;
         if (mNetworkUploadBytes == NETWORK_BYTES_UNKNOWN) {
             estimatedTransfer = mNetworkDownloadBytes;

@@ -3163,9 +3163,12 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
 
         private void validateJob(JobInfo job, int callingUid, @Nullable JobWorkItem jobWorkItem) {
+            final boolean rejectNegativeNetworkEstimates = CompatChanges.isChangeEnabled(
+                            JobInfo.REJECT_NEGATIVE_NETWORK_ESTIMATES, callingUid);
             job.enforceValidity(
                     CompatChanges.isChangeEnabled(
-                            JobInfo.DISALLOW_DEADLINES_FOR_PREFETCH_JOBS, callingUid));
+                            JobInfo.DISALLOW_DEADLINES_FOR_PREFETCH_JOBS, callingUid),
+                    rejectNegativeNetworkEstimates);
             if ((job.getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0) {
                 getContext().enforceCallingOrSelfPermission(
                         android.Manifest.permission.CONNECTIVITY_INTERNAL, TAG);
@@ -3180,7 +3183,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                 }
             }
             if (jobWorkItem != null) {
-                jobWorkItem.enforceValidity();
+                jobWorkItem.enforceValidity(rejectNegativeNetworkEstimates);
                 if (jobWorkItem.getEstimatedNetworkDownloadBytes() != JobInfo.NETWORK_BYTES_UNKNOWN
                         || jobWorkItem.getEstimatedNetworkUploadBytes()
                         != JobInfo.NETWORK_BYTES_UNKNOWN
