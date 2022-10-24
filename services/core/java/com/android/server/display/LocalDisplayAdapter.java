@@ -387,14 +387,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 // list of available modes will take care of updating display mode specs.
                 if (activeBaseMode == INVALID_MODE_ID
                         || mDisplayModeSpecs.baseModeId != activeBaseMode
-                        || mDisplayModeSpecs.primaryRefreshRateRange.min
-                                != modeSpecs.primaryRefreshRateMin
-                        || mDisplayModeSpecs.primaryRefreshRateRange.max
-                                != modeSpecs.primaryRefreshRateMax
-                        || mDisplayModeSpecs.appRequestRefreshRateRange.min
-                                != modeSpecs.appRequestRefreshRateMin
-                        || mDisplayModeSpecs.appRequestRefreshRateRange.max
-                                != modeSpecs.appRequestRefreshRateMax) {
+                        || !mDisplayModeSpecs.primary.equals(modeSpecs.primaryRanges)
+                        || !mDisplayModeSpecs.appRequest.equals(modeSpecs.appRequestRanges)) {
                     mDisplayModeSpecsInvalid = true;
                     sendTraversalRequestLocked();
                 }
@@ -997,10 +991,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                         getDisplayTokenLocked(),
                         new SurfaceControl.DesiredDisplayModeSpecs(baseSfModeId,
                                 mDisplayModeSpecs.allowGroupSwitching,
-                                mDisplayModeSpecs.primaryRefreshRateRange.min,
-                                mDisplayModeSpecs.primaryRefreshRateRange.max,
-                                mDisplayModeSpecs.appRequestRefreshRateRange.min,
-                                mDisplayModeSpecs.appRequestRefreshRateRange.max)));
+                                mDisplayModeSpecs.primary,
+                                mDisplayModeSpecs.appRequest)));
             }
         }
 

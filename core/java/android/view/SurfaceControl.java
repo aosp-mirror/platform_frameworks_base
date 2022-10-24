@@ -67,6 +67,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.util.Slog;
 import android.util.SparseIntArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.Surface.OutOfResourcesException;
@@ -1673,6 +1674,146 @@ public final class SurfaceControl implements Parcelable {
         return nativeGetDisplayedContentSample(displayToken, maxFrames, timestamp);
     }
 
+    /**
+     * Information about the min and max refresh rate DM would like to set the display to.
+     * @hide
+     */
+    public static final class RefreshRateRange {
+        public static final String TAG = "RefreshRateRange";
+
+        // The tolerance within which we consider something approximately equals.
+        public static final float FLOAT_TOLERANCE = 0.01f;
+
+        /**
+         * The lowest desired refresh rate.
+         */
+        public float min;
+
+        /**
+         * The highest desired refresh rate.
+         */
+        public float max;
+
+        public RefreshRateRange() {}
+
+        public RefreshRateRange(float min, float max) {
+            if (min < 0 || max < 0 || min > max + FLOAT_TOLERANCE) {
+                Slog.e(TAG, "Wrong values for min and max when initializing RefreshRateRange : "
+                        + min + " " + max);
+                this.min = this.max = 0;
+                return;
+            }
+            if (min > max) {
+                // Min and max are within epsilon of each other, but in the wrong order.
+                float t = min;
+                min = max;
+                max = t;
+            }
+            this.min = min;
+            this.max = max;
+        }
+
+        /**
+         * Checks whether the two objects have the same values.
+         */
+        @Override
+        public boolean equals(Object other) {
+            if (other == this) {
+                return true;
+            }
+
+            if (!(other instanceof RefreshRateRange)) {
+                return false;
+            }
+
+            RefreshRateRange refreshRateRange = (RefreshRateRange) other;
+            return (min == refreshRateRange.min && max == refreshRateRange.max);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(min, max);
+        }
+
+        @Override
+        public String toString() {
+            return "(" + min + " " + max + ")";
+        }
+
+        /**
+         * Copies the supplied object's values to this object.
+         */
+        public void copyFrom(RefreshRateRange other) {
+            this.min = other.min;
+            this.max = other.max;
+        }
+    }
+
+    /**
+     * Information about the ranges of refresh rates for the display physical refresh rates and the
+     * render frame rate DM would like to set the policy to.
+     * @hide
+     */
+    public static final class RefreshRateRanges {
+        public static final String TAG = "RefreshRateRanges";
+
+        /**
+         *  The range of refresh rates that the display should run at.
+         */
+        public final RefreshRateRange physical;
+
+        /**
+         *  The range of refresh rates that apps should render at.
+         */
+        public final RefreshRateRange render;
+
+        public RefreshRateRanges() {
+            physical = new RefreshRateRange();
+            render = new RefreshRateRange();
+        }
+
+        public RefreshRateRanges(RefreshRateRange physical, RefreshRateRange render) {
+            this.physical = new RefreshRateRange(physical.min, physical.max);
+            this.render = new RefreshRateRange(render.min, render.max);
+        }
+
+        /**
+         * Checks whether the two objects have the same values.
+         */
+        @Override
+        public boolean equals(Object other) {
+            if (other == this) {
+                return true;
+            }
+
+            if (!(other instanceof RefreshRateRanges)) {
+                return false;
+            }
+
+            RefreshRateRanges rates = (RefreshRateRanges) other;
+            return physical.equals(rates.physical) && render.equals(
+                    rates.render);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(physical, render);
+        }
+
+        @Override
+        public String toString() {
+            return "physical: " + physical + " render:  " + render;
+        }
+
+        /**
+         * Copies the supplied object's values to this object.
+         */
+        public void copyFrom(RefreshRateRanges other) {
+            this.physical.copyFrom(other.physical);
+            this.render.copyFrom(other.render);
+        }
+    }
+
 
     /**
      * Contains information about desired display configuration.
@@ -1682,44 +1823,49 @@ public final class SurfaceControl implements Parcelable {
     public static final class DesiredDisplayModeSpecs {
         public int defaultMode;
         /**
-         * The primary refresh rate range represents display manager's general guidance on the
-         * display configs surface flinger will consider when switching refresh rates. Unless
-         * surface flinger has a specific reason to do otherwise, it will stay within this range.
-         */
-        public float primaryRefreshRateMin;
-        public float primaryRefreshRateMax;
-        /**
-         * The app request refresh rate range allows surface flinger to consider more display
-         * configs when switching refresh rates. Although surface flinger will generally stay within
-         * the primary range, specific considerations, such as layer frame rate settings specified
-         * via the setFrameRate() api, may cause surface flinger to go outside the primary
-         * range. Surface flinger never goes outside the app request range. The app request range
-         * will be greater than or equal to the primary refresh rate range, never smaller.
-         */
-        public float appRequestRefreshRateMin;
-        public float appRequestRefreshRateMax;
-
-        /**
          * If true this will allow switching between modes in different display configuration
          * groups. This way the user may see visual interruptions when the display mode changes.
          */
         public boolean allowGroupSwitching;
 
-        public DesiredDisplayModeSpecs() {}
+        /**
+         * The primary physical and render refresh rate ranges represent display manager's general
+         * guidance on the display configs surface flinger will consider when switching refresh
+         * rates and scheduling the frame rate. Unless surface flinger has a specific reason to do
+         * otherwise, it will stay within this range.
+         */
+        public final RefreshRateRanges primaryRanges;
+
+        /**
+         * The app request physical and render refresh rate ranges allow surface flinger to consider
+         * more display configs when switching refresh rates. Although surface flinger will
+         * generally stay within the primary range, specific considerations, such as layer frame
+         * rate settings specified via the setFrameRate() api, may cause surface flinger to go
+         * outside the primary range. Surface flinger never goes outside the app request range.
+         * The app request range will be greater than or equal to the primary refresh rate range,
+         * never smaller.
+         */
+        public final RefreshRateRanges appRequestRanges;
+
+        public DesiredDisplayModeSpecs() {
+            this.primaryRanges = new RefreshRateRanges();
+            this.appRequestRanges = new RefreshRateRanges();
+        }
 
         public DesiredDisplayModeSpecs(DesiredDisplayModeSpecs other) {
+            this.primaryRanges = new RefreshRateRanges();
+            this.appRequestRanges = new RefreshRateRanges();
             copyFrom(other);
         }
 
         public DesiredDisplayModeSpecs(int defaultMode, boolean allowGroupSwitching,
-                float primaryRefreshRateMin, float primaryRefreshRateMax,
-                float appRequestRefreshRateMin, float appRequestRefreshRateMax) {
+                RefreshRateRanges primaryRanges, RefreshRateRanges appRequestRanges) {
             this.defaultMode = defaultMode;
             this.allowGroupSwitching = allowGroupSwitching;
-            this.primaryRefreshRateMin = primaryRefreshRateMin;
-            this.primaryRefreshRateMax = primaryRefreshRateMax;
-            this.appRequestRefreshRateMin = appRequestRefreshRateMin;
-            this.appRequestRefreshRateMax = appRequestRefreshRateMax;
+            this.primaryRanges =
+                    new RefreshRateRanges(primaryRanges.physical, primaryRanges.render);
+            this.appRequestRanges =
+                    new RefreshRateRanges(appRequestRanges.physical, appRequestRanges.render);
         }
 
         @Override
@@ -1732,10 +1878,9 @@ public final class SurfaceControl implements Parcelable {
          */
         public boolean equals(DesiredDisplayModeSpecs other) {
             return other != null && defaultMode == other.defaultMode
-                    && primaryRefreshRateMin == other.primaryRefreshRateMin
-                    && primaryRefreshRateMax == other.primaryRefreshRateMax
-                    && appRequestRefreshRateMin == other.appRequestRefreshRateMin
-                    && appRequestRefreshRateMax == other.appRequestRefreshRateMax;
+                    && allowGroupSwitching == other.allowGroupSwitching
+                    && primaryRanges.equals(other.primaryRanges)
+                    && appRequestRanges.equals(other.appRequestRanges);
         }
 
         @Override
@@ -1748,18 +1893,17 @@ public final class SurfaceControl implements Parcelable {
          */
         public void copyFrom(DesiredDisplayModeSpecs other) {
             defaultMode = other.defaultMode;
-            primaryRefreshRateMin = other.primaryRefreshRateMin;
-            primaryRefreshRateMax = other.primaryRefreshRateMax;
-            appRequestRefreshRateMin = other.appRequestRefreshRateMin;
-            appRequestRefreshRateMax = other.appRequestRefreshRateMax;
+            allowGroupSwitching = other.allowGroupSwitching;
+            primaryRanges.copyFrom(other.primaryRanges);
+            appRequestRanges.copyFrom(other.appRequestRanges);
         }
 
         @Override
         public String toString() {
-            return String.format("defaultConfig=%d primaryRefreshRateRange=[%.0f %.0f]"
-                            + " appRequestRefreshRateRange=[%.0f %.0f]",
-                    defaultMode, primaryRefreshRateMin, primaryRefreshRateMax,
-                    appRequestRefreshRateMin, appRequestRefreshRateMax);
+            return "defaultMode=" + defaultMode
+                    + " allowGroupSwitching=" + allowGroupSwitching
+                    + " primaryRanges=" + primaryRanges
+                    + " appRequestRanges=" + appRequestRanges;
         }
     }
 

@@ -57,7 +57,6 @@ import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.DisplayManagerInternal.RefreshRateLimitation;
-import android.hardware.display.DisplayManagerInternal.RefreshRateRange;
 import android.hardware.fingerprint.IUdfpsHbmListener;
 import android.os.Handler;
 import android.os.IThermalEventListener;
@@ -71,10 +70,11 @@ import android.test.mock.MockContentResolver;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
+import android.view.SurfaceControl.RefreshRateRange;
+import android.view.SurfaceControl.RefreshRateRanges;
 
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.display.BrightnessSynchronizer;
 import com.android.internal.util.Preconditions;
@@ -105,8 +105,11 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
+
 @SmallTest
-@RunWith(AndroidJUnit4.class)
+@RunWith(JUnitParamsRunner.class)
 public class DisplayModeDirectorTest {
     // The tolerance within which we consider something approximately equals.
     private static final String TAG = "DisplayModeDirectorTest";
@@ -154,8 +157,6 @@ public class DisplayModeDirectorTest {
 
     private DisplayModeDirector createDirectorFromRefreshRateArray(
             float[] refreshRates, int baseModeId, float defaultRefreshRate) {
-        DisplayModeDirector director =
-                new DisplayModeDirector(mContext, mHandler, mInjector);
         Display.Mode[] modes = new Display.Mode[refreshRates.length];
         Display.Mode defaultMode = null;
         for (int i = 0; i < refreshRates.length; i++) {
@@ -194,13 +195,24 @@ public class DisplayModeDirectorTest {
     }
 
     @Test
-    public void testDisplayModeVoting() {
+    @Parameters({
+            "true",
+            "false"
+    })
+    public void testDisplayModeVoting(boolean frameRateIsRefreshRate) {
+        when(mInjector.renderFrameRateIsPhysicalRefreshRate()).thenReturn(frameRateIsRefreshRate);
         // With no votes present, DisplayModeDirector should allow any refresh rate.
-        DesiredDisplayModeSpecs modeSpecs =
-                createDirectorFromFpsRange(60, 90).getDesiredDisplayModeSpecs(DISPLAY_ID);
+        DisplayModeDirector director = createDirectorFromFpsRange(60, 90);
+        DesiredDisplayModeSpecs modeSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
         assertThat(modeSpecs.baseModeId).isEqualTo(60);
-        assertThat(modeSpecs.primaryRefreshRateRange.min).isEqualTo(0f);
-        assertThat(modeSpecs.primaryRefreshRateRange.max).isEqualTo(Float.POSITIVE_INFINITY);
+        assertThat(modeSpecs.primary.physical.min).isEqualTo(0f);
+        assertThat(modeSpecs.primary.physical.max).isEqualTo(Float.POSITIVE_INFINITY);
+        assertThat(modeSpecs.primary.render.min).isEqualTo(0f);
+        assertThat(modeSpecs.primary.render.max).isEqualTo(Float.POSITIVE_INFINITY);
+        assertThat(modeSpecs.appRequest.physical.min).isEqualTo(0f);
+        assertThat(modeSpecs.appRequest.physical.max).isEqualTo(Float.POSITIVE_INFINITY);
+        assertThat(modeSpecs.appRequest.render.min).isEqualTo(0f);
+        assertThat(modeSpecs.appRequest.render.max).isEqualTo(Float.POSITIVE_INFINITY);
 
         int numPriorities =
                 DisplayModeDirector.Vote.MAX_PRIORITY - DisplayModeDirector.Vote.MIN_PRIORITY + 1;
@@ -210,21 +222,49 @@ public class DisplayModeDirectorTest {
         {
             int minFps = 60;
             int maxFps = 90;
-            DisplayModeDirector director = createDirectorFromFpsRange(60, 90);
+            director = createDirectorFromFpsRange(60, 90);
             assertTrue(2 * numPriorities < maxFps - minFps + 1);
             SparseArray<Vote> votes = new SparseArray<>();
             SparseArray<SparseArray<Vote>> votesByDisplay = new SparseArray<>();
             votesByDisplay.put(DISPLAY_ID, votes);
             for (int i = 0; i < numPriorities; i++) {
                 int priority = Vote.MIN_PRIORITY + i;
-                votes.put(priority, Vote.forRefreshRates(minFps + i, maxFps - i));
+                votes.put(priority, Vote.forPhysicalRefreshRates(minFps + i, maxFps - i));
                 director.injectVotesByDisplay(votesByDisplay);
                 modeSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
                 assertThat(modeSpecs.baseModeId).isEqualTo(minFps + i);
-                assertThat(modeSpecs.primaryRefreshRateRange.min)
+                assertThat(modeSpecs.primary.physical.min)
                         .isEqualTo((float) (minFps + i));
-                assertThat(modeSpecs.primaryRefreshRateRange.max)
+                assertThat(modeSpecs.primary.physical.max)
                         .isEqualTo((float) (maxFps - i));
+                if (frameRateIsRefreshRate) {
+                    assertThat(modeSpecs.primary.render.min)
+                            .isEqualTo((float) (minFps + i));
+                } else {
+                    assertThat(modeSpecs.primary.render.min).isZero();
+                }
+                assertThat(modeSpecs.primary.render.max)
+                        .isEqualTo((float) (maxFps - i));
+                if (priority >= Vote.APP_REQUEST_REFRESH_RATE_RANGE_PRIORITY_CUTOFF) {
+                    assertThat(modeSpecs.appRequest.physical.min)
+                            .isEqualTo((float) (minFps + i));
+                    assertThat(modeSpecs.appRequest.physical.max)
+                            .isEqualTo((float) (maxFps - i));
+                    if (frameRateIsRefreshRate) {
+                        assertThat(modeSpecs.appRequest.render.min).isEqualTo(
+                                (float) (minFps + i));
+                    } else {
+                        assertThat(modeSpecs.appRequest.render.min).isZero();
+                    }
+                    assertThat(modeSpecs.appRequest.render.max).isEqualTo(
+                            (float) (maxFps - i));
+                } else {
+                    assertThat(modeSpecs.appRequest.physical.min).isZero();
+                    assertThat(modeSpecs.appRequest.physical.max).isPositiveInfinity();
+                    assertThat(modeSpecs.appRequest.render.min).isZero();
+                    assertThat(modeSpecs.appRequest.render.max).isPositiveInfinity();
+                }
+
             }
         }
 
@@ -232,42 +272,53 @@ public class DisplayModeDirectorTest {
         // presence of higher priority votes.
         {
             assertTrue(numPriorities >= 2);
-            DisplayModeDirector director = createDirectorFromFpsRange(60, 90);
+            director = createDirectorFromFpsRange(60, 90);
             SparseArray<Vote> votes = new SparseArray<>();
             SparseArray<SparseArray<Vote>> votesByDisplay = new SparseArray<>();
             votesByDisplay.put(DISPLAY_ID, votes);
-            votes.put(Vote.MAX_PRIORITY, Vote.forRefreshRates(65, 85));
-            votes.put(Vote.MIN_PRIORITY, Vote.forRefreshRates(70, 80));
+            votes.put(Vote.MAX_PRIORITY, Vote.forPhysicalRefreshRates(65, 85));
+            votes.put(Vote.MIN_PRIORITY, Vote.forPhysicalRefreshRates(70, 80));
             director.injectVotesByDisplay(votesByDisplay);
             modeSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
             assertThat(modeSpecs.baseModeId).isEqualTo(70);
-            assertThat(modeSpecs.primaryRefreshRateRange.min).isEqualTo(70f);
-            assertThat(modeSpecs.primaryRefreshRateRange.max).isEqualTo(80f);
+            assertThat(modeSpecs.primary.physical.min).isEqualTo(70f);
+            assertThat(modeSpecs.primary.physical.max).isEqualTo(80f);
         }
     }
 
     @Test
-    public void testVotingWithFloatingPointErrors() {
+    @Parameters({
+            "true",
+            "false"
+    })
+    public void testVotingWithFloatingPointErrors(boolean frameRateIsRefreshRate) {
+        when(mInjector.renderFrameRateIsPhysicalRefreshRate()).thenReturn(frameRateIsRefreshRate);
         DisplayModeDirector director = createDirectorFromFpsRange(50, 90);
         SparseArray<Vote> votes = new SparseArray<>();
         SparseArray<SparseArray<Vote>> votesByDisplay = new SparseArray<>();
         votesByDisplay.put(DISPLAY_ID, votes);
         float error = FLOAT_TOLERANCE / 4;
-        votes.put(Vote.PRIORITY_USER_SETTING_PEAK_REFRESH_RATE, Vote.forRefreshRates(0, 60));
+        votes.put(Vote.PRIORITY_USER_SETTING_PEAK_RENDER_FRAME_RATE,
+                Vote.forRenderFrameRates(0, 60));
         votes.put(Vote.PRIORITY_APP_REQUEST_SIZE,
-                Vote.forRefreshRates(60 + error, 60 + error));
+                Vote.forPhysicalRefreshRates(60 + error, 60 + error));
         votes.put(Vote.PRIORITY_APP_REQUEST_BASE_MODE_REFRESH_RATE,
-                Vote.forRefreshRates(60 - error, 60 - error));
+                Vote.forPhysicalRefreshRates(60 - error, 60 - error));
         director.injectVotesByDisplay(votesByDisplay);
         DesiredDisplayModeSpecs desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
 
-        assertThat(desiredSpecs.primaryRefreshRateRange.min).isWithin(FLOAT_TOLERANCE).of(60);
-        assertThat(desiredSpecs.primaryRefreshRateRange.max).isWithin(FLOAT_TOLERANCE).of(60);
+        assertThat(desiredSpecs.primary.physical.min).isWithin(FLOAT_TOLERANCE).of(60);
+        assertThat(desiredSpecs.primary.physical.max).isWithin(FLOAT_TOLERANCE).of(60);
         assertThat(desiredSpecs.baseModeId).isEqualTo(60);
     }
 
     @Test
-    public void testFlickerHasLowerPriorityThanUserAndRangeIsSingle() {
+    @Parameters({
+            "true",
+            "false"
+    })
+    public void testFlickerHasLowerPriorityThanUserAndRangeIsSingle(
+            boolean frameRateIsRefreshRate) {
         assertTrue(Vote.PRIORITY_FLICKER_REFRESH_RATE
                 < Vote.PRIORITY_APP_REQUEST_BASE_MODE_REFRESH_RATE);
         assertTrue(Vote.PRIORITY_FLICKER_REFRESH_RATE
@@ -276,6 +327,7 @@ public class DisplayModeDirectorTest {
         assertTrue(Vote.PRIORITY_FLICKER_REFRESH_RATE_SWITCH
                 > Vote.PRIORITY_LOW_POWER_MODE);
 
+        when(mInjector.renderFrameRateIsPhysicalRefreshRate()).thenReturn(frameRateIsRefreshRate);
         Display.Mode[] modes = new Display.Mode[4];
         modes[0] = new Display.Mode(
                 /*modeId=*/1, /*width=*/1000, /*height=*/1000, 60);
@@ -295,14 +347,14 @@ public class DisplayModeDirectorTest {
                 Vote.forBaseModeRefreshRate(appRequestedMode.getRefreshRate()));
         votes.put(Vote.PRIORITY_APP_REQUEST_SIZE, Vote.forSize(appRequestedMode.getPhysicalWidth(),
                 appRequestedMode.getPhysicalHeight()));
-        votes.put(Vote.PRIORITY_FLICKER_REFRESH_RATE, Vote.forRefreshRates(60, 60));
+        votes.put(Vote.PRIORITY_FLICKER_REFRESH_RATE, Vote.forPhysicalRefreshRates(60, 60));
         votes.put(Vote.PRIORITY_FLICKER_REFRESH_RATE_SWITCH, Vote.forDisableRefreshRateSwitching());
         director.injectVotesByDisplay(votesByDisplay);
         DesiredDisplayModeSpecs desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
         assertThat(desiredSpecs.baseModeId).isEqualTo(2);
-        assertThat(desiredSpecs.primaryRefreshRateRange.min).isWithin(FLOAT_TOLERANCE).of(60);
-        assertThat(desiredSpecs.primaryRefreshRateRange.max)
-                .isWithin(FLOAT_TOLERANCE).of(desiredSpecs.primaryRefreshRateRange.min);
+        assertThat(desiredSpecs.primary.physical.min).isWithin(FLOAT_TOLERANCE).of(60);
+        assertThat(desiredSpecs.primary.physical.max)
+                .isWithin(FLOAT_TOLERANCE).of(desiredSpecs.primary.physical.min);
 
         votes.clear();
         appRequestedMode = modes[3];
@@ -310,14 +362,14 @@ public class DisplayModeDirectorTest {
                 Vote.forBaseModeRefreshRate(appRequestedMode.getRefreshRate()));
         votes.put(Vote.PRIORITY_APP_REQUEST_SIZE, Vote.forSize(appRequestedMode.getPhysicalWidth(),
                 appRequestedMode.getPhysicalHeight()));
-        votes.put(Vote.PRIORITY_FLICKER_REFRESH_RATE, Vote.forRefreshRates(90, 90));
+        votes.put(Vote.PRIORITY_FLICKER_REFRESH_RATE, Vote.forPhysicalRefreshRates(90, 90));
         votes.put(Vote.PRIORITY_FLICKER_REFRESH_RATE_SWITCH, Vote.forDisableRefreshRateSwitching());
         director.injectVotesByDisplay(votesByDisplay);
         desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
         assertThat(desiredSpecs.baseModeId).isEqualTo(4);
-        assertThat(desiredSpecs.primaryRefreshRateRange.min).isWithin(FLOAT_TOLERANCE).of(90);
-        assertThat(desiredSpecs.primaryRefreshRateRange.max)
-                .isWithin(FLOAT_TOLERANCE).of(desiredSpecs.primaryRefreshRateRange.min);
+        assertThat(desiredSpecs.primary.physical.min).isWithin(FLOAT_TOLERANCE).of(90);
+        assertThat(desiredSpecs.primary.physical.max)
+                .isWithin(FLOAT_TOLERANCE).of(desiredSpecs.primary.physical.min);
 
         votes.clear();
         appRequestedMode = modes[3];
@@ -325,14 +377,14 @@ public class DisplayModeDirectorTest {
                 Vote.forBaseModeRefreshRate(appRequestedMode.getRefreshRate()));
         votes.put(Vote.PRIORITY_APP_REQUEST_SIZE, Vote.forSize(appRequestedMode.getPhysicalWidth(),
                 appRequestedMode.getPhysicalHeight()));
-        votes.put(Vote.PRIORITY_FLICKER_REFRESH_RATE, Vote.forRefreshRates(60, 60));
+        votes.put(Vote.PRIORITY_FLICKER_REFRESH_RATE, Vote.forPhysicalRefreshRates(60, 60));
         votes.put(Vote.PRIORITY_FLICKER_REFRESH_RATE_SWITCH, Vote.forDisableRefreshRateSwitching());
         director.injectVotesByDisplay(votesByDisplay);
         desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
         assertThat(desiredSpecs.baseModeId).isEqualTo(4);
-        assertThat(desiredSpecs.primaryRefreshRateRange.min).isWithin(FLOAT_TOLERANCE).of(90);
-        assertThat(desiredSpecs.primaryRefreshRateRange.max)
-                .isWithin(FLOAT_TOLERANCE).of(desiredSpecs.primaryRefreshRateRange.min);
+        assertThat(desiredSpecs.primary.physical.min).isWithin(FLOAT_TOLERANCE).of(90);
+        assertThat(desiredSpecs.primary.physical.max)
+                .isWithin(FLOAT_TOLERANCE).of(desiredSpecs.primary.physical.min);
 
         votes.clear();
         appRequestedMode = modes[1];
@@ -340,22 +392,28 @@ public class DisplayModeDirectorTest {
                 Vote.forBaseModeRefreshRate(appRequestedMode.getRefreshRate()));
         votes.put(Vote.PRIORITY_APP_REQUEST_SIZE, Vote.forSize(appRequestedMode.getPhysicalWidth(),
                 appRequestedMode.getPhysicalHeight()));
-        votes.put(Vote.PRIORITY_FLICKER_REFRESH_RATE, Vote.forRefreshRates(90, 90));
+        votes.put(Vote.PRIORITY_FLICKER_REFRESH_RATE, Vote.forPhysicalRefreshRates(90, 90));
         votes.put(Vote.PRIORITY_FLICKER_REFRESH_RATE_SWITCH, Vote.forDisableRefreshRateSwitching());
         director.injectVotesByDisplay(votesByDisplay);
         desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
         assertThat(desiredSpecs.baseModeId).isEqualTo(2);
-        assertThat(desiredSpecs.primaryRefreshRateRange.min).isWithin(FLOAT_TOLERANCE).of(60);
-        assertThat(desiredSpecs.primaryRefreshRateRange.max)
-                .isWithin(FLOAT_TOLERANCE).of(desiredSpecs.primaryRefreshRateRange.min);
+        assertThat(desiredSpecs.primary.physical.min).isWithin(FLOAT_TOLERANCE).of(60);
+        assertThat(desiredSpecs.primary.physical.max)
+                .isWithin(FLOAT_TOLERANCE).of(desiredSpecs.primary.physical.min);
     }
 
     @Test
-    public void testLPMHasHigherPriorityThanUser() {
-        assertTrue(Vote.PRIORITY_LOW_POWER_MODE > Vote.PRIORITY_APP_REQUEST_BASE_MODE_REFRESH_RATE);
-        assertTrue(Vote.PRIORITY_LOW_POWER_MODE > Vote.PRIORITY_APP_REQUEST_SIZE);
+    @Parameters({
+            "true",
+            "false"
+    })
+    public void testLPMHasHigherPriorityThanUser(boolean frameRateIsRefreshRate) {
+        assertTrue(Vote.PRIORITY_LOW_POWER_MODE
+                > Vote.PRIORITY_APP_REQUEST_BASE_MODE_REFRESH_RATE);
+        assertTrue(Vote.PRIORITY_LOW_POWER_MODE
+                > Vote.PRIORITY_APP_REQUEST_SIZE);
 
-
+        when(mInjector.renderFrameRateIsPhysicalRefreshRate()).thenReturn(frameRateIsRefreshRate);
         Display.Mode[] modes = new Display.Mode[4];
         modes[0] = new Display.Mode(
                 /*modeId=*/1, /*width=*/1000, /*height=*/1000, 60);
@@ -375,12 +433,18 @@ public class DisplayModeDirectorTest {
                 Vote.forBaseModeRefreshRate(appRequestedMode.getRefreshRate()));
         votes.put(Vote.PRIORITY_APP_REQUEST_SIZE, Vote.forSize(appRequestedMode.getPhysicalWidth(),
                 appRequestedMode.getPhysicalHeight()));
-        votes.put(Vote.PRIORITY_LOW_POWER_MODE, Vote.forRefreshRates(60, 60));
+        votes.put(Vote.PRIORITY_LOW_POWER_MODE, Vote.forRenderFrameRates(60, 60));
         director.injectVotesByDisplay(votesByDisplay);
         DesiredDisplayModeSpecs desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
         assertThat(desiredSpecs.baseModeId).isEqualTo(2);
-        assertThat(desiredSpecs.primaryRefreshRateRange.min).isWithin(FLOAT_TOLERANCE).of(60);
-        assertThat(desiredSpecs.primaryRefreshRateRange.max).isWithin(FLOAT_TOLERANCE).of(60);
+        assertThat(desiredSpecs.primary.physical.min).isWithin(FLOAT_TOLERANCE).of(60);
+        if (frameRateIsRefreshRate) {
+            assertThat(desiredSpecs.primary.physical.max).isWithin(FLOAT_TOLERANCE).of(60);
+        } else {
+            assertThat(desiredSpecs.primary.physical.max).isPositiveInfinity();
+        }
+        assertThat(desiredSpecs.primary.render.min).isWithin(FLOAT_TOLERANCE).of(60);
+        assertThat(desiredSpecs.primary.render.max).isWithin(FLOAT_TOLERANCE).of(60);
 
         votes.clear();
         appRequestedMode = modes[3];
@@ -388,12 +452,18 @@ public class DisplayModeDirectorTest {
                 Vote.forBaseModeRefreshRate(appRequestedMode.getRefreshRate()));
         votes.put(Vote.PRIORITY_APP_REQUEST_SIZE, Vote.forSize(appRequestedMode.getPhysicalWidth(),
                 appRequestedMode.getPhysicalHeight()));
-        votes.put(Vote.PRIORITY_LOW_POWER_MODE, Vote.forRefreshRates(90, 90));
+        votes.put(Vote.PRIORITY_LOW_POWER_MODE, Vote.forRenderFrameRates(90, 90));
         director.injectVotesByDisplay(votesByDisplay);
         desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
         assertThat(desiredSpecs.baseModeId).isEqualTo(4);
-        assertThat(desiredSpecs.primaryRefreshRateRange.min).isWithin(FLOAT_TOLERANCE).of(90);
-        assertThat(desiredSpecs.primaryRefreshRateRange.max).isWithin(FLOAT_TOLERANCE).of(90);
+        assertThat(desiredSpecs.primary.physical.min).isWithin(FLOAT_TOLERANCE).of(90);
+        if (frameRateIsRefreshRate) {
+            assertThat(desiredSpecs.primary.physical.max).isWithin(FLOAT_TOLERANCE).of(90);
+        } else {
+            assertThat(desiredSpecs.primary.physical.max).isPositiveInfinity();
+        }
+        assertThat(desiredSpecs.primary.render.min).isWithin(FLOAT_TOLERANCE).of(90);
+        assertThat(desiredSpecs.primary.render.max).isWithin(FLOAT_TOLERANCE).of(90);
 
         votes.clear();
         appRequestedMode = modes[3];
@@ -401,12 +471,18 @@ public class DisplayModeDirectorTest {
                 Vote.forBaseModeRefreshRate(appRequestedMode.getRefreshRate()));
         votes.put(Vote.PRIORITY_APP_REQUEST_SIZE, Vote.forSize(appRequestedMode.getPhysicalWidth(),
                 appRequestedMode.getPhysicalHeight()));
-        votes.put(Vote.PRIORITY_LOW_POWER_MODE, Vote.forRefreshRates(60, 60));
+        votes.put(Vote.PRIORITY_LOW_POWER_MODE, Vote.forRenderFrameRates(60, 60));
         director.injectVotesByDisplay(votesByDisplay);
         desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
         assertThat(desiredSpecs.baseModeId).isEqualTo(2);
-        assertThat(desiredSpecs.primaryRefreshRateRange.min).isWithin(FLOAT_TOLERANCE).of(60);
-        assertThat(desiredSpecs.primaryRefreshRateRange.max).isWithin(FLOAT_TOLERANCE).of(60);
+        assertThat(desiredSpecs.primary.physical.min).isWithin(FLOAT_TOLERANCE).of(60);
+        if (frameRateIsRefreshRate) {
+            assertThat(desiredSpecs.primary.physical.max).isWithin(FLOAT_TOLERANCE).of(60);
+        } else {
+            assertThat(desiredSpecs.primary.physical.max).isPositiveInfinity();
+        }
+        assertThat(desiredSpecs.primary.render.min).isWithin(FLOAT_TOLERANCE).of(60);
+        assertThat(desiredSpecs.primary.render.max).isWithin(FLOAT_TOLERANCE).of(60);
 
         votes.clear();
         appRequestedMode = modes[1];
@@ -414,26 +490,37 @@ public class DisplayModeDirectorTest {
                 Vote.forBaseModeRefreshRate(appRequestedMode.getRefreshRate()));
         votes.put(Vote.PRIORITY_APP_REQUEST_SIZE, Vote.forSize(appRequestedMode.getPhysicalWidth(),
                 appRequestedMode.getPhysicalHeight()));
-        votes.put(Vote.PRIORITY_LOW_POWER_MODE, Vote.forRefreshRates(90, 90));
+        votes.put(Vote.PRIORITY_LOW_POWER_MODE, Vote.forRenderFrameRates(90, 90));
         director.injectVotesByDisplay(votesByDisplay);
         desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
         assertThat(desiredSpecs.baseModeId).isEqualTo(4);
-        assertThat(desiredSpecs.primaryRefreshRateRange.min).isWithin(FLOAT_TOLERANCE).of(90);
-        assertThat(desiredSpecs.primaryRefreshRateRange.max).isWithin(FLOAT_TOLERANCE).of(90);
+        assertThat(desiredSpecs.primary.physical.min).isWithin(FLOAT_TOLERANCE).of(90);
+        if (frameRateIsRefreshRate) {
+            assertThat(desiredSpecs.primary.physical.max).isWithin(FLOAT_TOLERANCE).of(90);
+        } else {
+            assertThat(desiredSpecs.primary.physical.max).isPositiveInfinity();
+        }
+        assertThat(desiredSpecs.primary.render.min).isWithin(FLOAT_TOLERANCE).of(90);
+        assertThat(desiredSpecs.primary.render.max).isWithin(FLOAT_TOLERANCE).of(90);
     }
 
     @Test
-    public void testAppRequestRefreshRateRange() {
+    @Parameters({
+            "true",
+            "false"
+    })
+    public void testAppRequestRefreshRateRange(boolean frameRateIsRefreshRate) {
         // Confirm that the app request range doesn't include flicker or min refresh rate settings,
         // but does include everything else.
         assertTrue(
                 Vote.PRIORITY_FLICKER_REFRESH_RATE
                         < Vote.APP_REQUEST_REFRESH_RATE_RANGE_PRIORITY_CUTOFF);
-        assertTrue(Vote.PRIORITY_USER_SETTING_MIN_REFRESH_RATE
+        assertTrue(Vote.PRIORITY_USER_SETTING_MIN_RENDER_FRAME_RATE
                 < Vote.APP_REQUEST_REFRESH_RATE_RANGE_PRIORITY_CUTOFF);
-        assertTrue(Vote.PRIORITY_USER_SETTING_PEAK_REFRESH_RATE
+        assertTrue(Vote.PRIORITY_USER_SETTING_PEAK_RENDER_FRAME_RATE
                 >= Vote.APP_REQUEST_REFRESH_RATE_RANGE_PRIORITY_CUTOFF);
 
+        when(mInjector.renderFrameRateIsPhysicalRefreshRate()).thenReturn(frameRateIsRefreshRate);
         Display.Mode[] modes = new Display.Mode[3];
         modes[0] = new Display.Mode(
                 /*modeId=*/60, /*width=*/1000, /*height=*/1000, 60);
@@ -446,25 +533,25 @@ public class DisplayModeDirectorTest {
         SparseArray<Vote> votes = new SparseArray<>();
         SparseArray<SparseArray<Vote>> votesByDisplay = new SparseArray<>();
         votesByDisplay.put(DISPLAY_ID, votes);
-        votes.put(Vote.PRIORITY_FLICKER_REFRESH_RATE, Vote.forRefreshRates(60, 60));
+        votes.put(Vote.PRIORITY_FLICKER_REFRESH_RATE, Vote.forPhysicalRefreshRates(60, 60));
         votes.put(Vote.PRIORITY_FLICKER_REFRESH_RATE_SWITCH, Vote.forDisableRefreshRateSwitching());
         director.injectVotesByDisplay(votesByDisplay);
         DesiredDisplayModeSpecs desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
         assertThat(desiredSpecs.baseModeId).isEqualTo(60);
-        assertThat(desiredSpecs.primaryRefreshRateRange.min).isWithin(FLOAT_TOLERANCE).of(60);
-        assertThat(desiredSpecs.primaryRefreshRateRange.max).isWithin(FLOAT_TOLERANCE).of(60);
-        assertThat(desiredSpecs.appRequestRefreshRateRange.min).isAtMost(60f);
-        assertThat(desiredSpecs.appRequestRefreshRateRange.max).isAtLeast(90f);
+        assertThat(desiredSpecs.primary.physical.min).isWithin(FLOAT_TOLERANCE).of(60);
+        assertThat(desiredSpecs.primary.physical.max).isWithin(FLOAT_TOLERANCE).of(60);
+        assertThat(desiredSpecs.appRequest.physical.min).isAtMost(60f);
+        assertThat(desiredSpecs.appRequest.physical.max).isAtLeast(90f);
 
-        votes.put(Vote.PRIORITY_USER_SETTING_MIN_REFRESH_RATE,
-                Vote.forRefreshRates(90, Float.POSITIVE_INFINITY));
+        votes.put(Vote.PRIORITY_USER_SETTING_MIN_RENDER_FRAME_RATE,
+                Vote.forRenderFrameRates(90, Float.POSITIVE_INFINITY));
         director.injectVotesByDisplay(votesByDisplay);
         desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
         assertThat(desiredSpecs.baseModeId).isEqualTo(90);
-        assertThat(desiredSpecs.primaryRefreshRateRange.min).isWithin(FLOAT_TOLERANCE).of(90);
-        assertThat(desiredSpecs.primaryRefreshRateRange.max).isAtLeast(90f);
-        assertThat(desiredSpecs.appRequestRefreshRateRange.min).isAtMost(60f);
-        assertThat(desiredSpecs.appRequestRefreshRateRange.max).isAtLeast(90f);
+        assertThat(desiredSpecs.primary.physical.min).isWithin(FLOAT_TOLERANCE).of(90);
+        assertThat(desiredSpecs.primary.physical.max).isAtLeast(90f);
+        assertThat(desiredSpecs.appRequest.physical.min).isAtMost(60f);
+        assertThat(desiredSpecs.appRequest.physical.max).isAtLeast(90f);
 
         Display.Mode appRequestedMode = modes[1];
         votes.put(Vote.PRIORITY_APP_REQUEST_BASE_MODE_REFRESH_RATE,
@@ -474,25 +561,28 @@ public class DisplayModeDirectorTest {
         director.injectVotesByDisplay(votesByDisplay);
         desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
         assertThat(desiredSpecs.baseModeId).isEqualTo(75);
-        assertThat(desiredSpecs.primaryRefreshRateRange.min).isWithin(FLOAT_TOLERANCE).of(75);
-        assertThat(desiredSpecs.primaryRefreshRateRange.max).isWithin(FLOAT_TOLERANCE).of(75);
-        assertThat(desiredSpecs.appRequestRefreshRateRange.min).isAtMost(60f);
-        assertThat(desiredSpecs.appRequestRefreshRateRange.max).isAtLeast(90f);
+        assertThat(desiredSpecs.primary.physical.min).isWithin(FLOAT_TOLERANCE).of(75);
+        assertThat(desiredSpecs.primary.physical.max).isWithin(FLOAT_TOLERANCE).of(75);
+        assertThat(desiredSpecs.appRequest.physical.min).isAtMost(60f);
+        assertThat(desiredSpecs.appRequest.physical.max).isAtLeast(90f);
     }
 
     void verifySpecsWithRefreshRateSettings(DisplayModeDirector director, float minFps,
-            float peakFps, float defaultFps, float primaryMin, float primaryMax,
-            float appRequestMin, float appRequestMax) {
+            float peakFps, float defaultFps, RefreshRateRanges primary,
+            RefreshRateRanges appRequest) {
         DesiredDisplayModeSpecs specs = director.getDesiredDisplayModeSpecsWithInjectedFpsSettings(
                 minFps, peakFps, defaultFps);
-        assertThat(specs.primaryRefreshRateRange.min).isEqualTo(primaryMin);
-        assertThat(specs.primaryRefreshRateRange.max).isEqualTo(primaryMax);
-        assertThat(specs.appRequestRefreshRateRange.min).isEqualTo(appRequestMin);
-        assertThat(specs.appRequestRefreshRateRange.max).isEqualTo(appRequestMax);
+        assertThat(specs.primary).isEqualTo(primary);
+        assertThat(specs.appRequest).isEqualTo(appRequest);
     }
 
     @Test
-    public void testSpecsFromRefreshRateSettings() {
+    @Parameters({
+            "true",
+            "false"
+    })
+    public void testSpecsFromRefreshRateSettings(boolean frameRateIsRefreshRate) {
+        when(mInjector.renderFrameRateIsPhysicalRefreshRate()).thenReturn(frameRateIsRefreshRate);
         // Confirm that, with varying settings for min, peak, and default refresh rate,
         // DesiredDisplayModeSpecs is calculated correctly.
         float[] refreshRates = {30.f, 60.f, 90.f, 120.f, 150.f};
@@ -500,17 +590,56 @@ public class DisplayModeDirectorTest {
                 createDirectorFromRefreshRateArray(refreshRates, /*baseModeId=*/0);
 
         float inf = Float.POSITIVE_INFINITY;
-        verifySpecsWithRefreshRateSettings(director, 0, 0, 0, 0, inf, 0, inf);
-        verifySpecsWithRefreshRateSettings(director, 0, 0, 90, 0, 90, 0, inf);
-        verifySpecsWithRefreshRateSettings(director, 0, 90, 0, 0, 90, 0, 90);
-        verifySpecsWithRefreshRateSettings(director, 0, 90, 60, 0, 60, 0, 90);
-        verifySpecsWithRefreshRateSettings(director, 0, 90, 120, 0, 90, 0, 90);
-        verifySpecsWithRefreshRateSettings(director, 90, 0, 0, 90, inf, 0, inf);
-        verifySpecsWithRefreshRateSettings(director, 90, 0, 120, 90, 120, 0, inf);
-        verifySpecsWithRefreshRateSettings(director, 90, 0, 60, 90, inf, 0, inf);
-        verifySpecsWithRefreshRateSettings(director, 90, 120, 0, 90, 120, 0, 120);
-        verifySpecsWithRefreshRateSettings(director, 90, 60, 0, 90, 90, 0, 90);
-        verifySpecsWithRefreshRateSettings(director, 60, 120, 90, 60, 90, 0, 120);
+        RefreshRateRange rangeAll = new RefreshRateRange(0, inf);
+        RefreshRateRange range0to60 = new RefreshRateRange(0, 60);
+        RefreshRateRange range0to90 = new RefreshRateRange(0, 90);
+        RefreshRateRange range0to120 = new RefreshRateRange(0, 120);
+        RefreshRateRange range60to90 = new RefreshRateRange(60, 90);
+        RefreshRateRange range90to90 = new RefreshRateRange(90, 90);
+        RefreshRateRange range90to120 = new RefreshRateRange(90, 120);
+        RefreshRateRange range60toInf = new RefreshRateRange(60, inf);
+        RefreshRateRange range90toInf = new RefreshRateRange(90, inf);
+
+        RefreshRateRanges frameRateAll = new RefreshRateRanges(rangeAll, rangeAll);
+        RefreshRateRanges frameRate90toInf = new RefreshRateRanges(range90toInf, range90toInf);
+        RefreshRateRanges frameRate0to60;
+        RefreshRateRanges frameRate0to90;
+        RefreshRateRanges frameRate0to120;
+        RefreshRateRanges frameRate60to90;
+        RefreshRateRanges frameRate90to90;
+        RefreshRateRanges frameRate90to120;
+        if (frameRateIsRefreshRate) {
+            frameRate0to60 = new RefreshRateRanges(range0to60, range0to60);
+            frameRate0to90 = new RefreshRateRanges(range0to90, range0to90);
+            frameRate0to120 = new RefreshRateRanges(range0to120, range0to120);
+            frameRate60to90 = new RefreshRateRanges(range60to90, range60to90);
+            frameRate90to90 = new RefreshRateRanges(range90to90, range90to90);
+            frameRate90to120 = new RefreshRateRanges(range90to120, range90to120);
+        } else {
+            frameRate0to60 = new RefreshRateRanges(rangeAll, range0to60);
+            frameRate0to90 = new RefreshRateRanges(rangeAll, range0to90);
+            frameRate0to120 = new RefreshRateRanges(rangeAll, range0to120);
+            frameRate60to90 = new RefreshRateRanges(range60toInf, range60to90);
+            frameRate90to90 = new RefreshRateRanges(range90toInf, range90to90);
+            frameRate90to120 = new RefreshRateRanges(range90toInf, range90to120);
+        }
+
+        verifySpecsWithRefreshRateSettings(director, 0, 0, 0, frameRateAll, frameRateAll);
+        verifySpecsWithRefreshRateSettings(director, 0, 0, 90, frameRate0to90, frameRateAll);
+        verifySpecsWithRefreshRateSettings(director, 0, 90, 0, frameRate0to90, frameRate0to90);
+        verifySpecsWithRefreshRateSettings(director, 0, 90, 60, frameRate0to60, frameRate0to90);
+        verifySpecsWithRefreshRateSettings(director, 0, 90, 120, frameRate0to90,
+                frameRate0to90);
+        verifySpecsWithRefreshRateSettings(director, 90, 0, 0, frameRate90toInf, frameRateAll);
+        verifySpecsWithRefreshRateSettings(director, 90, 0, 120, frameRate90to120,
+                frameRateAll);
+        verifySpecsWithRefreshRateSettings(director, 90, 0, 60, frameRate90toInf, frameRateAll);
+        verifySpecsWithRefreshRateSettings(director, 90, 120, 0, frameRate90to120,
+                frameRate0to120);
+        verifySpecsWithRefreshRateSettings(director, 90, 60, 0, frameRate90to90,
+                frameRate0to90);
+        verifySpecsWithRefreshRateSettings(director, 60, 120, 90, frameRate60to90,
+                frameRate0to120);
     }
 
     void verifyBrightnessObserverCall(DisplayModeDirector director, float minFps, float peakFps,
@@ -523,7 +652,12 @@ public class DisplayModeDirectorTest {
     }
 
     @Test
-    public void testBrightnessObserverCallWithRefreshRateSettings() {
+    @Parameters({
+            "true",
+            "false"
+    })
+    public void testBrightnessObserverCallWithRefreshRateSettings(boolean frameRateIsRefreshRate) {
+        when(mInjector.renderFrameRateIsPhysicalRefreshRate()).thenReturn(frameRateIsRefreshRate);
         // Confirm that, with varying settings for min, peak, and default refresh rate, we make the
         // correct call to the brightness observer.
         float[] refreshRates = {60.f, 90.f, 120.f};
@@ -538,7 +672,12 @@ public class DisplayModeDirectorTest {
     }
 
     @Test
-    public void testVotingWithAlwaysRespectAppRequest() {
+    @Parameters({
+            "true",
+            "false"
+    })
+    public void testVotingWithAlwaysRespectAppRequest(boolean frameRateIsRefreshRate) {
+        when(mInjector.renderFrameRateIsPhysicalRefreshRate()).thenReturn(frameRateIsRefreshRate);
         Display.Mode[] modes = new Display.Mode[3];
         modes[0] = new Display.Mode(
                 /*modeId=*/50, /*width=*/1000, /*height=*/1000, 50);
@@ -549,61 +688,94 @@ public class DisplayModeDirectorTest {
 
         DisplayModeDirector director = createDirectorFromModeArray(modes, modes[0]);
 
-
         SparseArray<Vote> votes = new SparseArray<>();
         SparseArray<SparseArray<Vote>> votesByDisplay = new SparseArray<>();
         votesByDisplay.put(DISPLAY_ID, votes);
-        votes.put(Vote.PRIORITY_FLICKER_REFRESH_RATE, Vote.forRefreshRates(0, 60));
-        votes.put(Vote.PRIORITY_USER_SETTING_MIN_REFRESH_RATE, Vote.forRefreshRates(60, 90));
+        votes.put(Vote.PRIORITY_FLICKER_REFRESH_RATE, Vote.forPhysicalRefreshRates(0, 60));
+        votes.put(Vote.PRIORITY_USER_SETTING_MIN_RENDER_FRAME_RATE,
+                Vote.forRenderFrameRates(60, 90));
         Display.Mode appRequestedMode = modes[2];
         votes.put(Vote.PRIORITY_APP_REQUEST_BASE_MODE_REFRESH_RATE,
                 Vote.forBaseModeRefreshRate(appRequestedMode.getRefreshRate()));
-        votes.put(Vote.PRIORITY_USER_SETTING_PEAK_REFRESH_RATE, Vote.forRefreshRates(60, 60));
-        votes.put(Vote.PRIORITY_LOW_POWER_MODE, Vote.forRefreshRates(0, 60));
+        votes.put(Vote.PRIORITY_USER_SETTING_PEAK_RENDER_FRAME_RATE,
+                Vote.forRenderFrameRates(60, 60));
+        votes.put(Vote.PRIORITY_LOW_POWER_MODE, Vote.forRenderFrameRates(0, 60));
         director.injectVotesByDisplay(votesByDisplay);
 
         assertThat(director.shouldAlwaysRespectAppRequestedMode()).isFalse();
         DesiredDisplayModeSpecs desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
 
-        assertThat(desiredSpecs.primaryRefreshRateRange.min).isWithin(FLOAT_TOLERANCE).of(60);
-        assertThat(desiredSpecs.primaryRefreshRateRange.max).isWithin(FLOAT_TOLERANCE).of(60);
+        assertThat(desiredSpecs.primary.physical.min).isWithin(FLOAT_TOLERANCE).of(60);
+        if (frameRateIsRefreshRate) {
+            assertThat(desiredSpecs.primary.physical.max).isWithin(FLOAT_TOLERANCE).of(60);
+        } else {
+            assertThat(desiredSpecs.primary.physical.max).isPositiveInfinity();
+        }
+        assertThat(desiredSpecs.primary.render.min).isWithin(FLOAT_TOLERANCE).of(60);
+        assertThat(desiredSpecs.primary.render.max).isWithin(FLOAT_TOLERANCE).of(60);
         assertThat(desiredSpecs.baseModeId).isEqualTo(60);
 
         director.setShouldAlwaysRespectAppRequestedMode(true);
         assertThat(director.shouldAlwaysRespectAppRequestedMode()).isTrue();
         desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
-        assertThat(desiredSpecs.primaryRefreshRateRange.min).isAtMost(50);
-        assertThat(desiredSpecs.primaryRefreshRateRange.max).isAtLeast(90);
+        assertThat(desiredSpecs.primary.physical.min).isAtMost(50);
+        assertThat(desiredSpecs.primary.physical.max).isAtLeast(90);
+        assertThat(desiredSpecs.primary.render.min).isAtMost(50);
+        assertThat(desiredSpecs.primary.render.max).isAtLeast(90);
         assertThat(desiredSpecs.baseModeId).isEqualTo(90);
 
         director.setShouldAlwaysRespectAppRequestedMode(false);
         assertThat(director.shouldAlwaysRespectAppRequestedMode()).isFalse();
 
         desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
-        assertThat(desiredSpecs.primaryRefreshRateRange.min).isWithin(FLOAT_TOLERANCE).of(60);
-        assertThat(desiredSpecs.primaryRefreshRateRange.max).isWithin(FLOAT_TOLERANCE).of(60);
+        assertThat(desiredSpecs.primary.physical.min).isWithin(FLOAT_TOLERANCE).of(60);
+        if (frameRateIsRefreshRate) {
+            assertThat(desiredSpecs.primary.physical.max).isWithin(FLOAT_TOLERANCE).of(60);
+        } else {
+            assertThat(desiredSpecs.primary.physical.max).isPositiveInfinity();
+        }
+        assertThat(desiredSpecs.primary.render.min).isWithin(FLOAT_TOLERANCE).of(60);
+        assertThat(desiredSpecs.primary.render.max).isWithin(FLOAT_TOLERANCE).of(60);
         assertThat(desiredSpecs.baseModeId).isEqualTo(60);
     }
 
     @Test
-    public void testVotingWithSwitchingTypeNone() {
+    @Parameters({
+            "true",
+            "false"
+    })
+    public void testVotingWithSwitchingTypeNone(boolean frameRateIsRefreshRate) {
+        when(mInjector.renderFrameRateIsPhysicalRefreshRate()).thenReturn(frameRateIsRefreshRate);
         DisplayModeDirector director = createDirectorFromFpsRange(0, 90);
         SparseArray<Vote> votes = new SparseArray<>();
         SparseArray<SparseArray<Vote>> votesByDisplay = new SparseArray<>();
         votesByDisplay.put(DISPLAY_ID, votes);
-        votes.put(Vote.PRIORITY_USER_SETTING_MIN_REFRESH_RATE, Vote.forRefreshRates(30, 90));
-        votes.put(Vote.PRIORITY_LOW_POWER_MODE, Vote.forRefreshRates(0, 60));
-
+        votes.put(Vote.PRIORITY_USER_SETTING_MIN_RENDER_FRAME_RATE,
+                Vote.forRenderFrameRates(30, 90));
+        votes.put(Vote.PRIORITY_LOW_POWER_MODE, Vote.forRenderFrameRates(0, 60));
 
         director.injectVotesByDisplay(votesByDisplay);
         assertThat(director.getModeSwitchingType())
                 .isNotEqualTo(DisplayManager.SWITCHING_TYPE_NONE);
         DesiredDisplayModeSpecs desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
 
-        assertThat(desiredSpecs.primaryRefreshRateRange.min).isWithin(FLOAT_TOLERANCE).of(30);
-        assertThat(desiredSpecs.primaryRefreshRateRange.max).isWithin(FLOAT_TOLERANCE).of(60);
-        assertThat(desiredSpecs.appRequestRefreshRateRange.min).isWithin(FLOAT_TOLERANCE).of(0);
-        assertThat(desiredSpecs.appRequestRefreshRateRange.max).isWithin(FLOAT_TOLERANCE).of(60);
+        assertThat(desiredSpecs.primary.physical.min).isWithin(FLOAT_TOLERANCE).of(30);
+        if (frameRateIsRefreshRate) {
+            assertThat(desiredSpecs.primary.physical.max).isWithin(FLOAT_TOLERANCE).of(60);
+        } else {
+            assertThat(desiredSpecs.primary.physical.max).isPositiveInfinity();
+        }
+        assertThat(desiredSpecs.primary.render.min).isWithin(FLOAT_TOLERANCE).of(30);
+        assertThat(desiredSpecs.primary.render.max).isWithin(FLOAT_TOLERANCE).of(60);
+        assertThat(desiredSpecs.appRequest.physical.min).isWithin(FLOAT_TOLERANCE).of(0);
+        if (frameRateIsRefreshRate) {
+            assertThat(desiredSpecs.appRequest.physical.max).isWithin(FLOAT_TOLERANCE).of(
+                    60);
+        } else {
+            assertThat(desiredSpecs.appRequest.physical.max).isPositiveInfinity();
+        }
+        assertThat(desiredSpecs.appRequest.render.min).isWithin(FLOAT_TOLERANCE).of(0);
+        assertThat(desiredSpecs.appRequest.render.max).isWithin(FLOAT_TOLERANCE).of(60);
         assertThat(desiredSpecs.baseModeId).isEqualTo(30);
 
         director.setModeSwitchingType(DisplayManager.SWITCHING_TYPE_NONE);
@@ -611,10 +783,14 @@ public class DisplayModeDirectorTest {
                 .isEqualTo(DisplayManager.SWITCHING_TYPE_NONE);
 
         desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
-        assertThat(desiredSpecs.primaryRefreshRateRange.min).isWithin(FLOAT_TOLERANCE).of(30);
-        assertThat(desiredSpecs.primaryRefreshRateRange.max).isWithin(FLOAT_TOLERANCE).of(30);
-        assertThat(desiredSpecs.appRequestRefreshRateRange.min).isWithin(FLOAT_TOLERANCE).of(30);
-        assertThat(desiredSpecs.appRequestRefreshRateRange.max).isWithin(FLOAT_TOLERANCE).of(30);
+        assertThat(desiredSpecs.primary.physical.min).isWithin(FLOAT_TOLERANCE).of(30);
+        assertThat(desiredSpecs.primary.physical.max).isWithin(FLOAT_TOLERANCE).of(30);
+        assertThat(desiredSpecs.primary.render.min).isWithin(FLOAT_TOLERANCE).of(30);
+        assertThat(desiredSpecs.primary.render.max).isWithin(FLOAT_TOLERANCE).of(30);
+        assertThat(desiredSpecs.appRequest.physical.min).isWithin(FLOAT_TOLERANCE).of(30);
+        assertThat(desiredSpecs.appRequest.physical.max).isWithin(FLOAT_TOLERANCE).of(30);
+        assertThat(desiredSpecs.appRequest.render.min).isWithin(FLOAT_TOLERANCE).of(30);
+        assertThat(desiredSpecs.appRequest.render.max).isWithin(FLOAT_TOLERANCE).of(30);
         assertThat(desiredSpecs.baseModeId).isEqualTo(30);
     }
 
@@ -641,7 +817,12 @@ public class DisplayModeDirectorTest {
     }
 
     @Test
-    public void testDefaultDisplayModeIsSelectedIfAvailable() {
+    @Parameters({
+            "true",
+            "false"
+    })
+    public void testDefaultDisplayModeIsSelectedIfAvailable(boolean frameRateIsRefreshRate) {
+        when(mInjector.renderFrameRateIsPhysicalRefreshRate()).thenReturn(frameRateIsRefreshRate);
         final float[] refreshRates = new float[]{24f, 25f, 30f, 60f, 90f};
         final int defaultModeId = 3;
         DisplayModeDirector director = createDirectorFromRefreshRateArray(
@@ -778,7 +959,7 @@ public class DisplayModeDirectorTest {
         sensorListener.onSensorChanged(TestUtils.createSensorEvent(lightSensor, 20 /*lux*/));
 
         Vote vote = director.getVote(Display.DEFAULT_DISPLAY, Vote.PRIORITY_FLICKER_REFRESH_RATE);
-        assertVoteForRefreshRate(vote, 90 /*fps*/);
+        assertVoteForPhysicalRefreshRate(vote, 90 /*fps*/);
         vote = director.getVote(Display.DEFAULT_DISPLAY, Vote.PRIORITY_FLICKER_REFRESH_RATE_SWITCH);
         assertThat(vote).isNotNull();
         assertThat(vote.disableRefreshRateSwitching).isTrue();
@@ -847,7 +1028,7 @@ public class DisplayModeDirectorTest {
         sensorListener.onSensorChanged(TestUtils.createSensorEvent(lightSensor, 9000));
 
         vote = director.getVote(Display.DEFAULT_DISPLAY, Vote.PRIORITY_FLICKER_REFRESH_RATE);
-        assertVoteForRefreshRate(vote, 60 /*fps*/);
+        assertVoteForPhysicalRefreshRate(vote, 60 /*fps*/);
         vote = director.getVote(Display.DEFAULT_DISPLAY, Vote.PRIORITY_FLICKER_REFRESH_RATE_SWITCH);
         assertThat(vote).isNotNull();
         assertThat(vote.disableRefreshRateSwitching).isTrue();
@@ -923,12 +1104,17 @@ public class DisplayModeDirectorTest {
     }
 
     @Test
-    public void testAppRequestMinRefreshRate() {
+    @Parameters({
+            "true",
+            "false"
+    })
+    public void testAppRequestMinRefreshRate(boolean frameRateIsRefreshRate) {
         // Confirm that the app min request range doesn't include flicker or min refresh rate
         // settings but does include everything else.
-        assertTrue(Vote.PRIORITY_APP_REQUEST_REFRESH_RATE_RANGE
+        assertTrue(Vote.PRIORITY_APP_REQUEST_RENDER_FRAME_RATE_RANGE
                 >= Vote.APP_REQUEST_REFRESH_RATE_RANGE_PRIORITY_CUTOFF);
 
+        when(mInjector.renderFrameRateIsPhysicalRefreshRate()).thenReturn(frameRateIsRefreshRate);
         Display.Mode[] modes = new Display.Mode[3];
         modes[0] = new Display.Mode(
                 /*modeId=*/60, /*width=*/1000, /*height=*/1000, 60);
@@ -942,38 +1128,42 @@ public class DisplayModeDirectorTest {
         SparseArray<SparseArray<Vote>> votesByDisplay = new SparseArray<>();
         votesByDisplay.put(DISPLAY_ID, votes);
         votes.put(Vote.PRIORITY_FLICKER_REFRESH_RATE_SWITCH, Vote.forDisableRefreshRateSwitching());
-        votes.put(Vote.PRIORITY_FLICKER_REFRESH_RATE, Vote.forRefreshRates(60, 60));
+        votes.put(Vote.PRIORITY_FLICKER_REFRESH_RATE, Vote.forPhysicalRefreshRates(60, 60));
         director.injectVotesByDisplay(votesByDisplay);
         DesiredDisplayModeSpecs desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
-        assertThat(desiredSpecs.primaryRefreshRateRange.min).isWithin(FLOAT_TOLERANCE).of(60);
-        assertThat(desiredSpecs.primaryRefreshRateRange.max).isWithin(FLOAT_TOLERANCE).of(60);
-        assertThat(desiredSpecs.appRequestRefreshRateRange.min).isAtMost(60f);
-        assertThat(desiredSpecs.appRequestRefreshRateRange.max).isAtLeast(90f);
+        assertThat(desiredSpecs.primary.physical.min).isWithin(FLOAT_TOLERANCE).of(60);
+        assertThat(desiredSpecs.primary.physical.max).isWithin(FLOAT_TOLERANCE).of(60);
+        assertThat(desiredSpecs.appRequest.physical.min).isAtMost(60f);
+        assertThat(desiredSpecs.appRequest.physical.max).isAtLeast(90f);
 
-        votes.put(Vote.PRIORITY_USER_SETTING_MIN_REFRESH_RATE,
-                Vote.forRefreshRates(90, Float.POSITIVE_INFINITY));
+        votes.put(Vote.PRIORITY_USER_SETTING_MIN_RENDER_FRAME_RATE,
+                Vote.forRenderFrameRates(90, Float.POSITIVE_INFINITY));
         director.injectVotesByDisplay(votesByDisplay);
         desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
-        assertThat(desiredSpecs.primaryRefreshRateRange.min).isWithin(FLOAT_TOLERANCE).of(90);
-        assertThat(desiredSpecs.primaryRefreshRateRange.max).isAtLeast(90f);
-        assertThat(desiredSpecs.appRequestRefreshRateRange.min).isAtMost(60f);
-        assertThat(desiredSpecs.appRequestRefreshRateRange.max).isAtLeast(90f);
+        assertThat(desiredSpecs.primary.physical.min).isWithin(FLOAT_TOLERANCE).of(90);
+        assertThat(desiredSpecs.primary.physical.max).isAtLeast(90f);
+        assertThat(desiredSpecs.appRequest.physical.min).isAtMost(60f);
+        assertThat(desiredSpecs.appRequest.physical.max).isAtLeast(90f);
 
-        votes.put(Vote.PRIORITY_APP_REQUEST_REFRESH_RATE_RANGE,
-                Vote.forRefreshRates(75, Float.POSITIVE_INFINITY));
+        votes.put(Vote.PRIORITY_APP_REQUEST_RENDER_FRAME_RATE_RANGE,
+                Vote.forRenderFrameRates(75, Float.POSITIVE_INFINITY));
         director.injectVotesByDisplay(votesByDisplay);
         desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
-        assertThat(desiredSpecs.primaryRefreshRateRange.min).isWithin(FLOAT_TOLERANCE).of(90);
-        assertThat(desiredSpecs.primaryRefreshRateRange.max).isWithin(FLOAT_TOLERANCE).of(90);
-        assertThat(desiredSpecs.appRequestRefreshRateRange.min).isWithin(FLOAT_TOLERANCE).of(75);
-        assertThat(desiredSpecs.appRequestRefreshRateRange.max).isAtLeast(90f);
+        assertThat(desiredSpecs.primary.physical.min).isWithin(FLOAT_TOLERANCE).of(90);
+        assertThat(desiredSpecs.primary.physical.max).isWithin(FLOAT_TOLERANCE).of(90);
+        assertThat(desiredSpecs.appRequest.physical.min).isWithin(FLOAT_TOLERANCE).of(75);
+        assertThat(desiredSpecs.appRequest.physical.max).isAtLeast(90f);
     }
 
     @Test
-    public void testAppRequestMaxRefreshRate() {
+    @Parameters({
+            "true",
+            "false"
+    })
+    public void testAppRequestMaxRefreshRate(boolean frameRateIsRefreshRate) {
         // Confirm that the app max request range doesn't include flicker or min refresh rate
         // settings but does include everything else.
-        assertTrue(Vote.PRIORITY_APP_REQUEST_REFRESH_RATE_RANGE
+        assertTrue(Vote.PRIORITY_APP_REQUEST_RENDER_FRAME_RATE_RANGE
                 >= Vote.APP_REQUEST_REFRESH_RATE_RANGE_PRIORITY_CUTOFF);
 
         Display.Mode[] modes = new Display.Mode[3];
@@ -984,47 +1174,85 @@ public class DisplayModeDirectorTest {
         modes[2] = new Display.Mode(
                 /*modeId=*/90, /*width=*/1000, /*height=*/1000, 90);
 
+        when(mInjector.renderFrameRateIsPhysicalRefreshRate()).thenReturn(frameRateIsRefreshRate);
         DisplayModeDirector director = createDirectorFromModeArray(modes, modes[1]);
         SparseArray<Vote> votes = new SparseArray<>();
         SparseArray<SparseArray<Vote>> votesByDisplay = new SparseArray<>();
         votesByDisplay.put(DISPLAY_ID, votes);
         votes.put(Vote.PRIORITY_FLICKER_REFRESH_RATE_SWITCH, Vote.forDisableRefreshRateSwitching());
-        votes.put(Vote.PRIORITY_FLICKER_REFRESH_RATE, Vote.forRefreshRates(60, 60));
+        votes.put(Vote.PRIORITY_FLICKER_REFRESH_RATE, Vote.forPhysicalRefreshRates(60, 60));
         director.injectVotesByDisplay(votesByDisplay);
         DesiredDisplayModeSpecs desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
-        assertThat(desiredSpecs.primaryRefreshRateRange.min).isWithin(FLOAT_TOLERANCE).of(60);
-        assertThat(desiredSpecs.primaryRefreshRateRange.max).isWithin(FLOAT_TOLERANCE).of(60);
-        assertThat(desiredSpecs.appRequestRefreshRateRange.min).isAtMost(60f);
-        assertThat(desiredSpecs.appRequestRefreshRateRange.max).isAtLeast(90f);
+        assertThat(desiredSpecs.primary.physical.min).isWithin(FLOAT_TOLERANCE).of(60);
+        assertThat(desiredSpecs.primary.physical.max).isWithin(FLOAT_TOLERANCE).of(60);
+        if (frameRateIsRefreshRate) {
+            assertThat(desiredSpecs.primary.render.min).isWithin(FLOAT_TOLERANCE).of(60);
+        } else {
+            assertThat(desiredSpecs.primary.render.min).isZero();
+        }
+        assertThat(desiredSpecs.primary.render.max).isAtMost(60);
+        assertThat(desiredSpecs.appRequest.physical.min).isAtMost(60f);
+        assertThat(desiredSpecs.appRequest.physical.max).isAtLeast(90f);
+        if (frameRateIsRefreshRate) {
+            assertThat(desiredSpecs.appRequest.render.min).isAtMost(60f);
+        } else {
+            assertThat(desiredSpecs.appRequest.render.min).isZero();
+        }
+        assertThat(desiredSpecs.appRequest.render.max).isAtLeast(90f);
 
-        votes.put(Vote.PRIORITY_USER_SETTING_MIN_REFRESH_RATE,
-                Vote.forRefreshRates(90, Float.POSITIVE_INFINITY));
+        votes.put(Vote.PRIORITY_USER_SETTING_MIN_RENDER_FRAME_RATE,
+                Vote.forRenderFrameRates(90, Float.POSITIVE_INFINITY));
         director.injectVotesByDisplay(votesByDisplay);
         desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
-        assertThat(desiredSpecs.primaryRefreshRateRange.min).isWithin(FLOAT_TOLERANCE).of(90);
-        assertThat(desiredSpecs.primaryRefreshRateRange.max).isAtLeast(90f);
-        assertThat(desiredSpecs.appRequestRefreshRateRange.min).isAtMost(60f);
-        assertThat(desiredSpecs.appRequestRefreshRateRange.max).isAtLeast(90f);
+        assertThat(desiredSpecs.primary.physical.min).isWithin(FLOAT_TOLERANCE).of(90);
+        assertThat(desiredSpecs.primary.physical.max).isWithin(FLOAT_TOLERANCE).of(90);
+        assertThat(desiredSpecs.primary.render.min).isWithin(FLOAT_TOLERANCE).of(90);
+        assertThat(desiredSpecs.primary.render.max).isAtLeast(90f);
+        assertThat(desiredSpecs.appRequest.physical.min).isAtMost(60f);
+        assertThat(desiredSpecs.appRequest.physical.max).isAtLeast(90f);
+        assertThat(desiredSpecs.appRequest.render.min).isAtMost(60f);
+        assertThat(desiredSpecs.appRequest.render.max).isAtLeast(90f);
 
-        votes.put(Vote.PRIORITY_APP_REQUEST_REFRESH_RATE_RANGE, Vote.forRefreshRates(0, 75));
+        votes.put(Vote.PRIORITY_APP_REQUEST_RENDER_FRAME_RATE_RANGE,
+                Vote.forRenderFrameRates(0, 75));
         director.injectVotesByDisplay(votesByDisplay);
         desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
-        assertThat(desiredSpecs.primaryRefreshRateRange.min).isWithin(FLOAT_TOLERANCE).of(75);
-        assertThat(desiredSpecs.primaryRefreshRateRange.max).isWithin(FLOAT_TOLERANCE).of(75);
-        assertThat(desiredSpecs.appRequestRefreshRateRange.min).isZero();
-        assertThat(desiredSpecs.appRequestRefreshRateRange.max).isWithin(FLOAT_TOLERANCE).of(75);
+        assertThat(desiredSpecs.primary.physical.min).isWithin(FLOAT_TOLERANCE).of(75);
+        assertThat(desiredSpecs.primary.physical.max).isWithin(FLOAT_TOLERANCE).of(75);
+        if (frameRateIsRefreshRate) {
+            assertThat(desiredSpecs.primary.render.min).isWithin(FLOAT_TOLERANCE).of(75);
+        } else {
+            assertThat(desiredSpecs.primary.render.min).isZero();
+        }
+        assertThat(desiredSpecs.primary.render.max).isWithin(FLOAT_TOLERANCE).of(75);
+        assertThat(desiredSpecs.appRequest.physical.min).isZero();
+        if (frameRateIsRefreshRate) {
+            assertThat(desiredSpecs.appRequest.physical.max).isWithin(FLOAT_TOLERANCE).of(
+                    75);
+        } else {
+            assertThat(desiredSpecs.appRequest.physical.max).isAtLeast(90f);
+        }
+        assertThat(desiredSpecs.appRequest.render.min).isZero();
+        assertThat(desiredSpecs.appRequest.render.max).isWithin(FLOAT_TOLERANCE).of(75);
     }
 
     @Test
-    public void testAppRequestObserver_modeId() {
+    @Parameters({
+            "true",
+            "false"
+    })
+    public void testAppRequestObserver_modeId(boolean frameRateIsRefreshRate) {
+        when(mInjector.renderFrameRateIsPhysicalRefreshRate()).thenReturn(frameRateIsRefreshRate);
         DisplayModeDirector director = createDirectorFromFpsRange(60, 90);
         director.getAppRequestObserver().setAppRequest(DISPLAY_ID, 60, 0, 0);
 
         Vote appRequestRefreshRate =
                 director.getVote(DISPLAY_ID, Vote.PRIORITY_APP_REQUEST_BASE_MODE_REFRESH_RATE);
         assertNotNull(appRequestRefreshRate);
-        assertThat(appRequestRefreshRate.refreshRateRange.min).isZero();
-        assertThat(appRequestRefreshRate.refreshRateRange.max).isPositiveInfinity();
+        assertThat(appRequestRefreshRate.refreshRateRanges.physical.min).isZero();
+        assertThat(appRequestRefreshRate.refreshRateRanges.physical.max).isPositiveInfinity();
+        assertThat(appRequestRefreshRate.refreshRateRanges.render.min).isZero();
+        assertThat(appRequestRefreshRate.refreshRateRanges.render.max).isPositiveInfinity();
         assertThat(appRequestRefreshRate.disableRefreshRateSwitching).isFalse();
         assertThat(appRequestRefreshRate.baseModeRefreshRate).isWithin(FLOAT_TOLERANCE).of(60);
         assertThat(appRequestRefreshRate.height).isEqualTo(INVALID_SIZE);
@@ -1032,15 +1260,17 @@ public class DisplayModeDirectorTest {
 
         Vote appRequestSize = director.getVote(DISPLAY_ID, Vote.PRIORITY_APP_REQUEST_SIZE);
         assertNotNull(appRequestSize);
-        assertThat(appRequestSize.refreshRateRange.min).isZero();
-        assertThat(appRequestSize.refreshRateRange.max).isPositiveInfinity();
+        assertThat(appRequestSize.refreshRateRanges.physical.min).isZero();
+        assertThat(appRequestSize.refreshRateRanges.physical.max).isPositiveInfinity();
+        assertThat(appRequestSize.refreshRateRanges.render.min).isZero();
+        assertThat(appRequestSize.refreshRateRanges.render.max).isPositiveInfinity();
         assertThat(appRequestSize.disableRefreshRateSwitching).isFalse();
         assertThat(appRequestSize.baseModeRefreshRate).isZero();
         assertThat(appRequestSize.height).isEqualTo(1000);
         assertThat(appRequestSize.width).isEqualTo(1000);
 
         Vote appRequestRefreshRateRange =
-                director.getVote(DISPLAY_ID, Vote.PRIORITY_APP_REQUEST_REFRESH_RATE_RANGE);
+                director.getVote(DISPLAY_ID, Vote.PRIORITY_APP_REQUEST_RENDER_FRAME_RATE_RANGE);
         assertNull(appRequestRefreshRateRange);
 
         director.getAppRequestObserver().setAppRequest(DISPLAY_ID, 90, 0, 0);
@@ -1048,8 +1278,10 @@ public class DisplayModeDirectorTest {
         appRequestRefreshRate =
                 director.getVote(DISPLAY_ID, Vote.PRIORITY_APP_REQUEST_BASE_MODE_REFRESH_RATE);
         assertNotNull(appRequestRefreshRate);
-        assertThat(appRequestRefreshRate.refreshRateRange.min).isZero();
-        assertThat(appRequestRefreshRate.refreshRateRange.max).isPositiveInfinity();
+        assertThat(appRequestRefreshRate.refreshRateRanges.physical.min).isZero();
+        assertThat(appRequestRefreshRate.refreshRateRanges.physical.max).isPositiveInfinity();
+        assertThat(appRequestRefreshRate.refreshRateRanges.render.min).isZero();
+        assertThat(appRequestRefreshRate.refreshRateRanges.render.max).isPositiveInfinity();
         assertThat(appRequestRefreshRate.disableRefreshRateSwitching).isFalse();
         assertThat(appRequestRefreshRate.baseModeRefreshRate).isWithin(FLOAT_TOLERANCE).of(90);
         assertThat(appRequestRefreshRate.height).isEqualTo(INVALID_SIZE);
@@ -1057,18 +1289,25 @@ public class DisplayModeDirectorTest {
 
         appRequestSize = director.getVote(DISPLAY_ID, Vote.PRIORITY_APP_REQUEST_SIZE);
         assertNotNull(appRequestSize);
-        assertThat(appRequestSize.refreshRateRange.min).isZero();
-        assertThat(appRequestSize.refreshRateRange.max).isPositiveInfinity();
+        assertThat(appRequestSize.refreshRateRanges.physical.min).isZero();
+        assertThat(appRequestSize.refreshRateRanges.physical.max).isPositiveInfinity();
+        assertThat(appRequestSize.refreshRateRanges.render.min).isZero();
+        assertThat(appRequestSize.refreshRateRanges.render.max).isPositiveInfinity();
         assertThat(appRequestSize.height).isEqualTo(1000);
         assertThat(appRequestSize.width).isEqualTo(1000);
 
         appRequestRefreshRateRange =
-                director.getVote(DISPLAY_ID, Vote.PRIORITY_APP_REQUEST_REFRESH_RATE_RANGE);
+                director.getVote(DISPLAY_ID, Vote.PRIORITY_APP_REQUEST_RENDER_FRAME_RATE_RANGE);
         assertNull(appRequestRefreshRateRange);
     }
 
     @Test
-    public void testAppRequestObserver_minRefreshRate() {
+    @Parameters({
+            "true",
+            "false"
+    })
+    public void testAppRequestObserver_minRefreshRate(boolean frameRateIsRefreshRate) {
+        when(mInjector.renderFrameRateIsPhysicalRefreshRate()).thenReturn(frameRateIsRefreshRate);
         DisplayModeDirector director = createDirectorFromFpsRange(60, 90);
         director.getAppRequestObserver().setAppRequest(DISPLAY_ID, -1, 60, 0);
         Vote appRequestRefreshRate =
@@ -1079,11 +1318,20 @@ public class DisplayModeDirectorTest {
         assertNull(appRequestSize);
 
         Vote appRequestRefreshRateRange =
-                director.getVote(DISPLAY_ID, Vote.PRIORITY_APP_REQUEST_REFRESH_RATE_RANGE);
+                director.getVote(DISPLAY_ID, Vote.PRIORITY_APP_REQUEST_RENDER_FRAME_RATE_RANGE);
         assertNotNull(appRequestRefreshRateRange);
-        assertThat(appRequestRefreshRateRange.refreshRateRange.min)
+        if (frameRateIsRefreshRate) {
+            assertThat(appRequestRefreshRateRange.refreshRateRanges.physical.min)
+                    .isWithin(FLOAT_TOLERANCE).of(60);
+            assertThat(appRequestRefreshRateRange.refreshRateRanges.physical.max).isAtLeast(90);
+        } else {
+            assertThat(appRequestRefreshRateRange.refreshRateRanges.physical.min).isZero();
+            assertThat(appRequestRefreshRateRange.refreshRateRanges.physical.max)
+                    .isPositiveInfinity();
+        }
+        assertThat(appRequestRefreshRateRange.refreshRateRanges.render.min)
                 .isWithin(FLOAT_TOLERANCE).of(60);
-        assertThat(appRequestRefreshRateRange.refreshRateRange.max).isAtLeast(90);
+        assertThat(appRequestRefreshRateRange.refreshRateRanges.render.max).isAtLeast(90);
         assertThat(appRequestRefreshRateRange.height).isEqualTo(INVALID_SIZE);
         assertThat(appRequestRefreshRateRange.width).isEqualTo(INVALID_SIZE);
 
@@ -1096,17 +1344,32 @@ public class DisplayModeDirectorTest {
         assertNull(appRequestSize);
 
         appRequestRefreshRateRange =
-                director.getVote(DISPLAY_ID, Vote.PRIORITY_APP_REQUEST_REFRESH_RATE_RANGE);
+                director.getVote(DISPLAY_ID, Vote.PRIORITY_APP_REQUEST_RENDER_FRAME_RATE_RANGE);
         assertNotNull(appRequestRefreshRateRange);
-        assertThat(appRequestRefreshRateRange.refreshRateRange.min)
+        if (frameRateIsRefreshRate) {
+            assertThat(appRequestRefreshRateRange.refreshRateRanges.physical.min).isWithin(
+                    FLOAT_TOLERANCE).of(90);
+            assertThat(appRequestRefreshRateRange.refreshRateRanges.physical.max).isAtLeast(90);
+        } else {
+            assertThat(appRequestRefreshRateRange.refreshRateRanges.physical.min).isZero();
+            assertThat(appRequestRefreshRateRange.refreshRateRanges.physical.max)
+                    .isPositiveInfinity();
+        }
+
+        assertThat(appRequestRefreshRateRange.refreshRateRanges.render.min)
                 .isWithin(FLOAT_TOLERANCE).of(90);
-        assertThat(appRequestRefreshRateRange.refreshRateRange.max).isAtLeast(90);
+        assertThat(appRequestRefreshRateRange.refreshRateRanges.render.max).isAtLeast(90);
         assertThat(appRequestRefreshRateRange.height).isEqualTo(INVALID_SIZE);
         assertThat(appRequestRefreshRateRange.width).isEqualTo(INVALID_SIZE);
     }
 
     @Test
-    public void testAppRequestObserver_maxRefreshRate() {
+    @Parameters({
+            "true",
+            "false"
+    })
+    public void testAppRequestObserver_maxRefreshRate(boolean frameRateIsRefreshRate) {
+        when(mInjector.renderFrameRateIsPhysicalRefreshRate()).thenReturn(frameRateIsRefreshRate);
         DisplayModeDirector director = createDirectorFromFpsRange(60, 90);
         director.getAppRequestObserver().setAppRequest(DISPLAY_ID, -1, 0, 90);
         Vote appRequestRefreshRate =
@@ -1117,10 +1380,19 @@ public class DisplayModeDirectorTest {
         assertNull(appRequestSize);
 
         Vote appRequestRefreshRateRange =
-                director.getVote(DISPLAY_ID, Vote.PRIORITY_APP_REQUEST_REFRESH_RATE_RANGE);
+                director.getVote(DISPLAY_ID, Vote.PRIORITY_APP_REQUEST_RENDER_FRAME_RATE_RANGE);
         assertNotNull(appRequestRefreshRateRange);
-        assertThat(appRequestRefreshRateRange.refreshRateRange.min).isZero();
-        assertThat(appRequestRefreshRateRange.refreshRateRange.max)
+        assertThat(appRequestRefreshRateRange.refreshRateRanges.physical.min).isZero();
+        if (frameRateIsRefreshRate) {
+            assertThat(appRequestRefreshRateRange.refreshRateRanges.physical.max)
+                    .isWithin(FLOAT_TOLERANCE).of(90);
+        } else {
+            assertThat(appRequestRefreshRateRange.refreshRateRanges.physical.max)
+                    .isPositiveInfinity();
+        }
+
+        assertThat(appRequestRefreshRateRange.refreshRateRanges.render.min).isZero();
+        assertThat(appRequestRefreshRateRange.refreshRateRanges.render.max)
                 .isWithin(FLOAT_TOLERANCE).of(90);
         assertThat(appRequestRefreshRateRange.height).isEqualTo(INVALID_SIZE);
         assertThat(appRequestRefreshRateRange.width).isEqualTo(INVALID_SIZE);
@@ -1134,10 +1406,19 @@ public class DisplayModeDirectorTest {
         assertNull(appRequestSize);
 
         appRequestRefreshRateRange =
-                director.getVote(DISPLAY_ID, Vote.PRIORITY_APP_REQUEST_REFRESH_RATE_RANGE);
+                director.getVote(DISPLAY_ID, Vote.PRIORITY_APP_REQUEST_RENDER_FRAME_RATE_RANGE);
         assertNotNull(appRequestRefreshRateRange);
-        assertThat(appRequestRefreshRateRange.refreshRateRange.min).isZero();
-        assertThat(appRequestRefreshRateRange.refreshRateRange.max)
+        assertThat(appRequestRefreshRateRange.refreshRateRanges.physical.min).isZero();
+        if (frameRateIsRefreshRate) {
+            assertThat(appRequestRefreshRateRange.refreshRateRanges.physical.max)
+                    .isWithin(FLOAT_TOLERANCE).of(60);
+        } else {
+            assertThat(appRequestRefreshRateRange.refreshRateRanges.physical.max)
+                    .isPositiveInfinity();
+        }
+
+        assertThat(appRequestRefreshRateRange.refreshRateRanges.render.min).isZero();
+        assertThat(appRequestRefreshRateRange.refreshRateRanges.render.max)
                 .isWithin(FLOAT_TOLERANCE).of(60);
         assertThat(appRequestRefreshRateRange.height).isEqualTo(INVALID_SIZE);
         assertThat(appRequestRefreshRateRange.width).isEqualTo(INVALID_SIZE);
@@ -1155,20 +1436,27 @@ public class DisplayModeDirectorTest {
         assertNull(appRequestSize);
 
         Vote appRequestRefreshRateRange =
-                director.getVote(DISPLAY_ID, Vote.PRIORITY_APP_REQUEST_REFRESH_RATE_RANGE);
+                director.getVote(DISPLAY_ID, Vote.PRIORITY_APP_REQUEST_RENDER_FRAME_RATE_RANGE);
         assertNull(appRequestRefreshRateRange);
     }
 
     @Test
-    public void testAppRequestObserver_modeIdAndRefreshRateRange() {
+    @Parameters({
+            "true",
+            "false"
+    })
+    public void testAppRequestObserver_modeIdAndRefreshRateRange(boolean frameRateIsRefreshRate) {
+        when(mInjector.renderFrameRateIsPhysicalRefreshRate()).thenReturn(frameRateIsRefreshRate);
         DisplayModeDirector director = createDirectorFromFpsRange(60, 90);
         director.getAppRequestObserver().setAppRequest(DISPLAY_ID, 60, 90, 90);
 
         Vote appRequestRefreshRate =
                 director.getVote(DISPLAY_ID, Vote.PRIORITY_APP_REQUEST_BASE_MODE_REFRESH_RATE);
         assertNotNull(appRequestRefreshRate);
-        assertThat(appRequestRefreshRate.refreshRateRange.min).isZero();
-        assertThat(appRequestRefreshRate.refreshRateRange.max).isPositiveInfinity();
+        assertThat(appRequestRefreshRate.refreshRateRanges.physical.min).isZero();
+        assertThat(appRequestRefreshRate.refreshRateRanges.physical.max).isPositiveInfinity();
+        assertThat(appRequestRefreshRate.refreshRateRanges.render.min).isZero();
+        assertThat(appRequestRefreshRate.refreshRateRanges.render.max).isPositiveInfinity();
         assertThat(appRequestRefreshRate.disableRefreshRateSwitching).isFalse();
         assertThat(appRequestRefreshRate.baseModeRefreshRate).isWithin(FLOAT_TOLERANCE).of(60);
         assertThat(appRequestRefreshRate.height).isEqualTo(INVALID_SIZE);
@@ -1177,24 +1465,41 @@ public class DisplayModeDirectorTest {
         Vote appRequestSize =
                 director.getVote(DISPLAY_ID, Vote.PRIORITY_APP_REQUEST_SIZE);
         assertNotNull(appRequestSize);
-        assertThat(appRequestSize.refreshRateRange.min).isZero();
-        assertThat(appRequestSize.refreshRateRange.max).isPositiveInfinity();
+        assertThat(appRequestSize.refreshRateRanges.physical.min).isZero();
+        assertThat(appRequestSize.refreshRateRanges.physical.max).isPositiveInfinity();
+        assertThat(appRequestSize.refreshRateRanges.render.min).isZero();
+        assertThat(appRequestSize.refreshRateRanges.render.max).isPositiveInfinity();
         assertThat(appRequestSize.height).isEqualTo(1000);
         assertThat(appRequestSize.width).isEqualTo(1000);
 
         Vote appRequestRefreshRateRange =
-                director.getVote(DISPLAY_ID, Vote.PRIORITY_APP_REQUEST_REFRESH_RATE_RANGE);
+                director.getVote(DISPLAY_ID, Vote.PRIORITY_APP_REQUEST_RENDER_FRAME_RATE_RANGE);
         assertNotNull(appRequestRefreshRateRange);
-        assertThat(appRequestRefreshRateRange.refreshRateRange.max)
+        if (frameRateIsRefreshRate) {
+            assertThat(appRequestRefreshRateRange.refreshRateRanges.physical.min)
+                    .isWithin(FLOAT_TOLERANCE).of(90);
+            assertThat(appRequestRefreshRateRange.refreshRateRanges.physical.max)
+                    .isWithin(FLOAT_TOLERANCE).of(90);
+        } else {
+            assertThat(appRequestRefreshRateRange.refreshRateRanges.physical.min).isZero();
+            assertThat(appRequestRefreshRateRange.refreshRateRanges.physical.max)
+                    .isPositiveInfinity();
+        }
+        assertThat(appRequestRefreshRateRange.refreshRateRanges.render.min)
                 .isWithin(FLOAT_TOLERANCE).of(90);
-        assertThat(appRequestRefreshRateRange.refreshRateRange.max)
+        assertThat(appRequestRefreshRateRange.refreshRateRanges.render.max)
                 .isWithin(FLOAT_TOLERANCE).of(90);
         assertThat(appRequestRefreshRateRange.height).isEqualTo(INVALID_SIZE);
         assertThat(appRequestRefreshRateRange.width).isEqualTo(INVALID_SIZE);
     }
 
     @Test
-    public void testAppRequestsIsTheDefaultMode() {
+    @Parameters({
+            "true",
+            "false"
+    })
+    public void testAppRequestsIsTheDefaultMode(boolean frameRateIsRefreshRate) {
+        when(mInjector.renderFrameRateIsPhysicalRefreshRate()).thenReturn(frameRateIsRefreshRate);
         Display.Mode[] modes = new Display.Mode[2];
         modes[0] = new Display.Mode(
                 /*modeId=*/1, /*width=*/1000, /*height=*/1000, 60);
@@ -1204,8 +1509,8 @@ public class DisplayModeDirectorTest {
         DisplayModeDirector director = createDirectorFromModeArray(modes, modes[0]);
         DesiredDisplayModeSpecs desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
         assertThat(desiredSpecs.baseModeId).isEqualTo(1);
-        assertThat(desiredSpecs.primaryRefreshRateRange.min).isAtMost(60);
-        assertThat(desiredSpecs.primaryRefreshRateRange.max).isAtLeast(90);
+        assertThat(desiredSpecs.primary.physical.min).isAtMost(60);
+        assertThat(desiredSpecs.primary.physical.max).isAtLeast(90);
 
         SparseArray<Vote> votes = new SparseArray<>();
         SparseArray<SparseArray<Vote>> votesByDisplay = new SparseArray<>();
@@ -1214,105 +1519,148 @@ public class DisplayModeDirectorTest {
         votes.put(Vote.PRIORITY_APP_REQUEST_BASE_MODE_REFRESH_RATE,
                 Vote.forBaseModeRefreshRate(appRequestedMode.getRefreshRate()));
         votes.put(Vote.PRIORITY_APP_REQUEST_SIZE, Vote.forSize(appRequestedMode.getPhysicalWidth(),
-                        appRequestedMode.getPhysicalHeight()));
+                appRequestedMode.getPhysicalHeight()));
         director.injectVotesByDisplay(votesByDisplay);
         desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
         assertThat(desiredSpecs.baseModeId).isEqualTo(2);
-        assertThat(desiredSpecs.primaryRefreshRateRange.min).isAtMost(60);
-        assertThat(desiredSpecs.primaryRefreshRateRange.max).isAtLeast(90);
+        assertThat(desiredSpecs.primary.physical.min).isAtMost(60);
+        assertThat(desiredSpecs.primary.physical.max).isAtLeast(90);
     }
 
     @Test
-    public void testDisableRefreshRateSwitchingVote() {
+    @Parameters({
+            "true",
+            "false"
+    })
+    public void testDisableRefreshRateSwitchingVote(boolean frameRateIsRefreshRate) {
+        when(mInjector.renderFrameRateIsPhysicalRefreshRate()).thenReturn(frameRateIsRefreshRate);
         DisplayModeDirector director = createDirectorFromFpsRange(50, 90);
         SparseArray<Vote> votes = new SparseArray<>();
         SparseArray<SparseArray<Vote>> votesByDisplay = new SparseArray<>();
         votesByDisplay.put(DISPLAY_ID, votes);
-        votes.put(Vote.PRIORITY_USER_SETTING_MIN_REFRESH_RATE,
-                Vote.forRefreshRates(90, Float.POSITIVE_INFINITY));
+        votes.put(Vote.PRIORITY_USER_SETTING_MIN_RENDER_FRAME_RATE,
+                Vote.forRenderFrameRates(90, Float.POSITIVE_INFINITY));
         votes.put(Vote.PRIORITY_FLICKER_REFRESH_RATE_SWITCH, Vote.forDisableRefreshRateSwitching());
-        votes.put(Vote.PRIORITY_LOW_POWER_MODE, Vote.forRefreshRates(0, 60));
+        votes.put(Vote.PRIORITY_LOW_POWER_MODE, Vote.forRenderFrameRates(0, 60));
         director.injectVotesByDisplay(votesByDisplay);
         DesiredDisplayModeSpecs desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
-        assertThat(desiredSpecs.primaryRefreshRateRange.min).isWithin(FLOAT_TOLERANCE).of(50);
-        assertThat(desiredSpecs.primaryRefreshRateRange.max).isWithin(FLOAT_TOLERANCE).of(50);
+        assertThat(desiredSpecs.primary.physical.min).isWithin(FLOAT_TOLERANCE).of(50);
+        assertThat(desiredSpecs.primary.physical.max).isWithin(FLOAT_TOLERANCE).of(50);
         assertThat(desiredSpecs.baseModeId).isEqualTo(50);
 
         votes.clear();
         votes.put(Vote.PRIORITY_FLICKER_REFRESH_RATE,
-                Vote.forRefreshRates(70, Float.POSITIVE_INFINITY));
-        votes.put(Vote.PRIORITY_USER_SETTING_MIN_REFRESH_RATE,
-                Vote.forRefreshRates(80, Float.POSITIVE_INFINITY));
+                Vote.forPhysicalRefreshRates(70, Float.POSITIVE_INFINITY));
+        votes.put(Vote.PRIORITY_USER_SETTING_MIN_RENDER_FRAME_RATE,
+                Vote.forRenderFrameRates(80, Float.POSITIVE_INFINITY));
         votes.put(Vote.PRIORITY_FLICKER_REFRESH_RATE_SWITCH, Vote.forDisableRefreshRateSwitching());
-        votes.put(Vote.PRIORITY_LOW_POWER_MODE, Vote.forRefreshRates(0, 90));
+        votes.put(Vote.PRIORITY_LOW_POWER_MODE, Vote.forRenderFrameRates(0, 90));
         desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
-        assertThat(desiredSpecs.primaryRefreshRateRange.min).isWithin(FLOAT_TOLERANCE).of(80);
-        assertThat(desiredSpecs.primaryRefreshRateRange.max).isWithin(FLOAT_TOLERANCE).of(80);
+        assertThat(desiredSpecs.primary.physical.min).isWithin(FLOAT_TOLERANCE).of(80);
+        assertThat(desiredSpecs.primary.physical.max).isWithin(FLOAT_TOLERANCE).of(80);
         assertThat(desiredSpecs.baseModeId).isEqualTo(80);
 
         votes.clear();
         votes.put(Vote.PRIORITY_FLICKER_REFRESH_RATE,
-                Vote.forRefreshRates(90, Float.POSITIVE_INFINITY));
-        votes.put(Vote.PRIORITY_USER_SETTING_MIN_REFRESH_RATE,
-                Vote.forRefreshRates(80, Float.POSITIVE_INFINITY));
+                Vote.forPhysicalRefreshRates(90, Float.POSITIVE_INFINITY));
+        votes.put(Vote.PRIORITY_USER_SETTING_MIN_RENDER_FRAME_RATE,
+                Vote.forRenderFrameRates(80, Float.POSITIVE_INFINITY));
         votes.put(Vote.PRIORITY_FLICKER_REFRESH_RATE_SWITCH, Vote.forDisableRefreshRateSwitching());
-        votes.put(Vote.PRIORITY_LOW_POWER_MODE, Vote.forRefreshRates(0, 90));
+        votes.put(Vote.PRIORITY_LOW_POWER_MODE, Vote.forRenderFrameRates(0, 90));
         desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
-        assertThat(desiredSpecs.primaryRefreshRateRange.min).isWithin(FLOAT_TOLERANCE).of(90);
-        assertThat(desiredSpecs.primaryRefreshRateRange.max).isWithin(FLOAT_TOLERANCE).of(90);
+        assertThat(desiredSpecs.primary.physical.min).isWithin(FLOAT_TOLERANCE).of(90);
+        assertThat(desiredSpecs.primary.physical.max).isWithin(FLOAT_TOLERANCE).of(90);
         assertThat(desiredSpecs.baseModeId).isEqualTo(90);
     }
 
     @Test
-    public void testBaseModeIdInPrimaryRange() {
+    @Parameters({
+            "true",
+            "false"
+    })
+    public void testBaseModeIdInPrimaryRange(boolean frameRateIsRefreshRate) {
+        when(mInjector.renderFrameRateIsPhysicalRefreshRate()).thenReturn(frameRateIsRefreshRate);
         DisplayModeDirector director = createDirectorFromFpsRange(50, 90);
         SparseArray<Vote> votes = new SparseArray<>();
         SparseArray<SparseArray<Vote>> votesByDisplay = new SparseArray<>();
         votesByDisplay.put(DISPLAY_ID, votes);
         votes.put(Vote.PRIORITY_APP_REQUEST_BASE_MODE_REFRESH_RATE,
                 Vote.forBaseModeRefreshRate(70));
-        votes.put(Vote.PRIORITY_LOW_POWER_MODE, Vote.forRefreshRates(0, 60));
+        votes.put(Vote.PRIORITY_LOW_POWER_MODE, Vote.forRenderFrameRates(0, 60));
         director.injectVotesByDisplay(votesByDisplay);
         DesiredDisplayModeSpecs desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
-        assertThat(desiredSpecs.primaryRefreshRateRange.min).isWithin(FLOAT_TOLERANCE).of(0);
-        assertThat(desiredSpecs.primaryRefreshRateRange.max).isWithin(FLOAT_TOLERANCE).of(60);
-        assertThat(desiredSpecs.baseModeId).isEqualTo(50);
+        assertThat(desiredSpecs.primary.physical.min).isWithin(FLOAT_TOLERANCE).of(0);
+        if (frameRateIsRefreshRate) {
+            assertThat(desiredSpecs.primary.physical.max).isWithin(FLOAT_TOLERANCE).of(60);
+            assertThat(desiredSpecs.baseModeId).isEqualTo(50);
+        } else {
+            assertThat(desiredSpecs.primary.physical.max).isPositiveInfinity();
+            assertThat(desiredSpecs.baseModeId).isEqualTo(70);
+        }
+        assertThat(desiredSpecs.primary.render.min).isWithin(FLOAT_TOLERANCE).of(0);
+        assertThat(desiredSpecs.primary.render.max).isWithin(FLOAT_TOLERANCE).of(60);
 
         votes.clear();
         votes.put(Vote.PRIORITY_APP_REQUEST_BASE_MODE_REFRESH_RATE,
                 Vote.forBaseModeRefreshRate(55));
-        votes.put(Vote.PRIORITY_LOW_POWER_MODE, Vote.forRefreshRates(0, 60));
+        votes.put(Vote.PRIORITY_LOW_POWER_MODE, Vote.forRenderFrameRates(0, 60));
         director.injectVotesByDisplay(votesByDisplay);
         desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
-        assertThat(desiredSpecs.primaryRefreshRateRange.min).isWithin(FLOAT_TOLERANCE).of(0);
-        assertThat(desiredSpecs.primaryRefreshRateRange.max).isWithin(FLOAT_TOLERANCE).of(60);
+        assertThat(desiredSpecs.primary.physical.min).isWithin(FLOAT_TOLERANCE).of(0);
+        if (frameRateIsRefreshRate) {
+            assertThat(desiredSpecs.primary.physical.max).isWithin(FLOAT_TOLERANCE).of(60);
+        } else {
+            assertThat(desiredSpecs.primary.physical.max).isPositiveInfinity();
+        }
+        assertThat(desiredSpecs.primary.render.min).isWithin(FLOAT_TOLERANCE).of(0);
+        assertThat(desiredSpecs.primary.render.max).isWithin(FLOAT_TOLERANCE).of(60);
         assertThat(desiredSpecs.baseModeId).isEqualTo(55);
 
         votes.clear();
-        votes.put(Vote.PRIORITY_APP_REQUEST_REFRESH_RATE_RANGE, Vote.forRefreshRates(0, 52));
+        votes.put(Vote.PRIORITY_APP_REQUEST_RENDER_FRAME_RATE_RANGE,
+                Vote.forRenderFrameRates(0, 52));
         votes.put(Vote.PRIORITY_APP_REQUEST_BASE_MODE_REFRESH_RATE,
                 Vote.forBaseModeRefreshRate(55));
-        votes.put(Vote.PRIORITY_LOW_POWER_MODE, Vote.forRefreshRates(0, 60));
+        votes.put(Vote.PRIORITY_LOW_POWER_MODE, Vote.forRenderFrameRates(0, 60));
         director.injectVotesByDisplay(votesByDisplay);
         desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
-        assertThat(desiredSpecs.primaryRefreshRateRange.min).isWithin(FLOAT_TOLERANCE).of(0);
-        assertThat(desiredSpecs.primaryRefreshRateRange.max).isWithin(FLOAT_TOLERANCE).of(60);
+        assertThat(desiredSpecs.primary.physical.min).isWithin(FLOAT_TOLERANCE).of(0);
+        if (frameRateIsRefreshRate) {
+            assertThat(desiredSpecs.primary.physical.max).isWithin(FLOAT_TOLERANCE).of(60);
+            assertThat(desiredSpecs.primary.render.max).isWithin(FLOAT_TOLERANCE).of(60);
+        } else {
+            assertThat(desiredSpecs.primary.physical.max).isPositiveInfinity();
+            assertThat(desiredSpecs.primary.render.max).isWithin(FLOAT_TOLERANCE).of(52);
+        }
+        assertThat(desiredSpecs.primary.render.min).isWithin(FLOAT_TOLERANCE).of(0);
         assertThat(desiredSpecs.baseModeId).isEqualTo(55);
 
         votes.clear();
-        votes.put(Vote.PRIORITY_APP_REQUEST_REFRESH_RATE_RANGE, Vote.forRefreshRates(0, 58));
+        votes.put(Vote.PRIORITY_APP_REQUEST_RENDER_FRAME_RATE_RANGE,
+                Vote.forRenderFrameRates(0, 58));
         votes.put(Vote.PRIORITY_APP_REQUEST_BASE_MODE_REFRESH_RATE,
                 Vote.forBaseModeRefreshRate(55));
-        votes.put(Vote.PRIORITY_LOW_POWER_MODE, Vote.forRefreshRates(0, 60));
+        votes.put(Vote.PRIORITY_LOW_POWER_MODE, Vote.forRenderFrameRates(0, 60));
         director.injectVotesByDisplay(votesByDisplay);
         desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
-        assertThat(desiredSpecs.primaryRefreshRateRange.min).isWithin(FLOAT_TOLERANCE).of(0);
-        assertThat(desiredSpecs.primaryRefreshRateRange.max).isWithin(FLOAT_TOLERANCE).of(58);
+        assertThat(desiredSpecs.primary.physical.min).isWithin(FLOAT_TOLERANCE).of(0);
+        if (frameRateIsRefreshRate) {
+            assertThat(desiredSpecs.primary.physical.max).isWithin(FLOAT_TOLERANCE).of(58);
+        } else {
+            assertThat(desiredSpecs.primary.physical.max).isPositiveInfinity();
+        }
+        assertThat(desiredSpecs.primary.render.min).isWithin(FLOAT_TOLERANCE).of(0);
+        assertThat(desiredSpecs.primary.render.max).isWithin(FLOAT_TOLERANCE).of(58);
         assertThat(desiredSpecs.baseModeId).isEqualTo(55);
     }
 
     @Test
-    public void testStaleAppVote() {
+    @Parameters({
+            "true",
+            "false"
+    })
+    public void testStaleAppVote(boolean frameRateIsRefreshRate) {
+        when(mInjector.renderFrameRateIsPhysicalRefreshRate()).thenReturn(frameRateIsRefreshRate);
         Display.Mode[] modes = new Display.Mode[4];
         modes[0] = new Display.Mode(
                 /*modeId=*/1, /*width=*/1000, /*height=*/1000, 60);
@@ -1358,9 +1706,124 @@ public class DisplayModeDirectorTest {
     }
 
     @Test
-    public void testProximitySensorVoting() throws Exception {
+    @Parameters({
+            "true",
+            "false"
+    })
+    public void testRefreshRateIsSubsetOfFrameRate(boolean frameRateIsRefreshRate) {
+        when(mInjector.renderFrameRateIsPhysicalRefreshRate()).thenReturn(frameRateIsRefreshRate);
+        DisplayModeDirector director = createDirectorFromFpsRange(60, 120);
+        SparseArray<Vote> votes = new SparseArray<>();
+        SparseArray<SparseArray<Vote>> votesByDisplay = new SparseArray<>();
+        votesByDisplay.put(DISPLAY_ID, votes);
+
+
+        votes.put(Vote.PRIORITY_UDFPS, Vote.forPhysicalRefreshRates(90, 120));
+        director.injectVotesByDisplay(votesByDisplay);
+        DesiredDisplayModeSpecs desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
+        assertThat(desiredSpecs.appRequest.physical.min).isWithin(FLOAT_TOLERANCE).of(90);
+        assertThat(desiredSpecs.appRequest.physical.max).isWithin(FLOAT_TOLERANCE).of(120);
+        if (frameRateIsRefreshRate) {
+            assertThat(desiredSpecs.appRequest.render.min).isWithin(FLOAT_TOLERANCE).of(90);
+        } else {
+            assertThat(desiredSpecs.appRequest.render.min).isZero();
+        }
+        assertThat(desiredSpecs.appRequest.render.max).isWithin(FLOAT_TOLERANCE).of(120);
+
+        votes.clear();
+        votes.put(Vote.PRIORITY_UDFPS, Vote.forPhysicalRefreshRates(90, 120));
+        votes.put(Vote.PRIORITY_USER_SETTING_PEAK_RENDER_FRAME_RATE,
+                Vote.forRenderFrameRates(0, 60));
+        director.injectVotesByDisplay(votesByDisplay);
+        desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
+        assertThat(desiredSpecs.appRequest.physical.min).isWithin(FLOAT_TOLERANCE).of(90);
+        assertThat(desiredSpecs.appRequest.physical.max).isWithin(FLOAT_TOLERANCE).of(120);
+        if (frameRateIsRefreshRate) {
+            assertThat(desiredSpecs.appRequest.render.min).isWithin(FLOAT_TOLERANCE).of(90);
+            assertThat(desiredSpecs.appRequest.render.max).isWithin(FLOAT_TOLERANCE).of(
+                    120);
+        } else {
+            assertThat(desiredSpecs.appRequest.render.min).isZero();
+            assertThat(desiredSpecs.appRequest.render.max).isWithin(FLOAT_TOLERANCE).of(60);
+        }
+
+        votes.clear();
+        votes.put(Vote.PRIORITY_UDFPS, Vote.forPhysicalRefreshRates(90, 120));
+        votes.put(Vote.PRIORITY_USER_SETTING_PEAK_RENDER_FRAME_RATE,
+                Vote.forRenderFrameRates(60, 60));
+        director.injectVotesByDisplay(votesByDisplay);
+        desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
+        assertThat(desiredSpecs.appRequest.physical.min).isWithin(FLOAT_TOLERANCE).of(90);
+        assertThat(desiredSpecs.appRequest.physical.max).isWithin(FLOAT_TOLERANCE).of(120);
+        if (frameRateIsRefreshRate) {
+            assertThat(desiredSpecs.appRequest.render.min).isWithin(FLOAT_TOLERANCE).of(90);
+            assertThat(desiredSpecs.appRequest.render.max).isWithin(FLOAT_TOLERANCE).of(
+                    120);
+        } else {
+            assertThat(desiredSpecs.appRequest.render.min).isWithin(FLOAT_TOLERANCE).of(60);
+            assertThat(desiredSpecs.appRequest.render.max).isWithin(FLOAT_TOLERANCE).of(60);
+        }
+
+        votes.clear();
+        votes.put(Vote.PRIORITY_UDFPS, Vote.forPhysicalRefreshRates(90, 120));
+        votes.put(Vote.PRIORITY_USER_SETTING_PEAK_RENDER_FRAME_RATE,
+                Vote.forRenderFrameRates(140, 140));
+        director.injectVotesByDisplay(votesByDisplay);
+        desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
+        assertThat(desiredSpecs.appRequest.physical.min).isWithin(FLOAT_TOLERANCE).of(90);
+        assertThat(desiredSpecs.appRequest.physical.max).isWithin(FLOAT_TOLERANCE).of(120);
+        if (frameRateIsRefreshRate) {
+            assertThat(desiredSpecs.appRequest.render.min).isWithin(FLOAT_TOLERANCE).of(90);
+        } else {
+            assertThat(desiredSpecs.appRequest.render.min).isZero();
+        }
+        assertThat(desiredSpecs.appRequest.render.max).isWithin(FLOAT_TOLERANCE).of(120);
+    }
+
+    @Test
+    public void testRenderFrameRateIsAchievableByPhysicalRefreshRate() {
+        when(mInjector.renderFrameRateIsPhysicalRefreshRate()).thenReturn(false);
+        DisplayModeDirector director = createDirectorFromFpsRange(60, 120);
+        SparseArray<Vote> votes = new SparseArray<>();
+        SparseArray<SparseArray<Vote>> votesByDisplay = new SparseArray<>();
+        votesByDisplay.put(DISPLAY_ID, votes);
+
+
+        votes.put(Vote.PRIORITY_UDFPS, Vote.forPhysicalRefreshRates(120, 120));
+        votes.put(Vote.PRIORITY_LOW_POWER_MODE, Vote.forRenderFrameRates(90, 90));
+        director.injectVotesByDisplay(votesByDisplay);
+        DesiredDisplayModeSpecs desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
+        assertThat(desiredSpecs.appRequest.physical.min).isWithin(FLOAT_TOLERANCE).of(120);
+        assertThat(desiredSpecs.appRequest.physical.max).isWithin(FLOAT_TOLERANCE).of(120);
+        assertThat(desiredSpecs.appRequest.render.min).isZero();
+        assertThat(desiredSpecs.appRequest.render.max).isWithin(FLOAT_TOLERANCE).of(120);
+    }
+
+    @Test
+    public void testRenderFrameRateIsDroppedIfLowerPriorityThenBaseModeRefreshRate() {
+        when(mInjector.renderFrameRateIsPhysicalRefreshRate()).thenReturn(false);
+        DisplayModeDirector director = createDirectorFromFpsRange(60, 120);
+        SparseArray<Vote> votes = new SparseArray<>();
+        SparseArray<SparseArray<Vote>> votesByDisplay = new SparseArray<>();
+        votesByDisplay.put(DISPLAY_ID, votes);
+        votes.put(Vote.PRIORITY_APP_REQUEST_RENDER_FRAME_RATE_RANGE,
+                Vote.forRenderFrameRates(120, 120));
+        votes.put(Vote.PRIORITY_APP_REQUEST_BASE_MODE_REFRESH_RATE,
+                Vote.forBaseModeRefreshRate(90));
+        votes.put(Vote.PRIORITY_PROXIMITY, Vote.forPhysicalRefreshRates(60, 120));
+        director.injectVotesByDisplay(votesByDisplay);
+        DesiredDisplayModeSpecs desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
+        assertThat(desiredSpecs.primary.physical.min).isWithin(FLOAT_TOLERANCE).of(60);
+        assertThat(desiredSpecs.primary.physical.max).isWithin(FLOAT_TOLERANCE).of(120);
+        assertThat(desiredSpecs.primary.render.min).isWithin(FLOAT_TOLERANCE).of(0);
+        assertThat(desiredSpecs.primary.render.max).isWithin(FLOAT_TOLERANCE).of(120);
+        assertThat(desiredSpecs.baseModeId).isEqualTo(90);
+    }
+
+    @Test
+    public void testProximitySensorVoting() {
         DisplayModeDirector director =
-                createDirectorFromRefreshRateArray(new float[] {60.f, 90.f}, 0);
+                createDirectorFromRefreshRateArray(new float[]{60.f, 90.f}, 0);
         director.start(createMockSensorManager());
 
         ArgumentCaptor<ProximityActiveListener> ProximityCaptor =
@@ -1389,7 +1852,7 @@ public class DisplayModeDirectorTest {
         // Set the proximity to active and verify that we added a vote.
         proximityListener.onProximityActive(true);
         vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_PROXIMITY);
-        assertVoteForRefreshRate(vote, 60.f);
+        assertVoteForPhysicalRefreshRate(vote, 60.f);
 
         // Set the display state to doze and verify that the vote is gone
         when(mInjector.isDozeState(any(Display.class))).thenReturn(true);
@@ -1401,7 +1864,7 @@ public class DisplayModeDirectorTest {
         when(mInjector.isDozeState(any(Display.class))).thenReturn(false);
         displayListener.onDisplayChanged(DISPLAY_ID);
         vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_PROXIMITY);
-        assertVoteForRefreshRate(vote, 60.f);
+        assertVoteForPhysicalRefreshRate(vote, 60.f);
 
         // Set the display state to doze and verify that the vote is gone
         when(mInjector.isDozeState(any(Display.class))).thenReturn(true);
@@ -1412,7 +1875,7 @@ public class DisplayModeDirectorTest {
         // Remove the display to cause the doze state to be removed
         displayListener.onDisplayRemoved(DISPLAY_ID);
         vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_PROXIMITY);
-        assertVoteForRefreshRate(vote, 60.f);
+        assertVoteForPhysicalRefreshRate(vote, 60.f);
 
         // Turn prox off and verify vote is gone.
         proximityListener.onProximityActive(false);
@@ -1456,7 +1919,7 @@ public class DisplayModeDirectorTest {
                     BrightnessInfo.BRIGHTNESS_MAX_REASON_NONE));
         listener.onDisplayChanged(DISPLAY_ID);
         vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_HIGH_BRIGHTNESS_MODE);
-        assertVoteForRefreshRate(vote, hbmRefreshRate);
+        assertVoteForPhysicalRefreshRate(vote, hbmRefreshRate);
 
         // Turn on HBM, with brightness below the HBM range
         when(mInjector.getBrightnessInfo(DISPLAY_ID)).thenReturn(
@@ -1483,7 +1946,7 @@ public class DisplayModeDirectorTest {
                     BrightnessInfo.BRIGHTNESS_MAX_REASON_NONE));
         listener.onDisplayChanged(DISPLAY_ID);
         vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_HIGH_BRIGHTNESS_MODE);
-        assertVoteForRefreshRate(vote, hbmRefreshRate);
+        assertVoteForPhysicalRefreshRate(vote, hbmRefreshRate);
 
         // Turn off HBM
         when(mInjector.getBrightnessInfo(DISPLAY_ID)).thenReturn(
@@ -1579,7 +2042,7 @@ public class DisplayModeDirectorTest {
                     TRANSITION_POINT, BrightnessInfo.BRIGHTNESS_MAX_REASON_NONE));
         listener.onDisplayChanged(DISPLAY_ID);
         vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_HIGH_BRIGHTNESS_MODE);
-        assertVoteForRefreshRate(vote, initialRefreshRate);
+        assertVoteForPhysicalRefreshRate(vote, initialRefreshRate);
 
         // Change refresh rate vote value through DeviceConfig, ensure it takes precedence
         final int updatedRefreshRate = 90;
@@ -1589,7 +2052,7 @@ public class DisplayModeDirectorTest {
         assertThat(director.getHbmObserver().getRefreshRateInHbmSunlight())
                 .isEqualTo(updatedRefreshRate);
         vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_HIGH_BRIGHTNESS_MODE);
-        assertVoteForRefreshRate(vote, updatedRefreshRate);
+        assertVoteForPhysicalRefreshRate(vote, updatedRefreshRate);
 
         // Turn off HBM
         when(mInjector.getBrightnessInfo(DISPLAY_ID)).thenReturn(
@@ -1605,7 +2068,7 @@ public class DisplayModeDirectorTest {
                     TRANSITION_POINT, BrightnessInfo.BRIGHTNESS_MAX_REASON_NONE));
         listener.onDisplayChanged(DISPLAY_ID);
         vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_HIGH_BRIGHTNESS_MODE);
-        assertVoteForRefreshRate(vote, updatedRefreshRate);
+        assertVoteForPhysicalRefreshRate(vote, updatedRefreshRate);
 
         // Reset DeviceConfig refresh rate, ensure vote falls back to the initial value
         mInjector.getDeviceConfig().setRefreshRateInHbmSunlight(0);
@@ -1613,7 +2076,7 @@ public class DisplayModeDirectorTest {
         waitForIdleSync();
         assertThat(director.getHbmObserver().getRefreshRateInHbmSunlight()).isEqualTo(0);
         vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_HIGH_BRIGHTNESS_MODE);
-        assertVoteForRefreshRate(vote, initialRefreshRate);
+        assertVoteForPhysicalRefreshRate(vote, initialRefreshRate);
 
         // Turn off HBM
         when(mInjector.getBrightnessInfo(DISPLAY_ID)).thenReturn(
@@ -1693,7 +2156,7 @@ public class DisplayModeDirectorTest {
                     TRANSITION_POINT, BrightnessInfo.BRIGHTNESS_MAX_REASON_NONE));
         listener.onDisplayChanged(DISPLAY_ID);
         vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_HIGH_BRIGHTNESS_MODE);
-        assertVoteForRefreshRate(vote, 60.0f);
+        assertVoteForPhysicalRefreshRate(vote, 60.0f);
 
         // Turn off HBM
         when(mInjector.getBrightnessInfo(DISPLAY_ID)).thenReturn(
@@ -1741,7 +2204,7 @@ public class DisplayModeDirectorTest {
         if (Float.isNaN(rr)) {
             assertNull(vote);
         } else {
-            assertVoteForRefreshRate(vote, rr);
+            assertVoteForPhysicalRefreshRate(vote, rr);
         }
     }
 
@@ -1817,7 +2280,7 @@ public class DisplayModeDirectorTest {
                     TRANSITION_POINT, BrightnessInfo.BRIGHTNESS_MAX_REASON_NONE));
         listener.onDisplayChanged(DISPLAY_ID);
         vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_HIGH_BRIGHTNESS_MODE);
-        assertVoteForRefreshRate(vote, 60.f);
+        assertVoteForPhysicalRefreshRate(vote, 60.f);
 
         // Turn off HBM
         listener.onDisplayRemoved(DISPLAY_ID);
@@ -1845,7 +2308,7 @@ public class DisplayModeDirectorTest {
         // Set the skin temperature to critical and verify that we added a vote.
         listener.notifyThrottling(getSkinTemp(Temperature.THROTTLING_CRITICAL));
         vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_SKIN_TEMPERATURE);
-        assertVoteForRefreshRateRange(vote, 0f, 60.f);
+        assertVoteForRenderFrameRateRange(vote, 0f, 60.f);
 
         // Set the skin temperature to severe and verify that the vote is gone.
         listener.notifyThrottling(getSkinTemp(Temperature.THROTTLING_SEVERE));
@@ -1871,18 +2334,18 @@ public class DisplayModeDirectorTest {
         return new Temperature(30.0f, Temperature.TYPE_SKIN, "test_skin_temp", status);
     }
 
-    private void assertVoteForRefreshRate(Vote vote, float refreshRate) {
+    private void assertVoteForPhysicalRefreshRate(Vote vote, float refreshRate) {
         assertThat(vote).isNotNull();
         final RefreshRateRange expectedRange = new RefreshRateRange(refreshRate, refreshRate);
-        assertThat(vote.refreshRateRange).isEqualTo(expectedRange);
+        assertThat(vote.refreshRateRanges.physical).isEqualTo(expectedRange);
     }
 
-    private void assertVoteForRefreshRateRange(
-            Vote vote, float refreshRateLow, float refreshRateHigh) {
+    private void assertVoteForRenderFrameRateRange(
+            Vote vote, float frameRateLow, float frameRateHigh) {
         assertThat(vote).isNotNull();
         final RefreshRateRange expectedRange =
-                new RefreshRateRange(refreshRateLow, refreshRateHigh);
-        assertThat(vote.refreshRateRange).isEqualTo(expectedRange);
+                new RefreshRateRange(frameRateLow, frameRateHigh);
+        assertThat(vote.refreshRateRanges.render).isEqualTo(expectedRange);
     }
 
     public static class FakeDeviceConfig extends FakeDeviceConfigInterface {
@@ -2081,6 +2544,11 @@ public class DisplayModeDirectorTest {
         @Override
         public IThermalService getThermalService() {
             return null;
+        }
+
+        @Override
+        public boolean renderFrameRateIsPhysicalRefreshRate() {
+            return true;
         }
 
         void notifyPeakRefreshRateChanged() {
