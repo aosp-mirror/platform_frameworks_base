@@ -294,6 +294,8 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
                 }
             });
             mUdfpsController.setAuthControllerUpdateUdfpsLocation(this::updateUdfpsLocation);
+            mUdfpsController.setUdfpsDisplayMode(new UdfpsDisplayMode(mContext, mExecution,
+                    this));
             mUdfpsBounds = mUdfpsProps.get(0).getLocation().getRect();
         }
 
