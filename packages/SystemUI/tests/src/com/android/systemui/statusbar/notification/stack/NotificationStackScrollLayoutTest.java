@@ -163,7 +163,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         mStackScroller.setCentralSurfaces(mCentralSurfaces);
         mStackScroller.setEmptyShadeView(mEmptyShadeView);
         when(mStackScrollLayoutController.isHistoryEnabled()).thenReturn(true);
-        when(mStackScrollLayoutController.getNoticationRoundessManager())
+        when(mStackScrollLayoutController.getNotificationRoundnessManager())
                 .thenReturn(mNotificationRoundnessManager);
         mStackScroller.setController(mStackScrollLayoutController);
 

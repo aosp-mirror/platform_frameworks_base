@@ -129,6 +129,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     @Mock private NotificationStackSizeCalculator mNotificationStackSizeCalculator;
     @Mock private ShadeTransitionController mShadeTransitionController;
     @Mock private FeatureFlags mFeatureFlags;
+    @Mock private NotificationTargetsHelper mNotificationTargetsHelper;
 
     @Captor
     private ArgumentCaptor<StatusBarStateController.StateListener> mStateListenerArgumentCaptor;
@@ -177,7 +178,8 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
                 mStackLogger,
                 mLogger,
                 mNotificationStackSizeCalculator,
-                mFeatureFlags
+                mFeatureFlags,
+                mNotificationTargetsHelper
         );
 
         when(mNotificationStackScrollLayout.isAttachedToWindow()).thenReturn(true);

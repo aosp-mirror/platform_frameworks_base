@@ -26,6 +26,8 @@ import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager;
+import com.android.systemui.statusbar.notification.Roundable;
+import com.android.systemui.statusbar.notification.SourceType;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.logging.NotificationRoundnessLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -59,8 +61,8 @@ public class NotificationRoundnessManager implements Dumpable {
     private boolean mIsClearAllInProgress;
 
     private ExpandableView mSwipedView = null;
-    private ExpandableView mViewBeforeSwipedView = null;
-    private ExpandableView mViewAfterSwipedView = null;
+    private Roundable mViewBeforeSwipedView = null;
+    private Roundable mViewAfterSwipedView = null;
 
     @Inject
     NotificationRoundnessManager(
@@ -101,11 +103,12 @@ public class NotificationRoundnessManager implements Dumpable {
     public boolean isViewAffectedBySwipe(ExpandableView expandableView) {
         return expandableView != null
                 && (expandableView == mSwipedView
-                    || expandableView == mViewBeforeSwipedView
-                    || expandableView == mViewAfterSwipedView);
+                || expandableView == mViewBeforeSwipedView
+                || expandableView == mViewAfterSwipedView);
     }
 
-    boolean updateViewWithoutCallback(ExpandableView view,
+    boolean updateViewWithoutCallback(
+            ExpandableView view,
             boolean animate) {
         if (view == null
                 || view == mViewBeforeSwipedView
@@ -113,11 +116,15 @@ public class NotificationRoundnessManager implements Dumpable {
             return false;
         }
 
-        final float topRoundness = getRoundnessFraction(view, true /* top */);
-        final float bottomRoundness = getRoundnessFraction(view, false /* top */);
+        final boolean isTopChanged = view.requestTopRoundness(
+                getRoundnessDefaultValue(view, true /* top */),
+                animate,
+                SourceType.DefaultValue);
 
-        final boolean topChanged = view.setTopRoundness(topRoundness, animate);
-        final boolean bottomChanged = view.setBottomRoundness(bottomRoundness, animate);
+        final boolean isBottomChanged = view.requestBottomRoundness(
+                getRoundnessDefaultValue(view, /* top = */ false),
+                animate,
+                SourceType.DefaultValue);
 
         final boolean isFirstInSection = isFirstInSection(view);
         final boolean isLastInSection = isLastInSection(view);
@@ -126,9 +133,9 @@ public class NotificationRoundnessManager implements Dumpable {
         view.setLastInSection(isLastInSection);
 
         mNotifLogger.onCornersUpdated(view, isFirstInSection,
-                isLastInSection, topChanged, bottomChanged);
+                isLastInSection, isTopChanged, isBottomChanged);
 
-        return (isFirstInSection || isLastInSection) && (topChanged || bottomChanged);
+        return (isFirstInSection || isLastInSection) && (isTopChanged || isBottomChanged);
     }
 
     private boolean isFirstInSection(ExpandableView view) {
@@ -150,42 +157,46 @@ public class NotificationRoundnessManager implements Dumpable {
     }
 
     void setViewsAffectedBySwipe(
-            ExpandableView viewBefore,
+            Roundable viewBefore,
             ExpandableView viewSwiped,
-            ExpandableView viewAfter) {
+            Roundable viewAfter) {
         final boolean animate = true;
+        final SourceType source = SourceType.OnDismissAnimation;
 
-        ExpandableView oldViewBefore = mViewBeforeSwipedView;
+        // This method requires you to change the roundness of the current View targets and reset
+        // the roundness of the old View targets (if any) to 0f.
+        // To avoid conflicts, it generates a set of old Views and removes the current Views
+        // from this set.
+        HashSet<Roundable> oldViews = new HashSet<>();
+        if (mViewBeforeSwipedView != null) oldViews.add(mViewBeforeSwipedView);
+        if (mSwipedView != null) oldViews.add(mSwipedView);
+        if (mViewAfterSwipedView != null) oldViews.add(mViewAfterSwipedView);
+
         mViewBeforeSwipedView = viewBefore;
-        if (oldViewBefore != null) {
-            final float bottomRoundness = getRoundnessFraction(oldViewBefore, false /* top */);
-            oldViewBefore.setBottomRoundness(bottomRoundness,  animate);
-        }
         if (viewBefore != null) {
-            viewBefore.setBottomRoundness(1f, animate);
+            oldViews.remove(viewBefore);
+            viewBefore.requestTopRoundness(0f, animate, source);
+            viewBefore.requestBottomRoundness(1f, animate, source);
         }
 
-        ExpandableView oldSwipedview = mSwipedView;
         mSwipedView = viewSwiped;
-        if (oldSwipedview != null) {
-            final float bottomRoundness = getRoundnessFraction(oldSwipedview, false /* top */);
-            final float topRoundness = getRoundnessFraction(oldSwipedview, true /* top */);
-            oldSwipedview.setTopRoundness(topRoundness, animate);
-            oldSwipedview.setBottomRoundness(bottomRoundness, animate);
-        }
         if (viewSwiped != null) {
-            viewSwiped.setTopRoundness(1f, animate);
-            viewSwiped.setBottomRoundness(1f, animate);
+            oldViews.remove(viewSwiped);
+            viewSwiped.requestTopRoundness(1f, animate, source);
+            viewSwiped.requestBottomRoundness(1f, animate, source);
         }
 
-        ExpandableView oldViewAfter = mViewAfterSwipedView;
         mViewAfterSwipedView = viewAfter;
-        if (oldViewAfter != null) {
-            final float topRoundness = getRoundnessFraction(oldViewAfter, true /* top */);
-            oldViewAfter.setTopRoundness(topRoundness, animate);
-        }
         if (viewAfter != null) {
-            viewAfter.setTopRoundness(1f, animate);
+            oldViews.remove(viewAfter);
+            viewAfter.requestTopRoundness(1f, animate, source);
+            viewAfter.requestBottomRoundness(0f, animate, source);
+        }
+
+        // After setting the current Views, reset the views that are still present in the set.
+        for (Roundable oldView : oldViews) {
+            oldView.requestTopRoundness(0f, animate, source);
+            oldView.requestBottomRoundness(0f, animate, source);
         }
     }
 
@@ -193,7 +204,7 @@ public class NotificationRoundnessManager implements Dumpable {
         mIsClearAllInProgress = isClearingAll;
     }
 
-    private float getRoundnessFraction(ExpandableView view, boolean top) {
+    private float getRoundnessDefaultValue(Roundable view, boolean top) {
         if (view == null) {
             return 0f;
         }
@@ -207,28 +218,35 @@ public class NotificationRoundnessManager implements Dumpable {
                 && mIsClearAllInProgress) {
             return 1.0f;
         }
-        if ((view.isPinned()
-                || (view.isHeadsUpAnimatingAway()) && !mExpanded)) {
-            return 1.0f;
-        }
-        if (isFirstInSection(view) && top) {
-            return 1.0f;
-        }
-        if (isLastInSection(view) && !top) {
-            return 1.0f;
-        }
+        if (view instanceof ExpandableView) {
+            ExpandableView expandableView = (ExpandableView) view;
+            if ((expandableView.isPinned()
+                    || (expandableView.isHeadsUpAnimatingAway()) && !mExpanded)) {
+                return 1.0f;
+            }
+            if (isFirstInSection(expandableView) && top) {
+                return 1.0f;
+            }
+            if (isLastInSection(expandableView) && !top) {
+                return 1.0f;
+            }
 
-        if (view == mTrackedHeadsUp) {
-            // If we're pushing up on a headsup the appear fraction is < 0 and it needs to still be
-            // rounded.
-            return MathUtils.saturate(1.0f - mAppearFraction);
+            if (view == mTrackedHeadsUp) {
+                // If we're pushing up on a headsup the appear fraction is < 0 and it needs to
+                // still be rounded.
+                return MathUtils.saturate(1.0f - mAppearFraction);
+            }
+            if (expandableView.showingPulsing() && mRoundForPulsingViews) {
+                return 1.0f;
+            }
+            if (expandableView.isChildInGroup()) {
+                return 0f;
+            }
+            final Resources resources = expandableView.getResources();
+            return resources.getDimension(R.dimen.notification_corner_radius_small)
+                    / resources.getDimension(R.dimen.notification_corner_radius);
         }
-        if (view.showingPulsing() && mRoundForPulsingViews) {
-            return 1.0f;
-        }
-        final Resources resources = view.getResources();
-        return resources.getDimension(R.dimen.notification_corner_radius_small)
-                / resources.getDimension(R.dimen.notification_corner_radius);
+        return 0f;
     }
 
     public void setExpanded(float expandedHeight, float appearFraction) {
@@ -258,8 +276,10 @@ public class NotificationRoundnessManager implements Dumpable {
         mNotifLogger.onSectionCornersUpdated(sections, anyChanged);
     }
 
-    private boolean handleRemovedOldViews(NotificationSection[] sections,
-            ExpandableView[] oldViews, boolean first) {
+    private boolean handleRemovedOldViews(
+            NotificationSection[] sections,
+            ExpandableView[] oldViews,
+            boolean first) {
         boolean anyChanged = false;
         for (ExpandableView oldView : oldViews) {
             if (oldView != null) {
@@ -289,8 +309,10 @@ public class NotificationRoundnessManager implements Dumpable {
         return anyChanged;
     }
 
-    private boolean handleAddedNewViews(NotificationSection[] sections,
-            ExpandableView[] oldViews, boolean first) {
+    private boolean handleAddedNewViews(
+            NotificationSection[] sections,
+            ExpandableView[] oldViews,
+            boolean first) {
         boolean anyChanged = false;
         for (NotificationSection section : sections) {
             ExpandableView newView =
