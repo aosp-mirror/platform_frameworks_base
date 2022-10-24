@@ -24,7 +24,6 @@ import android.os.UserHandle;
 import android.view.MotionEvent;
 
 import com.android.systemui.shared.recents.model.Task;
-import com.android.systemui.shared.system.RemoteTransitionCompat;
 
 /**
  * Temporary callbacks into SystemUI.
