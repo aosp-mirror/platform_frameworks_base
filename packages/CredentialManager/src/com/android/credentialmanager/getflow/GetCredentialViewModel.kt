@@ -30,6 +30,7 @@ import com.android.credentialmanager.common.ResultState
 data class GetCredentialUiState(
   val providers: List<ProviderInfo>,
   val currentScreenState: GetScreenState,
+  val requestDisplayInfo: RequestDisplayInfo,
   val selectedProvider: ProviderInfo? = null,
 )
 

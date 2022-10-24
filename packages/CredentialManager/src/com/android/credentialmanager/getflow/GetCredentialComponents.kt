@@ -66,6 +66,7 @@ fun GetCredentialScreen(
       val uiState = viewModel.uiState
       when (uiState.currentScreenState) {
         GetScreenState.CREDENTIAL_SELECTION -> CredentialSelectionCard(
+          requestDisplayInfo = uiState.requestDisplayInfo,
           providerInfo = uiState.selectedProvider!!,
           onCancel = {viewModel.onCancel()},
           onOptionSelected = {viewModel.onCredentailSelected(it)},
@@ -87,6 +88,7 @@ fun GetCredentialScreen(
 @ExperimentalMaterialApi
 @Composable
 fun CredentialSelectionCard(
+  requestDisplayInfo: RequestDisplayInfo,
   providerInfo: ProviderInfo,
   onOptionSelected: (Int) -> Unit,
   onCancel: () -> Unit,
@@ -111,7 +113,7 @@ fun CredentialSelectionCard(
           .align(alignment = Alignment.CenterHorizontally)
       )
       Text(
-        text = providerInfo.appDomainName,
+        text = requestDisplayInfo.appDomainName,
         style = Typography.body2,
         modifier = Modifier.padding(horizontal = 28.dp)
       )
