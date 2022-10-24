@@ -151,7 +151,7 @@ class MediaRouter2ServiceImpl {
         mContext.registerReceiver(mScreenOnOffReceiver, screenOnOffIntentFilter);
     }
 
-    // Methods that implement MediaRouter2 operations.
+    // Start of methods that implement MediaRouter2 operations.
 
     @NonNull
     public void enforceMediaContentControlPermission() {
@@ -194,46 +194,6 @@ class MediaRouter2ServiceImpl {
                 }
             }
             return new ArrayList<>(systemRoutes);
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
-    }
-
-    @NonNull
-    public RoutingSessionInfo getSystemSessionInfo(
-            @Nullable String packageName, boolean setDeviceRouteSelected) {
-        final int uid = Binder.getCallingUid();
-        final int userId = UserHandle.getUserHandleForUid(uid).getIdentifier();
-        final boolean hasModifyAudioRoutingPermission = mContext.checkCallingOrSelfPermission(
-                android.Manifest.permission.MODIFY_AUDIO_ROUTING)
-                == PackageManager.PERMISSION_GRANTED;
-
-        final long token = Binder.clearCallingIdentity();
-        try {
-            RoutingSessionInfo systemSessionInfo = null;
-            synchronized (mLock) {
-                UserRecord userRecord = getOrCreateUserRecordLocked(userId);
-                List<RoutingSessionInfo> sessionInfos;
-                if (hasModifyAudioRoutingPermission) {
-                    if (setDeviceRouteSelected) {
-                        systemSessionInfo = userRecord.mHandler.mSystemProvider
-                                .generateDeviceRouteSelectedSessionInfo(packageName);
-                    } else {
-                        sessionInfos = userRecord.mHandler.mSystemProvider.getSessionInfos();
-                        if (sessionInfos != null && !sessionInfos.isEmpty()) {
-                            systemSessionInfo = new RoutingSessionInfo.Builder(sessionInfos.get(0))
-                                    .setClientPackageName(packageName).build();
-                        } else {
-                            Slog.w(TAG, "System provider does not have any session info.");
-                        }
-                    }
-                } else {
-                    systemSessionInfo = new RoutingSessionInfo.Builder(
-                            userRecord.mHandler.mSystemProvider.getDefaultSessionInfo())
-                            .setClientPackageName(packageName).build();
-                }
-            }
-            return systemSessionInfo;
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -418,7 +378,9 @@ class MediaRouter2ServiceImpl {
         }
     }
 
-    // Methods that implement MediaRouter2Manager operations.
+    // End of methods that implement MediaRouter2 operations.
+
+    // Start of methods that implement MediaRouter2Manager operations.
 
     @NonNull
     public List<RoutingSessionInfo> getRemoteSessions(@NonNull IMediaRouter2Manager manager) {
@@ -610,6 +572,52 @@ class MediaRouter2ServiceImpl {
         }
     }
 
+    // End of methods that implement MediaRouter2Manager operations.
+
+    // Start of methods that implements operations for both MediaRouter2 and MediaRouter2Manager.
+
+    @NonNull
+    public RoutingSessionInfo getSystemSessionInfo(
+            @Nullable String packageName, boolean setDeviceRouteSelected) {
+        final int uid = Binder.getCallingUid();
+        final int userId = UserHandle.getUserHandleForUid(uid).getIdentifier();
+        final boolean hasModifyAudioRoutingPermission = mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+                == PackageManager.PERMISSION_GRANTED;
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            RoutingSessionInfo systemSessionInfo = null;
+            synchronized (mLock) {
+                UserRecord userRecord = getOrCreateUserRecordLocked(userId);
+                List<RoutingSessionInfo> sessionInfos;
+                if (hasModifyAudioRoutingPermission) {
+                    if (setDeviceRouteSelected) {
+                        systemSessionInfo = userRecord.mHandler.mSystemProvider
+                                .generateDeviceRouteSelectedSessionInfo(packageName);
+                    } else {
+                        sessionInfos = userRecord.mHandler.mSystemProvider.getSessionInfos();
+                        if (sessionInfos != null && !sessionInfos.isEmpty()) {
+                            systemSessionInfo = new RoutingSessionInfo.Builder(sessionInfos.get(0))
+                                    .setClientPackageName(packageName).build();
+                        } else {
+                            Slog.w(TAG, "System provider does not have any session info.");
+                        }
+                    }
+                } else {
+                    systemSessionInfo = new RoutingSessionInfo.Builder(
+                            userRecord.mHandler.mSystemProvider.getDefaultSessionInfo())
+                            .setClientPackageName(packageName).build();
+                }
+            }
+            return systemSessionInfo;
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    // End of methods that implements operations for both MediaRouter2 and MediaRouter2Manager.
+
     public void dump(@NonNull PrintWriter pw, @NonNull String prefix) {
         pw.println(prefix + "MediaRouter2ServiceImpl");
 
@@ -677,6 +685,8 @@ class MediaRouter2ServiceImpl {
     private boolean isUserActiveLocked(int userId) {
         return mUserManagerInternal.getProfileParentId(userId) == mCurrentActiveUserId;
     }
+
+    // Start of locked methods that are used by MediaRouter2.
 
     @GuardedBy("mLock")
     private void registerRouter2Locked(@NonNull IMediaRouter2 router, int uid, int pid,
@@ -951,6 +961,10 @@ class MediaRouter2ServiceImpl {
                         routerRecord.mUserRecord.mHandler,
                         DUMMY_REQUEST_ID, routerRecord, uniqueSessionId));
     }
+
+    // End of locked methods that are used by MediaRouter2.
+
+    // Start of locked methods that are used by MediaRouter2Manager.
 
     private List<RoutingSessionInfo> getRemoteSessionsLocked(
             @NonNull IMediaRouter2Manager manager) {
@@ -1260,6 +1274,10 @@ class MediaRouter2ServiceImpl {
                         uniqueRequestId, routerRecord, uniqueSessionId));
     }
 
+    // End of locked methods that are used by MediaRouter2Manager.
+
+    // Start of locked methods that are used by both MediaRouter2 and MediaRouter2Manager.
+
     @GuardedBy("mLock")
     private UserRecord getOrCreateUserRecordLocked(int userId) {
         UserRecord userRecord = mUserRecords.get(userId);
@@ -1293,6 +1311,8 @@ class MediaRouter2ServiceImpl {
             // Note: User already stopped (by switchUser) so no need to send stop message here.
         }
     }
+
+    // End of locked methods that are used by both MediaRouter2 and MediaRouter2Manager.
 
     static long toUniqueRequestId(int requesterId, int originalRequestId) {
         return ((long) requesterId << 32) | originalRequestId;
