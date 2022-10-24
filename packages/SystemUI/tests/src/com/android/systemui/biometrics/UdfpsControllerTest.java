@@ -169,6 +169,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
     @Mock
     private LatencyTracker mLatencyTracker;
     private FakeExecutor mFgExecutor;
+    @Mock
+    private UdfpsDisplayMode mUdfpsDisplayMode;
 
     // Stuff for configuring mocks
     @Mock
@@ -258,7 +260,6 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mVibrator,
                 mUdfpsHapticsSimulator,
                 mUdfpsShell,
-                Optional.of(mDisplayModeProvider),
                 mKeyguardStateController,
                 mDisplayManager,
                 mHandler,
@@ -275,6 +276,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
         verify(mScreenLifecycle).addObserver(mScreenObserverCaptor.capture());
         mScreenObserver = mScreenObserverCaptor.getValue();
         mUdfpsController.updateOverlayParams(TEST_UDFPS_SENSOR_ID, new UdfpsOverlayParams());
+        mUdfpsController.setUdfpsDisplayMode(mUdfpsDisplayMode);
     }
 
     @Test

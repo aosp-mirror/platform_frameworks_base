@@ -1188,7 +1188,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             return;
         }
         for (int i = 0; i < getChildCount(); i++) {
-            ExpandableView child = (ExpandableView) getChildAt(i);
+            ExpandableView child = getChildAtIndex(i);
             if (mChildrenToAddAnimated.contains(child)) {
                 final int startingPosition = getPositionInLinearLayout(child);
                 final int childHeight = getIntrinsicHeight(child) + mPaddingBetweenElements;
@@ -1658,7 +1658,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         // find the view under the pointer, accounting for GONE views
         final int count = getChildCount();
         for (int childIdx = 0; childIdx < count; childIdx++) {
-            ExpandableView slidingChild = (ExpandableView) getChildAt(childIdx);
+            ExpandableView slidingChild = getChildAtIndex(childIdx);
             if (slidingChild.getVisibility() != VISIBLE
                     || (ignoreDecors && slidingChild instanceof StackScrollerDecorView)) {
                 continue;
@@ -1689,6 +1689,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             }
         }
         return null;
+    }
+
+    private ExpandableView getChildAtIndex(int index) {
+        return (ExpandableView) getChildAt(index);
     }
 
     public ExpandableView getChildAtRawPosition(float touchX, float touchY) {
@@ -2276,7 +2280,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         int childCount = getChildCount();
         int count = 0;
         for (int i = 0; i < childCount; i++) {
-            ExpandableView child = (ExpandableView) getChildAt(i);
+            ExpandableView child = getChildAtIndex(i);
             if (child.getVisibility() != View.GONE && !child.willBeGone() && child != mShelf) {
                 count++;
             }
@@ -2496,7 +2500,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private ExpandableView getLastChildWithBackground() {
         int childCount = getChildCount();
         for (int i = childCount - 1; i >= 0; i--) {
-            ExpandableView child = (ExpandableView) getChildAt(i);
+            ExpandableView child = getChildAtIndex(i);
             if (child.getVisibility() != View.GONE && !(child instanceof StackScrollerDecorView)
                     && child != mShelf) {
                 return child;
@@ -2509,7 +2513,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private ExpandableView getFirstChildWithBackground() {
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
-            ExpandableView child = (ExpandableView) getChildAt(i);
+            ExpandableView child = getChildAtIndex(i);
             if (child.getVisibility() != View.GONE && !(child instanceof StackScrollerDecorView)
                     && child != mShelf) {
                 return child;
@@ -2523,7 +2527,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         ArrayList<ExpandableView> children = new ArrayList<>();
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
-            ExpandableView child = (ExpandableView) getChildAt(i);
+            ExpandableView child = getChildAtIndex(i);
             if (child.getVisibility() != View.GONE
                     && !(child instanceof StackScrollerDecorView)
                     && child != mShelf) {
@@ -2882,7 +2886,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
         int position = 0;
         for (int i = 0; i < getChildCount(); i++) {
-            ExpandableView child = (ExpandableView) getChildAt(i);
+            ExpandableView child = getChildAtIndex(i);
             boolean notGone = child.getVisibility() != View.GONE;
             if (notGone && !child.hasNoContentHeight()) {
                 if (position != 0) {
@@ -2936,7 +2940,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
         mAmbientState.setLastVisibleBackgroundChild(lastChild);
         // TODO: Refactor SectionManager and put the RoundnessManager there.
-        mController.getNoticationRoundessManager().updateRoundedChildren(mSections);
+        mController.getNotificationRoundnessManager().updateRoundedChildren(mSections);
         mAnimateBottomOnLayout = false;
         invalidate();
     }
@@ -3968,7 +3972,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void clearUserLockedViews() {
         for (int i = 0; i < getChildCount(); i++) {
-            ExpandableView child = (ExpandableView) getChildAt(i);
+            ExpandableView child = getChildAtIndex(i);
             if (child instanceof ExpandableNotificationRow) {
                 ExpandableNotificationRow row = (ExpandableNotificationRow) child;
                 row.setUserLocked(false);
@@ -3981,7 +3985,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         // lets make sure nothing is transient anymore
         clearTemporaryViewsInGroup(this);
         for (int i = 0; i < getChildCount(); i++) {
-            ExpandableView child = (ExpandableView) getChildAt(i);
+            ExpandableView child = getChildAtIndex(i);
             if (child instanceof ExpandableNotificationRow) {
                 ExpandableNotificationRow row = (ExpandableNotificationRow) child;
                 clearTemporaryViewsInGroup(row.getChildrenContainer());
@@ -4230,7 +4234,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         if (hideSensitive != mAmbientState.isHideSensitive()) {
             int childCount = getChildCount();
             for (int i = 0; i < childCount; i++) {
-                ExpandableView v = (ExpandableView) getChildAt(i);
+                ExpandableView v = getChildAtIndex(i);
                 v.setHideSensitiveForIntrinsicHeight(hideSensitive);
             }
             mAmbientState.setHideSensitive(hideSensitive);
@@ -4265,7 +4269,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private void applyCurrentState() {
         int numChildren = getChildCount();
         for (int i = 0; i < numChildren; i++) {
-            ExpandableView child = (ExpandableView) getChildAt(i);
+            ExpandableView child = getChildAtIndex(i);
             child.applyViewState();
         }
 
@@ -4285,7 +4289,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
         // Lefts first sort by Z difference
         for (int i = 0; i < getChildCount(); i++) {
-            ExpandableView child = (ExpandableView) getChildAt(i);
+            ExpandableView child = getChildAtIndex(i);
             if (child.getVisibility() != GONE) {
                 mTmpSortedChildren.add(child);
             }
@@ -4512,7 +4516,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     public void setClearAllInProgress(boolean clearAllInProgress) {
         mClearAllInProgress = clearAllInProgress;
         mAmbientState.setClearAllInProgress(clearAllInProgress);
-        mController.getNoticationRoundessManager().setClearAllInProgress(clearAllInProgress);
+        mController.getNotificationRoundnessManager().setClearAllInProgress(clearAllInProgress);
     }
 
     boolean getClearAllInProgress() {
@@ -4555,7 +4559,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         final int count = getChildCount();
         float max = 0;
         for (int childIdx = 0; childIdx < count; childIdx++) {
-            ExpandableView child = (ExpandableView) getChildAt(childIdx);
+            ExpandableView child = getChildAtIndex(childIdx);
             if (child.getVisibility() == GONE) {
                 continue;
             }
@@ -4586,7 +4590,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     public boolean isBelowLastNotification(float touchX, float touchY) {
         int childCount = getChildCount();
         for (int i = childCount - 1; i >= 0; i--) {
-            ExpandableView child = (ExpandableView) getChildAt(i);
+            ExpandableView child = getChildAtIndex(i);
             if (child.getVisibility() != View.GONE) {
                 float childTop = child.getY();
                 if (childTop > touchY) {
@@ -5052,7 +5056,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             pw.println();
 
             for (int i = 0; i < childCount; i++) {
-                ExpandableView child = (ExpandableView) getChildAt(i);
+                ExpandableView child = getChildAtIndex(i);
                 child.dump(pw, args);
                 pw.println();
             }
@@ -5341,7 +5345,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         float wakeUplocation = -1f;
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
-            ExpandableView view = (ExpandableView) getChildAt(i);
+            ExpandableView view = getChildAtIndex(i);
             if (view.getVisibility() == View.GONE) {
                 continue;
             }
@@ -5380,7 +5384,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     public void setController(
             NotificationStackScrollLayoutController notificationStackScrollLayoutController) {
         mController = notificationStackScrollLayoutController;
-        mController.getNoticationRoundessManager().setAnimatedChildren(mChildrenToAddAnimated);
+        mController.getNotificationRoundnessManager().setAnimatedChildren(mChildrenToAddAnimated);
     }
 
     void addSwipedOutView(View v) {
@@ -5391,31 +5395,22 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         if (!(viewSwiped instanceof ExpandableNotificationRow)) {
             return;
         }
-        final int indexOfSwipedView = indexOfChild(viewSwiped);
-        if (indexOfSwipedView < 0) {
-            return;
-        }
         mSectionsManager.updateFirstAndLastViewsForAllSections(
-                mSections, getChildrenWithBackground());
-        View viewBefore = null;
-        if (indexOfSwipedView > 0) {
-            viewBefore = getChildAt(indexOfSwipedView - 1);
-            if (mSectionsManager.beginsSection(viewSwiped, viewBefore)) {
-                viewBefore = null;
-            }
-        }
-        View viewAfter = null;
-        if (indexOfSwipedView < getChildCount()) {
-            viewAfter = getChildAt(indexOfSwipedView + 1);
-            if (mSectionsManager.beginsSection(viewAfter, viewSwiped)) {
-                viewAfter = null;
-            }
-        }
-        mController.getNoticationRoundessManager()
+                mSections,
+                getChildrenWithBackground()
+        );
+
+        RoundableTargets targets = mController.getNotificationTargetsHelper().findRoundableTargets(
+                (ExpandableNotificationRow) viewSwiped,
+                this,
+                mSectionsManager
+        );
+
+        mController.getNotificationRoundnessManager()
                 .setViewsAffectedBySwipe(
-                        (ExpandableView) viewBefore,
-                        (ExpandableView) viewSwiped,
-                        (ExpandableView) viewAfter);
+                        targets.getBefore(),
+                        targets.getSwiped(),
+                        targets.getAfter());
 
         updateFirstAndLastBackgroundViews();
         requestDisallowInterceptTouchEvent(true);
@@ -5426,7 +5421,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     void onSwipeEnd() {
         updateFirstAndLastBackgroundViews();
-        mController.getNoticationRoundessManager()
+        mController.getNotificationRoundnessManager()
                 .setViewsAffectedBySwipe(null, null, null);
         // Round bottom corners for notification right before shelf.
         mShelf.updateAppearance();

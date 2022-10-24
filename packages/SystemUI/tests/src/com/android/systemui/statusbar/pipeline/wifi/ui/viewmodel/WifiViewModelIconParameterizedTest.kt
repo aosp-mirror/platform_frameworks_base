@@ -27,6 +27,9 @@ import com.android.systemui.statusbar.connectivity.WifiIcons.WIFI_FULL_ICONS
 import com.android.systemui.statusbar.connectivity.WifiIcons.WIFI_NO_INTERNET_ICONS
 import com.android.systemui.statusbar.connectivity.WifiIcons.WIFI_NO_NETWORK
 import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
+import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
+import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
+import com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel.AirplaneModeViewModel
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.statusbar.pipeline.shared.data.model.ConnectivitySlot
@@ -64,19 +67,31 @@ internal class WifiViewModelIconParameterizedTest(private val testCase: TestCase
     @Mock private lateinit var logger: ConnectivityPipelineLogger
     @Mock private lateinit var connectivityConstants: ConnectivityConstants
     @Mock private lateinit var wifiConstants: WifiConstants
+    private lateinit var airplaneModeRepository: FakeAirplaneModeRepository
     private lateinit var connectivityRepository: FakeConnectivityRepository
     private lateinit var wifiRepository: FakeWifiRepository
     private lateinit var interactor: WifiInteractor
+    private lateinit var airplaneModeViewModel: AirplaneModeViewModel
     private lateinit var scope: CoroutineScope
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+        airplaneModeRepository = FakeAirplaneModeRepository()
         connectivityRepository = FakeConnectivityRepository()
         wifiRepository = FakeWifiRepository()
         wifiRepository.setIsWifiEnabled(true)
         interactor = WifiInteractor(connectivityRepository, wifiRepository)
         scope = CoroutineScope(IMMEDIATE)
+        airplaneModeViewModel =
+            AirplaneModeViewModel(
+                AirplaneModeInteractor(
+                    airplaneModeRepository,
+                    connectivityRepository,
+                ),
+                logger,
+                scope,
+            )
     }
 
     @After
@@ -102,6 +117,7 @@ internal class WifiViewModelIconParameterizedTest(private val testCase: TestCase
                 .thenReturn(testCase.hasDataCapabilities)
             underTest =
                 WifiViewModel(
+                    airplaneModeViewModel,
                     connectivityConstants,
                     context,
                     logger,

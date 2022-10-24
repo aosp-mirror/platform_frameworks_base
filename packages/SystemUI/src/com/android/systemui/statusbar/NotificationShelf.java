@@ -40,6 +40,7 @@ import com.android.systemui.animation.Interpolators;
 import com.android.systemui.animation.ShadeInterpolation;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.statusbar.notification.NotificationUtils;
+import com.android.systemui.statusbar.notification.SourceType;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
@@ -110,8 +111,8 @@ public class NotificationShelf extends ActivatableNotificationView implements
         setClipChildren(false);
         setClipToPadding(false);
         mShelfIcons.setIsStaticLayout(false);
-        setBottomRoundness(1.0f, false /* animate */);
-        setTopRoundness(1f, false /* animate */);
+        requestBottomRoundness(1.0f, /* animate = */ false, SourceType.DefaultValue);
+        requestTopRoundness(1f, false, SourceType.DefaultValue);
 
         // Setting this to first in section to get the clipping to the top roundness correct. This
         // value determines the way we are clipping to the top roundness of the overall shade
@@ -413,7 +414,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
                     if (iconState != null && iconState.clampedAppearAmount == 1.0f) {
                         // only if the first icon is fully in the shelf we want to clip to it!
                         backgroundTop = (int) (child.getTranslationY() - getTranslationY());
-                        firstElementRoundness = expandableRow.getCurrentTopRoundness();
+                        firstElementRoundness = expandableRow.getTopRoundness();
                     }
                 }
 
@@ -507,28 +508,36 @@ public class NotificationShelf extends ActivatableNotificationView implements
             // Round bottom corners within animation bounds
             final float changeFraction = MathUtils.saturate(
                     (viewEnd - cornerAnimationTop) / cornerAnimationDistance);
-            anv.setBottomRoundness(anv.isLastInSection() ? 1f : changeFraction,
-                    false /* animate */);
+            anv.requestBottomRoundness(
+                    anv.isLastInSection() ? 1f : changeFraction,
+                    /* animate = */ false,
+                    SourceType.OnScroll);
 
         } else if (viewEnd < cornerAnimationTop) {
             // Fast scroll skips frames and leaves corners with unfinished rounding.
             // Reset top and bottom corners outside of animation bounds.
-            anv.setBottomRoundness(anv.isLastInSection() ? 1f : smallCornerRadius,
-                    false /* animate */);
+            anv.requestBottomRoundness(
+                    anv.isLastInSection() ? 1f : smallCornerRadius,
+                    /* animate = */ false,
+                    SourceType.OnScroll);
         }
 
         if (viewStart >= cornerAnimationTop) {
             // Round top corners within animation bounds
             final float changeFraction = MathUtils.saturate(
                     (viewStart - cornerAnimationTop) / cornerAnimationDistance);
-            anv.setTopRoundness(anv.isFirstInSection() ? 1f : changeFraction,
-                    false /* animate */);
+            anv.requestTopRoundness(
+                    anv.isFirstInSection() ? 1f : changeFraction,
+                    false,
+                    SourceType.OnScroll);
 
         } else if (viewStart < cornerAnimationTop) {
             // Fast scroll skips frames and leaves corners with unfinished rounding.
             // Reset top and bottom corners outside of animation bounds.
-            anv.setTopRoundness(anv.isFirstInSection() ? 1f : smallCornerRadius,
-                    false /* animate */);
+            anv.requestTopRoundness(
+                    anv.isFirstInSection() ? 1f : smallCornerRadius,
+                    false,
+                    SourceType.OnScroll);
         }
     }
 

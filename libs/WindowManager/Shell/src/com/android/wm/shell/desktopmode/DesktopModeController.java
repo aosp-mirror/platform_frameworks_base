@@ -60,6 +60,7 @@ import com.android.wm.shell.transition.Transitions;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.concurrent.Executor;
 
 /**
  * Handles windowing changes when desktop mode system setting changes
@@ -130,6 +131,17 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
      */
     private ExternalInterfaceBinder createExternalInterface() {
         return new IDesktopModeImpl(this);
+    }
+
+    /**
+     * Adds a listener to find out about changes in the visibility of freeform tasks.
+     *
+     * @param listener the listener to add.
+     * @param callbackExecutor the executor to call the listener on.
+     */
+    public void addListener(DesktopModeTaskRepository.VisibleTasksListener listener,
+            Executor callbackExecutor) {
+        mDesktopModeTaskRepository.addVisibleTasksListener(listener, callbackExecutor);
     }
 
     @VisibleForTesting
@@ -237,11 +249,23 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
     @Override
     public WindowContainerTransaction handleRequest(@NonNull IBinder transition,
             @NonNull TransitionRequestInfo request) {
-
-        // Only do anything if we are in desktop mode and opening a task/app
-        if (!DesktopModeStatus.isActive(mContext) || request.getType() != TRANSIT_OPEN) {
+        // Only do anything if we are in desktop mode and opening a task/app in freeform
+        if (!DesktopModeStatus.isActive(mContext)) {
+            ProtoLog.d(WM_SHELL_DESKTOP_MODE,
+                    "skip shell transition request: desktop mode not active");
             return null;
         }
+        if (request.getType() != TRANSIT_OPEN) {
+            ProtoLog.d(WM_SHELL_DESKTOP_MODE,
+                    "skip shell transition request: only supports TRANSIT_OPEN");
+            return null;
+        }
+        if (request.getTriggerTask() == null
+                || request.getTriggerTask().getWindowingMode() != WINDOWING_MODE_FREEFORM) {
+            ProtoLog.d(WM_SHELL_DESKTOP_MODE, "skip shell transition request: not freeform task");
+            return null;
+        }
+        ProtoLog.d(WM_SHELL_DESKTOP_MODE, "handle shell transition request: %s", request);
 
         WindowContainerTransaction wct = mTransitions.dispatchRequest(transition, request, this);
         if (wct == null) {
@@ -293,7 +317,14 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
      */
     @ExternalThread
     private final class DesktopModeImpl implements DesktopMode {
-        // Do nothing
+
+        @Override
+        public void addListener(DesktopModeTaskRepository.VisibleTasksListener listener,
+                Executor callbackExecutor) {
+            mMainExecutor.execute(() -> {
+                DesktopModeController.this.addListener(listener, callbackExecutor);
+            });
+        }
     }
 
     /**

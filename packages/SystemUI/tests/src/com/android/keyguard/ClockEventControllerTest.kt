@@ -32,6 +32,7 @@ import com.android.systemui.plugins.ClockController
 import com.android.systemui.plugins.ClockEvents
 import com.android.systemui.plugins.ClockFaceController
 import com.android.systemui.plugins.ClockFaceEvents
+import com.android.systemui.plugins.log.LogBuffer
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.mockito.any
@@ -82,7 +83,7 @@ class ClockEventControllerTest : SysuiTestCase() {
     @Mock private lateinit var parentView: View
     @Mock private lateinit var transitionRepository: KeyguardTransitionRepository
     private lateinit var repository: FakeKeyguardRepository
-
+    @Mock private lateinit var logBuffer: LogBuffer
     private lateinit var underTest: ClockEventController
 
     @Before
@@ -109,6 +110,7 @@ class ClockEventControllerTest : SysuiTestCase() {
             context,
             mainExecutor,
             bgExecutor,
+            logBuffer,
             featureFlags
         )
         underTest.clock = clock

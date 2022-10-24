@@ -20,8 +20,12 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
+import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
+import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
+import com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel.AirplaneModeViewModel
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
+import com.android.systemui.statusbar.pipeline.shared.data.model.ConnectivitySlot
 import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
 import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.FakeWifiRepository
@@ -55,19 +59,31 @@ class WifiViewModelTest : SysuiTestCase() {
     @Mock private lateinit var logger: ConnectivityPipelineLogger
     @Mock private lateinit var connectivityConstants: ConnectivityConstants
     @Mock private lateinit var wifiConstants: WifiConstants
+    private lateinit var airplaneModeRepository: FakeAirplaneModeRepository
     private lateinit var connectivityRepository: FakeConnectivityRepository
     private lateinit var wifiRepository: FakeWifiRepository
     private lateinit var interactor: WifiInteractor
+    private lateinit var airplaneModeViewModel: AirplaneModeViewModel
     private lateinit var scope: CoroutineScope
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+        airplaneModeRepository = FakeAirplaneModeRepository()
         connectivityRepository = FakeConnectivityRepository()
         wifiRepository = FakeWifiRepository()
         wifiRepository.setIsWifiEnabled(true)
         interactor = WifiInteractor(connectivityRepository, wifiRepository)
         scope = CoroutineScope(IMMEDIATE)
+        airplaneModeViewModel = AirplaneModeViewModel(
+            AirplaneModeInteractor(
+                airplaneModeRepository,
+                connectivityRepository,
+            ),
+            logger,
+            scope,
+        )
+
         createAndSetViewModel()
     }
 
@@ -462,11 +478,64 @@ class WifiViewModelTest : SysuiTestCase() {
         job.cancel()
     }
 
+    @Test
+    fun airplaneSpacer_notAirplaneMode_outputsFalse() = runBlocking(IMMEDIATE) {
+        var latest: Boolean? = null
+        val job = underTest
+            .qs
+            .isAirplaneSpacerVisible
+            .onEach { latest = it }
+            .launchIn(this)
+
+        airplaneModeRepository.setIsAirplaneMode(false)
+        yield()
+
+        assertThat(latest).isFalse()
+
+        job.cancel()
+    }
+
+    @Test
+    fun airplaneSpacer_airplaneForceHidden_outputsFalse() = runBlocking(IMMEDIATE) {
+        var latest: Boolean? = null
+        val job = underTest
+            .qs
+            .isAirplaneSpacerVisible
+            .onEach { latest = it }
+            .launchIn(this)
+
+        airplaneModeRepository.setIsAirplaneMode(true)
+        connectivityRepository.setForceHiddenIcons(setOf(ConnectivitySlot.AIRPLANE))
+        yield()
+
+        assertThat(latest).isFalse()
+
+        job.cancel()
+    }
+
+    @Test
+    fun airplaneSpacer_airplaneIconVisible_outputsTrue() = runBlocking(IMMEDIATE) {
+        var latest: Boolean? = null
+        val job = underTest
+            .qs
+            .isAirplaneSpacerVisible
+            .onEach { latest = it }
+            .launchIn(this)
+
+        airplaneModeRepository.setIsAirplaneMode(true)
+        yield()
+
+        assertThat(latest).isTrue()
+
+        job.cancel()
+    }
+
     private fun createAndSetViewModel() {
         // [WifiViewModel] creates its flows as soon as it's instantiated, and some of those flow
         // creations rely on certain config values that we mock out in individual tests. This method
         // allows tests to create the view model only after those configs are correctly set up.
         underTest = WifiViewModel(
+            airplaneModeViewModel,
             connectivityConstants,
             context,
             logger,

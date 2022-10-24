@@ -423,7 +423,7 @@ public class DozeSensorsTest extends SysuiTestCase {
 
     @Test
     public void testGesturesAllInitiallyRespectSettings() {
-        DozeSensors dozeSensors = new DozeSensors(getContext(), mSensorManager, mDozeParameters,
+        DozeSensors dozeSensors = new DozeSensors(mSensorManager, mDozeParameters,
                 mAmbientDisplayConfiguration, mWakeLock, mCallback, mProxCallback, mDozeLog,
                 mProximitySensor, mFakeSettings, mAuthController,
                 mDevicePostureController);
@@ -435,7 +435,7 @@ public class DozeSensorsTest extends SysuiTestCase {
 
     private class TestableDozeSensors extends DozeSensors {
         TestableDozeSensors() {
-            super(getContext(), mSensorManager, mDozeParameters,
+            super(mSensorManager, mDozeParameters,
                     mAmbientDisplayConfiguration, mWakeLock, mCallback, mProxCallback, mDozeLog,
                     mProximitySensor, mFakeSettings, mAuthController,
                     mDevicePostureController);

@@ -27,6 +27,7 @@ import com.android.systemui.plugins.ClockController
 import com.android.systemui.plugins.ClockEvents
 import com.android.systemui.plugins.ClockFaceController
 import com.android.systemui.plugins.ClockFaceEvents
+import com.android.systemui.plugins.log.LogBuffer
 import com.android.systemui.shared.R
 import java.io.PrintWriter
 import java.util.Locale
@@ -86,9 +87,17 @@ class DefaultClockController(
         events.onTimeTick()
     }
 
+    override fun setLogBuffer(logBuffer: LogBuffer) {
+        smallClock.view.tag = "smallClockView"
+        largeClock.view.tag = "largeClockView"
+        smallClock.view.logBuffer = logBuffer
+        largeClock.view.logBuffer = logBuffer
+    }
+
     open inner class DefaultClockFaceController(
         override val view: AnimatableClockView,
     ) : ClockFaceController {
+
         // MAGENTA is a placeholder, and will be assigned correctly in initialize
         private var currentColor = Color.MAGENTA
         private var isRegionDark = false

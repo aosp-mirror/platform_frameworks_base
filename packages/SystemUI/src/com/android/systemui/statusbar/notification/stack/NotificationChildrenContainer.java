@@ -21,6 +21,9 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.Canvas;
+import android.graphics.Path;
+import android.graphics.Path.Direction;
 import android.graphics.drawable.ColorDrawable;
 import android.service.notification.StatusBarNotification;
 import android.util.AttributeSet;
@@ -33,6 +36,7 @@ import android.view.ViewGroup;
 import android.widget.RemoteViews;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -43,10 +47,14 @@ import com.android.systemui.statusbar.NotificationGroupingUtil;
 import com.android.systemui.statusbar.notification.FeedbackIcon;
 import com.android.systemui.statusbar.notification.NotificationFadeAware;
 import com.android.systemui.statusbar.notification.NotificationUtils;
+import com.android.systemui.statusbar.notification.Roundable;
+import com.android.systemui.statusbar.notification.RoundableState;
+import com.android.systemui.statusbar.notification.SourceType;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.HybridGroupManager;
 import com.android.systemui.statusbar.notification.row.HybridNotificationView;
+import com.android.systemui.statusbar.notification.row.wrapper.NotificationHeaderViewWrapper;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper;
 
 import java.util.ArrayList;
@@ -56,7 +64,7 @@ import java.util.List;
  * A container containing child notifications
  */
 public class NotificationChildrenContainer extends ViewGroup
-        implements NotificationFadeAware {
+        implements NotificationFadeAware, Roundable {
 
     private static final String TAG = "NotificationChildrenContainer";
 
@@ -100,9 +108,9 @@ public class NotificationChildrenContainer extends ViewGroup
     private boolean mEnableShadowOnChildNotifications;
 
     private NotificationHeaderView mNotificationHeader;
-    private NotificationViewWrapper mNotificationHeaderWrapper;
+    private NotificationHeaderViewWrapper mNotificationHeaderWrapper;
     private NotificationHeaderView mNotificationHeaderLowPriority;
-    private NotificationViewWrapper mNotificationHeaderWrapperLowPriority;
+    private NotificationHeaderViewWrapper mNotificationHeaderWrapperLowPriority;
     private NotificationGroupingUtil mGroupingUtil;
     private ViewState mHeaderViewState;
     private int mClipBottomAmount;
@@ -110,7 +118,8 @@ public class NotificationChildrenContainer extends ViewGroup
     private OnClickListener mHeaderClickListener;
     private ViewGroup mCurrentHeader;
     private boolean mIsConversation;
-
+    private Path mChildClipPath = null;
+    private final Path mHeaderPath = new Path();
     private boolean mShowGroupCountInExpander;
     private boolean mShowDividersWhenExpanded;
     private boolean mHideDividersDuringExpand;
@@ -119,6 +128,8 @@ public class NotificationChildrenContainer extends ViewGroup
     private float mHeaderVisibleAmount = 1.0f;
     private int mUntruncatedChildCount;
     private boolean mContainingNotificationIsFaded = false;
+    private RoundableState mRoundableState;
+    private boolean mIsNotificationGroupCornerEnabled;
 
     public NotificationChildrenContainer(Context context) {
         this(context, null);
@@ -132,10 +143,14 @@ public class NotificationChildrenContainer extends ViewGroup
         this(context, attrs, defStyleAttr, 0);
     }
 
-    public NotificationChildrenContainer(Context context, AttributeSet attrs, int defStyleAttr,
+    public NotificationChildrenContainer(
+            Context context,
+            AttributeSet attrs,
+            int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         mHybridGroupManager = new HybridGroupManager(getContext());
+        mRoundableState = new RoundableState(this, this, 0f);
         initDimens();
         setClipChildren(false);
     }
@@ -165,6 +180,12 @@ public class NotificationChildrenContainer extends ViewGroup
                 com.android.internal.R.dimen.notification_content_margin)
                 - mNotificationHeaderMargin;
         mHybridGroupManager.initDimens();
+    }
+
+    @NonNull
+    @Override
+    public RoundableState getRoundableState() {
+        return mRoundableState;
     }
 
     @Override
@@ -271,7 +292,7 @@ public class NotificationChildrenContainer extends ViewGroup
     /**
      * Add a child notification to this view.
      *
-     * @param row the row to add
+     * @param row        the row to add
      * @param childIndex the index to add it at, if -1 it will be added at the end
      */
     public void addNotification(ExpandableNotificationRow row, int childIndex) {
@@ -347,8 +368,11 @@ public class NotificationChildrenContainer extends ViewGroup
             mNotificationHeader.findViewById(com.android.internal.R.id.expand_button)
                     .setVisibility(VISIBLE);
             mNotificationHeader.setOnClickListener(mHeaderClickListener);
-            mNotificationHeaderWrapper = NotificationViewWrapper.wrap(getContext(),
-                    mNotificationHeader, mContainingNotification);
+            mNotificationHeaderWrapper =
+                    (NotificationHeaderViewWrapper) NotificationViewWrapper.wrap(
+                            getContext(),
+                            mNotificationHeader,
+                            mContainingNotification);
             addView(mNotificationHeader, 0);
             invalidate();
         } else {
@@ -381,8 +405,11 @@ public class NotificationChildrenContainer extends ViewGroup
                 mNotificationHeaderLowPriority.findViewById(com.android.internal.R.id.expand_button)
                         .setVisibility(VISIBLE);
                 mNotificationHeaderLowPriority.setOnClickListener(mHeaderClickListener);
-                mNotificationHeaderWrapperLowPriority = NotificationViewWrapper.wrap(getContext(),
-                        mNotificationHeaderLowPriority, mContainingNotification);
+                mNotificationHeaderWrapperLowPriority =
+                        (NotificationHeaderViewWrapper) NotificationViewWrapper.wrap(
+                                getContext(),
+                                mNotificationHeaderLowPriority,
+                                mContainingNotification);
                 addView(mNotificationHeaderLowPriority, 0);
                 invalidate();
             } else {
@@ -461,7 +488,9 @@ public class NotificationChildrenContainer extends ViewGroup
         return mAttachedChildren;
     }
 
-    /** To be called any time the rows have been updated */
+    /**
+     * To be called any time the rows have been updated
+     */
     public void updateExpansionStates() {
         if (mChildrenExpanded || mUserLocked) {
             // we don't modify it the group is expanded or if we are expanding it
@@ -475,7 +504,6 @@ public class NotificationChildrenContainer extends ViewGroup
     }
 
     /**
-     *
      * @return the intrinsic size of this children container, i.e the natural fully expanded state
      */
     public int getIntrinsicHeight() {
@@ -485,7 +513,7 @@ public class NotificationChildrenContainer extends ViewGroup
 
     /**
      * @return the intrinsic height with a number of children given
-     *         in @param maxAllowedVisibleChildren
+     * in @param maxAllowedVisibleChildren
      */
     private int getIntrinsicHeight(float maxAllowedVisibleChildren) {
         if (showingAsLowPriority()) {
@@ -539,7 +567,8 @@ public class NotificationChildrenContainer extends ViewGroup
 
     /**
      * Update the state of all its children based on a linear layout algorithm.
-     * @param parentState the state of the parent
+     *
+     * @param parentState  the state of the parent
      * @param ambientState the ambient state containing ambient information
      */
     public void updateState(ExpandableViewState parentState, AmbientState ambientState) {
@@ -655,14 +684,17 @@ public class NotificationChildrenContainer extends ViewGroup
      * When moving into the bottom stack, the bottom visible child in an expanded group adjusts its
      * height, children in the group after this are gone.
      *
-     * @param child the child who's height to adjust.
+     * @param child        the child who's height to adjust.
      * @param parentHeight the height of the parent.
-     * @param childState the state to update.
-     * @param yPosition the yPosition of the view.
+     * @param childState   the state to update.
+     * @param yPosition    the yPosition of the view.
      * @return true if children after this one should be hidden.
      */
-    private boolean updateChildStateForExpandedGroup(ExpandableNotificationRow child,
-            int parentHeight, ExpandableViewState childState, int yPosition) {
+    private boolean updateChildStateForExpandedGroup(
+            ExpandableNotificationRow child,
+            int parentHeight,
+            ExpandableViewState childState,
+            int yPosition) {
         final int top = yPosition + child.getClipTopAmount();
         final int intrinsicHeight = child.getIntrinsicHeight();
         final int bottom = top + intrinsicHeight;
@@ -690,13 +722,15 @@ public class NotificationChildrenContainer extends ViewGroup
         if (mIsLowPriority
                 || (!mContainingNotification.isOnKeyguard() && mContainingNotification.isExpanded())
                 || (mContainingNotification.isHeadsUpState()
-                        && mContainingNotification.canShowHeadsUp())) {
+                && mContainingNotification.canShowHeadsUp())) {
             return NUMBER_OF_CHILDREN_WHEN_SYSTEM_EXPANDED;
         }
         return NUMBER_OF_CHILDREN_WHEN_COLLAPSED;
     }
 
-    /** Applies state to children. */
+    /**
+     * Applies state to children.
+     */
     public void applyState() {
         int childCount = mAttachedChildren.size();
         ViewState tmpState = new ViewState();
@@ -768,17 +802,73 @@ public class NotificationChildrenContainer extends ViewGroup
         }
     }
 
+    @Override
+    protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
+        boolean isCanvasChanged = false;
+
+        Path clipPath = mChildClipPath;
+        if (clipPath != null) {
+            final float translation;
+            if (child instanceof ExpandableNotificationRow) {
+                ExpandableNotificationRow notificationRow = (ExpandableNotificationRow) child;
+                translation = notificationRow.getTranslation();
+            } else {
+                translation = child.getTranslationX();
+            }
+
+            isCanvasChanged = true;
+            canvas.save();
+            if (mIsNotificationGroupCornerEnabled && translation != 0f) {
+                clipPath.offset(translation, 0f);
+                canvas.clipPath(clipPath);
+                clipPath.offset(-translation, 0f);
+            } else {
+                canvas.clipPath(clipPath);
+            }
+        }
+
+        if (child instanceof NotificationHeaderView
+                && mNotificationHeaderWrapper.hasRoundedCorner()) {
+            float[] radii = mNotificationHeaderWrapper.getUpdatedRadii();
+            mHeaderPath.reset();
+            mHeaderPath.addRoundRect(
+                    child.getLeft(),
+                    child.getTop(),
+                    child.getRight(),
+                    child.getBottom(),
+                    radii,
+                    Direction.CW
+            );
+            if (!isCanvasChanged) {
+                isCanvasChanged = true;
+                canvas.save();
+            }
+            canvas.clipPath(mHeaderPath);
+        }
+
+        if (isCanvasChanged) {
+            boolean result = super.drawChild(canvas, child, drawingTime);
+            canvas.restore();
+            return result;
+        } else {
+            // If there have been no changes to the canvas we can proceed as usual
+            return super.drawChild(canvas, child, drawingTime);
+        }
+    }
+
+
     /**
      * This is called when the children expansion has changed and positions the children properly
      * for an appear animation.
-     *
      */
     public void prepareExpansionChanged() {
         // TODO: do something that makes sense, like placing the invisible views correctly
         return;
     }
 
-    /** Animate to a given state. */
+    /**
+     * Animate to a given state.
+     */
     public void startAnimationToState(AnimationProperties properties) {
         int childCount = mAttachedChildren.size();
         ViewState tmpState = new ViewState();
@@ -1102,7 +1192,8 @@ public class NotificationChildrenContainer extends ViewGroup
      * Get the minimum Height for this group.
      *
      * @param maxAllowedVisibleChildren the number of children that should be visible
-     * @param likeHighPriority if the height should be calculated as if it were not low priority
+     * @param likeHighPriority          if the height should be calculated as if it were not low
+     *                                  priority
      */
     private int getMinHeight(int maxAllowedVisibleChildren, boolean likeHighPriority) {
         return getMinHeight(maxAllowedVisibleChildren, likeHighPriority, mCurrentHeaderTranslation);
@@ -1112,10 +1203,13 @@ public class NotificationChildrenContainer extends ViewGroup
      * Get the minimum Height for this group.
      *
      * @param maxAllowedVisibleChildren the number of children that should be visible
-     * @param likeHighPriority if the height should be calculated as if it were not low priority
-     * @param headerTranslation the translation amount of the header
+     * @param likeHighPriority          if the height should be calculated as if it were not low
+     *                                  priority
+     * @param headerTranslation         the translation amount of the header
      */
-    private int getMinHeight(int maxAllowedVisibleChildren, boolean likeHighPriority,
+    private int getMinHeight(
+            int maxAllowedVisibleChildren,
+            boolean likeHighPriority,
             int headerTranslation) {
         if (!likeHighPriority && showingAsLowPriority()) {
             if (mNotificationHeaderLowPriority == null) {
@@ -1274,16 +1368,19 @@ public class NotificationChildrenContainer extends ViewGroup
         return mUserLocked;
     }
 
-    public void setCurrentBottomRoundness(float currentBottomRoundness) {
+    @Override
+    public void applyRoundness() {
+        Roundable.super.applyRoundness();
         boolean last = true;
         for (int i = mAttachedChildren.size() - 1; i >= 0; i--) {
             ExpandableNotificationRow child = mAttachedChildren.get(i);
             if (child.getVisibility() == View.GONE) {
                 continue;
             }
-            float bottomRoundness = last ? currentBottomRoundness : 0.0f;
-            child.setBottomRoundness(bottomRoundness, isShown() /* animate */);
-            child.setTopRoundness(0.0f, false /* animate */);
+            child.requestBottomRoundness(
+                    last ? getBottomRoundness() : 0f,
+                    /* animate = */ isShown(),
+                    SourceType.DefaultValue);
             last = false;
         }
     }
@@ -1293,7 +1390,9 @@ public class NotificationChildrenContainer extends ViewGroup
         mCurrentHeaderTranslation = (int) ((1.0f - headerVisibleAmount) * mTranslationForHeader);
     }
 
-    /** Shows the given feedback icon, or hides the icon if null. */
+    /**
+     * Shows the given feedback icon, or hides the icon if null.
+     */
     public void setFeedbackIcon(@Nullable FeedbackIcon icon) {
         if (mNotificationHeaderWrapper != null) {
             mNotificationHeaderWrapper.setFeedbackIcon(icon);
@@ -1324,5 +1423,27 @@ public class NotificationChildrenContainer extends ViewGroup
         for (ExpandableNotificationRow child : mAttachedChildren) {
             child.setNotificationFaded(faded);
         }
+    }
+
+    /**
+     * Allow to define a path the clip the children in #drawChild()
+     *
+     * @param childClipPath path used to clip the children
+     */
+    public void setChildClipPath(@Nullable Path childClipPath) {
+        mChildClipPath = childClipPath;
+        invalidate();
+    }
+
+    public NotificationHeaderViewWrapper getNotificationHeaderWrapper() {
+        return mNotificationHeaderWrapper;
+    }
+
+    /**
+     * Enable the support for rounded corner in notification group
+     * @param enabled true if is supported
+     */
+    public void enableNotificationGroupCorner(boolean enabled) {
+        mIsNotificationGroupCornerEnabled = enabled;
     }
 }

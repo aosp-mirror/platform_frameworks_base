@@ -18,6 +18,7 @@ import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.view.View
 import com.android.systemui.plugins.annotations.ProvidesInterface
+import com.android.systemui.plugins.log.LogBuffer
 import java.io.PrintWriter
 import java.util.Locale
 import java.util.TimeZone
@@ -70,6 +71,9 @@ interface ClockController {
 
     /** Optional method for dumping debug information */
     fun dump(pw: PrintWriter) { }
+
+    /** Optional method for debug logging */
+    fun setLogBuffer(logBuffer: LogBuffer) { }
 }
 
 /** Interface for a specific clock face version rendered by the clock */

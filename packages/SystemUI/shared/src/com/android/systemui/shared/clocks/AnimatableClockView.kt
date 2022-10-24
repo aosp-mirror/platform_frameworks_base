@@ -33,6 +33,8 @@ import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.animation.GlyphCallback
 import com.android.systemui.animation.Interpolators
 import com.android.systemui.animation.TextAnimator
+import com.android.systemui.plugins.log.LogBuffer
+import com.android.systemui.plugins.log.LogLevel.DEBUG
 import com.android.systemui.shared.R
 import java.io.PrintWriter
 import java.util.Calendar
@@ -52,14 +54,8 @@ class AnimatableClockView @JvmOverloads constructor(
     defStyleAttr: Int = 0,
     defStyleRes: Int = 0
 ) : TextView(context, attrs, defStyleAttr, defStyleRes) {
-
-    private var lastMeasureCall: CharSequence? = null
-    private var lastDraw: CharSequence? = null
-    private var lastTextUpdate: CharSequence? = null
-    private var lastOnTextChanged: CharSequence? = null
-    private var lastInvalidate: CharSequence? = null
-    private var lastTimeZoneChange: CharSequence? = null
-    private var lastAnimationCall: CharSequence? = null
+    var tag: String = "UnnamedClockView"
+    var logBuffer: LogBuffer? = null
 
     private val time = Calendar.getInstance()
 
@@ -136,6 +132,7 @@ class AnimatableClockView @JvmOverloads constructor(
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
+        logBuffer?.log(tag, DEBUG, "onAttachedToWindow")
         refreshFormat()
     }
 
@@ -151,27 +148,39 @@ class AnimatableClockView @JvmOverloads constructor(
         time.timeInMillis = timeOverrideInMillis ?: System.currentTimeMillis()
         contentDescription = DateFormat.format(descFormat, time)
         val formattedText = DateFormat.format(format, time)
+        logBuffer?.log(tag, DEBUG,
+                { str1 = formattedText?.toString() },
+                { "refreshTime: new formattedText=$str1" }
+        )
         // Setting text actually triggers a layout pass (because the text view is set to
         // wrap_content width and TextView always relayouts for this). Avoid needless
         // relayout if the text didn't actually change.
         if (!TextUtils.equals(text, formattedText)) {
             text = formattedText
+            logBuffer?.log(tag, DEBUG,
+                    { str1 = formattedText?.toString() },
+                    { "refreshTime: done setting new time text to: $str1" }
+            )
             // Because the TextLayout may mutate under the hood as a result of the new text, we
             // notify the TextAnimator that it may have changed and request a measure/layout. A
             // crash will occur on the next invocation of setTextStyle if the layout is mutated
             // without being notified TextInterpolator being notified.
             if (layout != null) {
                 textAnimator?.updateLayout(layout)
+                logBuffer?.log(tag, DEBUG, "refreshTime: done updating textAnimator layout")
             }
             requestLayout()
-            lastTextUpdate = getTimestamp()
+            logBuffer?.log(tag, DEBUG, "refreshTime: after requestLayout")
         }
     }
 
     fun onTimeZoneChanged(timeZone: TimeZone?) {
         time.timeZone = timeZone
         refreshFormat()
-        lastTimeZoneChange = "${getTimestamp()} timeZone=${time.timeZone}"
+        logBuffer?.log(tag, DEBUG,
+                { str1 = timeZone?.toString() },
+                { "onTimeZoneChanged newTimeZone=$str1" }
+        )
     }
 
     @SuppressLint("DrawAllocation")
@@ -185,27 +194,24 @@ class AnimatableClockView @JvmOverloads constructor(
         } else {
             animator.updateLayout(layout)
         }
-        lastMeasureCall = getTimestamp()
+        logBuffer?.log(tag, DEBUG, "onMeasure")
     }
 
     override fun onDraw(canvas: Canvas) {
-        lastDraw = getTimestamp()
         // Use textAnimator to render text if animation is enabled.
         // Otherwise default to using standard draw functions.
         if (isAnimationEnabled) {
+            // intentionally doesn't call super.onDraw here or else the text will be rendered twice
             textAnimator?.draw(canvas)
         } else {
             super.onDraw(canvas)
         }
+        logBuffer?.log(tag, DEBUG, "onDraw lastDraw")
     }
 
     override fun invalidate() {
         super.invalidate()
-        lastInvalidate = getTimestamp()
-    }
-
-    private fun getTimestamp(): CharSequence {
-        return "${DateFormat.format("HH:mm:ss", System.currentTimeMillis())} text=$text"
+        logBuffer?.log(tag, DEBUG, "invalidate")
     }
 
     override fun onTextChanged(
@@ -215,7 +221,10 @@ class AnimatableClockView @JvmOverloads constructor(
             lengthAfter: Int
     ) {
         super.onTextChanged(text, start, lengthBefore, lengthAfter)
-        lastOnTextChanged = "${getTimestamp()}"
+        logBuffer?.log(tag, DEBUG,
+                { str1 = text.toString() },
+                { "onTextChanged text=$str1" }
+        )
     }
 
     fun setLineSpacingScale(scale: Float) {
@@ -229,7 +238,7 @@ class AnimatableClockView @JvmOverloads constructor(
     }
 
     fun animateAppearOnLockscreen() {
-        lastAnimationCall = "${getTimestamp()} call=animateAppearOnLockscreen"
+        logBuffer?.log(tag, DEBUG, "animateAppearOnLockscreen")
         setTextStyle(
             weight = dozingWeight,
             textSize = -1f,
@@ -254,7 +263,7 @@ class AnimatableClockView @JvmOverloads constructor(
         if (isAnimationEnabled && textAnimator == null) {
             return
         }
-        lastAnimationCall = "${getTimestamp()} call=animateFoldAppear"
+        logBuffer?.log(tag, DEBUG, "animateFoldAppear")
         setTextStyle(
             weight = lockScreenWeightInternal,
             textSize = -1f,
@@ -281,7 +290,7 @@ class AnimatableClockView @JvmOverloads constructor(
             // Skip charge animation if dozing animation is already playing.
             return
         }
-        lastAnimationCall = "${getTimestamp()} call=animateCharge"
+        logBuffer?.log(tag, DEBUG, "animateCharge")
         val startAnimPhase2 = Runnable {
             setTextStyle(
                 weight = if (isDozing()) dozingWeight else lockScreenWeight,
@@ -305,7 +314,7 @@ class AnimatableClockView @JvmOverloads constructor(
     }
 
     fun animateDoze(isDozing: Boolean, animate: Boolean) {
-        lastAnimationCall = "${getTimestamp()} call=animateDoze"
+        logBuffer?.log(tag, DEBUG, "animateDoze")
         setTextStyle(
             weight = if (isDozing) dozingWeight else lockScreenWeight,
             textSize = -1f,
@@ -423,9 +432,12 @@ class AnimatableClockView @JvmOverloads constructor(
             isSingleLineInternal && !use24HourFormat -> Patterns.sClockView12
             else -> DOUBLE_LINE_FORMAT_12_HOUR
         }
+        logBuffer?.log(tag, DEBUG,
+                { str1 = format?.toString() },
+                { "refreshFormat format=$str1" }
+        )
 
         descFormat = if (use24HourFormat) Patterns.sClockView24 else Patterns.sClockView12
-
         refreshTime()
     }
 
@@ -434,15 +446,8 @@ class AnimatableClockView @JvmOverloads constructor(
         pw.println("    measuredWidth=$measuredWidth")
         pw.println("    measuredHeight=$measuredHeight")
         pw.println("    singleLineInternal=$isSingleLineInternal")
-        pw.println("    lastTextUpdate=$lastTextUpdate")
-        pw.println("    lastOnTextChanged=$lastOnTextChanged")
-        pw.println("    lastInvalidate=$lastInvalidate")
-        pw.println("    lastMeasureCall=$lastMeasureCall")
-        pw.println("    lastDraw=$lastDraw")
-        pw.println("    lastTimeZoneChange=$lastTimeZoneChange")
         pw.println("    currText=$text")
         pw.println("    currTimeContextDesc=$contentDescription")
-        pw.println("    lastAnimationCall=$lastAnimationCall")
         pw.println("    dozingWeightInternal=$dozingWeightInternal")
         pw.println("    lockScreenWeightInternal=$lockScreenWeightInternal")
         pw.println("    dozingColor=$dozingColor")
@@ -591,6 +596,7 @@ class AnimatableClockView @JvmOverloads constructor(
             if (!clockView12Skel.contains("a")) {
                 sClockView12 = clockView12.replace("a".toRegex(), "").trim { it <= ' ' }
             }
+
             sClockView24 = DateFormat.getBestDateTimePattern(locale, clockView24Skel)
             sCacheKey = key
         }

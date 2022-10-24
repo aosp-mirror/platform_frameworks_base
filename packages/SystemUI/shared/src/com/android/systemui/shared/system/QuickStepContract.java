@@ -110,6 +110,9 @@ public class QuickStepContract {
     public static final int SYSUI_STATE_IMMERSIVE_MODE = 1 << 24;
     // The voice interaction session window is showing
     public static final int SYSUI_STATE_VOICE_INTERACTION_WINDOW_SHOWING = 1 << 25;
+    // Freeform windows are showing in desktop mode
+    public static final int SYSUI_STATE_FREEFORM_ACTIVE_IN_DESKTOP_MODE = 1 << 26;
+
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({SYSUI_STATE_SCREEN_PINNING,
@@ -137,7 +140,8 @@ public class QuickStepContract {
             SYSUI_STATE_BACK_DISABLED,
             SYSUI_STATE_BUBBLES_MANAGE_MENU_EXPANDED,
             SYSUI_STATE_IMMERSIVE_MODE,
-            SYSUI_STATE_VOICE_INTERACTION_WINDOW_SHOWING
+            SYSUI_STATE_VOICE_INTERACTION_WINDOW_SHOWING,
+            SYSUI_STATE_FREEFORM_ACTIVE_IN_DESKTOP_MODE
     })
     public @interface SystemUiStateFlags {}
 
@@ -173,6 +177,8 @@ public class QuickStepContract {
                 ? "bubbles_mange_menu_expanded" : "");
         str.add((flags & SYSUI_STATE_IMMERSIVE_MODE) != 0 ? "immersive_mode" : "");
         str.add((flags & SYSUI_STATE_VOICE_INTERACTION_WINDOW_SHOWING) != 0 ? "vis_win_showing" : "");
+        str.add((flags & SYSUI_STATE_FREEFORM_ACTIVE_IN_DESKTOP_MODE) != 0
+                ? "freeform_active_in_desktop_mode" : "");
         return str.toString();
     }
 
