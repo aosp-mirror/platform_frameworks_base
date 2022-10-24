@@ -84,11 +84,13 @@ import android.telephony.data.ApnSetting;
 import android.telephony.emergency.EmergencyNumber;
 import android.telephony.ims.ImsCallSession;
 import android.telephony.ims.ImsReasonInfo;
+import android.telephony.ims.MediaQualityStatus;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.LocalLog;
 import android.util.Pair;
+import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
@@ -357,6 +359,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private CallQuality[] mCallQuality;
 
+    private List<SparseArray<MediaQualityStatus>> mMediaQualityStatus;
+
     private ArrayList<List<CallState>> mCallStateLists;
 
     // network type of the call associated with the mCallStateLists and mCallQuality
@@ -483,6 +487,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 TelephonyCallback.EVENT_DATA_ENABLED_CHANGED);
         REQUIRE_PRECISE_PHONE_STATE_PERMISSION.add(
                 TelephonyCallback.EVENT_LINK_CAPACITY_ESTIMATE_CHANGED);
+        REQUIRE_PRECISE_PHONE_STATE_PERMISSION.add(
+                TelephonyCallback.EVENT_MEDIA_QUALITY_STATUS_CHANGED);
     }
 
     private boolean isLocationPermissionRequired(Set<Integer> events) {
@@ -715,6 +721,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 cutListToSize(mCarrierPrivilegeStates, mNumPhones);
                 cutListToSize(mCarrierServiceStates, mNumPhones);
                 cutListToSize(mCallStateLists, mNumPhones);
+                cutListToSize(mMediaQualityStatus, mNumPhones);
                 return;
             }
 
@@ -738,6 +745,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 mCallDisconnectCause[i] = DisconnectCause.NOT_VALID;
                 mCallPreciseDisconnectCause[i] = PreciseDisconnectCause.NOT_VALID;
                 mCallQuality[i] = createCallQuality();
+                mMediaQualityStatus.add(i, new SparseArray<>());
                 mCallStateLists.add(i, new ArrayList<>());
                 mCallNetworkType[i] = TelephonyManager.NETWORK_TYPE_UNKNOWN;
                 mPreciseCallState[i] = createPreciseCallState();
@@ -805,6 +813,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         mCallDisconnectCause = new int[numPhones];
         mCallPreciseDisconnectCause = new int[numPhones];
         mCallQuality = new CallQuality[numPhones];
+        mMediaQualityStatus = new ArrayList<>();
         mCallNetworkType = new int[numPhones];
         mCallStateLists = new ArrayList<>();
         mPreciseDataConnectionStates = new ArrayList<>();
@@ -844,6 +853,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mCallDisconnectCause[i] = DisconnectCause.NOT_VALID;
             mCallPreciseDisconnectCause[i] = PreciseDisconnectCause.NOT_VALID;
             mCallQuality[i] = createCallQuality();
+            mMediaQualityStatus.add(i, new SparseArray<>());
             mCallStateLists.add(i, new ArrayList<>());
             mCallNetworkType[i] = TelephonyManager.NETWORK_TYPE_UNKNOWN;
             mPreciseCallState[i] = createPreciseCallState();
@@ -1390,6 +1400,32 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                         }
                     } catch (RemoteException ex) {
                         remove(r.binder);
+                    }
+                }
+                if (events.contains(TelephonyCallback.EVENT_MEDIA_QUALITY_STATUS_CHANGED)) {
+                    CallState callState = null;
+                    for (CallState cs : mCallStateLists.get(r.phoneId)) {
+                        if (cs.getCallState() == PreciseCallState.PRECISE_CALL_STATE_ACTIVE) {
+                            callState = cs;
+                            break;
+                        }
+                    }
+                    if (callState != null) {
+                        String callId = callState.getImsCallSessionId();
+                        try {
+                            MediaQualityStatus status = mMediaQualityStatus.get(r.phoneId).get(
+                                    MediaQualityStatus.MEDIA_SESSION_TYPE_AUDIO);
+                            if (status != null && status.getCallSessionId().equals(callId)) {
+                                r.callback.onMediaQualityStatusChanged(status);
+                            }
+                            status = mMediaQualityStatus.get(r.phoneId).get(
+                                    MediaQualityStatus.MEDIA_SESSION_TYPE_VIDEO);
+                            if (status != null && status.getCallSessionId().equals(callId)) {
+                                r.callback.onMediaQualityStatusChanged(status);
+                            }
+                        } catch (RemoteException ex) {
+                            remove(r.binder);
+                        }
                     }
                 }
             }
@@ -2283,6 +2319,17 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                         }
                         mCallStateLists.get(phoneId).add(builder.build());
                     }
+                    boolean hasOngoingCall = false;
+                    for (CallState cs : mCallStateLists.get(phoneId)) {
+                        if (cs.getCallState() != PreciseCallState.PRECISE_CALL_STATE_DISCONNECTED) {
+                            hasOngoingCall = true;
+                            break;
+                        }
+                    }
+                    if (!hasOngoingCall) {
+                        //no ongoing call. clear media quality status cached.
+                        mMediaQualityStatus.get(phoneId).clear();
+                    }
                 }
 
                 for (Record r : mRecords) {
@@ -2626,7 +2673,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     }
                 }
             }
-
             handleRemoveListLocked();
         }
     }
@@ -3121,6 +3167,55 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                             specificCarrierId);
                 } catch (RemoteException re) {
                     mRemoveList.add(r.binder);
+                }
+            }
+            handleRemoveListLocked();
+        }
+    }
+
+    @Override
+    public void notifyMediaQualityStatusChanged(int phoneId, int subId, MediaQualityStatus status) {
+        if (!checkNotifyPermission("notifyMediaQualityStatusChanged()")) {
+            return;
+        }
+
+        synchronized (mRecords) {
+            if (validatePhoneId(phoneId)) {
+                if (mCallStateLists.get(phoneId).size() > 0) {
+                    CallState callState = null;
+                    for (CallState cs : mCallStateLists.get(phoneId)) {
+                        if (cs.getCallState() == PreciseCallState.PRECISE_CALL_STATE_ACTIVE) {
+                            callState = cs;
+                            break;
+                        }
+                    }
+                    if (callState != null) {
+                        String callSessionId = callState.getImsCallSessionId();
+                        if (callSessionId != null
+                                && callSessionId.equals(status.getCallSessionId())) {
+                            mMediaQualityStatus.get(phoneId)
+                                    .put(status.getMediaSessionType(), status);
+                        } else {
+                            log("SessionId mismatch active call:" + callSessionId
+                                    + " media quality:" + status.getCallSessionId());
+                            return;
+                        }
+                    } else {
+                        log("There is no active call to report CallQaulity");
+                        return;
+                    }
+                }
+
+                for (Record r : mRecords) {
+                    if (r.matchTelephonyCallbackEvent(
+                            TelephonyCallback.EVENT_MEDIA_QUALITY_STATUS_CHANGED)
+                            && idMatch(r, subId, phoneId)) {
+                        try {
+                            r.callback.onMediaQualityStatusChanged(status);
+                        } catch (RemoteException ex) {
+                            mRemoveList.add(r.binder);
+                        }
+                    }
                 }
             }
             handleRemoveListLocked();

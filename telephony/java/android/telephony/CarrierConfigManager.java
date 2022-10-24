@@ -45,6 +45,7 @@ import android.telephony.gba.UaSecurityProtocolIdentifier;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.ImsRegistrationAttributes;
 import android.telephony.ims.ImsSsData;
+import android.telephony.ims.MediaQualityStatus;
 import android.telephony.ims.RcsUceAdapter;
 import android.telephony.ims.feature.MmTelFeature;
 import android.telephony.ims.feature.RcsFeature;
@@ -6262,6 +6263,50 @@ public class CarrierConfigManager {
         public static final String KEY_DTMFNB_PAYLOAD_TYPE_INT_ARRAY  =
                 KEY_PREFIX + "dtmfnb_payload_type_int_array";
 
+        /**
+         * This indicates the threshold for RTP packet loss rate in percentage. If measured packet
+         * loss rate crosses this, a callback with {@link MediaQualityStatus} will be invoked to
+         * listeners.
+         * See {@link android.telephony.TelephonyCallback.MediaQualityStatusChangedListener}
+         *
+         * <p/>
+         * Valid threshold range : 0 ~ 100
+         *
+         * @hide
+         */
+        public static final String KEY_VOICE_RTP_PACKET_LOSS_RATE_THRESHOLD_INT =
+                KEY_PREFIX + "rtp_packet_loss_rate_threshold_int";
+
+
+        /**
+         * This indicates the threshold for RTP jitter value in milliseconds (RFC3550). If measured
+         * jitter value crosses this, a callback with {@link MediaQualityStatus} will be invoked
+         * to listeners.
+         * See {@link android.telephony.TelephonyCallback.MediaQualityStatusChangedListener}
+         *
+         * <p/>
+         * Valid threshold range : 0 ~ 10000
+         *
+         * @hide
+         */
+        public static final String KEY_VOICE_RTP_JITTER_THRESHOLD_MILLIS_INT =
+                KEY_PREFIX + "rtp_jitter_threshold_millis_int";
+
+        /**
+         * This indicates the threshold for RTP inactivity time in milliseconds. If measured
+         * inactivity timer crosses this, a callback with {@link MediaQualityStatus} will be invoked
+         * to listeners.
+         * See {@link android.telephony.TelephonyCallback.MediaQualityStatusChangedListener}
+         *
+         * <p/>
+         * Valid threshold range : 0 ~ 60000
+         *
+         * @hide
+         */
+        public static final String KEY_VOICE_RTP_INACTIVITY_TIME_THRESHOLD_MILLIS_LONG =
+                KEY_PREFIX + "rtp_inactivity_time_threshold_millis_long";
+
+
         /** @hide */
         @IntDef({
             BANDWIDTH_EFFICIENT,
@@ -6748,6 +6793,9 @@ public class CarrierConfigManager {
             defaults.putInt(KEY_AUDIO_AS_BANDWIDTH_KBPS_INT, 41);
             defaults.putInt(KEY_AUDIO_RS_BANDWIDTH_BPS_INT, 600);
             defaults.putInt(KEY_AUDIO_RR_BANDWIDTH_BPS_INT, 2000);
+            defaults.putInt(KEY_VOICE_RTP_PACKET_LOSS_RATE_THRESHOLD_INT, 40);
+            defaults.putInt(KEY_VOICE_RTP_JITTER_THRESHOLD_MILLIS_INT, 120);
+            defaults.putLong(KEY_VOICE_RTP_INACTIVITY_TIME_THRESHOLD_MILLIS_LONG, 5000);
 
             defaults.putIntArray(
                     KEY_AUDIO_INACTIVITY_CALL_END_REASONS_INT_ARRAY,

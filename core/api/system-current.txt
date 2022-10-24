@@ -13785,6 +13785,7 @@ package android.telephony {
     field @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public static final int EVENT_IMS_CALL_DISCONNECT_CAUSE_CHANGED = 28; // 0x1c
     field @RequiresPermission(android.Manifest.permission.READ_CALL_LOG) public static final int EVENT_LEGACY_CALL_STATE_CHANGED = 36; // 0x24
     field @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public static final int EVENT_LINK_CAPACITY_ESTIMATE_CHANGED = 37; // 0x25
+    field @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public static final int EVENT_MEDIA_QUALITY_STATUS_CHANGED = 39; // 0x27
     field @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public static final int EVENT_MESSAGE_WAITING_INDICATOR_CHANGED = 3; // 0x3
     field @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public static final int EVENT_OEM_HOOK_RAW = 15; // 0xf
     field @RequiresPermission(android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION) public static final int EVENT_OUTGOING_EMERGENCY_CALL = 29; // 0x1d
@@ -13818,6 +13819,10 @@ package android.telephony {
 
   public static interface TelephonyCallback.LinkCapacityEstimateChangedListener {
     method @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public void onLinkCapacityEstimateChanged(@NonNull java.util.List<android.telephony.LinkCapacityEstimate>);
+  }
+
+  public static interface TelephonyCallback.MediaQualityStatusChangedListener {
+    method @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public void onMediaQualityStatusChanged(@NonNull android.telephony.ims.MediaQualityStatus);
   }
 
   public static interface TelephonyCallback.OutgoingEmergencyCallListener {
@@ -15362,6 +15367,37 @@ package android.telephony.ims {
     method public void receiveSessionModifyResponse(int, android.telecom.VideoProfile, android.telecom.VideoProfile);
   }
 
+  public final class MediaQualityStatus implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public String getCallSessionId();
+    method public int getMediaSessionType();
+    method public long getRtpInactivityMillis();
+    method public int getRtpJitterMillis();
+    method @IntRange(from=0, to=100) public int getRtpPacketLossRate();
+    method public int getTransportType();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.MediaQualityStatus> CREATOR;
+    field public static final int MEDIA_SESSION_TYPE_AUDIO = 1; // 0x1
+    field public static final int MEDIA_SESSION_TYPE_VIDEO = 2; // 0x2
+  }
+
+  public static final class MediaQualityStatus.Builder {
+    ctor public MediaQualityStatus.Builder(@NonNull String, int, int);
+    method @NonNull public android.telephony.ims.MediaQualityStatus build();
+    method @NonNull public android.telephony.ims.MediaQualityStatus.Builder setRtpInactivityMillis(long);
+    method @NonNull public android.telephony.ims.MediaQualityStatus.Builder setRtpJitterMillis(int);
+    method @NonNull public android.telephony.ims.MediaQualityStatus.Builder setRtpPacketLossRate(@IntRange(from=0, to=100) int);
+  }
+
+  public final class MediaThreshold implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public long[] getThresholdsRtpInactivityTimeMillis();
+    method @NonNull public int[] getThresholdsRtpJitterMillis();
+    method @NonNull public int[] getThresholdsRtpPacketLossRate();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.MediaThreshold> CREATOR;
+  }
+
   public class ProvisioningManager {
     method @NonNull public static android.telephony.ims.ProvisioningManager createForSubscriptionId(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) @WorkerThread public int getProvisioningIntValue(int);
@@ -15813,6 +15849,7 @@ package android.telephony.ims.feature {
     ctor public MmTelFeature(@NonNull java.util.concurrent.Executor);
     method public void changeEnabledCapabilities(@NonNull android.telephony.ims.feature.CapabilityChangeRequest, @NonNull android.telephony.ims.feature.ImsFeature.CapabilityCallbackProxy);
     method public void changeOfferedRtpHeaderExtensionTypes(@NonNull java.util.Set<android.telephony.ims.RtpHeaderExtensionType>);
+    method public void clearMediaThreshold(int);
     method @Nullable public android.telephony.ims.ImsCallProfile createCallProfile(int, int);
     method @Nullable public android.telephony.ims.stub.ImsCallSessionImplBase createCallSession(@NonNull android.telephony.ims.ImsCallProfile);
     method @NonNull public android.telephony.ims.stub.ImsEcbmImplBase getEcbm();
@@ -15822,6 +15859,7 @@ package android.telephony.ims.feature {
     method public final void notifyCapabilitiesStatusChanged(@NonNull android.telephony.ims.feature.MmTelFeature.MmTelCapabilities);
     method @Deprecated public final void notifyIncomingCall(@NonNull android.telephony.ims.stub.ImsCallSessionImplBase, @NonNull android.os.Bundle);
     method @Nullable public final android.telephony.ims.ImsCallSessionListener notifyIncomingCall(@NonNull android.telephony.ims.stub.ImsCallSessionImplBase, @NonNull String, @NonNull android.os.Bundle);
+    method public final void notifyMediaQualityStatusChanged(@NonNull android.telephony.ims.MediaQualityStatus);
     method public final void notifyRejectedCall(@NonNull android.telephony.ims.ImsCallProfile, @NonNull android.telephony.ims.ImsReasonInfo);
     method public void notifySrvccCanceled();
     method public void notifySrvccCompleted();
@@ -15832,7 +15870,9 @@ package android.telephony.ims.feature {
     method public void onFeatureRemoved();
     method public boolean queryCapabilityConfiguration(int, int);
     method @NonNull public final android.telephony.ims.feature.MmTelFeature.MmTelCapabilities queryCapabilityStatus();
+    method @Nullable public android.telephony.ims.MediaQualityStatus queryMediaQualityStatus(int);
     method public final void setCallAudioHandler(int);
+    method public void setMediaThreshold(int, @NonNull android.telephony.ims.MediaThreshold);
     method public void setTerminalBasedCallWaitingStatus(boolean);
     method public void setUiTtyMode(int, @Nullable android.os.Message);
     method public int shouldProcessCall(@NonNull String[]);

@@ -34,6 +34,7 @@ import android.telephony.Annotation.SrvccState;
 import android.telephony.TelephonyManager.DataEnabledReason;
 import android.telephony.emergency.EmergencyNumber;
 import android.telephony.ims.ImsReasonInfo;
+import android.telephony.ims.MediaQualityStatus;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.IPhoneStateListener;
@@ -1663,6 +1664,10 @@ public class PhoneStateListener {
         public void onLinkCapacityEstimateChanged(
                 List<LinkCapacityEstimate> linkCapacityEstimateList) {
             // default implementation empty
+        }
+
+        public final void onMediaQualityStatusChanged(MediaQualityStatus mediaQualityStatus) {
+            // not support. Can't override. Use TelephonyCallback.
         }
     }
 

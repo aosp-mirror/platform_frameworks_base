@@ -34,6 +34,8 @@ import android.telephony.ims.ImsCallSessionListener;
 import android.telephony.ims.ImsException;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.ImsService;
+import android.telephony.ims.MediaQualityStatus;
+import android.telephony.ims.MediaThreshold;
 import android.telephony.ims.RtpHeaderExtensionType;
 import android.telephony.ims.SrvccCall;
 import android.telephony.ims.aidl.IImsCallSessionListener;
@@ -255,7 +257,7 @@ public class MmTelFeature extends ImsFeature {
         public void changeCapabilitiesConfiguration(CapabilityChangeRequest request,
                 IImsCapabilityCallback c) {
             executeMethodAsyncNoException(() -> MmTelFeature.this
-                    .requestChangeEnabledCapabilities(request, c),
+                            .requestChangeEnabledCapabilities(request, c),
                     "changeCapabilitiesConfiguration");
         }
 
@@ -264,6 +266,26 @@ public class MmTelFeature extends ImsFeature {
                 IImsCapabilityCallback c) {
             executeMethodAsyncNoException(() -> queryCapabilityConfigurationInternal(
                     capability, radioTech, c), "queryCapabilityConfiguration");
+        }
+
+        @Override
+        public void setMediaQualityThreshold(@MediaQualityStatus.MediaSessionType int sessionType,
+                MediaThreshold mediaThreshold) {
+            if (mediaThreshold != null) {
+                executeMethodAsyncNoException(() -> setMediaThreshold(sessionType, mediaThreshold),
+                        "setMediaQualityThreshold");
+            } else {
+                executeMethodAsyncNoException(() -> clearMediaThreshold(sessionType),
+                        "clearMediaQualityThreshold");
+            }
+        }
+
+        @Override
+        public MediaQualityStatus queryMediaQualityStatus(
+                @MediaQualityStatus.MediaSessionType int sessionType)
+                throws RemoteException {
+            return executeMethodAsyncForResult(() -> MmTelFeature.this.queryMediaQualityStatus(
+                    sessionType), "queryMediaQualityStatus");
         }
 
         @Override
@@ -666,6 +688,17 @@ public class MmTelFeature extends ImsFeature {
         public void onStopImsTrafficSession(int token) {
 
         }
+
+        /**
+         * Called when the IMS provider notifies {@link MediaQualityStatus}.
+         *
+         * @param status media quality status currently measured.
+         * @hide
+         */
+        @Override
+        public void onMediaQualityStatusChanged(MediaQualityStatus status) {
+
+        }
     }
 
     /**
@@ -1030,6 +1063,32 @@ public class MmTelFeature extends ImsFeature {
     }
 
     /**
+     * Notify the framework that the measured media quality has crossed a threshold set by {@link
+     * MmTelFeature#setMediaThreshold}
+     *
+     * @param status current media quality status measured.
+     * @hide
+     */
+    @SystemApi
+    public final void notifyMediaQualityStatusChanged(
+            @NonNull MediaQualityStatus status) {
+        if (status == null) {
+            throw new IllegalArgumentException(
+                    "MediaQualityStatus must be non-null!");
+        }
+        Log.i(LOG_TAG, "notifyMediaQualityStatusChanged " + status);
+        IImsMmTelListener listener = getListener();
+        if (listener == null) {
+            throw new IllegalStateException("Session is not available.");
+        }
+        try {
+            listener.onMediaQualityStatusChanged(status);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
      * Notify the framework of an incoming call.
      * @param c The {@link ImsCallSessionImplBase} of the new incoming call.
      * @param extras A bundle containing extra parameters related to the call. See
@@ -1359,6 +1418,62 @@ public class MmTelFeature extends ImsFeature {
     public void changeEnabledCapabilities(@NonNull CapabilityChangeRequest request,
             @NonNull CapabilityCallbackProxy c) {
         // Base implementation, no-op
+    }
+
+    /**
+     * Called by the framework to pass {@link MediaThreshold}. The MmTelFeature should override this
+     * method to get Media quality threshold. This will pass the consolidated threshold values from
+     * Telephony framework. IMS provider needs to monitor media quality of active call and notify
+     * media quality {@link #notifyMediaQualityStatusChanged(MediaQualityStatus)} when the measured
+     * media quality crosses at least one of {@link MediaThreshold} set by this.
+     *
+     * @param mediaSessionType media session type for this Threshold info.
+     * @param mediaThreshold media threshold information
+     * @hide
+     */
+    @SystemApi
+    public void setMediaThreshold(
+            @MediaQualityStatus.MediaSessionType int mediaSessionType,
+            @NonNull MediaThreshold mediaThreshold) {
+        // Base Implementation - Should be overridden.
+        Log.d(LOG_TAG, "setMediaThreshold is not supported." + mediaThreshold);
+    }
+
+    /**
+     * The MmTelFeature should override this method to clear Media quality thresholds that were
+     * registered and stop media quality status updates.
+     *
+     * @param mediaSessionType media session type
+     * @hide
+     */
+    @SystemApi
+    public void clearMediaThreshold(@MediaQualityStatus.MediaSessionType int mediaSessionType) {
+        // Base Implementation - Should be overridden.
+        Log.d(LOG_TAG, "clearMediaThreshold is not supported." + mediaSessionType);
+    }
+
+    /**
+     * IMS provider should override this method to return currently measured media quality status.
+     *
+     * <p/>
+     * If media quality status is not yet measured after call is active, it needs to notify media
+     * quality status {@link #notifyMediaQualityStatusChanged(MediaQualityStatus)} when the first
+     * measurement is done.
+     *
+     * @param mediaSessionType media session type
+     * @return Current media quality status. It could be null if media quality status is not
+     *         measured yet or {@link MediaThreshold} was not set corresponding to the media session
+     *         type.
+     *
+     * @hide
+     */
+    @SystemApi
+    @Nullable
+    public MediaQualityStatus queryMediaQualityStatus(
+            @MediaQualityStatus.MediaSessionType int mediaSessionType) {
+        // Base Implementation - Should be overridden.
+        Log.d(LOG_TAG, "queryMediaQualityStatus is not supported." + mediaSessionType);
+        return null;
     }
 
     /**
