@@ -16771,7 +16771,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             mAtmInternal.onUserStopped(userId);
             // Clean up various services by removing the user
             mBatteryStatsService.onUserRemoved(userId);
-            mUserController.onUserRemoved(userId);
         }
 
         @Override

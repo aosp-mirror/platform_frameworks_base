@@ -389,6 +389,10 @@ public abstract class ActivityManagerInternal {
      */
     public abstract boolean isAppStartModeDisabled(int uid, String packageName);
 
+    /**
+     * Returns the ids of the current user and all of its profiles (if any), regardless of the
+     * running state of the profiles.
+     */
     public abstract int[] getCurrentProfileIds();
     public abstract UserInfo getCurrentUser();
     public abstract void ensureNotSpecialUser(@UserIdInt int userId);
