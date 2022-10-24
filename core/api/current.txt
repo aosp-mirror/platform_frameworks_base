@@ -143,6 +143,7 @@ package android {
     field public static final String READ_MEDIA_AUDIO = "android.permission.READ_MEDIA_AUDIO";
     field public static final String READ_MEDIA_IMAGES = "android.permission.READ_MEDIA_IMAGES";
     field public static final String READ_MEDIA_VIDEO = "android.permission.READ_MEDIA_VIDEO";
+    field public static final String READ_MEDIA_VISUAL_USER_SELECTED = "android.permission.READ_MEDIA_VISUAL_USER_SELECTED";
     field public static final String READ_NEARBY_STREAMING_POLICY = "android.permission.READ_NEARBY_STREAMING_POLICY";
     field public static final String READ_PHONE_NUMBERS = "android.permission.READ_PHONE_NUMBERS";
     field public static final String READ_PHONE_STATE = "android.permission.READ_PHONE_STATE";
