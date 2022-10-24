@@ -263,7 +263,7 @@ public class DisplayModeDirector {
         public int width;
         public int height;
         public boolean disableRefreshRateSwitching;
-        public float baseModeRefreshRate;
+        public float appRequestBaseModeRefreshRate;
 
         VoteSummary() {
             reset();
@@ -277,7 +277,7 @@ public class DisplayModeDirector {
             width = Vote.INVALID_SIZE;
             height = Vote.INVALID_SIZE;
             disableRefreshRateSwitching = false;
-            baseModeRefreshRate = 0f;
+            appRequestBaseModeRefreshRate = 0f;
         }
     }
 
@@ -326,8 +326,9 @@ public class DisplayModeDirector {
             if (!summary.disableRefreshRateSwitching && vote.disableRefreshRateSwitching) {
                 summary.disableRefreshRateSwitching = true;
             }
-            if (summary.baseModeRefreshRate == 0f && vote.baseModeRefreshRate > 0f) {
-                summary.baseModeRefreshRate = vote.baseModeRefreshRate;
+            if (summary.appRequestBaseModeRefreshRate == 0f
+                    && vote.appRequestBaseModeRefreshRate > 0f) {
+                summary.appRequestBaseModeRefreshRate = vote.appRequestBaseModeRefreshRate;
             }
 
             if (mLoggingEnabled) {
@@ -341,9 +342,39 @@ public class DisplayModeDirector {
                         + ", maxRenderFrameRate=" + summary.maxRenderFrameRate
                         + ", disableRefreshRateSwitching="
                         + summary.disableRefreshRateSwitching
-                        + ", baseModeRefreshRate=" + summary.baseModeRefreshRate);
+                        + ", appRequestBaseModeRefreshRate="
+                        + summary.appRequestBaseModeRefreshRate);
             }
         }
+    }
+
+    private boolean equalsWithinFloatTolerance(float a, float b) {
+        return a >= b - FLOAT_TOLERANCE && a <= b + FLOAT_TOLERANCE;
+    }
+
+    private Display.Mode selectBaseMode(VoteSummary summary,
+            ArrayList<Display.Mode> availableModes, Display.Mode defaultMode) {
+        // The base mode should be as close as possible to the app requested mode. Since all the
+        // available modes already have the same size, we just need to look for a matching refresh
+        // rate. If the summary doesn't include an app requested refresh rate, we'll use the default
+        // mode refresh rate. This is important because SurfaceFlinger can do only seamless switches
+        // by default. Some devices (e.g. TV) don't support seamless switching so the mode we select
+        // here won't be changed.
+        float preferredRefreshRate =
+                summary.appRequestBaseModeRefreshRate > 0
+                        ? summary.appRequestBaseModeRefreshRate : defaultMode.getRefreshRate();
+        for (Display.Mode availableMode : availableModes) {
+            if (equalsWithinFloatTolerance(preferredRefreshRate, availableMode.getRefreshRate())) {
+                return availableMode;
+            }
+        }
+
+        // If we couldn't find a mode id based on the refresh rate, it means that the available
+        // modes were filtered by the app requested size, which is different that the default mode
+        // size, and the requested app refresh rate was dropped from the summary due to a higher
+        // priority vote. Since we don't have any other hint about the refresh rate,
+        // we just pick the first.
+        return !availableModes.isEmpty() ? availableModes.get(0) : null;
     }
 
     /**
@@ -410,7 +441,8 @@ public class DisplayModeDirector {
                                 + ", maxRenderFrameRate=" + primarySummary.maxRenderFrameRate
                                 + ", disableRefreshRateSwitching="
                                 + primarySummary.disableRefreshRateSwitching
-                                + ", baseModeRefreshRate=" + primarySummary.baseModeRefreshRate);
+                                + ", appRequestBaseModeRefreshRate="
+                                + primarySummary.appRequestBaseModeRefreshRate);
                     }
                     break;
                 }
@@ -427,7 +459,8 @@ public class DisplayModeDirector {
                             + ", maxRenderFrameRate=" + primarySummary.maxRenderFrameRate
                             + ", disableRefreshRateSwitching="
                             + primarySummary.disableRefreshRateSwitching
-                            + ", baseModeRefreshRate=" + primarySummary.baseModeRefreshRate);
+                            + ", appRequestBaseModeRefreshRate="
+                            + primarySummary.appRequestBaseModeRefreshRate);
                 }
 
                 // If we haven't found anything with the current set of votes, drop the
@@ -479,38 +512,7 @@ public class DisplayModeDirector {
                                 + "]");
             }
 
-            // Select the base mode id based on the base mode physical refresh rate,
-            // if available, since this will be the mode id the
-            // app voted for.
-            Display.Mode baseMode = null;
-            for (Display.Mode availableMode : availableModes) {
-                if (primarySummary.baseModeRefreshRate
-                        >= availableMode.getRefreshRate() - FLOAT_TOLERANCE
-                        && primarySummary.baseModeRefreshRate
-                        <= availableMode.getRefreshRate() + FLOAT_TOLERANCE) {
-                    baseMode = availableMode;
-                }
-            }
-
-            // Select the default mode if available. This is important because SurfaceFlinger
-            // can do only seamless switches by default. Some devices (e.g. TV) don't support
-            // seamless switching so the mode we select here won't be changed.
-            if (baseMode == null) {
-                for (Display.Mode availableMode : availableModes) {
-                    if (availableMode.getModeId() == defaultMode.getModeId()) {
-                        baseMode = defaultMode;
-                        break;
-                    }
-                }
-            }
-
-            // If the application requests a display mode by setting
-            // LayoutParams.preferredDisplayModeId, it will be the only available mode and it'll
-            // be stored as baseModeId.
-            if (baseMode == null && !availableModes.isEmpty()) {
-                baseMode = availableModes.get(0);
-            }
-
+            Display.Mode baseMode = selectBaseMode(primarySummary, availableModes, defaultMode);
             if (baseMode == null) {
                 Slog.w(TAG, "Can't find a set of allowed modes which satisfies the votes. Falling"
                         + " back to the default mode. Display = " + displayId + ", votes = " + votes
@@ -574,7 +576,7 @@ public class DisplayModeDirector {
         }
 
         ArrayList<Display.Mode> availableModes = new ArrayList<>();
-        boolean missingBaseModeRefreshRate = summary.baseModeRefreshRate > 0f;
+        boolean missingBaseModeRefreshRate = summary.appRequestBaseModeRefreshRate > 0f;
         for (Display.Mode mode : supportedModes) {
             if (mode.getPhysicalWidth() != summary.width
                     || mode.getPhysicalHeight() != summary.height) {
@@ -626,8 +628,8 @@ public class DisplayModeDirector {
             }
 
             availableModes.add(mode);
-            if (mode.getRefreshRate() >= summary.baseModeRefreshRate - FLOAT_TOLERANCE
-                    && mode.getRefreshRate() <= summary.baseModeRefreshRate + FLOAT_TOLERANCE) {
+            if (equalsWithinFloatTolerance(mode.getRefreshRate(),
+                    summary.appRequestBaseModeRefreshRate)) {
                 missingBaseModeRefreshRate = false;
             }
         }
@@ -1118,10 +1120,21 @@ public class DisplayModeDirector {
         // Application can specify preferred refresh rate with below attrs.
         // @see android.view.WindowManager.LayoutParams#preferredRefreshRate
         // @see android.view.WindowManager.LayoutParams#preferredDisplayModeId
-        // These translates into votes for the base mode refresh rate and resolution to be
-        // used by SurfaceFlinger as the policy of choosing the display mode. The system also
-        // forces some apps like denylisted app to run at a lower refresh rate.
+        //
+        // When the app specifies a LayoutParams#preferredDisplayModeId, in addition to the
+        // refresh rate, it also chooses a preferred size (resolution) as part of the selected
+        // mode id. The app preference is then translated to APP_REQUEST_BASE_MODE_REFRESH_RATE and
+        // optionally to APP_REQUEST_SIZE as well, if a mode id was selected.
+        // The system also forces some apps like denylisted app to run at a lower refresh rate.
         // @see android.R.array#config_highRefreshRateBlacklist
+        //
+        // When summarizing the votes and filtering the allowed display modes, these votes determine
+        // which mode id should be the base mode id to be sent to SurfaceFlinger:
+        // - APP_REQUEST_BASE_MODE_REFRESH_RATE is used to validate the vote summary. If a summary
+        //   includes a base mode refresh rate, but it is not in the refresh rate range, then the
+        //   summary is considered invalid so we could drop a lower priority vote and try again.
+        // - APP_REQUEST_SIZE is used to filter out display modes of a different size.
+        //
         // The preferred refresh rate is set on the main surface of the app outside of
         // DisplayModeDirector.
         // @see com.android.server.wm.WindowState#updateFrameRateSelectionPriorityIfNeeded
@@ -1189,10 +1202,10 @@ public class DisplayModeDirector {
         public final boolean disableRefreshRateSwitching;
 
         /**
-         * The base mode refresh rate to be used for this display. This would be used when deciding
-         * the base mode id.
+         * The preferred refresh rate selected by the app. It is used to validate that the summary
+         * refresh rate ranges include this value, and are not restricted by a lower priority vote.
          */
-        public final float baseModeRefreshRate;
+        public final float appRequestBaseModeRefreshRate;
 
         public static Vote forPhysicalRefreshRates(float minRefreshRate, float maxRefreshRate) {
             return new Vote(INVALID_SIZE, INVALID_SIZE, minRefreshRate, maxRefreshRate, 0,
@@ -1237,7 +1250,7 @@ public class DisplayModeDirector {
                     new RefreshRateRange(minPhysicalRefreshRate, maxPhysicalRefreshRate),
                     new RefreshRateRange(minRenderFrameRate, maxRenderFrameRate));
             this.disableRefreshRateSwitching = disableRefreshRateSwitching;
-            this.baseModeRefreshRate = baseModeRefreshRate;
+            this.appRequestBaseModeRefreshRate = baseModeRefreshRate;
         }
 
         public static String priorityToString(int priority) {
@@ -1279,7 +1292,7 @@ public class DisplayModeDirector {
                     + "width=" + width + ", height=" + height
                     + ", refreshRateRanges=" + refreshRateRanges
                     + ", disableRefreshRateSwitching=" + disableRefreshRateSwitching
-                    + ", baseModeRefreshRate=" + baseModeRefreshRate + "}";
+                    + ", appRequestBaseModeRefreshRate=" + appRequestBaseModeRefreshRate + "}";
         }
     }
 
