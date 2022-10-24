@@ -4644,7 +4644,7 @@ public final class NotificationPanelViewController {
                 mUpdateFlingVelocity = vel;
             }
         } else if (!mCentralSurfaces.isBouncerShowing()
-                && !mStatusBarKeyguardViewManager.isShowingAlternateAuthOrAnimating()
+                && !mStatusBarKeyguardViewManager.isShowingAlternateAuth()
                 && !mKeyguardStateController.isKeyguardGoingAway()) {
             onEmptySpaceClick();
             onTrackingStopped(true);

@@ -38,7 +38,7 @@ constructor(
     private val interactor: BouncerInteractor,
 ) {
     /** Observe on bouncer expansion amount. */
-    val bouncerExpansionAmount: Flow<Float> = interactor.expansionAmount
+    val bouncerExpansionAmount: Flow<Float> = interactor.panelExpansionAmount
 
     /** Observe on bouncer visibility. */
     val isBouncerVisible: Flow<Boolean> = interactor.isVisible
