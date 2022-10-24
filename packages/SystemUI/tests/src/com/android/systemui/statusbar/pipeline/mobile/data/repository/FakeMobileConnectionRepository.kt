@@ -24,7 +24,14 @@ class FakeMobileConnectionRepository : MobileConnectionRepository {
     private val _subscriptionsModelFlow = MutableStateFlow(MobileSubscriptionModel())
     override val subscriptionModelFlow: Flow<MobileSubscriptionModel> = _subscriptionsModelFlow
 
+    private val _dataEnabled = MutableStateFlow(true)
+    override val dataEnabled = _dataEnabled
+
     fun setMobileSubscriptionModel(model: MobileSubscriptionModel) {
         _subscriptionsModelFlow.value = model
+    }
+
+    fun setDataEnabled(enabled: Boolean) {
+        _dataEnabled.value = enabled
     }
 }

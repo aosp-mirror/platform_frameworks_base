@@ -29,6 +29,9 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
 interface MobileIconInteractor {
+    /** Observable for the data enabled state of this connection */
+    val isDataEnabled: Flow<Boolean>
+
     /** Observable for RAT type (network type) indicator */
     val networkTypeIconGroup: Flow<MobileIconGroup>
 
@@ -53,6 +56,8 @@ class MobileIconInteractorImpl(
     connectionRepository: MobileConnectionRepository,
 ) : MobileIconInteractor {
     private val mobileStatusInfo = connectionRepository.subscriptionModelFlow
+
+    override val isDataEnabled: Flow<Boolean> = connectionRepository.dataEnabled
 
     /** Observable for the current RAT indicator icon ([MobileIconGroup]) */
     override val networkTypeIconGroup: Flow<MobileIconGroup> =

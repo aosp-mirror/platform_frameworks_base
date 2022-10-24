@@ -20,16 +20,20 @@ import android.telephony.CellSignalStrengthCdma
 import android.telephony.ServiceState
 import android.telephony.SignalStrength
 import android.telephony.SubscriptionInfo
-import android.telephony.SubscriptionManager
 import android.telephony.TelephonyCallback
 import android.telephony.TelephonyCallback.ServiceStateListener
 import android.telephony.TelephonyDisplayInfo
 import android.telephony.TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_LTE_CA
 import android.telephony.TelephonyManager
+import android.telephony.TelephonyManager.DATA_CONNECTED
+import android.telephony.TelephonyManager.DATA_CONNECTING
+import android.telephony.TelephonyManager.DATA_DISCONNECTED
+import android.telephony.TelephonyManager.DATA_DISCONNECTING
 import android.telephony.TelephonyManager.NETWORK_TYPE_LTE
 import android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DefaultNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileSubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.OverrideNetworkType
@@ -59,7 +63,6 @@ import org.mockito.MockitoAnnotations
 class MobileConnectionRepositoryTest : SysuiTestCase() {
     private lateinit var underTest: MobileConnectionRepositoryImpl
 
-    @Mock private lateinit var subscriptionManager: SubscriptionManager
     @Mock private lateinit var telephonyManager: TelephonyManager
     @Mock private lateinit var logger: ConnectivityPipelineLogger
 
@@ -148,16 +151,61 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun testFlowForSubId_dataConnectionState() =
+    fun testFlowForSubId_dataConnectionState_connected() =
         runBlocking(IMMEDIATE) {
             var latest: MobileSubscriptionModel? = null
             val job = underTest.subscriptionModelFlow.onEach { latest = it }.launchIn(this)
 
             val callback =
                 getTelephonyCallbackForType<TelephonyCallback.DataConnectionStateListener>()
-            callback.onDataConnectionStateChanged(100, 200 /* unused */)
+            callback.onDataConnectionStateChanged(DATA_CONNECTED, 200 /* unused */)
 
-            assertThat(latest?.dataConnectionState).isEqualTo(100)
+            assertThat(latest?.dataConnectionState).isEqualTo(DataConnectionState.Connected)
+
+            job.cancel()
+        }
+
+    @Test
+    fun testFlowForSubId_dataConnectionState_connecting() =
+        runBlocking(IMMEDIATE) {
+            var latest: MobileSubscriptionModel? = null
+            val job = underTest.subscriptionModelFlow.onEach { latest = it }.launchIn(this)
+
+            val callback =
+                getTelephonyCallbackForType<TelephonyCallback.DataConnectionStateListener>()
+            callback.onDataConnectionStateChanged(DATA_CONNECTING, 200 /* unused */)
+
+            assertThat(latest?.dataConnectionState).isEqualTo(DataConnectionState.Connecting)
+
+            job.cancel()
+        }
+
+    @Test
+    fun testFlowForSubId_dataConnectionState_disconnected() =
+        runBlocking(IMMEDIATE) {
+            var latest: MobileSubscriptionModel? = null
+            val job = underTest.subscriptionModelFlow.onEach { latest = it }.launchIn(this)
+
+            val callback =
+                getTelephonyCallbackForType<TelephonyCallback.DataConnectionStateListener>()
+            callback.onDataConnectionStateChanged(DATA_DISCONNECTED, 200 /* unused */)
+
+            assertThat(latest?.dataConnectionState).isEqualTo(DataConnectionState.Disconnected)
+
+            job.cancel()
+        }
+
+    @Test
+    fun testFlowForSubId_dataConnectionState_disconnecting() =
+        runBlocking(IMMEDIATE) {
+            var latest: MobileSubscriptionModel? = null
+            val job = underTest.subscriptionModelFlow.onEach { latest = it }.launchIn(this)
+
+            val callback =
+                getTelephonyCallbackForType<TelephonyCallback.DataConnectionStateListener>()
+            callback.onDataConnectionStateChanged(DATA_DISCONNECTING, 200 /* unused */)
+
+            assertThat(latest?.dataConnectionState).isEqualTo(DataConnectionState.Disconnecting)
 
             job.cancel()
         }
@@ -237,6 +285,32 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
             callback.onDisplayInfoChanged(ti)
 
             assertThat(latest?.resolvedNetworkType).isEqualTo(expected)
+
+            job.cancel()
+        }
+
+    @Test
+    fun dataEnabled_isEnabled() =
+        runBlocking(IMMEDIATE) {
+            whenever(telephonyManager.isDataConnectionAllowed).thenReturn(true)
+
+            var latest: Boolean? = null
+            val job = underTest.dataEnabled.onEach { latest = it }.launchIn(this)
+
+            assertThat(latest).isTrue()
+
+            job.cancel()
+        }
+
+    @Test
+    fun dataEnabled_isDisabled() =
+        runBlocking(IMMEDIATE) {
+            whenever(telephonyManager.isDataConnectionAllowed).thenReturn(false)
+
+            var latest: Boolean? = null
+            val job = underTest.dataEnabled.onEach { latest = it }.launchIn(this)
+
+            assertThat(latest).isFalse()
 
             job.cancel()
         }

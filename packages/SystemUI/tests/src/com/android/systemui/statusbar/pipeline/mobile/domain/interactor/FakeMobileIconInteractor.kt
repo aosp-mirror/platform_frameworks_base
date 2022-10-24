@@ -22,19 +22,22 @@ import com.android.settingslib.mobile.TelephonyIcons
 import kotlinx.coroutines.flow.MutableStateFlow
 
 class FakeMobileIconInteractor : MobileIconInteractor {
-    private val _iconGroup = MutableStateFlow<SignalIcon.MobileIconGroup>(TelephonyIcons.UNKNOWN)
+    private val _iconGroup = MutableStateFlow<SignalIcon.MobileIconGroup>(TelephonyIcons.THREE_G)
     override val networkTypeIconGroup = _iconGroup
 
-    private val _isEmergencyOnly = MutableStateFlow<Boolean>(false)
+    private val _isEmergencyOnly = MutableStateFlow(false)
     override val isEmergencyOnly = _isEmergencyOnly
 
-    private val _level = MutableStateFlow<Int>(CellSignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN)
+    private val _isDataEnabled = MutableStateFlow(true)
+    override val isDataEnabled = _isDataEnabled
+
+    private val _level = MutableStateFlow(CellSignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN)
     override val level = _level
 
-    private val _numberOfLevels = MutableStateFlow<Int>(4)
+    private val _numberOfLevels = MutableStateFlow(4)
     override val numberOfLevels = _numberOfLevels
 
-    private val _cutOut = MutableStateFlow<Boolean>(false)
+    private val _cutOut = MutableStateFlow(false)
     override val cutOut = _cutOut
 
     fun setIconGroup(group: SignalIcon.MobileIconGroup) {
@@ -43,6 +46,10 @@ class FakeMobileIconInteractor : MobileIconInteractor {
 
     fun setIsEmergencyOnly(emergency: Boolean) {
         _isEmergencyOnly.value = emergency
+    }
+
+    fun setIsDataEnabled(enabled: Boolean) {
+        _isDataEnabled.value = enabled
     }
 
     fun setLevel(level: Int) {
