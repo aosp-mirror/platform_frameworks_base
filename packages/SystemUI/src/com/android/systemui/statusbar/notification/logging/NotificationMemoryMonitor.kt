@@ -17,22 +17,11 @@
 
 package com.android.systemui.statusbar.notification.logging
 
-import android.app.Notification
-import android.app.Person
-import android.graphics.Bitmap
-import android.graphics.drawable.Icon
-import android.os.Bundle
-import android.os.Parcel
-import android.os.Parcelable
 import android.util.Log
-import androidx.annotation.WorkerThread
-import androidx.core.util.contains
 import com.android.systemui.Dumpable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.statusbar.notification.NotificationUtils
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
-import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import java.io.PrintWriter
 import javax.inject.Inject
 
@@ -46,12 +35,7 @@ constructor(
 ) : Dumpable {
 
     companion object {
-        private const val TAG = "NotificationMemMonitor"
-        private const val CAR_EXTENSIONS = "android.car.EXTENSIONS"
-        private const val CAR_EXTENSIONS_LARGE_ICON = "large_icon"
-        private const val TV_EXTENSIONS = "android.tv.EXTENSIONS"
-        private const val WEARABLE_EXTENSIONS = "android.wearable.EXTENSIONS"
-        private const val WEARABLE_EXTENSIONS_BACKGROUND = "background"
+        private const val TAG = "NotificationMemory"
     }
 
     fun init() {
@@ -60,184 +44,123 @@ constructor(
     }
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {
-        currentNotificationMemoryUse().forEach { use -> pw.println(use.toString()) }
+        val memoryUse =
+            NotificationMemoryMeter.notificationMemoryUse(notificationPipeline.allNotifs)
+                .sortedWith(compareBy({ it.packageName }, { it.notificationKey }))
+        dumpNotificationObjects(pw, memoryUse)
+        dumpNotificationViewUsage(pw, memoryUse)
     }
 
-    @WorkerThread
-    fun currentNotificationMemoryUse(): List<NotificationMemoryUsage> {
-        return notificationMemoryUse(notificationPipeline.allNotifs)
-    }
-
-    /** Returns a list of memory use entries for currently shown notifications. */
-    @WorkerThread
-    fun notificationMemoryUse(
-        notifications: Collection<NotificationEntry>
-    ): List<NotificationMemoryUsage> {
-        return notifications
-            .asSequence()
-            .map { entry ->
-                val packageName = entry.sbn.packageName
-                val notificationObjectUsage =
-                    computeNotificationObjectUse(entry.sbn.notification, hashSetOf())
-                NotificationMemoryUsage(
-                    packageName,
-                    NotificationUtils.logKey(entry.sbn.key),
-                    notificationObjectUsage
-                )
-            }
-            .toList()
-    }
-
-    /**
-     * Computes the estimated memory usage of a given [Notification] object. It'll attempt to
-     * inspect Bitmaps in the object and provide summary of memory usage.
-     */
-    private fun computeNotificationObjectUse(
-        notification: Notification,
-        seenBitmaps: HashSet<Int>
-    ): NotificationObjectUsage {
-        val extras = notification.extras
-        val smallIconUse = computeIconUse(notification.smallIcon, seenBitmaps)
-        val largeIconUse = computeIconUse(notification.getLargeIcon(), seenBitmaps)
-
-        // Collect memory usage of extra styles
-
-        // Big Picture
-        val bigPictureIconUse =
-            computeParcelableUse(extras, Notification.EXTRA_PICTURE_ICON, seenBitmaps) +
-                computeParcelableUse(extras, Notification.EXTRA_LARGE_ICON_BIG, seenBitmaps)
-        val bigPictureUse =
-            computeParcelableUse(extras, Notification.EXTRA_PICTURE, seenBitmaps) +
-                computeParcelableUse(extras, Notification.EXTRA_PICTURE_ICON, seenBitmaps)
-
-        // People
-        val peopleList = extras.getParcelableArrayList<Person>(Notification.EXTRA_PEOPLE_LIST)
-        val peopleUse =
-            peopleList?.sumOf { person -> computeIconUse(person.icon, seenBitmaps) } ?: 0
-
-        // Calling
-        val callingPersonUse =
-            computeParcelableUse(extras, Notification.EXTRA_CALL_PERSON, seenBitmaps)
-        val verificationIconUse =
-            computeParcelableUse(extras, Notification.EXTRA_VERIFICATION_ICON, seenBitmaps)
-
-        // Messages
-        val messages =
-            Notification.MessagingStyle.Message.getMessagesFromBundleArray(
-                extras.getParcelableArray(Notification.EXTRA_MESSAGES)
-            )
-        val messagesUse =
-            messages.sumOf { msg -> computeIconUse(msg.senderPerson?.icon, seenBitmaps) }
-        val historicMessages =
-            Notification.MessagingStyle.Message.getMessagesFromBundleArray(
-                extras.getParcelableArray(Notification.EXTRA_HISTORIC_MESSAGES)
-            )
-        val historyicMessagesUse =
-            historicMessages.sumOf { msg -> computeIconUse(msg.senderPerson?.icon, seenBitmaps) }
-
-        // Extenders
-        val carExtender = extras.getBundle(CAR_EXTENSIONS)
-        val carExtenderSize = carExtender?.let { computeBundleSize(it) } ?: 0
-        val carExtenderIcon =
-            computeParcelableUse(carExtender, CAR_EXTENSIONS_LARGE_ICON, seenBitmaps)
-
-        val tvExtender = extras.getBundle(TV_EXTENSIONS)
-        val tvExtenderSize = tvExtender?.let { computeBundleSize(it) } ?: 0
-
-        val wearExtender = extras.getBundle(WEARABLE_EXTENSIONS)
-        val wearExtenderSize = wearExtender?.let { computeBundleSize(it) } ?: 0
-        val wearExtenderBackground =
-            computeParcelableUse(wearExtender, WEARABLE_EXTENSIONS_BACKGROUND, seenBitmaps)
-
-        val style = notification.notificationStyle
-        val hasCustomView = notification.contentView != null || notification.bigContentView != null
-        val extrasSize = computeBundleSize(extras)
-
-        return NotificationObjectUsage(
-            smallIconUse,
-            largeIconUse,
-            extrasSize,
-            style?.simpleName,
-            bigPictureIconUse +
-                peopleUse +
-                callingPersonUse +
-                verificationIconUse +
-                messagesUse +
-                historyicMessagesUse,
-            bigPictureUse,
-            carExtenderSize +
-                carExtenderIcon +
-                tvExtenderSize +
-                wearExtenderSize +
-                wearExtenderBackground,
-            hasCustomView
+    /** Renders a table of notification object usage into passed [PrintWriter]. */
+    private fun dumpNotificationObjects(pw: PrintWriter, memoryUse: List<NotificationMemoryUsage>) {
+        pw.println("Notification Object Usage")
+        pw.println("-----------")
+        pw.println(
+            "Package".padEnd(35) +
+                "\t\tSmall\tLarge\t${"Style".padEnd(15)}\t\tStyle\tBig\tExtend.\tExtras\tCustom"
         )
+        pw.println("".padEnd(35) + "\t\tIcon\tIcon\t${"".padEnd(15)}\t\tIcon\tPicture\t \t \tView")
+        pw.println()
+
+        memoryUse.forEach { use ->
+            pw.println(
+                use.packageName.padEnd(35) +
+                    "\t\t" +
+                    "${use.objectUsage.smallIcon}\t${use.objectUsage.largeIcon}\t" +
+                    (use.objectUsage.style?.take(15) ?: "").padEnd(15) +
+                    "\t\t${use.objectUsage.styleIcon}\t" +
+                    "${use.objectUsage.bigPicture}\t${use.objectUsage.extender}\t" +
+                    "${use.objectUsage.extras}\t${use.objectUsage.hasCustomView}\t" +
+                    use.notificationKey
+            )
+        }
+
+        // Calculate totals for easily glanceable summary.
+        data class Totals(
+            var smallIcon: Int = 0,
+            var largeIcon: Int = 0,
+            var styleIcon: Int = 0,
+            var bigPicture: Int = 0,
+            var extender: Int = 0,
+            var extras: Int = 0,
+        )
+
+        val totals =
+            memoryUse.fold(Totals()) { t, usage ->
+                t.smallIcon += usage.objectUsage.smallIcon
+                t.largeIcon += usage.objectUsage.largeIcon
+                t.styleIcon += usage.objectUsage.styleIcon
+                t.bigPicture += usage.objectUsage.bigPicture
+                t.extender += usage.objectUsage.extender
+                t.extras += usage.objectUsage.extras
+                t
+            }
+
+        pw.println()
+        pw.println("TOTALS")
+        pw.println(
+            "".padEnd(35) +
+                "\t\t" +
+                "${toKb(totals.smallIcon)}\t${toKb(totals.largeIcon)}\t" +
+                "".padEnd(15) +
+                "\t\t${toKb(totals.styleIcon)}\t" +
+                "${toKb(totals.bigPicture)}\t${toKb(totals.extender)}\t" +
+                toKb(totals.extras)
+        )
+        pw.println()
     }
 
-    /**
-     * Calculates size of the bundle data (excluding FDs and other shared objects like ashmem
-     * bitmaps). Can be slow.
-     */
-    private fun computeBundleSize(extras: Bundle): Int {
-        val parcel = Parcel.obtain()
-        try {
-            extras.writeToParcel(parcel, 0)
-            return parcel.dataSize()
-        } finally {
-            parcel.recycle()
-        }
+    /** Renders a table of notification view usage into passed [PrintWriter] */
+    private fun dumpNotificationViewUsage(
+        pw: PrintWriter,
+        memoryUse: List<NotificationMemoryUsage>,
+    ) {
+
+        data class Totals(
+            var smallIcon: Int = 0,
+            var largeIcon: Int = 0,
+            var style: Int = 0,
+            var customViews: Int = 0,
+            var softwareBitmapsPenalty: Int = 0,
+        )
+
+        val totals = Totals()
+        pw.println("Notification View Usage")
+        pw.println("-----------")
+        pw.println("View Type".padEnd(24) + "\tSmall\tLarge\tStyle\tCustom\tSoftware")
+        pw.println("".padEnd(24) + "\tIcon\tIcon\tUse\tView\tBitmaps")
+        pw.println()
+        memoryUse
+            .filter { it.viewUsage.isNotEmpty() }
+            .forEach { use ->
+                pw.println(use.packageName + " " + use.notificationKey)
+                use.viewUsage.forEach { view ->
+                    pw.println(
+                        "  ${view.viewType.toString().padEnd(24)}\t${view.smallIcon}" +
+                            "\t${view.largeIcon}\t${view.style}" +
+                            "\t${view.customViews}\t${view.softwareBitmapsPenalty}"
+                    )
+
+                    if (view.viewType == ViewType.TOTAL) {
+                        totals.smallIcon += view.smallIcon
+                        totals.largeIcon += view.largeIcon
+                        totals.style += view.style
+                        totals.customViews += view.customViews
+                        totals.softwareBitmapsPenalty += view.softwareBitmapsPenalty
+                    }
+                }
+            }
+        pw.println()
+        pw.println("TOTALS")
+        pw.println(
+            "  ${"".padEnd(24)}\t${toKb(totals.smallIcon)}" +
+                "\t${toKb(totals.largeIcon)}\t${toKb(totals.style)}" +
+                "\t${toKb(totals.customViews)}\t${toKb(totals.softwareBitmapsPenalty)}"
+        )
+        pw.println()
     }
 
-    /**
-     * Deserializes [Icon], [Bitmap] or [Person] from extras and computes its memory use. Returns 0
-     * if the key does not exist in extras.
-     */
-    private fun computeParcelableUse(extras: Bundle?, key: String, seenBitmaps: HashSet<Int>): Int {
-        return when (val parcelable = extras?.getParcelable<Parcelable>(key)) {
-            is Bitmap -> computeBitmapUse(parcelable, seenBitmaps)
-            is Icon -> computeIconUse(parcelable, seenBitmaps)
-            is Person -> computeIconUse(parcelable.icon, seenBitmaps)
-            else -> 0
-        }
-    }
-
-    /**
-     * Calculates the byte size of bitmaps or data in the Icon object. Returns 0 if the icon is
-     * defined via Uri or a resource.
-     *
-     * @return memory usage in bytes or 0 if the icon is Uri/Resource based
-     */
-    private fun computeIconUse(icon: Icon?, seenBitmaps: HashSet<Int>) =
-        when (icon?.type) {
-            Icon.TYPE_BITMAP -> computeBitmapUse(icon.bitmap, seenBitmaps)
-            Icon.TYPE_ADAPTIVE_BITMAP -> computeBitmapUse(icon.bitmap, seenBitmaps)
-            Icon.TYPE_DATA -> computeDataUse(icon, seenBitmaps)
-            else -> 0
-        }
-
-    /**
-     * Returns the amount of memory a given bitmap is using. If the bitmap reference is part of
-     * seenBitmaps set, this method returns 0 to avoid double counting.
-     *
-     * @return memory usage of the bitmap in bytes
-     */
-    private fun computeBitmapUse(bitmap: Bitmap, seenBitmaps: HashSet<Int>? = null): Int {
-        val refId = System.identityHashCode(bitmap)
-        if (seenBitmaps?.contains(refId) == true) {
-            return 0
-        }
-
-        seenBitmaps?.add(refId)
-        return bitmap.allocationByteCount
-    }
-
-    private fun computeDataUse(icon: Icon, seenBitmaps: HashSet<Int>): Int {
-        val refId = System.identityHashCode(icon.dataBytes)
-        if (seenBitmaps.contains(refId)) {
-            return 0
-        }
-
-        seenBitmaps.add(refId)
-        return icon.dataLength
+    private fun toKb(bytes: Int): String {
+        return (bytes / 1024).toString() + " KB"
     }
 }
