@@ -40,6 +40,8 @@ import android.app.job.JobSnapshot;
 import android.app.job.JobWorkItem;
 import android.app.usage.UsageStatsManager;
 import android.app.usage.UsageStatsManagerInternal;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -58,6 +60,7 @@ import android.os.BatteryManager;
 import android.os.BatteryManagerInternal;
 import android.os.BatteryStatsInternal;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.LimitExceededException;
 import android.os.Looper;
@@ -165,6 +168,14 @@ public class JobSchedulerService extends com.android.server.SystemService
     private static final int MAX_JOBS_PER_APP = 150;
     /** The number of the most recently completed jobs to keep track of for debugging purposes. */
     private static final int NUM_COMPLETED_JOB_HISTORY = 20;
+
+    /**
+     * Require the hosting job to specify a network constraint if the included
+     * {@link android.app.job.JobWorkItem} indicates network usage.
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+    private static final long REQUIRE_NETWORK_CONSTRAINT_FOR_NETWORK_JOB_WORK_ITEMS = 241104082L;
 
     @VisibleForTesting
     public static Clock sSystemClock = Clock.systemUTC();
@@ -3147,7 +3158,11 @@ public class JobSchedulerService extends com.android.server.SystemService
             return canPersist;
         }
 
-        private void validateJobFlags(JobInfo job, int callingUid) {
+        private void validateJob(JobInfo job, int callingUid) {
+            validateJob(job, callingUid, null);
+        }
+
+        private void validateJob(JobInfo job, int callingUid, @Nullable JobWorkItem jobWorkItem) {
             job.enforceValidity(
                     CompatChanges.isChangeEnabled(
                             JobInfo.DISALLOW_DEADLINES_FOR_PREFETCH_JOBS, callingUid));
@@ -3162,6 +3177,26 @@ public class JobSchedulerService extends com.android.server.SystemService
                 if (job.isPeriodic()) {
                     Slog.wtf(TAG, "Periodic jobs mustn't have"
                             + " FLAG_EXEMPT_FROM_APP_STANDBY. Job=" + job);
+                }
+            }
+            if (jobWorkItem != null) {
+                jobWorkItem.enforceValidity();
+                if (jobWorkItem.getEstimatedNetworkDownloadBytes() != JobInfo.NETWORK_BYTES_UNKNOWN
+                        || jobWorkItem.getEstimatedNetworkUploadBytes()
+                        != JobInfo.NETWORK_BYTES_UNKNOWN
+                        || jobWorkItem.getMinimumNetworkChunkBytes()
+                        != JobInfo.NETWORK_BYTES_UNKNOWN) {
+                    if (job.getRequiredNetwork() == null) {
+                        final String errorMsg = "JobWorkItem implies network usage"
+                                + " but job doesn't specify a network constraint";
+                        if (CompatChanges.isChangeEnabled(
+                                REQUIRE_NETWORK_CONSTRAINT_FOR_NETWORK_JOB_WORK_ITEMS,
+                                callingUid)) {
+                            throw new IllegalArgumentException(errorMsg);
+                        } else {
+                            Slog.e(TAG, errorMsg);
+                        }
+                    }
                 }
             }
         }
@@ -3184,7 +3219,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                 }
             }
 
-            validateJobFlags(job, uid);
+            validateJob(job, uid);
 
             final long ident = Binder.clearCallingIdentity();
             try {
@@ -3212,8 +3247,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                 throw new NullPointerException("work is null");
             }
 
-            work.enforceValidity();
-            validateJobFlags(job, uid);
+            validateJob(job, uid, work);
 
             final long ident = Binder.clearCallingIdentity();
             try {
@@ -3244,7 +3278,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                         + " not permitted to schedule jobs for other apps");
             }
 
-            validateJobFlags(job, callerUid);
+            validateJob(job, callerUid);
 
             final long ident = Binder.clearCallingIdentity();
             try {
