@@ -1488,7 +1488,8 @@ public class BroadcastQueueImpl extends BroadcastQueue {
             // LocalServices.getService() here.
             final UserManagerInternal umInternal = LocalServices.getService(
                     UserManagerInternal.class);
-            final UserInfo userInfo = umInternal.getUserInfo(r.userId);
+            final UserInfo userInfo =
+                    (umInternal != null) ? umInternal.getUserInfo(r.userId) : null;
             if (userInfo != null) {
                 userType = UserManager.getUserTypeForStatsd(userInfo.userType);
             }
