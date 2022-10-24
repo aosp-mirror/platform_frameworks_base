@@ -32,10 +32,12 @@ import com.android.systemui.Dumpable
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.media.controls.models.player.MediaData
 import com.android.systemui.media.controls.pipeline.MediaDataManager
 import com.android.systemui.media.controls.pipeline.RESUME_MEDIA_TIMEOUT
+import com.android.systemui.settings.UserTracker
 import com.android.systemui.tuner.TunerService
 import com.android.systemui.util.Utils
 import com.android.systemui.util.time.SystemClock
@@ -55,6 +57,8 @@ class MediaResumeListener
 constructor(
     private val context: Context,
     private val broadcastDispatcher: BroadcastDispatcher,
+    private val userTracker: UserTracker,
+    @Main private val mainExecutor: Executor,
     @Background private val backgroundExecutor: Executor,
     private val tunerService: TunerService,
     private val mediaBrowserFactory: ResumeMediaBrowserFactory,
@@ -77,15 +81,23 @@ constructor(
     private var currentUserId: Int = context.userId
 
     @VisibleForTesting
-    val userChangeReceiver =
+    val userUnlockReceiver =
         object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 if (Intent.ACTION_USER_UNLOCKED == intent.action) {
-                    loadMediaResumptionControls()
-                } else if (Intent.ACTION_USER_SWITCHED == intent.action) {
-                    currentUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1)
-                    loadSavedComponents()
+                    val userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1)
+                    if (userId == currentUserId) {
+                        loadMediaResumptionControls()
+                    }
                 }
+            }
+        }
+
+    private val userTrackerCallback =
+        object : UserTracker.Callback {
+            override fun onUserChanged(newUser: Int, userContext: Context) {
+                currentUserId = newUser
+                loadSavedComponents()
             }
         }
 
@@ -126,13 +138,13 @@ constructor(
             dumpManager.registerDumpable(TAG, this)
             val unlockFilter = IntentFilter()
             unlockFilter.addAction(Intent.ACTION_USER_UNLOCKED)
-            unlockFilter.addAction(Intent.ACTION_USER_SWITCHED)
             broadcastDispatcher.registerReceiver(
-                userChangeReceiver,
+                userUnlockReceiver,
                 unlockFilter,
                 null,
                 UserHandle.ALL
             )
+            userTracker.addCallback(userTrackerCallback, mainExecutor)
             loadSavedComponents()
         }
     }
