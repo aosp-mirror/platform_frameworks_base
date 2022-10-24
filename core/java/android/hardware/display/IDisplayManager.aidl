@@ -18,6 +18,7 @@ package android.hardware.display;
 
 import android.content.pm.ParceledListSlice;
 import android.graphics.Point;
+import android.hardware.OverlayProperties;
 import android.hardware.display.BrightnessConfiguration;
 import android.hardware.display.BrightnessInfo;
 import android.hardware.display.Curve;
@@ -192,4 +193,7 @@ interface IDisplayManager {
     // to set the layerStack after the display was created, which is not something we support in
     // DMS. This should be deleted in V release.
     void setDisplayIdToMirror(in IBinder token, int displayId);
+
+    // Query overlay properties of the device
+    OverlayProperties getOverlaySupport();
 }
