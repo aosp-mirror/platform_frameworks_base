@@ -41,7 +41,6 @@
 #include <array>
 #include <map>
 #include <memory>
-#include <unordered_map>
 
 namespace android {
 
@@ -563,17 +562,8 @@ private:
     incfs::map_ptr<uint32_t>                      mStyles;
     uint32_t                                      mStylePoolSize;    // number of uint32_t
 
-    // mStringIndex is used to quickly map a string to its ID
-    mutable Mutex                                       mStringIndexLock;
-    mutable std::unordered_map<StringPiece, size_t>     mStringIndex8;
-    mutable std::unordered_map<StringPiece16, size_t>   mStringIndex16;
-
     base::expected<StringPiece, NullOrIOError> stringDecodeAt(
         size_t idx, incfs::map_ptr<uint8_t> str, size_t encLen) const;
-
-    template <typename TChar, typename SP=BasicStringPiece<TChar>>
-    base::expected<size_t, NullOrIOError> stringIndex(
-        SP str, std::unordered_map<SP, size_t>& map) const;
 };
 
 /**

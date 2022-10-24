@@ -1020,40 +1020,6 @@ base::expected<incfs::map_ptr<ResStringPool_span>, NullOrIOError> ResStringPool:
     return base::unexpected(std::nullopt);
 }
 
-template <typename TChar, typename SP>
-base::expected<size_t, NullOrIOError> ResStringPool::stringIndex(
-        SP sp, std::unordered_map<SP, size_t>& map) const
-{
-    AutoMutex lock(mStringIndexLock);
-
-    if (map.empty()) {
-        // build string index on the first call
-        for (size_t i = 0; i < mHeader->stringCount; i++) {
-            base::expected<SP, NullOrIOError> s;
-            if constexpr(std::is_same_v<TChar, char16_t>) {
-                s = stringAt(i);
-            } else {
-                s = string8At(i);
-            }
-            if (s.has_value()) {
-                const auto r = map.insert({*s, i});
-                if (!r.second) {
-                    ALOGE("failed to build string index, string id=%zu\n", i);
-                }
-            } else {
-                return base::unexpected(s.error());
-            }
-        }
-    }
-
-    if (!map.empty()) {
-        const auto result = map.find(sp);
-        if (result != map.end())
-            return result->second;
-    }
-    return base::unexpected(std::nullopt);
-}
-
 base::expected<size_t, NullOrIOError> ResStringPool::indexOfString(const char16_t* str,
                                                                    size_t strLen) const
 {
@@ -1061,28 +1027,134 @@ base::expected<size_t, NullOrIOError> ResStringPool::indexOfString(const char16_
         return base::unexpected(std::nullopt);
     }
 
-    if (kDebugStringPoolNoisy) {
-        ALOGI("indexOfString (%s): %s", isUTF8() ? "UTF-8" : "UTF-16",
-                String8(str, strLen).string());
-    }
-
-    base::expected<size_t, NullOrIOError> idx;
-    if (isUTF8()) {
-        auto str8 = String8(str, strLen);
-        idx = stringIndex<char>(StringPiece(str8.c_str(), str8.size()), mStringIndex8);
-    } else {
-        idx = stringIndex<char16_t>(StringPiece16(str, strLen), mStringIndex16);
-    }
-
-    if (UNLIKELY(!idx.has_value())) {
-        return base::unexpected(idx.error());
-    }
-
-    if (*idx < mHeader->stringCount) {
+    if ((mHeader->flags&ResStringPool_header::UTF8_FLAG) != 0) {
         if (kDebugStringPoolNoisy) {
-            ALOGI("MATCH! (idx=%zu)", *idx);
+            ALOGI("indexOfString UTF-8: %s", String8(str, strLen).string());
         }
-        return *idx;
+
+        // The string pool contains UTF 8 strings; we don't want to cause
+        // temporary UTF-16 strings to be created as we search.
+        if (mHeader->flags&ResStringPool_header::SORTED_FLAG) {
+            // Do a binary search for the string...  this is a little tricky,
+            // because the strings are sorted with strzcmp16().  So to match
+            // the ordering, we need to convert strings in the pool to UTF-16.
+            // But we don't want to hit the cache, so instead we will have a
+            // local temporary allocation for the conversions.
+            size_t convBufferLen = strLen + 4;
+            std::vector<char16_t> convBuffer(convBufferLen);
+            ssize_t l = 0;
+            ssize_t h = mHeader->stringCount-1;
+
+            ssize_t mid;
+            while (l <= h) {
+                mid = l + (h - l)/2;
+                int c = -1;
+                const base::expected<StringPiece, NullOrIOError> s = string8At(mid);
+                if (UNLIKELY(IsIOError(s))) {
+                    return base::unexpected(s.error());
+                }
+                if (s.has_value()) {
+                    char16_t* end = utf8_to_utf16(reinterpret_cast<const uint8_t*>(s->data()),
+                                                  s->size(), convBuffer.data(), convBufferLen);
+                    c = strzcmp16(convBuffer.data(), end-convBuffer.data(), str, strLen);
+                }
+                if (kDebugStringPoolNoisy) {
+                    ALOGI("Looking at %s, cmp=%d, l/mid/h=%d/%d/%d\n",
+                          s->data(), c, (int)l, (int)mid, (int)h);
+                }
+                if (c == 0) {
+                    if (kDebugStringPoolNoisy) {
+                        ALOGI("MATCH!");
+                    }
+                    return mid;
+                } else if (c < 0) {
+                    l = mid + 1;
+                } else {
+                    h = mid - 1;
+                }
+            }
+        } else {
+            // It is unusual to get the ID from an unsorted string block...
+            // most often this happens because we want to get IDs for style
+            // span tags; since those always appear at the end of the string
+            // block, start searching at the back.
+            String8 str8(str, strLen);
+            const size_t str8Len = str8.size();
+            for (int i=mHeader->stringCount-1; i>=0; i--) {
+                const base::expected<StringPiece, NullOrIOError> s = string8At(i);
+                if (UNLIKELY(IsIOError(s))) {
+                    return base::unexpected(s.error());
+                }
+                if (s.has_value()) {
+                    if (kDebugStringPoolNoisy) {
+                        ALOGI("Looking at %s, i=%d\n", s->data(), i);
+                    }
+                    if (str8Len == s->size()
+                            && memcmp(s->data(), str8.string(), str8Len) == 0) {
+                        if (kDebugStringPoolNoisy) {
+                            ALOGI("MATCH!");
+                        }
+                        return i;
+                    }
+                }
+            }
+        }
+
+    } else {
+        if (kDebugStringPoolNoisy) {
+            ALOGI("indexOfString UTF-16: %s", String8(str, strLen).string());
+        }
+
+        if (mHeader->flags&ResStringPool_header::SORTED_FLAG) {
+            // Do a binary search for the string...
+            ssize_t l = 0;
+            ssize_t h = mHeader->stringCount-1;
+
+            ssize_t mid;
+            while (l <= h) {
+                mid = l + (h - l)/2;
+                const base::expected<StringPiece16, NullOrIOError> s = stringAt(mid);
+                if (UNLIKELY(IsIOError(s))) {
+                    return base::unexpected(s.error());
+                }
+                int c = s.has_value() ? strzcmp16(s->data(), s->size(), str, strLen) : -1;
+                if (kDebugStringPoolNoisy) {
+                    ALOGI("Looking at %s, cmp=%d, l/mid/h=%d/%d/%d\n",
+                          String8(s->data(), s->size()).string(), c, (int)l, (int)mid, (int)h);
+                }
+                if (c == 0) {
+                    if (kDebugStringPoolNoisy) {
+                        ALOGI("MATCH!");
+                    }
+                    return mid;
+                } else if (c < 0) {
+                    l = mid + 1;
+                } else {
+                    h = mid - 1;
+                }
+            }
+        } else {
+            // It is unusual to get the ID from an unsorted string block...
+            // most often this happens because we want to get IDs for style
+            // span tags; since those always appear at the end of the string
+            // block, start searching at the back.
+            for (int i=mHeader->stringCount-1; i>=0; i--) {
+                const base::expected<StringPiece16, NullOrIOError> s = stringAt(i);
+                if (UNLIKELY(IsIOError(s))) {
+                    return base::unexpected(s.error());
+                }
+                if (kDebugStringPoolNoisy) {
+                    ALOGI("Looking at %s, i=%d\n", String8(s->data(), s->size()).string(), i);
+                }
+                if (s.has_value() && strLen == s->size() &&
+                        strzcmp16(s->data(), s->size(), str, strLen) == 0) {
+                    if (kDebugStringPoolNoisy) {
+                        ALOGI("MATCH!");
+                    }
+                    return i;
+                }
+            }
+        }
     }
     return base::unexpected(std::nullopt);
 }
