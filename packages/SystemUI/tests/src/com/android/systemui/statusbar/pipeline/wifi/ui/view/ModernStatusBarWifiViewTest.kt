@@ -30,6 +30,9 @@ import com.android.systemui.statusbar.StatusBarIconView.STATE_HIDDEN
 import com.android.systemui.statusbar.StatusBarIconView.STATE_ICON
 import com.android.systemui.statusbar.phone.StatusBarLocation
 import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
+import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
+import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
+import com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel.AirplaneModeViewModel
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
@@ -63,11 +66,13 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
     private lateinit var connectivityConstants: ConnectivityConstants
     @Mock
     private lateinit var wifiConstants: WifiConstants
+    private lateinit var airplaneModeRepository: FakeAirplaneModeRepository
     private lateinit var connectivityRepository: FakeConnectivityRepository
     private lateinit var wifiRepository: FakeWifiRepository
     private lateinit var interactor: WifiInteractor
     private lateinit var viewModel: WifiViewModel
     private lateinit var scope: CoroutineScope
+    private lateinit var airplaneModeViewModel: AirplaneModeViewModel
 
     @JvmField @Rule
     val instantTaskExecutor = InstantTaskExecutorRule()
@@ -77,12 +82,22 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         testableLooper = TestableLooper.get(this)
 
+        airplaneModeRepository = FakeAirplaneModeRepository()
         connectivityRepository = FakeConnectivityRepository()
         wifiRepository = FakeWifiRepository()
         wifiRepository.setIsWifiEnabled(true)
         interactor = WifiInteractor(connectivityRepository, wifiRepository)
         scope = CoroutineScope(Dispatchers.Unconfined)
+        airplaneModeViewModel = AirplaneModeViewModel(
+            AirplaneModeInteractor(
+                airplaneModeRepository,
+                connectivityRepository,
+            ),
+            logger,
+            scope,
+        )
         viewModel = WifiViewModel(
+            airplaneModeViewModel,
             connectivityConstants,
             context,
             logger,

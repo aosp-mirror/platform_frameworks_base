@@ -44,6 +44,9 @@ abstract class LocationBasedWifiViewModel(
 
     /** True if the activity container view should be visible. */
     val isActivityContainerVisible: Flow<Boolean>,
+
+    /** True if the airplane spacer view should be visible. */
+    val isAirplaneSpacerVisible: Flow<Boolean>,
 ) {
     /** The color that should be used to tint the icon. */
     val tint: Flow<Int> =

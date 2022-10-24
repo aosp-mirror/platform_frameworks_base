@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.pipeline.dagger
 
+import com.android.systemui.statusbar.pipeline.airplane.data.repository.AirplaneModeRepository
+import com.android.systemui.statusbar.pipeline.airplane.data.repository.AirplaneModeRepositoryImpl
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileSubscriptionRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileSubscriptionRepositoryImpl
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.UserSetupRepository
@@ -29,6 +31,9 @@ import dagger.Module
 
 @Module
 abstract class StatusBarPipelineModule {
+    @Binds
+    abstract fun airplaneModeRepository(impl: AirplaneModeRepositoryImpl): AirplaneModeRepository
+
     @Binds
     abstract fun connectivityRepository(impl: ConnectivityRepositoryImpl): ConnectivityRepository
 
