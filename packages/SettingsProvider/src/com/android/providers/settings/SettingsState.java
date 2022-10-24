@@ -1087,6 +1087,7 @@ final class SettingsState {
             parseStateLocked(parser);
             return true;
         } catch (XmlPullParserException | IOException e) {
+            Slog.e(LOG_TAG, "parse settings xml failed", e);
             return false;
         } finally {
             IoUtils.closeQuietly(in);
