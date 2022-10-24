@@ -33,6 +33,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.platform.test.annotations.Presubmit;
 import android.service.timezone.TimeZoneProviderEvent;
+import android.service.timezone.TimeZoneProviderStatus;
 import android.service.timezone.TimeZoneProviderSuggestion;
 import android.util.IndentingPrintWriter;
 
@@ -120,8 +121,9 @@ public class LocationTimeZoneProviderTest {
                 .setElapsedRealtimeMillis(ARBITRARY_ELAPSED_REALTIME_MILLIS)
                 .setTimeZoneIds(Arrays.asList("Europe/London"))
                 .build();
+        TimeZoneProviderStatus providerStatus = TimeZoneProviderStatus.UNKNOWN;
         TimeZoneProviderEvent event = TimeZoneProviderEvent.createSuggestionEvent(
-                ARBITRARY_ELAPSED_REALTIME_MILLIS, suggestion);
+                ARBITRARY_ELAPSED_REALTIME_MILLIS, suggestion, providerStatus);
         provider.simulateProviderEventReceived(event);
 
         currentState = assertAndReturnProviderState(
@@ -133,7 +135,8 @@ public class LocationTimeZoneProviderTest {
         mProviderListener.assertProviderChangeReported(PROVIDER_STATE_STARTED_CERTAIN);
 
         // Simulate an uncertain event being received.
-        event = TimeZoneProviderEvent.createUncertainEvent(ARBITRARY_ELAPSED_REALTIME_MILLIS);
+        event = TimeZoneProviderEvent.createUncertainEvent(ARBITRARY_ELAPSED_REALTIME_MILLIS,
+                TimeZoneProviderStatus.UNKNOWN);
         provider.simulateProviderEventReceived(event);
 
         currentState = assertAndReturnProviderState(
@@ -193,12 +196,13 @@ public class LocationTimeZoneProviderTest {
                 .setTimeZoneIds(Arrays.asList("Europe/London"))
                 .build();
         TimeZoneProviderEvent event = TimeZoneProviderEvent.createSuggestionEvent(
-                ARBITRARY_ELAPSED_REALTIME_MILLIS, suggestion);
+                ARBITRARY_ELAPSED_REALTIME_MILLIS, suggestion, TimeZoneProviderStatus.UNKNOWN);
         provider.simulateProviderEventReceived(event);
         provider.assertLatestRecordedState(PROVIDER_STATE_STARTED_CERTAIN);
 
         // Simulate an uncertain event being received.
-        event = TimeZoneProviderEvent.createUncertainEvent(ARBITRARY_ELAPSED_REALTIME_MILLIS);
+        event = TimeZoneProviderEvent.createUncertainEvent(ARBITRARY_ELAPSED_REALTIME_MILLIS,
+                TimeZoneProviderStatus.UNKNOWN);
         provider.simulateProviderEventReceived(event);
         provider.assertLatestRecordedState(PROVIDER_STATE_STARTED_UNCERTAIN);
 
@@ -235,8 +239,9 @@ public class LocationTimeZoneProviderTest {
                 .setElapsedRealtimeMillis(ARBITRARY_ELAPSED_REALTIME_MILLIS)
                 .setTimeZoneIds(invalidTimeZoneIds)
                 .build();
+        TimeZoneProviderStatus providerStatus = TimeZoneProviderStatus.UNKNOWN;
         TimeZoneProviderEvent event = TimeZoneProviderEvent.createSuggestionEvent(
-                ARBITRARY_ELAPSED_REALTIME_MILLIS, invalidIdSuggestion);
+                ARBITRARY_ELAPSED_REALTIME_MILLIS, invalidIdSuggestion, providerStatus);
         provider.simulateProviderEventReceived(event);
         provider.assertLatestRecordedState(PROVIDER_STATE_STARTED_UNCERTAIN);
     }
