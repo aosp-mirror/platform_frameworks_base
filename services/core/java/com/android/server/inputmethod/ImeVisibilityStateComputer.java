@@ -21,10 +21,12 @@ import static android.server.inputmethod.InputMethodManagerServiceProto.ACCESSIB
 import static android.server.inputmethod.InputMethodManagerServiceProto.SHOW_EXPLICITLY_REQUESTED;
 import static android.server.inputmethod.InputMethodManagerServiceProto.SHOW_FORCED;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED;
 import static android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 
 import static com.android.internal.inputmethod.InputMethodDebug.softInputModeToString;
+import static com.android.server.inputmethod.InputMethodManagerService.computeImeDisplayIdForTarget;
 
 import android.accessibilityservice.AccessibilityService;
 import android.annotation.IntDef;
@@ -58,6 +60,8 @@ public final class ImeVisibilityStateComputer {
 
     private final InputMethodManagerService mService;
     private final WindowManagerInternal mWindowManagerInternal;
+
+    final InputMethodManagerService.ImeDisplayValidator mImeDisplayValidator;
 
     /**
      * A map used to track the requested IME target window and its state. The key represents the
@@ -118,6 +122,7 @@ public final class ImeVisibilityStateComputer {
     public ImeVisibilityStateComputer(InputMethodManagerService service) {
         mService = service;
         mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
+        mImeDisplayValidator = mWindowManagerInternal::getDisplayImePolicy;
         mPolicy = new ImeVisibilityPolicy();
     }
 
@@ -181,6 +186,14 @@ public final class ImeVisibilityStateComputer {
     void clearImeShowFlags() {
         mRequestedShowExplicitly = false;
         mShowForced = false;
+    }
+
+    int computeImeDisplayId(@NonNull ImeTargetWindowState state, int displayId) {
+        final int displayToShowIme = computeImeDisplayIdForTarget(displayId, mImeDisplayValidator);
+        state.setImeDisplayId(displayToShowIme);
+        final boolean imeHiddenByPolicy = displayToShowIme == INVALID_DISPLAY;
+        mPolicy.setImeHiddenByDisplayPolicy(imeHiddenByPolicy);
+        return displayToShowIme;
     }
 
     /**

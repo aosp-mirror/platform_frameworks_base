@@ -691,8 +691,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
      */
     private static final int FALLBACK_DISPLAY_ID = DEFAULT_DISPLAY;
 
-    final ImeDisplayValidator mImeDisplayValidator;
-
     /**
      * If non-null, this is the input method service we are currently connected
      * to.
@@ -1686,7 +1684,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
         mImePlatformCompatUtils = new ImePlatformCompatUtils();
         mInputMethodDeviceConfigs = new InputMethodDeviceConfigs();
-        mImeDisplayValidator = mWindowManagerInternal::getDisplayImePolicy;
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
         mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
 
@@ -2464,12 +2461,15 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
         // Compute the final shown display ID with validated cs.selfReportedDisplayId for this
         // session & other conditions.
-        mDisplayIdToShowIme = computeImeDisplayIdForTarget(cs.mSelfReportedDisplayId,
-                mImeDisplayValidator);
-        final boolean imeHiddenByPolicy = mDisplayIdToShowIme == INVALID_DISPLAY;
-        mVisibilityStateComputer.getImePolicy().setImeHiddenByDisplayPolicy(imeHiddenByPolicy);
+        ImeTargetWindowState winState = mVisibilityStateComputer.getWindowStateOrNull(
+                mCurFocusedWindow);
+        if (winState == null) {
+            return InputBindResult.NOT_IME_TARGET_WINDOW;
+        }
+        final int csDisplayId = cs.mSelfReportedDisplayId;
+        mDisplayIdToShowIme = mVisibilityStateComputer.computeImeDisplayId(winState, csDisplayId);
 
-        if (imeHiddenByPolicy) {
+        if (mVisibilityStateComputer.getImePolicy().isImeHiddenByDisplayPolicy()) {
             hideCurrentInputLocked(mCurFocusedWindow, null /* statsToken */, 0 /* flags */,
                     null /* resultReceiver */,
                     SoftInputShowHideReason.HIDE_DISPLAY_IME_POLICY_HIDE);
