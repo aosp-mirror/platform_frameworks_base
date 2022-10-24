@@ -68,7 +68,7 @@ import java.util.function.Consumer;
  * Manages the recent task list from the system, caching it as necessary.
  */
 public class RecentTasksController implements TaskStackListenerCallback,
-        RemoteCallable<RecentTasksController>, DesktopModeTaskRepository.Listener {
+        RemoteCallable<RecentTasksController>, DesktopModeTaskRepository.ActiveTasksListener {
     private static final String TAG = RecentTasksController.class.getSimpleName();
 
     private final Context mContext;
@@ -147,7 +147,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
                 this::createExternalInterface, this);
         mShellCommandHandler.addDumpCallback(this::dump, this);
         mTaskStackListener.addListener(this);
-        mDesktopModeTaskRepository.ifPresent(it -> it.addListener(this));
+        mDesktopModeTaskRepository.ifPresent(it -> it.addActiveTaskListener(this));
     }
 
     /**
