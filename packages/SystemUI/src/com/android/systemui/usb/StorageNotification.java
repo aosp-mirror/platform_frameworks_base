@@ -381,7 +381,7 @@ public class StorageNotification implements CoreStartable {
 
         // Don't annoy when user dismissed in past.  (But make sure the disk is adoptable; we
         // used to allow snoozing non-adoptable disks too.)
-        if (rec.isSnoozed() && disk.isAdoptable()) {
+        if (rec == null || (rec.isSnoozed() && disk.isAdoptable())) {
             return null;
         }
         if (disk.isAdoptable() && !rec.isInited() && rec.getType() != VolumeInfo.TYPE_PUBLIC
