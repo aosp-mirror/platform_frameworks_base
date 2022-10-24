@@ -300,8 +300,8 @@ public class AppTransitionController {
             layoutRedo = appTransition.goodToGo(transit, topOpeningApp);
             handleNonAppWindowsInTransition(transit, flags);
             appTransition.postAnimationCallback();
-            appTransition.clear();
         } finally {
+            appTransition.clear();
             mService.mSurfaceAnimationRunner.continueStartingAnimations();
         }
 

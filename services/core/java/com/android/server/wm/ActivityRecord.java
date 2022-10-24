@@ -496,7 +496,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     /** The most recently given options. */
     private ActivityOptions mPendingOptions;
     /** Non-null if {@link #mPendingOptions} specifies the remote animation. */
-    private RemoteAnimationAdapter mPendingRemoteAnimation;
+    RemoteAnimationAdapter mPendingRemoteAnimation;
     private RemoteTransition mPendingRemoteTransition;
     ActivityOptions returningOptions; // options that are coming back via convertToTranslucent
     AppTimeTracker appTimeTracker; // set if we are tracking the time in this app/task/activity
