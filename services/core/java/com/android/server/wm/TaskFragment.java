@@ -2189,7 +2189,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 compatScreenHeightDp = inOutConfig.screenHeightDp;
             }
             // Reducing the screen layout starting from its parent config.
-            inOutConfig.screenLayout = computeScreenLayoutOverride(parentConfig.screenLayout,
+            inOutConfig.screenLayout = computeScreenLayout(parentConfig.screenLayout,
                     compatScreenWidthDp, compatScreenHeightDp);
         }
     }
@@ -2250,16 +2250,6 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             inOutBounds.top =
                     Math.max(intersectBounds.top + intersectInsets.top, inOutBounds.top);
         }
-    }
-
-    /** Computes LONG, SIZE and COMPAT parts of {@link Configuration#screenLayout}. */
-    static int computeScreenLayoutOverride(int sourceScreenLayout, int screenWidthDp,
-            int screenHeightDp) {
-        sourceScreenLayout = sourceScreenLayout
-                & (Configuration.SCREENLAYOUT_LONG_MASK | Configuration.SCREENLAYOUT_SIZE_MASK);
-        final int longSize = Math.max(screenWidthDp, screenHeightDp);
-        final int shortSize = Math.min(screenWidthDp, screenHeightDp);
-        return Configuration.reduceScreenLayout(sourceScreenLayout, longSize, shortSize);
     }
 
     @Override
