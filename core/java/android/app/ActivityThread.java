@@ -502,6 +502,7 @@ public final class ActivityThread extends ClientTransactionHandler
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     static volatile Handler sMainThreadHandler;  // set once in main()
+    private long mStartSeq; // Only accesssed from the main thread
 
     Bundle mCoreSettings = null;
 
@@ -6809,6 +6810,14 @@ public final class ActivityThread extends ClientTransactionHandler
         Application app;
         final StrictMode.ThreadPolicy savedPolicy = StrictMode.allowThreadDiskWrites();
         final StrictMode.ThreadPolicy writesAllowedPolicy = StrictMode.getThreadPolicy();
+
+        final IActivityManager mgr = ActivityManager.getService();
+        try {
+            mgr.finishAttachApplication(mStartSeq);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+
         try {
             // If the app is being launched for full backup or restore, bring it up in
             // a restricted environment with the base application class.
@@ -7649,6 +7658,8 @@ public final class ActivityThread extends ClientTransactionHandler
         sCurrentActivityThread = this;
         mConfigurationController = new ConfigurationController(this);
         mSystemThread = system;
+        mStartSeq = startSeq;
+
         if (!system) {
             android.ddm.DdmHandleAppName.setAppName("<pre-initialized>",
                                                     UserHandle.myUserId());

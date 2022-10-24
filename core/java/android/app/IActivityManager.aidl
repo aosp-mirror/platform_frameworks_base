@@ -147,6 +147,7 @@ interface IActivityManager {
     oneway void finishReceiver(in IBinder who, int resultCode, in String resultData, in Bundle map,
             boolean abortBroadcast, int flags);
     void attachApplication(in IApplicationThread app, long startSeq);
+    void finishAttachApplication(long startSeq);
     List<ActivityManager.RunningTaskInfo> getTasks(int maxNum);
     @UnsupportedAppUsage
     void moveTaskToFront(in IApplicationThread caller, in String callingPackage, int task,
@@ -718,8 +719,8 @@ interface IActivityManager {
 
     /**
      * Control the app freezer state. Returns true in case of success, false if the operation
-     * didn't succeed (for example, when the app freezer isn't supported). 
-     * Handling the freezer state via this method is reentrant, that is it can be 
+     * didn't succeed (for example, when the app freezer isn't supported).
+     * Handling the freezer state via this method is reentrant, that is it can be
      * disabled and re-enabled multiple times in parallel. As long as there's a 1:1 disable to
      * enable match, the freezer is re-enabled at last enable only.
      * @param enable set it to true to enable the app freezer, false to disable it.
