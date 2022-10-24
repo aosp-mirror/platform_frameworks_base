@@ -16,26 +16,27 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.data.repository
 
+import android.content.Intent
+import android.provider.Settings
 import android.telephony.SubscriptionInfo
 import android.telephony.SubscriptionManager
 import android.telephony.TelephonyCallback
 import android.telephony.TelephonyCallback.ActiveDataSubscriptionIdListener
 import android.telephony.TelephonyManager
 import androidx.test.filters.SmallTest
+import com.android.internal.telephony.PhoneConstants
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.mock
-import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.mockito.whenever
+import com.android.systemui.util.settings.FakeSettings
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runBlocking
@@ -43,7 +44,6 @@ import org.junit.After
 import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
-import org.mockito.ArgumentMatchers
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
@@ -57,29 +57,21 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
     @Mock private lateinit var subscriptionManager: SubscriptionManager
     @Mock private lateinit var telephonyManager: TelephonyManager
     @Mock private lateinit var logger: ConnectivityPipelineLogger
-    @Mock private lateinit var broadcastDispatcher: BroadcastDispatcher
 
     private val scope = CoroutineScope(IMMEDIATE)
+    private val globalSettings = FakeSettings()
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        whenever(
-                broadcastDispatcher.broadcastFlow(
-                    any(),
-                    nullable(),
-                    ArgumentMatchers.anyInt(),
-                    nullable(),
-                )
-            )
-            .thenReturn(flowOf(Unit))
 
         underTest =
             MobileConnectionsRepositoryImpl(
                 subscriptionManager,
                 telephonyManager,
                 logger,
-                broadcastDispatcher,
+                fakeBroadcastDispatcher,
+                globalSettings,
                 context,
                 IMMEDIATE,
                 scope,
@@ -210,6 +202,53 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
             assertThrows(IllegalArgumentException::class.java) {
                 underTest.getRepoForSubId(SUB_1_ID)
             }
+
+            job.cancel()
+        }
+
+    @Test
+    fun testDefaultDataSubId_updatesOnBroadcast() =
+        runBlocking(IMMEDIATE) {
+            var latest: Int? = null
+            val job = underTest.defaultDataSubId.onEach { latest = it }.launchIn(this)
+
+            fakeBroadcastDispatcher.registeredReceivers.forEach { receiver ->
+                receiver.onReceive(
+                    context,
+                    Intent(TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED)
+                        .putExtra(PhoneConstants.SUBSCRIPTION_KEY, SUB_2_ID)
+                )
+            }
+
+            assertThat(latest).isEqualTo(SUB_2_ID)
+
+            fakeBroadcastDispatcher.registeredReceivers.forEach { receiver ->
+                receiver.onReceive(
+                    context,
+                    Intent(TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED)
+                        .putExtra(PhoneConstants.SUBSCRIPTION_KEY, SUB_1_ID)
+                )
+            }
+
+            assertThat(latest).isEqualTo(SUB_1_ID)
+
+            job.cancel()
+        }
+
+    @Test
+    fun globalMobileDataSettingsChangedEvent_producesOnSettingChange() =
+        runBlocking(IMMEDIATE) {
+            var produced = false
+            val job =
+                underTest.globalMobileDataSettingChangedEvent
+                    .onEach { produced = true }
+                    .launchIn(this)
+
+            assertThat(produced).isFalse()
+
+            globalSettings.putInt(Settings.Global.MOBILE_DATA, 0)
+
+            assertThat(produced).isTrue()
 
             job.cancel()
         }

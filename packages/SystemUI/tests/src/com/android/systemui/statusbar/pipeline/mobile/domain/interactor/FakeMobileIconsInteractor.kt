@@ -26,8 +26,7 @@ import com.android.settingslib.mobile.TelephonyIcons
 import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxy
 import kotlinx.coroutines.flow.MutableStateFlow
 
-class FakeMobileIconsInteractor(private val mobileMappings: MobileMappingsProxy) :
-    MobileIconsInteractor {
+class FakeMobileIconsInteractor(mobileMappings: MobileMappingsProxy) : MobileIconsInteractor {
     val THREE_G_KEY = mobileMappings.toIconKey(THREE_G)
     val LTE_KEY = mobileMappings.toIconKey(LTE)
     val FOUR_G_KEY = mobileMappings.toIconKey(FOUR_G)
@@ -48,6 +47,9 @@ class FakeMobileIconsInteractor(private val mobileMappings: MobileMappingsProxy)
 
     private val _filteredSubscriptions = MutableStateFlow<List<SubscriptionInfo>>(listOf())
     override val filteredSubscriptions = _filteredSubscriptions
+
+    private val _activeDataConnectionHasDataEnabled = MutableStateFlow(false)
+    override val activeDataConnectionHasDataEnabled = _activeDataConnectionHasDataEnabled
 
     private val _defaultMobileIconMapping = MutableStateFlow(TEST_MAPPING)
     override val defaultMobileIconMapping = _defaultMobileIconMapping

@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.pipeline.mobile.domain.interactor
 import android.telephony.CarrierConfigManager
 import android.telephony.SubscriptionInfo
 import android.telephony.SubscriptionManager
+import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
 import com.android.settingslib.SignalIcon.MobileIconGroup
 import com.android.settingslib.mobile.TelephonyIcons
 import com.android.systemui.dagger.SysUISingleton
@@ -35,6 +36,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
@@ -51,6 +54,8 @@ import kotlinx.coroutines.flow.stateIn
 interface MobileIconsInteractor {
     /** List of subscriptions, potentially filtered for CBRS */
     val filteredSubscriptions: Flow<List<SubscriptionInfo>>
+    /** True if the active mobile data subscription has data enabled */
+    val activeDataConnectionHasDataEnabled: Flow<Boolean>
     /** The icon mapping from network type to [MobileIconGroup] for the default subscription */
     val defaultMobileIconMapping: Flow<Map<String, MobileIconGroup>>
     /** Fallback [MobileIconGroup] in the case where there is no icon in the mapping */
@@ -78,6 +83,18 @@ constructor(
 ) : MobileIconsInteractor {
     private val activeMobileDataSubscriptionId =
         mobileConnectionsRepo.activeMobileDataSubscriptionId
+
+    private val activeMobileDataConnectionRepo: Flow<MobileConnectionRepository?> =
+        activeMobileDataSubscriptionId.map { activeId ->
+            if (activeId == INVALID_SUBSCRIPTION_ID) {
+                null
+            } else {
+                mobileConnectionsRepo.getRepoForSubId(activeId)
+            }
+        }
+
+    override val activeDataConnectionHasDataEnabled: Flow<Boolean> =
+        activeMobileDataConnectionRepo.flatMapLatest { it?.dataEnabled ?: flowOf(false) }
 
     private val unfilteredSubscriptions: Flow<List<SubscriptionInfo>> =
         mobileConnectionsRepo.subscriptionsFlow
@@ -146,6 +163,7 @@ constructor(
     /** Vends out new [MobileIconInteractor] for a particular subId */
     override fun createMobileConnectionInteractorForSubId(subId: Int): MobileIconInteractor =
         MobileIconInteractorImpl(
+            activeDataConnectionHasDataEnabled,
             defaultMobileIconMapping,
             defaultMobileIconGroup,
             mobileMappingsProxy,

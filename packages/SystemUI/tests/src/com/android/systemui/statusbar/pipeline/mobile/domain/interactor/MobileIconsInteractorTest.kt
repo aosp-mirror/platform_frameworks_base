@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.pipeline.mobile.domain.interactor
 
 import android.telephony.SubscriptionInfo
+import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionRepository
@@ -32,6 +33,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.yield
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -164,6 +166,51 @@ class MobileIconsInteractorTest : SysuiTestCase() {
             // Filtered subscriptions should show the primary (non-opportunistic) if the config is
             // true
             assertThat(latest).isEqualTo(listOf(SUB_1))
+
+            job.cancel()
+        }
+
+    @Test
+    fun activeDataConnection_turnedOn() =
+        runBlocking(IMMEDIATE) {
+            CONNECTION_1.setDataEnabled(true)
+            var latest: Boolean? = null
+            val job =
+                underTest.activeDataConnectionHasDataEnabled.onEach { latest = it }.launchIn(this)
+
+            assertThat(latest).isTrue()
+
+            job.cancel()
+        }
+
+    @Test
+    fun activeDataConnection_turnedOff() =
+        runBlocking(IMMEDIATE) {
+            CONNECTION_1.setDataEnabled(true)
+            var latest: Boolean? = null
+            val job =
+                underTest.activeDataConnectionHasDataEnabled.onEach { latest = it }.launchIn(this)
+
+            CONNECTION_1.setDataEnabled(false)
+            yield()
+
+            assertThat(latest).isFalse()
+
+            job.cancel()
+        }
+
+    @Test
+    fun activeDataConnection_invalidSubId() =
+        runBlocking(IMMEDIATE) {
+            var latest: Boolean? = null
+            val job =
+                underTest.activeDataConnectionHasDataEnabled.onEach { latest = it }.launchIn(this)
+
+            connectionsRepository.setActiveMobileDataSubscriptionId(INVALID_SUBSCRIPTION_ID)
+            yield()
+
+            // An invalid active subId should tell us that data is off
+            assertThat(latest).isFalse()
 
             job.cancel()
         }

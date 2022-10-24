@@ -17,7 +17,7 @@
 package com.android.systemui.statusbar.pipeline.mobile.data.repository
 
 import android.telephony.SubscriptionInfo
-import android.telephony.SubscriptionManager
+import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
 import com.android.settingslib.mobile.MobileMappings.Config
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,17 +26,22 @@ class FakeMobileConnectionsRepository : MobileConnectionsRepository {
     private val _subscriptionsFlow = MutableStateFlow<List<SubscriptionInfo>>(listOf())
     override val subscriptionsFlow: Flow<List<SubscriptionInfo>> = _subscriptionsFlow
 
-    private val _activeMobileDataSubscriptionId =
-        MutableStateFlow(SubscriptionManager.INVALID_SUBSCRIPTION_ID)
+    private val _activeMobileDataSubscriptionId = MutableStateFlow(INVALID_SUBSCRIPTION_ID)
     override val activeMobileDataSubscriptionId = _activeMobileDataSubscriptionId
 
     private val _defaultDataSubRatConfig = MutableStateFlow(Config())
     override val defaultDataSubRatConfig = _defaultDataSubRatConfig
 
+    private val _defaultDataSubId = MutableStateFlow(INVALID_SUBSCRIPTION_ID)
+    override val defaultDataSubId = _defaultDataSubId
+
     private val subIdRepos = mutableMapOf<Int, MobileConnectionRepository>()
     override fun getRepoForSubId(subId: Int): MobileConnectionRepository {
         return subIdRepos[subId] ?: FakeMobileConnectionRepository().also { subIdRepos[subId] = it }
     }
+
+    private val _globalMobileDataSettingChangedEvent = MutableStateFlow(Unit)
+    override val globalMobileDataSettingChangedEvent = _globalMobileDataSettingChangedEvent
 
     fun setSubscriptions(subs: List<SubscriptionInfo>) {
         _subscriptionsFlow.value = subs
@@ -44,6 +49,14 @@ class FakeMobileConnectionsRepository : MobileConnectionsRepository {
 
     fun setDefaultDataSubRatConfig(config: Config) {
         _defaultDataSubRatConfig.value = config
+    }
+
+    fun setDefaultDataSubId(id: Int) {
+        _defaultDataSubId.value = id
+    }
+
+    suspend fun triggerGlobalMobileDataSettingChangedEvent() {
+        _globalMobileDataSettingChangedEvent.emit(Unit)
     }
 
     fun setActiveMobileDataSubscriptionId(subId: Int) {

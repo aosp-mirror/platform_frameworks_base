@@ -46,7 +46,7 @@ class MobileIconViewModelTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         interactor.apply {
             setLevel(1)
-            setCutOut(false)
+            setIsDefaultDataEnabled(true)
             setIconGroup(THREE_G)
             setIsEmergencyOnly(false)
             setNumberOfLevels(4)
@@ -59,8 +59,23 @@ class MobileIconViewModelTest : SysuiTestCase() {
         runBlocking(IMMEDIATE) {
             var latest: Int? = null
             val job = underTest.iconId.onEach { latest = it }.launchIn(this)
+            val expected = defaultSignal()
 
-            assertThat(latest).isEqualTo(SignalDrawable.getState(1, 4, false))
+            assertThat(latest).isEqualTo(expected)
+
+            job.cancel()
+        }
+
+    @Test
+    fun iconId_cutout_whenDefaultDataDisabled() =
+        runBlocking(IMMEDIATE) {
+            interactor.setIsDefaultDataEnabled(false)
+
+            var latest: Int? = null
+            val job = underTest.iconId.onEach { latest = it }.launchIn(this)
+            val expected = defaultSignal(level = 1, connected = false)
+
+            assertThat(latest).isEqualTo(expected)
 
             job.cancel()
         }
@@ -118,6 +133,14 @@ class MobileIconViewModelTest : SysuiTestCase() {
 
             job.cancel()
         }
+
+    /** Convenience constructor for these tests */
+    private fun defaultSignal(
+        level: Int = 1,
+        connected: Boolean = true,
+    ): Int {
+        return SignalDrawable.getState(level, /* numLevels */ 4, !connected)
+    }
 
     companion object {
         private val IMMEDIATE = Dispatchers.Main.immediate

@@ -53,6 +53,7 @@ class MobileIconInteractorTest : SysuiTestCase() {
     fun setUp() {
         underTest =
             MobileIconInteractorImpl(
+                mobileIconsInteractor.activeDataConnectionHasDataEnabled,
                 mobileIconsInteractor.defaultMobileIconMapping,
                 mobileIconsInteractor.defaultMobileIconGroup,
                 mobileMappingsProxy,
@@ -192,6 +193,21 @@ class MobileIconInteractorTest : SysuiTestCase() {
             val job = underTest.networkTypeIconGroup.onEach { latest = it }.launchIn(this)
 
             assertThat(latest).isEqualTo(FakeMobileIconsInteractor.DEFAULT_ICON)
+
+            job.cancel()
+        }
+
+    @Test
+    fun test_isDefaultDataEnabled_matchesParent() =
+        runBlocking(IMMEDIATE) {
+            var latest: Boolean? = null
+            val job = underTest.isDefaultDataEnabled.onEach { latest = it }.launchIn(this)
+
+            mobileIconsInteractor.activeDataConnectionHasDataEnabled.value = true
+            assertThat(latest).isTrue()
+
+            mobileIconsInteractor.activeDataConnectionHasDataEnabled.value = false
+            assertThat(latest).isFalse()
 
             job.cancel()
         }

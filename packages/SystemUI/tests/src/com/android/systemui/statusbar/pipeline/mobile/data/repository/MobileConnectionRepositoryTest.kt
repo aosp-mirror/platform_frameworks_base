@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.data.repository
 
+import android.os.UserHandle
+import android.provider.Settings
 import android.telephony.CellSignalStrengthCdma
 import android.telephony.ServiceState
 import android.telephony.SignalStrength
@@ -42,6 +44,7 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
+import com.android.systemui.util.settings.FakeSettings
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -67,16 +70,23 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
     @Mock private lateinit var logger: ConnectivityPipelineLogger
 
     private val scope = CoroutineScope(IMMEDIATE)
+    private val globalSettings = FakeSettings()
+    private val connectionsRepo = FakeMobileConnectionsRepository()
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+        globalSettings.userId = UserHandle.USER_ALL
         whenever(telephonyManager.subscriptionId).thenReturn(SUB_1_ID)
 
         underTest =
             MobileConnectionRepositoryImpl(
+                context,
                 SUB_1_ID,
                 telephonyManager,
+                globalSettings,
+                connectionsRepo.defaultDataSubId,
+                connectionsRepo.globalMobileDataSettingChangedEvent,
                 IMMEDIATE,
                 logger,
                 scope,
@@ -310,6 +320,57 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
             var latest: Boolean? = null
             val job = underTest.dataEnabled.onEach { latest = it }.launchIn(this)
 
+            assertThat(latest).isFalse()
+
+            job.cancel()
+        }
+
+    @Test
+    fun isDefaultDataSubscription_isDefault() =
+        runBlocking(IMMEDIATE) {
+            connectionsRepo.setDefaultDataSubId(SUB_1_ID)
+
+            var latest: Boolean? = null
+            val job = underTest.isDefaultDataSubscription.onEach { latest = it }.launchIn(this)
+
+            assertThat(latest).isTrue()
+
+            job.cancel()
+        }
+
+    @Test
+    fun isDefaultDataSubscription_isNotDefault() =
+        runBlocking(IMMEDIATE) {
+            // Our subId is SUB_1_ID
+            connectionsRepo.setDefaultDataSubId(123)
+
+            var latest: Boolean? = null
+            val job = underTest.isDefaultDataSubscription.onEach { latest = it }.launchIn(this)
+
+            assertThat(latest).isFalse()
+
+            job.cancel()
+        }
+
+    @Test
+    fun isDataConnectionAllowed_subIdSettingUpdate_valueUpdated() =
+        runBlocking(IMMEDIATE) {
+            val subIdSettingName = "${Settings.Global.MOBILE_DATA}$SUB_1_ID"
+
+            var latest: Boolean? = null
+            val job = underTest.dataEnabled.onEach { latest = it }.launchIn(this)
+
+            // We don't read the setting directly, we query telephony when changes happen
+            whenever(telephonyManager.isDataConnectionAllowed).thenReturn(false)
+            globalSettings.putInt(subIdSettingName, 0)
+            assertThat(latest).isFalse()
+
+            whenever(telephonyManager.isDataConnectionAllowed).thenReturn(true)
+            globalSettings.putInt(subIdSettingName, 1)
+            assertThat(latest).isTrue()
+
+            whenever(telephonyManager.isDataConnectionAllowed).thenReturn(false)
+            globalSettings.putInt(subIdSettingName, 0)
             assertThat(latest).isFalse()
 
             job.cancel()

@@ -31,14 +31,14 @@ class FakeMobileIconInteractor : MobileIconInteractor {
     private val _isDataEnabled = MutableStateFlow(true)
     override val isDataEnabled = _isDataEnabled
 
+    private val _isDefaultDataEnabled = MutableStateFlow(true)
+    override val isDefaultDataEnabled = _isDefaultDataEnabled
+
     private val _level = MutableStateFlow(CellSignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN)
     override val level = _level
 
     private val _numberOfLevels = MutableStateFlow(4)
     override val numberOfLevels = _numberOfLevels
-
-    private val _cutOut = MutableStateFlow(false)
-    override val cutOut = _cutOut
 
     fun setIconGroup(group: SignalIcon.MobileIconGroup) {
         _iconGroup.value = group
@@ -52,15 +52,15 @@ class FakeMobileIconInteractor : MobileIconInteractor {
         _isDataEnabled.value = enabled
     }
 
+    fun setIsDefaultDataEnabled(disabled: Boolean) {
+        _isDefaultDataEnabled.value = disabled
+    }
+
     fun setLevel(level: Int) {
         _level.value = level
     }
 
     fun setNumberOfLevels(num: Int) {
         _numberOfLevels.value = num
-    }
-
-    fun setCutOut(cutOut: Boolean) {
-        _cutOut.value = cutOut
     }
 }

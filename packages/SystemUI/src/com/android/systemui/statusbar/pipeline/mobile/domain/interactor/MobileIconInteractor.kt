@@ -29,6 +29,10 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
 interface MobileIconInteractor {
+    // TODO(b/256839546): clarify naming of default vs active
+    /** True if we want to consider the data connection enabled */
+    val isDefaultDataEnabled: Flow<Boolean>
+
     /** Observable for the data enabled state of this connection */
     val isDataEnabled: Flow<Boolean>
 
@@ -43,13 +47,11 @@ interface MobileIconInteractor {
 
     /** Based on [CarrierConfigManager.KEY_INFLATE_SIGNAL_STRENGTH_BOOL], either 4 or 5 */
     val numberOfLevels: Flow<Int>
-
-    /** True when we want to draw an icon that makes room for the exclamation mark */
-    val cutOut: Flow<Boolean>
 }
 
 /** Interactor for a single mobile connection. This connection _should_ have one subscription ID */
 class MobileIconInteractorImpl(
+    defaultSubscriptionHasDataEnabled: Flow<Boolean>,
     defaultMobileIconMapping: Flow<Map<String, MobileIconGroup>>,
     defaultMobileIconGroup: Flow<MobileIconGroup>,
     mobileMappingsProxy: MobileMappingsProxy,
@@ -58,6 +60,8 @@ class MobileIconInteractorImpl(
     private val mobileStatusInfo = connectionRepository.subscriptionModelFlow
 
     override val isDataEnabled: Flow<Boolean> = connectionRepository.dataEnabled
+
+    override val isDefaultDataEnabled = defaultSubscriptionHasDataEnabled
 
     /** Observable for the current RAT indicator icon ([MobileIconGroup]) */
     override val networkTypeIconGroup: Flow<MobileIconGroup> =
@@ -91,8 +95,4 @@ class MobileIconInteractorImpl(
      * once it's wired up inside of [CarrierConfigTracker]
      */
     override val numberOfLevels: Flow<Int> = flowOf(4)
-
-    /** Whether or not to draw the mobile triangle as "cut out", i.e., with the exclamation mark */
-    // TODO: find a better name for this?
-    override val cutOut: Flow<Boolean> = flowOf(false)
 }
