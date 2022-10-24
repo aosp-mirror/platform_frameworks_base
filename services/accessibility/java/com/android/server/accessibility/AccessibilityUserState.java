@@ -381,18 +381,22 @@ class AccessibilityUserState {
     }
 
     /**
-     * Remove service from crashed service list if users disable it.
+     * Remove the service from the crashed and binding service lists if the user disabled it.
      */
-    void updateCrashedServicesIfNeededLocked() {
+    void removeDisabledServicesFromTemporaryStatesLocked() {
         for (int i = 0, count = mInstalledServices.size(); i < count; i++) {
             final AccessibilityServiceInfo installedService = mInstalledServices.get(i);
             final ComponentName componentName = ComponentName.unflattenFromString(
                     installedService.getId());
 
-            if (mCrashedServices.contains(componentName)
-                    && !mEnabledServices.contains(componentName)) {
-                // Remove it from mCrashedServices since users toggle the switch bar to retry.
+            if (!mEnabledServices.contains(componentName)) {
+                // Remove from mCrashedServices, since users may toggle the on/off switch to retry.
                 mCrashedServices.remove(componentName);
+                // Remove from mBindingServices, since services can get stuck in the binding state
+                // if binding starts but never finishes. If the service later attempts to finish
+                // binding but it is not in the enabled list then it will exit before initializing;
+                // see AccessibilityServiceConnection#initializeService().
+                mBindingServices.remove(componentName);
             }
         }
     }
