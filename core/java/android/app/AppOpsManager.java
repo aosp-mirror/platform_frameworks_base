@@ -1343,9 +1343,17 @@ public class AppOpsManager {
     public static final int OP_RECEIVE_AMBIENT_TRIGGER_AUDIO =
             AppProtoEnums.APP_OP_RECEIVE_AMBIENT_TRIGGER_AUDIO;
 
+    /**
+     * Notify apps that they have been granted URI permission photos
+     *
+     * @hide
+     */
+    public static final int OP_READ_MEDIA_VISUAL_USER_SELECTED =
+            AppProtoEnums.APP_OP_READ_MEDIA_VISUAL_USER_SELECTED;
+
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int _NUM_OP = 121;
+    public static final int _NUM_OP = 122;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -1815,6 +1823,14 @@ public class AppOpsManager {
      */
     public static final String OPSTR_RECEIVE_AMBIENT_TRIGGER_AUDIO =
             "android:receive_ambient_trigger_audio";
+    /**
+     * Notify apps that they have been granted URI permission photos
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String OPSTR_READ_MEDIA_VISUAL_USER_SELECTED =
+            "android:read_media_visual_user_selected";
 
     /** {@link #sAppOpsToNote} not initialized yet for this op */
     private static final byte SHOULD_COLLECT_NOTE_OP_NOT_INITIALIZED = 0;
@@ -1906,6 +1922,7 @@ public class AppOpsManager {
             OP_USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER,
             OP_SCHEDULE_EXACT_ALARM,
             OP_MANAGE_MEDIA,
+            OP_READ_MEDIA_VISUAL_USER_SELECTED,
     };
 
     /**
@@ -2038,6 +2055,7 @@ public class AppOpsManager {
             OP_ESTABLISH_VPN_MANAGER,           // OP_ESTABLISH_VPN_MANAGER
             OP_ACCESS_RESTRICTED_SETTINGS,      // OP_ACCESS_RESTRICTED_SETTINGS
             OP_RECEIVE_AMBIENT_TRIGGER_AUDIO,      // RECEIVE_SOUNDTRIGGER_AUDIO
+            OP_READ_MEDIA_VISUAL_USER_SELECTED,  // READ_MEDIA_VISUAL_USER_SELECTED
     };
 
     /**
