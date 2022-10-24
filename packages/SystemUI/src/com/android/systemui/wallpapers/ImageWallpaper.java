@@ -47,7 +47,7 @@ import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.util.concurrency.DelayableExecutor;
-import com.android.systemui.wallpapers.canvas.WallpaperColorExtractor;
+import com.android.systemui.wallpapers.canvas.WallpaperLocalColorExtractor;
 import com.android.systemui.wallpapers.gl.EglHelper;
 import com.android.systemui.wallpapers.gl.ImageWallpaperRenderer;
 
@@ -521,7 +521,7 @@ public class ImageWallpaper extends WallpaperService {
 
     class CanvasEngine extends WallpaperService.Engine implements DisplayListener {
         private WallpaperManager mWallpaperManager;
-        private final WallpaperColorExtractor mWallpaperColorExtractor;
+        private final WallpaperLocalColorExtractor mWallpaperLocalColorExtractor;
         private SurfaceHolder mSurfaceHolder;
         @VisibleForTesting
         static final int MIN_SURFACE_WIDTH = 128;
@@ -543,9 +543,9 @@ public class ImageWallpaper extends WallpaperService {
             super();
             setFixedSizeAllowed(true);
             setShowForAllUsers(true);
-            mWallpaperColorExtractor = new WallpaperColorExtractor(
+            mWallpaperLocalColorExtractor = new WallpaperLocalColorExtractor(
                     mBackgroundExecutor,
-                    new WallpaperColorExtractor.WallpaperColorExtractorCallback() {
+                    new WallpaperLocalColorExtractor.WallpaperLocalColorExtractorCallback() {
                         @Override
                         public void onColorsProcessed(List<RectF> regions,
                                 List<WallpaperColors> colors) {
@@ -570,7 +570,7 @@ public class ImageWallpaper extends WallpaperService {
 
             // if the number of pages is already computed, transmit it to the color extractor
             if (mPagesComputed) {
-                mWallpaperColorExtractor.onPageChanged(mPages);
+                mWallpaperLocalColorExtractor.onPageChanged(mPages);
             }
         }
 
@@ -597,7 +597,7 @@ public class ImageWallpaper extends WallpaperService {
         public void onDestroy() {
             getDisplayContext().getSystemService(DisplayManager.class)
                     .unregisterDisplayListener(this);
-            mWallpaperColorExtractor.cleanUp();
+            mWallpaperLocalColorExtractor.cleanUp();
             unloadBitmap();
         }
 
@@ -813,7 +813,7 @@ public class ImageWallpaper extends WallpaperService {
 
         @VisibleForTesting
         void recomputeColorExtractorMiniBitmap() {
-            mWallpaperColorExtractor.onBitmapChanged(mBitmap);
+            mWallpaperLocalColorExtractor.onBitmapChanged(mBitmap);
         }
 
         @VisibleForTesting
@@ -830,14 +830,14 @@ public class ImageWallpaper extends WallpaperService {
         public void addLocalColorsAreas(@NonNull List<RectF> regions) {
             // this call will activate the offset notifications
             // if no colors were being processed before
-            mWallpaperColorExtractor.addLocalColorsAreas(regions);
+            mWallpaperLocalColorExtractor.addLocalColorsAreas(regions);
         }
 
         @Override
         public void removeLocalColorsAreas(@NonNull List<RectF> regions) {
             // this call will deactivate the offset notifications
             // if we are no longer processing colors
-            mWallpaperColorExtractor.removeLocalColorAreas(regions);
+            mWallpaperLocalColorExtractor.removeLocalColorAreas(regions);
         }
 
         @Override
@@ -853,7 +853,7 @@ public class ImageWallpaper extends WallpaperService {
             if (pages != mPages || !mPagesComputed) {
                 mPages = pages;
                 mPagesComputed = true;
-                mWallpaperColorExtractor.onPageChanged(mPages);
+                mWallpaperLocalColorExtractor.onPageChanged(mPages);
             }
         }
 
@@ -881,7 +881,7 @@ public class ImageWallpaper extends WallpaperService {
                     .getSystemService(WindowManager.class)
                     .getCurrentWindowMetrics()
                     .getBounds();
-            mWallpaperColorExtractor.setDisplayDimensions(window.width(), window.height());
+            mWallpaperLocalColorExtractor.setDisplayDimensions(window.width(), window.height());
         }
 
 
@@ -902,7 +902,7 @@ public class ImageWallpaper extends WallpaperService {
                     : mBitmap.isRecycled() ? "recycled"
                     : mBitmap.getWidth() + "x" + mBitmap.getHeight());
 
-            mWallpaperColorExtractor.dump(prefix, fd, out, args);
+            mWallpaperLocalColorExtractor.dump(prefix, fd, out, args);
         }
     }
 }

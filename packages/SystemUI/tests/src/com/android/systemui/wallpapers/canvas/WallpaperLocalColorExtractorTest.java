@@ -54,7 +54,7 @@ import java.util.concurrent.Executor;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
-public class WallpaperColorExtractorTest extends SysuiTestCase {
+public class WallpaperLocalColorExtractorTest extends SysuiTestCase {
     private static final int LOW_BMP_WIDTH = 128;
     private static final int LOW_BMP_HEIGHT = 128;
     private static final int HIGH_BMP_WIDTH = 3000;
@@ -105,11 +105,11 @@ public class WallpaperColorExtractorTest extends SysuiTestCase {
         return bitmap;
     }
 
-    private WallpaperColorExtractor getSpyWallpaperColorExtractor() {
+    private WallpaperLocalColorExtractor getSpyWallpaperLocalColorExtractor() {
 
-        WallpaperColorExtractor wallpaperColorExtractor = new WallpaperColorExtractor(
+        WallpaperLocalColorExtractor colorExtractor = new WallpaperLocalColorExtractor(
                 mBackgroundExecutor,
-                new WallpaperColorExtractor.WallpaperColorExtractorCallback() {
+                new WallpaperLocalColorExtractor.WallpaperLocalColorExtractorCallback() {
                     @Override
                     public void onColorsProcessed(List<RectF> regions,
                             List<WallpaperColors> colors) {
@@ -132,25 +132,25 @@ public class WallpaperColorExtractorTest extends SysuiTestCase {
                         mDeactivatedCount++;
                     }
                 });
-        WallpaperColorExtractor spyWallpaperColorExtractor = spy(wallpaperColorExtractor);
+        WallpaperLocalColorExtractor spyColorExtractor = spy(colorExtractor);
 
         doAnswer(invocation -> {
             mMiniBitmapWidth = invocation.getArgument(1);
             mMiniBitmapHeight = invocation.getArgument(2);
             return getMockBitmap(mMiniBitmapWidth, mMiniBitmapHeight);
-        }).when(spyWallpaperColorExtractor).createMiniBitmap(any(Bitmap.class), anyInt(), anyInt());
+        }).when(spyColorExtractor).createMiniBitmap(any(Bitmap.class), anyInt(), anyInt());
 
 
         doAnswer(invocation -> getMockBitmap(
                         invocation.getArgument(1),
                         invocation.getArgument(2)))
-                .when(spyWallpaperColorExtractor)
+                .when(spyColorExtractor)
                 .createMiniBitmap(any(Bitmap.class), anyInt(), anyInt());
 
         doReturn(new WallpaperColors(Color.valueOf(0), Color.valueOf(0), Color.valueOf(0)))
-                .when(spyWallpaperColorExtractor).getLocalWallpaperColors(any(Rect.class));
+                .when(spyColorExtractor).getLocalWallpaperColors(any(Rect.class));
 
-        return spyWallpaperColorExtractor;
+        return spyColorExtractor;
     }
 
     private RectF randomArea() {
@@ -180,18 +180,18 @@ public class WallpaperColorExtractorTest extends SysuiTestCase {
      */
     @Test
     public void testMiniBitmapCreation() {
-        WallpaperColorExtractor spyWallpaperColorExtractor = getSpyWallpaperColorExtractor();
+        WallpaperLocalColorExtractor spyColorExtractor = getSpyWallpaperLocalColorExtractor();
         int nSimulations = 10;
         for (int i = 0; i < nSimulations; i++) {
             resetCounters();
             int width = randomBetween(LOW_BMP_WIDTH, HIGH_BMP_WIDTH);
             int height = randomBetween(LOW_BMP_HEIGHT, HIGH_BMP_HEIGHT);
             Bitmap bitmap = getMockBitmap(width, height);
-            spyWallpaperColorExtractor.onBitmapChanged(bitmap);
+            spyColorExtractor.onBitmapChanged(bitmap);
 
             assertThat(mMiniBitmapUpdatedCount).isEqualTo(1);
             assertThat(Math.min(mMiniBitmapWidth, mMiniBitmapHeight))
-                    .isAtMost(WallpaperColorExtractor.SMALL_SIDE);
+                    .isAtMost(WallpaperLocalColorExtractor.SMALL_SIDE);
         }
     }
 
@@ -201,18 +201,18 @@ public class WallpaperColorExtractorTest extends SysuiTestCase {
      */
     @Test
     public void testSmallMiniBitmapCreation() {
-        WallpaperColorExtractor spyWallpaperColorExtractor = getSpyWallpaperColorExtractor();
+        WallpaperLocalColorExtractor spyColorExtractor = getSpyWallpaperLocalColorExtractor();
         int nSimulations = 10;
         for (int i = 0; i < nSimulations; i++) {
             resetCounters();
             int width = randomBetween(VERY_LOW_BMP_WIDTH, LOW_BMP_WIDTH);
             int height = randomBetween(VERY_LOW_BMP_HEIGHT, LOW_BMP_HEIGHT);
             Bitmap bitmap = getMockBitmap(width, height);
-            spyWallpaperColorExtractor.onBitmapChanged(bitmap);
+            spyColorExtractor.onBitmapChanged(bitmap);
 
             assertThat(mMiniBitmapUpdatedCount).isEqualTo(1);
             assertThat(Math.max(mMiniBitmapWidth, mMiniBitmapHeight))
-                    .isAtMost(WallpaperColorExtractor.SMALL_SIDE);
+                    .isAtMost(WallpaperLocalColorExtractor.SMALL_SIDE);
         }
     }
 
@@ -228,15 +228,15 @@ public class WallpaperColorExtractorTest extends SysuiTestCase {
         int nSimulations = 10;
         for (int i = 0; i < nSimulations; i++) {
             resetCounters();
-            WallpaperColorExtractor spyWallpaperColorExtractor = getSpyWallpaperColorExtractor();
+            WallpaperLocalColorExtractor spyColorExtractor = getSpyWallpaperLocalColorExtractor();
             List<RectF> regions = listOfRandomAreas(MIN_AREAS, MAX_AREAS);
             int nPages = randomBetween(PAGES_LOW, PAGES_HIGH);
             List<Runnable> tasks = Arrays.asList(
-                    () -> spyWallpaperColorExtractor.onPageChanged(nPages),
-                    () -> spyWallpaperColorExtractor.onBitmapChanged(bitmap),
-                    () -> spyWallpaperColorExtractor.setDisplayDimensions(
+                    () -> spyColorExtractor.onPageChanged(nPages),
+                    () -> spyColorExtractor.onBitmapChanged(bitmap),
+                    () -> spyColorExtractor.setDisplayDimensions(
                             DISPLAY_WIDTH, DISPLAY_HEIGHT),
-                    () -> spyWallpaperColorExtractor.addLocalColorsAreas(
+                    () -> spyColorExtractor.addLocalColorsAreas(
                             regions));
             Collections.shuffle(tasks);
             tasks.forEach(Runnable::run);
@@ -245,7 +245,7 @@ public class WallpaperColorExtractorTest extends SysuiTestCase {
             assertThat(mMiniBitmapUpdatedCount).isEqualTo(1);
             assertThat(mColorsProcessed).isEqualTo(regions.size());
 
-            spyWallpaperColorExtractor.removeLocalColorAreas(regions);
+            spyColorExtractor.removeLocalColorAreas(regions);
             assertThat(mDeactivatedCount).isEqualTo(1);
         }
     }
@@ -260,7 +260,7 @@ public class WallpaperColorExtractorTest extends SysuiTestCase {
         int nSimulations = 10;
         for (int i = 0; i < nSimulations; i++) {
             resetCounters();
-            WallpaperColorExtractor spyWallpaperColorExtractor = getSpyWallpaperColorExtractor();
+            WallpaperLocalColorExtractor spyColorExtractor = getSpyWallpaperLocalColorExtractor();
             List<RectF> regions1 = listOfRandomAreas(MIN_AREAS / 2, MAX_AREAS / 2);
             List<RectF> regions2 = listOfRandomAreas(MIN_AREAS / 2, MAX_AREAS / 2);
             List<RectF> regions = new ArrayList<>();
@@ -268,20 +268,20 @@ public class WallpaperColorExtractorTest extends SysuiTestCase {
             regions.addAll(regions2);
             int nPages = randomBetween(PAGES_LOW, PAGES_HIGH);
             List<Runnable> tasks = Arrays.asList(
-                    () -> spyWallpaperColorExtractor.onPageChanged(nPages),
-                    () -> spyWallpaperColorExtractor.onBitmapChanged(bitmap),
-                    () -> spyWallpaperColorExtractor.setDisplayDimensions(
+                    () -> spyColorExtractor.onPageChanged(nPages),
+                    () -> spyColorExtractor.onBitmapChanged(bitmap),
+                    () -> spyColorExtractor.setDisplayDimensions(
                             DISPLAY_WIDTH, DISPLAY_HEIGHT),
-                    () -> spyWallpaperColorExtractor.removeLocalColorAreas(regions1));
+                    () -> spyColorExtractor.removeLocalColorAreas(regions1));
 
-            spyWallpaperColorExtractor.addLocalColorsAreas(regions);
+            spyColorExtractor.addLocalColorsAreas(regions);
             assertThat(mActivatedCount).isEqualTo(1);
             Collections.shuffle(tasks);
             tasks.forEach(Runnable::run);
 
             assertThat(mMiniBitmapUpdatedCount).isEqualTo(1);
             assertThat(mDeactivatedCount).isEqualTo(0);
-            spyWallpaperColorExtractor.removeLocalColorAreas(regions2);
+            spyColorExtractor.removeLocalColorAreas(regions2);
             assertThat(mDeactivatedCount).isEqualTo(1);
         }
     }
@@ -295,18 +295,18 @@ public class WallpaperColorExtractorTest extends SysuiTestCase {
     @Test
     public void testRecomputeColorExtraction() {
         Bitmap bitmap = getMockBitmap(HIGH_BMP_WIDTH, HIGH_BMP_HEIGHT);
-        WallpaperColorExtractor spyWallpaperColorExtractor = getSpyWallpaperColorExtractor();
+        WallpaperLocalColorExtractor spyColorExtractor = getSpyWallpaperLocalColorExtractor();
         List<RectF> regions1 = listOfRandomAreas(MIN_AREAS / 2, MAX_AREAS / 2);
         List<RectF> regions2 = listOfRandomAreas(MIN_AREAS / 2, MAX_AREAS / 2);
         List<RectF> regions = new ArrayList<>();
         regions.addAll(regions1);
         regions.addAll(regions2);
-        spyWallpaperColorExtractor.addLocalColorsAreas(regions);
+        spyColorExtractor.addLocalColorsAreas(regions);
         assertThat(mActivatedCount).isEqualTo(1);
         int nPages = PAGES_LOW;
-        spyWallpaperColorExtractor.onBitmapChanged(bitmap);
-        spyWallpaperColorExtractor.onPageChanged(nPages);
-        spyWallpaperColorExtractor.setDisplayDimensions(DISPLAY_WIDTH, DISPLAY_HEIGHT);
+        spyColorExtractor.onBitmapChanged(bitmap);
+        spyColorExtractor.onPageChanged(nPages);
+        spyColorExtractor.setDisplayDimensions(DISPLAY_WIDTH, DISPLAY_HEIGHT);
 
         int nSimulations = 20;
         for (int i = 0; i < nSimulations; i++) {
@@ -315,22 +315,22 @@ public class WallpaperColorExtractorTest extends SysuiTestCase {
             // verify that if we remove some regions, they are not recomputed after other changes
             if (i == nSimulations / 2) {
                 regions.removeAll(regions2);
-                spyWallpaperColorExtractor.removeLocalColorAreas(regions2);
+                spyColorExtractor.removeLocalColorAreas(regions2);
             }
 
             if (Math.random() >= 0.5) {
                 int nPagesNew = randomBetween(PAGES_LOW, PAGES_HIGH);
                 if (nPagesNew == nPages) continue;
                 nPages = nPagesNew;
-                spyWallpaperColorExtractor.onPageChanged(nPagesNew);
+                spyColorExtractor.onPageChanged(nPagesNew);
             } else {
                 Bitmap newBitmap = getMockBitmap(HIGH_BMP_WIDTH, HIGH_BMP_HEIGHT);
-                spyWallpaperColorExtractor.onBitmapChanged(newBitmap);
+                spyColorExtractor.onBitmapChanged(newBitmap);
                 assertThat(mMiniBitmapUpdatedCount).isEqualTo(1);
             }
             assertThat(mColorsProcessed).isEqualTo(regions.size());
         }
-        spyWallpaperColorExtractor.removeLocalColorAreas(regions);
+        spyColorExtractor.removeLocalColorAreas(regions);
         assertThat(mDeactivatedCount).isEqualTo(1);
     }
 
@@ -339,12 +339,12 @@ public class WallpaperColorExtractorTest extends SysuiTestCase {
         resetCounters();
         Bitmap bitmap = getMockBitmap(HIGH_BMP_WIDTH, HIGH_BMP_HEIGHT);
         doNothing().when(bitmap).recycle();
-        WallpaperColorExtractor spyWallpaperColorExtractor = getSpyWallpaperColorExtractor();
-        spyWallpaperColorExtractor.onPageChanged(PAGES_LOW);
-        spyWallpaperColorExtractor.onBitmapChanged(bitmap);
+        WallpaperLocalColorExtractor spyColorExtractor = getSpyWallpaperLocalColorExtractor();
+        spyColorExtractor.onPageChanged(PAGES_LOW);
+        spyColorExtractor.onBitmapChanged(bitmap);
         assertThat(mMiniBitmapUpdatedCount).isEqualTo(1);
-        spyWallpaperColorExtractor.cleanUp();
-        spyWallpaperColorExtractor.addLocalColorsAreas(listOfRandomAreas(MIN_AREAS, MAX_AREAS));
+        spyColorExtractor.cleanUp();
+        spyColorExtractor.addLocalColorsAreas(listOfRandomAreas(MIN_AREAS, MAX_AREAS));
         assertThat(mColorsProcessed).isEqualTo(0);
     }
 }
