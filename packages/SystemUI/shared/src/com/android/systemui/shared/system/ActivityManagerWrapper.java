@@ -194,12 +194,8 @@ public class ActivityManagerWrapper {
                             Rect homeContentInsets, Rect minimizedHomeBounds) {
                         final RecentsAnimationControllerCompat controllerCompat =
                                 new RecentsAnimationControllerCompat(controller);
-                        final RemoteAnimationTargetCompat[] appsCompat =
-                                RemoteAnimationTargetCompat.wrap(apps);
-                        final RemoteAnimationTargetCompat[] wallpapersCompat =
-                                RemoteAnimationTargetCompat.wrap(wallpapers);
-                        animationHandler.onAnimationStart(controllerCompat, appsCompat,
-                                wallpapersCompat, homeContentInsets, minimizedHomeBounds);
+                        animationHandler.onAnimationStart(controllerCompat, apps,
+                                wallpapers, homeContentInsets, minimizedHomeBounds);
                     }
 
                     @Override
@@ -210,12 +206,7 @@ public class ActivityManagerWrapper {
 
                     @Override
                     public void onTasksAppeared(RemoteAnimationTarget[] apps) {
-                        final RemoteAnimationTargetCompat[] compats =
-                                new RemoteAnimationTargetCompat[apps.length];
-                        for (int i = 0; i < apps.length; ++i) {
-                            compats[i] = new RemoteAnimationTargetCompat(apps[i]);
-                        }
-                        animationHandler.onTasksAppeared(compats);
+                        animationHandler.onTasksAppeared(apps);
                     }
                 };
             }
