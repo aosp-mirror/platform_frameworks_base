@@ -84,6 +84,7 @@ public class GlobalSettings {
         Settings.Global.USER_PREFERRED_RESOLUTION_HEIGHT,
         Settings.Global.USER_PREFERRED_RESOLUTION_WIDTH,
         Settings.Global.POWER_BUTTON_LONG_PRESS,
+        Settings.Global.RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO_ENABLED,
         Settings.Global.Wearable.SMART_REPLIES_ENABLED,
         Settings.Global.Wearable.CLOCKWORK_AUTO_TIME,
         Settings.Global.Wearable.CLOCKWORK_AUTO_TIME_ZONE,

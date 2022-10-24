@@ -103,6 +103,7 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
             AppOpsManager.OP_SYSTEM_ALERT_WINDOW,
             AppOpsManager.OP_RECORD_AUDIO,
             AppOpsManager.OP_RECEIVE_AMBIENT_TRIGGER_AUDIO,
+            AppOpsManager.OP_RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO,
             AppOpsManager.OP_PHONE_CALL_MICROPHONE,
             AppOpsManager.OP_COARSE_LOCATION,
             AppOpsManager.OP_FINE_LOCATION

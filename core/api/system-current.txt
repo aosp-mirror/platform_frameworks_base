@@ -587,6 +587,7 @@ package android.app {
     field public static final String OPSTR_READ_MEDIA_VIDEO = "android:read_media_video";
     field public static final String OPSTR_RECEIVE_AMBIENT_TRIGGER_AUDIO = "android:receive_ambient_trigger_audio";
     field public static final String OPSTR_RECEIVE_EMERGENCY_BROADCAST = "android:receive_emergency_broadcast";
+    field public static final String OPSTR_RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO = "android:receive_explicit_user_interaction_audio";
     field public static final String OPSTR_REQUEST_DELETE_PACKAGES = "android:request_delete_packages";
     field public static final String OPSTR_REQUEST_INSTALL_PACKAGES = "android:request_install_packages";
     field public static final String OPSTR_RUN_ANY_IN_BACKGROUND = "android:run_any_in_background";

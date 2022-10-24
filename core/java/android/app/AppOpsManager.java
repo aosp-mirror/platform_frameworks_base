@@ -25,6 +25,7 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
@@ -1342,9 +1343,19 @@ public class AppOpsManager {
     public static final int OP_RECEIVE_AMBIENT_TRIGGER_AUDIO =
             AppProtoEnums.APP_OP_RECEIVE_AMBIENT_TRIGGER_AUDIO;
 
+     /**
+      * Receive audio from near-field mic (ie. TV remote)
+      * Allows audio recording regardless of sensor privacy state,
+      *  as it is an intentional user interaction: hold-to-talk
+      *
+      * @hide
+      */
+    public static final int OP_RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO =
+            AppProtoEnums.APP_OP_RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO;
+
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int _NUM_OP = 121;
+    public static final int _NUM_OP = 122;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -1816,6 +1827,18 @@ public class AppOpsManager {
     public static final String OPSTR_RECEIVE_AMBIENT_TRIGGER_AUDIO =
             "android:receive_ambient_trigger_audio";
 
+    /**
+     * Record audio from near-field microphone (ie. TV remote)
+     * Allows audio recording regardless of sensor privacy state,
+     *  as it is an intentional user interaction: hold-to-talk
+     *
+     * @hide
+     */
+    @SystemApi
+    @SuppressLint("IntentName")
+    public static final String OPSTR_RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO =
+            "android:receive_explicit_user_interaction_audio";
+
     /** {@link #sAppOpsToNote} not initialized yet for this op */
     private static final byte SHOULD_COLLECT_NOTE_OP_NOT_INITIALIZED = 0;
     /** Should not collect noting of this app-op in {@link #sAppOpsToNote} */
@@ -2285,7 +2308,11 @@ public class AppOpsManager {
             .setDisableReset(true).setRestrictRead(true).build(),
         new AppOpInfo.Builder(OP_RECEIVE_AMBIENT_TRIGGER_AUDIO, OPSTR_RECEIVE_AMBIENT_TRIGGER_AUDIO,
                 "RECEIVE_SOUNDTRIGGER_AUDIO").setDefaultMode(AppOpsManager.MODE_ALLOWED)
-                .setForceCollectNotes(true).build()
+                .setForceCollectNotes(true).build(),
+        new AppOpInfo.Builder(OP_RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO,
+                OPSTR_RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO,
+                "RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO").setDefaultMode(
+                AppOpsManager.MODE_ALLOWED).build()
     };
 
     /**
