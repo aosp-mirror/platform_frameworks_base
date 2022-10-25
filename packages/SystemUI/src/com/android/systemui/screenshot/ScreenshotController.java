@@ -20,6 +20,7 @@ import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_SCREENSHOT;
 
+import static com.android.systemui.flags.Flags.SCREENSHOT_WORK_PROFILE_POLICY;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_ANIM;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_CALLBACK;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_DISMISS;
@@ -634,6 +635,11 @@ public class ScreenshotController {
                         return true;
                     }
                 });
+
+        if (mFlags.isEnabled(SCREENSHOT_WORK_PROFILE_POLICY)) {
+            mScreenshotView.badgeScreenshot(
+                    mContext.getPackageManager().getUserBadgeForDensity(owner, 0));
+        }
         mScreenshotView.setScreenshot(mScreenBitmap, screenInsets);
         if (DEBUG_WINDOW) {
             Log.d(TAG, "setContentView: " + mScreenshotView);
@@ -1038,7 +1044,7 @@ public class ScreenshotController {
 
     private boolean isUserSetupComplete(UserHandle owner) {
         return Settings.Secure.getInt(mContext.createContextAsUser(owner, 0)
-                        .getContentResolver(), SETTINGS_SECURE_USER_SETUP_COMPLETE, 0) == 1;
+                .getContentResolver(), SETTINGS_SECURE_USER_SETUP_COMPLETE, 0) == 1;
     }
 
     /**
