@@ -151,9 +151,9 @@ class DebugProvider : ContentProvider() {
                 .add(ColumnEnum.PAGE_ID.id, page.id)
                 .add(ColumnEnum.PAGE_NAME.id, page.displayName)
                 .add(ColumnEnum.PAGE_ROUTE.id, page.buildRoute())
+                .add(ColumnEnum.PAGE_INTENT_URI.id, intent.toUri(URI_INTENT_SCHEME))
                 .add(ColumnEnum.PAGE_ENTRY_COUNT.id, pageWithEntry.entries.size)
                 .add(ColumnEnum.HAS_RUNTIME_PARAM.id, if (page.hasRuntimeParam()) 1 else 0)
-                .add(ColumnEnum.PAGE_INTENT_URI.id, intent.toUri(URI_INTENT_SCHEME))
         }
         return cursor
     }
@@ -170,7 +170,8 @@ class DebugProvider : ContentProvider() {
                 .add(ColumnEnum.ENTRY_NAME.id, entry.displayName)
                 .add(ColumnEnum.ENTRY_ROUTE.id, entry.containerPage().buildRoute())
                 .add(ColumnEnum.ENTRY_INTENT_URI.id, intent.toUri(URI_INTENT_SCHEME))
-                .add(ColumnEnum.ENTRY_HIERARCHY_PATH.id, entryRepository.getEntryPath(entry.id))
+                .add(ColumnEnum.ENTRY_HIERARCHY_PATH.id,
+                    entryRepository.getEntryPathWithDisplayName(entry.id))
         }
         return cursor
     }

@@ -120,12 +120,11 @@ class DebugActivity : ComponentActivity() {
         val allPageWithEntry = remember { entryRepository.getAllPageWithEntry() }
         RegularScaffold(title = "All Pages (${allPageWithEntry.size})") {
             for (pageWithEntry in allPageWithEntry) {
+                val page = pageWithEntry.page
                 Preference(object : PreferenceModel {
-                    override val title =
-                        "${pageWithEntry.page.displayName} (${pageWithEntry.entries.size})"
-                    override val summary = pageWithEntry.page.formatArguments().toState()
-                    override val onClick =
-                        navigator(route = ROUTE_PAGE + "/${pageWithEntry.page.id}")
+                    override val title = "${page.debugBrief()} (${pageWithEntry.entries.size})"
+                    override val summary = page.debugArguments().toState()
+                    override val onClick = navigator(route = ROUTE_PAGE + "/${page.id}")
                 })
             }
         }
@@ -146,16 +145,16 @@ class DebugActivity : ComponentActivity() {
         val entryRepository by spaEnvironment.entryRepository
         val id = arguments!!.getString(PARAM_NAME_PAGE_ID, "")
         val pageWithEntry = entryRepository.getPageWithEntry(id)!!
-        RegularScaffold(title = "Page - ${pageWithEntry.page.displayName}") {
-            Text(text = "id = ${pageWithEntry.page.id}")
-            Text(text = pageWithEntry.page.formatArguments())
+        val page = pageWithEntry.page
+        RegularScaffold(title = "Page - ${page.debugBrief()}") {
+            Text(text = "id = ${page.id}")
+            Text(text = page.debugArguments())
             Text(text = "Entry size: ${pageWithEntry.entries.size}")
             Preference(model = object : PreferenceModel {
                 override val title = "open page"
                 override val enabled =
-                    pageWithEntry.page.isBrowsable(context, spaEnvironment.browseActivityClass)
-                        .toState()
-                override val onClick = openPage(pageWithEntry.page)
+                    page.isBrowsable(context, spaEnvironment.browseActivityClass).toState()
+                override val onClick = openPage(page)
             })
             EntryList(pageWithEntry.entries)
         }
@@ -167,8 +166,8 @@ class DebugActivity : ComponentActivity() {
         val entryRepository by spaEnvironment.entryRepository
         val id = arguments!!.getString(PARAM_NAME_ENTRY_ID, "")
         val entry = entryRepository.getEntry(id)!!
-        val entryContent = remember { entry.formatContent() }
-        RegularScaffold(title = "Entry - ${entry.displayTitle()}") {
+        val entryContent = remember { entry.debugContent(entryRepository) }
+        RegularScaffold(title = "Entry - ${entry.debugBrief()}") {
             Preference(model = object : PreferenceModel {
                 override val title = "open entry"
                 override val enabled =
@@ -184,7 +183,7 @@ class DebugActivity : ComponentActivity() {
     private fun EntryList(entries: Collection<SettingsEntry>) {
         for (entry in entries) {
             Preference(object : PreferenceModel {
-                override val title = entry.displayTitle()
+                override val title = entry.debugBrief()
                 override val summary =
                     "${entry.fromPage?.displayName} -> ${entry.toPage?.displayName}".toState()
                 override val onClick = navigator(route = ROUTE_ENTRY + "/${entry.id}")

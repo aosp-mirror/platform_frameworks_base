@@ -99,21 +99,6 @@ data class SettingsEntry(
      */
     private val uiLayoutImpl: (@Composable (arguments: Bundle?) -> Unit) = {},
 ) {
-    fun formatContent(): String {
-        val content = listOf(
-            "id = $id",
-            "owner = ${owner.formatDisplayTitle()}",
-            "linkFrom = ${fromPage?.formatDisplayTitle()}",
-            "linkTo = ${toPage?.formatDisplayTitle()}",
-            "${getSearchData()?.format()}",
-        )
-        return content.joinToString("\n")
-    }
-
-    fun displayTitle(): String {
-        return "${owner.displayName}:$displayName"
-    }
-
     fun containerPage(): SettingsPage {
         // The Container page of the entry, which is the from-page or
         // the owner-page if from-page is unset.

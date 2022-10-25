@@ -169,7 +169,8 @@ open class EntryProvider : ContentProvider() {
             .add(ColumnEnum.ENTRY_INTENT_URI.id, intent.toUri(Intent.URI_INTENT_SCHEME))
             .add(ColumnEnum.SEARCH_TITLE.id, searchData.title)
             .add(ColumnEnum.SEARCH_KEYWORD.id, searchData.keyword)
-            .add(ColumnEnum.SEARCH_PATH.id, entryRepository.getEntryPath(entry.id))
+            .add(ColumnEnum.SEARCH_PATH.id,
+                entryRepository.getEntryPathWithTitle(entry.id, searchData.title))
     }
 
     private fun fetchStatusData(entry: SettingsEntry, cursor: MatrixCursor) {
