@@ -16,15 +16,10 @@
 
 package com.android.settingslib.spa.framework.common
 
-import androidx.compose.runtime.Composable
-
 /**
- * Defines interface of a entry macro, which contains entry functions to support different
- * scenarios, such as browsing (UiLayout), search, etc.
+ * Defines the status data of one Settings entry, which could be changed frequently.
  */
-interface EntryMacro {
-    @Composable
-    fun UiLayout() {}
-    fun getSearchData(): EntrySearchData? = null
-    fun getStatusData(): EntryStatusData? = null
-}
+data class EntryStatusData(
+    val isDisabled: Boolean = false,
+    val isSwitchOff: Boolean = false,
+)

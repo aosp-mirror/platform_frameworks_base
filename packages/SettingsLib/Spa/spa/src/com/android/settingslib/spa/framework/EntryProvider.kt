@@ -42,9 +42,10 @@ private const val TAG = "EntryProvider"
  * For gallery, AuthorityPath = com.android.spa.gallery.provider
  * For Settings, AuthorityPath = com.android.settings.spa.provider
  * Some examples:
- *   $ adb shell content query --uri content://<AuthorityPath>/search_sitemap
  *   $ adb shell content query --uri content://<AuthorityPath>/search_static
  *   $ adb shell content query --uri content://<AuthorityPath>/search_dynamic
+ *   $ adb shell content query --uri content://<AuthorityPath>/search_mutable_status
+ *   $ adb shell content query --uri content://<AuthorityPath>/search_immutable_status
  */
 open class EntryProvider : ContentProvider() {
     private val spaEnvironment get() = SpaEnvironmentFactory.instance
@@ -81,9 +82,10 @@ open class EntryProvider : ContentProvider() {
 
     override fun attachInfo(context: Context?, info: ProviderInfo?) {
         if (info != null) {
-            QueryEnum.SEARCH_SITEMAP_QUERY.addUri(uriMatcher, info.authority)
             QueryEnum.SEARCH_STATIC_DATA_QUERY.addUri(uriMatcher, info.authority)
             QueryEnum.SEARCH_DYNAMIC_DATA_QUERY.addUri(uriMatcher, info.authority)
+            QueryEnum.SEARCH_MUTABLE_STATUS_DATA_QUERY.addUri(uriMatcher, info.authority)
+            QueryEnum.SEARCH_IMMUTABLE_STATUS_DATA_QUERY.addUri(uriMatcher, info.authority)
         }
         super.attachInfo(context, info)
     }
@@ -97,9 +99,12 @@ open class EntryProvider : ContentProvider() {
     ): Cursor? {
         return try {
             when (uriMatcher.match(uri)) {
-                QueryEnum.SEARCH_SITEMAP_QUERY.queryMatchCode -> querySearchSitemap()
                 QueryEnum.SEARCH_STATIC_DATA_QUERY.queryMatchCode -> querySearchStaticData()
                 QueryEnum.SEARCH_DYNAMIC_DATA_QUERY.queryMatchCode -> querySearchDynamicData()
+                QueryEnum.SEARCH_MUTABLE_STATUS_DATA_QUERY.queryMatchCode ->
+                    querySearchMutableStatusData()
+                QueryEnum.SEARCH_IMMUTABLE_STATUS_DATA_QUERY.queryMatchCode ->
+                    querySearchImmutableStatusData()
                 else -> throw UnsupportedOperationException("Unknown Uri $uri")
             }
         } catch (e: UnsupportedOperationException) {
@@ -110,18 +115,22 @@ open class EntryProvider : ContentProvider() {
         }
     }
 
-    private fun querySearchSitemap(): Cursor {
+    private fun querySearchImmutableStatusData(): Cursor {
         val entryRepository by spaEnvironment.entryRepository
-        val cursor = MatrixCursor(QueryEnum.SEARCH_SITEMAP_QUERY.getColumns())
+        val cursor = MatrixCursor(QueryEnum.SEARCH_IMMUTABLE_STATUS_DATA_QUERY.getColumns())
         for (entry in entryRepository.getAllEntries()) {
-            if (!entry.isAllowSearch) continue
-            val intent = entry.containerPage()
-                .createBrowseIntent(context, spaEnvironment.browseActivityClass, entry.id)
-                ?: Intent()
-            cursor.newRow()
-                .add(ColumnEnum.ENTRY_ID.id, entry.id)
-                .add(ColumnEnum.ENTRY_HIERARCHY_PATH.id, entryRepository.getEntryPath(entry.id))
-                .add(ColumnEnum.ENTRY_INTENT_URI.id, intent.toUri(Intent.URI_INTENT_SCHEME))
+            if (!entry.isAllowSearch || entry.mutableStatus) continue
+            fetchStatusData(entry, cursor)
+        }
+        return cursor
+    }
+
+    private fun querySearchMutableStatusData(): Cursor {
+        val entryRepository by spaEnvironment.entryRepository
+        val cursor = MatrixCursor(QueryEnum.SEARCH_MUTABLE_STATUS_DATA_QUERY.getColumns())
+        for (entry in entryRepository.getAllEntries()) {
+            if (!entry.isAllowSearch || !entry.mutableStatus) continue
+            fetchStatusData(entry, cursor)
         }
         return cursor
     }
@@ -147,14 +156,27 @@ open class EntryProvider : ContentProvider() {
     }
 
     private fun fetchSearchData(entry: SettingsEntry, cursor: MatrixCursor) {
+        val entryRepository by spaEnvironment.entryRepository
+        val browseActivityClass = spaEnvironment.browseActivityClass
+
         // Fetch search data. We can add runtime arguments later if necessary
-        val searchData = entry.getSearchData()
+        val searchData = entry.getSearchData() ?: return
+        val intent = entry.containerPage()
+            .createBrowseIntent(context, browseActivityClass, entry.id)
+            ?: Intent()
         cursor.newRow()
             .add(ColumnEnum.ENTRY_ID.id, entry.id)
-            .add(ColumnEnum.ENTRY_TITLE.id, searchData?.title ?: "")
-            .add(
-                ColumnEnum.ENTRY_SEARCH_KEYWORD.id,
-                searchData?.keyword ?: emptyList<String>()
-            )
+            .add(ColumnEnum.ENTRY_INTENT_URI.id, intent.toUri(Intent.URI_INTENT_SCHEME))
+            .add(ColumnEnum.SEARCH_TITLE.id, searchData.title)
+            .add(ColumnEnum.SEARCH_KEYWORD.id, searchData.keyword)
+            .add(ColumnEnum.SEARCH_PATH.id, entryRepository.getEntryPath(entry.id))
+    }
+
+    private fun fetchStatusData(entry: SettingsEntry, cursor: MatrixCursor) {
+        // Fetch status data. We can add runtime arguments later if necessary
+        val statusData = entry.getStatusData() ?: return
+        cursor.newRow()
+            .add(ColumnEnum.ENTRY_ID.id, entry.id)
+            .add(ColumnEnum.SEARCH_STATUS_DISABLED.id, statusData.isDisabled)
     }
 }
