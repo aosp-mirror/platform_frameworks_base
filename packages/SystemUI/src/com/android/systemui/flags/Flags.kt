@@ -152,6 +152,9 @@ object Flags {
     // TODO(b/254512678): Tracking Bug
     @JvmField val NEW_FOOTER_ACTIONS = ReleasedFlag(507)
 
+    // TODO(b/244064524): Tracking Bug
+    @JvmField val QS_SECONDARY_DATA_SUB_INFO = UnreleasedFlag(508, teamfood = true)
+
     // 600- status bar
     // TODO(b/254513246): Tracking Bug
     val STATUS_BAR_USER_SWITCHER = ResourceBooleanFlag(602, R.bool.flag_user_switcher_chip)
