@@ -16,11 +16,12 @@
 
 package com.android.systemui.shared.system;
 
+import android.view.RemoteAnimationTarget;
 import android.view.WindowManager;
 
 public interface RemoteAnimationRunnerCompat {
     void onAnimationStart(@WindowManager.TransitionOldType int transit,
-            RemoteAnimationTargetCompat[] apps, RemoteAnimationTargetCompat[] wallpapers,
-            RemoteAnimationTargetCompat[] nonApps, Runnable finishedCallback);
+            RemoteAnimationTarget[] apps, RemoteAnimationTarget[] wallpapers,
+            RemoteAnimationTarget[] nonApps, Runnable finishedCallback);
     void onAnimationCancelled();
 }

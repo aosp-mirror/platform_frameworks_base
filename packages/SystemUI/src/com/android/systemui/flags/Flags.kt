@@ -118,6 +118,12 @@ object Flags {
      */
     @JvmField val STEP_CLOCK_ANIMATION = UnreleasedFlag(212)
 
+    /**
+     * Migration from the legacy isDozing/dozeAmount paths to the new KeyguardTransitionRepository
+     * will occur in stages. This is one stage of many to come.
+     */
+    @JvmField val DOZING_MIGRATION_1 = UnreleasedFlag(213, teamfood = true)
+
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
     @JvmField val POWER_MENU_LITE = ReleasedFlag(300)
@@ -132,7 +138,7 @@ object Flags {
     @Deprecated("Not needed anymore") val NEW_USER_SWITCHER = ReleasedFlag(500)
 
     // TODO(b/254512321): Tracking Bug
-    @JvmField val COMBINED_QS_HEADERS = UnreleasedFlag(501, teamfood = true)
+    @JvmField val COMBINED_QS_HEADERS = ReleasedFlag(501, teamfood = true)
     val PEOPLE_TILE = ResourceBooleanFlag(502, R.bool.flag_conversations)
     @JvmField
     val QS_USER_DETAIL_SHORTCUT =
@@ -142,7 +148,7 @@ object Flags {
     @Deprecated("Not needed anymore") val NEW_FOOTER = ReleasedFlag(504)
 
     // TODO(b/254512747): Tracking Bug
-    val NEW_HEADER = UnreleasedFlag(505, teamfood = true)
+    val NEW_HEADER = ReleasedFlag(505, teamfood = true)
 
     // TODO(b/254512383): Tracking Bug
     @JvmField

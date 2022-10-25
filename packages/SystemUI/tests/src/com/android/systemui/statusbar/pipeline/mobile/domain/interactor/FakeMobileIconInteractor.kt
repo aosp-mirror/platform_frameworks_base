@@ -23,7 +23,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 
 class FakeMobileIconInteractor : MobileIconInteractor {
     private val _iconGroup = MutableStateFlow<SignalIcon.MobileIconGroup>(TelephonyIcons.UNKNOWN)
-    override val iconGroup = _iconGroup
+    override val networkTypeIconGroup = _iconGroup
 
     private val _isEmergencyOnly = MutableStateFlow<Boolean>(false)
     override val isEmergencyOnly = _isEmergencyOnly

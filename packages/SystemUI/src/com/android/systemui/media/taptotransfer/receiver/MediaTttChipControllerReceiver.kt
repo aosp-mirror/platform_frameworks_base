@@ -25,7 +25,6 @@ import android.graphics.drawable.Icon
 import android.media.MediaRoute2Info
 import android.os.Handler
 import android.os.PowerManager
-import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -116,7 +115,7 @@ class MediaTttChipControllerReceiver @Inject constructor(
         logger.logStateChange(stateName, routeInfo.id, routeInfo.clientPackageName)
 
         if (chipState == null) {
-            Log.e(RECEIVER_TAG, "Unhandled MediaTransferReceiverState $displayState")
+            logger.logStateChangeError(displayState)
             return
         }
         uiEventLogger.logReceiverStateChange(chipState)
@@ -236,5 +235,3 @@ data class ChipReceiverInfo(
 ) : TemporaryViewInfo {
     override fun getTimeoutMs() = DEFAULT_TIMEOUT_MILLIS
 }
-
-private const val RECEIVER_TAG = "MediaTapToTransferRcvr"
