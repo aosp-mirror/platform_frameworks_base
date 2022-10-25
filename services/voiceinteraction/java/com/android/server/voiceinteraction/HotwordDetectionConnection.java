@@ -129,7 +129,10 @@ final class HotwordDetectionConnection {
 
     private static final String KEY_RESTART_PERIOD_IN_SECONDS = "restart_period_in_seconds";
     // TODO: These constants need to be refined.
-    private static final long VALIDATION_TIMEOUT_MILLIS = 4000;
+    // The validation timeout value is 3 seconds for onDetect of DSP trigger event.
+    private static final long VALIDATION_TIMEOUT_MILLIS = 3000;
+    // Write the onDetect timeout metric when it takes more time than MAX_VALIDATION_TIMEOUT_MILLIS.
+    private static final long MAX_VALIDATION_TIMEOUT_MILLIS = 4000;
     private static final long MAX_UPDATE_TIMEOUT_MILLIS = 30000;
     private static final long EXTERNAL_HOTWORD_CLEANUP_MILLIS = 2000;
     private static final Duration MAX_UPDATE_TIMEOUT_DURATION =
@@ -659,6 +662,10 @@ final class HotwordDetectionConnection {
         synchronized (mLock) {
             mValidatingDspTrigger = true;
             mRemoteHotwordDetectionService.run(service -> {
+                // We use the VALIDATION_TIMEOUT_MILLIS to inform that the client needs to invoke
+                // the callback before timeout value. In order to reduce the latency impact between
+                // server side and client side, we need to use another timeout value
+                // MAX_VALIDATION_TIMEOUT_MILLIS to monitor it.
                 mCancellationKeyPhraseDetectionFuture = mScheduledExecutorService.schedule(
                         () -> {
                             // TODO: avoid allocate every time
@@ -673,7 +680,7 @@ final class HotwordDetectionConnection {
                                 Slog.w(TAG, "Failed to report onError status: ", e);
                             }
                         },
-                        VALIDATION_TIMEOUT_MILLIS,
+                        MAX_VALIDATION_TIMEOUT_MILLIS,
                         TimeUnit.MILLISECONDS);
                 service.detectFromDspSource(
                         recognitionEvent,
