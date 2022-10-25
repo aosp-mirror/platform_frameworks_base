@@ -462,7 +462,7 @@ final class ScanPackageUtils {
             }
         }
 
-        return new ScanResult(request, true, pkgSetting, changedAbiCodePath,
+        return new ScanResult(request, pkgSetting, changedAbiCodePath,
                 !createNewPackage /* existingSettingCopied */,
                 Process.INVALID_UID /* previousAppId */ , sdkLibraryInfo,
                 staticSharedLibraryInfo, dynamicSharedLibraryInfos);
