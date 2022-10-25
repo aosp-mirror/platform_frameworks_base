@@ -16,7 +16,10 @@
 
 package com.android.systemui.dreams.complication;
 
+import static com.android.systemui.dreams.complication.Complication.COMPLICATION_TYPE_MEDIA_ENTRY;
 import static com.android.systemui.flags.Flags.DREAM_MEDIA_TAP_TO_OPEN;
+
+import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -32,6 +35,7 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.ActivityIntentHelper;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dreams.DreamOverlayStateController;
+import com.android.systemui.dreams.complication.dagger.DreamMediaEntryComplicationComponent;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.media.MediaCarouselController;
 import com.android.systemui.media.dream.MediaDreamComplication;
@@ -50,6 +54,9 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 public class DreamMediaEntryComplicationTest extends SysuiTestCase {
+    @Mock
+    private DreamMediaEntryComplicationComponent.Factory mComponentFactory;
+
     @Mock
     private View mView;
 
@@ -87,6 +94,14 @@ public class DreamMediaEntryComplicationTest extends SysuiTestCase {
     public void setup() {
         MockitoAnnotations.initMocks(this);
         when(mFeatureFlags.isEnabled(DREAM_MEDIA_TAP_TO_OPEN)).thenReturn(false);
+    }
+
+    @Test
+    public void testGetRequiredTypeAvailability() {
+        final DreamMediaEntryComplication complication =
+                new DreamMediaEntryComplication(mComponentFactory);
+        assertThat(complication.getRequiredTypeAvailability()).isEqualTo(
+                COMPLICATION_TYPE_MEDIA_ENTRY);
     }
 
     /**
