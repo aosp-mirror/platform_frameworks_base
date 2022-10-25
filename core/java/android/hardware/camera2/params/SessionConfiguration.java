@@ -23,6 +23,8 @@ import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
+import android.graphics.ColorSpace;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
@@ -30,6 +32,7 @@ import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.params.InputConfiguration;
 import android.hardware.camera2.params.OutputConfiguration;
 import android.hardware.camera2.utils.HashCodeHelpers;
+import android.media.ImageReader;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
@@ -94,6 +97,7 @@ public final class SessionConfiguration implements Parcelable {
     private Executor mExecutor = null;
     private InputConfiguration mInputConfig = null;
     private CaptureRequest mSessionParameters = null;
+    private int mColorSpace;
 
     /**
      * Create a new {@link SessionConfiguration}.
@@ -313,5 +317,46 @@ public final class SessionConfiguration implements Parcelable {
      */
     public CaptureRequest getSessionParameters() {
         return mSessionParameters;
+    }
+
+    /**
+     * Set a specific device-supported color space.
+     *
+     * <p>Clients can choose from any profile advertised as supported in
+     * {@link CameraCharacteristics#REQUEST_AVAILABLE_COLOR_SPACE_PROFILES}
+     * queried using {@link ColorSpaceProfiles#getSupportedColorSpaces}.
+     * When set, the colorSpace will override the default color spaces of the output targets,
+     * or the color space implied by the dataSpace passed into an {@link ImageReader}'s
+     * constructor.</p>
+     */
+    public void setColorSpace(@NonNull ColorSpace.Named colorSpace) {
+        mColorSpace = colorSpace.ordinal();
+        for (OutputConfiguration outputConfiguration : mOutputConfigurations) {
+            outputConfiguration.setColorSpace(colorSpace);
+        }
+    }
+
+    /**
+     * Clear the color space, such that the default color space will be used.
+     */
+    public void clearColorSpace() {
+        mColorSpace = ColorSpaceProfiles.UNSPECIFIED;
+        for (OutputConfiguration outputConfiguration : mOutputConfigurations) {
+            outputConfiguration.clearColorSpace();
+        }
+    }
+
+    /**
+     * Return the current color space.
+     *
+     * @return the currently set color space
+     */
+    @SuppressLint("MethodNameUnits")
+    public @Nullable ColorSpace getColorSpace() {
+        if (mColorSpace != ColorSpaceProfiles.UNSPECIFIED) {
+            return ColorSpace.get(ColorSpace.Named.values()[mColorSpace]);
+        } else {
+            return null;
+        }
     }
 }

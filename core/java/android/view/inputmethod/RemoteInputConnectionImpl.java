@@ -214,7 +214,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
         }
     }
 
-    public boolean isActive() {
+    private boolean isActive() {
         return mParentInputMethodManager.isActive() && !isFinished();
     }
 

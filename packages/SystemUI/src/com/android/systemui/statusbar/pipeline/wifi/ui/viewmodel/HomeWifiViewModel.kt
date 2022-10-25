@@ -32,6 +32,7 @@ class HomeWifiViewModel(
     isActivityInViewVisible: Flow<Boolean>,
     isActivityOutViewVisible: Flow<Boolean>,
     isActivityContainerVisible: Flow<Boolean>,
+    isAirplaneSpacerVisible: Flow<Boolean>,
 ) :
     LocationBasedWifiViewModel(
         statusBarPipelineFlags,
@@ -40,4 +41,5 @@ class HomeWifiViewModel(
         isActivityInViewVisible,
         isActivityOutViewVisible,
         isActivityContainerVisible,
+        isAirplaneSpacerVisible,
     )

@@ -32,40 +32,7 @@
         android:layout_height="match_parent"
         android:layout_width="match_parent" />
 
-    <include
-        layout="@layout/keyguard_bottom_area"
-        android:visibility="gone" />
-
-    <ViewStub
-        android:id="@+id/keyguard_user_switcher_stub"
-        android:layout="@layout/keyguard_user_switcher"
-        android:layout_height="match_parent"
-        android:layout_width="match_parent" />
-
     <include layout="@layout/status_bar_expanded_plugin_frame"/>
-
-    <include layout="@layout/dock_info_bottom_area_overlay" />
-
-    <com.android.keyguard.LockIconView
-        android:id="@+id/lock_icon_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
-        <!-- Background protection -->
-        <ImageView
-            android:id="@+id/lock_icon_bg"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@drawable/fingerprint_bg"
-            android:visibility="invisible"/>
-
-        <ImageView
-            android:id="@+id/lock_icon"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:scaleType="centerCrop"/>
-
-    </com.android.keyguard.LockIconView>
 
     <com.android.systemui.shade.NotificationsQuickSettingsContainer
         android:layout_width="match_parent"
@@ -144,6 +111,39 @@
             android:visibility="gone"
         />
     </com.android.systemui.shade.NotificationsQuickSettingsContainer>
+
+    <include
+        layout="@layout/keyguard_bottom_area"
+        android:visibility="gone" />
+
+    <ViewStub
+        android:id="@+id/keyguard_user_switcher_stub"
+        android:layout="@layout/keyguard_user_switcher"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent" />
+
+    <include layout="@layout/dock_info_bottom_area_overlay" />
+
+    <com.android.keyguard.LockIconView
+        android:id="@+id/lock_icon_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <!-- Background protection -->
+        <ImageView
+            android:id="@+id/lock_icon_bg"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/fingerprint_bg"
+            android:visibility="invisible"/>
+
+        <ImageView
+            android:id="@+id/lock_icon"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:scaleType="centerCrop"/>
+
+    </com.android.keyguard.LockIconView>
 
     <FrameLayout
         android:id="@+id/preview_container"

@@ -23,6 +23,7 @@ import static com.google.common.truth.Truth.assertWithMessage;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
@@ -127,6 +128,7 @@ public class PackageParserTest {
     private static final String TEST_APP3_APK = "PackageParserTestApp3.apk";
     private static final String TEST_APP4_APK = "PackageParserTestApp4.apk";
     private static final String TEST_APP5_APK = "PackageParserTestApp5.apk";
+    private static final String TEST_APP6_APK = "PackageParserTestApp6.apk";
     private static final String PACKAGE_NAME = "com.android.servicestests.apps.packageparserapp";
 
     @Before
@@ -329,6 +331,46 @@ public class PackageParserTest {
         } finally {
             testFile.delete();
         }
+    }
+
+    @Test
+    public void testParseActivityTargetDisplayCategoryValid() throws Exception {
+        final File testFile = extractFile(TEST_APP4_APK);
+        String actualDisplayCategory = null;
+        try {
+            final ParsedPackage pkg = new TestPackageParser2().parsePackage(testFile, 0, false);
+            final List<ParsedActivity> activities = pkg.getActivities();
+            for (ParsedActivity activity : activities) {
+                if ((PACKAGE_NAME + ".MyActivity").equals(activity.getName())) {
+                    actualDisplayCategory = activity.getTargetDisplayCategory();
+                }
+            }
+        } finally {
+            testFile.delete();
+        }
+        assertEquals("automotive", actualDisplayCategory);
+    }
+
+    @Test
+    public void testParseActivityTargetDisplayCategoryInvalid() throws Exception {
+        final File testFile = extractFile(TEST_APP6_APK);
+        String actualDisplayCategory = null;
+        try {
+            final ParsedPackage pkg = new TestPackageParser2().parsePackage(testFile, 0, false);
+            final List<ParsedActivity> activities = pkg.getActivities();
+            for (ParsedActivity activity : activities) {
+                if ((PACKAGE_NAME + ".MyActivity").equals(activity.getName())) {
+                    actualDisplayCategory = activity.getTargetDisplayCategory();
+                }
+            }
+        } catch (PackageManagerException e) {
+            assertThat(e.getMessage()).contains(
+                    "targetDisplayCategory attribute can only consists"
+                            + " of alphanumeric characters, '_', and '.'");
+        } finally {
+            testFile.delete();
+        }
+        assertNotEquals("$automotive", actualDisplayCategory);
     }
 
     private static final int PROPERTY_TYPE_BOOLEAN = 1;

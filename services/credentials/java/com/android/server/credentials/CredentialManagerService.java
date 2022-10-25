@@ -49,8 +49,7 @@ public final class CredentialManagerService extends
 
     public CredentialManagerService(@NonNull Context context) {
         super(context,
-                new SecureSettingsServiceNameResolver(context, Settings.Secure.AUTOFILL_SERVICE,
-                        /*isMultiple=*/true),
+                new SecureSettingsServiceNameResolver(context, Settings.Secure.AUTOFILL_SERVICE),
                 null, PACKAGE_UPDATE_POLICY_REFRESH_EAGER);
     }
 

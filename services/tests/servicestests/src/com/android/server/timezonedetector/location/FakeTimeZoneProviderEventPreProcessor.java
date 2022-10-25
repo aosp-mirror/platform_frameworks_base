@@ -17,6 +17,7 @@
 package com.android.server.timezonedetector.location;
 
 import android.service.timezone.TimeZoneProviderEvent;
+import android.service.timezone.TimeZoneProviderStatus;
 
 /**
  * Fake implementation of {@link TimeZoneProviderEventPreProcessor} which assumes that all events
@@ -31,7 +32,8 @@ public final class FakeTimeZoneProviderEventPreProcessor
     public TimeZoneProviderEvent preProcess(TimeZoneProviderEvent timeZoneProviderEvent) {
         if (mIsUncertain) {
             return TimeZoneProviderEvent.createUncertainEvent(
-                    timeZoneProviderEvent.getCreationElapsedMillis());
+                    timeZoneProviderEvent.getCreationElapsedMillis(),
+                    TimeZoneProviderStatus.UNKNOWN);
         }
         return timeZoneProviderEvent;
     }

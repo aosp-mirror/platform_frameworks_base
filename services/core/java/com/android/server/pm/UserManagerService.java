@@ -1540,10 +1540,9 @@ public class UserManagerService extends IUserManager.Stub {
         checkQueryOrInteractPermissionIfCallerInOtherProfileGroup(userId, "getUserProperties");
         final UserProperties origProperties = getUserPropertiesInternal(userId);
         if (origProperties != null) {
-            int callingUid = Binder.getCallingUid();
-            boolean exposeAllFields = callingUid == Process.SYSTEM_UID;
-            boolean hasManage = hasPermissionGranted(Manifest.permission.MANAGE_USERS, callingUid);
-            boolean hasQuery = hasPermissionGranted(Manifest.permission.QUERY_USERS, callingUid);
+            boolean exposeAllFields = Binder.getCallingUid() == Process.SYSTEM_UID;
+            boolean hasManage = hasManageUsersPermission();
+            boolean hasQuery = hasQueryUsersPermission();
             return new UserProperties(origProperties, exposeAllFields, hasManage, hasQuery);
         }
         // A non-existent or partial user will reach here.

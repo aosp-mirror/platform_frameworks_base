@@ -613,22 +613,21 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     protected void resetAllContentAlphas() {}
 
     @Override
-    protected void applyRoundness() {
+    public void applyRoundness() {
         super.applyRoundness();
-        applyBackgroundRoundness(getCurrentBackgroundRadiusTop(),
-                getCurrentBackgroundRadiusBottom());
+        applyBackgroundRoundness(getTopCornerRadius(), getBottomCornerRadius());
     }
 
     @Override
-    public float getCurrentBackgroundRadiusTop() {
+    public float getTopCornerRadius() {
         float fraction = getInterpolatedAppearAnimationFraction();
-        return MathUtils.lerp(0, super.getCurrentBackgroundRadiusTop(), fraction);
+        return MathUtils.lerp(0, super.getTopCornerRadius(), fraction);
     }
 
     @Override
-    public float getCurrentBackgroundRadiusBottom() {
+    public float getBottomCornerRadius() {
         float fraction = getInterpolatedAppearAnimationFraction();
-        return MathUtils.lerp(0, super.getCurrentBackgroundRadiusBottom(), fraction);
+        return MathUtils.lerp(0, super.getBottomCornerRadius(), fraction);
     }
 
     private void applyBackgroundRoundness(float topRadius, float bottomRadius) {

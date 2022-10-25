@@ -26,7 +26,6 @@ import static com.android.server.hdmi.Constants.ADDR_PLAYBACK_2;
 import static com.android.server.hdmi.Constants.ADDR_TV;
 import static com.android.server.hdmi.DeviceSelectActionFromTv.STATE_WAIT_FOR_DEVICE_POWER_ON;
 import static com.android.server.hdmi.DeviceSelectActionFromTv.STATE_WAIT_FOR_REPORT_POWER_STATUS;
-import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -101,7 +100,6 @@ public class DeviceSelectActionFromTvTest {
     private FakePowerManagerWrapper mPowerManager;
     private Looper mMyLooper;
     private TestLooper mTestLooper = new TestLooper();
-    private ArrayList<HdmiCecLocalDevice> mLocalDevices = new ArrayList<>();
 
     @Before
     public void setUp() {
@@ -110,7 +108,8 @@ public class DeviceSelectActionFromTvTest {
 
         mHdmiControlService =
                 new HdmiControlService(InstrumentationRegistry.getTargetContext(),
-                        Collections.emptyList(), new FakeAudioDeviceVolumeManagerWrapper()) {
+                        Collections.singletonList(HdmiDeviceInfo.DEVICE_TV),
+                        new FakeAudioDeviceVolumeManagerWrapper()) {
                     @Override
                     boolean isControlEnabled() {
                         return true;
@@ -127,8 +126,7 @@ public class DeviceSelectActionFromTvTest {
                     }
                 };
 
-        mHdmiCecLocalDeviceTv = new HdmiCecLocalDeviceTv(mHdmiControlService);
-        mHdmiCecLocalDeviceTv.init();
+
         mHdmiControlService.setIoLooper(mMyLooper);
         mHdmiControlService.setHdmiCecConfig(new FakeHdmiCecConfig(context));
         mNativeWrapper = new FakeNativeWrapper();
@@ -136,7 +134,6 @@ public class DeviceSelectActionFromTvTest {
                 mHdmiControlService, mNativeWrapper, mHdmiControlService.getAtomWriter());
         mHdmiControlService.setCecController(mHdmiCecController);
         mHdmiControlService.setHdmiMhlController(HdmiMhlControllerStub.create(mHdmiControlService));
-        mLocalDevices.add(mHdmiCecLocalDeviceTv);
         HdmiPortInfo[] hdmiPortInfos = new HdmiPortInfo[2];
         hdmiPortInfos[0] =
                 new HdmiPortInfo(1, HdmiPortInfo.PORT_INPUT, PHYSICAL_ADDRESS_PLAYBACK_1,
@@ -149,12 +146,12 @@ public class DeviceSelectActionFromTvTest {
         mHdmiControlService.onBootPhase(PHASE_SYSTEM_SERVICES_READY);
         mPowerManager = new FakePowerManagerWrapper(context);
         mHdmiControlService.setPowerManager(mPowerManager);
-        mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mNativeWrapper.setPhysicalAddress(0x0000);
         mTestLooper.dispatchAll();
         mNativeWrapper.clearResultMessages();
         mHdmiControlService.getHdmiCecNetwork().addCecDevice(INFO_PLAYBACK_1);
         mHdmiControlService.getHdmiCecNetwork().addCecDevice(INFO_PLAYBACK_2);
+        mHdmiCecLocalDeviceTv = mHdmiControlService.tv();
     }
 
     private static class TestActionTimer implements ActionTimer {

@@ -123,6 +123,7 @@ android_test {
         ":PackageParserTestApp3",
         ":PackageParserTestApp4",
         ":PackageParserTestApp5",
+        ":PackageParserTestApp6",
         ":apex.test",
         ":test.rebootless_apex_v1",
         ":test.rebootless_apex_v2",

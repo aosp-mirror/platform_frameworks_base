@@ -19,10 +19,10 @@ package com.android.server.wm;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 
-import android.hardware.display.DisplayManagerInternal.RefreshRateRange;
 import android.view.Display;
 import android.view.Display.Mode;
 import android.view.DisplayInfo;
+import android.view.SurfaceControl.RefreshRateRange;
 
 import java.util.HashMap;
 

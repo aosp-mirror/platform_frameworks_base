@@ -52,6 +52,7 @@ import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.pm.Installer;
 import com.android.server.pm.Installer.InstallerException;
+import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.PackageManagerServiceCompilerMapping;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.pkg.AndroidPackage;
@@ -724,6 +725,13 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
         @Override
         public PackageOptimizationInfo getPackageOptimizationInfo(
                 ApplicationInfo info, String abi, String activityName) {
+            if (info.packageName.equals(PackageManagerService.PLATFORM_PACKAGE_NAME)) {
+                // PackageManagerService.PLATFORM_PACKAGE_NAME in this context means that the
+                // activity is defined in bootclasspath. Currently, we don't have an API to get the
+                // correct optimization info.
+                return PackageOptimizationInfo.createWithNoInfo();
+            }
+
             String compilationReason;
             String compilationFilter;
             try {

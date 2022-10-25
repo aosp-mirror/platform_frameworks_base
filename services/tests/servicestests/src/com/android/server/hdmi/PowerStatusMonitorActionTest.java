@@ -20,7 +20,6 @@ import static com.android.server.SystemService.PHASE_SYSTEM_SERVICES_READY;
 import static com.android.server.hdmi.Constants.ADDR_BROADCAST;
 import static com.android.server.hdmi.Constants.ADDR_PLAYBACK_1;
 import static com.android.server.hdmi.Constants.ADDR_PLAYBACK_2;
-import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -44,7 +43,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
@@ -60,7 +58,6 @@ public class PowerStatusMonitorActionTest {
     private FakePowerManagerWrapper mPowerManager;
 
     private TestLooper mTestLooper = new TestLooper();
-    private ArrayList<HdmiCecLocalDevice> mLocalDevices = new ArrayList<>();
     private int mPhysicalAddress;
     private HdmiCecLocalDeviceTv mTvDevice;
 
@@ -101,9 +98,6 @@ public class PowerStatusMonitorActionTest {
                 this.mHdmiControlService, mNativeWrapper, mHdmiControlService.getAtomWriter());
         mHdmiControlService.setCecController(hdmiCecController);
         mHdmiControlService.setHdmiMhlController(HdmiMhlControllerStub.create(mHdmiControlService));
-        mTvDevice = new HdmiCecLocalDeviceTv(mHdmiControlService);
-        mTvDevice.init();
-        mLocalDevices.add(mTvDevice);
         mTestLooper.dispatchAll();
         HdmiPortInfo[] hdmiPortInfo = new HdmiPortInfo[2];
         hdmiPortInfo[0] =
@@ -117,8 +111,8 @@ public class PowerStatusMonitorActionTest {
         mHdmiControlService.setPowerManager(mPowerManager);
         mPhysicalAddress = 0x0000;
         mNativeWrapper.setPhysicalAddress(mPhysicalAddress);
-        mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mTestLooper.dispatchAll();
+        mTvDevice = mHdmiControlService.tv();
         mNativeWrapper.clearResultMessages();
     }
 

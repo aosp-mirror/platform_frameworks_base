@@ -19,6 +19,7 @@ package com.android.systemui.accessibility.floatingmenu;
 import android.annotation.IntDef;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.view.MotionEvent;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
@@ -51,6 +52,15 @@ class MenuViewLayer extends FrameLayout {
         mMenuView = new MenuView(context, menuViewModel, menuViewAppearance);
 
         addView(mMenuView, LayerIndex.MENU_VIEW);
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent event) {
+        if (mMenuView.maybeMoveOutEdgeAndShow((int) event.getX(), (int) event.getY())) {
+            return true;
+        }
+
+        return super.onInterceptTouchEvent(event);
     }
 
     @Override

@@ -48,7 +48,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.util.ArrayList;
-import java.util.Collections;
 
 @SmallTest
 @Presubmit
@@ -80,15 +79,19 @@ public class HdmiCecLocalDeviceAudioSystemTest {
     private HdmiDeviceInfo mDeviceInfo;
     private boolean mArcSupport;
     private HdmiPortInfo[] mHdmiPortInfo;
+    private ArrayList<Integer> mLocalDeviceTypes = new ArrayList<>();
 
     @Before
     public void setUp() {
         Context context = InstrumentationRegistry.getTargetContext();
         mMyLooper = mTestLooper.getLooper();
+        mLocalDeviceTypes.add(HdmiDeviceInfo.DEVICE_PLAYBACK);
+        mLocalDeviceTypes.add(HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
 
         mHdmiControlService =
             new HdmiControlService(InstrumentationRegistry.getTargetContext(),
-                    Collections.emptyList(), new FakeAudioDeviceVolumeManagerWrapper()) {
+                    mLocalDeviceTypes,
+                    new FakeAudioDeviceVolumeManagerWrapper()) {
                 @Override
                 AudioManager getAudioManager() {
                     return new AudioManager() {

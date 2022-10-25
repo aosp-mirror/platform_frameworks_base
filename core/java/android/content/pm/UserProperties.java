@@ -114,7 +114,7 @@ public final class UserProperties implements Parcelable {
     public UserProperties(UserProperties orig,
             boolean exposeAllFields,
             boolean hasManagePermission,
-            boolean hasQueryPermission) {
+            boolean hasQueryOrManagePermission) {
 
         if (orig.mDefaultProperties == null) {
             throw new IllegalArgumentException("Attempting to copy a non-original UserProperties.");
@@ -122,17 +122,19 @@ public final class UserProperties implements Parcelable {
 
         this.mDefaultProperties = null;
 
+        // Insert each setter into the following hierarchy based on its permission requirements.
         // NOTE: Copy each property using getters to ensure default values are copied if needed.
         if (exposeAllFields) {
+            // Add items that require exposeAllFields to be true (strictest permission level).
             setStartWithParent(orig.getStartWithParent());
         }
         if (hasManagePermission) {
-            // Add any items that require this permission.
+            // Add items that require MANAGE_USERS or stronger.
         }
-        if (hasQueryPermission) {
-            // Add any items that require this permission.
+        if (hasQueryOrManagePermission) {
+            // Add items that require QUERY_USERS or stronger.
         }
-        // Add any items that require no permissions at all.
+        // Add items that have no permission requirements at all.
         setShowInLauncher(orig.getShowInLauncher());
     }
 

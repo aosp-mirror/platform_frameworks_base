@@ -20,8 +20,9 @@ package com.android.systemui.statusbar.notification.logging
 /** Describes usage of a notification. */
 data class NotificationMemoryUsage(
     val packageName: String,
-    val notificationId: String,
+    val notificationKey: String,
     val objectUsage: NotificationObjectUsage,
+    val viewUsage: List<NotificationViewUsage>
 )
 
 /**
@@ -38,4 +39,27 @@ data class NotificationObjectUsage(
     val bigPicture: Int,
     val extender: Int,
     val hasCustomView: Boolean,
+)
+
+enum class ViewType {
+    PUBLIC_VIEW,
+    PRIVATE_CONTRACTED_VIEW,
+    PRIVATE_EXPANDED_VIEW,
+    PRIVATE_HEADS_UP_VIEW,
+    TOTAL
+}
+
+/**
+ * Describes current memory of a notification view hierarchy.
+ *
+ * The values are in bytes.
+ */
+data class NotificationViewUsage(
+    val viewType: ViewType,
+    val smallIcon: Int,
+    val largeIcon: Int,
+    val systemIcons: Int,
+    val style: Int,
+    val customViews: Int,
+    val softwareBitmapsPenalty: Int,
 )

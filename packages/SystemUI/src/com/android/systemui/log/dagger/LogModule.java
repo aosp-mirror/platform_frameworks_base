@@ -43,7 +43,7 @@ public class LogModule {
     @SysUISingleton
     @DozeLog
     public static LogBuffer provideDozeLogBuffer(LogBufferFactory factory) {
-        return factory.create("DozeLog", 120);
+        return factory.create("DozeLog", 150);
     }
 
     /** Provides a logging buffer for all logs related to the data layer of notifications. */
@@ -250,7 +250,7 @@ public class LogModule {
     /**
      * Provides a buffer for our connections and disconnections to MediaBrowserService.
      *
-     * See {@link com.android.systemui.media.ResumeMediaBrowser}.
+     * See {@link com.android.systemui.media.controls.resume.ResumeMediaBrowser}.
      */
     @Provides
     @SysUISingleton
@@ -262,7 +262,7 @@ public class LogModule {
     /**
      * Provides a buffer for updates to the media carousel.
      *
-     * See {@link com.android.systemui.media.MediaCarouselController}.
+     * See {@link com.android.systemui.media.controls.ui.MediaCarouselController}.
      */
     @Provides
     @SysUISingleton
@@ -313,6 +313,16 @@ public class LogModule {
     @StatusBarNetworkControllerLog
     public static LogBuffer provideStatusBarNetworkControllerBuffer(LogBufferFactory factory) {
         return factory.create("StatusBarNetworkControllerLog", 20);
+    }
+
+    /**
+     * Provides a {@link LogBuffer} for keyguard clock logs.
+     */
+    @Provides
+    @SysUISingleton
+    @KeyguardClockLog
+    public static LogBuffer provideKeyguardClockLog(LogBufferFactory factory) {
+        return factory.create("KeyguardClockLog", 500);
     }
 
     /**

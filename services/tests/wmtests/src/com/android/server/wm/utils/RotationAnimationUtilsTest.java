@@ -26,8 +26,10 @@ import android.graphics.ColorSpace;
 import android.graphics.Matrix;
 import android.graphics.PointF;
 import android.hardware.HardwareBuffer;
-import android.view.Surface;
 import android.platform.test.annotations.Presubmit;
+import android.view.Surface;
+
+import com.android.internal.policy.TransitionAnimation;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -52,7 +54,8 @@ public class RotationAnimationUtilsTest {
     public void blackLuma() {
         Bitmap swBitmap = createBitmap(0);
         HardwareBuffer hb = swBitmapToHardwareBuffer(swBitmap);
-        float borderLuma = RotationAnimationUtils.getMedianBorderLuma(hb, mColorSpace);
+        float borderLuma = TransitionAnimation.getBorderLuma(hb, mColorSpace);
+
         assertEquals(0, borderLuma, 0);
     }
 
@@ -60,7 +63,7 @@ public class RotationAnimationUtilsTest {
     public void whiteLuma() {
         Bitmap swBitmap = createBitmap(1);
         HardwareBuffer hb = swBitmapToHardwareBuffer(swBitmap);
-        float borderLuma = RotationAnimationUtils.getMedianBorderLuma(hb, mColorSpace);
+        float borderLuma = TransitionAnimation.getBorderLuma(hb, mColorSpace);
         assertEquals(1, borderLuma, 0);
     }
 
@@ -68,7 +71,7 @@ public class RotationAnimationUtilsTest {
     public void unevenBitmapDimens() {
         Bitmap swBitmap = createBitmap(1, BITMAP_WIDTH + 1, BITMAP_HEIGHT + 1);
         HardwareBuffer hb = swBitmapToHardwareBuffer(swBitmap);
-        float borderLuma = RotationAnimationUtils.getMedianBorderLuma(hb, mColorSpace);
+        float borderLuma = TransitionAnimation.getBorderLuma(hb, mColorSpace);
         assertEquals(1, borderLuma, 0);
     }
 
@@ -77,7 +80,7 @@ public class RotationAnimationUtilsTest {
         Bitmap swBitmap = createBitmap(1);
         setBorderLuma(swBitmap, 0);
         HardwareBuffer hb = swBitmapToHardwareBuffer(swBitmap);
-        float borderLuma = RotationAnimationUtils.getMedianBorderLuma(hb, mColorSpace);
+        float borderLuma = TransitionAnimation.getBorderLuma(hb, mColorSpace);
         assertEquals(0, borderLuma, 0);
     }
 
@@ -86,7 +89,7 @@ public class RotationAnimationUtilsTest {
         Bitmap swBitmap = createBitmap(0);
         setBorderLuma(swBitmap, 1);
         HardwareBuffer hb = swBitmapToHardwareBuffer(swBitmap);
-        float borderLuma = RotationAnimationUtils.getMedianBorderLuma(hb, mColorSpace);
+        float borderLuma = TransitionAnimation.getBorderLuma(hb, mColorSpace);
         assertEquals(1, borderLuma, 0);
     }
 
