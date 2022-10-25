@@ -3752,22 +3752,27 @@ public class ActivityManagerService extends IActivityManager.Stub
                             finishForceStopPackageLocked(packageName, appInfo.uid);
                         }
                     }
-                    final Intent intent = new Intent(Intent.ACTION_PACKAGE_DATA_CLEARED,
-                            Uri.fromParts("package", packageName, null));
-                    intent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
-                    intent.putExtra(Intent.EXTRA_UID, (appInfo != null) ? appInfo.uid : -1);
-                    intent.putExtra(Intent.EXTRA_USER_HANDLE, resolvedUserId);
-                    final int[] visibilityAllowList =
-                            mPackageManagerInt.getVisibilityAllowList(packageName, resolvedUserId);
-                    if (isInstantApp) {
-                        intent.putExtra(Intent.EXTRA_PACKAGE_NAME, packageName);
-                        broadcastIntentInPackage("android", null, SYSTEM_UID, uid, pid, intent,
-                                null, null, 0, null, null, permission.ACCESS_INSTANT_APPS, null,
-                                false, false, resolvedUserId, false, null, visibilityAllowList);
-                    } else {
-                        broadcastIntentInPackage("android", null, SYSTEM_UID, uid, pid, intent,
-                                null, null, 0, null, null, null, null, false, false, resolvedUserId,
-                                false, null, visibilityAllowList);
+
+                    if (succeeded) {
+                        final Intent intent = new Intent(Intent.ACTION_PACKAGE_DATA_CLEARED,
+                                Uri.fromParts("package", packageName, null /* fragment */));
+                        intent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
+                        intent.putExtra(Intent.EXTRA_UID,
+                                (appInfo != null) ? appInfo.uid : INVALID_UID);
+                        intent.putExtra(Intent.EXTRA_USER_HANDLE, resolvedUserId);
+                        if (isInstantApp) {
+                            intent.putExtra(Intent.EXTRA_PACKAGE_NAME, packageName);
+                        }
+                        final int[] visibilityAllowList = mPackageManagerInt.getVisibilityAllowList(
+                                packageName, resolvedUserId);
+
+                        broadcastIntentInPackage("android", null /* featureId */, SYSTEM_UID,
+                                uid, pid, intent, null /* resolvedType */, null /* resultTo */,
+                                0 /* resultCode */, null /* resultData */, null /* resultExtras */,
+                                isInstantApp ? permission.ACCESS_INSTANT_APPS : null,
+                                null /* bOptions */, false /* serialized */, false /* sticky */,
+                                resolvedUserId, false /* allowBackgroundActivityStarts */,
+                                null /* backgroundActivityStartsToken */, visibilityAllowList);
                     }
 
                     if (observer != null) {
