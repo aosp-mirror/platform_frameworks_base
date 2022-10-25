@@ -84,16 +84,6 @@ data class SettingsPage(
         return sppName == SppName
     }
 
-    fun formatArguments(): String {
-        val normArguments = parameter.normalize(arguments)
-        if (normArguments == null || normArguments.isEmpty) return "[No arguments]"
-        return normArguments.toString().removeRange(0, 6)
-    }
-
-    fun formatDisplayTitle(): String {
-        return "$displayName ${formatArguments()}"
-    }
-
     fun buildRoute(): String {
         return sppName + parameter.navLink(arguments)
     }
@@ -115,7 +105,7 @@ data class SettingsPage(
             id,
             LogEvent.PAGE_ENTER,
             category = LogCategory.FRAMEWORK,
-            details = formatDisplayTitle()
+            details = displayName,
         )
     }
 
@@ -124,7 +114,7 @@ data class SettingsPage(
             id,
             LogEvent.PAGE_LEAVE,
             category = LogCategory.FRAMEWORK,
-            details = formatDisplayTitle()
+            details = displayName,
         )
     }
 

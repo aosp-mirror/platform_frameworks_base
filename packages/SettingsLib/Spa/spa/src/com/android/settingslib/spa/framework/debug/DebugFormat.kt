@@ -16,16 +16,41 @@
 
 package com.android.settingslib.spa.framework.debug
 
+import com.android.settingslib.spa.framework.common.EntrySearchData
 import com.android.settingslib.spa.framework.common.EntryStatusData
 import com.android.settingslib.spa.framework.common.SettingsEntry
 import com.android.settingslib.spa.framework.common.SettingsEntryRepository
+import com.android.settingslib.spa.framework.common.SettingsPage
+import com.android.settingslib.spa.framework.util.normalize
 
-fun EntryStatusData.debugContent(): String {
+private fun EntrySearchData.debugContent(): String {
+    val content = listOf(
+        "search_title = $title",
+        "search_keyword = $keyword",
+    )
+    return content.joinToString("\n")
+}
+
+private fun EntryStatusData.debugContent(): String {
     val content = listOf(
         "is_disabled = $isDisabled",
         "is_switch_off = $isSwitchOff",
     )
     return content.joinToString("\n")
+}
+
+fun SettingsPage.debugArguments(): String {
+    val normArguments = parameter.normalize(arguments)
+    if (normArguments == null || normArguments.isEmpty) return "[No arguments]"
+    return normArguments.toString().removeRange(0, 6)
+}
+
+fun SettingsPage.debugBrief(): String {
+    return displayName
+}
+
+fun SettingsEntry.debugBrief(): String {
+    return "${owner.displayName}:$displayName"
 }
 
 fun SettingsEntry.debugContent(entryRepository: SettingsEntryRepository): String {
@@ -37,14 +62,14 @@ fun SettingsEntry.debugContent(entryRepository: SettingsEntryRepository): String
     val content = listOf(
         "------ STATIC ------",
         "id = $id",
-        "owner = ${owner.formatDisplayTitle()}",
-        "linkFrom = ${fromPage?.formatDisplayTitle()}",
-        "linkTo = ${toPage?.formatDisplayTitle()}",
+        "owner = ${owner.debugBrief()} ${owner.debugArguments()}",
+        "linkFrom = ${fromPage?.debugBrief()} ${fromPage?.debugArguments()}",
+        "linkTo = ${toPage?.debugBrief()} ${toPage?.debugArguments()}",
         "hierarchy_path = $entryPathWithName",
         "------ SEARCH ------",
         "search_path = $entryPathWithTitle",
-        "${searchData?.format()}",
-        "${statusData?.debugContent()}"
+        searchData?.debugContent() ?: "no search data",
+        statusData?.debugContent() ?: "no status data",
     )
     return content.joinToString("\n")
 }
