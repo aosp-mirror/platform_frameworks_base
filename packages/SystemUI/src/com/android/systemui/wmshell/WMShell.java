@@ -49,6 +49,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.model.SysUiState;
+import com.android.systemui.notetask.NoteTaskInitializer;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.tracing.ProtoTraceable;
 import com.android.systemui.statusbar.CommandQueue;
@@ -58,7 +59,6 @@ import com.android.systemui.tracing.ProtoTracer;
 import com.android.systemui.tracing.nano.SystemUiTraceProto;
 import com.android.wm.shell.desktopmode.DesktopMode;
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
-import com.android.wm.shell.floating.FloatingTasks;
 import com.android.wm.shell.nano.WmShellTraceProto;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.onehanded.OneHandedEventCallback;
@@ -113,7 +113,6 @@ public final class WMShell implements
     private final Optional<Pip> mPipOptional;
     private final Optional<SplitScreen> mSplitScreenOptional;
     private final Optional<OneHanded> mOneHandedOptional;
-    private final Optional<FloatingTasks> mFloatingTasksOptional;
     private final Optional<DesktopMode> mDesktopModeOptional;
 
     private final CommandQueue mCommandQueue;
@@ -125,6 +124,7 @@ public final class WMShell implements
     private final WakefulnessLifecycle mWakefulnessLifecycle;
     private final ProtoTracer mProtoTracer;
     private final UserTracker mUserTracker;
+    private final NoteTaskInitializer mNoteTaskInitializer;
     private final Executor mSysUiMainExecutor;
 
     // Listeners and callbacks. Note that we prefer member variable over anonymous class here to
@@ -176,7 +176,6 @@ public final class WMShell implements
             Optional<Pip> pipOptional,
             Optional<SplitScreen> splitScreenOptional,
             Optional<OneHanded> oneHandedOptional,
-            Optional<FloatingTasks> floatingTasksOptional,
             Optional<DesktopMode> desktopMode,
             CommandQueue commandQueue,
             ConfigurationController configurationController,
@@ -187,6 +186,7 @@ public final class WMShell implements
             ProtoTracer protoTracer,
             WakefulnessLifecycle wakefulnessLifecycle,
             UserTracker userTracker,
+            NoteTaskInitializer noteTaskInitializer,
             @Main Executor sysUiMainExecutor) {
         mContext = context;
         mShell = shell;
@@ -203,7 +203,7 @@ public final class WMShell implements
         mWakefulnessLifecycle = wakefulnessLifecycle;
         mProtoTracer = protoTracer;
         mUserTracker = userTracker;
-        mFloatingTasksOptional = floatingTasksOptional;
+        mNoteTaskInitializer = noteTaskInitializer;
         mSysUiMainExecutor = sysUiMainExecutor;
     }
 
@@ -226,6 +226,8 @@ public final class WMShell implements
         mSplitScreenOptional.ifPresent(this::initSplitScreen);
         mOneHandedOptional.ifPresent(this::initOneHanded);
         mDesktopModeOptional.ifPresent(this::initDesktopMode);
+
+        mNoteTaskInitializer.initialize();
     }
 
     @VisibleForTesting

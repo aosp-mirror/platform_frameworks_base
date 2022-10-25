@@ -48,6 +48,7 @@ import com.android.systemui.log.dagger.LogModule;
 import com.android.systemui.mediaprojection.appselector.MediaProjectionModule;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.NavigationBarComponent;
+import com.android.systemui.notetask.NoteTaskModule;
 import com.android.systemui.people.PeopleModule;
 import com.android.systemui.plugins.BcSmartspaceDataPlugin;
 import com.android.systemui.privacy.PrivacyModule;
@@ -152,6 +153,7 @@ import dagger.Provides;
             TunerModule.class,
             UserModule.class,
             UtilModule.class,
+            NoteTaskModule.class,
             WalletModule.class
         },
         subcomponents = {
