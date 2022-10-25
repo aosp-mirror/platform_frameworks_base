@@ -20,8 +20,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder;
 
@@ -123,6 +125,36 @@ public class InputMethodSubtypeTest {
         assertEquals(subtypeHe, clonedSubtypeHe);
         assertEquals("iw", clonedSubtypeIw.getLocale());
         assertEquals("he", clonedSubtypeHe.getLocale());
+    }
+
+    @Test
+    public void testCanonicalizedLanguageTagObjectCache() {
+        final InputMethodSubtype subtype = createSubtypeUsingLanguageTag("en-US");
+        // Verify that the returned object is cached and any subsequent call should return the same
+        // object, which is strictly guaranteed if the method gets called only on a single thread.
+        assertSame(subtype.getCanonicalizedLanguageTag(), subtype.getCanonicalizedLanguageTag());
+    }
+
+    @Test
+    public void testCanonicalizedLanguageTag() {
+        verifyCanonicalizedLanguageTag("en", "en");
+        verifyCanonicalizedLanguageTag("en-US", "en-US");
+        verifyCanonicalizedLanguageTag("en-Latn-US-t-k0-qwerty", "en-Latn-US-t-k0-qwerty");
+
+        verifyCanonicalizedLanguageTag("en-us", "en-US");
+        verifyCanonicalizedLanguageTag("EN-us", "en-US");
+
+        verifyCanonicalizedLanguageTag(null, "");
+        verifyCanonicalizedLanguageTag("", "");
+
+        verifyCanonicalizedLanguageTag("und", "und");
+        verifyCanonicalizedLanguageTag("apparently invalid language tag!!!", "und");
+    }
+
+    private void verifyCanonicalizedLanguageTag(
+            @Nullable String languageTag, @Nullable String expectedLanguageTag) {
+        final InputMethodSubtype subtype = createSubtypeUsingLanguageTag(languageTag);
+        assertEquals(subtype.getCanonicalizedLanguageTag(), expectedLanguageTag);
     }
 
     private static InputMethodSubtype cloneViaParcel(final InputMethodSubtype original) {
