@@ -35,6 +35,7 @@ import org.junit.runner.RunWith;
 
 import java.util.Locale;
 import java.util.Objects;
+import java.util.function.Supplier;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -155,6 +156,34 @@ public class InputMethodSubtypeTest {
             @Nullable String languageTag, @Nullable String expectedLanguageTag) {
         final InputMethodSubtype subtype = createSubtypeUsingLanguageTag(languageTag);
         assertEquals(subtype.getCanonicalizedLanguageTag(), expectedLanguageTag);
+    }
+
+    @Test
+    public void testIsSuitableForPhysicalKeyboardLayoutMapping() {
+        final Supplier<InputMethodSubtypeBuilder> getValidBuilder = () ->
+                new InputMethodSubtypeBuilder()
+                        .setLanguageTag("en-US")
+                        .setIsAuxiliary(false)
+                        .setSubtypeMode("keyboard")
+                        .setSubtypeId(1);
+
+        assertTrue(getValidBuilder.get().build().isSuitableForPhysicalKeyboardLayoutMapping());
+
+        // mode == "voice" is not suitable.
+        assertFalse(getValidBuilder.get().setSubtypeMode("voice").build()
+                .isSuitableForPhysicalKeyboardLayoutMapping());
+
+        // Auxiliary subtype not suitable.
+        assertFalse(getValidBuilder.get().setIsAuxiliary(true).build()
+                .isSuitableForPhysicalKeyboardLayoutMapping());
+
+        // languageTag == null is not suitable.
+        assertFalse(getValidBuilder.get().setLanguageTag(null).build()
+                .isSuitableForPhysicalKeyboardLayoutMapping());
+
+        // languageTag == "und" is not suitable.
+        assertFalse(getValidBuilder.get().setLanguageTag("und").build()
+                .isSuitableForPhysicalKeyboardLayoutMapping());
     }
 
     private static InputMethodSubtype cloneViaParcel(final InputMethodSubtype original) {

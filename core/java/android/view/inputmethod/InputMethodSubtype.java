@@ -76,6 +76,10 @@ public final class InputMethodSubtype implements Parcelable {
     /** {@hide} */
     public static final int SUBTYPE_ID_NONE = 0;
 
+    private static final String SUBTYPE_MODE_KEYBOARD = "keyboard";
+
+    private static final String UNDEFINED_LANGUAGE_TAG = "und";
+
     private final boolean mIsAuxiliary;
     private final boolean mOverridesImplicitlyEnabledSubtype;
     private final boolean mIsAsciiCapable;
@@ -430,6 +434,34 @@ public final class InputMethodSubtype implements Parcelable {
         result = TextUtils.emptyIfNull(result);
         mCachedCanonicalizedLanguageTag = result;
         return result;
+    }
+
+    /**
+     * Determines whether this {@link InputMethodSubtype} can be used as the key of mapping rules
+     * between {@link InputMethodSubtype} and hardware keyboard layout.
+     *
+     * <p>Note that in a future build may require different rules.  Design the system so that the
+     * system can automatically take care of any rule changes upon OTAs.</p>
+     *
+     * @return {@code true} if this {@link InputMethodSubtype} can be used as the key of mapping
+     *         rules between {@link InputMethodSubtype} and hardware keyboard layout.
+     * @hide
+     */
+    public boolean isSuitableForPhysicalKeyboardLayoutMapping() {
+        if (hashCode() == SUBTYPE_ID_NONE) {
+            return false;
+        }
+        if (!TextUtils.equals(getMode(), SUBTYPE_MODE_KEYBOARD)) {
+            return false;
+        }
+        if (isAuxiliary()) {
+            return false;
+        }
+        final String langTag = getCanonicalizedLanguageTag();
+        if (langTag.isEmpty() || TextUtils.equals(langTag, UNDEFINED_LANGUAGE_TAG)) {
+            return false;
+        }
+        return true;
     }
 
     /**
