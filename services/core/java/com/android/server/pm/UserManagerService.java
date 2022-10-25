@@ -2278,26 +2278,31 @@ public class UserManagerService extends IUserManager.Stub {
     @Override
     public void setUserName(@UserIdInt int userId, String name) {
         checkManageUsersPermission("rename users");
-        boolean changed = false;
         synchronized (mPackagesLock) {
             UserData userData = getUserDataNoChecks(userId);
             if (userData == null || userData.info.partial) {
-                Slog.w(LOG_TAG, "setUserName: unknown user #" + userId);
+                Slogf.w(LOG_TAG, "setUserName: unknown user #%d", userId);
                 return;
             }
-            if (name != null && !name.equals(userData.info.name)) {
-                userData.info.name = name;
-                writeUserLP(userData);
-                changed = true;
+            if (Objects.equals(name, userData.info.name)) {
+                Slogf.i(LOG_TAG, "setUserName: ignoring for user #%d as it didn't change (%s)",
+                        userId, getRedacted(name));
+                return;
             }
+            if (name == null) {
+                Slogf.i(LOG_TAG, "setUserName: resetting name of user #%d", userId);
+            } else {
+                Slogf.i(LOG_TAG, "setUserName: setting name of user #%d to %s", userId,
+                        getRedacted(name));
+            }
+            userData.info.name = name;
+            writeUserLP(userData);
         }
-        if (changed) {
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                sendUserInfoChangedBroadcast(userId);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            sendUserInfoChangedBroadcast(userId);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
@@ -6106,6 +6111,11 @@ public class UserManagerService extends IUserManager.Stub {
 
     private static String packageToRestrictionsFileName(String packageName) {
         return RESTRICTIONS_FILE_PREFIX + packageName + XML_SUFFIX;
+    }
+
+    @Nullable
+    private static String getRedacted(@Nullable String string) {
+        return string == null ? null : string.length() + "_chars";
     }
 
     @Override
