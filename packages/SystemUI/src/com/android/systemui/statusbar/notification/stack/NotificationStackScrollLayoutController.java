@@ -63,7 +63,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
-import com.android.systemui.media.KeyguardMediaController;
+import com.android.systemui.media.controls.ui.KeyguardMediaController;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.OnMenuEventListener;
@@ -180,6 +180,7 @@ public class NotificationStackScrollLayoutController {
     private int mBarState;
     private HeadsUpAppearanceController mHeadsUpAppearanceController;
     private final FeatureFlags mFeatureFlags;
+    private final NotificationTargetsHelper mNotificationTargetsHelper;
 
     private View mLongPressedView;
 
@@ -642,7 +643,8 @@ public class NotificationStackScrollLayoutController {
             StackStateLogger stackLogger,
             NotificationStackScrollLogger logger,
             NotificationStackSizeCalculator notificationStackSizeCalculator,
-            FeatureFlags featureFlags) {
+            FeatureFlags featureFlags,
+            NotificationTargetsHelper notificationTargetsHelper) {
         mStackStateLogger = stackLogger;
         mLogger = logger;
         mAllowLongPress = allowLongPress;
@@ -679,6 +681,7 @@ public class NotificationStackScrollLayoutController {
         mRemoteInputManager = remoteInputManager;
         mShadeController = shadeController;
         mFeatureFlags = featureFlags;
+        mNotificationTargetsHelper = notificationTargetsHelper;
         updateResources();
     }
 
@@ -1380,7 +1383,7 @@ public class NotificationStackScrollLayoutController {
         return mView.calculateGapHeight(previousView, child, count);
     }
 
-    NotificationRoundnessManager getNoticationRoundessManager() {
+    NotificationRoundnessManager getNotificationRoundnessManager() {
         return mNotificationRoundnessManager;
     }
 
@@ -1535,6 +1538,10 @@ public class NotificationStackScrollLayoutController {
 
     public void setNotificationActivityStarter(NotificationActivityStarter activityStarter) {
         mNotificationActivityStarter = activityStarter;
+    }
+
+    public NotificationTargetsHelper getNotificationTargetsHelper() {
+        return mNotificationTargetsHelper;
     }
 
     /**

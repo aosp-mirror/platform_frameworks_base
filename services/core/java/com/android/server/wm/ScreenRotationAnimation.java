@@ -55,6 +55,7 @@ import android.view.animation.Transformation;
 import android.window.ScreenCapture;
 
 import com.android.internal.R;
+import com.android.internal.policy.TransitionAnimation;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.display.DisplayControl;
 import com.android.server.wm.SurfaceAnimator.AnimationType;
@@ -246,7 +247,7 @@ class ScreenRotationAnimation {
             HardwareBuffer hardwareBuffer = screenshotBuffer.getHardwareBuffer();
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER,
                     "ScreenRotationAnimation#getMedianBorderLuma");
-            mStartLuma = RotationAnimationUtils.getMedianBorderLuma(hardwareBuffer,
+            mStartLuma = TransitionAnimation.getBorderLuma(hardwareBuffer,
                     screenshotBuffer.getColorSpace());
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
 
@@ -489,8 +490,8 @@ class ScreenRotationAnimation {
             return false;
         }
         if (!mStarted) {
-            mEndLuma = RotationAnimationUtils.getLumaOfSurfaceControl(mDisplayContent.getDisplay(),
-                    mDisplayContent.getWindowingLayer());
+            mEndLuma = TransitionAnimation.getBorderLuma(mDisplayContent.getWindowingLayer(),
+                    finalWidth, finalHeight);
             startAnimation(t, maxAnimationDuration, animationScale, finalWidth, finalHeight,
                     exitAnim, enterAnim);
         }

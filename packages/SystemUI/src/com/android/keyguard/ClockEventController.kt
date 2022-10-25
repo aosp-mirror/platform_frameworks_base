@@ -34,7 +34,9 @@ import com.android.systemui.flags.Flags.REGION_SAMPLING
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.log.dagger.KeyguardClockLog
 import com.android.systemui.plugins.ClockController
+import com.android.systemui.plugins.log.LogBuffer
 import com.android.systemui.shared.regionsampling.RegionSamplingInstance
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback
@@ -66,12 +68,14 @@ open class ClockEventController @Inject constructor(
     private val context: Context,
     @Main private val mainExecutor: Executor,
     @Background private val bgExecutor: Executor,
+    @KeyguardClockLog private val logBuffer: LogBuffer,
     private val featureFlags: FeatureFlags
 ) {
     var clock: ClockController? = null
         set(value) {
             field = value
             if (value != null) {
+                value.setLogBuffer(logBuffer)
                 value.initialize(resources, dozeAmount, 0f)
                 updateRegionSamplers(value)
             }

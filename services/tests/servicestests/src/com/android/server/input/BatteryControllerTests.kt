@@ -19,6 +19,7 @@ package com.android.server.input
 import android.content.Context
 import android.content.ContextWrapper
 import android.hardware.BatteryState.STATUS_CHARGING
+import android.hardware.BatteryState.STATUS_DISCHARGING
 import android.hardware.BatteryState.STATUS_FULL
 import android.hardware.BatteryState.STATUS_UNKNOWN
 import android.hardware.input.IInputDeviceBatteryListener
@@ -483,5 +484,54 @@ class BatteryControllerTests {
 
         testLooper.moveTimeForward(POLLING_PERIOD_MILLIS)
         assertFalse("There should be no polling callbacks posted to the handler", testLooper.isIdle)
+    }
+
+    @Test
+    fun testExpectedFlowForUsiBattery() {
+        `when`(native.getBatteryDevicePath(USI_DEVICE_ID)).thenReturn("/sys/dev/usi_device")
+        `when`(native.getBatteryStatus(USI_DEVICE_ID)).thenReturn(STATUS_DISCHARGING)
+        `when`(native.getBatteryCapacity(USI_DEVICE_ID)).thenReturn(78)
+
+        addInputDevice(USI_DEVICE_ID, supportsUsi = true)
+        testLooper.dispatchNext()
+        val uEventListener = ArgumentCaptor.forClass(UEventBatteryListener::class.java)
+        verify(uEventManager)
+            .addListener(uEventListener.capture(), eq("DEVPATH=/dev/usi_device"))
+
+        // A USI device's battery state is not valid until the first UEvent notification.
+        // Add a listener, and ensure it is notified that the battery state is not present.
+        val listener = createMockListener()
+        batteryController.registerBatteryListener(USI_DEVICE_ID, listener, PID)
+        listener.verifyNotified(isInvalidBatteryState(USI_DEVICE_ID))
+
+        // Ensure that querying for battery state also returns the same invalid result.
+        assertThat("battery state matches", batteryController.getBatteryState(USI_DEVICE_ID),
+            isInvalidBatteryState(USI_DEVICE_ID))
+
+        // There is a UEvent signaling a battery change. The battery state is now valid.
+        uEventListener.value!!.onBatteryUEvent(TIMESTAMP)
+        listener.verifyNotified(USI_DEVICE_ID, status = STATUS_DISCHARGING, capacity = 0.78f)
+        assertThat("battery state matches", batteryController.getBatteryState(USI_DEVICE_ID),
+            matchesState(USI_DEVICE_ID, status = STATUS_DISCHARGING, capacity = 0.78f))
+
+        // There is another UEvent notification. The battery state is now updated.
+        `when`(native.getBatteryCapacity(USI_DEVICE_ID)).thenReturn(64)
+        uEventListener.value!!.onBatteryUEvent(TIMESTAMP + 1)
+        listener.verifyNotified(USI_DEVICE_ID, status = STATUS_DISCHARGING, capacity = 0.64f)
+        assertThat("battery state matches", batteryController.getBatteryState(USI_DEVICE_ID),
+            matchesState(USI_DEVICE_ID, status = STATUS_DISCHARGING, capacity = 0.64f))
+
+        // The battery state is still valid after a millisecond.
+        testLooper.moveTimeForward(1)
+        testLooper.dispatchAll()
+        assertThat("battery state matches", batteryController.getBatteryState(USI_DEVICE_ID),
+            matchesState(USI_DEVICE_ID, status = STATUS_DISCHARGING, capacity = 0.64f))
+
+        // The battery is no longer present after the timeout expires.
+        testLooper.moveTimeForward(BatteryController.USI_BATTERY_VALIDITY_DURATION_MILLIS - 1)
+        testLooper.dispatchNext()
+        listener.verifyNotified(isInvalidBatteryState(USI_DEVICE_ID), times(2))
+        assertThat("battery state matches", batteryController.getBatteryState(USI_DEVICE_ID),
+            isInvalidBatteryState(USI_DEVICE_ID))
     }
 }

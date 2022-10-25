@@ -28,11 +28,6 @@
     <!-- Will display the bouncer on one side of the display, and the current user icon and
          user switcher on the other side -->
     <bool name="config_enableBouncerUserSwitcher">false</bool>
-    <!-- Whether to show the face scanning animation on devices with face auth supported.
-         The face scanning animation renders in a SW layer in ScreenDecorations.
-         Enabling this will also render the camera protection in the SW layer
-         (instead of HW, if relevant)."=-->
-    <bool name="config_enableFaceScanningAnimation">true</bool>
     <!-- Time to be considered a consecutive fingerprint failure in ms -->
     <integer name="fp_consecutive_failure_time_ms">3500</integer>
 </resources>

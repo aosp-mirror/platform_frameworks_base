@@ -24,12 +24,15 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 import android.app.UiModeManager;
+import android.graphics.Rect;
+import android.graphics.drawable.GradientDrawable;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.systemui.Prefs;
 import com.android.systemui.SysuiTestCase;
 
 import org.junit.After;
@@ -46,6 +49,8 @@ public class MenuViewTest extends SysuiTestCase {
     private int mNightMode;
     private UiModeManager mUiModeManager;
     private MenuView mMenuView;
+    private String mLastPosition;
+    private MenuViewAppearance mStubMenuViewAppearance;
 
     @Before
     public void setUp() throws Exception {
@@ -54,9 +59,10 @@ public class MenuViewTest extends SysuiTestCase {
         mUiModeManager.setNightMode(MODE_NIGHT_YES);
         final MenuViewModel stubMenuViewModel = new MenuViewModel(mContext);
         final WindowManager stubWindowManager = mContext.getSystemService(WindowManager.class);
-        final MenuViewAppearance stubMenuViewAppearance = new MenuViewAppearance(mContext,
-                stubWindowManager);
-        mMenuView = spy(new MenuView(mContext, stubMenuViewModel, stubMenuViewAppearance));
+        mStubMenuViewAppearance = new MenuViewAppearance(mContext, stubWindowManager);
+        mMenuView = spy(new MenuView(mContext, stubMenuViewModel, mStubMenuViewAppearance));
+        mLastPosition = Prefs.getString(mContext,
+                Prefs.Key.ACCESSIBILITY_FLOATING_MENU_POSITION, /* defaultValue= */ null);
     }
 
     @Test
@@ -77,8 +83,58 @@ public class MenuViewTest extends SysuiTestCase {
         assertThat(areInsetsMatched).isTrue();
     }
 
+    @Test
+    public void onDraggingStart_matchInsets() {
+        mMenuView.onDraggingStart();
+        final InstantInsetLayerDrawable insetLayerDrawable =
+                (InstantInsetLayerDrawable) mMenuView.getBackground();
+
+        assertThat(insetLayerDrawable.getLayerInsetLeft(INDEX_MENU_ITEM)).isEqualTo(0);
+        assertThat(insetLayerDrawable.getLayerInsetTop(INDEX_MENU_ITEM)).isEqualTo(0);
+        assertThat(insetLayerDrawable.getLayerInsetRight(INDEX_MENU_ITEM)).isEqualTo(0);
+        assertThat(insetLayerDrawable.getLayerInsetBottom(INDEX_MENU_ITEM)).isEqualTo(0);
+    }
+
+    @Test
+    public void onAnimationend_updatePositionForSharedPreference() {
+        final float percentageX = 0.0f;
+        final float percentageY = 0.5f;
+
+        mMenuView.persistPositionAndUpdateEdge(new Position(percentageX, percentageY));
+        final String positionString = Prefs.getString(mContext,
+                Prefs.Key.ACCESSIBILITY_FLOATING_MENU_POSITION, /* defaultValue= */ null);
+        final Position position = Position.fromString(positionString);
+
+        assertThat(position.getPercentageX()).isEqualTo(percentageX);
+        assertThat(position.getPercentageY()).isEqualTo(percentageY);
+    }
+
+    @Test
+    public void onEdgeChangedIfNeeded_moveToLeftEdge_matchRadii() {
+        final Rect draggableBounds = mStubMenuViewAppearance.getMenuDraggableBounds();
+        mMenuView.setTranslationX(draggableBounds.right);
+
+        mMenuView.setTranslationX(draggableBounds.left);
+        mMenuView.onEdgeChangedIfNeeded();
+        final float[] radii = getMenuViewGradient().getCornerRadii();
+
+        assertThat(radii[0]).isEqualTo(0.0f);
+        assertThat(radii[1]).isEqualTo(0.0f);
+        assertThat(radii[6]).isEqualTo(0.0f);
+        assertThat(radii[7]).isEqualTo(0.0f);
+    }
+
+    private InstantInsetLayerDrawable getMenuViewInsetLayer() {
+        return (InstantInsetLayerDrawable) mMenuView.getBackground();
+    }
+
+    private GradientDrawable getMenuViewGradient() {
+        return (GradientDrawable) getMenuViewInsetLayer().getDrawable(INDEX_MENU_ITEM);
+    }
+
     @After
     public void tearDown() throws Exception {
         mUiModeManager.setNightMode(mNightMode);
+        Prefs.putString(mContext, Prefs.Key.ACCESSIBILITY_FLOATING_MENU_POSITION, mLastPosition);
     }
 }

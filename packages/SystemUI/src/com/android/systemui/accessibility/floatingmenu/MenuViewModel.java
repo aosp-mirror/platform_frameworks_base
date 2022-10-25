@@ -33,6 +33,8 @@ class MenuViewModel implements MenuInfoRepository.OnSettingsContentsChanged {
     private final MutableLiveData<List<AccessibilityTarget>> mTargetFeaturesData =
             new MutableLiveData<>();
     private final MutableLiveData<Integer> mSizeTypeData = new MutableLiveData<>();
+    private final MutableLiveData<MenuFadeEffectInfo> mFadeEffectInfoData =
+            new MutableLiveData<>();
     private final MutableLiveData<Position> mPercentagePositionData = new MutableLiveData<>();
     private final MenuInfoRepository mInfoRepository;
 
@@ -50,6 +52,15 @@ class MenuViewModel implements MenuInfoRepository.OnSettingsContentsChanged {
         mSizeTypeData.setValue(newSizeType);
     }
 
+    @Override
+    public void onFadeEffectInfoChanged(MenuFadeEffectInfo fadeEffectInfo) {
+        mFadeEffectInfoData.setValue(fadeEffectInfo);
+    }
+
+    void updateMenuSavingPosition(Position percentagePosition) {
+        mInfoRepository.updateMenuSavingPosition(percentagePosition);
+    }
+
     LiveData<Position> getPercentagePositionData() {
         mInfoRepository.loadMenuPosition(mPercentagePositionData::setValue);
         return mPercentagePositionData;
@@ -58,6 +69,11 @@ class MenuViewModel implements MenuInfoRepository.OnSettingsContentsChanged {
     LiveData<Integer> getSizeTypeData() {
         mInfoRepository.loadMenuSizeType(mSizeTypeData::setValue);
         return mSizeTypeData;
+    }
+
+    LiveData<MenuFadeEffectInfo> getFadeEffectInfoData() {
+        mInfoRepository.loadMenuFadeEffectInfo(mFadeEffectInfoData::setValue);
+        return mFadeEffectInfoData;
     }
 
     LiveData<List<AccessibilityTarget>> getTargetFeaturesData() {

@@ -4144,7 +4144,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     if (readEnabledAccessibilityServicesLocked(userState)) {
                         mSecurityPolicy.onEnabledServicesChangedLocked(userState.mUserId,
                                 userState.mEnabledServices);
-                        userState.updateCrashedServicesIfNeededLocked();
+                        userState.removeDisabledServicesFromTemporaryStatesLocked();
                         onUserStateChangedLocked(userState);
                     }
                 } else if (mTouchExplorationGrantedAccessibilityServicesUri.equals(uri)) {

@@ -35,7 +35,6 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.hardware.display.DisplayManagerInternal.RefreshRateRange;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -43,6 +42,8 @@ import android.os.Looper;
 import android.view.Display;
 import android.view.DisplayAddress;
 import android.view.SurfaceControl;
+import android.view.SurfaceControl.RefreshRateRange;
+import android.view.SurfaceControl.RefreshRateRanges;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -75,6 +76,11 @@ public class LocalDisplayAdapterTest {
     private static final int PORT_A = 0;
     private static final int PORT_B = 0x80;
     private static final int PORT_C = 0xFF;
+    private static final float REFRESH_RATE = 60f;
+    private static final RefreshRateRange REFRESH_RATE_RANGE =
+            new RefreshRateRange(REFRESH_RATE, REFRESH_RATE);
+    private static final RefreshRateRanges REFRESH_RATE_RANGES =
+            new RefreshRateRanges(REFRESH_RATE_RANGE, REFRESH_RATE_RANGE);
 
     private static final long HANDLER_WAIT_MS = 100;
 
@@ -697,16 +703,14 @@ public class LocalDisplayAdapterTest {
                 new DisplayModeDirector.DesiredDisplayModeSpecs(
                         /*baseModeId*/ baseModeId,
                         /*allowGroupSwitching*/ false,
-                        new RefreshRateRange(60f, 60f),
-                        new RefreshRateRange(60f, 60f)
+                        REFRESH_RATE_RANGES, REFRESH_RATE_RANGES
                 ));
         waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
         verify(mSurfaceControlProxy).setDesiredDisplayModeSpecs(display.token,
                 new SurfaceControl.DesiredDisplayModeSpecs(
                         /* baseModeId */ 0,
                         /* allowGroupSwitching */ false,
-                        /* primaryRange */ 60f, 60f,
-                        /* appRange */ 60f, 60f
+                        REFRESH_RATE_RANGES, REFRESH_RATE_RANGES
                 ));
 
         // Change the display
@@ -732,8 +736,7 @@ public class LocalDisplayAdapterTest {
                 new DisplayModeDirector.DesiredDisplayModeSpecs(
                         /*baseModeId*/ baseModeId,
                         /*allowGroupSwitching*/ false,
-                        new RefreshRateRange(60f, 60f),
-                        new RefreshRateRange(60f, 60f)
+                        REFRESH_RATE_RANGES, REFRESH_RATE_RANGES
                 ));
 
         waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
@@ -743,8 +746,7 @@ public class LocalDisplayAdapterTest {
                 new SurfaceControl.DesiredDisplayModeSpecs(
                         /* baseModeId */ 2,
                         /* allowGroupSwitching */ false,
-                        /* primaryRange */ 60f, 60f,
-                        /* appRange */ 60f, 60f
+                        REFRESH_RATE_RANGES, REFRESH_RATE_RANGES
                 ));
     }
 
@@ -922,12 +924,11 @@ public class LocalDisplayAdapterTest {
         }
 
         public SurfaceControl.DesiredDisplayModeSpecs desiredDisplayModeSpecs =
-                new SurfaceControl.DesiredDisplayModeSpecs(/* defaultMode */ 0,
-                    /* allowGroupSwitching */ false,
-                    /* primaryRefreshRateMin */ 60.f,
-                    /* primaryRefreshRateMax */ 60.f,
-                    /* appRefreshRateMin */ 60.f,
-                    /* appRefreshRateMax */60.f);
+                new SurfaceControl.DesiredDisplayModeSpecs(
+                        /* defaultMode */ 0,
+                        /* allowGroupSwitching */ false,
+                        REFRESH_RATE_RANGES, REFRESH_RATE_RANGES
+                );
 
         private FakeDisplay(int port) {
             address = createDisplayAddress(port);

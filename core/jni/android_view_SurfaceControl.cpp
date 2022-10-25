@@ -190,12 +190,24 @@ static struct {
 static struct {
     jclass clazz;
     jmethodID ctor;
+    jfieldID min;
+    jfieldID max;
+} gRefreshRateRangeClassInfo;
+
+static struct {
+    jclass clazz;
+    jmethodID ctor;
+    jfieldID physical;
+    jfieldID render;
+} gRefreshRateRangesClassInfo;
+
+static struct {
+    jclass clazz;
+    jmethodID ctor;
     jfieldID defaultMode;
     jfieldID allowGroupSwitching;
-    jfieldID primaryRefreshRateMin;
-    jfieldID primaryRefreshRateMax;
-    jfieldID appRequestRefreshRateMin;
-    jfieldID appRequestRefreshRateMax;
+    jfieldID primaryRanges;
+    jfieldID appRequestRanges;
 } gDesiredDisplayModeSpecsClassInfo;
 
 static struct {
@@ -1190,6 +1202,39 @@ static jobject nativeGetDynamicDisplayInfo(JNIEnv* env, jclass clazz, jobject to
     return object;
 }
 
+struct RefreshRateRange {
+    const float min;
+    const float max;
+
+    RefreshRateRange(float min, float max) : min(min), max(max) {}
+
+    RefreshRateRange(JNIEnv* env, jobject obj)
+          : min(env->GetFloatField(obj, gRefreshRateRangeClassInfo.min)),
+            max(env->GetFloatField(obj, gRefreshRateRangeClassInfo.max)) {}
+
+    jobject toJava(JNIEnv* env) const {
+        return env->NewObject(gRefreshRateRangeClassInfo.clazz, gRefreshRateRangeClassInfo.ctor,
+                              min, max);
+    }
+};
+
+struct RefreshRateRanges {
+    const RefreshRateRange physical;
+    const RefreshRateRange render;
+
+    RefreshRateRanges(RefreshRateRange physical, RefreshRateRange render)
+          : physical(physical), render(render) {}
+
+    RefreshRateRanges(JNIEnv* env, jobject obj)
+          : physical(env, env->GetObjectField(obj, gRefreshRateRangesClassInfo.physical)),
+            render(env, env->GetObjectField(obj, gRefreshRateRangesClassInfo.render)) {}
+
+    jobject toJava(JNIEnv* env) const {
+        return env->NewObject(gRefreshRateRangesClassInfo.clazz, gRefreshRateRangesClassInfo.ctor,
+                              physical.toJava(env), render.toJava(env));
+    }
+};
+
 static jboolean nativeSetDesiredDisplayModeSpecs(JNIEnv* env, jclass clazz, jobject tokenObj,
                                                  jobject DesiredDisplayModeSpecs) {
     sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
@@ -1200,25 +1245,23 @@ static jboolean nativeSetDesiredDisplayModeSpecs(JNIEnv* env, jclass clazz, jobj
     jboolean allowGroupSwitching =
             env->GetBooleanField(DesiredDisplayModeSpecs,
                                  gDesiredDisplayModeSpecsClassInfo.allowGroupSwitching);
-    jfloat primaryRefreshRateMin =
-            env->GetFloatField(DesiredDisplayModeSpecs,
-                               gDesiredDisplayModeSpecsClassInfo.primaryRefreshRateMin);
-    jfloat primaryRefreshRateMax =
-            env->GetFloatField(DesiredDisplayModeSpecs,
-                               gDesiredDisplayModeSpecsClassInfo.primaryRefreshRateMax);
-    jfloat appRequestRefreshRateMin =
-            env->GetFloatField(DesiredDisplayModeSpecs,
-                               gDesiredDisplayModeSpecsClassInfo.appRequestRefreshRateMin);
-    jfloat appRequestRefreshRateMax =
-            env->GetFloatField(DesiredDisplayModeSpecs,
-                               gDesiredDisplayModeSpecsClassInfo.appRequestRefreshRateMax);
 
-    size_t result = SurfaceComposerClient::setDesiredDisplayModeSpecs(token, defaultMode,
-                                                                      allowGroupSwitching,
-                                                                      primaryRefreshRateMin,
-                                                                      primaryRefreshRateMax,
-                                                                      appRequestRefreshRateMin,
-                                                                      appRequestRefreshRateMax);
+    const jobject primaryRangesObject =
+            env->GetObjectField(DesiredDisplayModeSpecs,
+                                gDesiredDisplayModeSpecsClassInfo.primaryRanges);
+    const jobject appRequestRangesObject =
+            env->GetObjectField(DesiredDisplayModeSpecs,
+                                gDesiredDisplayModeSpecsClassInfo.appRequestRanges);
+    const RefreshRateRanges primaryRanges(env, primaryRangesObject);
+    const RefreshRateRanges appRequestRanges(env, appRequestRangesObject);
+
+    size_t result =
+            SurfaceComposerClient::setDesiredDisplayModeSpecs(token, defaultMode,
+                                                              allowGroupSwitching,
+                                                              primaryRanges.physical.min,
+                                                              primaryRanges.physical.max,
+                                                              appRequestRanges.physical.min,
+                                                              appRequestRanges.physical.max);
     return result == NO_ERROR ? JNI_TRUE : JNI_FALSE;
 }
 
@@ -1228,22 +1271,31 @@ static jobject nativeGetDesiredDisplayModeSpecs(JNIEnv* env, jclass clazz, jobje
 
     ui::DisplayModeId defaultMode;
     bool allowGroupSwitching;
-    float primaryRefreshRateMin;
-    float primaryRefreshRateMax;
-    float appRequestRefreshRateMin;
-    float appRequestRefreshRateMax;
+    float primaryPhysicalRefreshRateMin;
+    float primaryPhysicalRefreshRateMax;
+    float appRequestPhysicalRefreshRateMin;
+    float appRequestPhysicalRefreshRateMax;
     if (SurfaceComposerClient::getDesiredDisplayModeSpecs(token, &defaultMode, &allowGroupSwitching,
-                                                          &primaryRefreshRateMin,
-                                                          &primaryRefreshRateMax,
-                                                          &appRequestRefreshRateMin,
-                                                          &appRequestRefreshRateMax) != NO_ERROR) {
+                                                          &primaryPhysicalRefreshRateMin,
+                                                          &primaryPhysicalRefreshRateMax,
+                                                          &appRequestPhysicalRefreshRateMin,
+                                                          &appRequestPhysicalRefreshRateMax) !=
+        NO_ERROR) {
         return nullptr;
     }
 
+    const RefreshRateRange primaryPhysicalRange(primaryPhysicalRefreshRateMin,
+                                                primaryPhysicalRefreshRateMax);
+    const RefreshRateRange appRequestPhysicalRange(appRequestPhysicalRefreshRateMin,
+                                                   appRequestPhysicalRefreshRateMax);
+
+    // TODO(b/241460058): populate the render ranges
+    const RefreshRateRanges primaryRanges(primaryPhysicalRange, primaryPhysicalRange);
+    const RefreshRateRanges appRequestRanges(appRequestPhysicalRange, appRequestPhysicalRange);
+
     return env->NewObject(gDesiredDisplayModeSpecsClassInfo.clazz,
                           gDesiredDisplayModeSpecsClassInfo.ctor, defaultMode, allowGroupSwitching,
-                          primaryRefreshRateMin, primaryRefreshRateMax, appRequestRefreshRateMin,
-                          appRequestRefreshRateMax);
+                          primaryRanges.toJava(env), appRequestRanges.toJava(env));
 }
 
 static jobject nativeGetDisplayNativePrimaries(JNIEnv* env, jclass, jobject tokenObj) {
@@ -2235,23 +2287,45 @@ int register_android_view_SurfaceControl(JNIEnv* env)
     gDisplayPrimariesClassInfo.white = GetFieldIDOrDie(env, displayPrimariesClazz, "white",
             "Landroid/view/SurfaceControl$CieXyz;");
 
+    jclass RefreshRateRangeClazz =
+            FindClassOrDie(env, "android/view/SurfaceControl$RefreshRateRange");
+    gRefreshRateRangeClassInfo.clazz = MakeGlobalRefOrDie(env, RefreshRateRangeClazz);
+    gRefreshRateRangeClassInfo.ctor =
+            GetMethodIDOrDie(env, gRefreshRateRangeClassInfo.clazz, "<init>", "(FF)V");
+    gRefreshRateRangeClassInfo.min = GetFieldIDOrDie(env, RefreshRateRangeClazz, "min", "F");
+    gRefreshRateRangeClassInfo.max = GetFieldIDOrDie(env, RefreshRateRangeClazz, "max", "F");
+
+    jclass RefreshRateRangesClazz =
+            FindClassOrDie(env, "android/view/SurfaceControl$RefreshRateRanges");
+    gRefreshRateRangesClassInfo.clazz = MakeGlobalRefOrDie(env, RefreshRateRangesClazz);
+    gRefreshRateRangesClassInfo.ctor =
+            GetMethodIDOrDie(env, gRefreshRateRangesClassInfo.clazz, "<init>",
+                             "(Landroid/view/SurfaceControl$RefreshRateRange;Landroid/view/"
+                             "SurfaceControl$RefreshRateRange;)V");
+    gRefreshRateRangesClassInfo.physical =
+            GetFieldIDOrDie(env, RefreshRateRangesClazz, "physical",
+                            "Landroid/view/SurfaceControl$RefreshRateRange;");
+    gRefreshRateRangesClassInfo.render =
+            GetFieldIDOrDie(env, RefreshRateRangesClazz, "render",
+                            "Landroid/view/SurfaceControl$RefreshRateRange;");
+
     jclass DesiredDisplayModeSpecsClazz =
             FindClassOrDie(env, "android/view/SurfaceControl$DesiredDisplayModeSpecs");
     gDesiredDisplayModeSpecsClassInfo.clazz = MakeGlobalRefOrDie(env, DesiredDisplayModeSpecsClazz);
     gDesiredDisplayModeSpecsClassInfo.ctor =
-            GetMethodIDOrDie(env, gDesiredDisplayModeSpecsClassInfo.clazz, "<init>", "(IZFFFF)V");
+            GetMethodIDOrDie(env, gDesiredDisplayModeSpecsClassInfo.clazz, "<init>",
+                             "(IZLandroid/view/SurfaceControl$RefreshRateRanges;Landroid/view/"
+                             "SurfaceControl$RefreshRateRanges;)V");
     gDesiredDisplayModeSpecsClassInfo.defaultMode =
             GetFieldIDOrDie(env, DesiredDisplayModeSpecsClazz, "defaultMode", "I");
     gDesiredDisplayModeSpecsClassInfo.allowGroupSwitching =
             GetFieldIDOrDie(env, DesiredDisplayModeSpecsClazz, "allowGroupSwitching", "Z");
-    gDesiredDisplayModeSpecsClassInfo.primaryRefreshRateMin =
-            GetFieldIDOrDie(env, DesiredDisplayModeSpecsClazz, "primaryRefreshRateMin", "F");
-    gDesiredDisplayModeSpecsClassInfo.primaryRefreshRateMax =
-            GetFieldIDOrDie(env, DesiredDisplayModeSpecsClazz, "primaryRefreshRateMax", "F");
-    gDesiredDisplayModeSpecsClassInfo.appRequestRefreshRateMin =
-            GetFieldIDOrDie(env, DesiredDisplayModeSpecsClazz, "appRequestRefreshRateMin", "F");
-    gDesiredDisplayModeSpecsClassInfo.appRequestRefreshRateMax =
-            GetFieldIDOrDie(env, DesiredDisplayModeSpecsClazz, "appRequestRefreshRateMax", "F");
+    gDesiredDisplayModeSpecsClassInfo.primaryRanges =
+            GetFieldIDOrDie(env, DesiredDisplayModeSpecsClazz, "primaryRanges",
+                            "Landroid/view/SurfaceControl$RefreshRateRanges;");
+    gDesiredDisplayModeSpecsClassInfo.appRequestRanges =
+            GetFieldIDOrDie(env, DesiredDisplayModeSpecsClazz, "appRequestRanges",
+                            "Landroid/view/SurfaceControl$RefreshRateRanges;");
 
     jclass jankDataClazz =
                 FindClassOrDie(env, "android/view/SurfaceControl$JankData");

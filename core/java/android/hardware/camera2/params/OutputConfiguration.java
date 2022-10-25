@@ -22,7 +22,10 @@ import static com.android.internal.util.Preconditions.*;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
+import android.graphics.ColorSpace;
 import android.graphics.ImageFormat;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
@@ -30,7 +33,6 @@ import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.MultiResolutionImageReader;
 import android.hardware.camera2.params.DynamicRangeProfiles;
-import android.hardware.camera2.params.DynamicRangeProfiles.Profile;
 import android.hardware.camera2.params.MultiResolutionStreamInfo;
 import android.hardware.camera2.utils.HashCodeHelpers;
 import android.hardware.camera2.utils.SurfaceUtils;
@@ -454,7 +456,7 @@ public final class OutputConfiguration implements Parcelable {
      * {@link android.media.MediaCodec} etc.)
      * or {@link ImageFormat#YCBCR_P010}.</p>
      */
-    public void setDynamicRangeProfile(@Profile long profile) {
+    public void setDynamicRangeProfile(@DynamicRangeProfiles.Profile long profile) {
         mDynamicRangeProfile = profile;
     }
 
@@ -463,8 +465,51 @@ public final class OutputConfiguration implements Parcelable {
      *
      * @return the currently set dynamic range profile
      */
-    public @Profile long getDynamicRangeProfile() {
+    public @DynamicRangeProfiles.Profile long getDynamicRangeProfile() {
         return mDynamicRangeProfile;
+    }
+
+    /**
+     * Set a specific device-supported color space.
+     *
+     * <p>Clients can choose from any profile advertised as supported in
+     * {@link CameraCharacteristics#REQUEST_AVAILABLE_COLOR_SPACE_PROFILES}
+     * queried using {@link ColorSpaceProfiles#getSupportedColorSpaces}.
+     * When set, the colorSpace will override the default color spaces of the output targets,
+     * or the color space implied by the dataSpace passed into an {@link ImageReader}'s
+     * constructor.</p>
+     *
+     * @hide
+     */
+    @TestApi
+    public void setColorSpace(@NonNull ColorSpace.Named colorSpace) {
+        mColorSpace = colorSpace.ordinal();
+    }
+
+    /**
+     * Clear the color space, such that the default color space will be used.
+     *
+     * @hide
+     */
+    @TestApi
+    public void clearColorSpace() {
+        mColorSpace = ColorSpaceProfiles.UNSPECIFIED;
+    }
+
+    /**
+     * Return the current color space.
+     *
+     * @return the currently set color space
+     * @hide
+     */
+    @TestApi
+    @SuppressLint("MethodNameUnits")
+    public @Nullable ColorSpace getColorSpace() {
+        if (mColorSpace != ColorSpaceProfiles.UNSPECIFIED) {
+            return ColorSpace.get(ColorSpace.Named.values()[mColorSpace]);
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -530,6 +575,7 @@ public final class OutputConfiguration implements Parcelable {
         mIsMultiResolution = false;
         mSensorPixelModesUsed = new ArrayList<Integer>();
         mDynamicRangeProfile = DynamicRangeProfiles.STANDARD;
+        mColorSpace = ColorSpaceProfiles.UNSPECIFIED;
         mStreamUseCase = CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_DEFAULT;
         mTimestampBase = TIMESTAMP_BASE_DEFAULT;
         mMirrorMode = MIRROR_MODE_AUTO;
@@ -631,6 +677,7 @@ public final class OutputConfiguration implements Parcelable {
         mIsMultiResolution = false;
         mSensorPixelModesUsed = new ArrayList<Integer>();
         mDynamicRangeProfile = DynamicRangeProfiles.STANDARD;
+        mColorSpace = ColorSpaceProfiles.UNSPECIFIED;
         mStreamUseCase = CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_DEFAULT;
     }
 
@@ -1079,6 +1126,7 @@ public final class OutputConfiguration implements Parcelable {
         this.mIsMultiResolution = other.mIsMultiResolution;
         this.mSensorPixelModesUsed = other.mSensorPixelModesUsed;
         this.mDynamicRangeProfile = other.mDynamicRangeProfile;
+        this.mColorSpace = other.mColorSpace;
         this.mStreamUseCase = other.mStreamUseCase;
         this.mTimestampBase = other.mTimestampBase;
         this.mMirrorMode = other.mMirrorMode;
@@ -1105,6 +1153,7 @@ public final class OutputConfiguration implements Parcelable {
         checkArgumentInRange(rotation, ROTATION_0, ROTATION_270, "Rotation constant");
         long dynamicRangeProfile = source.readLong();
         DynamicRangeProfiles.checkProfileValue(dynamicRangeProfile);
+        int colorSpace = source.readInt();
 
         int timestampBase = source.readInt();
         int mirrorMode = source.readInt();
@@ -1132,6 +1181,7 @@ public final class OutputConfiguration implements Parcelable {
         mIsMultiResolution = isMultiResolutionOutput;
         mSensorPixelModesUsed = convertIntArrayToIntegerList(sensorPixelModesUsed);
         mDynamicRangeProfile = dynamicRangeProfile;
+        mColorSpace = colorSpace;
         mStreamUseCase = streamUseCase;
         mTimestampBase = timestampBase;
         mMirrorMode = mirrorMode;
@@ -1251,6 +1301,7 @@ public final class OutputConfiguration implements Parcelable {
         // writeList doesn't seem to work well with Integer list.
         dest.writeIntArray(convertIntegerToIntList(mSensorPixelModesUsed));
         dest.writeLong(mDynamicRangeProfile);
+        dest.writeInt(mColorSpace);
         dest.writeLong(mStreamUseCase);
         dest.writeInt(mTimestampBase);
         dest.writeInt(mMirrorMode);
@@ -1305,6 +1356,9 @@ public final class OutputConfiguration implements Parcelable {
             if (mDynamicRangeProfile != other.mDynamicRangeProfile) {
                 return false;
             }
+            if (mColorSpace != other.mColorSpace) {
+                return false;
+            }
 
             return true;
         }
@@ -1325,7 +1379,8 @@ public final class OutputConfiguration implements Parcelable {
                     mSurfaceGroupId, mSurfaceType, mIsShared ? 1 : 0,
                     mPhysicalCameraId == null ? 0 : mPhysicalCameraId.hashCode(),
                     mIsMultiResolution ? 1 : 0, mSensorPixelModesUsed.hashCode(),
-                    mDynamicRangeProfile, mStreamUseCase, mTimestampBase, mMirrorMode);
+                    mDynamicRangeProfile, mColorSpace, mStreamUseCase,
+                    mTimestampBase, mMirrorMode);
         }
 
         return HashCodeHelpers.hashCode(
@@ -1334,7 +1389,7 @@ public final class OutputConfiguration implements Parcelable {
                 mConfiguredDataspace, mSurfaceGroupId, mIsShared ? 1 : 0,
                 mPhysicalCameraId == null ? 0 : mPhysicalCameraId.hashCode(),
                 mIsMultiResolution ? 1 : 0, mSensorPixelModesUsed.hashCode(),
-                mDynamicRangeProfile, mStreamUseCase, mTimestampBase,
+                mDynamicRangeProfile, mColorSpace, mStreamUseCase, mTimestampBase,
                 mMirrorMode);
     }
 
@@ -1369,6 +1424,8 @@ public final class OutputConfiguration implements Parcelable {
     private ArrayList<Integer> mSensorPixelModesUsed;
     // Dynamic range profile
     private long mDynamicRangeProfile;
+    // Color space
+    private int mColorSpace;
     // Stream use case
     private long mStreamUseCase;
     // Timestamp base

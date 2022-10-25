@@ -27,7 +27,6 @@ import static com.android.server.hdmi.Constants.ADDR_PLAYBACK_3;
 import static com.android.server.hdmi.DeviceSelectActionFromPlayback.STATE_WAIT_FOR_ACTIVE_SOURCE_MESSAGE_AFTER_ROUTING_CHANGE;
 import static com.android.server.hdmi.DeviceSelectActionFromPlayback.STATE_WAIT_FOR_DEVICE_POWER_ON;
 import static com.android.server.hdmi.DeviceSelectActionFromPlayback.STATE_WAIT_FOR_REPORT_POWER_STATUS;
-import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -86,7 +85,6 @@ public class DeviceSelectActionFromPlaybackTest {
     private FakePowerManagerWrapper mPowerManager;
     private Looper mMyLooper;
     private TestLooper mTestLooper = new TestLooper();
-    private ArrayList<HdmiCecLocalDevice> mLocalDevices = new ArrayList<>();
 
     private int mPlaybackLogicalAddress1;
     private int mPlaybackLogicalAddress2;
@@ -101,7 +99,8 @@ public class DeviceSelectActionFromPlaybackTest {
 
         mHdmiControlService =
                 new HdmiControlService(InstrumentationRegistry.getTargetContext(),
-                        Collections.emptyList(), new FakeAudioDeviceVolumeManagerWrapper()) {
+                        Collections.singletonList(HdmiDeviceInfo.DEVICE_PLAYBACK),
+                        new FakeAudioDeviceVolumeManagerWrapper()) {
                     @Override
                     boolean isControlEnabled() {
                         return true;
@@ -119,8 +118,6 @@ public class DeviceSelectActionFromPlaybackTest {
                 };
 
 
-        mHdmiCecLocalDevicePlayback = new HdmiCecLocalDevicePlayback(mHdmiControlService);
-        mHdmiCecLocalDevicePlayback.init();
         mHdmiControlService.setIoLooper(mMyLooper);
         mHdmiControlService.setHdmiCecConfig(new FakeHdmiCecConfig(context));
         mNativeWrapper = new FakeNativeWrapper();
@@ -135,16 +132,14 @@ public class DeviceSelectActionFromPlaybackTest {
                 mHdmiCecController, mHdmiMhlControllerStub);
         mHdmiControlService.setHdmiCecNetwork(mHdmiCecNetwork);
 
-        mLocalDevices.add(mHdmiCecLocalDevicePlayback);
         mHdmiControlService.initService();
         mHdmiControlService.onBootPhase(PHASE_SYSTEM_SERVICES_READY);
-        mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mNativeWrapper.setPhysicalAddress(0x0000);
         mPowerManager = new FakePowerManagerWrapper(context);
         mHdmiControlService.setPowerManager(mPowerManager);
         mTestLooper.dispatchAll();
         mNativeWrapper.clearResultMessages();
-
+        mHdmiCecLocalDevicePlayback = mHdmiControlService.playback();
         // The addresses depend on local device's LA.
         // This help the tests to pass with every local device LA.
         mPlaybackLogicalAddress1 =

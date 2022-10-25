@@ -20,6 +20,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_OPEN;
+import static android.view.WindowManager.TRANSIT_TO_FRONT;
 
 import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE;
@@ -60,6 +61,7 @@ import com.android.wm.shell.transition.Transitions;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.concurrent.Executor;
 
 /**
  * Handles windowing changes when desktop mode system setting changes
@@ -132,6 +134,17 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
         return new IDesktopModeImpl(this);
     }
 
+    /**
+     * Adds a listener to find out about changes in the visibility of freeform tasks.
+     *
+     * @param listener the listener to add.
+     * @param callbackExecutor the executor to call the listener on.
+     */
+    public void addListener(DesktopModeTaskRepository.VisibleTasksListener listener,
+            Executor callbackExecutor) {
+        mDesktopModeTaskRepository.addVisibleTasksListener(listener, callbackExecutor);
+    }
+
     @VisibleForTesting
     void updateDesktopModeActive(boolean active) {
         ProtoLog.d(WM_SHELL_DESKTOP_MODE, "updateDesktopModeActive: active=%s", active);
@@ -181,7 +194,18 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
     /**
      * Show apps on desktop
      */
-    WindowContainerTransaction showDesktopApps() {
+    void showDesktopApps() {
+        WindowContainerTransaction wct = bringDesktopAppsToFront();
+
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+            mTransitions.startTransition(TRANSIT_TO_FRONT, wct, null /* handler */);
+        } else {
+            mShellTaskOrganizer.applyTransaction(wct);
+        }
+    }
+
+    @NonNull
+    private WindowContainerTransaction bringDesktopAppsToFront() {
         ArraySet<Integer> activeTasks = mDesktopModeTaskRepository.getActiveTasks();
         ProtoLog.d(WM_SHELL_DESKTOP_MODE, "bringDesktopAppsToFront: tasks=%s", activeTasks.size());
         ArrayList<RunningTaskInfo> taskInfos = new ArrayList<>();
@@ -197,11 +221,6 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
         for (RunningTaskInfo task : taskInfos) {
             wct.reorder(task.token, true);
         }
-
-        if (!Transitions.ENABLE_SHELL_TRANSITIONS) {
-            mShellTaskOrganizer.applyTransaction(wct);
-        }
-
         return wct;
     }
 
@@ -237,17 +256,29 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
     @Override
     public WindowContainerTransaction handleRequest(@NonNull IBinder transition,
             @NonNull TransitionRequestInfo request) {
-
-        // Only do anything if we are in desktop mode and opening a task/app
-        if (!DesktopModeStatus.isActive(mContext) || request.getType() != TRANSIT_OPEN) {
+        // Only do anything if we are in desktop mode and opening a task/app in freeform
+        if (!DesktopModeStatus.isActive(mContext)) {
+            ProtoLog.d(WM_SHELL_DESKTOP_MODE,
+                    "skip shell transition request: desktop mode not active");
             return null;
         }
+        if (request.getType() != TRANSIT_OPEN) {
+            ProtoLog.d(WM_SHELL_DESKTOP_MODE,
+                    "skip shell transition request: only supports TRANSIT_OPEN");
+            return null;
+        }
+        if (request.getTriggerTask() == null
+                || request.getTriggerTask().getWindowingMode() != WINDOWING_MODE_FREEFORM) {
+            ProtoLog.d(WM_SHELL_DESKTOP_MODE, "skip shell transition request: not freeform task");
+            return null;
+        }
+        ProtoLog.d(WM_SHELL_DESKTOP_MODE, "handle shell transition request: %s", request);
 
         WindowContainerTransaction wct = mTransitions.dispatchRequest(transition, request, this);
         if (wct == null) {
             wct = new WindowContainerTransaction();
         }
-        wct.merge(showDesktopApps(), true /* transfer */);
+        wct.merge(bringDesktopAppsToFront(), true /* transfer */);
         wct.reorder(request.getTriggerTask().token, true /* onTop */);
 
         return wct;
@@ -293,7 +324,14 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
      */
     @ExternalThread
     private final class DesktopModeImpl implements DesktopMode {
-        // Do nothing
+
+        @Override
+        public void addListener(DesktopModeTaskRepository.VisibleTasksListener listener,
+                Executor callbackExecutor) {
+            mMainExecutor.execute(() -> {
+                DesktopModeController.this.addListener(listener, callbackExecutor);
+            });
+        }
     }
 
     /**

@@ -21,7 +21,6 @@ import static android.hardware.hdmi.DeviceFeatures.FEATURE_SUPPORTED;
 import static android.hardware.hdmi.DeviceFeatures.FEATURE_SUPPORT_UNKNOWN;
 
 import static com.android.server.SystemService.PHASE_SYSTEM_SERVICES_READY;
-import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -67,7 +66,6 @@ public class SetAudioVolumeLevelDiscoveryActionTest {
     private Context mContextSpy;
     private TestLooper mTestLooper = new TestLooper();
     private int mPhysicalAddress = 0x1100;
-    private ArrayList<HdmiCecLocalDevice> mLocalDevices = new ArrayList<>();
     private int mPlaybackLogicalAddress;
 
     private TestCallback mTestCallback;
@@ -82,7 +80,8 @@ public class SetAudioVolumeLevelDiscoveryActionTest {
         mContextSpy = spy(new ContextWrapper(
                 InstrumentationRegistry.getInstrumentation().getTargetContext()));
 
-        mHdmiControlServiceSpy = spy(new HdmiControlService(mContextSpy, Collections.emptyList(),
+        mHdmiControlServiceSpy = spy(new HdmiControlService(mContextSpy,
+                Collections.singletonList(HdmiDeviceInfo.DEVICE_PLAYBACK),
                 new FakeAudioDeviceVolumeManagerWrapper()));
         doNothing().when(mHdmiControlServiceSpy)
                 .writeStringSystemProperty(anyString(), anyString());
@@ -104,21 +103,16 @@ public class SetAudioVolumeLevelDiscoveryActionTest {
         mPowerManager = new FakePowerManagerWrapper(mContextSpy);
         mHdmiControlServiceSpy.setPowerManager(mPowerManager);
 
-        mPlaybackDevice = new HdmiCecLocalDevicePlayback(mHdmiControlServiceSpy);
-        mPlaybackDevice.init();
-        mLocalDevices.add(mPlaybackDevice);
-
-        mHdmiControlServiceSpy.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mHdmiControlServiceSpy.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
         mTestLooper.dispatchAll();
 
+        mPlaybackDevice = mHdmiControlServiceSpy.playback();
         mPlaybackLogicalAddress = mPlaybackDevice.getDeviceInfo().getLogicalAddress();
 
         // Setup specific to these tests
         mNativeWrapper.onCecMessage(HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
                 Constants.ADDR_TV, 0x0000, HdmiDeviceInfo.DEVICE_TV));
         mTestLooper.dispatchAll();
-
         mTestCallback = new TestCallback();
         mAction = new SetAudioVolumeLevelDiscoveryAction(mPlaybackDevice,
                 Constants.ADDR_TV, mTestCallback);

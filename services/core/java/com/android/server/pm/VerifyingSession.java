@@ -707,7 +707,7 @@ final class VerifyingSession {
 
     private List<ComponentName> matchVerifiers(PackageInfoLite pkgInfo,
             List<ResolveInfo> receivers, final PackageVerificationState verificationState) {
-        if (pkgInfo.verifiers.length == 0) {
+        if (pkgInfo.verifiers == null || pkgInfo.verifiers.length == 0) {
             return null;
         }
 

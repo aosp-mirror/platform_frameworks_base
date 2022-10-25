@@ -29,5 +29,4 @@ public class Constants {
     */
     public static final String EXTRA_RESULT_RECEIVER =
             "android.credentials.ui.extra.RESULT_RECEIVER";
-
 }

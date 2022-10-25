@@ -15,6 +15,12 @@
  */
 package com.android.server.timezonedetector.location;
 
+import static android.service.timezone.TimeZoneProviderStatus.DEPENDENCY_STATUS_NOT_APPLICABLE;
+import static android.service.timezone.TimeZoneProviderStatus.DEPENDENCY_STATUS_TEMPORARILY_UNAVAILABLE;
+import static android.service.timezone.TimeZoneProviderStatus.DEPENDENCY_STATUS_WORKING;
+import static android.service.timezone.TimeZoneProviderStatus.OPERATION_STATUS_UNKNOWN;
+import static android.service.timezone.TimeZoneProviderStatus.OPERATION_STATUS_WORKING;
+
 import static com.android.server.timezonedetector.ConfigurationInternal.DETECTION_MODE_MANUAL;
 import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_DESTROYED;
 import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_PERM_FAILED;
@@ -48,6 +54,7 @@ import android.annotation.Nullable;
 import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
 import android.service.timezone.TimeZoneProviderEvent;
+import android.service.timezone.TimeZoneProviderStatus;
 import android.service.timezone.TimeZoneProviderSuggestion;
 import android.util.IndentingPrintWriter;
 
@@ -78,8 +85,15 @@ public class LocationTimeZoneProviderControllerTest {
             createSuggestionEvent(asList("Europe/London"));
     private static final TimeZoneProviderEvent USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT2 =
             createSuggestionEvent(asList("Europe/Paris"));
+    private static final TimeZoneProviderStatus UNCERTAIN_PROVIDER_STATUS =
+            new TimeZoneProviderStatus.Builder()
+                    .setLocationDetectionStatus(DEPENDENCY_STATUS_TEMPORARILY_UNAVAILABLE)
+                    .setConnectivityStatus(DEPENDENCY_STATUS_WORKING)
+                    .setTimeZoneResolutionStatus(OPERATION_STATUS_UNKNOWN)
+                    .build();
     private static final TimeZoneProviderEvent USER1_UNCERTAIN_LOCATION_TIME_ZONE_EVENT =
-            TimeZoneProviderEvent.createUncertainEvent(ARBITRARY_TIME_MILLIS);
+            TimeZoneProviderEvent.createUncertainEvent(
+                    ARBITRARY_TIME_MILLIS, UNCERTAIN_PROVIDER_STATUS);
     private static final TimeZoneProviderEvent USER1_PERM_FAILURE_LOCATION_TIME_ZONE_EVENT =
             TimeZoneProviderEvent.createPermanentFailureEvent(ARBITRARY_TIME_MILLIS, "Test");
 
@@ -1390,12 +1404,17 @@ public class LocationTimeZoneProviderControllerTest {
     }
 
     private static TimeZoneProviderEvent createSuggestionEvent(@NonNull List<String> timeZoneIds) {
+        TimeZoneProviderStatus providerStatus = new TimeZoneProviderStatus.Builder()
+                .setLocationDetectionStatus(DEPENDENCY_STATUS_NOT_APPLICABLE)
+                .setConnectivityStatus(DEPENDENCY_STATUS_NOT_APPLICABLE)
+                .setTimeZoneResolutionStatus(OPERATION_STATUS_WORKING)
+                .build();
+        TimeZoneProviderSuggestion suggestion = new TimeZoneProviderSuggestion.Builder()
+                .setElapsedRealtimeMillis(ARBITRARY_TIME_MILLIS)
+                .setTimeZoneIds(timeZoneIds)
+                .build();
         return TimeZoneProviderEvent.createSuggestionEvent(
-                ARBITRARY_TIME_MILLIS,
-                new TimeZoneProviderSuggestion.Builder()
-                        .setElapsedRealtimeMillis(ARBITRARY_TIME_MILLIS)
-                        .setTimeZoneIds(timeZoneIds)
-                        .build());
+                ARBITRARY_TIME_MILLIS, suggestion, providerStatus);
     }
 
     private static void assertControllerState(LocationTimeZoneProviderController controller,

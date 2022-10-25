@@ -63,7 +63,8 @@ object Flags {
     @JvmField val NOTIFICATION_DISMISSAL_FADE = UnreleasedFlag(113, teamfood = true)
     val STABILITY_INDEX_FIX = UnreleasedFlag(114, teamfood = true)
     val SEMI_STABLE_SORT = UnreleasedFlag(115, teamfood = true)
-    // next id: 116
+    @JvmField val NOTIFICATION_GROUP_CORNER = UnreleasedFlag(116, true)
+    // next id: 117
 
     // 200 - keyguard/lockscreen
     // ** Flag retired **
@@ -79,9 +80,6 @@ object Flags {
     // TODO(b/254512281): Tracking Bug
     @JvmField
     val BOUNCER_USER_SWITCHER = ResourceBooleanFlag(204, R.bool.config_enableBouncerUserSwitcher)
-
-    // TODO(b/254512694): Tracking Bug
-    val FACE_SCANNING_ANIM = ResourceBooleanFlag(205, R.bool.config_enableFaceScanningAnimation)
 
     // TODO(b/254512676): Tracking Bug
     @JvmField val LOCKSCREEN_CUSTOM_CLOCKS = UnreleasedFlag(207, teamfood = true)
@@ -192,7 +190,7 @@ object Flags {
 
     // 802 - wallpaper rendering
     // TODO(b/254512923): Tracking Bug
-    @JvmField val USE_CANVAS_RENDERER = UnreleasedFlag(802, teamfood = true)
+    @JvmField val USE_CANVAS_RENDERER = ReleasedFlag(802)
 
     // 803 - screen contents translation
     // TODO(b/254513187): Tracking Bug

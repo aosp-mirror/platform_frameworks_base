@@ -17,7 +17,6 @@
 package com.android.systemui.temporarydisplay
 
 import android.annotation.LayoutRes
-import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.PixelFormat
 import android.graphics.Rect
@@ -67,11 +66,10 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
      * Window layout params that will be used as a starting point for the [windowLayoutParams] of
      * all subclasses.
      */
-    @SuppressLint("WrongConstant") // We're allowed to use TYPE_VOLUME_OVERLAY
     internal val commonWindowLayoutParams = WindowManager.LayoutParams().apply {
         width = WindowManager.LayoutParams.WRAP_CONTENT
         height = WindowManager.LayoutParams.WRAP_CONTENT
-        type = WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY
+        type = WindowManager.LayoutParams.TYPE_SYSTEM_ERROR
         flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
             WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
         title = windowTitle

@@ -124,6 +124,9 @@ open class ChipbarCoordinator @Inject constructor(
         // ---- Text ----
         val textView = currentView.requireViewById<TextView>(R.id.text)
         TextViewBinder.bind(textView, newInfo.text)
+        // Updates text view bounds to make sure it perfectly fits the new text
+        // (If the new text is smaller than the previous text) see b/253228632.
+        textView.requestLayout()
 
         // ---- End item ----
         // Loading

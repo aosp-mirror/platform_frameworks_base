@@ -88,6 +88,11 @@
                   android:excludeFromRecents="true"
                   />
 
+        <activity android:name=".settings.brightness.BrightnessDialogTest$TestDialog"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            />
+
         <activity android:name="com.android.systemui.screenshot.ScrollViewActivity"
                   android:exported="false" />
 

@@ -26,6 +26,7 @@ import static android.app.AppOpsManager.OP_CAMERA;
 import static android.app.AppOpsManager.OP_PHONE_CALL_CAMERA;
 import static android.app.AppOpsManager.OP_PHONE_CALL_MICROPHONE;
 import static android.app.AppOpsManager.OP_RECEIVE_AMBIENT_TRIGGER_AUDIO;
+import static android.app.AppOpsManager.OP_RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO;
 import static android.app.AppOpsManager.OP_RECORD_AUDIO;
 import static android.content.Intent.EXTRA_PACKAGE_NAME;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
@@ -81,6 +82,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.res.Configuration;
+import android.database.ContentObserver;
 import android.graphics.drawable.Icon;
 import android.hardware.ISensorPrivacyListener;
 import android.hardware.ISensorPrivacyManager;
@@ -199,6 +201,7 @@ public final class SensorPrivacyService extends SystemService {
         if (phase == PHASE_SYSTEM_SERVICES_READY) {
             mKeyguardManager = mContext.getSystemService(KeyguardManager.class);
             mCallStateHelper = new CallStateHelper();
+            mSensorPrivacyServiceImpl.registerSettingsObserver();
         } else if (phase == PHASE_ACTIVITY_MANAGER_READY) {
             mCameraPrivacyLightController = new CameraPrivacyLightController(mContext);
         }
@@ -271,7 +274,7 @@ public final class SensorPrivacyService extends SystemService {
             mSensorPrivacyStateController = SensorPrivacyStateController.getInstance();
 
             int[] micAndCameraOps = new int[]{OP_RECORD_AUDIO, OP_PHONE_CALL_MICROPHONE,
-                    OP_CAMERA, OP_PHONE_CALL_CAMERA};
+                    OP_CAMERA, OP_PHONE_CALL_CAMERA, OP_RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO};
             mAppOpsManager.startWatchingNoted(micAndCameraOps, this);
             mAppOpsManager.startWatchingStarted(micAndCameraOps, this);
 
@@ -340,7 +343,8 @@ public final class SensorPrivacyService extends SystemService {
 
             int sensor;
             if (result == MODE_IGNORED) {
-                if (code == OP_RECORD_AUDIO || code == OP_PHONE_CALL_MICROPHONE) {
+                if (code == OP_RECORD_AUDIO || code == OP_PHONE_CALL_MICROPHONE
+                        || code == OP_RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO) {
                     sensor = MICROPHONE;
                 } else if (code == OP_CAMERA || code == OP_PHONE_CALL_CAMERA) {
                     sensor = CAMERA;
@@ -1072,6 +1076,14 @@ public final class SensorPrivacyService extends SystemService {
                     // restrict it when the microphone is disabled
                     mAppOpsManagerInternal.setGlobalRestriction(OP_RECEIVE_AMBIENT_TRIGGER_AUDIO,
                             enabled, mAppOpsRestrictionToken);
+
+                    // Set restriction for OP_RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO
+                    boolean allowed = (Settings.Global.getInt(mContext.getContentResolver(),
+                            Settings.Global.RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO_ENABLED, 1)
+                            == 1);
+                    mAppOpsManagerInternal.setGlobalRestriction(
+                            OP_RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO, enabled && !allowed,
+                            mAppOpsRestrictionToken);
                     break;
                 case CAMERA:
                     mAppOpsManagerInternal.setGlobalRestriction(OP_CAMERA, enabled,
@@ -1110,6 +1122,19 @@ public final class SensorPrivacyService extends SystemService {
                             + " from " + key);
                 }
             }
+        }
+
+        private void registerSettingsObserver() {
+            mContext.getContentResolver().registerContentObserver(
+                    Settings.Global.getUriFor(
+                            Settings.Global.RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO_ENABLED),
+                    false, new ContentObserver(mHandler) {
+                        @Override
+                        public void onChange(boolean selfChange) {
+                            setGlobalRestriction(MICROPHONE,
+                                    isCombinedToggleSensorPrivacyEnabled(MICROPHONE));
+                        }
+                    });
         }
 
         /**

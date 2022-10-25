@@ -2414,7 +2414,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      * Attempts to trigger active unlock from trust agent.
      */
     private void requestActiveUnlock(
-            ActiveUnlockConfig.ACTIVE_UNLOCK_REQUEST_ORIGIN requestOrigin,
+            @NonNull ActiveUnlockConfig.ACTIVE_UNLOCK_REQUEST_ORIGIN requestOrigin,
             String reason,
             boolean dismissKeyguard
     ) {
@@ -2444,7 +2444,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      * Only dismisses the keyguard under certain conditions.
      */
     public void requestActiveUnlock(
-            ActiveUnlockConfig.ACTIVE_UNLOCK_REQUEST_ORIGIN requestOrigin,
+            @NonNull ActiveUnlockConfig.ACTIVE_UNLOCK_REQUEST_ORIGIN requestOrigin,
             String extraReason
     ) {
         final boolean canFaceBypass = isFaceEnrolled() && mKeyguardBypassController != null
@@ -2711,7 +2711,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         return shouldListen;
     }
 
-    private void maybeLogListenerModelData(KeyguardListenModel model) {
+    private void maybeLogListenerModelData(@NonNull KeyguardListenModel model) {
         mLogger.logKeyguardListenerModel(model);
 
         if (model instanceof KeyguardActiveUnlockModel) {
