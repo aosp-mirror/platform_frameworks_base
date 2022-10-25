@@ -7135,7 +7135,7 @@ public final class Settings {
          * Format like "ime0;subtype0;subtype1;subtype2:ime1:ime2;subtype0"
          * where imeId is ComponentName and subtype is int32.
          */
-        @Readable
+        @Readable(maxTargetSdk = Build.VERSION_CODES.TIRAMISU)
         public static final String ENABLED_INPUT_METHODS = "enabled_input_methods";
 
         /**
@@ -7144,7 +7144,7 @@ public final class Settings {
          * by ':'.
          * @hide
          */
-        @Readable
+        @Readable(maxTargetSdk = Build.VERSION_CODES.TIRAMISU)
         public static final String DISABLED_SYSTEM_INPUT_METHODS = "disabled_system_input_methods";
 
         /**
