@@ -155,4 +155,21 @@ public final class IInputMethodManagerGlobal {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * Invokes {@link IInputMethodManager#removeImeSurface()}
+     */
+    @RequiresPermission(android.Manifest.permission.INTERNAL_SYSTEM_WINDOW)
+    @AnyThread
+    public static void removeImeSurface(@Nullable Consumer<RemoteException> exceptionHandler) {
+        final IInputMethodManager service = getService();
+        if (service == null) {
+            return;
+        }
+        try {
+            service.removeImeSurface();
+        } catch (RemoteException e) {
+            handleRemoteExceptionOrRethrow(e, exceptionHandler);
+        }
+    }
 }
