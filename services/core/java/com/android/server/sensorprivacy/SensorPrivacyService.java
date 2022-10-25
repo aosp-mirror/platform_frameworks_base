@@ -35,6 +35,7 @@ import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.hardware.SensorPrivacyManager.EXTRA_ALL_SENSORS;
 import static android.hardware.SensorPrivacyManager.EXTRA_SENSOR;
+import static android.hardware.SensorPrivacyManager.EXTRA_TOGGLE_TYPE;
 import static android.hardware.SensorPrivacyManager.Sensors.CAMERA;
 import static android.hardware.SensorPrivacyManager.Sensors.MICROPHONE;
 import static android.hardware.SensorPrivacyManager.Sources.DIALOG;
@@ -662,6 +663,29 @@ public final class SensorPrivacyService extends SystemService {
                                     ? /* dismiss immediately */ 1
                                     : /* no timeout */ 0)
                             .build());
+        }
+
+        private void showSensorStateChangedActivity(@SensorPrivacyManager.Sensors.Sensor int sensor,
+                @SensorPrivacyManager.ToggleType int toggleType) {
+            String activityName = mContext.getResources().getString(
+                    R.string.config_sensorStateChangedActivity);
+            if (TextUtils.isEmpty(activityName)) {
+                return;
+            }
+
+            Intent dialogIntent = new Intent();
+            dialogIntent.setComponent(
+                    ComponentName.unflattenFromString(activityName));
+
+            ActivityOptions options = ActivityOptions.makeBasic();
+            options.setTaskOverlay(true, true);
+
+            dialogIntent.addFlags(
+                    FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS | FLAG_ACTIVITY_NO_USER_ACTION);
+
+            dialogIntent.putExtra(EXTRA_SENSOR, sensor);
+            dialogIntent.putExtra(EXTRA_TOGGLE_TYPE, toggleType);
+            mContext.startActivityAsUser(dialogIntent, options.toBundle(), UserHandle.SYSTEM);
         }
 
         private boolean isTelevision(Context context) {
@@ -1378,6 +1402,8 @@ public final class SensorPrivacyService extends SystemService {
                     mToggleSensorListeners.finishBroadcast();
                 }
             }
+
+            mSensorPrivacyServiceImpl.showSensorStateChangedActivity(sensor, toggleType);
         }
 
         public void removeSuppressPackageReminderToken(Pair<Integer, UserHandle> key,
