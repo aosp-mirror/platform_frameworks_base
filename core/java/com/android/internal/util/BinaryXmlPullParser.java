@@ -72,7 +72,7 @@ import java.util.Objects;
  * <li>Namespaces, prefixes, properties, and options are unsupported.
  * </ul>
  */
-public final class BinaryXmlPullParser implements TypedXmlPullParser {
+public class BinaryXmlPullParser implements TypedXmlPullParser {
     private FastDataInput mIn;
 
     private int mCurrentToken = START_DOCUMENT;
@@ -99,7 +99,7 @@ public final class BinaryXmlPullParser implements TypedXmlPullParser {
             mIn = null;
         }
 
-        mIn = FastDataInput.obtainUsing4ByteSequences(is);
+        mIn = obtainFastDataInput(is);
 
         mCurrentToken = START_DOCUMENT;
         mCurrentDepth = 0;
@@ -127,6 +127,11 @@ public final class BinaryXmlPullParser implements TypedXmlPullParser {
         } catch (IOException e) {
             throw new XmlPullParserException(e.toString());
         }
+    }
+
+    @NonNull
+    protected FastDataInput obtainFastDataInput(@NonNull InputStream is) {
+        return FastDataInput.obtain(is);
     }
 
     @Override

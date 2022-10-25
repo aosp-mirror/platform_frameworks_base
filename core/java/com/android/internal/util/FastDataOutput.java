@@ -17,7 +17,6 @@
 package com.android.internal.util;
 
 import android.annotation.NonNull;
-import android.util.CharsetUtils;
 
 import dalvik.system.VMRuntime;
 
@@ -30,7 +29,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Optimized implementation of {@link DataOutput} which buffers data in memory
@@ -40,48 +38,31 @@ import java.util.concurrent.atomic.AtomicReference;
  * {@link DataOutputStream} with a {@link BufferedOutputStream}.
  */
 public class FastDataOutput implements DataOutput, Flushable, Closeable {
-    private static final int MAX_UNSIGNED_SHORT = 65_535;
+    protected static final int MAX_UNSIGNED_SHORT = 65_535;
 
-    private static final int DEFAULT_BUFFER_SIZE = 32_768;
+    protected static final int DEFAULT_BUFFER_SIZE = 32_768;
 
-    private static AtomicReference<FastDataOutput> sOutCache = new AtomicReference<>();
+    protected final VMRuntime mRuntime;
 
-    private final VMRuntime mRuntime;
-
-    private final byte[] mBuffer;
-    private final long mBufferPtr;
-    private final int mBufferCap;
-    private final boolean mUse4ByteSequence;
+    protected final byte[] mBuffer;
+    protected final int mBufferCap;
 
     private OutputStream mOut;
-    private int mBufferPos;
+    protected int mBufferPos;
 
     /**
      * Values that have been "interned" by {@link #writeInternedUTF(String)}.
      */
     private final HashMap<String, Integer> mStringRefs = new HashMap<>();
 
-    /**
-     * @deprecated callers must specify {@code use4ByteSequence} so they make a
-     *             clear choice about working around a long-standing ART bug, as
-     *             described by the {@code kUtfUse4ByteSequence} comments in
-     *             {@code art/runtime/jni/jni_internal.cc}.
-     */
-    @Deprecated
     public FastDataOutput(@NonNull OutputStream out, int bufferSize) {
-        this(out, bufferSize, true /* use4ByteSequence */);
-    }
-
-    public FastDataOutput(@NonNull OutputStream out, int bufferSize, boolean use4ByteSequence) {
         mRuntime = VMRuntime.getRuntime();
         if (bufferSize < 8) {
             throw new IllegalArgumentException();
         }
 
         mBuffer = (byte[]) mRuntime.newNonMovableArray(byte.class, bufferSize);
-        mBufferPtr = mRuntime.addressOf(mBuffer);
         mBufferCap = mBuffer.length;
-        mUse4ByteSequence = use4ByteSequence;
 
         setOutput(out);
     }
@@ -95,26 +76,8 @@ public class FastDataOutput implements DataOutput, Flushable, Closeable {
      * which specifies that large code-points must be encoded with 3-byte
      * sequences.
      */
-    public static FastDataOutput obtainUsing3ByteSequences(@NonNull OutputStream out) {
-        return new FastDataOutput(out, DEFAULT_BUFFER_SIZE, false /* use4ByteSequence */);
-    }
-
-    /**
-     * Obtain a {@link FastDataOutput} configured with the given
-     * {@link OutputStream} and which encodes large code-points using 4-byte
-     * sequences.
-     * <p>
-     * This <em>is not</em> compatible with the {@link DataOutput} API contract,
-     * which specifies that large code-points must be encoded with 3-byte
-     * sequences.
-     */
-    public static FastDataOutput obtainUsing4ByteSequences(@NonNull OutputStream out) {
-        FastDataOutput instance = sOutCache.getAndSet(null);
-        if (instance != null) {
-            instance.setOutput(out);
-            return instance;
-        }
-        return new FastDataOutput(out, DEFAULT_BUFFER_SIZE, true /* use4ByteSequence */);
+    public static FastDataOutput obtain(@NonNull OutputStream out) {
+        return new FastDataOutput(out, DEFAULT_BUFFER_SIZE);
     }
 
     /**
@@ -129,23 +92,22 @@ public class FastDataOutput implements DataOutput, Flushable, Closeable {
         mOut = null;
         mBufferPos = 0;
         mStringRefs.clear();
-
-        if (mBufferCap == DEFAULT_BUFFER_SIZE && mUse4ByteSequence) {
-            // Try to return to the cache.
-            sOutCache.compareAndSet(null, this);
-        }
     }
 
     /**
      * Re-initializes the object for the new output.
      */
-    private void setOutput(@NonNull OutputStream out) {
+    protected void setOutput(@NonNull OutputStream out) {
+        if (mOut != null) {
+            throw new IllegalStateException("setOutput() called before calling release()");
+        }
+
         mOut = Objects.requireNonNull(out);
         mBufferPos = 0;
         mStringRefs.clear();
     }
 
-    private void drain() throws IOException {
+    protected void drain() throws IOException {
         if (mBufferPos > 0) {
             mOut.write(mBuffer, 0, mBufferPos);
             mBufferPos = 0;
@@ -188,42 +150,6 @@ public class FastDataOutput implements DataOutput, Flushable, Closeable {
 
     @Override
     public void writeUTF(String s) throws IOException {
-        if (mUse4ByteSequence) {
-            writeUTFUsing4ByteSequences(s);
-        } else {
-            writeUTFUsing3ByteSequences(s);
-        }
-    }
-
-    private void writeUTFUsing4ByteSequences(String s) throws IOException {
-        // Attempt to write directly to buffer space if there's enough room,
-        // otherwise fall back to chunking into place
-        if (mBufferCap - mBufferPos < 2 + s.length()) drain();
-
-        // Magnitude of this returned value indicates the number of bytes
-        // required to encode the string; sign indicates success/failure
-        int len = CharsetUtils.toModifiedUtf8Bytes(s, mBufferPtr, mBufferPos + 2, mBufferCap);
-        if (Math.abs(len) > MAX_UNSIGNED_SHORT) {
-            throw new IOException("Modified UTF-8 length too large: " + len);
-        }
-
-        if (len >= 0) {
-            // Positive value indicates the string was encoded into the buffer
-            // successfully, so we only need to prefix with length
-            writeShort(len);
-            mBufferPos += len;
-        } else {
-            // Negative value indicates buffer was too small and we need to
-            // allocate a temporary buffer for encoding
-            len = -len;
-            final byte[] tmp = (byte[]) mRuntime.newNonMovableArray(byte.class, len + 1);
-            CharsetUtils.toModifiedUtf8Bytes(s, mRuntime.addressOf(tmp), 0, tmp.length);
-            writeShort(len);
-            write(tmp, 0, len);
-        }
-    }
-
-    private void writeUTFUsing3ByteSequences(String s) throws IOException {
         final int len = (int) ModifiedUtf8.countBytes(s, false);
         if (len > MAX_UNSIGNED_SHORT) {
             throw new IOException("Modified UTF-8 length too large: " + len);

@@ -63,7 +63,7 @@ import java.util.Arrays;
  * <li>Namespaces, prefixes, properties, and options are unsupported.
  * </ul>
  */
-public final class BinaryXmlSerializer implements TypedXmlSerializer {
+public class BinaryXmlSerializer implements TypedXmlSerializer {
     /**
      * The wire protocol always begins with a well-known magic value of
      * {@code ABX_}, representing "Android Binary XML." The final byte is a
@@ -118,11 +118,16 @@ public final class BinaryXmlSerializer implements TypedXmlSerializer {
             throw new UnsupportedOperationException();
         }
 
-        mOut = FastDataOutput.obtainUsing4ByteSequences(os);
+        mOut = obtainFastDataOutput(os);
         mOut.write(PROTOCOL_MAGIC_VERSION_0);
 
         mTagCount = 0;
         mTagNames = new String[8];
+    }
+
+    @NonNull
+    protected FastDataOutput obtainFastDataOutput(@NonNull OutputStream os) {
+        return FastDataOutput.obtain(os);
     }
 
     @Override

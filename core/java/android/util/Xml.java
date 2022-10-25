@@ -22,7 +22,8 @@ import android.os.SystemProperties;
 import android.system.ErrnoException;
 import android.system.Os;
 
-import com.android.internal.util.BinaryXmlPullParser;
+import com.android.internal.util.ArtBinaryXmlPullParser;
+import com.android.internal.util.ArtBinaryXmlSerializer;
 import com.android.internal.util.BinaryXmlSerializer;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
@@ -146,7 +147,7 @@ public class Xml {
      * @hide
      */
     public static @NonNull TypedXmlPullParser newBinaryPullParser() {
-        return new BinaryXmlPullParser();
+        return new ArtBinaryXmlPullParser();
     }
 
     /**
@@ -225,7 +226,7 @@ public class Xml {
      * @hide
      */
     public static @NonNull TypedXmlSerializer newBinarySerializer() {
-        return new BinaryXmlSerializer();
+        return new ArtBinaryXmlSerializer();
     }
 
     /**
