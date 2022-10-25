@@ -1,5 +1,8 @@
 include platform/frameworks/base:/services/core/java/com/android/server/am/OWNERS
+
+# Game Platform
 per-file FakeGameClassifier.java = file:/GAME_MANAGER_OWNERS
 per-file FakeGameServiceProviderInstance = file:/GAME_MANAGER_OWNERS
 per-file FakeServiceConnector.java = file:/GAME_MANAGER_OWNERS
 per-file Game* = file:/GAME_MANAGER_OWNERS
+per-file res/xml/game_manager* = file:/GAME_MANAGER_OWNERS
