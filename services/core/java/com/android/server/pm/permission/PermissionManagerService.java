@@ -942,8 +942,8 @@ public class PermissionManagerService {
             BasePermission bp = mSettings.getPermissionLocked(info.name);
             added = bp == null;
             int fixedLevel = PermissionInfo.fixProtectionLevel(info.protectionLevel);
+            enforcePermissionCapLocked(info, tree);
             if (added) {
-                enforcePermissionCapLocked(info, tree);
                 bp = new BasePermission(info.name, tree.getSourcePackageName(),
                         BasePermission.TYPE_DYNAMIC);
             } else if (!bp.isDynamic()) {
