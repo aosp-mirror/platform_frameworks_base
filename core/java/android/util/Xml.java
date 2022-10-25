@@ -27,6 +27,8 @@ import com.android.internal.util.ArtBinaryXmlSerializer;
 import com.android.internal.util.BinaryXmlSerializer;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 
 import libcore.util.XmlObjectFactory;
 

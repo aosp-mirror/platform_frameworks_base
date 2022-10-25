@@ -27,13 +27,13 @@ import android.os.BatteryUsageStatsQuery;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.os.PowerProfile;
+import com.android.modules.utils.TypedXmlSerializer;
 
 import org.junit.Before;
 import org.junit.Test;

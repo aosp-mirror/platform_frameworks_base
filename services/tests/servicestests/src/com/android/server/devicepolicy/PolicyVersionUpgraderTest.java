@@ -33,12 +33,12 @@ import android.content.pm.ApplicationInfo;
 import android.os.IpcDataCache;
 import android.os.Parcel;
 import android.os.UserHandle;
-import android.util.TypedXmlPullParser;
 import android.util.Xml;
 
 import androidx.test.InstrumentationRegistry;
 
 import com.android.internal.util.JournaledFile;
+import com.android.modules.utils.TypedXmlPullParser;
 import com.android.server.SystemService;
 
 import com.google.common.io.Files;

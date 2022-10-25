@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.util;
+package com.android.modules.utils;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -26,8 +26,6 @@ import java.io.IOException;
 /**
  * Specialization of {@link XmlSerializer} which adds explicit methods to
  * support consistent and efficient conversion of primitive data types.
- *
- * @hide
  */
 public interface TypedXmlSerializer extends XmlSerializer {
     /**

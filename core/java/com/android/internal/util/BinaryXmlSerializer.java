@@ -30,7 +30,8 @@ import static org.xmlpull.v1.XmlPullParser.TEXT;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.util.TypedXmlSerializer;
+
+import com.android.modules.utils.TypedXmlSerializer;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlSerializer;

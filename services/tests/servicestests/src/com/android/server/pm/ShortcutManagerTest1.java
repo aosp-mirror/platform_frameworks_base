@@ -98,13 +98,13 @@ import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 import android.util.Log;
 import android.util.SparseArray;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.frameworks.servicestests.R;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.pm.ShortcutService.ConfigConstants;
 import com.android.server.pm.ShortcutService.FileOutputStreamWithPath;
 import com.android.server.pm.ShortcutUser.PackageWithUser;
