@@ -18,11 +18,11 @@ package com.android.systemui.statusbar.pipeline.mobile.data.repository
 
 import android.telephony.SubscriptionInfo
 import android.telephony.SubscriptionManager
-import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileSubscriptionModel
+import com.android.settingslib.mobile.MobileMappings.Config
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
-class FakeMobileSubscriptionRepository : MobileSubscriptionRepository {
+class FakeMobileConnectionsRepository : MobileConnectionsRepository {
     private val _subscriptionsFlow = MutableStateFlow<List<SubscriptionInfo>>(listOf())
     override val subscriptionsFlow: Flow<List<SubscriptionInfo>> = _subscriptionsFlow
 
@@ -30,22 +30,27 @@ class FakeMobileSubscriptionRepository : MobileSubscriptionRepository {
         MutableStateFlow(SubscriptionManager.INVALID_SUBSCRIPTION_ID)
     override val activeMobileDataSubscriptionId = _activeMobileDataSubscriptionId
 
-    private val subIdFlows = mutableMapOf<Int, MutableStateFlow<MobileSubscriptionModel>>()
-    override fun getFlowForSubId(subId: Int): Flow<MobileSubscriptionModel> {
-        return subIdFlows[subId]
-            ?: MutableStateFlow(MobileSubscriptionModel()).also { subIdFlows[subId] = it }
+    private val _defaultDataSubRatConfig = MutableStateFlow(Config())
+    override val defaultDataSubRatConfig = _defaultDataSubRatConfig
+
+    private val subIdRepos = mutableMapOf<Int, MobileConnectionRepository>()
+    override fun getRepoForSubId(subId: Int): MobileConnectionRepository {
+        return subIdRepos[subId] ?: FakeMobileConnectionRepository().also { subIdRepos[subId] = it }
     }
 
     fun setSubscriptions(subs: List<SubscriptionInfo>) {
         _subscriptionsFlow.value = subs
     }
 
+    fun setDefaultDataSubRatConfig(config: Config) {
+        _defaultDataSubRatConfig.value = config
+    }
+
     fun setActiveMobileDataSubscriptionId(subId: Int) {
         _activeMobileDataSubscriptionId.value = subId
     }
 
-    fun setMobileSubscriptionModel(model: MobileSubscriptionModel, subId: Int) {
-        val subscription = subIdFlows[subId] ?: throw Exception("no flow exists for this subId yet")
-        subscription.value = model
+    fun setMobileConnectionRepositoryForId(subId: Int, repo: MobileConnectionRepository) {
+        subIdRepos[subId] = repo
     }
 }
