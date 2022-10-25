@@ -207,7 +207,7 @@ public final class GnssCapabilities implements Parcelable {
     /**
      * Returns {@code true} if GNSS chipset supports single shot locating, {@code false} otherwise.
      */
-    public boolean hasSingleShot() {
+    public boolean hasSingleShotFix() {
         return (mTopFlags & TOP_HAL_CAPABILITY_SINGLE_SHOT) != 0;
     }
 
@@ -482,7 +482,7 @@ public final class GnssCapabilities implements Parcelable {
         if (hasMsa()) {
             builder.append("MSA ");
         }
-        if (hasSingleShot()) {
+        if (hasSingleShotFix()) {
             builder.append("SINGLE_SHOT ");
         }
         if (hasOnDemandTime()) {
@@ -602,7 +602,7 @@ public final class GnssCapabilities implements Parcelable {
         /**
          * Sets single shot locating capability.
          */
-        public @NonNull Builder setHasSingleShot(boolean capable) {
+        public @NonNull Builder setHasSingleShotFix(boolean capable) {
             mTopFlags = setFlag(mTopFlags, TOP_HAL_CAPABILITY_SINGLE_SHOT, capable);
             return this;
         }
