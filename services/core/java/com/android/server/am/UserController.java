@@ -3327,6 +3327,14 @@ class UserController implements Handler.Callback {
             }
             EventLog.writeEvent(EventLogTags.UC_SEND_USER_BROADCAST, logUserId, intent.getAction());
 
+            // When the modern broadcast stack is enabled, deliver all our
+            // broadcasts as unordered, since the modern stack has better
+            // support for sequencing cold-starts, and it supports delivering
+            // resultTo for non-ordered broadcasts
+            if (mService.mEnableModernQueue) {
+                ordered = false;
+            }
+
             // TODO b/64165549 Verify that mLock is not held before calling AMS methods
             synchronized (mService) {
                 return mService.broadcastIntentLocked(null, null, null, intent, resolvedType,

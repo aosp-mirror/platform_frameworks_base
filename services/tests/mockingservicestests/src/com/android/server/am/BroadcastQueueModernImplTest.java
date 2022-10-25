@@ -26,6 +26,8 @@ import static com.android.server.am.BroadcastQueueTest.PACKAGE_YELLOW;
 import static com.android.server.am.BroadcastQueueTest.getUidForPackage;
 import static com.android.server.am.BroadcastQueueTest.makeManifestReceiver;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -278,7 +280,7 @@ public class BroadcastQueueModernImplTest {
         final long notCachedRunnableAt = queue.getRunnableAt();
         queue.setProcessCached(true);
         final long cachedRunnableAt = queue.getRunnableAt();
-        assertTrue(cachedRunnableAt > notCachedRunnableAt);
+        assertThat(cachedRunnableAt).isGreaterThan(notCachedRunnableAt);
         assertEquals(ProcessList.SCHED_GROUP_BACKGROUND, queue.getPreferredSchedulingGroupLocked());
     }
 
@@ -306,13 +308,13 @@ public class BroadcastQueueModernImplTest {
         // (b) the next one up is the fg-priority broadcast despite its later enqueue time
         queue.setProcessCached(false);
         assertTrue(queue.isRunnable());
-        assertEquals(airplaneRecord.enqueueTime, queue.getRunnableAt());
+        assertThat(queue.getRunnableAt()).isAtMost(airplaneRecord.enqueueClockTime);
         assertEquals(ProcessList.SCHED_GROUP_DEFAULT, queue.getPreferredSchedulingGroupLocked());
         assertEquals(queue.peekNextBroadcastRecord(), airplaneRecord);
 
         queue.setProcessCached(true);
         assertTrue(queue.isRunnable());
-        assertEquals(airplaneRecord.enqueueTime, queue.getRunnableAt());
+        assertThat(queue.getRunnableAt()).isAtMost(airplaneRecord.enqueueClockTime);
         assertEquals(ProcessList.SCHED_GROUP_DEFAULT, queue.getPreferredSchedulingGroupLocked());
         assertEquals(queue.peekNextBroadcastRecord(), airplaneRecord);
     }
@@ -356,12 +358,12 @@ public class BroadcastQueueModernImplTest {
 
         mConstants.MAX_PENDING_BROADCASTS = 128;
         queue.invalidateRunnableAt();
-        assertTrue(queue.getRunnableAt() > airplaneRecord.enqueueTime);
+        assertThat(queue.getRunnableAt()).isGreaterThan(airplaneRecord.enqueueTime);
         assertEquals(BroadcastProcessQueue.REASON_NORMAL, queue.getRunnableAtReason());
 
         mConstants.MAX_PENDING_BROADCASTS = 1;
         queue.invalidateRunnableAt();
-        assertTrue(queue.getRunnableAt() == airplaneRecord.enqueueTime);
+        assertThat(queue.getRunnableAt()).isAtMost(airplaneRecord.enqueueTime);
         assertEquals(BroadcastProcessQueue.REASON_MAX_PENDING, queue.getRunnableAtReason());
     }
 
