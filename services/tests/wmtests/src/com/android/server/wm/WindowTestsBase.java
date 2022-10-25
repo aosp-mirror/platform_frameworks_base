@@ -1017,6 +1017,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         private ActivityInfo.WindowLayout mWindowLayout;
         private boolean mVisible = true;
         private ActivityOptions mLaunchIntoPipOpts;
+        private String mRequiredDisplayCategory;
 
         ActivityBuilder(ActivityTaskManagerService service) {
             mService = service;
@@ -1157,6 +1158,11 @@ class WindowTestsBase extends SystemServiceTestsBase {
             return this;
         }
 
+        ActivityBuilder setRequiredDisplayCategory(String requiredDisplayCategory) {
+            mRequiredDisplayCategory = requiredDisplayCategory;
+            return this;
+        }
+
         ActivityRecord build() {
             SystemServicesTestRule.checkHoldsLock(mService.mGlobalLock);
             try {
@@ -1201,6 +1207,9 @@ class WindowTestsBase extends SystemServiceTestsBase {
             aInfo.configChanges |= mConfigChanges;
             aInfo.taskAffinity = mAffinity;
             aInfo.windowLayout = mWindowLayout;
+            if (mRequiredDisplayCategory != null) {
+                aInfo.requiredDisplayCategory = mRequiredDisplayCategory;
+            }
 
             if (mCreateTask) {
                 mTask = new TaskBuilder(mService.mTaskSupervisor)

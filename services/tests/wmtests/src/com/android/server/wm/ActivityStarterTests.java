@@ -62,11 +62,13 @@ import static com.android.server.wm.TaskFragment.EMBEDDING_DISALLOWED_NEW_TASK;
 import static com.android.server.wm.TaskFragment.EMBEDDING_DISALLOWED_UNTRUSTED_HOST;
 import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
+import static com.android.server.wm.WindowTestsBase.ActivityBuilder.DEFAULT_FAKE_UID;
 
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -1613,6 +1615,119 @@ public class ActivityStarterTests extends WindowTestsBase {
 
         assertEquals(START_DELIVERED_TO_TOP, result2);
         assertNull(starter2.mMovedToTopActivity);
+    }
+
+    /**
+     * Tests a task with specific display category exist in system and then launching another
+     * activity with the same affinity but without define the display category. Make sure the
+     * lunching activity is placed on the different task.
+     */
+    @Test
+    public void testLaunchActivityWithoutDisplayCategory() {
+        final ActivityInfo info = new ActivityInfo();
+        info.applicationInfo = new ApplicationInfo();
+        info.taskAffinity = ActivityRecord.computeTaskAffinity("test", DEFAULT_FAKE_UID,
+                0 /* launchMode */);
+        info.requiredDisplayCategory = "automotive";
+        final Task task = new TaskBuilder(mSupervisor).setCreateActivity(true).setActivityInfo(info)
+                .build();
+
+        final ActivityRecord target = new ActivityBuilder(mAtm).setAffinity(info.taskAffinity)
+                .build();
+        final ActivityStarter starter = prepareStarter(FLAG_ACTIVITY_NEW_TASK, false);
+        startActivityInner(starter, target, null /* source */, null /* options */,
+                null /* inTask */, null /* inTaskFragment */);
+
+        assertNotEquals(task, target.getTask());
+    }
+
+    /**
+     * Tests a task with a specific display category exist in the system and then launches another
+     * activity with the different display category. Make sure the launching activity is not placed
+     * on the sourceRecord's task.
+     */
+    @Test
+    public void testLaunchActivityWithDifferentDisplayCategory() {
+        final ActivityInfo info = new ActivityInfo();
+        info.applicationInfo = new ApplicationInfo();
+        info.taskAffinity = ActivityRecord.computeTaskAffinity("test", DEFAULT_FAKE_UID,
+                0 /* launchMode */);
+        info.requiredDisplayCategory = "automotive";
+        final Task task = new TaskBuilder(mSupervisor).setCreateActivity(true).setActivityInfo(info)
+                .build();
+
+        final ActivityRecord target = new ActivityBuilder(mAtm).setRequiredDisplayCategory("auto")
+                .setAffinity(info.taskAffinity).build();
+        final ActivityStarter starter = prepareStarter(0, false);
+        startActivityInner(starter, target,  task.getBottomMostActivity(), null /* options */,
+                null /* inTask */, null /* inTaskFragment */);
+
+        assertNotEquals(task, target.getTask());
+    }
+
+    /**
+     * Tests a task with specific display category exist in system and then launching another
+     * activity with the same display category. Make sure the launching activity is placed on the
+     * same task.
+     */
+    @Test
+    public void testLaunchActivityWithSameDisplayCategory() {
+        final ActivityInfo info = new ActivityInfo();
+        info.applicationInfo = new ApplicationInfo();
+        info.taskAffinity = ActivityRecord.computeTaskAffinity("test", DEFAULT_FAKE_UID,
+                0 /* launchMode */);
+        info.requiredDisplayCategory = "automotive";
+        final Task task = new TaskBuilder(mSupervisor).setCreateActivity(true).setActivityInfo(info)
+                .build();
+
+        final ActivityRecord target = new ActivityBuilder(mAtm)
+                .setRequiredDisplayCategory(info.requiredDisplayCategory)
+                .setAffinity(info.taskAffinity).build();
+        final ActivityStarter starter = prepareStarter(0, false);
+        startActivityInner(starter, target,  task.getBottomMostActivity(), null /* options */,
+                null /* inTask */, null /* inTaskFragment */);
+
+        assertEquals(task, target.getTask());
+    }
+
+    /**
+     * Tests a task with specific display category exist in system and launching activity into the
+     * specific task within inTask attribute. Make sure the activity is not placed on the task since
+     * the display category is different.
+     */
+    @Test
+    public void testLaunchActivityInTaskWithDisplayCategory() {
+        final ActivityInfo info = new ActivityInfo();
+        info.applicationInfo = new ApplicationInfo();
+        info.requiredDisplayCategory = "automotive";
+        final Task inTask = new TaskBuilder(mSupervisor).setActivityInfo(info).build();
+        inTask.inRecents = true;
+
+        final ActivityStarter starter = prepareStarter(0, false);
+        final ActivityRecord target = new ActivityBuilder(mAtm).build();
+        startActivityInner(starter, target, null /* source */, null /* options */, inTask,
+                null /* inTaskFragment */);
+
+        assertNotEquals(inTask, target.getTask());
+    }
+
+    /**
+     * Tests a task without a specific display category exist in the system and launches activity
+     * with display category into the task within the inTask attribute. Make sure the activity is
+     * not placed on the task since the display category is different.
+     */
+    @Test
+    public void testLaunchDisplayCategoryActivityInTask() {
+        final Task inTask = new TaskBuilder(mSupervisor).build();
+        inTask.inRecents = true;
+
+        final ActivityStarter starter = prepareStarter(0, false);
+        final ActivityRecord target = new ActivityBuilder(mAtm).setRequiredDisplayCategory("auto")
+                .build();
+        startActivityInner(starter, target, null /* source */, null /* options */, inTask,
+                null /* inTaskFragment */);
+
+        assertNotEquals(inTask, target.getTask());
     }
 
     private static void startActivityInner(ActivityStarter starter, ActivityRecord target,

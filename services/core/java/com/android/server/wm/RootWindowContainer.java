@@ -418,7 +418,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             } else if (!isDocument && !taskIsDocument
                     && mIdealRecord == null && mCandidateRecord == null
                     && task.rootAffinity != null) {
-                if (task.rootAffinity.equals(mTaskAffinity)) {
+                if (task.rootAffinity.equals(mTaskAffinity)
+                        && task.isSameRequiredDisplayCategory(mInfo)) {
                     ProtoLog.d(WM_DEBUG_TASKS, "Found matching affinity candidate!");
                     // It is possible for multiple tasks to have the same root affinity especially
                     // if they are in separate root tasks. We save off this candidate, but keep
