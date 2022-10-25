@@ -18,7 +18,6 @@ import android.database.ContentObserver
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Handler
-import android.os.UserHandle
 import android.provider.Settings
 import android.util.Log
 import com.android.internal.annotations.Keep
@@ -39,14 +38,14 @@ open class ClockRegistry(
     val context: Context,
     val pluginManager: PluginManager,
     val handler: Handler,
-    defaultClockProvider: ClockProvider
+    val isEnabled: Boolean,
+    userHandle: Int,
+    defaultClockProvider: ClockProvider,
 ) {
     // Usually this would be a typealias, but a SAM provides better java interop
     fun interface ClockChangeListener {
         fun onClockChanged()
     }
-
-    var isEnabled: Boolean = false
 
     private val gson = Gson()
     private val availableClocks = mutableMapOf<ClockId, ClockInfo>()
@@ -97,14 +96,19 @@ open class ClockRegistry(
             )
         }
 
-        pluginManager.addPluginListener(pluginListener, ClockProviderPlugin::class.java,
-            true /* allowMultiple */)
-        context.contentResolver.registerContentObserver(
-            Settings.Secure.getUriFor(Settings.Secure.LOCK_SCREEN_CUSTOM_CLOCK_FACE),
-            false,
-            settingObserver,
-            UserHandle.USER_ALL
-        )
+        if (isEnabled) {
+            pluginManager.addPluginListener(
+                pluginListener,
+                ClockProviderPlugin::class.java,
+                /*allowMultiple=*/ true
+            )
+            context.contentResolver.registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.LOCK_SCREEN_CUSTOM_CLOCK_FACE),
+                /*notifyForDescendants=*/ false,
+                settingObserver,
+                userHandle
+            )
+        }
     }
 
     private fun connectClocks(provider: ClockProvider) {
