@@ -17,32 +17,58 @@
 package com.android.systemui.statusbar.pipeline.mobile.domain.interactor
 
 import android.telephony.CarrierConfigManager
-import com.android.settingslib.SignalIcon
-import com.android.settingslib.mobile.TelephonyIcons
-import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileSubscriptionModel
+import com.android.settingslib.SignalIcon.MobileIconGroup
+import com.android.systemui.statusbar.pipeline.mobile.data.model.DefaultNetworkType
+import com.android.systemui.statusbar.pipeline.mobile.data.model.OverrideNetworkType
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
+import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxy
 import com.android.systemui.util.CarrierConfigTracker
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
 interface MobileIconInteractor {
-    /** Identifier for RAT type indicator */
-    val iconGroup: Flow<SignalIcon.MobileIconGroup>
+    /** Observable for RAT type (network type) indicator */
+    val networkTypeIconGroup: Flow<MobileIconGroup>
+
     /** True if this line of service is emergency-only */
     val isEmergencyOnly: Flow<Boolean>
+
     /** Int describing the connection strength. 0-4 OR 1-5. See [numberOfLevels] */
     val level: Flow<Int>
+
     /** Based on [CarrierConfigManager.KEY_INFLATE_SIGNAL_STRENGTH_BOOL], either 4 or 5 */
     val numberOfLevels: Flow<Int>
+
     /** True when we want to draw an icon that makes room for the exclamation mark */
     val cutOut: Flow<Boolean>
 }
 
 /** Interactor for a single mobile connection. This connection _should_ have one subscription ID */
 class MobileIconInteractorImpl(
-    mobileStatusInfo: Flow<MobileSubscriptionModel>,
+    defaultMobileIconMapping: Flow<Map<String, MobileIconGroup>>,
+    defaultMobileIconGroup: Flow<MobileIconGroup>,
+    mobileMappingsProxy: MobileMappingsProxy,
+    connectionRepository: MobileConnectionRepository,
 ) : MobileIconInteractor {
-    override val iconGroup: Flow<SignalIcon.MobileIconGroup> = flowOf(TelephonyIcons.THREE_G)
+    private val mobileStatusInfo = connectionRepository.subscriptionModelFlow
+
+    /** Observable for the current RAT indicator icon ([MobileIconGroup]) */
+    override val networkTypeIconGroup: Flow<MobileIconGroup> =
+        combine(
+            mobileStatusInfo,
+            defaultMobileIconMapping,
+            defaultMobileIconGroup,
+        ) { info, mapping, defaultGroup ->
+            val lookupKey =
+                when (val resolved = info.resolvedNetworkType) {
+                    is DefaultNetworkType -> mobileMappingsProxy.toIconKey(resolved.type)
+                    is OverrideNetworkType -> mobileMappingsProxy.toIconKeyOverride(resolved.type)
+                }
+            mapping[lookupKey] ?: defaultGroup
+        }
+
     override val isEmergencyOnly: Flow<Boolean> = mobileStatusInfo.map { it.isEmergencyOnly }
 
     override val level: Flow<Int> =

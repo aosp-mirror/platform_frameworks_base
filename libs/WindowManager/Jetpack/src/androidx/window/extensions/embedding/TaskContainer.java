@@ -221,6 +221,24 @@ class TaskContainer {
         return mContainers.indexOf(child);
     }
 
+    /** Whether the Task is in an intermediate state waiting for the server update.*/
+    boolean isInIntermediateState() {
+        for (TaskFragmentContainer container : mContainers) {
+            if (container.isInIntermediateState()) {
+                // We are in an intermediate state to wait for server update on this TaskFragment.
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Adds the descriptors of split states in this Task to {@code outSplitStates}. */
+    void getSplitStates(@NonNull List<SplitInfo> outSplitStates) {
+        for (SplitContainer container : mSplitContainers) {
+            outSplitStates.add(container.toSplitInfo());
+        }
+    }
+
     /**
      * A wrapper class which contains the display ID and {@link Configuration} of a
      * {@link TaskContainer}

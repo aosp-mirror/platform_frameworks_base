@@ -1422,6 +1422,11 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     @GuardedBy("mLock")
     void updateContainer(@NonNull WindowContainerTransaction wct,
             @NonNull TaskFragmentContainer container) {
+        if (!container.getTaskContainer().isVisible()) {
+            // Wait until the Task is visible to avoid unnecessary update when the Task is still in
+            // background.
+            return;
+        }
         if (launchPlaceholderIfNecessary(wct, container)) {
             // Placeholder was launched, the positions will be updated when the activity is added
             // to the secondary container.
@@ -1643,16 +1648,14 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     /**
      * Notifies listeners about changes to split states if necessary.
      */
+    @VisibleForTesting
     @GuardedBy("mLock")
-    private void updateCallbackIfNecessary() {
-        if (mEmbeddingCallback == null) {
+    void updateCallbackIfNecessary() {
+        if (mEmbeddingCallback == null || !readyToReportToClient()) {
             return;
         }
-        if (!allActivitiesCreated()) {
-            return;
-        }
-        List<SplitInfo> currentSplitStates = getActiveSplitStates();
-        if (currentSplitStates == null || mLastReportedSplitStates.equals(currentSplitStates)) {
+        final List<SplitInfo> currentSplitStates = getActiveSplitStates();
+        if (mLastReportedSplitStates.equals(currentSplitStates)) {
             return;
         }
         mLastReportedSplitStates.clear();
@@ -1661,48 +1664,27 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     }
 
     /**
-     * @return a list of descriptors for currently active split states. If the value returned is
-     * null, that indicates that the active split states are in an intermediate state and should
-     * not be reported.
+     * Returns a list of descriptors for currently active split states.
      */
     @GuardedBy("mLock")
-    @Nullable
+    @NonNull
     private List<SplitInfo> getActiveSplitStates() {
-        List<SplitInfo> splitStates = new ArrayList<>();
+        final List<SplitInfo> splitStates = new ArrayList<>();
         for (int i = mTaskContainers.size() - 1; i >= 0; i--) {
-            final List<SplitContainer> splitContainers = mTaskContainers.valueAt(i)
-                    .mSplitContainers;
-            for (SplitContainer container : splitContainers) {
-                if (container.getPrimaryContainer().isEmpty()
-                        || container.getSecondaryContainer().isEmpty()) {
-                    // We are in an intermediate state because either the split container is about
-                    // to be removed or the primary or secondary container are about to receive an
-                    // activity.
-                    return null;
-                }
-                final ActivityStack primaryContainer = container.getPrimaryContainer()
-                        .toActivityStack();
-                final ActivityStack secondaryContainer = container.getSecondaryContainer()
-                        .toActivityStack();
-                final SplitInfo splitState = new SplitInfo(primaryContainer, secondaryContainer,
-                        container.getSplitAttributes());
-                splitStates.add(splitState);
-            }
+            mTaskContainers.valueAt(i).getSplitStates(splitStates);
         }
         return splitStates;
     }
 
     /**
-     * Checks if all activities that are registered with the containers have already appeared in
-     * the client.
+     * Whether we can now report the split states to the client.
      */
-    private boolean allActivitiesCreated() {
+    @GuardedBy("mLock")
+    private boolean readyToReportToClient() {
         for (int i = mTaskContainers.size() - 1; i >= 0; i--) {
-            final List<TaskFragmentContainer> containers = mTaskContainers.valueAt(i).mContainers;
-            for (TaskFragmentContainer container : containers) {
-                if (!container.taskInfoActivityCountMatchesCreated()) {
-                    return false;
-                }
+            if (mTaskContainers.valueAt(i).isInIntermediateState()) {
+                // If any Task is in an intermediate state, wait for the server update.
+                return false;
             }
         }
         return true;
