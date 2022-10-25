@@ -64,9 +64,9 @@
     <string name="kg_sim_unlock_progress_dialog_message" msgid="4251352015304070326">"ছিম কার্ড আনলক কৰি থকা হৈছে…"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"৪টাৰ পৰা ৮টা সংখ্যাযুক্ত এটা পিন লিখক।"</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"PUK ক\'ডটো ৮টা বা তাতকৈ অধিক সংখ্যা থকা হ\'ব লাগিব।"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"আপুনি আপোনাৰ পিন <xliff:g id="NUMBER_0">%1$d</xliff:g> বাৰ ভুলকৈ লিখিছে। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g>ছেকেণ্ডৰ পিছত আকৌ চেষ্টা কৰক।"</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"আপুনি আপোনাৰ পিন <xliff:g id="NUMBER_0">%1$d</xliff:g> বাৰ ভুলকৈ লিখিছে। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g>ছেকেণ্ডৰ পাছত আকৌ চেষ্টা কৰক।"</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"আপুনি আপোনাৰ পাছৱৰ্ড <xliff:g id="NUMBER_0">%1$d</xliff:g>বাৰ ভুলকৈ লিখিছে। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> ছেকেণ্ডৰ পাছত আকৌ চেষ্টা কৰক।"</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"আপুনি আপোনাৰ আনলক আৰ্হি <xliff:g id="NUMBER_0">%1$d</xliff:g> বাৰ ভুলকৈ আঁকিছে। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g>ছেকেণ্ডৰ পিছত আকৌ চেষ্টা কৰক।"</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"আপুনি আপোনাৰ আনলক আৰ্হি <xliff:g id="NUMBER_0">%1$d</xliff:g> বাৰ ভুলকৈ আঁকিছে। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g>ছেকেণ্ডৰ পাছত আকৌ চেষ্টা কৰক।"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"ছিমৰ ভুল পিন ক\'ড, আপোনাৰ ডিভাইচটো আনলক কৰিবলৈ আপুনি এতিয়া আপোনাৰ বাহকৰ সৈতে যোগাযোগ কৰিবই লাগিব।"</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
       <item quantity="one">ছিমৰ ভুল পিন ক’ড, আপুনি আৰু <xliff:g id="NUMBER_1">%d</xliff:g> বাৰ প্ৰয়াস কৰিব পাৰিব।</item>
@@ -81,9 +81,9 @@
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"ছিম PUKৰ জৰিয়তে আনলক কৰিব পৰা নগ\'ল!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"ইনপুট পদ্ধতি সলনি কৰক"</string>
     <string name="airplane_mode" msgid="2528005343938497866">"এয়াৰপ্লে’ন ম’ড"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"ডিভাইচ ৰিষ্টাৰ্ট হোৱাৰ পিছত আৰ্হি দিয়াটো বাধ্যতামূলক"</string>
-    <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"ডিভাইচ ৰিষ্টাৰ্ট হোৱাৰ পিছত পিন দিয়াটো বাধ্যতামূলক"</string>
-    <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"ডিভাইচ ৰিষ্টাৰ্ট হোৱাৰ পিছত পাছৱৰ্ড দিয়াটো বাধ্যতামূলক"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"ডিভাইচ ৰিষ্টাৰ্ট হোৱাৰ পাছত আৰ্হি দিয়াটো বাধ্যতামূলক"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"ডিভাইচ ৰিষ্টাৰ্ট হোৱাৰ পাছত পিন দিয়াটো বাধ্যতামূলক"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"ডিভাইচ ৰিষ্টাৰ্ট হোৱাৰ পাছত পাছৱৰ্ড দিয়াটো বাধ্যতামূলক"</string>
     <string name="kg_prompt_reason_timeout_pattern" msgid="9170360502528959889">"অতিৰিক্ত সুৰক্ষাৰ বাবে আর্হি দিয়াটো বাধ্যতামূলক"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="5945186097160029201">"অতিৰিক্ত সুৰক্ষাৰ বাবে পিন দিয়াটো বাধ্যতামূলক"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"অতিৰিক্ত সুৰক্ষাৰ বাবে পাছৱর্ড দিয়াটো বাধ্যতামূলক"</string>
