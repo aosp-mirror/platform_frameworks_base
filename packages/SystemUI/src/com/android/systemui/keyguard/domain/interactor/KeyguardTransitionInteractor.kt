@@ -24,6 +24,8 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 
 /** Encapsulates business-logic related to the keyguard transitions. */
 @SysUISingleton
@@ -34,4 +36,17 @@ constructor(
 ) {
     /** AOD->LOCKSCREEN transition information. */
     val aodToLockscreenTransition: Flow<TransitionStep> = repository.transition(AOD, LOCKSCREEN)
+
+    /** LOCKSCREEN->AOD transition information. */
+    val lockscreenToAodTransition: Flow<TransitionStep> = repository.transition(LOCKSCREEN, AOD)
+
+    /**
+     * AOD<->LOCKSCREEN transition information, mapped to dozeAmount range of AOD (1f) <->
+     * Lockscreen (0f).
+     */
+    val dozeAmountTransition: Flow<TransitionStep> =
+        merge(
+            aodToLockscreenTransition.map { step -> step.copy(value = 1f - step.value) },
+            lockscreenToAodTransition,
+        )
 }
