@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -23,6 +22,7 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -458,11 +458,22 @@ fun CreationSelectionCard(
               PrimaryCreateOptionRow(requestDisplayInfo = requestDisplayInfo,
                 onOptionSelected = onOptionSelected)
             }
-          if (multiProvider) {
-            item {
-              MoreOptionsRow(onSelect = onMoreOptionsSelected)
-            }
-          }
+        }
+      }
+      if (multiProvider) {
+        TextButton(
+          onClick = onMoreOptionsSelected,
+          modifier = Modifier
+          .padding(horizontal = 24.dp)
+          .align(alignment = Alignment.CenterHorizontally)){
+          Text(
+              text =
+                when (requestDisplayInfo.type) {
+                  TYPE_PUBLIC_KEY_CREDENTIAL ->
+                    stringResource(R.string.string_create_in_another_place)
+                  else -> stringResource(R.string.string_save_to_another_place)},
+            textAlign = TextAlign.Center,
+          )
         }
       }
       Divider(
@@ -563,23 +574,4 @@ fun MoreOptionsInfoRow(
             )
         }
     }
-}
-
-@ExperimentalMaterialApi
-@Composable
-fun MoreOptionsRow(onSelect: () -> Unit) {
-  Chip(
-    modifier = Modifier.fillMaxWidth().height(52.dp),
-    onClick = onSelect,
-    colors = ChipDefaults.chipColors(
-      backgroundColor = Grey100,
-      leadingIconContentColor = Grey100
-    ),
-    shape = Shapes.large
-  ) {
-      Text(
-        text = stringResource(R.string.string_create_at_another_place),
-        style = Typography.h6,
-      )
-  }
 }
