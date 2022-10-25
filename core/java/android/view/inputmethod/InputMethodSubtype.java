@@ -16,6 +16,7 @@
 
 package android.view.inputmethod;
 
+import android.annotation.AnyThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -23,6 +24,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.icu.text.DisplayContext;
 import android.icu.text.LocaleDisplayNames;
+import android.icu.util.ULocale;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -88,6 +90,14 @@ public final class InputMethodSubtype implements Parcelable {
     private final Object mLock = new Object();
     private volatile Locale mCachedLocaleObj;
     private volatile HashMap<String, String> mExtraValueHashMapCache;
+
+    /**
+     * A volatile cache to optimize {@link #getCanonicalizedLanguageTag()}.
+     *
+     * <p>{@code null} means that the initial evaluation is not yet done.</p>
+     */
+    @Nullable
+    private volatile String mCachedCanonicalizedLanguageTag;
 
     /**
      * InputMethodSubtypeBuilder is a builder class of InputMethodSubtype.
@@ -389,6 +399,37 @@ public final class InputMethodSubtype implements Parcelable {
             }
             return mCachedLocaleObj;
         }
+    }
+
+    /**
+     * Returns a canonicalized BCP 47 Language Tag initialized with {@link #getLocaleObject()}.
+     *
+     * <p>This has an internal cache mechanism.  Subsequent calls are in general cheap and fast.</p>
+     *
+     * @return a canonicalized BCP 47 Language Tag initialized with {@link #getLocaleObject()}. An
+     *         empty string if {@link #getLocaleObject()} returns {@code null} or an empty
+     *         {@link Locale} object.
+     * @hide
+     */
+    @AnyThread
+    @NonNull
+    public String getCanonicalizedLanguageTag() {
+        final String cachedValue = mCachedCanonicalizedLanguageTag;
+        if (cachedValue != null) {
+            return cachedValue;
+        }
+
+        String result = null;
+        final Locale locale = getLocaleObject();
+        if (locale != null) {
+            final String langTag = locale.toLanguageTag();
+            if (!TextUtils.isEmpty(langTag)) {
+                result = ULocale.createCanonical(ULocale.forLanguageTag(langTag)).toLanguageTag();
+            }
+        }
+        result = TextUtils.emptyIfNull(result);
+        mCachedCanonicalizedLanguageTag = result;
+        return result;
     }
 
     /**
