@@ -22,6 +22,9 @@ import android.perftests.utils.PerfStatusReporter;
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.modules.utils.FastDataInput;
+import com.android.modules.utils.FastDataOutput;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
