@@ -37,8 +37,6 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.plugins.ClockAnimations;
 import com.android.systemui.plugins.ClockController;
@@ -120,8 +118,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             SecureSettings secureSettings,
             @Main Executor uiExecutor,
             DumpManager dumpManager,
-            ClockEventController clockEventController,
-            FeatureFlags featureFlags) {
+            ClockEventController clockEventController) {
         super(keyguardClockSwitch);
         mStatusBarStateController = statusBarStateController;
         mClockRegistry = clockRegistry;
@@ -134,7 +131,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mDumpManager = dumpManager;
         mClockEventController = clockEventController;
 
-        mClockRegistry.setEnabled(featureFlags.isEnabled(Flags.LOCKSCREEN_CUSTOM_CLOCKS));
         mClockChangedListener = () -> {
             setClock(mClockRegistry.createCurrentClock());
         };

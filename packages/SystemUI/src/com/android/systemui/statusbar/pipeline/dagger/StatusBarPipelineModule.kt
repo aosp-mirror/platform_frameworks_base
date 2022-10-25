@@ -18,10 +18,14 @@ package com.android.systemui.statusbar.pipeline.dagger
 
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.AirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.AirplaneModeRepositoryImpl
-import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileSubscriptionRepository
-import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileSubscriptionRepositoryImpl
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepositoryImpl
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.UserSetupRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.UserSetupRepositoryImpl
+import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconsInteractor
+import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconsInteractorImpl
+import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxy
+import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxyImpl
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepository
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepositoryImpl
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository
@@ -41,10 +45,16 @@ abstract class StatusBarPipelineModule {
     abstract fun wifiRepository(impl: WifiRepositoryImpl): WifiRepository
 
     @Binds
-    abstract fun mobileSubscriptionRepository(
-        impl: MobileSubscriptionRepositoryImpl
-    ): MobileSubscriptionRepository
+    abstract fun mobileConnectionsRepository(
+        impl: MobileConnectionsRepositoryImpl
+    ): MobileConnectionsRepository
 
     @Binds
     abstract fun userSetupRepository(impl: UserSetupRepositoryImpl): UserSetupRepository
+
+    @Binds
+    abstract fun mobileMappingsProxy(impl: MobileMappingsProxyImpl): MobileMappingsProxy
+
+    @Binds
+    abstract fun mobileIconsInteractor(impl: MobileIconsInteractorImpl): MobileIconsInteractor
 }

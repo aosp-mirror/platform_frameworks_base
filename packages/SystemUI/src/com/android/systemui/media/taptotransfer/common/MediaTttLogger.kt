@@ -43,6 +43,21 @@ class MediaTttLogger(
         )
     }
 
+    /**
+     * Logs an error in trying to update to [displayState].
+     *
+     * [displayState] is either a [android.app.StatusBarManager.MediaTransferSenderState] or
+     * a [android.app.StatusBarManager.MediaTransferReceiverState].
+     */
+    fun logStateChangeError(displayState: Int) {
+        buffer.log(
+            tag,
+            LogLevel.ERROR,
+            { int1 = displayState },
+            { "Cannot display state=$int1; aborting" }
+        )
+    }
+
     /** Logs that we couldn't find information for [packageName]. */
     fun logPackageNotFound(packageName: String) {
         buffer.log(

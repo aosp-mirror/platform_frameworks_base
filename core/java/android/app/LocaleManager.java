@@ -173,7 +173,7 @@ public class LocaleManager {
     @TestApi
     public void setSystemLocales(@NonNull LocaleList locales) {
         try {
-            Configuration conf = ActivityManager.getService().getConfiguration();
+            Configuration conf = new Configuration();
             conf.setLocales(locales);
             ActivityManager.getService().updatePersistentConfiguration(conf);
         } catch (RemoteException e) {

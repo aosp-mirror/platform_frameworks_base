@@ -19,7 +19,6 @@ package com.android.systemui.media.taptotransfer.sender
 import android.app.StatusBarManager
 import android.content.Context
 import android.media.MediaRoute2Info
-import android.util.Log
 import android.view.View
 import com.android.internal.logging.UiEventLogger
 import com.android.internal.statusbar.IUndoMediaTransferCallback
@@ -34,7 +33,6 @@ import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.temporarydisplay.chipbar.ChipbarCoordinator
 import com.android.systemui.temporarydisplay.chipbar.ChipbarEndItem
 import com.android.systemui.temporarydisplay.chipbar.ChipbarInfo
-import com.android.systemui.temporarydisplay.chipbar.SENDER_TAG
 import javax.inject.Inject
 
 /**
@@ -86,7 +84,7 @@ constructor(
         logger.logStateChange(stateName, routeInfo.id, routeInfo.clientPackageName)
 
         if (chipState == null) {
-            Log.e(SENDER_TAG, "Unhandled MediaTransferSenderState $displayState")
+            logger.logStateChangeError(displayState)
             return
         }
         uiEventLogger.logSenderStateChange(chipState)
