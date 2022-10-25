@@ -27,6 +27,7 @@ import android.telephony.TelephonyCallback.ServiceStateListener
 import android.telephony.TelephonyCallback.SignalStrengthsListener
 import android.telephony.TelephonyDisplayInfo
 import android.telephony.TelephonyManager
+import android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN
 
 /**
  * Data class containing all of the relevant information for a particular line of service, known as
@@ -57,6 +58,11 @@ data class MobileSubscriptionModel(
     /** From [CarrierNetworkListener.onCarrierNetworkChange] */
     val carrierNetworkChangeActive: Boolean? = null,
 
-    /** From [DisplayInfoListener.onDisplayInfoChanged] */
-    val displayInfo: TelephonyDisplayInfo? = null
+    /**
+     * From [DisplayInfoListener.onDisplayInfoChanged].
+     *
+     * [resolvedNetworkType] is the [TelephonyDisplayInfo.getOverrideNetworkType] if it exists or
+     * [TelephonyDisplayInfo.getNetworkType]. This is used to look up the proper network type icon
+     */
+    val resolvedNetworkType: ResolvedNetworkType = DefaultNetworkType(NETWORK_TYPE_UNKNOWN),
 )

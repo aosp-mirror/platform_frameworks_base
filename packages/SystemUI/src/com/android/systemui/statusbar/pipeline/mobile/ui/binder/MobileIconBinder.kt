@@ -17,6 +17,8 @@
 package com.android.systemui.statusbar.pipeline.mobile.ui.binder
 
 import android.content.res.ColorStateList
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.core.view.isVisible
@@ -24,6 +26,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.settingslib.graph.SignalDrawable
 import com.android.systemui.R
+import com.android.systemui.common.ui.binder.IconViewBinder
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconViewModel
 import kotlinx.coroutines.flow.collect
@@ -37,6 +40,7 @@ object MobileIconBinder {
         view: ViewGroup,
         viewModel: MobileIconViewModel,
     ) {
+        val networkTypeView = view.requireViewById<ImageView>(R.id.mobile_type)
         val iconView = view.requireViewById<ImageView>(R.id.mobile_signal)
         val mobileDrawable = SignalDrawable(view.context).also { iconView.setImageDrawable(it) }
 
@@ -52,10 +56,20 @@ object MobileIconBinder {
                     }
                 }
 
+                // Set the network type icon
+                launch {
+                    viewModel.networkTypeIcon.distinctUntilChanged().collect { dataTypeId ->
+                        dataTypeId?.let { IconViewBinder.bind(dataTypeId, networkTypeView) }
+                        networkTypeView.visibility = if (dataTypeId != null) VISIBLE else GONE
+                    }
+                }
+
                 // Set the tint
                 launch {
                     viewModel.tint.collect { tint ->
-                        iconView.imageTintList = ColorStateList.valueOf(tint)
+                        val tintList = ColorStateList.valueOf(tint)
+                        iconView.imageTintList = tintList
+                        networkTypeView.imageTintList = tintList
                     }
                 }
             }
