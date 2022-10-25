@@ -49,7 +49,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.timedetector.TimeDetectorStrategy.Origin;
-import com.android.server.timezonedetector.ConfigurationChangeListener;
+import com.android.server.timezonedetector.StateChangeListener;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -104,8 +104,8 @@ final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
     @NonNull private final ServerFlagsOriginPrioritiesSupplier mServerFlagsOriginPrioritiesSupplier;
 
     @GuardedBy("this")
-    @NonNull private final List<ConfigurationChangeListener> mConfigurationInternalListeners =
-            new ArrayList<>();
+    @NonNull
+    private final List<StateChangeListener> mConfigurationInternalListeners = new ArrayList<>();
 
     /**
      * If a newly calculated system clock time and the current system clock time differs by this or
@@ -167,20 +167,20 @@ final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
     }
 
     private synchronized void handleConfigurationInternalChangeOnMainThread() {
-        for (ConfigurationChangeListener changeListener : mConfigurationInternalListeners) {
+        for (StateChangeListener changeListener : mConfigurationInternalListeners) {
             changeListener.onChange();
         }
     }
 
     @Override
     public synchronized void addConfigurationInternalChangeListener(
-            @NonNull ConfigurationChangeListener listener) {
+            @NonNull StateChangeListener listener) {
         mConfigurationInternalListeners.add(Objects.requireNonNull(listener));
     }
 
     @Override
     public synchronized void removeConfigurationInternalChangeListener(
-            @NonNull ConfigurationChangeListener listener) {
+            @NonNull StateChangeListener listener) {
         mConfigurationInternalListeners.remove(Objects.requireNonNull(listener));
     }
 

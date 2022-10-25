@@ -28,7 +28,7 @@ import com.android.server.AlarmManagerInternal;
 import com.android.server.LocalServices;
 import com.android.server.SystemClockTime;
 import com.android.server.SystemClockTime.TimeConfidence;
-import com.android.server.timezonedetector.ConfigurationChangeListener;
+import com.android.server.timezonedetector.StateChangeListener;
 
 import java.io.PrintWriter;
 import java.util.Objects;
@@ -60,10 +60,10 @@ final class EnvironmentImpl implements TimeDetectorStrategyImpl.Environment {
 
     @Override
     public void setConfigurationInternalChangeListener(
-            @NonNull ConfigurationChangeListener listener) {
-        ConfigurationChangeListener configurationChangeListener =
+            @NonNull StateChangeListener listener) {
+        StateChangeListener stateChangeListener =
                 () -> mHandler.post(listener::onChange);
-        mServiceConfigAccessor.addConfigurationInternalChangeListener(configurationChangeListener);
+        mServiceConfigAccessor.addConfigurationInternalChangeListener(stateChangeListener);
     }
 
     @Override

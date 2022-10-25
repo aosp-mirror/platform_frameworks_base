@@ -18,8 +18,6 @@ package com.android.server.timezonedetector;
 
 import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
-import android.content.Context;
-import android.os.Handler;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 
@@ -29,7 +27,6 @@ import com.android.server.SystemTimeZone;
 import com.android.server.SystemTimeZone.TimeZoneConfidence;
 
 import java.io.PrintWriter;
-import java.util.Objects;
 
 /**
  * The real implementation of {@link TimeZoneDetectorStrategyImpl.Environment}.
@@ -38,29 +35,7 @@ final class EnvironmentImpl implements TimeZoneDetectorStrategyImpl.Environment 
 
     private static final String TIMEZONE_PROPERTY = "persist.sys.timezone";
 
-    @NonNull private final Context mContext;
-    @NonNull private final Handler mHandler;
-    @NonNull private final ServiceConfigAccessor mServiceConfigAccessor;
-
-    EnvironmentImpl(@NonNull Context context, @NonNull Handler handler,
-            @NonNull ServiceConfigAccessor serviceConfigAccessor) {
-        mContext = Objects.requireNonNull(context);
-        mHandler = Objects.requireNonNull(handler);
-        mServiceConfigAccessor = Objects.requireNonNull(serviceConfigAccessor);
-    }
-
-    @Override
-    public void setConfigurationInternalChangeListener(
-            @NonNull ConfigurationChangeListener listener) {
-        ConfigurationChangeListener configurationChangeListener =
-                () -> mHandler.post(listener::onChange);
-        mServiceConfigAccessor.addConfigurationInternalChangeListener(configurationChangeListener);
-    }
-
-    @Override
-    @NonNull
-    public ConfigurationInternal getCurrentUserConfigurationInternal() {
-        return mServiceConfigAccessor.getCurrentUserConfigurationInternal();
+    EnvironmentImpl() {
     }
 
     @Override

@@ -83,7 +83,7 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
             ServiceConfigAccessor serviceConfigAccessor =
                     ServiceConfigAccessorImpl.getInstance(context);
             TimeZoneDetectorStrategy timeZoneDetectorStrategy =
-                    TimeZoneDetectorStrategyImpl.create(context, handler, serviceConfigAccessor);
+                    TimeZoneDetectorStrategyImpl.create(handler, serviceConfigAccessor);
             DeviceActivityMonitor deviceActivityMonitor =
                     DeviceActivityMonitorImpl.create(context, handler);
 
@@ -99,16 +99,14 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
             CurrentUserIdentityInjector currentUserIdentityInjector =
                     CurrentUserIdentityInjector.REAL;
             TimeZoneDetectorInternal internal = new TimeZoneDetectorInternalImpl(
-                    context, handler, currentUserIdentityInjector, serviceConfigAccessor,
-                    timeZoneDetectorStrategy);
+                    context, handler, currentUserIdentityInjector, timeZoneDetectorStrategy);
             publishLocalService(TimeZoneDetectorInternal.class, internal);
 
             // Publish the binder service so it can be accessed from other (appropriately
             // permissioned) processes.
             CallerIdentityInjector callerIdentityInjector = CallerIdentityInjector.REAL;
             TimeZoneDetectorService service = new TimeZoneDetectorService(
-                    context, handler, callerIdentityInjector, serviceConfigAccessor,
-                    timeZoneDetectorStrategy);
+                    context, handler, callerIdentityInjector, timeZoneDetectorStrategy);
 
             // Dump the device activity monitor when the service is dumped.
             service.addDumpable(deviceActivityMonitor);
@@ -125,9 +123,6 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
 
     @NonNull
     private final CallerIdentityInjector mCallerIdentityInjector;
-
-    @NonNull
-    private final ServiceConfigAccessor mServiceConfigAccessor;
 
     @NonNull
     private final TimeZoneDetectorStrategy mTimeZoneDetectorStrategy;
@@ -150,18 +145,16 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
     @VisibleForTesting
     public TimeZoneDetectorService(@NonNull Context context, @NonNull Handler handler,
             @NonNull CallerIdentityInjector callerIdentityInjector,
-            @NonNull ServiceConfigAccessor serviceConfigAccessor,
             @NonNull TimeZoneDetectorStrategy timeZoneDetectorStrategy) {
         mContext = Objects.requireNonNull(context);
         mHandler = Objects.requireNonNull(handler);
         mCallerIdentityInjector = Objects.requireNonNull(callerIdentityInjector);
-        mServiceConfigAccessor = Objects.requireNonNull(serviceConfigAccessor);
         mTimeZoneDetectorStrategy = Objects.requireNonNull(timeZoneDetectorStrategy);
 
         // Wire up a change listener so that ITimeZoneDetectorListeners can be notified when
-        // the configuration changes for any reason.
-        mServiceConfigAccessor.addConfigurationInternalChangeListener(
-                () -> mHandler.post(this::handleConfigurationInternalChangedOnHandlerThread));
+        // the detector state changes for any reason.
+        mTimeZoneDetectorStrategy.addChangeListener(
+                () -> mHandler.post(this::handleChangeOnHandlerThread));
     }
 
     @Override
@@ -174,12 +167,15 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
     TimeZoneCapabilitiesAndConfig getCapabilitiesAndConfig(@UserIdInt int userId) {
         enforceManageTimeZoneDetectorPermission();
 
+        // Resolve constants like USER_CURRENT to the true user ID as needed.
+        int resolvedUserId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
+                Binder.getCallingUid(), userId, false, false, "getCapabilitiesAndConfig", null);
+
         final long token = mCallerIdentityInjector.clearCallingIdentity();
         try {
-            ConfigurationInternal configurationInternal =
-                    mServiceConfigAccessor.getConfigurationInternal(userId);
             final boolean bypassUserPolicyChecks = false;
-            return configurationInternal.createCapabilitiesAndConfig(bypassUserPolicyChecks);
+            return mTimeZoneDetectorStrategy.getCapabilitiesAndConfig(
+                    resolvedUserId, bypassUserPolicyChecks);
         } finally {
             mCallerIdentityInjector.restoreCallingIdentity(token);
         }
@@ -204,7 +200,7 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
         final long token = mCallerIdentityInjector.clearCallingIdentity();
         try {
             final boolean bypassUserPolicyChecks = false;
-            return mServiceConfigAccessor.updateConfiguration(
+            return mTimeZoneDetectorStrategy.updateConfiguration(
                     resolvedUserId, configuration, bypassUserPolicyChecks);
         } finally {
             mCallerIdentityInjector.restoreCallingIdentity(token);
@@ -285,8 +281,9 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
         }
     }
 
-    void handleConfigurationInternalChangedOnHandlerThread() {
-        // Configuration has changed, but each user may have a different view of the configuration.
+    void handleChangeOnHandlerThread() {
+        // Detector state has changed. Each user may have a different view of the configuration so
+        // no information is passed; each client must query what they're interested in.
         // It's possible that this will cause unnecessary notifications but that shouldn't be a
         // problem.
         synchronized (mListeners) {

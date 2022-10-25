@@ -38,19 +38,28 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
+import android.app.time.TimeZoneCapabilitiesAndConfig;
+import android.app.time.TimeZoneConfiguration;
 import android.app.time.TimeZoneState;
 import android.app.timezonedetector.ManualTimeZoneSuggestion;
 import android.app.timezonedetector.TelephonyTimeZoneSuggestion;
 import android.app.timezonedetector.TelephonyTimeZoneSuggestion.MatchType;
 import android.app.timezonedetector.TelephonyTimeZoneSuggestion.Quality;
+import android.os.HandlerThread;
 
 import com.android.server.SystemTimeZone.TimeZoneConfidence;
 import com.android.server.timezonedetector.TimeZoneDetectorStrategyImpl.QualifiedTelephonyTimeZoneSuggestion;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -97,7 +106,8 @@ public class TimeZoneDetectorStrategyImplTest {
     };
 
     private static final ConfigurationInternal CONFIG_USER_RESTRICTED_AUTO_DISABLED =
-            new ConfigurationInternal.Builder(USER_ID)
+            new ConfigurationInternal.Builder()
+                    .setUserId(USER_ID)
                     .setTelephonyDetectionFeatureSupported(true)
                     .setGeoDetectionFeatureSupported(true)
                     .setTelephonyFallbackSupported(false)
@@ -110,7 +120,8 @@ public class TimeZoneDetectorStrategyImplTest {
                     .build();
 
     private static final ConfigurationInternal CONFIG_USER_RESTRICTED_AUTO_ENABLED =
-            new ConfigurationInternal.Builder(USER_ID)
+            new ConfigurationInternal.Builder()
+                    .setUserId(USER_ID)
                     .setTelephonyDetectionFeatureSupported(true)
                     .setGeoDetectionFeatureSupported(true)
                     .setTelephonyFallbackSupported(false)
@@ -123,7 +134,8 @@ public class TimeZoneDetectorStrategyImplTest {
                     .build();
 
     private static final ConfigurationInternal CONFIG_AUTO_DETECT_NOT_SUPPORTED =
-            new ConfigurationInternal.Builder(USER_ID)
+            new ConfigurationInternal.Builder()
+                    .setUserId(USER_ID)
                     .setTelephonyDetectionFeatureSupported(false)
                     .setGeoDetectionFeatureSupported(false)
                     .setTelephonyFallbackSupported(false)
@@ -136,7 +148,8 @@ public class TimeZoneDetectorStrategyImplTest {
                     .build();
 
     private static final ConfigurationInternal CONFIG_AUTO_DISABLED_GEO_DISABLED =
-            new ConfigurationInternal.Builder(USER_ID)
+            new ConfigurationInternal.Builder()
+                    .setUserId(USER_ID)
                     .setTelephonyDetectionFeatureSupported(true)
                     .setGeoDetectionFeatureSupported(true)
                     .setTelephonyFallbackSupported(false)
@@ -149,7 +162,8 @@ public class TimeZoneDetectorStrategyImplTest {
                     .build();
 
     private static final ConfigurationInternal CONFIG_AUTO_ENABLED_GEO_DISABLED =
-            new ConfigurationInternal.Builder(USER_ID)
+            new ConfigurationInternal.Builder()
+                    .setUserId(USER_ID)
                     .setTelephonyDetectionFeatureSupported(true)
                     .setGeoDetectionFeatureSupported(true)
                     .setTelephonyFallbackSupported(false)
@@ -162,7 +176,8 @@ public class TimeZoneDetectorStrategyImplTest {
                     .build();
 
     private static final ConfigurationInternal CONFIG_AUTO_ENABLED_GEO_ENABLED =
-            new ConfigurationInternal.Builder(USER_ID)
+            new ConfigurationInternal.Builder()
+                    .setUserId(USER_ID)
                     .setTelephonyDetectionFeatureSupported(true)
                     .setGeoDetectionFeatureSupported(true)
                     .setTelephonyFallbackSupported(false)
@@ -174,14 +189,223 @@ public class TimeZoneDetectorStrategyImplTest {
                     .setGeoDetectionEnabledSetting(true)
                     .build();
 
-    private TimeZoneDetectorStrategyImpl mTimeZoneDetectorStrategy;
+    private FakeServiceConfigAccessor mFakeServiceConfigAccessorSpy;
     private FakeEnvironment mFakeEnvironment;
+    private HandlerThread mHandlerThread;
+    private TestHandler mTestHandler;
+
+    private TimeZoneDetectorStrategyImpl mTimeZoneDetectorStrategy;
 
     @Before
     public void setUp() {
         mFakeEnvironment = new FakeEnvironment();
-        mFakeEnvironment.initializeConfig(CONFIG_AUTO_DISABLED_GEO_DISABLED);
-        mTimeZoneDetectorStrategy = new TimeZoneDetectorStrategyImpl(mFakeEnvironment);
+        mFakeServiceConfigAccessorSpy = spy(new FakeServiceConfigAccessor());
+        mFakeServiceConfigAccessorSpy.initializeCurrentUserConfiguration(
+                CONFIG_AUTO_DISABLED_GEO_DISABLED);
+
+        // Create a thread + handler for processing the work that the strategy posts.
+        mHandlerThread = new HandlerThread("TimeZoneDetectorStrategyImplTest");
+        mHandlerThread.start();
+        mTestHandler = new TestHandler(mHandlerThread.getLooper());
+        mTimeZoneDetectorStrategy = new TimeZoneDetectorStrategyImpl(
+                mFakeServiceConfigAccessorSpy, mTestHandler, mFakeEnvironment);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        mHandlerThread.quit();
+        mHandlerThread.join();
+    }
+
+    @Test
+    public void testChangeListenerBehavior_currentUser() throws Exception {
+        ConfigurationInternal currentUserConfig = CONFIG_AUTO_DISABLED_GEO_DISABLED;
+        // The strategy initializes itself with the current user's config during construction.
+        assertEquals(currentUserConfig,
+                mTimeZoneDetectorStrategy.getCachedCapabilitiesAndConfigForTests());
+
+        TestStateChangeListener stateChangeListener = new TestStateChangeListener();
+        mTimeZoneDetectorStrategy.addChangeListener(stateChangeListener);
+
+        boolean bypassUserPolicyChecks = false;
+
+        // Report a config change, but not one that actually changes anything.
+        {
+            mFakeServiceConfigAccessorSpy.simulateCurrentUserConfigurationInternalChange(
+                    CONFIG_AUTO_DISABLED_GEO_DISABLED);
+            mTestHandler.waitForMessagesToBeProcessed();
+
+            stateChangeListener.assertNotificationsReceived(0);
+            assertEquals(CONFIG_AUTO_DISABLED_GEO_DISABLED,
+                    mTimeZoneDetectorStrategy.getCachedCapabilitiesAndConfigForTests());
+        }
+
+        // Report a config change that actually changes something.
+        {
+            mFakeServiceConfigAccessorSpy.simulateCurrentUserConfigurationInternalChange(
+                    CONFIG_AUTO_ENABLED_GEO_ENABLED);
+            mTestHandler.waitForMessagesToBeProcessed();
+
+            stateChangeListener.assertNotificationsReceived(1);
+            stateChangeListener.resetNotificationsReceivedCount();
+            assertEquals(CONFIG_AUTO_ENABLED_GEO_ENABLED,
+                    mTimeZoneDetectorStrategy.getCachedCapabilitiesAndConfigForTests());
+        }
+
+        // Perform a (current user) update via the strategy.
+        {
+            TimeZoneConfiguration requestedChanges =
+                    new TimeZoneConfiguration.Builder().setGeoDetectionEnabled(false).build();
+            mTimeZoneDetectorStrategy.updateConfiguration(
+                    USER_ID, requestedChanges, bypassUserPolicyChecks);
+            mTestHandler.waitForMessagesToBeProcessed();
+
+            stateChangeListener.assertNotificationsReceived(1);
+            stateChangeListener.resetNotificationsReceivedCount();
+        }
+    }
+
+    // Perform a (not current user) update via the strategy. There's no listener behavior for
+    // updates to "other" users.
+    @Test
+    public void testChangeListenerBehavior_otherUser() throws Exception {
+        ConfigurationInternal currentUserConfig = CONFIG_AUTO_DISABLED_GEO_DISABLED;
+        // The strategy initializes itself with the current user's config during construction.
+        assertEquals(currentUserConfig,
+                mTimeZoneDetectorStrategy.getCachedCapabilitiesAndConfigForTests());
+
+        TestStateChangeListener stateChangeListener = new TestStateChangeListener();
+        mTimeZoneDetectorStrategy.addChangeListener(stateChangeListener);
+
+        boolean bypassUserPolicyChecks = false;
+
+        int otherUserId = currentUserConfig.getUserId() + 1;
+        ConfigurationInternal otherUserConfig = new ConfigurationInternal.Builder(currentUserConfig)
+                .setUserId(otherUserId)
+                .setGeoDetectionEnabledSetting(true)
+                .build();
+        mFakeServiceConfigAccessorSpy.initializeOtherUserConfiguration(otherUserConfig);
+
+        TimeZoneConfiguration requestedChanges =
+                new TimeZoneConfiguration.Builder().setGeoDetectionEnabled(false).build();
+        mTimeZoneDetectorStrategy.updateConfiguration(
+                otherUserId, requestedChanges, bypassUserPolicyChecks);
+        mTestHandler.waitForMessagesToBeProcessed();
+
+        // Only changes to the current user's config are notified.
+        stateChangeListener.assertNotificationsReceived(0);
+        stateChangeListener.resetNotificationsReceivedCount();
+    }
+
+    // Current user behavior: the strategy caches and returns the latest configuration.
+    @Test
+    public void testReadAndWriteConfiguration_currentUser() throws Exception {
+        ConfigurationInternal currentUserConfig = CONFIG_AUTO_ENABLED_GEO_DISABLED;
+        mFakeServiceConfigAccessorSpy.simulateCurrentUserConfigurationInternalChange(
+                currentUserConfig);
+
+        int otherUserId = currentUserConfig.getUserId() + 1;
+        ConfigurationInternal otherUserConfig = new ConfigurationInternal.Builder(currentUserConfig)
+                .setUserId(otherUserId)
+                .setGeoDetectionEnabledSetting(true)
+                .build();
+        mFakeServiceConfigAccessorSpy.simulateOtherUserConfigurationInternalChange(otherUserConfig);
+        reset(mFakeServiceConfigAccessorSpy);
+
+        final boolean bypassUserPolicyChecks = false;
+
+        ConfigurationInternal cachedConfigurationInternal =
+                mTimeZoneDetectorStrategy.getCachedCapabilitiesAndConfigForTests();
+        assertEquals(currentUserConfig, cachedConfigurationInternal);
+
+        // Confirm getCapabilitiesAndConfig() does not call through to the ServiceConfigAccessor.
+        {
+            reset(mFakeServiceConfigAccessorSpy);
+            TimeZoneCapabilitiesAndConfig actualCapabilitiesAndConfig =
+                    mTimeZoneDetectorStrategy.getCapabilitiesAndConfig(
+                            currentUserConfig.getUserId(), bypassUserPolicyChecks);
+            verify(mFakeServiceConfigAccessorSpy, never()).getConfigurationInternal(
+                    currentUserConfig.getUserId());
+
+            assertEquals(currentUserConfig.asCapabilities(bypassUserPolicyChecks),
+                    actualCapabilitiesAndConfig.getCapabilities());
+            assertEquals(currentUserConfig.asConfiguration(),
+                    actualCapabilitiesAndConfig.getConfiguration());
+        }
+
+        // Confirm updateConfiguration() calls through to the ServiceConfigAccessor and updates
+        // the cached copy.
+        {
+            boolean newGeoDetectionEnabled =
+                    !cachedConfigurationInternal.asConfiguration().isGeoDetectionEnabled();
+            TimeZoneConfiguration requestedChanges = new TimeZoneConfiguration.Builder()
+                    .setGeoDetectionEnabled(newGeoDetectionEnabled)
+                    .build();
+            ConfigurationInternal expectedConfigAfterChange =
+                    new ConfigurationInternal.Builder(cachedConfigurationInternal)
+                            .setGeoDetectionEnabledSetting(newGeoDetectionEnabled)
+                            .build();
+
+            reset(mFakeServiceConfigAccessorSpy);
+            mTimeZoneDetectorStrategy.updateConfiguration(
+                    currentUserConfig.getUserId(), requestedChanges, bypassUserPolicyChecks);
+            verify(mFakeServiceConfigAccessorSpy, times(1)).updateConfiguration(
+                    currentUserConfig.getUserId(), requestedChanges, bypassUserPolicyChecks);
+            assertEquals(expectedConfigAfterChange,
+                    mTimeZoneDetectorStrategy.getCachedCapabilitiesAndConfigForTests());
+        }
+    }
+
+    // Not current user behavior: the strategy reads from the ServiceConfigAccessor.
+    @Test
+    public void testReadAndWriteConfiguration_otherUser() throws Exception {
+        ConfigurationInternal currentUserConfig = CONFIG_AUTO_ENABLED_GEO_DISABLED;
+        mFakeServiceConfigAccessorSpy.simulateCurrentUserConfigurationInternalChange(
+                currentUserConfig);
+
+        int otherUserId = currentUserConfig.getUserId() + 1;
+        ConfigurationInternal otherUserConfig = new ConfigurationInternal.Builder(currentUserConfig)
+                .setUserId(otherUserId)
+                .setGeoDetectionEnabledSetting(true)
+                .build();
+        mFakeServiceConfigAccessorSpy.simulateOtherUserConfigurationInternalChange(otherUserConfig);
+        reset(mFakeServiceConfigAccessorSpy);
+
+        final boolean bypassUserPolicyChecks = false;
+
+        // Confirm getCapabilitiesAndConfig() does not call through to the ServiceConfigAccessor.
+        {
+            reset(mFakeServiceConfigAccessorSpy);
+            TimeZoneCapabilitiesAndConfig actualCapabilitiesAndConfig =
+                    mTimeZoneDetectorStrategy.getCapabilitiesAndConfig(
+                            otherUserId, bypassUserPolicyChecks);
+            verify(mFakeServiceConfigAccessorSpy, times(1)).getConfigurationInternal(otherUserId);
+
+            assertEquals(otherUserConfig.asCapabilities(bypassUserPolicyChecks),
+                    actualCapabilitiesAndConfig.getCapabilities());
+            assertEquals(otherUserConfig.asConfiguration(),
+                    actualCapabilitiesAndConfig.getConfiguration());
+        }
+
+        // Confirm updateConfiguration() calls through to the ServiceConfigAccessor and doesn't
+        // touch the cached copy.
+        {
+            ConfigurationInternal cachedConfigBeforeChange =
+                    mTimeZoneDetectorStrategy.getCachedCapabilitiesAndConfigForTests();
+            boolean newGeoDetectionEnabled =
+                    !otherUserConfig.asConfiguration().isGeoDetectionEnabled();
+            TimeZoneConfiguration requestedChanges = new TimeZoneConfiguration.Builder()
+                    .setGeoDetectionEnabled(newGeoDetectionEnabled)
+                    .build();
+
+            reset(mFakeServiceConfigAccessorSpy);
+            mTimeZoneDetectorStrategy.updateConfiguration(
+                    currentUserConfig.getUserId(), requestedChanges, bypassUserPolicyChecks);
+            verify(mFakeServiceConfigAccessorSpy, times(1)).updateConfiguration(
+                    currentUserConfig.getUserId(), requestedChanges, bypassUserPolicyChecks);
+            assertEquals(cachedConfigBeforeChange,
+                    mTimeZoneDetectorStrategy.getCachedCapabilitiesAndConfigForTests());
+        }
     }
 
     @Test
@@ -1201,17 +1425,11 @@ public class TimeZoneDetectorStrategyImplTest {
 
         private final TestState<String> mTimeZoneId = new TestState<>();
         private final TestState<Integer> mTimeZoneConfidence = new TestState<>();
-        private ConfigurationInternal mConfigurationInternal;
         private @ElapsedRealtimeLong long mElapsedRealtimeMillis;
-        private ConfigurationChangeListener mConfigurationInternalChangeListener;
 
         FakeEnvironment() {
             // Ensure the fake environment starts with the defaults a fresh device would.
             initializeTimeZoneSetting("", TIME_ZONE_CONFIDENCE_LOW);
-        }
-
-        void initializeConfig(ConfigurationInternal configurationInternal) {
-            mConfigurationInternal = configurationInternal;
         }
 
         void initializeClock(@ElapsedRealtimeLong long elapsedRealtimeMillis) {
@@ -1225,16 +1443,6 @@ public class TimeZoneDetectorStrategyImplTest {
 
         void incrementClock() {
             mElapsedRealtimeMillis++;
-        }
-
-        @Override
-        public void setConfigurationInternalChangeListener(ConfigurationChangeListener listener) {
-            mConfigurationInternalChangeListener = listener;
-        }
-
-        @Override
-        public ConfigurationInternal getCurrentUserConfigurationInternal() {
-            return mConfigurationInternal;
         }
 
         @Override
@@ -1252,11 +1460,6 @@ public class TimeZoneDetectorStrategyImplTest {
                 String zoneId, @TimeZoneConfidence int confidence, String logInfo) {
             mTimeZoneId.set(zoneId);
             mTimeZoneConfidence.set(confidence);
-        }
-
-        void simulateConfigurationInternalChange(ConfigurationInternal configurationInternal) {
-            mConfigurationInternal = configurationInternal;
-            mConfigurationInternalChangeListener.onChange();
         }
 
         void assertTimeZoneNotChanged() {
@@ -1322,7 +1525,8 @@ public class TimeZoneDetectorStrategyImplTest {
          * Simulates the user / user's configuration changing.
          */
         Script simulateConfigurationInternalChange(ConfigurationInternal configurationInternal) {
-            mFakeEnvironment.simulateConfigurationInternalChange(configurationInternal);
+            mFakeServiceConfigAccessorSpy.simulateCurrentUserConfigurationInternalChange(
+                    configurationInternal);
             return this;
         }
 
@@ -1331,7 +1535,7 @@ public class TimeZoneDetectorStrategyImplTest {
          */
         Script simulateSetAutoMode(boolean autoDetectionEnabled) {
             ConfigurationInternal newConfig = new ConfigurationInternal.Builder(
-                    mFakeEnvironment.getCurrentUserConfigurationInternal())
+                    mFakeServiceConfigAccessorSpy.getCurrentUserConfigurationInternal())
                     .setAutoDetectionEnabledSetting(autoDetectionEnabled)
                     .build();
             simulateConfigurationInternalChange(newConfig);
@@ -1343,7 +1547,7 @@ public class TimeZoneDetectorStrategyImplTest {
          */
         Script simulateSetGeoDetectionEnabled(boolean geoDetectionEnabled) {
             ConfigurationInternal newConfig = new ConfigurationInternal.Builder(
-                    mFakeEnvironment.getCurrentUserConfigurationInternal())
+                    mFakeServiceConfigAccessorSpy.getCurrentUserConfigurationInternal())
                     .setGeoDetectionEnabledSetting(geoDetectionEnabled)
                     .build();
             simulateConfigurationInternalChange(newConfig);
@@ -1456,5 +1660,23 @@ public class TimeZoneDetectorStrategyImplTest {
     private static TelephonyTestCase newTelephonyTestCase(
             @MatchType int matchType, @Quality int quality, int expectedScore) {
         return new TelephonyTestCase(matchType, quality, expectedScore);
+    }
+
+    private static class TestStateChangeListener implements StateChangeListener {
+
+        private int mNotificationsReceived;
+
+        @Override
+        public void onChange() {
+            mNotificationsReceived++;
+        }
+
+        public void resetNotificationsReceivedCount() {
+            mNotificationsReceived = 0;
+        }
+
+        public void assertNotificationsReceived(int expectedCount) {
+            assertEquals(expectedCount, mNotificationsReceived);
+        }
     }
 }

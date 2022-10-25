@@ -17,6 +17,8 @@ package com.android.server.timezonedetector;
 
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
+import android.app.time.TimeZoneCapabilitiesAndConfig;
+import android.app.time.TimeZoneConfiguration;
 import android.app.time.TimeZoneState;
 import android.app.timezonedetector.ManualTimeZoneSuggestion;
 import android.app.timezonedetector.TelephonyTimeZoneSuggestion;
@@ -93,6 +95,48 @@ import android.util.IndentingPrintWriter;
  * @hide
  */
 public interface TimeZoneDetectorStrategy extends Dumpable {
+
+    /**
+     * Adds a listener that will be triggered when something changes that could affect the result
+     * of the {@link #getCapabilitiesAndConfig} call for the <em>current user only</em>. This
+     * includes the current user changing. This is exposed so that (indirect) users like SettingsUI
+     * can monitor for changes to data derived from {@link TimeZoneCapabilitiesAndConfig} and update
+     * the UI accordingly.
+     */
+    void addChangeListener(StateChangeListener listener);
+
+    /**
+     * Returns a {@link TimeZoneCapabilitiesAndConfig} object for the specified user.
+     *
+     * <p>The strategy is dependent on device state like current user, settings and device config.
+     * These updates are usually handled asynchronously, so callers should expect some delay between
+     * a change being made directly to services like settings and the strategy becoming aware of
+     * them. Changes made via {@link #updateConfiguration} will be visible immediately.
+     *
+     * @param userId the user ID to retrieve the information for
+     * @param bypassUserPolicyChecks {@code true} for device policy manager use cases where device
+     *   policy restrictions that should apply to actual users can be ignored
+     */
+    TimeZoneCapabilitiesAndConfig getCapabilitiesAndConfig(
+            @UserIdInt int userId, boolean bypassUserPolicyChecks);
+
+    /**
+     * Updates the configuration properties that control a device's time zone behavior.
+     *
+     * <p>This method returns {@code true} if the configuration was changed, {@code false}
+     * otherwise.
+     *
+     * <p>See {@link #getCapabilitiesAndConfig} for guarantees about visibility of updates to
+     * subsequent calls.
+     *
+     * @param userId the current user ID, supplied to make sure that the asynchronous process
+     *   that happens when users switch is completed when the call is made
+     * @param configuration the configuration changes
+     * @param bypassUserPolicyChecks {@code true} for device policy manager use cases where device
+     *   policy restrictions that should apply to actual users can be ignored
+     */
+    boolean updateConfiguration(@UserIdInt int userId, TimeZoneConfiguration configuration,
+            boolean bypassUserPolicyChecks);
 
     /** Returns a snapshot of the system time zone state. See {@link TimeZoneState} for details. */
     @NonNull

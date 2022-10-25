@@ -22,7 +22,6 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManagerInternal;
 import android.app.time.TimeZoneCapabilities;
-import android.app.time.TimeZoneCapabilitiesAndConfig;
 import android.app.time.TimeZoneConfiguration;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -104,8 +103,8 @@ public final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
     @NonNull private final LocationManager mLocationManager;
 
     @GuardedBy("this")
-    @NonNull private final List<ConfigurationChangeListener> mConfigurationInternalListeners =
-            new ArrayList<>();
+    @NonNull
+    private final List<StateChangeListener> mConfigurationInternalListeners = new ArrayList<>();
 
     /**
      * The mode to use for the primary location time zone provider in a test. Setting this
@@ -207,20 +206,20 @@ public final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
     }
 
     private synchronized void handleConfigurationInternalChangeOnMainThread() {
-        for (ConfigurationChangeListener changeListener : mConfigurationInternalListeners) {
+        for (StateChangeListener changeListener : mConfigurationInternalListeners) {
             changeListener.onChange();
         }
     }
 
     @Override
     public synchronized void addConfigurationInternalChangeListener(
-            @NonNull ConfigurationChangeListener listener) {
+            @NonNull StateChangeListener listener) {
         mConfigurationInternalListeners.add(Objects.requireNonNull(listener));
     }
 
     @Override
     public synchronized void removeConfigurationInternalChangeListener(
-            @NonNull ConfigurationChangeListener listener) {
+            @NonNull StateChangeListener listener) {
         mConfigurationInternalListeners.remove(Objects.requireNonNull(listener));
     }
 
@@ -237,10 +236,10 @@ public final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
             @NonNull TimeZoneConfiguration requestedConfiguration, boolean bypassUserPolicyChecks) {
         Objects.requireNonNull(requestedConfiguration);
 
-        TimeZoneCapabilitiesAndConfig capabilitiesAndConfig = getConfigurationInternal(userId)
-                .createCapabilitiesAndConfig(bypassUserPolicyChecks);
-        TimeZoneCapabilities capabilities = capabilitiesAndConfig.getCapabilities();
-        TimeZoneConfiguration oldConfiguration = capabilitiesAndConfig.getConfiguration();
+        ConfigurationInternal configurationInternal = getConfigurationInternal(userId);
+        TimeZoneCapabilities capabilities =
+                configurationInternal.asCapabilities(bypassUserPolicyChecks);
+        TimeZoneConfiguration oldConfiguration = configurationInternal.asConfiguration();
 
         final TimeZoneConfiguration newConfiguration =
                 capabilities.tryApplyConfigChanges(oldConfiguration, requestedConfiguration);
@@ -292,7 +291,8 @@ public final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
     @Override
     @NonNull
     public synchronized ConfigurationInternal getConfigurationInternal(@UserIdInt int userId) {
-        return new ConfigurationInternal.Builder(userId)
+        return new ConfigurationInternal.Builder()
+                .setUserId(userId)
                 .setTelephonyDetectionFeatureSupported(
                         isTelephonyTimeZoneDetectionFeatureSupported())
                 .setGeoDetectionFeatureSupported(isGeoTimeZoneDetectionFeatureSupported())
@@ -354,7 +354,7 @@ public final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
 
     @Override
     public void addLocationTimeZoneManagerConfigListener(
-            @NonNull ConfigurationChangeListener listener) {
+            @NonNull StateChangeListener listener) {
         mServerFlags.addListener(listener, LOCATION_TIME_ZONE_MANAGER_SERVER_FLAGS_KEYS_TO_WATCH);
     }
 

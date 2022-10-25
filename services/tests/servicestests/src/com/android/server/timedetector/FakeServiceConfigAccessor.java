@@ -25,7 +25,7 @@ import android.app.time.TimeCapabilities;
 import android.app.time.TimeCapabilitiesAndConfig;
 import android.app.time.TimeConfiguration;
 
-import com.android.server.timezonedetector.ConfigurationChangeListener;
+import com.android.server.timezonedetector.StateChangeListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,17 +33,17 @@ import java.util.List;
 /** A partially implemented, fake implementation of ServiceConfigAccessor for tests. */
 public class FakeServiceConfigAccessor implements ServiceConfigAccessor {
 
-    private final List<ConfigurationChangeListener> mConfigurationInternalChangeListeners =
+    private final List<StateChangeListener> mConfigurationInternalChangeListeners =
             new ArrayList<>();
     private ConfigurationInternal mConfigurationInternal;
 
     @Override
-    public void addConfigurationInternalChangeListener(ConfigurationChangeListener listener) {
+    public void addConfigurationInternalChangeListener(StateChangeListener listener) {
         mConfigurationInternalChangeListeners.add(listener);
     }
 
     @Override
-    public void removeConfigurationInternalChangeListener(ConfigurationChangeListener listener) {
+    public void removeConfigurationInternalChangeListener(StateChangeListener listener) {
         mConfigurationInternalChangeListeners.remove(listener);
     }
 
@@ -86,7 +86,7 @@ public class FakeServiceConfigAccessor implements ServiceConfigAccessor {
     }
 
     void simulateConfigurationChangeForTests() {
-        for (ConfigurationChangeListener listener : mConfigurationInternalChangeListeners) {
+        for (StateChangeListener listener : mConfigurationInternalChangeListeners) {
             listener.onChange();
         }
     }
