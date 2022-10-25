@@ -485,45 +485,18 @@ public class AuthContainerView extends LinearLayout
             mContainerState = STATE_SHOWING;
         } else {
             mContainerState = STATE_ANIMATING_IN;
-            // The background panel and content are different views since we need to be able to
-            // animate them separately in other places.
-            mPanelView.setY(mTranslationY);
-            mBiometricScrollView.setY(mTranslationY);
-
+            setY(mTranslationY);
             setAlpha(0f);
             final long animateDuration = mConfig.mSkipAnimation ? 0 : ANIMATION_DURATION_SHOW_MS;
             postOnAnimation(() -> {
-                mPanelView.animate()
-                        .translationY(0)
-                        .setDuration(animateDuration)
-                        .setInterpolator(mLinearOutSlowIn)
-                        .setListener(getJankListener(mPanelView, SHOW, animateDuration))
-                        .withLayer()
-                        .withEndAction(this::onDialogAnimatedIn)
-                        .start();
-                mBiometricScrollView.animate()
-                        .translationY(0)
-                        .setDuration(animateDuration)
-                        .setInterpolator(mLinearOutSlowIn)
-                        .setListener(getJankListener(mBiometricScrollView, SHOW, animateDuration))
-                        .withLayer()
-                        .start();
-                if (mCredentialView != null && mCredentialView.isAttachedToWindow()) {
-                    mCredentialView.setY(mTranslationY);
-                    mCredentialView.animate()
-                            .translationY(0)
-                            .setDuration(animateDuration)
-                            .setInterpolator(mLinearOutSlowIn)
-                            .setListener(getJankListener(mCredentialView, SHOW, animateDuration))
-                            .withLayer()
-                            .start();
-                }
                 animate()
                         .alpha(1f)
+                        .translationY(0)
                         .setDuration(animateDuration)
                         .setInterpolator(mLinearOutSlowIn)
                         .withLayer()
                         .setListener(getJankListener(this, SHOW, animateDuration))
+                        .withEndAction(this::onDialogAnimatedIn)
                         .start();
             });
         }
@@ -802,32 +775,9 @@ public class AuthContainerView extends LinearLayout
 
         final long animateDuration = mConfig.mSkipAnimation ? 0 : ANIMATION_DURATION_AWAY_MS;
         postOnAnimation(() -> {
-            mPanelView.animate()
-                    .translationY(mTranslationY)
-                    .setDuration(animateDuration)
-                    .setInterpolator(mLinearOutSlowIn)
-                    .setListener(getJankListener(mPanelView, DISMISS, animateDuration))
-                    .withLayer()
-                    .withEndAction(endActionRunnable)
-                    .start();
-            mBiometricScrollView.animate()
-                    .translationY(mTranslationY)
-                    .setDuration(animateDuration)
-                    .setInterpolator(mLinearOutSlowIn)
-                    .setListener(getJankListener(mBiometricScrollView, DISMISS, animateDuration))
-                    .withLayer()
-                    .start();
-            if (mCredentialView != null && mCredentialView.isAttachedToWindow()) {
-                mCredentialView.animate()
-                        .translationY(mTranslationY)
-                        .setDuration(animateDuration)
-                        .setInterpolator(mLinearOutSlowIn)
-                        .setListener(getJankListener(mCredentialView, DISMISS, animateDuration))
-                        .withLayer()
-                        .start();
-            }
             animate()
                     .alpha(0f)
+                    .translationY(mTranslationY)
                     .setDuration(animateDuration)
                     .setInterpolator(mLinearOutSlowIn)
                     .setListener(getJankListener(this, DISMISS, animateDuration))
@@ -842,6 +792,7 @@ public class AuthContainerView extends LinearLayout
                         mWindowManager.updateViewLayout(this, lp);
                     })
                     .withLayer()
+                    .withEndAction(endActionRunnable)
                     .start();
         });
     }
