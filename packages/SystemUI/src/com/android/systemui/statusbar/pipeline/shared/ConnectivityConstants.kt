@@ -34,7 +34,7 @@ class ConnectivityConstants
 @Inject
 constructor(dumpManager: DumpManager, telephonyManager: TelephonyManager) : Dumpable {
     init {
-        dumpManager.registerDumpable("$SB_LOGGING_TAG:ConnectivityConstants", this)
+        dumpManager.registerDumpable("${SB_LOGGING_TAG}Constants", this)
     }
 
     /** True if this device has the capability for data connections and false otherwise. */
