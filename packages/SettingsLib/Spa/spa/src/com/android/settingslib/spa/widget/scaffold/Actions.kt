@@ -16,9 +16,12 @@
 
 package com.android.settingslib.spa.widget.scaffold
 
+import androidx.appcompat.R
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.Clear
+import androidx.compose.material.icons.outlined.FindInPage
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.Icon
@@ -31,15 +34,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import com.android.settingslib.spa.framework.compose.LocalNavController
 
+/** Action that navigates back to last page. */
 @Composable
 internal fun NavigateBack() {
     val navController = LocalNavController.current
-    val contentDescription = stringResource(
-        id = androidx.appcompat.R.string.abc_action_bar_up_description,
-    )
+    val contentDescription = stringResource(R.string.abc_action_bar_up_description)
     BackAction(contentDescription) {
         navController.navigateBack()
     }
+}
+
+/** Action that collapses the search bar. */
+@Composable
+internal fun CollapseAction(onClick: () -> Unit) {
+    val contentDescription = stringResource(R.string.abc_toolbar_collapse_description)
+    BackAction(contentDescription, onClick)
 }
 
 @Composable
@@ -48,6 +57,28 @@ private fun BackAction(contentDescription: String, onClick: () -> Unit) {
         Icon(
             imageVector = Icons.Outlined.ArrowBack,
             contentDescription = contentDescription,
+        )
+    }
+}
+
+/** Action that expends the search bar. */
+@Composable
+internal fun SearchAction(onClick: () -> Unit) {
+    IconButton(onClick) {
+        Icon(
+            imageVector = Icons.Outlined.FindInPage,
+            contentDescription = stringResource(R.string.search_menu_title),
+        )
+    }
+}
+
+/** Action that clear the search query. */
+@Composable
+internal fun ClearAction(onClick: () -> Unit) {
+    IconButton(onClick) {
+        Icon(
+            imageVector = Icons.Outlined.Clear,
+            contentDescription = stringResource(R.string.abc_searchview_description_clear),
         )
     }
 }
@@ -71,9 +102,7 @@ private fun MoreOptionsActionButton(onClick: () -> Unit) {
     IconButton(onClick) {
         Icon(
             imageVector = Icons.Outlined.MoreVert,
-            contentDescription = stringResource(
-                id = androidx.appcompat.R.string.abc_action_menu_overflow_description,
-            )
+            contentDescription = stringResource(R.string.abc_action_menu_overflow_description),
         )
     }
 }

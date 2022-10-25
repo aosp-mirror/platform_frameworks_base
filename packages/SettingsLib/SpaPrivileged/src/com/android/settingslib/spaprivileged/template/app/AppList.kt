@@ -19,7 +19,6 @@ package com.android.settingslib.spaprivileged.template.app
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
@@ -29,6 +28,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.settingslib.spa.framework.compose.LogCompositions
 import com.android.settingslib.spa.framework.compose.TimeMeasurer.Companion.rememberTimeMeasurer
+import com.android.settingslib.spa.framework.compose.rememberLazyListStateAndHideKeyboardWhenStartScroll
 import com.android.settingslib.spa.framework.compose.toState
 import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.widget.ui.PlaceholderTitle
@@ -76,7 +76,7 @@ private fun <T : AppRecord> AppListWidget(
         }
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            state = rememberLazyListState(),
+            state = rememberLazyListStateAndHideKeyboardWhenStartScroll(),
             contentPadding = PaddingValues(bottom = SettingsDimension.itemPaddingVertical),
         ) {
             items(count = list.size, key = { option to list[it].record.app.packageName }) {

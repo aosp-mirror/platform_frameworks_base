@@ -16,10 +16,8 @@
 
 package com.android.settingslib.spaprivileged.template.app
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,9 +26,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import com.android.settingslib.spa.framework.compose.stateOf
 import com.android.settingslib.spa.widget.scaffold.MoreOptionsAction
-import com.android.settingslib.spa.widget.scaffold.SettingsScaffold
+import com.android.settingslib.spa.widget.scaffold.SearchScaffold
 import com.android.settingslib.spa.widget.ui.Spinner
 import com.android.settingslib.spaprivileged.R
 import com.android.settingslib.spaprivileged.model.app.AppListConfig
@@ -50,35 +47,28 @@ fun <T : AppRecord> AppListPage(
     appItem: @Composable (itemState: AppListItemModel<T>) -> Unit,
 ) {
     val showSystem = rememberSaveable { mutableStateOf(false) }
-    // TODO: Use SearchScaffold here.
-    SettingsScaffold(
+    SearchScaffold(
         title = title,
         actions = {
             ShowSystemAction(showSystem.value) { showSystem.value = it }
         },
-    ) { paddingValues ->
-        Box(
-            Modifier
-                .padding(paddingValues)
-                .fillMaxSize()
-        ) {
-            WorkProfilePager(primaryUserOnly) { userInfo ->
-                Column(Modifier.fillMaxSize()) {
-                    val options = remember { listModel.getSpinnerOptions() }
-                    val selectedOption = rememberSaveable { mutableStateOf(0) }
-                    Spinner(options, selectedOption.value) { selectedOption.value = it }
-                    AppList(
-                        appListConfig = AppListConfig(
-                            userId = userInfo.id,
-                            showInstantApps = showInstantApps,
-                        ),
-                        listModel = listModel,
-                        showSystem = showSystem,
-                        option = selectedOption,
-                        searchQuery = stateOf(""),
-                        appItem = appItem,
-                    )
-                }
+    ) { searchQuery ->
+        WorkProfilePager(primaryUserOnly) { userInfo ->
+            Column(Modifier.fillMaxSize()) {
+                val options = remember { listModel.getSpinnerOptions() }
+                val selectedOption = rememberSaveable { mutableStateOf(0) }
+                Spinner(options, selectedOption.value) { selectedOption.value = it }
+                AppList(
+                    appListConfig = AppListConfig(
+                        userId = userInfo.id,
+                        showInstantApps = showInstantApps,
+                    ),
+                    listModel = listModel,
+                    showSystem = showSystem,
+                    option = selectedOption,
+                    searchQuery = searchQuery,
+                    appItem = appItem,
+                )
             }
         }
     }

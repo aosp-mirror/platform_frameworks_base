@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spa.framework.compose.com.android.settingslib.spa.framework
+package com.android.settingslib.spa.framework.compose
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.android.settingslib.spa.framework.compose.OverridableFlow
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
