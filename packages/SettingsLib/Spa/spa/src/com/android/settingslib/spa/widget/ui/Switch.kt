@@ -16,30 +16,26 @@
 
 package com.android.settingslib.spa.widget.ui
 
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import com.android.settingslib.spa.framework.util.wrapOnSwitchWithLog
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsSwitch(
     checked: State<Boolean?>,
     changeable: State<Boolean>,
     onCheckedChange: ((newChecked: Boolean) -> Unit)? = null,
 ) {
-    // TODO: Replace Checkbox with Switch when the androidx.compose.material3_material3 library is
-    //       updated to date.
     val checkedValue = checked.value
     if (checkedValue != null) {
-        Checkbox(
+        Switch(
             checked = checkedValue,
             onCheckedChange = wrapOnSwitchWithLog(onCheckedChange),
             enabled = changeable.value,
         )
     } else {
-        Checkbox(
+        Switch(
             checked = false,
             onCheckedChange = null,
             enabled = false,

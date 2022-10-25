@@ -55,7 +55,7 @@ android {
 
 dependencies {
     api "androidx.appcompat:appcompat:1.7.0-alpha01"
-    api "androidx.compose.material3:material3:$jetpack_compose_material3_version"
+    api "androidx.compose.material3:material3:1.1.0-alpha01"
     api "androidx.compose.material:material-icons-extended:$jetpack_compose_version"
     api "androidx.compose.runtime:runtime-livedata:$jetpack_compose_version"
     api "androidx.compose.ui:ui-tooling-preview:$jetpack_compose_version"
