@@ -13,4 +13,9 @@ android_app {
     libs: ["SliceStore"],
     platform_apis: true,
     certificate: "platform",
+    optimize: {
+        proguard_flags_files: [
+            "proguard.flags",
+        ],
+    },
 }
