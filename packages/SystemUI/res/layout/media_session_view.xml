@@ -44,7 +44,7 @@
         android:background="@drawable/qs_media_outline_album_bg"
         />
 
-    <com.android.systemui.ripple.MultiRippleView
+    <com.android.systemui.surfaceeffects.ripple.MultiRippleView
         android:id="@+id/touch_ripple_view"
         android:layout_width="match_parent"
         android:layout_height="@dimen/qs_media_session_height_expanded"

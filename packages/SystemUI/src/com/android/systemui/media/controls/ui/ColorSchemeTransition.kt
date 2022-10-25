@@ -29,7 +29,7 @@ import com.android.internal.annotations.VisibleForTesting
 import com.android.settingslib.Utils
 import com.android.systemui.media.controls.models.player.MediaViewHolder
 import com.android.systemui.monet.ColorScheme
-import com.android.systemui.ripple.MultiRippleController
+import com.android.systemui.surfaceeffects.ripple.MultiRippleController
 
 /**
  * A [ColorTransition] is an object that updates the colors of views each time [updateColorScheme]

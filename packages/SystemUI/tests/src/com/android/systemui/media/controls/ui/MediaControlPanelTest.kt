@@ -78,9 +78,9 @@ import com.android.systemui.media.controls.util.MediaUiEventLogger
 import com.android.systemui.media.dialog.MediaOutputDialogFactory
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
-import com.android.systemui.ripple.MultiRippleView
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.surfaceeffects.ripple.MultiRippleView
 import com.android.systemui.util.animation.TransitionLayout
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.KotlinArgumentCaptor

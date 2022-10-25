@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.ripple
+package com.android.systemui.surfaceeffects.ripple
 
 import android.content.Context
 import android.graphics.Canvas
@@ -35,7 +35,7 @@ class MultiRippleView(context: Context?, attrs: AttributeSet?) : View(context, a
     private var isWarningLogged = false
 
     companion object {
-        const val TAG = "MultiRippleView"
+        private const val TAG = "MultiRippleView"
     }
 
     override fun onDraw(canvas: Canvas?) {

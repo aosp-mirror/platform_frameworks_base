@@ -13,22 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.systemui.surfaceeffects.turbulencenoise
 
-package com.android.systemui.media.taptotransfer.receiver
-
-import android.content.Context
-import android.util.AttributeSet
-import com.android.systemui.surfaceeffects.ripple.RippleShader
-import com.android.systemui.surfaceeffects.ripple.RippleView
-
-/**
- * An expanding ripple effect for the media tap-to-transfer receiver chip.
- */
-class ReceiverChipRippleView(context: Context?, attrs: AttributeSet?) : RippleView(context, attrs) {
-    init {
-        setupShader(RippleShader.RippleShape.ELLIPSE)
-        setRippleFill(true)
-        setSparkleStrength(0f)
-        duration = 3000L
+/** A controller that plays [TurbulenceNoiseView]. */
+class TurbulenceNoiseController(private val turbulenceNoiseView: TurbulenceNoiseView) {
+    // TODO: add cancel and/ or pause once design requirements become clear.
+    /** Plays [TurbulenceNoiseView] with the given config. */
+    fun play(turbulenceNoiseAnimationConfig: TurbulenceNoiseAnimationConfig) {
+        turbulenceNoiseView.play(turbulenceNoiseAnimationConfig)
     }
 }

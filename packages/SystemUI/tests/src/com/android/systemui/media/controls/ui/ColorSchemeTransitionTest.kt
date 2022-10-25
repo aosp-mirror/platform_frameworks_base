@@ -25,7 +25,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.media.controls.models.GutsViewHolder
 import com.android.systemui.media.controls.models.player.MediaViewHolder
 import com.android.systemui.monet.ColorScheme
-import com.android.systemui.ripple.MultiRippleController
+import com.android.systemui.surfaceeffects.ripple.MultiRippleController
 import junit.framework.Assert.assertEquals
 import org.junit.After
 import org.junit.Before

@@ -26,7 +26,7 @@ import android.widget.TextView
 import androidx.constraintlayout.widget.Barrier
 import com.android.systemui.R
 import com.android.systemui.media.controls.models.GutsViewHolder
-import com.android.systemui.ripple.MultiRippleView
+import com.android.systemui.surfaceeffects.ripple.MultiRippleView
 import com.android.systemui.util.animation.TransitionLayout
 
 private const val TAG = "MediaViewHolder"
