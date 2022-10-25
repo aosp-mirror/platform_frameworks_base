@@ -736,7 +736,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         if (DEBUG_BROADCAST) logv("Scheduling " + r + " to warm " + app);
         setDeliveryState(queue, app, r, index, receiver, BroadcastRecord.DELIVERY_SCHEDULED);
 
-        final IApplicationThread thread = app.getThread();
+        final IApplicationThread thread = app.getOnewayThread();
         if (thread != null) {
             try {
                 if (receiver instanceof BroadcastFilter) {
@@ -777,7 +777,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     private void scheduleResultTo(@NonNull BroadcastRecord r) {
         if ((r.resultToApp == null) || (r.resultTo == null)) return;
         final ProcessRecord app = r.resultToApp;
-        final IApplicationThread thread = app.getThread();
+        final IApplicationThread thread = app.getOnewayThread();
         if (thread != null) {
             mService.mOomAdjuster.mCachedAppOptimizer.unfreezeTemporarily(
                     app, OOM_ADJ_REASON_FINISH_RECEIVER);

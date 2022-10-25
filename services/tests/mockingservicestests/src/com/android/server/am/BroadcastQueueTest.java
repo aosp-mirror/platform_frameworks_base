@@ -897,8 +897,8 @@ public class BroadcastQueueTest {
                 // cold-started apps to be thawed, but the modern stack does
             } else {
                 // Confirm that app was thawed
-                verify(mAms.mOomAdjuster.mCachedAppOptimizer).unfreezeTemporarily(eq(receiverApp),
-                        eq(OomAdjuster.OOM_ADJ_REASON_START_RECEIVER));
+                verify(mAms.mOomAdjuster.mCachedAppOptimizer, atLeastOnce()).unfreezeTemporarily(
+                        eq(receiverApp), eq(OomAdjuster.OOM_ADJ_REASON_START_RECEIVER));
 
                 // Confirm that we added package to process
                 verify(receiverApp, atLeastOnce()).addPackage(eq(receiverApp.info.packageName),
