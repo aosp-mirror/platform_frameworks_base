@@ -18,6 +18,8 @@ package com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel
 
 import android.graphics.Color
 import com.android.settingslib.graph.SignalDrawable
+import com.android.systemui.common.shared.model.ContentDescription
+import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconInteractor
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconsInteractor
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
@@ -26,6 +28,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 
 /**
  * View model for the state of a single mobile icon. Each [MobileIconViewModel] will keep watch over
@@ -53,6 +56,16 @@ constructor(
             }
             .distinctUntilChanged()
             .logOutputChange(logger, "iconId($subscriptionId)")
+
+    /** The RAT icon (LTE, 3G, 5G, etc) to be displayed. Null if we shouldn't show anything */
+    var networkTypeIcon: Flow<Icon?> =
+        iconInteractor.networkTypeIconGroup.map {
+            val desc =
+                if (it.dataContentDescription != 0)
+                    ContentDescription.Resource(it.dataContentDescription)
+                else null
+            Icon.Resource(it.dataType, desc)
+        }
 
     var tint: Flow<Int> = flowOf(Color.CYAN)
 }
