@@ -1274,4 +1274,45 @@
         <item name="android:textColor">?androidprv:attr/textColorOnAccent</item>
         <item name="android:textSize">@dimen/broadcast_dialog_btn_text_size</item>
     </style>
+
+
+    <!-- The style for log access consent dialog -->
+    <style name="LogAccessDialogTheme" parent="@style/Theme.SystemUI.Dialog.Alert">
+        <item name="permissionGrantButtonTopStyle">@style/PermissionGrantButtonTop</item>
+        <item name="permissionGrantButtonBottomStyle">@style/PermissionGrantButtonBottom</item>
+    </style>
+
+    <style name="AllowLogAccess">
+        <item name="android:textSize">24sp</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+    </style>
+
+    <style name="PrimaryAllowLogAccess">
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+    </style>
+
+    <style name="PermissionGrantButtonTextAppearance">
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamilyMedium</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@android:color/system_neutral1_900</item>
+    </style>
+
+    <style name="PermissionGrantButtonTop"
+           parent="@android:style/Widget.DeviceDefault.Button.Borderless.Colored">
+        <item name="android:layout_width">332dp</item>
+        <item name="android:layout_height">56dp</item>
+        <item name="android:layout_marginTop">2dp</item>
+        <item name="android:layout_marginBottom">2dp</item>
+        <item name="android:background">@drawable/grant_permissions_buttons_top</item>
+    </style>
+
+    <style name="PermissionGrantButtonBottom"
+           parent="@android:style/Widget.DeviceDefault.Button.Borderless.Colored">
+        <item name="android:layout_width">332dp</item>
+        <item name="android:layout_height">56dp</item>
+        <item name="android:layout_marginTop">2dp</item>
+        <item name="android:layout_marginBottom">2dp</item>
+        <item name="android:background">@drawable/grant_permissions_buttons_bottom</item>
+    </style>
 </resources>

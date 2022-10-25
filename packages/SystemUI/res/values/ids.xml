@@ -195,5 +195,7 @@
     <item type="id" name="pm_lite"/>
     <item type="id" name="settings_button_container"/>
 
+    <item type="id" name="log_access_dialog_allow_button" />
+    <item type="id" name="log_access_dialog_deny_button" />
 </resources>
 

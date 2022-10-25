@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.app;
+package com.android.systemui.logcat;
 
 import android.annotation.StyleRes;
 import android.app.Activity;
@@ -23,7 +23,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -43,7 +42,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.android.internal.R;
+import com.android.internal.app.ILogAccessDialogCallback;
+import com.android.systemui.R;
+
 
 /**
  * Dialog responsible for obtaining user consent per-use log access
@@ -93,10 +94,7 @@ public class LogAccessDialogActivity extends Activity implements
         mAlertLearnMore = getResources().getString(R.string.log_access_confirmation_learn_more);
 
         // create View
-        boolean isDarkTheme = (getResources().getConfiguration().uiMode
-                & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
-        int themeId = isDarkTheme ? android.R.style.Theme_DeviceDefault_Dialog_Alert :
-                android.R.style.Theme_DeviceDefault_Light_Dialog_Alert;
+        int themeId = R.style.LogAccessDialogTheme;
         mAlertView = createView(themeId);
 
         // create AlertDialog
@@ -177,8 +175,7 @@ public class LogAccessDialogActivity extends Activity implements
                 PackageManager.MATCH_DIRECT_BOOT_AUTO,
                 UserHandle.getUserId(uid)).loadLabel(pm);
 
-        String titleString = context.getString(
-                com.android.internal.R.string.log_access_confirmation_title, appLabel);
+        String titleString = context.getString(R.string.log_access_confirmation_title, appLabel);
 
         return titleString;
     }
@@ -235,15 +232,12 @@ public class LogAccessDialogActivity extends Activity implements
     @Override
     public void onClick(View view) {
         try {
-            switch (view.getId()) {
-                case R.id.log_access_dialog_allow_button:
-                    mCallback.approveAccessForClient(mUid, mPackageName);
-                    finish();
-                    break;
-                case R.id.log_access_dialog_deny_button:
-                    declineLogAccess();
-                    finish();
-                    break;
+            if (view.getId() == R.id.log_access_dialog_allow_button) {
+                mCallback.approveAccessForClient(mUid, mPackageName);
+                finish();
+            } else if (view.getId() == R.id.log_access_dialog_allow_button) {
+                declineLogAccess();
+                finish();
             }
         } catch (RemoteException e) {
             finish();
