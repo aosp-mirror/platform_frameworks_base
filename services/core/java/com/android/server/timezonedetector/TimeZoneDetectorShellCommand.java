@@ -19,6 +19,7 @@ import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_CONFIR
 import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_DUMP_METRICS;
 import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_ENABLE_TELEPHONY_FALLBACK;
 import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_GET_TIME_ZONE_STATE;
+import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_HANDLE_LOCATION_ALGORITHM_EVENT;
 import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_IS_AUTO_DETECTION_ENABLED;
 import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_IS_GEO_DETECTION_ENABLED;
 import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_IS_GEO_DETECTION_SUPPORTED;
@@ -27,7 +28,6 @@ import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_SERVIC
 import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_SET_AUTO_DETECTION_ENABLED;
 import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_SET_GEO_DETECTION_ENABLED;
 import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_SET_TIME_ZONE_STATE;
-import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_SUGGEST_GEO_LOCATION_TIME_ZONE;
 import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_SUGGEST_MANUAL_TIME_ZONE;
 import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_SUGGEST_TELEPHONY_TIME_ZONE;
 import static android.provider.DeviceConfig.NAMESPACE_SYSTEM_TIME;
@@ -79,8 +79,8 @@ class TimeZoneDetectorShellCommand extends ShellCommand {
                 return runIsGeoDetectionEnabled();
             case SHELL_COMMAND_SET_GEO_DETECTION_ENABLED:
                 return runSetGeoDetectionEnabled();
-            case SHELL_COMMAND_SUGGEST_GEO_LOCATION_TIME_ZONE:
-                return runSuggestGeolocationTimeZone();
+            case SHELL_COMMAND_HANDLE_LOCATION_ALGORITHM_EVENT:
+                return runHandleLocationEvent();
             case SHELL_COMMAND_SUGGEST_MANUAL_TIME_ZONE:
                 return runSuggestManualTimeZone();
             case SHELL_COMMAND_SUGGEST_TELEPHONY_TIME_ZONE:
@@ -153,34 +153,34 @@ class TimeZoneDetectorShellCommand extends ShellCommand {
         return mInterface.updateConfiguration(userId, configuration) ? 0 : 1;
     }
 
-    private int runSuggestGeolocationTimeZone() {
-        return runSuggestTimeZone(
-                () -> GeolocationTimeZoneSuggestion.parseCommandLineArg(this),
-                mInterface::suggestGeolocationTimeZone);
+    private int runHandleLocationEvent() {
+        return runSingleArgMethod(
+                () -> LocationAlgorithmEvent.parseCommandLineArg(this),
+                mInterface::handleLocationAlgorithmEvent);
     }
 
     private int runSuggestManualTimeZone() {
-        return runSuggestTimeZone(
+        return runSingleArgMethod(
                 () -> ManualTimeZoneSuggestion.parseCommandLineArg(this),
                 mInterface::suggestManualTimeZone);
     }
 
     private int runSuggestTelephonyTimeZone() {
-        return runSuggestTimeZone(
+        return runSingleArgMethod(
                 () -> TelephonyTimeZoneSuggestion.parseCommandLineArg(this),
                 mInterface::suggestTelephonyTimeZone);
     }
 
-    private <T> int runSuggestTimeZone(Supplier<T> suggestionParser, Consumer<T> invoker) {
+    private <T> int runSingleArgMethod(Supplier<T> argParser, Consumer<T> invoker) {
         final PrintWriter pw = getOutPrintWriter();
         try {
-            T suggestion = suggestionParser.get();
-            if (suggestion == null) {
-                pw.println("Error: suggestion not specified");
+            T arg = argParser.get();
+            if (arg == null) {
+                pw.println("Error: arg not specified");
                 return 1;
             }
-            invoker.accept(suggestion);
-            pw.println("Suggestion " + suggestion + " injected.");
+            invoker.accept(arg);
+            pw.println("Arg " + arg + " injected.");
             return 0;
         } catch (RuntimeException e) {
             pw.println(e);
@@ -263,18 +263,18 @@ class TimeZoneDetectorShellCommand extends ShellCommand {
         pw.printf("    Sets the geolocation time zone detection enabled setting.\n");
         pw.printf("  %s\n", SHELL_COMMAND_ENABLE_TELEPHONY_FALLBACK);
         pw.printf("    Signals that telephony time zone detection fall back can be used if"
-                + " geolocation detection is supported and enabled. This is a temporary state until"
-                + " geolocation detection becomes \"certain\". To have an effect this requires that"
-                + " the telephony fallback feature is supported on the device, see below for"
-                + " for device_config flags.\n");
-        pw.println();
-        pw.printf("  %s <geolocation suggestion opts>\n",
-                SHELL_COMMAND_SUGGEST_GEO_LOCATION_TIME_ZONE);
-        pw.printf("    Suggests a time zone as if via the \"location\" origin.\n");
+                + " geolocation detection is supported and enabled.\n)");
+        pw.printf("    This is a temporary state until geolocation detection becomes \"certain\"."
+                + "\n");
+        pw.printf("    To have an effect this requires that the telephony fallback feature is"
+                + " supported on the device, see below for device_config flags.\n");
+        pw.printf("  %s <location event opts>\n", SHELL_COMMAND_HANDLE_LOCATION_ALGORITHM_EVENT);
+        pw.printf("    Simulates an event from the location time zone detection algorithm.\n");
         pw.printf("  %s <manual suggestion opts>\n", SHELL_COMMAND_SUGGEST_MANUAL_TIME_ZONE);
-        pw.printf("    Suggests a time zone as if via the \"manual\" origin.\n");
+        pw.printf("    Suggests a time zone as if supplied by a user manually.\n");
         pw.printf("  %s <telephony suggestion opts>\n", SHELL_COMMAND_SUGGEST_TELEPHONY_TIME_ZONE);
-        pw.printf("    Suggests a time zone as if via the \"telephony\" origin.\n");
+        pw.printf("    Simulates a time zone suggestion from the telephony time zone detection"
+                + " algorithm.\n");
         pw.printf("  %s\n", SHELL_COMMAND_GET_TIME_ZONE_STATE);
         pw.printf("    Returns the current time zone setting state.\n");
         pw.printf("  %s <time zone state options>\n", SHELL_COMMAND_SET_TIME_ZONE_STATE);
@@ -284,7 +284,7 @@ class TimeZoneDetectorShellCommand extends ShellCommand {
         pw.printf("  %s\n", SHELL_COMMAND_DUMP_METRICS);
         pw.printf("    Dumps the service metrics to stdout for inspection.\n");
         pw.println();
-        GeolocationTimeZoneSuggestion.printCommandLineOpts(pw);
+        LocationAlgorithmEvent.printCommandLineOpts(pw);
         pw.println();
         ManualTimeZoneSuggestion.printCommandLineOpts(pw);
         pw.println();

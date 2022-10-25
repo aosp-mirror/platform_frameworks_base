@@ -16,6 +16,11 @@
 
 package com.android.server.timezonedetector;
 
+import static android.app.time.DetectorStatusTypes.DETECTION_ALGORITHM_STATUS_RUNNING;
+import static android.app.time.DetectorStatusTypes.DETECTOR_STATUS_RUNNING;
+import static android.app.time.LocationTimeZoneAlgorithmStatus.PROVIDER_STATUS_IS_CERTAIN;
+import static android.app.time.LocationTimeZoneAlgorithmStatus.PROVIDER_STATUS_NOT_PRESENT;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThrows;
@@ -34,8 +39,11 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.app.time.ITimeZoneDetectorListener;
+import android.app.time.LocationTimeZoneAlgorithmStatus;
+import android.app.time.TelephonyTimeZoneAlgorithmStatus;
 import android.app.time.TimeZoneCapabilitiesAndConfig;
 import android.app.time.TimeZoneConfiguration;
+import android.app.time.TimeZoneDetectorStatus;
 import android.app.time.TimeZoneState;
 import android.app.timezonedetector.ManualTimeZoneSuggestion;
 import android.app.timezonedetector.TelephonyTimeZoneSuggestion;
@@ -59,6 +67,13 @@ import java.util.List;
 @RunWith(AndroidJUnit4.class)
 public class TimeZoneDetectorServiceTest {
 
+    private static final LocationTimeZoneAlgorithmStatus ARBITRARY_LOCATION_CERTAIN_STATUS =
+            new LocationTimeZoneAlgorithmStatus(DETECTION_ALGORITHM_STATUS_RUNNING,
+                    PROVIDER_STATUS_IS_CERTAIN, null, PROVIDER_STATUS_NOT_PRESENT, null);
+    private static final TimeZoneDetectorStatus ARBITRARY_DETECTOR_STATUS =
+            new TimeZoneDetectorStatus(DETECTOR_STATUS_RUNNING,
+                    new TelephonyTimeZoneAlgorithmStatus(DETECTION_ALGORITHM_STATUS_RUNNING),
+                    ARBITRARY_LOCATION_CERTAIN_STATUS);
     private static final int ARBITRARY_USER_ID = 9999;
     private static final List<String> ARBITRARY_TIME_ZONE_IDS = Arrays.asList("TestZoneId");
     private static final long ARBITRARY_ELAPSED_REALTIME_MILLIS = 1234L;
@@ -113,7 +128,8 @@ public class TimeZoneDetectorServiceTest {
 
         ConfigurationInternal configuration =
                 createConfigurationInternal(true /* autoDetectionEnabled*/);
-        mFakeTimeZoneDetectorStrategySpy.initializeConfiguration(configuration);
+        mFakeTimeZoneDetectorStrategySpy.initializeConfigurationAndStatus(configuration,
+                ARBITRARY_DETECTOR_STATUS);
 
         TimeZoneCapabilitiesAndConfig actualCapabilitiesAndConfig =
                 mTimeZoneDetectorService.getCapabilitiesAndConfig();
@@ -128,6 +144,7 @@ public class TimeZoneDetectorServiceTest {
 
         TimeZoneCapabilitiesAndConfig expectedCapabilitiesAndConfig =
                 new TimeZoneCapabilitiesAndConfig(
+                        ARBITRARY_DETECTOR_STATUS,
                         configuration.asCapabilities(expectedBypassUserPolicyChecks),
                         configuration.asConfiguration());
         assertEquals(expectedCapabilitiesAndConfig, actualCapabilitiesAndConfig);
@@ -161,7 +178,9 @@ public class TimeZoneDetectorServiceTest {
     public void testListenerRegistrationAndCallbacks() throws Exception {
         ConfigurationInternal initialConfiguration =
                 createConfigurationInternal(false /* autoDetectionEnabled */);
-        mFakeTimeZoneDetectorStrategySpy.initializeConfiguration(initialConfiguration);
+
+        mFakeTimeZoneDetectorStrategySpy.initializeConfigurationAndStatus(
+                initialConfiguration, ARBITRARY_DETECTOR_STATUS);
 
         IBinder mockListenerBinder = mock(IBinder.class);
         ITimeZoneDetectorListener mockListener = mock(ITimeZoneDetectorListener.class);
@@ -231,31 +250,35 @@ public class TimeZoneDetectorServiceTest {
     }
 
     @Test
-    public void testSuggestGeolocationTimeZone_withoutPermission() {
+    public void testHandleLocationAlgorithmEvent_withoutPermission() {
         doThrow(new SecurityException("Mock"))
                 .when(mMockContext).enforceCallingPermission(anyString(), any());
         GeolocationTimeZoneSuggestion timeZoneSuggestion = createGeolocationTimeZoneSuggestion();
+        LocationAlgorithmEvent event = new LocationAlgorithmEvent(
+                ARBITRARY_LOCATION_CERTAIN_STATUS, timeZoneSuggestion);
 
         assertThrows(SecurityException.class,
-                () -> mTimeZoneDetectorService.suggestGeolocationTimeZone(timeZoneSuggestion));
+                () -> mTimeZoneDetectorService.handleLocationAlgorithmEvent(event));
         verify(mMockContext).enforceCallingPermission(
                 eq(android.Manifest.permission.SET_TIME_ZONE), anyString());
     }
 
     @Test
-    public void testSuggestGeolocationTimeZone() throws Exception {
+    public void testHandleLocationAlgorithmEvent() throws Exception {
         doNothing().when(mMockContext).enforceCallingPermission(anyString(), any());
 
         GeolocationTimeZoneSuggestion timeZoneSuggestion = createGeolocationTimeZoneSuggestion();
+        LocationAlgorithmEvent event = new LocationAlgorithmEvent(
+                ARBITRARY_LOCATION_CERTAIN_STATUS, timeZoneSuggestion);
 
-        mTimeZoneDetectorService.suggestGeolocationTimeZone(timeZoneSuggestion);
+        mTimeZoneDetectorService.handleLocationAlgorithmEvent(event);
         mTestHandler.assertTotalMessagesEnqueued(1);
 
         verify(mMockContext).enforceCallingPermission(
                 eq(android.Manifest.permission.SET_TIME_ZONE), anyString());
 
         mTestHandler.waitForMessagesToBeProcessed();
-        verify(mFakeTimeZoneDetectorStrategySpy).suggestGeolocationTimeZone(timeZoneSuggestion);
+        verify(mFakeTimeZoneDetectorStrategySpy).handleLocationAlgorithmEvent(event);
     }
 
     @Test
