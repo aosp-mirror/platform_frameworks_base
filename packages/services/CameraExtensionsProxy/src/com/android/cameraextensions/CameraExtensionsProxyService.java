@@ -829,6 +829,15 @@ public class CameraExtensionsProxyService extends Service {
 
             return null;
         }
+
+        @Override
+        public boolean isCaptureProcessProgressAvailable() {
+            if (LATENCY_IMPROVEMENTS_SUPPORTED) {
+                return mAdvancedExtender.isCaptureProcessProgressAvailable();
+            }
+
+            return false;
+        }
     }
 
     private class CaptureCallbackStub implements SessionProcessorImpl.CaptureCallback {
@@ -920,6 +929,15 @@ public class CameraExtensionsProxyService extends Service {
                 mCaptureCallback.onCaptureCompleted(timestamp, requestId, captureResults);
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to notify capture complete due to remote exception!");
+            }
+        }
+
+        @Override
+        public void onCaptureProcessProgressed(int progress) {
+            try {
+                mCaptureCallback.onCaptureProcessProgressed(progress);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Remote client doesn't respond to capture progress callbacks!");
             }
         }
     }
@@ -1414,6 +1432,15 @@ public class CameraExtensionsProxyService extends Service {
         }
 
         @Override
+        public boolean isCaptureProcessProgressAvailable() {
+            if (LATENCY_IMPROVEMENTS_SUPPORTED) {
+                return mImageExtender.isCaptureProcessProgressAvailable();
+            }
+
+            return false;
+        }
+
+        @Override
         public CaptureStageImpl onEnableSession() {
             return initializeParcelable(mImageExtender.onEnableSession(), mCameraId);
         }
@@ -1567,6 +1594,15 @@ public class CameraExtensionsProxyService extends Service {
         private ProcessResultCallback(IProcessResultImpl processResult, String cameraId) {
             mProcessResult = processResult;
             mCameraId = cameraId;
+        }
+
+        @Override
+        public void onCaptureProcessProgressed(int progress) {
+            try {
+                mProcessResult.onCaptureProcessProgressed(progress);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Remote client doesn't respond to capture progress callbacks!");
+            }
         }
 
         @Override

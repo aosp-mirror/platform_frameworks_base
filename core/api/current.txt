@@ -17770,6 +17770,7 @@ package android.hardware.camera2 {
     method @NonNull public <T> java.util.List<android.util.Size> getExtensionSupportedSizes(int, @NonNull Class<T>);
     method @NonNull public java.util.List<android.util.Size> getExtensionSupportedSizes(int, int);
     method @NonNull public java.util.List<java.lang.Integer> getSupportedExtensions();
+    method public boolean isCaptureProcessProgressAvailable(int);
     field public static final int EXTENSION_AUTOMATIC = 0; // 0x0
     field @Deprecated public static final int EXTENSION_BEAUTY = 1; // 0x1
     field public static final int EXTENSION_BOKEH = 2; // 0x2
@@ -17789,6 +17790,7 @@ package android.hardware.camera2 {
   public abstract static class CameraExtensionSession.ExtensionCaptureCallback {
     ctor public CameraExtensionSession.ExtensionCaptureCallback();
     method public void onCaptureFailed(@NonNull android.hardware.camera2.CameraExtensionSession, @NonNull android.hardware.camera2.CaptureRequest);
+    method public void onCaptureProcessProgressed(@NonNull android.hardware.camera2.CameraExtensionSession, @NonNull android.hardware.camera2.CaptureRequest, @IntRange(from=0, to=100) int);
     method public void onCaptureProcessStarted(@NonNull android.hardware.camera2.CameraExtensionSession, @NonNull android.hardware.camera2.CaptureRequest);
     method public void onCaptureResultAvailable(@NonNull android.hardware.camera2.CameraExtensionSession, @NonNull android.hardware.camera2.CaptureRequest, @NonNull android.hardware.camera2.TotalCaptureResult);
     method public void onCaptureSequenceAborted(@NonNull android.hardware.camera2.CameraExtensionSession, int);
