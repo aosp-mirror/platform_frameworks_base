@@ -54,18 +54,17 @@ public class UserSelectionDialogResult extends BaseDialogResult implements Parce
     private static final String EXTRA_USER_SELECTION_RESULT =
             "android.credentials.ui.extra.USER_SELECTION_RESULT";
 
-    @NonNull
-    private final String mProviderId;
-
-    // TODO: consider switching to string or other types, depending on the service implementation.
-    private final int mEntryId;
+    @NonNull private final String mProviderId;
+    @NonNull private final String mEntryKey;
+    @NonNull private final String mEntrySubkey;
 
     public UserSelectionDialogResult(
             @NonNull IBinder requestToken, @NonNull String providerId,
-            int entryId) {
+            @NonNull String entryKey, @NonNull String entrySubkey) {
         super(requestToken);
         mProviderId = providerId;
-        mEntryId = entryId;
+        mEntryKey = entryKey;
+        mEntrySubkey = entrySubkey;
     }
 
     /** Returns provider package name whose entry was selected by the user. */
@@ -74,26 +73,38 @@ public class UserSelectionDialogResult extends BaseDialogResult implements Parce
         return mProviderId;
     }
 
-    /** Returns the id of the visual entry that the user selected. */
-    public int getEntryId() {
-        return mEntryId;
+    /** Returns the key of the visual entry that the user selected. */
+    @NonNull
+    public String getEntryKey() {
+        return mEntryKey;
+    }
+
+    /** Returns the subkey of the visual entry that the user selected. */
+    @NonNull
+    public String getEntrySubkey() {
+        return mEntrySubkey;
     }
 
     protected UserSelectionDialogResult(@NonNull Parcel in) {
         super(in);
         String providerId = in.readString8();
-        int entryId = in.readInt();
+        String entryKey = in.readString8();
+        String entrySubkey = in.readString8();
 
         mProviderId = providerId;
         AnnotationValidations.validate(NonNull.class, null, mProviderId);
-        mEntryId = entryId;
+        mEntryKey = entryKey;
+        AnnotationValidations.validate(NonNull.class, null, mEntryKey);
+        mEntrySubkey = entrySubkey;
+        AnnotationValidations.validate(NonNull.class, null, mEntrySubkey);
     }
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
         dest.writeString8(mProviderId);
-        dest.writeInt(mEntryId);
+        dest.writeString8(mEntryKey);
+        dest.writeString8(mEntrySubkey);
     }
 
     @Override

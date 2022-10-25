@@ -63,32 +63,32 @@ fun CreatePasskeyScreen(
       val uiState = viewModel.uiState
       when (uiState.currentScreenState) {
         CreateScreenState.PASSKEY_INTRO -> ConfirmationCard(
-          onConfirm = {viewModel.onConfirmIntro()},
-          onCancel = {viewModel.onCancel()},
+          onConfirm = viewModel::onConfirmIntro,
+          onCancel = viewModel::onCancel,
         )
         CreateScreenState.PROVIDER_SELECTION -> ProviderSelectionCard(
           providerList = uiState.providers,
-          onCancel = {viewModel.onCancel()},
-          onProviderSelected = {viewModel.onProviderSelected(it)}
+          onCancel = viewModel::onCancel,
+          onProviderSelected = viewModel::onProviderSelected
         )
         CreateScreenState.CREATION_OPTION_SELECTION -> CreationSelectionCard(
           requestDisplayInfo = uiState.requestDisplayInfo,
           providerInfo = uiState.activeEntry?.activeProvider!!,
           createOptionInfo = uiState.activeEntry.activeCreateOptionInfo,
-          onOptionSelected = {viewModel.onPrimaryCreateOptionInfoSelected()},
-          onConfirm = {viewModel.onPrimaryCreateOptionInfoSelected()},
-          onCancel = {viewModel.onCancel()},
+          onOptionSelected = viewModel::onPrimaryCreateOptionInfoSelected,
+          onConfirm = viewModel::onPrimaryCreateOptionInfoSelected,
+          onCancel = viewModel::onCancel,
           multiProvider = uiState.providers.size > 1,
-          onMoreOptionsSelected = {viewModel.onMoreOptionsSelected()}
+          onMoreOptionsSelected = viewModel::onMoreOptionsSelected
         )
         CreateScreenState.MORE_OPTIONS_SELECTION -> MoreOptionsSelectionCard(
             providerList = uiState.providers,
-            onBackButtonSelected = {viewModel.onBackButtonSelected()},
-            onOptionSelected = {viewModel.onMoreOptionsRowSelected(it)}
+            onBackButtonSelected = viewModel::onBackButtonSelected,
+            onOptionSelected = viewModel::onMoreOptionsRowSelected
           )
         CreateScreenState.MORE_OPTIONS_ROW_INTRO -> MoreOptionsRowIntroCard(
           providerInfo = uiState.activeEntry?.activeProvider!!,
-          onDefaultOrNotSelected = {viewModel.onDefaultOrNotSelected()}
+          onDefaultOrNotSelected = viewModel::onDefaultOrNotSelected
         )
       }
     },
@@ -485,40 +485,6 @@ fun CreationSelectionCard(
       Divider(
         thickness = 18.dp,
         color = Color.Transparent,
-        modifier = Modifier.padding(bottom = 16.dp)
-      )
-    }
-  }
-}
-
-@ExperimentalMaterialApi
-@Composable
-fun CreateOptionRow(createOptionInfo: CreateOptionInfo, onOptionSelected: (Int) -> Unit) {
-  Chip(
-    modifier = Modifier.fillMaxWidth(),
-    onClick = {onOptionSelected(createOptionInfo.id)},
-    leadingIcon = {
-      Image(modifier = Modifier.size(24.dp, 24.dp).padding(start = 10.dp),
-        bitmap = createOptionInfo.icon.toBitmap().asImageBitmap(),
-            // painter = painterResource(R.drawable.ic_passkey),
-        // TODO: add description.
-            contentDescription = "")
-    },
-    colors = ChipDefaults.chipColors(
-      backgroundColor = Grey100,
-      leadingIconContentColor = Grey100
-    ),
-    shape = Shapes.large
-  ) {
-    Column() {
-      Text(
-        text = createOptionInfo.title,
-        style = Typography.h6,
-        modifier = Modifier.padding(top = 16.dp)
-      )
-      Text(
-        text = createOptionInfo.subtitle,
-        style = Typography.body2,
         modifier = Modifier.padding(bottom = 16.dp)
       )
     }
