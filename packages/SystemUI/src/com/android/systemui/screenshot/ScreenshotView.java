@@ -74,7 +74,6 @@ import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowMetrics;
 import android.view.accessibility.AccessibilityManager;
-import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
@@ -122,14 +121,8 @@ public class ScreenshotView extends FrameLayout implements
     private static final long SCREENSHOT_TO_CORNER_SCALE_DURATION_MS = 234;
     private static final long SCREENSHOT_ACTIONS_EXPANSION_DURATION_MS = 400;
     private static final long SCREENSHOT_ACTIONS_ALPHA_DURATION_MS = 100;
-    private static final long SCREENSHOT_DISMISS_X_DURATION_MS = 350;
-    private static final long SCREENSHOT_DISMISS_ALPHA_DURATION_MS = 350;
-    private static final long SCREENSHOT_DISMISS_ALPHA_OFFSET_MS = 50; // delay before starting fade
     private static final float SCREENSHOT_ACTIONS_START_SCALE_X = .7f;
-    private static final float ROUNDED_CORNER_RADIUS = .25f;
     private static final int SWIPE_PADDING_DP = 12; // extra padding around views to allow swipe
-
-    private final Interpolator mAccelerateInterpolator = new AccelerateInterpolator();
 
     private final Resources mResources;
     private final Interpolator mFastOutSlowIn;
@@ -145,6 +138,7 @@ public class ScreenshotView extends FrameLayout implements
     private ImageView mScrollingScrim;
     private DraggableConstraintLayout mScreenshotStatic;
     private ImageView mScreenshotPreview;
+    private ImageView mScreenshotBadge;
     private View mScreenshotPreviewBorder;
     private ImageView mScrollablePreview;
     private ImageView mScreenshotFlash;
@@ -355,6 +349,7 @@ public class ScreenshotView extends FrameLayout implements
         mScreenshotPreviewBorder = requireNonNull(
                 findViewById(R.id.screenshot_preview_border));
         mScreenshotPreview.setClipToOutline(true);
+        mScreenshotBadge = requireNonNull(findViewById(R.id.screenshot_badge));
 
         mActionsContainerBackground = requireNonNull(findViewById(
                 R.id.actions_container_background));
@@ -595,8 +590,11 @@ public class ScreenshotView extends FrameLayout implements
 
         ValueAnimator borderFadeIn = ValueAnimator.ofFloat(0, 1);
         borderFadeIn.setDuration(100);
-        borderFadeIn.addUpdateListener((animation) ->
-                mScreenshotPreviewBorder.setAlpha(animation.getAnimatedFraction()));
+        borderFadeIn.addUpdateListener((animation) -> {
+            float borderAlpha = animation.getAnimatedFraction();
+            mScreenshotPreviewBorder.setAlpha(borderAlpha);
+            mScreenshotBadge.setAlpha(borderAlpha);
+        });
 
         if (showFlash) {
             dropInAnimation.play(flashOutAnimator).after(flashInAnimator);
@@ -761,6 +759,11 @@ public class ScreenshotView extends FrameLayout implements
                     mDirectionLTR ? 0 : mActionsContainerBackground.getWidth());
         });
         return animator;
+    }
+
+    void badgeScreenshot(Drawable badge) {
+        mScreenshotBadge.setImageDrawable(badge);
+        mScreenshotBadge.setVisibility(badge != null ? View.VISIBLE : View.GONE);
     }
 
     void setChipIntents(ScreenshotController.SavedImageData imageData) {
@@ -1027,6 +1030,9 @@ public class ScreenshotView extends FrameLayout implements
         mScreenshotPreview.setVisibility(View.INVISIBLE);
         mScreenshotPreview.setAlpha(1f);
         mScreenshotPreviewBorder.setAlpha(0);
+        mScreenshotBadge.setAlpha(0f);
+        mScreenshotBadge.setVisibility(View.GONE);
+        mScreenshotBadge.setImageDrawable(null);
         mPendingSharedTransition = false;
         mActionsContainerBackground.setVisibility(View.GONE);
         mActionsContainer.setVisibility(View.GONE);
@@ -1082,6 +1088,7 @@ public class ScreenshotView extends FrameLayout implements
             mActionsContainerBackground.setAlpha(alpha);
             mActionsContainer.setAlpha(alpha);
             mScreenshotPreviewBorder.setAlpha(alpha);
+            mScreenshotBadge.setAlpha(alpha);
         });
         alphaAnim.setDuration(600);
         return alphaAnim;

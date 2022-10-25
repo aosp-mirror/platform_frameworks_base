@@ -18,10 +18,13 @@ package com.android.keyguard.dagger;
 
 import android.content.Context;
 import android.os.Handler;
+import android.os.UserHandle;
 
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Application;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.shared.clocks.ClockRegistry;
 import com.android.systemui.shared.clocks.DefaultClockProvider;
 import com.android.systemui.shared.plugins.PluginManager;
@@ -39,7 +42,14 @@ public abstract class ClockRegistryModule {
             @Application Context context,
             PluginManager pluginManager,
             @Main Handler handler,
-            DefaultClockProvider defaultClockProvider) {
-        return new ClockRegistry(context, pluginManager, handler, defaultClockProvider);
+            DefaultClockProvider defaultClockProvider,
+            FeatureFlags featureFlags) {
+        return new ClockRegistry(
+                context,
+                pluginManager,
+                handler,
+                featureFlags.isEnabled(Flags.LOCKSCREEN_CUSTOM_CLOCKS),
+                UserHandle.USER_ALL,
+                defaultClockProvider);
     }
 }

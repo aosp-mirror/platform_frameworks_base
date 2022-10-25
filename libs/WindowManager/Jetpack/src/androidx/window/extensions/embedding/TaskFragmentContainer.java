@@ -166,16 +166,34 @@ class TaskFragmentContainer {
         return allActivities;
     }
 
-    /**
-     * Checks if the count of activities from the same process in task fragment info corresponds to
-     * the ones created and available on the client side.
-     */
-    boolean taskInfoActivityCountMatchesCreated() {
+    /** Whether the TaskFragment is in an intermediate state waiting for the server update.*/
+    boolean isInIntermediateState() {
         if (mInfo == null) {
-            return false;
+            // Haven't received onTaskFragmentAppeared event.
+            return true;
         }
-        return mPendingAppearedActivities.isEmpty()
-                && mInfo.getActivities().size() == collectNonFinishingActivities().size();
+        if (mInfo.isEmpty()) {
+            // Empty TaskFragment will be removed or will have activity launched into it soon.
+            return true;
+        }
+        if (!mPendingAppearedActivities.isEmpty()) {
+            // Reparented activity hasn't appeared.
+            return true;
+        }
+        // Check if there is any reported activity that is no longer alive.
+        for (IBinder token : mInfo.getActivities()) {
+            final Activity activity = mController.getActivity(token);
+            if (activity == null && !mTaskContainer.isVisible()) {
+                // Activity can be null if the activity is not attached to process yet. That can
+                // happen when the activity is started in background.
+                continue;
+            }
+            if (activity == null || activity.isFinishing()) {
+                // One of the reported activity is no longer alive, wait for the server update.
+                return true;
+            }
+        }
+        return false;
     }
 
     @NonNull
