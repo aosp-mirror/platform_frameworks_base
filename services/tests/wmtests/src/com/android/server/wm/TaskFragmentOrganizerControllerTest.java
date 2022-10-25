@@ -56,6 +56,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -91,6 +92,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.stubbing.Answer;
 
 import java.util.List;
 
@@ -759,6 +761,50 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
 
         // Successfully created when the organizer is registered.
         assertNotNull(mWindowOrganizerController.getTaskFragment(fragmentToken));
+    }
+
+    @Test
+    public void testOrganizerRemovedWithPendingEvents() {
+        final TaskFragment tf0 = new TaskFragmentBuilder(mAtm)
+                .setCreateParentTask()
+                .setOrganizer(mOrganizer)
+                .setFragmentToken(mFragmentToken)
+                .build();
+        final TaskFragment tf1 = new TaskFragmentBuilder(mAtm)
+                .setCreateParentTask()
+                .setOrganizer(mOrganizer)
+                .setFragmentToken(new Binder())
+                .build();
+        assertTrue(tf0.isOrganizedTaskFragment());
+        assertTrue(tf1.isOrganizedTaskFragment());
+        assertTrue(tf0.isAttached());
+        assertTrue(tf0.isAttached());
+
+        // Mock the behavior that remove TaskFragment can trigger event dispatch.
+        final Answer<Void> removeImmediately = invocation -> {
+            invocation.callRealMethod();
+            mController.dispatchPendingEvents();
+            return null;
+        };
+        doAnswer(removeImmediately).when(tf0).removeImmediately();
+        doAnswer(removeImmediately).when(tf1).removeImmediately();
+
+        // Add pending events.
+        mController.onTaskFragmentAppeared(mIOrganizer, tf0);
+        mController.onTaskFragmentAppeared(mIOrganizer, tf1);
+
+        // Remove organizer.
+        mController.unregisterOrganizer(mIOrganizer);
+        mController.dispatchPendingEvents();
+
+        // Nothing should happen after the organizer is removed.
+        verify(mOrganizer, never()).onTransactionReady(any());
+
+        // TaskFragments should be removed.
+        assertFalse(tf0.isOrganizedTaskFragment());
+        assertFalse(tf1.isOrganizedTaskFragment());
+        assertFalse(tf0.isAttached());
+        assertFalse(tf0.isAttached());
     }
 
     @Test
