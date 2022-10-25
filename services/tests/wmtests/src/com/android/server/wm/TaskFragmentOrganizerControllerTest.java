@@ -874,29 +874,87 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
 
     @Test
     public void testDeferPendingTaskFragmentEventsOfInvisibleTask() {
-        // Task - TaskFragment - Activity.
         final Task task = createTask(mDisplayContent);
         final TaskFragment taskFragment = new TaskFragmentBuilder(mAtm)
                 .setParentTask(task)
                 .setOrganizer(mOrganizer)
                 .setFragmentToken(mFragmentToken)
                 .build();
-
-        // Mock the task to invisible
         doReturn(false).when(task).shouldBeVisible(any());
 
-        // Sending events
-        taskFragment.mTaskFragmentAppearedSent = true;
+        // Dispatch the initial event in the Task to update the Task visibility to the organizer.
+        mController.onTaskFragmentAppeared(mIOrganizer, taskFragment);
+        mController.dispatchPendingEvents();
+        verify(mOrganizer).onTransactionReady(any());
+
+        // Verify that events were not sent when the Task is in background.
+        clearInvocations(mOrganizer);
+        final Rect bounds = new Rect(0, 0, 500, 1000);
+        task.setBoundsUnchecked(bounds);
+        mController.onTaskFragmentParentInfoChanged(mIOrganizer, task);
         mController.onTaskFragmentInfoChanged(mIOrganizer, taskFragment);
         mController.dispatchPendingEvents();
-
-        // Verifies that event was not sent
         verify(mOrganizer, never()).onTransactionReady(any());
+
+        // Verify that the events were sent when the Task becomes visible.
+        doReturn(true).when(task).shouldBeVisible(any());
+        task.lastActiveTime++;
+        mController.dispatchPendingEvents();
+        verify(mOrganizer).onTransactionReady(any());
+    }
+
+    @Test
+    public void testSendAllPendingTaskFragmentEventsWhenAnyTaskIsVisible() {
+        // Invisible Task.
+        final Task invisibleTask = createTask(mDisplayContent);
+        final TaskFragment invisibleTaskFragment = new TaskFragmentBuilder(mAtm)
+                .setParentTask(invisibleTask)
+                .setOrganizer(mOrganizer)
+                .setFragmentToken(mFragmentToken)
+                .build();
+        doReturn(false).when(invisibleTask).shouldBeVisible(any());
+
+        // Visible Task.
+        final IBinder fragmentToken = new Binder();
+        final Task visibleTask = createTask(mDisplayContent);
+        final TaskFragment visibleTaskFragment = new TaskFragmentBuilder(mAtm)
+                .setParentTask(visibleTask)
+                .setOrganizer(mOrganizer)
+                .setFragmentToken(fragmentToken)
+                .build();
+        doReturn(true).when(invisibleTask).shouldBeVisible(any());
+
+        // Sending events
+        invisibleTaskFragment.mTaskFragmentAppearedSent = true;
+        visibleTaskFragment.mTaskFragmentAppearedSent = true;
+        mController.onTaskFragmentInfoChanged(mIOrganizer, invisibleTaskFragment);
+        mController.onTaskFragmentInfoChanged(mIOrganizer, visibleTaskFragment);
+        mController.dispatchPendingEvents();
+
+        // Verify that both events are sent.
+        verify(mOrganizer).onTransactionReady(mTransactionCaptor.capture());
+        final TaskFragmentTransaction transaction = mTransactionCaptor.getValue();
+        final List<TaskFragmentTransaction.Change> changes = transaction.getChanges();
+
+        // There should be two Task info changed with two TaskFragment info changed.
+        assertEquals(4, changes.size());
+        // Invisible Task info changed
+        assertEquals(TYPE_TASK_FRAGMENT_PARENT_INFO_CHANGED, changes.get(0).getType());
+        assertEquals(invisibleTask.mTaskId, changes.get(0).getTaskId());
+        // Invisible TaskFragment info changed
+        assertEquals(TYPE_TASK_FRAGMENT_INFO_CHANGED, changes.get(1).getType());
+        assertEquals(invisibleTaskFragment.getFragmentToken(),
+                changes.get(1).getTaskFragmentToken());
+        // Visible Task info changed
+        assertEquals(TYPE_TASK_FRAGMENT_PARENT_INFO_CHANGED, changes.get(2).getType());
+        assertEquals(visibleTask.mTaskId, changes.get(2).getTaskId());
+        // Visible TaskFragment info changed
+        assertEquals(TYPE_TASK_FRAGMENT_INFO_CHANGED, changes.get(3).getType());
+        assertEquals(visibleTaskFragment.getFragmentToken(), changes.get(3).getTaskFragmentToken());
     }
 
     @Test
     public void testCanSendPendingTaskFragmentEventsAfterActivityResumed() {
-        // Task - TaskFragment - Activity.
         final Task task = createTask(mDisplayContent);
         final TaskFragment taskFragment = new TaskFragmentBuilder(mAtm)
                 .setParentTask(task)
@@ -905,24 +963,26 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
                 .createActivityCount(1)
                 .build();
         final ActivityRecord activity = taskFragment.getTopMostActivity();
-
-        // Mock the task to invisible
         doReturn(false).when(task).shouldBeVisible(any());
         taskFragment.setResumedActivity(null, "test");
 
-        // Sending events
-        taskFragment.mTaskFragmentAppearedSent = true;
+        // Dispatch the initial event in the Task to update the Task visibility to the organizer.
+        mController.onTaskFragmentAppeared(mIOrganizer, taskFragment);
+        mController.dispatchPendingEvents();
+        verify(mOrganizer).onTransactionReady(any());
+
+        // Verify the info changed event is not sent because the Task is invisible
+        clearInvocations(mOrganizer);
+        final Rect bounds = new Rect(0, 0, 500, 1000);
+        task.setBoundsUnchecked(bounds);
         mController.onTaskFragmentInfoChanged(mIOrganizer, taskFragment);
         mController.dispatchPendingEvents();
-
-        // Verifies that event was not sent
         verify(mOrganizer, never()).onTransactionReady(any());
 
-        // Mock the task becomes visible, and activity resumed
+        // Mock the task becomes visible, and activity resumed. Verify the info changed event is
+        // sent.
         doReturn(true).when(task).shouldBeVisible(any());
         taskFragment.setResumedActivity(activity, "test");
-
-        // Verifies that event is sent.
         mController.dispatchPendingEvents();
         verify(mOrganizer).onTransactionReady(any());
     }
@@ -977,25 +1037,24 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         final ActivityRecord embeddedActivity = taskFragment.getTopNonFinishingActivity();
         // Add another activity in the Task so that it always contains a non-finishing activity.
         createActivityRecord(task);
-        assertTrue(task.shouldBeVisible(null));
+        doReturn(false).when(task).shouldBeVisible(any());
 
-        // Dispatch pending info changed event from creating the activity
-        taskFragment.mTaskFragmentAppearedSent = true;
-        mController.onTaskFragmentInfoChanged(mIOrganizer, taskFragment);
+        // Dispatch the initial event in the Task to update the Task visibility to the organizer.
+        mController.onTaskFragmentAppeared(mIOrganizer, taskFragment);
         mController.dispatchPendingEvents();
         verify(mOrganizer).onTransactionReady(any());
 
-        // Verify the info changed callback is not called when the task is invisible
+        // Verify the info changed event is not sent because the Task is invisible
         clearInvocations(mOrganizer);
-        doReturn(false).when(task).shouldBeVisible(any());
+        final Rect bounds = new Rect(0, 0, 500, 1000);
+        task.setBoundsUnchecked(bounds);
         mController.onTaskFragmentInfoChanged(mIOrganizer, taskFragment);
         mController.dispatchPendingEvents();
         verify(mOrganizer, never()).onTransactionReady(any());
 
-        // Finish the embedded activity, and verify the info changed callback is called because the
+        // Finish the embedded activity, and verify the info changed event is sent because the
         // TaskFragment is becoming empty.
         embeddedActivity.finishing = true;
-        mController.onTaskFragmentInfoChanged(mIOrganizer, taskFragment);
         mController.dispatchPendingEvents();
         verify(mOrganizer).onTransactionReady(any());
     }
