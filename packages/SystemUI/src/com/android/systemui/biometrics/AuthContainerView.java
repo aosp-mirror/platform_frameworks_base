@@ -127,7 +127,7 @@ public class AuthContainerView extends LinearLayout
     private final ScrollView mBiometricScrollView;
     private final View mPanelView;
     private final float mTranslationY;
-    @ContainerState private int mContainerState = STATE_UNKNOWN;
+    @VisibleForTesting @ContainerState int mContainerState = STATE_UNKNOWN;
     private final Set<Integer> mFailedModalities = new HashSet<Integer>();
     private final OnBackInvokedCallback mBackCallback = this::onBackInvoked;
 
@@ -630,11 +630,25 @@ public class AuthContainerView extends LinearLayout
         wm.addView(this, getLayoutParams(mWindowToken, mConfig.mPromptInfo.getTitle()));
     }
 
+    private void forceExecuteAnimatedIn() {
+        if (mContainerState == STATE_ANIMATING_IN) {
+            //clear all animators
+            if (mCredentialView != null && mCredentialView.isAttachedToWindow()) {
+                mCredentialView.animate().cancel();
+            }
+            mPanelView.animate().cancel();
+            mBiometricView.animate().cancel();
+            animate().cancel();
+            onDialogAnimatedIn();
+        }
+    }
+
     @Override
     public void dismissWithoutCallback(boolean animate) {
         if (animate) {
             animateAway(false /* sendReason */, 0 /* reason */);
         } else {
+            forceExecuteAnimatedIn();
             removeWindowIfAttached();
         }
     }
