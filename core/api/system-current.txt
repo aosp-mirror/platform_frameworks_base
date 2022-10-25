@@ -15393,6 +15393,15 @@ package android.telephony.ims {
     method public void onRemoved();
   }
 
+  public final class PublishAttributes implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public java.util.List<android.telephony.ims.RcsContactPresenceTuple> getPresenceTuples();
+    method public int getPublishState();
+    method @Nullable public android.telephony.ims.SipDetails getSipDetails();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.PublishAttributes> CREATOR;
+  }
+
   public final class RcsClientConfiguration implements android.os.Parcelable {
     ctor @Deprecated public RcsClientConfiguration(@NonNull String, @NonNull String, @NonNull String, @NonNull String);
     ctor public RcsClientConfiguration(@NonNull String, @NonNull String, @NonNull String, @NonNull String, boolean);
@@ -15555,7 +15564,8 @@ package android.telephony.ims {
   }
 
   public static interface RcsUceAdapter.OnPublishStateChangedListener {
-    method public void onPublishStateChange(int);
+    method @Deprecated public void onPublishStateChange(int);
+    method public default void onPublishStateChange(@NonNull android.telephony.ims.PublishAttributes);
   }
 
   public interface RegistrationManager {
@@ -15835,7 +15845,8 @@ package android.telephony.ims.feature {
 package android.telephony.ims.stub {
 
   public interface CapabilityExchangeEventListener {
-    method public default void onPublishUpdated(int, @NonNull String, int, @NonNull String) throws android.telephony.ims.ImsException;
+    method @Deprecated public default void onPublishUpdated(int, @NonNull String, int, @NonNull String) throws android.telephony.ims.ImsException;
+    method public default void onPublishUpdated(@NonNull android.telephony.ims.SipDetails) throws android.telephony.ims.ImsException;
     method public void onRemoteCapabilityRequest(@NonNull android.net.Uri, @NonNull java.util.Set<java.lang.String>, @NonNull android.telephony.ims.stub.CapabilityExchangeEventListener.OptionsRequestCallback) throws android.telephony.ims.ImsException;
     method public void onRequestPublishCapabilities(int) throws android.telephony.ims.ImsException;
     method public void onUnpublish() throws android.telephony.ims.ImsException;
@@ -16058,8 +16069,9 @@ package android.telephony.ims.stub {
 
   public static interface RcsCapabilityExchangeImplBase.PublishResponseCallback {
     method public void onCommandError(int) throws android.telephony.ims.ImsException;
-    method public void onNetworkResponse(@IntRange(from=100, to=699) int, @NonNull String) throws android.telephony.ims.ImsException;
-    method public void onNetworkResponse(@IntRange(from=100, to=699) int, @NonNull String, @IntRange(from=100, to=699) int, @NonNull String) throws android.telephony.ims.ImsException;
+    method @Deprecated public void onNetworkResponse(@IntRange(from=100, to=699) int, @NonNull String) throws android.telephony.ims.ImsException;
+    method @Deprecated public void onNetworkResponse(@IntRange(from=100, to=699) int, @NonNull String, @IntRange(from=100, to=699) int, @NonNull String) throws android.telephony.ims.ImsException;
+    method public default void onNetworkResponse(@NonNull android.telephony.ims.SipDetails) throws android.telephony.ims.ImsException;
   }
 
   public static interface RcsCapabilityExchangeImplBase.SubscribeResponseCallback {

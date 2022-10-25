@@ -382,8 +382,21 @@ public class RcsUceAdapter {
         /**
          * Notifies the callback when the publish state has changed.
          * @param publishState The latest update to the publish state.
+         *
+         * @deprecated Replaced by {@link #onPublishStateChange}, deprecated for
+         * sip information.
          */
+        @Deprecated
         void onPublishStateChange(@PublishState int publishState);
+
+        /**
+         * Notifies the callback when the publish state has changed or the publish operation is
+         * done.
+         * @param attributes The latest information related to the publish.
+         */
+        default void onPublishStateChange(@NonNull PublishAttributes attributes) {
+            onPublishStateChange(attributes.getPublishState());
+        };
     }
 
     /**
@@ -404,13 +417,13 @@ public class RcsUceAdapter {
             }
 
             @Override
-            public void onPublishStateChanged(int publishState) {
+            public void onPublishUpdated(@NonNull PublishAttributes attributes) {
                 if (mPublishStateChangeListener == null) return;
 
                 final long callingIdentity = Binder.clearCallingIdentity();
                 try {
                     mExecutor.execute(() ->
-                            mPublishStateChangeListener.onPublishStateChange(publishState));
+                            mPublishStateChangeListener.onPublishStateChange(attributes));
                 } finally {
                     restoreCallingIdentity(callingIdentity);
                 }
