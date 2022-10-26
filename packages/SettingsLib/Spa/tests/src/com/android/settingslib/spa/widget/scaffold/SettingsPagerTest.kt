@@ -16,7 +16,6 @@
 
 package com.android.settingslib.spa.widget.scaffold
 
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.assertIsNotSelected
@@ -31,15 +30,13 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-class SettingsPagerKtTest {
+class SettingsPagerTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
     @Test
     fun twoPage_initialState() {
-        composeTestRule.setContent {
-            TestTwoPage()
-        }
+        setTwoPagesContent()
 
         composeTestRule.onNodeWithText("Personal").assertIsSelected()
         composeTestRule.onNodeWithText("Page 0").assertIsDisplayed()
@@ -49,9 +46,7 @@ class SettingsPagerKtTest {
 
     @Test
     fun twoPage_afterSwitch() {
-        composeTestRule.setContent {
-            TestTwoPage()
-        }
+        setTwoPagesContent()
 
         composeTestRule.onNodeWithText("Work").performClick()
 
@@ -73,11 +68,12 @@ class SettingsPagerKtTest {
         composeTestRule.onNodeWithText("Page 0").assertIsDisplayed()
         composeTestRule.onNodeWithText("Page 1").assertDoesNotExist()
     }
-}
 
-@Composable
-private fun TestTwoPage() {
-    SettingsPager(listOf("Personal", "Work")) {
-        SettingsTitle(title = "Page $it")
+    private fun setTwoPagesContent() {
+        composeTestRule.setContent {
+            SettingsPager(listOf("Personal", "Work")) {
+                SettingsTitle(title = "Page $it")
+            }
+        }
     }
 }

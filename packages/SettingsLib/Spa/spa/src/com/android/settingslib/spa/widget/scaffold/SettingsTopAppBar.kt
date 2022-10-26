@@ -17,41 +17,70 @@
 package com.android.settingslib.spa.widget.scaffold
 
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LargeTopAppBar
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
+import com.android.settingslib.spa.framework.compose.horizontalValues
 import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.framework.theme.SettingsTheme
+import com.android.settingslib.spa.framework.theme.rememberSettingsTypography
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun SettingsTopAppBar(
     title: String,
+    scrollBehavior: TopAppBarScrollBehavior,
     actions: @Composable RowScope.() -> Unit,
 ) {
-    TopAppBar(
-        title = {
-            Text(
-                text = title,
-                modifier = Modifier.padding(SettingsDimension.itemPaddingAround),
-                overflow = TextOverflow.Ellipsis,
-                maxLines = 1,
-            )
-        },
-        navigationIcon = { NavigateBack() },
-        actions = actions,
-        colors = settingsTopAppBarColors(),
+    val colorScheme = MaterialTheme.colorScheme
+    // TODO: Remove MaterialTheme() after top app bar color fixed in AndroidX.
+    MaterialTheme(
+        colorScheme = remember { colorScheme.copy(surface = colorScheme.background) },
+        typography = rememberSettingsTypography(),
+    ) {
+        LargeTopAppBar(
+            title = { Title(title) },
+            navigationIcon = { NavigateBack() },
+            actions = actions,
+            colors = largeTopAppBarColors(),
+            scrollBehavior = scrollBehavior,
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+internal fun TopAppBarScrollBehavior.collapse() {
+    with(state) {
+        heightOffset = heightOffsetLimit
+    }
+}
+
+@Composable
+private fun Title(title: String) {
+    Text(
+        text = title,
+        modifier = Modifier
+            .padding(WindowInsets.navigationBars.asPaddingValues().horizontalValues())
+            .padding(SettingsDimension.itemPaddingAround),
+        overflow = TextOverflow.Ellipsis,
+        maxLines = 1,
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun settingsTopAppBarColors() = TopAppBarDefaults.smallTopAppBarColors(
-    containerColor = SettingsTheme.colorScheme.surfaceHeader,
+private fun largeTopAppBarColors() = TopAppBarDefaults.largeTopAppBarColors(
+    containerColor = MaterialTheme.colorScheme.background,
     scrolledContainerColor = SettingsTheme.colorScheme.surfaceHeader,
 )

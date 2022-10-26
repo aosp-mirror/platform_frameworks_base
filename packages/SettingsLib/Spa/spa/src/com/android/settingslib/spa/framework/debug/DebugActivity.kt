@@ -62,7 +62,7 @@ class DebugActivity : ComponentActivity() {
     private val spaEnvironment get() = SpaEnvironmentFactory.instance
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        setTheme(R.style.Theme_SpaLib_DayNight)
+        setTheme(R.style.Theme_SpaLib)
         super.onCreate(savedInstanceState)
         spaEnvironment.logger.message(TAG, "onCreate", category = LogCategory.FRAMEWORK)
 
