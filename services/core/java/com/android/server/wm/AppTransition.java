@@ -1448,6 +1448,12 @@ public class AppTransition implements Dump {
                 || transit == TRANSIT_OLD_ACTIVITY_RELAUNCH;
     }
 
+    static boolean isTaskFragmentTransitOld(@TransitionOldType int transit) {
+        return transit == TRANSIT_OLD_TASK_FRAGMENT_OPEN
+                || transit == TRANSIT_OLD_TASK_FRAGMENT_CLOSE
+                || transit == TRANSIT_OLD_TASK_FRAGMENT_CHANGE;
+    }
+
     static boolean isChangeTransitOld(@TransitionOldType int transit) {
         return transit == TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE
                 || transit == TRANSIT_OLD_TASK_FRAGMENT_CHANGE;
