@@ -25,27 +25,25 @@ import android.os.Parcelable;
 /**
  * An entry to be shown on the UI. This entry represents where the credential to be created will
  * be stored. Examples include user's account, family group etc.
- *
- * @hide
  */
-public final class SaveEntry implements Parcelable {
+public final class CreateEntry implements Parcelable {
     private final @NonNull Slice mSlice;
     private final @NonNull PendingIntent mPendingIntent;
 
-    private SaveEntry(@NonNull Parcel in) {
+    private CreateEntry(@NonNull Parcel in) {
         mSlice = in.readTypedObject(Slice.CREATOR);
         mPendingIntent = in.readTypedObject(PendingIntent.CREATOR);
     }
 
-    public static final @NonNull Creator<SaveEntry> CREATOR = new Creator<SaveEntry>() {
+    public static final @NonNull Creator<CreateEntry> CREATOR = new Creator<CreateEntry>() {
         @Override
-        public SaveEntry createFromParcel(@NonNull Parcel in) {
-            return new SaveEntry(in);
+        public CreateEntry createFromParcel(@NonNull Parcel in) {
+            return new CreateEntry(in);
         }
 
         @Override
-        public SaveEntry[] newArray(int size) {
-            return new SaveEntry[size];
+        public CreateEntry[] newArray(int size) {
+            return new CreateEntry[size];
         }
     };
 
@@ -61,12 +59,12 @@ public final class SaveEntry implements Parcelable {
     }
 
     /**
-     * Constructs a save entry to be displayed on the UI.
+     * Constructs a CreateEntry to be displayed on the UI.
      *
      * @param slice the display content to be displayed on the UI, along with this entry
      * @param pendingIntent the intent to be invoked when the user selects this entry
      */
-    public SaveEntry(
+    public CreateEntry(
             @NonNull Slice slice,
             @NonNull PendingIntent pendingIntent) {
         this.mSlice = slice;
@@ -77,12 +75,12 @@ public final class SaveEntry implements Parcelable {
                 NonNull.class, null, mPendingIntent);
     }
 
-    /** Returns the content to be displayed with this save entry on the UI. */
+    /** Returns the content to be displayed with this create entry on the UI. */
     public @NonNull Slice getSlice() {
         return mSlice;
     }
 
-    /** Returns the pendingIntent to be invoked when this save entry on the UI is selectcd. */
+    /** Returns the pendingIntent to be invoked when this create entry on the UI is selectcd. */
     public @NonNull PendingIntent getPendingIntent() {
         return mPendingIntent;
     }

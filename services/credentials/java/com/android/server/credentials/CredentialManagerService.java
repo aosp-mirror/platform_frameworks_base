@@ -35,6 +35,7 @@ import android.os.CancellationSignal;
 import android.os.ICancellationSignal;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.service.credentials.BeginCreateCredentialRequest;
 import android.service.credentials.GetCredentialsRequest;
 import android.text.TextUtils;
 import android.util.Log;
@@ -199,7 +200,7 @@ public final class CredentialManagerService extends
             // Iterate over all provider sessions and invoke the request
             providerSessions.forEach(providerCreateSession -> {
                 providerCreateSession.getRemoteCredentialService().onCreateCredential(
-                        (android.service.credentials.CreateCredentialRequest)
+                        (BeginCreateCredentialRequest)
                                 providerCreateSession.getProviderRequest(),
                         /*callback=*/providerCreateSession);
             });

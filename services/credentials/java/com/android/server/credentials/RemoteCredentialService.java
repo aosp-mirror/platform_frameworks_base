@@ -24,14 +24,14 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.ICancellationSignal;
 import android.os.RemoteException;
-import android.service.credentials.CreateCredentialRequest;
-import android.service.credentials.CreateCredentialResponse;
+import android.service.credentials.BeginCreateCredentialRequest;
+import android.service.credentials.BeginCreateCredentialResponse;
 import android.service.credentials.CredentialProviderException;
 import android.service.credentials.CredentialProviderException.CredentialProviderError;
 import android.service.credentials.CredentialProviderService;
 import android.service.credentials.GetCredentialsRequest;
 import android.service.credentials.GetCredentialsResponse;
-import android.service.credentials.ICreateCredentialCallback;
+import android.service.credentials.IBeginCreateCredentialCallback;
 import android.service.credentials.ICredentialProviderService;
 import android.service.credentials.IGetCredentialsCallback;
 import android.text.format.DateUtils;
@@ -146,27 +146,27 @@ public class RemoteCredentialService extends ServiceConnector.Impl<ICredentialPr
                 handleExecutionResponse(result, error, cancellationSink, callback)));
     }
 
-    /** Main entry point to be called for executing a createCredential call on the remote
+    /** Main entry point to be called for executing a beginCreateCredential call on the remote
      * provider service.
      * @param request the request to be sent to the provider
      * @param callback the callback to be used to send back the provider response to the
      *                 {@link ProviderCreateSession} class that maintains provider state
      */
-    public void onCreateCredential(@NonNull CreateCredentialRequest request,
-            ProviderCallbacks<CreateCredentialResponse> callback) {
+    public void onCreateCredential(@NonNull BeginCreateCredentialRequest request,
+            ProviderCallbacks<BeginCreateCredentialResponse> callback) {
         Log.i(TAG, "In onCreateCredential in RemoteCredentialService");
         AtomicReference<ICancellationSignal> cancellationSink = new AtomicReference<>();
-        AtomicReference<CompletableFuture<CreateCredentialResponse>> futureRef =
+        AtomicReference<CompletableFuture<BeginCreateCredentialResponse>> futureRef =
                 new AtomicReference<>();
 
-        CompletableFuture<CreateCredentialResponse> connectThenExecute = postAsync(service -> {
-            CompletableFuture<CreateCredentialResponse> createCredentialFuture =
+        CompletableFuture<BeginCreateCredentialResponse> connectThenExecute = postAsync(service -> {
+            CompletableFuture<BeginCreateCredentialResponse> createCredentialFuture =
                     new CompletableFuture<>();
-            ICancellationSignal cancellationSignal = service.onCreateCredential(
-                    request, new ICreateCredentialCallback.Stub() {
+            ICancellationSignal cancellationSignal = service.onBeginCreateCredential(
+                    request, new IBeginCreateCredentialCallback.Stub() {
                         @Override
-                        public void onSuccess(CreateCredentialResponse response) {
-                            Log.i(TAG, "In onSuccess onCreateCredential "
+                        public void onSuccess(BeginCreateCredentialResponse response) {
+                            Log.i(TAG, "In onSuccess onBeginCreateCredential "
                                     + "in RemoteCredentialService");
                             createCredentialFuture.complete(response);
                         }
@@ -179,7 +179,7 @@ public class RemoteCredentialService extends ServiceConnector.Impl<ICredentialPr
                             createCredentialFuture.completeExceptionally(
                                     new CredentialProviderException(errorCode, errorMsg));
                         }});
-            CompletableFuture<CreateCredentialResponse> future = futureRef.get();
+            CompletableFuture<BeginCreateCredentialResponse> future = futureRef.get();
             if (future != null && future.isCancelled()) {
                 dispatchCancellationSignal(cancellationSignal);
             } else {

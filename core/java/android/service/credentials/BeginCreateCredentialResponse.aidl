@@ -16,4 +16,4 @@
 
 package android.service.credentials;
 
-parcelable CreateCredentialResponse;
+parcelable BeginCreateCredentialResponse;

@@ -39328,6 +39328,149 @@ package android.service.controls.templates {
 
 }
 
+package android.service.credentials {
+
+  public final class Action implements android.os.Parcelable {
+    ctor public Action(@NonNull android.app.slice.Slice, @NonNull android.app.PendingIntent);
+    method public int describeContents();
+    method @NonNull public android.app.PendingIntent getPendingIntent();
+    method @NonNull public android.app.slice.Slice getSlice();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.credentials.Action> CREATOR;
+  }
+
+  public final class BeginCreateCredentialRequest implements android.os.Parcelable {
+    ctor public BeginCreateCredentialRequest(@NonNull String, @NonNull String, @NonNull android.os.Bundle);
+    method public int describeContents();
+    method @NonNull public String getCallingPackage();
+    method @NonNull public android.os.Bundle getData();
+    method @NonNull public String getType();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.credentials.BeginCreateCredentialRequest> CREATOR;
+  }
+
+  public final class BeginCreateCredentialResponse implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public java.util.List<android.service.credentials.CreateEntry> getCreateEntries();
+    method @Nullable public android.service.credentials.CreateEntry getRemoteCreateEntry();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.credentials.BeginCreateCredentialResponse> CREATOR;
+  }
+
+  public static final class BeginCreateCredentialResponse.Builder {
+    ctor public BeginCreateCredentialResponse.Builder();
+    method @NonNull public android.service.credentials.BeginCreateCredentialResponse.Builder addCreateEntry(@NonNull android.service.credentials.CreateEntry);
+    method @NonNull public android.service.credentials.BeginCreateCredentialResponse build();
+    method @NonNull public android.service.credentials.BeginCreateCredentialResponse.Builder setCreateEntries(@NonNull java.util.List<android.service.credentials.CreateEntry>);
+    method @NonNull public android.service.credentials.BeginCreateCredentialResponse.Builder setRemoteCreateEntry(@Nullable android.service.credentials.CreateEntry);
+  }
+
+  public final class CreateCredentialRequest implements android.os.Parcelable {
+    ctor public CreateCredentialRequest(@NonNull String, @NonNull String, @NonNull android.os.Bundle);
+    method public int describeContents();
+    method @NonNull public String getCallingPackage();
+    method @NonNull public android.os.Bundle getData();
+    method @NonNull public String getType();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.credentials.CreateCredentialRequest> CREATOR;
+  }
+
+  public final class CreateEntry implements android.os.Parcelable {
+    ctor public CreateEntry(@NonNull android.app.slice.Slice, @NonNull android.app.PendingIntent);
+    method public int describeContents();
+    method @NonNull public android.app.PendingIntent getPendingIntent();
+    method @NonNull public android.app.slice.Slice getSlice();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.credentials.CreateEntry> CREATOR;
+  }
+
+  public final class CredentialEntry implements android.os.Parcelable {
+    method public int describeContents();
+    method @Nullable public android.credentials.Credential getCredential();
+    method @Nullable public android.app.PendingIntent getPendingIntent();
+    method @NonNull public android.app.slice.Slice getSlice();
+    method @NonNull public String getType();
+    method public boolean isAutoSelectAllowed();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.credentials.CredentialEntry> CREATOR;
+  }
+
+  public static final class CredentialEntry.Builder {
+    ctor public CredentialEntry.Builder(@NonNull String, @NonNull android.app.slice.Slice, @NonNull android.app.PendingIntent);
+    ctor public CredentialEntry.Builder(@NonNull String, @NonNull android.app.slice.Slice, @NonNull android.credentials.Credential);
+    method @NonNull public android.service.credentials.CredentialEntry build();
+    method @NonNull public android.service.credentials.CredentialEntry.Builder setAutoSelectAllowed(@NonNull boolean);
+  }
+
+  public class CredentialProviderException extends java.lang.Exception {
+    ctor public CredentialProviderException(int, @NonNull String, @NonNull Throwable);
+    ctor public CredentialProviderException(int, @NonNull String);
+    ctor public CredentialProviderException(int, @NonNull Throwable);
+    ctor public CredentialProviderException(int);
+    method public int getErrorCode();
+    field public static final int ERROR_UNKNOWN = 0; // 0x0
+  }
+
+  public abstract class CredentialProviderService extends android.app.Service {
+    ctor public CredentialProviderService();
+    method public abstract void onBeginCreateCredential(@NonNull android.service.credentials.BeginCreateCredentialRequest, @NonNull android.os.CancellationSignal, @NonNull android.os.OutcomeReceiver<android.service.credentials.BeginCreateCredentialResponse,android.service.credentials.CredentialProviderException>);
+    method @NonNull public final android.os.IBinder onBind(@NonNull android.content.Intent);
+    method public abstract void onGetCredentials(@NonNull android.service.credentials.GetCredentialsRequest, @NonNull android.os.CancellationSignal, @NonNull android.os.OutcomeReceiver<android.service.credentials.GetCredentialsResponse,android.service.credentials.CredentialProviderException>);
+    field public static final String CAPABILITY_META_DATA_KEY = "android.credentials.capabilities";
+    field public static final String EXTRA_CREATE_CREDENTIAL_REQUEST = "android.service.credentials.extra.CREATE_CREDENTIAL_REQUEST";
+    field public static final String EXTRA_CREATE_CREDENTIAL_RESULT = "android.service.credentials.extra.CREATE_CREDENTIAL_RESULT";
+    field public static final String EXTRA_CREDENTIAL_RESULT = "android.service.credentials.extra.CREDENTIAL_RESULT";
+    field public static final String EXTRA_ERROR = "android.service.credentials.extra.ERROR";
+    field public static final String EXTRA_GET_CREDENTIALS_CONTENT_RESULT = "android.service.credentials.extra.GET_CREDENTIALS_CONTENT_RESULT";
+    field public static final String SERVICE_INTERFACE = "android.service.credentials.CredentialProviderService";
+  }
+
+  public final class CredentialsResponseContent implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public java.util.List<android.service.credentials.Action> getActions();
+    method @NonNull public java.util.List<android.service.credentials.CredentialEntry> getCredentialEntries();
+    method @Nullable public android.service.credentials.CredentialEntry getRemoteCredentialEntry();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.credentials.CredentialsResponseContent> CREATOR;
+  }
+
+  public static final class CredentialsResponseContent.Builder {
+    ctor public CredentialsResponseContent.Builder();
+    method @NonNull public android.service.credentials.CredentialsResponseContent.Builder addAction(@NonNull android.service.credentials.Action);
+    method @NonNull public android.service.credentials.CredentialsResponseContent.Builder addCredentialEntry(@NonNull android.service.credentials.CredentialEntry);
+    method @NonNull public android.service.credentials.CredentialsResponseContent build();
+    method @NonNull public android.service.credentials.CredentialsResponseContent.Builder setActions(@NonNull java.util.List<android.service.credentials.Action>);
+    method @NonNull public android.service.credentials.CredentialsResponseContent.Builder setCredentialEntries(@NonNull java.util.List<android.service.credentials.CredentialEntry>);
+    method @NonNull public android.service.credentials.CredentialsResponseContent.Builder setRemoteCredentialEntry(@Nullable android.service.credentials.CredentialEntry);
+  }
+
+  public final class GetCredentialsRequest implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public String getCallingPackage();
+    method @NonNull public java.util.List<android.credentials.GetCredentialOption> getGetCredentialOptions();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.credentials.GetCredentialsRequest> CREATOR;
+  }
+
+  public static final class GetCredentialsRequest.Builder {
+    ctor public GetCredentialsRequest.Builder(@NonNull String);
+    method @NonNull public android.service.credentials.GetCredentialsRequest.Builder addGetCredentialOption(@NonNull android.credentials.GetCredentialOption);
+    method @NonNull public android.service.credentials.GetCredentialsRequest build();
+    method @NonNull public android.service.credentials.GetCredentialsRequest.Builder setGetCredentialOptions(@NonNull java.util.List<android.credentials.GetCredentialOption>);
+  }
+
+  public final class GetCredentialsResponse implements android.os.Parcelable {
+    method @NonNull public static android.service.credentials.GetCredentialsResponse createWithAuthentication(@NonNull android.service.credentials.Action);
+    method @NonNull public static android.service.credentials.GetCredentialsResponse createWithResponseContent(@NonNull android.service.credentials.CredentialsResponseContent);
+    method public int describeContents();
+    method @Nullable public android.service.credentials.Action getAuthenticationAction();
+    method @Nullable public android.service.credentials.CredentialsResponseContent getCredentialsResponseContent();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.credentials.GetCredentialsResponse> CREATOR;
+  }
+
+}
+
 package android.service.dreams {
 
   public class DreamService extends android.app.Service implements android.view.Window.Callback {

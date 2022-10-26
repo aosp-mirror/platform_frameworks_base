@@ -28,12 +28,10 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Content to be displayed on the account selector UI, including credential entries,
- * actions etc.
- *
- * @hide
+ * The content to be displayed on the account selector UI, including credential entries,
+ * actions etc. Returned as part of {@link GetCredentialsResponse}
  */
-public final class CredentialsDisplayContent implements Parcelable {
+public final class CredentialsResponseContent implements Parcelable {
     /** List of credential entries to be displayed on the UI. */
     private final @NonNull List<CredentialEntry> mCredentialEntries;
 
@@ -41,36 +39,36 @@ public final class CredentialsDisplayContent implements Parcelable {
     private final @NonNull List<Action> mActions;
 
     /** Remote credential entry to get the response from a different device. */
-    private final @Nullable Action mRemoteCredentialEntry;
+    private final @Nullable CredentialEntry mRemoteCredentialEntry;
 
-    private CredentialsDisplayContent(@NonNull List<CredentialEntry> credentialEntries,
+    private CredentialsResponseContent(@NonNull List<CredentialEntry> credentialEntries,
             @NonNull List<Action> actions,
-            @Nullable Action remoteCredentialEntry) {
+            @Nullable CredentialEntry remoteCredentialEntry) {
         mCredentialEntries = credentialEntries;
         mActions = actions;
         mRemoteCredentialEntry = remoteCredentialEntry;
     }
 
-    private CredentialsDisplayContent(@NonNull Parcel in) {
+    private CredentialsResponseContent(@NonNull Parcel in) {
         List<CredentialEntry> credentialEntries = new ArrayList<>();
         in.readTypedList(credentialEntries, CredentialEntry.CREATOR);
         mCredentialEntries = credentialEntries;
         List<Action> actions = new ArrayList<>();
         in.readTypedList(actions, Action.CREATOR);
         mActions = actions;
-        mRemoteCredentialEntry = in.readTypedObject(Action.CREATOR);
+        mRemoteCredentialEntry = in.readTypedObject(CredentialEntry.CREATOR);
     }
 
-    public static final @NonNull Creator<CredentialsDisplayContent> CREATOR =
-            new Creator<CredentialsDisplayContent>() {
+    public static final @NonNull Creator<CredentialsResponseContent> CREATOR =
+            new Creator<CredentialsResponseContent>() {
                 @Override
-                public CredentialsDisplayContent createFromParcel(@NonNull Parcel in) {
-                    return new CredentialsDisplayContent(in);
+                public CredentialsResponseContent createFromParcel(@NonNull Parcel in) {
+                    return new CredentialsResponseContent(in);
                 }
 
                 @Override
-                public CredentialsDisplayContent[] newArray(int size) {
-                    return new CredentialsDisplayContent[size];
+                public CredentialsResponseContent[] newArray(int size) {
+                    return new CredentialsResponseContent[size];
                 }
             };
 
@@ -103,22 +101,34 @@ public final class CredentialsDisplayContent implements Parcelable {
     /**
      * Returns the remote credential entry to be displayed on the UI.
      */
-    public @Nullable Action getRemoteCredentialEntry() {
+    public @Nullable CredentialEntry getRemoteCredentialEntry() {
         return mRemoteCredentialEntry;
     }
 
     /**
-     * Builds an instance of {@link CredentialsDisplayContent}.
+     * Builds an instance of {@link CredentialsResponseContent}.
      */
     public static final class Builder {
         private List<CredentialEntry> mCredentialEntries = new ArrayList<>();
         private List<Action> mActions = new ArrayList<>();
-        private Action mRemoteCredentialEntry;
+        private CredentialEntry mRemoteCredentialEntry;
 
         /**
-         * Sets the remote credential entry to be displayed on the UI.
+         * Sets a remote credential entry to be shown on the UI. Provider must set this if they
+         * wish to get the credential from a different device.
+         *
+         * <p> When constructing the {@link CredentialEntry} object, the {@code pendingIntent}
+         * must be set such that it leads to an activity that can provide UI to fulfill the request
+         * on a remote device. When user selects this {@code remoteCredentialEntry}, the system will
+         * invoke the {@code pendingIntent} set on the {@link CredentialEntry}.
+         *
+         * <p> Once the remote credential flow is complete, the {@link android.app.Activity}
+         * result should be set to {@link android.app.Activity#RESULT_OK} and an extra with the
+         * {@link CredentialProviderService#EXTRA_CREDENTIAL_RESULT} key should be populated
+         * with a {@link android.credentials.Credential} object.
          */
-        public @NonNull Builder setRemoteCredentialEntry(@Nullable Action remoteCredentialEntry) {
+        public @NonNull Builder setRemoteCredentialEntry(@Nullable CredentialEntry
+                remoteCredentialEntry) {
             mRemoteCredentialEntry = remoteCredentialEntry;
             return this;
         }
@@ -137,6 +147,11 @@ public final class CredentialsDisplayContent implements Parcelable {
         /**
          * Adds an {@link Action} to the list of actions to be displayed on
          * the UI.
+         *
+         * <p> An {@code action} must be used for independent user actions,
+         * such as opening the app, intenting directly into a certain app activity etc. The
+         * {@code pendingIntent} set with the {@code action} must invoke the corresponding
+         * activity.
          *
          * @throws NullPointerException If {@code action} is null.
          */
@@ -175,17 +190,16 @@ public final class CredentialsDisplayContent implements Parcelable {
         /**
          * Builds a {@link GetCredentialsResponse} instance.
          *
-         * @throws NullPointerException If {@code credentialEntries} is null.
-         * @throws IllegalStateException if both {@code credentialEntries} and
-         * {@code actions} are empty.
+         * @throws IllegalStateException if {@code credentialEntries}, {@code actions}
+         * and {@code remoteCredentialEntry} are all null or empty.
          */
-        public @NonNull CredentialsDisplayContent build() {
+        public @NonNull CredentialsResponseContent build() {
             if (mCredentialEntries != null && mCredentialEntries.isEmpty()
-                    && mActions != null && mActions.isEmpty()) {
+                    && mActions != null && mActions.isEmpty() && mRemoteCredentialEntry == null) {
                 throw new IllegalStateException("credentialEntries and actions must not both "
                         + "be empty");
             }
-            return new CredentialsDisplayContent(mCredentialEntries, mActions,
+            return new CredentialsResponseContent(mCredentialEntries, mActions,
                     mRemoteCredentialEntry);
         }
     }

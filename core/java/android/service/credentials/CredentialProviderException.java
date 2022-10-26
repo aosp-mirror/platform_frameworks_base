@@ -24,8 +24,6 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * Contains custom exceptions to be used by credential providers on failure.
- *
- * @hide
  */
 public class CredentialProviderException extends Exception {
     public static final int ERROR_UNKNOWN = 0;
@@ -59,6 +57,11 @@ public class CredentialProviderException extends Exception {
     @Retention(RetentionPolicy.SOURCE)
     public @interface CredentialProviderError { }
 
+    public CredentialProviderException(@CredentialProviderError int errorCode,
+            @NonNull String message, @NonNull Throwable cause) {
+        super(message, cause);
+        mErrorCode = errorCode;
+    }
 
     public CredentialProviderException(@CredentialProviderError int errorCode,
             @NonNull String message) {
